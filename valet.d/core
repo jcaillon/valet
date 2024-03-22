@@ -1,0 +1,402 @@
+#!/usr/bin/env bash
+# Title:         valet.d/core
+# Description:   this script contains the core functions and variables and it should be sourced, not called directly
+# Author:        github.com/jcaillon
+
+# we check for this variable to know if this script has already been included
+_CORE_INCLUDED=1
+
+#===============================================================
+# >>> Core variables
+#===============================================================
+
+# the variable EXPORT_VARIABLE_SCRIPT will contain the path to the script that should be modified to
+# automatically export variables when running the shell
+HOME=~
+
+# determine the color mode expect if the user has set VALET_NO_COLOR
+case "$TERM" in
+    xterm-color|xterm-256color|linux) VALET_NO_COLOR="${VALET_NO_COLOR:-false}";;
+    xterm) [ -n "$COLORTERM" ] && VALET_NO_COLOR="${VALET_NO_COLOR:-false}";;
+    *) VALET_NO_COLOR="${VALET_NO_COLOR:-true}";;
+esac
+
+# the color code used to output colored text
+if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
+  COLOR_DEFAULT=$'\033'"[0m"
+  COLOR_RED=$'\033'"[0;31m"
+  COLOR_GREEN=$'\033'"[32m"
+  COLOR_YELLOW=$'\033'"[33m"
+  COLOR_CYAN=$'\033'"[0;36m"
+  COLOR_GRAY=$'\033'"[1;30m"
+  COLOR_PINK=$'\033'"[1;35m"
+fi
+
+if [ "${VALET_NO_WRAP:-}" != "true" ]; then
+  _COLUMNS=$(tput cols 2>/dev/null || echo 120)
+else
+  _COLUMNS=120
+fi
+
+#===============================================================
+# >>> Temporay files and folders
+#===============================================================
+
+# little trick here; since we will use createTempFile / createTempDirectory in subshell $()
+# they will not have access to the same global variables.
+# thus, we re declare them with a hardcoded value for TMPDIR so that they create temp files
+# under this directory (which we can then clean up)
+_TEMPORARY_DIRECTORY="${TMPDIR:-/tmp}/valet-${EPOCHSECONDS}"
+while true; do
+  if [ ! -d "${_TEMPORARY_DIRECTORY}" ]; then break; fi
+  _TEMPORARY_DIRECTORY+="-${BASHPID}"
+done
+
+# Creates a temporary file and return its path in the global variable LAST_RETURNED_VALUE
+# Usage:
+#  createTempFile && local file="${LAST_RETURNED_VALUE}"
+# shellcheck disable=SC2016
+CREATE_TEMP_FILE_FUNCTION='
+function createTempFile() {
+  TMPDIR="'"${_TEMPORARY_DIRECTORY}"'"
+  if [ ! -d "${TMPDIR}" ]; then
+    mkdir -p "${TMPDIR}" 1>&2 2>/dev/null
+  fi
+  TEMPORARY_FILE_NUMBER=${TEMPORARY_FILE_NUMBER:-0}
+  while true; do
+    TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
+    LAST_RETURNED_VALUE="${TMPDIR}/f${BASH_SUBSHELL}${TEMPORARY_FILE_NUMBER}"
+    if [ ! -f "${LAST_RETURNED_VALUE}" ]; then
+      touch "${LAST_RETURNED_VALUE}" 1>&2 2>/dev/null
+      return 0
+    fi
+  done
+}
+'
+
+# Creates a temporary directory and return its path in the global variable LAST_RETURNED_VALUE
+# Usage:
+#  createTempFile && local file="${LAST_RETURNED_VALUE}"
+# shellcheck disable=SC2016
+CREATE_TEMP_DIRECTORY_FUNCTION='
+function createTempDirectory() {
+  TMPDIR="'"${_TEMPORARY_DIRECTORY}"'"
+  TEMPORARY_DIRECTORY_NUMBER=${TEMPORARY_DIRECTORY_NUMBER:-0}
+  while true; do
+    TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
+    LAST_RETURNED_VALUE="${TMPDIR}/d${BASH_SUBSHELL}${TEMPORARY_DIRECTORY_NUMBER}"
+    if [ ! -d "${LAST_RETURNED_VALUE}" ]; then
+      mkdir -p "${LAST_RETURNED_VALUE}" 1>&2 2>/dev/null
+      return 0
+    fi
+  done
+}
+'
+
+# removes all the tempoary files that were created
+# shellcheck disable=SC2016
+CREATE_TEMP_CLEANUP_FUNCTION='
+function cleanupTempFiles() {
+  local tmpDir
+  tmpDir="'"${_TEMPORARY_DIRECTORY}"'"
+  if [ ! -d "${tmpDir}" ]; then
+    return 0
+  fi
+  debug "Deleting temporary files."
+  rm -Rf "${tmpDir}" 1>&2 2>/dev/null
+}
+'
+
+eval "${CREATE_TEMP_FILE_FUNCTION}"$'\n'"${CREATE_TEMP_DIRECTORY_FUNCTION}"$'\n'"${CREATE_TEMP_CLEANUP_FUNCTION}"$'\n'
+unset CREATE_TEMP_FILE_FUNCTION
+unset CREATE_TEMP_DIRECTORY_FUNCTION
+unset CREATE_TEMP_CLEANUP_FUNCTION
+unset _TEMPORARY_DIRECTORY
+
+#===============================================================
+# >>> Logging
+#===============================================================
+
+function setLogLevelInt() {
+  # log level, defaults to info
+  LOG_LEVEL="${LOG_LEVEL:-info}"
+  case "${LOG_LEVEL}" in
+  fail) LOG_LEVEL_INT=4 ;;
+  warn) LOG_LEVEL_INT=3 ;;
+  success) LOG_LEVEL_INT=2 ;;
+  debug) LOG_LEVEL_INT=0 ;;
+  *) LOG_LEVEL_INT=1 ;;
+  esac
+
+  if [ "${LOG_LEVEL_INT}" != 1 ]; then
+    debug "Log level set to ${LOG_LEVEL}"
+  fi
+}
+
+# The log line function is used to display log messages in the terminal.
+# The implementation depends on the environment variables VALET_CI_MODE and VALET_NO_WRAP.
+# $1: the color of the log message
+# $2: the icon to display in the log message (utf8 character from nerdicons)
+# $3: the severity of the log message
+# $*: the content of the log message
+if [ "${VALET_CI_MODE:-}" != "true" ]; then
+  if [ "${VALET_NO_WRAP:-}" != "true" ]; then
+    _LOG_COLUMNS=$((_COLUMNS - 22))
+    if [ -n "${MINGW_PREFIX:-}" ]; then
+      _NO_ICON_PADDING="${_NO_ICON_PADDING:-true}"
+    fi
+    # displays an error message and then exit the program with error
+    function logLine() {
+      local color icon severity content
+      color="COLOR_${1}"
+      icon="${2}"
+      severity="${3}"
+      shift 3
+      content="$*"
+      printf "%s%(%H:%M:%S)T " "${COLOR_GRAY}" 1>&2
+      echo "${content}" | fold -s -w "${_LOG_COLUMNS:-120}" | awk -v color="${!color}" -v italicColor="${COLOR_PINK}" -v defaultColor="${COLOR_DEFAULT}" -v severity="${severity}" -v icon="${icon:-}" -v noIconPadding="${_NO_ICON_PADDING:-false}" -v noIcon="${VALET_NO_ICON:-}" \
+        'NR==1 {
+        gsub(/⌜[^⌝]+⌝/, italicColor "&" defaultColor);
+        if (noIcon=="true")
+          printf "%s%-8s%-3s%s%s%s\n", color, severity, "", defaultColor, $0, defaultColor;
+        else if (noIconPadding=="true")
+          printf "%s%-8s%-3s%s%s%s\n", color, severity, icon, defaultColor, $0, defaultColor;
+        else
+          printf "%s%-8s%-5s%s%s%s\n", color, severity, icon, defaultColor, $0, defaultColor
+      };
+      NR>1 {
+        printf "%-20s%s\n", "", $0
+      }' 1>&2
+    }
+  else
+    function logLine() {
+      local color icon severity content
+      color="COLOR_${1}"
+      icon="${2}"
+      severity="${3}"
+      shift 3
+      content="$*"
+      if [ "${VALET_NO_ICON:-}" != "true" ]; then
+        printf "%s%(%H:%M:%S)T %s%-8s%-4s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "${icon:-}" "${COLOR_DEFAULT}" "${content}" 1>&2
+      else
+        printf "%s%(%H:%M:%S)T %s%-8s%-2s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "" "${COLOR_DEFAULT}" "${content}" 1>&2
+      fi
+    }
+  fi
+else
+  function logLine() {
+    local severity content
+    severity="${3}"
+    shift 3
+    content="$*"
+    printf "%(%F_%H:%M:%S)T %-8s %s\n" "" "${severity}" "${content}" 1>&2
+  }
+fi
+
+# displays an error message and then exit the program with error
+function fail() {
+  logLine "RED" $'\uf2d3' "ERROR" "$*"
+  # shellcheck disable=SC2034
+  ERROR_DISPLAY=1
+  exit 1
+}
+
+# displays a warning and return a warning code
+function warn() {
+  if [[ ${LOG_LEVEL_INT:-1} -gt 3 ]]; then
+    return 0
+  fi
+  logLine "YELLOW" $'\uf071' "WARNING" "$*"
+  return 0
+}
+
+# displays a success message
+function succeed() {
+  if [[ ${LOG_LEVEL_INT:-1} -gt 2 ]]; then
+    return 0
+  fi
+  logLine "GREEN" $'\uf14a' "SUCCESS" "$*"
+  return 0
+}
+
+# displays an info message
+function inform() {
+  if [[ ${LOG_LEVEL_INT:-1} -gt 1 ]]; then
+    return 0
+  fi
+  logLine "CYAN" $'\uf05a' "INFO" "$*"
+  return 0
+}
+
+# displays a debug message if the global variable DEBUG is set to true
+function debug() {
+  if [[ ${LOG_LEVEL_INT:-1} -gt 0 ]]; then
+    return 0
+  fi
+  logLine "GRAY" $'\uf0ae' "DEBUG" "$*"
+  return 0
+}
+
+# returns 0 if debug mode is active, 1 otheriwse
+function isDebugMode() {
+  if [[ ${LOG_LEVEL_INT:-1} -eq 0 ]]; then
+    return 0
+  fi
+  return 1
+}
+
+# Check last return code and fail (exit) if it is an error
+# $1: the return code
+# $2+ : the error message to display in case of error
+#
+# Usage in a function:
+# command_that_could_fail || checkAndFail "$?"
+function checkAndFail() {
+  if [ "${1:-1}" != "0" ]; then
+    shift
+    fail "$*"
+  fi
+  return 0
+}
+
+# Check last return code and return a warning code if error
+# $0: the last return code
+# $1+ : the warning message to display in case of error
+#
+# Usage in a function:
+# command_that_could_fail || checkAndWarn "$?" || return "0"
+function checkAndWarn() {
+  if [ "${1:-}" != "0" ]; then
+    shift
+    warn "$*"
+    return 0
+  fi
+  return 0
+}
+
+#===============================================================
+# >>> Core utilities
+#===============================================================
+
+# Allows to get the nth element of a string separated by a given separator.
+# This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
+# but it uses pure bash to go faster.
+# $1: the string to cut
+# $2: the field number to get
+# $3: the separator (default to tab if not provided)
+function cutF() {
+  local str fieldNumber separator temp
+  str="${1}"
+  fieldNumber="${2}"
+  separator="${3:-$'\t'}"
+}
+
+#===============================================================
+# >>> Valet files and directories
+#===============================================================
+
+# Returns the path to the valet configuration directory in the global variable LAST_RETURNED_VALUE
+# Usage:
+#  getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
+function getConfigurationDirectory() {
+  local directory
+  directory="${XDG_CONFIG_HOME:-$HOME/.config}/valet"
+  if [ ! -d "${directory}" ]; then
+    mkdir -p "${directory}"
+  fi
+  LAST_RETURNED_VALUE="${directory}"
+}
+
+# Returns the path to the valet state directory in the global variable LAST_RETURNED_VALUE
+# Usage:
+#  getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
+function getLocalStateDirectory() {
+  local directory
+  directory="${XDG_CONFIG_HOME:-$HOME/.local/state}/valet"
+  if [ ! -d "${directory}" ]; then
+    mkdir -p "${directory}"
+  fi
+  LAST_RETURNED_VALUE="${directory}"
+}
+
+#===============================================================
+# >>> Parser and interactive mode
+#===============================================================
+
+function showHelp() {
+  local functionName
+  # get the function name of the calling function
+  functionName="${FUNCNAME[1]}"
+
+  showFunctionHelp "${functionName}"
+}
+
+# show an interactive menu for a command that has sub menus
+function showSubMenu() {
+  local menuFunctionName
+  # get the function name of the calling function
+  menuFunctionName="${FUNCNAME[1]}"
+
+  local parsedArguments
+  parseFunctionArguments "this" "$@" && parsedArguments="${LAST_RETURNED_VALUE}"
+  debug "Parsed arguments:"$'\n'"${parsedArguments}"
+  eval "${parsedArguments}"
+  if [ -n "${help:-}" ]; then
+    showFunctionHelp "${menuFunctionName}"
+    return 0
+  fi
+
+  # filter the commands to only keep the sub commands of the function
+  local filteredCommandsMenuBody line
+  local -n menuCommandName="CMD_COMMAND_${menuFunctionName}"
+  filteredCommandsMenuBody=""
+  while read -r line; do
+    if [[ "${line}" =~ ^(${menuCommandName} [^ ]+ ) ]]; then
+      filteredCommandsMenuBody+="${line}"$'\n'
+    fi
+  done <<<"${CMD_COMMANDS_MENU_BODY}"
+  showCommandsMenuAndRun "${filteredCommandsMenuBody%$'\n'}"
+}
+
+# Parse the arguments and options of a function
+#
+# Usage:
+#  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+#
+# Notes:
+# - It will return a string that can be evaluated to set the variables
+#   corresponding to the arguments and options; e.g.:
+#     "local arg1 option1
+#     arg1=\"\"
+#     option1=\"\"
+#     ..."
+# - It will also set the variable parsingErrors if there are any errors.
+# - Variable name for an option is taken from the first --long version of the option.
+# - If the function expects arguments or options but none are provided, it will
+#   automatically go into interactive mode and ask the user inputs.
+# - It will set the variable as an array if the (last) argument name ends with '...'
+function parseArguments() {
+  local functionName
+  # get the function name of the calling function
+  functionName="${FUNCNAME[1]}"
+
+  parseFunctionArgumentsOrGoInteractive "${functionName}" "$@"
+}
+
+function checkParseResults() {
+  local functionName help parsingErrors
+  functionName="${FUNCNAME[1]}"
+
+  help="${1:-}"
+  parsingErrors="${2:-}"
+
+  if [ -n "${help}" ]; then
+    showFunctionHelp "${functionName}"
+    exit 0
+  fi
+
+  if [ -n "${parsingErrors:-}" ]; then
+    local -n commandName="CMD_COMMAND_${functionName}"
+    fail "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
+  fi
+}

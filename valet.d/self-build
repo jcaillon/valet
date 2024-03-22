@@ -1,0 +1,533 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# Title:         valet.d/build
+# Description:   This script is called during development to build the valet.d/cmd script.
+#                It reads all the about_xxx functions and generates the valet.d/cmd script.
+# Author:        github.com/jcaillon
+
+if [ -z "${VALET_HOME:-}" ]; then
+  NOT_EXECUTED_FROM_VALET=true
+fi
+
+if [ -z "${_MAIN_INCLUDED:-}" ]; then
+  VALETD_DIR="${BASH_SOURCE[0]}"
+  VALETD_DIR="${VALETD_DIR%/*}" # strip file name
+  # shellcheck source=main
+  source "${VALETD_DIR}/main"
+fi
+# --- END OF COMMAND COMMON PART
+
+
+#===============================================================
+# >>> About build
+#===============================================================
+
+function about_build() {
+  echo "
+command: self build
+fileToSource: ${BASH_SOURCE[0]}
+shortDescription: Re-build the valet menu (for valet development purposes).
+description: |-
+  This command can be used to re-build the menu valet in case you have modified, added or removed an about_xxx function.
+
+  You should read ⌜README.md⌝ to learn more about this topic.
+options:
+  - name: -d, --user-directory <path>
+    description: |-
+      Specify the directory in which to look for valet commands.
+
+      This defaults to ⌜~/.valet.d⌝.
+"
+}
+
+
+#===============================================================
+# >>> Implementation
+#===============================================================
+function build() {
+  local buildFile
+  local defaultUserDir userDirectory
+  defaultUserDir=~/.valet.d
+
+  # need the real path of VALET_HOME because we will use it to build the file
+  VALET_HOME=$(realpath "${VALET_HOME}")
+
+  # parse arguments manually otherwise we have to count on cmd to be valid
+  while [[ $# -gt 0 ]]; do
+    case "${1}" in
+    -d | --user-directory) shift; userDirectory="${1}";;
+    -*) fail "Unknown option ⌜${1}⌝";;
+    *) fail "Unknown command ⌜${1}⌝";;
+    esac
+    shift
+  done
+
+  userDirectory="${userDirectory-${defaultUserDir}}"
+
+  # Check pre-requisites
+  if ! command -v yq 1>/dev/null 2>&1; then
+    fail "This command requires https://github.com/mikefarah/yq to parse the command about functions, please install it in your path and run this command again."
+  fi
+
+  createTempFile
+  buildFile="${LAST_RETURNED_VALUE}"
+
+  inform "Loading all commands"
+
+  eval "$(find "${VALET_HOME}/valet.d/commands.d" -type f -path '*.sh' -not -iname ".*" | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
+  eval "$(getTextBetweenLines "function about_this" "}" "$(cat "${VALET_HOME}/valet")")"
+  eval "$(getTextBetweenLines "function about_showCommandHelp" "}" "$(cat "${VALET_HOME}/valet.d/main")")"
+  if [[ -n "${userDirectory}" && -d "${userDirectory}" ]]; then
+    eval "$(find "${userDirectory}" -type f -path '*.sh' -not -iname ".*" | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
+  else
+    inform "Skipping user directory with value ⌜${userDirectory}⌝"
+  fi
+
+  inform "Validating the metadata for each command"
+  validateYamlForEachAboutFunction
+
+  writeHeader > "${buildFile}"
+  writeNewLines >> "${buildFile}"
+
+  inform "Writing computed functions to ${buildFile}"
+  writeAllFunctions >> "${buildFile}"
+  writeNewLines >> "${buildFile}"
+  writeExactCommandToFunctionMap >> "${buildFile}"
+  writeNewLines >> "${buildFile}"
+  writeMaxSubCommandLevel >> "${buildFile}"
+  writeNewLines >> "${buildFile}"
+  writeAllCommands >> "${buildFile}"
+  writeNewLines >> "${buildFile}"
+  writeMaxCommandWidth >> "${buildFile}"
+  writeNewLines >> "${buildFile}"
+  writeCommandsMenu >> "${buildFile}"
+  writeNewLines >> "${buildFile}"
+
+  # get properties for each function
+  echo "# ====================" >> "${buildFile}"
+  echo "# Variables to describe each function" >> "${buildFile}"
+  echo "# ====================" >> "${buildFile}"
+  writeGetForFunction >> "${buildFile}"
+  writeNewLines >> "${buildFile}"
+
+  # for parsing
+  echo "# ====================" >> "${buildFile}"
+  echo "# Variables used during parsing" >> "${buildFile}"
+  echo "# ====================" >> "${buildFile}"
+  writeFunctionOptions >> "${buildFile}"
+  writeNewLines >> "${buildFile}"
+  writeFunctionArguments >> "${buildFile}"
+  writeNewLines >> "${buildFile}"
+
+  bumpValetBuildVersion
+
+  mv -f "${buildFile}" "${VALET_HOME}/valet.d/cmd"
+
+  succeed "The valet menu has been successfully built"
+}
+
+bumpValetBuildVersion() {
+  local versionFile currentVersion
+  versionFile="${VALET_HOME}/valet.d/version"
+  currentVersion=$(cat "${versionFile}")
+  newVersion=$(echo "${currentVersion}" | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+  echo "${newVersion}" > "${versionFile}"
+}
+
+getTextBetweenLines() {
+  local beginTag beginLine endTag endLine
+  beginTag="${1}"
+  endTag="${2}"
+  text="${3}"
+  beginLine=$(echo "${text}" | grep -n "${beginTag}" | head -n 1 | cut -d':' -f1)
+  if [ -z "${beginLine}" ]; then
+    return 0
+  fi
+  endLine=$(echo "${text}" | tail -n "+$((beginLine + 1))" | grep --max-count=1 -n "${endTag}" | cut -d':' -f1)
+  endLine=$((beginLine + endLine))
+  if [ -z "${endLine}" ]; then
+    return 0
+  fi
+  echo "${text}" | head -n "+$((endLine))" | tail -n "$((endLine - beginLine + 1))"
+}
+
+
+# converts an input string from --option-name to optionName
+function optionNameToCamelCase() {
+  echo "${1}" | sed 's/^-*//' | sed -r 's/(^|-)(\w)/\U\2/g' | sed -r 's/^(\w)/\L\1/g'
+}
+
+# converts an input string from --option-name to OPTION_NAME
+function optioNameToCapsSnakeCase() {
+  echo "${1}" | sed -E 's/^[-]{2}//' | tr '[:lower:]' '[:upper:]' | tr '-' '_'
+}
+
+# from -o, --this-is-an-option, --option
+# will return thisIsAnOption
+# takes the first long option name
+function getVariableNameFromOptions() {
+  echo "${1}" | grep -oE "[-]{2}[-A-Za-z0-9]+" | head -n 1
+}
+
+function writeFunctionArguments() {
+  echo "# Get the arguments of a given function xxx."
+  echo "# CMD_ARGS_NAME_xxx = array with each argument names in camel case"
+  echo "# CMD_ARGS_LAST_IS_ARRAY_xxx = array which indicates if the last argument of the function is an array"
+  local function json jsonLines
+    while read -r function; do
+
+      jsonLines="$("about_${function}" | yq -o=j -I=0 ".arguments[]")"
+      jsonLines="${jsonLines%$'\n'}"
+
+      if [ -z "$(echo "${jsonLines}" | head -n 1)" ]; then
+        continue
+      fi
+
+      # array with each argument names in camel case
+      echo "CMD_ARGS_NAME_${function}=("
+      while read -r json; do
+        name="$(echo "${json}" | yq ".name")"
+        echo "  \"$(optionNameToCamelCase "${name%...}")\""
+      done <<< "${jsonLines}"
+      echo ")"
+
+      echo -n "CMD_ARGS_LAST_IS_ARRAY_${function}="
+      if [[ "${name}" == *"..." ]]; then echo "\"true\""; else echo "\"false\""; fi
+  done < <(listAllFunctions)
+}
+
+function writeFunctionOptions() {
+  echo "# Get the options of a given function xxx."
+  echo "# CMD_OPTS_xxx = array with each option separated by a space"
+  echo "# CMD_OPTS_HAS_VALUE_xxx = array which indicates for each option if it has a value or not"
+  echo "# CMD_OPTS_NAME_xxx = array with each option names in camel case"
+  echo "# CMD_OPTS_NAME_SC_xxx = array with each option names in snake case"
+  local function json jsonLines value
+    while read -r function; do
+
+      jsonLines="$("about_${function}" | yq -o=j -I=0 ".options[]")"
+      jsonLines="${jsonLines%$'\n'}"
+
+      if [[ -z "$(echo "${jsonLines}" | head -n 1)" || "${function}" == "this" ]]; then
+        continue
+      fi
+
+      # array with each option separated by a space
+      echo "CMD_OPTS_${function}=("
+      while read -r json; do
+        name="$(echo "${json}" | yq ".name")"
+        value="$(echo "${name}" | grep -oE "[-]{1,2}[-A-Za-z0-9]+" | tr $'\n' ' ')"
+        value="${value% }"
+        echo "  \"${value}\""
+      done <<< "${jsonLines}"
+      echo "  \"-h --help\""
+      echo ")"
+
+      # array which indicates for each option if it has a value or not
+      echo "CMD_OPTS_HAS_VALUE_${function}=("
+      while read -r json; do
+        name="$(echo "${json}" | yq ".name")"
+        echo "  \"$(echo "${name}" | grep -qE "<[-A-Za-z0-9]+>" && echo "true" || echo "false")\""
+      done <<< "${jsonLines}"
+      echo ")"
+
+      # array with each option names in camel case
+      echo "CMD_OPTS_NAME_${function}=("
+      while read -r json; do
+        name="$(echo "${json}" | yq ".name")"
+        echo "  \"$(optionNameToCamelCase "$(getVariableNameFromOptions "${name}")")\""
+      done <<< "${jsonLines}"
+      echo "  \"help\""
+      echo ")"
+
+      # array with each option names in snake case
+      echo "CMD_OPTS_NAME_SC_${function}=("
+      while read -r json; do
+        name="$(echo "${json}" | yq ".name")"
+        echo "  \"$(optioNameToCapsSnakeCase "$(getVariableNameFromOptions "${name}")")\""
+      done <<< "${jsonLines}"
+      echo ")"
+
+
+  done < <(listAllFunctions)
+}
+
+function writeGetForFunction() {
+  echo "# Get the properties of a given function xxx."
+  echo "# CMD_COMMAND_xxx = the command of the function"
+  echo "# CMD_FILETOSOURCE_xxx = the file to source for the function"
+  echo "# CMD_SUDO_xxx = true if the function requires sudo"
+  echo "# CMD_SHORTDESCRIPTION_xxx = the short description of the function"
+  echo "# CMD_DESCRIPTION_xxx = the description of the function"
+  echo "# CMD_EXAMPLES_NAME_xxx = array with each example name"
+  echo "# CMD_EXAMPLES_DESCRIPTION_xxx = array with each example description"
+  echo "# CMD_OPTIONS_NAME_xxx = array with each option name"
+  echo "# CMD_OPTIONS_DESCRIPTION_xxx = array with each option description"
+  echo "# CMD_ARGUMENTS_NAME_xxx = array with each argument name"
+  echo "# CMD_ARGUMENTS_DESCRIPTION_xxx = array with each argument description"
+  echo "# CMD_COMMANDS_NAME_xxx = array with each sub command name"
+  echo "# CMD_COMMANDS_SHORTDESCRIPTION_xxx = array with each sub commmand short description"
+
+
+  # write all the keys for each function
+  local json key value jsonLines property snakeCaseOptionName optionValue
+  for property in {command,fileToSource,sudo,shortDescription,description,examples,options,arguments}; do
+
+    while read -r function; do
+
+      if echo "${property}" | grep -q "s$"; then
+        # an array
+        jsonLines="$("about_${function}" | yq -o=j -I=0 ".${property}[]")"
+
+        if [[ -z "$(echo "${jsonLines}" | head -n 1)" && "${property}" != "options" ]]; then
+          continue
+        fi
+
+        for key in {name,description}; do
+
+          # array with each property.name in camel case
+          echo "CMD_$(echo "${property}_${key}" | tr '[:lower:]' '[:upper:]')_${function}=("
+          while read -r json; do
+            value="$(echo "${json}" | yq ".${key} // \"\"")"
+            if [ -n "${value}" ]; then
+              if [[ "${property}" = "options" && "${key}" = "description" ]]; then
+                # for options, add the help text regarding setting the option with env vars
+                name="$(echo "${json}" | yq ".name")"
+                snakeCaseOptionName="$(optioNameToCapsSnakeCase "$(getVariableNameFromOptions "${name}")")"
+                optionValue="$(echo "${name}" | grep -oE "<[-A-Za-z0-9]+>" || echo "")"
+                if [ -n "${optionValue}" ]; then
+                  value+=$'\n'"This option can be set by exporting the variable VALET_${snakeCaseOptionName}=\"${optionValue}\"."
+                else
+                  value+=$'\n'"This option can be set by exporting the variable VALET_${snakeCaseOptionName}=\"true\"."
+                fi
+              fi
+              echo "  \"${value//\"/\\\"}\""
+            fi
+          done <<< "${jsonLines}"
+          if [ "${property}" = "options" ]; then
+            # for options, add the default help option
+            if [ "${key}" = "name" ]; then
+              echo "  \"-h, --help\""
+            elif [ "${key}" = "description" ]; then
+              echo "  \"Display the help for this command\""
+            fi
+          fi
+          echo ")"
+
+        done
+
+      else
+        # simple string
+        value="$("about_${function}" | yq ".${property} // \"\"" | sed 's/"/\\"/g')"
+
+        # for fileToSource, make it relative to valet path
+        if [ "${property}" = "fileToSource" ] && [ -n "${value}" ]; then
+          value="$(realpath "${value}" | sed "s|${VALET_HOME}/||")"
+        fi
+
+        if [ -n "${value}" ]; then
+          echo "CMD_$(echo "${property}" | tr '[:lower:]' '[:upper:]')_${function}=\"${value}\""
+        fi
+      fi
+
+    done < <(listAllFunctions)
+  done
+
+  # also write the commands
+  local command subCommand subFunction lines
+
+  while read -r function; do
+    command="$(getFunctionCommand "${function}")"
+
+    lines="$(listSubCommandsOf "${command}")"
+
+    if [ -z "${lines}" ]; then
+      continue
+    fi
+
+    echo "CMD_COMMANDS_NAME_${function}=("
+    while read -r subCommand; do
+      echo "  \"${subCommand//\"/\\\"}\""
+    done <<<"${lines}"
+    echo ")"
+
+    echo "CMD_COMMANDS_DESCRIPTION_${function}=("
+    while read -r subCommand; do
+      if [ "${function}" = "this" ]; then
+        # case of "this", the main program
+        subFunction="$(getFunctionFromCommand "${subCommand}")"
+      else
+        subFunction="$(getFunctionFromCommand "${command} ${subCommand}")"
+      fi
+      value="$(getFunctionShortDescription "${subFunction}")"
+      echo "  \"${value//\"/\\\"}\""
+    done <<<"${lines}"
+    echo ")"
+
+  done < <(listAllFunctions)
+
+}
+
+function writeCommandsMenu() {
+  local maxWidth function
+  maxWidth=$(getMaxCommandWidth)
+  maxWidth=$((maxWidth + 2))
+  echo "# Get the input for fzf to display the header commands menu"
+  echo "CMD_COMMANDS_MENU_HEADER=\"Please select the command to run (filter by typing anything)
+
+$(printf "%-${maxWidth}s\t%s\n" "Command name" "Short description")\""
+
+
+  echo "CMD_COMMANDS_MENU_BODY=\"$(getCommandsMenu | sort)\""
+}
+
+function getCommandsMenu() {
+  local maxWidth function
+  maxWidth=$(getMaxCommandWidth)
+  maxWidth=$((maxWidth + 2))
+  while read -r function; do
+    if [ "${function}" = "this" ]; then continue; fi
+    printf "%-${maxWidth}s\t%s\n" "$(getFunctionCommand "${function}")" "$(getFunctionShortDescription "${function}")"
+  done < <(listAllFunctions)
+}
+
+function writeMaxCommandWidth() {
+  echo "# get the maximum width (nb characters) among all commands"
+  echo "CMD_MAX_COMMAND_WIDTH=\"$(getMaxCommandWidth)\""
+}
+
+function getMaxCommandWidth() {
+  local function maxWidth currentWidth
+  maxWidth=0
+  while read -r function; do
+    currentWidth=$(getFunctionCommand "${function}" | awk '{ print length }')
+    if [[ currentWidth -gt maxWidth ]]; then
+      maxWidth=$((currentWidth))
+    fi
+  done < <(listAllFunctions)
+  printf "%s" "${maxWidth}"
+}
+
+function writeAllCommands() {
+  local function
+  echo "# list all the commands"
+  echo -n "CMD_ALL_COMMANDS=\""
+  while read -r function; do
+    getFunctionCommand "${function}"
+  done < <(listAllFunctions)
+  echo "\""
+}
+
+function validateYamlForEachAboutFunction() {
+  local function
+  while read -r function; do
+    "about_${function}" | yq '.' > /dev/null || fail "The function about_${function} does not return a valid yaml"
+  done < <(listAllFunctions)
+
+  # TODO: validate that each option is different, same for arguments
+}
+
+function writeMaxSubCommandLevel() {
+  local function maxSpaces currentSpaces
+  maxSpaces=0
+  while read -r function; do
+    currentSpaces=$(getFunctionCommand "${function}" | tr -cd ' ' | wc -c)
+    if [[ currentSpaces -gt maxSpaces ]]; then
+      maxSpaces="${currentSpaces}"
+    fi
+  done < <(listAllFunctions)
+  echo "# get the maximum number of sub command levels; e.g. 'command subcommand subsubcommand' has 2 levels"
+  echo "CMD_MAX_SUB_COMMAND_LEVEL=\"${maxSpaces}\""
+}
+
+function writeNewLines() {
+  echo
+  echo
+}
+
+function writeExactCommandToFunctionMap() {
+  local function command
+  echo "# Get the function name from a command"
+  while read -r function; do
+    command=$(getFunctionCommand "${function}")
+    command="${command//-/_}"
+    echo "CMD_FUNCTION_NAME_${command// /_}=\"${function}\""
+  done < <(listAllFunctions)
+}
+
+function writeAllFunctions() {
+  local function
+  echo "# list all the functions callable with a command"
+  echo -n "CMD_ALL_COMMANDS=\""
+  while read -r function; do
+    echo "${function}"
+  done < <(listAllFunctions)
+  echo "\""
+}
+
+function writeHeader() {
+  echo "#!/usr/bin/env bash
+# Title:         valet.d/commands
+# Description:   This script is auto-generated by the 'build' script
+#                It contains metadata on each commands
+# Author:        github.com/jcaillon
+# shellcheck disable=SC2034
+
+_CMD_INCLUDED=1
+
+# /!\ This file is auto-generated by the 'build' script. Do not edit it manually
+"
+}
+
+function listAllFunctions() {
+  declare -F | grep "declare -f about_" | cut -c18-
+}
+
+function getFunctionCommand() {
+  "about_${1}" | yq '.command // ""'
+}
+
+function getFunctionShortDescription() {
+  "about_${1}" | yq '.shortDescription // ""'
+}
+
+# list all the sub commands of a given command
+function getFunctionFromCommand() {
+  local function command baseCommand
+  baseCommand="$*"
+  while read -r function; do
+    command=$(getFunctionCommand "${function}")
+    if [ "${command}" = "${baseCommand}" ] ; then
+      printf "%s" "${function}"
+      return 0
+    fi
+  done < <(listAllFunctions)
+}
+
+# list all the sub commands of a given command
+function listSubCommandsOf() {
+  local function command baseCommand subCommand
+  baseCommand="$*"
+
+  if [ -z "${baseCommand}" ]; then
+    # case of "this" function, the main program
+    while read -r function; do
+      command=$(getFunctionCommand "${function}")
+      echo "${command}"
+    done < <(listAllFunctions | grep -vE "^this$")
+    return 0
+  fi
+
+  while read -r function; do
+    command=$(getFunctionCommand "${function}")
+    if echo "${command}" | grep -qE "^${baseCommand} [^ ]+" > /dev/null; then
+      subCommand="$(echo "${command}" | sed "s/${baseCommand} //" | cut -d' ' -f1)"
+      echo "${subCommand}"
+    fi
+  done < <(listAllFunctions)
+}
+
+# if this script is run directly, execute the function, otherwise valet will do it
+if [ "${NOT_EXECUTED_FROM_VALET:-false}" == "true" ]; then
+  build "$@"
+fi

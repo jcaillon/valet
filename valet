@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# Title:         valet
+# Description:   A wrapper around commands.
+#                For the user, allows to enter interactive mode,
+#                 look for commands and run them.
+#                For the developer, allows to:
+#                - create new commands and have them available in the system
+#                - collect metadata on commands
+#                - parse command arguments and options
+# Usage:         valet --help
+# Author:        github.com/jcaillon
+
+#===============================================================
+# >>> About this program
+#===============================================================
+# shellcheck disable=SC2317
+function about_this() {
+  echo "
+shortDescription: Your personal assistant in the terminal!
+description: |-
+  Valet is wrapper around a collection of commands that help you with your daily tasks.
+
+  You can call valet without any commands to start an interactive session.
+
+  ⌜Exit codes:⌝
+  - 0: everything went well
+  - 1: an error occured
+
+  ⌜Configuration through environment variables:⌝
+  In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
+  - VALET_NO_COLOR=\"true\": will disable the color output for logs and help.
+  - VALET_NO_WRAP=\"true\": will disable the text wrapping for logs and help.
+  - VALET_NO_ICON=\"true\": will disable the icons for logs and help.
+  - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
+
+  ⌜Developer notes:⌝
+  Please check the README.md to learn how to implement a new command.
+  You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
+sudo: false
+arguments:
+  - name: commands...
+    description: |-
+      The command or sub commands to execute.
+      See the commands section for more information.
+options:
+  - name: -x, --profiling
+    description: |-
+      Turn on profiling (with debug mode) before running the required command.
+      It will output to ~/profile_valet_cmd.txt.
+      This is useful to debug your command and understand what takes a long time to execute.
+  - name: -ll, -log, --log-level <level>
+    description: |-
+      Set the log level of valet (defaults to info).
+      Possible values are: debug, info, warn, error, fatal.
+  - name: -v, --verbose
+    description: |-
+      Output verbose information.
+      This is the equivalent of setting the log level to debug.
+  - name: --version
+    description: |-
+      Display the current version of valet.
+examples:
+  - name: --help
+    description: |-
+      Displays this help text.
+  - name: ⌜-v⌝ ⌜a-command⌝ ⌜and-sub-command⌝
+    description: |-
+      Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
+"
+}
+
+#===============================================================
+# >>> Include core/utils
+#===============================================================
+VALET_HOME="${BASH_SOURCE[0]}"
+if [[ "${VALET_HOME}" != /* ]]; then
+  # resolve relative path (we avoid subshell as much as possible for performance reasons)
+  VALET_HOME="$(realpath -L "${VALET_HOME}")"
+fi
+VALET_HOME="${VALET_HOME%/*}" # strip filename
+
+
+#===============================================================
+# >>> Source main functions
+#===============================================================
+# shellcheck source=valet.d/main
+source "${VALET_HOME}/valet.d/main"
+
+#===============================================================
+# >>> Run the main function
+#===============================================================
+parseMainArguments "$@"
