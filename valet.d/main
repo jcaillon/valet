@@ -1,0 +1,1137 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# Title:         valet.d/main
+# Description:   this script contains the main code for our bash programs and
+#                it should be sourced, not called directly
+# Author:        github.com/jcaillon
+
+# # This function is called before the program exits
+# onExit() {
+#   return 0
+# }
+
+# # This function should return 0 to cancel the interruption
+# # or any other code to interrupt the program
+# # shellcheck disable=SC2317
+# onInterrupt() {
+#   return 0
+# }
+
+# # This function should return 0 to cancel the termination
+# # or any other code to interrupt the program
+# # shellcheck disable=SC2317
+# onTerminate() {
+#   return 0
+# }
+
+# # This function is always called before the program exits and can be
+# # used to clean up our mess
+# cleanUp() {
+#   return 0
+# }
+
+_MAIN_INCLUDED=1
+
+# Handle the case where this script was invoked outside of valet
+if [ -z "${VALET_HOME:-}" ]; then
+  VALET_HOME="${BASH_SOURCE[0]}"
+  VALET_HOME="${VALET_HOME%/*}" # strip file name
+  VALET_HOME="${VALET_HOME%/*}" # strip valet.d directory
+  if [[ "${VALET_HOME}" != /* ]]; then
+    # resolve relative path (we avoid subshell as much as possible for performance reasons)
+    VALET_HOME="$(realpath -L "${VALET_HOME}")"
+  fi
+fi
+
+if [ -z "${_CMD_INCLUDED:-}" ]; then
+  # shellcheck source=cmd
+  source "${VALET_HOME}/valet.d/cmd"
+fi
+if [ -z "${_CORE_INCLUDED:-}" ]; then
+  # shellcheck source=core
+  source "${VALET_HOME}/valet.d/core"
+fi
+
+#===============================================================
+# >>> Event handling
+#===============================================================
+
+function onErrorInternal() {
+  if [ "${ERROR_DISPLAY:-0}" = "1" ]; then
+    return 0
+  fi
+  local stack i stackSize func linen src
+  stack=""
+  stackSize=${#FUNCNAME[@]}
+  treeString="├─"
+  for ((i = 1; i < stackSize; i++)); do
+    func="${FUNCNAME[$i]}"
+    [ -z "${func}" ] && func=MAIN
+    linen="${BASH_LINENO[$((i - 1))]}"
+    src="${BASH_SOURCE[$i]}"
+    [ -z "${src}" ] && src=non_file_source
+    if [ "${i}" = "$((stackSize - 1))" ]; then
+      treeString="└─"
+    fi
+    stack+=$'\n'"${treeString} In function $func $src:$linen"
+  done
+  logLine "RED" $'\uf2d3' "ERROR" "Error code ${1} in ${FUNCNAME[1]}, stack:${stack}"
+  ERROR_DISPLAY=1
+}
+
+trap 'onErrorInternal $?' ERR
+
+function onExitInternal() {
+  local rc=$?
+  debug "Exiting with code ${rc} after ${SECONDS}s"
+  if command -v onExit 1>/dev/null 2>&1; then
+    onExit
+  fi
+  # always call cleanUp before exiting
+  onCleanUpInternal
+  if [[ "${ERROR_DISPLAY:-0}" != "1" && "${rc}" != "0" ]]; then
+    logLine "RED" $'\uf14c' "EXIT" "Exiting with code ${rc}."
+    ERROR_DISPLAY=1
+  fi
+}
+
+trap onExitInternal EXIT
+
+function onInterruptInternal() {
+  echo # Set cursor to the next line of '^C'
+  logLine "YELLOW" $'\uf256' "STOPPED" "Program interrupted by the user."
+  # check if the function exists
+  if command -v onInterrupt 1>/dev/null 2>&1; then
+    if onInterrupt; then
+      # if onInterrupt returns 0, then we cancel the interrupt
+      return 0
+    fi
+  fi
+  exit 1
+}
+
+# Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
+trap onInterruptInternal SIGINT SIGQUIT
+
+function onTerminateInternal() {
+  logLine "RED" $'\uf05e' "KILLED" "Program killed."
+  # check if the function exists
+  if command -v onTerminate 1>/dev/null 2>&1; then
+    if onTerminate; then
+      # if onTerminate returns 0, then we cancel the termination
+      return 0
+    fi
+  fi
+  exit 1
+}
+
+# Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
+trap onTerminateInternal SIGHUP SIGTERM
+
+function onCleanUpInternal() {
+  cleanupTempFiles
+  if command -v cleanUp 1>/dev/null 2>&1; then
+    cleanUp
+  fi
+}
+
+#===============================================================
+# >>> Profiler
+#===============================================================
+# https://github.com/vlovich/bashrc-wrangler/blob/master/bash.d/000-setup
+
+PROFILER_FDS=()
+if command -v ts 1>/dev/null 2>&1; then
+  enable_profiler() {
+    local file fd
+    file="$1"
+
+    # create the directory for file and reset it
+    mkdir -p "${file%/*}"
+    : "${file}"
+
+    # https://mdjnewman.me/2017/10/debugging-slow-bash-startup-files/
+    if [[ "${#PROFILER_FDS[@]}" -eq 0 ]]; then
+      fd=5
+      debug "Starting profiler $file."
+      exec 5> >(ts -i "%.s" >"$file")
+      export BASH_XTRACEFD=$fd
+      set -x
+    else
+      fd=$((${PROFILER_FDS[-1]} + 1))
+      debug "Using FD=$FD for nested profiler $file."
+      eval 'exec '$fd'> >(ts -i "%.s" | tee "$file" >&5)'
+      export BASH_XTRACEFD=$fd
+    fi
+    PROFILER_FDS+=("$fd")
+  }
+
+  disable_profiler() {
+    local fd
+
+    fd="${PROFILER_FDS[-1]}"
+    unset "PROFILER_FDS[${#PROFILER_FDS[@]} - 1]"
+    if [[ "$fd" -eq 5 ]]; then
+      debug "Disabling top-most profiler."
+      set +x
+      unset BASH_XTRACEFD
+      exec 5>/dev/null
+    else
+      debug "Disabling nested profiler $fd."
+      eval 'exec '"$fd"'>/dev/null'
+      export BASH_XTRACEFD=$((fd - 1))
+    fi
+  }
+else
+  enable_profiler() {
+    local file
+
+    if [[ -n "${PROFILING:-}" ]]; then
+      # Nested profiling not supported
+      return 0
+    fi
+    file=$1
+    PROFILING=y
+    warn "The profiler is not activated with moreutils/ts because the ts executable is not found; using simple PS4 trick."
+
+    # create the directory for file and reset it
+    mkdir -p "${file%/*}"
+    : "${file}"
+
+    PS4='+ $(date "+%s.%N")\011$BASH_SOURCE\011$BASH_LINENO\011 '
+    exec 3>&2 2>"${file}"
+    set -x
+  }
+
+  disable_profiler() {
+    set +x
+    exec 2>&3 3>&0
+    unset PS4
+    unset PROFILING
+  }
+fi
+
+if [ "${VALET_STARTUP_PROFILING:-}" = "true" ]; then
+  enable_profiler ~/profile_valet.txt
+fi
+
+#===============================================================
+# >>> Help
+#===============================================================
+
+# show the help text of a function (can be blank to show the root help)
+function showFunctionHelp() {
+  local functionName noColor maxColumns
+  functionName="${1:-this}"
+  noColor="${2:-false}"
+  maxColumns="${3:-120}"
+
+  if [ -z "${functionName}" ]; then
+    return 1
+  fi
+
+  # sudo apt-get install colortest
+  # colortest-16b
+  local cDefault cTitle cItalic cOption cArgument cCommand
+  if [ "${noColor}" = "true" ]; then
+    cDefault=""
+    cTitle=""
+    cItalic=""
+    cOption=""
+    cArgument=""
+    cCommand=""
+  else
+    cDefault=$'\033'"[0m"
+    cTitle=$'\033'"[36m"
+    cItalic=$'\033'"[32m"
+    cOption=$'\033'"[1;33m"
+    cArgument=$'\033'"[35m"
+    cCommand=$'\033'"[31m"
+  fi
+
+  local helpWidth
+  helpWidth="${maxColumns}"
+  if [[ ${helpWidth} -gt ${_COLUMNS} ]]; then helpWidth="${_COLUMNS}"; fi
+
+  local -n command="CMD_COMMAND_${functionName}"
+  local -n description="CMD_DESCRIPTION_${functionName}"
+  description="$(echo "${description}" | fold -w "$((helpWidth - 2))" -s | awk '{print "  " $0}')"
+
+  local -n functionOptions="CMD_OPTIONS_NAME_${functionName}"
+  local -n functionArguments="CMD_ARGUMENTS_NAME_${functionName}"
+  local -n functionCommands="CMD_COMMANDS_NAME_${functionName}"
+  local -n functionExamples="CMD_EXAMPLES_NAME_${functionName}"
+
+  # TODO: array with each line of the help + another (same length) with the indentation value
+  # then we regroup all the texts with the same indentation value and call fold only once for this value
+
+  # usage
+  local usage
+  if [ "${functionName}" = "this" ]; then
+    usage="valet"
+  else
+    usage="valet ${command}"
+  fi
+  if [ -n "${functionOptions:-}" ]; then
+    usage+=" ${cOption}[options]${cDefault}"
+  fi
+  if [ -n "${functionCommands:-}" ]; then
+    usage+=" ${cCommand}<command>${cDefault}"
+  fi
+  if [ -n "${functionArguments:-}" ]; then
+    for argument in "${functionArguments[@]}"; do
+      usage+=" ${cArgument}<${argument}>${cDefault}"
+    done
+  fi
+  usage="$(echo "${usage}" | fold -w "${helpWidth}" -s | awk '{print "  " $0}')"
+
+  # options
+  local options
+  if [ -n "${functionOptions:-}" ]; then
+    options="${cTitle}OPTIONS${cDefault}"$'\n'$'\n'
+    writeAsTable2 "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
+    options+="${LAST_RETURNED_VALUE}"$'\n'
+  fi
+
+  # arguments
+  local arguments
+  if [ -n "${functionArguments:-}" ]; then
+    arguments="${cTitle}ARGUMENTS${cDefault}"$'\n'$'\n'
+    writeAsTable2 "${helpWidth}" "${cArgument}" "CMD_ARGUMENTS" "${functionName}"
+    arguments+="${LAST_RETURNED_VALUE}"$'\n'
+  fi
+
+  # commands
+  local commands
+  if [ -n "${functionCommands:-}" ]; then
+    commands="${cTitle}COMMANDS${cDefault}"$'\n'$'\n'
+    writeAsTable2 "${helpWidth}" "${cCommand}" "CMD_COMMANDS" "${functionName}"
+    commands+="${LAST_RETURNED_VALUE}"$'\n'
+  fi
+
+  # examples
+  local examples
+  if [ -n "${functionExamples:-}" ]; then
+    examples="${cTitle}EXAMPLES${cDefault}"$'\n'$'\n'
+    writeAsTable2 "${helpWidth}" "" "CMD_EXAMPLES" "${functionName}"
+    examples+="${LAST_RETURNED_VALUE}"$'\n'
+  fi
+
+  local output="${cTitle}ABOUT${cDefault}
+
+${description}
+
+${cTitle}USAGE${cDefault}
+
+${usage}
+
+${options:-}${arguments:-}${commands:-}${examples:-}"
+
+  # surround "markdown like" _italic_ with italic color
+  if [ "${noColor:-false}" = "false" ]; then
+    output="$(echo "${output}" | sed -E 's/⌜([^⌝]+)⌝/'"${cItalic}"'\1'"${cDefault}"'/g')"
+  fi
+
+  echo "${output}"
+}
+
+# used in show help to write a table of options, commands, arguments...
+# transform text1\ttext2 to:
+#   text1
+#           text2
+# text1 can be showed in color and we respect a maximum width
+function writeAsTable2() {
+  local width color prefix functionName
+  width="${1}"
+  color="${2}"
+  prefix="${3}"
+  functionName="${4}"
+
+  local -n names="${prefix}_NAME_${functionName}"
+  local -n descriptions="${prefix}_DESCRIPTION_${functionName}"
+
+  local cDefault output description index
+  if [ -n "${color:-}" ]; then cDefault=$'\033'"[0m"; fi
+
+  output=""
+  for index in "${!names[@]}"; do
+    output+="  ${color}${names[${index}]}${cDefault:-}"$'\n'
+    output+="$(echo "${descriptions[${index}]}" | fold -w "$((width - 6))" -s | awk '{print "      " $0}'))"$'\n'
+  done
+
+  LAST_RETURNED_VALUE="${output}"
+}
+
+# shellcheck disable=SC2317
+function about_showCommandHelp() {
+  echo "
+command: help
+shortDescription: Show the help this program or of a specific command
+description: |-
+  Show the help this program or of the help of a specific command.
+
+  You can show the help with or without colors and set the maximum columns for the help text.
+arguments:
+  - name: commands...
+    description: |-
+      The name of the command to show the help for.
+      If not provided, show the help for the program.
+options:
+  - name: -nc, --no-colors
+    description: |-
+      Do not use any colors in the output
+  - name: -c, --columns <number>
+    description: |-
+      Set the maximum columns for the help text
+examples:
+  - name: help ⌜cmd⌝
+    description: |-
+      Shows the help for the command ⌜cmd⌝
+  - name: help ⌜cmd⌝ ⌜subCmd⌝
+    description: |-
+      Shows the help for the sub command ⌜subCmd⌝ of the command ⌜cmd⌝
+  - name: help --no-colors --columns 50
+    description: |-
+      Shows the help for the program without any color and with a maximum of 50 columns
+"
+}
+
+# show the help of the given command (can be blank to show the root help)
+# e.g. showCommandHelp "cmd1 subcmd2"
+function showCommandHelp() {
+  local -a commands
+  local parsingErrors help columns noColors help
+  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  checkParseResults "${help:-}" "${parsingErrors:-}"
+
+  # show the program help if no commands are provided
+  if [ -z "${commands[0]:-}" ]; then
+    showFunctionHelp "this" "${noColors:-}" "${columns:-}"
+    return 0
+  fi
+
+  local functionName
+  fuzzyMatchCommandtoFunctionName "${commands[@]}" && functionName="${LAST_RETURNED_VALUE:-}"
+  if [ -z "${functionName}" ]; then
+    fail "Could not show the help because the command _${commands[*]}_ does not exist"
+  fi
+
+  showFunctionHelp "${functionName}" "${noColors:-}" "${columns:-}"
+}
+
+#===============================================================
+# >>> Main functions
+#===============================================================
+
+# parse the user arguments for the main program.
+function parseMainArguments() {
+  local -a commands args
+  args=("$@")
+
+  # for the main command, we parse the arguments manually
+  # this is for performance reasons, we want to stop parsing as soon as possible
+  while [[ $# -gt 0 ]]; do
+    if [ -n "${commands[0]:-}" ] && [[ "${1}" == "-"* ]]; then
+      # we matched the commands and we found an option for the sub command
+      break
+    fi
+    case "${1}" in
+    -x | --profiling)
+      warn "Command profiling activated"
+      PROFIL_COMMAND=true
+      ;;
+    -ll | -log | --log-level)
+      shift
+      LOG_LEVEL="${1}"
+      setLogLevelInt
+      ;;
+    -ci | --ci-logging)
+      # shellcheck disable=SC2034
+      LOG_MODE="ci"
+      ;;
+    -v | --verbose)
+      LOG_LEVEL="debug"
+      setLogLevelInt
+      ;;
+    --version)
+      cat "${VALET_HOME}/valet.d/version"
+      exit 0
+      ;;
+    -h | --help)
+      showFunctionHelp "this"
+      exit 0
+      ;;
+    -*)
+      local fuzzyOption options
+      options="${CMD_OPTIONS_NAME_this[*]%<*}"
+      options="${options//,/}"
+      fuzzyFindOption "${options}" "${1}" && fuzzyOption="${LAST_RETURNED_VALUE:-}"
+      fail "Unknown option ⌜${1}⌝${fuzzyOption})"
+      ;;
+    *)
+      commands+=("$1")
+      ;;
+    esac
+    shift
+  done
+
+  # restore default args
+  set -- "${args[@]}"
+
+  debug "Command found ⌜${commands[*]}⌝."
+
+  if [ -z "${commands[0]:-}" ]; then
+    # no command provided, we show the commands menu
+    showCommandsMenuAndRun "${CMD_COMMANDS_MENU_BODY}"
+  fi
+
+  local functionName
+  fuzzyMatchCommandtoFunctionName "${commands[@]}" && functionName="${LAST_RETURNED_VALUE:-}"
+  if [ -z "${functionName}" ]; then
+    fail "Could not find a command for ⌜${commands[*]}⌝."
+  fi
+
+  debug "Function name found ⌜${functionName}⌝."
+
+  runFunction "${functionName}" "$@"
+}
+
+# Find the function name from arguments that represents the commands.
+# If we do not find an exact match, we return try to fuzzy find the command
+# and then return its function name.
+# $@: the commands to find
+# returns: the function name in the global variable LAST_RETURNED_VALUE
+#
+# Usage:
+#  fuzzyMatchCommandtoFunctionName "self" "build" && echo "${LAST_RETURNED_VALUE}"
+function fuzzyMatchCommandtoFunctionName() {
+  local functionName
+  findFunctionFromArguments "$@" && functionName="${LAST_RETURNED_VALUE:-}"
+  if [ -z "${functionName}" ] && command -v fzf 1>/dev/null 2>&1; then
+    fuzzyFindFunctionFromArguments "$@" && functionName="${LAST_RETURNED_VALUE:-}"
+    if [ -n "${functionName}" ]; then
+      local -n command="CMD_COMMAND_${functionName}"
+      inform "Fuzzy matching the command ⌜$*⌝ to ⌜${command}⌝"
+    fi
+  fi
+
+  LAST_RETURNED_VALUE="${functionName:-}"
+}
+
+# Run a given function
+# The first arguments should be the function name,
+# the rest of the arguments are the user arguments starting
+# from the command name. e.g.:
+# sub cmd --opt1 arg1 arg2
+#
+# $1: the function name
+# $2+: the user arguments
+function runFunction() {
+  local functionName
+  functionName="${1}"
+  shift
+
+  if [ -z "${functionName}" ]; then
+    fail "No function name provided"
+  fi
+
+  # get command name of the function
+  local -n commandName="CMD_COMMAND_${functionName}"
+
+  # check for sudo if the function requires it
+  local -n requiresSudo="CMD_SUDO_${functionName}"
+  if [ "${requiresSudo:-}" = "true" ]; then
+    checkSudo
+  fi
+
+  # source the file in which the function is located if needed
+  local fileToSource
+  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
+    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
+    if [ -f "${VALET_HOME:-}/${fileToSource}" ]; then
+      # shellcheck disable=SC1090
+      source "${VALET_HOME:-}/${fileToSource}"
+      debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
+    else
+      warn "The file ⌜${VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
+    fi
+  fi
+
+  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
+    fail "The function ⌜${functionName}⌝ associated with the command ⌜${commandName}⌝ does not exist"
+  fi
+
+  # filter the initial arguments to only keep what comes after the
+  # matched command
+  local filteredArgs commandIndex command nbSpaces keep commandArray
+  IFS=" " read -r -a commandArray <<<"${commandName}"
+  nbSpaces="$((${#commandArray[@]} - 1))"
+  filteredArgs=()
+  commandIndex=0
+  keep=false
+  for arg in "$@"; do
+    if [ "${keep}" = true ]; then
+      filteredArgs+=("${arg}")
+      continue
+    fi
+
+    command="${commandArray[${commandIndex}]}"
+    if [ "${arg}" = "${command}" ]; then
+      commandIndex=$((commandIndex + 1))
+      if [[ commandIndex -gt nbSpaces ]]; then
+        keep=true
+        continue
+      fi
+    fi
+
+  done
+
+  debug "Running the command ⌜${commandName}⌝ with the function ⌜${functionName}⌝ and the arguments ⌜${filteredArgs[*]}⌝."
+
+  if [ "${PROFIL_COMMAND:-}" = "true" ]; then
+    enable_profiler ~/profile_valet_cmd.txt
+  fi
+
+  # execute the function
+  "${functionName}" "${filteredArgs[@]}"
+
+  if [ "${PROFIL_COMMAND:-}" = "true" ]; then
+    disable_profiler
+  fi
+
+  exit 0
+}
+
+function checkSudo() {
+  # sudo
+  if command -v sudo 1>/dev/null 2>&1; then
+    inform "This command requires sudo privileges"
+    SUDO="sudo"
+    $SUDO echo "alright" 1>/dev/null || fail "Could not sudo but the command requires it."
+  else
+    SUDO=""
+  fi
+}
+
+# check the presence of fzf, mandatory for interactive mode
+function checkFzf() {
+  if ! command -v fzf 1>/dev/null 2>&1; then
+    fail "This program requires https://github.com/junegunn/fzf to display interactive prompt. Install fzf or pass the correct options and arguments. See --help for more information."
+  fi
+}
+
+# Show the given commands in an interactive menu and then
+# run the selected command if any.
+# $1: the menu body
+function showCommandsMenuAndRun() {
+  local commands
+  commands="${1}"
+
+  checkFzf
+
+  # display the fzf menu
+  local sortedCommandsMenuBody
+  sortCommands "commands-menu" "${commands}" && sortedCommandsMenuBody="${LAST_RETURNED_VALUE}"
+
+  local commandChoice
+  showInteractiveCommandsMenu "${CMD_COMMANDS_MENU_HEADER}" "${sortedCommandsMenuBody}" && commandChoice="${LAST_RETURNED_VALUE}"
+  if [[ -z "${commandChoice}" ]]; then
+    # the user pressed escape or ctrl-c
+    exit 0
+  fi
+  addLastChoice "commands-menu" "${commandChoice}"
+
+  local functionName
+  findFunctionFromArguments "${commandChoice}" && functionName="${LAST_RETURNED_VALUE}"
+
+  runFunction "${functionName}"
+}
+
+# This function sorts the commands in the menu
+# by reading a file that contains the last used commands (last on top).
+# The file is located in the configuration directory of the program.
+# $1: the id of the menu (used in the file name)
+# $2: the menu body
+#
+# Usage:
+#  sortCommands "id" "${commands}" && sortedCommands="${LAST_RETURNED_VALUE}"
+function sortCommands() {
+  local menuId commands
+  menuId="${1}"
+  commands="${2}"
+
+  local lastChoicesFile
+  getLocalStateDirectory
+  lastChoicesFile="${LAST_RETURNED_VALUE}/${menuId}-last-choice"
+  if [ ! -f "${lastChoicesFile}" ]; then
+    LAST_RETURNED_VALUE="${commands}"
+    return 0
+  fi
+
+  local lastChoices
+  readarray -d $'\n' -t lastChoices < "${lastChoicesFile}"
+
+  # list all the unplayed commands
+  local unplayedCommands line command lastChoice played
+  while read -r line; do
+    command="${line%%$'\t'*}"
+    command="${command%%  *}"
+    # check if the command has not been played yet
+    played=false
+    for lastChoice in "${lastChoices[@]}"; do
+      if [[ "${lastChoice}" == "${command}" ]]; then
+        played=true
+        break
+      fi
+    done
+    # if not played, add it to the list
+    if [ "${played}" = "false" ]; then
+      unplayedCommands+="${line}"$'\n'
+    fi
+  done <<< "${commands}"
+
+  local commandsArray
+  readarray -d $'\n' -t commandsArray <<< "${commands}"
+
+  # list all the played commands
+  local playedCommands
+  for lastChoice in "${lastChoices[@]}"; do
+    # find the corresponding line in the commands, if any
+    for line in "${commandsArray[@]}"; do
+      command="${line%%$'\t'*}"
+      command="${command%%  *}"
+      if [[ "${command}" == "${lastChoice}" ]]; then
+        playedCommands+="${line}"$'\n'
+        break
+      fi
+    done
+  done
+
+  commands="${playedCommands:-}${unplayedCommands:-}"
+  LAST_RETURNED_VALUE="${commands%$'\n'}"
+}
+
+# This function adds the user command choice to the last choices file.
+# It allows to sort the commands in the menu by the last used commands.
+# $1: the id of the menu (used in the file name)
+# $2: the command to add
+function addLastChoice() {
+  local menuId command
+  menuId="${1}"
+  command="${2}"
+
+  # load last choices from the file into an array
+  local lastChoicesFile
+  getLocalStateDirectory
+  lastChoicesFile="${LAST_RETURNED_VALUE}/${menuId}-last-choice"
+  if [ ! -f "${lastChoicesFile}" ]; then
+    touch "${lastChoicesFile}"
+  fi
+
+  local lastChoices
+  readarray -d $'\n' -t lastChoices < "${lastChoicesFile}"
+
+  # add the command to the array only of it is not already present
+  local notPresent
+  notPresent=true
+  for lastChoice in "${lastChoices[@]}"; do
+    if [[ "${lastChoice}" == "${command}" ]]; then
+      notPresent=false
+      break
+    fi
+  done
+  if [ "${notPresent}" = true ]; then
+    echo "${command}" > "${lastChoicesFile}"
+  else
+    : > "${lastChoicesFile}"
+  fi
+
+  # keep only the last 19 commands
+  if [[ "${#lastChoices[@]}" -gt "19" ]]; then
+    lastChoices=("${lastChoices[@]:0:19}")
+  fi
+
+  # write the array to the file
+  for lastChoice in "${lastChoices[@]}"; do
+    echo "${lastChoice}" >> "${lastChoicesFile}"
+  done
+}
+
+# show an interactive menu for commands
+# returns the selected command in standard output
+# $1: the menu header
+# $2: the menu body
+# $3+: additional options to pass to fzf (e.g. --height=10)
+function showInteractiveCommandsMenu() {
+  local menuHeader menuBody
+  menuHeader="${1}"
+  menuBody="${2}"
+  shift 2
+
+  local menuHeaderArray menuHeaderLength
+  readarray -d $'\n' -t menuHeaderArray <<< "${menuHeader}"
+  menuHeaderLength="${#menuHeaderArray[@]}"
+
+  local commandsPrompt previewWidth commandChoice
+  commandsPrompt="${menuHeader}"$'\n'"${menuBody}"
+  previewWidth=$((_COLUMNS / 2 - 10))
+  if [[ $previewWidth -le 0 ]]; then
+    previewWidth=10
+  fi
+
+  local choice
+  choice="$(echo "${commandsPrompt}" | fzf \
+      --tiebreak=begin,index --no-multi --cycle \
+      --layout=reverse --info=default \
+      --margin=0 --padding=0 \
+      "--header-lines=${menuHeaderLength}" \
+      --preview-window=right:$((previewWidth)):wrap \
+      --preview="echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} $0 help --columns $((previewWidth - 2)) {}" \
+      "$@" || echo "")"
+  choice="${choice%%$'\t'*}"
+  choice="${choice%%  *}"
+  LAST_RETURNED_VALUE="${choice}"
+}
+
+#===============================================================
+# >>> Find command/function from arguments
+#===============================================================
+
+# this function tries to find the function name from program arguments
+# e.g. we can receive "self build" as arguments and we need to find the function name
+# contrary to fuzzyFindFunctionFromArguments, it will try to match the exact command names
+#
+# Usage:
+#  findFunctionFromArguments "self" "build" && finalFunctionName="${LAST_RETURNED_VALUE}"
+#  findFunctionFromArguments "self build" && finalFunctionName="${LAST_RETURNED_VALUE}"
+function findFunctionFromArguments() {
+  local level loopI functionName command finalFunctionName
+  if [ $# -eq 0 ]; then
+    return 0
+  fi
+  getMaxPossibleCommandLevel "$@" && level="${LAST_RETURNED_VALUE}"
+
+  for ((loopI = level; loopI >= 1; loopI--)); do
+    command="${*:1:$loopI}"
+    command="${command//-/_}"
+    command="${command// /_}"
+    local -n functionName="CMD_FUNCTION_NAME_${command}"
+    if [ -n "${functionName:-}" ]; then
+      finalFunctionName="${functionName}"
+      break
+    fi
+  done
+
+  LAST_RETURNED_VALUE="${finalFunctionName:-}"
+}
+
+# this function tries to find the function name from program arguments
+# e.g. we can receive "self build" as arguments and we need to find the function name
+# it allows fuzzy matching
+#
+# Usage:
+#  fuzzyFindFunctionFromArguments "self" "build" && finalFunctionName="${LAST_RETURNED_VALUE}"
+function fuzzyFindFunctionFromArguments() {
+  local level loopI commandName
+  if [ $# -eq 0 ]; then
+    return 0
+  fi
+
+  getMaxPossibleCommandLevel "$@" && level="${LAST_RETURNED_VALUE}"
+
+  for ((loopI = level; loopI >= 1; loopI--)); do
+    commandName="$(echo "${CMD_ALL_COMMANDS}" | fzf --tiebreak=begin,index -f "${*:1:$loopI}" || printf "")"
+    if [ -n "${commandName}" ]; then
+      break
+    fi
+  done
+
+  commandName="${commandName%%$'\n'*}"
+  commandName="${commandName//-/_}"
+  commandName="${commandName// /_}"
+
+  local -n functionName="CMD_FUNCTION_NAME_${commandName}"
+  LAST_RETURNED_VALUE="${functionName:-}"
+}
+
+# Return the maximum level of subcommands
+# if in valet with have at max 2 level of commands
+# e.g. cmd subcmd
+# then there is no need to try to match a command with 5 arguments
+# Same thing, if we provide only 1 argument to the cli, we
+# can only match a simple command
+# $@: the arguments
+# Usage:
+#  getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3" && level="${LAST_RETURNED_VALUE}"
+function getMaxPossibleCommandLevel() {
+  local command commandPart level maxLevel
+  # count the number of spaces
+  command="${*}"
+  level=0
+  # shellcheck disable=SC2034
+  for commandPart in ${command}; do
+    level=$((level + 1))
+  done
+  maxLevel=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
+  if [ "${level}" -gt "${maxLevel}" ]; then
+    level="${maxLevel}"
+  fi
+
+  LAST_RETURNED_VALUE="${level}"
+}
+
+#===============================================================
+# >>> Parsers
+#===============================================================
+
+# check if a function expects arguments
+# usage: functionExpectsArguments "functionName"
+function functionExpectsArguments() {
+  local functionName
+  functionName="${1:-}"
+  local -n arguments="CMD_ARGUMENTS_NAME_${functionName}"
+  if [ -n "${arguments:-}" ]; then
+    return 0
+  fi
+  # we expect at least the --help option but we don't count it as an option
+  local -n options="CMD_OPTIONS_NAME_${functionName}"
+  if [ -n "${options[1]:-}" ]; then
+    return 0
+  fi
+  return 1
+}
+
+# Parses the arguments and options of a function.
+# Usage:
+#  parseFunctionArguments "functionName" "$@" && eval "${LAST_RETURNED_VALUE}"
+#
+# Notes:
+# - It will return a string that can be evaluated to set the variables
+#   corresponding to the arguments and options; e.g.:
+#     "local arg1 option1
+#     arg1=\"\"
+#     option1=\"\"
+#     ..."
+# - It will also set the variable parsingErrors if there are any errors.
+# - Variable name for an option is taken from the first --long version of the option.
+# - It will set the variable as an array if the (last) argument name ends with '...'
+function parseFunctionArguments() {
+  local functionName
+  functionName="${1:-}"
+  if [ -z "${functionName}" ]; then
+    return 1
+  fi
+  shift
+
+  local -n argumentsName="CMD_ARGS_NAME_${functionName}"
+  local -n isLastArgumentAnArray="CMD_ARGS_LAST_IS_ARRAY_${functionName}"
+  local totalNbArguments
+  if [ -n "${argumentsName[0]}" ]; then totalNbArguments="${#argumentsName[@]}"; else totalNbArguments=0; fi
+  local argumentPosition
+  argumentPosition=0
+
+  local -n options="CMD_OPTS_${functionName}"
+  local -n optionsHasValue="CMD_OPTS_HAS_VALUE_${functionName}"
+  local -n optionsName="CMD_OPTS_NAME_${functionName}"
+  local -n optionsNameSc="CMD_OPTS_NAME_SC_${functionName}"
+
+  local -a lastArgumentValues
+  local -a outputErrors
+  local -a outputSetLine
+  local -a matchedOptionsIndex
+
+  # parse each arguments
+  local optionIndex option matchedIndex startedArguments optionValue optionName argumentName
+  startedArguments="false"
+  while [ $# -gt 0 ]; do
+
+    if [[ "${1}" == "-"* ]]; then
+      matchedIndex=-1
+
+      # we are matching an option
+      # try to match the argument with one of the option name
+      for optionIndex in "${!options[@]}"; do
+        for option in ${options[${optionIndex}]}; do
+          if [[ "${option}" == "${1}" ]]; then
+            matchedIndex="${optionIndex}"
+            break 2
+          fi
+        done
+      done
+
+      if [ "${matchedIndex}" != "-1" ]; then
+        # it's a match!
+        if [ "${startedArguments}" = "true" ]; then
+          outputErrors+=("Option ⌜${1}⌝ was given after the first argument, it should come before that.")
+        else
+          optionValue="${optionsHasValue[${matchedIndex}]:-}"
+          optionName="${optionsName[${matchedIndex}]}"
+          matchedOptionsIndex+=("${matchedIndex}")
+
+          if [ "${optionValue}" = "true" ]; then
+            shift
+            if [ $# = 0 ]; then
+              outputErrors+=("Missing value for option ⌜${optionName}⌝.")
+            else
+              outputSetLine+=("${optionName}=\"${1//\"/\\\"}\"")
+            fi
+          else
+            outputSetLine+=("${optionName}=\"true\"")
+          fi
+        fi
+
+      else
+        # if we didn't match any option, flag it as unknown option and add it to the leftOver
+        fuzzyFindOption "${options[*]}" "${1}" && fuzzyOption="${LAST_RETURNED_VALUE:-}"
+        outputErrors+=("Unknown option ⌜${1}⌝${fuzzyOption:-}.")
+      fi
+
+    else
+
+      # we are matching an argument
+      startedArguments="true"
+
+      if [ "${argumentPosition}" -ge "${totalNbArguments}" ]; then
+        outputErrors+=("Expecting ${totalNbArguments} argument(s), got extra argument ⌜${1}⌝.")
+      else
+        argumentName="${argumentsName[${argumentPosition}]}"
+
+        if [[ "${argumentPosition}" -eq "$((totalNbArguments - 1))" && "${isLastArgumentAnArray}" = "true" ]]; then
+          # if the arg ends with ... we expect an infinite amount of arguments
+          lastArgumentValues+=("${1}")
+        else
+          argumentPosition=$((argumentPosition + 1))
+          outputSetLine+=("${argumentName}=\"${1//\"/\\\"}\"")
+        fi
+
+      fi
+    fi
+
+    shift
+  done
+
+  # increase argument position if the last arg is an array because we don't do it in the loop
+  if [ -n "${lastArgumentValues[0]:-}" ]; then
+    argumentPosition=$((argumentPosition + 1))
+  fi
+
+  # check if we have missing arguments
+  if [ "${argumentPosition}" -lt "${totalNbArguments}" ]; then
+    outputErrors+=("Expecting ⌜${totalNbArguments}⌝ argument(s) but got ⌜$((argumentPosition))⌝.")
+  fi
+
+  local outputString
+
+  # define all the possible local variables for options and arguments
+  local option argumentIndex nbScalarArguments
+  outputString="local parsingErrors"
+  for option in "${optionsName[@]}"; do
+    outputString+=" ${option}"
+  done
+  nbScalarArguments="${totalNbArguments}"
+  [ "${isLastArgumentAnArray}" = "true" ] && nbScalarArguments=$((nbScalarArguments - 1))
+  for ((argumentIndex = 0; argumentIndex < nbScalarArguments; argumentIndex++)); do
+    outputString+=" ${argumentsName[${argumentIndex}]}"
+  done
+  outputString+=$'\n'
+  if [ "${isLastArgumentAnArray}" = "true" ]; then
+    outputString+="local -a ${argumentsName[${nbScalarArguments}]}"$'\n'
+  fi
+
+  # assign all unmatched options to the corresponding global variable
+  local optionIndex optionName optionMatched matchedIndex optionNameSc
+  for optionIndex in "${!options[@]}"; do
+    optionMatched="false"
+    for matchedIndex in "${matchedOptionsIndex[@]}"; do
+      if [ "${optionIndex}" = "${matchedIndex}" ]; then
+        optionMatched="true"
+        break
+      fi
+    done
+    if [ "${optionMatched}" = "false" ]; then
+      optionName="${optionsName[${optionIndex}]}"
+      optionNameSc="${optionsNameSc[${optionIndex}]:-}"
+      if [ -n "${optionNameSc}" ]; then
+        outputString+="${optionsName[${optionIndex}]}=\"\${${optionNameSc}:-}\""$'\n'
+      fi
+    fi
+  done
+
+  # output the parsing errors
+  local outputErrorIndex
+  outputString+="parsingErrors=\""
+  for outputErrorIndex in "${!outputErrors[@]}"; do
+    if [ "${outputErrorIndex}" -gt 0 ]; then
+      outputString+=$'\n'
+    fi
+    outputString+="${outputErrors[${outputErrorIndex}]}"
+  done
+  outputString+="\""$'\n'
+
+  # output the matched arguments/options values
+  local outputSet
+  for outputSet in "${outputSetLine[@]}"; do
+    outputString+="${outputSet}"$'\n'
+  done
+
+  # output the last argument values
+  if [ "${isLastArgumentAnArray}" = "true" ]; then
+    local lastArgumentValue
+    outputString+="${argumentsName[${nbScalarArguments}]}=("$'\n'
+    for lastArgumentValue in "${lastArgumentValues[@]}"; do
+      outputString+="\"${lastArgumentValue//\"/\\\"}\""$'\n'
+    done
+    outputString+=")"
+  fi
+
+  LAST_RETURNED_VALUE="${outputString}"
+}
+
+# Tries to help the user by suggesting a fix for an unknown option
+# we receive the function options and the unknown option string
+# Usage:
+#  fuzzyFindOption "option1 option2 option3" "opt1" && fuzzyOption="${LAST_RETURNED_VALUE}"
+function fuzzyFindOption() {
+  local options unknownOption optionPerLine suggestedOption
+  options="${1}"
+  unknownOption="${2}"
+
+  if ! command -v fzf 1>/dev/null 2>&1; then
+    return 0
+  fi
+
+  # split to get one possible option per line
+  optionPerLine="${options// /$'\n'}"
+  suggestedOption="$(echo "${optionPerLine}" | fzf --tiebreak=begin,index -f "${unknownOption}" || printf "")"
+  suggestedOption="${suggestedOption%%$'\n'*}"
+  if [ -n "${suggestedOption}" ]; then
+    suggestedOption=" (did you mean ⌜${suggestedOption}⌝?)"
+  fi
+
+  LAST_RETURNED_VALUE="${suggestedOption}"
+}
+
+# Parse the arguments and options of a function
+# See @parseArguments
+# Usage:
+#   parseFunctionArgumentsOrGoInteractive "functionName" "$@" && eval "${LAST_RETURNED_VALUE}"
+function parseFunctionArgumentsOrGoInteractive() {
+  local functionName
+  functionName="${1:-}"
+  if [ -z "${functionName}" ]; then
+    return 1
+  fi
+  shift
+
+  if ! functionExpectsArguments "${functionName}"; then
+    return 0
+  fi
+
+  if [ "$#" -eq 0 ]; then
+    # TODO: go interactive
+    warn "No arguments provided, should go interactive!"
+  fi
+
+  parseFunctionArguments "${functionName}" "$@"
+  debug "Parsed arguments:"$'\n'"${LAST_RETURNED_VALUE}"
+}
