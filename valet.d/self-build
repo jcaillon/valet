@@ -17,6 +17,7 @@ if [ -z "${_MAIN_INCLUDED:-}" ]; then
 fi
 # --- END OF COMMAND COMMON PART
 
+# TODO: this script is ugly and not optimized at all, it should be refactored
 
 #===============================================================
 # >>> About build

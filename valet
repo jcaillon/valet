@@ -64,7 +64,7 @@ examples:
   - name: --help
     description: |-
       Displays this help text.
-  - name: ⌜-v⌝ ⌜a-command⌝ ⌜and-sub-command⌝
+  - name: -v a-command and-sub-command
     description: |-
       Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
 "

@@ -2,7 +2,8 @@
 
 ## 0. Prerequisite
 
-In order to add a new command, you will need to "rebuild" Valet, which requires [yq](https://github.com/mikefarah/yq) to be present in your `PATH`.
+> [!IMPORTANT]
+> In order to add a new command, you will need to "rebuild" Valet, which requires [yq](https://github.com/mikefarah/yq) to be present in your `PATH`.
 
 ## 1. Add a new command file
 

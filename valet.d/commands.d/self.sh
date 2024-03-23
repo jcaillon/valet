@@ -29,7 +29,7 @@ arguments:
 
       See the commands section for more information.
 examples:
-  - name: self ⌜build⌝
+  - name: self build
     description: |-
       Re-build the valet menu by calling the ⌜build⌝ sub command.
 "

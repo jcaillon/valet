@@ -12,6 +12,11 @@ xxx
 
 xxx
 
+> [!IMPORTANT]
+> Valet has an interactive mode which allows you to select the commands you want to play and pick your arguments interactively.
+> It requires [fzf](https://github.com/junegunn/fzf) to be installed and present in your PATH.
+> Please check the fzf Github page to learn how to install it.
+
 ## Usage
 
 xxx
@@ -33,3 +38,4 @@ While the difference may seem insignificant on linux systems, it is **HUGE** in 
 
 - Add support for interactive mode.
 - Generate an autocompletion script for bash and zsh.
+- Implement self test with approval tests.
