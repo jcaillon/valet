@@ -36,11 +36,11 @@ _MAIN_INCLUDED=1
 if [ -z "${VALET_HOME:-}" ]; then
   VALET_HOME="${BASH_SOURCE[0]}"
   VALET_HOME="${VALET_HOME%/*}" # strip file name
-  VALET_HOME="${VALET_HOME%/*}" # strip valet.d directory
   if [[ "${VALET_HOME}" != /* ]]; then
     # resolve relative path (we avoid subshell as much as possible for performance reasons)
     VALET_HOME="$(realpath -L "${VALET_HOME}")"
   fi
+  VALET_HOME="${VALET_HOME%/*}" # strip valet.d directory
 fi
 
 if [ -z "${_CMD_INCLUDED:-}" ]; then
@@ -224,7 +224,7 @@ function showFunctionHelp() {
   local functionName noColor maxColumns
   functionName="${1:-this}"
   noColor="${2:-false}"
-  maxColumns="${3:-120}"
+  maxColumns="${3:-180}"
 
   if [ -z "${functionName}" ]; then
     return 1
@@ -252,18 +252,17 @@ function showFunctionHelp() {
   local helpWidth
   helpWidth="${maxColumns}"
   if [[ ${helpWidth} -gt ${_COLUMNS} ]]; then helpWidth="${_COLUMNS}"; fi
+  if [[ ${helpWidth} -lt 30 ]]; then helpWidth=30; fi
 
   local -n command="CMD_COMMAND_${functionName}"
   local -n description="CMD_DESCRIPTION_${functionName}"
-  description="$(echo "${description}" | fold -w "$((helpWidth - 2))" -s | awk '{print "  " $0}')"
+  wrapText "${description}" "${helpWidth}" 2 "true"
+  description="${LAST_RETURNED_VALUE}"
 
   local -n functionOptions="CMD_OPTIONS_NAME_${functionName}"
   local -n functionArguments="CMD_ARGUMENTS_NAME_${functionName}"
   local -n functionCommands="CMD_COMMANDS_NAME_${functionName}"
   local -n functionExamples="CMD_EXAMPLES_NAME_${functionName}"
-
-  # TODO: array with each line of the help + another (same length) with the indentation value
-  # then we regroup all the texts with the same indentation value and call fold only once for this value
 
   # usage
   local usage
@@ -283,13 +282,14 @@ function showFunctionHelp() {
       usage+=" ${cArgument}<${argument}>${cDefault}"
     done
   fi
-  usage="$(echo "${usage}" | fold -w "${helpWidth}" -s | awk '{print "  " $0}')"
+  wrapText "${usage}" "${helpWidth}" 2 "true"
+  usage="${LAST_RETURNED_VALUE}"
 
   # options
   local options
   if [ -n "${functionOptions:-}" ]; then
     options="${cTitle}OPTIONS${cDefault}"$'\n'$'\n'
-    writeAsTable2 "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
+    writeAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
     options+="${LAST_RETURNED_VALUE}"$'\n'
   fi
 
@@ -297,7 +297,7 @@ function showFunctionHelp() {
   local arguments
   if [ -n "${functionArguments:-}" ]; then
     arguments="${cTitle}ARGUMENTS${cDefault}"$'\n'$'\n'
-    writeAsTable2 "${helpWidth}" "${cArgument}" "CMD_ARGUMENTS" "${functionName}"
+    writeAsTable "${helpWidth}" "${cArgument}" "CMD_ARGUMENTS" "${functionName}"
     arguments+="${LAST_RETURNED_VALUE}"$'\n'
   fi
 
@@ -305,7 +305,7 @@ function showFunctionHelp() {
   local commands
   if [ -n "${functionCommands:-}" ]; then
     commands="${cTitle}COMMANDS${cDefault}"$'\n'$'\n'
-    writeAsTable2 "${helpWidth}" "${cCommand}" "CMD_COMMANDS" "${functionName}"
+    writeAsTable "${helpWidth}" "${cCommand}" "CMD_COMMANDS" "${functionName}"
     commands+="${LAST_RETURNED_VALUE}"$'\n'
   fi
 
@@ -313,7 +313,7 @@ function showFunctionHelp() {
   local examples
   if [ -n "${functionExamples:-}" ]; then
     examples="${cTitle}EXAMPLES${cDefault}"$'\n'$'\n'
-    writeAsTable2 "${helpWidth}" "" "CMD_EXAMPLES" "${functionName}"
+    writeAsTable "${helpWidth}" "" "CMD_EXAMPLES" "${functionName}"
     examples+="${LAST_RETURNED_VALUE}"$'\n'
   fi
 
@@ -329,7 +329,8 @@ ${options:-}${arguments:-}${commands:-}${examples:-}"
 
   # surround "markdown like" _italic_ with italic color
   if [ "${noColor:-false}" = "false" ]; then
-    output="$(echo "${output}" | sed -E 's/⌜([^⌝]+)⌝/'"${cItalic}"'\1'"${cDefault}"'/g')"
+    output="${output//⌜/${cItalic}⌜}"
+    output="${output//⌝/⌝${cDefault}}"
   fi
 
   echo "${output}"
@@ -340,7 +341,7 @@ ${options:-}${arguments:-}${commands:-}${examples:-}"
 #   text1
 #           text2
 # text1 can be showed in color and we respect a maximum width
-function writeAsTable2() {
+function writeAsTable() {
   local width color prefix functionName
   width="${1}"
   color="${2}"
@@ -355,8 +356,11 @@ function writeAsTable2() {
 
   output=""
   for index in "${!names[@]}"; do
-    output+="  ${color}${names[${index}]}${cDefault:-}"$'\n'
-    output+="$(echo "${descriptions[${index}]}" | fold -w "$((width - 6))" -s | awk '{print "      " $0}'))"$'\n'
+    wrapText "${names[${index}]}" "${helpWidth}" 2 "true"
+    output+="${color}${LAST_RETURNED_VALUE}${cDefault:-}"$'\n'
+
+    wrapText "${descriptions[${index}]}" "${helpWidth}" 6 "true"
+    output+="${LAST_RETURNED_VALUE}"$'\n'
   done
 
   LAST_RETURNED_VALUE="${output}"
@@ -384,10 +388,10 @@ options:
     description: |-
       Set the maximum columns for the help text
 examples:
-  - name: help ⌜cmd⌝
+  - name: help ⌟cmd⌞
     description: |-
       Shows the help for the command ⌜cmd⌝
-  - name: help ⌜cmd⌝ ⌜subCmd⌝
+  - name: help ⌟cmd⌞ ⌟subCmd⌞
     description: |-
       Shows the help for the sub command ⌜subCmd⌝ of the command ⌜cmd⌝
   - name: help --no-colors --columns 50
@@ -402,6 +406,14 @@ function showCommandHelp() {
   local -a commands
   local parsingErrors help columns noColors help
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+
+  # for the help command, we can do without any arguments so remove this parsing error
+  if [ -n "${parsingErrors:-}" ]; then
+    parsingErrors="${parsingErrors}"$'\n'
+    parsingErrors="${parsingErrors//Expecting ⌜*$'\n'/}"
+    parsingErrors="${parsingErrors%$'\n'}"
+  fi
+
   checkParseResults "${help:-}" "${parsingErrors:-}"
 
   # show the program help if no commands are provided

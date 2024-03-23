@@ -33,9 +33,9 @@ if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
 fi
 
 if [ "${VALET_NO_WRAP:-}" != "true" ]; then
-  _COLUMNS=$(tput cols 2>/dev/null || echo 120)
+  _COLUMNS="${_COLUMNS:-$(tput cols 2>/dev/null || echo 120)}"
 else
-  _COLUMNS=120
+  _COLUMNS="${_COLUMNS:-120}"
 fi
 
 #===============================================================
@@ -141,10 +141,10 @@ function setLogLevelInt() {
 # $*: the content of the log message
 if [ "${VALET_CI_MODE:-}" != "true" ]; then
   if [ "${VALET_NO_WRAP:-}" != "true" ]; then
-    _LOG_COLUMNS=$((_COLUMNS - 22))
     if [ -n "${MINGW_PREFIX:-}" ]; then
       _NO_ICON_PADDING="${_NO_ICON_PADDING:-true}"
     fi
+    _LOG_COLUMNS="${_COLUMNS:-120}"
     # displays an error message and then exit the program with error
     function logLine() {
       local color icon severity content
@@ -153,20 +153,14 @@ if [ "${VALET_CI_MODE:-}" != "true" ]; then
       severity="${3}"
       shift 3
       content="$*"
-      printf "%s%(%H:%M:%S)T " "${COLOR_GRAY}" 1>&2
-      echo "${content}" | fold -s -w "${_LOG_COLUMNS:-120}" | awk -v color="${!color}" -v italicColor="${COLOR_PINK}" -v defaultColor="${COLOR_DEFAULT}" -v severity="${severity}" -v icon="${icon:-}" -v noIconPadding="${_NO_ICON_PADDING:-false}" -v noIcon="${VALET_NO_ICON:-}" \
-        'NR==1 {
-        gsub(/⌜[^⌝]+⌝/, italicColor "&" defaultColor);
-        if (noIcon=="true")
-          printf "%s%-8s%-3s%s%s%s\n", color, severity, "", defaultColor, $0, defaultColor;
-        else if (noIconPadding=="true")
-          printf "%s%-8s%-3s%s%s%s\n", color, severity, icon, defaultColor, $0, defaultColor;
-        else
-          printf "%s%-8s%-5s%s%s%s\n", color, severity, icon, defaultColor, $0, defaultColor
-      };
-      NR>1 {
-        printf "%-20s%s\n", "", $0
-      }' 1>&2
+      content="${content//⌜/${COLOR_PINK}⌜}"
+      content="${content//⌝/⌝${COLOR_DEFAULT}}"
+      wrapText "${content}" "${_LOG_COLUMNS:-120}" 20
+      if [ "${VALET_NO_ICON:-}" != "true" ]; then
+        printf "%s%(%H:%M:%S)T %s%-8s%-4s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "${icon:-}" "${COLOR_DEFAULT}" "${content}" 1>&2
+      else
+        printf "%s%(%H:%M:%S)T %s%-8s%-2s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "" "${COLOR_DEFAULT}" "${content}" 1>&2
+      fi
     }
   else
     function logLine() {
@@ -277,6 +271,144 @@ function checkAndWarn() {
 #===============================================================
 # >>> Core utilities
 #===============================================================
+
+# Allows to soft wrap the given text at the given width.
+# Optionally applies left padding to each new line.
+# $1: the text to wrap
+# $2: the width to wrap the text at
+# $3: the padding to apply to each new line (default to 0)
+# $4: true/false if the padding should be applied to the first line (default to false)
+# Returns the wrapped text in the global variable LAST_RETURNED_VALUE
+# Usage:
+#  wrapText "This is a long text that should be wrapped at 20 characters." 20 2 false && local wrappedText="${LAST_RETURNED_VALUE}"
+# Note:
+#  This function is written in pure bash and is faster than the fold command.
+function wrapText() {
+  local text width leftPaddingLength appendPaddingToFirstLine
+  text="${1}"
+  width="${2}"
+  leftPaddingLength="${3:-0}"
+  appendPaddingToFirstLine="${4:-false}"
+
+  # compute padding in number of spaces
+  local leftPadding
+  leftPadding=""
+  for ((i = 0; i < leftPaddingLength; i++)); do
+    leftPadding+=" "
+  done
+
+  local sentenceWidth=$((width - leftPaddingLength))
+
+  local wrappedText
+
+  # we call wrapSentence for each line of the text
+  local firstLine="1"
+  local line
+  while read -r line; do
+    wrappedText+=$'\n'
+    wrapSentence "${line}" "${sentenceWidth}" "${leftPadding}"
+    if [ "${firstLine}" = "1" ]; then
+      firstLine="0"
+    else
+      wrappedText+="${leftPadding}"
+    fi
+    wrappedText+="${LAST_RETURNED_VALUE}"
+  done <<< "${text}"
+
+  # add left padding on the first line (or not)
+  if [ "${appendPaddingToFirstLine}" = "true" ]; then
+    LAST_RETURNED_VALUE="${leftPadding}${wrappedText#$'\n'}"
+  else
+    LAST_RETURNED_VALUE="${wrappedText#$'\n'}"
+  fi
+}
+
+# Allows to soft wrap the given sentence (without new lines) at the given width.
+# Optionally applies a prefix on each new line.
+# $1: the text to wrap
+# $2: the width to wrap the text at
+# $3: the prefix to apply to each new line (default to "")
+# Returns the wrapped text in the global variable LAST_RETURNED_VALUE
+# Usage:
+#  wrapText "This is a long text that should be wrapped at 20 characters." 20 && local wrappedText="${LAST_RETURNED_VALUE}"
+# Note:
+#  This function is written in pure bash and is faster than the fold command.
+function wrapSentence() {
+  local text width newLinePrefix
+  text="${1}"
+  width="${2}"
+  newLinePrefix="${3:-}"
+
+  # short cut in case the text is already shorter than the width
+  if [ "${#text}" -le "${width}" ]; then
+    LAST_RETURNED_VALUE="${text}"
+    return 0
+  fi
+
+  # new line to append
+  local newLine
+  newLine=$'\n'"${newLinePrefix}"
+
+  local wrappedText word spaceLeft wordLength partialWordLength
+  wrappedText=""
+  spaceLeft="${width}"
+  local firstWord="1"
+  for word in ${text}; do
+
+    if [ "${firstWord}" = "1" ]; then
+      firstWord="0"
+    else
+      # we just added a word
+      if [ "${spaceLeft}" -gt 0 ]; then
+        # if we have space left, we add a space
+        wrappedText+=" "
+        spaceLeft=$((spaceLeft - 1))
+      else
+        # otherwise we add a new line
+        wrappedText+="${newLine}"
+        spaceLeft="${width}"
+      fi
+    fi
+
+    wordLength="${#word}"
+
+    if [ "${wordLength}" -le "${spaceLeft}" ]; then
+      # we have the space to add the word
+      wrappedText+="${word}"
+      spaceLeft=$((spaceLeft - wordLength))
+    else
+      # we don't have the space to add the word
+
+      # will the word fit in the width of the next line?
+      if [[ "${wordLength}" -le "${width}" ]]; then
+        # then we add the word to the next line
+        wrappedText+="${newLine}${word}"
+        spaceLeft=$((width - wordLength))
+      else
+        # the word doesn't fit in the width of the next line
+        # we can add the partial word to the current line
+        # and the rest on the next lines until we have the full word
+        while [ "${wordLength}" -gt 0 ]; do
+          partialWordLength="${wordLength}"
+          if [ "${partialWordLength}" -gt "${spaceLeft}" ]; then
+            partialWordLength="${spaceLeft}"
+          fi
+          wrappedText+="${word:0:${partialWordLength}}"
+          word="${word:${partialWordLength}}"
+          wordLength=$((wordLength - partialWordLength))
+          spaceLeft=$((spaceLeft - partialWordLength))
+          if [[ "${spaceLeft}" -eq 0 && "${wordLength}" -gt 0 ]]; then
+            wrappedText+="${newLine}"
+            spaceLeft="${width}"
+          fi
+        done
+      fi
+    fi
+  done
+
+  LAST_RETURNED_VALUE="${wrappedText}"
+}
+
 
 # Allows to get the nth element of a string separated by a given separator.
 # This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""

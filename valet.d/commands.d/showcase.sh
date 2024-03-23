@@ -29,7 +29,7 @@ arguments:
 
       See the commands section for more information.
 examples:
-  - name: showcase ⌜command1⌝
+  - name: showcase command1
     description: |-
       Run the ⌜command1⌝ showcase command.
 "

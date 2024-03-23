@@ -144,14 +144,14 @@ In addition to the environment variables defined for each options, you can defin
 Please check the README.md to learn how to implement a new command.
 You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt)."
 CMD_EXAMPLES_NAME_selfMenu=(
-  "self ⌜build⌝"
+  "self build"
 )
 CMD_EXAMPLES_DESCRIPTION_selfMenu=(
   "Re-build the valet menu by calling the ⌜build⌝ sub command."
 )
 CMD_EXAMPLES_NAME_showCommandHelp=(
-  "help ⌜cmd⌝"
-  "help ⌜cmd⌝ ⌜subCmd⌝"
+  "help ⌟cmd⌞"
+  "help ⌟cmd⌞ ⌟subCmd⌞"
   "help --no-colors --columns 50"
 )
 CMD_EXAMPLES_DESCRIPTION_showCommandHelp=(
@@ -160,7 +160,7 @@ CMD_EXAMPLES_DESCRIPTION_showCommandHelp=(
   "Shows the help for the program without any color and with a maximum of 50 columns"
 )
 CMD_EXAMPLES_NAME_showcaseMenu=(
-  "showcase ⌜command1⌝"
+  "showcase command1"
 )
 CMD_EXAMPLES_DESCRIPTION_showcaseMenu=(
   "Run the ⌜command1⌝ showcase command."
@@ -173,7 +173,7 @@ CMD_EXAMPLES_DESCRIPTION_showcase_command1=(
 )
 CMD_EXAMPLES_NAME_this=(
   "--help"
-  "⌜-v⌝ ⌜a-command⌝ ⌜and-sub-command⌝"
+  "-v a-command and-sub-command"
 )
 CMD_EXAMPLES_DESCRIPTION_this=(
   "Displays this help text."
