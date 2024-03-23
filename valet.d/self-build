@@ -413,9 +413,12 @@ function writeAllCommands() {
   local function
   echo "# list all the commands"
   echo -n "CMD_ALL_COMMANDS=\""
+  local allCommands
+  allCommands=""
   while read -r function; do
-    getFunctionCommand "${function}"
+    allCommands+="$(getFunctionCommand "${function}")"$'\n'
   done < <(listAllFunctions)
+  echo "${allCommands}" | sort
   echo "\""
 }
 

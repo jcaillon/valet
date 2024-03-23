@@ -29,10 +29,13 @@ Please check the [NEW_COMMAND.md](NEW_COMMAND.md) documentation.
 
 To get better performances:
 
-- Always favor bash built-in over forking to an external process.
-- Avoid using subshell (and thus, pipes). To get the standard output of a function, use a global variable `LAST_RETURNED_VALUE`.
+- We always favor bash built-in over forking to an external process.
+- We avoid using subshell (and thus, pipes).
+- When possible, we also avoid the `<<<` syntax.
+- We get the standard output of a function using the global variable `LAST_RETURNED_VALUE`. This avoid to have to invoke a function in a subshell to have the output. E.g. instead of `local value=$(myfunc)`, we do `local value; myfunc && value="${LAST_RETURNED_VALUE}"`. It also has the benefit of correctly showing a potential programming error instead of hiding it and just exiting the subshell with an error code.
+- We "build" the information of each command as simple global variables (e.g. `CMD_COMMAND_build="self build"`, see [valet.d/cmd](valet.d/cmd)). Then we can get a value with `local -n command="CMD_COMMAND_${functionName}"`: no need for additional assignment or call to a function.
 
-While the difference may seem insignificant on linux systems, it is **HUGE** in windows bash (I went from 5s to <0.300ms for executing a command by remove all forking and subshell). The exception is the build script, which has not been refactored for performance since it is run only once.
+> While the difference may seem insignificant on linux systems, it is **HUGE** in windows bash (I went from 5s to <0.300ms for executing a command by remove all forking and subshell). The exception is the build script, which has not been refactored for performance since it is run only once.
 
 ## Roadmap
 

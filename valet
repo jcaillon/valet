@@ -87,6 +87,7 @@ VALET_HOME="${VALET_HOME%/*}" # strip filename
 # shellcheck source=valet.d/main
 source "${VALET_HOME}/valet.d/main"
 
+
 #===============================================================
 # >>> Run the main function
 #===============================================================
