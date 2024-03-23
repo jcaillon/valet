@@ -6,6 +6,13 @@
 # we check for this variable to know if this script has already been included
 _CORE_INCLUDED=1
 
+if [ -z "${_MAIN_INCLUDED:-}" ]; then
+  # shellcheck source=cmd
+  VALETD_PATH="${BASH_SOURCE[0]}"
+  VALETD_PATH="${VALETD_PATH%/*}" # strip file name
+  source "${VALETD_PATH}/main"
+fi
+
 #===============================================================
 # >>> Core variables
 #===============================================================
@@ -33,6 +40,7 @@ if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
 fi
 
 if [ "${VALET_NO_WRAP:-}" != "true" ]; then
+  # this is the only subshell we need; can't be avoided
   _COLUMNS="${_COLUMNS:-$(tput cols 2>/dev/null || echo 120)}"
 else
   _COLUMNS="${_COLUMNS:-120}"
@@ -42,9 +50,9 @@ fi
 # >>> Temporay files and folders
 #===============================================================
 
-# little trick here; since we will use createTempFile / createTempDirectory in subshell $()
+# little trick here; since we might use createTempFile / createTempDirectory in subshell $()
 # they will not have access to the same global variables.
-# thus, we re declare them with a hardcoded value for TMPDIR so that they create temp files
+# thus, we declare them with a hardcoded value for TMPDIR so that they create temp files
 # under this directory (which we can then clean up)
 _TEMPORARY_DIRECTORY="${TMPDIR:-/tmp}/valet-${EPOCHSECONDS}"
 while true; do
@@ -52,9 +60,11 @@ while true; do
   _TEMPORARY_DIRECTORY+="-${BASHPID}"
 done
 
-# Creates a temporary file and return its path in the global variable LAST_RETURNED_VALUE
+# Creates a temporary file and return its path in the global variable LAST_RETURNED_VALUE.
+#
 # Usage:
 #  createTempFile && local file="${LAST_RETURNED_VALUE}"
+function createTempFile() { return 0; }
 # shellcheck disable=SC2016
 CREATE_TEMP_FILE_FUNCTION='
 function createTempFile() {
@@ -74,9 +84,11 @@ function createTempFile() {
 }
 '
 
-# Creates a temporary directory and return its path in the global variable LAST_RETURNED_VALUE
+# Creates a temporary directory and return its path in the global variable LAST_RETURNED_VALUE.
+#
 # Usage:
-#  createTempFile && local file="${LAST_RETURNED_VALUE}"
+#  createTempDirectory && local file="${LAST_RETURNED_VALUE}"
+function createTempDirectory() { return 0; }
 # shellcheck disable=SC2016
 CREATE_TEMP_DIRECTORY_FUNCTION='
 function createTempDirectory() {
@@ -93,7 +105,7 @@ function createTempDirectory() {
 }
 '
 
-# removes all the tempoary files that were created
+# Removes all the tempoary files that were created.
 # shellcheck disable=SC2016
 CREATE_TEMP_CLEANUP_FUNCTION='
 function cleanupTempFiles() {
@@ -117,9 +129,21 @@ unset _TEMPORARY_DIRECTORY
 # >>> Logging
 #===============================================================
 
+# Set the log level.
+# The log level can be set to one of the following values:
+# - debug
+# - info
+# - warn
+# - fail
+# - success
+# The log level can be set using the environment variable LOG_LEVEL.
+# $1: the log level to set
+#
+# Usage:
+#  setLogLevelInt "debug"
 function setLogLevelInt() {
   # log level, defaults to info
-  LOG_LEVEL="${LOG_LEVEL:-info}"
+  LOG_LEVEL="${1:-${LOG_LEVEL:-info}}"
   case "${LOG_LEVEL}" in
   fail) LOG_LEVEL_INT=4 ;;
   warn) LOG_LEVEL_INT=3 ;;
@@ -139,6 +163,11 @@ function setLogLevelInt() {
 # $2: the icon to display in the log message (utf8 character from nerdicons)
 # $3: the severity of the log message
 # $*: the content of the log message
+#
+# Usage:
+#  logLine "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
+# shellcheck disable=SC2317
+function logLine() { return 0; }
 if [ "${VALET_CI_MODE:-}" != "true" ]; then
   if [ "${VALET_NO_WRAP:-}" != "true" ]; then
     if [ -n "${MINGW_PREFIX:-}" ]; then
@@ -157,9 +186,9 @@ if [ "${VALET_CI_MODE:-}" != "true" ]; then
       content="${content//⌝/⌝${COLOR_DEFAULT}}"
       wrapText "${content}" "${_LOG_COLUMNS:-120}" 20
       if [ "${VALET_NO_ICON:-}" != "true" ]; then
-        printf "%s%(%H:%M:%S)T %s%-8s%-4s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "${icon:-}" "${COLOR_DEFAULT}" "${content}" 1>&2
+        printf "%s%(%H:%M:%S)T %s%-8s%-4s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "${icon:-}" "${COLOR_DEFAULT}" "${LAST_RETURNED_VALUE}" 1>&2
       else
-        printf "%s%(%H:%M:%S)T %s%-8s%-2s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "" "${COLOR_DEFAULT}" "${content}" 1>&2
+        printf "%s%(%H:%M:%S)T %s%-8s%-2s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "" "${COLOR_DEFAULT}" "${LAST_RETURNED_VALUE}" 1>&2
       fi
     }
   else
@@ -243,8 +272,8 @@ function isDebugMode() {
 # $1: the return code
 # $2+ : the error message to display in case of error
 #
-# Usage in a function:
-# command_that_could_fail || checkAndFail "$?"
+# Usage:
+#   command_that_could_fail || checkAndFail "$?" "The command that could fail has failed!"
 function checkAndFail() {
   if [ "${1:-1}" != "0" ]; then
     shift
@@ -253,17 +282,17 @@ function checkAndFail() {
   return 0
 }
 
-# Check last return code and return a warning code if error
-# $0: the last return code
-# $1+ : the warning message to display in case of error
+# Check last return code and return an error code if error
+# $1: the last return code
+# $2+ : the warning message to display in case of error
 #
-# Usage in a function:
-# command_that_could_fail || checkAndWarn "$?" || return "0"
+# Usage:
+#   command_that_could_fail || checkAndWarn "$?" "The command that could fail has failed!" || return "0"
 function checkAndWarn() {
   if [ "${1:-}" != "0" ]; then
     shift
     warn "$*"
-    return 0
+    return 1
   fi
   return 0
 }
@@ -279,8 +308,10 @@ function checkAndWarn() {
 # $3: the padding to apply to each new line (default to 0)
 # $4: true/false if the padding should be applied to the first line (default to false)
 # Returns the wrapped text in the global variable LAST_RETURNED_VALUE
+#
 # Usage:
 #  wrapText "This is a long text that should be wrapped at 20 characters." 20 2 false && local wrappedText="${LAST_RETURNED_VALUE}"
+#
 # Note:
 #  This function is written in pure bash and is faster than the fold command.
 function wrapText() {
@@ -329,8 +360,10 @@ function wrapText() {
 # $2: the width to wrap the text at
 # $3: the prefix to apply to each new line (default to "")
 # Returns the wrapped text in the global variable LAST_RETURNED_VALUE
+#
 # Usage:
-#  wrapText "This is a long text that should be wrapped at 20 characters." 20 && local wrappedText="${LAST_RETURNED_VALUE}"
+#  wrapSentence "This is a long text that should be wrapped at 20 characters." 20 && local wrappedText="${LAST_RETURNED_VALUE}"
+#
 # Note:
 #  This function is written in pure bash and is faster than the fold command.
 function wrapSentence() {
@@ -409,25 +442,129 @@ function wrapSentence() {
   LAST_RETURNED_VALUE="${wrappedText}"
 }
 
-
 # Allows to get the nth element of a string separated by a given separator.
 # This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
 # but it uses pure bash to go faster.
 # $1: the string to cut
-# $2: the field number to get
+# $2: the field number to get (starting at 1)
 # $3: the separator (default to tab if not provided)
+#
+# Usage:
+#  cutF "field1 field2 field3" 2 " " && local field2="${LAST_RETURNED_VALUE}"
 function cutF() {
-  local str fieldNumber separator temp
+  local str fieldNumber separator
   str="${1}"
   fieldNumber="${2}"
   separator="${3:-$'\t'}"
+
+  local index
+
+  # remove the first field n - 1 times
+  for((index=0; index < (fieldNumber - 1); index++)); do
+    str="${str#*"${separator}"}"
+  done
+
+  # remove everything after the first field
+  str="${str%%"${separator}"*}"
+
+  LAST_RETURNED_VALUE="${str}"
 }
+
+# Allows to fuzzy match a line against a given pattern.
+# Returns the best match from all lines.
+# $1: the pattern to match
+# $2: the text (multiple lines) to match against
+#
+# Usage:
+#   fuzzyMatch "pattern" "line1\nline2\nline3" && local bestMatch="${LAST_RETURNED_VALUE}"
+#
+# Note:
+#   This function is written in pure bash and is faster than the fzf command.
+#   All characters in the pattern must be found in the same order in the matched line.
+#   The function is case sensitive.
+#   We prioritize the lines that start with the pattern.
+#   Then we prioritize the lines that have the less distance between characters in the pattern.
+function fuzzyMatch() {
+  local pattern text
+  pattern="${1}"
+  text="${2}"
+
+  local bestMatch bestIndex bestDistance patternLength lineLength
+  patternLength="${#pattern}"
+  bestIndex=999999
+  bestDistance=999999
+
+  local IFS=$'\n'
+  local line patternCharIndex patternChar lineCharIndex lineChar lastLineCharIndex distance patternFirstCharIndex
+  for line in ${text}; do
+    # shortcut, exact match
+    if [[ "${line}" == "${pattern}" ]]; then
+      LAST_RETURNED_VALUE="${line}"
+      return 0
+    fi
+    lineLength="${#line}"
+
+    # for each character in the pattern
+    patternCharIndex=0
+    lineCharIndex=0
+    lastLineCharIndex=0
+    while [ "${patternCharIndex}" -lt "${patternLength}" ]; do
+      patternChar="${pattern:${patternCharIndex}:1}"
+
+      # find the character in the line
+      while [ "${lineCharIndex}" -lt "${lineLength}" ]; do
+        lineChar="${line:${lineCharIndex}:1}"
+
+        if [[ "${lineChar}" == "${patternChar}" ]]; then
+          # if we find the character, mark the distance
+          distance=$((lineCharIndex - lastLineCharIndex))
+          lastLineCharIndex=${lineCharIndex}
+
+          # if it is the first char of the pattern, remmember the index
+          if [ "${patternCharIndex}" -eq 0 ]; then
+            patternFirstCharIndex=${lineCharIndex}
+          fi
+
+          # loop on the next pattern character
+          break;
+        fi
+
+        lineCharIndex=$((lineCharIndex + 1))
+      done
+
+      # if we don't find the character in the line, the line is not a match
+      if [ "${lineCharIndex}" -ge "${lineLength}" ]; then
+        break;
+      else
+        lineCharIndex=$((lineCharIndex + 1))
+      fi
+
+      patternCharIndex=$((patternCharIndex + 1))
+    done
+
+    # if we found all the characters in the pattern
+    if [ "${patternCharIndex}" -ge "${patternLength}" ]; then
+
+      # we found the pattern at a lower index or we found the pattern at the same index but with less distance
+      if [[ "${patternFirstCharIndex}" -lt "${bestIndex}" || ("${patternFirstCharIndex}" -eq "${bestIndex}" && "${distance}" -lt "${bestDistance}") ]]; then
+        bestIndex="${patternFirstCharIndex}"
+        bestDistance="${distance}"
+        bestMatch="${line}"
+      fi
+    fi
+
+  done
+
+  LAST_RETURNED_VALUE="${bestMatch:-}"
+}
+
 
 #===============================================================
 # >>> Valet files and directories
 #===============================================================
 
-# Returns the path to the valet configuration directory in the global variable LAST_RETURNED_VALUE
+# Returns the path to the valet configuration directory.
+#
 # Usage:
 #  getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
 function getConfigurationDirectory() {
@@ -439,7 +576,8 @@ function getConfigurationDirectory() {
   LAST_RETURNED_VALUE="${directory}"
 }
 
-# Returns the path to the valet state directory in the global variable LAST_RETURNED_VALUE
+# Returns the path to the valet state directory.
+#
 # Usage:
 #  getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
 function getLocalStateDirectory() {
@@ -455,6 +593,11 @@ function getLocalStateDirectory() {
 # >>> Parser and interactive mode
 #===============================================================
 
+# Show the help for the current function.
+# This should be called from a command function for which you want to display the help text.
+#
+# Usage:
+#  showHelp
 function showHelp() {
   local functionName
   # get the function name of the calling function
@@ -463,7 +606,11 @@ function showHelp() {
   showFunctionHelp "${functionName}"
 }
 
-# show an interactive menu for a command that has sub menus
+# Show an interactive menu for a command that has sub menus.
+# This should be called from a command function for which you want to display the sub menu.
+#
+# Usage:
+#  showSubMenu
 function showSubMenu() {
   local menuFunctionName
   # get the function name of the calling function
@@ -482,15 +629,17 @@ function showSubMenu() {
   local filteredCommandsMenuBody line
   local -n menuCommandName="CMD_COMMAND_${menuFunctionName}"
   filteredCommandsMenuBody=""
-  while read -r line; do
+  local IFS=$'\n'
+  for line in ${CMD_COMMANDS_MENU_BODY}; do
     if [[ "${line}" =~ ^(${menuCommandName} [^ ]+ ) ]]; then
       filteredCommandsMenuBody+="${line}"$'\n'
     fi
-  done <<<"${CMD_COMMANDS_MENU_BODY}"
+  done
   showCommandsMenuAndRun "${filteredCommandsMenuBody%$'\n'}"
 }
 
-# Parse the arguments and options of a function
+# Parse the arguments and options of a function and return a string that can be evaluated to set the variables.
+# This should be called from a command function for which you want to parse the arguments.
 #
 # Usage:
 #  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
@@ -498,10 +647,10 @@ function showSubMenu() {
 # Notes:
 # - It will return a string that can be evaluated to set the variables
 #   corresponding to the arguments and options; e.g.:
-#     "local arg1 option1
-#     arg1=\"\"
-#     option1=\"\"
-#     ..."
+#     local arg1 option1
+#     arg1="xxx"
+#     option1="xxx"
+#     ...
 # - It will also set the variable parsingErrors if there are any errors.
 # - Variable name for an option is taken from the first --long version of the option.
 # - If the function expects arguments or options but none are provided, it will
@@ -515,6 +664,12 @@ function parseArguments() {
   parseFunctionArgumentsOrGoInteractive "${functionName}" "$@"
 }
 
+# A convenience function to check the parsing results and display an error message if needed.
+# Will also display the help if the help option is true.
+# This should be called from a command function for which you want to check the parsing results.
+#
+# Usage:
+#  checkParseResults "${help:-}" "${parsingErrors:-}"
 function checkParseResults() {
   local functionName help parsingErrors
   functionName="${FUNCNAME[1]}"

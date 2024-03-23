@@ -39,14 +39,15 @@ CMD_MAX_SUB_COMMAND_LEVEL="1"
 
 
 # list all the commands
-CMD_ALL_COMMANDS="self build
-showcase hello-world
-self
-self test
+CMD_ALL_COMMANDS="
+
 help
+self
+self build
+self test
 showcase
 showcase command1
-
+showcase hello-world
 "
 
 

@@ -454,16 +454,14 @@ function parseMainArguments() {
       ;;
     -ll | -log | --log-level)
       shift
-      LOG_LEVEL="${1}"
-      setLogLevelInt
+      setLogLevelInt "${1}"
       ;;
     -ci | --ci-logging)
       # shellcheck disable=SC2034
       LOG_MODE="ci"
       ;;
     -v | --verbose)
-      LOG_LEVEL="debug"
-      setLogLevelInt
+      setLogLevelInt "debug"
       ;;
     --version)
       cat "${VALET_HOME}/valet.d/version"
@@ -519,7 +517,7 @@ function parseMainArguments() {
 function fuzzyMatchCommandtoFunctionName() {
   local functionName
   findFunctionFromArguments "$@" && functionName="${LAST_RETURNED_VALUE:-}"
-  if [ -z "${functionName}" ] && command -v fzf 1>/dev/null 2>&1; then
+  if [ -z "${functionName}" ]; then
     fuzzyFindFunctionFromArguments "$@" && functionName="${LAST_RETURNED_VALUE:-}"
     if [ -n "${functionName}" ]; then
       local -n command="CMD_COMMAND_${functionName}"
@@ -641,7 +639,7 @@ function showCommandsMenuAndRun() {
 
   checkFzf
 
-  # display the fzf menu
+  # display the menu
   local sortedCommandsMenuBody
   sortCommands "commands-menu" "${commands}" && sortedCommandsMenuBody="${LAST_RETURNED_VALUE}"
 
@@ -792,14 +790,14 @@ function showInteractiveCommandsMenu() {
   fi
 
   local choice
-  choice="$(echo "${commandsPrompt}" | fzf \
+  choice="$(fzf \
       --tiebreak=begin,index --no-multi --cycle \
       --layout=reverse --info=default \
       --margin=0 --padding=0 \
       "--header-lines=${menuHeaderLength}" \
       --preview-window=right:$((previewWidth)):wrap \
       --preview="echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} $0 help --columns $((previewWidth - 2)) {}" \
-      "$@" || echo "")"
+      "$@" <<< "${commandsPrompt}" || echo "")"
   choice="${choice%%$'\t'*}"
   choice="${choice%%  *}"
   LAST_RETURNED_VALUE="${choice}"
@@ -852,7 +850,7 @@ function fuzzyFindFunctionFromArguments() {
   getMaxPossibleCommandLevel "$@" && level="${LAST_RETURNED_VALUE}"
 
   for ((loopI = level; loopI >= 1; loopI--)); do
-    commandName="$(echo "${CMD_ALL_COMMANDS}" | fzf --tiebreak=begin,index -f "${*:1:$loopI}" || printf "")"
+    fuzzyMatch "${*:1:$loopI}" "${CMD_ALL_COMMANDS}" && commandName="${LAST_RETURNED_VALUE}"
     if [ -n "${commandName}" ]; then
       break
     fi
@@ -1104,17 +1102,12 @@ function parseFunctionArguments() {
 # Usage:
 #  fuzzyFindOption "option1 option2 option3" "opt1" && fuzzyOption="${LAST_RETURNED_VALUE}"
 function fuzzyFindOption() {
-  local options unknownOption optionPerLine suggestedOption
+  local options unknownOption suggestedOption
   options="${1}"
   unknownOption="${2}"
 
-  if ! command -v fzf 1>/dev/null 2>&1; then
-    return 0
-  fi
-
   # split to get one possible option per line
-  optionPerLine="${options// /$'\n'}"
-  suggestedOption="$(echo "${optionPerLine}" | fzf --tiebreak=begin,index -f "${unknownOption}" || printf "")"
+  fuzzyMatch "${unknownOption}" "${options// /$'\n'}" && suggestedOption="${LAST_RETURNED_VALUE}"
   suggestedOption="${suggestedOption%%$'\n'*}"
   if [ -n "${suggestedOption}" ]; then
     suggestedOption=" (did you mean ⌜${suggestedOption}⌝?)"
