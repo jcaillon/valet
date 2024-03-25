@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
-# Title:         valet.d/commands/*
-# Description:   this script is a valet command
-# Author:        github.com/jcaillon
-
 # Import the core script (should always be skipped if the command is run from valet).
-# Your command can use all the functions defined in the core script.
 if [ -z "${_CORE_INCLUDED:-}" ]; then
   # shellcheck source=../valet.d/core
   source "$(dirname -- "$(command -v valet)")/valet.d/core"
 fi
 # --- END OF COMMAND COMMON PART
+# Everything above this line should stay as is for every command file you create.
+# Your command can use all the functions defined in the core script of valet.
 
 #===============================================================
 # >>> showcase command menu
 #===============================================================
+
+# Note that you do not need this menu if you command function only has a single command level.
+# E.g.  "command: showcase command1" is a 2 level command.
+# and   "command: command1" is a single level command.
+
 function about_showcaseMenu() {
   echo "
 command: showcase

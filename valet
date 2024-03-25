@@ -27,6 +27,11 @@ description: |-
   - 0: everything went well
   - 1: an error occured
 
+  ⌜Create your own commands:⌝
+  You can create your own commands and have them available in valet, please check the README.md or the examples under examples.d to do so.
+  Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using the environment variable VALET_USER_DIRECTORY=\"my/path\".
+  Once you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.
+
   ⌜Configuration through environment variables:⌝
   In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
   - VALET_NO_COLOR=\"true\": will disable the color output for logs and help.
@@ -36,7 +41,6 @@ description: |-
   - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
 
   ⌜Developer notes:⌝
-  Please check the README.md to learn how to implement a new command.
   You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
 sudo: false
 arguments:
@@ -87,7 +91,6 @@ VALET_HOME="${VALET_HOME%/*}" # strip filename
 #===============================================================
 # shellcheck source=valet.d/main
 source "${VALET_HOME}/valet.d/main"
-
 
 #===============================================================
 # >>> Run the main function

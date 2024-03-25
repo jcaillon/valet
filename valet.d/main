@@ -42,11 +42,6 @@ if [ -z "${VALET_HOME:-}" ]; then
   fi
   VALET_HOME="${VALET_HOME%/*}" # strip valet.d directory
 fi
-
-if [ -z "${_CMD_INCLUDED:-}" ]; then
-  # shellcheck source=cmd
-  source "${VALET_HOME}/valet.d/cmd"
-fi
 if [ -z "${_CORE_INCLUDED:-}" ]; then
   # shellcheck source=core
   source "${VALET_HOME}/valet.d/core"
@@ -249,10 +244,10 @@ function showFunctionHelp() {
     cCommand=$'\033'"[31m"
   fi
 
-  local helpWidth
+  local -i helpWidth
   helpWidth="${maxColumns}"
-  if [[ ${helpWidth} -gt ${_COLUMNS} ]]; then helpWidth="${_COLUMNS}"; fi
-  if [[ ${helpWidth} -lt 30 ]]; then helpWidth=30; fi
+  if [[ helpWidth -gt ${_COLUMNS} ]]; then helpWidth=${_COLUMNS}; fi
+  if [[ helpWidth -lt 30 ]]; then helpWidth=30; fi
 
   local -n command="CMD_COMMAND_${functionName}"
   local -n description="CMD_DESCRIPTION_${functionName}"
@@ -405,7 +400,7 @@ examples:
 function showCommandHelp() {
   local -a commands
   local parsingErrors help columns noColors help
-  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  parseFunctionArguments "${FUNCNAME[0]}" "$@" && eval "${LAST_RETURNED_VALUE}"
 
   # for the help command, we can do without any arguments so remove this parsing error
   if [ -n "${parsingErrors:-}" ]; then
@@ -535,6 +530,39 @@ function fuzzyMatchCommandtoFunctionName() {
 
   LAST_RETURNED_VALUE="${functionName:-}"
   LAST_RETURNED_VALUE2="${nbArgs:-}"
+}
+
+function sourceUserCommands() {
+  if [ -n "${_CMD_INCLUDED:-}" ]; then
+    return 0
+  fi
+
+  # source the user commands
+  local defaultUserDir
+  defaultUserDir=~/.valet.d
+  userDirectory="${VALET_USER_DIRECTORY:-${defaultUserDir}}"
+
+  local commandsFile
+  commandsFile="${userDirectory}/commands"
+
+  # if the commands file does not exist, we use the examples commands or we fail
+  if [ ! -f "${commandsFile}" ]; then
+    local message
+    message="The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'
+    message+="To get started with valet, you must build your command list using the ⌜valet self build⌝ command."$'\n'
+    message+="Please check the help using ⌜valet self build --help⌝ for details."
+    commandsFile="${VALET_HOME}/examples.d/commands"
+    if [ -f "${commandsFile}" ]; then
+      message+=$'\n'"Now using the examples commands from ⌜${commandsFile%/*}⌝."
+      warn "${message}"
+    else
+      fail "${message}"
+    fi
+  fi
+
+  # source commands
+  # shellcheck disable=SC1090
+  source "${commandsFile}"
 }
 
 # Run a given function
@@ -730,9 +758,9 @@ function addLastChoice() {
   echo "${command}" > "${lastChoicesFile}"
 
   # loop through the last choices and add them to the file, limit to 20 total
-  local total index
+  local -i total index
   total="${#lastChoices[@]}"
-  [ "${total}" -gt "20" ] && total=20
+  [[ total -gt 20 ]] && total=20
   index=0
   for((index=0; index<total; index++)); do
     if [[ "${lastChoices[${index}]}" != "${command}" ]]; then
@@ -761,7 +789,7 @@ function showInteractiveCommandsMenu() {
   local commandsPrompt previewWidth commandChoice
   commandsPrompt="${menuHeader}"$'\n'"${menuBody}"
   previewWidth=$((_COLUMNS / 2 - 10))
-  if [[ $previewWidth -le 0 ]]; then
+  if [[ previewWidth -le 0 ]]; then
     previewWidth=10
   fi
 
@@ -916,9 +944,9 @@ function parseFunctionArguments() {
 
   local -n argumentsName="CMD_ARGS_NAME_${functionName}"
   local -n isLastArgumentAnArray="CMD_ARGS_LAST_IS_ARRAY_${functionName}"
-  local totalNbArguments
-  if [ -n "${argumentsName[0]}" ]; then totalNbArguments="${#argumentsName[@]}"; else totalNbArguments=0; fi
-  local argumentPosition
+  local -i totalNbArguments
+  if [ -n "${argumentsName[0]}" ]; then totalNbArguments=${#argumentsName[@]}; else totalNbArguments=0; fi
+  local -i argumentPosition
   argumentPosition=0
 
   local -n options="CMD_OPTS_${functionName}"
@@ -982,16 +1010,16 @@ function parseFunctionArguments() {
       # we are matching an argument
       startedArguments="true"
 
-      if [ "${argumentPosition}" -ge "${totalNbArguments}" ]; then
+      if [[ argumentPosition -ge totalNbArguments ]]; then
         outputErrors+=("Expecting ${totalNbArguments} argument(s), got extra argument ⌜${1}⌝.")
       else
         argumentName="${argumentsName[${argumentPosition}]}"
 
-        if [[ "${argumentPosition}" -eq "$((totalNbArguments - 1))" && "${isLastArgumentAnArray}" = "true" ]]; then
+        if [[ argumentPosition -eq $((totalNbArguments - 1)) && "${isLastArgumentAnArray}" = "true" ]]; then
           # if the arg ends with ... we expect an infinite amount of arguments
           lastArgumentValues+=("${1}")
         else
-          argumentPosition=$((argumentPosition + 1))
+          argumentPosition=+1
           outputSetLine+=("${argumentName}=\"${1//\"/\\\"}\"")
         fi
 
@@ -1049,10 +1077,10 @@ function parseFunctionArguments() {
   done
 
   # output the parsing errors
-  local outputErrorIndex
+  local -i outputErrorIndex
   outputString+="parsingErrors=\""
   for outputErrorIndex in "${!outputErrors[@]}"; do
-    if [ "${outputErrorIndex}" -gt 0 ]; then
+    if [[ outputErrorIndex -gt 0 ]]; then
       outputString+=$'\n'
     fi
     outputString+="${outputErrors[${outputErrorIndex}]}"
@@ -1124,3 +1152,8 @@ function parseFunctionArgumentsOrGoInteractive() {
 
   LAST_RETURNED_VALUE="${args}"
 }
+
+#===============================================================
+# >>> Load the commands
+#===============================================================
+sourceUserCommands
