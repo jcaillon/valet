@@ -390,8 +390,7 @@ function wrapText() {
   # we call wrapSentence for each line of the text
   local firstLine="1"
   local line
-  local IFS=$'\n'
-  for line in ${text}; do
+  while read -r line; do
     wrappedText+=$'\n'
     wrapSentence "${line}" "${sentenceWidth}" "${leftPadding}"
     if [ "${firstLine}" = "1" ]; then
@@ -400,7 +399,7 @@ function wrapText() {
       wrappedText+="${leftPadding}"
     fi
     wrappedText+="${LAST_RETURNED_VALUE}"
-  done
+  done <<< "${text}"
 
   # add left padding on the first line (or not)
   if [ "${appendPaddingToFirstLine}" = "true" ]; then
@@ -423,13 +422,14 @@ function wrapText() {
 # Note:
 #  This function is written in pure bash and is faster than the fold command.
 function wrapSentence() {
-  local text width newLinePrefix
+  local text newLinePrefix
+  local -i width
   text="${1}"
   width="${2}"
   newLinePrefix="${3:-}"
 
   # short cut in case the text is already shorter than the width
-  if [ "${#text}" -le "${width}" ]; then
+  if [[ "${#text}" -le width ]]; then
     LAST_RETURNED_VALUE="${text}"
     return 0
   fi
@@ -438,9 +438,10 @@ function wrapSentence() {
   local newLine
   newLine=$'\n'"${newLinePrefix}"
 
-  local wrappedText word spaceLeft wordLength partialWordLength
+  local wrappedText word
+  local -i spaceLeft wordLength partialWordLength
   wrappedText=""
-  spaceLeft="${width}"
+  spaceLeft=${width}
   local firstWord="1"
   for word in ${text}; do
 
@@ -448,20 +449,20 @@ function wrapSentence() {
       firstWord="0"
     else
       # we just added a word
-      if [ "${spaceLeft}" -gt 0 ]; then
+      if [[ spaceLeft -gt 0 ]]; then
         # if we have space left, we add a space
         wrappedText+=" "
         spaceLeft=$((spaceLeft - 1))
       else
         # otherwise we add a new line
         wrappedText+="${newLine}"
-        spaceLeft="${width}"
+        spaceLeft=${width}
       fi
     fi
 
-    wordLength="${#word}"
+    wordLength=${#word}
 
-    if [ "${wordLength}" -le "${spaceLeft}" ]; then
+    if [[ wordLength -le spaceLeft ]]; then
       # we have the space to add the word
       wrappedText+="${word}"
       spaceLeft=$((spaceLeft - wordLength))
@@ -469,7 +470,7 @@ function wrapSentence() {
       # we don't have the space to add the word
 
       # will the word fit in the width of the next line?
-      if [[ "${wordLength}" -le "${width}" ]]; then
+      if [[ wordLength -le width ]]; then
         # then we add the word to the next line
         wrappedText+="${newLine}${word}"
         spaceLeft=$((width - wordLength))
@@ -477,16 +478,16 @@ function wrapSentence() {
         # the word doesn't fit in the width of the next line
         # we can add the partial word to the current line
         # and the rest on the next lines until we have the full word
-        while [ "${wordLength}" -gt 0 ]; do
+        while [[ wordLength -gt 0 ]]; do
           partialWordLength="${wordLength}"
-          if [ "${partialWordLength}" -gt "${spaceLeft}" ]; then
+          if [[ partialWordLength -gt spaceLeft ]]; then
             partialWordLength="${spaceLeft}"
           fi
           wrappedText+="${word:0:${partialWordLength}}"
           word="${word:${partialWordLength}}"
           wordLength=$((wordLength - partialWordLength))
           spaceLeft=$((spaceLeft - partialWordLength))
-          if [[ "${spaceLeft}" -eq 0 && "${wordLength}" -gt 0 ]]; then
+          if [[ spaceLeft -eq 0 && wordLength -gt 0 ]]; then
             wrappedText+="${newLine}"
             spaceLeft="${width}"
           fi
@@ -546,13 +547,15 @@ function fuzzyMatch() {
   pattern="${1}"
   text="${2}"
 
-  local bestMatch bestIndex bestDistance patternLength lineLength
+  local bestMatch
+  local -i patternLength lineLength bestIndex bestDistance
   patternLength="${#pattern}"
   bestIndex=999999
   bestDistance=999999
 
   local IFS=$'\n'
-  local line patternCharIndex patternChar lineCharIndex lineChar lastLineCharIndex distance patternFirstCharIndex
+  local line patternChar lineChar
+  local -i lineCharIndex patternCharIndex lastLineCharIndex distance patternFirstCharIndex
   for line in ${text}; do
     # shortcut, exact match
     if [[ "${line}" == "${pattern}" ]]; then
@@ -565,11 +568,11 @@ function fuzzyMatch() {
     patternCharIndex=0
     lineCharIndex=0
     lastLineCharIndex=0
-    while [ "${patternCharIndex}" -lt "${patternLength}" ]; do
+    while [[ patternCharIndex -lt patternLength ]]; do
       patternChar="${pattern:${patternCharIndex}:1}"
 
       # find the character in the line
-      while [ "${lineCharIndex}" -lt "${lineLength}" ]; do
+      while [[ lineCharIndex -lt lineLength ]]; do
         lineChar="${line:${lineCharIndex}:1}"
 
         if [[ "${lineChar}" == "${patternChar}" ]]; then
@@ -578,7 +581,7 @@ function fuzzyMatch() {
           lastLineCharIndex=${lineCharIndex}
 
           # if it is the first char of the pattern, remmember the index
-          if [ "${patternCharIndex}" -eq 0 ]; then
+          if [[ patternCharIndex -eq 0 ]]; then
             patternFirstCharIndex=${lineCharIndex}
           fi
 
@@ -586,24 +589,24 @@ function fuzzyMatch() {
           break;
         fi
 
-        lineCharIndex=$((lineCharIndex + 1))
+        lineCharIndex+=1
       done
 
       # if we don't find the character in the line, the line is not a match
-      if [ "${lineCharIndex}" -ge "${lineLength}" ]; then
+      if [[ lineCharIndex -ge lineLength ]]; then
         break;
       else
-        lineCharIndex=$((lineCharIndex + 1))
+        lineCharIndex+=1
       fi
 
-      patternCharIndex=$((patternCharIndex + 1))
+      patternCharIndex+=1
     done
 
     # if we found all the characters in the pattern
-    if [ "${patternCharIndex}" -ge "${patternLength}" ]; then
+    if [[ patternCharIndex -ge patternLength ]]; then
 
       # we found the pattern at a lower index or we found the pattern at the same index but with less distance
-      if [[ "${patternFirstCharIndex}" -lt "${bestIndex}" || ("${patternFirstCharIndex}" -eq "${bestIndex}" && "${distance}" -lt "${bestDistance}") ]]; then
+      if [[ patternFirstCharIndex -lt bestIndex || (patternFirstCharIndex -eq bestIndex && distance -lt bestDistance) ]]; then
         bestIndex="${patternFirstCharIndex}"
         bestDistance="${distance}"
         bestMatch="${line}"

@@ -34,6 +34,8 @@ Please check the [docs/create-new-command.md](docs/create-new-command.md) docume
 
 Please check [docs/working-on-bash-scripts.md](docs/working-on-bash-scripts.md) to learn more about working on bash scripts.
 
+You can enable debug mode with profiling for valet by setting the environment variable `VALET_STARTUP_PROFILING` to true (it will output to the file `~/profile_valet.txt`).
+
 ## Roadmap
 
 - Add support for interactive mode.

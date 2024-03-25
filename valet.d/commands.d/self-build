@@ -7,9 +7,10 @@ set -Eeu -o pipefail
 #                $ ./valet.d/commands.d/self-build
 # Author:        github.com/jcaillon
 
+_CMD_INCLUDED=1
+
 if [ -z "${_MAIN_INCLUDED:-}" ]; then
   NOT_EXECUTED_FROM_VALET=true
-  _CMD_INCLUDED=1
 
   VALETD_DIR="${BASH_SOURCE[0]}"
   VALETD_DIR="${VALETD_DIR%/*}" # strip file name
@@ -29,17 +30,17 @@ function about_build() {
   echo "
 command: self build
 fileToSource: ${BASH_SOURCE[0]}
-shortDescription: Re-build the valet menu (for valet development purposes).
+shortDescription: Re-build the menu of valet from your commands.
 description: |-
-  This command can be used to re-build the menu valet in case you have modified, added or removed an about_xxx function.
+  This command can be used to re-build the menu in case you have modified, added or removed an about_xxx function in your command scripts.
 
-  You should read ⌜README.md⌝ to learn more about this topic.
+  Please read the ⌜README.md⌝ to learn how to create and modified your commands.
 options:
   - name: -d, --user-directory <path>
     description: |-
-      Specify the directory in which to look for valet commands.
+      Specify the directory in which to look for your command scripts.
 
-      This defaults to ⌜~/.valet.d⌝.
+      This defaults to ⌜~/.valet.d⌝ or the path defined in the environment variable VALET_USER_DIRECTORY=\"my/path\".
 "
 }
 
@@ -48,7 +49,6 @@ options:
 # >>> Implementation
 #===============================================================
 function build() {
-  local buildFile
   local defaultUserDir userDirectory
   defaultUserDir=~/.valet.d
 
@@ -65,26 +65,36 @@ function build() {
     shift
   done
 
-  userDirectory="${userDirectory-${defaultUserDir}}"
+  userDirectory="${VALET_USER_DIRECTORY:-${userDirectory:-${defaultUserDir}}}"
 
   # Check pre-requisites
   if ! command -v yq 1>/dev/null 2>&1; then
     fail "This command requires https://github.com/mikefarah/yq to parse the command about functions, please install it in your path and run this command again."
   fi
 
-  createTempFile
-  buildFile="${LAST_RETURNED_VALUE}"
-
-  inform "Loading all commands"
-
+  inform "Sourcing builtin commands"
   eval "$(find "${VALET_HOME}/valet.d/commands.d" -type f -not -path '*/.*' -name '*.sh' | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
   eval "$(getTextBetweenLines "function about_this" "}" "$(cat "${VALET_HOME}/valet")")"
   eval "$(getTextBetweenLines "function about_showCommandHelp" "}" "$(cat "${VALET_HOME}/valet.d/main")")"
+
+  inform "Sourcing user commands"
   if [[ -n "${userDirectory}" && -d "${userDirectory}" ]]; then
     eval "$(find "${userDirectory}" -type f -not -path '*/.*' -name '*.sh'  | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
   else
     inform "Skipping user directory with value ⌜${userDirectory}⌝"
   fi
+
+  buildCommandsFile "${userDirectory}/commands"
+  succeed "The valet user commands have been successfully built"
+}
+
+function buildCommandsFile() {
+  local finalFilePath
+  finalFilePath="${1}"
+
+  local buildFile
+  createTempFile
+  buildFile="${LAST_RETURNED_VALUE}"
 
   inform "Validating the metadata for each command"
   validateYamlForEachAboutFunction
@@ -124,19 +134,16 @@ function build() {
 
   bumpValetBuildVersion
 
-  mv -f "${buildFile}" "${VALET_HOME}/valet.d/cmd"
+  mv -f "${buildFile}" "${finalFilePath}"
+
+  # shellcheck disable=SC1090
+  source "${finalFilePath}"
 
   sumpUp
-
-  succeed "The valet menu has been successfully built"
 }
 
 function sumpUp() {
   local commandsBuilt function
-
-  # source cmd file
-  # shellcheck source=../cmd
-  source "${VALET_HOME}/valet.d/cmd"
 
   IFS=$'\n'
   for function in ${CMD_ALL_FUNCTIONS}; do
@@ -172,7 +179,8 @@ function getTextBetweenLines() {
   if [ -z "${beginLine}" ]; then
     return 0
   fi
-  endLine=$(echo "${text}" | tail -n "+$((beginLine + 1))" | grep --max-count=1 -n "${endTag}" | cut -d':' -f1)
+  endLine=$(echo "${text}" | tail -n "+$((beginLine + 1))")
+  endLine=$(echo "${endLine}" | grep --max-count=1 -n "${endTag}" | cut -d':' -f1)
   endLine=$((beginLine + endLine))
   if [ -z "${endLine}" ]; then
     return 0
@@ -426,7 +434,8 @@ function writeMaxCommandWidth() {
 }
 
 function getMaxCommandWidth() {
-  local function maxWidth currentWidth
+  local function
+  local -i maxWidth currentWidth
   maxWidth=0
   while read -r function; do
     currentWidth=$(getFunctionCommand "${function}" | awk '{ print length }')
@@ -460,7 +469,8 @@ function validateYamlForEachAboutFunction() {
 }
 
 function writeMaxSubCommandLevel() {
-  local function maxSpaces currentSpaces
+  local function
+  local -i maxSpaces currentSpaces
   maxSpaces=0
   while read -r function; do
     currentSpaces=$(getFunctionCommand "${function}" | tr -cd ' ' | wc -c)
