@@ -139,6 +139,7 @@ function onCleanUpInternal() {
 # >>> Profiler
 #===============================================================
 # https://github.com/vlovich/bashrc-wrangler/blob/master/bash.d/000-setup
+# https://mdjnewman.me/2017/10/debugging-slow-bash-startup-files/
 
 PROFILER_FDS=()
 if command -v ts 1>/dev/null 2>&1; then
@@ -150,7 +151,6 @@ if command -v ts 1>/dev/null 2>&1; then
     mkdir -p "${file%/*}"
     : "${file}"
 
-    # https://mdjnewman.me/2017/10/debugging-slow-bash-startup-files/
     if [[ "${#PROFILER_FDS[@]}" -eq 0 ]]; then
       fd=5
       debug "Starting profiler $file."
@@ -175,10 +175,10 @@ if command -v ts 1>/dev/null 2>&1; then
       debug "Disabling top-most profiler."
       set +x
       unset BASH_XTRACEFD
-      exec 5>/dev/null
+      exec 5>&-
     else
       debug "Disabling nested profiler $fd."
-      eval 'exec '"$fd"'>/dev/null'
+      eval 'exec '"$fd"'>&-'
       export BASH_XTRACEFD=$((fd - 1))
     fi
   }
@@ -205,7 +205,7 @@ else
 
   disable_profiler() {
     set +x
-    exec 2>&3 3>&0
+    exec 2>&3 3>&-
     unset PS4
     unset PROFILING
   }
@@ -437,8 +437,10 @@ function showCommandHelp() {
 
 # parse the user arguments for the main program.
 function parseMainArguments() {
-  local -a commands args
-  args=("$@")
+  local -a commands subCommandArgs
+
+  local maxNbCommands
+  maxNbCommands=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
 
   # for the main command, we parse the arguments manually
   # this is for performance reasons, we want to stop parsing as soon as possible
@@ -480,13 +482,18 @@ function parseMainArguments() {
       ;;
     *)
       commands+=("$1")
+      # we don't expect more than maxNbCommands commands so if we matched enough, break
+      if [[ "${#commands[@]}" -ge "${maxNbCommands}" ]]; then
+        break
+      fi
+      # if we matched the first command, we can extract the arguments for the sub command
+      if [[ "${#commands[@]}" -eq "1" ]]; then
+        subCommandArgs=("$@")
+      fi
       ;;
     esac
     shift
   done
-
-  # restore default args
-  set -- "${args[@]}"
 
   debug "Command found ⌜${commands[*]}⌝."
 
@@ -495,15 +502,16 @@ function parseMainArguments() {
     showCommandsMenuAndRun "${CMD_COMMANDS_MENU_BODY}"
   fi
 
-  local functionName
-  fuzzyMatchCommandtoFunctionName "${commands[@]}" && functionName="${LAST_RETURNED_VALUE:-}"
+  local functionName nbArgs
+  fuzzyMatchCommandtoFunctionName "${commands[@]}" && functionName="${LAST_RETURNED_VALUE:-}" && nbArgs="${LAST_RETURNED_VALUE2:-}"
   if [ -z "${functionName}" ]; then
     fail "Could not find a command for ⌜${commands[*]}⌝."
   fi
 
   debug "Function name found ⌜${functionName}⌝."
 
-  runFunction "${functionName}" "$@"
+  # run the function without the matched commands in the arguments
+  runFunction "${functionName}" "${subCommandArgs[@]:${nbArgs}}"
 }
 
 # Find the function name from arguments that represents the commands.
@@ -515,10 +523,10 @@ function parseMainArguments() {
 # Usage:
 #  fuzzyMatchCommandtoFunctionName "self" "build" && echo "${LAST_RETURNED_VALUE}"
 function fuzzyMatchCommandtoFunctionName() {
-  local functionName
-  findFunctionFromArguments "$@" && functionName="${LAST_RETURNED_VALUE:-}"
+  local functionName nbArgs
+  findFunctionFromArguments "$@" && functionName="${LAST_RETURNED_VALUE:-}" && nbArgs="${LAST_RETURNED_VALUE2:-}"
   if [ -z "${functionName}" ]; then
-    fuzzyFindFunctionFromArguments "$@" && functionName="${LAST_RETURNED_VALUE:-}"
+    fuzzyFindFunctionFromArguments "$@" && functionName="${LAST_RETURNED_VALUE:-}" && nbArgs="${LAST_RETURNED_VALUE2:-}"
     if [ -n "${functionName}" ]; then
       local -n command="CMD_COMMAND_${functionName}"
       inform "Fuzzy matching the command ⌜$*⌝ to ⌜${command}⌝"
@@ -526,6 +534,7 @@ function fuzzyMatchCommandtoFunctionName() {
   fi
 
   LAST_RETURNED_VALUE="${functionName:-}"
+  LAST_RETURNED_VALUE2="${nbArgs:-}"
 }
 
 # Run a given function
@@ -546,7 +555,7 @@ function runFunction() {
   fi
 
   # get command name of the function
-  local -n commandName="CMD_COMMAND_${functionName}"
+  local -n command="CMD_COMMAND_${functionName}"
 
   # check for sudo if the function requires it
   local -n requiresSudo="CMD_SUDO_${functionName}"
@@ -568,42 +577,18 @@ function runFunction() {
   fi
 
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
-    fail "The function ⌜${functionName}⌝ associated with the command ⌜${commandName}⌝ does not exist"
+    fail "The function ⌜${functionName}⌝ associated with the command ⌜${command}⌝ does not exist"
   fi
 
-  # filter the initial arguments to only keep what comes after the
-  # matched command
-  local filteredArgs commandIndex command nbSpaces keep commandArray
-  IFS=" " read -r -a commandArray <<<"${commandName}"
-  nbSpaces="$((${#commandArray[@]} - 1))"
-  filteredArgs=()
-  commandIndex=0
-  keep=false
-  for arg in "$@"; do
-    if [ "${keep}" = true ]; then
-      filteredArgs+=("${arg}")
-      continue
-    fi
 
-    command="${commandArray[${commandIndex}]}"
-    if [ "${arg}" = "${command}" ]; then
-      commandIndex=$((commandIndex + 1))
-      if [[ commandIndex -gt nbSpaces ]]; then
-        keep=true
-        continue
-      fi
-    fi
-
-  done
-
-  debug "Running the command ⌜${commandName}⌝ with the function ⌜${functionName}⌝ and the arguments ⌜${filteredArgs[*]}⌝."
+  debug "Running the command ⌜${command}⌝ with the function ⌜${functionName}⌝ and the arguments ⌜$*⌝."
 
   if [ "${PROFIL_COMMAND:-}" = "true" ]; then
     enable_profiler ~/profile_valet_cmd.txt
   fi
 
   # execute the function
-  "${functionName}" "${filteredArgs[@]}"
+  "${functionName}" "$@"
 
   if [ "${PROFIL_COMMAND:-}" = "true" ]; then
     disable_profiler
@@ -683,7 +668,9 @@ function sortCommands() {
 
   # list all the unplayed commands
   local unplayedCommands line command lastChoice played
-  while read -r line; do
+  local -a commandsArray
+  local IFS=$'\n'
+  for line in ${commands}; do
     command="${line%%$'\t'*}"
     command="${command%%  *}"
     # check if the command has not been played yet
@@ -698,10 +685,8 @@ function sortCommands() {
     if [ "${played}" = "false" ]; then
       unplayedCommands+="${line}"$'\n'
     fi
-  done <<< "${commands}"
-
-  local commandsArray
-  readarray -d $'\n' -t commandsArray <<< "${commands}"
+    commandsArray+=("${line}")
+  done
 
   # list all the played commands
   local playedCommands
@@ -741,29 +726,18 @@ function addLastChoice() {
   local lastChoices
   readarray -d $'\n' -t lastChoices < "${lastChoicesFile}"
 
-  # add the command to the array only of it is not already present
-  local notPresent
-  notPresent=true
-  for lastChoice in "${lastChoices[@]}"; do
-    if [[ "${lastChoice}" == "${command}" ]]; then
-      notPresent=false
-      break
+  # write the command first
+  echo "${command}" > "${lastChoicesFile}"
+
+  # loop through the last choices and add them to the file, limit to 20 total
+  local total index
+  total="${#lastChoices[@]}"
+  [ "${total}" -gt "20" ] && total=20
+  index=0
+  for((index=0; index<total; index++)); do
+    if [[ "${lastChoices[${index}]}" != "${command}" ]]; then
+      echo "${lastChoices[${index}]}" >> "${lastChoicesFile}"
     fi
-  done
-  if [ "${notPresent}" = true ]; then
-    echo "${command}" > "${lastChoicesFile}"
-  else
-    : > "${lastChoicesFile}"
-  fi
-
-  # keep only the last 19 commands
-  if [[ "${#lastChoices[@]}" -gt "19" ]]; then
-    lastChoices=("${lastChoices[@]:0:19}")
-  fi
-
-  # write the array to the file
-  for lastChoice in "${lastChoices[@]}"; do
-    echo "${lastChoice}" >> "${lastChoicesFile}"
   done
 }
 
@@ -778,9 +752,11 @@ function showInteractiveCommandsMenu() {
   menuBody="${2}"
   shift 2
 
-  local menuHeaderArray menuHeaderLength
-  readarray -d $'\n' -t menuHeaderArray <<< "${menuHeader}"
-  menuHeaderLength="${#menuHeaderArray[@]}"
+  local -i menuHeaderLength
+  local line
+  while read -r line; do
+    menuHeaderLength+=1
+  done <<< "${menuHeader}"
 
   local commandsPrompt previewWidth commandChoice
   commandsPrompt="${menuHeader}"$'\n'"${menuBody}"
@@ -807,18 +783,20 @@ function showInteractiveCommandsMenu() {
 # >>> Find command/function from arguments
 #===============================================================
 
-# this function tries to find the function name from program arguments
-# e.g. we can receive "self build" as arguments and we need to find the function name
-# contrary to fuzzyFindFunctionFromArguments, it will try to match the exact command names
+# This function tries to find the function name from program arguments
+# e.g. we can receive "self build" as arguments and we need to find the function name.
+# Contrary to fuzzyFindFunctionFromArguments, it will try to match the exact command names.
+# It also returns the number of arguments that were used to find the function.
 #
 # Usage:
-#  findFunctionFromArguments "self" "build" && finalFunctionName="${LAST_RETURNED_VALUE}"
-#  findFunctionFromArguments "self build" && finalFunctionName="${LAST_RETURNED_VALUE}"
+#  findFunctionFromArguments "self" "build" && functionName="${LAST_RETURNED_VALUE}" && nbArgs="${LAST_RETURNED_VALUE2}"
+#  findFunctionFromArguments "self build" && functionName="${LAST_RETURNED_VALUE}" && nbArgs="${LAST_RETURNED_VALUE2}"
 function findFunctionFromArguments() {
-  local level loopI functionName command finalFunctionName
+  local level loopI functionName command
   if [ $# -eq 0 ]; then
     return 0
   fi
+
   getMaxPossibleCommandLevel "$@" && level="${LAST_RETURNED_VALUE}"
 
   for ((loopI = level; loopI >= 1; loopI--)); do
@@ -827,20 +805,21 @@ function findFunctionFromArguments() {
     command="${command// /_}"
     local -n functionName="CMD_FUNCTION_NAME_${command}"
     if [ -n "${functionName:-}" ]; then
-      finalFunctionName="${functionName}"
       break
     fi
   done
 
-  LAST_RETURNED_VALUE="${finalFunctionName:-}"
+  LAST_RETURNED_VALUE="${functionName:-}"
+  LAST_RETURNED_VALUE2="${loopI}"
 }
 
-# this function tries to find the function name from program arguments
+# This function tries to find the function name from program arguments
 # e.g. we can receive "self build" as arguments and we need to find the function name
-# it allows fuzzy matching
+# It allows fuzzy matching.
+# It also returns the number of arguments that were used to find the function.
 #
 # Usage:
-#  fuzzyFindFunctionFromArguments "self" "build" && finalFunctionName="${LAST_RETURNED_VALUE}"
+#  fuzzyFindFunctionFromArguments "self" "build" && finalFunctionName="${LAST_RETURNED_VALUE}" && nbArgs="${LAST_RETURNED_VALUE2}"
 function fuzzyFindFunctionFromArguments() {
   local level loopI commandName
   if [ $# -eq 0 ]; then
@@ -862,6 +841,7 @@ function fuzzyFindFunctionFromArguments() {
 
   local -n functionName="CMD_FUNCTION_NAME_${commandName}"
   LAST_RETURNED_VALUE="${functionName:-}"
+  LAST_RETURNED_VALUE2="${loopI}"
 }
 
 # Return the maximum level of subcommands
@@ -894,7 +874,8 @@ function getMaxPossibleCommandLevel() {
 # >>> Parsers
 #===============================================================
 
-# check if a function expects arguments
+# Check if a function expects arguments
+#
 # usage: functionExpectsArguments "functionName"
 function functionExpectsArguments() {
   local functionName
@@ -1138,5 +1119,8 @@ function parseFunctionArgumentsOrGoInteractive() {
   fi
 
   parseFunctionArguments "${functionName}" "$@"
-  debug "Parsed arguments:"$'\n'"${LAST_RETURNED_VALUE}"
+  local args="${LAST_RETURNED_VALUE}"
+  debug "Parsed arguments:"$'\n'"${args}"
+
+  LAST_RETURNED_VALUE="${args}"
 }

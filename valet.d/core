@@ -21,30 +21,6 @@ fi
 # automatically export variables when running the shell
 HOME=~
 
-# determine the color mode expect if the user has set VALET_NO_COLOR
-case "$TERM" in
-    xterm-color|xterm-256color|linux) VALET_NO_COLOR="${VALET_NO_COLOR:-false}";;
-    xterm) [ -n "$COLORTERM" ] && VALET_NO_COLOR="${VALET_NO_COLOR:-false}";;
-    *) VALET_NO_COLOR="${VALET_NO_COLOR:-true}";;
-esac
-
-# the color code used to output colored text
-if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
-  COLOR_DEFAULT=$'\033'"[0m"
-  COLOR_RED=$'\033'"[0;31m"
-  COLOR_GREEN=$'\033'"[32m"
-  COLOR_YELLOW=$'\033'"[33m"
-  COLOR_CYAN=$'\033'"[0;36m"
-  COLOR_GRAY=$'\033'"[1;30m"
-  COLOR_PINK=$'\033'"[1;35m"
-fi
-
-if [ "${VALET_NO_WRAP:-}" != "true" ]; then
-  # this is the only subshell we need; can't be avoided
-  _COLUMNS="${_COLUMNS:-$(tput cols 2>/dev/null || echo 120)}"
-else
-  _COLUMNS="${_COLUMNS:-120}"
-fi
 
 #===============================================================
 # >>> Temporay files and folders
@@ -129,6 +105,39 @@ unset _TEMPORARY_DIRECTORY
 # >>> Logging
 #===============================================================
 
+# determine the color mode expect if the user has set VALET_NO_COLOR
+case "$TERM" in
+    xterm-color|xterm-256color|linux) VALET_NO_COLOR="${VALET_NO_COLOR:-false}";;
+    xterm) [ -n "$COLORTERM" ] && VALET_NO_COLOR="${VALET_NO_COLOR:-false}";;
+    *) VALET_NO_COLOR="${VALET_NO_COLOR:-true}";;
+esac
+
+# the color code used to output colored text
+if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
+  COLOR_DEFAULT=$'\033'"[0m"
+  COLOR_RED=$'\033'"[0;31m"
+  COLOR_GREEN=$'\033'"[32m"
+  COLOR_YELLOW=$'\033'"[33m"
+  COLOR_CYAN=$'\033'"[0;36m"
+  COLOR_GRAY=$'\033'"[1;30m"
+  COLOR_PINK=$'\033'"[1;35m"
+else
+  COLOR_DEFAULT=""
+  COLOR_RED=""
+  COLOR_GREEN=""
+  COLOR_YELLOW=""
+  COLOR_CYAN=""
+  COLOR_GRAY=""
+  COLOR_PINK=""
+fi
+
+if [ "${VALET_NO_WRAP:-}" != "true" ]; then
+  # this is the only subshell we need; can't be avoided
+  _COLUMNS="${_COLUMNS:-$(tput cols 2>/dev/null || echo 120)}"
+else
+  _COLUMNS="${_COLUMNS:-120}"
+fi
+
 # Set the log level.
 # The log level can be set to one of the following values:
 # - debug
@@ -159,7 +168,7 @@ function setLogLevelInt() {
 
 # The log line function is used to display log messages in the terminal.
 # The implementation depends on the environment variables VALET_CI_MODE and VALET_NO_WRAP.
-# $1: the color of the log message
+# $1: the color of the log message (red, green, yellow, cyan, gray, pink)
 # $2: the icon to display in the log message (utf8 character from nerdicons)
 # $3: the severity of the log message
 # $*: the content of the log message
@@ -168,55 +177,82 @@ function setLogLevelInt() {
 #  logLine "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
 # shellcheck disable=SC2317
 function logLine() { return 0; }
-if [ "${VALET_CI_MODE:-}" != "true" ]; then
-  if [ "${VALET_NO_WRAP:-}" != "true" ]; then
-    if [ -n "${MINGW_PREFIX:-}" ]; then
-      _NO_ICON_PADDING="${_NO_ICON_PADDING:-true}"
-    fi
-    _LOG_COLUMNS="${_COLUMNS:-120}"
-    # displays an error message and then exit the program with error
-    function logLine() {
-      local color icon severity content
-      color="COLOR_${1}"
-      icon="${2}"
-      severity="${3}"
-      shift 3
-      content="$*"
-      content="${content//⌜/${COLOR_PINK}⌜}"
-      content="${content//⌝/⌝${COLOR_DEFAULT}}"
-      wrapText "${content}" "${_LOG_COLUMNS:-120}" 20
-      if [ "${VALET_NO_ICON:-}" != "true" ]; then
-        printf "%s%(%H:%M:%S)T %s%-8s%-4s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "${icon:-}" "${COLOR_DEFAULT}" "${LAST_RETURNED_VALUE}" 1>&2
-      else
-        printf "%s%(%H:%M:%S)T %s%-8s%-2s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "" "${COLOR_DEFAULT}" "${LAST_RETURNED_VALUE}" 1>&2
-      fi
-    }
-  else
-    function logLine() {
-      local color icon severity content
-      color="COLOR_${1}"
-      icon="${2}"
-      severity="${3}"
-      shift 3
-      content="$*"
-      if [ "${VALET_NO_ICON:-}" != "true" ]; then
-        printf "%s%(%H:%M:%S)T %s%-8s%-4s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "${icon:-}" "${COLOR_DEFAULT}" "${content}" 1>&2
-      else
-        printf "%s%(%H:%M:%S)T %s%-8s%-2s%s %s\n" "${COLOR_GRAY}" "" "${!color}" "${severity}" "" "${COLOR_DEFAULT}" "${content}" 1>&2
-      fi
-    }
+# We build the log line function dynamically to adapt to the user options
+# This avoid to have to check the options at each log message
+# shellcheck disable=SC2016
+function createLogLineFunction() {
+  # in CI mode, we disable wrapping, colors and icons
+  if [ "${VALET_CI_MODE:-}" = "true" ]; then
+    VALET_NO_WRAP="${VALET_NO_WRAP:-true}"
+    VALET_NO_ICON="${VALET_NO_ICON:-true}"
+    VALET_NO_COLOR="${VALET_NO_COLOR:-true}"
   fi
-else
+
+  LOG_LINE_FUNCTION='
   function logLine() {
-    local severity content
+    local icon severity
+    local -n color="COLOR_${1^^}"
+    icon="${2}"
     severity="${3}"
     shift 3
-    content="$*"
-    printf "%(%F_%H:%M:%S)T %-8s %s\n" "" "${severity}" "${content}" 1>&2
-  }
-fi
+    LAST_RETURNED_VALUE="$*"'
+  if [ "${VALET_NO_COLOR:-}" != "true" ]; then
+    # shellcheck disable=SC2016
+    LOG_LINE_FUNCTION+='
+    LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌜/${COLOR_PINK}⌜}"
+    LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌝/⌝${COLOR_DEFAULT}}"'
+  fi
 
-# displays an error message and then exit the program with error
+  if [ "${VALET_NO_WRAP:-}" != "true" ]; then
+    local wrapTextColumns="${VALET_LOG_COLUMNS:-${_COLUMNS:-120}}"
+    local wrapPaddingLength=20
+
+    LOG_LINE_FUNCTION+='
+    wrapText "${LAST_RETURNED_VALUE}" '"${wrapTextColumns}"' '"${wrapPaddingLength}"''
+  fi
+
+  local printfFormat
+  local printfArguments
+
+  # timestamp
+  if [ "${VALET_CI_MODE:-}" = "true" ]; then
+    printfFormat+="%(%F_%H:%M:%S)T "
+    printfArguments+='"${EPOCHSECONDS}" '
+  elif [ "${VALET_NO_TIMESTAMP:-}" = "true" ]; then
+    printfFormat+=""
+  else
+    printfFormat+="%s%(%H:%M:%S)T "
+    printfArguments+='"${COLOR_GRAY}" "${EPOCHSECONDS}" '
+  fi
+
+  # severity
+  if [ "${VALET_NO_ICON:-}" = "true" ]; then
+    printfFormat+="%s%-8s%s "
+    printfArguments+='"${color}" "${severity}" "${COLOR_DEFAULT}" '
+  else
+    printfFormat+="%s%-8s%-4s%s "
+    printfArguments+='"${color}" "${severity}" "${icon:-}" "${COLOR_DEFAULT}" '
+  fi
+
+  # message
+  printfFormat+="%s\n"
+  printfArguments+='"${LAST_RETURNED_VALUE}"'
+
+  LOG_LINE_FUNCTION+='
+    printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&2
+  }'
+}
+createLogLineFunction
+eval "${LOG_LINE_FUNCTION}"
+unset LOG_LINE_FUNCTION
+unset createLogLineFunction
+
+
+# Displays an error message and then exit the program with error.
+# $*: the error message to display
+#
+# Usage:
+#  fail "This is an error message."
 function fail() {
   logLine "RED" $'\uf2d3' "ERROR" "$*"
   # shellcheck disable=SC2034
@@ -224,7 +260,11 @@ function fail() {
   exit 1
 }
 
-# displays a warning and return a warning code
+# Displays a warning and return a warning code.
+# $*: the warning message to display
+#
+# Usage:
+#  warn "This is a warning message."
 function warn() {
   if [[ ${LOG_LEVEL_INT:-1} -gt 3 ]]; then
     return 0
@@ -233,7 +273,11 @@ function warn() {
   return 0
 }
 
-# displays a success message
+# Displays a success message.
+# $*: the success message to display
+#
+# Usage:
+#  succeed "This is a success message."
 function succeed() {
   if [[ ${LOG_LEVEL_INT:-1} -gt 2 ]]; then
     return 0
@@ -242,7 +286,11 @@ function succeed() {
   return 0
 }
 
-# displays an info message
+# Displays an info message.
+# $*: the info message to display
+#
+# Usage:
+#  inform "This is an info message."
 function inform() {
   if [[ ${LOG_LEVEL_INT:-1} -gt 1 ]]; then
     return 0
@@ -251,7 +299,11 @@ function inform() {
   return 0
 }
 
-# displays a debug message if the global variable DEBUG is set to true
+# Displays a debug message if the global variable DEBUG is set to true.
+# $*: the debug message to display
+#
+# Usage:
+#  debug "This is a debug message."
 function debug() {
   if [[ ${LOG_LEVEL_INT:-1} -gt 0 ]]; then
     return 0
@@ -260,7 +312,10 @@ function debug() {
   return 0
 }
 
-# returns 0 if debug mode is active, 1 otheriwse
+# Returns 0 if debug mode is active, 1 otherwise.
+#
+# Usage:
+#  isDebugMode && echo "Debug mode is active."
 function isDebugMode() {
   if [[ ${LOG_LEVEL_INT:-1} -eq 0 ]]; then
     return 0
@@ -335,7 +390,8 @@ function wrapText() {
   # we call wrapSentence for each line of the text
   local firstLine="1"
   local line
-  while read -r line; do
+  local IFS=$'\n'
+  for line in ${text}; do
     wrappedText+=$'\n'
     wrapSentence "${line}" "${sentenceWidth}" "${leftPadding}"
     if [ "${firstLine}" = "1" ]; then
@@ -344,7 +400,7 @@ function wrapText() {
       wrappedText+="${leftPadding}"
     fi
     wrappedText+="${LAST_RETURNED_VALUE}"
-  done <<< "${text}"
+  done
 
   # add left padding on the first line (or not)
   if [ "${appendPaddingToFirstLine}" = "true" ]; then
@@ -472,6 +528,7 @@ function cutF() {
 
 # Allows to fuzzy match a line against a given pattern.
 # Returns the best match from all lines.
+# Or an empty string if no match is found.
 # $1: the pattern to match
 # $2: the text (multiple lines) to match against
 #
