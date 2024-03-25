@@ -32,6 +32,7 @@ description: |-
   - VALET_NO_COLOR=\"true\": will disable the color output for logs and help.
   - VALET_NO_WRAP=\"true\": will disable the text wrapping for logs and help.
   - VALET_NO_ICON=\"true\": will disable the icons for logs and help.
+  - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
   - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
 
   ⌜Developer notes:⌝

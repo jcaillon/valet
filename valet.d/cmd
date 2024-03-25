@@ -12,10 +12,10 @@ _CMD_INCLUDED=1
 
 
 # list all the functions callable with a command
-CMD_ALL_COMMANDS="build
+CMD_ALL_FUNCTIONS="build
 helloWorld
 selfMenu
-selfTest
+selfTestCore
 showCommandHelp
 showcaseMenu
 showcase_command1
@@ -27,7 +27,7 @@ this
 CMD_FUNCTION_NAME_self_build="build"
 CMD_FUNCTION_NAME_showcase_hello_world="helloWorld"
 CMD_FUNCTION_NAME_self="selfMenu"
-CMD_FUNCTION_NAME_self_test="selfTest"
+CMD_FUNCTION_NAME_self_test_core="selfTestCore"
 CMD_FUNCTION_NAME_help="showCommandHelp"
 CMD_FUNCTION_NAME_showcase="showcaseMenu"
 CMD_FUNCTION_NAME_showcase_command1="showcase_command1"
@@ -44,7 +44,7 @@ CMD_ALL_COMMANDS="
 help
 self
 self build
-self test
+self test-core
 showcase
 showcase command1
 showcase hello-world
@@ -62,7 +62,7 @@ Command name          	Short description"
 CMD_COMMANDS_MENU_BODY="help                  	Show the help this program or of a specific command
 self build            	Re-build the valet menu (for valet development purposes).
 self                  	Show the valet self-maintenance sub menu.
-self test             	Test commands or test valet itself.
+self test-core        	Test valet core features.
 showcase command1     	A showcase command that uses arguments and options.
 showcase hello-world  	A very dumb command
 showcase              	Show the showcase sub menu."
@@ -88,21 +88,21 @@ showcase              	Show the showcase sub menu."
 CMD_COMMAND_build="self build"
 CMD_COMMAND_helloWorld="showcase hello-world"
 CMD_COMMAND_selfMenu="self"
-CMD_COMMAND_selfTest="self test"
+CMD_COMMAND_selfTestCore="self test-core"
 CMD_COMMAND_showCommandHelp="help"
 CMD_COMMAND_showcaseMenu="showcase"
 CMD_COMMAND_showcase_command1="showcase command1"
-CMD_FILETOSOURCE_build="valet.d/self-build"
-CMD_FILETOSOURCE_helloWorld="valet.d/commands.d/showcase.sh"
+CMD_FILETOSOURCE_build="valet.d/commands.d/self-build"
+CMD_FILETOSOURCE_helloWorld="examples.d/showcase.sh"
 CMD_FILETOSOURCE_selfMenu="valet.d/commands.d/self.sh"
-CMD_FILETOSOURCE_selfTest="valet.d/commands.d/self-test.sh"
-CMD_FILETOSOURCE_showcaseMenu="valet.d/commands.d/showcase.sh"
-CMD_FILETOSOURCE_showcase_command1="valet.d/commands.d/showcase.sh"
+CMD_FILETOSOURCE_selfTestCore="valet.d/commands.d/self-test-core.sh"
+CMD_FILETOSOURCE_showcaseMenu="examples.d/showcase.sh"
+CMD_FILETOSOURCE_showcase_command1="examples.d/showcase.sh"
 CMD_SUDO_showcase_command1="true"
 CMD_SHORTDESCRIPTION_build="Re-build the valet menu (for valet development purposes)."
 CMD_SHORTDESCRIPTION_helloWorld="A very dumb command"
 CMD_SHORTDESCRIPTION_selfMenu="Show the valet self-maintenance sub menu."
-CMD_SHORTDESCRIPTION_selfTest="Test commands or test valet itself."
+CMD_SHORTDESCRIPTION_selfTestCore="Test valet core features."
 CMD_SHORTDESCRIPTION_showCommandHelp="Show the help this program or of a specific command"
 CMD_SHORTDESCRIPTION_showcaseMenu="Show the showcase sub menu."
 CMD_SHORTDESCRIPTION_showcase_command1="A showcase command that uses arguments and options."
@@ -114,7 +114,7 @@ CMD_DESCRIPTION_helloWorld="A dumb command."
 CMD_DESCRIPTION_selfMenu="Show the valet self-maintenance sub menu.
 
 This is a sub command that regroups commands useful to maintain valet."
-CMD_DESCRIPTION_selfTest="Test commands and/or valet using approval tests approach."
+CMD_DESCRIPTION_selfTestCore="Test valet core features using approval tests approach."
 CMD_DESCRIPTION_showCommandHelp="Show the help this program or of the help of a specific command.
 
 You can show the help with or without colors and set the maximum columns for the help text."
@@ -203,10 +203,10 @@ CMD_OPTIONS_NAME_selfMenu=(
 CMD_OPTIONS_DESCRIPTION_selfMenu=(
   "Display the help for this command"
 )
-CMD_OPTIONS_NAME_selfTest=(
+CMD_OPTIONS_NAME_selfTestCore=(
   "-h, --help"
 )
-CMD_OPTIONS_DESCRIPTION_selfTest=(
+CMD_OPTIONS_DESCRIPTION_selfTestCore=(
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_showCommandHelp=(
@@ -269,13 +269,13 @@ CMD_ARGUMENTS_DESCRIPTION_selfMenu=(
 
 See the commands section for more information."
 )
-CMD_ARGUMENTS_NAME_selfTest=(
+CMD_ARGUMENTS_NAME_selfTestCore=(
   "testsDirectory"
 )
-CMD_ARGUMENTS_DESCRIPTION_selfTest=(
+CMD_ARGUMENTS_DESCRIPTION_selfTestCore=(
   "The path to the directory containing the tests.
 
-See ⌜tests.d⌝ for example tests."
+See ⌜.tests.d⌝ for the internal tests."
 )
 CMD_ARGUMENTS_NAME_showCommandHelp=(
   "commands..."
@@ -309,11 +309,11 @@ See the commands section for more information."
 )
 CMD_COMMANDS_NAME_selfMenu=(
   "build"
-  "test"
+  "test-core"
 )
 CMD_COMMANDS_DESCRIPTION_selfMenu=(
   "Re-build the valet menu (for valet development purposes)."
-  "Test commands or test valet itself."
+  "Test valet core features."
 )
 CMD_COMMANDS_NAME_showcaseMenu=(
   "hello-world"
@@ -327,7 +327,7 @@ CMD_COMMANDS_NAME_this=(
   "self build"
   "showcase hello-world"
   "self"
-  "self test"
+  "self test-core"
   "help"
   "showcase"
   "showcase command1"
@@ -336,7 +336,7 @@ CMD_COMMANDS_DESCRIPTION_this=(
   "Re-build the valet menu (for valet development purposes)."
   "A very dumb command"
   "Show the valet self-maintenance sub menu."
-  "Test commands or test valet itself."
+  "Test valet core features."
   "Show the help this program or of a specific command"
   "Show the showcase sub menu."
   "A showcase command that uses arguments and options."
@@ -410,10 +410,10 @@ CMD_ARGS_NAME_selfMenu=(
   "commands"
 )
 CMD_ARGS_LAST_IS_ARRAY_selfMenu="true"
-CMD_ARGS_NAME_selfTest=(
+CMD_ARGS_NAME_selfTestCore=(
   "testsDirectory"
 )
-CMD_ARGS_LAST_IS_ARRAY_selfTest="false"
+CMD_ARGS_LAST_IS_ARRAY_selfTestCore="false"
 CMD_ARGS_NAME_showCommandHelp=(
   "commands"
 )

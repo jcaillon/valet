@@ -3,10 +3,11 @@
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
-# import the main script (should always be skipped if the command is run from valet)
-if [ -z "${_MAIN_INCLUDED:-}" ]; then
-  # shellcheck source=../main
-  source "$(dirname -- "$(command -v valet)")/valetd/main"
+# Import the core script (should always be skipped if the command is run from valet).
+# Your command can use all the functions defined in the core script.
+if [ -z "${_CORE_INCLUDED:-}" ]; then
+  # shellcheck source=../valet.d/core
+  source "$(dirname -- "$(command -v valet)")/valet.d/core"
 fi
 # --- END OF COMMAND COMMON PART
 

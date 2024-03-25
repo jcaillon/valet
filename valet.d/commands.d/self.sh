@@ -5,8 +5,11 @@
 
 # import the main script (should always be skipped if the command is run from valet)
 if [ -z "${_MAIN_INCLUDED:-}" ]; then
+  VALETD_DIR="${BASH_SOURCE[0]}"
+  VALETD_DIR="${VALETD_DIR%/*}" # strip file name
+  VALETD_DIR="${VALETD_DIR%/*}" # strip directory
   # shellcheck source=../main
-  source "$(dirname -- "$(command -v valet)")/valetd/main"
+  source "${VALETD_DIR}/main"
 fi
 # --- END OF COMMAND COMMON PART
 
