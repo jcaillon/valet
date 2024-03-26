@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Title:         valet.d/core
-# Description:   this script contains the core functions and variables and it should be sourced, not called directly
-# Author:        github.com/jcaillon
+# Title:          valet.d/core
+# Description:    this script contains the core functions and variables and it
+#                 should be sourced, not called directly
+# Author:         github.com/jcaillon
 
 # we check for this variable to know if this script has already been included
 _CORE_INCLUDED=1
@@ -12,15 +13,6 @@ if [ -z "${_MAIN_INCLUDED:-}" ]; then
   VALETD_PATH="${VALETD_PATH%/*}" # strip file name
   source "${VALETD_PATH}/main"
 fi
-
-#===============================================================
-# >>> Core variables
-#===============================================================
-
-# the variable EXPORT_VARIABLE_SCRIPT will contain the path to the script that should be modified to
-# automatically export variables when running the shell
-HOME=~
-
 
 #===============================================================
 # >>> Temporay files and folders
@@ -99,7 +91,6 @@ eval "${CREATE_TEMP_FILE_FUNCTION}"$'\n'"${CREATE_TEMP_DIRECTORY_FUNCTION}"$'\n'
 unset CREATE_TEMP_FILE_FUNCTION
 unset CREATE_TEMP_DIRECTORY_FUNCTION
 unset CREATE_TEMP_CLEANUP_FUNCTION
-unset _TEMPORARY_DIRECTORY
 
 #===============================================================
 # >>> Logging
@@ -162,7 +153,7 @@ function setLogLevelInt() {
   esac
 
   if [ "${LOG_LEVEL_INT}" != 1 ]; then
-    debug "Log level set to ${LOG_LEVEL}"
+    debug "Log level set to ${LOG_LEVEL}."
   fi
 }
 
@@ -206,6 +197,14 @@ function createLogLineFunction() {
   if [ "${VALET_NO_WRAP:-}" != "true" ]; then
     local wrapTextColumns="${VALET_LOG_COLUMNS:-${_COLUMNS:-120}}"
     local wrapPaddingLength=20
+
+    if [ "${VALET_NO_TIMESTAMP:-}" = "true" ]; then
+      wrapPaddingLength=$((wrapPaddingLength - 9))
+    fi
+
+    if [ "${VALET_NO_ICON:-}" = "true" ]; then
+      wrapPaddingLength=$((wrapPaddingLength - 2))
+    fi
 
     LOG_LINE_FUNCTION+='
     wrapText "${LAST_RETURNED_VALUE}" '"${wrapTextColumns}"' '"${wrapPaddingLength}"''
@@ -351,6 +350,7 @@ function checkAndWarn() {
   fi
   return 0
 }
+
 
 #===============================================================
 # >>> Core utilities
@@ -508,6 +508,10 @@ function wrapSentence() {
 #
 # Usage:
 #  cutF "field1 field2 field3" 2 " " && local field2="${LAST_RETURNED_VALUE}"
+#
+# Notes:
+#  To be fast, it does not check the number of fields in the string.
+#  If the field number is higher than the number of fields, it will return the last field, not an empty string.
 function cutF() {
   local str fieldNumber separator
   str="${1}"
@@ -618,12 +622,32 @@ function fuzzyMatch() {
   LAST_RETURNED_VALUE="${bestMatch:-}"
 }
 
+# This functions tests if a given is empty.
+# $1: the file path to test
+# returns 0 if the file is empty, 1 otherwise
+#
+# Usage:
+#   isFileEmpty "/path/to/file" && echo "The file is empty."
+function isFileEmpty() {
+  local filePath
+  filePath="${1}"
+
+  local firstChar
+
+  IFS= read -N 1 -rd '' firstChar < "${filePath}" || true
+  if [ -z "${firstChar:-}" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
 
 #===============================================================
 # >>> Valet files and directories
 #===============================================================
 
 # Returns the path to the valet configuration directory.
+# Creates it if missing.
 #
 # Usage:
 #  getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
@@ -637,9 +661,10 @@ function getConfigurationDirectory() {
 }
 
 # Returns the path to the valet state directory.
+# Creates it if missing.
 #
 # Usage:
-#  getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
+#  getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
 function getLocalStateDirectory() {
   local directory
   directory="${XDG_CONFIG_HOME:-$HOME/.local/state}/valet"
@@ -647,6 +672,15 @@ function getLocalStateDirectory() {
     mkdir -p "${directory}"
   fi
   LAST_RETURNED_VALUE="${directory}"
+}
+
+# Returns the path to the valet user directory.
+# Does not create it if missing.
+#
+# Usage:
+#  getUserDirectory && local directory="${LAST_RETURNED_VALUE}"
+function getUserDirectory() {
+  LAST_RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"
 }
 
 #===============================================================

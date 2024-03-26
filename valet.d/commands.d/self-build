@@ -50,7 +50,6 @@ options:
 #===============================================================
 function build() {
   local defaultUserDir userDirectory
-  defaultUserDir=~/.valet.d
 
   # need the real path of VALET_HOME because we will use it to build the file
   VALET_HOME=$(realpath "${VALET_HOME}")
@@ -59,29 +58,29 @@ function build() {
   while [[ $# -gt 0 ]]; do
     case "${1}" in
     -d | --user-directory) shift; userDirectory="${1}";;
-    -*) fail "Unknown option ⌜${1}⌝";;
-    *) fail "Unknown command ⌜${1}⌝";;
+    -*) fail "Unknown option ⌜${1}⌝.";;
+    *) fail "Unknown command ⌜${1}⌝.";;
     esac
     shift
   done
 
-  userDirectory="${VALET_USER_DIRECTORY:-${userDirectory:-${defaultUserDir}}}"
+  userDirectory="${userDirectory:-${VALET_USER_DIRECTORY:-${HOME}/.valet.d}}"
 
   # Check pre-requisites
   if ! command -v yq 1>/dev/null 2>&1; then
     fail "This command requires https://github.com/mikefarah/yq to parse the command about functions, please install it in your path and run this command again."
   fi
 
-  inform "Sourcing builtin commands"
+  inform "Sourcing builtin commands."
   eval "$(find "${VALET_HOME}/valet.d/commands.d" -type f -not -path '*/.*' -name '*.sh' | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
   eval "$(getTextBetweenLines "function about_this" "}" "$(cat "${VALET_HOME}/valet")")"
   eval "$(getTextBetweenLines "function about_showCommandHelp" "}" "$(cat "${VALET_HOME}/valet.d/main")")"
 
-  inform "Sourcing user commands"
+  inform "Sourcing user commands from ⌜${userDirectory}⌝."
   if [[ -n "${userDirectory}" && -d "${userDirectory}" ]]; then
     eval "$(find "${userDirectory}" -type f -not -path '*/.*' -name '*.sh'  | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
   else
-    inform "Skipping user directory with value ⌜${userDirectory}⌝"
+    inform "Skipping user directory with value ⌜${userDirectory}⌝."
   fi
 
   buildCommandsFile "${userDirectory}/commands"
@@ -96,13 +95,13 @@ function buildCommandsFile() {
   createTempFile
   buildFile="${LAST_RETURNED_VALUE}"
 
-  inform "Validating the metadata for each command"
+  inform "Validating the metadata for each command."
   validateYamlForEachAboutFunction
 
   writeHeader > "${buildFile}"
   writeNewLines >> "${buildFile}"
 
-  inform "Writing computed functions to ${buildFile}"
+  inform "Writing computed functions."
   writeAllFunctions >> "${buildFile}"
   writeNewLines >> "${buildFile}"
   writeExactCommandToFunctionMap >> "${buildFile}"
@@ -156,7 +155,7 @@ function sumpUp() {
     for ((i=0; i<=padding; i++)); do
       command+=" "
     done
-    commandsBuilt+=$'\n'"${command} → ${fileToSource:-embedded}:${function}"
+    commandsBuilt+=$'\n'"${command} → ${fileToSource:-embedded} → ${function}()"
   done
 
   inform "Commands built:$(echo "${commandsBuilt}" | sort)"
@@ -462,7 +461,7 @@ function writeAllCommands() {
 function validateYamlForEachAboutFunction() {
   local function
   while read -r function; do
-    "about_${function}" | yq '.' > /dev/null || fail "The function about_${function} does not return a valid yaml"
+    "about_${function}" | yq '.' > /dev/null || fail "The function about_${function} does not return a valid yaml."
   done < <(listAllFunctions)
 
   # TODO: validate that each option is different, same for arguments

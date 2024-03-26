@@ -23,8 +23,6 @@ fileToSource: ${BASH_SOURCE[0]}
 shortDescription: Show the showcase sub menu.
 description: |-
   Can be used to show the showcase sub menu in interactive mode.
-
-  Note: interactive mode requires fzf to be installed.
 arguments:
   - name: commands...
     description: |-
@@ -47,7 +45,7 @@ function showcaseMenu() {
 #===============================================================
 
 # shellcheck disable=SC2317
-function about_showcase_command1() {
+function about_showcaseCommand1() {
   echo "
 command: showcase command1
 fileToSource: ${BASH_SOURCE[0]}
@@ -80,15 +78,15 @@ examples:
 "
 }
 
-function showcase_command1() {
+function showcaseCommand1() {
   local -a more
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  inform "First argument: ${firstArg:-}"
-  inform "Option 1: ${option1:-}"
-  inform "Option 2: ${thisIsOption2:-}"
-  inform "More: ${more[*]}"
+  inform "First argument: ${firstArg:-}."
+  inform "Option 1: ${option1:-}."
+  inform "Option 2: ${thisIsOption2:-}."
+  inform "More: ${more[*]}."
 }
 
 # shellcheck disable=SC2317
@@ -96,12 +94,44 @@ function about_helloWorld() {
   echo "
 command: showcase hello-world
 fileToSource: ${BASH_SOURCE[0]}
-shortDescription: A very dumb command
+shortDescription: An hello world command
 description: |-
-  A dumb command.
+  An hello world command.
 "
 }
 
 function helloWorld() {
   echo "Hello world!"
+}
+
+
+#===============================================================
+# >>> Additional hook functions
+#===============================================================
+
+# This function is called before the program exits.
+function onExit() {
+  debug "Exiting a showcase command."
+}
+
+# This function is always called before the program ends and allows
+# you to do some custom clean up.
+function cleanUp() {
+  debug "Cleaning up stuff in the showcase commands."
+}
+
+# This function should return 0 to cancel the interruption
+# or any other code to continue interrupting the program.
+# It is called on signal SIGINT and SIGQUIT.
+# shellcheck disable=SC2317
+onInterrupt() {
+  return 0
+}
+
+# This function should return 0 to cancel the termination
+# or any other code to interrupt the program.
+# It is called on signal SIGHUP and SIGTERM.
+# shellcheck disable=SC2317
+onTerminate() {
+  return 0
 }

@@ -1,14 +1,44 @@
 # valet
 
-Valet is a wrapper around your bash scripts that provides an interactive menu, standard help output, auto parsing for options and arguments, and so on...
+Valet is a wrapper around your bash scripts that provides an interactive menu, standard help output, auto parsing for options and arguments, a framework for approval testing, and so on...
 
 It works on **any Linux environment with bash** or on **Git bash for Windows**.
 
 It is written for performance and to minimize the overhead of a script calling your scripts.
 
-## Showcase
+## Use case
 
-xxx
+To help you on your daily tasks, you have created a collection of bash scripts that you added to your path.
+
+But...
+
+- You never recall what are the options and/or arguments of these scripts.
+- You struggle to even remember how they are named and how to invoke them.
+- They are not correctly documented.
+- They all follow a different convention regarding options and arguments.
+
+**→ This is where Valet can help you!**
+
+## Features showcase
+
+Valet in a gist:
+
+- In Valet, you can create new **commands** that you can invoke with `valet my-command`.
+- Each command has properties that help you describe it (a description, a list of arguments and options, and so on...).
+- Each command has a associated bash function that is called when the command is invoked and which contains your logic.
+- You define commands and their functions in `.sh` files under your valet user directory and Valet takes care of indexing your commands; which allows you to quickly find them, parse options, arguments, print their help...
+
+Invoking `valet` without arguments lets you interactively search and invoke commands:
+
+*insert gif*
+
+With `valet command --help` or `valet help command`, you get a beautifully formatted help for your command usage:
+
+*insert gif*
+
+Fuzzy matching command names allow you to invoke the right command more quickly, see this example with `valet h s h`:
+
+*insert gif*
 
 ## Installation
 
@@ -38,6 +68,7 @@ You can enable debug mode with profiling for valet by setting the environment va
 
 ## Roadmap
 
+- Installation and self update script.
 - Add support for interactive mode.
 - Generate an autocompletion script for bash and zsh.
 - Implement self test with approval tests.
