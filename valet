@@ -29,16 +29,18 @@ description: |-
 
   ⌜Create your own commands:⌝
   You can create your own commands and have them available in valet, please check the README.md or the examples under examples.d to do so.
-  Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using the environment variable VALET_USER_DIRECTORY=\"my/path\".
+  Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).
   Once you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.
 
   ⌜Configuration through environment variables:⌝
   In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
+  - VALET_USER_DIRECTORY=\"my/path\": set the path to the valet user directory (in which to find user commands).
   - VALET_NO_COLOR=\"true\": will disable the color output for logs and help.
-  - VALET_NO_WRAP=\"true\": will disable the text wrapping for logs and help.
+  - VALET_NO_WRAP=\"true\": will disable the text wrapping for logs.
   - VALET_NO_ICON=\"true\": will disable the icons for logs and help.
   - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
   - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
+  - VALET_OPTIONS_INTERACTIVE_MODE=\"true\": will enter interactive mode for command options (default is to only ask for arguments).
 
   ⌜Developer notes:⌝
   You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
@@ -65,6 +67,7 @@ options:
   - name: --version
     description: |-
       Display the current version of valet.
+    noEnvironmentVariable: true
 examples:
   - name: --help
     description: |-
