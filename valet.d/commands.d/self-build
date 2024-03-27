@@ -239,13 +239,16 @@ function writeFunctionOptions() {
   echo "# CMD_OPTS_HAS_VALUE_xxx = array which indicates for each option if it has a value or not"
   echo "# CMD_OPTS_NAME_xxx = array with each option names in camel case"
   echo "# CMD_OPTS_NAME_SC_xxx = array with each option names in snake case"
-  local function json jsonLines value
+  local function json jsonLines value noEnvironmentVariable
     while read -r function; do
 
       jsonLines="$("about_${function}" | yq -o=j -I=0 ".options[]")"
       jsonLines="${jsonLines%$'\n'}"
 
       if [[ -z "$(echo "${jsonLines}" | head -n 1)" || "${function}" == "this" ]]; then
+        # always add the help option
+        echo "CMD_OPTS_${function}=(\"-h --help\")"
+        echo "CMD_OPTS_NAME_${function}=(\"help\")"
         continue
       fi
 
@@ -281,7 +284,12 @@ function writeFunctionOptions() {
       echo "CMD_OPTS_NAME_SC_${function}=("
       while read -r json; do
         name="$(echo "${json}" | yq ".name")"
-        echo "  \"$(optioNameToCapsSnakeCase "$(getVariableNameFromOptions "${name}")")\""
+        noEnvironmentVariable="$(echo "${json}" | yq ".noEnvironmentVariable // \"\"")"
+        if [ "${noEnvironmentVariable:-false}" != true ]; then
+          echo "  \"$(optioNameToCapsSnakeCase "$(getVariableNameFromOptions "${name}")")\""
+        else
+          echo "  \"\""
+        fi
       done <<< "${jsonLines}"
       echo ")"
 
@@ -307,7 +315,7 @@ function writeGetForFunction() {
 
 
   # write all the keys for each function
-  local json key value jsonLines property snakeCaseOptionName optionValue
+  local json key value jsonLines property snakeCaseOptionName optionValue noEnvironmentVariable
   for property in {command,fileToSource,sudo,shortDescription,description,examples,options,arguments}; do
 
     while read -r function; do
@@ -332,10 +340,13 @@ function writeGetForFunction() {
                 name="$(echo "${json}" | yq ".name")"
                 snakeCaseOptionName="$(optioNameToCapsSnakeCase "$(getVariableNameFromOptions "${name}")")"
                 optionValue="$(echo "${name}" | grep -oE "<[-A-Za-z0-9]+>" || echo "")"
-                if [ -n "${optionValue}" ]; then
-                  value+=$'\n'"This option can be set by exporting the variable VALET_${snakeCaseOptionName}=\"${optionValue}\"."
-                else
-                  value+=$'\n'"This option can be set by exporting the variable VALET_${snakeCaseOptionName}=\"true\"."
+                noEnvironmentVariable="$(echo "${json}" | yq ".noEnvironmentVariable // \"\"")"
+                if [ "${noEnvironmentVariable:-false}" != true ]; then
+                  if [ -n "${optionValue}" ]; then
+                    value+=$'\n'"This option can be set by exporting the variable VALET_${snakeCaseOptionName}=\"${optionValue}\"."
+                  else
+                    value+=$'\n'"This option can be set by exporting the variable VALET_${snakeCaseOptionName}=\"true\"."
+                  fi
                 fi
               fi
               echo "  \"${value//\"/\\\"}\""

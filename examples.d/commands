@@ -156,12 +156,14 @@ Once you have created your new command script, run the ⌜valet self build⌝ co
 ⌜Configuration through environment variables:⌝
 In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
 - VALET_USER_DIRECTORY=\"my/path\": set the path to the valet user directory (in which to find user commands).
+- VALET_OPTIONS_INTERACTIVE_MODE=\"true\": will enter interactive mode for command options (default is to only ask for arguments).
 - VALET_NO_COLOR=\"true\": will disable the color output for logs and help.
+- VALET_COLOR_XXX=\"color\": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, ERROR, TIMESTAMP, HIGHLIGHT.
 - VALET_NO_WRAP=\"true\": will disable the text wrapping for logs.
 - VALET_NO_ICON=\"true\": will disable the icons for logs and help.
 - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
+- VALET_LOG_COLUMNS=\"120\": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the terminal width.
 - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
-- VALET_OPTIONS_INTERACTIVE_MODE=\"true\": will enter interactive mode for command options (default is to only ask for arguments).
 
 ⌜Developer notes:⌝
 You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt)."
@@ -225,7 +227,7 @@ CMD_OPTIONS_DESCRIPTION_selfMenu=(
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_selfTest=(
-  "-d, --test-directory <path>"
+  "-d, --user-directory <path>"
   "-a, --auto-approve"
   "-c, --with-core"
   "-i, --include <pattern>"
@@ -233,10 +235,10 @@ CMD_OPTIONS_NAME_selfTest=(
   "-h, --help"
 )
 CMD_OPTIONS_DESCRIPTION_selfTest=(
-  "The path to the directory containing the tests.
+  "The path to your valet directory.
 
-This defaults to ⌜/mnt/c/Users/jcaillon/data/repo/github.com/jcaillon/valet/examples.d/.tests.d⌝ or ⌜~/.valet.d/.tests.d⌝.
-This option can be set by exporting the variable VALET_TEST_DIRECTORY=\"<path>\"."
+Each sub directory named ⌜.tests.d⌝ will be considered as a test directory containing a test.sh file.
+This option can be set by exporting the variable VALET_USER_DIRECTORY=\"<path>\"."
   "The received test result files will automatically be approved.
 This option can be set by exporting the variable VALET_AUTO_APPROVE=\"true\"."
   "Also test the valet core functions.
@@ -265,6 +267,7 @@ CMD_OPTIONS_NAME_selfTestCore=(
   "--create-temp-files"
   "--logging-level"
   "--wait-indefinitely"
+  "--show-help"
   "-h, --help"
 )
 CMD_OPTIONS_DESCRIPTION_selfTestCore=(
@@ -294,6 +297,8 @@ This option can be set by exporting the variable VALET_CREATE_TEMP_FILES=\"true\
 This option can be set by exporting the variable VALET_LOGGING_LEVEL=\"true\"."
   "Test to wait indefinitely.
 This option can be set by exporting the variable VALET_WAIT_INDEFINITELY=\"true\"."
+  "Test to show the help of the function.
+This option can be set by exporting the variable VALET_SHOW_HELP=\"true\"."
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_selfUpdate=(
@@ -350,8 +355,7 @@ This option can be set by exporting the variable VALET_LOG_LEVEL=\"<level>\"."
   "Output verbose information.
 This is the equivalent of setting the log level to debug.
 This option can be set by exporting the variable VALET_VERBOSE=\"true\"."
-  "Display the current version of valet.
-This option can be set by exporting the variable VALET_VERSION=\"true\"."
+  "Display the current version of valet."
   "Display the help for this command"
 )
 CMD_ARGUMENTS_NAME_selfMenu=(
@@ -466,8 +470,12 @@ CMD_OPTS_NAME_build=(
 CMD_OPTS_NAME_SC_build=(
   "USER_DIRECTORY"
 )
+CMD_OPTS_helloWorld=("-h --help")
+CMD_OPTS_NAME_helloWorld=("help")
+CMD_OPTS_selfMenu=("-h --help")
+CMD_OPTS_NAME_selfMenu=("help")
 CMD_OPTS_selfTest=(
-  "-d --test-directory"
+  "-d --user-directory"
   "-a --auto-approve"
   "-c --with-core"
   "-i --include"
@@ -482,7 +490,7 @@ CMD_OPTS_HAS_VALUE_selfTest=(
   "true"
 )
 CMD_OPTS_NAME_selfTest=(
-  "testDirectory"
+  "userDirectory"
   "autoApprove"
   "withCore"
   "include"
@@ -490,7 +498,7 @@ CMD_OPTS_NAME_selfTest=(
   "help"
 )
 CMD_OPTS_NAME_SC_selfTest=(
-  "TEST_DIRECTORY"
+  "USER_DIRECTORY"
   "AUTO_APPROVE"
   "WITH_CORE"
   "INCLUDE"
@@ -508,12 +516,14 @@ CMD_OPTS_selfTestCore=(
   "--create-temp-files"
   "--logging-level"
   "--wait-indefinitely"
+  "--show-help"
   "-h --help"
 )
 CMD_OPTS_HAS_VALUE_selfTestCore=(
   "false"
   "true"
   "true"
+  "false"
   "false"
   "false"
   "false"
@@ -535,6 +545,7 @@ CMD_OPTS_NAME_selfTestCore=(
   "createTempFiles"
   "loggingLevel"
   "waitIndefinitely"
+  "showHelp"
   "help"
 )
 CMD_OPTS_NAME_SC_selfTestCore=(
@@ -549,7 +560,10 @@ CMD_OPTS_NAME_SC_selfTestCore=(
   "CREATE_TEMP_FILES"
   "LOGGING_LEVEL"
   "WAIT_INDEFINITELY"
+  "SHOW_HELP"
 )
+CMD_OPTS_selfUpdate=("-h --help")
+CMD_OPTS_NAME_selfUpdate=("help")
 CMD_OPTS_showCommandHelp=(
   "-nc --no-colors"
   "-c --columns"
@@ -586,6 +600,10 @@ CMD_OPTS_NAME_SC_showcaseCommand1=(
   "OPTION1"
   "THIS_IS_OPTION2"
 )
+CMD_OPTS_showcaseMenu=("-h --help")
+CMD_OPTS_NAME_showcaseMenu=("help")
+CMD_OPTS_this=("-h --help")
+CMD_OPTS_NAME_this=("help")
 
 
 # Get the arguments of a given function xxx.

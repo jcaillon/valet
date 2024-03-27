@@ -104,6 +104,7 @@ case "$TERM" in
 esac
 
 # the color code used to output colored text
+# shellcheck disable=SC2034
 if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
   COLOR_DEFAULT=${VALET_COLOR_DEFAULT:-$'\033'"[0m"}
   COLOR_DEBUG=${VALET_COLOR_DEBUG:-$'\033'"[1;30m"}
@@ -708,22 +709,26 @@ function showHelp() {
 # Usage:
 #  showSubMenu
 function showSubMenu() {
-  local menuFunctionName
+  local functionName
   # get the function name of the calling function
-  menuFunctionName="${FUNCNAME[1]}"
+  functionName="${FUNCNAME[1]}"
 
   local parsedArguments
   parseFunctionArguments "this" "$@" && parsedArguments="${LAST_RETURNED_VALUE}"
   debug "Parsed arguments:"$'\n'"${parsedArguments}"
   eval "${parsedArguments}"
   if [ -n "${help:-}" ]; then
-    showFunctionHelp "${menuFunctionName}"
+    showFunctionHelp "${functionName}"
     return 0
+  fi
+  if [ -n "${parsingErrors:-}" ]; then
+    local -n commandName="CMD_COMMAND_${functionName}"
+    fail "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
   fi
 
   # filter the commands to only keep the sub commands of the function
   local filteredCommandsMenuBody line
-  local -n menuCommandName="CMD_COMMAND_${menuFunctionName}"
+  local -n menuCommandName="CMD_COMMAND_${functionName}"
   filteredCommandsMenuBody=""
   local IFS=$'\n'
   for line in ${CMD_COMMANDS_MENU_BODY}; do

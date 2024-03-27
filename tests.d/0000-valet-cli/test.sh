@@ -14,27 +14,27 @@ function testEventHandlers() {
   # testing error handling (a statement returns != 0)
   "${VALET_HOME}/valet" self test-core --error 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithSubstitution 1>&2
-  endSubTest "Testing error handling" $?
+  endTest "Testing error handling" $?
 
   # testing exit code (exit 5) and custom exit function
   "${VALET_HOME}/valet" self test-core --exit
-  endSubTest "Testing exit message --exit" $?
+  endTest "Testing exit message --exit" $?
 
   # testing the fail function
   "${VALET_HOME}/valet" self test-core --fail
-  endSubTest "Testing fail function --fail" $?
+  endTest "Testing fail function --fail" $?
 
   # testing the unknown command handler
   "${VALET_HOME}/valet" self test-core --unknown-command 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithSubstitution 1>&2
-  endSubTest "Testing unknown command handling" $?
+  endTest "Testing unknown command handling" $?
 
   # testing kill
   # "${VALET_HOME}/valet" self test-core --wait-indefinitely &
   # processId=$!
   # kill -TERM ${processId}
   # wait ${processId} || true
-  # endSubTest "Testing kill" $?
+  # endTest "Testing kill" $?
 }
 
 function testLogging() {
@@ -48,7 +48,7 @@ function testLogging() {
   echo "---- level debug with verbose option ----" 1>&2
   "${VALET_HOME}/valet" -v self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithSubstitution 1>&2
-  endSubTest "Testing log level" 0
+  endTest "Testing log level" 0
 
   # testing the different log options
   unset VALET_NO_COLOR
@@ -91,7 +91,7 @@ function testLogging() {
   echoTempFileWithTimeStampSubstitution 1>&2
   unset VALET_LOG_COLUMNS
 
-  endSubTest "Testing log options" 0
+  endTest "Testing log options" 0
 
   unset VALET_NO_WRAP
   unset VALET_CI_MODE
@@ -131,7 +131,7 @@ function testMainOptions() {
   else
     echo "KO, startup profiling file should not be empty."
   fi
-  endSubTest "Testing profiling for command and startup" 0
+  endTest "Testing profiling for command and startup" 0
 
   unset VALET_LOG_LEVEL
   unset VALET_STARTUP_PROFILING
@@ -146,25 +146,25 @@ function testMainOptions() {
   else
     echo "KO, we did not get a version."
   fi
-  endSubTest "Testing version option" $?
+  endTest "Testing version option" $?
 
   # testing unknown option, corrected with fuzzy match
   "${VALET_HOME}/valet" -prof
-  endSubTest "Testing unknown option, corrected with fuzzy match" $?
+  endTest "Testing unknown option, corrected with fuzzy match" $?
 }
 
 function testCleaning() {
   # testing temp files/directories creation, cleaning and custom cleanUp
   ("${VALET_HOME}/valet" self test-core --create-temp-files) 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithSubstitution 1>&2
-  endSubTest "Testing temp files/directories creation, cleaning and custom cleanUp" $?
+  endTest "Testing temp files/directories creation, cleaning and custom cleanUp" $?
 }
 
 function testUserDirectory() {
   # testing with a non exising user directory
   export VALET_USER_DIRECTORY="${VALET_HOME}/non-existing"
   "${VALET_HOME}/valet" self test-core --logging-level
-  endSubTest "Testing with a non existing user directory" $?
+  endTest "Testing with a non existing user directory" $?
 }
 
 function main() {
