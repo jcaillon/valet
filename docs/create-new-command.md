@@ -75,6 +75,9 @@ In the function of a command, you have access to all functions defined in `valet
 
 In case of error, your function should call the `fail` directly which will exit the program while displaying a meaningful message to the user.
 
+> [!TIP]
+> Please check [docs/working-on-bash-scripts.md](docs/working-on-bash-scripts.md) to learn more about working on bash scripts and create performant scripts.
+
 ## 4. Rebuild valet menu
 
 In order to find your new command in the valet menu; you need to call the `self build` command. Either from the valet menu or by executing directly `./valet.d/self-build`. The later option is mandatory if you have an issue with the `valet.d/cmd` file itself.

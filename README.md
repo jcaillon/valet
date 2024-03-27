@@ -42,38 +42,60 @@ Fuzzy matching command names allow you to invoke the right command more quickly,
 
 ## Installation
 
-xxx
+You need bash version 5 or higher to be installed on your machine to run valet.
 
-> [!IMPORTANT]
-> Valet has an interactive mode which allows you to select the commands you want to play and pick your arguments interactively.
-> It requires [fzf](https://github.com/junegunn/fzf) to be installed and present in your PATH.
-> Please check the fzf Github page to learn how to install it.
+### Automated installation
 
-> [!IMPORTANT]
-> If you see the replacement character � in my terminal, it means you don't have a [nerd font](https://www.nerdfonts.com/) setup in your terminal.
+Run the following command to install valet:
+
+```bash
+curl https://github.com/jcaillon/valet | bash
+```
+
+> [!NOTE]
+> The automated installation downloads [fzf][fzf] and [yq][yq] in the valet `bin` sub directory.
 >
-> Either install a nerd font and activate it on our terminal or `export VALET_NO_ICON=true` in your environment.
+> It also copies the [examples.d](examples.d) directory to your valet user directory (if empty) and runs `valet self build` in order to get you started.
+
+### Manual installation
+
+You need the following tools installed and present in your PATH for valet to work:
+
+- [fzf][fzf]
+- [yq][yq]
+
+You can then git clone this project or download the source from the latest release into the directory of your choice.
+
+Finally, add this directory to your PATH so you can call `valet` from your terminal.
 
 ## Usage
 
 xxx
 
+> [!IMPORTANT]
+> If you see the replacement character � in my terminal, it means you don't have a [nerd font][nerd-font] setup in your terminal.
+>
+> Either install a nerd font and activate it on our terminal or `export VALET_NO_ICON=true` in your environment.
+
 ## How to add your own command
 
-Please check the [docs/create-new-command.md](docs/create-new-command.md) documentation.
+Please check the [docs/create-new-command.md][new-command] documentation.
 
-## Developers notes
+## Contributions
 
-Please check [docs/working-on-bash-scripts.md](docs/working-on-bash-scripts.md) to learn more about working on bash scripts.
-
-You can enable debug mode with profiling for valet by setting the environment variable `VALET_STARTUP_PROFILING` to true (it will output to the file `~/profile_valet.txt`).
+Please check the [CONTRIBUTING.md](CONTRIBUTING.md) documentation if you intend to work on this project.
 
 ## Roadmap
 
 - Installation and self update script.
 - Add support for interactive mode.
+- Setup github actions to automatically test valet.
 - Generate an autocompletion script for bash and zsh.
-- Implement self test with approval tests.
+- Self command to create a new command interactively.
 - Get rid of yq dependency in self build.
 - Replace fzf menu with equivalent pure bash menu.
-- Self command to create a new command interactively.
+
+[fzf]: https://github.com/junegunn/fzf
+[yq]: https://github.com/mikefarah/yq
+[nerd-font]: https://www.nerdfonts.com/
+[new-command]: docs/create-new-command.md

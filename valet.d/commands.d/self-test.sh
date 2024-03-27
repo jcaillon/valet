@@ -72,7 +72,7 @@ function selfTest() {
     # if the directory is named .tests.d, then it is a test directory
     if [[ "${testsDirectory}" == *"/.tests.d" ]]; then
       inform "Running tests for commands with the directory ⌜${testsDirectory}⌝."
-      runTests "${testsDirectory}"
+      runTestSuiteSuites "${testsDirectory}"
     fi
   done
 
@@ -81,7 +81,7 @@ function selfTest() {
 
   if [ -n "${withCore:-}" ]; then
     inform "Running all tests for core functions."
-    runTests "${VALET_HOME}/tests.d"
+    runTestSuiteSuites "${VALET_HOME}/tests.d"
   fi
 }
 
@@ -134,6 +134,9 @@ options:
   - name: --wait-indefinitely
     description: |-
       Test to wait indefinitely.
+  - name: --show-help
+    description: |-
+      Test to show the help of the function.
 "
 }
 
@@ -187,10 +190,12 @@ function selfTestCore() {
     while true; do
       sleep 1
     done
+  elif [ -n "${showHelp:-}" ]; then
+    showHelp
   else
     # default to running all tests
     inform "Running all tests for core functions."
-    runTests "${VALET_HOME}/tests.d"
+    runTestSuiteSuites "${VALET_HOME}/tests.d"
   fi
 }
 
@@ -200,22 +205,22 @@ function returnOne() { return 1; }
 # >>> Functions that can be used in the test files
 #===============================================================
 
-# Call this function after each sub test to write the sub test results to the report file.
-# $1: the description of the sub test
-# $2: the exit code of the sub test
+# Call this function after each test to write the test results to the report file.
+# $1: the description of the test
+# $2: the exit code of the test
 #
 # Usage:
-#   endSubTest "Testing something" $?
-function endSubTest() {
+#   endTest "Testing something" $?
+function endTest() {
   local testDescription="${1:-}"
   local exitCode="${2:-}"
 
   # reset the standard output and error output
   resetFdRedirection
 
-  debug "Ended sub test ⌜${testDescription}⌝ with exit code ⌜${exitCode}⌝."
+  debug "Ended test ⌜${testDescription}⌝ with exit code ⌜${exitCode}⌝."
 
-  # write the sub test title
+  # write the test title
   printf "%s\n\n" "## ${testDescription:-test}" >> "${_TEST_REPORT_FILE}"
 
   # write the exit code
@@ -281,7 +286,14 @@ function echoTempFileWithSubstitution() {
 # >>> Internal tests functions
 #===============================================================
 
-function runTests() {
+# Run all the test suites in the given directory.
+# A test suite is a folder that contains a test.sh file.
+# This test.sh allows to run multiple tests.
+# $1: the directory containing the test suites
+#
+# Usage:
+#   runTestSuiteSuites "${VALET_HOME}/tests.d"
+function runTestSuiteSuites() {
   local testsDirectory="${1}"
 
   createTempFile && _TEST_STANDARD_OUTPUT_FILE="${LAST_RETURNED_VALUE}"
@@ -320,7 +332,7 @@ function runTests() {
     inform "Running test ⌜${testDirectory##*/}⌝."
 
     exitCode=0
-    runTest "${testDirectory}" || exitCode=$?
+    runTestSuite "${testDirectory}" || exitCode=$?
     nbTests+=1
 
     if [ "${exitCode}" -eq 0 ]; then
@@ -349,7 +361,7 @@ function runTests() {
 
 }
 
-function runTest() {
+function runTestSuite() {
   local testDirectory="$1"
 
   # redirect the standard output and error output to files

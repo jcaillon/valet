@@ -12,17 +12,17 @@ There were 2 new lines before this."
 
   echo "------------------------------"
   wrapText "${shortText}" 30 && echo "${LAST_RETURNED_VALUE}"
-  endSubTest "Wrapping text at column 30 with no padding" 0
+  endTest "Wrapping text at column 30 with no padding" 0
 
 
   echo "------------------------------------------------------------------------------------------"
   wrapText "${shortText}" 90 4 false && echo "${LAST_RETURNED_VALUE}"
-  endSubTest "Wrapping text at column 90 with padding of 4 on new lines" 0
+  endTest "Wrapping text at column 90 with padding of 4 on new lines" 0
 
 
   echo "------------------------------------------------------------------------------------------"
   wrapText "${shortText}" 90 2 true && echo "${LAST_RETURNED_VALUE}"
-  endSubTest "Wrapping text at column 90 with padding of 2 on all lines" 0
+  endTest "Wrapping text at column 90 with padding of 2 on all lines" 0
 }
 
 function testCutF() {
@@ -43,7 +43,7 @@ function testCutF() {
 line2 does it work on lines?
 line3 seems so" 2 $'\n' && echo "${LAST_RETURNED_VALUE}"
 
-  endSubTest "Testing cutF" 0
+  endTest "Testing cutF" 0
 }
 
 function testFuzzyMatch() {
@@ -69,7 +69,7 @@ l5 ublievable"
   echo "--- matching pattern 'lubl', should prioritize lower distance between letters ---"
   fuzzyMatch "lubl" "${lines}" && echo "${LAST_RETURNED_VALUE}"
 
-  endSubTest "Testing fuzzyMatch" 0
+  endTest "Testing fuzzyMatch" 0
 }
 
 function testIsFileEmpty() {
@@ -82,7 +82,7 @@ function testIsFileEmpty() {
 
   if ! isFileEmpty "${file}"; then echo "OK, the file has content"; else echo "KO"; fi
 
-  endSubTest "Testing isFileEmpty" 0
+  endTest "Testing isFileEmpty" 0
 }
 
 

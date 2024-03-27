@@ -146,14 +146,18 @@ ABOUT
   In addition to the environment variables defined for each options, you can define the following environment variables 
   to configure valet:
   - VALET_USER_DIRECTORY="my/path": set the path to the valet user directory (in which to find user commands).
+  - VALET_OPTIONS_INTERACTIVE_MODE="true": will enter interactive mode for command options (default is to only ask for 
+  arguments).
   - VALET_NO_COLOR="true": will disable the color output for logs and help.
+  - VALET_COLOR_XXX="color": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, 
+  OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, ERROR, TIMESTAMP, HIGHLIGHT.
   - VALET_NO_WRAP="true": will disable the text wrapping for logs.
   - VALET_NO_ICON="true": will disable the icons for logs and help.
   - VALET_NO_TIMESTAMP="true": will disable the timestamp for logs.
+  - VALET_LOG_COLUMNS="120": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the 
+  terminal width.
   - VALET_CI_MODE="true": will simplify the log output for CI/CD environments (or slow systems), will display the logs 
   without colors, without wrapping lines and with the full date.
-  - VALET_OPTIONS_INTERACTIVE_MODE="true": will enter interactive mode for command options (default is to only ask for 
-  arguments).
   
   ⌜Developer notes:⌝
   You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true
@@ -161,7 +165,7 @@ ABOUT
 
 USAGE
 
-  valet [options] <command> <commands...>
+  valet [options] <command>
 
 OPTIONS
 
@@ -180,15 +184,8 @@ OPTIONS
       This option can be set by exporting the variable VALET_VERBOSE="true".
   --version
       Display the current version of valet.
-      This option can be set by exporting the variable VALET_VERSION="true".
   -h, --help
       Display the help for this command
-
-ARGUMENTS
-
-  commands...
-      The command or sub commands to execute.
-      See the commands section for more information.
 
 COMMANDS
 
@@ -219,5 +216,123 @@ EXAMPLES
       Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
 
 
+```
+
+## Testing that we can display the help of a sub menu
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+ABOUT
+
+  Show the valet self-maintenance sub menu.
+  
+  This is a sub command that regroups commands useful to maintain valet.
+
+USAGE
+
+  valet self [options] <command>
+
+OPTIONS
+
+  -h, --help
+      Display the help for this command
+
+COMMANDS
+
+  build
+      Re-build the menu of valet from your commands.
+  test-commands
+      Test your valet custom commands.
+  test-core
+      Test valet core features.
+  update
+      Test valet core features.
+
+EXAMPLES
+
+  self build
+      Re-build the valet menu by calling the ⌜build⌝ sub command.
+
+
+```
+
+## Testing that we can display the help of a function using showHelp
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+ABOUT
+
+  Test valet core features using approval tests approach.
+
+USAGE
+
+  valet self test-core [options]
+
+OPTIONS
+
+  -a, --auto-approve
+      The received test result files will automatically be approved.
+      This option can be set by exporting the variable VALET_AUTO_APPROVE="true".
+  -i, --include <pattern>
+      A regex pattern to include only the tests that match the pattern.
+      
+      Example: --include '(1|commands)'
+      This option can be set by exporting the variable VALET_INCLUDE="<pattern>".
+  -e, --exclude <pattern>
+      A regex pattern to exclude all the tests that match the pattern.
+      
+      Example: --exclude '(1|commands)'
+      This option can be set by exporting the variable VALET_EXCLUDE="<pattern>".
+  --error
+      Test the error handling.
+      This option can be set by exporting the variable VALET_ERROR="true".
+  --fail
+      Test the fail.
+      This option can be set by exporting the variable VALET_FAIL="true".
+  --exit
+      Test the exit code.
+      This option can be set by exporting the variable VALET_EXIT="true".
+  --unknown-command
+      Test with an unknown command.
+      This option can be set by exporting the variable VALET_UNKNOWN_COMMAND="true".
+  --create-temp-files
+      Test to create temp file and directory.
+      This option can be set by exporting the variable VALET_CREATE_TEMP_FILES="true".
+  --create-temp-files
+      Test to create temp file and directory.
+      This option can be set by exporting the variable VALET_CREATE_TEMP_FILES="true".
+  --logging-level
+      Test to output all log level messages.
+      This option can be set by exporting the variable VALET_LOGGING_LEVEL="true".
+  --wait-indefinitely
+      Test to wait indefinitely.
+      This option can be set by exporting the variable VALET_WAIT_INDEFINITELY="true".
+  --show-help
+      Test to show the help of the function.
+      This option can be set by exporting the variable VALET_SHOW_HELP="true".
+  -h, --help
+      Display the help for this command
+
+
+```
+
+## Testing that we correctly parse arguments and options and fail is they don't match
+
+Exit code: 1
+
+**Error** output:
+
+```log
+ERROR    Unknown option ⌜--non-existing-option⌝.
+Expecting 0 argument(s), got extra argument ⌜nonNeededArg1⌝.
+Unknown option ⌜-derp⌝.
+Expecting 0 argument(s), got extra argument ⌜anotherArg⌝.
+Use valet self test-core --help to get help.
 ```
 

@@ -75,7 +75,7 @@ DEBUG    Function name found ⌜selfTestCore⌝.
 DEBUG    Loaded file ⌜$VALET_HOME/valet.d/commands.d/self-test.sh⌝.
 DEBUG    Running the command ⌜self test-core⌝ with the function ⌜selfTestCore⌝ and the arguments ⌜--logging-level⌝.
 DEBUG    Parsed arguments:
-local parsingErrors autoApprove include exclude error fail exit unknownCommand createTempFiles createTempFiles loggingLevel waitIndefinitely help
+local parsingErrors autoApprove include exclude error fail exit unknownCommand createTempFiles createTempFiles loggingLevel waitIndefinitely showHelp help
 autoApprove="${AUTO_APPROVE:-}"
 include="${INCLUDE:-}"
 exclude="${EXCLUDE:-}"
@@ -86,6 +86,7 @@ unknownCommand="${UNKNOWN_COMMAND:-}"
 createTempFiles="${CREATE_TEMP_FILES:-}"
 createTempFiles="${CREATE_TEMP_FILES:-}"
 waitIndefinitely="${WAIT_INDEFINITELY:-}"
+showHelp="${SHOW_HELP:-}"
 parsingErrors=""
 loggingLevel="true"
 
@@ -109,8 +110,8 @@ Exit code: 0
 [1;30mHH:MM:SS [0;36mINFO     [0m This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you
                     live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
                     Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-[1;30mHH:MM:SS [32mSUCCESS  [0m This is a success message.
-[1;30mHH:MM:SS [33mWARNING  [0m This is a warning message.
+[1;30mHH:MM:SS [0;32mSUCCESS  [0m This is a success message.
+[1;30mHH:MM:SS [0;33mWARNING  [0m This is a warning message.
                     With a second line.
 ---- CI mode ----
 YYYY:MM:DD_HH:MM:SS INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
@@ -121,20 +122,20 @@ With a second line.
 [0;36mINFO     [0m This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, 
            you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself
            with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-[32mSUCCESS  [0m This is a success message.
-[33mWARNING  [0m This is a warning message.
+[0;32mSUCCESS  [0m This is a success message.
+[0;33mWARNING  [0m This is a warning message.
            With a second line.
 ---- normal, no icons ----
 [1;30mHH:MM:SS [0;36mINFO    [0m This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you 
                   live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
                   Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-[1;30mHH:MM:SS [32mSUCCESS [0m This is a success message.
-[1;30mHH:MM:SS [33mWARNING [0m This is a warning message.
+[1;30mHH:MM:SS [0;32mSUCCESS [0m This is a success message.
+[1;30mHH:MM:SS [0;33mWARNING [0m This is a warning message.
                   With a second line.
 ---- normal, no wrap ----
 [1;30mHH:MM:SS [0;36mINFO     [0m This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-[1;30mHH:MM:SS [32mSUCCESS  [0m This is a success message.
-[1;30mHH:MM:SS [33mWARNING  [0m This is a warning message.
+[1;30mHH:MM:SS [0;32mSUCCESS  [0m This is a success message.
+[1;30mHH:MM:SS [0;33mWARNING  [0m This is a warning message.
 With a second line.
 ---- normal, wrapping at 80 ----
 [1;30mHH:MM:SS [0;36mINFO     [0m This is an info message with a super long sentence. The 
@@ -146,8 +147,8 @@ With a second line.
                     people you can find, delegate authority, and don't interfere
                     as long as the policy you've decided upon is being carried 
                     out.
-[1;30mHH:MM:SS [32mSUCCESS  [0m This is a success message.
-[1;30mHH:MM:SS [33mWARNING  [0m This is a warning message.
+[1;30mHH:MM:SS [0;32mSUCCESS  [0m This is a success message.
+[1;30mHH:MM:SS [0;33mWARNING  [0m This is a warning message.
                     With a second line.
 ```
 
