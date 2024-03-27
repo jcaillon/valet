@@ -20,15 +20,9 @@ function about_selfUpdate() {
   echo "
 command: self update
 fileToSource: ${BASH_SOURCE[0]}
-shortDescription: Test valet core features.
+shortDescription: Update valet using the latest release on GitHub.
 description: |-
-  Test valet core features using approval tests approach.
-arguments:
-  - name: testsDirectory
-    description: |-
-      The path to the directory containing the tests.
-
-      See ⌜tests.d⌝ for the internal tests.
+  Update valet using the latest release on GitHub.
 "
 }
 

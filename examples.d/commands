@@ -73,7 +73,7 @@ self build             	Re-build the menu of valet from your commands.
 self                   	Show the valet self-maintenance sub menu.
 self test-core         	Test valet core features.
 self test              	Test your valet custom commands.
-self update            	Test valet core features.
+self update            	Update valet using the latest release on GitHub.
 showcase command1      	A showcase command that uses arguments and options.
 showcase hello-world   	An hello world command
 showcase               	Show the showcase sub menu.
@@ -123,7 +123,7 @@ CMD_SHORTDESCRIPTION_selfBuild="Re-build the menu of valet from your commands."
 CMD_SHORTDESCRIPTION_selfMenu="Show the valet self-maintenance sub menu."
 CMD_SHORTDESCRIPTION_selfTest="Test your valet custom commands."
 CMD_SHORTDESCRIPTION_selfTestCore="Test valet core features."
-CMD_SHORTDESCRIPTION_selfUpdate="Test valet core features."
+CMD_SHORTDESCRIPTION_selfUpdate="Update valet using the latest release on GitHub."
 CMD_SHORTDESCRIPTION_showCaseSudo="A command that requires sudo"
 CMD_SHORTDESCRIPTION_showCommandHelp="Show the help this program or of a specific command"
 CMD_SHORTDESCRIPTION_showcaseCommand1="A showcase command that uses arguments and options."
@@ -138,7 +138,7 @@ CMD_DESCRIPTION_selfMenu="Show the valet self-maintenance sub menu.
 This is a sub command that regroups commands useful to maintain valet."
 CMD_DESCRIPTION_selfTest="Test your valet custom commands using approval tests approach."
 CMD_DESCRIPTION_selfTestCore="Test valet core features using approval tests approach."
-CMD_DESCRIPTION_selfUpdate="Test valet core features using approval tests approach."
+CMD_DESCRIPTION_selfUpdate="Update valet using the latest release on GitHub."
 CMD_DESCRIPTION_showCaseSudo="Before starting this command, valet will check if sudo is available.
 
 If so, it will require the user to enter the sudo password and use sudo inside the command"
@@ -391,14 +391,6 @@ CMD_ARGUMENTS_DESCRIPTION_selfMenu=(
 
 See the commands section for more information."
 )
-CMD_ARGUMENTS_NAME_selfUpdate=(
-  "testsDirectory"
-)
-CMD_ARGUMENTS_DESCRIPTION_selfUpdate=(
-  "The path to the directory containing the tests.
-
-See ⌜tests.d⌝ for the internal tests."
-)
 CMD_ARGUMENTS_NAME_showCommandHelp=(
   "commands?..."
 )
@@ -439,7 +431,7 @@ CMD_COMMANDS_DESCRIPTION_selfMenu=(
   "Re-build the menu of valet from your commands."
   "Test your valet custom commands."
   "Test valet core features."
-  "Test valet core features."
+  "Update valet using the latest release on GitHub."
 )
 CMD_COMMANDS_NAME_showcaseMenu=(
   "hello-world"
@@ -469,7 +461,7 @@ CMD_COMMANDS_DESCRIPTION_this=(
   "Show the valet self-maintenance sub menu."
   "Test your valet custom commands."
   "Test valet core features."
-  "Test valet core features."
+  "Update valet using the latest release on GitHub."
   "A command that requires sudo"
   "Show the help this program or of a specific command"
   "A showcase command that uses arguments and options."
@@ -646,11 +638,6 @@ CMD_ARGS_NAME_selfMenu=(
 )
 CMD_ARGS_LAST_IS_ARRAY_selfMenu="true"
 CMD_ARGS_NB_OPTIONAL_selfMenu=1
-CMD_ARGS_NAME_selfUpdate=(
-  "testsDirectory"
-)
-CMD_ARGS_LAST_IS_ARRAY_selfUpdate="false"
-CMD_ARGS_NB_OPTIONAL_selfUpdate=0
 CMD_ARGS_NAME_showCommandHelp=(
   "commands"
 )
