@@ -202,7 +202,7 @@ COMMANDS
   self test-core
       Test valet core features.
   self update
-      Test valet core features.
+      Update valet using the latest release on GitHub.
   showcase sudo-command
       A command that requires sudo
   help
@@ -426,7 +426,7 @@ self build             	Re-build the menu of valet from your commands.
 self                   	Show the valet self-maintenance sub menu.
 self test-core         	Test valet core features.
 self test              	Test your valet custom commands.
-self update            	Test valet core features.
+self update            	Update valet using the latest release on GitHub.
 showcase command1      	A showcase command that uses arguments and options.
 showcase hello-world   	An hello world command
 showcase               	Show the showcase sub menu.
@@ -634,7 +634,7 @@ Command name           	Short description
 self build             	Re-build the menu of valet from your commands.
 self test-core         	Test valet core features.
 self test              	Test your valet custom commands.
-self update            	Test valet core features.
+self update            	Update valet using the latest release on GitHub.
 ===
 fzf args were:
 --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:50:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 48 {}
@@ -672,7 +672,7 @@ COMMANDS
   test-core
       Test valet core features.
   update
-      Test valet core features.
+      Update valet using the latest release on GitHub.
 
 EXAMPLES
 
@@ -708,7 +708,7 @@ Command name           	Short description
 self build             	Re-build the menu of valet from your commands.
 self test-core         	Test valet core features.
 self test              	Test your valet custom commands.
-self update            	Test valet core features.
+self update            	Update valet using the latest release on GitHub.
 ===
 fzf args were:
 --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:50:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 48 {}

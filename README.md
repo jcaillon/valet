@@ -31,15 +31,31 @@ Valet in a gist:
 
 Invoking `valet` without arguments lets you interactively search and invoke commands:
 
-*insert gif*
+![demo-menu](docs/images/readme/demo-menu.gif)
 
 With `valet command --help` or `valet help command`, you get a beautifully formatted help for your command usage:
 
-*insert gif*
+![demo-help](docs/images/readme/demo-help.gif)
 
 Fuzzy matching command names allow you to invoke the right command more quickly, see this example with `valet h s h`:
 
-*insert gif*
+![demo-fuzzy](docs/images/readme/demo-fuzzy.gif)
+
+Automate tests for your script with approval test approach:
+
+![demo-tests](docs/images/readme/demo-tests.gif)
+
+Beautiful logs fully customizable:
+
+![demo-logs](docs/images/readme/demo-logs.gif)
+
+Automated parsing of arguments and options based on your command configuration:
+
+![demo-parsing](docs/images/readme/demo-parsing.gif)
+
+> [!NOTE]
+> This showcase is recorded with the [windows terminal](https://github.com/microsoft/terminal), [debian on WSL](https://wiki.debian.org/InstallingDebianOn/Microsoft/Windows/SubsystemForLinux) with zsh & [oh my zsh](https://ohmyz.sh/).
+> The color scheme for the terminal is [dracula](https://draculatheme.com/windows-terminal) and the font is an home made modification of windows consolas ligaturized and with nerd font icons.
 
 ## Installation
 
@@ -98,6 +114,7 @@ Please check the [CONTRIBUTING.md](CONTRIBUTING.md) documentation if you intend 
 - Allow fileToSource to have multiple values separated by a comma (so we can load libraries of functions).
 - Add about option to hide the command in the menus.
 - Add tests for self build.
+- Implement self release command to tag and push to github.
 
 [fzf]: https://github.com/junegunn/fzf
 [yq]: https://github.com/mikefarah/yq

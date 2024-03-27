@@ -751,6 +751,7 @@ function addLastChoice() {
       echo "${lastChoices[${index}]}" >> "${lastChoicesFile}"
     else
       total+=1
+      [[ total -gt ${#lastChoices[@]} ]] && total=${#lastChoices[@]}
     fi
   done
 }

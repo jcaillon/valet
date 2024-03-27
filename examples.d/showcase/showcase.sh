@@ -103,7 +103,7 @@ description: |-
 }
 
 function helloWorld() {
-  echo "Hello world!"
+  echo "New Hello world!"
 }
 
 # shellcheck disable=SC2317
