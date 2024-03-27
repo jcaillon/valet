@@ -1,5 +1,7 @@
 # valet
 
+⚠️ THIS IS A WORK IN PROGRESS, PLEASE WAIT FOR A FIRST RELEASE :)
+
 Valet is a wrapper around your bash scripts that provides an interactive menu, standard help output, auto parsing for options and arguments, a framework for approval testing, and so on...
 
 It works on **any Linux environment with bash** or on **Git bash for Windows**.
