@@ -15,7 +15,7 @@ _CMD_INCLUDED=1
 CMD_ALL_FUNCTIONS="build
 helloWorld
 selfMenu
-selfTestCommands
+selfTest
 selfTestCore
 selfUpdate
 showCommandHelp
@@ -29,7 +29,7 @@ this
 CMD_FUNCTION_NAME_self_build="build"
 CMD_FUNCTION_NAME_showcase_hello_world="helloWorld"
 CMD_FUNCTION_NAME_self="selfMenu"
-CMD_FUNCTION_NAME_self_test_commands="selfTestCommands"
+CMD_FUNCTION_NAME_self_test_commands="selfTest"
 CMD_FUNCTION_NAME_self_test_core="selfTestCore"
 CMD_FUNCTION_NAME_self_update="selfUpdate"
 CMD_FUNCTION_NAME_help="showCommandHelp"
@@ -96,7 +96,7 @@ showcase              	Show the showcase sub menu."
 CMD_COMMAND_build="self build"
 CMD_COMMAND_helloWorld="showcase hello-world"
 CMD_COMMAND_selfMenu="self"
-CMD_COMMAND_selfTestCommands="self test-commands"
+CMD_COMMAND_selfTest="self test-commands"
 CMD_COMMAND_selfTestCore="self test-core"
 CMD_COMMAND_selfUpdate="self update"
 CMD_COMMAND_showCommandHelp="help"
@@ -105,7 +105,7 @@ CMD_COMMAND_showcaseMenu="showcase"
 CMD_FILETOSOURCE_build="valet.d/commands.d/self-build"
 CMD_FILETOSOURCE_helloWorld="examples.d/showcase.sh"
 CMD_FILETOSOURCE_selfMenu="valet.d/commands.d/self.sh"
-CMD_FILETOSOURCE_selfTestCommands="valet.d/commands.d/self-test.sh"
+CMD_FILETOSOURCE_selfTest="valet.d/commands.d/self-test.sh"
 CMD_FILETOSOURCE_selfTestCore="valet.d/commands.d/self-test.sh"
 CMD_FILETOSOURCE_selfUpdate="valet.d/commands.d/self-install.sh"
 CMD_FILETOSOURCE_showcaseCommand1="examples.d/showcase.sh"
@@ -114,7 +114,7 @@ CMD_SUDO_showcaseCommand1="true"
 CMD_SHORTDESCRIPTION_build="Re-build the menu of valet from your commands."
 CMD_SHORTDESCRIPTION_helloWorld="An hello world command"
 CMD_SHORTDESCRIPTION_selfMenu="Show the valet self-maintenance sub menu."
-CMD_SHORTDESCRIPTION_selfTestCommands="Test your valet custom commands."
+CMD_SHORTDESCRIPTION_selfTest="Test your valet custom commands."
 CMD_SHORTDESCRIPTION_selfTestCore="Test valet core features."
 CMD_SHORTDESCRIPTION_selfUpdate="Test valet core features."
 CMD_SHORTDESCRIPTION_showCommandHelp="Show the help this program or of a specific command"
@@ -128,7 +128,7 @@ CMD_DESCRIPTION_helloWorld="An hello world command."
 CMD_DESCRIPTION_selfMenu="Show the valet self-maintenance sub menu.
 
 This is a sub command that regroups commands useful to maintain valet."
-CMD_DESCRIPTION_selfTestCommands="Test your valet custom commands using approval tests approach."
+CMD_DESCRIPTION_selfTest="Test your valet custom commands using approval tests approach."
 CMD_DESCRIPTION_selfTestCore="Test valet core features using approval tests approach."
 CMD_DESCRIPTION_selfUpdate="Test valet core features using approval tests approach."
 CMD_DESCRIPTION_showCommandHelp="Show the help this program or of the help of a specific command.
@@ -224,14 +224,39 @@ CMD_OPTIONS_NAME_selfMenu=(
 CMD_OPTIONS_DESCRIPTION_selfMenu=(
   "Display the help for this command"
 )
-CMD_OPTIONS_NAME_selfTestCommands=(
+CMD_OPTIONS_NAME_selfTest=(
+  "-d, --test-directory <path>"
+  "-a, --auto-approve"
+  "-c, --with-core"
+  "-i, --include <pattern>"
+  "-e, --exclude <pattern>"
   "-h, --help"
 )
-CMD_OPTIONS_DESCRIPTION_selfTestCommands=(
+CMD_OPTIONS_DESCRIPTION_selfTest=(
+  "The path to the directory containing the tests.
+
+This defaults to ⌜/mnt/c/Users/jcaillon/data/repo/github.com/jcaillon/valet/examples.d/.tests.d⌝ or ⌜~/.valet.d/.tests.d⌝.
+This option can be set by exporting the variable VALET_TEST_DIRECTORY=\"<path>\"."
+  "The received test result files will automatically be approved.
+This option can be set by exporting the variable VALET_AUTO_APPROVE=\"true\"."
+  "Also test the valet core functions.
+
+This is only if you modified valet core functions themselves.
+This option can be set by exporting the variable VALET_WITH_CORE=\"true\"."
+  "A regex pattern to include only the tests that match the pattern.
+
+Example: --include '(1|commands)'
+This option can be set by exporting the variable VALET_INCLUDE=\"<pattern>\"."
+  "A regex pattern to exclude all the tests that match the pattern.
+
+Example: --exclude '(1|commands)'
+This option can be set by exporting the variable VALET_EXCLUDE=\"<pattern>\"."
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_selfTestCore=(
   "-a, --auto-approve"
+  "-i, --include <pattern>"
+  "-e, --exclude <pattern>"
   "--error"
   "--fail"
   "--exit"
@@ -245,6 +270,14 @@ CMD_OPTIONS_NAME_selfTestCore=(
 CMD_OPTIONS_DESCRIPTION_selfTestCore=(
   "The received test result files will automatically be approved.
 This option can be set by exporting the variable VALET_AUTO_APPROVE=\"true\"."
+  "A regex pattern to include only the tests that match the pattern.
+
+Example: --include '(1|commands)'
+This option can be set by exporting the variable VALET_INCLUDE=\"<pattern>\"."
+  "A regex pattern to exclude all the tests that match the pattern.
+
+Example: --exclude '(1|commands)'
+This option can be set by exporting the variable VALET_EXCLUDE=\"<pattern>\"."
   "Test the error handling.
 This option can be set by exporting the variable VALET_ERROR=\"true\"."
   "Test the fail.
@@ -433,8 +466,40 @@ CMD_OPTS_NAME_build=(
 CMD_OPTS_NAME_SC_build=(
   "USER_DIRECTORY"
 )
+CMD_OPTS_selfTest=(
+  "-d --test-directory"
+  "-a --auto-approve"
+  "-c --with-core"
+  "-i --include"
+  "-e --exclude"
+  "-h --help"
+)
+CMD_OPTS_HAS_VALUE_selfTest=(
+  "true"
+  "false"
+  "false"
+  "true"
+  "true"
+)
+CMD_OPTS_NAME_selfTest=(
+  "testDirectory"
+  "autoApprove"
+  "withCore"
+  "include"
+  "exclude"
+  "help"
+)
+CMD_OPTS_NAME_SC_selfTest=(
+  "TEST_DIRECTORY"
+  "AUTO_APPROVE"
+  "WITH_CORE"
+  "INCLUDE"
+  "EXCLUDE"
+)
 CMD_OPTS_selfTestCore=(
   "-a --auto-approve"
+  "-i --include"
+  "-e --exclude"
   "--error"
   "--fail"
   "--exit"
@@ -447,6 +512,8 @@ CMD_OPTS_selfTestCore=(
 )
 CMD_OPTS_HAS_VALUE_selfTestCore=(
   "false"
+  "true"
+  "true"
   "false"
   "false"
   "false"
@@ -458,6 +525,8 @@ CMD_OPTS_HAS_VALUE_selfTestCore=(
 )
 CMD_OPTS_NAME_selfTestCore=(
   "autoApprove"
+  "include"
+  "exclude"
   "error"
   "fail"
   "exit"
@@ -470,6 +539,8 @@ CMD_OPTS_NAME_selfTestCore=(
 )
 CMD_OPTS_NAME_SC_selfTestCore=(
   "AUTO_APPROVE"
+  "INCLUDE"
+  "EXCLUDE"
   "ERROR"
   "FAIL"
   "EXIT"

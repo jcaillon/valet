@@ -105,21 +105,23 @@ esac
 
 # the color code used to output colored text
 if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
-  COLOR_DEFAULT=$'\033'"[0m"
-  COLOR_RED=$'\033'"[0;31m"
-  COLOR_GREEN=$'\033'"[32m"
-  COLOR_YELLOW=$'\033'"[33m"
-  COLOR_CYAN=$'\033'"[0;36m"
-  COLOR_GRAY=$'\033'"[1;30m"
-  COLOR_PINK=$'\033'"[1;35m"
+  COLOR_DEFAULT=${VALET_COLOR_DEFAULT:-$'\033'"[0m"}
+  COLOR_DEBUG=${VALET_COLOR_DEBUG:-$'\033'"[1;30m"}
+  COLOR_INFO=${VALET_COLOR_INFO:-$'\033'"[0;36m"}
+  COLOR_WARNING=${VALET_COLOR_WARNING:-$'\033'"[0;33m"}
+  COLOR_SUCCESS=${VALET_COLOR_SUCCESS:-$'\033'"[0;32m"}
+  COLOR_ERROR=${VALET_COLOR_ERROR:-$'\033'"[0;31m"}
+  COLOR_TIMESTAMP=${VALET_COLOR_TIMESTAMP:-$'\033'"[1;30m"}
+  COLOR_HIGHLIGHT=${VALET_COLOR_HIGHLIGHT:-$'\033'"[1;35m"}
 else
   COLOR_DEFAULT=""
-  COLOR_RED=""
-  COLOR_GREEN=""
-  COLOR_YELLOW=""
-  COLOR_CYAN=""
-  COLOR_GRAY=""
-  COLOR_PINK=""
+  COLOR_DEBUG=""
+  COLOR_INFO=""
+  COLOR_WARNING=""
+  COLOR_SUCCESS=""
+  COLOR_ERROR=""
+  COLOR_TIMESTAMP=""
+  COLOR_HIGHLIGHT=""
 fi
 
 if [ "${VALET_NO_WRAP:-}" != "true" ]; then
@@ -190,7 +192,7 @@ function createLogLineFunction() {
   if [ "${VALET_NO_COLOR:-}" != "true" ]; then
     # shellcheck disable=SC2016
     LOG_LINE_FUNCTION+='
-    LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌜/${COLOR_PINK}⌜}"
+    LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌜/${COLOR_HIGHLIGHT}⌜}"
     LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌝/⌝${COLOR_DEFAULT}}"'
   fi
 
@@ -221,7 +223,7 @@ function createLogLineFunction() {
     printfFormat+=""
   else
     printfFormat+="%s%(%H:%M:%S)T "
-    printfArguments+='"${COLOR_GRAY}" "${EPOCHSECONDS}" '
+    printfArguments+='"${COLOR_TIMESTAMP}" "${EPOCHSECONDS}" '
   fi
 
   # severity
@@ -253,7 +255,7 @@ unset createLogLineFunction
 # Usage:
 #  fail "This is an error message."
 function fail() {
-  logLine "RED" $'\uf2d3' "ERROR" "$*"
+  logLine "ERROR" $'\uf2d3' "ERROR" "$*"
   # shellcheck disable=SC2034
   ERROR_DISPLAY=1
   exit 1
@@ -268,7 +270,7 @@ function warn() {
   if [[ ${LOG_LEVEL_INT:-1} -gt 3 ]]; then
     return 0
   fi
-  logLine "YELLOW" $'\uf071' "WARNING" "$*"
+  logLine "WARNING" $'\uf071' "WARNING" "$*"
   return 0
 }
 
@@ -281,7 +283,7 @@ function succeed() {
   if [[ ${LOG_LEVEL_INT:-1} -gt 2 ]]; then
     return 0
   fi
-  logLine "GREEN" $'\uf14a' "SUCCESS" "$*"
+  logLine "SUCCESS" $'\uf14a' "SUCCESS" "$*"
   return 0
 }
 
@@ -294,7 +296,7 @@ function inform() {
   if [[ ${LOG_LEVEL_INT:-1} -gt 1 ]]; then
     return 0
   fi
-  logLine "CYAN" $'\uf05a' "INFO" "$*"
+  logLine "INFO" $'\uf05a' "INFO" "$*"
   return 0
 }
 
@@ -307,7 +309,7 @@ function debug() {
   if [[ ${LOG_LEVEL_INT:-1} -gt 0 ]]; then
     return 0
   fi
-  logLine "GRAY" $'\uf0ae' "DEBUG" "$*"
+  logLine "DEBUG" $'\uf0ae' "DEBUG" "$*"
   return 0
 }
 
@@ -667,7 +669,7 @@ function getConfigurationDirectory() {
 #  getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
 function getLocalStateDirectory() {
   local directory
-  directory="${XDG_CONFIG_HOME:-$HOME/.local/state}/valet"
+  directory="${HOME}/.local/state/valet"
   if [ ! -d "${directory}" ]; then
     mkdir -p "${directory}"
   fi

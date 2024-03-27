@@ -75,8 +75,10 @@ DEBUG    Function name found ⌜selfTestCore⌝.
 DEBUG    Loaded file ⌜$VALET_HOME/valet.d/commands.d/self-test.sh⌝.
 DEBUG    Running the command ⌜self test-core⌝ with the function ⌜selfTestCore⌝ and the arguments ⌜--logging-level⌝.
 DEBUG    Parsed arguments:
-local parsingErrors autoApprove error fail exit unknownCommand createTempFiles createTempFiles loggingLevel waitIndefinitely help
+local parsingErrors autoApprove include exclude error fail exit unknownCommand createTempFiles createTempFiles loggingLevel waitIndefinitely help
 autoApprove="${AUTO_APPROVE:-}"
+include="${INCLUDE:-}"
+exclude="${EXCLUDE:-}"
 error="${ERROR:-}"
 fail="${FAIL:-}"
 exit="${EXIT:-}"
@@ -170,6 +172,16 @@ Exit code: 0
 OK, we got a version.
 ```
 
+## Testing unknown option, corrected with fuzzy match
+
+Exit code: 1
+
+**Error** output:
+
+```log
+ERROR    Unknown option ⌜-prof⌝ (did you mean ⌜--profiling⌝?)).
+```
+
 ## Testing temp files/directories creation, cleaning and custom cleanUp
 
 Exit code: 0
@@ -185,5 +197,24 @@ DEBUG    Log level set to debug.
 DEBUG    Exiting with code 0 after Xs.
 DEBUG    Deleting temporary files.
 WARNING  This is a custom clean up function.
+```
+
+## Testing with a non existing user directory
+
+Exit code: 0
+
+**Error** output:
+
+```log
+WARNING  The valet user directory ⌜/mnt/c/data/repo/github.com/jcaillon/valet/non-existing⌝ does not contain a built ⌜commands⌝ file.
+         To get started with valet, you must build your command list using the ⌜valet self build⌝ command.
+         Please check the help using ⌜valet self build --help⌝ for details.
+         Now using the examples commands from ⌜/mnt/c/data/repo/github.com/jcaillon/valet/examples.d⌝.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you 
+         are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with 
+         the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+         With a second line.
 ```
 

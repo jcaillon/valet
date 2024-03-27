@@ -54,7 +54,7 @@ function onErrorInternal() {
     fi
     stack+=$'\n'"${treeString} In function $func() $src:$linen"
   done
-  logLine "RED" $'\uf2d3' "ERROR" "Error code ${1} in ${FUNCNAME[1]}(), stack:${stack}"
+  logLine "ERROR" $'\uf2d3' "ERROR" "Error code ${1} in ${FUNCNAME[1]}(), stack:${stack}"
   ERROR_DISPLAY=1
 }
 
@@ -69,7 +69,7 @@ function onExitInternal() {
   # always call cleanUp before exiting
   onCleanUpInternal
   if [[ "${ERROR_DISPLAY:-0}" != "1" && "${rc}" != "0" ]]; then
-    logLine "RED" $'\uf14c' "EXIT" "Exiting with code ${rc}."
+    logLine "ERROR" $'\uf14c' "EXIT" "Exiting with code ${rc}."
     ERROR_DISPLAY=1
   fi
 }
@@ -78,7 +78,7 @@ trap onExitInternal EXIT
 
 function onInterruptInternal() {
   echo # Set cursor to the next line of '^C'
-  logLine "YELLOW" $'\uf256' "STOPPED" "Program interrupted by the user."
+  logLine "WARNING" $'\uf256' "STOPPED" "Program interrupted by the user."
   # check if the function exists
   if command -v onInterrupt 1>/dev/null 2>&1; then
     if onInterrupt; then
@@ -93,7 +93,7 @@ function onInterruptInternal() {
 trap onInterruptInternal SIGINT SIGQUIT
 
 function onTerminateInternal() {
-  logLine "RED" $'\uf05e' "KILLED" "Program killed."
+  logLine "ERROR" $'\uf05e' "KILLED" "Program killed."
   # check if the function exists
   if command -v onTerminate 1>/dev/null 2>&1; then
     if onTerminate; then
@@ -220,21 +220,21 @@ function showFunctionHelp() {
 
   # sudo apt-get install colortest
   # colortest-16b
-  local cDefault cTitle cItalic cOption cArgument cCommand
+  local cDefault cTitle cHighlight cOption cArgument cCommand
   if [ "${noColor}" = "true" ]; then
     cDefault=""
     cTitle=""
-    cItalic=""
+    cHighlight=""
     cOption=""
     cArgument=""
     cCommand=""
   else
-    cDefault=$'\033'"[0m"
-    cTitle=$'\033'"[36m"
-    cItalic=$'\033'"[32m"
-    cOption=$'\033'"[1;33m"
-    cArgument=$'\033'"[35m"
-    cCommand=$'\033'"[31m"
+    cDefault=${VALET_COLOR_DEFAULT:-$'\033'"[0m"}
+    cTitle=${VALET_COLOR_TITLE:-$'\033'"[0;36m"}
+    cHighlight=${VALET_COLOR_HIGHLIGHT:-$'\033'"[0;35m"}
+    cOption=${VALET_COLOR_OPTION:-$'\033'"[0;33m"}
+    cArgument=${VALET_COLOR_ARGUMENT:-$'\033'"[0;31m"}
+    cCommand=${VALET_COLOR_COMMAND:-$'\033'"[0;32m"}
   fi
 
   local -i helpWidth
@@ -264,11 +264,12 @@ function showFunctionHelp() {
   fi
   if [ -n "${functionCommands:-}" ]; then
     usage+=" ${cCommand}<command>${cDefault}"
-  fi
-  if [ -n "${functionArguments:-}" ]; then
-    for argument in "${functionArguments[@]}"; do
-      usage+=" ${cArgument}<${argument}>${cDefault}"
-    done
+  else
+    if [ -n "${functionArguments:-}" ]; then
+      for argument in "${functionArguments[@]}"; do
+        usage+=" ${cArgument}<${argument}>${cDefault}"
+      done
+    fi
   fi
   wrapText "${usage}" "${helpWidth}" 2 "true"
   usage="${LAST_RETURNED_VALUE}"
@@ -283,7 +284,7 @@ function showFunctionHelp() {
 
   # arguments
   local arguments
-  if [ -n "${functionArguments:-}" ]; then
+  if [[ -z "${functionCommands:-}" && -n "${functionArguments:-}" ]]; then
     arguments="${cTitle}ARGUMENTS${cDefault}"$'\n'$'\n'
     writeAsTable "${helpWidth}" "${cArgument}" "CMD_ARGUMENTS" "${functionName}"
     arguments+="${LAST_RETURNED_VALUE}"$'\n'
@@ -317,7 +318,7 @@ ${options:-}${arguments:-}${commands:-}${examples:-}"
 
   # surround "markdown like" _italic_ with italic color
   if [ "${noColor:-false}" = "false" ]; then
-    output="${output//⌜/${cItalic}⌜}"
+    output="${output//⌜/${cHighlight}⌜}"
     output="${output//⌝/⌝${cDefault}}"
   fi
 

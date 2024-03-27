@@ -1,43 +1,36 @@
 #!/usr/bin/env bash
 
-# we will run valet commands so we need to set the correct user directory
+# we will run "${VALET_HOME}/valet" commands so we need to set the correct user directory
 export VALET_USER_DIRECTORY="${VALET_HOME}/examples.d"
 
-# setting up valet to minimize output difference between 2 runs
+# setting up "${VALET_HOME}/valet" to minimize output difference between 2 runs
 export VALET_NO_COLOR="true"
 export VALET_NO_TIMESTAMP="true"
 export VALET_NO_ICON="true"
 export VALET_NO_WRAP="true"
 export _COLUMNS=180
 
-function main() {
-  testEventHandlers
-  testLogging
-  testMainOptions
-  testCleaning
-}
-
 function testEventHandlers() {
   # testing error handling (a statement returns != 0)
-  valet self test-core --error 2> "${_TEST_TEMP_FILE}"
+  "${VALET_HOME}/valet" self test-core --error 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithSubstitution 1>&2
   endSubTest "Testing error handling" $?
 
   # testing exit code (exit 5) and custom exit function
-  valet self test-core --exit
+  "${VALET_HOME}/valet" self test-core --exit
   endSubTest "Testing exit message --exit" $?
 
   # testing the fail function
-  valet self test-core --fail
+  "${VALET_HOME}/valet" self test-core --fail
   endSubTest "Testing fail function --fail" $?
 
   # testing the unknown command handler
-  valet self test-core --unknown-command 2> "${_TEST_TEMP_FILE}"
+  "${VALET_HOME}/valet" self test-core --unknown-command 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithSubstitution 1>&2
   endSubTest "Testing unknown command handling" $?
 
   # testing kill
-  # valet self test-core --wait-indefinitely &
+  # "${VALET_HOME}/valet" self test-core --wait-indefinitely &
   # processId=$!
   # kill -TERM ${processId}
   # wait ${processId} || true
@@ -48,12 +41,12 @@ function testLogging() {
   # testing log level
   echo "---- level success with variable ----" 1>&2
   export VALET_LOG_LEVEL="success"
-  valet self test-core --logging-level
+  "${VALET_HOME}/valet" self test-core --logging-level
   unset VALET_LOG_LEVEL
   echo "---- level warn with option ----" 1>&2
-  valet --log-level "warn" self test-core --logging-level
+  "${VALET_HOME}/valet" --log-level "warn" self test-core --logging-level
   echo "---- level debug with verbose option ----" 1>&2
-  valet -v self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
+  "${VALET_HOME}/valet" -v self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithSubstitution 1>&2
   endSubTest "Testing log level" 0
 
@@ -65,36 +58,36 @@ function testLogging() {
   unset VALET_CI_MODE
 
   echo "---- normal output ----" 1>&2
-  valet self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
+  "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithTimeStampSubstitution 1>&2
 
   echo "---- CI mode ----" 1>&2
   export VALET_CI_MODE="true"
-  valet self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
+  "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithTimeStampSubstitution 1>&2
   unset VALET_CI_MODE
 
   echo "---- normal, no timestamp ----" 1>&2
   export VALET_NO_TIMESTAMP="true"
-  valet self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
+  "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithTimeStampSubstitution 1>&2
   unset VALET_NO_TIMESTAMP
 
   echo "---- normal, no icons ----" 1>&2
   export VALET_NO_ICON="true"
-  valet self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
+  "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithTimeStampSubstitution 1>&2
   unset VALET_NO_ICON
 
   echo "---- normal, no wrap ----" 1>&2
   export VALET_NO_WRAP="true"
-  valet self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
+  "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithTimeStampSubstitution 1>&2
   unset VALET_NO_WRAP
 
   echo "---- normal, wrapping at 80 ----" 1>&2
   export VALET_LOG_COLUMNS="80"
-  valet self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
+  "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithTimeStampSubstitution 1>&2
   unset VALET_LOG_COLUMNS
 
@@ -119,16 +112,15 @@ function echoTempFileWithTimeStampSubstitution() {
 }
 
 function testMainOptions() {
-  # testing profiling
+  # testing command profiling + startup
   createTempFile && export VALET_CMD_PROFILING_FILE="${LAST_RETURNED_VALUE}"
   createTempFile && export VALET_STARTUP_PROFILING_FILE="${LAST_RETURNED_VALUE}"
   export VALET_CMD_PROFILING_FILE
   export VALET_STARTUP_PROFILING_FILE
   export VALET_LOG_LEVEL="warn"
 
-  # testing command profiling + startup
   export VALET_STARTUP_PROFILING="true"
-  valet --log-level "fail" -x self test-core --logging-level
+  "${VALET_HOME}/valet" --log-level "fail" -x self test-core --logging-level
   if ! isFileEmpty "${VALET_CMD_PROFILING_FILE}"; then
     echo "OK, command profiling file is not empty."
   else
@@ -148,7 +140,7 @@ function testMainOptions() {
 
   # testing version option
   : > "${_TEST_TEMP_FILE}"
-  valet --version 1> "${_TEST_TEMP_FILE}"
+  "${VALET_HOME}/valet" --version 1> "${_TEST_TEMP_FILE}"
   if ! isFileEmpty "${_TEST_TEMP_FILE}"; then
     echo "OK, we got a version."
   else
@@ -156,13 +148,31 @@ function testMainOptions() {
   fi
   endSubTest "Testing version option" $?
 
+  # testing unknown option, corrected with fuzzy match
+  "${VALET_HOME}/valet" -prof
+  endSubTest "Testing unknown option, corrected with fuzzy match" $?
 }
 
 function testCleaning() {
   # testing temp files/directories creation, cleaning and custom cleanUp
-  (valet self test-core --create-temp-files) 2> "${_TEST_TEMP_FILE}"
+  ("${VALET_HOME}/valet" self test-core --create-temp-files) 2> "${_TEST_TEMP_FILE}"
   echoTempFileWithSubstitution 1>&2
   endSubTest "Testing temp files/directories creation, cleaning and custom cleanUp" $?
+}
+
+function testUserDirectory() {
+  # testing with a non exising user directory
+  export VALET_USER_DIRECTORY="${VALET_HOME}/non-existing"
+  "${VALET_HOME}/valet" self test-core --logging-level
+  endSubTest "Testing with a non existing user directory" $?
+}
+
+function main() {
+  testEventHandlers
+  testLogging
+  testMainOptions
+  testCleaning
+  testUserDirectory
 }
 
 main

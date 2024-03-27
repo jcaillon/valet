@@ -8,6 +8,6 @@
 
 ## PR Checklist
 
-- [ ] Closes #xxx
-- [ ] Tests added/passed (if any)
-- [ ] Documentation updated
+- [ ] I have implemented the necessary tests for the feature
+- [ ] I have run `VALET_USER_DIRECTORY=examples.d valet self test --auto-approve --with-core` and all tests passed
+- [ ] The documentation has been updated (if needed)

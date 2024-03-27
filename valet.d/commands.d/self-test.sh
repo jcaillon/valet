@@ -14,7 +14,80 @@ fi
 # --- END OF COMMAND COMMON PART
 
 #===============================================================
-# >>> self test for valet
+# >>> self test for valet commands (and optionally, core functions)
+#===============================================================
+function about_selfTest() {
+  echo "
+command: self test-commands
+fileToSource: ${BASH_SOURCE[0]}
+shortDescription: Test your valet custom commands.
+description: |-
+  Test your valet custom commands using approval tests approach.
+options:
+  - name: -d, --user-directory <path>
+    description: |-
+      The path to your valet directory.
+
+      Each sub directory named ⌜.tests.d⌝ will be considered as a test directory containing a test.sh file.
+  - name: -a, --auto-approve
+    description: |-
+      The received test result files will automatically be approved.
+  - name: -c, --with-core
+    description: |-
+      Also test the valet core functions.
+
+      This is only if you modified valet core functions themselves.
+  - name: -i, --include <pattern>
+    description: |-
+      A regex pattern to include only the tests that match the pattern.
+
+      Example: --include '(1|commands)'
+  - name: -e, --exclude <pattern>
+    description: |-
+      A regex pattern to exclude all the tests that match the pattern.
+
+      Example: --exclude '(1|commands)'
+"
+}
+
+function selfTest() {
+  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  checkParseResults "${help:-}" "${parsingErrors:-}"
+
+  setGlobalOptions
+
+  # get the directory containing the tests for the commands
+  getUserDirectory
+  userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
+  debug "User directory is ⌜${userDirectory}⌝."
+
+  # change the shell options to include hidden files
+  shopt -s dotglob
+
+  local testsDirectory
+  for testsDirectory in "${userDirectory}"/**; do
+  debug "Tests directory: ⌜${testsDirectory}⌝."
+    # if the directory is not a directory, skip
+    [ ! -d "${testsDirectory}" ] && continue
+    # if the directory is named .tests.d, then it is a test directory
+    if [[ "${testsDirectory}" == *"/.tests.d" ]]; then
+      inform "Running tests for commands with the directory ⌜${testsDirectory}⌝."
+      runTests "${testsDirectory}"
+    fi
+  done
+
+  # change the shell options to exclude hidden files
+  shopt -s nullglob
+
+  if [ -n "${withCore:-}" ]; then
+    inform "Running all tests for core functions."
+    runTests "${VALET_HOME}/tests.d"
+  fi
+}
+
+
+#===============================================================
+# >>> self core test for valet
 #===============================================================
 function about_selfTestCore() {
   echo "
@@ -27,6 +100,16 @@ options:
   - name: -a, --auto-approve
     description: |-
       The received test result files will automatically be approved.
+  - name: -i, --include <pattern>
+    description: |-
+      A regex pattern to include only the tests that match the pattern.
+
+      Example: --include '(1|commands)'
+  - name: -e, --exclude <pattern>
+    description: |-
+      A regex pattern to exclude all the tests that match the pattern.
+
+      Example: --exclude '(1|commands)'
   - name: --error
     description: |-
       Test the error handling.
@@ -58,9 +141,7 @@ function selfTestCore() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  if [ -n "${autoApprove:-}" ]; then
-    AUTO_APPROVE="true"
-  fi
+  setGlobalOptions
 
   if [ -n "${error:-}" ]; then
     warn "This is for testing valet core functions, the next statement will return 1 and create an error."
@@ -111,29 +192,9 @@ function selfTestCore() {
     inform "Running all tests for core functions."
     runTests "${VALET_HOME}/tests.d"
   fi
-
-  unset AUTO_APPROVE
 }
 
 function returnOne() { return 1; }
-
-
-#===============================================================
-# >>> self test for valet commands
-#===============================================================
-function about_selfTestCommands() {
-  echo "
-command: self test-commands
-fileToSource: ${BASH_SOURCE[0]}
-shortDescription: Test your valet custom commands.
-description: |-
-  Test your valet custom commands using approval tests approach.
-"
-}
-
-function selfTestCommands() {
-  echo "testing 1, 2, 3..."
-}
 
 #===============================================================
 # >>> Functions that can be used in the test files
@@ -228,23 +289,39 @@ function runTests() {
   createTempFile && _TEST_REPORT_FILE="${LAST_RETURNED_VALUE}"
   createTempFile && _TEST_TEMP_FILE="${LAST_RETURNED_VALUE}"
 
-  local -i failedTests
+  local -i failedTests nbTests
   failedTests=0
+  nbTests=0
+
+  # change the shell options to exclude hidden files
+  shopt -s nullglob
 
   # for each test file in the test directory
-  local testDirectory exitCode
+  local testDirectory exitCode testDirectoryName
   for testDirectory in "${testsDirectory}/"*; do
+    testDirectoryName="${testDirectory##*/}"
+
     # skip if not a directory
     [ ! -d "${testDirectory}" ] && continue
-    # skip hidden directories
-    [[ "${testDirectory}" == .* ]] && continue
     # skip if does not contain a test.sh file
     [ ! -f "${testDirectory}/test.sh" ] && continue
+
+    # skip if the test directory does not match the include pattern
+    if [[ -n "${INCLUDE_PATTERN:-}" && ! ("${testDirectoryName}" =~ ${INCLUDE_PATTERN}) ]]; then
+      debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it does not match the include pattern."
+      continue
+    fi
+    # skip if the test directory matches the exclude pattern
+    if [[ -n "${EXCLUDE_PATTERN:-}" && "${testDirectoryName}" =~ ${EXCLUDE_PATTERN} ]]; then
+      debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it matches the exclude pattern."
+      continue
+    fi
 
     inform "Running test ⌜${testDirectory##*/}⌝."
 
     exitCode=0
     runTest "${testDirectory}" || exitCode=$?
+    nbTests+=1
 
     if [ "${exitCode}" -eq 0 ]; then
       succeed "Test ${testDirectory##*/} passed."
@@ -264,8 +341,10 @@ function runTests() {
       failMessage+=$'\n'"If the differences are legitimate, then approve the changes by running this command again with the option ⌜-a⌝."
     fi
     fail "${failMessage}"
+  elif [[ nbTests -gt 0 ]]; then
+    succeed "A total of ⌜${nbTests}⌝ tests passed!"
   else
-    succeed "All tests passed!"
+    warn "No tests were found."
   fi
 
 }
@@ -337,4 +416,19 @@ function resetFdRedirection() {
   # reset the standard output and error output
   exec 1>&3 3>&-
   exec 2>&4 4>&-
+}
+
+function setGlobalOptions() {
+  unset AUTO_APPROVE INCLUDE_PATTERN EXCLUDE_PATTERN
+  if [ -n "${autoApprove:-}" ]; then
+    AUTO_APPROVE="true"
+  fi
+  if [ -n "${include:-}" ]; then
+    inform "Including only tests that match the pattern ⌜${include}⌝."
+    INCLUDE_PATTERN="${include}"
+  fi
+  if [ -n "${exclude:-}" ]; then
+    inform "Excluding all tests that match the pattern ⌜${exclude}⌝."
+    EXCLUDE_PATTERN="${exclude}"
+  fi
 }
