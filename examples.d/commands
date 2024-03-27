@@ -30,7 +30,7 @@ this
 CMD_FUNCTION_NAME_showcase_hello_world="helloWorld"
 CMD_FUNCTION_NAME_self_build="selfBuild"
 CMD_FUNCTION_NAME_self="selfMenu"
-CMD_FUNCTION_NAME_self_test_commands="selfTest"
+CMD_FUNCTION_NAME_self_test="selfTest"
 CMD_FUNCTION_NAME_self_test_core="selfTestCore"
 CMD_FUNCTION_NAME_self_update="selfUpdate"
 CMD_FUNCTION_NAME_showcase_sudo_command="showCaseSudo"
@@ -50,7 +50,7 @@ CMD_ALL_COMMANDS="
 help
 self
 self build
-self test-commands
+self test
 self test-core
 self update
 showcase
@@ -71,8 +71,8 @@ Command name           	Short description"
 CMD_COMMANDS_MENU_BODY="help                   	Show the help this program or of a specific command
 self build             	Re-build the menu of valet from your commands.
 self                   	Show the valet self-maintenance sub menu.
-self test-commands     	Test your valet custom commands.
 self test-core         	Test valet core features.
+self test              	Test your valet custom commands.
 self update            	Test valet core features.
 showcase command1      	A showcase command that uses arguments and options.
 showcase hello-world   	An hello world command
@@ -100,7 +100,7 @@ showcase sudo-command  	A command that requires sudo"
 CMD_COMMAND_helloWorld="showcase hello-world"
 CMD_COMMAND_selfBuild="self build"
 CMD_COMMAND_selfMenu="self"
-CMD_COMMAND_selfTest="self test-commands"
+CMD_COMMAND_selfTest="self test"
 CMD_COMMAND_selfTestCore="self test-core"
 CMD_COMMAND_selfUpdate="self update"
 CMD_COMMAND_showCaseSudo="showcase sudo-command"
@@ -431,7 +431,7 @@ See the commands section for more information."
 )
 CMD_COMMANDS_NAME_selfMenu=(
   "build"
-  "test-commands"
+  "test"
   "test-core"
   "update"
 )
@@ -455,7 +455,7 @@ CMD_COMMANDS_NAME_this=(
   "showcase hello-world"
   "self build"
   "self"
-  "self test-commands"
+  "self test"
   "self test-core"
   "self update"
   "showcase sudo-command"

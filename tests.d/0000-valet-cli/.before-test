@@ -5,7 +5,7 @@ _TEST_0000_COMMON_UTILS=1
 # we will run "${VALET_HOME}/valet" commands so we need to set the correct user directory
 export VALET_USER_DIRECTORY="${VALET_HOME}/examples.d"
 
-# setting up "${VALET_HOME}/valet" to minimize output difference between 2 runs
+# setting up valet to minimize output difference between 2 runs
 export VALET_NO_COLOR="true"
 export VALET_NO_TIMESTAMP="true"
 export VALET_NO_ICON="true"
@@ -14,7 +14,6 @@ export _COLUMNS=120
 
 if [[ -z "${ORIGINAL_VALET_HOME:-}" ]]; then
   export ORIGINAL_VALET_HOME="${VALET_HOME}"
-  echo "ORIGINAL_VALET_HOME=${ORIGINAL_VALET_HOME}" 1>&4
 fi
 
 # override the local state and config directories to return temp directories

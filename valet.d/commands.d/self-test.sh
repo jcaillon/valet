@@ -18,7 +18,7 @@ fi
 #===============================================================
 function about_selfTest() {
   echo "
-command: self test-commands
+command: self test
 fileToSource: ${BASH_SOURCE[0]}
 shortDescription: Test your valet custom commands.
 description: |-
@@ -67,6 +67,7 @@ function selfTest() {
 
   # change the shell options to include hidden files
   shopt -s dotglob
+  shopt -s globstar
 
   local testsDirectory
   for testsDirectory in "${userDirectory}"/**; do
@@ -81,7 +82,8 @@ function selfTest() {
   done
 
   # change the shell options to exclude hidden files
-  shopt -s nullglob
+  shopt -u dotglob
+  shopt -u globstar
 
   if [ -n "${withCore:-}" ]; then
     inform "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
@@ -307,13 +309,9 @@ function runTestSuites() {
   createTempFile && _TEST_REPORT_FILE="${LAST_RETURNED_VALUE}"
   createTempFile && _TEST_TEMP_FILE="${LAST_RETURNED_VALUE}"
 
-  local -i failedTestSuites nbTestSuites nbTests
+  local -i failedTestSuites nbTestSuites
   failedTestSuites=0
   nbTestSuites=0
-  nbTests=0
-
-  # change the shell options to exclude hidden files
-  shopt -s nullglob
 
   # for each test file in the test directory
   local testDirectory exitCode testDirectoryName testScript
@@ -386,6 +384,9 @@ function runTest() {
   # redirect the standard output and error output to files
   setFdRedirection
 
+  # setting up valet to minimize output difference between 2 runs
+  setSimplerLogFunction
+
   # write the test script name
   local scriptName="${testScript##*/}"
   scriptName="${scriptName%.sh}"
@@ -399,6 +400,8 @@ function runTest() {
   source "${testScript}"
   set -Eeu -o pipefail
   popd >/dev/null
+
+  resetLogLineFunction
 
   # reset the standard output and error output
   resetFdRedirection
@@ -448,6 +451,26 @@ function resetFdRedirection() {
   # reset the standard output and error output
   exec 1>&3 3>&-
   exec 2>&4 4>&-
+}
+
+function setSimplerLogFunction() {
+  if [ -z "${ORIGINAL_LOG_LINE_FUNCTION:-}" ]; then
+    ORIGINAL_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
+    ORIGINAL_VALET_NO_COLOR="${VALET_NO_COLOR:-}"
+  fi
+  VALET_NO_COLOR="true"
+  setLogColors
+  VALET_NO_TIMESTAMP="true"
+  VALET_NO_ICON="true"
+  _COLUMNS=120
+  createLogLineFunction
+  eval "${LOG_LINE_FUNCTION}"
+}
+
+function resetLogLineFunction() {
+  VALET_NO_COLOR="${ORIGINAL_VALET_NO_COLOR}"
+  setLogColors
+  eval "${ORIGINAL_LOG_LINE_FUNCTION}"
 }
 
 function setGlobalOptions() {

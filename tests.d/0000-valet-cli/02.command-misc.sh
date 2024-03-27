@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [[ -z "${_TEST_0000_COMMON_UTILS:-}" ]]; then
-  source ".common-utils"
+  source ".before-test"
 fi
 
 function testParseAndCheckArgument() {
@@ -23,4 +23,4 @@ function main() {
 
 main
 
-source ".cleanup"
+source ".after-test"

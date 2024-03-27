@@ -103,27 +103,31 @@ case "$TERM" in
     *) VALET_NO_COLOR="${VALET_NO_COLOR:-true}";;
 esac
 
-# the color code used to output colored text
-# shellcheck disable=SC2034
-if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
-  COLOR_DEFAULT=${VALET_COLOR_DEFAULT:-$'\033'"[0m"}
-  COLOR_DEBUG=${VALET_COLOR_DEBUG:-$'\033'"[1;30m"}
-  COLOR_INFO=${VALET_COLOR_INFO:-$'\033'"[0;36m"}
-  COLOR_WARNING=${VALET_COLOR_WARNING:-$'\033'"[0;33m"}
-  COLOR_SUCCESS=${VALET_COLOR_SUCCESS:-$'\033'"[0;32m"}
-  COLOR_ERROR=${VALET_COLOR_ERROR:-$'\033'"[0;31m"}
-  COLOR_TIMESTAMP=${VALET_COLOR_TIMESTAMP:-$'\033'"[1;30m"}
-  COLOR_HIGHLIGHT=${VALET_COLOR_HIGHLIGHT:-$'\033'"[1;35m"}
-else
-  COLOR_DEFAULT=""
-  COLOR_DEBUG=""
-  COLOR_INFO=""
-  COLOR_WARNING=""
-  COLOR_SUCCESS=""
-  COLOR_ERROR=""
-  COLOR_TIMESTAMP=""
-  COLOR_HIGHLIGHT=""
-fi
+# This function sets the colors used in the log messages.
+function setLogColors() {
+  # the color code used to output colored text
+  # shellcheck disable=SC2034
+  if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
+    COLOR_DEFAULT=${VALET_COLOR_DEFAULT:-$'\033'"[0m"}
+    COLOR_DEBUG=${VALET_COLOR_DEBUG:-$'\033'"[1;30m"}
+    COLOR_INFO=${VALET_COLOR_INFO:-$'\033'"[0;36m"}
+    COLOR_WARNING=${VALET_COLOR_WARNING:-$'\033'"[0;33m"}
+    COLOR_SUCCESS=${VALET_COLOR_SUCCESS:-$'\033'"[0;32m"}
+    COLOR_ERROR=${VALET_COLOR_ERROR:-$'\033'"[0;31m"}
+    COLOR_TIMESTAMP=${VALET_COLOR_TIMESTAMP:-$'\033'"[1;30m"}
+    COLOR_HIGHLIGHT=${VALET_COLOR_HIGHLIGHT:-$'\033'"[1;35m"}
+  else
+    COLOR_DEFAULT=""
+    COLOR_DEBUG=""
+    COLOR_INFO=""
+    COLOR_WARNING=""
+    COLOR_SUCCESS=""
+    COLOR_ERROR=""
+    COLOR_TIMESTAMP=""
+    COLOR_HIGHLIGHT=""
+  fi
+}
+setLogColors
 
 if [ "${VALET_NO_WRAP:-}" != "true" ]; then
   # this is the only subshell we need; can't be avoided
@@ -246,8 +250,6 @@ function createLogLineFunction() {
 }
 createLogLineFunction
 eval "${LOG_LINE_FUNCTION}"
-unset LOG_LINE_FUNCTION
-unset createLogLineFunction
 
 
 # Displays an error message and then exit the program with error.
