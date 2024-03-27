@@ -48,7 +48,7 @@ description: |-
   You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
 sudo: false
 arguments:
-  - name: commands...
+  - name: commands?...
     description: |-
       The command or sub commands to execute.
       See the commands section for more information.

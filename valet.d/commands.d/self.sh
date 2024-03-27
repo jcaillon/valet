@@ -26,7 +26,7 @@ description: |-
 
   This is a sub command that regroups commands useful to maintain valet.
 arguments:
-  - name: commands...
+  - name: commands?...
     description: |-
       The command to execute.
 

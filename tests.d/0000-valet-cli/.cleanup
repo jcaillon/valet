@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+export VALET_HOME="${ORIGINAL_VALET_HOME}"

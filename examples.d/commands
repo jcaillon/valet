@@ -12,12 +12,13 @@ _CMD_INCLUDED=1
 
 
 # list all the functions callable with a command
-CMD_ALL_FUNCTIONS="build
-helloWorld
+CMD_ALL_FUNCTIONS="helloWorld
+selfBuild
 selfMenu
 selfTest
 selfTestCore
 selfUpdate
+showCaseSudo
 showCommandHelp
 showcaseCommand1
 showcaseMenu
@@ -26,12 +27,13 @@ this
 
 
 # Get the function name from a command
-CMD_FUNCTION_NAME_self_build="build"
 CMD_FUNCTION_NAME_showcase_hello_world="helloWorld"
+CMD_FUNCTION_NAME_self_build="selfBuild"
 CMD_FUNCTION_NAME_self="selfMenu"
 CMD_FUNCTION_NAME_self_test_commands="selfTest"
 CMD_FUNCTION_NAME_self_test_core="selfTestCore"
 CMD_FUNCTION_NAME_self_update="selfUpdate"
+CMD_FUNCTION_NAME_showcase_sudo_command="showCaseSudo"
 CMD_FUNCTION_NAME_help="showCommandHelp"
 CMD_FUNCTION_NAME_showcase_command1="showcaseCommand1"
 CMD_FUNCTION_NAME_showcase="showcaseMenu"
@@ -54,26 +56,28 @@ self update
 showcase
 showcase command1
 showcase hello-world
+showcase sudo-command
 "
 
 
 # get the maximum width (nb characters) among all commands
-CMD_MAX_COMMAND_WIDTH="20"
+CMD_MAX_COMMAND_WIDTH="21"
 
 
 # Get the input for fzf to display the header commands menu
 CMD_COMMANDS_MENU_HEADER="Please select the command to run (filter by typing anything)
 
-Command name          	Short description"
-CMD_COMMANDS_MENU_BODY="help                  	Show the help this program or of a specific command
-self build            	Re-build the menu of valet from your commands.
-self                  	Show the valet self-maintenance sub menu.
-self test-commands    	Test your valet custom commands.
-self test-core        	Test valet core features.
-self update           	Test valet core features.
-showcase command1     	A showcase command that uses arguments and options.
-showcase hello-world  	An hello world command
-showcase              	Show the showcase sub menu."
+Command name           	Short description"
+CMD_COMMANDS_MENU_BODY="help                   	Show the help this program or of a specific command
+self build             	Re-build the menu of valet from your commands.
+self                   	Show the valet self-maintenance sub menu.
+self test-commands     	Test your valet custom commands.
+self test-core         	Test valet core features.
+self update            	Test valet core features.
+showcase command1      	A showcase command that uses arguments and options.
+showcase hello-world   	An hello world command
+showcase               	Show the showcase sub menu.
+showcase sudo-command  	A command that requires sudo"
 
 
 # ====================
@@ -93,44 +97,51 @@ showcase              	Show the showcase sub menu."
 # CMD_ARGUMENTS_DESCRIPTION_xxx = array with each argument description
 # CMD_COMMANDS_NAME_xxx = array with each sub command name
 # CMD_COMMANDS_SHORTDESCRIPTION_xxx = array with each sub commmand short description
-CMD_COMMAND_build="self build"
 CMD_COMMAND_helloWorld="showcase hello-world"
+CMD_COMMAND_selfBuild="self build"
 CMD_COMMAND_selfMenu="self"
 CMD_COMMAND_selfTest="self test-commands"
 CMD_COMMAND_selfTestCore="self test-core"
 CMD_COMMAND_selfUpdate="self update"
+CMD_COMMAND_showCaseSudo="showcase sudo-command"
 CMD_COMMAND_showCommandHelp="help"
 CMD_COMMAND_showcaseCommand1="showcase command1"
 CMD_COMMAND_showcaseMenu="showcase"
-CMD_FILETOSOURCE_build="valet.d/commands.d/self-build"
-CMD_FILETOSOURCE_helloWorld="examples.d/showcase.sh"
+CMD_FILETOSOURCE_helloWorld="examples.d/showcase/showcase.sh"
+CMD_FILETOSOURCE_selfBuild="valet.d/commands.d/self-build"
 CMD_FILETOSOURCE_selfMenu="valet.d/commands.d/self.sh"
 CMD_FILETOSOURCE_selfTest="valet.d/commands.d/self-test.sh"
 CMD_FILETOSOURCE_selfTestCore="valet.d/commands.d/self-test.sh"
 CMD_FILETOSOURCE_selfUpdate="valet.d/commands.d/self-install.sh"
-CMD_FILETOSOURCE_showcaseCommand1="examples.d/showcase.sh"
-CMD_FILETOSOURCE_showcaseMenu="examples.d/showcase.sh"
+CMD_FILETOSOURCE_showCaseSudo="examples.d/showcase/showcase.sh"
+CMD_FILETOSOURCE_showcaseCommand1="examples.d/showcase/showcase.sh"
+CMD_FILETOSOURCE_showcaseMenu="examples.d/showcase/showcase.sh"
+CMD_SUDO_showCaseSudo="true"
 CMD_SUDO_showcaseCommand1="true"
-CMD_SHORTDESCRIPTION_build="Re-build the menu of valet from your commands."
 CMD_SHORTDESCRIPTION_helloWorld="An hello world command"
+CMD_SHORTDESCRIPTION_selfBuild="Re-build the menu of valet from your commands."
 CMD_SHORTDESCRIPTION_selfMenu="Show the valet self-maintenance sub menu."
 CMD_SHORTDESCRIPTION_selfTest="Test your valet custom commands."
 CMD_SHORTDESCRIPTION_selfTestCore="Test valet core features."
 CMD_SHORTDESCRIPTION_selfUpdate="Test valet core features."
+CMD_SHORTDESCRIPTION_showCaseSudo="A command that requires sudo"
 CMD_SHORTDESCRIPTION_showCommandHelp="Show the help this program or of a specific command"
 CMD_SHORTDESCRIPTION_showcaseCommand1="A showcase command that uses arguments and options."
 CMD_SHORTDESCRIPTION_showcaseMenu="Show the showcase sub menu."
 CMD_SHORTDESCRIPTION_this="Your personal assistant in the terminal!"
-CMD_DESCRIPTION_build="This command can be used to re-build the menu in case you have modified, added or removed an about_xxx function in your command scripts.
+CMD_DESCRIPTION_helloWorld="An hello world command."
+CMD_DESCRIPTION_selfBuild="This command can be used to re-build the menu in case you have modified, added or removed an about_xxx function in your command scripts.
 
 Please read the ⌜README.md⌝ to learn how to create and modified your commands."
-CMD_DESCRIPTION_helloWorld="An hello world command."
 CMD_DESCRIPTION_selfMenu="Show the valet self-maintenance sub menu.
 
 This is a sub command that regroups commands useful to maintain valet."
 CMD_DESCRIPTION_selfTest="Test your valet custom commands using approval tests approach."
 CMD_DESCRIPTION_selfTestCore="Test valet core features using approval tests approach."
 CMD_DESCRIPTION_selfUpdate="Test valet core features using approval tests approach."
+CMD_DESCRIPTION_showCaseSudo="Before starting this command, valet will check if sudo is available.
+
+If so, it will require the user to enter the sudo password and use sudo inside the command"
 CMD_DESCRIPTION_showCommandHelp="Show the help this program or of the help of a specific command.
 
 You can show the help with or without colors and set the maximum columns for the help text."
@@ -203,21 +214,21 @@ CMD_EXAMPLES_DESCRIPTION_this=(
   "Displays this help text."
   "Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝."
 )
-CMD_OPTIONS_NAME_build=(
-  "-d, --user-directory <path>"
-  "-h, --help"
-)
-CMD_OPTIONS_DESCRIPTION_build=(
-  "Specify the directory in which to look for your command scripts.
-
-This defaults to ⌜~/.valet.d⌝ or the path defined in the environment variable VALET_USER_DIRECTORY=\"my/path\".
-This option can be set by exporting the variable VALET_USER_DIRECTORY=\"<path>\"."
-  "Display the help for this command"
-)
 CMD_OPTIONS_NAME_helloWorld=(
   "-h, --help"
 )
 CMD_OPTIONS_DESCRIPTION_helloWorld=(
+  "Display the help for this command"
+)
+CMD_OPTIONS_NAME_selfBuild=(
+  "-d, --user-directory <path>"
+  "-h, --help"
+)
+CMD_OPTIONS_DESCRIPTION_selfBuild=(
+  "Specify the directory in which to look for your command scripts.
+
+This defaults to ⌜~/.valet.d⌝ or the path defined in the environment variable VALET_USER_DIRECTORY=\"my/path\".
+This option can be set by exporting the variable VALET_USER_DIRECTORY=\"<path>\"."
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_selfMenu=(
@@ -245,11 +256,15 @@ This option can be set by exporting the variable VALET_AUTO_APPROVE=\"true\"."
 
 This is only if you modified valet core functions themselves.
 This option can be set by exporting the variable VALET_WITH_CORE=\"true\"."
-  "A regex pattern to include only the tests that match the pattern.
+  "A regex pattern to include only the test suites that match the pattern.
+
+The name of the test suite is given by the name of the directory containing the .sh test files.
 
 Example: --include '(1|commands)'
 This option can be set by exporting the variable VALET_INCLUDE=\"<pattern>\"."
-  "A regex pattern to exclude all the tests that match the pattern.
+  "A regex pattern to exclude all the test suites that match the pattern.
+
+The name of the test suite is given by the name of the directory containing the .sh test files.
 
 Example: --exclude '(1|commands)'
 This option can be set by exporting the variable VALET_EXCLUDE=\"<pattern>\"."
@@ -273,11 +288,15 @@ CMD_OPTIONS_NAME_selfTestCore=(
 CMD_OPTIONS_DESCRIPTION_selfTestCore=(
   "The received test result files will automatically be approved.
 This option can be set by exporting the variable VALET_AUTO_APPROVE=\"true\"."
-  "A regex pattern to include only the tests that match the pattern.
+  "A regex pattern to include only the test suites that match the pattern.
+
+The name of the test suite is given by the name of the directory containing the .sh test files.
 
 Example: --include '(1|commands)'
 This option can be set by exporting the variable VALET_INCLUDE=\"<pattern>\"."
-  "A regex pattern to exclude all the tests that match the pattern.
+  "A regex pattern to exclude all the test suites that match the pattern.
+
+The name of the test suite is given by the name of the directory containing the .sh test files.
 
 Example: --exclude '(1|commands)'
 This option can be set by exporting the variable VALET_EXCLUDE=\"<pattern>\"."
@@ -305,6 +324,12 @@ CMD_OPTIONS_NAME_selfUpdate=(
   "-h, --help"
 )
 CMD_OPTIONS_DESCRIPTION_selfUpdate=(
+  "Display the help for this command"
+)
+CMD_OPTIONS_NAME_showCaseSudo=(
+  "-h, --help"
+)
+CMD_OPTIONS_DESCRIPTION_showCaseSudo=(
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_showCommandHelp=(
@@ -359,7 +384,7 @@ This option can be set by exporting the variable VALET_VERBOSE=\"true\"."
   "Display the help for this command"
 )
 CMD_ARGUMENTS_NAME_selfMenu=(
-  "commands..."
+  "commands?..."
 )
 CMD_ARGUMENTS_DESCRIPTION_selfMenu=(
   "The command to execute.
@@ -375,7 +400,7 @@ CMD_ARGUMENTS_DESCRIPTION_selfUpdate=(
 See ⌜tests.d⌝ for the internal tests."
 )
 CMD_ARGUMENTS_NAME_showCommandHelp=(
-  "commands..."
+  "commands?..."
 )
 CMD_ARGUMENTS_DESCRIPTION_showCommandHelp=(
   "The name of the command to show the help for.
@@ -390,7 +415,7 @@ CMD_ARGUMENTS_DESCRIPTION_showcaseCommand1=(
   "Will be an an array of strings."
 )
 CMD_ARGUMENTS_NAME_showcaseMenu=(
-  "commands..."
+  "commands?..."
 )
 CMD_ARGUMENTS_DESCRIPTION_showcaseMenu=(
   "The command to execute.
@@ -398,7 +423,7 @@ CMD_ARGUMENTS_DESCRIPTION_showcaseMenu=(
 See the commands section for more information."
 )
 CMD_ARGUMENTS_NAME_this=(
-  "commands..."
+  "commands?..."
 )
 CMD_ARGUMENTS_DESCRIPTION_this=(
   "The command or sub commands to execute.
@@ -418,30 +443,34 @@ CMD_COMMANDS_DESCRIPTION_selfMenu=(
 )
 CMD_COMMANDS_NAME_showcaseMenu=(
   "hello-world"
+  "sudo-command"
   "command1"
 )
 CMD_COMMANDS_DESCRIPTION_showcaseMenu=(
   "An hello world command"
+  "A command that requires sudo"
   "A showcase command that uses arguments and options."
 )
 CMD_COMMANDS_NAME_this=(
-  "self build"
   "showcase hello-world"
+  "self build"
   "self"
   "self test-commands"
   "self test-core"
   "self update"
+  "showcase sudo-command"
   "help"
   "showcase command1"
   "showcase"
 )
 CMD_COMMANDS_DESCRIPTION_this=(
-  "Re-build the menu of valet from your commands."
   "An hello world command"
+  "Re-build the menu of valet from your commands."
   "Show the valet self-maintenance sub menu."
   "Test your valet custom commands."
   "Test valet core features."
   "Test valet core features."
+  "A command that requires sudo"
   "Show the help this program or of a specific command"
   "A showcase command that uses arguments and options."
   "Show the showcase sub menu."
@@ -456,22 +485,22 @@ CMD_COMMANDS_DESCRIPTION_this=(
 # CMD_OPTS_HAS_VALUE_xxx = array which indicates for each option if it has a value or not
 # CMD_OPTS_NAME_xxx = array with each option names in camel case
 # CMD_OPTS_NAME_SC_xxx = array with each option names in snake case
-CMD_OPTS_build=(
+CMD_OPTS_helloWorld=("-h --help")
+CMD_OPTS_NAME_helloWorld=("help")
+CMD_OPTS_selfBuild=(
   "-d --user-directory"
   "-h --help"
 )
-CMD_OPTS_HAS_VALUE_build=(
+CMD_OPTS_HAS_VALUE_selfBuild=(
   "true"
 )
-CMD_OPTS_NAME_build=(
+CMD_OPTS_NAME_selfBuild=(
   "userDirectory"
   "help"
 )
-CMD_OPTS_NAME_SC_build=(
+CMD_OPTS_NAME_SC_selfBuild=(
   "USER_DIRECTORY"
 )
-CMD_OPTS_helloWorld=("-h --help")
-CMD_OPTS_NAME_helloWorld=("help")
 CMD_OPTS_selfMenu=("-h --help")
 CMD_OPTS_NAME_selfMenu=("help")
 CMD_OPTS_selfTest=(
@@ -564,6 +593,8 @@ CMD_OPTS_NAME_SC_selfTestCore=(
 )
 CMD_OPTS_selfUpdate=("-h --help")
 CMD_OPTS_NAME_selfUpdate=("help")
+CMD_OPTS_showCaseSudo=("-h --help")
+CMD_OPTS_NAME_showCaseSudo=("help")
 CMD_OPTS_showCommandHelp=(
   "-nc --no-colors"
   "-c --columns"
@@ -608,31 +639,38 @@ CMD_OPTS_NAME_this=("help")
 
 # Get the arguments of a given function xxx.
 # CMD_ARGS_NAME_xxx = array with each argument names in camel case
-# CMD_ARGS_LAST_IS_ARRAY_xxx = array which indicates if the last argument of the function is an array
+# CMD_ARGS_LAST_IS_ARRAY_xxx = true/false to indicate if the last argument of the function is an array (ending with ...)
+# CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (containing ?)
 CMD_ARGS_NAME_selfMenu=(
   "commands"
 )
 CMD_ARGS_LAST_IS_ARRAY_selfMenu="true"
+CMD_ARGS_NB_OPTIONAL_selfMenu=1
 CMD_ARGS_NAME_selfUpdate=(
   "testsDirectory"
 )
 CMD_ARGS_LAST_IS_ARRAY_selfUpdate="false"
+CMD_ARGS_NB_OPTIONAL_selfUpdate=0
 CMD_ARGS_NAME_showCommandHelp=(
   "commands"
 )
 CMD_ARGS_LAST_IS_ARRAY_showCommandHelp="true"
+CMD_ARGS_NB_OPTIONAL_showCommandHelp=1
 CMD_ARGS_NAME_showcaseCommand1=(
   "firstArg"
   "more"
 )
 CMD_ARGS_LAST_IS_ARRAY_showcaseCommand1="true"
+CMD_ARGS_NB_OPTIONAL_showcaseCommand1=0
 CMD_ARGS_NAME_showcaseMenu=(
   "commands"
 )
 CMD_ARGS_LAST_IS_ARRAY_showcaseMenu="true"
+CMD_ARGS_NB_OPTIONAL_showcaseMenu=1
 CMD_ARGS_NAME_this=(
   "commands"
 )
 CMD_ARGS_LAST_IS_ARRAY_this="true"
+CMD_ARGS_NB_OPTIONAL_this=1
 
 

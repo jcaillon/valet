@@ -55,7 +55,7 @@ function createTempFile() {
 # Creates a temporary directory and return its path in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
-#  createTempDirectory && local file="${LAST_RETURNED_VALUE}"
+#  createTempDirectory && local directory="${LAST_RETURNED_VALUE}"
 function createTempDirectory() { return 0; }
 # shellcheck disable=SC2016
 CREATE_TEMP_DIRECTORY_FUNCTION='
@@ -656,7 +656,7 @@ function isFileEmpty() {
 #  getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
 function getConfigurationDirectory() {
   local directory
-  directory="${XDG_CONFIG_HOME:-$HOME/.config}/valet"
+  directory="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}"
   if [ ! -d "${directory}" ]; then
     mkdir -p "${directory}"
   fi
@@ -670,7 +670,7 @@ function getConfigurationDirectory() {
 #  getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
 function getLocalStateDirectory() {
   local directory
-  directory="${HOME}/.local/state/valet"
+  directory="${VALET_LOCAL_STATE_DIRECTORY:-${HOME}/.local/state/valet}"
   if [ ! -d "${directory}" ]; then
     mkdir -p "${directory}"
   fi
@@ -717,14 +717,8 @@ function showSubMenu() {
   parseFunctionArguments "this" "$@" && parsedArguments="${LAST_RETURNED_VALUE}"
   debug "Parsed arguments:"$'\n'"${parsedArguments}"
   eval "${parsedArguments}"
-  if [ -n "${help:-}" ]; then
-    showFunctionHelp "${functionName}"
-    return 0
-  fi
-  if [ -n "${parsingErrors:-}" ]; then
-    local -n commandName="CMD_COMMAND_${functionName}"
-    fail "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
-  fi
+
+  checkParseResults "${help:-}" "${parsingErrors:-}" "${functionName}"
 
   # filter the commands to only keep the sub commands of the function
   local filteredCommandsMenuBody line
@@ -771,9 +765,10 @@ function parseArguments() {
 #
 # Usage:
 #  checkParseResults "${help:-}" "${parsingErrors:-}"
+#  checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
 function checkParseResults() {
   local functionName help parsingErrors
-  functionName="${FUNCNAME[1]}"
+  functionName="${3:-${FUNCNAME[1]}}"
 
   help="${1:-}"
   parsingErrors="${2:-}"

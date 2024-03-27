@@ -39,12 +39,16 @@ options:
       This is only if you modified valet core functions themselves.
   - name: -i, --include <pattern>
     description: |-
-      A regex pattern to include only the tests that match the pattern.
+      A regex pattern to include only the test suites that match the pattern.
+
+      The name of the test suite is given by the name of the directory containing the .sh test files.
 
       Example: --include '(1|commands)'
   - name: -e, --exclude <pattern>
     description: |-
-      A regex pattern to exclude all the tests that match the pattern.
+      A regex pattern to exclude all the test suites that match the pattern.
+
+      The name of the test suite is given by the name of the directory containing the .sh test files.
 
       Example: --exclude '(1|commands)'
 "
@@ -66,13 +70,13 @@ function selfTest() {
 
   local testsDirectory
   for testsDirectory in "${userDirectory}"/**; do
-  debug "Tests directory: ⌜${testsDirectory}⌝."
+    debug "Tests directory: ⌜${testsDirectory}⌝."
     # if the directory is not a directory, skip
     [ ! -d "${testsDirectory}" ] && continue
     # if the directory is named .tests.d, then it is a test directory
     if [[ "${testsDirectory}" == *"/.tests.d" ]]; then
-      inform "Running tests for commands with the directory ⌜${testsDirectory}⌝."
-      runTestSuiteSuites "${testsDirectory}"
+      inform "Running all test suites in directory ⌜${testsDirectory}⌝."
+      runTestSuites "${testsDirectory}"
     fi
   done
 
@@ -80,11 +84,10 @@ function selfTest() {
   shopt -s nullglob
 
   if [ -n "${withCore:-}" ]; then
-    inform "Running all tests for core functions."
-    runTestSuiteSuites "${VALET_HOME}/tests.d"
+    inform "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
+    runTestSuites "${VALET_HOME}/tests.d"
   fi
 }
-
 
 #===============================================================
 # >>> self core test for valet
@@ -102,12 +105,16 @@ options:
       The received test result files will automatically be approved.
   - name: -i, --include <pattern>
     description: |-
-      A regex pattern to include only the tests that match the pattern.
+      A regex pattern to include only the test suites that match the pattern.
+
+      The name of the test suite is given by the name of the directory containing the .sh test files.
 
       Example: --include '(1|commands)'
   - name: -e, --exclude <pattern>
     description: |-
-      A regex pattern to exclude all the tests that match the pattern.
+      A regex pattern to exclude all the test suites that match the pattern.
+
+      The name of the test suite is given by the name of the directory containing the .sh test files.
 
       Example: --exclude '(1|commands)'
   - name: --error
@@ -194,8 +201,8 @@ function selfTestCore() {
     showHelp
   else
     # default to running all tests
-    inform "Running all tests for core functions."
-    runTestSuiteSuites "${VALET_HOME}/tests.d"
+    inform "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
+    runTestSuites "${VALET_HOME}/tests.d"
   fi
 }
 
@@ -221,28 +228,28 @@ function endTest() {
   debug "Ended test ⌜${testDescription}⌝ with exit code ⌜${exitCode}⌝."
 
   # write the test title
-  printf "%s\n\n" "## ${testDescription:-test}" >> "${_TEST_REPORT_FILE}"
+  printf "%s\n\n" "### ${testDescription:-test}" >>"${_TEST_REPORT_FILE}"
 
   # write the exit code
-  printf "%s\n\n" "Exit code: ${exitCode}" >> "${_TEST_REPORT_FILE}"
+  printf "%s\n\n" "Exit code: ${exitCode}" >>"${_TEST_REPORT_FILE}"
 
   # write the standard output if any
   local stdOut
-  IFS= read -rd '' stdOut < "${_TEST_STANDARD_OUTPUT_FILE}" || true
+  IFS= read -rd '' stdOut <"${_TEST_STANDARD_OUTPUT_FILE}" || true
   if [ -n "${stdOut:-}" ]; then
-    printf "%s\n\n%s\n%s\n%s\n\n" "**Standard** output:" "\`\`\`plaintext" "${stdOut%$'\n'}" "\`\`\`" >> "${_TEST_REPORT_FILE}"
+    printf "%s\n\n%s\n%s\n%s\n\n" "**Standard** output:" "\`\`\`plaintext" "${stdOut%$'\n'}" "\`\`\`" >>"${_TEST_REPORT_FILE}"
   fi
 
   # write the error output if any
   local errorOut
-  IFS= read -rd '' errorOut < "${_TEST_STANDARD_ERROR_FILE}" || true
+  IFS= read -rd '' errorOut <"${_TEST_STANDARD_ERROR_FILE}" || true
   if [ -n "${errorOut:-}" ]; then
-    printf "%s\n\n%s\n%s\n%s\n\n" "**Error** output:" "\`\`\`log" "${errorOut%$'\n'}" "\`\`\`" >> "${_TEST_REPORT_FILE}"
+    printf "%s\n\n%s\n%s\n%s\n\n" "**Error** output:" "\`\`\`log" "${errorOut%$'\n'}" "\`\`\`" >>"${_TEST_REPORT_FILE}"
   fi
 
   # reset the standard output and error output files
-  : > "${_TEST_STANDARD_OUTPUT_FILE}"
-  : > "${_TEST_STANDARD_ERROR_FILE}"
+  : >"${_TEST_STANDARD_OUTPUT_FILE}"
+  : >"${_TEST_STANDARD_ERROR_FILE}"
   setFdRedirection
 
   set +Eeu +o pipefail
@@ -278,9 +285,8 @@ function echoTempFileWithSubstitution() {
       line="${line/%after */after Xs.}"
     fi
     echo "${line}"
-  done < "${file}"
+  done <"${file}"
 }
-
 
 #===============================================================
 # >>> Internal tests functions
@@ -292,8 +298,8 @@ function echoTempFileWithSubstitution() {
 # $1: the directory containing the test suites
 #
 # Usage:
-#   runTestSuiteSuites "${VALET_HOME}/tests.d"
-function runTestSuiteSuites() {
+#   runTestSuites "${VALET_HOME}/tests.d"
+function runTestSuites() {
   local testsDirectory="${1}"
 
   createTempFile && _TEST_STANDARD_OUTPUT_FILE="${LAST_RETURNED_VALUE}"
@@ -301,22 +307,21 @@ function runTestSuiteSuites() {
   createTempFile && _TEST_REPORT_FILE="${LAST_RETURNED_VALUE}"
   createTempFile && _TEST_TEMP_FILE="${LAST_RETURNED_VALUE}"
 
-  local -i failedTests nbTests
-  failedTests=0
+  local -i failedTestSuites nbTestSuites nbTests
+  failedTestSuites=0
+  nbTestSuites=0
   nbTests=0
 
   # change the shell options to exclude hidden files
   shopt -s nullglob
 
   # for each test file in the test directory
-  local testDirectory exitCode testDirectoryName
+  local testDirectory exitCode testDirectoryName testScript
   for testDirectory in "${testsDirectory}/"*; do
     testDirectoryName="${testDirectory##*/}"
 
     # skip if not a directory
     [ ! -d "${testDirectory}" ] && continue
-    # skip if does not contain a test.sh file
-    [ ! -f "${testDirectory}/test.sh" ] && continue
 
     # skip if the test directory does not match the include pattern
     if [[ -n "${INCLUDE_PATTERN:-}" && ! ("${testDirectoryName}" =~ ${INCLUDE_PATTERN}) ]]; then
@@ -329,23 +334,36 @@ function runTestSuiteSuites() {
       continue
     fi
 
-    inform "Running test ⌜${testDirectory##*/}⌝."
+    inform "Running test suite ⌜${testDirectory##*/}⌝."
+
+    # write the test suite title
+    printf "%s\n\n" "# Test suite ${testDirectory##*/}" >"${_TEST_REPORT_FILE}"
+
+    # for each .sh script in the test directory, run the test
+    for testScript in "${testDirectory}"/*.sh; do
+      # skip if not a file
+      [ ! -e "${testScript}" ] && continue
+
+      inform "Running test       ├── ⌜${testScript##*/}⌝."
+
+      runTest "${testDirectory}" "${testScript}"
+    done
 
     exitCode=0
-    runTestSuite "${testDirectory}" || exitCode=$?
-    nbTests+=1
+    compareWithApproved "${testDirectory}" "${_TEST_REPORT_FILE}" || exitCode=$?
+    nbTestSuites+=1
 
     if [ "${exitCode}" -eq 0 ]; then
-      succeed "Test ${testDirectory##*/} passed."
+      succeed "Test suite ${testDirectory##*/} passed."
     else
-      warn "Test ${testDirectory##*/} failed."
-      failedTests+=1
+      warn "Test suite ${testDirectory##*/} failed."
+      failedTestSuites+=1
     fi
   done
 
-  if [[ failedTests -gt 0 ]]; then
+  if [[ failedTestSuites -gt 0 ]]; then
     local failMessage
-    failMessage="A total of ⌜${failedTests}⌝ test(s) failed."
+    failMessage="A total of ⌜${failedTestSuites}⌝/⌜${nbTestSuites}⌝ test(s) failed."
     if [ "${AUTO_APPROVE:-false}" = "true" ]; then
       failMessage+=$'\n'"The received test result files were automatically approved."
     else
@@ -353,35 +371,37 @@ function runTestSuiteSuites() {
       failMessage+=$'\n'"If the differences are legitimate, then approve the changes by running this command again with the option ⌜-a⌝."
     fi
     fail "${failMessage}"
-  elif [[ nbTests -gt 0 ]]; then
-    succeed "A total of ⌜${nbTests}⌝ tests passed!"
+  elif [[ nbTestSuites -gt 0 ]]; then
+    succeed "A total of ⌜${nbTestSuites}⌝ tests passed!"
   else
     warn "No tests were found."
   fi
 
 }
 
-function runTestSuite() {
-  local testDirectory="$1"
+function runTest() {
+  local testDirectory="${1}"
+  local testScript="${2}"
 
   # redirect the standard output and error output to files
   setFdRedirection
 
-  # write the test title
-  printf "%s\n\n" "# Test: ${testDirectory##*/}" > "${_TEST_REPORT_FILE}"
+  # write the test script name
+  local scriptName="${testScript##*/}"
+  scriptName="${scriptName%.sh}"
+  printf "%s\n\n" "## Test script ${scriptName}" >>"${_TEST_REPORT_FILE}"
 
   # run the test
-  pushd "${testDirectory}" > /dev/null
+  pushd "${testDirectory}" >/dev/null
   # shellcheck disable=SC1091
   set +Eeu +o pipefail
-  source "test.sh"
+  # shellcheck disable=SC1090
+  source "${testScript}"
   set -Eeu -o pipefail
-  popd > /dev/null
+  popd >/dev/null
 
   # reset the standard output and error output
   resetFdRedirection
-
-  compareWithApproved "${testDirectory}" "${_TEST_REPORT_FILE}" || return 1
 }
 
 function compareWithApproved() {
@@ -395,7 +415,7 @@ function compareWithApproved() {
 
   if [ -f "${approvedFile}" ]; then
     if diff --color -u "${approvedFile}" "${receivedFileToCopy}" 1>&2; then
-      succeed "🧪 ${testName}: OK, equal to approved file."
+      debug "🧪 ${testName}: OK, equal to approved file."
       rm -f "${receivedFile}" 2>/dev/null || true
       return 0
     else
@@ -419,7 +439,7 @@ function compareWithApproved() {
 }
 
 function setFdRedirection() {
-    # redirect the standard output and error output to files
+  # redirect the standard output and error output to files
   exec 3>&1 1>"${_TEST_STANDARD_OUTPUT_FILE}"
   exec 4>&2 2>"${_TEST_STANDARD_ERROR_FILE}"
 }
@@ -436,11 +456,11 @@ function setGlobalOptions() {
     AUTO_APPROVE="true"
   fi
   if [ -n "${include:-}" ]; then
-    inform "Including only tests that match the pattern ⌜${include}⌝."
+    inform "Including only test suites that match the pattern ⌜${include}⌝."
     INCLUDE_PATTERN="${include}"
   fi
   if [ -n "${exclude:-}" ]; then
-    inform "Excluding all tests that match the pattern ⌜${exclude}⌝."
+    inform "Excluding all test suites that match the pattern ⌜${exclude}⌝."
     EXCLUDE_PATTERN="${exclude}"
   fi
 }

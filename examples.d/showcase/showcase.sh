@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Import the core script (should always be skipped if the command is run from valet).
 if [ -z "${_CORE_INCLUDED:-}" ]; then
-  # shellcheck source=../valet.d/core
+  # shellcheck source=../../valet.d/core
   source "$(dirname -- "$(command -v valet)")/valet.d/core"
 fi
 # --- END OF COMMAND COMMON PART
@@ -11,6 +11,8 @@ fi
 #===============================================================
 # >>> showcase command menu
 #===============================================================
+
+# TODO: autogenerate this kind of functions for each sub command root
 
 # Note that you do not need this menu if you command function only has a single command level.
 # E.g.  "command: showcase command1" is a 2 level command.
@@ -24,7 +26,7 @@ shortDescription: Show the showcase sub menu.
 description: |-
   Can be used to show the showcase sub menu in interactive mode.
 arguments:
-  - name: commands...
+  - name: commands?...
     description: |-
       The command to execute.
 
@@ -102,6 +104,24 @@ description: |-
 
 function helloWorld() {
   echo "Hello world!"
+}
+
+# shellcheck disable=SC2317
+function about_showCaseSudo() {
+  echo "
+command: showcase sudo-command
+fileToSource: ${BASH_SOURCE[0]}
+sudo: true
+shortDescription: A command that requires sudo
+description: |-
+  Before starting this command, valet will check if sudo is available.
+
+  If so, it will require the user to enter the sudo password and use sudo inside the command
+"
+}
+
+function showCaseSudo() {
+  $SUDO whoami
 }
 
 

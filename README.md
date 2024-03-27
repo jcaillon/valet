@@ -16,6 +16,7 @@ But...
 - You struggle to even remember how they are named and how to invoke them.
 - They are not correctly documented.
 - They all follow a different convention regarding options and arguments.
+- You never implemented tests for your scripts because you don't known how to do that fast.
 
 **→ This is where Valet can help you!**
 
@@ -94,6 +95,9 @@ Please check the [CONTRIBUTING.md](CONTRIBUTING.md) documentation if you intend 
 - Self command to create a new command interactively.
 - Get rid of yq dependency in self build.
 - Replace fzf menu with equivalent pure bash menu.
+- Allow fileToSource to have multiple values separated by a comma (so we can load libraries of functions).
+- Add about option to hide the command in the menus.
+- Add tests for self build.
 
 [fzf]: https://github.com/junegunn/fzf
 [yq]: https://github.com/mikefarah/yq

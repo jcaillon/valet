@@ -263,11 +263,15 @@ function showFunctionHelp() {
     usage+=" ${cOption}[options]${cDefault}"
   fi
   if [ -n "${functionCommands:-}" ]; then
-    usage+=" ${cCommand}<command>${cDefault}"
+    usage+=" ${cCommand}[command]${cDefault}"
   else
     if [ -n "${functionArguments:-}" ]; then
       for argument in "${functionArguments[@]}"; do
-        usage+=" ${cArgument}<${argument}>${cDefault}"
+        if [[ "${argument}" == *\?* ]]; then
+          usage+=" ${cArgument}[${argument//\?/}]${cDefault}"
+        else
+          usage+=" ${cArgument}<${argument}>${cDefault}"
+        fi
       done
     fi
   fi
@@ -365,7 +369,7 @@ description: |-
 
   You can show the help with or without colors and set the maximum columns for the help text.
 arguments:
-  - name: commands...
+  - name: commands?...
     description: |-
       The name of the command to show the help for.
       If not provided, show the help for the program.
@@ -395,13 +399,6 @@ function showCommandHelp() {
   local -a commands
   local parsingErrors help columns noColors help
   parseFunctionArguments "${FUNCNAME[0]}" "$@" && eval "${LAST_RETURNED_VALUE}"
-
-  # for the help command, we can do without any arguments so remove this parsing error
-  if [ -n "${parsingErrors:-}" ]; then
-    parsingErrors="${parsingErrors}"$'\n'
-    parsingErrors="${parsingErrors//Expecting ⌜*$'\n'/}"
-    parsingErrors="${parsingErrors%$'\n'}"
-  fi
 
   checkParseResults "${help:-}" "${parsingErrors:-}"
 
@@ -704,6 +701,9 @@ function sortCommands() {
 # It allows to sort the commands in the menu by the last used commands.
 # $1: the id of the menu (used in the file name)
 # $2: the command to add
+#
+# Usage:
+#  addLastChoice "id" "command"
 function addLastChoice() {
   local menuId command
   menuId="${1}"
@@ -726,11 +726,13 @@ function addLastChoice() {
   # loop through the last choices and add them to the file, limit to 20 total
   local -i total index
   total="${#lastChoices[@]}"
-  [[ total -gt 20 ]] && total=20
+  [[ total -gt 20 ]] && total=19
   index=0
   for((index=0; index<total; index++)); do
     if [[ "${lastChoices[${index}]}" != "${command}" ]]; then
       echo "${lastChoices[${index}]}" >> "${lastChoicesFile}"
+    else
+      total+=1
     fi
   done
 }
@@ -740,6 +742,10 @@ function addLastChoice() {
 # $1: the menu header
 # $2: the menu body
 # $3+: additional options to pass to fzf (e.g. --height=10)
+#
+# Usage:
+#  showInteractiveCommandsMenu "header" "body" && choice="${LAST_RETURNED_VALUE}"
+#  showInteractiveCommandsMenu "header" "body" --height=10 && choice="${LAST_RETURNED_VALUE}"
 function showInteractiveCommandsMenu() {
   local menuHeader menuBody
   menuHeader="${1}"
@@ -766,7 +772,7 @@ function showInteractiveCommandsMenu() {
       --margin=0 --padding=0 \
       "--header-lines=${menuHeaderLength}" \
       --preview-window=right:$((previewWidth)):wrap \
-      --preview="echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} $0 help --columns $((previewWidth - 2)) {}" \
+      --preview="echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '${VALET_HOME}/valet' help --columns $((previewWidth - 2)) {}" \
       "$@" <<< "${commandsPrompt}" || echo "")"
   choice="${choice%%$'\t'*}"
   choice="${choice%%  *}"
@@ -835,6 +841,7 @@ function fuzzyMatchCommandtoFunctionName() {
 # Same thing, if we provide only 1 argument to the cli, we
 # can only match a simple command
 # $@: the arguments
+#
 # Usage:
 #  getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3" && level="${LAST_RETURNED_VALUE}"
 function getMaxPossibleCommandLevel() {
@@ -857,24 +864,6 @@ function getMaxPossibleCommandLevel() {
 #===============================================================
 # >>> Parsers
 #===============================================================
-
-# Check if a function expects arguments
-#
-# usage: functionExpectsArguments "functionName"
-function functionExpectsArguments() {
-  local functionName
-  functionName="${1:-}"
-  local -n arguments="CMD_ARGUMENTS_NAME_${functionName}"
-  if [ -n "${arguments:-}" ]; then
-    return 0
-  fi
-  # we expect at least the --help option but we don't count it as an option
-  local -n options="CMD_OPTIONS_NAME_${functionName}"
-  if [ -n "${options[1]:-}" ]; then
-    return 0
-  fi
-  return 1
-}
 
 # Parses the arguments and options of a function.
 # Usage:
@@ -900,6 +889,8 @@ function parseFunctionArguments() {
 
   local -n argumentsName="CMD_ARGS_NAME_${functionName}"
   local -n isLastArgumentAnArray="CMD_ARGS_LAST_IS_ARRAY_${functionName}"
+  local -n nbOptionalArgsStr="CMD_ARGS_NB_OPTIONAL_${functionName}"
+  local -i nbOptionalArgs="${nbOptionalArgsStr:-0}"
   isLastArgumentAnArray="${isLastArgumentAnArray:-false}"
   local -i totalNbArguments
   if [ -n "${argumentsName[0]:-}" ]; then totalNbArguments=${#argumentsName[@]}; else totalNbArguments=0; fi
@@ -919,9 +910,10 @@ function parseFunctionArguments() {
   local -a matchedOptionsIndex
 
   # parse each arguments
-  local optionIndex option matchedIndex startedArguments optionValue optionName argumentName
+  local -i optionIndex matchedIndex
+  local option startedArguments optionValue optionName argumentName
   startedArguments="false"
-  while [ $# -gt 0 ]; do
+  while [[ $# -gt 0 ]]; do
 
     if [[ "${1}" == "-"* ]]; then
       matchedIndex=-1
@@ -939,7 +931,7 @@ function parseFunctionArguments() {
         done
       fi
 
-      if [ "${matchedIndex}" != "-1" ]; then
+      if [[ matchedIndex -ne -1 ]]; then
         # it's a match!
         if [ "${startedArguments}" = "true" ]; then
           outputErrors+=("Option ⌜${1}⌝ was given after the first argument, it should come before that.")
@@ -996,8 +988,9 @@ function parseFunctionArguments() {
   fi
 
   # check if we have missing arguments
-  if [ "${argumentPosition}" -lt "${totalNbArguments}" ]; then
-    outputErrors+=("Expecting ⌜${totalNbArguments}⌝ argument(s) but got ⌜$((argumentPosition))⌝.")
+  local -i nbExpectedArgs=$((totalNbArguments - nbOptionalArgs))
+  if [[ argumentPosition -lt nbExpectedArgs ]]; then
+    outputErrors+=("Expecting ⌜${nbExpectedArgs}⌝ argument(s) but got ⌜$((argumentPosition))⌝.")
   fi
 
   local outputString
@@ -1086,8 +1079,10 @@ function fuzzyFindOption() {
   LAST_RETURNED_VALUE="${suggestedOption}"
 }
 
-# Parse the arguments and options of a function
-# See @parseArguments
+# Parse the arguments and options of a function.
+# If no arguments are provided but some are expected, it will enter interactive mode.
+# See the @parseArguments function for more details on parsing.
+#
 # Usage:
 #   parseFunctionArgumentsOrGoInteractive "functionName" "$@" && eval "${LAST_RETURNED_VALUE}"
 function parseFunctionArgumentsOrGoInteractive() {
@@ -1117,8 +1112,8 @@ function parseFunctionArgumentsOrGoInteractive() {
 
   if [ "$#" -eq 0 ]; then
     if [[ "${expectArguments:-false}" = "true" || ("${expectOptions:-false}" = "true" && "${VALET_OPTIONS_INTERACTIVE_MODE:-false}" = "true") ]]; then
-      # TODO: go interactive
-      warn "No arguments provided, should go interactive!"
+      debug "No arguments provided but some were expected, entering interactive mode."
+      goInteractive "${functionName}"
     fi
   fi
 
@@ -1127,6 +1122,16 @@ function parseFunctionArgumentsOrGoInteractive() {
   debug "Parsed arguments:"$'\n'"${args}"
 
   LAST_RETURNED_VALUE="${args}"
+}
+
+function goInteractive() {
+  local functionName
+  functionName="${1:-}"
+  if [ -z "${functionName}" ]; then return 1; fi
+
+  # TODO: go interactive
+
+  # at the end, echo to the user the complete command that will be run
 }
 
 #===============================================================
