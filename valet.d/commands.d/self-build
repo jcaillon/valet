@@ -26,7 +26,7 @@ fi
 # >>> About build
 #===============================================================
 
-function about_build() {
+function about_selfBuild() {
   echo "
 command: self build
 fileToSource: ${BASH_SOURCE[0]}
@@ -44,11 +44,10 @@ options:
 "
 }
 
-
 #===============================================================
 # >>> Implementation
 #===============================================================
-function build() {
+function selfBuild() {
   local userDirectory
 
   # need the real path of VALET_HOME because we will use it to build the file
@@ -57,9 +56,12 @@ function build() {
   # parse arguments manually otherwise we have to count on cmd to be valid
   while [[ $# -gt 0 ]]; do
     case "${1}" in
-    -d | --user-directory) shift; userDirectory="${1}";;
-    -*) fail "Unknown option ⌜${1}⌝.";;
-    *) fail "Unknown command ⌜${1}⌝.";;
+    -d | --user-directory)
+      shift
+      userDirectory="${1}"
+      ;;
+    -*) fail "Unknown option ⌜${1}⌝." ;;
+    *) fail "Unknown command ⌜${1}⌝." ;;
     esac
     shift
   done
@@ -79,7 +81,7 @@ function build() {
 
   inform "Sourcing user commands from ⌜${userDirectory}⌝."
   if [[ -n "${userDirectory}" && -d "${userDirectory}" ]]; then
-    eval "$(find "${userDirectory}" -type f -not -path '*/.*' -name '*.sh'  | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
+    eval "$(find "${userDirectory}" -type f -not -path '*/.*' -name '*.sh' | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
   else
     inform "Skipping user directory with value ⌜${userDirectory}⌝."
   fi
@@ -99,38 +101,38 @@ function buildCommandsFile() {
   inform "Validating the metadata for each command."
   validateYamlForEachAboutFunction
 
-  writeHeader > "${buildFile}"
-  writeNewLines >> "${buildFile}"
+  writeHeader >"${buildFile}"
+  writeNewLines >>"${buildFile}"
 
   inform "Writing computed functions."
-  writeAllFunctions >> "${buildFile}"
-  writeNewLines >> "${buildFile}"
-  writeExactCommandToFunctionMap >> "${buildFile}"
-  writeNewLines >> "${buildFile}"
-  writeMaxSubCommandLevel >> "${buildFile}"
-  writeNewLines >> "${buildFile}"
-  writeAllCommands >> "${buildFile}"
-  writeNewLines >> "${buildFile}"
-  writeMaxCommandWidth >> "${buildFile}"
-  writeNewLines >> "${buildFile}"
-  writeCommandsMenu >> "${buildFile}"
-  writeNewLines >> "${buildFile}"
+  writeAllFunctions >>"${buildFile}"
+  writeNewLines >>"${buildFile}"
+  writeExactCommandToFunctionMap >>"${buildFile}"
+  writeNewLines >>"${buildFile}"
+  writeMaxSubCommandLevel >>"${buildFile}"
+  writeNewLines >>"${buildFile}"
+  writeAllCommands >>"${buildFile}"
+  writeNewLines >>"${buildFile}"
+  writeMaxCommandWidth >>"${buildFile}"
+  writeNewLines >>"${buildFile}"
+  writeCommandsMenu >>"${buildFile}"
+  writeNewLines >>"${buildFile}"
 
   # get properties for each function
-  echo "# ====================" >> "${buildFile}"
-  echo "# Variables to describe each function" >> "${buildFile}"
-  echo "# ====================" >> "${buildFile}"
-  writeGetForFunction >> "${buildFile}"
-  writeNewLines >> "${buildFile}"
+  echo "# ====================" >>"${buildFile}"
+  echo "# Variables to describe each function" >>"${buildFile}"
+  echo "# ====================" >>"${buildFile}"
+  writeGetForFunction >>"${buildFile}"
+  writeNewLines >>"${buildFile}"
 
   # for parsing
-  echo "# ====================" >> "${buildFile}"
-  echo "# Variables used during parsing" >> "${buildFile}"
-  echo "# ====================" >> "${buildFile}"
-  writeFunctionOptions >> "${buildFile}"
-  writeNewLines >> "${buildFile}"
-  writeFunctionArguments >> "${buildFile}"
-  writeNewLines >> "${buildFile}"
+  echo "# ====================" >>"${buildFile}"
+  echo "# Variables used during parsing" >>"${buildFile}"
+  echo "# ====================" >>"${buildFile}"
+  writeFunctionOptions >>"${buildFile}"
+  writeNewLines >>"${buildFile}"
+  writeFunctionArguments >>"${buildFile}"
+  writeNewLines >>"${buildFile}"
 
   bumpValetBuildVersion
 
@@ -153,7 +155,7 @@ function sumpUp() {
     # right padding with spaces based on the max command width, using for loop
     local -i i
     local -i padding=$((CMD_MAX_COMMAND_WIDTH - ${#command}))
-    for ((i=0; i<=padding; i++)); do
+    for ((i = 0; i <= padding; i++)); do
       command+=" "
     done
     commandsBuilt+=$'\n'"${command} → ${fileToSource:-embedded} → ${function}()"
@@ -167,7 +169,7 @@ function bumpValetBuildVersion() {
   versionFile="${VALET_HOME}/valet.d/version"
   currentVersion=$(cat "${versionFile}")
   newVersion=$(echo "${currentVersion}" | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-  echo "${newVersion}" > "${versionFile}"
+  echo "${newVersion}" >"${versionFile}"
 }
 
 function getTextBetweenLines() {
@@ -187,7 +189,6 @@ function getTextBetweenLines() {
   fi
   echo "${text}" | head -n "+$((endLine))" | tail -n "$((endLine - beginLine + 1))"
 }
-
 
 # converts an input string from --option-name to optionName
 function optionNameToCamelCase() {
@@ -209,27 +210,36 @@ function getVariableNameFromOptions() {
 function writeFunctionArguments() {
   echo "# Get the arguments of a given function xxx."
   echo "# CMD_ARGS_NAME_xxx = array with each argument names in camel case"
-  echo "# CMD_ARGS_LAST_IS_ARRAY_xxx = array which indicates if the last argument of the function is an array"
+  echo "# CMD_ARGS_LAST_IS_ARRAY_xxx = true/false to indicate if the last argument of the function is an array (ending with ...)"
+  echo "# CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (containing ?)"
   local function json jsonLines
-    while read -r function; do
+  local -i nbOptional
+  while read -r function; do
 
-      jsonLines="$("about_${function}" | yq -o=j -I=0 ".arguments[]")"
-      jsonLines="${jsonLines%$'\n'}"
+    jsonLines="$("about_${function}" | yq -o=j -I=0 ".arguments[]")"
+    jsonLines="${jsonLines%$'\n'}"
 
-      if [ -z "$(echo "${jsonLines}" | head -n 1)" ]; then
-        continue
+    if [ -z "$(echo "${jsonLines}" | head -n 1)" ]; then
+      continue
+    fi
+
+    nbOptional=0
+
+    echo "CMD_ARGS_NAME_${function}=("
+    while read -r json; do
+      name="$(echo "${json}" | yq ".name")"
+      if [[ "${name}" == *\?* ]]; then
+        nbOptional=+1
+        name="${name//\?/}"
       fi
+      echo "  \"$(optionNameToCamelCase "${name%...}")\""
+    done <<<"${jsonLines}"
+    echo ")"
 
-      # array with each argument names in camel case
-      echo "CMD_ARGS_NAME_${function}=("
-      while read -r json; do
-        name="$(echo "${json}" | yq ".name")"
-        echo "  \"$(optionNameToCamelCase "${name%...}")\""
-      done <<< "${jsonLines}"
-      echo ")"
+    echo -n "CMD_ARGS_LAST_IS_ARRAY_${function}="
+    if [[ "${name}" == *"..." ]]; then echo "\"true\""; else echo "\"false\""; fi
 
-      echo -n "CMD_ARGS_LAST_IS_ARRAY_${function}="
-      if [[ "${name}" == *"..." ]]; then echo "\"true\""; else echo "\"false\""; fi
+    echo "CMD_ARGS_NB_OPTIONAL_${function}=${nbOptional}"
   done < <(listAllFunctions)
 }
 
@@ -240,59 +250,58 @@ function writeFunctionOptions() {
   echo "# CMD_OPTS_NAME_xxx = array with each option names in camel case"
   echo "# CMD_OPTS_NAME_SC_xxx = array with each option names in snake case"
   local function json jsonLines value noEnvironmentVariable
-    while read -r function; do
+  while read -r function; do
 
-      jsonLines="$("about_${function}" | yq -o=j -I=0 ".options[]")"
-      jsonLines="${jsonLines%$'\n'}"
+    jsonLines="$("about_${function}" | yq -o=j -I=0 ".options[]")"
+    jsonLines="${jsonLines%$'\n'}"
 
-      if [[ -z "$(echo "${jsonLines}" | head -n 1)" || "${function}" == "this" ]]; then
-        # always add the help option
-        echo "CMD_OPTS_${function}=(\"-h --help\")"
-        echo "CMD_OPTS_NAME_${function}=(\"help\")"
-        continue
+    if [[ -z "$(echo "${jsonLines}" | head -n 1)" || "${function}" == "this" ]]; then
+      # always add the help option
+      echo "CMD_OPTS_${function}=(\"-h --help\")"
+      echo "CMD_OPTS_NAME_${function}=(\"help\")"
+      continue
+    fi
+
+    # array with each option separated by a space
+    echo "CMD_OPTS_${function}=("
+    while read -r json; do
+      name="$(echo "${json}" | yq ".name")"
+      value="$(echo "${name}" | grep -oE "[-]{1,2}[-A-Za-z0-9]+" | tr $'\n' ' ')"
+      value="${value% }"
+      echo "  \"${value}\""
+    done <<<"${jsonLines}"
+    echo "  \"-h --help\""
+    echo ")"
+
+    # array which indicates for each option if it has a value or not
+    echo "CMD_OPTS_HAS_VALUE_${function}=("
+    while read -r json; do
+      name="$(echo "${json}" | yq ".name")"
+      echo "  \"$(echo "${name}" | grep -qE "<[-A-Za-z0-9]+>" && echo "true" || echo "false")\""
+    done <<<"${jsonLines}"
+    echo ")"
+
+    # array with each option names in camel case
+    echo "CMD_OPTS_NAME_${function}=("
+    while read -r json; do
+      name="$(echo "${json}" | yq ".name")"
+      echo "  \"$(optionNameToCamelCase "$(getVariableNameFromOptions "${name}")")\""
+    done <<<"${jsonLines}"
+    echo "  \"help\""
+    echo ")"
+
+    # array with each option names in snake case
+    echo "CMD_OPTS_NAME_SC_${function}=("
+    while read -r json; do
+      name="$(echo "${json}" | yq ".name")"
+      noEnvironmentVariable="$(echo "${json}" | yq ".noEnvironmentVariable // \"\"")"
+      if [ "${noEnvironmentVariable:-false}" != true ]; then
+        echo "  \"$(optioNameToCapsSnakeCase "$(getVariableNameFromOptions "${name}")")\""
+      else
+        echo "  \"\""
       fi
-
-      # array with each option separated by a space
-      echo "CMD_OPTS_${function}=("
-      while read -r json; do
-        name="$(echo "${json}" | yq ".name")"
-        value="$(echo "${name}" | grep -oE "[-]{1,2}[-A-Za-z0-9]+" | tr $'\n' ' ')"
-        value="${value% }"
-        echo "  \"${value}\""
-      done <<< "${jsonLines}"
-      echo "  \"-h --help\""
-      echo ")"
-
-      # array which indicates for each option if it has a value or not
-      echo "CMD_OPTS_HAS_VALUE_${function}=("
-      while read -r json; do
-        name="$(echo "${json}" | yq ".name")"
-        echo "  \"$(echo "${name}" | grep -qE "<[-A-Za-z0-9]+>" && echo "true" || echo "false")\""
-      done <<< "${jsonLines}"
-      echo ")"
-
-      # array with each option names in camel case
-      echo "CMD_OPTS_NAME_${function}=("
-      while read -r json; do
-        name="$(echo "${json}" | yq ".name")"
-        echo "  \"$(optionNameToCamelCase "$(getVariableNameFromOptions "${name}")")\""
-      done <<< "${jsonLines}"
-      echo "  \"help\""
-      echo ")"
-
-      # array with each option names in snake case
-      echo "CMD_OPTS_NAME_SC_${function}=("
-      while read -r json; do
-        name="$(echo "${json}" | yq ".name")"
-        noEnvironmentVariable="$(echo "${json}" | yq ".noEnvironmentVariable // \"\"")"
-        if [ "${noEnvironmentVariable:-false}" != true ]; then
-          echo "  \"$(optioNameToCapsSnakeCase "$(getVariableNameFromOptions "${name}")")\""
-        else
-          echo "  \"\""
-        fi
-      done <<< "${jsonLines}"
-      echo ")"
-
+    done <<<"${jsonLines}"
+    echo ")"
 
   done < <(listAllFunctions)
 }
@@ -312,7 +321,6 @@ function writeGetForFunction() {
   echo "# CMD_ARGUMENTS_DESCRIPTION_xxx = array with each argument description"
   echo "# CMD_COMMANDS_NAME_xxx = array with each sub command name"
   echo "# CMD_COMMANDS_SHORTDESCRIPTION_xxx = array with each sub commmand short description"
-
 
   # write all the keys for each function
   local json key value jsonLines property snakeCaseOptionName optionValue noEnvironmentVariable
@@ -351,7 +359,7 @@ function writeGetForFunction() {
               fi
               echo "  \"${value//\"/\\\"}\""
             fi
-          done <<< "${jsonLines}"
+          done <<<"${jsonLines}"
           if [ "${property}" = "options" ]; then
             # for options, add the default help option
             if [ "${key}" = "name" ]; then
@@ -425,7 +433,6 @@ function writeCommandsMenu() {
 
 $(printf "%-${maxWidth}s\t%s\n" "Command name" "Short description")\""
 
-
   echo "CMD_COMMANDS_MENU_BODY=\"$(getCommandsMenu | sort)\""
 }
 
@@ -473,7 +480,7 @@ function writeAllCommands() {
 function validateYamlForEachAboutFunction() {
   local function
   while read -r function; do
-    "about_${function}" | yq '.' > /dev/null || fail "The function about_${function} does not return a valid yaml."
+    "about_${function}" | yq '.' >/dev/null || fail "The function about_${function} does not return a valid yaml."
   done < <(listAllFunctions)
 
   # TODO: validate that each option is different, same for arguments
@@ -550,7 +557,7 @@ function getFunctionFromCommand() {
   baseCommand="$*"
   while read -r function; do
     command=$(getFunctionCommand "${function}")
-    if [ "${command}" = "${baseCommand}" ] ; then
+    if [ "${command}" = "${baseCommand}" ]; then
       printf "%s" "${function}"
       return 0
     fi
@@ -573,7 +580,7 @@ function listSubCommandsOf() {
 
   while read -r function; do
     command=$(getFunctionCommand "${function}")
-    if echo "${command}" | grep -qE "^${baseCommand} [^ ]+" > /dev/null; then
+    if echo "${command}" | grep -qE "^${baseCommand} [^ ]+" >/dev/null; then
       subCommand="$(echo "${command}" | sed "s/${baseCommand} //" | cut -d' ' -f1)"
       echo "${subCommand}"
     fi
@@ -582,5 +589,5 @@ function listSubCommandsOf() {
 
 # if this script is run directly, execute the function, otherwise valet will do it
 if [ "${NOT_EXECUTED_FROM_VALET:-false}" == "true" ]; then
-  build "$@"
+  selfBuild "$@"
 fi

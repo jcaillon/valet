@@ -1,6 +1,8 @@
-# Test: 0001-core-functions
+# Test suite 0001-core-functions
 
-## Wrapping text at column 30 with no padding
+## Test script 99.tests
+
+### Wrapping text at column 30 with no padding
 
 Exit code: 0
 
@@ -45,7 +47,7 @@ There were 2 new lines before
 this.
 ```
 
-## Wrapping text at column 90 with padding of 4 on new lines
+### Wrapping text at column 90 with padding of 4 on new lines
 
 Exit code: 0
 
@@ -69,7 +71,7 @@ You don't get better on the days when you feel like going. You get better on the
     There were 2 new lines before this.
 ```
 
-## Wrapping text at column 90 with padding of 2 on all lines
+### Wrapping text at column 90 with padding of 2 on all lines
 
 Exit code: 0
 
@@ -93,7 +95,7 @@ Exit code: 0
   There were 2 new lines before this.
 ```
 
-## Testing cutF
+### Testing cutF
 
 Exit code: 0
 
@@ -112,7 +114,7 @@ field3
 line2 does it work on lines?
 ```
 
-## Testing fuzzyMatch
+### Testing fuzzyMatch
 
 Exit code: 0
 
@@ -131,7 +133,7 @@ l3 showcase command1
 l5 ublievable
 ```
 
-## Testing isFileEmpty
+### Testing isFileEmpty
 
 Exit code: 0
 
