@@ -197,7 +197,7 @@ COMMANDS
       Re-build the menu of valet from your commands.
   self
       Show the valet self-maintenance sub menu.
-  self test-commands
+  self test
       Test your valet custom commands.
   self test-core
       Test valet core features.
@@ -424,8 +424,8 @@ Command name           	Short description
 help                   	Show the help this program or of a specific command
 self build             	Re-build the menu of valet from your commands.
 self                   	Show the valet self-maintenance sub menu.
-self test-commands     	Test your valet custom commands.
 self test-core         	Test valet core features.
+self test              	Test your valet custom commands.
 self update            	Test valet core features.
 showcase command1      	A showcase command that uses arguments and options.
 showcase hello-world   	An hello world command
@@ -632,8 +632,8 @@ Please select the command to run (filter by typing anything)
 
 Command name           	Short description
 self build             	Re-build the menu of valet from your commands.
-self test-commands     	Test your valet custom commands.
 self test-core         	Test valet core features.
+self test              	Test your valet custom commands.
 self update            	Test valet core features.
 ===
 fzf args were:
@@ -667,7 +667,7 @@ COMMANDS
 
   build
       Re-build the menu of valet from your commands.
-  test-commands
+  test
       Test your valet custom commands.
   test-core
       Test valet core features.
@@ -706,8 +706,8 @@ Please select the command to run (filter by typing anything)
 
 Command name           	Short description
 self build             	Re-build the menu of valet from your commands.
-self test-commands     	Test your valet custom commands.
 self test-core         	Test valet core features.
+self test              	Test your valet custom commands.
 self update            	Test valet core features.
 ===
 fzf args were:

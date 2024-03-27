@@ -559,17 +559,7 @@ function runFunction() {
   fi
 
   # source the file in which the function is located if needed
-  local fileToSource
-  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
-    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
-    if [ -f "${VALET_HOME:-}/${fileToSource}" ]; then
-      # shellcheck disable=SC1090
-      source "${VALET_HOME:-}/${fileToSource}"
-      debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
-    else
-      warn "The file ⌜${VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
-    fi
-  fi
+  sourceForFunction "${functionName}"
 
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
     fail "The function ⌜${functionName}⌝ associated with the command ⌜${command}⌝ does not exist."
@@ -596,6 +586,34 @@ function runFunction() {
   exit 0
 }
 
+# Source the file associated with the function if needed.
+# $1: the function name
+#
+# Usage:
+#  sourceForFunction "functionName"
+function sourceForFunction() {
+  local functionName
+  functionName="${1}"
+
+  local fileToSource
+  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
+    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
+    if [ -f "${VALET_HOME:-}/${fileToSource}" ]; then
+      # shellcheck disable=SC1090
+      source "${VALET_HOME:-}/${fileToSource}"
+      debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
+    else
+      warn "The file ⌜${VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
+    fi
+  fi
+}
+
+# This function checks if the user has sudo privileges.
+# If the user has sudo, it will set the SUDO variable to "sudo".
+# If the user does not have sudo, it will set the SUDO variable to "".
+#
+# Usage:
+#  checkSudo
 function checkSudo() {
   # sudo
   if command -v sudo 1>/dev/null 2>&1; then
