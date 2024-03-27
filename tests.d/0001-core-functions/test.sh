@@ -72,11 +72,25 @@ l5 ublievable"
   endSubTest "Testing fuzzyMatch" 0
 }
 
+function testIsFileEmpty() {
+  createTempFile && local file="${LAST_RETURNED_VALUE}"
+
+  : > "${file}"
+  if isFileEmpty "${file}"; then echo "OK, the file is empty"; else echo "KO"; fi
+
+  echo -n "content" > "${file}"
+
+  if ! isFileEmpty "${file}"; then echo "OK, the file has content"; else echo "KO"; fi
+
+  endSubTest "Testing isFileEmpty" 0
+}
+
 
 function main() {
   testWrapText
   testCutF
   testFuzzyMatch
+  testIsFileEmpty
 }
 
 main

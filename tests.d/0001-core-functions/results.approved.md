@@ -131,3 +131,14 @@ l3 showcase command1
 l5 ublievable
 ```
 
+## Testing isFileEmpty
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+OK, the file is empty
+OK, the file has content
+```
+

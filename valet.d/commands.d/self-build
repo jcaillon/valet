@@ -49,7 +49,7 @@ options:
 # >>> Implementation
 #===============================================================
 function build() {
-  local defaultUserDir userDirectory
+  local userDirectory
 
   # need the real path of VALET_HOME because we will use it to build the file
   VALET_HOME=$(realpath "${VALET_HOME}")
@@ -64,7 +64,8 @@ function build() {
     shift
   done
 
-  userDirectory="${userDirectory:-${VALET_USER_DIRECTORY:-${HOME}/.valet.d}}"
+  getUserDirectory
+  userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
 
   # Check pre-requisites
   if ! command -v yq 1>/dev/null 2>&1; then

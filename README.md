@@ -51,6 +51,8 @@ xxx
 
 > [!IMPORTANT]
 > If you see the replacement character � in my terminal, it means you don't have a [nerd font](https://www.nerdfonts.com/) setup in your terminal.
+>
+> Either install a nerd font and activate it on our terminal or `export VALET_NO_ICON=true` in your environment.
 
 ## Usage
 
@@ -74,3 +76,4 @@ You can enable debug mode with profiling for valet by setting the environment va
 - Implement self test with approval tests.
 - Get rid of yq dependency in self build.
 - Replace fzf menu with equivalent pure bash menu.
+- Self command to create a new command interactively.

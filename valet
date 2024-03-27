@@ -35,12 +35,14 @@ description: |-
   ⌜Configuration through environment variables:⌝
   In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
   - VALET_USER_DIRECTORY=\"my/path\": set the path to the valet user directory (in which to find user commands).
+  - VALET_OPTIONS_INTERACTIVE_MODE=\"true\": will enter interactive mode for command options (default is to only ask for arguments).
   - VALET_NO_COLOR=\"true\": will disable the color output for logs and help.
+  - VALET_COLOR_XXX=\"color\": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, ITALIC, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, ERROR, TIMESTAMP, HIGHLIGHT.
   - VALET_NO_WRAP=\"true\": will disable the text wrapping for logs.
   - VALET_NO_ICON=\"true\": will disable the icons for logs and help.
   - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
+  - VALET_LOG_COLUMNS=\"120\": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the terminal width.
   - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
-  - VALET_OPTIONS_INTERACTIVE_MODE=\"true\": will enter interactive mode for command options (default is to only ask for arguments).
 
   ⌜Developer notes:⌝
   You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
