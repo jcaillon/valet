@@ -778,13 +778,13 @@ Exit code: 0
 **Error** output:
 
 ```log
-INFO     Created temp file: /tmp/valet/f01.
-INFO     Created temp file: /tmp/valet/f02.
-INFO     Created temp directory: /tmp/valet/d01.
-INFO     Created temp directory: /tmp/valet/d02.
+INFO     Created temp file: /tmp/valet.d/f1-0.
+INFO     Created temp file: /tmp/valet.d/f2-0.
+INFO     Created temp directory: /tmp/valet.d/d1-0.
+INFO     Created temp directory: /tmp/valet.d/d2-0.
 DEBUG    Log level set to debug.
 DEBUG    Exiting with code 0 after Xs.
-DEBUG    Deleting temporary files.
+DEBUG    Deleting temporary directory.
 WARNING  This is a custom clean up function.
 ```
 

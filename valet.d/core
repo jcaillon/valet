@@ -18,79 +18,69 @@ fi
 # >>> Temporay files and folders
 #===============================================================
 
-# little trick here; since we might use createTempFile / createTempDirectory in subshell $()
-# they will not have access to the same global variables.
-# thus, we declare them with a hardcoded value for TMPDIR so that they create temp files
-# under this directory (which we can then clean up)
-_TEMPORARY_DIRECTORY="${TMPDIR:-/tmp}/valet-${EPOCHSECONDS}"
-while true; do
-  if [ ! -d "${_TEMPORARY_DIRECTORY}" ]; then break; fi
-  _TEMPORARY_DIRECTORY+="-${BASHPID}"
-done
+# get unique file names for the stdout, stderr and temporary directory
+# to be fast, we do not create anything until we really need it
+# this could lead to issues, altough it is very unlikely
+_TEMPORARY_PREFIX="${TMPDIR:-/tmp}/temp-"
+_TEMPORARY_STDOUT_FILE="${_TEMPORARY_PREFIX}${BASHPID}.valet-stdout"
+while [ -e "${_TEMPORARY_STDOUT_FILE}" ]; do _TEMPORARY_STDOUT_FILE+="x"; done
+_TEMPORARY_STDERR_FILE="${_TEMPORARY_PREFIX}${BASHPID}.valet-stderr"
+while [ -e "${_TEMPORARY_STDERR_FILE}" ]; do _TEMPORARY_STDERR_FILE+="x"; done
+_TEMPORARY_DIRECTORY="${_TEMPORARY_PREFIX}${BASHPID}.valet.d"
+while [[ -e "${_TEMPORARY_DIRECTORY}" ]]; do _TEMPORARY_DIRECTORY+="x"; done
 
 # Creates a temporary file and return its path in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
 #  createTempFile && local file="${LAST_RETURNED_VALUE}"
-function createTempFile() { return 0; }
-# shellcheck disable=SC2016
-CREATE_TEMP_FILE_FUNCTION='
 function createTempFile() {
-  TMPDIR="'"${_TEMPORARY_DIRECTORY}"'"
-  if [ ! -d "${TMPDIR}" ]; then
-    mkdir -p "${TMPDIR}" 1>&2 2>/dev/null
+  if [ ! -d "${_TEMPORARY_DIRECTORY}" ]; then
+    mkdir -p "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
   fi
   TEMPORARY_FILE_NUMBER=${TEMPORARY_FILE_NUMBER:-0}
   while true; do
     TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
-    LAST_RETURNED_VALUE="${TMPDIR}/f${BASH_SUBSHELL}${TEMPORARY_FILE_NUMBER}"
+    LAST_RETURNED_VALUE="${_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
     if [ ! -f "${LAST_RETURNED_VALUE}" ]; then
       touch "${LAST_RETURNED_VALUE}" 1>&2 2>/dev/null
       return 0
     fi
   done
 }
-'
 
 # Creates a temporary directory and return its path in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
 #  createTempDirectory && local directory="${LAST_RETURNED_VALUE}"
-function createTempDirectory() { return 0; }
-# shellcheck disable=SC2016
-CREATE_TEMP_DIRECTORY_FUNCTION='
 function createTempDirectory() {
-  TMPDIR="'"${_TEMPORARY_DIRECTORY}"'"
+  if [ ! -d "${_TEMPORARY_DIRECTORY}" ]; then
+    mkdir -p "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
+  fi
   TEMPORARY_DIRECTORY_NUMBER=${TEMPORARY_DIRECTORY_NUMBER:-0}
   while true; do
     TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
-    LAST_RETURNED_VALUE="${TMPDIR}/d${BASH_SUBSHELL}${TEMPORARY_DIRECTORY_NUMBER}"
+    LAST_RETURNED_VALUE="${_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
     if [ ! -d "${LAST_RETURNED_VALUE}" ]; then
       mkdir -p "${LAST_RETURNED_VALUE}" 1>&2 2>/dev/null
       return 0
     fi
   done
 }
-'
 
 # Removes all the tempoary files that were created.
 # shellcheck disable=SC2016
-CREATE_TEMP_CLEANUP_FUNCTION='
 function cleanupTempFiles() {
-  local tmpDir
-  tmpDir="'"${_TEMPORARY_DIRECTORY}"'"
-  if [ ! -d "${tmpDir}" ]; then
-    return 0
+  if [ -e "${_TEMPORARY_DIRECTORY}" ]; then
+    debug "Deleting temporary directory."
+    rm -Rf "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
   fi
-  debug "Deleting temporary files."
-  rm -Rf "${tmpDir}" 1>&2 2>/dev/null
+  if [ -e "${_TEMPORARY_STDOUT_FILE}" ]; then
+    rm -f "${_TEMPORARY_STDOUT_FILE}" 1>&2 2>/dev/null
+  fi
+  if [ -e "${_TEMPORARY_STDERR_FILE}" ]; then
+    rm -f "${_TEMPORARY_STDERR_FILE}" 1>&2 2>/dev/null
+  fi
 }
-'
-
-eval "${CREATE_TEMP_FILE_FUNCTION}"$'\n'"${CREATE_TEMP_DIRECTORY_FUNCTION}"$'\n'"${CREATE_TEMP_CLEANUP_FUNCTION}"$'\n'
-unset CREATE_TEMP_FILE_FUNCTION
-unset CREATE_TEMP_DIRECTORY_FUNCTION
-unset CREATE_TEMP_CLEANUP_FUNCTION
 
 #===============================================================
 # >>> Logging
@@ -625,6 +615,26 @@ function fuzzyMatch() {
   done
 
   LAST_RETURNED_VALUE="${bestMatch:-}"
+}
+
+
+#
+function invoke() {
+  local executable
+  executable="${1:?The first argument should be the executable to invoke.}"
+
+  echo "ok" > "$_TEMPORARY_STDERR_FILE"
+  echo "ok" > "$_TEMPORARY_STDOUT_FILE"
+
+
+  echo --------------------------------------------------------
+  echo "_TEMPORARY_DIRECTORY = ${_TEMPORARY_DIRECTORY}"
+  echo ----
+  createTempFile && local truc="${LAST_RETURNED_VALUE}"
+  echo "truc = $truc"
+  echo "createTempFile = $(createTempFile && echo "${LAST_RETURNED_VALUE}")"
+  echo "createTempFile = $(createTempDirectory && echo "${LAST_RETURNED_VALUE}")"
+  echo --------------------------------------------------------
 }
 
 

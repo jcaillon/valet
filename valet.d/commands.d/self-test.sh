@@ -487,7 +487,7 @@ function echoFileSubstitutingPath() {
     line="${line//${VALET_HOME}/\$VALET_HOME}"
     line="${line//${CURRENT_DIRECTORY}/.}"
     line="${line//${_TEMPORARY_DIRECTORY}/\/tmp}"
-    line="${line//\/valet-*\//\/valet\/}"
+    line="${line//${_TEMPORARY_PREFIX}*.valet/\/tmp/valet}"
     if [[ "${line}" =~ "after "[0-9]{1,}s.$ ]]; then
       line="${line/%after */after Xs.}"
     fi

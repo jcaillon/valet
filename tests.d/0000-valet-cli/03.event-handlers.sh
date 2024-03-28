@@ -28,7 +28,7 @@ function testEventHandlers() {
   endTest "Testing unknown command handling" $?
 
   # testing kill
-  # "${VALET_HOME}/valet" self test-core --wait-indefinitely &
+  # ("${VALET_HOME}/valet" self test-core --wait-indefinitely &)
   # processId=$!
   # kill -TERM ${processId}
   # wait ${processId} || true

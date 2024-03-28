@@ -93,6 +93,11 @@ l5 ublievable"
 
 function testInvoke() {
 
+  invoke fzf --version
+
+  (invoke fzf --version)
+
+  echo "$(invoke fzf --version)"
 
   endTest "Testing invoke" 0
 }

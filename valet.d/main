@@ -918,7 +918,7 @@ function parseFunctionArguments() {
   local -n isLastArgumentAnArray="CMD_ARGS_LAST_IS_ARRAY_${functionName}"
   local -n nbOptionalArgsStr="CMD_ARGS_NB_OPTIONAL_${functionName}"
   local -i nbOptionalArgs="${nbOptionalArgsStr:-0}"
-  isLastArgumentAnArray="${isLastArgumentAnArray:-false}"
+  ${isLastArgumentAnArray:=false}
   local -i totalNbArguments
   if [ -n "${argumentsName[0]:-}" ]; then totalNbArguments=${#argumentsName[@]}; else totalNbArguments=0; fi
   local -i argumentPosition

@@ -33,6 +33,12 @@ function selfUpdate() {
   # replace call of "fzf" and "yq" by "${VALET_HOME}/bin/fzf" and "${VALET_HOME}/bin/yq" in valet
   # this way we don't loop in the PATH and it goes faster
 
+  invoke fzf --version
+
+  (invoke fzf --version)
+
+  echo "ok" | invoke fzf --version
+
   return 0
 }
 

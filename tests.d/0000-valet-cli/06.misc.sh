@@ -8,7 +8,7 @@ function testMainOptions() {
   # testing version option
   : > "${_TEST_TEMP_FILE}"
   echo "→ valet --version"
-  "${VALET_HOME}/valet" --version 1> "${_TEST_TEMP_FILE}"
+  ("${VALET_HOME}/valet" --version 1> "${_TEST_TEMP_FILE}")
   if [[ -s "${_TEST_TEMP_FILE}" ]]; then
     echo "OK, we got a version."
   else
@@ -18,7 +18,7 @@ function testMainOptions() {
 
   # testing unknown option, corrected with fuzzy match
   echo "→ valet -prof"
-  "${VALET_HOME}/valet" -prof
+  ("${VALET_HOME}/valet" -prof)
   endTest "Testing unknown option, corrected with fuzzy match" $?
 }
 

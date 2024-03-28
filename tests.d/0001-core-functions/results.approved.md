@@ -160,3 +160,29 @@ l5 ublievable
 
 Exit code: 0
 
+**Standard** output:
+
+```plaintext
+--------------------------------------------------------
+_TEMPORARY_DIRECTORY = /tmp
+----
+truc = /tmp/f11-0
+createTempFile = /tmp/f12-1
+createTempFile = /tmp/d3-1
+--------------------------------------------------------
+--------------------------------------------------------
+_TEMPORARY_DIRECTORY = /tmp
+----
+truc = /tmp/f13-1
+createTempFile = /tmp/f14-2
+createTempFile = /tmp/d3-2
+--------------------------------------------------------
+--------------------------------------------------------
+_TEMPORARY_DIRECTORY = /tmp
+----
+truc = /tmp/f14-1
+createTempFile = /tmp/f15-2
+createTempFile = /tmp/d4-2
+--------------------------------------------------------
+```
+
