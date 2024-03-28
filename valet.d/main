@@ -727,6 +727,8 @@ function addLastChoice() {
   menuId="${1}"
   command="${2}"
 
+  local maxNumberOfLastChoice=${VALET_REMEMBER_LAST_CHOICES:-20}
+
   # load last choices from the file into an array
   local lastChoicesFile
   getLocalStateDirectory
@@ -744,7 +746,7 @@ function addLastChoice() {
   # loop through the last choices and add them to the file, limit to 20 total
   local -i total index
   total="${#lastChoices[@]}"
-  [[ total -gt 20 ]] && total=19
+  [[ total -gt maxNumberOfLastChoice ]] && total=$((maxNumberOfLastChoice - 1))
   index=0
   for((index=0; index<total; index++)); do
     if [[ "${lastChoices[${index}]}" != "${command}" ]]; then

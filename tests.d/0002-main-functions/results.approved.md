@@ -52,26 +52,11 @@ Exit code: 0
 
 ```plaintext
 Content of myid1-last-choice:
-cm30
-cm29
-cm28
-cm27
-cm26
-cm25
-cm24
-cm23
-cm22
-cm21
-cm20
-cm19
-cm18
-cm17
-cm16
-cm15
-cm14
-cm13
-cm12
-cm11
+cm10
+cm9
+cm8
+cm7
+cm6
 
 ```
 
@@ -84,26 +69,10 @@ Exit code: 0
 ```plaintext
 Content of myid1-last-choice:
 another3
-cm30
-cm29
-cm28
-cm27
-cm26
-cm25
-cm24
-cm23
-cm22
-cm21
-cm20
-cm19
-cm18
-cm17
-cm16
-cm15
-cm14
-cm13
-cm12
-
+cm10
+cm9
+cm8
+cm7
 
 ```
 
