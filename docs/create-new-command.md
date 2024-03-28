@@ -86,10 +86,22 @@ The build process consists of recreating the `valet.d/cmd` program by reading al
 
 ## 5. Test your program
 
+What is a test suite?
+
+TODO
+
+You can exclude or include test suite using `-i` and `-e` options on `self test`.
+
+### How to debug your program
+
 Your command function is not working as expected or seems stuck ? Two ways to approach this problem:
 
 - Run your valet command in the bash debugger on visual studio.
-- Or use the `valet -x` option to enable the profiler (this turns the debug mode on `set -x`). This will output the complete trace in `~/profile_valet_cmd.txt` (or you can choose the destination with the environment variable `VALET_CMD_PROFILING_FILE`).  
+- Or use the `valet -x` option to enable the profiler (this turns the debug mode on `set -x`). This will output the complete trace in `~/profile_valet_cmd.txt` (or you can choose the destination with the environment variable `VALET_CMD_PROFILING_FILE`).
+
+Of course, a simpler strategy is to log stuff with `debug` (you can also do `if isDebugEnabled; then debug "stuff"; fi` to avoid computing a string value for debug).
+
+You can active the debug log level with Valet `-v` option, e.g. `valet -v my command`.
 
 ## Extra: defining sub commands
 

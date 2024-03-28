@@ -56,7 +56,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
-Content of myid1-last-choice:
+Content of last-choices-myid1:
 cm10
 cm9
 cm8
@@ -72,7 +72,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
-Content of myid1-last-choice:
+Content of last-choices-myid1:
 another3
 cm10
 cm9

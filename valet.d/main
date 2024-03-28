@@ -481,7 +481,7 @@ function parseMainArguments() {
 
   if [ -z "${commands[0]:-}" ]; then
     # no command provided, we show the commands menu
-    showCommandsMenuAndRun "${CMD_COMMANDS_MENU_BODY}"
+    showCommandsMenuAndRun "main-menu" "${CMD_COMMANDS_MENU_BODY}"
   fi
 
   local functionName nbArgs
@@ -625,12 +625,13 @@ function checkSudo() {
 # run the selected command if any.
 # $1: the menu body
 function showCommandsMenuAndRun() {
-  local commands
-  commands="${1}"
+  local menuId commands
+  menuId="${1}"
+  commands="${2}"
 
   # display the menu
   local sortedCommandsMenuBody
-  sortCommands "commands-menu" "${commands}" && sortedCommandsMenuBody="${LAST_RETURNED_VALUE}"
+  sortCommands "${menuId}" "${commands}" && sortedCommandsMenuBody="${LAST_RETURNED_VALUE}"
 
   local commandChoice
   showInteractiveCommandsMenu "${CMD_COMMANDS_MENU_HEADER}" "${sortedCommandsMenuBody}" && commandChoice="${LAST_RETURNED_VALUE}"
@@ -638,7 +639,7 @@ function showCommandsMenuAndRun() {
     # the user pressed escape or ctrl-c
     exit 0
   fi
-  addLastChoice "commands-menu" "${commandChoice}"
+  addLastChoice "${menuId}" "${commandChoice}"
 
   # get the function name from the command by replacing spaces and hyphens with _
   local functionName
@@ -662,7 +663,7 @@ function sortCommands() {
 
   local lastChoicesFile
   getLocalStateDirectory
-  lastChoicesFile="${LAST_RETURNED_VALUE}/${menuId}-last-choice"
+  lastChoicesFile="${LAST_RETURNED_VALUE}/last-choices-${menuId}"
   if [ ! -e "${lastChoicesFile}" ]; then
     LAST_RETURNED_VALUE="${commands}"
     return 0
@@ -728,7 +729,7 @@ function addLastChoice() {
   # load last choices from the file into an array
   local lastChoicesFile
   getLocalStateDirectory
-  lastChoicesFile="${LAST_RETURNED_VALUE}/${menuId}-last-choice"
+  lastChoicesFile="${LAST_RETURNED_VALUE}/last-choices-${menuId}"
   if [ ! -e "${lastChoicesFile}" ]; then
     touch "${lastChoicesFile}"
   fi

@@ -13,8 +13,9 @@ if [ -z "${_MAIN_INCLUDED:-}" ]; then
 fi
 # --- END OF COMMAND COMMON PART
 
+
 #===============================================================
-# >>> self test for valet commands (and optionally, core functions)
+# >>> command: self test
 #===============================================================
 function about_selfTest() {
   echo "
@@ -91,9 +92,11 @@ function selfTest() {
   fi
 }
 
+
 #===============================================================
-# >>> self core test for valet
+# >>> command: self test-core
 #===============================================================
+
 function about_selfTestCore() {
   echo "
 command: self test-core

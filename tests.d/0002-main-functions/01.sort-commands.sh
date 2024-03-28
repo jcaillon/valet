@@ -37,8 +37,8 @@ another3  	This is another command 3"
     addLastChoice "myid1" "cm${i}"
   done
   local content
-  IFS= read -rd '' content < "${localStateDirectory}/myid1-last-choice" || true
-  echo "Content of myid1-last-choice:"
+  IFS= read -rd '' content < "${localStateDirectory}/last-choices-myid1" || true
+  echo "Content of last-choices-myid1:"
   echo "$content"
   endTest "Testing addLastChoice after adding more than ${VALET_REMEMBER_LAST_CHOICES} commands, we only keep the last ${VALET_REMEMBER_LAST_CHOICES}" 0
 
@@ -46,8 +46,8 @@ another3  	This is another command 3"
   addLastChoice "myid1" "another3"
   addLastChoice "myid1" "another3"
   addLastChoice "myid1" "another3"
-  IFS= read -rd '' content < "${localStateDirectory}/myid1-last-choice" || true
-  echo "Content of myid1-last-choice:"
+  IFS= read -rd '' content < "${localStateDirectory}/last-choices-myid1" || true
+  echo "Content of last-choices-myid1:"
   echo "$content"
   endTest "Testing addLastChoice after adding the same command multiple times only keeps the last one" 0
 

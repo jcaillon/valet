@@ -147,8 +147,8 @@ ABOUT
   - 1: an error occured
   
   ⌜Create your own commands:⌝
-  You can create your own commands and have them available in valet, please check the README.md or the examples under 
-  examples.d to do so.
+  You can create your own commands and have them available in valet, please check 
+  https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or the examples under examples.d to do so.
   Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an 
   environment variable (see below).
   Once you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.
@@ -157,8 +157,6 @@ ABOUT
   In addition to the environment variables defined for each options, you can define the following environment variables 
   to configure valet:
   - VALET_USER_DIRECTORY="my/path": set the path to the valet user directory (in which to find user commands).
-  - VALET_OPTIONS_INTERACTIVE_MODE="true": will enter interactive mode for command options (default is to only ask for 
-  arguments).
   - VALET_NO_COLOR="true": will disable the color output for logs and help.
   - VALET_COLOR_XXX="color": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, 
   OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, ERROR, TIMESTAMP, HIGHLIGHT.
@@ -194,6 +192,9 @@ OPTIONS
       Output verbose information.
       This is the equivalent of setting the log level to debug.
       This option can be set by exporting the variable VALET_VERBOSE="true".
+  -i, --force-interactive-mode
+      Enter interactive mode for commands even if arguments are not required or provided.
+      This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE="true".
   --version
       Display the current version of valet.
   -h, --help

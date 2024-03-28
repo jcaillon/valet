@@ -877,15 +877,20 @@ function showSubMenu() {
 
   # filter the commands to only keep the sub commands of the function
   local filteredCommandsMenuBody line
-  local -n menuCommandName="CMD_COMMAND_${functionName}"
+  local -n command="CMD_COMMAND_${functionName}"
   filteredCommandsMenuBody=""
   local IFS=$'\n'
   for line in ${CMD_COMMANDS_MENU_BODY}; do
-    if [[ "${line}" =~ ^(${menuCommandName} [^ ]+ ) ]]; then
+    if [[ "${line}" =~ ^(${command} [^ ]+ ) ]]; then
       filteredCommandsMenuBody+="${line}"$'\n'
     fi
   done
-  showCommandsMenuAndRun "${filteredCommandsMenuBody%$'\n'}"
+
+  if [ -z "${filteredCommandsMenuBody}" ]; then
+    fail "No sub commands found for ⌜${command}⌝."
+  fi
+
+  showCommandsMenuAndRun "${functionName}" "${filteredCommandsMenuBody%$'\n'}"
 }
 
 # Parse the arguments and options of a function and return a string that can be evaluated to set the variables.
