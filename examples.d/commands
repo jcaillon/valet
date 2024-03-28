@@ -187,7 +187,7 @@ In addition to the environment variables defined for each options, you can defin
 - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
 - VALET_LOG_COLUMNS=\"120\": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the terminal width.
 - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
-- VALET_REMEMBER_LAST_CHOICES=\"20\": number of last choices to remember when selecting an item from a menu.
+- VALET_REMEMBER_LAST_CHOICES=\"20\": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the alphabetical order.
 
 ⌜Developer notes:⌝
 You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt)."
@@ -330,22 +330,14 @@ The name of the test suite is given by the name of the directory containing the 
 
 Example: --exclude '(1|commands)'
 This option can be set by exporting the variable VALET_EXCLUDE=\"<pattern>\"."
-  "Test the error handling.
-This option can be set by exporting the variable VALET_ERROR=\"true\"."
-  "Test the fail.
-This option can be set by exporting the variable VALET_FAIL=\"true\"."
-  "Test the exit code.
-This option can be set by exporting the variable VALET_EXIT=\"true\"."
-  "Test with an unknown command.
-This option can be set by exporting the variable VALET_UNKNOWN_COMMAND=\"true\"."
-  "Test to create temp file and directory.
-This option can be set by exporting the variable VALET_CREATE_TEMP_FILES=\"true\"."
-  "Test to create temp file and directory.
-This option can be set by exporting the variable VALET_CREATE_TEMP_FILES=\"true\"."
-  "Test to output all log level messages.
-This option can be set by exporting the variable VALET_LOGGING_LEVEL=\"true\"."
-  "Test to wait indefinitely.
-This option can be set by exporting the variable VALET_WAIT_INDEFINITELY=\"true\"."
+  "Test the error handling."
+  "Test the fail."
+  "Test the exit code."
+  "Test with an unknown command."
+  "Test to create temp file and directory."
+  "Test to create temp file and directory."
+  "Test to output all log level messages."
+  "Test to wait indefinitely."
   "Test to show the help of the function.
 This option can be set by exporting the variable VALET_SHOW_HELP=\"true\"."
   "Display the help for this command"
@@ -632,14 +624,14 @@ CMD_OPTS_NAME_SC_selfTestCore=(
   "AUTO_APPROVE"
   "INCLUDE"
   "EXCLUDE"
-  "ERROR"
-  "FAIL"
-  "EXIT"
-  "UNKNOWN_COMMAND"
-  "CREATE_TEMP_FILES"
-  "CREATE_TEMP_FILES"
-  "LOGGING_LEVEL"
-  "WAIT_INDEFINITELY"
+  ""
+  ""
+  ""
+  ""
+  ""
+  ""
+  ""
+  ""
   "SHOW_HELP"
 )
 CMD_OPTS_selfUpdate=("-h --help")

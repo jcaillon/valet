@@ -34,6 +34,21 @@ sub cmd1  	This is sub command 1
 sub cmd2  	This is sub command 2
 ```
 
+### Testing sortCommands, with VALET_REMEMBER_LAST_CHOICES=0 the order does not change
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ VALET_REMEMBER_LAST_CHOICES=0 sortCommands myid1 "${commands}"
+cm1  	This is command 1
+cm2  	This is command 2
+sub cmd1  	This is sub command 1
+sub cmd2  	This is sub command 2
+another3  	This is another command 3
+```
+
 ### Testing sortCommands for another id, the order of commands should be the initial one
 
 Exit code: 0

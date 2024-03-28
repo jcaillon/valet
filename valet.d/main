@@ -661,6 +661,12 @@ function sortCommands() {
   menuId="${1}"
   commands="${2}"
 
+  # if the user does not want to remember the last choices, we return
+  if [ "${VALET_REMEMBER_LAST_CHOICES:-20}" -eq 0 ]; then
+    LAST_RETURNED_VALUE="${commands}"
+    return 0
+  fi
+
   local lastChoicesFile
   getLocalStateDirectory
   lastChoicesFile="${LAST_RETURNED_VALUE}/last-choices-${menuId}"
@@ -725,6 +731,11 @@ function addLastChoice() {
   command="${2}"
 
   local maxNumberOfLastChoice=${VALET_REMEMBER_LAST_CHOICES:-20}
+
+  # if the user does not want to remember the last choices, we return
+  if [ "${maxNumberOfLastChoice}" -eq 0 ]; then
+    return 0
+  fi
 
   # load last choices from the file into an array
   local lastChoicesFile

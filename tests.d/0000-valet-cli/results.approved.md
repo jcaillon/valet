@@ -167,7 +167,8 @@ ABOUT
   terminal width.
   - VALET_CI_MODE="true": will simplify the log output for CI/CD environments (or slow systems), will display the logs 
   without colors, without wrapping lines and with the full date.
-  - VALET_REMEMBER_LAST_CHOICES="20": number of last choices to remember when selecting an item from a menu.
+  - VALET_REMEMBER_LAST_CHOICES="20": number of last choices to remember when selecting an item from a menu. Set to 0 to
+  disable this feature and always display items in the alphabetical order.
   
   ⌜Developer notes:⌝
   You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true
@@ -272,28 +273,20 @@ OPTIONS
       This option can be set by exporting the variable VALET_EXCLUDE="<pattern>".
   --error
       Test the error handling.
-      This option can be set by exporting the variable VALET_ERROR="true".
   --fail
       Test the fail.
-      This option can be set by exporting the variable VALET_FAIL="true".
   --exit
       Test the exit code.
-      This option can be set by exporting the variable VALET_EXIT="true".
   --unknown-command
       Test with an unknown command.
-      This option can be set by exporting the variable VALET_UNKNOWN_COMMAND="true".
   --create-temp-files
       Test to create temp file and directory.
-      This option can be set by exporting the variable VALET_CREATE_TEMP_FILES="true".
   --create-temp-files
       Test to create temp file and directory.
-      This option can be set by exporting the variable VALET_CREATE_TEMP_FILES="true".
   --logging-level
       Test to output all log level messages.
-      This option can be set by exporting the variable VALET_LOGGING_LEVEL="true".
   --wait-indefinitely
       Test to wait indefinitely.
-      This option can be set by exporting the variable VALET_WAIT_INDEFINITELY="true".
   --show-help
       Test to show the help of the function.
       This option can be set by exporting the variable VALET_SHOW_HELP="true".
@@ -560,13 +553,6 @@ local parsingErrors autoApprove include exclude error fail exit unknownCommand c
 autoApprove="${AUTO_APPROVE:-}"
 include="${INCLUDE:-}"
 exclude="${EXCLUDE:-}"
-error="${ERROR:-}"
-fail="${FAIL:-}"
-exit="${EXIT:-}"
-unknownCommand="${UNKNOWN_COMMAND:-}"
-createTempFiles="${CREATE_TEMP_FILES:-}"
-createTempFiles="${CREATE_TEMP_FILES:-}"
-waitIndefinitely="${WAIT_INDEFINITELY:-}"
 showHelp="${SHOW_HELP:-}"
 parsingErrors=""
 loggingLevel="true"

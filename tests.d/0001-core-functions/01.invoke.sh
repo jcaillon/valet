@@ -34,13 +34,11 @@ function testInvoke5() {
 
 function testInvoke3() {
 
-echo "ok2" 1>&3
   echo "→ invoke3 false 0 fakeexec2 --option argument1 argument2"
   invoke3 false 0 fakeexec2 --option argument1 argument2 && exitCode=0 || exitCode=$?
   echoInvokeOutput "$exitCode" true
   endTest "Testing invoke3, output to files" 0
 
-echo "ok2" 1>&3
   echo "→ invoke3var false 0 fakeexec2 --option argument1 argument2"
   invoke3var false 0 fakeexec2 --option argument1 argument2 && exitCode=0 || exitCode=$?
   echoInvokeOutput "$exitCode" false

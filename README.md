@@ -112,7 +112,7 @@ Calling `valet` without any arguments (you can pass options) will open the inter
 
 Type your query (fuzzy matching is active so you can skip some letters), press ⬇️/⬆️ to select the command and hit enter to run it.
 
-Valet will remember your choice so they it appear at the top of the list the next time the menu shows up. You can set up how many choices to remember with the variable `VALET_REMEMBER_LAST_CHOICES`.
+Valet will remember your choice so they it appear at the top of the list the next time the menu shows up. You can set up how many choices to remember with the variable `VALET_REMEMBER_LAST_CHOICES`. Setting `VALET_REMEMBER_LAST_CHOICES=0` will effectively disable this feature and always display items sorted alphabetically.
 
 ### Interactive mode
 

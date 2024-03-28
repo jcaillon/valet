@@ -26,6 +26,12 @@ another3  	This is another command 3"
   sortCommands "myid1" "${commands}" && echo "${LAST_RETURNED_VALUE}"
   endTest "Testing sortCommands after choosing another3 then cm2" $?
 
+  # testing with VALET_REMEMBER_LAST_CHOICES=0
+  echo "→ VALET_REMEMBER_LAST_CHOICES=0 sortCommands myid1 \"\${commands}\""
+  VALET_REMEMBER_LAST_CHOICES=0 sortCommands "myid1" "${commands}" && echo "${LAST_RETURNED_VALUE}"
+  endTest "Testing sortCommands, with VALET_REMEMBER_LAST_CHOICES=0 the order does not change" $?
+  VALET_REMEMBER_LAST_CHOICES=5
+
   # testing commands sort for another id, the order of commands should be the initial one
   echo "→ sortCommands myid2 \"\${commands}\""
   sortCommands "myid2" "${commands}" && echo "${LAST_RETURNED_VALUE}"

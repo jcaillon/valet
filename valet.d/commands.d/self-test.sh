@@ -125,27 +125,35 @@ options:
   - name: --error
     description: |-
       Test the error handling.
+    noEnvironmentVariable: true
   - name: --fail
     description: |-
       Test the fail.
+    noEnvironmentVariable: true
   - name: --exit
     description: |-
       Test the exit code.
+    noEnvironmentVariable: true
   - name: --unknown-command
     description: |-
       Test with an unknown command.
+    noEnvironmentVariable: true
   - name: --create-temp-files
     description: |-
       Test to create temp file and directory.
+    noEnvironmentVariable: true
   - name: --create-temp-files
     description: |-
       Test to create temp file and directory.
+    noEnvironmentVariable: true
   - name: --logging-level
     description: |-
       Test to output all log level messages.
+    noEnvironmentVariable: true
   - name: --wait-indefinitely
     description: |-
       Test to wait indefinitely.
+    noEnvironmentVariable: true
   - name: --show-help
     description: |-
       Test to show the help of the function.
