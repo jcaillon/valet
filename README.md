@@ -53,11 +53,11 @@ Automate tests for your script with approval test approach:
 
 ![demo-tests](docs/images/readme/demo-tests.gif)
 
-Beautiful logs fully customizable:
+Get beautiful logs fully customizable (with optional wrapping!):
 
 ![demo-logs](docs/images/readme/demo-logs.gif)
 
-Automated parsing of arguments and options based on your command configuration:
+Auto parsing of arguments and options based on your command configuration:
 
 ![demo-parsing](docs/images/readme/demo-parsing.gif)
 
@@ -74,11 +74,11 @@ You need bash version 5 or higher to be installed on your machine to run Valet.
 Run the following command to install Valet:
 
 ```bash
-curl https://github.com/jcaillon/valet | bash
+curl https://github.com/jcaillon/valet/TOBEDONE! | bash
 ```
 
 > [!NOTE]
-> The automated installation downloads [fzf][fzf] and [yq][yq] in the Valet `bin` sub directory.
+> The installer downloads additional tools ([fzf][fzf] and [yq][yq]) in the Valet `bin` sub directory.
 >
 > It also copies the [examples.d](examples.d) directory to your Valet user directory (if empty) and runs `valet self build` in order to get you started.
 

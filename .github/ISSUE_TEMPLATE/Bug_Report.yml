@@ -1,11 +1,13 @@
 name: "Bug report 🐛"
 description: Report errors or unexpected behavior
-labels: [Issue-Bug, Needs-Triage]
+labels: [bug]
 body:
 - type: markdown
   attributes:
     value: |
       Please make sure to [search for existing issues](https://github.com/jcaillon/valet/issues) before filing a new one!
+
+
 
 - type: input
   attributes:
@@ -15,7 +17,16 @@ body:
       You can obtain the valet version by running `valet --version`.
   validations:
     required: true
-    
+
+- type: input
+  attributes:
+    label: Bash version and OS.
+    placeholder: "5.x.x on windows git bash"
+    description: |
+      You can obtain the bash version by running `bash --version`.
+  validations:
+    required: true
+
 - type: textarea
   attributes:
     label: Steps to reproduce

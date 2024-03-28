@@ -33,6 +33,11 @@ function selfUpdate() {
   # replace call of "fzf" and "yq" by "${VALET_HOME}/bin/fzf" and "${VALET_HOME}/bin/yq" in valet
   # this way we don't loop in the PATH and it goes faster
 
+  # tell the user about what's next todo
+
+  # Warn the user about:
+  # If you see the replacement character � in my terminal, it means you don't have a [nerd font][nerd-font] setup in your terminal.
+
   invoke fzf --version
 
   (invoke fzf --version)

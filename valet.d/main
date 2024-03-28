@@ -122,6 +122,9 @@ function command_not_found_handle() {
   if [ "${1:-}" = "yq" ]; then
     fail "This command requires ⌜https://github.com/mikefarah/yq⌝ to parse the command about functions."$'\n'"Please install it in your path and run this command again."
   fi
+  if [ "${1:-}" = "curl" ]; then
+    fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
+  fi
   fail "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
 }
 
@@ -795,6 +798,9 @@ function showInteractiveCommandsMenu() {
   fi
 
   local choice
+
+  # TODO: replace with invoke5var
+
   choice="$(fzf \
       --tiebreak=begin,index --no-multi --cycle \
       --layout=reverse --info=default \
