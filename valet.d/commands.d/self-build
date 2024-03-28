@@ -20,6 +20,9 @@ if [ -z "${_MAIN_INCLUDED:-}" ]; then
 fi
 # --- END OF COMMAND COMMON PART
 
+# shellcheck source=utils
+source "${VALET_HOME}/valet.d/commands.d/utils"
+
 # TODO: this script is ugly and not optimized at all, it should be refactored
 
 #===============================================================
@@ -167,9 +170,12 @@ function sumpUp() {
 function bumpValetBuildVersion() {
   local versionFile currentVersion
   versionFile="${VALET_HOME}/valet.d/version"
-  currentVersion=$(cat "${versionFile}")
-  newVersion=$(echo "${currentVersion}" | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-  echo "${newVersion}" >"${versionFile}"
+
+  IFS= read -rd '' currentVersion <"${versionFile}" || true
+
+  bumpSemanticVersion "${currentVersion}" "patch" "false"
+
+  echo "${LAST_RETURNED_VALUE}" >"${versionFile}"
 }
 
 function getTextBetweenLines() {

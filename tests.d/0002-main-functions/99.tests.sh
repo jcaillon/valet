@@ -1,39 +1,62 @@
 #!/usr/bin/env bash
 
 function testGetFunctionNameFromCommand() {
-  echo "--- Testing with 'self build' ---"
+  echo "→ getFunctionNameFromCommand 'self build'"
   getFunctionNameFromCommand "self build" && echo "${LAST_RETURNED_VALUE}"
+
   endTest "Testing getFunctionNameFromCommand" $?
 }
 
 function testFuzzyMatchCommandtoFunctionName() {
-  echo "--- Testing with 'e bu other stuff dont care' ---"
-  fuzzyMatchCommandtoFunctionName "se bu other stuff dont care" && echo "${LAST_RETURNED_VALUE}"
-  echo "--- Testing with 'sf nop other stuff dont care' ---"
-  fuzzyMatchCommandtoFunctionName "sf nop other stuff dont care" && echo "${LAST_RETURNED_VALUE}"
-  endTest "Testing fuzzyMatchCommandtoFunctionName" $?
+
+  echo "→ fuzzyMatchCommandtoFunctionName 'se bu other stuff dont care'"
+  fuzzyMatchCommandtoFunctionName "se bu other stuff dont care"
+  echo "${LAST_RETURNED_VALUE}"
+  echo "${LAST_RETURNED_VALUE2}"
+
+  echo
+  echo "→ fuzzyMatchCommandtoFunctionName 'sf' 'nop' 'other' 'stuff' 'dont care'"
+  fuzzyMatchCommandtoFunctionName "sf" "nop" "other" "stuff" "dont care"
+  echo "${LAST_RETURNED_VALUE}"
+  echo "${LAST_RETURNED_VALUE2}"
+
+  endTest "Testing fuzzyMatchCommandtoFunctionName" 0
 }
 
 function testGetMaxPossibleCommandLevel() {
-  echo "--- Testing with '1' '2' '3' ---"
+
+  echo "→ getMaxPossibleCommandLevel '1' '2' '3'"
   getMaxPossibleCommandLevel "1" "2" "3" && echo "${LAST_RETURNED_VALUE}"
-  echo "--- Testing with '1 2 3' ---"
+
+  echo
+  echo "→ getMaxPossibleCommandLevel '1 2 3'"
   getMaxPossibleCommandLevel "1 2 3" && echo "${LAST_RETURNED_VALUE}"
-  echo "--- Testing with '1' ---"
+
+  echo
+  echo "→ getMaxPossibleCommandLevel '1'"
   getMaxPossibleCommandLevel "1" && echo "${LAST_RETURNED_VALUE}"
-  echo "--- Testing with '' ---"
+
+  echo
+  echo "→ getMaxPossibleCommandLevel"
   getMaxPossibleCommandLevel && echo "${LAST_RETURNED_VALUE}"
+
   endTest "Testing getMaxPossibleCommandLevel" 0
 }
 
 function testFuzzyFindOption() {
-  echo "--- Testing with '--opt1 --derp2 --allo3' 'de' ---"
+
+  echo "→ fuzzyFindOption '--opt1 --derp2 --allo3' 'de'"
   fuzzyFindOption "--opt1 --derp2 --allo3" "de" && echo "${LAST_RETURNED_VALUE}"
-  echo "--- Testing with '--opt1 --derp2 --allo3' '-a' ---"
+
+  echo
+  echo "→ fuzzyFindOption '--opt1 --derp2 --allo3' '-a'"
   fuzzyFindOption "--opt1 --derp2 --allo3" "-a" && echo "${LAST_RETURNED_VALUE}"
-  echo "--- Testing with '--opt1 --derp2 --allo3' 'thing' ---"
-  fuzzyFindOption "--opt1 --derp2 --allo3" "-a" && echo "${LAST_RETURNED_VALUE}"
-  endTest "Testing getMaxPossibleCommandLevel" 0
+
+  echo
+  echo "→ fuzzyFindOption '--opt1 --derp2 --allo3' 'thing'"
+  fuzzyFindOption "--opt1 --derp2 --allo3" "thing" && echo "${LAST_RETURNED_VALUE}"
+
+  endTest "Testing fuzzyFindOption" 0
 }
 
 function main() {

@@ -2,8 +2,8 @@
 
 # This function demonstrates how to test a function within your script
 function testShowcaseCommand1() {
-  echo "--- Testing with '-o -2 optionValue2 arg1 more1 more2' ---"
-  showcaseCommand1  -o -2 optionValue2 arg1 more1 more2
+  echo "→ showcaseCommand1 -o -2 optionValue2 arg1 more1 more2"
+  showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
   endTest "Testing the showcase command1" 0
 }
 
@@ -11,18 +11,21 @@ function testShowcaseCommand1() {
 # or variables to test your script
 function testShowCaseSudo() {
   SUDO="echo"
+  echo "→ showCaseSudo"
   showCaseSudo
   endTest "Testing the showcase sudo command by replacing sudo with echo" 0
 }
 
 # This function demonstrates how to test a command by running valet
 function testHelloWorld() {
+  echo "→ valet showcase hello-world"
   "${VALET_HOME}/valet" showcase hello-world
   endTest "Testing the hello world command" 0
 }
 
 # This demonstrates a custom test where we output what we want in the test results file
 function testOnInterrupt() {
+  echo "→ onInterrupt"
   if onInterrupt; then
     echo "onInterrupt is working"
   else

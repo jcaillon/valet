@@ -42,7 +42,7 @@ function fzf() {
   echo --- 1>&2
   echo "fzf input stream was:" 1>&2
   echo "${inputStreamContent}" 1>&2
-  echo "===" 1>&2
+  echo 1>&2
   echo "fzf args were:" 1>&2
   echo "$@" 1>&2
   echo --- 1>&2
@@ -63,4 +63,16 @@ function echoTempFileWithTimeStampSubstitution() {
     line="${line//????-??-??/YYYY:MM:DD}"
     echo "${line}"
   done < "${file}"
+}
+
+function echoTempFileWithLineNumberSubstitution() {
+  local file="${_TEST_TEMP_FILE}"
+  local line
+  local IFS=$'\n'
+  while read -rd $'\n' line; do
+    if [[ "${line}" =~ :[0-9]{1,}$ ]]; then
+      line="${line/%:*/:XXX}"
+    fi
+    echo "${line}"
+  done <"${file}"
 }

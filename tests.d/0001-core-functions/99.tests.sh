@@ -10,35 +10,44 @@ As long as I focus on what I feel and don't worry about where I'm going, it work
 
 There were 2 new lines before this."
 
+  echo "→  wrapText \"\${shortText}\" 30"
   echo "------------------------------"
   wrapText "${shortText}" 30 && echo "${LAST_RETURNED_VALUE}"
   endTest "Wrapping text at column 30 with no padding" 0
 
 
+  echo "→  wrapText \"\${shortText}\" 90 4 false"
   echo "------------------------------------------------------------------------------------------"
   wrapText "${shortText}" 90 4 false && echo "${LAST_RETURNED_VALUE}"
   endTest "Wrapping text at column 90 with padding of 4 on new lines" 0
 
 
+  echo "→  wrapText \"\${shortText}\" 90 2 true"
   echo "------------------------------------------------------------------------------------------"
   wrapText "${shortText}" 90 2 true && echo "${LAST_RETURNED_VALUE}"
   endTest "Wrapping text at column 90 with padding of 2 on all lines" 0
 }
 
 function testCutF() {
-  echo "--- extracting f1 ---"
+  echo "→  cutF \"field1 field2 field3\" 1 \" \""
   cutF "field1 field2 field3" 1 " " && echo "${LAST_RETURNED_VALUE}"
+  echo
 
-  echo "--- extracting f2 ---"
+  echo "→  cutF \"field1 field2 field3\" 2 \" \""
   cutF "field1 field2 field3" 2 " " && echo "${LAST_RETURNED_VALUE}"
+  echo
 
-  echo "--- extracting f3 ---"
+  echo "→  cutF \"field1 field2 field3\" 3 \" \""
   cutF "field1 field2 field3" 3 " " && echo "${LAST_RETURNED_VALUE}"
+  echo
 
-  echo "--- extracting f4 which does not exist ---"
+  echo "→  cutF \"field1 field2 field3\" 4 \" \""
   cutF "field1 field2 field3" 4 " " && echo "${LAST_RETURNED_VALUE}"
+  echo
 
-  echo "--- extracting line 2 ---"
+  echo "→  cutF \"line1 hm I wonder
+line2 does it work on lines?
+line3 seems so\" 2 \$'\n'"
   cutF "line1 hm I wonder
 line2 does it work on lines?
 line3 seems so" 2 $'\n' && echo "${LAST_RETURNED_VALUE}"
@@ -54,35 +63,38 @@ l3 showcase command1
 l4 showcase command2
 l5 ublievable"
 
-  echo "--- matching pattern 'evle' ---"
+  echo "lines=\"${lines}\""
+
+  echo
+  echo "→ fuzzyMatch evle \"\${lines}\""
   fuzzyMatch "evle" "${lines}" && echo "${LAST_RETURNED_VALUE}"
 
-  echo "--- matching pattern 'sh2' ---"
+  echo
+  echo "→ fuzzyMatch sh2 \"\${lines}\""
   fuzzyMatch "sh2" "${lines}" && echo "${LAST_RETURNED_VALUE}"
 
-  echo "--- matching pattern 'u', should prioritize lower index of u ---"
+  echo
+  echo "# should prioritize lower index of u"
+  echo "→ fuzzyMatch u \"\${lines}\""
   fuzzyMatch "u" "${lines}" && echo "${LAST_RETURNED_VALUE}"
 
-  echo "--- matching pattern 'showcase', should be the first equal match ---"
+  echo
+  echo "# should be the first equal match"
+  echo "→ fuzzyMatch showcase \"\${lines}\""
   fuzzyMatch "showcase" "${lines}" && echo "${LAST_RETURNED_VALUE}"
 
-  echo "--- matching pattern 'lubl', should prioritize lower distance between letters ---"
+  echo
+  echo "# should prioritize lower distance between letters"
+  echo "→ fuzzyMatch lubl \"\${lines}\""
   fuzzyMatch "lubl" "${lines}" && echo "${LAST_RETURNED_VALUE}"
 
   endTest "Testing fuzzyMatch" 0
 }
 
-function testIsFileEmpty() {
-  createTempFile && local file="${LAST_RETURNED_VALUE}"
+function testInvoke() {
 
-  : > "${file}"
-  if isFileEmpty "${file}"; then echo "OK, the file is empty"; else echo "KO"; fi
 
-  echo -n "content" > "${file}"
-
-  if ! isFileEmpty "${file}"; then echo "OK, the file has content"; else echo "KO"; fi
-
-  endTest "Testing isFileEmpty" 0
+  endTest "Testing invoke" 0
 }
 
 
@@ -90,7 +102,7 @@ function main() {
   testWrapText
   testCutF
   testFuzzyMatch
-  testIsFileEmpty
+  testInvoke
 }
 
 main

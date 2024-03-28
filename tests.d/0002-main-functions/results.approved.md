@@ -9,6 +9,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ sortCommands myid1 "${commands}"
 cm1  	This is command 1
 cm2  	This is command 2
 sub cmd1  	This is sub command 1
@@ -23,6 +24,9 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ addLastChoice myid1 another3
+→ addLastChoice myid1 cm2
+→ sortCommands myid1 "${commands}"
 cm2  	This is command 2
 another3  	This is another command 3
 cm1  	This is command 1
@@ -37,6 +41,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ sortCommands myid2 "${commands}"
 cm1  	This is command 1
 cm2  	This is command 2
 sub cmd1  	This is sub command 1
@@ -44,7 +49,7 @@ sub cmd2  	This is sub command 2
 another3  	This is another command 3
 ```
 
-### Testing addLastChoice after adding more than 20 commands, we only keep the last 20
+### Testing addLastChoice after adding more than 5 commands, we only keep the last 5
 
 Exit code: 0
 
@@ -85,7 +90,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
---- Testing with showcaseCommand1 and no arguments ---
+→ parseFunctionArguments showcaseCommand1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 option1="${OPTION1:-}"
@@ -93,7 +98,8 @@ thisIsOption2="${THIS_IS_OPTION2:-}"
 parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝."
 more=(
 )
---- Testing with showcaseCommand1 -o -2 optionValue2 arg1 more1 more2 ---
+
+→ parseFunctionArguments showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 parsingErrors=""
@@ -104,7 +110,8 @@ more=(
 "more1"
 "more2"
 )
---- Testing with showcaseCommand1 -o -o2 optionValue2 arg1 ---
+
+→ parseFunctionArguments showcaseCommand1 -o -o2 optionValue2 arg1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝."
@@ -113,7 +120,8 @@ thisIsOption2="optionValue2"
 firstArg="arg1"
 more=(
 )
---- Testing with showcaseCommand1 -unknown -what optionValue2 arg ---
+
+→ parseFunctionArguments showcaseCommand1 -unknown -what optionValue2 arg
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 option1="${OPTION1:-}"
@@ -124,7 +132,8 @@ firstArg="optionValue2"
 more=(
 "arg"
 )
---- Testing with showcaseCommand1 arg more1 more2 -o ---
+
+→ parseFunctionArguments showcaseCommand1 arg more1 more2 -o
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 option1="${OPTION1:-}"
@@ -135,7 +144,8 @@ more=(
 "more1"
 "more2"
 )
---- Testing with showcaseCommand1 -this arg more1 ---
+
+→ parseFunctionArguments showcaseCommand1 -this arg more1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 option1="${OPTION1:-}"
@@ -145,7 +155,8 @@ firstArg="arg"
 more=(
 "more1"
 )
---- Testing with showcaseCommand1 --this-is-option2 --option1 arg more1 ---
+
+→ parseFunctionArguments showcaseCommand1 --this-is-option2 --option1 arg more1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 option1="${OPTION1:-}"
@@ -166,7 +177,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
---- Testing with 'self build' ---
+→ getFunctionNameFromCommand 'self build'
 selfBuild
 ```
 
@@ -177,10 +188,20 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
---- Testing with 'e bu other stuff dont care' ---
+→ fuzzyMatchCommandtoFunctionName 'se bu other stuff dont care'
+selfBuild
+2
 
---- Testing with 'sf nop other stuff dont care' ---
+→ fuzzyMatchCommandtoFunctionName 'sf' 'nop' 'other' 'stuff' 'dont care'
+selfMenu
+1
+```
 
+**Error** output:
+
+```log
+INFO     Fuzzy matching the command ⌜se bu⌝ to ⌜self build⌝.
+INFO     Fuzzy matching the command ⌜sf⌝ to ⌜self⌝.
 ```
 
 ### Testing getMaxPossibleCommandLevel
@@ -190,28 +211,33 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
---- Testing with '1' '2' '3' ---
+→ getMaxPossibleCommandLevel '1' '2' '3'
 2
---- Testing with '1 2 3' ---
+
+→ getMaxPossibleCommandLevel '1 2 3'
 2
---- Testing with '1' ---
+
+→ getMaxPossibleCommandLevel '1'
 1
---- Testing with '' ---
+
+→ getMaxPossibleCommandLevel
 0
 ```
 
-### Testing getMaxPossibleCommandLevel
+### Testing fuzzyFindOption
 
 Exit code: 0
 
 **Standard** output:
 
 ```plaintext
---- Testing with '--opt1 --derp2 --allo3' 'de' ---
+→ fuzzyFindOption '--opt1 --derp2 --allo3' 'de'
  (did you mean ⌜--derp2⌝?)
---- Testing with '--opt1 --derp2 --allo3' '-a' ---
+
+→ fuzzyFindOption '--opt1 --derp2 --allo3' '-a'
  (did you mean ⌜--allo3⌝?)
---- Testing with '--opt1 --derp2 --allo3' 'thing' ---
- (did you mean ⌜--allo3⌝?)
+
+→ fuzzyFindOption '--opt1 --derp2 --allo3' 'thing'
+
 ```
 

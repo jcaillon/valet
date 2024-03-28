@@ -13,6 +13,9 @@ if [ -z "${_MAIN_INCLUDED:-}" ]; then
 fi
 # --- END OF COMMAND COMMON PART
 
+# shellcheck source=utils
+source "${VALET_HOME}/valet.d/commands.d/utils"
+
 #===============================================================
 # >>> self release valet
 #===============================================================
@@ -69,6 +72,20 @@ function selfRelease() {
   version="${version%%$'\n'*}"
   inform "The current version of valet is: ${version}"
 
+  # get the current latest tag
+  local lastTag
+  lastTag="$(git tag --sort=committerdate --no-color)"
+  lastTag="${lastTag%%$'\n'*}"
+
+  # prepare the tag message
+  local tagMessage line
+  tagMessage="# Release of version ${version}"$'\n'$'\n'
+  tagMessage+="Changelog: "$'\n'$'\n'
+  while read -r line; do
+    tagMessage+="- ${line}"$'\n'
+  done < <(git log --pretty=format:"%s" "${lastTag}..HEAD")
+  inform "The tag message is: ${tagMessage}"
+
   # create a new git tag with the version
   if [[ "${dryRun:-}" != "true" ]]; then
     git tag -a "v${version}" -m "Release version ${version}"
@@ -77,18 +94,38 @@ function selfRelease() {
   fi
 
   # bump the version
-  local -i level semVerNumber semVerIndex
-  [[ "${bumpLevel:-}" == "major" ]] && level=1 || level=2
-  local newVersion
-  for semVerIndex in {1..2}; do
-    cutF "${version}" "${semVerIndex}" "." && semVerNumber="${LAST_RETURNED_VALUE%-*}"
-    [[ semVerIndex -eq level ]] && semVerNumber=$((semVerNumber + 1))
-    [[ semVerIndex -eq 2 && level -eq 1 ]] && semVerNumber=0
-    newVersion+="${semVerNumber}."
-  done
-  newVersion="${newVersion}0"
+  bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${LAST_RETURNED_VALUE}"
   [[ "${dryRun:-}" != "true" ]] && echo "${newVersion}" >"${VALET_HOME}/valet.d/version"
   inform "The new version of valet is: ${newVersion}"
+
+  # commit the new version
+  if [[ "${dryRun:-}" != "true" ]]; then
+    git add "${VALET_HOME}/valet.d/version"
+    git commit -m "🔖 bump version to ${newVersion}"
+    git push origin main
+    succeed "The new version has been committed."
+  fi
+
+  # prepare the release payload
+  local releasePayload
+  releasePayLoad="{
+    \"tag_name\": \"v${version}\",
+    \"body\": \"${tagMessage}\",
+    \"draft\": false,
+    \"prerelease\": false
+  }"
+
+  # push the release to GitHub
+  if [[ "${dryRun:-}" != "true" ]]; then
+    curl -X POST --location --fail --location \
+      -H "Authorization: token ${githubReleaseToken}" \
+      -H "Accept: application/vnd.github.v3+json" \
+      -d "${releasePayload}" \
+      "https://api.github.com/repos/jcaillon/valet/releases"
+    succeed "The new version has been released on GitHub."
+  fi
+
+
 
   return 0
 }

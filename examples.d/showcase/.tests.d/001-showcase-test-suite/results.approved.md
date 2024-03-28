@@ -9,7 +9,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
---- Testing with '-o -2 optionValue2 arg1 more1 more2' ---
+→ showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
 ```
 
 **Error** output:
@@ -28,6 +28,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ showCaseSudo
 whoami
 ```
 
@@ -38,6 +39,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ valet showcase hello-world
 Hello world!
 ```
 
@@ -48,6 +50,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ onInterrupt
 onInterrupt is working
 ```
 

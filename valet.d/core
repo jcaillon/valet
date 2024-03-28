@@ -627,25 +627,6 @@ function fuzzyMatch() {
   LAST_RETURNED_VALUE="${bestMatch:-}"
 }
 
-# This functions tests if a given is empty.
-# $1: the file path to test
-# returns 0 if the file is empty, 1 otherwise
-#
-# Usage:
-#   isFileEmpty "/path/to/file" && echo "The file is empty."
-function isFileEmpty() {
-  local filePath
-  filePath="${1}"
-
-  local firstChar
-
-  IFS= read -N 1 -rd '' firstChar < "${filePath}" || true
-  if [ -z "${firstChar:-}" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
 
 #===============================================================
 # >>> Valet files and directories

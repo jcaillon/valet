@@ -236,17 +236,21 @@ function endTest() {
   printf "%s\n\n" "Exit code: ${exitCode}" >>"${_TEST_REPORT_FILE}"
 
   # write the standard output if any
-  local stdOut
-  IFS= read -rd '' stdOut <"${_TEST_STANDARD_OUTPUT_FILE}" || true
-  if [ -n "${stdOut:-}" ]; then
-    printf "%s\n\n%s\n%s\n%s\n\n" "**Standard** output:" "\`\`\`plaintext" "${stdOut%$'\n'}" "\`\`\`" >>"${_TEST_REPORT_FILE}"
+  if [ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]; then
+    {
+      printf "%s\n\n%s\n" "**Standard** output:" "\`\`\`plaintext"
+      echoFileSubstitutingPath "${_TEST_STANDARD_OUTPUT_FILE}"
+      printf "\n%s\n\n" "\`\`\`"
+    } >>"${_TEST_REPORT_FILE}"
   fi
 
   # write the error output if any
-  local errorOut
-  IFS= read -rd '' errorOut <"${_TEST_STANDARD_ERROR_FILE}" || true
-  if [ -n "${errorOut:-}" ]; then
-    printf "%s\n\n%s\n%s\n%s\n\n" "**Error** output:" "\`\`\`log" "${errorOut%$'\n'}" "\`\`\`" >>"${_TEST_REPORT_FILE}"
+  if [ -s "${_TEST_STANDARD_ERROR_FILE}" ]; then
+    {
+      printf "%s\n\n%s\n" "**Error** output:" "\`\`\`log"
+      echoFileSubstitutingPath "${_TEST_STANDARD_ERROR_FILE}"
+      printf "\n%s\n\n" "\`\`\`"
+    } >>"${_TEST_REPORT_FILE}"
   fi
 
   # reset the standard output and error output files
@@ -255,39 +259,6 @@ function endTest() {
   setFdRedirection
 
   set +Eeu +o pipefail
-}
-
-# This function is used to echo the content of the temp file with some substitutions.
-# The substitutions are:
-# - replace the VALET_HOME with $VALET_HOME
-# - replace the current test directory with a dot
-# - replace a line ending with a code line number :0 by :XXX
-# - replace a line ending with "after ${SECONDS}s." by "after Xs."
-# - replace a line with ${TMPDIR}/valet-*/ (temp directory) by /valet/
-#
-# This allows to have consistent results accross different execution environments for the tests.
-#
-# Usage:
-#   myCommandThatProducesLinesWithValetDirectoryPath 2> "${_TEST_TEMP_FILE}"
-#   echoTempFileWithSubstitution "${_TEST_TEMP_FILE}" 1>&2
-
-function echoTempFileWithSubstitution() {
-  local file="${1:-${_TEST_TEMP_FILE}}"
-  local line
-  local IFS=$'\n'
-  while read -rd $'\n' line; do
-    line="${line//${VALET_HOME}/\$VALET_HOME}"
-    line="${line//${PWD}/.}"
-    line="${line//${_TEMPORARY_DIRECTORY}/\/tmp}"
-    line="${line//\/valet-*\//\/valet\/}"
-    if [[ "${line}" =~ :[0-9]{1,}$ ]]; then
-      line="${line/%:*/:XXX}"
-    fi
-    if [[ "${line}" =~ "after "[0-9]{1,}s.$ ]]; then
-      line="${line/%after */after Xs.}"
-    fi
-    echo "${line}"
-  done <"${file}"
 }
 
 #===============================================================
@@ -386,6 +357,9 @@ function runTest() {
 
   # setting up valet to minimize output difference between 2 runs
   setSimplerLogFunction
+
+  # used in echoFileSubstitutingPath to replace this path with .
+  CURRENT_DIRECTORY="${PWD}"
 
   # write the test script name
   local scriptName="${testScript##*/}"
@@ -486,4 +460,37 @@ function setGlobalOptions() {
     inform "Excluding all test suites that match the pattern ⌜${exclude}⌝."
     EXCLUDE_PATTERN="${exclude}"
   fi
+}
+
+# This function is used to echo the content of a file with some substitutions.
+# The substitutions are:
+# - replace the VALET_HOME with $VALET_HOME
+# - replace the current test directory with a dot
+# - replace a line with ${TMPDIR}/valet-*/ (temp directory) by /valet/
+#
+# This allows to have consistent results accross different execution environments for the tests.
+#
+# Usage:
+#   myCommandThatProducesLinesWithValetDirectoryPath 2> "${_TEST_TEMP_FILE}"
+#   echoFileSubstitutingPath "${_TEST_TEMP_FILE}" 1>&2
+function echoFileSubstitutingPath() {
+  local file="${1}"
+  local line
+  local IFS=$'\n'
+  local -i firstLine=1
+  while read -rd $'\n' line; do
+    if [[ firstLine -eq 1 ]]; then
+      firstLine=0
+    else
+      echo
+    fi
+    line="${line//${VALET_HOME}/\$VALET_HOME}"
+    line="${line//${CURRENT_DIRECTORY}/.}"
+    line="${line//${_TEMPORARY_DIRECTORY}/\/tmp}"
+    line="${line//\/valet-*\//\/valet\/}"
+    if [[ "${line}" =~ "after "[0-9]{1,}s.$ ]]; then
+      line="${line/%after */after Xs.}"
+    fi
+    echo -n "${line}"
+  done <"${file}"
 }

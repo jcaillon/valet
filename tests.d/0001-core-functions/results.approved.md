@@ -9,6 +9,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→  wrapText "${shortText}" 30
 ------------------------------
 You don't get better on the 
 days when you feel like going.
@@ -54,6 +55,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→  wrapText "${shortText}" 90 4 false
 ------------------------------------------------------------------------------------------
 You don't get better on the days when you feel like going. You get better on the days 
     when you don't want to go, but you go anyway. If you can overcome the negative energy 
@@ -78,6 +80,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→  wrapText "${shortText}" 90 2 true
 ------------------------------------------------------------------------------------------
   You don't get better on the days when you feel like going. You get better on the days 
   when you don't want to go, but you go anyway. If you can overcome the negative energy 
@@ -102,15 +105,21 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
---- extracting f1 ---
+→  cutF "field1 field2 field3" 1 " "
 field1
---- extracting f2 ---
+
+→  cutF "field1 field2 field3" 2 " "
 field2
---- extracting f3 ---
+
+→  cutF "field1 field2 field3" 3 " "
 field3
---- extracting f4 which does not exist ---
+
+→  cutF "field1 field2 field3" 4 " "
 field3
---- extracting line 2 ---
+
+→  cutF "line1 hm I wonder
+line2 does it work on lines?
+line3 seems so" 2 $'\n'
 line2 does it work on lines?
 ```
 
@@ -121,26 +130,33 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
---- matching pattern 'evle' ---
+lines="l1 this is a word
 l2 very unbelievable
---- matching pattern 'sh2' ---
-l4 showcase command2
---- matching pattern 'u', should prioritize lower index of u ---
 l2 unbelievable
---- matching pattern 'showcase', should be the first equal match ---
 l3 showcase command1
---- matching pattern 'lubl', should prioritize lower distance between letters ---
+l4 showcase command2
+l5 ublievable"
+
+→ fuzzyMatch evle "${lines}"
+l2 very unbelievable
+
+→ fuzzyMatch sh2 "${lines}"
+l4 showcase command2
+
+# should prioritize lower index of u
+→ fuzzyMatch u "${lines}"
+l2 unbelievable
+
+# should be the first equal match
+→ fuzzyMatch showcase "${lines}"
+l3 showcase command1
+
+# should prioritize lower distance between letters
+→ fuzzyMatch lubl "${lines}"
 l5 ublievable
 ```
 
-### Testing isFileEmpty
+### Testing invoke
 
 Exit code: 0
-
-**Standard** output:
-
-```plaintext
-OK, the file is empty
-OK, the file has content
-```
 

@@ -9,6 +9,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ valet help showcase hello-world
 ABOUT
 
   An hello world command.
@@ -25,13 +26,14 @@ OPTIONS
 
 ```
 
-### Testing to fuzzy find command
+### Testing to fuzzy find an help
 
 Exit code: 0
 
 **Standard** output:
 
 ```plaintext
+→ valet hel s h
 ABOUT
 
   An hello world command.
@@ -51,7 +53,7 @@ OPTIONS
 **Error** output:
 
 ```log
-INFO     Fuzzy matching the command ⌜hel s⌝ to ⌜help⌝.
+INFO     Fuzzy matching the command ⌜hel⌝ to ⌜help⌝.
 INFO     Fuzzy matching the command ⌜s h⌝ to ⌜showcase hello-world⌝.
 ```
 
@@ -62,7 +64,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
-------------------------------------------------------------
+→ valet help --columns 60 help
 ABOUT
 
   Show the help this program or of the help of a specific 
@@ -112,6 +114,12 @@ EXAMPLES
 
 Exit code: 1
 
+**Standard** output:
+
+```plaintext
+→ valet help --unknown -colo
+```
+
 **Error** output:
 
 ```log
@@ -127,6 +135,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ valet help
 ABOUT
 
   Valet is wrapper around a collection of commands that help you with your daily tasks.
@@ -160,6 +169,7 @@ ABOUT
   terminal width.
   - VALET_CI_MODE="true": will simplify the log output for CI/CD environments (or slow systems), will display the logs 
   without colors, without wrapping lines and with the full date.
+  - VALET_REMEMBER_LAST_CHOICES="20": number of last choices to remember when selecting an item from a menu.
   
   ⌜Developer notes:⌝
   You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true
@@ -197,6 +207,8 @@ COMMANDS
       Re-build the menu of valet from your commands.
   self
       Show the valet self-maintenance sub menu.
+  self release
+      Release a new version of valet.
   self test
       Test your valet custom commands.
   self test-core
@@ -229,6 +241,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ valet self test-core --show-help
 ABOUT
 
   Test valet core features using approval tests approach.
@@ -291,9 +304,15 @@ OPTIONS
 
 ## Test script 02.command-misc
 
-### Testing that we correctly parse arguments and options and fail is they don't match
+### Testing that we correctly parse arguments and options and fail if they don't match
 
 Exit code: 1
+
+**Standard** output:
+
+```plaintext
+→ valet self test-core --non-existing-option nonNeededArg1 -derp anotherArg
+```
 
 **Error** output:
 
@@ -308,6 +327,12 @@ Use valet self test-core --help to get help.
 ### Testing that a command with sudo ask for sudo privileges
 
 Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ valet showcase sudo-command
+```
 
 **Error** output:
 
@@ -329,6 +354,12 @@ whoami
 
 Exit code: 0
 
+**Standard** output:
+
+```plaintext
+→ valet self test-core --error
+```
+
 **Error** output:
 
 ```log
@@ -344,6 +375,12 @@ ERROR    Error code 1 in selfTestCore(), stack:
 
 Exit code: 5
 
+**Standard** output:
+
+```plaintext
+→ valet self test-core --exit
+```
+
 **Error** output:
 
 ```log
@@ -356,6 +393,12 @@ EXIT     Exiting with code 5.
 
 Exit code: 1
 
+**Standard** output:
+
+```plaintext
+→ valet self test-core --fail
+```
+
 **Error** output:
 
 ```log
@@ -365,6 +408,12 @@ ERROR    This is for testing valet core functions, failing now.
 ### Testing unknown command handling
 
 Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ valet self test-core --unknown-command
+```
 
 **Error** output:
 
@@ -388,6 +437,12 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ showInteractiveCommandsMenu "ReturnLast My header
+2 lines" "cm1  	This is command 1
+cm2  	This is command 2
+sub cmd1  	This is sub command 1
+sub cmd2  	This is sub command 2
+another3  	This is another command 3"
 another3
 ```
 
@@ -403,15 +458,21 @@ cm2  	This is command 2
 sub cmd1  	This is sub command 1
 sub cmd2  	This is sub command 2
 another3  	This is another command 3
-===
+
 fzf args were:
---tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=2 --preview-window=right:50:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '/mnt/c/data/repo/github.com/jcaillon/valet/valet' help --columns 48 {}
+--tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=2 --preview-window=right:50:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 48 {}
 ---
 ```
 
 ### Testing that valet can be called without any arguments and show the menu
 
 Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ valet
+```
 
 **Error** output:
 
@@ -423,6 +484,7 @@ Please select the command to run (filter by typing anything)
 Command name           	Short description
 help                   	Show the help this program or of a specific command
 self build             	Re-build the menu of valet from your commands.
+self release           	Release a new version of valet.
 self                   	Show the valet self-maintenance sub menu.
 self test-core         	Test valet core features.
 self test              	Test your valet custom commands.
@@ -431,7 +493,7 @@ showcase command1      	A showcase command that uses arguments and options.
 showcase hello-world   	An hello world command
 showcase               	Show the showcase sub menu.
 showcase sudo-command  	A command that requires sudo
-===
+
 fzf args were:
 --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:50:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 48 {}
 ---
@@ -439,21 +501,54 @@ fzf args were:
 
 ## Test script 05.logging
 
-### Testing log level
+### Testing log with success level
 
 Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ VALET_LOG_LEVEL=success valet self test-core --logging-level
+```
 
 **Error** output:
 
 ```log
----- level success with variable ----
 SUCCESS  This is a success message.
 WARNING  This is a warning message.
 With a second line.
----- level warn with option ----
+```
+
+### Testing log with warn level
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ valet --log-level warn self test-core --logging-level
+```
+
+**Error** output:
+
+```log
 WARNING  This is a warning message.
 With a second line.
----- level debug with verbose option ----
+```
+
+### Testing log with debug level
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ valet -v self test-core --logging-level
+```
+
+**Error** output:
+
+```log
 DEBUG    Log level set to debug.
 DEBUG    Command found ⌜self test-core⌝.
 DEBUG    Function name found ⌜selfTestCore⌝.
@@ -484,14 +579,19 @@ The debug mode is activated!
 DEBUG    Exiting with code 0 after Xs.
 ```
 
-### Testing log options
+### Testing default logging
 
 Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ valet self test-core --logging-level
+```
 
 **Error** output:
 
 ```log
----- normal output ----
 [1;30mHH:MM:SS [0;36mINFO     [0m This is an info message with a super long sentence. The value of life is not in its duration, but in
                     its donation. You are not important because of how long you live, you are important because of how 
                     effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed 
@@ -500,36 +600,129 @@ Exit code: 0
 [1;30mHH:MM:SS [0;32mSUCCESS  [0m This is a success message.
 [1;30mHH:MM:SS [0;33mWARNING  [0m This is a warning message.
                     With a second line.
----- CI mode ----
+```
+
+### Testing no color logging
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ VALET_NO_COLOR=true valet self test-core --logging-level
+```
+
+**Error** output:
+
+```log
+HH:MM:SS INFO      This is an info message with a super long sentence. The value of life is not in its duration, but in
+                    its donation. You are not important because of how long you live, you are important because of how 
+                    effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed 
+                    him for a lifetime. Surround yourself with the best people you can find, delegate authority, and 
+                    don't interfere as long as the policy you've decided upon is being carried out.
+HH:MM:SS SUCCESS   This is a success message.
+HH:MM:SS WARNING   This is a warning message.
+                    With a second line.
+```
+
+### Testing CI MODE logging
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ VALET_NO_COLOR=true VALET_CI_MODE=true valet self test-core --logging-level
+```
+
+**Error** output:
+
+```log
 YYYY:MM:DD_HH:MM:SS INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 YYYY:MM:DD_HH:MM:SS SUCCESS  This is a success message.
 YYYY:MM:DD_HH:MM:SS WARNING  This is a warning message.
 With a second line.
----- normal, no timestamp ----
-[0;36mINFO     [0m This is an info message with a super long sentence. The value of life is not in its duration, but in its 
+```
+
+### Testing no timestamp logging
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ VALET_NO_COLOR=true VALET_NO_TIMESTAMP=true valet self test-core --logging-level
+```
+
+**Error** output:
+
+```log
+INFO      This is an info message with a super long sentence. The value of life is not in its duration, but in its 
            donation. You are not important because of how long you live, you are important because of how effective you 
            live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
            Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the 
            policy you've decided upon is being carried out.
-[0;32mSUCCESS  [0m This is a success message.
-[0;33mWARNING  [0m This is a warning message.
+SUCCESS   This is a success message.
+WARNING   This is a warning message.
            With a second line.
----- normal, no icons ----
-[1;30mHH:MM:SS [0;36mINFO    [0m This is an info message with a super long sentence. The value of life is not in its duration, but in 
+```
+
+### Testing no icon logging
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ VALET_NO_COLOR=true VALET_NO_ICON=true valet self test-core --logging-level
+```
+
+**Error** output:
+
+```log
+HH:MM:SS INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in 
                   its donation. You are not important because of how long you live, you are important because of how 
                   effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him
                   for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't 
                   interfere as long as the policy you've decided upon is being carried out.
-[1;30mHH:MM:SS [0;32mSUCCESS [0m This is a success message.
-[1;30mHH:MM:SS [0;33mWARNING [0m This is a warning message.
+HH:MM:SS SUCCESS  This is a success message.
+HH:MM:SS WARNING  This is a warning message.
                   With a second line.
----- normal, no wrap ----
-[1;30mHH:MM:SS [0;36mINFO     [0m This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-[1;30mHH:MM:SS [0;32mSUCCESS  [0m This is a success message.
-[1;30mHH:MM:SS [0;33mWARNING  [0m This is a warning message.
+```
+
+### Testing no wrap logging
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ VALET_NO_COLOR=true VALET_NO_WRAP=true valet self test-core --logging-level
+```
+
+**Error** output:
+
+```log
+HH:MM:SS INFO      This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+HH:MM:SS SUCCESS   This is a success message.
+HH:MM:SS WARNING   This is a warning message.
 With a second line.
----- normal, wrapping at 80 ----
-[1;30mHH:MM:SS [0;36mINFO     [0m This is an info message with a super long sentence. The 
+```
+
+### Testing wrap at 80 logging
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ VALET_NO_COLOR=true VALET_LOG_COLUMNS=80 valet self test-core --logging-level
+```
+
+**Error** output:
+
+```log
+HH:MM:SS INFO      This is an info message with a super long sentence. The 
                     value of life is not in its duration, but in its donation. 
                     You are not important because of how long you live, you are 
                     important because of how effective you live. Give a man a 
@@ -538,8 +731,8 @@ With a second line.
                     people you can find, delegate authority, and don't interfere
                     as long as the policy you've decided upon is being carried 
                     out.
-[1;30mHH:MM:SS [0;32mSUCCESS  [0m This is a success message.
-[1;30mHH:MM:SS [0;33mWARNING  [0m This is a warning message.
+HH:MM:SS SUCCESS   This is a success message.
+HH:MM:SS WARNING   This is a warning message.
                     With a second line.
 ```
 
@@ -552,12 +745,19 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ valet --version
 OK, we got a version.
 ```
 
 ### Testing unknown option, corrected with fuzzy match
 
 Exit code: 1
+
+**Standard** output:
+
+```plaintext
+→ valet -prof
+```
 
 **Error** output:
 
@@ -568,6 +768,12 @@ ERROR    Unknown option ⌜-prof⌝ (did you mean ⌜--profiling⌝?)).
 ### Testing temp files/directories creation, cleaning and custom cleanUp
 
 Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ valet self test-core --create-temp-files
+```
 
 **Error** output:
 
@@ -586,22 +792,23 @@ WARNING  This is a custom clean up function.
 
 Exit code: 0
 
+**Standard** output:
+
+```plaintext
+→ VALET_USER_DIRECTORY=non-existing self test-core --logging-level
+```
+
 **Error** output:
 
 ```log
-WARNING  The valet user directory ⌜$VALET_HOME/non-existing⌝ does not contain a built 
-         ⌜commands⌝ file.
-         To get started with valet, you must build your command list using the ⌜valet self build⌝ command.
-         Please check the help using ⌜valet self build --help⌝ for details.
-         Now using the examples commands from ⌜$VALET_HOME/examples.d⌝.
-INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its 
-         donation. You are not important because of how long you live, you are important because of how effective you 
-         live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
-         Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the 
-         policy you've decided upon is being carried out.
+WARNING  The valet user directory ⌜$VALET_HOME/non-existing⌝ does not contain a built ⌜commands⌝ file.
+To get started with valet, you must build your command list using the ⌜valet self build⌝ command.
+Please check the help using ⌜valet self build --help⌝ for details.
+Now using the examples commands from ⌜$VALET_HOME/examples.d⌝.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 SUCCESS  This is a success message.
 WARNING  This is a warning message.
-         With a second line.
+With a second line.
 ```
 
 ## Test script 07.profiler
@@ -613,6 +820,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ valet --log-level fail -x self test-core --logging-level
 OK, command profiling file is not empty.
 OK, startup profiling file is not empty.
 ```
@@ -623,6 +831,12 @@ OK, startup profiling file is not empty.
 
 Exit code: 0
 
+**Standard** output:
+
+```plaintext
+→ valet self
+```
+
 **Error** output:
 
 ```log
@@ -632,10 +846,11 @@ Please select the command to run (filter by typing anything)
 
 Command name           	Short description
 self build             	Re-build the menu of valet from your commands.
+self release           	Release a new version of valet.
 self test-core         	Test valet core features.
 self test              	Test your valet custom commands.
 self update            	Update valet using the latest release on GitHub.
-===
+
 fzf args were:
 --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:50:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 48 {}
 ---
@@ -648,6 +863,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
+→ valet self -h
 ABOUT
 
   Show the valet self-maintenance sub menu.
@@ -667,6 +883,8 @@ COMMANDS
 
   build
       Re-build the menu of valet from your commands.
+  release
+      Release a new version of valet.
   test
       Test your valet custom commands.
   test-core
@@ -686,32 +904,16 @@ EXAMPLES
 
 Exit code: 1
 
+**Standard** output:
+
+```plaintext
+→ valet self --unknown
+```
+
 **Error** output:
 
 ```log
 ERROR    Unknown option ⌜--unknown⌝.
-         Use valet self --help to get help.
-```
-
-### Testing that we go into the interactive menu with no arguments
-
-Exit code: 0
-
-**Error** output:
-
-```log
----
-fzf input stream was:
-Please select the command to run (filter by typing anything)
-
-Command name           	Short description
-self build             	Re-build the menu of valet from your commands.
-self test-core         	Test valet core features.
-self test              	Test your valet custom commands.
-self update            	Update valet using the latest release on GitHub.
-===
-fzf args were:
---tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:50:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 48 {}
----
+Use valet self --help to get help.
 ```
 

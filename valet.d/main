@@ -833,8 +833,14 @@ function fuzzyMatchCommandtoFunctionName() {
 
   getMaxPossibleCommandLevel "$@" && level="${LAST_RETURNED_VALUE}"
 
+  # we put the arguments into an array so we can interpret 'my' 'sub'
+  # and 'my sub' as the same command (we split everything by space)
+  local -a commandArrray
+  # shellcheck disable=SC2206
+  commandArrray=($*)
+
   for ((loopI = level; loopI >= 1; loopI--)); do
-    command="${*:1:$loopI}"
+    command="${commandArrray[*]:0:$loopI}"
 
     # case where the command is exact, we can match the function immediately
     getFunctionNameFromCommand "${command}" && functionName="${LAST_RETURNED_VALUE}"
@@ -846,7 +852,7 @@ function fuzzyMatchCommandtoFunctionName() {
     fuzzyMatch "${command}" "${CMD_ALL_COMMANDS}" && exactCommand="${LAST_RETURNED_VALUE}"
     if [ -n "${exactCommand}" ]; then
       getFunctionNameFromCommand "${exactCommand}" && functionName="${LAST_RETURNED_VALUE}"
-      inform "Fuzzy matching the command ⌜$*⌝ to ⌜${exactCommand}⌝."
+      inform "Fuzzy matching the command ⌜${command}⌝ to ⌜${exactCommand}⌝."
       break
     fi
   done

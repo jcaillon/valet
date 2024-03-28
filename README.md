@@ -1,12 +1,16 @@
 # valet
 
-⚠️ THIS IS A WORK IN PROGRESS, PLEASE WAIT FOR A FIRST RELEASE :)
+[![GitHub Release](https://img.shields.io/github/v/release/jcaillon/valet?sort=date&style=flat&logo=github&logoColor=white&label=Latest%20release&color=%2350C878)](https://github.com/jcaillon/3P/releases/latest)
+
+⚠️ THIS IS A WORK IN PROGRESS, PLEASE WAIT FOR THE REMOVAL OF THIS DISCLAIMER :)
 
 Valet is a wrapper around your bash scripts that provides an interactive menu, standard help output, auto parsing for options and arguments, a framework for approval testing, and so on...
 
 It works on **any Linux environment with bash** or on **Git bash for Windows**.
 
 It is written for performance and to minimize the overhead of a script calling your scripts.
+
+![icon](docs/images/icon.svg)
 
 ## Use case
 
