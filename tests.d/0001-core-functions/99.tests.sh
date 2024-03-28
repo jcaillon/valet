@@ -10,42 +10,42 @@ As long as I focus on what I feel and don't worry about where I'm going, it work
 
 There were 2 new lines before this."
 
-  echo "→  wrapText \"\${shortText}\" 30"
+  echo "→ wrapText \"\${shortText}\" 30"
   echo "------------------------------"
   wrapText "${shortText}" 30 && echo "${LAST_RETURNED_VALUE}"
   endTest "Wrapping text at column 30 with no padding" 0
 
 
-  echo "→  wrapText \"\${shortText}\" 90 4 false"
+  echo "→ wrapText \"\${shortText}\" 90 4 false"
   echo "------------------------------------------------------------------------------------------"
   wrapText "${shortText}" 90 4 false && echo "${LAST_RETURNED_VALUE}"
   endTest "Wrapping text at column 90 with padding of 4 on new lines" 0
 
 
-  echo "→  wrapText \"\${shortText}\" 90 2 true"
+  echo "→ wrapText \"\${shortText}\" 90 2 true"
   echo "------------------------------------------------------------------------------------------"
   wrapText "${shortText}" 90 2 true && echo "${LAST_RETURNED_VALUE}"
   endTest "Wrapping text at column 90 with padding of 2 on all lines" 0
 }
 
 function testCutF() {
-  echo "→  cutF \"field1 field2 field3\" 1 \" \""
+  echo "→ cutF \"field1 field2 field3\" 1 \" \""
   cutF "field1 field2 field3" 1 " " && echo "${LAST_RETURNED_VALUE}"
   echo
 
-  echo "→  cutF \"field1 field2 field3\" 2 \" \""
+  echo "→ cutF \"field1 field2 field3\" 2 \" \""
   cutF "field1 field2 field3" 2 " " && echo "${LAST_RETURNED_VALUE}"
   echo
 
-  echo "→  cutF \"field1 field2 field3\" 3 \" \""
+  echo "→ cutF \"field1 field2 field3\" 3 \" \""
   cutF "field1 field2 field3" 3 " " && echo "${LAST_RETURNED_VALUE}"
   echo
 
-  echo "→  cutF \"field1 field2 field3\" 4 \" \""
+  echo "→ cutF \"field1 field2 field3\" 4 \" \""
   cutF "field1 field2 field3" 4 " " && echo "${LAST_RETURNED_VALUE}"
   echo
 
-  echo "→  cutF \"line1 hm I wonder
+  echo "→ cutF \"line1 hm I wonder
 line2 does it work on lines?
 line3 seems so\" 2 \$'\n'"
   cutF "line1 hm I wonder
@@ -91,23 +91,10 @@ l5 ublievable"
   endTest "Testing fuzzyMatch" 0
 }
 
-function testInvoke() {
-
-  invoke fzf --version
-
-  (invoke fzf --version)
-
-  echo "$(invoke fzf --version)"
-
-  endTest "Testing invoke" 0
-}
-
-
 function main() {
   testWrapText
   testCutF
   testFuzzyMatch
-  testInvoke
 }
 
 main

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+read -rd '' INPUT_STREAM_CONTENT <&0 || true
+
+echo "▶ called fakexec"
+echo "Input stream was:"
+echo ---
+echo "${INPUT_STREAM_CONTENT:-}"
+echo ---
+echo "Arguments were:"
+echo "$@"
+
+echo "This is an error output from fakeexec" 1>&2

@@ -8,8 +8,9 @@ fi
 # Everything above this line should stay as is for every command file you create.
 # Your command can use all the functions defined in the core script of valet.
 
+
 #===============================================================
-# >>> showcase command menu
+# >>> command: showcase
 #===============================================================
 
 # TODO: autogenerate this kind of functions for each sub command root
@@ -42,8 +43,9 @@ function showcaseMenu() {
   showSubMenu "$@"
 }
 
+
 #===============================================================
-# >>> showcase commands
+# >>> command: showcase command1
 #===============================================================
 
 # shellcheck disable=SC2317
@@ -91,6 +93,11 @@ function showcaseCommand1() {
   inform "More: ${more[*]}."
 }
 
+
+#===============================================================
+# >>> command: showcase hello-world
+#===============================================================
+
 # shellcheck disable=SC2317
 function about_helloWorld() {
   echo "
@@ -105,6 +112,12 @@ description: |-
 function helloWorld() {
   echo "Hello world!"
 }
+
+
+#===============================================================
+# >>> command: showcase sudo-command
+#===============================================================
+
 
 # shellcheck disable=SC2317
 function about_showCaseSudo() {

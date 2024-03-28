@@ -1,5 +1,173 @@
 # Test suite 0001-core-functions
 
+## Test script 01.invoke
+
+### Testing invoke5, executable are taken in priority from VALET_BIN_PATH, input stream from file
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ invoke5 false 0 true "${tmpFile}" fakeexec --std-in --option argument1 argument2
+Invoke function ended with exit code ⌜0⌝.
+⌜stdout from file⌝:
+▶ called fakexec
+Input stream was:
+---
+Input stream content from a file
+---
+Arguments were:
+--std-in --option argument1 argument2
+⌜stderr from file⌝:
+This is an error output from fakeexec
+
+```
+
+### Testing invoke5, should return 1, input stream from string
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error
+Invoke function ended with exit code ⌜1⌝.
+⌜stdout from file⌝:
+▶ called fakeexec2
+Input stream was:
+---
+inputStreamValue
+---
+Arguments were:
+--std-in --error
+⌜stderr from file⌝:
+This is an error output from fakeexec2
+returning 1 from fakeexec2
+
+```
+
+### Testing invoke5, should fail
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ invoke5 true 0 false inputStreamValue fakeexec2 --std-in --error
+exitcode=1
+```
+
+**Error** output:
+
+```log
+ERROR    The command ⌜fakeexec2⌝ failed with exit code ⌜1⌝.
+⌜stdout⌝:
+▶ called fakeexec2
+Input stream was:
+---
+inputStreamValue
+---
+Arguments were:
+--std-in --error
+⌜stderr⌝:
+This is an error output from fakeexec2
+returning 1 from fakeexec2
+```
+
+### Testing invoke5, should translate error 1 to 0
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ invoke5 true 0,1,2 true '' fakeexec2 --error
+Invoke function ended with exit code ⌜0⌝.
+⌜stdout from file⌝:
+▶ called fakeexec2
+Input stream was:
+---
+
+---
+Arguments were:
+--error
+⌜stderr from file⌝:
+This is an error output from fakeexec2
+returning 1 from fakeexec2
+
+```
+
+### Testing invoke5var, should get stdout/stderr from var
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ invoke5var false 0 true '' fakeexec2
+Invoke function ended with exit code ⌜0⌝.
+⌜stdout from var⌝:
+▶ called fakeexec2
+Input stream was:
+---
+
+---
+Arguments were:
+
+
+⌜stderr from var⌝:
+This is an error output from fakeexec2
+
+
+```
+
+### Testing invoke3, output to files
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ invoke3 false 0 fakeexec2 --option argument1 argument2
+Invoke function ended with exit code ⌜0⌝.
+⌜stdout from file⌝:
+▶ called fakeexec2
+Input stream was:
+---
+
+---
+Arguments were:
+--option argument1 argument2
+⌜stderr from file⌝:
+This is an error output from fakeexec2
+
+```
+
+### Testing invoke3var, output to var
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ invoke3var false 0 fakeexec2 --option argument1 argument2
+Invoke function ended with exit code ⌜0⌝.
+⌜stdout from var⌝:
+▶ called fakeexec2
+Input stream was:
+---
+
+---
+Arguments were:
+--option argument1 argument2
+
+⌜stderr from var⌝:
+This is an error output from fakeexec2
+
+
+```
+
 ## Test script 99.tests
 
 ### Wrapping text at column 30 with no padding
@@ -9,7 +177,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
-→  wrapText "${shortText}" 30
+→ wrapText "${shortText}" 30
 ------------------------------
 You don't get better on the 
 days when you feel like going.
@@ -55,7 +223,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
-→  wrapText "${shortText}" 90 4 false
+→ wrapText "${shortText}" 90 4 false
 ------------------------------------------------------------------------------------------
 You don't get better on the days when you feel like going. You get better on the days 
     when you don't want to go, but you go anyway. If you can overcome the negative energy 
@@ -80,7 +248,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
-→  wrapText "${shortText}" 90 2 true
+→ wrapText "${shortText}" 90 2 true
 ------------------------------------------------------------------------------------------
   You don't get better on the days when you feel like going. You get better on the days 
   when you don't want to go, but you go anyway. If you can overcome the negative energy 
@@ -105,19 +273,19 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
-→  cutF "field1 field2 field3" 1 " "
+→ cutF "field1 field2 field3" 1 " "
 field1
 
-→  cutF "field1 field2 field3" 2 " "
+→ cutF "field1 field2 field3" 2 " "
 field2
 
-→  cutF "field1 field2 field3" 3 " "
+→ cutF "field1 field2 field3" 3 " "
 field3
 
-→  cutF "field1 field2 field3" 4 " "
+→ cutF "field1 field2 field3" 4 " "
 field3
 
-→  cutF "line1 hm I wonder
+→ cutF "line1 hm I wonder
 line2 does it work on lines?
 line3 seems so" 2 $'\n'
 line2 does it work on lines?
@@ -154,35 +322,5 @@ l3 showcase command1
 # should prioritize lower distance between letters
 → fuzzyMatch lubl "${lines}"
 l5 ublievable
-```
-
-### Testing invoke
-
-Exit code: 0
-
-**Standard** output:
-
-```plaintext
---------------------------------------------------------
-_TEMPORARY_DIRECTORY = /tmp
-----
-truc = /tmp/f11-0
-createTempFile = /tmp/f12-1
-createTempFile = /tmp/d3-1
---------------------------------------------------------
---------------------------------------------------------
-_TEMPORARY_DIRECTORY = /tmp
-----
-truc = /tmp/f13-1
-createTempFile = /tmp/f14-2
-createTempFile = /tmp/d3-2
---------------------------------------------------------
---------------------------------------------------------
-_TEMPORARY_DIRECTORY = /tmp
-----
-truc = /tmp/f14-1
-createTempFile = /tmp/f15-2
-createTempFile = /tmp/d4-2
---------------------------------------------------------
 ```
 

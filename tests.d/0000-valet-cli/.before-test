@@ -54,6 +54,27 @@ function fzf() {
 }
 export -f fzf
 
+# override the invoke5 function, but saving it first so we can restore it after the tests
+if [[ -z "${ORIGINAL_INVOKE5:-}" ]]; then
+  ORIGINAL_INVOKE5="$(declare -f invoke5)"
+fi
+function invoke5() {
+  local inputStreamContent
+  read -rd '' inputStreamContent <&0 || true
+
+  echo "▶ called invoke5" 1>&2
+  echo "Input stream was:" 1>&2
+  echo "${inputStreamContent:-}" 1>&2
+  echo 1>&2
+  echo "Arguments were:" 1>&2
+  echo "$@" 1>&2
+
+  if [[ "${inputStreamContent}" == "ReturnLast"* ]]; then
+    # returning the last line of the input stream
+    echo "${inputStreamContent##*$'\n'}"
+  fi
+}
+
 function echoTempFileWithTimeStampSubstitution() {
   local file="${_TEST_TEMP_FILE}"
   local line

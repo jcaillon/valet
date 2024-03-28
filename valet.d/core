@@ -41,7 +41,7 @@ function createTempFile() {
   while true; do
     TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
     LAST_RETURNED_VALUE="${_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
-    if [ ! -f "${LAST_RETURNED_VALUE}" ]; then
+    if [ ! -e "${LAST_RETURNED_VALUE}" ]; then
       touch "${LAST_RETURNED_VALUE}" 1>&2 2>/dev/null
       return 0
     fi
@@ -617,24 +617,186 @@ function fuzzyMatch() {
   LAST_RETURNED_VALUE="${bestMatch:-}"
 }
 
-
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to temporary files.
 #
-function invoke() {
-  local executable
-  executable="${1:?The first argument should be the executable to invoke.}"
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
+# $3: true/false to indicate if the 4th argument represents a file path or directly the content for stdin
+# $4: the stdin (can be empty)
+# $5: the executable to invoke
+# $6+: the arguments to pass to the executable
+#
+# Returns:
+#  The exit code of the function is the exit code of the executable.
+#  The stdout file of the executable in the global variable LAST_RETURNED_VALUE.
+#  The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#  invoke5 "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || fail "fzf failed."
+#  stdoutFilePath="${LAST_RETURNED_VALUE}"
+#  stderrFilePath="${LAST_RETURNED_VALUE2}"
+function invoke5() {
+  local failIfFails acceptableErrorCodes stdInFromFile stdIn executable
+  failIfFails="${1}"
+  acceptableErrorCodes="${2}"
+  stdInFromFile="${3}"
+  stdIn="${4}"
+  executable="${5}"
+  shift 5
 
-  echo "ok" > "$_TEMPORARY_STDERR_FILE"
-  echo "ok" > "$_TEMPORARY_STDOUT_FILE"
+  # reset the output files, but only if they already exist
+  [[ -s "${_TEMPORARY_STDOUT_FILE}" ]] && : > "${_TEMPORARY_STDOUT_FILE}"
+  [[ -s "${_TEMPORARY_STDERR_FILE}" ]] && : > "${_TEMPORARY_STDERR_FILE}"
 
+  # if debug mode is on, print some info
+  if isDebugMode; then
+    local debugMessage="Executing the command ⌜${executable}⌝."$'\n'
+    debugMessage+="Fail if it fails: ⌜${failIfFails}⌝"$'\n'
+    debugMessage+="Acceptable error codes: ⌜${acceptableErrorCodes}⌝"$'\n'
+    debugMessage+="Standard stream from file: ⌜${stdInFromFile}⌝"$'\n'
+    debugMessage+="Standard stream: ⌜${stdIn}⌝"$'\n'
+    debugMessage+="Extra parameters: ⌜${*}⌝"$'\n'
+    debug "${debugMessage}"
+  fi
 
-  echo --------------------------------------------------------
-  echo "_TEMPORARY_DIRECTORY = ${_TEMPORARY_DIRECTORY}"
-  echo ----
-  createTempFile && local truc="${LAST_RETURNED_VALUE}"
-  echo "truc = $truc"
-  echo "createTempFile = $(createTempFile && echo "${LAST_RETURNED_VALUE}")"
-  echo "createTempFile = $(createTempDirectory && echo "${LAST_RETURNED_VALUE}")"
-  echo --------------------------------------------------------
+  # try to find the executable in the valet bin folder,
+  # in which case bash will not have to find it on the path and we go faster
+  local possibleExecutablePath="${VALET_BIN_PATH:-"${VALET_HOME}/bin"}/${executable}"
+  if [[ -x "${possibleExecutablePath}" ]]; then
+    debug "The executable ⌜${executable}⌝ was found in ⌜${possibleExecutablePath}⌝."
+    executable="${possibleExecutablePath}"
+  fi
+
+  # execute the executable
+  local -i exitCode=0
+  if [[ -n "${stdIn}" ]]; then
+    if [[ "${stdInFromFile}" == "true" ]]; then
+      "${executable}" "$@" < "${stdIn}" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+    else
+      "${executable}" "$@" <<< "${stdIn}" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+    fi
+  else
+    "${executable}" "$@" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+  fi
+
+  # if debug mode is on, print the command and the exit code
+  if isDebugMode; then
+    local debugMessage="The command ⌜${executable}⌝ ended with exit code ⌜${exitCode}⌝."
+    if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
+      debugMessage+=$'\n'"⌜stdout⌝:"$'\n'"$(<"${_TEMPORARY_STDOUT_FILE}")"
+    fi
+    if [[ -s "${_TEMPORARY_STDERR_FILE}" ]]; then
+      debugMessage+=$'\n'"⌜stderr⌝:"$'\n'"$(<"${_TEMPORARY_STDERR_FILE}")"
+    fi
+    debug "${debugMessage}"
+  fi
+
+  # if the error code is acceptable, then we set it to 0
+  if [[ ",${acceptableErrorCodes}," == *",${exitCode},"* ]]; then
+    exitCode=0
+    debug "The error code ⌜${exitCode}⌝ is acceptable and has been reset to 0."
+  fi
+
+  # fail if needed; display all the debug information that could be useful
+  if [[ "${failIfFails}" == "true" && exitCode -ne 0 ]]; then
+    local message="The command ⌜${executable}⌝ failed with exit code ⌜${exitCode}⌝."
+    if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
+      message+=$'\n'"⌜stdout⌝:"$'\n'"$(<"${_TEMPORARY_STDOUT_FILE}")"
+    fi
+    if [[ -s "${_TEMPORARY_STDERR_FILE}" ]]; then
+      message+=$'\n'"⌜stderr⌝:"$'\n'"$(<"${_TEMPORARY_STDERR_FILE}")"
+    fi
+    fail "${message}"
+  fi
+
+  LAST_RETURNED_VALUE="${_TEMPORARY_STDOUT_FILE}"
+  LAST_RETURNED_VALUE2="${_TEMPORARY_STDERR_FILE}"
+  return ${exitCode}
+}
+
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to temporary files.
+#
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
+# $3: the executable to invoke
+# $4+: the arguments to pass to the executable
+#
+# Returns:
+#  The exit code of the function is the exit code of the executable.
+#  The stdout file of the executable in the global variable LAST_RETURNED_VALUE.
+#  The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#  invoke3 "false" "false" "fzf" "--height=10" || fail "fzf failed."
+#  stdoutFilePath="${LAST_RETURNED_VALUE}"
+#  stderrFilePath="${LAST_RETURNED_VALUE2}"
+function invoke3() {
+  local failIfFails acceptableErrorCodes executable
+  failIfFails="${1}"
+  acceptableErrorCodes="${2}"
+  shift 2
+
+  invoke5 "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
+}
+
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to environment variables.
+#
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
+# $3: true/false to indicate if the 4th argument represents a file path or directly the content for stdin
+# $4: the stdin (can be empty)
+# $5: the executable to invoke
+# $6+: the arguments to pass to the executable
+#
+# Returns:
+#  The exit code of the function is the exit code of the executable.
+#  The content of stdout in the global variable LAST_RETURNED_VALUE.
+#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#  invoke5var "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || fail "fzf failed."
+#  stdout="${LAST_RETURNED_VALUE}"
+#  stderr="${LAST_RETURNED_VALUE2}"
+function invoke5var() {
+  local -i exitCode=0
+  invoke5 "$@" || exitCode=$?
+
+  local content
+  IFS= read -rd '' content < "${LAST_RETURNED_VALUE}" || true
+  LAST_RETURNED_VALUE="${content}"
+  IFS= read -rd '' content < "${LAST_RETURNED_VALUE2}" || true
+  LAST_RETURNED_VALUE2="${content}"
+
+  return ${exitCode}
+}
+
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to environment variables.
+#
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
+# $3: the executable to invoke
+# $4+: the arguments to pass to the executable
+#
+# Returns:
+#  The exit code of the function is the exit code of the executable.
+#  The content of stdout in the global variable LAST_RETURNED_VALUE.
+#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#  invoke3var "false" "130,2" "fzf" "--height=10" || fail "fzf failed."
+#  stdout="${LAST_RETURNED_VALUE}"
+#  stderr="${LAST_RETURNED_VALUE2}"
+function invoke3var() {
+  local failIfFails acceptableErrorCodes executable
+  failIfFails="${1}"
+  acceptableErrorCodes="${2}"
+  shift 2
+
+  invoke5var "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
 }
 
 

@@ -146,7 +146,7 @@ function disableProfiler() { return 0; }
 # shellcheck disable=SC2016
 function createProfilerFunction() {
   PROFILER_FUNCTION='
-  enable_profiler() {
+  enableProfiler() {
     local file
     file="${1}"
 
@@ -175,7 +175,7 @@ function createProfilerFunction() {
     set -x
   }
 
-  disable_profiler() {
+  disableProfiler() {
     inform "Disabling profiler."
     set +x
   '
@@ -200,7 +200,7 @@ unset PROFILER_FUNCTION
 unset createProfilerFunction
 
 if [ "${VALET_STARTUP_PROFILING:-}" = "true" ]; then
-  enable_profiler "${VALET_STARTUP_PROFILING_FILE:-${HOME}/profile_valet.txt}"
+  enableProfiler "${VALET_STARTUP_PROFILING_FILE:-${HOME}/profile_valet.txt}"
 fi
 
 #===============================================================
@@ -213,10 +213,6 @@ function showFunctionHelp() {
   functionName="${1:-this}"
   noColor="${2:-${VALET_NO_COLOR:-false}}"
   maxColumns="${3:-180}"
-
-  if [ -z "${functionName}" ]; then
-    return 1
-  fi
 
   # sudo apt-get install colortest
   # colortest-16b
@@ -513,13 +509,13 @@ function sourceUserCommands() {
   commandsFile="${userDirectory}/commands"
 
   # if the commands file does not exist, we use the examples commands or we fail
-  if [ ! -f "${commandsFile}" ]; then
+  if [ ! -e "${commandsFile}" ]; then
     local message
     message="The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'
     message+="To get started with valet, you must build your command list using the ⌜valet self build⌝ command."$'\n'
     message+="Please check the help using ⌜valet self build --help⌝ for details."
     commandsFile="${VALET_HOME}/examples.d/commands"
-    if [ -f "${commandsFile}" ]; then
+    if [ -e "${commandsFile}" ]; then
       message+=$'\n'"Now using the examples commands from ⌜${commandsFile%/*}⌝."
       warn "${message}"
     else
@@ -570,17 +566,17 @@ function runFunction() {
 
   # disable startup profile and enable command profile, if needed
   if [ "${VALET_STARTUP_PROFILING:-}" = "true" ]; then
-    disable_profiler
+    disableProfiler
   fi
   if [ "${PROFIL_COMMAND:-}" = "true" ]; then
-    enable_profiler "${VALET_CMD_PROFILING_FILE:-${HOME}/profile_valet_cmd.txt}"
+    enableProfiler "${VALET_CMD_PROFILING_FILE:-${HOME}/profile_valet_cmd.txt}"
   fi
 
   # execute the function
   "${functionName}" "$@"
 
   if [ "${PROFIL_COMMAND:-}" = "true" ]; then
-    disable_profiler
+    disableProfiler
   fi
 
   exit 0
@@ -598,7 +594,7 @@ function sourceForFunction() {
   local fileToSource
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
     local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
-    if [ -f "${VALET_HOME:-}/${fileToSource}" ]; then
+    if [ -e "${VALET_HOME:-}/${fileToSource}" ]; then
       # shellcheck disable=SC1090
       source "${VALET_HOME:-}/${fileToSource}"
       debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
@@ -667,7 +663,7 @@ function sortCommands() {
   local lastChoicesFile
   getLocalStateDirectory
   lastChoicesFile="${LAST_RETURNED_VALUE}/${menuId}-last-choice"
-  if [ ! -f "${lastChoicesFile}" ]; then
+  if [ ! -e "${lastChoicesFile}" ]; then
     LAST_RETURNED_VALUE="${commands}"
     return 0
   fi
@@ -733,7 +729,7 @@ function addLastChoice() {
   local lastChoicesFile
   getLocalStateDirectory
   lastChoicesFile="${LAST_RETURNED_VALUE}/${menuId}-last-choice"
-  if [ ! -f "${lastChoicesFile}" ]; then
+  if [ ! -e "${lastChoicesFile}" ]; then
     touch "${lastChoicesFile}"
   fi
 
@@ -908,10 +904,7 @@ function getMaxPossibleCommandLevel() {
 # - It will set the variable as an array if the (last) argument name ends with '...'
 function parseFunctionArguments() {
   local functionName
-  functionName="${1:-}"
-  if [ -z "${functionName}" ]; then
-    return 1
-  fi
+  functionName="${1}"
   shift
 
   local -n argumentsName="CMD_ARGS_NAME_${functionName}"
@@ -930,6 +923,12 @@ function parseFunctionArguments() {
   local -n optionsNameSc="CMD_OPTS_NAME_SC_${functionName}"
   local -i totalNbOptions
   if [ -n "${options[0]:-}" ]; then totalNbOptions=${#options[@]}; else totalNbOptions=0; fi
+
+  # shortcut if the function expect no arguments and no options
+  if [[ totalNbArguments -eq 0 && totalNbOptions -eq 0 ]]; then
+    LAST_RETURNED_VALUE=""
+    return 0
+  fi
 
   local -a lastArgumentValues
   local -a outputErrors
@@ -1114,49 +1113,34 @@ function fuzzyFindOption() {
 #   parseFunctionArgumentsOrGoInteractive "functionName" "$@" && eval "${LAST_RETURNED_VALUE}"
 function parseFunctionArgumentsOrGoInteractive() {
   local functionName
-  functionName="${1:-}"
-  if [ -z "${functionName}" ]; then
-    return 1
-  fi
+  functionName="${1}"
   shift
 
+  parseFunctionArguments "${functionName}" "$@"
+  local parsedArguments="${LAST_RETURNED_VALUE}"
+  debug "Parsed arguments:"$'\n'"${parsedArguments}"
+
   # check if the function is expecting arguments and/or options
-  local expectArguments expectOptions
+  local expectArguments
   local -n arguments="CMD_ARGUMENTS_NAME_${functionName}"
   if [ -n "${arguments[0]:-}" ]; then
     expectArguments="true"
   fi
-  # we expect at least the --help option but we don't count it as an option
-  local -n options="CMD_OPTIONS_NAME_${functionName}"
-  if [ -n "${options[1]:-}" ]; then
-    expectOptions="true"
+
+  if [[ ("${expectArguments:-false}" == "true" && $# -eq 0) || "${VALET_FORCE_INTERACTIVE_MODE:-false}" == "true" ]]; then
+    goInteractive "${functionName}" "${parsedArguments}"
   fi
 
-  # the function expects nothing, nothing to parse
-  if [[ "${expectArguments:-false}" = "false" && "${expectOptions:-false}" = "false" ]]; then
-    return 0
-  fi
-
-  if [ "$#" -eq 0 ]; then
-    if [[ "${expectArguments:-false}" = "true" || ("${expectOptions:-false}" = "true" && "${VALET_OPTIONS_INTERACTIVE_MODE:-false}" = "true") ]]; then
-      debug "No arguments provided but some were expected, entering interactive mode."
-      goInteractive "${functionName}"
-    fi
-  fi
-
-  parseFunctionArguments "${functionName}" "$@"
-  local args="${LAST_RETURNED_VALUE}"
-  debug "Parsed arguments:"$'\n'"${args}"
-
-  LAST_RETURNED_VALUE="${args}"
+  LAST_RETURNED_VALUE="${parsedArguments}"
 }
 
 function goInteractive() {
-  local functionName
-  functionName="${1:-}"
-  if [ -z "${functionName}" ]; then return 1; fi
+  local functionName parsedArguments
+  functionName="${1}"
+  parsedArguments="${2}"
 
   # TODO: go interactive
+  warn "Entering interactive mode for the function ⌜${functionName}⌝. This is not yet implemented."
 
   # at the end, echo to the user the complete command that will be run
 }

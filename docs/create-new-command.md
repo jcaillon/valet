@@ -84,6 +84,13 @@ In order to find your new command in the valet menu; you need to call the `self 
 
 The build process consists of recreating the `valet.d/cmd` program by reading all the `about_xxx` functions and extracting info from the YAML definition. It also appends all the functions defined in `cmd-extra`.
 
+## 5. Test your program
+
+Your command function is not working as expected or seems stuck ? Two ways to approach this problem:
+
+- Run your valet command in the bash debugger on visual studio.
+- Or use the `valet -x` option to enable the profiler (this turns the debug mode on `set -x`). This will output the complete trace in `~/profile_valet_cmd.txt` (or you can choose the destination with the environment variable `VALET_CMD_PROFILING_FILE`).  
+
 ## Extra: defining sub commands
 
 If your new command name contains one or more spaces, you are defining a sub command. E.g. `sub cmd` defines a command `cmd` which is a sub command of the `sub` command. It can be useful to regroup commands under a theme. You can have a sub valet menu for the sub command `sub` which displays only the commands under this command.

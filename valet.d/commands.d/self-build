@@ -37,7 +37,7 @@ shortDescription: Re-build the menu of valet from your commands.
 description: |-
   This command can be used to re-build the menu in case you have modified, added or removed an about_xxx function in your command scripts.
 
-  Please read the ⌜README.md⌝ to learn how to create and modified your commands.
+  Please check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.
 options:
   - name: -d, --user-directory <path>
     description: |-
