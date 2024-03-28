@@ -108,6 +108,7 @@ Please check the [CONTRIBUTING.md](CONTRIBUTING.md) documentation if you intend 
 
 - Installation and self update script.
 - Add support for interactive mode.
+- For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Setup github actions to automatically test valet.
 - Generate an autocompletion script for bash and zsh.
 - Self command to create a new command interactively.

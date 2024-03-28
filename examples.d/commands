@@ -15,6 +15,7 @@ _CMD_INCLUDED=1
 CMD_ALL_FUNCTIONS="helloWorld
 selfBuild
 selfMenu
+selfRelease
 selfTest
 selfTestCore
 selfUpdate
@@ -30,6 +31,7 @@ this
 CMD_FUNCTION_NAME_showcase_hello_world="helloWorld"
 CMD_FUNCTION_NAME_self_build="selfBuild"
 CMD_FUNCTION_NAME_self="selfMenu"
+CMD_FUNCTION_NAME_self_release="selfRelease"
 CMD_FUNCTION_NAME_self_test="selfTest"
 CMD_FUNCTION_NAME_self_test_core="selfTestCore"
 CMD_FUNCTION_NAME_self_update="selfUpdate"
@@ -50,6 +52,7 @@ CMD_ALL_COMMANDS="
 help
 self
 self build
+self release
 self test
 self test-core
 self update
@@ -70,6 +73,7 @@ CMD_COMMANDS_MENU_HEADER="Please select the command to run (filter by typing any
 Command name           	Short description"
 CMD_COMMANDS_MENU_BODY="help                   	Show the help this program or of a specific command
 self build             	Re-build the menu of valet from your commands.
+self release           	Release a new version of valet.
 self                   	Show the valet self-maintenance sub menu.
 self test-core         	Test valet core features.
 self test              	Test your valet custom commands.
@@ -100,6 +104,7 @@ showcase sudo-command  	A command that requires sudo"
 CMD_COMMAND_helloWorld="showcase hello-world"
 CMD_COMMAND_selfBuild="self build"
 CMD_COMMAND_selfMenu="self"
+CMD_COMMAND_selfRelease="self release"
 CMD_COMMAND_selfTest="self test"
 CMD_COMMAND_selfTestCore="self test-core"
 CMD_COMMAND_selfUpdate="self update"
@@ -110,6 +115,7 @@ CMD_COMMAND_showcaseMenu="showcase"
 CMD_FILETOSOURCE_helloWorld="examples.d/showcase/showcase.sh"
 CMD_FILETOSOURCE_selfBuild="valet.d/commands.d/self-build"
 CMD_FILETOSOURCE_selfMenu="valet.d/commands.d/self.sh"
+CMD_FILETOSOURCE_selfRelease="valet.d/commands.d/self-release.sh"
 CMD_FILETOSOURCE_selfTest="valet.d/commands.d/self-test.sh"
 CMD_FILETOSOURCE_selfTestCore="valet.d/commands.d/self-test.sh"
 CMD_FILETOSOURCE_selfUpdate="valet.d/commands.d/self-install.sh"
@@ -121,6 +127,7 @@ CMD_SUDO_showcaseCommand1="true"
 CMD_SHORTDESCRIPTION_helloWorld="An hello world command"
 CMD_SHORTDESCRIPTION_selfBuild="Re-build the menu of valet from your commands."
 CMD_SHORTDESCRIPTION_selfMenu="Show the valet self-maintenance sub menu."
+CMD_SHORTDESCRIPTION_selfRelease="Release a new version of valet."
 CMD_SHORTDESCRIPTION_selfTest="Test your valet custom commands."
 CMD_SHORTDESCRIPTION_selfTestCore="Test valet core features."
 CMD_SHORTDESCRIPTION_selfUpdate="Update valet using the latest release on GitHub."
@@ -136,6 +143,12 @@ Please read the ⌜README.md⌝ to learn how to create and modified your command
 CMD_DESCRIPTION_selfMenu="Show the valet self-maintenance sub menu.
 
 This is a sub command that regroups commands useful to maintain valet."
+CMD_DESCRIPTION_selfRelease="Release a new version of valet.
+
+It will:
+- creates a git tag and pushes it to the remote repository,
+- bump the version of valet,
+- commit the new version."
 CMD_DESCRIPTION_selfTest="Test your valet custom commands using approval tests approach."
 CMD_DESCRIPTION_selfTestCore="Test valet core features using approval tests approach."
 CMD_DESCRIPTION_selfUpdate="Update valet using the latest release on GitHub."
@@ -175,6 +188,7 @@ In addition to the environment variables defined for each options, you can defin
 - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
 - VALET_LOG_COLUMNS=\"120\": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the terminal width.
 - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
+- VALET_REMEMBER_LAST_CHOICES=\"20\": number of last choices to remember when selecting an item from a menu.
 
 ⌜Developer notes:⌝
 You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt)."
@@ -235,6 +249,23 @@ CMD_OPTIONS_NAME_selfMenu=(
   "-h, --help"
 )
 CMD_OPTIONS_DESCRIPTION_selfMenu=(
+  "Display the help for this command"
+)
+CMD_OPTIONS_NAME_selfRelease=(
+  "-t, --github-release-token <token>"
+  "-b, --bump-level <semver>"
+  "--dry-run"
+  "-h, --help"
+)
+CMD_OPTIONS_DESCRIPTION_selfRelease=(
+  "The token necessary to create the release on GitHub and upload artifacts.
+This option can be set by exporting the variable VALET_GITHUB_RELEASE_TOKEN=\"<token>\"."
+  "The semver level to bump the version.
+
+Can be either: major or minor.
+This option can be set by exporting the variable VALET_BUMP_LEVEL=\"<semver>\"."
+  "Do not perform the release, just show what would be done.
+This option can be set by exporting the variable VALET_DRY_RUN=\"true\"."
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_selfTest=(
@@ -423,12 +454,14 @@ See the commands section for more information."
 )
 CMD_COMMANDS_NAME_selfMenu=(
   "build"
+  "release"
   "test"
   "test-core"
   "update"
 )
 CMD_COMMANDS_DESCRIPTION_selfMenu=(
   "Re-build the menu of valet from your commands."
+  "Release a new version of valet."
   "Test your valet custom commands."
   "Test valet core features."
   "Update valet using the latest release on GitHub."
@@ -447,6 +480,7 @@ CMD_COMMANDS_NAME_this=(
   "showcase hello-world"
   "self build"
   "self"
+  "self release"
   "self test"
   "self test-core"
   "self update"
@@ -459,6 +493,7 @@ CMD_COMMANDS_DESCRIPTION_this=(
   "An hello world command"
   "Re-build the menu of valet from your commands."
   "Show the valet self-maintenance sub menu."
+  "Release a new version of valet."
   "Test your valet custom commands."
   "Test valet core features."
   "Update valet using the latest release on GitHub."
@@ -495,6 +530,28 @@ CMD_OPTS_NAME_SC_selfBuild=(
 )
 CMD_OPTS_selfMenu=("-h --help")
 CMD_OPTS_NAME_selfMenu=("help")
+CMD_OPTS_selfRelease=(
+  "-t --github-release-token"
+  "-b --bump-level"
+  "--dry-run"
+  "-h --help"
+)
+CMD_OPTS_HAS_VALUE_selfRelease=(
+  "true"
+  "true"
+  "false"
+)
+CMD_OPTS_NAME_selfRelease=(
+  "githubReleaseToken"
+  "bumpLevel"
+  "dryRun"
+  "help"
+)
+CMD_OPTS_NAME_SC_selfRelease=(
+  "GITHUB_RELEASE_TOKEN"
+  "BUMP_LEVEL"
+  "DRY_RUN"
+)
 CMD_OPTS_selfTest=(
   "-d --user-directory"
   "-a --auto-approve"

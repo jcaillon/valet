@@ -3,7 +3,8 @@
 function testSortCommandsAndLastChoice() {
   # overriding getLocalStateDirectory to return a temporary directory
   createTempDirectory && local localStateDirectory="${LAST_RETURNED_VALUE}"
-  export VALET_LOCAL_STATE_DIRECTORY="${localStateDirectory}"
+  VALET_LOCAL_STATE_DIRECTORY="${localStateDirectory}"
+  VALET_REMEMBER_LAST_CHOICES=5
 
   local commands="cm1  	This is command 1
 cm2  	This is command 2
@@ -28,7 +29,7 @@ another3  	This is another command 3"
 
   # testing that after adding more than 20 commands, we only keep the last 20
   local -i i
-  for i in {1..30}; do
+  for i in {1..10}; do
     addLastChoice "myid1" "cm${i}"
   done
   local content
