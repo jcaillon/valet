@@ -8,5 +8,6 @@ folder.ico
 ### PROJECT ###
 **.received.md
 bin/
-valet.tar.gz
+.tmp/
 sandbox.sh
+*.tag.gz

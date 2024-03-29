@@ -73,6 +73,7 @@ function resetLogOptions() {
   unset VALET_CI_MODE
   unset VALET_LOG_COLUMNS
   unset _COLUMNS
+  export VALET_LOG_COLUMNS=120
 }
 
 function main() {

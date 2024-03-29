@@ -175,7 +175,7 @@ function bumpValetBuildVersion() {
 
   bumpSemanticVersion "${currentVersion}" "patch" "false"
 
-  echo "${LAST_RETURNED_VALUE}" >"${versionFile}"
+  echo -n "${LAST_RETURNED_VALUE}" >"${versionFile}"
 }
 
 function getTextBetweenLines() {

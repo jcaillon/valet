@@ -209,12 +209,14 @@ Exit code: 0
 ```plaintext
 → invoke fakeexec2 --option argument1 argument2
 Invoke function ended with exit code ⌈0⌉.
-stdout from file:
+stdout from var:
 ⌈▶ called fakeexec2 --option argument1 argument2
 ▶ fakeexec2 input stream was:
-⌈⌉⌉
-stderr from file:
-⌈This is an error output from fakeexec2⌉
+⌈⌉
+⌉
+stderr from var:
+⌈This is an error output from fakeexec2
+⌉
 
 ```
 

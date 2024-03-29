@@ -174,6 +174,7 @@ Please check the [CONTRIBUTING.md](CONTRIBUTING.md) documentation if you intend 
 - Add about option to hide the command in the menus.
 - Add tests for self build.
 - Implement self release command to tag and push to github.
+- We can have fuzzy matching on options too; just make sure it is not ambiguous.
 
 [fzf]: https://github.com/junegunn/fzf
 [yq]: https://github.com/mikefarah/yq

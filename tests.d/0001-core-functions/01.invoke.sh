@@ -62,7 +62,7 @@ function testInvoke() {
 
   echo "→ invoke fakeexec2 --option argument1 argument2"
   invoke fakeexec2 --option argument1 argument2 && exitCode=0 || exitCode=$?
-  echoInvokeOutput $exitCode true
+  echoInvokeOutput $exitCode false
   endTest "Testing invoke, output to var" 0
 }
 

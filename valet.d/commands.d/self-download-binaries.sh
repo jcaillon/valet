@@ -36,12 +36,23 @@ options:
       You can force the download for a specific OS by providing the name of the OS.
 
       Possible values are: linux, windows, macos.
+  - name: --destination <path>
+    description: |-
+      By default, this command will download the binaries in valet bin/ directory.
+
+      You can force the download in a specific directory by providing the path.
 "
 }
 
 function selfDownloadBinaries() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   checkParseResults "${help:-}" "${parsingErrors:-}"
+
+  destination="${destination:-${VALET_HOME}/bin}"
+  # make sure the destination is an absolute path
+  if [[ "${destination}" != /* ]]; then
+    destination="${PWD}/${destination}"
+  fi
 
   # for the sake of simpplicity, we only deal with amd64 arch...
   local arch
@@ -59,60 +70,70 @@ function selfDownloadBinaries() {
   fi
   inform "Downloading the binaries for the OS: ${os}."
 
-  mkdir -p "${VALET_HOME}/bin"
+  mkdir -p "${destination}"
 
   createTempDirectory && pushd "${LAST_RETURNED_VALUE}" 1>/dev/null
-  downloadFzf "${os}" "0.48.1"
-  downloadCurl "${os}" "8.7.1"
-  downloadYq "${os}" "4.43.1"
+  downloadFzf "${os}" "0.48.1" "${destination}"
+  downloadCurl "${os}" "8.7.1" "${destination}"
+  downloadYq "${os}" "4.43.1" "${destination}"
   popd 1>/dev/null
 
-  succeed "The binaries have been downloaded and stored in the bin directory of valet ⌜${VALET_HOME}/bin⌝."
+  succeed "The binaries have been downloaded and stored in the bin directory of valet ⌜${destination}⌝."
 
   return 0
 }
 
 function downloadFzf() {
-  if [[ "${1}" != "windows" ]]; then
-    local fzfUrl="https://github.com/junegunn/fzf/releases/download/${2}/fzf-${2}-${1}_amd64.tar.gz"
+  local os="${1}"
+  local version="${2}"
+  local destination="${3}"
+  if [[ "${os}" != "windows" ]]; then
+    local fzfUrl="https://github.com/junegunn/fzf/releases/download/${version}/fzf-${version}-${os}_amd64.tar.gz"
     inform "Downloading fzf from: ${fzfUrl}."
     kurlFile true 200 fzf.tar.gz "${fzfUrl}"
     invoke tar -xzf fzf.tar.gz
-    mv -f "fzf" "${VALET_HOME}/bin/fzf"
+    invoke mv -f "fzf" "${destination}/fzf"
   else
-    local fzfUrl="https://github.com/junegunn/fzf/releases/download/${2}/fzf-${2}-${1}_amd64.zip"
+    local fzfUrl="https://github.com/junegunn/fzf/releases/download/${version}/fzf-${version}-${os}_amd64.zip"
     inform "Downloading fzf from: ${fzfUrl}."
     kurlFile true 200 fzf.zip "${fzfUrl}"
     invoke unzip fzf.zip
-    mv -f "fzf.exe" "${VALET_HOME}/bin/fzf"
+    invoke mv -f "fzf.exe" "${destination}/fzf"
   fi
 }
 
 function downloadCurl() {
-  if [[ "${1}" != "windows" ]]; then
-    local curlUrl="https://github.com/moparisthebest/static-curl/releases/download/v${2}/curl-amd64"
+  local os="${1}"
+  local version="${2}"
+  local destination="${3}"
+  if [[ "${os}" != "windows" ]]; then
+    local curlUrl="https://github.com/moparisthebest/static-curl/releases/download/v${version}/curl-amd64"
     inform "Downloading curl from: ${curlUrl}."
     kurlFile true 200 curl "${curlUrl}"
-    mv -f "curl" "${VALET_HOME}/bin/curl"
+    invoke mv -f "curl" "${destination}/curl"
   else
     local curlUrl="https://curl.se/windows/latest.cgi?p=win64-mingw.zip"
+    inform "Downloading curl from: ${curlUrl}."
     kurlFile true 200 curl.zip "${curlUrl}"
     invoke unzip curl.zip
-    mv -f -- */bin/* "${VALET_HOME}/bin"
-    mv -f "${VALET_HOME}/bin/curl.exe" "${VALET_HOME}/bin/curl"
+    invoke mv -f -- */bin/* "${destination}"
+    invoke mv -f "${destination}/curl.exe" "${destination}/curl"
   fi
 }
 
 function downloadYq() {
-  if [[ "${1}" != "windows" ]]; then
-    local yqUrl="https://github.com/mikefarah/yq/releases/download/v${2}/yq_${1}_amd64"
+  local os="${1}"
+  local version="${2}"
+  local destination="${3}"
+  if [[ "${os}" != "windows" ]]; then
+    local yqUrl="https://github.com/mikefarah/yq/releases/download/v${version}/yq_${os}_amd64"
     inform "Downloading yq from: ${yqUrl}."
     kurlFile true 200 yq "${yqUrl}"
-    mv -f "yq" "${VALET_HOME}/bin/yq"
+    invoke mv -f "yq" "${destination}/yq"
   else
-    local yqUrl="https://github.com/mikefarah/yq/releases/download/v${2}/yq_${1}_amd64.exe"
+    local yqUrl="https://github.com/mikefarah/yq/releases/download/v${version}/yq_${os}_amd64.exe"
     inform "Downloading yq from: ${yqUrl}."
     kurlFile true 200 yq.exe "${yqUrl}"
-    mv -f "yq.exe" "${VALET_HOME}/bin/yq"
+    invoke mv -f "yq.exe" "${destination}/yq"
   fi
 }

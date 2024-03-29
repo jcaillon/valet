@@ -273,6 +273,7 @@ function endTest() {
   # reset the standard output and error output files
   : >"${_TEST_STANDARD_OUTPUT_FILE}"
   : >"${_TEST_STANDARD_ERROR_FILE}"
+
   setFdRedirection
 
   set +Eeu +o pipefail
@@ -372,6 +373,8 @@ function runTest() {
   # redirect the standard output and error output to files
   setFdRedirection
 
+  trap onExitTest EXIT
+
   # used in echoFileSubstitutingPath to replace this path with .
   CURRENT_DIRECTORY="${PWD}"
 
@@ -391,6 +394,8 @@ function runTest() {
 
   # reset the standard output and error output
   resetFdRedirection
+
+  trap onExitInternal EXIT
 }
 
 function compareWithApproved() {
@@ -425,6 +430,21 @@ function compareWithApproved() {
   fi
 
   return 1
+}
+
+function onExitTest() {
+  local rc=$?
+
+  resetFdRedirection
+
+  local message="The program is exiting during a test with code ${rc}."$'\n'
+  message+="Current test error output: ⌜$(<"${_TEST_STANDARD_ERROR_FILE}")⌝"$'\n'
+  message+="If you expect the tested function/program to exit/fail, then run it in a subshell like that: (myFunctionThatFails)."
+
+  warn "${message}"
+
+  ERROR_DISPLAY=1
+  onExitInternal
 }
 
 function setFdRedirection() {

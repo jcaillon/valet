@@ -60,8 +60,10 @@ function selfRelease() {
 
     # check that the git workarea is clean
     debug "Checking if the workarea is clean"
-    invoke git update-index --really-refresh 1>/dev/null || true
-    if ! git diff-index --quiet HEAD; then
+    invoke3 false 0 git update-index --really-refresh 1>/dev/null || true
+    local -i exitCode=0
+    invoke3 false 0 git diff-index --quiet HEAD || exitCode=$?
+    if [[ exitCode -ne 0 ]]; then
       fail "The workarea is not clean, please commit your changes before releasing a new version."
     fi
   fi
@@ -77,6 +79,7 @@ function selfRelease() {
   invoke git tag --sort=committerdate --no-color
   lastTag="${LAST_RETURNED_VALUE}"
   lastTag="${lastTag%%$'\n'*}"
+  inform "The last tag is: ${lastTag}."
 
   # prepare the tag message
   local tagMessage line
@@ -87,6 +90,7 @@ function selfRelease() {
   for line in ${LAST_RETURNED_VALUE}; do
     tagMessage+="- ${line}"$'\n'
   done
+  IFS=$' '
   inform "The tag message is:"$'\n'"${tagMessage}"
 
   # create a new git tag with the version and push it
@@ -98,7 +102,7 @@ function selfRelease() {
 
   # bump the version
   bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${LAST_RETURNED_VALUE}"
-  [[ "${dryRun:-}" != "true" ]] && echo "${newVersion}" >"${VALET_HOME}/valet.d/version"
+  [[ "${dryRun:-}" != "true" ]] && echo -n "${newVersion}" >"${VALET_HOME}/valet.d/version"
   inform "The new version of valet is: ${newVersion}."
 
   # commit the new version and push it
@@ -113,9 +117,9 @@ function selfRelease() {
   local prerelease=false
   [[ "${version}" == *"-"* ]] && prerelease=true
   local releasePayload
-  releasePayLoad="{
+  releasePayload="{
     \"tag_name\": \"v${version}\",
-    \"body\": \"${tagMessage}\",
+    \"body\": \"${tagMessage//$'\n'/\\n}\",
     \"draft\": false,
     \"prerelease\": ${prerelease}
   }"
@@ -124,16 +128,16 @@ function selfRelease() {
   # create the release on GitHub
   local uploadUrl
   if [[ "${dryRun:-}" != "true" ]]; then
-    kurl '' -X POST \
-      -H "Authorization: token ${githubReleaseToken}" \
+    kurl true '201,422' -X POST \
+      -H "Authorization: token ${githubReleaseToken:-}" \
       -H "Accept: application/vnd.github.v3+json" \
+      -H "Content-type: application/json; charset=utf-8" \
       -d "${releasePayload}" \
       "https://api.github.com/repos/jcaillon/valet/releases"
-
-    succeed "The new version has been released on GitHub."
-
     local createdReleaseJson
     createdReleaseJson="${LAST_RETURNED_VALUE}"
+
+    succeed "The new version has been released on GitHub."
 
     extractBetween "${createdReleaseJson}" '"upload_url":' '{?name,label}"'
     extractBetween "${LAST_RETURNED_VALUE}" '"' ''
@@ -142,32 +146,77 @@ function selfRelease() {
     debug "The upload URL is: ${uploadUrl}"
   fi
 
-  # prepare the artifact
-  local artifactPath="${VALET_HOME}/valet.tar.gz"
-  pushd "${VALET_HOME}" 1>/dev/null
-  invoke tar -czvf "${artifactPath}" examples.d valet.d valet
+  # make sure to source the file in which this function is defined
+  sourceForFunction "selfDownloadBinaries" 2>/dev/null
+
+  # prepare a temp folder to store the binaries
+  local tempDir="${VALET_HOME}/.tmp"
+  rm -Rf "${tempDir}"
+  mkdir -p "${tempDir}"
+  pushd "${tempDir}" 1>/dev/null
+
+  for artifact in linux windows no-binaries; do
+    # clean the folder
+    rm -Rf "${tempDir:?}"/*
+
+    if [[ "${artifact:-}" != "no-binaries" ]]; then
+      # download the binaries
+      selfDownloadBinaries -os "${artifact}" --destination "${tempDir}/bin"
+    fi
+
+    if [[ "${dryRun:-}" != "true" ]]; then
+      uploadArtifact "${uploadUrl}" "${artifact}"
+    fi
+
+  done
+
   popd 1>/dev/null
-  inform "The artifact has been created at: ${artifactPath} with:"$'\n'"${LAST_RETURNED_VALUE}"
+
+  rm -Rf "${tempDir}"
+
+  succeed "The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝."
+
+  return 0
+}
+
+function uploadArtifact() {
+  local uploadUrl="${1}"
+  local os="${2}"
+
+  local artifactName
+  case "${os}" in
+  linux) artifactName="valet-linux-amd64" ;;
+  windows) artifactName="valet-windows-amd64" ;;
+  no-binaries) artifactName="valet-no-binaries" ;;
+  esac
+
+  local -a files
+  files=(examples.d valet.d valet)
+
+  # copy each file from valet dir to current dir
+  local file
+  for file in "${files[@]}"; do
+    invoke cp -R "${VALET_HOME}/${file}" .
+  done
+
+  if [[ "${os}" != "no-binaries" ]]; then
+    files+=(bin)
+  fi
+
+  # prepare artifact
+  local artifactPath="${artifactName}.tar.gz"
+  invoke tar -czvf "${artifactPath}" "${files[@]}"
+  inform "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}"
 
   # upload the artifact
   if [[ "${dryRun:-}" != "true" && -n "${uploadUrl}" ]]; then
-    kurl '' -X POST \
-      --header "Content-Type:application/gzip" \
+    inform "Uploading the artifact ⌜${artifactPath}⌝ to ⌜${uploadUrl}⌝."
+    kurl true '' -X POST \
+      -H "Authorization: token ${githubReleaseToken:-}" \
+      -H "Content-Type: application/tar+gzip" \
       --data-binary "@$artifactPath" \
-      "$uploadUrl?name=$(basename "${artifactPath##*/}")" \
-      || fail "The artifact could not be uploaded to the release."
-
-    succeed "The new version has been released on GitHub."
-
-    local createdReleaseJson
-    createdReleaseJson="${LAST_RETURNED_VALUE}"
-
-    extractBetween "${createdReleaseJson}" '"upload_url":' '{?name,label}"'
-    extractBetween "${LAST_RETURNED_VALUE}" '"' ''
-    uploadUrl="${LAST_RETURNED_VALUE}"
-
-    debug "The upload URL is: ${uploadUrl}"
+      "${uploadUrl}?name=${artifactPath}"
   fi
 
-  return 0
+  rm -f "${artifactPath}"
 }

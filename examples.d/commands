@@ -202,6 +202,7 @@ In addition to the environment variables defined for each options, you can defin
 - VALET_LOG_COLUMNS=\"120\": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the terminal width.
 - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
 - VALET_REMEMBER_LAST_CHOICES=\"3\": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the alphabetical order.
+- VALET_DO_NOT_USE_LOCAL_BIN=\"false\": if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
 
 ⌜Developer notes:⌝
 
@@ -261,6 +262,7 @@ This option can be set by exporting the variable VALET_USER_DIRECTORY=\"<path>\"
 )
 CMD_OPTIONS_NAME_selfDownloadBinaries=(
   "-os, --force-os <name>"
+  "--destination <path>"
   "-h, --help"
 )
 CMD_OPTIONS_DESCRIPTION_selfDownloadBinaries=(
@@ -270,6 +272,10 @@ You can force the download for a specific OS by providing the name of the OS.
 
 Possible values are: linux, windows, macos.
 This option can be set by exporting the variable VALET_FORCE_OS=\"<name>\"."
+  "By default, this command will download the binaries in valet bin/ directory.
+
+You can force the download in a specific directory by providing the path.
+This option can be set by exporting the variable VALET_DESTINATION=\"<path>\"."
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_selfMenu=(
@@ -556,17 +562,21 @@ CMD_OPTS_NAME_SC_selfBuild=(
 )
 CMD_OPTS_selfDownloadBinaries=(
   "-os --force-os"
+  "--destination"
   "-h --help"
 )
 CMD_OPTS_HAS_VALUE_selfDownloadBinaries=(
   "true"
+  "true"
 )
 CMD_OPTS_NAME_selfDownloadBinaries=(
   "forceOs"
+  "destination"
   "help"
 )
 CMD_OPTS_NAME_SC_selfDownloadBinaries=(
   "FORCE_OS"
+  "DESTINATION"
 )
 CMD_OPTS_selfMenu=("-h --help")
 CMD_OPTS_NAME_selfMenu=("help")

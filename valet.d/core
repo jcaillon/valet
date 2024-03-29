@@ -250,7 +250,12 @@ eval "${LOG_LINE_FUNCTION}"
 # Usage:
 #  fail "This is an error message."
 function fail() {
-  logLine "ERROR" $'\uf2d3' "ERROR" "$*"
+  local message="$*"
+  if isDebugEnabled; then
+    getStack 2 && local stack=$'\n'"stack:${LAST_RETURNED_VALUE}"
+    message+="${stack:-}"
+  fi
+  logLine "ERROR" $'\uf2d3' "ERROR" "${message}"
   # shellcheck disable=SC2034
   ERROR_DISPLAY=1
   exit 1
@@ -346,6 +351,33 @@ function checkAndWarn() {
     return 1
   fi
   return 0
+}
+
+# This function returns the current function stack.
+# The stack is returned in the global variable LAST_RETURNED_VALUE.
+#
+# $1: the number of levels to skip (default to 2)
+#
+# Usage:
+#  getStack 2 && local stack="${LAST_RETURNED_VALUE}"
+function getStack() {
+  local -i levelToSkip="${1:-2}"
+  local stack i stackSize func linen src
+  stack=""
+  stackSize=${#FUNCNAME[@]}
+  treeString="├─"
+  for ((i = levelToSkip; i < stackSize; i++)); do
+    func="${FUNCNAME[$i]}"
+    [ -z "${func}" ] && func=MAIN
+    linen="${BASH_LINENO[$((i - 1))]}"
+    src="${BASH_SOURCE[$i]}"
+    [ -z "${src}" ] && src=non_file_source
+    if [ "${i}" = "$((stackSize - 1))" ]; then
+      treeString="└─"
+    fi
+    stack+=$'\n'"${treeString} In function $func() $src:$linen"
+  done
+  LAST_RETURNED_VALUE="${stack}"
 }
 
 
@@ -619,6 +651,21 @@ function fuzzyMatch() {
   LAST_RETURNED_VALUE="${bestMatch:-}"
 }
 
+# Will return the full path of the given command if it found in the bin folder of valet.
+#
+# $1: the command to find
+#
+# Usage:
+#  getCommandFullPath "fzf" && local fullPath="${LAST_RETURNED_VALUE}"
+function getCommandFullPath() {
+  local executable="${1}"
+  local possibleExecutablePath="${VALET_BIN_PATH:-"${VALET_HOME}/bin"}/${executable}"
+  if [[ "${VALET_DO_NOT_USE_LOCAL_BIN:-false}" != "true" && -x "${possibleExecutablePath}" ]]; then
+    executable="${possibleExecutablePath}"
+  fi
+  LAST_RETURNED_VALUE="${executable}"
+}
+
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to temporary files.
 #
@@ -651,6 +698,9 @@ function invoke5() {
   [[ -s "${_TEMPORARY_STDOUT_FILE}" ]] && : > "${_TEMPORARY_STDOUT_FILE}"
   [[ -s "${_TEMPORARY_STDERR_FILE}" ]] && : > "${_TEMPORARY_STDERR_FILE}"
 
+  getCommandFullPath "${executable}"
+  executable="${LAST_RETURNED_VALUE}"
+
   # if debug mode is on, print some info
   if isDebugEnabled; then
     local debugMessage="Executing the command ⌜${executable}⌝."$'\n'
@@ -660,14 +710,6 @@ function invoke5() {
     debugMessage+="Standard stream: ⌜${stdIn}⌝"$'\n'
     debugMessage+="Extra parameters: ⌜${*}⌝"
     debug "${debugMessage}"
-  fi
-
-  # try to find the executable in the valet bin folder,
-  # in which case bash will not have to find it on the path and we go faster
-  local possibleExecutablePath="${VALET_BIN_PATH:-"${VALET_HOME}/bin"}/${executable}"
-  if [[ "${VALET_DO_NOT_USE_LOCAL_BIN:-false}" != "true" && -x "${possibleExecutablePath}" ]]; then
-    debug "The executable ⌜${executable}⌝ was found in ⌜${possibleExecutablePath}⌝."
-    executable="${possibleExecutablePath}"
   fi
 
   # execute the executable
@@ -825,7 +867,7 @@ function invoke3var() {
 # Usage:
 #  invoke git add --all
 function invoke() {
-  invoke5 "true" "0" "" "" "$@"
+  invoke5var "true" "0" "" "" "$@"
 }
 
 # This function is a wrapper around curl.
@@ -909,7 +951,8 @@ function kurl() {
   # reset the temporary file, only if needed
   [[ -s "${_TEMPORARY_WORK_FILE}" ]] && : > "${_TEMPORARY_WORK_FILE}"
 
-  local exitCode errors httpStatusCode
+  local -i exitCode=0
+  local errors httpStatusCode
   kurlFile "${failIfFails}" "${acceptableStatusCodes}" "${_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
   errors="${LAST_RETURNED_VALUE}"
   httpStatusCode="${LAST_RETURNED_VALUE2}"
