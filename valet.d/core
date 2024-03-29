@@ -910,6 +910,112 @@ function kurl() {
   return $exitCode
 }
 
+# Find the first index of a string within another string.
+#
+# $1: the string in which to search
+# $2: the string to search
+# $3: the starting index (default to 0)
+#
+# Returns:
+#  The index of the substring in the string or -1 if not found in the global variable LAST_RETURNED_VALUE.
+#
+# Usage:
+#  indexOf "This is a long text" "long" && local index="${LAST_RETURNED_VALUE}"
+#  indexOf "This is a long text" "long" 10 && local index="${LAST_RETURNED_VALUE}"
+function indexOf() {
+  local search string
+  local -i startingIndex
+  string="${1}"
+  search="${2}"
+  startingIndex=${3:-0}
+
+  local -i stringLength
+  stringLength="${#string}"
+
+  if [[ startingIndex -gt 0 ]]; then
+    # if the starting index is greater than the length of the string, we return -1
+    if [[ startingIndex -ge stringLength ]]; then
+      LAST_RETURNED_VALUE=-1
+      echo "nop"
+      return 0
+    fi
+
+    # otherwise we keep only what is after this index
+    string="${string:${startingIndex}}"
+  fi
+
+  stringLength="${#string}"
+
+  # if the string starts with the search, we have our index
+  if [[ "${string}" == "${search}"* ]]; then
+      echo "yeah"
+    LAST_RETURNED_VALUE=${startingIndex}
+    return 0
+  fi
+
+  # cut everything after the search string
+  local tempString
+  tempString="${string%%"${search}"*}"
+  local -i tempStringLength="${#tempString}"
+
+  # the index is the length of the temp string if it is different than the initial string lenght
+  if [[ tempStringLength -ne stringLength ]]; then
+    LAST_RETURNED_VALUE=$((tempStringLength + startingIndex))
+  else
+    LAST_RETURNED_VALUE=-1
+  fi
+  return 0
+}
+
+# Extract the text between two strings within a string.
+# Search for the first occurence of the start string and the first occurence
+# (after the start index) of the end string.
+# Both start and end strings are excluded in the extracted text.
+# Both start and end strings must be found to extract something.
+#
+# $1: the string in which to search
+# $2: the start string (if empty, then it will extract from the beginning of the string)
+# $3: the end string (if empty, then it will extract until the end of the string)
+#
+# Returns:
+#  The extracted text in the global variable LAST_RETURNED_VALUE.
+#
+# Usage:
+#  extractBetween "This is a long text" "is a " " text" && local extractedText="${LAST_RETURNED_VALUE}"
+function extractBetween() {
+  local string start end
+  string="${1}"
+  start="${2}"
+  end="${3}"
+
+  local -i startIndex endIndex
+
+  if [[ -n "${start}" ]]; then
+    indexOf "${string}" "${start}" && startIndex="${LAST_RETURNED_VALUE}"
+    if [[ startIndex -eq -1 ]]; then
+      LAST_RETURNED_VALUE=""
+      return 0
+    fi
+    startIndex=$((startIndex + ${#start}))
+  else
+    startIndex=0
+  fi
+
+  if [[ -n "${end}" ]]; then
+    indexOf "${string}" "${end}" "${startIndex}" && endIndex="${LAST_RETURNED_VALUE}"
+    if [[ endIndex -eq -1 ]]; then
+      LAST_RETURNED_VALUE=""
+      return 0
+    fi
+  else
+    LAST_RETURNED_VALUE="${string:${startIndex}}"
+    return 0
+  fi
+
+  local -i extractedLength
+  extractedLength=$((endIndex - startIndex))
+  LAST_RETURNED_VALUE="${string:${startIndex}:${extractedLength}}"
+}
 
 #===============================================================
 # >>> Valet files and directories

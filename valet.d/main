@@ -170,6 +170,7 @@ function createProfilerFunction() {
     '
   else
     PROFILER_FUNCTION+='
+    warn "The ts command (from moreutils package on linux) is not available, the profiler will not display the elapsed time of each statement, consider installing ts."
     PS4='"'"'+ $(date "+%s.%N")\011$BASH_SOURCE\011$BASH_LINENO\011 '"'"'
     exec 3>&2 2>"${file}"
     '

@@ -1,4 +1,4 @@
-# Valet
+# ♣️ Valet
 
 [![GitHub Release](https://img.shields.io/github/v/release/jcaillon/valet?sort=date&style=flat&logo=github&logoColor=white&label=Latest%20release&color=%2350C878)](https://github.com/jcaillon/3P/releases/latest)
 
@@ -14,7 +14,26 @@ It is made for providing an awesome user experience in interactive mode but it i
 
 ![icon](docs/images/icon.svg)
 
-## Use case
+---
+
+Table of contents:
+
+- [🤔 Use cases](#-use-cases)
+- [✨ Features showcase](#-features-showcase)
+- [🎉 Installation](#-installation)
+  - [Automated installation](#automated-installation)
+  - [Manual installation](#manual-installation)
+- [💻 Usage](#-usage)
+  - [Adding your own commands](#adding-your-own-commands)
+  - [Command menu](#command-menu)
+  - [Interactive mode](#interactive-mode)
+  - [Environments variables](#environments-variables)
+- [🤝 Contributions](#-contributions)
+- [🔭 Roadmap](#-roadmap)
+
+---
+
+## 🤔 Use cases
 
 To help you on your daily tasks, you have created a collection of bash scripts that you added to your path.
 
@@ -28,7 +47,7 @@ But...
 
 **→ This is where Valet can help you!**
 
-## Features showcase
+## ✨ Features showcase
 
 Valet in a gist:
 
@@ -65,7 +84,7 @@ Auto parsing of arguments and options based on your command configuration:
 > This showcase is recorded with the [windows terminal](https://github.com/microsoft/terminal), [debian on WSL](https://wiki.debian.org/InstallingDebianOn/Microsoft/Windows/SubsystemForLinux) with zsh & [oh my zsh](https://ohmyz.sh/).
 > The color scheme for the terminal is [dracula](https://draculatheme.com/windows-terminal) and the font is an home made modification of windows consolas ligaturized and with nerd font icons.
 
-## Installation
+## 🎉 Installation
 
 You need bash version 5 or higher to be installed on your machine to run Valet.
 
@@ -91,7 +110,7 @@ curl https://github.com/jcaillon/valet/TOBEDONE! | bash
 3. Add this directory to your PATH (or link Valet to `/usr/local/bin`) so you can call `valet` from your terminal.
 4. Call `valet` to get started with the example commands!
 
-## Usage
+## 💻 Usage
 
 > [!IMPORTANT]
 > If you see the replacement character � in my terminal, it means you don't have a [nerd font][nerd-font] setup in your terminal.
@@ -126,11 +145,11 @@ Most (all?) options in Valet are configurable with environment variables. Even o
 
 This makes Valet particularly suitable for automation (in CI/CD pipelines for instance).
 
-## Contributions
+## 🤝 Contributions
 
 Please check the [CONTRIBUTING.md](CONTRIBUTING.md) documentation if you intend to work on this project.
 
-## Roadmap
+## 🔭 Roadmap
 
 - Installation and self update script.
 - Add support for interactive mode.

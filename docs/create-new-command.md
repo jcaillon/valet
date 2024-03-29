@@ -11,6 +11,10 @@ Copy the template command `showcase.sh` to a new file and rename it as you wish.
 
 Files starting with a `.` are ignored, so the commands defined inside them are never shown in the valet menu.
 
+All `*.sh` files under your Valet user directory will be sourced during build in order to find your commands.
+
+The search is recursive. This is handy because it means that you can separate your commands into several directories. You can even have multiple git repositories cloned of linked in your user directory to load commands that could be shared with your teammates or on the internet!
+
 ## 2. Define your new command
 
 Follow the example of the template to create a new `about_xxx` function that returns a YAML file describing your command. `xxx` is the function name of your command (see next chapter).

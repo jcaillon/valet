@@ -166,6 +166,32 @@ You can ⌜highlight⌝ some text as well."
 CMD_DESCRIPTION_showcaseMenu="Can be used to show the showcase sub menu in interactive mode."
 CMD_DESCRIPTION_this="Valet is wrapper around a collection of commands that help you with your daily tasks.
 
+▮                          ::::::::.
+▮                          ::::::::.
+▮                          ::::::::.
+▮                  .   :.  ::-=::::
+▮    %%%%%%%%%%%%%%#.  #%*=+#%#::-%%%%%%%%%%%%%%%%=
+▮    %%%%%%%%%%%%%%%#. #*=.-+##:-#%%%%%%%%%%%%%%%*-
+▮    -%%%%%%%%%%%%%%%*..   :::--#%%%%%%%%%%%%%%%*+-
+▮      -%%%%%%%%%%%%%%%*.   :::-*%%%%%%%%%%%%%%%#++-
+▮      =%%%%%%%%%%%%%%%+   :::*%%%%%%%%%%%%%%%#+++-
+▮        +%%%%%%%%%%%%%%%=  ::+%%%%%%%%%%%%%%%#*+++-
+▮        *%%%%%%%%%%%%%%%= :+%%%%%%%%%%%%%%%#*++++-
+▮          *%%%%%%%%%%%%%%%-=%%%%%%%%%%%%%%%%*+++++-
+▮          #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#-::::::.
+▮            #%%%%%%%%%%%%%%%%%%%%%%%%%%%%#.......
+▮            .%%%%%%%%%%%%%%%%%%%%%%%%%%%%.
+▮            .%%%%%%%%%%%%%%%%%%%%%%%%%%.
+▮              :%%%%%%%%%%%%%%%%%%%%%%%%:
+▮              -%%%%%%%%%%%%%%%%%%%%%%:
+▮                -%%%%%%%%%%%%%%%%%%%%-
+▮                =%%%%%%%%%%%%%%%%%%=
+▮                  +%%%%%%%%%%%%%%%%+
+▮                  *%%%%%%%%%%%%%%+
+▮                    *%%%%%%%%%%%%*
+
+Online documentation is available at https://github.com/jcaillon/valet.
+
 You can call valet without any commands to start an interactive session.
 
 ⌜Exit codes:⌝
@@ -187,7 +213,7 @@ In addition to the environment variables defined for each options, you can defin
 - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
 - VALET_LOG_COLUMNS=\"120\": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the terminal width.
 - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
-- VALET_REMEMBER_LAST_CHOICES=\"20\": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the alphabetical order.
+- VALET_REMEMBER_LAST_CHOICES=\"3\": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the alphabetical order.
 
 ⌜Developer notes:⌝
 You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt)."

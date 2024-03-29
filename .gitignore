@@ -8,4 +8,5 @@ folder.ico
 ### PROJECT ###
 **.received.md
 bin/
+release.tar.gz
 sandbox.sh

@@ -6,10 +6,6 @@ This project uses [GitHub issues][gh-issue] to [track bugs][gh-bug] and [feature
 
 For help and questions about using this project, please look at the [docs][docs].
 
-## Microsoft Support Policy  
-
-Support for Windows Terminal is limited to the resources listed above.
-
 [gh-issue]: https://github.com/jcaillon/valet/issues/new/choose
 [gh-bug]: https://github.com/jcaillon/valet/issues/new?assignees=&labels=Issue-Bug&template=bug_report.md&title=
 [gh-feature]: https://github.com/jcaillon/valet/issues/new?assignees=&labels=Issue-Feature&template=Feature_Request.md&title=

@@ -82,13 +82,17 @@ function selfTest() {
     fi
   done
 
-  # change the shell options to exclude hidden files
+  # reset glob options
   shopt -u dotglob
   shopt -u globstar
 
   if [ -n "${withCore:-}" ]; then
-    inform "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
-    runTestSuites "${VALET_HOME}/tests.d"
+    if [[ ! -d "${VALET_HOME}/tests.d" ]]; then
+      warn "The valet core tests directory ⌜${VALET_HOME}/tests.d⌝ does not exist, skipping core tests."
+    else
+      inform "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
+      runTestSuites "${VALET_HOME}/tests.d"
+    fi
   fi
 }
 

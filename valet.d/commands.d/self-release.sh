@@ -115,16 +115,29 @@ function selfRelease() {
     \"prerelease\": false
   }"
 
-  # push the release to GitHub
+  # create the release on GitHub
+  local uploadUrl
   if [[ "${dryRun:-}" != "true" ]]; then
-    curl -X POST --location --fail --location \
+    kurl '' -X POST \
       -H "Authorization: token ${githubReleaseToken}" \
       -H "Accept: application/vnd.github.v3+json" \
       -d "${releasePayload}" \
       "https://api.github.com/repos/jcaillon/valet/releases"
+
+    local createdReleaseJson
+    createdReleaseJson="${LAST_RETURNED_VALUE}"
+
+    uploadUrl
+
     succeed "The new version has been released on GitHub."
   fi
 
+  # prepare the artifact
+  local artifactPath="${VALET_HOME}/release.tar.gz"
+  pushd "${VALET_HOME}" 1>/dev/null
+  invoke3var true 0 tar -czvf "${artifactPath}" examples.d valet.d valet
+  popd 1>/dev/null
+  inform "The artifact has been created at: ${artifactPath} with:"$'\n'"${LAST_RETURNED_VALUE}"
 
 
   return 0
