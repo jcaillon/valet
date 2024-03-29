@@ -2,7 +2,7 @@
 
 function testInvoke5() {
   createTempFile && local tmpFile="${LAST_RETURNED_VALUE}"
-  local exitCode
+  local -i exitCode
 
   echo "Input stream content from a file" >"${tmpFile}"
 
@@ -33,24 +33,25 @@ function testInvoke5() {
 
   # test debug mode
   local previousLevel="${LOG_LEVEL_INT}"
-  LOG_LEVEL_INT=0
   echo "→ invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error"
+  LOG_LEVEL_INT=0
   invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error && exitCode=0 || exitCode=$?
+  LOG_LEVEL_INT="${previousLevel}"
   echoInvokeOutput $exitCode true
   endTest "Testing invoke5, with debug mode on" 0
-  LOG_LEVEL_INT="${previousLevel}"
 }
 
 function testInvoke3() {
+  local -i exitCode
 
   echo "→ invoke3 false 0 fakeexec2 --option argument1 argument2"
   invoke3 false 0 fakeexec2 --option argument1 argument2 && exitCode=0 || exitCode=$?
-  echoInvokeOutput "$exitCode" true
+  echoInvokeOutput $exitCode true
   endTest "Testing invoke3, output to files" 0
 
   echo "→ invoke3var false 0 fakeexec2 --option argument1 argument2"
   invoke3var false 0 fakeexec2 --option argument1 argument2 && exitCode=0 || exitCode=$?
-  echoInvokeOutput "$exitCode" false
+  echoInvokeOutput $exitCode false
   endTest "Testing invoke3var, output to var" 0
 }
 
