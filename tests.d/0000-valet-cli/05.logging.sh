@@ -26,6 +26,8 @@ function testLogging() {
   unset VALET_NO_ICON
   unset VALET_NO_WRAP
   unset VALET_CI_MODE
+  unset _COLUMNS
+  unset VALET_LOG_COLUMNS
 
   echo "→ valet self test-core --logging-level"
   ("${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
@@ -73,13 +75,6 @@ function testLogging() {
   echoTempFileWithTimeStampSubstitution 1>&2
   unset VALET_LOG_COLUMNS
   endTest "Testing wrap at 80 logging" 0
-
-  unset VALET_CI_MODE
-  export VALET_NO_COLOR="true"
-  export VALET_NO_TIMESTAMP="true"
-  export VALET_NO_ICON="true"
-  export VALET_NO_WRAP="true"
-  export _COLUMNS=120
 }
 
 function main() {

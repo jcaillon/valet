@@ -122,6 +122,53 @@ This is an error output from fakeexec2
 
 ```
 
+### Testing invoke5, with debug mode on
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error
+Invoke function ended with exit code ⌜1⌝.
+⌜stdout from file⌝:
+▶ called fakeexec2
+Input stream was:
+---
+inputStreamValue
+---
+Arguments were:
+--std-in --error
+⌜stderr from file⌝:
+This is an error output from fakeexec2
+returning 1 from fakeexec2
+
+```
+
+**Error** output:
+
+```log
+DEBUG    Executing the command ⌜fakeexec2⌝.
+Fail if it fails: ⌜false⌝
+Acceptable error codes: ⌜0⌝
+Standard stream from file: ⌜false⌝
+Standard stream: ⌜inputStreamValue⌝
+Extra parameters: ⌜--std-in --error⌝
+
+DEBUG    The command ⌜fakeexec2⌝ ended with exit code ⌜1⌝.
+⌜stdout⌝:
+▶ called fakeexec2
+Input stream was:
+---
+inputStreamValue
+---
+Arguments were:
+--std-in --error
+⌜stderr⌝:
+This is an error output from fakeexec2
+returning 1 from fakeexec2
+```
+
 ### Testing invoke3, output to files
 
 Exit code: 0

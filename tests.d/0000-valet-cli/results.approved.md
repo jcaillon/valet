@@ -147,32 +147,28 @@ ABOUT
   - 1: an error occured
   
   ⌜Create your own commands:⌝
-  You can create your own commands and have them available in valet, please check 
-  https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or the examples under examples.d to do so.
-  Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an 
-  environment variable (see below).
+  You can create your own commands and have them available in valet, please check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or the examples under 
+  examples.d to do so.
+  Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).
   Once you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.
   
   ⌜Configuration through environment variables:⌝
-  In addition to the environment variables defined for each options, you can define the following environment variables 
-  to configure valet:
+  In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
   - VALET_USER_DIRECTORY="my/path": set the path to the valet user directory (in which to find user commands).
   - VALET_NO_COLOR="true": will disable the color output for logs and help.
-  - VALET_COLOR_XXX="color": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, 
-  OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, ERROR, TIMESTAMP, HIGHLIGHT.
+  - VALET_COLOR_XXX="color": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, 
+  ERROR, TIMESTAMP, HIGHLIGHT.
   - VALET_NO_WRAP="true": will disable the text wrapping for logs.
   - VALET_NO_ICON="true": will disable the icons for logs and help.
   - VALET_NO_TIMESTAMP="true": will disable the timestamp for logs.
-  - VALET_LOG_COLUMNS="120": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the 
-  terminal width.
-  - VALET_CI_MODE="true": will simplify the log output for CI/CD environments (or slow systems), will display the logs 
-  without colors, without wrapping lines and with the full date.
-  - VALET_REMEMBER_LAST_CHOICES="20": number of last choices to remember when selecting an item from a menu. Set to 0 to
-  disable this feature and always display items in the alphabetical order.
+  - VALET_LOG_COLUMNS="120": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the terminal width.
+  - VALET_CI_MODE="true": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full 
+  date.
+  - VALET_REMEMBER_LAST_CHOICES="20": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the 
+  alphabetical order.
   
   ⌜Developer notes:⌝
-  You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true
-  (it will output to ~/profile_valet.txt).
+  You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
 
 USAGE
 
@@ -454,7 +450,7 @@ sub cmd2  	This is sub command 2
 another3  	This is another command 3
 
 fzf args were:
---tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=2 --preview-window=right:50:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 48 {}
+--tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=2 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
 ---
 ```
 
@@ -489,7 +485,7 @@ showcase               	Show the showcase sub menu.
 showcase sudo-command  	A command that requires sudo
 
 fzf args were:
---tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:50:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 48 {}
+--tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
 ---
 ```
 
@@ -579,11 +575,9 @@ Exit code: 0
 **Error** output:
 
 ```log
-[1;30mHH:MM:SS [0;36mINFO     [0m This is an info message with a super long sentence. The value of life is not in its duration, but in
-                    its donation. You are not important because of how long you live, you are important because of how 
-                    effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed 
-                    him for a lifetime. Surround yourself with the best people you can find, delegate authority, and 
-                    don't interfere as long as the policy you've decided upon is being carried out.
+[1;30mHH:MM:SS [0;36mINFO     [0m This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. 
+                    Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've 
+                    decided upon is being carried out.
 [1;30mHH:MM:SS [0;32mSUCCESS  [0m This is a success message.
 [1;30mHH:MM:SS [0;33mWARNING  [0m This is a warning message.
                     With a second line.
@@ -602,11 +596,9 @@ Exit code: 0
 **Error** output:
 
 ```log
-HH:MM:SS INFO      This is an info message with a super long sentence. The value of life is not in its duration, but in
-                    its donation. You are not important because of how long you live, you are important because of how 
-                    effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed 
-                    him for a lifetime. Surround yourself with the best people you can find, delegate authority, and 
-                    don't interfere as long as the policy you've decided upon is being carried out.
+HH:MM:SS INFO      This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. 
+                    Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've 
+                    decided upon is being carried out.
 HH:MM:SS SUCCESS   This is a success message.
 HH:MM:SS WARNING   This is a warning message.
                     With a second line.
@@ -644,11 +636,9 @@ Exit code: 0
 **Error** output:
 
 ```log
-INFO      This is an info message with a super long sentence. The value of life is not in its duration, but in its 
-           donation. You are not important because of how long you live, you are important because of how effective you 
-           live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
-           Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the 
-           policy you've decided upon is being carried out.
+INFO      This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man 
+           a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being
+           carried out.
 SUCCESS   This is a success message.
 WARNING   This is a warning message.
            With a second line.
@@ -667,11 +657,9 @@ Exit code: 0
 **Error** output:
 
 ```log
-HH:MM:SS INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in 
-                  its donation. You are not important because of how long you live, you are important because of how 
-                  effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him
-                  for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't 
-                  interfere as long as the policy you've decided upon is being carried out.
+HH:MM:SS INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give
+                  a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided 
+                  upon is being carried out.
 HH:MM:SS SUCCESS  This is a success message.
 HH:MM:SS WARNING  This is a warning message.
                   With a second line.
@@ -839,7 +827,7 @@ self test              	Test your valet custom commands.
 self update            	Update valet using the latest release on GitHub.
 
 fzf args were:
---tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:50:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 48 {}
+--tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
 ---
 ```
 

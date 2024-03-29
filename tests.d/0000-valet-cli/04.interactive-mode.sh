@@ -11,8 +11,6 @@ sub cmd1  	This is sub command 1
 sub cmd2  	This is sub command 2
 another3  	This is another command 3"
 
-  export VALET_HOME="${ORIGINAL_VALET_HOME}"
-
   # testing showInteractiveCommandsMenu, should return the last line of the input stream
   echo "→ showInteractiveCommandsMenu \"ReturnLast My header"$'\n'"2 lines\" \"${commands}\""
   showInteractiveCommandsMenu "ReturnLast My header"$'\n'"2 lines" "${commands}" && echo "${LAST_RETURNED_VALUE}"

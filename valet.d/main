@@ -665,7 +665,7 @@ function sortCommands() {
   commands="${2}"
 
   # if the user does not want to remember the last choices, we return
-  if [ "${VALET_REMEMBER_LAST_CHOICES:-20}" -eq 0 ]; then
+  if [ "${VALET_REMEMBER_LAST_CHOICES:-3}" -eq 0 ]; then
     LAST_RETURNED_VALUE="${commands}"
     return 0
   fi
@@ -733,7 +733,7 @@ function addLastChoice() {
   menuId="${1}"
   command="${2}"
 
-  local maxNumberOfLastChoice=${VALET_REMEMBER_LAST_CHOICES:-20}
+  local maxNumberOfLastChoice=${VALET_REMEMBER_LAST_CHOICES:-3}
 
   # if the user does not want to remember the last choices, we return
   if [ "${maxNumberOfLastChoice}" -eq 0 ]; then

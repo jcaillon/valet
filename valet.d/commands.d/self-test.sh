@@ -202,7 +202,7 @@ function selfTestCore() {
     inform "This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out."
     succeed "This is a success message."
     warn "This is a warning message."$'\n'"With a second line."
-    if isDebugMode; then
+    if isDebugEnabled; then
       echo "The debug mode is activated!" 1>&2
     fi
   elif [ -n "${waitIndefinitely:-}" ]; then
@@ -438,22 +438,29 @@ function resetFdRedirection() {
   exec 2>&4 4>&-
 }
 
+# sets up a simpler log function for the tests
+# so we can have consistent results independent of the environment
 function setSimplerLogFunction() {
   if [ -z "${ORIGINAL_LOG_LINE_FUNCTION:-}" ]; then
     ORIGINAL_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
     ORIGINAL_VALET_NO_COLOR="${VALET_NO_COLOR:-}"
   fi
-  VALET_NO_COLOR="true"
+  export VALET_NO_COLOR="true"
   setLogColors
-  VALET_NO_TIMESTAMP="true"
-  VALET_NO_ICON="true"
-  _COLUMNS=120
+  export VALET_NO_COLOR="true"
+  export VALET_NO_TIMESTAMP="true"
+  export VALET_NO_ICON="true"
+  export VALET_NO_WRAP="true"
+  export VALET_CI_MODE="false"
+  export VALET_LOG_COLUMNS=9999
+  export _COLUMNS=9999
   createLogLineFunction
   eval "${LOG_LINE_FUNCTION}"
 }
 
+# reset the original log line function between each test
 function resetLogLineFunction() {
-  VALET_NO_COLOR="${ORIGINAL_VALET_NO_COLOR}"
+  export VALET_NO_COLOR="${ORIGINAL_VALET_NO_COLOR}"
   setLogColors
   eval "${ORIGINAL_LOG_LINE_FUNCTION}"
 }

@@ -309,8 +309,8 @@ function debug() {
 # Returns 0 if debug mode is active, 1 otherwise.
 #
 # Usage:
-#  isDebugMode && echo "Debug mode is active."
-function isDebugMode() {
+#  isDebugEnabled && echo "Debug mode is active."
+function isDebugEnabled() {
   if [[ ${LOG_LEVEL_INT:-1} -eq 0 ]]; then
     return 0
   fi
@@ -650,7 +650,7 @@ function invoke5() {
   [[ -s "${_TEMPORARY_STDERR_FILE}" ]] && : > "${_TEMPORARY_STDERR_FILE}"
 
   # if debug mode is on, print some info
-  if isDebugMode; then
+  if isDebugEnabled; then
     local debugMessage="Executing the command ⌜${executable}⌝."$'\n'
     debugMessage+="Fail if it fails: ⌜${failIfFails}⌝"$'\n'
     debugMessage+="Acceptable error codes: ⌜${acceptableErrorCodes}⌝"$'\n'
@@ -681,7 +681,7 @@ function invoke5() {
   fi
 
   # if debug mode is on, print the command and the exit code
-  if isDebugMode; then
+  if isDebugEnabled; then
     local debugMessage="The command ⌜${executable}⌝ ended with exit code ⌜${exitCode}⌝."
     if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
       debugMessage+=$'\n'"⌜stdout⌝:"$'\n'"$(<"${_TEMPORARY_STDOUT_FILE}")"
@@ -765,10 +765,18 @@ function invoke5var() {
   invoke5 "$@" || exitCode=$?
 
   local content
-  IFS= read -rd '' content < "${LAST_RETURNED_VALUE}" || true
-  LAST_RETURNED_VALUE="${content}"
-  IFS= read -rd '' content < "${LAST_RETURNED_VALUE2}" || true
-  LAST_RETURNED_VALUE2="${content}"
+  if [ -s "${LAST_RETURNED_VALUE}" ]; then
+    IFS= read -rd '' content < "${LAST_RETURNED_VALUE}" || true
+    LAST_RETURNED_VALUE="${content}"
+  else
+    LAST_RETURNED_VALUE=""
+  fi
+  if [ -s "${LAST_RETURNED_VALUE2}" ]; then
+    IFS= read -rd '' content < "${LAST_RETURNED_VALUE2}" || true
+    LAST_RETURNED_VALUE2="${content}"
+  else
+    LAST_RETURNED_VALUE2=""
+  fi
 
   return ${exitCode}
 }
@@ -799,7 +807,19 @@ function invoke3var() {
   invoke5var "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
 }
 
-# TODO: implement kurl
+
+# This function is a wrapper around curl.
+# It allows you to check the http status code and return 1 if it is not acceptable.
+#
+# $1: a list of http status codes that are acceptable, comma separated
+# $2: the file in which to save the output of curl
+#
+# Returns:
+#  The exit code of the function is 0 if the http status code is acceptable, 1 otherwise.
+#  The content of stderr in the global variable LAST_RETURNED_VALUE.
+#
+# Usage:
+#  kurlFile "200,201" "/filePath" "https://example.com" || fail "The curl command failed."
 
 
 #===============================================================
