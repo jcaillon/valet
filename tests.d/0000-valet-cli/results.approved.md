@@ -208,6 +208,8 @@ COMMANDS
       An hello world command
   self build
       Re-build the menu of valet from your commands.
+  self download-binaries
+      Download the required binaries for valet.
   self
       Show the valet self-maintenance sub menu.
   self release
@@ -333,14 +335,8 @@ Exit code: 0
 
 ```log
 INFO     This command requires sudo privileges.
----
-sudo args were:
-echo alright
----
----
-sudo args were:
-whoami
----
+▶ called sudo echo alright
+▶ called sudo whoami
 ```
 
 ## Test script 03.event-handlers
@@ -444,19 +440,15 @@ another3
 **Error** output:
 
 ```log
----
-fzf input stream was:
-ReturnLast My header
+▶ called fzf --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=2 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
+▶ fzf input stream was:
+⌈ReturnLast My header
 2 lines
 cm1  	This is command 1
 cm2  	This is command 2
 sub cmd1  	This is sub command 1
 sub cmd2  	This is sub command 2
-another3  	This is another command 3
-
-fzf args were:
---tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=2 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
----
+another3  	This is another command 3⌉
 ```
 
 ### Testing that valet can be called without any arguments and show the menu
@@ -472,26 +464,23 @@ Exit code: 0
 **Error** output:
 
 ```log
----
-fzf input stream was:
-Please select the command to run (filter by typing anything)
+▶ called fzf --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
+▶ fzf input stream was:
+⌈Please select the command to run (filter by typing anything)
 
-Command name           	Short description
-help                   	Show the help this program or of a specific command
-self build             	Re-build the menu of valet from your commands.
-self release           	Release a new version of valet.
-self                   	Show the valet self-maintenance sub menu.
-self test-core         	Test valet core features.
-self test              	Test your valet custom commands.
-self update            	Update valet using the latest release on GitHub.
-showcase command1      	A showcase command that uses arguments and options.
-showcase hello-world   	An hello world command
-showcase               	Show the showcase sub menu.
-showcase sudo-command  	A command that requires sudo
-
-fzf args were:
---tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
----
+Command name            	Short description
+help                    	Show the help this program or of a specific command
+self build              	Re-build the menu of valet from your commands.
+self download-binaries  	Download the required binaries for valet.
+self release            	Release a new version of valet.
+self                    	Show the valet self-maintenance sub menu.
+self test-core          	Test valet core features.
+self test               	Test your valet custom commands.
+self update             	Update valet using the latest release on GitHub.
+showcase command1       	A showcase command that uses arguments and options.
+showcase hello-world    	An hello world command
+showcase                	Show the showcase sub menu.
+showcase sudo-command   	A command that requires sudo⌉
 ```
 
 ## Test script 05.logging
@@ -816,20 +805,26 @@ Exit code: 0
 **Error** output:
 
 ```log
----
-fzf input stream was:
-Please select the command to run (filter by typing anything)
+▶ called fzf --tiebreak=begin,index
+--no-multi
+--cycle
+--layout=reverse
+--info=default
+--margin=0
+--padding=0
+--header-lines=3
+--preview-window=right:4989:wrap
+--preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
+▶ fzf input stream was:
+⌈Please select the command to run (filter by typing anything)
 
-Command name           	Short description
-self build             	Re-build the menu of valet from your commands.
-self release           	Release a new version of valet.
-self test-core         	Test valet core features.
-self test              	Test your valet custom commands.
-self update            	Update valet using the latest release on GitHub.
-
-fzf args were:
---tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
----
+Command name            	Short description
+self build              	Re-build the menu of valet from your commands.
+self download-binaries  	Download the required binaries for valet.
+self release            	Release a new version of valet.
+self test-core          	Test valet core features.
+self test               	Test your valet custom commands.
+self update             	Update valet using the latest release on GitHub.⌉
 ```
 
 ### Testing that we can display the help of a sub menu
@@ -859,6 +854,8 @@ COMMANDS
 
   build
       Re-build the menu of valet from your commands.
+  download-binaries
+      Download the required binaries for valet.
   release
       Release a new version of valet.
   test

@@ -19,10 +19,7 @@ export VALET_CONFIG_DIRECTORY="${LAST_RETURNED_VALUE}"
 
 # override sudo to be able to test a command with sudo
 function sudo() {
-  echo --- 1>&2
-  echo "sudo args were:" 1>&2
-  echo "$@" 1>&2
-  echo --- 1>&2
+  echo "▶ called sudo $*" 1>&2
 }
 export -f sudo
 
@@ -34,13 +31,9 @@ function fzf() {
   local inputStreamContent
   read -rd '' inputStreamContent <&0 || true
 
-  echo --- 1>&2
-  echo "fzf input stream was:" 1>&2
-  echo "${inputStreamContent}" 1>&2
-  echo 1>&2
-  echo "fzf args were:" 1>&2
-  echo "$@" 1>&2
-  echo --- 1>&2
+  echo "▶ called fzf $*" 1>&2
+  echo "▶ fzf input stream was:" 1>&2
+  echo "⌈${inputStreamContent}⌉" 1>&2
 
   if [[ "${inputStreamContent}" == "ReturnLast"* ]]; then
     # returning the last line of the input stream
@@ -48,27 +41,6 @@ function fzf() {
   fi
 }
 export -f fzf
-
-# override the invoke5 function, but saving it first so we can restore it after the tests
-if [[ -z "${ORIGINAL_INVOKE5:-}" ]]; then
-  ORIGINAL_INVOKE5="$(declare -f invoke5)"
-fi
-function invoke5() {
-  local inputStreamContent
-  read -rd '' inputStreamContent <&0 || true
-
-  echo "▶ called invoke5" 1>&2
-  echo "Input stream was:" 1>&2
-  echo "${inputStreamContent:-}" 1>&2
-  echo 1>&2
-  echo "Arguments were:" 1>&2
-  echo "$@" 1>&2
-
-  if [[ "${inputStreamContent}" == "ReturnLast"* ]]; then
-    # returning the last line of the input stream
-    echo "${inputStreamContent##*$'\n'}"
-  fi
-}
 
 function echoTempFileWithTimeStampSubstitution() {
   local file="${_TEST_TEMP_FILE}"

@@ -665,7 +665,7 @@ function invoke5() {
   # try to find the executable in the valet bin folder,
   # in which case bash will not have to find it on the path and we go faster
   local possibleExecutablePath="${VALET_BIN_PATH:-"${VALET_HOME}/bin"}/${executable}"
-  if [[ -x "${possibleExecutablePath}" ]]; then
+  if [[ "${VALET_DO_NOT_USE_LOCAL_BIN:-false}" != "true" && -x "${possibleExecutablePath}" ]]; then
     debug "The executable ⌜${executable}⌝ was found in ⌜${possibleExecutablePath}⌝."
     executable="${possibleExecutablePath}"
   fi
@@ -812,6 +812,20 @@ function invoke3var() {
   shift 2
 
   invoke5var "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
+}
+
+# This function call an executable and its arguments.
+# If the execution fails, it will fail the script and show the std/err output.
+# Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
+#
+# Returns:
+#  The content of stdout in the global variable LAST_RETURNED_VALUE.
+#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#  invoke git add --all
+function invoke() {
+  invoke5 "true" "0" "" "" "$@"
 }
 
 # This function is a wrapper around curl.
@@ -1016,6 +1030,22 @@ function extractBetween() {
   local -i extractedLength
   extractedLength=$((endIndex - startIndex))
   LAST_RETURNED_VALUE="${string:${startIndex}:${extractedLength}}"
+}
+
+# Returns the name of the current OS.
+# Can be one of these values: "darwin", "linux", "windows".
+#
+# Usage:
+#  getOsName && local osName="${LAST_RETURNED_VALUE}"
+function getOsName() {
+  local osName
+  case "${OSTYPE:-}" in
+    darwin*) osName="darwin";;
+    linux*) osName="linux";;
+    msys*) osName="windows";;
+    *) osName="unknown";;
+  esac
+  LAST_RETURNED_VALUE="${osName}"
 }
 
 #===============================================================

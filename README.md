@@ -1,6 +1,6 @@
 # ♣️ Valet
 
-[![GitHub Release](https://img.shields.io/github/v/release/jcaillon/valet?sort=date&style=flat&logo=github&logoColor=white&label=Latest%20release&color=%2350C878)](https://github.com/jcaillon/3P/releases/latest)
+[![GitHub Release](https://img.shields.io/github/v/release/jcaillon/valet?sort=date&style=flat&logo=github&logoColor=white&label=Latest%20release&color=%2350C878)](https://github.com/jcaillon/valet/releases/latest)
 
 ⚠️ THIS IS A WORK IN PROGRESS, PLEASE WAIT FOR THE REMOVAL OF THIS DISCLAIMER :)
 
@@ -23,6 +23,7 @@ Table of contents:
 - [🎉 Installation](#-installation)
   - [Automated installation](#automated-installation)
   - [Manual installation](#manual-installation)
+  - [Manual installation from sources](#manual-installation-from-sources)
 - [💻 Usage](#-usage)
   - [Adding your own commands](#adding-your-own-commands)
   - [Command menu](#command-menu)
@@ -97,11 +98,21 @@ curl https://github.com/jcaillon/valet/TOBEDONE! | bash
 ```
 
 > [!NOTE]
-> The installer downloads additional tools ([fzf][fzf] and [yq][yq]) in the Valet `bin` sub directory.
+> The installer downloads the package from GitHub which contains additional tools ([fzf][fzf] and [yq][yq]) in the Valet `bin` sub directory.
 >
 > It also copies the [examples.d](examples.d) directory to your Valet user directory (if empty) and runs `valet self build` in order to get you started.
 
 ### Manual installation
+
+1. Download the correct package (depends on your OS/cpu architecture) from the [latest release from GitHub](https://github.com/jcaillon/valet/releases/latest).
+2. Extract the archive to your favorite installation directory.
+3. Add this directory to your PATH (or link Valet to `/usr/local/bin`) so you can call `valet` from your terminal.
+4. Call `valet` to get started with the example commands!
+
+> [!NOTE]
+> The `valet-no-binaries.tar.gz` package does not pack fzf, yg and curl. You will need to have them in your PATH.
+
+### Manual installation from sources
 
 1. You need the following tools installed and present in your PATH for valet to work:
    1. [yq][yq] (to be able to build your commands)

@@ -10,17 +10,12 @@ Exit code: 0
 
 ```plaintext
 → invoke5 false 0 true "${tmpFile}" fakeexec --std-in --option argument1 argument2
-Invoke function ended with exit code ⌈0⌉.
+Invoke function ended with exit code ⌈1⌉.
 stdout from file:
-⌈▶ called fakexec
-Input stream was:
----
-Input stream content from a file
----
-Arguments were:
---std-in --option argument1 argument2⌉
+⌈⌉
 stderr from file:
-⌈This is an error output from fakeexec⌉
+⌈ERROR    Command not found: ⌜fakeexec⌝.
+Please check your ⌜PATH⌝ variable.⌉
 
 ```
 
@@ -34,13 +29,9 @@ Exit code: 0
 → invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error
 Invoke function ended with exit code ⌈1⌉.
 stdout from file:
-⌈▶ called fakeexec2
-Input stream was:
----
-inputStreamValue
----
-Arguments were:
---std-in --error⌉
+⌈▶ called fakeexec2 --std-in --error
+▶ fakeexec2 input stream was:
+⌈inputStreamValue⌉⌉
 stderr from file:
 ⌈This is an error output from fakeexec2
 returning 1 from fakeexec2⌉
@@ -63,13 +54,9 @@ exitcode=1
 ```log
 ERROR    The command ⌜fakeexec2⌝ originally ended with exit code ⌜1⌝.
 Standard output:
-⌜▶ called fakeexec2
-Input stream was:
----
-inputStreamValue
----
-Arguments were:
---std-in --error⌝
+⌜▶ called fakeexec2 --std-in --error
+▶ fakeexec2 input stream was:
+⌈inputStreamValue⌉⌝
 Error output:
 ⌜This is an error output from fakeexec2
 returning 1 from fakeexec2⌝
@@ -85,13 +72,9 @@ Exit code: 0
 → invoke5 true 0,1,2 true '' fakeexec2 --error
 Invoke function ended with exit code ⌈0⌉.
 stdout from file:
-⌈▶ called fakeexec2
-Input stream was:
----
-
----
-Arguments were:
---error⌉
+⌈▶ called fakeexec2 --error
+▶ fakeexec2 input stream was:
+⌈⌉⌉
 stderr from file:
 ⌈This is an error output from fakeexec2
 returning 1 from fakeexec2⌉
@@ -108,13 +91,9 @@ Exit code: 0
 → invoke5var false 0 true '' fakeexec2
 Invoke function ended with exit code ⌈0⌉.
 stdout from var:
-⌈▶ called fakeexec2
-Input stream was:
----
-
----
-Arguments were:
-
+⌈▶ called fakeexec2 
+▶ fakeexec2 input stream was:
+⌈⌉
 ⌉
 stderr from var:
 ⌈This is an error output from fakeexec2
@@ -132,13 +111,9 @@ Exit code: 0
 → invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error
 Invoke function ended with exit code ⌈1⌉.
 stdout from file:
-⌈▶ called fakeexec2
-Input stream was:
----
-inputStreamValue
----
-Arguments were:
---std-in --error⌉
+⌈▶ called fakeexec2 --std-in --error
+▶ fakeexec2 input stream was:
+⌈inputStreamValue⌉⌉
 stderr from file:
 ⌈This is an error output from fakeexec2
 returning 1 from fakeexec2⌉
@@ -156,13 +131,9 @@ Standard stream: ⌜inputStreamValue⌝
 Extra parameters: ⌜--std-in --error⌝
 DEBUG    The command ⌜fakeexec2⌝ originally ended with exit code ⌜1⌝.
 Standard output:
-⌜▶ called fakeexec2
-Input stream was:
----
-inputStreamValue
----
-Arguments were:
---std-in --error⌝
+⌜▶ called fakeexec2 --std-in --error
+▶ fakeexec2 input stream was:
+⌈inputStreamValue⌉⌝
 Error output:
 ⌜This is an error output from fakeexec2
 returning 1 from fakeexec2⌝
@@ -178,13 +149,9 @@ Exit code: 0
 → invoke3 false 0 fakeexec2 --option argument1 argument2
 Invoke function ended with exit code ⌈0⌉.
 stdout from file:
-⌈▶ called fakeexec2
-Input stream was:
----
-
----
-Arguments were:
---option argument1 argument2⌉
+⌈▶ called fakeexec2 --option argument1 argument2
+▶ fakeexec2 input stream was:
+⌈⌉⌉
 stderr from file:
 ⌈This is an error output from fakeexec2⌉
 
@@ -200,17 +167,54 @@ Exit code: 0
 → invoke3var false 0 fakeexec2 --option argument1 argument2
 Invoke function ended with exit code ⌈0⌉.
 stdout from var:
-⌈▶ called fakeexec2
-Input stream was:
----
-
----
-Arguments were:
---option argument1 argument2
+⌈▶ called fakeexec2 --option argument1 argument2
+▶ fakeexec2 input stream was:
+⌈⌉
 ⌉
 stderr from var:
 ⌈This is an error output from fakeexec2
 ⌉
+
+```
+
+### Testing invoke, should fail
+
+Exit code: 1
+
+**Standard** output:
+
+```plaintext
+→ invoke fakeexec2 --error
+```
+
+**Error** output:
+
+```log
+ERROR    The command ⌜fakeexec2⌝ originally ended with exit code ⌜1⌝.
+Standard output:
+⌜▶ called fakeexec2 --error
+▶ fakeexec2 input stream was:
+⌈⌉⌝
+Error output:
+⌜This is an error output from fakeexec2
+returning 1 from fakeexec2⌝
+```
+
+### Testing invoke, output to var
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ invoke fakeexec2 --option argument1 argument2
+Invoke function ended with exit code ⌈0⌉.
+stdout from file:
+⌈▶ called fakeexec2 --option argument1 argument2
+▶ fakeexec2 input stream was:
+⌈⌉⌉
+stderr from file:
+⌈This is an error output from fakeexec2⌉
 
 ```
 
@@ -229,9 +233,8 @@ http return code was ⌈200⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 200 -curlOption1 --fakeOpt2 https://hello.com⌉
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 200 -curlOption1 --fakeOpt2 https://hello.com
+⌉
 ```
 
 ### Testing kurlFile, http code 500 not acceptable return 1
@@ -247,9 +250,8 @@ http return code was ⌈500⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 500 https://hello.com⌉
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 500 https://hello.com
+⌉
 ```
 
 ### Testing kurlFile, http code 500 not acceptable fails
@@ -267,9 +269,8 @@ Exit code: 0
 ```log
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://hello.com⌝.
 Error output:
-⌜▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 500 https://hello.com⌝
+⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 500 https://hello.com
+⌝
 ```
 
 ### Testing kurlFile, http code 500 is now acceptable return 0
@@ -285,9 +286,8 @@ http return code was ⌈500⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 500 https://hello.com⌉
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 500 https://hello.com
+⌉
 ```
 
 ### Testing kurlFile, testing debug mode https code 400
@@ -303,9 +303,8 @@ http return code was ⌈400⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 400 --error https://hello.com/bla --otherOptReturning 1 from curl.
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 400 --error https://hello.com/bla --otherOpt
+Returning 1 from curl.
 ⌉
 ```
 
@@ -322,9 +321,8 @@ DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜1⌝.
 Standard output:
 ⌜400⌝
 Error output:
-⌜▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 400 --error https://hello.com/bla --otherOptReturning 1 from curl.⌝
+⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 400 --error https://hello.com/bla --otherOpt
+Returning 1 from curl.⌝
 DEBUG    The curl command for url ⌜https://hello.com/bla⌝ ended with exit code ⌜1⌝, the http return code was ⌜400⌝.
 DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜https://hello.com/bla⌝.
 ```
@@ -342,9 +340,8 @@ http return code was ⌈200⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 200 http://hello.com⌉
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 200 http://hello.com
+⌉
 ```
 
 **Error** output:
@@ -361,9 +358,7 @@ The error code ⌜0⌝ is acceptable and has been reset to 0.
 Standard output:
 ⌜200⌝
 Error output:
-⌜▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 200 http://hello.com⌝
+⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 200 http://hello.com⌝
 DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
 DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
 ```
@@ -381,9 +376,8 @@ http return code was ⌈200⌉
 stdout:
 ⌈⌉
 stderr:
-⌈▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 200 http://hello.com⌉
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 200 http://hello.com
+⌉
 ```
 
 ### Testing kurl, with no content http code 500, fails
@@ -401,9 +395,8 @@ Exit code: 0
 ```log
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜http://hello.com⌝.
 Error output:
-⌜▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 500 http://hello.com⌝
+⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 500 http://hello.com
+⌝
 ```
 
 ### Testing kurl, debug mode, with content http code 400
@@ -419,9 +412,8 @@ http return code was ⌈400⌉
 stdout:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 400 http://hello.com⌉
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 400 http://hello.com
+⌉
 ```
 
 **Error** output:
@@ -438,9 +430,7 @@ The error code ⌜0⌝ is acceptable and has been reset to 0.
 Standard output:
 ⌜400⌝
 Error output:
-⌜▶ called curl
-Arguments were:
---silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 400 http://hello.com⌝
+⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 400 http://hello.com⌝
 DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜400⌝.
 DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜http://hello.com⌝.
 ```
@@ -668,5 +658,26 @@ l3 showcase command1
 # should prioritize lower distance between letters
 → fuzzyMatch lubl "${lines}"
 l5 ublievable
+```
+
+### Testing getOsName
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ OSTYPE=linux-bsd getOsName
+linux
+
+→ OSTYPE=msys getOsName
+windows
+
+→ OSTYPE=darwin-stuff getOsName
+darwin
+
+→ OSTYPE=nop getOsName
+unknown
+
 ```
 

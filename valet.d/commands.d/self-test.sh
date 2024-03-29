@@ -439,6 +439,7 @@ function setFdRedirection() {
     ORIGINAL_VALET_NO_COLOR="${VALET_NO_COLOR:-}"
     ORIGINAL_LOG_LEVEL="${LOG_LEVEL:-}"
     ORIGINAL_LOG_LEVEL_INT="${LOG_LEVEL_INT:-}"
+    ORIGINAL_VALET_DO_NOT_USE_LOCAL_BIN="${VALET_DO_NOT_USE_LOCAL_BIN:-}"
   fi
   export LOG_LEVEL="info"
   export LOG_LEVEL_INT=1
@@ -450,6 +451,7 @@ function setFdRedirection() {
   export VALET_CI_MODE="false"
   export VALET_LOG_COLUMNS=9999
   export _COLUMNS=9999
+  export VALET_DO_NOT_USE_LOCAL_BIN="true"
   if [ -z "${SIMPLIFIED_LOG_LINE_FUNCTION:-}" ]; then
     createLogLineFunction
     SIMPLIFIED_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
@@ -466,6 +468,7 @@ function resetFdRedirection() {
   export LOG_LEVEL="${ORIGINAL_LOG_LEVEL}"
   export LOG_LEVEL_INT="${ORIGINAL_LOG_LEVEL_INT}"
   export VALET_NO_COLOR="${ORIGINAL_VALET_NO_COLOR}"
+  export VALET_DO_NOT_USE_LOCAL_BIN="${ORIGINAL_VALET_DO_NOT_USE_LOCAL_BIN}"
   setLogColors
   eval "${ORIGINAL_LOG_LINE_FUNCTION}"
 }

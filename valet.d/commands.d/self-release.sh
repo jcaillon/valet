@@ -60,7 +60,7 @@ function selfRelease() {
 
     # check that the git workarea is clean
     debug "Checking if the workarea is clean"
-    git update-index --really-refresh 1>/dev/null || true
+    invoke git update-index --really-refresh 1>/dev/null || true
     if ! git diff-index --quiet HEAD; then
       fail "The workarea is not clean, please commit your changes before releasing a new version."
     fi
@@ -70,50 +70,56 @@ function selfRelease() {
   local version
   IFS= read -rd '' version <"${VALET_HOME}/valet.d/version" || true
   version="${version%%$'\n'*}"
-  inform "The current version of valet is: ${version}"
+  inform "The current version of valet is: ${version}."
 
   # get the current latest tag
   local lastTag
-  lastTag="$(git tag --sort=committerdate --no-color)"
+  invoke git tag --sort=committerdate --no-color
+  lastTag="${LAST_RETURNED_VALUE}"
   lastTag="${lastTag%%$'\n'*}"
 
   # prepare the tag message
   local tagMessage line
   tagMessage="# Release of version ${version}"$'\n'$'\n'
   tagMessage+="Changelog: "$'\n'$'\n'
-  while read -r line; do
+  invoke git log --pretty=format:"%s" "${lastTag}..HEAD"
+  local IFS=$'\n'
+  for line in ${LAST_RETURNED_VALUE}; do
     tagMessage+="- ${line}"$'\n'
-  done < <(git log --pretty=format:"%s" "${lastTag}..HEAD")
-  inform "The tag message is: ${tagMessage}"
+  done
+  inform "The tag message is:"$'\n'"${tagMessage}"
 
-  # create a new git tag with the version
+  # create a new git tag with the version and push it
   if [[ "${dryRun:-}" != "true" ]]; then
-    git tag -a "v${version}" -m "Release version ${version}"
-    git push origin "v${version}"
+    invoke git tag -a "v${version}" -m "Release version ${version}"
+    invoke git push origin "v${version}"
     succeed "The new version has been tagged and pushed to the remote repository."
   fi
 
   # bump the version
   bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${LAST_RETURNED_VALUE}"
   [[ "${dryRun:-}" != "true" ]] && echo "${newVersion}" >"${VALET_HOME}/valet.d/version"
-  inform "The new version of valet is: ${newVersion}"
+  inform "The new version of valet is: ${newVersion}."
 
-  # commit the new version
+  # commit the new version and push it
   if [[ "${dryRun:-}" != "true" ]]; then
-    git add "${VALET_HOME}/valet.d/version"
-    git commit -m "🔖 bump version to ${newVersion}"
-    git push origin main
+    invoke git add "${VALET_HOME}/valet.d/version"
+    invoke git commit -m "🔖 bump version to ${newVersion}"
+    invoke git push origin main
     succeed "The new version has been committed."
   fi
 
   # prepare the release payload
+  local prerelease=false
+  [[ "${version}" == *"-"* ]] && prerelease=true
   local releasePayload
   releasePayLoad="{
     \"tag_name\": \"v${version}\",
     \"body\": \"${tagMessage}\",
     \"draft\": false,
-    \"prerelease\": false
+    \"prerelease\": ${prerelease}
   }"
+  debug "The release payload is: ⌜${releasePayload}⌝"
 
   # create the release on GitHub
   local uploadUrl
@@ -139,7 +145,7 @@ function selfRelease() {
   # prepare the artifact
   local artifactPath="${VALET_HOME}/valet.tar.gz"
   pushd "${VALET_HOME}" 1>/dev/null
-  invoke3var true 0 tar -czvf "${artifactPath}" examples.d valet.d valet
+  invoke tar -czvf "${artifactPath}" examples.d valet.d valet
   popd 1>/dev/null
   inform "The artifact has been created at: ${artifactPath} with:"$'\n'"${LAST_RETURNED_VALUE}"
 

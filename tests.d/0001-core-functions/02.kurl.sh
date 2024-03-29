@@ -95,9 +95,7 @@ function echoOutputKurl() {
 # Override curl for tests
 # shellcheck disable=SC2317
 function curl() {
-  echo "▶ called curl" 1>&2
-  echo "Arguments were:" 1>&2
-  echo -n "$@" 1>&2
+  echo "▶ called curl $*" 1>&2
 
   while [[ $# -gt 0 ]]; do
     case "${1}" in

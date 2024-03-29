@@ -53,6 +53,19 @@ function testInvoke3() {
   endTest "Testing invoke3var, output to var" 0
 }
 
+function testInvoke() {
+  local -i exitCode
+
+  echo "→ invoke fakeexec2 --error"
+  (invoke fakeexec2 --error) && exitCode=0 || exitCode=$?
+  endTest "Testing invoke, should fail" $exitCode
+
+  echo "→ invoke fakeexec2 --option argument1 argument2"
+  invoke fakeexec2 --option argument1 argument2 && exitCode=0 || exitCode=$?
+  echoInvokeOutput $exitCode true
+  endTest "Testing invoke, output to var" 0
+}
+
 function echoInvokeOutput() {
   local exitCode areFiles
   exitCode="${1}"
@@ -78,13 +91,9 @@ function fakeexec2() {
     read -rd '' inputStreamContent <&0 || true
   fi
 
-  echo "▶ called fakeexec2"
-  echo "Input stream was:"
-  echo ---
-  echo "${inputStreamContent:-}"
-  echo ---
-  echo "Arguments were:"
-  echo "$@"
+  echo "▶ called fakeexec2 $*"
+  echo "▶ fakeexec2 input stream was:"
+  echo "⌈${inputStreamContent:-}⌉"
 
   echo "This is an error output from fakeexec2" 1>&2
 
@@ -100,6 +109,7 @@ function main() {
 
   testInvoke5
   testInvoke3
+  testInvoke
 
   unset VALET_BIN_PATH
 }

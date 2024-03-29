@@ -14,6 +14,7 @@ _CMD_INCLUDED=1
 # list all the functions callable with a command
 CMD_ALL_FUNCTIONS="helloWorld
 selfBuild
+selfDownloadBinaries
 selfMenu
 selfRelease
 selfTest
@@ -30,6 +31,7 @@ this
 # Get the function name from a command
 CMD_FUNCTION_NAME_showcase_hello_world="helloWorld"
 CMD_FUNCTION_NAME_self_build="selfBuild"
+CMD_FUNCTION_NAME_self_download_binaries="selfDownloadBinaries"
 CMD_FUNCTION_NAME_self="selfMenu"
 CMD_FUNCTION_NAME_self_release="selfRelease"
 CMD_FUNCTION_NAME_self_test="selfTest"
@@ -52,6 +54,7 @@ CMD_ALL_COMMANDS="
 help
 self
 self build
+self download-binaries
 self release
 self test
 self test-core
@@ -64,24 +67,25 @@ showcase sudo-command
 
 
 # get the maximum width (nb characters) among all commands
-CMD_MAX_COMMAND_WIDTH="21"
+CMD_MAX_COMMAND_WIDTH="22"
 
 
 # Get the input for fzf to display the header commands menu
 CMD_COMMANDS_MENU_HEADER="Please select the command to run (filter by typing anything)
 
-Command name           	Short description"
-CMD_COMMANDS_MENU_BODY="help                   	Show the help this program or of a specific command
-self build             	Re-build the menu of valet from your commands.
-self release           	Release a new version of valet.
-self                   	Show the valet self-maintenance sub menu.
-self test-core         	Test valet core features.
-self test              	Test your valet custom commands.
-self update            	Update valet using the latest release on GitHub.
-showcase command1      	A showcase command that uses arguments and options.
-showcase hello-world   	An hello world command
-showcase               	Show the showcase sub menu.
-showcase sudo-command  	A command that requires sudo"
+Command name            	Short description"
+CMD_COMMANDS_MENU_BODY="help                    	Show the help this program or of a specific command
+self build              	Re-build the menu of valet from your commands.
+self download-binaries  	Download the required binaries for valet.
+self release            	Release a new version of valet.
+self                    	Show the valet self-maintenance sub menu.
+self test-core          	Test valet core features.
+self test               	Test your valet custom commands.
+self update             	Update valet using the latest release on GitHub.
+showcase command1       	A showcase command that uses arguments and options.
+showcase hello-world    	An hello world command
+showcase                	Show the showcase sub menu.
+showcase sudo-command   	A command that requires sudo"
 
 
 # ====================
@@ -103,6 +107,7 @@ showcase sudo-command  	A command that requires sudo"
 # CMD_COMMANDS_SHORTDESCRIPTION_xxx = array with each sub commmand short description
 CMD_COMMAND_helloWorld="showcase hello-world"
 CMD_COMMAND_selfBuild="self build"
+CMD_COMMAND_selfDownloadBinaries="self download-binaries"
 CMD_COMMAND_selfMenu="self"
 CMD_COMMAND_selfRelease="self release"
 CMD_COMMAND_selfTest="self test"
@@ -114,6 +119,7 @@ CMD_COMMAND_showcaseCommand1="showcase command1"
 CMD_COMMAND_showcaseMenu="showcase"
 CMD_FILETOSOURCE_helloWorld="examples.d/showcase/showcase.sh"
 CMD_FILETOSOURCE_selfBuild="valet.d/commands.d/self-build"
+CMD_FILETOSOURCE_selfDownloadBinaries="valet.d/commands.d/self-download-binaries.sh"
 CMD_FILETOSOURCE_selfMenu="valet.d/commands.d/self.sh"
 CMD_FILETOSOURCE_selfRelease="valet.d/commands.d/self-release.sh"
 CMD_FILETOSOURCE_selfTest="valet.d/commands.d/self-test.sh"
@@ -126,6 +132,7 @@ CMD_SUDO_showCaseSudo="true"
 CMD_SUDO_showcaseCommand1="true"
 CMD_SHORTDESCRIPTION_helloWorld="An hello world command"
 CMD_SHORTDESCRIPTION_selfBuild="Re-build the menu of valet from your commands."
+CMD_SHORTDESCRIPTION_selfDownloadBinaries="Download the required binaries for valet."
 CMD_SHORTDESCRIPTION_selfMenu="Show the valet self-maintenance sub menu."
 CMD_SHORTDESCRIPTION_selfRelease="Release a new version of valet."
 CMD_SHORTDESCRIPTION_selfTest="Test your valet custom commands."
@@ -140,6 +147,9 @@ CMD_DESCRIPTION_helloWorld="An hello world command."
 CMD_DESCRIPTION_selfBuild="This command can be used to re-build the menu in case you have modified, added or removed an about_xxx function in your command scripts.
 
 Please check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands."
+CMD_DESCRIPTION_selfDownloadBinaries="Download the required binaries for valet: fzf, curl, yq.
+
+These binaries will be stored in the bin directory of valet and used in priority over the binaries in your PATH."
 CMD_DESCRIPTION_selfMenu="Show the valet self-maintenance sub menu.
 
 This is a sub command that regroups commands useful to maintain valet."
@@ -247,6 +257,19 @@ CMD_OPTIONS_DESCRIPTION_selfBuild=(
 
 This defaults to ⌜~/.valet.d⌝ or the path defined in the environment variable VALET_USER_DIRECTORY=\"my/path\".
 This option can be set by exporting the variable VALET_USER_DIRECTORY=\"<path>\"."
+  "Display the help for this command"
+)
+CMD_OPTIONS_NAME_selfDownloadBinaries=(
+  "-os, --force-os <name>"
+  "-h, --help"
+)
+CMD_OPTIONS_DESCRIPTION_selfDownloadBinaries=(
+  "By default, this command will download the binaries for your current OS.
+
+You can force the download for a specific OS by providing the name of the OS.
+
+Possible values are: linux, windows, macos.
+This option can be set by exporting the variable VALET_FORCE_OS=\"<name>\"."
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_selfMenu=(
@@ -453,6 +476,7 @@ See the commands section for more information."
 )
 CMD_COMMANDS_NAME_selfMenu=(
   "build"
+  "download-binaries"
   "release"
   "test"
   "test-core"
@@ -460,6 +484,7 @@ CMD_COMMANDS_NAME_selfMenu=(
 )
 CMD_COMMANDS_DESCRIPTION_selfMenu=(
   "Re-build the menu of valet from your commands."
+  "Download the required binaries for valet."
   "Release a new version of valet."
   "Test your valet custom commands."
   "Test valet core features."
@@ -478,6 +503,7 @@ CMD_COMMANDS_DESCRIPTION_showcaseMenu=(
 CMD_COMMANDS_NAME_this=(
   "showcase hello-world"
   "self build"
+  "self download-binaries"
   "self"
   "self release"
   "self test"
@@ -491,6 +517,7 @@ CMD_COMMANDS_NAME_this=(
 CMD_COMMANDS_DESCRIPTION_this=(
   "An hello world command"
   "Re-build the menu of valet from your commands."
+  "Download the required binaries for valet."
   "Show the valet self-maintenance sub menu."
   "Release a new version of valet."
   "Test your valet custom commands."
@@ -526,6 +553,20 @@ CMD_OPTS_NAME_selfBuild=(
 )
 CMD_OPTS_NAME_SC_selfBuild=(
   "USER_DIRECTORY"
+)
+CMD_OPTS_selfDownloadBinaries=(
+  "-os --force-os"
+  "-h --help"
+)
+CMD_OPTS_HAS_VALUE_selfDownloadBinaries=(
+  "true"
+)
+CMD_OPTS_NAME_selfDownloadBinaries=(
+  "forceOs"
+  "help"
+)
+CMD_OPTS_NAME_SC_selfDownloadBinaries=(
+  "FORCE_OS"
 )
 CMD_OPTS_selfMenu=("-h --help")
 CMD_OPTS_NAME_selfMenu=("help")

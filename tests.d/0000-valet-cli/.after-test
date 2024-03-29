@@ -1,6 +1,3 @@
 #!/usr/bin/env bash
 
 export VALET_HOME="${ORIGINAL_VALET_HOME}"
-
-# restore the original invoke5 function
-eval "${ORIGINAL_INVOKE5}"
