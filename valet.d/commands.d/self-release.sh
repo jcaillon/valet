@@ -124,21 +124,44 @@ function selfRelease() {
       -d "${releasePayload}" \
       "https://api.github.com/repos/jcaillon/valet/releases"
 
+    succeed "The new version has been released on GitHub."
+
     local createdReleaseJson
     createdReleaseJson="${LAST_RETURNED_VALUE}"
 
-    uploadUrl
+    extractBetween "${createdReleaseJson}" '"upload_url":' '{?name,label}"'
+    extractBetween "${LAST_RETURNED_VALUE}" '"' ''
+    uploadUrl="${LAST_RETURNED_VALUE}"
 
-    succeed "The new version has been released on GitHub."
+    debug "The upload URL is: ${uploadUrl}"
   fi
 
   # prepare the artifact
-  local artifactPath="${VALET_HOME}/release.tar.gz"
+  local artifactPath="${VALET_HOME}/valet.tar.gz"
   pushd "${VALET_HOME}" 1>/dev/null
   invoke3var true 0 tar -czvf "${artifactPath}" examples.d valet.d valet
   popd 1>/dev/null
   inform "The artifact has been created at: ${artifactPath} with:"$'\n'"${LAST_RETURNED_VALUE}"
 
+  # upload the artifact
+  if [[ "${dryRun:-}" != "true" && -n "${uploadUrl}" ]]; then
+    kurl '' -X POST \
+      --header "Content-Type:application/gzip" \
+      --data-binary "@$artifactPath" \
+      "$uploadUrl?name=$(basename "${artifactPath##*/}")" \
+      || fail "The artifact could not be uploaded to the release."
+
+    succeed "The new version has been released on GitHub."
+
+    local createdReleaseJson
+    createdReleaseJson="${LAST_RETURNED_VALUE}"
+
+    extractBetween "${createdReleaseJson}" '"upload_url":' '{?name,label}"'
+    extractBetween "${LAST_RETURNED_VALUE}" '"' ''
+    uploadUrl="${LAST_RETURNED_VALUE}"
+
+    debug "The upload URL is: ${uploadUrl}"
+  fi
 
   return 0
 }

@@ -5,31 +5,35 @@ function testKurlFile() {
   local tmpFile="${_TEMPORARY_DIRECTORY}/kurl-test"
   local exitCode
 
-  echo "→ kurlFile '' \"\${tmpFile}\" -curlOption1 --fakeOpt2 https://hello.com"
-  kurlFile '' "${tmpFile}" -curlOption1 --fakeOpt2 https://hello.com && exitCode=0 || exitCode=$?
+  echo "→ kurlFile false '' \"\${tmpFile}\" --code 200 -curlOption1 --fakeOpt2 https://hello.com"
+  kurlFile false '' "${tmpFile}" --code 200 -curlOption1 --fakeOpt2 https://hello.com && exitCode=0 || exitCode=$?
   echoOutputKurlFile $exitCode "${tmpFile}"
-  endTest "Testing kurlFile, empty stderr, should write to file" 0
+  endTest "Testing kurlFile, should write to file" 0
 
-  echo "→ kurlFile '' \"\${tmpFile}\" --code 500 https://hello.com"
-  kurlFile '' "${tmpFile}" --code 500 https://hello.com && exitCode=0 || exitCode=$?
+  echo "→ kurlFile false '' \"\${tmpFile}\" --code 500 https://hello.com"
+  kurlFile false '' "${tmpFile}" --code 500 https://hello.com && exitCode=0 || exitCode=$?
   echoOutputKurlFile $exitCode "${tmpFile}"
   endTest "Testing kurlFile, http code 500 not acceptable return 1" 0
 
-  echo "→ kurlFile '300,500,999' \"\${tmpFile}\" --code 500 https://hello.com"
-  kurlFile '300,500,999' "${tmpFile}" --code 500 https://hello.com && exitCode=0 || exitCode=$?
+  echo "→ kurlFile true '' \"\${tmpFile}\" --code 500 https://hello.com"
+  (kurlFile true '' "${tmpFile}" --code 500 https://hello.com)
+  endTest "Testing kurlFile, http code 500 not acceptable fails" 0
+
+  echo "→ kurlFile false '300,500,999' \"\${tmpFile}\" --code 500 https://hello.com"
+  kurlFile false '300,500,999' "${tmpFile}" --code 500 https://hello.com && exitCode=0 || exitCode=$?
   echoOutputKurlFile $exitCode "${tmpFile}"
   endTest "Testing kurlFile, http code 500 is now acceptable return 0" 0
 
   # test debug mode
-  echo "→ kurlFile '' \"\${tmpFile}\" --code 400 --error https://hello.com/bla --otherOpt"
+  echo "→ kurlFile false '' \"\${tmpFile}\" --code 400 --error https://hello.com/bla --otherOpt"
   LOG_LEVEL_INT=0
-  kurlFile '' "${tmpFile}" --code 400 --error https://hello.com/bla --otherOpt && exitCode=0 || exitCode=$?
+  kurlFile false '' "${tmpFile}" --code 400 --error https://hello.com/bla --otherOpt && exitCode=0 || exitCode=$?
   echoOutputKurlFile $exitCode "${tmpFile}"
   endTest "Testing kurlFile, testing debug mode https code 400" 0
 
-  echo "→ kurlFile '' \"\${tmpFile}\" --code 200 http://hello.com"
+  echo "→ kurlFile false '' \"\${tmpFile}\" --code 200 http://hello.com"
   LOG_LEVEL_INT=0
-  kurlFile '' "${tmpFile}" --code 200 http://hello.com && exitCode=0 || exitCode=$?
+  kurlFile false '' "${tmpFile}" --code 200 http://hello.com && exitCode=0 || exitCode=$?
   echoOutputKurlFile $exitCode "${tmpFile}"
   endTest "Testing kurlFile, testing debug mode http code 200" 0
 
@@ -41,12 +45,12 @@ function echoOutputKurlFile() {
   filePath="${2}"
 
   local debugMessage
-  debugMessage="kurlFile function ended with exit code ⌜${exitCode}⌝."$'\n'
-  debugMessage+="http return code was ⌜${LAST_RETURNED_VALUE2}⌝"$'\n'
+  debugMessage="kurlFile false function ended with exit code ⌈${exitCode}⌉."$'\n'
+  debugMessage+="http return code was ⌈${LAST_RETURNED_VALUE2}⌉"$'\n'
   if [[ -s "${filePath}" ]]; then
-    debugMessage+="⌜Content of downloaded file⌝:"$'\n'"$(<"${filePath}")"$'\n'
+    debugMessage+="Content of downloaded file:"$'\n'"⌈$(<"${filePath}")⌉"$'\n'
   fi
-  debugMessage+="⌜stderr⌝:"$'\n'"${LAST_RETURNED_VALUE}"
+  debugMessage+="stderr:"$'\n'"⌈${LAST_RETURNED_VALUE}⌉"
   echo "${debugMessage}"
 }
 
@@ -55,17 +59,21 @@ function testKurl() {
 
   export NO_CURL_CONTENT=true
 
-  echo "→ kurl '' --code 200 http://hello.com"
-  kurl '' --code 200 http://hello.com && exitCode=0 || exitCode=$?
+  echo "→ kurl false '' --code 200 http://hello.com"
+  kurl false '' --code 200 http://hello.com && exitCode=0 || exitCode=$?
   echoOutputKurl $exitCode
   endTest "Testing kurl, with no content http code 200" 0
+
+  echo "→ kurl false '' --code 500 http://hello.com"
+  (kurl true '' --code 500 http://hello.com)
+  endTest "Testing kurl, with no content http code 500, fails" 0
 
   unset NO_CURL_CONTENT
 
   # test debug mode
-  echo "→ kurl '' --code 400 http://hello.com"
+  echo "→ kurl false '' --code 400 http://hello.com"
   LOG_LEVEL_INT=0
-  kurl '' --code 400 http://hello.com && exitCode=0 || exitCode=$?
+  kurl false '' --code 400 http://hello.com && exitCode=0 || exitCode=$?
   echoOutputKurl $exitCode
   endTest "Testing kurl, debug mode, with content http code 400" 0
 
@@ -76,10 +84,10 @@ function echoOutputKurl() {
   exitCode="${1}"
 
   local debugMessage
-  debugMessage="kurl function ended with exit code ⌜${exitCode}⌝."$'\n'
-  debugMessage+="http return code was ⌜${LAST_RETURNED_VALUE3}⌝"$'\n'
-  debugMessage+="⌜stdout⌝:"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
-  debugMessage+="⌜stderr⌝:"$'\n'"${LAST_RETURNED_VALUE2}"
+  debugMessage="kurl function ended with exit code ⌈${exitCode}⌉."$'\n'
+  debugMessage+="http return code was ⌈${LAST_RETURNED_VALUE3}⌉"$'\n'
+  debugMessage+="stdout:"$'\n'"⌈${LAST_RETURNED_VALUE}⌉"$'\n'
+  debugMessage+="stderr:"$'\n'"⌈${LAST_RETURNED_VALUE2}⌉"
   echo "${debugMessage}"
 }
 

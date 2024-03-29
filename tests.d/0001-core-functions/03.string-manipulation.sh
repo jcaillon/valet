@@ -25,19 +25,19 @@ function testIndexOf() {
 # This function test the extractBetween function
 function testExtractBetween() {
   echo "→ extractBetween 'hello' 'e' 'o'"
-  extractBetween 'hello' 'e' 'o' && echo "ll=⌜${LAST_RETURNED_VALUE}⌝"
+  extractBetween 'hello' 'e' 'o' && echo "ll=⌈${LAST_RETURNED_VALUE}⌉"
   echo
   echo "→ extractBetween 'hello' '' 'l'"
-  extractBetween 'hello' '' 'l' && echo "he=⌜${LAST_RETURNED_VALUE}⌝"
+  extractBetween 'hello' '' 'l' && echo "he=⌈${LAST_RETURNED_VALUE}⌉"
   echo
   echo "→ extractBetween 'hello' 'e' ''"
-  extractBetween 'hello' 'e' '' && echo "llo=⌜${LAST_RETURNED_VALUE}⌝"
+  extractBetween 'hello' 'e' '' && echo "llo=⌈${LAST_RETURNED_VALUE}⌉"
   echo
   echo "→ extractBetween 'hello' 'a' ''"
-  extractBetween 'hello' 'a' '' && echo "=⌜${LAST_RETURNED_VALUE}⌝"
+  extractBetween 'hello' 'a' '' && echo "=⌈${LAST_RETURNED_VALUE}⌉"
   echo
   echo "→ extractBetween 'hello' 'h' 'a'"
-  extractBetween 'hello' 'h' 'a' && echo "=⌜${LAST_RETURNED_VALUE}⌝"
+  extractBetween 'hello' 'h' 'a' && echo "=⌈${LAST_RETURNED_VALUE}⌉"
 
   local multilinetext="1 line one
 2 line two
@@ -47,10 +47,10 @@ function testExtractBetween() {
   echo "multilinetext=\"$multilinetext\""
   echo
   echo "→ extractBetween \"\$multilinetext\" \"one\"\$'\n' '4'"
-  extractBetween "${multilinetext}" "one"$'\n' '4' && echo "line 2 and 3=⌜${LAST_RETURNED_VALUE}⌝"
+  extractBetween "${multilinetext}" "one"$'\n' '4' && echo "line 2 and 3=⌈${LAST_RETURNED_VALUE}⌉"
   echo
   echo "→ extractBetween \"\$multilinetext\" \"2 \" \$'\n'"
-  extractBetween "${multilinetext}" "2 " $'\n' && echo "line two=⌜${LAST_RETURNED_VALUE}⌝"
+  extractBetween "${multilinetext}" "2 " $'\n' && echo "line two=⌈${LAST_RETURNED_VALUE}⌉"
 
   endTest "Testing extractBetween function" 0
 }

@@ -658,7 +658,7 @@ function invoke5() {
     debugMessage+="Acceptable error codes: ⌜${acceptableErrorCodes}⌝"$'\n'
     debugMessage+="Standard stream from file: ⌜${stdInFromFile}⌝"$'\n'
     debugMessage+="Standard stream: ⌜${stdIn}⌝"$'\n'
-    debugMessage+="Extra parameters: ⌜${*}⌝"$'\n'
+    debugMessage+="Extra parameters: ⌜${*}⌝"
     debug "${debugMessage}"
   fi
 
@@ -682,34 +682,39 @@ function invoke5() {
     "${executable}" "$@" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
   fi
 
-  # if debug mode is on, print the command and the exit code
-  if isDebugEnabled; then
-    local debugMessage="The command ⌜${executable}⌝ ended with exit code ⌜${exitCode}⌝."
-    if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
-      debugMessage+=$'\n'"⌜stdout⌝:"$'\n'"$(<"${_TEMPORARY_STDOUT_FILE}")"
-    fi
-    if [[ -s "${_TEMPORARY_STDERR_FILE}" ]]; then
-      debugMessage+=$'\n'"⌜stderr⌝:"$'\n'"$(<"${_TEMPORARY_STDERR_FILE}")"
-    fi
-    debug "${debugMessage}"
-  fi
+  local debugMessage="The command ⌜${executable}⌝ originally ended with exit code ⌜${exitCode}⌝."
 
   # if the error code is acceptable, then we set it to 0
   if [[ ",${acceptableErrorCodes}," == *",${exitCode},"* ]]; then
     exitCode=0
-    debug "The error code ⌜${exitCode}⌝ is acceptable and has been reset to 0."
+    debugMessage+=$'\n'"The error code ⌜${exitCode}⌝ is acceptable and has been reset to 0."
   fi
 
-  # fail if needed; display all the debug information that could be useful
-  if [[ "${failIfFails}" == "true" && exitCode -ne 0 ]]; then
-    local message="The command ⌜${executable}⌝ failed with exit code ⌜${exitCode}⌝."
+  local shouldFail=false
+  [[ "${failIfFails}" == "true" && exitCode -ne 0 ]] && shouldFail=true
+
+  # fail if needed or we are debug mode; display all the debug information that could be useful
+  if isDebugEnabled || [[ "${shouldFail}" == "true" ]]; then
+
+    # append std out
     if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
-      message+=$'\n'"⌜stdout⌝:"$'\n'"$(<"${_TEMPORARY_STDOUT_FILE}")"
+      # test if a file is less than 200Ko
+      if [[ $(stat -c %s "${_TEMPORARY_STDOUT_FILE}") -lt 200000 ]]; then
+        debugMessage+=$'\n'"Standard output:"$'\n'"⌜$(<"${_TEMPORARY_STDOUT_FILE}")⌝"
+      else
+        debugMessage+=$'\n'"Standard output is too big to be displayed."
+      fi
     fi
+    # append stderr
     if [[ -s "${_TEMPORARY_STDERR_FILE}" ]]; then
-      message+=$'\n'"⌜stderr⌝:"$'\n'"$(<"${_TEMPORARY_STDERR_FILE}")"
+      debugMessage+=$'\n'"Error output:"$'\n'"⌜$(<"${_TEMPORARY_STDERR_FILE}")⌝"
     fi
-    fail "${message}"
+
+    if [[ "${shouldFail}" == "true" ]]; then
+      fail "${debugMessage}"
+    else
+      debug "${debugMessage}"
+    fi
   fi
 
   LAST_RETURNED_VALUE="${_TEMPORARY_STDOUT_FILE}"
@@ -813,9 +818,10 @@ function invoke3var() {
 # It allows you to check the http status code and return 1 if it is not acceptable.
 # It invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o $2.
 #
-# $1: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
-# $2: the file in which to save the output of curl
-# $3+: options for curl
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
+# $3: the file in which to save the output of curl
+# $4+: options for curl
 #
 # Returns:
 #  The exit code of the function is 0 if the http status code is acceptable, 1 otherwise.
@@ -823,12 +829,13 @@ function invoke3var() {
 #  The http status code in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#  kurlFile "200,201" "/filePath" "https://example.com" || fail "The curl command failed."
+#  kurlFile "true" "200,201" "/filePath" "https://example.com" || fail "The curl command failed."
 function kurlFile() {
-  local acceptableStatusCodes outputFile url
-  acceptableStatusCodes="${1:-200,201,202,204,301,304,308}"
-  outputFile="${2}"
-  shift 2
+  local failIfFails acceptableStatusCodes outputFile url
+  failIfFails="${1:-false}"
+  acceptableStatusCodes="${2:-200,201,202,204,301,304,308}"
+  outputFile="${3}"
+  shift 3
 
   # call curl
   local -i exitCode=0
@@ -837,19 +844,12 @@ function kurlFile() {
   httpStatusCode="${LAST_RETURNED_VALUE}"
   errors="${LAST_RETURNED_VALUE2}"
 
-  # if debug mode is on, print info on what happened
-  if isDebugEnabled; then
-    local url="$*"
-    url="http${url##*http}"
-    url="${url%% *}"
-    url="${url%% \'}"
+  local url="$*"
+  url="http${url##*http}"
+  url="${url%% *}"
+  url="${url%% \'}"
 
-    local debugMessage="The curl command for url ⌜${url}⌝ ended with exit code ⌜${exitCode}⌝, the http return code was ⌜${httpStatusCode}⌝."
-    if [[ -n "${errors}" ]]; then
-      debugMessage+=$'\n'"⌜stderr⌝:"$'\n'"${errors}"
-    fi
-    debug "${debugMessage}"
-  fi
+  debug "The curl command for url ⌜${url}⌝ ended with exit code ⌜${exitCode}⌝, the http return code was ⌜${httpStatusCode}⌝."
 
   # if the error code is acceptable, then we set it to 0
   if [[ ",${acceptableStatusCodes}," == *",${httpStatusCode},"* ]]; then
@@ -857,7 +857,12 @@ function kurlFile() {
     debug "The http return code ⌜${httpStatusCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
   else
     exitCode=1
-    debug "The http return code ⌜${httpStatusCode}⌝ is not acceptable and exit code has set to 1 from ⌜${exitCode}⌝."
+    local message="The http return code ⌜${httpStatusCode}⌝ is not acceptable for url ⌜${url}⌝."
+    if [[ "${failIfFails}" == "true" ]]; then
+      message+=$'\n'"Error output:"$'\n'"⌜${errors}⌝"
+      fail "${message}"
+    fi
+    debug "${message}"
   fi
 
   LAST_RETURNED_VALUE="${errors}"
@@ -869,8 +874,9 @@ function kurlFile() {
 # It allows you to check the http status code and return 1 if it is not acceptable.
 # It invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o "tempfile".
 #
-# $1: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
-# $2+: options for curl
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
+# $3+: options for curl
 #
 # Returns:
 #  The exit code of the function is 0 if the http status code is acceptable, 1 otherwise.
@@ -879,29 +885,24 @@ function kurlFile() {
 #  The http status code in the global variable LAST_RETURNED_VALUE3.
 #
 # Usage:
-#  kurl "200,201" "https://example.com" || fail "The curl command failed."
+#  kurl false 200,201 https://example.com || fail "The curl command failed."
 function kurl() {
   local acceptableStatusCodes
-  acceptableStatusCodes="${1}"
-  shift
+  failIfFails="${1:-false}"
+  acceptableStatusCodes="${2:-}"
+  shift 2
 
   # reset the temporary file, only if needed
   [[ -s "${_TEMPORARY_WORK_FILE}" ]] && : > "${_TEMPORARY_WORK_FILE}"
 
   local exitCode errors httpStatusCode
-  kurlFile "${acceptableStatusCodes}" "${_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
+  kurlFile "${failIfFails}" "${acceptableStatusCodes}" "${_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
   errors="${LAST_RETURNED_VALUE}"
   httpStatusCode="${LAST_RETURNED_VALUE2}"
 
   local stdout
   if [ -s "${_TEMPORARY_WORK_FILE}" ]; then
     IFS= read -rd '' stdout < "${_TEMPORARY_WORK_FILE}" || true
-  fi
-
-  if isDebugEnabled; then
-    if [[ -n "${stdout}" ]]; then
-      debug "⌜curl stdout⌝:"$'\n'"${stdout}"
-    fi
   fi
 
   LAST_RETURNED_VALUE="${stdout:-}"

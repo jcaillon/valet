@@ -98,9 +98,9 @@ ARGUMENTS
 
 EXAMPLES
 
-  help ⌟cmd⌞
+  help cmd
       Shows the help for the command ⌜cmd⌝
-  help ⌟cmd⌞ ⌟subCmd⌞
+  help cmd subCmd
       Shows the help for the sub command ⌜subCmd⌝ of the 
       command ⌜cmd⌝
   help --no-colors --columns 50
@@ -138,13 +138,16 @@ Exit code: 0
 → valet help
 ABOUT
 
-  Valet is wrapper around a collection of commands that help you with your daily tasks.
+  Valet helps you browse, understand and execute your custom bash commands.
+  
+  Online documentation is available at https://github.com/jcaillon/valet.
   
   You can call valet without any commands to start an interactive session.
   
   ⌜Exit codes:⌝
+  
   - 0: everything went well
-  - 1: an error occured
+  - 1+: an error occured
   
   ⌜Create your own commands:⌝
   You can create your own commands and have them available in valet, please check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or the examples under 
@@ -153,6 +156,7 @@ ABOUT
   Once you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.
   
   ⌜Configuration through environment variables:⌝
+  
   In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
   - VALET_USER_DIRECTORY="my/path": set the path to the valet user directory (in which to find user commands).
   - VALET_NO_COLOR="true": will disable the color output for logs and help.
@@ -164,10 +168,11 @@ ABOUT
   - VALET_LOG_COLUMNS="120": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the terminal width.
   - VALET_CI_MODE="true": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full 
   date.
-  - VALET_REMEMBER_LAST_CHOICES="20": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the 
+  - VALET_REMEMBER_LAST_CHOICES="3": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the 
   alphabetical order.
   
   ⌜Developer notes:⌝
+  
   You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
 
 USAGE

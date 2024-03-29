@@ -381,10 +381,10 @@ options:
     description: |-
       Set the maximum columns for the help text
 examples:
-  - name: help ⌟cmd⌞
+  - name: help cmd
     description: |-
       Shows the help for the command ⌜cmd⌝
-  - name: help ⌟cmd⌞ ⌟subCmd⌞
+  - name: help cmd subCmd
     description: |-
       Shows the help for the sub command ⌜subCmd⌝ of the command ⌜cmd⌝
   - name: help --no-colors --columns 50

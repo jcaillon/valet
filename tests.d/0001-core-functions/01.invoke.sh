@@ -59,13 +59,13 @@ function echoInvokeOutput() {
   areFiles="${2}"
 
   local debugMessage
-  debugMessage="Invoke function ended with exit code ⌜${exitCode}⌝."$'\n'
+  debugMessage="Invoke function ended with exit code ⌈${exitCode}⌉."$'\n'
   if [[ "${areFiles}" == "true" ]]; then
-    debugMessage+="⌜stdout from file⌝:"$'\n'"$(<"${LAST_RETURNED_VALUE}")"$'\n'
-    debugMessage+="⌜stderr from file⌝:"$'\n'"$(<"${LAST_RETURNED_VALUE2}")"$'\n'
+    debugMessage+="stdout from file:"$'\n'"⌈$(<"${LAST_RETURNED_VALUE}")⌉"$'\n'
+    debugMessage+="stderr from file:"$'\n'"⌈$(<"${LAST_RETURNED_VALUE2}")⌉"$'\n'
   else
-    debugMessage+="⌜stdout from var⌝:"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
-    debugMessage+="⌜stderr from var⌝:"$'\n'"${LAST_RETURNED_VALUE2}"$'\n'
+    debugMessage+="stdout from var:"$'\n'"⌈${LAST_RETURNED_VALUE}⌉"$'\n'
+    debugMessage+="stderr from var:"$'\n'"⌈${LAST_RETURNED_VALUE2}⌉"$'\n'
   fi
 
   echo "${debugMessage}"

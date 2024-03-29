@@ -1,6 +1,6 @@
 # Test suite 0003-self
 
-## Test script 99.tests
+## Test script 00.utils
 
 ### Testing bumpSemanticVersion
 
