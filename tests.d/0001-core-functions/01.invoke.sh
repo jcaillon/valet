@@ -32,11 +32,9 @@ function testInvoke5() {
   endTest "Testing invoke5var, should get stdout/stderr from var" 0
 
   # test debug mode
-  local previousLevel="${LOG_LEVEL_INT}"
   echo "→ invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error"
   LOG_LEVEL_INT=0
   invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error && exitCode=0 || exitCode=$?
-  LOG_LEVEL_INT="${previousLevel}"
   echoInvokeOutput $exitCode true
   endTest "Testing invoke5, with debug mode on" 0
 }

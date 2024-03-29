@@ -21,60 +21,58 @@ function testLogging() {
   endTest "Testing log with debug level" 0
 
   # testing the different log options
+
+  echo "→ valet self test-core --logging-level"
+  resetLogOptions
+  ("${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
+  echoTempFileWithTimeStampSubstitution 1>&2
+  endTest "Testing default logging" 0
+
+  echo "→ VALET_NO_COLOR=true valet self test-core --logging-level"
+  resetLogOptions
+  (VALET_NO_COLOR=true "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
+  echoTempFileWithTimeStampSubstitution 1>&2
+  endTest "Testing no color logging" 0
+
+  echo "→ VALET_NO_COLOR=true VALET_CI_MODE=true valet self test-core --logging-level"
+  resetLogOptions
+  (VALET_NO_COLOR=true VALET_CI_MODE=true "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
+  echoTempFileWithTimeStampSubstitution 1>&2
+  endTest "Testing CI MODE logging" 0
+
+  echo "→ VALET_NO_COLOR=true VALET_NO_TIMESTAMP=true valet self test-core --logging-level"
+  resetLogOptions
+  (VALET_NO_COLOR=true VALET_NO_TIMESTAMP=true "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
+  echoTempFileWithTimeStampSubstitution 1>&2
+  endTest "Testing no timestamp logging" 0
+
+  echo "→ VALET_NO_COLOR=true VALET_NO_ICON=true valet self test-core --logging-level"
+  resetLogOptions
+  (VALET_NO_COLOR=true VALET_NO_ICON=true "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
+  echoTempFileWithTimeStampSubstitution 1>&2
+  endTest "Testing no icon logging" 0
+
+  echo "→ VALET_NO_COLOR=true VALET_NO_WRAP=true valet self test-core --logging-level"
+  resetLogOptions
+  (VALET_NO_COLOR=true VALET_NO_WRAP=true "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
+  echoTempFileWithTimeStampSubstitution 1>&2
+  endTest "Testing no wrap logging" 0
+
+  echo "→ VALET_NO_COLOR=true VALET_LOG_COLUMNS=80 valet self test-core --logging-level"
+  resetLogOptions
+  (VALET_NO_COLOR=true VALET_LOG_COLUMNS=80 "${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
+  echoTempFileWithTimeStampSubstitution 1>&2
+  endTest "Testing wrap at 80 logging" 0
+}
+
+function resetLogOptions() {
   unset VALET_NO_COLOR
   unset VALET_NO_TIMESTAMP
   unset VALET_NO_ICON
   unset VALET_NO_WRAP
   unset VALET_CI_MODE
+  unset VALET_LOG_COLUMNS
   unset _COLUMNS
-  unset VALET_LOG_COLUMNS
-
-  echo "→ valet self test-core --logging-level"
-  ("${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
-  echoTempFileWithTimeStampSubstitution 1>&2
-  endTest "Testing default logging" 0
-
-  export VALET_NO_COLOR="true"
-
-  echo "→ VALET_NO_COLOR=true valet self test-core --logging-level"
-  ("${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
-  echoTempFileWithTimeStampSubstitution 1>&2
-  endTest "Testing no color logging" 0
-
-  echo "→ VALET_NO_COLOR=true VALET_CI_MODE=true valet self test-core --logging-level"
-  export VALET_CI_MODE="true"
-  ("${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
-  echoTempFileWithTimeStampSubstitution 1>&2
-  unset VALET_CI_MODE
-  endTest "Testing CI MODE logging" 0
-
-  echo "→ VALET_NO_COLOR=true VALET_NO_TIMESTAMP=true valet self test-core --logging-level"
-  export VALET_NO_TIMESTAMP="true"
-  ("${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
-  echoTempFileWithTimeStampSubstitution 1>&2
-  unset VALET_NO_TIMESTAMP
-  endTest "Testing no timestamp logging" 0
-
-  echo "→ VALET_NO_COLOR=true VALET_NO_ICON=true valet self test-core --logging-level"
-  export VALET_NO_ICON="true"
-  ("${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
-  echoTempFileWithTimeStampSubstitution 1>&2
-  unset VALET_NO_ICON
-  endTest "Testing no icon logging" 0
-
-  echo "→ VALET_NO_COLOR=true VALET_NO_WRAP=true valet self test-core --logging-level"
-  export VALET_NO_WRAP="true"
-  ("${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
-  echoTempFileWithTimeStampSubstitution 1>&2
-  unset VALET_NO_WRAP
-  endTest "Testing no wrap logging" 0
-
-  echo "→ VALET_NO_COLOR=true VALET_LOG_COLUMNS=80 valet self test-core --logging-level"
-  export VALET_LOG_COLUMNS="80"
-  ("${VALET_HOME}/valet" self test-core --logging-level 2> "${_TEST_TEMP_FILE}")
-  echoTempFileWithTimeStampSubstitution 1>&2
-  unset VALET_LOG_COLUMNS
-  endTest "Testing wrap at 80 logging" 0
 }
 
 function main() {

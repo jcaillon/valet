@@ -21,19 +21,15 @@ function testKurlFile() {
   endTest "Testing kurlFile, http code 500 is now acceptable return 0" 0
 
   # test debug mode
-  local previousLevel="${LOG_LEVEL_INT}"
-
   echo "→ kurlFile '' \"\${tmpFile}\" --code 400 --error https://hello.com/bla --otherOpt"
   LOG_LEVEL_INT=0
   kurlFile '' "${tmpFile}" --code 400 --error https://hello.com/bla --otherOpt && exitCode=0 || exitCode=$?
-  LOG_LEVEL_INT="${previousLevel}"
   echoOutputKurlFile $exitCode "${tmpFile}"
   endTest "Testing kurlFile, testing debug mode https code 400" 0
 
   echo "→ kurlFile '' \"\${tmpFile}\" --code 200 http://hello.com"
   LOG_LEVEL_INT=0
   kurlFile '' "${tmpFile}" --code 200 http://hello.com && exitCode=0 || exitCode=$?
-  LOG_LEVEL_INT="${previousLevel}"
   echoOutputKurlFile $exitCode "${tmpFile}"
   endTest "Testing kurlFile, testing debug mode http code 200" 0
 
@@ -67,12 +63,9 @@ function testKurl() {
   unset NO_CURL_CONTENT
 
   # test debug mode
-  local previousLevel="${LOG_LEVEL_INT}"
-
   echo "→ kurl '' --code 400 http://hello.com"
   LOG_LEVEL_INT=0
   kurl '' --code 400 http://hello.com && exitCode=0 || exitCode=$?
-  LOG_LEVEL_INT="${previousLevel}"
   echoOutputKurl $exitCode
   endTest "Testing kurl, debug mode, with content http code 400" 0
 

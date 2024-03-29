@@ -226,6 +226,8 @@ function returnOne() { return 1; }
 #===============================================================
 
 # Call this function after each test to write the test results to the report file.
+# This create a new H3 section in the report file with the test description and the exit code.
+#
 # $1: the description of the test
 # $2: the exit code of the test
 #
@@ -366,9 +368,6 @@ function runTest() {
   # redirect the standard output and error output to files
   setFdRedirection
 
-  # setting up valet to minimize output difference between 2 runs
-  setSimplerLogFunction
-
   # used in echoFileSubstitutingPath to replace this path with .
   CURRENT_DIRECTORY="${PWD}"
 
@@ -385,8 +384,6 @@ function runTest() {
   source "${testScript}"
   set -Eeu -o pipefail
   popd >/dev/null
-
-  resetLogLineFunction
 
   # reset the standard output and error output
   resetFdRedirection
@@ -430,36 +427,40 @@ function setFdRedirection() {
   # redirect the standard output and error output to files
   exec 3>&1 1>"${_TEST_STANDARD_OUTPUT_FILE}"
   exec 4>&2 2>"${_TEST_STANDARD_ERROR_FILE}"
-}
 
-function resetFdRedirection() {
-  # reset the standard output and error output
-  exec 1>&3 3>&-
-  exec 2>&4 4>&-
-}
-
-# sets up a simpler log function for the tests
-# so we can have consistent results independent of the environment
-function setSimplerLogFunction() {
+  # sets up a simpler log function for the tests
+  # so we can have consistent results independent of the environment
   if [ -z "${ORIGINAL_LOG_LINE_FUNCTION:-}" ]; then
     ORIGINAL_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
     ORIGINAL_VALET_NO_COLOR="${VALET_NO_COLOR:-}"
+    ORIGINAL_LOG_LEVEL="${LOG_LEVEL:-}"
+    ORIGINAL_LOG_LEVEL_INT="${LOG_LEVEL_INT:-}"
   fi
+  export LOG_LEVEL="info"
+  export LOG_LEVEL_INT=1
   export VALET_NO_COLOR="true"
   setLogColors
-  export VALET_NO_COLOR="true"
   export VALET_NO_TIMESTAMP="true"
   export VALET_NO_ICON="true"
   export VALET_NO_WRAP="true"
   export VALET_CI_MODE="false"
   export VALET_LOG_COLUMNS=9999
   export _COLUMNS=9999
-  createLogLineFunction
-  eval "${LOG_LINE_FUNCTION}"
+  if [ -z "${SIMPLIFIED_LOG_LINE_FUNCTION:-}" ]; then
+    createLogLineFunction
+    SIMPLIFIED_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
+  fi
+  eval "${SIMPLIFIED_LOG_LINE_FUNCTION}"
 }
 
-# reset the original log line function between each test
-function resetLogLineFunction() {
+function resetFdRedirection() {
+  # reset the standard output and error output
+  exec 1>&3 3>&-
+  exec 2>&4 4>&-
+
+  # reset the original logs
+  export LOG_LEVEL="${ORIGINAL_LOG_LEVEL}"
+  export LOG_LEVEL_INT="${ORIGINAL_LOG_LEVEL_INT}"
   export VALET_NO_COLOR="${ORIGINAL_VALET_NO_COLOR}"
   setLogColors
   eval "${ORIGINAL_LOG_LINE_FUNCTION}"
