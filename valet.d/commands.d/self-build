@@ -107,7 +107,7 @@ function buildCommandsFile() {
   writeHeader >"${buildFile}"
   writeNewLines >>"${buildFile}"
 
-  inform "Writing computed functions."
+  inform "Writing computed functions (this can take a while)."
   writeAllFunctions >>"${buildFile}"
   writeNewLines >>"${buildFile}"
   writeExactCommandToFunctionMap >>"${buildFile}"

@@ -23,6 +23,7 @@
 # Environment variables to configure the installation:
 #
 #   SINGLE_USER_INSTALLATION: set to 'true' to install Valet for the current user only.
+#                             Note: for windows, the installation is always for the current user.
 #   VALET_HOME: the directory where Valet will be installed.
 #   DEBUG: set to 'true' to display debug information.
 #   NO_SHIM: set to 'true' to not create the shim script in /usr/local/bin.
@@ -117,9 +118,14 @@ function selfUpdate() {
     SUDO='sudo'
   fi
 
+  # get the os
+  getOsName
+  local os="${LAST_RETURNED_VALUE}"
+  inform "The current OS is: ${os}."
+
   # set the default options
   local binDirectory
-  if [[ "${SINGLE_USER_INSTALLATION:-false}" == "true" ]]; then
+  if [[ "${SINGLE_USER_INSTALLATION:-false}" == "true" || "${os}" == "windows" ]]; then
     inform "Installing Valet for the current user only."
     VALET_HOME="${VALET_HOME:-${HOME}/.local/valet}"
     binDirectory="${HOME}/.local/bin"
@@ -129,10 +135,10 @@ function selfUpdate() {
     binDirectory="/usr/local/bin"
   fi
 
-  # get the os
-  getOsName
-  local os="${LAST_RETURNED_VALUE}"
-  inform "The current OS is: ${os}."
+  # make sure the old valet directory is not a git repository
+  if [[ -d "${VALET_HOME}/.git" ]]; then
+    fail "The Valet directory ⌜${VALET_HOME}⌝ already exists and is a git repository, aborting (remove it manually and run the command again; or simply update with git pull)."
+  fi
 
   local tempDirectory="${TMPDIR:-/tmp}/temp-${BASHPID}.valet.install.d"
   mkdir -p "${tempDirectory}" 1>/dev/null || fail "Could not create the temporary directory ⌜${tempDirectory}⌝."
@@ -153,15 +159,18 @@ function selfUpdate() {
 
   # make valet executable
   chmod +x "${VALET_HOME}/valet"
+  chmod +x "${VALET_HOME}/bin/"*
 
   # create the shim in the bin directory
   local valetBin="${binDirectory}/valet"
   if [[ -e "${valetBin}" && "${valetAlreadyInstalled}" == "false" ]]; then
     warn "A valet shim already exists in ⌜${valetBin}⌝!?"
   else
+    mkdir -p "${binDirectory}" 1>/dev/null || fail "Could not create the bin directory ⌜${binDirectory}⌝."
     inform "Creating a shim ⌜${VALET_HOME}/valet → ${valetBin}⌝."
     echo "#!/usr/bin/env bash
 '${VALET_HOME}/valet' \"\$@\"" >"${valetBin}"
+    warn "Make sure to have ⌜${binDirectory}⌝ (or ⌜${VALET_HOME}⌝) in your PATH."
   fi
 
   # copy the examples if the user directory does not exist
@@ -214,6 +223,9 @@ function selfWelcomeUser() {
   inform "You answered: ${answer}."
 
   if [[ "${answer}" == "false" ]]; then
+    export VALET_NO_COLOR=true
+    createLogLineFunction
+    eval "${LOG_LINE_FUNCTION}"
     valetConfigFileContent+="VALET_NO_COLOR=true"$'\n'
   fi
 
@@ -239,6 +251,9 @@ function selfWelcomeUser() {
     inform "You answered: ${answer}."
 
     if [[ "${answer}" == "true" ]]; then
+      export VALET_NO_ICON=true
+      createLogLineFunction
+      eval "${LOG_LINE_FUNCTION}"
       valetConfigFileContent+="VALET_NO_ICON=true"$'\n'
     fi
   fi
