@@ -4,7 +4,7 @@
 
 ⚠️ THIS IS A WORK IN PROGRESS, PLEASE WAIT FOR THE REMOVAL OF THIS DISCLAIMER :)
 
-Valet is a wrapper around your bash scripts that provides an interactive menu, standard help output, auto parsing for options and arguments, error handling, a framework for approval testing, and so on...
+Valet is a wrapper around your bash scripts that provides an interactive menu, standard help output, auto parsing for options and arguments, error handling, a framework for approval testing, execution profiling, and so on...
 
 It works on **any Linux environment with bash** or on **Git bash for Windows**.
 

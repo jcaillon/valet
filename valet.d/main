@@ -48,6 +48,10 @@ trap 'onErrorInternal $?' ERR
 
 function onExitInternal() {
   local rc=$?
+
+  # disable the profiler is still on
+  if [ "${PROFILING:-}" = "1" ]; then disableProfiler; fi
+
   debug "Exiting with code ${rc} after ${SECONDS}s."
   if command -v onExit 1>/dev/null 2>&1; then
     onExit
@@ -55,7 +59,8 @@ function onExitInternal() {
   # always call cleanUp before exiting
   onCleanUpInternal
   if [[ "${ERROR_DISPLAY:-0}" != "1" && "${rc}" != "0" ]]; then
-    logLine "ERROR" $'\uf14c' "EXIT" "Exiting with code ${rc}."
+    getStack 2 && local stack="${LAST_RETURNED_VALUE}"
+    logLine "ERROR" $'\uf14c' "EXIT" "Exiting with code ${rc}, stack:${stack}"
     ERROR_DISPLAY=1
   fi
 }
@@ -65,6 +70,12 @@ trap onExitInternal EXIT
 function onInterruptInternal() {
   echo # Set cursor to the next line of '^C'
   logLine "WARNING" $'\uf256' "STOPPED" "Program interrupted by the user."
+
+  if isDebugEnabled; then
+    getStack 2 && local stack="${LAST_RETURNED_VALUE}"
+    debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:${stack}"
+  fi
+
   # check if the function exists
   if command -v onInterrupt 1>/dev/null 2>&1; then
     if onInterrupt; then
@@ -122,72 +133,121 @@ function command_not_found_handle() {
 #
 # Usage:
 #   enableProfiler "${HOME}/profile_valet.txt"
-function enableProfiler() { return 0; }
+function enableProfiler() {
+  local file
+  file="${1}"
+
+  # Nested profiling not supported
+  if [[ -n "${PROFILING:-}" ]]; then return 0; fi
+  PROFILING=1
+
+  # create the directory for file and reset it
+  mkdir -p "${file%/*}"
+  : "${file}"
+
+  inform "Starting profiler, writing in ⌜${file}⌝. ${FUNCNAME[3]:-}"
+
+  # we can only get the function depth if we call the enableProfiler from a function
+  if [[ -n "${FUNCNAME[3]:-}" ]]; then
+    functionDepthExpression='${#FUNCNAME[@]}'
+  else
+    functionDepthExpression='0'
+  fi
+
+  PS4='●'$'\011''$(("${EPOCHREALTIME//./}" - PROFILER_START_REALTIME))'$'\011''${BASH_SOURCE[1]:-}:${BASH_LINENO[0]:-0}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
+
+  exec 5>"${file}"
+
+  export PROFILER_FILE="${file}"
+  export PROFILER_START_REALTIME="${EPOCHREALTIME//./}"
+  export BASH_XTRACEFD=5
+  set -x
+}
 
 # Disable the profiler.
 #
 # Usage:
 #   disableProfiler
-function disableProfiler() { return 0; }
-
-# The following function allows use to build the enable/disable profiler functions.
-# The function depends in the presence of the ts command.
-# shellcheck disable=SC2016
-function createProfilerFunction() {
-  PROFILER_FUNCTION='
-  enableProfiler() {
-    local file
-    file="${1}"
-
-    # Nested profiling not supported
-    if [[ -n "${PROFILING:-}" ]]; then return 0; fi
-    PROFILING=y
-
-    # create the directory for file and reset it
-    mkdir -p "${file%/*}"
-    : "${file}"
-
-    inform "Starting profiler, writing in ⌜${file}⌝."
-  '
-  if command -v ts 1>/dev/null 2>&1; then
-    PROFILER_FUNCTION+='
-    exec 5> >(ts -i "%.s" > "${file}")
-    export BASH_XTRACEFD=5
-    '
-  else
-    PROFILER_FUNCTION+='
-    warn "The ts command (from moreutils package on linux) is not available, the profiler will not display the elapsed time of each statement, consider installing ts."
-    PS4='"'"'+ $(date "+%s.%N")\011$BASH_SOURCE\011$BASH_LINENO\011 '"'"'
-    exec 3>&2 2>"${file}"
-    '
-  fi
-  PROFILER_FUNCTION+='
-    set -x
-  }
-
-  disableProfiler() {
-    inform "Disabling profiler."
-    set +x
-  '
-  if command -v ts 1>/dev/null 2>&1; then
-    PROFILER_FUNCTION+='
-    unset BASH_XTRACEFD
-    exec 5>&-
-    '
-  else
-    PROFILER_FUNCTION+='
-    exec 2>&3 3>&-
-    unset PS4
-    '
-  fi
-  PROFILER_FUNCTION+='
-    unset PROFILING
-  }'
+function disableProfiler() {
+  inform "Disabling profiler."
+  set +x
+  unset BASH_XTRACEFD
+  exec 5>&-
+  unset PS4
+  unset PROFILING
+  cleanProfilerFile
 }
-createProfilerFunction
-eval "${PROFILER_FUNCTION}"
-unset PROFILER_FUNCTION
-unset createProfilerFunction
+
+# Allows to pretty format the profiler file and remove stuff the user does not need.
+#
+# Usage:
+#   cleanProfilerFile
+function cleanProfilerFile() {
+  createTempFile && local newProfilerFile="${LAST_RETURNED_VALUE}"
+
+  local timePrecision=${EPOCHREALTIME#*.}
+  timePrecision=${#timePrecision}
+
+  # we do this one in awk because we need some computation that can't easily be done in bash
+  if ! command -v awk 1>/dev/null 2>&1; then
+    warn "The awk command is required to clean the profiler file. It was not found on the PATH so we skip the cleaning."
+    return 0
+  fi
+
+  local clearLine=true
+  [[ "${VALET_STARTUP_PROFILING:-false}" == "true" ]] && clearLine=false
+
+  awk -F $'\t' -v timePrecision="${timePrecision}" -v clearCoreLine="${clearLine}" '
+  BEGIN {
+    printf "%s\n\n", "(D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)";
+    printf "%s\n", "D  I  S  timer  delta               function caller source:line function                         command";
+    lastLineWasSkipped = 0;
+    lastLineLength = 0;
+    lastTimer = 0;
+    baseStackLength = 99999;
+  }
+  {
+    if (clearCoreLine == "true" && $0 ~ /(valet.d\/core:|valet.d\/main:)/) {
+      lastLineWasSkipped = 1;
+      next;
+    }
+    if ($0 ~ /^●/) {
+      if (clearCoreLine == "true") {
+        lastLineWasSkipped = 0;
+      }
+    } else {
+      if (lastLineWasSkipped == 1) {
+        next;
+      }
+      printf "%97s%s\n", "", $0;
+      next;
+    }
+    if (baseStackLength == 99999) {
+      baseStackLength = $6;
+    }
+
+    indirectionLevel = length($1);
+    timer = $2 / (10 ^ timePrecision);
+    program = $3;
+    programShorten = substr(program, length(program)-39)
+    fun = $4 "()";
+    subShellLevel = $5;
+    stackLength = $6 - baseStackLength;
+    theRest = "";
+    for (x = 8; x <= NF; x++) {
+      theRest = theRest $x;
+    }
+    deltaTimer = timer - lastTimer;
+
+
+    printf "%02d %02d %02d %.4f %.4f %40s %-30s → %s\n", stackLength, indirectionLevel, subShellLevel, timer, deltaTimer, programShorten, fun, theRest;
+    lastTimer = timer;
+    lastLineLength = length($0) - length(theRest);
+  }
+  ' <"${PROFILER_FILE}" >"${newProfilerFile}"
+
+  mv -f "${newProfilerFile}" "${PROFILER_FILE}"
+}
 
 if [ "${VALET_STARTUP_PROFILING:-}" = "true" ]; then
   enableProfiler "${VALET_STARTUP_PROFILING_FILE:-${HOME}/profile_valet.txt}"
@@ -551,7 +611,6 @@ function runFunction() {
     fail "The function ⌜${functionName}⌝ associated with the command ⌜${command}⌝ does not exist."
   fi
 
-
   debug "Running the command ⌜${command}⌝ with the function ⌜${functionName}⌝ and the arguments ⌜$*⌝."
 
   # disable startup profile and enable command profile, if needed
@@ -666,7 +725,7 @@ function sortCommands() {
   fi
 
   local lastChoices
-  readarray -d $'\n' -t lastChoices < "${lastChoicesFile}"
+  readarray -d $'\n' -t lastChoices <"${lastChoicesFile}"
 
   # list all the unplayed commands
   local unplayedCommands line command lastChoice played
@@ -736,19 +795,19 @@ function addLastChoice() {
   fi
 
   local lastChoices
-  readarray -d $'\n' -t lastChoices < "${lastChoicesFile}"
+  readarray -d $'\n' -t lastChoices <"${lastChoicesFile}"
 
   # write the command first
-  echo "${command}" > "${lastChoicesFile}"
+  echo "${command}" >"${lastChoicesFile}"
 
   # loop through the last choices and add them to the file, limit to 20 total
   local -i total index
   total="${#lastChoices[@]}"
   [[ total -gt maxNumberOfLastChoice ]] && total=$((maxNumberOfLastChoice - 1))
   index=0
-  for((index=0; index<total; index++)); do
+  for ((index = 0; index < total; index++)); do
     if [[ "${lastChoices[${index}]}" != "${command}" ]]; then
-      echo "${lastChoices[${index}]}" >> "${lastChoicesFile}"
+      echo "${lastChoices[${index}]}" >>"${lastChoicesFile}"
     else
       total+=1
       [[ total -gt ${#lastChoices[@]} ]] && total=${#lastChoices[@]}
@@ -775,7 +834,7 @@ function showInteractiveCommandsMenu() {
   local line
   while read -r line; do
     menuHeaderLength+=1
-  done <<< "${menuHeader}"
+  done <<<"${menuHeader}"
 
   local commandsPrompt previewWidth commandChoice
   commandsPrompt="${menuHeader}"$'\n'"${menuBody}"
@@ -787,7 +846,7 @@ function showInteractiveCommandsMenu() {
   local choice
 
   # reset the output files, but only if they already exist
-  [[ -s "${_TEMPORARY_STDOUT_FILE}" ]] && : > "${_TEMPORARY_STDOUT_FILE}"
+  [[ -s "${_TEMPORARY_STDOUT_FILE}" ]] && : >"${_TEMPORARY_STDOUT_FILE}"
 
   getCommandFullPath "fzf"
   local fzfExecutable="${LAST_RETURNED_VALUE}"
@@ -795,16 +854,16 @@ function showInteractiveCommandsMenu() {
   debug "Running fzf from ⌜${fzfExecutable}⌝."
 
   "${fzfExecutable}" \
-      --tiebreak=begin,index --no-multi --cycle \
-      --layout=reverse --info=default \
-      --margin=0 --padding=0 \
-      "--header-lines=${menuHeaderLength}" \
-      --preview-window=right:$((previewWidth)):wrap \
-      --preview="echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '${VALET_HOME}/valet' help --columns $((previewWidth - 2)) {}" \
-      "$@" <<< "${commandsPrompt}" 1> "${_TEMPORARY_STDOUT_FILE}" || true
+    --tiebreak=begin,index --no-multi --cycle \
+    --layout=reverse --info=default \
+    --margin=0 --padding=0 \
+    "--header-lines=${menuHeaderLength}" \
+    --preview-window=right:$((previewWidth)):wrap \
+    --preview="echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '${VALET_HOME}/valet' --log-level fail help --columns $((previewWidth - 2)) {}" \
+    "$@" <<<"${commandsPrompt}" 1>"${_TEMPORARY_STDOUT_FILE}" || true
 
   if [ -s "${LAST_RETURNED_VALUE}" ]; then
-    IFS= read -rd '' choice < "${_TEMPORARY_STDOUT_FILE}" || true
+    IFS= read -rd '' choice <"${_TEMPORARY_STDOUT_FILE}" || true
     choice="${choice%%$'\t'*}"
     choice="${choice%%  *}"
   else

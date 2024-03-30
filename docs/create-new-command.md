@@ -82,6 +82,15 @@ In case of error, your function should call the `fail` directly which will exit 
 > [!TIP]
 > Please check [working-on-bash-scripts.md](working-on-bash-scripts.md) to learn more about working on bash scripts and create performant scripts.
 
+
+> [!NOTE]
+> In Valet, the bash options are set like so `set -Eeu -o pipefail`, which means that your command will stop with an error if any statement returns an error code different than zero. This also include any program in a pipe.
+>
+> If you expect a statement to fail but want to continue the execution, catch the exit code:
+> `thingThatReturns1 || exitCode=$?`
+> Or simply discard the error:
+> `thingThatReturns1 || true`
+
 ## 4. Rebuild valet menu
 
 In order to find your new command in the valet menu; you need to call the `self build` command. Either from the valet menu or by executing directly `./valet.d/self-build`. The later option is mandatory if you have an issue with the `valet.d/cmd` file itself.

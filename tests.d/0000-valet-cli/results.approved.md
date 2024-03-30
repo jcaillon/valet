@@ -378,7 +378,11 @@ Exit code: 5
 ```log
 WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
-EXIT     Exiting with code 5.
+EXIT     Exiting with code 5, stack:
+├─ In function selfTestCore() $VALET_HOME/valet.d/commands.d/self-test.sh:1
+├─ In function runFunction() $VALET_HOME/valet.d/main:625
+├─ In function parseMainArguments() $VALET_HOME/valet.d/main:546
+└─ In function main() $VALET_HOME/valet:111
 ```
 
 ### Testing fail function
@@ -441,7 +445,7 @@ another3  	This is another command 3"
 **Error** output:
 
 ```log
-▶ called fzf --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=2 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
+▶ called fzf --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=2 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' --log-level fail help --columns 4987 {}
 ▶ fzf input stream was:
 ⌈ReturnLast My header
 2 lines
@@ -465,7 +469,7 @@ Exit code: 0
 **Error** output:
 
 ```log
-▶ called fzf --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
+▶ called fzf --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' --log-level fail help --columns 4987 {}
 ▶ fzf input stream was:
 ⌈Please select the command to run (filter by typing anything)
 
@@ -535,6 +539,7 @@ Exit code: 0
 
 ```log
 DEBUG    Log level set to debug.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Command found ⌜self test-core⌝.
 DEBUG    Function name found ⌜selfTestCore⌝.
 DEBUG    Loaded file ⌜$VALET_HOME/valet.d/commands.d/self-test.sh⌝.
@@ -761,6 +766,7 @@ INFO     Created temp file: /tmp/valet.d/f2-0.
 INFO     Created temp directory: /tmp/valet.d/d1-0.
 INFO     Created temp directory: /tmp/valet.d/d2-0.
 DEBUG    Log level set to debug.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Exiting with code 0 after Xs.
 DEBUG    Deleting temporary directory.
 WARNING  This is a custom clean up function.
@@ -798,7 +804,7 @@ Exit code: 0
 **Standard** output:
 
 ```plaintext
-→ valet --log-level fail -x self test-core --logging-level
+→ valet --log-level error -x self test-core --logging-level
 OK, command profiling file is not empty.
 OK, startup profiling file is not empty.
 ```
@@ -827,7 +833,7 @@ Exit code: 0
 --padding=0
 --header-lines=3
 --preview-window=right:4989:wrap
---preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' help --columns 4987 {}
+--preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' --log-level fail help --columns 4987 {}
 ▶ fzf input stream was:
 ⌈Please select the command to run (filter by typing anything)
 

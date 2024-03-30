@@ -132,9 +132,9 @@ fi
 # The log level can be set to one of the following values:
 # - debug
 # - info
-# - warn
-# - fail
 # - success
+# - warning
+# - error
 # The log level can be set using the environment variable LOG_LEVEL.
 # $1: the log level to set
 #
@@ -144,8 +144,8 @@ function setLogLevelInt() {
   # log level, defaults to info
   LOG_LEVEL="${1:-${LOG_LEVEL:-info}}"
   case "${LOG_LEVEL}" in
-  fail) LOG_LEVEL_INT=4 ;;
-  warn) LOG_LEVEL_INT=3 ;;
+  error) LOG_LEVEL_INT=4 ;;
+  warning) LOG_LEVEL_INT=3 ;;
   success) LOG_LEVEL_INT=2 ;;
   debug) LOG_LEVEL_INT=0 ;;
   *) LOG_LEVEL_INT=1 ;;
@@ -153,6 +153,9 @@ function setLogLevelInt() {
 
   if [ "${LOG_LEVEL_INT}" != 1 ]; then
     debug "Log level set to ${LOG_LEVEL}."
+  fi
+  if [ "${LOG_LEVEL_INT}" == 0 ]; then
+    warn "Beware that debug log level might lead to secret leak, use it only if necessary."
   fi
 }
 

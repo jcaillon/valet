@@ -44,6 +44,8 @@ options:
 "
 }
 
+# TODO: do not download if already exist in the destination, except if option -f
+
 function selfDownloadBinaries() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   checkParseResults "${help:-}" "${parsingErrors:-}"
