@@ -158,6 +158,7 @@ ABOUT
   ⌜Configuration through environment variables:⌝
   
   In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
+  
   - VALET_USER_DIRECTORY="my/path": set the path to the valet user directory (in which to find user commands).
   - VALET_NO_COLOR="true": will disable the color output for logs and help.
   - VALET_COLOR_XXX="color": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, 
@@ -171,6 +172,10 @@ ABOUT
   - VALET_REMEMBER_LAST_CHOICES="3": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the 
   alphabetical order.
   - VALET_DO_NOT_USE_LOCAL_BIN="false": if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
+  
+  These variables can be exported in your .bashrc file.
+  Alternatively, you can define them in your valet user config file, located by default at ~/.config/valet/config. This path can be configured using the VALET_USER_CONFIG_FILE 
+  environment variable.
   
   ⌜Developer notes:⌝
   
@@ -189,7 +194,7 @@ OPTIONS
       This option can be set by exporting the variable VALET_PROFILING="true".
   -ll, -log, --log-level <level>
       Set the log level of valet (defaults to info).
-      Possible values are: debug, info, warn, error, fatal.
+      Possible values are: debug, success, info, success, warning, error.
       This option can be set by exporting the variable VALET_LOG_LEVEL="<level>".
   -v, --verbose
       Output verbose information.
@@ -365,7 +370,7 @@ ERROR    Error code 1 in selfTestCore(), stack:
 
 ### Testing exit message and custom onExit function
 
-Exit code: 5
+Exit code: 0
 
 **Standard** output:
 
@@ -379,10 +384,10 @@ Exit code: 5
 WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
-├─ In function selfTestCore() $VALET_HOME/valet.d/commands.d/self-test.sh:1
-├─ In function runFunction() $VALET_HOME/valet.d/main:625
-├─ In function parseMainArguments() $VALET_HOME/valet.d/main:546
-└─ In function main() $VALET_HOME/valet:111
+├─ In function selfTestCore() $VALET_HOME/valet.d/commands.d/self-test.sh:XXX
+├─ In function runFunction() $VALET_HOME/valet.d/main:XXX
+├─ In function parseMainArguments() $VALET_HOME/valet.d/main:XXX
+└─ In function main() $VALET_HOME/valet:XXX
 ```
 
 ### Testing fail function

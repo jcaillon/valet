@@ -56,9 +56,6 @@ function selfBuild() {
   # need the real path of VALET_HOME because we will use it to build the file
   VALET_HOME=$(realpath "${VALET_HOME}")
 
-  # for now we need yq in the path, let's get rid of it asap
-  export PATH="${VALET_HOME}/bin:${PATH}"
-
   # parse arguments manually otherwise we have to count on cmd to be valid
   while [[ $# -gt 0 ]]; do
     case "${1}" in

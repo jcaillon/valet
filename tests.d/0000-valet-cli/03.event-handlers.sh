@@ -12,9 +12,9 @@ function testEventHandlers() {
   endTest "Testing error handling" $?
 
   # testing exit code (exit 5) and custom exit function
-
   echo "→ valet self test-core --exit"
-  ("${VALET_HOME}/valet" self test-core --exit)
+  ("${VALET_HOME}/valet" self test-core --exit 2> "${_TEST_TEMP_FILE}")
+  echoTempFileWithLineNumberSubstitution 1>&2
   endTest "Testing exit message and custom onExit function" $?
 
   # testing the fail function

@@ -38,6 +38,7 @@ description: |-
   ⌜Configuration through environment variables:⌝
 
   In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
+
   - VALET_USER_DIRECTORY=\"my/path\": set the path to the valet user directory (in which to find user commands).
   - VALET_NO_COLOR=\"true\": will disable the color output for logs and help.
   - VALET_COLOR_XXX=\"color\": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, ERROR, TIMESTAMP, HIGHLIGHT.
@@ -48,6 +49,9 @@ description: |-
   - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
   - VALET_REMEMBER_LAST_CHOICES=\"3\": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the alphabetical order.
   - VALET_DO_NOT_USE_LOCAL_BIN=\"false\": if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
+
+  These variables can be exported in your .bashrc file.
+  Alternatively, you can define them in your valet user config file, located by default at ~/.config/valet/config. This path can be configured using the VALET_USER_CONFIG_FILE environment variable.
 
   ⌜Developer notes:⌝
 

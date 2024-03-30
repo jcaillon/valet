@@ -8,27 +8,9 @@ set -Eeu -o pipefail
 # we check for this variable to know if this script has already been included
 _MAIN_INCLUDED=1
 
-# Handle the case where this script was invoked outside of valet
-if [ -z "${VALET_HOME:-}" ]; then
-  VALET_HOME="${BASH_SOURCE[0]}"
-  VALET_HOME="${VALET_HOME%/*}" # strip file name
-  if [[ "${VALET_HOME}" != /* ]]; then
-    # resolve relative path (we avoid subshell as much as possible for performance reasons)
-    VALET_HOME="$(realpath -L "${VALET_HOME}")"
-  fi
-  VALET_HOME="${VALET_HOME%/*}" # strip valet.d directory
-fi
 if [ -z "${_CORE_INCLUDED:-}" ]; then
   # shellcheck source=core
-  source "${VALET_HOME}/valet.d/core"
-fi
-
-# Parsing the options from environment variables
-if [ -n "${VALET_LOG_LEVEL:-}" ]; then
-  setLogLevelInt "${VALET_LOG_LEVEL}"
-fi
-if [ "${VALET_VERBOSE=:-}" = "true" ]; then
-  setLogLevelInt "debug"
+  source "${BASH_SOURCE[0]%/*}/core"
 fi
 
 #===============================================================

@@ -7,12 +7,27 @@
 # we check for this variable to know if this script has already been included
 _CORE_INCLUDED=1
 
-if [ -z "${_MAIN_INCLUDED:-}" ]; then
-  # shellcheck source=cmd
-  VALETD_PATH="${BASH_SOURCE[0]}"
-  VALETD_PATH="${VALETD_PATH%/*}" # strip file name
-  source "${VALETD_PATH}/main"
+# Handle the case where this script was invoked outside of valet
+if [ -z "${VALET_HOME:-}" ]; then
+  VALET_HOME="${BASH_SOURCE[0]}"
+  VALET_HOME="${VALET_HOME%/*}" # strip file name
+  if [[ "${VALET_HOME}" != /* ]]; then
+    # resolve relative path (we avoid subshell as much as possible for performance reasons)
+    VALET_HOME="$(realpath -L "${VALET_HOME}")"
+  fi
+  VALET_HOME="${VALET_HOME%/*}" # strip valet.d directory
 fi
+
+# First thing we do is to source the valet configuration from the user config dir
+# This file can be used to override the default configuration by setting VALET_* env variables.
+VALET_USER_CONFIG_FILE="${VALET_USER_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}/config"}"
+if [[ -e "${VALET_USER_CONFIG_FILE}" ]]; then
+  # shellcheck source=/dev/null
+  source "${VALET_USER_CONFIG_FILE}"
+fi
+
+# for now we need yq in the path
+export PATH="${VALET_HOME}/bin:${PATH}"
 
 #===============================================================
 # >>> Temporay files and folders
@@ -383,6 +398,13 @@ function getStack() {
   LAST_RETURNED_VALUE="${stack}"
 }
 
+# Parsing the options from environment variables
+if [ -n "${VALET_LOG_LEVEL:-}" ]; then
+  setLogLevelInt "${VALET_LOG_LEVEL}"
+fi
+if [ "${VALET_VERBOSE=:-}" = "true" ]; then
+  setLogLevelInt "debug"
+fi
 
 #===============================================================
 # >>> Core utilities
@@ -1237,3 +1259,15 @@ function checkParseResults() {
     fail "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
   fi
 }
+
+
+#===============================================================
+# >>> Include main
+#===============================================================
+
+if [ -z "${_MAIN_INCLUDED:-}" ]; then
+  # shellcheck source=cmd
+  VALETD_PATH="${BASH_SOURCE[0]}"
+  VALETD_PATH="${VALETD_PATH%/*}" # strip file name
+  source "${VALETD_PATH}/main"
+fi
