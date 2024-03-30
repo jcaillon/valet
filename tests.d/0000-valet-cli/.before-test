@@ -35,7 +35,7 @@ function fzf() {
   echo "▶ fzf input stream was:" 1>&2
   echo "⌈${inputStreamContent}⌉" 1>&2
 
-  if [[ "${inputStreamContent}" == "ReturnLast"* ]]; then
+  if [[ "$*" == *"ReturnLast"* ]]; then
     # returning the last line of the input stream
     echo "${inputStreamContent##*$'\n'}"
   fi

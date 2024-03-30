@@ -78,13 +78,13 @@ function selfBuild() {
   fi
 
   inform "Sourcing builtin commands."
-  eval "$(find "${VALET_HOME}/valet.d/commands.d" -type f -not -path '*/.*' -name '*.sh' | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
+  eval "$(find "${VALET_HOME}/valet.d/commands.d" -type f -name '*.sh' -not -iname '.*' | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
   eval "$(getTextBetweenLines "function about_this" "}" "$(cat "${VALET_HOME}/valet")")"
   eval "$(getTextBetweenLines "function about_showCommandHelp" "}" "$(cat "${VALET_HOME}/valet.d/main")")"
 
   inform "Sourcing user commands from ⌜${userDirectory}⌝."
   if [[ -n "${userDirectory}" && -d "${userDirectory}" ]]; then
-    eval "$(find "${userDirectory}" -type f -not -path '*/.*' -name '*.sh' | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
+    eval "$(find "${userDirectory}" -type f -not -path '*/tests.d/*' -name '*.sh' -not -iname '.*' | xargs -P1 -I{} printf "source \"%s\"\n" "{}")"
   else
     inform "Skipping user directory with value ⌜${userDirectory}⌝."
   fi
@@ -435,10 +435,7 @@ function writeCommandsMenu() {
   maxWidth=$(getMaxCommandWidth)
   maxWidth=$((maxWidth + 2))
   echo "# Get the input for fzf to display the header commands menu"
-  echo "CMD_COMMANDS_MENU_HEADER=\"Please select the command to run (filter by typing anything)
-
-$(printf "%-${maxWidth}s\t%s\n" "Command name" "Short description")\""
-
+  echo "CMD_COMMANDS_MENU_HEADER=\"Please select the command to run (filter by typing anything)\""
   echo "CMD_COMMANDS_MENU_BODY=\"$(getCommandsMenu | sort)\""
 }
 

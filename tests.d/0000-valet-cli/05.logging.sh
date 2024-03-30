@@ -12,9 +12,9 @@ function testLogging() {
   unset VALET_LOG_LEVEL
   endTest "Testing log with success level" 0
 
-  echo "→ valet --log-level warn self test-core --logging-level"
+  echo "→ valet --log-level warning self test-core --logging-level"
   ("${VALET_HOME}/valet" --log-level "warning" self test-core --logging-level)
-  endTest "Testing log with warn level" 0
+  endTest "Testing log with warning level" 0
 
   echo "→ valet -v self test-core --logging-level"
   ("${VALET_HOME}/valet" -v self test-core --logging-level)

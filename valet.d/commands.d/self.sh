@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Title:         valet.d/commands/*
+# Title:         valet.d/commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
@@ -12,6 +12,8 @@ if [ -z "${_MAIN_INCLUDED:-}" ]; then
   source "${VALETD_DIR}/main"
 fi
 # --- END OF COMMAND COMMON PART
+
+#TODO: valet self zefzef should not open the self menu!
 
 #===============================================================
 # >>> dev sub menu

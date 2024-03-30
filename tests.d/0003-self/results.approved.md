@@ -85,6 +85,19 @@ INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/
 ▶ called kurlFile true 200 yq.exe https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_windows_amd64.exe
 ▶ called invoke mv -f yq.exe $VALET_HOME/.tmp/bin/yq
 SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
+▶ called invoke5 false 0   uname -m
+INFO     Downloading the binaries for the OS: darwin.
+INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.tar.gz.
+▶ called kurlFile true 200 fzf.tar.gz https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.tar.gz
+▶ called invoke tar -xzf fzf.tar.gz
+▶ called invoke mv -f fzf $VALET_HOME/.tmp/bin/fzf
+INFO     Downloading curl from: https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64.
+▶ called kurlFile true 200 curl https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64
+▶ called invoke mv -f curl $VALET_HOME/.tmp/bin/curl
+INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_darwin_amd64.
+▶ called kurlFile true 200 yq https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_darwin_amd64
+▶ called invoke mv -f yq $VALET_HOME/.tmp/bin/yq
+SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
 SUCCESS  The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝.
 ```
 
@@ -169,7 +182,7 @@ SUCCESS  The binaries have been downloaded and stored in the bin directory of va
 ▶ called invoke cp -R $VALET_HOME/valet.d .
 ▶ called invoke cp -R $VALET_HOME/valet .
 ▶ called invoke tar -czvf valet-linux-amd64.tar.gz examples.d valet.d valet bin
-INFO     The artifact has been created at ⌜valet-linux-amd64.tar.gz⌝ with:
+DEBUG    The artifact has been created at ⌜valet-linux-amd64.tar.gz⌝ with:
 
 INFO     Uploading the artifact ⌜valet-linux-amd64.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 ▶ called kurl true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet-linux-amd64.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet-linux-amd64.tar.gz
@@ -199,15 +212,43 @@ SUCCESS  The binaries have been downloaded and stored in the bin directory of va
 ▶ called invoke cp -R $VALET_HOME/valet.d .
 ▶ called invoke cp -R $VALET_HOME/valet .
 ▶ called invoke tar -czvf valet-windows-amd64.tar.gz examples.d valet.d valet bin
-INFO     The artifact has been created at ⌜valet-windows-amd64.tar.gz⌝ with:
+DEBUG    The artifact has been created at ⌜valet-windows-amd64.tar.gz⌝ with:
 
 INFO     Uploading the artifact ⌜valet-windows-amd64.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 ▶ called kurl true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet-windows-amd64.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet-windows-amd64.tar.gz
+DEBUG    Parsed arguments:
+local parsingErrors forceOs destination help
+parsingErrors=""
+forceOs="darwin"
+destination="$VALET_HOME/.tmp/bin"
+
+▶ called invoke5 false 0   uname -m
+DEBUG    Your CPU architecture is: x86_64.
+INFO     Downloading the binaries for the OS: darwin.
+INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.tar.gz.
+▶ called kurlFile true 200 fzf.tar.gz https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.tar.gz
+▶ called invoke tar -xzf fzf.tar.gz
+▶ called invoke mv -f fzf $VALET_HOME/.tmp/bin/fzf
+INFO     Downloading curl from: https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64.
+▶ called kurlFile true 200 curl https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64
+▶ called invoke mv -f curl $VALET_HOME/.tmp/bin/curl
+INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_darwin_amd64.
+▶ called kurlFile true 200 yq https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_darwin_amd64
+▶ called invoke mv -f yq $VALET_HOME/.tmp/bin/yq
+SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
+▶ called invoke cp -R $VALET_HOME/examples.d .
+▶ called invoke cp -R $VALET_HOME/valet.d .
+▶ called invoke cp -R $VALET_HOME/valet .
+▶ called invoke tar -czvf .tar.gz examples.d valet.d valet bin
+DEBUG    The artifact has been created at ⌜.tar.gz⌝ with:
+
+INFO     Uploading the artifact ⌜.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
+▶ called kurl true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=.tar.gz
 ▶ called invoke cp -R $VALET_HOME/examples.d .
 ▶ called invoke cp -R $VALET_HOME/valet.d .
 ▶ called invoke cp -R $VALET_HOME/valet .
 ▶ called invoke tar -czvf valet-no-binaries.tar.gz examples.d valet.d valet
-INFO     The artifact has been created at ⌜valet-no-binaries.tar.gz⌝ with:
+DEBUG    The artifact has been created at ⌜valet-no-binaries.tar.gz⌝ with:
 
 INFO     Uploading the artifact ⌜valet-no-binaries.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 ▶ called kurl true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet-no-binaries.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet-no-binaries.tar.gz

@@ -20,6 +20,7 @@ selfRelease
 selfTest
 selfTestCore
 selfUpdate
+selfWelcomeUser
 showCaseSudo
 showCommandHelp
 showcaseCommand1
@@ -37,6 +38,7 @@ CMD_FUNCTION_NAME_self_release="selfRelease"
 CMD_FUNCTION_NAME_self_test="selfTest"
 CMD_FUNCTION_NAME_self_test_core="selfTestCore"
 CMD_FUNCTION_NAME_self_update="selfUpdate"
+CMD_FUNCTION_NAME_self_welcome_user="selfWelcomeUser"
 CMD_FUNCTION_NAME_showcase_sudo_command="showCaseSudo"
 CMD_FUNCTION_NAME_help="showCommandHelp"
 CMD_FUNCTION_NAME_showcase_command1="showcaseCommand1"
@@ -59,6 +61,7 @@ self release
 self test
 self test-core
 self update
+self welcome-user
 showcase
 showcase command1
 showcase hello-world
@@ -71,9 +74,7 @@ CMD_MAX_COMMAND_WIDTH="22"
 
 
 # Get the input for fzf to display the header commands menu
-CMD_COMMANDS_MENU_HEADER="Please select the command to run (filter by typing anything)
-
-Command name            	Short description"
+CMD_COMMANDS_MENU_HEADER="Please select the command to run (filter by typing anything)"
 CMD_COMMANDS_MENU_BODY="help                    	Show the help this program or of a specific command
 self build              	Re-build the menu of valet from your commands.
 self download-binaries  	Download the required binaries for valet.
@@ -82,6 +83,7 @@ self                    	Show the valet self-maintenance sub menu.
 self test-core          	Test valet core features.
 self test               	Test your valet custom commands.
 self update             	Update valet using the latest release on GitHub.
+self welcome-user       	The command run after the installation of Valet to guide the user.
 showcase command1       	A showcase command that uses arguments and options.
 showcase hello-world    	An hello world command
 showcase                	Show the showcase sub menu.
@@ -113,6 +115,7 @@ CMD_COMMAND_selfRelease="self release"
 CMD_COMMAND_selfTest="self test"
 CMD_COMMAND_selfTestCore="self test-core"
 CMD_COMMAND_selfUpdate="self update"
+CMD_COMMAND_selfWelcomeUser="self welcome-user"
 CMD_COMMAND_showCaseSudo="showcase sudo-command"
 CMD_COMMAND_showCommandHelp="help"
 CMD_COMMAND_showcaseCommand1="showcase command1"
@@ -125,6 +128,7 @@ CMD_FILETOSOURCE_selfRelease="valet.d/commands.d/self-release.sh"
 CMD_FILETOSOURCE_selfTest="valet.d/commands.d/self-test.sh"
 CMD_FILETOSOURCE_selfTestCore="valet.d/commands.d/self-test.sh"
 CMD_FILETOSOURCE_selfUpdate="valet.d/commands.d/self-install.sh"
+CMD_FILETOSOURCE_selfWelcomeUser="valet.d/commands.d/self-install.sh"
 CMD_FILETOSOURCE_showCaseSudo="examples.d/showcase/showcase.sh"
 CMD_FILETOSOURCE_showcaseCommand1="examples.d/showcase/showcase.sh"
 CMD_FILETOSOURCE_showcaseMenu="examples.d/showcase/showcase.sh"
@@ -138,6 +142,7 @@ CMD_SHORTDESCRIPTION_selfRelease="Release a new version of valet."
 CMD_SHORTDESCRIPTION_selfTest="Test your valet custom commands."
 CMD_SHORTDESCRIPTION_selfTestCore="Test valet core features."
 CMD_SHORTDESCRIPTION_selfUpdate="Update valet using the latest release on GitHub."
+CMD_SHORTDESCRIPTION_selfWelcomeUser="The command run after the installation of Valet to guide the user."
 CMD_SHORTDESCRIPTION_showCaseSudo="A command that requires sudo"
 CMD_SHORTDESCRIPTION_showCommandHelp="Show the help this program or of a specific command"
 CMD_SHORTDESCRIPTION_showcaseCommand1="A showcase command that uses arguments and options."
@@ -162,6 +167,10 @@ It will:
 CMD_DESCRIPTION_selfTest="Test your valet custom commands using approval tests approach."
 CMD_DESCRIPTION_selfTestCore="Test valet core features using approval tests approach."
 CMD_DESCRIPTION_selfUpdate="Update valet using the latest release on GitHub."
+CMD_DESCRIPTION_selfWelcomeUser="The command run after the installation of Valet to guide the user.
+
+Adjust the Valet configuration according to the user environment.
+Let the user know what to do next."
 CMD_DESCRIPTION_showCaseSudo="Before starting this command, valet will check if sudo is available.
 
 If so, it will require the user to enter the sudo password and use sudo inside the command"
@@ -194,15 +203,15 @@ Once you have created your new command script, run the ⌜valet self build⌝ co
 
 In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
 
-- VALET_USER_DIRECTORY=\"my/path\": set the path to the valet user directory (in which to find user commands).
+- VALET_USER_DIRECTORY=\"~/valet.d\": set the path to the valet user directory (in which to find user commands).
 - VALET_NO_COLOR=\"true\": will disable the color output for logs and help.
 - VALET_COLOR_XXX=\"color\": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, ERROR, TIMESTAMP, HIGHLIGHT.
 - VALET_NO_WRAP=\"true\": will disable the text wrapping for logs.
 - VALET_NO_ICON=\"true\": will disable the icons for logs and help.
 - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
-- VALET_LOG_COLUMNS=\"120\": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the terminal width.
+- VALET_LOG_COLUMNS=\"120\": set the number of columns at which to wrap the logs to 120 (if wrap is enabled); defaults to the terminal width.
 - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
-- VALET_REMEMBER_LAST_CHOICES=\"3\": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the alphabetical order.
+- VALET_REMEMBER_LAST_CHOICES=\"3\": number of last choices to remember when selecting an item from a command menu. Set to 0 to disable this feature and always display items in the alphabetical order.
 - VALET_DO_NOT_USE_LOCAL_BIN=\"false\": if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
 
 These variables can be exported in your .bashrc file.
@@ -292,6 +301,7 @@ CMD_OPTIONS_NAME_selfRelease=(
   "-t, --github-release-token <token>"
   "-b, --bump-level <semver>"
   "--dry-run"
+  "--upload-artifacts-only"
   "-h, --help"
 )
 CMD_OPTIONS_DESCRIPTION_selfRelease=(
@@ -303,6 +313,8 @@ Can be either: major or minor.
 This option can be set by exporting the variable VALET_BUMP_LEVEL=\"<semver>\"."
   "Do not perform the release, just show what would be done.
 This option can be set by exporting the variable VALET_DRY_RUN=\"true\"."
+  "Do no create the release, just upload the artifacts to the latest release.
+This option can be set by exporting the variable VALET_UPLOAD_ARTIFACTS_ONLY=\"true\"."
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_selfTest=(
@@ -384,6 +396,12 @@ CMD_OPTIONS_NAME_selfUpdate=(
   "-h, --help"
 )
 CMD_OPTIONS_DESCRIPTION_selfUpdate=(
+  "Display the help for this command"
+)
+CMD_OPTIONS_NAME_selfWelcomeUser=(
+  "-h, --help"
+)
+CMD_OPTIONS_DESCRIPTION_selfWelcomeUser=(
   "Display the help for this command"
 )
 CMD_OPTIONS_NAME_showCaseSudo=(
@@ -491,6 +509,7 @@ CMD_COMMANDS_NAME_selfMenu=(
   "test"
   "test-core"
   "update"
+  "welcome-user"
 )
 CMD_COMMANDS_DESCRIPTION_selfMenu=(
   "Re-build the menu of valet from your commands."
@@ -499,6 +518,7 @@ CMD_COMMANDS_DESCRIPTION_selfMenu=(
   "Test your valet custom commands."
   "Test valet core features."
   "Update valet using the latest release on GitHub."
+  "The command run after the installation of Valet to guide the user."
 )
 CMD_COMMANDS_NAME_showcaseMenu=(
   "hello-world"
@@ -519,6 +539,7 @@ CMD_COMMANDS_NAME_this=(
   "self test"
   "self test-core"
   "self update"
+  "self welcome-user"
   "showcase sudo-command"
   "help"
   "showcase command1"
@@ -533,6 +554,7 @@ CMD_COMMANDS_DESCRIPTION_this=(
   "Test your valet custom commands."
   "Test valet core features."
   "Update valet using the latest release on GitHub."
+  "The command run after the installation of Valet to guide the user."
   "A command that requires sudo"
   "Show the help this program or of a specific command"
   "A showcase command that uses arguments and options."
@@ -588,23 +610,27 @@ CMD_OPTS_selfRelease=(
   "-t --github-release-token"
   "-b --bump-level"
   "--dry-run"
+  "--upload-artifacts-only"
   "-h --help"
 )
 CMD_OPTS_HAS_VALUE_selfRelease=(
   "true"
   "true"
   "false"
+  "false"
 )
 CMD_OPTS_NAME_selfRelease=(
   "githubReleaseToken"
   "bumpLevel"
   "dryRun"
+  "uploadArtifactsOnly"
   "help"
 )
 CMD_OPTS_NAME_SC_selfRelease=(
   "GITHUB_RELEASE_TOKEN"
   "BUMP_LEVEL"
   "DRY_RUN"
+  "UPLOAD_ARTIFACTS_ONLY"
 )
 CMD_OPTS_selfTest=(
   "-d --user-directory"
@@ -696,6 +722,8 @@ CMD_OPTS_NAME_SC_selfTestCore=(
 )
 CMD_OPTS_selfUpdate=("-h --help")
 CMD_OPTS_NAME_selfUpdate=("help")
+CMD_OPTS_selfWelcomeUser=("-h --help")
+CMD_OPTS_NAME_selfWelcomeUser=("help")
 CMD_OPTS_showCaseSudo=("-h --help")
 CMD_OPTS_NAME_showCaseSudo=("help")
 CMD_OPTS_showCommandHelp=(

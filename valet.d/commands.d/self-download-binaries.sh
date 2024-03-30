@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Title:         valet.d/commands/*
+# Title:         valet.d/commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
@@ -89,7 +89,7 @@ function downloadFzf() {
   local os="${1}"
   local version="${2}"
   local destination="${3}"
-  if [[ "${os}" != "windows" ]]; then
+  if [[ "${os}" == "linux" ]]; then
     local fzfUrl="https://github.com/junegunn/fzf/releases/download/${version}/fzf-${version}-${os}_amd64.tar.gz"
     inform "Downloading fzf from: ${fzfUrl}."
     kurlFile true 200 fzf.tar.gz "${fzfUrl}"
@@ -100,7 +100,11 @@ function downloadFzf() {
     inform "Downloading fzf from: ${fzfUrl}."
     kurlFile true 200 fzf.zip "${fzfUrl}"
     invoke unzip fzf.zip
-    invoke mv -f "fzf.exe" "${destination}/fzf"
+    if [[ "${os}" == "darwin" ]]; then
+      invoke mv -f "fzf" "${destination}/fzf"
+    else
+      invoke mv -f "fzf.exe" "${destination}/fzf"
+    fi
   fi
 }
 

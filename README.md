@@ -94,7 +94,7 @@ You need bash version 5 or higher to be installed on your machine to run Valet.
 Run the following command to install Valet:
 
 ```bash
-curl https://github.com/jcaillon/valet/TOBEDONE! | bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/valet.d/commands.d/self-install.sh)"
 ```
 
 > [!NOTE]

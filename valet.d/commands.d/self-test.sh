@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Title:         valet.d/commands/*
+# Title:         valet.d/commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 

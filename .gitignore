@@ -10,4 +10,5 @@ folder.ico
 bin/
 .tmp/
 sandbox.sh
-*.tag.gz
+**.tag.gz
+**.zip

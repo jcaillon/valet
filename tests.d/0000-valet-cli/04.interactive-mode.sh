@@ -13,7 +13,7 @@ another3  	This is another command 3"
 
   # testing showInteractiveCommandsMenu, should return the last line of the input stream
   echo "→ showInteractiveCommandsMenu \"ReturnLast My header"$'\n'"2 lines\" \"${commands}\""
-  showInteractiveCommandsMenu "ReturnLast My header"$'\n'"2 lines" "${commands}" && echo "${LAST_RETURNED_VALUE}"
+  showInteractiveCommandsMenu "test-menu" "ReturnLast My header"$'\n'"2 lines" "${commands}" && echo "${LAST_RETURNED_VALUE}"
   endTest "Testing showInteractiveCommandsMenu, should return the last line of the input stream" $?
 }
 

@@ -159,17 +159,17 @@ ABOUT
   
   In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
   
-  - VALET_USER_DIRECTORY="my/path": set the path to the valet user directory (in which to find user commands).
+  - VALET_USER_DIRECTORY="~/valet.d": set the path to the valet user directory (in which to find user commands).
   - VALET_NO_COLOR="true": will disable the color output for logs and help.
   - VALET_COLOR_XXX="color": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, 
   ERROR, TIMESTAMP, HIGHLIGHT.
   - VALET_NO_WRAP="true": will disable the text wrapping for logs.
   - VALET_NO_ICON="true": will disable the icons for logs and help.
   - VALET_NO_TIMESTAMP="true": will disable the timestamp for logs.
-  - VALET_LOG_COLUMNS="120": the number of columns at which to wrap the logs (if wrap is enabled); defaults to the terminal width.
+  - VALET_LOG_COLUMNS="120": set the number of columns at which to wrap the logs to 120 (if wrap is enabled); defaults to the terminal width.
   - VALET_CI_MODE="true": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full 
   date.
-  - VALET_REMEMBER_LAST_CHOICES="3": number of last choices to remember when selecting an item from a menu. Set to 0 to disable this feature and always display items in the 
+  - VALET_REMEMBER_LAST_CHOICES="3": number of last choices to remember when selecting an item from a command menu. Set to 0 to disable this feature and always display items in the
   alphabetical order.
   - VALET_DO_NOT_USE_LOCAL_BIN="false": if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
   
@@ -226,6 +226,8 @@ COMMANDS
       Test valet core features.
   self update
       Update valet using the latest release on GitHub.
+  self welcome-user
+      The command run after the installation of Valet to guide the user.
   showcase sudo-command
       A command that requires sudo
   help
@@ -450,11 +452,26 @@ another3  	This is another command 3"
 **Error** output:
 
 ```log
-▶ called fzf --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=2 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' --log-level fail help --columns 4987 {}
+▶ called fzf --history=/tmp/d1-0/fzf-history-test-menu --history-size=50 --bind alt-up:prev-history --bind alt-down:next-history --bind=alt-h:preview(echo -e 'HELP
+
+Navigate through the options with the UP/DOWN keys.
+
+Validate your choice with ENTER.
+
+Cancel with ESC or CTRL+C.
+
+ADDITIONAL KEY BINDINGS
+
+ALT+H: Show this help.
+ALT+/: Rotate through the preview options (this pane).
+ALT+UP/ALT+DOWN: Previous/next query in the history.
+SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
+') --preview-window=right,4989 --bind alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|) --layout=reverse --info=right --pointer=◆ --marker=✓ --cycle --tiebreak=begin,index --margin=0 --padding=0 --delimiter=
+ --tabstop=3 --header-first --header=Press ALT+H to display the help and keybindings.
+ReturnLast My header
+2 lines --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}
 ▶ fzf input stream was:
-⌈ReturnLast My header
-2 lines
-cm1  	This is command 1
+⌈cm1  	This is command 1
 cm2  	This is command 2
 sub cmd1  	This is sub command 1
 sub cmd2  	This is sub command 2
@@ -474,12 +491,25 @@ Exit code: 0
 **Error** output:
 
 ```log
-▶ called fzf --tiebreak=begin,index --no-multi --cycle --layout=reverse --info=default --margin=0 --padding=0 --header-lines=3 --preview-window=right:4989:wrap --preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' --log-level fail help --columns 4987 {}
-▶ fzf input stream was:
-⌈Please select the command to run (filter by typing anything)
+▶ called fzf --history=/tmp/d1-0/fzf-history-main-menu --history-size=50 --bind alt-up:prev-history --bind alt-down:next-history --bind=alt-h:preview(echo -e 'HELP
 
-Command name            	Short description
-help                    	Show the help this program or of a specific command
+Navigate through the options with the UP/DOWN keys.
+
+Validate your choice with ENTER.
+
+Cancel with ESC or CTRL+C.
+
+ADDITIONAL KEY BINDINGS
+
+ALT+H: Show this help.
+ALT+/: Rotate through the preview options (this pane).
+ALT+UP/ALT+DOWN: Previous/next query in the history.
+SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
+') --preview-window=right,4989 --bind alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|) --layout=reverse --info=right --pointer=◆ --marker=✓ --cycle --tiebreak=begin,index --margin=0 --padding=0 --delimiter=
+ --tabstop=3 --header-first --header=Press ALT+H to display the help and keybindings.
+Please select the command to run (filter by typing anything) --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}
+▶ fzf input stream was:
+⌈help                    	Show the help this program or of a specific command
 self build              	Re-build the menu of valet from your commands.
 self download-binaries  	Download the required binaries for valet.
 self release            	Release a new version of valet.
@@ -487,6 +517,7 @@ self                    	Show the valet self-maintenance sub menu.
 self test-core          	Test valet core features.
 self test               	Test your valet custom commands.
 self update             	Update valet using the latest release on GitHub.
+self welcome-user       	The command run after the installation of Valet to guide the user.
 showcase command1       	A showcase command that uses arguments and options.
 showcase hello-world    	An hello world command
 showcase                	Show the showcase sub menu.
@@ -513,14 +544,14 @@ WARNING  This is a warning message.
 With a second line.
 ```
 
-### Testing log with warn level
+### Testing log with warning level
 
 Exit code: 0
 
 **Standard** output:
 
 ```plaintext
-→ valet --log-level warn self test-core --logging-level
+→ valet --log-level warning self test-core --logging-level
 ```
 
 **Error** output:
@@ -829,26 +860,56 @@ Exit code: 0
 **Error** output:
 
 ```log
-▶ called fzf --tiebreak=begin,index
---no-multi
---cycle
+▶ called fzf --history=/tmp/d1-0/fzf-history-selfMenu
+--history-size=50
+--bind
+alt-up:prev-history
+--bind
+alt-down:next-history
+--bind=alt-h:preview(echo -e 'HELP
+
+Navigate through the options with the UP/DOWN keys.
+
+Validate your choice with ENTER.
+
+Cancel with ESC or CTRL+C.
+
+ADDITIONAL KEY BINDINGS
+
+ALT+H: Show this help.
+ALT+/: Rotate through the preview options (this pane).
+ALT+UP/ALT+DOWN: Previous/next query in the history.
+SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
+')
+--preview-window=right,4989
+--bind
+alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|)
 --layout=reverse
---info=default
+--info=right
+--pointer=◆
+--marker=✓
+--cycle
+--tiebreak=begin,index
 --margin=0
 --padding=0
---header-lines=3
---preview-window=right:4989:wrap
---preview=echo {} | cut -d$'\t' -f1 | sed -e 's/[[:space:]]*$//' | xargs -P1 -I{} '$VALET_HOME/valet' --log-level fail help --columns 4987 {}
-▶ fzf input stream was:
-⌈Please select the command to run (filter by typing anything)
+--delimiter=
 
-Command name            	Short description
-self build              	Re-build the menu of valet from your commands.
+--tabstop=3
+--header-first
+--header=Press ALT+H to display the help and keybindings.
+Please select the command to run (filter by typing anything)
+--print-query
+--no-multi
+--preview-label=Command help
+--preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}
+▶ fzf input stream was:
+⌈self build              	Re-build the menu of valet from your commands.
 self download-binaries  	Download the required binaries for valet.
 self release            	Release a new version of valet.
 self test-core          	Test valet core features.
 self test               	Test your valet custom commands.
-self update             	Update valet using the latest release on GitHub.⌉
+self update             	Update valet using the latest release on GitHub.
+self welcome-user       	The command run after the installation of Valet to guide the user.⌉
 ```
 
 ### Testing that we can display the help of a sub menu
@@ -888,6 +949,8 @@ COMMANDS
       Test valet core features.
   update
       Update valet using the latest release on GitHub.
+  welcome-user
+      The command run after the installation of Valet to guide the user.
 
 EXAMPLES
 
