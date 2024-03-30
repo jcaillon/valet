@@ -152,6 +152,9 @@ function createRelease() {
   invoke git log --pretty=format:"%s" "${lastTag}..HEAD"
   local IFS=$'\n'
   for line in ${LAST_RETURNED_VALUE}; do
+    if [[ "${line}" == ":bookmark:"* ]]; then
+      continue
+    fi
     tagMessage+="- ${line}"$'\n'
   done
   IFS=$' '
@@ -172,7 +175,7 @@ function createRelease() {
   # commit the new version and push it
   if [[ "${dryRun:-}" != "true" ]]; then
     invoke git add "${VALET_HOME}/valet.d/version"
-    invoke git commit -m "🔖 bump version to ${newVersion}"
+    invoke git commit -m ":bookmark: bump version to ${newVersion}"
     invoke git push origin main
     succeed "The new version has been committed."
   fi

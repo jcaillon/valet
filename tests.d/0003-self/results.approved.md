@@ -38,6 +38,7 @@ Exit code: 0
 
 ```plaintext
 → selfRelease -t token -b major --dry-run
+⌜v1.2.3⌝
 ```
 
 **Error** output:
@@ -87,9 +88,9 @@ INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/
 SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
 ▶ called invoke5 false 0   uname -m
 INFO     Downloading the binaries for the OS: darwin.
-INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.tar.gz.
-▶ called kurlFile true 200 fzf.tar.gz https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.tar.gz
-▶ called invoke tar -xzf fzf.tar.gz
+INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip.
+▶ called kurlFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip
+▶ called invoke unzip fzf.zip
 ▶ called invoke mv -f fzf $VALET_HOME/.tmp/bin/fzf
 INFO     Downloading curl from: https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64.
 ▶ called kurlFile true 200 curl https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64
@@ -109,14 +110,16 @@ Exit code: 0
 
 ```plaintext
 → LOG_LEVEL_INT=0 selfRelease -t token -b minor
+⌜v1.2.3⌝
 ```
 
 **Error** output:
 
 ```log
 DEBUG    Parsed arguments:
-local parsingErrors githubReleaseToken bumpLevel dryRun help
+local parsingErrors githubReleaseToken bumpLevel dryRun uploadArtifactsOnly help
 dryRun="${DRY_RUN:-}"
+uploadArtifactsOnly="${UPLOAD_ARTIFACTS_ONLY:-}"
 parsingErrors=""
 githubReleaseToken="token"
 bumpLevel="minor"
@@ -141,7 +144,7 @@ Changelog:
 SUCCESS  The new version has been tagged and pushed to the remote repository.
 INFO     The new version of valet is: 1.3.0.
 ▶ called invoke git add $VALET_HOME/valet.d/version
-▶ called invoke git commit -m 🔖 bump version to 1.3.0
+▶ called invoke git commit -m :bookmark: bump version to 1.3.0
 ▶ called invoke git push origin main
 SUCCESS  The new version has been committed.
 DEBUG    The release payload is: ⌜{
@@ -225,9 +228,9 @@ destination="$VALET_HOME/.tmp/bin"
 ▶ called invoke5 false 0   uname -m
 DEBUG    Your CPU architecture is: x86_64.
 INFO     Downloading the binaries for the OS: darwin.
-INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.tar.gz.
-▶ called kurlFile true 200 fzf.tar.gz https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.tar.gz
-▶ called invoke tar -xzf fzf.tar.gz
+INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip.
+▶ called kurlFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip
+▶ called invoke unzip fzf.zip
 ▶ called invoke mv -f fzf $VALET_HOME/.tmp/bin/fzf
 INFO     Downloading curl from: https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64.
 ▶ called kurlFile true 200 curl https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64
@@ -239,11 +242,11 @@ SUCCESS  The binaries have been downloaded and stored in the bin directory of va
 ▶ called invoke cp -R $VALET_HOME/examples.d .
 ▶ called invoke cp -R $VALET_HOME/valet.d .
 ▶ called invoke cp -R $VALET_HOME/valet .
-▶ called invoke tar -czvf .tar.gz examples.d valet.d valet bin
-DEBUG    The artifact has been created at ⌜.tar.gz⌝ with:
+▶ called invoke tar -czvf valet-darwin-amd64.tar.gz examples.d valet.d valet bin
+DEBUG    The artifact has been created at ⌜valet-darwin-amd64.tar.gz⌝ with:
 
-INFO     Uploading the artifact ⌜.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
-▶ called kurl true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=.tar.gz
+INFO     Uploading the artifact ⌜valet-darwin-amd64.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
+▶ called kurl true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet-darwin-amd64.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet-darwin-amd64.tar.gz
 ▶ called invoke cp -R $VALET_HOME/examples.d .
 ▶ called invoke cp -R $VALET_HOME/valet.d .
 ▶ called invoke cp -R $VALET_HOME/valet .
