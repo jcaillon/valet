@@ -1,8 +1,12 @@
 # ♣️ Valet
 
-[![GitHub Release](https://img.shields.io/github/v/release/jcaillon/valet?sort=date&style=flat&logo=github&logoColor=white&label=Latest%20release&color=%2350C878)](https://github.com/jcaillon/valet/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/jcaillon/valet?sort=date&style=flat&logo=github&logoColor=white&label=Latest%20release&color=%2350C878)][latest-release]
+[![Total downloads](https://img.shields.io/github/downloads/jcaillon/valet/total.svg?style=flat)][releases]
+[![MIT license](https://img.shields.io/badge/License-MIT-74A5C2.svg?style=flat)][license]
+[![bash 5+ required](https://img.shields.io/badge/Requires-bash%20v5+-C8597A.svg?logo=gnubash&logoColor=white)][bash]
+[![Notepad++ v7.5.4+ required](https://img.shields.io/badge/Requires-fzf%20v0.48+-865FC5.svg)][fzf]
 
-⚠️ THIS IS A WORK IN PROGRESS, PLEASE WAIT FOR THE REMOVAL OF THIS DISCLAIMER :)
+![icon](docs/images/icon.svg)
 
 Valet is a wrapper around your bash scripts that provides an interactive menu, standard help output, auto parsing for options and arguments, error handling, a framework for approval testing, execution profiling, and so on...
 
@@ -12,15 +16,12 @@ It is written for performance and to minimize the overhead of a script calling y
 
 It is made for providing an awesome user experience in interactive mode but it is also designed to make your scripts easy to use and debug in CI/CD pipelines; DevOps engineers should love it! 💖
 
-![icon](docs/images/icon.svg)
-
----
-
-Table of contents:
+**Table of contents**:
 
 - [🤔 Use cases](#-use-cases)
 - [✨ Features showcase](#-features-showcase)
 - [🎉 Installation](#-installation)
+  - [Dependencies](#dependencies)
   - [Automated installation](#automated-installation)
   - [Manual installation](#manual-installation)
   - [Manual installation from sources](#manual-installation-from-sources)
@@ -82,12 +83,18 @@ Auto parsing of arguments and options based on your command configuration:
 ![demo-parsing](docs/images/readme/demo-parsing.gif)
 
 > [!NOTE]
-> This showcase is recorded with the [windows terminal](https://github.com/microsoft/terminal), [debian on WSL](https://wiki.debian.org/InstallingDebianOn/Microsoft/Windows/SubsystemForLinux) with zsh & [oh my zsh](https://ohmyz.sh/).
-> The color scheme for the terminal is [dracula](https://draculatheme.com/windows-terminal) and the font is an home made modification of windows consolas ligaturized and with nerd font icons.
+> This showcase is recorded with the [windows terminal][windows-terminal], [debian on WSL][debian-wsl] with zsh & [oh my zsh][oh-my-zsh]. The color scheme for the terminal is [dracula][dracula-theme] and the font is an home made modification of windows Consolas (with ligatures + with nerd font icons).
 
 ## 🎉 Installation
 
-You need bash version 5 or higher to be installed on your machine to run Valet.
+### Dependencies
+
+- Bash version 5 or superior is required.
+- [fzf][fzf] is required for the interactive mode.
+- [curl][curl] is only needed for the self-update command.
+
+> [!NOTE]
+> The [latest release][latest-release] package already contains [fzf][fzf] & [curl][curl] for your OS, so you don't have to install them. You can always opt-in for the 'no-binaries' package.
 
 ### Automated installation
 
@@ -97,20 +104,18 @@ Run the following command to install Valet:
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/valet.d/commands.d/self-install.sh)"
 ```
 
-> [!NOTE]
-> The installer downloads the package from GitHub which contains additional tools ([fzf][fzf] and [yq][yq]) in the Valet `bin` sub directory.
->
-> It also copies the [examples.d](examples.d) directory to your Valet user directory (if empty) and runs `valet self build` in order to get you started.
+> [!TIP]
+> Please review the [install script][install-script] to learn about the different installer options.
 
 ### Manual installation
 
-1. Download the correct package (depends on your OS/cpu architecture) from the [latest release from GitHub](https://github.com/jcaillon/valet/releases/latest).
+1. Download the correct package (depends on your OS/cpu architecture) from the [latest release from GitHub][latest-release].
 2. Extract the archive to your favorite installation directory.
 3. Add this directory to your PATH (or link Valet to `/usr/local/bin`) so you can call `valet` from your terminal.
 4. Call `valet` to get started with the example commands!
 
 > [!NOTE]
-> The `valet-no-binaries.tar.gz` package does not pack fzf, yg and curl. You will need to have them in your PATH.
+> The `valet-no-binaries.tar.gz` package does not pack the dependencies binaries. You will need to have them in your PATH.
 
 ### Manual installation from sources
 
@@ -126,7 +131,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/vale
 > [!IMPORTANT]
 > If you see the replacement character � in my terminal, it means you don't have a [nerd font][nerd-font] setup in your terminal.
 >
-> Either install a nerd font and activate it on our terminal or `export VALET_NO_ICON=true` in your environment.
+> Either install a nerd font and activate it on our terminal or `export VALET_NO_ICON=true` in your environment. This is reminded to you during the automated installation process.
 
 ### Adding your own commands
 
@@ -140,9 +145,9 @@ To create a new command, follow this [documentation][new-command].
 
 Calling `valet` without any arguments (you can pass options) will open the interactive search for commands.
 
-Type your query (fuzzy matching is active so you can skip some letters), press ⬇️/⬆️ to select the command and hit enter to run it.
+Type your query (fuzzy matching is active so you can skip some letters), press ⬇️/⬆️ to select the command and hit enter to run it. Press `ALT+H` to show the help text for interactive mode.
 
-Valet will remember your choice so they it appear at the top of the list the next time the menu shows up. You can set up how many choices to remember with the variable `VALET_REMEMBER_LAST_CHOICES`. Setting `VALET_REMEMBER_LAST_CHOICES=0` will effectively disable this feature and always display items sorted alphabetically.
+Valet will remember your last choices and they will appear at the top of the list the next time the menu shows up. You can set up how many choices to remember with the variable `VALET_REMEMBER_LAST_CHOICES`. Setting `VALET_REMEMBER_LAST_CHOICES=0` will effectively disable this feature and always display items sorted alphabetically.
 
 ### Interactive mode
 
@@ -158,25 +163,37 @@ This makes Valet particularly suitable for automation (in CI/CD pipelines for in
 
 ## 🤝 Contributions
 
-Please check the [CONTRIBUTING.md](CONTRIBUTING.md) documentation if you intend to work on this project.
+Please check the [CONTRIBUTING.md][contributing] documentation if you intend to work on this project.
 
 ## 🔭 Roadmap
 
-- Installation and self update script.
+- Get rid of yq dependency in self build.
 - Add support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Setup github actions to automatically test Valet.
 - Generate an autocompletion script for bash and zsh.
 - Self command to create a new command interactively.
-- Get rid of yq dependency in self build.
 - Replace fzf menu with equivalent pure bash menu.
 - Allow fileToSource to have multiple values separated by a comma (so we can load libraries of functions).
 - Add about option to hide the command in the menus.
 - Add tests for self build.
 - Implement self release command to tag and push to github.
 - We can have fuzzy matching on options too; just make sure it is not ambiguous.
+- Create a valet-community-commands where everyone can contribute to new default commands for Valet.
 
+[releases]: https://github.com/jcaillon/valet/releases
+[latest-release]: https://github.com/jcaillon/valet/releases/latest
+[new-command]: docs/create-new-command.md
+[install-script]: ./valet.d/commands.d/self-install.sh
+[examples]: ./examples.d
+[license]: ./LICENSE
+[contributing]: CONTRIBUTING.md
+[bash]: https://www.gnu.org/software/bash/
 [fzf]: https://github.com/junegunn/fzf
 [yq]: https://github.com/mikefarah/yq
 [nerd-font]: https://www.nerdfonts.com/
-[new-command]: docs/create-new-command.md
+[windows-terminal]: https://github.com/microsoft/terminal
+[debian-wsl]: https://wiki.debian.org/InstallingDebianOn/Microsoft/Windows/SubsystemForLinux
+[oh-my-zsh]: https://ohmyz.sh/
+[dracula-theme]: https://draculatheme.com/windows-terminal
+[curl]: https://curl.se/
