@@ -27,6 +27,8 @@
 #   VALET_HOME: the directory where Valet will be installed.
 #   DEBUG: set to 'true' to display debug information.
 #   NO_SHIM: set to 'true' to not create the shim script in /usr/local/bin.
+#   NO_BINARIES: set to 'true' to not download the binaries (just Valet scripts).
+#   NO_ADD_TO_PATH: set to 'true' to not add the Valet directory to the PATH (append to your .bashrc file).
 #
 # Usage:
 #
@@ -76,6 +78,9 @@ if [ -z "${_MAIN_INCLUDED:-}" ]; then
     }
     function getUserDirectory() { LAST_RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"; }
     VALET_USER_CONFIG_FILE="${VALET_USER_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}/config"}"
+
+    VALET_NO_COLOR=true
+    VALET_NO_ICON=true
   fi
 fi
 # --- END OF COMMAND COMMON PART
@@ -144,7 +149,12 @@ function selfUpdate() {
   mkdir -p "${tempDirectory}" 1>/dev/null || fail "Could not create the temporary directory ⌜${tempDirectory}⌝."
 
   # download the latest release and unpack it
-  local latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet-${os}-amd64.tar.gz"
+  local latestReleaseUrl
+  if [[ "${NO_BINARIES:-false}" == true ]]; then
+    latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet-no-binaries.tar.gz"
+  else
+    latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet-${os}-amd64.tar.gz"
+  fi
   local latestReleaseFile="${tempDirectory}/valet.tar.gz"
   inform "Downloading the latest release from ⌜${latestReleaseUrl}⌝."
   curl -fsSL -o "${latestReleaseFile}" "${latestReleaseUrl}" || fail "Could not download the latest release from ⌜${latestReleaseUrl}⌝."
@@ -161,16 +171,30 @@ function selfUpdate() {
   chmod +x "${VALET_HOME}/valet"
   chmod +x "${VALET_HOME}/bin/"*
 
-  # create the shim in the bin directory
-  local valetBin="${binDirectory}/valet"
-  if [[ -e "${valetBin}" && "${valetAlreadyInstalled}" == "false" ]]; then
-    warn "A valet shim already exists in ⌜${valetBin}⌝!?"
-  else
-    mkdir -p "${binDirectory}" 1>/dev/null || fail "Could not create the bin directory ⌜${binDirectory}⌝."
-    inform "Creating a shim ⌜${VALET_HOME}/valet → ${valetBin}⌝."
-    echo "#!/usr/bin/env bash
-'${VALET_HOME}/valet' \"\$@\"" >"${valetBin}"
-    warn "Make sure to have ⌜${binDirectory}⌝ (or ⌜${VALET_HOME}⌝) in your PATH."
+  if [[ "${NO_SHIM:-false}" != true ]]; then
+
+    # create the shim in the bin directory
+    local valetBin="${binDirectory}/valet"
+    if [[ -e "${valetBin}" && "${valetAlreadyInstalled}" == "false" ]]; then
+      warn "A valet shim already exists in ⌜${valetBin}⌝!?"
+    else
+      mkdir -p "${binDirectory}" 1>/dev/null || fail "Could not create the bin directory ⌜${binDirectory}⌝."
+      inform "Creating a shim ⌜${VALET_HOME}/valet → ${valetBin}⌝."
+      {
+        echo "#!/usr/bin/env bash"
+        echo -n "'${VALET_HOME}/valet' \"\$@\""
+      } >"${valetBin}"
+    fi
+    # make sure the valetBin directory is in the path or add it to ~.bashrc
+    if ! command -v valet &>/dev/null; then
+      if [[ "${NO_ADD_TO_PATH:-false}" == true ]]; then
+        warn "Make sure to add ⌜${binDirectory}⌝ (or ⌜${VALET_HOME}⌝) in your PATH."
+      else
+        inform "Adding ⌜${binDirectory}⌝ to your PATH via .bashrc right now."
+        printf "\n\n# Add Valet to the PATH\nexport PATH=\"%s:\$PATH\"\n" "${binDirectory}" >>"${HOME}/.bashrc"
+      fi
+    fi
+
   fi
 
   # copy the examples if the user directory does not exist
@@ -181,10 +205,13 @@ function selfUpdate() {
   fi
 
   # silently build the commands
-  LOG_LEVEL=error "${VALET_HOME}/valet" self build
+  sourceForFunction "selfBuild"
+  setLogLevelInt "error"
+  selfBuild
+  setLogLevelInt "info"
 
   # run the post install command
-  "${VALET_HOME}/valet" self welcome-user
+  selfWelcomeUser
 }
 
 #===============================================================

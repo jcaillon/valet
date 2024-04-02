@@ -54,7 +54,7 @@ But...
 Valet in a gist:
 
 - In Valet, you can create new **commands** that you can invoke with `valet my-command`.
-- Each command has properties that help you describe it (a description, a list of arguments and options, and so on...).
+- Each command has a definition with properties that help you describe it (a description, a list of arguments and options, and so on...).
 - Each command has a associated bash function that is called when the command is invoked and which contains your logic.
 - You define commands and their functions in `.sh` files under your Valet user directory and Valet takes care of indexing your commands; which allows you to quickly find them, parse options, arguments, print their help...
 

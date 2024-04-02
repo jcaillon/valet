@@ -59,7 +59,7 @@ function createTempFile() {
     TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
     LAST_RETURNED_VALUE="${_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
     if [ ! -e "${LAST_RETURNED_VALUE}" ]; then
-      touch "${LAST_RETURNED_VALUE}" 1>&2 2>/dev/null
+      :>"${LAST_RETURNED_VALUE}"
       return 0
     fi
   done
@@ -139,12 +139,22 @@ function setLogColors() {
 }
 setLogColors
 
+# This function exports the terminal size in the global variables _COLUMNS and _LINES.
+function exportTerminalSize() {
+  shopt -s checkwinsize; (:;:)
+  _COLUMNS="${COLUMNS}"
+  _LINES="${LINES}"
+  shopt -u checkwinsize
+}
+
 if [ "${VALET_NO_WRAP:-}" != "true" ]; then
-  # this is the only subshell we need; can't be avoided
-  _COLUMNS="${_COLUMNS:-$(tput cols 2>/dev/null || echo 120)}"
+  exportTerminalSize
 else
   _COLUMNS="${_COLUMNS:-120}"
 fi
+
+# Re export terminal size on window resize.
+trap exportTerminalSize SIGWINCH
 
 # Set the log level.
 # The log level can be set to one of the following values:
@@ -1290,6 +1300,11 @@ function showFzf() {
   body="${4}"
   shift 4
 
+  # in CI mode, we do not allow to display fzf because it would make the job hang forever
+  if [[ "${VALET_CI_MODE:-false}" == "true" ]]; then
+    fail "CI/CD mode is activated, interactive mode has been started but we cannot run fzf or we would make the job hang forever."
+  fi
+
   getCommandFullPath "fzf"
   local fzfExecutable="${LAST_RETURNED_VALUE}"
 
@@ -1304,7 +1319,7 @@ function showFzf() {
   if [[ -n "${historyId}" ]]; then
     historyFile="${stateDirectory}/fzf-history-${historyId}"
     if [ ! -e "${historyFile}" ]; then
-      touch "${historyFile}"
+      :>"${historyFile}"
     fi
     defaultOptions+=(
       --history="${historyFile}"
@@ -1313,7 +1328,6 @@ function showFzf() {
       --bind "alt-down:next-history"
     )
   fi
-
 
   # compute preview width
   local previewWidth=$((_COLUMNS / 2 - 10))
@@ -1438,7 +1452,7 @@ ${COLOR_ERROR}SHIFT+UP${COLOR_DEFAULT}/${COLOR_ERROR}SHIFT+DOWN${COLOR_DEFAULT}:
     --print-query
   )
 
-  # reset the output files, but only if they already exist
+  # reset the output file, but only if it already exist
   [[ -s "${_TEMPORARY_STDOUT_FILE}" ]] && : >"${_TEMPORARY_STDOUT_FILE}"
 
   "${fzfExecutable}" "${defaultOptions[@]}" "${modeOptions[@]}" "$@" <<<"${body}" 1>"${_TEMPORARY_STDOUT_FILE}" || true

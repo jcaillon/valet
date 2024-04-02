@@ -48,6 +48,7 @@ This allows you to have autocompletion of the core functions from your command s
 - [Advanced bash scripting guide](https://tldp.org/LDP/abs/html/index.html)
 - [Google shell style guidelines](https://google.github.io/styleguide/shellguide.html)
 - [Baeldung Linux scripting series](https://www.baeldung.com/linux/linux-scripting-series)
+- [Pure bash bible](https://github.com/dylanaraps/pure-bash-bible)
 
 ## Tips for performant scripts
 

@@ -1,0 +1,284 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# author: github.com/jcaillon
+# description: Utility functions for the self-build script
+
+# This function extracts each content between the valet front matter tags.
+#
+# $1: The file to extract from.
+#
+# Returns:
+#   LAST_RETURNED_VALUE_ARRAY: Each extracted content in an array.
+#
+# Usage:
+#   extractCommandYamls "myfile"
+function extractCommandYamls() {
+  local file="$1"
+
+  local firstLine=": \"---"
+  local lastLine="---\""
+
+  declare -a contentArray
+
+  local line content
+  local -i firstLineMatched=0 lastLineMatched=1
+  while IFS= read -r line; do
+    if [[ firstLineMatched -eq 0 ]]; then
+      if [[ "$line" == "$firstLine" ]]; then
+        firstLineMatched=1
+        lastLineMatched=0
+        content=""
+        continue
+      fi
+    elif [[ lastLineMatched -eq 0 ]]; then
+      if [[ "$line" == "$lastLine" ]]; then
+        lastLineMatched=1
+        firstLineMatched=0
+        contentArray+=("${content}")
+        continue
+      fi
+      content+="${line}"$'\n'
+    fi
+  done <"${file}"
+
+  LAST_RETURNED_VALUE_ARRAY=("${contentArray[@]}")
+}
+
+# This function convert a camelCase string to a SNAKE_CASE string.
+# It uses pure bash.
+# Removes all leading underscores.
+#
+# $1: The camelCase string to convert.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The SNAKE_CASE string.
+#
+# Usage:
+#   camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
+function camelCaseToSnakeCase() {
+  local camelCase="$1"
+  local snakeCase
+  local -i charIndex strLength=${#camelCase}
+  local char
+  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
+    char="${camelCase:charIndex:1}"
+    if [[ "${char}" =~ ^[[:upper:]]$ ]]; then
+      snakeCase+="_${char^}"
+    else
+      snakeCase+="${char^}"
+    fi
+  done
+  while [[ "${snakeCase}" == _* ]]; do
+    snakeCase="${snakeCase:1}"
+  done
+  LAST_RETURNED_VALUE="${snakeCase}"
+}
+
+# This function convert a kebab-case string to a SNAKE_CASE string.
+# It uses pure bash.
+# Removes all leading dashes.
+#
+# $1: The kebab-case string to convert.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The SNAKE_CASE string.
+#
+# Usage:
+#   kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
+function kebabCaseToSnakeCase() {
+  local kebabCase="$1"
+  local snakeCase
+  local -i charIndex strLength=${#kebabCase}
+  local char
+  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
+    char="${kebabCase:charIndex:1}"
+    if [[ "${char}" == "-" ]]; then
+      snakeCase+="_"
+    else
+      snakeCase+="${char^}"
+    fi
+  done
+  while [[ "${snakeCase}" == _* ]]; do
+    snakeCase="${snakeCase:1}"
+  done
+  LAST_RETURNED_VALUE="${snakeCase}"
+}
+
+# This function convert a kebab-case string to a camelCase string.
+# It uses pure bash.
+# Removes all leading dashes.
+#
+# $1: The kebab-case string to convert.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The camelCase string.
+#
+# Usage:
+#   kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${LAST_RETURNED_VALUE}"
+function kebabCaseToCamelCase() {
+  local kebabCase="$1"
+  local camelCase
+  local -i charIndex strLength=${#kebabCase}
+  local char
+  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
+    char="${kebabCase:charIndex:1}"
+    if [[ "${char}" == "-" ]]; then
+      continue
+    fi
+    if [[ "${kebabCase:charIndex-1:1}" == "-" ]]; then
+      camelCase+="${char^}"
+    else
+      camelCase+="${char}"
+    fi
+  done
+  LAST_RETURNED_VALUE="${camelCase,}"
+}
+
+# This function extracts properties from a command definition and stores them in
+# TEMP_CMD_BUILD_* global variables.
+# This is basically a parser for yaml-like content that supports only one level of properties
+# (including an array with properties at level 1).
+#
+# $1: The command definition (yaml text) to extract from.
+#
+# Usage:
+#   extractCommandDefinitionToVariables "commandDefinition Yaml content"
+function extractCommandDefinitionToVariables() {
+  local commandDefinition="$1"
+
+  # loop through lines
+  local multiLineIndentation=""
+  local newIndentation=""
+  local -i newIndentationLevel=0
+  local -a propertyNames=()
+  local propertyName
+  local propertyValue=""
+  local -i arrayLength=-1
+  local -i currentArrayLength
+  local -i readingMultiLine=0
+  local newPropertyName newPropertyValue
+  local -i lineNumber=0
+  local line
+  local IFS
+  while IFS=$'\n' read -rd $'\n' line; do
+    lineNumber+=1
+    if [[ readingMultiLine -eq 0 || (-n "${line}" && "${line}" != "${multiLineIndentation}"*) ]]; then
+      # we are matching a new property
+      newPropertyName="${line%%:*}"
+      newPropertyName="${newPropertyName// /}"
+      newPropertyValue="${line#*:}"
+      newPropertyValue="${newPropertyValue/# /}"
+      newIndentation="${line%%[![:space:]]*}"
+
+      # skip if property name is empty
+      [[ -z "${newPropertyName}" ]] && continue
+
+      # if we were on a multi line property, we store it
+      if [[ readingMultiLine -eq 1 ]]; then
+        IFS=_ propertyName="${propertyNames[*]}"; IFS=' '
+        createGlobalVariable "${propertyName}" "${propertyValue%$'\n'}" "${arrayLength}"
+        readingMultiLine=0
+        unset "propertyNames[-1]"
+      fi
+
+      # we are on an item of an array
+      if [[ "${newPropertyName}" == "-"* ]]; then
+        if [[ arrayLength -le -1 ]]; then
+          fail "Array item (starts with '- ') defined outside of an array [line ${lineNumber}]."
+        fi
+        arrayLength+=1
+        newPropertyName="${newPropertyName:1}"
+        newIndentation="${newIndentation}  "
+        debug "Processing new array item."
+      fi
+
+      # check that property name only contains alphanumeric characters
+      if [[ ! "${newPropertyName}" =~ ^[[:alnum:]]+$ ]]; then
+        fail "Property name ⌜${newPropertyName}⌝ contains invalid characters (should be alphanumeric) [line ${lineNumber}]."
+      fi
+
+      propertyNames+=("${newPropertyName}")
+
+      if [[ -z "${newPropertyValue// /}" ]]; then
+        # we are on a new array property
+        debug "Starting new array property: ⌜${newPropertyName}⌝."
+        arrayLength=0
+        newIndentation="  "
+        propertyNames=("${newPropertyName}")
+      elif [[ "${newPropertyValue}" == "|-"* ]]; then
+        # we are on an a multi line property
+        debug "Starting new multi line property: ⌜${newPropertyName}⌝."
+        readingMultiLine=1
+        propertyValue=""
+        newIndentation="${newIndentation}  "
+        multiLineIndentation="${newIndentation}"
+      else
+        # we are on a single line value property
+        if [[ ${#newIndentation} -eq 0 ]]; then
+          propertyName="${newPropertyName}"
+        else
+          IFS=_ propertyName="${propertyNames[*]}"; IFS=' '
+        fi
+        createGlobalVariable "${propertyName}" "${newPropertyValue}" "${arrayLength}"
+      fi
+
+      newIndentationLevel="${#newIndentation}"
+
+      # if the indentation level has decreased, we un stack the property names
+      if [[ newIndentationLevel -eq 0 ]]; then
+        propertyNames=()
+        arrayLength=-1
+      elif [[ newIndentationLevel -eq 2 ]]; then
+        while [[ ${#propertyNames[@]} -gt 1 ]]; do
+          unset "propertyNames[-1]"
+        done
+      fi
+    else
+      # continuation of a multi lines value
+      propertyValue+="${line#"${multiLineIndentation}"}"$'\n'
+    fi
+
+  done <<<"${commandDefinition}"$'\n'"end:"
+}
+
+function createGlobalVariable() {
+  local name="${1}"
+  local value="${2}"
+  local arrayLength="${3}"
+
+  debug "Setting variable ⌜TEMP_CMD_BUILD_${name}⌝ (array length=${arrayLength})."
+  if [[ arrayLength -le -1 ]]; then
+    # simple variable
+    declare -g "TEMP_CMD_BUILD_${name}"="${value}"
+  else
+    # array variable
+    if [[ -p "TEMP_CMD_BUILD_${name}" ]]; then
+      currentArrayLength=0
+    else
+      eval "currentArrayLength=\${#TEMP_CMD_BUILD_${name}[@]}"
+    fi
+    debug "currentArrayLength: ${currentArrayLength}."
+    arrayLength=$((arrayLength - 1))
+    while [[ arrayLength -gt currentArrayLength ]]; do
+      eval "TEMP_CMD_BUILD_${name}+=(\"\")"
+      eval "currentArrayLength=\${#TEMP_CMD_BUILD_${name}[@]}"
+    done
+    eval "TEMP_CMD_BUILD_${name}+=(\"${value//\"/\\\"}\")"
+  fi
+}
+
+# Trim all whitespaces and truncate spaces.
+#
+# $1: The string to trim.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The trimmed string.
+#
+# Usage:
+#   trimAll "   example   string    " && local trimmedString="${LAST_RETURNED_VALUE}"
+function trimAll() {
+    set -f
+    set -- $*
+    LAST_RETURNED_VALUE="$*"
+    set +f
+}

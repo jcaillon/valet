@@ -1,22 +1,9 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
-# Title:         valet
-# Description:   A wrapper around commands.
-#                For the user, allows to enter interactive mode,
-#                 look for commands and run them.
-#                For the developer, allows to:
-#                - create new commands and have them available in the system
-#                - collect metadata on commands
-#                - parse command arguments and options
-# Usage:         valet --help
-# Author:        github.com/jcaillon
-
-#===============================================================
-# >>> About this program
-#===============================================================
-# shellcheck disable=SC2317
-function about_this() {
-  echo "
+: "---
+command: valet
+function: this
+author: github.com/jcaillon
 shortDescription: Your personal assistant in the terminal!
 description: |-
   Valet helps you browse, understand and execute your custom bash commands.
@@ -46,9 +33,9 @@ description: |-
   - VALET_NO_ICON=\"true\": will disable the icons for logs and help.
   - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
   - VALET_LOG_COLUMNS=\"120\": set the number of columns at which to wrap the logs to 120 (if wrap is enabled); defaults to the terminal width.
-  - VALET_CI_MODE=\"true\": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
-  - VALET_REMEMBER_LAST_CHOICES=\"3\": number of last choices to remember when selecting an item from a command menu. Set to 0 to disable this feature and always display items in the alphabetical order.
-  - VALET_DO_NOT_USE_LOCAL_BIN=\"false\": if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
+  - VALET_CI_MODE='true': will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.
+  - VALET_REMEMBER_LAST_CHOICES='3': number of last choices to remember when selecting an item from a command menu. Set to 0 to disable this feature and always display items in the alphabetical order.
+  - VALET_DO_NOT_USE_LOCAL_BIN='false': if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
 
   These variables can be exported in your .bashrc file.
   Alternatively, you can define them in your valet user config file, located by default at ~/.config/valet/config. This path can be configured using the VALET_USER_CONFIG_FILE environment variable.
@@ -58,40 +45,39 @@ description: |-
   You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
 sudo: false
 arguments:
-  - name: commands?...
-    description: |-
-      The command or sub commands to execute.
-      See the commands section for more information.
+- name: commands?...
+  description: |-
+    The command or sub commands to execute.
+    See the commands section for more information.
 options:
-  - name: -x, --profiling
-    description: |-
-      Turn on profiling (with debug mode) before running the required command.
-      It will output to ~/profile_valet_cmd.txt.
-      This is useful to debug your command and understand what takes a long time to execute.
-  - name: -ll, -log, --log-level <level>
-    description: |-
-      Set the log level of valet (defaults to info).
-      Possible values are: debug, success, info, success, warning, error.
-  - name: -v, --verbose
-    description: |-
-      Output verbose information.
-      This is the equivalent of setting the log level to debug.
-  - name: -i, --force-interactive-mode
-    description: |-
-      Enter interactive mode for commands even if arguments are not required or provided.
-  - name: --version
-    description: |-
-      Display the current version of valet.
-    noEnvironmentVariable: true
+- name: -x, --profiling
+  description: |-
+    Turn on profiling (with debug mode) before running the required command.
+    It will output to ~/profile_valet_cmd.txt.
+    This is useful to debug your command and understand what takes a long time to execute.
+- name: -ll, -log, --log-level <level>
+  description: |-
+    Set the log level of valet (defaults to info).
+    Possible values are: debug, success, info, success, warning, error.
+- name: -v, --verbose
+  description: |-
+    Output verbose information.
+    This is the equivalent of setting the log level to debug.
+- name: -i, --force-interactive-mode
+  description: |-
+    Enter interactive mode for commands even if arguments are not required or provided.
+- name: --version
+  description: |-
+    Display the current version of valet.
+  noEnvironmentVariable: true
 examples:
-  - name: --help
-    description: |-
-      Displays this help text.
-  - name: -v a-command and-sub-command
-    description: |-
-      Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
-"
-}
+- name: --help
+  description: |-
+    Displays this help text.
+- name: -v a-command and-sub-command
+  description: |-
+    Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
+---"
 
 #===============================================================
 # >>> Include core/utils

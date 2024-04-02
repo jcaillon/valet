@@ -41,10 +41,15 @@ options:
       By default, this command will download the binaries in valet bin/ directory.
 
       You can force the download in a specific directory by providing the path.
+  - name: -f, --force
+    description: |-
+      By default, this command will download the binaries only if the final files do not exist in the destination directory.
+
+      You can force the download in all case with this option.
 "
 }
 
-# TODO: do not download if already exist in the destination, except if option -f
+#TODO: let the user commands have a hook to download their own dependencies when this command is run
 
 function selfDownloadBinaries() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
@@ -56,12 +61,9 @@ function selfDownloadBinaries() {
     destination="${PWD}/${destination}"
   fi
 
-  # for the sake of simpplicity, we only deal with amd64 arch...
-  local arch
-  invoke3var false 0 uname -m && arch="${LAST_RETURNED_VALUE%$'\n'*}" || arch="x86_64"
-  debug "Your CPU architecture is: ${arch}."
-  if [[ "${arch}" != "x86_64" ]]; then
-    fail "Only amd64 architecture is supported for now. Please download the binaries manually and add them in your PATH."
+  # for the sake of simplicity, we only deal with amd64 arch...
+  if [[ "${HOSTTYPE:-x86_64}" != "x86_64" ]]; then
+    fail "Only amd64 architecture is supported for now but yours is ⌜${HOSTTYPE:-x86_64}⌝. Please download the binaries manually and add them in your PATH."
   fi
 
   # get the OS
@@ -75,9 +77,9 @@ function selfDownloadBinaries() {
   mkdir -p "${destination}"
 
   createTempDirectory && pushd "${LAST_RETURNED_VALUE}" 1>/dev/null
-  downloadFzf "${os}" "0.48.1" "${destination}"
-  downloadCurl "${os}" "8.7.1" "${destination}"
-  downloadYq "${os}" "4.43.1" "${destination}"
+  [[ ! -e "${destination}/fzf" || "${force:-}" == "true" ]] && downloadFzf "${os}" "0.48.1" "${destination}"
+  [[ ! -e "${destination}/curl" || "${force:-}" == "true" ]] && downloadCurl "${os}" "8.7.1" "${destination}"
+  [[ ! -e "${destination}/yq" || "${force:-}" == "true" ]] && downloadYq "${os}" "4.43.1" "${destination}"
   popd 1>/dev/null
 
   succeed "The binaries have been downloaded and stored in the bin directory of valet ⌜${destination}⌝."

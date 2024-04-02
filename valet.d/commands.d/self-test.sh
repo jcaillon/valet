@@ -212,7 +212,8 @@ function selfTestCore() {
   elif [ -n "${waitIndefinitely:-}" ]; then
     inform "This is for testing valet core functions, waiting indefinitely."
     while true; do
-      sleep 1
+      # sleep for 1s
+      read -rt 1 <> <(:) || :
     done
   elif [ -n "${showHelp:-}" ]; then
     showHelp
@@ -395,6 +396,11 @@ function runTest() {
   # reset the standard output and error output
   resetFdRedirection
 
+  # test if the user forgot to call endTest
+  if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" || -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
+    fail "The test script ⌜${testScript}⌝ did not call endTest OR it had outputs after the last endTest call."
+  fi
+
   trap onExitInternal EXIT
 }
 
@@ -407,17 +413,18 @@ function compareWithApproved() {
   approvedFile="${testDirectory}/results.approved.md"
   receivedFile="${testDirectory}/results.received.md"
 
-  if [ -f "${approvedFile}" ]; then
-    if diff --color -u "${approvedFile}" "${receivedFileToCopy}" 1>&2; then
-      debug "🧪 ${testName}: OK, equal to approved file."
-      rm -f "${receivedFile}" 2>/dev/null || true
-      return 0
-    else
-      echo "${receivedFile} is different than ${approvedFile} (see above)" 1>&2
-      warn "🧪 ${testName}: KO, differs from approved file (see difference above)." | tee >(cat >&2)
-    fi
+  if [ ! -f "${approvedFile}" ]; then
+    debug "🧪 ${testName}: no approved file, creating one."
+    : > "${approvedFile}"
+  fi
+
+  if diff --color -u "${approvedFile}" "${receivedFileToCopy}" 1>&2; then
+    debug "🧪 ${testName}: OK, equal to approved file."
+    rm -f "${receivedFile}" 2>/dev/null || true
+    return 0
   else
-    warn "🧪 ${testName}: KO, no approved file found." 1>&2
+    echo "${receivedFile} is different than ${approvedFile} (see above)" 1>&2
+    warn "🧪 ${testName}: KO, differs from approved file (see difference above)." | tee >(cat >&2)
   fi
 
   # if the option is activated, we approve the received file

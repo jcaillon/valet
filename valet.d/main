@@ -555,6 +555,8 @@ function sourceUserCommands() {
     fi
   fi
 
+  debug "Sourcing the user commands from ⌜${commandsFile}⌝."
+
   # source commands
   # shellcheck disable=SC1090
   source "${commandsFile}"
@@ -665,7 +667,7 @@ function showCommandsMenuAndRun() {
   sortCommands "${menuId}" "${commands}" && sortedCommandsMenuBody="${LAST_RETURNED_VALUE}"
 
   local commandChoice
-  showInteractiveCommandsMenu "${menuId}" "${CMD_COMMANDS_MENU_HEADER}" "${sortedCommandsMenuBody}" && commandChoice="${LAST_RETURNED_VALUE}"
+  showInteractiveCommandsMenu "${menuId}" "Please select the command to run." "${sortedCommandsMenuBody}" && commandChoice="${LAST_RETURNED_VALUE}"
   if [[ -z "${commandChoice}" ]]; then
     # the user pressed escape or ctrl-c
     exit 0
@@ -773,7 +775,7 @@ function addLastChoice() {
   getLocalStateDirectory
   lastChoicesFile="${LAST_RETURNED_VALUE}/last-choices-${menuId}"
   if [ ! -e "${lastChoicesFile}" ]; then
-    touch "${lastChoicesFile}"
+    :>"${lastChoicesFile}"
   fi
 
   local lastChoices
