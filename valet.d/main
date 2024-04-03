@@ -387,40 +387,37 @@ function writeAsTable() {
   LAST_RETURNED_VALUE="${output}"
 }
 
-# shellcheck disable=SC2317
-function about_showCommandHelp() {
-  echo "
+: "---
 command: help
+function: showCommandHelp
 shortDescription: Show the help this program or of a specific command
 description: |-
   Show the help this program or of the help of a specific command.
 
   You can show the help with or without colors and set the maximum columns for the help text.
 arguments:
-  - name: commands?...
-    description: |-
-      The name of the command to show the help for.
-      If not provided, show the help for the program.
+- name: commands?...
+  description: |-
+    The name of the command to show the help for.
+    If not provided, show the help for the program.
 options:
-  - name: -nc, --no-colors
-    description: |-
-      Do not use any colors in the output
-  - name: -c, --columns <number>
-    description: |-
-      Set the maximum columns for the help text
+- name: -nc, --no-colors
+  description: |-
+    Do not use any colors in the output
+- name: -c, --columns <number>
+  description: |-
+    Set the maximum columns for the help text
 examples:
-  - name: help cmd
-    description: |-
-      Shows the help for the command ⌜cmd⌝
-  - name: help cmd subCmd
-    description: |-
-      Shows the help for the sub command ⌜subCmd⌝ of the command ⌜cmd⌝
-  - name: help --no-colors --columns 50
-    description: |-
-      Shows the help for the program without any color and with a maximum of 50 columns
-"
-}
-
+- name: help cmd
+  description: |-
+    Shows the help for the command ⌜cmd⌝
+- name: help cmd subCmd
+  description: |-
+    Shows the help for the sub command ⌜subCmd⌝ of the command ⌜cmd⌝
+- name: help --no-colors --columns 50
+  description: |-
+    Shows the help for the program without any color and with a maximum of 50 columns
+---"
 # show the help of the given command (can be blank to show the root help)
 # e.g. showCommandHelp "cmd1 subcmd2"
 function showCommandHelp() {
@@ -474,10 +471,10 @@ function parseMainArguments() {
       ;;
     -ll | -log | --log-level)
       shift
-      setLogLevelInt "${1}"
+      setLogLevel "${1}"
       ;;
     -v | --verbose)
-      setLogLevelInt "debug"
+      setLogLevel "debug"
       ;;
     --version)
       cat "${VALET_HOME}/valet.d/version"
@@ -627,7 +624,11 @@ function sourceForFunction() {
   local fileToSource
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
     local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
-    if [ -e "${VALET_HOME:-}/${fileToSource}" ]; then
+    if [ -e "${fileToSource}" ]; then
+      # shellcheck disable=SC1090
+      source "${fileToSource}"
+      debug "Loaded file ⌜${fileToSource}⌝."
+    elif [ -e "${VALET_HOME:-}/${fileToSource}" ]; then
       # shellcheck disable=SC1090
       source "${VALET_HOME:-}/${fileToSource}"
       debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
@@ -837,10 +838,8 @@ function showInteractiveCommandsMenu() {
 # Usage:
 #  getFunctionNameFromCommand "self build" && echo "${LAST_RETURNED_VALUE}"
 function getFunctionNameFromCommand() {
-  local command
-  command="${1:-}"
-  command="${command//-/_}"
-  local -n functionName="CMD_FUNCTION_NAME_${command// /_}"
+  local command="${1:-}"
+  local -n functionName="CMD_FUNCTION_NAME_${command//[-[:space:]]/_}"
 
   LAST_RETURNED_VALUE="${functionName:-}"
 }

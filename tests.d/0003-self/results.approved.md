@@ -1,33 +1,5 @@
 # Test suite 0003-self
 
-## Test script 00.utils
-
-### Testing bumpSemanticVersion
-
-Exit code: 0
-
-**Standard** output:
-
-```plaintext
-→ bumping 0.0.0 minor
-0.1.0
-
-→ bumping 1.2.3-alpha+zae345 major
-2.0.0
-
-→ bumping 1.2.3-alpha+zae345 minor
-1.3.0
-
-→ bumping 1.2.3-alpha+zae345 patch
-1.2.4
-
-→ bumping 1.2.3-alpha+zae345 major false
-2.0.0-alpha+zae345
-
-→ bumping 1.2.3-alpha patch false
-1.2.157-alpha
-```
-
 ## Test script 01.self-release
 
 ### Testing selfRelease, dry run major version
@@ -38,7 +10,6 @@ Exit code: 0
 
 ```plaintext
 → selfRelease -t token -b major --dry-run
-⌜v1.2.3⌝
 ```
 
 **Error** output:
@@ -58,7 +29,6 @@ Changelog:
 - 🐞 fix
 
 INFO     The new version of valet is: 2.0.0.
-▶ called invoke5 false 0   uname -m
 INFO     Downloading the binaries for the OS: linux.
 INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-linux_amd64.tar.gz.
 ▶ called kurlFile true 200 fzf.tar.gz https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-linux_amd64.tar.gz
@@ -71,7 +41,6 @@ INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/
 ▶ called kurlFile true 200 yq https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_linux_amd64
 ▶ called invoke mv -f yq $VALET_HOME/.tmp/bin/yq
 SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
-▶ called invoke5 false 0   uname -m
 INFO     Downloading the binaries for the OS: windows.
 INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip.
 ▶ called kurlFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip
@@ -86,7 +55,6 @@ INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/
 ▶ called kurlFile true 200 yq.exe https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_windows_amd64.exe
 ▶ called invoke mv -f yq.exe $VALET_HOME/.tmp/bin/yq
 SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
-▶ called invoke5 false 0   uname -m
 INFO     Downloading the binaries for the OS: darwin.
 INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip.
 ▶ called kurlFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip
@@ -110,7 +78,6 @@ Exit code: 0
 
 ```plaintext
 → LOG_LEVEL_INT=0 selfRelease -t token -b minor
-⌜v1.2.3⌝
 ```
 
 **Error** output:
@@ -167,8 +134,6 @@ parsingErrors=""
 forceOs="linux"
 destination="$VALET_HOME/.tmp/bin"
 
-▶ called invoke5 false 0   uname -m
-DEBUG    Your CPU architecture is: x86_64.
 INFO     Downloading the binaries for the OS: linux.
 INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-linux_amd64.tar.gz.
 ▶ called kurlFile true 200 fzf.tar.gz https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-linux_amd64.tar.gz
@@ -195,8 +160,6 @@ parsingErrors=""
 forceOs="windows"
 destination="$VALET_HOME/.tmp/bin"
 
-▶ called invoke5 false 0   uname -m
-DEBUG    Your CPU architecture is: x86_64.
 INFO     Downloading the binaries for the OS: windows.
 INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip.
 ▶ called kurlFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip
@@ -225,8 +188,6 @@ parsingErrors=""
 forceOs="darwin"
 destination="$VALET_HOME/.tmp/bin"
 
-▶ called invoke5 false 0   uname -m
-DEBUG    Your CPU architecture is: x86_64.
 INFO     Downloading the binaries for the OS: darwin.
 INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip.
 ▶ called kurlFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip

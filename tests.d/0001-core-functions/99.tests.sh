@@ -107,11 +107,28 @@ function testGetOsName() {
   endTest "Testing getOsName" 0
 }
 
+function outputTextToStdErr() {
+  echo "This is an error message" 1>&2
+}
+
+function testCaptureOutput() {
+
+  echo "→ captureOutput echo \"Hello world!\""
+  captureOutput echo "Hello world!" && echo "${LAST_RETURNED_VALUE}"
+
+  echo
+  echo "→ captureOutput outputTextToStdErr"
+  captureOutput outputTextToStdErr && echo "${LAST_RETURNED_VALUE2}"
+
+  endTest "Testing captureOutput" 0
+}
+
 function main() {
   testWrapText
   testCutF
   testFuzzyMatch
   testGetOsName
+  testCaptureOutput
 }
 
 main

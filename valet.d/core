@@ -10,10 +10,12 @@ _CORE_INCLUDED=1
 # Handle the case where this script was invoked outside of valet
 if [ -z "${VALET_HOME:-}" ]; then
   VALET_HOME="${BASH_SOURCE[0]}"
-  VALET_HOME="${VALET_HOME%/*}" # strip file name
   if [[ "${VALET_HOME}" != /* ]]; then
-    # resolve relative path (we avoid subshell as much as possible for performance reasons)
-    VALET_HOME="$(realpath -L "${VALET_HOME}")"
+    # resolve relative path
+    if pushd "${VALET_HOME%/*}" &>/dev/null; then VALET_HOME="${PWD}"; popd &>/dev/null;
+    else VALET_HOME="${PWD}"; fi
+  else
+    VALET_HOME="${VALET_HOME%/*}" # strip filename
   fi
   VALET_HOME="${VALET_HOME%/*}" # strip valet.d directory
 fi
@@ -94,8 +96,8 @@ function cleanupTempFiles() {
   if [ -e "${_TEMPORARY_WORK_FILE}" ]; then
     rm -f "${_TEMPORARY_WORK_FILE}" 1>&2 2>/dev/null
   fi
-  if [ -e "${_TEMPORARY_STDERR_FILE}" ]; then
-    rm -f "${_TEMPORARY_STDERR_FILE}" 1>&2 2>/dev/null
+  if [ -e "${_TEMPORARY_STDOUT_FILE}" ]; then
+    rm -f "${_TEMPORARY_STDOUT_FILE}" 1>&2 2>/dev/null
   fi
   if [ -e "${_TEMPORARY_STDERR_FILE}" ]; then
     rm -f "${_TEMPORARY_STDERR_FILE}" 1>&2 2>/dev/null
@@ -142,8 +144,8 @@ setLogColors
 # This function exports the terminal size in the global variables _COLUMNS and _LINES.
 function exportTerminalSize() {
   shopt -s checkwinsize; (:;:)
-  _COLUMNS="${COLUMNS}"
-  _LINES="${LINES}"
+  _COLUMNS="${COLUMNS:-120}"
+  _LINES="${LINES:-30}"
   shopt -u checkwinsize
 }
 
@@ -164,11 +166,11 @@ trap exportTerminalSize SIGWINCH
 # - warning
 # - error
 # The log level can be set using the environment variable LOG_LEVEL.
-# $1: the log level to set
+# $1: the log level to set (or defaults to info)
 #
 # Usage:
-#  setLogLevelInt "debug"
-function setLogLevelInt() {
+#  setLogLevel "debug"
+function setLogLevel() {
   # log level, defaults to info
   LOG_LEVEL="${1:-${LOG_LEVEL:-info}}"
   case "${LOG_LEVEL}" in
@@ -244,7 +246,7 @@ function createLogLineFunction() {
   local printfArguments
 
   # timestamp
-  if [ "${VALET_CI_MODE:-}" = "true" ]; then
+  if [[ "${VALET_CI_MODE:-}" == "true" && "${VALET_NO_TIMESTAMP:-}" != "true" ]]; then
     printfFormat+="%(%F_%H:%M:%S)T "
     printfArguments+='"${EPOCHSECONDS}" '
   elif [ "${VALET_NO_TIMESTAMP:-}" = "true" ]; then
@@ -413,10 +415,10 @@ function getStack() {
 
 # Parsing the options from environment variables
 if [ -n "${VALET_LOG_LEVEL:-}" ]; then
-  setLogLevelInt "${VALET_LOG_LEVEL}"
+  setLogLevel "${VALET_LOG_LEVEL}"
 fi
 if [ "${VALET_VERBOSE=:-}" = "true" ]; then
-  setLogLevelInt "debug"
+  setLogLevel "debug"
 fi
 
 #===============================================================
@@ -779,7 +781,7 @@ function invoke5() {
     # append std out
     if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
       # test if a file is less than 200Ko
-      if [[ $(stat -c %s "${_TEMPORARY_STDOUT_FILE}") -lt 200000 ]]; then
+      if [[ $(stat -c %s "${_TEMPORARY_STDOUT_FILE}" 2>/dev/null || echo 0) -lt 200000 ]]; then
         debugMessage+=$'\n'"Standard output:"$'\n'"⌜$(<"${_TEMPORARY_STDOUT_FILE}")⌝"
       else
         debugMessage+=$'\n'"Standard output is too big to be displayed."
@@ -1128,6 +1130,39 @@ function getOsName() {
   esac
   LAST_RETURNED_VALUE="${osName}"
 }
+
+# Execute the given command and return the output in the global variable LAST_RETURNED_VALUE.
+#
+# $1+: the command to execute (with args)
+#
+# Returns:
+#  exit with code 1 if the command fails.
+#  The output of the command in the global variable LAST_RETURNED_VALUE.
+#  The error output of the command in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#  captureOutput "ls -l" && local lsOutput="${LAST_RETURNED_VALUE}"
+function captureOutput() {
+  local -i exitCode=0
+  "$@" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+
+  local content
+  if [ -s "${_TEMPORARY_STDOUT_FILE}" ]; then
+    IFS= read -rd '' content < "${_TEMPORARY_STDOUT_FILE}" || true
+    LAST_RETURNED_VALUE="${content}"
+  else
+    LAST_RETURNED_VALUE=""
+  fi
+  if [ -s "${_TEMPORARY_STDERR_FILE}" ]; then
+    IFS= read -rd '' content < "${_TEMPORARY_STDERR_FILE}" || true
+    LAST_RETURNED_VALUE2="${content}"
+  else
+    LAST_RETURNED_VALUE2=""
+  fi
+
+  return ${exitCode}
+}
+
 
 #===============================================================
 # >>> Valet files and directories
@@ -1522,8 +1557,6 @@ function promptYesNo() {
 #===============================================================
 
 if [ -z "${_MAIN_INCLUDED:-}" ]; then
-  # shellcheck source=cmd
-  VALETD_PATH="${BASH_SOURCE[0]}"
-  VALETD_PATH="${VALETD_PATH%/*}" # strip file name
-  source "${VALETD_PATH}/main"
+  # shellcheck source=main
+  source "${VALET_HOME}/valet.d/main"
 fi

@@ -46,17 +46,20 @@ if [ -z "${BASH_VERSION:-}" ]; then
   exit 0
 fi
 
-# import the main script (should always be skipped if the command is run from valet)
-if [ -z "${_MAIN_INCLUDED:-}" ]; then
+# import the core script (should always be skipped if the command is run from valet)
+if [ -z "${_CORE_INCLUDED:-}" ]; then
   NOT_EXECUTED_FROM_VALET=true
 
   VALETD_DIR="${BASH_SOURCE[0]}"
-  VALETD_DIR="${VALETD_DIR%/*}" # strip file name
+  if [[ "${VALETD_DIR}" != /* ]]; then
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null;
+    else VALETD_DIR="${PWD}"; fi
+  else VALETD_DIR="${VALETD_DIR%/*}"; fi
   VALETD_DIR="${VALETD_DIR%/*}" # strip directory
 
-  if [[ -e "${VALETD_DIR}/main" ]]; then
-    # shellcheck source=../main
-    source "${VALETD_DIR}/main"
+  if [[ -e "${VALETD_DIR}/core" ]]; then
+    # shellcheck source=../core
+    source "${VALETD_DIR}/core"
   else
     set -Eeu -o pipefail
 
@@ -89,16 +92,13 @@ fi
 # >>> command: self update
 #===============================================================
 
-function about_selfUpdate() {
-  echo "
+: "---
 command: self update
-fileToSource: ${BASH_SOURCE[0]}
+function: selfUpdate
 shortDescription: Update valet using the latest release on GitHub.
 description: |-
   Update valet using the latest release on GitHub.
-"
-}
-
+---"
 function selfUpdate() {
   # download the latest version of valet
 
@@ -204,11 +204,18 @@ function selfUpdate() {
     cp -R "${VALET_HOME}/examples.d" "${userDirectory}"
   fi
 
+  # source valet core and self-build
+  if [ -z "${_CORE_INCLUDED:-}" ]; then
+    # shellcheck source=../core
+    source "${VALET_HOME}/valet.d/core"
+  fi
+  # shellcheck source=self-build
+  source "${VALET_HOME}/valet.d/commands.d/self-build"
+
   # silently build the commands
-  sourceForFunction "selfBuild"
-  setLogLevelInt "error"
+  setLogLevel "error"
   selfBuild
-  setLogLevelInt "info"
+  setLogLevel "info"
 
   # run the post install command
   selfWelcomeUser
@@ -218,19 +225,16 @@ function selfUpdate() {
 # >>> command: self welcome-user
 #===============================================================
 
-function about_selfWelcomeUser() {
-  echo "
+: "---
 command: self welcome-user
-fileToSource: ${BASH_SOURCE[0]}
+function: selfWelcomeUser
 shortDescription: The command run after the installation of Valet to guide the user.
 description: |-
   The command run after the installation of Valet to guide the user.
 
   Adjust the Valet configuration according to the user environment.
   Let the user know what to do next.
-"
-}
-
+---"
 function selfWelcomeUser() {
   inform "Valet has been successfully installed."
 
@@ -301,6 +305,13 @@ function selfWelcomeUser() {
   fi
 
   succeed "The setup is complete!"
+
+  # TODO: verify that we have all the external tools we need:
+  # awk for the profiler
+  # diff for the self test
+  # stat for the logs
+
+  succeed "You are all set!"
 
   # tell the user about what's next todo
   inform "You can now run ⌜valet --help⌝ to get started."

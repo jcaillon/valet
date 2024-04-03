@@ -14,7 +14,7 @@ It works on **any Linux environment with bash** or on **Git bash for Windows**.
 
 It is written for performance and to minimize the overhead of a script calling your scripts.
 
-It is made for providing an awesome user experience in interactive mode but it is also designed to make your scripts easy to use and debug in CI/CD pipelines; DevOps engineers should love it! 💖
+It is made for providing an awesome user experience in interactive mode, but it is also designed to make your scripts easy to use and debug in CI/CD pipelines; DevOps engineers should love it! 💖
 
 **Table of contents**:
 
@@ -45,7 +45,7 @@ But...
 - You struggle to even remember how they are named and how to invoke them.
 - They are not correctly documented.
 - They all follow a different convention regarding options and arguments.
-- You never implemented tests for your scripts because you don't known how to do that fast.
+- You never implemented tests for your scripts because you don't know how to do that fast.
 
 **→ This is where Valet can help you!**
 
@@ -55,7 +55,7 @@ Valet in a gist:
 
 - In Valet, you can create new **commands** that you can invoke with `valet my-command`.
 - Each command has a definition with properties that help you describe it (a description, a list of arguments and options, and so on...).
-- Each command has a associated bash function that is called when the command is invoked and which contains your logic.
+- Each command has an associated bash function that is called when the command is invoked and which contains your logic.
 - You define commands and their functions in `.sh` files under your Valet user directory and Valet takes care of indexing your commands; which allows you to quickly find them, parse options, arguments, print their help...
 
 Invoking `valet` without arguments lets you interactively search and invoke commands:
@@ -83,7 +83,7 @@ Auto parsing of arguments and options based on your command configuration:
 ![demo-parsing](docs/images/readme/demo-parsing.gif)
 
 > [!NOTE]
-> This showcase is recorded with the [windows terminal][windows-terminal], [debian on WSL][debian-wsl] with zsh & [oh my zsh][oh-my-zsh]. The color scheme for the terminal is [dracula][dracula-theme] and the font is an home made modification of windows Consolas (with ligatures + with nerd font icons).
+> This showcase is recorded with the [windows terminal][windows-terminal], [debian on WSL][debian-wsl] with zsh & [oh my zsh][oh-my-zsh]. The color scheme for the terminal is [dracula][dracula-theme] and the font is a homemade modification of windows Consolas (with ligatures + with nerd font icons).
 
 ## 🎉 Installation
 
@@ -94,7 +94,7 @@ Auto parsing of arguments and options based on your command configuration:
 - [curl][curl] is only needed for the self-update command.
 
 > [!NOTE]
-> The [latest release][latest-release] package already contains [fzf][fzf] & [curl][curl] for your OS, so you don't have to install them. You can always opt-in for the 'no-binaries' package.
+> The [latest release][latest-release] package already contains [fzf][fzf] & [curl][curl] for your OS, so you don't have to install them. You can always opt in for the 'no-binaries' package.
 
 ### Automated installation
 
@@ -105,7 +105,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/vale
 ```
 
 > [!TIP]
-> Please review the [install script][install-script] to learn about the different installer options.
+> Please review the [installation script][install-script] to learn about the different installer options.
 
 ### Manual installation
 
@@ -122,7 +122,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/vale
 1. You need the following tools installed and present in your PATH for valet to work:
    1. [yq][yq] (to be able to build your commands)
    2. [fzf][fzf] (to have the interactive mode/menu)
-2. You can then git clone this project or download the source from the latest release into the directory of your choice.
+2. You can then clone this project or download the source from the latest release into the directory of your choice.
 3. Add this directory to your PATH (or link Valet to `/usr/local/bin`) so you can call `valet` from your terminal.
 4. Call `valet` to get started with the example commands!
 
@@ -137,7 +137,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/vale
 
 Valet is pre-configured with some example commands so you can try it immediately and see how it feels.
 
-However, the main goal is to create your own commands and add them in Valet. Valet takes care of the boiler plate stuff (parsing arguments, proper log functions, help, testing your command...) so you can focus on the feature of your command.
+However, the main goal is to create your own commands and add them in Valet. Valet takes care of the boilerplate stuff (parsing arguments, proper log functions, help, testing your command...) so you can focus on the feature of your command.
 
 To create a new command, follow this [documentation][new-command].
 
@@ -147,7 +147,7 @@ Calling `valet` without any arguments (you can pass options) will open the inter
 
 Type your query (fuzzy matching is active so you can skip some letters), press ⬇️/⬆️ to select the command and hit enter to run it. Press `ALT+H` to show the help text for interactive mode.
 
-Valet will remember your last choices and they will appear at the top of the list the next time the menu shows up. You can set up how many choices to remember with the variable `VALET_REMEMBER_LAST_CHOICES`. Setting `VALET_REMEMBER_LAST_CHOICES=0` will effectively disable this feature and always display items sorted alphabetically.
+Valet will remember your last choices, and they will appear at the top of the list the next time the menu shows up. You can set up how many choices to remember with the variable `VALET_REMEMBER_LAST_CHOICES`. Setting `VALET_REMEMBER_LAST_CHOICES=0` will effectively disable this feature and always display items sorted alphabetically.
 
 ### Interactive mode
 
@@ -168,11 +168,12 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 ## 🔭 Roadmap
 
 - Get rid of yq dependency in self build.
+- Regroup all functions for interactive mode in an interactive script which is only sourced when needed.
 - Add support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Setup github actions to automatically test Valet.
 - Generate an autocompletion script for bash and zsh.
-- Self command to create a new command interactively.
+- Self-command to create a new command interactively.
 - Replace fzf menu with equivalent pure bash menu.
 - Allow fileToSource to have multiple values separated by a comma (so we can load libraries of functions).
 - Add about option to hide the command in the menus.
@@ -180,6 +181,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Implement self release command to tag and push to github.
 - We can have fuzzy matching on options too; just make sure it is not ambiguous.
 - Create a valet-community-commands where everyone can contribute to new default commands for Valet.
+- Optional strict mode (env var) to disable fuzzy matching (to not mistakenly execute a command on ci for instance).
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

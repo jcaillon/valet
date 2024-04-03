@@ -507,7 +507,7 @@ ALT+UP/ALT+DOWN: Previous/next query in the history.
 SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
 ') --preview-window=right,4989 --bind alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|) --layout=reverse --info=right --pointer=◆ --marker=✓ --cycle --tiebreak=begin,index --margin=0 --padding=0 --delimiter=
  --tabstop=3 --header-first --header=Press ALT+H to display the help and keybindings.
-Please select the command to run (filter by typing anything) --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}
+Please select the command to run. --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}
 ▶ fzf input stream was:
 ⌈help                    	Show the help this program or of a specific command
 self build              	Re-build the menu of valet from your commands.
@@ -897,7 +897,7 @@ alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|)
 --tabstop=3
 --header-first
 --header=Press ALT+H to display the help and keybindings.
-Please select the command to run (filter by typing anything)
+Please select the command to run.
 --print-query
 --no-multi
 --preview-label=Command help

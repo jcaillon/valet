@@ -683,3 +683,19 @@ unknown
 
 ```
 
+### Testing captureOutput
+
+Exit code: 0
+
+**Standard** output:
+
+```plaintext
+→ captureOutput echo "Hello world!"
+Hello world!
+
+
+→ captureOutput outputTextToStdErr
+This is an error message
+
+```
+

@@ -43,7 +43,6 @@ description: |-
   ⌜Developer notes:⌝
 
   You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
-sudo: false
 arguments:
 - name: commands?...
   description: |-
@@ -84,10 +83,12 @@ examples:
 #===============================================================
 VALET_HOME="${BASH_SOURCE[0]}"
 if [[ "${VALET_HOME}" != /* ]]; then
-  # resolve relative path (we avoid subshell as much as possible for performance reasons)
-  VALET_HOME="$(realpath -L "${VALET_HOME}")"
+  # resolve relative path
+  if pushd "${VALET_HOME%/*}" &>/dev/null; then VALET_HOME="${PWD}"; popd &>/dev/null;
+  else VALET_HOME="${PWD}"; fi
+else
+  VALET_HOME="${VALET_HOME%/*}" # strip filename
 fi
-VALET_HOME="${VALET_HOME%/*}" # strip filename
 
 #===============================================================
 # >>> Source main functions

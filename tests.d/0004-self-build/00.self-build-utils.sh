@@ -15,42 +15,6 @@ function testExtractCommandYamls() {
   endTest "Testing extractCommandYamls" 0
 }
 
-function testCamelCaseToSnakeCase() {
-
-  echo "→ camelCaseToSnakeCase thisIsATest0"
-  camelCaseToSnakeCase thisIsATest0 && echo "${LAST_RETURNED_VALUE}"
-
-  echo "→ camelCaseToSnakeCase AnotherTest"
-  camelCaseToSnakeCase AnotherTest && echo "${LAST_RETURNED_VALUE}"
-
-  endTest "Testing camelCaseToSnakeCase" 0
-
-}
-
-function testKebabCaseToSnakeCase() {
-
-  echo "→ kebabCaseToSnakeCase this-is-a-test0"
-  kebabCaseToSnakeCase this-is-a-test0 && echo "${LAST_RETURNED_VALUE}"
-
-  echo "→ kebabCaseToSnakeCase --another-test"
-  kebabCaseToSnakeCase --another-test && echo "${LAST_RETURNED_VALUE}"
-
-  endTest "Testing kebabCaseToSnakeCase" 0
-
-}
-
-function testKebabCaseToCamelCase() {
-
-  echo "→ kebabCaseToCamelCase this-is-a-test0"
-  kebabCaseToCamelCase this-is-a-test0 && echo "${LAST_RETURNED_VALUE}"
-
-  echo "→ kebabCaseToCamelCase --another-test"
-  kebabCaseToCamelCase --another-test && echo "${LAST_RETURNED_VALUE}"
-
-  endTest "Testing kebabCaseToCamelCase" 0
-
-}
-
 function testExtractCommandDefinitionToVariables() {
   local content="
 command: test
@@ -90,7 +54,6 @@ options:
 "
   echo "${content}"
 
-  setLogLevelInt "debug"
   extractCommandDefinitionToVariables "${content}"
 
   declare -p ${!TEMP_CMD_BUILD_*}
@@ -98,25 +61,32 @@ options:
   endTest "Testing extractCommandDefinitionToVariables" 0
 }
 
-function testTrimAll() {
+function testMakeArraysSameSize {
+  declare -g array1=("a" "b" "c")
+  declare -g array2=("" "2")
+  declare -g array3=("x" "y" "z" "w")
 
-  echo "→ trimAll '  a  super test  '"
-  trimAll '  a  super test  ' && echo "${LAST_RETURNED_VALUE}"
+  makeArraysSameSize array1 array2 array3 array4
 
-  echo "→ trimAll 'this is a command  '"
-  trimAll 'this is a command  ' && echo "${LAST_RETURNED_VALUE}"
+  declare -p array1 array2 array3 array4
 
-  endTest "Testing trimAll" 0
+  endTest "Testing makeArraysSameSize" 0
+}
 
+function testExtractFirstLongNameFromOptionString() {
+
+  local optionString="-x, --profiling"
+
+  echo "→ extractFirstLongNameFromOptionString '${optionString}'"
+  extractFirstLongNameFromOptionString "${optionString}" && echo "${LAST_RETURNED_VALUE}"
+
+  endTest "Testing extractFirstLongNameFromOptionString" 0
 }
 
 function main() {
   testExtractCommandYamls
-  testKebabCaseToSnakeCase
-  testKebabCaseToSnakeCase
-  testKebabCaseToCamelCase
-  testTrimAll
-
   testExtractCommandDefinitionToVariables
+  testMakeArraysSameSize
+  testExtractFirstLongNameFromOptionString
 }
 main

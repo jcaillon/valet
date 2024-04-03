@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
 # author: github.com/jcaillon
-# description: Utility functions for the self-build script
+# description: Utility functions for the self-build script.
 
 # This function extracts each content between the valet front matter tags.
 #
@@ -44,96 +44,6 @@ function extractCommandYamls() {
   LAST_RETURNED_VALUE_ARRAY=("${contentArray[@]}")
 }
 
-# This function convert a camelCase string to a SNAKE_CASE string.
-# It uses pure bash.
-# Removes all leading underscores.
-#
-# $1: The camelCase string to convert.
-#
-# Returns:
-#   LAST_RETURNED_VALUE: The SNAKE_CASE string.
-#
-# Usage:
-#   camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
-function camelCaseToSnakeCase() {
-  local camelCase="$1"
-  local snakeCase
-  local -i charIndex strLength=${#camelCase}
-  local char
-  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
-    char="${camelCase:charIndex:1}"
-    if [[ "${char}" =~ ^[[:upper:]]$ ]]; then
-      snakeCase+="_${char^}"
-    else
-      snakeCase+="${char^}"
-    fi
-  done
-  while [[ "${snakeCase}" == _* ]]; do
-    snakeCase="${snakeCase:1}"
-  done
-  LAST_RETURNED_VALUE="${snakeCase}"
-}
-
-# This function convert a kebab-case string to a SNAKE_CASE string.
-# It uses pure bash.
-# Removes all leading dashes.
-#
-# $1: The kebab-case string to convert.
-#
-# Returns:
-#   LAST_RETURNED_VALUE: The SNAKE_CASE string.
-#
-# Usage:
-#   kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
-function kebabCaseToSnakeCase() {
-  local kebabCase="$1"
-  local snakeCase
-  local -i charIndex strLength=${#kebabCase}
-  local char
-  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
-    char="${kebabCase:charIndex:1}"
-    if [[ "${char}" == "-" ]]; then
-      snakeCase+="_"
-    else
-      snakeCase+="${char^}"
-    fi
-  done
-  while [[ "${snakeCase}" == _* ]]; do
-    snakeCase="${snakeCase:1}"
-  done
-  LAST_RETURNED_VALUE="${snakeCase}"
-}
-
-# This function convert a kebab-case string to a camelCase string.
-# It uses pure bash.
-# Removes all leading dashes.
-#
-# $1: The kebab-case string to convert.
-#
-# Returns:
-#   LAST_RETURNED_VALUE: The camelCase string.
-#
-# Usage:
-#   kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${LAST_RETURNED_VALUE}"
-function kebabCaseToCamelCase() {
-  local kebabCase="$1"
-  local camelCase
-  local -i charIndex strLength=${#kebabCase}
-  local char
-  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
-    char="${kebabCase:charIndex:1}"
-    if [[ "${char}" == "-" ]]; then
-      continue
-    fi
-    if [[ "${kebabCase:charIndex-1:1}" == "-" ]]; then
-      camelCase+="${char^}"
-    else
-      camelCase+="${char}"
-    fi
-  done
-  LAST_RETURNED_VALUE="${camelCase,}"
-}
-
 # This function extracts properties from a command definition and stores them in
 # TEMP_CMD_BUILD_* global variables.
 # This is basically a parser for yaml-like content that supports only one level of properties
@@ -145,6 +55,12 @@ function kebabCaseToCamelCase() {
 #   extractCommandDefinitionToVariables "commandDefinition Yaml content"
 function extractCommandDefinitionToVariables() {
   local commandDefinition="$1"
+
+  # make sure to unset all previous TEMP_CMD_BUILD_* variables
+  local var
+  for var in ${!TEMP_CMD_BUILD_*}; do
+    unset "${var}"
+  done
 
   # loop through lines
   local multiLineIndentation=""
@@ -252,10 +168,11 @@ function createGlobalVariable() {
     declare -g "TEMP_CMD_BUILD_${name}"="${value}"
   else
     # array variable
-    if [[ -p "TEMP_CMD_BUILD_${name}" ]]; then
-      currentArrayLength=0
+    local -n array="TEMP_CMD_BUILD_${name}"
+    if [[ -n "${array[0]:-}" ]]; then
+      currentArrayLength=${#array[@]}
     else
-      eval "currentArrayLength=\${#TEMP_CMD_BUILD_${name}[@]}"
+      currentArrayLength=0
     fi
     debug "currentArrayLength: ${currentArrayLength}."
     arrayLength=$((arrayLength - 1))
@@ -267,18 +184,142 @@ function createGlobalVariable() {
   fi
 }
 
-# Trim all whitespaces and truncate spaces.
+# This function makes sure that all the arrays have the same size.
+# It will add empty strings to the arrays that are too short.
 #
-# $1: The string to trim.
-#
-# Returns:
-#   LAST_RETURNED_VALUE: The trimmed string.
+# $1+: The arrays (global variable names) to make the same size.
 #
 # Usage:
-#   trimAll "   example   string    " && local trimmedString="${LAST_RETURNED_VALUE}"
-function trimAll() {
-    set -f
-    set -- $*
-    LAST_RETURNED_VALUE="$*"
-    set +f
+#   makeArraysSameSize "array1" "array2" "array3"
+function makeArraysSameSize() {
+  local array
+  local -i length
+  local -a lengths
+  local -i maxLength=0
+
+  # compute max length among all arrays
+  for array in "$@"; do
+    if [[ ! -v "${array}" ]]; then
+      eval "${array}=()"
+    fi
+    eval "length=\${#${array}[@]}" || length=0
+    lengths+=("${length}")
+    if [[ length -gt maxLength ]]; then
+      maxLength=length
+    fi
+  done
+
+  for length in "${lengths[@]}"; do
+    while [[ length -lt maxLength ]]; do
+      eval "${1}+=(\"\")"
+      length+=1
+    done
+    shift
+  done
+}
+
+# This function extract the first long name of an option from an option string formatted as:
+# --option -o --other-long-name
+#
+# $1: The option string.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The first long name of the option.
+#
+# Usage:
+#   extractFirstLongNameFromOptionString "--option -o" && local firstLongName="${LAST_RETURNED_VALUE}"
+function extractFirstLongNameFromOptionString() {
+  local optionString="${1}"
+  local word
+  # shellcheck disable=SC2034
+  for word in ${optionString}; do
+    if [[ "${word}" == "--"* ]]; then
+      LAST_RETURNED_VALUE="${word}"
+      return 0
+    fi
+  done
+  LAST_RETURNED_VALUE=""
+}
+
+
+# This function writes the command definition variables to a file.
+# It will write a header with the description of each variable.
+# It will write the variables in the same format as the declare -p command.
+#
+# $1: The file to write to.
+#
+# Usage:
+#   writeCommandDefinitionVariablesToFile "myfile"
+function writeCommandDefinitionVariablesToFile() {
+  local outputFile="$1"
+  local content
+
+  {
+    # write the header
+    echo "#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script declares global variables used in valet to manage commands.
+# shellcheck disable=SC2034
+
+_CMD_INCLUDED=1
+
+# /!\ This file is auto-generated by the 'self-build' script. Do not edit it manually
+
+# For the rest of this document:
+# - xxx represents a function name
+# - yyy represents a command name
+
+# ====================
+# Common variables
+# ====================
+# CMD_ALL_FUNCTIONS_ARRAY = array of all the functions callable with a command
+# CMD_ALL_FUNCTIONS = list all the functions callable with a command
+# CMD_ALL_COMMANDS_ARRAY = array of all the commands
+# CMD_ALL_COMMANDS = list all the commands
+# CMD_MAX_SUB_COMMAND_LEVEL = maximum number of sub command levels; e.g. 'command subcommand subsubcommand' has 2 levels
+# CMD_ALL_SUB_MENUS_COMMANDS_ARRAY = array of all the commands that should open a sub menu to show a list of sub commands
+# CMD_MAX_COMMAND_WIDTH = get the maximum width (nb characters) among all commands
+# CMD_FUNCTION_NAME_yyy = the function name for the given yyy command
+# CMD_COMMAND_xxx = the command of the function
+# CMD_FILETOSOURCE_xxx = the file to source for the function
+#
+# CMD_COMMANDS_MENU_BODY = the input used to display the commands menu
+
+# ====================
+# Variables used to show the help of each command
+# ====================
+# CMD_SHORTDESCRIPTION_xxx = the short description of the function
+# CMD_DESCRIPTION_xxx = the description of the function
+# CMD_SUDO_xxx = true if the function requires sudo
+# CMD_EXAMPLES_NAME_xxx = array with each example name
+# CMD_EXAMPLES_DESCRIPTION_xxx = array with each example description
+# CMD_OPTIONS_NAME_xxx = array with each option name
+# CMD_OPTIONS_DESCRIPTION_xxx = array with each option description
+# CMD_ARGUMENTS_NAME_xxx = array with each argument name
+# CMD_ARGUMENTS_DESCRIPTION_xxx = array with each argument description
+#
+# CMD_COMMANDS_NAME_xxx = array with each sub command name
+# CMD_COMMANDS_SHORTDESCRIPTION_xxx = array with each sub commmand short description
+
+# ====================
+# Variables used during the arguments parsing of each command
+# ====================
+# Get the options of a given function xxx.
+# CMD_OPTS_xxx = array with each option separated by a space
+# CMD_OPTS_HAS_VALUE_xxx = array which indicates for each option if it has a value or not
+# CMD_OPTS_NAME_xxx = array with each option names in camel case
+# CMD_OPTS_NAME_SC_xxx = array with each option names in snake case
+# CMD_ARGS_NAME_xxx = array with each argument names in camel case
+# CMD_ARGS_LAST_IS_ARRAY_xxx = true/false to indicate if the last argument of the function is an array (contains ...)
+# CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (contains ?)
+
+"
+    captureOutput declare -p ${!CMD_*}
+    local IFS=$'\n'
+    local line
+    for line in ${LAST_RETURNED_VALUE}; do
+      echo "${line#declare -? }"
+    done
+
+  } >"${outputFile}"
 }

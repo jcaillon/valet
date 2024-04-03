@@ -4,12 +4,14 @@
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet)
-if [ -z "${_MAIN_INCLUDED:-}" ]; then
+if [ -z "${_CORE_INCLUDED:-}" ]; then
   VALETD_DIR="${BASH_SOURCE[0]}"
-  VALETD_DIR="${VALETD_DIR%/*}" # strip file name
-  VALETD_DIR="${VALETD_DIR%/*}" # strip directory
-  # shellcheck source=../main
-  source "${VALETD_DIR}/main"
+  if [[ "${VALETD_DIR}" != /* ]]; then
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null;
+    else VALETD_DIR="${PWD}"; fi
+  else VALETD_DIR="${VALETD_DIR%/*}"; fi
+  # shellcheck source=../core
+  source "${VALETD_DIR%/*}/core"
 fi
 # --- END OF COMMAND COMMON PART
 
@@ -17,44 +19,41 @@ fi
 #===============================================================
 # >>> command: self test
 #===============================================================
-function about_selfTest() {
-  echo "
+: "---
 command: self test
-fileToSource: ${BASH_SOURCE[0]}
+function: selfTest
 shortDescription: Test your valet custom commands.
 description: |-
   Test your valet custom commands using approval tests approach.
 options:
-  - name: -d, --user-directory <path>
-    description: |-
-      The path to your valet directory.
+- name: -d, --user-directory <path>
+  description: |-
+    The path to your valet directory.
 
-      Each sub directory named ⌜.tests.d⌝ will be considered as a test directory containing a test.sh file.
-  - name: -a, --auto-approve
-    description: |-
-      The received test result files will automatically be approved.
-  - name: -c, --with-core
-    description: |-
-      Also test the valet core functions.
+    Each sub directory named ⌜.tests.d⌝ will be considered as a test directory containing a test.sh file.
+- name: -a, --auto-approve
+  description: |-
+    The received test result files will automatically be approved.
+- name: -c, --with-core
+  description: |-
+    Also test the valet core functions.
 
-      This is only if you modified valet core functions themselves.
-  - name: -i, --include <pattern>
-    description: |-
-      A regex pattern to include only the test suites that match the pattern.
+    This is only if you modified valet core functions themselves.
+- name: -i, --include <pattern>
+  description: |-
+    A regex pattern to include only the test suites that match the pattern.
 
-      The name of the test suite is given by the name of the directory containing the .sh test files.
+    The name of the test suite is given by the name of the directory containing the .sh test files.
 
-      Example: --include '(1|commands)'
-  - name: -e, --exclude <pattern>
-    description: |-
-      A regex pattern to exclude all the test suites that match the pattern.
+    Example: --include '(1|commands)'
+- name: -e, --exclude <pattern>
+  description: |-
+    A regex pattern to exclude all the test suites that match the pattern.
 
-      The name of the test suite is given by the name of the directory containing the .sh test files.
+    The name of the test suite is given by the name of the directory containing the .sh test files.
 
-      Example: --exclude '(1|commands)'
-"
-}
-
+    Example: --exclude '(1|commands)'
+---"
 function selfTest() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   checkParseResults "${help:-}" "${parsingErrors:-}"
@@ -101,69 +100,66 @@ function selfTest() {
 # >>> command: self test-core
 #===============================================================
 
-function about_selfTestCore() {
-  echo "
+: "---
 command: self test-core
-fileToSource: ${BASH_SOURCE[0]}
+function: selfTestCore
 shortDescription: Test valet core features.
 description: |-
   Test valet core features using approval tests approach.
 options:
-  - name: -a, --auto-approve
-    description: |-
-      The received test result files will automatically be approved.
-  - name: -i, --include <pattern>
-    description: |-
-      A regex pattern to include only the test suites that match the pattern.
+- name: -a, --auto-approve
+  description: |-
+    The received test result files will automatically be approved.
+- name: -i, --include <pattern>
+  description: |-
+    A regex pattern to include only the test suites that match the pattern.
 
-      The name of the test suite is given by the name of the directory containing the .sh test files.
+    The name of the test suite is given by the name of the directory containing the .sh test files.
 
-      Example: --include '(1|commands)'
-  - name: -e, --exclude <pattern>
-    description: |-
-      A regex pattern to exclude all the test suites that match the pattern.
+    Example: --include '(1|commands)'
+- name: -e, --exclude <pattern>
+  description: |-
+    A regex pattern to exclude all the test suites that match the pattern.
 
-      The name of the test suite is given by the name of the directory containing the .sh test files.
+    The name of the test suite is given by the name of the directory containing the .sh test files.
 
-      Example: --exclude '(1|commands)'
-  - name: --error
-    description: |-
-      Test the error handling.
-    noEnvironmentVariable: true
-  - name: --fail
-    description: |-
-      Test the fail.
-    noEnvironmentVariable: true
-  - name: --exit
-    description: |-
-      Test the exit code.
-    noEnvironmentVariable: true
-  - name: --unknown-command
-    description: |-
-      Test with an unknown command.
-    noEnvironmentVariable: true
-  - name: --create-temp-files
-    description: |-
-      Test to create temp file and directory.
-    noEnvironmentVariable: true
-  - name: --create-temp-files
-    description: |-
-      Test to create temp file and directory.
-    noEnvironmentVariable: true
-  - name: --logging-level
-    description: |-
-      Test to output all log level messages.
-    noEnvironmentVariable: true
-  - name: --wait-indefinitely
-    description: |-
-      Test to wait indefinitely.
-    noEnvironmentVariable: true
-  - name: --show-help
-    description: |-
-      Test to show the help of the function.
-"
-}
-
+    Example: --exclude '(1|commands)'
+- name: --error
+  description: |-
+    Test the error handling.
+  noEnvironmentVariable: true
+- name: --fail
+  description: |-
+    Test the fail.
+  noEnvironmentVariable: true
+- name: --exit
+  description: |-
+    Test the exit code.
+  noEnvironmentVariable: true
+- name: --unknown-command
+  description: |-
+    Test with an unknown command.
+  noEnvironmentVariable: true
+- name: --create-temp-files
+  description: |-
+    Test to create temp file and directory.
+  noEnvironmentVariable: true
+- name: --create-temp-files
+  description: |-
+    Test to create temp file and directory.
+  noEnvironmentVariable: true
+- name: --logging-level
+  description: |-
+    Test to output all log level messages.
+  noEnvironmentVariable: true
+- name: --wait-indefinitely
+  description: |-
+    Test to wait indefinitely.
+  noEnvironmentVariable: true
+- name: --show-help
+  description: |-
+    Test to show the help of the function.
+---"
 function selfTestCore() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   checkParseResults "${help:-}" "${parsingErrors:-}"
@@ -200,7 +196,7 @@ function selfTestCore() {
     inform "Created temp directory: ${tmp3}."
     inform "Created temp directory: ${tmp4}."
     # activating debug log to see the cleanup
-    setLogLevelInt "debug"
+    setLogLevel "debug"
   elif [ -n "${loggingLevel:-}" ]; then
     debug "This is a debug message."
     inform "This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out."

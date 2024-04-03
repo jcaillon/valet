@@ -10,49 +10,12 @@ fi
 
 
 #===============================================================
-# >>> command: showcase
-#===============================================================
-
-# TODO: autogenerate this kind of functions for each sub command root
-
-# Note that you do not need this menu if you command function only has a single command level.
-# E.g.  "command: showcase command1" is a 2 level command.
-# and   "command: command1" is a single level command.
-
-function about_showcaseMenu() {
-  echo "
-command: showcase
-fileToSource: ${BASH_SOURCE[0]}
-shortDescription: Show the showcase sub menu.
-description: |-
-  Can be used to show the showcase sub menu in interactive mode.
-arguments:
-  - name: commands?...
-    description: |-
-      The command to execute.
-
-      See the commands section for more information.
-examples:
-  - name: showcase command1
-    description: |-
-      Run the ⌜command1⌝ showcase command.
-"
-}
-
-function showcaseMenu() {
-  showSubMenu "$@"
-}
-
-
-#===============================================================
 # >>> command: showcase command1
 #===============================================================
 
-# shellcheck disable=SC2317
-function about_showcaseCommand1() {
-  echo "
+: "---
 command: showcase command1
-fileToSource: ${BASH_SOURCE[0]}
+function: showcaseCommand1
 sudo: true
 shortDescription: A showcase command that uses arguments and options.
 description: |-
@@ -62,26 +25,25 @@ description: |-
 
   You can ⌜highlight⌝ some text as well.
 arguments:
-  - name: firstArg
-    description: |-
-      First argument.
-  - name: more...
-    description: |-
-      Will be an an array of strings.
+- name: firstArg
+  description: |-
+    First argument.
+- name: more...
+  description: |-
+    Will be an an array of strings.
 options:
-  - name: -o, --option1
-    description: |-
-      First option.
-  - name: -o2, -2, --this-is-option2 <level>
-    description: |-
-      An option with a value.
+- name: -o, --option1
+  description: |-
+    First option.
+  noEnvironmentVariable: true
+- name: -o2, -2, --this-is-option2 <level>
+  description: |-
+    An option with a value.
 examples:
-  - name: showcase command1 -o -2 value1 arg1 more1 more2
-    description: |-
-      Call command1 with option1, option2 and some arguments.
-"
-}
-
+- name: showcase command1 -o -2 value1 arg1 more1 more2
+  description: |-
+    Call command1 with option1, option2 and some arguments.
+---"
 function showcaseCommand1() {
   local -a more
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
@@ -98,17 +60,13 @@ function showcaseCommand1() {
 # >>> command: showcase hello-world
 #===============================================================
 
-# shellcheck disable=SC2317
-function about_helloWorld() {
-  echo "
+: "---
 command: showcase hello-world
-fileToSource: ${BASH_SOURCE[0]}
+function: helloWorld
 shortDescription: An hello world command
 description: |-
   An hello world command.
-"
-}
-
+---"
 function helloWorld() {
   echo "Hello world!"
 }
@@ -119,20 +77,16 @@ function helloWorld() {
 #===============================================================
 
 
-# shellcheck disable=SC2317
-function about_showCaseSudo() {
-  echo "
+: "---
 command: showcase sudo-command
-fileToSource: ${BASH_SOURCE[0]}
+function: showCaseSudo
 sudo: true
 shortDescription: A command that requires sudo
 description: |-
   Before starting this command, valet will check if sudo is available.
 
   If so, it will require the user to enter the sudo password and use sudo inside the command
-"
-}
-
+---"
 function showCaseSudo() {
   $SUDO whoami
 }

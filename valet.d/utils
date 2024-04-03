@@ -1,0 +1,280 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# This function allows to bump a semantic version formatted like:
+# major.minor.patch-prerelease+build
+# $1: the version to bump
+# $2: the level to bump (major, minor, patch)
+# $3: clear the prerelease and build (optional, defaults to true)
+#
+# Usage:
+#   bumpSemanticVersion "1.2.3-prerelease+build" "major" && local newVersion="${LAST_RETURNED_VALUE}"
+function bumpSemanticVersion() {
+  local version level clearPreRelease
+  version="${1}"
+  bumpLevel="${2}"
+  clearPreRelease="${3:-true}"
+
+  local prerelease build modifiedVersion
+  modifiedVersion="${version}-+"
+  prerelease="${modifiedVersion#*-}"
+  prerelease="${prerelease%%+*}"
+  [[ -n "${prerelease}" ]] && prerelease="-${prerelease%-}"
+  build="${modifiedVersion#*+}"
+  if [[ -n "${build}" ]]; then
+    build="+${build%-+}"
+  fi
+
+  # bump the version
+  local -i level semVerNumber semVerIndex
+  level=3
+  [[ "${bumpLevel:-}" == "major" ]] && level=1
+  [[ "${bumpLevel:-}" == "minor" ]] && level=2
+  local newVersion semVerString
+  for semVerIndex in {1..3}; do
+    cutF "${version}" "${semVerIndex}" "." && semVerString="${LAST_RETURNED_VALUE%-*}"
+    semVerNumber="${semVerString%+}"
+    [[ semVerIndex -eq level ]] && semVerNumber=$((semVerNumber + 1))
+    [[ semVerIndex -gt level ]] && semVerNumber=0
+    newVersion+="${semVerNumber}."
+  done
+  newVersion="${newVersion%.}"
+
+  if [[ "${clearPreRelease}" != "true" ]]; then
+    newVersion="${newVersion%.}${prerelease}${build}"
+  fi
+
+  LAST_RETURNED_VALUE="${newVersion}"
+}
+
+# This function convert a camelCase string to a SNAKE_CASE string.
+# It uses pure bash.
+# Removes all leading underscores.
+#
+# $1: The camelCase string to convert.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The SNAKE_CASE string.
+#
+# Usage:
+#   camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
+function camelCaseToSnakeCase() {
+  local camelCase="$1"
+  local snakeCase=""
+  local -i charIndex strLength=${#camelCase}
+  local char
+  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
+    char="${camelCase:charIndex:1}"
+    if [[ "${char}" =~ ^[[:upper:]]$ ]]; then
+      snakeCase+="_${char^}"
+    else
+      snakeCase+="${char^}"
+    fi
+  done
+  while [[ "${snakeCase}" == _* ]]; do
+    snakeCase="${snakeCase:1}"
+  done
+  LAST_RETURNED_VALUE="${snakeCase}"
+}
+
+# This function convert a kebab-case string to a SNAKE_CASE string.
+# It uses pure bash.
+# Removes all leading dashes.
+#
+# $1: The kebab-case string to convert.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The SNAKE_CASE string.
+#
+# Usage:
+#   kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
+function kebabCaseToSnakeCase() {
+  local kebabCase="$1"
+  local snakeCase=""
+  local -i charIndex strLength=${#kebabCase}
+  local char
+  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
+    char="${kebabCase:charIndex:1}"
+    if [[ "${char}" == "-" ]]; then
+      snakeCase+="_"
+    else
+      snakeCase+="${char^}"
+    fi
+  done
+  while [[ "${snakeCase}" == _* ]]; do
+    snakeCase="${snakeCase:1}"
+  done
+  LAST_RETURNED_VALUE="${snakeCase}"
+}
+
+# This function convert a kebab-case string to a camelCase string.
+# It uses pure bash.
+# Removes all leading dashes.
+#
+# $1: The kebab-case string to convert.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The camelCase string.
+#
+# Usage:
+#   kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${LAST_RETURNED_VALUE}"
+function kebabCaseToCamelCase() {
+  local kebabCase="$1"
+  local camelCase=""
+  local -i charIndex strLength=${#kebabCase}
+  local char
+  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
+    char="${kebabCase:charIndex:1}"
+    if [[ "${char}" == "-" ]]; then
+      continue
+    fi
+    if [[ "${kebabCase:charIndex-1:1}" == "-" ]]; then
+      camelCase+="${char^}"
+    else
+      camelCase+="${char}"
+    fi
+  done
+  LAST_RETURNED_VALUE="${camelCase,}"
+}
+
+# Trim all whitespaces and truncate spaces.
+#
+# $1: The string to trim.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The trimmed string.
+#
+# Usage:
+#   trimAll "   example   string    " && local trimmedString="${LAST_RETURNED_VALUE}"
+function trimAll() {
+    set -f
+    set -- $*
+    LAST_RETURNED_VALUE="$*"
+    set +f
+}
+
+# This function returns the absolute path of a file.
+# The file must exists for this function to work.
+#
+# $1: The file to get the absolute path.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The absolute path of the file.
+#
+# Usage:
+#   toAbsolutePath "myFile" && local myFileAbsolutePath="${LAST_RETURNED_VALUE}"
+function toAbsolutePath() {
+  local file="${1%/}"
+
+  if [[ "${file}" == "/"* ]]; then
+    LAST_RETURNED_VALUE="${file}"
+    return 0
+  fi
+
+  LAST_RETURNED_VALUE="${PWD}/${file##*/}"
+  if [[ -f "${LAST_RETURNED_VALUE}" ]]; then
+    return 0
+  fi
+
+  if pushd "${file%/*}" &>/dev/null; then
+    LAST_RETURNED_VALUE="${PWD}/${file##*/}"
+    popd &>/dev/null
+    return 0
+  fi
+
+  LAST_RETURNED_VALUE="${file}"
+}
+
+# Get the list of all the environment variables.
+# In pure bash, no need for env or printenv.
+#
+# Returns:
+#   LAST_RETURNED_ARRAY_VALUE: An array with the list of all the environment variables.
+#
+# Usage:
+#   getEnvVars
+#   for var in "${LAST_RETURNED_ARRAY_VALUE[@]}"; do
+#       printf '%s=%s\n' "$var" "${!var}"
+#   done
+function getEnvVars() {
+  mapfile -t LAST_RETURNED_ARRAY_VALUE < <(compgen -v)
+}
+
+# Sorts an array using the > bash operator (lexicographic order).
+# It uses pure bash.
+#
+# $1: The global variable name of array to sort.
+#
+# Usage:
+#   declare -g myArray=( "z" "a" "b" )
+#   sortArray myArray
+#   echo "${myArray[@]}"
+function sortArray() {
+  local -n array=$1
+  local -i i j
+  local temp
+  for ((i = 0; i < ${#array[@]}; i++)); do
+    for ((j = i + 1; j < ${#array[@]}; j++)); do
+      if [[ "${array[i]}" > "${array[j]}" ]]; then
+        temp="${array[i]}"
+        array[i]="${array[j]}"
+        array[j]="${temp}"
+      fi
+    done
+  done
+}
+
+# Add a value to an array if it is not already present.
+# It uses pure bash.
+#
+# $1: The global variable name of the array.
+# $2: The value to add.
+#
+# Usage:
+#   declare -g myArray=( "a" "b" )
+#   appendToArrayIfNotPresent myArray "c"
+#   echo "${myArray[@]}"
+function appendToArrayIfNotPresent() {
+  local -n array="${1}"
+  local value="${2}"
+
+  # add value to array if not present, check in a loop
+  local -i present=0
+  local item
+  for item in "${array[@]}"; do
+    if [[ "${item}" == "${value}" ]]; then
+      present=1
+      break
+    fi
+  done
+  if [[ present -eq 0 ]]; then
+    array+=("${value}")
+  fi
+}
+
+# Check if a value is in an array.
+# It uses pure bash.
+#
+# $1: The global variable name of the array.
+# $2: The value to check.
+#
+# Returns:
+#   0 if the value is in the array, 1 otherwise.
+#
+# Usage:
+#   declare -g myArray=( "a" "b" )
+#   isInArray myArray "b" && echo "b is in the array"
+function isInArray() {
+  local -n array="${1}"
+  local value="${2}"
+
+  local item
+  for item in "${array[@]}"; do
+    if [[ "${item}" == "${value}" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}

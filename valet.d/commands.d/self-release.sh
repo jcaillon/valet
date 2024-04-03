@@ -4,25 +4,26 @@
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet)
-if [ -z "${_MAIN_INCLUDED:-}" ]; then
+if [ -z "${_CORE_INCLUDED:-}" ]; then
   VALETD_DIR="${BASH_SOURCE[0]}"
-  VALETD_DIR="${VALETD_DIR%/*}" # strip file name
-  VALETD_DIR="${VALETD_DIR%/*}" # strip directory
-  # shellcheck source=../main
-  source "${VALETD_DIR}/main"
+  if [[ "${VALETD_DIR}" != /* ]]; then
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null;
+    else VALETD_DIR="${PWD}"; fi
+  else VALETD_DIR="${VALETD_DIR%/*}"; fi
+  # shellcheck source=../core
+  source "${VALETD_DIR%/*}/core"
 fi
 # --- END OF COMMAND COMMON PART
 
-# shellcheck source=utils
-source "${VALET_HOME}/valet.d/commands.d/utils"
+# shellcheck source=../utils
+source "${VALET_HOME}/valet.d/utils"
 
 #===============================================================
 # >>> self release valet
 #===============================================================
-function about_selfRelease() {
-  echo "
+: "---
 command: self release
-fileToSource: ${BASH_SOURCE[0]}
+function: selfRelease
 shortDescription: Release a new version of valet.
 description: |-
   Release a new version of valet.
@@ -46,9 +47,7 @@ options:
   - name: --upload-artifacts-only
     description: |-
       Do no create the release, just upload the artifacts to the latest release.
-"
-}
-
+---"
 function selfRelease() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   checkParseResults "${help:-}" "${parsingErrors:-}"
@@ -142,7 +141,6 @@ function createRelease() {
   lastTag="${LAST_RETURNED_VALUE}"
   lastTag="${lastTag%%$'\n'}"
   lastTag="${lastTag##*$'\n'}"
-  echo "⌜${lastTag}⌝"
   inform "The last tag is: ${lastTag}."
 
   # prepare the tag message

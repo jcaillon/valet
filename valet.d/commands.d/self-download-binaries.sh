@@ -4,53 +4,51 @@
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet)
-if [ -z "${_MAIN_INCLUDED:-}" ]; then
+if [ -z "${_CORE_INCLUDED:-}" ]; then
   VALETD_DIR="${BASH_SOURCE[0]}"
-  VALETD_DIR="${VALETD_DIR%/*}" # strip file name
-  VALETD_DIR="${VALETD_DIR%/*}" # strip directory
-  # shellcheck source=../main
-  source "${VALETD_DIR}/main"
+  if [[ "${VALETD_DIR}" != /* ]]; then
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null;
+    else VALETD_DIR="${PWD}"; fi
+  else VALETD_DIR="${VALETD_DIR%/*}"; fi
+  # shellcheck source=../core
+  source "${VALETD_DIR%/*}/core"
 fi
 # --- END OF COMMAND COMMON PART
 
-# shellcheck source=utils
-source "${VALET_HOME}/valet.d/commands.d/utils"
+# shellcheck source=../utils
+source "${VALET_HOME}/valet.d/utils"
 
 #===============================================================
 # >>> command: self download-binaries
 #===============================================================
-function about_selfDownloadBinaries() {
-  echo "
+: "---
 command: self download-binaries
-fileToSource: ${BASH_SOURCE[0]}
+function: selfDownloadBinaries
 shortDescription: Download the required binaries for valet.
 description: |-
   Download the required binaries for valet: fzf, curl, yq.
 
   These binaries will be stored in the bin directory of valet and used in priority over the binaries in your PATH.
 options:
-  - name: -os, --force-os <name>
-    description: |-
-      By default, this command will download the binaries for your current OS.
+- name: -os, --force-os <name>
+  description: |-
+    By default, this command will download the binaries for your current OS.
 
-      You can force the download for a specific OS by providing the name of the OS.
+    You can force the download for a specific OS by providing the name of the OS.
 
-      Possible values are: linux, windows, macos.
-  - name: --destination <path>
-    description: |-
-      By default, this command will download the binaries in valet bin/ directory.
+    Possible values are: linux, windows, macos.
+- name: --destination <path>
+  description: |-
+    By default, this command will download the binaries in valet bin/ directory.
 
-      You can force the download in a specific directory by providing the path.
-  - name: -f, --force
-    description: |-
-      By default, this command will download the binaries only if the final files do not exist in the destination directory.
+    You can force the download in a specific directory by providing the path.
+- name: -f, --force
+  description: |-
+    By default, this command will download the binaries only if the final files do not exist in the destination directory.
 
-      You can force the download in all case with this option.
-"
-}
-
+    You can force the download in all case with this option.
+---"
 #TODO: let the user commands have a hook to download their own dependencies when this command is run
-
 function selfDownloadBinaries() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   checkParseResults "${help:-}" "${parsingErrors:-}"
