@@ -4,7 +4,7 @@
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet)
-if [ -z "${_CORE_INCLUDED:-}" ]; then
+if [[ -z "${_CORE_INCLUDED:-}" ]]; then
   VALETD_DIR="${BASH_SOURCE[0]}"
   if [[ "${VALETD_DIR}" != /* ]]; then
     if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null;

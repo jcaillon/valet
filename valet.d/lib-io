@@ -287,13 +287,13 @@ function readFile() {
   local filePath="${1}"
   local -i maxCharacters="${2:-0}"
 
-  if [ ! -s "${filePath}" ]; then
+  if [[ ! -s "${filePath}" ]]; then
     LAST_RETURNED_VALUE=""
     return 0
   fi
 
   local IFS=
-  if [ "${maxCharacters}" -gt 0 ]; then
+  if [[ "${maxCharacters}" -gt 0 ]]; then
     read -rd '' -n "${maxCharacters}" LAST_RETURNED_VALUE < "${filePath}" || true
   else
     read -rd '' LAST_RETURNED_VALUE < "${filePath}" || true

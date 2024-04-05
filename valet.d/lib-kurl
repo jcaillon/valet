@@ -93,7 +93,7 @@ function kurl() {
   httpStatusCode="${LAST_RETURNED_VALUE2}"
 
   local stdout
-  if [ -s "${_TEMPORARY_WORK_FILE}" ]; then
+  if [[ -s "${_TEMPORARY_WORK_FILE}" ]]; then
     IFS= read -rd '' stdout < "${_TEMPORARY_WORK_FILE}" || true
   fi
 

@@ -49,7 +49,7 @@ function showFzf() {
   local historyFile
   if [[ -n "${historyId}" ]]; then
     historyFile="${stateDirectory}/fzf-history-${historyId}"
-    if [ ! -e "${historyFile}" ]; then
+    if [[ ! -e "${historyFile}" ]]; then
       :>"${historyFile}"
     fi
     defaultOptions+=(
@@ -189,7 +189,7 @@ ${COLOR_ERROR}SHIFT+UP${COLOR_DEFAULT}/${COLOR_ERROR}SHIFT+DOWN${COLOR_DEFAULT}:
   "${fzfExecutable}" "${defaultOptions[@]}" "${modeOptions[@]}" "$@" <<<"${body}" 1>"${_TEMPORARY_STDOUT_FILE}" || true
 
   local choice
-  if [ -s "${_TEMPORARY_STDOUT_FILE}" ]; then
+  if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
     IFS= read -rd '' choice <"${_TEMPORARY_STDOUT_FILE}" || true
   else
     choice=""
@@ -198,7 +198,7 @@ ${COLOR_ERROR}SHIFT+UP${COLOR_DEFAULT}/${COLOR_ERROR}SHIFT+DOWN${COLOR_DEFAULT}:
   # if any, append the query to the history file
   if [[ -n "${historyId}" ]]; then
     local query=${choice%%$'\n'*}
-    if [ -n "${query}" ]; then
+    if [[ -n "${query}" ]]; then
       echo "${query}" >>"${historyFile}"
     fi
   fi

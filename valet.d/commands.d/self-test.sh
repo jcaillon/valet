@@ -4,7 +4,7 @@
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet)
-if [ -z "${_CORE_INCLUDED:-}" ]; then
+if [[ -z "${_CORE_INCLUDED:-}" ]]; then
   VALETD_DIR="${BASH_SOURCE[0]}"
   if [[ "${VALETD_DIR}" != /* ]]; then
     if pushd "${VALETD_DIR%/*}" &>/dev/null; then
@@ -74,7 +74,7 @@ function selfTest() {
   for testsDirectory in "${userDirectory}"/**; do
     debug "Tests directory: ⌜${testsDirectory}⌝."
     # if the directory is not a directory, skip
-    if [ ! -d "${testsDirectory}" ]; then continue; fi
+    if [[ ! -d "${testsDirectory}" ]]; then continue; fi
     # if the directory is named .tests.d, then it is a test directory
     if [[ "${testsDirectory}" == *"/tests.d" ]]; then
       inform "Running all test suites in directory ⌜${testsDirectory}⌝."
@@ -86,7 +86,7 @@ function selfTest() {
   shopt -u dotglob
   shopt -u globstar
 
-  if [ -n "${withCore:-}" ]; then
+  if [[ -n "${withCore:-}" ]]; then
     if [[ ! -d "${VALET_HOME}/tests.d" ]]; then
       warn "The valet core tests directory ⌜${VALET_HOME}/tests.d⌝ does not exist, skipping core tests."
     else
@@ -165,22 +165,22 @@ function selfTestCore() {
 
   setGlobalOptions
 
-  if [ -n "${error:-}" ]; then
+  if [[ -n "${error:-}" ]]; then
     warn "This is for testing valet core functions, the next statement will return 1 and create an error."
     returnOne
-  elif [ -n "${fail:-}" ]; then
+  elif [[ -n "${fail:-}" ]]; then
     fail "This is for testing valet core functions, failing now."
-  elif [ -n "${exit:-}" ]; then
+  elif [[ -n "${exit:-}" ]]; then
     # shellcheck disable=SC2317
     function onExit() {
       warn "This is a custom on exit function."
     }
     warn "This is for testing valet core functions, exiting with code 5."
     exit 5
-  elif [ -n "${unknownCommand:-}" ]; then
+  elif [[ -n "${unknownCommand:-}" ]]; then
     warn "This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle."
     thisIsAnUnknownCommandForTesting
-  elif [ -n "${createTempFiles:-}" ]; then
+  elif [[ -n "${createTempFiles:-}" ]]; then
     # shellcheck disable=SC2317
     function cleanUp() {
       warn "This is a custom clean up function."
@@ -196,7 +196,7 @@ function selfTestCore() {
     inform "Created temp directory: ${tmp4}."
     # activating debug log to see the cleanup
     setLogLevel "debug"
-  elif [ -n "${loggingLevel:-}" ]; then
+  elif [[ -n "${loggingLevel:-}" ]]; then
     debug "This is a debug message."
     inform "This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out."
     succeed "This is a success message."
@@ -204,13 +204,13 @@ function selfTestCore() {
     if isDebugEnabled; then
       echo "The debug mode is activated!" 1>&2
     fi
-  elif [ -n "${waitIndefinitely:-}" ]; then
+  elif [[ -n "${waitIndefinitely:-}" ]]; then
     inform "This is for testing valet core functions, waiting indefinitely."
     while true; do
       # sleep for 1s
       read -rt 1 <> <(:) || :
     done
-  elif [ -n "${showHelp:-}" ]; then
+  elif [[ -n "${showHelp:-}" ]]; then
     showHelp
   else
     # default to running tests
@@ -258,7 +258,7 @@ function endTest() {
     printf "%s\n\n" "### ${testTitle:-test}"
 
     # write the test description if any
-    if [ -n "${testDescription}" ]; then
+    if [[ -n "${testDescription}" ]]; then
       printf "%s\n\n" "${testDescription}"
     fi
 
@@ -266,14 +266,14 @@ function endTest() {
     printf "%s\n\n" "Exit code: \`${exitCode}\`"
 
     # write the standard output if any
-    if [ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]; then
+    if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
       printf "%s\n\n%s\n" "**Standard** output:" "\`\`\`plaintext"
       echoFileSubstitutingPath "${_TEST_STANDARD_OUTPUT_FILE}"
       printf "\n%s\n\n" "\`\`\`"
     fi
 
     # write the error output if any
-    if [ -s "${_TEST_STANDARD_ERROR_FILE}" ]; then
+    if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
       printf "%s\n\n%s\n" "**Error** output:" "\`\`\`log"
       echoFileSubstitutingPath "${_TEST_STANDARD_ERROR_FILE}"
       printf "\n%s\n\n" "\`\`\`"
@@ -333,7 +333,7 @@ function runTestSuites() {
     testDirectoryName="${testDirectory##*/}"
 
     # skip if not a directory
-    if [ ! -d "${testDirectory}" ]; then continue; fi
+    if [[ ! -d "${testDirectory}" ]]; then continue; fi
 
     # skip if the test directory does not match the include pattern
     if [[ -n "${INCLUDE_PATTERN:-}" && ! ("${testDirectoryName}" =~ ${INCLUDE_PATTERN}) ]]; then
@@ -354,7 +354,7 @@ function runTestSuites() {
     # for each .sh script in the test directory, run the test
     for testScript in "${testDirectory}"/*.sh; do
       # skip if not a file
-      if [ ! -e "${testScript}" ]; then continue; fi
+      if [[ ! -e "${testScript}" ]]; then continue; fi
 
       inform "Running test       ├── ⌜${testScript##*/}⌝."
 
@@ -365,7 +365,7 @@ function runTestSuites() {
     compareWithApproved "${testDirectory}" "${_TEST_REPORT_FILE}" || exitCode=$?
     nbTestSuites+=1
 
-    if [ "${exitCode}" -eq 0 ]; then
+    if [[ "${exitCode}" -eq 0 ]]; then
       succeed "Test suite ${testDirectory##*/} passed."
     else
       warn "Test suite ${testDirectory##*/} failed."
@@ -376,7 +376,7 @@ function runTestSuites() {
   if [[ failedTestSuites -gt 0 ]]; then
     local failMessage
     failMessage="A total of ⌜${failedTestSuites}⌝/⌜${nbTestSuites}⌝ test(s) failed."
-    if [ "${AUTO_APPROVE:-false}" = "true" ]; then
+    if [[ "${AUTO_APPROVE:-false}" = "true" ]]; then
       failMessage+=$'\n'"The received test result files were automatically approved."
     else
       failMessage+=$'\n'"You should review the difference in the logs above or by comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
@@ -437,7 +437,7 @@ function compareWithApproved() {
   approvedFile="${testDirectory}/results.approved.md"
   receivedFile="${testDirectory}/results.received.md"
 
-  if [ ! -f "${approvedFile}" ]; then
+  if [[ ! -f "${approvedFile}" ]]; then
     debug "🧪 ${testName}: no approved file, creating one."
     : >"${approvedFile}"
   fi
@@ -452,7 +452,7 @@ function compareWithApproved() {
   fi
 
   # if the option is activated, we approve the received file
-  if [ "${AUTO_APPROVE:-false}" == "true" ]; then
+  if [[ "${AUTO_APPROVE:-false}" == "true" ]]; then
     inform "🧪 ${testName}: Auto-approving"
     cp -f "${receivedFileToCopy}" "${approvedFile}"
     rm -f "${receivedFile}" 2>/dev/null || true
@@ -491,7 +491,7 @@ function setFdRedirection() {
 
   # sets up a simpler log function for the tests
   # so we can have consistent results independent of the environment
-  if [ -z "${ORIGINAL_LOG_LINE_FUNCTION:-}" ]; then
+  if [[ -z "${ORIGINAL_LOG_LINE_FUNCTION:-}" ]]; then
     ORIGINAL_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
     ORIGINAL_VALET_NO_COLOR="${VALET_NO_COLOR:-}"
     ORIGINAL_LOG_LEVEL="${VALET_LOG_LEVEL:-}"
@@ -508,7 +508,7 @@ function setFdRedirection() {
   export VALET_LOG_COLUMNS=9999
   export _COLUMNS=9999
   export VALET_DO_NOT_USE_LOCAL_BIN="true"
-  if [ -z "${SIMPLIFIED_LOG_LINE_FUNCTION:-}" ]; then
+  if [[ -z "${SIMPLIFIED_LOG_LINE_FUNCTION:-}" ]]; then
     createLogLineFunction
     SIMPLIFIED_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
   fi
@@ -533,14 +533,14 @@ function resetFdRedirection() {
 
 function setGlobalOptions() {
   unset AUTO_APPROVE INCLUDE_PATTERN EXCLUDE_PATTERN
-  if [ -n "${autoApprove:-}" ]; then
+  if [[ -n "${autoApprove:-}" ]]; then
     AUTO_APPROVE="true"
   fi
-  if [ -n "${include:-}" ]; then
+  if [[ -n "${include:-}" ]]; then
     inform "Including only test suites that match the pattern ⌜${include}⌝."
     INCLUDE_PATTERN="${include}"
   fi
-  if [ -n "${exclude:-}" ]; then
+  if [[ -n "${exclude:-}" ]]; then
     inform "Excluding all test suites that match the pattern ⌜${exclude}⌝."
     EXCLUDE_PATTERN="${exclude}"
   fi

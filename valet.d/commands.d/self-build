@@ -9,7 +9,7 @@ set -Eeu -o pipefail
 
 _CMD_INCLUDED=1
 
-if [ -z "${_CORE_INCLUDED:-}" ]; then
+if [[ -z "${_CORE_INCLUDED:-}" ]]; then
   NOT_EXECUTED_FROM_VALET=true
 
   VALETD_DIR="${BASH_SOURCE[0]}"
@@ -105,7 +105,7 @@ function selfBuild() {
     local file
     for file in "${userDirectory}"/**; do
       # if directory, skip
-      if [ -d "${file}" ]; then continue; fi
+      if [[ -d "${file}" ]]; then continue; fi
       debug "Considering file: ⌜${file}⌝."
       # skip all files not ending with .sh
       if [[ "${file}" != *".sh" ]]; then continue; fi
@@ -537,6 +537,6 @@ function verifyCommandDefinition() {
 #===============================================================
 
 # if this script is run directly, execute the function, otherwise valet will do it
-if [ "${NOT_EXECUTED_FROM_VALET:-false}" == "true" ]; then
+if [[ "${NOT_EXECUTED_FROM_VALET:-false}" == "true" ]]; then
   selfBuild "$@"
 fi

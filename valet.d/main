@@ -8,7 +8,7 @@ set -Eeu -o pipefail
 # we check for this variable to know if this script has already been included
 _MAIN_INCLUDED=1
 
-if [ -z "${_CORE_INCLUDED:-}" ]; then
+if [[ -z "${_CORE_INCLUDED:-}" ]]; then
   # shellcheck source=core
   source "${BASH_SOURCE[0]%/*}/core"
 fi
@@ -18,7 +18,7 @@ fi
 #===============================================================
 
 function onErrorInternal() {
-  if [ "${ERROR_DISPLAY:-0}" = "1" ]; then
+  if [[ "${ERROR_DISPLAY:-0}" = "1" ]]; then
     return 0
   fi
   getStack 2 && local stack="${LAST_RETURNED_VALUE}"
@@ -32,7 +32,7 @@ function onExitInternal() {
   local rc=$?
 
   # disable the profiler is still on
-  if [ "${PROFILING:-}" = "1" ]; then disableProfiler; fi
+  if [[ "${PROFILING:-}" = "1" ]]; then disableProfiler; fi
 
   debug "Exiting with code ${rc} after ${SECONDS}s."
   if command -v onExit 1>/dev/null 2>&1; then
@@ -95,10 +95,10 @@ function onCleanUpInternal() {
 
 # Introducing our own function to handle commands not found, so we can display a better message
 function command_not_found_handle() {
-  if [ "${1:-}" = "fzf" ]; then
+  if [[ "${1:-}" = "fzf" ]]; then
     fail "This program requires ⌜https://github.com/junegunn/fzf⌝ to display interactive prompt."$'\n'"Install fzf or pass the correct options and arguments. See --help for more information."
   fi
-  if [ "${1:-}" = "curl" ]; then
+  if [[ "${1:-}" = "curl" ]]; then
     fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
   fi
   fail "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
@@ -247,7 +247,7 @@ function cleanProfilerFile() {
   mv -f "${newProfilerFile}" "${PROFILER_FILE}"
 }
 
-if [ "${VALET_STARTUP_PROFILING:-}" = "true" ]; then
+if [[ "${VALET_STARTUP_PROFILING:-}" = "true" ]]; then
   enableProfiler "${VALET_STARTUP_PROFILING_FILE:-${HOME}/profile_valet.txt}"
 fi
 
@@ -273,7 +273,7 @@ function printHelp() {
   # sudo apt-get install colortest
   # colortest-16b
   local cDefault cTitle cHighlight cOption cArgument cCommand
-  if [ "${noColor}" = "true" ]; then
+  if [[ "${noColor}" = "true" ]]; then
     cDefault=""
     cTitle=""
     cHighlight=""
@@ -326,18 +326,18 @@ function printHelp() {
 
   # usage
   local usage
-  if [ "${functionName}" = "this" ]; then
+  if [[ "${functionName}" = "this" ]]; then
     usage="valet"
   else
     usage="valet ${command}"
   fi
-  if [ -n "${functionOptions:-}" ]; then
+  if [[ -n "${functionOptions:-}" ]]; then
     usage+=" ${cOption}[options]${cDefault}"
   fi
-  if [ -n "${functionCommands:-}" ]; then
+  if [[ -n "${functionCommands:-}" ]]; then
     usage+=" ${cCommand}[command]${cDefault}"
   else
-    if [ -n "${functionArguments:-}" ]; then
+    if [[ -n "${functionArguments:-}" ]]; then
       for argument in "${functionArguments[@]}"; do
         if [[ "${argument}" == *\?* ]]; then
           usage+=" ${cArgument}[${argument//\?/}]${cDefault}"
@@ -352,7 +352,7 @@ function printHelp() {
 
   # options
   local options
-  if [ -n "${functionOptions:-}" ]; then
+  if [[ -n "${functionOptions:-}" ]]; then
     options="${cTitle}OPTIONS${cDefault}"$'\n'$'\n'
     writeAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
     options+="${LAST_RETURNED_VALUE}"$'\n'
@@ -368,7 +368,7 @@ function printHelp() {
 
   # commands
   local commands
-  if [ -n "${functionCommands:-}" ]; then
+  if [[ -n "${functionCommands:-}" ]]; then
     commands="${cTitle}COMMANDS${cDefault}"$'\n'$'\n'
     writeAsTable "${helpWidth}" "${cCommand}" "CMD_COMMANDS" "${functionName}"
     commands+="${LAST_RETURNED_VALUE}"$'\n'
@@ -376,7 +376,7 @@ function printHelp() {
 
   # examples
   local examples
-  if [ -n "${functionExamples:-}" ]; then
+  if [[ -n "${functionExamples:-}" ]]; then
     examples="${cTitle}EXAMPLES${cDefault}"$'\n'$'\n'
     writeAsTable "${helpWidth}" "" "CMD_EXAMPLES" "${functionName}"
     examples+="${LAST_RETURNED_VALUE}"$'\n'
@@ -393,7 +393,7 @@ ${usage}
 ${options:-}${arguments:-}${commands:-}${examples:-}"
 
   # surround "markdown like" _italic_ with italic color
-  if [ "${noColor:-false}" = "false" ]; then
+  if [[ "${noColor:-false}" = "false" ]]; then
     output="${output//⌜/${cHighlight}⌜}"
     output="${output//⌝/⌝${cDefault}}"
   fi
@@ -417,7 +417,7 @@ function writeAsTable() {
   local -n descriptions="${prefix}_DESCRIPTION_${functionName}"
 
   local cDefault output description index
-  if [ -n "${color:-}" ]; then cDefault=$'\033'"[0m"; fi
+  if [[ -n "${color:-}" ]]; then cDefault=$'\033'"[0m"; fi
 
   output=""
   for index in "${!names[@]}"; do
@@ -482,7 +482,7 @@ function showCommandHelp() {
   fuzzyMatchCommandtoFunctionName "${commands[@]}"
   functionName="${LAST_RETURNED_VALUE:-}"
   exactCommand="${LAST_RETURNED_VALUE3:-}"
-  if [ -z "${functionName}" ]; then
+  if [[ -z "${functionName}" ]]; then
     fail "Could not show the help because the command ⌜${commands[*]}⌝ does not exist."
   fi
 
@@ -506,7 +506,7 @@ function parseMainArguments() {
   maxNbCommands=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
 
   # Parsing the options from environment variables
-  if [ "${VALET_PROFILING=:-}" = "true" ]; then
+  if [[ "${VALET_PROFILING=:-}" = "true" ]]; then
     PROFIL_COMMAND=true
   fi
 
@@ -570,7 +570,7 @@ function parseMainArguments() {
   functionName="${LAST_RETURNED_VALUE:-}"
   nbArgs="${LAST_RETURNED_VALUE2:-}"
   exactCommand="${LAST_RETURNED_VALUE3:-}"
-  if [ -z "${functionName}" ]; then
+  if [[ -z "${functionName}" ]]; then
     fail "Could not find a command for ⌜${commands[*]}⌝."
   fi
 
@@ -598,7 +598,7 @@ function runFunction() {
   functionName="${1}"
   shift
 
-  if [ -z "${functionName}" ]; then
+  if [[ -z "${functionName}" ]]; then
     fail "No function name provided."
   fi
 
@@ -607,7 +607,7 @@ function runFunction() {
 
   # check for sudo if the function requires it
   local -n requiresSudo="CMD_SUDO_${functionName}"
-  if [ "${requiresSudo:-}" = "true" ]; then
+  if [[ "${requiresSudo:-}" = "true" ]]; then
     checkSudo
   fi
 
@@ -621,17 +621,17 @@ function runFunction() {
   debug "Running the command ⌜${command}⌝ with the function ⌜${functionName}⌝ and the arguments ⌜$*⌝."
 
   # disable startup profile and enable command profile, if needed
-  if [ "${VALET_STARTUP_PROFILING:-}" = "true" ]; then
+  if [[ "${VALET_STARTUP_PROFILING:-}" = "true" ]]; then
     disableProfiler
   fi
-  if [ "${PROFIL_COMMAND:-}" = "true" ]; then
+  if [[ "${PROFIL_COMMAND:-}" = "true" ]]; then
     enableProfiler "${VALET_COMMAND_PROFILING_FILE:-${HOME}/profile_valet_cmd.txt}"
   fi
 
   # execute the function
   "${functionName}" "$@"
 
-  if [ "${PROFIL_COMMAND:-}" = "true" ]; then
+  if [[ "${PROFIL_COMMAND:-}" = "true" ]]; then
     disableProfiler
   fi
 
@@ -673,12 +673,12 @@ function runMenuWithSubCommands() {
   debug "Parsed arguments:"$'\n'"${parsedArguments}"
   eval "${parsedArguments}"
 
-  if [ -n "${help:-}" ]; then
+  if [[ -n "${help:-}" ]]; then
     printHelp menu "${command}"
     exit 0
   fi
 
-  if [ -n "${parsingErrors:-}" ]; then
+  if [[ -n "${parsingErrors:-}" ]]; then
     fail "${parsingErrors}"$'\n'"Use valet ${command} --help to get help."
   fi
 
@@ -692,7 +692,7 @@ function runMenuWithSubCommands() {
     fi
   done
 
-  if [ -z "${filteredCommandsMenuBody}" ]; then
+  if [[ -z "${filteredCommandsMenuBody}" ]]; then
     fail "No sub commands found for ⌜${command}⌝."
   fi
 
@@ -741,7 +741,7 @@ function sortCommands() {
   commands="${2}"
 
   # if the user does not want to remember the last choices, we return
-  if [ "${VALET_REMEMBER_LAST_CHOICES:-3}" -eq 0 ]; then
+  if [[ "${VALET_REMEMBER_LAST_CHOICES:-3}" -eq 0 ]]; then
     LAST_RETURNED_VALUE="${commands}"
     return 0
   fi
@@ -749,7 +749,7 @@ function sortCommands() {
   local lastChoicesFile
   getLocalStateDirectory
   lastChoicesFile="${LAST_RETURNED_VALUE}/last-choices-${menuId}"
-  if [ ! -e "${lastChoicesFile}" ]; then
+  if [[ ! -e "${lastChoicesFile}" ]]; then
     LAST_RETURNED_VALUE="${commands}"
     return 0
   fi
@@ -773,7 +773,7 @@ function sortCommands() {
       fi
     done
     # if not played, add it to the list
-    if [ "${played}" = "false" ]; then
+    if [[ "${played}" = "false" ]]; then
       unplayedCommands+="${line}"$'\n'
     fi
     commandsArray+=("${line}")
@@ -812,7 +812,7 @@ function addLastChoice() {
   local maxNumberOfLastChoice=${VALET_REMEMBER_LAST_CHOICES:-3}
 
   # if the user does not want to remember the last choices, we return
-  if [ "${maxNumberOfLastChoice}" -eq 0 ]; then
+  if [[ "${maxNumberOfLastChoice}" -eq 0 ]]; then
     return 0
   fi
 
@@ -820,7 +820,7 @@ function addLastChoice() {
   local lastChoicesFile
   getLocalStateDirectory
   lastChoicesFile="${LAST_RETURNED_VALUE}/last-choices-${menuId}"
-  if [ ! -e "${lastChoicesFile}" ]; then
+  if [[ ! -e "${lastChoicesFile}" ]]; then
     :>"${lastChoicesFile}"
   fi
 
@@ -882,7 +882,7 @@ function showInteractiveCommandsMenu() {
 # Usage:
 #  sourceUserCommands
 function sourceUserCommands() {
-  if [ -n "${_CMD_INCLUDED:-}" ]; then
+  if [[ -n "${_CMD_INCLUDED:-}" ]]; then
     return 0
   fi
 
@@ -894,13 +894,13 @@ function sourceUserCommands() {
   commandsFile="${userDirectory}/commands"
 
   # if the commands file does not exist, we use the examples commands or we fail
-  if [ ! -e "${commandsFile}" ]; then
+  if [[ ! -e "${commandsFile}" ]]; then
     local message
     message="The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'
     message+="To get started with valet, you must build your command list using the ⌜valet self build⌝ command."$'\n'
     message+="Please check the help using ⌜valet self build --help⌝ for details."
     commandsFile="${VALET_HOME}/examples.d/commands"
-    if [ -e "${commandsFile}" ]; then
+    if [[ -e "${commandsFile}" ]]; then
       message+=$'\n'"Now using the examples commands from ⌜${commandsFile%/*}⌝."
       warn "${message}"
     else
@@ -943,7 +943,7 @@ function getFunctionNameFromCommand() {
 #  fuzzyMatchCommandtoFunctionName "self" "build" && echo "${LAST_RETURNED_VALUE}"
 function fuzzyMatchCommandtoFunctionName() {
   local level loopI functionName command exactCommand
-  if [ $# -eq 0 ]; then
+  if [[ $# -eq 0 ]]; then
     return 0
   fi
 
@@ -968,7 +968,7 @@ function fuzzyMatchCommandtoFunctionName() {
 
     # case where the command is not exact, we try to fuzzy match it
     fuzzyMatch "${command}" "${CMD_ALL_COMMANDS}" && exactCommand="${LAST_RETURNED_VALUE}"
-    if [ -n "${exactCommand}" ]; then
+    if [[ -n "${exactCommand}" ]]; then
       getFunctionNameFromCommand "${exactCommand}" && functionName="${LAST_RETURNED_VALUE}"
       inform "Fuzzy matching the command ⌜${command}⌝ to ⌜${exactCommand}⌝."
       break
@@ -1000,7 +1000,7 @@ function getMaxPossibleCommandLevel() {
     level=$((level + 1))
   done
   maxLevel=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
-  if [ "${level}" -gt "${maxLevel}" ]; then
+  if [[ "${level}" -gt "${maxLevel}" ]]; then
     level="${maxLevel}"
   fi
 
@@ -1089,16 +1089,16 @@ function parseFunctionArguments() {
 
       if [[ matchedIndex -ne -1 ]]; then
         # it's a match!
-        if [ "${startedArguments}" = "true" ]; then
+        if [[ "${startedArguments}" = "true" ]]; then
           outputErrors+=("Option ⌜${1}⌝ was given after the first argument, it should come before that.")
         else
           optionValue="${optionsHasValue[${matchedIndex}]:-}"
           optionName="${optionsName[${matchedIndex}]}"
           matchedOptionsIndex+=("${matchedIndex}")
 
-          if [ "${optionValue}" = "true" ]; then
+          if [[ "${optionValue}" = "true" ]]; then
             shift
-            if [ $# = 0 ]; then
+            if [[ $# = 0 ]]; then
               outputErrors+=("Missing value for option ⌜${optionName}⌝.")
             else
               outputSetLine+=("${optionName}=\"${1//\"/\\\"}\"")
@@ -1158,12 +1158,12 @@ function parseFunctionArguments() {
     outputString+=" ${option}"
   done
   nbScalarArguments="${totalNbArguments}"
-  if [ "${isLastArgumentAnArray}" = "true" ]; then nbScalarArguments=$((nbScalarArguments - 1)); fi
+  if [[ "${isLastArgumentAnArray}" = "true" ]]; then nbScalarArguments=$((nbScalarArguments - 1)); fi
   for ((argumentIndex = 0; argumentIndex < nbScalarArguments; argumentIndex++)); do
     outputString+=" ${argumentsName[${argumentIndex}]}"
   done
   outputString+=$'\n'
-  if [ "${isLastArgumentAnArray}" = "true" ]; then
+  if [[ "${isLastArgumentAnArray}" = "true" ]]; then
     outputString+="local -a ${argumentsName[${nbScalarArguments}]}"$'\n'
   fi
 
@@ -1172,15 +1172,15 @@ function parseFunctionArguments() {
   for optionIndex in "${!options[@]}"; do
     optionMatched="false"
     for matchedIndex in "${matchedOptionsIndex[@]}"; do
-      if [ "${optionIndex}" = "${matchedIndex}" ]; then
+      if [[ "${optionIndex}" = "${matchedIndex}" ]]; then
         optionMatched="true"
         break
       fi
     done
-    if [ "${optionMatched}" = "false" ]; then
+    if [[ "${optionMatched}" = "false" ]]; then
       optionName="${optionsName[${optionIndex}]}"
       optionNameSc="${optionsNameSc[${optionIndex}]:-}"
-      if [ -n "${optionNameSc}" ]; then
+      if [[ -n "${optionNameSc}" ]]; then
         outputString+="${optionsName[${optionIndex}]}=\"\${${optionNameSc}:-}\""$'\n'
       fi
     fi
@@ -1204,7 +1204,7 @@ function parseFunctionArguments() {
   done
 
   # output the last argument values
-  if [ "${isLastArgumentAnArray}" = "true" ]; then
+  if [[ "${isLastArgumentAnArray}" = "true" ]]; then
     local lastArgumentValue
     outputString+="${argumentsName[${nbScalarArguments}]}=("$'\n'
     for lastArgumentValue in "${lastArgumentValues[@]}"; do
@@ -1228,7 +1228,7 @@ function fuzzyFindOption() {
   # split to get one possible option per line
   fuzzyMatch "${unknownOption}" "${options// /$'\n'}" && suggestedOption="${LAST_RETURNED_VALUE}"
   suggestedOption="${suggestedOption%%$'\n'*}"
-  if [ -n "${suggestedOption}" ]; then
+  if [[ -n "${suggestedOption}" ]]; then
     suggestedOption=" (did you mean ⌜${suggestedOption}⌝?)"
   fi
 

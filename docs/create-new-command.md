@@ -43,10 +43,10 @@ parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
 checkParseResults "${help:-}" "${parsingErrors:-}"
 
 # check if the user asked to just display the help of this command
-if [ -n "${help:-}" ]; then showHelp; return 0; fi
+if [[ -n "${help:-}" ]]; then showHelp; return 0; fi
 
 # check if the parser caught some errors and fail if so
-if [ -n "${parsingErrors:-}" ]; then fail "${parsingErrors}"; fi
+if [[ -n "${parsingErrors:-}" ]]; then fail "${parsingErrors}"; fi
 
 # use options and arguments
 echo "${myOption} > ${myArgument}"

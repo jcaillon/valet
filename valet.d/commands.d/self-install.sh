@@ -41,13 +41,13 @@
 #     SINGLE_USER_INSTALLATION=true ./self-install.sh
 
 # if not executing in bash, we can stop here
-if [ -z "${BASH_VERSION:-}" ]; then
+if [[ -z "${BASH_VERSION:-}" ]]; then
   echo "❌ This script must be run with bash." 1>&2
   exit 0
 fi
 
 # import the core script (should always be skipped if the command is run from valet)
-if [ -z "${_CORE_INCLUDED:-}" ]; then
+if [[ -z "${_CORE_INCLUDED:-}" ]]; then
   NOT_EXECUTED_FROM_VALET=true
 
   VALETD_DIR="${BASH_SOURCE[0]}"
@@ -209,7 +209,7 @@ function selfUpdate() {
   fi
 
   # source valet core and self-build
-  if [ -z "${_CORE_INCLUDED:-}" ]; then
+  if [[ -z "${_CORE_INCLUDED:-}" ]]; then
     # shellcheck source=../core
     source "${VALET_HOME}/valet.d/core"
   fi
@@ -324,6 +324,6 @@ function selfWelcomeUser() {
 }
 
 # if this script is run directly, execute the function, otherwise valet will do it
-if [ "${NOT_EXECUTED_FROM_VALET:-false}" == "true" ]; then
+if [[ "${NOT_EXECUTED_FROM_VALET:-false}" == "true" ]]; then
   selfUpdate "$@"
 fi

@@ -8,7 +8,7 @@
 _CORE_INCLUDED=1
 
 # Handle the case where this script was invoked outside of valet
-if [ -z "${VALET_HOME:-}" ]; then
+if [[ -z "${VALET_HOME:-}" ]]; then
   VALET_HOME="${BASH_SOURCE[0]}"
   if [[ "${VALET_HOME}" != /* ]]; then
     # resolve relative path
@@ -51,14 +51,14 @@ while [[ -e "${_TEMPORARY_DIRECTORY}" ]]; do _TEMPORARY_DIRECTORY+="x"; done
 # Usage:
 #  createTempFile && local file="${LAST_RETURNED_VALUE}"
 function createTempFile() {
-  if [ ! -d "${_TEMPORARY_DIRECTORY}" ]; then
+  if [[ ! -d "${_TEMPORARY_DIRECTORY}" ]]; then
     mkdir -p "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
   fi
   TEMPORARY_FILE_NUMBER=${TEMPORARY_FILE_NUMBER:-0}
   while true; do
     TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
     LAST_RETURNED_VALUE="${_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
-    if [ ! -e "${LAST_RETURNED_VALUE}" ]; then
+    if [[ ! -e "${LAST_RETURNED_VALUE}" ]]; then
       :>"${LAST_RETURNED_VALUE}"
       return 0
     fi
@@ -70,14 +70,14 @@ function createTempFile() {
 # Usage:
 #  createTempDirectory && local directory="${LAST_RETURNED_VALUE}"
 function createTempDirectory() {
-  if [ ! -d "${_TEMPORARY_DIRECTORY}" ]; then
+  if [[ ! -d "${_TEMPORARY_DIRECTORY}" ]]; then
     mkdir -p "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
   fi
   TEMPORARY_DIRECTORY_NUMBER=${TEMPORARY_DIRECTORY_NUMBER:-0}
   while true; do
     TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
     LAST_RETURNED_VALUE="${_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
-    if [ ! -d "${LAST_RETURNED_VALUE}" ]; then
+    if [[ ! -d "${LAST_RETURNED_VALUE}" ]]; then
       mkdir -p "${LAST_RETURNED_VALUE}" 1>&2 2>/dev/null
       return 0
     fi
@@ -87,18 +87,18 @@ function createTempDirectory() {
 # Removes all the tempoary files that were created.
 # shellcheck disable=SC2016
 function cleanupTempFiles() {
-  if [ -e "${_TEMPORARY_DIRECTORY}" ]; then
+  if [[ -e "${_TEMPORARY_DIRECTORY}" ]]; then
     debug "Deleting temporary directory."
     rm -Rf "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
     unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
   fi
-  if [ -e "${_TEMPORARY_WORK_FILE}" ]; then
+  if [[ -e "${_TEMPORARY_WORK_FILE}" ]]; then
     rm -f "${_TEMPORARY_WORK_FILE}" 1>&2 2>/dev/null
   fi
-  if [ -e "${_TEMPORARY_STDOUT_FILE}" ]; then
+  if [[ -e "${_TEMPORARY_STDOUT_FILE}" ]]; then
     rm -f "${_TEMPORARY_STDOUT_FILE}" 1>&2 2>/dev/null
   fi
-  if [ -e "${_TEMPORARY_STDERR_FILE}" ]; then
+  if [[ -e "${_TEMPORARY_STDERR_FILE}" ]]; then
     rm -f "${_TEMPORARY_STDERR_FILE}" 1>&2 2>/dev/null
   fi
 }
@@ -175,10 +175,10 @@ function setLogLevel() {
   *) _LOG_LEVEL_INT=1 ;;
   esac
 
-  if [ "${_LOG_LEVEL_INT}" != 1 ]; then
+  if [[ "${_LOG_LEVEL_INT}" != 1 ]]; then
     debug "Log level set to ${VALET_LOG_LEVEL}."
   fi
-  if [ "${_LOG_LEVEL_INT}" == 0 ]; then
+  if [[ "${_LOG_LEVEL_INT}" == 0 ]]; then
     warn "Beware that debug log level might lead to secret leak, use it only if necessary."
   fi
 }
@@ -199,7 +199,7 @@ function logLine() { return 0; }
 # shellcheck disable=SC2016
 function createLogLineFunction() {
   # in CI mode, we disable wrapping, colors and icons
-  if [ "${VALET_CI_MODE:-}" = "true" ]; then
+  if [[ "${VALET_CI_MODE:-}" = "true" ]]; then
     VALET_NO_WRAP="${VALET_NO_WRAP:-true}"
     VALET_NO_ICON="${VALET_NO_ICON:-true}"
     VALET_NO_COLOR="${VALET_NO_COLOR:-true}"
@@ -213,22 +213,22 @@ function createLogLineFunction() {
     severity="${3}"
     shift 3
     LAST_RETURNED_VALUE="$*"'
-  if [ "${VALET_NO_COLOR:-}" != "true" ]; then
+  if [[ "${VALET_NO_COLOR:-}" != "true" ]]; then
     # shellcheck disable=SC2016
     LOG_LINE_FUNCTION+='
     LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌜/${COLOR_HIGHLIGHT}⌜}"
     LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌝/⌝${COLOR_DEFAULT}}"'
   fi
 
-  if [ "${VALET_NO_WRAP:-}" != "true" ]; then
+  if [[ "${VALET_NO_WRAP:-}" != "true" ]]; then
     local wrapTextColumns="${VALET_LOG_COLUMNS:-${_COLUMNS}}"
     local wrapPaddingLength=20
 
-    if [ "${VALET_NO_TIMESTAMP:-}" = "true" ]; then
+    if [[ "${VALET_NO_TIMESTAMP:-}" = "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 9))
     fi
 
-    if [ "${VALET_NO_ICON:-}" = "true" ]; then
+    if [[ "${VALET_NO_ICON:-}" = "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 2))
     fi
 
@@ -243,7 +243,7 @@ function createLogLineFunction() {
   if [[ "${VALET_CI_MODE:-}" == "true" && "${VALET_NO_TIMESTAMP:-}" != "true" ]]; then
     printfFormat+="%(%F_%H:%M:%S)T "
     printfArguments+='"${EPOCHSECONDS}" '
-  elif [ "${VALET_NO_TIMESTAMP:-}" = "true" ]; then
+  elif [[ "${VALET_NO_TIMESTAMP:-}" = "true" ]]; then
     printfFormat+=""
   else
     printfFormat+="%s%(%H:%M:%S)T "
@@ -251,7 +251,7 @@ function createLogLineFunction() {
   fi
 
   # severity
-  if [ "${VALET_NO_ICON:-}" = "true" ]; then
+  if [[ "${VALET_NO_ICON:-}" = "true" ]]; then
     printfFormat+="%s%-8s%s "
     printfArguments+='"${color}" "${severity}" "${COLOR_DEFAULT}" '
   else
@@ -358,7 +358,7 @@ function isDebugEnabled() {
 # Usage:
 #   command_that_could_fail || checkAndFail "$?" "The command that could fail has failed!"
 function checkAndFail() {
-  if [ "${1:-1}" != "0" ]; then
+  if [[ "${1:-1}" != "0" ]]; then
     shift
     fail "$*"
   fi
@@ -372,7 +372,7 @@ function checkAndFail() {
 # Usage:
 #   command_that_could_fail || checkAndWarn "$?" "The command that could fail has failed!" || return "0"
 function checkAndWarn() {
-  if [ "${1:-}" != "0" ]; then
+  if [[ "${1:-}" != "0" ]]; then
     shift
     warn "$*"
     return 1
@@ -395,11 +395,11 @@ function getStack() {
   treeString="├─"
   for ((i = levelToSkip; i < stackSize; i++)); do
     func="${FUNCNAME[$i]}"
-    if [ -z "${func}" ]; then func=MAIN; fi
+    if [[ -z "${func}" ]]; then func=MAIN; fi
     linen="${BASH_LINENO[$((i - 1))]}"
     src="${BASH_SOURCE[$i]}"
-    if [ -z "${src}" ]; then src=non_file_source; fi
-    if [ "${i}" = "$((stackSize - 1))" ]; then
+    if [[ -z "${src}" ]]; then src=non_file_source; fi
+    if [[ "${i}" = "$((stackSize - 1))" ]]; then
       treeString="└─"
     fi
     stack+=$'\n'"${treeString} In function $func() $src:$linen"
@@ -408,10 +408,10 @@ function getStack() {
 }
 
 # Parsing the options from environment variables
-if [ -n "${VALET_LOG_LEVEL:-}" ]; then
+if [[ -n "${VALET_LOG_LEVEL:-}" ]]; then
   setLogLevel "${VALET_LOG_LEVEL}"
 fi
-if [ "${VALET_VERBOSE=:-}" = "true" ]; then
+if [[ "${VALET_VERBOSE=:-}" = "true" ]]; then
   setLogLevel "debug"
 fi
 
@@ -434,17 +434,17 @@ function include() {
   local filePathToInclude includedFile
   # for each argument
   while [[ $# -gt 0 ]]; do
-    if [ -e "${VALET_HOME}/valet.d/lib-${1}" ]; then
+    if [[ -e "${VALET_HOME}/valet.d/lib-${1}" ]]; then
       filePathToInclude="${VALET_HOME}/valet.d/lib-${1}"
-    elif [ -e "${BASH_SOURCE[1]%/*}/${1}" ]; then
+    elif [[ -e "${BASH_SOURCE[1]%/*}/${1}" ]]; then
       filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
-    elif [ -e "${1}" ]; then
+    elif [[ -e "${1}" ]]; then
       filePathToInclude="${1}"
     else
       fail "The file ${1} could not be found."
     fi
     for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
-      if [ "${includedFile}" = "${filePathToInclude}" ]; then
+      if [[ "${includedFile}" = "${filePathToInclude}" ]]; then
         return 0
       fi
     done
@@ -503,7 +503,7 @@ function wrapText() {
   while read -r line; do
     wrappedText+=$'\n'
     wrapSentence "${line}" "${sentenceWidth}" "${leftPadding}"
-    if [ "${firstLine}" = "1" ]; then
+    if [[ "${firstLine}" = "1" ]]; then
       firstLine="0"
     else
       wrappedText+="${leftPadding}"
@@ -512,7 +512,7 @@ function wrapText() {
   done <<< "${text}"
 
   # add left padding on the first line (or not)
-  if [ "${appendPaddingToFirstLine}" = "true" ]; then
+  if [[ "${appendPaddingToFirstLine}" = "true" ]]; then
     LAST_RETURNED_VALUE="${leftPadding}${wrappedText#$'\n'}"
   else
     LAST_RETURNED_VALUE="${wrappedText#$'\n'}"
@@ -555,7 +555,7 @@ function wrapSentence() {
   local firstWord="1"
   for word in ${text}; do
 
-    if [ "${firstWord}" = "1" ]; then
+    if [[ "${firstWord}" = "1" ]]; then
       firstWord="0"
     else
       # we just added a word
@@ -712,11 +712,11 @@ function sourceForFunction() {
   local fileToSource
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
     local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
-    if [ -e "${fileToSource}" ]; then
+    if [[ -e "${fileToSource}" ]]; then
       # shellcheck disable=SC1090
       source "${fileToSource}"
       debug "Loaded file ⌜${fileToSource}⌝."
-    elif [ -e "${VALET_HOME:-}/${fileToSource}" ]; then
+    elif [[ -e "${VALET_HOME:-}/${fileToSource}" ]]; then
       # shellcheck disable=SC1090
       source "${VALET_HOME:-}/${fileToSource}"
       debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
@@ -738,7 +738,7 @@ function sourceForFunction() {
 function getConfigurationDirectory() {
   local directory
   directory="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}"
-  if [ ! -d "${directory}" ]; then
+  if [[ ! -d "${directory}" ]]; then
     mkdir -p "${directory}"
   fi
   LAST_RETURNED_VALUE="${directory}"
@@ -752,7 +752,7 @@ function getConfigurationDirectory() {
 function getLocalStateDirectory() {
   local directory
   directory="${VALET_LOCAL_STATE_DIRECTORY:-${HOME}/.local/state/valet}"
-  if [ ! -d "${directory}" ]; then
+  if [[ ! -d "${directory}" ]]; then
     mkdir -p "${directory}"
   fi
   LAST_RETURNED_VALUE="${directory}"
@@ -824,12 +824,12 @@ function checkParseResults() {
   help="${1:-}"
   parsingErrors="${2:-}"
 
-  if [ -n "${help}" ]; then
+  if [[ -n "${help}" ]]; then
     printHelp function "${functionName}"
     exit 0
   fi
 
-  if [ -n "${parsingErrors:-}" ]; then
+  if [[ -n "${parsingErrors:-}" ]]; then
     local -n commandName="CMD_COMMAND_${functionName}"
     fail "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
   fi
@@ -839,7 +839,7 @@ function checkParseResults() {
 # >>> Include main
 #===============================================================
 
-if [ -z "${_MAIN_INCLUDED:-}" ]; then
+if [[ -z "${_MAIN_INCLUDED:-}" ]]; then
   # shellcheck source=main
   source "${VALET_HOME}/valet.d/main"
 fi
