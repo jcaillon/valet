@@ -744,14 +744,15 @@ function getConfigurationDirectory() {
   LAST_RETURNED_VALUE="${directory}"
 }
 
-# Returns the path to the valet state directory.
+# Returns the path to the valet locla state directory.
+# The base directory relative to which user-specific state files should be stored.
 # Creates it if missing.
 #
 # Usage:
 #   getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
 function getLocalStateDirectory() {
   local directory
-  directory="${VALET_LOCAL_STATE_DIRECTORY:-${HOME}/.local/state/valet}"
+  directory="${VALET_LOCAL_STATE_DIRECTORY:-${XDG_STATE_HOME:-$HOME/.local/share}/valet}"
   if [[ ! -d "${directory}" ]]; then
     mkdir -p "${directory}"
   fi

@@ -247,3 +247,4 @@ function promptYesNo() {
   LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE%%$'\n'*}"
   if [[ ${LAST_RETURNED_VALUE} == "Yes" ]]; then LAST_RETURNED_VALUE=true; else LAST_RETURNED_VALUE=false; fi
 }
+
