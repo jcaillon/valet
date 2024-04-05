@@ -25,7 +25,7 @@ command: self download-binaries
 function: selfDownloadBinaries
 shortDescription: Download the required binaries for valet.
 description: |-
-  Download the required binaries for valet: fzf, curl, yq.
+  Download the required binaries for valet: fzf.
 
   These binaries will be stored in the bin directory of valet and used in priority over the binaries in your PATH.
 options:
@@ -75,8 +75,6 @@ function selfDownloadBinaries() {
 
   createTempDirectory && pushd "${LAST_RETURNED_VALUE}" 1>/dev/null
   [[ ! -e "${destination}/fzf" || "${force:-}" == "true" ]] && downloadFzf "${os}" "0.48.1" "${destination}"
-  [[ ! -e "${destination}/curl" || "${force:-}" == "true" ]] && downloadCurl "${os}" "8.7.1" "${destination}"
-  [[ ! -e "${destination}/yq" || "${force:-}" == "true" ]] && downloadYq "${os}" "4.43.1" "${destination}"
   popd 1>/dev/null
 
   succeed "The binaries have been downloaded and stored in the bin directory of valet ⌜${destination}⌝."
@@ -104,41 +102,5 @@ function downloadFzf() {
     else
       invoke mv -f "fzf.exe" "${destination}/fzf"
     fi
-  fi
-}
-
-function downloadCurl() {
-  local os="${1}"
-  local version="${2}"
-  local destination="${3}"
-  if [[ "${os}" != "windows" ]]; then
-    local curlUrl="https://github.com/moparisthebest/static-curl/releases/download/v${version}/curl-amd64"
-    inform "Downloading curl from: ${curlUrl}."
-    kurlFile true 200 curl "${curlUrl}"
-    invoke mv -f "curl" "${destination}/curl"
-  else
-    local curlUrl="https://curl.se/windows/latest.cgi?p=win64-mingw.zip"
-    inform "Downloading curl from: ${curlUrl}."
-    kurlFile true 200 curl.zip "${curlUrl}"
-    invoke unzip curl.zip
-    invoke mv -f -- */bin/* "${destination}"
-    invoke mv -f "${destination}/curl.exe" "${destination}/curl"
-  fi
-}
-
-function downloadYq() {
-  local os="${1}"
-  local version="${2}"
-  local destination="${3}"
-  if [[ "${os}" != "windows" ]]; then
-    local yqUrl="https://github.com/mikefarah/yq/releases/download/v${version}/yq_${os}_amd64"
-    inform "Downloading yq from: ${yqUrl}."
-    kurlFile true 200 yq "${yqUrl}"
-    invoke mv -f "yq" "${destination}/yq"
-  else
-    local yqUrl="https://github.com/mikefarah/yq/releases/download/v${version}/yq_${os}_amd64.exe"
-    inform "Downloading yq from: ${yqUrl}."
-    kurlFile true 200 yq.exe "${yqUrl}"
-    invoke mv -f "yq.exe" "${destination}/yq"
   fi
 }

@@ -16,7 +16,7 @@ function testSelfRelease() {
   endTest "Testing selfRelease, minor version" $exitCode
 }
 
-# need to override git, curl
+# need to override git, kurl
 function invoke5() {
   echo "▶ called invoke5 $*" 1>&2
   if [[ "${5}" == "uname" ]]; then

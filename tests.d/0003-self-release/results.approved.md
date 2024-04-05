@@ -34,38 +34,18 @@ INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download
 ▶ called kurlFile true 200 fzf.tar.gz https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-linux_amd64.tar.gz
 ▶ called invoke tar -xzf fzf.tar.gz
 ▶ called invoke mv -f fzf $VALET_HOME/.tmp/bin/fzf
-INFO     Downloading curl from: https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64.
-▶ called kurlFile true 200 curl https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64
-▶ called invoke mv -f curl $VALET_HOME/.tmp/bin/curl
-INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_linux_amd64.
-▶ called kurlFile true 200 yq https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_linux_amd64
-▶ called invoke mv -f yq $VALET_HOME/.tmp/bin/yq
 SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
 INFO     Downloading the binaries for the OS: windows.
 INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip.
 ▶ called kurlFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip
 ▶ called invoke unzip fzf.zip
 ▶ called invoke mv -f fzf.exe $VALET_HOME/.tmp/bin/fzf
-INFO     Downloading curl from: https://curl.se/windows/latest.cgi?p=win64-mingw.zip.
-▶ called kurlFile true 200 curl.zip https://curl.se/windows/latest.cgi?p=win64-mingw.zip
-▶ called invoke unzip curl.zip
-▶ called invoke mv -f -- */bin/* $VALET_HOME/.tmp/bin
-▶ called invoke mv -f $VALET_HOME/.tmp/bin/curl.exe $VALET_HOME/.tmp/bin/curl
-INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_windows_amd64.exe.
-▶ called kurlFile true 200 yq.exe https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_windows_amd64.exe
-▶ called invoke mv -f yq.exe $VALET_HOME/.tmp/bin/yq
 SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
 INFO     Downloading the binaries for the OS: darwin.
 INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip.
 ▶ called kurlFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip
 ▶ called invoke unzip fzf.zip
 ▶ called invoke mv -f fzf $VALET_HOME/.tmp/bin/fzf
-INFO     Downloading curl from: https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64.
-▶ called kurlFile true 200 curl https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64
-▶ called invoke mv -f curl $VALET_HOME/.tmp/bin/curl
-INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_darwin_amd64.
-▶ called kurlFile true 200 yq https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_darwin_amd64
-▶ called invoke mv -f yq $VALET_HOME/.tmp/bin/yq
 SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
 SUCCESS  The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝.
 ```
@@ -142,12 +122,6 @@ INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download
 ▶ called kurlFile true 200 fzf.tar.gz https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-linux_amd64.tar.gz
 ▶ called invoke tar -xzf fzf.tar.gz
 ▶ called invoke mv -f fzf $VALET_HOME/.tmp/bin/fzf
-INFO     Downloading curl from: https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64.
-▶ called kurlFile true 200 curl https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64
-▶ called invoke mv -f curl $VALET_HOME/.tmp/bin/curl
-INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_linux_amd64.
-▶ called kurlFile true 200 yq https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_linux_amd64
-▶ called invoke mv -f yq $VALET_HOME/.tmp/bin/yq
 SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
 ▶ called invoke cp -R $VALET_HOME/examples.d .
 ▶ called invoke cp -R $VALET_HOME/valet.d .
@@ -169,14 +143,6 @@ INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download
 ▶ called kurlFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip
 ▶ called invoke unzip fzf.zip
 ▶ called invoke mv -f fzf.exe $VALET_HOME/.tmp/bin/fzf
-INFO     Downloading curl from: https://curl.se/windows/latest.cgi?p=win64-mingw.zip.
-▶ called kurlFile true 200 curl.zip https://curl.se/windows/latest.cgi?p=win64-mingw.zip
-▶ called invoke unzip curl.zip
-▶ called invoke mv -f -- */bin/* $VALET_HOME/.tmp/bin
-▶ called invoke mv -f $VALET_HOME/.tmp/bin/curl.exe $VALET_HOME/.tmp/bin/curl
-INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_windows_amd64.exe.
-▶ called kurlFile true 200 yq.exe https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_windows_amd64.exe
-▶ called invoke mv -f yq.exe $VALET_HOME/.tmp/bin/yq
 SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
 ▶ called invoke cp -R $VALET_HOME/examples.d .
 ▶ called invoke cp -R $VALET_HOME/valet.d .
@@ -198,12 +164,6 @@ INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download
 ▶ called kurlFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip
 ▶ called invoke unzip fzf.zip
 ▶ called invoke mv -f fzf $VALET_HOME/.tmp/bin/fzf
-INFO     Downloading curl from: https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64.
-▶ called kurlFile true 200 curl https://github.com/moparisthebest/static-curl/releases/download/v8.7.1/curl-amd64
-▶ called invoke mv -f curl $VALET_HOME/.tmp/bin/curl
-INFO     Downloading yq from: https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_darwin_amd64.
-▶ called kurlFile true 200 yq https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_darwin_amd64
-▶ called invoke mv -f yq $VALET_HOME/.tmp/bin/yq
 SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$VALET_HOME/.tmp/bin⌝.
 ▶ called invoke cp -R $VALET_HOME/examples.d .
 ▶ called invoke cp -R $VALET_HOME/valet.d .

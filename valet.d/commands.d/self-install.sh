@@ -106,8 +106,8 @@ description: |-
 function selfUpdate() {
   # download the latest version of valet
 
-  # also download fzf and yq in ${VALET_HOME}/bin
-  # replace call of "fzf" and "yq" by "${VALET_HOME}/bin/fzf" and "${VALET_HOME}/bin/yq" in valet
+  # also download fzf in ${VALET_HOME}/bin
+  # replace call of "fzf" by "${VALET_HOME}/bin/fzf" in valet
   # this way we don't loop in the PATH and it goes faster
 
   # tell the user about what's next todo

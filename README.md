@@ -94,7 +94,7 @@ Auto parsing of arguments and options based on your command configuration:
 - [curl][curl] is only needed for the self-update command.
 
 > [!NOTE]
-> The [latest release][latest-release] package already contains [fzf][fzf] & [curl][curl] for your OS, so you don't have to install them. You can always opt in for the 'no-binaries' package.
+> The [latest release][latest-release] package already contains [fzf][fzf] for your OS, so you don't have to install them. You can always opt in for the 'no-binaries' package.
 
 ### Automated installation
 
@@ -119,9 +119,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/vale
 
 ### Manual installation from sources
 
-1. You need the following tools installed and present in your PATH for valet to work:
-   1. [yq][yq] (to be able to build your commands)
-   2. [fzf][fzf] (to have the interactive mode/menu)
+1. You need the [fzf][fzf] installed and present in your PATH to have the interactive mode/menu.
 2. You can then clone this project or download the source from the latest release into the directory of your choice.
 3. Add this directory to your PATH (or link Valet to `/usr/local/bin`) so you can call `valet` from your terminal.
 4. Call `valet` to get started with the example commands!
@@ -167,7 +165,6 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 
 ## 🔭 Roadmap
 
-- Get rid of yq dependency in self build.
 - Regroup all functions for interactive mode in an interactive script which is only sourced when needed.
 - Add support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
@@ -194,7 +191,6 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 [contributing]: CONTRIBUTING.md
 [bash]: https://www.gnu.org/software/bash/
 [fzf]: https://github.com/junegunn/fzf
-[yq]: https://github.com/mikefarah/yq
 [nerd-font]: https://www.nerdfonts.com/
 [windows-terminal]: https://github.com/microsoft/terminal
 [debian-wsl]: https://wiki.debian.org/InstallingDebianOn/Microsoft/Windows/SubsystemForLinux
