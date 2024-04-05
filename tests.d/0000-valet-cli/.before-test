@@ -1,22 +1,5 @@
 #!/usr/bin/env bash
 
-_TEST_0000_COMMON_UTILS=1
-
-# we will run "${VALET_HOME}/valet" commands so we need to set the correct user directory
-export VALET_USER_DIRECTORY="${VALET_HOME}/examples.d"
-
-if [[ -z "${ORIGINAL_VALET_HOME:-}" ]]; then
-  export ORIGINAL_VALET_HOME="${VALET_HOME}"
-else
-  export VALET_HOME="${ORIGINAL_VALET_HOME}"
-fi
-
-# override the local state and config directories to return temp directories
-createTempDirectory
-export VALET_LOCAL_STATE_DIRECTORY="${LAST_RETURNED_VALUE}"
-createTempDirectory
-export VALET_CONFIG_DIRECTORY="${LAST_RETURNED_VALUE}"
-
 # override sudo to be able to test a command with sudo
 function sudo() {
   echo "▶ called sudo $*" 1>&2
@@ -25,22 +8,33 @@ export -f sudo
 
 # overriding fzf to log the inputs
 # shellcheck disable=SC2034
-VALET_DO_NOT_USE_BIN="true"
+VALET_DO_NOT_USE_BIN=true
+
 # shellcheck disable=SC2317
 function fzf() {
   local inputStreamContent
   read -rd '' inputStreamContent <&0 || true
 
-  echo "▶ called fzf $*" 1>&2
+  echo "▶ called ⌈fzf $*⌉" 1>&2
   echo "▶ fzf input stream was:" 1>&2
   echo "⌈${inputStreamContent}⌉" 1>&2
-
-  if [[ "$*" == *"ReturnLast"* ]]; then
-    # returning the last line of the input stream
-    echo "${inputStreamContent##*$'\n'}"
-  fi
 }
 export -f fzf
+
+
+
+if [[ -n "${_TEST_0000_COMMON_UTILS:-}" ]]; then
+  return 0
+fi
+_TEST_0000_COMMON_UTILS=1
+
+
+
+# override the local state and config directories to return temp directories
+createTempDirectory
+export VALET_LOCAL_STATE_DIRECTORY="${LAST_RETURNED_VALUE}"
+createTempDirectory
+export VALET_CONFIG_DIRECTORY="${LAST_RETURNED_VALUE}"
 
 function echoTempFileWithTimeStampSubstitution() {
   local file="${_TEST_TEMP_FILE}"

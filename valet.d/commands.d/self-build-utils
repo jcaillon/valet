@@ -169,53 +169,21 @@ function createGlobalVariable() {
   else
     # array variable
     local -n array="TEMP_CMD_BUILD_${name}"
-    if [[ -n "${array[0]:-}" ]]; then
+    if [[ -v array && "${#array[@]}" -gt 0 ]]; then
       currentArrayLength=${#array[@]}
     else
       currentArrayLength=0
+      eval "TEMP_CMD_BUILD_${name}=()"
     fi
     debug "currentArrayLength: ${currentArrayLength}."
     arrayLength=$((arrayLength - 1))
     while [[ arrayLength -gt currentArrayLength ]]; do
+      debug "Adding empty string to array TEMP_CMD_BUILD_${name}."
       eval "TEMP_CMD_BUILD_${name}+=(\"\")"
-      eval "currentArrayLength=\${#TEMP_CMD_BUILD_${name}[@]}"
+      currentArrayLength+=1
     done
     eval "TEMP_CMD_BUILD_${name}+=(\"${value//\"/\\\"}\")"
   fi
-}
-
-# This function makes sure that all the arrays have the same size.
-# It will add empty strings to the arrays that are too short.
-#
-# $1+: The arrays (global variable names) to make the same size.
-#
-# Usage:
-#   makeArraysSameSize "array1" "array2" "array3"
-function makeArraysSameSize() {
-  local array
-  local -i length
-  local -a lengths
-  local -i maxLength=0
-
-  # compute max length among all arrays
-  for array in "$@"; do
-    if [[ ! -v "${array}" ]]; then
-      eval "${array}=()"
-    fi
-    eval "length=\${#${array}[@]}" || length=0
-    lengths+=("${length}")
-    if [[ length -gt maxLength ]]; then
-      maxLength=length
-    fi
-  done
-
-  for length in "${lengths[@]}"; do
-    while [[ length -lt maxLength ]]; do
-      eval "${1}+=(\"\")"
-      length+=1
-    done
-    shift
-  done
 }
 
 # This function extract the first long name of an option from an option string formatted as:
@@ -277,7 +245,7 @@ _CMD_INCLUDED=1
 # CMD_ALL_COMMANDS_ARRAY = array of all the commands
 # CMD_ALL_COMMANDS = list all the commands
 # CMD_MAX_SUB_COMMAND_LEVEL = maximum number of sub command levels; e.g. 'command subcommand subsubcommand' has 2 levels
-# CMD_ALL_SUB_MENUS_COMMANDS_ARRAY = array of all the commands that should open a sub menu to show a list of sub commands
+# CMD_ALL_MENU_COMMANDS_ARRAY = array of all the commands that should open a sub menu to show a list of sub commands
 # CMD_MAX_COMMAND_WIDTH = get the maximum width (nb characters) among all commands
 # CMD_FUNCTION_NAME_yyy = the function name for the given yyy command
 # CMD_COMMAND_xxx = the command of the function

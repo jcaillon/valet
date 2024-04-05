@@ -16,7 +16,6 @@ fi
 : "---
 command: showcase command1
 function: showcaseCommand1
-sudo: true
 shortDescription: A showcase command that uses arguments and options.
 description: |-
   An example of description.
@@ -53,6 +52,15 @@ function showcaseCommand1() {
   inform "Option 1: ${option1:-}."
   inform "Option 2: ${thisIsOption2:-}."
   inform "More: ${more[*]}."
+
+  aSubFunctionInShowcaseCommand1
+
+  echo "That's it!"
+}
+
+function aSubFunctionInShowcaseCommand1() {
+  # this is mainly to demonstrate the profiler
+  debug "This is a sub function."
 }
 
 
@@ -63,11 +71,14 @@ function showcaseCommand1() {
 : "---
 command: showcase hello-world
 function: helloWorld
-shortDescription: An hello world command
+shortDescription: An hello world command.
 description: |-
   An hello world command.
 ---"
 function helloWorld() {
+  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  checkParseResults "${help:-}" "${parsingErrors:-}"
+
   echo "Hello world!"
 }
 
@@ -81,13 +92,16 @@ function helloWorld() {
 command: showcase sudo-command
 function: showCaseSudo
 sudo: true
-shortDescription: A command that requires sudo
+shortDescription: A command that requires sudo.
 description: |-
   Before starting this command, valet will check if sudo is available.
 
   If so, it will require the user to enter the sudo password and use sudo inside the command
 ---"
 function showCaseSudo() {
+  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  checkParseResults "${help:-}" "${parsingErrors:-}"
+
   $SUDO whoami
 }
 

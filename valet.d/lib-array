@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# Sorts an array using the > bash operator (lexicographic order).
+# It uses pure bash.
+#
+# $1: The global variable name of array to sort.
+#
+# Usage:
+#   declare -g myArray=( "z" "a" "b" )
+#   sortArray myArray
+#   echo "${myArray[@]}"
+function sortArray() {
+  local -n array=$1
+  local -i i j
+  local temp
+  for ((i = 0; i < ${#array[@]}; i++)); do
+    for ((j = i + 1; j < ${#array[@]}; j++)); do
+      if [[ "${array[i]}" > "${array[j]}" ]]; then
+        temp="${array[i]}"
+        array[i]="${array[j]}"
+        array[j]="${temp}"
+      fi
+    done
+  done
+}
+
+# Add a value to an array if it is not already present.
+# It uses pure bash.
+#
+# $1: The global variable name of the array.
+# $2: The value to add.
+#
+# Returns:
+#   0 if the value was added, 1 if it was already present.
+#
+# Usage:
+#   declare -g myArray=( "a" "b" )
+#   appendToArrayIfNotPresent myArray "c"
+#   echo "${myArray[@]}"
+function appendToArrayIfNotPresent() {
+  local -n array="${1}"
+  local value="${2}"
+
+  # add value to array if not present, check in a loop
+  local -i present=0
+  local item
+  for item in "${array[@]}"; do
+    if [[ "${item}" == "${value}" ]]; then
+      present=1
+      break
+    fi
+  done
+  if [[ present -eq 0 ]]; then
+    array+=("${value}")
+  fi
+  return ${present}
+}
+
+# Check if a value is in an array.
+# It uses pure bash.
+#
+# $1: The global variable name of the array.
+# $2: The value to check.
+#
+# Returns:
+#   0 if the value is in the array, 1 otherwise.
+#
+# Usage:
+#   declare -g myArray=( "a" "b" )
+#   isInArray myArray "b" && echo "b is in the array"
+function isInArray() {
+  local -n array="${1}"
+  local value="${2}"
+
+  local item
+  for item in "${array[@]}"; do
+    if [[ "${item}" == "${value}" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+# This function makes sure that all the arrays have the same size.
+# It will add empty strings to the arrays that are too short.
+#
+# $1+: The arrays (global variable names) to make the same size.
+#
+# Usage:
+#   makeArraysSameSize "array1" "array2" "array3"
+function makeArraysSameSize() {
+  local array
+  local -i length
+  local -a lengths
+  local -i maxLength=0
+
+  # compute max length among all arrays
+  for array in "$@"; do
+    if [[ ! -v "${array}" ]]; then
+      eval "${array}=()"
+    fi
+    eval "length=\${#${array}[@]}" || length=0
+    lengths+=("${length}")
+    if [[ length -gt maxLength ]]; then
+      maxLength=length
+    fi
+  done
+
+  for length in "${lengths[@]}"; do
+    while [[ length -lt maxLength ]]; do
+      eval "${1}+=(\"\")"
+      length+=1
+    done
+    shift
+  done
+}

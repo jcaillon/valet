@@ -28,33 +28,6 @@ There were 2 new lines before this."
   endTest "Wrapping text at column 90 with padding of 2 on all lines" 0
 }
 
-function testCutF() {
-  echo "→ cutF \"field1 field2 field3\" 1 \" \""
-  cutF "field1 field2 field3" 1 " " && echo "${LAST_RETURNED_VALUE}"
-  echo
-
-  echo "→ cutF \"field1 field2 field3\" 2 \" \""
-  cutF "field1 field2 field3" 2 " " && echo "${LAST_RETURNED_VALUE}"
-  echo
-
-  echo "→ cutF \"field1 field2 field3\" 3 \" \""
-  cutF "field1 field2 field3" 3 " " && echo "${LAST_RETURNED_VALUE}"
-  echo
-
-  echo "→ cutF \"field1 field2 field3\" 4 \" \""
-  cutF "field1 field2 field3" 4 " " && echo "${LAST_RETURNED_VALUE}"
-  echo
-
-  echo "→ cutF \"line1 hm I wonder
-line2 does it work on lines?
-line3 seems so\" 2 \$'\n'"
-  cutF "line1 hm I wonder
-line2 does it work on lines?
-line3 seems so" 2 $'\n' && echo "${LAST_RETURNED_VALUE}"
-
-  endTest "Testing cutF" 0
-}
-
 function testFuzzyMatch() {
   local lines="l1 this is a word
 l2 very unbelievable
@@ -91,44 +64,9 @@ l5 ublievable"
   endTest "Testing fuzzyMatch" 0
 }
 
-function testGetOsName() {
-  echo "→ OSTYPE=linux-bsd getOsName"
-  OSTYPE=linux-bsd getOsName && echo "${LAST_RETURNED_VALUE}"
-  echo
-  echo "→ OSTYPE=msys getOsName"
-  OSTYPE=msys getOsName && echo "${LAST_RETURNED_VALUE}"
-  echo
-  echo "→ OSTYPE=darwin-stuff getOsName"
-  OSTYPE=darwin-stuff getOsName && echo "${LAST_RETURNED_VALUE}"
-  echo
-  echo "→ OSTYPE=nop getOsName"
-  OSTYPE=nop getOsName && echo "${LAST_RETURNED_VALUE}"
-  echo
-  endTest "Testing getOsName" 0
-}
-
-function outputTextToStdErr() {
-  echo "This is an error message" 1>&2
-}
-
-function testCaptureOutput() {
-
-  echo "→ captureOutput echo \"Hello world!\""
-  captureOutput echo "Hello world!" && echo "${LAST_RETURNED_VALUE}"
-
-  echo
-  echo "→ captureOutput outputTextToStdErr"
-  captureOutput outputTextToStdErr && echo "${LAST_RETURNED_VALUE2}"
-
-  endTest "Testing captureOutput" 0
-}
-
 function main() {
   testWrapText
-  testCutF
   testFuzzyMatch
-  testGetOsName
-  testCaptureOutput
 }
 
 main

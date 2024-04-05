@@ -110,7 +110,7 @@ You can exclude or include test suite using `-i` and `-e` options on `self test`
 Your command function is not working as expected or seems stuck ? Two ways to approach this problem:
 
 - Run your valet command in the bash debugger on visual studio.
-- Or use the `valet -x` option to enable the profiler (this turns the debug mode on `set -x`). This will output the complete trace in `~/profile_valet_cmd.txt` (or you can choose the destination with the environment variable `VALET_CMD_PROFILING_FILE`).
+- Or use the `valet -x` option to enable the profiler (this turns the debug mode on `set -x`). This will output the complete trace in `~/profile_valet_cmd.txt` (or you can choose the destination with the environment variable `VALET_COMMAND_PROFILING_FILE`). You can see what the profiling file looks like in this [test report](../tests.d/0006-profiler/results.approved.md).
 
 Of course, a simpler strategy is to log stuff with `debug` (you can also do `if isDebugEnabled; then debug "stuff"; fi` to avoid computing a string value for debug).
 
@@ -118,12 +118,4 @@ You can active the debug log level with Valet `-v` option, e.g. `valet -v my com
 
 ## Extra: defining sub commands
 
-If your new command name contains one or more spaces, you are defining a sub command. E.g. `sub cmd` defines a command `cmd` which is a sub command of the `sub` command. It can be useful to regroup commands under a theme. You can have a sub valet menu for the sub command `sub` which displays only the commands under this command.
-
-The body of the function for the `sub` command should be:
-
-```bash
-showSubMenu "$@"
-```
-
-An example is available under `valet.d/cmdd/self.sh`.
+If your new command name contains one or more spaces, you are defining a sub command. E.g. `sub cmd` defines a command `cmd` which is a sub command of the `sub` command. It can be useful to regroup commands under a theme. Valet will show a menu for the command `sub` which displays only the sub commands under this command.

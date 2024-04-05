@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+sourceForFunction "selfRelease"
+
 function testSelfRelease() {
   local -i exitCode
 
@@ -8,8 +10,9 @@ function testSelfRelease() {
   selfRelease -t token -b major --dry-run && exitCode=0 || exitCode=$?
   endTest "Testing selfRelease, dry run major version" $exitCode
 
-  echo "→ LOG_LEVEL_INT=0 selfRelease -t token -b minor"
-  LOG_LEVEL_INT=0 selfRelease -t token -b minor && exitCode=0 || exitCode=$?
+  setLogLevel debug
+  echo "→ selfRelease -t token -b minor"
+  selfRelease -t token -b minor && exitCode=0 || exitCode=$?
   endTest "Testing selfRelease, minor version" $exitCode
 }
 
@@ -61,8 +64,6 @@ function kurlFile() {
 }
 
 function main() {
-  # make sure to source the file in which these known functions are defined
-  sourceForFunction "selfRelease" 2> /dev/null
 
   createTempFile && local tmpFile="${LAST_RETURNED_VALUE}"
   cp -f "${VALET_HOME}/valet.d/version" "${tmpFile}"
@@ -74,3 +75,5 @@ function main() {
 }
 
 main
+
+resetIncludedFiles

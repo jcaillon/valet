@@ -4,7 +4,7 @@
 
 ### Testing help for the showcase hello-world command
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -13,6 +13,7 @@ Exit code: 0
 ABOUT
 
   An hello world command.
+  
 
 USAGE
 
@@ -21,14 +22,14 @@ USAGE
 OPTIONS
 
   -h, --help
-      Display the help for this command
+      Display the help for this command.
 
 
 ```
 
 ### Testing to fuzzy find an help
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -37,6 +38,7 @@ Exit code: 0
 ABOUT
 
   An hello world command.
+  
 
 USAGE
 
@@ -45,7 +47,7 @@ USAGE
 OPTIONS
 
   -h, --help
-      Display the help for this command
+      Display the help for this command.
 
 
 ```
@@ -59,7 +61,7 @@ INFO     Fuzzy matching the command ⌜s h⌝ to ⌜showcase hello-world⌝.
 
 ### Testing help with columns 60
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -82,13 +84,13 @@ OPTIONS
   -nc, --no-colors
       Do not use any colors in the output
       This option can be set by exporting the variable 
-      VALET_NO_COLORS="true".
+      VALET_NO_COLORS='true'.
   -c, --columns <number>
       Set the maximum columns for the help text
       This option can be set by exporting the variable 
-      VALET_COLUMNS="<number>".
+      VALET_COLUMNS='<number>'.
   -h, --help
-      Display the help for this command
+      Display the help for this command.
 
 ARGUMENTS
 
@@ -106,13 +108,14 @@ EXAMPLES
   help --no-colors --columns 50
       Shows the help for the program without any color and 
       with a maximum of 50 columns
+      
 
 
 ```
 
 ### Testing that we catch option errors in help
 
-Exit code: 1
+Exit code: `1`
 
 **Standard** output:
 
@@ -130,7 +133,7 @@ Use valet help --help to get help.
 
 ### Testing that no arguments show the valet help
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -159,19 +162,19 @@ ABOUT
   
   In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
   
-  - VALET_USER_DIRECTORY="~/valet.d": set the path to the valet user directory (in which to find user commands).
-  - VALET_NO_COLOR="true": will disable the color output for logs and help.
-  - VALET_COLOR_XXX="color": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, 
+  - VALET_USER_DIRECTORY=\"~/valet.d\": set the path to the valet user directory (in which to find user commands).
+  - VALET_NO_COLOR=\"true\": will disable the color output for logs and help.
+  - VALET_COLOR_XXX=\"color\": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, 
   ERROR, TIMESTAMP, HIGHLIGHT.
-  - VALET_NO_WRAP="true": will disable the text wrapping for logs.
-  - VALET_NO_ICON="true": will disable the icons for logs and help.
-  - VALET_NO_TIMESTAMP="true": will disable the timestamp for logs.
-  - VALET_LOG_COLUMNS="120": set the number of columns at which to wrap the logs to 120 (if wrap is enabled); defaults to the terminal width.
-  - VALET_CI_MODE="true": will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full 
+  - VALET_NO_WRAP=\"true\": will disable the text wrapping for logs.
+  - VALET_NO_ICON=\"true\": will disable the icons for logs and help.
+  - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
+  - VALET_LOG_COLUMNS=\"120\": set the number of columns at which to wrap the logs to 120 (if wrap is enabled); defaults to the terminal width.
+  - VALET_CI_MODE='true': will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full 
   date.
-  - VALET_REMEMBER_LAST_CHOICES="3": number of last choices to remember when selecting an item from a command menu. Set to 0 to disable this feature and always display items in the
+  - VALET_REMEMBER_LAST_CHOICES='3': number of last choices to remember when selecting an item from a command menu. Set to 0 to disable this feature and always display items in the
   alphabetical order.
-  - VALET_DO_NOT_USE_LOCAL_BIN="false": if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
+  - VALET_DO_NOT_USE_LOCAL_BIN='false': if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
   
   These variables can be exported in your .bashrc file.
   Alternatively, you can define them in your valet user config file, located by default at ~/.config/valet/config. This path can be configured using the VALET_USER_CONFIG_FILE 
@@ -191,33 +194,33 @@ OPTIONS
       Turn on profiling (with debug mode) before running the required command.
       It will output to ~/profile_valet_cmd.txt.
       This is useful to debug your command and understand what takes a long time to execute.
-      This option can be set by exporting the variable VALET_PROFILING="true".
+      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable 
+      VALET_KEEP_ALL_PROFILER_LINES to true.
+      This option can be set by exporting the variable VALET_PROFILING='true'.
   -ll, -log, --log-level <level>
       Set the log level of valet (defaults to info).
       Possible values are: debug, success, info, success, warning, error.
-      This option can be set by exporting the variable VALET_LOG_LEVEL="<level>".
+      This option can be set by exporting the variable VALET_LOG_LEVEL='<level>'.
   -v, --verbose
       Output verbose information.
       This is the equivalent of setting the log level to debug.
-      This option can be set by exporting the variable VALET_VERBOSE="true".
+      This option can be set by exporting the variable VALET_VERBOSE='true'.
   -i, --force-interactive-mode
       Enter interactive mode for commands even if arguments are not required or provided.
-      This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE="true".
+      This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
   --version
       Display the current version of valet.
   -h, --help
-      Display the help for this command
+      Display the help for this command.
 
 COMMANDS
 
-  showcase hello-world
-      An hello world command
+  help
+      Show the help this program or of a specific command.
   self build
       Re-build the menu of valet from your commands.
   self download-binaries
       Download the required binaries for valet.
-  self
-      Show the valet self-maintenance sub menu.
   self release
       Release a new version of valet.
   self test
@@ -228,14 +231,12 @@ COMMANDS
       Update valet using the latest release on GitHub.
   self welcome-user
       The command run after the installation of Valet to guide the user.
-  showcase sudo-command
-      A command that requires sudo
-  help
-      Show the help this program or of a specific command
   showcase command1
       A showcase command that uses arguments and options.
-  showcase
-      Show the showcase sub menu.
+  showcase hello-world
+      An hello world command.
+  showcase sudo-command
+      A command that requires sudo.
 
 EXAMPLES
 
@@ -243,13 +244,14 @@ EXAMPLES
       Displays this help text.
   -v a-command and-sub-command
       Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
+      
 
 
 ```
 
 ### Testing that we can display the help of a function using showHelp
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -257,52 +259,16 @@ Exit code: 0
 → valet self test-core --show-help
 ABOUT
 
-  Test valet core features using approval tests approach.
+  Show a menu with sub commands for the current command.
 
 USAGE
 
-  valet self test-core [options]
+  valet selfTestCore [options]
 
 OPTIONS
 
-  -a, --auto-approve
-      The received test result files will automatically be approved.
-      This option can be set by exporting the variable VALET_AUTO_APPROVE="true".
-  -i, --include <pattern>
-      A regex pattern to include only the test suites that match the pattern.
-      
-      The name of the test suite is given by the name of the directory containing the .sh test files.
-      
-      Example: --include '(1|commands)'
-      This option can be set by exporting the variable VALET_INCLUDE="<pattern>".
-  -e, --exclude <pattern>
-      A regex pattern to exclude all the test suites that match the pattern.
-      
-      The name of the test suite is given by the name of the directory containing the .sh test files.
-      
-      Example: --exclude '(1|commands)'
-      This option can be set by exporting the variable VALET_EXCLUDE="<pattern>".
-  --error
-      Test the error handling.
-  --fail
-      Test the fail.
-  --exit
-      Test the exit code.
-  --unknown-command
-      Test with an unknown command.
-  --create-temp-files
-      Test to create temp file and directory.
-  --create-temp-files
-      Test to create temp file and directory.
-  --logging-level
-      Test to output all log level messages.
-  --wait-indefinitely
-      Test to wait indefinitely.
-  --show-help
-      Test to show the help of the function.
-      This option can be set by exporting the variable VALET_SHOW_HELP="true".
   -h, --help
-      Display the help for this command
+      Display the help for this command.
 
 
 ```
@@ -311,7 +277,7 @@ OPTIONS
 
 ### Testing that we correctly parse arguments and options and fail if they don't match
 
-Exit code: 1
+Exit code: `1`
 
 **Standard** output:
 
@@ -331,7 +297,7 @@ Use valet self test-core --help to get help.
 
 ### Testing that a command with sudo ask for sudo privileges
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -351,7 +317,7 @@ INFO     This command requires sudo privileges.
 
 ### Testing error handling
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -372,7 +338,7 @@ ERROR    Error code 1 in selfTestCore(), stack:
 
 ### Testing exit message and custom onExit function
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -394,7 +360,7 @@ EXIT     Exiting with code 5, stack:
 
 ### Testing fail function
 
-Exit code: 1
+Exit code: `1`
 
 **Standard** output:
 
@@ -410,7 +376,7 @@ ERROR    This is for testing valet core functions, failing now.
 
 ### Testing unknown command handling
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -433,54 +399,9 @@ ERROR    Error code 1 in selfTestCore(), stack:
 
 ## Test script 04.interactive-mode
 
-### Testing showInteractiveCommandsMenu, should return the last line of the input stream
-
-Exit code: 0
-
-**Standard** output:
-
-```plaintext
-→ showInteractiveCommandsMenu "ReturnLast My header
-2 lines" "cm1  	This is command 1
-cm2  	This is command 2
-sub cmd1  	This is sub command 1
-sub cmd2  	This is sub command 2
-another3  	This is another command 3"
-
-```
-
-**Error** output:
-
-```log
-▶ called fzf --history=/tmp/d1-0/fzf-history-test-menu --history-size=50 --bind alt-up:prev-history --bind alt-down:next-history --bind=alt-h:preview(echo -e 'HELP
-
-Navigate through the options with the UP/DOWN keys.
-
-Validate your choice with ENTER.
-
-Cancel with ESC or CTRL+C.
-
-ADDITIONAL KEY BINDINGS
-
-ALT+H: Show this help.
-ALT+/: Rotate through the preview options (this pane).
-ALT+UP/ALT+DOWN: Previous/next query in the history.
-SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
-') --preview-window=right,4989 --bind alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|) --layout=reverse --info=right --pointer=◆ --marker=✓ --cycle --tiebreak=begin,index --margin=0 --padding=0 --delimiter=
- --tabstop=3 --header-first --header=Press ALT+H to display the help and keybindings.
-ReturnLast My header
-2 lines --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}
-▶ fzf input stream was:
-⌈cm1  	This is command 1
-cm2  	This is command 2
-sub cmd1  	This is sub command 1
-sub cmd2  	This is sub command 2
-another3  	This is another command 3⌉
-```
-
 ### Testing that valet can be called without any arguments and show the menu
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -491,7 +412,7 @@ Exit code: 0
 **Error** output:
 
 ```log
-▶ called fzf --history=/tmp/d1-0/fzf-history-main-menu --history-size=50 --bind alt-up:prev-history --bind alt-down:next-history --bind=alt-h:preview(echo -e 'HELP
+▶ called ⌈fzf --history=/tmp/d1-0/fzf-history-main-menu --history-size=50 --bind alt-up:prev-history --bind alt-down:next-history --bind=alt-h:preview(echo -e 'HELP
 
 Navigate through the options with the UP/DOWN keys.
 
@@ -505,30 +426,28 @@ ALT+H: Show this help.
 ALT+/: Rotate through the preview options (this pane).
 ALT+UP/ALT+DOWN: Previous/next query in the history.
 SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
-') --preview-window=right,4989 --bind alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|) --layout=reverse --info=right --pointer=◆ --marker=✓ --cycle --tiebreak=begin,index --margin=0 --padding=0 --delimiter=
+') --preview-window=right,80 --bind alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|) --layout=reverse --info=right --pointer=◆ --marker=✓ --cycle --tiebreak=begin,index --margin=0 --padding=0 --delimiter=
  --tabstop=3 --header-first --header=Press ALT+H to display the help and keybindings.
-Please select the command to run. --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}
+Please select the command to run. --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
 ▶ fzf input stream was:
-⌈help                    	Show the help this program or of a specific command
-self build              	Re-build the menu of valet from your commands.
-self download-binaries  	Download the required binaries for valet.
-self release            	Release a new version of valet.
-self                    	Show the valet self-maintenance sub menu.
-self test-core          	Test valet core features.
-self test               	Test your valet custom commands.
-self update             	Update valet using the latest release on GitHub.
-self welcome-user       	The command run after the installation of Valet to guide the user.
-showcase command1       	A showcase command that uses arguments and options.
-showcase hello-world    	An hello world command
-showcase                	Show the showcase sub menu.
-showcase sudo-command   	A command that requires sudo⌉
+⌈help                  	Show the help this program or of a specific command.
+self build            	Re-build the menu of valet from your commands.
+self download-binaries	Download the required binaries for valet.
+self release          	Release a new version of valet.
+self test             	Test your valet custom commands.
+self test-core        	Test valet core features.
+self update           	Update valet using the latest release on GitHub.
+self welcome-user     	The command run after the installation of Valet to guide the user.
+showcase command1     	A showcase command that uses arguments and options.
+showcase hello-world  	An hello world command.
+showcase sudo-command 	A command that requires sudo.⌉
 ```
 
 ## Test script 05.logging
 
 ### Testing log with success level
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -546,7 +465,7 @@ With a second line.
 
 ### Testing log with warning level
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -563,7 +482,7 @@ With a second line.
 
 ### Testing log with debug level
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -582,10 +501,10 @@ DEBUG    Loaded file ⌜$VALET_HOME/valet.d/commands.d/self-test.sh⌝.
 DEBUG    Running the command ⌜self test-core⌝ with the function ⌜selfTestCore⌝ and the arguments ⌜--logging-level⌝.
 DEBUG    Parsed arguments:
 local parsingErrors autoApprove include exclude error fail exit unknownCommand createTempFiles createTempFiles loggingLevel waitIndefinitely showHelp help
-autoApprove="${AUTO_APPROVE:-}"
-include="${INCLUDE:-}"
-exclude="${EXCLUDE:-}"
-showHelp="${SHOW_HELP:-}"
+autoApprove="${VALET_AUTO_APPROVE:-}"
+include="${VALET_INCLUDE:-}"
+exclude="${VALET_EXCLUDE:-}"
+showHelp="${VALET_SHOW_HELP:-}"
 parsingErrors=""
 loggingLevel="true"
 
@@ -600,7 +519,7 @@ DEBUG    Exiting with code 0 after Xs.
 
 ### Testing default logging
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -623,7 +542,7 @@ Exit code: 0
 
 ### Testing no color logging
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -646,7 +565,7 @@ HH:MM:SS WARNING   This is a warning message.
 
 ### Testing CI MODE logging
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -665,7 +584,7 @@ With a second line.
 
 ### Testing no timestamp logging
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -688,7 +607,7 @@ WARNING   This is a warning message.
 
 ### Testing no icon logging
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -711,7 +630,7 @@ HH:MM:SS WARNING  This is a warning message.
 
 ### Testing no wrap logging
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -730,7 +649,7 @@ With a second line.
 
 ### Testing wrap at 80 logging
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -759,7 +678,7 @@ HH:MM:SS WARNING   This is a warning message.
 
 ### Testing version option
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -770,7 +689,7 @@ OK, we got a version.
 
 ### Testing unknown option, corrected with fuzzy match
 
-Exit code: 1
+Exit code: `1`
 
 **Standard** output:
 
@@ -786,7 +705,7 @@ ERROR    Unknown option ⌜-prof⌝ (did you mean ⌜--profiling⌝?)).
 
 ### Testing temp files/directories creation, cleaning and custom cleanUp
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -810,7 +729,7 @@ WARNING  This is a custom clean up function.
 
 ### Testing with a non existing user directory
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -831,25 +750,11 @@ WARNING  This is a warning message.
 With a second line.
 ```
 
-## Test script 07.profiler
-
-### Testing profiling for command and startup
-
-Exit code: 0
-
-**Standard** output:
-
-```plaintext
-→ valet --log-level error -x self test-core --logging-level
-OK, command profiling file is not empty.
-OK, startup profiling file is not empty.
-```
-
 ## Test script 08.submenu
 
 ### Testing that we go into the interactive sub menu with no arguments
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -860,7 +765,7 @@ Exit code: 0
 **Error** output:
 
 ```log
-▶ called fzf --history=/tmp/d1-0/fzf-history-selfMenu
+▶ called ⌈fzf --history=/tmp/d1-0/fzf-history-self
 --history-size=50
 --bind
 alt-up:prev-history
@@ -881,7 +786,7 @@ ALT+/: Rotate through the preview options (this pane).
 ALT+UP/ALT+DOWN: Previous/next query in the history.
 SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
 ')
---preview-window=right,4989
+--preview-window=right,80
 --bind
 alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|)
 --layout=reverse
@@ -901,20 +806,20 @@ Please select the command to run.
 --print-query
 --no-multi
 --preview-label=Command help
---preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}
+--preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
 ▶ fzf input stream was:
-⌈self build              	Re-build the menu of valet from your commands.
-self download-binaries  	Download the required binaries for valet.
-self release            	Release a new version of valet.
-self test-core          	Test valet core features.
-self test               	Test your valet custom commands.
-self update             	Update valet using the latest release on GitHub.
-self welcome-user       	The command run after the installation of Valet to guide the user.⌉
+⌈self build            	Re-build the menu of valet from your commands.
+self download-binaries	Download the required binaries for valet.
+self release          	Release a new version of valet.
+self test             	Test your valet custom commands.
+self test-core        	Test valet core features.
+self update           	Update valet using the latest release on GitHub.
+self welcome-user     	The command run after the installation of Valet to guide the user.⌉
 ```
 
 ### Testing that we can display the help of a sub menu
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -922,9 +827,7 @@ Exit code: 0
 → valet self -h
 ABOUT
 
-  Show the valet self-maintenance sub menu.
-  
-  This is a sub command that regroups commands useful to maintain valet.
+  Show a menu with sub commands for the current command.
 
 USAGE
 
@@ -933,36 +836,31 @@ USAGE
 OPTIONS
 
   -h, --help
-      Display the help for this command
+      Display the help for this command.
 
 COMMANDS
 
-  build
-      Re-build the menu of valet from your commands.
-  download-binaries
-      Download the required binaries for valet.
-  release
-      Release a new version of valet.
-  test
-      Test your valet custom commands.
-  test-core
-      Test valet core features.
-  update
-      Update valet using the latest release on GitHub.
-  welcome-user
-      The command run after the installation of Valet to guide the user.
-
-EXAMPLES
-
   self build
-      Re-build the valet menu by calling the ⌜build⌝ sub command.
+      Re-build the menu of valet from your commands.
+  self download-binaries
+      Download the required binaries for valet.
+  self release
+      Release a new version of valet.
+  self test
+      Test your valet custom commands.
+  self test-core
+      Test valet core features.
+  self update
+      Update valet using the latest release on GitHub.
+  self welcome-user
+      The command run after the installation of Valet to guide the user.
 
 
 ```
 
 ### Testing that we catch option errors in sub menu
 
-Exit code: 1
+Exit code: `1`
 
 **Standard** output:
 

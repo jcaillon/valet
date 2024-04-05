@@ -13,12 +13,14 @@ function testFuzzyMatchCommandtoFunctionName() {
   fuzzyMatchCommandtoFunctionName "se bu other stuff dont care"
   echo "${LAST_RETURNED_VALUE}"
   echo "${LAST_RETURNED_VALUE2}"
+  echo "${LAST_RETURNED_VALUE3}"
 
   echo
   echo "→ fuzzyMatchCommandtoFunctionName 'sf' 'nop' 'other' 'stuff' 'dont care'"
   fuzzyMatchCommandtoFunctionName "sf" "nop" "other" "stuff" "dont care"
   echo "${LAST_RETURNED_VALUE}"
   echo "${LAST_RETURNED_VALUE2}"
+  echo "${LAST_RETURNED_VALUE3}"
 
   endTest "Testing fuzzyMatchCommandtoFunctionName" 0
 }

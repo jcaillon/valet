@@ -4,7 +4,7 @@
 
 ### Testing sortCommands without prior choices, the order of commands is kept
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -19,7 +19,7 @@ another3  	This is another command 3
 
 ### Testing sortCommands after choosing another3 then cm2
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -36,7 +36,7 @@ sub cmd2  	This is sub command 2
 
 ### Testing sortCommands, with VALET_REMEMBER_LAST_CHOICES=0 the order does not change
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -51,7 +51,7 @@ another3  	This is another command 3
 
 ### Testing sortCommands for another id, the order of commands should be the initial one
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -66,7 +66,7 @@ another3  	This is another command 3
 
 ### Testing addLastChoice after adding more than 5 commands, we only keep the last 5
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -82,7 +82,7 @@ cm6
 
 ### Testing addLastChoice after adding the same command multiple times only keeps the last one
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -100,7 +100,7 @@ cm7
 
 ### Testing parseFunctionArguments
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -108,8 +108,7 @@ Exit code: 0
 → parseFunctionArguments showcaseCommand1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
-option1="${OPTION1:-}"
-thisIsOption2="${THIS_IS_OPTION2:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝."
 more=(
 )
@@ -139,8 +138,7 @@ more=(
 → parseFunctionArguments showcaseCommand1 -unknown -what optionValue2 arg
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
-option1="${OPTION1:-}"
-thisIsOption2="${THIS_IS_OPTION2:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 parsingErrors="Unknown option ⌜-unknown⌝.
 Unknown option ⌜-what⌝."
 firstArg="optionValue2"
@@ -151,8 +149,7 @@ more=(
 → parseFunctionArguments showcaseCommand1 arg more1 more2 -o
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
-option1="${OPTION1:-}"
-thisIsOption2="${THIS_IS_OPTION2:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 parsingErrors="Option ⌜-o⌝ was given after the first argument, it should come before that."
 firstArg="arg"
 more=(
@@ -163,8 +160,7 @@ more=(
 → parseFunctionArguments showcaseCommand1 -this arg more1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
-option1="${OPTION1:-}"
-thisIsOption2="${THIS_IS_OPTION2:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 parsingErrors="Unknown option ⌜-this⌝ (did you mean ⌜--this-is-option2⌝?)."
 firstArg="arg"
 more=(
@@ -174,7 +170,6 @@ more=(
 → parseFunctionArguments showcaseCommand1 --this-is-option2 --option1 arg more1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
-option1="${OPTION1:-}"
 parsingErrors=""
 thisIsOption2="--option1"
 firstArg="arg"
@@ -187,7 +182,7 @@ more=(
 
 ### Testing getFunctionNameFromCommand
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -198,7 +193,7 @@ selfBuild
 
 ### Testing fuzzyMatchCommandtoFunctionName
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -206,10 +201,12 @@ Exit code: 0
 → fuzzyMatchCommandtoFunctionName 'se bu other stuff dont care'
 selfBuild
 2
+self build
 
 → fuzzyMatchCommandtoFunctionName 'sf' 'nop' 'other' 'stuff' 'dont care'
-selfMenu
+_menu
 1
+self
 ```
 
 **Error** output:
@@ -221,7 +218,7 @@ INFO     Fuzzy matching the command ⌜sf⌝ to ⌜self⌝.
 
 ### Testing getMaxPossibleCommandLevel
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -241,7 +238,7 @@ Exit code: 0
 
 ### Testing fuzzyFindOption
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 

@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -z "${_TEST_0000_COMMON_UTILS:-}" ]]; then
-  source ".before-test"
-fi
+source ".before-test"
 
 function testInteractiveSubMenu() {
   # test that we go into the interactive menu with no arguments

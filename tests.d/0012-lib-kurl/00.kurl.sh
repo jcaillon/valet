@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+include kurl
+
 function testKurlFile() {
   mkdir -p "${_TEMPORARY_DIRECTORY}" &>/dev/null
   local tmpFile="${_TEMPORARY_DIRECTORY}/kurl-test"
@@ -16,7 +18,9 @@ function testKurlFile() {
   endTest "Testing kurlFile, http code 500 not acceptable return 1" 0
 
   echo "→ kurlFile true '' \"\${tmpFile}\" --code 500 https://hello.com"
+  export ERROR_DISPLAY=1
   (kurlFile true '' "${tmpFile}" --code 500 https://hello.com)
+  unset ERROR_DISPLAY
   endTest "Testing kurlFile, http code 500 not acceptable fails" 0
 
   echo "→ kurlFile false '300,500,999' \"\${tmpFile}\" --code 500 https://hello.com"
@@ -26,13 +30,13 @@ function testKurlFile() {
 
   # test debug mode
   echo "→ kurlFile false '' \"\${tmpFile}\" --code 400 --error https://hello.com/bla --otherOpt"
-  LOG_LEVEL_INT=0
+  setLogLevel debug
   kurlFile false '' "${tmpFile}" --code 400 --error https://hello.com/bla --otherOpt && exitCode=0 || exitCode=$?
   echoOutputKurlFile $exitCode "${tmpFile}"
   endTest "Testing kurlFile, testing debug mode https code 400" 0
 
   echo "→ kurlFile false '' \"\${tmpFile}\" --code 200 http://hello.com"
-  LOG_LEVEL_INT=0
+  setLogLevel debug
   kurlFile false '' "${tmpFile}" --code 200 http://hello.com && exitCode=0 || exitCode=$?
   echoOutputKurlFile $exitCode "${tmpFile}"
   endTest "Testing kurlFile, testing debug mode http code 200" 0
@@ -72,7 +76,7 @@ function testKurl() {
 
   # test debug mode
   echo "→ kurl false '' --code 400 http://hello.com"
-  LOG_LEVEL_INT=0
+  setLogLevel debug
   kurl false '' --code 400 http://hello.com && exitCode=0 || exitCode=$?
   echoOutputKurl $exitCode
   endTest "Testing kurl, debug mode, with content http code 400" 0
@@ -91,6 +95,10 @@ function echoOutputKurl() {
   echo "${debugMessage}"
 }
 
+function main() {
+  testKurlFile
+  testKurl
+}
 
 # Override curl for tests
 # shellcheck disable=SC2317
@@ -117,11 +125,6 @@ function curl() {
     esac
     shift
   done
-}
-
-function main() {
-  testKurlFile
-  testKurl
 }
 
 main

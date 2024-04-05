@@ -182,6 +182,8 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - We can have fuzzy matching on options too; just make sure it is not ambiguous.
 - Create a valet-community-commands where everyone can contribute to new default commands for Valet.
 - Optional strict mode (env var) to disable fuzzy matching (to not mistakenly execute a command on ci for instance).
+- head / tail from file
+
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

@@ -1,0 +1,301 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# This function returns the absolute path of a file.
+# The file must exists for this function to work.
+#
+# $1: The file to get the absolute path.
+#
+# Returns:
+#   LAST_RETURNED_VALUE: The absolute path of the file.
+#
+# Usage:
+#   toAbsolutePath "myFile" && local myFileAbsolutePath="${LAST_RETURNED_VALUE}"
+function toAbsolutePath() {
+  local file="${1%/}"
+
+  if [[ "${file}" == "/"* ]]; then
+    LAST_RETURNED_VALUE="${file}"
+    return 0
+  fi
+
+  LAST_RETURNED_VALUE="${PWD}/${file##*/}"
+  if [[ -f "${LAST_RETURNED_VALUE}" ]]; then
+    return 0
+  fi
+
+  if pushd "${file%/*}" &>/dev/null; then
+    LAST_RETURNED_VALUE="${PWD}/${file##*/}"
+    popd &>/dev/null
+    return 0
+  fi
+
+  LAST_RETURNED_VALUE="${file}"
+}
+
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to temporary files.
+#
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
+# $3: true/false to indicate if the 4th argument represents a file path or directly the content for stdin
+# $4: the stdin (can be empty)
+# $5: the executable to invoke
+# $6+: the arguments to pass to the executable
+#
+# Returns:
+#   The exit code of the function is the exit code of the executable.
+#   The stdout file of the executable in the global variable LAST_RETURNED_VALUE.
+#   The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#   invoke5 "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || fail "fzf failed."
+#   stdoutFilePath="${LAST_RETURNED_VALUE}"
+#   stderrFilePath="${LAST_RETURNED_VALUE2}"
+function invoke5() {
+  local failIfFails acceptableErrorCodes stdInFromFile stdIn executable
+  failIfFails="${1}"
+  acceptableErrorCodes="${2}"
+  stdInFromFile="${3}"
+  stdIn="${4}"
+  executable="${5}"
+  shift 5
+
+  # reset the output files, but only if they already exist
+  [[ -s "${_TEMPORARY_STDOUT_FILE}" ]] && : > "${_TEMPORARY_STDOUT_FILE}"
+  [[ -s "${_TEMPORARY_STDERR_FILE}" ]] && : > "${_TEMPORARY_STDERR_FILE}"
+
+  getCommandFullPath "${executable}"
+  executable="${LAST_RETURNED_VALUE}"
+
+  # if debug mode is on, print some info
+  if isDebugEnabled; then
+    local debugMessage="Executing the command ⌜${executable}⌝."$'\n'
+    debugMessage+="Fail if it fails: ⌜${failIfFails}⌝"$'\n'
+    debugMessage+="Acceptable error codes: ⌜${acceptableErrorCodes}⌝"$'\n'
+    debugMessage+="Standard stream from file: ⌜${stdInFromFile}⌝"$'\n'
+    debugMessage+="Standard stream: ⌜${stdIn}⌝"$'\n'
+    debugMessage+="Extra parameters: ⌜${*}⌝"
+    debug "${debugMessage}"
+  fi
+
+  # execute the executable
+  local -i exitCode=0
+  if [[ -n "${stdIn}" ]]; then
+    if [[ "${stdInFromFile}" == "true" ]]; then
+      "${executable}" "$@" < "${stdIn}" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+    else
+      "${executable}" "$@" <<< "${stdIn}" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+    fi
+  else
+    "${executable}" "$@" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+  fi
+
+  local debugMessage="The command ⌜${executable}⌝ originally ended with exit code ⌜${exitCode}⌝."
+
+  # if the error code is acceptable, then we set it to 0
+  if [[ ",${acceptableErrorCodes}," == *",${exitCode},"* ]]; then
+    exitCode=0
+    debugMessage+=$'\n'"The error code ⌜${exitCode}⌝ is acceptable and has been reset to 0."
+  fi
+
+  local shouldFail=false
+  [[ "${failIfFails}" == "true" && exitCode -ne 0 ]] && shouldFail=true
+
+  # fail if needed or we are debug mode; display all the debug information that could be useful
+  if isDebugEnabled || [[ "${shouldFail}" == "true" ]]; then
+
+    # append std out
+    if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
+      readFile "${_TEMPORARY_STDOUT_FILE}" 5000
+      if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
+      debugMessage+=$'\n'"Standard output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
+    fi
+    # append stderr
+    if [[ -s "${_TEMPORARY_STDERR_FILE}" ]]; then
+      readFile "${_TEMPORARY_STDERR_FILE}" 5000
+      if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
+      debugMessage+=$'\n'"Error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
+    fi
+
+    if [[ "${shouldFail}" == "true" ]]; then
+      fail "${debugMessage}"
+    else
+      debug "${debugMessage}"
+    fi
+  fi
+
+  LAST_RETURNED_VALUE="${_TEMPORARY_STDOUT_FILE}"
+  LAST_RETURNED_VALUE2="${_TEMPORARY_STDERR_FILE}"
+  return ${exitCode}
+}
+
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to temporary files.
+#
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
+# $3: the executable to invoke
+# $4+: the arguments to pass to the executable
+#
+# Returns:
+#   The exit code of the function is the exit code of the executable.
+#   The stdout file of the executable in the global variable LAST_RETURNED_VALUE.
+#   The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#   invoke3 "false" "false" "fzf" "--height=10" || fail "fzf failed."
+#   stdoutFilePath="${LAST_RETURNED_VALUE}"
+#   stderrFilePath="${LAST_RETURNED_VALUE2}"
+function invoke3() {
+  local failIfFails acceptableErrorCodes executable
+  failIfFails="${1}"
+  acceptableErrorCodes="${2}"
+  shift 2
+
+  invoke5 "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
+}
+
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to environment variables.
+#
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
+# $3: true/false to indicate if the 4th argument represents a file path or directly the content for stdin
+# $4: the stdin (can be empty)
+# $5: the executable to invoke
+# $6+: the arguments to pass to the executable
+#
+# Returns:
+#   The exit code of the function is the exit code of the executable.
+#   The content of stdout in the global variable LAST_RETURNED_VALUE.
+#   The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#   invoke5var "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || fail "fzf failed."
+#   stdout="${LAST_RETURNED_VALUE}"
+#   stderr="${LAST_RETURNED_VALUE2}"
+function invoke5var() {
+  local -i exitCode=0
+  invoke5 "$@" || exitCode=$?
+  local stdOutFile="${LAST_RETURNED_VALUE}"
+  local stdErrFile="${LAST_RETURNED_VALUE2}"
+
+  readFile "${stdErrFile}"
+  LAST_RETURNED_VALUE2="${LAST_RETURNED_VALUE}"
+  readFile "${stdOutFile}"
+
+  return ${exitCode}
+}
+
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to environment variables.
+#
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
+# $3: the executable to invoke
+# $4+: the arguments to pass to the executable
+#
+# Returns:
+#   The exit code of the function is the exit code of the executable.
+#   The content of stdout in the global variable LAST_RETURNED_VALUE.
+#   The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#   invoke3var "false" "130,2" "fzf" "--height=10" || fail "fzf failed."
+#   stdout="${LAST_RETURNED_VALUE}"
+#   stderr="${LAST_RETURNED_VALUE2}"
+function invoke3var() {
+  local failIfFails acceptableErrorCodes executable
+  failIfFails="${1}"
+  acceptableErrorCodes="${2}"
+  shift 2
+
+  invoke5var "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
+}
+
+# This function call an executable and its arguments.
+# If the execution fails, it will fail the script and show the std/err output.
+# Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
+#
+# Returns:
+#  The content of stdout in the global variable LAST_RETURNED_VALUE.
+#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#  invoke git add --all
+function invoke() {
+  invoke5var "true" "0" "" "" "$@"
+}
+
+# Will return the full path of the given command if it is found in the bin folder of valet.
+#
+# $1: the command to find
+#
+# Usage:
+#   getCommandFullPath "fzf" && local fullPath="${LAST_RETURNED_VALUE}"
+function getCommandFullPath() {
+  local executable="${1}"
+  local possibleExecutablePath="${VALET_BIN_PATH:-"${VALET_HOME}/bin"}/${executable}"
+  if [[ "${VALET_DO_NOT_USE_LOCAL_BIN:-false}" != "true" && -x "${possibleExecutablePath}" ]]; then
+    executable="${possibleExecutablePath}"
+  fi
+  LAST_RETURNED_VALUE="${executable}"
+}
+
+# Execute the given command and return the output in the global variable LAST_RETURNED_VALUE.
+#
+# $1+: the command to execute (with args)
+#
+# Returns:
+#   exit with code 1 if the command fails.
+#   The output of the command in the global variable LAST_RETURNED_VALUE.
+#   The error output of the command in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#   captureOutput "ls -l" && local lsOutput="${LAST_RETURNED_VALUE}"
+function captureOutput() {
+  local -i exitCode=0
+  "$@" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+
+  readFile "${_TEMPORARY_STDERR_FILE}"
+  LAST_RETURNED_VALUE2="${LAST_RETURNED_VALUE}"
+
+  readFile "${_TEMPORARY_STDOUT_FILE}"
+
+  return ${exitCode}
+}
+
+# Reads the content of a file and returns it in the global variable LAST_RETURNED_VALUE.
+# Uses pure bash.
+#
+# $1: the file path to read
+# $2: (optional) the maximum number of characters to read
+#
+# Notes:
+#   If the file does not exist, the function will return an empty string instead of failing.
+#
+# Returns:
+#   The content of the file in the global variable LAST_RETURNED_VALUE.
+#
+# Usage:
+#   readFile "/path/to/file" && local fileContent="${LAST_RETURNED_VALUE}"
+#   readFile "/path/to/file" 500 && local fileContent="${LAST_RETURNED_VALUE}"
+function readFile() {
+  local filePath="${1}"
+  local -i maxCharacters="${2:-0}"
+
+  if [ ! -s "${filePath}" ]; then
+    LAST_RETURNED_VALUE=""
+    return 0
+  fi
+
+  local IFS=
+  if [ "${maxCharacters}" -gt 0 ]; then
+    read -rd '' -n "${maxCharacters}" LAST_RETURNED_VALUE < "${filePath}" || true
+  else
+    read -rd '' LAST_RETURNED_VALUE < "${filePath}" || true
+  fi
+}

@@ -7,14 +7,15 @@
 if [ -z "${_CORE_INCLUDED:-}" ]; then
   VALETD_DIR="${BASH_SOURCE[0]}"
   if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null;
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then
+      VALETD_DIR="${PWD}"
+      popd &>/dev/null
     else VALETD_DIR="${PWD}"; fi
   else VALETD_DIR="${VALETD_DIR%/*}"; fi
   # shellcheck source=../core
   source "${VALETD_DIR%/*}/core"
 fi
 # --- END OF COMMAND COMMON PART
-
 
 #===============================================================
 # >>> command: self test
@@ -75,7 +76,7 @@ function selfTest() {
     # if the directory is not a directory, skip
     [ ! -d "${testsDirectory}" ] && continue
     # if the directory is named .tests.d, then it is a test directory
-    if [[ "${testsDirectory}" == *"/.tests.d" ]]; then
+    if [[ "${testsDirectory}" == *"/tests.d" ]]; then
       inform "Running all test suites in directory ⌜${testsDirectory}⌝."
       runTestSuites "${testsDirectory}"
     fi
@@ -89,12 +90,10 @@ function selfTest() {
     if [[ ! -d "${VALET_HOME}/tests.d" ]]; then
       warn "The valet core tests directory ⌜${VALET_HOME}/tests.d⌝ does not exist, skipping core tests."
     else
-      inform "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
-      runTestSuites "${VALET_HOME}/tests.d"
+      runCoreTests
     fi
   fi
 }
-
 
 #===============================================================
 # >>> command: self test-core
@@ -214,9 +213,8 @@ function selfTestCore() {
   elif [ -n "${showHelp:-}" ]; then
     showHelp
   else
-    # default to running all tests
-    inform "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
-    runTestSuites "${VALET_HOME}/tests.d"
+    # default to running tests
+    runCoreTests
   fi
 }
 
@@ -226,46 +224,62 @@ function returnOne() { return 1; }
 # >>> Functions that can be used in the test files
 #===============================================================
 
+# Call this function to add a paragraph in the report file.
+#
+# $1: the text to add in the report file
+#
+# Usage:
+#   commentTest "This is a comment."
+function commentTest() {
+  printf "%s\n\n" "${1:-}" >>"${_TEST_REPORT_FILE}"
+}
+
+
 # Call this function after each test to write the test results to the report file.
 # This create a new H3 section in the report file with the test description and the exit code.
 #
-# $1: the description of the test
+# $1: the title of the test
 # $2: the exit code of the test
+# $3: (optional) a text to explain what is being tested
 #
 # Usage:
 #   endTest "Testing something" $?
 function endTest() {
-  local testDescription="${1:-}"
+  local testTitle="${1:-}"
   local exitCode="${2:-}"
+  local testDescription="${3:-}"
 
-  # reset the standard output and error output
   resetFdRedirection
 
-  debug "Ended test ⌜${testDescription}⌝ with exit code ⌜${exitCode}⌝."
+  {
+    debug "Ended test ⌜${testTitle}⌝ with exit code ⌜${exitCode}⌝."
 
-  # write the test title
-  printf "%s\n\n" "### ${testDescription:-test}" >>"${_TEST_REPORT_FILE}"
+    # write the test title
+    printf "%s\n\n" "### ${testTitle:-test}"
 
-  # write the exit code
-  printf "%s\n\n" "Exit code: ${exitCode}" >>"${_TEST_REPORT_FILE}"
+    # write the test description if any
+    if [ -n "${testDescription}" ]; then
+      printf "%s\n\n" "${testDescription}"
+    fi
 
-  # write the standard output if any
-  if [ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]; then
-    {
+    # write the exit code
+    printf "%s\n\n" "Exit code: \`${exitCode}\`"
+
+    # write the standard output if any
+    if [ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]; then
       printf "%s\n\n%s\n" "**Standard** output:" "\`\`\`plaintext"
       echoFileSubstitutingPath "${_TEST_STANDARD_OUTPUT_FILE}"
       printf "\n%s\n\n" "\`\`\`"
-    } >>"${_TEST_REPORT_FILE}"
-  fi
+    fi
 
-  # write the error output if any
-  if [ -s "${_TEST_STANDARD_ERROR_FILE}" ]; then
-    {
+    # write the error output if any
+    if [ -s "${_TEST_STANDARD_ERROR_FILE}" ]; then
       printf "%s\n\n%s\n" "**Error** output:" "\`\`\`log"
       echoFileSubstitutingPath "${_TEST_STANDARD_ERROR_FILE}"
       printf "\n%s\n\n" "\`\`\`"
-    } >>"${_TEST_REPORT_FILE}"
-  fi
+    fi
+
+  } >>"${_TEST_REPORT_FILE}"
 
   # reset the standard output and error output files
   : >"${_TEST_STANDARD_OUTPUT_FILE}"
@@ -279,6 +293,20 @@ function endTest() {
 #===============================================================
 # >>> Internal tests functions
 #===============================================================
+
+function runCoreTests() {
+  local originalUserDirectory="${VALET_USER_DIRECTORY:-}"
+
+  # we will run some example commands so we need to set the correct user directory and commands
+  export VALET_USER_DIRECTORY="${VALET_HOME}/examples.d"
+  unset _CMD_INCLUDED
+  sourceUserCommands
+
+  inform "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
+  runTestSuites "${VALET_HOME}/tests.d"
+
+  VALET_USER_DIRECTORY="${originalUserDirectory}"
+}
 
 # Run all the test suites in the given directory.
 # A test suite is a folder that contains a test.sh file.
@@ -389,15 +417,15 @@ function runTest() {
   set -Eeu -o pipefail
   popd >/dev/null
 
-  # reset the standard output and error output
   resetFdRedirection
+
+  trap onExitInternal EXIT
 
   # test if the user forgot to call endTest
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" || -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
     fail "The test script ⌜${testScript}⌝ did not call endTest OR it had outputs after the last endTest call."
   fi
 
-  trap onExitInternal EXIT
 }
 
 function compareWithApproved() {
@@ -411,7 +439,7 @@ function compareWithApproved() {
 
   if [ ! -f "${approvedFile}" ]; then
     debug "🧪 ${testName}: no approved file, creating one."
-    : > "${approvedFile}"
+    : >"${approvedFile}"
   fi
 
   if diff --color -u "${approvedFile}" "${receivedFileToCopy}" 1>&2; then
@@ -435,14 +463,17 @@ function compareWithApproved() {
   return 1
 }
 
+# Allows to explicitly warn the user that a test made Valet exit (it should not).
+# Give guidance on what to do to fix this.
 function onExitTest() {
   local rc=$?
 
   resetFdRedirection
 
   local message="The program is exiting during a test with code ${rc}."$'\n'
-  message+="Current test error output: ⌜$(<"${_TEST_STANDARD_ERROR_FILE}")⌝"$'\n'
-  message+="If you expect the tested function/program to exit/fail, then run it in a subshell like that: (myFunctionThatFails)."
+  readFile "${_TEST_STANDARD_ERROR_FILE}"
+  message+="Current test error output: ⌜${LAST_RETURNED_VALUE}⌝"$'\n'
+  message+="If you expect the tested function/program to exit/fail, then run it in a subshell like that:"$'\n'"(myFunctionThatFails)"
 
   warn "${message}"
 
@@ -450,6 +481,9 @@ function onExitTest() {
   onExitInternal
 }
 
+# After this function call, everything written to stdout and stderr will be redirected
+# to the test output files.
+# Call resetFdRedirection to reset the redirection.
 function setFdRedirection() {
   # redirect the standard output and error output to files
   exec 3>&1 1>"${_TEST_STANDARD_OUTPUT_FILE}"
@@ -460,12 +494,11 @@ function setFdRedirection() {
   if [ -z "${ORIGINAL_LOG_LINE_FUNCTION:-}" ]; then
     ORIGINAL_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
     ORIGINAL_VALET_NO_COLOR="${VALET_NO_COLOR:-}"
-    ORIGINAL_LOG_LEVEL="${LOG_LEVEL:-}"
-    ORIGINAL_LOG_LEVEL_INT="${LOG_LEVEL_INT:-}"
+    ORIGINAL_LOG_LEVEL="${VALET_LOG_LEVEL:-}"
     ORIGINAL_VALET_DO_NOT_USE_LOCAL_BIN="${VALET_DO_NOT_USE_LOCAL_BIN:-}"
   fi
-  export LOG_LEVEL="info"
-  export LOG_LEVEL_INT=1
+  export VALET_LOG_LEVEL="info"
+  setLogLevel info &>/dev/null
   export VALET_NO_COLOR="true"
   setLogColors
   export VALET_NO_TIMESTAMP="true"
@@ -482,14 +515,16 @@ function setFdRedirection() {
   eval "${SIMPLIFIED_LOG_LINE_FUNCTION}"
 }
 
+# Restores the standard output and error output.
+# Call this function after setFdRedirection.
 function resetFdRedirection() {
   # reset the standard output and error output
   exec 1>&3 3>&-
   exec 2>&4 4>&-
 
   # reset the original logs
-  export LOG_LEVEL="${ORIGINAL_LOG_LEVEL}"
-  export LOG_LEVEL_INT="${ORIGINAL_LOG_LEVEL_INT}"
+  export VALET_LOG_LEVEL="${ORIGINAL_LOG_LEVEL}"
+  setLogLevel "${ORIGINAL_LOG_LEVEL}" &>/dev/null
   export VALET_NO_COLOR="${ORIGINAL_VALET_NO_COLOR}"
   export VALET_DO_NOT_USE_LOCAL_BIN="${ORIGINAL_VALET_DO_NOT_USE_LOCAL_BIN}"
   setLogColors

@@ -61,18 +61,6 @@ options:
   endTest "Testing extractCommandDefinitionToVariables" 0
 }
 
-function testMakeArraysSameSize {
-  declare -g array1=("a" "b" "c")
-  declare -g array2=("" "2")
-  declare -g array3=("x" "y" "z" "w")
-
-  makeArraysSameSize array1 array2 array3 array4
-
-  declare -p array1 array2 array3 array4
-
-  endTest "Testing makeArraysSameSize" 0
-}
-
 function testExtractFirstLongNameFromOptionString() {
 
   local optionString="-x, --profiling"
@@ -86,7 +74,6 @@ function testExtractFirstLongNameFromOptionString() {
 function main() {
   testExtractCommandYamls
   testExtractCommandDefinitionToVariables
-  testMakeArraysSameSize
   testExtractFirstLongNameFromOptionString
 }
 main

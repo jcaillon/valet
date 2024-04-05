@@ -88,6 +88,10 @@ if [ -z "${_CORE_INCLUDED:-}" ]; then
 fi
 # --- END OF COMMAND COMMON PART
 
+if declare -f include &>/dev/null; then
+  include system interactive
+fi
+
 #===============================================================
 # >>> command: self update
 #===============================================================

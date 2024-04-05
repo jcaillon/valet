@@ -15,8 +15,7 @@ if [ -z "${_CORE_INCLUDED:-}" ]; then
 fi
 # --- END OF COMMAND COMMON PART
 
-# shellcheck source=../utils
-source "${VALET_HOME}/valet.d/utils"
+include system io kurl
 
 #===============================================================
 # >>> command: self download-binaries

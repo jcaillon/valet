@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-export VALET_HOME="${ORIGINAL_VALET_HOME}"
+export VALET_DO_NOT_USE_BIN=false
+
+unset fzf
+unset sudo

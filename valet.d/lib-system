@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# Returns the name of the current OS.
+# Can be one of these values: "darwin", "linux", "windows".
+#
+# Usage:
+#  getOsName && local osName="${LAST_RETURNED_VALUE}"
+function getOsName() {
+  local osName
+  case "${OSTYPE:-}" in
+    darwin*) osName="darwin";;
+    linux*) osName="linux";;
+    msys*) osName="windows";;
+    *) osName="unknown";;
+  esac
+  LAST_RETURNED_VALUE="${osName}"
+}
+
+# Get the list of all the environment variables.
+# In pure bash, no need for env or printenv.
+#
+# Returns:
+#   LAST_RETURNED_ARRAY_VALUE: An array with the list of all the environment variables.
+#
+# Usage:
+#   getEnvVars
+#   for var in "${LAST_RETURNED_ARRAY_VALUE[@]}"; do
+#       printf '%s=%s\n' "$var" "${!var}"
+#   done
+function getEnvVars() {
+  mapfile -t LAST_RETURNED_ARRAY_VALUE < <(compgen -v)
+}

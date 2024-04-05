@@ -15,8 +15,7 @@ if [ -z "${_CORE_INCLUDED:-}" ]; then
 fi
 # --- END OF COMMAND COMMON PART
 
-# shellcheck source=../utils
-source "${VALET_HOME}/valet.d/utils"
+include string kurl
 
 #===============================================================
 # >>> self release valet
@@ -33,20 +32,20 @@ description: |-
   - bump the version of valet,
   - commit the new version.
 options:
-  - name: -t, --github-release-token <token>
-    description: |-
-      The token necessary to create the release on GitHub and upload artifacts.
-  - name: -b, --bump-level <semver>
-    description: |-
-      The semver level to bump the version.
+- name: -t, --github-release-token <token>
+  description: |-
+    The token necessary to create the release on GitHub and upload artifacts.
+- name: -b, --bump-level <semver>
+  description: |-
+    The semver level to bump the version.
 
-      Can be either: major or minor.
-  - name: --dry-run
-    description: |-
-      Do not perform the release, just show what would be done.
-  - name: --upload-artifacts-only
-    description: |-
-      Do no create the release, just upload the artifacts to the latest release.
+    Can be either: major or minor.
+- name: --dry-run
+  description: |-
+    Do not perform the release, just show what would be done.
+- name: --upload-artifacts-only
+  description: |-
+    Do no create the release, just upload the artifacts to the latest release.
 ---"
 function selfRelease() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"

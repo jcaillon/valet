@@ -4,12 +4,13 @@
 
 ### Testing the showcase command1
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
 → showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
+That's it!
 ```
 
 **Error** output:
@@ -23,7 +24,7 @@ INFO     More: more1 more2.
 
 ### Testing the showcase sudo command by replacing sudo with echo
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -34,7 +35,7 @@ whoami
 
 ### Testing the hello world command
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -45,7 +46,7 @@ Hello world!
 
 ### Testing the behavior of onInterrupt
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 

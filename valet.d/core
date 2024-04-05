@@ -28,8 +28,6 @@ if [[ -e "${VALET_USER_CONFIG_FILE}" ]]; then
   source "${VALET_USER_CONFIG_FILE}"
 fi
 
-# for now we need yq in the path
-export PATH="${VALET_HOME}/bin:${PATH}"
 
 #===============================================================
 # >>> Temporay files and folders
@@ -92,6 +90,7 @@ function cleanupTempFiles() {
   if [ -e "${_TEMPORARY_DIRECTORY}" ]; then
     debug "Deleting temporary directory."
     rm -Rf "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
+    unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
   fi
   if [ -e "${_TEMPORARY_WORK_FILE}" ]; then
     rm -f "${_TEMPORARY_WORK_FILE}" 1>&2 2>/dev/null
@@ -144,16 +143,11 @@ setLogColors
 # This function exports the terminal size in the global variables _COLUMNS and _LINES.
 function exportTerminalSize() {
   shopt -s checkwinsize; (:;:)
-  _COLUMNS="${COLUMNS:-120}"
+  _COLUMNS="${COLUMNS:-180}"
   _LINES="${LINES:-30}"
   shopt -u checkwinsize
 }
-
-if [ "${VALET_NO_WRAP:-}" != "true" ]; then
-  exportTerminalSize
-else
-  _COLUMNS="${_COLUMNS:-120}"
-fi
+exportTerminalSize
 
 # Re export terminal size on window resize.
 trap exportTerminalSize SIGWINCH
@@ -165,26 +159,26 @@ trap exportTerminalSize SIGWINCH
 # - success
 # - warning
 # - error
-# The log level can be set using the environment variable LOG_LEVEL.
+#
 # $1: the log level to set (or defaults to info)
 #
 # Usage:
-#  setLogLevel "debug"
+#   setLogLevel "debug"
 function setLogLevel() {
   # log level, defaults to info
-  LOG_LEVEL="${1:-${LOG_LEVEL:-info}}"
-  case "${LOG_LEVEL}" in
-  error) LOG_LEVEL_INT=4 ;;
-  warning) LOG_LEVEL_INT=3 ;;
-  success) LOG_LEVEL_INT=2 ;;
-  debug) LOG_LEVEL_INT=0 ;;
-  *) LOG_LEVEL_INT=1 ;;
+  VALET_LOG_LEVEL="${1:-${VALET_LOG_LEVEL:-info}}"
+  case "${VALET_LOG_LEVEL}" in
+  error) _LOG_LEVEL_INT=4 ;;
+  warning) _LOG_LEVEL_INT=3 ;;
+  success) _LOG_LEVEL_INT=2 ;;
+  debug) _LOG_LEVEL_INT=0 ;;
+  *) _LOG_LEVEL_INT=1 ;;
   esac
 
-  if [ "${LOG_LEVEL_INT}" != 1 ]; then
-    debug "Log level set to ${LOG_LEVEL}."
+  if [ "${_LOG_LEVEL_INT}" != 1 ]; then
+    debug "Log level set to ${VALET_LOG_LEVEL}."
   fi
-  if [ "${LOG_LEVEL_INT}" == 0 ]; then
+  if [ "${_LOG_LEVEL_INT}" == 0 ]; then
     warn "Beware that debug log level might lead to secret leak, use it only if necessary."
   fi
 }
@@ -197,7 +191,7 @@ function setLogLevel() {
 # $*: the content of the log message
 #
 # Usage:
-#  logLine "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
+#   logLine "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
 # shellcheck disable=SC2317
 function logLine() { return 0; }
 # We build the log line function dynamically to adapt to the user options
@@ -227,7 +221,7 @@ function createLogLineFunction() {
   fi
 
   if [ "${VALET_NO_WRAP:-}" != "true" ]; then
-    local wrapTextColumns="${VALET_LOG_COLUMNS:-${_COLUMNS:-120}}"
+    local wrapTextColumns="${VALET_LOG_COLUMNS:-${_COLUMNS}}"
     local wrapPaddingLength=20
 
     if [ "${VALET_NO_TIMESTAMP:-}" = "true" ]; then
@@ -281,7 +275,7 @@ eval "${LOG_LINE_FUNCTION}"
 # $*: the error message to display
 #
 # Usage:
-#  fail "This is an error message."
+#   fail "This is an error message."
 function fail() {
   local message="$*"
   if isDebugEnabled; then
@@ -298,9 +292,9 @@ function fail() {
 # $*: the warning message to display
 #
 # Usage:
-#  warn "This is a warning message."
+#   warn "This is a warning message."
 function warn() {
-  if [[ ${LOG_LEVEL_INT:-1} -gt 3 ]]; then
+  if [[ ${_LOG_LEVEL_INT:-1} -gt 3 ]]; then
     return 0
   fi
   logLine "WARNING" $'\uf071' "WARNING" "$*"
@@ -311,9 +305,9 @@ function warn() {
 # $*: the success message to display
 #
 # Usage:
-#  succeed "This is a success message."
+#   succeed "This is a success message."
 function succeed() {
-  if [[ ${LOG_LEVEL_INT:-1} -gt 2 ]]; then
+  if [[ ${_LOG_LEVEL_INT:-1} -gt 2 ]]; then
     return 0
   fi
   logLine "SUCCESS" $'\uf14a' "SUCCESS" "$*"
@@ -324,9 +318,9 @@ function succeed() {
 # $*: the info message to display
 #
 # Usage:
-#  inform "This is an info message."
+#   inform "This is an info message."
 function inform() {
-  if [[ ${LOG_LEVEL_INT:-1} -gt 1 ]]; then
+  if [[ ${_LOG_LEVEL_INT:-1} -gt 1 ]]; then
     return 0
   fi
   logLine "INFO" $'\uf05a' "INFO" "$*"
@@ -337,9 +331,9 @@ function inform() {
 # $*: the debug message to display
 #
 # Usage:
-#  debug "This is a debug message."
+#   debug "This is a debug message."
 function debug() {
-  if [[ ${LOG_LEVEL_INT:-1} -gt 0 ]]; then
+  if [[ ${_LOG_LEVEL_INT:-1} -gt 0 ]]; then
     return 0
   fi
   logLine "DEBUG" $'\uf0ae' "DEBUG" "$*"
@@ -349,9 +343,9 @@ function debug() {
 # Returns 0 if debug mode is active, 1 otherwise.
 #
 # Usage:
-#  isDebugEnabled && echo "Debug mode is active."
+#   isDebugEnabled && echo "Debug mode is active."
 function isDebugEnabled() {
-  if [[ ${LOG_LEVEL_INT:-1} -eq 0 ]]; then
+  if [[ ${_LOG_LEVEL_INT:-1} -eq 0 ]]; then
     return 0
   fi
   return 1
@@ -392,7 +386,7 @@ function checkAndWarn() {
 # $1: the number of levels to skip (default to 2)
 #
 # Usage:
-#  getStack 2 && local stack="${LAST_RETURNED_VALUE}"
+#   getStack 2 && local stack="${LAST_RETURNED_VALUE}"
 function getStack() {
   local -i levelToSkip="${1:-2}"
   local stack i stackSize func linen src
@@ -425,6 +419,53 @@ fi
 # >>> Core utilities
 #===============================================================
 
+# Allows to include a library file. It sources a file.
+#
+# $1: the name of the library (array, interactive, string...) or the file path to include.
+#
+# Notes:
+#   The file can be relative to the current script (script that calls this function).
+#   This function makes sure that we do not include the same file twice.
+#
+# Usage:
+#   include string array system
+#   include ./my/path my/other/path
+function include() {
+  local filePathToInclude includedFile
+  # for each argument
+  while [[ $# -gt 0 ]]; do
+    if [ -e "${VALET_HOME}/valet.d/lib-${1}" ]; then
+      filePathToInclude="${VALET_HOME}/valet.d/lib-${1}"
+    elif [ -e "${BASH_SOURCE[1]%/*}/${1}" ]; then
+      filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
+    elif [ -e "${1}" ]; then
+      filePathToInclude="${1}"
+    else
+      fail "The file ${1} could not be found."
+    fi
+    for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
+      if [ "${includedFile}" = "${filePathToInclude}" ]; then
+        return 0
+      fi
+    done
+    # shellcheck source=/dev/null
+    source "${filePathToInclude}"
+    _LIST_OF_INCLUDED_FILES+=("${filePathToInclude}")
+    shift
+  done
+}
+_LIST_OF_INCLUDED_FILES=()
+
+# Allows to reset the included files.
+# When calling the include function, it will source the files again.
+# This is useful when we want to reload the libraries.
+#
+# Usage:
+#   resetIncludedFiles
+function resetIncludedFiles() {
+  _LIST_OF_INCLUDED_FILES=()
+}
+
 # Allows to soft wrap the given text at the given width.
 # Optionally applies left padding to each new line.
 # $1: the text to wrap
@@ -434,10 +475,10 @@ fi
 # Returns the wrapped text in the global variable LAST_RETURNED_VALUE
 #
 # Usage:
-#  wrapText "This is a long text that should be wrapped at 20 characters." 20 2 false && local wrappedText="${LAST_RETURNED_VALUE}"
+#   wrapText "This is a long text that should be wrapped at 20 characters." 20 2 false && local wrappedText="${LAST_RETURNED_VALUE}"
 #
 # Note:
-#  This function is written in pure bash and is faster than the fold command.
+#   This function is written in pure bash and is faster than calling the fold command.
 function wrapText() {
   local text width leftPaddingLength appendPaddingToFirstLine
   text="${1}"
@@ -486,10 +527,10 @@ function wrapText() {
 # Returns the wrapped text in the global variable LAST_RETURNED_VALUE
 #
 # Usage:
-#  wrapSentence "This is a long text that should be wrapped at 20 characters." 20 && local wrappedText="${LAST_RETURNED_VALUE}"
+#   wrapSentence "This is a long text that should be wrapped at 20 characters." 20 && local wrappedText="${LAST_RETURNED_VALUE}"
 #
 # Note:
-#  This function is written in pure bash and is faster than the fold command.
+#   This function is written in pure bash and is faster than calling the fold command.
 function wrapSentence() {
   local text newLinePrefix
   local -i width
@@ -566,38 +607,6 @@ function wrapSentence() {
   done
 
   LAST_RETURNED_VALUE="${wrappedText}"
-}
-
-# Allows to get the nth element of a string separated by a given separator.
-# This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
-# but it uses pure bash to go faster.
-# $1: the string to cut
-# $2: the field number to get (starting at 1)
-# $3: the separator (default to tab if not provided)
-#
-# Usage:
-#  cutF "field1 field2 field3" 2 " " && local field2="${LAST_RETURNED_VALUE}"
-#
-# Notes:
-#  To be fast, it does not check the number of fields in the string.
-#  If the field number is higher than the number of fields, it will return the last field, not an empty string.
-function cutF() {
-  local str fieldNumber separator
-  str="${1}"
-  fieldNumber="${2}"
-  separator="${3:-$'\t'}"
-
-  local index
-
-  # remove the first field n - 1 times
-  for((index=0; index < (fieldNumber - 1); index++)); do
-    str="${str#*"${separator}"}"
-  done
-
-  # remove everything after the first field
-  str="${str%%"${separator}"*}"
-
-  LAST_RETURNED_VALUE="${str}"
 }
 
 # Allows to fuzzy match a line against a given pattern.
@@ -691,478 +700,31 @@ function fuzzyMatch() {
   LAST_RETURNED_VALUE="${bestMatch:-}"
 }
 
-# Will return the full path of the given command if it found in the bin folder of valet.
-#
-# $1: the command to find
-#
-# Usage:
-#  getCommandFullPath "fzf" && local fullPath="${LAST_RETURNED_VALUE}"
-function getCommandFullPath() {
-  local executable="${1}"
-  local possibleExecutablePath="${VALET_BIN_PATH:-"${VALET_HOME}/bin"}/${executable}"
-  if [[ "${VALET_DO_NOT_USE_LOCAL_BIN:-false}" != "true" && -x "${possibleExecutablePath}" ]]; then
-    executable="${possibleExecutablePath}"
-  fi
-  LAST_RETURNED_VALUE="${executable}"
-}
-
-# This function call an executable and its arguments.
-# It redirects the stdout and stderr to temporary files.
-#
-# $1: true/false to indicate if the function should fail in case the execution fails
-# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
-# $3: true/false to indicate if the 4th argument represents a file path or directly the content for stdin
-# $4: the stdin (can be empty)
-# $5: the executable to invoke
-# $6+: the arguments to pass to the executable
-#
-# Returns:
-#  The exit code of the function is the exit code of the executable.
-#  The stdout file of the executable in the global variable LAST_RETURNED_VALUE.
-#  The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
+# Source the file associated with the function if needed.
+# $1: the function name
 #
 # Usage:
-#  invoke5 "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || fail "fzf failed."
-#  stdoutFilePath="${LAST_RETURNED_VALUE}"
-#  stderrFilePath="${LAST_RETURNED_VALUE2}"
-function invoke5() {
-  local failIfFails acceptableErrorCodes stdInFromFile stdIn executable
-  failIfFails="${1}"
-  acceptableErrorCodes="${2}"
-  stdInFromFile="${3}"
-  stdIn="${4}"
-  executable="${5}"
-  shift 5
+#  sourceForFunction "functionName"
+function sourceForFunction() {
+  local functionName
+  functionName="${1}"
 
-  # reset the output files, but only if they already exist
-  [[ -s "${_TEMPORARY_STDOUT_FILE}" ]] && : > "${_TEMPORARY_STDOUT_FILE}"
-  [[ -s "${_TEMPORARY_STDERR_FILE}" ]] && : > "${_TEMPORARY_STDERR_FILE}"
-
-  getCommandFullPath "${executable}"
-  executable="${LAST_RETURNED_VALUE}"
-
-  # if debug mode is on, print some info
-  if isDebugEnabled; then
-    local debugMessage="Executing the command ⌜${executable}⌝."$'\n'
-    debugMessage+="Fail if it fails: ⌜${failIfFails}⌝"$'\n'
-    debugMessage+="Acceptable error codes: ⌜${acceptableErrorCodes}⌝"$'\n'
-    debugMessage+="Standard stream from file: ⌜${stdInFromFile}⌝"$'\n'
-    debugMessage+="Standard stream: ⌜${stdIn}⌝"$'\n'
-    debugMessage+="Extra parameters: ⌜${*}⌝"
-    debug "${debugMessage}"
-  fi
-
-  # execute the executable
-  local -i exitCode=0
-  if [[ -n "${stdIn}" ]]; then
-    if [[ "${stdInFromFile}" == "true" ]]; then
-      "${executable}" "$@" < "${stdIn}" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+  local fileToSource
+  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
+    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
+    if [ -e "${fileToSource}" ]; then
+      # shellcheck disable=SC1090
+      source "${fileToSource}"
+      debug "Loaded file ⌜${fileToSource}⌝."
+    elif [ -e "${VALET_HOME:-}/${fileToSource}" ]; then
+      # shellcheck disable=SC1090
+      source "${VALET_HOME:-}/${fileToSource}"
+      debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
     else
-      "${executable}" "$@" <<< "${stdIn}" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
-    fi
-  else
-    "${executable}" "$@" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
-  fi
-
-  local debugMessage="The command ⌜${executable}⌝ originally ended with exit code ⌜${exitCode}⌝."
-
-  # if the error code is acceptable, then we set it to 0
-  if [[ ",${acceptableErrorCodes}," == *",${exitCode},"* ]]; then
-    exitCode=0
-    debugMessage+=$'\n'"The error code ⌜${exitCode}⌝ is acceptable and has been reset to 0."
-  fi
-
-  local shouldFail=false
-  [[ "${failIfFails}" == "true" && exitCode -ne 0 ]] && shouldFail=true
-
-  # fail if needed or we are debug mode; display all the debug information that could be useful
-  if isDebugEnabled || [[ "${shouldFail}" == "true" ]]; then
-
-    # append std out
-    if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
-      # test if a file is less than 200Ko
-      if [[ $(stat -c %s "${_TEMPORARY_STDOUT_FILE}" 2>/dev/null || echo 0) -lt 200000 ]]; then
-        debugMessage+=$'\n'"Standard output:"$'\n'"⌜$(<"${_TEMPORARY_STDOUT_FILE}")⌝"
-      else
-        debugMessage+=$'\n'"Standard output is too big to be displayed."
-      fi
-    fi
-    # append stderr
-    if [[ -s "${_TEMPORARY_STDERR_FILE}" ]]; then
-      debugMessage+=$'\n'"Error output:"$'\n'"⌜$(<"${_TEMPORARY_STDERR_FILE}")⌝"
-    fi
-
-    if [[ "${shouldFail}" == "true" ]]; then
-      fail "${debugMessage}"
-    else
-      debug "${debugMessage}"
+      warn "The file ⌜${VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
     fi
   fi
-
-  LAST_RETURNED_VALUE="${_TEMPORARY_STDOUT_FILE}"
-  LAST_RETURNED_VALUE2="${_TEMPORARY_STDERR_FILE}"
-  return ${exitCode}
 }
-
-# This function call an executable and its arguments.
-# It redirects the stdout and stderr to temporary files.
-#
-# $1: true/false to indicate if the function should fail in case the execution fails
-# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
-# $3: the executable to invoke
-# $4+: the arguments to pass to the executable
-#
-# Returns:
-#  The exit code of the function is the exit code of the executable.
-#  The stdout file of the executable in the global variable LAST_RETURNED_VALUE.
-#  The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
-#
-# Usage:
-#  invoke3 "false" "false" "fzf" "--height=10" || fail "fzf failed."
-#  stdoutFilePath="${LAST_RETURNED_VALUE}"
-#  stderrFilePath="${LAST_RETURNED_VALUE2}"
-function invoke3() {
-  local failIfFails acceptableErrorCodes executable
-  failIfFails="${1}"
-  acceptableErrorCodes="${2}"
-  shift 2
-
-  invoke5 "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
-}
-
-# This function call an executable and its arguments.
-# It redirects the stdout and stderr to environment variables.
-#
-# $1: true/false to indicate if the function should fail in case the execution fails
-# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
-# $3: true/false to indicate if the 4th argument represents a file path or directly the content for stdin
-# $4: the stdin (can be empty)
-# $5: the executable to invoke
-# $6+: the arguments to pass to the executable
-#
-# Returns:
-#  The exit code of the function is the exit code of the executable.
-#  The content of stdout in the global variable LAST_RETURNED_VALUE.
-#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
-#
-# Usage:
-#  invoke5var "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || fail "fzf failed."
-#  stdout="${LAST_RETURNED_VALUE}"
-#  stderr="${LAST_RETURNED_VALUE2}"
-function invoke5var() {
-  local -i exitCode=0
-  invoke5 "$@" || exitCode=$?
-
-  local content
-  if [ -s "${LAST_RETURNED_VALUE}" ]; then
-    IFS= read -rd '' content < "${LAST_RETURNED_VALUE}" || true
-    LAST_RETURNED_VALUE="${content}"
-  else
-    LAST_RETURNED_VALUE=""
-  fi
-  if [ -s "${LAST_RETURNED_VALUE2}" ]; then
-    IFS= read -rd '' content < "${LAST_RETURNED_VALUE2}" || true
-    LAST_RETURNED_VALUE2="${content}"
-  else
-    LAST_RETURNED_VALUE2=""
-  fi
-
-  return ${exitCode}
-}
-
-# This function call an executable and its arguments.
-# It redirects the stdout and stderr to environment variables.
-#
-# $1: true/false to indicate if the function should fail in case the execution fails
-# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
-# $3: the executable to invoke
-# $4+: the arguments to pass to the executable
-#
-# Returns:
-#  The exit code of the function is the exit code of the executable.
-#  The content of stdout in the global variable LAST_RETURNED_VALUE.
-#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
-#
-# Usage:
-#  invoke3var "false" "130,2" "fzf" "--height=10" || fail "fzf failed."
-#  stdout="${LAST_RETURNED_VALUE}"
-#  stderr="${LAST_RETURNED_VALUE2}"
-function invoke3var() {
-  local failIfFails acceptableErrorCodes executable
-  failIfFails="${1}"
-  acceptableErrorCodes="${2}"
-  shift 2
-
-  invoke5var "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
-}
-
-# This function call an executable and its arguments.
-# If the execution fails, it will fail the script and show the std/err output.
-# Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
-#
-# Returns:
-#  The content of stdout in the global variable LAST_RETURNED_VALUE.
-#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
-#
-# Usage:
-#  invoke git add --all
-function invoke() {
-  invoke5var "true" "0" "" "" "$@"
-}
-
-# This function is a wrapper around curl.
-# It allows you to check the http status code and return 1 if it is not acceptable.
-# It invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o $2.
-#
-# $1: true/false to indicate if the function should fail in case the execution fails
-# $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
-# $3: the file in which to save the output of curl
-# $4+: options for curl
-#
-# Returns:
-#  The exit code of the function is 0 if the http status code is acceptable, 1 otherwise.
-#  The content of stderr in the global variable LAST_RETURNED_VALUE.
-#  The http status code in the global variable LAST_RETURNED_VALUE2.
-#
-# Usage:
-#  kurlFile "true" "200,201" "/filePath" "https://example.com" || fail "The curl command failed."
-function kurlFile() {
-  local failIfFails acceptableStatusCodes outputFile url
-  failIfFails="${1:-false}"
-  acceptableStatusCodes="${2:-200,201,202,204,301,304,308}"
-  outputFile="${3}"
-  shift 3
-
-  # call curl
-  local -i exitCode=0
-  local httpStatusCode errors
-  invoke5var "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{http_code}" "--output" "${outputFile}" "$@" || exitCode=$?
-  httpStatusCode="${LAST_RETURNED_VALUE}"
-  errors="${LAST_RETURNED_VALUE2}"
-
-  local url="$*"
-  url="http${url##*http}"
-  url="${url%% *}"
-  url="${url%% \'}"
-
-  debug "The curl command for url ⌜${url}⌝ ended with exit code ⌜${exitCode}⌝, the http return code was ⌜${httpStatusCode}⌝."
-
-  # if the error code is acceptable, then we set it to 0
-  if [[ ",${acceptableStatusCodes}," == *",${httpStatusCode},"* ]]; then
-    exitCode=0
-    debug "The http return code ⌜${httpStatusCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
-  else
-    exitCode=1
-    local message="The http return code ⌜${httpStatusCode}⌝ is not acceptable for url ⌜${url}⌝."
-    if [[ "${failIfFails}" == "true" ]]; then
-      message+=$'\n'"Error output:"$'\n'"⌜${errors}⌝"
-      fail "${message}"
-    fi
-    debug "${message}"
-  fi
-
-  LAST_RETURNED_VALUE="${errors}"
-  LAST_RETURNED_VALUE2="${httpStatusCode}"
-  return ${exitCode}
-}
-
-# This function is a wrapper around curl.
-# It allows you to check the http status code and return 1 if it is not acceptable.
-# It invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o "tempfile".
-#
-# $1: true/false to indicate if the function should fail in case the execution fails
-# $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
-# $3+: options for curl
-#
-# Returns:
-#  The exit code of the function is 0 if the http status code is acceptable, 1 otherwise.
-#  The content of the request in the global variable LAST_RETURNED_VALUE.
-#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
-#  The http status code in the global variable LAST_RETURNED_VALUE3.
-#
-# Usage:
-#  kurl false 200,201 https://example.com || fail "The curl command failed."
-function kurl() {
-  local acceptableStatusCodes
-  failIfFails="${1:-false}"
-  acceptableStatusCodes="${2:-}"
-  shift 2
-
-  # reset the temporary file, only if needed
-  [[ -s "${_TEMPORARY_WORK_FILE}" ]] && : > "${_TEMPORARY_WORK_FILE}"
-
-  local -i exitCode=0
-  local errors httpStatusCode
-  kurlFile "${failIfFails}" "${acceptableStatusCodes}" "${_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
-  errors="${LAST_RETURNED_VALUE}"
-  httpStatusCode="${LAST_RETURNED_VALUE2}"
-
-  local stdout
-  if [ -s "${_TEMPORARY_WORK_FILE}" ]; then
-    IFS= read -rd '' stdout < "${_TEMPORARY_WORK_FILE}" || true
-  fi
-
-  LAST_RETURNED_VALUE="${stdout:-}"
-  LAST_RETURNED_VALUE2="${errors}"
-  LAST_RETURNED_VALUE3="${httpStatusCode}"
-  return $exitCode
-}
-
-# Find the first index of a string within another string.
-#
-# $1: the string in which to search
-# $2: the string to search
-# $3: the starting index (default to 0)
-#
-# Returns:
-#  The index of the substring in the string or -1 if not found in the global variable LAST_RETURNED_VALUE.
-#
-# Usage:
-#  indexOf "This is a long text" "long" && local index="${LAST_RETURNED_VALUE}"
-#  indexOf "This is a long text" "long" 10 && local index="${LAST_RETURNED_VALUE}"
-function indexOf() {
-  local search string
-  local -i startingIndex
-  string="${1}"
-  search="${2}"
-  startingIndex=${3:-0}
-
-  local -i stringLength
-  stringLength="${#string}"
-
-  if [[ startingIndex -gt 0 ]]; then
-    # if the starting index is greater than the length of the string, we return -1
-    if [[ startingIndex -ge stringLength ]]; then
-      LAST_RETURNED_VALUE=-1
-      echo "nop"
-      return 0
-    fi
-
-    # otherwise we keep only what is after this index
-    string="${string:${startingIndex}}"
-  fi
-
-  stringLength="${#string}"
-
-  # if the string starts with the search, we have our index
-  if [[ "${string}" == "${search}"* ]]; then
-      echo "yeah"
-    LAST_RETURNED_VALUE=${startingIndex}
-    return 0
-  fi
-
-  # cut everything after the search string
-  local tempString
-  tempString="${string%%"${search}"*}"
-  local -i tempStringLength="${#tempString}"
-
-  # the index is the length of the temp string if it is different than the initial string lenght
-  if [[ tempStringLength -ne stringLength ]]; then
-    LAST_RETURNED_VALUE=$((tempStringLength + startingIndex))
-  else
-    LAST_RETURNED_VALUE=-1
-  fi
-  return 0
-}
-
-# Extract the text between two strings within a string.
-# Search for the first occurence of the start string and the first occurence
-# (after the start index) of the end string.
-# Both start and end strings are excluded in the extracted text.
-# Both start and end strings must be found to extract something.
-#
-# $1: the string in which to search
-# $2: the start string (if empty, then it will extract from the beginning of the string)
-# $3: the end string (if empty, then it will extract until the end of the string)
-#
-# Returns:
-#  The extracted text in the global variable LAST_RETURNED_VALUE.
-#
-# Usage:
-#  extractBetween "This is a long text" "is a " " text" && local extractedText="${LAST_RETURNED_VALUE}"
-function extractBetween() {
-  local string start end
-  string="${1}"
-  start="${2}"
-  end="${3}"
-
-  local -i startIndex endIndex
-
-  if [[ -n "${start}" ]]; then
-    indexOf "${string}" "${start}" && startIndex="${LAST_RETURNED_VALUE}"
-    if [[ startIndex -eq -1 ]]; then
-      LAST_RETURNED_VALUE=""
-      return 0
-    fi
-    startIndex=$((startIndex + ${#start}))
-  else
-    startIndex=0
-  fi
-
-  if [[ -n "${end}" ]]; then
-    indexOf "${string}" "${end}" "${startIndex}" && endIndex="${LAST_RETURNED_VALUE}"
-    if [[ endIndex -eq -1 ]]; then
-      LAST_RETURNED_VALUE=""
-      return 0
-    fi
-  else
-    LAST_RETURNED_VALUE="${string:${startIndex}}"
-    return 0
-  fi
-
-  local -i extractedLength
-  extractedLength=$((endIndex - startIndex))
-  LAST_RETURNED_VALUE="${string:${startIndex}:${extractedLength}}"
-}
-
-# Returns the name of the current OS.
-# Can be one of these values: "darwin", "linux", "windows".
-#
-# Usage:
-#  getOsName && local osName="${LAST_RETURNED_VALUE}"
-function getOsName() {
-  local osName
-  case "${OSTYPE:-}" in
-    darwin*) osName="darwin";;
-    linux*) osName="linux";;
-    msys*) osName="windows";;
-    *) osName="unknown";;
-  esac
-  LAST_RETURNED_VALUE="${osName}"
-}
-
-# Execute the given command and return the output in the global variable LAST_RETURNED_VALUE.
-#
-# $1+: the command to execute (with args)
-#
-# Returns:
-#  exit with code 1 if the command fails.
-#  The output of the command in the global variable LAST_RETURNED_VALUE.
-#  The error output of the command in the global variable LAST_RETURNED_VALUE2.
-#
-# Usage:
-#  captureOutput "ls -l" && local lsOutput="${LAST_RETURNED_VALUE}"
-function captureOutput() {
-  local -i exitCode=0
-  "$@" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
-
-  local content
-  if [ -s "${_TEMPORARY_STDOUT_FILE}" ]; then
-    IFS= read -rd '' content < "${_TEMPORARY_STDOUT_FILE}" || true
-    LAST_RETURNED_VALUE="${content}"
-  else
-    LAST_RETURNED_VALUE=""
-  fi
-  if [ -s "${_TEMPORARY_STDERR_FILE}" ]; then
-    IFS= read -rd '' content < "${_TEMPORARY_STDERR_FILE}" || true
-    LAST_RETURNED_VALUE2="${content}"
-  else
-    LAST_RETURNED_VALUE2=""
-  fi
-
-  return ${exitCode}
-}
-
 
 #===============================================================
 # >>> Valet files and directories
@@ -1172,7 +734,7 @@ function captureOutput() {
 # Creates it if missing.
 #
 # Usage:
-#  getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
+#   getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
 function getConfigurationDirectory() {
   local directory
   directory="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}"
@@ -1186,7 +748,7 @@ function getConfigurationDirectory() {
 # Creates it if missing.
 #
 # Usage:
-#  getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
+#   getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
 function getLocalStateDirectory() {
   local directory
   directory="${VALET_LOCAL_STATE_DIRECTORY:-${HOME}/.local/state/valet}"
@@ -1200,7 +762,7 @@ function getLocalStateDirectory() {
 # Does not create it if missing.
 #
 # Usage:
-#  getUserDirectory && local directory="${LAST_RETURNED_VALUE}"
+#   getUserDirectory && local directory="${LAST_RETURNED_VALUE}"
 function getUserDirectory() {
   LAST_RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"
 }
@@ -1213,68 +775,33 @@ function getUserDirectory() {
 # This should be called from a command function for which you want to display the help text.
 #
 # Usage:
-#  showHelp
+#   showHelp
 function showHelp() {
   local functionName
   # get the function name of the calling function
   functionName="${FUNCNAME[1]}"
 
-  showFunctionHelp "${functionName}"
-}
-
-# Show an interactive menu for a command that has sub menus.
-# This should be called from a command function for which you want to display the sub menu.
-#
-# Usage:
-#  showSubMenu
-function showSubMenu() {
-  local functionName
-  # get the function name of the calling function
-  functionName="${FUNCNAME[1]}"
-
-  local parsedArguments
-  parseFunctionArguments "this" "$@" && parsedArguments="${LAST_RETURNED_VALUE}"
-  debug "Parsed arguments:"$'\n'"${parsedArguments}"
-  eval "${parsedArguments}"
-
-  checkParseResults "${help:-}" "${parsingErrors:-}" "${functionName}"
-
-  # filter the commands to only keep the sub commands of the function
-  local filteredCommandsMenuBody line
-  local -n command="CMD_COMMAND_${functionName}"
-  filteredCommandsMenuBody=""
-  local IFS=$'\n'
-  for line in ${CMD_COMMANDS_MENU_BODY}; do
-    if [[ "${line}" =~ ^(${command} [^ ]+ ) ]]; then
-      filteredCommandsMenuBody+="${line}"$'\n'
-    fi
-  done
-
-  if [ -z "${filteredCommandsMenuBody}" ]; then
-    fail "No sub commands found for ⌜${command}⌝."
-  fi
-
-  showCommandsMenuAndRun "${functionName}" "${filteredCommandsMenuBody%$'\n'}"
+  printHelp funtion "${functionName}"
 }
 
 # Parse the arguments and options of a function and return a string that can be evaluated to set the variables.
 # This should be called from a command function for which you want to parse the arguments.
 #
 # Usage:
-#  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+#   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
 #
 # Notes:
-# - It will return a string that can be evaluated to set the variables
-#   corresponding to the arguments and options; e.g.:
-#     local arg1 option1
-#     arg1="xxx"
-#     option1="xxx"
-#     ...
-# - It will also set the variable parsingErrors if there are any errors.
-# - Variable name for an option is taken from the first --long version of the option.
-# - If the function expects arguments or options but none are provided, it will
-#   automatically go into interactive mode and ask the user inputs.
-# - It will set the variable as an array if the (last) argument name ends with '...'
+#   - It will return a string that can be evaluated to set the variables
+#     corresponding to the arguments and options; e.g.:
+#       local arg1 option1
+#       arg1="xxx"
+#       option1="xxx"
+#       ...
+#   - It will also set the variable parsingErrors if there are any errors.
+#   - Variable name for an option is taken from the first --long version of the option.
+#   - If the function expects arguments or options but none are provided, it will
+#     automatically go into interactive mode and ask the user inputs.
+#   - It will set the variable as an array if the (last) argument name ends with '...'
 function parseArguments() {
   local functionName
   # get the function name of the calling function
@@ -1288,8 +815,8 @@ function parseArguments() {
 # This should be called from a command function for which you want to check the parsing results.
 #
 # Usage:
-#  checkParseResults "${help:-}" "${parsingErrors:-}"
-#  checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
+#   checkParseResults "${help:-}" "${parsingErrors:-}"
+#   checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
 function checkParseResults() {
   local functionName help parsingErrors
   functionName="${3:-${FUNCNAME[1]}}"
@@ -1298,7 +825,7 @@ function checkParseResults() {
   parsingErrors="${2:-}"
 
   if [ -n "${help}" ]; then
-    showFunctionHelp "${functionName}"
+    printHelp function "${functionName}"
     exit 0
   fi
 
@@ -1306,250 +833,6 @@ function checkParseResults() {
     local -n commandName="CMD_COMMAND_${functionName}"
     fail "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
   fi
-}
-
-
-#===============================================================
-# >>> Fzf glorious functions
-#===============================================================
-
-# Open fzf with the given mode, history id, header and body.
-#
-# $1: the mode to use, can be "menu", "search", "options"
-# $2: the history id to use (used in the name of the fzf history file)
-# $3: the header to display
-# $4: the body to display
-# $5+: additional options to pass to fzf
-#
-# Returns:
-#  The choices made by the user in the global variable LAST_RETURNED_VALUE.
-#  The first line is the query (can be empty), the next lines are the choices.
-#
-# Usage:
-#  showFzf "menu" "my-command" "Choose an option" "option1"$'\n'"option2"$'\n'"option3"
-function showFzf() {
-  local mode historyId header body
-  mode="${1}"
-  historyId="${2}"
-  header="${3}"
-  body="${4}"
-  shift 4
-
-  # in CI mode, we do not allow to display fzf because it would make the job hang forever
-  if [[ "${VALET_CI_MODE:-false}" == "true" ]]; then
-    fail "CI/CD mode is activated, interactive mode has been started but we cannot run fzf or we would make the job hang forever."
-  fi
-
-  getCommandFullPath "fzf"
-  local fzfExecutable="${LAST_RETURNED_VALUE}"
-
-  debug "Running fzf from ⌜${fzfExecutable}⌝."
-
-  local -a defaultOptions
-  local -a modeOptions
-
-  # get the history file
-  getLocalStateDirectory && local stateDirectory="${LAST_RETURNED_VALUE}"
-  local historyFile
-  if [[ -n "${historyId}" ]]; then
-    historyFile="${stateDirectory}/fzf-history-${historyId}"
-    if [ ! -e "${historyFile}" ]; then
-      :>"${historyFile}"
-    fi
-    defaultOptions+=(
-      --history="${historyFile}"
-      --history-size=50
-      --bind "alt-up:prev-history"
-      --bind "alt-down:next-history"
-    )
-  fi
-
-  # compute preview width
-  local previewWidth=$((_COLUMNS / 2 - 10))
-  if [[ previewWidth -le 15 ]]; then
-    previewWidth=15
-  fi
-
-  local headerHelp="${COLOR_ERROR}Press ALT+H to display the help and keybindings.${COLOR_DEFAULT}"$'\n'
-
-  local helpPreview
-  case "${mode}" in
-    "options" | "menu")
-      helpPreview="${COLOR_INFO}HELP${COLOR_DEFAULT}"$'\n'$'\n'"Navigate through the options with the ${COLOR_ERROR}UP${COLOR_DEFAULT}/${COLOR_ERROR}DOWN${COLOR_DEFAULT} keys."$'\n'$'\n'"Validate your choice with ${COLOR_ERROR}ENTER${COLOR_DEFAULT}."
-      modeOptions+=(
-        --no-multi
-      )
-      if [[ "${mode}" == "options" ]]; then
-        modeOptions+=(
-          --height=~100%
-          --min-height=10
-        )
-      fi
-      ;;
-    "multi-options")
-      helpPreview="${COLOR_INFO}HELP${COLOR_DEFAULT}"$'\n'$'\n'"Navigate through the options with the ${COLOR_ERROR}UP${COLOR_DEFAULT}/${COLOR_ERROR}DOWN${COLOR_DEFAULT} keys."$'\n'$'\n'"Opt-in and out of an option using ${COLOR_ERROR}TAB${COLOR_DEFAULT}."$'\n'$'\n'"Validate with ${COLOR_ERROR}ENTER${COLOR_DEFAULT}."
-      modeOptions+=(
-        --multi
-        --height=~100%
-        --min-height=10
-        )
-      ;;
-    "yes-no")
-      helpPreview="${COLOR_INFO}HELP${COLOR_DEFAULT}"$'\n'$'\n'"Navigate through the options with the ${COLOR_ERROR}UP${COLOR_DEFAULT}/${COLOR_ERROR}DOWN${COLOR_DEFAULT} keys."$'\n'$'\n'"Validate your choice with ${COLOR_ERROR}ENTER${COLOR_DEFAULT}."
-      modeOptions+=(
-        --height=~100%
-        --min-height=10
-        --no-multi
-        --no-info
-        --no-separator
-      )
-      body="Yes"$'\n'"No"
-      headerHelp=""
-      helpPreview=""
-      ;;
-    "query")
-      helpPreview="${COLOR_INFO}HELP${COLOR_DEFAULT}"$'\n'$'\n'"Type your answer in the prompt."$'\n'$'\n'"Validate with ${COLOR_ERROR}ENTER${COLOR_DEFAULT}."
-      modeOptions+=(
-        --height=~100%
-      )
-      if [[ -z "${body}" ]]; then
-        modeOptions+=(
-          --no-mouse
-          --no-info
-          --no-separator
-          --no-scrollbar
-          --pointer=' '
-          --color=pointer:-1
-          --color=fg+:-1
-          --color=bg+:-1
-        )
-        headerHelp=""
-        helpPreview=""
-      else
-        modeOptions+=(
-          --bind "tab:replace-query"
-          --min-height=10
-        )
-        headerHelp="${COLOR_ERROR}Type your answer, press TAB to replace with the selection (ALT+H for help).${COLOR_DEFAULT}"$'\n'
-        helpPreview+=$'\n'$'\n'"Use ${COLOR_ERROR}TAB${COLOR_DEFAULT} to replace your answer with the current selection."
-      fi
-      ;;
-    "command-options")
-      helpPreview="${COLOR_INFO}HELP${COLOR_DEFAULT}"$'\n'$'\n'"Navigate through the options with the ${COLOR_ERROR}UP${COLOR_DEFAULT}/${COLOR_ERROR}DOWN${COLOR_DEFAULT} keys."$'\n'$'\n'"Opt-in and out of an option using ${COLOR_ERROR}TAB${COLOR_DEFAULT} or ${COLOR_ERROR}SPACE${COLOR_DEFAULT}."$'\n'$'\n'"Modify the value of an option by pressing ${COLOR_ERROR}M${COLOR_DEFAULT}."$'\n'$'\n'"Validate with ${COLOR_ERROR}ENTER${COLOR_DEFAULT}."
-      modeOptions+=(
-        --multi
-        --bind "tab:toggle"
-        --bind "space:toggle"
-        --bind "m:execute(echo {} | fzf)"
-      )
-      ;;
-    *)
-      fail "Unknown fzf mode ⌜${mode}⌝."
-      ;;
-  esac
-
-  helpPreview+="
-
-Cancel with ${COLOR_ERROR}ESC${COLOR_DEFAULT} or ${COLOR_ERROR}CTRL+C${COLOR_DEFAULT}.
-
-${COLOR_INFO}ADDITIONAL KEY BINDINGS${COLOR_DEFAULT}
-
-${COLOR_ERROR}ALT+H${COLOR_DEFAULT}: Show this help.
-${COLOR_ERROR}ALT+/${COLOR_DEFAULT}: Rotate through the preview options (this pane).
-${COLOR_ERROR}ALT+UP${COLOR_DEFAULT}/${COLOR_ERROR}ALT+DOWN${COLOR_DEFAULT}: Previous/next query in the history.
-${COLOR_ERROR}SHIFT+UP${COLOR_DEFAULT}/${COLOR_ERROR}SHIFT+DOWN${COLOR_DEFAULT}: Scroll the preview up and down.
-"
-
-  if [[ -n "${helpPreview}" ]]; then
-    wrapText "${helpPreview}" "${previewWidth}"
-    helpPreview="${LAST_RETURNED_VALUE}"
-    defaultOptions+=(
-      "--bind=alt-h:preview(echo -e '${helpPreview}')"
-      "--preview-window=right,${previewWidth}"
-      --bind 'alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|)'
-    )
-  fi
-
-  # shellcheck disable=SC2054
-  defaultOptions+=(
-    --layout=reverse
-    --info=right
-    --pointer=◆
-    --marker=✓
-    --cycle
-    --tiebreak=begin,index
-    --margin=0
-    --padding=0
-    --delimiter=$'\n'
-    --tabstop=3
-    --header-first
-    --header="${headerHelp}${header}"
-    --print-query
-  )
-
-  # reset the output file, but only if it already exist
-  [[ -s "${_TEMPORARY_STDOUT_FILE}" ]] && : >"${_TEMPORARY_STDOUT_FILE}"
-
-  "${fzfExecutable}" "${defaultOptions[@]}" "${modeOptions[@]}" "$@" <<<"${body}" 1>"${_TEMPORARY_STDOUT_FILE}" || true
-
-  local choice
-  if [ -s "${_TEMPORARY_STDOUT_FILE}" ]; then
-    IFS= read -rd '' choice <"${_TEMPORARY_STDOUT_FILE}" || true
-  else
-    choice=""
-  fi
-
-  # if any, append the query to the history file
-  if [[ -n "${historyId}" ]]; then
-    local query=${choice%%$'\n'*}
-    if [ -n "${query}" ]; then
-      echo "${query}" >>"${historyFile}"
-    fi
-  fi
-
-  LAST_RETURNED_VALUE="${choice}"
-}
-
-# Ask the user for a string input.
-#
-# $1: the prompt to display
-# $2: a list of options that the user can select with TAB (can be empty, separated by new lines)
-#
-# Returns:
-#  The value entered by the user in the global variable LAST_RETURNED_VALUE.
-#
-# Usage:
-#  promptString "What is your name?" "John" && local name="${LAST_RETURNED_VALUE}"
-function promptString() {
-  local prompt autocompletionValues
-  prompt="${1}"
-  autocompletionValues="${2}"
-
-  showFzf "query" "" "${prompt}" "${autocompletionValues:-}"
-
-  # we keep only the query, i.e. the first line
-  LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE%%$'\n'*}"
-}
-
-# Ask the user to yes or no.
-#
-# $1: the prompt to display
-#
-# Returns:
-#  True or false in the global variable LAST_RETURNED_VALUE.
-#
-# Usage:
-#  promptYesNo "Do you want to continue?" && local answer="${LAST_RETURNED_VALUE}"
-function promptYesNo() {
-  local prompt
-  prompt="${1}"
-
-  showFzf "yes-no" "" "${prompt}" ''
-
-  # we keep only the selected value, i.e. the 2nd line
-  LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE#*$'\n'}"
-  LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE%%$'\n'*}"
-  [[ "${LAST_RETURNED_VALUE}" == "Yes" ]] && LAST_RETURNED_VALUE=true || LAST_RETURNED_VALUE=false
 }
 
 #===============================================================

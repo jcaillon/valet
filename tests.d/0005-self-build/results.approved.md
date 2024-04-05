@@ -1,3 +1,14 @@
+# Test suite 0005-self-build
+
+## Test script 01.self-build
+
+### Testing selfbuild
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
 #!/usr/bin/env bash
 # author: github.com/jcaillon
 # description: This script declares global variables used in valet to manage commands.
@@ -227,3 +238,53 @@ CMD_SHORT_DESCRIPTION_showCommandHelp="Show the help this program or of a specif
 CMD_SHORT_DESCRIPTION_showcaseCommand1="A showcase command that uses arguments and options."
 CMD_SHORT_DESCRIPTION_this="Your personal assistant in the terminal!"
 CMD_SUDO_showCaseSudo="true"
+
+```
+
+**Error** output:
+
+```log
+INFO     Extracting commands from ⌜$VALET_HOME/valet⌝.
+INFO                              ├── ⌜⌝.
+INFO     Extracting commands from ⌜$VALET_HOME/valet.d/main⌝.
+INFO                              ├── ⌜help⌝.
+INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-build⌝.
+INFO                              ├── ⌜self build⌝.
+INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-download-binaries.sh⌝.
+INFO                              ├── ⌜self download-binaries⌝.
+INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-install.sh⌝.
+INFO                              ├── ⌜self update⌝.
+INFO                              ├── ⌜self welcome-user⌝.
+INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-release.sh⌝.
+INFO                              ├── ⌜self release⌝.
+INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-test.sh⌝.
+INFO                              ├── ⌜self test⌝.
+INFO                              ├── ⌜self test-core⌝.
+INFO     Extracting commands from ⌜$VALET_HOME/examples.d/showcase/showcase.sh⌝.
+INFO                              ├── ⌜showcase command1⌝.
+INFO                              ├── ⌜showcase hello-world⌝.
+INFO                              ├── ⌜showcase sudo-command⌝.
+INFO     == Summary of the commands ==
+
+- Number of variables declared: ⌜171⌝.
+- Number of functions: ⌜12⌝.
+- Number of commands: ⌜11⌝.
+- Maximum sub command level: ⌜1⌝.
+
+== List of all the commands ==
+
+help                  	Show the help this program or of a specific command.
+self build            	Re-build the menu of valet from your commands.
+self download-binaries	Download the required binaries for valet.
+self release          	Release a new version of valet.
+self test             	Test your valet custom commands.
+self test-core        	Test valet core features.
+self update           	Update valet using the latest release on GitHub.
+self welcome-user     	The command run after the installation of Valet to guide the user.
+showcase command1     	A showcase command that uses arguments and options.
+showcase hello-world  	An hello world command.
+showcase sudo-command 	A command that requires sudo.
+
+SUCCESS  The valet user commands have been successfully built
+```
+

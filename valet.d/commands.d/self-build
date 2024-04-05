@@ -19,6 +19,7 @@ if [ -z "${_CORE_INCLUDED:-}" ]; then
       popd &>/dev/null
     else VALETD_DIR="${PWD}"; fi
   else VALETD_DIR="${VALETD_DIR%/*}"; fi
+
   # shellcheck source=../core
   source "${VALETD_DIR%/*}/core"
 fi
@@ -26,8 +27,12 @@ fi
 
 # shellcheck source=self-build-utils
 source "${VALET_HOME}/valet.d/commands.d/self-build-utils"
-# shellcheck source=../utils
-source "${VALET_HOME}/valet.d/utils"
+# shellcheck source=../lib-array
+source "${VALET_HOME}/valet.d/lib-array"
+# shellcheck source=../lib-io
+source "${VALET_HOME}/valet.d/lib-io"
+# shellcheck source=../lib-string
+source "${VALET_HOME}/valet.d/lib-string"
 
 #===============================================================
 # >>> command: self build
@@ -77,7 +82,7 @@ function selfBuild() {
       outputFile="${1}"
       ;;
     -*) fail "Unknown option ⌜${1}⌝." ;;
-    *) fail "Unknown command ⌜${1}⌝." ;;
+    *) fail "This command takes no arguments." ;;
     esac
     shift
   done
@@ -153,13 +158,12 @@ function summarize() {
     numberOfVars+=1
   done
 
-  local message="Summary of the commands:"$'\n'
+  local message="== Summary of the commands =="$'\n\n'
   message+="- Number of variables declared: ⌜${numberOfVars}⌝."$'\n'
   message+="- Number of functions: ⌜${#CMD_ALL_FUNCTIONS_ARRAY[@]}⌝."$'\n'
   message+="- Number of commands: ⌜${#CMD_ALL_COMMANDS_ARRAY[@]}⌝."$'\n'
   message+="- Maximum sub command level: ⌜${CMD_MAX_SUB_COMMAND_LEVEL:-0}⌝."$'\n'
-  message+="- Maximum command width: ⌜${CMD_MAX_COMMAND_WIDTH:-0}⌝."$'\n'
-  message+="List of all the commands:"$'\n'
+  message+=$'\n'"== List of all the commands =="$'\n\n'
   message+="${CMD_COMMANDS_MENU_BODY}"
   inform "${message}"
 }
@@ -204,7 +208,12 @@ function extractCommandDefinitionsToVariables() {
       inform "                         ├── ⌜${command}⌝."
 
       toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${LAST_RETURNED_VALUE}"
-      TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${VALET_HOME}/"/}"
+      TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${VALET_HOME}"/}"
+
+      if isDebugEnabled; then
+        captureOutput declare -p ${!TEMP_CMD_BUILD_*}
+        debug "Declared variables for this command:"$'\n'"${LAST_RETURNED_VALUE}"
+      fi
 
       # make sure that all these arrays exists and have the same size
       makeArraysSameSize TEMP_CMD_BUILD_options_name TEMP_CMD_BUILD_options_description TEMP_CMD_BUILD_options_noEnvironmentVariable
@@ -239,11 +248,9 @@ function extractCommandDefinitionsToVariables() {
 #
 # Declared variables:
 # CMD_ALL_FUNCTIONS_ARRAY = array of all the functions callable with a command
-# CMD_ALL_FUNCTIONS = list all the functions callable with a command
 # CMD_ALL_COMMANDS_ARRAY = array of all the commands
-# CMD_ALL_COMMANDS = list all the commands
+# CMD_ALL_MENU_COMMANDS_ARRAY = array of all the commands that should open a sub menu to show a list of sub commands
 # CMD_MAX_SUB_COMMAND_LEVEL = maximum number of sub command levels; e.g. 'command subcommand subsubcommand' has 2 levels
-# CMD_ALL_SUB_MENUS_COMMANDS_ARRAY = array of all the commands that should open a sub menu to show a list of sub commands
 # CMD_MAX_COMMAND_WIDTH = get the maximum width (nb characters) among all commands
 # CMD_FUNCTION_NAME_yyy = the function name for the given yyy command
 # CMD_COMMAND_xxx = the command of the function
@@ -255,12 +262,10 @@ function declareFinalCommandDefinitionCommonVariables() {
 
   # add to the list of all the functions
   CMD_ALL_FUNCTIONS_ARRAY+=("${function}")
-  CMD_ALL_FUNCTIONS+="${function}"$'\n'
 
   # add to the list of all the commands
   if [[ -n "${command}" ]]; then
     CMD_ALL_COMMANDS_ARRAY+=("${command}")
-    CMD_ALL_COMMANDS+="${command}"$'\n'
   fi
 
   # get the maximum number of sub command levels; e.g. 'command subcommand subsubcommand' has 2 levels,
@@ -271,7 +276,7 @@ function declareFinalCommandDefinitionCommonVariables() {
   for word in ${command}; do
     level+=1
   done
-  if [[ "${level}" -gt "${CMD_MAX_SUB_COMMAND_LEVEL:-0}" ]]; then
+  if [[ "${level}" -gt "${CMD_MAX_SUB_COMMAND_LEVEL:--1}" ]]; then
     CMD_MAX_SUB_COMMAND_LEVEL="${level}"
   fi
 
@@ -287,7 +292,12 @@ function declareFinalCommandDefinitionCommonVariables() {
     fi
     index+=1
   done
-  appendToArrayIfNotPresent CMD_ALL_SUB_MENUS_COMMANDS_ARRAY "${parentCommand# }"
+  parentCommand="${parentCommand# }"
+  if [[ -n "${parentCommand}" ]]; then
+    if ! appendToArrayIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY "${parentCommand# }"; then
+      declare -g "CMD_FUNCTION_NAME_${parentCommand//[-[:space:]]/_}"="_menu"
+    fi
+  fi
 
   # get the maximum width (nb characters) among all commands
   local -i width="${#command}"
@@ -336,8 +346,9 @@ function declareFinalCommandDefinitionHelpVariables() {
   for ((index = 0; index < ${#TEMP_CMD_BUILD_options_name[@]}; index++)); do
     if [[ "${TEMP_CMD_BUILD_options_noEnvironmentVariable[index]}" != "true" ]]; then
       optionValue="${TEMP_CMD_BUILD_options_name[index]}"
-      if [[ "${optionValue}" == *"<"* ]]; then optionValue="<${optionValue##<*}"; else optionValue="true"; fi
-      kebabCaseToSnakeCase "${TEMP_CMD_BUILD_options_name[index]}"
+      if [[ "${optionValue}" == *"<"* ]]; then optionValue="<${optionValue##*<}"; else optionValue="true"; fi
+      extractFirstLongNameFromOptionString "${TEMP_CMD_BUILD_options_name[index]}"
+      kebabCaseToSnakeCase "${LAST_RETURNED_VALUE}"
       TEMP_CMD_BUILD_options_description[index]+=$'\n'"This option can be set by exporting the variable VALET_${LAST_RETURNED_VALUE}='${optionValue}'."
     fi
   done
@@ -399,11 +410,11 @@ function declareFinalCommandDefinitionParserVariables() {
     for ((index = 0; index < ${#TEMP_CMD_BUILD_arguments_name[@]}; index++)); do
       argument="${TEMP_CMD_BUILD_arguments_name[index]}"
       if [[ "${argument}" == *"..."* ]]; then
-        argument="${argument//.../}"
+        argument="${argument//\.\.\./}"
         lastArgumentIsArray="true"
       fi
       if [[ "${argument}" == *"?"* ]]; then
-        argument="${argument//?/}"
+        argument="${argument//\?/}"
         nbOptionalArguments+=1
       fi
       kebabCaseToCamelCase "${argument}" && argumentNameCc="${LAST_RETURNED_VALUE}"
@@ -422,12 +433,18 @@ function declareFinalCommandDefinitionParserVariables() {
 #
 # Declared variables:
 # CMD_COMMANDS_MENU_BODY = the input used to display the commands menu
+# CMD_COMMANDS_NAME_this = array with each sub command name
+# CMD_COMMANDS_DESCRIPTION_this = array with each sub commmand short description
+# CMD_ALL_FUNCTIONS = list all the functions callable with a command
+# CMD_ALL_COMMANDS = list all the commands
+# shellcheck disable=SC2034
 function declareOtherCommmandVariables() {
   # sort commands in alphabetical order
   sortArray CMD_ALL_COMMANDS_ARRAY
 
-  # declare the main menu body
   CMD_COMMANDS_MENU_BODY=""
+  CMD_COMMANDS_NAME_this=()
+  CMD_COMMANDS_DESCRIPTION_this=()
 
   # for each command
   local command line
@@ -442,44 +459,24 @@ function declareOtherCommmandVariables() {
 
     # declare the command menu body
     CMD_COMMANDS_MENU_BODY+="${line}"
+
+    # declare the sub commands for the main menu
+    CMD_COMMANDS_NAME_this+=("${command}")
+    CMD_COMMANDS_DESCRIPTION_this+=("${shortDescription}")
   done
 
-  return 0
-}
+  # CMD_ALL_COMMANDS and CMD_ALL_FUNCTIONS
+  local IFS=$'\n'
+  CMD_ALL_COMMANDS="${CMD_ALL_MENU_COMMANDS_ARRAY[*]}"$'\n'"${CMD_ALL_COMMANDS_ARRAY[*]}"
+  CMD_ALL_FUNCTIONS="${CMD_ALL_FUNCTIONS_ARRAY[*]}"
+  unset IFS
 
-# This function declare additional variables that are needed in the commands file.
-# It is executed after all the command definitions have been extracted.
-#
-# Declared variables:
-# CMD_COMMANDS_NAME_xxx = array with each sub command name
-# CMD_COMMANDS_SHORTDESCRIPTION_xxx = array with each sub commmand short description
-function declareSubMenusVariables() {
-
-  # for each command that should open a sub menu
-  local command functionName
-  for command in "${CMD_ALL_SUB_MENUS_COMMANDS_ARRAY[@]}"; do
-    # check if there is an associated function, which mean we could already values for the help of this command
-    local -n function="CMD_FUNCTION_NAME_${command//[-[:space:]]/_}"
-    if [[ -n "${function:-}" ]]; then
-      functionName="${function}"
-    else
-      functionName="${command//[[:space:]]/-}"
-      kebabCaseToCamelCase "${functionName}" && functionName="${LAST_RETURNED_VALUE}"
-    fi
-
-
-    local subCommand
-    for subCommand in "${CMD_ALL_COMMANDS_ARRAY[@]}"; do
-      if [[ "${subCommand}" == "${command} "* ]]; then
-        subCommands+=("${subCommand}")
-        local -n function="CMD_FUNCTION_NAME_${subCommand//[-[:space:]]/_}"
-        local -n shortDescription="CMD_SHORT_DESCRIPTION_${function}"
-        subCommandsShortDescription+=("${shortDescription}")
-      fi
-    done
-    eval "CMD_COMMANDS_NAME_${command//[-[:space:]]/_}=(\"\${subCommands[@]}\")"
-    eval "CMD_COMMANDS_SHORTDESCRIPTION_${command//[-[:space:]]/_}=(\"\${subCommandsShortDescription[@]}\")"
-  done
+  # declare additional variables for the sub commands menu
+  CMD_DESCRIPTION__menu="Show a menu with sub commands for the current command."
+  CMD_OPTIONS_NAME__menu="-h, --help"
+  CMD_OPTIONS_DESCRIPTION__menu="Display the help for this command."
+  CMD_OPTS__menu=("-h --help")
+  CMD_OPTS_NAME__menu=("help")
 
   return 0
 }

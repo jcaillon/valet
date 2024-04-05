@@ -1,10 +1,10 @@
-# Test suite 0003-self
+# Test suite 0003-self-release
 
 ## Test script 01.self-release
 
 ### Testing selfRelease, dry run major version
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
@@ -72,21 +72,23 @@ SUCCESS  The new version has been released, check: ⌜https://github.com/jcaillo
 
 ### Testing selfRelease, minor version
 
-Exit code: 0
+Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ LOG_LEVEL_INT=0 selfRelease -t token -b minor
+→ selfRelease -t token -b minor
 ```
 
 **Error** output:
 
 ```log
+DEBUG    Log level set to debug.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Parsed arguments:
 local parsingErrors githubReleaseToken bumpLevel dryRun uploadArtifactsOnly help
-dryRun="${DRY_RUN:-}"
-uploadArtifactsOnly="${UPLOAD_ARTIFACTS_ONLY:-}"
+dryRun="${VALET_DRY_RUN:-}"
+uploadArtifactsOnly="${VALET_UPLOAD_ARTIFACTS_ONLY:-}"
 parsingErrors=""
 githubReleaseToken="token"
 bumpLevel="minor"
@@ -129,7 +131,8 @@ DEBUG    The release payload is: ⌜{
 SUCCESS  The new version has been released on GitHub.
 DEBUG    The upload URL is: https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets
 DEBUG    Parsed arguments:
-local parsingErrors forceOs destination help
+local parsingErrors forceOs destination force help
+force="${VALET_FORCE:-}"
 parsingErrors=""
 forceOs="linux"
 destination="$VALET_HOME/.tmp/bin"
@@ -155,7 +158,8 @@ DEBUG    The artifact has been created at ⌜valet-linux-amd64.tar.gz⌝ with:
 INFO     Uploading the artifact ⌜valet-linux-amd64.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 ▶ called kurl true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet-linux-amd64.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet-linux-amd64.tar.gz
 DEBUG    Parsed arguments:
-local parsingErrors forceOs destination help
+local parsingErrors forceOs destination force help
+force="${VALET_FORCE:-}"
 parsingErrors=""
 forceOs="windows"
 destination="$VALET_HOME/.tmp/bin"
@@ -183,7 +187,8 @@ DEBUG    The artifact has been created at ⌜valet-windows-amd64.tar.gz⌝ with:
 INFO     Uploading the artifact ⌜valet-windows-amd64.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 ▶ called kurl true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet-windows-amd64.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet-windows-amd64.tar.gz
 DEBUG    Parsed arguments:
-local parsingErrors forceOs destination help
+local parsingErrors forceOs destination force help
+force="${VALET_FORCE:-}"
 parsingErrors=""
 forceOs="darwin"
 destination="$VALET_HOME/.tmp/bin"

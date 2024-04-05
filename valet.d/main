@@ -98,9 +98,6 @@ function command_not_found_handle() {
   if [ "${1:-}" = "fzf" ]; then
     fail "This program requires ⌜https://github.com/junegunn/fzf⌝ to display interactive prompt."$'\n'"Install fzf or pass the correct options and arguments. See --help for more information."
   fi
-  if [ "${1:-}" = "yq" ]; then
-    fail "This command requires ⌜https://github.com/mikefarah/yq⌝ to parse the command about functions."$'\n'"Please install it in your path and run this command again."
-  fi
   if [ "${1:-}" = "curl" ]; then
     fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
   fi
@@ -136,7 +133,7 @@ function enableProfiler() {
     functionDepthExpression='0'
   fi
 
-  PS4='●'$'\011''$(("${EPOCHREALTIME//./}" - PROFILER_START_REALTIME))'$'\011''${BASH_SOURCE[1]:-}:${BASH_LINENO[0]:-0}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
+  PS4='●'$'\011''$(("${EPOCHREALTIME//./}" - PROFILER_START_REALTIME))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
 
   exec 5>"${file}"
 
@@ -170,26 +167,35 @@ function cleanProfilerFile() {
   local timePrecision=${EPOCHREALTIME#*.}
   timePrecision=${#timePrecision}
 
-  # we do this one in awk because we need some computation that can't easily be done in bash
+  local clearLine
+  if [[ "${VALET_KEEP_ALL_PROFILER_LINES:-false}" == "true" ]]; then
+    clearLine=false
+  fi
+  if [[ -z "${clearLine:-}" && "${VALET_STARTUP_PROFILING:-false}" == "true" ]]; then
+    clearLine=false
+  fi
+  if [[ -z "${clearLine:-}" ]]; then
+    clearLine=true
+  fi
+
+  # we do this one in awk for now because it was a good place to learn awk
+  # TODO: could be replaced with bash later but im not sure how to do decimal math in bash
   if ! command -v awk 1>/dev/null 2>&1; then
     warn "The awk command is required to clean the profiler file. It was not found on the PATH so we skip the cleaning."
     return 0
   fi
 
-  local clearLine=true
-  [[ "${VALET_STARTUP_PROFILING:-false}" == "true" ]] && clearLine=false
-
   awk -F $'\t' -v timePrecision="${timePrecision}" -v clearCoreLine="${clearLine}" '
   BEGIN {
     printf "%s\n\n", "(D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)";
-    printf "%s\n", "D  I  S  timer  delta               function caller source:line function                         command";
+    printf "%s\n", "D  I  S  timer  delta                           source:line function                                 → command";
     lastLineWasSkipped = 0;
     lastLineLength = 0;
     lastTimer = 0;
     baseStackLength = 99999;
   }
   {
-    if (clearCoreLine == "true" && $0 ~ /(valet.d\/core:|valet.d\/main:)/) {
+    if (clearCoreLine == "true" && $3 ~ /(valet.d\/core|valet.d\/main|valet.d\/lib-[a-z0-9])$/) {
       lastLineWasSkipped = 1;
       next;
     }
@@ -201,28 +207,38 @@ function cleanProfilerFile() {
       if (lastLineWasSkipped == 1) {
         next;
       }
-      printf "%97s%s\n", "", $0;
+      printf "%103s%s\n", "", $0;
       next;
     }
     if (baseStackLength == 99999) {
-      baseStackLength = $6;
+      baseStackLength = $7;
     }
 
     indirectionLevel = length($1);
     timer = $2 / (10 ^ timePrecision);
     program = $3;
-    programShorten = substr(program, length(program)-39)
-    fun = $4 "()";
-    subShellLevel = $5;
-    stackLength = $6 - baseStackLength;
+    lineNumber = $4;
+    if (length(program) > 30) {
+      programShorten = "..." substr(program, length(program)-27);
+    } else {
+      programShorten = program;
+    }
+    fun = $5 "()";
+    if (length(fun) > 40) {
+      funShorten = "..." substr(fun, length(fun)-37);
+    } else {
+      funShorten = fun;
+    }
+    subShellLevel = $6;
+    stackLength = $7 - baseStackLength;
     theRest = "";
-    for (x = 8; x <= NF; x++) {
+    for (x = 9; x <= NF; x++) {
       theRest = theRest $x;
     }
     deltaTimer = timer - lastTimer;
 
 
-    printf "%02d %02d %02d %.4f %.4f %40s %-30s → %s\n", stackLength, indirectionLevel, subShellLevel, timer, deltaTimer, programShorten, fun, theRest;
+    printf "%02d %02d %02d %.4f %.4f %30s:%-4d %-40s → %s\n", stackLength, indirectionLevel, subShellLevel, timer, deltaTimer, programShorten, lineNumber, fun, theRest;
     lastTimer = timer;
     lastLineLength = length($0) - length(theRest);
   }
@@ -239,12 +255,20 @@ fi
 # >>> Help
 #===============================================================
 
-# show the help text of a function (can be blank to show the root help)
-function showFunctionHelp() {
-  local functionName noColor maxColumns
-  functionName="${1:-this}"
-  noColor="${2:-${VALET_NO_COLOR:-false}}"
-  maxColumns="${3:-180}"
+# Prints the help text of a function or a command.
+#
+# $1: the type help to print (function or menu).
+# $2: the name of the function or the command in the case of a menu.
+# $3: whether to use colors or not.
+# $4: the maximum columns for the help text.
+#
+# Usage:
+#   printHelp function "this" "${VALET_NO_COLOR:-false}" "${_COLUMNS}"
+function printHelp() {
+  local type=${1:-function}
+  local name="${2:-this}"
+  local noColor="${3:-${VALET_NO_COLOR:-false}}"
+  local maxColumns="${4:-180}"
 
   # sudo apt-get install colortest
   # colortest-16b
@@ -270,15 +294,35 @@ function showFunctionHelp() {
   if [[ helpWidth -gt ${_COLUMNS} ]]; then helpWidth=${_COLUMNS}; fi
   if [[ helpWidth -lt 30 ]]; then helpWidth=30; fi
 
+  if [[ "${type}" == "function" ]]; then
+    # case of a function; we will get the description from CMD_ vars directly
+    functionName="${name}"
+  else
+    # case of a menu; we will the sub commands for it
+    functionName="_menu"
+    # shellcheck disable=SC2034
+    CMD_COMMAND__menu="${name}"
+    CMD_COMMANDS_NAME__menu=()
+    CMD_COMMANDS_DESCRIPTION__menu=()
+    local index subCommand
+    for index in "${!CMD_COMMANDS_NAME_this[@]}"; do
+      local subCommand="${CMD_COMMANDS_NAME_this[${index}]}"
+      if [[ "${subCommand}" != "${name} "* ]]; then continue; fi
+      CMD_COMMANDS_NAME__menu+=("${subCommand}")
+      CMD_COMMANDS_DESCRIPTION__menu+=("${CMD_COMMANDS_DESCRIPTION_this[${index}]}")
+    done
+  fi
+
   local -n command="CMD_COMMAND_${functionName}"
   local -n description="CMD_DESCRIPTION_${functionName}"
-  wrapText "${description}" "${helpWidth}" 2 "true"
-  description="${LAST_RETURNED_VALUE}"
-
   local -n functionOptions="CMD_OPTIONS_NAME_${functionName}"
   local -n functionArguments="CMD_ARGUMENTS_NAME_${functionName}"
   local -n functionCommands="CMD_COMMANDS_NAME_${functionName}"
   local -n functionExamples="CMD_EXAMPLES_NAME_${functionName}"
+
+  # description
+  wrapText "${description}" "${helpWidth}" 2 "true"
+  description="${LAST_RETURNED_VALUE}"
 
   # usage
   local usage
@@ -390,7 +434,7 @@ function writeAsTable() {
 : "---
 command: help
 function: showCommandHelp
-shortDescription: Show the help this program or of a specific command
+shortDescription: Show the help this program or of a specific command.
 description: |-
   Show the help this program or of the help of a specific command.
 
@@ -423,23 +467,30 @@ examples:
 function showCommandHelp() {
   local -a commands
   local parsingErrors help columns noColors help
-  parseFunctionArguments "${FUNCNAME[0]}" "$@" && eval "${LAST_RETURNED_VALUE}"
+  parseFunctionArguments "${FUNCNAME[0]}" "$@"
+  eval "${LAST_RETURNED_VALUE}"
 
   checkParseResults "${help:-}" "${parsingErrors:-}"
 
   # show the program help if no commands are provided
-  if [ -z "${commands[0]:-}" ]; then
-    showFunctionHelp "this" "${noColors:-}" "${columns:-}"
+  if [[ ${#commands[@]} -eq 0 ]]; then
+    printHelp function "this" "${noColors:-}" "${columns:-}"
     return 0
   fi
 
-  local functionName
-  fuzzyMatchCommandtoFunctionName "${commands[@]}" && functionName="${LAST_RETURNED_VALUE:-}"
+  local functionName exactCommand
+  fuzzyMatchCommandtoFunctionName "${commands[@]}"
+  functionName="${LAST_RETURNED_VALUE:-}"
+  exactCommand="${LAST_RETURNED_VALUE3:-}"
   if [ -z "${functionName}" ]; then
     fail "Could not show the help because the command ⌜${commands[*]}⌝ does not exist."
   fi
 
-  showFunctionHelp "${functionName}" "${noColors:-}" "${columns:-}"
+  if [[ "${functionName}" == "_menu" ]]; then
+    printHelp menu "${exactCommand}" "${noColors:-}" "${columns:-}"
+  else
+    printHelp function "${functionName}" "${noColors:-}" "${columns:-}"
+  fi
 }
 
 #===============================================================
@@ -448,7 +499,8 @@ function showCommandHelp() {
 
 # parse the user arguments for the main program.
 function parseMainArguments() {
-  local -a commands subCommandArgs
+  local -a commands=()
+  local -a subCommandArgs=()
 
   local maxNbCommands
   maxNbCommands=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
@@ -461,7 +513,7 @@ function parseMainArguments() {
   # for the main command, we parse the arguments manually
   # this is for performance reasons, we want to stop parsing as soon as possible
   while [[ $# -gt 0 ]]; do
-    if [ -n "${commands[0]:-}" ] && [[ "${1}" == "-"* ]]; then
+    if [[ ${#commands[@]} -gt 0 && "${1}" == "-"* ]]; then
       # we matched the commands and we found an option for the sub command
       break
     fi
@@ -481,7 +533,7 @@ function parseMainArguments() {
       exit 0
       ;;
     -h | --help)
-      showFunctionHelp "this"
+      printHelp function "this"
       exit 0
       ;;
     -*)
@@ -508,55 +560,29 @@ function parseMainArguments() {
 
   debug "Command found ⌜${commands[*]}⌝."
 
-  if [ -z "${commands[0]:-}" ]; then
+  if [[ ${#commands[@]} -eq 0 ]]; then
     # no command provided, we show the commands menu
     showCommandsMenuAndRun "main-menu" "${CMD_COMMANDS_MENU_BODY}"
   fi
 
-  local functionName nbArgs
-  fuzzyMatchCommandtoFunctionName "${commands[@]}" && functionName="${LAST_RETURNED_VALUE:-}" && nbArgs="${LAST_RETURNED_VALUE2:-}"
+  local functionName nbArgs exactCommand
+  fuzzyMatchCommandtoFunctionName "${commands[@]}"
+  functionName="${LAST_RETURNED_VALUE:-}"
+  nbArgs="${LAST_RETURNED_VALUE2:-}"
+  exactCommand="${LAST_RETURNED_VALUE3:-}"
   if [ -z "${functionName}" ]; then
     fail "Could not find a command for ⌜${commands[*]}⌝."
   fi
 
   debug "Function name found ⌜${functionName}⌝."
 
-  # run the function without the matched commands in the arguments
-  runFunction "${functionName}" "${subCommandArgs[@]:${nbArgs}}"
-}
-
-function sourceUserCommands() {
-  if [ -n "${_CMD_INCLUDED:-}" ]; then
-    return 0
+  if [[ "${functionName}" == "_menu" ]]; then
+    # run a menu with the list of sub commands
+    runMenuWithSubCommands "${exactCommand}" "${subCommandArgs[@]:${nbArgs}}"
+  else
+    # run the function without the matched commands in the arguments
+    runFunction "${functionName}" "${subCommandArgs[@]:${nbArgs}}"
   fi
-
-  # source the user commands
-  local userDirectory
-  getUserDirectory && userDirectory="${LAST_RETURNED_VALUE}"
-
-  local commandsFile
-  commandsFile="${userDirectory}/commands"
-
-  # if the commands file does not exist, we use the examples commands or we fail
-  if [ ! -e "${commandsFile}" ]; then
-    local message
-    message="The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'
-    message+="To get started with valet, you must build your command list using the ⌜valet self build⌝ command."$'\n'
-    message+="Please check the help using ⌜valet self build --help⌝ for details."
-    commandsFile="${VALET_HOME}/examples.d/commands"
-    if [ -e "${commandsFile}" ]; then
-      message+=$'\n'"Now using the examples commands from ⌜${commandsFile%/*}⌝."
-      warn "${message}"
-    else
-      fail "${message}"
-    fi
-  fi
-
-  debug "Sourcing the user commands from ⌜${commandsFile}⌝."
-
-  # source commands
-  # shellcheck disable=SC1090
-  source "${commandsFile}"
 }
 
 # Run a given function
@@ -599,7 +625,7 @@ function runFunction() {
     disableProfiler
   fi
   if [ "${PROFIL_COMMAND:-}" = "true" ]; then
-    enableProfiler "${VALET_CMD_PROFILING_FILE:-${HOME}/profile_valet_cmd.txt}"
+    enableProfiler "${VALET_COMMAND_PROFILING_FILE:-${HOME}/profile_valet_cmd.txt}"
   fi
 
   # execute the function
@@ -610,32 +636,6 @@ function runFunction() {
   fi
 
   exit 0
-}
-
-# Source the file associated with the function if needed.
-# $1: the function name
-#
-# Usage:
-#  sourceForFunction "functionName"
-function sourceForFunction() {
-  local functionName
-  functionName="${1}"
-
-  local fileToSource
-  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
-    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
-    if [ -e "${fileToSource}" ]; then
-      # shellcheck disable=SC1090
-      source "${fileToSource}"
-      debug "Loaded file ⌜${fileToSource}⌝."
-    elif [ -e "${VALET_HOME:-}/${fileToSource}" ]; then
-      # shellcheck disable=SC1090
-      source "${VALET_HOME:-}/${fileToSource}"
-      debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
-    else
-      warn "The file ⌜${VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
-    fi
-  fi
 }
 
 # This function checks if the user has sudo privileges.
@@ -653,6 +653,50 @@ function checkSudo() {
   else
     SUDO=""
   fi
+}
+
+# Run the a command that has sub command:
+# - either show an interactive menu for a command that has sub commands,
+# - or display the help for this menu.
+#
+# $1: the command name
+#
+# Usage:
+#   runMenuWithSubCommands "command"
+function runMenuWithSubCommands() {
+  local command="${1}"
+  shift
+
+  local parsedArguments
+  parseFunctionArguments "_menu" "$@"
+  parsedArguments="${LAST_RETURNED_VALUE}"
+  debug "Parsed arguments:"$'\n'"${parsedArguments}"
+  eval "${parsedArguments}"
+
+  if [ -n "${help:-}" ]; then
+    printHelp menu "${command}"
+    exit 0
+  fi
+
+  if [ -n "${parsingErrors:-}" ]; then
+    fail "${parsingErrors}"$'\n'"Use valet ${command} --help to get help."
+  fi
+
+  # filter the commands to only keep the sub commands of the function
+  local filteredCommandsMenuBody line
+  filteredCommandsMenuBody=""
+  local IFS=$'\n'
+  for line in ${CMD_COMMANDS_MENU_BODY}; do
+    if [[ "${line}" =~ ^(${command} [^ ]+ ) ]]; then
+      filteredCommandsMenuBody+="${line}"$'\n'
+    fi
+  done
+
+  if [ -z "${filteredCommandsMenuBody}" ]; then
+    fail "No sub commands found for ⌜${command}⌝."
+  fi
+
+  showCommandsMenuAndRun "${command//[-[:space:]]/_}" "${filteredCommandsMenuBody%$'\n'}"
 }
 
 # Show the given commands in an interactive menu and then
@@ -682,6 +726,7 @@ function showCommandsMenuAndRun() {
   runFunction "${functionName}"
 }
 
+# TODO: simplify this by directly storing and sourcing bash arrays
 # This function sorts the commands in the menu
 # by reading a file that contains the last used commands (last on top).
 # The file is located in the configuration directory of the program.
@@ -817,6 +862,8 @@ function showInteractiveCommandsMenu() {
   menuBody="${3}"
   shift 2
 
+  include interactive
+
   showFzf "menu" "${menuId}" "${menuHeader}" "${menuBody}" \
     --preview-label='Command help' \
     --preview="VALET_LOG_LEVEL=error '${VALET_HOME}/valet' help --columns \$((FZF_PREVIEW_COLUMNS - 1)) {1}"
@@ -829,6 +876,45 @@ function showInteractiveCommandsMenu() {
   LAST_RETURNED_VALUE="${choice}"
 }
 
+# Source the user 'commands' file from the valet user directory.
+# If the file does not exist, we use the examples commands.
+#
+# Usage:
+#  sourceUserCommands
+function sourceUserCommands() {
+  if [ -n "${_CMD_INCLUDED:-}" ]; then
+    return 0
+  fi
+
+  # source the user commands
+  local userDirectory
+  getUserDirectory && userDirectory="${LAST_RETURNED_VALUE}"
+
+  local commandsFile
+  commandsFile="${userDirectory}/commands"
+
+  # if the commands file does not exist, we use the examples commands or we fail
+  if [ ! -e "${commandsFile}" ]; then
+    local message
+    message="The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'
+    message+="To get started with valet, you must build your command list using the ⌜valet self build⌝ command."$'\n'
+    message+="Please check the help using ⌜valet self build --help⌝ for details."
+    commandsFile="${VALET_HOME}/examples.d/commands"
+    if [ -e "${commandsFile}" ]; then
+      message+=$'\n'"Now using the examples commands from ⌜${commandsFile%/*}⌝."
+      warn "${message}"
+    else
+      fail "${message}"
+    fi
+  fi
+
+  debug "Sourcing the user commands from ⌜${commandsFile}⌝."
+
+  # source commands
+  # shellcheck disable=SC1090
+  source "${commandsFile}"
+}
+
 #===============================================================
 # >>> Find command/function from arguments
 #===============================================================
@@ -838,17 +924,20 @@ function showInteractiveCommandsMenu() {
 # Usage:
 #  getFunctionNameFromCommand "self build" && echo "${LAST_RETURNED_VALUE}"
 function getFunctionNameFromCommand() {
-  local command="${1:-}"
-  local -n functionName="CMD_FUNCTION_NAME_${command//[-[:space:]]/_}"
-
+  local -n functionName="CMD_FUNCTION_NAME_${1//[-[:space:]]/_}"
   LAST_RETURNED_VALUE="${functionName:-}"
 }
 
 # Find the function name from arguments that represents the commands.
 # If we do not find an exact match, we return try to fuzzy find the command
 # and then return its function name.
+#
 # $@: the commands to find
-# returns: the function name in the global variable LAST_RETURNED_VALUE
+#
+# Returns:
+#   the function name in the global variable LAST_RETURNED_VALUE
+#   the level of the command in the global variable LAST_RETURNED_VALUE2
+#   the exact command in the global variable LAST_RETURNED_VALUE3
 #
 # Usage:
 #  fuzzyMatchCommandtoFunctionName "self" "build" && echo "${LAST_RETURNED_VALUE}"
@@ -858,7 +947,8 @@ function fuzzyMatchCommandtoFunctionName() {
     return 0
   fi
 
-  getMaxPossibleCommandLevel "$@" && level="${LAST_RETURNED_VALUE}"
+  getMaxPossibleCommandLevel "$@"
+  level="${LAST_RETURNED_VALUE}"
 
   # we put the arguments into an array so we can interpret 'my' 'sub'
   # and 'my sub' as the same command (we split everything by space)
@@ -871,7 +961,8 @@ function fuzzyMatchCommandtoFunctionName() {
 
     # case where the command is exact, we can match the function immediately
     getFunctionNameFromCommand "${command}" && functionName="${LAST_RETURNED_VALUE}"
-    if [ -n "${functionName:-}" ]; then
+    if [[ -n "${functionName:-}" ]]; then
+      exactCommand="${command}"
       break
     fi
 
@@ -886,6 +977,7 @@ function fuzzyMatchCommandtoFunctionName() {
 
   LAST_RETURNED_VALUE="${functionName:-}"
   LAST_RETURNED_VALUE2="${loopI}"
+  LAST_RETURNED_VALUE3="${exactCommand:-}"
 }
 
 # Return the maximum level of subcommands
@@ -939,21 +1031,28 @@ function parseFunctionArguments() {
   shift
 
   local -n argumentsName="CMD_ARGS_NAME_${functionName}"
+  local -i totalNbArguments
+  if [[ -v argumentsName && "${#argumentsName[@]}" -gt 0 ]]; then
+    totalNbArguments=${#argumentsName[@]};
+  else
+    totalNbArguments=0;
+  fi
   local -n isLastArgumentAnArray="CMD_ARGS_LAST_IS_ARRAY_${functionName}"
   local -n nbOptionalArgsStr="CMD_ARGS_NB_OPTIONAL_${functionName}"
   local -i nbOptionalArgs="${nbOptionalArgsStr:-0}"
-  ${isLastArgumentAnArray:=false}
-  local -i totalNbArguments
-  if [ -n "${argumentsName[0]:-}" ]; then totalNbArguments=${#argumentsName[@]}; else totalNbArguments=0; fi
-  local -i argumentPosition
-  argumentPosition=0
+  if [[ -z "${isLastArgumentAnArray:-}" ]]; then isLastArgumentAnArray=false; fi
+  local -i argumentPosition=0
 
   local -n options="CMD_OPTS_${functionName}"
+  local -i totalNbOptions
+  if [[ -v options && "${#options[@]}" -gt 0 ]]; then
+    totalNbOptions=${#options[@]};
+  else
+    totalNbOptions=0;
+  fi
   local -n optionsHasValue="CMD_OPTS_HAS_VALUE_${functionName}"
   local -n optionsName="CMD_OPTS_NAME_${functionName}"
   local -n optionsNameSc="CMD_OPTS_NAME_SC_${functionName}"
-  local -i totalNbOptions
-  if [ -n "${options[0]:-}" ]; then totalNbOptions=${#options[@]}; else totalNbOptions=0; fi
 
   # shortcut if the function expect no arguments and no options
   if [[ totalNbArguments -eq 0 && totalNbOptions -eq 0 ]]; then
@@ -961,7 +1060,7 @@ function parseFunctionArguments() {
     return 0
   fi
 
-  local -a lastArgumentValues
+  local -a lastArgumentValues=()
   local -a outputErrors
   local -a outputSetLine
   local -a matchedOptionsIndex
@@ -1040,7 +1139,7 @@ function parseFunctionArguments() {
   done
 
   # increase argument position if the last arg is an array because we don't do it in the loop
-  if [ -n "${lastArgumentValues[0]:-}" ]; then
+  if [[ ${#lastArgumentValues[@]} -gt 0 ]]; then
     argumentPosition=$((argumentPosition + 1))
   fi
 
@@ -1154,7 +1253,7 @@ function parseFunctionArgumentsOrGoInteractive() {
   # check if the function is expecting arguments and/or options
   local expectArguments
   local -n arguments="CMD_ARGUMENTS_NAME_${functionName}"
-  if [ -n "${arguments[0]:-}" ]; then
+  if [[ -v arguments && "${#arguments[@]}" -gt 0 ]]; then
     expectArguments="true"
   fi
 

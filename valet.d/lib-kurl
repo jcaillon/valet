@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+include io
+
+# This function is a wrapper around curl.
+# It allows you to check the http status code and return 1 if it is not acceptable.
+# It invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o $2.
+#
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
+# $3: the file in which to save the output of curl
+# $4+: options for curl
+#
+# Returns:
+#  The exit code of the function is 0 if the http status code is acceptable, 1 otherwise.
+#  The content of stderr in the global variable LAST_RETURNED_VALUE.
+#  The http status code in the global variable LAST_RETURNED_VALUE2.
+#
+# Usage:
+#  kurlFile "true" "200,201" "/filePath" "https://example.com" || fail "The curl command failed."
+function kurlFile() {
+  local failIfFails acceptableStatusCodes outputFile url
+  failIfFails="${1:-false}"
+  acceptableStatusCodes="${2:-200,201,202,204,301,304,308}"
+  outputFile="${3}"
+  shift 3
+
+  # call curl
+  local -i exitCode=0
+  local httpStatusCode errors
+  invoke5var "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{http_code}" "--output" "${outputFile}" "$@" || exitCode=$?
+  httpStatusCode="${LAST_RETURNED_VALUE}"
+  errors="${LAST_RETURNED_VALUE2}"
+
+  local url="$*"
+  url="http${url##*http}"
+  url="${url%% *}"
+  url="${url%% \'}"
+
+  debug "The curl command for url ⌜${url}⌝ ended with exit code ⌜${exitCode}⌝, the http return code was ⌜${httpStatusCode}⌝."
+
+  # if the error code is acceptable, then we set it to 0
+  if [[ ",${acceptableStatusCodes}," == *",${httpStatusCode},"* ]]; then
+    exitCode=0
+    debug "The http return code ⌜${httpStatusCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
+  else
+    exitCode=1
+    local message="The http return code ⌜${httpStatusCode}⌝ is not acceptable for url ⌜${url}⌝."
+    if [[ "${failIfFails}" == "true" ]]; then
+      message+=$'\n'"Error output:"$'\n'"⌜${errors}⌝"
+      fail "${message}"
+    fi
+    debug "${message}"
+  fi
+
+  LAST_RETURNED_VALUE="${errors}"
+  LAST_RETURNED_VALUE2="${httpStatusCode}"
+  return ${exitCode}
+}
+
+# This function is a wrapper around curl.
+# It allows you to check the http status code and return 1 if it is not acceptable.
+# It invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o "tempfile".
+#
+# $1: true/false to indicate if the function should fail in case the execution fails
+# $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
+# $3+: options for curl
+#
+# Returns:
+#  The exit code of the function is 0 if the http status code is acceptable, 1 otherwise.
+#  The content of the request in the global variable LAST_RETURNED_VALUE.
+#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#  The http status code in the global variable LAST_RETURNED_VALUE3.
+#
+# Usage:
+#  kurl false 200,201 https://example.com || fail "The curl command failed."
+function kurl() {
+  local acceptableStatusCodes
+  failIfFails="${1:-false}"
+  acceptableStatusCodes="${2:-}"
+  shift 2
+
+  # reset the temporary file, only if needed
+  [[ -s "${_TEMPORARY_WORK_FILE}" ]] && : > "${_TEMPORARY_WORK_FILE}"
+
+  local -i exitCode=0
+  local errors httpStatusCode
+  kurlFile "${failIfFails}" "${acceptableStatusCodes}" "${_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
+  errors="${LAST_RETURNED_VALUE}"
+  httpStatusCode="${LAST_RETURNED_VALUE2}"
+
+  local stdout
+  if [ -s "${_TEMPORARY_WORK_FILE}" ]; then
+    IFS= read -rd '' stdout < "${_TEMPORARY_WORK_FILE}" || true
+  fi
+
+  LAST_RETURNED_VALUE="${stdout:-}"
+  LAST_RETURNED_VALUE2="${errors}"
+  LAST_RETURNED_VALUE3="${httpStatusCode}"
+  return $exitCode
+}

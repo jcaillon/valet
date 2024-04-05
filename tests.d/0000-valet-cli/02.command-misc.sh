@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -z "${_TEST_0000_COMMON_UTILS:-}" ]]; then
-  source ".before-test"
-fi
+source ".before-test"
 
 function testParseAndCheckArgument() {
   # test that we correctly parse arguments and options and fail is they don't match
