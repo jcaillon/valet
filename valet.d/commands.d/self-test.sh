@@ -74,7 +74,7 @@ function selfTest() {
   for testsDirectory in "${userDirectory}"/**; do
     debug "Tests directory: ⌜${testsDirectory}⌝."
     # if the directory is not a directory, skip
-    [ ! -d "${testsDirectory}" ] && continue
+    if [ ! -d "${testsDirectory}" ]; then continue; fi
     # if the directory is named .tests.d, then it is a test directory
     if [[ "${testsDirectory}" == *"/tests.d" ]]; then
       inform "Running all test suites in directory ⌜${testsDirectory}⌝."
@@ -333,7 +333,7 @@ function runTestSuites() {
     testDirectoryName="${testDirectory##*/}"
 
     # skip if not a directory
-    [ ! -d "${testDirectory}" ] && continue
+    if [ ! -d "${testDirectory}" ]; then continue; fi
 
     # skip if the test directory does not match the include pattern
     if [[ -n "${INCLUDE_PATTERN:-}" && ! ("${testDirectoryName}" =~ ${INCLUDE_PATTERN}) ]]; then
@@ -354,7 +354,7 @@ function runTestSuites() {
     # for each .sh script in the test directory, run the test
     for testScript in "${testDirectory}"/*.sh; do
       # skip if not a file
-      [ ! -e "${testScript}" ] && continue
+      if [ ! -e "${testScript}" ]; then continue; fi
 
       inform "Running test       ├── ⌜${testScript##*/}⌝."
 

@@ -87,7 +87,7 @@ function extractCommandDefinitionToVariables() {
       newIndentation="${line%%[![:space:]]*}"
 
       # skip if property name is empty
-      [[ -z "${newPropertyName}" ]] && continue
+      if [[ -z "${newPropertyName}" ]]; then continue; fi
 
       # if we were on a multi line property, we store it
       if [[ readingMultiLine -eq 1 ]]; then

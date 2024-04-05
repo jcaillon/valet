@@ -184,7 +184,7 @@ ${COLOR_ERROR}SHIFT+UP${COLOR_DEFAULT}/${COLOR_ERROR}SHIFT+DOWN${COLOR_DEFAULT}:
   )
 
   # reset the output file, but only if it already exist
-  [[ -s "${_TEMPORARY_STDOUT_FILE}" ]] && : >"${_TEMPORARY_STDOUT_FILE}"
+  if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then : >"${_TEMPORARY_STDOUT_FILE}"; fi
 
   "${fzfExecutable}" "${defaultOptions[@]}" "${modeOptions[@]}" "$@" <<<"${body}" 1>"${_TEMPORARY_STDOUT_FILE}" || true
 
@@ -245,5 +245,5 @@ function promptYesNo() {
   # we keep only the selected value, i.e. the 2nd line
   LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE#*$'\n'}"
   LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE%%$'\n'*}"
-  [[ "${LAST_RETURNED_VALUE}" == "Yes" ]] && LAST_RETURNED_VALUE=true || LAST_RETURNED_VALUE=false
+  if [[ "${LAST_RETURNED_VALUE}" == "Yes" ]]; then LAST_RETURNED_VALUE=true; else LAST_RETURNED_VALUE=false; fi
 }

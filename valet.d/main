@@ -833,14 +833,14 @@ function addLastChoice() {
   # loop through the last choices and add them to the file, limit to 20 total
   local -i total index
   total="${#lastChoices[@]}"
-  [[ total -gt maxNumberOfLastChoice ]] && total=$((maxNumberOfLastChoice - 1))
+  if [[ total -gt maxNumberOfLastChoice ]]; then total=$((maxNumberOfLastChoice - 1)); fi
   index=0
   for ((index = 0; index < total; index++)); do
     if [[ "${lastChoices[${index}]}" != "${command}" ]]; then
       echo "${lastChoices[${index}]}" >>"${lastChoicesFile}"
     else
       total+=1
-      [[ total -gt ${#lastChoices[@]} ]] && total=${#lastChoices[@]}
+      if [[ total -gt ${#lastChoices[@]} ]]; then total=${#lastChoices[@]}; fi
     fi
   done
 }
@@ -1158,7 +1158,7 @@ function parseFunctionArguments() {
     outputString+=" ${option}"
   done
   nbScalarArguments="${totalNbArguments}"
-  [ "${isLastArgumentAnArray}" = "true" ] && nbScalarArguments=$((nbScalarArguments - 1))
+  if [ "${isLastArgumentAnArray}" = "true" ]; then nbScalarArguments=$((nbScalarArguments - 1)); fi
   for ((argumentIndex = 0; argumentIndex < nbScalarArguments; argumentIndex++)); do
     outputString+=" ${argumentsName[${argumentIndex}]}"
   done

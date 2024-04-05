@@ -110,7 +110,7 @@ function cleanupTempFiles() {
 # determine the color mode expect if the user has set VALET_NO_COLOR
 case "${TERM:-}" in
     xterm-color|xterm-256color|linux) VALET_NO_COLOR="${VALET_NO_COLOR:-false}";;
-    xterm) [ -n "${COLORTERM:-}" ] && VALET_NO_COLOR="${VALET_NO_COLOR:-false}" || VALET_NO_COLOR="${VALET_NO_COLOR:-true}";;
+    xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_NO_COLOR="${VALET_NO_COLOR:-false}"; else VALET_NO_COLOR="${VALET_NO_COLOR:-true}"; fi ;;
     *) VALET_NO_COLOR="${VALET_NO_COLOR:-true}";;
 esac
 
@@ -395,10 +395,10 @@ function getStack() {
   treeString="├─"
   for ((i = levelToSkip; i < stackSize; i++)); do
     func="${FUNCNAME[$i]}"
-    [ -z "${func}" ] && func=MAIN
+    if [ -z "${func}" ]; then func=MAIN; fi
     linen="${BASH_LINENO[$((i - 1))]}"
     src="${BASH_SOURCE[$i]}"
-    [ -z "${src}" ] && src=non_file_source
+    if [ -z "${src}" ]; then src=non_file_source; fi
     if [ "${i}" = "$((stackSize - 1))" ]; then
       treeString="└─"
     fi

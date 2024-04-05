@@ -64,8 +64,8 @@ function invoke5() {
   shift 5
 
   # reset the output files, but only if they already exist
-  [[ -s "${_TEMPORARY_STDOUT_FILE}" ]] && : > "${_TEMPORARY_STDOUT_FILE}"
-  [[ -s "${_TEMPORARY_STDERR_FILE}" ]] && : > "${_TEMPORARY_STDERR_FILE}"
+  if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then : > "${_TEMPORARY_STDOUT_FILE}"; fi
+  if [[ -s "${_TEMPORARY_STDERR_FILE}" ]]; then : > "${_TEMPORARY_STDERR_FILE}"; fi
 
   getCommandFullPath "${executable}"
   executable="${LAST_RETURNED_VALUE}"
@@ -102,7 +102,7 @@ function invoke5() {
   fi
 
   local shouldFail=false
-  [[ "${failIfFails}" == "true" && exitCode -ne 0 ]] && shouldFail=true
+  if [[ "${failIfFails}" == "true" && exitCode -ne 0 ]]; then shouldFail=true; fi
 
   # fail if needed or we are debug mode; display all the debug information that could be useful
   if isDebugEnabled || [[ "${shouldFail}" == "true" ]]; then

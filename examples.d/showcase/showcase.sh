@@ -9,6 +9,9 @@ fi
 # Your command can use all the functions defined in the core script of valet.
 
 
+# importing libraries from the core (note that we could do that in the function that needs it as well)
+include io string
+
 #===============================================================
 # >>> command: showcase command1
 #===============================================================

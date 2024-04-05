@@ -74,7 +74,9 @@ function selfDownloadBinaries() {
   mkdir -p "${destination}"
 
   createTempDirectory && pushd "${LAST_RETURNED_VALUE}" 1>/dev/null
-  [[ ! -e "${destination}/fzf" || "${force:-}" == "true" ]] && downloadFzf "${os}" "0.48.1" "${destination}"
+  if [[ ! -e "${destination}/fzf" || "${force:-}" == "true" ]]; then
+    downloadFzf "${os}" "0.48.1" "${destination}"
+  fi
   popd 1>/dev/null
 
   succeed "The binaries have been downloaded and stored in the bin directory of valet ⌜${destination}⌝."

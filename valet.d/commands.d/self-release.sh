@@ -166,7 +166,7 @@ function createRelease() {
 
   # bump the version
   bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${LAST_RETURNED_VALUE}"
-  [[ "${dryRun:-}" != "true" ]] && echo -n "${newVersion}" >"${VALET_HOME}/valet.d/version"
+  if [[ "${dryRun:-}" != "true" ]]; then echo -n "${newVersion}" >"${VALET_HOME}/valet.d/version"; fi
   inform "The new version of valet is: ${newVersion}."
 
   # commit the new version and push it
@@ -179,7 +179,7 @@ function createRelease() {
 
   # prepare the release payload
   local prerelease=false
-  [[ "${version}" == *"-"* ]] && prerelease=true
+  if [[ "${version}" == *"-"* ]]; then prerelease=true; fi
   local releasePayload
   releasePayload="{
     \"tag_name\": \"v${version}\",

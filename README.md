@@ -165,21 +165,18 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 
 ## 🔭 Roadmap
 
-- Regroup all functions for interactive mode in an interactive script which is only sourced when needed.
 - Add support for interactive mode.
+- Replace fzf menu with equivalent pure bash menu.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Setup github actions to automatically test Valet.
 - Generate an autocompletion script for bash and zsh.
 - Self-command to create a new command interactively.
-- Replace fzf menu with equivalent pure bash menu.
-- Allow fileToSource to have multiple values separated by a comma (so we can load libraries of functions).
 - Add about option to hide the command in the menus.
-- Add tests for self build.
 - Implement self release command to tag and push to github.
 - We can have fuzzy matching on options too; just make sure it is not ambiguous.
 - Create a valet-community-commands where everyone can contribute to new default commands for Valet.
 - Optional strict mode (env var) to disable fuzzy matching (to not mistakenly execute a command on ci for instance).
-- head / tail from file
+- head / tail from file.
 
 
 [releases]: https://github.com/jcaillon/valet/releases

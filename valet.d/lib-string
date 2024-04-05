@@ -56,7 +56,7 @@ function bumpSemanticVersion() {
   modifiedVersion="${version}-+"
   prerelease="${modifiedVersion#*-}"
   prerelease="${prerelease%%+*}"
-  [[ -n "${prerelease}" ]] && prerelease="-${prerelease%-}"
+  if [[ -n "${prerelease}" ]]; then prerelease="-${prerelease%-}"; fi
   build="${modifiedVersion#*+}"
   if [[ -n "${build}" ]]; then
     build="+${build%-+}"
@@ -65,14 +65,14 @@ function bumpSemanticVersion() {
   # bump the version
   local -i level semVerNumber semVerIndex
   level=3
-  [[ "${bumpLevel:-}" == "major" ]] && level=1
-  [[ "${bumpLevel:-}" == "minor" ]] && level=2
+  if [[ "${bumpLevel:-}" == "major" ]]; then level=1; fi
+  if [[ "${bumpLevel:-}" == "minor" ]]; then level=2; fi
   local newVersion semVerString
   for semVerIndex in {1..3}; do
     cutF "${version}" "${semVerIndex}" "." && semVerString="${LAST_RETURNED_VALUE%-*}"
     semVerNumber="${semVerString%+}"
-    [[ semVerIndex -eq level ]] && semVerNumber=$((semVerNumber + 1))
-    [[ semVerIndex -gt level ]] && semVerNumber=0
+    if [[ semVerIndex -eq level ]]; then semVerNumber=$((semVerNumber + 1)); fi
+    if [[ semVerIndex -gt level ]]; then semVerNumber=0; fi
     newVersion+="${semVerNumber}."
   done
   newVersion="${newVersion%.}"

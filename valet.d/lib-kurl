@@ -84,7 +84,7 @@ function kurl() {
   shift 2
 
   # reset the temporary file, only if needed
-  [[ -s "${_TEMPORARY_WORK_FILE}" ]] && : > "${_TEMPORARY_WORK_FILE}"
+  if [[ -s "${_TEMPORARY_WORK_FILE}" ]]; then : > "${_TEMPORARY_WORK_FILE}"; fi
 
   local -i exitCode=0
   local errors httpStatusCode

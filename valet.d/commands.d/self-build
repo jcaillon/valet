@@ -105,12 +105,12 @@ function selfBuild() {
     local file
     for file in "${userDirectory}"/**; do
       # if directory, skip
-      [ -d "${file}" ] && continue
+      if [ -d "${file}" ]; then continue; fi
       debug "Considering file: ⌜${file}⌝."
       # skip all files not ending with .sh
-      [[ "${file}" != *".sh" ]] && continue
+      if [[ "${file}" != *".sh" ]]; then continue; fi
       # skip everything under tests.d
-      [[ "${file}" == *"/tests.d/"* ]] && continue
+      if [[ "${file}" == *"/tests.d/"* ]]; then continue; fi
       commandDefinitionFiles+=("${file}")
     done
     shopt -u globstar
@@ -333,7 +333,7 @@ function declareFinalCommandDefinitionHelpVariables() {
 
   declare -g "CMD_SHORT_DESCRIPTION_${function}"="${TEMP_CMD_BUILD_shortDescription}"
   declare -g "CMD_DESCRIPTION_${function}"="${TEMP_CMD_BUILD_description}"
-  [[ -n "${TEMP_CMD_BUILD_sudo:-}" ]] && declare -g "CMD_SUDO_${function}"="${TEMP_CMD_BUILD_sudo}"
+  if [[ -n "${TEMP_CMD_BUILD_sudo:-}" ]]; then declare -g "CMD_SUDO_${function}"="${TEMP_CMD_BUILD_sudo}"; fi
 
   # add the default --help option
   TEMP_CMD_BUILD_options_name+=("-h, --help")
@@ -354,12 +354,12 @@ function declareFinalCommandDefinitionHelpVariables() {
   done
 
   # declare examples, arguments and options for the help
-  [[ "${#TEMP_CMD_BUILD_examples_name[@]}" -gt 0 ]] && eval "CMD_EXAMPLES_NAME_${function}=(\"\${TEMP_CMD_BUILD_examples_name[@]}\")"
-  [[ "${#TEMP_CMD_BUILD_examples_description[@]}" -gt 0 ]] && eval "CMD_EXAMPLES_DESCRIPTION_${function}=(\"\${TEMP_CMD_BUILD_examples_description[@]}\")"
+  if [[ "${#TEMP_CMD_BUILD_examples_name[@]}" -gt 0 ]]; then eval "CMD_EXAMPLES_NAME_${function}=(\"\${TEMP_CMD_BUILD_examples_name[@]}\")"; fi
+  if [[ "${#TEMP_CMD_BUILD_examples_description[@]}" -gt 0 ]]; then eval "CMD_EXAMPLES_DESCRIPTION_${function}=(\"\${TEMP_CMD_BUILD_examples_description[@]}\")"; fi
   eval "CMD_OPTIONS_NAME_${function}=(\"\${TEMP_CMD_BUILD_options_name[@]}\")"
   eval "CMD_OPTIONS_DESCRIPTION_${function}=(\"\${TEMP_CMD_BUILD_options_description[@]}\")"
-  [[ "${#TEMP_CMD_BUILD_arguments_name[@]}" -gt 0 ]] && eval "CMD_ARGUMENTS_NAME_${function}=(\"\${TEMP_CMD_BUILD_arguments_name[@]}\")"
-  [[ "${#TEMP_CMD_BUILD_arguments_description[@]}" -gt 0 ]] && eval "CMD_ARGUMENTS_DESCRIPTION_${function}=(\"\${TEMP_CMD_BUILD_arguments_description[@]}\")"
+  if [[ "${#TEMP_CMD_BUILD_arguments_name[@]}" -gt 0 ]]; then eval "CMD_ARGUMENTS_NAME_${function}=(\"\${TEMP_CMD_BUILD_arguments_name[@]}\")"; fi
+  if [[ "${#TEMP_CMD_BUILD_arguments_description[@]}" -gt 0 ]]; then eval "CMD_ARGUMENTS_DESCRIPTION_${function}=(\"\${TEMP_CMD_BUILD_arguments_description[@]}\")"; fi
 
   return 0
 }
@@ -449,7 +449,7 @@ function declareOtherCommmandVariables() {
   # for each command
   local command line
   for command in "${CMD_ALL_COMMANDS_ARRAY[@]}"; do
-    [[ -z "${command}" ]] && continue
+    if [[ -z "${command}" ]]; then continue; fi
 
     # get the function name from a command
     local -n function="CMD_FUNCTION_NAME_${command//[-[:space:]]/_}"
