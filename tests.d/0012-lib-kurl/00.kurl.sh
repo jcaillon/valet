@@ -9,12 +9,12 @@ function testKurlFile() {
 
   echo "→ kurlFile false '' \"\${tmpFile}\" --code 200 -curlOption1 --fakeOpt2 https://hello.com"
   kurlFile false '' "${tmpFile}" --code 200 -curlOption1 --fakeOpt2 https://hello.com && exitCode=0 || exitCode=$?
-  echoOutputKurlFile $exitCode "${tmpFile}"
+  echoOutputKurlFile ${exitCode} "${tmpFile}"
   endTest "Testing kurlFile, should write to file" 0
 
   echo "→ kurlFile false '' \"\${tmpFile}\" --code 500 https://hello.com"
   kurlFile false '' "${tmpFile}" --code 500 https://hello.com && exitCode=0 || exitCode=$?
-  echoOutputKurlFile $exitCode "${tmpFile}"
+  echoOutputKurlFile ${exitCode} "${tmpFile}"
   endTest "Testing kurlFile, http code 500 not acceptable return 1" 0
 
   echo "→ kurlFile true '' \"\${tmpFile}\" --code 500 https://hello.com"
@@ -25,20 +25,20 @@ function testKurlFile() {
 
   echo "→ kurlFile false '300,500,999' \"\${tmpFile}\" --code 500 https://hello.com"
   kurlFile false '300,500,999' "${tmpFile}" --code 500 https://hello.com && exitCode=0 || exitCode=$?
-  echoOutputKurlFile $exitCode "${tmpFile}"
+  echoOutputKurlFile ${exitCode} "${tmpFile}"
   endTest "Testing kurlFile, http code 500 is now acceptable return 0" 0
 
   # test debug mode
   echo "→ kurlFile false '' \"\${tmpFile}\" --code 400 --error https://hello.com/bla --otherOpt"
   setLogLevel debug
   kurlFile false '' "${tmpFile}" --code 400 --error https://hello.com/bla --otherOpt && exitCode=0 || exitCode=$?
-  echoOutputKurlFile $exitCode "${tmpFile}"
+  echoOutputKurlFile ${exitCode} "${tmpFile}"
   endTest "Testing kurlFile, testing debug mode https code 400" 0
 
   echo "→ kurlFile false '' \"\${tmpFile}\" --code 200 http://hello.com"
   setLogLevel debug
   kurlFile false '' "${tmpFile}" --code 200 http://hello.com && exitCode=0 || exitCode=$?
-  echoOutputKurlFile $exitCode "${tmpFile}"
+  echoOutputKurlFile ${exitCode} "${tmpFile}"
   endTest "Testing kurlFile, testing debug mode http code 200" 0
 
 }
@@ -65,7 +65,7 @@ function testKurl() {
 
   echo "→ kurl false '' --code 200 http://hello.com"
   kurl false '' --code 200 http://hello.com && exitCode=0 || exitCode=$?
-  echoOutputKurl $exitCode
+  echoOutputKurl ${exitCode}
   endTest "Testing kurl, with no content http code 200" 0
 
   echo "→ kurl false '' --code 500 http://hello.com"
@@ -78,7 +78,7 @@ function testKurl() {
   echo "→ kurl false '' --code 400 http://hello.com"
   setLogLevel debug
   kurl false '' --code 400 http://hello.com && exitCode=0 || exitCode=$?
-  echoOutputKurl $exitCode
+  echoOutputKurl ${exitCode}
   endTest "Testing kurl, debug mode, with content http code 400" 0
 
 }

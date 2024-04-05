@@ -175,10 +175,10 @@ function setLogLevel() {
   *) _LOG_LEVEL_INT=1 ;;
   esac
 
-  if [[ "${_LOG_LEVEL_INT}" != 1 ]]; then
+  if [[ ${_LOG_LEVEL_INT} -ne 1 ]]; then
     debug "Log level set to ${VALET_LOG_LEVEL}."
   fi
-  if [[ "${_LOG_LEVEL_INT}" == 0 ]]; then
+  if [[ ${_LOG_LEVEL_INT} -eq 0 ]]; then
     warn "Beware that debug log level might lead to secret leak, use it only if necessary."
   fi
 }
@@ -199,7 +199,7 @@ function logLine() { return 0; }
 # shellcheck disable=SC2016
 function createLogLineFunction() {
   # in CI mode, we disable wrapping, colors and icons
-  if [[ "${VALET_CI_MODE:-}" = "true" ]]; then
+  if [[ ${VALET_CI_MODE:-} == "true" ]]; then
     VALET_NO_WRAP="${VALET_NO_WRAP:-true}"
     VALET_NO_ICON="${VALET_NO_ICON:-true}"
     VALET_NO_COLOR="${VALET_NO_COLOR:-true}"
@@ -224,11 +224,11 @@ function createLogLineFunction() {
     local wrapTextColumns="${VALET_LOG_COLUMNS:-${_COLUMNS}}"
     local wrapPaddingLength=20
 
-    if [[ "${VALET_NO_TIMESTAMP:-}" = "true" ]]; then
+    if [[ ${VALET_NO_TIMESTAMP:-} == "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 9))
     fi
 
-    if [[ "${VALET_NO_ICON:-}" = "true" ]]; then
+    if [[ ${VALET_NO_ICON:-} == "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 2))
     fi
 
@@ -240,10 +240,10 @@ function createLogLineFunction() {
   local printfArguments
 
   # timestamp
-  if [[ "${VALET_CI_MODE:-}" == "true" && "${VALET_NO_TIMESTAMP:-}" != "true" ]]; then
+  if [[ ${VALET_CI_MODE:-} == "true" && "${VALET_NO_TIMESTAMP:-}" != "true" ]]; then
     printfFormat+="%(%F_%H:%M:%S)T "
     printfArguments+='"${EPOCHSECONDS}" '
-  elif [[ "${VALET_NO_TIMESTAMP:-}" = "true" ]]; then
+  elif [[ ${VALET_NO_TIMESTAMP:-} == "true" ]]; then
     printfFormat+=""
   else
     printfFormat+="%s%(%H:%M:%S)T "
@@ -251,7 +251,7 @@ function createLogLineFunction() {
   fi
 
   # severity
-  if [[ "${VALET_NO_ICON:-}" = "true" ]]; then
+  if [[ ${VALET_NO_ICON:-} == "true" ]]; then
     printfFormat+="%s%-8s%s "
     printfArguments+='"${color}" "${severity}" "${COLOR_DEFAULT}" '
   else
@@ -394,15 +394,15 @@ function getStack() {
   stackSize=${#FUNCNAME[@]}
   treeString="├─"
   for ((i = levelToSkip; i < stackSize; i++)); do
-    func="${FUNCNAME[$i]}"
+    func="${FUNCNAME[${i}]}"
     if [[ -z "${func}" ]]; then func=MAIN; fi
     linen="${BASH_LINENO[$((i - 1))]}"
-    src="${BASH_SOURCE[$i]}"
+    src="${BASH_SOURCE[${i}]}"
     if [[ -z "${src}" ]]; then src=non_file_source; fi
-    if [[ "${i}" = "$((stackSize - 1))" ]]; then
+    if [[ ${i} -eq "$((stackSize - 1))" ]]; then
       treeString="└─"
     fi
-    stack+=$'\n'"${treeString} In function $func() $src:$linen"
+    stack+=$'\n'"${treeString} In function ${func}() ${src}:${linen}"
   done
   LAST_RETURNED_VALUE="${stack}"
 }
@@ -411,7 +411,7 @@ function getStack() {
 if [[ -n "${VALET_LOG_LEVEL:-}" ]]; then
   setLogLevel "${VALET_LOG_LEVEL}"
 fi
-if [[ "${VALET_VERBOSE=:-}" = "true" ]]; then
+if [[ ${VALET_VERBOSE=:-} == "true" ]]; then
   setLogLevel "debug"
 fi
 
@@ -444,7 +444,7 @@ function include() {
       fail "The file ${1} could not be found."
     fi
     for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
-      if [[ "${includedFile}" = "${filePathToInclude}" ]]; then
+      if [[ ${includedFile} == "${filePathToInclude}" ]]; then
         return 0
       fi
     done
@@ -503,7 +503,7 @@ function wrapText() {
   while read -r line; do
     wrappedText+=$'\n'
     wrapSentence "${line}" "${sentenceWidth}" "${leftPadding}"
-    if [[ "${firstLine}" = "1" ]]; then
+    if [[ ${firstLine} == "1" ]]; then
       firstLine="0"
     else
       wrappedText+="${leftPadding}"
@@ -512,7 +512,7 @@ function wrapText() {
   done <<< "${text}"
 
   # add left padding on the first line (or not)
-  if [[ "${appendPaddingToFirstLine}" = "true" ]]; then
+  if [[ ${appendPaddingToFirstLine} == "true" ]]; then
     LAST_RETURNED_VALUE="${leftPadding}${wrappedText#$'\n'}"
   else
     LAST_RETURNED_VALUE="${wrappedText#$'\n'}"
@@ -555,7 +555,7 @@ function wrapSentence() {
   local firstWord="1"
   for word in ${text}; do
 
-    if [[ "${firstWord}" = "1" ]]; then
+    if [[ ${firstWord} == "1" ]]; then
       firstWord="0"
     else
       # we just added a word
@@ -640,7 +640,7 @@ function fuzzyMatch() {
   local -i lineCharIndex patternCharIndex lastLineCharIndex distance patternFirstCharIndex
   for line in ${text}; do
     # shortcut, exact match
-    if [[ "${line}" == "${pattern}" ]]; then
+    if [[ ${line} == "${pattern}" ]]; then
       LAST_RETURNED_VALUE="${line}"
       return 0
     fi
@@ -657,7 +657,7 @@ function fuzzyMatch() {
       while [[ lineCharIndex -lt lineLength ]]; do
         lineChar="${line:${lineCharIndex}:1}"
 
-        if [[ "${lineChar}" == "${patternChar}" ]]; then
+        if [[ ${lineChar} == "${patternChar}" ]]; then
           # if we find the character, mark the distance
           distance=$((lineCharIndex - lastLineCharIndex))
           lastLineCharIndex=${lineCharIndex}

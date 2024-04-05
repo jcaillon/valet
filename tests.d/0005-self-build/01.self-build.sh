@@ -9,7 +9,7 @@ function testSelfBuild() {
 
   local content
   IFS= read -rd '' content < "${tmpFile}" || true
-  echo "$content"
+  echo "${content}"
 
   endTest "Testing selfbuild" 0
 }

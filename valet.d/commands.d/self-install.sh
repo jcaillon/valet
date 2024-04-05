@@ -65,7 +65,7 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
 
     # we are executing this script without valet, create functions to replace the core functions.
     function inform() { printf "%-8s %s\n" "INFO" "ℹ️ $*"; }
-    function debug() { if [[ "${DEBUG:-false}" == "true" ]]; then printf "%-8s %s\n" "DEBUG" "📰 $*"; fi; }
+    function debug() { if [[ ${DEBUG:-false} == "true" ]]; then printf "%-8s %s\n" "DEBUG" "📰 $*"; fi; }
     function warn() { printf "%-8s %s\n" "WARNING" "⚠️ $*"; }
     function fail() {
       printf "%-8s %s\n" "ERROR" "❌ $*"
@@ -80,7 +80,7 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
       esac
     }
     function getUserDirectory() { LAST_RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"; }
-    VALET_USER_CONFIG_FILE="${VALET_USER_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}/config"}"
+    VALET_USER_CONFIG_FILE="${VALET_USER_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
 
     VALET_NO_COLOR=true
     VALET_NO_ICON=true
@@ -134,7 +134,7 @@ function selfUpdate() {
 
   # set the default options
   local binDirectory
-  if [[ "${SINGLE_USER_INSTALLATION:-false}" == "true" || "${os}" == "windows" ]]; then
+  if [[ ${SINGLE_USER_INSTALLATION:-false} == "true" || "${os}" == "windows" ]]; then
     inform "Installing Valet for the current user only."
     VALET_HOME="${VALET_HOME:-${HOME}/.local/valet}"
     binDirectory="${HOME}/.local/bin"
@@ -154,7 +154,7 @@ function selfUpdate() {
 
   # download the latest release and unpack it
   local latestReleaseUrl
-  if [[ "${NO_BINARIES:-false}" == true ]]; then
+  if [[ ${NO_BINARIES:-false} == true ]]; then
     latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet-no-binaries.tar.gz"
   else
     latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet-${os}-amd64.tar.gz"
@@ -168,8 +168,8 @@ function selfUpdate() {
 
   # remove the old valet directory and move the new one
   rm -f "${latestReleaseFile}"
-  $SUDO rm -Rf "${VALET_HOME}"
-  $SUDO mv -f "${tempDirectory}" "${VALET_HOME}"
+  ${SUDO} rm -Rf "${VALET_HOME}"
+  ${SUDO} mv -f "${tempDirectory}" "${VALET_HOME}"
 
   # make valet executable
   chmod +x "${VALET_HOME}/valet"
@@ -191,11 +191,11 @@ function selfUpdate() {
     fi
     # make sure the valetBin directory is in the path or add it to ~.bashrc
     if ! command -v valet &>/dev/null; then
-      if [[ "${NO_ADD_TO_PATH:-false}" == true ]]; then
+      if [[ ${NO_ADD_TO_PATH:-false} == true ]]; then
         warn "Make sure to add ⌜${binDirectory}⌝ (or ⌜${VALET_HOME}⌝) in your PATH."
       else
         inform "Adding ⌜${binDirectory}⌝ to your PATH via .bashrc right now."
-        printf "\n\n# Add Valet to the PATH\nexport PATH=\"%s:\$PATH\"\n" "${binDirectory}" >>"${HOME}/.bashrc"
+        printf "\n\n# Add Valet to the PATH\nexport PATH=\"%s:\${PATH}\"\n" "${binDirectory}" >>"${HOME}/.bashrc"
       fi
     fi
 
@@ -257,7 +257,7 @@ function selfWelcomeUser() {
   answer="${LAST_RETURNED_VALUE}"
   inform "You answered: ${answer}."
 
-  if [[ "${answer}" == "false" ]]; then
+  if [[ ${answer} == "false" ]]; then
     export VALET_NO_COLOR=true
     createLogLineFunction
     eval "${LOG_LINE_FUNCTION}"
@@ -277,7 +277,7 @@ function selfWelcomeUser() {
   answer="${LAST_RETURNED_VALUE}"
   inform "You answered: ${answer}."
 
-  if [[ "${answer}" == "false" ]]; then
+  if [[ ${answer} == "false" ]]; then
     inform "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."
 
     echo "Do you want to disable the icons in Valet?"
@@ -285,7 +285,7 @@ function selfWelcomeUser() {
     answer="${LAST_RETURNED_VALUE}"
     inform "You answered: ${answer}."
 
-    if [[ "${answer}" == "true" ]]; then
+    if [[ ${answer} == "true" ]]; then
       export VALET_NO_ICON=true
       createLogLineFunction
       eval "${LOG_LINE_FUNCTION}"
@@ -301,7 +301,7 @@ function selfWelcomeUser() {
     promptYesNo "Answer 'yes' to apply the configuration."$'\n'"Answer 'no' to skip this step."
     answer="${LAST_RETURNED_VALUE}"
     inform "You answered: ${answer}."
-    if [[ "${answer}" == "true" ]]; then
+    if [[ ${answer} == "true" ]]; then
       mkdir -p "${VALET_USER_CONFIG_FILE%/*}" 1>/dev/null || fail "Could not create the valet config directory ⌜${VALET_USER_CONFIG_FILE%/*}⌝."
       echo "${valetConfigFileContent}" >>"${VALET_USER_CONFIG_FILE}"
       inform "The configuration has been applied."
@@ -324,6 +324,6 @@ function selfWelcomeUser() {
 }
 
 # if this script is run directly, execute the function, otherwise valet will do it
-if [[ "${NOT_EXECUTED_FROM_VALET:-false}" == "true" ]]; then
+if [[ ${NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
   selfUpdate "$@"
 fi

@@ -76,7 +76,7 @@ function selfTest() {
     # if the directory is not a directory, skip
     if [[ ! -d "${testsDirectory}" ]]; then continue; fi
     # if the directory is named .tests.d, then it is a test directory
-    if [[ "${testsDirectory}" == *"/tests.d" ]]; then
+    if [[ ${testsDirectory} == *"/tests.d" ]]; then
       inform "Running all test suites in directory ⌜${testsDirectory}⌝."
       runTestSuites "${testsDirectory}"
     fi
@@ -376,7 +376,7 @@ function runTestSuites() {
   if [[ failedTestSuites -gt 0 ]]; then
     local failMessage
     failMessage="A total of ⌜${failedTestSuites}⌝/⌜${nbTestSuites}⌝ test(s) failed."
-    if [[ "${AUTO_APPROVE:-false}" = "true" ]]; then
+    if [[ ${AUTO_APPROVE:-false} == "true" ]]; then
       failMessage+=$'\n'"The received test result files were automatically approved."
     else
       failMessage+=$'\n'"You should review the difference in the logs above or by comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
@@ -452,7 +452,7 @@ function compareWithApproved() {
   fi
 
   # if the option is activated, we approve the received file
-  if [[ "${AUTO_APPROVE:-false}" == "true" ]]; then
+  if [[ ${AUTO_APPROVE:-false} == "true" ]]; then
     inform "🧪 ${testName}: Auto-approving"
     cp -f "${receivedFileToCopy}" "${approvedFile}"
     rm -f "${receivedFile}" 2>/dev/null || true
@@ -572,7 +572,7 @@ function echoFileSubstitutingPath() {
     line="${line//${CURRENT_DIRECTORY}/.}"
     line="${line//${_TEMPORARY_DIRECTORY}/\/tmp}"
     line="${line//${_TEMPORARY_PREFIX}*.valet/\/tmp/valet}"
-    if [[ "${line}" =~ "after "[0-9]{1,}s.$ ]]; then
+    if [[ ${line} =~ "after "[0-9]{1,}s.$ ]]; then
       line="${line/%after */after Xs.}"
     fi
     echo -n "${line}"

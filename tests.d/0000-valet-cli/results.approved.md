@@ -24,7 +24,6 @@ OPTIONS
   -h, --help
       Display the help for this command.
 
-
 ```
 
 ### Testing to fuzzy find an help
@@ -48,7 +47,6 @@ OPTIONS
 
   -h, --help
       Display the help for this command.
-
 
 ```
 
@@ -109,7 +107,6 @@ EXAMPLES
       Shows the help for the program without any color and 
       with a maximum of 50 columns
       
-
 
 ```
 
@@ -246,7 +243,6 @@ EXAMPLES
       Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
       
 
-
 ```
 
 ### Testing that we can display the help of a function using showHelp
@@ -269,7 +265,6 @@ OPTIONS
 
   -h, --help
       Display the help for this command.
-
 
 ```
 
@@ -854,7 +849,6 @@ COMMANDS
       Update valet using the latest release on GitHub.
   self welcome-user
       The command run after the installation of Valet to guide the user.
-
 
 ```
 

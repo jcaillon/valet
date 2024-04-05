@@ -5,7 +5,7 @@ set -Eeu -o pipefail
 
 # This function extracts each content between the valet front matter tags.
 #
-# $1: The file to extract from.
+# ${1}: The file to extract from.
 #
 # Returns:
 #   LAST_RETURNED_VALUE_ARRAY: Each extracted content in an array.
@@ -13,7 +13,7 @@ set -Eeu -o pipefail
 # Usage:
 #   extractCommandYamls "myfile"
 function extractCommandYamls() {
-  local file="$1"
+  local file="${1}"
 
   local firstLine=": \"---"
   local lastLine="---\""
@@ -24,14 +24,14 @@ function extractCommandYamls() {
   local -i firstLineMatched=0 lastLineMatched=1
   while IFS= read -r line; do
     if [[ firstLineMatched -eq 0 ]]; then
-      if [[ "$line" == "$firstLine" ]]; then
+      if [[ ${line} == "${firstLine}" ]]; then
         firstLineMatched=1
         lastLineMatched=0
         content=""
         continue
       fi
     elif [[ lastLineMatched -eq 0 ]]; then
-      if [[ "$line" == "$lastLine" ]]; then
+      if [[ ${line} == "${lastLine}" ]]; then
         lastLineMatched=1
         firstLineMatched=0
         contentArray+=("${content}")
@@ -54,7 +54,7 @@ function extractCommandYamls() {
 # Usage:
 #   extractCommandDefinitionToVariables "commandDefinition Yaml content"
 function extractCommandDefinitionToVariables() {
-  local commandDefinition="$1"
+  local commandDefinition="${1}"
 
   # make sure to unset all previous TEMP_CMD_BUILD_* variables
   local var
@@ -98,7 +98,7 @@ function extractCommandDefinitionToVariables() {
       fi
 
       # we are on an item of an array
-      if [[ "${newPropertyName}" == "-"* ]]; then
+      if [[ ${newPropertyName} == "-"* ]]; then
         if [[ arrayLength -le -1 ]]; then
           fail "Array item (starts with '- ') defined outside of an array [line ${lineNumber}]."
         fi
@@ -121,7 +121,7 @@ function extractCommandDefinitionToVariables() {
         arrayLength=0
         newIndentation="  "
         propertyNames=("${newPropertyName}")
-      elif [[ "${newPropertyValue}" == "|-"* ]]; then
+      elif [[ ${newPropertyValue} == "|-"* ]]; then
         # we are on an a multi line property
         debug "Starting new multi line property: ⌜${newPropertyName}⌝."
         readingMultiLine=1
@@ -201,7 +201,7 @@ function extractFirstLongNameFromOptionString() {
   local word
   # shellcheck disable=SC2034
   for word in ${optionString}; do
-    if [[ "${word}" == "--"* ]]; then
+    if [[ ${word} == "--"* ]]; then
       LAST_RETURNED_VALUE="${word}"
       return 0
     fi
@@ -219,7 +219,7 @@ function extractFirstLongNameFromOptionString() {
 # Usage:
 #   writeCommandDefinitionVariablesToFile "myfile"
 function writeCommandDefinitionVariablesToFile() {
-  local outputFile="$1"
+  local outputFile="${1}"
   local content
 
   {

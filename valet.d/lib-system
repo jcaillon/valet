@@ -28,7 +28,7 @@ function getOsName() {
 # Usage:
 #   getEnvVars
 #   for var in "${LAST_RETURNED_ARRAY_VALUE[@]}"; do
-#       printf '%s=%s\n' "$var" "${!var}"
+#       printf '%s=%s\n' "${var}" "${!var}"
 #   done
 function getEnvVars() {
   mapfile -t LAST_RETURNED_ARRAY_VALUE < <(compgen -v)

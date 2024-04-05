@@ -8,18 +8,18 @@ function testSelfRelease() {
   LAST_GIT_TAG="v1.2.3"
   echo "→ selfRelease -t token -b major --dry-run"
   selfRelease -t token -b major --dry-run && exitCode=0 || exitCode=$?
-  endTest "Testing selfRelease, dry run major version" $exitCode
+  endTest "Testing selfRelease, dry run major version" ${exitCode}
 
   setLogLevel debug
   echo "→ selfRelease -t token -b minor"
   selfRelease -t token -b minor && exitCode=0 || exitCode=$?
-  endTest "Testing selfRelease, minor version" $exitCode
+  endTest "Testing selfRelease, minor version" ${exitCode}
 }
 
 # need to override git, kurl
 function invoke5() {
   echo "▶ called invoke5 $*" 1>&2
-  if [[ "${5}" == "uname" ]]; then
+  if [[ ${5} == "uname" ]]; then
     echo -n "x86_64" > "${_TEMPORARY_STDOUT_FILE}"
     LAST_RETURNED_VALUE="${_TEMPORARY_STDOUT_FILE}"
     LAST_RETURNED_VALUE2=""
@@ -31,7 +31,7 @@ function invoke5() {
 
 function invoke() {
   echo "▶ called invoke $*" 1>&2
-  if [[ "${1}" == "git" ]]; then
+  if [[ ${1} == "git" ]]; then
     while [[ $# -gt 0 ]]; do
       case "${1}" in
       tag) LAST_RETURNED_VALUE="${LAST_GIT_TAG}"; return 0;;
@@ -48,7 +48,7 @@ function invoke() {
 function kurl() {
   echo "▶ called kurl $*" 1>&2
   echo -n 200
-  if [[ "$*" == *"tag_name"* ]]; then
+  if [[ $* == *"tag_name"* ]]; then
     # post on the release endpoint
     LAST_RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}" }'
     return 0

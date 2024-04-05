@@ -154,12 +154,12 @@ function testExtractBetween() {
 3 line three
 4 line four"
   echo
-  echo "multilinetext=\"$multilinetext\""
+  echo "multilinetext=\"${multilinetext}\""
   echo
-  echo "→ extractBetween \"\$multilinetext\" \"one\"\$'\n' '4'"
+  echo "→ extractBetween \"\${multilinetext}\" \"one\"\$'\n' '4'"
   extractBetween "${multilinetext}" "one"$'\n' '4' && echo "line 2 and 3=⌈${LAST_RETURNED_VALUE}⌉"
   echo
-  echo "→ extractBetween \"\$multilinetext\" \"2 \" \$'\n'"
+  echo "→ extractBetween \"\${multilinetext}\" \"2 \" \$'\n'"
   extractBetween "${multilinetext}" "2 " $'\n' && echo "line two=⌈${LAST_RETURNED_VALUE}⌉"
 
   endTest "Testing extractBetween function" 0

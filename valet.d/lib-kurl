@@ -7,7 +7,7 @@ include io
 
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o $2.
+# It invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o ${2}.
 #
 # $1: true/false to indicate if the function should fail in case the execution fails
 # $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
@@ -43,13 +43,13 @@ function kurlFile() {
   debug "The curl command for url ⌜${url}⌝ ended with exit code ⌜${exitCode}⌝, the http return code was ⌜${httpStatusCode}⌝."
 
   # if the error code is acceptable, then we set it to 0
-  if [[ ",${acceptableStatusCodes}," == *",${httpStatusCode},"* ]]; then
+  if [[ ,${acceptableStatusCodes}, == *",${httpStatusCode},"* ]]; then
     exitCode=0
     debug "The http return code ⌜${httpStatusCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
   else
     exitCode=1
     local message="The http return code ⌜${httpStatusCode}⌝ is not acceptable for url ⌜${url}⌝."
-    if [[ "${failIfFails}" == "true" ]]; then
+    if [[ ${failIfFails} == "true" ]]; then
       message+=$'\n'"Error output:"$'\n'"⌜${errors}⌝"
       fail "${message}"
     fi
@@ -100,5 +100,5 @@ function kurl() {
   LAST_RETURNED_VALUE="${stdout:-}"
   LAST_RETURNED_VALUE2="${errors}"
   LAST_RETURNED_VALUE3="${httpStatusCode}"
-  return $exitCode
+  return ${exitCode}
 }

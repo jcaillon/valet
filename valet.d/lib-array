@@ -13,7 +13,7 @@ set -Eeu -o pipefail
 #   sortArray myArray
 #   echo "${myArray[@]}"
 function sortArray() {
-  local -n array=$1
+  local -n array=${1}
   local -i i j
   local temp
   for ((i = 0; i < ${#array[@]}; i++)); do
@@ -48,7 +48,7 @@ function appendToArrayIfNotPresent() {
   local -i present=0
   local item
   for item in "${array[@]}"; do
-    if [[ "${item}" == "${value}" ]]; then
+    if [[ ${item} == "${value}" ]]; then
       present=1
       break
     fi
@@ -77,7 +77,7 @@ function isInArray() {
 
   local item
   for item in "${array[@]}"; do
-    if [[ "${item}" == "${value}" ]]; then
+    if [[ ${item} == "${value}" ]]; then
       return 0
     fi
   done

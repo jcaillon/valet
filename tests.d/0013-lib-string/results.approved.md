@@ -167,12 +167,12 @@ multilinetext="1 line one
 3 line three
 4 line four"
 
-→ extractBetween "$multilinetext" "one"$'\n' '4'
+→ extractBetween "${multilinetext}" "one"$'\n' '4'
 line 2 and 3=⌈2 line two
 3 line three
 ⌉
 
-→ extractBetween "$multilinetext" "2 " $'\n'
+→ extractBetween "${multilinetext}" "2 " $'\n'
 line two=⌈line two⌉
 ```
 

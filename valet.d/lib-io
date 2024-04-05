@@ -16,7 +16,7 @@ set -Eeu -o pipefail
 function toAbsolutePath() {
   local file="${1%/}"
 
-  if [[ "${file}" == "/"* ]]; then
+  if [[ ${file} == "/"* ]]; then
     LAST_RETURNED_VALUE="${file}"
     return 0
   fi
@@ -84,7 +84,7 @@ function invoke5() {
   # execute the executable
   local -i exitCode=0
   if [[ -n "${stdIn}" ]]; then
-    if [[ "${stdInFromFile}" == "true" ]]; then
+    if [[ ${stdInFromFile} == "true" ]]; then
       "${executable}" "$@" < "${stdIn}" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
     else
       "${executable}" "$@" <<< "${stdIn}" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
@@ -96,16 +96,16 @@ function invoke5() {
   local debugMessage="The command ⌜${executable}⌝ originally ended with exit code ⌜${exitCode}⌝."
 
   # if the error code is acceptable, then we set it to 0
-  if [[ ",${acceptableErrorCodes}," == *",${exitCode},"* ]]; then
+  if [[ ,${acceptableErrorCodes}, == *",${exitCode},"* ]]; then
     exitCode=0
     debugMessage+=$'\n'"The error code ⌜${exitCode}⌝ is acceptable and has been reset to 0."
   fi
 
   local shouldFail=false
-  if [[ "${failIfFails}" == "true" && exitCode -ne 0 ]]; then shouldFail=true; fi
+  if [[ ${failIfFails} == "true" && exitCode -ne 0 ]]; then shouldFail=true; fi
 
   # fail if needed or we are debug mode; display all the debug information that could be useful
-  if isDebugEnabled || [[ "${shouldFail}" == "true" ]]; then
+  if isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
 
     # append std out
     if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
@@ -120,7 +120,7 @@ function invoke5() {
       debugMessage+=$'\n'"Error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
     fi
 
-    if [[ "${shouldFail}" == "true" ]]; then
+    if [[ ${shouldFail} == "true" ]]; then
       fail "${debugMessage}"
     else
       debug "${debugMessage}"

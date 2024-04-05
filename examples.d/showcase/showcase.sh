@@ -105,7 +105,7 @@ function showCaseSudo() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  $SUDO whoami
+  ${SUDO} whoami
 }
 
 

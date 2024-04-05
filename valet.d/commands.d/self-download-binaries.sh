@@ -88,7 +88,7 @@ function downloadFzf() {
   local os="${1}"
   local version="${2}"
   local destination="${3}"
-  if [[ "${os}" == "linux" ]]; then
+  if [[ ${os} == "linux" ]]; then
     local fzfUrl="https://github.com/junegunn/fzf/releases/download/${version}/fzf-${version}-${os}_amd64.tar.gz"
     inform "Downloading fzf from: ${fzfUrl}."
     kurlFile true 200 fzf.tar.gz "${fzfUrl}"
@@ -99,7 +99,7 @@ function downloadFzf() {
     inform "Downloading fzf from: ${fzfUrl}."
     kurlFile true 200 fzf.zip "${fzfUrl}"
     invoke unzip fzf.zip
-    if [[ "${os}" == "darwin" ]]; then
+    if [[ ${os} == "darwin" ]]; then
       invoke mv -f "fzf" "${destination}/fzf"
     else
       invoke mv -f "fzf.exe" "${destination}/fzf"

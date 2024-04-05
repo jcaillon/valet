@@ -110,7 +110,7 @@ function selfBuild() {
       # skip all files not ending with .sh
       if [[ "${file}" != *".sh" ]]; then continue; fi
       # skip everything under tests.d
-      if [[ "${file}" == *"/tests.d/"* ]]; then continue; fi
+      if [[ ${file} == *"/tests.d/"* ]]; then continue; fi
       commandDefinitionFiles+=("${file}")
     done
     shopt -u globstar
@@ -186,7 +186,7 @@ function bumpValetBuildVersion() {
 # $@: The files to extract from.
 function extractCommandDefinitionsToVariables() {
   while [[ $# -gt 0 ]]; do
-    local file="$1"
+    local file="${1}"
     shift
     inform "Extracting commands from ⌜${file}⌝."
     extractCommandYamls "${file}"
@@ -329,7 +329,7 @@ function declareFinalCommandDefinitionCommonVariables() {
 #
 # shellcheck disable=SC2154
 function declareFinalCommandDefinitionHelpVariables() {
-  local function="$1"
+  local function="${1}"
 
   declare -g "CMD_SHORT_DESCRIPTION_${function}"="${TEMP_CMD_BUILD_shortDescription}"
   declare -g "CMD_DESCRIPTION_${function}"="${TEMP_CMD_BUILD_description}"
@@ -346,7 +346,7 @@ function declareFinalCommandDefinitionHelpVariables() {
   for ((index = 0; index < ${#TEMP_CMD_BUILD_options_name[@]}; index++)); do
     if [[ "${TEMP_CMD_BUILD_options_noEnvironmentVariable[index]}" != "true" ]]; then
       optionValue="${TEMP_CMD_BUILD_options_name[index]}"
-      if [[ "${optionValue}" == *"<"* ]]; then optionValue="<${optionValue##*<}"; else optionValue="true"; fi
+      if [[ ${optionValue} == *"<"* ]]; then optionValue="<${optionValue##*<}"; else optionValue="true"; fi
       extractFirstLongNameFromOptionString "${TEMP_CMD_BUILD_options_name[index]}"
       kebabCaseToSnakeCase "${LAST_RETURNED_VALUE}"
       TEMP_CMD_BUILD_options_description[index]+=$'\n'"This option can be set by exporting the variable VALET_${LAST_RETURNED_VALUE}='${optionValue}'."
@@ -373,7 +373,7 @@ function declareFinalCommandDefinitionHelpVariables() {
 # CMD_ARGS_LAST_IS_ARRAY_xxx = true/false to indicate if the last argument of the function is an array (contains with ...)
 # CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (contains ?)
 function declareFinalCommandDefinitionParserVariables() {
-  local function="$1"
+  local function="${1}"
 
   # for each option
   local -i index
@@ -381,7 +381,7 @@ function declareFinalCommandDefinitionParserVariables() {
   for ((index = 0; index < ${#TEMP_CMD_BUILD_options_name[@]}; index++)); do
     option="${TEMP_CMD_BUILD_options_name[index]}"
     optionNoEnvVar="${TEMP_CMD_BUILD_options_noEnvironmentVariable[index]}"
-    if [[ "${option}" == *"<"* ]]; then
+    if [[ ${option} == *"<"* ]]; then
       optionHasValue="true"
       option="${option%%<*}"
     else
@@ -409,11 +409,11 @@ function declareFinalCommandDefinitionParserVariables() {
     local -i nbOptionalArguments=0
     for ((index = 0; index < ${#TEMP_CMD_BUILD_arguments_name[@]}; index++)); do
       argument="${TEMP_CMD_BUILD_arguments_name[index]}"
-      if [[ "${argument}" == *"..."* ]]; then
+      if [[ ${argument} == *"..."* ]]; then
         argument="${argument//\.\.\./}"
         lastArgumentIsArray="true"
       fi
-      if [[ "${argument}" == *"?"* ]]; then
+      if [[ ${argument} == *"?"* ]]; then
         argument="${argument//\?/}"
         nbOptionalArguments+=1
       fi
@@ -537,6 +537,6 @@ function verifyCommandDefinition() {
 #===============================================================
 
 # if this script is run directly, execute the function, otherwise valet will do it
-if [[ "${NOT_EXECUTED_FROM_VALET:-false}" == "true" ]]; then
+if [[ ${NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
   selfBuild "$@"
 fi

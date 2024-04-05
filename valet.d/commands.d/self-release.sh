@@ -51,7 +51,7 @@ function selfRelease() {
   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  if [[ "${dryRun:-}" == "true" ]]; then
+  if [[ ${dryRun:-} == "true" ]]; then
     inform "Dry run mode is enabled, no changes will be made."
   fi
 
@@ -149,7 +149,7 @@ function createRelease() {
   invoke git log --pretty=format:"%s" "${lastTag}..HEAD"
   local IFS=$'\n'
   for line in ${LAST_RETURNED_VALUE}; do
-    if [[ "${line}" == ":bookmark:"* ]]; then
+    if [[ ${line} == ":bookmark:"* ]]; then
       continue
     fi
     tagMessage+="- ${line}"$'\n'
@@ -179,7 +179,7 @@ function createRelease() {
 
   # prepare the release payload
   local prerelease=false
-  if [[ "${version}" == *"-"* ]]; then prerelease=true; fi
+  if [[ ${version} == *"-"* ]]; then prerelease=true; fi
   local releasePayload
   releasePayload="{
     \"tag_name\": \"v${version}\",
@@ -244,7 +244,7 @@ function uploadArtifact() {
     kurl true '' -X POST \
       -H "Authorization: token ${githubReleaseToken:-}" \
       -H "Content-Type: application/tar+gzip" \
-      --data-binary "@$artifactPath" \
+      --data-binary "@${artifactPath}" \
       "${uploadUrl}?name=${artifactPath}"
   fi
 
