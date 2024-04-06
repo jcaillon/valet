@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ".before-test"
+builtin source ".before-test"
 
 function testParseAndCheckArgument() {
   # test that we correctly parse arguments and options and fail is they don't match
@@ -23,4 +23,4 @@ function main() {
 
 main
 
-source ".after-test"
+builtin source ".after-test"

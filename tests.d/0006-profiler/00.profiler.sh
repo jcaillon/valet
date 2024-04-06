@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-include io
+# shellcheck source=../../valet.d/lib-io
+source io
 
 commentTest "The profiler is an excellent tool to debug your command. The following example shows what you would get when you enable it."$'\n\n'"Notice that the profiling file has been cleanup after the command execution to maximize readability."
 

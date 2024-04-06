@@ -862,7 +862,8 @@ function showInteractiveCommandsMenu() {
   menuBody="${3}"
   shift 2
 
-  include fzf
+  # shellcheck source=lib-fzf
+  source fzf
 
   showFzf "menu" "${menuId}" "${menuHeader}" "${menuBody}" \
     --preview-label='Command help' \
@@ -912,7 +913,7 @@ function sourceUserCommands() {
 
   # source commands
   # shellcheck disable=SC1090
-  source "${commandsFile}"
+  builtin source "${commandsFile}"
 }
 
 #===============================================================

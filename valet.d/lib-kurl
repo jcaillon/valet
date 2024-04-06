@@ -3,7 +3,8 @@ set -Eeu -o pipefail
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-include io
+# shellcheck source=lib-io
+source io
 
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.

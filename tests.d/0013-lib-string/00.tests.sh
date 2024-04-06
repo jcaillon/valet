@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-include string
+# shellcheck source=../../valet.d/lib-string
+source string
 
 function testBumpSemanticVersion() {
 

@@ -420,6 +420,8 @@ fi
 #===============================================================
 
 # Allows to include a library file. It sources a file.
+# It replaces the builtin source command to make sure that we do not include the same file twice.
+# This also allows us to specify to spellcheck the included file.
 #
 # $1: the name of the library (array, interactive, string...) or the file path to include.
 #
@@ -428,31 +430,28 @@ fi
 #   This function makes sure that we do not include the same file twice.
 #
 # Usage:
-#   include string array system
-#   include ./my/path my/other/path
-function include() {
+#   source string array system
+#   source ./my/path my/other/path
+function source() {
   local filePathToInclude includedFile
-  # for each argument
-  while [[ $# -gt 0 ]]; do
-    if [[ -e "${VALET_HOME}/valet.d/lib-${1}" ]]; then
-      filePathToInclude="${VALET_HOME}/valet.d/lib-${1}"
-    elif [[ -e "${BASH_SOURCE[1]%/*}/${1}" ]]; then
-      filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
-    elif [[ -e "${1}" ]]; then
-      filePathToInclude="${1}"
-    else
-      fail "The file ${1} could not be found."
+  if [[ -e "${VALET_HOME}/valet.d/lib-${1}" ]]; then
+    filePathToInclude="${VALET_HOME}/valet.d/lib-${1}"
+  elif [[ -e "${BASH_SOURCE[1]%/*}/${1}" ]]; then
+    filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
+  elif [[ -e "${1}" ]]; then
+    filePathToInclude="${1}"
+  else
+    fail "The file ${1} could not be found."
+  fi
+  for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
+    if [[ ${includedFile} == "${filePathToInclude}" ]]; then
+      return 0
     fi
-    for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
-      if [[ ${includedFile} == "${filePathToInclude}" ]]; then
-        return 0
-      fi
-    done
-    # shellcheck source=/dev/null
-    source "${filePathToInclude}"
-    _LIST_OF_INCLUDED_FILES+=("${filePathToInclude}")
-    shift
   done
+  shift
+  # shellcheck source=/dev/null
+  builtin source "${filePathToInclude}" "$@"
+  _LIST_OF_INCLUDED_FILES+=("${filePathToInclude}")
 }
 _LIST_OF_INCLUDED_FILES=()
 

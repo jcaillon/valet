@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-include interactive
+# shellcheck source=../../valet.d/lib-interactive
+source interactive
 
 function testSortArray() {
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ".before-test"
+builtin source ".before-test"
 
 function testValetInteractiveMenu() {
   # test that valet can be called without any arguments
@@ -15,4 +15,4 @@ function main() {
 
 main
 
-source ".after-test"
+builtin source ".after-test"

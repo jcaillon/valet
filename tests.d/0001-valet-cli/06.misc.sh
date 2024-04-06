@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ".before-test"
+builtin source ".before-test"
 
 function testMainOptions() {
   # testing version option
@@ -47,4 +47,4 @@ function main() {
 
 main
 
-source ".after-test"
+builtin source ".after-test"

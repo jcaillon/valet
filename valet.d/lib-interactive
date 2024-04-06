@@ -9,7 +9,7 @@ if [[ ${VALET_CI_MODE:-false} == "true" ]]; then
 fi
 
 # shellcheck source=lib-ansi-codes
-include ansi-codes
+source ansi-codes
 
 #===============================================================
 # >>> Custom drawing functions

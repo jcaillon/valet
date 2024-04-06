@@ -15,7 +15,12 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
 fi
 # --- END OF COMMAND COMMON PART
 
-include system io kurl
+# shellcheck source=../lib-system
+source system
+# shellcheck source=../lib-io
+source io
+# shellcheck source=../lib-kurl
+source kurl
 
 #===============================================================
 # >>> command: self download-binaries

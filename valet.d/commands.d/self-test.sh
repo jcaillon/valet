@@ -15,7 +15,8 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
 fi
 # --- END OF COMMAND COMMON PART
 
-include self-test-utils
+# shellcheck source=self-test-utils
+source self-test-utils
 
 #===============================================================
 # >>> command: self test

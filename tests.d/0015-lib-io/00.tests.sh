@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-include io
+# shellcheck source=../../valet.d/lib-io
+source io
 
 function testToAbsolutePath() {
 

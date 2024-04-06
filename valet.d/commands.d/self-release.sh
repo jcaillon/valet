@@ -15,7 +15,10 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
 fi
 # --- END OF COMMAND COMMON PART
 
-include string kurl
+# shellcheck source=../lib-string
+source string
+# shellcheck source=../lib-kurl
+source kurl
 
 #===============================================================
 # >>> self release valet

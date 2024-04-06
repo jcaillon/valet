@@ -165,6 +165,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 
 ## 🔭 Roadmap
 
+- Replace include by source so we can keep using shellcheck directive. Use builtin source "$@" in case it is needed.
 - Prefix function with the lib. E.g. string::wrapText.
 - Document everything. Document test.
 - Add support for interactive mode.
@@ -181,7 +182,6 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - head / tail from file.
 - New self command that writes a default user config file with the default values. This is called on selfSetup.
 - Allow to regroup single letter options (e.g. -fsSL).
-- Replace include by source so we can keep using shellcheck directive. Use builtin source "$@" in case it is needed.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

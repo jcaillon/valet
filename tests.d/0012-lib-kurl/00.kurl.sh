@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-include kurl
+# shellcheck source=../../valet.d/lib-kurl
+source kurl
 
 function testKurlFile() {
   mkdir -p "${_TEMPORARY_DIRECTORY}" &>/dev/null

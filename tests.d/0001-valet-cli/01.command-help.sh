@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ".before-test"
+builtin source ".before-test"
 
 function testHelp() {
   # testing to get help for the self test-core2 command
@@ -43,4 +43,4 @@ function main() {
 
 main
 
-source ".after-test"
+builtin source ".after-test"

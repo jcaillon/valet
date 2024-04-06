@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ".before-test"
+builtin source ".before-test"
 
 function testInteractiveSubMenu() {
   # test that we go into the interactive menu with no arguments
@@ -25,4 +25,4 @@ function main() {
 
 main
 
-source ".after-test"
+builtin source ".after-test"

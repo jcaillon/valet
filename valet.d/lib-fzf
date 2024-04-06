@@ -34,7 +34,8 @@ function showFzf() {
   body="${4}"
   shift 4
 
-  include io
+  # shellcheck source=lib-io
+  source io
 
   getCommandFullPath "fzf"
   local fzfExecutable="${LAST_RETURNED_VALUE}"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ".before-test"
+builtin source ".before-test"
 
 function testLogging() {
   # testing log level
@@ -80,4 +80,4 @@ function main() {
 
 main
 
-source ".after-test"
+builtin source ".after-test"

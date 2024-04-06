@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ".before-test"
+builtin source ".before-test"
 
 function testEventHandlers() {
   # testing error handling (a statement returns != 0)
@@ -40,4 +40,4 @@ function main() {
 
 main
 
-source ".after-test"
+builtin source ".after-test"

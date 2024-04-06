@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-include system
+# shellcheck source=../../valet.d/lib-system
+source system
 
 function testGetOsName() {
 
