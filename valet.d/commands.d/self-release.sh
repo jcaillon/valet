@@ -89,7 +89,7 @@ function selfRelease() {
 
     if [[ "${artifact:-}" != "no-binaries" ]]; then
       # download the binaries
-      selfDownloadBinaries -os "${artifact}" --destination "${tempDir}/bin"
+      selfDownloadBinaries --force-os "${artifact}" --destination "${tempDir}/bin"
     fi
 
     if [[ "${dryRun:-}" != "true" ]]; then

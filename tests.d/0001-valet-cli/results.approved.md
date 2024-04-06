@@ -26,7 +26,7 @@ OPTIONS
 
   -o, --option1
       First option.
-  -o2, -2, --this-is-option2 <level>
+  -2, --this-is-option2 <level>
       An option with a value.
       This option can be set by exporting the variable VALET_THIS_IS_OPTION2='<level>'.
   -h, --help
@@ -120,7 +120,7 @@ USAGE
 
 OPTIONS
 
-  -nc, --no-colors
+  -n, --no-colors
       Do not use any colors in the output
       This option can be set by exporting the variable 
       VALET_NO_COLORS='true'.
@@ -235,10 +235,10 @@ OPTIONS
       The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable 
       VALET_KEEP_ALL_PROFILER_LINES to true.
       This option can be set by exporting the variable VALET_PROFILING='true'.
-  -ll, -log, --log-level <level>
+  -l, --log, --log-level <level>
       Set the log level of valet (defaults to info).
       Possible values are: debug, success, info, success, warning, error.
-      This option can be set by exporting the variable VALET_LOG_LEVEL='<level>'.
+      This option can be set by exporting the variable VALET_LOG,='<level>'.
   -v, --verbose
       Output verbose information.
       This is the equivalent of setting the log level to debug.
@@ -754,7 +754,7 @@ WARNING  This is a custom clean up function.
 
 ### Testing with a non existing user directory
 
-Exit code: `1`
+Exit code: `0`
 
 **Standard** output:
 
@@ -769,8 +769,10 @@ WARNING  The valet user directory ⌜$VALET_HOME/non-existing⌝ does not contai
 To get started with valet, you must build your command list using the ⌜valet self build⌝ command.
 Please check the help using ⌜valet self build --help⌝ for details.
 Now using the examples commands from ⌜$VALET_HOME/examples.d⌝.
-WARNING  The file ⌜$VALET_HOME/valet.d/commands.d/self-test-core.sh⌝ referenced by the function ⌜selfTestCore1⌝ does not exist!
-ERROR    The function ⌜selfTestCore1⌝ associated with the command ⌜self test-core1⌝ does not exist.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
 ```
 
 ## Test script 08.submenu

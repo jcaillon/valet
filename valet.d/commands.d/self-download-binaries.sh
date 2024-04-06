@@ -31,7 +31,7 @@ description: |-
 
   These binaries will be stored in the bin directory of valet and used in priority over the binaries in your PATH.
 options:
-- name: -os, --force-os <name>
+- name: -s, --force-os <name>
   description: |-
     By default, this command will download the binaries for your current OS.
 

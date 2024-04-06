@@ -125,7 +125,7 @@ more=(
 "more2"
 )
 
-→ parseFunctionArguments selfTestCore2 -o -o2 optionValue2 arg1
+→ parseFunctionArguments selfTestCore2 -o -2 optionValue2 arg1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝."

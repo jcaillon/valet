@@ -445,7 +445,7 @@ arguments:
     The name of the command to show the help for.
     If not provided, show the help for the program.
 options:
-- name: -nc, --no-colors
+- name: -n, --no-colors
   description: |-
     Do not use any colors in the output
 - name: -c, --columns <number>
@@ -521,7 +521,7 @@ function parseMainArguments() {
     -x | --profiling)
       PROFIL_COMMAND=true
       ;;
-    -ll | -log | --log-level)
+    -l | --log | --log-level)
       shift
       setLogLevel "${1}"
       ;;

@@ -10,8 +10,8 @@ function testParseFunctionArguments() {
   parseFunctionArguments selfTestCore2 -o -2 optionValue2 arg1 more1 more2 && echo "${LAST_RETURNED_VALUE}"
   echo
 
-  echo "→ parseFunctionArguments selfTestCore2 -o -o2 optionValue2 arg1"
-  parseFunctionArguments selfTestCore2 -o -o2 optionValue2 arg1 && echo "${LAST_RETURNED_VALUE}"
+  echo "→ parseFunctionArguments selfTestCore2 -o -2 optionValue2 arg1"
+  parseFunctionArguments selfTestCore2 -o -2 optionValue2 arg1 && echo "${LAST_RETURNED_VALUE}"
   echo
 
   echo "→ parseFunctionArguments selfTestCore2 -unknown -what optionValue2 arg"

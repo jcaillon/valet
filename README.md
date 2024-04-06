@@ -165,8 +165,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 
 ## 🔭 Roadmap
 
-- Remove dependency between self test and examples.d.
-- Add `hideInMenu` option, allows us to hide self test-core1/2.
+- Prefix function with the lib. E.g. string::wrapText.
 - Document everything. Document test.
 - Add support for interactive mode.
 - Replace fzf menu with equivalent pure bash menu.
@@ -182,7 +181,6 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - head / tail from file.
 - New self command that writes a default user config file with the default values. This is called on selfSetup.
 - Allow to regroup single letter options (e.g. -fsSL).
-- Prefix function with the lib. E.g. string::wrapText.
 - Replace include by source so we can keep using shellcheck directive. Use builtin source "$@" in case it is needed.
 
 [releases]: https://github.com/jcaillon/valet/releases

@@ -142,7 +142,7 @@ options:
   description: |-
     First option.
   noEnvironmentVariable: true
-- name: -o2, -2, --this-is-option2 <level>
+- name: -2, --this-is-option2 <level>
   description: |-
     An option with a value.
 examples:

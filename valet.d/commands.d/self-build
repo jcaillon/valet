@@ -540,6 +540,27 @@ function verifyCommandDefinition() {
     SELF_BUILD_ERRORS+="- does not have a file to source to find the function."$'\n'
   fi
 
+  # check for each option
+  local -i index
+  local option optionName
+  for ((index = 0; index < ${#TEMP_CMD_BUILD_options_name[@]}; index++)); do
+    option="${TEMP_CMD_BUILD_options_name[index]}"
+    optionNames="${option}"
+
+    # make sure that there is only one short option and that is has only 1 character
+    if [[ ${optionNames} == *"<"* ]]; then
+      optionNames="${optionNames%%<*}"
+    fi
+    optionNames="${optionNames//,/ }"
+    trimAll "${optionNames}" && optionNames=" ${LAST_RETURNED_VALUE} "
+    # remove the first short option
+    optionNames="${optionNames/ -? /}"
+    # if there still are short options, it means that there are more than one or that one has more than one character
+    if [[ ${optionNames} =~ " -"[^-]+ ]]; then
+      SELF_BUILD_ERRORS+="- has an invalid option ⌜${option}⌝, it can only have one short option (single -) and the short option must have a single character."$'\n'
+    fi
+  done
+
   # TODO: validate that each option is different, same for arguments
   # only the last argument can end with ...
   # only the last arguments can be optional
