@@ -281,12 +281,12 @@ function printHelp() {
     cArgument=""
     cCommand=""
   else
-    cDefault=${VALET_COLOR_DEFAULT:-$'\033'"[0m"}
-    cTitle=${VALET_COLOR_TITLE:-$'\033'"[0;36m"}
-    cHighlight=${VALET_COLOR_HIGHLIGHT:-$'\033'"[0;35m"}
-    cOption=${VALET_COLOR_OPTION:-$'\033'"[0;33m"}
-    cArgument=${VALET_COLOR_ARGUMENT:-$'\033'"[0;31m"}
-    cCommand=${VALET_COLOR_COMMAND:-$'\033'"[0;32m"}
+    cDefault=${VALET_COLOR_DEFAULT:-$'\e'"[0m"}
+    cTitle=${VALET_COLOR_TITLE:-$'\e'"[0;36m"}
+    cHighlight=${VALET_COLOR_HIGHLIGHT:-$'\e'"[0;35m"}
+    cOption=${VALET_COLOR_OPTION:-$'\e'"[0;33m"}
+    cArgument=${VALET_COLOR_ARGUMENT:-$'\e'"[0;31m"}
+    cCommand=${VALET_COLOR_COMMAND:-$'\e'"[0;32m"}
   fi
 
   local -i helpWidth
@@ -417,7 +417,7 @@ function writeAsTable() {
   local -n descriptions="${prefix}_DESCRIPTION_${functionName}"
 
   local cDefault output description index
-  if [[ -n "${color:-}" ]]; then cDefault=$'\033'"[0m"; fi
+  if [[ -n "${color:-}" ]]; then cDefault=$'\e'"[0m"; fi
 
   output=""
   for index in "${!names[@]}"; do

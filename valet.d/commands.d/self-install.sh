@@ -248,8 +248,8 @@ function selfWelcomeUser() {
   inform "Now running test with you to set up Valet."
 
   echo "─────────────────────────────────────"
-  echo $'\033'"[0;36mThis is a COLOR CHECK, this line should be COLORED (in cyan by default)."$'\033'"[0m"
-  echo $'\033'"[0;32mThis is a COLOR CHECK, this line should be COLORED (in green by default)."$'\033'"[0m"
+  echo $'\e'"[0;36mThis is a COLOR CHECK, this line should be COLORED (in cyan by default)."$'\e'"[0m"
+  echo $'\e'"[0;32mThis is a COLOR CHECK, this line should be COLORED (in green by default)."$'\e'"[0m"
   echo "─────────────────────────────────────"
 
   echo "Do you see the colors in the color check above the line?"

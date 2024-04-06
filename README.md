@@ -165,6 +165,9 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 
 ## 🔭 Roadmap
 
+- Remove dependency between self test and examples.d.
+- Add `hideInMenu` option, allows us to hide self test-core1/2.
+- Document everything. Document test.
 - Add support for interactive mode.
 - Replace fzf menu with equivalent pure bash menu.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
@@ -177,7 +180,8 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Create a valet-community-commands where everyone can contribute to new default commands for Valet.
 - Optional strict mode (env var) to disable fuzzy matching (to not mistakenly execute a command on ci for instance).
 - head / tail from file.
-
+- New self command that writes a default user config file with the default values. This is called on post install.
+- Allow to regroup single letter options (e.g. -fsSL).
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

@@ -88,7 +88,7 @@ CMD_ARGUMENTS_NAME_showCommandHelp=([0]="commands?...")
 CMD_ARGUMENTS_NAME_showcaseCommand1=([0]="firstArg" [1]="more...")
 CMD_ARGUMENTS_NAME_this=([0]="commands?...")
 CMD_COMMANDS_DESCRIPTION_this=([0]="Show the help this program or of a specific command." [1]="Re-build the menu of valet from your commands." [2]="Download the required binaries for valet." [3]="Release a new version of valet." [4]="Test your valet custom commands." [5]="Test valet core features." [6]="Update valet using the latest release on GitHub." [7]="The command run after the installation of Valet to guide the user." [8]="A showcase command that uses arguments and options." [9]="An hello world command." [10]="A command that requires sudo.")
-CMD_COMMANDS_MENU_BODY=$'help                  \tShow the help this program or of a specific command.\nself build            \tRe-build the menu of valet from your commands.\nself download-binaries\tDownload the required binaries for valet.\nself release          \tRelease a new version of valet.\nself test             \tTest your valet custom commands.\nself test-core        \tTest valet core features.\nself update           \tUpdate valet using the latest release on GitHub.\nself welcome-user     \tThe command run after the installation of Valet to guide the user.\nshowcase command1     \tA showcase command that uses arguments and options.\nshowcase hello-world  \tAn hello world command.\nshowcase sudo-command \tA command that requires sudo.\n'
+CMD_COMMANDS_MENU_BODY=$'help                  \tShow the help this program or of a specific command.\nself build            \tRe-build the menu of valet from your commands.\nself download-binaries\tDownload the required binaries for valet.\nself release          \tRelease a new version of valet.\nself test             \tTest your valet custom commands.\nself test-core        \tTest valet core features.\nself update           \tUpdate valet using the latest release on GitHub.\nself welcome-user     \tThe command run after the installation of Valet to guide the user.\nshowcase command1     \tA showcase command that uses arguments and options.\nshowcase hello-world  \tAn hello world command.\nshowcase sudo-command \tA command that requires sudo.'
 CMD_COMMANDS_NAME_this=([0]="help" [1]="self build" [2]="self download-binaries" [3]="self release" [4]="self test" [5]="self test-core" [6]="self update" [7]="self welcome-user" [8]="showcase command1" [9]="showcase hello-world" [10]="showcase sudo-command")
 CMD_COMMAND_helloWorld="showcase hello-world"
 CMD_COMMAND_selfBuild="self build"
@@ -284,7 +284,6 @@ self welcome-user     	The command run after the installation of Valet to guide 
 showcase command1     	A showcase command that uses arguments and options.
 showcase hello-world  	An hello world command.
 showcase sudo-command 	A command that requires sudo.
-
 SUCCESS  The valet user commands have been successfully built
 ```
 

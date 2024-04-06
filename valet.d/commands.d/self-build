@@ -465,6 +465,8 @@ function declareOtherCommmandVariables() {
     CMD_COMMANDS_DESCRIPTION_this+=("${shortDescription}")
   done
 
+  CMD_COMMANDS_MENU_BODY="${CMD_COMMANDS_MENU_BODY%$'\n'}"
+
   # CMD_ALL_COMMANDS and CMD_ALL_FUNCTIONS
   local IFS=$'\n'
   CMD_ALL_COMMANDS="${CMD_ALL_MENU_COMMANDS_ARRAY[*]}"$'\n'"${CMD_ALL_COMMANDS_ARRAY[*]}"
@@ -526,6 +528,7 @@ function verifyCommandDefinition() {
   # only the last arguments can be optional
   # check the syntax for options
   # check the alphanumeric characters for options and arguments
+  # for short option, only one character is allowed
 
   if [[ -n "${message}" ]]; then
     SELF_BUILD_ERRORS+="The command definition ⌜${command}⌝ for function ⌜${function}⌝:"$'\n'"${message}"
