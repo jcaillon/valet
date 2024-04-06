@@ -14,9 +14,7 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
 
   VALETD_DIR="${BASH_SOURCE[0]}"
   if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then
-      VALETD_DIR="${PWD}"
-      popd &>/dev/null
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null || true;
     else VALETD_DIR="${PWD}"; fi
   else VALETD_DIR="${VALETD_DIR%/*}"; fi
 
@@ -136,6 +134,8 @@ function selfBuild() {
 
   summarize
 
+  unset CMD_COMMANDS_HIDDEN_MENU_BODY
+
   if [[ -n "${SELF_BUILD_ERRORS:-}" ]]; then
     fail "The valet user commands have not been successfully built. Please check the following errors:"$'\n'"${SELF_BUILD_ERRORS}"
   fi
@@ -163,8 +163,13 @@ function summarize() {
   message+="- Number of functions: ⌜${#CMD_ALL_FUNCTIONS_ARRAY[@]}⌝."$'\n'
   message+="- Number of commands: ⌜${#CMD_ALL_COMMANDS_ARRAY[@]}⌝."$'\n'
   message+="- Maximum sub command level: ⌜${CMD_MAX_SUB_COMMAND_LEVEL:-0}⌝."$'\n'
+
   message+=$'\n'"== List of all the commands =="$'\n\n'
-  message+="${CMD_COMMANDS_MENU_BODY}"
+  message+="${CMD_COMMANDS_MENU_BODY}"$'\n\n'
+
+  message+=$'\n'"== List of all the hidden commands =="$'\n\n'
+  message+="${CMD_COMMANDS_HIDDEN_MENU_BODY}"$'\n'
+
   inform "${message}"
 }
 
@@ -255,6 +260,7 @@ function extractCommandDefinitionsToVariables() {
 # CMD_FUNCTION_NAME_yyy = the function name for the given yyy command
 # CMD_COMMAND_xxx = the command of the function
 # CMD_FILETOSOURCE_xxx = the file to source for the function
+# CMD_HIDEINMENU_xxx = true to hide the command in the menu
 function declareFinalCommandDefinitionCommonVariables() {
   local function command
   function="${1}"
@@ -311,6 +317,9 @@ function declareFinalCommandDefinitionCommonVariables() {
   # declare basic properties
   declare -g "CMD_COMMAND_${function}"="${command}"
   declare -g "CMD_FILETOSOURCE_${function}"="${TEMP_CMD_BUILD_fileToSource}"
+  if [[ ${TEMP_CMD_BUILD_hideInMenu:-false} == "true" ]]; then
+    declare -g "CMD_HIDEINMENU_${function}"=true
+  fi
 }
 
 # This function uses the global TEMP_CMD_BUILD_* variables to declare the final
@@ -433,6 +442,7 @@ function declareFinalCommandDefinitionParserVariables() {
 #
 # Declared variables:
 # CMD_COMMANDS_MENU_BODY = the input used to display the commands menu
+# CMD_COMMANDS_HIDDEN_MENU_BODY = all the commands that are not shown in the menu
 # CMD_COMMANDS_NAME_this = array with each sub command name
 # CMD_COMMANDS_DESCRIPTION_this = array with each sub commmand short description
 # CMD_ALL_FUNCTIONS = list all the functions callable with a command
@@ -443,6 +453,7 @@ function declareOtherCommmandVariables() {
   sortArray CMD_ALL_COMMANDS_ARRAY
 
   CMD_COMMANDS_MENU_BODY=""
+  CMD_COMMANDS_HIDDEN_MENU_BODY=""
   CMD_COMMANDS_NAME_this=()
   CMD_COMMANDS_DESCRIPTION_this=()
 
@@ -454,11 +465,16 @@ function declareOtherCommmandVariables() {
     # get the function name from a command
     local -n function="CMD_FUNCTION_NAME_${command//[-[:space:]]/_}"
     local -n shortDescription="CMD_SHORT_DESCRIPTION_${function}"
+    local -n hideInMenu="CMD_HIDEINMENU_${function}"
 
     printf -v line "%-${CMD_MAX_COMMAND_WIDTH}s\t%s\n" "${command}" "${shortDescription}"
 
     # declare the command menu body
-    CMD_COMMANDS_MENU_BODY+="${line}"
+    if [[ ${hideInMenu:-false} == "true" ]]; then
+      CMD_COMMANDS_HIDDEN_MENU_BODY+="${line}";
+    else
+      CMD_COMMANDS_MENU_BODY+="${line}";
+    fi
 
     # declare the sub commands for the main menu
     CMD_COMMANDS_NAME_this+=("${command}")
@@ -466,6 +482,7 @@ function declareOtherCommmandVariables() {
   done
 
   CMD_COMMANDS_MENU_BODY="${CMD_COMMANDS_MENU_BODY%$'\n'}"
+  CMD_COMMANDS_HIDDEN_MENU_BODY="${CMD_COMMANDS_HIDDEN_MENU_BODY%$'\n'}"
 
   # CMD_ALL_COMMANDS and CMD_ALL_FUNCTIONS
   local IFS=$'\n'

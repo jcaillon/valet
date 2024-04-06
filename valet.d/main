@@ -862,7 +862,7 @@ function showInteractiveCommandsMenu() {
   menuBody="${3}"
   shift 2
 
-  include interactive
+  include fzf
 
   showFzf "menu" "${menuId}" "${menuHeader}" "${menuBody}" \
     --preview-label='Command help' \

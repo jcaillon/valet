@@ -7,7 +7,7 @@
 if [[ -z "${_CORE_INCLUDED:-}" ]]; then
   VALETD_DIR="${BASH_SOURCE[0]}"
   if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null;
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null || true;
     else VALETD_DIR="${PWD}"; fi
   else VALETD_DIR="${VALETD_DIR%/*}"; fi
   # shellcheck source=../core
@@ -23,6 +23,7 @@ include string kurl
 : "---
 command: self release
 function: selfRelease
+author: github.com/jcaillon
 shortDescription: Release a new version of valet.
 description: |-
   Release a new version of valet.

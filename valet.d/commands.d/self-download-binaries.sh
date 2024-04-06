@@ -7,7 +7,7 @@
 if [[ -z "${_CORE_INCLUDED:-}" ]]; then
   VALETD_DIR="${BASH_SOURCE[0]}"
   if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null;
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null || true;
     else VALETD_DIR="${PWD}"; fi
   else VALETD_DIR="${VALETD_DIR%/*}"; fi
   # shellcheck source=../core
@@ -22,7 +22,9 @@ include system io kurl
 #===============================================================
 : "---
 command: self download-binaries
+hideInMenu: true
 function: selfDownloadBinaries
+author: github.com/jcaillon
 shortDescription: Download the required binaries for valet.
 description: |-
   Download the required binaries for valet: fzf.

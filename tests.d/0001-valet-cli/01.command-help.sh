@@ -3,10 +3,10 @@
 source ".before-test"
 
 function testHelp() {
-  # testing to get help for the showcase hello-world command
-  echo "→ valet help showcase hello-world"
-  ("${VALET_HOME}/valet" help showcase hello-world)
-  endTest "Testing help for the showcase hello-world command" $?
+  # testing to get help for the self test-core2 command
+  echo "→ valet help self test-core2"
+  ("${VALET_HOME}/valet" help self test-core2)
+  endTest "Testing help for the self test-core2 command" $?
 
   # Testing to fuzzy find an help
   echo "→ valet hel s h"
@@ -31,8 +31,8 @@ function testHelp() {
 
 function testShowHelp() {
   # test that we can display the help of a function using showHelp
-  echo "→ valet self test-core --show-help"
-  ("${VALET_HOME}/valet" self test-core --show-help)
+  echo "→ valet self test-core1 show-help"
+  ("${VALET_HOME}/valet" self test-core1 show-help)
   endTest "Testing that we can display the help of a function using showHelp" $?
 }
 

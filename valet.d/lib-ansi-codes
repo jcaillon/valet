@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+# Notes:
+# While it could be very handy to define a function for each of these instructions,
+# it would also be slower to execute (function overhead + multiple printf calls).
+#
+# Reference:
+# - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
+# - https://en.wikipedia.org/wiki/ANSI_escape_code
+# - https://vt100.net/docs/vt102-ug/chapter5.html
+# - https://vt100.net/docs/vt100-ug/chapter3.html#S3.3.1
+
+# Text colors
+fgBlack=$'\e[30m'
+fgBlackIntense=$'\e[90m'
+fgBlue=$'\e[34m'
+fgBlueIntense=$'\e[94m'
+fgCyan=$'\e[36m'
+fgCyanIntense=$'\e[96m'
+fgGreen=$'\e[32m'
+fgGreenIntense=$'\e[92m'
+fgMagenta=$'\e[35m'
+fgMagentaIntense=$'\e[95m'
+fgRed=$'\e[31m'
+fgRedIntense=$'\e[91m'
+fgWhite=$'\e[37m'
+fgWhiteIntense=$'\e[97m'
+fgYellow=$'\e[33m'
+fgYellowIntense=$'\e[93m'
+fgReset=$'\e[39m'
+fgColor=$'\e[38;5;'
+_code=$'m' # "${fgColor}2${_code}"
+
+# background colors
+bgBlack=$'\e[40m'
+bgBlackIntense=$'\e[100m'
+bgBlue=$'\e[44m'
+bgBlueIntense=$'\e[104m'
+bgCyan=$'\e[46m'
+bgCyanIntense=$'\e[106m'
+bgGreen=$'\e[42m'
+bgGreenIntense=$'\e[102m'
+bgMagenta=$'\e[45m'
+bgMagentaIntense=$'\e[105m'
+bgRed=$'\e[41m'
+bgRedIntense=$'\e[101m'
+bgWhite=$'\e[47m'
+bgWhiteIntense=$'\e[107m'
+bgYellow=$'\e[43m'
+bgYellowIntense=$'\e[103m'
+bgReset=$'\e[49m'
+resetColor=$'\e[0m'
+bgColor=$'\e[48;5;' # "${bgColor}2${_code}"
+
+# text attributes
+textBold=$'\e[1m'
+textNoBold=$'\e[21m'
+textFaint=$'\e[2m'
+textNoFaint=$'\e[22m'
+textItalic=$'\e[3m'
+textNoItalic=$'\e[23m'
+textUnderline=$'\e[4m'
+textNoUnderline=$'\e[24m'
+textBlink=$'\e[5m'
+textNoBlink=$'\e[25m'
+textInverse=$'\e[7m'
+textNoInverse=$'\e[27m'
+textInvisible=$'\e[8m'
+textVisible=$'\e[28m'
+textStrike=$'\e[9m'
+textNoStrike=$'\e[29m'
+textReset=$'\e[0m'
+textResetAttributes=$'\e[21;22;23;24;25;26;27;28;29m'
+
+# cursor
+cursorRestorePos=$'\e[u'
+cursorSavePos=$'\e[s'
+cursorHide=$'\e[?25l'
+cursorShow=$'\e[?25h'
+ringBell=$'\007'
+
+# display
+switchScreenBuffer=$'\e[?1049h'
+disableLineWrapping=$'\e[?7l'
+enableLineWrapping=$'\e[?7h'
+eraseLinesBelow=$'\e[0J'
+eraseLinesAbove=$'\e[1J'
+eraseScreen=$'\e[2J'
+eraseCharsRight=$'\e[0K'
+eraseCharsLeft=$'\e[1K'
+eraseLine=$'\e[2K'
+repeatLastChar=$'\e[1b' # 1 can be x
+echoOff=$'\e[2h'        # does not seem to work, better rely on stty -echo
+echoOn=$'\e[2l'
+redrawPrompt=$'\r\e[K'
+
+# cursor movement
+cursorMove=$'\e['
+_to=$'H'          # "${cursorMove}1;1${_to}" (row;col)
+_left=$'D'        # "${cursorMove}2${_left}"
+_right=$'C'       # "${cursorMove}2${_right}"
+_down=$'B'        # "${cursorMove}2${_down}"
+_up=$'A'          # "${cursorMove}2${_up}"
+_column=$'G'      # "${cursorMove}2${_column}"
+_line=$'d'        # "${cursorMove}2${_line}"
+_tabBackward=$'Z' # "${cursorMove}2${_tabBackward}"
+_tabForward=$'I'  # "${cursorMove}2${_tabForward}"
+_scrollDown=$'T'  # "${cursorMove}2${_scrollDown}"
+_scrollUp=$'S'    # "${cursorMove}2${_scrollUp}"
+
+limitScrolling=$'\e[1;'
+_lines=$'r' # "${limitScrolling}20${_lines}"

@@ -180,8 +180,10 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Create a valet-community-commands where everyone can contribute to new default commands for Valet.
 - Optional strict mode (env var) to disable fuzzy matching (to not mistakenly execute a command on ci for instance).
 - head / tail from file.
-- New self command that writes a default user config file with the default values. This is called on post install.
+- New self command that writes a default user config file with the default values. This is called on selfSetup.
 - Allow to regroup single letter options (e.g. -fsSL).
+- Prefix function with the lib. E.g. string::wrapText.
+- Replace include by source so we can keep using shellcheck directive. Use builtin source "$@" in case it is needed.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

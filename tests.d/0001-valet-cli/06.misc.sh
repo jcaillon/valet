@@ -22,8 +22,8 @@ function testMainOptions() {
 
 function testCleaning() {
   # testing temp files/directories creation, cleaning and custom cleanUp
-  echo "→ valet self test-core --create-temp-files"
-  ("${VALET_HOME}/valet" self test-core --create-temp-files)
+  echo "→ valet self test-core1 create-temp-files"
+  ("${VALET_HOME}/valet" self test-core1 create-temp-files)
   endTest "Testing temp files/directories creation, cleaning and custom cleanUp" $?
 }
 
@@ -32,8 +32,8 @@ function testUserDirectory() {
   local previousUserDirectory="${VALET_USER_DIRECTORY}"
   export VALET_USER_DIRECTORY="${VALET_HOME}/non-existing"
 
-  echo "→ VALET_USER_DIRECTORY=non-existing self test-core --logging-level"
-  ("${VALET_HOME}/valet" self test-core --logging-level)
+  echo "→ VALET_USER_DIRECTORY=non-existing self test-core1 logging-level"
+  ("${VALET_HOME}/valet" self test-core1 logging-level)
   endTest "Testing with a non existing user directory" $?
 
   export VALET_USER_DIRECTORY="${previousUserDirectory}"

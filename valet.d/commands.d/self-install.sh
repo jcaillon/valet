@@ -52,7 +52,7 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
 
   VALETD_DIR="${BASH_SOURCE[0]}"
   if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null;
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null || true;
     else VALETD_DIR="${PWD}"; fi
   else VALETD_DIR="${VALETD_DIR%/*}"; fi
   VALETD_DIR="${VALETD_DIR%/*}" # strip directory
@@ -99,6 +99,7 @@ fi
 : "---
 command: self update
 function: selfUpdate
+author: github.com/jcaillon
 shortDescription: Update valet using the latest release on GitHub.
 description: |-
   Update valet using the latest release on GitHub.
@@ -222,24 +223,25 @@ function selfUpdate() {
   setLogLevel "info"
 
   # run the post install command
-  selfWelcomeUser
+  selfSetup
 }
 
 #===============================================================
-# >>> command: self welcome-user
+# >>> command: self setup
 #===============================================================
 
 : "---
-command: self welcome-user
-function: selfWelcomeUser
-shortDescription: The command run after the installation of Valet to guide the user.
+command: self setup
+function: selfSetup
+author: github.com/jcaillon
+shortDescription: The command run after the installation of Valet to setup the tool.
 description: |-
-  The command run after the installation of Valet to guide the user.
+  The command run after the installation of Valet to setup the tool.
 
   Adjust the Valet configuration according to the user environment.
   Let the user know what to do next.
 ---"
-function selfWelcomeUser() {
+function selfSetup() {
   inform "Valet has been successfully installed."
 
   local valetConfigFileContent
@@ -313,7 +315,7 @@ function selfWelcomeUser() {
   # TODO: verify that we have all the external tools we need:
   # awk for the profiler
   # diff for the self test
-  # stat for the logs
+  # curl for the self update
 
   succeed "You are all set!"
 

@@ -10,7 +10,7 @@ fi
 
 
 # importing libraries from the core (note that we could do that in the function that needs it as well)
-include io string
+include interactive
 
 #===============================================================
 # >>> command: showcase command1

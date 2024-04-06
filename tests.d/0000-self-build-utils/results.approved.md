@@ -1,4 +1,4 @@
-# Test suite 0004-self-build
+# Test suite 0000-self-build-utils
 
 ## Test script 00.self-build-utils
 

@@ -1,28 +1,49 @@
-# Test suite 0000-valet-cli
+# Test suite 0001-valet-cli
 
 ## Test script 01.command-help
 
-### Testing help for the showcase hello-world command
+### Testing help for the self test-core2 command
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ valet help showcase hello-world
+→ valet help self test-core2
 ABOUT
 
-  An hello world command.
+  An example of description.
   
+  You can put any text here, it will be wrapped to fit the terminal width.
+  
+  You can ⌜highlight⌝ some text as well.
 
 USAGE
 
-  valet showcase hello-world [options]
+  valet self test-core2 [options] <firstArg> <more...>
 
 OPTIONS
 
+  -o, --option1
+      First option.
+  -o2, -2, --this-is-option2 <level>
+      An option with a value.
+      This option can be set by exporting the variable VALET_THIS_IS_OPTION2='<level>'.
   -h, --help
       Display the help for this command.
+
+ARGUMENTS
+
+  firstArg
+      First argument.
+  more...
+      Will be an an array of strings.
+
+EXAMPLES
+
+  self test-core2 -o -2 value1 arg1 more1 more2
+      Call command1 with option1, option2 and some arguments.
+      
 
 ```
 
@@ -36,17 +57,37 @@ Exit code: `0`
 → valet hel s h
 ABOUT
 
-  An hello world command.
-  
+  Show a menu with sub commands for the current command.
 
 USAGE
 
-  valet showcase hello-world [options]
+  valet self [options] [command]
 
 OPTIONS
 
   -h, --help
       Display the help for this command.
+
+COMMANDS
+
+  self build
+      Re-build the menu of valet from your commands.
+  self download-binaries
+      Download the required binaries for valet.
+  self release
+      Release a new version of valet.
+  self setup
+      The command run after the installation of Valet to setup the tool.
+  self test
+      Test your valet custom commands.
+  self test-core1
+      A command that only for testing valet core functions.
+  self test-core2
+      A command that only for testing valet core functions.
+  self test-core3
+      A command that only for testing valet core functions.
+  self update
+      Update valet using the latest release on GitHub.
 
 ```
 
@@ -54,7 +95,7 @@ OPTIONS
 
 ```log
 INFO     Fuzzy matching the command ⌜hel⌝ to ⌜help⌝.
-INFO     Fuzzy matching the command ⌜s h⌝ to ⌜showcase hello-world⌝.
+INFO     Fuzzy matching the command ⌜s⌝ to ⌜self⌝.
 ```
 
 ### Testing help with columns 60
@@ -220,20 +261,18 @@ COMMANDS
       Download the required binaries for valet.
   self release
       Release a new version of valet.
+  self setup
+      The command run after the installation of Valet to setup the tool.
   self test
       Test your valet custom commands.
-  self test-core
-      Test valet core features.
+  self test-core1
+      A command that only for testing valet core functions.
+  self test-core2
+      A command that only for testing valet core functions.
+  self test-core3
+      A command that only for testing valet core functions.
   self update
       Update valet using the latest release on GitHub.
-  self welcome-user
-      The command run after the installation of Valet to guide the user.
-  showcase command1
-      A showcase command that uses arguments and options.
-  showcase hello-world
-      An hello world command.
-  showcase sudo-command
-      A command that requires sudo.
 
 EXAMPLES
 
@@ -252,14 +291,14 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core --show-help
+→ valet self test-core1 show-help
 ABOUT
 
   Show a menu with sub commands for the current command.
 
 USAGE
 
-  valet selfTestCore [options]
+  valet selfTestCore1 [options]
 
 OPTIONS
 
@@ -277,17 +316,16 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core --non-existing-option nonNeededArg1 -derp anotherArg
+→ valet self test-core1 non-existing-option nonNeededArg1 -derp anotherArg
 ```
 
 **Error** output:
 
 ```log
-ERROR    Unknown option ⌜--non-existing-option⌝.
-Expecting 0 argument(s), got extra argument ⌜nonNeededArg1⌝.
+ERROR    Expecting 1 argument(s), got extra argument ⌜nonNeededArg1⌝.
 Unknown option ⌜-derp⌝.
-Expecting 0 argument(s), got extra argument ⌜anotherArg⌝.
-Use valet self test-core --help to get help.
+Expecting 1 argument(s), got extra argument ⌜anotherArg⌝.
+Use valet self test-core1 --help to get help.
 ```
 
 ### Testing that a command with sudo ask for sudo privileges
@@ -297,7 +335,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet showcase sudo-command
+→ valet self test-core3
 ```
 
 **Error** output:
@@ -317,15 +355,15 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core --error
+→ valet self test-core1 error
 ```
 
 **Error** output:
 
 ```log
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
-ERROR    Error code 1 in selfTestCore(), stack:
-├─ In function selfTestCore() $VALET_HOME/valet.d/commands.d/self-test.sh:XXX
+ERROR    Error code 1 in selfTestCore1(), stack:
+├─ In function selfTestCore1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
 ├─ In function runFunction() $VALET_HOME/valet.d/main:XXX
 ├─ In function parseMainArguments() $VALET_HOME/valet.d/main:XXX
 └─ In function main() $VALET_HOME/valet:XXX
@@ -338,7 +376,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core --exit
+→ valet self test-core1 exit
 ```
 
 **Error** output:
@@ -347,7 +385,7 @@ Exit code: `0`
 WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
-├─ In function selfTestCore() $VALET_HOME/valet.d/commands.d/self-test.sh:XXX
+├─ In function selfTestCore1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
 ├─ In function runFunction() $VALET_HOME/valet.d/main:XXX
 ├─ In function parseMainArguments() $VALET_HOME/valet.d/main:XXX
 └─ In function main() $VALET_HOME/valet:XXX
@@ -360,7 +398,7 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core --fail
+→ valet self test-core1 fail
 ```
 
 **Error** output:
@@ -376,7 +414,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core --unknown-command
+→ valet self test-core1 unknown-command
 ```
 
 **Error** output:
@@ -385,8 +423,8 @@ Exit code: `0`
 WARNING  This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle.
 ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
-ERROR    Error code 1 in selfTestCore(), stack:
-├─ In function selfTestCore() $VALET_HOME/valet.d/commands.d/self-test.sh:XXX
+ERROR    Error code 1 in selfTestCore1(), stack:
+├─ In function selfTestCore1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
 ├─ In function runFunction() $VALET_HOME/valet.d/main:XXX
 ├─ In function parseMainArguments() $VALET_HOME/valet.d/main:XXX
 └─ In function main() $VALET_HOME/valet:XXX
@@ -427,15 +465,11 @@ Please select the command to run. --print-query --no-multi --preview-label=Comma
 ▶ fzf input stream was:
 ⌈help                  	Show the help this program or of a specific command.
 self build            	Re-build the menu of valet from your commands.
-self download-binaries	Download the required binaries for valet.
 self release          	Release a new version of valet.
+self setup            	The command run after the installation of Valet to setup the tool.
 self test             	Test your valet custom commands.
-self test-core        	Test valet core features.
-self update           	Update valet using the latest release on GitHub.
-self welcome-user     	The command run after the installation of Valet to guide the user.
-showcase command1     	A showcase command that uses arguments and options.
-showcase hello-world  	An hello world command.
-showcase sudo-command 	A command that requires sudo.⌉
+self test-core3       	A command that only for testing valet core functions.
+self update           	Update valet using the latest release on GitHub.⌉
 ```
 
 ## Test script 05.logging
@@ -447,7 +481,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_LOG_LEVEL=success valet self test-core --logging-level
+→ VALET_LOG_LEVEL=success valet self test-core1 logging-level
 ```
 
 **Error** output:
@@ -465,7 +499,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet --log-level warning self test-core --logging-level
+→ valet --log-level warning self test-core1 logging-level
 ```
 
 **Error** output:
@@ -482,7 +516,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet -v self test-core --logging-level
+→ valet -v self test-core1 logging-level
 ```
 
 **Error** output:
@@ -490,18 +524,14 @@ Exit code: `0`
 ```log
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Command found ⌜self test-core⌝.
-DEBUG    Function name found ⌜selfTestCore⌝.
-DEBUG    Loaded file ⌜$VALET_HOME/valet.d/commands.d/self-test.sh⌝.
-DEBUG    Running the command ⌜self test-core⌝ with the function ⌜selfTestCore⌝ and the arguments ⌜--logging-level⌝.
+DEBUG    Command found ⌜self test-core1⌝.
+DEBUG    Function name found ⌜selfTestCore1⌝.
+DEBUG    Loaded file ⌜$VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
+DEBUG    Running the command ⌜self test-core1⌝ with the function ⌜selfTestCore1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
-local parsingErrors autoApprove include exclude error fail exit unknownCommand createTempFiles createTempFiles loggingLevel waitIndefinitely showHelp help
-autoApprove="${VALET_AUTO_APPROVE:-}"
-include="${VALET_INCLUDE:-}"
-exclude="${VALET_EXCLUDE:-}"
-showHelp="${VALET_SHOW_HELP:-}"
+local parsingErrors help action
 parsingErrors=""
-loggingLevel="true"
+action="logging-level"
 
 DEBUG    This is a debug message.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
@@ -519,7 +549,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core --logging-level
+→ valet self test-core1 logging-level
 ```
 
 **Error** output:
@@ -542,7 +572,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true valet self test-core --logging-level
+→ VALET_NO_COLOR=true valet self test-core1 logging-level
 ```
 
 **Error** output:
@@ -565,7 +595,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_CI_MODE=true valet self test-core --logging-level
+→ VALET_NO_COLOR=true VALET_CI_MODE=true valet self test-core1 logging-level
 ```
 
 **Error** output:
@@ -584,7 +614,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_NO_TIMESTAMP=true valet self test-core --logging-level
+→ VALET_NO_COLOR=true VALET_NO_TIMESTAMP=true valet self test-core1 logging-level
 ```
 
 **Error** output:
@@ -607,7 +637,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_NO_ICON=true valet self test-core --logging-level
+→ VALET_NO_COLOR=true VALET_NO_ICON=true valet self test-core1 logging-level
 ```
 
 **Error** output:
@@ -630,7 +660,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_NO_WRAP=true valet self test-core --logging-level
+→ VALET_NO_COLOR=true VALET_NO_WRAP=true valet self test-core1 logging-level
 ```
 
 **Error** output:
@@ -649,7 +679,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_LOG_COLUMNS=80 valet self test-core --logging-level
+→ VALET_NO_COLOR=true VALET_LOG_COLUMNS=80 valet self test-core1 logging-level
 ```
 
 **Error** output:
@@ -705,7 +735,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core --create-temp-files
+→ valet self test-core1 create-temp-files
 ```
 
 **Error** output:
@@ -724,12 +754,12 @@ WARNING  This is a custom clean up function.
 
 ### Testing with a non existing user directory
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 
 ```plaintext
-→ VALET_USER_DIRECTORY=non-existing self test-core --logging-level
+→ VALET_USER_DIRECTORY=non-existing self test-core1 logging-level
 ```
 
 **Error** output:
@@ -739,10 +769,8 @@ WARNING  The valet user directory ⌜$VALET_HOME/non-existing⌝ does not contai
 To get started with valet, you must build your command list using the ⌜valet self build⌝ command.
 Please check the help using ⌜valet self build --help⌝ for details.
 Now using the examples commands from ⌜$VALET_HOME/examples.d⌝.
-INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-SUCCESS  This is a success message.
-WARNING  This is a warning message.
-With a second line.
+WARNING  The file ⌜$VALET_HOME/valet.d/commands.d/self-test-core.sh⌝ referenced by the function ⌜selfTestCore1⌝ does not exist!
+ERROR    The function ⌜selfTestCore1⌝ associated with the command ⌜self test-core1⌝ does not exist.
 ```
 
 ## Test script 08.submenu
@@ -804,12 +832,11 @@ Please select the command to run.
 --preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
 ▶ fzf input stream was:
 ⌈self build            	Re-build the menu of valet from your commands.
-self download-binaries	Download the required binaries for valet.
 self release          	Release a new version of valet.
+self setup            	The command run after the installation of Valet to setup the tool.
 self test             	Test your valet custom commands.
-self test-core        	Test valet core features.
-self update           	Update valet using the latest release on GitHub.
-self welcome-user     	The command run after the installation of Valet to guide the user.⌉
+self test-core3       	A command that only for testing valet core functions.
+self update           	Update valet using the latest release on GitHub.⌉
 ```
 
 ### Testing that we can display the help of a sub menu
@@ -841,14 +868,18 @@ COMMANDS
       Download the required binaries for valet.
   self release
       Release a new version of valet.
+  self setup
+      The command run after the installation of Valet to setup the tool.
   self test
       Test your valet custom commands.
-  self test-core
-      Test valet core features.
+  self test-core1
+      A command that only for testing valet core functions.
+  self test-core2
+      A command that only for testing valet core functions.
+  self test-core3
+      A command that only for testing valet core functions.
   self update
       Update valet using the latest release on GitHub.
-  self welcome-user
-      The command run after the installation of Valet to guide the user.
 
 ```
 

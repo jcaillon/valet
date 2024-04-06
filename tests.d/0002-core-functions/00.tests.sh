@@ -32,8 +32,8 @@ function testFuzzyMatch() {
   local lines="l1 this is a word
 l2 very unbelievable
 l2 unbelievable
-l3 showcase command1
-l4 showcase command2
+l3 self test-core1
+l4 self test-core2
 l5 ublievable"
 
   echo "lines=\"${lines}\""
@@ -44,7 +44,7 @@ l5 ublievable"
 
   echo
   echo "→ fuzzyMatch sh2 \"\${lines}\""
-  fuzzyMatch "sh2" "${lines}" && echo "${LAST_RETURNED_VALUE}"
+  fuzzyMatch "sc2" "${lines}" && echo "${LAST_RETURNED_VALUE}"
 
   echo
   echo "# should prioritize lower index of u"
@@ -53,8 +53,8 @@ l5 ublievable"
 
   echo
   echo "# should be the first equal match"
-  echo "→ fuzzyMatch showcase \"\${lines}\""
-  fuzzyMatch "showcase" "${lines}" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ fuzzyMatch self \"\${lines}\""
+  fuzzyMatch "self" "${lines}" && echo "${LAST_RETURNED_VALUE}"
 
   echo
   echo "# should prioritize lower distance between letters"

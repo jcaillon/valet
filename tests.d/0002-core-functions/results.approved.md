@@ -1,4 +1,4 @@
-# Test suite 0001-core-functions
+# Test suite 0002-core-functions
 
 ## Test script 00.tests
 
@@ -108,23 +108,23 @@ Exit code: `0`
 lines="l1 this is a word
 l2 very unbelievable
 l2 unbelievable
-l3 showcase command1
-l4 showcase command2
+l3 self test-core1
+l4 self test-core2
 l5 ublievable"
 
 → fuzzyMatch evle "${lines}"
 l2 very unbelievable
 
 → fuzzyMatch sh2 "${lines}"
-l4 showcase command2
+l4 self test-core2
 
 # should prioritize lower index of u
 → fuzzyMatch u "${lines}"
 l2 unbelievable
 
 # should be the first equal match
-→ fuzzyMatch showcase "${lines}"
-l3 showcase command1
+→ fuzzyMatch self "${lines}"
+l3 self test-core1
 
 # should prioritize lower distance between letters
 → fuzzyMatch lubl "${lines}"

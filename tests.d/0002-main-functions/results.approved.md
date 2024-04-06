@@ -105,7 +105,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ parseFunctionArguments showcaseCommand1
+→ parseFunctionArguments selfTestCore2
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -113,7 +113,7 @@ parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝."
 more=(
 )
 
-→ parseFunctionArguments showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
+→ parseFunctionArguments selfTestCore2 -o -2 optionValue2 arg1 more1 more2
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 parsingErrors=""
@@ -125,7 +125,7 @@ more=(
 "more2"
 )
 
-→ parseFunctionArguments showcaseCommand1 -o -o2 optionValue2 arg1
+→ parseFunctionArguments selfTestCore2 -o -o2 optionValue2 arg1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝."
@@ -135,7 +135,7 @@ firstArg="arg1"
 more=(
 )
 
-→ parseFunctionArguments showcaseCommand1 -unknown -what optionValue2 arg
+→ parseFunctionArguments selfTestCore2 -unknown -what optionValue2 arg
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -146,7 +146,7 @@ more=(
 "arg"
 )
 
-→ parseFunctionArguments showcaseCommand1 arg more1 more2 -o
+→ parseFunctionArguments selfTestCore2 arg more1 more2 -o
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -157,7 +157,7 @@ more=(
 "more2"
 )
 
-→ parseFunctionArguments showcaseCommand1 -this arg more1
+→ parseFunctionArguments selfTestCore2 -this arg more1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -167,7 +167,7 @@ more=(
 "more1"
 )
 
-→ parseFunctionArguments showcaseCommand1 --this-is-option2 --option1 arg more1
+→ parseFunctionArguments selfTestCore2 --this-is-option2 --option1 arg more1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 parsingErrors=""

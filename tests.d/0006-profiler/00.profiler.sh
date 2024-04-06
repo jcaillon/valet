@@ -13,20 +13,20 @@ function testProfiler() {
   export VALET_COMMAND_PROFILING_FILE
   export VALET_STARTUP_PROFILING_FILE
 
-  echo "→ valet -x showcase command1 arg1 arg2"
+  echo "→ valet -x self test-core2 arg1 arg2"
 
   echo
   echo "→ cat 'profiler.log'"
-  ("${VALET_HOME}/valet" -x showcase command1 arg1 arg2)
+  ("${VALET_HOME}/valet" -x self test-core2 arg1 arg2)
   if [[ -s "${VALET_COMMAND_PROFILING_FILE}" ]]; then
     echoFileWithSubstitution "${VALET_COMMAND_PROFILING_FILE}"
   fi
 
   endTest "Testing profiling for command" 0
 
-  echo "→ VALET_STARTUP_PROFILING=true valet --log-level error -x self test-core --logging-level"
+  echo "→ VALET_STARTUP_PROFILING=true valet --log-level error -x self test-core1 logging-level"
 
-  (VALET_STARTUP_PROFILING=true "${VALET_HOME}/valet" --log-level error -x self test-core --logging-level)
+  (VALET_STARTUP_PROFILING=true "${VALET_HOME}/valet" --log-level error -x self test-core1 logging-level)
   if [[ -s "${VALET_STARTUP_PROFILING_FILE}" ]]; then
     echo "A startup profiling file has been created to log everything happening from the start of Valet to the start of the chosen command."
   fi
@@ -57,7 +57,7 @@ function echoFileWithSubstitution() {
   local line
   local IFS=$'\n'
   while read -rd $'\n' line; do
-    line="${line/*showcase.sh:/00 00 00 0.0XXX 0.0XXX                     showcase.sh:}"
+    line="${line/*self-mock.sh:/00 00 00 0.0XXX 0.0XXX                    self-mock.sh:}"
     echo "${line}"
   done <"${file}"
 }
