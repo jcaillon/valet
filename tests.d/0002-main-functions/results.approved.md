@@ -105,7 +105,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ main::parseFunctionArguments selfTestCore2
+→ main::parseFunctionArguments selfMock2
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -113,7 +113,7 @@ parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝."
 more=(
 )
 
-→ main::parseFunctionArguments selfTestCore2 -o -2 optionValue2 arg1 more1 more2
+→ main::parseFunctionArguments selfMock2 -o -2 optionValue2 arg1 more1 more2
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 parsingErrors=""
@@ -125,7 +125,7 @@ more=(
 "more2"
 )
 
-→ main::parseFunctionArguments selfTestCore2 -o -2 optionValue2 arg1
+→ main::parseFunctionArguments selfMock2 -o -2 optionValue2 arg1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝."
@@ -135,7 +135,7 @@ firstArg="arg1"
 more=(
 )
 
-→ main::parseFunctionArguments selfTestCore2 -unknown -what optionValue2 arg
+→ main::parseFunctionArguments selfMock2 -unknown -what optionValue2 arg
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -146,7 +146,7 @@ more=(
 "arg"
 )
 
-→ main::parseFunctionArguments selfTestCore2 arg more1 more2 -o
+→ main::parseFunctionArguments selfMock2 arg more1 more2 -o
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -157,7 +157,7 @@ more=(
 "more2"
 )
 
-→ main::parseFunctionArguments selfTestCore2 -this arg more1
+→ main::parseFunctionArguments selfMock2 -this arg more1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -167,7 +167,7 @@ more=(
 "more1"
 )
 
-→ main::parseFunctionArguments selfTestCore2 --this-is-option2 --option1 arg more1
+→ main::parseFunctionArguments selfMock2 --this-is-option2 --option1 arg more1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 parsingErrors=""

@@ -3,10 +3,10 @@
 builtin source ".before-test"
 
 function testHelp() {
-  # testing to get help for the self test-core2 command
-  echo "→ valet help self test-core2"
-  ("${VALET_HOME}/valet" help self test-core2)
-  endTest "Testing help for the self test-core2 command" $?
+  # testing to get help for the self mock2 command
+  echo "→ valet help self mock2"
+  ("${VALET_HOME}/valet" help self mock2)
+  endTest "Testing help for the self mock2 command" $?
 
   # Testing to fuzzy find an help
   echo "→ valet hel s h"
@@ -31,8 +31,8 @@ function testHelp() {
 
 function testCoreShowHelp() {
   # test that we can display the help of a function using core::showHelp
-  echo "→ valet self test-core1 show-help"
-  ("${VALET_HOME}/valet" self test-core1 show-help)
+  echo "→ valet self mock1 show-help"
+  ("${VALET_HOME}/valet" self mock1 show-help)
   endTest "Testing that we can display the help of a function using core::showHelp" $?
 }
 

@@ -108,15 +108,15 @@ Exit code: `0`
 lines="l1 this is a word
 l2 very unbelievable
 l2 unbelievable
-l3 self test-core1
-l4 self test-core2
+l3 self mock1
+l4 self mock2
 l5 ublievable"
 
 → string::fuzzyMatch evle "${lines}"
 l2 very unbelievable
 
 → string::fuzzyMatch sh2 "${lines}"
-l4 self test-core2
+l4 self mock2
 
 # should prioritize lower index of u
 → string::fuzzyMatch u "${lines}"
@@ -124,7 +124,7 @@ l2 unbelievable
 
 # should be the first equal match
 → string::fuzzyMatch self "${lines}"
-l3 self test-core1
+l3 self mock1
 
 # should prioritize lower distance between letters
 → string::fuzzyMatch lubl "${lines}"

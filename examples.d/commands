@@ -57,8 +57,8 @@ _CMD_INCLUDED=1
 # CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (contains ?)
 
 
-CMD_ALL_COMMANDS=$'self\nshowcase\nhelp\nself build\nself download-binaries\nself release\nself setup\nself test\nself test-core1\nself test-core2\nself test-core3\nself update\nshowcase command1\nshowcase hello-world\nshowcase sudo-command'
-CMD_ALL_COMMANDS_ARRAY=([0]="help" [1]="self build" [2]="self download-binaries" [3]="self release" [4]="self setup" [5]="self test" [6]="self test-core1" [7]="self test-core2" [8]="self test-core3" [9]="self update" [10]="showcase command1" [11]="showcase hello-world" [12]="showcase sudo-command")
+CMD_ALL_COMMANDS=$'self\nshowcase\nhelp\nself build\nself download-binaries\nself release\nself setup\nself test\nself mock1\nself mock2\nself mock3\nself update\nshowcase command1\nshowcase hello-world\nshowcase sudo-command'
+CMD_ALL_COMMANDS_ARRAY=([0]="help" [1]="self build" [2]="self download-binaries" [3]="self release" [4]="self setup" [5]="self test" [6]="self mock1" [7]="self mock2" [8]="self mock3" [9]="self update" [10]="showcase command1" [11]="showcase hello-world" [12]="showcase sudo-command")
 CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfDownloadBinaries\nselfUpdate\nselfSetup\nselfTestCore1\nselfTestCore2\nselfTestCore3\nselfRelease\nselfTest\nshowcaseCommand1\nhelloWorld\nshowCaseSudo'
 CMD_ALL_FUNCTIONS_ARRAY=([0]="this" [1]="showCommandHelp" [2]="selfBuild" [3]="selfDownloadBinaries" [4]="selfUpdate" [5]="selfSetup" [6]="selfTestCore1" [7]="selfTestCore2" [8]="selfTestCore3" [9]="selfRelease" [10]="selfTest" [11]="showcaseCommand1" [12]="helloWorld" [13]="showCaseSudo")
 CMD_ALL_MENU_COMMANDS_ARRAY=([0]="self" [1]="showcase")
@@ -88,17 +88,17 @@ CMD_ARGUMENTS_NAME_showCommandHelp=([0]="commands?...")
 CMD_ARGUMENTS_NAME_showcaseCommand1=([0]="firstArg" [1]="more...")
 CMD_ARGUMENTS_NAME_this=([0]="commands?...")
 CMD_COMMANDS_DESCRIPTION_this=([0]="Show the help this program or of a specific command." [1]="Re-build the menu of valet from your commands." [2]="Download the required binaries for valet." [3]="Release a new version of valet." [4]="The command run after the installation of Valet to setup the tool." [5]="Test your valet custom commands." [6]="A command that only for testing valet core functions." [7]="A command that only for testing valet core functions." [8]="A command that only for testing valet core functions." [9]="Update valet using the latest release on GitHub." [10]="A showcase command that uses arguments and options." [11]="An hello world command." [12]="A command that requires sudo.")
-CMD_COMMANDS_MENU_BODY=$'help                  \tShow the help this program or of a specific command.\nself build            \tRe-build the menu of valet from your commands.\nself release          \tRelease a new version of valet.\nself setup            \tThe command run after the installation of Valet to setup the tool.\nself test             \tTest your valet custom commands.\nself test-core3       \tA command that only for testing valet core functions.\nself update           \tUpdate valet using the latest release on GitHub.\nshowcase command1     \tA showcase command that uses arguments and options.\nshowcase hello-world  \tAn hello world command.\nshowcase sudo-command \tA command that requires sudo.'
-CMD_COMMANDS_NAME_this=([0]="help" [1]="self build" [2]="self download-binaries" [3]="self release" [4]="self setup" [5]="self test" [6]="self test-core1" [7]="self test-core2" [8]="self test-core3" [9]="self update" [10]="showcase command1" [11]="showcase hello-world" [12]="showcase sudo-command")
+CMD_COMMANDS_MENU_BODY=$'help                  \tShow the help this program or of a specific command.\nself build            \tRe-build the menu of valet from your commands.\nself release          \tRelease a new version of valet.\nself setup            \tThe command run after the installation of Valet to setup the tool.\nself test             \tTest your valet custom commands.\nself mock3       \tA command that only for testing valet core functions.\nself update           \tUpdate valet using the latest release on GitHub.\nshowcase command1     \tA showcase command that uses arguments and options.\nshowcase hello-world  \tAn hello world command.\nshowcase sudo-command \tA command that requires sudo.'
+CMD_COMMANDS_NAME_this=([0]="help" [1]="self build" [2]="self download-binaries" [3]="self release" [4]="self setup" [5]="self test" [6]="self mock1" [7]="self mock2" [8]="self mock3" [9]="self update" [10]="showcase command1" [11]="showcase hello-world" [12]="showcase sudo-command")
 CMD_COMMAND_helloWorld="showcase hello-world"
 CMD_COMMAND_selfBuild="self build"
 CMD_COMMAND_selfDownloadBinaries="self download-binaries"
 CMD_COMMAND_selfRelease="self release"
 CMD_COMMAND_selfSetup="self setup"
 CMD_COMMAND_selfTest="self test"
-CMD_COMMAND_selfTestCore1="self test-core1"
-CMD_COMMAND_selfTestCore2="self test-core2"
-CMD_COMMAND_selfTestCore3="self test-core3"
+CMD_COMMAND_selfTestCore1="self mock1"
+CMD_COMMAND_selfTestCore2="self mock2"
+CMD_COMMAND_selfTestCore3="self mock3"
 CMD_COMMAND_selfUpdate="self update"
 CMD_COMMAND_showCaseSudo="showcase sudo-command"
 CMD_COMMAND_showCommandHelp="help"
@@ -123,7 +123,7 @@ CMD_EXAMPLES_DESCRIPTION_selfTestCore2=([0]=$'Call command1 with option1, option
 CMD_EXAMPLES_DESCRIPTION_showCommandHelp=([0]="Shows the help for the command ⌜cmd⌝" [1]="Shows the help for the sub command ⌜subCmd⌝ of the command ⌜cmd⌝" [2]=$'Shows the help for the program without any color and with a maximum of 50 columns\n')
 CMD_EXAMPLES_DESCRIPTION_showcaseCommand1=([0]=$'Call command1 with option1, option2 and some arguments.\n')
 CMD_EXAMPLES_DESCRIPTION_this=([0]="Displays this help text." [1]=$'Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.\n')
-CMD_EXAMPLES_NAME_selfTestCore2=([0]="self test-core2 -o -2 value1 arg1 more1 more2")
+CMD_EXAMPLES_NAME_selfTestCore2=([0]="self mock2 -o -2 value1 arg1 more1 more2")
 CMD_EXAMPLES_NAME_showCommandHelp=([0]="help cmd" [1]="help cmd subCmd" [2]="help --no-colors --columns 50")
 CMD_EXAMPLES_NAME_showcaseCommand1=([0]="showcase command1 -o -2 value1 arg1 more1 more2")
 CMD_EXAMPLES_NAME_this=([0]="--help" [1]="-v a-command and-sub-command")

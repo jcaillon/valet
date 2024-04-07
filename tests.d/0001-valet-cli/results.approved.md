@@ -2,14 +2,14 @@
 
 ## Test script 01.command-help
 
-### Testing help for the self test-core2 command
+### Testing help for the self mock2 command
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ valet help self test-core2
+→ valet help self mock2
 ABOUT
 
   An example of description.
@@ -20,7 +20,7 @@ ABOUT
 
 USAGE
 
-  valet self test-core2 [options] <firstArg> <more...>
+  valet self mock2 [options] <firstArg> <more...>
 
 OPTIONS
 
@@ -41,7 +41,7 @@ ARGUMENTS
 
 EXAMPLES
 
-  self test-core2 -o -2 value1 arg1 more1 more2
+  self mock2 -o -2 value1 arg1 more1 more2
       Call command1 with option1, option2 and some arguments.
       
 
@@ -74,18 +74,18 @@ COMMANDS
       Re-build the menu of valet from your commands.
   self download-binaries
       Download the required binaries for valet.
+  self mock1
+      A command that only for testing valet core functions.
+  self mock2
+      A command that only for testing valet core functions.
+  self mock3
+      A command that only for testing valet core functions.
   self release
       Release a new version of valet.
   self setup
       The command run after the installation of Valet to setup the tool.
   self test
       Test your valet custom commands.
-  self test-core1
-      A command that only for testing valet core functions.
-  self test-core2
-      A command that only for testing valet core functions.
-  self test-core3
-      A command that only for testing valet core functions.
   self update
       Update valet using the latest release on GitHub.
 
@@ -261,18 +261,18 @@ COMMANDS
       Re-build the menu of valet from your commands.
   self download-binaries
       Download the required binaries for valet.
+  self mock1
+      A command that only for testing valet core functions.
+  self mock2
+      A command that only for testing valet core functions.
+  self mock3
+      A command that only for testing valet core functions.
   self release
       Release a new version of valet.
   self setup
       The command run after the installation of Valet to setup the tool.
   self test
       Test your valet custom commands.
-  self test-core1
-      A command that only for testing valet core functions.
-  self test-core2
-      A command that only for testing valet core functions.
-  self test-core3
-      A command that only for testing valet core functions.
   self update
       Update valet using the latest release on GitHub.
 
@@ -293,14 +293,14 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core1 show-help
+→ valet self mock1 show-help
 ABOUT
 
   Show a menu with sub commands for the current command.
 
 USAGE
 
-  valet selfTestCore1 [options]
+  valet selfMock1 [options]
 
 OPTIONS
 
@@ -318,7 +318,7 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core1 non-existing-option nonNeededArg1 -derp anotherArg
+→ valet self mock1 non-existing-option nonNeededArg1 -derp anotherArg
 ```
 
 **Error** output:
@@ -327,7 +327,7 @@ Exit code: `1`
 ERROR    Expecting 1 argument(s), got extra argument ⌜nonNeededArg1⌝.
 Unknown option ⌜-derp⌝.
 Expecting 1 argument(s), got extra argument ⌜anotherArg⌝.
-Use valet self test-core1 --help to get help.
+Use valet self mock1 --help to get help.
 ```
 
 ### Testing that a command with sudo ask for sudo privileges
@@ -337,7 +337,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core3
+→ valet self mock3
 ```
 
 **Error** output:
@@ -357,15 +357,15 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core1 error
+→ valet self mock1 error
 ```
 
 **Error** output:
 
 ```log
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
-ERROR    Error code 1 in selfTestCore1(), stack:
-├─ In function selfTestCore1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+ERROR    Error code 1 in selfMock1(), stack:
+├─ In function selfMock1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
 ├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
 ├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
 └─ In function main() $VALET_HOME/valet:XXX
@@ -378,7 +378,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core1 exit
+→ valet self mock1 exit
 ```
 
 **Error** output:
@@ -387,7 +387,7 @@ Exit code: `0`
 WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
-├─ In function selfTestCore1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ In function selfMock1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
 ├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
 ├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
 └─ In function main() $VALET_HOME/valet:XXX
@@ -400,7 +400,7 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core1 fail
+→ valet self mock1 fail
 ```
 
 **Error** output:
@@ -416,7 +416,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core1 unknown-command
+→ valet self mock1 unknown-command
 ```
 
 **Error** output:
@@ -425,8 +425,8 @@ Exit code: `0`
 WARNING  This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle.
 ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
-ERROR    Error code 1 in selfTestCore1(), stack:
-├─ In function selfTestCore1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+ERROR    Error code 1 in selfMock1(), stack:
+├─ In function selfMock1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
 ├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
 ├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
 └─ In function main() $VALET_HOME/valet:XXX
@@ -470,7 +470,6 @@ self build            	Re-build the menu of valet from your commands.
 self release          	Release a new version of valet.
 self setup            	The command run after the installation of Valet to setup the tool.
 self test             	Test your valet custom commands.
-self test-core3       	A command that only for testing valet core functions.
 self update           	Update valet using the latest release on GitHub.⌉
 ```
 
@@ -483,7 +482,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_LOG_LEVEL=success valet self test-core1 logging-level
+→ VALET_LOG_LEVEL=success valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -501,7 +500,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet --log-level warning self test-core1 logging-level
+→ valet --log-level warning self mock1 logging-level
 ```
 
 **Error** output:
@@ -518,7 +517,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet -v self test-core1 logging-level
+→ valet -v self mock1 logging-level
 ```
 
 **Error** output:
@@ -526,10 +525,10 @@ Exit code: `0`
 ```log
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Command found ⌜self test-core1⌝.
-DEBUG    Function name found ⌜selfTestCore1⌝.
+DEBUG    Command found ⌜self mock1⌝.
+DEBUG    Function name found ⌜selfMock1⌝.
 DEBUG    Loaded file ⌜$VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
-DEBUG    Running the command ⌜self test-core1⌝ with the function ⌜selfTestCore1⌝ and the arguments ⌜logging-level⌝.
+DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
 local parsingErrors help action
 parsingErrors=""
@@ -551,7 +550,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core1 logging-level
+→ valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -574,7 +573,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true valet self test-core1 logging-level
+→ VALET_NO_COLOR=true valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -597,7 +596,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_CI_MODE=true valet self test-core1 logging-level
+→ VALET_NO_COLOR=true VALET_CI_MODE=true valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -616,7 +615,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_NO_TIMESTAMP=true valet self test-core1 logging-level
+→ VALET_NO_COLOR=true VALET_NO_TIMESTAMP=true valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -639,7 +638,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_NO_ICON=true valet self test-core1 logging-level
+→ VALET_NO_COLOR=true VALET_NO_ICON=true valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -662,7 +661,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_NO_WRAP=true valet self test-core1 logging-level
+→ VALET_NO_COLOR=true VALET_NO_WRAP=true valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -681,7 +680,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_LOG_COLUMNS=80 valet self test-core1 logging-level
+→ VALET_NO_COLOR=true VALET_LOG_COLUMNS=80 valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -737,7 +736,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self test-core1 create-temp-files
+→ valet self mock1 create-temp-files
 ```
 
 **Error** output:
@@ -756,12 +755,12 @@ WARNING  This is a custom clean up function.
 
 ### Testing with a non existing user directory
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 
 ```plaintext
-→ VALET_USER_DIRECTORY=non-existing self test-core1 logging-level
+→ VALET_USER_DIRECTORY=non-existing self mock1 logging-level
 ```
 
 **Error** output:
@@ -771,10 +770,8 @@ WARNING  The valet user directory ⌜$VALET_HOME/non-existing⌝ does not contai
 To get started with valet, you must build your command list using the ⌜valet self build⌝ command.
 Please check the help using ⌜valet self build --help⌝ for details.
 Now using the examples commands from ⌜$VALET_HOME/examples.d⌝.
-INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-SUCCESS  This is a success message.
-WARNING  This is a warning message.
-With a second line.
+INFO     Fuzzy matching the command ⌜self mock1⌝ to ⌜self mock1⌝.
+ERROR    Could not find a command for ⌜self mock1⌝.
 ```
 
 ## Test script 08.submenu
@@ -839,7 +836,6 @@ Please select the command to run.
 self release          	Release a new version of valet.
 self setup            	The command run after the installation of Valet to setup the tool.
 self test             	Test your valet custom commands.
-self test-core3       	A command that only for testing valet core functions.
 self update           	Update valet using the latest release on GitHub.⌉
 ```
 
@@ -870,18 +866,18 @@ COMMANDS
       Re-build the menu of valet from your commands.
   self download-binaries
       Download the required binaries for valet.
+  self mock1
+      A command that only for testing valet core functions.
+  self mock2
+      A command that only for testing valet core functions.
+  self mock3
+      A command that only for testing valet core functions.
   self release
       Release a new version of valet.
   self setup
       The command run after the installation of Valet to setup the tool.
   self test
       Test your valet custom commands.
-  self test-core1
-      A command that only for testing valet core functions.
-  self test-core2
-      A command that only for testing valet core functions.
-  self test-core3
-      A command that only for testing valet core functions.
   self update
       Update valet using the latest release on GitHub.
 

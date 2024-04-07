@@ -32,8 +32,8 @@ function testString::fuzzyMatch() {
   local lines="l1 this is a word
 l2 very unbelievable
 l2 unbelievable
-l3 self test-core1
-l4 self test-core2
+l3 self mock1
+l4 self mock2
 l5 ublievable"
 
   echo "lines=\"${lines}\""

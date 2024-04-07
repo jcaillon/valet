@@ -13,16 +13,16 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet -x self test-core2 arg1 arg2
+→ valet -x self mock2 arg1 arg2
 
 → cat 'profiler.log'
 That's it!
 (D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)
 
 D  I  S  timer  delta                           source:line function                                 → command
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:154  selfTestCore2()                          → local -a more
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:155  selfTestCore2()                          → core::parseArguments arg1 arg2
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:155  selfTestCore2()                          → eval 'local parsingErrors option1 thisIsOption2 help firstArg
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:154  selfMock2()                              → local -a more
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:155  selfMock2()                              → core::parseArguments arg1 arg2
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:155  selfMock2()                              → eval 'local parsingErrors option1 thisIsOption2 help firstArg
                                                                                                        local -a more
                                                                                                        thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
                                                                                                        parsingErrors=""
@@ -30,20 +30,20 @@ D  I  S  timer  delta                           source:line function            
                                                                                                        more=(
                                                                                                        "arg2"
                                                                                                        )'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:155  selfTestCore2()                          → local parsingErrors option1 thisIsOption2 help firstArg
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:156  selfTestCore2()                          → local -a more
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:157  selfTestCore2()                          → thisIsOption2=
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:158  selfTestCore2()                          → parsingErrors=
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:159  selfTestCore2()                          → firstArg=arg1
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:162  selfTestCore2()                          → more=("arg2")
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:156  selfTestCore2()                          → core::checkParseResults '' ''
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:158  selfTestCore2()                          → log::info 'First argument: arg1.'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:159  selfTestCore2()                          → log::info 'Option 1: .'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:160  selfTestCore2()                          → log::info 'Option 2: .'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:161  selfTestCore2()                          → log::info 'More: arg2.'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:163  selfTestCore2()                          → aSubFunctionInSelfTestCore2
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  aSubFunctionInSelfTestCore2()            → log::debug 'This is a sub function.'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:165  selfTestCore2()                          → echo 'That'\''s it!'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:155  selfMock2()                              → local parsingErrors option1 thisIsOption2 help firstArg
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:156  selfMock2()                              → local -a more
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:157  selfMock2()                              → thisIsOption2=
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:158  selfMock2()                              → parsingErrors=
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:159  selfMock2()                              → firstArg=arg1
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:162  selfMock2()                              → more=("arg2")
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:156  selfMock2()                              → core::checkParseResults '' ''
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:158  selfMock2()                              → log::info 'First argument: arg1.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:159  selfMock2()                              → log::info 'Option 1: .'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:160  selfMock2()                              → log::info 'Option 2: .'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:161  selfMock2()                              → log::info 'More: arg2.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:163  selfMock2()                              → aSubFunctionInselfMock2
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  aSubFunctionInselfMock2()                → log::debug 'This is a sub function.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:165  selfMock2()                              → echo 'That'\''s it!'
 ```
 
 **Error** output:
@@ -64,7 +64,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_STARTUP_PROFILING=true valet --log-level error -x self test-core1 logging-level
+→ VALET_STARTUP_PROFILING=true valet --log-level error -x self mock1 logging-level
 A startup profiling file has been created to log everything happening from the start of Valet to the start of the chosen command.
 A command profiling file has been created to log everything happening in the chosen command execution.
 ```

@@ -18,13 +18,13 @@ fi
 # --- END OF COMMAND COMMON PART
 
 #===============================================================
-# >>> command: self test-core1
+# >>> command: self mock1
 #===============================================================
 
 : "---
-command: self test-core1
+command: self mock1
 hideInMenu: true
-function: selfTestCore1
+function: selfMock1
 author: github.com/jcaillon
 shortDescription: A command that only for testing valet core functions.
 description: |-
@@ -44,7 +44,7 @@ arguments:
     - wait-indefinitely
     - show-help
 ---"
-function selfTestCore1() {
+function selfMock1() {
   core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
@@ -115,13 +115,13 @@ function returnOne() { return 1; }
 
 
 #===============================================================
-# >>> command: self test-core1
+# >>> command: self mock1
 #===============================================================
 
 : "---
-command: self test-core2
+command: self mock2
 hideInMenu: true
-function: selfTestCore2
+function: selfMock2
 author: github.com/jcaillon
 shortDescription: A command that only for testing valet core functions.
 description: |-
@@ -146,11 +146,11 @@ options:
   description: |-
     An option with a value.
 examples:
-- name: self test-core2 -o -2 value1 arg1 more1 more2
+- name: self mock2 -o -2 value1 arg1 more1 more2
   description: |-
     Call command1 with option1, option2 and some arguments.
 ---"
-function selfTestCore2() {
+function selfMock2() {
   local -a more
   core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
@@ -160,22 +160,23 @@ function selfTestCore2() {
   log::info "Option 2: ${thisIsOption2:-}."
   log::info "More: ${more[*]}."
 
-  aSubFunctionInSelfTestCore2
+  aSubFunctionInselfMock2
 
   echo "That's it!"
 }
 
-function aSubFunctionInSelfTestCore2() {
+function aSubFunctionInselfMock2() {
   # this is mainly to demonstrate the profiler
   log::debug "This is a sub function."
 }
 
 #===============================================================
-# >>> command: self test-core3
+# >>> command: self mock3
 #===============================================================
 : "---
-command: self test-core3
-function: selfTestCore3
+command: self mock3
+hideInMenu: true
+function: selfMock3
 sudo: true
 shortDescription: A command that only for testing valet core functions.
 description: |-
@@ -183,7 +184,7 @@ description: |-
 
   If so, it will require the user to enter the sudo password and use sudo inside the command
 ---"
-function selfTestCore3() {
+function selfMock3() {
   core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
