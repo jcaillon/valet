@@ -165,8 +165,6 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 
 ## 🔭 Roadmap
 
-- Replace include by source so we can keep using shellcheck directive. Use builtin source "$@" in case it is needed.
-- Prefix function with the lib. E.g. string::wrapText.
 - Document everything. Document test.
 - Add support for interactive mode.
 - Replace fzf menu with equivalent pure bash menu.

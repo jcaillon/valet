@@ -45,67 +45,67 @@ arguments:
     - show-help
 ---"
 function selfTestCore1() {
-  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
-  checkParseResults "${help:-}" "${parsingErrors:-}"
+  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   case "${action:-}" in
   error)
-    warn "This is for testing valet core functions, the next statement will return 1 and create an error."
+    log::warning "This is for testing valet core functions, the next statement will return 1 and create an error."
     returnOne
     ;;
   fail)
-    fail "This is for testing valet core functions, failing now."
+    log::error "This is for testing valet core functions, failing now."
     ;;
   exit)
     # shellcheck disable=SC2317
     function onExit() {
-      warn "This is a custom on exit function."
+      log::warning "This is a custom on exit function."
     }
-    warn "This is for testing valet core functions, exiting with code 5."
+    log::warning "This is for testing valet core functions, exiting with code 5."
     exit 5
     ;;
   unknown-command)
-    warn "This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle."
+    log::warning "This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle."
     thisIsAnUnknownCommandForTesting
     ;;
   create-temp-files)
     # shellcheck disable=SC2317
     function cleanUp() {
-      warn "This is a custom clean up function."
+      log::warning "This is a custom clean up function."
     }
     local tmp1 tmp2 tmp3 tmp4
-    createTempFile && tmp1="${LAST_RETURNED_VALUE}"
-    createTempFile && tmp2="${LAST_RETURNED_VALUE}"
-    createTempDirectory && tmp3="${LAST_RETURNED_VALUE}"
-    createTempDirectory && tmp4="${LAST_RETURNED_VALUE}"
-    inform "Created temp file: ${tmp1}."
-    inform "Created temp file: ${tmp2}."
-    inform "Created temp directory: ${tmp3}."
-    inform "Created temp directory: ${tmp4}."
+    io::createTempFile && tmp1="${LAST_RETURNED_VALUE}"
+    io::createTempFile && tmp2="${LAST_RETURNED_VALUE}"
+    io::createTempDirectory && tmp3="${LAST_RETURNED_VALUE}"
+    io::createTempDirectory && tmp4="${LAST_RETURNED_VALUE}"
+    log::info "Created temp file: ${tmp1}."
+    log::info "Created temp file: ${tmp2}."
+    log::info "Created temp directory: ${tmp3}."
+    log::info "Created temp directory: ${tmp4}."
     # activating debug log to see the cleanup
-    setLogLevel "debug"
+    log::setLevel "debug"
     ;;
   logging-level)
-    debug "This is a debug message."
-    inform "This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out."
-    succeed "This is a success message."
-    warn "This is a warning message."$'\n'"With a second line."
-    if isDebugEnabled; then
+    log::debug "This is a debug message."
+    log::info "This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out."
+    log::success "This is a success message."
+    log::warning "This is a warning message."$'\n'"With a second line."
+    if log::isDebugEnabled; then
       echo "The debug mode is activated!" 1>&2
     fi
     ;;
   wait-indefinitely)
-    inform "This is for testing valet core functions, waiting indefinitely."
+    log::info "This is for testing valet core functions, waiting indefinitely."
     while true; do
       # sleep for 1s
       read -rt 1 <> <(:) || :
     done
     ;;
   show-help)
-    showHelp
+    core::showHelp
     ;;
   *)
-    warn "This is for testing valet core functions, running the tests."
+    log::warning "This is for testing valet core functions, running the tests."
     ;;
   esac
 }
@@ -152,13 +152,13 @@ examples:
 ---"
 function selfTestCore2() {
   local -a more
-  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
-  checkParseResults "${help:-}" "${parsingErrors:-}"
+  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  inform "First argument: ${firstArg:-}."
-  inform "Option 1: ${option1:-}."
-  inform "Option 2: ${thisIsOption2:-}."
-  inform "More: ${more[*]}."
+  log::info "First argument: ${firstArg:-}."
+  log::info "Option 1: ${option1:-}."
+  log::info "Option 2: ${thisIsOption2:-}."
+  log::info "More: ${more[*]}."
 
   aSubFunctionInSelfTestCore2
 
@@ -167,7 +167,7 @@ function selfTestCore2() {
 
 function aSubFunctionInSelfTestCore2() {
   # this is mainly to demonstrate the profiler
-  debug "This is a sub function."
+  log::debug "This is a sub function."
 }
 
 #===============================================================
@@ -184,8 +184,8 @@ description: |-
   If so, it will require the user to enter the sudo password and use sudo inside the command
 ---"
 function selfTestCore3() {
-  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
-  checkParseResults "${help:-}" "${parsingErrors:-}"
+  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   ${SUDO} whoami
 }

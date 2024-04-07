@@ -33,9 +33,9 @@ _TEST_0000_COMMON_UTILS=1
 
 
 # override the local state and config directories to return temp directories
-createTempDirectory
+io::createTempDirectory
 export VALET_LOCAL_STATE_DIRECTORY="${LAST_RETURNED_VALUE}"
-createTempDirectory
+io::createTempDirectory
 export VALET_CONFIG_DIRECTORY="${LAST_RETURNED_VALUE}"
 
 function echoTempFileWithTimeStampSubstitution() {
@@ -55,7 +55,10 @@ function echoTempFileWithLineNumberSubstitution() {
   local IFS=$'\n'
   while read -rd $'\n' line; do
     if [[ ${line} =~ :[0-9]{1,}$ ]]; then
-      line="${line/%:*/:XXX}"
+      line="${line/%:?/:XXX}"
+      line="${line/%:??/:XXX}"
+      line="${line/%:???/:XXX}"
+      line="${line/%:????/:XXX}"
     fi
     echo "${line}"
   done <"${file}"

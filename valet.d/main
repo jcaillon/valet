@@ -17,45 +17,45 @@ fi
 # >>> Event handling
 #===============================================================
 
-function onErrorInternal() {
+function main::onErrorInternal() {
   if [[ ${ERROR_DISPLAY:-0} == "1" ]]; then
     return 0
   fi
-  getStack 2 && local stack="${LAST_RETURNED_VALUE}"
-  logLine "ERROR" $'\uf2d3' "ERROR" "Error code ${1} in ${FUNCNAME[1]}(), stack:${stack}"
+  log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
+  log::print "ERROR" $'\uf2d3' "ERROR" "Error code ${1} in ${FUNCNAME[1]}(), stack:${stack}"
   ERROR_DISPLAY=1
 }
 
-trap 'onErrorInternal $?' ERR
+trap 'main::onErrorInternal $?' ERR
 
-function onExitInternal() {
+function main::onExitInternal() {
   local rc=$?
 
   # disable the profiler is still on
-  if [[ ${PROFILING:-} == "1" ]]; then disableProfiler; fi
+  if [[ ${PROFILING:-} == "1" ]]; then main::disableProfiler; fi
 
-  debug "Exiting with code ${rc} after ${SECONDS}s."
+  log::debug "Exiting with code ${rc} after ${SECONDS}s."
   if command -v onExit 1>/dev/null 2>&1; then
     onExit
   fi
   # always call cleanUp before exiting
-  onCleanUpInternal
+  main::onCleanUpInternal
   if [[ "${ERROR_DISPLAY:-0}" != "1" && "${rc}" != "0" ]]; then
-    getStack 2 && local stack="${LAST_RETURNED_VALUE}"
-    logLine "ERROR" $'\uf14c' "EXIT" "Exiting with code ${rc}, stack:${stack}"
+    log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
+    log::print "ERROR" $'\uf14c' "EXIT" "Exiting with code ${rc}, stack:${stack}"
     ERROR_DISPLAY=1
   fi
 }
 
-trap onExitInternal EXIT
+trap main::onExitInternal EXIT
 
-function onInterruptInternal() {
+function main::onInterruptInternal() {
   echo # Set cursor to the next line of '^C'
-  logLine "WARNING" $'\uf256' "STOPPED" "Program interrupted by the user."
+  log::print "WARNING" $'\uf256' "STOPPED" "Program interrupted by the user."
 
-  if isDebugEnabled; then
-    getStack 2 && local stack="${LAST_RETURNED_VALUE}"
-    debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:${stack}"
+  if log::isDebugEnabled; then
+    log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
+    log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:${stack}"
   fi
 
   # check if the function exists
@@ -69,10 +69,10 @@ function onInterruptInternal() {
 }
 
 # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
-trap onInterruptInternal SIGINT SIGQUIT
+trap main::onInterruptInternal SIGINT SIGQUIT
 
-function onTerminateInternal() {
-  logLine "ERROR" $'\uf05e' "KILLED" "Program killed."
+function main::onTerminateInternal() {
+  log::print "ERROR" $'\uf05e' "KILLED" "Program killed."
   # check if the function exists
   if command -v onTerminate 1>/dev/null 2>&1; then
     if onTerminate; then
@@ -84,10 +84,10 @@ function onTerminateInternal() {
 }
 
 # Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
-trap onTerminateInternal SIGHUP SIGTERM
+trap main::onTerminateInternal SIGHUP SIGTERM
 
-function onCleanUpInternal() {
-  cleanupTempFiles
+function main::onCleanUpInternal() {
+  io::cleanupTempFiles
   if command -v cleanUp 1>/dev/null 2>&1; then
     cleanUp
   fi
@@ -96,12 +96,12 @@ function onCleanUpInternal() {
 # Introducing our own function to handle commands not found, so we can display a better message
 function command_not_found_handle() {
   if [[ ${1:-} == "fzf" ]]; then
-    fail "This program requires ⌜https://github.com/junegunn/fzf⌝ to display interactive prompt."$'\n'"Install fzf or pass the correct options and arguments. See --help for more information."
+    log::error "This program requires ⌜https://github.com/junegunn/fzf⌝ to display interactive prompt."$'\n'"Install fzf or pass the correct options and arguments. See --help for more information."
   fi
   if [[ ${1:-} == "curl" ]]; then
-    fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
+    log::error "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
   fi
-  fail "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
+  log::error "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
 }
 
 #===============================================================
@@ -111,8 +111,8 @@ function command_not_found_handle() {
 # $1: the file to write to
 #
 # Usage:
-#   enableProfiler "${HOME}/profile_valet.txt"
-function enableProfiler() {
+#   main::enableProfiler "${HOME}/profile_valet.txt"
+function main::enableProfiler() {
   local file
   file="${1}"
 
@@ -124,9 +124,9 @@ function enableProfiler() {
   mkdir -p "${file%/*}"
   : "${file}"
 
-  inform "Starting profiler, writing in ⌜${file}⌝. ${FUNCNAME[3]:-}"
+  log::info "Starting profiler, writing in ⌜${file}⌝. ${FUNCNAME[3]:-}"
 
-  # we can only get the function depth if we call the enableProfiler from a function
+  # we can only get the function depth if we call the main::enableProfiler from a function
   if [[ -n "${FUNCNAME[3]:-}" ]]; then
     functionDepthExpression='${#FUNCNAME[@]}'
   else
@@ -146,23 +146,23 @@ function enableProfiler() {
 # Disable the profiler.
 #
 # Usage:
-#   disableProfiler
-function disableProfiler() {
-  inform "Disabling profiler."
+#   main::disableProfiler
+function main::disableProfiler() {
+  log::info "Disabling profiler."
   set +x
   unset BASH_XTRACEFD
   exec 5>&-
   unset PS4
   unset PROFILING
-  cleanProfilerFile
+  main::cleanProfilerFile
 }
 
 # Allows to pretty format the profiler file and remove stuff the user does not need.
 #
 # Usage:
-#   cleanProfilerFile
-function cleanProfilerFile() {
-  createTempFile && local newProfilerFile="${LAST_RETURNED_VALUE}"
+#   main::cleanProfilerFile
+function main::cleanProfilerFile() {
+  io::createTempFile && local newProfilerFile="${LAST_RETURNED_VALUE}"
 
   local timePrecision=${EPOCHREALTIME#*.}
   timePrecision=${#timePrecision}
@@ -181,7 +181,7 @@ function cleanProfilerFile() {
   # we do this one in awk for now because it was a good place to learn awk
   # TODO: could be replaced with bash later but im not sure how to do decimal math in bash
   if ! command -v awk 1>/dev/null 2>&1; then
-    warn "The awk command is required to clean the profiler file. It was not found on the PATH so we skip the cleaning."
+    log::warning "The awk command is required to clean the profiler file. It was not found on the PATH so we skip the cleaning."
     return 0
   fi
 
@@ -248,7 +248,7 @@ function cleanProfilerFile() {
 }
 
 if [[ ${VALET_STARTUP_PROFILING:-} == "true" ]]; then
-  enableProfiler "${VALET_STARTUP_PROFILING_FILE:-${HOME}/profile_valet.txt}"
+  main::enableProfiler "${VALET_STARTUP_PROFILING_FILE:-${HOME}/profile_valet.txt}"
 fi
 
 #===============================================================
@@ -263,8 +263,8 @@ fi
 # $4: the maximum columns for the help text.
 #
 # Usage:
-#   printHelp function "this" "${VALET_NO_COLOR:-false}" "${_COLUMNS}"
-function printHelp() {
+#   main::printHelp function "this" "${VALET_NO_COLOR:-false}" "${_COLUMNS}"
+function main::printHelp() {
   local type=${1:-function}
   local name="${2:-this}"
   local noColor="${3:-${VALET_NO_COLOR:-false}}"
@@ -321,7 +321,7 @@ function printHelp() {
   local -n functionExamples="CMD_EXAMPLES_NAME_${functionName}"
 
   # description
-  wrapText "${description}" "${helpWidth}" 2 "true"
+  string::wrapText "${description}" "${helpWidth}" 2 "true"
   description="${LAST_RETURNED_VALUE}"
 
   # usage
@@ -347,14 +347,14 @@ function printHelp() {
       done
     fi
   fi
-  wrapText "${usage}" "${helpWidth}" 2 "true"
+  string::wrapText "${usage}" "${helpWidth}" 2 "true"
   usage="${LAST_RETURNED_VALUE}"
 
   # options
   local options
   if [[ -n "${functionOptions:-}" ]]; then
     options="${cTitle}OPTIONS${cDefault}"$'\n'$'\n'
-    writeAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
+    main::writeAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
     options+="${LAST_RETURNED_VALUE}"$'\n'
   fi
 
@@ -362,7 +362,7 @@ function printHelp() {
   local arguments
   if [[ -z "${functionCommands:-}" && -n "${functionArguments:-}" ]]; then
     arguments="${cTitle}ARGUMENTS${cDefault}"$'\n'$'\n'
-    writeAsTable "${helpWidth}" "${cArgument}" "CMD_ARGUMENTS" "${functionName}"
+    main::writeAsTable "${helpWidth}" "${cArgument}" "CMD_ARGUMENTS" "${functionName}"
     arguments+="${LAST_RETURNED_VALUE}"$'\n'
   fi
 
@@ -370,7 +370,7 @@ function printHelp() {
   local commands
   if [[ -n "${functionCommands:-}" ]]; then
     commands="${cTitle}COMMANDS${cDefault}"$'\n'$'\n'
-    writeAsTable "${helpWidth}" "${cCommand}" "CMD_COMMANDS" "${functionName}"
+    main::writeAsTable "${helpWidth}" "${cCommand}" "CMD_COMMANDS" "${functionName}"
     commands+="${LAST_RETURNED_VALUE}"$'\n'
   fi
 
@@ -378,7 +378,7 @@ function printHelp() {
   local examples
   if [[ -n "${functionExamples:-}" ]]; then
     examples="${cTitle}EXAMPLES${cDefault}"$'\n'$'\n'
-    writeAsTable "${helpWidth}" "" "CMD_EXAMPLES" "${functionName}"
+    main::writeAsTable "${helpWidth}" "" "CMD_EXAMPLES" "${functionName}"
     examples+="${LAST_RETURNED_VALUE}"$'\n'
   fi
 
@@ -406,7 +406,7 @@ ${options:-}${arguments:-}${commands:-}${examples:-}"
 #   text1
 #           text2
 # text1 can be showed in color and we respect a maximum width
-function writeAsTable() {
+function main::writeAsTable() {
   local width color prefix functionName
   width="${1}"
   color="${2}"
@@ -421,10 +421,10 @@ function writeAsTable() {
 
   output=""
   for index in "${!names[@]}"; do
-    wrapText "${names[${index}]}" "${helpWidth}" 2 "true"
+    string::wrapText "${names[${index}]}" "${helpWidth}" 2 "true"
     output+="${color}${LAST_RETURNED_VALUE}${cDefault:-}"$'\n'
 
-    wrapText "${descriptions[${index}]}" "${helpWidth}" 6 "true"
+    string::wrapText "${descriptions[${index}]}" "${helpWidth}" 6 "true"
     output+="${LAST_RETURNED_VALUE}"$'\n'
   done
 
@@ -467,29 +467,29 @@ examples:
 function showCommandHelp() {
   local -a commands
   local parsingErrors help columns noColors help
-  parseFunctionArguments "${FUNCNAME[0]}" "$@"
+  main::parseFunctionArguments "${FUNCNAME[0]}" "$@"
   eval "${LAST_RETURNED_VALUE}"
 
-  checkParseResults "${help:-}" "${parsingErrors:-}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   # show the program help if no commands are provided
   if [[ ${#commands[@]} -eq 0 ]]; then
-    printHelp function "this" "${noColors:-}" "${columns:-}"
+    main::printHelp function "this" "${noColors:-}" "${columns:-}"
     return 0
   fi
 
   local functionName exactCommand
-  fuzzyMatchCommandtoFunctionName "${commands[@]}"
+  main::fuzzyMatchCommandtoFunctionName "${commands[@]}"
   functionName="${LAST_RETURNED_VALUE:-}"
   exactCommand="${LAST_RETURNED_VALUE3:-}"
   if [[ -z "${functionName}" ]]; then
-    fail "Could not show the help because the command ⌜${commands[*]}⌝ does not exist."
+    log::error "Could not show the help because the command ⌜${commands[*]}⌝ does not exist."
   fi
 
   if [[ ${functionName} == "_menu" ]]; then
-    printHelp menu "${exactCommand}" "${noColors:-}" "${columns:-}"
+    main::printHelp menu "${exactCommand}" "${noColors:-}" "${columns:-}"
   else
-    printHelp function "${functionName}" "${noColors:-}" "${columns:-}"
+    main::printHelp function "${functionName}" "${noColors:-}" "${columns:-}"
   fi
 }
 
@@ -498,7 +498,7 @@ function showCommandHelp() {
 #===============================================================
 
 # parse the user arguments for the main program.
-function parseMainArguments() {
+function main::parseMainArguments() {
   local -a commands=()
   local -a subCommandArgs=()
 
@@ -523,25 +523,25 @@ function parseMainArguments() {
       ;;
     -l | --log | --log-level)
       shift
-      setLogLevel "${1}"
+      log::setLevel "${1}"
       ;;
     -v | --verbose)
-      setLogLevel "debug"
+      log::setLevel "debug"
       ;;
     --version)
       cat "${VALET_HOME}/valet.d/version"
       exit 0
       ;;
     -h | --help)
-      printHelp function "this"
+      main::printHelp function "this"
       exit 0
       ;;
     -*)
       local fuzzyOption options
       options="${CMD_OPTIONS_NAME_this[*]%<*}"
       options="${options//,/}"
-      fuzzyFindOption "${options}" "${1}" && fuzzyOption="${LAST_RETURNED_VALUE:-}"
-      fail "Unknown option ⌜${1}⌝${fuzzyOption})."
+      main::fuzzyFindOption "${options}" "${1}" && fuzzyOption="${LAST_RETURNED_VALUE:-}"
+      log::error "Unknown option ⌜${1}⌝${fuzzyOption})."
       ;;
     *)
       commands+=("${1}")
@@ -558,30 +558,30 @@ function parseMainArguments() {
     shift
   done
 
-  debug "Command found ⌜${commands[*]}⌝."
+  log::debug "Command found ⌜${commands[*]}⌝."
 
   if [[ ${#commands[@]} -eq 0 ]]; then
     # no command provided, we show the commands menu
-    showCommandsMenuAndRun "main-menu" "${CMD_COMMANDS_MENU_BODY}"
+    main::showCommandsMenuAndRun "main-menu" "${CMD_COMMANDS_MENU_BODY}"
   fi
 
   local functionName nbArgs exactCommand
-  fuzzyMatchCommandtoFunctionName "${commands[@]}"
+  main::fuzzyMatchCommandtoFunctionName "${commands[@]}"
   functionName="${LAST_RETURNED_VALUE:-}"
   nbArgs="${LAST_RETURNED_VALUE2:-}"
   exactCommand="${LAST_RETURNED_VALUE3:-}"
   if [[ -z "${functionName}" ]]; then
-    fail "Could not find a command for ⌜${commands[*]}⌝."
+    log::error "Could not find a command for ⌜${commands[*]}⌝."
   fi
 
-  debug "Function name found ⌜${functionName}⌝."
+  log::debug "Function name found ⌜${functionName}⌝."
 
   if [[ ${functionName} == "_menu" ]]; then
     # run a menu with the list of sub commands
-    runMenuWithSubCommands "${exactCommand}" "${subCommandArgs[@]:${nbArgs}}"
+    main::runMenuWithSubCommands "${exactCommand}" "${subCommandArgs[@]:${nbArgs}}"
   else
     # run the function without the matched commands in the arguments
-    runFunction "${functionName}" "${subCommandArgs[@]:${nbArgs}}"
+    main::runFunction "${functionName}" "${subCommandArgs[@]:${nbArgs}}"
   fi
 }
 
@@ -593,13 +593,13 @@ function parseMainArguments() {
 #
 # $1: the function name
 # $2+: the user arguments
-function runFunction() {
+function main::runFunction() {
   local functionName
   functionName="${1}"
   shift
 
   if [[ -z "${functionName}" ]]; then
-    fail "No function name provided."
+    log::error "No function name provided."
   fi
 
   # get command name of the function
@@ -608,31 +608,31 @@ function runFunction() {
   # check for sudo if the function requires it
   local -n requiresSudo="CMD_SUDO_${functionName}"
   if [[ ${requiresSudo:-} == "true" ]]; then
-    checkSudo
+    main::checkSudo
   fi
 
   # source the file in which the function is located if needed
-  sourceForFunction "${functionName}"
+  core::sourceForFunction "${functionName}"
 
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
-    fail "The function ⌜${functionName}⌝ associated with the command ⌜${command}⌝ does not exist."
+    log::error "The function ⌜${functionName}⌝ associated with the command ⌜${command}⌝ does not exist."
   fi
 
-  debug "Running the command ⌜${command}⌝ with the function ⌜${functionName}⌝ and the arguments ⌜$*⌝."
+  log::debug "Running the command ⌜${command}⌝ with the function ⌜${functionName}⌝ and the arguments ⌜$*⌝."
 
   # disable startup profile and enable command profile, if needed
   if [[ ${VALET_STARTUP_PROFILING:-} == "true" ]]; then
-    disableProfiler
+    main::disableProfiler
   fi
   if [[ ${PROFIL_COMMAND:-} == "true" ]]; then
-    enableProfiler "${VALET_COMMAND_PROFILING_FILE:-${HOME}/profile_valet_cmd.txt}"
+    main::enableProfiler "${VALET_COMMAND_PROFILING_FILE:-${HOME}/profile_valet_cmd.txt}"
   fi
 
   # execute the function
   "${functionName}" "$@"
 
   if [[ ${PROFIL_COMMAND:-} == "true" ]]; then
-    disableProfiler
+    main::disableProfiler
   fi
 
   exit 0
@@ -643,13 +643,13 @@ function runFunction() {
 # If the user does not have sudo, it will set the SUDO variable to "".
 #
 # Usage:
-#  checkSudo
-function checkSudo() {
+#  main::checkSudo
+function main::checkSudo() {
   # sudo
   if command -v sudo 1>/dev/null 2>&1; then
-    inform "This command requires sudo privileges."
+    log::info "This command requires sudo privileges."
     SUDO="sudo"
-    ${SUDO} echo "alright" 1>/dev/null || fail "Could not sudo but the command requires it."
+    ${SUDO} echo "alright" 1>/dev/null || log::error "Could not sudo but the command requires it."
   else
     SUDO=""
   fi
@@ -662,24 +662,24 @@ function checkSudo() {
 # $1: the command name
 #
 # Usage:
-#   runMenuWithSubCommands "command"
-function runMenuWithSubCommands() {
+#   main::runMenuWithSubCommands "command"
+function main::runMenuWithSubCommands() {
   local command="${1}"
   shift
 
   local parsedArguments
-  parseFunctionArguments "_menu" "$@"
+  main::parseFunctionArguments "_menu" "$@"
   parsedArguments="${LAST_RETURNED_VALUE}"
-  debug "Parsed arguments:"$'\n'"${parsedArguments}"
+  log::debug "Parsed arguments:"$'\n'"${parsedArguments}"
   eval "${parsedArguments}"
 
   if [[ -n "${help:-}" ]]; then
-    printHelp menu "${command}"
+    main::printHelp menu "${command}"
     exit 0
   fi
 
   if [[ -n "${parsingErrors:-}" ]]; then
-    fail "${parsingErrors}"$'\n'"Use valet ${command} --help to get help."
+    log::error "${parsingErrors}"$'\n'"Use valet ${command} --help to get help."
   fi
 
   # filter the commands to only keep the sub commands of the function
@@ -693,37 +693,37 @@ function runMenuWithSubCommands() {
   done
 
   if [[ -z "${filteredCommandsMenuBody}" ]]; then
-    fail "No sub commands found for ⌜${command}⌝."
+    log::error "No sub commands found for ⌜${command}⌝."
   fi
 
-  showCommandsMenuAndRun "${command//[-[:space:]]/_}" "${filteredCommandsMenuBody%$'\n'}"
+  main::showCommandsMenuAndRun "${command//[-[:space:]]/_}" "${filteredCommandsMenuBody%$'\n'}"
 }
 
 # Show the given commands in an interactive menu and then
 # run the selected command if any.
 # $1: the menu body
-function showCommandsMenuAndRun() {
+function main::showCommandsMenuAndRun() {
   local menuId commands
   menuId="${1}"
   commands="${2}"
 
   # display the menu
   local sortedCommandsMenuBody
-  sortCommands "${menuId}" "${commands}" && sortedCommandsMenuBody="${LAST_RETURNED_VALUE}"
+  main::sortCommands "${menuId}" "${commands}" && sortedCommandsMenuBody="${LAST_RETURNED_VALUE}"
 
   local commandChoice
-  showInteractiveCommandsMenu "${menuId}" "Please select the command to run." "${sortedCommandsMenuBody}" && commandChoice="${LAST_RETURNED_VALUE}"
+  main::showInteractiveCommandsMenu "${menuId}" "Please select the command to run." "${sortedCommandsMenuBody}" && commandChoice="${LAST_RETURNED_VALUE}"
   if [[ -z "${commandChoice}" ]]; then
     # the user pressed escape or ctrl-c
     exit 0
   fi
-  addLastChoice "${menuId}" "${commandChoice}"
+  main::addLastChoice "${menuId}" "${commandChoice}"
 
   # get the function name from the command by replacing spaces and hyphens with _
   local functionName
-  getFunctionNameFromCommand "${commandChoice}" && functionName="${LAST_RETURNED_VALUE}"
+  main::getFunctionNameFromCommand "${commandChoice}" && functionName="${LAST_RETURNED_VALUE}"
 
-  runFunction "${functionName}"
+  main::runFunction "${functionName}"
 }
 
 # TODO: simplify this by directly storing and sourcing bash arrays
@@ -734,8 +734,8 @@ function showCommandsMenuAndRun() {
 # $2: the menu body
 #
 # Usage:
-#  sortCommands "id" "${commands}" && sortedCommands="${LAST_RETURNED_VALUE}"
-function sortCommands() {
+#  main::sortCommands "id" "${commands}" && sortedCommands="${LAST_RETURNED_VALUE}"
+function main::sortCommands() {
   local menuId commands
   menuId="${1}"
   commands="${2}"
@@ -747,7 +747,7 @@ function sortCommands() {
   fi
 
   local lastChoicesFile
-  getLocalStateDirectory
+  core::getLocalStateDirectory
   lastChoicesFile="${LAST_RETURNED_VALUE}/last-choices-${menuId}"
   if [[ ! -e "${lastChoicesFile}" ]]; then
     LAST_RETURNED_VALUE="${commands}"
@@ -803,8 +803,8 @@ function sortCommands() {
 # $2: the command to add
 #
 # Usage:
-#  addLastChoice "id" "command"
-function addLastChoice() {
+#  main::addLastChoice "id" "command"
+function main::addLastChoice() {
   local menuId command
   menuId="${1}"
   command="${2}"
@@ -818,7 +818,7 @@ function addLastChoice() {
 
   # load last choices from the file into an array
   local lastChoicesFile
-  getLocalStateDirectory
+  core::getLocalStateDirectory
   lastChoicesFile="${LAST_RETURNED_VALUE}/last-choices-${menuId}"
   if [[ ! -e "${lastChoicesFile}" ]]; then
     :>"${lastChoicesFile}"
@@ -853,9 +853,9 @@ function addLastChoice() {
 # $4+: additional options to pass to fzf (e.g. --height=10)
 #
 # Usage:
-#  showInteractiveCommandsMenu "menuId" "header" "body" && choice="${LAST_RETURNED_VALUE}"
-#  showInteractiveCommandsMenu "menuId" "header" "body" --height=10 && choice="${LAST_RETURNED_VALUE}"
-function showInteractiveCommandsMenu() {
+#  main::showInteractiveCommandsMenu "menuId" "header" "body" && choice="${LAST_RETURNED_VALUE}"
+#  main::showInteractiveCommandsMenu "menuId" "header" "body" --height=10 && choice="${LAST_RETURNED_VALUE}"
+function main::showInteractiveCommandsMenu() {
   local menuHeader menuBody
   menuId="${1}"
   menuHeader="${2}"
@@ -865,7 +865,7 @@ function showInteractiveCommandsMenu() {
   # shellcheck source=lib-fzf
   source fzf
 
-  showFzf "menu" "${menuId}" "${menuHeader}" "${menuBody}" \
+  fzf::showFzf "menu" "${menuId}" "${menuHeader}" "${menuBody}" \
     --preview-label='Command help' \
     --preview="VALET_LOG_LEVEL=error '${VALET_HOME}/valet' help --columns \$((FZF_PREVIEW_COLUMNS - 1)) {1}"
 
@@ -877,45 +877,6 @@ function showInteractiveCommandsMenu() {
   LAST_RETURNED_VALUE="${choice}"
 }
 
-# Source the user 'commands' file from the valet user directory.
-# If the file does not exist, we use the examples commands.
-#
-# Usage:
-#  sourceUserCommands
-function sourceUserCommands() {
-  if [[ -n "${_CMD_INCLUDED:-}" ]]; then
-    return 0
-  fi
-
-  # source the user commands
-  local userDirectory
-  getUserDirectory && userDirectory="${LAST_RETURNED_VALUE}"
-
-  local commandsFile
-  commandsFile="${userDirectory}/commands"
-
-  # if the commands file does not exist, we use the examples commands or we fail
-  if [[ ! -e "${commandsFile}" ]]; then
-    local message
-    message="The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'
-    message+="To get started with valet, you must build your command list using the ⌜valet self build⌝ command."$'\n'
-    message+="Please check the help using ⌜valet self build --help⌝ for details."
-    commandsFile="${VALET_HOME}/examples.d/commands"
-    if [[ -e "${commandsFile}" ]]; then
-      message+=$'\n'"Now using the examples commands from ⌜${commandsFile%/*}⌝."
-      warn "${message}"
-    else
-      fail "${message}"
-    fi
-  fi
-
-  debug "Sourcing the user commands from ⌜${commandsFile}⌝."
-
-  # source commands
-  # shellcheck disable=SC1090
-  builtin source "${commandsFile}"
-}
-
 #===============================================================
 # >>> Find command/function from arguments
 #===============================================================
@@ -923,8 +884,8 @@ function sourceUserCommands() {
 # Get the function name of a command.
 #
 # Usage:
-#  getFunctionNameFromCommand "self build" && echo "${LAST_RETURNED_VALUE}"
-function getFunctionNameFromCommand() {
+#  main::getFunctionNameFromCommand "self build" && echo "${LAST_RETURNED_VALUE}"
+function main::getFunctionNameFromCommand() {
   local -n functionName="CMD_FUNCTION_NAME_${1//[-[:space:]]/_}"
   LAST_RETURNED_VALUE="${functionName:-}"
 }
@@ -941,14 +902,14 @@ function getFunctionNameFromCommand() {
 #   the exact command in the global variable LAST_RETURNED_VALUE3
 #
 # Usage:
-#  fuzzyMatchCommandtoFunctionName "self" "build" && echo "${LAST_RETURNED_VALUE}"
-function fuzzyMatchCommandtoFunctionName() {
+#  main::fuzzyMatchCommandtoFunctionName "self" "build" && echo "${LAST_RETURNED_VALUE}"
+function main::fuzzyMatchCommandtoFunctionName() {
   local level loopI functionName command exactCommand
   if [[ $# -eq 0 ]]; then
     return 0
   fi
 
-  getMaxPossibleCommandLevel "$@"
+  main::getMaxPossibleCommandLevel "$@"
   level="${LAST_RETURNED_VALUE}"
 
   # we put the arguments into an array so we can interpret 'my' 'sub'
@@ -961,17 +922,17 @@ function fuzzyMatchCommandtoFunctionName() {
     command="${commandArrray[*]:0:${loopI}}"
 
     # case where the command is exact, we can match the function immediately
-    getFunctionNameFromCommand "${command}" && functionName="${LAST_RETURNED_VALUE}"
+    main::getFunctionNameFromCommand "${command}" && functionName="${LAST_RETURNED_VALUE}"
     if [[ -n "${functionName:-}" ]]; then
       exactCommand="${command}"
       break
     fi
 
     # case where the command is not exact, we try to fuzzy match it
-    fuzzyMatch "${command}" "${CMD_ALL_COMMANDS}" && exactCommand="${LAST_RETURNED_VALUE}"
+    string::fuzzyMatch "${command}" "${CMD_ALL_COMMANDS}" && exactCommand="${LAST_RETURNED_VALUE}"
     if [[ -n "${exactCommand}" ]]; then
-      getFunctionNameFromCommand "${exactCommand}" && functionName="${LAST_RETURNED_VALUE}"
-      inform "Fuzzy matching the command ⌜${command}⌝ to ⌜${exactCommand}⌝."
+      main::getFunctionNameFromCommand "${exactCommand}" && functionName="${LAST_RETURNED_VALUE}"
+      log::info "Fuzzy matching the command ⌜${command}⌝ to ⌜${exactCommand}⌝."
       break
     fi
   done
@@ -990,8 +951,8 @@ function fuzzyMatchCommandtoFunctionName() {
 # $@: the arguments
 #
 # Usage:
-#  getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3" && level="${LAST_RETURNED_VALUE}"
-function getMaxPossibleCommandLevel() {
+#  main::getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3" && level="${LAST_RETURNED_VALUE}"
+function main::getMaxPossibleCommandLevel() {
   local command commandPart level maxLevel
   # count the number of spaces
   command="${*}"
@@ -1014,7 +975,7 @@ function getMaxPossibleCommandLevel() {
 
 # Parses the arguments and options of a function.
 # Usage:
-#  parseFunctionArguments "functionName" "$@" && eval "${LAST_RETURNED_VALUE}"
+#  main::parseFunctionArguments "functionName" "$@" && eval "${LAST_RETURNED_VALUE}"
 #
 # Notes:
 # - It will return a string that can be evaluated to set the variables
@@ -1026,7 +987,7 @@ function getMaxPossibleCommandLevel() {
 # - It will also set the variable parsingErrors if there are any errors.
 # - Variable name for an option is taken from the first --long version of the option.
 # - It will set the variable as an array if the (last) argument name ends with '...'
-function parseFunctionArguments() {
+function main::parseFunctionArguments() {
   local functionName
   functionName="${1}"
   shift
@@ -1111,7 +1072,7 @@ function parseFunctionArguments() {
 
       else
         # if we didn't match any option, flag it as unknown option and add it to the leftOver
-        fuzzyFindOption "${options[*]}" "${1}" && fuzzyOption="${LAST_RETURNED_VALUE:-}"
+        main::fuzzyFindOption "${options[*]}" "${1}" && fuzzyOption="${LAST_RETURNED_VALUE:-}"
         outputErrors+=("Unknown option ⌜${1}⌝${fuzzyOption:-}.")
       fi
 
@@ -1220,14 +1181,14 @@ function parseFunctionArguments() {
 # Tries to help the user by suggesting a fix for an unknown option
 # we receive the function options and the unknown option string
 # Usage:
-#  fuzzyFindOption "option1 option2 option3" "opt1" && fuzzyOption="${LAST_RETURNED_VALUE}"
-function fuzzyFindOption() {
+#  main::fuzzyFindOption "option1 option2 option3" "opt1" && fuzzyOption="${LAST_RETURNED_VALUE}"
+function main::fuzzyFindOption() {
   local options unknownOption suggestedOption
   options="${1}"
   unknownOption="${2}"
 
   # split to get one possible option per line
-  fuzzyMatch "${unknownOption}" "${options// /$'\n'}" && suggestedOption="${LAST_RETURNED_VALUE}"
+  string::fuzzyMatch "${unknownOption}" "${options// /$'\n'}" && suggestedOption="${LAST_RETURNED_VALUE}"
   suggestedOption="${suggestedOption%%$'\n'*}"
   if [[ -n "${suggestedOption}" ]]; then
     suggestedOption=" (did you mean ⌜${suggestedOption}⌝?)"
@@ -1238,18 +1199,18 @@ function fuzzyFindOption() {
 
 # Parse the arguments and options of a function.
 # If no arguments are provided but some are expected, it will enter interactive mode.
-# See the @parseArguments function for more details on parsing.
+# See the @core::parseArguments function for more details on parsing.
 #
 # Usage:
-#   parseFunctionArgumentsOrGoInteractive "functionName" "$@" && eval "${LAST_RETURNED_VALUE}"
-function parseFunctionArgumentsOrGoInteractive() {
+#   main::parseFunctionArgumentsOrmain::goInteractive "functionName" "$@" && eval "${LAST_RETURNED_VALUE}"
+function main::parseFunctionArgumentsOrmain::goInteractive() {
   local functionName
   functionName="${1}"
   shift
 
-  parseFunctionArguments "${functionName}" "$@"
+  main::parseFunctionArguments "${functionName}" "$@"
   local parsedArguments="${LAST_RETURNED_VALUE}"
-  debug "Parsed arguments:"$'\n'"${parsedArguments}"
+  log::debug "Parsed arguments:"$'\n'"${parsedArguments}"
 
   # check if the function is expecting arguments and/or options
   local expectArguments
@@ -1259,19 +1220,19 @@ function parseFunctionArgumentsOrGoInteractive() {
   fi
 
   if [[ ("${expectArguments:-false}" == "true" && $# -eq 0) || "${VALET_FORCE_INTERACTIVE_MODE:-false}" == "true" ]]; then
-    goInteractive "${functionName}" "${parsedArguments}"
+    main::goInteractive "${functionName}" "${parsedArguments}"
   fi
 
   LAST_RETURNED_VALUE="${parsedArguments}"
 }
 
-function goInteractive() {
+function main::goInteractive() {
   local functionName parsedArguments
   functionName="${1}"
   parsedArguments="${2}"
 
   # TODO: go interactive
-  warn "Entering interactive mode for the function ⌜${functionName}⌝. This is not yet implemented."
+  log::warning "Entering interactive mode for the function ⌜${functionName}⌝. This is not yet implemented."
 
   # at the end, echo to the user the complete command that will be run
 }
@@ -1279,4 +1240,4 @@ function goInteractive() {
 #===============================================================
 # >>> Load the commands
 #===============================================================
-sourceUserCommands
+core::sourceUserCommands

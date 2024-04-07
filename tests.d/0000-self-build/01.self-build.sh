@@ -2,7 +2,7 @@
 
 function testSelfBuild() {
 
-  # setLogLevel "debug"
+  # log::setLevel "debug"
   selfBuild --output "commands" --user-directory ""
 
   local content
@@ -12,22 +12,12 @@ function testSelfBuild() {
   endTest "Testing selfbuild" 0
 }
 
-function reloadAllUserCmds() {
-  # make sure reload the potentially new commands
-  local var
-  for var in ${!CMD_*}; do
-    unset "${var}"
-  done
-  unset _CMD_INCLUDED
-  sourceUserCommands
-}
-
 function main() {
-  sourceForFunction selfBuild
+  core::sourceForFunction selfBuild
 
   testSelfBuild
 
-  reloadAllUserCmds
+  core::reloadUserCommands
 }
 
 main

@@ -79,16 +79,16 @@ function selfBuild() {
       shift
       outputFile="${1}"
       ;;
-    -*) fail "Unknown option ⌜${1}⌝." ;;
-    *) fail "This command takes no arguments." ;;
+    -*) log::error "Unknown option ⌜${1}⌝." ;;
+    *) log::error "This command takes no arguments." ;;
     esac
     shift
   done
 
-  getUserDirectory && userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
+  core::getUserDirectory && userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
   outputFile="${outputFile:-${userDirectory}/commands}"
 
-  toAbsolutePath "${VALET_HOME}" && VALET_HOME="${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath "${VALET_HOME}" && VALET_HOME="${LAST_RETURNED_VALUE}"
 
   # list all the files in which we need to find command definitions
   local -a commandDefinitionFiles
@@ -104,7 +104,7 @@ function selfBuild() {
     for file in "${userDirectory}"/**; do
       # if directory, skip
       if [[ -d "${file}" ]]; then continue; fi
-      debug "Considering file: ⌜${file}⌝."
+      log::debug "Considering file: ⌜${file}⌝."
       # skip all files not ending with .sh
       if [[ "${file}" != *".sh" ]]; then continue; fi
       # skip everything under tests.d
@@ -113,12 +113,12 @@ function selfBuild() {
     done
     shopt -u globstar
   else
-    warn "Skipping user directory ⌜${userDirectory}⌝ because it does not exist."
+    log::warning "Skipping user directory ⌜${userDirectory}⌝ because it does not exist."
   fi
 
-  if isDebugEnabled; then
+  if log::isDebugEnabled; then
     local IFS=$'\n'
-    debug "Will extract command definitions from the following files:"$'\n'"${commandDefinitionFiles[*]}"
+    log::debug "Will extract command definitions from the following files:"$'\n'"${commandDefinitionFiles[*]}"
     unset IFS
   fi
 
@@ -137,13 +137,13 @@ function selfBuild() {
   unset CMD_COMMANDS_HIDDEN_MENU_BODY
 
   if [[ -n "${SELF_BUILD_ERRORS:-}" ]]; then
-    fail "The valet user commands have not been successfully built. Please check the following errors:"$'\n'"${SELF_BUILD_ERRORS}"
+    log::error "The valet user commands have not been successfully built. Please check the following errors:"$'\n'"${SELF_BUILD_ERRORS}"
   fi
 
   writeCommandDefinitionVariablesToFile "${outputFile}"
   bumpValetBuildVersion
 
-  succeed "The valet user commands have been successfully built"
+  log::success "The valet user commands have been successfully built"
 }
 
 #===============================================================
@@ -170,7 +170,7 @@ function summarize() {
   message+=$'\n'"== List of all the hidden commands =="$'\n\n'
   message+="${CMD_COMMANDS_HIDDEN_MENU_BODY}"$'\n'
 
-  inform "${message}"
+  log::info "${message}"
 }
 
 # Bump the valet build version by one patch.
@@ -180,7 +180,7 @@ function bumpValetBuildVersion() {
 
   IFS= read -rd '' currentVersion <"${versionFile}" || true
 
-  bumpSemanticVersion "${currentVersion}" "patch" "false"
+  string::bumpSemanticVersion "${currentVersion}" "patch" "false"
 
   echo -n "${LAST_RETURNED_VALUE}" >"${versionFile}"
 }
@@ -193,41 +193,41 @@ function extractCommandDefinitionsToVariables() {
   while [[ $# -gt 0 ]]; do
     local file="${1}"
     shift
-    inform "Extracting commands from ⌜${file}⌝."
+    log::info "Extracting commands from ⌜${file}⌝."
     extractCommandYamls "${file}"
     local content
     for content in "${LAST_RETURNED_VALUE_ARRAY[@]}"; do
 
-      if isDebugEnabled; then debug "Extracting command definition for: ⌜${content%%$'\n'*}...⌝."; fi
+      if log::isDebugEnabled; then log::debug "Extracting command definition for: ⌜${content%%$'\n'*}...⌝."; fi
 
       extractCommandDefinitionToVariables "${content}"
 
       local function command
-      trimAll "${TEMP_CMD_BUILD_function:-}" && function="${LAST_RETURNED_VALUE}"
-      trimAll "${TEMP_CMD_BUILD_command:-}" && command="${LAST_RETURNED_VALUE}"
+      string::trimAll "${TEMP_CMD_BUILD_function:-}" && function="${LAST_RETURNED_VALUE}"
+      string::trimAll "${TEMP_CMD_BUILD_command:-}" && command="${LAST_RETURNED_VALUE}"
 
       # trim the leading "valet" from the command
       command="${command#valet }"
       command="${command#valet}"
 
-      inform "                         ├── ⌜${command}⌝."
+      log::info "                         ├── ⌜${command}⌝."
 
-      toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${LAST_RETURNED_VALUE}"
+      io::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${LAST_RETURNED_VALUE}"
       TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${VALET_HOME}"/}"
 
-      if isDebugEnabled; then
-        captureOutput declare -p ${!TEMP_CMD_BUILD_*}
-        debug "Declared variables for this command:"$'\n'"${LAST_RETURNED_VALUE}"
+      if log::isDebugEnabled; then
+        io::captureOutput declare -p ${!TEMP_CMD_BUILD_*}
+        log::debug "Declared variables for this command:"$'\n'"${LAST_RETURNED_VALUE}"
       fi
 
       # make sure that all these arrays exists and have the same size
-      makeArraysSameSize TEMP_CMD_BUILD_options_name TEMP_CMD_BUILD_options_description TEMP_CMD_BUILD_options_noEnvironmentVariable
-      makeArraysSameSize TEMP_CMD_BUILD_arguments_name TEMP_CMD_BUILD_arguments_description
-      makeArraysSameSize TEMP_CMD_BUILD_examples_name TEMP_CMD_BUILD_examples_description
+      array::makeArraysSameSize TEMP_CMD_BUILD_options_name TEMP_CMD_BUILD_options_description TEMP_CMD_BUILD_options_noEnvironmentVariable
+      array::makeArraysSameSize TEMP_CMD_BUILD_arguments_name TEMP_CMD_BUILD_arguments_description
+      array::makeArraysSameSize TEMP_CMD_BUILD_examples_name TEMP_CMD_BUILD_examples_description
 
-      if isDebugEnabled; then
-        captureOutput declare -p ${!TEMP_CMD_BUILD_*}
-        debug "Declared variables for this command:"$'\n'"${LAST_RETURNED_VALUE}"
+      if log::isDebugEnabled; then
+        io::captureOutput declare -p ${!TEMP_CMD_BUILD_*}
+        log::debug "Declared variables for this command:"$'\n'"${LAST_RETURNED_VALUE}"
       fi
 
       # verify that the command definition is valid
@@ -300,7 +300,7 @@ function declareFinalCommandDefinitionCommonVariables() {
   done
   parentCommand="${parentCommand# }"
   if [[ -n "${parentCommand}" ]]; then
-    if ! appendToArrayIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY "${parentCommand# }"; then
+    if ! array::appendToArrayIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY "${parentCommand# }"; then
       declare -g "CMD_FUNCTION_NAME_${parentCommand//[-[:space:]]/_}"="_menu"
     fi
   fi
@@ -357,7 +357,7 @@ function declareFinalCommandDefinitionHelpVariables() {
       optionValue="${TEMP_CMD_BUILD_options_name[index]}"
       if [[ ${optionValue} == *"<"* ]]; then optionValue="<${optionValue##*<}"; else optionValue="true"; fi
       extractFirstLongNameFromOptionString "${TEMP_CMD_BUILD_options_name[index]}"
-      kebabCaseToSnakeCase "${LAST_RETURNED_VALUE}"
+      string::kebabCaseToSnakeCase "${LAST_RETURNED_VALUE}"
       TEMP_CMD_BUILD_options_description[index]+=$'\n'"This option can be set by exporting the variable VALET_${LAST_RETURNED_VALUE}='${optionValue}'."
     fi
   done
@@ -397,11 +397,11 @@ function declareFinalCommandDefinitionParserVariables() {
       optionHasValue="false"
     fi
     option="${option//,/ }"
-    trimAll "${option}" && option="${LAST_RETURNED_VALUE}"
+    string::trimAll "${option}" && option="${LAST_RETURNED_VALUE}"
     extractFirstLongNameFromOptionString "${option}" && optionName="${LAST_RETURNED_VALUE}"
-    kebabCaseToCamelCase "${optionName}" && optionNameCc="${LAST_RETURNED_VALUE}"
+    string::kebabCaseToCamelCase "${optionName}" && optionNameCc="${LAST_RETURNED_VALUE}"
     if [[ "${optionNoEnvVar}" != "true" ]]; then
-      kebabCaseToSnakeCase "${optionName}" && optionNameSc="VALET_${LAST_RETURNED_VALUE}"
+      string::kebabCaseToSnakeCase "${optionName}" && optionNameSc="VALET_${LAST_RETURNED_VALUE}"
     else
       optionNameSc=""
     fi
@@ -426,7 +426,7 @@ function declareFinalCommandDefinitionParserVariables() {
         argument="${argument//\?/}"
         nbOptionalArguments+=1
       fi
-      kebabCaseToCamelCase "${argument}" && argumentNameCc="${LAST_RETURNED_VALUE}"
+      string::kebabCaseToCamelCase "${argument}" && argumentNameCc="${LAST_RETURNED_VALUE}"
 
       eval "CMD_ARGS_NAME_${function}+=(\"${argumentNameCc}\")"
     done
@@ -450,7 +450,7 @@ function declareFinalCommandDefinitionParserVariables() {
 # shellcheck disable=SC2034
 function declareOtherCommmandVariables() {
   # sort commands in alphabetical order
-  sortArray CMD_ALL_COMMANDS_ARRAY
+  array::sortArray CMD_ALL_COMMANDS_ARRAY
 
   CMD_COMMANDS_MENU_BODY=""
   CMD_COMMANDS_HIDDEN_MENU_BODY=""
@@ -552,7 +552,7 @@ function verifyCommandDefinition() {
       optionNames="${optionNames%%<*}"
     fi
     optionNames="${optionNames//,/ }"
-    trimAll "${optionNames}" && optionNames=" ${LAST_RETURNED_VALUE} "
+    string::trimAll "${optionNames}" && optionNames=" ${LAST_RETURNED_VALUE} "
     # remove the first short option
     optionNames="${optionNames/ -? /}"
     # if there still are short options, it means that there are more than one or that one has more than one character

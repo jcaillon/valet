@@ -4,6 +4,7 @@
 ### WINDOWS ###
 desktop.ini
 folder.ico
+*.bak
 
 ### PROJECT ###
 **.received.md

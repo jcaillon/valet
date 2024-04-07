@@ -1,64 +1,64 @@
 #!/usr/bin/env bash
 
 function testGetFunctionNameFromCommand() {
-  echo "→ getFunctionNameFromCommand 'self build'"
-  getFunctionNameFromCommand "self build" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ main::getFunctionNameFromCommand 'self build'"
+  main::getFunctionNameFromCommand "self build" && echo "${LAST_RETURNED_VALUE}"
 
-  endTest "Testing getFunctionNameFromCommand" $?
+  endTest "Testing main::getFunctionNameFromCommand" $?
 }
 
 function testFuzzyMatchCommandtoFunctionName() {
 
-  echo "→ fuzzyMatchCommandtoFunctionName 'se bu other stuff dont care'"
-  fuzzyMatchCommandtoFunctionName "se bu other stuff dont care"
+  echo "→ main::fuzzyMatchCommandtoFunctionName 'se bu other stuff dont care'"
+  main::fuzzyMatchCommandtoFunctionName "se bu other stuff dont care"
   echo "${LAST_RETURNED_VALUE}"
   echo "${LAST_RETURNED_VALUE2}"
   echo "${LAST_RETURNED_VALUE3}"
 
   echo
-  echo "→ fuzzyMatchCommandtoFunctionName 'sf' 'nop' 'other' 'stuff' 'dont care'"
-  fuzzyMatchCommandtoFunctionName "sf" "nop" "other" "stuff" "dont care"
+  echo "→ main::fuzzyMatchCommandtoFunctionName 'sf' 'nop' 'other' 'stuff' 'dont care'"
+  main::fuzzyMatchCommandtoFunctionName "sf" "nop" "other" "stuff" "dont care"
   echo "${LAST_RETURNED_VALUE}"
   echo "${LAST_RETURNED_VALUE2}"
   echo "${LAST_RETURNED_VALUE3}"
 
-  endTest "Testing fuzzyMatchCommandtoFunctionName" 0
+  endTest "Testing main::fuzzyMatchCommandtoFunctionName" 0
 }
 
 function testGetMaxPossibleCommandLevel() {
 
-  echo "→ getMaxPossibleCommandLevel '1' '2' '3'"
-  getMaxPossibleCommandLevel "1" "2" "3" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ main::getMaxPossibleCommandLevel '1' '2' '3'"
+  main::getMaxPossibleCommandLevel "1" "2" "3" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ getMaxPossibleCommandLevel '1 2 3'"
-  getMaxPossibleCommandLevel "1 2 3" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ main::getMaxPossibleCommandLevel '1 2 3'"
+  main::getMaxPossibleCommandLevel "1 2 3" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ getMaxPossibleCommandLevel '1'"
-  getMaxPossibleCommandLevel "1" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ main::getMaxPossibleCommandLevel '1'"
+  main::getMaxPossibleCommandLevel "1" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ getMaxPossibleCommandLevel"
-  getMaxPossibleCommandLevel && echo "${LAST_RETURNED_VALUE}"
+  echo "→ main::getMaxPossibleCommandLevel"
+  main::getMaxPossibleCommandLevel && echo "${LAST_RETURNED_VALUE}"
 
-  endTest "Testing getMaxPossibleCommandLevel" 0
+  endTest "Testing main::getMaxPossibleCommandLevel" 0
 }
 
 function testFuzzyFindOption() {
 
-  echo "→ fuzzyFindOption '--opt1 --derp2 --allo3' 'de'"
-  fuzzyFindOption "--opt1 --derp2 --allo3" "de" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ main::fuzzyFindOption '--opt1 --derp2 --allo3' 'de'"
+  main::fuzzyFindOption "--opt1 --derp2 --allo3" "de" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ fuzzyFindOption '--opt1 --derp2 --allo3' '-a'"
-  fuzzyFindOption "--opt1 --derp2 --allo3" "-a" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ main::fuzzyFindOption '--opt1 --derp2 --allo3' '-a'"
+  main::fuzzyFindOption "--opt1 --derp2 --allo3" "-a" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ fuzzyFindOption '--opt1 --derp2 --allo3' 'thing'"
-  fuzzyFindOption "--opt1 --derp2 --allo3" "thing" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ main::fuzzyFindOption '--opt1 --derp2 --allo3' 'thing'"
+  main::fuzzyFindOption "--opt1 --derp2 --allo3" "thing" && echo "${LAST_RETURNED_VALUE}"
 
-  endTest "Testing fuzzyFindOption" 0
+  endTest "Testing main::fuzzyFindOption" 0
 }
 
 function main() {

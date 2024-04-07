@@ -12,8 +12,8 @@ set -Eeu -o pipefail
 #   LAST_RETURNED_VALUE: The absolute path of the file.
 #
 # Usage:
-#   toAbsolutePath "myFile" && local myFileAbsolutePath="${LAST_RETURNED_VALUE}"
-function toAbsolutePath() {
+#   io::toAbsolutePath "myFile" && local myFileAbsolutePath="${LAST_RETURNED_VALUE}"
+function io::toAbsolutePath() {
   local file="${1%/}"
 
   if [[ ${file} == "/"* ]]; then
@@ -42,7 +42,7 @@ function toAbsolutePath() {
 # $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
 # $3: true/false to indicate if the 4th argument represents a file path or directly the content for stdin
 # $4: the stdin (can be empty)
-# $5: the executable to invoke
+# $5: the executable to io::invoke
 # $6+: the arguments to pass to the executable
 #
 # Returns:
@@ -51,10 +51,10 @@ function toAbsolutePath() {
 #   The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   invoke5 "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || fail "fzf failed."
+#   io::invoke5 "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || log::error "fzf failed."
 #   stdoutFilePath="${LAST_RETURNED_VALUE}"
 #   stderrFilePath="${LAST_RETURNED_VALUE2}"
-function invoke5() {
+function io::invoke5() {
   local failIfFails acceptableErrorCodes stdInFromFile stdIn executable
   failIfFails="${1}"
   acceptableErrorCodes="${2}"
@@ -63,18 +63,18 @@ function invoke5() {
   executable="${5}"
   shift 5
 
-  getCommandFullPath "${executable}"
+  io::getCommandLocalPath "${executable}"
   executable="${LAST_RETURNED_VALUE}"
 
   # if debug mode is on, print some info
-  if isDebugEnabled; then
+  if log::isDebugEnabled; then
     local debugMessage="Executing the command ⌜${executable}⌝."$'\n'
     debugMessage+="Fail if it fails: ⌜${failIfFails}⌝"$'\n'
     debugMessage+="Acceptable error codes: ⌜${acceptableErrorCodes}⌝"$'\n'
     debugMessage+="Standard stream from file: ⌜${stdInFromFile}⌝"$'\n'
     debugMessage+="Standard stream: ⌜${stdIn}⌝"$'\n'
     debugMessage+="Extra parameters: ⌜${*}⌝"
-    debug "${debugMessage}"
+    log::debug "${debugMessage}"
   fi
 
   # execute the executable
@@ -101,25 +101,25 @@ function invoke5() {
   if [[ ${failIfFails} == "true" && exitCode -ne 0 ]]; then shouldFail=true; fi
 
   # fail if needed or we are debug mode; display all the debug information that could be useful
-  if isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
+  if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
 
     # append std out
     if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
-      readFile "${_TEMPORARY_STDOUT_FILE}" 5000
+      io::readFile "${_TEMPORARY_STDOUT_FILE}" 5000
       if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
       debugMessage+=$'\n'"Standard output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
     fi
     # append stderr
     if [[ -s "${_TEMPORARY_STDERR_FILE}" ]]; then
-      readFile "${_TEMPORARY_STDERR_FILE}" 5000
+      io::readFile "${_TEMPORARY_STDERR_FILE}" 5000
       if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
       debugMessage+=$'\n'"Error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
     fi
 
     if [[ ${shouldFail} == "true" ]]; then
-      fail "${debugMessage}"
+      log::error "${debugMessage}"
     else
-      debug "${debugMessage}"
+      log::debug "${debugMessage}"
     fi
   fi
 
@@ -133,7 +133,7 @@ function invoke5() {
 #
 # $1: true/false to indicate if the function should fail in case the execution fails
 # $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
-# $3: the executable to invoke
+# $3: the executable to io::invoke
 # $4+: the arguments to pass to the executable
 #
 # Returns:
@@ -142,16 +142,16 @@ function invoke5() {
 #   The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   invoke3 "false" "false" "fzf" "--height=10" || fail "fzf failed."
+#   io::invoke3 "false" "false" "fzf" "--height=10" || log::error "fzf failed."
 #   stdoutFilePath="${LAST_RETURNED_VALUE}"
 #   stderrFilePath="${LAST_RETURNED_VALUE2}"
-function invoke3() {
+function io::invoke3() {
   local failIfFails acceptableErrorCodes executable
   failIfFails="${1}"
   acceptableErrorCodes="${2}"
   shift 2
 
-  invoke5 "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
+  io::invoke5 "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
 }
 
 # This function call an executable and its arguments.
@@ -161,7 +161,7 @@ function invoke3() {
 # $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
 # $3: true/false to indicate if the 4th argument represents a file path or directly the content for stdin
 # $4: the stdin (can be empty)
-# $5: the executable to invoke
+# $5: the executable to io::invoke
 # $6+: the arguments to pass to the executable
 #
 # Returns:
@@ -170,18 +170,18 @@ function invoke3() {
 #   The content of stderr in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   invoke5var "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || fail "fzf failed."
+#   io::invoke5var "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || log::error "fzf failed."
 #   stdout="${LAST_RETURNED_VALUE}"
 #   stderr="${LAST_RETURNED_VALUE2}"
-function invoke5var() {
+function io::invoke5var() {
   local -i exitCode=0
-  invoke5 "$@" || exitCode=$?
+  io::invoke5 "$@" || exitCode=$?
   local stdOutFile="${LAST_RETURNED_VALUE}"
   local stdErrFile="${LAST_RETURNED_VALUE2}"
 
-  readFile "${stdErrFile}"
+  io::readFile "${stdErrFile}"
   LAST_RETURNED_VALUE2="${LAST_RETURNED_VALUE}"
-  readFile "${stdOutFile}"
+  io::readFile "${stdOutFile}"
 
   return ${exitCode}
 }
@@ -191,7 +191,7 @@ function invoke5var() {
 #
 # $1: true/false to indicate if the function should fail in case the execution fails
 # $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
-# $3: the executable to invoke
+# $3: the executable to io::invoke
 # $4+: the arguments to pass to the executable
 #
 # Returns:
@@ -200,16 +200,16 @@ function invoke5var() {
 #   The content of stderr in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   invoke3var "false" "130,2" "fzf" "--height=10" || fail "fzf failed."
+#   io::invoke3var "false" "130,2" "fzf" "--height=10" || log::error "fzf failed."
 #   stdout="${LAST_RETURNED_VALUE}"
 #   stderr="${LAST_RETURNED_VALUE2}"
-function invoke3var() {
+function io::invoke3var() {
   local failIfFails acceptableErrorCodes executable
   failIfFails="${1}"
   acceptableErrorCodes="${2}"
   shift 2
 
-  invoke5var "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
+  io::invoke5var "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
 }
 
 # This function call an executable and its arguments.
@@ -221,18 +221,19 @@ function invoke3var() {
 #  The content of stderr in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#  invoke git add --all
-function invoke() {
-  invoke5var "true" "0" "" "" "$@"
+#  io::invoke git add --all
+function io::invoke() {
+  io::invoke5var "true" "0" "" "" "$@"
 }
 
 # Will return the full path of the given command if it is found in the bin folder of valet.
+# Will return the command as is if it is not found.
 #
 # $1: the command to find
 #
 # Usage:
-#   getCommandFullPath "fzf" && local fullPath="${LAST_RETURNED_VALUE}"
-function getCommandFullPath() {
+#   io::getCommandLocalPath "fzf" && local fullPath="${LAST_RETURNED_VALUE}"
+function io::getCommandLocalPath() {
   local executable="${1}"
   local possibleExecutablePath="${VALET_BIN_PATH:-"${VALET_HOME}/bin"}/${executable}"
   if [[ "${VALET_DO_NOT_USE_LOCAL_BIN:-false}" != "true" && -x "${possibleExecutablePath}" ]]; then
@@ -254,15 +255,15 @@ function getCommandFullPath() {
 #   The error output of the command in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   captureOutput "ls -l" && local lsOutput="${LAST_RETURNED_VALUE}"
-function captureOutput() {
+#   io::captureOutput "ls -l" && local lsOutput="${LAST_RETURNED_VALUE}"
+function io::captureOutput() {
   local -i exitCode=0
   "$@" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
 
-  readFile "${_TEMPORARY_STDERR_FILE}"
+  io::readFile "${_TEMPORARY_STDERR_FILE}"
   LAST_RETURNED_VALUE2="${LAST_RETURNED_VALUE}"
 
-  readFile "${_TEMPORARY_STDOUT_FILE}"
+  io::readFile "${_TEMPORARY_STDOUT_FILE}"
 
   return ${exitCode}
 }
@@ -280,9 +281,9 @@ function captureOutput() {
 #   The content of the file in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
-#   readFile "/path/to/file" && local fileContent="${LAST_RETURNED_VALUE}"
-#   readFile "/path/to/file" 500 && local fileContent="${LAST_RETURNED_VALUE}"
-function readFile() {
+#   io::readFile "/path/to/file" && local fileContent="${LAST_RETURNED_VALUE}"
+#   io::readFile "/path/to/file" 500 && local fileContent="${LAST_RETURNED_VALUE}"
+function io::readFile() {
   local filePath="${1}"
   local -i maxCharacters="${2:-0}"
 
@@ -297,4 +298,33 @@ function readFile() {
   else
     read -rd '' LAST_RETURNED_VALUE < "${filePath}" || true
   fi
+}
+
+# Check last return code and fail (exit) if it is an error
+# $1: the return code
+# $2+ : the error message to display in case of error
+#
+# Usage:
+#   command_that_could_fail || checkAndlog::error "$?" "The command that could fail has failed!"
+function io::checkAndFail() {
+  if [[ "${1:-}" != "0" ]]; then
+    shift
+    log::error "$*"
+  fi
+  return 0
+}
+
+# Check last return code and return an error code if error
+# $1: the last return code
+# $2+ : the warning message to display in case of error
+#
+# Usage:
+#   command_that_could_fail || checkAndlog::warning "$?" "The command that could fail has failed!" || return "0"
+function io::checkAndWarn() {
+  if [[ "${1:-}" != "0" ]]; then
+    shift
+    log::warning "$*"
+    return 1
+  fi
+  return 0
 }

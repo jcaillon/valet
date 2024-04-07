@@ -49,13 +49,13 @@ examples:
 ---"
 function showcaseCommand1() {
   local -a more
-  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
-  checkParseResults "${help:-}" "${parsingErrors:-}"
+  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  inform "First argument: ${firstArg:-}."
-  inform "Option 1: ${option1:-}."
-  inform "Option 2: ${thisIsOption2:-}."
-  inform "More: ${more[*]}."
+  log::info "First argument: ${firstArg:-}."
+  log::info "Option 1: ${option1:-}."
+  log::info "Option 2: ${thisIsOption2:-}."
+  log::info "More: ${more[*]}."
 
   aSubFunctionInShowcaseCommand1
 
@@ -64,7 +64,7 @@ function showcaseCommand1() {
 
 function aSubFunctionInShowcaseCommand1() {
   # this is mainly to demonstrate the profiler
-  debug "This is a sub function."
+  log::debug "This is a sub function."
 }
 
 
@@ -80,8 +80,8 @@ description: |-
   An hello world command.
 ---"
 function helloWorld() {
-  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
-  checkParseResults "${help:-}" "${parsingErrors:-}"
+  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   echo "Hello world!"
 }
@@ -103,8 +103,8 @@ description: |-
   If so, it will require the user to enter the sudo password and use sudo inside the command
 ---"
 function showCaseSudo() {
-  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
-  checkParseResults "${help:-}" "${parsingErrors:-}"
+  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   ${SUDO} whoami
 }
@@ -116,13 +116,13 @@ function showCaseSudo() {
 
 # This function is called before the program exits.
 function onExit() {
-  debug "Exiting a showcase command."
+  log::debug "Exiting a showcase command."
 }
 
 # This function is always called before the program ends and allows
 # you to do some custom clean up.
 function cleanUp() {
-  debug "Cleaning up stuff in the showcase commands."
+  log::debug "Cleaning up stuff in the showcase commands."
 }
 
 # This function should return 0 to cancel the interruption

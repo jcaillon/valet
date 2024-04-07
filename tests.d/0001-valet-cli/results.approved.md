@@ -286,7 +286,7 @@ EXAMPLES
 
 ```
 
-### Testing that we can display the help of a function using showHelp
+### Testing that we can display the help of a function using core::showHelp
 
 Exit code: `0`
 
@@ -366,8 +366,8 @@ Exit code: `0`
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 ERROR    Error code 1 in selfTestCore1(), stack:
 ├─ In function selfTestCore1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function runFunction() $VALET_HOME/valet.d/main:XXX
-├─ In function parseMainArguments() $VALET_HOME/valet.d/main:XXX
+├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
 └─ In function main() $VALET_HOME/valet:XXX
 ```
 
@@ -388,8 +388,8 @@ WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
 ├─ In function selfTestCore1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function runFunction() $VALET_HOME/valet.d/main:XXX
-├─ In function parseMainArguments() $VALET_HOME/valet.d/main:XXX
+├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
 └─ In function main() $VALET_HOME/valet:XXX
 ```
 
@@ -427,8 +427,8 @@ ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
 ERROR    Error code 1 in selfTestCore1(), stack:
 ├─ In function selfTestCore1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function runFunction() $VALET_HOME/valet.d/main:XXX
-├─ In function parseMainArguments() $VALET_HOME/valet.d/main:XXX
+├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
 └─ In function main() $VALET_HOME/valet:XXX
 ```
 

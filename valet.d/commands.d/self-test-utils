@@ -34,7 +34,7 @@ function endTest() {
   resetFdRedirection
 
   {
-    debug "Ended test ⌜${testTitle}⌝ with exit code ⌜${exitCode}⌝."
+    log::debug "Ended test ⌜${testTitle}⌝ with exit code ⌜${exitCode}⌝."
 
     # write the test title
     printf "%s\n\n" "### ${testTitle:-test}"
@@ -79,21 +79,16 @@ function endTest() {
 
 function runCoreTests() {
   if [[ ! -d "${VALET_HOME}/tests.d" ]]; then
-    fail "The valet core tests directory ⌜${VALET_HOME}/tests.d⌝ does not exist, can't run core tests."
+    log::error "The valet core tests directory ⌜${VALET_HOME}/tests.d⌝ does not exist, can't run core tests."
   fi
 
   local originalUserDirectory="${VALET_USER_DIRECTORY:-}"
 
   # we will run some example commands so we need to set the correct user directory and commands
   export VALET_USER_DIRECTORY="${VALET_HOME}/tests.d/0000-self-build"
-  local var
-  for var in ${!CMD_*}; do
-    unset "${var}"
-  done
-  unset _CMD_INCLUDED
-  sourceUserCommands
+  core::reloadUserCommands
 
-  inform "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
+  log::info "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
   runTestSuites "${VALET_HOME}/tests.d"
 
   VALET_USER_DIRECTORY="${originalUserDirectory}"
@@ -109,10 +104,10 @@ function runCoreTests() {
 function runTestSuites() {
   local testsDirectory="${1}"
 
-  createTempFile && _TEST_STANDARD_OUTPUT_FILE="${LAST_RETURNED_VALUE}"
-  createTempFile && _TEST_STANDARD_ERROR_FILE="${LAST_RETURNED_VALUE}"
-  createTempFile && _TEST_REPORT_FILE="${LAST_RETURNED_VALUE}"
-  createTempFile && _TEST_TEMP_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && _TEST_STANDARD_OUTPUT_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && _TEST_STANDARD_ERROR_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && _TEST_REPORT_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && _TEST_TEMP_FILE="${LAST_RETURNED_VALUE}"
 
   local -i failedTestSuites nbTestSuites
   failedTestSuites=0
@@ -128,16 +123,16 @@ function runTestSuites() {
 
     # skip if the test directory does not match the include pattern
     if [[ -n "${INCLUDE_PATTERN:-}" && ! ("${testDirectoryName}" =~ ${INCLUDE_PATTERN}) ]]; then
-      debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it does not match the include pattern."
+      log::debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it does not match the include pattern."
       continue
     fi
     # skip if the test directory matches the exclude pattern
     if [[ -n "${EXCLUDE_PATTERN:-}" && "${testDirectoryName}" =~ ${EXCLUDE_PATTERN} ]]; then
-      debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it matches the exclude pattern."
+      log::debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it matches the exclude pattern."
       continue
     fi
 
-    inform "Running test suite ⌜${testDirectory##*/}⌝."
+    log::info "Running test suite ⌜${testDirectory##*/}⌝."
 
     # write the test suite title
     printf "%s\n\n" "# Test suite ${testDirectory##*/}" >"${_TEST_REPORT_FILE}"
@@ -147,7 +142,7 @@ function runTestSuites() {
       # skip if not a file
       if [[ ! -e "${testScript}" ]]; then continue; fi
 
-      inform "Running test       ├── ⌜${testScript##*/}⌝."
+      log::info "Running test       ├── ⌜${testScript##*/}⌝."
 
       runTest "${testDirectory}" "${testScript}"
     done
@@ -157,9 +152,9 @@ function runTestSuites() {
     nbTestSuites+=1
 
     if [[ "${exitCode}" -eq 0 ]]; then
-      succeed "Test suite ${testDirectory##*/} passed."
+      log::success "Test suite ${testDirectory##*/} passed."
     else
-      warn "Test suite ${testDirectory##*/} failed."
+      log::warning "Test suite ${testDirectory##*/} failed."
       failedTestSuites+=1
     fi
   done
@@ -173,11 +168,11 @@ function runTestSuites() {
       failMessage+=$'\n'"You should review the difference in the logs above or by comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
       failMessage+=$'\n'"If the differences are legitimate, then approve the changes by running this command again with the option ⌜-a⌝."
     fi
-    fail "${failMessage}"
+    log::error "${failMessage}"
   elif [[ nbTestSuites -gt 0 ]]; then
-    succeed "A total of ⌜${nbTestSuites}⌝ tests passed!"
+    log::success "A total of ⌜${nbTestSuites}⌝ tests passed!"
   else
-    warn "No tests were found."
+    log::warning "No tests were found."
   fi
 
 }
@@ -210,11 +205,11 @@ function runTest() {
 
   resetFdRedirection
 
-  trap onExitInternal EXIT
+  trap main::onExitInternal EXIT
 
   # test if the user forgot to call endTest
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" || -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
-    fail "The test script ⌜${testScript}⌝ did not call endTest OR it had outputs after the last endTest call."
+    log::error "The test script ⌜${testScript}⌝ did not call endTest OR it had outputs after the last endTest call."
   fi
 
 }
@@ -229,22 +224,22 @@ function compareWithApproved() {
   receivedFile="${testDirectory}/results.received.md"
 
   if [[ ! -f "${approvedFile}" ]]; then
-    debug "🧪 ${testName}: no approved file, creating one."
+    log::debug "🧪 ${testName}: no approved file, creating one."
     : >"${approvedFile}"
   fi
 
   if diff --color -u "${approvedFile}" "${receivedFileToCopy}" 1>&2; then
-    debug "🧪 ${testName}: OK, equal to approved file."
+    log::debug "🧪 ${testName}: OK, equal to approved file."
     rm -f "${receivedFile}" 2>/dev/null || true
     return 0
   else
     echo "${receivedFile} is different than ${approvedFile} (see above)" 1>&2
-    warn "🧪 ${testName}: KO, differs from approved file (see difference above)." | tee >(cat >&2)
+    log::warning "🧪 ${testName}: KO, differs from approved file (see difference above)." | tee >(cat >&2)
   fi
 
   # if the option is activated, we approve the received file
   if [[ ${AUTO_APPROVE:-false} == "true" ]]; then
-    inform "🧪 ${testName}: Auto-approving"
+    log::info "🧪 ${testName}: Auto-approving"
     cp -f "${receivedFileToCopy}" "${approvedFile}"
     rm -f "${receivedFile}" 2>/dev/null || true
   else
@@ -262,14 +257,14 @@ function onExitTest() {
   resetFdRedirection
 
   local message="The program is exiting during a test with code ${rc}."$'\n'
-  readFile "${_TEST_STANDARD_ERROR_FILE}"
+  io::readFile "${_TEST_STANDARD_ERROR_FILE}"
   message+="Current test error output: ⌜${LAST_RETURNED_VALUE}⌝"$'\n'
   message+="If you expect the tested function/program to exit/fail, then run it in a subshell like that:"$'\n'"(myFunctionThatFails)"
 
-  warn "${message}"
+  log::warning "${message}"
 
   ERROR_DISPLAY=1
-  onExitInternal
+  main::onExitInternal
 }
 
 # After this function call, everything written to stdout and stderr will be redirected
@@ -289,9 +284,9 @@ function setFdRedirection() {
     ORIGINAL_VALET_DO_NOT_USE_LOCAL_BIN="${VALET_DO_NOT_USE_LOCAL_BIN:-}"
   fi
   export VALET_LOG_LEVEL="info"
-  setLogLevel info &>/dev/null
+  log::setLevel info &>/dev/null
   export VALET_NO_COLOR="true"
-  setLogColors
+  log::setColors
   export VALET_NO_TIMESTAMP="true"
   export VALET_NO_ICON="true"
   export VALET_NO_WRAP="true"
@@ -300,7 +295,7 @@ function setFdRedirection() {
   export _COLUMNS=9999
   export VALET_DO_NOT_USE_LOCAL_BIN="true"
   if [[ -z "${SIMPLIFIED_LOG_LINE_FUNCTION:-}" ]]; then
-    createLogLineFunction
+    log::createPrintFunction
     SIMPLIFIED_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
   fi
   eval "${SIMPLIFIED_LOG_LINE_FUNCTION}"
@@ -315,10 +310,10 @@ function resetFdRedirection() {
 
   # reset the original logs
   export VALET_LOG_LEVEL="${ORIGINAL_LOG_LEVEL}"
-  setLogLevel "${ORIGINAL_LOG_LEVEL}" &>/dev/null
+  log::setLevel "${ORIGINAL_LOG_LEVEL}" &>/dev/null
   export VALET_NO_COLOR="${ORIGINAL_VALET_NO_COLOR}"
   export VALET_DO_NOT_USE_LOCAL_BIN="${ORIGINAL_VALET_DO_NOT_USE_LOCAL_BIN}"
-  setLogColors
+  log::setColors
   eval "${ORIGINAL_LOG_LINE_FUNCTION}"
 }
 
@@ -328,11 +323,11 @@ function setGlobalOptions() {
     AUTO_APPROVE="true"
   fi
   if [[ -n "${include:-}" ]]; then
-    inform "Including only test suites that match the pattern ⌜${include}⌝."
+    log::info "Including only test suites that match the pattern ⌜${include}⌝."
     INCLUDE_PATTERN="${include}"
   fi
   if [[ -n "${exclude:-}" ]]; then
-    inform "Excluding all test suites that match the pattern ⌜${exclude}⌝."
+    log::info "Excluding all test suites that match the pattern ⌜${exclude}⌝."
     EXCLUDE_PATTERN="${exclude}"
   fi
 }

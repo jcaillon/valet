@@ -5,7 +5,7 @@ set -Eeu -o pipefail
 
 # in CI mode, we do not allow to go interactive because it would make the job hang forever
 if [[ ${VALET_CI_MODE:-false} == "true" ]]; then
-  fail "CI/CD mode is activated, interactive mode has been started but we cannot run fzf or we would make the job hang forever."
+  log::error "CI/CD mode is activated, interactive mode has been started but we cannot run fzf or we would make the job hang forever."
 fi
 
 # shellcheck source=lib-ansi-codes
@@ -116,10 +116,10 @@ function fullScreenInteractive() {
   # we still need to export the terminal size but in addition, we need to redraw.
   # Note: SIGWINCH does not interrupt a read command and wait for it to complete so we need
   # to set a timeout on read to allow this refresh.
-  trap 'exportTerminalSize; redraw' SIGWINCH
+  trap 'system::exportTerminalSize; redraw' SIGWINCH
 
   # still need to handle the exit, but we also need to reset the terminal when exiting.
-  trap 'resetTerminal; onExitInternal' EXIT
+  trap 'resetTerminal; main::onExitInternal' EXIT
 
   setupTerminal
   redraw
@@ -133,11 +133,11 @@ function fullScreenInteractive() {
     if [[ ! -t 1 || ${CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
   done
 
-  trap 'exportTerminalSize' SIGWINCH
-  trap 'onExitInternal' EXIT
+  trap 'system::exportTerminalSize' SIGWINCH
+  trap 'main::onExitInternal' EXIT
   resetTerminal
 
-  inform "Bye!"
+  log::info "Bye!"
 }
 
 # Ask the user to yes or no.
@@ -148,12 +148,12 @@ function fullScreenInteractive() {
 #  True or false in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
-#  promptYesNo "Do you want to continue?" && local answer="${LAST_RETURNED_VALUE}"
-function promptYesNo() {
+#  interactive::promptYesNo "Do you want to continue?" && local answer="${LAST_RETURNED_VALUE}"
+function interactive::promptYesNo() {
   local prompt
   prompt="${1}"
 
-  showFzf "yes-no" "" "${prompt}" ''
+  fzf::showFzf "yes-no" "" "${prompt}" ''
 
   # we keep only the selected value, i.e. the 2nd line
   LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE#*$'\n'}"

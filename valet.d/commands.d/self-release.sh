@@ -52,11 +52,11 @@ options:
     Do no create the release, just upload the artifacts to the latest release.
 ---"
 function selfRelease() {
-  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
-  checkParseResults "${help:-}" "${parsingErrors:-}"
+  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   if [[ ${dryRun:-} == "true" ]]; then
-    inform "Dry run mode is enabled, no changes will be made."
+    log::info "Dry run mode is enabled, no changes will be made."
   fi
 
   if [[ "${uploadArtifactsOnly:-}" != "true" ]]; then
@@ -65,20 +65,20 @@ function selfRelease() {
     createdReleaseJson="${LAST_RETURNED_VALUE}"
   else
     # get the latest release
-    kurl true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
+    kurl::toVar true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
     createdReleaseJson="${LAST_RETURNED_VALUE}"
   fi
 
   if [[ -n "${createdReleaseJson}" ]]; then
-    extractBetween "${createdReleaseJson}" '"upload_url":' '{?name,label}"'
-    extractBetween "${LAST_RETURNED_VALUE}" '"' ''
+    string::extractBetween "${createdReleaseJson}" '"upload_url":' '{?name,label}"'
+    string::extractBetween "${LAST_RETURNED_VALUE}" '"' ''
     uploadUrl="${LAST_RETURNED_VALUE}"
-    debug "The upload URL is: ${uploadUrl:-}"
+    log::debug "The upload URL is: ${uploadUrl:-}"
   fi
 
 
   # make sure to source the file in which this function is defined
-  sourceForFunction "selfDownloadBinaries" 2>/dev/null
+  core::sourceForFunction "selfDownloadBinaries" 2>/dev/null
 
   # prepare a temp folder to store the binaries
   local tempDir="${VALET_HOME}/.tmp"
@@ -105,7 +105,7 @@ function selfRelease() {
 
   rm -Rf "${tempDir}"
 
-  succeed "The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝."
+  log::success "The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝."
 
   return 0
 }
@@ -119,16 +119,16 @@ function createRelease() {
   if [[ "${dryRun:-}" != "true" ]]; then
     # check that we got the necessary token
     if [[ -z "${githubReleaseToken:-}" ]]; then
-      fail "The GitHub release token is required to create a new release."
+      log::error "The GitHub release token is required to create a new release."
     fi
 
     # check that the git workarea is clean
-    debug "Checking if the workarea is clean"
-    invoke3 false 0 git update-index --really-refresh 1>/dev/null || true
+    log::debug "Checking if the workarea is clean"
+    io::invoke3 false 0 git update-index --really-refresh 1>/dev/null || true
     local -i exitCode=0
-    invoke3 false 0 git diff-index --quiet HEAD || exitCode=$?
+    io::invoke3 false 0 git diff-index --quiet HEAD || exitCode=$?
     if [[ exitCode -ne 0 ]]; then
-      fail "The workarea is not clean, please commit your changes before releasing a new version."
+      log::error "The workarea is not clean, please commit your changes before releasing a new version."
     fi
   fi
 
@@ -136,21 +136,21 @@ function createRelease() {
   local version
   IFS= read -rd '' version <"${VALET_HOME}/valet.d/version" || true
   version="${version%%$'\n'*}"
-  inform "The current version of valet is: ${version}."
+  log::info "The current version of valet is: ${version}."
 
   # get the current latest tag
   local lastTag
-  invoke git tag --sort=committerdate --no-color
+  io::invoke git tag --sort=committerdate --no-color
   lastTag="${LAST_RETURNED_VALUE}"
   lastTag="${lastTag%%$'\n'}"
   lastTag="${lastTag##*$'\n'}"
-  inform "The last tag is: ${lastTag}."
+  log::info "The last tag is: ${lastTag}."
 
   # prepare the tag message
   local tagMessage line
   tagMessage="# Release of version ${version}"$'\n'$'\n'
   tagMessage+="Changelog: "$'\n'$'\n'
-  invoke git log --pretty=format:"%s" "${lastTag}..HEAD"
+  io::invoke git log --pretty=format:"%s" "${lastTag}..HEAD"
   local IFS=$'\n'
   for line in ${LAST_RETURNED_VALUE}; do
     if [[ ${line} == ":bookmark:"* ]]; then
@@ -159,26 +159,26 @@ function createRelease() {
     tagMessage+="- ${line}"$'\n'
   done
   IFS=$' '
-  inform "The tag message is:"$'\n'"${tagMessage}"
+  log::info "The tag message is:"$'\n'"${tagMessage}"
 
   # create a new git tag with the version and push it
   if [[ "${dryRun:-}" != "true" ]]; then
-    invoke git tag -a "v${version}" -m "Release version ${version}"
-    invoke git push origin "v${version}"
-    succeed "The new version has been tagged and pushed to the remote repository."
+    io::invoke git tag -a "v${version}" -m "Release version ${version}"
+    io::invoke git push origin "v${version}"
+    log::success "The new version has been tagged and pushed to the remote repository."
   fi
 
   # bump the version
-  bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${LAST_RETURNED_VALUE}"
+  string::bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${LAST_RETURNED_VALUE}"
   if [[ "${dryRun:-}" != "true" ]]; then echo -n "${newVersion}" >"${VALET_HOME}/valet.d/version"; fi
-  inform "The new version of valet is: ${newVersion}."
+  log::info "The new version of valet is: ${newVersion}."
 
   # commit the new version and push it
   if [[ "${dryRun:-}" != "true" ]]; then
-    invoke git add "${VALET_HOME}/valet.d/version"
-    invoke git commit -m ":bookmark: bump version to ${newVersion}"
-    invoke git push origin main
-    succeed "The new version has been committed."
+    io::invoke git add "${VALET_HOME}/valet.d/version"
+    io::invoke git commit -m ":bookmark: bump version to ${newVersion}"
+    io::invoke git push origin main
+    log::success "The new version has been committed."
   fi
 
   # prepare the release payload
@@ -191,13 +191,13 @@ function createRelease() {
     \"draft\": false,
     \"prerelease\": ${prerelease}
   }"
-  debug "The release payload is: ⌜${releasePayload}⌝"
+  log::debug "The release payload is: ⌜${releasePayload}⌝"
 
   # create the release on GitHub
   local uploadUrl
   local createdReleaseJson
   if [[ "${dryRun:-}" != "true" ]]; then
-    kurl true '201,422' -X POST \
+    kurl::toVar true '201,422' -X POST \
       -H "Authorization: token ${githubReleaseToken:-}" \
       -H "Accept: application/vnd.github.v3+json" \
       -H "Content-type: application/json; charset=utf-8" \
@@ -206,7 +206,7 @@ function createRelease() {
 
     createdReleaseJson="${LAST_RETURNED_VALUE}"
 
-    succeed "The new version has been released on GitHub."
+    log::success "The new version has been released on GitHub."
   fi
 
   LAST_RETURNED_VALUE="${createdReleaseJson:-}"
@@ -230,7 +230,7 @@ function uploadArtifact() {
   # copy each file from valet dir to current dir
   local file
   for file in "${files[@]}"; do
-    invoke cp -R "${VALET_HOME}/${file}" .
+    io::invoke cp -R "${VALET_HOME}/${file}" .
   done
 
   if [[ "${os}" != "no-binaries" ]]; then
@@ -239,13 +239,13 @@ function uploadArtifact() {
 
   # prepare artifact
   local artifactPath="${artifactName}.tar.gz"
-  invoke tar -czvf "${artifactPath}" "${files[@]}"
-  debug "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}"
+  io::invoke tar -czvf "${artifactPath}" "${files[@]}"
+  log::debug "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}"
 
   # upload the artifact
   if [[ "${dryRun:-}" != "true" && -n "${uploadUrl}" ]]; then
-    inform "Uploading the artifact ⌜${artifactPath}⌝ to ⌜${uploadUrl}⌝."
-    kurl true '' -X POST \
+    log::info "Uploading the artifact ⌜${artifactPath}⌝ to ⌜${uploadUrl}⌝."
+    kurl::toVar true '' -X POST \
       -H "Authorization: token ${githubReleaseToken:-}" \
       -H "Content-Type: application/tar+gzip" \
       --data-binary "@${artifactPath}" \

@@ -3,61 +3,61 @@
 # shellcheck source=../../valet.d/lib-io
 source io
 
-function testToAbsolutePath() {
+function testIo::toAbsolutePath() {
 
-  echo "→ toAbsolutePath \${PWD}/fakeexec"
-  toAbsolutePath "${PWD}/fakeexec" && echo "${LAST_RETURNED_VALUE}"
-
-  echo
-  echo "→ toAbsolutePath fakeexec"
-  toAbsolutePath "fakeexec" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ io::toAbsolutePath \${PWD}/fakeexec"
+  io::toAbsolutePath "${PWD}/fakeexec" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ toAbsolutePath ./fakeexec"
-  toAbsolutePath "./fakeexec" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ io::toAbsolutePath fakeexec"
+  io::toAbsolutePath "fakeexec" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ toAbsolutePath ../0003-self/fakeexec"
-  toAbsolutePath "../0003-self/fakeexec" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ io::toAbsolutePath ./fakeexec"
+  io::toAbsolutePath "./fakeexec" && echo "${LAST_RETURNED_VALUE}"
 
-  endTest "Testing toAbsolutePath" 0
+  echo
+  echo "→ io::toAbsolutePath ../0003-self/fakeexec"
+  io::toAbsolutePath "../0003-self/fakeexec" && echo "${LAST_RETURNED_VALUE}"
+
+  endTest "Testing io::toAbsolutePath" 0
 }
 
 function outputTextToStdErr() {
   echo "This is an error message" 1>&2
 }
 
-function testCaptureOutput() {
+function testIo::captureOutput() {
 
-  echo "→ captureOutput echo \"Hello world!\""
-  captureOutput echo "Hello world!" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ io::captureOutput echo \"Hello world!\""
+  io::captureOutput echo "Hello world!" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ captureOutput outputTextToStdErr"
-  captureOutput outputTextToStdErr && echo "${LAST_RETURNED_VALUE2}"
+  echo "→ io::captureOutput outputTextToStdErr"
+  io::captureOutput outputTextToStdErr && echo "${LAST_RETURNED_VALUE2}"
 
-  endTest "Testing captureOutput" 0
+  endTest "Testing io::captureOutput" 0
 }
 
-function testReadFile() {
+function testIo::readFile() {
 
-  echo "→ readFile 'resources/file-to-read' 100"
-  readFile 'resources/file-to-read' 100
+  echo "→ io::readFile 'resources/file-to-read' 100"
+  io::readFile 'resources/file-to-read' 100
   echo "${LAST_RETURNED_VALUE}"
 
-  endTest "Testing readFile limited to x chars" 0
+  endTest "Testing io::readFile limited to x chars" 0
 
-  echo "→ readFile 'resources/file-to-read'"
-  readFile 'resources/file-to-read'
+  echo "→ io::readFile 'resources/file-to-read'"
+  io::readFile 'resources/file-to-read'
   echo "${LAST_RETURNED_VALUE}"
 
-  endTest "Testing readFile unlimited" 0
+  endTest "Testing io::readFile unlimited" 0
 }
 
 function main() {
-  testToAbsolutePath
-  testCaptureOutput
-  testReadFile
+  testIo::toAbsolutePath
+  testIo::captureOutput
+  testIo::readFile
 }
 
 main

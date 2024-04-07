@@ -3,7 +3,7 @@
 # shellcheck source=../../valet.d/lib-interactive
 source interactive
 
-function testSortArray() {
+function testArray::sortArray() {
 
   declare -g MYARRAY=(
     breakdown
@@ -19,15 +19,15 @@ function testSortArray() {
   declare -p MYARRAY
 
   echo
-  echo "→ sortArray MYARRAY"
-  sortArray MYARRAY
+  echo "→ array::sortArray MYARRAY"
+  array::sortArray MYARRAY
 
   declare -p MYARRAY
 
-  endTest "Testing sortArray" 0
+  endTest "testArray::ing array::sortArray" 0
 }
 
-function testAppendToArrayIfNotPresent() {
+function testArray::appendToArrayIfNotPresent() {
 
   declare -g MYARRAY=(
     breakdown
@@ -37,30 +37,30 @@ function testAppendToArrayIfNotPresent() {
   declare -p MYARRAY
 
   echo
-  echo "→ appendToArrayIfNotPresent MYARRAY 'deliver'"
-  appendToArrayIfNotPresent MYARRAY 'deliver'
+  echo "→ array::appendToArrayIfNotPresent MYARRAY 'deliver'"
+  array::appendToArrayIfNotPresent MYARRAY 'deliver'
   echo $?
 
   declare -p MYARRAY
 
   echo
-  echo "→ appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday'"
-  appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday'
+  echo "→ array::appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday'"
+  array::appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday'
   echo $?
 
   declare -p MYARRAY
 
   echo
-  echo "→ appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'"
-  appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'
+  echo "→ array::appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'"
+  array::appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'
   echo $?
 
   declare -p MYARRAY
 
-  endTest "Testing appendToArrayIfNotPresent" 0
+  endTest "testArray::ing array::appendToArrayIfNotPresent" 0
 }
 
-function testIsInArray() {
+function testArray::isInArray() {
 
   declare -g MYARRAY=(
     breakdown
@@ -73,17 +73,17 @@ function testIsInArray() {
   declare -p MYARRAY
 
   echo
-  echo "→ isInArray MYARRAY 'deliver'"
-  isInArray MYARRAY 'deliver' && echo "$?"
+  echo "→ array::isInArray MYARRAY 'deliver'"
+  array::isInArray MYARRAY 'deliver' && echo "$?"
 
   echo
-  echo "→ isInArray MYARRAY 'holiday'"
-  isInArray MYARRAY 'holiday' || echo "$?"
+  echo "→ array::isInArray MYARRAY 'holiday'"
+  array::isInArray MYARRAY 'holiday' || echo "$?"
 
-  endTest "Testing isInArray" 0
+  endTest "testArray::ing array::isInArray" 0
 }
 
-function testMakeArraysSameSize {
+function testArray::makeArraysSameSize {
   declare -g array1=("a" "b" "c")
   declare -g array2=("" "2")
   declare -g array3=("x" "y" "z" "w")
@@ -91,19 +91,19 @@ function testMakeArraysSameSize {
   declare -p array1 array2 array3
 
   echo
-  echo "→ makeArraysSameSize array1 array2 array3 array4"
-  makeArraysSameSize array1 array2 array3 array4
+  echo "→ array::makeArraysSameSize array1 array2 array3 array4"
+  array::makeArraysSameSize array1 array2 array3 array4
 
   declare -p array1 array2 array3 array4
 
-  endTest "Testing makeArraysSameSize" 0
+  endTest "testArray::ing array::makeArraysSameSize" 0
 }
 
 function main() {
-  testSortArray
-  testAppendToArrayIfNotPresent
-  testIsInArray
-  testMakeArraysSameSize
+  testArray::sortArray
+  testArray::appendToArrayIfNotPresent
+  testArray::isInArray
+  testArray::makeArraysSameSize
 }
 
 main

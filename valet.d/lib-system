@@ -7,8 +7,8 @@ set -Eeu -o pipefail
 # Can be one of these values: "darwin", "linux", "windows".
 #
 # Usage:
-#  getOsName && local osName="${LAST_RETURNED_VALUE}"
-function getOsName() {
+#  system::getOsName && local osName="${LAST_RETURNED_VALUE}"
+function system::getOsName() {
   local osName
   case "${OSTYPE:-}" in
     darwin*) osName="darwin";;
@@ -26,10 +26,10 @@ function getOsName() {
 #   LAST_RETURNED_ARRAY_VALUE: An array with the list of all the environment variables.
 #
 # Usage:
-#   getEnvVars
+#   system::getEnvVars
 #   for var in "${LAST_RETURNED_ARRAY_VALUE[@]}"; do
 #       printf '%s=%s\n' "${var}" "${!var}"
 #   done
-function getEnvVars() {
+function system::getEnvVars() {
   mapfile -t LAST_RETURNED_ARRAY_VALUE < <(compgen -v)
 }

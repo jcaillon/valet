@@ -2,7 +2,7 @@
 
 ## Test script 00.tests
 
-### Testing bumpSemanticVersion
+### Testing string::bumpSemanticVersion
 
 Exit code: `0`
 
@@ -28,137 +28,137 @@ Exit code: `0`
 1.2.157-alpha
 ```
 
-### Testing kebabCaseToSnakeCase
+### Testing string::kebabCaseToSnakeCase
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ kebabCaseToSnakeCase this-is-a-test0
+→ string::kebabCaseToSnakeCase this-is-a-test0
 THIS_IS_A_TEST0
 
-→ kebabCaseToSnakeCase --another-test
+→ string::kebabCaseToSnakeCase --another-test
 ANOTHER_TEST
 ```
 
-### Testing kebabCaseToSnakeCase
+### Testing string::kebabCaseToSnakeCase
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ kebabCaseToSnakeCase this-is-a-test0
+→ string::kebabCaseToSnakeCase this-is-a-test0
 THIS_IS_A_TEST0
 
-→ kebabCaseToSnakeCase --another-test
+→ string::kebabCaseToSnakeCase --another-test
 ANOTHER_TEST
 ```
 
-### Testing kebabCaseToCamelCase
+### Testing string::kebabCaseToCamelCase
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ kebabCaseToCamelCase this-is-a-test0
+→ string::kebabCaseToCamelCase this-is-a-test0
 thisIsATest0
 
-→ kebabCaseToCamelCase --another-test
+→ string::kebabCaseToCamelCase --another-test
 anotherTest
 ```
 
-### Testing trimAll
+### Testing string::trimAll
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ trimAll '  a  super test  '
+→ string::trimAll '  a  super test  '
 a super test
 
-→ trimAll 'this is a command  '
+→ string::trimAll 'this is a command  '
 this is a command
 ```
 
-### Testing cutF
+### Testing string::cutField
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ cutF "field1 field2 field3" 1 " "
+→ string::cutField "field1 field2 field3" 1 " "
 field1
 
-→ cutF "field1 field2 field3" 2 " "
+→ string::cutField "field1 field2 field3" 2 " "
 field2
 
-→ cutF "field1 field2 field3" 3 " "
+→ string::cutField "field1 field2 field3" 3 " "
 field3
 
-→ cutF "field1 field2 field3" 4 " "
+→ string::cutField "field1 field2 field3" 4 " "
 field3
 
-→ cutF "line1 hm I wonder
+→ string::cutField "line1 hm I wonder
 line2 does it work on lines?
 line3 seems so" 2 $'\n'
 line2 does it work on lines?
 ```
 
-### Testing indexOf function
+### Testing string::indexOf function
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ indexOf 'hello' 'l'
+→ string::indexOf 'hello' 'l'
 2=2
 
-→ indexOf 'hello' 'he'
+→ string::indexOf 'hello' 'he'
 yeah
 0=0
 
-→ indexOf 'hello' 'he' 10
+→ string::indexOf 'hello' 'he' 10
 nop
 -1=-1
 
-→ indexOf 'yesyes' 'ye' 1
+→ string::indexOf 'yesyes' 'ye' 1
 3=3
 
-→ indexOf 'yesyes' 'yes' 3
+→ string::indexOf 'yesyes' 'yes' 3
 yeah
 3=3
 
-→ indexOf 'yesyes' 'yes' 5
+→ string::indexOf 'yesyes' 'yes' 5
 -1=-1
 
 ```
 
-### Testing extractBetween function
+### Testing string::extractBetween function
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ extractBetween 'hello' 'e' 'o'
+→ string::extractBetween 'hello' 'e' 'o'
 ll=⌈ll⌉
 
-→ extractBetween 'hello' '' 'l'
+→ string::extractBetween 'hello' '' 'l'
 he=⌈he⌉
 
-→ extractBetween 'hello' 'e' ''
+→ string::extractBetween 'hello' 'e' ''
 llo=⌈llo⌉
 
-→ extractBetween 'hello' 'a' ''
+→ string::extractBetween 'hello' 'a' ''
 =⌈⌉
 
-→ extractBetween 'hello' 'h' 'a'
+→ string::extractBetween 'hello' 'h' 'a'
 yeah
 =⌈⌉
 
@@ -167,12 +167,12 @@ multilinetext="1 line one
 3 line three
 4 line four"
 
-→ extractBetween "${multilinetext}" "one"$'\n' '4'
+→ string::extractBetween "${multilinetext}" "one"$'\n' '4'
 line 2 and 3=⌈2 line two
 3 line three
 ⌉
 
-→ extractBetween "${multilinetext}" "2 " $'\n'
+→ string::extractBetween "${multilinetext}" "2 " $'\n'
 line two=⌈line two⌉
 ```
 

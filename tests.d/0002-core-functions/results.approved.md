@@ -9,7 +9,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ wrapText "${shortText}" 30
+→ string::wrapText "${shortText}" 30
 ------------------------------
 You don't get better on the 
 days when you feel like going.
@@ -55,7 +55,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ wrapText "${shortText}" 90 4 false
+→ string::wrapText "${shortText}" 90 4 false
 ------------------------------------------------------------------------------------------
 You don't get better on the days when you feel like going. You get better on the days 
     when you don't want to go, but you go anyway. If you can overcome the negative energy 
@@ -80,7 +80,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ wrapText "${shortText}" 90 2 true
+→ string::wrapText "${shortText}" 90 2 true
 ------------------------------------------------------------------------------------------
   You don't get better on the days when you feel like going. You get better on the days 
   when you don't want to go, but you go anyway. If you can overcome the negative energy 
@@ -98,7 +98,7 @@ Exit code: `0`
   There were 2 new lines before this.
 ```
 
-### Testing fuzzyMatch
+### Testing string::fuzzyMatch
 
 Exit code: `0`
 
@@ -112,22 +112,22 @@ l3 self test-core1
 l4 self test-core2
 l5 ublievable"
 
-→ fuzzyMatch evle "${lines}"
+→ string::fuzzyMatch evle "${lines}"
 l2 very unbelievable
 
-→ fuzzyMatch sh2 "${lines}"
+→ string::fuzzyMatch sh2 "${lines}"
 l4 self test-core2
 
 # should prioritize lower index of u
-→ fuzzyMatch u "${lines}"
+→ string::fuzzyMatch u "${lines}"
 l2 unbelievable
 
 # should be the first equal match
-→ fuzzyMatch self "${lines}"
+→ string::fuzzyMatch self "${lines}"
 l3 self test-core1
 
 # should prioritize lower distance between letters
-→ fuzzyMatch lubl "${lines}"
+→ string::fuzzyMatch lubl "${lines}"
 l5 ublievable
 ```
 

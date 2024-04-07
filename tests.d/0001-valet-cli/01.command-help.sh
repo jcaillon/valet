@@ -29,16 +29,16 @@ function testHelp() {
   endTest "Testing that no arguments show the valet help" $?
 }
 
-function testShowHelp() {
-  # test that we can display the help of a function using showHelp
+function testCoreShowHelp() {
+  # test that we can display the help of a function using core::showHelp
   echo "→ valet self test-core1 show-help"
   ("${VALET_HOME}/valet" self test-core1 show-help)
-  endTest "Testing that we can display the help of a function using showHelp" $?
+  endTest "Testing that we can display the help of a function using core::showHelp" $?
 }
 
 function main() {
   testHelp
-  testShowHelp
+  testCoreShowHelp
 }
 
 main

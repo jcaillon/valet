@@ -2,23 +2,23 @@
 
 ## Test script 00.tests
 
-### Testing getOsName
+### Testing system::getOsName
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ OSTYPE=linux-bsd getOsName
+→ OSTYPE=linux-bsd system::getOsName
 linux
 
-→ OSTYPE=msys getOsName
+→ OSTYPE=msys system::getOsName
 windows
 
-→ OSTYPE=darwin-stuff getOsName
+→ OSTYPE=darwin-stuff system::getOsName
 darwin
 
-→ OSTYPE=nop getOsName
+→ OSTYPE=nop system::getOsName
 unknown
 
 ```

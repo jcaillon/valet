@@ -10,9 +10,9 @@ set -Eeu -o pipefail
 #
 # Usage:
 #   declare -g myArray=( "z" "a" "b" )
-#   sortArray myArray
+#   array::sortArray myArray
 #   echo "${myArray[@]}"
-function sortArray() {
+function array::sortArray() {
   local -n array=${1}
   local -i i j
   local temp
@@ -38,9 +38,9 @@ function sortArray() {
 #
 # Usage:
 #   declare -g myArray=( "a" "b" )
-#   appendToArrayIfNotPresent myArray "c"
+#   array::appendToArrayIfNotPresent myArray "c"
 #   echo "${myArray[@]}"
-function appendToArrayIfNotPresent() {
+function array::appendToArrayIfNotPresent() {
   local -n array="${1}"
   local value="${2}"
 
@@ -70,8 +70,8 @@ function appendToArrayIfNotPresent() {
 #
 # Usage:
 #   declare -g myArray=( "a" "b" )
-#   isInArray myArray "b" && echo "b is in the array"
-function isInArray() {
+#   array::isInArray myArray "b" && echo "b is in the array"
+function array::isInArray() {
   local -n array="${1}"
   local value="${2}"
 
@@ -90,8 +90,8 @@ function isInArray() {
 # $1+: The arrays (global variable names) to make the same size.
 #
 # Usage:
-#   makeArraysSameSize "array1" "array2" "array3"
-function makeArraysSameSize() {
+#   array::makeArraysSameSize "array1" "array2" "array3"
+function array::makeArraysSameSize() {
   local array
   local -i length
   local -a lengths

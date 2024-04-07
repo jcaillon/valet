@@ -36,8 +36,8 @@ function testOnInterrupt() {
 
 function main() {
   # make sure to source the file in which these known functions are defined
-  sourceForFunction "showcaseCommand1" 2> /dev/null
-  sourceForFunction "showCaseSudo" 2> /dev/null
+  core::sourceForFunction "showcaseCommand1" 2> /dev/null
+  core::sourceForFunction "showCaseSudo" 2> /dev/null
 
   testShowcaseCommand1
   testShowCaseSudo

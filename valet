@@ -107,4 +107,4 @@ source "${VALET_HOME}/valet.d/main"
 #===============================================================
 # >>> Run the main function
 #===============================================================
-parseMainArguments "$@"
+main::parseMainArguments "$@"

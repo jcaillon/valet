@@ -12,12 +12,12 @@ set -Eeu -o pipefail
 # $3: the separator (default to tab if not provided)
 #
 # Usage:
-#  cutF "field1 field2 field3" 2 " " && local field2="${LAST_RETURNED_VALUE}"
+#  string::cutField "field1 field2 field3" 2 " " && local field2="${LAST_RETURNED_VALUE}"
 #
 # Notes:
 #  To be fast, it does not check the number of fields in the string.
 #  If the field number is higher than the number of fields, it will return the last field, not an empty string.
-function cutF() {
+function string::cutField() {
   local str fieldNumber separator
   str="${1}"
   fieldNumber="${2}"
@@ -45,8 +45,8 @@ function cutF() {
 # $3: clear the prerelease and build (optional, defaults to true)
 #
 # Usage:
-#   bumpSemanticVersion "1.2.3-prerelease+build" "major" && local newVersion="${LAST_RETURNED_VALUE}"
-function bumpSemanticVersion() {
+#   string::bumpSemanticVersion "1.2.3-prerelease+build" "major" && local newVersion="${LAST_RETURNED_VALUE}"
+function string::bumpSemanticVersion() {
   local version level clearPreRelease
   version="${1}"
   bumpLevel="${2}"
@@ -69,7 +69,7 @@ function bumpSemanticVersion() {
   if [[ ${bumpLevel:-} == "minor" ]]; then level=2; fi
   local newVersion semVerString
   for semVerIndex in {1..3}; do
-    cutF "${version}" "${semVerIndex}" "." && semVerString="${LAST_RETURNED_VALUE%-*}"
+    string::cutField "${version}" "${semVerIndex}" "." && semVerString="${LAST_RETURNED_VALUE%-*}"
     semVerNumber="${semVerString%+}"
     if [[ semVerIndex -eq level ]]; then semVerNumber=$((semVerNumber + 1)); fi
     if [[ semVerIndex -gt level ]]; then semVerNumber=0; fi
@@ -94,8 +94,8 @@ function bumpSemanticVersion() {
 #   LAST_RETURNED_VALUE: The SNAKE_CASE string.
 #
 # Usage:
-#   camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
-function camelCaseToSnakeCase() {
+#   string::camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
+function string::camelCaseToSnakeCase() {
   local camelCase="${1}"
   local snakeCase=""
   local -i charIndex strLength=${#camelCase}
@@ -124,8 +124,8 @@ function camelCaseToSnakeCase() {
 #   LAST_RETURNED_VALUE: The SNAKE_CASE string.
 #
 # Usage:
-#   kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
-function kebabCaseToSnakeCase() {
+#   string::kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
+function string::kebabCaseToSnakeCase() {
   local kebabCase="${1}"
   local snakeCase=""
   local -i charIndex strLength=${#kebabCase}
@@ -154,8 +154,8 @@ function kebabCaseToSnakeCase() {
 #   LAST_RETURNED_VALUE: The camelCase string.
 #
 # Usage:
-#   kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${LAST_RETURNED_VALUE}"
-function kebabCaseToCamelCase() {
+#   string::kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${LAST_RETURNED_VALUE}"
+function string::kebabCaseToCamelCase() {
   local kebabCase="${1}"
   local camelCase=""
   local -i charIndex strLength=${#kebabCase}
@@ -182,8 +182,8 @@ function kebabCaseToCamelCase() {
 #   LAST_RETURNED_VALUE: The trimmed string.
 #
 # Usage:
-#   trimAll "   example   string    " && local trimmedString="${LAST_RETURNED_VALUE}"
-function trimAll() {
+#   string::trimAll "   example   string    " && local trimmedString="${LAST_RETURNED_VALUE}"
+function string::trimAll() {
     set -f
     set -- $*
     LAST_RETURNED_VALUE="$*"
@@ -200,9 +200,9 @@ function trimAll() {
 #  The index of the substring in the string or -1 if not found in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
-#  indexOf "This is a long text" "long" && local index="${LAST_RETURNED_VALUE}"
-#  indexOf "This is a long text" "long" 10 && local index="${LAST_RETURNED_VALUE}"
-function indexOf() {
+#  string::indexOf "This is a long text" "long" && local index="${LAST_RETURNED_VALUE}"
+#  string::indexOf "This is a long text" "long" 10 && local index="${LAST_RETURNED_VALUE}"
+function string::indexOf() {
   local search string
   local -i startingIndex
   string="${1}"
@@ -261,8 +261,8 @@ function indexOf() {
 #  The extracted text in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
-#  extractBetween "This is a long text" "is a " " text" && local extractedText="${LAST_RETURNED_VALUE}"
-function extractBetween() {
+#  string::extractBetween "This is a long text" "is a " " text" && local extractedText="${LAST_RETURNED_VALUE}"
+function string::extractBetween() {
   local string start end
   string="${1}"
   start="${2}"
@@ -271,7 +271,7 @@ function extractBetween() {
   local -i startIndex endIndex
 
   if [[ -n "${start}" ]]; then
-    indexOf "${string}" "${start}" && startIndex="${LAST_RETURNED_VALUE}"
+    string::indexOf "${string}" "${start}" && startIndex="${LAST_RETURNED_VALUE}"
     if [[ startIndex -eq -1 ]]; then
       LAST_RETURNED_VALUE=""
       return 0
@@ -282,7 +282,7 @@ function extractBetween() {
   fi
 
   if [[ -n "${end}" ]]; then
-    indexOf "${string}" "${end}" "${startIndex}" && endIndex="${LAST_RETURNED_VALUE}"
+    string::indexOf "${string}" "${end}" "${startIndex}" && endIndex="${LAST_RETURNED_VALUE}"
     if [[ endIndex -eq -1 ]]; then
       LAST_RETURNED_VALUE=""
       return 0

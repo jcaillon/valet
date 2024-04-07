@@ -56,8 +56,8 @@ options:
 ---"
 #TODO: let the user commands have a hook to download their own dependencies when this command is run
 function selfDownloadBinaries() {
-  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
-  checkParseResults "${help:-}" "${parsingErrors:-}"
+  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   destination="${destination:-${VALET_HOME}/bin}"
   # make sure the destination is an absolute path
@@ -67,26 +67,26 @@ function selfDownloadBinaries() {
 
   # for the sake of simplicity, we only deal with amd64 arch...
   if [[ "${HOSTTYPE:-x86_64}" != "x86_64" ]]; then
-    fail "Only amd64 architecture is supported for now but yours is ⌜${HOSTTYPE:-x86_64}⌝. Please download the binaries manually and add them in your PATH."
+    log::error "Only amd64 architecture is supported for now but yours is ⌜${HOSTTYPE:-x86_64}⌝. Please download the binaries manually and add them in your PATH."
   fi
 
   # get the OS
   local os="${forceOs:-}"
   if [[ -z "${forceOs:-}" ]]; then
-    getOsName
+    system::getOsName
     os="${LAST_RETURNED_VALUE}"
   fi
-  inform "Downloading the binaries for the OS: ${os}."
+  log::info "Downloading the binaries for the OS: ${os}."
 
   mkdir -p "${destination}"
 
-  createTempDirectory && pushd "${LAST_RETURNED_VALUE}" 1>/dev/null
+  io::createTempDirectory && pushd "${LAST_RETURNED_VALUE}" 1>/dev/null
   if [[ ! -e "${destination}/fzf" || "${force:-}" == "true" ]]; then
     downloadFzf "${os}" "0.48.1" "${destination}"
   fi
   popd 1>/dev/null
 
-  succeed "The binaries have been downloaded and stored in the bin directory of valet ⌜${destination}⌝."
+  log::success "The binaries have been downloaded and stored in the bin directory of valet ⌜${destination}⌝."
 
   return 0
 }
@@ -97,19 +97,19 @@ function downloadFzf() {
   local destination="${3}"
   if [[ ${os} == "linux" ]]; then
     local fzfUrl="https://github.com/junegunn/fzf/releases/download/${version}/fzf-${version}-${os}_amd64.tar.gz"
-    inform "Downloading fzf from: ${fzfUrl}."
-    kurlFile true 200 fzf.tar.gz "${fzfUrl}"
-    invoke tar -xzf fzf.tar.gz
-    invoke mv -f "fzf" "${destination}/fzf"
+    log::info "Downloading fzf from: ${fzfUrl}."
+    kurl::toFile true 200 fzf.tar.gz "${fzfUrl}"
+    io::invoke tar -xzf fzf.tar.gz
+    io::invoke mv -f "fzf" "${destination}/fzf"
   else
     local fzfUrl="https://github.com/junegunn/fzf/releases/download/${version}/fzf-${version}-${os}_amd64.zip"
-    inform "Downloading fzf from: ${fzfUrl}."
-    kurlFile true 200 fzf.zip "${fzfUrl}"
-    invoke unzip fzf.zip
+    log::info "Downloading fzf from: ${fzfUrl}."
+    kurl::toFile true 200 fzf.zip "${fzfUrl}"
+    io::invoke unzip fzf.zip
     if [[ ${os} == "darwin" ]]; then
-      invoke mv -f "fzf" "${destination}/fzf"
+      io::invoke mv -f "fzf" "${destination}/fzf"
     else
-      invoke mv -f "fzf.exe" "${destination}/fzf"
+      io::invoke mv -f "fzf.exe" "${destination}/fzf"
     fi
   fi
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sourceForFunction "selfRelease"
+core::sourceForFunction "selfRelease"
 
 function testSelfRelease() {
   local -i exitCode
@@ -10,15 +10,15 @@ function testSelfRelease() {
   selfRelease -t token -b major --dry-run && exitCode=0 || exitCode=$?
   endTest "Testing selfRelease, dry run major version" ${exitCode}
 
-  setLogLevel debug
+  log::setLevel debug
   echo "→ selfRelease -t token -b minor"
   selfRelease -t token -b minor && exitCode=0 || exitCode=$?
   endTest "Testing selfRelease, minor version" ${exitCode}
 }
 
 # need to override git, kurl
-function invoke5() {
-  echo "▶ called invoke5 $*" 1>&2
+function io::invoke5() {
+  echo "▶ called io::invoke5 $*" 1>&2
   if [[ ${5} == "uname" ]]; then
     echo -n "x86_64" > "${_TEMPORARY_STDOUT_FILE}"
     LAST_RETURNED_VALUE="${_TEMPORARY_STDOUT_FILE}"
@@ -29,8 +29,8 @@ function invoke5() {
   LAST_RETURNED_VALUE2=""
 }
 
-function invoke() {
-  echo "▶ called invoke $*" 1>&2
+function io::invoke() {
+  echo "▶ called io::invoke $*" 1>&2
   if [[ ${1} == "git" ]]; then
     while [[ $# -gt 0 ]]; do
       case "${1}" in
@@ -45,8 +45,8 @@ function invoke() {
   LAST_RETURNED_VALUE2=""
 }
 
-function kurl() {
-  echo "▶ called kurl $*" 1>&2
+function kurl::toVar() {
+  echo "▶ called kurl::toVar $*" 1>&2
   echo -n 200
   if [[ $* == *"tag_name"* ]]; then
     # post on the release endpoint
@@ -57,15 +57,15 @@ function kurl() {
 }
 
 
-function kurlFile() {
-  echo "▶ called kurlFile $*" 1>&2
+function kurl::toFile() {
+  echo "▶ called kurl::toFile $*" 1>&2
   echo -n 200
   LAST_RETURNED_VALUE=""
 }
 
 function main() {
 
-  createTempFile && local tmpFile="${LAST_RETURNED_VALUE}"
+  io::createTempFile && local tmpFile="${LAST_RETURNED_VALUE}"
   cp -f "${VALET_HOME}/valet.d/version" "${tmpFile}"
   echo -n "1.2.3" > "${VALET_HOME}/valet.d/version"
 
@@ -76,4 +76,4 @@ function main() {
 
 main
 
-resetIncludedFiles
+core::resetIncludedFiles

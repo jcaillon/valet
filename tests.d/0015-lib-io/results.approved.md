@@ -2,63 +2,63 @@
 
 ## Test script 00.tests
 
-### Testing toAbsolutePath
+### Testing io::toAbsolutePath
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ toAbsolutePath ${PWD}/fakeexec
+→ io::toAbsolutePath ${PWD}/fakeexec
 $VALET_HOME/tests.d/0015-lib-io/fakeexec
 
-→ toAbsolutePath fakeexec
+→ io::toAbsolutePath fakeexec
 $VALET_HOME/tests.d/0015-lib-io/fakeexec
 
-→ toAbsolutePath ./fakeexec
+→ io::toAbsolutePath ./fakeexec
 $VALET_HOME/tests.d/0015-lib-io/fakeexec
 
-→ toAbsolutePath ../0003-self/fakeexec
+→ io::toAbsolutePath ../0003-self/fakeexec
 $VALET_HOME/tests.d/0015-lib-io/fakeexec
 ```
 
-### Testing captureOutput
+### Testing io::captureOutput
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ captureOutput echo "Hello world!"
+→ io::captureOutput echo "Hello world!"
 Hello world!
 
 
-→ captureOutput outputTextToStdErr
+→ io::captureOutput outputTextToStdErr
 This is an error message
 
 ```
 
-### Testing readFile limited to x chars
+### Testing io::readFile limited to x chars
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ readFile 'resources/file-to-read' 100
+→ io::readFile 'resources/file-to-read' 100
 # Explore why veganism is kinder to animals, to people and to our planet's future.
 
 Source: <https:/
 ```
 
-### Testing readFile unlimited
+### Testing io::readFile unlimited
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ readFile 'resources/file-to-read'
+→ io::readFile 'resources/file-to-read'
 # Explore why veganism is kinder to animals, to people and to our planet's future.
 
 Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
@@ -88,15 +88,15 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ## Test script 01.invoke
 
-### Testing invoke5, executable are taken in priority from VALET_BIN_PATH, input stream from file
+### Testing io::invoke5, executable are taken in priority from VALET_BIN_PATH, input stream from file
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ invoke5 false 0 true "${tmpFile}" fakeexec --std-in --option argument1 argument2
-Invoke function ended with exit code ⌈0⌉.
+→ io::invoke5 false 0 true "${tmpFile}" fakeexec --std-in --option argument1 argument2
+io::invoke function ended with exit code ⌈0⌉.
 stdout from file:
 ⌈▶ called fakeexec --std-in --option argument1 argument2
 ▶ fakeexec input stream was:
@@ -106,15 +106,15 @@ stderr from file:
 
 ```
 
-### Testing invoke5, should return 1, input stream from string
+### Testing io::invoke5, should return 1, input stream from string
 
 Exit code: `1`
 
 **Standard** output:
 
 ```plaintext
-→ invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error
-Invoke function ended with exit code ⌈1⌉.
+→ io::invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error
+io::invoke function ended with exit code ⌈1⌉.
 stdout from file:
 ⌈▶ called fakeexec2 --std-in --error
 ▶ fakeexec2 input stream was:
@@ -125,14 +125,14 @@ returning 1 from fakeexec2⌉
 
 ```
 
-### Testing invoke5, should fail
+### Testing io::invoke5, should fail
 
 Exit code: `1`
 
 **Standard** output:
 
 ```plaintext
-→ invoke5 true 0 false inputStreamValue fakeexec2 --std-in --error
+→ io::invoke5 true 0 false inputStreamValue fakeexec2 --std-in --error
 exitcode=1
 ```
 
@@ -151,15 +151,15 @@ returning 1 from fakeexec2
 ⌝
 ```
 
-### Testing invoke5, should translate error 1 to 0
+### Testing io::invoke5, should translate error 1 to 0
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ invoke5 true 0,1,2 true '' fakeexec2 --error
-Invoke function ended with exit code ⌈0⌉.
+→ io::invoke5 true 0,1,2 true '' fakeexec2 --error
+io::invoke function ended with exit code ⌈0⌉.
 stdout from file:
 ⌈▶ called fakeexec2 --error
 ▶ fakeexec2 input stream was:
@@ -170,15 +170,15 @@ returning 1 from fakeexec2⌉
 
 ```
 
-### Testing invoke5var, should get stdout/stderr from var
+### Testing io::invoke5var, should get stdout/stderr from var
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ invoke5var false 0 true '' fakeexec2
-Invoke function ended with exit code ⌈0⌉.
+→ io::invoke5var false 0 true '' fakeexec2
+io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
 ⌈▶ called fakeexec2 
 ▶ fakeexec2 input stream was:
@@ -190,15 +190,15 @@ stderr from var:
 
 ```
 
-### Testing invoke5, with debug mode on
+### Testing io::invoke5, with debug mode on
 
 Exit code: `1`
 
 **Standard** output:
 
 ```plaintext
-→ invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error
-Invoke function ended with exit code ⌈1⌉.
+→ io::invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error
+io::invoke function ended with exit code ⌈1⌉.
 stdout from file:
 ⌈▶ called fakeexec2 --std-in --error
 ▶ fakeexec2 input stream was:
@@ -232,15 +232,15 @@ returning 1 from fakeexec2
 ⌝
 ```
 
-### Testing invoke3, output to files
+### Testing io::invoke3, output to files
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ invoke3 false 0 fakeexec2 --option argument1 argument2
-Invoke function ended with exit code ⌈0⌉.
+→ io::invoke3 false 0 fakeexec2 --option argument1 argument2
+io::invoke function ended with exit code ⌈0⌉.
 stdout from file:
 ⌈▶ called fakeexec2 --option argument1 argument2
 ▶ fakeexec2 input stream was:
@@ -250,15 +250,15 @@ stderr from file:
 
 ```
 
-### Testing invoke3var, output to var
+### Testing io::invoke3var, output to var
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ invoke3var false 0 fakeexec2 --option argument1 argument2
-Invoke function ended with exit code ⌈0⌉.
+→ io::invoke3var false 0 fakeexec2 --option argument1 argument2
+io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
 ⌈▶ called fakeexec2 --option argument1 argument2
 ▶ fakeexec2 input stream was:
@@ -270,14 +270,14 @@ stderr from var:
 
 ```
 
-### Testing invoke, should fail
+### Testing io::invoke, should fail
 
 Exit code: `1`
 
 **Standard** output:
 
 ```plaintext
-→ invoke fakeexec2 --error
+→ io::invoke fakeexec2 --error
 ```
 
 **Error** output:
@@ -295,15 +295,15 @@ returning 1 from fakeexec2
 ⌝
 ```
 
-### Testing invoke, output to var
+### Testing io::invoke, output to var
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ invoke fakeexec2 --option argument1 argument2
-Invoke function ended with exit code ⌈0⌉.
+→ io::invoke fakeexec2 --option argument1 argument2
+io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
 ⌈▶ called fakeexec2 --option argument1 argument2
 ▶ fakeexec2 input stream was:

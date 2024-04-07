@@ -7,7 +7,7 @@
 # we check for this variable to know if this script has already been included
 _CORE_INCLUDED=1
 
-# Handle the case where this script was invoked outside of valet
+# Handle the case where this script was io::invoked outside of valet
 if [[ -z "${VALET_HOME:-}" ]]; then
   VALET_HOME="${BASH_SOURCE[0]}"
   if [[ "${VALET_HOME}" != /* ]]; then
@@ -50,8 +50,8 @@ while [[ -e "${_TEMPORARY_DIRECTORY}" ]]; do _TEMPORARY_DIRECTORY+="x"; done
 # Creates a temporary file and return its path in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
-#  createTempFile && local file="${LAST_RETURNED_VALUE}"
-function createTempFile() {
+#  io::createTempFile && local file="${LAST_RETURNED_VALUE}"
+function io::createTempFile() {
   if [[ ! -d "${_TEMPORARY_DIRECTORY}" ]]; then
     mkdir -p "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
   fi
@@ -69,8 +69,8 @@ function createTempFile() {
 # Creates a temporary directory and return its path in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
-#  createTempDirectory && local directory="${LAST_RETURNED_VALUE}"
-function createTempDirectory() {
+#  io::createTempDirectory && local directory="${LAST_RETURNED_VALUE}"
+function io::createTempDirectory() {
   if [[ ! -d "${_TEMPORARY_DIRECTORY}" ]]; then
     mkdir -p "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
   fi
@@ -86,10 +86,13 @@ function createTempDirectory() {
 }
 
 # Removes all the tempoary files that were created.
+#
+# Usage:
+#  io::cleanupTempFiles
 # shellcheck disable=SC2016
-function cleanupTempFiles() {
+function io::cleanupTempFiles() {
   if [[ -e "${_TEMPORARY_DIRECTORY}" ]]; then
-    debug "Deleting temporary directory."
+    log::debug "Deleting temporary directory."
     rm -Rf "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
     unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
   fi
@@ -116,7 +119,7 @@ case "${TERM:-}" in
 esac
 
 # This function sets the colors used in the log messages.
-function setLogColors() {
+function log::setColors() {
   # the color code used to output colored text
   # shellcheck disable=SC2034
   if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
@@ -139,19 +142,22 @@ function setLogColors() {
     COLOR_HIGHLIGHT=""
   fi
 }
-setLogColors
+log::setColors
 
 # This function exports the terminal size in the global variables _COLUMNS and _LINES.
-function exportTerminalSize() {
+#
+# Usage:
+#   system::exportTerminalSize
+function system::exportTerminalSize() {
   shopt -s checkwinsize; (:;:)
   _COLUMNS="${COLUMNS:-180}"
   _LINES="${LINES:-30}"
   shopt -u checkwinsize
 }
-exportTerminalSize
+system::exportTerminalSize
 
 # Re export terminal size on window resize.
-trap exportTerminalSize SIGWINCH
+trap system::exportTerminalSize SIGWINCH
 
 # Set the log level.
 # The log level can be set to one of the following values:
@@ -164,8 +170,8 @@ trap exportTerminalSize SIGWINCH
 # $1: the log level to set (or defaults to info)
 #
 # Usage:
-#   setLogLevel "debug"
-function setLogLevel() {
+#   log::setLevel "debug"
+function log::setLevel() {
   # log level, defaults to info
   VALET_LOG_LEVEL="${1:-${VALET_LOG_LEVEL:-info}}"
   case "${VALET_LOG_LEVEL}" in
@@ -177,10 +183,10 @@ function setLogLevel() {
   esac
 
   if [[ ${_LOG_LEVEL_INT} -ne 1 ]]; then
-    debug "Log level set to ${VALET_LOG_LEVEL}."
+    log::debug "Log level set to ${VALET_LOG_LEVEL}."
   fi
   if [[ ${_LOG_LEVEL_INT} -eq 0 ]]; then
-    warn "Beware that debug log level might lead to secret leak, use it only if necessary."
+    log::warning "Beware that debug log level might lead to secret leak, use it only if necessary."
   fi
 }
 
@@ -188,17 +194,17 @@ function setLogLevel() {
 # The implementation depends on the environment variables VALET_CI_MODE and VALET_NO_WRAP.
 # $1: the color of the log message (red, green, yellow, cyan, gray, pink)
 # $2: the icon to display in the log message (utf8 character from nerdicons)
-# $3: the severity of the log message
+# $3: the severity of the log message (masx 7 chars)
 # $*: the content of the log message
 #
 # Usage:
-#   logLine "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
+#   log::print "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
 # shellcheck disable=SC2317
-function logLine() { return 0; }
+function log::print() { return 0; }
 # We build the log line function dynamically to adapt to the user options
 # This avoid to have to check the options at each log message
 # shellcheck disable=SC2016
-function createLogLineFunction() {
+function log::createPrintFunction() {
   # in CI mode, we disable wrapping, colors and icons
   if [[ ${VALET_CI_MODE:-} == "true" ]]; then
     VALET_NO_WRAP="${VALET_NO_WRAP:-true}"
@@ -207,7 +213,7 @@ function createLogLineFunction() {
   fi
 
   LOG_LINE_FUNCTION='
-  function logLine() {
+  function log::print() {
     local icon severity
     local -n color="COLOR_${1^^}"
     icon="${2}"
@@ -234,7 +240,7 @@ function createLogLineFunction() {
     fi
 
     LOG_LINE_FUNCTION+='
-    wrapText "${LAST_RETURNED_VALUE}" '"${wrapTextColumns}"' '"${wrapPaddingLength}"''
+    string::wrapText "${LAST_RETURNED_VALUE}" '"${wrapTextColumns}"' '"${wrapPaddingLength}"''
   fi
 
   local printfFormat
@@ -268,7 +274,7 @@ function createLogLineFunction() {
     printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&2
   }'
 }
-createLogLineFunction
+log::createPrintFunction
 eval "${LOG_LINE_FUNCTION}"
 
 
@@ -276,14 +282,14 @@ eval "${LOG_LINE_FUNCTION}"
 # $*: the error message to display
 #
 # Usage:
-#   fail "This is an error message."
-function fail() {
+#   log::error "This is an error message."
+function log::error() {
   local message="$*"
-  if isDebugEnabled; then
-    getStack 2 && local stack=$'\n'"stack:${LAST_RETURNED_VALUE}"
+  if log::isDebugEnabled; then
+    log::getCallStack 2 && local stack=$'\n'"stack:${LAST_RETURNED_VALUE}"
     message+="${stack:-}"
   fi
-  logLine "ERROR" $'\uf2d3' "ERROR" "${message}"
+  log::print "ERROR" $'\uf2d3' "ERROR" "${message}"
   # shellcheck disable=SC2034
   ERROR_DISPLAY=1
   exit 1
@@ -293,12 +299,12 @@ function fail() {
 # $*: the warning message to display
 #
 # Usage:
-#   warn "This is a warning message."
-function warn() {
+#   log::warning "This is a warning message."
+function log::warning() {
   if [[ ${_LOG_LEVEL_INT:-1} -gt 3 ]]; then
     return 0
   fi
-  logLine "WARNING" $'\uf071' "WARNING" "$*"
+  log::print "WARNING" $'\uf071' "WARNING" "$*"
   return 0
 }
 
@@ -306,12 +312,12 @@ function warn() {
 # $*: the success message to display
 #
 # Usage:
-#   succeed "This is a success message."
-function succeed() {
+#   log::success "This is a success message."
+function log::success() {
   if [[ ${_LOG_LEVEL_INT:-1} -gt 2 ]]; then
     return 0
   fi
-  logLine "SUCCESS" $'\uf14a' "SUCCESS" "$*"
+  log::print "SUCCESS" $'\uf14a' "SUCCESS" "$*"
   return 0
 }
 
@@ -319,12 +325,12 @@ function succeed() {
 # $*: the info message to display
 #
 # Usage:
-#   inform "This is an info message."
-function inform() {
+#   log::info "This is an info message."
+function log::info() {
   if [[ ${_LOG_LEVEL_INT:-1} -gt 1 ]]; then
     return 0
   fi
-  logLine "INFO" $'\uf05a' "INFO" "$*"
+  log::print "INFO" $'\uf05a' "INFO" "$*"
   return 0
 }
 
@@ -332,53 +338,24 @@ function inform() {
 # $*: the debug message to display
 #
 # Usage:
-#   debug "This is a debug message."
-function debug() {
+#   log::debug "This is a debug message."
+function log::debug() {
   if [[ ${_LOG_LEVEL_INT:-1} -gt 0 ]]; then
     return 0
   fi
-  logLine "DEBUG" $'\uf0ae' "DEBUG" "$*"
+  log::print "DEBUG" $'\uf0ae' "DEBUG" "$*"
   return 0
 }
 
 # Returns 0 if debug mode is active, 1 otherwise.
 #
 # Usage:
-#   isDebugEnabled && echo "Debug mode is active."
-function isDebugEnabled() {
+#   log::isDebugEnabled && echo "Debug mode is active."
+function log::isDebugEnabled() {
   if [[ ${_LOG_LEVEL_INT:-1} -eq 0 ]]; then
     return 0
   fi
   return 1
-}
-
-# Check last return code and fail (exit) if it is an error
-# $1: the return code
-# $2+ : the error message to display in case of error
-#
-# Usage:
-#   command_that_could_fail || checkAndFail "$?" "The command that could fail has failed!"
-function checkAndFail() {
-  if [[ "${1:-1}" != "0" ]]; then
-    shift
-    fail "$*"
-  fi
-  return 0
-}
-
-# Check last return code and return an error code if error
-# $1: the last return code
-# $2+ : the warning message to display in case of error
-#
-# Usage:
-#   command_that_could_fail || checkAndWarn "$?" "The command that could fail has failed!" || return "0"
-function checkAndWarn() {
-  if [[ "${1:-}" != "0" ]]; then
-    shift
-    warn "$*"
-    return 1
-  fi
-  return 0
 }
 
 # This function returns the current function stack.
@@ -387,8 +364,8 @@ function checkAndWarn() {
 # $1: the number of levels to skip (default to 2)
 #
 # Usage:
-#   getStack 2 && local stack="${LAST_RETURNED_VALUE}"
-function getStack() {
+#   log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
+function log::getCallStack() {
   local -i levelToSkip="${1:-2}"
   local stack i stackSize func linen src
   stack=""
@@ -410,10 +387,10 @@ function getStack() {
 
 # Parsing the options from environment variables
 if [[ -n "${VALET_LOG_LEVEL:-}" ]]; then
-  setLogLevel "${VALET_LOG_LEVEL}"
+  log::setLevel "${VALET_LOG_LEVEL}"
 fi
 if [[ ${VALET_VERBOSE=:-} == "true" ]]; then
-  setLogLevel "debug"
+  log::setLevel "debug"
 fi
 
 #===============================================================
@@ -442,7 +419,7 @@ function source() {
   elif [[ -e "${1}" ]]; then
     filePathToInclude="${1}"
   else
-    fail "The file ${1} could not be found."
+    log::error "The file ${1} could not be found."
   fi
   for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
     if [[ ${includedFile} == "${filePathToInclude}" ]]; then
@@ -461,10 +438,92 @@ _LIST_OF_INCLUDED_FILES=()
 # This is useful when we want to reload the libraries.
 #
 # Usage:
-#   resetIncludedFiles
-function resetIncludedFiles() {
+#   core::resetIncludedFiles
+function core::resetIncludedFiles() {
   _LIST_OF_INCLUDED_FILES=()
 }
+
+# Source the file associated with the function if needed.
+# $1: the function name
+#
+# Usage:
+#  core::sourceForFunction "functionName"
+function core::sourceForFunction() {
+  local functionName
+  functionName="${1}"
+
+  local fileToSource
+  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
+    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
+    if [[ -e "${fileToSource}" ]]; then
+      # shellcheck disable=SC1090
+      source "${fileToSource}"
+      log::debug "Loaded file ⌜${fileToSource}⌝."
+    elif [[ -e "${VALET_HOME:-}/${fileToSource}" ]]; then
+      # shellcheck disable=SC1090
+      source "${VALET_HOME:-}/${fileToSource}"
+      log::debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
+    else
+      log::warning "The file ⌜${VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
+    fi
+  fi
+}
+
+# Source the user 'commands' file from the valet user directory.
+# If the file does not exist, we use the examples commands.
+#
+# Usage:
+#  core::sourceUserCommands
+function core::sourceUserCommands() {
+  if [[ -n "${_CMD_INCLUDED:-}" ]]; then
+    return 0
+  fi
+
+  # source the user commands
+  local userDirectory
+  core::getUserDirectory && userDirectory="${LAST_RETURNED_VALUE}"
+
+  local commandsFile
+  commandsFile="${userDirectory}/commands"
+
+  # if the commands file does not exist, we use the examples commands or we fail
+  if [[ ! -e "${commandsFile}" ]]; then
+    local message
+    message="The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'
+    message+="To get started with valet, you must build your command list using the ⌜valet self build⌝ command."$'\n'
+    message+="Please check the help using ⌜valet self build --help⌝ for details."
+    commandsFile="${VALET_HOME}/examples.d/commands"
+    if [[ -e "${commandsFile}" ]]; then
+      message+=$'\n'"Now using the examples commands from ⌜${commandsFile%/*}⌝."
+      log::warning "${message}"
+    else
+      log::error "${message}"
+    fi
+  fi
+
+  log::debug "Sourcing the user commands from ⌜${commandsFile}⌝."
+
+  # source commands (use builtin to not use our custom source function)
+  builtin source "${commandsFile}"
+}
+
+# Forcibly source again the user 'commands' file from the valet user directory.
+#
+# Usage:
+#  core::reloadUserCommands
+function core::reloadUserCommands() {
+  # delete previous variables
+  local var
+  for var in ${!CMD_*}; do
+    unset "${var}"
+  done
+  unset _CMD_INCLUDED
+  core::sourceUserCommands
+}
+
+#===============================================================
+# >>> String utilities
+#===============================================================
 
 # Allows to soft wrap the given text at the given width.
 # Optionally applies left padding to each new line.
@@ -475,11 +534,11 @@ function resetIncludedFiles() {
 # Returns the wrapped text in the global variable LAST_RETURNED_VALUE
 #
 # Usage:
-#   wrapText "This is a long text that should be wrapped at 20 characters." 20 2 false && local wrappedText="${LAST_RETURNED_VALUE}"
+#   string::wrapText "This is a long text that should be wrapped at 20 characters." 20 2 false && local wrappedText="${LAST_RETURNED_VALUE}"
 #
 # Note:
 #   This function is written in pure bash and is faster than calling the fold command.
-function wrapText() {
+function string::wrapText() {
   local text width leftPaddingLength appendPaddingToFirstLine
   text="${1}"
   width="${2}"
@@ -497,12 +556,12 @@ function wrapText() {
 
   local wrappedText
 
-  # we call wrapSentence for each line of the text
+  # we call string::wrapSentence for each line of the text
   local firstLine="1"
   local line
   while read -r line; do
     wrappedText+=$'\n'
-    wrapSentence "${line}" "${sentenceWidth}" "${leftPadding}"
+    string::wrapSentence "${line}" "${sentenceWidth}" "${leftPadding}"
     if [[ ${firstLine} == "1" ]]; then
       firstLine="0"
     else
@@ -527,11 +586,11 @@ function wrapText() {
 # Returns the wrapped text in the global variable LAST_RETURNED_VALUE
 #
 # Usage:
-#   wrapSentence "This is a long text that should be wrapped at 20 characters." 20 && local wrappedText="${LAST_RETURNED_VALUE}"
+#   string::wrapSentence "This is a long text that should be wrapped at 20 characters." 20 && local wrappedText="${LAST_RETURNED_VALUE}"
 #
 # Note:
 #   This function is written in pure bash and is faster than calling the fold command.
-function wrapSentence() {
+function string::wrapSentence() {
   local text newLinePrefix
   local -i width
   text="${1}"
@@ -616,7 +675,7 @@ function wrapSentence() {
 # $2: the text (multiple lines) to match against
 #
 # Usage:
-#   fuzzyMatch "pattern" "line1\nline2\nline3" && local bestMatch="${LAST_RETURNED_VALUE}"
+#   string::fuzzyMatch "pattern" "line1\nline2\nline3" && local bestMatch="${LAST_RETURNED_VALUE}"
 #
 # Note:
 #   This function is written in pure bash and is faster than the fzf command.
@@ -624,7 +683,7 @@ function wrapSentence() {
 #   The function is case sensitive.
 #   We prioritize the lines that start with the pattern.
 #   Then we prioritize the lines that have the less distance between characters in the pattern.
-function fuzzyMatch() {
+function string::fuzzyMatch() {
   local pattern text
   pattern="${1}"
   text="${2}"
@@ -700,32 +759,6 @@ function fuzzyMatch() {
   LAST_RETURNED_VALUE="${bestMatch:-}"
 }
 
-# Source the file associated with the function if needed.
-# $1: the function name
-#
-# Usage:
-#  sourceForFunction "functionName"
-function sourceForFunction() {
-  local functionName
-  functionName="${1}"
-
-  local fileToSource
-  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
-    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
-    if [[ -e "${fileToSource}" ]]; then
-      # shellcheck disable=SC1090
-      source "${fileToSource}"
-      debug "Loaded file ⌜${fileToSource}⌝."
-    elif [[ -e "${VALET_HOME:-}/${fileToSource}" ]]; then
-      # shellcheck disable=SC1090
-      source "${VALET_HOME:-}/${fileToSource}"
-      debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
-    else
-      warn "The file ⌜${VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
-    fi
-  fi
-}
-
 #===============================================================
 # >>> Valet files and directories
 #===============================================================
@@ -734,8 +767,8 @@ function sourceForFunction() {
 # Creates it if missing.
 #
 # Usage:
-#   getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
-function getConfigurationDirectory() {
+#   core::getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
+function core::getConfigurationDirectory() {
   local directory
   directory="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}"
   if [[ ! -d "${directory}" ]]; then
@@ -749,8 +782,8 @@ function getConfigurationDirectory() {
 # Creates it if missing.
 #
 # Usage:
-#   getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
-function getLocalStateDirectory() {
+#   core::getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
+function core::getLocalStateDirectory() {
   local directory
   directory="${VALET_LOCAL_STATE_DIRECTORY:-${XDG_STATE_HOME:-$HOME/.local/share}/valet}"
   if [[ ! -d "${directory}" ]]; then
@@ -763,8 +796,8 @@ function getLocalStateDirectory() {
 # Does not create it if missing.
 #
 # Usage:
-#   getUserDirectory && local directory="${LAST_RETURNED_VALUE}"
-function getUserDirectory() {
+#   core::getUserDirectory && local directory="${LAST_RETURNED_VALUE}"
+function core::getUserDirectory() {
   LAST_RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"
 }
 
@@ -776,20 +809,20 @@ function getUserDirectory() {
 # This should be called from a command function for which you want to display the help text.
 #
 # Usage:
-#   showHelp
-function showHelp() {
+#   core::showHelp
+function core::showHelp() {
   local functionName
   # get the function name of the calling function
   functionName="${FUNCNAME[1]}"
 
-  printHelp funtion "${functionName}"
+  main::printHelp funtion "${functionName}"
 }
 
 # Parse the arguments and options of a function and return a string that can be evaluated to set the variables.
 # This should be called from a command function for which you want to parse the arguments.
 #
 # Usage:
-#   parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+#   core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
 #
 # Notes:
 #   - It will return a string that can be evaluated to set the variables
@@ -803,12 +836,12 @@ function showHelp() {
 #   - If the function expects arguments or options but none are provided, it will
 #     automatically go into interactive mode and ask the user inputs.
 #   - It will set the variable as an array if the (last) argument name ends with '...'
-function parseArguments() {
+function core::parseArguments() {
   local functionName
   # get the function name of the calling function
   functionName="${FUNCNAME[1]}"
 
-  parseFunctionArgumentsOrGoInteractive "${functionName}" "$@"
+  main::parseFunctionArgumentsOrmain::goInteractive "${functionName}" "$@"
 }
 
 # A convenience function to check the parsing results and display an error message if needed.
@@ -816,9 +849,9 @@ function parseArguments() {
 # This should be called from a command function for which you want to check the parsing results.
 #
 # Usage:
-#   checkParseResults "${help:-}" "${parsingErrors:-}"
-#   checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
-function checkParseResults() {
+#   core::checkParseResults "${help:-}" "${parsingErrors:-}"
+#   core::checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
+function core::checkParseResults() {
   local functionName help parsingErrors
   functionName="${3:-${FUNCNAME[1]}}"
 
@@ -826,13 +859,13 @@ function checkParseResults() {
   parsingErrors="${2:-}"
 
   if [[ -n "${help}" ]]; then
-    printHelp function "${functionName}"
+    main::printHelp function "${functionName}"
     exit 0
   fi
 
   if [[ -n "${parsingErrors:-}" ]]; then
     local -n commandName="CMD_COMMAND_${functionName}"
-    fail "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
+    log::error "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
   fi
 }
 

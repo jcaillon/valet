@@ -61,8 +61,8 @@ options:
     Example: --exclude '(1|commands)'
 ---"
 function selfTest() {
-  parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
-  checkParseResults "${help:-}" "${parsingErrors:-}"
+  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   setGlobalOptions
 
@@ -72,9 +72,9 @@ function selfTest() {
   fi
 
   # get the directory containing the tests for the commands
-  getUserDirectory
+  core::getUserDirectory
   userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
-  debug "User directory is ⌜${userDirectory}⌝."
+  log::debug "User directory is ⌜${userDirectory}⌝."
 
   # change the shell options to include hidden files
   shopt -s dotglob
@@ -82,12 +82,12 @@ function selfTest() {
 
   local testsDirectory
   for testsDirectory in "${userDirectory}"/**; do
-    debug "Tests directory: ⌜${testsDirectory}⌝."
+    log::debug "Tests directory: ⌜${testsDirectory}⌝."
     # if the directory is not a directory, skip
     if [[ ! -d "${testsDirectory}" ]]; then continue; fi
     # if the directory is named .tests.d, then it is a test directory
     if [[ ${testsDirectory} == *"/tests.d" ]]; then
-      inform "Running all test suites in directory ⌜${testsDirectory}⌝."
+      log::info "Running all test suites in directory ⌜${testsDirectory}⌝."
       runTestSuites "${testsDirectory}"
     fi
   done

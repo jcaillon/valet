@@ -71,7 +71,7 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
       printf "%-8s %s\n" "ERROR" "❌ $*"
       exit 1
     }
-    function getOsName() {
+    function system::getOsName() {
       case "${OSTYPE:-}" in
       darwin*) LAST_RETURNED_VALUE="darwin" ;;
       linux*) LAST_RETURNED_VALUE="linux" ;;
@@ -79,7 +79,7 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
       *) LAST_RETURNED_VALUE="unknown" ;;
       esac
     }
-    function getUserDirectory() { LAST_RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"; }
+    function core::getUserDirectory() { LAST_RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"; }
     VALET_USER_CONFIG_FILE="${VALET_USER_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
 
     VALET_NO_COLOR=true
@@ -122,7 +122,7 @@ function selfUpdate() {
   # check if valet already exists
   local valetAlreadyInstalled=false
   if command -v valet &>/dev/null; then
-    inform "Valet is already installed, updating it."
+    log::info "Valet is already installed, updating it."
     valetAlreadyInstalled=true
   fi
 
@@ -132,29 +132,29 @@ function selfUpdate() {
   fi
 
   # get the os
-  getOsName
+  system::getOsName
   local os="${LAST_RETURNED_VALUE}"
-  inform "The current OS is: ${os}."
+  log::info "The current OS is: ${os}."
 
   # set the default options
   local binDirectory
   if [[ ${SINGLE_USER_INSTALLATION:-false} == "true" || "${os}" == "windows" ]]; then
-    inform "Installing Valet for the current user only."
+    log::info "Installing Valet for the current user only."
     VALET_HOME="${VALET_HOME:-${HOME}/.local/valet}"
     binDirectory="${HOME}/.local/bin"
   else
-    inform "Installing Valet for all users."
+    log::info "Installing Valet for all users."
     VALET_HOME="${VALET_HOME:-/opt/valet}"
     binDirectory="/usr/local/bin"
   fi
 
   # make sure the old valet directory is not a git repository
   if [[ -d "${VALET_HOME}/.git" ]]; then
-    fail "The Valet directory ⌜${VALET_HOME}⌝ already exists and is a git repository, aborting (remove it manually and run the command again; or simply update with git pull)."
+    log::error "The Valet directory ⌜${VALET_HOME}⌝ already exists and is a git repository, aborting (remove it manually and run the command again; or simply update with git pull)."
   fi
 
   local tempDirectory="${TMPDIR:-/tmp}/temp-${BASHPID}.valet.install.d"
-  mkdir -p "${tempDirectory}" 1>/dev/null || fail "Could not create the temporary directory ⌜${tempDirectory}⌝."
+  mkdir -p "${tempDirectory}" 1>/dev/null || log::error "Could not create the temporary directory ⌜${tempDirectory}⌝."
 
   # download the latest release and unpack it
   local latestReleaseUrl
@@ -164,11 +164,11 @@ function selfUpdate() {
     latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet-${os}-amd64.tar.gz"
   fi
   local latestReleaseFile="${tempDirectory}/valet.tar.gz"
-  inform "Downloading the latest release from ⌜${latestReleaseUrl}⌝."
-  curl -fsSL -o "${latestReleaseFile}" "${latestReleaseUrl}" || fail "Could not download the latest release from ⌜${latestReleaseUrl}⌝."
-  debug "Unpacking the release in ⌜${VALET_HOME}⌝."
+  log::info "Downloading the latest release from ⌜${latestReleaseUrl}⌝."
+  curl -fsSL -o "${latestReleaseFile}" "${latestReleaseUrl}" || log::error "Could not download the latest release from ⌜${latestReleaseUrl}⌝."
+  log::debug "Unpacking the release in ⌜${VALET_HOME}⌝."
   tar -xzf "${latestReleaseFile}" -C "${tempDirectory}"
-  debug "The release has been unpacked in ⌜${VALET_HOME}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}."
+  log::debug "The release has been unpacked in ⌜${VALET_HOME}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}."
 
   # remove the old valet directory and move the new one
   rm -f "${latestReleaseFile}"
@@ -184,10 +184,10 @@ function selfUpdate() {
     # create the shim in the bin directory
     local valetBin="${binDirectory}/valet"
     if [[ -e "${valetBin}" && "${valetAlreadyInstalled}" == "false" ]]; then
-      warn "A valet shim already exists in ⌜${valetBin}⌝!?"
+      log::warning "A valet shim already exists in ⌜${valetBin}⌝!?"
     else
-      mkdir -p "${binDirectory}" 1>/dev/null || fail "Could not create the bin directory ⌜${binDirectory}⌝."
-      inform "Creating a shim ⌜${VALET_HOME}/valet → ${valetBin}⌝."
+      mkdir -p "${binDirectory}" 1>/dev/null || log::error "Could not create the bin directory ⌜${binDirectory}⌝."
+      log::info "Creating a shim ⌜${VALET_HOME}/valet → ${valetBin}⌝."
       {
         echo "#!/usr/bin/env bash"
         echo -n "'${VALET_HOME}/valet' \"\$@\""
@@ -196,9 +196,9 @@ function selfUpdate() {
     # make sure the valetBin directory is in the path or add it to ~.bashrc
     if ! command -v valet &>/dev/null; then
       if [[ ${NO_ADD_TO_PATH:-false} == true ]]; then
-        warn "Make sure to add ⌜${binDirectory}⌝ (or ⌜${VALET_HOME}⌝) in your PATH."
+        log::warning "Make sure to add ⌜${binDirectory}⌝ (or ⌜${VALET_HOME}⌝) in your PATH."
       else
-        inform "Adding ⌜${binDirectory}⌝ to your PATH via .bashrc right now."
+        log::info "Adding ⌜${binDirectory}⌝ to your PATH via .bashrc right now."
         printf "\n\n# Add Valet to the PATH\nexport PATH=\"%s:\${PATH}\"\n" "${binDirectory}" >>"${HOME}/.bashrc"
       fi
     fi
@@ -206,9 +206,9 @@ function selfUpdate() {
   fi
 
   # copy the examples if the user directory does not exist
-  getUserDirectory && local userDirectory="${LAST_RETURNED_VALUE}"
+  core::getUserDirectory && local userDirectory="${LAST_RETURNED_VALUE}"
   if [[ ! -d "${userDirectory}" ]]; then
-    inform "Copying the examples in ⌜${userDirectory}⌝."
+    log::info "Copying the examples in ⌜${userDirectory}⌝."
     cp -R "${VALET_HOME}/examples.d" "${userDirectory}"
   fi
 
@@ -221,9 +221,9 @@ function selfUpdate() {
   source "${VALET_HOME}/valet.d/commands.d/self-build"
 
   # silently build the commands
-  setLogLevel "error"
+  log::setLevel "error"
   selfBuild
-  setLogLevel "info"
+  log::setLevel "info"
 
   # run the post install command
   selfSetup
@@ -245,12 +245,12 @@ description: |-
   Let the user know what to do next.
 ---"
 function selfSetup() {
-  inform "Valet has been successfully installed."
+  log::info "Valet has been successfully installed."
 
   local valetConfigFileContent
   local answer
 
-  inform "Now running test with you to set up Valet."
+  log::info "Now running test with you to set up Valet."
 
   echo "─────────────────────────────────────"
   echo $'\e'"[0;36mThis is a COLOR CHECK, this line should be COLORED (in cyan by default)."$'\e'"[0m"
@@ -258,13 +258,13 @@ function selfSetup() {
   echo "─────────────────────────────────────"
 
   echo "Do you see the colors in the color check above the line?"
-  promptYesNo "Answer 'yes' if you see the colors."$'\n'"Answer 'no' if you don't see any colors."
+  interactive::promptYesNo "Answer 'yes' if you see the colors."$'\n'"Answer 'no' if you don't see any colors."
   answer="${LAST_RETURNED_VALUE}"
-  inform "You answered: ${answer}."
+  log::info "You answered: ${answer}."
 
   if [[ ${answer} == "false" ]]; then
     export VALET_NO_COLOR=true
-    createLogLineFunction
+    log::createPrintFunction
     eval "${LOG_LINE_FUNCTION}"
     valetConfigFileContent+="VALET_NO_COLOR=true"$'\n'
   fi
@@ -278,55 +278,55 @@ function selfSetup() {
   echo "─────────────────────────────────────"
 
   echo "Do you correctly see the nerd icons in the icon check above the line?"
-  promptYesNo "Answer 'yes' if you see the icons."$'\n'"Answer 'no' if you see ? or anything else instead of the icons."
+  interactive::promptYesNo "Answer 'yes' if you see the icons."$'\n'"Answer 'no' if you see ? or anything else instead of the icons."
   answer="${LAST_RETURNED_VALUE}"
-  inform "You answered: ${answer}."
+  log::info "You answered: ${answer}."
 
   if [[ ${answer} == "false" ]]; then
-    inform "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."
+    log::info "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."
 
     echo "Do you want to disable the icons in Valet?"
-    promptYesNo "Answer 'yes' to disable the icons."$'\n'"Answer 'no' if you plan to install a nerd font."
+    interactive::promptYesNo "Answer 'yes' to disable the icons."$'\n'"Answer 'no' if you plan to install a nerd font."
     answer="${LAST_RETURNED_VALUE}"
-    inform "You answered: ${answer}."
+    log::info "You answered: ${answer}."
 
     if [[ ${answer} == "true" ]]; then
       export VALET_NO_ICON=true
-      createLogLineFunction
+      log::createPrintFunction
       eval "${LOG_LINE_FUNCTION}"
       valetConfigFileContent+="VALET_NO_ICON=true"$'\n'
     fi
   fi
 
   if [[ -n "${valetConfigFileContent:-}" ]]; then
-    inform "Based on your answers, the following configuration will be added to your valet config file:"$'\n'"${valetConfigFileContent}"
-    inform "The valet config file is located at ⌜${VALET_USER_CONFIG_FILE}⌝."
+    log::info "Based on your answers, the following configuration will be added to your valet config file:"$'\n'"${valetConfigFileContent}"
+    log::info "The valet config file is located at ⌜${VALET_USER_CONFIG_FILE}⌝."
 
     echo "Do you want to apply this configuration?"
-    promptYesNo "Answer 'yes' to apply the configuration."$'\n'"Answer 'no' to skip this step."
+    interactive::promptYesNo "Answer 'yes' to apply the configuration."$'\n'"Answer 'no' to skip this step."
     answer="${LAST_RETURNED_VALUE}"
-    inform "You answered: ${answer}."
+    log::info "You answered: ${answer}."
     if [[ ${answer} == "true" ]]; then
-      mkdir -p "${VALET_USER_CONFIG_FILE%/*}" 1>/dev/null || fail "Could not create the valet config directory ⌜${VALET_USER_CONFIG_FILE%/*}⌝."
+      mkdir -p "${VALET_USER_CONFIG_FILE%/*}" 1>/dev/null || log::error "Could not create the valet config directory ⌜${VALET_USER_CONFIG_FILE%/*}⌝."
       echo "${valetConfigFileContent}" >>"${VALET_USER_CONFIG_FILE}"
-      inform "The configuration has been applied."
+      log::info "The configuration has been applied."
     fi
   fi
 
   # TODO: verify if /dev/shm is available and suggest to use it for the work files
 
-  succeed "The setup is complete!"
+  log::success "The setup is complete!"
 
   # TODO: verify that we have all the external tools we need:
   # awk for the profiler
   # diff for the self test
   # curl for the self update
 
-  succeed "You are all set!"
+  log::success "You are all set!"
 
   # tell the user about what's next todo
-  inform "You can now run ⌜valet --help⌝ to get started."
-  inform "You can create your own commands and have them available in valet, please check ⌜https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md⌝ or the examples under examples.d to do so."
+  log::info "You can now run ⌜valet --help⌝ to get started."
+  log::info "You can create your own commands and have them available in valet, please check ⌜https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md⌝ or the examples under examples.d to do so."
 
 }
 

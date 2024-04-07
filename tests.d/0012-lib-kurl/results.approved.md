@@ -2,15 +2,15 @@
 
 ## Test script 00.kurl
 
-### Testing kurlFile, should write to file
+### Testing kurl::toFile, should write to file
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ kurlFile false '' "${tmpFile}" --code 200 -curlOption1 --fakeOpt2 https://hello.com
-kurlFile false function ended with exit code ⌈0⌉.
+→ kurl::toFile false '' "${tmpFile}" --code 200 -curlOption1 --fakeOpt2 https://hello.com
+kurl::toFile false function ended with exit code ⌈0⌉.
 http return code was ⌈200⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
@@ -19,15 +19,15 @@ stderr:
 ⌉
 ```
 
-### Testing kurlFile, http code 500 not acceptable return 1
+### Testing kurl::toFile, http code 500 not acceptable return 1
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ kurlFile false '' "${tmpFile}" --code 500 https://hello.com
-kurlFile false function ended with exit code ⌈1⌉.
+→ kurl::toFile false '' "${tmpFile}" --code 500 https://hello.com
+kurl::toFile false function ended with exit code ⌈1⌉.
 http return code was ⌈500⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
@@ -36,14 +36,14 @@ stderr:
 ⌉
 ```
 
-### Testing kurlFile, http code 500 not acceptable fails
+### Testing kurl::toFile, http code 500 not acceptable fails
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ kurlFile true '' "${tmpFile}" --code 500 https://hello.com
+→ kurl::toFile true '' "${tmpFile}" --code 500 https://hello.com
 ```
 
 **Error** output:
@@ -55,15 +55,15 @@ Error output:
 ⌝
 ```
 
-### Testing kurlFile, http code 500 is now acceptable return 0
+### Testing kurl::toFile, http code 500 is now acceptable return 0
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ kurlFile false '300,500,999' "${tmpFile}" --code 500 https://hello.com
-kurlFile false function ended with exit code ⌈0⌉.
+→ kurl::toFile false '300,500,999' "${tmpFile}" --code 500 https://hello.com
+kurl::toFile false function ended with exit code ⌈0⌉.
 http return code was ⌈500⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
@@ -72,15 +72,15 @@ stderr:
 ⌉
 ```
 
-### Testing kurlFile, testing debug mode https code 400
+### Testing kurl::toFile, testing debug mode https code 400
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ kurlFile false '' "${tmpFile}" --code 400 --error https://hello.com/bla --otherOpt
-kurlFile false function ended with exit code ⌈1⌉.
+→ kurl::toFile false '' "${tmpFile}" --code 400 --error https://hello.com/bla --otherOpt
+kurl::toFile false function ended with exit code ⌈1⌉.
 http return code was ⌈400⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
@@ -112,15 +112,15 @@ DEBUG    The curl command for url ⌜https://hello.com/bla⌝ ended with exit co
 DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜https://hello.com/bla⌝.
 ```
 
-### Testing kurlFile, testing debug mode http code 200
+### Testing kurl::toFile, testing debug mode http code 200
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ kurlFile false '' "${tmpFile}" --code 200 http://hello.com
-kurlFile false function ended with exit code ⌈0⌉.
+→ kurl::toFile false '' "${tmpFile}" --code 200 http://hello.com
+kurl::toFile false function ended with exit code ⌈0⌉.
 http return code was ⌈200⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
@@ -158,8 +158,8 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ kurl false '' --code 200 http://hello.com
-kurl function ended with exit code ⌈0⌉.
+→ kurl::toVar false '' --code 200 http://hello.com
+kurl::toVar function ended with exit code ⌈0⌉.
 http return code was ⌈200⌉
 stdout:
 ⌈⌉
@@ -175,7 +175,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ kurl false '' --code 500 http://hello.com
+→ kurl::toVar false '' --code 500 http://hello.com
 ```
 
 **Error** output:
@@ -194,8 +194,8 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ kurl false '' --code 400 http://hello.com
-kurl function ended with exit code ⌈1⌉.
+→ kurl::toVar false '' --code 400 http://hello.com
+kurl::toVar function ended with exit code ⌈1⌉.
 http return code was ⌈400⌉
 stdout:
 ⌈Writing stuff to file because the --output option was given.⌉

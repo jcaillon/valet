@@ -9,8 +9,8 @@ function testProfiler() {
   # testing command profiling + startup
   if [[ TEMPORARY_DIRECTORY_NUMBER -lt 100 ]]; then TEMPORARY_DIRECTORY_NUMBER=100; fi
   if [[ TEMPORARY_FILE_NUMBER -lt 100 ]]; then TEMPORARY_FILE_NUMBER=100; fi
-  createTempFile && export VALET_COMMAND_PROFILING_FILE="${LAST_RETURNED_VALUE}"
-  createTempFile && export VALET_STARTUP_PROFILING_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && export VALET_COMMAND_PROFILING_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && export VALET_STARTUP_PROFILING_FILE="${LAST_RETURNED_VALUE}"
   export VALET_COMMAND_PROFILING_FILE
   export VALET_STARTUP_PROFILING_FILE
 
@@ -45,7 +45,7 @@ function testProfiler() {
 
 function testCommandProfiler() {
   # testing command profiling
-  createTempFile && export VALET_COMMAND_PROFILING_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && export VALET_COMMAND_PROFILING_FILE="${LAST_RETURNED_VALUE}"
   export VALET_COMMAND_PROFILING_FILE
 
 

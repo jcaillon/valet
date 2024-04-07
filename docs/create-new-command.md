@@ -38,15 +38,15 @@ Valet has a function to parse the expected options and arguments directly into v
 ```bash
 local myOption myArgument
 # parse the arguments of the command
-parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
 # check if we need to fail because there was some inputs errors or if we need to just display the help
-checkParseResults "${help:-}" "${parsingErrors:-}"
+core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
 # check if the user asked to just display the help of this command
-if [[ -n "${help:-}" ]]; then showHelp; return 0; fi
+if [[ -n "${help:-}" ]]; then core::showHelp; return 0; fi
 
 # check if the parser caught some errors and fail if so
-if [[ -n "${parsingErrors:-}" ]]; then fail "${parsingErrors}"; fi
+if [[ -n "${parsingErrors:-}" ]]; then log::error "${parsingErrors}"; fi
 
 # use options and arguments
 echo "${myOption} > ${myArgument}"
@@ -61,7 +61,7 @@ echo "${myOption} > ${myArgument}"
 - An argument named `my-other-args...` will translate to a local bash array `myOtherArgs` (camel case). Note that only the last argument can end with `...` to indicate an array of arguments.
 - `parsingErrors` will contain the parsing error messages (one per line).
 
-The function `parseFunctionArgumentsOrGoInteractive` will return a string that can be evaluated to define the parsed variables. E.g. it can look like that:
+The function `main::parseFunctionArgumentsOrmain::goInteractive` will return a string that can be evaluated to define the parsed variables. E.g. it can look like that:
 
 ```bash
 local parsingErrors myOption myArgument
@@ -107,7 +107,7 @@ Your command function is not working as expected or seems stuck ? Two ways to ap
 - Run your valet command in the bash debugger on visual studio.
 - Or use the `valet -x` option to enable the profiler (this turns the debug mode on `set -x`). This will output the complete trace in `~/profile_valet_cmd.txt` (or you can choose the destination with the environment variable `VALET_COMMAND_PROFILING_FILE`). You can see what the profiling file looks like in this [test report](../tests.d/0006-profiler/results.approved.md).
 
-Of course, a simpler strategy is to log stuff with `debug` (you can also do `if isDebugEnabled; then debug "stuff"; fi` to avoid computing a string value for debug).
+Of course, a simpler strategy is to log stuff with `debug` (you can also do `if log::isDebugEnabled; then log::debug "stuff"; fi` to avoid computing a string value for debug).
 
 You can active the debug log level with Valet `-v` option, e.g. `valet -v my command`.
 

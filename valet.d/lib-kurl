@@ -8,7 +8,7 @@ source io
 
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o ${2}.
+# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o ${2}.
 #
 # $1: true/false to indicate if the function should fail in case the execution fails
 # $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
@@ -21,8 +21,8 @@ source io
 #  The http status code in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#  kurlFile "true" "200,201" "/filePath" "https://example.com" || fail "The curl command failed."
-function kurlFile() {
+#  kurl::toFile "true" "200,201" "/filePath" "https://example.com" || log::error "The curl command failed."
+function kurl::toFile() {
   local failIfFails acceptableStatusCodes outputFile url
   failIfFails="${1:-false}"
   acceptableStatusCodes="${2:-200,201,202,204,301,304,308}"
@@ -32,7 +32,7 @@ function kurlFile() {
   # call curl
   local -i exitCode=0
   local httpStatusCode errors
-  invoke5var "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{http_code}" "--output" "${outputFile}" "$@" || exitCode=$?
+  io::invoke5var "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{http_code}" "--output" "${outputFile}" "$@" || exitCode=$?
   httpStatusCode="${LAST_RETURNED_VALUE}"
   errors="${LAST_RETURNED_VALUE2}"
 
@@ -41,20 +41,20 @@ function kurlFile() {
   url="${url%% *}"
   url="${url%% \'}"
 
-  debug "The curl command for url ⌜${url}⌝ ended with exit code ⌜${exitCode}⌝, the http return code was ⌜${httpStatusCode}⌝."
+  log::debug "The curl command for url ⌜${url}⌝ ended with exit code ⌜${exitCode}⌝, the http return code was ⌜${httpStatusCode}⌝."
 
   # if the error code is acceptable, then we set it to 0
   if [[ ,${acceptableStatusCodes}, == *",${httpStatusCode},"* ]]; then
     exitCode=0
-    debug "The http return code ⌜${httpStatusCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
+    log::debug "The http return code ⌜${httpStatusCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
   else
     exitCode=1
     local message="The http return code ⌜${httpStatusCode}⌝ is not acceptable for url ⌜${url}⌝."
     if [[ ${failIfFails} == "true" ]]; then
       message+=$'\n'"Error output:"$'\n'"⌜${errors}⌝"
-      fail "${message}"
+      log::error "${message}"
     fi
-    debug "${message}"
+    log::debug "${message}"
   fi
 
   LAST_RETURNED_VALUE="${errors}"
@@ -64,7 +64,7 @@ function kurlFile() {
 
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o "tempfile".
+# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o "tempfile".
 #
 # $1: true/false to indicate if the function should fail in case the execution fails
 # $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
@@ -77,8 +77,8 @@ function kurlFile() {
 #  The http status code in the global variable LAST_RETURNED_VALUE3.
 #
 # Usage:
-#  kurl false 200,201 https://example.com || fail "The curl command failed."
-function kurl() {
+#  kurl::toVar false 200,201 https://example.com || log::error "The curl command failed."
+function kurl::toVar() {
   local acceptableStatusCodes
   failIfFails="${1:-false}"
   acceptableStatusCodes="${2:-}"
@@ -89,16 +89,11 @@ function kurl() {
 
   local -i exitCode=0
   local errors httpStatusCode
-  kurlFile "${failIfFails}" "${acceptableStatusCodes}" "${_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
+  kurl::toFile "${failIfFails}" "${acceptableStatusCodes}" "${_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
   errors="${LAST_RETURNED_VALUE}"
   httpStatusCode="${LAST_RETURNED_VALUE2}"
 
-  local stdout
-  if [[ -s "${_TEMPORARY_WORK_FILE}" ]]; then
-    IFS= read -rd '' stdout < "${_TEMPORARY_WORK_FILE}" || true
-  fi
-
-  LAST_RETURNED_VALUE="${stdout:-}"
+  io::readFile "${_TEMPORARY_WORK_FILE}"
   LAST_RETURNED_VALUE2="${errors}"
   LAST_RETURNED_VALUE3="${httpStatusCode}"
   return ${exitCode}

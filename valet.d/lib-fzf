@@ -5,7 +5,7 @@ set -Eeu -o pipefail
 
 # in CI mode, we do not allow to go interactive because it would make the job hang forever
 if [[ ${VALET_CI_MODE:-false} == "true" ]]; then
-  fail "CI/CD mode is activated, interactive mode has been started but we cannot run fzf or we would make the job hang forever."
+  log::error "CI/CD mode is activated, interactive mode has been started but we cannot run fzf or we would make the job hang forever."
 fi
 
 #===============================================================
@@ -25,8 +25,8 @@ fi
 #  The first line is the query (can be empty), the next lines are the choices.
 #
 # Usage:
-#  showFzf "menu" "my-command" "Choose an option" "option1"$'\n'"option2"$'\n'"option3"
-function showFzf() {
+#  fzf::showFzf "menu" "my-command" "Choose an option" "option1"$'\n'"option2"$'\n'"option3"
+function fzf::showFzf() {
   local mode historyId header body
   mode="${1}"
   historyId="${2}"
@@ -37,16 +37,16 @@ function showFzf() {
   # shellcheck source=lib-io
   source io
 
-  getCommandFullPath "fzf"
+  io::getCommandLocalPath "fzf"
   local fzfExecutable="${LAST_RETURNED_VALUE}"
 
-  debug "Running fzf from ⌜${fzfExecutable}⌝."
+  log::debug "Running fzf from ⌜${fzfExecutable}⌝."
 
   local -a defaultOptions
   local -a modeOptions
 
   # get the history file
-  getLocalStateDirectory && local stateDirectory="${LAST_RETURNED_VALUE}"
+  core::getLocalStateDirectory && local stateDirectory="${LAST_RETURNED_VALUE}"
   local historyFile
   if [[ -n "${historyId}" ]]; then
     historyFile="${stateDirectory}/fzf-history-${historyId}"
@@ -141,7 +141,7 @@ function showFzf() {
     )
     ;;
   *)
-    fail "Unknown fzf mode ⌜${mode}⌝."
+    log::error "Unknown fzf mode ⌜${mode}⌝."
     ;;
   esac
 
@@ -158,7 +158,7 @@ ${COLOR_ERROR}SHIFT+UP${COLOR_DEFAULT}/${COLOR_ERROR}SHIFT+DOWN${COLOR_DEFAULT}:
 "
 
   if [[ -n "${helpPreview}" ]]; then
-    wrapText "${helpPreview}" "${previewWidth}"
+    string::wrapText "${helpPreview}" "${previewWidth}"
     helpPreview="${LAST_RETURNED_VALUE}"
     defaultOptions+=(
       "--bind=alt-h:preview(echo -e '${helpPreview}')"
