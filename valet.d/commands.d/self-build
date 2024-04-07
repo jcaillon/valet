@@ -94,8 +94,7 @@ function selfBuild() {
   local -a commandDefinitionFiles
   commandDefinitionFiles=(
     "${VALET_HOME}/valet"
-    "${VALET_HOME}/valet.d/main"
-    "${VALET_HOME}/valet.d/commands.d"/self-build
+    "${BASH_SOURCE[0]}"
     "${VALET_HOME}/valet.d/commands.d"/*.sh
   )
   if [[ -d "${userDirectory}" ]]; then
