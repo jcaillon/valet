@@ -70,8 +70,8 @@ _CMD_INCLUDED=1
 
 CMD_ALL_COMMANDS=$'self\nhelp\nself build\nself download-binaries\nself mock1\nself mock2\nself mock3\nself release\nself setup\nself test\nself update'
 CMD_ALL_COMMANDS_ARRAY=([0]="help" [1]="self build" [2]="self download-binaries" [3]="self mock1" [4]="self mock2" [5]="self mock3" [6]="self release" [7]="self setup" [8]="self test" [9]="self update")
-CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfDownloadBinaries\nselfUpdate\nselfSetup\nselfMock1\nselfMock2\nselfMock3\nselfRelease\nselfTest'
-CMD_ALL_FUNCTIONS_ARRAY=([0]="this" [1]="showCommandHelp" [2]="selfBuild" [3]="selfDownloadBinaries" [4]="selfUpdate" [5]="selfSetup" [6]="selfMock1" [7]="selfMock2" [8]="selfMock3" [9]="selfRelease" [10]="selfTest")
+CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfDownloadBinaries\nselfUpdate\nselfMock1\nselfMock2\nselfMock3\nselfRelease\nselfSetup\nselfTest'
+CMD_ALL_FUNCTIONS_ARRAY=([0]="this" [1]="showCommandHelp" [2]="selfBuild" [3]="selfDownloadBinaries" [4]="selfUpdate" [5]="selfMock1" [6]="selfMock2" [7]="selfMock3" [8]="selfRelease" [9]="selfSetup" [10]="selfTest")
 CMD_ALL_MENU_COMMANDS_ARRAY=([0]="self")
 CMD_ARGS_LAST_IS_ARRAY_selfMock1="false"
 CMD_ARGS_LAST_IS_ARRAY_selfMock2="true"
@@ -131,7 +131,7 @@ CMD_FILETOSOURCE_selfMock1="valet.d/commands.d/self-mock.sh"
 CMD_FILETOSOURCE_selfMock2="valet.d/commands.d/self-mock.sh"
 CMD_FILETOSOURCE_selfMock3="valet.d/commands.d/self-mock.sh"
 CMD_FILETOSOURCE_selfRelease="valet.d/commands.d/self-release.sh"
-CMD_FILETOSOURCE_selfSetup="valet.d/commands.d/self-install.sh"
+CMD_FILETOSOURCE_selfSetup="valet.d/commands.d/self-setup.sh"
 CMD_FILETOSOURCE_selfTest="valet.d/commands.d/self-test.sh"
 CMD_FILETOSOURCE_selfUpdate="valet.d/commands.d/self-install.sh"
 CMD_FILETOSOURCE_showCommandHelp="valet.d/commands.d/help.sh"
@@ -252,13 +252,14 @@ INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-downloa
 INFO                              ├── ⌜self download-binaries⌝.
 INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-install.sh⌝.
 INFO                              ├── ⌜self update⌝.
-INFO                              ├── ⌜self setup⌝.
 INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
 INFO                              ├── ⌜self mock1⌝.
 INFO                              ├── ⌜self mock2⌝.
 INFO                              ├── ⌜self mock3⌝.
 INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-release.sh⌝.
 INFO                              ├── ⌜self release⌝.
+INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-setup.sh⌝.
+INFO                              ├── ⌜self setup⌝.
 INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-test.sh⌝.
 INFO                              ├── ⌜self test⌝.
 INFO     == Summary of the commands ==

@@ -755,7 +755,7 @@ WARNING  This is a custom clean up function.
 
 ### Testing with a non existing user directory
 
-Exit code: `1`
+Exit code: `0`
 
 **Standard** output:
 
@@ -770,8 +770,10 @@ WARNING  The valet user directory ⌜$VALET_HOME/non-existing⌝ does not contai
 To get started with valet, you must build your command list using the ⌜valet self build⌝ command.
 Please check the help using ⌜valet self build --help⌝ for details.
 Now using the examples commands from ⌜$VALET_HOME/examples.d⌝.
-INFO     Fuzzy matching the command ⌜self mock1⌝ to ⌜self mock1⌝.
-ERROR    Could not find a command for ⌜self mock1⌝.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
 ```
 
 ## Test script 08.submenu
