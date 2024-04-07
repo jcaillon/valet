@@ -15,7 +15,7 @@ http return code was ⌈200⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 200 -curlOption1 --fakeOpt2 https://hello.com
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 200 -curlOption1 --fakeOpt2 https://hello.com
 ⌉
 ```
 
@@ -32,7 +32,7 @@ http return code was ⌈500⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 500 https://hello.com
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
 ⌉
 ```
 
@@ -51,7 +51,7 @@ Exit code: `0`
 ```log
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://hello.com⌝.
 Error output:
-⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 500 https://hello.com
+⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
 ⌝
 ```
 
@@ -68,7 +68,7 @@ http return code was ⌈500⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 500 https://hello.com
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
 ⌉
 ```
 
@@ -85,7 +85,7 @@ http return code was ⌈400⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 400 --error https://hello.com/bla --otherOpt
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt
 Returning 1 from curl.
 ⌉
 ```
@@ -100,12 +100,12 @@ Fail if it fails: ⌜false⌝
 Acceptable error codes: ⌜0⌝
 Standard stream from file: ⌜false⌝
 Standard stream: ⌜⌝
-Extra parameters: ⌜--silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 400 --error https://hello.com/bla --otherOpt⌝
+Extra parameters: ⌜--silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt⌝
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜1⌝.
 Standard output:
 ⌜400⌝
 Error output:
-⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 400 --error https://hello.com/bla --otherOpt
+⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt
 Returning 1 from curl.
 ⌝
 DEBUG    The curl command for url ⌜https://hello.com/bla⌝ ended with exit code ⌜1⌝, the http return code was ⌜400⌝.
@@ -125,7 +125,7 @@ http return code was ⌈200⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 200 http://hello.com
+⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 200 http://hello.com
 ⌉
 ```
 
@@ -139,13 +139,13 @@ Fail if it fails: ⌜false⌝
 Acceptable error codes: ⌜0⌝
 Standard stream from file: ⌜false⌝
 Standard stream: ⌜⌝
-Extra parameters: ⌜--silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 200 http://hello.com⌝
+Extra parameters: ⌜--silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 200 http://hello.com⌝
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
 Standard output:
 ⌜200⌝
 Error output:
-⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/kurl-test --code 200 http://hello.com
+⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 200 http://hello.com
 ⌝
 DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
 DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.

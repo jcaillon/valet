@@ -37,12 +37,13 @@ fi
 # to be fast, we do not create anything until we really need it
 # this could lead to issues, altough it is very unlikely
 _TEMPORARY_PREFIX="${TMPDIR:-/tmp}/temp-"
-_TEMPORARY_WORK_FILE="${_TEMPORARY_PREFIX}${BASHPID}.valet-work"
-while [ -e "${_TEMPORARY_WORK_FILE}" ]; do _TEMPORARY_WORK_FILE+="x"; done
-_TEMPORARY_STDOUT_FILE="${_TEMPORARY_PREFIX}${BASHPID}.valet-stdout"
-while [ -e "${_TEMPORARY_STDOUT_FILE}" ]; do _TEMPORARY_STDOUT_FILE+="x"; done
-_TEMPORARY_STDERR_FILE="${_TEMPORARY_PREFIX}${BASHPID}.valet-stderr"
-while [ -e "${_TEMPORARY_STDERR_FILE}" ]; do _TEMPORARY_STDERR_FILE+="x"; done
+_TEMPORARY_IN_MEM_PREFIX="${VALET_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/temp-"
+_TEMPORARY_WORK_FILE="${_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-work"
+while [[ -e "${_TEMPORARY_WORK_FILE}" ]]; do _TEMPORARY_WORK_FILE+="x"; done
+_TEMPORARY_STDOUT_FILE="${_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stdout"
+while [[ -e "${_TEMPORARY_STDOUT_FILE}" ]]; do _TEMPORARY_STDOUT_FILE+="x"; done
+_TEMPORARY_STDERR_FILE="${_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stderr"
+while [[ -e "${_TEMPORARY_STDERR_FILE}" ]]; do _TEMPORARY_STDERR_FILE+="x"; done
 _TEMPORARY_DIRECTORY="${_TEMPORARY_PREFIX}${BASHPID}.valet.d"
 while [[ -e "${_TEMPORARY_DIRECTORY}" ]]; do _TEMPORARY_DIRECTORY+="x"; done
 

@@ -313,6 +313,8 @@ function selfSetup() {
     fi
   fi
 
+  # TODO: verify if /dev/shm is available and suggest to use it for the work files
+
   succeed "The setup is complete!"
 
   # TODO: verify that we have all the external tools we need:

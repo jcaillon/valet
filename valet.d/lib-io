@@ -63,10 +63,6 @@ function invoke5() {
   executable="${5}"
   shift 5
 
-  # reset the output files, but only if they already exist
-  if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then : > "${_TEMPORARY_STDOUT_FILE}"; fi
-  if [[ -s "${_TEMPORARY_STDERR_FILE}" ]]; then : > "${_TEMPORARY_STDERR_FILE}"; fi
-
   getCommandFullPath "${executable}"
   executable="${LAST_RETURNED_VALUE}"
 
@@ -246,6 +242,9 @@ function getCommandFullPath() {
 }
 
 # Execute the given command and return the output in the global variable LAST_RETURNED_VALUE.
+# In windows, this is tremendously faster than doing myvar="$(mycommand)".
+# On linux, it is slighly faster (but it might be slower if you don't have SSD?).
+# On linux, you can use a tmpfs directory for massive gains over subshells.
 #
 # $1+: the command to execute (with args)
 #

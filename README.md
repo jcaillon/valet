@@ -182,6 +182,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - head / tail from file.
 - New self command that writes a default user config file with the default values. This is called on selfSetup.
 - Allow to regroup single letter options (e.g. -fsSL).
+- Frame questions in interactive mode.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

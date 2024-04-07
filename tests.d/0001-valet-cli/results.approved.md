@@ -213,6 +213,8 @@ ABOUT
   - VALET_REMEMBER_LAST_CHOICES='3': number of last choices to remember when selecting an item from a command menu. Set to 0 to disable this feature and always display items in the
   alphabetical order.
   - VALET_DO_NOT_USE_LOCAL_BIN='false': if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
+  - VALET_WORK_FILES_DIRECTORY='': the directory in which to write work files (small files to capture output of programs). If not set, it will default to the temporary directory. 
+  You can set it to a tmpfs directory (such as /dev/shm) to speed up the execution of valet.
   
   These variables can be exported in your .bashrc file.
   Alternatively, you can define them in your valet user config file, located by default at ~/.config/valet/config. This path can be configured using the VALET_USER_CONFIG_FILE 
@@ -445,7 +447,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
-▶ called ⌈fzf --history=/tmp/d1-0/fzf-history-main-menu --history-size=50 --bind alt-up:prev-history --bind alt-down:next-history --bind=alt-h:preview(echo -e 'HELP
+▶ called ⌈fzf --history=/tmp/valet.d/d1-0/fzf-history-main-menu --history-size=50 --bind alt-up:prev-history --bind alt-down:next-history --bind=alt-h:preview(echo -e 'HELP
 
 Navigate through the options with the UP/DOWN keys.
 
@@ -790,7 +792,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
-▶ called ⌈fzf --history=/tmp/d1-0/fzf-history-self
+▶ called ⌈fzf --history=/tmp/valet.d/d1-0/fzf-history-self
 --history-size=50
 --bind
 alt-up:prev-history
