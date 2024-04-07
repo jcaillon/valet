@@ -5,7 +5,7 @@ set -Eeu -o pipefail
 # Description:   This script is called during development to build the commands script.
 #                It reads all the files in which we could find command definitions and generates commands script.
 #                You can call this script directly in case calling ⌜valet self build⌝ is broken:
-#                $ ./valet.d/commands.d/self-build
+#                $ ./valet.d/commands.d/self-build.sh
 
 _CMD_INCLUDED=1
 
@@ -52,7 +52,7 @@ description: |-
 
   You can call this script directly in case calling ⌜valet self build⌝ is broken:
 
-  → ./valet.d/commands.d/self-build
+  → ./valet.d/commands.d.sh
 options:
 - name: -d, --user-directory <path>
   description: |-
@@ -94,7 +94,6 @@ function selfBuild() {
   local -a commandDefinitionFiles
   commandDefinitionFiles=(
     "${VALET_HOME}/valet"
-    "${BASH_SOURCE[0]}"
     "${VALET_HOME}/valet.d/commands.d"/*.sh
   )
   if [[ -d "${userDirectory}" ]]; then

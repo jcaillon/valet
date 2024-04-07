@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../../valet.d/lib-interactive
-source interactive
+# shellcheck source=../../valet.d/lib-array
+source array
 
 function testArray::sortArray() {
 

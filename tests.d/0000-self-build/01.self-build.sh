@@ -3,7 +3,7 @@
 function testSelfBuild() {
 
   # log::setLevel "debug"
-  selfBuild --output "commands" --user-directory ""
+  "${VALET_HOME}/valet.d/commands.d/self-build.sh" --output "commands" --user-directory ""
 
   local content
   IFS= read -rd '' content <"commands" || true
@@ -13,8 +13,6 @@ function testSelfBuild() {
 }
 
 function main() {
-  core::sourceForFunction selfBuild
-
   testSelfBuild
 
   core::reloadUserCommands

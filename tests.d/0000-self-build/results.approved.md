@@ -70,8 +70,8 @@ _CMD_INCLUDED=1
 
 CMD_ALL_COMMANDS=$'self\nhelp\nself build\nself download-binaries\nself release\nself setup\nself test\nself test-core1\nself test-core2\nself test-core3\nself update'
 CMD_ALL_COMMANDS_ARRAY=([0]="help" [1]="self build" [2]="self download-binaries" [3]="self release" [4]="self setup" [5]="self test" [6]="self test-core1" [7]="self test-core2" [8]="self test-core3" [9]="self update")
-CMD_ALL_FUNCTIONS=$'this\nselfBuild\nshowCommandHelp\nselfDownloadBinaries\nselfUpdate\nselfSetup\nselfTestCore1\nselfTestCore2\nselfTestCore3\nselfRelease\nselfTest'
-CMD_ALL_FUNCTIONS_ARRAY=([0]="this" [1]="selfBuild" [2]="showCommandHelp" [3]="selfDownloadBinaries" [4]="selfUpdate" [5]="selfSetup" [6]="selfTestCore1" [7]="selfTestCore2" [8]="selfTestCore3" [9]="selfRelease" [10]="selfTest")
+CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfDownloadBinaries\nselfUpdate\nselfSetup\nselfTestCore1\nselfTestCore2\nselfTestCore3\nselfRelease\nselfTest'
+CMD_ALL_FUNCTIONS_ARRAY=([0]="this" [1]="showCommandHelp" [2]="selfBuild" [3]="selfDownloadBinaries" [4]="selfUpdate" [5]="selfSetup" [6]="selfTestCore1" [7]="selfTestCore2" [8]="selfTestCore3" [9]="selfRelease" [10]="selfTest")
 CMD_ALL_MENU_COMMANDS_ARRAY=([0]="self")
 CMD_ARGS_LAST_IS_ARRAY_selfTestCore1="false"
 CMD_ARGS_LAST_IS_ARRAY_selfTestCore2="true"
@@ -108,7 +108,7 @@ CMD_COMMAND_selfUpdate="self update"
 CMD_COMMAND_showCommandHelp="help"
 CMD_COMMAND_this=""
 CMD_DESCRIPTION__menu="Show a menu with sub commands for the current command."
-CMD_DESCRIPTION_selfBuild=$'This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.\n\nPlease check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.\n\nThis scripts:\n  - Makes a list of all the elligible files in which we could find command definitions.\n  - For each file in this list, extract the command definitions.\n  - Build your commands file (in your valet user directory) from these definitions.\n\nYou can call this script directly in case calling ⌜valet self build⌝ is broken:\n\n→ ./valet.d/commands.d/self-build'
+CMD_DESCRIPTION_selfBuild=$'This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.\n\nPlease check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.\n\nThis scripts:\n  - Makes a list of all the elligible files in which we could find command definitions.\n  - For each file in this list, extract the command definitions.\n  - Build your commands file (in your valet user directory) from these definitions.\n\nYou can call this script directly in case calling ⌜valet self build⌝ is broken:\n\n→ ./valet.d/commands.d.sh'
 CMD_DESCRIPTION_selfDownloadBinaries=$'Download the required binaries for valet: fzf.\n\nThese binaries will be stored in the bin directory of valet and used in priority over the binaries in your PATH.'
 CMD_DESCRIPTION_selfRelease=$'Release a new version of valet.\n\nIt will:\n- creates a git tag and pushes it to the remote repository,\n- bump the version of valet,\n- commit the new version.'
 CMD_DESCRIPTION_selfSetup=$'The command run after the installation of Valet to setup the tool.\n\nAdjust the Valet configuration according to the user environment.\nLet the user know what to do next.\n'
@@ -125,7 +125,7 @@ CMD_EXAMPLES_DESCRIPTION_this=([0]="Displays this help text." [1]=$'Active ⌜ve
 CMD_EXAMPLES_NAME_selfTestCore2=([0]="self test-core2 -o -2 value1 arg1 more1 more2")
 CMD_EXAMPLES_NAME_showCommandHelp=([0]="help cmd" [1]="help cmd subCmd" [2]="help --no-colors --columns 50")
 CMD_EXAMPLES_NAME_this=([0]="--help" [1]="-v a-command and-sub-command")
-CMD_FILETOSOURCE_selfBuild="valet.d/commands.d/self-build"
+CMD_FILETOSOURCE_selfBuild="valet.d/commands.d/self-build.sh"
 CMD_FILETOSOURCE_selfDownloadBinaries="valet.d/commands.d/self-download-binaries.sh"
 CMD_FILETOSOURCE_selfRelease="valet.d/commands.d/self-release.sh"
 CMD_FILETOSOURCE_selfSetup="valet.d/commands.d/self-install.sh"
@@ -243,10 +243,10 @@ CMD_SUDO_selfTestCore3="true"
 ```log
 INFO     Extracting commands from ⌜$VALET_HOME/valet⌝.
 INFO                              ├── ⌜⌝.
-INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-build⌝.
-INFO                              ├── ⌜self build⌝.
 INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/help.sh⌝.
 INFO                              ├── ⌜help⌝.
+INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-build.sh⌝.
+INFO                              ├── ⌜self build⌝.
 INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-download-binaries.sh⌝.
 INFO                              ├── ⌜self download-binaries⌝.
 INFO     Extracting commands from ⌜$VALET_HOME/valet.d/commands.d/self-install.sh⌝.

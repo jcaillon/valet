@@ -218,7 +218,7 @@ function selfUpdate() {
     source "${VALET_HOME}/valet.d/core"
   fi
   # shellcheck source=self-build
-  source "${VALET_HOME}/valet.d/commands.d/self-build"
+  source "${VALET_HOME}/valet.d/commands.d/self-build.sh"
 
   # silently build the commands
   log::setLevel "error"

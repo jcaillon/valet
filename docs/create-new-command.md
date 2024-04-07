@@ -88,7 +88,7 @@ In case of error, your function should call the `fail` directly which will exit 
 
 ## 4. Rebuild valet menu
 
-In order to find your new command in the valet menu; you need to call the `self build` command. Either from the valet menu or by executing directly `./valet.d/self-build`. The later option is mandatory if you have an issue with the `valet.d/cmd` file itself.
+In order to find your new command in the valet menu; you need to call the `self build` command. Either from the valet menu or by executing directly `./valet.d/commands.d/self-build.sh`. The later option is mandatory if you have an issue with the `valet.d/cmd` file itself.
 
 The build process consists of recreating the `valet.d/cmd` program by reading all the `about_xxx` functions and extracting info from the YAML definition. It also appends all the functions defined in `cmd-extra`.
 
