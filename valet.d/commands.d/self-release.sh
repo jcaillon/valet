@@ -21,6 +21,7 @@ source kurl
 : "---
 command: self release
 function: selfRelease
+hideInMenu: true
 author: github.com/jcaillon
 shortDescription: Release a new version of valet.
 description: |-

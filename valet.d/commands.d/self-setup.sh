@@ -20,6 +20,7 @@ source interactive
 : "---
 command: self setup
 function: selfSetup
+hideInMenu: true
 author: github.com/jcaillon
 shortDescription: The command run after the installation of Valet to setup the tool.
 description: |-

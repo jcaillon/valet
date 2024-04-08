@@ -463,8 +463,6 @@ Please select the command to run. --print-query --no-multi --preview-label=Comma
 ▶ fzf input stream was:
 ⌈help                  	Show the help this program or of a specific command.
 self build            	Re-build the menu of valet from your commands.
-self release          	Release a new version of valet.
-self setup            	The command run after the installation of Valet to setup the tool.
 self test             	Test your valet custom commands.
 self update           	Update valet using the latest release on GitHub.⌉
 ```
@@ -830,8 +828,6 @@ Please select the command to run.
 --preview=VALET_LOG_LEVEL=error '$_VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
 ▶ fzf input stream was:
 ⌈self build            	Re-build the menu of valet from your commands.
-self release          	Release a new version of valet.
-self setup            	The command run after the installation of Valet to setup the tool.
 self test             	Test your valet custom commands.
 self update           	Update valet using the latest release on GitHub.⌉
 ```

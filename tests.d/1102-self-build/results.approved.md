@@ -94,7 +94,7 @@ CMD_ARGUMENTS_NAME_selfMock2=([0]="firstArg" [1]="more...")
 CMD_ARGUMENTS_NAME_showCommandHelp=([0]="commands?...")
 CMD_ARGUMENTS_NAME_this=([0]="commands?...")
 CMD_COMMANDS_DESCRIPTION_this=([0]="Show the help this program or of a specific command." [1]="Re-build the menu of valet from your commands." [2]="Open the configuration file of Valet with your default editor." [3]="Download the required binaries for valet." [4]="A command that only for testing valet core functions." [5]="A command that only for testing valet core functions." [6]="A command that only for testing valet core functions." [7]="Release a new version of valet." [8]="The command run after the installation of Valet to setup the tool." [9]="Test your valet custom commands." [10]="Update valet using the latest release on GitHub.")
-CMD_COMMANDS_MENU_BODY=$'help                  \tShow the help this program or of a specific command.\nself build            \tRe-build the menu of valet from your commands.\nself release          \tRelease a new version of valet.\nself setup            \tThe command run after the installation of Valet to setup the tool.\nself test             \tTest your valet custom commands.\nself update           \tUpdate valet using the latest release on GitHub.'
+CMD_COMMANDS_MENU_BODY=$'help                  \tShow the help this program or of a specific command.\nself build            \tRe-build the menu of valet from your commands.\nself test             \tTest your valet custom commands.\nself update           \tUpdate valet using the latest release on GitHub.'
 CMD_COMMANDS_NAME_this=([0]="help" [1]="self build" [2]="self config" [3]="self download-binaries" [4]="self mock1" [5]="self mock2" [6]="self mock3" [7]="self release" [8]="self setup" [9]="self test" [10]="self update")
 CMD_COMMAND_selfBuild="self build"
 CMD_COMMAND_selfConfig="self config"
@@ -157,6 +157,8 @@ CMD_HIDEINMENU_selfDownloadBinaries="true"
 CMD_HIDEINMENU_selfMock1="true"
 CMD_HIDEINMENU_selfMock2="true"
 CMD_HIDEINMENU_selfMock3="true"
+CMD_HIDEINMENU_selfRelease="true"
+CMD_HIDEINMENU_selfSetup="true"
 CMD_MAX_COMMAND_WIDTH="22"
 CMD_MAX_SUB_COMMAND_LEVEL="1"
 CMD_OPTIONS_DESCRIPTION__menu="Display the help for this command."
@@ -279,7 +281,7 @@ INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-test.s
 INFO                              ├── ⌜self test⌝.
 INFO     == Summary of the commands ==
 
-- Number of variables declared: ⌜181⌝.
+- Number of variables declared: ⌜183⌝.
 - Number of functions: ⌜12⌝.
 - Number of commands: ⌜11⌝.
 - Maximum sub command level: ⌜1⌝.
@@ -288,8 +290,6 @@ INFO     == Summary of the commands ==
 
 help                  	Show the help this program or of a specific command.
 self build            	Re-build the menu of valet from your commands.
-self release          	Release a new version of valet.
-self setup            	The command run after the installation of Valet to setup the tool.
 self test             	Test your valet custom commands.
 self update           	Update valet using the latest release on GitHub.
 
@@ -300,6 +300,8 @@ self download-binaries	Download the required binaries for valet.
 self mock1            	A command that only for testing valet core functions.
 self mock2            	A command that only for testing valet core functions.
 self mock3            	A command that only for testing valet core functions.
+self release          	Release a new version of valet.
+self setup            	The command run after the installation of Valet to setup the tool.
 
 INFO     The command definition variables have been written to ⌜/tmp/valet.d/f501-0⌝.
 SUCCESS  The valet user commands have been successfully built
