@@ -17,8 +17,7 @@
 #     - '/usr/local/bin' in case of a multi user installation
 #     - '~/.local/bin' otherwise
 #   - Copy the examples in the user valet directory '~/.valet.d'.
-#   - Run `valet self build` to update the valet commands.
-#   - Run the post install command (in case of an installation).
+#   - Run self setup command (in case of an installation).
 #
 # Environment variables to configure the installation:
 #
@@ -57,17 +56,17 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
   else VALETD_DIR="${VALETD_DIR%/*}"; fi
   VALETD_DIR="${VALETD_DIR%/*}" # strip directory
 
-  if [[ -e "${VALETD_DIR}/core" ]]; then
+  if [[ -f "${VALETD_DIR}/core" ]]; then
     # shellcheck source=../core
     source "${VALETD_DIR}/core"
   else
     set -Eeu -o pipefail
 
     # we are executing this script without valet, create functions to replace the core functions.
-    function inform() { printf "%-8s %s\n" "INFO" "ℹ️ $*"; }
-    function debug() { if [[ ${DEBUG:-false} == "true" ]]; then printf "%-8s %s\n" "DEBUG" "📰 $*"; fi; }
-    function warn() { printf "%-8s %s\n" "WARNING" "⚠️ $*"; }
-    function fail() {
+    function log::info() { printf "%-8s %s\n" "INFO" "ℹ️ $*"; }
+    function log:debug() { if [[ ${DEBUG:-false} == "true" ]]; then printf "%-8s %s\n" "DEBUG" "📰 $*"; fi; }
+    function log::warning() { printf "%-8s %s\n" "WARNING" "⚠️ $*"; }
+    function core::fail() {
       printf "%-8s %s\n" "ERROR" "❌ $*"
       exit 1
     }
@@ -108,17 +107,6 @@ description: |-
   Update valet using the latest release on GitHub.
 ---"
 function selfUpdate() {
-  # download the latest version of valet
-
-  # also download fzf in ${_VALET_HOME}/bin
-  # replace call of "fzf" by "${_VALET_HOME}/bin/fzf" in valet
-  # this way we don't loop in the PATH and it goes faster
-
-  # tell the user about what's next todo
-
-  # Warn the user about:
-  # If you see the replacement character � in my terminal, it means you don't have a [nerd font][nerd-font] setup in your terminal.
-
   # check if valet already exists
   local valetAlreadyInstalled=false
   if command -v valet &>/dev/null; then
@@ -179,11 +167,17 @@ function selfUpdate() {
   chmod +x "${_VALET_HOME}/valet"
   chmod +x "${_VALET_HOME}/bin/"*
 
+  # source valet core
+  if [[ -z "${_CORE_INCLUDED:-}" ]]; then
+    # shellcheck source=../core
+    source "${_VALET_HOME}/valet.d/core"
+  fi
+
   if [[ "${NO_SHIM:-false}" != true ]]; then
 
     # create the shim in the bin directory
     local valetBin="${binDirectory}/valet"
-    if [[ -e "${valetBin}" && "${valetAlreadyInstalled}" == "false" ]]; then
+    if [[ -f "${valetBin}" && "${valetAlreadyInstalled}" == "false" ]]; then
       log::warning "A valet shim already exists in ⌜${valetBin}⌝!?"
     else
       mkdir -p "${binDirectory}" 1>/dev/null || core::fail "Could not create the bin directory ⌜${binDirectory}⌝."
@@ -198,8 +192,14 @@ function selfUpdate() {
       if [[ ${NO_ADD_TO_PATH:-false} == true ]]; then
         log::warning "Make sure to add ⌜${binDirectory}⌝ (or ⌜${_VALET_HOME}⌝) in your PATH."
       else
-        log::info "Adding ⌜${binDirectory}⌝ to your PATH via .bashrc right now."
-        printf "\n\n# Add Valet to the PATH\nexport PATH=\"%s:\${PATH}\"\n" "${binDirectory}" >>"${HOME}/.bashrc"
+        if [[ -f "${HOME}/.bashrc" ]]; then
+          log::info "Adding ⌜${binDirectory}⌝ to your PATH via .bashrc right now."
+          printf "\n\n# Add Valet to the PATH\nexport PATH=\"%s:\${PATH}\"\n" "${binDirectory}" >>"${HOME}/.bashrc"
+        fi
+        if [[ -f "${HOME}/.zshrc" ]]; then
+          log::info "Adding ⌜${binDirectory}⌝ to your PATH via .zshrc right now."
+          printf "\n\n# Add Valet to the PATH\nexport PATH=\"%s:\${PATH}\"\n" "${binDirectory}" >>"${HOME}/.zshrc"
+        fi
       fi
     fi
 
@@ -211,19 +211,6 @@ function selfUpdate() {
     log::info "Copying the examples in ⌜${userDirectory}⌝."
     cp -R "${_VALET_HOME}/examples.d" "${userDirectory}"
   fi
-
-  # source valet core and self-build
-  if [[ -z "${_CORE_INCLUDED:-}" ]]; then
-    # shellcheck source=../core
-    source "${_VALET_HOME}/valet.d/core"
-  fi
-  # shellcheck source=self-build.sh
-  source "${_VALET_HOME}/valet.d/commands.d/self-build.sh"
-
-  # silently build the commands
-  log::setLevel "error"
-  selfBuild
-  log::setLevel "info"
 
   # run the post install command
   core::sourceForFunction selfSetup

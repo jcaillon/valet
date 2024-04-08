@@ -177,7 +177,7 @@ function runTestSuites() {
     # for each .sh script in the test directory, run the test
     for testScript in "${testDirectory}"/*.sh; do
       # skip if not a file
-      if [[ ! -e "${testScript}" ]]; then continue; fi
+      if [[ ! -f "${testScript}" ]]; then continue; fi
 
       log::info "Running test       ├── ⌜${testScript##*/}⌝."
 

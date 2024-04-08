@@ -6,12 +6,142 @@ set -Eeu -o pipefail
 # shellcheck source=lib-ansi-codes
 source ansi-codes
 
+
 #===============================================================
 # >>> Events
 #===============================================================
 
 # make sure to restore the cursor and echo  when exiting
 trap "main::onExitInternal; printf '%s' $'\e[?25h'; stty echo" EXIT
+
+
+#===============================================================
+# >>> Interactive prompts
+#===============================================================
+
+# Ask the user to press the button to continue.
+#
+# $1: the prompt to display
+#
+# Returns:
+#   Returns 0 if the user pressed enter, 1 otherwise.
+function interactive::askForConfirmation() {
+  interactive::displayQuestion "${1}"
+
+  local colorActiveButton="${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${fgMagenta}}"
+
+  # print the current state (then move to column 1 to be ready to rewrite)
+  printf '%s%s%s' \
+    "${cursorHide}${textBold}${textInverse}${colorActiveButton}" \
+    "   (O)K   " \
+    "${textReset}${cursorMove}1${_column}"
+
+  local keyPressed
+  while true; do
+    # wait and handle key press
+    if interactive::waitForKey -t 1; then
+      case ${LAST_KEY_PRESSED} in
+      $'\n' | ' ' | o)
+        break
+        ;;
+      ESC)
+        core::fail "Interactive session cancelled."
+        ;;
+      esac
+    fi
+
+    # break if fd 1 is closed or does not refer to a terminal.
+    if [[ ! -t 1 ]]; then break; fi
+  done
+
+  printf '%s' "${eraseCharsRight}${cursorShow}"
+
+  interactive::displayAnswer "Ok."
+  return 0
+}
+
+
+# Ask the user to yes or no.
+# The user can switch between the two options with the arrow keys or space.
+# The user can validate the choice with the enter key.
+# The user can also validate immediately with the y or n key.
+#
+# $1: the prompt to display
+#
+# Returns:
+#   Returns 0 if true, 1 if false.
+#   True or false in the global variable LAST_RETURNED_VALUE.
+#
+# Usage:
+#  interactive::promptYesNo "Do you want to continue?" && local answer="${LAST_RETURNED_VALUE}"
+function interactive::promptYesNo() {
+  interactive::displayQuestion "${1}"
+
+  local state=true
+  local colorActiveButton="${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${fgMagenta}}"
+  local colorUnactiveButton="${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}"
+
+  printf '%s' "${cursorHide}"
+
+  local keyPressed yesColor noColor
+  while true; do
+    if [[ ${state} == "true" ]]; then
+      yesColor="${colorActiveButton}"
+      noColor="${colorUnactiveButton}"
+    else
+      yesColor="${colorUnactiveButton}"
+      noColor="${colorActiveButton}"
+    fi
+
+    # print the current state (then move to column 1 to be ready to rewrite)
+    printf '%s%s%s   %s%s%s' \
+      "${textBold}${textInverse}${yesColor}" \
+      "   (Y)ES   " \
+      "${textReset}" \
+      "${textBold}${textInverse}${noColor}" \
+      "   (N)O   " \
+      "${textReset}${cursorMove}1${_column}"
+
+    # wait and handle key press
+    if interactive::waitForKey -t 1; then
+      case ${LAST_KEY_PRESSED} in
+      $'\n' | ' ')
+        break
+        ;;
+      y)
+        state=true
+        break
+        ;;
+      n)
+        state=false
+        break
+        ;;
+      UP | LEFT | RIGHT | DOWN)
+        if [[ ${state} == "true" ]]; then state=false; else state=true; fi
+        ;;
+      ESC)
+        core::fail "Interactive session cancelled."
+        ;;
+      esac
+    fi
+
+    # break if fd 1 is closed or does not refer to a terminal.
+    if [[ ! -t 1 ]]; then break; fi
+  done
+
+  printf '%s' "${eraseCharsRight}${cursorShow}"
+
+  if [[ ${state} == "true" ]]; then
+    interactive::displayAnswer "Yes."
+    LAST_RETURNED_VALUE=${state}
+    return 0
+  fi
+
+  interactive::displayAnswer "No."
+  LAST_RETURNED_VALUE=${state}
+  return 1
+}
+
 
 #===============================================================
 # >>> Custom drawing functions
@@ -197,86 +327,6 @@ function interactive::waitForKey() {
   return 0
 }
 
-# Ask the user to yes or no.
-# The user can switch between the two options with the arrow keys or space.
-# The user can validate the choice with the enter key.
-# The user can also validate immediately with the y or n key.
-#
-# $1: the prompt to display
-#
-# Returns:
-#   Returns 0 if true, 1 if false.
-#   True or false in the global variable LAST_RETURNED_VALUE.
-#
-# Usage:
-#  interactive::promptYesNo "Do you want to continue?" && local answer="${LAST_RETURNED_VALUE}"
-function interactive::promptYesNo() {
-  interactive::displayQuestion "${1}"
-
-  local state=true
-  CLOSE_INTERACTIVE_SESSION=false
-
-  printf '%s' "${cursorHide}"
-
-  local keyPressed yesColor noColor
-  while true; do
-    if [[ ${state} == "true" ]]; then
-      yesColor="${fgMagenta}"
-      noColor=""
-    else
-      yesColor=""
-      noColor="${fgMagenta}"
-    fi
-
-    # print the current state (then move to column 1 to be ready to rewrite)
-    printf '%s%s%s   %s%s%s' \
-      "${yesColor}${textBold}${textInverse}" \
-      "   (Y)ES   " \
-      "${textReset}" \
-      "${noColor}${textBold}${textInverse}" \
-      "   (N)O   " \
-      "${textReset}${cursorMove}1${_column}"
-
-    # wait and handle key press
-    if interactive::waitForKey -t 1; then
-      case ${LAST_KEY_PRESSED} in
-      $'\n' | ' ')
-        break
-        ;;
-      y)
-        state=true
-        break
-        ;;
-      n)
-        state=false
-        break
-        ;;
-      UP | LEFT | RIGHT | DOWN)
-        if [[ ${state} == "true" ]]; then state=false; else state=true; fi
-        ;;
-      $'\e')
-        core::fail "Interactive session cancelled."
-        ;;
-      esac
-    fi
-
-    # break if fd 1 is closed or does not refer to a terminal.
-    if [[ ! -t 1 ]]; then break; fi
-  done
-
-  printf '%s' "${eraseCharsRight}${cursorShow}"
-
-  if [[ ${state} == "true" ]]; then
-    interactive::displayAnswer "Yes."
-    LAST_RETURNED_VALUE=${state}
-    return 0
-  fi
-
-  interactive::displayAnswer "No."
-  LAST_RETURNED_VALUE=${state}
-  return 1
-}
-
 # Displays a question to the user.
 #
 # $1: the prompt to display
@@ -360,3 +410,4 @@ interactive::displayDialogBox() {
 
   printf '%s\n' "${finalString}"
 }
+

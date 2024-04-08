@@ -70,7 +70,7 @@ function writeConfigFile() {
     local exportedVariable
     for exportedVariable in ${!VALET_CONFIG_*} VALET_USER_DIRECTORY; do
       local -n variable="${exportedVariable}"
-      if [[ -z "${variable}" ]]; then
+      if [[ -z "${variable:-}" ]]; then
         continue
       fi
       printf -v "EXPORTED_${exportedVariable}" "%q" "${variable}"
@@ -137,7 +137,7 @@ VALET_CONFIG_ENABLE_CI_MODE=\"\${VALET_CONFIG_ENABLE_CI_MODE:-${EXPORTED_VALET_C
 # If true, will disable the icons (using nerd font).
 VALET_CONFIG_DISABLE_NERDFONT_ICONS=\"\${VALET_CONFIG_DISABLE_NERDFONT_ICONS:-${EXPORTED_VALET_CONFIG_DISABLE_NERDFONT_ICONS:-}}\"
 
-# If true, will disable the color output.
+# If true, will disable the color output (colors are still needed for interactive mode).
 VALET_CONFIG_DISABLE_COLORS=\"\${VALET_CONFIG_DISABLE_COLORS:-${EXPORTED_VALET_CONFIG_DISABLE_COLORS:-}}\"
 
 # If true, will disable the text wrapping for logs.
@@ -192,6 +192,11 @@ VALET_CONFIG_COLOR_TITLE=\"\${VALET_CONFIG_COLOR_TITLE:-${EXPORTED_VALET_CONFIG_
 VALET_CONFIG_COLOR_OPTION=\"\${VALET_CONFIG_COLOR_OPTION:-${EXPORTED_VALET_CONFIG_COLOR_OPTION:-}}\"
 VALET_CONFIG_COLOR_ARGUMENT=\"\${VALET_CONFIG_COLOR_ARGUMENT:-${EXPORTED_VALET_CONFIG_COLOR_ARGUMENT:-}}\"
 VALET_CONFIG_COLOR_COMMAND=\"\${VALET_CONFIG_COLOR_COMMAND:-${EXPORTED_VALET_CONFIG_COLOR_COMMAND:-}}\"
+
+# Colors for the interactive mode
+VALET_CONFIG_COLOR_ACTIVE_BUTTON=\"\${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${EXPORTED_VALET_CONFIG_COLOR_ACTIVE_BUTTON:-}}\"
+VALET_CONFIG_COLOR_UNACTIVE_BUTTON=\"\${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-${EXPORTED_VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}}\"
+
 "
 
   echo "${valetConfigFileContent}" >"${VALET_CONFIG_FILE}"

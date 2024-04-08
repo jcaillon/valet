@@ -10,6 +10,9 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
 fi
 # --- END OF COMMAND COMMON PART
 
+# shellcheck source=../lib-interactive
+source interactive
+
 #===============================================================
 # >>> command: self setup
 #===============================================================
@@ -57,20 +60,33 @@ function selfSetup() {
     fi
   fi
 
-  # TODO: verify if /dev/shm is available and suggest to use it for the work files
-
-  # TODO: verify that we have all the external tools we need:
-  # awk for the profiler
-  # diff for the self test
-  # curl for the self update
-
+  # generate the config
   core::sourceForFunction selfConfig
-  selfConfig --no-edit
+  selfConfig --export-current-values --no-edit
+
+  # verify that we have the tools required
+  local -i nbMissingTools=0
+  if ! command -v awk &>/dev/null; then
+    log::warning "The tool ⌜awk⌝ is missing. It is needed for cleaning the profiler logs."
+    nbMissingTools+=1
+  fi
+  if ! command -v diff &>/dev/null; then
+    log::warning "The tool ⌜diff⌝ is missing. It is needed for the self test command."
+    nbMissingTools+=1
+  fi
+  if ! command -v curl &>/dev/null; then
+    log::warning "The tool ⌜curl⌝ is missing. It is needed for the self update command."
+    nbMissingTools+=1
+  fi
+  if [[ nbMissingTools -gt 0 ]]; then
+    log::warning "You are missing some tools, please install them to use Valet to its full potential."$'\n'"You can install them using your package manager, e.g., ⌜sudo apt install gawk diffutils curl⌝."$'\n'"You can also install them using a package manager like brew, e.g., ⌜brew install gawk diffutils curl⌝"
+    interactive::askForConfirmation "Did you read the warnings above?"
+  fi
 
   log::success "You are all set!"
 
   # tell the user about what's next todo
-  log::info "As a reminder, you can modify the configuration done during this set up by either:"$'\n'"- replaying the command ⌜valet self setup⌝,"$'\n'"- editing the valet config file located at ⌜${VALET_CONFIG_FILE}⌝,"$'\n'"- or setting the environment variables directly in your shell or in your .bashrc file."
+  log::info "As a reminder, you can modify the configuration done during this set up by either:"$'\n'"- replaying the command ⌜valet self setup⌝,"$'\n'"- running the command ⌜valet self config⌝."
   log::info "You can now run ⌜valet --help⌝ to get started."
   log::info "You can create your own commands and have them available in valet, please check ⌜https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md⌝ to do so."
 }

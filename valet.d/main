@@ -700,7 +700,7 @@ function main::sortCommands() {
   local lastChoicesFile
   core::getLocalStateDirectory
   lastChoicesFile="${LAST_RETURNED_VALUE}/last-choices-${menuId}"
-  if [[ ! -e "${lastChoicesFile}" ]]; then
+  if [[ ! -f "${lastChoicesFile}" ]]; then
     LAST_RETURNED_VALUE="${commands}"
     return 0
   fi
@@ -771,7 +771,7 @@ function main::addLastChoice() {
   local lastChoicesFile
   core::getLocalStateDirectory
   lastChoicesFile="${LAST_RETURNED_VALUE}/last-choices-${menuId}"
-  if [[ ! -e "${lastChoicesFile}" ]]; then
+  if [[ ! -f "${lastChoicesFile}" ]]; then
     :>"${lastChoicesFile}"
   fi
 

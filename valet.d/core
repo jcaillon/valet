@@ -23,7 +23,7 @@ fi
 # First thing we do is to source the valet configuration from the user config dir
 # This file can be used to override the default configuration by setting VALET_* env variables.
 VALET_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}/config"}"
-if [[ -e "${VALET_CONFIG_FILE}" ]]; then
+if [[ -f "${VALET_CONFIG_FILE}" ]]; then
   # shellcheck source=/dev/null
   source "${VALET_CONFIG_FILE}"
 fi
@@ -59,7 +59,7 @@ function io::createTempFile() {
   while true; do
     TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
     LAST_RETURNED_VALUE="${_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
-    if [[ ! -e "${LAST_RETURNED_VALUE}" ]]; then
+    if [[ ! -f "${LAST_RETURNED_VALUE}" ]]; then
       :>"${LAST_RETURNED_VALUE}"
       return 0
     fi
@@ -91,18 +91,18 @@ function io::createTempDirectory() {
 #  io::cleanupTempFiles
 # shellcheck disable=SC2016
 function io::cleanupTempFiles() {
-  if [[ -e "${_TEMPORARY_DIRECTORY}" ]]; then
+  if [[ -d "${_TEMPORARY_DIRECTORY}" ]]; then
     log::debug "Deleting temporary directory."
     rm -Rf "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
     unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
   fi
-  if [[ -e "${_TEMPORARY_WORK_FILE}" ]]; then
+  if [[ -f "${_TEMPORARY_WORK_FILE}" ]]; then
     rm -f "${_TEMPORARY_WORK_FILE}" 1>&2 2>/dev/null
   fi
-  if [[ -e "${_TEMPORARY_STDOUT_FILE}" ]]; then
+  if [[ -f "${_TEMPORARY_STDOUT_FILE}" ]]; then
     rm -f "${_TEMPORARY_STDOUT_FILE}" 1>&2 2>/dev/null
   fi
-  if [[ -e "${_TEMPORARY_STDERR_FILE}" ]]; then
+  if [[ -f "${_TEMPORARY_STDERR_FILE}" ]]; then
     rm -f "${_TEMPORARY_STDERR_FILE}" 1>&2 2>/dev/null
   fi
 }

@@ -8,7 +8,7 @@
 
 ![icon](docs/images/icon.svg)
 
-Valet is a wrapper around your bash scripts that provides an interactive menu, standard help output, auto parsing for options and arguments, error handling, a framework for approval testing, execution profiling, and so on...
+Valet is a wrapper around your bash scripts that provides an interactive menu, standard help output, auto parsing for options and arguments, error handling, a framework for approval testing, execution profiling, and so on... It also doubles as a library from which you can easily import useful functions written in pure bash (faster and no dependencies!) to manipulate string, arrays or even display beautiful prompts to your users!
 
 It works on **any Linux environment with bash** or on **Git bash for Windows**.
 
@@ -165,22 +165,20 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 
 ## 🔭 Roadmap
 
+- rename CMD_ variables.
 - Document everything. Document test.
-- Add support for interactive mode.
+- Add full support for interactive mode.
 - Replace fzf menu with equivalent pure bash menu.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Setup github actions to automatically test Valet.
 - Generate an autocompletion script for bash and zsh.
 - Self-command to create a new command interactively.
-- Add about option to hide the command in the menus.
-- Implement self release command to tag and push to github.
 - We can have fuzzy matching on options too; just make sure it is not ambiguous.
 - Create a valet-community-commands where everyone can contribute to new default commands for Valet.
 - Optional strict mode (env var) to disable fuzzy matching (to not mistakenly execute a command on ci for instance).
 - head / tail from file.
-- New self command that writes a default user config file with the default values. This is called on selfSetup.
 - Allow to regroup single letter options (e.g. -fsSL).
-- Frame questions in interactive mode.
+- Add a command self package that build the user commands into a single script file.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest
