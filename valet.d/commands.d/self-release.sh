@@ -119,7 +119,7 @@ function createRelease() {
   if [[ "${dryRun:-}" != "true" ]]; then
     # check that we got the necessary token
     if [[ -z "${githubReleaseToken:-}" ]]; then
-      log::error "The GitHub release token is required to create a new release."
+      core::fail "The GitHub release token is required to create a new release."
     fi
 
     # check that the git workarea is clean
@@ -128,7 +128,7 @@ function createRelease() {
     local -i exitCode=0
     io::invoke3 false 0 git diff-index --quiet HEAD || exitCode=$?
     if [[ exitCode -ne 0 ]]; then
-      log::error "The workarea is not clean, please commit your changes before releasing a new version."
+      core::fail "The workarea is not clean, please commit your changes before releasing a new version."
     fi
   fi
 

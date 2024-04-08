@@ -67,7 +67,7 @@ function selfDownloadBinaries() {
 
   # for the sake of simplicity, we only deal with amd64 arch...
   if [[ "${HOSTTYPE:-x86_64}" != "x86_64" ]]; then
-    log::error "Only amd64 architecture is supported for now but yours is ⌜${HOSTTYPE:-x86_64}⌝. Please download the binaries manually and add them in your PATH."
+    core::fail "Only amd64 architecture is supported for now but yours is ⌜${HOSTTYPE:-x86_64}⌝. Please download the binaries manually and add them in your PATH."
   fi
 
   # get the OS

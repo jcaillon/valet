@@ -168,6 +168,7 @@ trap system::exportTerminalSize SIGWINCH
 # - error
 #
 # $1: the log level to set (or defaults to info)
+# $2: true to silently switch log level (does not print a message)
 #
 # Usage:
 #   log::setLevel "debug"
@@ -182,11 +183,13 @@ function log::setLevel() {
   *) _LOG_LEVEL_INT=1 ;;
   esac
 
-  if [[ ${_LOG_LEVEL_INT} -ne 1 ]]; then
-    log::debug "Log level set to ${VALET_LOG_LEVEL}."
-  fi
-  if [[ ${_LOG_LEVEL_INT} -eq 0 ]]; then
-    log::warning "Beware that debug log level might lead to secret leak, use it only if necessary."
+  if [[ -z ${2:-} ]]; then
+    if [[ ${_LOG_LEVEL_INT} -ne 1 ]]; then
+      log::debug "Log level set to ${VALET_LOG_LEVEL}."
+    fi
+    if [[ ${_LOG_LEVEL_INT} -eq 0 ]]; then
+      log::warning "Beware that debug log level might lead to secret leak, use it only if necessary."
+    fi
   fi
 }
 
@@ -279,7 +282,22 @@ eval "${LOG_LINE_FUNCTION}"
 
 
 # Displays an error message and then exit the program with error.
-# $*: the error message to display
+#
+# $@: the error message to display
+#
+# Usage:
+#   core::fail "This is an error message."
+function core::fail() {
+  log::error "$@"
+  # shellcheck disable=SC2034
+  ERROR_DISPLAYED=1
+  exit 1
+}
+
+# Displays an error message.
+# You probably want to exit immediately after an error and should consider using core::fail function instead.
+#
+# $@: the error message to display
 #
 # Usage:
 #   log::error "This is an error message."
@@ -290,9 +308,6 @@ function log::error() {
     message+="${stack:-}"
   fi
   log::print "ERROR" $'\uf2d3' "ERROR" "${message}"
-  # shellcheck disable=SC2034
-  ERROR_DISPLAY=1
-  exit 1
 }
 
 # Displays a warning and return a warning code.
@@ -419,7 +434,7 @@ function source() {
   elif [[ -e "${1}" ]]; then
     filePathToInclude="${1}"
   else
-    log::error "The file ${1} could not be found."
+    core::fail "The file ${1} could not be found."
   fi
   for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
     if [[ ${includedFile} == "${filePathToInclude}" ]]; then
@@ -497,7 +512,7 @@ function core::sourceUserCommands() {
       message+=$'\n'"Now using the examples commands from ⌜${commandsFile%/*}⌝."
       log::warning "${message}"
     else
-      log::error "${message}"
+      core::fail "${message}"
     fi
   fi
 
@@ -513,11 +528,8 @@ function core::sourceUserCommands() {
 #  core::reloadUserCommands
 function core::reloadUserCommands() {
   # delete previous variables
-  local var
-  for var in ${!CMD_*}; do
-    unset "${var}"
-  done
-  unset _CMD_INCLUDED
+  unset -v ${!CMD_*}
+  unset -v _CMD_INCLUDED
   core::sourceUserCommands
 }
 
@@ -541,7 +553,7 @@ function core::reloadUserCommands() {
 function string::wrapText() {
   local text width leftPaddingLength appendPaddingToFirstLine
   text="${1}"
-  width="${2}"
+  width="${2:-_COLUMNS}"
   leftPaddingLength="${3:-0}"
   appendPaddingToFirstLine="${4:-false}"
 
@@ -555,6 +567,8 @@ function string::wrapText() {
   local sentenceWidth=$((width - leftPaddingLength))
 
   local wrappedText
+
+  # TODO: check if faster if we skip the loop in case the text does not have new lines
 
   # we call string::wrapSentence for each line of the text
   local firstLine="1"
@@ -865,7 +879,7 @@ function core::checkParseResults() {
 
   if [[ -n "${parsingErrors:-}" ]]; then
     local -n commandName="CMD_COMMAND_${functionName}"
-    log::error "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
+    core::fail "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
   fi
 }
 

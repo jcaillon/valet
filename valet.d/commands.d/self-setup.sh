@@ -93,7 +93,7 @@ function selfSetup() {
     answer="${LAST_RETURNED_VALUE}"
     log::info "You answered: ${answer}."
     if [[ ${answer} == "true" ]]; then
-      mkdir -p "${VALET_USER_CONFIG_FILE%/*}" 1>/dev/null || log::error "Could not create the valet config directory ⌜${VALET_USER_CONFIG_FILE%/*}⌝."
+      mkdir -p "${VALET_USER_CONFIG_FILE%/*}" 1>/dev/null || core::fail "Could not create the valet config directory ⌜${VALET_USER_CONFIG_FILE%/*}⌝."
       echo "${valetConfigFileContent}" >>"${VALET_USER_CONFIG_FILE}"
       log::info "The configuration has been applied."
     fi

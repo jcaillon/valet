@@ -19,9 +19,9 @@ function testKurl::toFile() {
   endTest "Testing kurl::toFile, http code 500 not acceptable return 1" 0
 
   echo "→ kurl::toFile true '' \"\${tmpFile}\" --code 500 https://hello.com"
-  export ERROR_DISPLAY=1
+  export ERROR_DISPLAYED=1
   (kurl::toFile true '' "${tmpFile}" --code 500 https://hello.com)
-  unset ERROR_DISPLAY
+  unset ERROR_DISPLAYED
   endTest "Testing kurl::toFile, http code 500 not acceptable fails" 0
 
   echo "→ kurl::toFile false '300,500,999' \"\${tmpFile}\" --code 500 https://hello.com"

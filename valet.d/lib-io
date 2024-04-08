@@ -51,7 +51,7 @@ function io::toAbsolutePath() {
 #   The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   io::invoke5 "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || log::error "fzf failed."
+#   io::invoke5 "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || core::fail "fzf failed."
 #   stdoutFilePath="${LAST_RETURNED_VALUE}"
 #   stderrFilePath="${LAST_RETURNED_VALUE2}"
 function io::invoke5() {
@@ -117,7 +117,7 @@ function io::invoke5() {
     fi
 
     if [[ ${shouldFail} == "true" ]]; then
-      log::error "${debugMessage}"
+      core::fail "${debugMessage}"
     else
       log::debug "${debugMessage}"
     fi
@@ -142,7 +142,7 @@ function io::invoke5() {
 #   The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   io::invoke3 "false" "false" "fzf" "--height=10" || log::error "fzf failed."
+#   io::invoke3 "false" "false" "fzf" "--height=10" || core::fail "fzf failed."
 #   stdoutFilePath="${LAST_RETURNED_VALUE}"
 #   stderrFilePath="${LAST_RETURNED_VALUE2}"
 function io::invoke3() {
@@ -170,7 +170,7 @@ function io::invoke3() {
 #   The content of stderr in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   io::invoke5var "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || log::error "fzf failed."
+#   io::invoke5var "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || core::fail "fzf failed."
 #   stdout="${LAST_RETURNED_VALUE}"
 #   stderr="${LAST_RETURNED_VALUE2}"
 function io::invoke5var() {
@@ -200,7 +200,7 @@ function io::invoke5var() {
 #   The content of stderr in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   io::invoke3var "false" "130,2" "fzf" "--height=10" || log::error "fzf failed."
+#   io::invoke3var "false" "130,2" "fzf" "--height=10" || core::fail "fzf failed."
 #   stdout="${LAST_RETURNED_VALUE}"
 #   stderr="${LAST_RETURNED_VALUE2}"
 function io::invoke3var() {
@@ -305,11 +305,11 @@ function io::readFile() {
 # $2+ : the error message to display in case of error
 #
 # Usage:
-#   command_that_could_fail || checkAndlog::error "$?" "The command that could fail has failed!"
+#   command_that_could_fail || checkAndcore::fail "$?" "The command that could fail has failed!"
 function io::checkAndFail() {
   if [[ "${1:-}" != "0" ]]; then
     shift
-    log::error "$*"
+    core::fail "$*"
   fi
   return 0
 }

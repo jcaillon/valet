@@ -66,35 +66,33 @@ function selfTest() {
 
   setGlobalOptions
 
-  if [[ ${onlyCore:-false} == "true" ]]; then
-    runCoreTests
-    return
+  if [[ ${onlyCore:-false} != "true" ]]; then
+
+    # get the directory containing the tests for the commands
+    core::getUserDirectory
+    userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
+    log::debug "User directory is ⌜${userDirectory}⌝."
+
+    # change the shell options to include hidden files
+    shopt -s dotglob
+    shopt -s globstar
+
+    local testsDirectory
+    for testsDirectory in "${userDirectory}"/**; do
+      log::debug "Tests directory: ⌜${testsDirectory}⌝."
+      # if the directory is not a directory, skip
+      if [[ ! -d "${testsDirectory}" ]]; then continue; fi
+      # if the directory is named .tests.d, then it is a test directory
+      if [[ ${testsDirectory} == *"/tests.d" ]]; then
+        log::info "Running all test suites in directory ⌜${testsDirectory}⌝."
+        runTestSuites "${testsDirectory}"
+      fi
+    done
+
+    # reset glob options
+    shopt -u dotglob
+    shopt -u globstar
   fi
-
-  # get the directory containing the tests for the commands
-  core::getUserDirectory
-  userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
-  log::debug "User directory is ⌜${userDirectory}⌝."
-
-  # change the shell options to include hidden files
-  shopt -s dotglob
-  shopt -s globstar
-
-  local testsDirectory
-  for testsDirectory in "${userDirectory}"/**; do
-    log::debug "Tests directory: ⌜${testsDirectory}⌝."
-    # if the directory is not a directory, skip
-    if [[ ! -d "${testsDirectory}" ]]; then continue; fi
-    # if the directory is named .tests.d, then it is a test directory
-    if [[ ${testsDirectory} == *"/tests.d" ]]; then
-      log::info "Running all test suites in directory ⌜${testsDirectory}⌝."
-      runTestSuites "${testsDirectory}"
-    fi
-  done
-
-  # reset glob options
-  shopt -u dotglob
-  shopt -u globstar
 
   if [[ -n "${withCore:-}" ]]; then
     runCoreTests

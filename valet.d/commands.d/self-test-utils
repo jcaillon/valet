@@ -79,7 +79,7 @@ function endTest() {
 
 function runCoreTests() {
   if [[ ! -d "${VALET_HOME}/tests.d" ]]; then
-    log::error "The valet core tests directory ⌜${VALET_HOME}/tests.d⌝ does not exist, can't run core tests."
+    core::fail "The valet core tests directory ⌜${VALET_HOME}/tests.d⌝ does not exist, can't run core tests."
   fi
 
   local originalUserDirectory="${VALET_USER_DIRECTORY:-}"
@@ -164,11 +164,12 @@ function runTestSuites() {
     failMessage="A total of ⌜${failedTestSuites}⌝/⌜${nbTestSuites}⌝ test(s) failed."
     if [[ ${AUTO_APPROVE:-false} == "true" ]]; then
       failMessage+=$'\n'"The received test result files were automatically approved."
+      core::warn "${failMessage}"
     else
       failMessage+=$'\n'"You should review the difference in the logs above or by comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
       failMessage+=$'\n'"If the differences are legitimate, then approve the changes by running this command again with the option ⌜-a⌝."
+      core::fail "${failMessage}"
     fi
-    log::error "${failMessage}"
   elif [[ nbTestSuites -gt 0 ]]; then
     log::success "A total of ⌜${nbTestSuites}⌝ tests passed!"
   else
@@ -184,7 +185,9 @@ function runTest() {
   # redirect the standard output and error output to files
   setFdRedirection
 
-  trap onExitTest EXIT
+  # make sure that, if we exit in the test, we catch that and explain to the user
+  # why this should not happen
+  eval "function onExitTest() { onExitTestInternal; }"
 
   # used in echoFileSubstitutingPath to replace this path with .
   CURRENT_DIRECTORY="${PWD}"
@@ -203,13 +206,14 @@ function runTest() {
   set -Eeu -o pipefail
   popd >/dev/null
 
-  resetFdRedirection
+  # remove the onExitTest function, we can exit safely now
+  unset -f onExitTest
 
-  trap main::onExitInternal EXIT
+  resetFdRedirection
 
   # test if the user forgot to call endTest
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" || -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
-    log::error "The test script ⌜${testScript}⌝ did not call endTest OR it had outputs after the last endTest call."
+    core::fail "The test script ⌜${testScript}⌝ did not call endTest OR it had outputs after the last endTest call."
   fi
 
 }
@@ -251,20 +255,21 @@ function compareWithApproved() {
 
 # Allows to explicitly warn the user that a test made Valet exit (it should not).
 # Give guidance on what to do to fix this.
-function onExitTest() {
+function onExitTestInternal() {
   local rc=$?
 
   resetFdRedirection
 
-  local message="The program is exiting during a test with code ${rc}."$'\n'
+  source io
+
+  local message="The program has exit during a test with code ${rc}."$'\n'
   io::readFile "${_TEST_STANDARD_ERROR_FILE}"
-  message+="Current test error output: ⌜${LAST_RETURNED_VALUE}⌝"$'\n'
+  message+="Current test error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"$'\n'
   message+="If you expect the tested function/program to exit/fail, then run it in a subshell like that:"$'\n'"(myFunctionThatFails)"
 
-  log::warning "${message}"
+  log::error "${message}"
 
-  ERROR_DISPLAY=1
-  main::onExitInternal
+  ERROR_DISPLAYED=1
 }
 
 # After this function call, everything written to stdout and stderr will be redirected

@@ -18,12 +18,12 @@ fi
 #===============================================================
 
 function main::onErrorInternal() {
-  if [[ ${ERROR_DISPLAY:-0} == "1" ]]; then
+  if [[ ${ERROR_DISPLAYED:-0} == "1" ]]; then
     return 0
   fi
   log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
   log::print "ERROR" $'\uf2d3' "ERROR" "Error code ${1} in ${FUNCNAME[1]}(), stack:${stack}"
-  ERROR_DISPLAY=1
+  ERROR_DISPLAYED=1
 }
 
 trap 'main::onErrorInternal $?' ERR
@@ -35,15 +35,20 @@ function main::onExitInternal() {
   if [[ ${PROFILING:-} == "1" ]]; then main::disableProfiler; fi
 
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
+  if command -v onExitTest 1>/dev/null 2>&1; then
+    # this is for the self test command, we need to inform the user in case of an
+    # unexpected exit because they would not see the logs otherwise
+    onExitTest
+  fi
   if command -v onExit 1>/dev/null 2>&1; then
     onExit
   fi
   # always call cleanUp before exiting
   main::onCleanUpInternal
-  if [[ "${ERROR_DISPLAY:-0}" != "1" && "${rc}" != "0" ]]; then
+  if [[ "${ERROR_DISPLAYED:-0}" != "1" && "${rc}" != "0" ]]; then
     log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
     log::print "ERROR" $'\uf14c' "EXIT" "Exiting with code ${rc}, stack:${stack}"
-    ERROR_DISPLAY=1
+    ERROR_DISPLAYED=1
   fi
 }
 
@@ -95,13 +100,20 @@ function main::onCleanUpInternal() {
 
 # Introducing our own function to handle commands not found, so we can display a better message
 function command_not_found_handle() {
+  # set log level to debug to have a stack trace
+  log::setLevel "debug" true
+
   if [[ ${1:-} == "fzf" ]]; then
-    log::error "This program requires ⌜https://github.com/junegunn/fzf⌝ to display interactive prompt."$'\n'"Install fzf or pass the correct options and arguments. See --help for more information."
+    core::fail "This program requires ⌜https://github.com/junegunn/fzf⌝ to display interactive prompt."$'\n'"Install fzf or pass the correct options and arguments. See --help for more information."
   fi
   if [[ ${1:-} == "curl" ]]; then
-    log::error "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
+    core::fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
   fi
-  log::error "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
+  # if the command contains :: it is one of our function, we can suggest to source the 'package'
+  if [[ ${1} == *::* ]]; then
+    core::fail "Command not found: ⌜${1}⌝."$'\n'"Did you forget to source the package? ⌜source ${1%%::*}⌝"
+  fi
+  core::fail "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
 }
 
 #===============================================================
@@ -480,7 +492,7 @@ function main::parseMainArguments() {
       options="${CMD_OPTIONS_NAME_this[*]%<*}"
       options="${options//,/}"
       main::fuzzyFindOption "${options}" "${1}" && fuzzyOption="${LAST_RETURNED_VALUE:-}"
-      log::error "Unknown option ⌜${1}⌝${fuzzyOption})."
+      core::fail "Unknown option ⌜${1}⌝${fuzzyOption})."
       ;;
     *)
       commands+=("${1}")
@@ -510,7 +522,7 @@ function main::parseMainArguments() {
   nbArgs="${LAST_RETURNED_VALUE2:-}"
   exactCommand="${LAST_RETURNED_VALUE3:-}"
   if [[ -z "${functionName}" ]]; then
-    log::error "Could not find a command for ⌜${commands[*]}⌝."
+    core::fail "Could not find a command for ⌜${commands[*]}⌝."
   fi
 
   log::debug "Function name found ⌜${functionName}⌝."
@@ -538,7 +550,7 @@ function main::runFunction() {
   shift
 
   if [[ -z "${functionName}" ]]; then
-    log::error "No function name provided."
+    core::fail "No function name provided."
   fi
 
   # get command name of the function
@@ -554,7 +566,7 @@ function main::runFunction() {
   core::sourceForFunction "${functionName}"
 
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
-    log::error "The function ⌜${functionName}⌝ associated with the command ⌜${command}⌝ does not exist."
+    core::fail "The function ⌜${functionName}⌝ associated with the command ⌜${command}⌝ does not exist."
   fi
 
   log::debug "Running the command ⌜${command}⌝ with the function ⌜${functionName}⌝ and the arguments ⌜$*⌝."
@@ -588,7 +600,7 @@ function main::checkSudo() {
   if command -v sudo 1>/dev/null 2>&1; then
     log::info "This command requires sudo privileges."
     SUDO="sudo"
-    ${SUDO} echo "alright" 1>/dev/null || log::error "Could not sudo but the command requires it."
+    ${SUDO} echo "alright" 1>/dev/null || core::fail "Could not sudo but the command requires it."
   else
     SUDO=""
   fi
@@ -618,7 +630,7 @@ function main::runMenuWithSubCommands() {
   fi
 
   if [[ -n "${parsingErrors:-}" ]]; then
-    log::error "${parsingErrors}"$'\n'"Use valet ${command} --help to get help."
+    core::fail "${parsingErrors}"$'\n'"Use valet ${command} --help to get help."
   fi
 
   # filter the commands to only keep the sub commands of the function
@@ -632,7 +644,7 @@ function main::runMenuWithSubCommands() {
   done
 
   if [[ -z "${filteredCommandsMenuBody}" ]]; then
-    log::error "No sub commands found for ⌜${command}⌝."
+    core::fail "No sub commands found for ⌜${command}⌝."
   fi
 
   main::showCommandsMenuAndRun "${command//[-[:space:]]/_}" "${filteredCommandsMenuBody%$'\n'}"

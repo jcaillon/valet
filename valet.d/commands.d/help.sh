@@ -69,7 +69,7 @@ function showCommandHelp() {
   functionName="${LAST_RETURNED_VALUE:-}"
   exactCommand="${LAST_RETURNED_VALUE3:-}"
   if [[ -z "${functionName}" ]]; then
-    log::error "Could not show the help because the command ⌜${commands[*]}⌝ does not exist."
+    core::fail "Could not show the help because the command ⌜${commands[*]}⌝ does not exist."
   fi
 
   if [[ ${functionName} == "_menu" ]]; then

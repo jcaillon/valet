@@ -5,7 +5,7 @@ set -Eeu -o pipefail
 
 # in CI mode, we do not allow to go interactive because it would make the job hang forever
 if [[ ${VALET_CI_MODE:-false} == "true" ]]; then
-  log::error "CI/CD mode is activated, interactive mode has been started but we cannot run fzf or we would make the job hang forever."
+  core::fail "CI/CD mode is activated, interactive mode has been started but we cannot run fzf or we would make the job hang forever."
 fi
 
 #===============================================================
@@ -141,7 +141,7 @@ function fzf::showFzf() {
     )
     ;;
   *)
-    log::error "Unknown fzf mode ⌜${mode}⌝."
+    core::fail "Unknown fzf mode ⌜${mode}⌝."
     ;;
   esac
 

@@ -57,10 +57,7 @@ function extractCommandDefinitionToVariables() {
   local commandDefinition="${1}"
 
   # make sure to unset all previous TEMP_CMD_BUILD_* variables
-  local var
-  for var in ${!TEMP_CMD_BUILD_*}; do
-    unset "${var}"
-  done
+  unset -v ${!TEMP_CMD_BUILD_*}
 
   # loop through lines
   local multiLineIndentation=""
@@ -100,7 +97,7 @@ function extractCommandDefinitionToVariables() {
       # we are on an item of an array
       if [[ ${newPropertyName} == "-"* ]]; then
         if [[ arrayLength -le -1 ]]; then
-          log::error "Array item (starts with '- ') defined outside of an array [line ${lineNumber}]."
+          core::fail "Array item (starts with '- ') defined outside of an array [line ${lineNumber}]."
         fi
         arrayLength+=1
         newPropertyName="${newPropertyName:1}"
@@ -110,7 +107,7 @@ function extractCommandDefinitionToVariables() {
 
       # check that property name only contains alphanumeric characters
       if [[ ! "${newPropertyName}" =~ ^[[:alnum:]]+$ ]]; then
-        log::error "Property name ⌜${newPropertyName}⌝ contains invalid characters (should be alphanumeric) [line ${lineNumber}]."
+        core::fail "Property name ⌜${newPropertyName}⌝ contains invalid characters (should be alphanumeric) [line ${lineNumber}]."
       fi
 
       propertyNames+=("${newPropertyName}")

@@ -54,7 +54,7 @@ function selfMock1() {
     returnOne
     ;;
   fail)
-    log::error "This is for testing valet core functions, failing now."
+    core::fail "This is for testing valet core functions, failing now."
     ;;
   exit)
     # shellcheck disable=SC2317

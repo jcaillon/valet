@@ -425,6 +425,13 @@ Exit code: `0`
 WARNING  This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle.
 ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
+stack:
+├─ In function core::fail() $VALET_HOME/valet.d/core:XXX
+├─ In function command_not_found_handle() $VALET_HOME/valet.d/main:XXX
+├─ In function selfMock1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
+└─ In function main() $VALET_HOME/valet:XXX
 ERROR    Error code 1 in selfMock1(), stack:
 ├─ In function selfMock1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
 ├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX

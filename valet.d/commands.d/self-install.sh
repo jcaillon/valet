@@ -150,11 +150,11 @@ function selfUpdate() {
 
   # make sure the old valet directory is not a git repository
   if [[ -d "${VALET_HOME}/.git" ]]; then
-    log::error "The Valet directory ⌜${VALET_HOME}⌝ already exists and is a git repository, aborting (remove it manually and run the command again; or simply update with git pull)."
+    core::fail "The Valet directory ⌜${VALET_HOME}⌝ already exists and is a git repository, aborting (remove it manually and run the command again; or simply update with git pull)."
   fi
 
   local tempDirectory="${TMPDIR:-/tmp}/temp-${BASHPID}.valet.install.d"
-  mkdir -p "${tempDirectory}" 1>/dev/null || log::error "Could not create the temporary directory ⌜${tempDirectory}⌝."
+  mkdir -p "${tempDirectory}" 1>/dev/null || core::fail "Could not create the temporary directory ⌜${tempDirectory}⌝."
 
   # download the latest release and unpack it
   local latestReleaseUrl
@@ -165,7 +165,7 @@ function selfUpdate() {
   fi
   local latestReleaseFile="${tempDirectory}/valet.tar.gz"
   log::info "Downloading the latest release from ⌜${latestReleaseUrl}⌝."
-  curl -fsSL -o "${latestReleaseFile}" "${latestReleaseUrl}" || log::error "Could not download the latest release from ⌜${latestReleaseUrl}⌝."
+  curl -fsSL -o "${latestReleaseFile}" "${latestReleaseUrl}" || core::fail "Could not download the latest release from ⌜${latestReleaseUrl}⌝."
   log::debug "Unpacking the release in ⌜${VALET_HOME}⌝."
   tar -xzf "${latestReleaseFile}" -C "${tempDirectory}"
   log::debug "The release has been unpacked in ⌜${VALET_HOME}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}."
@@ -186,7 +186,7 @@ function selfUpdate() {
     if [[ -e "${valetBin}" && "${valetAlreadyInstalled}" == "false" ]]; then
       log::warning "A valet shim already exists in ⌜${valetBin}⌝!?"
     else
-      mkdir -p "${binDirectory}" 1>/dev/null || log::error "Could not create the bin directory ⌜${binDirectory}⌝."
+      mkdir -p "${binDirectory}" 1>/dev/null || core::fail "Could not create the bin directory ⌜${binDirectory}⌝."
       log::info "Creating a shim ⌜${VALET_HOME}/valet → ${valetBin}⌝."
       {
         echo "#!/usr/bin/env bash"

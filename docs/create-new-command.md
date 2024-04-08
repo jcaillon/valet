@@ -46,7 +46,7 @@ core::checkParseResults "${help:-}" "${parsingErrors:-}"
 if [[ -n "${help:-}" ]]; then core::showHelp; return 0; fi
 
 # check if the parser caught some errors and fail if so
-if [[ -n "${parsingErrors:-}" ]]; then log::error "${parsingErrors}"; fi
+if [[ -n "${parsingErrors:-}" ]]; then core::fail "${parsingErrors}"; fi
 
 # use options and arguments
 echo "${myOption} > ${myArgument}"

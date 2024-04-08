@@ -3,34 +3,36 @@ set -Eeu -o pipefail
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# in CI mode, we do not allow to go interactive because it would make the job hang forever
-if [[ ${VALET_CI_MODE:-false} == "true" ]]; then
-  log::error "CI/CD mode is activated, interactive mode has been started but we cannot run fzf or we would make the job hang forever."
-fi
-
 # shellcheck source=lib-ansi-codes
 source ansi-codes
+
+#===============================================================
+# >>> Events
+#===============================================================
+
+# make sure to restore the cursor and echo  when exiting
+trap "main::onExitInternal; printf '%s' $'\e[?25h'; stty echo" EXIT
 
 #===============================================================
 # >>> Custom drawing functions
 #===============================================================
 
-setupTerminal() {
+function setupTerminal() {
   stty -echo
   printf '%s' "${switchScreenBuffer}${disableLineWrapping}${cursorHide}${eraseScreen}${limitScrolling}$((_LINES - 1))${_lines}"
 }
 
-resetTerminal() {
+function resetTerminal() {
   printf '%s' "${enableLineWrapping}${cursorShow}${eraseScreen}${limitScrolling}${_lines}${switchScreenBuffer}"
   stty echo
 }
 
 # Write a message to the status bar.
-writeToStatusBar() {
+function writeToStatusBar() {
   printf '%s' "${cursorSavePos}${cursorMove}$((_LINES - 1));1${_to}${eraseLine}${textBold}${1}${textReset}${cursorRestorePos}"
 }
 
-key() {
+function key() {
   local keyPressed="${1}"
   local specialKeyPress=false
 
@@ -73,7 +75,7 @@ key() {
   esac
 }
 
-search() {
+function search() {
   local keyPressed
   local searchString=""
 
@@ -112,6 +114,7 @@ function redraw() {
 function fullScreenInteractive() {
 
   # TODO: also need to custom trap interrupt because we will use it to close the interactive session in full screen
+  # Need to figure out how to properly restore the screen buffer and cursor position exactly as it was
 
   # we still need to export the terminal size but in addition, we need to redraw.
   # Note: SIGWINCH does not interrupt a read command and wait for it to complete so we need
@@ -140,23 +143,220 @@ function fullScreenInteractive() {
   log::info "Bye!"
 }
 
+# Wait for a user input and prints the character that bash sees.
+# Useful to program key bindings.
+#
+# Usage:
+#   interactive::testKeys
+function interactive::testKeys() {
+  local keyPressed
+
+  echo "Press any key to see the character that bash sees (CTRL + C to interrupt).${cursorHide}"
+  while true; do
+    if interactive::waitForKey -t 1; then
+      printf "You pressed: %q        %s" "⌜${LAST_KEY_PRESSED}⌝" "${cursorMove}1${_column}"
+    fi
+    if [[ ! -t 1 ]]; then break; fi
+  done
+}
+
+# Wait for a user input (single key).
+# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
+# Some special keys are translated into more readable strings.
+#
+# Returns:
+#   Returns 0 if a key was pressed, 1 otherwise.
+#   The key pressed in the global variable LAST_KEY_PRESSED.
+#
+# Usage:
+#   interactive::waitForKey
+#   interactive::waitForKey -t 0.1
+function interactive::waitForKey() {
+  IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || return 1
+  # special key detection, need to read more characters (up to 4 for F1-F12 keys)
+  if [[ ${LAST_KEY_PRESSED} == $'\e' ]]; then
+    IFS='' read -t 0.01 -d '' -rsn 4
+    LAST_KEY_PRESSED+="${REPLY}"
+    # translate some common inputs into more readable strings
+    case ${LAST_KEY_PRESSED} in
+    $'\e[A' | $'\eOA') LAST_KEY_PRESSED="UP" ;;
+    $'\e[B' | $'\eOA') LAST_KEY_PRESSED="DOWN" ;;
+    $'\e[C' | $'\eOA') LAST_KEY_PRESSED="RIGHT" ;;
+    $'\e[D' | $'\eOA') LAST_KEY_PRESSED="LEFT" ;;
+    $'\177' | $'\b') LAST_KEY_PRESSED="BACKSPACE" ;;
+    $'\e[3~') LAST_KEY_PRESSED="DEL" ;;
+    $'\e[5~') LAST_KEY_PRESSED="PAGE_UP" ;;
+    $'\e[6~') LAST_KEY_PRESSED="PAGE_DOWN" ;;
+    $'\e[H') LAST_KEY_PRESSED="HOME" ;;
+    $'\e[F') LAST_KEY_PRESSED="END" ;;
+    $'\e') LAST_KEY_PRESSED="ESC" ;;
+    $'\eOP') LAST_KEY_PRESSED="F1" ;;
+    $'\e'?) LAST_KEY_PRESSED="ALT+${LAST_KEY_PRESSED#$'\e'}" ;;
+    esac
+  fi
+  return 0
+}
+
 # Ask the user to yes or no.
+# The user can switch between the two options with the arrow keys or space.
+# The user can validate the choice with the enter key.
+# The user can also validate immediately with the y or n key.
 #
 # $1: the prompt to display
 #
 # Returns:
-#  True or false in the global variable LAST_RETURNED_VALUE.
+#   Returns 0 if true, 1 if false.
+#   True or false in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
 #  interactive::promptYesNo "Do you want to continue?" && local answer="${LAST_RETURNED_VALUE}"
 function interactive::promptYesNo() {
-  local prompt
-  prompt="${1}"
+  interactive::displayQuestion "${1}"
 
-  fzf::showFzf "yes-no" "" "${prompt}" ''
+  local state=true
+  CLOSE_INTERACTIVE_SESSION=false
 
-  # we keep only the selected value, i.e. the 2nd line
-  LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE#*$'\n'}"
-  LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE%%$'\n'*}"
-  if [[ ${LAST_RETURNED_VALUE} == "Yes" ]]; then LAST_RETURNED_VALUE=true; else LAST_RETURNED_VALUE=false; fi
+  printf '%s' "${cursorHide}"
+
+  local keyPressed yesColor noColor
+  while true; do
+    if [[ ${state} == "true" ]]; then
+      yesColor="${fgMagenta}"
+      noColor=""
+    else
+      yesColor=""
+      noColor="${fgMagenta}"
+    fi
+
+    # print the current state (then move to column 1 to be ready to rewrite)
+    printf '%s%s%s   %s%s%s' \
+      "${yesColor}${textBold}${textInverse}" \
+      "   (Y)ES   " \
+      "${textReset}" \
+      "${noColor}${textBold}${textInverse}" \
+      "   (N)O   " \
+      "${textReset}${cursorMove}1${_column}"
+
+    # wait and handle key press
+    if interactive::waitForKey -t 1; then
+      case ${LAST_KEY_PRESSED} in
+      $'\n' | ' ')
+        break
+        ;;
+      y)
+        state=true
+        break
+        ;;
+      n)
+        state=false
+        break
+        ;;
+      UP | LEFT | RIGHT | DOWN)
+        if [[ ${state} == "true" ]]; then state=false; else state=true; fi
+        ;;
+      $'\e')
+        core::fail "Interactive session cancelled."
+        ;;
+      esac
+    fi
+
+    # break if fd 1 is closed or does not refer to a terminal.
+    if [[ ! -t 1 ]]; then break; fi
+  done
+
+  printf '%s' "${eraseCharsRight}${cursorShow}"
+
+  if [[ ${state} == "true" ]]; then
+    interactive::displayAnswer "Yes."
+    LAST_RETURNED_VALUE=${state}
+    return 0
+  fi
+
+  interactive::displayAnswer "No."
+  LAST_RETURNED_VALUE=${state}
+  return 1
+}
+
+# Displays a question to the user.
+#
+# $1: the prompt to display
+# $2: (optional) the maximum width of the dialog box
+#
+# Usage:
+#  interactive::displayPrompt "Do you want to continue?"
+#
+# Notes:
+#   Frames: https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9
+#   The text is wrapped and put inside a box like so:
+#
+#   ┌────────────┐
+#   │ My prompt. │
+#   └────────────┘\
+interactive::displayQuestion() {
+  interactive::displayDialogBox "system" "${1}" "${2:-}"
+}
+
+# Displays an answer to a previous question.
+#
+# $1: the answer to display
+# $2: (optional) the maximum width of the dialog box
+#
+# Usage:
+#  interactive::displayPrompt "Do you want to continue?"
+#
+# Notes:
+#   Frames: https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9
+#   The text is wrapped and put inside a box like so:
+#
+#  ┌────────────┐
+#  │ My answer. │
+# /└────────────┘
+interactive::displayAnswer() {
+  interactive::displayDialogBox "user" "${1}" "${2:-}"
+}
+
+# Displays a dialog box with a speaker and a text.
+#
+# $1: the speaker (system or user)
+# $2: the text to display
+# $3: (optional) the maximum width of the dialog box
+#
+# Usage:
+#   interactive::displayDialogBox "system" "This is a system message."
+interactive::displayDialogBox() {
+  local speaker="${1}"
+  local text="${2}"
+  local dialogMaxWidth="${3:-180}"
+
+  local -i maxWidth=$((_COLUMNS - 5))
+  if [[ ${#text} -lt ${maxWidth} ]]; then
+    maxWidth=${#text}
+  fi
+  if [[ ${#text} -gt dialogMaxWidth ]]; then
+    maxWidth="${dialogMaxWidth}"
+  fi
+
+  local leftChar="   "
+  local lastLeftChar="   "
+  local lastRightChar=""
+  if [[ ${speaker} == "system" ]]; then
+    lastRightChar="\\"
+  elif [[ ${speaker} == "user" ]]; then
+    leftChar=" "
+    lastLeftChar="/"
+  fi
+
+  string::wrapText "${text}" "${maxWidth}"
+  local wrappedText="${LAST_RETURNED_VALUE}"
+
+  local finalString="${textFaint}${leftChar}┌─${repeat}${maxWidth}${_lastChar}─┐${textReset}"$'\n'
+
+  local line
+  while read -r line; do
+    finalString+="${textFaint}${leftChar}│${textReset} ${line} ${textFaint}│${textReset}"$'\n'
+  done <<<"${wrappedText}"
+
+  finalString+="${textFaint}${lastLeftChar}└─${repeat}${maxWidth}${_lastChar}─┘${lastRightChar}${textReset}"
+
+  printf '%s\n' "${finalString}"
 }

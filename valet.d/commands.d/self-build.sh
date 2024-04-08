@@ -79,8 +79,8 @@ function selfBuild() {
       shift
       outputFile="${1}"
       ;;
-    -*) log::error "Unknown option ⌜${1}⌝." ;;
-    *) log::error "This command takes no arguments." ;;
+    -*) core::fail "Unknown option ⌜${1}⌝." ;;
+    *) core::fail "This command takes no arguments." ;;
     esac
     shift
   done
@@ -121,10 +121,7 @@ function selfBuild() {
   fi
 
   # make sure to unset all previous CMD_* variables
-  local var
-  for var in ${!CMD_*}; do
-    unset "${var}"
-  done
+  unset -v ${!CMD_*}
   unset SELF_BUILD_ERRORS
 
   # extract the command definitions to variables
@@ -135,7 +132,7 @@ function selfBuild() {
   unset CMD_COMMANDS_HIDDEN_MENU_BODY
 
   if [[ -n "${SELF_BUILD_ERRORS:-}" ]]; then
-    log::error "The valet user commands have not been successfully built. Please check the following errors:"$'\n'"${SELF_BUILD_ERRORS}"
+    core::fail "The valet user commands have not been successfully built. Please check the following errors:"$'\n'"${SELF_BUILD_ERRORS}"
   fi
 
   writeCommandDefinitionVariablesToFile "${outputFile}"
