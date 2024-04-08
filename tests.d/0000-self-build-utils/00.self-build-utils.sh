@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck source=../../valet.d/commands.d/self-build-utils
-source "${VALET_HOME}/valet.d/commands.d/self-build-utils"
+source "${_VALET_HOME}/valet.d/commands.d/self-build-utils"
 
 function testExtractCommandYamls() {
 

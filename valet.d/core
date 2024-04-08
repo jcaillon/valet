@@ -8,24 +8,24 @@
 _CORE_INCLUDED=1
 
 # Handle the case where this script was io::invoked outside of valet
-if [[ -z "${VALET_HOME:-}" ]]; then
-  VALET_HOME="${BASH_SOURCE[0]}"
-  if [[ "${VALET_HOME}" != /* ]]; then
+if [[ -z "${_VALET_HOME:-}" ]]; then
+  _VALET_HOME="${BASH_SOURCE[0]}"
+  if [[ "${_VALET_HOME}" != /* ]]; then
     # resolve relative path
-    if pushd "${VALET_HOME%/*}" &>/dev/null; then VALET_HOME="${PWD}"; popd &>/dev/null;
-    else VALET_HOME="${PWD}"; fi
+    if pushd "${_VALET_HOME%/*}" &>/dev/null; then _VALET_HOME="${PWD}"; popd &>/dev/null;
+    else _VALET_HOME="${PWD}"; fi
   else
-    VALET_HOME="${VALET_HOME%/*}" # strip filename
+    _VALET_HOME="${_VALET_HOME%/*}" # strip filename
   fi
-  VALET_HOME="${VALET_HOME%/*}" # strip valet.d directory
+  _VALET_HOME="${_VALET_HOME%/*}" # strip valet.d directory
 fi
 
 # First thing we do is to source the valet configuration from the user config dir
 # This file can be used to override the default configuration by setting VALET_* env variables.
-VALET_USER_CONFIG_FILE="${VALET_USER_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}/config"}"
-if [[ -e "${VALET_USER_CONFIG_FILE}" ]]; then
+VALET_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}/config"}"
+if [[ -e "${VALET_CONFIG_FILE}" ]]; then
   # shellcheck source=/dev/null
-  source "${VALET_USER_CONFIG_FILE}"
+  source "${VALET_CONFIG_FILE}"
 fi
 
 
@@ -37,7 +37,7 @@ fi
 # to be fast, we do not create anything until we really need it
 # this could lead to issues, altough it is very unlikely
 _TEMPORARY_PREFIX="${TMPDIR:-/tmp}/temp-"
-_TEMPORARY_IN_MEM_PREFIX="${VALET_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/temp-"
+_TEMPORARY_IN_MEM_PREFIX="${VALET_CONFIG_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/temp-"
 _TEMPORARY_WORK_FILE="${_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-work"
 while [[ -e "${_TEMPORARY_WORK_FILE}" ]]; do _TEMPORARY_WORK_FILE+="x"; done
 _TEMPORARY_STDOUT_FILE="${_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stdout"
@@ -111,26 +111,26 @@ function io::cleanupTempFiles() {
 # >>> Logging
 #===============================================================
 
-# determine the color mode expect if the user has set VALET_NO_COLOR
+# determine the color mode expect if the user has set VALET_CONFIG_DISABLE_COLORS
 case "${TERM:-}" in
-    xterm-color|xterm-256color|linux) VALET_NO_COLOR="${VALET_NO_COLOR:-false}";;
-    xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_NO_COLOR="${VALET_NO_COLOR:-false}"; else VALET_NO_COLOR="${VALET_NO_COLOR:-true}"; fi ;;
-    *) VALET_NO_COLOR="${VALET_NO_COLOR:-true}";;
+    xterm-color|xterm-256color|linux) VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-false}";;
+    xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-false}"; else VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-true}"; fi ;;
+    *) VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-true}";;
 esac
 
 # This function sets the colors used in the log messages.
 function log::setColors() {
   # the color code used to output colored text
   # shellcheck disable=SC2034
-  if [[ ${VALET_CI_MODE:-} != true && ${VALET_NO_COLOR:-} != true ]]; then
-    COLOR_DEFAULT=${VALET_COLOR_DEFAULT:-$'\e'"[0m"}
-    COLOR_DEBUG=${VALET_COLOR_DEBUG:-$'\e'"[1;30m"}
-    COLOR_INFO=${VALET_COLOR_INFO:-$'\e'"[0;36m"}
-    COLOR_WARNING=${VALET_COLOR_WARNING:-$'\e'"[0;33m"}
-    COLOR_SUCCESS=${VALET_COLOR_SUCCESS:-$'\e'"[0;32m"}
-    COLOR_ERROR=${VALET_COLOR_ERROR:-$'\e'"[0;31m"}
-    COLOR_TIMESTAMP=${VALET_COLOR_TIMESTAMP:-$'\e'"[1;90m"}
-    COLOR_HIGHLIGHT=${VALET_COLOR_HIGHLIGHT:-$'\e'"[1;35m"}
+  if [[ ${VALET_CONFIG_ENABLE_CI_MODE:-} != true && ${VALET_CONFIG_DISABLE_COLORS:-} != true ]]; then
+    COLOR_DEFAULT=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
+    COLOR_DEBUG=${VALET_CONFIG_COLOR_DEBUG:-$'\e'"[1;30m"}
+    COLOR_INFO=${VALET_CONFIG_COLOR_INFO:-$'\e'"[0;36m"}
+    COLOR_WARNING=${VALET_CONFIG_COLOR_WARNING:-$'\e'"[0;33m"}
+    COLOR_SUCCESS=${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[0;32m"}
+    COLOR_ERROR=${VALET_CONFIG_COLOR_ERROR:-$'\e'"[0;31m"}
+    COLOR_TIMESTAMP=${VALET_CONFIG_COLOR_TIMESTAMP:-$'\e'"[1;90m"}
+    COLOR_HIGHLIGHT=${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[1;35m"}
   else
     COLOR_DEFAULT=""
     COLOR_DEBUG=""
@@ -194,7 +194,7 @@ function log::setLevel() {
 }
 
 # The log line function is used to display log messages in the terminal.
-# The implementation depends on the environment variables VALET_CI_MODE and VALET_NO_WRAP.
+# The implementation depends on the environment variables VALET_CONFIG_ENABLE_CI_MODE and VALET_CONFIG_DISABLE_LOG_WRAP.
 # $1: the color of the log message (red, green, yellow, cyan, gray, pink)
 # $2: the icon to display in the log message (utf8 character from nerdicons)
 # $3: the severity of the log message (masx 7 chars)
@@ -209,10 +209,10 @@ function log::print() { return 0; }
 # shellcheck disable=SC2016
 function log::createPrintFunction() {
   # in CI mode, we disable wrapping, colors and icons
-  if [[ ${VALET_CI_MODE:-} == "true" ]]; then
-    VALET_NO_WRAP="${VALET_NO_WRAP:-true}"
-    VALET_NO_ICON="${VALET_NO_ICON:-true}"
-    VALET_NO_COLOR="${VALET_NO_COLOR:-true}"
+  if [[ ${VALET_CONFIG_ENABLE_CI_MODE:-} == "true" ]]; then
+    VALET_CONFIG_DISABLE_LOG_WRAP="${VALET_CONFIG_DISABLE_LOG_WRAP:-true}"
+    VALET_CONFIG_DISABLE_NERDFONT_ICONS="${VALET_CONFIG_DISABLE_NERDFONT_ICONS:-true}"
+    VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-true}"
   fi
 
   LOG_LINE_FUNCTION='
@@ -223,22 +223,22 @@ function log::createPrintFunction() {
     severity="${3}"
     shift 3
     LAST_RETURNED_VALUE="$*"'
-  if [[ "${VALET_NO_COLOR:-}" != "true" ]]; then
+  if [[ "${VALET_CONFIG_DISABLE_COLORS:-}" != "true" ]]; then
     # shellcheck disable=SC2016
     LOG_LINE_FUNCTION+='
     LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌜/${COLOR_HIGHLIGHT}⌜}"
     LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌝/⌝${COLOR_DEFAULT}}"'
   fi
 
-  if [[ "${VALET_NO_WRAP:-}" != "true" ]]; then
-    local wrapTextColumns="${VALET_LOG_COLUMNS:-${_COLUMNS}}"
+  if [[ "${VALET_CONFIG_DISABLE_LOG_WRAP:-}" != "true" ]]; then
+    local wrapTextColumns="${VALET_CONFIG_LOG_COLUMNS:-${_COLUMNS}}"
     local wrapPaddingLength=20
 
-    if [[ ${VALET_NO_TIMESTAMP:-} == "true" ]]; then
+    if [[ ${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-} == "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 9))
     fi
 
-    if [[ ${VALET_NO_ICON:-} == "true" ]]; then
+    if [[ ${VALET_CONFIG_DISABLE_NERDFONT_ICONS:-} == "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 2))
     fi
 
@@ -250,10 +250,10 @@ function log::createPrintFunction() {
   local printfArguments
 
   # timestamp
-  if [[ ${VALET_CI_MODE:-} == "true" && "${VALET_NO_TIMESTAMP:-}" != "true" ]]; then
+  if [[ ${VALET_CONFIG_ENABLE_CI_MODE:-} == "true" && "${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-}" != "true" ]]; then
     printfFormat+="%(%F_%H:%M:%S)T "
     printfArguments+='"${EPOCHSECONDS}" '
-  elif [[ ${VALET_NO_TIMESTAMP:-} == "true" ]]; then
+  elif [[ ${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-} == "true" ]]; then
     printfFormat+=""
   else
     printfFormat+="%s%(%H:%M:%S)T "
@@ -261,7 +261,7 @@ function log::createPrintFunction() {
   fi
 
   # severity
-  if [[ ${VALET_NO_ICON:-} == "true" ]]; then
+  if [[ ${VALET_CONFIG_DISABLE_NERDFONT_ICONS:-} == "true" ]]; then
     printfFormat+="%s%-8s%s "
     printfArguments+='"${color}" "${severity}" "${COLOR_DEFAULT}" '
   else
@@ -427,14 +427,14 @@ fi
 #   source ./my/path my/other/path
 function source() {
   local filePathToInclude includedFile
-  if [[ -e "${VALET_HOME}/valet.d/lib-${1}" ]]; then
-    filePathToInclude="${VALET_HOME}/valet.d/lib-${1}"
-  elif [[ -e "${BASH_SOURCE[1]%/*}/${1}" ]]; then
+  if [[ -f "${_VALET_HOME}/valet.d/lib-${1}" ]]; then
+    filePathToInclude="${_VALET_HOME}/valet.d/lib-${1}"
+  elif [[ -f "${BASH_SOURCE[1]%/*}/${1}" ]]; then
     filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
-  elif [[ -e "${1}" ]]; then
+  elif [[ -f "${1}" ]]; then
     filePathToInclude="${1}"
   else
-    core::fail "The file ${1} could not be found."
+    core::fail "Cannot source the file ${1} because it does not exist."
   fi
   for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
     if [[ ${includedFile} == "${filePathToInclude}" ]]; then
@@ -470,16 +470,16 @@ function core::sourceForFunction() {
   local fileToSource
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
     local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
-    if [[ -e "${fileToSource}" ]]; then
+    if [[ -f "${fileToSource}" ]]; then
       # shellcheck disable=SC1090
       source "${fileToSource}"
       log::debug "Loaded file ⌜${fileToSource}⌝."
-    elif [[ -e "${VALET_HOME:-}/${fileToSource}" ]]; then
+    elif [[ -f "${_VALET_HOME:-}/${fileToSource}" ]]; then
       # shellcheck disable=SC1090
-      source "${VALET_HOME:-}/${fileToSource}"
-      log::debug "Loaded file ⌜${VALET_HOME:-}/${fileToSource}⌝."
+      source "${_VALET_HOME:-}/${fileToSource}"
+      log::debug "Loaded file ⌜${_VALET_HOME:-}/${fileToSource}⌝."
     else
-      log::warning "The file ⌜${VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
+      log::warning "The file ⌜${_VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
     fi
   fi
 }
@@ -507,7 +507,7 @@ function core::sourceUserCommands() {
     message="The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'
     message+="To get started with valet, you must build your command list using the ⌜valet self build⌝ command."$'\n'
     message+="Please check the help using ⌜valet self build --help⌝ for details."
-    commandsFile="${VALET_HOME}/examples.d/commands"
+    commandsFile="${_VALET_HOME}/examples.d/commands"
     if [[ -e "${commandsFile}" ]]; then
       message+=$'\n'"Now using the examples commands from ⌜${commandsFile%/*}⌝."
       log::warning "${message}"
@@ -799,7 +799,7 @@ function core::getConfigurationDirectory() {
 #   core::getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
 function core::getLocalStateDirectory() {
   local directory
-  directory="${VALET_LOCAL_STATE_DIRECTORY:-${XDG_STATE_HOME:-$HOME/.local/share}/valet}"
+  directory="${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-${XDG_STATE_HOME:-$HOME/.local/share}/valet}"
   if [[ ! -d "${directory}" ]]; then
     mkdir -p "${directory}"
   fi
@@ -889,5 +889,5 @@ function core::checkParseResults() {
 
 if [[ -z "${_MAIN_INCLUDED:-}" ]]; then
   # shellcheck source=main
-  source "${VALET_HOME}/valet.d/main"
+  source "${_VALET_HOME}/valet.d/main"
 fi

@@ -72,6 +72,8 @@ COMMANDS
 
   self build
       Re-build the menu of valet from your commands.
+  self config
+      Open the configuration file of Valet with your default editor.
   self download-binaries
       Download the required binaries for valet.
   self mock1
@@ -198,31 +200,16 @@ ABOUT
   
   ⌜Configuration through environment variables:⌝
   
-  In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
+  In addition to the environment variables defined for each options, you can define environment variables to configure valet.
   
-  - VALET_USER_DIRECTORY=\"~/valet.d\": set the path to the valet user directory (in which to find user commands).
-  - VALET_NO_COLOR=\"true\": will disable the color output for logs and help.
-  - VALET_COLOR_XXX=\"color\": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, 
-  ERROR, TIMESTAMP, HIGHLIGHT.
-  - VALET_NO_WRAP=\"true\": will disable the text wrapping for logs.
-  - VALET_NO_ICON=\"true\": will disable the icons for logs and help.
-  - VALET_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
-  - VALET_LOG_COLUMNS=\"120\": set the number of columns at which to wrap the logs to 120 (if wrap is enabled); defaults to the terminal width.
-  - VALET_CI_MODE='true': will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full 
-  date.
-  - VALET_REMEMBER_LAST_CHOICES='3': number of last choices to remember when selecting an item from a command menu. Set to 0 to disable this feature and always display items in the
-  alphabetical order.
-  - VALET_DO_NOT_USE_LOCAL_BIN='false': if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
-  - VALET_WORK_FILES_DIRECTORY='': the directory in which to write work files (small files to capture output of programs). If not set, it will default to the temporary directory. 
-  You can set it to a tmpfs directory (such as /dev/shm) to speed up the execution of valet.
+  These variables are conviently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the 
+  VALET_CONFIG_FILE environment variable).
   
-  These variables can be exported in your .bashrc file.
-  Alternatively, you can define them in your valet user config file, located by default at ~/.config/valet/config. This path can be configured using the VALET_USER_CONFIG_FILE 
-  environment variable.
+  You can run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).
   
   ⌜Developer notes:⌝
   
-  You can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
+  You can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
 
 USAGE
 
@@ -235,12 +222,12 @@ OPTIONS
       It will output to ~/profile_valet_cmd.txt.
       This is useful to debug your command and understand what takes a long time to execute.
       The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable 
-      VALET_KEEP_ALL_PROFILER_LINES to true.
+      VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
       This option can be set by exporting the variable VALET_PROFILING='true'.
-  -l, --log, --log-level <level>
+  -l, --log-level, --log <level>
       Set the log level of valet (defaults to info).
       Possible values are: debug, success, info, success, warning, error.
-      This option can be set by exporting the variable VALET_LOG,='<level>'.
+      This option can be set by exporting the variable VALET_LOG_LEVEL,='<level>'.
   -v, --verbose
       Output verbose information.
       This is the equivalent of setting the log level to debug.
@@ -259,6 +246,8 @@ COMMANDS
       Show the help this program or of a specific command.
   self build
       Re-build the menu of valet from your commands.
+  self config
+      Open the configuration file of Valet with your default editor.
   self download-binaries
       Download the required binaries for valet.
   self mock1
@@ -365,10 +354,10 @@ Exit code: `0`
 ```log
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 ERROR    Error code 1 in selfMock1(), stack:
-├─ In function selfMock1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
-└─ In function main() $VALET_HOME/valet:XXX
+├─ In function selfMock1() $_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ In function main::runFunction() $_VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $_VALET_HOME/valet.d/main:XXX
+└─ In function main() $_VALET_HOME/valet:XXX
 ```
 
 ### Testing exit message and custom onExit function
@@ -387,10 +376,10 @@ Exit code: `0`
 WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
-├─ In function selfMock1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
-└─ In function main() $VALET_HOME/valet:XXX
+├─ In function selfMock1() $_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ In function main::runFunction() $_VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $_VALET_HOME/valet.d/main:XXX
+└─ In function main() $_VALET_HOME/valet:XXX
 ```
 
 ### Testing fail function
@@ -426,17 +415,17 @@ WARNING  This is for testing valet core functions, the next statement will call 
 ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
 stack:
-├─ In function core::fail() $VALET_HOME/valet.d/core:XXX
-├─ In function command_not_found_handle() $VALET_HOME/valet.d/main:XXX
-├─ In function selfMock1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
-└─ In function main() $VALET_HOME/valet:XXX
+├─ In function core::fail() $_VALET_HOME/valet.d/core:XXX
+├─ In function command_not_found_handle() $_VALET_HOME/valet.d/main:XXX
+├─ In function selfMock1() $_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ In function main::runFunction() $_VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $_VALET_HOME/valet.d/main:XXX
+└─ In function main() $_VALET_HOME/valet:XXX
 ERROR    Error code 1 in selfMock1(), stack:
-├─ In function selfMock1() $VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $VALET_HOME/valet.d/main:XXX
-└─ In function main() $VALET_HOME/valet:XXX
+├─ In function selfMock1() $_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ In function main::runFunction() $_VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $_VALET_HOME/valet.d/main:XXX
+└─ In function main() $_VALET_HOME/valet:XXX
 ```
 
 ## Test script 04.interactive-mode
@@ -470,7 +459,7 @@ ALT+UP/ALT+DOWN: Previous/next query in the history.
 SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
 ') --preview-window=right,80 --bind alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|) --layout=reverse --info=right --pointer=◆ --marker=✓ --cycle --tiebreak=begin,index --margin=0 --padding=0 --delimiter=
  --tabstop=3 --header-first --header=Press ALT+H to display the help and keybindings.
-Please select the command to run. --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
+Please select the command to run. --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$_VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
 ▶ fzf input stream was:
 ⌈help                  	Show the help this program or of a specific command.
 self build            	Re-build the menu of valet from your commands.
@@ -534,7 +523,7 @@ DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Command found ⌜self mock1⌝.
 DEBUG    Function name found ⌜selfMock1⌝.
-DEBUG    Loaded file ⌜$VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
+DEBUG    Loaded file ⌜$_VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
 local parsingErrors help action
@@ -580,7 +569,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true valet self mock1 logging-level
+→ VALET_CONFIG_DISABLE_COLORS=true valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -603,7 +592,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_CI_MODE=true valet self mock1 logging-level
+→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_ENABLE_CI_MODE=true valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -622,7 +611,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_NO_TIMESTAMP=true valet self mock1 logging-level
+→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_DISABLE_LOG_TIMESTAMP=true valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -645,7 +634,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_NO_ICON=true valet self mock1 logging-level
+→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_DISABLE_NERDFONT_ICONS=true valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -668,7 +657,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_NO_WRAP=true valet self mock1 logging-level
+→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_DISABLE_LOG_WRAP=true valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -687,7 +676,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_NO_COLOR=true VALET_LOG_COLUMNS=80 valet self mock1 logging-level
+→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -773,10 +762,10 @@ Exit code: `0`
 **Error** output:
 
 ```log
-WARNING  The valet user directory ⌜$VALET_HOME/non-existing⌝ does not contain a built ⌜commands⌝ file.
+WARNING  The valet user directory ⌜$_VALET_HOME/non-existing⌝ does not contain a built ⌜commands⌝ file.
 To get started with valet, you must build your command list using the ⌜valet self build⌝ command.
 Please check the help using ⌜valet self build --help⌝ for details.
-Now using the examples commands from ⌜$VALET_HOME/examples.d⌝.
+Now using the examples commands from ⌜$_VALET_HOME/examples.d⌝.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 SUCCESS  This is a success message.
 WARNING  This is a warning message.
@@ -839,7 +828,7 @@ Please select the command to run.
 --print-query
 --no-multi
 --preview-label=Command help
---preview=VALET_LOG_LEVEL=error '$VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
+--preview=VALET_LOG_LEVEL=error '$_VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
 ▶ fzf input stream was:
 ⌈self build            	Re-build the menu of valet from your commands.
 self release          	Release a new version of valet.
@@ -873,6 +862,8 @@ COMMANDS
 
   self build
       Re-build the menu of valet from your commands.
+  self config
+      Open the configuration file of Valet with your default editor.
   self download-binaries
       Download the required binaries for valet.
   self mock1

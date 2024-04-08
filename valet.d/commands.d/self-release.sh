@@ -3,15 +3,10 @@
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
-# import the main script (should always be skipped if the command is run from valet)
+# import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
 if [[ -z "${_CORE_INCLUDED:-}" ]]; then
-  VALETD_DIR="${BASH_SOURCE[0]}"
-  if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null || true;
-    else VALETD_DIR="${PWD}"; fi
-  else VALETD_DIR="${VALETD_DIR%/*}"; fi
   # shellcheck source=../core
-  source "${VALETD_DIR%/*}/core"
+  source "$(dirname -- "$(command -v valet)")/valet.d/core"
 fi
 # --- END OF COMMAND COMMON PART
 
@@ -81,7 +76,7 @@ function selfRelease() {
   core::sourceForFunction "selfDownloadBinaries" 2>/dev/null
 
   # prepare a temp folder to store the binaries
-  local tempDir="${VALET_HOME}/.tmp"
+  local tempDir="${_VALET_HOME}/.tmp"
   rm -Rf "${tempDir}"
   mkdir -p "${tempDir}"
   pushd "${tempDir}" 1>/dev/null
@@ -134,7 +129,7 @@ function createRelease() {
 
   # read the version from the valet file
   local version
-  IFS= read -rd '' version <"${VALET_HOME}/valet.d/version" || true
+  IFS= read -rd '' version <"${_VALET_HOME}/valet.d/version" || true
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."
 
@@ -170,12 +165,12 @@ function createRelease() {
 
   # bump the version
   string::bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${LAST_RETURNED_VALUE}"
-  if [[ "${dryRun:-}" != "true" ]]; then echo -n "${newVersion}" >"${VALET_HOME}/valet.d/version"; fi
+  if [[ "${dryRun:-}" != "true" ]]; then echo -n "${newVersion}" >"${_VALET_HOME}/valet.d/version"; fi
   log::info "The new version of valet is: ${newVersion}."
 
   # commit the new version and push it
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke git add "${VALET_HOME}/valet.d/version"
+    io::invoke git add "${_VALET_HOME}/valet.d/version"
     io::invoke git commit -m ":bookmark: bump version to ${newVersion}"
     io::invoke git push origin main
     log::success "The new version has been committed."
@@ -230,7 +225,7 @@ function uploadArtifact() {
   # copy each file from valet dir to current dir
   local file
   for file in "${files[@]}"; do
-    io::invoke cp -R "${VALET_HOME}/${file}" .
+    io::invoke cp -R "${_VALET_HOME}/${file}" .
   done
 
   if [[ "${os}" != "no-binaries" ]]; then

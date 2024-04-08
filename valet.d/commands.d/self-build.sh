@@ -24,13 +24,13 @@ fi
 # --- END OF COMMAND COMMON PART
 
 # shellcheck source=self-build-utils
-source "${VALET_HOME}/valet.d/commands.d/self-build-utils"
+source "${_VALET_HOME}/valet.d/commands.d/self-build-utils"
 # shellcheck source=../lib-array
-source "${VALET_HOME}/valet.d/lib-array"
+source "${_VALET_HOME}/valet.d/lib-array"
 # shellcheck source=../lib-io
-source "${VALET_HOME}/valet.d/lib-io"
+source "${_VALET_HOME}/valet.d/lib-io"
 # shellcheck source=../lib-string
-source "${VALET_HOME}/valet.d/lib-string"
+source "${_VALET_HOME}/valet.d/lib-string"
 
 #===============================================================
 # >>> command: self build
@@ -88,13 +88,13 @@ function selfBuild() {
   core::getUserDirectory && userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
   outputFile="${outputFile:-${userDirectory}/commands}"
 
-  io::toAbsolutePath "${VALET_HOME}" && VALET_HOME="${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath "${_VALET_HOME}" && _VALET_HOME="${LAST_RETURNED_VALUE}"
 
   # list all the files in which we need to find command definitions
   local -a commandDefinitionFiles
   commandDefinitionFiles=(
-    "${VALET_HOME}/valet"
-    "${VALET_HOME}/valet.d/commands.d"/*.sh
+    "${_VALET_HOME}/valet"
+    "${_VALET_HOME}/valet.d/commands.d"/*.sh
   )
   if [[ -d "${userDirectory}" ]]; then
     shopt -s globstar
@@ -171,7 +171,7 @@ function summarize() {
 # Bump the valet build version by one patch.
 function bumpValetBuildVersion() {
   local versionFile currentVersion
-  versionFile="${VALET_HOME}/valet.d/version"
+  versionFile="${_VALET_HOME}/valet.d/version"
 
   IFS= read -rd '' currentVersion <"${versionFile}" || true
 
@@ -208,7 +208,7 @@ function extractCommandDefinitionsToVariables() {
       log::info "                         ├── ⌜${command}⌝."
 
       io::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${LAST_RETURNED_VALUE}"
-      TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${VALET_HOME}"/}"
+      TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${_VALET_HOME}"/}"
 
       if log::isDebugEnabled; then
         io::captureOutput declare -p ${!TEMP_CMD_BUILD_*}

@@ -64,14 +64,14 @@ function kurl::toFile() {
 }
 
 function main() {
-
+  setTempFilesNumber 100
   io::createTempFile && local tmpFile="${LAST_RETURNED_VALUE}"
-  cp -f "${VALET_HOME}/valet.d/version" "${tmpFile}"
-  echo -n "1.2.3" > "${VALET_HOME}/valet.d/version"
+  cp -f "${_VALET_HOME}/valet.d/version" "${tmpFile}"
+  echo -n "1.2.3" > "${_VALET_HOME}/valet.d/version"
 
   testSelfRelease
 
-  mv -f "${tmpFile}" "${VALET_HOME}/valet.d/version"
+  mv -f "${tmpFile}" "${_VALET_HOME}/valet.d/version"
 }
 
 main

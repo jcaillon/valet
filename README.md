@@ -129,7 +129,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/vale
 > [!IMPORTANT]
 > If you see the replacement character � in my terminal, it means you don't have a [nerd font][nerd-font] setup in your terminal.
 >
-> Either install a nerd font and activate it on our terminal or `export VALET_NO_ICON=true` in your environment. This is reminded to you during the automated installation process.
+> Either install a nerd font and activate it on our terminal or `export VALET_CONFIG_DISABLE_NERDFONT_ICONS=true` in your environment. This is reminded to you during the automated installation process.
 
 ### Adding your own commands
 
@@ -145,7 +145,7 @@ Calling `valet` without any arguments (you can pass options) will open the inter
 
 Type your query (fuzzy matching is active so you can skip some letters), press ⬇️/⬆️ to select the command and hit enter to run it. Press `ALT+H` to show the help text for interactive mode.
 
-Valet will remember your last choices, and they will appear at the top of the list the next time the menu shows up. You can set up how many choices to remember with the variable `VALET_REMEMBER_LAST_CHOICES`. Setting `VALET_REMEMBER_LAST_CHOICES=0` will effectively disable this feature and always display items sorted alphabetically.
+Valet will remember your last choices, and they will appear at the top of the list the next time the menu shows up. You can set up how many choices to remember with the variable `VALET_CONFIG_REMEMBER_LAST_CHOICES`. Setting `VALET_CONFIG_REMEMBER_LAST_CHOICES=0` will effectively disable this feature and always display items sorted alphabetically.
 
 ### Interactive mode
 

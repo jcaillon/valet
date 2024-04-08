@@ -72,24 +72,36 @@ function endTest() {
   set +Eeu +o pipefail
 }
 
+# This function allows to set the temp files and directories
+# numbers so we can have consistent results.
+#
+# $1: the new number for temp files and directories
+#
+# Usage:
+#   setTempFilesNumber 3
+function setTempFilesNumber() {
+  TEMPORARY_FILE_NUMBER=${1}
+  TEMPORARY_DIRECTORY_NUMBER=${1}
+}
+
 
 #===============================================================
 # >>> Internal tests functions
 #===============================================================
 
 function runCoreTests() {
-  if [[ ! -d "${VALET_HOME}/tests.d" ]]; then
-    core::fail "The valet core tests directory ⌜${VALET_HOME}/tests.d⌝ does not exist, can't run core tests."
+  if [[ ! -d "${_VALET_HOME}/tests.d" ]]; then
+    core::fail "The valet core tests directory ⌜${_VALET_HOME}/tests.d⌝ does not exist, can't run core tests."
   fi
 
   local originalUserDirectory="${VALET_USER_DIRECTORY:-}"
 
   # we will run some example commands so we need to set the correct user directory and commands
-  export VALET_USER_DIRECTORY="${VALET_HOME}/tests.d/0000-self-build"
+  export VALET_USER_DIRECTORY="${_VALET_HOME}/tests.d/0000-self-build"
   core::reloadUserCommands
 
-  log::info "Running all test suites in directory ⌜${VALET_HOME}/tests.d⌝."
-  runTestSuites "${VALET_HOME}/tests.d"
+  log::info "Running all test suites in directory ⌜${_VALET_HOME}/tests.d⌝."
+  runTestSuites "${_VALET_HOME}/tests.d"
 
   VALET_USER_DIRECTORY="${originalUserDirectory}"
 }
@@ -100,7 +112,7 @@ function runCoreTests() {
 # $1: the directory containing the test suites
 #
 # Usage:
-#   runTestSuites "${VALET_HOME}/tests.d"
+#   runTestSuites "${_VALET_HOME}/tests.d"
 function runTestSuites() {
   local testsDirectory="${1}"
 
@@ -164,7 +176,7 @@ function runTestSuites() {
     failMessage="A total of ⌜${failedTestSuites}⌝/⌜${nbTestSuites}⌝ test(s) failed."
     if [[ ${AUTO_APPROVE:-false} == "true" ]]; then
       failMessage+=$'\n'"The received test result files were automatically approved."
-      core::warn "${failMessage}"
+      log::warning "${failMessage}"
     else
       failMessage+=$'\n'"You should review the difference in the logs above or by comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
       failMessage+=$'\n'"If the differences are legitimate, then approve the changes by running this command again with the option ⌜-a⌝."
@@ -284,21 +296,21 @@ function setFdRedirection() {
   # so we can have consistent results independent of the environment
   if [[ -z "${ORIGINAL_LOG_LINE_FUNCTION:-}" ]]; then
     ORIGINAL_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
-    ORIGINAL_VALET_NO_COLOR="${VALET_NO_COLOR:-}"
+    ORIGINAL_VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-}"
     ORIGINAL_LOG_LEVEL="${VALET_LOG_LEVEL:-}"
-    ORIGINAL_VALET_DO_NOT_USE_LOCAL_BIN="${VALET_DO_NOT_USE_LOCAL_BIN:-}"
+    ORIGINAL_VALET_CONFIG_DISABLE_LOCAL_BIN="${VALET_CONFIG_DISABLE_LOCAL_BIN:-}"
   fi
   export VALET_LOG_LEVEL="info"
   log::setLevel info &>/dev/null
-  export VALET_NO_COLOR="true"
+  export VALET_CONFIG_DISABLE_COLORS="true"
   log::setColors
-  export VALET_NO_TIMESTAMP="true"
-  export VALET_NO_ICON="true"
-  export VALET_NO_WRAP="true"
-  export VALET_CI_MODE="false"
-  export VALET_LOG_COLUMNS=9999
+  export VALET_CONFIG_DISABLE_LOG_TIMESTAMP="true"
+  export VALET_CONFIG_DISABLE_NERDFONT_ICONS="true"
+  export VALET_CONFIG_DISABLE_LOG_WRAP="true"
+  export VALET_CONFIG_ENABLE_CI_MODE="false"
+  export VALET_CONFIG_LOG_COLUMNS=9999
   export _COLUMNS=9999
-  export VALET_DO_NOT_USE_LOCAL_BIN="true"
+  export VALET_CONFIG_DISABLE_LOCAL_BIN="true"
   if [[ -z "${SIMPLIFIED_LOG_LINE_FUNCTION:-}" ]]; then
     log::createPrintFunction
     SIMPLIFIED_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
@@ -316,8 +328,8 @@ function resetFdRedirection() {
   # reset the original logs
   export VALET_LOG_LEVEL="${ORIGINAL_LOG_LEVEL}"
   log::setLevel "${ORIGINAL_LOG_LEVEL}" &>/dev/null
-  export VALET_NO_COLOR="${ORIGINAL_VALET_NO_COLOR}"
-  export VALET_DO_NOT_USE_LOCAL_BIN="${ORIGINAL_VALET_DO_NOT_USE_LOCAL_BIN}"
+  export VALET_CONFIG_DISABLE_COLORS="${ORIGINAL_VALET_CONFIG_DISABLE_COLORS}"
+  export VALET_CONFIG_DISABLE_LOCAL_BIN="${ORIGINAL_VALET_CONFIG_DISABLE_LOCAL_BIN}"
   log::setColors
   eval "${ORIGINAL_LOG_LINE_FUNCTION}"
 }
@@ -339,7 +351,7 @@ function setGlobalOptions() {
 
 # This function is used to echo the content of a file with some substitutions.
 # The substitutions are:
-# - replace the VALET_HOME with $VALET_HOME
+# - replace the _VALET_HOME with $_VALET_HOME
 # - replace the current test directory with a dot
 # - replace a line with ${TMPDIR}/valet-*/ (temp directory) by /valet/
 #
@@ -359,7 +371,7 @@ function echoFileSubstitutingPath() {
     else
       echo
     fi
-    line="${line//${VALET_HOME}/\$VALET_HOME}"
+    line="${line//${_VALET_HOME}/\$_VALET_HOME}"
     line="${line//${CURRENT_DIRECTORY}/.}"
     line="${line//${_TEMPORARY_PREFIX}*.valet/\/tmp/valet}"
     line="${line//${_TEMPORARY_IN_MEM_PREFIX}*.valet/\/tmp/valet}"

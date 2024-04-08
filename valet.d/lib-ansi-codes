@@ -7,6 +7,7 @@ set -Eeu -o pipefail
 # it would also be slower to execute (function overhead + multiple printf calls).
 #
 # Reference:
+# - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 # - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
 # - https://en.wikipedia.org/wiki/ANSI_escape_code
 # - https://vt100.net/docs/vt102-ug/chapter5.html

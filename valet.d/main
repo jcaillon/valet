@@ -180,10 +180,10 @@ function main::cleanProfilerFile() {
   timePrecision=${#timePrecision}
 
   local clearLine
-  if [[ ${VALET_KEEP_ALL_PROFILER_LINES:-false} == "true" ]]; then
+  if [[ ${VALET_CONFIG_KEEP_ALL_PROFILER_LINES:-false} == "true" ]]; then
     clearLine=false
   fi
-  if [[ -z "${clearLine:-}" && "${VALET_STARTUP_PROFILING:-false}" == "true" ]]; then
+  if [[ -z "${clearLine:-}" && "${VALET_CONFIG_STARTUP_PROFILING:-false}" == "true" ]]; then
     clearLine=false
   fi
   if [[ -z "${clearLine:-}" ]]; then
@@ -259,8 +259,8 @@ function main::cleanProfilerFile() {
   mv -f "${newProfilerFile}" "${PROFILER_FILE}"
 }
 
-if [[ ${VALET_STARTUP_PROFILING:-} == "true" ]]; then
-  main::enableProfiler "${VALET_STARTUP_PROFILING_FILE:-${HOME}/profile_valet.txt}"
+if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
+  main::enableProfiler "${VALET_CONFIG_STARTUP_PROFILING_FILE:-${HOME}/profile_valet.txt}"
 fi
 
 #===============================================================
@@ -275,11 +275,11 @@ fi
 # $4: the maximum columns for the help text.
 #
 # Usage:
-#   main::printHelp function "this" "${VALET_NO_COLOR:-false}" "${_COLUMNS}"
+#   main::printHelp function "this" "${VALET_CONFIG_DISABLE_COLORS:-false}" "${_COLUMNS}"
 function main::printHelp() {
   local type=${1:-function}
   local name="${2:-this}"
-  local noColor="${3:-${VALET_NO_COLOR:-false}}"
+  local noColor="${3:-${VALET_CONFIG_DISABLE_COLORS:-false}}"
   local maxColumns="${4:-180}"
 
   # sudo apt-get install colortest
@@ -293,12 +293,12 @@ function main::printHelp() {
     cArgument=""
     cCommand=""
   else
-    cDefault=${VALET_COLOR_DEFAULT:-$'\e'"[0m"}
-    cTitle=${VALET_COLOR_TITLE:-$'\e'"[0;36m"}
-    cHighlight=${VALET_COLOR_HIGHLIGHT:-$'\e'"[0;35m"}
-    cOption=${VALET_COLOR_OPTION:-$'\e'"[0;33m"}
-    cArgument=${VALET_COLOR_ARGUMENT:-$'\e'"[0;31m"}
-    cCommand=${VALET_COLOR_COMMAND:-$'\e'"[0;32m"}
+    cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
+    cTitle=${VALET_CONFIG_COLOR_TITLE:-$'\e'"[0;36m"}
+    cHighlight=${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[0;35m"}
+    cOption=${VALET_CONFIG_COLOR_OPTION:-$'\e'"[0;33m"}
+    cArgument=${VALET_CONFIG_COLOR_ARGUMENT:-$'\e'"[0;31m"}
+    cCommand=${VALET_CONFIG_COLOR_COMMAND:-$'\e'"[0;32m"}
   fi
 
   local -i helpWidth
@@ -480,7 +480,7 @@ function main::parseMainArguments() {
       log::setLevel "debug"
       ;;
     --version)
-      cat "${VALET_HOME}/valet.d/version"
+      cat "${_VALET_HOME}/valet.d/version"
       exit 0
       ;;
     -h | --help)
@@ -572,11 +572,11 @@ function main::runFunction() {
   log::debug "Running the command ⌜${command}⌝ with the function ⌜${functionName}⌝ and the arguments ⌜$*⌝."
 
   # disable startup profile and enable command profile, if needed
-  if [[ ${VALET_STARTUP_PROFILING:-} == "true" ]]; then
+  if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
     main::disableProfiler
   fi
   if [[ ${PROFIL_COMMAND:-} == "true" ]]; then
-    main::enableProfiler "${VALET_COMMAND_PROFILING_FILE:-${HOME}/profile_valet_cmd.txt}"
+    main::enableProfiler "${VALET_CONFIG_COMMAND_PROFILING_FILE:-${HOME}/profile_valet_cmd.txt}"
   fi
 
   # execute the function
@@ -692,7 +692,7 @@ function main::sortCommands() {
   commands="${2}"
 
   # if the user does not want to remember the last choices, we return
-  if [[ "${VALET_REMEMBER_LAST_CHOICES:-3}" -eq 0 ]]; then
+  if [[ "${VALET_CONFIG_REMEMBER_LAST_CHOICES:-3}" -eq 0 ]]; then
     LAST_RETURNED_VALUE="${commands}"
     return 0
   fi
@@ -760,7 +760,7 @@ function main::addLastChoice() {
   menuId="${1}"
   command="${2}"
 
-  local maxNumberOfLastChoice=${VALET_REMEMBER_LAST_CHOICES:-3}
+  local maxNumberOfLastChoice=${VALET_CONFIG_REMEMBER_LAST_CHOICES:-3}
 
   # if the user does not want to remember the last choices, we return
   if [[ "${maxNumberOfLastChoice}" -eq 0 ]]; then
@@ -818,7 +818,7 @@ function main::showInteractiveCommandsMenu() {
 
   fzf::showFzf "menu" "${menuId}" "${menuHeader}" "${menuBody}" \
     --preview-label='Command help' \
-    --preview="VALET_LOG_LEVEL=error '${VALET_HOME}/valet' help --columns \$((FZF_PREVIEW_COLUMNS - 1)) {1}"
+    --preview="VALET_LOG_LEVEL=error '${_VALET_HOME}/valet' help --columns \$((FZF_PREVIEW_COLUMNS - 1)) {1}"
 
   choice="${LAST_RETURNED_VALUE}"
   choice="${choice#*$'\n'}" # delete first line (query)

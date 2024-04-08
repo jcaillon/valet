@@ -34,14 +34,14 @@ sub cmd1  	This is sub command 1
 sub cmd2  	This is sub command 2
 ```
 
-### Testing main::sortCommands, with VALET_REMEMBER_LAST_CHOICES=0 the order does not change
+### Testing main::sortCommands, with VALET_CONFIG_REMEMBER_LAST_CHOICES=0 the order does not change
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ VALET_REMEMBER_LAST_CHOICES=0 main::sortCommands myid1 "${commands}"
+→ VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands myid1 "${commands}"
 cm1  	This is command 1
 cm2  	This is command 2
 sub cmd1  	This is sub command 1

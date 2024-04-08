@@ -57,10 +57,10 @@ _CMD_INCLUDED=1
 # CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (contains ?)
 
 
-CMD_ALL_COMMANDS=$'self\nhelp\nself build\nself download-binaries\nself mock1\nself mock2\nself mock3\nself release\nself setup\nself test\nself update'
-CMD_ALL_COMMANDS_ARRAY=([0]="help" [1]="self build" [2]="self download-binaries" [3]="self mock1" [4]="self mock2" [5]="self mock3" [6]="self release" [7]="self setup" [8]="self test" [9]="self update")
-CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfDownloadBinaries\nselfUpdate\nselfMock1\nselfMock2\nselfMock3\nselfRelease\nselfSetup\nselfTest'
-CMD_ALL_FUNCTIONS_ARRAY=([0]="this" [1]="showCommandHelp" [2]="selfBuild" [3]="selfDownloadBinaries" [4]="selfUpdate" [5]="selfMock1" [6]="selfMock2" [7]="selfMock3" [8]="selfRelease" [9]="selfSetup" [10]="selfTest")
+CMD_ALL_COMMANDS=$'self\nhelp\nself build\nself config\nself download-binaries\nself mock1\nself mock2\nself mock3\nself release\nself setup\nself test\nself update'
+CMD_ALL_COMMANDS_ARRAY=([0]="help" [1]="self build" [2]="self config" [3]="self download-binaries" [4]="self mock1" [5]="self mock2" [6]="self mock3" [7]="self release" [8]="self setup" [9]="self test" [10]="self update")
+CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfConfig\nselfDownloadBinaries\nselfUpdate\nselfMock1\nselfMock2\nselfMock3\nselfRelease\nselfSetup\nselfTest'
+CMD_ALL_FUNCTIONS_ARRAY=([0]="this" [1]="showCommandHelp" [2]="selfBuild" [3]="selfConfig" [4]="selfDownloadBinaries" [5]="selfUpdate" [6]="selfMock1" [7]="selfMock2" [8]="selfMock3" [9]="selfRelease" [10]="selfSetup" [11]="selfTest")
 CMD_ALL_MENU_COMMANDS_ARRAY=([0]="self")
 CMD_ARGS_LAST_IS_ARRAY_selfMock1="false"
 CMD_ARGS_LAST_IS_ARRAY_selfMock2="true"
@@ -82,10 +82,11 @@ CMD_ARGUMENTS_NAME_selfMock1=([0]="action")
 CMD_ARGUMENTS_NAME_selfMock2=([0]="firstArg" [1]="more...")
 CMD_ARGUMENTS_NAME_showCommandHelp=([0]="commands?...")
 CMD_ARGUMENTS_NAME_this=([0]="commands?...")
-CMD_COMMANDS_DESCRIPTION_this=([0]="Show the help this program or of a specific command." [1]="Re-build the menu of valet from your commands." [2]="Download the required binaries for valet." [3]="A command that only for testing valet core functions." [4]="A command that only for testing valet core functions." [5]="A command that only for testing valet core functions." [6]="Release a new version of valet." [7]="The command run after the installation of Valet to setup the tool." [8]="Test your valet custom commands." [9]="Update valet using the latest release on GitHub.")
+CMD_COMMANDS_DESCRIPTION_this=([0]="Show the help this program or of a specific command." [1]="Re-build the menu of valet from your commands." [2]="Open the configuration file of Valet with your default editor." [3]="Download the required binaries for valet." [4]="A command that only for testing valet core functions." [5]="A command that only for testing valet core functions." [6]="A command that only for testing valet core functions." [7]="Release a new version of valet." [8]="The command run after the installation of Valet to setup the tool." [9]="Test your valet custom commands." [10]="Update valet using the latest release on GitHub.")
 CMD_COMMANDS_MENU_BODY=$'help                  \tShow the help this program or of a specific command.\nself build            \tRe-build the menu of valet from your commands.\nself release          \tRelease a new version of valet.\nself setup            \tThe command run after the installation of Valet to setup the tool.\nself test             \tTest your valet custom commands.\nself update           \tUpdate valet using the latest release on GitHub.'
-CMD_COMMANDS_NAME_this=([0]="help" [1]="self build" [2]="self download-binaries" [3]="self mock1" [4]="self mock2" [5]="self mock3" [6]="self release" [7]="self setup" [8]="self test" [9]="self update")
+CMD_COMMANDS_NAME_this=([0]="help" [1]="self build" [2]="self config" [3]="self download-binaries" [4]="self mock1" [5]="self mock2" [6]="self mock3" [7]="self release" [8]="self setup" [9]="self test" [10]="self update")
 CMD_COMMAND_selfBuild="self build"
+CMD_COMMAND_selfConfig="self config"
 CMD_COMMAND_selfDownloadBinaries="self download-binaries"
 CMD_COMMAND_selfMock1="self mock1"
 CMD_COMMAND_selfMock2="self mock2"
@@ -98,6 +99,7 @@ CMD_COMMAND_showCommandHelp="help"
 CMD_COMMAND_this=""
 CMD_DESCRIPTION__menu="Show a menu with sub commands for the current command."
 CMD_DESCRIPTION_selfBuild=$'This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.\n\nPlease check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.\n\nThis scripts:\n  - Makes a list of all the elligible files in which we could find command definitions.\n  - For each file in this list, extract the command definitions.\n  - Build your commands file (in your valet user directory) from these definitions.\n\nYou can call this script directly in case calling ⌜valet self build⌝ is broken:\n\n→ ./valet.d/commands.d.sh'
+CMD_DESCRIPTION_selfConfig=$'Open the configuration file of Valet with your default editor.\n\nThis allows you to set advanced options for Valet.'
 CMD_DESCRIPTION_selfDownloadBinaries=$'Download the required binaries for valet: fzf.\n\nThese binaries will be stored in the bin directory of valet and used in priority over the binaries in your PATH.'
 CMD_DESCRIPTION_selfMock1="A command that only for testing valet core functions."
 CMD_DESCRIPTION_selfMock2=$'An example of description.\n\nYou can put any text here, it will be wrapped to fit the terminal width.\n\nYou can ⌜highlight⌝ some text as well.'
@@ -107,7 +109,7 @@ CMD_DESCRIPTION_selfSetup=$'The command run after the installation of Valet to s
 CMD_DESCRIPTION_selfTest="Test your valet custom commands using approval tests approach."
 CMD_DESCRIPTION_selfUpdate=$'Update valet using the latest release on GitHub.\n'
 CMD_DESCRIPTION_showCommandHelp=$'Show the help this program or of the help of a specific command.\n\nYou can show the help with or without colors and set the maximum columns for the help text.'
-CMD_DESCRIPTION_this=$'Valet helps you browse, understand and execute your custom bash commands.\n\nOnline documentation is available at https://github.com/jcaillon/valet.\n\nYou can call valet without any commands to start an interactive session.\n\n⌜Exit codes:⌝\n\n- 0: everything went well\n- 1+: an error occured\n\n⌜Create your own commands:⌝\nYou can create your own commands and have them available in valet, please check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or the examples under examples.d to do so.\nValet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).\nOnce you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.\n\n⌜Configuration through environment variables:⌝\n\nIn addition to the environment variables defined for each options, you can define the following environment variables to configure valet:\n\n- VALET_USER_DIRECTORY=\\"~/valet.d\\": set the path to the valet user directory (in which to find user commands).\n- VALET_NO_COLOR=\\"true\\": will disable the color output for logs and help.\n- VALET_COLOR_XXX=\\"color\\": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, SUCCESS, ERROR, TIMESTAMP, HIGHLIGHT.\n- VALET_NO_WRAP=\\"true\\": will disable the text wrapping for logs.\n- VALET_NO_ICON=\\"true\\": will disable the icons for logs and help.\n- VALET_NO_TIMESTAMP=\\"true\\": will disable the timestamp for logs.\n- VALET_LOG_COLUMNS=\\"120\\": set the number of columns at which to wrap the logs to 120 (if wrap is enabled); defaults to the terminal width.\n- VALET_CI_MODE=\'true\': will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the full date.\n- VALET_REMEMBER_LAST_CHOICES=\'3\': number of last choices to remember when selecting an item from a command menu. Set to 0 to disable this feature and always display items in the alphabetical order.\n- VALET_DO_NOT_USE_LOCAL_BIN=\'false\': if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.\n- VALET_WORK_FILES_DIRECTORY=\'\': the directory in which to write work files (small files to capture output of programs). If not set, it will default to the temporary directory. You can set it to a tmpfs directory (such as /dev/shm) to speed up the execution of valet.\n\nThese variables can be exported in your .bashrc file.\nAlternatively, you can define them in your valet user config file, located by default at ~/.config/valet/config. This path can be configured using the VALET_USER_CONFIG_FILE environment variable.\n\n⌜Developer notes:⌝\n\nYou can enable debug mode with profiling for valet by setting the environment variable VALET_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).'
+CMD_DESCRIPTION_this=$'Valet helps you browse, understand and execute your custom bash commands.\n\nOnline documentation is available at https://github.com/jcaillon/valet.\n\nYou can call valet without any commands to start an interactive session.\n\n⌜Exit codes:⌝\n\n- 0: everything went well\n- 1+: an error occured\n\n⌜Create your own commands:⌝\nYou can create your own commands and have them available in valet, please check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or the examples under examples.d to do so.\nValet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).\nOnce you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.\n\n⌜Configuration through environment variables:⌝\n\nIn addition to the environment variables defined for each options, you can define environment variables to configure valet.\n\nThese variables are conviently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the VALET_CONFIG_FILE environment variable).\n\nYou can run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).\n\n⌜Developer notes:⌝\n\nYou can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).'
 CMD_EXAMPLES_DESCRIPTION_selfMock2=([0]=$'Call command1 with option1, option2 and some arguments.\n')
 CMD_EXAMPLES_DESCRIPTION_showCommandHelp=([0]="Shows the help for the command ⌜cmd⌝" [1]="Shows the help for the sub command ⌜subCmd⌝ of the command ⌜cmd⌝" [2]=$'Shows the help for the program without any color and with a maximum of 50 columns\n')
 CMD_EXAMPLES_DESCRIPTION_this=([0]="Displays this help text." [1]=$'Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.\n')
@@ -115,6 +117,7 @@ CMD_EXAMPLES_NAME_selfMock2=([0]="self mock2 -o -2 value1 arg1 more1 more2")
 CMD_EXAMPLES_NAME_showCommandHelp=([0]="help cmd" [1]="help cmd subCmd" [2]="help --no-colors --columns 50")
 CMD_EXAMPLES_NAME_this=([0]="--help" [1]="-v a-command and-sub-command")
 CMD_FILETOSOURCE_selfBuild="valet.d/commands.d/self-build.sh"
+CMD_FILETOSOURCE_selfConfig="valet.d/commands.d/self-config.sh"
 CMD_FILETOSOURCE_selfDownloadBinaries="valet.d/commands.d/self-download-binaries.sh"
 CMD_FILETOSOURCE_selfMock1="valet.d/commands.d/self-mock.sh"
 CMD_FILETOSOURCE_selfMock2="valet.d/commands.d/self-mock.sh"
@@ -129,6 +132,7 @@ CMD_FUNCTION_NAME_="this"
 CMD_FUNCTION_NAME_help="showCommandHelp"
 CMD_FUNCTION_NAME_self="_menu"
 CMD_FUNCTION_NAME_self_build="selfBuild"
+CMD_FUNCTION_NAME_self_config="selfConfig"
 CMD_FUNCTION_NAME_self_download_binaries="selfDownloadBinaries"
 CMD_FUNCTION_NAME_self_mock1="selfMock1"
 CMD_FUNCTION_NAME_self_mock2="selfMock2"
@@ -137,6 +141,7 @@ CMD_FUNCTION_NAME_self_release="selfRelease"
 CMD_FUNCTION_NAME_self_setup="selfSetup"
 CMD_FUNCTION_NAME_self_test="selfTest"
 CMD_FUNCTION_NAME_self_update="selfUpdate"
+CMD_HIDEINMENU_selfConfig="true"
 CMD_HIDEINMENU_selfDownloadBinaries="true"
 CMD_HIDEINMENU_selfMock1="true"
 CMD_HIDEINMENU_selfMock2="true"
@@ -145,6 +150,7 @@ CMD_MAX_COMMAND_WIDTH="22"
 CMD_MAX_SUB_COMMAND_LEVEL="1"
 CMD_OPTIONS_DESCRIPTION__menu="Display the help for this command."
 CMD_OPTIONS_DESCRIPTION_selfBuild=([0]=$'Specify the directory in which to look for your command scripts.\n\nThis defaults to the path defined in the environment variable VALET_USER_DIRECTORY=\\my/path\\ or to ⌜~/.valet.d⌝.\nThis option can be set by exporting the variable VALET_USER_DIRECTORY=\'<path>\'.' [1]=$'Specify the file path in which to write the command definition variables.\n\nThis defaults to the ⌜commands⌝ file in your Valet user directory.\n\nThis option can be set by exporting the variable VALET_OUTPUT=\'<path>\'.' [2]="Display the help for this command.")
+CMD_OPTIONS_DESCRIPTION_selfConfig=([0]=$'Create the configuration file if it does not exist but do not open it.\nThis option can be set by exporting the variable VALET_NO_EDIT=\'true\'.' [1]=$'Override of the configuration file even if it already exists.\nThis option can be set by exporting the variable VALET_OVERRIDE=\'true\'.' [2]=$'When writing the configuration file, export the current values of the variables.\n\nThis option can be set by exporting the variable VALET_EXPORT_CURRENT_VALUES=\'true\'.' [3]="Display the help for this command.")
 CMD_OPTIONS_DESCRIPTION_selfDownloadBinaries=([0]=$'By default, this command will download the binaries for your current OS.\n\nYou can force the download for a specific OS by providing the name of the OS.\n\nPossible values are: linux, windows, macos.\nThis option can be set by exporting the variable VALET_FORCE_OS=\'<name>\'.' [1]=$'By default, this command will download the binaries in valet bin/ directory.\n\nYou can force the download in a specific directory by providing the path.\nThis option can be set by exporting the variable VALET_DESTINATION=\'<path>\'.' [2]=$'By default, this command will download the binaries only if the final files do not exist in the destination directory.\n\nYou can force the download in all case with this option.\n\nThis option can be set by exporting the variable VALET_FORCE=\'true\'.' [3]="Display the help for this command.")
 CMD_OPTIONS_DESCRIPTION_selfMock1=([0]="Display the help for this command.")
 CMD_OPTIONS_DESCRIPTION_selfMock2=([0]="First option." [1]=$'An option with a value.\nThis option can be set by exporting the variable VALET_THIS_IS_OPTION2=\'<level>\'.' [2]="Display the help for this command.")
@@ -154,9 +160,10 @@ CMD_OPTIONS_DESCRIPTION_selfSetup=([0]="Display the help for this command.")
 CMD_OPTIONS_DESCRIPTION_selfTest=([0]=$'The path to your valet directory.\n\nEach sub directory named ⌜.tests.d⌝ will be considered as a test directory containing a test.sh file.\nThis option can be set by exporting the variable VALET_USER_DIRECTORY=\'<path>\'.' [1]=$'The received test result files will automatically be approved.\nThis option can be set by exporting the variable VALET_AUTO_APPROVE=\'true\'.' [2]=$'Also test the valet core functions.\n\nThis is only if you modified valet core functions themselves.\nThis option can be set by exporting the variable VALET_WITH_CORE=\'true\'.' [3]=$'Only test the valet core functions. Skips the tests for user commands.\nThis option can be set by exporting the variable VALET_ONLY_CORE=\'true\'.' [4]=$'A regex pattern to include only the test suites that match the pattern.\n\nThe name of the test suite is given by the name of the directory containing the .sh test files.\n\nExample: --include \'(1|commands)\'\nThis option can be set by exporting the variable VALET_INCLUDE=\'<pattern>\'.' [5]=$'A regex pattern to exclude all the test suites that match the pattern.\n\nThe name of the test suite is given by the name of the directory containing the .sh test files.\n\nExample: --exclude \'(1|commands)\'\n\nThis option can be set by exporting the variable VALET_EXCLUDE=\'<pattern>\'.' [6]="Display the help for this command.")
 CMD_OPTIONS_DESCRIPTION_selfUpdate=([0]="Display the help for this command.")
 CMD_OPTIONS_DESCRIPTION_showCommandHelp=([0]=$'Do not use any colors in the output\nThis option can be set by exporting the variable VALET_NO_COLORS=\'true\'.' [1]=$'Set the maximum columns for the help text\nThis option can be set by exporting the variable VALET_COLUMNS=\'<number>\'.' [2]="Display the help for this command.")
-CMD_OPTIONS_DESCRIPTION_this=([0]=$'Turn on profiling (with debug mode) before running the required command.\nIt will output to ~/profile_valet_cmd.txt.\nThis is useful to debug your command and understand what takes a long time to execute.\nThe profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable VALET_KEEP_ALL_PROFILER_LINES to true.\nThis option can be set by exporting the variable VALET_PROFILING=\'true\'.' [1]=$'Set the log level of valet (defaults to info).\nPossible values are: debug, success, info, success, warning, error.\nThis option can be set by exporting the variable VALET_LOG,=\'<level>\'.' [2]=$'Output verbose information.\nThis is the equivalent of setting the log level to debug.\nThis option can be set by exporting the variable VALET_VERBOSE=\'true\'.' [3]=$'Enter interactive mode for commands even if arguments are not required or provided.\nThis option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE=\'true\'.' [4]="Display the current version of valet." [5]="Display the help for this command.")
+CMD_OPTIONS_DESCRIPTION_this=([0]=$'Turn on profiling (with debug mode) before running the required command.\nIt will output to ~/profile_valet_cmd.txt.\nThis is useful to debug your command and understand what takes a long time to execute.\nThe profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.\nThis option can be set by exporting the variable VALET_PROFILING=\'true\'.' [1]=$'Set the log level of valet (defaults to info).\nPossible values are: debug, success, info, success, warning, error.\nThis option can be set by exporting the variable VALET_LOG_LEVEL,=\'<level>\'.' [2]=$'Output verbose information.\nThis is the equivalent of setting the log level to debug.\nThis option can be set by exporting the variable VALET_VERBOSE=\'true\'.' [3]=$'Enter interactive mode for commands even if arguments are not required or provided.\nThis option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE=\'true\'.' [4]="Display the current version of valet." [5]="Display the help for this command.")
 CMD_OPTIONS_NAME__menu="-h, --help"
 CMD_OPTIONS_NAME_selfBuild=([0]="-d, --user-directory <path>" [1]="-o, --output <path>" [2]="-h, --help")
+CMD_OPTIONS_NAME_selfConfig=([0]="--no-edit" [1]="--override" [2]="--export-current-values" [3]="-h, --help")
 CMD_OPTIONS_NAME_selfDownloadBinaries=([0]="-s, --force-os <name>" [1]="--destination <path>" [2]="-f, --force" [3]="-h, --help")
 CMD_OPTIONS_NAME_selfMock1=([0]="-h, --help")
 CMD_OPTIONS_NAME_selfMock2=([0]="-o, --option1" [1]="-2, --this-is-option2 <level>" [2]="-h, --help")
@@ -166,8 +173,9 @@ CMD_OPTIONS_NAME_selfSetup=([0]="-h, --help")
 CMD_OPTIONS_NAME_selfTest=([0]="-d, --user-directory <path>" [1]="-a, --auto-approve" [2]="-c, --with-core" [3]="-C, --only-core" [4]="-i, --include <pattern>" [5]="-e, --exclude <pattern>" [6]="-h, --help")
 CMD_OPTIONS_NAME_selfUpdate=([0]="-h, --help")
 CMD_OPTIONS_NAME_showCommandHelp=([0]="-n, --no-colors" [1]="-c, --columns <number>" [2]="-h, --help")
-CMD_OPTIONS_NAME_this=([0]="-x, --profiling" [1]="-l, --log, --log-level <level>" [2]="-v, --verbose" [3]="-i, --force-interactive-mode" [4]="--version" [5]="-h, --help")
+CMD_OPTIONS_NAME_this=([0]="-x, --profiling" [1]="-l, --log-level, --log <level>" [2]="-v, --verbose" [3]="-i, --force-interactive-mode" [4]="--version" [5]="-h, --help")
 CMD_OPTS_HAS_VALUE_selfBuild=([0]="true" [1]="true" [2]="false")
+CMD_OPTS_HAS_VALUE_selfConfig=([0]="false" [1]="false" [2]="false" [3]="false")
 CMD_OPTS_HAS_VALUE_selfDownloadBinaries=([0]="true" [1]="true" [2]="false" [3]="false")
 CMD_OPTS_HAS_VALUE_selfMock1=([0]="false")
 CMD_OPTS_HAS_VALUE_selfMock2=([0]="false" [1]="true" [2]="false")
@@ -179,6 +187,7 @@ CMD_OPTS_HAS_VALUE_selfUpdate=([0]="false")
 CMD_OPTS_HAS_VALUE_showCommandHelp=([0]="false" [1]="true" [2]="false")
 CMD_OPTS_HAS_VALUE_this=([0]="false" [1]="true" [2]="false" [3]="false" [4]="false" [5]="false")
 CMD_OPTS_NAME_SC_selfBuild=([0]="VALET_USER_DIRECTORY" [1]="VALET_OUTPUT" [2]="")
+CMD_OPTS_NAME_SC_selfConfig=([0]="VALET_NO_EDIT" [1]="VALET_OVERRIDE" [2]="VALET_EXPORT_CURRENT_VALUES" [3]="")
 CMD_OPTS_NAME_SC_selfDownloadBinaries=([0]="VALET_FORCE_OS" [1]="VALET_DESTINATION" [2]="VALET_FORCE" [3]="")
 CMD_OPTS_NAME_SC_selfMock1=([0]="")
 CMD_OPTS_NAME_SC_selfMock2=([0]="" [1]="VALET_THIS_IS_OPTION2" [2]="")
@@ -188,9 +197,10 @@ CMD_OPTS_NAME_SC_selfSetup=([0]="")
 CMD_OPTS_NAME_SC_selfTest=([0]="VALET_USER_DIRECTORY" [1]="VALET_AUTO_APPROVE" [2]="VALET_WITH_CORE" [3]="VALET_ONLY_CORE" [4]="VALET_INCLUDE" [5]="VALET_EXCLUDE" [6]="")
 CMD_OPTS_NAME_SC_selfUpdate=([0]="")
 CMD_OPTS_NAME_SC_showCommandHelp=([0]="VALET_NO_COLORS" [1]="VALET_COLUMNS" [2]="")
-CMD_OPTS_NAME_SC_this=([0]="VALET_PROFILING" [1]="VALET_LOG" [2]="VALET_VERBOSE" [3]="VALET_FORCE_INTERACTIVE_MODE" [4]="" [5]="")
+CMD_OPTS_NAME_SC_this=([0]="VALET_PROFILING" [1]="VALET_LOG_LEVEL" [2]="VALET_VERBOSE" [3]="VALET_FORCE_INTERACTIVE_MODE" [4]="" [5]="")
 CMD_OPTS_NAME__menu=([0]="help")
 CMD_OPTS_NAME_selfBuild=([0]="userDirectory" [1]="output" [2]="help")
+CMD_OPTS_NAME_selfConfig=([0]="noEdit" [1]="override" [2]="exportCurrentValues" [3]="help")
 CMD_OPTS_NAME_selfDownloadBinaries=([0]="forceOs" [1]="destination" [2]="force" [3]="help")
 CMD_OPTS_NAME_selfMock1=([0]="help")
 CMD_OPTS_NAME_selfMock2=([0]="option1" [1]="thisIsOption2" [2]="help")
@@ -200,9 +210,10 @@ CMD_OPTS_NAME_selfSetup=([0]="help")
 CMD_OPTS_NAME_selfTest=([0]="userDirectory" [1]="autoApprove" [2]="withCore" [3]="onlyCore" [4]="include" [5]="exclude" [6]="help")
 CMD_OPTS_NAME_selfUpdate=([0]="help")
 CMD_OPTS_NAME_showCommandHelp=([0]="noColors" [1]="columns" [2]="help")
-CMD_OPTS_NAME_this=([0]="profiling" [1]="log" [2]="verbose" [3]="forceInteractiveMode" [4]="version" [5]="help")
+CMD_OPTS_NAME_this=([0]="profiling" [1]="logLevel" [2]="verbose" [3]="forceInteractiveMode" [4]="version" [5]="help")
 CMD_OPTS__menu=([0]="-h --help")
 CMD_OPTS_selfBuild=([0]="-d --user-directory" [1]="-o --output" [2]="-h --help")
+CMD_OPTS_selfConfig=([0]="--no-edit" [1]="--override" [2]="--export-current-values" [3]="-h --help")
 CMD_OPTS_selfDownloadBinaries=([0]="-s --force-os" [1]="--destination" [2]="-f --force" [3]="-h --help")
 CMD_OPTS_selfMock1=([0]="-h --help")
 CMD_OPTS_selfMock2=([0]="-o --option1" [1]="-2 --this-is-option2" [2]="-h --help")
@@ -212,8 +223,9 @@ CMD_OPTS_selfSetup=([0]="-h --help")
 CMD_OPTS_selfTest=([0]="-d --user-directory" [1]="-a --auto-approve" [2]="-c --with-core" [3]="-C --only-core" [4]="-i --include" [5]="-e --exclude" [6]="-h --help")
 CMD_OPTS_selfUpdate=([0]="-h --help")
 CMD_OPTS_showCommandHelp=([0]="-n --no-colors" [1]="-c --columns" [2]="-h --help")
-CMD_OPTS_this=([0]="-x --profiling" [1]="-l --log --log-level" [2]="-v --verbose" [3]="-i --force-interactive-mode" [4]="--version" [5]="-h --help")
+CMD_OPTS_this=([0]="-x --profiling" [1]="-l --log-level --log" [2]="-v --verbose" [3]="-i --force-interactive-mode" [4]="--version" [5]="-h --help")
 CMD_SHORT_DESCRIPTION_selfBuild="Re-build the menu of valet from your commands."
+CMD_SHORT_DESCRIPTION_selfConfig="Open the configuration file of Valet with your default editor."
 CMD_SHORT_DESCRIPTION_selfDownloadBinaries="Download the required binaries for valet."
 CMD_SHORT_DESCRIPTION_selfMock1="A command that only for testing valet core functions."
 CMD_SHORT_DESCRIPTION_selfMock2="A command that only for testing valet core functions."

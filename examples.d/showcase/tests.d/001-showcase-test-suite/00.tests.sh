@@ -19,7 +19,7 @@ function testShowCaseSudo() {
 # This function demonstrates how to test a command by running valet
 function testHelloWorld() {
   echo "→ valet showcase hello-world"
-  ("${VALET_HOME}/valet" showcase hello-world)
+  ("${_VALET_HOME}/valet" showcase hello-world)
   endTest "Testing the hello world command" 0
 }
 

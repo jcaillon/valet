@@ -5,7 +5,7 @@ builtin source ".before-test"
 function testValetInteractiveMenu() {
   # test that valet can be called without any arguments
   echo "→ valet"
-  ("${VALET_HOME}/valet")
+  ("${_VALET_HOME}/valet")
   endTest "Testing that valet can be called without any arguments and show the menu" $?
 }
 

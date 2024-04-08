@@ -235,8 +235,8 @@ function io::invoke() {
 #   io::getCommandLocalPath "fzf" && local fullPath="${LAST_RETURNED_VALUE}"
 function io::getCommandLocalPath() {
   local executable="${1}"
-  local possibleExecutablePath="${VALET_BIN_PATH:-"${VALET_HOME}/bin"}/${executable}"
-  if [[ "${VALET_DO_NOT_USE_LOCAL_BIN:-false}" != "true" && -x "${possibleExecutablePath}" ]]; then
+  local possibleExecutablePath="${VALET_CONFIG_BIN_PATH:-"${_VALET_HOME}/bin"}/${executable}"
+  if [[ "${VALET_CONFIG_DISABLE_LOCAL_BIN:-false}" != "true" && -x "${possibleExecutablePath}" ]]; then
     executable="${possibleExecutablePath}"
   fi
   LAST_RETURNED_VALUE="${executable}"

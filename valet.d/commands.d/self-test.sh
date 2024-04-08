@@ -3,15 +3,10 @@
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
-# import the main script (should always be skipped if the command is run from valet)
+# import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
 if [[ -z "${_CORE_INCLUDED:-}" ]]; then
-  VALETD_DIR="${BASH_SOURCE[0]}"
-  if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null || true;
-    else VALETD_DIR="${PWD}"; fi
-  else VALETD_DIR="${VALETD_DIR%/*}"; fi
   # shellcheck source=../core
-  source "${VALETD_DIR%/*}/core"
+  source "$(dirname -- "$(command -v valet)")/valet.d/core"
 fi
 # --- END OF COMMAND COMMON PART
 
@@ -66,12 +61,13 @@ function selfTest() {
 
   setGlobalOptions
 
-  if [[ ${onlyCore:-false} != "true" ]]; then
+  # get the directory containing the tests for the commands
+  core::getUserDirectory
+  userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
+  log::debug "User directory is ⌜${userDirectory}⌝."
+  core::reloadUserCommands
 
-    # get the directory containing the tests for the commands
-    core::getUserDirectory
-    userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
-    log::debug "User directory is ⌜${userDirectory}⌝."
+  if [[ ${onlyCore:-false} != "true" ]]; then
 
     # change the shell options to include hidden files
     shopt -s dotglob
@@ -94,7 +90,7 @@ function selfTest() {
     shopt -u globstar
   fi
 
-  if [[ -n "${withCore:-}" ]]; then
+  if [[ -n "${withCore:-}" || ${onlyCore:-false} == "true" ]]; then
     runCoreTests
   fi
 }

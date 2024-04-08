@@ -2,8 +2,7 @@
 
 function testSelfBuild() {
 
-  # log::setLevel "debug"
-  "${VALET_HOME}/valet.d/commands.d/self-build.sh" --output "commands" --user-directory ""
+  "${_VALET_HOME}/valet.d/commands.d/self-build.sh" --output "commands" --user-directory ""
 
   local content
   IFS= read -rd '' content <"commands" || true

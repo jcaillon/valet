@@ -3,8 +3,8 @@
 function testSortCommandsAndLastChoice() {
   # overriding core::getLocalStateDirectory to return a temporary directory
   io::createTempDirectory && local localStateDirectory="${LAST_RETURNED_VALUE}"
-  VALET_LOCAL_STATE_DIRECTORY="${localStateDirectory}"
-  VALET_REMEMBER_LAST_CHOICES=5
+  VALET_CONFIG_LOCAL_STATE_DIRECTORY="${localStateDirectory}"
+  VALET_CONFIG_REMEMBER_LAST_CHOICES=5
 
   local commands="cm1  	This is command 1
 cm2  	This is command 2
@@ -26,11 +26,11 @@ another3  	This is another command 3"
   main::sortCommands "myid1" "${commands}" && echo "${LAST_RETURNED_VALUE}"
   endTest "Testing main::sortCommands after choosing another3 then cm2" $?
 
-  # testing with VALET_REMEMBER_LAST_CHOICES=0
-  echo "→ VALET_REMEMBER_LAST_CHOICES=0 main::sortCommands myid1 \"\${commands}\""
-  VALET_REMEMBER_LAST_CHOICES=0 main::sortCommands "myid1" "${commands}" && echo "${LAST_RETURNED_VALUE}"
-  endTest "Testing main::sortCommands, with VALET_REMEMBER_LAST_CHOICES=0 the order does not change" $?
-  VALET_REMEMBER_LAST_CHOICES=5
+  # testing with VALET_CONFIG_REMEMBER_LAST_CHOICES=0
+  echo "→ VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands myid1 \"\${commands}\""
+  VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands "myid1" "${commands}" && echo "${LAST_RETURNED_VALUE}"
+  endTest "Testing main::sortCommands, with VALET_CONFIG_REMEMBER_LAST_CHOICES=0 the order does not change" $?
+  VALET_CONFIG_REMEMBER_LAST_CHOICES=5
 
   # testing commands sort for another id, the order of commands should be the initial one
   echo "→ main::sortCommands myid2 \"\${commands}\""
@@ -46,7 +46,7 @@ another3  	This is another command 3"
   IFS= read -rd '' content < "${localStateDirectory}/last-choices-myid1" || true
   echo "Content of last-choices-myid1:"
   echo "${content}"
-  endTest "Testing main::addLastChoice after adding more than ${VALET_REMEMBER_LAST_CHOICES} commands, we only keep the last ${VALET_REMEMBER_LAST_CHOICES}" 0
+  endTest "Testing main::addLastChoice after adding more than ${VALET_CONFIG_REMEMBER_LAST_CHOICES} commands, we only keep the last ${VALET_CONFIG_REMEMBER_LAST_CHOICES}" 0
 
   # testing commands that adding the same command multiple times only keeps the last one
   main::addLastChoice "myid1" "another3"

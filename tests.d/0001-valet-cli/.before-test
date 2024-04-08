@@ -8,7 +8,7 @@ export -f sudo
 
 # overriding fzf to log the inputs
 # shellcheck disable=SC2034
-VALET_DO_NOT_USE_BIN=true
+VALET_CONFIG_DISABLE_LOCAL_BIN=true
 
 # shellcheck disable=SC2317
 function fzf() {
@@ -34,7 +34,7 @@ _TEST_0000_COMMON_UTILS=1
 
 # override the local state and config directories to return temp directories
 io::createTempDirectory
-export VALET_LOCAL_STATE_DIRECTORY="${LAST_RETURNED_VALUE}"
+export VALET_CONFIG_LOCAL_STATE_DIRECTORY="${LAST_RETURNED_VALUE}"
 io::createTempDirectory
 export VALET_CONFIG_DIRECTORY="${LAST_RETURNED_VALUE}"
 

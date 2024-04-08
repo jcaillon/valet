@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 function testIo::invoke5() {
+  setTempFilesNumber 300
   io::createTempFile && local tmpFile="${LAST_RETURNED_VALUE}"
   local -i exitCode
 
@@ -9,7 +10,7 @@ function testIo::invoke5() {
   echo "→ io::invoke5 false 0 true \"\${tmpFile}\" fakeexec --std-in --option argument1 argument2"
   io::invoke5 false 0 true "${tmpFile}" fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} true
-  endTest "Testing io::invoke5, executable are taken in priority from VALET_BIN_PATH, input stream from file" ${exitCode}
+  endTest "Testing io::invoke5, executable are taken in priority from VALET_CONFIG_BIN_PATH, input stream from file" ${exitCode}
 
   echo "→ io::invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error"
   io::invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error && exitCode=0 || exitCode=$?
@@ -104,17 +105,17 @@ function fakeexec2() {
 }
 
 function main() {
-  # setting VALET_BIN_PATH to the current directory so we can find our executable fakeexec
-  VALET_BIN_PATH="${PWD}"
-  VALET_DO_NOT_USE_LOCAL_BIN=false
+  # setting VALET_CONFIG_BIN_PATH to the current directory so we can find our executable fakeexec
+  VALET_CONFIG_BIN_PATH="${PWD}"
+  VALET_CONFIG_DISABLE_LOCAL_BIN=false
   chmod +x fakeexec
 
   testIo::invoke5
   testIo::invoke3
   testIo::invoke
 
-  unset VALET_BIN_PATH
-  unset VALET_DO_NOT_USE_LOCAL_BIN
+  unset VALET_CONFIG_BIN_PATH
+  unset VALET_CONFIG_DISABLE_LOCAL_BIN
 }
 
 main

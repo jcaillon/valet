@@ -10,16 +10,16 @@ Exit code: `0`
 
 ```plaintext
 → io::toAbsolutePath ${PWD}/fakeexec
-$VALET_HOME/tests.d/0015-lib-io/fakeexec
+$_VALET_HOME/tests.d/0015-lib-io/fakeexec
 
 → io::toAbsolutePath fakeexec
-$VALET_HOME/tests.d/0015-lib-io/fakeexec
+$_VALET_HOME/tests.d/0015-lib-io/fakeexec
 
 → io::toAbsolutePath ./fakeexec
-$VALET_HOME/tests.d/0015-lib-io/fakeexec
+$_VALET_HOME/tests.d/0015-lib-io/fakeexec
 
 → io::toAbsolutePath ../0003-self/fakeexec
-$VALET_HOME/tests.d/0015-lib-io/fakeexec
+$_VALET_HOME/tests.d/0015-lib-io/fakeexec
 ```
 
 ### Testing io::captureOutput
@@ -88,7 +88,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ## Test script 01.invoke
 
-### Testing io::invoke5, executable are taken in priority from VALET_BIN_PATH, input stream from file
+### Testing io::invoke5, executable are taken in priority from VALET_CONFIG_BIN_PATH, input stream from file
 
 Exit code: `0`
 

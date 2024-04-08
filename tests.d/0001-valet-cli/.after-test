@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export VALET_DO_NOT_USE_BIN=false
+export VALET_CONFIG_DISABLE_LOCAL_BIN=false
 
 unset fzf
 unset sudo
