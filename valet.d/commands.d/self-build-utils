@@ -219,6 +219,10 @@ function writeCommandDefinitionVariablesToFile() {
   local outputFile="${1}"
   local content
 
+  if [[ ! -d "${outputFile%/*}" ]]; then
+    mkdir -p "${outputFile%/*}"
+  fi
+
   {
     # write the header
     echo "#!/usr/bin/env bash

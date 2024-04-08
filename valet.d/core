@@ -513,17 +513,19 @@ function core::sourceUserCommands() {
   commandsFile="${userDirectory}/commands"
 
   # if the commands file does not exist, we use the examples commands or we fail
-  if [[ ! -e "${commandsFile}" ]]; then
-    local message
-    message="The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'
-    message+="To get started with valet, you must build your command list using the ⌜valet self build⌝ command."$'\n'
-    message+="Please check the help using ⌜valet self build --help⌝ for details."
-    commandsFile="${_VALET_HOME}/examples.d/commands"
-    if [[ -e "${commandsFile}" ]]; then
-      message+=$'\n'"Now using the examples commands from ⌜${commandsFile%/*}⌝."
-      log::warning "${message}"
-    else
-      core::fail "${message}"
+  if [[ ! -f "${commandsFile}" ]]; then
+    log::info "The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'"Now building it using ⌜valet self build⌝ command."
+
+    local originalLogLevel
+    log::getLevel && originalLogLevel="${LAST_RETURNED_VALUE}"
+    log::setLevel warning true
+    # shellcheck disable=SC1091
+    source "${_VALET_HOME}/valet.d/commands.d/self-build.sh"
+    selfBuild
+    log::setLevel "${originalLogLevel}" true
+
+    if [[ ! -f "${commandsFile}" ]]; then
+      core::fail "Could not build the commands file, please check the error above."
     fi
   fi
 

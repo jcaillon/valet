@@ -72,6 +72,8 @@ COMMANDS
 
   self build
       Re-build the menu of valet from your commands.
+  self config
+      Open the configuration file of Valet with your default editor.
   self download-binaries
       Download the required binaries for valet.
   self mock1
@@ -198,27 +200,12 @@ ABOUT
   
   ⌜Configuration through environment variables:⌝
   
-  In addition to the environment variables defined for each options, you can define the following environment variables to configure valet:
+  In addition to the environment variables defined for each options, you can define environment variables to configure valet.
   
-  - VALET_CONFIG_USER_DIRECTORY=\"~/valet.d\": set the path to the valet user directory (in which to find user commands).
-  - VALET_CONFIG_NO_COLOR=\"true\": will disable the color output for logs and help.
-  - VALET_CONFIG_COLOR_XXX=\"color\": will set the colors for the logs and the help, XXX can be one of these: DEFAULT, TITLE, OPTION, ARGUMENT, COMMAND, DEBUG, INFO, WARNING, 
-  SUCCESS, ERROR, TIMESTAMP, HIGHLIGHT.
-  - VALET_CONFIG_NO_WRAP=\"true\": will disable the text wrapping for logs.
-  - VALET_CONFIG_NO_ICON=\"true\": will disable the icons for logs and help.
-  - VALET_CONFIG_NO_TIMESTAMP=\"true\": will disable the timestamp for logs.
-  - VALET_LOG_COLUMNS=\"120\": set the number of columns at which to wrap the logs to 120 (if wrap is enabled); defaults to the terminal width.
-  - VALET_CONFIG_CI_MODE='true': will simplify the log output for CI/CD environments (or slow systems), will display the logs without colors, without wrapping lines and with the 
-  full date.
-  - VALET_CONFIG_REMEMBER_LAST_CHOICES='3': number of last choices to remember when selecting an item from a command menu. Set to 0 to disable this feature and always display items
-  in the alphabetical order.
-  - VALET_CONFIG_DO_NOT_USE_LOCAL_BIN='false': if true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
-  - VALET_CONFIG_WORK_FILES_DIRECTORY='': the directory in which to write work files (small files to capture output of programs). If not set, it will default to the temporary 
-  directory. You can set it to a tmpfs directory (such as /dev/shm) to speed up the execution of valet.
+  These variables are conviently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the 
+  VALET_CONFIG_FILE environment variable).
   
-  These variables can be exported in your .bashrc file.
-  Alternatively, you can define them in your valet user config file, located by default at ~/.config/valet/config. This path can be configured using the 
-  VALET_CONFIG_USER_CONFIG_FILE environment variable.
+  You can run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).
   
   ⌜Developer notes:⌝
   
@@ -259,6 +246,8 @@ COMMANDS
       Show the help this program or of a specific command.
   self build
       Re-build the menu of valet from your commands.
+  self config
+      Open the configuration file of Valet with your default editor.
   self download-binaries
       Download the required binaries for valet.
   self mock1
@@ -454,7 +443,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
-▶ called ⌈fzf --history=/tmp/valet.d/d107-0/fzf-history-main-menu --history-size=50 --bind alt-up:prev-history --bind alt-down:next-history --bind=alt-h:preview(echo -e 'HELP
+▶ called ⌈fzf --history=/tmp/valet.d/d801-0/fzf-history-main-menu --history-size=50 --bind alt-up:prev-history --bind alt-down:next-history --bind=alt-h:preview(echo -e 'HELP
 
 Navigate through the options with the UP/DOWN keys.
 
@@ -762,7 +751,7 @@ WARNING  This is a custom clean up function.
 
 ### Testing with a non existing user directory
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 
@@ -773,10 +762,9 @@ Exit code: `0`
 **Error** output:
 
 ```log
-WARNING  The valet user directory ⌜$_VALET_HOME/non-existing⌝ does not contain a built ⌜commands⌝ file.
-To get started with valet, you must build your command list using the ⌜valet self build⌝ command.
-Please check the help using ⌜valet self build --help⌝ for details.
-Now using the examples commands from ⌜$_VALET_HOME/examples.d⌝.
+INFO     The valet user directory ⌜/tmp/valet.d/d601-0/non-existing⌝ does not contain a built ⌜commands⌝ file.
+Now building it using ⌜valet self build⌝ command.
+WARNING  Skipping user directory ⌜/tmp/valet.d/d601-0/non-existing⌝ because it does not exist.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 SUCCESS  This is a success message.
 WARNING  This is a warning message.
@@ -798,7 +786,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
-▶ called ⌈fzf --history=/tmp/valet.d/d107-0/fzf-history-self
+▶ called ⌈fzf --history=/tmp/valet.d/d801-0/fzf-history-self
 --history-size=50
 --bind
 alt-up:prev-history
@@ -873,6 +861,8 @@ COMMANDS
 
   self build
       Re-build the menu of valet from your commands.
+  self config
+      Open the configuration file of Valet with your default editor.
   self download-binaries
       Download the required binaries for valet.
   self mock1

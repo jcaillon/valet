@@ -254,6 +254,7 @@ CMD_SUDO_selfMock3="true"
 **Error** output:
 
 ```log
+WARNING  Skipping user directory ⌜⌝ because it does not exist.
 INFO     Extracting commands from ⌜$_VALET_HOME/valet⌝.
 INFO                              ├── ⌜⌝.
 INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/help.sh⌝.
@@ -276,13 +277,6 @@ INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-setup.
 INFO                              ├── ⌜self setup⌝.
 INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-test.sh⌝.
 INFO                              ├── ⌜self test⌝.
-INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/apply_proj_cleaner.sh⌝.
-INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/apply_proj_properties.sh⌝.
-INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/connect.sh⌝.
-INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/misc.sh⌝.
-INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/self.sh⌝.
-INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/setup-distrib.sh⌝.
-INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/update.sh⌝.
 INFO     == Summary of the commands ==
 
 - Number of variables declared: ⌜181⌝.

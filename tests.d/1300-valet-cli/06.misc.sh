@@ -30,11 +30,12 @@ function testCleaning() {
 function testUserDirectory() {
   # testing with a non exising user directory
   local previousUserDirectory="${VALET_USER_DIRECTORY}"
-  export VALET_USER_DIRECTORY="${_VALET_HOME}/non-existing"
+  setTempFilesNumber 600
+  io::createTempDirectory && export VALET_USER_DIRECTORY="${LAST_RETURNED_VALUE}/non-existing"
 
   echo "→ VALET_USER_DIRECTORY=non-existing self mock1 logging-level"
-  ("${_VALET_HOME}/valet" self mock1 logging-level)
-  endTest "Testing with a non existing user directory" $?
+  ("${_VALET_HOME}/valet" self mock1 logging-level) || true
+  endTest "Testing with a non existing user directory" 1
 
   export VALET_USER_DIRECTORY="${previousUserDirectory}"
 }

@@ -2,6 +2,7 @@
 
 function testSortCommandsAndLastChoice() {
   # overriding core::getLocalStateDirectory to return a temporary directory
+  setTempFilesNumber 700
   io::createTempDirectory && local localStateDirectory="${LAST_RETURNED_VALUE}"
   VALET_CONFIG_LOCAL_STATE_DIRECTORY="${localStateDirectory}"
   VALET_CONFIG_REMEMBER_LAST_CHOICES=5

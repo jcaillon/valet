@@ -89,7 +89,7 @@ function selfBuild() {
     shift
   done
 
-  core::getUserDirectory && userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
+  core::getUserDirectory && userDirectory="${userDirectory-${LAST_RETURNED_VALUE}}"
   outputFile="${outputFile-${userDirectory}/commands}"
 
   io::toAbsolutePath "${_VALET_HOME}" && _VALET_HOME="${LAST_RETURNED_VALUE}"
