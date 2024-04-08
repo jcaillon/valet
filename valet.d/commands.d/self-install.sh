@@ -21,6 +21,7 @@
 #
 # Environment variables to configure the installation:
 #
+#   NO_PROMPT: set to 'true' to not enter interactive mode for the setup (useful for automated installation)
 #   SINGLE_USER_INSTALLATION: set to 'true' to install Valet for the current user only.
 #                             Note: for windows, the installation is always for the current user.
 #   _VALET_HOME: the directory where Valet will be installed.
@@ -64,7 +65,8 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
 
     # we are executing this script without valet, create functions to replace the core functions.
     function log::info() { printf "%-8s %s\n" "INFO" "ℹ️ $*"; }
-    function log:debug() { if [[ ${DEBUG:-false} == "true" ]]; then printf "%-8s %s\n" "DEBUG" "📰 $*"; fi; }
+    function log::success() { printf "%-8s %s\n" "SUCCESS" "✅ $*"; }
+    function log::debug() { if [[ ${DEBUG:-false} == "true" ]]; then printf "%-8s %s\n" "DEBUG" "📰 $*"; fi; }
     function log::warning() { printf "%-8s %s\n" "WARNING" "⚠️ $*"; }
     function core::fail() {
       printf "%-8s %s\n" "ERROR" "❌ $*"
@@ -115,7 +117,7 @@ function selfUpdate() {
   fi
 
   local SUDO=''
-  if command -v sudo &>/dev/null; then
+  if command -v sudo &>/dev/null && ${SINGLE_USER_INSTALLATION:-false} != "true"; then
     SUDO='sudo'
   fi
 
@@ -159,13 +161,23 @@ function selfUpdate() {
   log::debug "The release has been unpacked in ⌜${_VALET_HOME}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}."
 
   # remove the old valet directory and move the new one
-  rm -f "${latestReleaseFile}"
+  ${SUDO} rm -f "${latestReleaseFile}"
   ${SUDO} rm -Rf "${_VALET_HOME}"
   ${SUDO} mv -f "${tempDirectory}" "${_VALET_HOME}"
+  log::info "Valet has been copied in ⌜${_VALET_HOME}⌝."
 
   # make valet executable
-  chmod +x "${_VALET_HOME}/valet"
-  chmod +x "${_VALET_HOME}/bin/"*
+  ${SUDO} chmod +x "${_VALET_HOME}/valet"
+  ${SUDO} chmod +x "${_VALET_HOME}/bin/"*
+
+  log::success "Valet has been installed in ⌜${_VALET_HOME}⌝."
+
+  # copy the examples if the user directory does not exist
+  core::getUserDirectory && local userDirectory="${LAST_RETURNED_VALUE}"
+  if [[ ! -d "${userDirectory}" ]]; then
+    log::info "Copying the examples in ⌜${userDirectory}⌝."
+    cp -R "${_VALET_HOME}/examples.d" "${userDirectory}"
+  fi
 
   # source valet core
   if [[ -z "${_CORE_INCLUDED:-}" ]]; then
@@ -180,13 +192,15 @@ function selfUpdate() {
     if [[ -f "${valetBin}" && "${valetAlreadyInstalled}" == "false" ]]; then
       log::warning "A valet shim already exists in ⌜${valetBin}⌝!?"
     else
-      mkdir -p "${binDirectory}" 1>/dev/null || core::fail "Could not create the bin directory ⌜${binDirectory}⌝."
+      ${SUDO} mkdir -p "${binDirectory}" 1>/dev/null || core::fail "Could not create the bin directory ⌜${binDirectory}⌝."
       log::info "Creating a shim ⌜${_VALET_HOME}/valet → ${valetBin}⌝."
       {
         echo "#!/usr/bin/env bash"
         echo -n "'${_VALET_HOME}/valet' \"\$@\""
-      } >"${valetBin}"
+      } | ${SUDO} tee -a "${valetBin}"
+      ${SUDO} chmod +x "${valetBin}"
     fi
+
     # make sure the valetBin directory is in the path or add it to ~.bashrc
     if ! command -v valet &>/dev/null; then
       if [[ ${NO_ADD_TO_PATH:-false} == true ]]; then
@@ -205,16 +219,12 @@ function selfUpdate() {
 
   fi
 
-  # copy the examples if the user directory does not exist
-  core::getUserDirectory && local userDirectory="${LAST_RETURNED_VALUE}"
-  if [[ ! -d "${userDirectory}" ]]; then
-    log::info "Copying the examples in ⌜${userDirectory}⌝."
-    cp -R "${_VALET_HOME}/examples.d" "${userDirectory}"
-  fi
-
   # run the post install command
-  core::sourceForFunction selfSetup
-  selfSetup
+  if [[ ${NO_PROMPT:-} != "true" ]]; then
+    log::info "Running the self setup command."
+    core::sourceForFunction selfSetup
+    selfSetup
+  fi
 }
 
 

@@ -39,9 +39,11 @@ function selfSetup() {
 
   if ! interactive::promptYesNo "Do you see the colors in the color check above the line?"; then
     export VALET_CONFIG_DISABLE_COLORS=true
-    log::createPrintFunction
-    eval "${LOG_LINE_FUNCTION}"
+  else
+    export VALET_CONFIG_DISABLE_COLORS=false
   fi
+  log::createPrintFunction
+  eval "${LOG_LINE_FUNCTION}"
 
   echo "─────────────────────────────────────"
   echo "This is a nerd icon check, check out the next lines:"
@@ -52,13 +54,15 @@ function selfSetup() {
   echo "─────────────────────────────────────"
 
   if ! interactive::promptYesNo "Do you correctly see the nerd icons in the icon check above the line?"; then
-    log::info "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."
+    log::info "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."$'\n'"You can also choose to disable the icons in Valet if you don't want to install a font."
 
     if interactive::promptYesNo "Do you want to disable the icons in Valet?"; then
       export VALET_CONFIG_DISABLE_NERDFONT_ICONS=true
-      log::createPrintFunction
-      eval "${LOG_LINE_FUNCTION}"
+    else
+      export VALET_CONFIG_DISABLE_NERDFONT_ICONS=false
     fi
+    log::createPrintFunction
+    eval "${LOG_LINE_FUNCTION}"
   fi
 
   # generate the config

@@ -39,7 +39,7 @@ function selfConfig() {
   core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  if [[ ! -e "${VALET_CONFIG_FILE}" || ${override:-} == "true" ]]; then
+  if [[ ! -f "${VALET_CONFIG_FILE}" || ${override:-} == "true" ]]; then
     log::info "Creating the valet config file ⌜${VALET_CONFIG_FILE}⌝."
     writeConfigFile "${exportCurrentValues:-}"
   fi
@@ -76,6 +76,10 @@ function writeConfigFile() {
       printf -v "EXPORTED_${exportedVariable}" "%q" "${variable}"
       log::debug "Exporte the variable ⌜EXPORTED_${exportedVariable}⌝ with the value ⌜${variable}⌝."
     done
+  fi
+
+  if [[ ! -d "${VALET_CONFIG_FILE%/*}" ]]; then
+    mkdir -p "${VALET_CONFIG_FILE%/*}"
   fi
 
   local valetConfigFileContent="#!/usr/bin/env bash
