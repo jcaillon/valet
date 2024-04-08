@@ -42,6 +42,7 @@ function selfSetup() {
   else
     export VALET_CONFIG_DISABLE_COLORS=false
   fi
+  log::setColors
   log::createPrintFunction
   eval "${LOG_LINE_FUNCTION}"
 
@@ -92,6 +93,6 @@ function selfSetup() {
 
   # tell the user about what's next todo
   log::info "As a reminder, you can modify the configuration done during this set up by either:"$'\n'"- replaying the command ⌜valet self setup⌝,"$'\n'"- running the command ⌜valet self config⌝."
-  log::info "You can now run ⌜valet --help⌝ to get started."
+  log::info "Run ⌜valet --help⌝ to get started."
   log::info "You can create your own commands and have them available in valet, please check ⌜https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md⌝ to do so."
 }

@@ -197,7 +197,7 @@ function selfUpdate() {
       {
         echo "#!/usr/bin/env bash"
         echo -n "'${_VALET_HOME}/valet' \"\$@\""
-      } | ${SUDO} tee -a "${valetBin}"
+      } | ${SUDO} tee -a "${valetBin}" 1>/dev/null
       ${SUDO} chmod +x "${valetBin}"
     fi
 
@@ -214,6 +214,7 @@ function selfUpdate() {
           log::info "Adding ⌜${binDirectory}⌝ to your PATH via .zshrc right now."
           printf "\n\n# Add Valet to the PATH\nexport PATH=\"%s:\${PATH}\"\n" "${binDirectory}" >>"${HOME}/.zshrc"
         fi
+        log::warning "Please login again to apply the changes to your path or run the following command:"$'\n'"export PATH=\"${binDirectory}:\${PATH}\""
       fi
     fi
 
