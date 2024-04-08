@@ -1,4 +1,4 @@
-# Test suite 0010-lib-array
+# Test suite 1006-lib-array
 
 ## Test script 00.tests
 

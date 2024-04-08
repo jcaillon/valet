@@ -1,4 +1,4 @@
-# Test suite 0002-main-functions
+# Test suite 1001-main-functions
 
 ## Test script 01.sort-commands
 

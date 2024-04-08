@@ -193,6 +193,17 @@ function log::setLevel() {
   fi
 }
 
+# Get the current log level.
+#
+# Returns:
+#   the current log level in the global variable LAST_RETURNED_VALUE.
+#
+# Usage:
+#   log::getLevel && echo "The log level is ⌜${LAST_RETURNED_VALUE}⌝."
+function log::getLevel() {
+  LAST_RETURNED_VALUE="${VALET_LOG_LEVEL:-info}"
+}
+
 # The log line function is used to display log messages in the terminal.
 # The implementation depends on the environment variables VALET_CONFIG_ENABLE_CI_MODE and VALET_CONFIG_DISABLE_LOG_WRAP.
 # $1: the color of the log message (red, green, yellow, cyan, gray, pink)

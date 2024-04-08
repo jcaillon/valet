@@ -1,4 +1,4 @@
-# Test suite 0003-self-release
+# Test suite 1103-self-release
 
 ## Test script 01.self-release
 

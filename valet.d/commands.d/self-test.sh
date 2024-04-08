@@ -59,6 +59,8 @@ function selfTest() {
   core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
+  declare -i NB_TEST_SUITES=0 NB_FAILED_TEST_SUITES=0
+
   setGlobalOptions
 
   # get the directory containing the tests for the commands
@@ -92,5 +94,22 @@ function selfTest() {
 
   if [[ -n "${withCore:-}" || ${onlyCore:-false} == "true" ]]; then
     runCoreTests
+  fi
+
+  if [[ NB_FAILED_TEST_SUITES -gt 0 ]]; then
+    local failMessage
+    failMessage="A total of ⌜${NB_FAILED_TEST_SUITES}⌝/⌜${NB_TEST_SUITES}⌝ test(s) failed."
+    if [[ ${AUTO_APPROVE:-false} == "true" ]]; then
+      failMessage+=$'\n'"The received test result files were automatically approved."
+      log::warning "${failMessage}"
+    else
+      failMessage+=$'\n'"You should review the difference in the logs above or by comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
+      failMessage+=$'\n'"If the differences are legitimate, then approve the changes by running this command again with the option ⌜-a⌝."
+      core::fail "${failMessage}"
+    fi
+  elif [[ NB_TEST_SUITES -gt 0 ]]; then
+    log::success "A total of ⌜${NB_TEST_SUITES}⌝ tests passed!"
+  else
+    log::warning "No elligible test suites found."
   fi
 }

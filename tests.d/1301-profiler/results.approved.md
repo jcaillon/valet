@@ -1,4 +1,4 @@
-# Test suite 0006-profiler
+# Test suite 1301-profiler
 
 ## Test script 00.profiler
 

@@ -59,11 +59,15 @@ options:
     Specify the directory in which to look for your command scripts.
 
     This defaults to the path defined in the environment variable VALET_USER_DIRECTORY=\"my/path\" or to ⌜~/.valet.d⌝.
+
+    Can be empty to only build the core commands.
 - name: -o, --output <path>
   description: |-
     Specify the file path in which to write the command definition variables.
 
     This defaults to the ⌜commands⌝ file in your Valet user directory.
+
+    Can be empty to not write the file.
 ---"
 function selfBuild() {
   local userDirectory outputFile
@@ -86,7 +90,7 @@ function selfBuild() {
   done
 
   core::getUserDirectory && userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
-  outputFile="${outputFile:-${userDirectory}/commands}"
+  outputFile="${outputFile-${userDirectory}/commands}"
 
   io::toAbsolutePath "${_VALET_HOME}" && _VALET_HOME="${LAST_RETURNED_VALUE}"
 
@@ -135,7 +139,10 @@ function selfBuild() {
     core::fail "The valet user commands have not been successfully built. Please check the following errors:"$'\n'"${SELF_BUILD_ERRORS}"
   fi
 
-  writeCommandDefinitionVariablesToFile "${outputFile}"
+  if [[ -n "${outputFile}" ]]; then
+    writeCommandDefinitionVariablesToFile "${outputFile}"
+    log::info "The command definition variables have been written to ⌜${outputFile}⌝."
+  fi
   bumpValetBuildVersion
 
   log::success "The valet user commands have been successfully built"
@@ -160,7 +167,7 @@ function summarize() {
   message+="- Maximum sub command level: ⌜${CMD_MAX_SUB_COMMAND_LEVEL:-0}⌝."$'\n'
 
   message+=$'\n'"== List of all the commands =="$'\n\n'
-  message+="${CMD_COMMANDS_MENU_BODY}"$'\n\n'
+  message+="${CMD_COMMANDS_MENU_BODY}"$'\n'
 
   message+=$'\n'"== List of all the hidden commands =="$'\n\n'
   message+="${CMD_COMMANDS_HIDDEN_MENU_BODY}"$'\n'

@@ -1,4 +1,4 @@
-# Test suite 0002-core-functions
+# Test suite 1000-core-functions
 
 ## Test script 00.tests
 

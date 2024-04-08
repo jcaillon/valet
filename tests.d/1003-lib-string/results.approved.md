@@ -1,4 +1,4 @@
-# Test suite 0013-lib-string
+# Test suite 1003-lib-string
 
 ## Test script 00.tests
 

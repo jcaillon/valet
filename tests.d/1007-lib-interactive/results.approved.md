@@ -1,4 +1,4 @@
-# Test suite 0011-lib-interactive
+# Test suite 1007-lib-interactive
 
 ## Test script 00.tests
 

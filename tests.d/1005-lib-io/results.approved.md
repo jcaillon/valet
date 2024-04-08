@@ -1,4 +1,4 @@
-# Test suite 0015-lib-io
+# Test suite 1005-lib-io
 
 ## Test script 00.tests
 
@@ -10,16 +10,16 @@ Exit code: `0`
 
 ```plaintext
 → io::toAbsolutePath ${PWD}/fakeexec
-$_VALET_HOME/tests.d/0015-lib-io/fakeexec
+$_VALET_HOME/tests.d/1005-lib-io/fakeexec
 
 → io::toAbsolutePath fakeexec
-$_VALET_HOME/tests.d/0015-lib-io/fakeexec
+$_VALET_HOME/tests.d/1005-lib-io/fakeexec
 
 → io::toAbsolutePath ./fakeexec
-$_VALET_HOME/tests.d/0015-lib-io/fakeexec
+$_VALET_HOME/tests.d/1005-lib-io/fakeexec
 
 → io::toAbsolutePath ../0003-self/fakeexec
-$_VALET_HOME/tests.d/0015-lib-io/fakeexec
+$_VALET_HOME/tests.d/1005-lib-io/fakeexec
 ```
 
 ### Testing io::captureOutput

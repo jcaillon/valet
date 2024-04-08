@@ -1,4 +1,4 @@
-# Test suite 0000-self-build
+# Test suite 1102-self-build
 
 ## Test script 01.self-build
 
@@ -160,7 +160,7 @@ CMD_HIDEINMENU_selfMock3="true"
 CMD_MAX_COMMAND_WIDTH="22"
 CMD_MAX_SUB_COMMAND_LEVEL="1"
 CMD_OPTIONS_DESCRIPTION__menu="Display the help for this command."
-CMD_OPTIONS_DESCRIPTION_selfBuild=([0]=$'Specify the directory in which to look for your command scripts.\n\nThis defaults to the path defined in the environment variable VALET_USER_DIRECTORY=\\my/path\\ or to ⌜~/.valet.d⌝.\nThis option can be set by exporting the variable VALET_USER_DIRECTORY=\'<path>\'.' [1]=$'Specify the file path in which to write the command definition variables.\n\nThis defaults to the ⌜commands⌝ file in your Valet user directory.\n\nThis option can be set by exporting the variable VALET_OUTPUT=\'<path>\'.' [2]="Display the help for this command.")
+CMD_OPTIONS_DESCRIPTION_selfBuild=([0]=$'Specify the directory in which to look for your command scripts.\n\nThis defaults to the path defined in the environment variable VALET_USER_DIRECTORY=\\my/path\\ or to ⌜~/.valet.d⌝.\n\nCan be empty to only build the core commands.\nThis option can be set by exporting the variable VALET_USER_DIRECTORY=\'<path>\'.' [1]=$'Specify the file path in which to write the command definition variables.\n\nThis defaults to the ⌜commands⌝ file in your Valet user directory.\n\nCan be empty to not write the file.\n\nThis option can be set by exporting the variable VALET_OUTPUT=\'<path>\'.' [2]="Display the help for this command.")
 CMD_OPTIONS_DESCRIPTION_selfConfig=([0]=$'Create the configuration file if it does not exist but do not open it.\nThis option can be set by exporting the variable VALET_NO_EDIT=\'true\'.' [1]=$'Override of the configuration file even if it already exists.\nThis option can be set by exporting the variable VALET_OVERRIDE=\'true\'.' [2]=$'When writing the configuration file, export the current values of the variables.\n\nThis option can be set by exporting the variable VALET_EXPORT_CURRENT_VALUES=\'true\'.' [3]="Display the help for this command.")
 CMD_OPTIONS_DESCRIPTION_selfDownloadBinaries=([0]=$'By default, this command will download the binaries for your current OS.\n\nYou can force the download for a specific OS by providing the name of the OS.\n\nPossible values are: linux, windows, macos.\nThis option can be set by exporting the variable VALET_FORCE_OS=\'<name>\'.' [1]=$'By default, this command will download the binaries in valet bin/ directory.\n\nYou can force the download in a specific directory by providing the path.\nThis option can be set by exporting the variable VALET_DESTINATION=\'<path>\'.' [2]=$'By default, this command will download the binaries only if the final files do not exist in the destination directory.\n\nYou can force the download in all case with this option.\n\nThis option can be set by exporting the variable VALET_FORCE=\'true\'.' [3]="Display the help for this command.")
 CMD_OPTIONS_DESCRIPTION_selfMock1=([0]="Display the help for this command.")
@@ -276,6 +276,13 @@ INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-setup.
 INFO                              ├── ⌜self setup⌝.
 INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-test.sh⌝.
 INFO                              ├── ⌜self test⌝.
+INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/apply_proj_cleaner.sh⌝.
+INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/apply_proj_properties.sh⌝.
+INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/connect.sh⌝.
+INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/misc.sh⌝.
+INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/self.sh⌝.
+INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/setup-distrib.sh⌝.
+INFO     Extracting commands from ⌜/c/Users/jcaillon/.valet.d/update.sh⌝.
 INFO     == Summary of the commands ==
 
 - Number of variables declared: ⌜181⌝.
@@ -292,7 +299,6 @@ self setup            	The command run after the installation of Valet to setup 
 self test             	Test your valet custom commands.
 self update           	Update valet using the latest release on GitHub.
 
-
 == List of all the hidden commands ==
 
 self config           	Open the configuration file of Valet with your default editor.
@@ -301,6 +307,7 @@ self mock1            	A command that only for testing valet core functions.
 self mock2            	A command that only for testing valet core functions.
 self mock3            	A command that only for testing valet core functions.
 
+INFO     The command definition variables have been written to ⌜/tmp/valet.d/f501-0⌝.
 SUCCESS  The valet user commands have been successfully built
 ```
 

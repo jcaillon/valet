@@ -1,4 +1,4 @@
-# Test suite 0014-lib-system
+# Test suite 1004-lib-system
 
 ## Test script 00.tests
 

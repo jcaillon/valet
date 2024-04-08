@@ -89,27 +89,52 @@ function setTempFilesNumber() {
 # >>> Internal tests functions
 #===============================================================
 
+# Allows to run the core tests of Valet (tests.d directory in the repo) as
+# well as the examples (examples.d in the repo).
 function runCoreTests() {
   if [[ ! -d "${_VALET_HOME}/tests.d" ]]; then
-    core::fail "The valet core tests directory ⌜${_VALET_HOME}/tests.d⌝ does not exist, can't run core tests."
+    core::fail "The valet core tests directory ⌜${_VALET_HOME}/tests.d⌝ does not exist, cannot run core tests."
   fi
 
-  local originalUserDirectory="${VALET_USER_DIRECTORY:-}"
-
-  # we will run some example commands so we need to set the correct user directory and commands
-  export VALET_USER_DIRECTORY="${_VALET_HOME}/tests.d/0000-self-build"
-  core::reloadUserCommands
+  # we need to rebuild the commands for the core commands only
+  rebuildCommands ""
 
   log::info "Running all test suites in directory ⌜${_VALET_HOME}/tests.d⌝."
   runTestSuites "${_VALET_HOME}/tests.d"
 
-  VALET_USER_DIRECTORY="${originalUserDirectory}"
+  # now we can also test the commands in examples.d if the directory is there
+  if [[ ! -d "${_VALET_HOME}/examples.d" ]]; then
+    log::warning "The valet examples directory ⌜${_VALET_HOME}/examples.d⌝ does not exist, cannot run the tests on the core examples."
+  else
+    # we need to rebuild the commands for the examples only
+    rebuildCommands "${_VALET_HOME}/examples.d"
+
+    log::info "Running all test suites in directory ⌜${_VALET_HOME}/examples.d⌝."
+    runTestSuites "${_VALET_HOME}/examples.d"
+  fi
+
+  # reload the orignal commands
+  core::reloadUserCommands
+}
+
+function rebuildCommands() {
+  local originalLogLevel
+  log::getLevel && originalLogLevel="${LAST_RETURNED_VALUE}"
+  log::setLevel warning true
+  core::sourceForFunction selfBuild
+  selfBuild --output "" --user-directory "${1:-}"
+  log::setLevel "${originalLogLevel}" true
 }
 
 # Run all the test suites in the given directory.
 # A test suite is a folder that contains a test.sh file.
 # This test.sh allows to run multiple tests.
+#
 # $1: the directory containing the test suites
+#
+# Returns:
+#   the number of test suites run (increments the global variable NB_TEST_SUITES)
+#   the number of failed test suites (increments the global variable NB_FAILED_TEST_SUITES)
 #
 # Usage:
 #   runTestSuites "${_VALET_HOME}/tests.d"
@@ -171,23 +196,8 @@ function runTestSuites() {
     fi
   done
 
-  if [[ failedTestSuites -gt 0 ]]; then
-    local failMessage
-    failMessage="A total of ⌜${failedTestSuites}⌝/⌜${nbTestSuites}⌝ test(s) failed."
-    if [[ ${AUTO_APPROVE:-false} == "true" ]]; then
-      failMessage+=$'\n'"The received test result files were automatically approved."
-      log::warning "${failMessage}"
-    else
-      failMessage+=$'\n'"You should review the difference in the logs above or by comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
-      failMessage+=$'\n'"If the differences are legitimate, then approve the changes by running this command again with the option ⌜-a⌝."
-      core::fail "${failMessage}"
-    fi
-  elif [[ nbTestSuites -gt 0 ]]; then
-    log::success "A total of ⌜${nbTestSuites}⌝ tests passed!"
-  else
-    log::warning "No tests were found."
-  fi
-
+  NB_TEST_SUITES=$((NB_TEST_SUITES + nbTestSuites))
+  NB_FAILED_TEST_SUITES=$((NB_FAILED_TEST_SUITES + failedTestSuites))
 }
 
 function runTest() {

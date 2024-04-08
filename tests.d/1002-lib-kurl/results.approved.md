@@ -1,4 +1,4 @@
-# Test suite 0012-lib-kurl
+# Test suite 1002-lib-kurl
 
 ## Test script 00.kurl
 
