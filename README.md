@@ -60,27 +60,27 @@ Valet in a gist:
 
 Invoking `valet` without arguments lets you interactively search and invoke commands:
 
-![demo-menu](docs/images/readme/demo-menu.gif)
+![demo-menu](docs/content/showcase/demo-menu.gif)
 
 With `valet command --help` or `valet help command`, you get a beautifully formatted help for your command usage:
 
-![demo-help](docs/images/readme/demo-help.gif)
+![demo-help](docs/content/showcase/demo-help.gif)
 
 Fuzzy matching command names allow you to invoke the right command more quickly, see this example with `valet h s h`:
 
-![demo-fuzzy](docs/images/readme/demo-fuzzy.gif)
+![demo-fuzzy](docs/content/showcase/demo-fuzzy.gif)
 
 Automate tests for your script with approval test approach:
 
-![demo-tests](docs/images/readme/demo-tests.gif)
+![demo-tests](docs/content/showcase/demo-tests.gif)
 
 Get beautiful logs fully customizable (with optional wrapping!):
 
-![demo-logs](docs/images/readme/demo-logs.gif)
+![demo-logs](docs/content/showcase/demo-logs.gif)
 
 Auto parsing of arguments and options based on your command configuration:
 
-![demo-parsing](docs/images/readme/demo-parsing.gif)
+![demo-parsing](docs/content/showcase/demo-parsing.gif)
 
 > [!NOTE]
 > This showcase is recorded with the [windows terminal][windows-terminal], [debian on WSL][debian-wsl] with zsh & [oh my zsh][oh-my-zsh]. The color scheme for the terminal is [dracula][dracula-theme] and the font is a homemade modification of windows Consolas (with ligatures + with nerd font icons).
@@ -179,6 +179,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - head / tail from file.
 - Allow to regroup single letter options (e.g. -fsSL).
 - Add a command self package that build the user commands into a single script file.
+- Add vscode extensions [recommendations](https://github.com/imfing/hextra-starter-template/blob/main/.vscode/extensions.json).
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

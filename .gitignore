@@ -6,6 +6,12 @@ desktop.ini
 folder.ico
 *.bak
 
+### DOCS ###
+docs/public/
+docs/resources/
+docs/.hugo_build.lock
+docs/hugo.exe
+
 ### PROJECT ###
 **.received.md
 bin/

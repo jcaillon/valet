@@ -86,10 +86,7 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
     VALET_CONFIG_DISABLE_COLORS=true
     VALET_CONFIG_DISABLE_NERDFONT_ICONS=true
   fi
-fi
-# --- END OF COMMAND COMMON PART
-
-if [[ -n "${_CORE_INCLUDED:-}" ]]; then
+else
   # shellcheck source=../lib-system
   source system
   # shellcheck source=../lib-interactive
