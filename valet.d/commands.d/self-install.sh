@@ -21,14 +21,15 @@
 #
 # Environment variables to configure the installation:
 #
-#   NO_PROMPT: set to 'true' to not enter interactive mode for the setup (useful for automated installation)
-#   SINGLE_USER_INSTALLATION: set to 'true' to install Valet for the current user only.
+#   VALET_UNATTENDED: set to 'true' to not enter interactive mode for the setup (useful for automated installation)
+#   VALET_SINGLE_USER_INSTALLATION: set to 'true' to install Valet for the current user only.
+#                             Defaults to false
 #                             Note: for windows, the installation is always for the current user.
-#   _VALET_HOME: the directory where Valet will be installed.
-#   DEBUG: set to 'true' to display debug information.
-#   NO_SHIM: set to 'true' to not create the shim script in /usr/local/bin.
-#   NO_BINARIES: set to 'true' to not download the binaries (just Valet scripts).
-#   NO_ADD_TO_PATH: set to 'true' to not add the Valet directory to the PATH (append to your .bashrc file).
+#   VALET_INSTALLATION_DIRECTORY the directory where Valet will be installed.
+#   VALET_VERBOSE: set to 'true' to display debug information.
+#   VALET_NO_SHIM: set to 'true' to not create the shim script in /usr/local/bin.
+#   VALET_NO_BINARIES: set to 'true' to not download the binaries (just Valet scripts).
+#   VALET_DONT_APPEND_PATH: set to 'true' to not add the Valet directory to the PATH (append to your .bashrc file).
 #
 # Usage:
 #
@@ -38,7 +39,7 @@
 #
 #   To install Valet for the current user only:
 #
-#     SINGLE_USER_INSTALLATION=true ./self-install.sh
+#     VALET_SINGLE_USER_INSTALLATION=true ./self-install.sh
 
 # if not executing in bash, we can stop here
 if [[ -z "${BASH_VERSION:-}" ]]; then
@@ -66,7 +67,7 @@ if [[ -z "${_CORE_INCLUDED:-}" ]]; then
     # we are executing this script without valet, create functions to replace the core functions.
     function log::info() { printf "%-8s %s\n" "INFO" "ℹ️ $*"; }
     function log::success() { printf "%-8s %s\n" "SUCCESS" "✅ $*"; }
-    function log::debug() { if [[ ${DEBUG:-false} == "true" ]]; then printf "%-8s %s\n" "DEBUG" "📰 $*"; fi; }
+    function log::debug() { if [[ ${VALET_VERBOSE:-false} == "true" ]]; then printf "%-8s %s\n" "VALET_VERBOSE" "📰 $*"; fi; }
     function log::warning() { printf "%-8s %s\n" "WARNING" "⚠️ $*"; }
     function core::fail() {
       printf "%-8s %s\n" "ERROR" "❌ $*"
@@ -114,7 +115,7 @@ function selfUpdate() {
   fi
 
   local SUDO=''
-  if command -v sudo &>/dev/null && ${SINGLE_USER_INSTALLATION:-false} != "true"; then
+  if command -v sudo &>/dev/null && ${VALET_SINGLE_USER_INSTALLATION:-false} != "true"; then
     SUDO='sudo'
   fi
 
@@ -125,13 +126,13 @@ function selfUpdate() {
 
   # set the default options
   local binDirectory
-  if [[ ${SINGLE_USER_INSTALLATION:-false} == "true" || "${os}" == "windows" ]]; then
+  if [[ ${VALET_SINGLE_USER_INSTALLATION:-false} == "true" || "${os}" == "windows" ]]; then
     log::info "Installing Valet for the current user only."
-    _VALET_HOME="${_VALET_HOME:-${HOME}/.local/valet}"
+    _VALET_HOME="${VALET_INSTALLATION_DIRECTORY:-${_VALET_HOME:-${HOME}/.local/valet}}"
     binDirectory="${HOME}/.local/bin"
   else
     log::info "Installing Valet for all users."
-    _VALET_HOME="${_VALET_HOME:-/opt/valet}"
+    _VALET_HOME="${VALET_INSTALLATION_DIRECTORY:-${_VALET_HOME:-/opt/valet}}"
     binDirectory="/usr/local/bin"
   fi
 
@@ -145,7 +146,7 @@ function selfUpdate() {
 
   # download the latest release and unpack it
   local latestReleaseUrl
-  if [[ ${NO_BINARIES:-false} == true ]]; then
+  if [[ ${VALET_NO_BINARIES:-false} == true ]]; then
     latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet-no-binaries.tar.gz"
   else
     latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet-${os}-amd64.tar.gz"
@@ -182,7 +183,7 @@ function selfUpdate() {
     source "${_VALET_HOME}/valet.d/core"
   fi
 
-  if [[ "${NO_SHIM:-false}" != true ]]; then
+  if [[ "${VALET_NO_SHIM:-false}" != true ]]; then
 
     # create the shim in the bin directory
     local valetBin="${binDirectory}/valet"
@@ -200,7 +201,7 @@ function selfUpdate() {
 
     # make sure the valetBin directory is in the path or add it to ~.bashrc
     if ! command -v valet &>/dev/null; then
-      if [[ ${NO_ADD_TO_PATH:-false} == true ]]; then
+      if [[ ${VALET_DONT_APPEND_PATH:-false} == true ]]; then
         log::warning "Make sure to add ⌜${binDirectory}⌝ (or ⌜${_VALET_HOME}⌝) in your PATH."
       else
         if [[ -f "${HOME}/.bashrc" ]]; then
@@ -218,7 +219,7 @@ function selfUpdate() {
   fi
 
   # run the post install command
-  if [[ ${NO_PROMPT:-} != "true" ]]; then
+  if [[ ${VALET_UNATTENDED:-} != "true" ]]; then
     log::info "Running the self setup command."
     core::sourceForFunction selfSetup
     selfSetup
