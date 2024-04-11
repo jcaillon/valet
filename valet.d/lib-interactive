@@ -150,17 +150,17 @@ function interactive::promptYesNo() {
 
 function setupTerminal() {
   stty -echo
-  printf '%s' "${switchScreenBuffer}${disableLineWrapping}${cursorHide}${eraseScreen}${limitScrolling}$((_LINES - 1))${_lines}"
+  printf '%s' "${switchScreenBuffer}${disableLineWrapping}${cursorHide}${eraseScreen}${limitScrolling}$((GLOBAL_LINES - 1))${GLOBAL_LINES}"
 }
 
 function resetTerminal() {
-  printf '%s' "${enableLineWrapping}${cursorShow}${eraseScreen}${limitScrolling}${_lines}${switchScreenBuffer}"
+  printf '%s' "${enableLineWrapping}${cursorShow}${eraseScreen}${limitScrolling}${GLOBAL_LINES}${switchScreenBuffer}"
   stty echo
 }
 
 # Write a message to the status bar.
 function writeToStatusBar() {
-  printf '%s' "${cursorSavePos}${cursorMove}$((_LINES - 1));1${_to}${eraseLine}${textBold}${1}${textReset}${cursorRestorePos}"
+  printf '%s' "${cursorSavePos}${cursorMove}$((GLOBAL_LINES - 1));1${_to}${eraseLine}${textBold}${1}${textReset}${cursorRestorePos}"
 }
 
 function key() {
@@ -210,7 +210,7 @@ function search() {
   local keyPressed
   local searchString=""
 
-  printf '%s' "${cursorShow}${cursorMove}$((_LINES));1${_to}${eraseLine}"
+  printf '%s' "${cursorShow}${cursorMove}$((GLOBAL_LINES));1${_to}${eraseLine}"
 
   while IFS= read -rsn 1 -p "${cursorHide}${redrawPrompt}${cursorShow}${textBold}SEARCH:${textReset} ${searchString}" keyPressed; do
     case ${keyPressed} in
@@ -239,7 +239,7 @@ function search() {
 }
 
 function redraw() {
-  writeToStatusBar "Terminal size is: ${_COLUMNS}x${_LINES}"
+  writeToStatusBar "Terminal size is: ${GLOBAL_COLUMNS}x${GLOBAL_LINES}"
 }
 
 function fullScreenInteractive() {
@@ -379,7 +379,7 @@ interactive::displayDialogBox() {
   local text="${2}"
   local dialogMaxWidth="${3:-180}"
 
-  local -i maxWidth=$((_COLUMNS - 5))
+  local -i maxWidth=$((GLOBAL_COLUMNS - 5))
   if [[ ${#text} -lt ${maxWidth} ]]; then
     maxWidth=${#text}
   fi

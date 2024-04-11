@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Import the core script (should always be skipped if the command is run from valet, this is mainly for shellcheck).
-if [[ -z "${_CORE_INCLUDED:-}" ]]; then
+if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   # shellcheck source=../../valet.d/core
   source "$(dirname -- "$(command -v valet)")/valet.d/core"
 fi

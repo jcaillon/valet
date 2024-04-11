@@ -20,8 +20,8 @@ function testSelfRelease() {
 function io::invoke5() {
   echo "▶ called io::invoke5 $*" 1>&2
   if [[ ${5} == "uname" ]]; then
-    echo -n "x86_64" > "${_TEMPORARY_STDOUT_FILE}"
-    LAST_RETURNED_VALUE="${_TEMPORARY_STDOUT_FILE}"
+    echo -n "x86_64" > "${GLOBAL_TEMPORARY_STDOUT_FILE}"
+    LAST_RETURNED_VALUE="${GLOBAL_TEMPORARY_STDOUT_FILE}"
     LAST_RETURNED_VALUE2=""
     return 0
   fi
@@ -66,12 +66,12 @@ function kurl::toFile() {
 function main() {
   setTempFilesNumber 100
   io::createTempFile && local tmpFile="${LAST_RETURNED_VALUE}"
-  cp -f "${_VALET_HOME}/valet.d/version" "${tmpFile}"
-  echo -n "1.2.3" > "${_VALET_HOME}/valet.d/version"
+  cp -f "${GLOBAL_VALET_HOME}/valet.d/version" "${tmpFile}"
+  echo -n "1.2.3" > "${GLOBAL_VALET_HOME}/valet.d/version"
 
   testSelfRelease
 
-  mv -f "${tmpFile}" "${_VALET_HOME}/valet.d/version"
+  mv -f "${tmpFile}" "${GLOBAL_VALET_HOME}/valet.d/version"
 }
 
 main

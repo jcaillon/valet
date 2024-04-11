@@ -4,7 +4,7 @@
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
-if [[ -z "${_CORE_INCLUDED:-}" ]]; then
+if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   # shellcheck source=../core
   source "$(dirname -- "$(command -v valet)")/valet.d/core"
 fi
@@ -54,7 +54,7 @@ function selfDownloadBinaries() {
   core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  destination="${destination:-${_VALET_HOME}/bin}"
+  destination="${destination:-${GLOBAL_VALET_HOME}/bin}"
   # make sure the destination is an absolute path
   if [[ "${destination}" != /* ]]; then
     destination="${PWD}/${destination}"

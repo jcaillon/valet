@@ -6,9 +6,9 @@ set -Eeu -o pipefail
 # Author:         github.com/jcaillon
 
 # we check for this variable to know if this script has already been included
-_MAIN_INCLUDED=1
+GLOBAL_MAIN_INCLUDED=1
 
-if [[ -z "${_CORE_INCLUDED:-}" ]]; then
+if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   # shellcheck source=core
   source "${BASH_SOURCE[0]%/*}/core"
 fi
@@ -18,12 +18,12 @@ fi
 #===============================================================
 
 function main::onErrorInternal() {
-  if [[ ${ERROR_DISPLAYED:-0} == "1" ]]; then
+  if [[ ${GLOBAL_ERROR_DISPLAYED:-0} == "1" ]]; then
     return 0
   fi
   log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
   log::error "Error code ${1} in ${FUNCNAME[1]}(), stack:${stack}"
-  ERROR_DISPLAYED=1
+  GLOBAL_ERROR_DISPLAYED=1
 }
 
 trap 'main::onErrorInternal $?' ERR
@@ -45,10 +45,10 @@ function main::onExitInternal() {
   fi
   # always call cleanUp before exiting
   main::onCleanUpInternal
-  if [[ "${ERROR_DISPLAYED:-0}" != "1" && "${rc}" != "0" ]]; then
+  if [[ "${GLOBAL_ERROR_DISPLAYED:-0}" != "1" && "${rc}" != "0" ]]; then
     log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
     log::print "ERROR" "${VALET_CONFIG_ICON_EXIT:-$'\uf14c'}" "EXIT" "Exiting with code ${rc}, stack:${stack}"
-    ERROR_DISPLAYED=1
+    GLOBAL_ERROR_DISPLAYED=1
   fi
 }
 
@@ -275,7 +275,7 @@ fi
 # $4: the maximum columns for the help text.
 #
 # Usage:
-#   main::printHelp function "this" "${VALET_CONFIG_DISABLE_COLORS:-false}" "${_COLUMNS}"
+#   main::printHelp function "this" "${VALET_CONFIG_DISABLE_COLORS:-false}" "${GLOBAL_COLUMNS}"
 function main::printHelp() {
   local type=${1:-function}
   local name="${2:-this}"
@@ -303,7 +303,7 @@ function main::printHelp() {
 
   local -i helpWidth
   helpWidth="${maxColumns}"
-  if [[ helpWidth -gt ${_COLUMNS} ]]; then helpWidth=${_COLUMNS}; fi
+  if [[ helpWidth -gt ${GLOBAL_COLUMNS} ]]; then helpWidth=${GLOBAL_COLUMNS}; fi
   if [[ helpWidth -lt 30 ]]; then helpWidth=30; fi
 
   if [[ ${type} == "function" ]]; then
@@ -480,7 +480,7 @@ function main::parseMainArguments() {
       log::setLevel "debug"
       ;;
     --version)
-      cat "${_VALET_HOME}/valet.d/version"
+      cat "${GLOBAL_VALET_HOME}/valet.d/version"
       exit 0
       ;;
     -h | --help)
@@ -818,7 +818,7 @@ function main::showInteractiveCommandsMenu() {
 
   fzf::showFzf "menu" "${menuId}" "${menuHeader}" "${menuBody}" \
     --preview-label='Command help' \
-    --preview="VALET_LOG_LEVEL=error '${_VALET_HOME}/valet' help --columns \$((FZF_PREVIEW_COLUMNS - 1)) {1}"
+    --preview="VALET_LOG_LEVEL=error '${GLOBAL_VALET_HOME}/valet' help --columns \$((FZF_PREVIEWGLOBAL_COLUMNS - 1)) {1}"
 
   choice="${LAST_RETURNED_VALUE}"
   choice="${choice#*$'\n'}" # delete first line (query)

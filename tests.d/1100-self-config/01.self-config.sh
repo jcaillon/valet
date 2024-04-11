@@ -34,7 +34,7 @@ function testSelfConfig() {
     unset ${!VALET_CONFIG_*} VALET_USER_DIRECTORY
     export VALET_CONFIG_FILE="${configFile}"
     export VALET_CONFIG_COLOR_DEBUG=$'\e[44m'
-    export VALET_CONFIG_LOG_COLUMNS=20
+    export VALET_CONFIG_LOGGLOBAL_COLUMNS=20
     export VALET_CONFIG_ENABLE_CI_MODE=true
     selfConfig --override --export-current-values
   ) && exitCode=0 || exitCode=$?

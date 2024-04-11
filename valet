@@ -78,20 +78,20 @@ examples:
 #===============================================================
 # >>> Include core/utils
 #===============================================================
-_VALET_HOME="${BASH_SOURCE[0]}"
-if [[ "${_VALET_HOME}" != /* ]]; then
+GLOBAL_VALET_HOME="${BASH_SOURCE[0]}"
+if [[ "${GLOBAL_VALET_HOME}" != /* ]]; then
   # resolve relative path
-  if pushd "${_VALET_HOME%/*}" &>/dev/null; then _VALET_HOME="${PWD}"; popd &>/dev/null;
-  else _VALET_HOME="${PWD}"; fi
+  if pushd "${GLOBAL_VALET_HOME%/*}" &>/dev/null; then GLOBAL_VALET_HOME="${PWD}"; popd &>/dev/null;
+  else GLOBAL_VALET_HOME="${PWD}"; fi
 else
-  _VALET_HOME="${_VALET_HOME%/*}" # strip filename
+  GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip filename
 fi
 
 #===============================================================
 # >>> Source main functions
 #===============================================================
 # shellcheck source=valet.d/main
-source "${_VALET_HOME}/valet.d/main"
+source "${GLOBAL_VALET_HOME}/valet.d/main"
 
 #===============================================================
 # >>> Run the main function

@@ -50,7 +50,7 @@ function fzf::showFzf() {
   local historyFile
   if [[ -n "${historyId}" ]]; then
     historyFile="${stateDirectory}/fzf-history-${historyId}"
-    if [[ ! -e "${historyFile}" ]]; then
+    if [[ ! -f "${historyFile}" ]]; then
       : >"${historyFile}"
     fi
     defaultOptions+=(
@@ -62,17 +62,28 @@ function fzf::showFzf() {
   fi
 
   # compute preview width
-  local previewWidth=$((_COLUMNS / 2 - 10))
+  local previewWidth=$((GLOBAL_COLUMNS / 2 - 10))
   if [[ previewWidth -le 15 ]]; then
     previewWidth=15
   fi
 
-  local headerHelp="${COLOR_ERROR}Press ALT+H to display the help and keybindings.${COLOR_DEFAULT}"$'\n'
+  local cDefault cTitle cKeybinding
+  if [[ ${VALET_CONFIG_DISABLE_COLORS:-} != true ]]; then
+    cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
+    cTitle=${VALET_CONFIG_COLOR_TITLE:-$'\e'"[0;36m"}
+    cKeybinding=${VALET_CONFIG_COLOR_COMMAND:-$'\e'"[0;31m"}
+  else
+    cDefault=""
+    cTitle=""
+    cKeybinding=""
+  fi
+
+  local headerHelp="${cKeybinding}Press ALT+H to display the help and keybindings.${cDefault}"$'\n'
 
   local helpPreview
   case "${mode}" in
   "options" | "menu")
-    helpPreview="${COLOR_INFO}HELP${COLOR_DEFAULT}"$'\n'$'\n'"Navigate through the options with the ${COLOR_ERROR}UP${COLOR_DEFAULT}/${COLOR_ERROR}DOWN${COLOR_DEFAULT} keys."$'\n'$'\n'"Validate your choice with ${COLOR_ERROR}ENTER${COLOR_DEFAULT}."
+    helpPreview="${cTitle}HELP${cDefault}"$'\n'$'\n'"Navigate through the options with the ${cKeybinding}UP${cDefault}/${cKeybinding}DOWN${cDefault} keys."$'\n'$'\n'"Validate your choice with ${cKeybinding}ENTER${cDefault}."
     modeOptions+=(
       --no-multi
     )
@@ -84,7 +95,7 @@ function fzf::showFzf() {
     fi
     ;;
   "multi-options")
-    helpPreview="${COLOR_INFO}HELP${COLOR_DEFAULT}"$'\n'$'\n'"Navigate through the options with the ${COLOR_ERROR}UP${COLOR_DEFAULT}/${COLOR_ERROR}DOWN${COLOR_DEFAULT} keys."$'\n'$'\n'"Opt-in and out of an option using ${COLOR_ERROR}TAB${COLOR_DEFAULT}."$'\n'$'\n'"Validate with ${COLOR_ERROR}ENTER${COLOR_DEFAULT}."
+    helpPreview="${cTitle}HELP${cDefault}"$'\n'$'\n'"Navigate through the options with the ${cKeybinding}UP${cDefault}/${cKeybinding}DOWN${cDefault} keys."$'\n'$'\n'"Opt-in and out of an option using ${cKeybinding}TAB${cDefault}."$'\n'$'\n'"Validate with ${cKeybinding}ENTER${cDefault}."
     modeOptions+=(
       --multi
       --height=~100%
@@ -92,7 +103,7 @@ function fzf::showFzf() {
     )
     ;;
   "yes-no")
-    helpPreview="${COLOR_INFO}HELP${COLOR_DEFAULT}"$'\n'$'\n'"Navigate through the options with the ${COLOR_ERROR}UP${COLOR_DEFAULT}/${COLOR_ERROR}DOWN${COLOR_DEFAULT} keys."$'\n'$'\n'"Validate your choice with ${COLOR_ERROR}ENTER${COLOR_DEFAULT}."
+    helpPreview="${cTitle}HELP${cDefault}"$'\n'$'\n'"Navigate through the options with the ${cKeybinding}UP${cDefault}/${cKeybinding}DOWN${cDefault} keys."$'\n'$'\n'"Validate your choice with ${cKeybinding}ENTER${cDefault}."
     modeOptions+=(
       --height=~100%
       --min-height=10
@@ -105,7 +116,7 @@ function fzf::showFzf() {
     helpPreview=""
     ;;
   "query")
-    helpPreview="${COLOR_INFO}HELP${COLOR_DEFAULT}"$'\n'$'\n'"Type your answer in the prompt."$'\n'$'\n'"Validate with ${COLOR_ERROR}ENTER${COLOR_DEFAULT}."
+    helpPreview="${cTitle}HELP${cDefault}"$'\n'$'\n'"Type your answer in the prompt."$'\n'$'\n'"Validate with ${cKeybinding}ENTER${cDefault}."
     modeOptions+=(
       --height=~100%
     )
@@ -127,12 +138,12 @@ function fzf::showFzf() {
         --bind "tab:replace-query"
         --min-height=10
       )
-      headerHelp="${COLOR_ERROR}Type your answer, press TAB to replace with the selection (ALT+H for help).${COLOR_DEFAULT}"$'\n'
-      helpPreview+=$'\n'$'\n'"Use ${COLOR_ERROR}TAB${COLOR_DEFAULT} to replace your answer with the current selection."
+      headerHelp="${cKeybinding}Type your answer, press TAB to replace with the selection (ALT+H for help).${cDefault}"$'\n'
+      helpPreview+=$'\n'$'\n'"Use ${cKeybinding}TAB${cDefault} to replace your answer with the current selection."
     fi
     ;;
   "command-options")
-    helpPreview="${COLOR_INFO}HELP${COLOR_DEFAULT}"$'\n'$'\n'"Navigate through the options with the ${COLOR_ERROR}UP${COLOR_DEFAULT}/${COLOR_ERROR}DOWN${COLOR_DEFAULT} keys."$'\n'$'\n'"Opt-in and out of an option using ${COLOR_ERROR}TAB${COLOR_DEFAULT} or ${COLOR_ERROR}SPACE${COLOR_DEFAULT}."$'\n'$'\n'"Modify the value of an option by pressing ${COLOR_ERROR}M${COLOR_DEFAULT}."$'\n'$'\n'"Validate with ${COLOR_ERROR}ENTER${COLOR_DEFAULT}."
+    helpPreview="${cTitle}HELP${cDefault}"$'\n'$'\n'"Navigate through the options with the ${cKeybinding}UP${cDefault}/${cKeybinding}DOWN${cDefault} keys."$'\n'$'\n'"Opt-in and out of an option using ${cKeybinding}TAB${cDefault} or ${cKeybinding}SPACE${cDefault}."$'\n'$'\n'"Modify the value of an option by pressing ${cKeybinding}M${cDefault}."$'\n'$'\n'"Validate with ${cKeybinding}ENTER${cDefault}."
     modeOptions+=(
       --multi
       --bind "tab:toggle"
@@ -147,14 +158,14 @@ function fzf::showFzf() {
 
   helpPreview+="
 
-Cancel with ${COLOR_ERROR}ESC${COLOR_DEFAULT} or ${COLOR_ERROR}CTRL+C${COLOR_DEFAULT}.
+Cancel with ${cKeybinding}ESC${cDefault} or ${cKeybinding}CTRL+C${cDefault}.
 
-${COLOR_INFO}ADDITIONAL KEY BINDINGS${COLOR_DEFAULT}
+${cTitle}ADDITIONAL KEY BINDINGS${cDefault}
 
-${COLOR_ERROR}ALT+H${COLOR_DEFAULT}: Show this help.
-${COLOR_ERROR}ALT+/${COLOR_DEFAULT}: Rotate through the preview options (this pane).
-${COLOR_ERROR}ALT+UP${COLOR_DEFAULT}/${COLOR_ERROR}ALT+DOWN${COLOR_DEFAULT}: Previous/next query in the history.
-${COLOR_ERROR}SHIFT+UP${COLOR_DEFAULT}/${COLOR_ERROR}SHIFT+DOWN${COLOR_DEFAULT}: Scroll the preview up and down.
+${cKeybinding}ALT+H${cDefault}: Show this help.
+${cKeybinding}ALT+/${cDefault}: Rotate through the preview options (this pane).
+${cKeybinding}ALT+UP${cDefault}/${cKeybinding}ALT+DOWN${cDefault}: Previous/next query in the history.
+${cKeybinding}SHIFT+UP${cDefault}/${cKeybinding}SHIFT+DOWN${cDefault}: Scroll the preview up and down.
 "
 
   if [[ -n "${helpPreview}" ]]; then
@@ -185,13 +196,13 @@ ${COLOR_ERROR}SHIFT+UP${COLOR_DEFAULT}/${COLOR_ERROR}SHIFT+DOWN${COLOR_DEFAULT}:
   )
 
   # reset the output file, but only if it already exist
-  if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then : >"${_TEMPORARY_STDOUT_FILE}"; fi
+  if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then : >"${GLOBAL_TEMPORARY_STDOUT_FILE}"; fi
 
-  "${fzfExecutable}" "${defaultOptions[@]}" "${modeOptions[@]}" "$@" <<<"${body}" 1>"${_TEMPORARY_STDOUT_FILE}" || true
+  "${fzfExecutable}" "${defaultOptions[@]}" "${modeOptions[@]}" "$@" <<<"${body}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || true
 
   local choice
-  if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
-    IFS= read -rd '' choice <"${_TEMPORARY_STDOUT_FILE}" || true
+  if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
+    IFS= read -rd '' choice <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || true
   else
     choice=""
   fi

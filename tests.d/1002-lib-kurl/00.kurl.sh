@@ -4,8 +4,8 @@
 source kurl
 
 function testKurl::toFile() {
-  mkdir -p "${_TEMPORARY_DIRECTORY}" &>/dev/null
-  local tmpFile="${_TEMPORARY_DIRECTORY}/kurl-test"
+  mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" &>/dev/null
+  local tmpFile="${GLOBAL_TEMPORARY_DIRECTORY}/kurl-test"
   local exitCode
 
   echo "→ kurl::toFile false '' \"\${tmpFile}\" --code 200 -curlOption1 --fakeOpt2 https://hello.com"
@@ -19,9 +19,9 @@ function testKurl::toFile() {
   endTest "Testing kurl::toFile, http code 500 not acceptable return 1" 0
 
   echo "→ kurl::toFile true '' \"\${tmpFile}\" --code 500 https://hello.com"
-  export ERROR_DISPLAYED=1
+  export GLOBAL_ERROR_DISPLAYED=1
   (kurl::toFile true '' "${tmpFile}" --code 500 https://hello.com)
-  unset ERROR_DISPLAYED
+  unset GLOBAL_ERROR_DISPLAYED
   endTest "Testing kurl::toFile, http code 500 not acceptable fails" 0
 
   echo "→ kurl::toFile false '300,500,999' \"\${tmpFile}\" --code 500 https://hello.com"

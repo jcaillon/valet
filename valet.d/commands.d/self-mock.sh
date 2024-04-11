@@ -4,7 +4,7 @@
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
-if [[ -z "${_CORE_INCLUDED:-}" ]]; then
+if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   # shellcheck source=../core
   source "$(dirname -- "$(command -v valet)")/valet.d/core"
 fi

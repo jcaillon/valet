@@ -4,7 +4,7 @@
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
-if [[ -z "${_CORE_INCLUDED:-}" ]]; then
+if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   # shellcheck source=../core
   source "$(dirname -- "$(command -v valet)")/valet.d/core"
 fi
@@ -148,7 +148,7 @@ VALET_CONFIG_DISABLE_COLORS=\"\${VALET_CONFIG_DISABLE_COLORS:-${EXPORTED_VALET_C
 VALET_CONFIG_DISABLE_LOG_WRAP=\"\${VALET_CONFIG_DISABLE_LOG_WRAP:-${EXPORTED_VALET_CONFIG_DISABLE_LOG_WRAP:-}}\"
 
 # Sets the maximum width for the log output (used only when log wrapping is enabled).
-VALET_CONFIG_LOG_COLUMNS=\"\${VALET_CONFIG_LOG_COLUMNS:-${EXPORTED_VALET_CONFIG_LOG_COLUMNS:-}}\"
+VALET_CONFIG_LOGGLOBAL_COLUMNS=\"\${VALET_CONFIG_LOGGLOBAL_COLUMNS:-${EXPORTED_VALET_CONFIG_LOGGLOBAL_COLUMNS:-}}\"
 
 # If true, will disable the timestamp for logs.
 VALET_CONFIG_DISABLE_LOG_TIMESTAMP=\"\${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-${EXPORTED_VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-}}\"
@@ -194,8 +194,9 @@ VALET_CONFIG_STARTUP_PROFILING_FILE=\"\${VALET_CONFIG_STARTUP_PROFILING_FILE:-${
 # E.g., this will set the INFO levels logs to blue:
 # VALET_CONFIG_COLOR_INFO=\$'\e[44m'
 
-# Colors for logs
 VALET_CONFIG_COLOR_DEFAULT=\"\${VALET_CONFIG_COLOR_DEFAULT:-${EXPORTED_VALET_CONFIG_COLOR_DEFAULT:-}}\"
+
+# Colors for logs
 VALET_CONFIG_COLOR_DEBUG=\"\${VALET_CONFIG_COLOR_DEBUG:-${EXPORTED_VALET_CONFIG_COLOR_DEBUG:-}}\"
 VALET_CONFIG_COLOR_INFO=\"\${VALET_CONFIG_COLOR_INFO:-${EXPORTED_VALET_CONFIG_COLOR_INFO:-}}\"
 VALET_CONFIG_COLOR_WARNING=\"\${VALET_CONFIG_COLOR_WARNING:-${EXPORTED_VALET_CONFIG_COLOR_WARNING:-}}\"

@@ -81,12 +81,12 @@ function io::invoke5() {
   local -i exitCode=0
   if [[ -n "${stdIn}" ]]; then
     if [[ ${stdInFromFile} == "true" ]]; then
-      "${executable}" "$@" < "${stdIn}" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+      "${executable}" "$@" < "${stdIn}" 1> "${GLOBAL_TEMPORARY_STDOUT_FILE}" 2> "${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
     else
-      "${executable}" "$@" <<< "${stdIn}" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+      "${executable}" "$@" <<< "${stdIn}" 1> "${GLOBAL_TEMPORARY_STDOUT_FILE}" 2> "${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
     fi
   else
-    "${executable}" "$@" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+    "${executable}" "$@" 1> "${GLOBAL_TEMPORARY_STDOUT_FILE}" 2> "${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
   fi
 
   local debugMessage="The command ⌜${executable}⌝ originally ended with exit code ⌜${exitCode}⌝."
@@ -104,14 +104,14 @@ function io::invoke5() {
   if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
 
     # append std out
-    if [[ -s "${_TEMPORARY_STDOUT_FILE}" ]]; then
-      io::readFile "${_TEMPORARY_STDOUT_FILE}" 5000
+    if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
+      io::readFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 5000
       if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
       debugMessage+=$'\n'"Standard output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
     fi
     # append stderr
-    if [[ -s "${_TEMPORARY_STDERR_FILE}" ]]; then
-      io::readFile "${_TEMPORARY_STDERR_FILE}" 5000
+    if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
+      io::readFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 5000
       if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
       debugMessage+=$'\n'"Error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
     fi
@@ -123,8 +123,8 @@ function io::invoke5() {
     fi
   fi
 
-  LAST_RETURNED_VALUE="${_TEMPORARY_STDOUT_FILE}"
-  LAST_RETURNED_VALUE2="${_TEMPORARY_STDERR_FILE}"
+  LAST_RETURNED_VALUE="${GLOBAL_TEMPORARY_STDOUT_FILE}"
+  LAST_RETURNED_VALUE2="${GLOBAL_TEMPORARY_STDERR_FILE}"
   return ${exitCode}
 }
 
@@ -235,7 +235,7 @@ function io::invoke() {
 #   io::getCommandLocalPath "fzf" && local fullPath="${LAST_RETURNED_VALUE}"
 function io::getCommandLocalPath() {
   local executable="${1}"
-  local possibleExecutablePath="${VALET_CONFIG_BIN_PATH:-"${_VALET_HOME}/bin"}/${executable}"
+  local possibleExecutablePath="${VALET_CONFIG_BIN_PATH:-"${GLOBAL_VALET_HOME}/bin"}/${executable}"
   if [[ "${VALET_CONFIG_DISABLE_LOCAL_BIN:-false}" != "true" && -x "${possibleExecutablePath}" ]]; then
     executable="${possibleExecutablePath}"
   fi
@@ -258,12 +258,12 @@ function io::getCommandLocalPath() {
 #   io::captureOutput "ls -l" && local lsOutput="${LAST_RETURNED_VALUE}"
 function io::captureOutput() {
   local -i exitCode=0
-  "$@" 1> "${_TEMPORARY_STDOUT_FILE}" 2> "${_TEMPORARY_STDERR_FILE}" || exitCode=$?
+  "$@" 1> "${GLOBAL_TEMPORARY_STDOUT_FILE}" 2> "${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
 
-  io::readFile "${_TEMPORARY_STDERR_FILE}"
+  io::readFile "${GLOBAL_TEMPORARY_STDERR_FILE}"
   LAST_RETURNED_VALUE2="${LAST_RETURNED_VALUE}"
 
-  io::readFile "${_TEMPORARY_STDOUT_FILE}"
+  io::readFile "${GLOBAL_TEMPORARY_STDOUT_FILE}"
 
   return ${exitCode}
 }

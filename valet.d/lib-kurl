@@ -85,15 +85,15 @@ function kurl::toVar() {
   shift 2
 
   # reset the temporary file, only if needed
-  if [[ -s "${_TEMPORARY_WORK_FILE}" ]]; then : > "${_TEMPORARY_WORK_FILE}"; fi
+  if [[ -s "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; then : > "${GLOBAL_TEMPORARY_WORK_FILE}"; fi
 
   local -i exitCode=0
   local errors httpStatusCode
-  kurl::toFile "${failIfFails}" "${acceptableStatusCodes}" "${_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
+  kurl::toFile "${failIfFails}" "${acceptableStatusCodes}" "${GLOBAL_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
   errors="${LAST_RETURNED_VALUE}"
   httpStatusCode="${LAST_RETURNED_VALUE2}"
 
-  io::readFile "${_TEMPORARY_WORK_FILE}"
+  io::readFile "${GLOBAL_TEMPORARY_WORK_FILE}"
   LAST_RETURNED_VALUE2="${errors}"
   LAST_RETURNED_VALUE3="${httpStatusCode}"
   return ${exitCode}

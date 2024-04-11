@@ -354,10 +354,10 @@ Exit code: `0`
 ```log
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 ERROR    Error code 1 in selfMock1(), stack:
-├─ In function selfMock1() $_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $_VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $_VALET_HOME/valet.d/main:XXX
-└─ In function main() $_VALET_HOME/valet:XXX
+├─ In function selfMock1() $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:XXX
+└─ In function main() $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ### Testing exit message and custom onExit function
@@ -376,10 +376,10 @@ Exit code: `0`
 WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
-├─ In function selfMock1() $_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $_VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $_VALET_HOME/valet.d/main:XXX
-└─ In function main() $_VALET_HOME/valet:XXX
+├─ In function selfMock1() $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:XXX
+└─ In function main() $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ### Testing fail function
@@ -415,17 +415,17 @@ WARNING  This is for testing valet core functions, the next statement will call 
 ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
 stack:
-├─ In function core::fail() $_VALET_HOME/valet.d/core:XXX
-├─ In function command_not_found_handle() $_VALET_HOME/valet.d/main:XXX
-├─ In function selfMock1() $_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $_VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $_VALET_HOME/valet.d/main:XXX
-└─ In function main() $_VALET_HOME/valet:XXX
+├─ In function core::fail() $GLOBAL_VALET_HOME/valet.d/core:XXX
+├─ In function command_not_found_handle() $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ In function selfMock1() $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:XXX
+└─ In function main() $GLOBAL_VALET_HOME/valet:XXX
 ERROR    Error code 1 in selfMock1(), stack:
-├─ In function selfMock1() $_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $_VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $_VALET_HOME/valet.d/main:XXX
-└─ In function main() $_VALET_HOME/valet:XXX
+├─ In function selfMock1() $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:XXX
+└─ In function main() $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ## Test script 04.interactive-mode
@@ -459,7 +459,7 @@ ALT+UP/ALT+DOWN: Previous/next query in the history.
 SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
 ') --preview-window=right,80 --bind alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|) --layout=reverse --info=right --pointer=◆ --marker=✓ --cycle --tiebreak=begin,index --margin=0 --padding=0 --delimiter=
  --tabstop=3 --header-first --header=Press ALT+H to display the help and keybindings.
-Please select the command to run. --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$_VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
+Please select the command to run. --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$GLOBAL_VALET_HOME/valet' help --columns $((FZF_PREVIEWGLOBAL_COLUMNS - 1)) {1}⌉
 ▶ fzf input stream was:
 ⌈help                  	Show the help this program or of a specific command.
 self build            	Re-build the menu of valet from your commands.
@@ -521,7 +521,7 @@ DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Command found ⌜self mock1⌝.
 DEBUG    Function name found ⌜selfMock1⌝.
-DEBUG    Loaded file ⌜$_VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
+DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
 local parsingErrors help action
@@ -674,7 +674,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 logging-level
+→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_LOGGLOBAL_COLUMNS=80 valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -825,7 +825,7 @@ Please select the command to run.
 --print-query
 --no-multi
 --preview-label=Command help
---preview=VALET_LOG_LEVEL=error '$_VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
+--preview=VALET_LOG_LEVEL=error '$GLOBAL_VALET_HOME/valet' help --columns $((FZF_PREVIEWGLOBAL_COLUMNS - 1)) {1}⌉
 ▶ fzf input stream was:
 ⌈self build            	Re-build the menu of valet from your commands.
 self test             	Test your valet custom commands.

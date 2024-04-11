@@ -9,7 +9,7 @@ set -Eeu -o pipefail
 
 _CMD_INCLUDED=1
 
-if [[ -z "${_CORE_INCLUDED:-}" ]]; then
+if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   NOT_EXECUTED_FROM_VALET=true
 
   VALETD_DIR="${BASH_SOURCE[0]}"
@@ -24,13 +24,13 @@ fi
 # --- END OF COMMAND COMMON PART
 
 # shellcheck source=self-build-utils
-source "${_VALET_HOME}/valet.d/commands.d/self-build-utils"
+source "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build-utils"
 # shellcheck source=../lib-array
-source "${_VALET_HOME}/valet.d/lib-array"
+source "${GLOBAL_VALET_HOME}/valet.d/lib-array"
 # shellcheck source=../lib-io
-source "${_VALET_HOME}/valet.d/lib-io"
+source "${GLOBAL_VALET_HOME}/valet.d/lib-io"
 # shellcheck source=../lib-string
-source "${_VALET_HOME}/valet.d/lib-string"
+source "${GLOBAL_VALET_HOME}/valet.d/lib-string"
 
 #===============================================================
 # >>> command: self build
@@ -92,13 +92,13 @@ function selfBuild() {
   core::getUserDirectory && userDirectory="${userDirectory-${LAST_RETURNED_VALUE}}"
   outputFile="${outputFile-${userDirectory}/commands}"
 
-  io::toAbsolutePath "${_VALET_HOME}" && _VALET_HOME="${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath "${GLOBAL_VALET_HOME}" && GLOBAL_VALET_HOME="${LAST_RETURNED_VALUE}"
 
   # list all the files in which we need to find command definitions
   local -a commandDefinitionFiles
   commandDefinitionFiles=(
-    "${_VALET_HOME}/valet"
-    "${_VALET_HOME}/valet.d/commands.d"/*.sh
+    "${GLOBAL_VALET_HOME}/valet"
+    "${GLOBAL_VALET_HOME}/valet.d/commands.d"/*.sh
   )
   if [[ -d "${userDirectory}" ]]; then
     shopt -s globstar
@@ -178,7 +178,7 @@ function summarize() {
 # Bump the valet build version by one patch.
 function bumpValetBuildVersion() {
   local versionFile currentVersion
-  versionFile="${_VALET_HOME}/valet.d/version"
+  versionFile="${GLOBAL_VALET_HOME}/valet.d/version"
 
   IFS= read -rd '' currentVersion <"${versionFile}" || true
 
@@ -215,7 +215,7 @@ function extractCommandDefinitionsToVariables() {
       log::info "                         ├── ⌜${command}⌝."
 
       io::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${LAST_RETURNED_VALUE}"
-      TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${_VALET_HOME}"/}"
+      TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${GLOBAL_VALET_HOME}"/}"
 
       # make sure that all these arrays exists and have the same size
       array::makeArraysSameSize TEMP_CMD_BUILD_options_name TEMP_CMD_BUILD_options_description TEMP_CMD_BUILD_options_noEnvironmentVariable

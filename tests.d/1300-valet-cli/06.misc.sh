@@ -6,7 +6,7 @@ function testMainOptions() {
   # testing version option
   : > "${_TEST_TEMP_FILE}"
   echo "→ valet --version"
-  ("${_VALET_HOME}/valet" --version 1> "${_TEST_TEMP_FILE}")
+  ("${GLOBAL_VALET_HOME}/valet" --version 1> "${_TEST_TEMP_FILE}")
   if [[ -s "${_TEST_TEMP_FILE}" ]]; then
     echo "OK, we got a version."
   else
@@ -16,14 +16,14 @@ function testMainOptions() {
 
   # testing unknown option, corrected with fuzzy match
   echo "→ valet -prof"
-  ("${_VALET_HOME}/valet" -prof)
+  ("${GLOBAL_VALET_HOME}/valet" -prof)
   endTest "Testing unknown option, corrected with fuzzy match" $?
 }
 
 function testCleaning() {
   # testing temp files/directories creation, cleaning and custom cleanUp
   echo "→ valet self mock1 create-temp-files"
-  ("${_VALET_HOME}/valet" self mock1 create-temp-files)
+  ("${GLOBAL_VALET_HOME}/valet" self mock1 create-temp-files)
   endTest "Testing temp files/directories creation, cleaning and custom cleanUp" $?
 }
 
@@ -34,7 +34,7 @@ function testUserDirectory() {
   io::createTempDirectory && export VALET_USER_DIRECTORY="${LAST_RETURNED_VALUE}/non-existing"
 
   echo "→ VALET_USER_DIRECTORY=non-existing self mock1 logging-level"
-  ("${_VALET_HOME}/valet" self mock1 logging-level) || true
+  ("${GLOBAL_VALET_HOME}/valet" self mock1 logging-level) || true
   endTest "Testing with a non existing user directory" 1
 
   export VALET_USER_DIRECTORY="${previousUserDirectory}"

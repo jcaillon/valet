@@ -5,19 +5,19 @@
 # Author:         github.com/jcaillon
 
 # we check for this variable to know if this script has already been included
-_CORE_INCLUDED=1
+GLOBAL_CORE_INCLUDED=1
 
 # Handle the case where this script was io::invoked outside of valet
-if [[ -z "${_VALET_HOME:-}" ]]; then
-  _VALET_HOME="${BASH_SOURCE[0]}"
-  if [[ "${_VALET_HOME}" != /* ]]; then
+if [[ -z "${GLOBAL_VALET_HOME:-}" ]]; then
+  GLOBAL_VALET_HOME="${BASH_SOURCE[0]}"
+  if [[ "${GLOBAL_VALET_HOME}" != /* ]]; then
     # resolve relative path
-    if pushd "${_VALET_HOME%/*}" &>/dev/null; then _VALET_HOME="${PWD}"; popd &>/dev/null;
-    else _VALET_HOME="${PWD}"; fi
+    if pushd "${GLOBAL_VALET_HOME%/*}" &>/dev/null; then GLOBAL_VALET_HOME="${PWD}"; popd &>/dev/null;
+    else GLOBAL_VALET_HOME="${PWD}"; fi
   else
-    _VALET_HOME="${_VALET_HOME%/*}" # strip filename
+    GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip filename
   fi
-  _VALET_HOME="${_VALET_HOME%/*}" # strip valet.d directory
+  GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip valet.d directory
 fi
 
 # First thing we do is to source the valet configuration from the user config dir
@@ -36,29 +36,29 @@ fi
 # get unique file names for the stdout, stderr and temporary directory
 # to be fast, we do not create anything until we really need it
 # this could lead to issues, altough it is very unlikely
-_TEMPORARY_PREFIX="${TMPDIR:-/tmp}/temp-"
-_TEMPORARY_IN_MEM_PREFIX="${VALET_CONFIG_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/temp-"
-_TEMPORARY_WORK_FILE="${_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-work"
-while [[ -e "${_TEMPORARY_WORK_FILE}" ]]; do _TEMPORARY_WORK_FILE+="x"; done
-_TEMPORARY_STDOUT_FILE="${_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stdout"
-while [[ -e "${_TEMPORARY_STDOUT_FILE}" ]]; do _TEMPORARY_STDOUT_FILE+="x"; done
-_TEMPORARY_STDERR_FILE="${_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stderr"
-while [[ -e "${_TEMPORARY_STDERR_FILE}" ]]; do _TEMPORARY_STDERR_FILE+="x"; done
-_TEMPORARY_DIRECTORY="${_TEMPORARY_PREFIX}${BASHPID}.valet.d"
-while [[ -e "${_TEMPORARY_DIRECTORY}" ]]; do _TEMPORARY_DIRECTORY+="x"; done
+GLOBAL_TEMPORARY_PREFIX="${TMPDIR:-/tmp}/temp-"
+GLOBAL_TEMPORARY_IN_MEM_PREFIX="${VALET_CONFIG_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/temp-"
+GLOBAL_TEMPORARY_WORK_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-work"
+while [[ -e "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; do GLOBAL_TEMPORARY_WORK_FILE+="x"; done
+GLOBAL_TEMPORARY_STDOUT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stdout"
+while [[ -e "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; do GLOBAL_TEMPORARY_STDOUT_FILE+="x"; done
+GLOBAL_TEMPORARY_STDERR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stderr"
+while [[ -e "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; do GLOBAL_TEMPORARY_STDERR_FILE+="x"; done
+GLOBAL_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_PREFIX}${BASHPID}.valet.d"
+while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; do GLOBAL_TEMPORARY_DIRECTORY+="x"; done
 
 # Creates a temporary file and return its path in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
 #  io::createTempFile && local file="${LAST_RETURNED_VALUE}"
 function io::createTempFile() {
-  if [[ ! -d "${_TEMPORARY_DIRECTORY}" ]]; then
-    mkdir -p "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
+  if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
+    mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
   fi
   TEMPORARY_FILE_NUMBER=${TEMPORARY_FILE_NUMBER:-0}
   while true; do
     TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
-    LAST_RETURNED_VALUE="${_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
+    LAST_RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
     if [[ ! -f "${LAST_RETURNED_VALUE}" ]]; then
       :>"${LAST_RETURNED_VALUE}"
       return 0
@@ -71,13 +71,13 @@ function io::createTempFile() {
 # Usage:
 #  io::createTempDirectory && local directory="${LAST_RETURNED_VALUE}"
 function io::createTempDirectory() {
-  if [[ ! -d "${_TEMPORARY_DIRECTORY}" ]]; then
-    mkdir -p "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
+  if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
+    mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
   fi
   TEMPORARY_DIRECTORY_NUMBER=${TEMPORARY_DIRECTORY_NUMBER:-0}
   while true; do
     TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
-    LAST_RETURNED_VALUE="${_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
+    LAST_RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
     if [[ ! -d "${LAST_RETURNED_VALUE}" ]]; then
       mkdir -p "${LAST_RETURNED_VALUE}" 1>&2 2>/dev/null
       return 0
@@ -91,19 +91,19 @@ function io::createTempDirectory() {
 #  io::cleanupTempFiles
 # shellcheck disable=SC2016
 function io::cleanupTempFiles() {
-  if [[ -d "${_TEMPORARY_DIRECTORY}" ]]; then
+  if [[ -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
     log::debug "Deleting temporary directory."
-    rm -Rf "${_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
+    rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
     unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
   fi
-  if [[ -f "${_TEMPORARY_WORK_FILE}" ]]; then
-    rm -f "${_TEMPORARY_WORK_FILE}" 1>&2 2>/dev/null
+  if [[ -f "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; then
+    rm -f "${GLOBAL_TEMPORARY_WORK_FILE}" 1>&2 2>/dev/null
   fi
-  if [[ -f "${_TEMPORARY_STDOUT_FILE}" ]]; then
-    rm -f "${_TEMPORARY_STDOUT_FILE}" 1>&2 2>/dev/null
+  if [[ -f "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
+    rm -f "${GLOBAL_TEMPORARY_STDOUT_FILE}" 1>&2 2>/dev/null
   fi
-  if [[ -f "${_TEMPORARY_STDERR_FILE}" ]]; then
-    rm -f "${_TEMPORARY_STDERR_FILE}" 1>&2 2>/dev/null
+  if [[ -f "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
+    rm -f "${GLOBAL_TEMPORARY_STDERR_FILE}" 1>&2 2>/dev/null
   fi
 }
 
@@ -144,14 +144,14 @@ function log::setColors() {
 }
 log::setColors
 
-# This function exports the terminal size in the global variables _COLUMNS and _LINES.
+# This function exports the terminal size in the global variables GLOBAL_COLUMNS and GLOBAL_LINES.
 #
 # Usage:
 #   system::exportTerminalSize
 function system::exportTerminalSize() {
   shopt -s checkwinsize; (:;:)
-  _COLUMNS="${COLUMNS:-180}"
-  _LINES="${LINES:-30}"
+  GLOBAL_COLUMNS="${COLUMNS:-180}"
+  GLOBAL_LINES="${LINES:-30}"
   shopt -u checkwinsize
 }
 system::exportTerminalSize
@@ -174,20 +174,20 @@ trap system::exportTerminalSize SIGWINCH
 #   log::setLevel "debug"
 function log::setLevel() {
   # log level, defaults to info
-  VALET_LOG_LEVEL="${1:-${VALET_LOG_LEVEL:-info}}"
+  VALET_LOG_LEVEL="${1:-info}"
   case "${VALET_LOG_LEVEL}" in
-  error) _LOG_LEVEL_INT=4 ;;
-  warning) _LOG_LEVEL_INT=3 ;;
-  success) _LOG_LEVEL_INT=2 ;;
-  debug) _LOG_LEVEL_INT=0 ;;
-  *) _LOG_LEVEL_INT=1 ;;
+  error) LOG_LEVEL_INT=4 ;;
+  warning) LOG_LEVEL_INT=3 ;;
+  success) LOG_LEVEL_INT=2 ;;
+  debug) LOG_LEVEL_INT=0 ;;
+  *) LOG_LEVEL_INT=1 ;;
   esac
 
   if [[ -z ${2:-} ]]; then
-    if [[ ${_LOG_LEVEL_INT} -ne 1 ]]; then
+    if [[ ${LOG_LEVEL_INT} -ne 1 ]]; then
       log::debug "Log level set to ${VALET_LOG_LEVEL}."
     fi
-    if [[ ${_LOG_LEVEL_INT} -eq 0 ]]; then
+    if [[ ${LOG_LEVEL_INT} -eq 0 ]]; then
       log::warning "Beware that debug log level might lead to secret leak, use it only if necessary."
     fi
   fi
@@ -242,7 +242,7 @@ function log::createPrintFunction() {
   fi
 
   if [[ "${VALET_CONFIG_DISABLE_LOG_WRAP:-}" != "true" ]]; then
-    local wrapTextColumns="${VALET_CONFIG_LOG_COLUMNS:-${_COLUMNS}}"
+    local wrapTextColumns="${VALET_CONFIG_LOGGLOBAL_COLUMNS:-${GLOBAL_COLUMNS}}"
     local wrapPaddingLength=20
 
     if [[ ${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-} == "true" ]]; then
@@ -301,7 +301,7 @@ eval "${LOG_LINE_FUNCTION}"
 function core::fail() {
   log::error "$@"
   # shellcheck disable=SC2034
-  ERROR_DISPLAYED=1
+  GLOBAL_ERROR_DISPLAYED=1
   exit 1
 }
 
@@ -327,7 +327,7 @@ function log::error() {
 # Usage:
 #   log::warning "This is a warning message."
 function log::warning() {
-  if [[ ${_LOG_LEVEL_INT:-1} -gt 3 ]]; then
+  if [[ ${LOG_LEVEL_INT:-1} -gt 3 ]]; then
     return 0
   fi
   log::print "WARNING" "${VALET_CONFIG_ICON_WARNING:-$'\uf071'}" "WARNING" "$*"
@@ -340,7 +340,7 @@ function log::warning() {
 # Usage:
 #   log::success "This is a success message."
 function log::success() {
-  if [[ ${_LOG_LEVEL_INT:-1} -gt 2 ]]; then
+  if [[ ${LOG_LEVEL_INT:-1} -gt 2 ]]; then
     return 0
   fi
   log::print "SUCCESS" "${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}" "SUCCESS" "$*"
@@ -353,7 +353,7 @@ function log::success() {
 # Usage:
 #   log::info "This is an info message."
 function log::info() {
-  if [[ ${_LOG_LEVEL_INT:-1} -gt 1 ]]; then
+  if [[ ${LOG_LEVEL_INT:-1} -gt 1 ]]; then
     return 0
   fi
   log::print "INFO" "${VALET_CONFIG_ICON_INFO:-$'\uf05a'}" "INFO" "$*"
@@ -366,7 +366,7 @@ function log::info() {
 # Usage:
 #   log::debug "This is a debug message."
 function log::debug() {
-  if [[ ${_LOG_LEVEL_INT:-1} -gt 0 ]]; then
+  if [[ ${LOG_LEVEL_INT:-1} -gt 0 ]]; then
     return 0
   fi
   log::print "DEBUG" "${VALET_CONFIG_ICON_DEBUG:-$'\uf0ae'}" "DEBUG" "$*"
@@ -378,7 +378,7 @@ function log::debug() {
 # Usage:
 #   log::isDebugEnabled && echo "Debug mode is active."
 function log::isDebugEnabled() {
-  if [[ ${_LOG_LEVEL_INT:-1} -eq 0 ]]; then
+  if [[ ${LOG_LEVEL_INT:-1} -eq 0 ]]; then
     return 0
   fi
   return 1
@@ -438,8 +438,8 @@ fi
 #   source ./my/path my/other/path
 function source() {
   local filePathToInclude includedFile
-  if [[ -f "${_VALET_HOME}/valet.d/lib-${1}" ]]; then
-    filePathToInclude="${_VALET_HOME}/valet.d/lib-${1}"
+  if [[ -f "${GLOBAL_VALET_HOME}/valet.d/lib-${1}" ]]; then
+    filePathToInclude="${GLOBAL_VALET_HOME}/valet.d/lib-${1}"
   elif [[ -f "${BASH_SOURCE[1]%/*}/${1}" ]]; then
     filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
   elif [[ -f "${1}" ]]; then
@@ -485,12 +485,12 @@ function core::sourceForFunction() {
       # shellcheck disable=SC1090
       source "${fileToSource}"
       log::debug "Loaded file ⌜${fileToSource}⌝."
-    elif [[ -f "${_VALET_HOME:-}/${fileToSource}" ]]; then
+    elif [[ -f "${GLOBAL_VALET_HOME:-}/${fileToSource}" ]]; then
       # shellcheck disable=SC1090
-      source "${_VALET_HOME:-}/${fileToSource}"
-      log::debug "Loaded file ⌜${_VALET_HOME:-}/${fileToSource}⌝."
+      source "${GLOBAL_VALET_HOME:-}/${fileToSource}"
+      log::debug "Loaded file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝."
     else
-      log::warning "The file ⌜${_VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
+      log::warning "The file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
     fi
   fi
 }
@@ -520,7 +520,7 @@ function core::sourceUserCommands() {
     log::getLevel && originalLogLevel="${LAST_RETURNED_VALUE}"
     log::setLevel warning true
     # shellcheck disable=SC1091
-    source "${_VALET_HOME}/valet.d/commands.d/self-build.sh"
+    source "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh"
     selfBuild
     log::setLevel "${originalLogLevel}" true
 
@@ -566,7 +566,7 @@ function core::reloadUserCommands() {
 function string::wrapText() {
   local text width leftPaddingLength appendPaddingToFirstLine
   text="${1}"
-  width="${2:-_COLUMNS}"
+  width="${2:-GLOBAL_COLUMNS}"
   leftPaddingLength="${3:-0}"
   appendPaddingToFirstLine="${4:-false}"
 
@@ -900,7 +900,7 @@ function core::checkParseResults() {
 # >>> Include main
 #===============================================================
 
-if [[ -z "${_MAIN_INCLUDED:-}" ]]; then
+if [[ -z "${GLOBAL_MAIN_INCLUDED:-}" ]]; then
   # shellcheck source=main
-  source "${_VALET_HOME}/valet.d/main"
+  source "${GLOBAL_VALET_HOME}/valet.d/main"
 fi

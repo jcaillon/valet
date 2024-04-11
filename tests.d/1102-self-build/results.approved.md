@@ -258,27 +258,27 @@ CMD_SUDO_selfMock3="true"
 
 ```log
 WARNING  Skipping user directory ⌜⌝ because it does not exist.
-INFO     Extracting commands from ⌜$_VALET_HOME/valet⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet⌝.
 INFO                              ├── ⌜⌝.
-INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/help.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/help.sh⌝.
 INFO                              ├── ⌜help⌝.
-INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-build.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-build.sh⌝.
 INFO                              ├── ⌜self build⌝.
-INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-config.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-config.sh⌝.
 INFO                              ├── ⌜self config⌝.
-INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-download-binaries.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-download-binaries.sh⌝.
 INFO                              ├── ⌜self download-binaries⌝.
-INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-install.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh⌝.
 INFO                              ├── ⌜self update⌝.
-INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
 INFO                              ├── ⌜self mock1⌝.
 INFO                              ├── ⌜self mock2⌝.
 INFO                              ├── ⌜self mock3⌝.
-INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-release.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-release.sh⌝.
 INFO                              ├── ⌜self release⌝.
-INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-setup.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-setup.sh⌝.
 INFO                              ├── ⌜self setup⌝.
-INFO     Extracting commands from ⌜$_VALET_HOME/valet.d/commands.d/self-test.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-test.sh⌝.
 INFO                              ├── ⌜self test⌝.
 INFO     == Summary of the commands ==
 

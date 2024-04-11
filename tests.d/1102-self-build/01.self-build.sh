@@ -4,7 +4,7 @@ function testSelfBuild() {
   setTempFilesNumber 500
   io::createTempFile && local tempFile="${LAST_RETURNED_VALUE}"
 
-  ("${_VALET_HOME}/valet.d/commands.d/self-build.sh" --output "${tempFile}" --user-directory "")
+  ("${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh" --output "${tempFile}" --user-directory "")
 
   local content
   IFS= read -rd '' content <"${tempFile}" || true

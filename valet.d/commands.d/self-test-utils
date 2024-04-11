@@ -92,25 +92,25 @@ function setTempFilesNumber() {
 # Allows to run the core tests of Valet (tests.d directory in the repo) as
 # well as the examples (examples.d in the repo).
 function runCoreTests() {
-  if [[ ! -d "${_VALET_HOME}/tests.d" ]]; then
-    core::fail "The valet core tests directory ⌜${_VALET_HOME}/tests.d⌝ does not exist, cannot run core tests."
+  if [[ ! -d "${GLOBAL_VALET_HOME}/tests.d" ]]; then
+    core::fail "The valet core tests directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝ does not exist, cannot run core tests."
   fi
 
   # we need to rebuild the commands for the core commands only
   rebuildCommands ""
 
-  log::info "Running all test suites in directory ⌜${_VALET_HOME}/tests.d⌝."
-  runTestSuites "${_VALET_HOME}/tests.d"
+  log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝."
+  runTestSuites "${GLOBAL_VALET_HOME}/tests.d"
 
   # now we can also test the commands in examples.d if the directory is there
-  if [[ ! -d "${_VALET_HOME}/examples.d" ]]; then
-    log::warning "The valet examples directory ⌜${_VALET_HOME}/examples.d⌝ does not exist, cannot run the tests on the core examples."
+  if [[ ! -d "${GLOBAL_VALET_HOME}/examples.d" ]]; then
+    log::warning "The valet examples directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝ does not exist, cannot run the tests on the core examples."
   else
     # we need to rebuild the commands for the examples only
-    rebuildCommands "${_VALET_HOME}/examples.d"
+    rebuildCommands "${GLOBAL_VALET_HOME}/examples.d"
 
-    log::info "Running all test suites in directory ⌜${_VALET_HOME}/examples.d⌝."
-    runTestSuites "${_VALET_HOME}/examples.d"
+    log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝."
+    runTestSuites "${GLOBAL_VALET_HOME}/examples.d"
   fi
 
   # reload the orignal commands
@@ -137,7 +137,7 @@ function rebuildCommands() {
 #   the number of failed test suites (increments the global variable NB_FAILED_TEST_SUITES)
 #
 # Usage:
-#   runTestSuites "${_VALET_HOME}/tests.d"
+#   runTestSuites "${GLOBAL_VALET_HOME}/tests.d"
 function runTestSuites() {
   local testsDirectory="${1}"
 
@@ -291,7 +291,7 @@ function onExitTestInternal() {
 
   log::error "${message}"
 
-  ERROR_DISPLAYED=1
+  GLOBAL_ERROR_DISPLAYED=1
 }
 
 # After this function call, everything written to stdout and stderr will be redirected
@@ -318,8 +318,8 @@ function setFdRedirection() {
   export VALET_CONFIG_DISABLE_NERDFONT_ICONS="true"
   export VALET_CONFIG_DISABLE_LOG_WRAP="true"
   export VALET_CONFIG_ENABLE_CI_MODE="false"
-  export VALET_CONFIG_LOG_COLUMNS=9999
-  export _COLUMNS=9999
+  export VALET_CONFIG_LOGGLOBAL_COLUMNS=9999
+  export GLOBAL_COLUMNS=9999
   export VALET_CONFIG_DISABLE_LOCAL_BIN="true"
   if [[ -z "${SIMPLIFIED_LOG_LINE_FUNCTION:-}" ]]; then
     log::createPrintFunction
@@ -361,7 +361,7 @@ function setGlobalOptions() {
 
 # This function is used to echo the content of a file with some substitutions.
 # The substitutions are:
-# - replace the _VALET_HOME with $_VALET_HOME
+# - replace the GLOBAL_VALET_HOME with $GLOBAL_VALET_HOME
 # - replace the current test directory with a dot
 # - replace a line with ${TMPDIR}/valet-*/ (temp directory) by /valet/
 #
@@ -381,10 +381,10 @@ function echoFileSubstitutingPath() {
     else
       echo
     fi
-    line="${line//${_VALET_HOME}/\$_VALET_HOME}"
+    line="${line//${GLOBAL_VALET_HOME}/\$GLOBAL_VALET_HOME}"
     line="${line//${CURRENT_DIRECTORY}/.}"
-    line="${line//${_TEMPORARY_PREFIX}*.valet/\/tmp/valet}"
-    line="${line//${_TEMPORARY_IN_MEM_PREFIX}*.valet/\/tmp/valet}"
+    line="${line//${GLOBAL_TEMPORARY_PREFIX}*.valet/\/tmp/valet}"
+    line="${line//${GLOBAL_TEMPORARY_IN_MEM_PREFIX}*.valet/\/tmp/valet}"
     if [[ ${line} =~ "after "[0-9]{1,}s.$ ]]; then
       line="${line/%after */after Xs.}"
     fi

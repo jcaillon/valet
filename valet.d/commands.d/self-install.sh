@@ -48,7 +48,7 @@ if [[ -z "${BASH_VERSION:-}" ]]; then
 fi
 
 # import the core script (should always be skipped if the command is run from valet)
-if [[ -z "${_CORE_INCLUDED:-}" ]]; then
+if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   NOT_EXECUTED_FROM_VALET=true
 
   VALETD_DIR="${BASH_SOURCE[0]}"
@@ -128,17 +128,17 @@ function selfUpdate() {
   local binDirectory
   if [[ ${VALET_SINGLE_USER_INSTALLATION:-false} == "true" || "${os}" == "windows" ]]; then
     log::info "Installing Valet for the current user only."
-    _VALET_HOME="${VALET_INSTALLATION_DIRECTORY:-${_VALET_HOME:-${HOME}/.local/valet}}"
+    GLOBAL_VALET_HOME="${VALET_INSTALLATION_DIRECTORY:-${GLOBAL_VALET_HOME:-${HOME}/.local/valet}}"
     binDirectory="${HOME}/.local/bin"
   else
     log::info "Installing Valet for all users."
-    _VALET_HOME="${VALET_INSTALLATION_DIRECTORY:-${_VALET_HOME:-/opt/valet}}"
+    GLOBAL_VALET_HOME="${VALET_INSTALLATION_DIRECTORY:-${GLOBAL_VALET_HOME:-/opt/valet}}"
     binDirectory="/usr/local/bin"
   fi
 
   # make sure the old valet directory is not a git repository
-  if [[ -d "${_VALET_HOME}/.git" ]]; then
-    core::fail "The Valet directory ⌜${_VALET_HOME}⌝ already exists and is a git repository, aborting (remove it manually and run the command again; or simply update with git pull)."
+  if [[ -d "${GLOBAL_VALET_HOME}/.git" ]]; then
+    core::fail "The Valet directory ⌜${GLOBAL_VALET_HOME}⌝ already exists and is a git repository, aborting (remove it manually and run the command again; or simply update with git pull)."
   fi
 
   local tempDirectory="${TMPDIR:-/tmp}/temp-${BASHPID}.valet.install.d"
@@ -154,33 +154,33 @@ function selfUpdate() {
   local latestReleaseFile="${tempDirectory}/valet.tar.gz"
   log::info "Downloading the latest release from ⌜${latestReleaseUrl}⌝."
   curl -fsSL -o "${latestReleaseFile}" "${latestReleaseUrl}" || core::fail "Could not download the latest release from ⌜${latestReleaseUrl}⌝."
-  log::debug "Unpacking the release in ⌜${_VALET_HOME}⌝."
+  log::debug "Unpacking the release in ⌜${GLOBAL_VALET_HOME}⌝."
   tar -xzf "${latestReleaseFile}" -C "${tempDirectory}"
-  log::debug "The release has been unpacked in ⌜${_VALET_HOME}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}."
+  log::debug "The release has been unpacked in ⌜${GLOBAL_VALET_HOME}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}."
 
   # remove the old valet directory and move the new one
   ${SUDO} rm -f "${latestReleaseFile}"
-  ${SUDO} rm -Rf "${_VALET_HOME}"
-  ${SUDO} mv -f "${tempDirectory}" "${_VALET_HOME}"
-  log::info "Valet has been copied in ⌜${_VALET_HOME}⌝."
+  ${SUDO} rm -Rf "${GLOBAL_VALET_HOME}"
+  ${SUDO} mv -f "${tempDirectory}" "${GLOBAL_VALET_HOME}"
+  log::info "Valet has been copied in ⌜${GLOBAL_VALET_HOME}⌝."
 
   # make valet executable
-  ${SUDO} chmod +x "${_VALET_HOME}/valet"
-  ${SUDO} chmod +x "${_VALET_HOME}/bin/"*
+  ${SUDO} chmod +x "${GLOBAL_VALET_HOME}/valet"
+  ${SUDO} chmod +x "${GLOBAL_VALET_HOME}/bin/"*
 
-  log::success "Valet has been installed in ⌜${_VALET_HOME}⌝."
+  log::success "Valet has been installed in ⌜${GLOBAL_VALET_HOME}⌝."
 
   # copy the examples if the user directory does not exist
   core::getUserDirectory && local userDirectory="${LAST_RETURNED_VALUE}"
   if [[ ! -d "${userDirectory}" ]]; then
     log::info "Copying the examples in ⌜${userDirectory}⌝."
-    cp -R "${_VALET_HOME}/examples.d" "${userDirectory}"
+    cp -R "${GLOBAL_VALET_HOME}/examples.d" "${userDirectory}"
   fi
 
   # source valet core
-  if [[ -z "${_CORE_INCLUDED:-}" ]]; then
+  if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
     # shellcheck source=../core
-    source "${_VALET_HOME}/valet.d/core"
+    source "${GLOBAL_VALET_HOME}/valet.d/core"
   fi
 
   if [[ "${VALET_NO_SHIM:-false}" != true ]]; then
@@ -191,10 +191,10 @@ function selfUpdate() {
       log::warning "A valet shim already exists in ⌜${valetBin}⌝!?"
     else
       ${SUDO} mkdir -p "${binDirectory}" 1>/dev/null || core::fail "Could not create the bin directory ⌜${binDirectory}⌝."
-      log::info "Creating a shim ⌜${_VALET_HOME}/valet → ${valetBin}⌝."
+      log::info "Creating a shim ⌜${GLOBAL_VALET_HOME}/valet → ${valetBin}⌝."
       {
         echo "#!/usr/bin/env bash"
-        echo -n "'${_VALET_HOME}/valet' \"\$@\""
+        echo -n "'${GLOBAL_VALET_HOME}/valet' \"\$@\""
       } | ${SUDO} tee -a "${valetBin}" 1>/dev/null
       ${SUDO} chmod +x "${valetBin}"
     fi
@@ -202,7 +202,7 @@ function selfUpdate() {
     # make sure the valetBin directory is in the path or add it to ~.bashrc
     if ! command -v valet &>/dev/null; then
       if [[ ${VALET_DONT_APPEND_PATH:-false} == true ]]; then
-        log::warning "Make sure to add ⌜${binDirectory}⌝ (or ⌜${_VALET_HOME}⌝) in your PATH."
+        log::warning "Make sure to add ⌜${binDirectory}⌝ (or ⌜${GLOBAL_VALET_HOME}⌝) in your PATH."
       else
         if [[ -f "${HOME}/.bashrc" ]]; then
           log::info "Adding ⌜${binDirectory}⌝ to your PATH via .bashrc right now."

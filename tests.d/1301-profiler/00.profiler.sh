@@ -17,7 +17,7 @@ function testProfiler() {
 
   echo
   echo "→ cat 'profiler.log'"
-  ("${_VALET_HOME}/valet" -x self mock2 arg1 arg2)
+  ("${GLOBAL_VALET_HOME}/valet" -x self mock2 arg1 arg2)
   if [[ -s "${VALET_CONFIG_COMMAND_PROFILING_FILE}" ]]; then
     echoFileWithSubstitution "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
   fi
@@ -26,7 +26,7 @@ function testProfiler() {
 
   echo "→ VALET_CONFIG_STARTUP_PROFILING=true valet --log-level error -x self mock1 logging-level"
 
-  (VALET_CONFIG_STARTUP_PROFILING=true "${_VALET_HOME}/valet" --log-level error -x self mock1 logging-level)
+  (VALET_CONFIG_STARTUP_PROFILING=true "${GLOBAL_VALET_HOME}/valet" --log-level error -x self mock1 logging-level)
   if [[ -s "${VALET_CONFIG_STARTUP_PROFILING_FILE}" ]]; then
     echo "A startup profiling file has been created to log everything happening from the start of Valet to the start of the chosen command."
   fi
@@ -36,7 +36,6 @@ function testProfiler() {
 
   endTest "Testing profiling for command and startup" 0
 
-  unset VALET_LOG_LEVEL
   unset VALET_CONFIG_STARTUP_PROFILING
   unset VALET_CONFIG_COMMAND_PROFILING_FILE
   unset VALET_CONFIG_STARTUP_PROFILING_FILE
@@ -48,7 +47,6 @@ function testCommandProfiler() {
   export VALET_CONFIG_COMMAND_PROFILING_FILE
 
 
-  unset VALET_LOG_LEVEL
   unset VALET_CONFIG_COMMAND_PROFILING_FILE
 }
 
