@@ -318,7 +318,7 @@ function log::error() {
     log::getCallStack 2 && local stack=$'\n'"stack:${LAST_RETURNED_VALUE}"
     message+="${stack:-}"
   fi
-  log::print "ERROR" $'\uf2d3' "ERROR" "${message}"
+  log::print "ERROR" "${VALET_CONFIG_ICON_ERROR:-$'\uf2d3'}" "ERROR" "${message}"
 }
 
 # Displays a warning and return a warning code.
@@ -330,7 +330,7 @@ function log::warning() {
   if [[ ${_LOG_LEVEL_INT:-1} -gt 3 ]]; then
     return 0
   fi
-  log::print "WARNING" $'\uf071' "WARNING" "$*"
+  log::print "WARNING" "${VALET_CONFIG_ICON_WARNING:-$'\uf071'}" "WARNING" "$*"
   return 0
 }
 
@@ -343,7 +343,7 @@ function log::success() {
   if [[ ${_LOG_LEVEL_INT:-1} -gt 2 ]]; then
     return 0
   fi
-  log::print "SUCCESS" $'\uf14a' "SUCCESS" "$*"
+  log::print "SUCCESS" "${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}" "SUCCESS" "$*"
   return 0
 }
 
@@ -356,7 +356,7 @@ function log::info() {
   if [[ ${_LOG_LEVEL_INT:-1} -gt 1 ]]; then
     return 0
   fi
-  log::print "INFO" $'\uf05a' "INFO" "$*"
+  log::print "INFO" "${VALET_CONFIG_ICON_INFO:-$'\uf05a'}" "INFO" "$*"
   return 0
 }
 
@@ -369,7 +369,7 @@ function log::debug() {
   if [[ ${_LOG_LEVEL_INT:-1} -gt 0 ]]; then
     return 0
   fi
-  log::print "DEBUG" $'\uf0ae' "DEBUG" "$*"
+  log::print "DEBUG" "${VALET_CONFIG_ICON_DEBUG:-$'\uf0ae'}" "DEBUG" "$*"
   return 0
 }
 

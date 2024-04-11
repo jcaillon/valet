@@ -33,8 +33,8 @@ function selfSetup() {
   log::info "Now setting up Valet."
 
   echo "─────────────────────────────────────"
-  echo $'\e'"[0;36mThis is a COLOR CHECK, this line should be COLORED (in cyan by default)."$'\e'"[0m"
-  echo $'\e'"[0;32mThis is a COLOR CHECK, this line should be COLORED (in green by default)."$'\e'"[0m"
+  echo "${VALET_CONFIG_COLOR_INFO:-$'\e'"[0;36m"}This is a COLOR CHECK, this line should be COLORED (in cyan by default).${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
+  echo "${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[0;32m"}This is a COLOR CHECK, this line should be COLORED (in green by default).${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
   echo "─────────────────────────────────────"
 
   if ! interactive::promptYesNo "Do you see the colors in the color check above the line?"; then
@@ -48,10 +48,10 @@ function selfSetup() {
 
   echo "─────────────────────────────────────"
   echo "This is a nerd icon check, check out the next lines:"
-  echo "A cross within a square: "$'\uf2d3'
-  echo "A warning sign: "$'\uf071'
-  echo "A checked box: "$'\uf14a'
-  echo "An information icon: "$'\uf05a'
+  echo "A cross within a square: ${VALET_CONFIG_ICON_ERROR:-$'\uf2d3'}"
+  echo "A warning sign: ${VALET_CONFIG_ICON_WARNING:-$'\uf071'}"
+  echo "A checked box: ${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}"
+  echo "An information icon: ${VALET_CONFIG_ICON_INFO:-$'\uf05a'}"
   echo "─────────────────────────────────────"
 
   if ! interactive::promptYesNo "Do you correctly see the nerd icons in the icon check above the line?"; then

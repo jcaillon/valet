@@ -35,6 +35,7 @@ jobs:
       - name: Run valet tests
         run: |
           chmod +x valet
+          chmod +x valet.d/commands.d/self-build.sh
           export VALET_CONFIG_DISABLE_COLORS=false
           export VALET_CONFIG_DISABLE_NERDFONT_ICONS=true
           ./valet self test -C

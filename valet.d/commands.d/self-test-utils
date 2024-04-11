@@ -191,7 +191,7 @@ function runTestSuites() {
     if [[ "${exitCode}" -eq 0 ]]; then
       log::success "Test suite ${testDirectory##*/} passed."
     else
-      log::warning "Test suite ${testDirectory##*/} failed."
+      log::error "Test suite ${testDirectory##*/} failed."
       failedTestSuites+=1
     fi
   done
@@ -260,7 +260,7 @@ function compareWithApproved() {
     return 0
   else
     echo "${receivedFile} is different than ${approvedFile} (see above)" 1>&2
-    log::warning "🧪 ${testName}: KO, differs from approved file (see difference above)." | tee >(cat >&2)
+    log::error "🧪 ${testName}: KO, differs from approved file (see difference above)." | tee >(cat >&2)
   fi
 
   # if the option is activated, we approve the received file

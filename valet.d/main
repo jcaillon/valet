@@ -22,7 +22,7 @@ function main::onErrorInternal() {
     return 0
   fi
   log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
-  log::print "ERROR" $'\uf2d3' "ERROR" "Error code ${1} in ${FUNCNAME[1]}(), stack:${stack}"
+  log::error "Error code ${1} in ${FUNCNAME[1]}(), stack:${stack}"
   ERROR_DISPLAYED=1
 }
 
@@ -47,7 +47,7 @@ function main::onExitInternal() {
   main::onCleanUpInternal
   if [[ "${ERROR_DISPLAYED:-0}" != "1" && "${rc}" != "0" ]]; then
     log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
-    log::print "ERROR" $'\uf14c' "EXIT" "Exiting with code ${rc}, stack:${stack}"
+    log::print "ERROR" "${VALET_CONFIG_ICON_EXIT:-$'\uf14c'}" "EXIT" "Exiting with code ${rc}, stack:${stack}"
     ERROR_DISPLAYED=1
   fi
 }
@@ -56,7 +56,7 @@ trap main::onExitInternal EXIT
 
 function main::onInterruptInternal() {
   echo # Set cursor to the next line of '^C'
-  log::print "WARNING" $'\uf256' "STOPPED" "Program interrupted by the user."
+  log::print "WARNING" "${VALET_CONFIG_ICON_STOPPED:-$'\uf256'}" "STOPPED" "Program interrupted by the user."
 
   if log::isDebugEnabled; then
     log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
@@ -77,7 +77,7 @@ function main::onInterruptInternal() {
 trap main::onInterruptInternal SIGINT SIGQUIT
 
 function main::onTerminateInternal() {
-  log::print "ERROR" $'\uf05e' "KILLED" "Program killed."
+  log::print "ERROR" "${VALET_CONFIG_ICON_KILLED:-$'\uf05e'}" "KILLED" "Program killed."
   # check if the function exists
   if command -v onTerminate 1>/dev/null 2>&1; then
     if onTerminate; then
@@ -145,7 +145,7 @@ function main::enableProfiler() {
     functionDepthExpression='0'
   fi
 
-  PS4='●'$'\011''$(("${EPOCHREALTIME//./}" - PROFILER_START_REALTIME))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
+  PS4='+'$'\011''$(("${EPOCHREALTIME//./}" - PROFILER_START_REALTIME))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
 
   exec 5>"${file}"
 
@@ -211,7 +211,7 @@ function main::cleanProfilerFile() {
       lastLineWasSkipped = 1;
       next;
     }
-    if ($0 ~ /^●/) {
+    if ($0 ~ /^\+/) {
       if (clearCoreLine == "true") {
         lastLineWasSkipped = 0;
       }

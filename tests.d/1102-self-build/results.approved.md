@@ -251,6 +251,7 @@ CMD_SHORT_DESCRIPTION_showCommandHelp="Show the help this program or of a specif
 CMD_SHORT_DESCRIPTION_this="Your personal assistant in the terminal!"
 CMD_SUDO_selfMock3="true"
 
+
 ```
 
 **Error** output:

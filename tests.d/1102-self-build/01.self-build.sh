@@ -15,8 +15,6 @@ function testSelfBuild() {
 
 function main() {
   testSelfBuild
-
-  core::reloadUserCommands
 }
 
 main

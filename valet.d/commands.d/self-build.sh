@@ -217,11 +217,6 @@ function extractCommandDefinitionsToVariables() {
       io::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${LAST_RETURNED_VALUE}"
       TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${_VALET_HOME}"/}"
 
-      if log::isDebugEnabled; then
-        io::captureOutput declare -p ${!TEMP_CMD_BUILD_*}
-        log::debug "Declared variables for this command:"$'\n'"${LAST_RETURNED_VALUE}"
-      fi
-
       # make sure that all these arrays exists and have the same size
       array::makeArraysSameSize TEMP_CMD_BUILD_options_name TEMP_CMD_BUILD_options_description TEMP_CMD_BUILD_options_noEnvironmentVariable
       array::makeArraysSameSize TEMP_CMD_BUILD_arguments_name TEMP_CMD_BUILD_arguments_description

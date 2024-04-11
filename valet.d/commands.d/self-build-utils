@@ -287,9 +287,9 @@ _CMD_INCLUDED=1
     io::captureOutput declare -p ${!CMD_*}
     local IFS=$'\n'
     local line
-    for line in ${LAST_RETURNED_VALUE}; do
+    local IFS=':'
+    while read -r -d $'\n' line; do
       echo "${line#declare -? }"
-    done
-
+    done <<< "${LAST_RETURNED_VALUE}"
   } >"${outputFile}"
 }

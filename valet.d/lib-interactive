@@ -11,9 +11,10 @@ source ansi-codes
 # >>> Events
 #===============================================================
 
-# make sure to restore the cursor and echo  when exiting
-trap "main::onExitInternal; printf '%s' $'\e[?25h'; stty echo" EXIT
-
+# if interactive shell, make sure to restore the cursor and echo when exiting
+if [[ $- == *i* ]]; then
+  trap "main::onExitInternal; printf '%s' $'\e[?25h'; stty echo" EXIT
+fi
 
 #===============================================================
 # >>> Interactive prompts
