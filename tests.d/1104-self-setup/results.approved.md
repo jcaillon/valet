@@ -48,12 +48,13 @@ INFO     Now setting up Valet.
 INFO     If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal.
 You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
 After that, you need to setup your terminal to use this newly installed font.
+You can also choose to disable the icons in Valet if you don't want to install a font.
 INFO     Creating the valet config file ⌜/tmp/valet.d/f801-0⌝.
 SUCCESS  You are all set!
 INFO     As a reminder, you can modify the configuration done during this set up by either:
 - replaying the command ⌜valet self setup⌝,
 - running the command ⌜valet self config⌝.
-INFO     You can now run ⌜valet --help⌝ to get started.
+INFO     Run ⌜valet --help⌝ to get started.
 INFO     You can create your own commands and have them available in valet, please check ⌜https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md⌝ to do so.
 ```
 
@@ -94,12 +95,12 @@ An information icon: 
 
 ```log
 INFO     Now setting up Valet.
-INFO     Creating the valet config file ⌜/tmp/valet.d/f801-0⌝.
-SUCCESS  You are all set!
-INFO     As a reminder, you can modify the configuration done during this set up by either:
-- replaying the command ⌜valet self setup⌝,
-- running the command ⌜valet self config⌝.
-INFO     You can now run ⌜valet --help⌝ to get started.
-INFO     You can create your own commands and have them available in valet, please check ⌜https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md⌝ to do so.
+[0;36mINFO    [0m Creating the valet config file [1;35m⌜/tmp/valet.d/f801-0⌝[0m.
+[0;32mSUCCESS [0m You are all set!
+[0;36mINFO    [0m As a reminder, you can modify the configuration done during this set up by either:
+- replaying the command [1;35m⌜valet self setup⌝[0m,
+- running the command [1;35m⌜valet self config⌝[0m.
+[0;36mINFO    [0m Run [1;35m⌜valet --help⌝[0m to get started.
+[0;36mINFO    [0m You can create your own commands and have them available in valet, please check [1;35m⌜https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md⌝[0m to do so.
 ```
 

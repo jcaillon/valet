@@ -165,6 +165,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 
 ## 🔭 Roadmap
 
+- reverse icons and colors settings, disabled by default. 
 - rename CMD_ variables.
 - Document everything. Document test.
 - Add full support for interactive mode.

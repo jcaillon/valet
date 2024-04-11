@@ -34,4 +34,7 @@ jobs:
       # Runs our tests
       - name: Run valet tests
         run: |
-          valet self test -C
+          chmod +x valet
+          export VALET_CONFIG_DISABLE_COLORS=false
+          export VALET_CONFIG_DISABLE_NERDFONT_ICONS=true
+          ./valet self test -C

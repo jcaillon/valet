@@ -37,12 +37,12 @@ VALET_USER_DIRECTORY="${VALET_USER_DIRECTORY:-}"
 
 # The path to the configuration directory, where we store that should be kept between sessions.
 # You can backup this directory to keep your configuration.
-# Defaults to the '.config' directory in the Valet home directory.
+# Defaults to the '.config' directory in the user home directory.
 VALET_CONFIG_DIRECTORY="${VALET_CONFIG_DIRECTORY:-}"
 
 # The path to the directory in which to store the data that should be kept between sessions
 # but are not essential for the user configuration (e.g. last choices in menus).
-# Defaults to the '.local/state' directory in the Valet home directory.
+# Defaults to the '.local/state' directory in the user home directory.
 VALET_CONFIG_LOCAL_STATE_DIRECTORY="${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-}"
 
 # The directory in which to write work files (small files to capture output of programs).
@@ -66,7 +66,7 @@ VALET_CONFIG_REMEMBER_LAST_CHOICES="${VALET_CONFIG_REMEMBER_LAST_CHOICES:-}"
 # Log/output configuration
 # -----------
 # If true, will simplify the log output for CI/CD environments:
-# will display the logs without colors, without wrapping lines and with the full date.
+# will display the logs without colors, without icons, without wrapping lines and with the full date.
 VALET_CONFIG_ENABLE_CI_MODE="${VALET_CONFIG_ENABLE_CI_MODE:-}"
 
 # If true, will disable the icons (using nerd font).
@@ -211,12 +211,12 @@ VALET_USER_DIRECTORY="${VALET_USER_DIRECTORY:-}"
 
 # The path to the configuration directory, where we store that should be kept between sessions.
 # You can backup this directory to keep your configuration.
-# Defaults to the '.config' directory in the Valet home directory.
+# Defaults to the '.config' directory in the user home directory.
 VALET_CONFIG_DIRECTORY="${VALET_CONFIG_DIRECTORY:-}"
 
 # The path to the directory in which to store the data that should be kept between sessions
 # but are not essential for the user configuration (e.g. last choices in menus).
-# Defaults to the '.local/state' directory in the Valet home directory.
+# Defaults to the '.local/state' directory in the user home directory.
 VALET_CONFIG_LOCAL_STATE_DIRECTORY="${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-}"
 
 # The directory in which to write work files (small files to capture output of programs).
@@ -240,7 +240,7 @@ VALET_CONFIG_REMEMBER_LAST_CHOICES="${VALET_CONFIG_REMEMBER_LAST_CHOICES:-}"
 # Log/output configuration
 # -----------
 # If true, will simplify the log output for CI/CD environments:
-# will display the logs without colors, without wrapping lines and with the full date.
+# will display the logs without colors, without icons, without wrapping lines and with the full date.
 VALET_CONFIG_ENABLE_CI_MODE="${VALET_CONFIG_ENABLE_CI_MODE:-true}"
 
 # If true, will disable the icons (using nerd font).
