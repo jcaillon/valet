@@ -3,11 +3,6 @@ set -Eeu -o pipefail
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# in CI mode, we do not allow to go interactive because it would make the job hang forever
-if [[ ${VALET_CONFIG_ENABLE_CI_MODE:-false} == "true" ]]; then
-  core::fail "CI/CD mode is activated, interactive mode has been started but we cannot run fzf or we would make the job hang forever."
-fi
-
 #===============================================================
 # >>> Fzf glorious functions
 #===============================================================
@@ -68,7 +63,7 @@ function fzf::showFzf() {
   fi
 
   local cDefault cTitle cKeybinding
-  if [[ ${VALET_CONFIG_DISABLE_COLORS:-} != true ]]; then
+  if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == true ]]; then
     cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
     cTitle=${VALET_CONFIG_COLOR_TITLE:-$'\e'"[0;36m"}
     cKeybinding=${VALET_CONFIG_COLOR_COMMAND:-$'\e'"[0;31m"}

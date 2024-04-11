@@ -37,10 +37,10 @@ function selfSetup() {
   echo "${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[0;32m"}This is a COLOR CHECK, this line should be COLORED (in green by default).${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
   echo "─────────────────────────────────────"
 
-  if ! interactive::promptYesNo "Do you see the colors in the color check above the line?"; then
-    export VALET_CONFIG_DISABLE_COLORS=true
+  if interactive::promptYesNo "Do you see the colors in the color check above the line?"; then
+    export VALET_CONFIG_ENABLE_COLORS=true
   else
-    export VALET_CONFIG_DISABLE_COLORS=false
+    export VALET_CONFIG_ENABLE_COLORS=false
   fi
   log::createPrintFunction
   eval "${GLOBAL_LOG_PRINT_FUNCTION}"
@@ -54,20 +54,22 @@ function selfSetup() {
   echo "─────────────────────────────────────"
 
   if ! interactive::promptYesNo "Do you correctly see the nerd icons in the icon check above the line?"; then
-    log::info "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."$'\n'"You can also choose to disable the icons in Valet if you don't want to install a font."
+    log::info "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."$'\n'"You can also choose to enable the icons in Valet if you plan to install a nerd font."
 
-    if interactive::promptYesNo "Do you want to disable the icons in Valet?"; then
-      export VALET_CONFIG_DISABLE_NERDFONT_ICONS=true
+    if interactive::promptYesNo "Do you want to enable the icons in Valet?"; then
+      export VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
     else
-      export VALET_CONFIG_DISABLE_NERDFONT_ICONS=false
+      export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
     fi
-    log::createPrintFunction
-    eval "${GLOBAL_LOG_PRINT_FUNCTION}"
+  else
+    export VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
   fi
+  log::createPrintFunction
+  eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
   # generate the config
   core::sourceForFunction selfConfig
-  selfConfig --export-current-values --no-edit
+  selfConfig --export-current-values --no-edit --override
 
   # verify that we have the tools required
   local -i nbMissingTools=0

@@ -168,6 +168,26 @@ stderr:
 ⌉
 ```
 
+**Error** output:
+
+```log
+DEBUG    Executing the command ⌜curl⌝.
+Fail if it fails: ⌜false⌝
+Acceptable error codes: ⌜0⌝
+Standard stream from file: ⌜false⌝
+Standard stream: ⌜⌝
+Extra parameters: ⌜--silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 200 http://hello.com⌝
+DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
+The error code ⌜0⌝ is acceptable and has been reset to 0.
+Standard output:
+⌜200⌝
+Error output:
+⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 200 http://hello.com
+⌝
+DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
+DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
+```
+
 ### Testing kurl, with no content http code 500, fails
 
 Exit code: `1`
@@ -181,10 +201,39 @@ Exit code: `1`
 **Error** output:
 
 ```log
+DEBUG    Executing the command ⌜curl⌝.
+Fail if it fails: ⌜false⌝
+Acceptable error codes: ⌜0⌝
+Standard stream from file: ⌜false⌝
+Standard stream: ⌜⌝
+Extra parameters: ⌜--silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 500 http://hello.com⌝
+DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
+The error code ⌜0⌝ is acceptable and has been reset to 0.
+Standard output:
+⌜500⌝
+Error output:
+⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 500 http://hello.com
+⌝
+DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜500⌝.
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜http://hello.com⌝.
 Error output:
 ⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 500 http://hello.com
 ⌝
+stack:
+├─ In function core::fail() $GLOBAL_VALET_HOME/valet.d/core:296
+├─ In function kurl::toFile() $GLOBAL_VALET_HOME/valet.d/lib-kurl:55
+├─ In function kurl::toVar() $GLOBAL_VALET_HOME/valet.d/lib-kurl:92
+├─ In function testKurl::toVar() $GLOBAL_VALET_HOME/tests.d/1002-lib-kurl/00.kurl.sh:73
+├─ In function main() $GLOBAL_VALET_HOME/tests.d/1002-lib-kurl/00.kurl.sh:101
+├─ In function source() $GLOBAL_VALET_HOME/tests.d/1002-lib-kurl/00.kurl.sh:131
+├─ In function source() $GLOBAL_VALET_HOME/valet.d/core:451
+├─ In function runTest() valet.d/commands.d/self-test-utils:241
+├─ In function runTestSuites() valet.d/commands.d/self-test-utils:195
+├─ In function runCoreTests() valet.d/commands.d/self-test-utils:107
+├─ In function selfTest() valet.d/commands.d/self-test.sh:110
+├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:585
+├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:537
+└─ In function main() ./valet:99
 ```
 
 ### Testing kurl, debug mode, with content http code 400

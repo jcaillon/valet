@@ -546,95 +546,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_CONFIG_DISABLE_COLORS=false valet self mock1 logging-level
-```
-
-**Error** output:
-
-```log
-CTIHH:MM:SS CININFO    II  CDE This is an info message with a super long sentence. The value of life is not in its duration, but in
-                    its donation. You are not important because of how long you live, you are important because of how 
-                    effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed 
-                    him for a lifetime. Surround yourself with the best people you can find, delegate authority, and 
-                    don't interfere as long as the policy you've decided upon is being carried out.
-CTIHH:MM:SS CSUSUCCESS IS  CDE This is a success message.
-CTIHH:MM:SS CWAWARNING IW  CDE This is a warning message.
-                    With a second line.
-```
-
-### Testing no color logging
-
-Exit code: `0`
-
-**Standard** output:
-
-```plaintext
-→ VALET_CONFIG_DISABLE_COLORS=true valet self mock1 logging-level
-```
-
-**Error** output:
-
-```log
-HH:MM:SS INFO    II   This is an info message with a super long sentence. The value of life is not in its duration, but in
-                    its donation. You are not important because of how long you live, you are important because of how 
-                    effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed 
-                    him for a lifetime. Surround yourself with the best people you can find, delegate authority, and 
-                    don't interfere as long as the policy you've decided upon is being carried out.
-HH:MM:SS SUCCESS IS   This is a success message.
-HH:MM:SS WARNING IW   This is a warning message.
-                    With a second line.
-```
-
-### Testing CI MODE logging
-
-Exit code: `0`
-
-**Standard** output:
-
-```plaintext
-→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_ENABLE_CI_MODE=true valet self mock1 logging-level
-```
-
-**Error** output:
-
-```log
-YYYY:MM:DD_HH:MM:SS INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-YYYY:MM:DD_HH:MM:SS SUCCESS  This is a success message.
-YYYY:MM:DD_HH:MM:SS WARNING  This is a warning message.
-With a second line.
-```
-
-### Testing no timestamp logging
-
-Exit code: `0`
-
-**Standard** output:
-
-```plaintext
-→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_DISABLE_LOG_TIMESTAMP=true valet self mock1 logging-level
-```
-
-**Error** output:
-
-```log
-INFO    II   This is an info message with a super long sentence. The value of life is not in its duration, but in its 
-           donation. You are not important because of how long you live, you are important because of how effective you 
-           live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
-           Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the 
-           policy you've decided upon is being carried out.
-SUCCESS IS   This is a success message.
-WARNING IW   This is a warning message.
-           With a second line.
-```
-
-### Testing no icon logging
-
-Exit code: `0`
-
-**Standard** output:
-
-```plaintext
-→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_DISABLE_NERDFONT_ICONS=true valet self mock1 logging-level
+→ valet self mock1 logging-level
 ```
 
 **Error** output:
@@ -650,50 +562,72 @@ HH:MM:SS WARNING  This is a warning message.
                   With a second line.
 ```
 
-### Testing no wrap logging
+### Testing color + icon logging
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_DISABLE_LOG_WRAP=true valet self mock1 logging-level
+→ VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true valet self mock1 logging-level
 ```
 
 **Error** output:
 
 ```log
-HH:MM:SS INFO    II   This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-HH:MM:SS SUCCESS IS   This is a success message.
-HH:MM:SS WARNING IW   This is a warning message.
+CTIHH:MM:SS CININFO    II  CDE This is an info message with a super long sentence. The value of life is not in its duration, but in
+                    its donation. You are not important because of how long you live, you are important because of how 
+                    effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed 
+                    him for a lifetime. Surround yourself with the best people you can find, delegate authority, and 
+                    don't interfere as long as the policy you've decided upon is being carried out.
+CTIHH:MM:SS CSUSUCCESS IS  CDE This is a success message.
+CTIHH:MM:SS CWAWARNING IW  CDE This is a warning message.
+                    With a second line.
+```
+
+### Testing no timestamp, no wrap logging
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ VALET_CONFIG_DISABLE_LOG_WRAP=true VALET_CONFIG_DISABLE_LOG_TIME=true valet self mock1 logging-level
+```
+
+**Error** output:
+
+```log
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
 With a second line.
 ```
 
-### Testing wrap at 80 logging
+### Testing enable log timestamp and wrap at 80 logging
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 logging-level
+→ VALET_CONFIG_ENABLE_LOG_TIMESTAMP= true VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 logging-level
 ```
 
 **Error** output:
 
 ```log
-HH:MM:SS INFO    II   This is an info message with a super long sentence. The 
-                    value of life is not in its duration, but in its donation. 
-                    You are not important because of how long you live, you are 
-                    important because of how effective you live. Give a man a 
-                    fish and you feed him for a day; teach a man to fish and you
-                    feed him for a lifetime. Surround yourself with the best 
-                    people you can find, delegate authority, and don't interfere
-                    as long as the policy you've decided upon is being carried 
-                    out.
-HH:MM:SS SUCCESS IS   This is a success message.
-HH:MM:SS WARNING IW   This is a warning message.
-                    With a second line.
+YYYY:MM:DD_HH:MM:SS INFO     This is an info message with a super long sentence. The value 
+                  of life is not in its duration, but in its donation. You are 
+                  not important because of how long you live, you are important 
+                  because of how effective you live. Give a man a fish and you 
+                  feed him for a day; teach a man to fish and you feed him for a
+                  lifetime. Surround yourself with the best people you can find,
+                  delegate authority, and don't interfere as long as the policy 
+                  you've decided upon is being carried out.
+YYYY:MM:DD_HH:MM:SS SUCCESS  This is a success message.
+YYYY:MM:DD_HH:MM:SS WARNING  This is a warning message.
+                  With a second line.
 ```
 
 ## Test script 06.misc

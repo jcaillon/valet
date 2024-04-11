@@ -83,9 +83,6 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
     }
     function core::getUserDirectory() { LAST_RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"; }
     VALET_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
-
-    VALET_CONFIG_DISABLE_COLORS=true
-    VALET_CONFIG_DISABLE_NERDFONT_ICONS=true
   fi
 else
   # shellcheck source=../lib-system

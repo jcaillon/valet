@@ -357,11 +357,11 @@ function resetOriginalImportantVariables() {
 # As well as a simplified log line function.
 function setSimplifiedImportantVariables() {
   SIMPLIFIED_IMPORTANT_VARIABLES="
-  export VALET_CONFIG_DISABLE_COLORS=true
-  export VALET_CONFIG_DISABLE_LOG_TIMESTAMP=true
-  export VALET_CONFIG_DISABLE_NERDFONT_ICONS=true
+  export VALET_CONFIG_ENABLE_COLORS=false
+  export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
+  export VALET_CONFIG_DISABLE_LOG_TIME=true
   export VALET_CONFIG_DISABLE_LOG_WRAP=true
-  export VALET_CONFIG_ENABLE_CI_MODE=false
+  export VALET_CONFIG_ENABLE_LOG_TIMESTAMP=false
   export VALET_CONFIG_LOG_COLUMNS=9999
 
   export VALET_CONFIG_ICON_ERROR=IE

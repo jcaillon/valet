@@ -250,6 +250,27 @@ stderr from file:
 
 ```
 
+**Error** output:
+
+```log
+DEBUG    Executing the command ⌜fakeexec2⌝.
+Fail if it fails: ⌜false⌝
+Acceptable error codes: ⌜0⌝
+Standard stream from file: ⌜⌝
+Standard stream: ⌜⌝
+Extra parameters: ⌜--option argument1 argument2⌝
+DEBUG    The command ⌜fakeexec2⌝ originally ended with exit code ⌜0⌝.
+The error code ⌜0⌝ is acceptable and has been reset to 0.
+Standard output:
+⌜▶ called fakeexec2 --option argument1 argument2
+▶ fakeexec2 input stream was:
+⌈⌉
+⌝
+Error output:
+⌜This is an error output from fakeexec2
+⌝
+```
+
 ### Testing io::invoke3var, output to var
 
 Exit code: `0`
@@ -270,6 +291,27 @@ stderr from var:
 
 ```
 
+**Error** output:
+
+```log
+DEBUG    Executing the command ⌜fakeexec2⌝.
+Fail if it fails: ⌜false⌝
+Acceptable error codes: ⌜0⌝
+Standard stream from file: ⌜⌝
+Standard stream: ⌜⌝
+Extra parameters: ⌜--option argument1 argument2⌝
+DEBUG    The command ⌜fakeexec2⌝ originally ended with exit code ⌜0⌝.
+The error code ⌜0⌝ is acceptable and has been reset to 0.
+Standard output:
+⌜▶ called fakeexec2 --option argument1 argument2
+▶ fakeexec2 input stream was:
+⌈⌉
+⌝
+Error output:
+⌜This is an error output from fakeexec2
+⌝
+```
+
 ### Testing io::invoke, should fail
 
 Exit code: `1`
@@ -283,6 +325,12 @@ Exit code: `1`
 **Error** output:
 
 ```log
+DEBUG    Executing the command ⌜fakeexec2⌝.
+Fail if it fails: ⌜true⌝
+Acceptable error codes: ⌜0⌝
+Standard stream from file: ⌜⌝
+Standard stream: ⌜⌝
+Extra parameters: ⌜--error⌝
 ERROR    The command ⌜fakeexec2⌝ originally ended with exit code ⌜1⌝.
 Standard output:
 ⌜▶ called fakeexec2 --error
@@ -293,6 +341,22 @@ Error output:
 ⌜This is an error output from fakeexec2
 returning 1 from fakeexec2
 ⌝
+stack:
+├─ In function core::fail() $GLOBAL_VALET_HOME/valet.d/core:296
+├─ In function io::invoke5() $GLOBAL_VALET_HOME/valet.d/lib-io:120
+├─ In function io::invoke5var() $GLOBAL_VALET_HOME/valet.d/lib-io:178
+├─ In function io::invoke() $GLOBAL_VALET_HOME/valet.d/lib-io:226
+├─ In function testIo::invoke() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:61
+├─ In function main() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:115
+├─ In function source() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:120
+├─ In function source() $GLOBAL_VALET_HOME/valet.d/core:451
+├─ In function runTest() valet.d/commands.d/self-test-utils:241
+├─ In function runTestSuites() valet.d/commands.d/self-test-utils:195
+├─ In function runCoreTests() valet.d/commands.d/self-test-utils:107
+├─ In function selfTest() valet.d/commands.d/self-test.sh:110
+├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:585
+├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:537
+└─ In function main() ./valet:99
 ```
 
 ### Testing io::invoke, output to var
@@ -313,5 +377,26 @@ stderr from var:
 ⌈This is an error output from fakeexec2
 ⌉
 
+```
+
+**Error** output:
+
+```log
+DEBUG    Executing the command ⌜fakeexec2⌝.
+Fail if it fails: ⌜true⌝
+Acceptable error codes: ⌜0⌝
+Standard stream from file: ⌜⌝
+Standard stream: ⌜⌝
+Extra parameters: ⌜--option argument1 argument2⌝
+DEBUG    The command ⌜fakeexec2⌝ originally ended with exit code ⌜0⌝.
+The error code ⌜0⌝ is acceptable and has been reset to 0.
+Standard output:
+⌜▶ called fakeexec2 --option argument1 argument2
+▶ fakeexec2 input stream was:
+⌈⌉
+⌝
+Error output:
+⌜This is an error output from fakeexec2
+⌝
 ```
 

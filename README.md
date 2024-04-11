@@ -83,7 +83,7 @@ Auto parsing of arguments and options based on your command configuration:
 ![demo-parsing](docs/content/showcase/demo-parsing.gif)
 
 > [!NOTE]
-> This showcase is recorded with the [windows terminal][windows-terminal], [debian on WSL][debian-wsl] with zsh & [oh my zsh][oh-my-zsh]. The color scheme for the terminal is [dracula][dracula-theme] and the font is a homemade modification of windows Consolas (with ligatures + with nerd font icons).
+> This showcase is recorded with the [windows terminal][windows-terminal], [debian on WSL][debian-wsl] with zsh & [oh my zsh][oh-my-zsh]. The color scheme for the terminal is [dracula][dracula-theme] and the font is a homemade modification of windows Consolas (with ligatures + with [nerd font icons][nerd-font]).
 
 ## 🎉 Installation
 
@@ -126,11 +126,6 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/vale
 
 ## 💻 Usage
 
-> [!IMPORTANT]
-> If you see the replacement character � in my terminal, it means you don't have a [nerd font][nerd-font] setup in your terminal.
->
-> Either install a nerd font and activate it on our terminal or `export VALET_CONFIG_DISABLE_NERDFONT_ICONS=true` in your environment. This is reminded to you during the automated installation process.
-
 ### Adding your own commands
 
 Valet is pre-configured with some example commands so you can try it immediately and see how it feels.
@@ -165,7 +160,6 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 
 ## 🔭 Roadmap
 
-- reverse icons and colors settings, disabled by default. 
 - rename CMD_ variables.
 - Document everything. Document test.
 - Add full support for interactive mode.
@@ -181,12 +175,14 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Allow to regroup single letter options (e.g. -fsSL).
 - Add a command self package that build the user commands into a single script file.
 - Add vscode extensions [recommendations](https://github.com/imfing/hextra-starter-template/blob/main/.vscode/extensions.json).
+- fix running tests with verbose mode on.
+- try to make interactive functions usable in colorless mode.
+- for yes/no, add param to choose the default option.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest
 [new-command]: docs/create-new-command.md
 [install-script]: ./valet.d/commands.d/self-install.sh
-[examples]: ./examples.d
 [license]: ./LICENSE
 [contributing]: CONTRIBUTING.md
 [bash]: https://www.gnu.org/software/bash/

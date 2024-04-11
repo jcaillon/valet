@@ -111,11 +111,10 @@ function io::cleanupTempFiles() {
 # >>> Logging
 #===============================================================
 
-# determine the color mode expect if the user has set VALET_CONFIG_DISABLE_COLORS
+# determine if we support colors (can be overriden by the user with VALET_CONFIG_ENABLE_COLORS)
 case "${TERM:-}" in
-    xterm-color|xterm-256color|linux) VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-false}";;
-    xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-false}"; else VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-true}"; fi ;;
-    *) VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-true}";;
+    xterm-color|xterm-256color|linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}";;
+    xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
 esac
 
 # This function exports the terminal size in the global variables GLOBAL_COLUMNS and GLOBAL_LINES.
@@ -179,7 +178,7 @@ function log::getLevel() {
 }
 
 # The log line function is used to display log messages in the terminal.
-# The implementation depends on the environment variables VALET_CONFIG_ENABLE_CI_MODE and VALET_CONFIG_DISABLE_LOG_WRAP.
+#
 # $1: the color of the log message (red, green, yellow, cyan, gray, pink)
 # $2: the icon to display in the log message (utf8 character from nerdicons)
 # $3: the severity of the log message (masx 7 chars)
@@ -193,13 +192,6 @@ function log::print() { return 0; }
 # This avoid to have to check the options at each log message
 # shellcheck disable=SC2016
 function log::createPrintFunction() {
-  # in CI mode, we disable wrapping, colors and icons
-  if [[ ${VALET_CONFIG_ENABLE_CI_MODE:-} == "true" ]]; then
-    VALET_CONFIG_DISABLE_LOG_WRAP="${VALET_CONFIG_DISABLE_LOG_WRAP:-true}"
-    VALET_CONFIG_DISABLE_NERDFONT_ICONS="${VALET_CONFIG_DISABLE_NERDFONT_ICONS:-true}"
-    VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-true}"
-  fi
-
   GLOBAL_LOG_PRINT_FUNCTION='
   function log::print() {
     local icon severity
@@ -211,7 +203,7 @@ function log::createPrintFunction() {
 
   local cDefault=""
   local cTimestamp=""
-  if [[ "${VALET_CONFIG_DISABLE_COLORS:-}" != "true" ]]; then
+  if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
     cTimestamp=${VALET_CONFIG_COLOR_TIMESTAMP:-$'\e'"[1;90m"}
     cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
     local cDebug=${VALET_CONFIG_COLOR_DEBUG:-$'\e'"[1;30m"}
@@ -247,11 +239,11 @@ function log::createPrintFunction() {
     local wrapTextColumns="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
     local wrapPaddingLength=20
 
-    if [[ ${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-} == "true" ]]; then
+    if [[ ${VALET_CONFIG_DISABLE_LOG_TIME:-} == "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 9))
     fi
 
-    if [[ ${VALET_CONFIG_DISABLE_NERDFONT_ICONS:-} == "true" ]]; then
+    if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} != "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 2))
     fi
 
@@ -263,23 +255,23 @@ function log::createPrintFunction() {
   local printfArguments
 
   # timestamp
-  if [[ ${VALET_CONFIG_ENABLE_CI_MODE:-} == "true" && "${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-}" != "true" ]]; then
+  if [[ ${VALET_CONFIG_DISABLE_LOG_TIME:-} == "true" ]]; then
+    printfFormat+=""
+  elif [[ ${VALET_CONFIG_ENABLE_LOG_TIMESTAMP:-} == "true" ]]; then
     printfFormat+="%(%F_%H:%M:%S)T "
     printfArguments+='"${EPOCHSECONDS}" '
-  elif [[ ${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-} == "true" ]]; then
-    printfFormat+=""
   else
     printfFormat+="%s%(%H:%M:%S)T "
     printfArguments+="${cTimestamp@Q}"' "${EPOCHSECONDS}" '
   fi
 
   # severity
-  if [[ ${VALET_CONFIG_DISABLE_NERDFONT_ICONS:-} == "true" ]]; then
-    printfFormat+="%s%-8s%s "
-    printfArguments+='"${color:-}" "${severity}" '"${cDefault@Q}"' '
-  else
+  if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} == "true" ]]; then
     printfFormat+="%s%-8s%-4s%s "
     printfArguments+='"${color:-}" "${severity}" "${icon:-}" '"${cDefault@Q}"' '
+  else
+    printfFormat+="%s%-8s%s "
+    printfArguments+='"${color:-}" "${severity}" '"${cDefault@Q}"' '
   fi
 
   # message

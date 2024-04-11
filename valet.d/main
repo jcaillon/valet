@@ -273,12 +273,16 @@ fi
 # $4: the maximum columns for the help text.
 #
 # Usage:
-#   main::printHelp function "this" "${VALET_CONFIG_DISABLE_COLORS:-false}" "${GLOBAL_COLUMNS}"
+#   main::printHelp function "this" "false" "${GLOBAL_COLUMNS}"
 function main::printHelp() {
   local type=${1:-function}
   local name="${2:-this}"
-  local noColor="${3:-${VALET_CONFIG_DISABLE_COLORS:-false}}"
+  local noColor="${3:-}"
   local maxColumns="${4:-180}"
+
+  if [[ -z ${noColor:-} && ${VALET_CONFIG_ENABLE_COLORS:-false} != true ]]; then
+    noColor=true
+  fi
 
   # sudo apt-get install colortest
   # colortest-16b

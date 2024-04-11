@@ -24,6 +24,9 @@ cat ${configFile}
 # Empty variables will be replaced by the default values during the execution.
 # You should not define all the variables, only the ones you want to change.
 
+# If you break this file, valet will fail to start.
+# You can delete it and run the 'valet self config' command to recreate it.
+
 # -----------
 # General config
 # -----------
@@ -65,15 +68,11 @@ VALET_CONFIG_REMEMBER_LAST_CHOICES="${VALET_CONFIG_REMEMBER_LAST_CHOICES:-}"
 # -----------
 # Log/output configuration
 # -----------
-# If true, will simplify the log output for CI/CD environments:
-# will display the logs without colors, without icons, without wrapping lines and with the full date.
-VALET_CONFIG_ENABLE_CI_MODE="${VALET_CONFIG_ENABLE_CI_MODE:-}"
+# If true, will enable the icons (using nerd font).
+VALET_CONFIG_ENABLE_NERDFONT_ICONS="${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-}"
 
-# If true, will disable the icons (using nerd font).
-VALET_CONFIG_DISABLE_NERDFONT_ICONS="${VALET_CONFIG_DISABLE_NERDFONT_ICONS:-}"
-
-# If true, will disable the color output (colors are still needed for interactive mode).
-VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-}"
+# If true, will forcibly enable the color output (otherwise we try to detect color support on start).
+VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-}"
 
 # If true, will disable the text wrapping for logs.
 VALET_CONFIG_DISABLE_LOG_WRAP="${VALET_CONFIG_DISABLE_LOG_WRAP:-}"
@@ -81,8 +80,11 @@ VALET_CONFIG_DISABLE_LOG_WRAP="${VALET_CONFIG_DISABLE_LOG_WRAP:-}"
 # Sets the maximum width for the log output (used only when log wrapping is enabled).
 VALET_CONFIG_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-}"
 
-# If true, will disable the timestamp for logs.
-VALET_CONFIG_DISABLE_LOG_TIMESTAMP="${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-}"
+# If true, will disable the time for logs.
+VALET_CONFIG_DISABLE_LOG_TIME="${VALET_CONFIG_DISABLE_LOG_TIME:-}"
+
+# If true, will print a timestamp instead of simple time in the logs.
+VALET_CONFIG_ENABLE_LOG_TIMESTAMP="${VALET_CONFIG_ENABLE_LOG_TIMESTAMP:-}"
 
 # -----------
 # Log icons configuration
@@ -212,6 +214,9 @@ cat ${configFile}
 # Empty variables will be replaced by the default values during the execution.
 # You should not define all the variables, only the ones you want to change.
 
+# If you break this file, valet will fail to start.
+# You can delete it and run the 'valet self config' command to recreate it.
+
 # -----------
 # General config
 # -----------
@@ -253,15 +258,11 @@ VALET_CONFIG_REMEMBER_LAST_CHOICES="${VALET_CONFIG_REMEMBER_LAST_CHOICES:-}"
 # -----------
 # Log/output configuration
 # -----------
-# If true, will simplify the log output for CI/CD environments:
-# will display the logs without colors, without icons, without wrapping lines and with the full date.
-VALET_CONFIG_ENABLE_CI_MODE="${VALET_CONFIG_ENABLE_CI_MODE:-true}"
+# If true, will enable the icons (using nerd font).
+VALET_CONFIG_ENABLE_NERDFONT_ICONS="${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-}"
 
-# If true, will disable the icons (using nerd font).
-VALET_CONFIG_DISABLE_NERDFONT_ICONS="${VALET_CONFIG_DISABLE_NERDFONT_ICONS:-}"
-
-# If true, will disable the color output (colors are still needed for interactive mode).
-VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-}"
+# If true, will forcibly enable the color output (otherwise we try to detect color support on start).
+VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-}"
 
 # If true, will disable the text wrapping for logs.
 VALET_CONFIG_DISABLE_LOG_WRAP="${VALET_CONFIG_DISABLE_LOG_WRAP:-}"
@@ -269,8 +270,11 @@ VALET_CONFIG_DISABLE_LOG_WRAP="${VALET_CONFIG_DISABLE_LOG_WRAP:-}"
 # Sets the maximum width for the log output (used only when log wrapping is enabled).
 VALET_CONFIG_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-20}"
 
-# If true, will disable the timestamp for logs.
-VALET_CONFIG_DISABLE_LOG_TIMESTAMP="${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-}"
+# If true, will disable the time for logs.
+VALET_CONFIG_DISABLE_LOG_TIME="${VALET_CONFIG_DISABLE_LOG_TIME:-}"
+
+# If true, will print a timestamp instead of simple time in the logs.
+VALET_CONFIG_ENABLE_LOG_TIMESTAMP="${VALET_CONFIG_ENABLE_LOG_TIMESTAMP:-true}"
 
 # -----------
 # Log icons configuration

@@ -6,7 +6,6 @@ set -Eeu -o pipefail
 # shellcheck source=lib-ansi-codes
 source ansi-codes
 
-
 #===============================================================
 # >>> Events
 #===============================================================
@@ -29,7 +28,11 @@ fi
 function interactive::askForConfirmation() {
   interactive::displayQuestion "${1}"
 
-  local colorActiveButton="${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${fgMagenta}}"
+  # colors
+  local colorActiveButton=""
+  if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
+    colorActiveButton="${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${fgMagenta}}"
+  fi
 
   # print the current state (then move to column 1 to be ready to rewrite)
   printf '%s%s%s' \
@@ -61,7 +64,6 @@ function interactive::askForConfirmation() {
   return 0
 }
 
-
 # Ask the user to yes or no.
 # The user can switch between the two options with the arrow keys or space.
 # The user can validate the choice with the enter key.
@@ -79,8 +81,14 @@ function interactive::promptYesNo() {
   interactive::displayQuestion "${1}"
 
   local state=true
-  local colorActiveButton="${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${fgMagenta}}"
-  local colorUnactiveButton="${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}"
+
+  # colors
+  local colorActiveButton=""
+  local colorUnactiveButton=""
+  if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
+    colorActiveButton="${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${fgMagenta}}"
+    colorUnactiveButton="${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}"
+  fi
 
   printf '%s' "${cursorHide}"
 
@@ -142,7 +150,6 @@ function interactive::promptYesNo() {
   LAST_RETURNED_VALUE=${state}
   return 1
 }
-
 
 #===============================================================
 # >>> Custom drawing functions
@@ -411,4 +418,3 @@ interactive::displayDialogBox() {
 
   printf '%s\n' "${finalString}"
 }
-
