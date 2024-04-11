@@ -18,6 +18,7 @@ function testselfSetup() {
   function diff() { return 0; }
   # shellcheck disable=SC2317
   function curl() { return 0; }
+  export -f awk diff curl
 
   echo "→ echo nny | selfSetup"
   echo nny | selfSetup && exitCode=0 || exitCode=$?
@@ -25,11 +26,14 @@ function testselfSetup() {
 
   rm -f "${configFile}"
   unset -f awk diff curl
+  local originalPath="${PATH}"
+  export PATH=""
 
   echo "→ echo nny | selfSetup"
   echo yyo | selfSetup && exitCode=0 || exitCode=$?
   endTest "Testing selfSetup 2" ${exitCode}
 
+  export PATH="${originalPath}"
   VALET_CONFIG_FILE="${originalConfigFile}"
 }
 

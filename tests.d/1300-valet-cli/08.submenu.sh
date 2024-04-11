@@ -3,6 +3,8 @@
 builtin source ".before-test"
 
 function testInteractiveSubMenu() {
+  export VALET_CONFIG_LOCAL_STATE_DIRECTORY="${TEST_VALET_CONFIG_LOCAL_STATE_DIRECTORY}"
+
   # test that we go into the interactive menu with no arguments
   echo "→ valet self"
   ("${GLOBAL_VALET_HOME}/valet" self)

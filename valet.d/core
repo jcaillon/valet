@@ -118,32 +118,6 @@ case "${TERM:-}" in
     *) VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-true}";;
 esac
 
-# This function sets the colors used in the log messages.
-function log::setColors() {
-  # the color code used to output colored text
-  # shellcheck disable=SC2034
-  if [[ ${VALET_CONFIG_ENABLE_CI_MODE:-} != true && ${VALET_CONFIG_DISABLE_COLORS:-} != true ]]; then
-    COLOR_DEFAULT=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
-    COLOR_DEBUG=${VALET_CONFIG_COLOR_DEBUG:-$'\e'"[1;30m"}
-    COLOR_INFO=${VALET_CONFIG_COLOR_INFO:-$'\e'"[0;36m"}
-    COLOR_WARNING=${VALET_CONFIG_COLOR_WARNING:-$'\e'"[0;33m"}
-    COLOR_SUCCESS=${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[0;32m"}
-    COLOR_ERROR=${VALET_CONFIG_COLOR_ERROR:-$'\e'"[0;31m"}
-    COLOR_TIMESTAMP=${VALET_CONFIG_COLOR_TIMESTAMP:-$'\e'"[1;90m"}
-    COLOR_HIGHLIGHT=${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[1;35m"}
-  else
-    COLOR_DEFAULT=""
-    COLOR_DEBUG=""
-    COLOR_INFO=""
-    COLOR_WARNING=""
-    COLOR_SUCCESS=""
-    COLOR_ERROR=""
-    COLOR_TIMESTAMP=""
-    COLOR_HIGHLIGHT=""
-  fi
-}
-log::setColors
-
 # This function exports the terminal size in the global variables GLOBAL_COLUMNS and GLOBAL_LINES.
 #
 # Usage:
@@ -174,8 +148,8 @@ trap system::exportTerminalSize SIGWINCH
 #   log::setLevel "debug"
 function log::setLevel() {
   # log level, defaults to info
-  VALET_LOG_LEVEL="${1:-info}"
-  case "${VALET_LOG_LEVEL}" in
+  GLOBAL_LOG_LEVEL="${1:-${VALET_LOG_LEVEL:-info}}"
+  case "${GLOBAL_LOG_LEVEL}" in
   error) LOG_LEVEL_INT=4 ;;
   warning) LOG_LEVEL_INT=3 ;;
   success) LOG_LEVEL_INT=2 ;;
@@ -185,7 +159,7 @@ function log::setLevel() {
 
   if [[ -z ${2:-} ]]; then
     if [[ ${LOG_LEVEL_INT} -ne 1 ]]; then
-      log::debug "Log level set to ${VALET_LOG_LEVEL}."
+      log::debug "Log level set to ${GLOBAL_LOG_LEVEL}."
     fi
     if [[ ${LOG_LEVEL_INT} -eq 0 ]]; then
       log::warning "Beware that debug log level might lead to secret leak, use it only if necessary."
@@ -201,7 +175,7 @@ function log::setLevel() {
 # Usage:
 #   log::getLevel && echo "The log level is ⌜${LAST_RETURNED_VALUE}⌝."
 function log::getLevel() {
-  LAST_RETURNED_VALUE="${VALET_LOG_LEVEL:-info}"
+  LAST_RETURNED_VALUE="${GLOBAL_LOG_LEVEL:-info}"
 }
 
 # The log line function is used to display log messages in the terminal.
@@ -226,23 +200,51 @@ function log::createPrintFunction() {
     VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-true}"
   fi
 
-  LOG_LINE_FUNCTION='
+  GLOBAL_LOG_PRINT_FUNCTION='
   function log::print() {
     local icon severity
-    local -n color="COLOR_${1^^}"
+    local colorCode="${1}"
     icon="${2}"
     severity="${3}"
     shift 3
     LAST_RETURNED_VALUE="$*"'
+
+  local cDefault=""
+  local cTimestamp=""
   if [[ "${VALET_CONFIG_DISABLE_COLORS:-}" != "true" ]]; then
+    cTimestamp=${VALET_CONFIG_COLOR_TIMESTAMP:-$'\e'"[1;90m"}
+    cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
+    local cDebug=${VALET_CONFIG_COLOR_DEBUG:-$'\e'"[1;30m"}
+    local cInfo=${VALET_CONFIG_COLOR_INFO:-$'\e'"[0;36m"}
+    local cWarning=${VALET_CONFIG_COLOR_WARNING:-$'\e'"[0;33m"}
+    local cSuccess=${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[0;32m"}
+    local cError=${VALET_CONFIG_COLOR_ERROR:-$'\e'"[0;31m"}
+    local cHighlight=${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[1;35m"}
+
+    GLOBAL_LOG_PRINT_FUNCTION+="
+    local color
+    case \"\${colorCode}\" in
+    DEBUG) color=${cDebug@Q} ;;
+    INFO) color=${cInfo@Q} ;;
+    WARNING) color=${cWarning@Q} ;;
+    SUCCESS) color=${cSuccess@Q} ;;
+    ERROR) color=${cError@Q} ;;
+    *) color=${cDefault@Q} ;;
+    esac
+    "
     # shellcheck disable=SC2016
-    LOG_LINE_FUNCTION+='
-    LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌜/${COLOR_HIGHLIGHT}⌜}"
-    LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌝/⌝${COLOR_DEFAULT}}"'
+    GLOBAL_LOG_PRINT_FUNCTION+='
+    LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌜/'"${cHighlight@Q}"'⌜}"
+    LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌝/⌝'"${cDefault@Q}"'}"
+    '
+  else
+    GLOBAL_LOG_PRINT_FUNCTION+='
+    local color=""
+    '
   fi
 
   if [[ "${VALET_CONFIG_DISABLE_LOG_WRAP:-}" != "true" ]]; then
-    local wrapTextColumns="${VALET_CONFIG_LOGGLOBAL_COLUMNS:-${GLOBAL_COLUMNS}}"
+    local wrapTextColumns="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
     local wrapPaddingLength=20
 
     if [[ ${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-} == "true" ]]; then
@@ -253,7 +255,7 @@ function log::createPrintFunction() {
       wrapPaddingLength=$((wrapPaddingLength - 2))
     fi
 
-    LOG_LINE_FUNCTION+='
+    GLOBAL_LOG_PRINT_FUNCTION+='
     string::wrapText "${LAST_RETURNED_VALUE}" '"${wrapTextColumns}"' '"${wrapPaddingLength}"''
   fi
 
@@ -268,28 +270,28 @@ function log::createPrintFunction() {
     printfFormat+=""
   else
     printfFormat+="%s%(%H:%M:%S)T "
-    printfArguments+='"${COLOR_TIMESTAMP}" "${EPOCHSECONDS}" '
+    printfArguments+="${cTimestamp@Q}"' "${EPOCHSECONDS}" '
   fi
 
   # severity
   if [[ ${VALET_CONFIG_DISABLE_NERDFONT_ICONS:-} == "true" ]]; then
     printfFormat+="%s%-8s%s "
-    printfArguments+='"${color}" "${severity}" "${COLOR_DEFAULT}" '
+    printfArguments+='"${color:-}" "${severity}" '"${cDefault@Q}"' '
   else
     printfFormat+="%s%-8s%-4s%s "
-    printfArguments+='"${color}" "${severity}" "${icon:-}" "${COLOR_DEFAULT}" '
+    printfArguments+='"${color:-}" "${severity}" "${icon:-}" '"${cDefault@Q}"' '
   fi
 
   # message
   printfFormat+="%s\n"
   printfArguments+='"${LAST_RETURNED_VALUE}"'
 
-  LOG_LINE_FUNCTION+='
+  GLOBAL_LOG_PRINT_FUNCTION+='
     printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&2
   }'
 }
 log::createPrintFunction
-eval "${LOG_LINE_FUNCTION}"
+eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
 
 # Displays an error message and then exit the program with error.
@@ -541,8 +543,7 @@ function core::sourceUserCommands() {
 #  core::reloadUserCommands
 function core::reloadUserCommands() {
   # delete previous variables
-  unset -v ${!CMD_*}
-  unset -v _CMD_INCLUDED
+  unset -v ${!CMD_*} _CMD_INCLUDED
   core::sourceUserCommands
 }
 

@@ -114,8 +114,10 @@ function selfBuild() {
       commandDefinitionFiles+=("${file}")
     done
     shopt -u globstar
-  else
+  elif [[ -n "${userDirectory}" ]]; then
     log::warning "Skipping user directory ⌜${userDirectory}⌝ because it does not exist."
+  else
+    log::info "Skipping user directory because it was empty."
   fi
 
   if log::isDebugEnabled; then
@@ -125,8 +127,8 @@ function selfBuild() {
   fi
 
   # make sure to unset all previous CMD_* variables
-  unset -v ${!CMD_*}
-  unset SELF_BUILD_ERRORS
+  unset -v ${!CMD_*} \
+    SELF_BUILD_ERRORS
 
   # extract the command definitions to variables
   extractCommandDefinitionsToVariables "${commandDefinitionFiles[@]}"

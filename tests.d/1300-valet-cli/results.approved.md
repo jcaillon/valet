@@ -100,21 +100,21 @@ INFO     Fuzzy matching the command ⌜hel⌝ to ⌜help⌝.
 INFO     Fuzzy matching the command ⌜s⌝ to ⌜self⌝.
 ```
 
-### Testing help with columns 60
+### Testing help with columns 48
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ valet help --columns 60 help
+→ valet help --columns 48 help
 ABOUT
 
-  Show the help this program or of the help of a specific 
-  command.
+  Show the help this program or of the help of a
+  specific command.
   
-  You can show the help with or without colors and set the 
-  maximum columns for the help text.
+  You can show the help with or without colors 
+  and set the maximum columns for the help text.
 
 USAGE
 
@@ -124,31 +124,33 @@ OPTIONS
 
   -n, --no-colors
       Do not use any colors in the output
-      This option can be set by exporting the variable 
-      VALET_NO_COLORS='true'.
+      This option can be set by exporting the 
+      variable VALET_NO_COLORS='true'.
   -c, --columns <number>
       Set the maximum columns for the help text
-      This option can be set by exporting the variable 
-      VALET_COLUMNS='<number>'.
+      This option can be set by exporting the 
+      variable VALET_COLUMNS='<number>'.
   -h, --help
       Display the help for this command.
 
 ARGUMENTS
 
   commands?...
-      The name of the command to show the help for.
-      If not provided, show the help for the program.
+      The name of the command to show the help 
+      for.
+      If not provided, show the help for the 
+      program.
 
 EXAMPLES
 
   help cmd
       Shows the help for the command ⌜cmd⌝
   help cmd subCmd
-      Shows the help for the sub command ⌜subCmd⌝ of the 
-      command ⌜cmd⌝
+      Shows the help for the sub command 
+      ⌜subCmd⌝ of the command ⌜cmd⌝
   help --no-colors --columns 50
-      Shows the help for the program without any color and 
-      with a maximum of 50 columns
+      Shows the help for the program without any
+      color and with a maximum of 50 columns
       
 
 ```
@@ -459,7 +461,7 @@ ALT+UP/ALT+DOWN: Previous/next query in the history.
 SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
 ') --preview-window=right,80 --bind alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|) --layout=reverse --info=right --pointer=◆ --marker=✓ --cycle --tiebreak=begin,index --margin=0 --padding=0 --delimiter=
  --tabstop=3 --header-first --header=Press ALT+H to display the help and keybindings.
-Please select the command to run. --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$GLOBAL_VALET_HOME/valet' help --columns $((FZF_PREVIEWGLOBAL_COLUMNS - 1)) {1}⌉
+Please select the command to run. --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$GLOBAL_VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
 ▶ fzf input stream was:
 ⌈help                  	Show the help this program or of a specific command.
 self build            	Re-build the menu of valet from your commands.
@@ -544,19 +546,19 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet self mock1 logging-level
+→ VALET_CONFIG_DISABLE_COLORS=false valet self mock1 logging-level
 ```
 
 **Error** output:
 
 ```log
-[1;90mHH:MM:SS [0;36mINFO     [0m This is an info message with a super long sentence. The value of life is not in its duration, but in
+CTIHH:MM:SS CININFO    II  CDE This is an info message with a super long sentence. The value of life is not in its duration, but in
                     its donation. You are not important because of how long you live, you are important because of how 
                     effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed 
                     him for a lifetime. Surround yourself with the best people you can find, delegate authority, and 
                     don't interfere as long as the policy you've decided upon is being carried out.
-[1;90mHH:MM:SS [0;32mSUCCESS  [0m This is a success message.
-[1;90mHH:MM:SS [0;33mWARNING  [0m This is a warning message.
+CTIHH:MM:SS CSUSUCCESS IS  CDE This is a success message.
+CTIHH:MM:SS CWAWARNING IW  CDE This is a warning message.
                     With a second line.
 ```
 
@@ -573,13 +575,13 @@ Exit code: `0`
 **Error** output:
 
 ```log
-HH:MM:SS INFO      This is an info message with a super long sentence. The value of life is not in its duration, but in
+HH:MM:SS INFO    II   This is an info message with a super long sentence. The value of life is not in its duration, but in
                     its donation. You are not important because of how long you live, you are important because of how 
                     effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed 
                     him for a lifetime. Surround yourself with the best people you can find, delegate authority, and 
                     don't interfere as long as the policy you've decided upon is being carried out.
-HH:MM:SS SUCCESS   This is a success message.
-HH:MM:SS WARNING   This is a warning message.
+HH:MM:SS SUCCESS IS   This is a success message.
+HH:MM:SS WARNING IW   This is a warning message.
                     With a second line.
 ```
 
@@ -615,13 +617,13 @@ Exit code: `0`
 **Error** output:
 
 ```log
-INFO      This is an info message with a super long sentence. The value of life is not in its duration, but in its 
+INFO    II   This is an info message with a super long sentence. The value of life is not in its duration, but in its 
            donation. You are not important because of how long you live, you are important because of how effective you 
            live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
            Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the 
            policy you've decided upon is being carried out.
-SUCCESS   This is a success message.
-WARNING   This is a warning message.
+SUCCESS IS   This is a success message.
+WARNING IW   This is a warning message.
            With a second line.
 ```
 
@@ -661,9 +663,9 @@ Exit code: `0`
 **Error** output:
 
 ```log
-HH:MM:SS INFO      This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-HH:MM:SS SUCCESS   This is a success message.
-HH:MM:SS WARNING   This is a warning message.
+HH:MM:SS INFO    II   This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+HH:MM:SS SUCCESS IS   This is a success message.
+HH:MM:SS WARNING IW   This is a warning message.
 With a second line.
 ```
 
@@ -674,13 +676,13 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_LOGGLOBAL_COLUMNS=80 valet self mock1 logging-level
+→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 logging-level
 ```
 
 **Error** output:
 
 ```log
-HH:MM:SS INFO      This is an info message with a super long sentence. The 
+HH:MM:SS INFO    II   This is an info message with a super long sentence. The 
                     value of life is not in its duration, but in its donation. 
                     You are not important because of how long you live, you are 
                     important because of how effective you live. Give a man a 
@@ -689,8 +691,8 @@ HH:MM:SS INFO      This is an info message with a super long sentence. The
                     people you can find, delegate authority, and don't interfere
                     as long as the policy you've decided upon is being carried 
                     out.
-HH:MM:SS SUCCESS   This is a success message.
-HH:MM:SS WARNING   This is a warning message.
+HH:MM:SS SUCCESS IS   This is a success message.
+HH:MM:SS WARNING IW   This is a warning message.
                     With a second line.
 ```
 
@@ -825,7 +827,7 @@ Please select the command to run.
 --print-query
 --no-multi
 --preview-label=Command help
---preview=VALET_LOG_LEVEL=error '$GLOBAL_VALET_HOME/valet' help --columns $((FZF_PREVIEWGLOBAL_COLUMNS - 1)) {1}⌉
+--preview=VALET_LOG_LEVEL=error '$GLOBAL_VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
 ▶ fzf input stream was:
 ⌈self build            	Re-build the menu of valet from your commands.
 self test             	Test your valet custom commands.

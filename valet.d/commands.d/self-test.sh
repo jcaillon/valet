@@ -59,15 +59,29 @@ function selfTest() {
   core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  declare -i NB_TEST_SUITES=0 NB_FAILED_TEST_SUITES=0
-
-  setGlobalOptions
+  # set the options
+  unset TEST_AUTO_APPROVE \
+    TEST_INCLUDE_PATTERN \
+    TEST_EXCLUDE_PATTERN
+  if [[ -n "${autoApprove:-}" ]]; then
+    TEST_AUTO_APPROVE="true"
+  fi
+  if [[ -n "${include:-}" ]]; then
+    log::info "Including only test suites that match the pattern ⌜${include}⌝."
+    TEST_INCLUDE_PATTERN="${include}"
+  fi
+  if [[ -n "${exclude:-}" ]]; then
+    log::info "Excluding all test suites that match the pattern ⌜${exclude}⌝."
+    TEST_EXCLUDE_PATTERN="${exclude}"
+  fi
 
   # get the directory containing the tests for the commands
   core::getUserDirectory
   userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
   log::debug "User directory is ⌜${userDirectory}⌝."
   core::reloadUserCommands
+
+  declare -i NB_TEST_SUITES=0 NB_FAILED_TEST_SUITES=0
 
   if [[ ${onlyCore:-false} != "true" ]]; then
 
@@ -99,7 +113,7 @@ function selfTest() {
   if [[ NB_FAILED_TEST_SUITES -gt 0 ]]; then
     local failMessage
     failMessage="A total of ⌜${NB_FAILED_TEST_SUITES}⌝/⌜${NB_TEST_SUITES}⌝ test(s) failed."
-    if [[ ${AUTO_APPROVE:-false} == "true" ]]; then
+    if [[ ${TEST_AUTO_APPROVE:-false} == "true" ]]; then
       failMessage+=$'\n'"The received test result files were automatically approved."
       log::warning "${failMessage}"
     else

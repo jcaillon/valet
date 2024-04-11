@@ -21,7 +21,7 @@ stderr:
 
 ### Testing kurl::toFile, http code 500 not acceptable return 1
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 
@@ -38,7 +38,7 @@ stderr:
 
 ### Testing kurl::toFile, http code 500 not acceptable fails
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 
@@ -74,7 +74,7 @@ stderr:
 
 ### Testing kurl::toFile, testing debug mode https code 400
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 
@@ -170,7 +170,7 @@ stderr:
 
 ### Testing kurl, with no content http code 500, fails
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 
@@ -189,7 +189,7 @@ Error output:
 
 ### Testing kurl, debug mode, with content http code 400
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 

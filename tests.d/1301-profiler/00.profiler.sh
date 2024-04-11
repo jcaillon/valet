@@ -36,16 +36,15 @@ function testProfiler() {
 
   endTest "Testing profiling for command and startup" 0
 
-  unset VALET_CONFIG_STARTUP_PROFILING
-  unset VALET_CONFIG_COMMAND_PROFILING_FILE
-  unset VALET_CONFIG_STARTUP_PROFILING_FILE
+  unset VALET_CONFIG_STARTUP_PROFILING \
+    VALET_CONFIG_COMMAND_PROFILING_FILE \
+    VALET_CONFIG_STARTUP_PROFILING_FILE
 }
 
 function testCommandProfiler() {
   # testing command profiling
   io::createTempFile && export VALET_CONFIG_COMMAND_PROFILING_FILE="${LAST_RETURNED_VALUE}"
   export VALET_CONFIG_COMMAND_PROFILING_FILE
-
 
   unset VALET_CONFIG_COMMAND_PROFILING_FILE
 }

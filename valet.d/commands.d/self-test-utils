@@ -31,11 +31,14 @@ function endTest() {
   local exitCode="${2:-}"
   local testDescription="${3:-}"
 
-  resetFdRedirection
+  local fdRedirectionReset=false
+  if [[ ${ORIGINAL_GLOBAL_LOG_LEVEL} == "debug" ]]; then
+    resetFdRedirection
+    fdRedirectionReset=true
+    log::debug "Ended test ⌜${testTitle}⌝ with exit code ⌜${exitCode}⌝."
+  fi
 
   {
-    log::debug "Ended test ⌜${testTitle}⌝ with exit code ⌜${exitCode}⌝."
-
     # write the test title
     printf "%s\n\n" "### ${testTitle:-test}"
 
@@ -67,7 +70,9 @@ function endTest() {
   : >"${_TEST_STANDARD_OUTPUT_FILE}"
   : >"${_TEST_STANDARD_ERROR_FILE}"
 
-  setFdRedirection
+  if [[ ${fdRedirectionReset} == "true" ]]; then
+    setFdRedirection
+  fi
 
   set +Eeu +o pipefail
 }
@@ -83,7 +88,6 @@ function setTempFilesNumber() {
   TEMPORARY_FILE_NUMBER=${1}
   TEMPORARY_DIRECTORY_NUMBER=${1}
 }
-
 
 #===============================================================
 # >>> Internal tests functions
@@ -141,6 +145,13 @@ function rebuildCommands() {
 function runTestSuites() {
   local testsDirectory="${1}"
 
+  # save the original important variables so we can restore them after the test suite
+  ORIGINAL_GLOBAL_LOG_LEVEL="${GLOBAL_LOG_LEVEL}"
+  ORIGINAL_GLOBAL_LOG_PRINT_FUNCTION="${GLOBAL_LOG_PRINT_FUNCTION}"
+  setOriginalImportantVariables
+  setSimplifiedImportantVariables
+  resetOriginalImportantVariables
+
   io::createTempFile && _TEST_STANDARD_OUTPUT_FILE="${LAST_RETURNED_VALUE}"
   io::createTempFile && _TEST_STANDARD_ERROR_FILE="${LAST_RETURNED_VALUE}"
   io::createTempFile && _TEST_REPORT_FILE="${LAST_RETURNED_VALUE}"
@@ -159,12 +170,12 @@ function runTestSuites() {
     if [[ ! -d "${testDirectory}" ]]; then continue; fi
 
     # skip if the test directory does not match the include pattern
-    if [[ -n "${INCLUDE_PATTERN:-}" && ! ("${testDirectoryName}" =~ ${INCLUDE_PATTERN}) ]]; then
+    if [[ -n "${TEST_INCLUDE_PATTERN:-}" && ! ("${testDirectoryName}" =~ ${TEST_INCLUDE_PATTERN}) ]]; then
       log::debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it does not match the include pattern."
       continue
     fi
     # skip if the test directory matches the exclude pattern
-    if [[ -n "${EXCLUDE_PATTERN:-}" && "${testDirectoryName}" =~ ${EXCLUDE_PATTERN} ]]; then
+    if [[ -n "${TEST_EXCLUDE_PATTERN:-}" && "${testDirectoryName}" =~ ${TEST_EXCLUDE_PATTERN} ]]; then
       log::debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it matches the exclude pattern."
       continue
     fi
@@ -204,6 +215,9 @@ function runTest() {
   local testDirectory="${1}"
   local testScript="${2}"
 
+  # set a simplified log print function to have consistent results in tests
+  eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
+
   # redirect the standard output and error output to files
   setFdRedirection
 
@@ -232,6 +246,9 @@ function runTest() {
   unset -f onExitTest
 
   resetFdRedirection
+
+  # restore the important variables
+  resetOriginalImportantVariables
 
   # test if the user forgot to call endTest
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" || -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
@@ -264,7 +281,7 @@ function compareWithApproved() {
   fi
 
   # if the option is activated, we approve the received file
-  if [[ ${AUTO_APPROVE:-false} == "true" ]]; then
+  if [[ ${TEST_AUTO_APPROVE:-false} == "true" ]]; then
     log::info "🧪 ${testName}: Auto-approving"
     cp -f "${receivedFileToCopy}" "${approvedFile}"
     rm -f "${receivedFile}" 2>/dev/null || true
@@ -282,6 +299,7 @@ function onExitTestInternal() {
 
   resetFdRedirection
 
+  # shellcheck disable=SC1091
   source io
 
   local message="The program has exit during a test with code ${rc}."$'\n'
@@ -304,28 +322,8 @@ function setFdRedirection() {
 
   # sets up a simpler log function for the tests
   # so we can have consistent results independent of the environment
-  if [[ -z "${ORIGINAL_LOG_LINE_FUNCTION:-}" ]]; then
-    ORIGINAL_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
-    ORIGINAL_VALET_CONFIG_DISABLE_COLORS="${VALET_CONFIG_DISABLE_COLORS:-}"
-    ORIGINAL_LOG_LEVEL="${VALET_LOG_LEVEL:-}"
-    ORIGINAL_VALET_CONFIG_DISABLE_LOCAL_BIN="${VALET_CONFIG_DISABLE_LOCAL_BIN:-}"
-  fi
-  export VALET_LOG_LEVEL="info"
-  log::setLevel info &>/dev/null
-  export VALET_CONFIG_DISABLE_COLORS="true"
-  log::setColors
-  export VALET_CONFIG_DISABLE_LOG_TIMESTAMP="true"
-  export VALET_CONFIG_DISABLE_NERDFONT_ICONS="true"
-  export VALET_CONFIG_DISABLE_LOG_WRAP="true"
-  export VALET_CONFIG_ENABLE_CI_MODE="false"
-  export VALET_CONFIG_LOGGLOBAL_COLUMNS=9999
-  export GLOBAL_COLUMNS=9999
-  export VALET_CONFIG_DISABLE_LOCAL_BIN="true"
-  if [[ -z "${SIMPLIFIED_LOG_LINE_FUNCTION:-}" ]]; then
-    log::createPrintFunction
-    SIMPLIFIED_LOG_LINE_FUNCTION="${LOG_LINE_FUNCTION}"
-  fi
-  eval "${SIMPLIFIED_LOG_LINE_FUNCTION}"
+  log::setLevel info true
+  eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
 }
 
 # Restores the standard output and error output.
@@ -336,27 +334,68 @@ function resetFdRedirection() {
   exec 2>&4 4>&-
 
   # reset the original logs
-  export VALET_LOG_LEVEL="${ORIGINAL_LOG_LEVEL}"
-  log::setLevel "${ORIGINAL_LOG_LEVEL}" &>/dev/null
-  export VALET_CONFIG_DISABLE_COLORS="${ORIGINAL_VALET_CONFIG_DISABLE_COLORS}"
-  export VALET_CONFIG_DISABLE_LOCAL_BIN="${ORIGINAL_VALET_CONFIG_DISABLE_LOCAL_BIN}"
-  log::setColors
-  eval "${ORIGINAL_LOG_LINE_FUNCTION}"
+  log::setLevel "${ORIGINAL_GLOBAL_LOG_LEVEL}" true
+  eval "${ORIGINAL_GLOBAL_LOG_PRINT_FUNCTION}"
 }
 
-function setGlobalOptions() {
-  unset AUTO_APPROVE INCLUDE_PATTERN EXCLUDE_PATTERN
-  if [[ -n "${autoApprove:-}" ]]; then
-    AUTO_APPROVE="true"
-  fi
-  if [[ -n "${include:-}" ]]; then
-    log::info "Including only test suites that match the pattern ⌜${include}⌝."
-    INCLUDE_PATTERN="${include}"
-  fi
-  if [[ -n "${exclude:-}" ]]; then
-    log::info "Excluding all test suites that match the pattern ⌜${exclude}⌝."
-    EXCLUDE_PATTERN="${exclude}"
-  fi
+# This function returns a string that can be evaluated to reset all
+# valet config and global variables to their original values.
+# As well as the log line function.
+function setOriginalImportantVariables() {
+  io::captureOutput declare -p ${!VALET_CONFIG_*} ${!GLOBAL_*}
+  ORIGINAL_IMPORTANT_VARIABLES="${GLOBAL_LOG_PRINT_FUNCTION}"$'\n'"${LAST_RETURNED_VALUE//declare -? /}"
+}
+
+function resetOriginalImportantVariables() {
+  unset -v ${!VALET_CONFIG_*} ${!GLOBAL_*}
+  eval "${ORIGINAL_IMPORTANT_VARIABLES}"
+}
+
+# This function returns a string that can be evaluated to set all
+# valet config and global variables to simpler values
+# in order to have consistent results in the tests.
+# As well as a simplified log line function.
+function setSimplifiedImportantVariables() {
+  SIMPLIFIED_IMPORTANT_VARIABLES="
+  export VALET_CONFIG_DISABLE_COLORS=true
+  export VALET_CONFIG_DISABLE_LOG_TIMESTAMP=true
+  export VALET_CONFIG_DISABLE_NERDFONT_ICONS=true
+  export VALET_CONFIG_DISABLE_LOG_WRAP=true
+  export VALET_CONFIG_ENABLE_CI_MODE=false
+  export VALET_CONFIG_LOG_COLUMNS=9999
+
+  export VALET_CONFIG_ICON_ERROR=IE
+  export VALET_CONFIG_ICON_WARNING=IW
+  export VALET_CONFIG_ICON_SUCCESS=IS
+  export VALET_CONFIG_ICON_INFO=II
+  export VALET_CONFIG_ICON_DEBUG=ID
+  export VALET_CONFIG_ICON_EXIT=IX
+  export VALET_CONFIG_ICON_STOPPED=IP
+  export VALET_CONFIG_ICON_KILLED=IK
+
+  export VALET_CONFIG_COLOR_DEFAULT=CDE
+  export VALET_CONFIG_COLOR_DEBUG=CDB
+  export VALET_CONFIG_COLOR_INFO=CIN
+  export VALET_CONFIG_COLOR_WARNING=CWA
+  export VALET_CONFIG_COLOR_SUCCESS=CSU
+  export VALET_CONFIG_COLOR_ERROR=CER
+  export VALET_CONFIG_COLOR_TIMESTAMP=CTI
+  export VALET_CONFIG_COLOR_HIGHLIGHT=CHI
+  export VALET_CONFIG_COLOR_TITLE=CTT
+  export VALET_CONFIG_COLOR_OPTION=COP
+  export VALET_CONFIG_COLOR_ARGUMENT=CAR
+  export VALET_CONFIG_COLOR_COMMAND=CCO
+  export VALET_CONFIG_COLOR_ACTIVE_BUTTON=CAB
+  export VALET_CONFIG_COLOR_UNACTIVE_BUTTON=CUB
+
+  export GLOBAL_COLUMNS=9999
+  export VALET_CONFIG_DISABLE_LOCAL_BIN=true
+  "
+  eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
+  log::createPrintFunction
+  SIMPLIFIED_IMPORTANT_VARIABLES+="
+  ${GLOBAL_LOG_PRINT_FUNCTION}
+  "
 }
 
 # This function is used to echo the content of a file with some substitutions.

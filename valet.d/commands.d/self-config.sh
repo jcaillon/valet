@@ -74,7 +74,7 @@ function writeConfigFile() {
         continue
       fi
       printf -v "EXPORTED_${exportedVariable}" "%q" "${variable}"
-      log::debug "Exporte the variable ⌜EXPORTED_${exportedVariable}⌝ with the value ⌜${variable}⌝."
+      log::debug "Exported the variable ⌜EXPORTED_${exportedVariable}⌝ with the value ⌜${variable}⌝."
     done
   fi
 
@@ -148,7 +148,7 @@ VALET_CONFIG_DISABLE_COLORS=\"\${VALET_CONFIG_DISABLE_COLORS:-${EXPORTED_VALET_C
 VALET_CONFIG_DISABLE_LOG_WRAP=\"\${VALET_CONFIG_DISABLE_LOG_WRAP:-${EXPORTED_VALET_CONFIG_DISABLE_LOG_WRAP:-}}\"
 
 # Sets the maximum width for the log output (used only when log wrapping is enabled).
-VALET_CONFIG_LOGGLOBAL_COLUMNS=\"\${VALET_CONFIG_LOGGLOBAL_COLUMNS:-${EXPORTED_VALET_CONFIG_LOGGLOBAL_COLUMNS:-}}\"
+VALET_CONFIG_LOG_COLUMNS=\"\${VALET_CONFIG_LOG_COLUMNS:-${EXPORTED_VALET_CONFIG_LOG_COLUMNS:-}}\"
 
 # If true, will disable the timestamp for logs.
 VALET_CONFIG_DISABLE_LOG_TIMESTAMP=\"\${VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-${EXPORTED_VALET_CONFIG_DISABLE_LOG_TIMESTAMP:-}}\"

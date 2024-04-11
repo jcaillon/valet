@@ -56,7 +56,11 @@ options:
 
   extractCommandDefinitionToVariables "${content}"
 
-  declare -p ${!TEMP_CMD_BUILD_*}
+  local varName var
+  for varName in ${!TEMP_CMD_BUILD_*}; do
+    local -n var="${varName}"
+    echo "${varName}=${var@Q}"
+  done
 
   endTest "Testing extractCommandDefinitionToVariables" 0
 }

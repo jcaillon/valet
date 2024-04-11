@@ -162,10 +162,8 @@ function main::enableProfiler() {
 function main::disableProfiler() {
   log::info "Disabling profiler."
   set +x
-  unset BASH_XTRACEFD
+  unset BASH_XTRACEFD PS4 PROFILING
   exec 5>&-
-  unset PS4
-  unset PROFILING
   main::cleanProfilerFile
 }
 
@@ -818,7 +816,7 @@ function main::showInteractiveCommandsMenu() {
 
   fzf::showFzf "menu" "${menuId}" "${menuHeader}" "${menuBody}" \
     --preview-label='Command help' \
-    --preview="VALET_LOG_LEVEL=error '${GLOBAL_VALET_HOME}/valet' help --columns \$((FZF_PREVIEWGLOBAL_COLUMNS - 1)) {1}"
+    --preview="VALET_LOG_LEVEL=error '${GLOBAL_VALET_HOME}/valet' help --columns \$((FZF_PREVIEW_COLUMNS - 1)) {1}"
 
   choice="${LAST_RETURNED_VALUE}"
   choice="${choice#*$'\n'}" # delete first line (query)

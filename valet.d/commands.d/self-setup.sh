@@ -42,9 +42,8 @@ function selfSetup() {
   else
     export VALET_CONFIG_DISABLE_COLORS=false
   fi
-  log::setColors
   log::createPrintFunction
-  eval "${LOG_LINE_FUNCTION}"
+  eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
   echo "─────────────────────────────────────"
   echo "This is a nerd icon check, check out the next lines:"
@@ -63,7 +62,7 @@ function selfSetup() {
       export VALET_CONFIG_DISABLE_NERDFONT_ICONS=false
     fi
     log::createPrintFunction
-    eval "${LOG_LINE_FUNCTION}"
+    eval "${GLOBAL_LOG_PRINT_FUNCTION}"
   fi
 
   # generate the config

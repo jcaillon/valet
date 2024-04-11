@@ -14,9 +14,9 @@ function testHelp() {
   endTest "Testing to fuzzy find an help" $?
 
   # testing help options
-  echo "→ valet help --columns 60 help"
-  ("${GLOBAL_VALET_HOME}/valet" help --columns 60 help)
-  endTest "Testing help with columns 60" $?
+  echo "→ valet help --columns 48 help"
+  ("${GLOBAL_VALET_HOME}/valet" help --columns 48 help)
+  endTest "Testing help with columns 48" $?
 
   # test that we catch option errors
   echo "→ valet help --unknown -colo"

@@ -33,11 +33,9 @@ _TEST_0000_COMMON_UTILS=1
 
 
 # override the local state and config directories to return temp directories
-  setTempFilesNumber 800
+setTempFilesNumber 800
 io::createTempDirectory
-export VALET_CONFIG_LOCAL_STATE_DIRECTORY="${LAST_RETURNED_VALUE}"
-io::createTempDirectory
-export VALET_CONFIG_DIRECTORY="${LAST_RETURNED_VALUE}"
+export TEST_VALET_CONFIG_LOCAL_STATE_DIRECTORY="${LAST_RETURNED_VALUE}"
 
 function echoTempFileWithTimeStampSubstitution() {
   local file="${_TEST_TEMP_FILE}"

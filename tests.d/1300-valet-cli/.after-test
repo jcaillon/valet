@@ -2,5 +2,4 @@
 
 export VALET_CONFIG_DISABLE_LOCAL_BIN=false
 
-unset fzf
-unset sudo
+unset fzf sudo

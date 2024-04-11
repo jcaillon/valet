@@ -150,11 +150,11 @@ function interactive::promptYesNo() {
 
 function setupTerminal() {
   stty -echo
-  printf '%s' "${switchScreenBuffer}${disableLineWrapping}${cursorHide}${eraseScreen}${limitScrolling}$((GLOBAL_LINES - 1))${GLOBAL_LINES}"
+  printf '%s' "${switchScreenBuffer}${disableLineWrapping}${cursorHide}${eraseScreen}${limitScrolling}$((GLOBAL_LINES - 1))${_lines}"
 }
 
 function resetTerminal() {
-  printf '%s' "${enableLineWrapping}${cursorShow}${eraseScreen}${limitScrolling}${GLOBAL_LINES}${switchScreenBuffer}"
+  printf '%s' "${enableLineWrapping}${cursorShow}${eraseScreen}${limitScrolling}${_lines}${switchScreenBuffer}"
   stty echo
 }
 

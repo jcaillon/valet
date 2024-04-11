@@ -64,17 +64,17 @@ options:
 
     Another line.
 
-declare -a TEMP_CMD_BUILD_arguments_description=([0]="Description of arg 1." [1]="Description of arg 2." [2]="Description of arg 3.")
-declare -a TEMP_CMD_BUILD_arguments_fourthProp=([0]="" [1]="" [2]="ok3")
-declare -a TEMP_CMD_BUILD_arguments_name=([0]="arg1" [1]="arg2" [2]="arg3")
-declare -a TEMP_CMD_BUILD_arguments_thirdProp=([0]="" [1]="ok2")
-declare -- TEMP_CMD_BUILD_author="github.com/jcaillon"
-declare -- TEMP_CMD_BUILD_command="test"
-declare -- TEMP_CMD_BUILD_description=$'A long description.\n\nIn a multi-line string.\n\nWith 3 paragraphs.'
-declare -- TEMP_CMD_BUILD_fileToSource="source"
-declare -a TEMP_CMD_BUILD_options_description=([0]=$'Description of option 1.\n\nAnother line.' [1]=$'Description of option 2.\n\nAnother line.' [2]=$'Description of option 3.\n\nAnother line.\n')
-declare -a TEMP_CMD_BUILD_options_name=([0]="option1" [1]="option2")
-declare -- TEMP_CMD_BUILD_shortDescription="Short description."
+TEMP_CMD_BUILD_arguments_description='Description of arg 1.'
+TEMP_CMD_BUILD_arguments_fourthProp=''
+TEMP_CMD_BUILD_arguments_name='arg1'
+TEMP_CMD_BUILD_arguments_thirdProp=''
+TEMP_CMD_BUILD_author='github.com/jcaillon'
+TEMP_CMD_BUILD_command='test'
+TEMP_CMD_BUILD_description=$'A long description.\n\nIn a multi-line string.\n\nWith 3 paragraphs.'
+TEMP_CMD_BUILD_fileToSource='source'
+TEMP_CMD_BUILD_options_description=$'Description of option 1.\n\nAnother line.'
+TEMP_CMD_BUILD_options_name='option1'
+TEMP_CMD_BUILD_shortDescription='Short description.'
 ```
 
 ### Testing extractFirstLongNameFromOptionString

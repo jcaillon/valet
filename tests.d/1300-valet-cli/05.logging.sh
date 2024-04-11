@@ -20,9 +20,9 @@ function testLogging() {
 
   # testing the different log options
 
-  echo "→ valet self mock1 logging-level"
+  echo "→ VALET_CONFIG_DISABLE_COLORS=false valet self mock1 logging-level"
   resetLogOptions
-  ("${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${_TEST_TEMP_FILE}")
+  (VALET_CONFIG_DISABLE_COLORS=false "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${_TEST_TEMP_FILE}")
   echoTempFileWithTimeStampSubstitution 1>&2
   endTest "Testing default logging" 0
 
@@ -56,22 +56,22 @@ function testLogging() {
   echoTempFileWithTimeStampSubstitution 1>&2
   endTest "Testing no wrap logging" 0
 
-  echo "→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_LOGGLOBAL_COLUMNS=80 valet self mock1 logging-level"
+  echo "→ VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 logging-level"
   resetLogOptions
-  (VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_LOGGLOBAL_COLUMNS=80 "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${_TEST_TEMP_FILE}")
+  (VALET_CONFIG_DISABLE_COLORS=true VALET_CONFIG_LOG_COLUMNS=80 "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${_TEST_TEMP_FILE}")
   echoTempFileWithTimeStampSubstitution 1>&2
   endTest "Testing wrap at 80 logging" 0
 }
 
 function resetLogOptions() {
-  unset VALET_CONFIG_DISABLE_COLORS
-  unset VALET_CONFIG_DISABLE_LOG_TIMESTAMP
-  unset VALET_CONFIG_DISABLE_NERDFONT_ICONS
-  unset VALET_CONFIG_DISABLE_LOG_WRAP
-  unset VALET_CONFIG_ENABLE_CI_MODE
-  unset VALET_CONFIG_LOGGLOBAL_COLUMNS
-  unset GLOBAL_COLUMNS
-  export VALET_CONFIG_LOGGLOBAL_COLUMNS=120
+  unset VALET_CONFIG_DISABLE_COLORS \
+    VALET_CONFIG_DISABLE_LOG_TIMESTAMP \
+    VALET_CONFIG_DISABLE_NERDFONT_ICONS \
+    VALET_CONFIG_DISABLE_LOG_WRAP \
+    VALET_CONFIG_ENABLE_CI_MODE \
+    VALET_CONFIG_LOG_COLUMNS \
+    GLOBAL_COLUMNS
+  export VALET_CONFIG_LOG_COLUMNS=120
 }
 
 function main() {

@@ -114,8 +114,7 @@ function main() {
   testIo::invoke3
   testIo::invoke
 
-  unset VALET_CONFIG_BIN_PATH
-  unset VALET_CONFIG_DISABLE_LOCAL_BIN
+  unset VALET_CONFIG_BIN_PATH VALET_CONFIG_DISABLE_LOCAL_BIN
 }
 
 main
