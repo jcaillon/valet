@@ -9,7 +9,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ echo nny | selfSetup
+→ echo nnn | selfSetup
 ─────────────────────────────────────
 CINThis is a COLOR CHECK, this line should be COLORED (in cyan by default).CDE
 CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
@@ -17,7 +17,8 @@ CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
 [2m   ┌─[56b─┐[0m
 [2m   │[0m Do you see the colors in the color check above the line? [2m│[0m
 [2m   └─[56b─┘\[0m
-[?25l[1m[7m   (Y)ES   [0m   [1m[7m   (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
+[1G[0J
+[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
 [2m │[0m No. [2m│[0m
 [2m/└─[3b─┘[0m
 ─────────────────────────────────────
@@ -30,15 +31,17 @@ An information icon: II
 [2m   ┌─[69b─┐[0m
 [2m   │[0m Do you correctly see the nerd icons in the icon check above the line? [2m│[0m
 [2m   └─[69b─┘\[0m
-[?25l[1m[7m   (Y)ES   [0m   [1m[7m   (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
+[1G[0J
+[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
 [2m │[0m No. [2m│[0m
 [2m/└─[3b─┘[0m
 [2m   ┌─[41b─┐[0m
 [2m   │[0m Do you want to enable the icons in Valet? [2m│[0m
 [2m   └─[41b─┘\[0m
-[?25l[1m[7m   (Y)ES   [0m   [1m[7m   (N)O   [0m[1G[0K[?25h[2m ┌─[4b─┐[0m
-[2m │[0m Yes. [2m│[0m
-[2m/└─[4b─┘[0m
+[1G[0J
+[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
+[2m │[0m No. [2m│[0m
+[2m/└─[3b─┘[0m
 ```
 
 **Error** output:
@@ -49,13 +52,13 @@ INFO     If you see the replacement character ? in my terminal, it means you don
 You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
 After that, you need to setup your terminal to use this newly installed font.
 You can also choose to enable the icons in Valet if you plan to install a nerd font.
-INFO    II   Creating the valet config file ⌜/tmp/valet.d/f801-0⌝.
-SUCCESS IS   You are all set!
-INFO    II   As a reminder, you can modify the configuration done during this set up by either:
+INFO     Creating the valet config file ⌜/tmp/valet.d/f801-0⌝.
+SUCCESS  You are all set!
+INFO     As a reminder, you can modify the configuration done during this set up by either:
 - replaying the command ⌜valet self setup⌝,
 - running the command ⌜valet self config⌝.
-INFO    II   Run ⌜valet --help⌝ to get started.
-INFO    II   You can create your own commands and have them available in valet, please check ⌜https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md⌝ to do so.
+INFO     Run ⌜valet --help⌝ to get started.
+INFO     You can create your own commands and have them available in valet, please check ⌜https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md⌝ to do so.
 ```
 
 ### Testing selfSetup 2
@@ -65,7 +68,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ echo nny | selfSetup
+→ echo yyo | selfSetup
 ─────────────────────────────────────
 CINThis is a COLOR CHECK, this line should be COLORED (in cyan by default).CDE
 CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
@@ -73,7 +76,8 @@ CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
 [2m   ┌─[56b─┐[0m
 [2m   │[0m Do you see the colors in the color check above the line? [2m│[0m
 [2m   └─[56b─┘\[0m
-[?25l[1m[7m   (Y)ES   [0m   [1m[7m   (N)O   [0m[1G[0K[?25h[2m ┌─[4b─┐[0m
+[1G[0J
+[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m ┌─[4b─┐[0m
 [2m │[0m Yes. [2m│[0m
 [2m/└─[4b─┘[0m
 ─────────────────────────────────────
@@ -86,13 +90,15 @@ An information icon: II
 [2m   ┌─[69b─┐[0m
 [2m   │[0m Do you correctly see the nerd icons in the icon check above the line? [2m│[0m
 [2m   └─[69b─┘\[0m
-[?25l[1m[7mCAB   (Y)ES   [0m   [1m[7mCUB   (N)O   [0m[1G[0K[?25h[2m ┌─[4b─┐[0m
+[1G[0J
+[1F[?25l[7mCAB   (Y)ES   [0m   [7mCUB   (N)O   [0m[1G[0K[?25h[2m ┌─[4b─┐[0m
 [2m │[0m Yes. [2m│[0m
 [2m/└─[4b─┘[0m
 [2m   ┌─[32b─┐[0m
 [2m   │[0m Did you read the warnings above? [2m│[0m
 [2m   └─[32b─┘\[0m
-[?25l[1m[7mCAB   (O)K   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
+[1G[0J
+[1F[?25l[7mCAB   (O)K   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
 [2m │[0m Ok. [2m│[0m
 [2m/└─[3b─┘[0m
 ```

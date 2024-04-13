@@ -204,14 +204,14 @@ function log::createPrintFunction() {
   local cDefault=""
   local cTimestamp=""
   if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
-    cTimestamp=${VALET_CONFIG_COLOR_TIMESTAMP:-$'\e'"[1;90m"}
+    cTimestamp=${VALET_CONFIG_COLOR_TIMESTAMP:-$'\e'"[90m"} # Bright Black (Gray)
     cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
-    local cDebug=${VALET_CONFIG_COLOR_DEBUG:-$'\e'"[1;30m"}
-    local cInfo=${VALET_CONFIG_COLOR_INFO:-$'\e'"[0;36m"}
-    local cWarning=${VALET_CONFIG_COLOR_WARNING:-$'\e'"[0;33m"}
-    local cSuccess=${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[0;32m"}
-    local cError=${VALET_CONFIG_COLOR_ERROR:-$'\e'"[0;31m"}
-    local cHighlight=${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[1;35m"}
+    local cDebug=${VALET_CONFIG_COLOR_DEBUG:-$'\e'"[90m"} # Bright Black (Gray)
+    local cInfo=${VALET_CONFIG_COLOR_INFO:-$'\e'"[36m"} # Cyan
+    local cWarning=${VALET_CONFIG_COLOR_WARNING:-$'\e'"[33m"} # Yellow
+    local cSuccess=${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[32m"} # Green
+    local cError=${VALET_CONFIG_COLOR_ERROR:-$'\e'"[31m"} # Red
+    local cHighlight=${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"} # Bright Magenta (Pink)
 
     GLOBAL_LOG_PRINT_FUNCTION+="
     local color
@@ -404,14 +404,6 @@ function log::getCallStack() {
   done
   LAST_RETURNED_VALUE="${stack}"
 }
-
-# Parsing the options from environment variables
-if [[ -n "${VALET_LOG_LEVEL:-}" ]]; then
-  log::setLevel "${VALET_LOG_LEVEL}"
-fi
-if [[ ${VALET_VERBOSE=:-} == "true" ]]; then
-  log::setLevel "debug"
-fi
 
 #===============================================================
 # >>> Core utilities
@@ -890,9 +882,18 @@ function core::checkParseResults() {
 }
 
 #===============================================================
-# >>> Include main
+# >>> Main
 #===============================================================
 
+# Parsing the options from environment variables
+if [[ -n "${VALET_LOG_LEVEL:-}" ]]; then
+  log::setLevel "${VALET_LOG_LEVEL}"
+fi
+if [[ ${VALET_VERBOSE=:-} == "true" ]]; then
+  log::setLevel "debug"
+fi
+
+# Include main if not already included
 if [[ -z "${GLOBAL_MAIN_INCLUDED:-}" ]]; then
   # shellcheck source=main
   source "${GLOBAL_VALET_HOME}/valet.d/main"

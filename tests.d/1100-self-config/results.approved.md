@@ -148,6 +148,14 @@ VALET_CONFIG_COLOR_COMMAND="${VALET_CONFIG_COLOR_COMMAND:-}"
 VALET_CONFIG_COLOR_ACTIVE_BUTTON="${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-}"
 VALET_CONFIG_COLOR_UNACTIVE_BUTTON="${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}"
 
+# -----------
+# Other configs.
+# -----------
+
+# If true, will enable the automatic bump of the version of Valet on build.
+# Intended for Valet developers only.
+VALET_CONFIG_BUMP_VERSION_ON_BUILD="${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-}"
+
 
 
 ```
@@ -337,6 +345,14 @@ VALET_CONFIG_COLOR_COMMAND="${VALET_CONFIG_COLOR_COMMAND:-}"
 # Colors for the interactive mode
 VALET_CONFIG_COLOR_ACTIVE_BUTTON="${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-}"
 VALET_CONFIG_COLOR_UNACTIVE_BUTTON="${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}"
+
+# -----------
+# Other configs.
+# -----------
+
+# If true, will enable the automatic bump of the version of Valet on build.
+# Intended for Valet developers only.
+VALET_CONFIG_BUMP_VERSION_ON_BUILD="${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-}"
 
 
 

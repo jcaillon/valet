@@ -145,7 +145,10 @@ function selfBuild() {
     writeCommandDefinitionVariablesToFile "${outputFile}"
     log::info "The command definition variables have been written to ⌜${outputFile}⌝."
   fi
-  bumpValetBuildVersion
+
+  if [[ ${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-false} == "true" ]]; then
+    bumpValetBuildVersion
+  fi
 
   log::success "The valet user commands have been successfully built"
 }
@@ -187,6 +190,8 @@ function bumpValetBuildVersion() {
   string::bumpSemanticVersion "${currentVersion}" "patch" "false"
 
   echo -n "${LAST_RETURNED_VALUE}" >"${versionFile}"
+
+  log::info "The valet build version has been bumped to ⌜${LAST_RETURNED_VALUE}⌝."
 }
 
 # This function extracts the command definitions from the files and stores them in

@@ -349,14 +349,14 @@ stack:
 ├─ In function testIo::invoke() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:61
 ├─ In function main() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:115
 ├─ In function source() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:120
-├─ In function source() $GLOBAL_VALET_HOME/valet.d/core:451
+├─ In function source() $GLOBAL_VALET_HOME/valet.d/core:443
 ├─ In function runTest() valet.d/commands.d/self-test-utils:241
 ├─ In function runTestSuites() valet.d/commands.d/self-test-utils:195
 ├─ In function runCoreTests() valet.d/commands.d/self-test-utils:107
 ├─ In function selfTest() valet.d/commands.d/self-test.sh:110
 ├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:585
 ├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:537
-└─ In function main() ./valet:99
+└─ In function main() $GLOBAL_VALET_HOME/valet:99
 ```
 
 ### Testing io::invoke, output to var

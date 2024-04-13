@@ -20,8 +20,9 @@ function testselfSetup() {
   function curl() { return 0; }
   export -f awk diff curl
 
-  echo "→ echo nny | selfSetup"
-  echo nny | selfSetup && exitCode=0 || exitCode=$?
+  echo "→ echo nnn | selfSetup"
+  echo nnn 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
+  selfSetup <"${GLOBAL_TEMPORARY_WORK_FILE}" && exitCode=0 || exitCode=$?
   endTest "Testing selfSetup 1" ${exitCode}
 
   rm -f "${configFile}"
@@ -29,8 +30,9 @@ function testselfSetup() {
   local originalPath="${PATH}"
   export PATH=""
 
-  echo "→ echo nny | selfSetup"
-  echo yyo | selfSetup && exitCode=0 || exitCode=$?
+  echo "→ echo yyo | selfSetup"
+  echo yyo 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
+  selfSetup <"${GLOBAL_TEMPORARY_WORK_FILE}" && exitCode=0 || exitCode=$?
   endTest "Testing selfSetup 2" ${exitCode}
 
   export PATH="${originalPath}"

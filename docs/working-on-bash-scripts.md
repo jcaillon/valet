@@ -59,13 +59,13 @@ To write performance script, you should:
   - Avoid [subshells](https://tldp.org/LDP/abs/html/subshells.html),
   - avoid [pipes](https://tldp.org/LDP/abs/html/special-chars.html#PIPEREF) which also run as [child processes](https://tldp.org/LDP/abs/html/othertypesv.html#CHILDREF).
 - If possible, prefer manipulating variables content instead of files content.
-- Avoid here string `<<<`.
+- Try to avoid here string `<<<` (AFAIK it uses a temporary file behind the scene).
 
 > This improvements can lead to **HUGE** differences in run time. Especially in windows bash which is quite slow.
 >
 > The initial version of valet was taking around 5s to parse and execute a command, and it went down to a few hundred milliseconds after refactoring using the rules above.
 
-The chapters below give you some tips for the most common
+The chapters below give you some tips for the common problems that you can encounter:
 
 ### Call and get the output of a function
 
@@ -185,3 +185,18 @@ done
 IFS can be set as a `local` variable, and it can be any character.
 
 However, you will not go through lines that are empty. You will need to keep the `while read` if you need them.
+
+### Pass string to stdin of a program or function
+
+Instead of a pipe:
+
+```bash
+echo y | doSomething
+```
+
+do:
+
+```bash
+echo y 1> myfile
+doSomething <myfile
+```
