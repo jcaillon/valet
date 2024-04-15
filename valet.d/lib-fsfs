@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+# fsfs stands for full srceen fuzzy search.
+
+# shellcheck source=lib-ansi-codes
+source ansi-codes interactive io
+
+#===============================================================
+# >>> Events
+#===============================================================
+
+
+
+#===============================================================
+# >>> Custom drawing functions
+#===============================================================
+
+function fsfs::searchCommand() {
+
+  local originalTraps
+  io::captureOutput trap -p SIGWINCH EXIT SIGINT SIGQUIT
+  originalTraps="${LAST_RETURNED_VALUE}"
+
+  _CLOSE_INTERACTIVE_SESSION=false
+
+  # we still need to export the terminal size but in addition, we need to _drawScreen.
+  # Note: SIGWINCH does not interrupt a read command and wait for it to complete so we need
+  # to set a timeout on read to allow this refresh.
+  trap 'system::exportTerminalSize; _drawScreen' SIGWINCH
+
+  # still need to handle the exit, but we also need to reset the terminal when exiting.
+  trap '_resetTerminal; main::onExitInternal' EXIT
+
+  # interrupting closes the interactive session
+  trap '_interruptSession' SIGINT SIGQUIT
+
+  _setupTerminal
+  _drawScreen
+
+  while true; do
+    read -t 0.1 -srn 1 && key "${REPLY}"
+
+    # break if fd 1 is closed or does not refer to a terminal.
+    if [[ ! -t 1 || ${_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
+  done
+
+  # restore the initial traps
+  eval "${originalTraps}"
+
+  _resetTerminal
+
+  log::info "Bye!"
+}
+
+function _drawScreen() {
+  writeToStatusBar "Terminal size is: ${GLOBAL_COLUMNS}x${GLOBAL_LINES}"
+}
+
+function _setupTerminal() {
+  if command -v stty &>/dev/null; then
+    stty -echo &>/dev/null
+  fi
+  printf '%s' "${enableAlternateBufferScreen}${cursorHide}${eraseScreen}"
+}
+
+function _resetTerminal() {
+  printf '%s' "${cursorShow}${disableAlternateBufferScreen}"
+  if command -v stty &>/dev/null; then
+    stty echo &>/dev/null
+  fi
+}
+
+function _interruptSession() {
+  _CLOSE_INTERACTIVE_SESSION=true
+  return 0
+}
+
+
+# Write a message to the status bar.
+function writeToStatusBar() {
+  printf '%s' "${cursorSavePos}${cursorMove}$((GLOBAL_LINES - 1));1${_to}${eraseLine}${textBold}${1}${textReset}${cursorRestorePos}"
+}
+
+function key() {
+  local keyPressed="${1}"
+  local specialKeyPress=false
+
+  # Special key detection.
+  if [[ ${keyPressed} == $'\e' ]]; then
+    read -t 0.1 -rsn 2
+    keyPressed="${keyPressed}${REPLY}"
+    specialKeyPress=true
+
+    local sk2
+    printf -v sk2 "%q" "${keyPressed}"
+    writeToStatusBar "Special key pressed: ⌜${sk2}⌝."
+  fi
+
+  case ${keyPressed} in
+  $'\e[C' | $'\eOC' | "")
+    writeToStatusBar right or enter
+    ;;
+  $'\e[D' | $'\eOD' | $'\177' | $'\b')
+    writeToStatusBar left or backspace
+    ;;
+  $'\e[B' | $'\eOB')
+    writeToStatusBar down
+    ;;
+  $'\e[A' | $'\eOA')
+    writeToStatusBar up
+    ;;
+  s)
+    writeToStatusBar Start search
+    search "search"
+    ;;
+  q)
+    _CLOSE_INTERACTIVE_SESSION=true
+    ;;
+  *)
+    if [[ ${specialKeyPress} == "false" ]]; then
+      writeToStatusBar "Normal key pressed: ⌜${keyPressed}⌝."
+    fi
+    ;;
+  esac
+}
+
+function search() {
+  local keyPressed
+  local searchString=""
+
+  printf '%s' "${cursorShow}${cursorMove}$((GLOBAL_LINES));1${_to}${eraseLine}"
+
+  while IFS= read -rsn 1 -p "${cursorHide}${_drawScreenPrompt}${cursorShow}${textBold}SEARCH:${textReset} ${searchString}" keyPressed; do
+    case ${keyPressed} in
+    # Backspace.
+    $'\177' | $'\b')
+      searchString=${searchString%?}
+      ;;
+    # Escape key.
+    $'\e')
+      read -t 0.1 -rsn 2
+      searchString=
+      break
+      ;;
+    # Enter/Return.
+    "")
+      writeToStatusBar "You searched: ${searchString}"
+      break
+      ;;
+    *)
+      searchString+=$keyPressed
+      ;;
+    esac
+  done
+
+  printf '%s' "${cursorHide}${eraseLine}"
+}
+

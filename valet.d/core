@@ -396,7 +396,13 @@ function log::getCallStack() {
     if [[ -z "${func}" ]]; then func=MAIN; fi
     linen="${BASH_LINENO[$((i - 1))]}"
     src="${BASH_SOURCE[${i}]}"
-    if [[ -z "${src}" ]]; then src=non_file_source; fi
+    if [[ -z "${src}" ]]; then
+      src=non_file_source;
+    elif [[ -f "${src/#.\//"${PWD}"\/}" ]]; then
+      src="${src/#.\//"${PWD}"\/}"
+    elif [[ -f "${src/#.\//"${GLOBAL_VALET_HOME}"\/}" ]]; then
+      src="${src/#.\//"${GLOBAL_VALET_HOME}"\/}"
+    fi
     if [[ ${i} -eq "$((stackSize - 1))" ]]; then
       treeString="└─"
     fi

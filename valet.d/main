@@ -31,7 +31,7 @@ trap 'main::onErrorInternal $?' ERR
 function main::onExitInternal() {
   local rc=$?
 
-  # disable the profiler is still on
+  # disable the profiler if still on
   if [[ ${PROFILING:-} == "1" ]]; then main::disableProfiler; fi
 
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
@@ -42,6 +42,10 @@ function main::onExitInternal() {
   fi
   if command -v onExit 1>/dev/null 2>&1; then
     onExit
+  fi
+  # if we ran an interactive function, make sure to restore the cursor
+  if [[ -n ${cursorShow:-} ]]; then
+    printf '%s' "${cursorShow}"
   fi
   # always call cleanUp before exiting
   main::onCleanUpInternal

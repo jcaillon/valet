@@ -1,6 +1,14 @@
 ---
 title: Valet
 layout: hextra-home
+keywords:
+  - bash
+  - script
+  - windows
+  - interactive
+  - menu
+  - search
+  - string
 ---
 
 {{< hextra/hero-badge >}}
@@ -22,12 +30,12 @@ layout: hextra-home
 </div>
 
 <div class="hx-mb-6" style="padding-top: 2rem; padding-bottom: 2rem;">
-{{< hextra/hero-button text="Read the 🤬 manual" link="docs" >}}
+{{< hextra/hero-button text="Read the docs" link="docs" >}}
 </div>
 
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
-    title="Fast and Full-featured"
+    title="A menu to find your scripts"
     subtitle="Simple and easy to use, yet powerful and feature-rich."
     class="hx-aspect-auto md:hx-aspect-[1.1/1] max-md:hx-min-h-[340px]"
     image="images/hextra-doc.webp"
@@ -35,7 +43,7 @@ layout: hextra-home
     style="background: radial-gradient(ellipse at 50% 80%,rgba(194,97,254,0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
-    title="Markdown is All You Need"
+    title="Clear and standardized help"
     subtitle="Compose with just Markdown. Enrich with Shortcode components."
     class="hx-aspect-auto md:hx-aspect-[1.1/1] max-lg:hx-min-h-[340px]"
     image="images/hextra-markdown.webp"
