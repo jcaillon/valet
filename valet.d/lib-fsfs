@@ -160,18 +160,18 @@ function _drawRightPane() {
   local details="${1}"
   local IFS
 
-  printf '%s' "${cursorMove}${_RIGHT_PANE_FIRST_LINE};$((_LEFT_PANE_WIDTH + 1))${_to}"
+  printf '%s' "${AC__CURSOR_MOVE__}${_RIGHT_PANE_FIRST_LINE};$((_LEFT_PANE_WIDTH + 1))${__AC__TO}"
 
   # draw the title
   local titleWidth=${#_RIGHT_PANE_TITLE}
   local titlePadding=$(((_RIGHT_PANE_WIDTH - titleWidth) / 2 - 2))
-  printf '%s' "┌─${repeat}${titlePadding}${_lastChar}${_RIGHT_PANE_TITLE}─${repeat}$((_RIGHT_PANE_WIDTH - titleWidth - titlePadding - 4))${_lastChar}┐"$'\n'
+  printf '%s' "┌─${AC__REPEAT__}${titlePadding}${__AC__LAST_CHAR}${_RIGHT_PANE_TITLE}─${AC__REPEAT__}$((_RIGHT_PANE_WIDTH - titleWidth - titlePadding - 4))${__AC__LAST_CHAR}┐"$'\n'
 
   # draw the details
   local -i currentLine=1
   local line
   while IFS= read -r line; do
-    printf "%s%s%-$((_RIGHT_PANE_WIDTH - 4))s%s\n" "${cursorMove}$((_RIGHT_PANE_FIRST_LINE + currentLine));$((_LEFT_PANE_WIDTH + 1))${_to}" "│ " "${line}" " │"
+    printf "%s%s%-$((_RIGHT_PANE_WIDTH - 4))s%s\n" "${AC__CURSOR_MOVE__}$((_RIGHT_PANE_FIRST_LINE + currentLine));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" "│ " "${line}" " │"
     currentLine+=1
   done <<<"${details}"
 
@@ -181,7 +181,7 @@ function _drawStaticScreen() {
   local IFS
 
   # clear the screen, move to the top left corner
-  printf '%s' "${eraseScreen}${cursorMove}1;1${_to}"
+  printf '%s' "${AC__ERASE_SCREEN}${AC__CURSOR_MOVE__}1;1${__AC__TO}"
 
   local leftPaneWidth=$((GLOBAL_COLUMNS - _RIGHT_PANE_WIDTH))
 
@@ -207,18 +207,18 @@ function _drawStaticScreen() {
   _RIGHT_LINES=$(( _RIGHT_LINES > 0 ? _RIGHT_LINES : 1 ))
 
   # draw the left help text
-  printf '%s' "${cursorMove}$((GLOBAL_LINES));1${_to}${eraseLine}${_LEFT_PANE_HELP_TEXT}"
+  printf '%s' "${AC__CURSOR_MOVE__}$((GLOBAL_LINES));1${__AC__TO}${AC__ERASE_LINE}${_LEFT_PANE_HELP_TEXT}"
 }
 
 function _setupTerminal() {
   if command -v stty &>/dev/null; then
     stty -echo &>/dev/null || true
   fi
-  printf '%s' "${enableAlternateBufferScreen}${cursorHide}${eraseScreen}"
+  printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
 }
 
 function _resetTerminal() {
-  printf '%s' "${cursorShow}${disableAlternateBufferScreen}"
+  printf '%s' "${AC__CURSOR_SHOW}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
   if command -v stty &>/dev/null; then
     stty echo &>/dev/null || true
   fi
@@ -232,7 +232,7 @@ function _interruptSession() {
 
 # Write a message to the status bar.
 function writeToStatusBar() {
-  printf '%s' "${cursorSavePos}${cursorMove}$((GLOBAL_LINES - 1));1${_to}${eraseLine}${textBold}${1}${textReset}${cursorRestorePos}"
+  printf '%s' "${AC__CURSOR_SAVE_POS}${AC__CURSOR_MOVE__}$((GLOBAL_LINES - 1));1${__AC__TO}${AC__ERASE_LINE}${AC__TEXT_BOLD}${1}${AC__TEXT_RESET}${AC__CURSOR_RESTORE_POS}"
 }
 
 function key() {
@@ -282,9 +282,9 @@ function search() {
   local keyPressed
   local searchString=""
 
-  printf '%s' "${cursorShow}${cursorMove}$((GLOBAL_LINES));1${_to}${eraseLine}"
+  printf '%s' "${AC__CURSOR_SHOW}${AC__CURSOR_MOVE__}$((GLOBAL_LINES));1${__AC__TO}${AC__ERASE_LINE}"
 
-  while IFS= read -rsn 1 -p "${cursorHide}${_drawScreenPrompt}${cursorShow}${textBold}SEARCH:${textReset} ${searchString}" keyPressed; do
+  while IFS= read -rsn 1 -p "${AC__CURSOR_HIDE}${_drawScreenPrompt}${AC__CURSOR_SHOW}${AC__TEXT_BOLD}SEARCH:${AC__TEXT_RESET} ${searchString}" keyPressed; do
     case ${keyPressed} in
     # Backspace.
     $'\177' | $'\b')
@@ -307,6 +307,6 @@ function search() {
     esac
   done
 
-  printf '%s' "${cursorHide}${eraseLine}"
+  printf '%s' "${AC__CURSOR_HIDE}${AC__ERASE_LINE}"
 }
 

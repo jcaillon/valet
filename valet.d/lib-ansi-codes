@@ -25,22 +25,22 @@ set -Eeu -o pipefail
 #===============================================================
 # https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
 
-textReset=$'\e[0m'
+AC__TEXT_RESET=$'\e[0m'
 
-textBold=$'\e[1m'
-textNoBold=$'\e[21m'
-textFaint=$'\e[2m'
-textNoFaint=$'\e[22m'
-textItalic=$'\e[3m'
-textNoItalic=$'\e[23m'
-textUnderline=$'\e[4m'
-textNoUnderline=$'\e[24m'
-textBlink=$'\e[5m'
-textNoBlink=$'\e[25m'
-textInverse=$'\e[7m'
-textNoInverse=$'\e[27m'
-textStrike=$'\e[9m'
-textNoStrike=$'\e[29m'
+AC__TEXT_BOLD=$'\e[1m'
+AC__TEXT_NO_BOLD=$'\e[21m'
+AC__TEXT_FAINT=$'\e[2m'
+AC__TEXT_NO_FAINT=$'\e[22m'
+AC__TEXT_ITALIC=$'\e[3m'
+AC__TEXT_NO_ITALIC=$'\e[23m'
+AC__TEXT_UNDERLINE=$'\e[4m'
+AC__TEXT_NO_UNDERLINE=$'\e[24m'
+AC__TEXT_BLINK=$'\e[5m'
+AC__TEXT_NO_BLINK=$'\e[25m'
+AC__TEXT_INVERSE=$'\e[7m'
+AC__TEXT_NO_INVERSE=$'\e[27m'
+AC__TEXT_STRIKE=$'\e[9m'
+AC__TEXT_NO_STRIKE=$'\e[29m'
 
 
 #===============================================================
@@ -48,54 +48,54 @@ textNoStrike=$'\e[29m'
 #===============================================================
 # https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit
 
-colorReset=$'\e[49m'$'\e[39m'
+AC__COLOR_RESET=$'\e[49m'$'\e[39m'
 
 # Text colors
-fgBlack=$'\e[30m'
-fgBrightBlack=$'\e[90m'
-fgRed=$'\e[31m'
-fgBrightRed=$'\e[91m'
-fgGreen=$'\e[32m'
-fgBrightGreen=$'\e[92m'
-fgYellow=$'\e[33m'
-fgBrightYellow=$'\e[93m'
-fgBlue=$'\e[34m'
-fgBrightBlue=$'\e[94m'
-fgMagenta=$'\e[35m'
-fgBrightMagenta=$'\e[95m'
-fgCyan=$'\e[36m'
-fgBrightCyan=$'\e[96m'
-fgWhite=$'\e[37m'
-fgBrightWhite=$'\e[97m'
+AC__FG_BLACK=$'\e[30m'
+AC__FG_BRIGHT_BLACK=$'\e[90m'
+AC__FG_RED=$'\e[31m'
+AC__FG_BRIGHT_RED=$'\e[91m'
+AC__FG_GREEN=$'\e[32m'
+AC__FG_BRIGHT_GREEN=$'\e[92m'
+AC__FG_YELLOW=$'\e[33m'
+AC__FG_BRIGHT_YELLOW=$'\e[93m'
+AC__FG_BLUE=$'\e[34m'
+AC__FG_BRIGHT_BLUE=$'\e[94m'
+AC__FG_MAGENTA=$'\e[35m'
+AC__FG_BRIGHT_MAGENTA=$'\e[95m'
+AC__FG_CYAN=$'\e[36m'
+AC__FG_BRIGHT_CYAN=$'\e[96m'
+AC__FG_WHITE=$'\e[37m'
+AC__FG_BRIGHT_WHITE=$'\e[97m'
 
-fgReset=$'\e[39m'
+AC__FG_RESET=$'\e[39m'
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
-fgColor=$'\e[38;5;'
-_code=$'m' # "${fgColor}2${_code}"
+AC__FG_COLOR__=$'\e[38;5;'
+__AC__CODE=$'m' # "${fgColor}2${_code}"
 
 # background colors
-bgBlack=$'\e[40m'
-bgBrightBlack=$'\e[100m'
-bgRed=$'\e[41m'
-bgBrightRed=$'\e[101m'
-bgGreen=$'\e[42m'
-bgBrightGreen=$'\e[102m'
-bgYellow=$'\e[43m'
-bgBrightYellow=$'\e[103m'
-bgBlue=$'\e[44m'
-bgBrightBlue=$'\e[104m'
-bgMagenta=$'\e[45m'
-bgBrightMagenta=$'\e[105m'
-bgCyan=$'\e[46m'
-bgBrightCyan=$'\e[106m'
-bgWhite=$'\e[47m'
-bgBrightWhite=$'\e[107m'
+AC__BG_BLACK=$'\e[40m'
+AC__BG_BRIGHT_BLACK=$'\e[100m'
+AC__BG_RED=$'\e[41m'
+AC__BG_BRIGHT_RED=$'\e[101m'
+AC__BG_GREEN=$'\e[42m'
+AC__BG_BRIGHT_GREEN=$'\e[102m'
+AC__BG_YELLOW=$'\e[43m'
+AC__BG_BRIGHT_YELLOW=$'\e[103m'
+AC__BG_BLUE=$'\e[44m'
+AC__BG_BRIGHT_BLUE=$'\e[104m'
+AC__BG_MAGENTA=$'\e[45m'
+AC__BG_BRIGHT_MAGENTA=$'\e[105m'
+AC__BG_CYAN=$'\e[46m'
+AC__BG_BRIGHT_CYAN=$'\e[106m'
+AC__BG_WHITE=$'\e[47m'
+AC__BG_BRIGHT_WHITE=$'\e[107m'
 
-bgReset=$'\e[49m'
+AC__BG_RESET=$'\e[49m'
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
-bgColor=$'\e[48;5;' # "${bgColor}2${_code}"
+AC__BG_COLOR=$'\e[48;5;' # "${bgColor}2${_code}"
 
 
 #===============================================================
@@ -106,67 +106,67 @@ bgColor=$'\e[48;5;' # "${bgColor}2${_code}"
 # Cursor at 1;1 is the top left corner of the screen.
 
 # cursor movement
-cursorMove=$'\e['
-_up=$'A'          # "${cursorMove}2${_up}"
-_down=$'B'        # "${cursorMove}2${_down}"
-_right=$'C'       # "${cursorMove}2${_right}"
-_left=$'D'        # "${cursorMove}2${_left}"
+AC__CURSOR_MOVE__=$'\e['
+__AC__UP=$'A'          # "${cursorMove}2${_up}"
+__AC__DOWN=$'B'        # "${cursorMove}2${_down}"
+__AC__RIGHT=$'C'       # "${cursorMove}2${_right}"
+__AC__LEFT=$'D'        # "${cursorMove}2${_left}"
 # Moves cursor to beginning of the line n lines down/up. If the active position is at the bottom margin, a scroll up is performed
-_startOfLineDown=$'E' # "${cursorMove}1${_startOfLine}"
-_startOfLineUp=$'F'   # "${cursorMove}1${_startOfLine}"
-_column=$'G'      # "${cursorMove}2${_column}"
-_to=$'H'          # "${cursorMove}1;1${_to}" (row;col)
+__AC__START_OF_LINE_DOWN=$'E' # "${cursorMove}1${_startOfLine}"
+__AC__START_OF_LINE_UP=$'F'   # "${cursorMove}1${_startOfLine}"
+__AC__COLUMN=$'G'      # "${cursorMove}2${_column}"
+__AC__TO=$'H'          # "${cursorMove}1;1${_to}" (row;col)
 
-_tabBackward=$'Z' # "${cursorMove}2${_tabBackward}"
-_tabForward=$'I'  # "${cursorMove}2${_tabForward}"
+__AC__TAB_BACKWARD=$'Z' # "${cursorMove}2${_tabBackward}"
+__AC__TAB_FORWARD=$'I'  # "${cursorMove}2${_tabForward}"
 
-_scrollUp=$'S'    # "${cursorMove}2${_scrollUp}" Scroll whole page up by n (default 1) lines. New lines are added at the bottom.
-_scrollDown=$'T'  # "${cursorMove}2${_scrollDown}" Scroll whole page down by n (default 1) lines. New lines are added at the top.
-requestCursorPosition=$'\e[6n' # Reports the cursor position to the application as (as ESC[n;mR), where n is the line and m is the column.
+__AC__SCROLL_UP=$'S'    # "${cursorMove}2${_scrollUp}" Scroll whole page up by n (default 1) lines. New lines are added at the bottom.
+__AC__SCROLL_DOWN=$'T'  # "${cursorMove}2${_scrollDown}" Scroll whole page down by n (default 1) lines. New lines are added at the top.
+AC__REQUEST_CURSOR_POSITION=$'\e[6n' # Reports the cursor position to the application as (as ESC[n;mR), where n is the line and m is the column.
 
 # erase in display or line
-eraseLinesBelow=$'\e[0J' # clear from cursor to end of screen
-eraseLinesAbove=$'\e[1J' # clear from cursor to beginning of the screen
-eraseScreen=$'\e[2J'     # clear entire screen
-eraseCharsRight=$'\e[0K' # clear from cursor to the end of the line
-eraseCharsLeft=$'\e[1K'  # clear from cursor to the beginning of the line
-eraseLine=$'\e[2K'       # clear entire line
+AC__ERASE_LINES_BELOW=$'\e[0J' # clear from cursor to end of screen
+AC__ERASE_LINES_ABOVE=$'\e[1J' # clear from cursor to beginning of the screen
+AC__ERASE_SCREEN=$'\e[2J'     # clear entire screen
+AC__ERASE_CHARS_RIGHT=$'\e[0K' # clear from cursor to the end of the line
+AC__ERASE_CHARS_LEFT=$'\e[1K'  # clear from cursor to the beginning of the line
+AC__ERASE_LINE=$'\e[2K'       # clear entire line
 
 
 #===============================================================
 # >>> General ASCII Codes
 #===============================================================
 
-ringBell=$'\a'
-returnCarriage=$'\r' # Moves the cursor to the first column.
-newLine=$'\n' # Moves to next line, scrolls the display up if at bottom of the screen. Usually does not move horizontally, though programs should not rely on this.
-tab=$'\t' #  	Moves the cursor right to next multiple of 8.
-backspace=$'\b' # Moves the cursor left (but may "backwards wrap" if cursor is at start of line).
+AC__RING_BELL=$'\a'
+AC__RETURN_CARRIAGE=$'\r' # Moves the cursor to the first column.
+AC__NEW_LINE=$'\n' # Moves to next line, scrolls the display up if at bottom of the screen. Usually does not move horizontally, though programs should not rely on this.
+AC__TAB=$'\t' #  	Moves the cursor right to next multiple of 8.
+AC__BACKSPACE=$'\b' # Moves the cursor left (but may "backwards wrap" if cursor is at start of line).
 
 #===============================================================
 # >>> Other Common Private Modes
 #===============================================================
 
 # cursor
-cursorRestorePos=$'\e8'
-cursorSavePos=$'\e7'
-cursorHide=$'\e[?25l'
-cursorShow=$'\e[?25h'
+AC__CURSOR_RESTORE_POS=$'\e8'
+AC__CURSOR_SAVE_POS=$'\e7'
+AC__CURSOR_HIDE=$'\e[?25l'
+AC__CURSOR_SHOW=$'\e[?25h'
 
 # display
-enableAlternateBufferScreen=$'\e[?1049h'
-disableAlternateBufferScreen=$'\e[?1049l'
-saveScreen=$'\e[?47h'
-restoreScreen=$'\e[?47l'
+AC__ENABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049h'
+AC__DISABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049l'
+AC__SAVE_SCREEN=$'\e[?47h'
+AC__RESTORE_SCREEN=$'\e[?47l'
 
-limitScrolling=$'\e[1;'
-_lines=$'r' # "${limitScrolling}20${_lines}"
+AC__LIMIT_SCROLLING__=$'\e[1;'
+__AC__LINES=$'r' # "${limitScrolling}20${_lines}"
 
 # Repeat last displayed character n times
-repeat=$'\e['
-_lastChar=$'b'  # "${repeat}2${_lastChar}"
+AC__REPEAT__=$'\e['
+__AC__LAST_CHAR=$'b'  # "${repeat}2${_lastChar}"
 
-redrawPrompt=$'\r\e[K'
+AC__REDRAW_PROMPT=$'\r\e[K'
 
 # Change cursor style
 # 0 blinking block.
@@ -174,11 +174,11 @@ redrawPrompt=$'\r\e[K'
 # 2 steady block.
 # 3 blinking underline.
 # 4 steady underline.
-changeCursor=$'\e['
-_style=$' q' # "${changeCursor}1${_style}"
+AC__CHANGE_CURSOR__=$'\e['
+__AC__STYLE=$' q' # "${changeCursor}1${_style}"
 
 # change the cursor color (only works in xterm)
 # https://gist.github.com/anonymous/8f1e6c22b5213faf8170dcfc2b0f5b93
 # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/admin-guide/vga-softcursor.rst
-changeCursorToPrompt=$'\e[1 q'$'\e[?16;0;80;c'
-changeCursorToNormal=$'\e[0 q'$'\e[?0;c'
+AC__CHANGE_CURSOR_TO_PROMPT=$'\e[1 q'$'\e[?16;0;80;c'
+AC__CHANGE_CURSOR_TO_NORMAL=$'\e[0 q'$'\e[?0;c'

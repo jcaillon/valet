@@ -37,18 +37,18 @@ function interactive::askForConfirmationRaw() {
   # colors
   local styleActiveButton
   if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
-    styleActiveButton="${textInverse}${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${fgMagenta}}"
+    styleActiveButton="${AC__TEXT_INVERSE}${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${AC__FG_MAGENTA}}"
   else
-    styleActiveButton="${textInverse}"
+    styleActiveButton="${AC__TEXT_INVERSE}"
   fi
 
   interactive::createSpace 2
 
   # print the current state (then move to column 1 to be ready to rewrite)
   printf '%s%s%s' \
-    "${cursorHide}${styleActiveButton}" \
+    "${AC__CURSOR_HIDE}${styleActiveButton}" \
     "   (O)K   " \
-    "${textReset}${cursorMove}1${_column}"
+    "${AC__TEXT_RESET}${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
 
   local keyPressed
   while true; do
@@ -68,7 +68,7 @@ function interactive::askForConfirmationRaw() {
     if [[ ! -t 1 ]]; then break; fi
   done
 
-  printf '%s' "${eraseCharsRight}${cursorShow}"
+  printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}"
 
   return 0
 }
@@ -122,16 +122,16 @@ function interactive::promptYesNoRaw() {
   local styleActiveButton
   local styleUnactiveButton
   if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
-    styleActiveButton="${textInverse}${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${fgMagenta}}"
-    styleUnactiveButton="${textInverse}${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}"
+    styleActiveButton="${AC__TEXT_INVERSE}${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${AC__FG_MAGENTA}}"
+    styleUnactiveButton="${AC__TEXT_INVERSE}${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}"
   else
-    styleActiveButton="${textInverse}"
+    styleActiveButton="${AC__TEXT_INVERSE}"
     styleUnactiveButton=""
   fi
 
   interactive::createSpace 2
 
-  printf '%s' "${cursorHide}"
+  printf '%s' "${AC__CURSOR_HIDE}"
 
   local keyPressed yesColor noColor
   while true; do
@@ -147,10 +147,10 @@ function interactive::promptYesNoRaw() {
     printf '%s%s%s   %s%s%s' \
       "${yesColor}" \
       "   (Y)ES   " \
-      "${textReset}" \
+      "${AC__TEXT_RESET}" \
       "${noColor}" \
       "   (N)O   " \
-      "${textReset}${cursorMove}1${_column}"
+      "${AC__TEXT_RESET}${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
 
     # wait and handle key press
     if interactive::waitForKey -t 1; then
@@ -179,7 +179,7 @@ function interactive::promptYesNoRaw() {
     if [[ ! -t 1 ]]; then break; fi
   done
 
-  printf '%s' "${eraseCharsRight}${cursorShow}"
+  printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}"
 
   if [[ ${state} == "true" ]]; then
     LAST_RETURNED_VALUE=${state}
@@ -260,14 +260,14 @@ interactive::displayDialogBox() {
   string::wrapText "${text}" "${maxWidth}"
   local wrappedText="${LAST_RETURNED_VALUE}"
 
-  local finalString="${textFaint}${leftChar}┌─${repeat}${maxWidth}${_lastChar}─┐${textReset}"$'\n'
+  local finalString="${AC__TEXT_FAINT}${leftChar}┌─${AC__REPEAT__}${maxWidth}${__AC__LAST_CHAR}─┐${AC__TEXT_RESET}"$'\n'
 
   local line
   while read -r line; do
-    finalString+="${textFaint}${leftChar}│${textReset} ${line} ${textFaint}│${textReset}"$'\n'
+    finalString+="${AC__TEXT_FAINT}${leftChar}│${AC__TEXT_RESET} ${line} ${AC__TEXT_FAINT}│${AC__TEXT_RESET}"$'\n'
   done <<<"${wrappedText}"
 
-  finalString+="${textFaint}${lastLeftChar}└─${repeat}${maxWidth}${_lastChar}─┘${lastRightChar}${textReset}"
+  finalString+="${AC__TEXT_FAINT}${lastLeftChar}└─${AC__REPEAT__}${maxWidth}${__AC__LAST_CHAR}─┘${lastRightChar}${AC__TEXT_RESET}"
 
   printf '%s\n' "${finalString}"
 }
@@ -284,10 +284,10 @@ interactive::displayDialogBox() {
 function interactive::testKeys() {
   local keyPressed
 
-  echo "Press any key to see the character that bash sees (CTRL + C to interrupt).${cursorHide}"
+  echo "Press any key to see the character that bash sees (CTRL + C to interrupt).${AC__CURSOR_HIDE}"
   while true; do
     if interactive::waitForKey -t 1; then
-      printf "You pressed: %q        %s" "⌜${LAST_KEY_PRESSED}⌝" "${cursorMove}1${_column}"
+      printf "You pressed: %q        %s" "⌜${LAST_KEY_PRESSED}⌝" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
     fi
     if [[ ! -t 1 ]]; then break; fi
   done
@@ -349,7 +349,7 @@ function interactive::createSpace() {
   local -i loop
   local newLines
   for ((loop = 0; loop < lines; loop++)); do newLines+=$'\n'; done
-  printf '%s' "${cursorMove}1${_column}${eraseLinesBelow}${newLines}${cursorMove}${lines}${_startOfLineUp}"
+  printf '%s' "${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${newLines}${AC__CURSOR_MOVE__}${lines}${__AC__START_OF_LINE_UP}"
 }
 
 # Get the current cursor position.
@@ -362,7 +362,7 @@ function interactive::createSpace() {
 function interactive::getCursorPosition() {
   local escapeCode IFS
   # we request the position and first read \e[
-  IFS='' read -d '' -p "${requestCursorPosition}" -n 2 -sr escapeCode || true
+  IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr escapeCode || true
   # then read line;colR
   IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || true
 }
