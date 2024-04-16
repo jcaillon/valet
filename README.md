@@ -178,6 +178,8 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - fix running tests with verbose mode on.
 - try to make interactive functions usable in colorless mode.
 - for yes/no, add param to choose the default option.
+- Replace awk with bash.
+- Provide an alternative bash function if diff is not found.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

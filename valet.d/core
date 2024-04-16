@@ -788,7 +788,7 @@ function string::fuzzyMatch() {
 #   core::getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
 function core::getConfigurationDirectory() {
   local directory
-  directory="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/valet}"
+  directory="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}"
   if [[ ! -d "${directory}" ]]; then
     mkdir -p "${directory}"
   fi
@@ -803,7 +803,7 @@ function core::getConfigurationDirectory() {
 #   core::getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
 function core::getLocalStateDirectory() {
   local directory
-  directory="${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-${XDG_STATE_HOME:-$HOME/.local/share}/valet}"
+  directory="${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/share}/valet}"
   if [[ ! -d "${directory}" ]]; then
     mkdir -p "${directory}"
   fi

@@ -2,43 +2,113 @@
 set -Eeu -o pipefail
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
+
 # fsfs stands for full srceen fuzzy search.
+# This script uses a lot of "private" variables (starting with _).
 
 # shellcheck source=lib-ansi-codes
-source ansi-codes interactive io
+source ansi-codes
+# shellcheck source=lib-interactive
+source interactive
+# shellcheck source=lib-io
+source io
 
 #===============================================================
-# >>> Events
+# >>> Customization
 #===============================================================
 
+_LEFT_PANE_HELP_TEXT="↑/↓: Move | Enter: Select | Esc: Quit"
+_RIGHT_PANE_HELP_TEXT="←/→: Scroll"
+_RIGHT_PANE_TITLE="Details"
 
+# arrays of current items and their details (if any and if already computed)
+declare -a _ITEMS
+declare -a _ITEMS_DETAILS
+
+# width of the left pane when the right pane is on
+declare -i _LEFT_PANE_WIDTH
+# current item selected
+declare -i _SELECTED_ITEM_INDEX=0
+# index of the first item displayed in the left pane
+declare -i _LEFT_PANE_START_INDEX=0
+# screen line at which to start to display the left pane
+declare -i _LEFT_PANE_FIRST_LINE=1
+# number of lines for the left pane
+declare -i _LEFT_LINES
+
+# width of the right pane
+declare -i _RIGHT_PANE_WIDTH
+# index of the first line displayed in the right pane
+declare -i _RIGHT_PANE_START_INDEX=0
+# screen line at which to start to display the right pane
+declare -i _RIGHT_PANE_FIRST_LINE=1
+# number of lines for the right pane
+declare -i _RIGHT_LINES
+
+# contains the current search string of the user
+declare _SEARCH_STRING
+
+# true when the user asked to close the interactive session
+declare _CLOSE_INTERACTIVE_SESSION
 
 #===============================================================
 # >>> Custom drawing functions
 #===============================================================
 
-function fsfs::searchCommand() {
+# Displays a menu where the user can search and select an item.
+# The menu is displayed in full screen.
+# Each item can optionally have a description/details shown in a right panel.
+# The user can search for an item by typing.
+#
+# $1: The title of the menu.
+# $2: The items to display.
+# $3: The function to call when an item is selected (the 1st param is the current item
+#     2nd param is the item number; it should return the details of the item
+#     in the LAST_RETURNED_VALUE variable).
+function fsfs::menu() {
+  _HEADER="${1}"
+  local items="${2}"
+  _ITEM_SELECTED_CALLBACK="${3}"
 
+  # wrap the header
+  string::wrapText "${_HEADER}" "${GLOBAL_COLUMNS}"
+  _HEADER="${LAST_RETURNED_VALUE}"
+
+  # extract items into an array
+  local line IFS
+  while IFS= read -r line; do
+    _ITEMS+=("${line}")
+  done <<<"${items}"
+
+  _SELECTED_ITEM_INDEX=0
+  _LEFT_PANE_START_INDEX=0
+  _RIGHT_PANE_START_INDEX=0
+
+  _CLOSE_INTERACTIVE_SESSION=false
+  _SEARCH_STRING=""
+
+
+  # save the original traps so we can restore them later
   local originalTraps
   io::captureOutput trap -p SIGWINCH EXIT SIGINT SIGQUIT
   originalTraps="${LAST_RETURNED_VALUE}"
 
-  _CLOSE_INTERACTIVE_SESSION=false
-
   # we still need to export the terminal size but in addition, we need to _drawScreen.
   # Note: SIGWINCH does not interrupt a read command and wait for it to complete so we need
   # to set a timeout on read to allow this refresh.
-  trap 'system::exportTerminalSize; _drawScreen' SIGWINCH
+  trap 'system::exportTerminalSize; _drawScreen full;' SIGWINCH
 
   # still need to handle the exit, but we also need to reset the terminal when exiting.
-  trap '_resetTerminal; main::onExitInternal' EXIT
+  trap '_resetTerminal; main::onExitInternal;' EXIT
 
   # interrupting closes the interactive session
-  trap '_interruptSession' SIGINT SIGQUIT
+  trap '_interruptSession;' SIGINT SIGQUIT
 
   _setupTerminal
-  _drawScreen
+  _drawScreen full
 
+
+  # main loop
   while true; do
     read -t 0.1 -srn 1 && key "${REPLY}"
 
@@ -46,21 +116,103 @@ function fsfs::searchCommand() {
     if [[ ! -t 1 || ${_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
   done
 
+
   # restore the initial traps
   eval "${originalTraps}"
 
   _resetTerminal
-
-  log::info "Bye!"
 }
 
 function _drawScreen() {
-  writeToStatusBar "Terminal size is: ${GLOBAL_COLUMNS}x${GLOBAL_LINES}"
+  local drawMode="${1:-full}"
+
+  if [[ ${drawMode} == "full" ]]; then
+    # compute the potential width of the right panel
+    _RIGHT_PANE_WIDTH=$((GLOBAL_COLUMNS * 9 / 20))
+    _ITEMS_DETAILS=()
+
+    _drawStaticScreen
+  fi
+
+  # get the details for the current item; this will tell us if we need a right pane
+  # or not
+  local details
+  if [[ -n ${_ITEMS_DETAILS[${_SELECTED_ITEM_INDEX}]:-} ]]; then
+    details="${_ITEMS_DETAILS[${_SELECTED_ITEM_INDEX}]}"
+  elif [[ -n ${_ITEM_SELECTED_CALLBACK} ]]; then
+    "${_ITEM_SELECTED_CALLBACK}" "${_ITEMS[${_SELECTED_ITEM_INDEX}]}" "${_SELECTED_ITEM_INDEX}"
+    string::wrapText "${LAST_RETURNED_VALUE}" "$((_RIGHT_PANE_WIDTH - 4))"
+    details="${LAST_RETURNED_VALUE}"
+    _ITEMS_DETAILS[_SELECTED_ITEM_INDEX]="${details}"
+  fi
+
+  # if we have details, we need to draw the right pane and
+  # adjust the left pane width
+  if [[ -n ${details} ]]; then
+    _LEFT_PANE_WIDTH=$((GLOBAL_COLUMNS - _RIGHT_PANE_WIDTH))
+    _drawRightPane "${details}"
+  else
+    _LEFT_PANE_WIDTH=${GLOBAL_COLUMNS}
+  fi
+}
+
+function _drawRightPane() {
+  local details="${1}"
+  local IFS
+
+  printf '%s' "${cursorMove}${_RIGHT_PANE_FIRST_LINE};$((_LEFT_PANE_WIDTH + 1))${_to}"
+
+  # draw the title
+  local titleWidth=${#_RIGHT_PANE_TITLE}
+  local titlePadding=$(((_RIGHT_PANE_WIDTH - titleWidth) / 2 - 2))
+  printf '%s' "┌─${repeat}${titlePadding}${_lastChar}${_RIGHT_PANE_TITLE}─${repeat}$((_RIGHT_PANE_WIDTH - titleWidth - titlePadding - 4))${_lastChar}┐"$'\n'
+
+  # draw the details
+  local -i currentLine=1
+  local line
+  while IFS= read -r line; do
+    printf "%s%s%-$((_RIGHT_PANE_WIDTH - 4))s%s\n" "${cursorMove}$((_RIGHT_PANE_FIRST_LINE + currentLine));$((_LEFT_PANE_WIDTH + 1))${_to}" "│ " "${line}" " │"
+    currentLine+=1
+  done <<<"${details}"
+
+}
+
+function _drawStaticScreen() {
+  local IFS
+
+  # clear the screen, move to the top left corner
+  printf '%s' "${eraseScreen}${cursorMove}1;1${_to}"
+
+  local leftPaneWidth=$((GLOBAL_COLUMNS - _RIGHT_PANE_WIDTH))
+
+  # draw the header
+  _LEFT_PANE_FIRST_LINE=1
+  _RIGHT_PANE_FIRST_LINE=1
+  local line headerOverflowing=false
+  while IFS= read -r line; do
+    printf '%s\n' "${line}"
+    _LEFT_PANE_FIRST_LINE+=1
+    if [[ ${#line} -gt leftPaneWidth ]]; then
+      headerOverflowing=true
+    fi
+  done <<<"${_HEADER}"
+  # if the header is too long, we can't start the right pane at line 1
+  if [[ ${headerOverflowing} == "true" ]]; then
+    _RIGHT_PANE_FIRST_LINE=${_LEFT_PANE_FIRST_LINE}
+  fi
+
+  _LEFT_LINES=$((GLOBAL_LINES - _LEFT_PANE_FIRST_LINE))
+  _LEFT_LINES=$(( _LEFT_LINES > 0 ? _LEFT_LINES : 1 ))
+  _RIGHT_LINES=$((GLOBAL_LINES - _RIGHT_PANE_FIRST_LINE + 1))
+  _RIGHT_LINES=$(( _RIGHT_LINES > 0 ? _RIGHT_LINES : 1 ))
+
+  # draw the left help text
+  printf '%s' "${cursorMove}$((GLOBAL_LINES));1${_to}${eraseLine}${_LEFT_PANE_HELP_TEXT}"
 }
 
 function _setupTerminal() {
   if command -v stty &>/dev/null; then
-    stty -echo &>/dev/null
+    stty -echo &>/dev/null || true
   fi
   printf '%s' "${enableAlternateBufferScreen}${cursorHide}${eraseScreen}"
 }
@@ -68,7 +220,7 @@ function _setupTerminal() {
 function _resetTerminal() {
   printf '%s' "${cursorShow}${disableAlternateBufferScreen}"
   if command -v stty &>/dev/null; then
-    stty echo &>/dev/null
+    stty echo &>/dev/null || true
   fi
 }
 
