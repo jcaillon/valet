@@ -182,3 +182,8 @@ __AC__STYLE=$' q' # "${changeCursor}1${_style}"
 # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/admin-guide/vga-softcursor.rst
 AC__CHANGE_CURSOR_TO_PROMPT=$'\e[1 q'$'\e[?16;0;80;c'
 AC__CHANGE_CURSOR_TO_NORMAL=$'\e[0 q'$'\e[?0;c'
+
+# change line wrapping option
+AC__ENABLE_LINE_WRAPPING=$'\e[?7h'
+AC__DISABLE_LINE_WRAPPING=$'\e[?7l'
+

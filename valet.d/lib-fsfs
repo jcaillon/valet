@@ -63,8 +63,8 @@ declare _CLOSE_INTERACTIVE_SESSION
 # $1: The title of the menu.
 # $2: The items to display.
 # $3: The function to call when an item is selected (the 1st param is the current item
-#     2nd param is the item number; it should return the details of the item
-#     in the LAST_RETURNED_VALUE variable).
+#     2nd param is the item number; 3rd is the current panel width; it should return
+#     the details of the item in the LAST_RETURNED_VALUE variable).
 function fsfs::menu() {
   _HEADER="${1}"
   local items="${2}"
@@ -87,7 +87,6 @@ function fsfs::menu() {
   _CLOSE_INTERACTIVE_SESSION=false
   _SEARCH_STRING=""
 
-
   # save the original traps so we can restore them later
   local originalTraps
   io::captureOutput trap -p SIGWINCH EXIT SIGINT SIGQUIT
@@ -96,7 +95,7 @@ function fsfs::menu() {
   # we still need to export the terminal size but in addition, we need to _drawScreen.
   # Note: SIGWINCH does not interrupt a read command and wait for it to complete so we need
   # to set a timeout on read to allow this refresh.
-  trap 'system::exportTerminalSize; _drawScreen full;' SIGWINCH
+  trap 'onResize;' SIGWINCH
 
   # still need to handle the exit, but we also need to reset the terminal when exiting.
   trap '_resetTerminal; main::onExitInternal;' EXIT
@@ -107,24 +106,34 @@ function fsfs::menu() {
   _setupTerminal
   _drawScreen full
 
-
   # main loop
   while true; do
     read -t 0.1 -srn 1 && key "${REPLY}"
 
     # break if fd 1 is closed or does not refer to a terminal.
     if [[ ! -t 1 || ${_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
-  done
 
+    echo "Resized to ${GLOBAL_LINES}x${GLOBAL_COLUMNS}." >&2
+    # # redraw the screen if the terminal was resized
+    # if [[ ${FSFS_REDRAW_REQUIRED:-false} == "true" ]]; then
+    #   _drawScreen full
+    # fi
+  done
 
   # restore the initial traps
   eval "${originalTraps}"
-
   _resetTerminal
+}
+
+function onResize() {
+  system::exportTerminalSize
+  FSFS_REDRAW_REQUIRED=true
 }
 
 function _drawScreen() {
   local drawMode="${1:-full}"
+
+  FSFS_REDRAW_REQUIRED=false
 
   if [[ ${drawMode} == "full" ]]; then
     # compute the potential width of the right panel
@@ -132,6 +141,8 @@ function _drawScreen() {
     _ITEMS_DETAILS=()
 
     _drawStaticScreen
+
+    drawMode="left-right"
   fi
 
   # get the details for the current item; this will tell us if we need a right pane
@@ -140,8 +151,7 @@ function _drawScreen() {
   if [[ -n ${_ITEMS_DETAILS[${_SELECTED_ITEM_INDEX}]:-} ]]; then
     details="${_ITEMS_DETAILS[${_SELECTED_ITEM_INDEX}]}"
   elif [[ -n ${_ITEM_SELECTED_CALLBACK} ]]; then
-    "${_ITEM_SELECTED_CALLBACK}" "${_ITEMS[${_SELECTED_ITEM_INDEX}]}" "${_SELECTED_ITEM_INDEX}"
-    string::wrapText "${LAST_RETURNED_VALUE}" "$((_RIGHT_PANE_WIDTH - 4))"
+    "${_ITEM_SELECTED_CALLBACK}" "${_ITEMS[${_SELECTED_ITEM_INDEX}]}" "${_SELECTED_ITEM_INDEX}" "$((_RIGHT_PANE_WIDTH - 4))"
     details="${LAST_RETURNED_VALUE}"
     _ITEMS_DETAILS[_SELECTED_ITEM_INDEX]="${details}"
   fi
@@ -150,7 +160,7 @@ function _drawScreen() {
   # adjust the left pane width
   if [[ -n ${details} ]]; then
     _LEFT_PANE_WIDTH=$((GLOBAL_COLUMNS - _RIGHT_PANE_WIDTH))
-    _drawRightPane "${details}"
+    # _drawRightPane "${details}"
   else
     _LEFT_PANE_WIDTH=${GLOBAL_COLUMNS}
   fi
@@ -160,20 +170,40 @@ function _drawRightPane() {
   local details="${1}"
   local IFS
 
-  printf '%s' "${AC__CURSOR_MOVE__}${_RIGHT_PANE_FIRST_LINE};$((_LEFT_PANE_WIDTH + 1))${__AC__TO}"
-
   # draw the title
-  local titleWidth=${#_RIGHT_PANE_TITLE}
-  local titlePadding=$(((_RIGHT_PANE_WIDTH - titleWidth) / 2 - 2))
-  printf '%s' "┌─${AC__REPEAT__}${titlePadding}${__AC__LAST_CHAR}${_RIGHT_PANE_TITLE}─${AC__REPEAT__}$((_RIGHT_PANE_WIDTH - titleWidth - titlePadding - 4))${__AC__LAST_CHAR}┐"$'\n'
+  local titleWidth=$((${#_RIGHT_PANE_TITLE} + 2))
+  local title=" ${_RIGHT_PANE_TITLE} "
+  if ((titleWidth > _RIGHT_PANE_WIDTH - 6)); then
+    titleWidth=0
+    title=""
+  fi
+  local titlePadding=$(((_RIGHT_PANE_WIDTH - titleWidth) / 2 - 3))
+  printf '%s%s\n' \
+    "${AC__CURSOR_MOVE__}${_RIGHT_PANE_FIRST_LINE};$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" \
+    "┌─${AC__REPEAT__}${titlePadding}${__AC__LAST_CHAR}${title}─${AC__REPEAT__}$((_RIGHT_PANE_WIDTH - titleWidth - titlePadding - 2 - 2))${__AC__LAST_CHAR}┐"
 
   # draw the details
   local -i currentLine=1
   local line
   while IFS= read -r line; do
-    printf "%s%s%-$((_RIGHT_PANE_WIDTH - 4))s%s\n" "${AC__CURSOR_MOVE__}$((_RIGHT_PANE_FIRST_LINE + currentLine));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" "│ " "${line}" " │"
+    printf "%s%s%s%s\n" "${AC__CURSOR_MOVE__}$((_RIGHT_PANE_FIRST_LINE + currentLine));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" "│ " "${line}" "${AC__CURSOR_MOVE__}$((GLOBAL_COLUMNS))${__AC__COLUMN}│"
     currentLine+=1
+    if ((currentLine >= _RIGHT_LINES - 1)); then
+      break
+    fi
   done <<<"${details}"
+
+  # draw last line with help text
+  local helpWidth=$((${#_RIGHT_PANE_HELP_TEXT} + 2))
+  local help=" ${_RIGHT_PANE_HELP_TEXT} "
+  if ((helpWidth > _RIGHT_PANE_WIDTH - 6)); then
+    helpWidth=0
+    help=""
+  fi
+  local helpPadding=$(((_RIGHT_PANE_WIDTH - helpWidth) / 2 - 3))
+  printf '%s%s' \
+    "${AC__CURSOR_MOVE__}$((GLOBAL_LINES));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" \
+    "└─${AC__REPEAT__}${helpPadding}${__AC__LAST_CHAR}${help}─${AC__REPEAT__}$((_RIGHT_PANE_WIDTH - helpWidth - helpPadding - 2 - 2))${__AC__LAST_CHAR}┘"
 
 }
 
@@ -192,7 +222,7 @@ function _drawStaticScreen() {
   while IFS= read -r line; do
     printf '%s\n' "${line}"
     _LEFT_PANE_FIRST_LINE+=1
-    if [[ ${#line} -gt leftPaneWidth ]]; then
+    if ((${#line} > leftPaneWidth)); then
       headerOverflowing=true
     fi
   done <<<"${_HEADER}"
@@ -202,25 +232,43 @@ function _drawStaticScreen() {
   fi
 
   _LEFT_LINES=$((GLOBAL_LINES - _LEFT_PANE_FIRST_LINE))
-  _LEFT_LINES=$(( _LEFT_LINES > 0 ? _LEFT_LINES : 1 ))
+  _LEFT_LINES=$((_LEFT_LINES > 0 ? _LEFT_LINES : 1))
   _RIGHT_LINES=$((GLOBAL_LINES - _RIGHT_PANE_FIRST_LINE + 1))
-  _RIGHT_LINES=$(( _RIGHT_LINES > 0 ? _RIGHT_LINES : 1 ))
+  _RIGHT_LINES=$((_RIGHT_LINES > 0 ? _RIGHT_LINES : 1))
 
   # draw the left help text
   printf '%s' "${AC__CURSOR_MOVE__}$((GLOBAL_LINES));1${__AC__TO}${AC__ERASE_LINE}${_LEFT_PANE_HELP_TEXT}"
+
+  writeToStatusBar "Screen is ${GLOBAL_LINES}x${GLOBAL_COLUMNS}."
 }
 
 function _setupTerminal() {
+  # disable echoing when we type something
   if command -v stty &>/dev/null; then
     stty -echo &>/dev/null || true
   fi
+  # switch to the alternate screen, hide the cursor and clear the screen
   printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
+
+  # in full screen mode, we don't see the error messages so we capture them somewhere else
+  FSFS_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-interactive.err"
+  while [[ -e "${FSFS_TEMPORARY_ERROR_FILE}" ]]; do FSFS_TEMPORARY_ERROR_FILE+="x"; done
+  exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
 }
 
 function _resetTerminal() {
+  # restore the terminal state
   printf '%s' "${AC__CURSOR_SHOW}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
+  # restore the key echoing
   if command -v stty &>/dev/null; then
     stty echo &>/dev/null || true
+  fi
+
+  # restore the error output and display them if any
+  exec 2>&4 4>&-
+  if [[ -s "${FSFS_TEMPORARY_ERROR_FILE}" ]]; then
+    io::readFile "${FSFS_TEMPORARY_ERROR_FILE}"
+    log::error "Error messages during the interactive session:"$'\n'"${LAST_RETURNED_VALUE%$'\n'}"
   fi
 }
 
@@ -229,10 +277,11 @@ function _interruptSession() {
   return 0
 }
 
-
+STATUS_LINE=0
 # Write a message to the status bar.
 function writeToStatusBar() {
-  printf '%s' "${AC__CURSOR_SAVE_POS}${AC__CURSOR_MOVE__}$((GLOBAL_LINES - 1));1${__AC__TO}${AC__ERASE_LINE}${AC__TEXT_BOLD}${1}${AC__TEXT_RESET}${AC__CURSOR_RESTORE_POS}"
+  printf '%s' "${AC__CURSOR_MOVE__}$((GLOBAL_LINES - 1 - STATUS_LINE));1${__AC__TO}${AC__ERASE_LINE}${AC__TEXT_BOLD}${1}${AC__TEXT_RESET}"
+  STATUS_LINE=$((STATUS_LINE + 1))
 }
 
 function key() {
@@ -309,4 +358,3 @@ function search() {
 
   printf '%s' "${AC__CURSOR_HIDE}${AC__ERASE_LINE}"
 }
-

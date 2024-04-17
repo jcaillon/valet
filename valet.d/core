@@ -96,15 +96,11 @@ function io::cleanupTempFiles() {
     rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
     unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
   fi
-  if [[ -f "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; then
-    rm -f "${GLOBAL_TEMPORARY_WORK_FILE}" 1>&2 2>/dev/null
-  fi
-  if [[ -f "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
-    rm -f "${GLOBAL_TEMPORARY_STDOUT_FILE}" 1>&2 2>/dev/null
-  fi
-  if [[ -f "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
-    rm -f "${GLOBAL_TEMPORARY_STDERR_FILE}" 1>&2 2>/dev/null
-  fi
+  local _file
+  for _file in "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet"*; do
+    rm -f "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet"* 1>&2 2>/dev/null
+    break
+  done
 }
 
 #===============================================================

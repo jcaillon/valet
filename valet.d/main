@@ -273,12 +273,26 @@ fi
 #
 # $1: the type help to print (function or menu).
 # $2: the name of the function or the command in the case of a menu.
-# $3: whether to use colors or not.
-# $4: the maximum columns for the help text.
+# $3: (optional) whether to use colors or not (true to not use color).
+# $4: (optional) the maximum columns for the help text.
 #
 # Usage:
 #   main::printHelp function "this" "false" "${GLOBAL_COLUMNS}"
 function main::printHelp() {
+  main::getHelpText "$@"
+  echo -n "${LAST_RETURNED_VALUE}"
+}
+
+# Get the help text of a function or a command.
+#
+# $1: the type help to print (function or menu).
+# $2: the name of the function or the command in the case of a menu.
+# $3: (optional) whether to use colors or not (true to not use colors).
+# $4: (optional) the maximum columns for the help text.
+#
+# Usage:
+#   main::getHelpText function "this" "false" "${GLOBAL_COLUMNS}"
+function main::getHelpText() {
   local type=${1:-function}
   local name="${2:-this}"
   local noColor="${3:-}"
@@ -310,7 +324,6 @@ function main::printHelp() {
   local -i helpWidth
   helpWidth="${maxColumns}"
   if [[ helpWidth -gt ${GLOBAL_COLUMNS} ]]; then helpWidth=${GLOBAL_COLUMNS}; fi
-  if [[ helpWidth -lt 30 ]]; then helpWidth=30; fi
 
   if [[ ${type} == "function" ]]; then
     # case of a function; we will get the description from CMD_ vars directly
@@ -416,7 +429,7 @@ ${options:-}${arguments:-}${commands:-}${examples:-}"
     output="${output//⌝/⌝${cDefault}}"
   fi
 
-  echo -n "${output}"
+  LAST_RETURNED_VALUE="${output}"
 }
 
 # used in show help to write a table of options, commands, arguments...
