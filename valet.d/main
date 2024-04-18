@@ -353,7 +353,7 @@ function main::getHelpText() {
 
   # description
   string::wrapText "${description}" "${helpWidth}" 2 "true"
-  description="${LAST_RETURNED_VALUE}"
+  local wrappedDescription="${LAST_RETURNED_VALUE}"
 
   # usage
   local usage
@@ -415,7 +415,7 @@ function main::getHelpText() {
 
   local output="${cTitle}ABOUT${cDefault}
 
-${description}
+${wrappedDescription}
 
 ${cTitle}USAGE${cDefault}
 
@@ -507,11 +507,9 @@ function main::parseMainArguments() {
       exit 0
       ;;
     -*)
-      local fuzzyOption options
-      options="${CMD_OPTIONS_NAME_this[*]%<*}"
-      options="${options//,/}"
-      main::fuzzyFindOption "${options}" "${1}" && fuzzyOption="${LAST_RETURNED_VALUE:-}"
-      core::fail "Unknown option ⌜${1}⌝${fuzzyOption})."
+      # shellcheck disable=SC2048 disable=SC2086
+      main::fuzzyFindOption "${1}" ${CMD_OPTS_this[*]}
+      core::fail "Unknown option ⌜${1}⌝${LAST_RETURNED_VALUE:-}."
       ;;
     *)
       commands+=("${1}")
@@ -899,8 +897,13 @@ function main::fuzzyMatchCommandtoFunctionName() {
     fi
 
     # case where the command is not exact, we try to fuzzy match it
-    string::fuzzyMatch "${command}" "${CMD_ALL_COMMANDS}" && exactCommand="${LAST_RETURNED_VALUE}"
-    if [[ -n "${exactCommand}" ]]; then
+    array::fuzzyFilter "${command}" CMD_ALL_COMMANDS_ARRAY
+    if (( ${#LAST_RETURNED_ARRAY_VALUE[@]} > 1 )); then
+      local IFS=$'\n'
+      log::debug "Ambiguous matching for the command ⌜${command}⌝:"$'\n'"${LAST_RETURNED_ARRAY_VALUE[*]}"
+      unset IFS
+    elif (( ${#LAST_RETURNED_ARRAY_VALUE[@]} == 1 )); then
+      exactCommand="${LAST_RETURNED_ARRAY_VALUE[0]}"
       main::getFunctionNameFromCommand "${exactCommand}" && functionName="${LAST_RETURNED_VALUE}"
       log::info "Fuzzy matching the command ⌜${command}⌝ to ⌜${exactCommand}⌝."
       break
@@ -1042,8 +1045,9 @@ function main::parseFunctionArguments() {
 
       else
         # if we didn't match any option, flag it as unknown option and add it to the leftOver
-        main::fuzzyFindOption "${options[*]}" "${1}" && fuzzyOption="${LAST_RETURNED_VALUE:-}"
-        outputErrors+=("Unknown option ⌜${1}⌝${fuzzyOption:-}.")
+        # shellcheck disable=SC2048 disable=SC2086
+        main::fuzzyFindOption "${1}" ${options[*]}
+        outputErrors+=("Unknown option ⌜${1}⌝${LAST_RETURNED_VALUE:-}.")
       fi
 
     else
@@ -1150,21 +1154,27 @@ function main::parseFunctionArguments() {
 
 # Tries to help the user by suggesting a fix for an unknown option
 # we receive the function options and the unknown option string
+#
+# $1: the user string to match
+# $2+: options to match against
+#
 # Usage:
-#  main::fuzzyFindOption "option1 option2 option3" "opt1" && fuzzyOption="${LAST_RETURNED_VALUE}"
+#  main::fuzzyFindOption opt1 option1 option2 option3 && fuzzyOption="${LAST_RETURNED_VALUE}"
 function main::fuzzyFindOption() {
-  local options unknownOption suggestedOption
-  options="${1}"
-  unknownOption="${2}"
+  local unknownOption suggestedOption
+  unknownOption="${1}"
+  shift
+  _OPTIONS_TO_MATCH=("$@")
 
   # split to get one possible option per line
-  string::fuzzyMatch "${unknownOption}" "${options// /$'\n'}" && suggestedOption="${LAST_RETURNED_VALUE}"
-  suggestedOption="${suggestedOption%%$'\n'*}"
-  if [[ -n "${suggestedOption}" ]]; then
-    suggestedOption=" (did you mean ⌜${suggestedOption}⌝?)"
+  array::fuzzyFilter "${unknownOption}" _OPTIONS_TO_MATCH
+  if (( ${#LAST_RETURNED_ARRAY_VALUE[@]} == 1 )); then
+    suggestedOption=" (did you mean ⌜${LAST_RETURNED_ARRAY_VALUE[0]}⌝?)"
+  elif (( ${#LAST_RETURNED_ARRAY_VALUE[@]} > 1 )); then
+    suggestedOption=" (did you mean one of ⌜${LAST_RETURNED_ARRAY_VALUE[*]}⌝?)"
   fi
 
-  LAST_RETURNED_VALUE="${suggestedOption}"
+  LAST_RETURNED_VALUE="${suggestedOption:-}"
 }
 
 # Parse the arguments and options of a function.

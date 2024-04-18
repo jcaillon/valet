@@ -9,8 +9,8 @@ function testHelp() {
   endTest "Testing help for the self mock2 command" $?
 
   # Testing to fuzzy find an help
-  echo "→ valet hel s h"
-  ("${GLOBAL_VALET_HOME}/valet" hel s h)
+  echo "→ valet hel sel mo3"
+  ("${GLOBAL_VALET_HOME}/valet" hel sel mo3)
   endTest "Testing to fuzzy find an help" $?
 
   # testing help options

@@ -93,12 +93,12 @@ function io::createTempDirectory() {
 function io::cleanupTempFiles() {
   if [[ -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
     log::debug "Deleting temporary directory."
-    rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
+    rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
     unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
   fi
   local _file
   for _file in "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet"*; do
-    rm -f "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet"* 1>&2 2>/dev/null
+    rm -f "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-"* 1>/dev/null
     break
   done
 }
@@ -118,7 +118,10 @@ esac
 # Usage:
 #   system::exportTerminalSize
 function system::exportTerminalSize() {
-  shopt -s checkwinsize; (:;:)
+  shopt -s checkwinsize
+  # the following subshell is required to correctly compute the columns and lines
+  # the bash manual says it these are computed after the execution of an external command
+  (:;:)
   GLOBAL_COLUMNS="${COLUMNS:-180}"
   GLOBAL_LINES="${LINES:-30}"
   shopt -u checkwinsize
@@ -682,41 +685,42 @@ function string::wrapSentence() {
   LAST_RETURNED_VALUE="${wrappedText}"
 }
 
-# Allows to fuzzy match a line against a given pattern.
-# Returns the best match from all lines.
-# Or an empty string if no match is found.
+# Allows to fuzzy match an array against a given pattern.
+# Returns an array containing only the lines matching the pattern.
+#
 # $1: the pattern to match
-# $2: the text (multiple lines) to match against
+# $2: the initial array name
+#
+# Returns:
+#   an array containing only the lines matching the pattern in the global variable LAST_RETURNED_ARRAY_VALUE
+#   an array of the same size that contains the start index of the match in the global variable LAST_RETURNED_ARRAY_VALUE2
+#   an array of the same size that contains the distance of the match in the global variable LAST_RETURNED_ARRAY_VALUE3
 #
 # Usage:
-#   string::fuzzyMatch "pattern" "line1\nline2\nline3" && local bestMatch="${LAST_RETURNED_VALUE}"
+#   array::fuzzyMatch "pattern" "myarray" && local bestMatch="${LAST_RETURNED_VALUE}"
 #
 # Note:
-#   This function is written in pure bash and is faster than the fzf command.
 #   All characters in the pattern must be found in the same order in the matched line.
-#   The function is case sensitive.
-#   We prioritize the lines that start with the pattern.
-#   Then we prioritize the lines that have the less distance between characters in the pattern.
-function string::fuzzyMatch() {
-  local pattern text
-  pattern="${1}"
-  text="${2}"
+#   The function is case insensitive.
+#   This function does not sort the results, it only filters them.
+function array::fuzzyFilter() {
+  local pattern="${1}"
+  local -n array="${2}"
 
-  local bestMatch
-  local -i patternLength lineLength bestIndex bestDistance
+  local -a matches=()
+  local -a indexes=()
+  local -a distances=()
+
+  local -i patternLength lineLength
   patternLength="${#pattern}"
-  bestIndex=999999
-  bestDistance=999999
 
-  local IFS=$'\n'
+  # make all match case insensitive
+  shopt -s nocasematch
+
   local line patternChar lineChar
   local -i lineCharIndex patternCharIndex lastLineCharIndex distance patternFirstCharIndex
-  for line in ${text}; do
-    # shortcut, exact match
-    if [[ ${line} == "${pattern}" ]]; then
-      LAST_RETURNED_VALUE="${line}"
-      return 0
-    fi
+
+  for line in "${array[@]}"; do
     lineLength="${#line}"
 
     # for each character in the pattern
@@ -759,18 +763,18 @@ function string::fuzzyMatch() {
 
     # if we found all the characters in the pattern
     if [[ patternCharIndex -ge patternLength ]]; then
-
-      # we found the pattern at a lower index or we found the pattern at the same index but with less distance
-      if [[ patternFirstCharIndex -lt bestIndex || (patternFirstCharIndex -eq bestIndex && distance -lt bestDistance) ]]; then
-        bestIndex="${patternFirstCharIndex}"
-        bestDistance="${distance}"
-        bestMatch="${line}"
-      fi
+      matches+=("${line}")
+      indexes+=("${patternFirstCharIndex}")
+      distances+=("${distance}")
     fi
 
   done
 
-  LAST_RETURNED_VALUE="${bestMatch:-}"
+  shopt -u nocasematch
+
+  LAST_RETURNED_ARRAY_VALUE=("${matches[@]}")
+  LAST_RETURNED_ARRAY_VALUE2=("${indexes[@]}")
+  LAST_RETURNED_ARRAY_VALUE3=("${distances[@]}")
 }
 
 #===============================================================

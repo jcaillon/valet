@@ -89,6 +89,21 @@ function setTempFilesNumber() {
   TEMPORARY_DIRECTORY_NUMBER=${1}
 }
 
+function echoFileWithLineNumberSubstitution() {
+  local file="${1}"
+  local line
+  local IFS=$'\n'
+  while read -rd $'\n' line; do
+    if [[ ${line} =~ :[0-9]{1,4}$ ]]; then
+      line="${line/%:[[:digit:]]/:XXX}"
+      line="${line/%:[[:digit:]][[:digit:]]/:XXX}"
+      line="${line/%:[[:digit:]][[:digit:]][[:digit:]]/:XXX}"
+      line="${line/%:[[:digit:]][[:digit:]][[:digit:]][[:digit:]]/:XXX}"
+    fi
+    echo "${line}"
+  done <"${file}"
+}
+
 #===============================================================
 # >>> Internal tests functions
 #===============================================================

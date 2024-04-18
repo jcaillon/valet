@@ -62,7 +62,7 @@ function showCommandHelp() {
   functionName="${LAST_RETURNED_VALUE:-}"
   exactCommand="${LAST_RETURNED_VALUE3:-}"
   if [[ -z "${functionName}" ]]; then
-    core::fail "Could not show the help because the command ⌜${commands[*]}⌝ does not exist."
+    core::fail "Could not show the help because the command ⌜${commands[*]}⌝ does not exist or is ambiguous."
   fi
 
   if [[ ${functionName} == "_menu" ]]; then

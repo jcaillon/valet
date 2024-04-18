@@ -48,15 +48,15 @@ function testGetMaxPossibleCommandLevel() {
 function testFuzzyFindOption() {
 
   echo "→ main::fuzzyFindOption '--opt1 --derp2 --allo3' 'de'"
-  main::fuzzyFindOption "--opt1 --derp2 --allo3" "de" && echo "${LAST_RETURNED_VALUE}"
+  main::fuzzyFindOption de --opt1 --derp2 --allo3 && echo "${LAST_RETURNED_VALUE}"
 
   echo
   echo "→ main::fuzzyFindOption '--opt1 --derp2 --allo3' '-a'"
-  main::fuzzyFindOption "--opt1 --derp2 --allo3" "-a" && echo "${LAST_RETURNED_VALUE}"
+  main::fuzzyFindOption -a --opt1 --derp2 --allo3 && echo "${LAST_RETURNED_VALUE}"
 
   echo
   echo "→ main::fuzzyFindOption '--opt1 --derp2 --allo3' 'thing'"
-  main::fuzzyFindOption "--opt1 --derp2 --allo3" "thing" && echo "${LAST_RETURNED_VALUE}"
+  main::fuzzyFindOption thing --opt1 --derp2 --allo3 && echo "${LAST_RETURNED_VALUE}"
 
   endTest "Testing main::fuzzyFindOption" 0
 }

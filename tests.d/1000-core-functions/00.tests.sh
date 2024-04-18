@@ -15,12 +15,10 @@ There were 2 new lines before this."
   string::wrapText "${shortText}" 30 && echo "${LAST_RETURNED_VALUE}"
   endTest "Wrapping text at column 30 with no padding" 0
 
-
   echo "→ string::wrapText \"\${shortText}\" 90 4 false"
   echo "------------------------------------------------------------------------------------------"
   string::wrapText "${shortText}" 90 4 false && echo "${LAST_RETURNED_VALUE}"
   endTest "Wrapping text at column 90 with padding of 4 on new lines" 0
-
 
   echo "→ string::wrapText \"\${shortText}\" 90 2 true"
   echo "------------------------------------------------------------------------------------------"
@@ -28,45 +26,49 @@ There were 2 new lines before this."
   endTest "Wrapping text at column 90 with padding of 2 on all lines" 0
 }
 
-function testString::fuzzyMatch() {
-  local lines="l1 this is a word
-l2 very unbelievable
-l2 unbelievable
-l3 self mock1
-l4 self mock2
-l5 ublievable"
+function testArray::fuzzyFilter() {
+  lines=("this is a word"
+    "very unbelievable"
+    "unbelievable"
+    "self mock1"
+    "self mock2"
+    "ublievable")
 
-  echo "lines=\"${lines}\""
-
-  echo
-  echo "→ string::fuzzyMatch evle \"\${lines}\""
-  string::fuzzyMatch "evle" "${lines}" && echo "${LAST_RETURNED_VALUE}"
+  declare -p lines
 
   echo
-  echo "→ string::fuzzyMatch sh2 \"\${lines}\""
-  string::fuzzyMatch "sc2" "${lines}" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ array::fuzzyFilter evle lines"
+  array::fuzzyFilter "evle" lines
+  declare -p LAST_RETURNED_ARRAY_VALUE LAST_RETURNED_ARRAY_VALUE2 LAST_RETURNED_ARRAY_VALUE3
 
   echo
-  echo "# should prioritize lower index of u"
-  echo "→ string::fuzzyMatch u \"\${lines}\""
-  string::fuzzyMatch "u" "${lines}" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ array::fuzzyFilter SC2 lines"
+  array::fuzzyFilter "SC2" lines
+  declare -p LAST_RETURNED_ARRAY_VALUE LAST_RETURNED_ARRAY_VALUE2 LAST_RETURNED_ARRAY_VALUE3
 
   echo
-  echo "# should be the first equal match"
-  echo "→ string::fuzzyMatch self \"\${lines}\""
-  string::fuzzyMatch "self" "${lines}" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ array::fuzzyFilter u lines"
+  array::fuzzyFilter "u" lines
+  declare -p LAST_RETURNED_ARRAY_VALUE LAST_RETURNED_ARRAY_VALUE2 LAST_RETURNED_ARRAY_VALUE3
 
   echo
-  echo "# should prioritize lower distance between letters"
-  echo "→ string::fuzzyMatch lubl \"\${lines}\""
-  string::fuzzyMatch "lubl" "${lines}" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ array::fuzzyFilter seLf lines"
+  array::fuzzyFilter "seLf" lines
+  declare -p LAST_RETURNED_ARRAY_VALUE LAST_RETURNED_ARRAY_VALUE2 LAST_RETURNED_ARRAY_VALUE3
 
-  endTest "Testing string::fuzzyMatch" 0
+  echo
+  echo "→ array::fuzzyFilter nomatch lines"
+  array::fuzzyFilter "nomatch" lines
+  declare -p LAST_RETURNED_ARRAY_VALUE LAST_RETURNED_ARRAY_VALUE2 LAST_RETURNED_ARRAY_VALUE3
+
+  unset lines
+
+  endTest "Testing array::fuzzyFilter" 0
 }
 
 function main() {
   testString::wrapText
-  testString::fuzzyMatch
+  testArray::fuzzyFilter
 }
 
 main

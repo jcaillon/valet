@@ -35,13 +35,14 @@ function testKurl::toFile() {
   kurl::toFile false '' "${tmpFile}" --code 400 --error https://hello.com/bla --otherOpt && exitCode=0 || exitCode=$?
   echoOutputKurlToFile ${exitCode} "${tmpFile}"
   endTest "Testing kurl::toFile, testing debug mode https code 400" ${exitCode}
+  log::setLevel info
 
   echo "→ kurl::toFile false '' \"\${tmpFile}\" --code 200 http://hello.com"
   log::setLevel debug
   kurl::toFile false '' "${tmpFile}" --code 200 http://hello.com && exitCode=0 || exitCode=$?
   echoOutputKurlToFile ${exitCode} "${tmpFile}"
   endTest "Testing kurl::toFile, testing debug mode http code 200" ${exitCode}
-
+  log::setLevel info
 }
 
 function echoOutputKurlToFile() {
@@ -70,7 +71,9 @@ function testKurl::toVar() {
   endTest "Testing kurl, with no content http code 200" ${exitCode}
 
   echo "→ kurl::toVar false '' --code 500 http://hello.com"
+  export GLOBAL_ERROR_DISPLAYED=1
   (kurl::toVar true '' --code 500 http://hello.com) && exitCode=0 || exitCode=$?
+  unset GLOBAL_ERROR_DISPLAYED
   endTest "Testing kurl, with no content http code 500, fails" ${exitCode}
 
   unset NO_CURL_CONTENT
@@ -81,7 +84,7 @@ function testKurl::toVar() {
   kurl::toVar false '' --code 400 http://hello.com && exitCode=0 || exitCode=$?
   echoOutputKurlToVar ${exitCode}
   endTest "Testing kurl, debug mode, with content http code 400" ${exitCode}
-
+  log::setLevel info
 }
 
 function echoOutputKurlToVar() {

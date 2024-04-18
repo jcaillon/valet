@@ -180,6 +180,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - for yes/no, add param to choose the default option.
 - Replace awk with bash.
 - Provide an alternative bash function if diff is not found.
+- Allow to separate commands from options/arguments with `--`.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

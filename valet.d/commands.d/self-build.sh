@@ -83,7 +83,13 @@ function selfBuild() {
       shift
       outputFile="${1}"
       ;;
-    -*) core::fail "Unknown option ⌜${1}⌝." ;;
+    -*)
+      if [[ -v CMD_OPTS_selfBuild ]]; then
+        main::fuzzyFindOption "${1}" ${CMD_OPTS_selfBuild[*]}
+      else
+        LAST_RETURNED_VALUE=""
+      fi
+      core::fail "Unknown option ⌜${1}⌝${LAST_RETURNED_VALUE:-}." ;;
     *) core::fail "This command takes no arguments." ;;
     esac
     shift

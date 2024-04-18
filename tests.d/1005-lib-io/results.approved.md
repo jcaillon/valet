@@ -342,21 +342,21 @@ Error output:
 returning 1 from fakeexec2
 ⌝
 stack:
-├─ In function core::fail() $GLOBAL_VALET_HOME/valet.d/core:296
-├─ In function io::invoke5() $GLOBAL_VALET_HOME/valet.d/lib-io:120
-├─ In function io::invoke5var() $GLOBAL_VALET_HOME/valet.d/lib-io:178
-├─ In function io::invoke() $GLOBAL_VALET_HOME/valet.d/lib-io:226
-├─ In function testIo::invoke() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:61
-├─ In function main() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:115
-├─ In function source() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:120
-├─ In function source() $GLOBAL_VALET_HOME/valet.d/core:449
-├─ In function runTest() valet.d/commands.d/self-test-utils:241
-├─ In function runTestSuites() valet.d/commands.d/self-test-utils:195
-├─ In function runCoreTests() valet.d/commands.d/self-test-utils:107
-├─ In function selfTest() valet.d/commands.d/self-test.sh:110
-├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:589
-├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:541
-└─ In function main() $GLOBAL_VALET_HOME/valet:99
+├─ In function core::fail() $GLOBAL_VALET_HOME/valet.d/core:XXX
+├─ In function io::invoke5() $GLOBAL_VALET_HOME/valet.d/lib-io:XXX
+├─ In function io::invoke5var() $GLOBAL_VALET_HOME/valet.d/lib-io:XXX
+├─ In function io::invoke() $GLOBAL_VALET_HOME/valet.d/lib-io:XXX
+├─ In function testIo::invoke() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:XXX
+├─ In function main() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:XXX
+├─ In function source() $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:XXX
+├─ In function source() $GLOBAL_VALET_HOME/valet.d/core:XXX
+├─ In function runTest() valet.d/commands.d/self-test-utils:XXX
+├─ In function runTestSuites() valet.d/commands.d/self-test-utils:XXX
+├─ In function runCoreTests() valet.d/commands.d/self-test-utils:XXX
+├─ In function selfTest() valet.d/commands.d/self-test.sh:XXX
+├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:XXX
+└─ In function main() $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ### Testing io::invoke, output to var

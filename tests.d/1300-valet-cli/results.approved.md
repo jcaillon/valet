@@ -54,42 +54,22 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ valet hel s h
+→ valet hel sel mo3
 ABOUT
 
-  Show a menu with sub commands for the current command.
+  Before starting this command, valet will check if sudo is available.
+  
+  If so, it will require the user to enter the sudo password and use sudo inside the command
+  
 
 USAGE
 
-  valet self [options] [command]
+  valet self mock3 [options]
 
 OPTIONS
 
   -h, --help
       Display the help for this command.
-
-COMMANDS
-
-  self build
-      Re-build the menu of valet from your commands.
-  self config
-      Open the configuration file of Valet with your default editor.
-  self download-binaries
-      Download the required binaries for valet.
-  self mock1
-      A command that only for testing valet core functions.
-  self mock2
-      A command that only for testing valet core functions.
-  self mock3
-      A command that only for testing valet core functions.
-  self release
-      Release a new version of valet.
-  self setup
-      The command run after the installation of Valet to setup the tool.
-  self test
-      Test your valet custom commands.
-  self update
-      Update valet using the latest release on GitHub.
 
 ```
 
@@ -97,7 +77,7 @@ COMMANDS
 
 ```log
 INFO     Fuzzy matching the command ⌜hel⌝ to ⌜help⌝.
-INFO     Fuzzy matching the command ⌜s⌝ to ⌜self⌝.
+INFO     Fuzzy matching the command ⌜sel mo3⌝ to ⌜self mock3⌝.
 ```
 
 ### Testing help with columns 48
@@ -656,7 +636,7 @@ Exit code: `1`
 **Error** output:
 
 ```log
-ERROR    Unknown option ⌜-prof⌝ (did you mean ⌜--profiling⌝?)).
+ERROR    Unknown option ⌜-prof⌝ (did you mean ⌜--profiling⌝?).
 ```
 
 ### Testing temp files/directories creation, cleaning and custom cleanUp

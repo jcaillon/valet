@@ -184,6 +184,6 @@ AC__CHANGE_CURSOR_TO_PROMPT=$'\e[1 q'$'\e[?16;0;80;c'
 AC__CHANGE_CURSOR_TO_NORMAL=$'\e[0 q'$'\e[?0;c'
 
 # change line wrapping option
-AC__ENABLE_LINE_WRAPPING=$'\e[?7h'
 AC__DISABLE_LINE_WRAPPING=$'\e[?7l'
+AC__ENABLE_LINE_WRAPPING=$'\e[?7h'
 

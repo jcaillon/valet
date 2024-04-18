@@ -204,16 +204,15 @@ selfBuild
 self build
 
 → main::fuzzyMatchCommandtoFunctionName 'sf' 'nop' 'other' 'stuff' 'dont care'
-_menu
-1
-self
+
+0
+
 ```
 
 **Error** output:
 
 ```log
 INFO     Fuzzy matching the command ⌜se bu⌝ to ⌜self build⌝.
-INFO     Fuzzy matching the command ⌜sf⌝ to ⌜self⌝.
 ```
 
 ### Testing main::getMaxPossibleCommandLevel

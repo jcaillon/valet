@@ -24,6 +24,7 @@ _RIGHT_PANE_TITLE="Details"
 # arrays of current items and their details (if any and if already computed)
 declare -a _ITEMS
 declare -a _ITEMS_DETAILS
+declare -a FSFS_FETCHED_DETAILS_INDEXES
 
 # width of the left pane when the right pane is on
 declare -i _LEFT_PANE_WIDTH
@@ -83,6 +84,7 @@ function fsfs::menu() {
   _SELECTED_ITEM_INDEX=0
   _LEFT_PANE_START_INDEX=0
   _RIGHT_PANE_START_INDEX=0
+  FSFS_FETCHED_DETAILS_INDEXES=()
 
   _CLOSE_INTERACTIVE_SESSION=false
   _SEARCH_STRING=""
@@ -108,16 +110,15 @@ function fsfs::menu() {
 
   # main loop
   while true; do
-    read -t 0.1 -srn 1 && key "${REPLY}"
+    read -t 0.05 -srn 1 && key "${REPLY}"
 
     # break if fd 1 is closed or does not refer to a terminal.
     if [[ ! -t 1 || ${_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
 
-    echo "Resized to ${GLOBAL_LINES}x${GLOBAL_COLUMNS}." >&2
     # # redraw the screen if the terminal was resized
-    # if [[ ${FSFS_REDRAW_REQUIRED:-false} == "true" ]]; then
-    #   _drawScreen full
-    # fi
+    if [[ ${FSFS_REDRAW_REQUIRED:-false} == "true" ]]; then
+      _drawScreen full
+    fi
   done
 
   # restore the initial traps
@@ -126,8 +127,15 @@ function fsfs::menu() {
 }
 
 function onResize() {
+  # export terminal size does not work if
+  exec 2>&4 4>&-
   system::exportTerminalSize
+  exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
   FSFS_REDRAW_REQUIRED=true
+}
+
+function fuuuuck() {
+  return 0
 }
 
 function _drawScreen() {
@@ -138,7 +146,7 @@ function _drawScreen() {
   if [[ ${drawMode} == "full" ]]; then
     # compute the potential width of the right panel
     _RIGHT_PANE_WIDTH=$((GLOBAL_COLUMNS * 9 / 20))
-    _ITEMS_DETAILS=()
+    FSFS_FETCHED_DETAILS_INDEXES=()
 
     _drawStaticScreen
 
@@ -147,27 +155,37 @@ function _drawScreen() {
 
   # get the details for the current item; this will tell us if we need a right pane
   # or not
-  local details
-  if [[ -n ${_ITEMS_DETAILS[${_SELECTED_ITEM_INDEX}]:-} ]]; then
-    details="${_ITEMS_DETAILS[${_SELECTED_ITEM_INDEX}]}"
-  elif [[ -n ${_ITEM_SELECTED_CALLBACK} ]]; then
+  local hasDetails=${FSFS_FETCHED_DETAILS_INDEXES[${_SELECTED_ITEM_INDEX}]:-unknown}
+  if [[ ${hasDetails} == "unknown" && -n ${_ITEM_SELECTED_CALLBACK:-} ]]; then
     "${_ITEM_SELECTED_CALLBACK}" "${_ITEMS[${_SELECTED_ITEM_INDEX}]}" "${_SELECTED_ITEM_INDEX}" "$((_RIGHT_PANE_WIDTH - 4))"
-    details="${LAST_RETURNED_VALUE}"
-    _ITEMS_DETAILS[_SELECTED_ITEM_INDEX]="${details}"
+    _ITEMS_DETAILS[_SELECTED_ITEM_INDEX]="${LAST_RETURNED_VALUE}"
+    if [[ -n ${LAST_RETURNED_VALUE} ]]; then
+      hasDetails=true
+    else
+      hasDetails=false
+    fi
+    FSFS_FETCHED_DETAILS_INDEXES[_SELECTED_ITEM_INDEX]="${hasDetails}"
   fi
 
   # if we have details, we need to draw the right pane and
   # adjust the left pane width
-  if [[ -n ${details} ]]; then
+  if [[ ${hasDetails} == "true" ]]; then
     _LEFT_PANE_WIDTH=$((GLOBAL_COLUMNS - _RIGHT_PANE_WIDTH))
-    # _drawRightPane "${details}"
   else
     _LEFT_PANE_WIDTH=${GLOBAL_COLUMNS}
+  fi
+
+  if [[ ${drawMode} == *"right"* && ${hasDetails} == "true" ]]; then
+    _drawRightPane
+  fi
+
+  if [[ ${drawMode} == *"left"* ]]; then
+    _drawLeftPane
   fi
 }
 
 function _drawRightPane() {
-  local details="${1}"
+  local details="${_ITEMS_DETAILS[_SELECTED_ITEM_INDEX]}"
   local IFS
 
   # draw the title
@@ -184,9 +202,14 @@ function _drawRightPane() {
 
   # draw the details
   local -i currentLine=1
+  local -i currentIndex=0
   local line
   while IFS= read -r line; do
-    printf "%s%s%s%s\n" "${AC__CURSOR_MOVE__}$((_RIGHT_PANE_FIRST_LINE + currentLine));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" "│ " "${line}" "${AC__CURSOR_MOVE__}$((GLOBAL_COLUMNS))${__AC__COLUMN}│"
+    currentIndex+=1
+    if ((currentIndex < _RIGHT_PANE_START_INDEX + 1)); then
+      continue
+    fi
+    printf "%s%s%s%s\n" "${AC__CURSOR_MOVE__}$((_RIGHT_PANE_FIRST_LINE + currentLine));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}${AC__ERASE_CHARS_RIGHT}" "│ " "${line}" "${AC__CURSOR_MOVE__}$((GLOBAL_COLUMNS))${__AC__COLUMN}│"
     currentLine+=1
     if ((currentLine >= _RIGHT_LINES - 1)); then
       break
@@ -200,11 +223,14 @@ function _drawRightPane() {
     helpWidth=0
     help=""
   fi
-  local helpPadding=$(((_RIGHT_PANE_WIDTH - helpWidth) / 2 - 3))
   printf '%s%s' \
     "${AC__CURSOR_MOVE__}$((GLOBAL_LINES));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" \
-    "└─${AC__REPEAT__}${helpPadding}${__AC__LAST_CHAR}${help}─${AC__REPEAT__}$((_RIGHT_PANE_WIDTH - helpWidth - helpPadding - 2 - 2))${__AC__LAST_CHAR}┘"
+    "└─${AC__REPEAT__}$((_RIGHT_PANE_WIDTH - helpWidth - 4))${__AC__LAST_CHAR}${help}─┘"
 
+}
+
+function _drawLeftPane() {
+  return 0
 }
 
 function _drawStaticScreen() {
@@ -248,7 +274,7 @@ function _setupTerminal() {
     stty -echo &>/dev/null || true
   fi
   # switch to the alternate screen, hide the cursor and clear the screen
-  printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
+  printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__DISABLE_LINE_WRAPPING}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
 
   # in full screen mode, we don't see the error messages so we capture them somewhere else
   FSFS_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-interactive.err"
@@ -258,7 +284,7 @@ function _setupTerminal() {
 
 function _resetTerminal() {
   # restore the terminal state
-  printf '%s' "${AC__CURSOR_SHOW}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
+  printf '%s' "${AC__ENABLE_LINE_WRAPPING}${AC__CURSOR_SHOW}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
   # restore the key echoing
   if command -v stty &>/dev/null; then
     stty echo &>/dev/null || true
@@ -296,15 +322,16 @@ function key() {
 
     local sk2
     printf -v sk2 "%q" "${keyPressed}"
-    writeToStatusBar "Special key pressed: ⌜${sk2}⌝."
   fi
 
   case ${keyPressed} in
   $'\e[C' | $'\eOC' | "")
-    writeToStatusBar right or enter
+    _RIGHT_PANE_START_INDEX=$((_RIGHT_PANE_START_INDEX + 1))
+    _drawRightPane
     ;;
   $'\e[D' | $'\eOD' | $'\177' | $'\b')
-    writeToStatusBar left or backspace
+    _RIGHT_PANE_START_INDEX=$((_RIGHT_PANE_START_INDEX - 1))
+    _drawRightPane
     ;;
   $'\e[B' | $'\eOB')
     writeToStatusBar down

@@ -98,36 +98,38 @@ Exit code: `0`
   There were 2 new lines before this.
 ```
 
-### Testing string::fuzzyMatch
+### Testing array::fuzzyFilter
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-lines="l1 this is a word
-l2 very unbelievable
-l2 unbelievable
-l3 self mock1
-l4 self mock2
-l5 ublievable"
+declare -a lines=([0]="this is a word" [1]="very unbelievable" [2]="unbelievable" [3]="self mock1" [4]="self mock2" [5]="ublievable")
 
-→ string::fuzzyMatch evle "${lines}"
-l2 very unbelievable
+→ array::fuzzyFilter evle lines
+declare -a LAST_RETURNED_ARRAY_VALUE=([0]="very unbelievable" [1]="unbelievable" [2]="ublievable")
+declare -a LAST_RETURNED_ARRAY_VALUE2=([0]="1" [1]="3" [2]="4")
+declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="1" [1]="1" [2]="1")
 
-→ string::fuzzyMatch sh2 "${lines}"
-l4 self mock2
+→ array::fuzzyFilter SC2 lines
+declare -a LAST_RETURNED_ARRAY_VALUE=([0]="self mock2")
+declare -a LAST_RETURNED_ARRAY_VALUE2=([0]="0")
+declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="2")
 
-# should prioritize lower index of u
-→ string::fuzzyMatch u "${lines}"
-l2 unbelievable
+→ array::fuzzyFilter u lines
+declare -a LAST_RETURNED_ARRAY_VALUE=([0]="very unbelievable" [1]="unbelievable" [2]="ublievable")
+declare -a LAST_RETURNED_ARRAY_VALUE2=([0]="5" [1]="0" [2]="0")
+declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="5" [1]="0" [2]="0")
 
-# should be the first equal match
-→ string::fuzzyMatch self "${lines}"
-l3 self mock1
+→ array::fuzzyFilter seLf lines
+declare -a LAST_RETURNED_ARRAY_VALUE=([0]="self mock1" [1]="self mock2")
+declare -a LAST_RETURNED_ARRAY_VALUE2=([0]="0" [1]="0")
+declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="1" [1]="1")
 
-# should prioritize lower distance between letters
-→ string::fuzzyMatch lubl "${lines}"
-l5 ublievable
+→ array::fuzzyFilter nomatch lines
+declare -a LAST_RETURNED_ARRAY_VALUE=()
+declare -a LAST_RETURNED_ARRAY_VALUE2=()
+declare -a LAST_RETURNED_ARRAY_VALUE3=()
 ```
 
