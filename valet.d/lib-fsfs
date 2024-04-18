@@ -17,8 +17,9 @@ source io
 # >>> Customization
 #===============================================================
 
+HAS_PREVIEW=true
 _LEFT_PANE_HELP_TEXT="↑/↓: Move | Enter: Select | Esc: Quit"
-_RIGHT_PANE_HELP_TEXT="←/→: Scroll"
+_RIGHT_PANE_HELP_TEXT="←/→: Scroll | Page up/down: Scroll x3"
 _RIGHT_PANE_TITLE="Details"
 
 # arrays of current items and their details (if any and if already computed)
@@ -45,9 +46,6 @@ declare -i _RIGHT_PANE_START_INDEX=0
 declare -i _RIGHT_PANE_FIRST_LINE=1
 # number of lines for the right pane
 declare -i _RIGHT_LINES
-
-# contains the current search string of the user
-declare _SEARCH_STRING
 
 # true when the user asked to close the interactive session
 declare _CLOSE_INTERACTIVE_SESSION
@@ -86,6 +84,9 @@ function fsfs::menu() {
   _RIGHT_PANE_START_INDEX=0
   FSFS_FETCHED_DETAILS_INDEXES=()
 
+  # contains the current search string of the user
+  declare _SEARCH_STRING
+
   _CLOSE_INTERACTIVE_SESSION=false
   _SEARCH_STRING=""
 
@@ -94,52 +95,45 @@ function fsfs::menu() {
   io::captureOutput trap -p SIGWINCH EXIT SIGINT SIGQUIT
   originalTraps="${LAST_RETURNED_VALUE}"
 
-  # we still need to export the terminal size but in addition, we need to _drawScreen.
+  # we still need to export the terminal size but in addition, we need to drawScreen.
   # Note: SIGWINCH does not interrupt a read command and wait for it to complete so we need
   # to set a timeout on read to allow this refresh.
   trap 'onResize;' SIGWINCH
 
   # still need to handle the exit, but we also need to reset the terminal when exiting.
-  trap '_resetTerminal; main::onExitInternal;' EXIT
+  trap 'interactive::switchBackFromFullScreen; main::onExitInternal;' EXIT
 
   # interrupting closes the interactive session
-  trap '_interruptSession;' SIGINT SIGQUIT
+  trap 'onSessionInterrupted;' SIGINT SIGQUIT
 
-  _setupTerminal
-  _drawScreen full
+  interactive::switchToFullScreen
+  drawScreen full
 
   # main loop
   while true; do
-    read -t 0.05 -srn 1 && key "${REPLY}"
+    if interactive::waitForKey -t 0.05; then
+      onKeyPressed "${LAST_KEY_PRESSED}"
+    fi
 
     # break if fd 1 is closed or does not refer to a terminal.
     if [[ ! -t 1 || ${_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
 
     # # redraw the screen if the terminal was resized
     if [[ ${FSFS_REDRAW_REQUIRED:-false} == "true" ]]; then
-      _drawScreen full
+      drawScreen full
     fi
   done
 
   # restore the initial traps
   eval "${originalTraps}"
-  _resetTerminal
+  interactive::switchBackFromFullScreen
 }
 
-function onResize() {
-  # export terminal size does not work if
-  exec 2>&4 4>&-
-  system::exportTerminalSize
-  exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
-  FSFS_REDRAW_REQUIRED=true
-}
-
-function fuuuuck() {
-  return 0
-}
-
-function _drawScreen() {
+function drawScreen() {
   local drawMode="${1:-full}"
+
+  # hide the cursor
+  printf '%s' "${AC__CURSOR_HIDE}"
 
   FSFS_REDRAW_REQUIRED=false
 
@@ -182,6 +176,9 @@ function _drawScreen() {
   if [[ ${drawMode} == *"left"* ]]; then
     _drawLeftPane
   fi
+
+  # finish with the prompt line has we show the cursor again
+  drawPrompt
 }
 
 function _drawRightPane() {
@@ -230,7 +227,37 @@ function _drawRightPane() {
 }
 
 function _drawLeftPane() {
-  return 0
+  local IFS
+  # separator
+  local title=" 10/10"
+  local titleWidth=${#title}
+  if ((titleWidth > _LEFT_PANE_WIDTH)); then
+    titleWidth=0
+    title=""
+  fi
+  printf '%s%s\n' \
+    "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1));1${__AC__TO}" \
+    "─${AC__REPEAT__}$((_LEFT_PANE_WIDTH - titleWidth - 2))${__AC__LAST_CHAR}${title} "
+
+  # draw the items
+  local -i currentLine=1
+  local -i currentIndex=0
+  local line
+  for line in "${_ITEMS[@]}"; do
+    currentIndex+=1
+    if ((currentIndex < _LEFT_PANE_START_INDEX + 1)); then
+      continue
+    fi
+    printf "%s\r%s%s\n" "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1 + currentLine));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}" "  " "${line}"
+    currentLine+=1
+    if ((currentLine >= _LEFT_LINES - 1)); then
+      break
+    fi
+  done
+}
+
+function drawPrompt() {
+  printf '%s\r%s' "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}" "▶ ${_SEARCH_STRING}${AC__CURSOR_SHOW}"
 }
 
 function _drawStaticScreen() {
@@ -247,7 +274,7 @@ function _drawStaticScreen() {
   local line headerOverflowing=false
   while IFS= read -r line; do
     printf '%s\n' "${line}"
-    _LEFT_PANE_FIRST_LINE+=1
+    _LEFT_PANE_FIRST_LINE=$((_LEFT_PANE_FIRST_LINE + 1))
     if ((${#line} > leftPaneWidth)); then
       headerOverflowing=true
     fi
@@ -257,131 +284,56 @@ function _drawStaticScreen() {
     _RIGHT_PANE_FIRST_LINE=${_LEFT_PANE_FIRST_LINE}
   fi
 
-  _LEFT_LINES=$((GLOBAL_LINES - _LEFT_PANE_FIRST_LINE))
+  _LEFT_LINES=$((GLOBAL_LINES - _LEFT_PANE_FIRST_LINE - 2))
   _LEFT_LINES=$((_LEFT_LINES > 0 ? _LEFT_LINES : 1))
   _RIGHT_LINES=$((GLOBAL_LINES - _RIGHT_PANE_FIRST_LINE + 1))
   _RIGHT_LINES=$((_RIGHT_LINES > 0 ? _RIGHT_LINES : 1))
 
   # draw the left help text
   printf '%s' "${AC__CURSOR_MOVE__}$((GLOBAL_LINES));1${__AC__TO}${AC__ERASE_LINE}${_LEFT_PANE_HELP_TEXT}"
-
-  writeToStatusBar "Screen is ${GLOBAL_LINES}x${GLOBAL_COLUMNS}."
 }
 
-function _setupTerminal() {
-  # disable echoing when we type something
-  if command -v stty &>/dev/null; then
-    stty -echo &>/dev/null || true
-  fi
-  # switch to the alternate screen, hide the cursor and clear the screen
-  printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__DISABLE_LINE_WRAPPING}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
-
-  # in full screen mode, we don't see the error messages so we capture them somewhere else
-  FSFS_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-interactive.err"
-  while [[ -e "${FSFS_TEMPORARY_ERROR_FILE}" ]]; do FSFS_TEMPORARY_ERROR_FILE+="x"; done
-  exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
-}
-
-function _resetTerminal() {
-  # restore the terminal state
-  printf '%s' "${AC__ENABLE_LINE_WRAPPING}${AC__CURSOR_SHOW}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
-  # restore the key echoing
-  if command -v stty &>/dev/null; then
-    stty echo &>/dev/null || true
-  fi
-
-  # restore the error output and display them if any
-  exec 2>&4 4>&-
-  if [[ -s "${FSFS_TEMPORARY_ERROR_FILE}" ]]; then
-    io::readFile "${FSFS_TEMPORARY_ERROR_FILE}"
-    log::error "Error messages during the interactive session:"$'\n'"${LAST_RETURNED_VALUE%$'\n'}"
-  fi
-}
-
-function _interruptSession() {
-  _CLOSE_INTERACTIVE_SESSION=true
-  return 0
-}
-
-STATUS_LINE=0
-# Write a message to the status bar.
-function writeToStatusBar() {
-  printf '%s' "${AC__CURSOR_MOVE__}$((GLOBAL_LINES - 1 - STATUS_LINE));1${__AC__TO}${AC__ERASE_LINE}${AC__TEXT_BOLD}${1}${AC__TEXT_RESET}"
-  STATUS_LINE=$((STATUS_LINE + 1))
-}
-
-function key() {
-  local keyPressed="${1}"
-  local specialKeyPress=false
-
-  # Special key detection.
-  if [[ ${keyPressed} == $'\e' ]]; then
-    read -t 0.1 -rsn 2
-    keyPressed="${keyPressed}${REPLY}"
-    specialKeyPress=true
-
-    local sk2
-    printf -v sk2 "%q" "${keyPressed}"
-  fi
-
-  case ${keyPressed} in
-  $'\e[C' | $'\eOC' | "")
+# Called when a key is pressed.
+function onKeyPressed() {
+  case ${LAST_KEY_PRESSED} in
+  RIGHT)
     _RIGHT_PANE_START_INDEX=$((_RIGHT_PANE_START_INDEX + 1))
     _drawRightPane
     ;;
-  $'\e[D' | $'\eOD' | $'\177' | $'\b')
+  LEFT)
     _RIGHT_PANE_START_INDEX=$((_RIGHT_PANE_START_INDEX - 1))
     _drawRightPane
     ;;
-  $'\e[B' | $'\eOB')
-    writeToStatusBar down
+  BACKSPACE)
+    _SEARCH_STRING="${_SEARCH_STRING%?}"
+    drawPrompt
     ;;
-  $'\e[A' | $'\eOA')
-    writeToStatusBar up
+  $'\n')
+    printf '%s' "${AC__CURSOR_MOVE__}$((GLOBAL_LINES - 2));1${__AC__TO}${AC__ERASE_LINE}${AC__TEXT_BOLD}You searched: ${_SEARCH_STRING}${AC__TEXT_RESET}"
     ;;
-  s)
-    writeToStatusBar Start search
-    search "search"
-    ;;
-  q)
-    _CLOSE_INTERACTIVE_SESSION=true
-    ;;
-  *)
-    if [[ ${specialKeyPress} == "false" ]]; then
-      writeToStatusBar "Normal key pressed: ⌜${keyPressed}⌝."
-    fi
+  # any special key
+  $'\e') ;;
+  # normal key
+  ?)
+    _SEARCH_STRING+="${LAST_KEY_PRESSED}"
+    drawPrompt
     ;;
   esac
 }
 
-function search() {
-  local keyPressed
-  local searchString=""
+# Called when the user interrupts the session (CTRL+C).
+function onSessionInterrupted() {
+  _CLOSE_INTERACTIVE_SESSION=true
+  # interactive::switchBackFromFullScreen
+  # main::onInterruptInternal
+}
 
-  printf '%s' "${AC__CURSOR_SHOW}${AC__CURSOR_MOVE__}$((GLOBAL_LINES));1${__AC__TO}${AC__ERASE_LINE}"
-
-  while IFS= read -rsn 1 -p "${AC__CURSOR_HIDE}${_drawScreenPrompt}${AC__CURSOR_SHOW}${AC__TEXT_BOLD}SEARCH:${AC__TEXT_RESET} ${searchString}" keyPressed; do
-    case ${keyPressed} in
-    # Backspace.
-    $'\177' | $'\b')
-      searchString=${searchString%?}
-      ;;
-    # Escape key.
-    $'\e')
-      read -t 0.1 -rsn 2
-      searchString=
-      break
-      ;;
-    # Enter/Return.
-    "")
-      writeToStatusBar "You searched: ${searchString}"
-      break
-      ;;
-    *)
-      searchString+=$keyPressed
-      ;;
-    esac
-  done
-
-  printf '%s' "${AC__CURSOR_HIDE}${AC__ERASE_LINE}"
+# Called when the user resizes the terminal.
+function onResize() {
+  # export terminal size does not work if both 1 and 2 fd
+  # are not the terminal. We need to temporarily redirect
+  exec 2>&4 4>&-
+  system::exportTerminalSize
+  exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
+  FSFS_REDRAW_REQUIRED=true
 }

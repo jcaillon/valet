@@ -282,12 +282,10 @@ interactive::displayDialogBox() {
 # Usage:
 #   interactive::testKeys
 function interactive::testKeys() {
-  local keyPressed
-
   echo "Press any key to see the character that bash sees (CTRL + C to interrupt).${AC__CURSOR_HIDE}"
   while true; do
     if interactive::waitForKey -t 1; then
-      printf "You pressed: %q        %s" "⌜${LAST_KEY_PRESSED}⌝" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+      printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
     fi
     if [[ ! -t 1 ]]; then break; fi
   done
@@ -312,7 +310,7 @@ function interactive::waitForKey() {
   IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || return 1
   # special key detection, need to read more characters (up to 4 for F1-F12 keys)
   if [[ ${LAST_KEY_PRESSED} == $'\e' ]]; then
-    IFS='' read -t 0.01 -d '' -rsn 4
+    IFS='' read -t 0.001 -d '' -rsn 4
     LAST_KEY_PRESSED+="${REPLY}"
     # translate some common inputs into more readable strings
     case ${LAST_KEY_PRESSED} in
@@ -320,7 +318,7 @@ function interactive::waitForKey() {
     $'\e[B' | $'\eOA') LAST_KEY_PRESSED="DOWN" ;;
     $'\e[C' | $'\eOA') LAST_KEY_PRESSED="RIGHT" ;;
     $'\e[D' | $'\eOA') LAST_KEY_PRESSED="LEFT" ;;
-    $'\177' | $'\b') LAST_KEY_PRESSED="BACKSPACE" ;;
+    $'\e[2~') LAST_KEY_PRESSED="INSERT" ;;
     $'\e[3~') LAST_KEY_PRESSED="DEL" ;;
     $'\e[5~') LAST_KEY_PRESSED="PAGE_UP" ;;
     $'\e[6~') LAST_KEY_PRESSED="PAGE_DOWN" ;;
@@ -329,6 +327,10 @@ function interactive::waitForKey() {
     $'\e') LAST_KEY_PRESSED="ESC" ;;
     $'\eOP') LAST_KEY_PRESSED="F1" ;;
     $'\e'?) LAST_KEY_PRESSED="ALT+${LAST_KEY_PRESSED#$'\e'}" ;;
+    esac
+  else
+    case ${LAST_KEY_PRESSED} in
+    $'\177' | $'\b') LAST_KEY_PRESSED="BACKSPACE" ;;
     esac
   fi
   return 0
@@ -365,4 +367,58 @@ function interactive::getCursorPosition() {
   IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr escapeCode || true
   # then read line;colR
   IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || true
+}
+
+# Call this function to start an interactive session in full screen mode.
+# This function will switch to the alternate screen, hide the cursor and clear the screen.
+# It will also disable echoing when we type something.
+# You should call interactive::switchBackFromFullScreen at the end of the interactive session.
+# In the alternate screen, we don't see the error messages so we capture them somewhere else.
+#
+# Usage:
+#   interactive::switchToFullScreen
+function interactive::switchToFullScreen() {
+  if [[ ! -t 2 ]]; then
+    core::fail "This function can only be used in an interactive session. Did you already called interactive::switchBackFromFullScreen?"
+  fi
+
+  # disable echoing when we type something
+  if command -v stty &>/dev/null; then
+    stty -echo &>/dev/null || true
+  fi
+  # switch to the alternate screen, hide the cursor and clear the screen
+  printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
+
+  # in full screen mode, we don't see the error messages so we capture them somewhere else
+  FSFS_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-interactive.err"
+  while [[ -e "${FSFS_TEMPORARY_ERROR_FILE}" ]]; do FSFS_TEMPORARY_ERROR_FILE+="x"; done
+  exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
+}
+
+# Call this function to switch back from the full screen mode.
+# This function will restore the terminal state, show the cursor and clear the screen.
+# It will also restore the key echoing.
+# If there were error messages during the interactive session, they will be displayed at the end.
+#
+# Usage:
+#   interactive::switchBackFromFullScreen
+function interactive::switchBackFromFullScreen() {
+  if [[ -t 2 ]]; then
+    # already in the normal terminal mode
+    return
+  fi
+
+  # restore the terminal state
+  printf '%s' "${AC__CURSOR_SHOW}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
+  # restore the key echoing
+  if command -v stty &>/dev/null; then
+    stty echo &>/dev/null || true
+  fi
+
+  # restore the error output and display them if any
+  exec 2>&4 4>&-
+  if [[ -s "${FSFS_TEMPORARY_ERROR_FILE}" ]]; then
+    io::readFile "${FSFS_TEMPORARY_ERROR_FILE}"
+    log::error "Error messages during the interactive session:"$'\n'"${LAST_RETURNED_VALUE%$'\n'}"
+  fi
 }

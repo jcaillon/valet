@@ -133,6 +133,7 @@ AC__ERASE_CHARS_LEFT=$'\e[1K'  # clear from cursor to the beginning of the line
 AC__ERASE_LINE=$'\e[2K'       # clear entire line
 
 
+
 #===============================================================
 # >>> General ASCII Codes
 #===============================================================
@@ -165,8 +166,6 @@ __AC__LINES=$'r' # "${limitScrolling}20${_lines}"
 # Repeat last displayed character n times
 AC__REPEAT__=$'\e['
 __AC__LAST_CHAR=$'b'  # "${repeat}2${_lastChar}"
-
-AC__REDRAW_PROMPT=$'\r\e[K'
 
 # Change cursor style
 # 0 blinking block.
