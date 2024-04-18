@@ -10,9 +10,9 @@ set -Eeu -o pipefail
 #
 # Usage:
 #   declare -g myArray=( "z" "a" "b" )
-#   array::sortArray myArray
+#   array::sort myArray
 #   echo "${myArray[@]}"
-function array::sortArray() {
+function array::sort() {
   local -n array=${1}
   local -i i j
   local temp
@@ -38,9 +38,9 @@ function array::sortArray() {
 #
 # Usage:
 #   declare -g myArray=( "a" "b" )
-#   array::appendToArrayIfNotPresent myArray "c"
+#   array::appendIfNotPresent myArray "c"
 #   echo "${myArray[@]}"
-function array::appendToArrayIfNotPresent() {
+function array::appendIfNotPresent() {
   local -n array="${1}"
   local value="${2}"
 
@@ -115,5 +115,47 @@ function array::makeArraysSameSize() {
       length+=1
     done
     shift
+  done
+}
+
+# Sorts an array using mulitple criteria.
+# Excepts multiple arrays. The first array is the one to sort.
+# The other arrays are used as criteria. Criteria are used in the order they are given.
+# Each criteria array must have the same size as the array to sort.
+# Each criteria array must containing integers representing the order of the elements.
+# We first sort using the first criteria (from smallest to biggest), then the second, etc.
+#
+# $1: the name of the array to sort
+# $2+: the names of the arrays to use as criteria
+#
+# Usage:
+#   declare -g myArray=( "a" "b" "c" )
+#   declare -g criteria1=( 3 2 2 )
+#   declare -g criteria2=( 1 3 2 )
+#   array::sortWithCriteria myArray criteria1 criteria2
+#   echo "${LAST_RETURNED_VALUE_ARRAY[@]}"
+#   > c b a
+function array::sortWithCriteria() {
+  local -n array="${1}"
+  shift
+  local -a criteria=("$@")
+
+  local -i i j k
+  local temp
+  for ((i = 0; i < ${#array[@]}; i++)); do
+    for ((j = i + 1; j < ${#array[@]}; j++)); do
+
+      for ((k = 0; k < ${#criteria[@]}; k++)); do
+        local -n criterion="${criteria[k]}"
+        if ((criterion[i] > criterion[j])); then
+          temp="${array[i]}"
+          array[i]="${array[j]}"
+          array[j]="${temp}"
+          break;
+        elif ((criterion[i] < criterion[j])); then
+          break;
+        fi
+      done
+    done
   done
 }

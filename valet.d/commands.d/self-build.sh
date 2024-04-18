@@ -310,7 +310,7 @@ function declareFinalCommandDefinitionCommonVariables() {
   done
   parentCommand="${parentCommand# }"
   if [[ -n "${parentCommand}" ]]; then
-    if ! array::appendToArrayIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY "${parentCommand# }"; then
+    if ! array::appendIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY "${parentCommand# }"; then
       declare -g "CMD_FUNCTION_NAME_${parentCommand//[-[:space:]]/_}"="_menu"
     fi
   fi
@@ -460,7 +460,7 @@ function declareFinalCommandDefinitionParserVariables() {
 # shellcheck disable=SC2034
 function declareOtherCommmandVariables() {
   # sort commands in alphabetical order
-  array::sortArray CMD_ALL_COMMANDS_ARRAY
+  array::sort CMD_ALL_COMMANDS_ARRAY
 
   CMD_COMMANDS_MENU_BODY=""
   CMD_COMMANDS_HIDDEN_MENU_BODY=""

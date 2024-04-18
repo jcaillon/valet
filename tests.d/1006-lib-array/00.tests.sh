@@ -3,7 +3,7 @@
 # shellcheck source=../../valet.d/lib-array
 source array
 
-function testArray::sortArray() {
+function testarray::sort() {
 
   declare -g MYARRAY=(
     breakdown
@@ -19,15 +19,15 @@ function testArray::sortArray() {
   declare -p MYARRAY
 
   echo
-  echo "→ array::sortArray MYARRAY"
-  array::sortArray MYARRAY
+  echo "→ array::sort MYARRAY"
+  array::sort MYARRAY
 
   declare -p MYARRAY
 
-  endTest "testArray::ing array::sortArray" 0
+  endTest "testArray::ing array::sort" 0
 }
 
-function testArray::appendToArrayIfNotPresent() {
+function testarray::appendIfNotPresent() {
 
   declare -g MYARRAY=(
     breakdown
@@ -37,27 +37,27 @@ function testArray::appendToArrayIfNotPresent() {
   declare -p MYARRAY
 
   echo
-  echo "→ array::appendToArrayIfNotPresent MYARRAY 'deliver'"
-  array::appendToArrayIfNotPresent MYARRAY 'deliver'
+  echo "→ array::appendIfNotPresent MYARRAY 'deliver'"
+  array::appendIfNotPresent MYARRAY 'deliver'
   echo $?
 
   declare -p MYARRAY
 
   echo
-  echo "→ array::appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday'"
-  array::appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday'
+  echo "→ array::appendIfNotPresent MYARRAY 'deliver' 'holiday'"
+  array::appendIfNotPresent MYARRAY 'deliver' 'holiday'
   echo $?
 
   declare -p MYARRAY
 
   echo
-  echo "→ array::appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'"
-  array::appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'
+  echo "→ array::appendIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'"
+  array::appendIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'
   echo $?
 
   declare -p MYARRAY
 
-  endTest "testArray::ing array::appendToArrayIfNotPresent" 0
+  endTest "testArray::ing array::appendIfNotPresent" 0
 }
 
 function testArray::isInArray() {
@@ -99,11 +99,29 @@ function testArray::makeArraysSameSize {
   endTest "testArray::ing array::makeArraysSameSize" 0
 }
 
+function testArray::sortWithCriteria() {
+  declare -g myArray=(   a b c d e f g )
+  declare -g criteria1=( 3 2 2 1 1 4 0 )
+  declare -g criteria2=( 1 3 2 5 0 2 9 )
+
+  declare -p myArray criteria1 criteria2
+
+  echo
+  echo "→ array::sortWithCriteria myArray criteria1 criteria2"
+  array::sortWithCriteria myArray criteria1 criteria2
+
+  declare -p myArray
+  echo "expected: g e d c b a f"
+
+  endTest "testArray::ing array::sortWithCriteria" 0
+}
+
 function main() {
-  testArray::sortArray
-  testArray::appendToArrayIfNotPresent
+  testarray::sort
+  testarray::appendIfNotPresent
   testArray::isInArray
   testArray::makeArraysSameSize
+  testArray::sortWithCriteria
 }
 
 main

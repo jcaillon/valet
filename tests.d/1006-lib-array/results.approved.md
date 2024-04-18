@@ -2,7 +2,7 @@
 
 ## Test script 00.tests
 
-### testArray::ing array::sortArray
+### testArray::ing array::sort
 
 Exit code: `0`
 
@@ -11,11 +11,11 @@ Exit code: `0`
 ```plaintext
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="conventional" [3]="baby" [4]="holiday" [5]="abundant" [6]="deliver" [7]="position" [8]="economics")
 
-→ array::sortArray MYARRAY
+→ array::sort MYARRAY
 declare -a MYARRAY=([0]="abundant" [1]="baby" [2]="breakdown" [3]="constitutional" [4]="conventional" [5]="deliver" [6]="economics" [7]="holiday" [8]="position")
 ```
 
-### testArray::ing array::appendToArrayIfNotPresent
+### testArray::ing array::appendIfNotPresent
 
 Exit code: `0`
 
@@ -24,15 +24,15 @@ Exit code: `0`
 ```plaintext
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional")
 
-→ array::appendToArrayIfNotPresent MYARRAY 'deliver'
+→ array::appendIfNotPresent MYARRAY 'deliver'
 0
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
 
-→ array::appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday'
+→ array::appendIfNotPresent MYARRAY 'deliver' 'holiday'
 1
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
 
-→ array::appendToArrayIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'
+→ array::appendIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'
 1
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
 ```
