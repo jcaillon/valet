@@ -532,6 +532,7 @@ function core::sourceUserCommands() {
 #  core::reloadUserCommands
 function core::reloadUserCommands() {
   # delete previous variables
+  # shellcheck disable=SC2086
   unset -v ${!CMD_*} _CMD_INCLUDED
   core::sourceUserCommands
 }
@@ -737,7 +738,7 @@ function array::fuzzyFilter() {
         if [[ ${lineChar} == "${patternChar}" ]]; then
           # if we find the character, mark the distance
           distance=$((lineCharIndex - lastLineCharIndex))
-          lastLineCharIndex=${lineCharIndex}
+          lastLineCharIndex=$((lineCharIndex + 1))
 
           # if it is the first char of the pattern, remmember the index
           if [[ patternCharIndex -eq 0 ]]; then

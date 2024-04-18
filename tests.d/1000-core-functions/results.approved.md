@@ -110,12 +110,12 @@ declare -a lines=([0]="this is a word" [1]="very unbelievable" [2]="unbelievable
 → array::fuzzyFilter evle lines
 declare -a LAST_RETURNED_ARRAY_VALUE=([0]="very unbelievable" [1]="unbelievable" [2]="ublievable")
 declare -a LAST_RETURNED_ARRAY_VALUE2=([0]="1" [1]="3" [2]="4")
-declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="1" [1]="1" [2]="1")
+declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="0" [1]="0" [2]="0")
 
 → array::fuzzyFilter SC2 lines
 declare -a LAST_RETURNED_ARRAY_VALUE=([0]="self mock2")
 declare -a LAST_RETURNED_ARRAY_VALUE2=([0]="0")
-declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="2")
+declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="1")
 
 → array::fuzzyFilter u lines
 declare -a LAST_RETURNED_ARRAY_VALUE=([0]="very unbelievable" [1]="unbelievable" [2]="ublievable")
@@ -125,7 +125,7 @@ declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="5" [1]="0" [2]="0")
 → array::fuzzyFilter seLf lines
 declare -a LAST_RETURNED_ARRAY_VALUE=([0]="self mock1" [1]="self mock2")
 declare -a LAST_RETURNED_ARRAY_VALUE2=([0]="0" [1]="0")
-declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="1" [1]="1")
+declare -a LAST_RETURNED_ARRAY_VALUE3=([0]="0" [1]="0")
 
 → array::fuzzyFilter nomatch lines
 declare -a LAST_RETURNED_ARRAY_VALUE=()

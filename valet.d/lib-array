@@ -41,7 +41,7 @@ function array::sort() {
 #   array::appendIfNotPresent myArray "c"
 #   echo "${myArray[@]}"
 function array::appendIfNotPresent() {
-  local -n array="${1}"
+  local -n array=${1}
   local value="${2}"
 
   # add value to array if not present, check in a loop
@@ -138,24 +138,156 @@ function array::makeArraysSameSize() {
 function array::sortWithCriteria() {
   local -n array="${1}"
   shift
-  local -a criteria=("$@")
+  local -a criteria=("${@}")
 
   local -i i j k
   local temp
+  local -a indexes
+
+  # create an array of indexes
+  for ((i = 0; i < ${#array[@]}; i++)); do
+    indexes+=("${i}")
+  done
+
+  # sort the indexes
   for ((i = 0; i < ${#array[@]}; i++)); do
     for ((j = i + 1; j < ${#array[@]}; j++)); do
 
       for ((k = 0; k < ${#criteria[@]}; k++)); do
         local -n criterion="${criteria[k]}"
-        if ((criterion[i] > criterion[j])); then
-          temp="${array[i]}"
-          array[i]="${array[j]}"
-          array[j]="${temp}"
+        if ((criterion[indexes[i]] > criterion[indexes[j]])); then
+            temp="${indexes[i]}"
+            indexes[i]="${indexes[j]}"
+            indexes[j]="${temp}"
           break;
-        elif ((criterion[i] < criterion[j])); then
+        elif ((criterion[indexes[i]] < criterion[indexes[j]])); then
           break;
         fi
       done
     done
   done
+
+  # create the sorted array
+  local -a sortedArray
+  for i in "${indexes[@]}"; do
+    sortedArray+=("${array[i]}")
+  done
+
+  array=("${sortedArray[@]}")
+}
+
+
+# Allows to fuzzy sort an array against a given pattern.
+# Returns an array containing only the lines matching the pattern.
+# The array is sorted by (in order):
+# - the index of the first matched character in the line
+# - the distance between the characters in the line
+#
+# $1: the pattern to match
+# $2: the initial array name
+# $3: (optional) string to add before each matched char
+# $4: (optional) string to add after each matched char
+#
+# Returns:
+#   an the sorted and filtered in the global variable LAST_RETURNED_ARRAY_VALUE
+
+# Usage:
+#   array::fuzzyMatch "pattern" "myarray" && local bestMatch="${LAST_RETURNED_VALUE}"
+#
+# Note:
+#   All characters in the pattern must be found in the same order in the matched line.
+#   The function is case insensitive.
+#   This function does not sort the results, it only filters them.
+function array::fuzzyFilterSort() {
+  local pattern="${1}"
+  local -n array="${2}"
+  local beforeChar="${3:-}"
+  local afterChar="${4:-}"
+
+  ARRAY_MATCHES=()
+  ARRAY_INDEXES=()
+  ARRAY_DISTANCES=()
+
+  local -i patternLength lineLength
+  patternLength="${#pattern}"
+
+  # make all match case insensitive
+  shopt -s nocasematch
+
+  local line patternChar lineChar modifiedLine
+  local -i lineCharIndex patternCharIndex lastLineCharIndex distance patternFirstCharIndex
+
+  for line in "${array[@]}"; do
+    lineLength="${#line}"
+
+    modifiedLine=""
+
+    # for each character in the pattern
+    patternCharIndex=0
+    lineCharIndex=0
+    lastLineCharIndex=0
+    while [[ patternCharIndex -lt patternLength ]]; do
+      patternChar="${pattern:${patternCharIndex}:1}"
+
+      # find the character in the line
+      while [[ lineCharIndex -lt lineLength ]]; do
+        lineChar="${line:${lineCharIndex}:1}"
+
+        if [[ ${lineChar} == "${patternChar}" ]]; then
+          # modify the line
+          if ((lineCharIndex - lastLineCharIndex > 0)); then
+            modifiedLine+="${line:${lastLineCharIndex}:$((lineCharIndex  - lastLineCharIndex))}"
+          fi
+          modifiedLine+="${beforeChar}${lineChar}${afterChar}"
+
+          # if we find the character, mark the distance
+          distance=$((lineCharIndex - lastLineCharIndex))
+          lastLineCharIndex=$((lineCharIndex + 1))
+
+          # if it is the first char of the pattern, remmember the index
+          if [[ patternCharIndex -eq 0 ]]; then
+            patternFirstCharIndex=${lineCharIndex}
+          fi
+
+          # loop on the next pattern character
+          break;
+        fi
+
+        lineCharIndex+=1
+      done
+
+      # if we don't find the character in the line, the line is not a match
+      if [[ lineCharIndex -ge lineLength ]]; then
+        break;
+      else
+        lineCharIndex+=1
+      fi
+
+      patternCharIndex+=1
+    done
+
+    # if we found all the characters in the pattern
+    if [[ patternCharIndex -ge patternLength ]]; then
+      # add the remaining characters in the line
+      if ((lineLength - lastLineCharIndex > 0)); then
+        modifiedLine+="${line:$((lastLineCharIndex)):$((lineLength - lastLineCharIndex))}"
+      fi
+
+      ARRAY_MATCHES+=("${modifiedLine}")
+      ARRAY_INDEXES+=("${patternFirstCharIndex}")
+      ARRAY_DISTANCES+=("${distance}")
+    fi
+
+  done
+
+  shopt -u nocasematch
+
+  declare -p ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
+
+  # sort the results
+  array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
+
+  LAST_RETURNED_ARRAY_VALUE=("${ARRAY_MATCHES[@]}")
+
+  unset ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
 }

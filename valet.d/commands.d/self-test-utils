@@ -267,7 +267,10 @@ function runTest() {
 
   # test if the user forgot to call endTest
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" || -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
-    core::fail "The test script ⌜${testScript}⌝ did not call endTest OR it had outputs after the last endTest call."
+    local content1 content2
+    io::readFile "${_TEST_STANDARD_OUTPUT_FILE}" && content1="${LAST_RETURNED_VALUE}"
+    io::readFile "${_TEST_STANDARD_ERROR_FILE}" && content2="${LAST_RETURNED_VALUE}"
+    core::fail "The test script ⌜${testScript}⌝ did not call endTest OR it had outputs after the last endTest call."$'\n'"Standard output"$'\n'"⌜${content1}⌝"$'\n'"Error output:"$'\n'"⌜${content2}⌝"
   fi
 
 }

@@ -3,7 +3,7 @@
 # shellcheck source=../../valet.d/lib-array
 source array
 
-function testarray::sort() {
+function testArray::sort() {
 
   declare -g MYARRAY=(
     breakdown
@@ -27,7 +27,7 @@ function testarray::sort() {
   endTest "testArray::ing array::sort" 0
 }
 
-function testarray::appendIfNotPresent() {
+function testArray::appendIfNotPresent() {
 
   declare -g MYARRAY=(
     breakdown
@@ -100,9 +100,9 @@ function testArray::makeArraysSameSize {
 }
 
 function testArray::sortWithCriteria() {
-  declare -g myArray=(   a b c d e f g )
-  declare -g criteria1=( 3 2 2 1 1 4 0 )
-  declare -g criteria2=( 1 3 2 5 0 2 9 )
+  declare -g myArray=(a b c d e f g)
+  declare -g criteria1=(3 2 2 1 1 4 0)
+  declare -g criteria2=(1 3 2 5 0 2 9)
 
   declare -p myArray criteria1 criteria2
 
@@ -113,15 +113,64 @@ function testArray::sortWithCriteria() {
   declare -p myArray
   echo "expected: g e d c b a f"
 
-  endTest "testArray::ing array::sortWithCriteria" 0
+  declare -a ARRAY_MATCHES=([0]="one the" [1]="the breakdown" [2]="holding the baby" [3]="the d day")
+  declare -a ARRAY_INDEXES=([0]="4" [1]="0" [2]="8" [3]="0")
+  declare -a ARRAY_DISTANCES=([0]="0" [1]="0" [2]="0" [3]="0")
+
+  declare -p ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
+
+  echo
+  echo "→ array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES"
+  array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
+
+  declare -p ARRAY_MATCHES
+
+  unset ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
+
+  endTest "tesing array::sortWithCriteria" 0
+}
+
+function testArray::fuzzyFilterSort() {
+  myArray=(
+    "one the"
+    "the breakdown"
+    "constitutional"
+    "conventional"
+    "hold the baby"
+    "holiday inn"
+    "deliver"
+    "abundant"
+    "make a living"
+    "the d day"
+    "elevator"
+  )
+
+  declare -p myArray
+
+  echo
+  echo "→ array::fuzzyFilterSort the myArray"
+  array::fuzzyFilterSort the myArray
+
+  declare -p LAST_RETURNED_ARRAY_VALUE
+
+  echo
+  echo "→ array::fuzzyFilterSort elv myArray ⌜ ⌝"
+  array::fuzzyFilterSort elv myArray ⌜ ⌝
+
+  declare -p LAST_RETURNED_ARRAY_VALUE
+
+  unset myArray
+
+  endTest "testing array::fuzzyFilterSort" 0
 }
 
 function main() {
-  testarray::sort
-  testarray::appendIfNotPresent
+  testArray::sort
+  testArray::appendIfNotPresent
   testArray::isInArray
   testArray::makeArraysSameSize
   testArray::sortWithCriteria
+  testArray::fuzzyFilterSort
 }
 
 main
