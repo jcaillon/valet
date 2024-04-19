@@ -156,12 +156,12 @@ function array::sortWithCriteria() {
       for ((k = 0; k < ${#criteria[@]}; k++)); do
         local -n criterion="${criteria[k]}"
         if ((criterion[indexes[i]] > criterion[indexes[j]])); then
-            temp="${indexes[i]}"
-            indexes[i]="${indexes[j]}"
-            indexes[j]="${temp}"
-          break;
+          temp="${indexes[i]}"
+          indexes[i]="${indexes[j]}"
+          indexes[j]="${temp}"
+          break
         elif ((criterion[indexes[i]] < criterion[indexes[j]])); then
-          break;
+          break
         fi
       done
     done
@@ -176,7 +176,6 @@ function array::sortWithCriteria() {
   array=("${sortedArray[@]}")
 }
 
-
 # Allows to fuzzy sort an array against a given pattern.
 # Returns an array containing only the lines matching the pattern.
 # The array is sorted by (in order):
@@ -187,12 +186,16 @@ function array::sortWithCriteria() {
 # $2: the initial array name
 # $3: (optional) string to add before each matched char
 # $4: (optional) string to add after each matched char
+# $5: (optional) The maximum length to keep for the matched lines
+#     Does not count the strings added/before after each matched char.
 #
 # Returns:
 #   an the sorted and filtered in the global variable LAST_RETURNED_ARRAY_VALUE
-
+#
 # Usage:
-#   array::fuzzyMatch "pattern" "myarray" && local bestMatch="${LAST_RETURNED_VALUE}"
+#   array::fuzzyFilterSort "pattern" "myarray" && local filteredArray="${LAST_RETURNED_ARRAY_VALUE}"
+#   array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ && local filteredArray="${LAST_RETURNED_ARRAY_VALUE}"
+#   array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${LAST_RETURNED_ARRAY_VALUE}"
 #
 # Note:
 #   All characters in the pattern must be found in the same order in the matched line.
@@ -203,24 +206,28 @@ function array::fuzzyFilterSort() {
   local -n array="${2}"
   local beforeChar="${3:-}"
   local afterChar="${4:-}"
+  local maxMatchedLineLength="${5:-9999999}"
 
   ARRAY_MATCHES=()
   ARRAY_INDEXES=()
   ARRAY_DISTANCES=()
 
-  local -i patternLength lineLength
+  local -i patternLength lineLength matchedLineLength
   patternLength="${#pattern}"
 
   # make all match case insensitive
   shopt -s nocasematch
 
-  local line patternChar lineChar modifiedLine
+  local line patternChar lineChar matchedLine hasBeginEllipsis hasEndEllipsis
   local -i lineCharIndex patternCharIndex lastLineCharIndex distance patternFirstCharIndex
 
   for line in "${array[@]}"; do
     lineLength="${#line}"
 
-    modifiedLine=""
+    hasBeginEllipsis=false
+    hasEndEllipsis=false
+    matchedLine=""
+    matchedLineLength=0
 
     # for each character in the pattern
     patternCharIndex=0
@@ -234,23 +241,46 @@ function array::fuzzyFilterSort() {
         lineChar="${line:${lineCharIndex}:1}"
 
         if [[ ${lineChar} == "${patternChar}" ]]; then
-          # modify the line
-          if ((lineCharIndex - lastLineCharIndex > 0)); then
-            modifiedLine+="${line:${lastLineCharIndex}:$((lineCharIndex  - lastLineCharIndex))}"
-          fi
-          modifiedLine+="${beforeChar}${lineChar}${afterChar}"
 
-          # if we find the character, mark the distance
-          distance=$((lineCharIndex - lastLineCharIndex))
-          lastLineCharIndex=$((lineCharIndex + 1))
+          # see if we need to shift the matched line if the line is too long
+          # and the first matched character is not at the beginning of the line
+          if [[ ${lineLength} -gt ${maxMatchedLineLength} && ${hasBeginEllipsis} != "true" && ${patternCharIndex} -eq 0 && ${lineCharIndex} -ge ${maxMatchedLineLength} ]]; then
+            local -i remainingChars=$((maxMatchedLineLength - lineCharIndex))
+            matchedLine="…${beforeChar}${lineChar}${afterChar}"
+            matchedLineLength=2
+            hasBeginEllipsis=true
+
+          elif ((matchedLineLength + 1 + lineCharIndex - lastLineCharIndex < maxMatchedLineLength)); then
+            if ((lineCharIndex - lastLineCharIndex > 0)); then
+              # add the characters before the matched character
+              matchedLine+="${line:${lastLineCharIndex}:$((lineCharIndex - lastLineCharIndex))}"
+              matchedLineLength+=$((lineCharIndex - lastLineCharIndex))
+            fi
+            matchedLine+="${beforeChar}${lineChar}${afterChar}"
+            matchedLineLength+=1
+
+          elif [[ ${hasEndEllipsis} != "true" ]]; then
+            local -i remainingChars=$((maxMatchedLineLength - 1 - matchedLineLength))
+            if ((remainingChars > 0)); then
+              matchedLine+="${line:${lastLineCharIndex}:${remainingChars}}"
+              matchedLineLength+=${remainingChars}
+            fi
+            matchedLine+="…"
+            matchedLineLength+=1
+            hasEndEllipsis=true
+          fi
 
           # if it is the first char of the pattern, remmember the index
           if [[ patternCharIndex -eq 0 ]]; then
             patternFirstCharIndex=${lineCharIndex}
           fi
 
+          # if we find the character, mark the distance
+          distance=$((lineCharIndex - lastLineCharIndex))
+          lastLineCharIndex=$((lineCharIndex + 1))
+
           # loop on the next pattern character
-          break;
+          break
         fi
 
         lineCharIndex+=1
@@ -258,7 +288,7 @@ function array::fuzzyFilterSort() {
 
       # if we don't find the character in the line, the line is not a match
       if [[ lineCharIndex -ge lineLength ]]; then
-        break;
+        break
       else
         lineCharIndex+=1
       fi
@@ -270,10 +300,21 @@ function array::fuzzyFilterSort() {
     if [[ patternCharIndex -ge patternLength ]]; then
       # add the remaining characters in the line
       if ((lineLength - lastLineCharIndex > 0)); then
-        modifiedLine+="${line:$((lastLineCharIndex)):$((lineLength - lastLineCharIndex))}"
+        local remainingChars=$((lineLength - lastLineCharIndex))
+        local hasEllipsis=false
+        if ((remainingChars > maxMatchedLineLength - matchedLineLength)); then
+          remainingChars=$((maxMatchedLineLength - matchedLineLength - 1))
+          hasEllipsis=true
+        fi
+        if ((remainingChars > 0)); then
+          matchedLine+="${line:${lastLineCharIndex}:${remainingChars}}"
+        fi
+        if [[ ${hasEllipsis} == "true" && ${hasEndEllipsis} != "true" ]]; then
+          matchedLine+="…"
+        fi
       fi
 
-      ARRAY_MATCHES+=("${modifiedLine}")
+      ARRAY_MATCHES+=("${matchedLine}")
       ARRAY_INDEXES+=("${patternFirstCharIndex}")
       ARRAY_DISTANCES+=("${distance}")
     fi
@@ -281,8 +322,6 @@ function array::fuzzyFilterSort() {
   done
 
   shopt -u nocasematch
-
-  declare -p ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
 
   # sort the results
   array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES

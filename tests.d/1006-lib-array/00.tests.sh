@@ -159,6 +159,23 @@ function testArray::fuzzyFilterSort() {
 
   declare -p LAST_RETURNED_ARRAY_VALUE
 
+  echo
+  myArray=(
+    "On the"
+    "One of the most beautiful"
+    "One of this happy end"
+    "thaerty"
+    "thazrerty"
+  )
+
+  declare -p myArray
+
+  echo
+  echo "→ array::fuzzyFilterSort the myArray ⌜ ⌝ 6"
+  array::fuzzyFilterSort the myArray ⌜ ⌝ 6
+
+  declare -p LAST_RETURNED_ARRAY_VALUE
+
   unset myArray
 
   endTest "testing array::fuzzyFilterSort" 0

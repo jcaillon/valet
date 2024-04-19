@@ -396,7 +396,7 @@ function interactive::switchToFullScreen() {
 }
 
 # Call this function to switch back from the full screen mode.
-# This function will restore the terminal state, show the cursor and clear the screen.
+# This function will restore the terminal state and show the cursor.
 # It will also restore the key echoing.
 # If there were error messages during the interactive session, they will be displayed at the end.
 #

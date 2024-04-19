@@ -12,6 +12,8 @@ source ansi-codes
 source interactive
 # shellcheck source=lib-io
 source io
+# shellcheck source=lib-array
+source array
 
 #===============================================================
 # >>> Customization
@@ -74,6 +76,8 @@ function fsfs::menu() {
   _HEADER="${LAST_RETURNED_VALUE}"
 
   # extract items into an array
+  _ITEMS=()
+  _FILTERED_ITEMS=()
   local line IFS
   while IFS= read -r line; do
     _ITEMS+=("${line}")
@@ -142,7 +146,7 @@ function drawScreen() {
     _RIGHT_PANE_WIDTH=$((GLOBAL_COLUMNS * 9 / 20))
     FSFS_FETCHED_DETAILS_INDEXES=()
 
-    _drawStaticScreen
+    drawStaticScreen
 
     drawMode="left-right"
   fi
@@ -170,18 +174,18 @@ function drawScreen() {
   fi
 
   if [[ ${drawMode} == *"right"* && ${hasDetails} == "true" ]]; then
-    _drawRightPane
+    drawRightPane
   fi
 
   if [[ ${drawMode} == *"left"* ]]; then
-    _drawLeftPane
+    drawLeftPane
   fi
 
   # finish with the prompt line has we show the cursor again
   drawPrompt
 }
 
-function _drawRightPane() {
+function drawRightPane() {
   local details="${_ITEMS_DETAILS[_SELECTED_ITEM_INDEX]}"
   local IFS
 
@@ -226,10 +230,27 @@ function _drawRightPane() {
 
 }
 
-function _drawLeftPane() {
+function drawLeftPane() {
   local IFS
+
+  # Compute filtered items
+  if [[ -n ${_SEARCH_STRING} ]]; then
+    array::fuzzyFilterSort "${_SEARCH_STRING}" _ITEMS "${AC__FG_BRIGHT_GREEN}" "${AC__FG_RESET}" "$((_LEFT_PANE_WIDTH - 4))"
+    _FILTERED_ITEMS=("${LAST_RETURNED_ARRAY_VALUE[@]}")
+  else
+    # for each item longer than the left width, cut and add ellipsis
+    _FILTERED_ITEMS=()
+    local line
+    for line in "${_ITEMS[@]}"; do
+      if ((${#line} > _LEFT_PANE_WIDTH - 3)); then
+        line="${line:0:$((_LEFT_PANE_WIDTH - 4))}…"
+      fi
+      _FILTERED_ITEMS+=("${line}")
+    done
+  fi
+
   # separator
-  local title=" 10/10"
+  local title=" ${#_FILTERED_ITEMS[@]}/${#_ITEMS[@]}"
   local titleWidth=${#title}
   if ((titleWidth > _LEFT_PANE_WIDTH)); then
     titleWidth=0
@@ -243,7 +264,7 @@ function _drawLeftPane() {
   local -i currentLine=1
   local -i currentIndex=0
   local line
-  for line in "${_ITEMS[@]}"; do
+  for line in "${_FILTERED_ITEMS[@]}"; do
     currentIndex+=1
     if ((currentIndex < _LEFT_PANE_START_INDEX + 1)); then
       continue
@@ -254,13 +275,18 @@ function _drawLeftPane() {
       break
     fi
   done
+  # clear the remaining lines
+  while ((currentLine < _LEFT_LINES - 1)); do
+    printf "%s" "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1 + currentLine));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"
+    currentLine+=1
+  done
 }
 
 function drawPrompt() {
   printf '%s\r%s' "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}" "▶ ${_SEARCH_STRING}${AC__CURSOR_SHOW}"
 }
 
-function _drawStaticScreen() {
+function drawStaticScreen() {
   local IFS
 
   # clear the screen, move to the top left corner
@@ -298,14 +324,15 @@ function onKeyPressed() {
   case ${LAST_KEY_PRESSED} in
   RIGHT)
     _RIGHT_PANE_START_INDEX=$((_RIGHT_PANE_START_INDEX + 1))
-    _drawRightPane
+    drawRightPane
     ;;
   LEFT)
     _RIGHT_PANE_START_INDEX=$((_RIGHT_PANE_START_INDEX - 1))
-    _drawRightPane
+    drawRightPane
     ;;
   BACKSPACE)
     _SEARCH_STRING="${_SEARCH_STRING%?}"
+    drawLeftPane
     drawPrompt
     ;;
   $'\n')
@@ -316,6 +343,7 @@ function onKeyPressed() {
   # normal key
   ?)
     _SEARCH_STRING+="${LAST_KEY_PRESSED}"
+    drawLeftPane
     drawPrompt
     ;;
   esac
