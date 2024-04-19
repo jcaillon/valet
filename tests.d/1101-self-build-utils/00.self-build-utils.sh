@@ -8,7 +8,7 @@ function testExtractCommandYamls() {
   extractCommandYamls "resources/extract-command-yamls-test-file"
 
   local content
-  for content in "${LAST_RETURNED_VALUE_ARRAY[@]}"; do
+  for content in "${LAST_RETURNED_ARRAY_VALUE[@]}"; do
     echo "content:"$'\n'"⌜${content}⌝"
   done
 

@@ -1,11 +1,11 @@
 # How to work on bash script
 
 > [!INFORMATION]
-> Disclaimer: This page is just one opinion. This is not the best way to work on bash scripts, this is just an explanation on how I work.
+> Disclaimer: This page is just one opinion. This is not the best way to work on bash scripts, this is just an explanation of how I work.
 
 ## IDE
 
-I work mostly with VS code on windows + WSL.
+I work with VS code on windows + WSL.
 
 Install VS code from [here](https://code.visualstudio.com/download).
 
@@ -31,16 +31,17 @@ GitHub Copilot is of great help if you can have it.
 
 ## VS code settings
 
-You can open your `~/.valet.d` directory as a workspace on vscode. I recommend to copy the `valet.d/core` in your workspace folder and add the following settings in your `~/.valet.d/.vscode/settings.json`:
+You can open your `~/.valet.d` directory as a workspace on vscode. I recommend to copy (or link) the `valet.d` directory from the Valet installation to `~/.valet.d/.valet.libs` in your workspace folder and add the following settings in your `~/.valet.d/.vscode/settings.json`:
 
 ```json
 {
-    "bashIde.globPattern": "**/*@(.sh|.inc|.bash|.command|core)",
-    "bashIde.includeAllWorkspaceSymbols": true
+  // https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
+  "bashIde.globPattern": "**/*@(.sh|.inc|.bash|.command|core|lib-*)",
+  "bashIde.includeAllWorkspaceSymbols": true
 }
 ```
 
-This allows you to have autocompletion of the core functions from your command scripts.
+This allows you to have autocompletion of the core and libraries functions from your command scripts.
 
 ## Where to start your bash journey
 
@@ -63,7 +64,7 @@ To write performance script, you should:
 
 > This improvements can lead to **HUGE** differences in run time. Especially in windows bash which is quite slow.
 >
-> The initial version of valet was taking around 5s to parse and execute a command, and it went down to a few hundred milliseconds after refactoring using the rules above.
+> The initial version of valet was taking around 5s to parse and execute a command, and it went down to a under a hundred milliseconds after refactoring using the rules above.
 
 The chapters below give you some tips for the common problems that you can encounter:
 

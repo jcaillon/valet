@@ -78,11 +78,13 @@ function fsfs::menu() {
   # extract items into an array
   _ITEMS=()
   _FILTERED_ITEMS=()
+  _FILTERED_ITEMS_CORRESPONDANCES=()
   local line IFS
   while IFS= read -r line; do
     _ITEMS+=("${line}")
   done <<<"${items}"
 
+  FSFS_FINAL_SELECTION_INDEX=-1
   _SELECTED_ITEM_INDEX=0
   _LEFT_PANE_START_INDEX=0
   _RIGHT_PANE_START_INDEX=0
@@ -131,6 +133,8 @@ function fsfs::menu() {
   # restore the initial traps
   eval "${originalTraps}"
   interactive::switchBackFromFullScreen
+
+  log::info "Selected index: ${FSFS_FINAL_SELECTION_INDEX}"
 }
 
 function drawScreen() {
@@ -198,7 +202,7 @@ function drawRightPane() {
   fi
   local titlePadding=$(((_RIGHT_PANE_WIDTH - titleWidth) / 2 - 3))
   printf '%s%s\n' \
-    "${AC__CURSOR_MOVE__}${_RIGHT_PANE_FIRST_LINE};$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" \
+    "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}${_RIGHT_PANE_FIRST_LINE};$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" \
     "┌─${AC__REPEAT__}${titlePadding}${__AC__LAST_CHAR}${title}─${AC__REPEAT__}$((_RIGHT_PANE_WIDTH - titleWidth - titlePadding - 2 - 2))${__AC__LAST_CHAR}┐"
 
   # draw the details
@@ -216,6 +220,12 @@ function drawRightPane() {
       break
     fi
   done <<<"${details}"
+
+  # clear the remaining lines
+  while ((currentLine < _RIGHT_LINES - 1)); do
+    printf "%s" "${AC__CURSOR_MOVE__}$((_RIGHT_PANE_FIRST_LINE + currentLine));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}${AC__ERASE_CHARS_RIGHT}"
+    currentLine+=1
+  done
 
   # draw last line with help text
   local helpWidth=$((${#_RIGHT_PANE_HELP_TEXT} + 2))
@@ -237,6 +247,7 @@ function drawLeftPane() {
   if [[ -n ${_SEARCH_STRING} ]]; then
     array::fuzzyFilterSort "${_SEARCH_STRING}" _ITEMS "${AC__FG_BRIGHT_GREEN}" "${AC__FG_RESET}" "$((_LEFT_PANE_WIDTH - 4))"
     _FILTERED_ITEMS=("${LAST_RETURNED_ARRAY_VALUE[@]}")
+    _FILTERED_ITEMS_CORRESPONDANCES=("${LAST_RETURNED_ARRAY_VALUE2[@]}")
   else
     # for each item longer than the left width, cut and add ellipsis
     _FILTERED_ITEMS=()
@@ -247,7 +258,12 @@ function drawLeftPane() {
       fi
       _FILTERED_ITEMS+=("${line}")
     done
+    _FILTERED_ITEMS_CORRESPONDANCES=()
+    for ((i = 0; i < ${#_ITEMS[@]}; i++)); do
+      _FILTERED_ITEMS_CORRESPONDANCES+=("${i}")
+    done
   fi
+  changeSelectedItemIndex 0
 
   # separator
   local title=" ${#_FILTERED_ITEMS[@]}/${#_ITEMS[@]}"
@@ -257,33 +273,40 @@ function drawLeftPane() {
     title=""
   fi
   printf '%s%s\n' \
-    "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1));1${__AC__TO}" \
+    "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1));1${__AC__TO}" \
     "─${AC__REPEAT__}$((_LEFT_PANE_WIDTH - titleWidth - 2))${__AC__LAST_CHAR}${title} "
 
   # draw the items
-  local -i currentLine=1
-  local -i currentIndex=0
-  local line
+  local -i currentLine=0
+  local -i currentIndex=-1
+  local line itemPrefix
   for line in "${_FILTERED_ITEMS[@]}"; do
     currentIndex+=1
-    if ((currentIndex < _LEFT_PANE_START_INDEX + 1)); then
+    if ((currentIndex < _LEFT_PANE_START_INDEX)); then
       continue
     fi
-    printf "%s\r%s%s\n" "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1 + currentLine));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}" "  " "${line}"
     currentLine+=1
-    if ((currentLine >= _LEFT_LINES - 1)); then
+    if ((currentIndex == _SELECTED_ITEM_INDEX)); then
+      itemPrefix="◆ "
+    else
+      itemPrefix="  "
+    fi
+
+    printf "%s\r%s%s\n" "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1 + currentLine));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}" "${itemPrefix}" "${line}"
+    if ((currentLine >= _LEFT_LINES)); then
       break
     fi
   done
+
   # clear the remaining lines
-  while ((currentLine < _LEFT_LINES - 1)); do
-    printf "%s" "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1 + currentLine));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"
+  while ((currentLine < _LEFT_LINES)); do
     currentLine+=1
+    printf "%s" "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1 + currentLine));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"
   done
 }
 
 function drawPrompt() {
-  printf '%s\r%s' "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}" "▶ ${_SEARCH_STRING}${AC__CURSOR_SHOW}"
+  printf '%s\r%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}" "▶ ${_SEARCH_STRING}${AC__CURSOR_SHOW}"
 }
 
 function drawStaticScreen() {
@@ -319,34 +342,127 @@ function drawStaticScreen() {
   printf '%s' "${AC__CURSOR_MOVE__}$((GLOBAL_LINES));1${__AC__TO}${AC__ERASE_LINE}${_LEFT_PANE_HELP_TEXT}"
 }
 
+# Modifies the selected item index.
+# Make it loop.
+#
+# $1: The delta to apply to the current index.
+#
+# Usage:
+#   changeSelectedItemIndex 1
+function changeSelectedItemIndex() {
+  local delta="${1:-0}"
+
+  # if we have no items, we do nothing
+  if [[ ${#_FILTERED_ITEMS[@]} -eq 0 ]]; then
+    _SELECTED_ITEM_INDEX=-1
+    return 0
+  fi
+
+  # compute the new index
+  local newIndex=$((_SELECTED_ITEM_INDEX + delta))
+  if ((newIndex < 0)); then
+    newIndex=$((${#_FILTERED_ITEMS[@]} - 1))
+  elif ((newIndex >= ${#_FILTERED_ITEMS[@]})); then
+    newIndex=0
+  fi
+
+  # now we need to adjust the start index if needed
+  # to make sure that the new index is visible on the screen
+  if ((newIndex < _LEFT_PANE_START_INDEX)); then
+    _LEFT_PANE_START_INDEX=${newIndex}
+  elif ((newIndex > _LEFT_PANE_START_INDEX + _LEFT_LINES - 1)); then
+    _LEFT_PANE_START_INDEX=$((newIndex - _LEFT_LINES + 1))
+  fi
+
+  _SELECTED_ITEM_INDEX=${newIndex}
+}
+
+# Modifies the right pane start index.
+#
+# $1: The delta to apply to the current index.
+#
+# Usage:
+#   changeRightPaneStartIndex 1
+function changeRightPaneStartIndex() {
+  local delta="${1:-0}"
+  local newIndex=$((_RIGHT_PANE_START_INDEX + delta))
+  if ((newIndex < 0)); then
+    newIndex=0
+  fi
+  _RIGHT_PANE_START_INDEX=${newIndex}
+}
+
 # Called when a key is pressed.
 function onKeyPressed() {
   case ${LAST_KEY_PRESSED} in
+  ESC)
+    _CLOSE_INTERACTIVE_SESSION=true
+    return 0
+    ;;
+  $'\n')
+    # if we selected index is within the range of the filtered items
+    # we can return the corresponding index in the original items
+    if ((_SELECTED_ITEM_INDEX >= 0 && _SELECTED_ITEM_INDEX < ${#_FILTERED_ITEMS_CORRESPONDANCES[@]})); then
+      FSFS_FINAL_SELECTION_INDEX=${_FILTERED_ITEMS_CORRESPONDANCES[${_SELECTED_ITEM_INDEX}]}
+    fi
+    _CLOSE_INTERACTIVE_SESSION=true
+    return 0
+    ;;
+  PAGE_DOWN)
+    changeRightPaneStartIndex 3
+    drawRightPane
+    ;;
+  PAGE_UP)
+    changeRightPaneStartIndex -3
+    drawRightPane
+    ;;
   RIGHT)
-    _RIGHT_PANE_START_INDEX=$((_RIGHT_PANE_START_INDEX + 1))
+    changeRightPaneStartIndex 1
     drawRightPane
     ;;
   LEFT)
-    _RIGHT_PANE_START_INDEX=$((_RIGHT_PANE_START_INDEX - 1))
+    changeRightPaneStartIndex -1
     drawRightPane
     ;;
-  BACKSPACE)
-    _SEARCH_STRING="${_SEARCH_STRING%?}"
+  UP)
+    changeSelectedItemIndex -1
     drawLeftPane
-    drawPrompt
     ;;
-  $'\n')
-    printf '%s' "${AC__CURSOR_MOVE__}$((GLOBAL_LINES - 2));1${__AC__TO}${AC__ERASE_LINE}${AC__TEXT_BOLD}You searched: ${_SEARCH_STRING}${AC__TEXT_RESET}"
-    ;;
-  # any special key
-  $'\e') ;;
-  # normal key
-  ?)
-    _SEARCH_STRING+="${LAST_KEY_PRESSED}"
+  DOWN)
+    changeSelectedItemIndex 1
     drawLeftPane
+    ;;
+  DEL)
+    _SEARCH_STRING=""
+    drawLeftPane
+    ;;
+  *)
+    case ${LAST_KEY_PRESSED} in
+    BACKSPACE)
+      _SEARCH_STRING="${_SEARCH_STRING%?}"
+      drawLeftPane
+      ;;
+    # filter any special key
+    $'\e') ;;
+    # normal key
+    ?)
+      # if we pressed a special key less than 0.1s after the previous one,
+      # we ignore it
+      if ((${EPOCHREALTIME//./} - ${LAST_KEY_PRESS_TIME:-"-99999"} < 400000)); then
+        return 0
+      fi
+      LAST_KEY_PRESS_TIME=-999999
+
+      _SEARCH_STRING+="${LAST_KEY_PRESSED}"
+      drawLeftPane
+      ;;
+    esac
     drawPrompt
+    return 0
     ;;
   esac
+  LAST_KEY_PRESS_TIME="${EPOCHREALTIME//./}"
+  drawPrompt
 }
 
 # Called when the user interrupts the session (CTRL+C).

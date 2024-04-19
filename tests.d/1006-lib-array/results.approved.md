@@ -83,6 +83,7 @@ declare -a criteria1=([0]="3" [1]="2" [2]="2" [3]="1" [4]="1" [5]="4" [6]="0")
 declare -a criteria2=([0]="1" [1]="3" [2]="2" [3]="5" [4]="0" [5]="2" [6]="9")
 
 → array::sortWithCriteria myArray criteria1 criteria2
+declare -a LAST_RETURNED_ARRAY_VALUE=([0]="6" [1]="4" [2]="3" [3]="2" [4]="1" [5]="0" [6]="5")
 declare -a myArray=([0]="g" [1]="e" [2]="d" [3]="c" [4]="b" [5]="a" [6]="f")
 expected: g e d c b a f
 declare -a ARRAY_MATCHES=([0]="one the" [1]="the breakdown" [2]="holding the baby" [3]="the d day")
@@ -90,6 +91,7 @@ declare -a ARRAY_INDEXES=([0]="4" [1]="0" [2]="8" [3]="0")
 declare -a ARRAY_DISTANCES=([0]="0" [1]="0" [2]="0" [3]="0")
 
 → array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
+declare -a LAST_RETURNED_ARRAY_VALUE=([0]="1" [1]="3" [2]="0" [3]="2")
 declare -a ARRAY_MATCHES=([0]="the breakdown" [1]="the d day" [2]="one the" [3]="holding the baby")
 ```
 
@@ -104,13 +106,16 @@ declare -a myArray=([0]="one the" [1]="the breakdown" [2]="constitutional" [3]="
 
 → array::fuzzyFilterSort the myArray
 declare -a LAST_RETURNED_ARRAY_VALUE=([0]="the breakdown" [1]="the d day" [2]="one the" [3]="hold the baby")
+declare -a LAST_RETURNED_ARRAY_VALUE2=([0]="1" [1]="9" [2]="0" [3]="4")
 
 → array::fuzzyFilterSort elv myArray ⌜ ⌝
 declare -a LAST_RETURNED_ARRAY_VALUE=([0]="⌜e⌝⌜l⌝e⌜v⌝ator" [1]="d⌜e⌝⌜l⌝i⌜v⌝er" [2]="mak⌜e⌝ a ⌜l⌝i⌜v⌝ing")
+declare -a LAST_RETURNED_ARRAY_VALUE2=([0]="10" [1]="6" [2]="8")
 
 declare -a myArray=([0]="On the" [1]="One of the most beautiful" [2]="One of this happy end" [3]="thaerty" [4]="thazrerty")
 
 → array::fuzzyFilterSort the myArray ⌜ ⌝ 6
 declare -a LAST_RETURNED_ARRAY_VALUE=([0]="⌜t⌝⌜h⌝a⌜e⌝r…" [1]="⌜t⌝⌜h⌝azr…" [2]="On ⌜t⌝⌜h⌝…" [3]="…⌜t⌝⌜h⌝⌜e⌝ …" [4]="…⌜t⌝⌜h⌝is…")
+declare -a LAST_RETURNED_ARRAY_VALUE2=([0]="3" [1]="4" [2]="0" [3]="1" [4]="2")
 ```
 

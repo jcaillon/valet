@@ -174,13 +174,12 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - head / tail from file.
 - Allow to regroup single letter options (e.g. -fsSL).
 - Add a command self package that build the user commands into a single script file.
-- Add vscode extensions [recommendations](https://github.com/imfing/hextra-starter-template/blob/main/.vscode/extensions.json).
 - fix running tests with verbose mode on.
-- try to make interactive functions usable in colorless mode.
-- for yes/no, add param to choose the default option.
 - Replace awk with bash.
 - Provide an alternative bash function if diff is not found.
 - Allow to separate commands from options/arguments with `--`.
+- Fsfs: Display the number of lines and the current first line for the right panel.
+- Fsfs: improve drawing time; connect the left and right panel with a T.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest
