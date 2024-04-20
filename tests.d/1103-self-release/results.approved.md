@@ -29,24 +29,6 @@ Changelog:
 - 🐞 fix
 
 INFO     The new version of valet is: 2.0.0.
-INFO     Downloading the binaries for the OS: linux.
-INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-linux_amd64.tar.gz.
-▶ called kurl::toFile true 200 fzf.tar.gz https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-linux_amd64.tar.gz
-▶ called io::invoke tar -xzf fzf.tar.gz
-▶ called io::invoke mv -f fzf $GLOBAL_VALET_HOME/.tmp/bin/fzf
-SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$GLOBAL_VALET_HOME/.tmp/bin⌝.
-INFO     Downloading the binaries for the OS: windows.
-INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip.
-▶ called kurl::toFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip
-▶ called io::invoke unzip fzf.zip
-▶ called io::invoke mv -f fzf.exe $GLOBAL_VALET_HOME/.tmp/bin/fzf
-SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$GLOBAL_VALET_HOME/.tmp/bin⌝.
-INFO     Downloading the binaries for the OS: darwin.
-INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip.
-▶ called kurl::toFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip
-▶ called io::invoke unzip fzf.zip
-▶ called io::invoke mv -f fzf $GLOBAL_VALET_HOME/.tmp/bin/fzf
-SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$GLOBAL_VALET_HOME/.tmp/bin⌝.
 SUCCESS  The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝.
 ```
 
@@ -110,77 +92,14 @@ DEBUG    The release payload is: ⌜{
   } https://api.github.com/repos/jcaillon/valet/releases
 SUCCESS  The new version has been released on GitHub.
 DEBUG    The upload URL is: https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets
-DEBUG    Parsed arguments:
-local parsingErrors forceOs destination force help
-force="${VALET_FORCE:-}"
-parsingErrors=""
-forceOs="linux"
-destination="$GLOBAL_VALET_HOME/.tmp/bin"
-
-INFO     Downloading the binaries for the OS: linux.
-INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-linux_amd64.tar.gz.
-▶ called kurl::toFile true 200 fzf.tar.gz https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-linux_amd64.tar.gz
-▶ called io::invoke tar -xzf fzf.tar.gz
-▶ called io::invoke mv -f fzf $GLOBAL_VALET_HOME/.tmp/bin/fzf
-SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$GLOBAL_VALET_HOME/.tmp/bin⌝.
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/examples.d .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet.d .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet .
-▶ called io::invoke tar -czvf valet-linux-amd64.tar.gz examples.d valet.d valet bin
-DEBUG    The artifact has been created at ⌜valet-linux-amd64.tar.gz⌝ with:
+▶ called io::invoke tar -czvf valet.tar.gz examples.d valet.d valet
+DEBUG    The artifact has been created at ⌜valet.tar.gz⌝ with:
 
-INFO     Uploading the artifact ⌜valet-linux-amd64.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
-▶ called kurl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet-linux-amd64.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet-linux-amd64.tar.gz
-DEBUG    Parsed arguments:
-local parsingErrors forceOs destination force help
-force="${VALET_FORCE:-}"
-parsingErrors=""
-forceOs="windows"
-destination="$GLOBAL_VALET_HOME/.tmp/bin"
-
-INFO     Downloading the binaries for the OS: windows.
-INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip.
-▶ called kurl::toFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-windows_amd64.zip
-▶ called io::invoke unzip fzf.zip
-▶ called io::invoke mv -f fzf.exe $GLOBAL_VALET_HOME/.tmp/bin/fzf
-SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$GLOBAL_VALET_HOME/.tmp/bin⌝.
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/examples.d .
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet.d .
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet .
-▶ called io::invoke tar -czvf valet-windows-amd64.tar.gz examples.d valet.d valet bin
-DEBUG    The artifact has been created at ⌜valet-windows-amd64.tar.gz⌝ with:
-
-INFO     Uploading the artifact ⌜valet-windows-amd64.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
-▶ called kurl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet-windows-amd64.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet-windows-amd64.tar.gz
-DEBUG    Parsed arguments:
-local parsingErrors forceOs destination force help
-force="${VALET_FORCE:-}"
-parsingErrors=""
-forceOs="darwin"
-destination="$GLOBAL_VALET_HOME/.tmp/bin"
-
-INFO     Downloading the binaries for the OS: darwin.
-INFO     Downloading fzf from: https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip.
-▶ called kurl::toFile true 200 fzf.zip https://github.com/junegunn/fzf/releases/download/0.48.1/fzf-0.48.1-darwin_amd64.zip
-▶ called io::invoke unzip fzf.zip
-▶ called io::invoke mv -f fzf $GLOBAL_VALET_HOME/.tmp/bin/fzf
-SUCCESS  The binaries have been downloaded and stored in the bin directory of valet ⌜$GLOBAL_VALET_HOME/.tmp/bin⌝.
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/examples.d .
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet.d .
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet .
-▶ called io::invoke tar -czvf valet-darwin-amd64.tar.gz examples.d valet.d valet bin
-DEBUG    The artifact has been created at ⌜valet-darwin-amd64.tar.gz⌝ with:
-
-INFO     Uploading the artifact ⌜valet-darwin-amd64.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
-▶ called kurl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet-darwin-amd64.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet-darwin-amd64.tar.gz
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/examples.d .
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet.d .
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet .
-▶ called io::invoke tar -czvf valet-no-binaries.tar.gz examples.d valet.d valet
-DEBUG    The artifact has been created at ⌜valet-no-binaries.tar.gz⌝ with:
-
-INFO     Uploading the artifact ⌜valet-no-binaries.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
-▶ called kurl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet-no-binaries.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet-no-binaries.tar.gz
+INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
+▶ called kurl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz
 SUCCESS  The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝.
 ```
 

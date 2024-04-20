@@ -7,7 +7,7 @@ function testValetInteractiveMenu() {
 
   # test that valet can be called without any arguments
   echo "→ valet"
-  ("${GLOBAL_VALET_HOME}/valet")
+  (main::parseMainArguments)
   endTest "Testing that valet can be called without any arguments and show the menu" $?
 }
 

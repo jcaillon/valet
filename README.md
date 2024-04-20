@@ -3,8 +3,7 @@
 [![Latest Release](https://img.shields.io/github/v/release/jcaillon/valet?sort=date&style=flat&logo=github&logoColor=white&label=Latest%20release&color=%2350C878)][latest-release]
 [![Total downloads](https://img.shields.io/github/downloads/jcaillon/valet/total.svg?style=flat)][releases]
 [![MIT license](https://img.shields.io/badge/License-MIT-74A5C2.svg?style=flat)][license]
-[![bash 5.2+ required](https://img.shields.io/badge/Requires-bash%20v5.2+-C8597A.svg?logo=gnubash&logoColor=white)][bash]
-[![Notepad++ v7.5.4+ required](https://img.shields.io/badge/Requires-fzf%20v0.48+-865FC5.svg)][fzf]
+[![bash 5.2+ required](https://img.shields.io/badge/Requires-bash%20v5.2+-865FC5.svg?logo=gnubash&logoColor=white)][bash]
 
 ![icon](docs/images/icon.svg)
 
@@ -91,11 +90,7 @@ Auto parsing of arguments and options based on your command configuration:
 
 - Bash version 5.2 or superior is required (might work with older versions but it is not guaranteed).
 - From [GNU coreutils](https://www.gnu.org/software/coreutils/): it uses `rm`, `mv`, `mkdir`, `ln` (for the install).
-- [fzf][fzf] is required for the interactive mode.
-- [curl][curl] is only needed for the self-update command.
-
-> [!NOTE]
-> The [latest release][latest-release] package already contains [fzf][fzf] for your OS, so you don't have to install them. You can always opt in for the 'no-binaries' package.
+- [curl][curl] and [tar][tar] are needed only for the self-update command.
 
 ### Automated installation
 
@@ -120,10 +115,9 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/vale
 
 ### Manual installation from sources
 
-1. You need the [fzf][fzf] installed and present in your PATH to have the interactive mode/menu.
-2. You can then clone this project or download the source from the latest release into the directory of your choice.
-3. Add this directory to your PATH (or link Valet to `/usr/local/bin`) so you can call `valet` from your terminal.
-4. Call `valet` to get started with the example commands!
+1. You can then clone this project or download the source from the latest release into the directory of your choice.
+2. Add this directory to your PATH (or link Valet to `/usr/local/bin`) so you can call `valet` from your terminal.
+3. Call `valet` to get started with the example commands!
 
 ## 💻 Usage
 
@@ -164,7 +158,6 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - rename CMD_ variables.
 - Document everything. Document test.
 - Add full support for interactive mode.
-- Replace fzf menu with equivalent pure bash menu.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Generate an autocompletion script for bash and zsh.
 - Self-command to create a new command interactively.
@@ -181,6 +174,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Fsfs: Display the number of lines and the current first line for the right panel + nb items on the left pane.
 - The installer script should embed the latest version at the time (modify just before a release) so it downloads the corresponding binary.
 - Have a consistent look and feel for interactive functions.
+- Reimplement usage of main::sortCommands / main::addLastChoice.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest
@@ -189,10 +183,10 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 [license]: ./LICENSE
 [contributing]: CONTRIBUTING.md
 [bash]: https://www.gnu.org/software/bash/
-[fzf]: https://github.com/junegunn/fzf
 [nerd-font]: https://www.nerdfonts.com/
 [windows-terminal]: https://github.com/microsoft/terminal
 [debian-wsl]: https://wiki.debian.org/InstallingDebianOn/Microsoft/Windows/SubsystemForLinux
 [oh-my-zsh]: https://ohmyz.sh/
 [dracula-theme]: https://draculatheme.com/windows-terminal
 [curl]: https://curl.se/
+[tar]: https://www.gnu.org/software/tar/

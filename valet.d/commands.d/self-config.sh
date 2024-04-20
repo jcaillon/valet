@@ -122,11 +122,6 @@ VALET_CONFIG_LOCAL_STATE_DIRECTORY=\"\${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-${EX
 # Defaults to the temporary directory (TMPDIR or /tmp).
 VALET_CONFIG_WORK_FILES_DIRECTORY=\"\${VALET_CONFIG_WORK_FILES_DIRECTORY:-${EXPORTED_VALET_CONFIG_WORK_FILES_DIRECTORY:-}}\"
 
-# The directory in which to find executables required by Valet.
-# Defaults to the 'bin' directory in the Valet home directory.
-# /!\ will dissapear once we get rid of fzf and go with pure bash.
-VALET_CONFIG_BIN_PATH=\"\${VALET_CONFIG_BIN_PATH:-${EXPORTED_VALET_CONFIG_BIN_PATH:-}}\"
-
 # If true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
 VALET_CONFIG_DISABLE_LOCAL_BIN=\"\${VALET_CONFIG_DISABLE_LOCAL_BIN:-${EXPORTED_VALET_CONFIG_DISABLE_LOCAL_BIN:-}}\"
 

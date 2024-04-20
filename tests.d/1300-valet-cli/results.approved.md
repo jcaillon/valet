@@ -231,8 +231,6 @@ COMMANDS
       Re-build the menu of valet from your commands.
   self config
       Open the configuration file of Valet with your default editor.
-  self download-binaries
-      Download the required binaries for valet.
   self mock1
       A command that only for testing valet core functions.
   self mock2
@@ -426,28 +424,12 @@ Exit code: `0`
 **Error** output:
 
 ```log
-▶ called ⌈fzf --history=/tmp/valet.d/d801-0/fzf-history-main-menu --history-size=50 --bind alt-up:prev-history --bind alt-down:next-history --bind=alt-h:preview(echo -e 'HELP
-
-Navigate through the options with the UP/DOWN keys.
-
-Validate your choice with ENTER.
-
-Cancel with ESC or CTRL+C.
-
-ADDITIONAL KEY BINDINGS
-
-ALT+H: Show this help.
-ALT+/: Rotate through the preview options (this pane).
-ALT+UP/ALT+DOWN: Previous/next query in the history.
-SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
-') --preview-window=right,80 --bind alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|) --layout=reverse --info=right --pointer=◆ --marker=✓ --cycle --tiebreak=begin,index --margin=0 --padding=0 --delimiter=
- --tabstop=3 --header-first --header=Press ALT+H to display the help and keybindings.
-Please select the command to run. --print-query --no-multi --preview-label=Command help --preview=VALET_LOG_LEVEL=error '$GLOBAL_VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
-▶ fzf input stream was:
-⌈help                  	Show the help this program or of a specific command.
-self build            	Re-build the menu of valet from your commands.
-self test             	Test your valet custom commands.
-self update           	Update valet using the latest release on GitHub.⌉
+▶ called main::showInteractiveCommandsMenu main-menu Please select the command to run. CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY⌉
+▶ received array was:
+⌈help            Show the help this program or of a specific command.
+self build      Re-build the menu of valet from your commands.
+self test       Test your valet custom commands.
+self update     Update valet using the latest release on GitHub.⌉
 ```
 
 ## Test script 05.logging
@@ -701,52 +683,11 @@ Exit code: `0`
 **Error** output:
 
 ```log
-▶ called ⌈fzf --history=/tmp/valet.d/d801-0/fzf-history-self
---history-size=50
---bind
-alt-up:prev-history
---bind
-alt-down:next-history
---bind=alt-h:preview(echo -e 'HELP
-
-Navigate through the options with the UP/DOWN keys.
-
-Validate your choice with ENTER.
-
-Cancel with ESC or CTRL+C.
-
-ADDITIONAL KEY BINDINGS
-
-ALT+H: Show this help.
-ALT+/: Rotate through the preview options (this pane).
-ALT+UP/ALT+DOWN: Previous/next query in the history.
-SHIFT+UP/SHIFT+DOWN: Scroll the preview up and down.
-')
---preview-window=right,80
---bind
-alt-/:change-preview-window(right,70%|down,40%,border-horizontal|hidden|)
---layout=reverse
---info=right
---pointer=◆
---marker=✓
---cycle
---tiebreak=begin,index
---margin=0
---padding=0
---delimiter=
-
---tabstop=3
---header-first
---header=Press ALT+H to display the help and keybindings.
-Please select the command to run.
---print-query
---no-multi
---preview-label=Command help
---preview=VALET_LOG_LEVEL=error '$GLOBAL_VALET_HOME/valet' help --columns $((FZF_PREVIEW_COLUMNS - 1)) {1}⌉
-▶ fzf input stream was:
-⌈self build            	Re-build the menu of valet from your commands.
-self test             	Test your valet custom commands.
-self update           	Update valet using the latest release on GitHub.⌉
+▶ called main::showInteractiveCommandsMenu self Please select the command to run. FILTERED_COMMANDS_FOR_SUB_MENU⌉
+▶ received array was:
+⌈self build      Re-build the menu of valet from your commands.
+self test       Test your valet custom commands.
+self update     Update valet using the latest release on GitHub.⌉
 ```
 
 ### Testing that we can display the help of a sub menu
@@ -776,8 +717,6 @@ COMMANDS
       Re-build the menu of valet from your commands.
   self config
       Open the configuration file of Valet with your default editor.
-  self download-binaries
-      Download the required binaries for valet.
   self mock1
       A command that only for testing valet core functions.
   self mock2

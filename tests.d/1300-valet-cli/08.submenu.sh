@@ -7,7 +7,7 @@ function testInteractiveSubMenu() {
 
   # test that we go into the interactive menu with no arguments
   echo "→ valet self"
-  ("${GLOBAL_VALET_HOME}/valet" self)
+  (main::parseMainArguments self)
   endTest "Testing that we go into the interactive sub menu with no arguments" $?
 
   # test that we can display the help of a sub menu

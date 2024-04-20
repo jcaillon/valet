@@ -107,9 +107,6 @@ function command_not_found_handle() {
   # set log level to debug to have a stack trace
   log::setLevel "debug" true
 
-  if [[ ${1:-} == "fzf" ]]; then
-    core::fail "This program requires ⌜https://github.com/junegunn/fzf⌝ to display interactive prompt."$'\n'"Install fzf or pass the correct options and arguments. See --help for more information."
-  fi
   if [[ ${1:-} == "curl" ]]; then
     core::fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
   fi
@@ -530,7 +527,7 @@ function main::parseMainArguments() {
 
   if [[ ${#commands[@]} -eq 0 ]]; then
     # no command provided, we show the commands menu
-    main::showCommandsMenuAndRun "main-menu" "${CMD_COMMANDS_MENU_BODY}"
+    main::showCommandsMenuAndRun "main-menu" CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY
   fi
 
   local functionName nbArgs exactCommand
@@ -651,41 +648,42 @@ function main::runMenuWithSubCommands() {
   fi
 
   # filter the commands to only keep the sub commands of the function
-  local filteredCommandsMenuBody line
-  filteredCommandsMenuBody=""
-  local IFS=$'\n'
-  for line in ${CMD_COMMANDS_MENU_BODY}; do
+  local line
+  declare -g -a FILTERED_COMMANDS_FOR_SUB_MENU=()
+  for line in "${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[@]}"; do
     if [[ ${line} =~ ^(${command} [^ ]+ ) ]]; then
-      filteredCommandsMenuBody+="${line}"$'\n'
+      FILTERED_COMMANDS_FOR_SUB_MENU+=("${line}")
     fi
   done
 
-  if [[ -z "${filteredCommandsMenuBody}" ]]; then
+  if (( ${#FILTERED_COMMANDS_FOR_SUB_MENU[@]} == 0 )); then
     core::fail "No sub commands found for ⌜${command}⌝."
   fi
 
-  main::showCommandsMenuAndRun "${command//[-[:space:]]/_}" "${filteredCommandsMenuBody%$'\n'}"
+  main::showCommandsMenuAndRun "${command//[-[:space:]]/_}" FILTERED_COMMANDS_FOR_SUB_MENU
 }
 
 # Show the given commands in an interactive menu and then
 # run the selected command if any.
-# $1: the menu body
+# $1: the menu id
+# $2: the command selection items array name
 function main::showCommandsMenuAndRun() {
-  local menuId commands
+  local menuId commandSelectionItemsArrayName
   menuId="${1}"
-  commands="${2}"
+  commandSelectionItemsArrayName="${2}"
 
   # display the menu
-  local sortedCommandsMenuBody
-  main::sortCommands "${menuId}" "${commands}" && sortedCommandsMenuBody="${LAST_RETURNED_VALUE}"
+  # TODO: reimplement usage of main::sortCommands
 
   local commandChoice
-  main::showInteractiveCommandsMenu "${menuId}" "Please select the command to run." "${sortedCommandsMenuBody}" && commandChoice="${LAST_RETURNED_VALUE}"
+  main::showInteractiveCommandsMenu "${menuId}" "Please select the command to run." "${commandSelectionItemsArrayName}"
+  commandChoice="${LAST_RETURNED_VALUE}"
   if [[ -z "${commandChoice}" ]]; then
     # the user pressed escape or ctrl-c
     exit 0
   fi
-  main::addLastChoice "${menuId}" "${commandChoice}"
+  # TODO: reimplement usage of main::addLastChoice
+  # main::addLastChoice "${menuId}" "${commandChoice}"
 
   # get the function name from the command by replacing spaces and hyphens with _
   local functionName
@@ -817,32 +815,40 @@ function main::addLastChoice() {
 # returns the selected command in standard output
 # $1: the menu id
 # $2: the menu header
-# $3: the menu body
-# $4+: additional options to pass to fzf (e.g. --height=10)
+# $3: the menu items array name (reference)
 #
 # Usage:
-#  main::showInteractiveCommandsMenu "menuId" "header" "body" && choice="${LAST_RETURNED_VALUE}"
-#  main::showInteractiveCommandsMenu "menuId" "header" "body" --height=10 && choice="${LAST_RETURNED_VALUE}"
+#  main::showInteractiveCommandsMenu "menuId" "header" ARRAY_NAME && choice="${LAST_RETURNED_VALUE}"
 function main::showInteractiveCommandsMenu() {
-  local menuHeader menuBody
+  local menuId menuHeader commandSelectionItemsArrayName
   menuId="${1}"
   menuHeader="${2}"
-  menuBody="${3}"
+  commandSelectionItemsArrayName="${3}"
   shift 2
 
-  # shellcheck source=lib-fzf
-  source fzf
+  # shellcheck source=lib-fsfs
+  source fsfs
 
-  fzf::showFzf "menu" "${menuId}" "${menuHeader}" "${menuBody}" \
-    --preview-label='Command help' \
-    --preview="VALET_LOG_LEVEL=error '${GLOBAL_VALET_HOME}/valet' help --columns \$((FZF_PREVIEW_COLUMNS - 1)) {1}"
+  fsfs::itemSelector "${menuHeader}" "${commandSelectionItemsArrayName}" "main::onFsfsItemSelectionChange" "Command help"
 
   choice="${LAST_RETURNED_VALUE}"
-  choice="${choice#*$'\n'}" # delete first line (query)
-  choice="${choice%%$'\t'*}"
-  choice="${choice%%  *}"
+  if (( ${#choice} >= CMD_MAX_COMMAND_WIDTH)); then
+    choice="${choice:0:${CMD_MAX_COMMAND_WIDTH}}  "
+    choice="${choice%%  *}"
+  else
+    choice=""
+  fi
 
   LAST_RETURNED_VALUE="${choice}"
+}
+
+function main::onFsfsItemSelectionChange() {
+  local item="$1"
+  local command="${item:0:${CMD_MAX_COMMAND_WIDTH}}  "
+  command="${command%%  *}"
+  main::getFunctionNameFromCommand "${command}"
+  main::getHelpText function "${LAST_RETURNED_VALUE}" "" "${3}"
+  return 0
 }
 
 #===============================================================

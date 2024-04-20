@@ -141,7 +141,7 @@ function selfBuild() {
 
   summarize
 
-  unset CMD_COMMANDS_HIDDEN_MENU_BODY
+  unset CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY
 
   if [[ -n "${SELF_BUILD_ERRORS:-}" ]]; then
     core::fail "The valet user commands have not been successfully built. Please check the following errors:"$'\n'"${SELF_BUILD_ERRORS}"
@@ -178,10 +178,11 @@ function summarize() {
   message+="- Maximum sub command level: ⌜${CMD_MAX_SUB_COMMAND_LEVEL:-0}⌝."$'\n'
 
   message+=$'\n'"== List of all the commands =="$'\n\n'
-  message+="${CMD_COMMANDS_MENU_BODY}"$'\n'
+  local IFS=$'\n'
+  message+="${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]}"$'\n'
 
   message+=$'\n'"== List of all the hidden commands =="$'\n\n'
-  message+="${CMD_COMMANDS_HIDDEN_MENU_BODY}"$'\n'
+  message+="${CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY[*]}"$'\n'
 
   log::info "${message}"
 }
@@ -451,8 +452,8 @@ function declareFinalCommandDefinitionParserVariables() {
 # It is executed after all the command definitions have been extracted.
 #
 # Declared variables:
-# CMD_COMMANDS_MENU_BODY = the input used to display the commands menu
-# CMD_COMMANDS_HIDDEN_MENU_BODY = all the commands that are not shown in the menu
+# CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY = the input used to display the commands menu
+# CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY = all the commands that are not shown in the menu
 # CMD_COMMANDS_NAME_this = array with each sub command name
 # CMD_COMMANDS_DESCRIPTION_this = array with each sub commmand short description
 # CMD_ALL_FUNCTIONS = list all the functions callable with a command
@@ -462,8 +463,8 @@ function declareOtherCommmandVariables() {
   # sort commands in alphabetical order
   array::sort CMD_ALL_COMMANDS_ARRAY
 
-  CMD_COMMANDS_MENU_BODY=""
-  CMD_COMMANDS_HIDDEN_MENU_BODY=""
+  CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY=()
+  CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY=()
   CMD_COMMANDS_NAME_this=()
   CMD_COMMANDS_DESCRIPTION_this=()
 
@@ -477,22 +478,19 @@ function declareOtherCommmandVariables() {
     local -n shortDescription="CMD_SHORT_DESCRIPTION_${function}"
     local -n hideInMenu="CMD_HIDEINMENU_${function}"
 
-    printf -v line "%-${CMD_MAX_COMMAND_WIDTH}s\t%s\n" "${command}" "${shortDescription}"
+    printf -v line "%-$((CMD_MAX_COMMAND_WIDTH + 4))s%s" "${command}" "${shortDescription}"
 
     # declare the command menu body
     if [[ ${hideInMenu:-false} == "true" ]]; then
-      CMD_COMMANDS_HIDDEN_MENU_BODY+="${line}";
+      CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY+=("${line}");
     else
-      CMD_COMMANDS_MENU_BODY+="${line}";
+      CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY+=("${line}");
     fi
 
     # declare the sub commands for the main menu
     CMD_COMMANDS_NAME_this+=("${command}")
     CMD_COMMANDS_DESCRIPTION_this+=("${shortDescription}")
   done
-
-  CMD_COMMANDS_MENU_BODY="${CMD_COMMANDS_MENU_BODY%$'\n'}"
-  CMD_COMMANDS_HIDDEN_MENU_BODY="${CMD_COMMANDS_HIDDEN_MENU_BODY%$'\n'}"
 
   # CMD_ALL_COMMANDS and CMD_ALL_FUNCTIONS
   local IFS=$'\n'

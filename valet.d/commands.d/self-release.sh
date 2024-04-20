@@ -72,34 +72,9 @@ function selfRelease() {
     log::debug "The upload URL is: ${uploadUrl:-}"
   fi
 
-
-  # make sure to source the file in which this function is defined
-  core::sourceForFunction "selfDownloadBinaries" 2>/dev/null
-
-  # prepare a temp folder to store the binaries
-  local tempDir="${GLOBAL_VALET_HOME}/.tmp"
-  rm -Rf "${tempDir}"
-  mkdir -p "${tempDir}"
-  pushd "${tempDir}" 1>/dev/null
-
-  for artifact in linux windows darwin no-binaries; do
-    # clean the folder
-    rm -Rf "${tempDir:?}"/*
-
-    if [[ "${artifact:-}" != "no-binaries" ]]; then
-      # download the binaries
-      selfDownloadBinaries --force-os "${artifact}" --destination "${tempDir}/bin"
-    fi
-
-    if [[ "${dryRun:-}" != "true" ]]; then
-      uploadArtifact "${uploadUrl}" "${artifact}"
-    fi
-
-  done
-
-  popd 1>/dev/null
-
-  rm -Rf "${tempDir}"
+  if [[ "${dryRun:-}" != "true" ]]; then
+    uploadArtifact "${uploadUrl}"
+  fi
 
   log::success "The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝."
 
@@ -210,15 +185,6 @@ function createRelease() {
 
 function uploadArtifact() {
   local uploadUrl="${1}"
-  local os="${2}"
-
-  local artifactName
-  case "${os}" in
-  linux) artifactName="valet-linux-amd64" ;;
-  windows) artifactName="valet-windows-amd64" ;;
-  darwin) artifactName="valet-darwin-amd64" ;;
-  no-binaries) artifactName="valet-no-binaries" ;;
-  esac
 
   local -a files
   files=(examples.d valet.d valet)
@@ -229,12 +195,8 @@ function uploadArtifact() {
     io::invoke cp -R "${GLOBAL_VALET_HOME}/${file}" .
   done
 
-  if [[ "${os}" != "no-binaries" ]]; then
-    files+=(bin)
-  fi
-
   # prepare artifact
-  local artifactPath="${artifactName}.tar.gz"
+  local artifactPath="valet.tar.gz"
   io::invoke tar -czvf "${artifactPath}" "${files[@]}"
   log::debug "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}"
 

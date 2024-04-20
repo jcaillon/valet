@@ -245,6 +245,7 @@ _CMD_INCLUDED=1
 # CMD_ALL_FUNCTIONS = list all the functions callable with a command
 # CMD_ALL_COMMANDS_ARRAY = array of all the commands
 # CMD_ALL_COMMANDS = list all the commands
+# CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY = the list of commands [4 spaces] command short description that is used to display the command menus
 # CMD_MAX_SUB_COMMAND_LEVEL = maximum number of sub command levels; e.g. 'command subcommand subsubcommand' has 2 levels
 # CMD_ALL_MENU_COMMANDS_ARRAY = array of all the commands that should open a sub menu to show a list of sub commands
 # CMD_MAX_COMMAND_WIDTH = get the maximum width (nb characters) among all commands
@@ -252,8 +253,6 @@ _CMD_INCLUDED=1
 # CMD_COMMAND_xxx = the command of the function
 # CMD_FILETOSOURCE_xxx = the file to source for the function
 # CMD_HIDEINMENU_xxx = true to hide the command in the menu
-#
-# CMD_COMMANDS_MENU_BODY = the input used to display the commands menu
 
 # ====================
 # Variables used to show the help of each command

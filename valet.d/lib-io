@@ -51,7 +51,7 @@ function io::toAbsolutePath() {
 #   The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   io::invoke5 "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || core::fail "fzf failed."
+#   io::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
 #   stdoutFilePath="${LAST_RETURNED_VALUE}"
 #   stderrFilePath="${LAST_RETURNED_VALUE2}"
 function io::invoke5() {
@@ -142,7 +142,7 @@ function io::invoke5() {
 #   The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   io::invoke3 "false" "false" "fzf" "--height=10" || core::fail "fzf failed."
+#   io::invoke3 "false" "false" "stuff" "--height=10" || core::fail "stuff failed."
 #   stdoutFilePath="${LAST_RETURNED_VALUE}"
 #   stderrFilePath="${LAST_RETURNED_VALUE2}"
 function io::invoke3() {
@@ -170,7 +170,7 @@ function io::invoke3() {
 #   The content of stderr in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   io::invoke5var "false" "130,2" "false" "This is the stdin" "fzf" "--height=10" || core::fail "fzf failed."
+#   io::invoke5var "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
 #   stdout="${LAST_RETURNED_VALUE}"
 #   stderr="${LAST_RETURNED_VALUE2}"
 function io::invoke5var() {
@@ -200,7 +200,7 @@ function io::invoke5var() {
 #   The content of stderr in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   io::invoke3var "false" "130,2" "fzf" "--height=10" || core::fail "fzf failed."
+#   io::invoke3var "false" "130,2" "stuff" "--height=10" || core::fail "stuff failed."
 #   stdout="${LAST_RETURNED_VALUE}"
 #   stderr="${LAST_RETURNED_VALUE2}"
 function io::invoke3var() {
@@ -232,7 +232,7 @@ function io::invoke() {
 # $1: the command to find
 #
 # Usage:
-#   io::getCommandLocalPath "fzf" && local fullPath="${LAST_RETURNED_VALUE}"
+#   io::getCommandLocalPath "stuff" && local fullPath="${LAST_RETURNED_VALUE}"
 function io::getCommandLocalPath() {
   local executable="${1}"
   local possibleExecutablePath="${VALET_CONFIG_BIN_PATH:-"${GLOBAL_VALET_HOME}/bin"}/${executable}"

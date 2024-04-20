@@ -6,31 +6,22 @@ function sudo() {
 }
 export -f sudo
 
-# overriding fzf to log the inputs
-# shellcheck disable=SC2034
-VALET_CONFIG_DISABLE_LOCAL_BIN=true
-
 # shellcheck disable=SC2317
-function fzf() {
-  local inputStreamContent
-  read -rd '' inputStreamContent <&0 || true
+function main::showInteractiveCommandsMenu() {
+  local -n array="${3}"
 
-  echo "▶ called ⌈fzf $*⌉" 1>&2
-  echo "▶ fzf input stream was:" 1>&2
-  echo "⌈${inputStreamContent}⌉" 1>&2
+  echo "▶ called main::showInteractiveCommandsMenu $*⌉" 1>&2
+  echo "▶ received array was:" 1>&2
+  local IFS=$'\n'
+  echo "⌈${array[*]}⌉" 1>&2
+
+  LAST_RETURNED_VALUE=""
 }
-export -f fzf
 
 if [[ -n "${_TEST_0000_COMMON_UTILS:-}" ]]; then
   return 0
 fi
 _TEST_0000_COMMON_UTILS=1
-
-
-
-
-
-
 
 # override the local state and config directories to return temp directories
 setTempFilesNumber 800
@@ -45,5 +36,5 @@ function echoTempFileWithTimeStampSubstitution() {
     line="${line//??:??:??/HH:MM:SS}"
     line="${line//????-??-??/YYYY:MM:DD}"
     echo "${line}"
-  done < "${file}"
+  done <"${file}"
 }
