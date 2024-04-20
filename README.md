@@ -89,7 +89,8 @@ Auto parsing of arguments and options based on your command configuration:
 
 ### Dependencies
 
-- Bash version 5 or superior is required.
+- Bash version 5.2 or superior is required (might work with older versions but it is not guaranteed).
+- From [GNU coreutils](https://www.gnu.org/software/coreutils/): it uses `rm`, `mv`, `mkdir`, `ln` (for the install).
 - [fzf][fzf] is required for the interactive mode.
 - [curl][curl] is only needed for the self-update command.
 
@@ -165,7 +166,6 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Add full support for interactive mode.
 - Replace fzf menu with equivalent pure bash menu.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
-- Setup github actions to automatically test Valet.
 - Generate an autocompletion script for bash and zsh.
 - Self-command to create a new command interactively.
 - We can have fuzzy matching on options too; just make sure it is not ambiguous.
@@ -178,8 +178,9 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Replace awk with bash.
 - Provide an alternative bash function if diff is not found.
 - Allow to separate commands from options/arguments with `--`.
-- Fsfs: Display the number of lines and the current first line for the right panel.
-- Fsfs: improve drawing time; connect the left and right panel with a T.
+- Fsfs: Display the number of lines and the current first line for the right panel + nb items on the left pane.
+- The installer script should embed the latest version at the time (modify just before a release) so it downloads the corresponding binary.
+- Have a consistent look and feel for interactive functions.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

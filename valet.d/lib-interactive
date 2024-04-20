@@ -307,6 +307,10 @@ function interactive::testKeys() {
 # Notes:
 #   https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences
 function interactive::waitForKey() {
+  # TODO: try instead = read directly 5 characters or wait very few time
+  # if there are several ESC then it means we read too much; we can assume it is
+  # the same length as the previous ESC key and thus we can read a set number of
+  # chars.
   IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || return 1
   # special key detection, need to read more characters (up to 4 for F1-F12 keys)
   if [[ ${LAST_KEY_PRESSED} == $'\e' ]]; then
@@ -409,7 +413,7 @@ function interactive::switchBackFromFullScreen() {
   fi
 
   # restore the terminal state
-  printf '%s' "${AC__CURSOR_SHOW}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
+  printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
   # restore the key echoing
   if command -v stty &>/dev/null; then
     stty echo &>/dev/null || true

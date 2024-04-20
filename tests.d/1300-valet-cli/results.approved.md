@@ -175,6 +175,7 @@ ABOUT
   - 1+: an error occured
   
   ⌜Create your own commands:⌝
+  
   You can create your own commands and have them available in valet, please check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or the examples under 
   examples.d to do so.
   Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).

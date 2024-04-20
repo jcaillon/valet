@@ -19,38 +19,8 @@ source array
 # >>> Customization
 #===============================================================
 
-HAS_PREVIEW=true
-_LEFT_PANE_HELP_TEXT="↑/↓: Move | Enter: Select | Esc: Quit"
-_RIGHT_PANE_HELP_TEXT="←/→: Scroll | Page up/down: Scroll x3"
-_RIGHT_PANE_TITLE="Details"
-
-# arrays of current items and their details (if any and if already computed)
-declare -a _ITEMS
-declare -a _ITEMS_DETAILS
-declare -a FSFS_FETCHED_DETAILS_INDEXES
-
-# width of the left pane when the right pane is on
-declare -i _LEFT_PANE_WIDTH
-# current item selected
-declare -i _SELECTED_ITEM_INDEX=0
-# index of the first item displayed in the left pane
-declare -i _LEFT_PANE_START_INDEX=0
-# screen line at which to start to display the left pane
-declare -i _LEFT_PANE_FIRST_LINE=1
-# number of lines for the left pane
-declare -i _LEFT_LINES
-
-# width of the right pane
-declare -i _RIGHT_PANE_WIDTH
-# index of the first line displayed in the right pane
-declare -i _RIGHT_PANE_START_INDEX=0
-# screen line at which to start to display the right pane
-declare -i _RIGHT_PANE_FIRST_LINE=1
-# number of lines for the right pane
-declare -i _RIGHT_LINES
-
-# true when the user asked to close the interactive session
-declare _CLOSE_INTERACTIVE_SESSION
+FSFS_LEFT_PANE_HELP_TEXT="↑/↓: Move | Enter: Select | Esc: Quit"
+FSFS_RIGHT_PANE_HELP_TEXT="←/→: Scroll | Page up/down: Scroll x3"
 
 #===============================================================
 # >>> Custom drawing functions
@@ -61,47 +31,35 @@ declare _CLOSE_INTERACTIVE_SESSION
 # Each item can optionally have a description/details shown in a right panel.
 # The user can search for an item by typing.
 #
-# $1: The title of the menu.
+# $1: The prompt to display to the user (e.g. Please pick an item).
 # $2: The items to display.
-# $3: The function to call when an item is selected (the 1st param is the current item
+# $3: (optional) The function to call when an item is selected (the 1st param is the current item
 #     2nd param is the item number; 3rd is the current panel width; it should return
 #     the details of the item in the LAST_RETURNED_VALUE variable).
-function fsfs::menu() {
-  _HEADER="${1}"
-  local items="${2}"
-  _ITEM_SELECTED_CALLBACK="${3}"
+#     This parameter can be left empty to hide the preview right pane.
+# $4: (optional) the title of the preview right pane (if any)
+#
+# Returns:
+#   The selected item value in the global variable LAST_RETURNED_VALUE (or empty).
+#   The selected item index (from the original array) in the global variable
+#   LAST_RETURNED_VALUE2 (-1 if the user cancelled the selection).
+#
+# Usage:
+#   fsfs::itemSelector "Select an item" item_array_name "onItemSelected" "Details"
+function fsfs::itemSelector() {
+  local prompt="${1}"
+  local itemsArrayName="${2}"
+  FSFS_ITEM_SELECTED_CALLBACK="${3:-}"
+  FSFS_RIGHT_PANE_TITLE="${4:-"Details"}"
 
-  # wrap the header
-  string::wrapText "${_HEADER}" "${GLOBAL_COLUMNS}"
-  _HEADER="${LAST_RETURNED_VALUE}"
-
-  # extract items into an array
-  _ITEMS=()
-  _FILTERED_ITEMS=()
-  _FILTERED_ITEMS_CORRESPONDANCES=()
-  local line IFS
-  while IFS= read -r line; do
-    _ITEMS+=("${line}")
-  done <<<"${items}"
-
-  FSFS_FINAL_SELECTION_INDEX=-1
-  _SELECTED_ITEM_INDEX=0
-  _LEFT_PANE_START_INDEX=0
-  _RIGHT_PANE_START_INDEX=0
-  FSFS_FETCHED_DETAILS_INDEXES=()
-
-  # contains the current search string of the user
-  declare _SEARCH_STRING
-
-  _CLOSE_INTERACTIVE_SESSION=false
-  _SEARCH_STRING=""
+  fsfsInitialize "${itemsArrayName}"
 
   # save the original traps so we can restore them later
   local originalTraps
   io::captureOutput trap -p SIGWINCH EXIT SIGINT SIGQUIT
   originalTraps="${LAST_RETURNED_VALUE}"
 
-  # we still need to export the terminal size but in addition, we need to drawScreen.
+  # we still need to export the terminal size but in addition, we need to fsfsDrawScreen.
   # Note: SIGWINCH does not interrupt a read command and wait for it to complete so we need
   # to set a timeout on read to allow this refresh.
   trap 'onResize;' SIGWINCH
@@ -113,7 +71,7 @@ function fsfs::menu() {
   trap 'onSessionInterrupted;' SIGINT SIGQUIT
 
   interactive::switchToFullScreen
-  drawScreen full
+  fsfsDrawScreen "${prompt}"
 
   # main loop
   while true; do
@@ -122,11 +80,20 @@ function fsfs::menu() {
     fi
 
     # break if fd 1 is closed or does not refer to a terminal.
-    if [[ ! -t 1 || ${_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
+    if [[ ! -t 1 || ${FSFS_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
 
-    # # redraw the screen if the terminal was resized
+    # redraw the screen if the terminal was resized
     if [[ ${FSFS_REDRAW_REQUIRED:-false} == "true" ]]; then
-      drawScreen full
+      fsfsDrawScreen "${prompt}"
+    fi
+
+    # recompute the right pane content if needed
+    # only do it each 0.4s at maximum
+    if [[ ${FSFS_RECOMPUTE_RIGHT_PANE_CONTENT} == "true" && $((${EPOCHREALTIME//./} - ${LAST_RECOMPUTE_RIGHT_PANE_CONTENT_TIME:-"-99999"})) -gt 400000 ]]; then
+      LAST_RECOMPUTE_RIGHT_PANE_CONTENT_TIME="${EPOCHREALTIME//./}"
+      computeRightPaneContent
+      drawRightPane
+      drawPrompt
     fi
   done
 
@@ -134,212 +101,370 @@ function fsfs::menu() {
   eval "${originalTraps}"
   interactive::switchBackFromFullScreen
 
-  log::info "Selected index: ${FSFS_FINAL_SELECTION_INDEX}"
+  LAST_RETURNED_VALUE="${FSFS_ORIGINAL_ITEMS[${FSFS_FINAL_SELECTION_INDEX}]}"
+  LAST_RETURNED_VALUE2="${FSFS_FINAL_SELECTION_INDEX}"
 }
 
-function drawScreen() {
-  local drawMode="${1:-full}"
+# Initialises the state for fsfs menu.
+function fsfsInitialize() {
+  local itemsArrayName="${1}"
 
-  # hide the cursor
-  printf '%s' "${AC__CURSOR_HIDE}"
+  # see if there is a preview panel of not
+  if [[ -z ${FSFS_ITEM_SELECTED_CALLBACK} ]]; then
+    FSFS_HAS_PREVIEW=false
+  else
+    FSFS_HAS_PREVIEW=true
+  fi
+
+  # an array of items that will be displayed in the left pane
+  local -n originalItems="${itemsArrayName}"
+
+  FSFS_ORIGINAL_ITEMS=("${originalItems[@]}")
+
+  # the list of items filtered with the search string
+  # and the correspondance between the currently displayed indexes with
+  # the original items indexes
+  FSFS_FILTERED_ITEMS=()
+  FSFS_FILTERED_ITEMS_CORRESPONDANCES=()
+
+  FSFS_FINAL_SELECTION_INDEX=-1
+  FSFS_SELECTED_FILTERED_ITEM_INDEX=0
+
+  # index of the first item displayed in the left pane
+  FSFS_LEFT_PANE_START_INDEX=0
+
+  # index of the first line displayed in the right pane
+  FSFS_RIGHT_PANE_START_INDEX=0
+
+  # contains the current search st+ring of the user
+  FSFS_SEARCH_STRING=""
+
+  # switched to true when the user wants to close the session
+  FSFS_CLOSE_INTERACTIVE_SESSION=false
+  FSFS_SEARCH_STRING=""
+
+  # set up colors
+  if [[ ${VALET_CONFIG_ENABLE_COLORS} == "true" ]]; then
+    FSFS_COLOR_RESET_TEXT="${VALET_COLOR_FSFS_RESET_TEXT:-"${AC__TEXT_RESET}"}"
+    FSFS_COLOR_STATIC="${VALET_COLOR_FSFS_STATIC:-"${AC__FG_BRIGHT_BLACK}"}"
+    FSFS_COLOR_FOCUS="${VALET_COLOR_FSFS_FOCUS:-"${AC__FG_MAGENTA}"}"
+    FSFS_COLOR_FOCUS_RESET="${VALET_COLOR_FSFS_FOCUS_RESET:-"${AC__FG_RESET}"}"
+    FSFS_COLOR_LETTER_HIGHLIGHT="${VALET_COLOR_FSFS_LETTER_HIGHLIGHT:-"${AC__TEXT_INVERSE}${AC__FG_MAGENTA}"}"
+    FSFS_COLOR_LETTER_HIGHLIGHT_RESET="${VALET_COLOR_FSFS_LETTER_HIGHLIGHT_RESET:-"${AC__TEXT_NO_INVERSE}${AC__FG_RESET}"}"
+    FSFS_COLOR_SELECTED_ITEM="${VALET_COLOR_FSFS_SELECTED_ITEM:-"${AC__BG_BLACK}"}"
+    FSFS_COLOR_SELECTED_ITEM_RESET="${VALET_COLOR_FSFS_SELECTED_ITEM_RESET:-"${AC__BG_RESET}"}"
+    FSFS_COLOR_PROMPT_STRING="${VALET_COLOR_FSFS_PROMPT_STRING:-"${AC__FG_CYAN}${AC__TEXT_BOLD}"}"
+    FSFS_COLOR_PROMPT_STRING_RESET="${VALET_COLOR_FSFS_PROMPT_STRING_RESET:-"${AC__TEXT_RESET}"}"
+  else
+    FSFS_COLOR_RESET_TEXT=""
+    FSFS_COLOR_STATIC=""
+    FSFS_COLOR_FOCUS=""
+    FSFS_COLOR_FOCUS_RESET=""
+    FSFS_COLOR_LETTER_HIGHLIGHT="${AC__TEXT_INVERSE}"
+    FSFS_COLOR_LETTER_HIGHLIGHT_RESET="${AC__TEXT_NO_INVERSE}"
+    FSFS_COLOR_SELECTED_ITEM=""
+    FSFS_COLOR_SELECTED_ITEM_RESET=""
+    FSFS_COLOR_PROMPT_STRING=""
+    FSFS_COLOR_PROMPT_STRING_RESET=""
+  fi
+}
+
+# Draw or redraw the whole screen (initially or after a terminal resize).
+function fsfsDrawScreen() {
+  local prompt="${1}"
+  local toPrint="${AC__CURSOR_HIDE}${FSFS_COLOR_STATIC}"
 
   FSFS_REDRAW_REQUIRED=false
 
-  if [[ ${drawMode} == "full" ]]; then
-    # compute the potential width of the right panel
-    _RIGHT_PANE_WIDTH=$((GLOBAL_COLUMNS * 9 / 20))
-    FSFS_FETCHED_DETAILS_INDEXES=()
+  # clear the screen, move to the top left corner
+  toPrint+="${AC__ERASE_SCREEN}${AC__CURSOR_MOVE__}1;1${__AC__TO}"
 
-    drawStaticScreen
-
-    drawMode="left-right"
-  fi
-
-  # get the details for the current item; this will tell us if we need a right pane
-  # or not
-  local hasDetails=${FSFS_FETCHED_DETAILS_INDEXES[${_SELECTED_ITEM_INDEX}]:-unknown}
-  if [[ ${hasDetails} == "unknown" && -n ${_ITEM_SELECTED_CALLBACK:-} ]]; then
-    "${_ITEM_SELECTED_CALLBACK}" "${_ITEMS[${_SELECTED_ITEM_INDEX}]}" "${_SELECTED_ITEM_INDEX}" "$((_RIGHT_PANE_WIDTH - 4))"
-    _ITEMS_DETAILS[_SELECTED_ITEM_INDEX]="${LAST_RETURNED_VALUE}"
-    if [[ -n ${LAST_RETURNED_VALUE} ]]; then
-      hasDetails=true
-    else
-      hasDetails=false
-    fi
-    FSFS_FETCHED_DETAILS_INDEXES[_SELECTED_ITEM_INDEX]="${hasDetails}"
-  fi
-
-  # if we have details, we need to draw the right pane and
-  # adjust the left pane width
-  if [[ ${hasDetails} == "true" ]]; then
-    _LEFT_PANE_WIDTH=$((GLOBAL_COLUMNS - _RIGHT_PANE_WIDTH))
+  # compute the width of the left/right panel
+  if [[ ${FSFS_HAS_PREVIEW} == "true" ]]; then
+    FSFS_RIGHT_PANE_WIDTH=$((GLOBAL_COLUMNS * 9 / 20))
+    FSFS_LEFT_PANE_WIDTH=$((GLOBAL_COLUMNS - FSFS_RIGHT_PANE_WIDTH))
   else
-    _LEFT_PANE_WIDTH=${GLOBAL_COLUMNS}
+    FSFS_RIGHT_PANE_WIDTH=0
+    FSFS_LEFT_PANE_WIDTH=${GLOBAL_COLUMNS}
   fi
 
-  if [[ ${drawMode} == *"right"* && ${hasDetails} == "true" ]]; then
-    drawRightPane
+  # For the left and the right pane:
+  # - compute the screen line at which to start to display the pane
+  # - compute the number of content lines for the pane
+
+  # 1. draw the prompt string
+  string::wrapText "${prompt}" "$((FSFS_LEFT_PANE_WIDTH - 1))"
+  prompt="${LAST_RETURNED_VALUE}"
+  FSFS_LEFT_PANE_FIRST_LINE=1
+  local IFS line
+  toPrint+="${FSFS_COLOR_PROMPT_STRING}"
+  while IFS= read -r line; do
+    toPrint+="${line}"$'\n'
+    FSFS_LEFT_PANE_FIRST_LINE=$((FSFS_LEFT_PANE_FIRST_LINE + 1))
+  done <<<"${prompt}"
+  toPrint+="${FSFS_COLOR_PROMPT_STRING_RESET}${FSFS_COLOR_STATIC}"
+  FSFS_RIGHT_PANE_FIRST_LINE=1
+
+  # on the left side, we need to have space for the prompt, separator and help
+  FSFS_LEFT_PANE_FIRST_CONTENT_LINE=$((FSFS_LEFT_PANE_FIRST_LINE + 2))
+  FSFS_LEFT_PANE_LINES=$((GLOBAL_LINES - (FSFS_LEFT_PANE_FIRST_LINE - 1) - 3))
+  FSFS_LEFT_PANE_LINES=$((FSFS_LEFT_PANE_LINES > 0 ? FSFS_LEFT_PANE_LINES : 1))
+  # on the right side, we need space for the top and bottom of the pane
+  FSFS_RIGHT_PANE_FIRST_CONTENT_LINE=$((FSFS_RIGHT_PANE_FIRST_LINE + 1))
+  FSFS_RIGHT_PANE_LINES=$((GLOBAL_LINES - (FSFS_RIGHT_PANE_FIRST_LINE - 1) - 2))
+  FSFS_RIGHT_PANE_LINES=$((FSFS_RIGHT_PANE_LINES > 0 ? FSFS_RIGHT_PANE_LINES : 1))
+
+  # 2. draw the left help text
+  local leftHelpWidth=$((${#FSFS_LEFT_PANE_HELP_TEXT} + 2))
+  local leftHelp=" ${FSFS_LEFT_PANE_HELP_TEXT} "
+  if ((leftHelpWidth > FSFS_LEFT_PANE_WIDTH - 4)); then
+    leftHelpWidth=0
+    leftHelp=""
+  fi
+  toPrint+="${AC__CURSOR_MOVE__}${GLOBAL_LINES};1${__AC__TO}░─${leftHelp}─${AC__REPEAT__}$((FSFS_LEFT_PANE_WIDTH - leftHelpWidth - 4))${__AC__LAST_CHAR}"
+  if [[ ${FSFS_HAS_PREVIEW} == "true" ]]; then
+    toPrint+="─"
+  else
+    toPrint+="░"
   fi
 
-  if [[ ${drawMode} == *"left"* ]]; then
-    drawLeftPane
+  # 3. draw the separator of the left pane
+  toPrint+="${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE + 1));1${__AC__TO}░─${AC__REPEAT__}$((FSFS_LEFT_PANE_WIDTH - 3))${__AC__LAST_CHAR}"
+  if [[ ${FSFS_HAS_PREVIEW} == "true" ]]; then
+    toPrint+="─"
+  else
+    toPrint+="░"
   fi
 
-  # finish with the prompt line has we show the cursor again
+  # 4. draw the static portion of the right pane
+  if [[ ${FSFS_HAS_PREVIEW} == "true" ]]; then
+    # first line with title
+    local titleWidth=$((${#FSFS_RIGHT_PANE_TITLE} + 2))
+    local title=" ${FSFS_RIGHT_PANE_TITLE} "
+    # -10 to have the space to display the page counter 000/000
+    if ((titleWidth > FSFS_RIGHT_PANE_WIDTH - 4 - 10)); then
+      titleWidth=0
+      title=""
+    fi
+    toPrint+="${AC__CURSOR_MOVE__}${FSFS_RIGHT_PANE_FIRST_LINE};$((FSFS_LEFT_PANE_WIDTH + 1))${__AC__TO}┌─${title}─${AC__REPEAT__}$((FSFS_RIGHT_PANE_WIDTH - titleWidth - 4))${__AC__LAST_CHAR}░"
+
+    # last line with help
+    local helpWidth=$((${#FSFS_RIGHT_PANE_HELP_TEXT} + 2))
+    local help=" ${FSFS_RIGHT_PANE_HELP_TEXT} "
+    if ((helpWidth > FSFS_RIGHT_PANE_WIDTH - 4)); then
+      helpWidth=0
+      help=""
+    fi
+    toPrint+="${AC__CURSOR_MOVE__}${GLOBAL_LINES};$((FSFS_LEFT_PANE_WIDTH + 1))${__AC__TO}┴─${AC__REPEAT__}$((FSFS_RIGHT_PANE_WIDTH - helpWidth - 4))${__AC__LAST_CHAR}${help}─░"
+
+    # left border of the right pane
+    for ((line = FSFS_RIGHT_PANE_FIRST_LINE + 1; line <= FSFS_RIGHT_PANE_FIRST_LINE + FSFS_RIGHT_PANE_LINES; line++)); do
+      toPrint+="${AC__CURSOR_MOVE__}${line};$((FSFS_LEFT_PANE_WIDTH + 1))${__AC__TO}"
+      if ((line == FSFS_LEFT_PANE_FIRST_LINE + 1)); then
+        toPrint+="┤"
+      else
+        toPrint+="│"
+      fi
+    done
+  fi
+
+  printf '%s' "${toPrint}"
+
+  # reset the fetched details because they are for a given width that might have changed
+  # shellcheck disable=SC2086
+  unset -v ${!FSFS_RIGHT_PANE_CONTENT_ARRAY*}
+  FSFS_RECOMPUTE_RIGHT_PANE_CONTENT=${FSFS_HAS_PREVIEW}
+
+  drawLeftPane
+  drawRightPane
+
+  # finish with the prompt line, we show the cursor again
   drawPrompt
 }
 
-function drawRightPane() {
-  local details="${_ITEMS_DETAILS[_SELECTED_ITEM_INDEX]}"
-  local IFS
-
-  # draw the title
-  local titleWidth=$((${#_RIGHT_PANE_TITLE} + 2))
-  local title=" ${_RIGHT_PANE_TITLE} "
-  if ((titleWidth > _RIGHT_PANE_WIDTH - 6)); then
-    titleWidth=0
-    title=""
-  fi
-  local titlePadding=$(((_RIGHT_PANE_WIDTH - titleWidth) / 2 - 3))
-  printf '%s%s\n' \
-    "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}${_RIGHT_PANE_FIRST_LINE};$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" \
-    "┌─${AC__REPEAT__}${titlePadding}${__AC__LAST_CHAR}${title}─${AC__REPEAT__}$((_RIGHT_PANE_WIDTH - titleWidth - titlePadding - 2 - 2))${__AC__LAST_CHAR}┐"
-
-  # draw the details
-  local -i currentLine=1
-  local -i currentIndex=0
-  local line
-  while IFS= read -r line; do
-    currentIndex+=1
-    if ((currentIndex < _RIGHT_PANE_START_INDEX + 1)); then
-      continue
-    fi
-    printf "%s%s%s%s\n" "${AC__CURSOR_MOVE__}$((_RIGHT_PANE_FIRST_LINE + currentLine));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}${AC__ERASE_CHARS_RIGHT}" "│ " "${line}" "${AC__CURSOR_MOVE__}$((GLOBAL_COLUMNS))${__AC__COLUMN}│"
-    currentLine+=1
-    if ((currentLine >= _RIGHT_LINES - 1)); then
-      break
-    fi
-  done <<<"${details}"
-
-  # clear the remaining lines
-  while ((currentLine < _RIGHT_LINES - 1)); do
-    printf "%s" "${AC__CURSOR_MOVE__}$((_RIGHT_PANE_FIRST_LINE + currentLine));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}${AC__ERASE_CHARS_RIGHT}"
-    currentLine+=1
-  done
-
-  # draw last line with help text
-  local helpWidth=$((${#_RIGHT_PANE_HELP_TEXT} + 2))
-  local help=" ${_RIGHT_PANE_HELP_TEXT} "
-  if ((helpWidth > _RIGHT_PANE_WIDTH - 6)); then
-    helpWidth=0
-    help=""
-  fi
-  printf '%s%s' \
-    "${AC__CURSOR_MOVE__}$((GLOBAL_LINES));$((_LEFT_PANE_WIDTH + 1))${__AC__TO}" \
-    "└─${AC__REPEAT__}$((_RIGHT_PANE_WIDTH - helpWidth - 4))${__AC__LAST_CHAR}${help}─┘"
-
-}
-
+# Draw the left pane content.
 function drawLeftPane() {
   local IFS
+  local toPrint="${AC__CURSOR_HIDE}${FSFS_COLOR_RESET_TEXT}"
+
+  getCurrentInitialItemsIndex
+  local initialOriginalIndex=${LAST_RETURNED_VALUE}
+  local initialNbFilteredItems=${#FSFS_FILTERED_ITEMS[@]}
 
   # Compute filtered items
-  if [[ -n ${_SEARCH_STRING} ]]; then
-    array::fuzzyFilterSort "${_SEARCH_STRING}" _ITEMS "${AC__FG_BRIGHT_GREEN}" "${AC__FG_RESET}" "$((_LEFT_PANE_WIDTH - 4))"
-    _FILTERED_ITEMS=("${LAST_RETURNED_ARRAY_VALUE[@]}")
-    _FILTERED_ITEMS_CORRESPONDANCES=("${LAST_RETURNED_ARRAY_VALUE2[@]}")
+  if [[ -n ${FSFS_SEARCH_STRING} ]]; then
+    array::fuzzyFilterSort "${FSFS_SEARCH_STRING}" FSFS_ORIGINAL_ITEMS "${FSFS_COLOR_LETTER_HIGHLIGHT}" "${FSFS_COLOR_LETTER_HIGHLIGHT_RESET}" "$((FSFS_LEFT_PANE_WIDTH - 4))"
+    FSFS_FILTERED_ITEMS=("${LAST_RETURNED_ARRAY_VALUE[@]}")
+    FSFS_FILTERED_ITEMS_CORRESPONDANCES=("${LAST_RETURNED_ARRAY_VALUE2[@]}")
   else
     # for each item longer than the left width, cut and add ellipsis
-    _FILTERED_ITEMS=()
+    FSFS_FILTERED_ITEMS=()
     local line
-    for line in "${_ITEMS[@]}"; do
-      if ((${#line} > _LEFT_PANE_WIDTH - 3)); then
-        line="${line:0:$((_LEFT_PANE_WIDTH - 4))}…"
+    for line in "${FSFS_ORIGINAL_ITEMS[@]}"; do
+      if ((${#line} > FSFS_LEFT_PANE_WIDTH - 3)); then
+        line="${line:0:$((FSFS_LEFT_PANE_WIDTH - 4))}…"
       fi
-      _FILTERED_ITEMS+=("${line}")
+      FSFS_FILTERED_ITEMS+=("${line}")
     done
-    _FILTERED_ITEMS_CORRESPONDANCES=()
-    for ((i = 0; i < ${#_ITEMS[@]}; i++)); do
-      _FILTERED_ITEMS_CORRESPONDANCES+=("${i}")
+    FSFS_FILTERED_ITEMS_CORRESPONDANCES=()
+    for ((i = 0; i < ${#FSFS_ORIGINAL_ITEMS[@]}; i++)); do
+      FSFS_FILTERED_ITEMS_CORRESPONDANCES+=("${i}")
     done
+    initialOriginalIndex=-1
   fi
+
+  # if we are not pointing to the same original item, we need to
+  # recompute the right pane content
+  getCurrentInitialItemsIndex
+  local newOriginalIndex=${LAST_RETURNED_VALUE}
+  if [[ ${initialOriginalIndex} -ne ${newOriginalIndex} ]]; then
+    FSFS_RECOMPUTE_RIGHT_PANE_CONTENT=${FSFS_HAS_PREVIEW}
+  fi
+
+  # make sure to select an existing index regarding the newly filtered items +
+  # make sure it is in the view
   changeSelectedItemIndex 0
 
-  # separator
-  local title=" ${#_FILTERED_ITEMS[@]}/${#_ITEMS[@]}"
-  local titleWidth=${#title}
-  if ((titleWidth > _LEFT_PANE_WIDTH)); then
-    titleWidth=0
-    title=""
+  # draw the items count
+  if ((${#FSFS_FILTERED_ITEMS[@]} != initialNbFilteredItems)); then
+    local itemCount="${#FSFS_ORIGINAL_ITEMS[@]}"
+    local itemsCounter
+    printf -v itemsCounter " %0${#itemCount}i/%i " "${#FSFS_FILTERED_ITEMS[@]}" "${#FSFS_ORIGINAL_ITEMS[@]}"
+    toPrint+="${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE + 1));$((FSFS_LEFT_PANE_WIDTH - ${#itemsCounter}))${__AC__TO}${FSFS_COLOR_STATIC}${itemsCounter}${FSFS_COLOR_RESET_TEXT}"
   fi
-  printf '%s%s\n' \
-    "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1));1${__AC__TO}" \
-    "─${AC__REPEAT__}$((_LEFT_PANE_WIDTH - titleWidth - 2))${__AC__LAST_CHAR}${title} "
 
   # draw the items
-  local -i currentLine=0
-  local -i currentIndex=-1
-  local line itemPrefix
-  for line in "${_FILTERED_ITEMS[@]}"; do
-    currentIndex+=1
-    if ((currentIndex < _LEFT_PANE_START_INDEX)); then
-      continue
-    fi
-    currentLine+=1
-    if ((currentIndex == _SELECTED_ITEM_INDEX)); then
-      itemPrefix="◆ "
+  local itemPrefix
+  local -i index line=${FSFS_LEFT_PANE_FIRST_CONTENT_LINE}
+  local -i max=$((FSFS_LEFT_PANE_START_INDEX + FSFS_LEFT_PANE_LINES - 1))
+  max=$((max > ${#FSFS_FILTERED_ITEMS[@]} - 1 ? ${#FSFS_FILTERED_ITEMS[@]} - 1 : max))
+  for ((index = FSFS_LEFT_PANE_START_INDEX; index <= max; index++)); do
+    if ((index == FSFS_SELECTED_FILTERED_ITEM_INDEX)); then
+      itemPrefix="${FSFS_COLOR_SELECTED_ITEM}${FSFS_COLOR_FOCUS}◆ ${FSFS_COLOR_FOCUS_RESET}"
     else
       itemPrefix="  "
     fi
-
-    printf "%s\r%s%s\n" "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1 + currentLine));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}" "${itemPrefix}" "${line}"
-    if ((currentLine >= _LEFT_LINES)); then
-      break
-    fi
+    toPrint+="${AC__CURSOR_MOVE__}${line};${FSFS_LEFT_PANE_WIDTH}${__AC__TO}${AC__ERASE_CHARS_LEFT}"$'\r'"${itemPrefix}${FSFS_FILTERED_ITEMS[index]}${FSFS_COLOR_SELECTED_ITEM_RESET}"
+    line+=1
   done
 
   # clear the remaining lines
-  while ((currentLine < _LEFT_LINES)); do
-    currentLine+=1
-    printf "%s" "${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE + 1 + currentLine));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"
+  for ((line = FSFS_LEFT_PANE_FIRST_CONTENT_LINE + line - FSFS_LEFT_PANE_FIRST_CONTENT_LINE; line < FSFS_LEFT_PANE_FIRST_CONTENT_LINE + FSFS_LEFT_PANE_LINES; line++)); do
+    toPrint+="${AC__CURSOR_MOVE__}${line};${FSFS_LEFT_PANE_WIDTH}${__AC__TO}${AC__ERASE_CHARS_LEFT}"
   done
+
+  printf '%s' "${toPrint}"
 }
 
-function drawPrompt() {
-  printf '%s\r%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((_LEFT_PANE_FIRST_LINE));$((_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}" "▶ ${_SEARCH_STRING}${AC__CURSOR_SHOW}"
-}
-
-function drawStaticScreen() {
-  local IFS
-
-  # clear the screen, move to the top left corner
-  printf '%s' "${AC__ERASE_SCREEN}${AC__CURSOR_MOVE__}1;1${__AC__TO}"
-
-  local leftPaneWidth=$((GLOBAL_COLUMNS - _RIGHT_PANE_WIDTH))
-
-  # draw the header
-  _LEFT_PANE_FIRST_LINE=1
-  _RIGHT_PANE_FIRST_LINE=1
-  local line headerOverflowing=false
-  while IFS= read -r line; do
-    printf '%s\n' "${line}"
-    _LEFT_PANE_FIRST_LINE=$((_LEFT_PANE_FIRST_LINE + 1))
-    if ((${#line} > leftPaneWidth)); then
-      headerOverflowing=true
-    fi
-  done <<<"${_HEADER}"
-  # if the header is too long, we can't start the right pane at line 1
-  if [[ ${headerOverflowing} == "true" ]]; then
-    _RIGHT_PANE_FIRST_LINE=${_LEFT_PANE_FIRST_LINE}
+# Compute the array that should be displayed in the right pane.
+# It is stored in the FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY variable.
+function computeRightPaneContent() {
+  FSFS_RECOMPUTE_RIGHT_PANE_CONTENT=false
+  if [[ ${FSFS_HAS_PREVIEW} != "true" ]]; then
+    # nothing to do
+    return 0
   fi
 
-  _LEFT_LINES=$((GLOBAL_LINES - _LEFT_PANE_FIRST_LINE - 2))
-  _LEFT_LINES=$((_LEFT_LINES > 0 ? _LEFT_LINES : 1))
-  _RIGHT_LINES=$((GLOBAL_LINES - _RIGHT_PANE_FIRST_LINE + 1))
-  _RIGHT_LINES=$((_RIGHT_LINES > 0 ? _RIGHT_LINES : 1))
+  FSFS_RIGHT_PANE_START_INDEX=0
 
-  # draw the left help text
-  printf '%s' "${AC__CURSOR_MOVE__}$((GLOBAL_LINES));1${__AC__TO}${AC__ERASE_LINE}${_LEFT_PANE_HELP_TEXT}"
+  getCurrentInitialItemsIndex
+  local -i originalItemIndex=${LAST_RETURNED_VALUE}
+
+  if ((originalItemIndex < 0)); then
+    unset FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY
+    return 0
+  fi
+
+  # if we already have a cached version of the details, we use it
+  # otherwise, we built it
+  if [[ ! -v "FSFS_RIGHT_PANE_CONTENT_ARRAY${originalItemIndex}" ]]; then
+    declare -n array="FSFS_RIGHT_PANE_CONTENT_ARRAY${originalItemIndex}"
+
+    local originalItem="${FSFS_ORIGINAL_ITEMS[${originalItemIndex}]}"
+    "${FSFS_ITEM_SELECTED_CALLBACK}" "${originalItem}" "${originalItemIndex}" "$((FSFS_RIGHT_PANE_WIDTH - 3))"
+    local content="${LAST_RETURNED_VALUE}"
+
+    array=()
+    local line IFS
+    while IFS= read -r line; do
+      array+=("${line}")
+    done <<<"${content}"
+  fi
+
+  declare -g -n FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY="FSFS_RIGHT_PANE_CONTENT_ARRAY${originalItemIndex}"
+}
+
+# Draw the right pane content.
+function drawRightPane() {
+  if [[ ${FSFS_HAS_PREVIEW} != "true" ]]; then
+    # nothing to do
+    return 0
+  fi
+  local toPrint="${AC__CURSOR_HIDE}${FSFS_COLOR_RESET_TEXT}"
+
+  # compute the number of lines for the right pane content
+  local contentLength
+  if [[ ! -v FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY || ${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} -eq 0 ]]; then
+    contentLength=0
+  else
+    contentLength=${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]}
+  fi
+
+  # display the page counter
+  local itemsCounter
+  if ((contentLength > 0)); then
+    local itemCount="${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]}"
+    printf -v itemsCounter " %0${#itemCount}i/%i " "${FSFS_RIGHT_PANE_START_INDEX}" "${itemCount}"
+  else
+    itemsCounter="─────────"
+  fi
+  local -i repeat=$((9 - ${#itemsCounter}))
+  repeat=$((repeat > 0 ? repeat : 0))
+  toPrint+="${AC__CURSOR_MOVE__}${FSFS_RIGHT_PANE_FIRST_LINE};$((GLOBAL_COLUMNS - 9 - 2))${__AC__TO}${FSFS_COLOR_STATIC}─${AC__REPEAT__}${repeat}${__AC__LAST_CHAR}${itemsCounter}${FSFS_COLOR_RESET_TEXT}"
+
+  # draw the lines
+  local -i index line=${FSFS_RIGHT_PANE_FIRST_CONTENT_LINE}
+  local -i max=$((FSFS_RIGHT_PANE_START_INDEX + FSFS_RIGHT_PANE_LINES - 1))
+  max=$((max > contentLength - 1 ? contentLength - 1 : max))
+  for ((index = FSFS_RIGHT_PANE_START_INDEX; index <= max; index++)); do
+    toPrint+="${AC__CURSOR_MOVE__}${line};$((FSFS_LEFT_PANE_WIDTH + 2))${__AC__TO}${AC__ERASE_CHARS_RIGHT} ${FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[index]}"
+    line+=1
+  done
+
+  # clear the remaining lines
+  for ((line = FSFS_RIGHT_PANE_FIRST_CONTENT_LINE + line - FSFS_RIGHT_PANE_FIRST_CONTENT_LINE; line < FSFS_RIGHT_PANE_FIRST_CONTENT_LINE + FSFS_RIGHT_PANE_LINES; line++)); do
+    toPrint+="${AC__CURSOR_MOVE__}${line};$((FSFS_LEFT_PANE_WIDTH + 2))${__AC__TO}${AC__ERASE_CHARS_RIGHT}"
+  done
+
+  # if there is no content, display a loading... message on the center of the right pane
+  if ((contentLength == 0)); then
+    local loadingMessage="Loading…"
+    toPrint+="${AC__CURSOR_MOVE__}$((FSFS_RIGHT_PANE_FIRST_CONTENT_LINE + FSFS_RIGHT_PANE_LINES / 2));$((FSFS_LEFT_PANE_WIDTH + 2 + FSFS_RIGHT_PANE_WIDTH / 2 - ${#loadingMessage} / 2))${__AC__TO}${loadingMessage}"
+  fi
+
+  printf '%s' "${toPrint}"
+}
+
+# Draw the prompt line
+function drawPrompt() {
+  # check if we need to shorten the prompt
+  local prompt="${FSFS_SEARCH_STRING}"
+  if ((${#FSFS_SEARCH_STRING} > FSFS_LEFT_PANE_WIDTH - 4)); then
+    prompt="…${FSFS_SEARCH_STRING:$((${#FSFS_SEARCH_STRING} - (FSFS_LEFT_PANE_WIDTH - 4) + 1))}"
+  else
+    prompt="${FSFS_SEARCH_STRING}"
+  fi
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE));$((FSFS_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"$'\r'"${FSFS_COLOR_STATIC}> ${FSFS_COLOR_RESET_TEXT}${FSFS_COLOR_FOCUS}${prompt}${AC__CURSOR_SHOW}"
+}
+
+# Returns the index of the item in the original array (if any, or -1).
+# It returns in the LAST_RETURNED_VALUE variable.
+function getCurrentInitialItemsIndex() {
+  if ((FSFS_SELECTED_FILTERED_ITEM_INDEX >= 0 && FSFS_SELECTED_FILTERED_ITEM_INDEX < ${#FSFS_FILTERED_ITEMS_CORRESPONDANCES[@]})); then
+    LAST_RETURNED_VALUE=${FSFS_FILTERED_ITEMS_CORRESPONDANCES[${FSFS_SELECTED_FILTERED_ITEM_INDEX}]}
+    return 0
+  fi
+  LAST_RETURNED_VALUE=-1
 }
 
 # Modifies the selected item index.
@@ -353,28 +478,35 @@ function changeSelectedItemIndex() {
   local delta="${1:-0}"
 
   # if we have no items, we do nothing
-  if [[ ${#_FILTERED_ITEMS[@]} -eq 0 ]]; then
-    _SELECTED_ITEM_INDEX=-1
+  if [[ ${#FSFS_FILTERED_ITEMS[@]} -eq 0 ]]; then
+    FSFS_SELECTED_FILTERED_ITEM_INDEX=-1
+    FSFS_RECOMPUTE_RIGHT_PANE_CONTENT=${FSFS_HAS_PREVIEW}
     return 0
   fi
 
-  # compute the new index
-  local newIndex=$((_SELECTED_ITEM_INDEX + delta))
+  # compute the new index (cycle through)
+  local newIndex=$((FSFS_SELECTED_FILTERED_ITEM_INDEX + delta))
   if ((newIndex < 0)); then
-    newIndex=$((${#_FILTERED_ITEMS[@]} - 1))
-  elif ((newIndex >= ${#_FILTERED_ITEMS[@]})); then
+    newIndex=$((${#FSFS_FILTERED_ITEMS[@]} - 1))
+  elif ((newIndex >= ${#FSFS_FILTERED_ITEMS[@]})); then
     newIndex=0
   fi
 
   # now we need to adjust the start index if needed
   # to make sure that the new index is visible on the screen
-  if ((newIndex < _LEFT_PANE_START_INDEX)); then
-    _LEFT_PANE_START_INDEX=${newIndex}
-  elif ((newIndex > _LEFT_PANE_START_INDEX + _LEFT_LINES - 1)); then
-    _LEFT_PANE_START_INDEX=$((newIndex - _LEFT_LINES + 1))
+  if ((newIndex < FSFS_LEFT_PANE_START_INDEX)); then
+    FSFS_LEFT_PANE_START_INDEX=${newIndex}
+  elif ((newIndex > FSFS_LEFT_PANE_START_INDEX + FSFS_LEFT_PANE_LINES - 1)); then
+    FSFS_LEFT_PANE_START_INDEX=$((newIndex - FSFS_LEFT_PANE_LINES + 1))
   fi
 
-  _SELECTED_ITEM_INDEX=${newIndex}
+  FSFS_SELECTED_FILTERED_ITEM_INDEX=${newIndex}
+
+  # if we are not pointing to the same item, we need to
+  # recompute the right pane content
+  if ((delta != 0)); then
+    FSFS_RECOMPUTE_RIGHT_PANE_CONTENT=${FSFS_HAS_PREVIEW}
+  fi
 }
 
 # Modifies the right pane start index.
@@ -385,27 +517,28 @@ function changeSelectedItemIndex() {
 #   changeRightPaneStartIndex 1
 function changeRightPaneStartIndex() {
   local delta="${1:-0}"
-  local newIndex=$((_RIGHT_PANE_START_INDEX + delta))
+  local newIndex=$((FSFS_RIGHT_PANE_START_INDEX + delta))
   if ((newIndex < 0)); then
     newIndex=0
+  elif [[ ! -v FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY || newIndex -ge ${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} ]]; then
+    newIndex=$((${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} - 1))
   fi
-  _RIGHT_PANE_START_INDEX=${newIndex}
+  FSFS_RIGHT_PANE_START_INDEX=${newIndex}
 }
 
 # Called when a key is pressed.
 function onKeyPressed() {
   case ${LAST_KEY_PRESSED} in
   ESC)
-    _CLOSE_INTERACTIVE_SESSION=true
+    FSFS_CLOSE_INTERACTIVE_SESSION=true
     return 0
     ;;
   $'\n')
     # if we selected index is within the range of the filtered items
     # we can return the corresponding index in the original items
-    if ((_SELECTED_ITEM_INDEX >= 0 && _SELECTED_ITEM_INDEX < ${#_FILTERED_ITEMS_CORRESPONDANCES[@]})); then
-      FSFS_FINAL_SELECTION_INDEX=${_FILTERED_ITEMS_CORRESPONDANCES[${_SELECTED_ITEM_INDEX}]}
-    fi
-    _CLOSE_INTERACTIVE_SESSION=true
+    getCurrentInitialItemsIndex
+    FSFS_FINAL_SELECTION_INDEX=${LAST_RETURNED_VALUE}
+    FSFS_CLOSE_INTERACTIVE_SESSION=true
     return 0
     ;;
   PAGE_DOWN)
@@ -433,27 +566,28 @@ function onKeyPressed() {
     drawLeftPane
     ;;
   DEL)
-    _SEARCH_STRING=""
+    FSFS_SEARCH_STRING=""
     drawLeftPane
     ;;
+  # filter any special key
+  $'\e') ;;
   *)
+    # Case of keys that are supposed to only affect the search string
     case ${LAST_KEY_PRESSED} in
     BACKSPACE)
-      _SEARCH_STRING="${_SEARCH_STRING%?}"
+      FSFS_SEARCH_STRING="${FSFS_SEARCH_STRING%?}"
       drawLeftPane
       ;;
-    # filter any special key
-    $'\e') ;;
     # normal key
     ?)
-      # if we pressed a special key less than 0.1s after the previous one,
+      # if we pressed a special key less than 0.4s after the previous one,
       # we ignore it
       if ((${EPOCHREALTIME//./} - ${LAST_KEY_PRESS_TIME:-"-99999"} < 400000)); then
         return 0
       fi
       LAST_KEY_PRESS_TIME=-999999
 
-      _SEARCH_STRING+="${LAST_KEY_PRESSED}"
+      FSFS_SEARCH_STRING+="${LAST_KEY_PRESSED}"
       drawLeftPane
       ;;
     esac
@@ -467,9 +601,7 @@ function onKeyPressed() {
 
 # Called when the user interrupts the session (CTRL+C).
 function onSessionInterrupted() {
-  _CLOSE_INTERACTIVE_SESSION=true
-  # interactive::switchBackFromFullScreen
-  # main::onInterruptInternal
+  FSFS_CLOSE_INTERACTIVE_SESSION=true
 }
 
 # Called when the user resizes the terminal.
