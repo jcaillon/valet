@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-read -rd '' INPUT_STREAM_CONTENT <&0 || true
-
-echo "▶ called fakeexec $*"
-echo "▶ fakeexec input stream was:"
-echo "⌈${INPUT_STREAM_CONTENT:-}⌉"
-
-echo "This is an error output from fakeexec" 1>&2

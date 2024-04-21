@@ -53,9 +53,6 @@ VALET_CONFIG_LOCAL_STATE_DIRECTORY="${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-}"
 # Defaults to the temporary directory (TMPDIR or /tmp).
 VALET_CONFIG_WORK_FILES_DIRECTORY="${VALET_CONFIG_WORK_FILES_DIRECTORY:-}"
 
-# If true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
-VALET_CONFIG_DISABLE_LOCAL_BIN="${VALET_CONFIG_DISABLE_LOCAL_BIN:-}"
-
 # Number of last choices to remember when selecting an item from a command menu.
 # Set to 0 to disable this feature and always display items in the alphabetical order.
 VALET_CONFIG_REMEMBER_LAST_CHOICES="${VALET_CONFIG_REMEMBER_LAST_CHOICES:-}"
@@ -257,9 +254,6 @@ VALET_CONFIG_LOCAL_STATE_DIRECTORY="${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-}"
 # You can set it to a tmpfs directory (such as /dev/shm) to speed up the execution of valet.
 # Defaults to the temporary directory (TMPDIR or /tmp).
 VALET_CONFIG_WORK_FILES_DIRECTORY="${VALET_CONFIG_WORK_FILES_DIRECTORY:-}"
-
-# If true, valet will use the executable from the PATH even if they exist in the valet bin/ directory.
-VALET_CONFIG_DISABLE_LOCAL_BIN="${VALET_CONFIG_DISABLE_LOCAL_BIN:-}"
 
 # Number of last choices to remember when selecting an item from a command menu.
 # Set to 0 to disable this feature and always display items in the alphabetical order.

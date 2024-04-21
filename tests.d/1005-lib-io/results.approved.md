@@ -9,17 +9,17 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::toAbsolutePath ${PWD}/fakeexec
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/fakeexec
+→ io::toAbsolutePath ${PWD}/01.invoke.sh
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh
 
-→ io::toAbsolutePath fakeexec
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/fakeexec
+→ io::toAbsolutePath 01.invoke.sh
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh
 
-→ io::toAbsolutePath ./fakeexec
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/fakeexec
+→ io::toAbsolutePath ./01.invoke.sh
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh
 
-→ io::toAbsolutePath ../0003-self/fakeexec
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/fakeexec
+→ io::toAbsolutePath ../0003-self/01.invoke.sh
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh
 ```
 
 ### Testing io::captureOutput
@@ -88,24 +88,6 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ## Test script 01.invoke
 
-### Testing io::invoke5, executable are taken in priority from VALET_CONFIG_BIN_PATH, input stream from file
-
-Exit code: `0`
-
-**Standard** output:
-
-```plaintext
-→ io::invoke5 false 0 true "${tmpFile}" fakeexec --std-in --option argument1 argument2
-io::invoke function ended with exit code ⌈0⌉.
-stdout from file:
-⌈▶ called fakeexec --std-in --option argument1 argument2
-▶ fakeexec input stream was:
-⌈Input stream content from a file⌉⌉
-stderr from file:
-⌈This is an error output from fakeexec⌉
-
-```
-
 ### Testing io::invoke5, should return 1, input stream from string
 
 Exit code: `1`
@@ -113,15 +95,15 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ io::invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error
+→ io::invoke5 false 0 false inputStreamValue fakeexec --std-in --error
 io::invoke function ended with exit code ⌈1⌉.
 stdout from file:
-⌈▶ called fakeexec2 --std-in --error
-▶ fakeexec2 input stream was:
+⌈▶ called fakeexec --std-in --error
+▶ fakeexec input stream was:
 ⌈inputStreamValue⌉⌉
 stderr from file:
-⌈This is an error output from fakeexec2
-returning 1 from fakeexec2⌉
+⌈This is an error output from fakeexec
+returning 1 from fakeexec⌉
 
 ```
 
@@ -132,22 +114,22 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ io::invoke5 true 0 false inputStreamValue fakeexec2 --std-in --error
+→ io::invoke5 true 0 false inputStreamValue fakeexec --std-in --error
 exitcode=1
 ```
 
 **Error** output:
 
 ```log
-ERROR    The command ⌜fakeexec2⌝ originally ended with exit code ⌜1⌝.
+ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 Standard output:
-⌜▶ called fakeexec2 --std-in --error
-▶ fakeexec2 input stream was:
+⌜▶ called fakeexec --std-in --error
+▶ fakeexec input stream was:
 ⌈inputStreamValue⌉
 ⌝
 Error output:
-⌜This is an error output from fakeexec2
-returning 1 from fakeexec2
+⌜This is an error output from fakeexec
+returning 1 from fakeexec
 ⌝
 ```
 
@@ -158,34 +140,34 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::invoke5 true 0,1,2 true '' fakeexec2 --error
+→ io::invoke5 true 0,1,2 true '' fakeexec --error
 io::invoke function ended with exit code ⌈0⌉.
 stdout from file:
-⌈▶ called fakeexec2 --error
-▶ fakeexec2 input stream was:
+⌈▶ called fakeexec --error
+▶ fakeexec input stream was:
 ⌈⌉⌉
 stderr from file:
-⌈This is an error output from fakeexec2
-returning 1 from fakeexec2⌉
+⌈This is an error output from fakeexec
+returning 1 from fakeexec⌉
 
 ```
 
-### Testing io::invoke5var, should get stdout/stderr from var
+### Testing io::invoke5var, input stream for file, should get stdout/stderr from var
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ io::invoke5var false 0 true '' fakeexec2
+→ io::invoke5var false 0 true 'tmpFile' fakeexec --std-in
 io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
-⌈▶ called fakeexec2 
-▶ fakeexec2 input stream was:
-⌈⌉
+⌈▶ called fakeexec --std-in
+▶ fakeexec input stream was:
+⌈Input stream content from a file⌉
 ⌉
 stderr from var:
-⌈This is an error output from fakeexec2
+⌈This is an error output from fakeexec
 ⌉
 
 ```
@@ -197,15 +179,15 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ io::invoke5 false 0 false inputStreamValue fakeexec2 --std-in --error
+→ io::invoke5 false 0 false inputStreamValue fakeexec --std-in --error
 io::invoke function ended with exit code ⌈1⌉.
 stdout from file:
-⌈▶ called fakeexec2 --std-in --error
-▶ fakeexec2 input stream was:
+⌈▶ called fakeexec --std-in --error
+▶ fakeexec input stream was:
 ⌈inputStreamValue⌉⌉
 stderr from file:
-⌈This is an error output from fakeexec2
-returning 1 from fakeexec2⌉
+⌈This is an error output from fakeexec
+returning 1 from fakeexec⌉
 
 ```
 
@@ -214,21 +196,21 @@ returning 1 from fakeexec2⌉
 ```log
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Executing the command ⌜fakeexec2⌝.
+DEBUG    Executing the command ⌜fakeexec⌝.
 Fail if it fails: ⌜false⌝
 Acceptable error codes: ⌜0⌝
 Standard stream from file: ⌜false⌝
 Standard stream: ⌜inputStreamValue⌝
 Extra parameters: ⌜--std-in --error⌝
-DEBUG    The command ⌜fakeexec2⌝ originally ended with exit code ⌜1⌝.
+DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 Standard output:
-⌜▶ called fakeexec2 --std-in --error
-▶ fakeexec2 input stream was:
+⌜▶ called fakeexec --std-in --error
+▶ fakeexec input stream was:
 ⌈inputStreamValue⌉
 ⌝
 Error output:
-⌜This is an error output from fakeexec2
-returning 1 from fakeexec2
+⌜This is an error output from fakeexec
+returning 1 from fakeexec
 ⌝
 ```
 
@@ -239,35 +221,35 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::invoke3 false 0 fakeexec2 --option argument1 argument2
+→ io::invoke3 false 0 fakeexec --option argument1 argument2
 io::invoke function ended with exit code ⌈0⌉.
 stdout from file:
-⌈▶ called fakeexec2 --option argument1 argument2
-▶ fakeexec2 input stream was:
+⌈▶ called fakeexec --option argument1 argument2
+▶ fakeexec input stream was:
 ⌈⌉⌉
 stderr from file:
-⌈This is an error output from fakeexec2⌉
+⌈This is an error output from fakeexec⌉
 
 ```
 
 **Error** output:
 
 ```log
-DEBUG    Executing the command ⌜fakeexec2⌝.
+DEBUG    Executing the command ⌜fakeexec⌝.
 Fail if it fails: ⌜false⌝
 Acceptable error codes: ⌜0⌝
 Standard stream from file: ⌜⌝
 Standard stream: ⌜⌝
 Extra parameters: ⌜--option argument1 argument2⌝
-DEBUG    The command ⌜fakeexec2⌝ originally ended with exit code ⌜0⌝.
+DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
 Standard output:
-⌜▶ called fakeexec2 --option argument1 argument2
-▶ fakeexec2 input stream was:
+⌜▶ called fakeexec --option argument1 argument2
+▶ fakeexec input stream was:
 ⌈⌉
 ⌝
 Error output:
-⌜This is an error output from fakeexec2
+⌜This is an error output from fakeexec
 ⌝
 ```
 
@@ -278,15 +260,15 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::invoke3var false 0 fakeexec2 --option argument1 argument2
+→ io::invoke3var false 0 fakeexec --option argument1 argument2
 io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
-⌈▶ called fakeexec2 --option argument1 argument2
-▶ fakeexec2 input stream was:
+⌈▶ called fakeexec --option argument1 argument2
+▶ fakeexec input stream was:
 ⌈⌉
 ⌉
 stderr from var:
-⌈This is an error output from fakeexec2
+⌈This is an error output from fakeexec
 ⌉
 
 ```
@@ -294,21 +276,21 @@ stderr from var:
 **Error** output:
 
 ```log
-DEBUG    Executing the command ⌜fakeexec2⌝.
+DEBUG    Executing the command ⌜fakeexec⌝.
 Fail if it fails: ⌜false⌝
 Acceptable error codes: ⌜0⌝
 Standard stream from file: ⌜⌝
 Standard stream: ⌜⌝
 Extra parameters: ⌜--option argument1 argument2⌝
-DEBUG    The command ⌜fakeexec2⌝ originally ended with exit code ⌜0⌝.
+DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
 Standard output:
-⌜▶ called fakeexec2 --option argument1 argument2
-▶ fakeexec2 input stream was:
+⌜▶ called fakeexec --option argument1 argument2
+▶ fakeexec input stream was:
 ⌈⌉
 ⌝
 Error output:
-⌜This is an error output from fakeexec2
+⌜This is an error output from fakeexec
 ⌝
 ```
 
@@ -319,27 +301,27 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ io::invoke fakeexec2 --error
+→ io::invoke fakeexec --error
 ```
 
 **Error** output:
 
 ```log
-DEBUG    Executing the command ⌜fakeexec2⌝.
+DEBUG    Executing the command ⌜fakeexec⌝.
 Fail if it fails: ⌜true⌝
 Acceptable error codes: ⌜0⌝
 Standard stream from file: ⌜⌝
 Standard stream: ⌜⌝
 Extra parameters: ⌜--error⌝
-ERROR    The command ⌜fakeexec2⌝ originally ended with exit code ⌜1⌝.
+ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 Standard output:
-⌜▶ called fakeexec2 --error
-▶ fakeexec2 input stream was:
+⌜▶ called fakeexec --error
+▶ fakeexec input stream was:
 ⌈⌉
 ⌝
 Error output:
-⌜This is an error output from fakeexec2
-returning 1 from fakeexec2
+⌜This is an error output from fakeexec
+returning 1 from fakeexec
 ⌝
 stack:
 ├─ In function core::fail() $GLOBAL_VALET_HOME/valet.d/core:XXX
@@ -366,15 +348,15 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::invoke fakeexec2 --option argument1 argument2
+→ io::invoke fakeexec --option argument1 argument2
 io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
-⌈▶ called fakeexec2 --option argument1 argument2
-▶ fakeexec2 input stream was:
+⌈▶ called fakeexec --option argument1 argument2
+▶ fakeexec input stream was:
 ⌈⌉
 ⌉
 stderr from var:
-⌈This is an error output from fakeexec2
+⌈This is an error output from fakeexec
 ⌉
 
 ```
@@ -382,21 +364,21 @@ stderr from var:
 **Error** output:
 
 ```log
-DEBUG    Executing the command ⌜fakeexec2⌝.
+DEBUG    Executing the command ⌜fakeexec⌝.
 Fail if it fails: ⌜true⌝
 Acceptable error codes: ⌜0⌝
 Standard stream from file: ⌜⌝
 Standard stream: ⌜⌝
 Extra parameters: ⌜--option argument1 argument2⌝
-DEBUG    The command ⌜fakeexec2⌝ originally ended with exit code ⌜0⌝.
+DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
 Standard output:
-⌜▶ called fakeexec2 --option argument1 argument2
-▶ fakeexec2 input stream was:
+⌜▶ called fakeexec --option argument1 argument2
+▶ fakeexec input stream was:
 ⌈⌉
 ⌝
 Error output:
-⌜This is an error output from fakeexec2
+⌜This is an error output from fakeexec
 ⌝
 ```
 

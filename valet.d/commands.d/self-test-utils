@@ -407,7 +407,6 @@ function setSimplifiedImportantVariables() {
   export VALET_CONFIG_COLOR_UNACTIVE_BUTTON=CUB
 
   export GLOBAL_COLUMNS=9999
-  export VALET_CONFIG_DISABLE_LOCAL_BIN=true
   "
   eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
   log::createPrintFunction

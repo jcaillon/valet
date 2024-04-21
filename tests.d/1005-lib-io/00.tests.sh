@@ -5,20 +5,20 @@ source io
 
 function testIo::toAbsolutePath() {
 
-  echo "→ io::toAbsolutePath \${PWD}/fakeexec"
-  io::toAbsolutePath "${PWD}/fakeexec" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ io::toAbsolutePath \${PWD}/01.invoke.sh"
+  io::toAbsolutePath "${PWD}/01.invoke.sh" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ io::toAbsolutePath fakeexec"
-  io::toAbsolutePath "fakeexec" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ io::toAbsolutePath 01.invoke.sh"
+  io::toAbsolutePath "01.invoke.sh" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ io::toAbsolutePath ./fakeexec"
-  io::toAbsolutePath "./fakeexec" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ io::toAbsolutePath ./01.invoke.sh"
+  io::toAbsolutePath "./01.invoke.sh" && echo "${LAST_RETURNED_VALUE}"
 
   echo
-  echo "→ io::toAbsolutePath ../0003-self/fakeexec"
-  io::toAbsolutePath "../0003-self/fakeexec" && echo "${LAST_RETURNED_VALUE}"
+  echo "→ io::toAbsolutePath ../0003-self/01.invoke.sh"
+  io::toAbsolutePath "../0003-self/01.invoke.sh" && echo "${LAST_RETURNED_VALUE}"
 
   endTest "Testing io::toAbsolutePath" 0
 }

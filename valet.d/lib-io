@@ -63,9 +63,6 @@ function io::invoke5() {
   executable="${5}"
   shift 5
 
-  io::getCommandLocalPath "${executable}"
-  executable="${LAST_RETURNED_VALUE}"
-
   # if debug mode is on, print some info
   if log::isDebugEnabled; then
     local debugMessage="Executing the command ⌜${executable}⌝."$'\n'
@@ -224,22 +221,6 @@ function io::invoke3var() {
 #  io::invoke git add --all
 function io::invoke() {
   io::invoke5var "true" "0" "" "" "$@"
-}
-
-# Will return the full path of the given command if it is found in the bin folder of valet.
-# Will return the command as is if it is not found.
-#
-# $1: the command to find
-#
-# Usage:
-#   io::getCommandLocalPath "stuff" && local fullPath="${LAST_RETURNED_VALUE}"
-function io::getCommandLocalPath() {
-  local executable="${1}"
-  local possibleExecutablePath="${VALET_CONFIG_BIN_PATH:-"${GLOBAL_VALET_HOME}/bin"}/${executable}"
-  if [[ "${VALET_CONFIG_DISABLE_LOCAL_BIN:-false}" != "true" && -x "${possibleExecutablePath}" ]]; then
-    executable="${possibleExecutablePath}"
-  fi
-  LAST_RETURNED_VALUE="${executable}"
 }
 
 # Execute the given command and return the output in the global variable LAST_RETURNED_VALUE.

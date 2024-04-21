@@ -28,7 +28,6 @@
 #   VALET_INSTALLATION_DIRECTORY the directory where Valet will be installed.
 #   VALET_VERBOSE: set to 'true' to display debug information.
 #   VALET_NO_SHIM: set to 'true' to not create the shim script in /usr/local/bin.
-#   VALET_NO_BINARIES: set to 'true' to not download the binaries (just Valet scripts).
 #   VALET_DONT_APPEND_PATH: set to 'true' to not add the Valet directory to the PATH (append to your .bashrc file).
 #
 # Usage:
@@ -142,12 +141,7 @@ function selfUpdate() {
   mkdir -p "${tempDirectory}" 1>/dev/null || core::fail "Could not create the temporary directory ⌜${tempDirectory}⌝."
 
   # download the latest release and unpack it
-  local latestReleaseUrl
-  if [[ ${VALET_NO_BINARIES:-false} == true ]]; then
-    latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet-no-binaries.tar.gz"
-  else
-    latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet-${os}-amd64.tar.gz"
-  fi
+  local latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet.tar.gz"
   local latestReleaseFile="${tempDirectory}/valet.tar.gz"
   log::info "Downloading the latest release from ⌜${latestReleaseUrl}⌝."
   curl -fsSL -o "${latestReleaseFile}" "${latestReleaseUrl}" || core::fail "Could not download the latest release from ⌜${latestReleaseUrl}⌝."
@@ -163,7 +157,6 @@ function selfUpdate() {
 
   # make valet executable
   ${SUDO} chmod +x "${GLOBAL_VALET_HOME}/valet"
-  ${SUDO} chmod +x "${GLOBAL_VALET_HOME}/bin/"*
 
   log::success "Valet has been installed in ⌜${GLOBAL_VALET_HOME}⌝."
 
