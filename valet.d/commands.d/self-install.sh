@@ -9,7 +9,7 @@
 #   Do not run this script with sudo, it will ask for your password when needed.
 #
 #   This script will :
-#   - Download the latest release from GitHub.
+#   - Download the given release from GitHub.
 #   - Copy it in the Valet home directory, which defaults to:
 #     - '/opt/valet' in case of a multi user installation
 #     - '~/.local/valet' otherwise
@@ -46,13 +46,19 @@ if [[ -z "${BASH_VERSION:-}" ]]; then
   exit 0
 fi
 
+if [[ -z "${VALET_VERSION:-}" ]]; then
+  VALET_VERSION="0.0.1"
+fi
+
 # import the core script (should always be skipped if the command is run from valet)
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   NOT_EXECUTED_FROM_VALET=true
 
   VALETD_DIR="${BASH_SOURCE[0]}"
   if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null || true;
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then
+      VALETD_DIR="${PWD}"
+      popd &>/dev/null || true
     else VALETD_DIR="${PWD}"; fi
   else VALETD_DIR="${VALETD_DIR%/*}"; fi
   VALETD_DIR="${VALETD_DIR%/*}" # strip directory
@@ -140,17 +146,21 @@ function selfUpdate() {
   local tempDirectory="${TMPDIR:-/tmp}/temp-${BASHPID}.valet.install.d"
   mkdir -p "${tempDirectory}" 1>/dev/null || core::fail "Could not create the temporary directory ⌜${tempDirectory}⌝."
 
-  # download the latest release and unpack it
-  local latestReleaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet.tar.gz"
-  local latestReleaseFile="${tempDirectory}/valet.tar.gz"
-  log::info "Downloading the latest release from ⌜${latestReleaseUrl}⌝."
-  curl -fsSL -o "${latestReleaseFile}" "${latestReleaseUrl}" || core::fail "Could not download the latest release from ⌜${latestReleaseUrl}⌝."
+  # download the release and unpack it
+  local releaseUrl="https://github.com/jcaillon/valet/releases/download/v${VALET_VERSION}/valet.tar.gz"
+  if [[ ${NOT_EXECUTED_FROM_VALET} != "true" ]]; then
+    VALET_VERSION="latest"
+    releaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet.tar.gz"
+  fi
+  local releaseFile="${tempDirectory}/valet.tar.gz"
+  log::info "Downloading the release ⌜${VALET_VERSION}⌝ from ⌜${releaseUrl}⌝."
+  curl -fsSL -o "${releaseFile}" "${releaseUrl}" || core::fail "Could not download the release ⌜${VALET_VERSION}⌝ from ⌜${releaseUrl}⌝."
   log::debug "Unpacking the release in ⌜${GLOBAL_VALET_HOME}⌝."
-  tar -xzf "${latestReleaseFile}" -C "${tempDirectory}"
+  tar -xzf "${releaseFile}" -C "${tempDirectory}"
   log::debug "The release has been unpacked in ⌜${GLOBAL_VALET_HOME}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}."
 
   # remove the old valet directory and move the new one
-  ${SUDO} rm -f "${latestReleaseFile}"
+  ${SUDO} rm -f "${releaseFile}"
   ${SUDO} rm -Rf "${GLOBAL_VALET_HOME}"
   ${SUDO} mv -f "${tempDirectory}" "${GLOBAL_VALET_HOME}"
   log::info "Valet has been copied in ⌜${GLOBAL_VALET_HOME}⌝."
@@ -215,7 +225,6 @@ function selfUpdate() {
     selfSetup
   fi
 }
-
 
 # if this script is run directly, execute the function, otherwise valet will do it
 if [[ ${NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then

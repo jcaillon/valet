@@ -59,6 +59,11 @@ DEBUG    Checking if the workarea is clean
 ▶ called io::invoke5 false 0   git update-index --really-refresh
 ▶ called io::invoke5 false 0   git diff-index --quiet HEAD
 INFO     The current version of valet is: 1.2.3.
+▶ called io::invoke sed -E -i s/VALET_VERSION="[0-9]+\.[^"]+"/VALET_VERSION="aa"/ $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
+▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
+▶ called io::invoke git commit -m :rocket: releasing version 2.0.0
+▶ called io::invoke git push origin main
+SUCCESS  The new version has been committed.
 ▶ called io::invoke git tag --sort=committerdate --no-color
 INFO     The last tag is: v1.2.3.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD

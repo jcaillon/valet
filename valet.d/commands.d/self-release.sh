@@ -109,6 +109,17 @@ function createRelease() {
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."
 
+  # write the current version in the self-install script
+  # then commit the file
+  if [[ "${dryRun:-}" != "true" ]]; then
+    io::invoke sed -E -i "s/VALET_VERSION=\"[0-9]+\.[^\"]+\"/VALET_VERSION=\"aa\"/" "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
+
+    io::invoke git add "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
+    io::invoke git commit -m ":rocket: releasing version ${version}"
+    io::invoke git push origin main
+    log::success "The new version has been committed."
+  fi
+
   # get the current latest tag
   local lastTag
   io::invoke git tag --sort=committerdate --no-color

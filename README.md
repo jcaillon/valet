@@ -89,8 +89,8 @@ Auto parsing of arguments and options based on your command configuration:
 ### Dependencies
 
 - Bash version 5.2 or superior is required (might work with older versions but it is not guaranteed).
-- From [GNU coreutils](https://www.gnu.org/software/coreutils/): it uses `rm`, `mv`, `mkdir`, `ln` (for the install).
-- [curl][curl] and [tar][tar] are needed only for the self-update command.
+- From [GNU coreutils](https://www.gnu.org/software/coreutils/): it uses `rm`, `mv`, `mkdir` for all commands. It uses `chmod`, `ln` for the installation/updates.
+- [curl][curl] and [tar][tar] are needed if you want to use the self-update command.
 
 ### Automated installation
 
