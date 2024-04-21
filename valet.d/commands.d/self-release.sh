@@ -112,7 +112,7 @@ function createRelease() {
   # write the current version in the self-install script
   # then commit the file
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke sed -E -i "s/VALET_VERSION=\"[0-9]+\.[^\"]+\"/VALET_VERSION=\"aa\"/" "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
+    io::invoke sed -E -i "s/VALET_VERSION=\"[0-9]+\.[^\"]+\"/VALET_VERSION=\"${version}\"/" "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
 
     io::invoke git add "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
     io::invoke git commit -m ":rocket: releasing version ${version}"
@@ -197,6 +197,12 @@ function createRelease() {
 function uploadArtifact() {
   local uploadUrl="${1}"
 
+  # prepare a temp folder to store the release
+  local tempDir="${GLOBAL_VALET_HOME}/.tmp"
+  rm -Rf "${tempDir}"
+  mkdir -p "${tempDir}"
+  pushd "${tempDir}" 1>/dev/null
+
   local -a files
   files=(examples.d valet.d valet)
 
@@ -222,4 +228,6 @@ function uploadArtifact() {
   fi
 
   rm -f "${artifactPath}"
+  popd 1>/dev/null
+  rm -Rf "${tempDir}"
 }
