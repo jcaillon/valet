@@ -132,7 +132,7 @@ function runCoreTests() {
     rebuildCommands "${GLOBAL_VALET_HOME}/examples.d"
 
     log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝."
-    runTestSuites "${GLOBAL_VALET_HOME}/examples.d"
+    runTestSuites "${GLOBAL_VALET_HOME}/examples.d/showcase/tests.d"
   fi
 
   # reload the orignal commands

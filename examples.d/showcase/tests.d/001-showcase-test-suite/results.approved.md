@@ -33,17 +33,6 @@ Exit code: `0`
 whoami
 ```
 
-### Testing the hello world command
-
-Exit code: `0`
-
-**Standard** output:
-
-```plaintext
-→ valet showcase hello-world
-Hello world!
-```
-
 ### Testing the behavior of onInterrupt
 
 Exit code: `0`

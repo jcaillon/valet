@@ -75,15 +75,16 @@ function selfTest() {
     TEST_EXCLUDE_PATTERN="${exclude}"
   fi
 
-  # get the directory containing the tests for the commands
-  core::getUserDirectory
-  userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
-  log::debug "User directory is ⌜${userDirectory}⌝."
-  core::reloadUserCommands
-
   declare -i NB_TEST_SUITES=0 NB_FAILED_TEST_SUITES=0
 
   if [[ ${onlyCore:-false} != "true" ]]; then
+    # get the user directory
+    core::getUserDirectory
+    userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
+
+    # rebuild the commands for the user dir
+    log::info "Rebuilding the commands for the user directory ⌜${userDirectory}⌝."
+    rebuildCommands "${userDirectory}"
 
     # change the shell options to include hidden files
     shopt -s dotglob

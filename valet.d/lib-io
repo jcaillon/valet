@@ -281,12 +281,13 @@ function io::readFile() {
   fi
 }
 
-# Check last return code and fail (exit) if it is an error
+# Check last return code and fail (exit) if it is an error.
+#
 # $1: the return code
 # $2+ : the error message to display in case of error
 #
 # Usage:
-#   command_that_could_fail || checkAndcore::fail "$?" "The command that could fail has failed!"
+#   command_that_could_fail || io::checkAndFail "$?" "The command that could fail has failed!"
 function io::checkAndFail() {
   if [[ "${1:-}" != "0" ]]; then
     shift
@@ -295,12 +296,13 @@ function io::checkAndFail() {
   return 0
 }
 
-# Check last return code and return an error code if error
+# Check last return code and warn the user + return an error code if error.
+#
 # $1: the last return code
 # $2+ : the warning message to display in case of error
 #
 # Usage:
-#   command_that_could_fail || checkAndlog::warning "$?" "The command that could fail has failed!" || return "0"
+#   command_that_could_fail || io::checkAndWarn "$?" "The command that could fail has failed!" || return "0"
 function io::checkAndWarn() {
   if [[ "${1:-}" != "0" ]]; then
     shift

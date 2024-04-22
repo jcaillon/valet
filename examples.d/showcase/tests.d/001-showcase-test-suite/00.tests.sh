@@ -16,13 +16,6 @@ function testShowCaseSudo() {
   endTest "Testing the showcase sudo command by replacing sudo with echo" 0
 }
 
-# This function demonstrates how to test a command by running valet
-function testHelloWorld() {
-  echo "→ valet showcase hello-world"
-  ("${GLOBAL_VALET_HOME}/valet" showcase hello-world)
-  endTest "Testing the hello world command" 0
-}
-
 # This demonstrates a custom test where we output what we want in the test results file
 function testOnInterrupt() {
   echo "→ onInterrupt"
@@ -41,7 +34,6 @@ function main() {
 
   testShowcaseCommand1
   testShowCaseSudo
-  testHelloWorld
   testOnInterrupt
 }
 

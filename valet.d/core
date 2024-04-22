@@ -155,7 +155,7 @@ function log::setLevel() {
   *) LOG_LEVEL_INT=1 ;;
   esac
 
-  if [[ -z ${2:-} ]]; then
+  if [[ ${2:-false} != "true" ]]; then
     if [[ ${LOG_LEVEL_INT} -ne 1 ]]; then
       log::debug "Log level set to ${GLOBAL_LOG_LEVEL}."
     fi
