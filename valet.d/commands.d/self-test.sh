@@ -87,10 +87,9 @@ function selfTest() {
 
     # change the shell options to include hidden files
     shopt -s dotglob
-    shopt -s globstar
     local testsDirectory listOfDirectories currentDirectory
 
-    # the globstar does not include files under symbolic link directories
+    # the shopt globstar does not include files under symbolic link directories
     # so we need to manually force the search in these directories
     listOfDirectories="${userDirectory}"$'\n'
     while [[ -n "${listOfDirectories}" ]]; do
@@ -98,7 +97,7 @@ function selfTest() {
       listOfDirectories="${listOfDirectories#*$'\n'}"
       log::debug "Searching for test suites directory in ⌜${currentDirectory}⌝."
       log::debug "listOfDirectories: ⌜${listOfDirectories}⌝."
-      for testsDirectory in "${currentDirectory}"/**; do
+      for testsDirectory in "${currentDirectory}"/*; do
         if [[ ! -d "${testsDirectory}" ]]; then
           # if the directory is not a directory, skip
           continue
@@ -106,9 +105,8 @@ function selfTest() {
           # if the directory is named .tests.d, then it is a test directory
           log::info "Running all test suites in directory ⌜${testsDirectory}⌝."
           runTestSuites "${testsDirectory}"
-        elif [[ -L "${testsDirectory}" && ${testsDirectory##*/} != "."* ]]; then
-          # if the directory is a symbolic link, we need to add it to the search list
-          # except if it starts with a .
+        elif [[ ${testsDirectory##*/} != "."* ]]; then
+          # we need the directory to the search list except if it starts with a .
           listOfDirectories+="${testsDirectory}"$'\n'
           log::debug "adding directory ⌜${testsDirectory}⌝ to the search list."
         fi
@@ -117,7 +115,6 @@ function selfTest() {
 
     # reset glob options
     shopt -u dotglob
-    shopt -u globstar
   fi
 
   if [[ -n "${withCore:-}" || ${onlyCore:-false} == "true" ]]; then

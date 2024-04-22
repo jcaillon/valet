@@ -109,8 +109,8 @@ function selfBuild() {
   )
   if [[ -d "${userDirectory}" ]]; then
     local file listOfDirectories currentDirectory
-    shopt -s globstar
-    # the globstar does not include files under symbolic link directories
+
+    # the shopt globstar does not include files under symbolic link directories
     # so we need to manually force the search in these directories
     listOfDirectories="${userDirectory}"$'\n'
     while [[ -n "${listOfDirectories}" ]]; do
@@ -119,27 +119,21 @@ function selfBuild() {
       log::debug "Searching for command definitions in ⌜${currentDirectory}⌝."
       log::debug "listOfDirectories: ⌜${listOfDirectories}⌝."
       for file in "${currentDirectory}"/**; do
-        if [[ -d "${file}" ]]; then
-          if [[ -L "${file}" && ${file##*/} != "."* ]]; then
-            # if the directory is a symbolic link, we need to add it to the search list
-            # except if it starts with a .
-            listOfDirectories+="${file}"$'\n'
-            log::debug "adding directory ⌜${file}⌝ to the search list."
-          fi
-          # skip directories
+        local fileBasename="${file##*/}"
+        if [[ -d "${file}" && ${fileBasename} != "."* && ${fileBasename} != "tests.d" ]]; then
+          # if directory we need to add it to the search list
+          # except if it starts with a . or if it is a tests.d directory
+          listOfDirectories+="${file}"$'\n'
+          log::debug "adding directory ⌜${file}⌝ to the search list."
           continue
         elif [[ "${file}" != *".sh" ]]; then
           # skip all files not ending with .sh
-          continue
-        elif [[ ${file} == *"/tests.d/"* ]]; then
-          # skip everything under tests.d
           continue
         fi
         log::debug "Considering file ⌜${file}⌝."
         commandDefinitionFiles+=("${file}")
       done
     done
-    shopt -u globstar
   elif [[ -n "${userDirectory}" ]]; then
     log::warning "Skipping user directory ⌜${userDirectory}⌝ because it does not exist."
   else
