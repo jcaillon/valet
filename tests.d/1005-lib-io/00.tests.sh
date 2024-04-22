@@ -67,11 +67,20 @@ function testIo::createFilePathIfNeeded() {
   endTest "Testing io::createFilePathIfNeeded" 0
 }
 
+function testIo::sleep() {
+
+  echo "→ io::sleep 0.001"
+  io::sleep 0.001
+
+  endTest "Testing io::sleep" 0
+}
+
 function main() {
   testIo::toAbsolutePath
   testIo::captureOutput
   testIo::readFile
   testIo::createFilePathIfNeeded
+  testIo::sleep
 }
 
 main

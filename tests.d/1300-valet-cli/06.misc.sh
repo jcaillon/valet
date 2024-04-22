@@ -34,7 +34,7 @@ function testUserDirectory() {
   io::createTempDirectory && export VALET_USER_DIRECTORY="${LAST_RETURNED_VALUE}/non-existing"
 
   echo "→ VALET_USER_DIRECTORY=non-existing self mock1 logging-level"
-  ("${GLOBAL_VALET_HOME}/valet" self mock1 logging-level) || true
+  ("${GLOBAL_VALET_HOME}/valet" self mock1 logging-level) || :
   endTest "Testing with a non existing user directory" 1
 
   export VALET_USER_DIRECTORY="${previousUserDirectory}"

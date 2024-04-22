@@ -314,7 +314,7 @@ function interactive::waitForKey() {
   IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || return 1
   # special key detection, need to read more characters (up to 4 for F1-F12 keys)
   if [[ ${LAST_KEY_PRESSED} == $'\e' ]]; then
-    IFS='' read -t 0.01 -d '' -rsn 4 || true
+    IFS='' read -t 0.01 -d '' -rsn 4 || :
     LAST_KEY_PRESSED+="${REPLY}"
     # translate some common inputs into more readable strings
     case ${LAST_KEY_PRESSED} in
@@ -368,9 +368,9 @@ function interactive::createSpace() {
 function interactive::getCursorPosition() {
   local escapeCode IFS
   # we request the position and first read \e[
-  IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr escapeCode || true
+  IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr escapeCode || :
   # then read line;colR
-  IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || true
+  IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || :
 }
 
 # Call this function to start an interactive session in full screen mode.
@@ -388,7 +388,7 @@ function interactive::switchToFullScreen() {
 
   # disable echoing when we type something
   if command -v stty &>/dev/null; then
-    stty -echo &>/dev/null || true
+    stty -echo &>/dev/null || :
   fi
   # switch to the alternate screen, hide the cursor and clear the screen
   printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
@@ -416,7 +416,7 @@ function interactive::switchBackFromFullScreen() {
   printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
   # restore the key echoing
   if command -v stty &>/dev/null; then
-    stty echo &>/dev/null || true
+    stty echo &>/dev/null || :
   fi
 
   # restore the error output and display them if any

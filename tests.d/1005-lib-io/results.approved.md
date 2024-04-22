@@ -98,6 +98,16 @@ $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/dir/subdir/file1
 File created successfully!
 ```
 
+### Testing io::sleep
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::sleep 0.001
+```
+
 ## Test script 01.invoke
 
 ### Testing io::invoke5, should return 1, input stream from string

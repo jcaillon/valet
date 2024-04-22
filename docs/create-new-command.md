@@ -84,7 +84,7 @@ In case of error, your function should call the `fail` directly which will exit 
 > If you expect a statement to fail but want to continue the execution, catch the exit code:
 > `thingThatReturns1 || exitCode=$?`
 > Or simply discard the error:
-> `thingThatReturns1 || true`
+> `thingThatReturns1 || :`
 
 ## 4. Rebuild valet menu
 

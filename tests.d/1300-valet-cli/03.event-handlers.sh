@@ -30,7 +30,7 @@ function testEventHandlers() {
   # ("${GLOBAL_VALET_HOME}/valet" self mock1 wait-indefinitely &)
   # processId=$!
   # kill -TERM ${processId}
-  # wait ${processId} || true
+  # wait ${processId} || :
   # endTest "Testing kill" $?
 }
 

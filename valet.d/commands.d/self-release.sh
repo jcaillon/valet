@@ -95,7 +95,7 @@ function createRelease() {
 
     # check that the git workarea is clean
     log::debug "Checking if the workarea is clean"
-    io::invoke3 false 0 git update-index --really-refresh 1>/dev/null || true
+    io::invoke3 false 0 git update-index --really-refresh 1>/dev/null || :
     local -i exitCode=0
     io::invoke3 false 0 git diff-index --quiet HEAD || exitCode=$?
     if [[ exitCode -ne 0 ]]; then
@@ -105,7 +105,7 @@ function createRelease() {
 
   # read the version from the valet file
   local version
-  IFS= read -rd '' version <"${GLOBAL_VALET_HOME}/valet.d/version" || true
+  IFS= read -rd '' version <"${GLOBAL_VALET_HOME}/valet.d/version" || :
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."
 

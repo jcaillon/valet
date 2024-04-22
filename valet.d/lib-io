@@ -337,3 +337,32 @@ function io::createFilePathIfNeeded() {
 
   LAST_RETURNED_VALUE="${filePath}"
 }
+
+# Sleep for the given amount of time.
+# This is a pure bash replacement of sleep.
+#
+# $1: the time to sleep in seconds (can be a float)
+#
+# Usage:
+#   io:sleep 1.5
+function io::sleep() {
+  local timeout="${1}"
+  # when connected to a terminal, we can just read the stdout
+  # which will never be written to, and use a timeout on read
+  if [[ -t 2 ]]; then
+    read -rt "${timeout}" -u 2 || :
+    return 0
+  elif command -v mkfifo 1>/dev/null; then
+    if [[ -z ${IO_SLEEP_FIFO:-} ]]; then
+      io::createTempFile && IO_SLEEP_FIFO="${LAST_RETURNED_VALUE}"
+      rm "${IO_SLEEP_FIFO}"
+      mkfifo -m 700 "${IO_SLEEP_FIFO}"
+      exec 9<>"${IO_SLEEP_FIFO}"
+      rm "${IO_SLEEP_FIFO}"
+    fi
+    read -rt "${timeout}" -u 9 || :
+  else
+    # when everything else failed...
+    sleep "${timeout}"
+  fi
+}

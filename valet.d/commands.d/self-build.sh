@@ -14,7 +14,7 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
 
   VALETD_DIR="${BASH_SOURCE[0]}"
   if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null || true;
+    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null || :;
     else VALETD_DIR="${PWD}"; fi
   else VALETD_DIR="${VALETD_DIR%/*}"; fi
 
@@ -206,7 +206,7 @@ function bumpValetBuildVersion() {
   local versionFile currentVersion
   versionFile="${GLOBAL_VALET_HOME}/valet.d/version"
 
-  IFS= read -rd '' currentVersion <"${versionFile}" || true
+  IFS= read -rd '' currentVersion <"${versionFile}" || :
 
   string::bumpSemanticVersion "${currentVersion}" "patch" "false"
 

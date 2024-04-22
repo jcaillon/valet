@@ -58,7 +58,7 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   if [[ "${VALETD_DIR}" != /* ]]; then
     if pushd "${VALETD_DIR%/*}" &>/dev/null; then
       VALETD_DIR="${PWD}"
-      popd &>/dev/null || true
+      popd &>/dev/null || :
     else VALETD_DIR="${PWD}"; fi
   else VALETD_DIR="${VALETD_DIR%/*}"; fi
   VALETD_DIR="${VALETD_DIR%/*}" # strip directory

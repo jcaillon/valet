@@ -85,7 +85,7 @@ function fakeexec() {
   local inputStreamContent
 
   if [[ $* == *"--std-in"* ]]; then
-    read -rd '' inputStreamContent <&0 || true
+    read -rd '' inputStreamContent <&0 || :
   fi
 
   echo "▶ called fakeexec $*"

@@ -13,7 +13,7 @@ function testInteractive::promptYesNo() {
   echo
   echo "echo n | interactive::promptYesNo 'Do you see this message?'"
   echo n 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
-  interactive::promptYesNo 'Do you see this message?' <"${GLOBAL_TEMPORARY_WORK_FILE}" || true
+  interactive::promptYesNo 'Do you see this message?' <"${GLOBAL_TEMPORARY_WORK_FILE}" || :
 
   endTest "Testing interactive::promptYesNo" 1
 }
