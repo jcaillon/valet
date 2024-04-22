@@ -36,7 +36,7 @@ You can open your `~/.valet.d` directory as a workspace on vscode. I recommend t
 ```json
 {
   // https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
-  "bashIde.globPattern": "**/*@(.sh|.inc|.bash|.command|core|lib-*)",
+  "bashIde.globPattern": "**/@(*@(.sh|.inc|.bash|.command|core)|lib-*)",
   "bashIde.includeAllWorkspaceSymbols": true
 }
 ```

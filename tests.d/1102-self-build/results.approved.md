@@ -185,6 +185,7 @@ CMD_SUDO_selfMock3='true'
 **Error** output:
 
 ```log
+INFO     Building the valet user commands from the user directory ⌜⌝.
 INFO     Skipping user directory because it was empty.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet⌝.
 INFO                              ├── ⌜⌝.

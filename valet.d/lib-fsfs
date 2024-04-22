@@ -101,7 +101,11 @@ function fsfs::itemSelector() {
   eval "${originalTraps}"
   interactive::switchBackFromFullScreen
 
-  LAST_RETURNED_VALUE="${FSFS_ORIGINAL_ITEMS[${FSFS_FINAL_SELECTION_INDEX}]}"
+  if ((FSFS_FINAL_SELECTION_INDEX >= 0)); then
+    LAST_RETURNED_VALUE="${FSFS_ORIGINAL_ITEMS[${FSFS_FINAL_SELECTION_INDEX}]}"
+  else
+    LAST_RETURNED_VALUE=""
+  fi
   LAST_RETURNED_VALUE2="${FSFS_FINAL_SELECTION_INDEX}"
 }
 

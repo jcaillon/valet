@@ -88,17 +88,31 @@ function selfTest() {
     # change the shell options to include hidden files
     shopt -s dotglob
     shopt -s globstar
+    local testsDirectory listOfDirectories currentDirectory
 
-    local testsDirectory
-    for testsDirectory in "${userDirectory}"/**; do
-      log::debug "Tests directory: ⌜${testsDirectory}⌝."
-      # if the directory is not a directory, skip
-      if [[ ! -d "${testsDirectory}" ]]; then continue; fi
-      # if the directory is named .tests.d, then it is a test directory
-      if [[ ${testsDirectory} == *"/tests.d" ]]; then
-        log::info "Running all test suites in directory ⌜${testsDirectory}⌝."
-        runTestSuites "${testsDirectory}"
-      fi
+    # the globstar does not include files under symbolic link directories
+    # so we need to manually force the search in these directories
+    listOfDirectories="${userDirectory}"$'\n'
+    while [[ -n "${listOfDirectories}" ]]; do
+      currentDirectory="${listOfDirectories%%$'\n'*}"
+      listOfDirectories="${listOfDirectories#*$'\n'}"
+      log::debug "Searching for test suites directory in ⌜${currentDirectory}⌝."
+      log::debug "listOfDirectories: ⌜${listOfDirectories}⌝."
+      for testsDirectory in "${currentDirectory}"/**; do
+        if [[ ! -d "${testsDirectory}" ]]; then
+          # if the directory is not a directory, skip
+          continue
+        elif [[ ${testsDirectory} == *"/tests.d" ]]; then
+          # if the directory is named .tests.d, then it is a test directory
+          log::info "Running all test suites in directory ⌜${testsDirectory}⌝."
+          runTestSuites "${testsDirectory}"
+        elif [[ -L "${testsDirectory}" && ${testsDirectory##*/} != "."* ]]; then
+          # if the directory is a symbolic link, we need to add it to the search list
+          # except if it starts with a .
+          listOfDirectories+="${testsDirectory}"$'\n'
+          log::debug "adding directory ⌜${testsDirectory}⌝ to the search list."
+        fi
+      done
     done
 
     # reset glob options

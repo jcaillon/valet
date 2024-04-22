@@ -54,10 +54,24 @@ function testIo::readFile() {
   endTest "Testing io::readFile unlimited" 0
 }
 
+function testIo::createFilePathIfNeeded() {
+
+  echo "→ io::createFilePathIfNeeded 'resources/dir/subdir/file1'"
+  io::createFilePathIfNeeded resources/dir/subdir/file1
+  echo "${LAST_RETURNED_VALUE}"
+
+  if [[ -f resources/dir/subdir/file1 ]]; then
+    echo "File created successfully!"
+  fi
+
+  endTest "Testing io::createFilePathIfNeeded" 0
+}
+
 function main() {
   testIo::toAbsolutePath
   testIo::captureOutput
   testIo::readFile
+  testIo::createFilePathIfNeeded
 }
 
 main

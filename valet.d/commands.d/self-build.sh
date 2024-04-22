@@ -101,23 +101,43 @@ function selfBuild() {
   io::toAbsolutePath "${GLOBAL_VALET_HOME}" && GLOBAL_VALET_HOME="${LAST_RETURNED_VALUE}"
 
   # list all the files in which we need to find command definitions
+  log::info "Building the valet user commands from the user directory ⌜${userDirectory}⌝."
   local -a commandDefinitionFiles
   commandDefinitionFiles=(
     "${GLOBAL_VALET_HOME}/valet"
     "${GLOBAL_VALET_HOME}/valet.d/commands.d"/*.sh
   )
   if [[ -d "${userDirectory}" ]]; then
+    local file listOfDirectories currentDirectory
     shopt -s globstar
-    local file
-    for file in "${userDirectory}"/**; do
-      # if directory, skip
-      if [[ -d "${file}" ]]; then continue; fi
-      log::debug "Considering file: ⌜${file}⌝."
-      # skip all files not ending with .sh
-      if [[ "${file}" != *".sh" ]]; then continue; fi
-      # skip everything under tests.d
-      if [[ ${file} == *"/tests.d/"* ]]; then continue; fi
-      commandDefinitionFiles+=("${file}")
+    # the globstar does not include files under symbolic link directories
+    # so we need to manually force the search in these directories
+    listOfDirectories="${userDirectory}"$'\n'
+    while [[ -n "${listOfDirectories}" ]]; do
+      currentDirectory="${listOfDirectories%%$'\n'*}"
+      listOfDirectories="${listOfDirectories#*$'\n'}"
+      log::debug "Searching for command definitions in ⌜${currentDirectory}⌝."
+      log::debug "listOfDirectories: ⌜${listOfDirectories}⌝."
+      for file in "${currentDirectory}"/**; do
+        if [[ -d "${file}" ]]; then
+          if [[ -L "${file}" && ${file##*/} != "."* ]]; then
+            # if the directory is a symbolic link, we need to add it to the search list
+            # except if it starts with a .
+            listOfDirectories+="${file}"$'\n'
+            log::debug "adding directory ⌜${file}⌝ to the search list."
+          fi
+          # skip directories
+          continue
+        elif [[ "${file}" != *".sh" ]]; then
+          # skip all files not ending with .sh
+          continue
+        elif [[ ${file} == *"/tests.d/"* ]]; then
+          # skip everything under tests.d
+          continue
+        fi
+        log::debug "Considering file ⌜${file}⌝."
+        commandDefinitionFiles+=("${file}")
+      done
     done
     shopt -u globstar
   elif [[ -n "${userDirectory}" ]]; then

@@ -86,6 +86,18 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ```
 
+### Testing io::createFilePathIfNeeded
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::createFilePathIfNeeded 'resources/dir/subdir/file1'
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/dir/subdir/file1
+File created successfully!
+```
+
 ## Test script 01.invoke
 
 ### Testing io::invoke5, should return 1, input stream from string

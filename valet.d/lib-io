@@ -78,12 +78,12 @@ function io::invoke5() {
   local -i exitCode=0
   if [[ -n "${stdIn}" ]]; then
     if [[ ${stdInFromFile} == "true" ]]; then
-      "${executable}" "$@" < "${stdIn}" 1> "${GLOBAL_TEMPORARY_STDOUT_FILE}" 2> "${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
+      "${executable}" "$@" <"${stdIn}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
     else
-      "${executable}" "$@" <<< "${stdIn}" 1> "${GLOBAL_TEMPORARY_STDOUT_FILE}" 2> "${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
+      "${executable}" "$@" <<<"${stdIn}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
     fi
   else
-    "${executable}" "$@" 1> "${GLOBAL_TEMPORARY_STDOUT_FILE}" 2> "${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
+    "${executable}" "$@" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
   fi
 
   local debugMessage="The command ⌜${executable}⌝ originally ended with exit code ⌜${exitCode}⌝."
@@ -239,7 +239,7 @@ function io::invoke() {
 #   io::captureOutput "ls -l" && local lsOutput="${LAST_RETURNED_VALUE}"
 function io::captureOutput() {
   local -i exitCode=0
-  "$@" 1> "${GLOBAL_TEMPORARY_STDOUT_FILE}" 2> "${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
+  "$@" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
 
   io::readFile "${GLOBAL_TEMPORARY_STDERR_FILE}"
   LAST_RETURNED_VALUE2="${LAST_RETURNED_VALUE}"
@@ -275,9 +275,9 @@ function io::readFile() {
 
   local IFS=
   if [[ "${maxCharacters}" -gt 0 ]]; then
-    read -rd '' -n "${maxCharacters}" LAST_RETURNED_VALUE < "${filePath}" || true
+    read -rd '' -n "${maxCharacters}" LAST_RETURNED_VALUE <"${filePath}" || true
   else
-    read -rd '' LAST_RETURNED_VALUE < "${filePath}" || true
+    read -rd '' LAST_RETURNED_VALUE <"${filePath}" || true
   fi
 }
 
@@ -308,4 +308,30 @@ function io::checkAndWarn() {
     return 1
   fi
   return 0
+}
+
+# Make sure that the given file path exists.
+# Create the directory tree and the file if needed.
+#
+# $1: the file path to create
+#
+# Returns:
+#   The absolute path of the file in the global variable LAST_RETURNED_VALUE.
+#
+# Usage:
+#   io::createFilePathIfNeeded "myFile"
+function io::createFilePathIfNeeded() {
+  io::toAbsolutePath "${1}"
+  local filePath="${LAST_RETURNED_VALUE}"
+  local parentDir="${filePath%/*}"
+
+  if [[ ! -d "${parentDir}" ]]; then
+    mkdir -p "${parentDir}" 1>/dev/null || core::fail "Failed to create the directory ⌜${parentDir}⌝ for the file ⌜${filePath}⌝."
+  fi
+
+  if [[ ! -f "${filePath}" ]]; then
+    : >"${filePath}"
+  fi
+
+  LAST_RETURNED_VALUE="${filePath}"
 }

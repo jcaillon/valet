@@ -678,6 +678,9 @@ function main::showCommandsMenuAndRun() {
   local commandChoice
   main::showInteractiveCommandsMenu "${menuId}" "Please select the command to run." "${commandSelectionItemsArrayName}"
   commandChoice="${LAST_RETURNED_VALUE}"
+
+  log::debug "Command choice ⌜${commandChoice}⌝."
+
   if [[ -z "${commandChoice}" ]]; then
     # the user pressed escape or ctrl-c
     exit 0
