@@ -7,6 +7,9 @@ set -Eeu -o pipefail
 # >>> Functions that can be used in the test scripts
 #===============================================================
 
+# shellcheck source=../lib-io
+source io
+
 # Call this function to add a paragraph in the report file.
 #
 # $1: the text to add in the report file
@@ -161,7 +164,8 @@ function runTestSuites() {
   local testsDirectory="${1}"
 
   # save the original important variables so we can restore them after the test suite
-  ORIGINAL_GLOBAL_LOG_LEVEL="${GLOBAL_LOG_LEVEL}"
+  log::getLevel
+  ORIGINAL_GLOBAL_LOG_LEVEL="${LAST_RETURNED_VALUE}"
   ORIGINAL_GLOBAL_LOG_PRINT_FUNCTION="${GLOBAL_LOG_PRINT_FUNCTION}"
   setOriginalImportantVariables
   setSimplifiedImportantVariables
@@ -317,12 +321,27 @@ function onExitTestInternal() {
 
   resetFdRedirection
 
-  # shellcheck disable=SC1091
-  source io
+  log::getCallStack 4 && local stack="${LAST_RETURNED_VALUE}"
 
-  local message="The program has exit during a test with code ${rc}."$'\n'
-  io::readFile "${_TEST_STANDARD_ERROR_FILE}"
-  message+="Current test error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"$'\n'
+  local message="The program has exit during a test with code ${rc}, stack:${stack}"$'\n'
+  if [[ -s "${_TEST_REPORT_FILE}" ]]; then
+    io::readFile "${_TEST_REPORT_FILE}"
+    message+="Current test report:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"$'\n'
+  else
+    message+="No test report yet for the current test."$'\n'
+  fi
+  if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
+    io::readFile "${_TEST_STANDARD_OUTPUT_FILE}"
+    message+="Current test standard output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"$'\n'
+  else
+    message+="No standard output for the current test."$'\n'
+  fi
+  if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
+    io::readFile "${_TEST_STANDARD_ERROR_FILE}"
+    message+="Current test error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"$'\n'
+  else
+    message+="No error output for the current test."$'\n'
+  fi
   message+="If you expect the tested function/program to exit/fail, then run it in a subshell like that:"$'\n'"(myFunctionThatFails)"
 
   log::error "${message}"

@@ -159,6 +159,8 @@ function fsfsInitialize() {
     FSFS_COLOR_SELECTED_ITEM_RESET="${VALET_COLOR_FSFS_SELECTED_ITEM_RESET:-"${AC__BG_RESET}"}"
     FSFS_COLOR_PROMPT_STRING="${VALET_COLOR_FSFS_PROMPT_STRING:-"${AC__FG_CYAN}${AC__TEXT_BOLD}"}"
     FSFS_COLOR_PROMPT_STRING_RESET="${VALET_COLOR_FSFS_PROMPT_STRING_RESET:-"${AC__TEXT_RESET}"}"
+    FSFS_COLOR_COUNT="${VALET_COLOR_FSFS_COUNT:-"${AC__FG_YELLOW}"}"
+    FSFS_COLOR_COUNT_RESET="${VALET_COLOR_FSFS_COUNT_RESET:-"${AC__TEXT_RESET}"}"
   else
     FSFS_COLOR_RESET_TEXT=""
     FSFS_COLOR_STATIC=""
@@ -170,6 +172,8 @@ function fsfsInitialize() {
     FSFS_COLOR_SELECTED_ITEM_RESET=""
     FSFS_COLOR_PROMPT_STRING=""
     FSFS_COLOR_PROMPT_STRING_RESET=""
+    FSFS_COLOR_COUNT=""
+    FSFS_COLOR_COUNT_RESET=""
   fi
 }
 
@@ -317,6 +321,10 @@ function drawLeftPane() {
     initialOriginalIndex=-1
   fi
 
+  # make sure to select an existing index regarding the newly filtered items +
+  # make sure it is in the view
+  changeSelectedItemIndex 0
+
   # if we are not pointing to the same original item, we need to
   # recompute the right pane content
   getCurrentInitialItemsIndex
@@ -325,16 +333,13 @@ function drawLeftPane() {
     FSFS_RECOMPUTE_RIGHT_PANE_CONTENT=${FSFS_HAS_PREVIEW}
   fi
 
-  # make sure to select an existing index regarding the newly filtered items +
-  # make sure it is in the view
-  changeSelectedItemIndex 0
-
   # draw the items count
   if ((${#FSFS_FILTERED_ITEMS[@]} != initialNbFilteredItems)); then
     local itemCount="${#FSFS_ORIGINAL_ITEMS[@]}"
     local itemsCounter
-    printf -v itemsCounter " %0${#itemCount}i/%i " "${#FSFS_FILTERED_ITEMS[@]}" "${#FSFS_ORIGINAL_ITEMS[@]}"
-    toPrint+="${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE + 1));$((FSFS_LEFT_PANE_WIDTH - ${#itemsCounter}))${__AC__TO}${FSFS_COLOR_STATIC}${itemsCounter}${FSFS_COLOR_RESET_TEXT}"
+    printf -v itemsCounter " %s%0${#itemCount}i%s/%i%s " "${FSFS_COLOR_COUNT}" "${#FSFS_FILTERED_ITEMS[@]}" "${FSFS_COLOR_COUNT_RESET}${FSFS_COLOR_STATIC}" "${#FSFS_ORIGINAL_ITEMS[@]}" "${FSFS_COLOR_RESET_TEXT}"
+    local itemCounterLength=$((3 + ${#itemCount} * 2))
+    toPrint+="${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE + 1));$((FSFS_LEFT_PANE_WIDTH - itemCounterLength))${__AC__TO}${itemsCounter}"
   fi
 
   # draw the items
@@ -416,15 +421,18 @@ function drawRightPane() {
 
   # display the page counter
   local itemsCounter
+  local itemsCounterLength
   if ((contentLength > 0)); then
     local itemCount="${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]}"
-    printf -v itemsCounter " %0${#itemCount}i/%i " "${FSFS_RIGHT_PANE_START_INDEX}" "${itemCount}"
+    printf -v itemsCounter " %s%0${#itemCount}i%s/%i%s " "${FSFS_COLOR_COUNT}" "${FSFS_RIGHT_PANE_START_INDEX}" "${FSFS_COLOR_COUNT_RESET}${FSFS_COLOR_STATIC}" "${itemCount}" "${FSFS_COLOR_RESET_TEXT}"
+    itemsCounterLength=$((3 + ${#itemCount} * 2))
   else
     itemsCounter="─────────"
+    itemsCounterLength=9
   fi
-  local -i repeat=$((9 - ${#itemsCounter}))
+  local -i repeat=$((9 - itemsCounterLength))
   repeat=$((repeat > 0 ? repeat : 0))
-  toPrint+="${AC__CURSOR_MOVE__}${FSFS_RIGHT_PANE_FIRST_LINE};$((GLOBAL_COLUMNS - 9 - 2))${__AC__TO}${FSFS_COLOR_STATIC}─${AC__REPEAT__}${repeat}${__AC__LAST_CHAR}${itemsCounter}${FSFS_COLOR_RESET_TEXT}"
+  toPrint+="${AC__CURSOR_MOVE__}${FSFS_RIGHT_PANE_FIRST_LINE};$((GLOBAL_COLUMNS - 9 - 2))${__AC__TO}${FSFS_COLOR_STATIC}─${AC__REPEAT__}${repeat}${__AC__LAST_CHAR}${itemsCounter}"
 
   # draw the lines
   local -i index line=${FSFS_RIGHT_PANE_FIRST_CONTENT_LINE}
@@ -440,9 +448,9 @@ function drawRightPane() {
     toPrint+="${AC__CURSOR_MOVE__}${line};$((FSFS_LEFT_PANE_WIDTH + 2))${__AC__TO}${AC__ERASE_CHARS_RIGHT}"
   done
 
-  # if there is no content, display a loading... message on the center of the right pane
+  # if there is no content, display a "Nothing to show" message on the center of the right pane
   if ((contentLength == 0)); then
-    local loadingMessage="Loading…"
+    local loadingMessage="Nothing to show…"
     toPrint+="${AC__CURSOR_MOVE__}$((FSFS_RIGHT_PANE_FIRST_CONTENT_LINE + FSFS_RIGHT_PANE_LINES / 2));$((FSFS_LEFT_PANE_WIDTH + 2 + FSFS_RIGHT_PANE_WIDTH / 2 - ${#loadingMessage} / 2))${__AC__TO}${loadingMessage}"
   fi
 
