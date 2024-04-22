@@ -7,35 +7,35 @@ set -Eeu -o pipefail
 # Allows to get the nth element of a string separated by a given separator.
 # This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
 # but it uses pure bash to go faster.
+#
 # $1: the string to cut
-# $2: the field number to get (starting at 1)
+# $2: the field number to get (starting at 0)
 # $3: the separator (default to tab if not provided)
 #
 # Usage:
-#  string::cutField "field1 field2 field3" 2 " " && local field2="${LAST_RETURNED_VALUE}"
+#  string::cutField "field1 field2 field3" 1 " " && local field="${LAST_RETURNED_VALUE}"
+#  echo "${field}" # will output "field2"
 #
 # Notes:
-#  To be fast, it does not check the number of fields in the string.
-#  If the field number is higher than the number of fields, it will return the last field, not an empty string.
+#  This is faster than:
+#  - using read into an array from a here string
+#  - using bash parameter expansion to remove before/after the separator
 function string::cutField() {
   local str fieldNumber separator
   str="${1}"
   fieldNumber="${2}"
   separator="${3:-$'\t'}"
 
-  # TODO: try to refactor using find index of separator and another using IFS
-
-  local index
-
-  # remove the first field n - 1 times
-  for((index=0; index < (fieldNumber - 1); index++)); do
-    str="${str#*"${separator}"}"
+  local field IFS="${separator}"
+  local -i index=0
+  for field in ${str}; do
+    if [[ index -eq fieldNumber ]]; then
+      LAST_RETURNED_VALUE="${field}"
+      return 0
+    fi
+    index=$((index + 1))
   done
-
-  # remove everything after the first field
-  str="${str%%"${separator}"*}"
-
-  LAST_RETURNED_VALUE="${str}"
+  LAST_RETURNED_VALUE=""
 }
 
 # This function allows to bump a semantic version formatted like:
@@ -64,11 +64,11 @@ function string::bumpSemanticVersion() {
 
   # bump the version
   local -i level semVerNumber semVerIndex
-  level=3
-  if [[ ${bumpLevel:-} == "major" ]]; then level=1; fi
-  if [[ ${bumpLevel:-} == "minor" ]]; then level=2; fi
+  level=2
+  if [[ ${bumpLevel:-} == "major" ]]; then level=0; fi
+  if [[ ${bumpLevel:-} == "minor" ]]; then level=1; fi
   local newVersion semVerString
-  for semVerIndex in {1..3}; do
+  for semVerIndex in {0..2}; do
     string::cutField "${version}" "${semVerIndex}" "." && semVerString="${LAST_RETURNED_VALUE%-*}"
     semVerNumber="${semVerString%+}"
     if [[ semVerIndex -eq level ]]; then semVerNumber=$((semVerNumber + 1)); fi

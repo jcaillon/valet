@@ -101,12 +101,12 @@ field2
 field3
 
 → string::cutField "field1 field2 field3" 4 " "
-field3
+
 
 → string::cutField "line1 hm I wonder
 line2 does it work on lines?
 line3 seems so" 2 $'\n'
-line2 does it work on lines?
+line3 seems so
 ```
 
 ### Testing string::indexOf function

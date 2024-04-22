@@ -85,19 +85,19 @@ function testString::trimAll() {
 
 function testString::cutField() {
   echo "→ string::cutField \"field1 field2 field3\" 1 \" \""
-  string::cutField "field1 field2 field3" 1 " " && echo "${LAST_RETURNED_VALUE}"
+  string::cutField "field1 field2 field3" 0 " " && echo "${LAST_RETURNED_VALUE}"
   echo
 
   echo "→ string::cutField \"field1 field2 field3\" 2 \" \""
-  string::cutField "field1 field2 field3" 2 " " && echo "${LAST_RETURNED_VALUE}"
+  string::cutField "field1 field2 field3" 1 " " && echo "${LAST_RETURNED_VALUE}"
   echo
 
   echo "→ string::cutField \"field1 field2 field3\" 3 \" \""
-  string::cutField "field1 field2 field3" 3 " " && echo "${LAST_RETURNED_VALUE}"
+  string::cutField "field1 field2 field3" 2 " " && echo "${LAST_RETURNED_VALUE}"
   echo
 
   echo "→ string::cutField \"field1 field2 field3\" 4 \" \""
-  string::cutField "field1 field2 field3" 4 " " && echo "${LAST_RETURNED_VALUE}"
+  string::cutField "field1 field2 field3" 3 " " && echo "${LAST_RETURNED_VALUE}"
   echo
 
   echo "→ string::cutField \"line1 hm I wonder
