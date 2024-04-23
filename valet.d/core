@@ -278,7 +278,7 @@ function log::createPrintFunction() {
   printfArguments+='"${LAST_RETURNED_VALUE}"'
 
   GLOBAL_LOG_PRINT_FUNCTION+='
-    printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&2
+    printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_LOG_FD:-2}"'
   }'
 }
 log::createPrintFunction
@@ -898,6 +898,14 @@ if [[ -n "${VALET_LOG_LEVEL:-}" ]]; then
 fi
 if [[ ${VALET_VERBOSE=:-} == "true" ]]; then
   log::setLevel "debug"
+fi
+if [[ -n "${VALET_LOG_FD:-}" ]]; then
+  # make sure the file descriptor is valid
+  if ! { : >&"${VALET_LOG_FD}"; } 2>/dev/null; then
+    _ORIGINAL_FD="${VALET_LOG_FD}"
+    VALET_LOG_FD=2
+    core::fail "The file descriptor VALET_LOG_FD=⌜${_ORIGINAL_FD}⌝ is not valid."
+  fi
 fi
 
 # Include main if not already included
