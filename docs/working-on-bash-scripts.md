@@ -112,6 +112,8 @@ IFS='' read -r -d '' myString < file
 echo "${myString}"
 ```
 
+> With this technique, the last line of the file is always read, even if it does not have a trailing newline.
+
 ### Read a file, line by line
 
 This example is for the newline (`$'\n'`) delimiter which is the default delimiter of read, but you can specify any delimiter with `IFS=''` + the `-d ''` option.
@@ -119,10 +121,12 @@ This example is for the newline (`$'\n'`) delimiter which is the default delimit
 Do:
 
 ```bash
-while read -r myString; do
+while read -r myString || [[ -n ${myString:-} ]]; do
   echo "${myString}"
 done < file
 ```
+
+> Note the `|| [[ -n ${myString:-} ]]` which allows to read the last line even if the file does not have a trailing newline.
 
 Or read into an array and then loop through it:
 

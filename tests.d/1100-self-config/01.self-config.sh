@@ -18,7 +18,7 @@ function testSelfConfig() {
   selfConfig && exitCode=0 || exitCode=$?
   echo
   echo "cat \${configFile}"
-  io::readFile "${configFile}" && echo "${LAST_RETURNED_VALUE}"
+  io::cat "${configFile}"
   endTest "Testing selfConfig" ${exitCode}
 
   echo "→ selfConfig"
@@ -40,7 +40,7 @@ function testSelfConfig() {
   ) && exitCode=0 || exitCode=$?
   echo
   echo "cat \${configFile}"
-  io::readFile "${configFile}" && echo "${LAST_RETURNED_VALUE}"
+  io::cat "${configFile}"
   endTest "Testing selfConfig override export" ${exitCode}
 
   VALET_CONFIG_FILE="${originalConfigFile}"

@@ -203,10 +203,12 @@ function summarize() {
 
 # Bump the valet build version by one patch.
 function bumpValetBuildVersion() {
-  local versionFile currentVersion
+  local versionFile
   versionFile="${GLOBAL_VALET_HOME}/valet.d/version"
 
-  IFS= read -rd '' currentVersion <"${versionFile}" || :
+  io::readFile "${versionFile}"
+  local currentVersion="${LAST_RETURNED_VALUE:-0.0.0}"
+  currentVersion="${currentVersion%%$'\n'*}"
 
   string::bumpSemanticVersion "${currentVersion}" "patch" "false"
 

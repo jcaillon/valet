@@ -104,8 +104,8 @@ function createRelease() {
   fi
 
   # read the version from the valet file
-  local version
-  IFS= read -rd '' version <"${GLOBAL_VALET_HOME}/valet.d/version" || :
+  io::readFile "${GLOBAL_VALET_HOME}/valet.d/version"
+  local version="${LAST_RETURNED_VALUE}"
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."
 

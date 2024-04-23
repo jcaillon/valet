@@ -273,7 +273,7 @@ function io::readFile() {
     return 0
   fi
 
-  local IFS=
+  local IFS=''
   if [[ "${maxCharacters}" -gt 0 ]]; then
     read -rd '' -n "${maxCharacters}" LAST_RETURNED_VALUE <"${filePath}" || true
   else
@@ -376,5 +376,5 @@ function io::sleep() {
 #   io::cat "myFile"
 function io::cat() {
   io::readFile "${1}"
-  printf "%s" "${LAST_RETURNED_VALUE}"
+  echo "${LAST_RETURNED_VALUE}"
 }
