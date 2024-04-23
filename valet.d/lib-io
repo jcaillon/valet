@@ -366,3 +366,15 @@ function io::sleep() {
     sleep "${timeout}"
   fi
 }
+
+# Print the content of a file to stdout.
+# This is a pure bash equivalent of cat.
+#
+# $1: the file to print
+#
+# Usage:
+#   io::cat "myFile"
+function io::cat() {
+  io::readFile "${1}"
+  printf "%s" "${LAST_RETURNED_VALUE}"
+}

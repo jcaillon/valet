@@ -10,16 +10,16 @@ set -Eeu -o pipefail
 _CMD_INCLUDED=1
 
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
-  NOT_EXECUTED_FROM_VALET=true
+  _NOT_EXECUTED_FROM_VALET=true
 
-  VALETD_DIR="${BASH_SOURCE[0]}"
-  if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then VALETD_DIR="${PWD}"; popd &>/dev/null || :;
-    else VALETD_DIR="${PWD}"; fi
-  else VALETD_DIR="${VALETD_DIR%/*}"; fi
+  _VALETD_DIR="${BASH_SOURCE[0]}"
+  if [[ "${_VALETD_DIR}" != /* ]]; then
+    if pushd "${_VALETD_DIR%/*}" &>/dev/null; then _VALETD_DIR="${PWD}"; popd &>/dev/null || :;
+    else _VALETD_DIR="${PWD}"; fi
+  else _VALETD_DIR="${_VALETD_DIR%/*}"; fi
 
   # shellcheck source=../core
-  source "${VALETD_DIR%/*}/core"
+  source "${_VALETD_DIR%/*}/core"
 fi
 # --- END OF COMMAND COMMON PART
 
@@ -600,6 +600,6 @@ function verifyCommandDefinition() {
 #===============================================================
 
 # if this script is run directly, execute the function, otherwise valet will do it
-if [[ ${NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
+if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
   selfBuild "$@"
 fi

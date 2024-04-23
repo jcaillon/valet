@@ -192,7 +192,7 @@ ABOUT
   
   ⌜Developer notes:⌝
   
-  You can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/profile_valet.txt).
+  You can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/valet-profiler-{PID}.txt).
 
 USAGE
 
@@ -202,7 +202,7 @@ OPTIONS
 
   -x, --profiling
       Turn on profiling (with debug mode) before running the required command.
-      It will output to ~/profile_valet_cmd.txt.
+      It will output to ~/valet-profiler-{PID}-command.txt.
       This is useful to debug your command and understand what takes a long time to execute.
       The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable 
       VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.

@@ -75,12 +75,21 @@ function testIo::sleep() {
   endTest "Testing io::sleep" 0
 }
 
+function testIo::cat() {
+
+  echo "→ io::cat 'resources/file-to-read'"
+  io::cat 'resources/file-to-read'
+
+  endTest "Testing io::cat" 0
+}
+
 function main() {
   testIo::toAbsolutePath
   testIo::captureOutput
   testIo::readFile
   testIo::createFilePathIfNeeded
   testIo::sleep
+  testIo::cat
 }
 
 main

@@ -52,20 +52,20 @@ fi
 
 # import the core script (should always be skipped if the command is run from valet)
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
-  NOT_EXECUTED_FROM_VALET=true
+  _NOT_EXECUTED_FROM_VALET=true
 
-  VALETD_DIR="${BASH_SOURCE[0]}"
-  if [[ "${VALETD_DIR}" != /* ]]; then
-    if pushd "${VALETD_DIR%/*}" &>/dev/null; then
-      VALETD_DIR="${PWD}"
+  _VALETD_DIR="${BASH_SOURCE[0]}"
+  if [[ "${_VALETD_DIR}" != /* ]]; then
+    if pushd "${_VALETD_DIR%/*}" &>/dev/null; then
+      _VALETD_DIR="${PWD}"
       popd &>/dev/null || :
-    else VALETD_DIR="${PWD}"; fi
-  else VALETD_DIR="${VALETD_DIR%/*}"; fi
-  VALETD_DIR="${VALETD_DIR%/*}" # strip directory
+    else _VALETD_DIR="${PWD}"; fi
+  else _VALETD_DIR="${_VALETD_DIR%/*}"; fi
+  _VALETD_DIR="${_VALETD_DIR%/*}" # strip directory
 
-  if [[ -f "${VALETD_DIR}/core" ]]; then
+  if [[ -f "${_VALETD_DIR}/core" ]]; then
     # shellcheck source=../core
-    source "${VALETD_DIR}/core"
+    source "${_VALETD_DIR}/core"
   else
     set -Eeu -o pipefail
 
@@ -148,7 +148,7 @@ function selfUpdate() {
 
   # download the release and unpack it
   local releaseUrl="https://github.com/jcaillon/valet/releases/download/v${VALET_VERSION}/valet.tar.gz"
-  if [[ ${NOT_EXECUTED_FROM_VALET} != "true" ]]; then
+  if [[ ${_NOT_EXECUTED_FROM_VALET} != "true" ]]; then
     VALET_VERSION="latest"
     releaseUrl="https://github.com/jcaillon/valet/releases/latest/download/valet.tar.gz"
   fi
@@ -227,6 +227,6 @@ function selfUpdate() {
 }
 
 # if this script is run directly, execute the function, otherwise valet will do it
-if [[ ${NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
+if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
   selfUpdate "$@"
 fi
