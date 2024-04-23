@@ -97,6 +97,24 @@ function writeConfigFile() {
 # You can delete it and run the 'valet self config' command to recreate it.
 
 # -----------
+# Custom startup script
+# -----------
+# You can define a custom startup script that will be sourced by Valet on startup.*
+# This allows you to define custom functions or variables that will be available in Valet.
+# The script should be named 'startup' and be in the same directory as this file.
+_CONFIG_DIR=\"\${BASH_SOURCE[0]}\"
+if [[ \"\${_CONFIG_DIR}\" != /* ]]; then
+  # resolve relative path
+  if pushd \"\${_CONFIG_DIR%/*}\" &>/dev/null; then _CONFIG_DIR=\"\${PWD}\"; popd &>/dev/null;
+  else _CONFIG_DIR=\"\${PWD}\"; fi
+else
+  _CONFIG_DIR=\"\${_CONFIG_DIR%/*}\" # strip filename
+fi
+if [[ -f \"\${_CONFIG_DIR}/startup\" ]]; then
+  source \"\${_CONFIG_DIR}/startup\"
+fi
+
+# -----------
 # General config
 # -----------
 # The path to this Valet config file: MUST BE declared outside this file!
