@@ -4,10 +4,10 @@ builtin source ".before-test"
 
 function testMainOptions() {
   # testing version option
-  : > "${_TEST_TEMP_FILE}"
+  : > "${GLOBAL_TEST_TEMP_FILE}"
   echo "→ valet --version"
-  ("${GLOBAL_VALET_HOME}/valet" --version 1> "${_TEST_TEMP_FILE}")
-  if [[ -s "${_TEST_TEMP_FILE}" ]]; then
+  ("${GLOBAL_VALET_HOME}/valet" --version 1> "${GLOBAL_TEST_TEMP_FILE}")
+  if [[ -s "${GLOBAL_TEST_TEMP_FILE}" ]]; then
     echo "OK, we got a version."
   else
     echo "KO, we did not get a version."

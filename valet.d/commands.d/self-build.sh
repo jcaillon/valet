@@ -326,7 +326,7 @@ function declareFinalCommandDefinitionCommonVariables() {
   parentCommand="${parentCommand# }"
   if [[ -n "${parentCommand}" ]]; then
     if ! array::appendIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY "${parentCommand# }"; then
-      declare -g "CMD_FUNCTION_NAME_${parentCommand//[-[:space:]]/_}"="_menu"
+      declare -g "CMD_FUNCTION_NAME_${parentCommand//[^[:alnum:]]/_}"="_menu"
     fi
   fi
 
@@ -337,7 +337,7 @@ function declareFinalCommandDefinitionCommonVariables() {
   fi
 
   # get the function name from a command
-  declare -g "CMD_FUNCTION_NAME_${command//[-[:space:]]/_}"="${function}"
+  declare -g "CMD_FUNCTION_NAME_${command//[^[:alnum:]]/_}"="${function}"
 
   # declare basic properties
   declare -g "CMD_COMMAND_${function}"="${command}"
@@ -488,7 +488,7 @@ function declareOtherCommmandVariables() {
     if [[ -z "${command}" ]]; then continue; fi
 
     # get the function name from a command
-    local -n function="CMD_FUNCTION_NAME_${command//[-[:space:]]/_}"
+    local -n function="CMD_FUNCTION_NAME_${command//[^[:alnum:]]/_}"
     local -n shortDescription="CMD_SHORT_DESCRIPTION_${function}"
     local -n hideInMenu="CMD_HIDEINMENU_${function}"
 

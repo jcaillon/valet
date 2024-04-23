@@ -29,7 +29,7 @@ io::createTempDirectory
 export TEST_VALET_CONFIG_LOCAL_STATE_DIRECTORY="${LAST_RETURNED_VALUE}"
 
 function echoTempFileWithTimeStampSubstitution() {
-  local file="${_TEST_TEMP_FILE}"
+  local file="${GLOBAL_TEST_TEMP_FILE}"
   local line
   local IFS=$'\n'
   while read -rd $'\n' line; do

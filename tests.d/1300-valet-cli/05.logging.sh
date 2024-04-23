@@ -22,25 +22,25 @@ function testLogging() {
 
   echo "→ valet self mock1 logging-level"
   resetLogOptions
-  ("${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${_TEST_TEMP_FILE}")
+  ("${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${GLOBAL_TEST_TEMP_FILE}")
   echoTempFileWithTimeStampSubstitution 1>&2
   endTest "Testing default logging" 0
 
   echo "→ VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true valet self mock1 logging-level"
   resetLogOptions
-  (VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${_TEST_TEMP_FILE}")
+  (VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${GLOBAL_TEST_TEMP_FILE}")
   echoTempFileWithTimeStampSubstitution 1>&2
   endTest "Testing color + icon logging" 0
 
   echo "→ VALET_CONFIG_DISABLE_LOG_WRAP=true VALET_CONFIG_DISABLE_LOG_TIME=true valet self mock1 logging-level"
   resetLogOptions
-  (VALET_CONFIG_DISABLE_LOG_WRAP=true VALET_CONFIG_DISABLE_LOG_TIME=true "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${_TEST_TEMP_FILE}")
+  (VALET_CONFIG_DISABLE_LOG_WRAP=true VALET_CONFIG_DISABLE_LOG_TIME=true "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${GLOBAL_TEST_TEMP_FILE}")
   echoTempFileWithTimeStampSubstitution 1>&2
   endTest "Testing no timestamp, no wrap logging" 0
 
   echo "→ VALET_CONFIG_ENABLE_LOG_TIMESTAMP= true VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 logging-level"
   resetLogOptions
-  (VALET_CONFIG_ENABLE_LOG_TIMESTAMP=true VALET_CONFIG_LOG_COLUMNS=80 "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${_TEST_TEMP_FILE}")
+  (VALET_CONFIG_ENABLE_LOG_TIMESTAMP=true VALET_CONFIG_LOG_COLUMNS=80 "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level 2> "${GLOBAL_TEST_TEMP_FILE}")
   echoTempFileWithTimeStampSubstitution 1>&2
   endTest "Testing enable log timestamp and wrap at 80 logging" 0
 }

@@ -101,6 +101,8 @@ function writeConfigFile() {
 # -----------
 # You can define a custom startup script that will be sourced by Valet on startup.*
 # This allows you to define custom functions or variables that will be available in Valet.
+# For example, it is convenient to translate CI_* variables to VALET_* variables.
+#
 # The script should be named 'startup' and be in the same directory as this file.
 _CONFIG_DIR=\"\${BASH_SOURCE[0]}\"
 if [[ \"\${_CONFIG_DIR}\" != /* ]]; then
@@ -182,7 +184,7 @@ VALET_CONFIG_ICON_KILLED=\"\${VALET_CONFIG_ICON_KILLED:-${EXPORTED_VALET_CONFIG_
 # Profiler configuration
 # -----------
 # The path to the file in which to write the profiling information for the command.
-# Defaults to the ~/profile_valet_cmd.txt file.
+# Defaults to the ~/valet-profiler-{PID}-command.txt file.
 VALET_CONFIG_COMMAND_PROFILING_FILE=\"\${VALET_CONFIG_COMMAND_PROFILING_FILE:-${EXPORTED_VALET_CONFIG_COMMAND_PROFILING_FILE:-}}\"
 
 # The profiler log will be cleanup to only keep lines relevant for your command script
@@ -195,7 +197,7 @@ VALET_CONFIG_KEEP_ALL_PROFILER_LINES=\"\${VALET_CONFIG_KEEP_ALL_PROFILER_LINES:-
 VALET_CONFIG_STARTUP_PROFILING=\"\${VALET_CONFIG_STARTUP_PROFILING:-${EXPORTED_VALET_CONFIG_STARTUP_PROFILING:-}}\"
 
 # The path to the file in which to write the profiling information for the startup of Valet.
-# Defaults to the ~/profile_valet.txt file.
+# Defaults to the ~/valet-profiler-{PID}.txt file.
 VALET_CONFIG_STARTUP_PROFILING_FILE=\"\${VALET_CONFIG_STARTUP_PROFILING_FILE:-${EXPORTED_VALET_CONFIG_STARTUP_PROFILING_FILE:-}}\"
 
 # -----------

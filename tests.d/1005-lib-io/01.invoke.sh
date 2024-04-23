@@ -53,8 +53,8 @@ function testIo::invoke() {
   local -i exitCode
 
   echo "→ io::invoke fakeexec --error"
-  (io::invoke fakeexec --error 2> "${_TEST_TEMP_FILE}") && exitCode=0 || exitCode=$?
-  echoFileWithLineNumberSubstitution "${_TEST_TEMP_FILE}" 1>&2
+  (io::invoke fakeexec --error 2> "${GLOBAL_TEST_TEMP_FILE}") && exitCode=0 || exitCode=$?
+  echoFileWithLineNumberSubstitution "${GLOBAL_TEST_TEMP_FILE}" 1>&2
   endTest "Testing io::invoke, should fail" ${exitCode}
 
   echo "→ io::invoke fakeexec --option argument1 argument2"

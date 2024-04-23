@@ -107,7 +107,7 @@ talk about after-each-test-suite, before-tests hooks
 Your command function is not working as expected or seems stuck ? Two ways to approach this problem:
 
 - Run your valet command in the bash debugger on visual studio.
-- Or use the `valet -x` option to enable the profiler (this turns the debug mode on `set -x`). This will output the complete trace in `~/profile_valet_cmd.txt` (or you can choose the destination with the environment variable `VALET_CONFIG_COMMAND_PROFILING_FILE`). You can see what the profiling file looks like in this [test report](../tests.d/1301-profiler/results.approved.md).
+- Or use the `valet -x` option to enable the profiler (this turns the debug mode on `set -x`). This will output the complete trace in `~/valet-profiler-{PID}.txt` (or you can choose the destination with the environment variable `VALET_CONFIG_COMMAND_PROFILING_FILE`). You can see what the profiling file looks like in this [test report](../tests.d/1301-profiler/results.approved.md).
 
 Of course, a simpler strategy is to log stuff with `debug` (you can also do `if log::isDebugEnabled; then log::debug "stuff"; fi` to avoid computing a string value for debug).
 

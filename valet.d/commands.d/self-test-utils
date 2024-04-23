@@ -163,6 +163,11 @@ function rebuildCommands() {
 function runTestSuites() {
   local testSuiteDirectory="${1}"
 
+  io::createTempFile && _TEST_STANDARD_OUTPUT_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && _TEST_STANDARD_ERROR_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && _TEST_REPORT_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && _TEST_TEMP_FILE="${LAST_RETURNED_VALUE}"
+
   # save the original important variables so we can restore them after the test suite
   log::getLevel
   ORIGINAL_GLOBAL_LOG_LEVEL="${LAST_RETURNED_VALUE}"
@@ -170,11 +175,6 @@ function runTestSuites() {
   setOriginalImportantVariables
   setSimplifiedImportantVariables
   resetOriginalImportantVariables
-
-  io::createTempFile && _TEST_STANDARD_OUTPUT_FILE="${LAST_RETURNED_VALUE}"
-  io::createTempFile && _TEST_STANDARD_ERROR_FILE="${LAST_RETURNED_VALUE}"
-  io::createTempFile && _TEST_REPORT_FILE="${LAST_RETURNED_VALUE}"
-  io::createTempFile && _TEST_TEMP_FILE="${LAST_RETURNED_VALUE}"
 
   local -i failedTestSuites nbTestSuites
   failedTestSuites=0
@@ -351,19 +351,19 @@ function onExitTestInternal() {
   local message="The program has exit during a test with code ${rc}, stack:${stack}"$'\n'
   if [[ -s "${_TEST_REPORT_FILE}" ]]; then
     io::readFile "${_TEST_REPORT_FILE}"
-    message+="Current test report:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"$'\n'
+    message+="⌜Current test report:⌝"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
   else
     message+="No test report yet for the current test."$'\n'
   fi
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
     io::readFile "${_TEST_STANDARD_OUTPUT_FILE}"
-    message+="Current test standard output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"$'\n'
+    message+="⌜Current test standard output:⌝"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
   else
     message+="No standard output for the current test."$'\n'
   fi
   if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
     io::readFile "${_TEST_STANDARD_ERROR_FILE}"
-    message+="Current test error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"$'\n'
+    message+="⌜Current test error output:⌝"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
   else
     message+="No error output for the current test."$'\n'
   fi
@@ -451,6 +451,8 @@ function setSimplifiedImportantVariables() {
   export VALET_CONFIG_COLOR_UNACTIVE_BUTTON=CUB
 
   export GLOBAL_COLUMNS=9999
+
+  export GLOBAL_TEST_TEMP_FILE=\"${_TEST_TEMP_FILE}\"
   "
   eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
   log::createPrintFunction
@@ -468,8 +470,8 @@ function setSimplifiedImportantVariables() {
 # This allows to have consistent results accross different execution environments for the tests.
 #
 # Usage:
-#   myCommandThatProducesLinesWithValetDirectoryPath 2> "${_TEST_TEMP_FILE}"
-#   echoFileSubstitutingPath "${_TEST_TEMP_FILE}" 1>&2
+#   myCommandThatProducesLinesWithValetDirectoryPath 2> "${GLOBAL_TEST_TEMP_FILE}"
+#   echoFileSubstitutingPath "${GLOBAL_TEST_TEMP_FILE}" 1>&2
 function echoFileSubstitutingPath() {
   local file="${1}"
   local line

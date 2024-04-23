@@ -121,10 +121,11 @@ function command_not_found_handle() {
 # >>> Profiler
 #===============================================================
 # Enables the profiler and start writing to the given file.
-# $1: the file to write to
+#
+# $1: the file to write to.
 #
 # Usage:
-#   main::enableProfiler "${HOME}/profile_valet.txt"
+#   main::enableProfiler "${HOME}/valet-profiler-${BASHPID}.txt"
 function main::enableProfiler() {
   local file
   file="${1}"
@@ -259,7 +260,7 @@ function main::cleanProfilerFile() {
 }
 
 if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
-  main::enableProfiler "${VALET_CONFIG_STARTUP_PROFILING_FILE:-${HOME}/profile_valet.txt}"
+  main::enableProfiler "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}.txt"}"
 fi
 
 #===============================================================
@@ -590,7 +591,7 @@ function main::runFunction() {
     main::disableProfiler
   fi
   if [[ ${PROFIL_COMMAND:-} == "true" ]]; then
-    main::enableProfiler "${VALET_CONFIG_COMMAND_PROFILING_FILE:-${HOME}/profile_valet_cmd.txt}"
+    main::enableProfiler "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}-command.txt"}"
   fi
 
   # execute the function
@@ -660,7 +661,7 @@ function main::runMenuWithSubCommands() {
     core::fail "No sub commands found for ⌜${command}⌝."
   fi
 
-  main::showCommandsMenuAndRun "${command//[-[:space:]]/_}" FILTERED_COMMANDS_FOR_SUB_MENU
+  main::showCommandsMenuAndRun "${command//[^[:alnum:]]/_}" FILTERED_COMMANDS_FOR_SUB_MENU
 }
 
 # Show the given commands in an interactive menu and then
@@ -863,7 +864,7 @@ function main::onFsfsItemSelectionChange() {
 # Usage:
 #  main::getFunctionNameFromCommand "self build" && echo "${LAST_RETURNED_VALUE}"
 function main::getFunctionNameFromCommand() {
-  local -n functionName="CMD_FUNCTION_NAME_${1//[-[:space:]]/_}"
+  local -n functionName="CMD_FUNCTION_NAME_${1//[^[:alnum:]]/_}"
   LAST_RETURNED_VALUE="${functionName:-}"
 }
 
