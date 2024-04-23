@@ -161,7 +161,7 @@ function rebuildCommands() {
 # Usage:
 #   runTestSuites "${GLOBAL_VALET_HOME}/tests.d"
 function runTestSuites() {
-  local testsDirectory="${1}"
+  local testSuiteDirectory="${1}"
 
   # save the original important variables so we can restore them after the test suite
   log::getLevel
@@ -180,9 +180,12 @@ function runTestSuites() {
   failedTestSuites=0
   nbTestSuites=0
 
+  # run a custom user script before the tests if it exists
+  runHookScript "${testSuiteDirectory}/before-tests"
+
   # for each test file in the test directory
   local testDirectory exitCode testDirectoryName testScript
-  for testDirectory in "${testsDirectory}/"*; do
+  for testDirectory in "${testSuiteDirectory}/"*; do
     testDirectoryName="${testDirectory##*/}"
 
     # skip if not a directory
@@ -200,6 +203,9 @@ function runTestSuites() {
     fi
 
     log::info "Running test suite ⌜${testDirectory##*/}⌝."
+
+    # run a custom user script before the test suite if it exists
+    runHookScript "${testSuiteDirectory}/before-each-test-suite"
 
     # write the test suite title
     printf "%s\n\n" "# Test suite ${testDirectory##*/}" >"${_TEST_REPORT_FILE}"
@@ -224,10 +230,29 @@ function runTestSuites() {
       log::error "Test suite ${testDirectory##*/} failed."
       failedTestSuites+=1
     fi
+
+    # run a custom user script after the test suite if it exists
+    runHookScript "${testSuiteDirectory}/after-each-test-suite"
+
   done
+
+  # run a custom user script after the tests if it exists
+  runHookScript "${testSuiteDirectory}/after-tests"
 
   NB_TEST_SUITES=$((NB_TEST_SUITES + nbTestSuites))
   NB_FAILED_TEST_SUITES=$((NB_FAILED_TEST_SUITES + failedTestSuites))
+}
+
+function runHookScript() {
+  # run a custom script if it exists
+  if [[ -f "${1}" ]]; then
+    log::info "Running (source) ${1##*/} script."
+    # shellcheck disable=SC1091
+    # shellcheck disable=SC1090
+    source "${1}"
+  else
+    log::debug "No script found for ${1##*/}."
+  fi
 }
 
 function runTest() {

@@ -100,6 +100,8 @@ TODO
 
 You can exclude or include test suite using `-i` and `-e` options on `self test`.
 
+talk about after-each-test-suite, before-tests hooks
+
 ### How to debug your program
 
 Your command function is not working as expected or seems stuck ? Two ways to approach this problem:

@@ -9,6 +9,7 @@ set -Eeu -o pipefail
 # Reference:
 # - https://en.wikipedia.org/wiki/ANSI_escape_code
 # - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+# - https://paulbourke.net/dataformats/ascii/
 # - https://www.aivosto.com/articles/control-characters.html
 # - https://github.com/tmux/tmux/blob/master/tools/ansicode.txt
 # - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
@@ -132,7 +133,13 @@ AC__ERASE_CHARS_RIGHT=$'\e[0K' # clear from cursor to the end of the line
 AC__ERASE_CHARS_LEFT=$'\e[1K'  # clear from cursor to the beginning of the line
 AC__ERASE_LINE=$'\e[2K'       # clear entire line
 
+# Erase a set number of characters
+AC__ERASE__=$'\e['
+__AC_CHARS=$'X' # "${AC__ERASE__}2${__AC_CHARS}"
 
+# Repeat last displayed character n times
+AC__REPEAT__=$'\e['
+__AC__LAST_CHAR=$'b'  # "${repeat}2${_lastChar}"
 
 #===============================================================
 # >>> General ASCII Codes
@@ -160,12 +167,12 @@ AC__DISABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049l'
 AC__SAVE_SCREEN=$'\e[?47h'
 AC__RESTORE_SCREEN=$'\e[?47l'
 
+#===============================================================
+# >>> Uncommon Private Modes (should probably delete these)
+#===============================================================
+
 AC__LIMIT_SCROLLING__=$'\e[1;'
 __AC__LINES=$'r' # "${limitScrolling}20${_lines}"
-
-# Repeat last displayed character n times
-AC__REPEAT__=$'\e['
-__AC__LAST_CHAR=$'b'  # "${repeat}2${_lastChar}"
 
 # Change cursor style
 # 0 blinking block.

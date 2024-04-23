@@ -175,6 +175,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - The installer script should embed the latest version at the time (modify just before a release) so it downloads the corresponding binary.
 - Have a consistent look and feel for interactive functions.
 - Reimplement usage of main::sortCommands / main::addLastChoice.
+- Add a default value for options.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest
