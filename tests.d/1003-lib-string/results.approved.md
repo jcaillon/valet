@@ -190,3 +190,21 @@ Exit code: `0`
 3=3
 ```
 
+### Testing string::split function
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string:::split 'name:firstname:address' ':'
+name
+firstname
+address
+
+→ string::split 'one:two:three' '\n'
+one
+two
+three
+```
+

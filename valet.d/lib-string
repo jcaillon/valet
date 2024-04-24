@@ -317,3 +317,22 @@ function string::count() {
   local newString="${string//"${2}"/}"
   LAST_RETURNED_VALUE=$(((${#string} - ${#newString}) / ${#2}))
 }
+
+# Split a string into an array using a separator.
+#
+# $1: the string to split
+# $2: the separator (must be a single character!)
+#
+# Returns:
+#   The array in the global variable LAST_RETURNED_ARRAY_VALUE.
+#
+# Usage:
+#   string::split "name,firstname,address" "," && local -a array=("${LAST_RETURNED_ARRAY_VALUE[@]}")
+#
+# Notes:
+#   - This is faster than using read into an array from a here string.
+function string::split() {
+  local IFS="${2}"
+  # shellcheck disable=SC2206
+  LAST_RETURNED_ARRAY_VALUE=(${1})
+}

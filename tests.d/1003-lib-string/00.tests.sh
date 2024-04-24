@@ -176,6 +176,18 @@ function testString::count() {
   endTest "Testing string::count function" 0
 }
 
+function testString::split() {
+  local IFS=$'\n'
+
+  echo "→ string:::split 'name:firstname:address' ':'"
+  string::split "name:firstname:address" ":" && echo "${LAST_RETURNED_ARRAY_VALUE[*]}"
+  echo
+  echo "→ string::split 'one:two:three' '\\n'"
+  string::split "one"$'\n'"two"$'\n'"three" $'\n' && echo "${LAST_RETURNED_ARRAY_VALUE[*]}"
+
+  endTest "Testing string::split function" 0
+}
+
 function main() {
   testString::bumpSemanticVersion
   testString::kebabCaseToSnakeCase
@@ -186,6 +198,7 @@ function main() {
   testString::indexOf
   testString::extractBetween
   testString::count
+  testString::split
 }
 
 main

@@ -101,16 +101,23 @@ function io::invoke5() {
   if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
 
     # append std out
+    debugMessage+=$'\n'"________"$'\n'"Standard output:"$'\n'
     if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
       io::readFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 5000
       if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
-      debugMessage+=$'\n'"________"$'\n'"Standard output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
+      debugMessage+="⌜${LAST_RETURNED_VALUE}⌝"
+    else
+      debugMessage+="⌜(empty)⌝"
     fi
+
     # append stderr
+    debugMessage+=$'\n'"________"$'\n'"Error output:"$'\n'
     if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
       io::readFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 5000
       if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
-      debugMessage+=$'\n'"________"$'\n'"Error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
+      debugMessage+="⌜${LAST_RETURNED_VALUE}⌝"
+    else
+      debugMessage+="⌜(empty)⌝"
     fi
 
     if [[ ${shouldFail} == "true" ]]; then
