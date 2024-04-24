@@ -3,7 +3,6 @@ set -Eeu -o pipefail
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-
 # Allows to get the nth element of a string separated by a given separator.
 # This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
 # but it uses pure bash to go faster.
@@ -184,12 +183,12 @@ function string::kebabCaseToCamelCase() {
 # Usage:
 #   string::trimAll "   example   string    " && local trimmedString="${LAST_RETURNED_VALUE}"
 function string::trimAll() {
-    set -f
-    # shellcheck disable=SC2086
-    # shellcheck disable=SC2048
-    set -- $*
-    LAST_RETURNED_VALUE="$*"
-    set +f
+  set -f
+  # shellcheck disable=SC2086
+  # shellcheck disable=SC2048
+  set -- $*
+  LAST_RETURNED_VALUE="$*"
+  set +f
 }
 
 # Find the first index of a string within another string.
@@ -230,7 +229,7 @@ function string::indexOf() {
 
   # if the string starts with the search, we have our index
   if [[ ${string} == "${search}"* ]]; then
-      echo "yeah"
+    echo "yeah"
     LAST_RETURNED_VALUE=${startingIndex}
     return 0
   fi
@@ -335,4 +334,27 @@ function string::split() {
   local IFS="${2}"
   # shellcheck disable=SC2206
   LAST_RETURNED_ARRAY=(${1})
+}
+
+# Matches a string against a regex and returns the first capture group of the matched string.
+#
+# $1: the string to match
+# $2: the regex
+#
+# Returns:
+#   The first capture group in the global variable LAST_RETURNED_VALUE.
+#   Empty if no match.
+#
+# Usage:
+#   string::regexGetFirst "name: julien" "name:(.*)"
+#
+# Notes:
+#   Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+function string::regexGetFirst() {
+  # Usage: regex "string" "regex"
+  if [[ ${1} =~ ${2} ]]; then
+    LAST_RETURNED_VALUE="${BASH_REMATCH[1]:-}"
+  else
+    LAST_RETURNED_VALUE=""
+  fi
 }

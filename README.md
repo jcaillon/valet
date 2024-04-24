@@ -176,6 +176,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Have a consistent look and feel for interactive functions.
 - Reimplement usage of main::sortCommands / main::addLastChoice.
 - Add a default value for options.
+- Implement regex replace in pure bash.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

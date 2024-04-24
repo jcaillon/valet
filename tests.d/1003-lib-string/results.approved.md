@@ -208,3 +208,14 @@ two
 three
 ```
 
+### Testing string::regexGetFirst function
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::regexGetFirst 'name: julien' 'name:[[:space:]]*([[:alnum:]]*)'
+julien
+```
+

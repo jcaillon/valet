@@ -188,6 +188,14 @@ function testString::split() {
   endTest "Testing string::split function" 0
 }
 
+function testString::regexGetFirst() {
+  echo "→ string::regexGetFirst 'name: julien' 'name:[[:space:]]*([[:alnum:]]*)'"
+  string::regexGetFirst 'name: julien' 'name:[[:space:]]*([[:alnum:]]*)'
+  echo "${LAST_RETURNED_VALUE}"
+
+  endTest "Testing string::regexGetFirst function" 0
+}
+
 function main() {
   testString::bumpSemanticVersion
   testString::kebabCaseToSnakeCase
@@ -199,6 +207,7 @@ function main() {
   testString::extractBetween
   testString::count
   testString::split
+  testString::regexGetFirst
 }
 
 main
