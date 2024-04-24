@@ -185,6 +185,8 @@ function string::kebabCaseToCamelCase() {
 #   string::trimAll "   example   string    " && local trimmedString="${LAST_RETURNED_VALUE}"
 function string::trimAll() {
     set -f
+    # shellcheck disable=SC2086
+    # shellcheck disable=SC2048
     set -- $*
     LAST_RETURNED_VALUE="$*"
     set +f
@@ -295,4 +297,23 @@ function string::extractBetween() {
   local -i extractedLength
   extractedLength=$((endIndex - startIndex))
   LAST_RETURNED_VALUE="${string:${startIndex}:${extractedLength}}"
+}
+
+# Counts the number of occurences of a substring in a string.
+#
+# $1: the string in which to search
+# $2: the substring to count
+#
+# Returns:
+#  The number of occurences in the global variable LAST_RETURNED_VALUE.
+#
+# Usage:
+#  string::count "name,firstname,address" "," && local count="${LAST_RETURNED_VALUE}"
+#
+# Notes:
+#   - This is faster than looping over the string and check the substring.
+function string::count() {
+  local string="${1}"
+  local newString="${string//"${2}"/}"
+  LAST_RETURNED_VALUE=$(((${#string} - ${#newString}) / ${#2}))
 }

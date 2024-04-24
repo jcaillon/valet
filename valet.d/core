@@ -181,7 +181,7 @@ function log::getLevel() {
 # $1: the color of the log message (red, green, yellow, cyan, gray, pink)
 # $2: the icon to display in the log message (utf8 character from nerdicons)
 # $3: the severity of the log message (masx 7 chars)
-# $*: the content of the log message
+# $*: the content of the log message (each arg will be separated by a new line)
 #
 # Usage:
 #   log::print "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
@@ -574,21 +574,24 @@ function string::wrapText() {
 
   local wrappedText
 
-  # TODO: check if faster if we skip the loop in case the text does not have new lines
-
-  # we call string::wrapSentence for each line of the text
-  local firstLine="1"
-  local line
-  while read -r line; do
-    wrappedText+=$'\n'
-    string::wrapSentence "${line}" "${sentenceWidth}" "${leftPadding}"
-    if [[ ${firstLine} == "1" ]]; then
-      firstLine="0"
-    else
-      wrappedText+="${leftPadding}"
-    fi
-    wrappedText+="${LAST_RETURNED_VALUE}"
-  done <<< "${text}"
+  if [[ "${text}" == *$'\n'* ]]; then
+    # we call string::wrapSentence for each line of the text
+    local firstLine="1"
+    local line
+    while read -r line; do
+      wrappedText+=$'\n'
+      string::wrapSentence "${line}" "${sentenceWidth}" "${leftPadding}"
+      if [[ ${firstLine} == "1" ]]; then
+        firstLine="0"
+      else
+        wrappedText+="${leftPadding}"
+      fi
+      wrappedText+="${LAST_RETURNED_VALUE}"
+    done <<< "${text}"
+  else
+    string::wrapSentence "${text}" "${sentenceWidth}" "${leftPadding}"
+    wrappedText="${LAST_RETURNED_VALUE}"
+  fi
 
   # add left padding on the first line (or not)
   if [[ ${appendPaddingToFirstLine} == "true" ]]; then
@@ -632,6 +635,7 @@ function string::wrapSentence() {
   wrappedText=""
   spaceLeft=${width}
   local firstWord="1"
+  local IFS=' '
   for word in ${text}; do
 
     if [[ ${firstWord} == "1" ]]; then

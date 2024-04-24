@@ -176,3 +176,17 @@ line 2 and 3=⌈2 line two
 line two=⌈line two⌉
 ```
 
+### Testing string::count function
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::count 'name,firstname,address' ','
+2=2
+
+→ string::count 'bonjour mon bon ami, bonne journée!' 'bo'
+3=3
+```
+

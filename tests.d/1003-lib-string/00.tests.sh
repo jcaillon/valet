@@ -166,6 +166,16 @@ function testString::extractBetween() {
   endTest "Testing string::extractBetween function" 0
 }
 
+function testString::count() {
+  echo "→ string::count 'name,firstname,address' ','"
+  string::count 'name,firstname,address' ',' && echo "2=${LAST_RETURNED_VALUE}"
+  echo
+  echo "→ string::count 'bonjour mon bon ami, bonne journée!' 'bo'"
+  string::count 'bonjour mon bon ami, bonne journée!' 'bo' && echo "3=${LAST_RETURNED_VALUE}"
+
+  endTest "Testing string::count function" 0
+}
+
 function main() {
   testString::bumpSemanticVersion
   testString::kebabCaseToSnakeCase
@@ -175,6 +185,7 @@ function main() {
   testString::cutField
   testString::indexOf
   testString::extractBetween
+  testString::count
 }
 
 main
