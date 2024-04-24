@@ -481,7 +481,7 @@ function core::sourceForFunction() {
       source "${GLOBAL_VALET_HOME:-}/${fileToSource}"
       log::debug "Loaded file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝."
     else
-      log::warning "The file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
+      log::warning "The source file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
     fi
   fi
 }

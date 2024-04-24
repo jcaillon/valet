@@ -105,7 +105,13 @@ function selfTest() {
         elif [[ ${testsDirectory} == *"/tests.d" ]]; then
           # if the directory is named .tests.d, then it is a test directory
           log::info "Running all test suites in directory ⌜${testsDirectory}⌝."
+
+          # we should always run the test suite from the user directory to have consistent paths
+          # in the report files
+          pushd "${testsDirectory}" 1> /dev/null
+
           runTestSuites "${testsDirectory}"
+          popd 1> /dev/null
         elif [[ ${testsDirectory##*/} != "."* ]]; then
           # we need the directory to the search list except if it starts with a .
           listOfDirectories+="${testsDirectory}"$'\n'

@@ -121,6 +121,10 @@ function runCoreTests() {
   # we need to rebuild the commands for the core commands only
   rebuildCommands ""
 
+  # we should always run the test suite from the valet home directory to have consistent paths
+  # in the report files
+  pushd "${GLOBAL_VALET_HOME}" 1> /dev/null
+
   log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝."
   runTestSuites "${GLOBAL_VALET_HOME}/tests.d"
 
@@ -134,6 +138,8 @@ function runCoreTests() {
     log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝."
     runTestSuites "${GLOBAL_VALET_HOME}/examples.d/showcase/tests.d"
   fi
+
+  popd 1> /dev/null
 
   # reload the orignal commands
   core::reloadUserCommands
@@ -162,6 +168,9 @@ function rebuildCommands() {
 #   runTestSuites "${GLOBAL_VALET_HOME}/tests.d"
 function runTestSuites() {
   local testSuiteDirectory="${1}"
+
+  # reset the temp files
+  io::cleanupTempFiles
 
   io::createTempFile && _TEST_STANDARD_OUTPUT_FILE="${LAST_RETURNED_VALUE}"
   io::createTempFile && _TEST_STANDARD_ERROR_FILE="${LAST_RETURNED_VALUE}"
