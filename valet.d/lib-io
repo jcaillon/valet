@@ -104,13 +104,13 @@ function io::invoke5() {
     if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
       io::readFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 5000
       if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
-      debugMessage+=$'\n'"Standard output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
+      debugMessage+=$'\n'"________"$'\n'"Standard output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
     fi
     # append stderr
     if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
       io::readFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 5000
       if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
-      debugMessage+=$'\n'"Error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
+      debugMessage+=$'\n'"________"$'\n'"Error output:"$'\n'"⌜${LAST_RETURNED_VALUE}⌝"
     fi
 
     if [[ ${shouldFail} == "true" ]]; then
@@ -213,6 +213,15 @@ function io::invoke3var() {
 # If the execution fails, it will fail the script and show the std/err output.
 # Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
 #
+# In windows, this is tremendously faster to do
+# io::invoke && myvar="${LAST_RETURNED_VALUE}"
+# than doing:
+# myvar="$(mycommand)".
+# On linux, it is slighly faster (but it might be slower if you don't have SSD?).
+# On linux, you can use a tmpfs directory for massive gains over subshells.
+#
+# $@: the command and its arguments
+#
 # Returns:
 #  The content of stdout in the global variable LAST_RETURNED_VALUE.
 #  The content of stderr in the global variable LAST_RETURNED_VALUE2.
@@ -220,33 +229,32 @@ function io::invoke3var() {
 # Usage:
 #  io::invoke git add --all
 function io::invoke() {
-  io::invoke5var "true" "0" "" "" "$@"
+  io::invoke5var true 0 '' '' "$@"
 }
 
-# Execute the given command and return the output in the global variable LAST_RETURNED_VALUE.
-# In windows, this is tremendously faster than doing myvar="$(mycommand)".
+# This function call an executable and its arguments and input a given string as stdin.
+# If the execution fails, it will fail the script and show the std/err output.
+# Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
+#
+# This is the equivalent of:
+# myvar="$(echo "mystring" | mycommand)"
+# In windows, this is tremendously faster that the example above.
 # On linux, it is slighly faster (but it might be slower if you don't have SSD?).
 # On linux, you can use a tmpfs directory for massive gains over subshells.
 #
-# $1+: the command to execute (with args)
+# $1: the stdin to pass to the executable
+# $2+: the command and its arguments
 #
 # Returns:
-#   exit with code 1 if the command fails.
-#   The output of the command in the global variable LAST_RETURNED_VALUE.
-#   The error output of the command in the global variable LAST_RETURNED_VALUE2.
+#  The content of stdout in the global variable LAST_RETURNED_VALUE.
+#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
 #
 # Usage:
-#   io::captureOutput "ls -l" && local lsOutput="${LAST_RETURNED_VALUE}"
-function io::captureOutput() {
-  local -i exitCode=0
-  "$@" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
-
-  io::readFile "${GLOBAL_TEMPORARY_STDERR_FILE}"
-  LAST_RETURNED_VALUE2="${LAST_RETURNED_VALUE}"
-
-  io::readFile "${GLOBAL_TEMPORARY_STDOUT_FILE}"
-
-  return ${exitCode}
+#  io::invoke git add --all
+function io::invokePiped() {
+  local stdIn="${1}"
+  shift
+  io::invoke5var true 0 false "${stdIn}" "$@"
 }
 
 # Reads the content of a file and returns it in the global variable LAST_RETURNED_VALUE.
@@ -278,6 +286,10 @@ function io::readFile() {
     read -rd '' -n "${maxCharacters}" LAST_RETURNED_VALUE <"${filePath}" || true
   else
     read -rd '' LAST_RETURNED_VALUE <"${filePath}" || true
+    # fail safe for cases where the file is suppose to not be empty but we get null string
+    if [[ -z "${LAST_RETURNED_VALUE}" ]]; then
+      LAST_RETURNED_VALUE="$(<"${filePath}")"
+    fi
   fi
 }
 

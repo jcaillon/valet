@@ -358,25 +358,28 @@ function onExitTestInternal() {
   log::getCallStack 4 && local stack="${LAST_RETURNED_VALUE}"
 
   local message="The program has exit during a test with code ${rc}, stack:${stack}"$'\n'
+  message+="________"$'\n'
   if [[ -s "${_TEST_REPORT_FILE}" ]]; then
     io::readFile "${_TEST_REPORT_FILE}"
-    message+="⌜Current test report:⌝"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
+    message+="Current test report:"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
   else
     message+="No test report yet for the current test."$'\n'
   fi
+  message+="________"$'\n'
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
     io::readFile "${_TEST_STANDARD_OUTPUT_FILE}"
-    message+="⌜Current test standard output:⌝"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
+    message+="Current test standard output:"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
   else
     message+="No standard output for the current test."$'\n'
   fi
+  message+="________"$'\n'
   if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
     io::readFile "${_TEST_STANDARD_ERROR_FILE}"
-    message+="⌜Current test error output:⌝"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
+    message+="Current test error output:"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
   else
     message+="No error output for the current test."$'\n'
   fi
-  message+="If you expect the tested function/program to exit/fail, then run it in a subshell like that:"$'\n'"(myFunctionThatFails)"
+  message+="→ If you expect the tested function/program to exit or fail, then run it in a subshell like that:"$'\n'"(myFunctionThatFails)"
 
   log::error "${message}"
 
@@ -413,7 +416,7 @@ function resetFdRedirection() {
 # valet config and global variables to their original values.
 # As well as the log line function.
 function setOriginalImportantVariables() {
-  io::captureOutput declare -p ${!VALET_CONFIG_*} ${!GLOBAL_*}
+  io::invoke declare -p ${!VALET_CONFIG_*} ${!GLOBAL_*}
   ORIGINAL_IMPORTANT_VARIABLES="${GLOBAL_LOG_PRINT_FUNCTION}"$'\n'"${LAST_RETURNED_VALUE//declare -? /}"
 }
 

@@ -63,6 +63,15 @@ function testIo::invoke() {
   endTest "Testing io::invoke, output to var" ${exitCode}
 }
 
+function testIo::invokePiped() {
+  local -i exitCode
+
+  echo "→ io::invokePiped 'this is an stdin' fakeexec --std-in --option argument1 argument2"
+  io::invokePiped 'this is an stdin' fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
+  echoio::invokeOutput ${exitCode} false
+  endTest "Testing io::invokePiped, stdin as string, output to var" ${exitCode}
+}
+
 function echoio::invokeOutput() {
   local exitCode areFiles
   exitCode="${1}"
@@ -104,6 +113,7 @@ function main() {
   testIo::invoke5
   testIo::invoke3
   testIo::invoke
+  testIo::invokePiped
 }
 
 main

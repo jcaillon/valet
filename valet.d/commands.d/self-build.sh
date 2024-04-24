@@ -253,7 +253,7 @@ function extractCommandDefinitionsToVariables() {
       array::makeArraysSameSize TEMP_CMD_BUILD_examples_name TEMP_CMD_BUILD_examples_description
 
       if log::isDebugEnabled; then
-        io::captureOutput declare -p ${!TEMP_CMD_BUILD_*}
+        io::invoke declare -p ${!TEMP_CMD_BUILD_*}
         log::debug "Declared variables for this command:"$'\n'"${LAST_RETURNED_VALUE}"
       fi
 

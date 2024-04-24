@@ -198,7 +198,9 @@ function log::createPrintFunction() {
     icon="${2}"
     severity="${3}"
     shift 3
-    LAST_RETURNED_VALUE="$*"'
+    local IFS='"$'\n'"'
+    LAST_RETURNED_VALUE="$*"
+    unset IFS'
 
   local cDefault=""
   local cTimestamp=""

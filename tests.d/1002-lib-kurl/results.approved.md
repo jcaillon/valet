@@ -102,8 +102,10 @@ Standard stream from file: ⌜false⌝
 Standard stream: ⌜⌝
 Extra parameters: ⌜--silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt⌝
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜1⌝.
+________
 Standard output:
 ⌜400⌝
+________
 Error output:
 ⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt
 Returning 1 from curl.
@@ -142,8 +144,10 @@ Standard stream: ⌜⌝
 Extra parameters: ⌜--silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 200 http://hello.com⌝
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
+________
 Standard output:
 ⌜200⌝
+________
 Error output:
 ⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 200 http://hello.com
 ⌝
@@ -217,8 +221,10 @@ Standard stream: ⌜⌝
 Extra parameters: ⌜--silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 400 http://hello.com⌝
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
+________
 Standard output:
 ⌜400⌝
+________
 Error output:
 ⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 400 http://hello.com
 ⌝

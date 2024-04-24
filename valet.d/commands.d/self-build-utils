@@ -283,7 +283,7 @@ _CMD_INCLUDED=1
 # CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (contains ?)
 
 "
-    io::captureOutput declare -p ${!CMD_*}
+    io::invoke declare -p ${!CMD_*}
     local IFS=$'\n'
     local line
     local IFS=':'

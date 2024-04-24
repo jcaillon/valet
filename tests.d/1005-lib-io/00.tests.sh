@@ -27,18 +27,6 @@ function outputTextToStdErr() {
   echo "This is an error message" 1>&2
 }
 
-function testIo::captureOutput() {
-
-  echo "→ io::captureOutput echo \"Hello world!\""
-  io::captureOutput echo "Hello world!" && echo "${LAST_RETURNED_VALUE}"
-
-  echo
-  echo "→ io::captureOutput outputTextToStdErr"
-  io::captureOutput outputTextToStdErr && echo "${LAST_RETURNED_VALUE2}"
-
-  endTest "Testing io::captureOutput" 0
-}
-
 function testIo::readFile() {
 
   echo "→ io::readFile 'resources/file-to-read' 100"
@@ -85,7 +73,6 @@ function testIo::cat() {
 
 function main() {
   testIo::toAbsolutePath
-  testIo::captureOutput
   testIo::readFile
   testIo::createFilePathIfNeeded
   testIo::sleep

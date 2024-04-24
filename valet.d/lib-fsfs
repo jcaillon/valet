@@ -56,7 +56,7 @@ function fsfs::itemSelector() {
 
   # save the original traps so we can restore them later
   local originalTraps
-  io::captureOutput trap -p SIGWINCH EXIT SIGINT SIGQUIT
+  io::invoke trap -p SIGWINCH EXIT SIGINT SIGQUIT
   originalTraps="${LAST_RETURNED_VALUE}"
 
   # we still need to export the terminal size but in addition, we need to fsfsDrawScreen.
