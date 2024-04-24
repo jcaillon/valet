@@ -228,7 +228,7 @@ function extractCommandDefinitionsToVariables() {
     log::info "Extracting commands from ⌜${file}⌝."
     extractCommandYamls "${file}"
     local content
-    for content in "${LAST_RETURNED_ARRAY_VALUE[@]}"; do
+    for content in "${LAST_RETURNED_ARRAY[@]}"; do
 
       if log::isDebugEnabled; then log::debug "Extracting command definition for: ⌜${content%%$'\n'*}...⌝."; fi
 

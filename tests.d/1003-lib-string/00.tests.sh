@@ -180,10 +180,10 @@ function testString::split() {
   local IFS=$'\n'
 
   echo "→ string:::split 'name:firstname:address' ':'"
-  string::split "name:firstname:address" ":" && echo "${LAST_RETURNED_ARRAY_VALUE[*]}"
+  string::split "name:firstname:address" ":" && echo "${LAST_RETURNED_ARRAY[*]}"
   echo
   echo "→ string::split 'one:two:three' '\\n'"
-  string::split "one"$'\n'"two"$'\n'"three" $'\n' && echo "${LAST_RETURNED_ARRAY_VALUE[*]}"
+  string::split "one"$'\n'"two"$'\n'"three" $'\n' && echo "${LAST_RETURNED_ARRAY[*]}"
 
   endTest "Testing string::split function" 0
 }

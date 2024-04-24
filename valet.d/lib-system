@@ -23,13 +23,13 @@ function system::getOsName() {
 # In pure bash, no need for env or printenv.
 #
 # Returns:
-#   LAST_RETURNED_ARRAY_VALUE: An array with the list of all the environment variables.
+#   LAST_RETURNED_ARRAY: An array with the list of all the environment variables.
 #
 # Usage:
 #   system::getEnvVars
-#   for var in "${LAST_RETURNED_ARRAY_VALUE[@]}"; do
+#   for var in "${LAST_RETURNED_ARRAY[@]}"; do
 #       printf '%s=%s\n' "${var}" "${!var}"
 #   done
 function system::getEnvVars() {
-  mapfile -t LAST_RETURNED_ARRAY_VALUE < <(compgen -v)
+  mapfile -t LAST_RETURNED_ARRAY < <(compgen -v)
 }

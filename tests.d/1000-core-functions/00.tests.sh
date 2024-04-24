@@ -39,27 +39,27 @@ function testArray::fuzzyFilter() {
   echo
   echo "→ array::fuzzyFilter evle lines"
   array::fuzzyFilter "evle" lines
-  declare -p LAST_RETURNED_ARRAY_VALUE LAST_RETURNED_ARRAY_VALUE2 LAST_RETURNED_ARRAY_VALUE3
+  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2 LAST_RETURNED_ARRAY3
 
   echo
   echo "→ array::fuzzyFilter SC2 lines"
   array::fuzzyFilter "SC2" lines
-  declare -p LAST_RETURNED_ARRAY_VALUE LAST_RETURNED_ARRAY_VALUE2 LAST_RETURNED_ARRAY_VALUE3
+  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2 LAST_RETURNED_ARRAY3
 
   echo
   echo "→ array::fuzzyFilter u lines"
   array::fuzzyFilter "u" lines
-  declare -p LAST_RETURNED_ARRAY_VALUE LAST_RETURNED_ARRAY_VALUE2 LAST_RETURNED_ARRAY_VALUE3
+  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2 LAST_RETURNED_ARRAY3
 
   echo
   echo "→ array::fuzzyFilter seLf lines"
   array::fuzzyFilter "seLf" lines
-  declare -p LAST_RETURNED_ARRAY_VALUE LAST_RETURNED_ARRAY_VALUE2 LAST_RETURNED_ARRAY_VALUE3
+  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2 LAST_RETURNED_ARRAY3
 
   echo
   echo "→ array::fuzzyFilter nomatch lines"
   array::fuzzyFilter "nomatch" lines
-  declare -p LAST_RETURNED_ARRAY_VALUE LAST_RETURNED_ARRAY_VALUE2 LAST_RETURNED_ARRAY_VALUE3
+  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2 LAST_RETURNED_ARRAY3
 
   unset lines
 

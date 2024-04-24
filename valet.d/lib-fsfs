@@ -302,8 +302,8 @@ function drawLeftPane() {
   # Compute filtered items
   if [[ -n ${FSFS_SEARCH_STRING} ]]; then
     array::fuzzyFilterSort "${FSFS_SEARCH_STRING}" FSFS_ORIGINAL_ITEMS "${FSFS_COLOR_LETTER_HIGHLIGHT}" "${FSFS_COLOR_LETTER_HIGHLIGHT_RESET}" "$((FSFS_LEFT_PANE_WIDTH - 4))"
-    FSFS_FILTERED_ITEMS=("${LAST_RETURNED_ARRAY_VALUE[@]}")
-    FSFS_FILTERED_ITEMS_CORRESPONDANCES=("${LAST_RETURNED_ARRAY_VALUE2[@]}")
+    FSFS_FILTERED_ITEMS=("${LAST_RETURNED_ARRAY[@]}")
+    FSFS_FILTERED_ITEMS_CORRESPONDANCES=("${LAST_RETURNED_ARRAY2[@]}")
   else
     # for each item longer than the left width, cut and add ellipsis
     FSFS_FILTERED_ITEMS=()

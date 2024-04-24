@@ -908,12 +908,12 @@ function main::fuzzyMatchCommandtoFunctionName() {
 
     # case where the command is not exact, we try to fuzzy match it
     array::fuzzyFilter "${command}" CMD_ALL_COMMANDS_ARRAY
-    if (( ${#LAST_RETURNED_ARRAY_VALUE[@]} > 1 )); then
+    if (( ${#LAST_RETURNED_ARRAY[@]} > 1 )); then
       local IFS=$'\n'
-      log::debug "Ambiguous matching for the command ⌜${command}⌝:"$'\n'"${LAST_RETURNED_ARRAY_VALUE[*]}"
+      log::debug "Ambiguous matching for the command ⌜${command}⌝:"$'\n'"${LAST_RETURNED_ARRAY[*]}"
       unset IFS
-    elif (( ${#LAST_RETURNED_ARRAY_VALUE[@]} == 1 )); then
-      exactCommand="${LAST_RETURNED_ARRAY_VALUE[0]}"
+    elif (( ${#LAST_RETURNED_ARRAY[@]} == 1 )); then
+      exactCommand="${LAST_RETURNED_ARRAY[0]}"
       main::getFunctionNameFromCommand "${exactCommand}" && functionName="${LAST_RETURNED_VALUE}"
       log::info "Fuzzy matching the command ⌜${command}⌝ to ⌜${exactCommand}⌝."
       break
@@ -1178,10 +1178,10 @@ function main::fuzzyFindOption() {
 
   # split to get one possible option per line
   array::fuzzyFilter "${unknownOption}" _OPTIONS_TO_MATCH
-  if (( ${#LAST_RETURNED_ARRAY_VALUE[@]} == 1 )); then
-    suggestedOption=" (did you mean ⌜${LAST_RETURNED_ARRAY_VALUE[0]}⌝?)"
-  elif (( ${#LAST_RETURNED_ARRAY_VALUE[@]} > 1 )); then
-    suggestedOption=" (did you mean one of ⌜${LAST_RETURNED_ARRAY_VALUE[*]}⌝?)"
+  if (( ${#LAST_RETURNED_ARRAY[@]} == 1 )); then
+    suggestedOption=" (did you mean ⌜${LAST_RETURNED_ARRAY[0]}⌝?)"
+  elif (( ${#LAST_RETURNED_ARRAY[@]} > 1 )); then
+    suggestedOption=" (did you mean one of ⌜${LAST_RETURNED_ARRAY[*]}⌝?)"
   fi
 
   LAST_RETURNED_VALUE="${suggestedOption:-}"

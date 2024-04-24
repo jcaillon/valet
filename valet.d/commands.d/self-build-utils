@@ -8,7 +8,7 @@ set -Eeu -o pipefail
 # $1: The file to extract from.
 #
 # Returns:
-#   LAST_RETURNED_ARRAY_VALUE: Each extracted content in an array.
+#   LAST_RETURNED_ARRAY: Each extracted content in an array.
 #
 # Usage:
 #   extractCommandYamls "myfile"
@@ -41,7 +41,7 @@ function extractCommandYamls() {
     fi
   done <"${file}"
 
-  LAST_RETURNED_ARRAY_VALUE=("${contentArray[@]}")
+  LAST_RETURNED_ARRAY=("${contentArray[@]}")
 }
 
 # This function extracts properties from a command definition and stores them in

@@ -699,9 +699,9 @@ function string::wrapSentence() {
 # $2: the initial array name
 #
 # Returns:
-#   an array containing only the lines matching the pattern in the global variable LAST_RETURNED_ARRAY_VALUE
-#   an array of the same size that contains the start index of the match in the global variable LAST_RETURNED_ARRAY_VALUE2
-#   an array of the same size that contains the distance of the match in the global variable LAST_RETURNED_ARRAY_VALUE3
+#   an array containing only the lines matching the pattern in the global variable LAST_RETURNED_ARRAY
+#   an array of the same size that contains the start index of the match in the global variable LAST_RETURNED_ARRAY2
+#   an array of the same size that contains the distance of the match in the global variable LAST_RETURNED_ARRAY3
 #
 # Usage:
 #   array::fuzzyMatch "pattern" "myarray" && local bestMatch="${LAST_RETURNED_VALUE}"
@@ -779,9 +779,9 @@ function array::fuzzyFilter() {
 
   shopt -u nocasematch
 
-  LAST_RETURNED_ARRAY_VALUE=("${matches[@]}")
-  LAST_RETURNED_ARRAY_VALUE2=("${indexes[@]}")
-  LAST_RETURNED_ARRAY_VALUE3=("${distances[@]}")
+  LAST_RETURNED_ARRAY=("${matches[@]}")
+  LAST_RETURNED_ARRAY2=("${indexes[@]}")
+  LAST_RETURNED_ARRAY3=("${distances[@]}")
 }
 
 #===============================================================
