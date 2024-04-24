@@ -410,3 +410,19 @@ function io::readStdIn() {
   local IFS=''
   read -rd '' LAST_RETURNED_VALUE <&0 || :
 }
+
+# Returns the number of arguments passed.
+#
+# A convenient function that can be used to:
+# - count the files/directories in a directory
+#   io::countArgs "${PWD}"/* && local numberOfFiles="${LAST_RETURNED_VALUE}"
+# - count the number of variables starting with VALET_
+#   io::countArgs "${!VALET_@}" && local numberOfVariables="${LAST_RETURNED_VALUE}"
+#
+# Returns:
+#   The number of arguments passed in the global variable LAST_RETURNED_VALUE.
+# Usage:
+#   io::countArgs 1 2 3
+function io::countArgs() {
+  LAST_RETURNED_VALUE="$#"
+}

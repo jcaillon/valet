@@ -80,6 +80,19 @@ function testIo::readStdIn() {
   endTest "Testing io::readStdIn" 0
 }
 
+function testIo::countArgs() {
+
+  echo "→ io::countArgs 'arg1' 'arg2' 'arg3'"
+  io::countArgs 'arg1' 'arg2' 'arg3'
+  echo "${LAST_RETURNED_VALUE}"
+
+  echo "→ io::countArgs \$PWD/*"
+  io::countArgs "${PWD}/resources"/*
+  echo "${LAST_RETURNED_VALUE}"
+
+  endTest "Testing io::countArgs" 0
+}
+
 function main() {
   testIo::toAbsolutePath
   testIo::readFile
@@ -87,6 +100,7 @@ function main() {
   testIo::sleep
   testIo::cat
   testIo::readStdIn
+  testIo::countArgs
 }
 
 main

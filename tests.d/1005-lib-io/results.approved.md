@@ -137,6 +137,19 @@ coucou
 
 ```
 
+### Testing io::countArgs
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::countArgs 'arg1' 'arg2' 'arg3'
+3
+→ io::countArgs $PWD/*
+2
+```
+
 ## Test script 01.invoke
 
 ### Testing io::invoke5, should return 1, input stream from string
