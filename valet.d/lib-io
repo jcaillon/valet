@@ -397,3 +397,16 @@ function io::cat() {
   io::readFile "${1}"
   echo "${LAST_RETURNED_VALUE}"
 }
+
+# Read the content of the standard input.
+#
+# Returns:
+#   The content of the standard input in the global variable LAST_RETURNED_VALUE.
+#
+# Usage:
+#   io::readStdIn && local stdIn="${LAST_RETURNED_VALUE}"
+function io::readStdIn() {
+  LAST_RETURNED_VALUE=""
+  local IFS=''
+  read -rd '' LAST_RETURNED_VALUE <&0 || :
+}

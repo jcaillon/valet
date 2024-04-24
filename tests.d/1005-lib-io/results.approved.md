@@ -125,6 +125,18 @@ The production of meat and other animal derived products places a heavy burden o
 Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there's never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it's the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.
 ```
 
+### Testing io::readStdIn
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::readStdIn <<<'coucou'
+coucou
+
+```
+
 ## Test script 01.invoke
 
 ### Testing io::invoke5, should return 1, input stream from string
@@ -139,7 +151,8 @@ io::invoke function ended with exit code ⌈1⌉.
 stdout from file:
 ⌈▶ called fakeexec --std-in --error
 ▶ fakeexec input stream was:
-⌈inputStreamValue⌉⌉
+⌈inputStreamValue
+⌉⌉
 stderr from file:
 ⌈This is an error output from fakeexec
 returning 1 from fakeexec⌉
@@ -165,7 +178,8 @@ ________
 Standard output:
 ⌜▶ called fakeexec --std-in --error
 ▶ fakeexec input stream was:
-⌈inputStreamValue⌉
+⌈inputStreamValue
+⌉
 ⌝
 ________
 Error output:
@@ -205,7 +219,8 @@ io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
 ⌈▶ called fakeexec --std-in
 ▶ fakeexec input stream was:
-⌈Input stream content from a file⌉
+⌈Input stream content from a file
+⌉
 ⌉
 stderr from var:
 ⌈This is an error output from fakeexec
@@ -225,7 +240,8 @@ io::invoke function ended with exit code ⌈1⌉.
 stdout from file:
 ⌈▶ called fakeexec --std-in --error
 ▶ fakeexec input stream was:
-⌈inputStreamValue⌉⌉
+⌈inputStreamValue
+⌉⌉
 stderr from file:
 ⌈This is an error output from fakeexec
 returning 1 from fakeexec⌉
@@ -248,7 +264,8 @@ ________
 Standard output:
 ⌜▶ called fakeexec --std-in --error
 ▶ fakeexec input stream was:
-⌈inputStreamValue⌉
+⌈inputStreamValue
+⌉
 ⌝
 ________
 Error output:
@@ -445,7 +462,8 @@ io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
 ⌈▶ called fakeexec --std-in --option argument1 argument2
 ▶ fakeexec input stream was:
-⌈this is an stdin⌉
+⌈this is an stdin
+⌉
 ⌉
 stderr from var:
 ⌈This is an error output from fakeexec
@@ -468,7 +486,8 @@ ________
 Standard output:
 ⌜▶ called fakeexec --std-in --option argument1 argument2
 ▶ fakeexec input stream was:
-⌈this is an stdin⌉
+⌈this is an stdin
+⌉
 ⌝
 ________
 Error output:

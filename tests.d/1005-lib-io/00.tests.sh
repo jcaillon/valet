@@ -71,12 +71,22 @@ function testIo::cat() {
   endTest "Testing io::cat" 0
 }
 
+function testIo::readStdIn() {
+
+  echo "→ io::readStdIn <<<'coucou'"
+  io::readStdIn <<<"coucou"
+  echo "${LAST_RETURNED_VALUE}"
+
+  endTest "Testing io::readStdIn" 0
+}
+
 function main() {
   testIo::toAbsolutePath
   testIo::readFile
   testIo::createFilePathIfNeeded
   testIo::sleep
   testIo::cat
+  testIo::readStdIn
 }
 
 main

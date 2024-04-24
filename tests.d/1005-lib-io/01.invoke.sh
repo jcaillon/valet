@@ -94,7 +94,8 @@ function fakeexec() {
   local inputStreamContent
 
   if [[ $* == *"--std-in"* ]]; then
-    read -rd '' inputStreamContent <&0 || :
+    io::readStdIn
+    inputStreamContent="${LAST_RETURNED_VALUE}"
   fi
 
   echo "▶ called fakeexec $*"
