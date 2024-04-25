@@ -15,8 +15,14 @@ $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh
 → io::toAbsolutePath 01.invoke.sh
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh
 
+→ io::toAbsolutePath resources
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources
+
 → io::toAbsolutePath ./01.invoke.sh
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh
+
+→ io::toAbsolutePath ./resources
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources
 
 → io::toAbsolutePath ../0003-self/01.invoke.sh
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh
@@ -135,6 +141,8 @@ Exit code: `0`
 → io::readStdIn <<<'coucou'
 coucou
 
+→ io::readStdIn
+
 ```
 
 ### Testing io::countArgs
@@ -187,14 +195,12 @@ exitcode=1
 
 ```log
 ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
-________
 Standard output:
 ⌜▶ called fakeexec --std-in --error
 ▶ fakeexec input stream was:
 ⌈inputStreamValue
 ⌉
 ⌝
-________
 Error output:
 ⌜This is an error output from fakeexec
 returning 1 from fakeexec
@@ -273,14 +279,12 @@ Standard stream from file: ⌜false⌝
 Standard stream: ⌜inputStreamValue⌝
 Extra parameters: ⌜--std-in --error⌝
 DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
-________
 Standard output:
 ⌜▶ called fakeexec --std-in --error
 ▶ fakeexec input stream was:
 ⌈inputStreamValue
 ⌉
 ⌝
-________
 Error output:
 ⌜This is an error output from fakeexec
 returning 1 from fakeexec
@@ -316,13 +320,11 @@ Standard stream: ⌜⌝
 Extra parameters: ⌜--option argument1 argument2⌝
 DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
-________
 Standard output:
 ⌜▶ called fakeexec --option argument1 argument2
 ▶ fakeexec input stream was:
 ⌈⌉
 ⌝
-________
 Error output:
 ⌜This is an error output from fakeexec
 ⌝
@@ -359,13 +361,11 @@ Standard stream: ⌜⌝
 Extra parameters: ⌜--option argument1 argument2⌝
 DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
-________
 Standard output:
 ⌜▶ called fakeexec --option argument1 argument2
 ▶ fakeexec input stream was:
 ⌈⌉
 ⌝
-________
 Error output:
 ⌜This is an error output from fakeexec
 ⌝
@@ -391,13 +391,11 @@ Standard stream from file: ⌜⌝
 Standard stream: ⌜⌝
 Extra parameters: ⌜--error⌝
 ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
-________
 Standard output:
 ⌜▶ called fakeexec --error
 ▶ fakeexec input stream was:
 ⌈⌉
 ⌝
-________
 Error output:
 ⌜This is an error output from fakeexec
 returning 1 from fakeexec
@@ -451,13 +449,11 @@ Standard stream: ⌜⌝
 Extra parameters: ⌜--option argument1 argument2⌝
 DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
-________
 Standard output:
 ⌜▶ called fakeexec --option argument1 argument2
 ▶ fakeexec input stream was:
 ⌈⌉
 ⌝
-________
 Error output:
 ⌜This is an error output from fakeexec
 ⌝
@@ -495,14 +491,12 @@ Standard stream: ⌜this is an stdin⌝
 Extra parameters: ⌜--std-in --option argument1 argument2⌝
 DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
-________
 Standard output:
 ⌜▶ called fakeexec --std-in --option argument1 argument2
 ▶ fakeexec input stream was:
 ⌈this is an stdin
 ⌉
 ⌝
-________
 Error output:
 ⌜This is an error output from fakeexec
 ⌝

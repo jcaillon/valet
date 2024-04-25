@@ -556,6 +556,7 @@ function core::reloadUserCommands() {
 #
 # Note:
 #   This function is written in pure bash and is faster than calling the fold command.
+#   This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 function string::wrapText() {
   local text width leftPaddingLength appendPaddingToFirstLine
   text="${1}"
@@ -613,6 +614,7 @@ function string::wrapText() {
 #
 # Note:
 #   This function is written in pure bash and is faster than calling the fold command.
+#   This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 function string::wrapSentence() {
   local text newLinePrefix
   local -i width

@@ -977,7 +977,7 @@ function main::parseFunctionArguments() {
 
   local -n argumentsName="CMD_ARGS_NAME_${functionName}"
   local -i totalNbArguments
-  if [[ -v argumentsName && "${#argumentsName[@]}" -gt 0 ]]; then
+  if [[ -v argumentsName && ${#argumentsName[@]} -gt 0 ]]; then
     totalNbArguments=${#argumentsName[@]};
   else
     totalNbArguments=0;
@@ -990,7 +990,7 @@ function main::parseFunctionArguments() {
 
   local -n options="CMD_OPTS_${functionName}"
   local -i totalNbOptions
-  if [[ -v options && "${#options[@]}" -gt 0 ]]; then
+  if [[ -v options && ${#options[@]} -gt 0 ]]; then
     totalNbOptions=${#options[@]};
   else
     totalNbOptions=0;

@@ -43,8 +43,7 @@ another3  	This is another command 3"
   for i in {1..10}; do
     main::addLastChoice "myid1" "cm${i}"
   done
-  local content
-  IFS= read -rd '' content < "${localStateDirectory}/last-choices-myid1" || :
+  io::readFile "${localStateDirectory}/last-choices-myid1" && local content="${LAST_RETURNED_VALUE}"
   echo "Content of last-choices-myid1:"
   echo "${content}"
   endTest "Testing main::addLastChoice after adding more than ${VALET_CONFIG_REMEMBER_LAST_CHOICES} commands, we only keep the last ${VALET_CONFIG_REMEMBER_LAST_CHOICES}" 0
@@ -53,7 +52,7 @@ another3  	This is another command 3"
   main::addLastChoice "myid1" "another3"
   main::addLastChoice "myid1" "another3"
   main::addLastChoice "myid1" "another3"
-  IFS= read -rd '' content < "${localStateDirectory}/last-choices-myid1" || :
+  io::readFile "${localStateDirectory}/last-choices-myid1" && content="${LAST_RETURNED_VALUE}"
   echo "Content of last-choices-myid1:"
   echo "${content}"
   endTest "Testing main::addLastChoice after adding the same command multiple times only keeps the last one" 0

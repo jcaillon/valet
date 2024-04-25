@@ -22,7 +22,7 @@ function io::toAbsolutePath() {
   fi
 
   LAST_RETURNED_VALUE="${PWD}/${file##*/}"
-  if [[ -f "${LAST_RETURNED_VALUE}" ]]; then
+  if [[ -e "${LAST_RETURNED_VALUE}" ]]; then
     return 0
   fi
 
@@ -101,7 +101,7 @@ function io::invoke5() {
   if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
 
     # append std out
-    debugMessage+=$'\n'"________"$'\n'"Standard output:"$'\n'
+    debugMessage+=$'\n'"Standard output:"$'\n'
     if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
       io::readFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 5000
       if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
@@ -111,7 +111,7 @@ function io::invoke5() {
     fi
 
     # append stderr
-    debugMessage+=$'\n'"________"$'\n'"Error output:"$'\n'
+    debugMessage+=$'\n'"Error output:"$'\n'
     if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
       io::readFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 5000
       if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
@@ -221,7 +221,7 @@ function io::invoke3var() {
 # Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
 #
 # In windows, this is tremendously faster to do
-# io::invoke && myvar="${LAST_RETURNED_VALUE}"
+# io::invoke mycommand && myvar="${LAST_RETURNED_VALUE}"
 # than doing:
 # myvar="$(mycommand)".
 # On linux, it is slighly faster (but it might be slower if you don't have SSD?).
@@ -288,11 +288,12 @@ function io::readFile() {
     return 0
   fi
 
+  LAST_RETURNED_VALUE=""
   local IFS=''
   if [[ "${maxCharacters}" -gt 0 ]]; then
-    read -rd '' -n "${maxCharacters}" LAST_RETURNED_VALUE <"${filePath}" || true
+    read -rd '' -n "${maxCharacters}" LAST_RETURNED_VALUE <"${filePath}" || [[ -n ${LAST_RETURNED_VALUE} ]]
   else
-    read -rd '' LAST_RETURNED_VALUE <"${filePath}" || true
+    read -rd '' LAST_RETURNED_VALUE <"${filePath}" || [[ -n ${LAST_RETURNED_VALUE} ]]
     # fail safe for cases where the file is suppose to not be empty but we get null string
     if [[ -z "${LAST_RETURNED_VALUE}" ]]; then
       LAST_RETURNED_VALUE="$(<"${filePath}")"
@@ -369,7 +370,7 @@ function io::sleep() {
   # when connected to a terminal, we can just read the stdout
   # which will never be written to, and use a timeout on read
   if [[ -t 2 ]]; then
-    read -rt "${timeout}" -u 2 || :
+    read -rt "${timeout}" -u 2
     return 0
   elif command -v mkfifo 1>/dev/null; then
     if [[ -z ${IO_SLEEP_FIFO:-} ]]; then
@@ -379,7 +380,7 @@ function io::sleep() {
       exec 9<>"${IO_SLEEP_FIFO}"
       rm "${IO_SLEEP_FIFO}"
     fi
-    read -rt "${timeout}" -u 9 || :
+    read -rt "${timeout}" -u 9
   else
     # when everything else failed...
     sleep "${timeout}"
@@ -399,6 +400,7 @@ function io::cat() {
 }
 
 # Read the content of the standard input.
+# Will immediately return if the standard input is empty.
 #
 # Returns:
 #   The content of the standard input in the global variable LAST_RETURNED_VALUE.
@@ -408,7 +410,11 @@ function io::cat() {
 function io::readStdIn() {
   LAST_RETURNED_VALUE=""
   local IFS=''
-  read -rd '' LAST_RETURNED_VALUE <&0 || :
+  if read -t 0 -u 0 -rd ''; then
+    read -u 0 -rd '' LAST_RETURNED_VALUE || [[ -n ${LAST_RETURNED_VALUE} ]]
+  else
+    LAST_RETURNED_VALUE=""
+  fi
 }
 
 # Returns the number of arguments passed.

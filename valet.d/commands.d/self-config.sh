@@ -39,13 +39,16 @@ function selfConfig() {
   core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  if [[ ! -f "${VALET_CONFIG_FILE}" || ${override:-} == "true" ]]; then
-    log::info "Creating the valet config file ⌜${VALET_CONFIG_FILE}⌝."
+  core::getConfigurationDirectory
+  local valetConfigFile="${VALET_CONFIG_FILE:-"${LAST_RETURNED_VALUE}/config"}"
+
+  if [[ ! -f "${valetConfigFile}" || ${override:-} == "true" ]]; then
+    log::info "Creating the valet config file ⌜${valetConfigFile}⌝."
     writeConfigFile "${exportCurrentValues:-}"
   fi
 
   if [[ ${noEdit:-} == "true" ]]; then
-    log::debug "The valet config file ⌜${VALET_CONFIG_FILE}⌝ has been created, now leaving."
+    log::debug "The valet config file ⌜${valetConfigFile}⌝ has been created, now leaving."
     return 0
   fi
 
@@ -54,8 +57,8 @@ function selfConfig() {
   fi
 
   # open the config file
-  log::info "Opening the valet config file ⌜${VALET_CONFIG_FILE}⌝."
-  "${EDITOR:-vi}" "${VALET_CONFIG_FILE}"
+  log::info "Opening the valet config file ⌜${valetConfigFile}⌝."
+  "${EDITOR:-vi}" "${valetConfigFile}"
 }
 
 function writeConfigFile() {
@@ -78,8 +81,8 @@ function writeConfigFile() {
     done
   fi
 
-  if [[ ! -d "${VALET_CONFIG_FILE%/*}" ]]; then
-    mkdir -p "${VALET_CONFIG_FILE%/*}"
+  if [[ ! -d "${valetConfigFile%/*}" ]]; then
+    mkdir -p "${valetConfigFile%/*}"
   fi
 
   local valetConfigFileContent="#!/usr/bin/env bash
@@ -256,5 +259,5 @@ VALET_CONFIG_BUMP_VERSION_ON_BUILD=\"\${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-${EX
 
 "
 
-  echo "${valetConfigFileContent}" >"${VALET_CONFIG_FILE}"
+  echo "${valetConfigFileContent}" >"${valetConfigFile}"
 }

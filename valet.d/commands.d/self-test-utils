@@ -430,7 +430,10 @@ function resetOriginalImportantVariables() {
 # in order to have consistent results in the tests.
 # As well as a simplified log line function.
 function setSimplifiedImportantVariables() {
+  # unset all VALET_ variables to not have the user variables interfere with the tests
   SIMPLIFIED_IMPORTANT_VARIABLES="
+  unset -v ${!VALET_*}
+
   export VALET_CONFIG_ENABLE_COLORS=false
   export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
   export VALET_CONFIG_DISABLE_LOG_TIME=true

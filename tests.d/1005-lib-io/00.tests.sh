@@ -10,11 +10,19 @@ function testIo::toAbsolutePath() {
 
   echo
   echo "→ io::toAbsolutePath 01.invoke.sh"
-  io::toAbsolutePath "01.invoke.sh" && echo "${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath 01.invoke.sh && echo "${LAST_RETURNED_VALUE}"
+
+  echo
+  echo "→ io::toAbsolutePath resources"
+  io::toAbsolutePath resources && echo "${LAST_RETURNED_VALUE}"
 
   echo
   echo "→ io::toAbsolutePath ./01.invoke.sh"
-  io::toAbsolutePath "./01.invoke.sh" && echo "${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath ./01.invoke.sh && echo "${LAST_RETURNED_VALUE}"
+
+  echo
+  echo "→ io::toAbsolutePath ./resources"
+  io::toAbsolutePath ./resources && echo "${LAST_RETURNED_VALUE}"
 
   echo
   echo "→ io::toAbsolutePath ../0003-self/01.invoke.sh"
@@ -75,6 +83,10 @@ function testIo::readStdIn() {
 
   echo "→ io::readStdIn <<<'coucou'"
   io::readStdIn <<<"coucou"
+  echo "${LAST_RETURNED_VALUE}"
+
+  echo "→ io::readStdIn"
+  io::readStdIn
   echo "${LAST_RETURNED_VALUE}"
 
   endTest "Testing io::readStdIn" 0

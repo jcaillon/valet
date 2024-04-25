@@ -285,7 +285,7 @@ function interactive::testKeys() {
   echo "Press any key to see the character that bash sees (CTRL + C to interrupt).${AC__CURSOR_HIDE}"
   while true; do
     if interactive::waitForKey -t 1; then
-      printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+      printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
     fi
     if [[ ! -t 1 ]]; then break; fi
   done

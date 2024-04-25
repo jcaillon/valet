@@ -4,7 +4,7 @@ core::sourceForFunction "selfSetup"
 
 function testselfSetup() {
   local -i exitCode
-  local originalConfigFile="${VALET_CONFIG_FILE}"
+  local originalConfigFile="${VALET_CONFIG_FILE:-}"
   local configFile
   setTempFilesNumber 800
   io::createTempFile && configFile="${LAST_RETURNED_VALUE}"
