@@ -42,7 +42,7 @@
 
 # if not executing in bash, we can stop here
 if [[ -z "${BASH_VERSION:-}" ]]; then
-  echo "❌ This script must be run with bash." 1>&2
+  printf '%s\n' "❌ This script must be run with bash." 1>&2
   exit 0
 fi
 
@@ -193,8 +193,8 @@ function selfUpdate() {
       ${SUDO} mkdir -p "${binDirectory}" 1>/dev/null || core::fail "Could not create the bin directory ⌜${binDirectory}⌝."
       log::info "Creating a shim ⌜${GLOBAL_VALET_HOME}/valet → ${valetBin}⌝."
       {
-        echo "#!/usr/bin/env bash"
-        echo -n "'${GLOBAL_VALET_HOME}/valet' \"\$@\""
+        printf '%s\n' "#!/usr/bin/env bash"
+        printf '%s' "'${GLOBAL_VALET_HOME}/valet' \"\$@\""
       } | ${SUDO} tee -a "${valetBin}" 1>/dev/null
       ${SUDO} chmod +x "${valetBin}"
     fi

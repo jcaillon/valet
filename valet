@@ -2,7 +2,7 @@
 set -Eeu -o pipefail
 
 if [[ ${BASH_VERSINFO[0]:-0} -lt 5 ]]; then
-  echo "Bash 5 or higher is required to run valet."
+  printf '%s\n' "Bash 5 or higher is required to run valet."
   exit 1
 fi
 

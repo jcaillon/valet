@@ -152,7 +152,7 @@ function createRelease() {
 
   # bump the version
   string::bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${LAST_RETURNED_VALUE}"
-  if [[ "${dryRun:-}" != "true" ]]; then echo -n "${newVersion}" >"${GLOBAL_VALET_HOME}/valet.d/version"; fi
+  if [[ "${dryRun:-}" != "true" ]]; then printf '%s' "${newVersion}" >"${GLOBAL_VALET_HOME}/valet.d/version"; fi
   log::info "The new version of valet is: ${newVersion}."
 
   # commit the new version and push it

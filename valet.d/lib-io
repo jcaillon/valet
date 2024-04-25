@@ -244,7 +244,7 @@ function io::invoke() {
 # Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
 #
 # This is the equivalent of:
-# myvar="$(echo "mystring" | mycommand)"
+# myvar="$(printf '%s\n' "mystring" | mycommand)"
 # In windows, this is tremendously faster that the example above.
 # On linux, it is slighly faster (but it might be slower if you don't have SSD?).
 # On linux, you can use a tmpfs directory for massive gains over subshells.
@@ -377,10 +377,10 @@ function io::sleep() {
       io::createTempFile && IO_SLEEP_FIFO="${LAST_RETURNED_VALUE}"
       rm "${IO_SLEEP_FIFO}"
       mkfifo -m 700 "${IO_SLEEP_FIFO}"
-      exec 9<>"${IO_SLEEP_FIFO}"
+      exec 6<>"${IO_SLEEP_FIFO}"
       rm "${IO_SLEEP_FIFO}"
     fi
-    read -rt "${timeout}" -u 9
+    read -rt "${timeout}" -u 6
   else
     # when everything else failed...
     sleep "${timeout}"
@@ -396,7 +396,7 @@ function io::sleep() {
 #   io::cat "myFile"
 function io::cat() {
   io::readFile "${1}"
-  echo "${LAST_RETURNED_VALUE}"
+  printf '%s\n' "${LAST_RETURNED_VALUE}"
 }
 
 # Read the content of the standard input.

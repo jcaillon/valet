@@ -171,7 +171,7 @@ function log::setLevel() {
 #   the current log level in the global variable LAST_RETURNED_VALUE.
 #
 # Usage:
-#   log::getLevel && echo "The log level is ⌜${LAST_RETURNED_VALUE}⌝."
+#   log::getLevel && printf '%s\n' "The log level is ⌜${LAST_RETURNED_VALUE}⌝."
 function log::getLevel() {
   LAST_RETURNED_VALUE="${GLOBAL_LOG_LEVEL:-info}"
 }
@@ -187,8 +187,9 @@ function log::getLevel() {
 #   log::print "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
 # shellcheck disable=SC2317
 function log::print() { return 0; }
-# We build the log line function dynamically to adapt to the user options
-# This avoid to have to check the options at each log message
+# We build the log line function dynamically to adapt to the user options.
+# This avoid to have to check the options at each log message.
+# It creates the global variable GLOBAL_LOG_PRINT_FUNCTION.
 # shellcheck disable=SC2016
 function log::createPrintFunction() {
   GLOBAL_LOG_PRINT_FUNCTION='
@@ -371,7 +372,7 @@ function log::debug() {
 # Returns 0 if debug mode is active, 1 otherwise.
 #
 # Usage:
-#   log::isDebugEnabled && echo "Debug mode is active."
+#   log::isDebugEnabled && printf '%s\n' "Debug mode is active."
 function log::isDebugEnabled() {
   if [[ ${LOG_LEVEL_INT:-1} -eq 0 ]]; then
     return 0

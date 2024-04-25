@@ -314,7 +314,7 @@ Exit code: `0`
 
 ```log
 INFO     This command requires sudo privileges.
-▶ called sudo echo alright
+▶ called sudo printf %s alright
 ▶ called sudo whoami
 ```
 

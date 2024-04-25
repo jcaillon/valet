@@ -219,13 +219,11 @@ function writeCommandDefinitionVariablesToFile() {
   local outputFile="${1}"
   local content
 
-  if [[ ! -d "${outputFile%/*}" ]]; then
-    mkdir -p "${outputFile%/*}"
-  fi
+  io::createFilePathIfNeeded "${outputFile}"
 
   {
     # write the header
-    echo "#!/usr/bin/env bash
+    printf '%s\n' "#!/usr/bin/env bash
 # author: github.com/jcaillon
 # description: This script declares global variables used in valet to manage commands.
 # shellcheck disable=SC2034
@@ -288,7 +286,7 @@ _CMD_INCLUDED=1
     local line
     local IFS=':'
     while read -r -d $'\n' line; do
-      echo "${line#declare -? }"
+      printf '%s\n' "${line#declare -? }"
     done <<< "${LAST_RETURNED_VALUE}"
   } >"${outputFile}"
 }

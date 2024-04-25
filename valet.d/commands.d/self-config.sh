@@ -259,5 +259,5 @@ VALET_CONFIG_BUMP_VERSION_ON_BUILD=\"\${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-${EX
 
 "
 
-  echo "${valetConfigFileContent}" >"${valetConfigFile}"
+  printf '%s\n' "${valetConfigFileContent}" >"${valetConfigFile}"
 }

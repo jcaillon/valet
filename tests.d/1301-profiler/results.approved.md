@@ -43,7 +43,7 @@ D  I  S  timer  delta                           source:line function            
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:154  selfMock2()                              → log::info 'More: arg2.'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:156  selfMock2()                              → aSubFunctionInselfMock2
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:163  aSubFunctionInselfMock2()                → log::debug 'This is a sub function.'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:158  selfMock2()                              → echo 'That'\''s it!'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:158  selfMock2()                              → printf '%s\n' 'That'\''s it!'
 ```
 
 **Error** output:

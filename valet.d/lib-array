@@ -11,7 +11,7 @@ set -Eeu -o pipefail
 # Usage:
 #   declare -g myArray=( "z" "a" "b" )
 #   array::sort myArray
-#   echo "${myArray[@]}"
+#   printf '%s\n' "${myArray[@]}"
 function array::sort() {
   local -n array=${1}
   local -i i j
@@ -39,7 +39,7 @@ function array::sort() {
 # Usage:
 #   declare -g myArray=( "a" "b" )
 #   array::appendIfNotPresent myArray "c"
-#   echo "${myArray[@]}"
+#   printf '%s\n' "${myArray[@]}"
 function array::appendIfNotPresent() {
   local -n array=${1}
   local value="${2}"
@@ -70,7 +70,7 @@ function array::appendIfNotPresent() {
 #
 # Usage:
 #   declare -g myArray=( "a" "b" )
-#   array::isInArray myArray "b" && echo "b is in the array"
+#   array::isInArray myArray "b" && printf '%s\n' "b is in the array"
 function array::isInArray() {
   local -n array="${1}"
   local value="${2}"
@@ -137,9 +137,9 @@ function array::makeArraysSameSize() {
 #   declare -g criteria1=( 3 2 2 )
 #   declare -g criteria2=( 1 3 2 )
 #   array::sortWithCriteria myArray criteria1 criteria2
-#   echo "${myArray[@]}"
+#   printf '%s\n' "${myArray[@]}"
 #   > c b a
-#   echo "${LAST_RETURNED_ARRAY[@]}"
+#   printf '%s\n' "${LAST_RETURNED_ARRAY[@]}"
 #   > 3 2 1
 function array::sortWithCriteria() {
   local -n array="${1}"

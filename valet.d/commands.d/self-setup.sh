@@ -32,10 +32,10 @@ description: |-
 function selfSetup() {
   log::info "Now setting up Valet."
 
-  echo "─────────────────────────────────────"
-  echo "${VALET_CONFIG_COLOR_INFO:-$'\e'"[0;36m"}This is a COLOR CHECK, this line should be COLORED (in cyan by default).${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
-  echo "${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[0;32m"}This is a COLOR CHECK, this line should be COLORED (in green by default).${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
-  echo "─────────────────────────────────────"
+  printf '%s\n' "─────────────────────────────────────"
+  printf '%s\n' "${VALET_CONFIG_COLOR_INFO:-$'\e'"[0;36m"}This is a COLOR CHECK, this line should be COLORED (in cyan by default).${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
+  printf '%s\n' "${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[0;32m"}This is a COLOR CHECK, this line should be COLORED (in green by default).${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
+  printf '%s\n' "─────────────────────────────────────"
 
   if interactive::promptYesNo "Do you see the colors in the color check above the line?"; then
     export VALET_CONFIG_ENABLE_COLORS=true
@@ -45,13 +45,13 @@ function selfSetup() {
   log::createPrintFunction
   eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
-  echo "─────────────────────────────────────"
-  echo "This is a nerd icon check, check out the next lines:"
-  echo "A cross within a square: ${VALET_CONFIG_ICON_ERROR:-$'\uf2d3'}"
-  echo "A warning sign: ${VALET_CONFIG_ICON_WARNING:-$'\uf071'}"
-  echo "A checked box: ${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}"
-  echo "An information icon: ${VALET_CONFIG_ICON_INFO:-$'\uf05a'}"
-  echo "─────────────────────────────────────"
+  printf '%s\n' "─────────────────────────────────────"
+  printf '%s\n' "This is a nerd icon check, check out the next lines:"
+  printf '%s\n' "A cross within a square: ${VALET_CONFIG_ICON_ERROR:-$'\uf2d3'}"
+  printf '%s\n' "A warning sign: ${VALET_CONFIG_ICON_WARNING:-$'\uf071'}"
+  printf '%s\n' "A checked box: ${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}"
+  printf '%s\n' "An information icon: ${VALET_CONFIG_ICON_INFO:-$'\uf05a'}"
+  printf '%s\n' "─────────────────────────────────────"
 
   if ! interactive::promptYesNo "Do you correctly see the nerd icons in the icon check above the line?"; then
     log::info "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."$'\n'"You can also choose to enable the icons in Valet if you plan to install a nerd font."

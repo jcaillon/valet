@@ -120,18 +120,15 @@ Exit code: `0`
 2=2
 
 → string::indexOf 'hello' 'he'
-yeah
 0=0
 
 → string::indexOf 'hello' 'he' 10
-nop
 -1=-1
 
 → string::indexOf 'yesyes' 'ye' 1
 3=3
 
 → string::indexOf 'yesyes' 'yes' 3
-yeah
 3=3
 
 → string::indexOf 'yesyes' 'yes' 5
@@ -159,7 +156,6 @@ llo=⌈llo⌉
 =⌈⌉
 
 → string::extractBetween 'hello' 'h' 'a'
-yeah
 =⌈⌉
 
 multilinetext="1 line one

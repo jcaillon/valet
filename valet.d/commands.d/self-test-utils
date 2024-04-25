@@ -103,7 +103,7 @@ function echoFileWithLineNumberSubstitution() {
       line="${line/%:[[:digit:]][[:digit:]][[:digit:]]/:XXX}"
       line="${line/%:[[:digit:]][[:digit:]][[:digit:]][[:digit:]]/:XXX}"
     fi
-    echo "${line}"
+    printf '%s\n' "${line}"
   done <"${file}"
 }
 
@@ -119,7 +119,7 @@ function runCoreTests() {
   fi
 
   # we need to rebuild the commands for the core commands only
-  rebuildCommands ""
+  rebuildCommands "" ""
 
   # we should always run the test suite from the valet home directory to have consistent paths
   # in the report files
@@ -133,7 +133,7 @@ function runCoreTests() {
     log::warning "The valet examples directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝ does not exist, cannot run the tests on the core examples."
   else
     # we need to rebuild the commands for the examples only
-    rebuildCommands "${GLOBAL_VALET_HOME}/examples.d"
+    rebuildCommands "${GLOBAL_VALET_HOME}/examples.d" ""
 
     log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝."
     runTestSuites "${GLOBAL_VALET_HOME}/examples.d/showcase/tests.d"
@@ -150,7 +150,11 @@ function rebuildCommands() {
   log::getLevel && originalLogLevel="${LAST_RETURNED_VALUE}"
   log::setLevel warning true
   core::sourceForFunction selfBuild
-  selfBuild --output "" --user-directory "${1:-}"
+  if (( $# == 1)); then
+    selfBuild --user-directory "${1:-}"
+  else
+    selfBuild --user-directory "${1:-}" --output "${2}"
+  fi
   log::setLevel "${originalLogLevel}" true
 }
 
@@ -288,11 +292,8 @@ function runTest() {
 
   # run the test
   pushd "${testDirectory}" >/dev/null
-  # shellcheck disable=SC1091
-  set +Eeu +o pipefail
   # shellcheck disable=SC1090
   source "${testScript}"
-  set -Eeu -o pipefail
   popd >/dev/null
 
   # remove the onExitTest function, we can exit safely now
@@ -332,7 +333,7 @@ function compareWithApproved() {
     rm -f "${receivedFile}" 2>/dev/null || :
     return 0
   else
-    echo "${receivedFile} is different than ${approvedFile} (see above)" 1>&2
+    printf '%s\n' "${receivedFile} is different than ${approvedFile} (see above)" 1>&2
     log::error "🧪 ${testName}: KO, differs from approved file (see difference above)." | tee >(cat >&2)
   fi
 
@@ -354,6 +355,14 @@ function onExitTestInternal() {
   local rc=$?
 
   resetFdRedirection
+
+  # For this message, it is actually very inconvenient to have log wrap because
+  # it will not correctly show spaces and such.
+  # we disable the log wrap from now
+  resetOriginalImportantVariables
+  export VALET_CONFIG_DISABLE_LOG_WRAP=true
+  log::createPrintFunction
+  eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
   log::getCallStack 4 && local stack="${LAST_RETURNED_VALUE}"
 
@@ -469,6 +478,7 @@ function setSimplifiedImportantVariables() {
 
   export GLOBAL_TEST_TEMP_FILE=\"${_TEST_TEMP_FILE}\"
   "
+
   eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
   log::createPrintFunction
   SIMPLIFIED_IMPORTANT_VARIABLES+="
@@ -476,7 +486,7 @@ function setSimplifiedImportantVariables() {
   "
 }
 
-# This function is used to echo the content of a file with some substitutions.
+# This function is used to print the content of a file with some substitutions.
 # The substitutions are:
 # - replace the GLOBAL_VALET_HOME with $GLOBAL_VALET_HOME
 # - replace the current test directory with a dot
@@ -505,6 +515,6 @@ function echoFileSubstitutingPath() {
     if [[ ${line} =~ "after "[0-9]{1,}s.$ ]]; then
       line="${line/%after */after Xs.}"
     fi
-    echo -n "${line}"
+    printf '%s' "${line}"
   done <"${file}"
 }

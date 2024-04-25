@@ -13,7 +13,7 @@ set -Eeu -o pipefail
 #
 # Usage:
 #  string::cutField "field1 field2 field3" 1 " " && local field="${LAST_RETURNED_VALUE}"
-#  echo "${field}" # will output "field2"
+#  printf '%s' "${field}" # will output "field2"
 #
 # Notes:
 #  This is faster than:
@@ -217,7 +217,6 @@ function string::indexOf() {
     # if the starting index is greater than the length of the string, we return -1
     if [[ startingIndex -ge stringLength ]]; then
       LAST_RETURNED_VALUE=-1
-      echo "nop"
       return 0
     fi
 
@@ -229,7 +228,6 @@ function string::indexOf() {
 
   # if the string starts with the search, we have our index
   if [[ ${string} == "${search}"* ]]; then
-    echo "yeah"
     LAST_RETURNED_VALUE=${startingIndex}
     return 0
   fi

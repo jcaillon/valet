@@ -59,7 +59,7 @@ function main::onExitInternal() {
 trap main::onExitInternal EXIT
 
 function main::onInterruptInternal() {
-  echo # Set cursor to the next line of '^C'
+  printf '\n' # Set cursor to the next line of '^C'
   log::print "WARNING" "${VALET_CONFIG_ICON_STOPPED:-$'\uf256'}" "STOPPED" "Program interrupted by the user."
 
   if log::isDebugEnabled; then
@@ -278,7 +278,7 @@ fi
 #   main::printHelp function "this" "false" "${GLOBAL_COLUMNS}"
 function main::printHelp() {
   main::getHelpText "$@"
-  echo -n "${LAST_RETURNED_VALUE}"
+  printf '%s' "${LAST_RETURNED_VALUE}"
 }
 
 # Get the help text of a function or a command.
@@ -615,7 +615,7 @@ function main::checkSudo() {
   if command -v sudo 1>/dev/null 2>&1; then
     log::info "This command requires sudo privileges."
     SUDO="sudo"
-    ${SUDO} echo "alright" 1>/dev/null || core::fail "Could not sudo but the command requires it."
+    ${SUDO} printf '%s' "alright" 1>/dev/null || core::fail "Could not sudo but the command requires it."
   else
     SUDO=""
   fi
@@ -798,7 +798,7 @@ function main::addLastChoice() {
   readarray -d $'\n' -t lastChoices <"${lastChoicesFile}"
 
   # write the command first
-  echo "${command}" >"${lastChoicesFile}"
+  printf '%s\n' "${command}" >"${lastChoicesFile}"
 
   # loop through the last choices and add them to the file, limit to 20 total
   local -i total index
@@ -807,7 +807,7 @@ function main::addLastChoice() {
   index=0
   for ((index = 0; index < total; index++)); do
     if [[ "${lastChoices[${index}]}" != "${command}" ]]; then
-      echo "${lastChoices[${index}]}" >>"${lastChoicesFile}"
+      printf '%s\n' "${lastChoices[${index}]}" >>"${lastChoicesFile}"
     else
       total+=1
       if [[ total -gt ${#lastChoices[@]} ]]; then total=${#lastChoices[@]}; fi
@@ -862,7 +862,7 @@ function main::onFsfsItemSelectionChange() {
 # Get the function name of a command.
 #
 # Usage:
-#  main::getFunctionNameFromCommand "self build" && echo "${LAST_RETURNED_VALUE}"
+#  main::getFunctionNameFromCommand "self build" && printf '%s\n' "${LAST_RETURNED_VALUE}"
 function main::getFunctionNameFromCommand() {
   local -n functionName="CMD_FUNCTION_NAME_${1//[^[:alnum:]]/_}"
   LAST_RETURNED_VALUE="${functionName:-}"
@@ -880,7 +880,7 @@ function main::getFunctionNameFromCommand() {
 #   the exact command in the global variable LAST_RETURNED_VALUE3
 #
 # Usage:
-#  main::fuzzyMatchCommandtoFunctionName "self" "build" && echo "${LAST_RETURNED_VALUE}"
+#  main::fuzzyMatchCommandtoFunctionName "self" "build" && printf '%s\n' "${LAST_RETURNED_VALUE}"
 function main::fuzzyMatchCommandtoFunctionName() {
   local level loopI functionName command exactCommand
   if [[ $# -eq 0 ]]; then
@@ -1224,7 +1224,7 @@ function main::goInteractive() {
   # TODO: go interactive
   log::warning "Entering interactive mode for the function ⌜${functionName}⌝. This is not yet implemented."
 
-  # at the end, echo to the user the complete command that will be run
+  # at the end, printf '%s\n' to the user the complete command that will be run
 }
 
 #===============================================================

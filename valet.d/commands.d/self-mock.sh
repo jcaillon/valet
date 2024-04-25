@@ -84,7 +84,7 @@ function selfMock1() {
     log::success "This is a success message."
     log::warning "This is a warning message."$'\n'"With a second line."
     if log::isDebugEnabled; then
-      echo "The debug mode is activated!" 1>&2
+      printf '%s\n' "The debug mode is activated!" 1>&2
     fi
     ;;
   wait-indefinitely)
@@ -155,7 +155,7 @@ function selfMock2() {
 
   aSubFunctionInselfMock2
 
-  echo "That's it!"
+  printf '%s\n' "That's it!"
 }
 
 function aSubFunctionInselfMock2() {

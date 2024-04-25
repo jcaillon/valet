@@ -212,7 +212,7 @@ function bumpValetBuildVersion() {
 
   string::bumpSemanticVersion "${currentVersion}" "patch" "false"
 
-  echo -n "${LAST_RETURNED_VALUE}" >"${versionFile}"
+  printf '%s' "${LAST_RETURNED_VALUE}" >"${versionFile}"
 
   log::info "The valet build version has been bumped to ⌜${LAST_RETURNED_VALUE}⌝."
 }
