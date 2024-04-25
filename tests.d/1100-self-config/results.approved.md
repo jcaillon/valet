@@ -77,6 +77,12 @@ VALET_CONFIG_WORK_FILES_DIRECTORY="${VALET_CONFIG_WORK_FILES_DIRECTORY:-}"
 # Set to 0 to disable this feature and always display items in the alphabetical order.
 VALET_CONFIG_REMEMBER_LAST_CHOICES="${VALET_CONFIG_REMEMBER_LAST_CHOICES:-}"
 
+# The name of a script which will be sourced by Valet on startup if it is present in
+# the current directory. This allows you to define custom functions or variables that
+# will be available in Valet.
+# Defaults to the '.env' file in the current directory.
+VALET_CONFIG_DOT_ENV_SCRIPT="${VALET_CONFIG_DOT_ENV_SCRIPT:-}"
+
 # -----------
 # Log/output configuration
 # -----------
@@ -303,6 +309,12 @@ VALET_CONFIG_WORK_FILES_DIRECTORY="${VALET_CONFIG_WORK_FILES_DIRECTORY:-}"
 # Number of last choices to remember when selecting an item from a command menu.
 # Set to 0 to disable this feature and always display items in the alphabetical order.
 VALET_CONFIG_REMEMBER_LAST_CHOICES="${VALET_CONFIG_REMEMBER_LAST_CHOICES:-}"
+
+# The name of a script which will be sourced by Valet on startup if it is present in
+# the current directory. This allows you to define custom functions or variables that
+# will be available in Valet.
+# Defaults to the '.env' file in the current directory.
+VALET_CONFIG_DOT_ENV_SCRIPT="${VALET_CONFIG_DOT_ENV_SCRIPT:-}"
 
 # -----------
 # Log/output configuration
