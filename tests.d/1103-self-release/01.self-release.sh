@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-core::sourceForFunction "selfRelease"
+core::sourceFunction "selfRelease"
 
 function testSelfRelease() {
   local -i exitCode

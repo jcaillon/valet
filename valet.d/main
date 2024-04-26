@@ -578,7 +578,7 @@ function main::runFunction() {
   fi
 
   # source the file in which the function is located if needed
-  core::sourceForFunction "${functionName}"
+  core::sourceFunction "${functionName}"
 
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
     core::fail "The function ⌜${functionName}⌝ associated with the command ⌜${command}⌝ does not exist."

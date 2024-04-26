@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-core::sourceForFunction "selfSetup"
+core::sourceFunction "selfSetup"
 
 function testselfSetup() {
   local -i exitCode

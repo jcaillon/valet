@@ -221,7 +221,7 @@ function selfUpdate() {
   # run the post install command
   if [[ ${VALET_UNATTENDED:-} != "true" ]]; then
     log::info "Running the self setup command."
-    core::sourceForFunction selfSetup
+    core::sourceFunction selfSetup
     selfSetup
   fi
 }

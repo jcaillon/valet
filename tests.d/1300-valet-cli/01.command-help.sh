@@ -25,7 +25,13 @@ function testHelp() {
 
   # test that no arguments show the valet help
   echo "→ valet help"
-  ("${GLOBAL_VALET_HOME}/valet" help)
+  local output
+  output="$("${GLOBAL_VALET_HOME}/valet" help 2>&1)"
+  if [[ ${output} == *"valet [options] [command]"* ]]; then
+    echo "OK, we got the valet help."
+  else
+    echo "KO, we did not get the valet help."
+  fi
   endTest "Testing that no arguments show the valet help" $?
 }
 

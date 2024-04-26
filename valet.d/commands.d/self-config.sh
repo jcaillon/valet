@@ -31,6 +31,7 @@ options:
 - name: --override
   description: |-
     Override of the configuration file even if it already exists.
+    Unless the option --export-current-values is used, the existing values will be reset.
 - name: --export-current-values
   description: |-
     When writing the configuration file, export the current values of the variables.

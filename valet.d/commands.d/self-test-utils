@@ -149,7 +149,7 @@ function rebuildCommands() {
   local originalLogLevel
   log::getLevel && originalLogLevel="${LAST_RETURNED_VALUE}"
   log::setLevel warning true
-  core::sourceForFunction selfBuild
+  core::sourceFunction selfBuild
   if (( $# == 1)); then
     selfBuild --user-directory "${1:-}"
   else
@@ -473,6 +473,8 @@ function setSimplifiedImportantVariables() {
   export VALET_CONFIG_COLOR_COMMAND=CCO
   export VALET_CONFIG_COLOR_ACTIVE_BUTTON=CAB
   export VALET_CONFIG_COLOR_UNACTIVE_BUTTON=CUB
+
+  export VALET_CONFIG_DOT_ENV_SCRIPT=false
 
   export GLOBAL_COLUMNS=9999
 

@@ -68,7 +68,7 @@ function selfSetup() {
   eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
   # generate the config
-  core::sourceForFunction selfConfig
+  core::sourceFunction selfConfig
   selfConfig --export-current-values --no-edit --override
 
   # verify that we have the tools required

@@ -28,7 +28,7 @@ if [[ -f ${VALET_CONFIG_FILE} ]]; then
   source "${VALET_CONFIG_FILE}"
 fi
 # Same with the env script
-if [[ -f ${VALET_CONFIG_DOT_ENV_SCRIPT:-.env} ]]; then
+if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_SCRIPT:-.env} ]]; then
   # shellcheck source=/dev/null
   source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
 fi
@@ -285,9 +285,17 @@ function log::createPrintFunction() {
   printfFormat+="%s\n"
   printfArguments+='"${LAST_RETURNED_VALUE}"'
 
-  GLOBAL_LOG_PRINT_FUNCTION+='
-    printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_LOG_FD:-2}"'
-  }'
+  if [[ -z ${VALET_LOG_FD:-} || ${#VALET_LOG_FD} == 1 ]]; then
+    # it is a numbered file descriptor
+    GLOBAL_LOG_PRINT_FUNCTION+='
+      printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_LOG_FD:-2}"'
+    }'
+  else
+    # it is a file
+    GLOBAL_LOG_PRINT_FUNCTION+='
+      printf "'"${printfFormat}"'" '"${printfArguments}"' 1>>'"${VALET_LOG_FD}"'
+    }'
+  fi
 }
 log::createPrintFunction
 eval "${GLOBAL_LOG_PRINT_FUNCTION}"
@@ -472,8 +480,8 @@ function core::resetIncludedFiles() {
 # $1: the function name
 #
 # Usage:
-#  core::sourceForFunction "functionName"
-function core::sourceForFunction() {
+#  core::sourceFunction "functionName"
+function core::sourceFunction() {
   local functionName
   functionName="${1}"
 
