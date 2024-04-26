@@ -116,6 +116,7 @@ function io::cleanupTempFiles() {
 case "${TERM:-}" in
     xterm-color|xterm-256color|linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}";;
     xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
+    *) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}";;
 esac
 
 # This function exports the terminal size in the global variables GLOBAL_COLUMNS and GLOBAL_LINES.
@@ -285,15 +286,15 @@ function log::createPrintFunction() {
   printfFormat+="%s\n"
   printfArguments+='"${LAST_RETURNED_VALUE}"'
 
-  if [[ -z ${VALET_LOG_FD:-} || ${#VALET_LOG_FD} == 1 ]]; then
+  if [[ -z ${VALET_CONFIG_LOG_FD:-} || ${#VALET_CONFIG_LOG_FD} == 1 ]]; then
     # it is a numbered file descriptor
     GLOBAL_LOG_PRINT_FUNCTION+='
-      printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_LOG_FD:-2}"'
+      printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_CONFIG_LOG_FD:-2}"'
     }'
   else
     # it is a file
     GLOBAL_LOG_PRINT_FUNCTION+='
-      printf "'"${printfFormat}"'" '"${printfArguments}"' 1>>'"${VALET_LOG_FD}"'
+      printf "'"${printfFormat}"'" '"${printfArguments}"' 1>>'"${VALET_CONFIG_LOG_FD}"'
     }'
   fi
 }
@@ -921,12 +922,12 @@ fi
 if [[ ${VALET_VERBOSE=:-} == "true" ]]; then
   log::setLevel "debug"
 fi
-if [[ -n "${VALET_LOG_FD:-}" ]]; then
+if [[ -n "${VALET_CONFIG_LOG_FD:-}" ]]; then
   # make sure the file descriptor is valid
-  if ! { : >&"${VALET_LOG_FD}"; } 2>/dev/null; then
-    _ORIGINAL_FD="${VALET_LOG_FD}"
-    VALET_LOG_FD=2
-    core::fail "The file descriptor VALET_LOG_FD=⌜${_ORIGINAL_FD}⌝ is not valid."
+  if ! { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+    _ORIGINAL_FD="${VALET_CONFIG_LOG_FD}"
+    VALET_CONFIG_LOG_FD=2
+    core::fail "The file descriptor VALET_CONFIG_LOG_FD=⌜${_ORIGINAL_FD}⌝ is not valid."
   fi
 fi
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -Eeu -o pipefail
 # Title:         valet.d/commands.d/*
 # Author:        github.com/jcaillon
 #
@@ -28,7 +29,8 @@
 #   VALET_INSTALLATION_DIRECTORY the directory where Valet will be installed.
 #   VALET_VERBOSE: set to 'true' to display debug information.
 #   VALET_NO_SHIM: set to 'true' to not create the shim script in /usr/local/bin.
-#   VALET_DONT_APPEND_PATH: set to 'true' to not add the Valet directory to the PATH (append to your .bashrc file).
+#   VALET_NO_PATH: set to 'true' to not add the Valet directory to the PATH (append to your .bashrc file).
+#   VALET_NO_EXAMPLES: set to 'true' to not copy the examples (showcase) to the ~/.valet.d valet user directory (will do it only if empty by default).
 #
 # Usage:
 #
@@ -201,7 +203,7 @@ function selfUpdate() {
 
     # make sure the valetBin directory is in the path or add it to ~.bashrc
     if ! command -v valet &>/dev/null; then
-      if [[ ${VALET_DONT_APPEND_PATH:-false} == true ]]; then
+      if [[ ${VALET_NO_PATH:-false} == true ]]; then
         log::warning "Make sure to add ⌜${binDirectory}⌝ (or ⌜${GLOBAL_VALET_HOME}⌝) in your PATH."
       else
         if [[ -f "${HOME}/.bashrc" ]]; then

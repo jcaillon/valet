@@ -148,7 +148,7 @@ function fsfsInitialize() {
   FSFS_SEARCH_STRING=""
 
   # set up colors
-  if [[ ${VALET_CONFIG_ENABLE_COLORS} == "true" ]]; then
+  if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
     FSFS_COLOR_RESET_TEXT="${VALET_COLOR_FSFS_RESET_TEXT:-"${AC__TEXT_RESET}"}"
     FSFS_COLOR_STATIC="${VALET_COLOR_FSFS_STATIC:-"${AC__FG_BRIGHT_BLACK}"}"
     FSFS_COLOR_FOCUS="${VALET_COLOR_FSFS_FOCUS:-"${AC__FG_MAGENTA}"}"
