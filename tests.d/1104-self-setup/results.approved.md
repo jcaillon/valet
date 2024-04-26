@@ -32,14 +32,14 @@ An information icon: II
 [2m   │[0m Do you correctly see the nerd icons in the icon check above the line? [2m│[0m
 [2m   └─[69b─┘\[0m
 [1G[0J
-[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
+[1F[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
 [2m │[0m No. [2m│[0m
 [2m/└─[3b─┘[0m
 [2m   ┌─[41b─┐[0m
 [2m   │[0m Do you want to enable the icons in Valet? [2m│[0m
 [2m   └─[41b─┘\[0m
 [1G[0J
-[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
+[1F[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
 [2m │[0m No. [2m│[0m
 [2m/└─[3b─┘[0m
 ```
@@ -91,7 +91,7 @@ An information icon: II
 [2m   │[0m Do you correctly see the nerd icons in the icon check above the line? [2m│[0m
 [2m   └─[69b─┘\[0m
 [1G[0J
-[1F[?25l[7mCAB   (Y)ES   [0m   [7mCUB   (N)O   [0m[1G[0K[?25h[2m ┌─[4b─┐[0m
+[1F[?25l[7mCUB   (Y)ES   [0m   [7mCAB   (N)O   [0m[1G[0K[?25h[2m ┌─[4b─┐[0m
 [2m │[0m Yes. [2m│[0m
 [2m/└─[4b─┘[0m
 [2m   ┌─[32b─┐[0m

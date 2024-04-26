@@ -28,7 +28,7 @@ function io::toAbsolutePath() {
 
   if pushd "${file%/*}" &>/dev/null; then
     LAST_RETURNED_VALUE="${PWD}/${file##*/}"
-    popd &>/dev/null
+    popd 1>/dev/null
     return 0
   fi
 

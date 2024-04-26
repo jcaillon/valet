@@ -12,7 +12,7 @@ if [[ -z "${GLOBAL_VALET_HOME:-}" ]]; then
   GLOBAL_VALET_HOME="${BASH_SOURCE[0]}"
   if [[ "${GLOBAL_VALET_HOME}" != /* ]]; then
     # resolve relative path
-    if pushd "${GLOBAL_VALET_HOME%/*}" &>/dev/null; then GLOBAL_VALET_HOME="${PWD}"; popd &>/dev/null;
+    if pushd "${GLOBAL_VALET_HOME%/*}" &>/dev/null; then GLOBAL_VALET_HOME="${PWD}"; popd 1>/dev/null;
     else GLOBAL_VALET_HOME="${PWD}"; fi
   else
     GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip filename
