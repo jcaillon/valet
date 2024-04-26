@@ -56,16 +56,18 @@ fi
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   _NOT_EXECUTED_FROM_VALET=true
 
-  _VALETD_DIR="${BASH_SOURCE[0]}"
-  if [[ "${_VALETD_DIR}" != /* ]]; then
-    if pushd "${_VALETD_DIR%/*}" &>/dev/null; then
-      _VALETD_DIR="${PWD}"
-      popd &>/dev/null || :
-    else _VALETD_DIR="${PWD}"; fi
-  else _VALETD_DIR="${_VALETD_DIR%/*}"; fi
-  _VALETD_DIR="${_VALETD_DIR%/*}" # strip directory
+  _VALETD_DIR="${BASH_SOURCE[0]:-}"
+  if [[ -z ${_VALETD_DIR} ]]; then
+    if [[ ${_VALETD_DIR} != /* ]]; then
+      if pushd "${_VALETD_DIR%/*}" &>/dev/null; then
+        _VALETD_DIR="${PWD}"
+        popd &>/dev/null || :
+      else _VALETD_DIR="${PWD}"; fi
+    else _VALETD_DIR="${_VALETD_DIR%/*}"; fi
+    _VALETD_DIR="${_VALETD_DIR%/*}" # strip directory
+  fi
 
-  if [[ -f "${_VALETD_DIR}/core" ]]; then
+  if [[ -n ${_VALETD_DIR} && -f ${_VALETD_DIR}/core ]]; then
     # shellcheck source=../core
     source "${_VALETD_DIR}/core"
   else
