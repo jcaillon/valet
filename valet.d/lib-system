@@ -7,7 +7,7 @@ set -Eeu -o pipefail
 # Can be one of these values: "darwin", "linux", "windows".
 #
 # Usage:
-#  system::getOsName && local osName="${LAST_RETURNED_VALUE}"
+#  system::getOsName && local osName="${RETURNED_VALUE}"
 function system::getOsName() {
   local osName
   case "${OSTYPE:-}" in
@@ -16,20 +16,20 @@ function system::getOsName() {
     msys*) osName="windows";;
     *) osName="unknown";;
   esac
-  LAST_RETURNED_VALUE="${osName}"
+  RETURNED_VALUE="${osName}"
 }
 
 # Get the list of all the environment variables.
 # In pure bash, no need for env or printenv.
 #
 # Returns:
-#   LAST_RETURNED_ARRAY: An array with the list of all the environment variables.
+#   RETURNED_ARRAY: An array with the list of all the environment variables.
 #
 # Usage:
 #   system::getEnvVars
-#   for var in "${LAST_RETURNED_ARRAY[@]}"; do
+#   for var in "${RETURNED_ARRAY[@]}"; do
 #       printf '%s=%s\n' "${var}" "${!var}"
 #   done
 function system::getEnvVars() {
-  mapfile -t LAST_RETURNED_ARRAY < <(compgen -v)
+  mapfile -t RETURNED_ARRAY < <(compgen -v)
 }

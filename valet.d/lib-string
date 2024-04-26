@@ -12,7 +12,7 @@ set -Eeu -o pipefail
 # $3: the separator (default to tab if not provided)
 #
 # Usage:
-#  string::cutField "field1 field2 field3" 1 " " && local field="${LAST_RETURNED_VALUE}"
+#  string::cutField "field1 field2 field3" 1 " " && local field="${RETURNED_VALUE}"
 #  printf '%s' "${field}" # will output "field2"
 #
 # Notes:
@@ -29,12 +29,12 @@ function string::cutField() {
   local -i index=0
   for field in ${str}; do
     if [[ index -eq fieldNumber ]]; then
-      LAST_RETURNED_VALUE="${field}"
+      RETURNED_VALUE="${field}"
       return 0
     fi
     index=$((index + 1))
   done
-  LAST_RETURNED_VALUE=""
+  RETURNED_VALUE=""
 }
 
 # This function allows to bump a semantic version formatted like:
@@ -44,7 +44,7 @@ function string::cutField() {
 # $3: clear the prerelease and build (optional, defaults to true)
 #
 # Usage:
-#   string::bumpSemanticVersion "1.2.3-prerelease+build" "major" && local newVersion="${LAST_RETURNED_VALUE}"
+#   string::bumpSemanticVersion "1.2.3-prerelease+build" "major" && local newVersion="${RETURNED_VALUE}"
 function string::bumpSemanticVersion() {
   local version level clearPreRelease
   version="${1}"
@@ -68,7 +68,7 @@ function string::bumpSemanticVersion() {
   if [[ ${bumpLevel:-} == "minor" ]]; then level=1; fi
   local newVersion semVerString
   for semVerIndex in {0..2}; do
-    string::cutField "${version}" "${semVerIndex}" "." && semVerString="${LAST_RETURNED_VALUE%-*}"
+    string::cutField "${version}" "${semVerIndex}" "." && semVerString="${RETURNED_VALUE%-*}"
     semVerNumber="${semVerString%+}"
     if [[ semVerIndex -eq level ]]; then semVerNumber=$((semVerNumber + 1)); fi
     if [[ semVerIndex -gt level ]]; then semVerNumber=0; fi
@@ -80,7 +80,7 @@ function string::bumpSemanticVersion() {
     newVersion="${newVersion%.}${prerelease}${build}"
   fi
 
-  LAST_RETURNED_VALUE="${newVersion}"
+  RETURNED_VALUE="${newVersion}"
 }
 
 # This function convert a camelCase string to a SNAKE_CASE string.
@@ -90,10 +90,10 @@ function string::bumpSemanticVersion() {
 # $1: The camelCase string to convert.
 #
 # Returns:
-#   LAST_RETURNED_VALUE: The SNAKE_CASE string.
+#   RETURNED_VALUE: The SNAKE_CASE string.
 #
 # Usage:
-#   string::camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
+#   string::camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
 function string::camelCaseToSnakeCase() {
   local camelCase="${1}"
   local snakeCase=""
@@ -110,7 +110,7 @@ function string::camelCaseToSnakeCase() {
   while [[ ${snakeCase} == _* ]]; do
     snakeCase="${snakeCase:1}"
   done
-  LAST_RETURNED_VALUE="${snakeCase}"
+  RETURNED_VALUE="${snakeCase}"
 }
 
 # This function convert a kebab-case string to a SNAKE_CASE string.
@@ -120,10 +120,10 @@ function string::camelCaseToSnakeCase() {
 # $1: The kebab-case string to convert.
 #
 # Returns:
-#   LAST_RETURNED_VALUE: The SNAKE_CASE string.
+#   RETURNED_VALUE: The SNAKE_CASE string.
 #
 # Usage:
-#   string::kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${LAST_RETURNED_VALUE}"
+#   string::kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
 function string::kebabCaseToSnakeCase() {
   local kebabCase="${1}"
   local snakeCase=""
@@ -140,7 +140,7 @@ function string::kebabCaseToSnakeCase() {
   while [[ ${snakeCase} == _* ]]; do
     snakeCase="${snakeCase:1}"
   done
-  LAST_RETURNED_VALUE="${snakeCase}"
+  RETURNED_VALUE="${snakeCase}"
 }
 
 # This function convert a kebab-case string to a camelCase string.
@@ -150,10 +150,10 @@ function string::kebabCaseToSnakeCase() {
 # $1: The kebab-case string to convert.
 #
 # Returns:
-#   LAST_RETURNED_VALUE: The camelCase string.
+#   RETURNED_VALUE: The camelCase string.
 #
 # Usage:
-#   string::kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${LAST_RETURNED_VALUE}"
+#   string::kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
 function string::kebabCaseToCamelCase() {
   local kebabCase="${1}"
   local camelCase=""
@@ -170,7 +170,7 @@ function string::kebabCaseToCamelCase() {
       camelCase+="${char}"
     fi
   done
-  LAST_RETURNED_VALUE="${camelCase,}"
+  RETURNED_VALUE="${camelCase,}"
 }
 
 # Trim all whitespaces and truncate spaces.
@@ -178,16 +178,16 @@ function string::kebabCaseToCamelCase() {
 # $1: The string to trim.
 #
 # Returns:
-#   LAST_RETURNED_VALUE: The trimmed string.
+#   RETURNED_VALUE: The trimmed string.
 #
 # Usage:
-#   string::trimAll "   example   string    " && local trimmedString="${LAST_RETURNED_VALUE}"
+#   string::trimAll "   example   string    " && local trimmedString="${RETURNED_VALUE}"
 function string::trimAll() {
   set -f
   # shellcheck disable=SC2086
   # shellcheck disable=SC2048
   set -- $*
-  LAST_RETURNED_VALUE="$*"
+  RETURNED_VALUE="$*"
   set +f
 }
 
@@ -198,11 +198,11 @@ function string::trimAll() {
 # $3: the starting index (default to 0)
 #
 # Returns:
-#  The index of the substring in the string or -1 if not found in the global variable LAST_RETURNED_VALUE.
+#  The index of the substring in the string or -1 if not found in the global variable RETURNED_VALUE.
 #
 # Usage:
-#  string::indexOf "This is a long text" "long" && local index="${LAST_RETURNED_VALUE}"
-#  string::indexOf "This is a long text" "long" 10 && local index="${LAST_RETURNED_VALUE}"
+#  string::indexOf "This is a long text" "long" && local index="${RETURNED_VALUE}"
+#  string::indexOf "This is a long text" "long" 10 && local index="${RETURNED_VALUE}"
 function string::indexOf() {
   local search string
   local -i startingIndex
@@ -216,7 +216,7 @@ function string::indexOf() {
   if [[ startingIndex -gt 0 ]]; then
     # if the starting index is greater than the length of the string, we return -1
     if [[ startingIndex -ge stringLength ]]; then
-      LAST_RETURNED_VALUE=-1
+      RETURNED_VALUE=-1
       return 0
     fi
 
@@ -228,7 +228,7 @@ function string::indexOf() {
 
   # if the string starts with the search, we have our index
   if [[ ${string} == "${search}"* ]]; then
-    LAST_RETURNED_VALUE=${startingIndex}
+    RETURNED_VALUE=${startingIndex}
     return 0
   fi
 
@@ -239,9 +239,9 @@ function string::indexOf() {
 
   # the index is the length of the temp string if it is different than the initial string lenght
   if [[ tempStringLength -ne stringLength ]]; then
-    LAST_RETURNED_VALUE=$((tempStringLength + startingIndex))
+    RETURNED_VALUE=$((tempStringLength + startingIndex))
   else
-    LAST_RETURNED_VALUE=-1
+    RETURNED_VALUE=-1
   fi
   return 0
 }
@@ -257,10 +257,10 @@ function string::indexOf() {
 # $3: the end string (if empty, then it will extract until the end of the string)
 #
 # Returns:
-#  The extracted text in the global variable LAST_RETURNED_VALUE.
+#  The extracted text in the global variable RETURNED_VALUE.
 #
 # Usage:
-#  string::extractBetween "This is a long text" "is a " " text" && local extractedText="${LAST_RETURNED_VALUE}"
+#  string::extractBetween "This is a long text" "is a " " text" && local extractedText="${RETURNED_VALUE}"
 function string::extractBetween() {
   local string start end
   string="${1}"
@@ -270,9 +270,9 @@ function string::extractBetween() {
   local -i startIndex endIndex
 
   if [[ -n "${start}" ]]; then
-    string::indexOf "${string}" "${start}" && startIndex="${LAST_RETURNED_VALUE}"
+    string::indexOf "${string}" "${start}" && startIndex="${RETURNED_VALUE}"
     if [[ startIndex -eq -1 ]]; then
-      LAST_RETURNED_VALUE=""
+      RETURNED_VALUE=""
       return 0
     fi
     startIndex=$((startIndex + ${#start}))
@@ -281,19 +281,19 @@ function string::extractBetween() {
   fi
 
   if [[ -n "${end}" ]]; then
-    string::indexOf "${string}" "${end}" "${startIndex}" && endIndex="${LAST_RETURNED_VALUE}"
+    string::indexOf "${string}" "${end}" "${startIndex}" && endIndex="${RETURNED_VALUE}"
     if [[ endIndex -eq -1 ]]; then
-      LAST_RETURNED_VALUE=""
+      RETURNED_VALUE=""
       return 0
     fi
   else
-    LAST_RETURNED_VALUE="${string:${startIndex}}"
+    RETURNED_VALUE="${string:${startIndex}}"
     return 0
   fi
 
   local -i extractedLength
   extractedLength=$((endIndex - startIndex))
-  LAST_RETURNED_VALUE="${string:${startIndex}:${extractedLength}}"
+  RETURNED_VALUE="${string:${startIndex}:${extractedLength}}"
 }
 
 # Counts the number of occurences of a substring in a string.
@@ -302,17 +302,17 @@ function string::extractBetween() {
 # $2: the substring to count
 #
 # Returns:
-#  The number of occurences in the global variable LAST_RETURNED_VALUE.
+#  The number of occurences in the global variable RETURNED_VALUE.
 #
 # Usage:
-#  string::count "name,firstname,address" "," && local count="${LAST_RETURNED_VALUE}"
+#  string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
 #
 # Notes:
 #   - This is faster than looping over the string and check the substring.
 function string::count() {
   local string="${1}"
   local newString="${string//"${2}"/}"
-  LAST_RETURNED_VALUE=$(((${#string} - ${#newString}) / ${#2}))
+  RETURNED_VALUE=$(((${#string} - ${#newString}) / ${#2}))
 }
 
 # Split a string into an array using a separator.
@@ -321,17 +321,17 @@ function string::count() {
 # $2: the separator (must be a single character!)
 #
 # Returns:
-#   The array in the global variable LAST_RETURNED_ARRAY.
+#   The array in the global variable RETURNED_ARRAY.
 #
 # Usage:
-#   string::split "name,firstname,address" "," && local -a array=("${LAST_RETURNED_ARRAY[@]}")
+#   string::split "name,firstname,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
 #
 # Notes:
 #   - This is faster than using read into an array from a here string.
 function string::split() {
   local IFS="${2}"
   # shellcheck disable=SC2206
-  LAST_RETURNED_ARRAY=(${1})
+  RETURNED_ARRAY=(${1})
 }
 
 # Matches a string against a regex and returns the first capture group of the matched string.
@@ -340,7 +340,7 @@ function string::split() {
 # $2: the regex
 #
 # Returns:
-#   The first capture group in the global variable LAST_RETURNED_VALUE.
+#   The first capture group in the global variable RETURNED_VALUE.
 #   Empty if no match.
 #
 # Usage:
@@ -351,8 +351,8 @@ function string::split() {
 function string::regexGetFirst() {
   # Usage: regex "string" "regex"
   if [[ ${1} =~ ${2} ]]; then
-    LAST_RETURNED_VALUE="${BASH_REMATCH[1]:-}"
+    RETURNED_VALUE="${BASH_REMATCH[1]:-}"
   else
-    LAST_RETURNED_VALUE=""
+    RETURNED_VALUE=""
   fi
 }

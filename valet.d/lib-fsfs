@@ -35,14 +35,14 @@ FSFS_RIGHT_PANE_HELP_TEXT="←/→: Scroll | Page up/down: Scroll x3"
 # $2: The items to display.
 # $3: (optional) The function to call when an item is selected (the 1st param is the current item
 #     2nd param is the item number; 3rd is the current panel width; it should return
-#     the details of the item in the LAST_RETURNED_VALUE variable).
+#     the details of the item in the RETURNED_VALUE variable).
 #     This parameter can be left empty to hide the preview right pane.
 # $4: (optional) the title of the preview right pane (if any)
 #
 # Returns:
-#   The selected item value in the global variable LAST_RETURNED_VALUE (or empty).
+#   The selected item value in the global variable RETURNED_VALUE (or empty).
 #   The selected item index (from the original array) in the global variable
-#   LAST_RETURNED_VALUE2 (-1 if the user cancelled the selection).
+#   RETURNED_VALUE2 (-1 if the user cancelled the selection).
 #
 # Usage:
 #   fsfs::itemSelector "Select an item" item_array_name "onItemSelected" "Details"
@@ -57,7 +57,7 @@ function fsfs::itemSelector() {
   # save the original traps so we can restore them later
   local originalTraps
   io::invoke trap -p SIGWINCH EXIT SIGINT SIGQUIT
-  originalTraps="${LAST_RETURNED_VALUE}"
+  originalTraps="${RETURNED_VALUE}"
 
   # we still need to export the terminal size but in addition, we need to fsfsDrawScreen.
   # Note: SIGWINCH does not interrupt a read command and wait for it to complete so we need
@@ -102,11 +102,11 @@ function fsfs::itemSelector() {
   interactive::switchBackFromFullScreen
 
   if ((FSFS_FINAL_SELECTION_INDEX >= 0)); then
-    LAST_RETURNED_VALUE="${FSFS_ORIGINAL_ITEMS[${FSFS_FINAL_SELECTION_INDEX}]}"
+    RETURNED_VALUE="${FSFS_ORIGINAL_ITEMS[${FSFS_FINAL_SELECTION_INDEX}]}"
   else
-    LAST_RETURNED_VALUE=""
+    RETURNED_VALUE=""
   fi
-  LAST_RETURNED_VALUE2="${FSFS_FINAL_SELECTION_INDEX}"
+  RETURNED_VALUE2="${FSFS_FINAL_SELECTION_INDEX}"
 }
 
 # Initialises the state for fsfs menu.
@@ -202,7 +202,7 @@ function fsfsDrawScreen() {
 
   # 1. draw the prompt string
   string::wrapText "${prompt}" "$((FSFS_LEFT_PANE_WIDTH - 1))"
-  prompt="${LAST_RETURNED_VALUE}"
+  prompt="${RETURNED_VALUE}"
   FSFS_LEFT_PANE_FIRST_LINE=1
   local IFS line
   toPrint+="${FSFS_COLOR_PROMPT_STRING}"
@@ -296,14 +296,14 @@ function drawLeftPane() {
   local toPrint="${AC__CURSOR_HIDE}${FSFS_COLOR_RESET_TEXT}"
 
   getCurrentInitialItemsIndex
-  local initialOriginalIndex=${LAST_RETURNED_VALUE}
+  local initialOriginalIndex=${RETURNED_VALUE}
   local initialNbFilteredItems=${#FSFS_FILTERED_ITEMS[@]}
 
   # Compute filtered items
   if [[ -n ${FSFS_SEARCH_STRING} ]]; then
     array::fuzzyFilterSort "${FSFS_SEARCH_STRING}" FSFS_ORIGINAL_ITEMS "${FSFS_COLOR_LETTER_HIGHLIGHT}" "${FSFS_COLOR_LETTER_HIGHLIGHT_RESET}" "$((FSFS_LEFT_PANE_WIDTH - 4))"
-    FSFS_FILTERED_ITEMS=("${LAST_RETURNED_ARRAY[@]}")
-    FSFS_FILTERED_ITEMS_CORRESPONDANCES=("${LAST_RETURNED_ARRAY2[@]}")
+    FSFS_FILTERED_ITEMS=("${RETURNED_ARRAY[@]}")
+    FSFS_FILTERED_ITEMS_CORRESPONDANCES=("${RETURNED_ARRAY2[@]}")
   else
     # for each item longer than the left width, cut and add ellipsis
     FSFS_FILTERED_ITEMS=()
@@ -328,7 +328,7 @@ function drawLeftPane() {
   # if we are not pointing to the same original item, we need to
   # recompute the right pane content
   getCurrentInitialItemsIndex
-  local newOriginalIndex=${LAST_RETURNED_VALUE}
+  local newOriginalIndex=${RETURNED_VALUE}
   if [[ ${initialOriginalIndex} -ne ${newOriginalIndex} ]]; then
     FSFS_RECOMPUTE_RIGHT_PANE_CONTENT=${FSFS_HAS_PREVIEW}
   fi
@@ -377,7 +377,7 @@ function computeRightPaneContent() {
   FSFS_RIGHT_PANE_START_INDEX=0
 
   getCurrentInitialItemsIndex
-  local -i originalItemIndex=${LAST_RETURNED_VALUE}
+  local -i originalItemIndex=${RETURNED_VALUE}
 
   if ((originalItemIndex < 0)); then
     unset FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY
@@ -391,7 +391,7 @@ function computeRightPaneContent() {
 
     local originalItem="${FSFS_ORIGINAL_ITEMS[${originalItemIndex}]}"
     "${FSFS_ITEM_SELECTED_CALLBACK}" "${originalItem}" "${originalItemIndex}" "$((FSFS_RIGHT_PANE_WIDTH - 3))"
-    local content="${LAST_RETURNED_VALUE}"
+    local content="${RETURNED_VALUE}"
 
     array=()
     local line IFS
@@ -470,13 +470,13 @@ function drawPrompt() {
 }
 
 # Returns the index of the item in the original array (if any, or -1).
-# It returns in the LAST_RETURNED_VALUE variable.
+# It returns in the RETURNED_VALUE variable.
 function getCurrentInitialItemsIndex() {
   if ((FSFS_SELECTED_FILTERED_ITEM_INDEX >= 0 && FSFS_SELECTED_FILTERED_ITEM_INDEX < ${#FSFS_FILTERED_ITEMS_CORRESPONDANCES[@]})); then
-    LAST_RETURNED_VALUE=${FSFS_FILTERED_ITEMS_CORRESPONDANCES[${FSFS_SELECTED_FILTERED_ITEM_INDEX}]}
+    RETURNED_VALUE=${FSFS_FILTERED_ITEMS_CORRESPONDANCES[${FSFS_SELECTED_FILTERED_ITEM_INDEX}]}
     return 0
   fi
-  LAST_RETURNED_VALUE=-1
+  RETURNED_VALUE=-1
 }
 
 # Modifies the selected item index.
@@ -549,7 +549,7 @@ function onKeyPressed() {
     # if we selected index is within the range of the filtered items
     # we can return the corresponding index in the original items
     getCurrentInitialItemsIndex
-    FSFS_FINAL_SELECTION_INDEX=${LAST_RETURNED_VALUE}
+    FSFS_FINAL_SELECTION_INDEX=${RETURNED_VALUE}
     FSFS_CLOSE_INTERACTIVE_SESSION=true
     return 0
     ;;

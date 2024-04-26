@@ -31,7 +31,7 @@ function testUserDirectory() {
   # testing with a non exising user directory
   local previousUserDirectory="${VALET_USER_DIRECTORY}"
   setTempFilesNumber 600
-  io::createTempDirectory && export VALET_USER_DIRECTORY="${LAST_RETURNED_VALUE}/non-existing"
+  io::createTempDirectory && export VALET_USER_DIRECTORY="${RETURNED_VALUE}/non-existing"
 
   echo "→ VALET_USER_DIRECTORY=non-existing self mock1 logging-level"
   ("${GLOBAL_VALET_HOME}/valet" self mock1 logging-level) || :

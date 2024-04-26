@@ -38,7 +38,7 @@ arguments:
     - show-help
 ---"
 function selfMock1() {
-  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   case "${action:-}" in
@@ -67,10 +67,10 @@ function selfMock1() {
       log::warning "This is a custom clean up function."
     }
     local tmp1 tmp2 tmp3 tmp4
-    io::createTempFile && tmp1="${LAST_RETURNED_VALUE}"
-    io::createTempFile && tmp2="${LAST_RETURNED_VALUE}"
-    io::createTempDirectory && tmp3="${LAST_RETURNED_VALUE}"
-    io::createTempDirectory && tmp4="${LAST_RETURNED_VALUE}"
+    io::createTempFile && tmp1="${RETURNED_VALUE}"
+    io::createTempFile && tmp2="${RETURNED_VALUE}"
+    io::createTempDirectory && tmp3="${RETURNED_VALUE}"
+    io::createTempDirectory && tmp4="${RETURNED_VALUE}"
     log::info "Created temp file: ${tmp1}."
     log::info "Created temp file: ${tmp2}."
     log::info "Created temp directory: ${tmp3}."
@@ -145,7 +145,7 @@ examples:
 ---"
 function selfMock2() {
   local -a more
-  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   log::info "First argument: ${firstArg:-}."
@@ -178,7 +178,7 @@ description: |-
   If so, it will require the user to enter the sudo password and use sudo inside the command
 ---"
 function selfMock3() {
-  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   ${SUDO} whoami

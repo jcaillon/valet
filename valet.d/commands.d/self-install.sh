@@ -84,13 +84,13 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
     }
     function system::getOsName() {
       case "${OSTYPE:-}" in
-      darwin*) LAST_RETURNED_VALUE="darwin" ;;
-      linux*) LAST_RETURNED_VALUE="linux" ;;
-      msys*) LAST_RETURNED_VALUE="windows" ;;
-      *) LAST_RETURNED_VALUE="unknown" ;;
+      darwin*) RETURNED_VALUE="darwin" ;;
+      linux*) RETURNED_VALUE="linux" ;;
+      msys*) RETURNED_VALUE="windows" ;;
+      *) RETURNED_VALUE="unknown" ;;
       esac
     }
-    function core::getUserDirectory() { LAST_RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"; }
+    function core::getUserDirectory() { RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"; }
     VALET_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
   fi
 else
@@ -127,7 +127,7 @@ function selfUpdate() {
 
   # get the os
   system::getOsName
-  local os="${LAST_RETURNED_VALUE}"
+  local os="${RETURNED_VALUE}"
   log::info "The current OS is: ${os}."
 
   # set the default options
@@ -161,7 +161,7 @@ function selfUpdate() {
   curl -fsSL -o "${releaseFile}" "${releaseUrl}" || core::fail "Could not download the release ⌜${VALET_VERSION}⌝ from ⌜${releaseUrl}⌝."
   log::debug "Unpacking the release in ⌜${GLOBAL_VALET_HOME}⌝."
   tar -xzf "${releaseFile}" -C "${tempDirectory}"
-  log::debug "The release has been unpacked in ⌜${GLOBAL_VALET_HOME}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}."
+  log::debug "The release has been unpacked in ⌜${GLOBAL_VALET_HOME}⌝ with:"$'\n'"${RETURNED_VALUE}."
 
   # remove the old valet directory and move the new one
   ${SUDO} rm -f "${releaseFile}"
@@ -175,8 +175,8 @@ function selfUpdate() {
   log::success "Valet has been installed in ⌜${GLOBAL_VALET_HOME}⌝."
 
   # copy the examples if the user directory does not exist
-  core::getUserDirectory && local userDirectory="${LAST_RETURNED_VALUE}"
-  if [[ ! -d "${userDirectory}" ]]; then
+  core::getUserDirectory && local userDirectory="${RETURNED_VALUE}"
+  if [[ ${VALET_NO_EXAMPLES:-} != "true" && ! -d ${userDirectory} ]]; then
     log::info "Copying the examples in ⌜${userDirectory}⌝."
     cp -R "${GLOBAL_VALET_HOME}/examples.d" "${userDirectory}"
   fi

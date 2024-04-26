@@ -7,7 +7,7 @@ function testselfSetup() {
   local originalConfigFile="${VALET_CONFIG_FILE:-}"
   local configFile
   setTempFilesNumber 800
-  io::createTempFile && configFile="${LAST_RETURNED_VALUE}"
+  io::createTempFile && configFile="${RETURNED_VALUE}"
   VALET_CONFIG_FILE="${configFile}"
 
   rm -f "${configFile}"

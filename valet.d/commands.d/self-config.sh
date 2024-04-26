@@ -37,11 +37,11 @@ options:
     When writing the configuration file, export the current values of the variables.
 ---"
 function selfConfig() {
-  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   core::getConfigurationDirectory
-  local valetConfigFile="${VALET_CONFIG_FILE:-"${LAST_RETURNED_VALUE}/config"}"
+  local valetConfigFile="${VALET_CONFIG_FILE:-"${RETURNED_VALUE}/config"}"
 
   if [[ ! -f "${valetConfigFile}" || ${override:-} == "true" ]]; then
     log::info "Creating the valet config file ⌜${valetConfigFile}⌝."

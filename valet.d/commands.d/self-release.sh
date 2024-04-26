@@ -48,7 +48,7 @@ options:
     Do no create the release, just upload the artifacts to the latest release.
 ---"
 function selfRelease() {
-  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   if [[ ${dryRun:-} == "true" ]]; then
@@ -58,17 +58,17 @@ function selfRelease() {
   if [[ "${uploadArtifactsOnly:-}" != "true" ]]; then
     # create a new release
     createRelease "${githubReleaseToken:-}" "${bumpLevel:-}" "${dryRun:-}"
-    createdReleaseJson="${LAST_RETURNED_VALUE}"
+    createdReleaseJson="${RETURNED_VALUE}"
   else
     # get the latest release
     kurl::toVar true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
-    createdReleaseJson="${LAST_RETURNED_VALUE}"
+    createdReleaseJson="${RETURNED_VALUE}"
   fi
 
   if [[ -n "${createdReleaseJson}" ]]; then
     string::extractBetween "${createdReleaseJson}" '"upload_url":' '{?name,label}"'
-    string::extractBetween "${LAST_RETURNED_VALUE}" '"' ''
-    uploadUrl="${LAST_RETURNED_VALUE}"
+    string::extractBetween "${RETURNED_VALUE}" '"' ''
+    uploadUrl="${RETURNED_VALUE}"
     log::debug "The upload URL is: ${uploadUrl:-}"
   fi
 
@@ -105,7 +105,7 @@ function createRelease() {
 
   # read the version from the valet file
   io::readFile "${GLOBAL_VALET_HOME}/valet.d/version"
-  local version="${LAST_RETURNED_VALUE}"
+  local version="${RETURNED_VALUE}"
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."
 
@@ -123,7 +123,7 @@ function createRelease() {
   # get the current latest tag
   local lastTag
   io::invoke git tag --sort=committerdate --no-color
-  lastTag="${LAST_RETURNED_VALUE}"
+  lastTag="${RETURNED_VALUE}"
   lastTag="${lastTag%%$'\n'}"
   lastTag="${lastTag##*$'\n'}"
   log::info "The last tag is: ${lastTag}."
@@ -134,7 +134,7 @@ function createRelease() {
   tagMessage+="Changelog: "$'\n'$'\n'
   io::invoke git log --pretty=format:"%s" "${lastTag}..HEAD"
   local IFS=$'\n'
-  for line in ${LAST_RETURNED_VALUE}; do
+  for line in ${RETURNED_VALUE}; do
     if [[ ${line} == ":bookmark:"* ]]; then
       continue
     fi
@@ -151,7 +151,7 @@ function createRelease() {
   fi
 
   # bump the version
-  string::bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${LAST_RETURNED_VALUE}"
+  string::bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${RETURNED_VALUE}"
   if [[ "${dryRun:-}" != "true" ]]; then printf '%s' "${newVersion}" >"${GLOBAL_VALET_HOME}/valet.d/version"; fi
   log::info "The new version of valet is: ${newVersion}."
 
@@ -186,12 +186,12 @@ function createRelease() {
       -d "${releasePayload}" \
       "https://api.github.com/repos/jcaillon/valet/releases"
 
-    createdReleaseJson="${LAST_RETURNED_VALUE}"
+    createdReleaseJson="${RETURNED_VALUE}"
 
     log::success "The new version has been released on GitHub."
   fi
 
-  LAST_RETURNED_VALUE="${createdReleaseJson:-}"
+  RETURNED_VALUE="${createdReleaseJson:-}"
 }
 
 function uploadArtifact() {
@@ -215,7 +215,7 @@ function uploadArtifact() {
   # prepare artifact
   local artifactPath="valet.tar.gz"
   io::invoke tar -czvf "${artifactPath}" "${files[@]}"
-  log::debug "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${LAST_RETURNED_VALUE}"
+  log::debug "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${RETURNED_VALUE}"
 
   # upload the artifact
   if [[ "${dryRun:-}" != "true" && -n "${uploadUrl}" ]]; then

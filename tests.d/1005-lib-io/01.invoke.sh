@@ -2,7 +2,7 @@
 
 function testIo::invoke5() {
   setTempFilesNumber 300
-  io::createTempFile && local tmpFile="${LAST_RETURNED_VALUE}"
+  io::createTempFile && local tmpFile="${RETURNED_VALUE}"
   local -i exitCode
 
   echo "Input stream content from a file" >"${tmpFile}"
@@ -80,11 +80,11 @@ function echoio::invokeOutput() {
   local debugMessage
   debugMessage="io::invoke function ended with exit code ⌈${exitCode}⌉."$'\n'
   if [[ ${areFiles} == "true" ]]; then
-    debugMessage+="stdout from file:"$'\n'"⌈$(<"${LAST_RETURNED_VALUE}")⌉"$'\n'
-    debugMessage+="stderr from file:"$'\n'"⌈$(<"${LAST_RETURNED_VALUE2}")⌉"$'\n'
+    debugMessage+="stdout from file:"$'\n'"⌈$(<"${RETURNED_VALUE}")⌉"$'\n'
+    debugMessage+="stderr from file:"$'\n'"⌈$(<"${RETURNED_VALUE2}")⌉"$'\n'
   else
-    debugMessage+="stdout from var:"$'\n'"⌈${LAST_RETURNED_VALUE}⌉"$'\n'
-    debugMessage+="stderr from var:"$'\n'"⌈${LAST_RETURNED_VALUE2}⌉"$'\n'
+    debugMessage+="stdout from var:"$'\n'"⌈${RETURNED_VALUE}⌉"$'\n'
+    debugMessage+="stderr from var:"$'\n'"⌈${RETURNED_VALUE2}⌉"$'\n'
   fi
 
   echo "${debugMessage}"
@@ -95,7 +95,7 @@ function fakeexec() {
 
   if [[ $* == *"--std-in"* ]]; then
     io::readStdIn
-    inputStreamContent="${LAST_RETURNED_VALUE}"
+    inputStreamContent="${RETURNED_VALUE}"
   fi
 
   echo "▶ called fakeexec $*"

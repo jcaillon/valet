@@ -52,11 +52,11 @@ function echoOutputKurlToFile() {
 
   local debugMessage
   debugMessage="kurl::toFile false function ended with exit code ⌈${exitCode}⌉."$'\n'
-  debugMessage+="http return code was ⌈${LAST_RETURNED_VALUE2}⌉"$'\n'
+  debugMessage+="http return code was ⌈${RETURNED_VALUE2}⌉"$'\n'
   if [[ -s "${filePath}" ]]; then
     debugMessage+="Content of downloaded file:"$'\n'"⌈$(<"${filePath}")⌉"$'\n'
   fi
-  debugMessage+="stderr:"$'\n'"⌈${LAST_RETURNED_VALUE}⌉"
+  debugMessage+="stderr:"$'\n'"⌈${RETURNED_VALUE}⌉"
   echo "${debugMessage}"
 }
 
@@ -93,9 +93,9 @@ function echoOutputKurlToVar() {
 
   local debugMessage
   debugMessage="kurl::toVar function ended with exit code ⌈${exitCode}⌉."$'\n'
-  debugMessage+="http return code was ⌈${LAST_RETURNED_VALUE3}⌉"$'\n'
-  debugMessage+="stdout:"$'\n'"⌈${LAST_RETURNED_VALUE}⌉"$'\n'
-  debugMessage+="stderr:"$'\n'"⌈${LAST_RETURNED_VALUE2}⌉"
+  debugMessage+="http return code was ⌈${RETURNED_VALUE3}⌉"$'\n'
+  debugMessage+="stdout:"$'\n'"⌈${RETURNED_VALUE}⌉"$'\n'
+  debugMessage+="stderr:"$'\n'"⌈${RETURNED_VALUE2}⌉"
   echo "${debugMessage}"
 }
 

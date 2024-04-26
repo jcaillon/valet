@@ -147,7 +147,7 @@ function runCoreTests() {
 
 function rebuildCommands() {
   local originalLogLevel
-  log::getLevel && originalLogLevel="${LAST_RETURNED_VALUE}"
+  log::getLevel && originalLogLevel="${RETURNED_VALUE}"
   log::setLevel warning true
   core::sourceFunction selfBuild
   if (( $# == 1)); then
@@ -176,14 +176,14 @@ function runTestSuites() {
   # reset the temp files
   io::cleanupTempFiles
 
-  io::createTempFile && _TEST_STANDARD_OUTPUT_FILE="${LAST_RETURNED_VALUE}"
-  io::createTempFile && _TEST_STANDARD_ERROR_FILE="${LAST_RETURNED_VALUE}"
-  io::createTempFile && _TEST_REPORT_FILE="${LAST_RETURNED_VALUE}"
-  io::createTempFile && _TEST_TEMP_FILE="${LAST_RETURNED_VALUE}"
+  io::createTempFile && _TEST_STANDARD_OUTPUT_FILE="${RETURNED_VALUE}"
+  io::createTempFile && _TEST_STANDARD_ERROR_FILE="${RETURNED_VALUE}"
+  io::createTempFile && _TEST_REPORT_FILE="${RETURNED_VALUE}"
+  io::createTempFile && _TEST_TEMP_FILE="${RETURNED_VALUE}"
 
   # save the original important variables so we can restore them after the test suite
   log::getLevel
-  ORIGINAL_GLOBAL_LOG_LEVEL="${LAST_RETURNED_VALUE}"
+  ORIGINAL_GLOBAL_LOG_LEVEL="${RETURNED_VALUE}"
   ORIGINAL_GLOBAL_LOG_PRINT_FUNCTION="${GLOBAL_LOG_PRINT_FUNCTION}"
   setOriginalImportantVariables
   setSimplifiedImportantVariables
@@ -307,8 +307,8 @@ function runTest() {
   # test if the user forgot to call endTest
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" || -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
     local content1 content2
-    io::readFile "${_TEST_STANDARD_OUTPUT_FILE}" && content1="${LAST_RETURNED_VALUE}"
-    io::readFile "${_TEST_STANDARD_ERROR_FILE}" && content2="${LAST_RETURNED_VALUE}"
+    io::readFile "${_TEST_STANDARD_OUTPUT_FILE}" && content1="${RETURNED_VALUE}"
+    io::readFile "${_TEST_STANDARD_ERROR_FILE}" && content2="${RETURNED_VALUE}"
     core::fail "The test script ⌜${testScript}⌝ did not call endTest OR it had outputs after the last endTest call."$'\n'"Standard output"$'\n'"⌜${content1}⌝"$'\n'"Error output:"$'\n'"⌜${content2}⌝"
   fi
 
@@ -364,27 +364,27 @@ function onExitTestInternal() {
   log::createPrintFunction
   eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
-  log::getCallStack 4 && local stack="${LAST_RETURNED_VALUE}"
+  log::getCallStack 4 && local stack="${RETURNED_VALUE}"
 
   local message="The program has exit during a test with code ${rc}, stack:${stack}"$'\n'
   message+="________"$'\n'
   if [[ -s "${_TEST_REPORT_FILE}" ]]; then
     io::readFile "${_TEST_REPORT_FILE}"
-    message+="Current test report:"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
+    message+="Current test report:"$'\n'"${RETURNED_VALUE}"$'\n'
   else
     message+="No test report yet for the current test."$'\n'
   fi
   message+="________"$'\n'
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
     io::readFile "${_TEST_STANDARD_OUTPUT_FILE}"
-    message+="Current test standard output:"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
+    message+="Current test standard output:"$'\n'"${RETURNED_VALUE}"$'\n'
   else
     message+="No standard output for the current test."$'\n'
   fi
   message+="________"$'\n'
   if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
     io::readFile "${_TEST_STANDARD_ERROR_FILE}"
-    message+="Current test error output:"$'\n'"${LAST_RETURNED_VALUE}"$'\n'
+    message+="Current test error output:"$'\n'"${RETURNED_VALUE}"$'\n'
   else
     message+="No error output for the current test."$'\n'
   fi
@@ -426,7 +426,7 @@ function resetFdRedirection() {
 # As well as the log line function.
 function setOriginalImportantVariables() {
   io::invoke declare -p ${!VALET_CONFIG_*} ${!GLOBAL_*}
-  ORIGINAL_IMPORTANT_VARIABLES="${GLOBAL_LOG_PRINT_FUNCTION}"$'\n'"${LAST_RETURNED_VALUE//declare -? /}"
+  ORIGINAL_IMPORTANT_VARIABLES="${GLOBAL_LOG_PRINT_FUNCTION}"$'\n'"${RETURNED_VALUE//declare -? /}"
 }
 
 function resetOriginalImportantVariables() {

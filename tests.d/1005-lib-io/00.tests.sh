@@ -6,27 +6,27 @@ source io
 function testIo::toAbsolutePath() {
 
   echo "→ io::toAbsolutePath \${PWD}/01.invoke.sh"
-  io::toAbsolutePath "${PWD}/01.invoke.sh" && echo "${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath "${PWD}/01.invoke.sh" && echo "${RETURNED_VALUE}"
 
   echo
   echo "→ io::toAbsolutePath 01.invoke.sh"
-  io::toAbsolutePath 01.invoke.sh && echo "${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath 01.invoke.sh && echo "${RETURNED_VALUE}"
 
   echo
   echo "→ io::toAbsolutePath resources"
-  io::toAbsolutePath resources && echo "${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath resources && echo "${RETURNED_VALUE}"
 
   echo
   echo "→ io::toAbsolutePath ./01.invoke.sh"
-  io::toAbsolutePath ./01.invoke.sh && echo "${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath ./01.invoke.sh && echo "${RETURNED_VALUE}"
 
   echo
   echo "→ io::toAbsolutePath ./resources"
-  io::toAbsolutePath ./resources && echo "${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath ./resources && echo "${RETURNED_VALUE}"
 
   echo
   echo "→ io::toAbsolutePath ../0003-self/01.invoke.sh"
-  io::toAbsolutePath "../0003-self/01.invoke.sh" && echo "${LAST_RETURNED_VALUE}"
+  io::toAbsolutePath "../0003-self/01.invoke.sh" && echo "${RETURNED_VALUE}"
 
   endTest "Testing io::toAbsolutePath" 0
 }
@@ -39,13 +39,13 @@ function testIo::readFile() {
 
   echo "→ io::readFile 'resources/file-to-read' 100"
   io::readFile 'resources/file-to-read' 100
-  echo "${LAST_RETURNED_VALUE}"
+  echo "${RETURNED_VALUE}"
 
   endTest "Testing io::readFile limited to x chars" 0
 
   echo "→ io::readFile 'resources/file-to-read'"
   io::readFile 'resources/file-to-read'
-  echo "${LAST_RETURNED_VALUE}"
+  echo "${RETURNED_VALUE}"
 
   endTest "Testing io::readFile unlimited" 0
 }
@@ -54,7 +54,7 @@ function testIo::createFilePathIfNeeded() {
 
   echo "→ io::createFilePathIfNeeded 'resources/dir/subdir/file1'"
   io::createFilePathIfNeeded resources/dir/subdir/file1
-  echo "${LAST_RETURNED_VALUE}"
+  echo "${RETURNED_VALUE}"
 
   if [[ -f resources/dir/subdir/file1 ]]; then
     echo "File created successfully!"
@@ -83,11 +83,11 @@ function testIo::readStdIn() {
 
   echo "→ io::readStdIn <<<'coucou'"
   io::readStdIn <<<"coucou"
-  echo "${LAST_RETURNED_VALUE}"
+  echo "${RETURNED_VALUE}"
 
   echo "→ io::readStdIn"
   io::readStdIn
-  echo "${LAST_RETURNED_VALUE}"
+  echo "${RETURNED_VALUE}"
 
   endTest "Testing io::readStdIn" 0
 }
@@ -96,11 +96,11 @@ function testIo::countArgs() {
 
   echo "→ io::countArgs 'arg1' 'arg2' 'arg3'"
   io::countArgs 'arg1' 'arg2' 'arg3'
-  echo "${LAST_RETURNED_VALUE}"
+  echo "${RETURNED_VALUE}"
 
   echo "→ io::countArgs \$PWD/*"
   io::countArgs "${PWD}/resources"/*
-  echo "${LAST_RETURNED_VALUE}"
+  echo "${RETURNED_VALUE}"
 
   endTest "Testing io::countArgs" 0
 }

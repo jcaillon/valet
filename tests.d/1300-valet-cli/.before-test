@@ -15,7 +15,7 @@ function main::showInteractiveCommandsMenu() {
   local IFS=$'\n'
   echo "⌈${array[*]}⌉" 1>&2
 
-  LAST_RETURNED_VALUE=""
+  RETURNED_VALUE=""
 }
 
 if [[ -n "${_TEST_0000_COMMON_UTILS:-}" ]]; then
@@ -26,7 +26,7 @@ _TEST_0000_COMMON_UTILS=1
 # override the local state and config directories to return temp directories
 setTempFilesNumber 800
 io::createTempDirectory
-export TEST_VALET_CONFIG_LOCAL_STATE_DIRECTORY="${LAST_RETURNED_VALUE}"
+export TEST_VALET_CONFIG_LOCAL_STATE_DIRECTORY="${RETURNED_VALUE}"
 
 function echoTempFileWithTimeStampSubstitution() {
   local file="${GLOBAL_TEST_TEMP_FILE}"

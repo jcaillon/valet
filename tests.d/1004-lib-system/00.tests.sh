@@ -6,19 +6,19 @@ source system
 function testSystem::getOsName() {
 
   echo "→ OSTYPE=linux-bsd system::getOsName"
-  OSTYPE=linux-bsd system::getOsName && echo "${LAST_RETURNED_VALUE}"
+  OSTYPE=linux-bsd system::getOsName && echo "${RETURNED_VALUE}"
   echo
 
   echo "→ OSTYPE=msys system::getOsName"
-  OSTYPE=msys system::getOsName && echo "${LAST_RETURNED_VALUE}"
+  OSTYPE=msys system::getOsName && echo "${RETURNED_VALUE}"
   echo
 
   echo "→ OSTYPE=darwin-stuff system::getOsName"
-  OSTYPE=darwin-stuff system::getOsName && echo "${LAST_RETURNED_VALUE}"
+  OSTYPE=darwin-stuff system::getOsName && echo "${RETURNED_VALUE}"
   echo
 
   echo "→ OSTYPE=nop system::getOsName"
-  OSTYPE=nop system::getOsName && echo "${LAST_RETURNED_VALUE}"
+  OSTYPE=nop system::getOsName && echo "${RETURNED_VALUE}"
   echo
 
   endTest "Testing system::getOsName" 0

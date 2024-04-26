@@ -38,7 +38,7 @@ Valet has a function to parse the expected options and arguments directly into v
 ```bash
 local myOption myArgument
 # parse the arguments of the command
-core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+core::parseArguments "$@" && eval "${RETURNED_VALUE}"
 # check if we need to fail because there was some inputs errors or if we need to just display the help
 core::checkParseResults "${help:-}" "${parsingErrors:-}"
 

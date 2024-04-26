@@ -47,7 +47,7 @@ function showCommandHelp() {
   local -a commands
   local parsingErrors help columns noColors help
   main::parseFunctionArguments "${FUNCNAME[0]}" "$@"
-  eval "${LAST_RETURNED_VALUE}"
+  eval "${RETURNED_VALUE}"
 
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
@@ -59,8 +59,8 @@ function showCommandHelp() {
 
   local functionName exactCommand
   main::fuzzyMatchCommandtoFunctionName "${commands[@]}"
-  functionName="${LAST_RETURNED_VALUE:-}"
-  exactCommand="${LAST_RETURNED_VALUE3:-}"
+  functionName="${RETURNED_VALUE:-}"
+  exactCommand="${RETURNED_VALUE3:-}"
   if [[ -z "${functionName}" ]]; then
     core::fail "Could not show the help because the command ⌜${commands[*]}⌝ does not exist or is ambiguous."
   fi

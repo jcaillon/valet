@@ -49,7 +49,7 @@ examples:
 ---"
 function showcaseCommand1() {
   local -a more
-  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   log::info "First argument: ${firstArg:-}."
@@ -80,7 +80,7 @@ description: |-
   An hello world command.
 ---"
 function helloWorld() {
-  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   echo "Hello world!"
@@ -103,7 +103,7 @@ description: |-
   If so, it will require the user to enter the sudo password and use sudo inside the command
 ---"
 function showCaseSudo() {
-  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   ${SUDO} whoami

@@ -9,30 +9,30 @@ set -Eeu -o pipefail
 # $1: The file to get the absolute path.
 #
 # Returns:
-#   LAST_RETURNED_VALUE: The absolute path of the file.
+#   RETURNED_VALUE: The absolute path of the file.
 #
 # Usage:
-#   io::toAbsolutePath "myFile" && local myFileAbsolutePath="${LAST_RETURNED_VALUE}"
+#   io::toAbsolutePath "myFile" && local myFileAbsolutePath="${RETURNED_VALUE}"
 function io::toAbsolutePath() {
   local file="${1%/}"
 
   if [[ ${file} == "/"* ]]; then
-    LAST_RETURNED_VALUE="${file}"
+    RETURNED_VALUE="${file}"
     return 0
   fi
 
-  LAST_RETURNED_VALUE="${PWD}/${file##*/}"
-  if [[ -e "${LAST_RETURNED_VALUE}" ]]; then
+  RETURNED_VALUE="${PWD}/${file##*/}"
+  if [[ -e "${RETURNED_VALUE}" ]]; then
     return 0
   fi
 
   if pushd "${file%/*}" &>/dev/null; then
-    LAST_RETURNED_VALUE="${PWD}/${file##*/}"
+    RETURNED_VALUE="${PWD}/${file##*/}"
     popd 1>/dev/null
     return 0
   fi
 
-  LAST_RETURNED_VALUE="${file}"
+  RETURNED_VALUE="${file}"
 }
 
 # This function call an executable and its arguments.
@@ -47,13 +47,13 @@ function io::toAbsolutePath() {
 #
 # Returns:
 #   The exit code of the function is the exit code of the executable.
-#   The stdout file of the executable in the global variable LAST_RETURNED_VALUE.
-#   The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
+#   The stdout file of the executable in the global variable RETURNED_VALUE.
+#   The stderr file of the executable in the global variable RETURNED_VALUE2.
 #
 # Usage:
 #   io::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
-#   stdoutFilePath="${LAST_RETURNED_VALUE}"
-#   stderrFilePath="${LAST_RETURNED_VALUE2}"
+#   stdoutFilePath="${RETURNED_VALUE}"
+#   stderrFilePath="${RETURNED_VALUE2}"
 function io::invoke5() {
   local failIfFails acceptableErrorCodes stdInFromFile stdIn executable
   failIfFails="${1}"
@@ -104,8 +104,8 @@ function io::invoke5() {
     debugMessage+=$'\n'"Standard output:"$'\n'
     if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
       io::readFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 5000
-      if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
-      debugMessage+="⌜${LAST_RETURNED_VALUE}⌝"
+      if [[ "${#RETURNED_VALUE}" -ge 5000 ]]; then RETURNED_VALUE+="... (truncated)"; fi
+      debugMessage+="⌜${RETURNED_VALUE}⌝"
     else
       debugMessage+="⌜(empty)⌝"
     fi
@@ -114,8 +114,8 @@ function io::invoke5() {
     debugMessage+=$'\n'"Error output:"$'\n'
     if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
       io::readFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 5000
-      if [[ "${#LAST_RETURNED_VALUE}" -ge 5000 ]]; then LAST_RETURNED_VALUE+="... (truncated)"; fi
-      debugMessage+="⌜${LAST_RETURNED_VALUE}⌝"
+      if [[ "${#RETURNED_VALUE}" -ge 5000 ]]; then RETURNED_VALUE+="... (truncated)"; fi
+      debugMessage+="⌜${RETURNED_VALUE}⌝"
     else
       debugMessage+="⌜(empty)⌝"
     fi
@@ -127,8 +127,8 @@ function io::invoke5() {
     fi
   fi
 
-  LAST_RETURNED_VALUE="${GLOBAL_TEMPORARY_STDOUT_FILE}"
-  LAST_RETURNED_VALUE2="${GLOBAL_TEMPORARY_STDERR_FILE}"
+  RETURNED_VALUE="${GLOBAL_TEMPORARY_STDOUT_FILE}"
+  RETURNED_VALUE2="${GLOBAL_TEMPORARY_STDERR_FILE}"
   return ${exitCode}
 }
 
@@ -142,13 +142,13 @@ function io::invoke5() {
 #
 # Returns:
 #   The exit code of the function is the exit code of the executable.
-#   The stdout file of the executable in the global variable LAST_RETURNED_VALUE.
-#   The stderr file of the executable in the global variable LAST_RETURNED_VALUE2.
+#   The stdout file of the executable in the global variable RETURNED_VALUE.
+#   The stderr file of the executable in the global variable RETURNED_VALUE2.
 #
 # Usage:
 #   io::invoke3 "false" "false" "stuff" "--height=10" || core::fail "stuff failed."
-#   stdoutFilePath="${LAST_RETURNED_VALUE}"
-#   stderrFilePath="${LAST_RETURNED_VALUE2}"
+#   stdoutFilePath="${RETURNED_VALUE}"
+#   stderrFilePath="${RETURNED_VALUE2}"
 function io::invoke3() {
   local failIfFails acceptableErrorCodes executable
   failIfFails="${1}"
@@ -170,21 +170,21 @@ function io::invoke3() {
 #
 # Returns:
 #   The exit code of the function is the exit code of the executable.
-#   The content of stdout in the global variable LAST_RETURNED_VALUE.
-#   The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#   The content of stdout in the global variable RETURNED_VALUE.
+#   The content of stderr in the global variable RETURNED_VALUE2.
 #
 # Usage:
 #   io::invoke5var "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
-#   stdout="${LAST_RETURNED_VALUE}"
-#   stderr="${LAST_RETURNED_VALUE2}"
+#   stdout="${RETURNED_VALUE}"
+#   stderr="${RETURNED_VALUE2}"
 function io::invoke5var() {
   local -i exitCode=0
   io::invoke5 "$@" || exitCode=$?
-  local stdOutFile="${LAST_RETURNED_VALUE}"
-  local stdErrFile="${LAST_RETURNED_VALUE2}"
+  local stdOutFile="${RETURNED_VALUE}"
+  local stdErrFile="${RETURNED_VALUE2}"
 
   io::readFile "${stdErrFile}"
-  LAST_RETURNED_VALUE2="${LAST_RETURNED_VALUE}"
+  RETURNED_VALUE2="${RETURNED_VALUE}"
   io::readFile "${stdOutFile}"
 
   return ${exitCode}
@@ -200,13 +200,13 @@ function io::invoke5var() {
 #
 # Returns:
 #   The exit code of the function is the exit code of the executable.
-#   The content of stdout in the global variable LAST_RETURNED_VALUE.
-#   The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#   The content of stdout in the global variable RETURNED_VALUE.
+#   The content of stderr in the global variable RETURNED_VALUE2.
 #
 # Usage:
 #   io::invoke3var "false" "130,2" "stuff" "--height=10" || core::fail "stuff failed."
-#   stdout="${LAST_RETURNED_VALUE}"
-#   stderr="${LAST_RETURNED_VALUE2}"
+#   stdout="${RETURNED_VALUE}"
+#   stderr="${RETURNED_VALUE2}"
 function io::invoke3var() {
   local failIfFails acceptableErrorCodes executable
   failIfFails="${1}"
@@ -221,7 +221,7 @@ function io::invoke3var() {
 # Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
 #
 # In windows, this is tremendously faster to do
-# io::invoke mycommand && myvar="${LAST_RETURNED_VALUE}"
+# io::invoke mycommand && myvar="${RETURNED_VALUE}"
 # than doing:
 # myvar="$(mycommand)".
 # On linux, it is slighly faster (but it might be slower if you don't have SSD?).
@@ -230,8 +230,8 @@ function io::invoke3var() {
 # $@: the command and its arguments
 #
 # Returns:
-#  The content of stdout in the global variable LAST_RETURNED_VALUE.
-#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#  The content of stdout in the global variable RETURNED_VALUE.
+#  The content of stderr in the global variable RETURNED_VALUE2.
 #
 # Usage:
 #  io::invoke git add --all
@@ -253,8 +253,8 @@ function io::invoke() {
 # $2+: the command and its arguments
 #
 # Returns:
-#  The content of stdout in the global variable LAST_RETURNED_VALUE.
-#  The content of stderr in the global variable LAST_RETURNED_VALUE2.
+#  The content of stdout in the global variable RETURNED_VALUE.
+#  The content of stderr in the global variable RETURNED_VALUE2.
 #
 # Usage:
 #  io::invoke git add --all
@@ -264,7 +264,7 @@ function io::invokePiped() {
   io::invoke5var true 0 false "${stdIn}" "$@"
 }
 
-# Reads the content of a file and returns it in the global variable LAST_RETURNED_VALUE.
+# Reads the content of a file and returns it in the global variable RETURNED_VALUE.
 # Uses pure bash.
 #
 # $1: the file path to read
@@ -274,29 +274,29 @@ function io::invokePiped() {
 #   If the file does not exist, the function will return an empty string instead of failing.
 #
 # Returns:
-#   The content of the file in the global variable LAST_RETURNED_VALUE.
+#   The content of the file in the global variable RETURNED_VALUE.
 #
 # Usage:
-#   io::readFile "/path/to/file" && local fileContent="${LAST_RETURNED_VALUE}"
-#   io::readFile "/path/to/file" 500 && local fileContent="${LAST_RETURNED_VALUE}"
+#   io::readFile "/path/to/file" && local fileContent="${RETURNED_VALUE}"
+#   io::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
 function io::readFile() {
   local filePath="${1}"
   local -i maxCharacters="${2:-0}"
 
   if [[ ! -s "${filePath}" ]]; then
-    LAST_RETURNED_VALUE=""
+    RETURNED_VALUE=""
     return 0
   fi
 
-  LAST_RETURNED_VALUE=""
+  RETURNED_VALUE=""
   local IFS=''
   if [[ "${maxCharacters}" -gt 0 ]]; then
-    read -rd '' -n "${maxCharacters}" LAST_RETURNED_VALUE <"${filePath}" || [[ -n ${LAST_RETURNED_VALUE} ]]
+    read -rd '' -n "${maxCharacters}" RETURNED_VALUE <"${filePath}" || [[ -n ${RETURNED_VALUE} ]]
   else
-    read -rd '' LAST_RETURNED_VALUE <"${filePath}" || [[ -n ${LAST_RETURNED_VALUE} ]]
+    read -rd '' RETURNED_VALUE <"${filePath}" || [[ -n ${RETURNED_VALUE} ]]
     # fail safe for cases where the file is suppose to not be empty but we get null string
-    if [[ -z "${LAST_RETURNED_VALUE}" ]]; then
-      LAST_RETURNED_VALUE="$(<"${filePath}")"
+    if [[ -z "${RETURNED_VALUE}" ]]; then
+      RETURNED_VALUE="$(<"${filePath}")"
     fi
   fi
 }
@@ -338,13 +338,13 @@ function io::checkAndWarn() {
 # $1: the file path to create
 #
 # Returns:
-#   The absolute path of the file in the global variable LAST_RETURNED_VALUE.
+#   The absolute path of the file in the global variable RETURNED_VALUE.
 #
 # Usage:
 #   io::createFilePathIfNeeded "myFile"
 function io::createFilePathIfNeeded() {
   io::toAbsolutePath "${1}"
-  local filePath="${LAST_RETURNED_VALUE}"
+  local filePath="${RETURNED_VALUE}"
   local parentDir="${filePath%/*}"
 
   if [[ ! -d "${parentDir}" ]]; then
@@ -355,7 +355,7 @@ function io::createFilePathIfNeeded() {
     : >"${filePath}"
   fi
 
-  LAST_RETURNED_VALUE="${filePath}"
+  RETURNED_VALUE="${filePath}"
 }
 
 # Sleep for the given amount of time.
@@ -374,7 +374,7 @@ function io::sleep() {
     return 0
   elif command -v mkfifo 1>/dev/null; then
     if [[ -z ${IO_SLEEP_FIFO:-} ]]; then
-      io::createTempFile && IO_SLEEP_FIFO="${LAST_RETURNED_VALUE}"
+      io::createTempFile && IO_SLEEP_FIFO="${RETURNED_VALUE}"
       rm "${IO_SLEEP_FIFO}"
       mkfifo -m 700 "${IO_SLEEP_FIFO}"
       exec 6<>"${IO_SLEEP_FIFO}"
@@ -396,24 +396,24 @@ function io::sleep() {
 #   io::cat "myFile"
 function io::cat() {
   io::readFile "${1}"
-  printf '%s\n' "${LAST_RETURNED_VALUE}"
+  printf '%s\n' "${RETURNED_VALUE}"
 }
 
 # Read the content of the standard input.
 # Will immediately return if the standard input is empty.
 #
 # Returns:
-#   The content of the standard input in the global variable LAST_RETURNED_VALUE.
+#   The content of the standard input in the global variable RETURNED_VALUE.
 #
 # Usage:
-#   io::readStdIn && local stdIn="${LAST_RETURNED_VALUE}"
+#   io::readStdIn && local stdIn="${RETURNED_VALUE}"
 function io::readStdIn() {
-  LAST_RETURNED_VALUE=""
+  RETURNED_VALUE=""
   local IFS=''
   if read -t 0 -u 0 -rd ''; then
-    read -u 0 -rd '' LAST_RETURNED_VALUE || [[ -n ${LAST_RETURNED_VALUE} ]]
+    read -u 0 -rd '' RETURNED_VALUE || [[ -n ${RETURNED_VALUE} ]]
   else
-    LAST_RETURNED_VALUE=""
+    RETURNED_VALUE=""
   fi
 }
 
@@ -421,14 +421,14 @@ function io::readStdIn() {
 #
 # A convenient function that can be used to:
 # - count the files/directories in a directory
-#   io::countArgs "${PWD}"/* && local numberOfFiles="${LAST_RETURNED_VALUE}"
+#   io::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"
 # - count the number of variables starting with VALET_
-#   io::countArgs "${!VALET_@}" && local numberOfVariables="${LAST_RETURNED_VALUE}"
+#   io::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"
 #
 # Returns:
-#   The number of arguments passed in the global variable LAST_RETURNED_VALUE.
+#   The number of arguments passed in the global variable RETURNED_VALUE.
 # Usage:
 #   io::countArgs 1 2 3
 function io::countArgs() {
-  LAST_RETURNED_VALUE="$#"
+  RETURNED_VALUE="$#"
 }

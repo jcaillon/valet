@@ -56,7 +56,7 @@ options:
     Example: --exclude '(1|commands)'
 ---"
 function selfTest() {
-  core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   # set the options
@@ -80,7 +80,7 @@ function selfTest() {
   if [[ ${onlyCore:-false} != "true" ]]; then
     # get the user directory
     core::getUserDirectory
-    userDirectory="${userDirectory:-${LAST_RETURNED_VALUE}}"
+    userDirectory="${userDirectory:-${RETURNED_VALUE}}"
 
     # rebuild the commands for the user dir
     log::info "Rebuilding the commands for the user directory ⌜${userDirectory}⌝."

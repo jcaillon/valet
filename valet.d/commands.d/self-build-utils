@@ -8,7 +8,7 @@ set -Eeu -o pipefail
 # $1: The file to extract from.
 #
 # Returns:
-#   LAST_RETURNED_ARRAY: Each extracted content in an array.
+#   RETURNED_ARRAY: Each extracted content in an array.
 #
 # Usage:
 #   extractCommandYamls "myfile"
@@ -41,7 +41,7 @@ function extractCommandYamls() {
     fi
   done <"${file}"
 
-  LAST_RETURNED_ARRAY=("${contentArray[@]}")
+  RETURNED_ARRAY=("${contentArray[@]}")
 }
 
 # This function extracts properties from a command definition and stores them in
@@ -189,21 +189,21 @@ function createGlobalVariable() {
 # $1: The option string.
 #
 # Returns:
-#   LAST_RETURNED_VALUE: The first long name of the option.
+#   RETURNED_VALUE: The first long name of the option.
 #
 # Usage:
-#   extractFirstLongNameFromOptionString "--option -o" && local firstLongName="${LAST_RETURNED_VALUE}"
+#   extractFirstLongNameFromOptionString "--option -o" && local firstLongName="${RETURNED_VALUE}"
 function extractFirstLongNameFromOptionString() {
   local optionString="${1}"
   local word
   # shellcheck disable=SC2034
   for word in ${optionString}; do
     if [[ ${word} == "--"* ]]; then
-      LAST_RETURNED_VALUE="${word}"
+      RETURNED_VALUE="${word}"
       return 0
     fi
   done
-  LAST_RETURNED_VALUE=""
+  RETURNED_VALUE=""
 }
 
 
@@ -287,6 +287,6 @@ _CMD_INCLUDED=1
     local IFS=':'
     while read -r -d $'\n' line; do
       printf '%s\n' "${line#declare -? }"
-    done <<< "${LAST_RETURNED_VALUE}"
+    done <<< "${RETURNED_VALUE}"
   } >"${outputFile}"
 }

@@ -52,10 +52,10 @@ while [[ -e "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; do GLOBAL_TEMPORARY_STDERR_FIL
 GLOBAL_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_PREFIX}${BASHPID}.valet.d"
 while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; do GLOBAL_TEMPORARY_DIRECTORY+="x"; done
 
-# Creates a temporary file and return its path in the global variable LAST_RETURNED_VALUE.
+# Creates a temporary file and return its path in the global variable RETURNED_VALUE.
 #
 # Usage:
-#  io::createTempFile && local file="${LAST_RETURNED_VALUE}"
+#  io::createTempFile && local file="${RETURNED_VALUE}"
 function io::createTempFile() {
   if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
     mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
@@ -63,18 +63,18 @@ function io::createTempFile() {
   TEMPORARY_FILE_NUMBER=${TEMPORARY_FILE_NUMBER:-0}
   while true; do
     TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
-    LAST_RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
-    if [[ ! -f "${LAST_RETURNED_VALUE}" ]]; then
-      :>"${LAST_RETURNED_VALUE}"
+    RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
+    if [[ ! -f "${RETURNED_VALUE}" ]]; then
+      :>"${RETURNED_VALUE}"
       return 0
     fi
   done
 }
 
-# Creates a temporary directory and return its path in the global variable LAST_RETURNED_VALUE.
+# Creates a temporary directory and return its path in the global variable RETURNED_VALUE.
 #
 # Usage:
-#  io::createTempDirectory && local directory="${LAST_RETURNED_VALUE}"
+#  io::createTempDirectory && local directory="${RETURNED_VALUE}"
 function io::createTempDirectory() {
   if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
     mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
@@ -82,9 +82,9 @@ function io::createTempDirectory() {
   TEMPORARY_DIRECTORY_NUMBER=${TEMPORARY_DIRECTORY_NUMBER:-0}
   while true; do
     TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
-    LAST_RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
-    if [[ ! -d "${LAST_RETURNED_VALUE}" ]]; then
-      mkdir -p "${LAST_RETURNED_VALUE}" 1>&2 2>/dev/null
+    RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
+    if [[ ! -d "${RETURNED_VALUE}" ]]; then
+      mkdir -p "${RETURNED_VALUE}" 1>&2 2>/dev/null
       return 0
     fi
   done
@@ -174,12 +174,12 @@ function log::setLevel() {
 # Get the current log level.
 #
 # Returns:
-#   the current log level in the global variable LAST_RETURNED_VALUE.
+#   the current log level in the global variable RETURNED_VALUE.
 #
 # Usage:
-#   log::getLevel && printf '%s\n' "The log level is ⌜${LAST_RETURNED_VALUE}⌝."
+#   log::getLevel && printf '%s\n' "The log level is ⌜${RETURNED_VALUE}⌝."
 function log::getLevel() {
-  LAST_RETURNED_VALUE="${GLOBAL_LOG_LEVEL:-info}"
+  RETURNED_VALUE="${GLOBAL_LOG_LEVEL:-info}"
 }
 
 # The log line function is used to display log messages in the terminal.
@@ -206,7 +206,7 @@ function log::createPrintFunction() {
     severity="${3}"
     shift 3
     local IFS='"$'\n'"'
-    LAST_RETURNED_VALUE="$*"
+    RETURNED_VALUE="$*"
     unset IFS'
 
   local cDefault=""
@@ -234,8 +234,8 @@ function log::createPrintFunction() {
     "
     # shellcheck disable=SC2016
     GLOBAL_LOG_PRINT_FUNCTION+='
-    LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌜/'"${cHighlight@Q}"'⌜}"
-    LAST_RETURNED_VALUE="${LAST_RETURNED_VALUE//⌝/⌝'"${cDefault@Q}"'}"
+    RETURNED_VALUE="${RETURNED_VALUE//⌜/'"${cHighlight@Q}"'⌜}"
+    RETURNED_VALUE="${RETURNED_VALUE//⌝/⌝'"${cDefault@Q}"'}"
     '
   else
     GLOBAL_LOG_PRINT_FUNCTION+='
@@ -256,7 +256,7 @@ function log::createPrintFunction() {
     fi
 
     GLOBAL_LOG_PRINT_FUNCTION+='
-    string::wrapText "${LAST_RETURNED_VALUE}" '"${wrapTextColumns}"' '"${wrapPaddingLength}"''
+    string::wrapText "${RETURNED_VALUE}" '"${wrapTextColumns}"' '"${wrapPaddingLength}"''
   fi
 
   local printfFormat
@@ -284,7 +284,7 @@ function log::createPrintFunction() {
 
   # message
   printfFormat+="%s\n"
-  printfArguments+='"${LAST_RETURNED_VALUE}"'
+  printfArguments+='"${RETURNED_VALUE}"'
 
   if [[ -z ${VALET_CONFIG_LOG_FD:-} || ${#VALET_CONFIG_LOG_FD} == 1 ]]; then
     # it is a numbered file descriptor
@@ -325,7 +325,7 @@ function core::fail() {
 function log::error() {
   local message="$*"
   if log::isDebugEnabled; then
-    log::getCallStack 2 && local stack=$'\n'"stack:${LAST_RETURNED_VALUE}"
+    log::getCallStack 2 && local stack=$'\n'"stack:${RETURNED_VALUE}"
     message+="${stack:-}"
   fi
   log::print "ERROR" "${VALET_CONFIG_ICON_ERROR:-$'\uf2d3'}" "ERROR" "${message}"
@@ -395,12 +395,12 @@ function log::isDebugEnabled() {
 }
 
 # This function returns the current function stack.
-# The stack is returned in the global variable LAST_RETURNED_VALUE.
+# The stack is returned in the global variable RETURNED_VALUE.
 #
 # $1: the number of levels to skip (default to 2)
 #
 # Usage:
-#   log::getCallStack 2 && local stack="${LAST_RETURNED_VALUE}"
+#   log::getCallStack 2 && local stack="${RETURNED_VALUE}"
 function log::getCallStack() {
   local -i levelToSkip="${1:-2}"
   local stack i stackSize func linen src
@@ -424,7 +424,7 @@ function log::getCallStack() {
     fi
     stack+=$'\n'"${treeString} In function ${func}() ${src}:${linen}"
   done
-  LAST_RETURNED_VALUE="${stack}"
+  RETURNED_VALUE="${stack}"
 }
 
 #===============================================================
@@ -515,7 +515,7 @@ function core::sourceUserCommands() {
 
   # source the user commands
   local userDirectory
-  core::getUserDirectory && userDirectory="${LAST_RETURNED_VALUE}"
+  core::getUserDirectory && userDirectory="${RETURNED_VALUE}"
 
   local commandsFile
   commandsFile="${userDirectory}/commands"
@@ -525,7 +525,7 @@ function core::sourceUserCommands() {
     log::info "The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'"Now building it using ⌜valet self build⌝ command."
 
     local originalLogLevel
-    log::getLevel && originalLogLevel="${LAST_RETURNED_VALUE}"
+    log::getLevel && originalLogLevel="${RETURNED_VALUE}"
     log::setLevel warning true
     # shellcheck disable=SC1091
     source "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh"
@@ -564,10 +564,10 @@ function core::reloadUserCommands() {
 # $2: the width to wrap the text at
 # $3: the padding to apply to each new line (default to 0)
 # $4: true/false if the padding should be applied to the first line (default to false)
-# Returns the wrapped text in the global variable LAST_RETURNED_VALUE
+# Returns the wrapped text in the global variable RETURNED_VALUE
 #
 # Usage:
-#   string::wrapText "This is a long text that should be wrapped at 20 characters." 20 2 false && local wrappedText="${LAST_RETURNED_VALUE}"
+#   string::wrapText "This is a long text that should be wrapped at 20 characters." 20 2 false && local wrappedText="${RETURNED_VALUE}"
 #
 # Note:
 #   This function is written in pure bash and is faster than calling the fold command.
@@ -602,18 +602,18 @@ function string::wrapText() {
       else
         wrappedText+="${leftPadding}"
       fi
-      wrappedText+="${LAST_RETURNED_VALUE}"
+      wrappedText+="${RETURNED_VALUE}"
     done <<< "${text}"
   else
     string::wrapSentence "${text}" "${sentenceWidth}" "${leftPadding}"
-    wrappedText="${LAST_RETURNED_VALUE}"
+    wrappedText="${RETURNED_VALUE}"
   fi
 
   # add left padding on the first line (or not)
   if [[ ${appendPaddingToFirstLine} == "true" ]]; then
-    LAST_RETURNED_VALUE="${leftPadding}${wrappedText#$'\n'}"
+    RETURNED_VALUE="${leftPadding}${wrappedText#$'\n'}"
   else
-    LAST_RETURNED_VALUE="${wrappedText#$'\n'}"
+    RETURNED_VALUE="${wrappedText#$'\n'}"
   fi
 }
 
@@ -622,10 +622,10 @@ function string::wrapText() {
 # $1: the text to wrap
 # $2: the width to wrap the text at
 # $3: the prefix to apply to each new line (default to "")
-# Returns the wrapped text in the global variable LAST_RETURNED_VALUE
+# Returns the wrapped text in the global variable RETURNED_VALUE
 #
 # Usage:
-#   string::wrapSentence "This is a long text that should be wrapped at 20 characters." 20 && local wrappedText="${LAST_RETURNED_VALUE}"
+#   string::wrapSentence "This is a long text that should be wrapped at 20 characters." 20 && local wrappedText="${RETURNED_VALUE}"
 #
 # Note:
 #   This function is written in pure bash and is faster than calling the fold command.
@@ -639,7 +639,7 @@ function string::wrapSentence() {
 
   # short cut in case the text is already shorter than the width
   if [[ "${#text}" -le width ]]; then
-    LAST_RETURNED_VALUE="${text}"
+    RETURNED_VALUE="${text}"
     return 0
   fi
 
@@ -706,7 +706,7 @@ function string::wrapSentence() {
     fi
   done
 
-  LAST_RETURNED_VALUE="${wrappedText}"
+  RETURNED_VALUE="${wrappedText}"
 }
 
 # Allows to fuzzy match an array against a given pattern.
@@ -716,12 +716,12 @@ function string::wrapSentence() {
 # $2: the initial array name
 #
 # Returns:
-#   an array containing only the lines matching the pattern in the global variable LAST_RETURNED_ARRAY
-#   an array of the same size that contains the start index of the match in the global variable LAST_RETURNED_ARRAY2
-#   an array of the same size that contains the distance of the match in the global variable LAST_RETURNED_ARRAY3
+#   an array containing only the lines matching the pattern in the global variable RETURNED_ARRAY
+#   an array of the same size that contains the start index of the match in the global variable RETURNED_ARRAY2
+#   an array of the same size that contains the distance of the match in the global variable RETURNED_ARRAY3
 #
 # Usage:
-#   array::fuzzyMatch "pattern" "myarray" && local bestMatch="${LAST_RETURNED_VALUE}"
+#   array::fuzzyMatch "pattern" "myarray" && local bestMatch="${RETURNED_VALUE}"
 #
 # Note:
 #   All characters in the pattern must be found in the same order in the matched line.
@@ -796,9 +796,9 @@ function array::fuzzyFilter() {
 
   shopt -u nocasematch
 
-  LAST_RETURNED_ARRAY=("${matches[@]}")
-  LAST_RETURNED_ARRAY2=("${indexes[@]}")
-  LAST_RETURNED_ARRAY3=("${distances[@]}")
+  RETURNED_ARRAY=("${matches[@]}")
+  RETURNED_ARRAY2=("${indexes[@]}")
+  RETURNED_ARRAY3=("${distances[@]}")
 }
 
 #===============================================================
@@ -809,14 +809,14 @@ function array::fuzzyFilter() {
 # Creates it if missing.
 #
 # Usage:
-#   core::getConfigurationDirectory && local directory="${LAST_RETURNED_VALUE}"
+#   core::getConfigurationDirectory && local directory="${RETURNED_VALUE}"
 function core::getConfigurationDirectory() {
   local directory
   directory="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}"
   if [[ ! -d "${directory}" ]]; then
     mkdir -p "${directory}"
   fi
-  LAST_RETURNED_VALUE="${directory}"
+  RETURNED_VALUE="${directory}"
 }
 
 # Returns the path to the valet locla state directory.
@@ -824,23 +824,23 @@ function core::getConfigurationDirectory() {
 # Creates it if missing.
 #
 # Usage:
-#   core::getLocalStateDirectory && local directory="${LAST_RETURNED_VALUE}"
+#   core::getLocalStateDirectory && local directory="${RETURNED_VALUE}"
 function core::getLocalStateDirectory() {
   local directory
   directory="${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/share}/valet}"
   if [[ ! -d "${directory}" ]]; then
     mkdir -p "${directory}"
   fi
-  LAST_RETURNED_VALUE="${directory}"
+  RETURNED_VALUE="${directory}"
 }
 
 # Returns the path to the valet user directory.
 # Does not create it if missing.
 #
 # Usage:
-#   core::getUserDirectory && local directory="${LAST_RETURNED_VALUE}"
+#   core::getUserDirectory && local directory="${RETURNED_VALUE}"
 function core::getUserDirectory() {
-  LAST_RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"
+  RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"
 }
 
 #===============================================================
@@ -864,7 +864,7 @@ function core::showHelp() {
 # This should be called from a command function for which you want to parse the arguments.
 #
 # Usage:
-#   core::parseArguments "$@" && eval "${LAST_RETURNED_VALUE}"
+#   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
 #
 # Notes:
 #   - It will return a string that can be evaluated to set the variables

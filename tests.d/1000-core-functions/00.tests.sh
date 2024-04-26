@@ -12,17 +12,17 @@ There were 2 new lines before this."
 
   echo "→ string::wrapText \"\${shortText}\" 30"
   echo "------------------------------"
-  string::wrapText "${shortText}" 30 && echo "${LAST_RETURNED_VALUE}"
+  string::wrapText "${shortText}" 30 && echo "${RETURNED_VALUE}"
   endTest "Wrapping text at column 30 with no padding" 0
 
   echo "→ string::wrapText \"\${shortText}\" 90 4 false"
   echo "------------------------------------------------------------------------------------------"
-  string::wrapText "${shortText}" 90 4 false && echo "${LAST_RETURNED_VALUE}"
+  string::wrapText "${shortText}" 90 4 false && echo "${RETURNED_VALUE}"
   endTest "Wrapping text at column 90 with padding of 4 on new lines" 0
 
   echo "→ string::wrapText \"\${shortText}\" 90 2 true"
   echo "------------------------------------------------------------------------------------------"
-  string::wrapText "${shortText}" 90 2 true && echo "${LAST_RETURNED_VALUE}"
+  string::wrapText "${shortText}" 90 2 true && echo "${RETURNED_VALUE}"
   endTest "Wrapping text at column 90 with padding of 2 on all lines" 0
 }
 
@@ -39,27 +39,27 @@ function testArray::fuzzyFilter() {
   echo
   echo "→ array::fuzzyFilter evle lines"
   array::fuzzyFilter "evle" lines
-  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2 LAST_RETURNED_ARRAY3
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2 RETURNED_ARRAY3
 
   echo
   echo "→ array::fuzzyFilter SC2 lines"
   array::fuzzyFilter "SC2" lines
-  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2 LAST_RETURNED_ARRAY3
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2 RETURNED_ARRAY3
 
   echo
   echo "→ array::fuzzyFilter u lines"
   array::fuzzyFilter "u" lines
-  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2 LAST_RETURNED_ARRAY3
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2 RETURNED_ARRAY3
 
   echo
   echo "→ array::fuzzyFilter seLf lines"
   array::fuzzyFilter "seLf" lines
-  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2 LAST_RETURNED_ARRAY3
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2 RETURNED_ARRAY3
 
   echo
   echo "→ array::fuzzyFilter nomatch lines"
   array::fuzzyFilter "nomatch" lines
-  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2 LAST_RETURNED_ARRAY3
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2 RETURNED_ARRAY3
 
   unset lines
 

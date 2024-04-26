@@ -83,22 +83,22 @@ function interactive::askForConfirmationRaw() {
 #
 # Returns:
 #   Returns 0 if true, 1 if false.
-#   True or false in the global variable LAST_RETURNED_VALUE.
+#   True or false in the global variable RETURNED_VALUE.
 #
 # Usage:
-#  interactive::promptYesNo "Do you want to continue?" && local answer="${LAST_RETURNED_VALUE}"
+#  interactive::promptYesNo "Do you want to continue?" && local answer="${RETURNED_VALUE}"
 function interactive::promptYesNo() {
   interactive::displayQuestion "${1}"
   interactive::promptYesNoRaw "${2:-true}"
 
-  if [[ ${LAST_RETURNED_VALUE} == "true" ]]; then
+  if [[ ${RETURNED_VALUE} == "true" ]]; then
     interactive::displayAnswer "Yes."
-    LAST_RETURNED_VALUE=true
+    RETURNED_VALUE=true
     return 0
   fi
 
   interactive::displayAnswer "No."
-  LAST_RETURNED_VALUE=false
+  RETURNED_VALUE=false
   return 1
 }
 
@@ -111,10 +111,10 @@ function interactive::promptYesNo() {
 #
 # Returns:
 #   Returns 0 if true, 1 if false.
-#   True or false in the global variable LAST_RETURNED_VALUE.
+#   True or false in the global variable RETURNED_VALUE.
 #
 # Usage:
-#  interactive::promptYesNoRaw "Do you want to continue?" && local answer="${LAST_RETURNED_VALUE}"
+#  interactive::promptYesNoRaw "Do you want to continue?" && local answer="${RETURNED_VALUE}"
 function interactive::promptYesNoRaw() {
   local state=${1:-true}
 
@@ -182,11 +182,11 @@ function interactive::promptYesNoRaw() {
   printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}"
 
   if [[ ${state} == "true" ]]; then
-    LAST_RETURNED_VALUE=${state}
+    RETURNED_VALUE=${state}
     return 0
   fi
 
-  LAST_RETURNED_VALUE=${state}
+  RETURNED_VALUE=${state}
   return 1
 }
 
@@ -258,7 +258,7 @@ interactive::displayDialogBox() {
   fi
 
   string::wrapText "${text}" "${maxWidth}"
-  local wrappedText="${LAST_RETURNED_VALUE}"
+  local wrappedText="${RETURNED_VALUE}"
 
   local finalString="${AC__TEXT_FAINT}${leftChar}┌─${AC__REPEAT__}${maxWidth}${__AC__LAST_CHAR}─┐${AC__TEXT_RESET}"$'\n'
 
@@ -423,6 +423,6 @@ function interactive::switchBackFromFullScreen() {
   exec 2>&4 4>&-
   if [[ -s "${FSFS_TEMPORARY_ERROR_FILE}" ]]; then
     io::readFile "${FSFS_TEMPORARY_ERROR_FILE}"
-    log::error "Error messages during the interactive session:"$'\n'"${LAST_RETURNED_VALUE%$'\n'}"
+    log::error "Error messages during the interactive session:"$'\n'"${RETURNED_VALUE%$'\n'}"
   fi
 }

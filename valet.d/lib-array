@@ -130,7 +130,7 @@ function array::makeArraysSameSize() {
 #
 # Returns:
 #   The original array is sorted in place.
-#   An array that contains the corresponding indexes of the sorted array in the original array in the global variable LAST_RETURNED_ARRAY
+#   An array that contains the corresponding indexes of the sorted array in the original array in the global variable RETURNED_ARRAY
 #
 # Usage:
 #   declare -g myArray=( "a" "b" "c" )
@@ -139,7 +139,7 @@ function array::makeArraysSameSize() {
 #   array::sortWithCriteria myArray criteria1 criteria2
 #   printf '%s\n' "${myArray[@]}"
 #   > c b a
-#   printf '%s\n' "${LAST_RETURNED_ARRAY[@]}"
+#   printf '%s\n' "${RETURNED_ARRAY[@]}"
 #   > 3 2 1
 function array::sortWithCriteria() {
   local -n array="${1}"
@@ -179,7 +179,7 @@ function array::sortWithCriteria() {
     sortedArray+=("${array[i]}")
   done
 
-  LAST_RETURNED_ARRAY=("${indexes[@]}")
+  RETURNED_ARRAY=("${indexes[@]}")
 
   array=("${sortedArray[@]}")
 }
@@ -198,13 +198,13 @@ function array::sortWithCriteria() {
 #     Does not count the strings added/before after each matched char.
 #
 # Returns:
-#   an the sorted and filtered in the global variable LAST_RETURNED_ARRAY
-#   an array containing the indexes of the matched lines in the original array in the global variable LAST_RETURNED_ARRAY2
+#   an the sorted and filtered in the global variable RETURNED_ARRAY
+#   an array containing the indexes of the matched lines in the original array in the global variable RETURNED_ARRAY2
 #
 # Usage:
-#   array::fuzzyFilterSort "pattern" "myarray" && local filteredArray="${LAST_RETURNED_ARRAY}"
-#   array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ && local filteredArray="${LAST_RETURNED_ARRAY}"
-#   array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${LAST_RETURNED_ARRAY}"
+#   array::fuzzyFilterSort "pattern" "myarray" && local filteredArray="${RETURNED_ARRAY}"
+#   array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ && local filteredArray="${RETURNED_ARRAY}"
+#   array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${RETURNED_ARRAY}"
 #
 # Note:
 #   All characters in the pattern must be found in the same order in the matched line.
@@ -342,12 +342,12 @@ function array::fuzzyFilterSort() {
   array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
 
   # create the final correspondance array
-  LAST_RETURNED_ARRAY2=()
-  for i in "${LAST_RETURNED_ARRAY[@]}"; do
-    LAST_RETURNED_ARRAY2+=("${originalIndexes[i]}")
+  RETURNED_ARRAY2=()
+  for i in "${RETURNED_ARRAY[@]}"; do
+    RETURNED_ARRAY2+=("${originalIndexes[i]}")
   done
 
-  LAST_RETURNED_ARRAY=("${ARRAY_MATCHES[@]}")
+  RETURNED_ARRAY=("${ARRAY_MATCHES[@]}")
 
   unset ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
 }

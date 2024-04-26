@@ -21,12 +21,12 @@ function io::invoke5() {
   echo "▶ called io::invoke5 $*" 1>&2
   if [[ ${5} == "uname" ]]; then
     echo -n "x86_64" > "${GLOBAL_TEMPORARY_STDOUT_FILE}"
-    LAST_RETURNED_VALUE="${GLOBAL_TEMPORARY_STDOUT_FILE}"
-    LAST_RETURNED_VALUE2=""
+    RETURNED_VALUE="${GLOBAL_TEMPORARY_STDOUT_FILE}"
+    RETURNED_VALUE2=""
     return 0
   fi
-  LAST_RETURNED_VALUE=""
-  LAST_RETURNED_VALUE2=""
+  RETURNED_VALUE=""
+  RETURNED_VALUE2=""
 }
 
 function io::invoke() {
@@ -34,15 +34,15 @@ function io::invoke() {
   if [[ ${1} == "git" ]]; then
     while [[ $# -gt 0 ]]; do
       case "${1}" in
-      tag) LAST_RETURNED_VALUE="${LAST_GIT_TAG}"; return 0;;
-      log) LAST_RETURNED_VALUE="✨ feature"$'\n'"🐞 fix"; return 0;;
+      tag) RETURNED_VALUE="${LAST_GIT_TAG}"; return 0;;
+      log) RETURNED_VALUE="✨ feature"$'\n'"🐞 fix"; return 0;;
       *) ;;
       esac
       shift
     done
   fi
-  LAST_RETURNED_VALUE=""
-  LAST_RETURNED_VALUE2=""
+  RETURNED_VALUE=""
+  RETURNED_VALUE2=""
 }
 
 function kurl::toVar() {
@@ -50,22 +50,22 @@ function kurl::toVar() {
   echo -n 200
   if [[ $* == *"tag_name"* ]]; then
     # post on the release endpoint
-    LAST_RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}" }'
+    RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}" }'
     return 0
   fi
-  LAST_RETURNED_VALUE=""
+  RETURNED_VALUE=""
 }
 
 
 function kurl::toFile() {
   echo "▶ called kurl::toFile $*" 1>&2
   echo -n 200
-  LAST_RETURNED_VALUE=""
+  RETURNED_VALUE=""
 }
 
 function main() {
   setTempFilesNumber 100
-  io::createTempFile && local tmpFile="${LAST_RETURNED_VALUE}"
+  io::createTempFile && local tmpFile="${RETURNED_VALUE}"
   cp -f "${GLOBAL_VALET_HOME}/valet.d/version" "${tmpFile}"
   echo -n "1.2.3" > "${GLOBAL_VALET_HOME}/valet.d/version"
 

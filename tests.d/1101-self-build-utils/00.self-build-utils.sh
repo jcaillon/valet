@@ -8,7 +8,7 @@ function testExtractCommandYamls() {
   extractCommandYamls "resources/extract-command-yamls-test-file"
 
   local content
-  for content in "${LAST_RETURNED_ARRAY[@]}"; do
+  for content in "${RETURNED_ARRAY[@]}"; do
     echo "content:"$'\n'"⌜${content}⌝"
   done
 
@@ -70,7 +70,7 @@ function testExtractFirstLongNameFromOptionString() {
   local optionString="-x, --profiling"
 
   echo "→ extractFirstLongNameFromOptionString '${optionString}'"
-  extractFirstLongNameFromOptionString "${optionString}" && echo "${LAST_RETURNED_VALUE}"
+  extractFirstLongNameFromOptionString "${optionString}" && echo "${RETURNED_VALUE}"
 
   endTest "Testing extractFirstLongNameFromOptionString" 0
 }

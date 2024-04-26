@@ -109,7 +109,7 @@ function testArray::sortWithCriteria() {
   echo
   echo "→ array::sortWithCriteria myArray criteria1 criteria2"
   array::sortWithCriteria myArray criteria1 criteria2
-  declare -p LAST_RETURNED_ARRAY myArray
+  declare -p RETURNED_ARRAY myArray
   echo "expected: g e d c b a f"
 
   declare -a ARRAY_MATCHES=([0]="one the" [1]="the breakdown" [2]="holding the baby" [3]="the d day")
@@ -122,7 +122,7 @@ function testArray::sortWithCriteria() {
   echo "→ array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES"
   array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
 
-  declare -p LAST_RETURNED_ARRAY ARRAY_MATCHES
+  declare -p RETURNED_ARRAY ARRAY_MATCHES
 
   unset ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
 
@@ -150,13 +150,13 @@ function testArray::fuzzyFilterSort() {
   echo "→ array::fuzzyFilterSort the myArray"
   array::fuzzyFilterSort the myArray
 
-  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
   echo
   echo "→ array::fuzzyFilterSort elv myArray ⌜ ⌝"
   array::fuzzyFilterSort elv myArray ⌜ ⌝
 
-  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
   echo
   myArray=(
@@ -173,7 +173,7 @@ function testArray::fuzzyFilterSort() {
   echo "→ array::fuzzyFilterSort the myArray ⌜ ⌝ 6"
   array::fuzzyFilterSort the myArray ⌜ ⌝ 6
 
-  declare -p LAST_RETURNED_ARRAY LAST_RETURNED_ARRAY2
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
   unset myArray
 
