@@ -13,6 +13,10 @@ function testIo::toAbsolutePath() {
   io::toAbsolutePath 01.invoke.sh && echo "${RETURNED_VALUE}"
 
   echo
+  echo "→ io::toAbsolutePath ../1004-lib-system/00.tests.sh"
+  io::toAbsolutePath "../1004-lib-system/00.tests.sh" && echo "${RETURNED_VALUE}"
+
+  echo
   echo "→ io::toAbsolutePath resources"
   io::toAbsolutePath resources && echo "${RETURNED_VALUE}"
 
@@ -25,8 +29,8 @@ function testIo::toAbsolutePath() {
   io::toAbsolutePath ./resources && echo "${RETURNED_VALUE}"
 
   echo
-  echo "→ io::toAbsolutePath ../0003-self/01.invoke.sh"
-  io::toAbsolutePath "../0003-self/01.invoke.sh" && echo "${RETURNED_VALUE}"
+  echo "→ io::toAbsolutePath missing-file"
+  io::toAbsolutePath "missing-file" && echo "${RETURNED_VALUE}"
 
   endTest "Testing io::toAbsolutePath" 0
 }

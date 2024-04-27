@@ -591,6 +591,8 @@ function verifyCommandDefinition() {
   # check the syntax for options
   # check the alphanumeric characters for options and arguments
   # for short option, only one character is allowed
+  #
+  #
 
   if [[ -n "${message}" ]]; then
     SELF_BUILD_ERRORS+="The command definition ⌜${command}⌝ for function ⌜${function}⌝:"$'\n'"${message}"

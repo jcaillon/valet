@@ -177,6 +177,9 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Reimplement usage of main::sortCommands / main::addLastChoice.
 - Add a default value for options.
 - Implement regex replace in pure bash.
+- Show the arguments required when a command parsing fails.
+- Betters checks in self build!
+- Support alternative single comments `# ## VALET COMMAND` instead of multiline comments for command declaration (see we can have help in autocompletion).
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

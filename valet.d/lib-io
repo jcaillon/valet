@@ -4,7 +4,6 @@ set -Eeu -o pipefail
 # description: This script can be sourced by commands to provide convenient functions.
 
 # This function returns the absolute path of a file.
-# The file must exists for this function to work.
 #
 # $1: The file to get the absolute path.
 #
@@ -21,8 +20,8 @@ function io::toAbsolutePath() {
     return 0
   fi
 
-  RETURNED_VALUE="${PWD}/${file##*/}"
-  if [[ -e "${RETURNED_VALUE}" ]]; then
+  RETURNED_VALUE="${PWD}/${file#./}"
+  if [[ ${file} != ".."* && -e "${RETURNED_VALUE}" ]]; then
     return 0
   fi
 
@@ -32,7 +31,12 @@ function io::toAbsolutePath() {
     return 0
   fi
 
-  RETURNED_VALUE="${file}"
+  RETURNED_VALUE="${PWD}/${file#./}"
+  if [[ -e "${RETURNED_VALUE}" ]]; then
+    return 0
+  fi
+
+  RETURNED_VALUE="${PWD}/${file#./}"
 }
 
 # This function call an executable and its arguments.
@@ -370,7 +374,7 @@ function io::sleep() {
   # when connected to a terminal, we can just read the stdout
   # which will never be written to, and use a timeout on read
   if [[ -t 2 ]]; then
-    read -rt "${timeout}" -u 2
+    read -rt "${timeout}" -u 2 || :
     return 0
   elif command -v mkfifo 1>/dev/null; then
     if [[ -z ${IO_SLEEP_FIFO:-} ]]; then
@@ -380,7 +384,7 @@ function io::sleep() {
       exec 6<>"${IO_SLEEP_FIFO}"
       rm "${IO_SLEEP_FIFO}"
     fi
-    read -rt "${timeout}" -u 6
+    read -rt "${timeout}" -u 6 || :
   else
     # when everything else failed...
     sleep "${timeout}"
