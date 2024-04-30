@@ -197,6 +197,14 @@ exitcode=1
 **Error** output:
 
 ```log
+TRACE    Fakeexec standard output stream:
+   1 ░ ▶ called fakeexec --std-in --error
+   2 ░ ▶ fakeexec input stream was:
+   3 ░ ⌈inputStreamValue
+   4 ░ ⌉
+TRACE    Fakeexec standard error stream:
+   1 ░ This is an error output from fakeexec
+   2 ░ returning 1 from fakeexec
 ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 ```
 
@@ -330,6 +338,13 @@ Exit code: `1`
 **Error** output:
 
 ```log
+TRACE    Fakeexec standard output stream:
+   1 ░ ▶ called fakeexec --error
+   2 ░ ▶ fakeexec input stream was:
+   3 ░ ⌈⌉
+TRACE    Fakeexec standard error stream:
+   1 ░ This is an error output from fakeexec
+   2 ░ returning 1 from fakeexec
 ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 ```
 

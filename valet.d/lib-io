@@ -85,10 +85,10 @@ function io::invoke5() {
     if [[ -n "${stdIn}" ]]; then
       if [[ ${stdInFromFile} == "true" ]]; then
         log::trace "${executable^} standard input from file ${stdIn}:"
-        log::printFile true "${stdIn}" 9999
+        log::printFile "${stdIn}" 9999
       else
         log::trace "${executable^} standard input from string:"
-        log::printFile false "${stdIn}" 9999
+        log::printFileString "${stdIn}" 9999
       fi
     else
       log::trace "No standard input."
@@ -121,21 +121,21 @@ function io::invoke5() {
   # fail if needed or we are debug mode; display all the debug information that could be useful
   if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
 
-    if log::isTraceEnabled; then
+    if log::isTraceEnabled || [[ ${shouldFail} == "true" ]]; then
       # print std out
       if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
-        log::trace "${executable^} standard output stream:"
-        log::printFile true "${GLOBAL_TEMPORARY_STDOUT_FILE}" 9999
+        log::errorTrace "${executable^} standard output stream:"
+        log::printFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 9999
       else
-        log::trace "${executable^} had no standard output stream."
+        log::errorTrace "${executable^} had no standard output stream."
       fi
 
       # print stderr
       if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
-        log::trace "${executable^} standard error stream:"
-        log::printFile true "${GLOBAL_TEMPORARY_STDERR_FILE}" 9999
+        log::errorTrace "${executable^} standard error stream:"
+        log::printFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 9999
       else
-        log::trace "${executable^} had no standard error stream."
+        log::errorTrace "${executable^} had no standard error stream."
       fi
     fi
 

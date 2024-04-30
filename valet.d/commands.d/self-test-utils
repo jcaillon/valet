@@ -362,32 +362,29 @@ function onExitTestInternal() {
   resetFdRedirection
   resetOriginalImportantVariables
 
-  log::setLevel trace
-
   if [[ -s "${_TEST_REPORT_FILE}" ]]; then
-    log::trace "Current test report:"
-    log::printFile true "${_TEST_REPORT_FILE}"
+    log::errorTrace "Current test report:"
+    log::printFile "${_TEST_REPORT_FILE}"
   else
-    log::trace "No test report yet for the current test."
+    log::errorTrace "No test report yet for the current test."
   fi
 
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
-    log::trace "Current test standard output:"
+    log::errorTrace "Current test standard output:"
     io::readFile "${_TEST_STANDARD_OUTPUT_FILE}"
-    log::printFile false "${RETURNED_VALUE}"
+    log::printFileString "${RETURNED_VALUE}"
   else
-    log::trace "No standard output for the current test."
+    log::errorTrace "No standard output for the current test."
   fi
 
   if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
-    log::trace "Current test error output:"
+    log::errorTrace "Current test error output:"
     io::readFile "${_TEST_STANDARD_ERROR_FILE}"
-    log::printFile false "${RETURNED_VALUE}"
+    log::printFileString "${RETURNED_VALUE}"
   else
-    log::trace "No error output for the current test."
+    log::errorTrace "No error output for the current test."
   fi
 
-  log::setLevel error
   log::error "The program has exit during a test with code ${rc}. If you expect the tested function/program to exit or fail, then run it in a subshell and capture the exit code like that:"$'\n'"(myFunctionThatFails) || exitCode=\$?"
 
   GLOBAL_ERROR_DISPLAYED=1

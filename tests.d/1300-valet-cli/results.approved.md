@@ -354,6 +354,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
+TRACE    This is an error trace message which is always displayed.
 SUCCESS  This is a success message.
 WARNING  This is a warning message.
 With a second line.
@@ -372,6 +373,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
+TRACE    This is an error trace message which is always displayed.
 WARNING  This is a warning message.
 With a second line.
 ```
@@ -400,6 +402,7 @@ local parsingErrors help action
 parsingErrors=""
 action="logging-level"
 
+TRACE    This is an error trace message which is always displayed.
 DEBUG    This is a debug message.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 SUCCESS  This is a success message.
@@ -432,6 +435,7 @@ local parsingErrors help action
 parsingErrors=""
 action="logging-level"
 
+TRACE    This is an error trace message which is always displayed.
 TRACE    This is a trace message.
 DEBUG    This is a debug message.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
@@ -456,6 +460,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
+HH:MM:SS TRACE    This is an error trace message which is always displayed.
 HH:MM:SS INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in 
                   its donation. You are not important because of how long you live, you are important because of how 
                   effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him
@@ -479,6 +484,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
+CTIHH:MM:SS CDBTRACE    CDE This is an error trace message which is always displayed.
 CTIHH:MM:SS CININFO    II  CDE This is an info message with a super long sentence. The value of life is not in its duration, but in
                     its donation. You are not important because of how long you live, you are important because of how 
                     effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed 
@@ -502,6 +508,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
+TRACE    This is an error trace message which is always displayed.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 SUCCESS  This is a success message.
 WARNING  This is a warning message.
@@ -521,6 +528,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
+YYYY:MM:DD_HH:MM:SS TRACE    This is an error trace message which is always displayed.
 YYYY:MM:DD_HH:MM:SS INFO     This is an info message with a super long sentence. The value 
                   of life is not in its duration, but in its donation. You are 
                   not important because of how long you live, you are important 
@@ -738,6 +746,7 @@ Exit code: `1`
 INFO     The valet user directory ⌜/tmp/valet.d/d601-0/non-existing⌝ does not contain a built ⌜commands⌝ file.
 Now building it using ⌜valet self build⌝ command.
 WARNING  Skipping user directory ⌜/tmp/valet.d/d601-0/non-existing⌝ because it does not exist.
+TRACE    This is an error trace message which is always displayed.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 SUCCESS  This is a success message.
 WARNING  This is a warning message.

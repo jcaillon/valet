@@ -233,7 +233,7 @@ function extractCommandDefinitionsToVariables() {
     local content
     for content in "${RETURNED_ARRAY[@]}"; do
 
-      if log::isDebugEnabled; then log::debug "Extracting command definition for: ⌜${content%%$'\n'*}...⌝."; fi
+      if log::isTraceEnabled; then log::trace "Extracting command definition for:"; log::printFileString "${content%%$'\n'*}"; fi
 
       extractCommandDefinitionToVariables "${content}"
 
@@ -255,10 +255,11 @@ function extractCommandDefinitionsToVariables() {
       array::makeArraysSameSize TEMP_CMD_BUILD_arguments_name TEMP_CMD_BUILD_arguments_description
       array::makeArraysSameSize TEMP_CMD_BUILD_examples_name TEMP_CMD_BUILD_examples_description
 
-      if log::isDebugEnabled; then
+      if log::isTraceEnabled; then
         # shellcheck disable=SC2086
         io::invoke declare -p ${!TEMP_CMD_BUILD_*}
-        log::debug "Declared variables for this command:"$'\n'"${RETURNED_VALUE}"
+        log::trace "Declared variables for this command:"
+        log::printFileString "${RETURNED_VALUE}"
       fi
 
       # verify that the command definition is valid

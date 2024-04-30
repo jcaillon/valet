@@ -80,6 +80,7 @@ function selfMock1() {
     log::setLevel debug
     ;;
   logging-level)
+    log::errorTrace "This is an error trace message which is always displayed."
     log::trace "This is a trace message."
     log::debug "This is a debug message."
     log::info "This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out."
@@ -108,11 +109,11 @@ function selfMock1() {
       log::info "This is to test the printRaw function."
       log::printRaw "  Two spaces before that"$'\n'"New line(    )here."
       log::info "This is to test the printFile function from an actual file."
-      log::printFile true "resources/file-to-read"
+      log::printFile "resources/file-to-read"
       log::info "This is to test the printFile function from an actual file with number of lines restriction."
-      log::printFile true "resources/file-to-read" 10
+      log::printFile "resources/file-to-read" 10
       log::info "This is to test the printFile function from a string."
-      log::printFile false "This is an info message with a super long sentence."$'\n'"The value of life is not in its duration, but in its donation."$'\n'"You are not important because of how long you live, you are important because of how effective you live."$'\n'"Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime."$'\n\n'"Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out."
+      log::printFileString "This is an info message with a super long sentence."$'\n'"The value of life is not in its duration, but in its donation."$'\n'"You are not important because of how long you live, you are important because of how effective you live."$'\n'"Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime."$'\n\n'"Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out."
     ;;
   *)
     log::warning "This is for testing valet core functions, running the tests."
