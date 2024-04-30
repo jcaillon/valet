@@ -16,8 +16,8 @@ function testMainOptions() {
 
   # testing unknown option, corrected with fuzzy match
   echo "→ valet -prof"
-  ("${GLOBAL_VALET_HOME}/valet" -prof)
-  endTest "Testing unknown option, corrected with fuzzy match" $?
+  ("${GLOBAL_VALET_HOME}/valet" -prof) || echo "Failed as expected."
+  endTest "Testing unknown option, corrected with fuzzy match" 1
 }
 
 function testCleaning() {
@@ -29,7 +29,7 @@ function testCleaning() {
 
 function testUserDirectory() {
   # testing with a non exising user directory
-  local previousUserDirectory="${VALET_USER_DIRECTORY}"
+  local previousUserDirectory="${VALET_USER_DIRECTORY:-}"
   setTempFilesNumber 600
   io::createTempDirectory && export VALET_USER_DIRECTORY="${RETURNED_VALUE}/non-existing"
 

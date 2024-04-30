@@ -95,30 +95,9 @@ Returning 1 from curl.
 ```log
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Executing the command ⌜curl⌝.
-Fail if it fails: ⌜false⌝.
-Acceptable error codes: ⌜0⌝.
-Curl extra parameters:
-'--silent'
-'--show-error'
-'--location'
-'--write-out'
-'%{http_code}'
-'--output'
-'/tmp/valet.d/kurl-test'
-'--code'
-'400'
-'--error'
-'https://hello.com/bla'
-'--otherOpt'
-DEBUG    No standard input.
+DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
+'--silent' '--show-error' '--location' '--write-out' '%{http_code}' '--output' '/tmp/valet.d/kurl-test' '--code' '400' '--error' 'https://hello.com/bla' '--otherOpt'
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜1⌝.
-Curl standard output:
-⌜400⌝
-Curl error output:
-⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt
-Returning 1 from curl.
-⌝
 DEBUG    The curl command for url ⌜https://hello.com/bla⌝ ended with exit code ⌜1⌝, the http return code was ⌜400⌝.
 DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜https://hello.com/bla⌝.
 ```
@@ -145,28 +124,10 @@ stderr:
 ```log
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Executing the command ⌜curl⌝.
-Fail if it fails: ⌜false⌝.
-Acceptable error codes: ⌜0⌝.
-Curl extra parameters:
-'--silent'
-'--show-error'
-'--location'
-'--write-out'
-'%{http_code}'
-'--output'
-'/tmp/valet.d/kurl-test'
-'--code'
-'200'
-'http://hello.com'
-DEBUG    No standard input.
+DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
+'--silent' '--show-error' '--location' '--write-out' '%{http_code}' '--output' '/tmp/valet.d/kurl-test' '--code' '200' 'http://hello.com'
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
-Curl standard output:
-⌜200⌝
-Curl error output:
-⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 200 http://hello.com
-⌝
 DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
 DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
 ```
@@ -229,28 +190,10 @@ stderr:
 ```log
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Executing the command ⌜curl⌝.
-Fail if it fails: ⌜false⌝.
-Acceptable error codes: ⌜0⌝.
-Curl extra parameters:
-'--silent'
-'--show-error'
-'--location'
-'--write-out'
-'%{http_code}'
-'--output'
-'/tmp/valet-work'
-'--code'
-'400'
-'http://hello.com'
-DEBUG    No standard input.
+DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
+'--silent' '--show-error' '--location' '--write-out' '%{http_code}' '--output' '/tmp/valet-work' '--code' '400' 'http://hello.com'
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
-Curl standard output:
-⌜400⌝
-Curl error output:
-⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 400 http://hello.com
-⌝
 DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜400⌝.
 DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜http://hello.com⌝.
 ```

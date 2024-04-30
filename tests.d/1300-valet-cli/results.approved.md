@@ -143,6 +143,7 @@ Exit code: `1`
 
 ```plaintext
 → valet help --unknown -colo
+Failed as expected.
 ```
 
 **Error** output:
@@ -197,6 +198,7 @@ Exit code: `1`
 
 ```plaintext
 → valet self mock1 non-existing-option nonNeededArg1 -derp anotherArg
+Failed as expected.
 ```
 
 **Error** output:
@@ -230,12 +232,13 @@ INFO     This command requires sudo privileges.
 
 ### Testing error handling
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 
 ```plaintext
 → valet self mock1 error
+Failed as expected.
 ```
 
 **Error** output:
@@ -246,17 +249,18 @@ ERROR    Error code 1 in selfMock1(), stack:
 ├─ in selfMock1() at $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
 ├─ in main::runFunction() at $GLOBAL_VALET_HOME/valet.d/main:XXX
 ├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:XXX
-└─ in ROOT at $GLOBAL_VALET_HOME/valet:XXX
+└─ in main() at $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ### Testing exit message and custom onExit function
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 
 ```plaintext
 → valet self mock1 exit
+Failed as expected.
 ```
 
 **Error** output:
@@ -268,7 +272,7 @@ EXIT     Exiting with code 5, stack:
 ├─ in selfMock1() at $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
 ├─ in main::runFunction() at $GLOBAL_VALET_HOME/valet.d/main:XXX
 ├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:XXX
-└─ in ROOT at $GLOBAL_VALET_HOME/valet:XXX
+└─ in main() at $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ### Testing fail function
@@ -279,6 +283,7 @@ Exit code: `1`
 
 ```plaintext
 → valet self mock1 fail
+Failed as expected.
 ```
 
 **Error** output:
@@ -289,12 +294,13 @@ ERROR    This is for testing valet core functions, failing now.
 
 ### Testing unknown command handling
 
-Exit code: `0`
+Exit code: `1`
 
 **Standard** output:
 
 ```plaintext
 → valet self mock1 unknown-command
+Failed as expected.
 ```
 
 **Error** output:
@@ -307,7 +313,7 @@ ERROR    Error code 1 in selfMock1(), stack:
 ├─ in selfMock1() at $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
 ├─ in main::runFunction() at $GLOBAL_VALET_HOME/valet.d/main:XXX
 ├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:XXX
-└─ in ROOT at $GLOBAL_VALET_HOME/valet:XXX
+└─ in main() at $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ## Test script 04.interactive-mode
@@ -494,6 +500,138 @@ YYYY:MM:DD_HH:MM:SS WARNING  This is a warning message.
                   With a second line.
 ```
 
+### Testing printing raw string and printing file
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ VALET_CONFIG_DISABLE_LOG_TIME=true VALET_CONFIG_DISABLE_LOG_WRAP=false VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 print-raw-and-file
+```
+
+**Error** output:
+
+```log
+INFO     This is to test the printRaw function.
+         Preventing the exploitation of animals is not the only reason for becom
+         ###ing vegan, but for many it remains the key factor in their decision 
+         ###to go vegan and stay vegan. Having emotional attachments with animal
+         ###s may form part of that reason, while many believe that all sentient
+         ### creatures have a right to life and freedom. Specifics aside, avoidi
+         ###ng animal products is one of the most obvious ways you can take a st
+         ###and against animal cruelty and animal exploitation everywhere. Read 
+         ###a detailed overview on why being vegan demonstrates true compassion 
+         ###for animals.
+INFO     This is to test the printFile function from an actual file.
+            1 ░ # Explore why veganism is kinder to animals, to people and to ou
+              ░ r planet's future.
+            2 ░ 
+            3 ░ Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
+            4 ░ 
+            5 ░ ## For the animals
+            6 ░ 
+            7 ░ Preventing the exploitation of animals is not the only reason fo
+              ░ r becoming vegan, but for many it remains the key factor in thei
+              ░ r decision to go vegan and stay vegan. Having emotional attachme
+              ░ nts with animals may form part of that reason, while many believ
+              ░ e that all sentient creatures have a right to life and freedom. 
+              ░ Specifics aside, avoiding animal products is one of the most obv
+              ░ ious ways you can take a stand against animal cruelty and animal
+              ░  exploitation everywhere. Read a detailed overview on why being 
+              ░ vegan demonstrates true compassion for animals.
+            8 ░ 
+            9 ░ ## For your health
+           10 ░ 
+           11 ░ Well-planned vegan diets follow healthy eating guidelines, and c
+              ░ ontain all the nutrients that our bodies need. Both the British 
+              ░ Dietetic Association and the American Academy of Nutrition and D
+              ░ ietetics recognise that they are suitable for every age and stag
+              ░ e of life. Some research has linked that there are certain healt
+              ░ h benefits to vegan diets with lower blood pressure and choleste
+              ░ rol, and lower rates of heart disease, type 2 diabetes and some 
+              ░ types of cancer.
+           12 ░ 
+           13 ░ Going vegan is a great opportunity to learn more about nutrition
+              ░  and cooking, and improve your diet. Getting your nutrients from
+              ░  plant foods allows more room in your diet for health-promoting 
+              ░ options like whole grains, fruit, nuts, seeds and vegetables, wh
+              ░ ich are packed full of beneficial fibre, vitamins and minerals.
+           14 ░ 
+           15 ░ ## For the environment
+           16 ░ 
+           17 ░ From recycling our household rubbish to cycling to work, we're a
+              ░ ll aware of ways to live a greener life. One of the most effecti
+              ░ ve things an individual can do to lower their carbon footprint i
+              ░ s to avoid all animal products. This goes way beyond the problem
+              ░  of cow flatulence and air pollution!
+           18 ░ Why is meat and dairy so bad for the environment?
+           19 ░ 
+           20 ░ The production of meat and other animal derived products places 
+              ░ a heavy burden on the environment. The vast amount of grain feed
+              ░  required for meat production is a significant contributor to de
+              ░ forestation, habitat loss and species extinction. In Brazil alon
+              ░ e, the equivalent of 5.6 million acres of land is used to grow s
+              ░ oya beans for animals in Europe. This land contributes to develo
+              ░ ping world malnutrition by driving impoverished populations to g
+              ░ row cash crops for animal feed, rather than food for themselves.
+              ░  On the other hand, considerably lower quantities of crops and w
+              ░ ater are required to sustain a vegan diet, making the switch to 
+              ░ veganism one of the easiest, most enjoyable and most effective w
+              ░ ays to reduce our impact on the environment. For more on how veg
+              ░ anism is the way forward for the environment, see our environmen
+              ░ t section.
+           21 ░ 
+           22 ░ ## For people
+           23 ░ 
+           24 ░ Just like veganism is the sustainable option when it comes to lo
+              ░ oking after our planet, plant-based living is also a more sustai
+              ░ nable way of feeding the human family. A plant-based diet requir
+              ░ es only one third of the land needed to support a meat and dairy
+              ░  diet. With rising global food and water insecurity due to a myr
+              ░ iad of environmental and socio-economic problems, there's never 
+              ░ been a better time to adopt a more sustainable way of living. Av
+              ░ oiding animal products is not just one of the simplest ways an i
+              ░ ndividual can reduce the strain on food as well as other resourc
+              ░ es, it's the simplest way to take a stand against inefficient fo
+              ░ od systems which disproportionately affect the poorest people al
+              ░ l over the world. Read more about how vegan diets can help peopl
+              ░ e.
+INFO     This is to test the printFile function from an actual file with number 
+         of lines restriction.
+            1 ░ # Explore why veganism is kinder to animals, to people and to ou
+              ░ r planet's future.
+            2 ░ 
+            3 ░ Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
+            4 ░ 
+            5 ░ ## For the animals
+            6 ░ 
+            7 ░ Preventing the exploitation of animals is not the only reason fo
+              ░ r becoming vegan, but for many it remains the key factor in thei
+              ░ r decision to go vegan and stay vegan. Having emotional attachme
+              ░ nts with animals may form part of that reason, while many believ
+              ░ e that all sentient creatures have a right to life and freedom. 
+              ░ Specifics aside, avoiding animal products is one of the most obv
+              ░ ious ways you can take a stand against animal cruelty and animal
+              ░  exploitation everywhere. Read a detailed overview on why being 
+              ░ vegan demonstrates true compassion for animals.
+            8 ░ 
+            9 ░ ## For your health
+           10 ░ 
+            … ░ (truncated)
+INFO     This is to test the printFile function from a string.
+            1 ░ This is an info message with a super long sentence.
+            2 ░ The value of life is not in its duration, but in its donation.
+            3 ░ You are not important because of how long you live, you are impo
+              ░ rtant because of how effective you live.
+            4 ░ Give a man a fish and you feed him for a day; teach a man to fis
+              ░ h and you feed him for a lifetime.
+            5 ░ 
+            6 ░ Surround yourself with the best people you can find, delegate au
+              ░ thority, and don't interfere as long as the policy you've decide
+              ░ d upon is being carried out.
+```
+
 ## Test script 06.misc
 
 ### Testing version option
@@ -515,6 +653,7 @@ Exit code: `1`
 
 ```plaintext
 → valet -prof
+Failed as expected.
 ```
 
 **Error** output:
@@ -643,6 +782,7 @@ Exit code: `1`
 
 ```plaintext
 → valet self --unknown
+Failed as expected.
 ```
 
 **Error** output:

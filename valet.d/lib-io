@@ -15,27 +15,28 @@ set -Eeu -o pipefail
 function io::toAbsolutePath() {
   local file="${1%/}"
 
+  # if the file is already an absolute path, we return it
   if [[ ${file} == "/"* ]]; then
     RETURNED_VALUE="${file}"
     return 0
   fi
 
+  # if the file is a relative path (not containing ..), we return the absolute path
   RETURNED_VALUE="${PWD}/${file#./}"
-  if [[ ${file} != ".."* && -e "${RETURNED_VALUE}" ]]; then
+  if [[ ${file} != *".."* && -e "${RETURNED_VALUE}" ]]; then
     return 0
   fi
 
+  # the file contains .., we need to resolve the path by cd'ing into the directory
   if pushd "${file%/*}" &>/dev/null; then
     RETURNED_VALUE="${PWD}/${file##*/}"
     popd 1>/dev/null
     return 0
   fi
 
-  RETURNED_VALUE="${PWD}/${file#./}"
-  if [[ -e "${RETURNED_VALUE}" ]]; then
-    return 0
-  fi
-
+  # other cases of relative paths not handled:
+  # - file directory does not exist
+  # - the path is .. or .
   RETURNED_VALUE="${PWD}/${file#./}"
 }
 
@@ -69,23 +70,28 @@ function io::invoke5() {
 
   # if debug mode is on, print some info
   if log::isDebugEnabled; then
-    local debugMessage="Executing the command ⌜${executable}⌝."$'\n'
-    debugMessage+="Fail if it fails: ⌜${failIfFails}⌝."$'\n'
-    debugMessage+="Acceptable error codes: ⌜${acceptableErrorCodes}⌝."$'\n'
-    local IFS=$'\n'
-    log::debug "${debugMessage}${executable^} extra parameters:" "${@@Q}"
+    local IFS=' '
+    if (( $# > 0 )); then
+      local args="${*@Q}"
+      log::debug "Executing the command ⌜${executable}⌝ with arguments (quoted): " "${args}"
+    else
+      log::debug "Executing the command ⌜${executable}⌝ (no arguments)."
+    fi
+
+  fi
+
+  # if trace mode is on, print some info
+  if log::isTraceEnabled; then
     if [[ -n "${stdIn}" ]]; then
       if [[ ${stdInFromFile} == "true" ]]; then
-        log::debug "${executable^} Standard input from file ${stdIn}:"
-        io::readFile "${stdIn}" 5000
-        if [[ "${#RETURNED_VALUE}" -ge 5000 ]]; then RETURNED_VALUE+="... (truncated)"; fi
-        printf '%s\n' "${RETURNED_VALUE}" 1>&2
+        log::trace "${executable^} standard input from file ${stdIn}:"
+        log::printFile true "${stdIn}" 9999
       else
-        log::debug "${executable^} Standard input from string:"
-        printf '%s\n' "${stdIn}" 1>&2
+        log::trace "${executable^} standard input from string:"
+        log::printFile false "${stdIn}" 9999
       fi
     else
-      log::debug "No standard input."
+      log::trace "No standard input."
     fi
   fi
 
@@ -115,24 +121,22 @@ function io::invoke5() {
   # fail if needed or we are debug mode; display all the debug information that could be useful
   if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
 
-    # append std out
-    debugMessage+=$'\n'"${executable^} standard output:"$'\n'
-    if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
-      io::readFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 5000
-      if [[ "${#RETURNED_VALUE}" -ge 5000 ]]; then RETURNED_VALUE+="... (truncated)"; fi
-      debugMessage+="⌜${RETURNED_VALUE}⌝"
-    else
-      debugMessage+="⌜(empty)⌝"
-    fi
+    if log::isTraceEnabled; then
+      # print std out
+      if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
+        log::trace "${executable^} standard output stream:"
+        log::printFile true "${GLOBAL_TEMPORARY_STDOUT_FILE}" 9999
+      else
+        log::trace "${executable^} had no standard output stream."
+      fi
 
-    # append stderr
-    debugMessage+=$'\n'"${executable^} error output:"$'\n'
-    if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
-      io::readFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 5000
-      if [[ "${#RETURNED_VALUE}" -ge 5000 ]]; then RETURNED_VALUE+="... (truncated)"; fi
-      debugMessage+="⌜${RETURNED_VALUE}⌝"
-    else
-      debugMessage+="⌜(empty)⌝"
+      # print stderr
+      if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
+        log::trace "${executable^} standard error stream:"
+        log::printFile true "${GLOBAL_TEMPORARY_STDERR_FILE}" 9999
+      else
+        log::trace "${executable^} had no standard error stream."
+      fi
     fi
 
     if [[ ${shouldFail} == "true" ]]; then

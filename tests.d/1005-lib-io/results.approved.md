@@ -198,16 +198,6 @@ exitcode=1
 
 ```log
 ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
-Fakeexec standard output:
-⌜▶ called fakeexec --std-in --error
-▶ fakeexec input stream was:
-⌈inputStreamValue
-⌉
-⌝
-Fakeexec error output:
-⌜This is an error output from fakeexec
-returning 1 from fakeexec
-⌝
 ```
 
 ### Testing io::invoke5, should translate error 1 to 0
@@ -250,7 +240,7 @@ stderr from var:
 
 ```
 
-### Testing io::invoke5, with debug mode on
+### Testing io::invoke5, with trace mode on
 
 Exit code: `1`
 
@@ -273,27 +263,20 @@ returning 1 from fakeexec⌉
 **Error** output:
 
 ```log
-DEBUG    Log level set to debug.
-WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Executing the command ⌜fakeexec⌝.
-Fail if it fails: ⌜false⌝.
-Acceptable error codes: ⌜0⌝.
-Fakeexec extra parameters:
-'--std-in'
-'--error'
-DEBUG    Fakeexec Standard input from string:
-inputStreamValue
+DEBUG    Log level set to trace.
+DEBUG    Executing the command ⌜fakeexec⌝ with arguments (quoted): 
+'--std-in' '--error'
+TRACE    Fakeexec standard input from string:
+   1 ░ inputStreamValue
+TRACE    Fakeexec standard output stream:
+   1 ░ ▶ called fakeexec --std-in --error
+   2 ░ ▶ fakeexec input stream was:
+   3 ░ ⌈inputStreamValue
+   4 ░ ⌉
+TRACE    Fakeexec standard error stream:
+   1 ░ This is an error output from fakeexec
+   2 ░ returning 1 from fakeexec
 DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
-Fakeexec standard output:
-⌜▶ called fakeexec --std-in --error
-▶ fakeexec input stream was:
-⌈inputStreamValue
-⌉
-⌝
-Fakeexec error output:
-⌜This is an error output from fakeexec
-returning 1 from fakeexec
-⌝
 ```
 
 ### Testing io::invoke3, output to files
@@ -312,29 +295,6 @@ stdout from file:
 stderr from file:
 ⌈This is an error output from fakeexec⌉
 
-```
-
-**Error** output:
-
-```log
-DEBUG    Executing the command ⌜fakeexec⌝.
-Fail if it fails: ⌜false⌝.
-Acceptable error codes: ⌜0⌝.
-Fakeexec extra parameters:
-'--option'
-'argument1'
-'argument2'
-DEBUG    No standard input.
-DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
-The error code ⌜0⌝ is acceptable and has been reset to 0.
-Fakeexec standard output:
-⌜▶ called fakeexec --option argument1 argument2
-▶ fakeexec input stream was:
-⌈⌉
-⌝
-Fakeexec error output:
-⌜This is an error output from fakeexec
-⌝
 ```
 
 ### Testing io::invoke3var, output to var
@@ -357,29 +317,6 @@ stderr from var:
 
 ```
 
-**Error** output:
-
-```log
-DEBUG    Executing the command ⌜fakeexec⌝.
-Fail if it fails: ⌜false⌝.
-Acceptable error codes: ⌜0⌝.
-Fakeexec extra parameters:
-'--option'
-'argument1'
-'argument2'
-DEBUG    No standard input.
-DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
-The error code ⌜0⌝ is acceptable and has been reset to 0.
-Fakeexec standard output:
-⌜▶ called fakeexec --option argument1 argument2
-▶ fakeexec input stream was:
-⌈⌉
-⌝
-Fakeexec error output:
-⌜This is an error output from fakeexec
-⌝
-```
-
 ### Testing io::invoke, should fail
 
 Exit code: `1`
@@ -393,37 +330,7 @@ Exit code: `1`
 **Error** output:
 
 ```log
-DEBUG    Executing the command ⌜fakeexec⌝.
-Fail if it fails: ⌜true⌝.
-Acceptable error codes: ⌜0⌝.
-Fakeexec extra parameters:
-'--error'
-DEBUG    No standard input.
 ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
-Fakeexec standard output:
-⌜▶ called fakeexec --error
-▶ fakeexec input stream was:
-⌈⌉
-⌝
-Fakeexec error output:
-⌜This is an error output from fakeexec
-returning 1 from fakeexec
-⌝
-├─ in core::fail() at $GLOBAL_VALET_HOME/valet.d/core:XXX
-├─ in io::invoke5() at $GLOBAL_VALET_HOME/valet.d/lib-io:XXX
-├─ in io::invoke5var() at $GLOBAL_VALET_HOME/valet.d/lib-io:XXX
-├─ in io::invoke() at $GLOBAL_VALET_HOME/valet.d/lib-io:XXX
-├─ in testIo::invoke() at $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:XXX
-├─ in ROOT at $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:XXX
-├─ in source() at $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh:XXX
-├─ in source() at $GLOBAL_VALET_HOME/valet.d/core:XXX
-├─ in runTest() at valet.d/commands.d/self-test-utils:XXX
-├─ in runTestSuites() at valet.d/commands.d/self-test-utils:XXX
-├─ in runCoreTests() at valet.d/commands.d/self-test-utils:XXX
-├─ in selfTest() at valet.d/commands.d/self-test.sh:XXX
-├─ in main::runFunction() at $GLOBAL_VALET_HOME/valet.d/main:XXX
-├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:XXX
-└─ in ROOT at $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ### Testing io::invoke, output to var
@@ -446,29 +353,6 @@ stderr from var:
 
 ```
 
-**Error** output:
-
-```log
-DEBUG    Executing the command ⌜fakeexec⌝.
-Fail if it fails: ⌜true⌝.
-Acceptable error codes: ⌜0⌝.
-Fakeexec extra parameters:
-'--option'
-'argument1'
-'argument2'
-DEBUG    No standard input.
-DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
-The error code ⌜0⌝ is acceptable and has been reset to 0.
-Fakeexec standard output:
-⌜▶ called fakeexec --option argument1 argument2
-▶ fakeexec input stream was:
-⌈⌉
-⌝
-Fakeexec error output:
-⌜This is an error output from fakeexec
-⌝
-```
-
 ### Testing io::invokePiped, stdin as string, output to var
 
 Exit code: `0`
@@ -488,31 +372,5 @@ stderr from var:
 ⌈This is an error output from fakeexec
 ⌉
 
-```
-
-**Error** output:
-
-```log
-DEBUG    Executing the command ⌜fakeexec⌝.
-Fail if it fails: ⌜true⌝.
-Acceptable error codes: ⌜0⌝.
-Fakeexec extra parameters:
-'--std-in'
-'--option'
-'argument1'
-'argument2'
-DEBUG    Fakeexec Standard input from string:
-this is an stdin
-DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜0⌝.
-The error code ⌜0⌝ is acceptable and has been reset to 0.
-Fakeexec standard output:
-⌜▶ called fakeexec --std-in --option argument1 argument2
-▶ fakeexec input stream was:
-⌈this is an stdin
-⌉
-⌝
-Fakeexec error output:
-⌜This is an error output from fakeexec
-⌝
 ```
 

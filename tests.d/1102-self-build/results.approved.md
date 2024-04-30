@@ -28,7 +28,7 @@ CMD_ARGS_NB_OPTIONAL_selfMock1='0'
 CMD_ARGS_NB_OPTIONAL_selfMock2='0'
 CMD_ARGS_NB_OPTIONAL_showCommandHelp='1'
 CMD_ARGS_NB_OPTIONAL_this='1'
-CMD_ARGUMENTS_DESCRIPTION_selfMock1=$'The action to perform.\nOne of the following options:\n\n- error\n- fail\n- exit\n- unknown-command\n- create-temp-files\n- logging-level\n- wait-indefinitely\n- show-help\n'
+CMD_ARGUMENTS_DESCRIPTION_selfMock1=$'The action to perform.\nOne of the following options:\n\n- error\n- fail\n- exit\n- unknown-command\n- create-temp-files\n- logging-level\n- wait-indefinitely\n- show-help\n- print-raw-and-file\n'
 CMD_ARGUMENTS_DESCRIPTION_selfMock2='First argument.'
 CMD_ARGUMENTS_DESCRIPTION_showCommandHelp=$'The name of the command to show the help for.\nIf not provided, show the help for the program.'
 CMD_ARGUMENTS_DESCRIPTION_this=$'The command or sub commands to execute.\nSee the commands section for more information.'
@@ -231,7 +231,6 @@ self release    Release a new version of valet.
 self setup      The command run after the installation of Valet to setup the tool.
 
 INFO     The command definition variables have been written to ⌜/tmp/valet.d/f501-0⌝.
-INFO     The valet build version has been bumped to ⌜0.11.38⌝.
 SUCCESS  The valet user commands have been successfully built
 ```
 

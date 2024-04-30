@@ -270,6 +270,9 @@ function runTest() {
   local testDirectory="${1}"
   local testScript="${2}"
 
+  # make sure we set the options to fail on error, pipe erors and on unset variables
+  set -Eeu -o pipefail
+
   # set a simplified log print function to have consistent results in tests
   eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
 
@@ -291,7 +294,7 @@ function runTest() {
   # run the test
   pushd "${testDirectory}" >/dev/null
   # shellcheck disable=SC1090
-  source "${testScript}"
+  builtin source "${testScript}"
   popd >/dev/null
 
   # remove the onExitTest function, we can exit safely now

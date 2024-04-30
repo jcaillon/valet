@@ -5,8 +5,8 @@ builtin source ".before-test"
 function testParseAndCheckArgument() {
   # test that we correctly parse arguments and options and fail is they don't match
   echo "→ valet self mock1 non-existing-option nonNeededArg1 -derp anotherArg"
-  ("${GLOBAL_VALET_HOME}/valet" self mock1 non-existing-option nonNeededArg1 -derp anotherArg)
-  endTest "Testing that we correctly parse arguments and options and fail if they don't match" $?
+  ("${GLOBAL_VALET_HOME}/valet" self mock1 non-existing-option nonNeededArg1 -derp anotherArg) || echo "Failed as expected."
+  endTest "Testing that we correctly parse arguments and options and fail if they don't match" 1
 }
 
 function testCommandWithSudo() {

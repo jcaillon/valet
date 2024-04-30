@@ -204,6 +204,7 @@ function log::print() { return 0; }
 #
 # $1: true if the second argument is a file path, false if it is a string.
 # $2: the file path or the string to display.
+# $3: (optional) max lines to display (default to 0 which prints all lines).
 #
 # Usage:
 #   log::printFile false "myfilecontent"
@@ -356,11 +357,16 @@ function log::createPrintFunction() {
           lineNumberPadding="${lineNumberPadding%?}"
           currentLineNumberLength+=1
         fi
+        if (( maxLines != 0 && lineNumber > maxLines )); then
+          toPrint+="${messageLeftPadding}   … ░ (truncated)"'"$'\n'"'
+          break;
+        fi
   '
   GLOBAL_LOG_PRINT_FUNCTION+='
   function log::printFile() {
     local isFile="${1}"
     local content="${2}"
+    local maxLines="${3:-0}"
     local wrapTextColumns='"$((wrapTextColumns - wrapPaddingLength - 7))"'
     local messageLeftPadding="'"${messageLeftPadding}"'"
     local line toPrint
@@ -416,7 +422,7 @@ function core::fail() {
 # Displays an error message.
 # You probably want to exit immediately after an error and should consider using core::fail function instead.
 #
-# $@: the error message to display
+# $@: the error messages to display
 #
 # Usage:
 #   log::error "This is an error message."
@@ -429,7 +435,7 @@ function log::error() {
 
 # Displays a warning and return a warning code.
 #
-# $@: the warning message to display
+# $@: the warning messages to display
 #
 # Usage:
 #   log::warning "This is a warning message."
@@ -443,7 +449,7 @@ function log::warning() {
 
 # Displays a success message.
 #
-# $*: the success message to display
+# $@: the success messages to display
 #
 # Usage:
 #   log::success "This is a success message."
@@ -456,7 +462,8 @@ function log::success() {
 }
 
 # Displays an info message.
-# $*: the info message to display
+#
+# $@: the info messages to display
 #
 # Usage:
 #   log::info "This is an info message."
@@ -470,7 +477,7 @@ function log::info() {
 
 # Displays a debug message.
 #
-# $@: the debug message to display
+# $@: the debug messages to display
 #
 # Usage:
 #   log::debug "This is a debug message."
@@ -484,7 +491,7 @@ function log::debug() {
 
 # Displays a trace message.
 #
-# $@: the debug message to display
+# $@: the debug messages to display
 #
 # Usage:
 #   log::debug "This is a debug message."
@@ -499,7 +506,7 @@ function log::trace() {
 # Returns 0 if debug mode (log debug level) is active, 1 otherwise.
 #
 # Usage:
-#   log::isDebugEnabled && printf '%s\n' "Debug mode is active."
+#   if log::isDebugEnabled; then printf '%s\n' "Debug mode is active."; fi
 function log::isDebugEnabled() {
   if ((${LOG_LEVEL_INT:-1} <= 0)); then
     return 0
@@ -510,7 +517,7 @@ function log::isDebugEnabled() {
 # Returns 0 if trace mode (log trace level) is active, 1 otherwise.
 #
 # Usage:
-#   log::isTraceEnabled && printf '%s\n' "Debug mode is active."
+#   if log::isTraceEnabled; then printf '%s\n' "Debug mode is active."; fi
 function log::isTraceEnabled() {
   if ((${LOG_LEVEL_INT:-1} <= -1)); then
     return 0

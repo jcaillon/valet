@@ -45,6 +45,13 @@ function testLogging() {
   endTest "Testing enable log timestamp and wrap at 80 logging" 0
 }
 
+function testLog::printRawAndFile() {
+  echo "→ VALET_CONFIG_DISABLE_LOG_TIME=true VALET_CONFIG_DISABLE_LOG_WRAP=false VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 print-raw-and-file"
+  (VALET_CONFIG_DISABLE_LOG_TIME=true VALET_CONFIG_DISABLE_LOG_WRAP=false VALET_CONFIG_LOG_COLUMNS=80 "${GLOBAL_VALET_HOME}/valet" self mock1 print-raw-and-file)
+
+  endTest "Testing printing raw string and printing file" 0
+}
+
 function resetLogOptions() {
   export VALET_CONFIG_ENABLE_COLORS=false
   export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
@@ -57,6 +64,7 @@ function resetLogOptions() {
 
 function main() {
   testLogging
+  testLog::printRawAndFile
 }
 
 main

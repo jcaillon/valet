@@ -27,12 +27,13 @@ function testIo::invoke5() {
   echoio::invokeOutput ${exitCode} false
   endTest "Testing io::invoke5var, input stream for file, should get stdout/stderr from var" ${exitCode}
 
-  # test debug mode
+  # test trace mode
   echo "→ io::invoke5 false 0 false inputStreamValue fakeexec --std-in --error"
-  log::setLevel debug
+  log::setLevel trace
   io::invoke5 false 0 false inputStreamValue fakeexec --std-in --error && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} true
-  endTest "Testing io::invoke5, with debug mode on" ${exitCode}
+  log::setLevel info
+  endTest "Testing io::invoke5, with trace mode on" ${exitCode}
 }
 
 function testIo::invoke3() {

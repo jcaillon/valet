@@ -17,8 +17,8 @@ function testInteractiveSubMenu() {
 
   # test that we catch option errors
   echo "→ valet self --unknown"
-  ("${GLOBAL_VALET_HOME}/valet" self --unknown)
-  endTest "Testing that we catch option errors in sub menu" $?
+  ("${GLOBAL_VALET_HOME}/valet" self --unknown) || echo "Failed as expected."
+  endTest "Testing that we catch option errors in sub menu" 1
 }
 
 function main() {

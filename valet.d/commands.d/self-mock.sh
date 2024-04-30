@@ -36,6 +36,7 @@ arguments:
     - logging-level
     - wait-indefinitely
     - show-help
+    - print-raw-and-file
 ---"
 function selfMock1() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
@@ -79,6 +80,7 @@ function selfMock1() {
     log::setLevel "debug"
     ;;
   logging-level)
+    log::trace "This is a trace message."
     log::debug "This is a debug message."
     log::info "This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out."
     log::success "This is a success message."
@@ -96,6 +98,16 @@ function selfMock1() {
     ;;
   show-help)
     core::showHelp
+    ;;
+  print-raw-and-file)
+      log::info "This is to test the printRaw function."
+      log::printRaw "Preventing the exploitation of animals is not the only reason for becoming vegan, but for many it remains the key factor in their decision to go vegan and stay vegan. Having emotional attachments with animals may form part of that reason, while many believe that all sentient creatures have a right to life and freedom. Specifics aside, avoiding animal products is one of the most obvious ways you can take a stand against animal cruelty and animal exploitation everywhere. Read a detailed overview on why being vegan demonstrates true compassion for animals." "###"
+      log::info "This is to test the printFile function from an actual file."
+      log::printFile true "resources/file-to-read"
+      log::info "This is to test the printFile function from an actual file with number of lines restriction."
+      log::printFile true "resources/file-to-read" 10
+      log::info "This is to test the printFile function from a string."
+      log::printFile false "This is an info message with a super long sentence."$'\n'"The value of life is not in its duration, but in its donation."$'\n'"You are not important because of how long you live, you are important because of how effective you live."$'\n'"Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime."$'\n\n'"Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out."
     ;;
   *)
     log::warning "This is for testing valet core functions, running the tests."

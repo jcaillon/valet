@@ -28,13 +28,14 @@ declare -a MYARRAY=([0]="breakdown" [1]="constitutional")
 0
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
 
-→ array::appendIfNotPresent MYARRAY 'deliver' 'holiday'
-1
+→ array::appendIfNotPresent MYARRAY 'breakdown'
+Failed as expected
+0
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
 
-→ array::appendIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'
-1
-declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
+→ array::appendIfNotPresent MYARRAY 'holiday'
+0
+declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="holiday")
 ```
 
 ### testArray::ing array::isInArray

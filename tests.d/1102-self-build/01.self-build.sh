@@ -5,6 +5,7 @@ function testSelfBuild() {
   io::createTempFile && local tempFile="${RETURNED_VALUE}"
 
   (
+    export VALET_CONFIG_BUMP_VERSION_ON_BUILD=false
     "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh" --output "${tempFile}" --user-directory ""
 
     local varName var

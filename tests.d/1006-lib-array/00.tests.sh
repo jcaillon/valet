@@ -44,15 +44,15 @@ function testArray::appendIfNotPresent() {
   declare -p MYARRAY
 
   echo
-  echo "→ array::appendIfNotPresent MYARRAY 'deliver' 'holiday'"
-  array::appendIfNotPresent MYARRAY 'deliver' 'holiday'
+  echo "→ array::appendIfNotPresent MYARRAY 'breakdown'"
+  array::appendIfNotPresent MYARRAY 'breakdown' || echo "Failed as expected"
   echo $?
 
   declare -p MYARRAY
 
   echo
-  echo "→ array::appendIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'"
-  array::appendIfNotPresent MYARRAY 'deliver' 'holiday' 'economics'
+  echo "→ array::appendIfNotPresent MYARRAY 'holiday'"
+  array::appendIfNotPresent MYARRAY 'holiday'
   echo $?
 
   declare -p MYARRAY
