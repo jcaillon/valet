@@ -77,7 +77,7 @@ function selfMock1() {
     log::info "Created temp directory: ${tmp3}."
     log::info "Created temp directory: ${tmp4}."
     # activating debug log to see the cleanup
-    log::setLevel "debug"
+    log::setLevel debug
     ;;
   logging-level)
     log::trace "This is a trace message."
@@ -87,6 +87,9 @@ function selfMock1() {
     log::warning "This is a warning message."$'\n'"With a second line."
     if log::isDebugEnabled; then
       printf '%s\n' "The debug mode is activated!" 1>&2
+    fi
+    if log::isTraceEnabled; then
+      printf '%s\n' "The trace mode is activated!" 1>&2
     fi
     ;;
   wait-indefinitely)

@@ -409,6 +409,40 @@ The debug mode is activated!
 DEBUG    Exiting with code 0 after Xs.
 ```
 
+### Testing log with trace level
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ valet -w self mock1 logging-level
+```
+
+**Error** output:
+
+```log
+DEBUG    Log level set to trace.
+DEBUG    Command found ⌜self mock1⌝.
+DEBUG    Function name found ⌜selfMock1⌝.
+DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
+DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
+DEBUG    Parsed arguments:
+local parsingErrors help action
+parsingErrors=""
+action="logging-level"
+
+TRACE    This is a trace message.
+DEBUG    This is a debug message.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
+The debug mode is activated!
+The trace mode is activated!
+DEBUG    Exiting with code 0 after Xs.
+```
+
 ### Testing default logging
 
 Exit code: `0`

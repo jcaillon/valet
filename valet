@@ -60,6 +60,10 @@ options:
   description: |-
     Output verbose information.
     This is the equivalent of setting the log level to debug.
+- name: -w, --very-verbose
+  description: |-
+    Output very verbose information.
+    This is the equivalent of setting the log level to trace.
 - name: -i, --force-interactive-mode
   description: |-
     Enter interactive mode for commands even if arguments are not required or provided.

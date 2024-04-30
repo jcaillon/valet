@@ -491,7 +491,10 @@ function main::parseMainArguments() {
       log::setLevel "${1}"
       ;;
     -v | --verbose)
-      log::setLevel "debug"
+      log::setLevel debug
+      ;;
+    -w | --very-verbose)
+      log::setLevel trace
       ;;
     --version)
       cat "${GLOBAL_VALET_HOME}/valet.d/version"

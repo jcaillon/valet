@@ -1100,7 +1100,10 @@ if [[ -n "${VALET_LOG_LEVEL:-}" ]]; then
   log::setLevel "${VALET_LOG_LEVEL}"
 fi
 if [[ ${VALET_VERBOSE:-} == "true" ]]; then
-  log::setLevel "debug"
+  log::setLevel debug
+fi
+if [[ ${VALET_VERY_VERBOSE:-} == "true" ]]; then
+  log::setLevel trace
 fi
 if [[ -n "${VALET_CONFIG_LOG_FD:-}" ]]; then
   # make sure the file descriptor is valid

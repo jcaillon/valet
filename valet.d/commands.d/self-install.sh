@@ -56,7 +56,7 @@ fi
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   _NOT_EXECUTED_FROM_VALET=true
 
-  _VALETD_DIR="${BASH_SOURCE[0]:-}"
+  _VALETD_DIR="${BASH_SOURCE[0]:-"${0}"}"
   if [[ -z ${_VALETD_DIR} ]]; then
     if [[ ${_VALETD_DIR} != /* ]]; then
       if pushd "${_VALETD_DIR%/*}" &>/dev/null; then

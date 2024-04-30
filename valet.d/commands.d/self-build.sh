@@ -12,7 +12,7 @@ _CMD_INCLUDED=1
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   _NOT_EXECUTED_FROM_VALET=true
 
-  _VALETD_DIR="${BASH_SOURCE[0]}"
+  _VALETD_DIR="${BASH_SOURCE[0]:-"${0}"}"
   if [[ "${_VALETD_DIR}" != /* ]]; then
     if pushd "${_VALETD_DIR%/*}" &>/dev/null; then _VALETD_DIR="${PWD}"; popd &>/dev/null || :;
     else _VALETD_DIR="${PWD}"; fi

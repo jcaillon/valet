@@ -18,6 +18,10 @@ function testLogging() {
   ("${GLOBAL_VALET_HOME}/valet" -v self mock1 logging-level)
   endTest "Testing log with debug level" 0
 
+  echo "→ valet -w self mock1 logging-level"
+  ("${GLOBAL_VALET_HOME}/valet" -w self mock1 logging-level)
+  endTest "Testing log with trace level" 0
+
   # testing the different log options
 
   echo "→ valet self mock1 logging-level"
