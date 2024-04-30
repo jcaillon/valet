@@ -85,6 +85,8 @@ function selfBuild() {
       ;;
     -*)
       if [[ -v CMD_OPTS_selfBuild ]]; then
+        # shellcheck disable=SC2048
+        # shellcheck disable=SC2086
         main::fuzzyFindOption "${1}" ${CMD_OPTS_selfBuild[*]}
       else
         RETURNED_VALUE=""
@@ -147,6 +149,7 @@ function selfBuild() {
   fi
 
   # make sure to unset all previous CMD_* variables
+  # shellcheck disable=SC2086
   unset -v ${!CMD_*} \
     SELF_BUILD_ERRORS
 
@@ -253,6 +256,7 @@ function extractCommandDefinitionsToVariables() {
       array::makeArraysSameSize TEMP_CMD_BUILD_examples_name TEMP_CMD_BUILD_examples_description
 
       if log::isDebugEnabled; then
+        # shellcheck disable=SC2086
         io::invoke declare -p ${!TEMP_CMD_BUILD_*}
         log::debug "Declared variables for this command:"$'\n'"${RETURNED_VALUE}"
       fi

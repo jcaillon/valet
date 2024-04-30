@@ -76,8 +76,6 @@ function endTest() {
   if [[ ${fdRedirectionReset} == "true" ]]; then
     setFdRedirection
   fi
-
-  set +Eeu +o pipefail
 }
 
 # This function allows to set the temp files and directories
@@ -96,7 +94,7 @@ function echoFileWithLineNumberSubstitution() {
   local file="${1}"
   local line
   local IFS=$'\n'
-  while read -rd $'\n' line; do
+  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
     if [[ ${line} =~ :[0-9]{1,4}$ ]]; then
       line="${line/%:[[:digit:]]/:XXX}"
       line="${line/%:[[:digit:]][[:digit:]]/:XXX}"
@@ -280,7 +278,7 @@ function runTest() {
 
   # make sure that, if we exit in the test, we catch that and explain to the user
   # why this should not happen
-  eval "function onExitTest() { onExitTestInternal; }"
+  eval "function onExitTest() { onExitTestInternal "\$@"; }"
 
   # used in echoFileSubstitutingPath to replace this path with .
   CURRENT_DIRECTORY="${PWD}"
@@ -352,45 +350,38 @@ function compareWithApproved() {
 # Allows to explicitly warn the user that a test made Valet exit (it should not).
 # Give guidance on what to do to fix this.
 function onExitTestInternal() {
-  local rc=$?
+  local rc="${1:-}"
 
   resetFdRedirection
-
-  # For this message, it is actually very inconvenient to have log wrap because
-  # it will not correctly show spaces and such.
-  # we disable the log wrap from now
   resetOriginalImportantVariables
-  export VALET_CONFIG_DISABLE_LOG_WRAP=true
-  log::createPrintFunction
-  eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
-  log::getCallStack 4 && local stack="${RETURNED_VALUE}"
+  log::setLevel trace
 
-  local message="The program has exit during a test with code ${rc}, stack:${stack}"$'\n'
-  message+="________"$'\n'
   if [[ -s "${_TEST_REPORT_FILE}" ]]; then
-    io::readFile "${_TEST_REPORT_FILE}"
-    message+="Current test report:"$'\n'"${RETURNED_VALUE}"$'\n'
+    log::trace "Current test report:"
+    log::printFile true "${_TEST_REPORT_FILE}"
   else
-    message+="No test report yet for the current test."$'\n'
+    log::trace "No test report yet for the current test."
   fi
-  message+="________"$'\n'
-  if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
-    io::readFile "${_TEST_STANDARD_OUTPUT_FILE}"
-    message+="Current test standard output:"$'\n'"${RETURNED_VALUE}"$'\n'
-  else
-    message+="No standard output for the current test."$'\n'
-  fi
-  message+="________"$'\n'
-  if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
-    io::readFile "${_TEST_STANDARD_ERROR_FILE}"
-    message+="Current test error output:"$'\n'"${RETURNED_VALUE}"$'\n'
-  else
-    message+="No error output for the current test."$'\n'
-  fi
-  message+="→ If you expect the tested function/program to exit or fail, then run it in a subshell like that:"$'\n'"(myFunctionThatFails)"
 
-  log::error "${message}"
+  if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
+    log::trace "Current test standard output:"
+    io::readFile "${_TEST_STANDARD_OUTPUT_FILE}"
+    log::printFile false "${RETURNED_VALUE}"
+  else
+    log::trace "No standard output for the current test."
+  fi
+
+  if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
+    log::trace "Current test error output:"
+    io::readFile "${_TEST_STANDARD_ERROR_FILE}"
+    log::printFile false "${RETURNED_VALUE}"
+  else
+    log::trace "No error output for the current test."
+  fi
+
+  log::setLevel error
+  log::error "The program has exit during a test with code ${rc}. If you expect the tested function/program to exit or fail, then run it in a subshell and capture the exit code like that:"$'\n'"(myFunctionThatFails) || exitCode=\$?"
 
   GLOBAL_ERROR_DISPLAYED=1
 }
@@ -504,7 +495,7 @@ function echoFileSubstitutingPath() {
   local line
   local IFS=$'\n'
   local -i firstLine=1
-  while read -rd $'\n' line; do
+  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
     if [[ firstLine -eq 1 ]]; then
       firstLine=0
     else

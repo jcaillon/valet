@@ -55,7 +55,7 @@ options:
 - name: -l, --log-level, --log <level>
   description: |-
     Set the log level of valet (defaults to info).
-    Possible values are: debug, success, info, success, warning, error.
+    Possible values are: trace, debug, success, info, success, warning, error.
 - name: -v, --verbose
   description: |-
     Output verbose information.

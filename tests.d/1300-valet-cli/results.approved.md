@@ -243,10 +243,10 @@ Exit code: `0`
 ```log
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 ERROR    Error code 1 in selfMock1(), stack:
-├─ In function selfMock1() $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:XXX
-└─ In function main() $GLOBAL_VALET_HOME/valet:XXX
+├─ in selfMock1() at $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ in main::runFunction() at $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:XXX
+└─ in ROOT at $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ### Testing exit message and custom onExit function
@@ -265,10 +265,10 @@ Exit code: `0`
 WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
-├─ In function selfMock1() $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:XXX
-└─ In function main() $GLOBAL_VALET_HOME/valet:XXX
+├─ in selfMock1() at $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ in main::runFunction() at $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:XXX
+└─ in ROOT at $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ### Testing fail function
@@ -303,18 +303,11 @@ Exit code: `0`
 WARNING  This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle.
 ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
-stack:
-├─ In function core::fail() $GLOBAL_VALET_HOME/valet.d/core:XXX
-├─ In function command_not_found_handle() $GLOBAL_VALET_HOME/valet.d/main:XXX
-├─ In function selfMock1() $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:XXX
-└─ In function main() $GLOBAL_VALET_HOME/valet:XXX
 ERROR    Error code 1 in selfMock1(), stack:
-├─ In function selfMock1() $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ In function main::runFunction() $GLOBAL_VALET_HOME/valet.d/main:XXX
-├─ In function main::parseMainArguments() $GLOBAL_VALET_HOME/valet.d/main:XXX
-└─ In function main() $GLOBAL_VALET_HOME/valet:XXX
+├─ in selfMock1() at $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
+├─ in main::runFunction() at $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:XXX
+└─ in ROOT at $GLOBAL_VALET_HOME/valet:XXX
 ```
 
 ## Test script 04.interactive-mode

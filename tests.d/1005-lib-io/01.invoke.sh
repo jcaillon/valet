@@ -98,6 +98,7 @@ function fakeexec() {
     inputStreamContent="${RETURNED_VALUE}"
   fi
 
+  local IFS=" "
   echo "▶ called fakeexec $*"
   echo "▶ fakeexec input stream was:"
   echo "⌈${inputStreamContent:-}⌉"

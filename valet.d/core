@@ -12,7 +12,9 @@ if [[ -z "${GLOBAL_VALET_HOME:-}" ]]; then
   GLOBAL_VALET_HOME="${BASH_SOURCE[0]}"
   if [[ "${GLOBAL_VALET_HOME}" != /* ]]; then
     # resolve relative path
-    if pushd "${GLOBAL_VALET_HOME%/*}" &>/dev/null; then GLOBAL_VALET_HOME="${PWD}"; popd 1>/dev/null;
+    if pushd "${GLOBAL_VALET_HOME%/*}" &>/dev/null; then
+      GLOBAL_VALET_HOME="${PWD}"
+      popd 1>/dev/null
     else GLOBAL_VALET_HOME="${PWD}"; fi
   else
     GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip filename
@@ -32,7 +34,6 @@ if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_S
   # shellcheck source=/dev/null
   source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
 fi
-
 
 #===============================================================
 # >>> Temporay files and folders
@@ -65,7 +66,7 @@ function io::createTempFile() {
     TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
     RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
     if [[ ! -f "${RETURNED_VALUE}" ]]; then
-      :>"${RETURNED_VALUE}"
+      : >"${RETURNED_VALUE}"
       return 0
     fi
   done
@@ -114,9 +115,9 @@ function io::cleanupTempFiles() {
 
 # determine if we support colors (can be overriden by the user with VALET_CONFIG_ENABLE_COLORS)
 case "${TERM:-}" in
-    xterm-color|xterm-256color|linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}";;
-    xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
-    *) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}";;
+xterm-color | xterm-256color | linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}" ;;
+xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
+*) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
 esac
 
 # This function exports the terminal size in the global variables GLOBAL_COLUMNS and GLOBAL_LINES.
@@ -127,7 +128,10 @@ function system::exportTerminalSize() {
   shopt -s checkwinsize
   # the following subshell is required to correctly compute the columns and lines
   # the bash manual says it these are computed after the execution of an external command
-  (:;:)
+  (
+    :
+    :
+  )
   GLOBAL_COLUMNS="${COLUMNS:-180}"
   GLOBAL_LINES="${LINES:-30}"
   shopt -u checkwinsize
@@ -139,6 +143,7 @@ trap system::exportTerminalSize SIGWINCH
 
 # Set the log level.
 # The log level can be set to one of the following values:
+# - trace
 # - debug
 # - info
 # - success
@@ -158,6 +163,7 @@ function log::setLevel() {
   warning) LOG_LEVEL_INT=3 ;;
   success) LOG_LEVEL_INT=2 ;;
   debug) LOG_LEVEL_INT=0 ;;
+  trace) LOG_LEVEL_INT=-1 ;;
   *) LOG_LEVEL_INT=1 ;;
   esac
 
@@ -182,70 +188,81 @@ function log::getLevel() {
   RETURNED_VALUE="${GLOBAL_LOG_LEVEL:-info}"
 }
 
-# The log line function is used to display log messages in the terminal.
+# Display log messages in the terminal.
 #
-# $1: the color of the log message (red, green, yellow, cyan, gray, pink)
+# $1: the color level of the log message (TRACE, DEBUG...)
 # $2: the icon to display in the log message (utf8 character from nerdicons)
-# $3: the severity of the log message (masx 7 chars)
-# $*: the content of the log message (each arg will be separated by a new line)
+# $3: the severity (max 7 chars)
+# $4+: the content of the log message (each arg will be separated by a new line)
 #
 # Usage:
 #   log::print "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
 # shellcheck disable=SC2317
 function log::print() { return 0; }
+
+# Display a file content with line numbers in the logs.
+#
+# $1: true if the second argument is a file path, false if it is a string.
+# $2: the file path or the string to display.
+#
+# Usage:
+#   log::printFile false "myfilecontent"
+#   log::printFile true "/my/file/path"
+# shellcheck disable=SC2317
+function log::printFile() { return 0; }
+
+# Display a raw string in the log.
+#
+# $1: the content to log (can contain new lines)
+# $2: the string with which to prepend each wrapped line (empty by default)
+#
+# Usage:
+#   log::printRaw "my line"
+# shellcheck disable=SC2317
+function log::printRaw() { return 0; }
+
 # We build the log line function dynamically to adapt to the user options.
 # This avoid to have to check the options at each log message.
 # It creates the global variable GLOBAL_LOG_PRINT_FUNCTION.
 # shellcheck disable=SC2016
 function log::createPrintFunction() {
-  GLOBAL_LOG_PRINT_FUNCTION='
-  function log::print() {
-    local icon severity
-    local colorCode="${1}"
-    icon="${2}"
-    severity="${3}"
-    shift 3
-    local IFS='"$'\n'"'
-    RETURNED_VALUE="$*"
-    unset IFS'
-
   local cDefault=""
   local cTimestamp=""
+  local colorStatement
   if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
     cTimestamp=${VALET_CONFIG_COLOR_TIMESTAMP:-$'\e'"[90m"} # Bright Black (Gray)
     cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
-    local cDebug=${VALET_CONFIG_COLOR_DEBUG:-$'\e'"[90m"} # Bright Black (Gray)
-    local cInfo=${VALET_CONFIG_COLOR_INFO:-$'\e'"[36m"} # Cyan
-    local cWarning=${VALET_CONFIG_COLOR_WARNING:-$'\e'"[33m"} # Yellow
-    local cSuccess=${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[32m"} # Green
-    local cError=${VALET_CONFIG_COLOR_ERROR:-$'\e'"[31m"} # Red
+    local cDebug=${VALET_CONFIG_COLOR_DEBUG:-$'\e'"[90m"}         # Bright Black (Gray)
+    local cInfo=${VALET_CONFIG_COLOR_INFO:-$'\e'"[36m"}           # Cyan
+    local cWarning=${VALET_CONFIG_COLOR_WARNING:-$'\e'"[33m"}     # Yellow
+    local cSuccess=${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[32m"}     # Green
+    local cError=${VALET_CONFIG_COLOR_ERROR:-$'\e'"[31m"}         # Red
     local cHighlight=${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"} # Bright Magenta (Pink)
 
-    GLOBAL_LOG_PRINT_FUNCTION+="
+    colorStatement="
     local color
     case \"\${colorCode}\" in
     DEBUG) color=${cDebug@Q} ;;
+    TRACE) color=${cDebug@Q} ;;
     INFO) color=${cInfo@Q} ;;
     WARNING) color=${cWarning@Q} ;;
     SUCCESS) color=${cSuccess@Q} ;;
     ERROR) color=${cError@Q} ;;
     *) color=${cDefault@Q} ;;
-    esac
-    "
+    esac"
     # shellcheck disable=SC2016
-    GLOBAL_LOG_PRINT_FUNCTION+='
+    colorStatement+='
     RETURNED_VALUE="${RETURNED_VALUE//⌜/'"${cHighlight@Q}"'⌜}"
-    RETURNED_VALUE="${RETURNED_VALUE//⌝/⌝'"${cDefault@Q}"'}"
-    '
+    RETURNED_VALUE="${RETURNED_VALUE//⌝/⌝'"${cDefault@Q}"'}"'
   else
-    GLOBAL_LOG_PRINT_FUNCTION+='
-    local color=""
-    '
+    colorStatement='
+    local color=""'
   fi
 
+  local wrapStatement
+  local wrapTextColumns="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
+  local wrapPaddingLength=20
   if [[ "${VALET_CONFIG_DISABLE_LOG_WRAP:-}" != "true" ]]; then
-    local wrapTextColumns="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
-    local wrapPaddingLength=20
 
     if [[ ${VALET_CONFIG_DISABLE_LOG_TIME:-} == "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 9))
@@ -255,10 +272,14 @@ function log::createPrintFunction() {
       wrapPaddingLength=$((wrapPaddingLength - 2))
     fi
 
-    GLOBAL_LOG_PRINT_FUNCTION+='
+    wrapStatement='
     string::wrapText "${RETURNED_VALUE}" '"${wrapTextColumns}"' '"${wrapPaddingLength}"''
+  else
+    wrapPaddingLength=0
   fi
 
+  local printStatement
+  local standardPrintStatement
   local printfFormat
   local printfArguments
 
@@ -288,19 +309,96 @@ function log::createPrintFunction() {
 
   if [[ -z ${VALET_CONFIG_LOG_FD:-} || ${#VALET_CONFIG_LOG_FD} == 1 ]]; then
     # it is a numbered file descriptor
-    GLOBAL_LOG_PRINT_FUNCTION+='
-      printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_CONFIG_LOG_FD:-2}"'
-    }'
+    printStatement='
+    printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_CONFIG_LOG_FD:-2}"
+    standardPrintStatement='
+    printf "%s" "${toPrint}" 1>&'"${VALET_CONFIG_LOG_FD:-2}"
   else
     # it is a file
-    GLOBAL_LOG_PRINT_FUNCTION+='
-      printf "'"${printfFormat}"'" '"${printfArguments}"' 1>>'"${VALET_CONFIG_LOG_FD}"'
-    }'
+    printStatement='
+    printf "'"${printfFormat}"'" '"${printfArguments}"' 1>>'"${VALET_CONFIG_LOG_FD}"
+    standardPrintStatement='
+    printf "%s" "${toPrint}" 1>>'"${VALET_CONFIG_LOG_FD}"
   fi
+
+  # string with the number of spaces necessary to align with other log messages
+  local messageLeftPadding
+  messageLeftPadding=""
+  for ((i = 0; i < wrapPaddingLength; i++)); do
+    messageLeftPadding+=" "
+  done
+
+  # log::print function
+  GLOBAL_LOG_PRINT_FUNCTION='
+  function log::print() {
+    local icon severity
+    local colorCode="${1}"
+    icon="${2}"
+    severity="${3}"
+    shift 3
+    local IFS='"$'\n'"'
+    RETURNED_VALUE="$*"
+    IFS=" "
+
+    '"${colorStatement}"'
+
+    '"${wrapStatement:-}"'
+
+    '"${printStatement}"'
+  }'
+
+  # log::printFile function
+  local insideTheLoop='
+        string::wrapCharacters "${line}" "${wrapTextColumns}" "${messageLeftPadding}     ░ "
+        toPrint+="${messageLeftPadding}${lineNumberPadding}${lineNumber} ░ ${RETURNED_VALUE}"'"$'\n'"'
+        lineNumber+=1
+        if (( ${#lineNumber} > currentLineNumberLength )); then
+          lineNumberPadding="${lineNumberPadding%?}"
+          currentLineNumberLength+=1
+        fi
+  '
+  GLOBAL_LOG_PRINT_FUNCTION+='
+  function log::printFile() {
+    local isFile="${1}"
+    local content="${2}"
+    local wrapTextColumns='"$((wrapTextColumns - wrapPaddingLength - 7))"'
+    local messageLeftPadding="'"${messageLeftPadding}"'"
+    local line toPrint
+    local lineNumberPadding="   "
+    local -i lineNumber=1 currentLineNumberLength=1
+    if [[ ${isFile} == "true" ]]; then
+      if [[ ! -f "${content}" ]]; then
+        log::error "Can not print the file ⌜${content}⌝ because does not exist."
+        return 1
+      fi
+      while read -r line || [[ -n ${line:-} ]]; do
+        '"${insideTheLoop}"'
+      done <"${content}"
+    else
+      while read -r line; do
+        '"${insideTheLoop}"'
+      done <<<"${content}"
+    fi
+    '"${standardPrintStatement}"'
+  }'
+
+  # log::printRaw function
+  GLOBAL_LOG_PRINT_FUNCTION+='
+  function log::printRaw() {
+    local content="${1}"
+    local wrappedLineLeftPaddingString="${2:-}"
+    local wrapTextColumns='"$((wrapTextColumns - wrapPaddingLength))"'
+    local messageLeftPadding="'"${messageLeftPadding}"'"
+    local line toPrint
+    while read -r line; do
+        string::wrapCharacters "${line}" "${wrapTextColumns}" "${messageLeftPadding}${wrappedLineLeftPaddingString}" "$((wrapTextColumns - ${#wrappedLineLeftPaddingString}))"
+        toPrint+="${messageLeftPadding}${RETURNED_VALUE}"'"$'\n'"'
+    done <<<"${content}"
+    '"${standardPrintStatement}"'
+  }'
 }
 log::createPrintFunction
 eval "${GLOBAL_LOG_PRINT_FUNCTION}"
-
 
 # Displays an error message and then exit the program with error.
 #
@@ -323,37 +421,37 @@ function core::fail() {
 # Usage:
 #   log::error "This is an error message."
 function log::error() {
-  local message="$*"
+  log::print "ERROR" "${VALET_CONFIG_ICON_ERROR:-$'\uf2d3'}" "ERROR" "$@"
   if log::isDebugEnabled; then
-    log::getCallStack 2 && local stack=$'\n'"stack:${RETURNED_VALUE}"
-    message+="${stack:-}"
+    log::printCallStack 2
   fi
-  log::print "ERROR" "${VALET_CONFIG_ICON_ERROR:-$'\uf2d3'}" "ERROR" "${message}"
 }
 
 # Displays a warning and return a warning code.
-# $*: the warning message to display
+#
+# $@: the warning message to display
 #
 # Usage:
 #   log::warning "This is a warning message."
 function log::warning() {
-  if [[ ${LOG_LEVEL_INT:-1} -gt 3 ]]; then
+  if  ((${LOG_LEVEL_INT:-1} > 3)); then
     return 0
   fi
-  log::print "WARNING" "${VALET_CONFIG_ICON_WARNING:-$'\uf071'}" "WARNING" "$*"
+  log::print "WARNING" "${VALET_CONFIG_ICON_WARNING:-$'\uf071'}" "WARNING" "$@"
   return 0
 }
 
 # Displays a success message.
+#
 # $*: the success message to display
 #
 # Usage:
 #   log::success "This is a success message."
 function log::success() {
-  if [[ ${LOG_LEVEL_INT:-1} -gt 2 ]]; then
+  if  ((${LOG_LEVEL_INT:-1} > 2)); then
     return 0
   fi
-  log::print "SUCCESS" "${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}" "SUCCESS" "$*"
+  log::print "SUCCESS" "${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}" "SUCCESS" "$@"
   return 0
 }
 
@@ -363,68 +461,98 @@ function log::success() {
 # Usage:
 #   log::info "This is an info message."
 function log::info() {
-  if [[ ${LOG_LEVEL_INT:-1} -gt 1 ]]; then
+  if  ((${LOG_LEVEL_INT:-1} > 1)); then
     return 0
   fi
-  log::print "INFO" "${VALET_CONFIG_ICON_INFO:-$'\uf05a'}" "INFO" "$*"
+  log::print "INFO" "${VALET_CONFIG_ICON_INFO:-$'\uf05a'}" "INFO" "$@"
   return 0
 }
 
-# Displays a debug message if the global variable DEBUG is set to true.
-# $*: the debug message to display
+# Displays a debug message.
+#
+# $@: the debug message to display
 #
 # Usage:
 #   log::debug "This is a debug message."
 function log::debug() {
-  if [[ ${LOG_LEVEL_INT:-1} -gt 0 ]]; then
+  if  ((${LOG_LEVEL_INT:-1} > 0)); then
     return 0
   fi
-  log::print "DEBUG" "${VALET_CONFIG_ICON_DEBUG:-$'\uf0ae'}" "DEBUG" "$*"
+  log::print "DEBUG" "${VALET_CONFIG_ICON_DEBUG:-$'\uf188'}" "DEBUG" "$@"
   return 0
 }
 
-# Returns 0 if debug mode is active, 1 otherwise.
+# Displays a trace message.
+#
+# $@: the debug message to display
+#
+# Usage:
+#   log::debug "This is a debug message."
+function log::trace() {
+  if ((${LOG_LEVEL_INT:-1} > -1)); then
+    return 0
+  fi
+  log::print "TRACE" "${VALET_CONFIG_ICON_DEBUG:-$'\ue241'}" "TRACE" "$@"
+  return 0
+}
+
+# Returns 0 if debug mode (log debug level) is active, 1 otherwise.
 #
 # Usage:
 #   log::isDebugEnabled && printf '%s\n' "Debug mode is active."
 function log::isDebugEnabled() {
-  if [[ ${LOG_LEVEL_INT:-1} -eq 0 ]]; then
+  if ((${LOG_LEVEL_INT:-1} <= 0)); then
     return 0
   fi
   return 1
 }
 
-# This function returns the current function stack.
-# The stack is returned in the global variable RETURNED_VALUE.
-#
-# $1: the number of levels to skip (default to 2)
+# Returns 0 if trace mode (log trace level) is active, 1 otherwise.
 #
 # Usage:
-#   log::getCallStack 2 && local stack="${RETURNED_VALUE}"
-function log::getCallStack() {
+#   log::isTraceEnabled && printf '%s\n' "Debug mode is active."
+function log::isTraceEnabled() {
+  if ((${LOG_LEVEL_INT:-1} <= -1)); then
+    return 0
+  fi
+  return 1
+}
+
+# This function prints the current function stack in the logs.
+#
+# $1: the number of levels to skip (default to 2 which skips this function
+#      and the first calling function which is usually the onError function)
+#
+# Usage:
+#   log::printCallStack 2
+function log::printCallStack() {
   local -i levelToSkip="${1:-2}"
-  local stack i stackSize func linen src
-  stack=""
+  local i stackSize func linen="${LINENO}" src
   stackSize=${#FUNCNAME[@]}
   treeString="├─"
   for ((i = levelToSkip; i < stackSize; i++)); do
     func="${FUNCNAME[${i}]}"
-    if [[ -z "${func}" ]]; then func=MAIN; fi
-    linen="${BASH_LINENO[$((i - 1))]}"
+    if [[ -z ${func} ]]; then
+      func=ROOT;
+    else
+      func="${func}()"
+    fi
+    if (( i > 0 )); then
+      linen="${BASH_LINENO[$((i - 1))]}"
+    fi
     src="${BASH_SOURCE[${i}]}"
     if [[ -z "${src}" ]]; then
-      src=non_file_source;
+      src=non_file_source
     elif [[ -f "${src/#.\//"${PWD}"\/}" ]]; then
       src="${src/#.\//"${PWD}"\/}"
     elif [[ -f "${src/#.\//"${GLOBAL_VALET_HOME}"\/}" ]]; then
       src="${src/#.\//"${GLOBAL_VALET_HOME}"\/}"
     fi
-    if [[ ${i} -eq "$((stackSize - 1))" ]]; then
+    if (( i == stackSize - 1)); then
       treeString="└─"
     fi
-    stack+=$'\n'"${treeString} In function ${func}() ${src}:${linen}"
+    log::printRaw "${treeString} in ${func} at ${src}:${linen}" "│  "
   done
-  RETURNED_VALUE="${stack}"
 }
 
 #===============================================================
@@ -559,6 +687,7 @@ function core::reloadUserCommands() {
 #===============================================================
 
 # Allows to soft wrap the given text at the given width.
+# Wrapping is done at word boundaries.
 # Optionally applies left padding to each new line.
 # $1: the text to wrap
 # $2: the width to wrap the text at
@@ -573,20 +702,20 @@ function core::reloadUserCommands() {
 #   This function is written in pure bash and is faster than calling the fold command.
 #   This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 function string::wrapText() {
-  local text width leftPaddingLength appendPaddingToFirstLine
+  local text width leftPadding appendPaddingToFirstLine
   text="${1}"
-  width="${2:-GLOBAL_COLUMNS}"
-  leftPaddingLength="${3:-0}"
+  width="${2:-${GLOBAL_COLUMNS}}"
+  leftPadding="${3:-0}"
   appendPaddingToFirstLine="${4:-false}"
 
   # compute padding in number of spaces
-  local leftPadding
-  leftPadding=""
-  for ((i = 0; i < leftPaddingLength; i++)); do
-    leftPadding+=" "
+  local messageLeftPadding
+  messageLeftPadding=""
+  for ((i = 0; i < leftPadding; i++)); do
+    messageLeftPadding+=" "
   done
 
-  local sentenceWidth=$((width - leftPaddingLength))
+  local sentenceWidth=$((width - leftPadding))
 
   local wrappedText
 
@@ -596,22 +725,22 @@ function string::wrapText() {
     local line
     while read -r line; do
       wrappedText+=$'\n'
-      string::wrapSentence "${line}" "${sentenceWidth}" "${leftPadding}"
+      string::wrapSentence "${line}" "${sentenceWidth}" "${messageLeftPadding}"
       if [[ ${firstLine} == "1" ]]; then
         firstLine="0"
       else
-        wrappedText+="${leftPadding}"
+        wrappedText+="${messageLeftPadding}"
       fi
       wrappedText+="${RETURNED_VALUE}"
-    done <<< "${text}"
+    done <<<"${text}"
   else
-    string::wrapSentence "${text}" "${sentenceWidth}" "${leftPadding}"
+    string::wrapSentence "${text}" "${sentenceWidth}" "${messageLeftPadding}"
     wrappedText="${RETURNED_VALUE}"
   fi
 
   # add left padding on the first line (or not)
   if [[ ${appendPaddingToFirstLine} == "true" ]]; then
-    RETURNED_VALUE="${leftPadding}${wrappedText#$'\n'}"
+    RETURNED_VALUE="${messageLeftPadding}${wrappedText#$'\n'}"
   else
     RETURNED_VALUE="${wrappedText#$'\n'}"
   fi
@@ -709,6 +838,50 @@ function string::wrapSentence() {
   RETURNED_VALUE="${wrappedText}"
 }
 
+# Allows to hard wrap the given string (without new lines) at the given width.
+# Wrapping is done at character boundaries without taking spaces into consideration.
+# Optionally applies a prefix on each new line.
+#
+# $1: the text to wrap
+# $2: the width to wrap the text at
+# $3: (optional) the prefix to apply to each new line (default to "")
+# $4: (optional) the width to wrap the text for each new line (default to the width)
+#
+# Returns:
+#   The wrapped string in the global variable RETURNED_VALUE
+#
+# Usage:
+#   string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 --- && local wrappedString="${RETURNED_VALUE}"
+#
+# Note:
+#   This function is written in pure bash and is faster than calling the fold command.
+function string::wrapCharacters() {
+  local text="${1}"
+  local -i width="${2:-${GLOBAL_COLUMNS}}"
+  local newLinePrefix="${3:-}"
+  local -i newLineWidth="${4:-"${width}"}"
+
+  # short cut in case the text is already shorter than the width
+  if [[ "${#text}" -le width ]]; then
+    RETURNED_VALUE="${text}"
+    return 0
+  fi
+
+  RETURNED_VALUE=""
+  local -i textLength="${#text}" i nbLines=-1
+  local first=true
+  for ((i = 0; i < textLength; i += width)); do
+    if ((nbLines == 0)); then
+      width=${newLineWidth}
+    fi
+    if ((nbLines >= 0)); then
+      RETURNED_VALUE+=$'\n'"${newLinePrefix}"
+    fi
+    RETURNED_VALUE+="${text:i:width}"
+    nbLines+=1
+  done
+}
+
 # Allows to fuzzy match an array against a given pattern.
 # Returns an array containing only the lines matching the pattern.
 #
@@ -769,7 +942,7 @@ function array::fuzzyFilter() {
           fi
 
           # loop on the next pattern character
-          break;
+          break
         fi
 
         lineCharIndex+=1
@@ -777,7 +950,7 @@ function array::fuzzyFilter() {
 
       # if we don't find the character in the line, the line is not a match
       if [[ lineCharIndex -ge lineLength ]]; then
-        break;
+        break
       else
         lineCharIndex+=1
       fi
@@ -919,7 +1092,7 @@ function core::checkParseResults() {
 if [[ -n "${VALET_LOG_LEVEL:-}" ]]; then
   log::setLevel "${VALET_LOG_LEVEL}"
 fi
-if [[ ${VALET_VERBOSE=:-} == "true" ]]; then
+if [[ ${VALET_VERBOSE:-} == "true" ]]; then
   log::setLevel "debug"
 fi
 if [[ -n "${VALET_CONFIG_LOG_FD:-}" ]]; then

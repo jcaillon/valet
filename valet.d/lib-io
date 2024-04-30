@@ -70,12 +70,23 @@ function io::invoke5() {
   # if debug mode is on, print some info
   if log::isDebugEnabled; then
     local debugMessage="Executing the command ⌜${executable}⌝."$'\n'
-    debugMessage+="Fail if it fails: ⌜${failIfFails}⌝"$'\n'
-    debugMessage+="Acceptable error codes: ⌜${acceptableErrorCodes}⌝"$'\n'
-    debugMessage+="Standard stream from file: ⌜${stdInFromFile}⌝"$'\n'
-    debugMessage+="Standard stream: ⌜${stdIn}⌝"$'\n'
-    debugMessage+="Extra parameters: ⌜${*}⌝"
-    log::debug "${debugMessage}"
+    debugMessage+="Fail if it fails: ⌜${failIfFails}⌝."$'\n'
+    debugMessage+="Acceptable error codes: ⌜${acceptableErrorCodes}⌝."$'\n'
+    local IFS=$'\n'
+    log::debug "${debugMessage}${executable^} extra parameters:" "${@@Q}"
+    if [[ -n "${stdIn}" ]]; then
+      if [[ ${stdInFromFile} == "true" ]]; then
+        log::debug "${executable^} Standard input from file ${stdIn}:"
+        io::readFile "${stdIn}" 5000
+        if [[ "${#RETURNED_VALUE}" -ge 5000 ]]; then RETURNED_VALUE+="... (truncated)"; fi
+        printf '%s\n' "${RETURNED_VALUE}" 1>&2
+      else
+        log::debug "${executable^} Standard input from string:"
+        printf '%s\n' "${stdIn}" 1>&2
+      fi
+    else
+      log::debug "No standard input."
+    fi
   fi
 
   # execute the executable
@@ -105,7 +116,7 @@ function io::invoke5() {
   if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
 
     # append std out
-    debugMessage+=$'\n'"Standard output:"$'\n'
+    debugMessage+=$'\n'"${executable^} standard output:"$'\n'
     if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
       io::readFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 5000
       if [[ "${#RETURNED_VALUE}" -ge 5000 ]]; then RETURNED_VALUE+="... (truncated)"; fi
@@ -115,7 +126,7 @@ function io::invoke5() {
     fi
 
     # append stderr
-    debugMessage+=$'\n'"Error output:"$'\n'
+    debugMessage+=$'\n'"${executable^} error output:"$'\n'
     if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
       io::readFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 5000
       if [[ "${#RETURNED_VALUE}" -ge 5000 ]]; then RETURNED_VALUE+="... (truncated)"; fi

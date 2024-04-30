@@ -231,6 +231,7 @@ self release    Release a new version of valet.
 self setup      The command run after the installation of Valet to setup the tool.
 
 INFO     The command definition variables have been written to ⌜/tmp/valet.d/f501-0⌝.
+INFO     The valet build version has been bumped to ⌜0.11.38⌝.
 SUCCESS  The valet user commands have been successfully built
 ```
 

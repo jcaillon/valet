@@ -66,9 +66,28 @@ function testArray::fuzzyFilter() {
   endTest "Testing array::fuzzyFilter" 0
 }
 
+function testString::wrapCharacters() {
+  local shortText
+
+  shortText="You don't get better on the days when you feel like going. You get better on the days when you don't want to go, but you go anyway. If you can overcome the negative energy coming from your tired body or unmotivated mind, you will grow and become better. It won't be the best workout you have, you won't accomplish as much as what you usually do when you actually feel good, but that doesn't matter. Growth is a long term game, and the crappy days are more important."
+
+  echo "→ string::wrapCharacters \"\${shortText}\" 30 \"  \"" 28
+  echo "------------------------------"
+  string::wrapCharacters "${shortText}" 30 "  " 28 && echo "${RETURNED_VALUE}"
+  endTest "Wrapping characters at column 30 with new line prefix" 0
+
+  echo "→ string::wrapCharacters \"\${shortText}\" 20"
+  echo "--------------------"
+  string::wrapCharacters "${shortText}" 20 && echo "${RETURNED_VALUE}"
+  endTest "Wrapping characters at 20, no other options" 0
+
+
+}
+
 function main() {
   testString::wrapText
   testArray::fuzzyFilter
+  testString::wrapCharacters
 }
 
 main

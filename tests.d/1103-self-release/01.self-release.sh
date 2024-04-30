@@ -47,20 +47,21 @@ function io::invoke() {
 
 function kurl::toVar() {
   echo "▶ called kurl::toVar $*" 1>&2
-  echo -n 200
   if [[ $* == *"tag_name"* ]]; then
     # post on the release endpoint
     RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}" }'
-    return 0
+  else
+    RETURNED_VALUE=""
   fi
-  RETURNED_VALUE=""
+  RETURNED_VALUE2=""
+  RETURNED_VALUE3=200
 }
 
 
 function kurl::toFile() {
   echo "▶ called kurl::toFile $*" 1>&2
-  echo -n 200
   RETURNED_VALUE=""
+  RETURNED_VALUE2=200
 }
 
 function main() {

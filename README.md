@@ -180,6 +180,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Show the arguments required when a command parsing fails.
 - Betters checks in self build!
 - Support alternative single comments `# ## VALET COMMAND` instead of multiline comments for command declaration (see we can have help in autocompletion).
+- A command can declare dependencies to auto check if some tools are installed before running the command.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

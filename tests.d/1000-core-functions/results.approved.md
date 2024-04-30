@@ -133,3 +133,66 @@ declare -a RETURNED_ARRAY2=()
 declare -a RETURNED_ARRAY3=()
 ```
 
+### Wrapping characters at column 30 with new line prefix
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::wrapCharacters "${shortText}" 30 "  " 28
+------------------------------
+You don't get better on the da
+  ys when you feel like going.
+   You get better on the days 
+  when you don't want to go, b
+  ut you go anyway. If you can
+   overcome the negative energ
+  y coming from your tired bod
+  y or unmotivated mind, you w
+  ill grow and become better. 
+  It won't be the best workout
+   you have, you won't accompl
+  ish as much as what you usua
+  lly do when you actually fee
+  l good, but that doesn't mat
+  ter. Growth is a long term g
+  ame, and the crappy days are
+   more important.
+```
+
+### Wrapping characters at 20, no other options
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::wrapCharacters "${shortText}" 20
+--------------------
+You don't get better
+ on the days when yo
+u feel like going. Y
+ou get better on the
+ days when you don't
+ want to go, but you
+ go anyway. If you c
+an overcome the nega
+tive energy coming f
+rom your tired body 
+or unmotivated mind,
+ you will grow and b
+ecome better. It won
+'t be the best worko
+ut you have, you won
+'t accomplish as muc
+h as what you usuall
+y do when you actual
+ly feel good, but th
+at doesn't matter. G
+rowth is a long term
+ game, and the crapp
+y days are more impo
+rtant.
+```
+

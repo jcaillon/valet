@@ -21,8 +21,8 @@ function main::onErrorInternal() {
   if [[ ${GLOBAL_ERROR_DISPLAYED:-0} == "1" ]]; then
     return 0
   fi
-  log::getCallStack 2 && local stack="${RETURNED_VALUE}"
-  log::error "Error code ${1} in ${FUNCNAME[1]}(), stack:${stack}"
+  log::error "Error code ${1} in ${FUNCNAME[1]}(), stack:"
+  log::printCallStack 2
   GLOBAL_ERROR_DISPLAYED=1
 }
 
@@ -38,7 +38,7 @@ function main::onExitInternal() {
   if command -v onExitTest 1>/dev/null 2>&1; then
     # this is for the self test command, we need to inform the user in case of an
     # unexpected exit because they would not see the logs otherwise
-    onExitTest
+    onExitTest "${rc}"
   fi
   if command -v onExit 1>/dev/null 2>&1; then
     onExit
@@ -50,8 +50,8 @@ function main::onExitInternal() {
   # always call cleanUp before exiting
   main::onCleanUpInternal
   if [[ "${GLOBAL_ERROR_DISPLAYED:-0}" != "1" && "${rc}" != "0" ]]; then
-    log::getCallStack 2 && local stack="${RETURNED_VALUE}"
-    log::print "ERROR" "${VALET_CONFIG_ICON_EXIT:-$'\uf14c'}" "EXIT" "Exiting with code ${rc}, stack:${stack}"
+    log::print "ERROR" "${VALET_CONFIG_ICON_EXIT:-$'\uf14c'}" "EXIT" "Exiting with code ${rc}, stack:"
+    log::printCallStack 2
     GLOBAL_ERROR_DISPLAYED=1
   fi
 }
@@ -63,8 +63,8 @@ function main::onInterruptInternal() {
   log::print "WARNING" "${VALET_CONFIG_ICON_STOPPED:-$'\uf256'}" "STOPPED" "Program interrupted by the user."
 
   if log::isDebugEnabled; then
-    log::getCallStack 2 && local stack="${RETURNED_VALUE}"
-    log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:${stack}"
+    log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:"
+    log::printCallStack 2
   fi
 
   # check if the function exists
@@ -104,9 +104,6 @@ function main::onCleanUpInternal() {
 
 # Introducing our own function to handle commands not found, so we can display a better message
 function command_not_found_handle() {
-  # set log level to debug to have a stack trace
-  log::setLevel "debug" true
-
   if [[ ${1:-} == "curl" ]]; then
     core::fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
   fi
@@ -474,7 +471,7 @@ function main::parseMainArguments() {
   maxNbCommands=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
 
   # Parsing the options from environment variables
-  if [[ ${VALET_PROFILING=:-} == "true" ]]; then
+  if [[ ${VALET_PROFILING:-} == "true" ]]; then
     PROFIL_COMMAND=true
   fi
 

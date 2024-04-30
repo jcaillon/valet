@@ -107,6 +107,7 @@ function main() {
 # Override curl for tests
 # shellcheck disable=SC2317
 function curl() {
+  local IFS=" "
   echo "▶ called curl $*" 1>&2
 
   while [[ $# -gt 0 ]]; do

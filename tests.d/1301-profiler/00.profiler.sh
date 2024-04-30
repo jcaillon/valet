@@ -53,7 +53,7 @@ function echoFileWithSubstitution() {
   local file="${1}"
   local line
   local IFS=$'\n'
-  while read -rd $'\n' line; do
+  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
     line="${line/*self-mock.sh:/00 00 00 0.0XXX 0.0XXX                    self-mock.sh:}"
     echo "${line}"
   done <"${file}"
