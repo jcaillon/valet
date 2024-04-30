@@ -102,7 +102,7 @@ function extractCommandDefinitionToVariables() {
         arrayLength+=1
         newPropertyName="${newPropertyName:1}"
         newIndentation="${newIndentation}  "
-        log::debug "Processing new array item."
+        log::trace "Processing new array item."
       fi
 
       # check that property name only contains alphanumeric characters
@@ -114,13 +114,13 @@ function extractCommandDefinitionToVariables() {
 
       if [[ -z "${newPropertyValue// /}" ]]; then
         # we are on a new array property
-        log::debug "Starting new array property: ⌜${newPropertyName}⌝."
+        log::trace "Starting new array property: ⌜${newPropertyName}⌝."
         arrayLength=0
         newIndentation="  "
         propertyNames=("${newPropertyName}")
       elif [[ ${newPropertyValue} == "|-"* ]]; then
         # we are on an a multi line property
-        log::debug "Starting new multi line property: ⌜${newPropertyName}⌝."
+        log::trace "Starting new multi line property: ⌜${newPropertyName}⌝."
         readingMultiLine=1
         propertyValue=""
         newIndentation="${newIndentation}  "
@@ -159,7 +159,7 @@ function createGlobalVariable() {
   local value="${2}"
   local arrayLength="${3}"
 
-  log::debug "Setting variable ⌜TEMP_CMD_BUILD_${name}⌝ (array length=${arrayLength})."
+  log::trace "Setting variable ⌜TEMP_CMD_BUILD_${name}⌝ (array length=${arrayLength})."
   if [[ arrayLength -le -1 ]]; then
     # simple variable
     declare -g "TEMP_CMD_BUILD_${name}"="${value}"
@@ -172,10 +172,10 @@ function createGlobalVariable() {
       currentArrayLength=0
       eval "TEMP_CMD_BUILD_${name}=()"
     fi
-    log::debug "currentArrayLength: ${currentArrayLength}."
+    log::trace "currentArrayLength: ${currentArrayLength}."
     arrayLength=$((arrayLength - 1))
     while [[ arrayLength -gt currentArrayLength ]]; do
-      log::debug "Adding empty string to array TEMP_CMD_BUILD_${name}."
+      log::trace "Adding empty string to array TEMP_CMD_BUILD_${name}."
       eval "TEMP_CMD_BUILD_${name}+=(\"\")"
       currentArrayLength+=1
     done

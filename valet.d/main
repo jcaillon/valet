@@ -636,7 +636,10 @@ function main::runMenuWithSubCommands() {
   local parsedArguments
   main::parseFunctionArguments "_menu" "$@"
   parsedArguments="${RETURNED_VALUE}"
-  log::debug "Parsed arguments:"$'\n'"${parsedArguments}"
+  if log::isDebugEnabled; then
+    log::debug "Parsed arguments:"
+    log::printString "${parsedArguments}"
+  fi
   eval "${parsedArguments}"
 
   if [[ -n "${help:-}" ]]; then
@@ -1200,7 +1203,10 @@ function main::parseFunctionArgumentsOrmain::goInteractive() {
 
   main::parseFunctionArguments "${functionName}" "$@"
   local parsedArguments="${RETURNED_VALUE}"
-  log::debug "Parsed arguments:"$'\n'"${parsedArguments}"
+  if log::isDebugEnabled; then
+    log::debug "Parsed arguments:"
+    log::printString "${parsedArguments}"
+  fi
 
   # check if the function is expecting arguments and/or options
   local expectArguments

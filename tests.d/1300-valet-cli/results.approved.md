@@ -575,72 +575,73 @@ New line(    )here.INFO     This is to test the printFile function from an actua
             4 ░ 
             5 ░ ## For the animals
             6 ░ 
-            7 ░ Preventing the exploitation of animals is not the only reason fo
-              ░ r becoming vegan, but for many it remains the key factor in thei
-              ░ r decision to go vegan and stay vegan. Having emotional attachme
-              ░ nts with animals may form part of that reason, while many believ
-              ░ e that all sentient creatures have a right to life and freedom. 
-              ░ Specifics aside, avoiding animal products is one of the most obv
-              ░ ious ways you can take a stand against animal cruelty and animal
-              ░  exploitation everywhere. Read a detailed overview on why being 
-              ░ vegan demonstrates true compassion for animals.
+            7 ░   Preventing the exploitation of animals is not the only reason 
+              ░ for becoming vegan, but for many it remains the key factor in th
+              ░ eir decision to go vegan and stay vegan. Having emotional attach
+              ░ ments with animals may form part of that reason, while many beli
+              ░ eve that all sentient creatures have a right to life and freedom
+              ░ . Specifics aside, avoiding animal products is one of the most o
+              ░ bvious ways you can take a stand against animal cruelty and anim
+              ░ al exploitation everywhere. Read a detailed overview on why bein
+              ░ g vegan demonstrates true compassion for animals.
             8 ░ 
             9 ░ ## For your health
            10 ░ 
-           11 ░ Well-planned vegan diets follow healthy eating guidelines, and c
-              ░ ontain all the nutrients that our bodies need. Both the British 
-              ░ Dietetic Association and the American Academy of Nutrition and D
-              ░ ietetics recognise that they are suitable for every age and stag
-              ░ e of life. Some research has linked that there are certain healt
-              ░ h benefits to vegan diets with lower blood pressure and choleste
-              ░ rol, and lower rates of heart disease, type 2 diabetes and some 
-              ░ types of cancer.
+           11 ░   Well-planned vegan diets follow healthy eating guidelines, and
+              ░  contain all the nutrients that our bodies need. Both the Britis
+              ░ h Dietetic Association and the American Academy of Nutrition and
+              ░  Dietetics recognise that they are suitable for every age and st
+              ░ age of life. Some research has linked that there are certain hea
+              ░ lth benefits to vegan diets with lower blood pressure and choles
+              ░ terol, and lower rates of heart disease, type 2 diabetes and som
+              ░ e types of cancer.
            12 ░ 
-           13 ░ Going vegan is a great opportunity to learn more about nutrition
-              ░  and cooking, and improve your diet. Getting your nutrients from
-              ░  plant foods allows more room in your diet for health-promoting 
-              ░ options like whole grains, fruit, nuts, seeds and vegetables, wh
-              ░ ich are packed full of beneficial fibre, vitamins and minerals.
+           13 ░   Going vegan is a great opportunity to learn more about nutriti
+              ░ on and cooking, and improve your diet. Getting your nutrients fr
+              ░ om plant foods allows more room in your diet for health-promotin
+              ░ g options like whole grains, fruit, nuts, seeds and vegetables, 
+              ░ which are packed full of beneficial fibre, vitamins and minerals
+              ░ .
            14 ░ 
            15 ░ ## For the environment
            16 ░ 
-           17 ░ From recycling our household rubbish to cycling to work, we're a
-              ░ ll aware of ways to live a greener life. One of the most effecti
-              ░ ve things an individual can do to lower their carbon footprint i
-              ░ s to avoid all animal products. This goes way beyond the problem
-              ░  of cow flatulence and air pollution!
-           18 ░ Why is meat and dairy so bad for the environment?
+           17 ░   From recycling our household rubbish to cycling to work, we're
+              ░  all aware of ways to live a greener life. One of the most effec
+              ░ tive things an individual can do to lower their carbon footprint
+              ░  is to avoid all animal products. This goes way beyond the probl
+              ░ em of cow flatulence and air pollution!
+           18 ░   Why is meat and dairy so bad for the environment?
            19 ░ 
-           20 ░ The production of meat and other animal derived products places 
-              ░ a heavy burden on the environment. The vast amount of grain feed
-              ░  required for meat production is a significant contributor to de
-              ░ forestation, habitat loss and species extinction. In Brazil alon
-              ░ e, the equivalent of 5.6 million acres of land is used to grow s
-              ░ oya beans for animals in Europe. This land contributes to develo
-              ░ ping world malnutrition by driving impoverished populations to g
-              ░ row cash crops for animal feed, rather than food for themselves.
-              ░  On the other hand, considerably lower quantities of crops and w
-              ░ ater are required to sustain a vegan diet, making the switch to 
-              ░ veganism one of the easiest, most enjoyable and most effective w
-              ░ ays to reduce our impact on the environment. For more on how veg
-              ░ anism is the way forward for the environment, see our environmen
-              ░ t section.
+           20 ░   The production of meat and other animal derived products place
+              ░ s a heavy burden on the environment. The vast amount of grain fe
+              ░ ed required for meat production is a significant contributor to 
+              ░ deforestation, habitat loss and species extinction. In Brazil al
+              ░ one, the equivalent of 5.6 million acres of land is used to grow
+              ░  soya beans for animals in Europe. This land contributes to deve
+              ░ loping world malnutrition by driving impoverished populations to
+              ░  grow cash crops for animal feed, rather than food for themselve
+              ░ s. On the other hand, considerably lower quantities of crops and
+              ░  water are required to sustain a vegan diet, making the switch t
+              ░ o veganism one of the easiest, most enjoyable and most effective
+              ░  ways to reduce our impact on the environment. For more on how v
+              ░ eganism is the way forward for the environment, see our environm
+              ░ ent section.
            21 ░ 
            22 ░ ## For people
            23 ░ 
-           24 ░ Just like veganism is the sustainable option when it comes to lo
-              ░ oking after our planet, plant-based living is also a more sustai
-              ░ nable way of feeding the human family. A plant-based diet requir
-              ░ es only one third of the land needed to support a meat and dairy
-              ░  diet. With rising global food and water insecurity due to a myr
-              ░ iad of environmental and socio-economic problems, there's never 
-              ░ been a better time to adopt a more sustainable way of living. Av
-              ░ oiding animal products is not just one of the simplest ways an i
-              ░ ndividual can reduce the strain on food as well as other resourc
-              ░ es, it's the simplest way to take a stand against inefficient fo
-              ░ od systems which disproportionately affect the poorest people al
-              ░ l over the world. Read more about how vegan diets can help peopl
-              ░ e.
+           24 ░   Just like veganism is the sustainable option when it comes to 
+              ░ looking after our planet, plant-based living is also a more sust
+              ░ ainable way of feeding the human family. A plant-based diet requ
+              ░ ires only one third of the land needed to support a meat and dai
+              ░ ry diet. With rising global food and water insecurity due to a m
+              ░ yriad of environmental and socio-economic problems, there's neve
+              ░ r been a better time to adopt a more sustainable way of living. 
+              ░ Avoiding animal products is not just one of the simplest ways an
+              ░  individual can reduce the strain on food as well as other resou
+              ░ rces, it's the simplest way to take a stand against inefficient 
+              ░ food systems which disproportionately affect the poorest people 
+              ░ all over the world. Read more about how vegan diets can help peo
+              ░ ple.
 INFO     This is to test the printFile function from an actual file with number 
          of lines restriction.
             1 ░ # Explore why veganism is kinder to animals, to people and to ou
@@ -650,15 +651,15 @@ INFO     This is to test the printFile function from an actual file with number
             4 ░ 
             5 ░ ## For the animals
             6 ░ 
-            7 ░ Preventing the exploitation of animals is not the only reason fo
-              ░ r becoming vegan, but for many it remains the key factor in thei
-              ░ r decision to go vegan and stay vegan. Having emotional attachme
-              ░ nts with animals may form part of that reason, while many believ
-              ░ e that all sentient creatures have a right to life and freedom. 
-              ░ Specifics aside, avoiding animal products is one of the most obv
-              ░ ious ways you can take a stand against animal cruelty and animal
-              ░  exploitation everywhere. Read a detailed overview on why being 
-              ░ vegan demonstrates true compassion for animals.
+            7 ░   Preventing the exploitation of animals is not the only reason 
+              ░ for becoming vegan, but for many it remains the key factor in th
+              ░ eir decision to go vegan and stay vegan. Having emotional attach
+              ░ ments with animals may form part of that reason, while many beli
+              ░ eve that all sentient creatures have a right to life and freedom
+              ░ . Specifics aside, avoiding animal products is one of the most o
+              ░ bvious ways you can take a stand against animal cruelty and anim
+              ░ al exploitation everywhere. Read a detailed overview on why bein
+              ░ g vegan demonstrates true compassion for animals.
             8 ░ 
             9 ░ ## For your health
            10 ░ 
