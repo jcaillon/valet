@@ -547,7 +547,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
-INFO     This is to test the printRaw function.
+INFO     This is to test the printString function.
          Preventing the exploitation of animals is not the only reason for becom
          ###ing vegan, but for many it remains the key factor in their decision 
          ###to go vegan and stay vegan. Having emotional attachments with animal
@@ -557,7 +557,9 @@ INFO     This is to test the printRaw function.
          ###and against animal cruelty and animal exploitation everywhere. Read 
          ###a detailed overview on why being vegan demonstrates true compassion 
          ###for animals.
-INFO     This is to test the printFile function from an actual file.
+INFO     This is to test the printRaw function.
+  Two spaces before that
+New line(    )here.INFO     This is to test the printFile function from an actual file.
             1 ░ # Explore why veganism is kinder to animals, to people and to ou
               ░ r planet's future.
             2 ░ 

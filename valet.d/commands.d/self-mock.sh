@@ -86,10 +86,10 @@ function selfMock1() {
     log::success "This is a success message."
     log::warning "This is a warning message."$'\n'"With a second line."
     if log::isDebugEnabled; then
-      printf '%s\n' "The debug mode is activated!" 1>&2
+      log::printString "The debug mode is activated!"
     fi
     if log::isTraceEnabled; then
-      printf '%s\n' "The trace mode is activated!" 1>&2
+      log::printString "The trace mode is activated!"
     fi
     ;;
   wait-indefinitely)
@@ -103,8 +103,10 @@ function selfMock1() {
     core::showHelp
     ;;
   print-raw-and-file)
+      log::info "This is to test the printString function."
+      log::printString "Preventing the exploitation of animals is not the only reason for becoming vegan, but for many it remains the key factor in their decision to go vegan and stay vegan. Having emotional attachments with animals may form part of that reason, while many believe that all sentient creatures have a right to life and freedom. Specifics aside, avoiding animal products is one of the most obvious ways you can take a stand against animal cruelty and animal exploitation everywhere. Read a detailed overview on why being vegan demonstrates true compassion for animals." "###"
       log::info "This is to test the printRaw function."
-      log::printRaw "Preventing the exploitation of animals is not the only reason for becoming vegan, but for many it remains the key factor in their decision to go vegan and stay vegan. Having emotional attachments with animals may form part of that reason, while many believe that all sentient creatures have a right to life and freedom. Specifics aside, avoiding animal products is one of the most obvious ways you can take a stand against animal cruelty and animal exploitation everywhere. Read a detailed overview on why being vegan demonstrates true compassion for animals." "###"
+      log::printRaw "  Two spaces before that"$'\n'"New line(    )here."
       log::info "This is to test the printFile function from an actual file."
       log::printFile true "resources/file-to-read"
       log::info "This is to test the printFile function from an actual file with number of lines restriction."

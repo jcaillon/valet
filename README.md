@@ -171,8 +171,6 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Replace awk with bash.
 - Provide an alternative bash function if diff is not found.
 - Allow to separate commands from options/arguments with `--`.
-- Fsfs: Display the number of lines and the current first line for the right panel + nb items on the left pane.
-- The installer script should embed the latest version at the time (modify just before a release) so it downloads the corresponding binary.
 - Have a consistent look and feel for interactive functions.
 - Reimplement usage of main::sortCommands / main::addLastChoice.
 - Add a default value for options.

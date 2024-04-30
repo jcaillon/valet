@@ -59,7 +59,7 @@ while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; do GLOBAL_TEMPORARY_DIRECTORY+="
 #  io::createTempFile && local file="${RETURNED_VALUE}"
 function io::createTempFile() {
   if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
-    mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
+    mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
   fi
   TEMPORARY_FILE_NUMBER=${TEMPORARY_FILE_NUMBER:-0}
   while true; do
@@ -78,14 +78,14 @@ function io::createTempFile() {
 #  io::createTempDirectory && local directory="${RETURNED_VALUE}"
 function io::createTempDirectory() {
   if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
-    mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>&2 2>/dev/null
+    mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
   fi
   TEMPORARY_DIRECTORY_NUMBER=${TEMPORARY_DIRECTORY_NUMBER:-0}
   while true; do
     TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
     RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
     if [[ ! -d "${RETURNED_VALUE}" ]]; then
-      mkdir -p "${RETURNED_VALUE}" 1>&2 2>/dev/null
+      mkdir -p "${RETURNED_VALUE}" 1>/dev/null
       return 0
     fi
   done
@@ -201,6 +201,7 @@ function log::getLevel() {
 function log::print() { return 0; }
 
 # Display a file content with line numbers in the logs.
+# The file content will be aligned with the current log output and hard wrapped if necessary.
 #
 # $1: true if the second argument is a file path, false if it is a string.
 # $2: the file path or the string to display.
@@ -212,10 +213,20 @@ function log::print() { return 0; }
 # shellcheck disable=SC2317
 function log::printFile() { return 0; }
 
-# Display a raw string in the log.
+# Display a string in the log.
+# The string will be aligned with the current log output and hard wrapped if necessary.
 #
 # $1: the content to log (can contain new lines)
 # $2: the string with which to prepend each wrapped line (empty by default)
+#
+# Usage:
+#   log::printString "my line"
+# shellcheck disable=SC2317
+function log::printString() { return 0; }
+
+# Display something in the log stream.
+#
+# $1: the content to print (can contain new lines)
 #
 # Usage:
 #   log::printRaw "my line"
@@ -388,9 +399,9 @@ function log::createPrintFunction() {
     '"${standardPrintStatement}"'
   }'
 
-  # log::printRaw function
+  # log::printString function
   GLOBAL_LOG_PRINT_FUNCTION+='
-  function log::printRaw() {
+  function log::printString() {
     local content="${1}"
     local wrappedLineLeftPaddingString="${2:-}"
     local wrapTextColumns='"$((wrapTextColumns - wrapPaddingLength))"'
@@ -400,6 +411,13 @@ function log::createPrintFunction() {
         string::wrapCharacters "${line}" "${wrapTextColumns}" "${messageLeftPadding}${wrappedLineLeftPaddingString}" "$((wrapTextColumns - ${#wrappedLineLeftPaddingString}))"
         toPrint+="${messageLeftPadding}${RETURNED_VALUE}"'"$'\n'"'
     done <<<"${content}"
+    '"${standardPrintStatement}"'
+  }'
+
+  # log::printRaw function
+  GLOBAL_LOG_PRINT_FUNCTION+='
+  function log::printRaw() {
+    local toPrint="${1}"
     '"${standardPrintStatement}"'
   }'
 }
@@ -558,7 +576,7 @@ function log::printCallStack() {
     if (( i == stackSize - 1)); then
       treeString="└─"
     fi
-    log::printRaw "${treeString} in ${func} at ${src}:${linen}" "│  "
+    log::printString "${treeString} in ${func} at ${src}:${linen}" "│  "
   done
 }
 

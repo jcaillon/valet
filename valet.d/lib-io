@@ -430,7 +430,7 @@ function io::readStdIn() {
   RETURNED_VALUE=""
   local IFS=''
   if read -t 0 -u 0 -rd ''; then
-    read -u 0 -rd '' RETURNED_VALUE || [[ -n ${RETURNED_VALUE} ]]
+    read -u 0 -rd '' RETURNED_VALUE || [[ -n ${RETURNED_VALUE} ]] || RETURNED_VALUE=""
   else
     RETURNED_VALUE=""
   fi

@@ -331,18 +331,22 @@ function compareWithApproved() {
 
   if diff --color -u "${approvedFile}" "${receivedFileToCopy}" 1>&2; then
     log::debug "🧪 ${testName}: OK, equal to approved file."
-    rm -f "${receivedFile}" 2>/dev/null || :
+    if [[ -f "${receivedFile}" ]]; then
+      rm -f "${receivedFile}" 1>/dev/null
+    fi
     return 0
   else
-    printf '%s\n' "${receivedFile} is different than ${approvedFile} (see above)" 1>&2
-    log::error "🧪 ${testName}: KO, differs from approved file (see difference above)." | tee >(cat >&2)
+    log::printString "${receivedFile} is different than ${approvedFile} (see above)"
+    log::error "🧪 ${testName}: KO, differs from approved file (see difference above)."
   fi
 
   # if the option is activated, we approve the received file
   if [[ ${TEST_AUTO_APPROVE:-false} == "true" ]]; then
     log::info "🧪 ${testName}: Auto-approving"
     cp -f "${receivedFileToCopy}" "${approvedFile}"
-    rm -f "${receivedFile}" 2>/dev/null || :
+    if [[ -f "${receivedFile}" ]]; then
+      rm -f "${receivedFile}" 1>/dev/null
+    fi
   else
     cp -f "${receivedFileToCopy}" "${receivedFile}"
   fi
