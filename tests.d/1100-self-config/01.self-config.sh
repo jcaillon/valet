@@ -8,7 +8,6 @@ function testSelfConfig() {
   local -i exitCode
   local originalConfigFile="${VALET_CONFIG_FILE:-}"
   local configFile
-  setTempFilesNumber 400
   io::createTempFile && configFile="${RETURNED_VALUE}"
   VALET_CONFIG_FILE="${configFile}"
 

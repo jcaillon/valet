@@ -230,7 +230,7 @@ self mock3      A command that only for testing valet core functions.
 self release    Release a new version of valet.
 self setup      The command run after the installation of Valet to setup the tool.
 
-INFO     The command definition variables have been written to ⌜/tmp/valet.d/f501-0⌝.
+INFO     The command definition variables have been written to ⌜/tmp/valet.d/f1-0⌝.
 SUCCESS  The valet user commands have been successfully built
 ```
 

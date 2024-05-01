@@ -24,7 +24,6 @@ fi
 _TEST_0000_COMMON_UTILS=1
 
 # override the local state and config directories to return temp directories
-setTempFilesNumber 800
 io::createTempDirectory
 export TEST_VALET_CONFIG_LOCAL_STATE_DIRECTORY="${RETURNED_VALUE}"
 

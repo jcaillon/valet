@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 function testIo::invoke5() {
-  setTempFilesNumber 300
   io::createTempFile && local tmpFile="${RETURNED_VALUE}"
   local -i exitCode
 

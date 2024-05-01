@@ -86,8 +86,7 @@ function endTest() {
 # Usage:
 #   setTempFilesNumber 3
 function setTempFilesNumber() {
-  TEMPORARY_FILE_NUMBER=${1}
-  TEMPORARY_DIRECTORY_NUMBER=${1}
+  return 0
 }
 
 function echoFileWithLineNumberSubstitution() {
@@ -121,7 +120,7 @@ function runCoreTests() {
 
   # we should always run the test suite from the valet home directory to have consistent paths
   # in the report files
-  pushd "${GLOBAL_VALET_HOME}" 1> /dev/null
+  pushd "${GLOBAL_VALET_HOME}" 1>/dev/null
 
   log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝."
   runTestSuites "${GLOBAL_VALET_HOME}/tests.d"
@@ -137,7 +136,7 @@ function runCoreTests() {
     runTestSuites "${GLOBAL_VALET_HOME}/examples.d/showcase/tests.d"
   fi
 
-  popd 1> /dev/null
+  popd 1>/dev/null
 
   # reload the orignal commands
   core::reloadUserCommands
@@ -148,7 +147,7 @@ function rebuildCommands() {
   log::getLevel && originalLogLevel="${RETURNED_VALUE}"
   log::setLevel warning true
   core::sourceFunction selfBuild
-  if (( $# == 1)); then
+  if (($# == 1)); then
     selfBuild --user-directory "${1:-}"
   else
     selfBuild --user-directory "${1:-}" --output "${2}"
@@ -171,13 +170,10 @@ function rebuildCommands() {
 function runTestSuites() {
   local testSuiteDirectory="${1}"
 
-  # reset the temp files
-  io::cleanupTempFiles
-
-  io::createTempFile && _TEST_STANDARD_OUTPUT_FILE="${RETURNED_VALUE}"
-  io::createTempFile && _TEST_STANDARD_ERROR_FILE="${RETURNED_VALUE}"
-  io::createTempFile && _TEST_REPORT_FILE="${RETURNED_VALUE}"
-  io::createTempFile && _TEST_TEMP_FILE="${RETURNED_VALUE}"
+  _TEST_STANDARD_OUTPUT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-stdout"
+  _TEST_STANDARD_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-stderr"
+  _TEST_REPORT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-report"
+  _TEST_TEMP_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-tempfile"
 
   # save the original important variables so we can restore them after the test suite
   log::getLevel
@@ -212,6 +208,9 @@ function runTestSuites() {
       log::debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it matches the exclude pattern."
       continue
     fi
+
+    # reset the temp files
+    io::cleanupTempFiles
 
     log::info "Running test suite ⌜${testDirectory##*/}⌝."
 

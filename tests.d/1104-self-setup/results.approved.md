@@ -52,7 +52,7 @@ INFO     If you see the replacement character ? in my terminal, it means you don
 You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
 After that, you need to setup your terminal to use this newly installed font.
 You can also choose to enable the icons in Valet if you plan to install a nerd font.
-INFO     Creating the valet config file ⌜/tmp/valet.d/f801-0⌝.
+INFO     Creating the valet config file ⌜/tmp/valet.d/f1-0⌝.
 SUCCESS  You are all set!
 INFO     As a reminder, you can modify the configuration done during this set up by either:
 - replaying the command ⌜valet self setup⌝,
@@ -107,7 +107,7 @@ An information icon: II
 
 ```log
 INFO     Now setting up Valet.
-CININFO    II  CDE Creating the valet config file CHI⌜/tmp/valet.d/f801-0⌝CDE.
+CININFO    II  CDE Creating the valet config file CHI⌜/tmp/valet.d/f1-0⌝CDE.
 CWAWARNING IW  CDE The tool CHI⌜awk⌝CDE is missing. It is needed for cleaning the profiler logs.
 CWAWARNING IW  CDE The tool CHI⌜diff⌝CDE is missing. It is needed for the self test command.
 CWAWARNING IW  CDE The tool CHI⌜curl⌝CDE is missing. It is needed for the self update command.

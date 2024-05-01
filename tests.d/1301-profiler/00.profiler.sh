@@ -7,7 +7,6 @@ commentTest "The profiler is an excellent tool to debug your command. The follow
 
 function testProfiler() {
   # testing command profiling + startup
-  setTempFilesNumber 200
   io::createTempFile && export VALET_CONFIG_COMMAND_PROFILING_FILE="${RETURNED_VALUE}"
   io::createTempFile && export VALET_CONFIG_STARTUP_PROFILING_FILE="${RETURNED_VALUE}"
   export VALET_CONFIG_COMMAND_PROFILING_FILE

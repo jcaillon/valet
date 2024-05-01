@@ -224,6 +224,7 @@ function log::printFileString() { return 0; }
 
 # Display a string in the log.
 # The string will be aligned with the current log output and hard wrapped if necessary.
+# Does not check the log level.
 #
 # $1: the content to log (can contain new lines)
 # $2: the string with which to prepend each wrapped line (empty by default)
@@ -234,6 +235,7 @@ function log::printFileString() { return 0; }
 function log::printString() { return 0; }
 
 # Display something in the log stream.
+# Does not check the log level.
 #
 # $1: the content to print (can contain new lines)
 #
@@ -333,13 +335,13 @@ function log::createPrintFunction() {
     printStatement='
     printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_CONFIG_LOG_FD:-2}"
     standardPrintStatement='
-    printf "%s" "${toPrint}" 1>&'"${VALET_CONFIG_LOG_FD:-2}"
+    printf "%s" "${toPrint:-}" 1>&'"${VALET_CONFIG_LOG_FD:-2}"
   else
     # it is a file
     printStatement='
     printf "'"${printfFormat}"'" '"${printfArguments}"' 1>>'"${VALET_CONFIG_LOG_FD}"
     standardPrintStatement='
-    printf "%s" "${toPrint}" 1>>'"${VALET_CONFIG_LOG_FD}"
+    printf "%s" "${toPrint:-}" 1>>'"${VALET_CONFIG_LOG_FD}"
   fi
 
   # string with the number of spaces necessary to align with other log messages

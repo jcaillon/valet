@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 function testSelfBuild() {
-  setTempFilesNumber 500
   io::createTempFile && local tempFile="${RETURNED_VALUE}"
 
   (

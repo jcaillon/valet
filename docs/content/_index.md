@@ -23,6 +23,8 @@ keywords:
 {{< /hextra/hero-headline >}}
 </div>
 
+Valet is a zero dependency framework that helps you build fast, robust, testable and interactive bash scripts.
+
 <div class="hx-mb-12">
 {{< hextra/hero-subtitle >}}
   Build awesome bash scripts!
