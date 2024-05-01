@@ -96,8 +96,8 @@ function selfTest() {
     while [[ -n "${listOfDirectories}" ]]; do
       currentDirectory="${listOfDirectories%%$'\n'*}"
       listOfDirectories="${listOfDirectories#*$'\n'}"
-      log::debug "Searching for test suites directory in ⌜${currentDirectory}⌝."
-      log::debug "listOfDirectories: ⌜${listOfDirectories}⌝."
+      log::trace "Searching for test suites directory in ⌜${currentDirectory}⌝."
+      log::trace "listOfDirectories: ⌜${listOfDirectories}⌝."
       for testsDirectory in "${currentDirectory}"/*; do
         if [[ ! -d "${testsDirectory}" ]]; then
           # if the directory is not a directory, skip
@@ -115,7 +115,7 @@ function selfTest() {
         elif [[ ${testsDirectory##*/} != "."* ]]; then
           # we need the directory to the search list except if it starts with a .
           listOfDirectories+="${testsDirectory}"$'\n'
-          log::debug "adding directory ⌜${testsDirectory}⌝ to the search list."
+          log::trace "adding directory ⌜${testsDirectory}⌝ to the search list."
         fi
       done
     done

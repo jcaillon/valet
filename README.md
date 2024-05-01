@@ -180,6 +180,7 @@ Please check the [CONTRIBUTING.md][contributing] documentation if you intend to 
 - Support alternative single comments `# ## VALET COMMAND` instead of multiline comments for command declaration (see we can have help in autocompletion).
 - A command can declare dependencies to auto check if some tools are installed before running the command.
 - Generate vscode snippets from each function in core and lib-* to provide autocompletion for users.
+- Try to add a variable that allows to output the logs to a given file in addition to &2 and we generate a unique file for each time valet is run.
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

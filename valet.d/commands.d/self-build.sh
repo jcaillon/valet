@@ -118,15 +118,15 @@ function selfBuild() {
     while [[ -n "${listOfDirectories}" ]]; do
       currentDirectory="${listOfDirectories%%$'\n'*}"
       listOfDirectories="${listOfDirectories#*$'\n'}"
-      log::debug "Searching for command definitions in ⌜${currentDirectory}⌝."
-      log::debug "listOfDirectories: ⌜${listOfDirectories}⌝."
+      log::trace "Searching for command definitions in ⌜${currentDirectory}⌝."
+      log::trace "listOfDirectories: ⌜${listOfDirectories}⌝."
       for file in "${currentDirectory}"/**; do
         local fileBasename="${file##*/}"
         if [[ -d "${file}" && ${fileBasename} != "."* && ${fileBasename} != "tests.d" ]]; then
           # if directory we need to add it to the search list
           # except if it starts with a . or if it is a tests.d directory
           listOfDirectories+="${file}"$'\n'
-          log::debug "adding directory ⌜${file}⌝ to the search list."
+          log::trace "adding directory ⌜${file}⌝ to the search list."
           continue
         elif [[ "${file}" != *".sh" ]]; then
           # skip all files not ending with .sh
