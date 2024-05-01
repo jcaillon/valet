@@ -1077,7 +1077,7 @@ function main::parseFunctionArguments() {
           # if the arg ends with ... we expect an infinite amount of arguments
           lastArgumentValues+=("${1}")
         else
-          argumentPosition=+1
+          argumentPosition+=1
           outputSetLine+=("${argumentName}=\"${1//\"/\\\"}\"")
         fi
 
@@ -1095,7 +1095,7 @@ function main::parseFunctionArguments() {
   # check if we have missing arguments
   local -i nbExpectedArgs=$((totalNbArguments - nbOptionalArgs))
   if [[ argumentPosition -lt nbExpectedArgs ]]; then
-    outputErrors+=("Expecting ⌜${nbExpectedArgs}⌝ argument(s) but got ⌜$((argumentPosition))⌝.")
+    outputErrors+=("Expecting ⌜${nbExpectedArgs}⌝ argument(s) but got ⌜${argumentPosition}⌝.")
   fi
 
   local outputString

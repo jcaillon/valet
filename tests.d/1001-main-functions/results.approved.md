@@ -176,6 +176,13 @@ firstArg="arg"
 more=(
 "more1"
 )
+
+→ main::parseFunctionArguments selfMock4 arg1 arg2
+local parsingErrors help firstArg secondArg
+parsingErrors=""
+firstArg="arg1"
+secondArg="arg2"
+
 ```
 
 ## Test script 99.tests

@@ -126,7 +126,7 @@ function returnOne() { return 1; }
 
 
 #===============================================================
-# >>> command: self mock1
+# >>> command: self mock2
 #===============================================================
 
 : "---
@@ -181,6 +181,7 @@ function aSubFunctionInselfMock2() {
   log::debug "This is a sub function."
 }
 
+
 #===============================================================
 # >>> command: self mock3
 #===============================================================
@@ -200,4 +201,33 @@ function selfMock3() {
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   ${SUDO} whoami
+}
+
+
+#===============================================================
+# >>> command: self mock4
+#===============================================================
+
+: "---
+command: self mock4
+hideInMenu: true
+function: selfMock4
+author: github.com/jcaillon
+shortDescription: A command that only for testing valet core functions.
+description: |-
+  An example of description.
+arguments:
+- name: firstArg
+  description: |-
+    First argument.
+- name: secondArg
+  description: |-
+    Second argument.
+---"
+function selfMock4() {
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+
+  log::info "First argument: ${firstArg:-}."
+  log::info "Second argument: ${secondArg:-}."
 }

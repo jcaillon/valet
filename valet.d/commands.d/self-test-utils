@@ -78,17 +78,6 @@ function endTest() {
   fi
 }
 
-# This function allows to set the temp files and directories
-# numbers so we can have consistent results.
-#
-# $1: the new number for temp files and directories
-#
-# Usage:
-#   setTempFilesNumber 3
-function setTempFilesNumber() {
-  return 0
-}
-
 function echoFileWithLineNumberSubstitution() {
   local file="${1}"
   local line
@@ -195,30 +184,31 @@ function runTestSuites() {
   for testDirectory in "${testSuiteDirectory}/"*; do
     testDirectoryName="${testDirectory##*/}"
 
-    # skip if not a directory
-    if [[ ! -d "${testDirectory}" ]]; then continue; fi
+    # skip if not a directory or hidden dir
+    if [[ ! -d ${testDirectory} || ${testDirectoryName} == "."* ]]; then continue; fi
 
     # skip if the test directory does not match the include pattern
-    if [[ -n "${TEST_INCLUDE_PATTERN:-}" && ! ("${testDirectoryName}" =~ ${TEST_INCLUDE_PATTERN}) ]]; then
-      log::debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it does not match the include pattern."
+    if [[ -n ${TEST_INCLUDE_PATTERN:-} && ! (${testDirectory} =~ ${TEST_INCLUDE_PATTERN}) ]]; then
+      log::debug "Skipping test ⌜${testDirectory}⌝ because it does not match the include pattern."
       continue
     fi
     # skip if the test directory matches the exclude pattern
-    if [[ -n "${TEST_EXCLUDE_PATTERN:-}" && "${testDirectoryName}" =~ ${TEST_EXCLUDE_PATTERN} ]]; then
-      log::debug "Skipping test ⌜${testDirectoryName##*/}⌝ because it matches the exclude pattern."
+    if [[ -n ${TEST_EXCLUDE_PATTERN:-} && ${testDirectory} =~ ${TEST_EXCLUDE_PATTERN} ]]; then
+      log::debug "Skipping test ⌜${testDirectory}⌝ because it matches the exclude pattern."
       continue
     fi
 
     # reset the temp files
     io::cleanupTempFiles
 
-    log::info "Running test suite ⌜${testDirectory##*/}⌝."
+    log::info "Running test suite ⌜${testDirectoryName}⌝."
+    log::debug "Test suite directory is ⌜${testDirectory}⌝."
 
     # run a custom user script before the test suite if it exists
     runHookScript "${testSuiteDirectory}/before-each-test-suite"
 
     # write the test suite title
-    printf "%s\n\n" "# Test suite ${testDirectory##*/}" >"${_TEST_REPORT_FILE}"
+    printf "%s\n\n" "# Test suite ${testDirectoryName}" >"${_TEST_REPORT_FILE}"
 
     # for each .sh script in the test directory, run the test
     for testScript in "${testDirectory}"/*.sh; do
@@ -235,9 +225,9 @@ function runTestSuites() {
     nbTestSuites+=1
 
     if [[ "${exitCode}" -eq 0 ]]; then
-      log::success "Test suite ${testDirectory##*/} passed."
+      log::success "Test suite ${testDirectoryName} passed."
     else
-      log::error "Test suite ${testDirectory##*/} failed."
+      log::error "Test suite ${testDirectoryName} failed."
       failedTestSuites+=1
     fi
 

@@ -9,31 +9,36 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-CMD_ALL_COMMANDS=$'self\nhelp\nself build\nself config\nself mock1\nself mock2\nself mock3\nself release\nself setup\nself test\nself update'
+CMD_ALL_COMMANDS=$'self\nhelp\nself build\nself config\nself mock1\nself mock2\nself mock3\nself mock4\nself release\nself setup\nself test\nself update'
 CMD_ALL_COMMANDS_ARRAY='help'
 CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY='help            Show the help this program or of a specific command.'
-CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfConfig\nselfUpdate\nselfMock1\nselfMock2\nselfMock3\nselfRelease\nselfSetup\nselfTest'
+CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfConfig\nselfUpdate\nselfMock1\nselfMock2\nselfMock3\nselfMock4\nselfRelease\nselfSetup\nselfTest'
 CMD_ALL_FUNCTIONS_ARRAY='this'
 CMD_ALL_MENU_COMMANDS_ARRAY='self'
 CMD_ARGS_LAST_IS_ARRAY_selfConfig='false'
 CMD_ARGS_LAST_IS_ARRAY_selfMock1='false'
 CMD_ARGS_LAST_IS_ARRAY_selfMock2='true'
+CMD_ARGS_LAST_IS_ARRAY_selfMock4='false'
 CMD_ARGS_LAST_IS_ARRAY_showCommandHelp='true'
 CMD_ARGS_LAST_IS_ARRAY_this='true'
 CMD_ARGS_NAME_selfMock1='action'
 CMD_ARGS_NAME_selfMock2='firstArg'
+CMD_ARGS_NAME_selfMock4='firstArg'
 CMD_ARGS_NAME_showCommandHelp='commands'
 CMD_ARGS_NAME_this='commands'
 CMD_ARGS_NB_OPTIONAL_selfMock1='0'
 CMD_ARGS_NB_OPTIONAL_selfMock2='0'
+CMD_ARGS_NB_OPTIONAL_selfMock4='0'
 CMD_ARGS_NB_OPTIONAL_showCommandHelp='1'
 CMD_ARGS_NB_OPTIONAL_this='1'
 CMD_ARGUMENTS_DESCRIPTION_selfMock1=$'The action to perform.\nOne of the following options:\n\n- error\n- fail\n- exit\n- unknown-command\n- create-temp-files\n- logging-level\n- wait-indefinitely\n- show-help\n- print-raw-and-file\n'
 CMD_ARGUMENTS_DESCRIPTION_selfMock2='First argument.'
+CMD_ARGUMENTS_DESCRIPTION_selfMock4='First argument.'
 CMD_ARGUMENTS_DESCRIPTION_showCommandHelp=$'The name of the command to show the help for.\nIf not provided, show the help for the program.'
 CMD_ARGUMENTS_DESCRIPTION_this=$'The command or sub commands to execute.\nSee the commands section for more information.'
 CMD_ARGUMENTS_NAME_selfMock1='action'
 CMD_ARGUMENTS_NAME_selfMock2='firstArg'
+CMD_ARGUMENTS_NAME_selfMock4='firstArg'
 CMD_ARGUMENTS_NAME_showCommandHelp='commands?...'
 CMD_ARGUMENTS_NAME_this='commands?...'
 CMD_COMMANDS_DESCRIPTION_this='Show the help this program or of a specific command.'
@@ -43,6 +48,7 @@ CMD_COMMAND_selfConfig='self config'
 CMD_COMMAND_selfMock1='self mock1'
 CMD_COMMAND_selfMock2='self mock2'
 CMD_COMMAND_selfMock3='self mock3'
+CMD_COMMAND_selfMock4='self mock4'
 CMD_COMMAND_selfRelease='self release'
 CMD_COMMAND_selfSetup='self setup'
 CMD_COMMAND_selfTest='self test'
@@ -55,6 +61,7 @@ CMD_DESCRIPTION_selfConfig=$'Open the configuration file of Valet with your defa
 CMD_DESCRIPTION_selfMock1='A command that only for testing valet core functions.'
 CMD_DESCRIPTION_selfMock2=$'An example of description.\n\nYou can put any text here, it will be wrapped to fit the terminal width.\n\nYou can highlight some text as well.'
 CMD_DESCRIPTION_selfMock3=$'Before starting this command, valet will check if sudo is available.\n\nIf so, it will require the user to enter the sudo password and use sudo inside the command\n'
+CMD_DESCRIPTION_selfMock4='An example of description.'
 CMD_DESCRIPTION_selfRelease=$'Release a new version of valet.\n\nIt will:\n- creates a git tag and pushes it to the remote repository,\n- bump the version of valet,\n- commit the new version.'
 CMD_DESCRIPTION_selfSetup=$'The command run after the installation of Valet to setup the tool.\n\nAdjust the Valet configuration according to the user environment.\nLet the user know what to do next.\n'
 CMD_DESCRIPTION_selfTest='Test your valet custom commands using approval tests approach.'
@@ -72,6 +79,7 @@ CMD_FILETOSOURCE_selfConfig='valet.d/commands.d/self-config.sh'
 CMD_FILETOSOURCE_selfMock1='valet.d/commands.d/self-mock.sh'
 CMD_FILETOSOURCE_selfMock2='valet.d/commands.d/self-mock.sh'
 CMD_FILETOSOURCE_selfMock3='valet.d/commands.d/self-mock.sh'
+CMD_FILETOSOURCE_selfMock4='valet.d/commands.d/self-mock.sh'
 CMD_FILETOSOURCE_selfRelease='valet.d/commands.d/self-release.sh'
 CMD_FILETOSOURCE_selfSetup='valet.d/commands.d/self-setup.sh'
 CMD_FILETOSOURCE_selfTest='valet.d/commands.d/self-test.sh'
@@ -86,6 +94,7 @@ CMD_FUNCTION_NAME_self_config='selfConfig'
 CMD_FUNCTION_NAME_self_mock1='selfMock1'
 CMD_FUNCTION_NAME_self_mock2='selfMock2'
 CMD_FUNCTION_NAME_self_mock3='selfMock3'
+CMD_FUNCTION_NAME_self_mock4='selfMock4'
 CMD_FUNCTION_NAME_self_release='selfRelease'
 CMD_FUNCTION_NAME_self_setup='selfSetup'
 CMD_FUNCTION_NAME_self_test='selfTest'
@@ -94,6 +103,7 @@ CMD_HIDEINMENU_selfConfig='true'
 CMD_HIDEINMENU_selfMock1='true'
 CMD_HIDEINMENU_selfMock2='true'
 CMD_HIDEINMENU_selfMock3='true'
+CMD_HIDEINMENU_selfMock4='true'
 CMD_HIDEINMENU_selfRelease='true'
 CMD_HIDEINMENU_selfSetup='true'
 CMD_MAX_COMMAND_WIDTH='12'
@@ -104,6 +114,7 @@ CMD_OPTIONS_DESCRIPTION_selfConfig=$'Create the configuration file if it does no
 CMD_OPTIONS_DESCRIPTION_selfMock1='Display the help for this command.'
 CMD_OPTIONS_DESCRIPTION_selfMock2='First option.'
 CMD_OPTIONS_DESCRIPTION_selfMock3='Display the help for this command.'
+CMD_OPTIONS_DESCRIPTION_selfMock4='Display the help for this command.'
 CMD_OPTIONS_DESCRIPTION_selfRelease=$'The token necessary to create the release on GitHub and upload artifacts.\nThis option can be set by exporting the variable VALET_GITHUB_RELEASE_TOKEN=\'<token>\'.'
 CMD_OPTIONS_DESCRIPTION_selfSetup='Display the help for this command.'
 CMD_OPTIONS_DESCRIPTION_selfTest=$'The path to your valet directory.\n\nEach sub directory named .tests.d will be considered as a test directory containing a test.sh file.\nThis option can be set by exporting the variable VALET_USER_DIRECTORY=\'<path>\'.'
@@ -116,6 +127,7 @@ CMD_OPTIONS_NAME_selfConfig='--no-edit'
 CMD_OPTIONS_NAME_selfMock1='-h, --help'
 CMD_OPTIONS_NAME_selfMock2='-o, --option1'
 CMD_OPTIONS_NAME_selfMock3='-h, --help'
+CMD_OPTIONS_NAME_selfMock4='-h, --help'
 CMD_OPTIONS_NAME_selfRelease='-t, --github-release-token <token>'
 CMD_OPTIONS_NAME_selfSetup='-h, --help'
 CMD_OPTIONS_NAME_selfTest='-d, --user-directory <path>'
@@ -127,6 +139,7 @@ CMD_OPTS_HAS_VALUE_selfConfig='false'
 CMD_OPTS_HAS_VALUE_selfMock1='false'
 CMD_OPTS_HAS_VALUE_selfMock2='false'
 CMD_OPTS_HAS_VALUE_selfMock3='false'
+CMD_OPTS_HAS_VALUE_selfMock4='false'
 CMD_OPTS_HAS_VALUE_selfRelease='true'
 CMD_OPTS_HAS_VALUE_selfSetup='false'
 CMD_OPTS_HAS_VALUE_selfTest='true'
@@ -138,6 +151,7 @@ CMD_OPTS_NAME_SC_selfConfig='VALET_NO_EDIT'
 CMD_OPTS_NAME_SC_selfMock1=''
 CMD_OPTS_NAME_SC_selfMock2=''
 CMD_OPTS_NAME_SC_selfMock3=''
+CMD_OPTS_NAME_SC_selfMock4=''
 CMD_OPTS_NAME_SC_selfRelease='VALET_GITHUB_RELEASE_TOKEN'
 CMD_OPTS_NAME_SC_selfSetup=''
 CMD_OPTS_NAME_SC_selfTest='VALET_USER_DIRECTORY'
@@ -150,6 +164,7 @@ CMD_OPTS_NAME_selfConfig='noEdit'
 CMD_OPTS_NAME_selfMock1='help'
 CMD_OPTS_NAME_selfMock2='option1'
 CMD_OPTS_NAME_selfMock3='help'
+CMD_OPTS_NAME_selfMock4='help'
 CMD_OPTS_NAME_selfRelease='githubReleaseToken'
 CMD_OPTS_NAME_selfSetup='help'
 CMD_OPTS_NAME_selfTest='userDirectory'
@@ -162,6 +177,7 @@ CMD_OPTS_selfConfig='--no-edit'
 CMD_OPTS_selfMock1='-h --help'
 CMD_OPTS_selfMock2='-o --option1'
 CMD_OPTS_selfMock3='-h --help'
+CMD_OPTS_selfMock4='-h --help'
 CMD_OPTS_selfRelease='-t --github-release-token'
 CMD_OPTS_selfSetup='-h --help'
 CMD_OPTS_selfTest='-d --user-directory'
@@ -173,6 +189,7 @@ CMD_SHORT_DESCRIPTION_selfConfig='Open the configuration file of Valet with your
 CMD_SHORT_DESCRIPTION_selfMock1='A command that only for testing valet core functions.'
 CMD_SHORT_DESCRIPTION_selfMock2='A command that only for testing valet core functions.'
 CMD_SHORT_DESCRIPTION_selfMock3='A command that only for testing valet core functions.'
+CMD_SHORT_DESCRIPTION_selfMock4='A command that only for testing valet core functions.'
 CMD_SHORT_DESCRIPTION_selfRelease='Release a new version of valet.'
 CMD_SHORT_DESCRIPTION_selfSetup='The command run after the installation of Valet to setup the tool.'
 CMD_SHORT_DESCRIPTION_selfTest='Test your valet custom commands.'
@@ -201,6 +218,7 @@ INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-
 INFO                              ├── ⌜self mock1⌝.
 INFO                              ├── ⌜self mock2⌝.
 INFO                              ├── ⌜self mock3⌝.
+INFO                              ├── ⌜self mock4⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-release.sh⌝.
 INFO                              ├── ⌜self release⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-setup.sh⌝.
@@ -209,9 +227,9 @@ INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-
 INFO                              ├── ⌜self test⌝.
 INFO     == Summary of the commands ==
 
-- Number of variables declared: ⌜171⌝.
-- Number of functions: ⌜11⌝.
-- Number of commands: ⌜10⌝.
+- Number of variables declared: ⌜188⌝.
+- Number of functions: ⌜12⌝.
+- Number of commands: ⌜11⌝.
 - Maximum sub command level: ⌜1⌝.
 
 == List of all the commands ==
@@ -227,6 +245,7 @@ self config     Open the configuration file of Valet with your default editor.
 self mock1      A command that only for testing valet core functions.
 self mock2      A command that only for testing valet core functions.
 self mock3      A command that only for testing valet core functions.
+self mock4      A command that only for testing valet core functions.
 self release    Release a new version of valet.
 self setup      The command run after the installation of Valet to setup the tool.
 

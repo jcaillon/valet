@@ -809,6 +809,8 @@ COMMANDS
       A command that only for testing valet core functions.
   self mock3
       A command that only for testing valet core functions.
+  self mock4
+      A command that only for testing valet core functions.
   self release
       Release a new version of valet.
   self setup

@@ -24,10 +24,14 @@ function testMain::parseFunctionArguments() {
 
   echo "→ main::parseFunctionArguments selfMock2 -this arg more1"
   main::parseFunctionArguments selfMock2 -this arg more1 && echo "${RETURNED_VALUE}"
-  echo
 
+  echo
   echo "→ main::parseFunctionArguments selfMock2 --this-is-option2 --option1 arg more1"
   main::parseFunctionArguments selfMock2 --this-is-option2 --option1 arg more1 && echo "${RETURNED_VALUE}"
+
+  echo
+  echo "→ main::parseFunctionArguments selfMock4 arg1 arg2"
+  main::parseFunctionArguments selfMock4 arg1 arg2 && echo "${RETURNED_VALUE}"
 
   endTest "Testing main::parseFunctionArguments" 0
 }
