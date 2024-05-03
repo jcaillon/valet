@@ -291,7 +291,7 @@ function main::getHelpText() {
   local type=${1:-function}
   local name="${2:-this}"
   local noColor="${3:-}"
-  local maxColumns="${4:-180}"
+  local maxColumns="${4:-${GLOBAL_COLUMNS}}"
 
   if [[ -z ${noColor:-} && ${VALET_CONFIG_ENABLE_COLORS:-false} != true ]]; then
     noColor=true

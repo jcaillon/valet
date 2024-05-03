@@ -132,7 +132,7 @@ function system::exportTerminalSize() {
     :
     :
   )
-  GLOBAL_COLUMNS="${COLUMNS:-180}"
+  GLOBAL_COLUMNS="${COLUMNS:-160}"
   GLOBAL_LINES="${LINES:-30}"
   shopt -u checkwinsize
 }
@@ -1075,7 +1075,7 @@ function core::getLocalStateDirectory() {
 # Usage:
 #   core::getUserDirectory && local directory="${RETURNED_VALUE}"
 function core::getUserDirectory() {
-  RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"
+  RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/valet.d}"
 }
 
 #===============================================================

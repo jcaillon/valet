@@ -237,7 +237,7 @@ interactive::displayAnswer() {
 interactive::displayDialogBox() {
   local speaker="${1}"
   local text="${2}"
-  local dialogMaxWidth="${3:-180}"
+  local dialogMaxWidth="${3:-${GLOBAL_COLUMNS}}"
 
   local -i maxWidth=$((GLOBAL_COLUMNS - 5))
   if [[ ${#text} -lt ${maxWidth} ]]; then
