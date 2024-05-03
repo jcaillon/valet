@@ -191,6 +191,20 @@ function string::trimAll() {
   set +f
 }
 
+# Trim leading and trailing whitespaces.
+#
+# $1: The string to trim.
+#
+# Returns:
+#   RETURNED_VALUE: The trimmed string.
+#
+# Usage:
+#   string::trim "   example string    " && local trimmedString="${RETURNED_VALUE}"
+function string::trim() {
+  RETURNED_VALUE="${1#"${1%%[![:space:]]*}"}"
+  RETURNED_VALUE="${RETURNED_VALUE%"${RETURNED_VALUE##*[![:space:]]}"}"
+}
+
 # Find the first index of a string within another string.
 #
 # $1: the string in which to search

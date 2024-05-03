@@ -136,19 +136,19 @@ function testString::indexOf() {
 # This function test the string::extractBetween function
 function testString::extractBetween() {
   echo "→ string::extractBetween 'hello' 'e' 'o'"
-  string::extractBetween 'hello' 'e' 'o' && echo "ll=⌈${RETURNED_VALUE}⌉"
+  string::extractBetween 'hello' 'e' 'o' && echo "ll=⌜${RETURNED_VALUE}⌝"
   echo
   echo "→ string::extractBetween 'hello' '' 'l'"
-  string::extractBetween 'hello' '' 'l' && echo "he=⌈${RETURNED_VALUE}⌉"
+  string::extractBetween 'hello' '' 'l' && echo "he=⌜${RETURNED_VALUE}⌝"
   echo
   echo "→ string::extractBetween 'hello' 'e' ''"
-  string::extractBetween 'hello' 'e' '' && echo "llo=⌈${RETURNED_VALUE}⌉"
+  string::extractBetween 'hello' 'e' '' && echo "llo=⌜${RETURNED_VALUE}⌝"
   echo
   echo "→ string::extractBetween 'hello' 'a' ''"
-  string::extractBetween 'hello' 'a' '' && echo "=⌈${RETURNED_VALUE}⌉"
+  string::extractBetween 'hello' 'a' '' && echo "=⌜${RETURNED_VALUE}⌝"
   echo
   echo "→ string::extractBetween 'hello' 'h' 'a'"
-  string::extractBetween 'hello' 'h' 'a' && echo "=⌈${RETURNED_VALUE}⌉"
+  string::extractBetween 'hello' 'h' 'a' && echo "=⌜${RETURNED_VALUE}⌝"
 
   local multilinetext="1 line one
 2 line two
@@ -158,10 +158,10 @@ function testString::extractBetween() {
   echo "multilinetext=\"${multilinetext}\""
   echo
   echo "→ string::extractBetween \"\${multilinetext}\" \"one\"\$'\n' '4'"
-  string::extractBetween "${multilinetext}" "one"$'\n' '4' && echo "line 2 and 3=⌈${RETURNED_VALUE}⌉"
+  string::extractBetween "${multilinetext}" "one"$'\n' '4' && echo "line 2 and 3=⌜${RETURNED_VALUE}⌝"
   echo
   echo "→ string::extractBetween \"\${multilinetext}\" \"2 \" \$'\n'"
-  string::extractBetween "${multilinetext}" "2 " $'\n' && echo "line two=⌈${RETURNED_VALUE}⌉"
+  string::extractBetween "${multilinetext}" "2 " $'\n' && echo "line two=⌜${RETURNED_VALUE}⌝"
 
   endTest "Testing string::extractBetween function" 0
 }
@@ -196,6 +196,26 @@ function testString::regexGetFirst() {
   endTest "Testing string::regexGetFirst function" 0
 }
 
+function testString::trim() {
+  echo "→ string::trim '  hello  world  '"
+  string::trim '  hello  world  ' && echo "hello  world=⌜${RETURNED_VALUE}⌝"
+
+  echo
+  echo "→ string::trim 'hello  '"
+  string::trim 'hello  ' ' ' && echo "hello=⌜${RETURNED_VALUE}⌝"
+
+  echo
+  echo "→ string::trim '  hello'"
+  string::trim '  hello' && echo "hello=⌜${RETURNED_VALUE}⌝"
+
+  echo
+  # shellcheck disable=SC2028
+  echo "→ string::trim $'\n'$'\t''  hello'$'\n'$'\t'' '"
+  string::trim $'\n'$'\t''  hello'$'\n'$'\t'' ' && echo "hello=⌜${RETURNED_VALUE}⌝"
+
+  endTest "Testing string::trim function" 0
+}
+
 function main() {
   testString::bumpSemanticVersion
   testString::kebabCaseToSnakeCase
@@ -208,6 +228,7 @@ function main() {
   testString::count
   testString::split
   testString::regexGetFirst
+  testString::trim
 }
 
 main

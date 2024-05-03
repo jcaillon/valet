@@ -144,19 +144,19 @@ Exit code: `0`
 
 ```plaintext
 → string::extractBetween 'hello' 'e' 'o'
-ll=⌈ll⌉
+ll=⌜ll⌝
 
 → string::extractBetween 'hello' '' 'l'
-he=⌈he⌉
+he=⌜he⌝
 
 → string::extractBetween 'hello' 'e' ''
-llo=⌈llo⌉
+llo=⌜llo⌝
 
 → string::extractBetween 'hello' 'a' ''
-=⌈⌉
+=⌜⌝
 
 → string::extractBetween 'hello' 'h' 'a'
-=⌈⌉
+=⌜⌝
 
 multilinetext="1 line one
 2 line two
@@ -164,12 +164,12 @@ multilinetext="1 line one
 4 line four"
 
 → string::extractBetween "${multilinetext}" "one"$'\n' '4'
-line 2 and 3=⌈2 line two
+line 2 and 3=⌜2 line two
 3 line three
-⌉
+⌝
 
 → string::extractBetween "${multilinetext}" "2 " $'\n'
-line two=⌈line two⌉
+line two=⌜line two⌝
 ```
 
 ### Testing string::count function
@@ -213,5 +213,25 @@ Exit code: `0`
 ```plaintext
 → string::regexGetFirst 'name: julien' 'name:[[:space:]]*([[:alnum:]]*)'
 julien
+```
+
+### Testing string::trim function
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::trim '  hello  world  '
+hello  world=⌜hello  world⌝
+
+→ string::trim 'hello  '
+hello=⌜hello⌝
+
+→ string::trim '  hello'
+hello=⌜hello⌝
+
+→ string::trim $'\n'$'\t''  hello'$'\n'$'\t'' '
+hello=⌜hello⌝
 ```
 
