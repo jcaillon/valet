@@ -344,6 +344,27 @@ function log::createPrintFunction() {
     printf "%s" "${toPrint:-}" 1>>'"${VALET_CONFIG_LOG_FD}"
   fi
 
+  # check if we need to additionally output the logs to a file
+  if [[ -n ${VALET_CONFIG_LOG_TO_DIRECTORY:-} ]]; then
+    # compute the name of the output file
+    local logFile
+    if [[ -z ${VALET_CONFIG_LOG_FILENAME_PATTERN:-} ]]; then
+      printf -v logFile "%s%(%F_%Hh%Mm%Ss)T%s" "valet-" "${EPOCHSECONDS}" ".log"
+    else
+      eval "${VALET_CONFIG_LOG_FILENAME_PATTERN}"
+    fi
+    if [[ -n ${logFile:-} ]]; then
+      if [[ ! -d "${VALET_CONFIG_LOG_TO_DIRECTORY}" ]]; then
+        mkdir -p "${VALET_CONFIG_LOG_TO_DIRECTORY}" 1>/dev/null
+      fi
+      # append the log to the file
+      printStatement+='
+      printf "'"${printfFormat}"'" '"${printfArguments}"' 1>>'"${VALET_CONFIG_LOG_TO_DIRECTORY%/}/${logFile}"
+      standardPrintStatement+='
+      printf "%s" "${toPrint:-}" 1>>'"${VALET_CONFIG_LOG_TO_DIRECTORY%/}/${logFile}"
+    fi
+  fi
+
   # string with the number of spaces necessary to align with other log messages
   local messageLeftPadding
   messageLeftPadding=""
@@ -482,7 +503,7 @@ function log::error() {
 # Usage:
 #   log::warning "This is a warning message."
 function log::warning() {
-  if  ((${LOG_LEVEL_INT:-1} > 3)); then
+  if ((${LOG_LEVEL_INT:-1} > 3)); then
     return 0
   fi
   log::print "WARNING" "${VALET_CONFIG_ICON_WARNING:-$'\uf071'}" "WARNING" "$@"
@@ -496,7 +517,7 @@ function log::warning() {
 # Usage:
 #   log::success "This is a success message."
 function log::success() {
-  if  ((${LOG_LEVEL_INT:-1} > 2)); then
+  if ((${LOG_LEVEL_INT:-1} > 2)); then
     return 0
   fi
   log::print "SUCCESS" "${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}" "SUCCESS" "$@"
@@ -510,7 +531,7 @@ function log::success() {
 # Usage:
 #   log::info "This is an info message."
 function log::info() {
-  if  ((${LOG_LEVEL_INT:-1} > 1)); then
+  if ((${LOG_LEVEL_INT:-1} > 1)); then
     return 0
   fi
   log::print "INFO" "${VALET_CONFIG_ICON_INFO:-$'\uf05a'}" "INFO" "$@"
@@ -524,7 +545,7 @@ function log::info() {
 # Usage:
 #   log::debug "This is a debug message."
 function log::debug() {
-  if  ((${LOG_LEVEL_INT:-1} > 0)); then
+  if ((${LOG_LEVEL_INT:-1} > 0)); then
     return 0
   fi
   log::print "DEBUG" "${VALET_CONFIG_ICON_DEBUG:-$'\uf188'}" "DEBUG" "$@"
@@ -595,11 +616,11 @@ function log::printCallStack() {
   for ((i = levelToSkip; i < stackSize; i++)); do
     func="${FUNCNAME[${i}]}"
     if [[ -z ${func} ]]; then
-      func=ROOT;
+      func=ROOT
     else
       func="${func}()"
     fi
-    if (( i > 0 )); then
+    if ((i > 0)); then
       linen="${BASH_LINENO[$((i - 1))]}"
     fi
     src="${BASH_SOURCE[${i}]}"
@@ -610,7 +631,7 @@ function log::printCallStack() {
     elif [[ -f "${src/#.\//"${GLOBAL_VALET_HOME}"\/}" ]]; then
       src="${src/#.\//"${GLOBAL_VALET_HOME}"\/}"
     fi
-    if (( i == stackSize - 1)); then
+    if ((i == stackSize - 1)); then
       treeString="└─"
     fi
     log::printString "${treeString} in ${func} at ${src}:${linen}" "│  "

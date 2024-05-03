@@ -107,6 +107,17 @@ VALET_CONFIG_ENABLE_LOG_TIMESTAMP="${VALET_CONFIG_ENABLE_LOG_TIMESTAMP:-}"
 # The file descriptor to use for the logs (default to 2 to output to stderr).
 VALET_CONFIG_LOG_FD="${VALET_CONFIG_LOG_FD:-}"
 
+# A path to directory in which we will create 1 log file per valet execution, which
+# will contain the valet logs.
+VALET_CONFIG_LOG_TO_DIRECTORY="${VALET_CONFIG_LOG_TO_DIRECTORY:-}"
+
+# A string that will be evaluated to set a variable 'logFile' which represents
+# the name of the file in which to write the logs.
+# Only used if VALET_CONFIG_LOG_TO_DIRECTORY is set.
+# The default is equivalent to setting this string to:
+# printf -v logFile '%s%(%F_%Hh%Mm%Ss)T%s' 'valet-' ${EPOCHSECONDS} '.log'
+VALET_CONFIG_LOG_FILENAME_PATTERN="${VALET_CONFIG_LOG_FILENAME_PATTERN:-}"
+
 # -----------
 # Log icons configuration
 # -----------
@@ -341,6 +352,17 @@ VALET_CONFIG_ENABLE_LOG_TIMESTAMP="${VALET_CONFIG_ENABLE_LOG_TIMESTAMP:-true}"
 
 # The file descriptor to use for the logs (default to 2 to output to stderr).
 VALET_CONFIG_LOG_FD="${VALET_CONFIG_LOG_FD:-}"
+
+# A path to directory in which we will create 1 log file per valet execution, which
+# will contain the valet logs.
+VALET_CONFIG_LOG_TO_DIRECTORY="${VALET_CONFIG_LOG_TO_DIRECTORY:-}"
+
+# A string that will be evaluated to set a variable 'logFile' which represents
+# the name of the file in which to write the logs.
+# Only used if VALET_CONFIG_LOG_TO_DIRECTORY is set.
+# The default is equivalent to setting this string to:
+# printf -v logFile '%s%(%F_%Hh%Mm%Ss)T%s' 'valet-' ${EPOCHSECONDS} '.log'
+VALET_CONFIG_LOG_FILENAME_PATTERN="${VALET_CONFIG_LOG_FILENAME_PATTERN:-}"
 
 # -----------
 # Log icons configuration

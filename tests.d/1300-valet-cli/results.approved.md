@@ -677,6 +677,91 @@ INFO     This is to test the printFile function from a string.
               ░ d upon is being carried out.
 ```
 
+### Testing that we can output the logs to a file additionally to console
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d2-0 VALET_CONFIG_DISABLE_LOG_TIME=true valet self mock1 logging-level
+
+→ io::countArgs /tmp/valet.d/d2-0/*
+1
+```
+
+**Error** output:
+
+```log
+TRACE    This is an error trace message which is always displayed.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its 
+         donation. You are not important because of how long you live, you are important because of how effective you 
+         live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
+         Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the 
+         policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+         With a second line.
+```
+
+### Testing that we can output the logs to a specific file name additionally to console
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ VALET_CONFIG_LOG_FILENAME_PATTERN='logFile=test.log' VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d2-0 VALET_CONFIG_DISABLE_LOG_TIME=true valet self mock1 logging-level
+
+→ cat /tmp/valet.d/d2-0/test.log
+TRACE    This is an error trace message which is always displayed.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its 
+         donation. You are not important because of how long you live, you are important because of how effective you 
+         live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
+         Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the 
+         policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+         With a second line.
+
+```
+
+**Error** output:
+
+```log
+TRACE    This is an error trace message which is always displayed.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its 
+         donation. You are not important because of how long you live, you are important because of how effective you 
+         live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
+         Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the 
+         policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+         With a second line.
+```
+
+### Testing that we can output the logs to a file directly instead of the console err stream
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ VALET_CONFIG_LOG_FD=/tmp/valet.d/d2-0/test2.log VALET_CONFIG_DISABLE_LOG_TIME=true valet self mock1 logging-level
+
+→ cat /tmp/valet.d/d2-0/test2.log
+TRACE    This is an error trace message which is always displayed.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its 
+         donation. You are not important because of how long you live, you are important because of how effective you 
+         live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. 
+         Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the 
+         policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+         With a second line.
+
+```
+
 ## Test script 06.misc
 
 ### Testing version option
@@ -744,9 +829,9 @@ Exit code: `1`
 **Error** output:
 
 ```log
-INFO     The valet user directory ⌜/tmp/valet.d/d2-0/non-existing⌝ does not contain a built ⌜commands⌝ file.
+INFO     The valet user directory ⌜/tmp/valet.d/d3-0/non-existing⌝ does not contain a built ⌜commands⌝ file.
 Now building it using ⌜valet self build⌝ command.
-WARNING  Skipping user directory ⌜/tmp/valet.d/d2-0/non-existing⌝ because it does not exist.
+WARNING  Skipping user directory ⌜/tmp/valet.d/d3-0/non-existing⌝ because it does not exist.
 TRACE    This is an error trace message which is always displayed.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 SUCCESS  This is a success message.

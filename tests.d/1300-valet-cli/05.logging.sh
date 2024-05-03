@@ -66,9 +66,40 @@ function resetLogOptions() {
   export GLOBAL_COLUMNS=120
 }
 
+function testFileLogging() {
+  io::createTempDirectory
+  logDirectory="${RETURNED_VALUE}"
+
+  echo "→ VALET_CONFIG_LOG_TO_DIRECTORY=${logDirectory} VALET_CONFIG_DISABLE_LOG_TIME=true valet self mock1 logging-level"
+  resetLogOptions
+  (VALET_CONFIG_LOG_TO_DIRECTORY="${logDirectory}" VALET_CONFIG_DISABLE_LOG_TIME=true "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level)
+  echo
+  echo "→ io::countArgs ${logDirectory}/*"
+  io::countArgs "${logDirectory}"/*
+  echo "${RETURNED_VALUE}"
+  endTest "Testing that we can output the logs to a file additionally to console" 0
+
+  echo "→ VALET_CONFIG_LOG_FILENAME_PATTERN='logFile=test.log' VALET_CONFIG_LOG_TO_DIRECTORY=${logDirectory} VALET_CONFIG_DISABLE_LOG_TIME=true valet self mock1 logging-level"
+  resetLogOptions
+  (VALET_CONFIG_LOG_FILENAME_PATTERN='logFile=test.log' VALET_CONFIG_LOG_TO_DIRECTORY="${logDirectory}" VALET_CONFIG_DISABLE_LOG_TIME=true "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level)
+  echo
+  echo "→ cat ${logDirectory}/test.log"
+  io::cat "${logDirectory}/test.log"
+  endTest "Testing that we can output the logs to a specific file name additionally to console" 0
+
+  echo "→ VALET_CONFIG_LOG_FD=${logDirectory}/test2.log VALET_CONFIG_DISABLE_LOG_TIME=true valet self mock1 logging-level"
+  resetLogOptions
+  (VALET_CONFIG_LOG_FD="${logDirectory}/test2.log" VALET_CONFIG_DISABLE_LOG_TIME=true  "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level)
+  echo
+  echo "→ cat ${logDirectory}/test2.log"
+  io::cat "${logDirectory}/test2.log"
+  endTest "Testing that we can output the logs to a file directly instead of the console err stream" 0
+}
+
 function main() {
   testLogging
   testLog::printRawAndFile
+  testFileLogging
 }
 
 main
