@@ -95,9 +95,9 @@ function createRelease() {
 
     # check that the git workarea is clean
     log::debug "Checking if the workarea is clean"
-    io::invoke3 false 0 git update-index --really-refresh 1>/dev/null || :
+    io::invoke2 false git update-index --really-refresh 1>/dev/null || :
     local -i exitCode=0
-    io::invoke3 false 0 git diff-index --quiet HEAD || exitCode=$?
+    io::invoke2 false git diff-index --quiet HEAD || exitCode=$?
     if [[ exitCode -ne 0 ]]; then
       core::fail "The workarea is not clean, please commit your changes before releasing a new version."
     fi

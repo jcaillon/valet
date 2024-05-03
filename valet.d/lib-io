@@ -43,22 +43,31 @@ function io::toAbsolutePath() {
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to temporary files.
 #
-# $1: true/false to indicate if the function should fail in case the execution fails
+# $1: true/false to indicate if the function should fail in case the execution fails.
+#     If true and the execution fails, the script will exit.
 # $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
 # $3: true/false to indicate if the 4th argument represents a file path or directly the content for stdin
 # $4: the stdin (can be empty)
-# $5: the executable to io::invoke
+# $5: the executable or function to execute
 # $6+: the arguments to pass to the executable
 #
 # Returns:
 #   The exit code of the function is the exit code of the executable.
-#   The stdout file of the executable in the global variable RETURNED_VALUE.
-#   The stderr file of the executable in the global variable RETURNED_VALUE2.
+#   The file path containing the stdout of the executable in the global variable RETURNED_VALUE.
+#   The file path containing the stderr of the executable in the global variable RETURNED_VALUE2.
 #
 # Usage:
 #   io::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
 #   stdoutFilePath="${RETURNED_VALUE}"
 #   stderrFilePath="${RETURNED_VALUE2}"
+#
+# Notes:
+#   In windows, this is tremendously faster to do (or any other invoke flavor):
+#   io::invoke5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"
+#   than doing:
+#   myvar="$(mycommand)".
+#   On linux, it is slighly faster (but it might be slower if you don't have SSD?).
+#   On linux, you can use a tmpfs directory for massive gains over subshells.
 function io::invoke5() {
   local failIfFails acceptableErrorCodes stdInFromFile stdIn executable
   failIfFails="${1}"
@@ -152,39 +161,15 @@ function io::invoke5() {
 }
 
 # This function call an executable and its arguments.
-# It redirects the stdout and stderr to temporary files.
-#
-# $1: true/false to indicate if the function should fail in case the execution fails
-# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
-# $3: the executable to io::invoke
-# $4+: the arguments to pass to the executable
-#
-# Returns:
-#   The exit code of the function is the exit code of the executable.
-#   The stdout file of the executable in the global variable RETURNED_VALUE.
-#   The stderr file of the executable in the global variable RETURNED_VALUE2.
-#
-# Usage:
-#   io::invoke3 "false" "false" "stuff" "--height=10" || core::fail "stuff failed."
-#   stdoutFilePath="${RETURNED_VALUE}"
-#   stderrFilePath="${RETURNED_VALUE2}"
-function io::invoke3() {
-  local failIfFails acceptableErrorCodes executable
-  failIfFails="${1}"
-  acceptableErrorCodes="${2}"
-  shift 2
-
-  io::invoke5 "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
-}
-
-# This function call an executable and its arguments.
 # It redirects the stdout and stderr to environment variables.
+# It calls invoke5 and reads the files to set the environment variables.
 #
-# $1: true/false to indicate if the function should fail in case the execution fails
+# $1: true/false to indicate if the function should fail in case the execution fails.
+#     If true and the execution fails, the script will exit.
 # $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
 # $3: true/false to indicate if the 4th argument represents a file path or directly the content for stdin
 # $4: the stdin (can be empty)
-# $5: the executable to io::invoke
+# $5: the executable or function to execute
 # $6+: the arguments to pass to the executable
 #
 # Returns:
@@ -196,6 +181,9 @@ function io::invoke3() {
 #   io::invoke5var "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
 #   stdout="${RETURNED_VALUE}"
 #   stderr="${RETURNED_VALUE2}"
+#
+# Notes:
+#   See io::invoke5 for more information.
 function io::invoke5var() {
   local -i exitCode=0
   io::invoke5 "$@" || exitCode=$?
@@ -209,12 +197,102 @@ function io::invoke5var() {
   return ${exitCode}
 }
 
+
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to temporary files.
+# Equivalent to io::invoke5 "${1}" 0 "" "" "${@:2}"
+#
+# $1: true/false to indicate if the function should fail in case the execution fails.
+#     If true and the execution fails, the script will exit.
+# $2: the executable or function to execute
+# $3+: the arguments to pass to the executable
+#
+# Returns:
+#   The exit code of the function is the exit code of the executable.
+#   The stdout file of the executable in the global variable RETURNED_VALUE.
+#   The stderr file of the executable in the global variable RETURNED_VALUE2.
+#
+# Usage:
+#   io::invoke2 false git status || core::fail "status failed."
+#   stdoutFilePath="${RETURNED_VALUE}"
+#   stderrFilePath="${RETURNED_VALUE2}"
+#
+# Notes:
+#   See io::invoke5 for more information.
+function io::invoke2() {
+  local failIfFails="${1}"
+  shift
+  io::invoke5 "${failIfFails}" 0 '' '' "$@" || return $?
+}
+
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to environment variables.
+# Equivalent to io::invoke5var "${1}" 0 "" "" "${@:2}"
 #
-# $1: true/false to indicate if the function should fail in case the execution fails
-# $2: the acceptable error codes, comma separated (if the error code is matched, then set the output error code to 0)
-# $3: the executable to io::invoke
+# $1: true/false to indicate if the function should fail in case the execution fails.
+#     If true and the execution fails, the script will exit.
+# $2: the executable or function to execute
+# $3+: the arguments to pass to the executable
+#
+# Returns:
+#   The exit code of the function is the exit code of the executable.
+#   The content of stdout in the global variable RETURNED_VALUE.
+#   The content of stderr in the global variable RETURNED_VALUE2.
+#
+# Usage:
+#   io::invoke2 false git status || core::fail "status failed."
+#   stdout="${RETURNED_VALUE}"
+#   stderr="${RETURNED_VALUE2}"
+#
+# Notes:
+#   See io::invoke5 for more information.
+function io::invoke2var() {
+  local failIfFails="${1}"
+  shift
+  io::invoke5var "${failIfFails}" 0 '' '' "$@" || return $?
+}
+
+# This function call an executable and its arguments and input a given string as stdin.
+# It redirects the stdout and stderr to temporary files.
+# Equivalent to io::invoke5 "${1}" 0 false "${2}" "${@:3}"
+#
+# $1: true/false to indicate if the function should fail in case the execution fails.
+#     If true and the execution fails, the script will exit.
+# $2: the stdin to pass to the executable
+# $3: the executable or function to execute
+# $4+: the arguments to pass to the executable
+#
+# Returns:
+#   The exit code of the function is the exit code of the executable.
+#   The stdout file of the executable in the global variable RETURNED_VALUE.
+#   The stderr file of the executable in the global variable RETURNED_VALUE2.
+#
+# Usage:
+#   io::invoke2piped true "key: val" yq -o json -p yaml -
+#   stdoutFilePath="${RETURNED_VALUE}"
+#   stderrFilePath="${RETURNED_VALUE2}"
+#
+# Notes:
+#   This is the equivalent of:
+#   myvar="$(printf '%s\n' "mystring" | mycommand)"
+#   But without using a subshell.
+#
+#   See io::invoke5 for more information.
+function io::invoke2piped() {
+  local failIfFails="${1}"
+  local stdIn="${2}"
+  shift 2
+  io::invoke5 "${failIfFails}" 0 false "${stdIn}" "$@" || return $?
+}
+
+# This function call an executable and its arguments and input a given string as stdin.
+# It redirects the stdout and stderr to environment variables.
+# Equivalent to io::invoke5var "${1}" 0 false "${2}" "${@:3}"
+#
+# $1: true/false to indicate if the function should fail in case the execution fails.
+#     If true and the execution fails, the script will exit.
+# $2: the stdin to pass to the executable
+# $3: the executable or function to execute
 # $4+: the arguments to pass to the executable
 #
 # Returns:
@@ -223,28 +301,29 @@ function io::invoke5var() {
 #   The content of stderr in the global variable RETURNED_VALUE2.
 #
 # Usage:
-#   io::invoke3var "false" "130,2" "stuff" "--height=10" || core::fail "stuff failed."
+#   io::invoke2pipedvar true "key: val" yq -o json -p yaml -
 #   stdout="${RETURNED_VALUE}"
 #   stderr="${RETURNED_VALUE2}"
-function io::invoke3var() {
-  local failIfFails acceptableErrorCodes executable
-  failIfFails="${1}"
-  acceptableErrorCodes="${2}"
+#
+# Notes:
+#   This is the equivalent of:
+#   myvar="$(printf '%s\n' "mystring" | mycommand)"
+#   But without using a subshell.
+#
+#   See io::invoke5 for more information.
+function io::invoke2pipedvar() {
+  local failIfFails="${1}"
+  local stdIn="${2}"
   shift 2
-
-  io::invoke5var "${failIfFails}" "${acceptableErrorCodes}" "" "" "$@" || return $?
+  io::invoke5var "${failIfFails}" 0 false "${stdIn}" "$@" || return $?
 }
 
 # This function call an executable and its arguments.
 # If the execution fails, it will fail the script and show the std/err output.
 # Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
 #
-# In windows, this is tremendously faster to do
-# io::invoke mycommand && myvar="${RETURNED_VALUE}"
-# than doing:
-# myvar="$(mycommand)".
-# On linux, it is slighly faster (but it might be slower if you don't have SSD?).
-# On linux, you can use a tmpfs directory for massive gains over subshells.
+# It redirects the stdout and stderr to environment variables.
+# Equivalent to io::invoke5var true 0 '' '' "${@}"
 #
 # $@: the command and its arguments
 #
@@ -253,34 +332,12 @@ function io::invoke3var() {
 #  The content of stderr in the global variable RETURNED_VALUE2.
 #
 # Usage:
-#  io::invoke git add --all
+#   io::invoke git add --all
+#
+# Notes:
+#   See io::invoke5 for more information.
 function io::invoke() {
   io::invoke5var true 0 '' '' "$@"
-}
-
-# This function call an executable and its arguments and input a given string as stdin.
-# If the execution fails, it will fail the script and show the std/err output.
-# Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
-#
-# This is the equivalent of:
-# myvar="$(printf '%s\n' "mystring" | mycommand)"
-# In windows, this is tremendously faster that the example above.
-# On linux, it is slighly faster (but it might be slower if you don't have SSD?).
-# On linux, you can use a tmpfs directory for massive gains over subshells.
-#
-# $1: the stdin to pass to the executable
-# $2+: the command and its arguments
-#
-# Returns:
-#  The content of stdout in the global variable RETURNED_VALUE.
-#  The content of stderr in the global variable RETURNED_VALUE2.
-#
-# Usage:
-#  io::invoke git add --all
-function io::invokePiped() {
-  local stdIn="${1}"
-  shift
-  io::invoke5var true 0 false "${stdIn}" "$@"
 }
 
 # Reads the content of a file and returns it in the global variable RETURNED_VALUE.

@@ -287,14 +287,14 @@ TRACE    Fakeexec standard error stream:
 DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 ```
 
-### Testing io::invoke3, output to files
+### Testing io::invoke2, output to files
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ io::invoke3 false 0 fakeexec --option argument1 argument2
+→ io::invoke2 false fakeexec --option argument1 argument2
 io::invoke function ended with exit code ⌈0⌉.
 stdout from file:
 ⌈▶ called fakeexec --option argument1 argument2
@@ -305,14 +305,14 @@ stderr from file:
 
 ```
 
-### Testing io::invoke3var, output to var
+### Testing io::invoke2var, output to var
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ io::invoke3var false 0 fakeexec --option argument1 argument2
+→ io::invoke2var false fakeexec --option argument1 argument2
 io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
 ⌈▶ called fakeexec --option argument1 argument2
@@ -368,14 +368,33 @@ stderr from var:
 
 ```
 
-### Testing io::invokePiped, stdin as string, output to var
+### Testing io::invoke2piped, stdin as string, output to files
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ io::invokePiped 'this is an stdin' fakeexec --std-in --option argument1 argument2
+→ io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2
+io::invoke function ended with exit code ⌈0⌉.
+stdout from file:
+⌈▶ called fakeexec --std-in --option argument1 argument2
+▶ fakeexec input stream was:
+⌈this is an stdin
+⌉⌉
+stderr from file:
+⌈This is an error output from fakeexec⌉
+
+```
+
+### Testing io::invoke2pipedvar, stdin as string, output to vars
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::invoke2pipedvar true 'this is an stdin' fakeexec --std-in --option argument1 argument2
 io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
 ⌈▶ called fakeexec --std-in --option argument1 argument2

@@ -1075,7 +1075,7 @@ function core::getLocalStateDirectory() {
 # Usage:
 #   core::getUserDirectory && local directory="${RETURNED_VALUE}"
 function core::getUserDirectory() {
-  RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/valet.d}"
+  RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"
 }
 
 #===============================================================

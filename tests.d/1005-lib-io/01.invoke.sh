@@ -35,18 +35,18 @@ function testIo::invoke5() {
   endTest "Testing io::invoke5, with trace mode on" ${exitCode}
 }
 
-function testIo::invoke3() {
+function testIo::invoke2() {
   local -i exitCode
 
-  echo "→ io::invoke3 false 0 fakeexec --option argument1 argument2"
-  io::invoke3 false 0 fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
+  echo "→ io::invoke2 false fakeexec --option argument1 argument2"
+  io::invoke2 false fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} true
-  endTest "Testing io::invoke3, output to files" ${exitCode}
+  endTest "Testing io::invoke2, output to files" ${exitCode}
 
-  echo "→ io::invoke3var false 0 fakeexec --option argument1 argument2"
-  io::invoke3var false 0 fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
+  echo "→ io::invoke2var false fakeexec --option argument1 argument2"
+  io::invoke2var false fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} false
-  endTest "Testing io::invoke3var, output to var" ${exitCode}
+  endTest "Testing io::invoke2var, output to var" ${exitCode}
 }
 
 function testIo::invoke() {
@@ -63,13 +63,18 @@ function testIo::invoke() {
   endTest "Testing io::invoke, output to var" ${exitCode}
 }
 
-function testIo::invokePiped() {
+function testIo::invoke2piped() {
   local -i exitCode
 
-  echo "→ io::invokePiped 'this is an stdin' fakeexec --std-in --option argument1 argument2"
-  io::invokePiped 'this is an stdin' fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
+  echo "→ io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2"
+  io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
+  echoio::invokeOutput ${exitCode} true
+  endTest "Testing io::invoke2piped, stdin as string, output to files" ${exitCode}
+
+  echo "→ io::invoke2pipedvar true 'this is an stdin' fakeexec --std-in --option argument1 argument2"
+  io::invoke2pipedvar true 'this is an stdin' fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} false
-  endTest "Testing io::invokePiped, stdin as string, output to var" ${exitCode}
+  endTest "Testing io::invoke2pipedvar, stdin as string, output to vars" ${exitCode}
 }
 
 function echoio::invokeOutput() {
@@ -113,9 +118,9 @@ function fakeexec() {
 
 function main() {
   testIo::invoke5
-  testIo::invoke3
+  testIo::invoke2
   testIo::invoke
-  testIo::invokePiped
+  testIo::invoke2piped
 }
 
 main
