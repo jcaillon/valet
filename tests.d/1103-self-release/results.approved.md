@@ -17,7 +17,7 @@ Exit code: `0`
 ```log
 INFO     Dry run mode is enabled, no changes will be made.
 INFO     The current version of valet is: 1.2.3.
-▶ called io::invoke git tag --sort=committerdate --no-color
+▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
 INFO     The tag message is:
@@ -64,7 +64,7 @@ INFO     The current version of valet is: 1.2.3.
 ▶ called io::invoke git commit -m :rocket: releasing version 1.2.3
 ▶ called io::invoke git push origin main
 SUCCESS  The new version has been committed.
-▶ called io::invoke git tag --sort=committerdate --no-color
+▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
 INFO     The tag message is:

@@ -41,8 +41,9 @@ Auto parsing of arguments and options based on your command configuration:
 
 ![demo-parsing](demo-parsing.gif)
 
-> [!NOTE]
-> This showcase is recorded with the [windows terminal][windows-terminal], [debian on WSL][debian-wsl] with zsh & [oh my zsh][oh-my-zsh]. The color scheme for the terminal is [dracula][dracula-theme] and the font is a homemade modification of windows Consolas (with ligatures + with nerd font icons).
+{{< callout type="info" >}}
+This showcase was recorded with the [windows terminal][windows-terminal], [debian on WSL][debian-wsl] with zsh & [oh my zsh][oh-my-zsh]. The color scheme for the terminal is [dracula][dracula-theme] and the font is a homemade modification of windows Consolas (with ligatures + with nerd font icons).
+{{< /callout >}}
 
 [windows-terminal]: https://github.com/microsoft/terminal
 [debian-wsl]: https://wiki.debian.org/InstallingDebianOn/Microsoft/Windows/SubsystemForLinux

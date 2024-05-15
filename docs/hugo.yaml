@@ -34,6 +34,11 @@ menu:
       weight: 40
       params:
         type: search
+    - name: Discussions ↗
+      weight: 50
+      url: "https://github.com/jcaillon/valet/discussions"
+      params:
+        icon: chat-alt-2
     - name: GitHub ↗
       weight: 50
       url: "https://github.com/jcaillon/valet"

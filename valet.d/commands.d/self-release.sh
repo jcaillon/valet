@@ -122,7 +122,7 @@ function createRelease() {
 
   # get the current latest tag
   local lastTag
-  io::invoke git tag --sort=committerdate --no-color
+  io::invoke git tag --sort=version:refname --no-color
   lastTag="${RETURNED_VALUE}"
   lastTag="${lastTag%%$'\n'}"
   lastTag="${lastTag##*$'\n'}"
