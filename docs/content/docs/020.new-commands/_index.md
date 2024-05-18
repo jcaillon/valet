@@ -1,4 +1,10 @@
-# How to add your own command
+---
+title: ✨ New commands
+cascade:
+  type: docs
+weight: 20
+url: /docs/new-commands
+---
 
 ## 1. Add a new command file
 
@@ -77,7 +83,6 @@ In case of error, your function should call the `fail` directly which will exit 
 > [!TIP]
 > Please check [working-on-bash-scripts.md](working-on-bash-scripts.md) to learn more about working on bash scripts and create performant scripts.
 
-
 > [!NOTE]
 > In Valet, the bash options are set like so `set -Eeu -o pipefail`, which means that your command will stop with an error if any statement returns an error code different than zero. This also include any program in a pipe.
 >
@@ -91,16 +96,6 @@ In case of error, your function should call the `fail` directly which will exit 
 In order to find your new command in the valet menu; you need to call the `self build` command. Either from the valet menu or by executing directly `./valet.d/commands.d/self-build.sh`. The later option is mandatory if you have an issue with the `valet.d/cmd` file itself.
 
 The build process consists of recreating the `valet.d/cmd` program by reading all the `about_xxx` functions and extracting info from the YAML definition. It also appends all the functions defined in `cmd-extra`.
-
-## 5. Test your program
-
-What is a test suite?
-
-TODO
-
-You can exclude or include test suite using `-i` and `-e` options on `self test`.
-
-talk about after-each-test-suite, before-tests hooks
 
 ### How to debug your program
 

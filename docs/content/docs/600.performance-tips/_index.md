@@ -1,57 +1,10 @@
-# How to work on bash script
-
-> [!INFORMATION]
-> Disclaimer: This page is just one opinion. This is not the best way to work on bash scripts, this is just an explanation of how I work.
-
-## IDE
-
-I work with VS code on windows + WSL.
-
-Install VS code from [here](https://code.visualstudio.com/download).
-
-## VS code extensions
-
-Here is a list of recommended extensions to work on bash scripts:
-
-- [Bash IDE](https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode)
-- [Debug bash scripts](https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug)
-- [Shell Script Command Completion](https://marketplace.visualstudio.com/items?itemName=tetradresearch.vscode-h2o)
-- [Better comments](https://marketplace.visualstudio.com/items?itemName=aaron-bond.better-comments)
-- [Better shellscript syntax](https://marketplace.visualstudio.com/items?itemName=jeff-hykin.better-shellscript-syntax)
-- [Code spell checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker)
-- [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
-- [Indent rainbow](https://marketplace.visualstudio.com/items?itemName=oderwat.indent-rainbow)
-- [Format shell script](https://marketplace.visualstudio.com/items?itemName=foxundermoon.shell-format)
-- [Shellcheck](https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck)
-- [Snippets manager](https://marketplace.visualstudio.com/items?itemName=zjffun.snippetsmanager)
-- [Snippets for bash scripts](https://marketplace.visualstudio.com/items?itemName=Remisa.shellman)
-- [Snippets for shebang](https://marketplace.visualstudio.com/items?itemName=rpinski.shebang-snippets)
-
-GitHub Copilot is of great help if you can have it.
-
-## VS code settings
-
-You can open your `~/.valet.d` directory as a workspace on vscode. I recommend to copy (or link) the `valet.d` directory from the Valet installation to `~/.valet.d/.valet.libs` in your workspace folder and add the following settings in your `~/.valet.d/.vscode/settings.json`:
-
-```json
-{
-  // https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
-  "bashIde.globPattern": "**/@(*@(.sh|.inc|.bash|.command|core)|lib-*)",
-  "bashIde.includeAllWorkspaceSymbols": true
-}
-```
-
-This allows you to have autocompletion of the core and libraries functions from your command scripts.
-
-## Where to start your bash journey
-
-- [The official bash documentation](https://www.gnu.org/software/bash/manual/bash.html) / [Alternate view on devdocs.io](https://devdocs.io/bash/)
-- [Advanced bash scripting guide](https://tldp.org/LDP/abs/html/index.html)
-- [Google shell style guidelines](https://google.github.io/styleguide/shellguide.html)
-- [Baeldung Linux scripting series](https://www.baeldung.com/linux/linux-scripting-series)
-- [Pure bash bible](https://github.com/dylanaraps/pure-bash-bible)
-
-## Tips for performant scripts
+---
+title: 🐇 Performance tips
+cascade:
+  type: docs
+weight: 600
+url: /docs/performance-tips
+---
 
 To write performance script, you should:
 
@@ -68,7 +21,7 @@ To write performance script, you should:
 
 The chapters below give you some tips for the common problems that you can encounter:
 
-### Call and get the output of a function
+## Call and get the output of a function
 
 Instead of (which creates a subshell):
 
@@ -96,7 +49,7 @@ Using a global variable seem to be a bad idea and can lead to confusion in the c
 
 Avoid code mistakes by deciding on 1 global variable for all your functions and always assign this variable in each return path of a function (otherwise you might use a value from a previous function call!).
 
-### Read a whole file
+## Read a whole file
 
 Instead of (subshell + forking):
 
@@ -114,7 +67,7 @@ echo "${myString}"
 
 > With this technique, the last line of the file is always read, even if it does not have a trailing newline.
 
-### Read a file, line by line
+## Read a file, line by line
 
 This example is for the newline (`$'\n'`) delimiter which is the default delimiter of read, but you can specify any delimiter with `IFS=''` + the `-d ''` option.
 
@@ -141,7 +94,7 @@ done
 
 Both are roughly equivalent.
 
-### Read external output of an executable into a variable
+## Read external output of an executable into a variable
 
 Depending on the following conditions:
 
@@ -162,7 +115,7 @@ tput cols 2>/dev/null 1> /tmp/file
 read -r myvar < /tmp/file
 ```
 
-### Loop through line or fields of the content of a variable
+## Loop through line or fields of the content of a variable
 
 Instead of [here string](https://tldp.org/LDP/abs/html/x17837.html#HERESTRINGSREF):
 
@@ -191,7 +144,7 @@ IFS can be set as a `local` variable, and it can be any character.
 
 However, you will not go through lines that are empty. You will need to keep the `while read` if you need them.
 
-### Pass string to stdin of a program or function
+## Pass string to stdin of a program or function
 
 Instead of a pipe:
 
