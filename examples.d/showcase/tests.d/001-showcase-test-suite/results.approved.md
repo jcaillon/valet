@@ -20,6 +20,7 @@ INFO     First argument: arg1.
 INFO     Option 1: true.
 INFO     Option 2: optionValue2.
 INFO     More: more1 more2.
+INFO     Extracted text is: ⌜My bold text⌝
 ```
 
 ### Testing the showcase sudo command by replacing sudo with echo

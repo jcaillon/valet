@@ -55,7 +55,7 @@ fi
 # VALET_CONFIG_FILE
 
 # The directory in which to find user commands.
-# Defaults to the 'valet.d' directory in the user home directory.
+# Defaults to the '.valet.d' directory in the user home directory.
 VALET_USER_DIRECTORY="${VALET_USER_DIRECTORY:-}"
 
 # The path to the configuration directory, where we store that should be kept between sessions.
@@ -301,7 +301,7 @@ fi
 # VALET_CONFIG_FILE
 
 # The directory in which to find user commands.
-# Defaults to the 'valet.d' directory in the user home directory.
+# Defaults to the '.valet.d' directory in the user home directory.
 VALET_USER_DIRECTORY="${VALET_USER_DIRECTORY:-}"
 
 # The path to the configuration directory, where we store that should be kept between sessions.

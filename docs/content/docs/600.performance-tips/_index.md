@@ -15,9 +15,11 @@ To write performance script, you should:
 - If possible, prefer manipulating variables content instead of files content.
 - Try to avoid here string `<<<` (AFAIK it uses a temporary file behind the scene).
 
-> This improvements can lead to **HUGE** differences in run time. Especially in windows bash which is quite slow.
->
-> The initial version of valet was taking around 5s to parse and execute a command, and it went down to a under a hundred milliseconds after refactoring using the rules above.
+{{< callout type="info" >}}
+These improvements can lead to **HUGE** differences in run time. Especially in windows bash which is quite slow.
+
+The initial version of valet was taking around 5s to parse and execute a command, and it went down to under a hundred milliseconds after refactoring.
+{{< /callout >}}
 
 The chapters below give you some tips for the common problems that you can encounter:
 

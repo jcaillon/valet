@@ -34,5 +34,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - A command can declare dependencies to auto check if some tools are installed before running the command.
 - Generate vscode snippets from each function in core and lib-* to provide autocompletion for users.
 - Try to add a variable that allows to output the logs to a given file in addition to &2 and we generate a unique file for each time valet is run.
+- On release:
+  - Update `docs/static/config.md`
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

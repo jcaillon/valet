@@ -6,38 +6,85 @@ weight: 20
 url: /docs/new-commands
 ---
 
-## 1. Add a new command file
+This page describes how to add your own commands in Valet. Make sure to review the [Valet usage][usage] first to get a good understanding of what is a command.
 
-Copy the template command `showcase.sh` to a new file and rename it as you wish.
+The section [working on bash][work-on-bash-scripts] helps you set up a coding environment for bash.
 
-Files starting with a `.` are ignored, so the commands defined inside them are never shown in the valet menu.
+## 📂 Commands file location
 
-All `*.sh` files under your Valet user directory will be sourced during build in order to find your commands.
+Commands are found and indexed by Valet if they are defined in `*.sh` bash scripts located under your user directory which defaults to `~/.valet.d`. This directory can be changed with the variable `VALET_USER_DIRECTORY`, see [configuration][configuration].
 
-The search is recursive. This is handy because it means that you can separate your commands into several directories. You can even have multiple git repositories cloned of linked in your user directory to load commands that could be shared with your teammates or on the internet!
+It is recommended to organize commands in subdirectories which has the added benefice of allowing you to share commands with other, by cloning repositories under your `~/.valet.d` directory.
 
-## 2. Define your new command
+Commands can be defined individually in separated files or can be regrouped in a single script. Keep in mind that the bash script of the command function will be sourced, so you might want to keep them light/short.
 
-Follow the example of the template to create a new `about_xxx` function that returns a YAML file describing your command. `xxx` is the function name of your command (see next chapter).
+Here is an example content for your user directory:
 
-The available properties are:
+{{< filetree/container >}}
+  {{< filetree/folder name="~/.valet.d" >}}
+    {{< filetree/folder name="showcase" >}}
+      {{< filetree/file name="showcase.sh" >}}
+      {{< filetree/file name="showcase-interactive.sh" >}}
+    {{< /filetree/folder >}}
+    {{< filetree/folder name="personal" >}}
+      {{< filetree/file name="myawesomecmd.sh" >}}
+      {{< filetree/file name="another.sh" >}}
+    {{< /filetree/folder >}}
+    {{< filetree/folder name="shared-commands" state="closed" >}}
+      {{< filetree/file name="file.sh" >}}
+    {{< /filetree/folder >}}
+  {{< /filetree/folder >}}
+{{< /filetree/container >}}
 
-- **command**: the name with which your command can be called by the user. E.g. `mycmd` will be accessible with `valet mycmd`.
-- **fileToSource**: should always be equals to `${BASH_SOURCE[0]}`. It is the file that will be sourced to execute the function of your command.
-- **sudo**: `true` if your command uses `sudo`; in which case we will prompt the user for sudo password before executing the command. `false` otherwise.  
-- **shortDescription**: shortly describe your command; this will appear next to your command name in the valet menu.
-- **description**: long description of your command and its purpose.
-- **options**: a list of options for your command. Don't forget that, by definition, an option is optional (i.e. it is not mandatory like an argument). If you expect an option to be defined, then it is an argument.
-- **arguments**: a list of mandatory arguments for your command. If the user does not provide an argument, your command should fail. Otherwise, that means it is an option, not an argument.
-- **examples**: a list of examples for your command.
+## ➕ Create a command
 
-All commands will have, by default, an `-h, --help` option to display the help of this command.
+{{% steps %}}
 
-## 3. Implement your command
+### Add a new command file
 
-The `xxx` (in your `about_xxx` function) must be the name of the function that implements your command.
+{{< callout type="info" >}}
+This step is optional, you can add a command in an existing file.
+{{< /callout >}}
 
-Implement your command in new function named `xxx` placed in the same file as the `about_xxx` function.
+Create a new bash script with the file extension `.sh` under your user directory. E.g.:
+
+{{< filetree/container >}}
+  {{< filetree/folder name="~/.valet.d" >}}
+    {{< filetree/file name="command.sh" >}}
+  {{< /filetree/folder >}}
+{{< /filetree/container >}}
+
+Add the bash [shebang][shebang] at the beginning of the file to help your editor identifying the correct shell:
+
+```bash
+#!/usr/bin/env bash
+```
+
+### Define your new command
+
+Valet looks for a specific YAML formatted string to read command properties.
+
+A very simple example is:
+
+```bash
+: "---
+command: hello-world
+function: helloWorld
+shortDescription: A dummy command.
+description: |-
+  This command says hello world.
+---"
+```
+
+In the example above, we need to define a bash function named `helloWorld` in the same file as the command properties (see next step). When running `valet hello-world`, this function will be called.
+
+A list of all the available command properties can be found in [this section][command-properties].
+
+Fore more examples, take a look at the [showcase command definitions][showcase-commands].
+
+### Implement your command
+
+Once the command properties are set.
 
 Valet has a function to parse the expected options and arguments directly into variables. See the example file `showcase.sh`. Here is a standard usage of the parser:
 
@@ -80,8 +127,7 @@ In the function of a command, you have access to all functions defined in `valet
 
 In case of error, your function should call the `fail` directly which will exit the program while displaying a meaningful message to the user.
 
-> [!TIP]
-> Please check [working-on-bash-scripts.md](working-on-bash-scripts.md) to learn more about working on bash scripts and create performant scripts.
+ The section [performance tips][performance-tips] gives you pointer to write scripts that are fast to execute.
 
 > [!NOTE]
 > In Valet, the bash options are set like so `set -Eeu -o pipefail`, which means that your command will stop with an error if any statement returns an error code different than zero. This also include any program in a pipe.
@@ -91,17 +137,29 @@ In case of error, your function should call the `fail` directly which will exit 
 > Or simply discard the error:
 > `thingThatReturns1 || :`
 
-## 4. Rebuild valet menu
+### (optional) Test your command
+
+Please check the [test command](../test-commands) section.
+
+### Rebuild valet menu
 
 In order to find your new command in the valet menu; you need to call the `self build` command. Either from the valet menu or by executing directly `./valet.d/commands.d/self-build.sh`. The later option is mandatory if you have an issue with the `valet.d/cmd` file itself.
 
 The build process consists of recreating the `valet.d/cmd` program by reading all the `about_xxx` functions and extracting info from the YAML definition. It also appends all the functions defined in `cmd-extra`.
 
-### How to debug your program
+{{< callout type="info" emoji="💡" >}}
+During the build, all files matching `*.sh` will be read by Valet and the search is recursive. Directories named `tests.d` or hidden directory (starting with a `.`) will be ignored. Consider these rules to lower the build time if it becomes too important.
+{{< /callout >}}
 
-Your command function is not working as expected or seems stuck ? Two ways to approach this problem:
+{{% /steps %}}
 
-- Run your valet command in the bash debugger on visual studio.
+## 🐛 How to debug your program
+
+Your command function is not working as expected or seems stuck?
+
+Two ways to approach this problem:
+
+- Run your valet command in the bash debugger on Visual Studio.
 - Or use the `valet -x` option to enable the profiler (this turns the debug mode on `set -x`). This will output the complete trace in `~/valet-profiler-{PID}.txt` (or you can choose the destination with the environment variable `VALET_CONFIG_COMMAND_PROFILING_FILE`). You can see what the profiling file looks like in this [test report](../tests.d/1301-profiler/results.approved.md).
 
 Of course, a simpler strategy is to log stuff with `debug` (you can also do `if log::isDebugEnabled; then log::debug "stuff"; fi` to avoid computing a string value for debug).
@@ -111,3 +169,16 @@ You can active the debug log level with Valet `-v` option, e.g. `valet -v my com
 ## Extra: defining sub commands
 
 If your new command name contains one or more spaces, you are defining a sub command. E.g. `sub cmd` defines a command `cmd` which is a sub command of the `sub` command. It can be useful to regroup commands under a theme. Valet will show a menu for the command `sub` which displays only the sub commands under this command.
+
+{{< cards >}}
+  {{< card icon="arrow-circle-left" link="../configuration" title="Configuration" >}}
+  {{< card icon="arrow-circle-right" link="../command-properties" title="Command properties" >}}
+{{< /cards >}}
+
+[usage]: ../usage
+[work-on-bash-scripts]: ../work-on-bash-scripts
+[performance-tips]: performance-tips
+[configuration]: ../configuration
+[shebang]: https://en.wikipedia.org/wiki/Shebang_(Unix)
+[showcase-commands]: https://github.com/jcaillon/valet/tree/main/examples.d/showcase
+[command-properties]: ../command-properties
