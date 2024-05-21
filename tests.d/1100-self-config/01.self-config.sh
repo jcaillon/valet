@@ -18,15 +18,15 @@ function testSelfConfig() {
   echo
   echo "cat \${configFile}"
   io::cat "${configFile}"
-  endTest "Testing selfConfig" ${exitCode}
+  test::endTest "Testing selfConfig" ${exitCode}
 
   echo "→ selfConfig"
   selfConfig && exitCode=0 || exitCode=$?
-  endTest "Testing selfConfig (should only open, file exists)" ${exitCode}
+  test::endTest "Testing selfConfig (should only open, file exists)" ${exitCode}
 
   echo "→ selfConfig --override --no-edit"
   selfConfig --override --no-edit && exitCode=0 || exitCode=$?
-  endTest "Testing selfConfig override no edit" ${exitCode}
+  test::endTest "Testing selfConfig override no edit" ${exitCode}
 
   echo "→ (selfConfig --override --export-current-values)"
   (
@@ -40,7 +40,7 @@ function testSelfConfig() {
   echo
   echo "cat \${configFile}"
   io::cat "${configFile}"
-  endTest "Testing selfConfig override export" ${exitCode}
+  test::endTest "Testing selfConfig override export" ${exitCode}
 
   VALET_CONFIG_FILE="${originalConfigFile}"
 }

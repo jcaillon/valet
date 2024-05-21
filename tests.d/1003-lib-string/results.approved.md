@@ -82,6 +82,9 @@ a super test
 
 → string::trimAll 'this is a command  '
 this is a command
+
+→ string::trimAll '\t\nthis is a \tcommand  '
+this is a command
 ```
 
 ### Testing string::cutField

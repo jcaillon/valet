@@ -21,7 +21,7 @@ function testSystem::getOsName() {
   OSTYPE=nop system::getOsName && echo "${RETURNED_VALUE}"
   echo
 
-  endTest "Testing system::getOsName" 0
+  test::endTest "Testing system::getOsName" 0
 }
 
 function main() {

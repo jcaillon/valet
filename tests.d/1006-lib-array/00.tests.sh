@@ -24,7 +24,7 @@ function testArray::sort() {
 
   declare -p MYARRAY
 
-  endTest "testArray::ing array::sort" 0
+  test::endTest "testArray::ing array::sort" 0
 }
 
 function testArray::appendIfNotPresent() {
@@ -57,7 +57,7 @@ function testArray::appendIfNotPresent() {
 
   declare -p MYARRAY
 
-  endTest "testArray::ing array::appendIfNotPresent" 0
+  test::endTest "testArray::ing array::appendIfNotPresent" 0
 }
 
 function testArray::isInArray() {
@@ -80,7 +80,7 @@ function testArray::isInArray() {
   echo "→ array::isInArray MYARRAY 'holiday'"
   array::isInArray MYARRAY 'holiday' || echo "$?"
 
-  endTest "testArray::ing array::isInArray" 0
+  test::endTest "testArray::ing array::isInArray" 0
 }
 
 function testArray::makeArraysSameSize {
@@ -96,7 +96,7 @@ function testArray::makeArraysSameSize {
 
   declare -p array1 array2 array3 array4
 
-  endTest "testArray::ing array::makeArraysSameSize" 0
+  test::endTest "testArray::ing array::makeArraysSameSize" 0
 }
 
 function testArray::sortWithCriteria() {
@@ -126,7 +126,7 @@ function testArray::sortWithCriteria() {
 
   unset ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
 
-  endTest "tesing array::sortWithCriteria" 0
+  test::endTest "tesing array::sortWithCriteria" 0
 }
 
 function testArray::fuzzyFilterSort() {
@@ -177,7 +177,7 @@ function testArray::fuzzyFilterSort() {
 
   unset myArray
 
-  endTest "testing array::fuzzyFilterSort" 0
+  test::endTest "testing array::fuzzyFilterSort" 0
 }
 
 function main() {

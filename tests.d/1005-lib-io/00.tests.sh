@@ -32,7 +32,7 @@ function testIo::toAbsolutePath() {
   echo "→ io::toAbsolutePath missing-file"
   io::toAbsolutePath "missing-file" && echo "${RETURNED_VALUE}"
 
-  endTest "Testing io::toAbsolutePath" 0
+  test::endTest "Testing io::toAbsolutePath" 0
 }
 
 function outputTextToStdErr() {
@@ -45,13 +45,13 @@ function testIo::readFile() {
   io::readFile 'resources/file-to-read' 100
   echo "${RETURNED_VALUE}"
 
-  endTest "Testing io::readFile limited to x chars" 0
+  test::endTest "Testing io::readFile limited to x chars" 0
 
   echo "→ io::readFile 'resources/file-to-read'"
   io::readFile 'resources/file-to-read'
   echo "${RETURNED_VALUE}"
 
-  endTest "Testing io::readFile unlimited" 0
+  test::endTest "Testing io::readFile unlimited" 0
 }
 
 function testIo::createFilePathIfNeeded() {
@@ -64,7 +64,7 @@ function testIo::createFilePathIfNeeded() {
     echo "File created successfully!"
   fi
 
-  endTest "Testing io::createFilePathIfNeeded" 0
+  test::endTest "Testing io::createFilePathIfNeeded" 0
 }
 
 function testIo::sleep() {
@@ -72,7 +72,7 @@ function testIo::sleep() {
   echo "→ io::sleep 0.001"
   io::sleep 0.001
 
-  endTest "Testing io::sleep" 0
+  test::endTest "Testing io::sleep" 0
 }
 
 function testIo::cat() {
@@ -80,7 +80,7 @@ function testIo::cat() {
   echo "→ io::cat 'resources/file-to-read'"
   io::cat 'resources/file-to-read'
 
-  endTest "Testing io::cat" 0
+  test::endTest "Testing io::cat" 0
 }
 
 function testIo::readStdIn() {
@@ -93,7 +93,7 @@ function testIo::readStdIn() {
   io::readStdIn
   echo "${RETURNED_VALUE}"
 
-  endTest "Testing io::readStdIn" 0
+  test::endTest "Testing io::readStdIn" 0
 }
 
 function testIo::countArgs() {
@@ -106,7 +106,7 @@ function testIo::countArgs() {
   io::countArgs "${PWD}/resources"/*
   echo "${RETURNED_VALUE}"
 
-  endTest "Testing io::countArgs" 0
+  test::endTest "Testing io::countArgs" 0
 }
 
 function main() {

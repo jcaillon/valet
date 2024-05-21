@@ -12,19 +12,19 @@ function testMainOptions() {
   else
     echo "KO, we did not get a version."
   fi
-  endTest "Testing version option" $?
+  test::endTest "Testing version option" $?
 
   # testing unknown option, corrected with fuzzy match
   echo "→ valet -prof"
   ("${GLOBAL_VALET_HOME}/valet" -prof) || echo "Failed as expected."
-  endTest "Testing unknown option, corrected with fuzzy match" 1
+  test::endTest "Testing unknown option, corrected with fuzzy match" 1
 }
 
 function testCleaning() {
   # testing temp files/directories creation, cleaning and custom cleanUp
   echo "→ valet self mock1 create-temp-files"
   ("${GLOBAL_VALET_HOME}/valet" self mock1 create-temp-files)
-  endTest "Testing temp files/directories creation, cleaning and custom cleanUp" $?
+  test::endTest "Testing temp files/directories creation, cleaning and custom cleanUp" $?
 }
 
 function testUserDirectory() {
@@ -34,7 +34,7 @@ function testUserDirectory() {
 
   echo "→ VALET_USER_DIRECTORY=non-existing self mock1 logging-level"
   ("${GLOBAL_VALET_HOME}/valet" self mock1 logging-level) || :
-  endTest "Testing with a non existing user directory" 1
+  test::endTest "Testing with a non existing user directory" 1
 
   export VALET_USER_DIRECTORY="${previousUserDirectory}"
 }

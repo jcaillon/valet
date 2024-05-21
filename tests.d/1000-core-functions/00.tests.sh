@@ -13,17 +13,17 @@ There were 2 new lines before this."
   echo "→ string::wrapText \"\${shortText}\" 30"
   echo "------------------------------"
   string::wrapText "${shortText}" 30 && echo "${RETURNED_VALUE}"
-  endTest "Wrapping text at column 30 with no padding" 0
+  test::endTest "Wrapping text at column 30 with no padding" 0
 
   echo "→ string::wrapText \"\${shortText}\" 90 4 false"
   echo "------------------------------------------------------------------------------------------"
   string::wrapText "${shortText}" 90 4 false && echo "${RETURNED_VALUE}"
-  endTest "Wrapping text at column 90 with padding of 4 on new lines" 0
+  test::endTest "Wrapping text at column 90 with padding of 4 on new lines" 0
 
   echo "→ string::wrapText \"\${shortText}\" 90 2 true"
   echo "------------------------------------------------------------------------------------------"
   string::wrapText "${shortText}" 90 2 true && echo "${RETURNED_VALUE}"
-  endTest "Wrapping text at column 90 with padding of 2 on all lines" 0
+  test::endTest "Wrapping text at column 90 with padding of 2 on all lines" 0
 }
 
 function testArray::fuzzyFilter() {
@@ -63,7 +63,7 @@ function testArray::fuzzyFilter() {
 
   unset lines
 
-  endTest "Testing array::fuzzyFilter" 0
+  test::endTest "Testing array::fuzzyFilter" 0
 }
 
 function testString::wrapCharacters() {
@@ -74,12 +74,12 @@ function testString::wrapCharacters() {
   echo "→ string::wrapCharacters \"\${shortText}\" 30 \"  \"" 28
   echo "------------------------------"
   string::wrapCharacters "${shortText}" 30 "  " 28 && echo "${RETURNED_VALUE}"
-  endTest "Wrapping characters at column 30 with new line prefix" 0
+  test::endTest "Wrapping characters at column 30 with new line prefix" 0
 
   echo "→ string::wrapCharacters \"\${shortText}\" 20"
   echo "--------------------"
   string::wrapCharacters "${shortText}" 20 && echo "${RETURNED_VALUE}"
-  endTest "Wrapping characters at 20, no other options" 0
+  test::endTest "Wrapping characters at 20, no other options" 0
 
 
 }

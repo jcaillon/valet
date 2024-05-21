@@ -8,7 +8,7 @@ function testValetInteractiveMenu() {
   # test that valet can be called without any arguments
   echo "→ valet"
   (main::parseMainArguments)
-  endTest "Testing that valet can be called without any arguments and show the menu" $?
+  test::endTest "Testing that valet can be called without any arguments and show the menu" $?
 }
 
 function main() {

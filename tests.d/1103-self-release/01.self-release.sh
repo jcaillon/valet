@@ -8,12 +8,12 @@ function testSelfRelease() {
   LAST_GIT_TAG="v1.2.3"
   echo "→ selfRelease -t token -b major --dry-run"
   selfRelease -t token -b major --dry-run && exitCode=0 || exitCode=$?
-  endTest "Testing selfRelease, dry run major version" ${exitCode}
+  test::endTest "Testing selfRelease, dry run major version" ${exitCode}
 
   log::setLevel debug
   echo "→ selfRelease -t token -b minor"
   selfRelease -t token -b minor && exitCode=0 || exitCode=$?
-  endTest "Testing selfRelease, minor version" ${exitCode}
+  test::endTest "Testing selfRelease, minor version" ${exitCode}
 }
 
 # need to override git, kurl

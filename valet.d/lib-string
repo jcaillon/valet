@@ -359,6 +359,7 @@ function string::split() {
 #
 # Usage:
 #   string::regexGetFirst "name: julien" "name:(.*)"
+#   echo "${RETURNED_VALUE}"
 #
 # Notes:
 #   Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions

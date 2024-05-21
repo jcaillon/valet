@@ -12,7 +12,7 @@ function testExtractCommandYamls() {
     echo "content:"$'\n'"⌜${content}⌝"
   done
 
-  endTest "Testing extractCommandYamls" 0
+  test::endTest "Testing extractCommandYamls" 0
 }
 
 function testExtractCommandDefinitionToVariables() {
@@ -62,7 +62,7 @@ options:
     echo "${varName}=${var@Q}"
   done
 
-  endTest "Testing extractCommandDefinitionToVariables" 0
+  test::endTest "Testing extractCommandDefinitionToVariables" 0
 }
 
 function testExtractFirstLongNameFromOptionString() {
@@ -72,7 +72,7 @@ function testExtractFirstLongNameFromOptionString() {
   echo "→ extractFirstLongNameFromOptionString '${optionString}'"
   extractFirstLongNameFromOptionString "${optionString}" && echo "${RETURNED_VALUE}"
 
-  endTest "Testing extractFirstLongNameFromOptionString" 0
+  test::endTest "Testing extractFirstLongNameFromOptionString" 0
 }
 
 function main() {

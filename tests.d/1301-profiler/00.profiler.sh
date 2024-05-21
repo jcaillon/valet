@@ -3,7 +3,7 @@
 # shellcheck source=../../valet.d/lib-io
 source io
 
-commentTest "The profiler is an excellent tool to debug your command. The following example shows what you would get when you enable it."$'\n\n'"Notice that the profiling file has been cleanup after the command execution to maximize readability."
+test::commentTest "The profiler is an excellent tool to debug your command. The following example shows what you would get when you enable it."$'\n\n'"Notice that the profiling file has been cleanup after the command execution to maximize readability."
 
 function testProfiler() {
   # testing command profiling + startup
@@ -21,7 +21,7 @@ function testProfiler() {
     echoFileWithSubstitution "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
   fi
 
-  endTest "Testing profiling for command" 0
+  test::endTest "Testing profiling for command" 0
 
   echo "→ VALET_CONFIG_STARTUP_PROFILING=true valet --log-level error -x self mock1 logging-level"
 
@@ -33,7 +33,7 @@ function testProfiler() {
     echo "A command profiling file has been created to log everything happening in the chosen command execution."
   fi
 
-  endTest "Testing profiling for command and startup" 0
+  test::endTest "Testing profiling for command and startup" 0
 
   unset VALET_CONFIG_STARTUP_PROFILING \
     VALET_CONFIG_COMMAND_PROFILING_FILE \

@@ -22,7 +22,7 @@ function testselfSetup() {
   echo "→ echo nnn | selfSetup"
   echo nnn 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
   selfSetup <"${GLOBAL_TEMPORARY_WORK_FILE}" && exitCode=0 || exitCode=$?
-  endTest "Testing selfSetup 1" ${exitCode}
+  test::endTest "Testing selfSetup 1" ${exitCode}
 
   rm -f "${configFile}"
   unset -f awk diff curl
@@ -32,7 +32,7 @@ function testselfSetup() {
   echo "→ echo yyo | selfSetup"
   echo yyo 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
   selfSetup <"${GLOBAL_TEMPORARY_WORK_FILE}" && exitCode=0 || exitCode=$?
-  endTest "Testing selfSetup 2" ${exitCode}
+  test::endTest "Testing selfSetup 2" ${exitCode}
 
   export PATH="${originalPath}"
   VALET_CONFIG_FILE="${originalConfigFile}"

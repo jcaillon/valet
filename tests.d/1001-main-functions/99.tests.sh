@@ -4,7 +4,7 @@ function testGetFunctionNameFromCommand() {
   echo "→ main::getFunctionNameFromCommand 'self build'"
   main::getFunctionNameFromCommand "self build" && echo "${RETURNED_VALUE}"
 
-  endTest "Testing main::getFunctionNameFromCommand" $?
+  test::endTest "Testing main::getFunctionNameFromCommand" $?
 }
 
 function testFuzzyMatchCommandtoFunctionName() {
@@ -22,7 +22,7 @@ function testFuzzyMatchCommandtoFunctionName() {
   echo "${RETURNED_VALUE2}"
   echo "${RETURNED_VALUE3}"
 
-  endTest "Testing main::fuzzyMatchCommandtoFunctionName" 0
+  test::endTest "Testing main::fuzzyMatchCommandtoFunctionName" 0
 }
 
 function testGetMaxPossibleCommandLevel() {
@@ -42,7 +42,7 @@ function testGetMaxPossibleCommandLevel() {
   echo "→ main::getMaxPossibleCommandLevel"
   main::getMaxPossibleCommandLevel && echo "${RETURNED_VALUE}"
 
-  endTest "Testing main::getMaxPossibleCommandLevel" 0
+  test::endTest "Testing main::getMaxPossibleCommandLevel" 0
 }
 
 function testFuzzyFindOption() {
@@ -58,7 +58,7 @@ function testFuzzyFindOption() {
   echo "→ main::fuzzyFindOption '--opt1 --derp2 --allo3' 'thing'"
   main::fuzzyFindOption thing --opt1 --derp2 --allo3 && echo "${RETURNED_VALUE}"
 
-  endTest "Testing main::fuzzyFindOption" 0
+  test::endTest "Testing main::fuzzyFindOption" 0
 }
 
 function main() {

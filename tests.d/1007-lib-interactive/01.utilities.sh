@@ -7,7 +7,7 @@ function testInteractive::createSpace() {
   echo "interactive::createSpace 5"
   interactive::createSpace 5
 
-  endTest "Testing interactive::createSpace" 0
+  test::endTest "Testing interactive::createSpace" 0
 }
 
 function testInteractive::getCursorPosition() {
@@ -16,7 +16,7 @@ function testInteractive::getCursorPosition() {
   interactive::getCursorPosition < "${GLOBAL_TEMPORARY_WORK_FILE}"
   echo "CURSOR_LINE: ${CURSOR_LINE}; CURSOR_COLUMN: ${CURSOR_COLUMN}"
 
-  endTest "Testing interactive::getCursorPosition" 0
+  test::endTest "Testing interactive::getCursorPosition" 0
 }
 
 function main() {

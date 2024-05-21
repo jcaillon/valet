@@ -4,7 +4,7 @@
 function testShowcaseCommand1() {
   echo "→ showcaseCommand1 -o -2 optionValue2 arg1 more1 more2"
   showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
-  endTest "Testing the showcase command1" 0
+  test::endTest "Testing the showcase command1" 0
 }
 
 # Another example that reminds you that you can override existing functions
@@ -13,7 +13,7 @@ function testShowCaseSudo() {
   SUDO="echo"
   echo "→ showCaseSudo"
   showCaseSudo
-  endTest "Testing the showcase sudo command by replacing sudo with echo" 0
+  test::endTest "Testing the showcase sudo command by replacing sudo with echo" 0
 }
 
 # This demonstrates a custom test where we output what we want in the test results file
@@ -24,7 +24,7 @@ function testOnInterrupt() {
   else
     echo "onInterrupt is not working"
   fi
-  endTest "Testing the behavior of onInterrupt" 0
+  test::endTest "Testing the behavior of onInterrupt" 0
 }
 
 function main() {

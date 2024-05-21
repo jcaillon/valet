@@ -15,7 +15,7 @@ function testSelfBuild() {
     done
   )
 
-  endTest "Testing selfbuild" 0
+  test::endTest "Testing selfbuild" 0
 }
 
 function main() {

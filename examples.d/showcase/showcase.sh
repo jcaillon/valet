@@ -1,17 +1,4 @@
 #!/usr/bin/env bash
-# Import the core script (should always be skipped if the command is run from valet, this is mainly for shellcheck).
-if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
-  # shellcheck source=../../valet.d/core
-  source "$(dirname -- "$(command -v valet)")/valet.d/core"
-fi
-# --- END OF COMMAND COMMON PART
-# Everything above this line should stay as is for every command file you create.
-# Your command can use all the functions defined in the core script of valet.
-
-
-# importing libraries from the core (note that we could do that in the function that needs it as well)
-# shellcheck source=../../valet.d/lib-interactive
-source interactive
 
 #===============================================================
 # >>> command: showcase command1
@@ -57,40 +44,21 @@ function showcaseCommand1() {
   log::info "Option 2: ${thisIsOption2:-}."
   log::info "More: ${more[*]}."
 
-  aSubFunctionInShowcaseCommand1
+  # example use of a library function
+  # Importing the string library (note that we could do that at the begining of the script)
+  # shellcheck disable=SC1091
+  source string
+  string::extractBetween "<b>My bold text</b>" "<b>" "</b>"
+  local extractedText="${RETURNED_VALUE}"
+  log::info "Extracted text is: ⌜${extractedText:-}⌝"
 
   echo "That's it!"
-}
-
-function aSubFunctionInShowcaseCommand1() {
-  # this is mainly to demonstrate the profiler
-  log::debug "This is a sub function."
-}
-
-
-#===============================================================
-# >>> command: showcase hello-world
-#===============================================================
-
-: "---
-command: showcase hello-world
-function: helloWorld
-shortDescription: An hello world command.
-description: |-
-  An hello world command.
----"
-function helloWorld() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
-
-  echo "Hello world!"
 }
 
 
 #===============================================================
 # >>> command: showcase sudo-command
 #===============================================================
-
 
 : "---
 command: showcase sudo-command
@@ -100,7 +68,7 @@ shortDescription: A command that requires sudo.
 description: |-
   Before starting this command, valet will check if sudo is available.
 
-  If so, it will require the user to enter the sudo password and use sudo inside the command
+  If so, it will require the user to enter the sudo password and you can use the \${SUDO} variable inside the command
 ---"
 function showCaseSudo() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
@@ -111,16 +79,18 @@ function showCaseSudo() {
 
 
 #===============================================================
-# >>> Additional hook functions
+# >>> Optional hook functions
 #===============================================================
 
 # This function is called before the program exits.
+# It does not have to be defined.
 function onExit() {
   log::debug "Exiting a showcase command."
 }
 
 # This function is always called before the program ends and allows
 # you to do some custom clean up.
+# It does not have to be defined.
 function cleanUp() {
   log::debug "Cleaning up stuff in the showcase commands."
 }
@@ -128,6 +98,7 @@ function cleanUp() {
 # This function should return 0 to cancel the interruption
 # or any other code to continue interrupting the program.
 # It is called on signal SIGINT and SIGQUIT.
+# It does not have to be defined.
 # shellcheck disable=SC2317
 onInterrupt() {
   return 0
@@ -136,6 +107,7 @@ onInterrupt() {
 # This function should return 0 to cancel the termination
 # or any other code to interrupt the program.
 # It is called on signal SIGHUP and SIGTERM.
+# It does not have to be defined.
 # shellcheck disable=SC2317
 onTerminate() {
   return 0

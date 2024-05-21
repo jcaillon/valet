@@ -28,7 +28,7 @@ function testString::bumpSemanticVersion() {
   echo "→ bumping 1.2.3-alpha patch false"
   string::bumpSemanticVersion "1.2.156-alpha" "patch" "false" && echo "${RETURNED_VALUE}"
 
-  endTest "Testing string::bumpSemanticVersion" 0
+  test::endTest "Testing string::bumpSemanticVersion" 0
 }
 
 function testString::camelCaseToSnakeCase() {
@@ -40,7 +40,7 @@ function testString::camelCaseToSnakeCase() {
   echo "→ string::camelCaseToSnakeCase AnotherTest"
   string::camelCaseToSnakeCase AnotherTest && echo "${RETURNED_VALUE}"
 
-  endTest "Testing string::camelCaseToSnakeCase" 0
+  test::endTest "Testing string::camelCaseToSnakeCase" 0
 
 }
 
@@ -53,7 +53,7 @@ function testString::kebabCaseToSnakeCase() {
   echo "→ string::kebabCaseToSnakeCase --another-test"
   string::kebabCaseToSnakeCase --another-test && echo "${RETURNED_VALUE}"
 
-  endTest "Testing string::kebabCaseToSnakeCase" 0
+  test::endTest "Testing string::kebabCaseToSnakeCase" 0
 
 }
 
@@ -66,7 +66,7 @@ function testString::kebabCaseToCamelCase() {
   echo "→ string::kebabCaseToCamelCase --another-test"
   string::kebabCaseToCamelCase --another-test && echo "${RETURNED_VALUE}"
 
-  endTest "Testing string::kebabCaseToCamelCase" 0
+  test::endTest "Testing string::kebabCaseToCamelCase" 0
 
 }
 
@@ -79,7 +79,11 @@ function testString::trimAll() {
   echo "→ string::trimAll 'this is a command  '"
   string::trimAll 'this is a command  ' && echo "${RETURNED_VALUE}"
 
-  endTest "Testing string::trimAll" 0
+  echo
+  echo "→ string::trimAll '\t\nthis is a \tcommand  '"
+  string::trimAll $'\t\n''this is a '$'\t''command  ' && echo "${RETURNED_VALUE}"
+
+  test::endTest "Testing string::trimAll" 0
 
 }
 
@@ -107,7 +111,7 @@ line3 seems so\" 2 \$'\n'"
 line2 does it work on lines?
 line3 seems so" 2 $'\n' && echo "${RETURNED_VALUE}"
 
-  endTest "Testing string::cutField" 0
+  test::endTest "Testing string::cutField" 0
 }
 
 
@@ -130,7 +134,7 @@ function testString::indexOf() {
   echo "→ string::indexOf 'yesyes' 'yes' 5"
   string::indexOf 'yesyes' 'yes' 5 && echo "-1=${RETURNED_VALUE}"
   echo
-  endTest "Testing string::indexOf function" 0
+  test::endTest "Testing string::indexOf function" 0
 }
 
 # This function test the string::extractBetween function
@@ -163,7 +167,7 @@ function testString::extractBetween() {
   echo "→ string::extractBetween \"\${multilinetext}\" \"2 \" \$'\n'"
   string::extractBetween "${multilinetext}" "2 " $'\n' && echo "line two=⌜${RETURNED_VALUE}⌝"
 
-  endTest "Testing string::extractBetween function" 0
+  test::endTest "Testing string::extractBetween function" 0
 }
 
 function testString::count() {
@@ -173,7 +177,7 @@ function testString::count() {
   echo "→ string::count 'bonjour mon bon ami, bonne journée!' 'bo'"
   string::count 'bonjour mon bon ami, bonne journée!' 'bo' && echo "3=${RETURNED_VALUE}"
 
-  endTest "Testing string::count function" 0
+  test::endTest "Testing string::count function" 0
 }
 
 function testString::split() {
@@ -185,7 +189,7 @@ function testString::split() {
   echo "→ string::split 'one:two:three' '\\n'"
   string::split "one"$'\n'"two"$'\n'"three" $'\n' && echo "${RETURNED_ARRAY[*]}"
 
-  endTest "Testing string::split function" 0
+  test::endTest "Testing string::split function" 0
 }
 
 function testString::regexGetFirst() {
@@ -193,7 +197,7 @@ function testString::regexGetFirst() {
   string::regexGetFirst 'name: julien' 'name:[[:space:]]*([[:alnum:]]*)'
   echo "${RETURNED_VALUE}"
 
-  endTest "Testing string::regexGetFirst function" 0
+  test::endTest "Testing string::regexGetFirst function" 0
 }
 
 function testString::trim() {
@@ -213,7 +217,7 @@ function testString::trim() {
   echo "→ string::trim $'\n'$'\t''  hello'$'\n'$'\t'' '"
   string::trim $'\n'$'\t''  hello'$'\n'$'\t'' ' && echo "hello=⌜${RETURNED_VALUE}⌝"
 
-  endTest "Testing string::trim function" 0
+  test::endTest "Testing string::trim function" 0
 }
 
 function main() {

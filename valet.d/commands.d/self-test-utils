@@ -15,8 +15,8 @@ source io
 # $1: the text to add in the report file
 #
 # Usage:
-#   commentTest "This is a comment."
-function commentTest() {
+#   test::commentTest "This is a comment."
+function test::commentTest() {
   printf "%s\n\n" "${1:-}" >>"${_TEST_REPORT_FILE}"
 }
 
@@ -28,8 +28,8 @@ function commentTest() {
 # $3: (optional) a text to explain what is being tested
 #
 # Usage:
-#   endTest "Testing something" $?
-function endTest() {
+#   test::endTest "Testing something" $?
+function test::endTest() {
   local testTitle="${1:-}"
   local exitCode="${2:-}"
   local testDescription="${3:-}"
@@ -78,7 +78,7 @@ function endTest() {
   fi
 }
 
-function echoFileWithLineNumberSubstitution() {
+function test::echoFileWithLineNumberSubstitution() {
   local file="${1}"
   local line
   local IFS=$'\n'
@@ -294,12 +294,12 @@ function runTest() {
   # restore the important variables
   resetOriginalImportantVariables
 
-  # test if the user forgot to call endTest
+  # test if the user forgot to call test::endTest
   if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" || -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
     local content1 content2
     io::readFile "${_TEST_STANDARD_OUTPUT_FILE}" && content1="${RETURNED_VALUE}"
     io::readFile "${_TEST_STANDARD_ERROR_FILE}" && content2="${RETURNED_VALUE}"
-    core::fail "The test script ⌜${testScript}⌝ did not call endTest OR it had outputs after the last endTest call."$'\n'"Standard output"$'\n'"⌜${content1}⌝"$'\n'"Error output:"$'\n'"⌜${content2}⌝"
+    core::fail "The test script ⌜${testScript}⌝ did not call test::endTest OR it had outputs after the last test::endTest call."$'\n'"Standard output"$'\n'"⌜${content1}⌝"$'\n'"Error output:"$'\n'"⌜${content2}⌝"
   fi
 
 }
