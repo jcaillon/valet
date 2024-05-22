@@ -36,5 +36,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - Try to add a variable that allows to output the logs to a given file in addition to &2 and we generate a unique file for each time valet is run.
 - On release:
   - Update `docs/static/config.md`
+  - Add the built-in commands help in the docs.
+- Add test:: and also add a snippet to create a new function.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues
