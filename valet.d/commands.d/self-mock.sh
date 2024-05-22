@@ -30,6 +30,7 @@ arguments:
 
     - error
     - fail
+    - fail2
     - exit
     - unknown-command
     - create-temp-files
@@ -49,6 +50,9 @@ function selfMock1() {
     ;;
   fail)
     core::fail "This is for testing valet core functions, failing now."
+    ;;
+  fail2)
+    core::fail2 255 "This is for testing valet core functions, failing now with exit code 255."
     ;;
   exit)
     # shellcheck disable=SC2317

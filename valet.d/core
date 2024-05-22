@@ -482,6 +482,22 @@ function core::fail() {
   exit 1
 }
 
+# Displays an error message and then exit the program with error.
+#
+# $1: the exit code to use, should be between 1 and 255
+# $2+: the error message to display
+#
+# Usage:
+#   core::fail2 255 "This is an error message."
+function core::fail2() {
+  local exitCode="${1}"
+  shift
+  log::error "$@"
+  # shellcheck disable=SC2034
+  GLOBAL_ERROR_DISPLAYED=1
+  exit "${exitCode}"
+}
+
 # Displays an error message.
 # You probably want to exit immediately after an error and should consider using core::fail function instead.
 #

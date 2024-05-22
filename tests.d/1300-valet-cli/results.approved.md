@@ -292,6 +292,23 @@ Failed as expected.
 ERROR    This is for testing valet core functions, failing now.
 ```
 
+### Testing fail2 function
+
+Exit code: `1`
+
+**Standard** output:
+
+```plaintext
+→ valet self mock1 fail2
+Failed as expected with code 255.
+```
+
+**Error** output:
+
+```log
+ERROR    This is for testing valet core functions, failing now with exit code 255.
+```
+
 ### Testing unknown command handling
 
 Exit code: `1`

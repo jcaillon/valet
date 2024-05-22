@@ -20,6 +20,11 @@ function testEventHandlers() {
   ("${GLOBAL_VALET_HOME}/valet" self mock1 fail) || echo "Failed as expected."
   test::endTest "Testing fail function" 1
 
+  # testing the fail2 function
+  echo "→ valet self mock1 fail2"
+  ("${GLOBAL_VALET_HOME}/valet" self mock1 fail2) || echo "Failed as expected with code $?."
+  test::endTest "Testing fail2 function" 1
+
   # testing the unknown command handler
   echo "→ valet self mock1 unknown-command"
   ("${GLOBAL_VALET_HOME}/valet" self mock1 unknown-command 2> "${GLOBAL_TEST_TEMP_FILE}") || echo "Failed as expected."
