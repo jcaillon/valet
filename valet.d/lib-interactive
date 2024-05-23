@@ -86,7 +86,7 @@ function interactive::askForConfirmationRaw() {
 #   True or false in the global variable RETURNED_VALUE.
 #
 # Usage:
-#  interactive::promptYesNo "Do you want to continue?" && local answer="${RETURNED_VALUE}"
+#  if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
 function interactive::promptYesNo() {
   interactive::displayQuestion "${1}"
   interactive::promptYesNoRaw "${2:-true}"

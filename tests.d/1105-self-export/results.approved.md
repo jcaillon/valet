@@ -20,7 +20,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ selfExport -l string,array
+→ selfExport -a
 successfully output to file
 ```
 

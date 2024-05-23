@@ -177,13 +177,7 @@ More useful function are accessible by including a Valet library in your script 
 source string
 ```
 
-You can find a list of [all the libraries here][libraries]
-
-{{< callout type="info" >}}
-All Valet functions are prefixed with the library name. E.g. the function `string::cutField` is from the `string` library.
-{{< /callout >}}
-
-The bash built-in `source` is overridden by a function in Valet. This allows to not source the same file twice, so you can safely call `source mylibrary` several times without impacting the runtime performance. If you need to use the default source keyword, use `builtin source`.
+You can find a list of [all the libraries here][libraries].
 
 #### Error handling and return values
 
