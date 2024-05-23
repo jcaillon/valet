@@ -13,8 +13,8 @@ function testSelfExport() {
   fi
   test::endTest "Testing selfExport" 0
 
-  echo "→ selfExport -l string,array"
-  selfExport -l string,array 1>"${GLOBAL_TEST_TEMP_FILE}"
+  echo "→ selfExport -a"
+  selfExport -a 1>"${GLOBAL_TEST_TEMP_FILE}"
 
   if [[ -s "${GLOBAL_TEST_TEMP_FILE:-}" ]]; then
     echo "successfully output to file"

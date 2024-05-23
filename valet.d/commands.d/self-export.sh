@@ -29,13 +29,11 @@ description: |-
 
   This will export all the necessary functions and variables to use the Valet log library by default.
 
-  You can also use this command to export additional libraries if needed.
+  You can optionally export all the functions if needed.
 options:
-- name: -l, --additional-libraries <libraries>
+- name: -a, --export-all
   description: |-
-    A comma separated list of libraries to export.
-
-    E.g. -l string,array
+    Export all the libraries.
 ---"
 function selfExport() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
@@ -58,20 +56,19 @@ function selfExport() {
   exportFunctionsForLibrary string
   output+="${RETURNED_VALUE//declare -? /}"$'\n'
 
-  # export additional libraries if needed
-  if [[ -n "${additionalLibraries:-}" ]]; then
-    local IFS=','
+  # export all libraries
+  if [[ ${exportAll:-} == "true" ]]; then
     local library
-    for library in ${additionalLibraries}; do
+    for library in "${GLOBAL_VALET_HOME}/valet.d/lib-"*; do
       local -i lineNumber=0
 
       # read the library file line by line
-      while IFS=$'\n' read -r line; do
+      while IFS=$'\n' read -r line|| [[ -n ${line:-} ]]; do
         if [[ ${lineNumber} -gt 1 && ${line} != "source "* ]]; then
           output+="${line}"$'\n'
         fi
         lineNumber+=1
-      done < "${GLOBAL_VALET_HOME}/valet.d/lib-${library}"
+      done < "${library}"
     done
   fi
 

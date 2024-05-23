@@ -22,7 +22,7 @@ function extractCommandYamls() {
 
   local line content
   local -i firstLineMatched=0 lastLineMatched=1
-  while IFS= read -r line; do
+  while IFS= read -r line || [[ -n ${line:-} ]]; do
     if [[ firstLineMatched -eq 0 ]]; then
       if [[ ${line} == "${firstLine}" ]]; then
         firstLineMatched=1
