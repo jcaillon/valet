@@ -788,6 +788,7 @@ function core::reloadUserCommands() {
 # Allows to soft wrap the given text at the given width.
 # Wrapping is done at word boundaries.
 # Optionally applies left padding to each new line.
+#
 # $1: the text to wrap
 # $2: the width to wrap the text at
 # $3: the padding to apply to each new line (default to 0)
@@ -847,6 +848,7 @@ function string::wrapText() {
 
 # Allows to soft wrap the given sentence (without new lines) at the given width.
 # Optionally applies a prefix on each new line.
+#
 # $1: the text to wrap
 # $2: the width to wrap the text at
 # $3: the prefix to apply to each new line (default to "")

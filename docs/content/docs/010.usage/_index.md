@@ -50,7 +50,7 @@ Additionally, at the beginning of its execution, Valet will `source` a file name
 
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../installation" title="Installation" >}}
-  {{< card icon="arrow-circle-right" link="../Configuration" title="Valet configuration" >}}
+  {{< card icon="arrow-circle-right" link="../configuration" title="Valet configuration" >}}
 {{< /cards >}}
 
 [new-commands]: ../new-commands

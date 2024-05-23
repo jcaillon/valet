@@ -30,6 +30,9 @@ description: |-
   Let the user know what to do next.
 ---"
 function selfSetup() {
+  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+
   log::info "Now setting up Valet."
 
   printf '%s\n' "─────────────────────────────────────"

@@ -32,11 +32,12 @@ This page lists the features that I would like to implement in Valet. They come 
 - Betters checks in self build!
 - Support alternative single comments `# ## VALET COMMAND` instead of multiline comments for command declaration (see we can have help in autocompletion).
 - A command can declare dependencies to auto check if some tools are installed before running the command.
-- Generate vscode snippets from each function in core and lib-* to provide autocompletion for users.
 - Try to add a variable that allows to output the logs to a given file in addition to &2 and we generate a unique file for each time valet is run.
 - On release:
   - Update `docs/static/config.md`
   - Add the built-in commands help in the docs.
 - Add test:: and also add a snippet to create a new function.
+- Generate vscode snippets from each function in core and lib-* to provide autocompletion for users.
+  Alternatively, generate a single sh containing all the function definitions with comments...
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

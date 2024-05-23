@@ -171,11 +171,19 @@ In the function of a command, you have access by default to a set of Valet funct
 - All the core functions, i.e. function starting with `core::`. See the [core library documentation page][core-library] for more available functions.
 - All the log functions, i.e. function starting with `log::`. See the [core library documentation page][core-library] for more available functions.
 
-More useful function are accessible by including a Valet library in your script or command function:
+More useful function are accessible by including a Valet library in your script or command function. For this, you need to _source_ the library that you need, e.g.:
 
 ```bash
 source string
 ```
+
+You can find a list of [all the libraries here][libraries]
+
+{{< callout type="info" >}}
+All Valet functions are prefixed with the library name. E.g. the function `string::cutField` is from the `string` library.
+{{< /callout >}}
+
+The bash built-in `source` is overridden by a function in Valet. This allows to not source the same file twice, so you can safely call `source mylibrary` several times without impacting the runtime performance. If you need to use the default source keyword, use `builtin source`.
 
 #### Error handling and return values
 
@@ -221,7 +229,9 @@ You can also revert these bash options in your function. However, they are very 
 
 #### Implementation tips
 
- The section [performance tips][performance-tips] gives you pointer to write scripts that are fast to execute.
+The section [performance tips][performance-tips] gives you pointer to write scripts that are fast to execute.
+
+You don't have to remember all the Valet functions or look at the documentation every 5s: check [this section][work-on-bash-scripts] to learn how to configure VScode to have autocompletion on all Valet functions.
 
 ### 🧪 (optional) Test your command
 
@@ -271,3 +281,4 @@ You can activate the debug log level with Valet `-v` option, e.g. `valet -v my c
 [core-library]: ../core-library
 [bash-manual-set]: https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html#index-set
 [profiler-output-example]: https://github.com/jcaillon/valet/blob/main/tests.d/1301-profiler/results.approved.md
+[libraries]: ../libraries

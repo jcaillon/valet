@@ -905,6 +905,8 @@ COMMANDS
       Re-build the menu of valet from your commands.
   self config
       Open the configuration file of Valet with your default editor.
+  self export
+      Returns a string that can be evaluated to have Valet functions in bash.
   self mock1
       A command that only for testing valet core functions.
   self mock2
