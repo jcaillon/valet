@@ -52,7 +52,7 @@ function selfMock1() {
     core::fail "This is for testing valet core functions, failing now."
     ;;
   fail2)
-    core::fail2 255 "This is for testing valet core functions, failing now with exit code 255."
+    core::failWithCode 255 "This is for testing valet core functions, failing now with exit code 255."
     ;;
   exit)
     # shellcheck disable=SC2317
