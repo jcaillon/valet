@@ -17,7 +17,6 @@ fi
 : "---
 command: self config
 function: selfConfig
-hideInMenu: true
 author: github.com/jcaillon
 shortDescription: Open the configuration file of Valet with your default editor.
 description: |-

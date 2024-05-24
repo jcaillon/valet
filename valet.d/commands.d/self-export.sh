@@ -89,23 +89,17 @@ function selfExport() {
 function exportFunctionsForLibrary() {
   local libraryName="${1}"
 
-  io::invoke declare -F
-  local listOfFunctions="${RETURNED_VALUE//declare -? /}"
-
-  listOfFunctions="${listOfFunctions//$'\n'/ }"
-  local -a filteredListOfFunctions=()
-  for function in ${listOfFunctions}; do
-    if [[ "${function}" == "${libraryName}::"* ]]; then
-      filteredListOfFunctions+=("${function}")
-    fi
-  done
+  io::invoke compgen -A 'function' "${libraryName}::"
+  local filteredListOfFunctions="${RETURNED_VALUE//$'\n'/ }"
 
   # leave if empty
-  if [[ ${#filteredListOfFunctions[@]} -eq 0 ]]; then
+  if [[ -z ${filteredListOfFunctions} ]]; then
     return 1
   fi
 
-  io::invoke declare -f "${filteredListOfFunctions[@]}"
+  local IFS=' '
+  # shellcheck disable=SC2086
+  io::invoke declare -f ${filteredListOfFunctions}
 
   RETURNED_VALUE="${RETURNED_VALUE//declare -? /}"
 

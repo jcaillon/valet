@@ -49,7 +49,7 @@ echo "${MY_GLOBAL_VAR}"
 
 Using a global variable seem to be a bad idea and can lead to confusion in the code if you are not rigorous. But the cost in performance of the first solution is huge (try to time these 2 codes in 1000 iterations).
 
-Avoid code mistakes by deciding on 1 global variable for all your functions and always assign this variable in each return path of a function (otherwise you might use a value from a previous function call!).
+Avoid code mistakes by deciding on 1 global variable for all your functions and always assign this variable in each return path of a function (otherwise you might use a value from a previous function call!). In valet, this variable is named `RETURNED_VALUE`.
 
 ## Read a whole file
 
@@ -68,6 +68,13 @@ echo "${myString}"
 ```
 
 > With this technique, the last line of the file is always read, even if it does not have a trailing newline.
+
+In valet, you can do:
+
+```bash
+io::readFile file
+echo "${RETURNED_VALUE}"
+```
 
 ## Read a file, line by line
 
@@ -115,6 +122,13 @@ do:
 ```bash
 tput cols 2>/dev/null 1> /tmp/file
 read -r myvar < /tmp/file
+```
+
+In valet, you can do:
+
+```bash
+io::invoke tput cols
+myvar="${RETURNED_VALUE}"
 ```
 
 ## Loop through line or fields of the content of a variable
