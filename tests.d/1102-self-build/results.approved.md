@@ -103,7 +103,6 @@ CMD_FUNCTION_NAME_self_release='selfRelease'
 CMD_FUNCTION_NAME_self_setup='selfSetup'
 CMD_FUNCTION_NAME_self_test='selfTest'
 CMD_FUNCTION_NAME_self_update='selfUpdate'
-CMD_HIDEINMENU_selfConfig='true'
 CMD_HIDEINMENU_selfExport='true'
 CMD_HIDEINMENU_selfMock1='true'
 CMD_HIDEINMENU_selfMock2='true'
@@ -241,7 +240,7 @@ INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-
 INFO                              ├── ⌜self test⌝.
 INFO     == Summary of the commands ==
 
-- Number of variables declared: ⌜200⌝.
+- Number of variables declared: ⌜199⌝.
 - Number of functions: ⌜13⌝.
 - Number of commands: ⌜12⌝.
 - Maximum sub command level: ⌜1⌝.
@@ -250,12 +249,12 @@ INFO     == Summary of the commands ==
 
 help            Show the help this program or of a specific command.
 self build      Re-build the menu of valet from your commands.
+self config     Open the configuration file of Valet with your default editor.
 self test       Test your valet custom commands.
 self update     Update valet using the latest release on GitHub.
 
 == List of all the hidden commands ==
 
-self config     Open the configuration file of Valet with your default editor.
 self export     Returns a string that can be evaluated to have Valet functions in bash.
 self mock1      A command that only for testing valet core functions.
 self mock2      A command that only for testing valet core functions.

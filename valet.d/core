@@ -1200,8 +1200,17 @@ if [[ ${VALET_VERY_VERBOSE:-} == "true" ]]; then
   log::setLevel trace
 fi
 if [[ -n "${VALET_CONFIG_LOG_FD:-}" ]]; then
+  _INVALID_FD=false
   # make sure the file descriptor is valid
-  if ! { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+  if [[ ! "${VALET_CONFIG_LOG_FD}" =~ ^[0-9]+$ ]]; then
+    # it is a file
+    if ! { : >>"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+      _INVALID_FD=true
+    fi
+  elif ! { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+    _INVALID_FD=true
+  fi
+  if [[ ${_INVALID_FD} == "true" ]]; then
     _ORIGINAL_FD="${VALET_CONFIG_LOG_FD}"
     VALET_CONFIG_LOG_FD=2
     core::fail "The file descriptor VALET_CONFIG_LOG_FD=⌜${_ORIGINAL_FD}⌝ is not valid."

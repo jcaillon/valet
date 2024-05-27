@@ -352,6 +352,7 @@ Exit code: `0`
 ▶ received array was:
 ⌈help            Show the help this program or of a specific command.
 self build      Re-build the menu of valet from your commands.
+self config     Open the configuration file of Valet with your default editor.
 self test       Test your valet custom commands.
 self update     Update valet using the latest release on GitHub.⌉
 ```
@@ -874,6 +875,7 @@ Exit code: `0`
 ▶ called main::showInteractiveCommandsMenu self Please select the command to run. FILTERED_COMMANDS_FOR_SUB_MENU⌉
 ▶ received array was:
 ⌈self build      Re-build the menu of valet from your commands.
+self config     Open the configuration file of Valet with your default editor.
 self test       Test your valet custom commands.
 self update     Update valet using the latest release on GitHub.⌉
 ```
