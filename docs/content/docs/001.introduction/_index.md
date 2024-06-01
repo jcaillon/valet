@@ -10,7 +10,7 @@ url: /docs/introduction
 
 Valet is a framework that helps you build CLI applications in bash.
 
-This tool was initially created to resolve the following problem:
+This tool was initially created to solve the following problem:
 
 > I am building a set of bash scripts to automate various tasks. In each of these scripts, I am writing the same functions to log messages, parse the arguments, display an usage text, handle errors etc... I need generic functions that do these jobs for me, and which I can source in each of my scripts.
 

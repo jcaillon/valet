@@ -145,6 +145,11 @@ In addition to the test scripts, you can create other specific scripts which wil
 | `tests.d/before-each-test-suite` | Source'd before the execution of each test suite. |
 | `tests.d/after-each-test-suite` | Source'd after the execution of each test suite. |
 
+{{< cards >}}
+  {{< card icon="arrow-circle-left" link="../command-properties" title="Command properties" >}}
+  {{< card icon="arrow-circle-right" link="../libraries" title="Libraries" >}}
+{{< /cards >}}
+
 [valet-test-suites]: https://github.com/jcaillon/valet/tree/main/tests.d
 [valet-string-tests-report]: https://github.com/jcaillon/valet/blob/main/tests.d/1003-lib-string/results.approved.md
 [valet-string-lib-tests]: https://github.com/jcaillon/valet/blob/main/tests.d/1003-lib-string/00.tests.sh

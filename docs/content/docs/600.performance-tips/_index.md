@@ -174,3 +174,7 @@ do:
 echo y 1> myfile
 doSomething <myfile
 ```
+
+{{< cards >}}
+  {{< card icon="arrow-circle-left" link="../work-on-bash-scripts" title="Work on bash scripts" >}}
+{{< /cards >}}

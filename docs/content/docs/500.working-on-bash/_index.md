@@ -56,3 +56,8 @@ This allows you to have autocompletion of the core and libraries functions from 
 - [Google shell style guidelines](https://google.github.io/styleguide/shellguide.html)
 - [Baeldung Linux scripting series](https://www.baeldung.com/linux/linux-scripting-series)
 - [Pure bash bible](https://github.com/dylanaraps/pure-bash-bible)
+
+{{< cards >}}
+  {{< card icon="arrow-circle-left" link="../libraries" title="Libraries" >}}
+  {{< card icon="arrow-circle-right" link="../performance-tips" title="Performance tips" >}}
+{{< /cards >}}

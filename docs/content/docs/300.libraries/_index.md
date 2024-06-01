@@ -39,10 +39,13 @@ For more details, please check the documentation on each library:
 {{< cards >}}
   {{< card link="ansi-codes" icon="code" title="ansi-code" subtitle="This library exports variables containing ASCII escape codes, enabling interactive programs." >}}
   {{< card link="array" icon="clipboard-list" title="array" subtitle="Functions to manipulate bash arrays." >}}
+  {{< card link="core" icon="star" title="core" subtitle="The core functions of Valet." >}}
   {{< card link="fsfs" icon="table" title="fsfs" subtitle="Functions to display a full screen fuzzy search, which is used for the Valet menus." >}}
   {{< card link="interactive" icon="cursor-click" title="interactive" subtitle="Functions to make your program interactive." >}}
   {{< card link="io" icon="lightning-bolt" title="io" subtitle="Functions for file manipulation, command execution..." >}}
   {{< card link="kurl" icon="cloud-download" title="kurl" subtitle="Wrapper functions around curl." >}}
+  {{< card link="log" icon="pencil-alt" title="log" subtitle="Logging functions." >}}
   {{< card link="string" icon="menu-alt-2" title="string" subtitle="Functions for string manipulation." >}}
   {{< card link="system" icon="desktop-computer" title="system" subtitle="Functions to get system/user information." >}}
 {{< /cards >}}
+
