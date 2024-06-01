@@ -10,15 +10,19 @@ source ansi-codes
 # >>> Interactive prompts
 #===============================================================
 
+# ##  interactive::askForConfirmation
+#
 # Ask the user to press the button to continue.
 #
-# $1: the prompt to display
+# - 1: the prompt to display
 #
 # Returns:
-#   Returns 0 if the user pressed enter, 1 otherwise.
 #
-# Usage:
-#  interactive::askForConfirmation "Press enter to continue."
+# - $?: 0 if the user pressed enter, 1 otherwise.
+#
+# ```bash
+# interactive::askForConfirmation "Press enter to continue."
+# ```
 function interactive::askForConfirmation() {
   interactive::displayQuestion "${1}"
   interactive::askForConfirmationRaw
@@ -26,13 +30,19 @@ function interactive::askForConfirmation() {
   return 0
 }
 
+# ## interactive::askForConfirmationRaw
+#
 # Ask the user to press the button to continue.
 #
-# Returns:
-#   Returns 0 if the user pressed enter, 1 otherwise.
+# This raw version does not display the prompt or the answer.
 #
-# Usage:
-#  interactive::askForConfirmationRaw
+# Returns:
+#
+# - $?: 0 if the user pressed enter, 1 otherwise.
+#
+# ```bash
+# interactive::askForConfirmationRaw
+# ```
 function interactive::askForConfirmationRaw() {
   # colors
   local styleActiveButton
@@ -50,7 +60,6 @@ function interactive::askForConfirmationRaw() {
     "   (O)K   " \
     "${AC__TEXT_RESET}${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
 
-  local keyPressed
   while true; do
     # wait and handle key press
     if interactive::waitForKey -t 1; then
@@ -73,20 +82,25 @@ function interactive::askForConfirmationRaw() {
   return 0
 }
 
-# Ask the user to yes or no.
-# The user can switch between the two options with the arrow keys or space.
-# The user can validate the choice with the enter key.
-# The user can also validate immediately with the y or n key.
+# ## interactive::promptYesNo
 #
-# $1: the prompt to display
-# $2: (optional) the default value (true or false) - defaults to true
+# Ask the user to yes or no.
+#
+# - The user can switch between the two options with the arrow keys or space.
+# - The user can validate the choice with the enter key.
+# - The user can also validate immediately with the y or n key.
+#
+# - $1: the prompt to display
+# - $2: (optional) the default value (true or false) - defaults to true
 #
 # Returns:
-#   Returns 0 if true, 1 if false.
-#   True or false in the global variable RETURNED_VALUE.
 #
-# Usage:
-#  if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
+# - $?: 0 if true, 1 if false.
+# - `RETURNED_VALUE`: true or false.
+#
+# ```bash
+# if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
+# ```
 function interactive::promptYesNo() {
   interactive::displayQuestion "${1}"
   interactive::promptYesNoRaw "${2:-true}"
@@ -102,19 +116,26 @@ function interactive::promptYesNo() {
   return 1
 }
 
+# ## interactive::promptYesNoRaw
+#
 # Ask the user to yes or no.
-# The user can switch between the two options with the arrow keys or space.
-# The user can validate the choice with the enter key.
-# The user can also validate immediately with the y or n key.
+#
+# - The user can switch between the two options with the arrow keys or space.
+# - The user can validate the choice with the enter key.
+# - The user can also validate immediately with the y or n key.
+#
+# This raw version does not display the prompt or the answer.
 #
 # $1: (optional) the default value (true or false) - defaults to true
 #
 # Returns:
-#   Returns 0 if true, 1 if false.
-#   True or false in the global variable RETURNED_VALUE.
 #
-# Usage:
-#  interactive::promptYesNoRaw "Do you want to continue?" && local answer="${RETURNED_VALUE}"
+# - $?: 0 if true, 1 if false.
+# - `RETURNED_VALUE`: true or false.
+#
+# ```bash
+# interactive::promptYesNoRaw "Do you want to continue?" && local answer="${RETURNED_VALUE}"
+# ```
 function interactive::promptYesNoRaw() {
   local state=${1:-true}
 
@@ -133,7 +154,7 @@ function interactive::promptYesNoRaw() {
 
   printf '%s' "${AC__CURSOR_HIDE}"
 
-  local keyPressed yesColor noColor
+  local yesColor noColor
   while true; do
     if [[ ${state} == "true" ]]; then
       yesColor="${styleActiveButton}"
@@ -190,50 +211,61 @@ function interactive::promptYesNoRaw() {
   return 1
 }
 
+# ## interactive::displayQuestion
+#
 # Displays a question to the user.
 #
-# $1: the prompt to display
-# $2: (optional) the maximum width of the dialog box
+# The text is wrapped and put inside a box like so:
 #
-# Usage:
-#  interactive::displayPrompt "Do you want to continue?"
-#
-# Notes:
-#   The text is wrapped and put inside a box like so:
-#
+# ```text
 #   ┌────────────┐
 #   │ My prompt. │
 #   └────────────┘\
-interactive::displayQuestion() {
+# ```
+#
+# - $1: the prompt to display
+# - $2: (optional) the maximum width of the dialog box
+#
+# ```bash
+# interactive::displayPrompt "Do you want to continue?"
+# ```
+function interactive::displayQuestion() {
   interactive::displayDialogBox "system" "${1}" "${2:-}"
 }
 
+# ## interactive::displayAnswer
+#
 # Displays an answer to a previous question.
 #
-# $1: the answer to display
-# $2: (optional) the maximum width of the dialog box
+# The text is wrapped and put inside a box like so:
 #
-# Usage:
-#  interactive::displayPrompt "Do you want to continue?"
-#
-# Notes:
-#   The text is wrapped and put inside a box like so:
-#
+# ```text
 #  ┌────────────┐
 #  │ My answer. │
 # /└────────────┘
-interactive::displayAnswer() {
+# ```
+#
+# - $1: the answer to display
+# - $2: (optional) the maximum width of the dialog box
+#
+# ```bash
+# interactive::displayAnswer "My answer."
+# ```
+function interactive::displayAnswer() {
   interactive::displayDialogBox "user" "${1}" "${2:-}"
 }
 
+# ## interactive::displayDialogBox
+#
 # Displays a dialog box with a speaker and a text.
 #
-# $1: the speaker (system or user)
-# $2: the text to display
-# $3: (optional) the maximum width of the dialog box
+# - $1: the speaker (system or user)
+# - $2: the text to display
+# - $3: (optional) the maximum width of the dialog box
 #
-# Usage:
-#   interactive::displayDialogBox "system" "This is a system message."
+# ```bash
+# interactive::displayDialogBox "system" "This is a system message."
+# ```
 interactive::displayDialogBox() {
   local speaker="${1}"
   local text="${2}"
@@ -276,11 +308,14 @@ interactive::displayDialogBox() {
 # >>> Interactive utilities
 #===============================================================
 
+# ## interactive::testKeys
+#
 # Wait for a user input and prints the character that bash sees.
 # Useful to program key bindings.
 #
-# Usage:
-#   interactive::testKeys
+# ```bash
+# interactive::testKeys
+# ```
 function interactive::testKeys() {
   printf '%s\n' "Press any key to see the character that bash sees (CTRL + C to interrupt).${AC__CURSOR_HIDE}"
   while true; do
@@ -291,21 +326,27 @@ function interactive::testKeys() {
   done
 }
 
+# ## interactive::waitForKey
+#
 # Wait for a user input (single key).
 # You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
+#
 # Some special keys are translated into more readable strings:
 # UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
 #
+# - $@: additional parameters to pass to the read command
+#
 # Returns:
-#   Returns 0 if a key was pressed, 1 otherwise.
-#   The key pressed in the global variable LAST_KEY_PRESSED.
 #
-# Usage:
-#   interactive::waitForKey
-#   interactive::waitForKey -t 0.1
+# - $?: 0 if a key was pressed, 1 otherwise.
+# - `LAST_KEY_PRESSED`: the key pressed.
 #
-# Notes:
-#   https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences
+# ```bash
+# interactive::waitForKey
+# interactive::waitForKey -t 0.1
+# ```
+#
+# > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>
 function interactive::waitForKey() {
   IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || return 1
   # special key detection, need to read more characters (up to 4 for F1-F12 keys)
@@ -345,15 +386,18 @@ function interactive::waitForKey() {
   return 0
 }
 
+# ## interactive::createSpace
+#
 # This function creates some new lines after the current cursor position.
 # Then it moves back to its original position.
 # This effectively creates a space in the terminal (scroll up if we are at the bottom).
 # It does not create more space than the number of lines in the terminal.
 #
-# $1: the number of lines to create
+# - $1: the number of lines to create
 #
-# Usage:
-#   interactive::createSpace 5
+# ```bash
+# interactive::createSpace 5
+# ```
 function interactive::createSpace() {
   local -i lines="${1}"
   lines=$((lines - 1 > GLOBAL_LINES ? GLOBAL_LINES : lines - 1))
@@ -363,13 +407,18 @@ function interactive::createSpace() {
   printf '%s' "${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${newLines}${AC__CURSOR_MOVE__}${lines}${__AC__START_OF_LINE_UP}"
 }
 
+# ## interactive::getCursorPosition
+#
 # Get the current cursor position.
 #
 # Returns:
-#   The cursor position in the global variables CURSOR_LINE and CURSOR_COLUMN.
 #
-# Usage:
-#   interactive::getCursorPosition
+# - `CURSOR_LINE`: the line number
+# - `CURSOR_COLUMN`: the column number
+#
+# ```bash
+# interactive::getCursorPosition
+# ```
 function interactive::getCursorPosition() {
   local escapeCode IFS
   # we request the position and first read \e[
@@ -378,14 +427,19 @@ function interactive::getCursorPosition() {
   IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || :
 }
 
+# ## interactive::switchToFullScreen
+#
 # Call this function to start an interactive session in full screen mode.
 # This function will switch to the alternate screen, hide the cursor and clear the screen.
 # It will also disable echoing when we type something.
+#
 # You should call interactive::switchBackFromFullScreen at the end of the interactive session.
+#
 # In the alternate screen, we don't see the error messages so we capture them somewhere else.
 #
-# Usage:
-#   interactive::switchToFullScreen
+# ```bash
+# interactive::switchToFullScreen
+# ```
 function interactive::switchToFullScreen() {
   if [[ ! -t 2 ]]; then
     core::fail "This function can only be used in an interactive session. Did you already called interactive::switchBackFromFullScreen?"
@@ -404,13 +458,17 @@ function interactive::switchToFullScreen() {
   exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
 }
 
-# Call this function to switch back from the full screen mode.
-# This function will restore the terminal state and show the cursor.
-# It will also restore the key echoing.
-# If there were error messages during the interactive session, they will be displayed at the end.
+# ## interactive::switchBackFromFullScreen
 #
-# Usage:
-#   interactive::switchBackFromFullScreen
+# Call this function to switch back from the full screen mode.
+#
+# - This function will restore the terminal state and show the cursor.
+# - It will also restore the key echoing.
+# - If there were error messages during the interactive session, they will be displayed at the end.
+#
+# ```bash
+# interactive::switchBackFromFullScreen
+# ```
 function interactive::switchBackFromFullScreen() {
   if [[ -t 2 ]]; then
     # already in the normal terminal mode

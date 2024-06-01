@@ -10,25 +10,31 @@ set -Eeu -o pipefail
 # shellcheck source=../lib-io
 source io
 
+# ## test::commentTest
+#
 # Call this function to add a paragraph in the report file.
 #
-# $1: the text to add in the report file
+# - $1: the text to add in the report file
 #
-# Usage:
-#   test::commentTest "This is a comment."
+# ```bash
+# test::commentTest "This is a comment."
+# ```
 function test::commentTest() {
   printf "%s\n\n" "${1:-}" >>"${_TEST_REPORT_FILE}"
 }
 
+# ## test::endTest
+#
 # Call this function after each test to write the test results to the report file.
 # This create a new H3 section in the report file with the test description and the exit code.
 #
-# $1: the title of the test
-# $2: the exit code of the test
-# $3: (optional) a text to explain what is being tested
+# - $1: the title of the test
+# - $2: the exit code of the test
+# - $3: (optional) a text to explain what is being tested
 #
-# Usage:
+# ```bash
 #   test::endTest "Testing something" $?
+# ```
 function test::endTest() {
   local testTitle="${1:-}"
   local exitCode="${2:-}"
