@@ -58,7 +58,7 @@ if (document.documentElement.style.colorScheme === "dark") {
   {{< hextra/feature-card
     link="showcase"
     icon="cursor-click"
-    title="Interactively to execute your commands"
+    title="Interactively execute your commands"
     subtitle="Find all your commands in a convenient menu with fuzzy finding capabilities. Get prompted for missing arguments or options to make your commands easy to use."
     class="hx-aspect-auto md:hx-aspect-[1.1/1] max-md:hx-min-h-[340px]"
     style="background: radial-gradient(ellipse at 50% 80%,rgba(194,97,254,0.15),hsla(0,0%,100%,0));"

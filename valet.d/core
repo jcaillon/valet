@@ -34,7 +34,7 @@ if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_S
   # shellcheck source=/dev/null
   source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
 fi
-test::commentTest
+
 #===============================================================
 # >>> Temporay files and folders
 #===============================================================
