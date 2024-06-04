@@ -576,7 +576,7 @@ function io::countArgs() {
 # - $1: the directory to list
 # - $2: (optional) true to list recursively, false otherwise (default to false)
 # - $3: (optional) true to list hidden paths, false otherwise (default to false)
-# - $4: (optional) a function name that is called to filter the paths
+# - $4: (optional) a function name that is called to filter the paths that will be listed
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 # - $5: (optional) a function name that is called to filter the directories (for recursive listing)
@@ -588,7 +588,7 @@ function io::countArgs() {
 # - `RETURNED_ARRAY`: An array with the list of all the paths.
 #
 # ```bash
-# io::listPaths "/path/to/directory" "true" "myFilterFunction"
+# io::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
 # for path in "${RETURNED_ARRAY[@]}"; do
 #   printf '%s' "${path}"
 # done
@@ -640,4 +640,62 @@ function io::listPaths() {
   if [[ ${activatedHidden} == "true" ]]; then
     shopt -u dotglob
   fi
+}
+
+# ## io::listFiles
+#
+# List all the files in the given directory.
+#
+# - $1: the directory to list
+# - $2: (optional) true to list recursively, false otherwise (default to false)
+# - $3: (optional) true to list hidden paths, false otherwise (default to false)
+# - $4: (optional) a function name that is called to filter the directories (for recursive listing)
+#       The function should return 0 if the path is to be kept, 1 otherwise.
+#       The function is called with the path as the first argument.
+#
+# Returns:
+#
+# - `RETURNED_ARRAY`: An array with the list of all the files.
+#
+# ```bash
+# io::listFiles "/path/to/directory" true true myFilterFunction
+# for path in "${RETURNED_ARRAY[@]}"; do
+#   printf '%s' "${path}"
+# done
+# ```
+function io::listFiles() {
+  # shellcheck disable=SC2317
+  function ioListFilesReturnTrueIfFile() {
+    if [[ ! -f ${1} ]]; then return 1; fi
+  }
+  io::listPaths "${1}" "${2:-false}" "${3:-false}" ioListFilesReturnTrueIfFile "${4:-}"
+}
+
+# ## io::listDirectories
+#
+# List all the directories in the given directory.
+#
+# - $1: the directory to list
+# - $2: (optional) true to list recursively, false otherwise (default to false)
+# - $3: (optional) true to list hidden paths, false otherwise (default to false)
+# - $4: (optional) a function name that is called to filter the sub directories (for recursive listing)
+#       The function should return 0 if the path is to be kept, 1 otherwise.
+#       The function is called with the path as the first argument.
+#
+# Returns:
+#
+# - `RETURNED_ARRAY`: An array with the list of all the files.
+#
+# ```bash
+# io::listDirectories "/path/to/directory" true true myFilterFunction
+# for path in "${RETURNED_ARRAY[@]}"; do
+#   printf '%s' "${path}"
+# done
+# ```
+function io::listDirectories() {
+  # shellcheck disable=SC2317
+  function ioListDirectoriesReturnTrueIfDirectory() {
+    if [[ ! -d ${1} ]]; then return 1; fi
+  }
+  io::listPaths "${1}" "${2:-false}" "${3:-false}" ioListDirectoriesReturnTrueIfDirectory "${4:-}"
 }

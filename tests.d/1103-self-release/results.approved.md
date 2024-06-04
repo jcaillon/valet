@@ -16,18 +16,19 @@ Exit code: `0`
 
 ```log
 INFO     Dry run mode is enabled, no changes will be made.
+▶ called io::invoke git rev-parse HEAD
 INFO     The current version of valet is: 1.2.3.
 ▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
 INFO     The tag message is:
-# Release of version 1.2.3
-
-Changelog: 
-
-- ✨ feature
-- 🐞 fix
-
+   1 ░ # Release of version 1.2.3
+   2 ░ 
+   3 ░ Changelog: 
+   4 ░ 
+   5 ░ - ✨ feature
+   6 ░ - 🐞 fix
+   7 ░ 
 INFO     The new version of valet is: 2.0.0.
 SUCCESS  The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝.
 ```
@@ -55,26 +56,31 @@ parsingErrors=""
 githubReleaseToken="token"
 bumpLevel="minor"
 
+▶ called io::invoke git rev-parse HEAD
 DEBUG    Checking if the workarea is clean
 ▶ called io::invokef5 false 0   git update-index --really-refresh
 ▶ called io::invokef5 false 0   git diff-index --quiet HEAD
 INFO     The current version of valet is: 1.2.3.
+▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/static/config.md
+▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/300.libraries/*
+▶ called io::invoke git commit -m :memo: updating the documentation
+SUCCESS  The documentation update has been committed.
 ▶ called io::invoke sed -E -i s/VALET_VERSION="[0-9]+\.[^"]+"/VALET_VERSION="1.2.3"/ $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
 ▶ called io::invoke git commit -m :rocket: releasing version 1.2.3
-▶ called io::invoke git push origin main
 SUCCESS  The new version has been committed.
 ▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
 INFO     The tag message is:
-# Release of version 1.2.3
-
-Changelog: 
-
-- ✨ feature
-- 🐞 fix
-
+   1 ░ # Release of version 1.2.3
+   2 ░ 
+   3 ░ Changelog: 
+   4 ░ 
+   5 ░ - ✨ feature
+   6 ░ - 🐞 fix
+   7 ░ 
+▶ called io::invoke git push origin main
 ▶ called io::invoke git tag -a v1.2.3 -m Release version 1.2.3
 ▶ called io::invoke git push origin v1.2.3
 SUCCESS  The new version has been tagged and pushed to the remote repository.
