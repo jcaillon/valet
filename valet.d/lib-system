@@ -3,11 +3,18 @@ set -Eeu -o pipefail
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# Returns the name of the current OS.
-# Can be one of these values: "darwin", "linux", "windows".
+# ## system::getOsName
 #
-# Usage:
-#  system::getOsName && local osName="${RETURNED_VALUE}"
+# Returns the name of the current OS.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the name of the current OS: "darwin", "linux" or "windows".
+#
+# ```bash
+# system::getOsName
+# local osName="${RETURNED_VALUE}"
+# ```
 function system::getOsName() {
   local osName
   case "${OSTYPE:-}" in
@@ -19,17 +26,26 @@ function system::getOsName() {
   RETURNED_VALUE="${osName}"
 }
 
+# ## system::getEnvVars
+#
 # Get the list of all the environment variables.
 # In pure bash, no need for env or printenv.
 #
 # Returns:
-#   RETURNED_ARRAY: An array with the list of all the environment variables.
 #
-# Usage:
-#   system::getEnvVars
-#   for var in "${RETURNED_ARRAY[@]}"; do
-#       printf '%s=%s\n' "${var}" "${!var}"
-#   done
+# - `RETURNED_ARRAY`: An array with the list of all the environment variables.
+#
+# ```bash
+# system::getEnvVars
+# for var in "${RETURNED_ARRAY[@]}"; do
+#   printf '%s=%s\n' "${var}" "${!var}"
+# done
+# ```
+#
+# > This is faster than using mapfile on <(compgen -v).
 function system::getEnvVars() {
-  mapfile -t RETURNED_ARRAY < <(compgen -v)
+  RETURNED_ARRAY=()
+  for i in $(compgen -v); do
+    RETURNED_ARRAY+=("${i}")
+  done
 }

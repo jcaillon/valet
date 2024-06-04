@@ -6,22 +6,26 @@ set -Eeu -o pipefail
 # shellcheck source=lib-io
 source io
 
+# ##  kurl::toFile
+#
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
 # It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o ${2}.
 #
-# $1: true/false to indicate if the function should fail in case the execution fails
-# $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
-# $3: the file in which to save the output of curl
-# $4+: options for curl
+# - $1: true/false to indicate if the function should fail in case the execution fails
+# - $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
+# - $3: the file in which to save the output of curl
+# - $4+: options for curl
 #
 # Returns:
-#  The exit code of the function is 0 if the http status code is acceptable, 1 otherwise.
-#  The content of stderr in the global variable RETURNED_VALUE.
-#  The http status code in the global variable RETURNED_VALUE2.
 #
-# Usage:
-#  kurl::toFile "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
+# - $?: 0 if the http status code is acceptable, 1 otherwise.
+# - `RETURNED_VALUE`: the content of stderr
+# - `RETURNED_VALUE2`: the http status code
+#
+# ```bash
+# kurl::toFile "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
+# ```
 function kurl::toFile() {
   local failIfFails acceptableStatusCodes outputFile url
   failIfFails="${1:-false}"
@@ -49,9 +53,12 @@ function kurl::toFile() {
     log::debug "The http return code ⌜${httpStatusCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
   else
     exitCode=1
+    if log::isDebugEnabled || [[ ${failIfFails} == "true" ]]; then
+      log::errorTrace "Curl error output stream:"
+      log::printFileString "${errors}"
+    fi
     local message="The http return code ⌜${httpStatusCode}⌝ is not acceptable for url ⌜${url}⌝."
     if [[ ${failIfFails} == "true" ]]; then
-      message+=$'\n'"Error output:"$'\n'"⌜${errors}⌝"
       core::fail "${message}"
     fi
     log::debug "${message}"
@@ -62,22 +69,26 @@ function kurl::toFile() {
   return ${exitCode}
 }
 
+# ## kurl::toVar
+#
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
 # It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o "tempfile".
 #
-# $1: true/false to indicate if the function should fail in case the execution fails
-# $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
-# $3+: options for curl
+# - $1: true/false to indicate if the function should fail in case the execution fails
+# - $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
+# - $3+: options for curl
 #
 # Returns:
-#  The exit code of the function is 0 if the http status code is acceptable, 1 otherwise.
-#  The content of the request in the global variable RETURNED_VALUE.
-#  The content of stderr in the global variable RETURNED_VALUE2.
-#  The http status code in the global variable RETURNED_VALUE3.
 #
-# Usage:
-#  kurl::toVar false 200,201 https://example.com || core::fail "The curl command failed."
+# - $?: 0 if the http status code is acceptable, 1 otherwise.
+# - `RETURNED_VALUE`: the content of the request
+# - `RETURNED_VALUE2`: the content of stderr
+# - `RETURNED_VALUE3`: the http status code
+#
+# ```bash
+# kurl::toVar false 200,201 https://example.com || core::fail "The curl command failed."
+# ```
 function kurl::toVar() {
   local acceptableStatusCodes
   failIfFails="${1:-false}"
@@ -85,7 +96,7 @@ function kurl::toVar() {
   shift 2
 
   # reset the temporary file, only if needed
-  if [[ -s "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; then : > "${GLOBAL_TEMPORARY_WORK_FILE}"; fi
+  if [[ -s "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; then : >"${GLOBAL_TEMPORARY_WORK_FILE}"; fi
 
   local -i exitCode=0
   local errors httpStatusCode
