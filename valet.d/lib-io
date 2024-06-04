@@ -408,6 +408,25 @@ function io::readFile() {
   fi
 }
 
+## io::writeFile
+#
+# Write the content to a file.
+#
+# - $1: the file path to write
+# - $2: the name of the variable with the content to write
+#
+# ```bash
+# io::writeFile "/path/to/file" "myVariable"
+# ```
+#
+# > - This function will overwrite the file if it already exists.
+# > - If the file path does not exist, the function will create the directory tree.
+# > - The main use case is to be able to mock this function during tests...
+function io::writeFile() {
+  io::createFilePathIfNeeded "${1}"
+  printf '%s' "${!2}" >"${1}"
+}
+
 # ## io::checkAndFail
 #
 # Check last return code and fail (exit) if it is an error.

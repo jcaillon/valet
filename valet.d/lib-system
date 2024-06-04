@@ -3,7 +3,7 @@ set -Eeu -o pipefail
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# ## system::getOsName
+# ## system::os
 #
 # Returns the name of the current OS.
 #
@@ -12,10 +12,10 @@ set -Eeu -o pipefail
 # - `RETURNED_VALUE`: the name of the current OS: "darwin", "linux" or "windows".
 #
 # ```bash
-# system::getOsName
+# system::os
 # local osName="${RETURNED_VALUE}"
 # ```
-function system::getOsName() {
+function system::os() {
   local osName
   case "${OSTYPE:-}" in
     darwin*) osName="darwin";;
@@ -26,7 +26,7 @@ function system::getOsName() {
   RETURNED_VALUE="${osName}"
 }
 
-# ## system::getEnvVars
+# ## system::env
 #
 # Get the list of all the environment variables.
 # In pure bash, no need for env or printenv.
@@ -36,16 +36,38 @@ function system::getOsName() {
 # - `RETURNED_ARRAY`: An array with the list of all the environment variables.
 #
 # ```bash
-# system::getEnvVars
+# system::env
 # for var in "${RETURNED_ARRAY[@]}"; do
 #   printf '%s=%s\n' "${var}" "${!var}"
 # done
 # ```
 #
 # > This is faster than using mapfile on <(compgen -v).
-function system::getEnvVars() {
+function system::env() {
   RETURNED_ARRAY=()
   for i in $(compgen -v); do
     RETURNED_ARRAY+=("${i}")
   done
+}
+
+# ## system::date
+#
+# Get the current date in the given format.
+#
+# - $1: (optional) the format of the date to return (defaults to %(%F_%Hh%Mm%Ss)T).
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the current date in the given format.
+#
+# ```bash
+# system::date
+# local date="${RETURNED_VALUE}"
+# ```
+#
+# > This function avoid to call $(date) in a subshell (date is a an external executable).
+function system::date() {
+  local format="${1:-'%(%F_%Hh%Mm%Ss)T'}"
+  # shellcheck disable=SC2059
+  printf -v RETURNED_VALUE "${format}" "${EPOCHSECONDS}"
 }

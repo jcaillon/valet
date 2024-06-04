@@ -61,8 +61,9 @@ DEBUG    Checking if the workarea is clean
 ▶ called io::invokef5 false 0   git update-index --really-refresh
 ▶ called io::invokef5 false 0   git diff-index --quiet HEAD
 INFO     The current version of valet is: 1.2.3.
+▶ called io::writeFile $GLOBAL_VALET_HOME/docs/static/config.md CONFIG_FILE_CONTENT
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/static/config.md
-▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/300.libraries/*
+▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/000.core.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/010.ansi-codes.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/020.array.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/100.test.md
 ▶ called io::invoke git commit -m :memo: updating the documentation
 SUCCESS  The documentation update has been committed.
 ▶ called io::invoke sed -E -i s/VALET_VERSION="[0-9]+\.[^"]+"/VALET_VERSION="1.2.3"/ $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh

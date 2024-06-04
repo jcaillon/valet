@@ -3,29 +3,55 @@
 # shellcheck source=../../valet.d/lib-system
 source system
 
-function testSystem::getOsName() {
+function testSystem::os() {
 
-  echo "→ OSTYPE=linux-bsd system::getOsName"
-  OSTYPE=linux-bsd system::getOsName && echo "${RETURNED_VALUE}"
+  echo "→ OSTYPE=linux-bsd system::os"
+  OSTYPE=linux-bsd system::os && echo "${RETURNED_VALUE}"
   echo
 
-  echo "→ OSTYPE=msys system::getOsName"
-  OSTYPE=msys system::getOsName && echo "${RETURNED_VALUE}"
+  echo "→ OSTYPE=msys system::os"
+  OSTYPE=msys system::os && echo "${RETURNED_VALUE}"
   echo
 
-  echo "→ OSTYPE=darwin-stuff system::getOsName"
-  OSTYPE=darwin-stuff system::getOsName && echo "${RETURNED_VALUE}"
+  echo "→ OSTYPE=darwin-stuff system::os"
+  OSTYPE=darwin-stuff system::os && echo "${RETURNED_VALUE}"
   echo
 
-  echo "→ OSTYPE=nop system::getOsName"
-  OSTYPE=nop system::getOsName && echo "${RETURNED_VALUE}"
+  echo "→ OSTYPE=nop system::os"
+  OSTYPE=nop system::os && echo "${RETURNED_VALUE}"
   echo
 
-  test::endTest "Testing system::getOsName" 0
+  test::endTest "Testing system::os" 0
+}
+
+function testSystem::env() {
+
+  RETURNED_ARRAY=()
+  echo "→ system::env"
+  system::env
+  if (( ${#RETURNED_ARRAY[*]} > 0 )); then
+    echo "Found environment variables."
+  fi
+
+  test::endTest "Testing system::env" 0
+}
+
+function testSystem::date() {
+
+  echo "→ system::date"
+  system::date && echo "Returned date with length ${#RETURNED_VALUE}."
+  echo
+
+  echo "→ system::date %(%H:%M:%S)T"
+  system::date '%(%H:%M:%S)T' && echo "Returned date with length ${#RETURNED_VALUE}."
+
+  test::endTest "Testing system::date" 0
 }
 
 function main() {
-  testSystem::getOsName
+  testSystem::os
+  testSystem::env
+  testSystem::date
 }
 
 main

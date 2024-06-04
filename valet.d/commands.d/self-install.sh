@@ -82,7 +82,7 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
       printf "%-8s %s\n" "ERROR" "❌ $*"
       exit 1
     }
-    function system::getOsName() {
+    function system::os() {
       case "${OSTYPE:-}" in
       darwin*) RETURNED_VALUE="darwin" ;;
       linux*) RETURNED_VALUE="linux" ;;
@@ -126,7 +126,7 @@ function selfUpdate() {
   fi
 
   # get the os
-  system::getOsName
+  system::os
   local os="${RETURNED_VALUE}"
   log::info "The current OS is: ${os}."
 

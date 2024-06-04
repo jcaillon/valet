@@ -45,7 +45,7 @@ function io::invoke() {
   RETURNED_VALUE2=""
 }
 
-function interactive::askForConfirmation() {
+function interactive::promptYesNo() {
   return 0
 }
 
@@ -76,6 +76,10 @@ function main() {
   testSelfRelease
 
   mv -f "${tmpFile}" "${GLOBAL_VALET_HOME}/valet.d/version"
+}
+
+function io::writeFile() {
+  echo "▶ called io::writeFile $*" 1>&2
 }
 
 main

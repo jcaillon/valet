@@ -16,7 +16,8 @@ source string
 source kurl
 # shellcheck source=../lib-interactive
 source interactive
-
+# shellcheck source=../lib-system
+source system
 #===============================================================
 # >>> self release valet
 #===============================================================
@@ -94,7 +95,7 @@ function createRelease() {
   dryRun="${3:-false}"
 
   io::invoke git rev-parse HEAD
-  local currentHead="${RETURNED_VALUE}"
+  local currentHead="${RETURNED_VALUE%%$'\n'*}"
 
   if [[ "${dryRun:-}" != "true" ]]; then
     # check that we got the necessary token
@@ -119,7 +120,7 @@ function createRelease() {
   log::info "The current version of valet is: ${version}."
 
   # update the documentation
-  updateDocumentation
+  updateDocumentation "${version}"
 
   # write the current version in the self-install script
   # then commit the file
@@ -155,7 +156,7 @@ function createRelease() {
   log::info "The tag message is:"
   log::printFileString "${tagMessage}"
 
-  if ! interactive::askForConfirmation "Do you want to continue with the release of version ${version}?"; then
+  if ! interactive::promptYesNo "Do you want to continue with the release of version ${version}?" false; then
     # reset to the original head
     if [[ "${dryRun:-}" != "true" ]]; then
       io::invoke git reset --hard "${currentHead}"
@@ -254,14 +255,20 @@ function uploadArtifact() {
 }
 
 function updateDocumentation() {
+  local version="${1}"
+
+  system::date "%(%F)T"
+  local currentDate="${RETURNED_VALUE}"
+
   # export the valet config valet to the documentation
   core::sourceFunction selfConfig
   config::getFileContent false
-  local configFileContent='```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'
+  CONFIG_FILE_CONTENT='```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'$'\n'$'\n'"> Config for the version ${version} (${currentDate})."
 
   if [[ "${dryRun:-}" != "true" ]]; then
-    printf '%s' "${configFileContent}" >"${GLOBAL_VALET_HOME}/docs/static/config.md"
+    io::writeFile "${GLOBAL_VALET_HOME}/docs/static/config.md" CONFIG_FILE_CONTENT
   fi
+  unset -v CONFIG_FILE_CONTENT
 
   # export the documentation for each library
 
@@ -270,7 +277,16 @@ function updateDocumentation() {
   if [[ "${dryRun:-}" != "true" ]]; then
     io::invoke git add "${GLOBAL_VALET_HOME}/docs/static/config.md"
     io::listFiles "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries"
-    io::invoke git add "${RETURNED_ARRAY[@]}"
+    # remove _index.md
+    local -a files
+    local file
+    for file in "${RETURNED_ARRAY[@]}"; do
+      if [[ ${file} == *"_index.md" ]]; then
+        continue
+      fi
+      files+=("${file}")
+    done
+    io::invoke git add "${files[@]}"
     io::invoke git commit -m ":memo: updating the documentation"
     log::success "The documentation update has been committed."
   fi
