@@ -62,8 +62,27 @@ function selfConfig() {
 }
 
 function writeConfigFile() {
+  if [[ ! -d "${valetConfigFile%/*}" ]]; then
+    mkdir -p "${valetConfigFile%/*}"
+  fi
+
+  config::getFileContent "${@}"
+
+  printf '%s\n' "${RETURNED_VALUE}" >"${valetConfigFile}"
+}
+
+# Return the content of the valet config file.
+# Optionally export the current values of the variables.
+#
+# - $1: exportCurrentValues: if true, export the current values of the variables.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the content of the valet config file.
+function config::getFileContent() {
   local exportCurrentValues="${1}"
 
+  # shellcheck disable=SC2086
   unset -v ${!EXPORTED_VALET_*}
 
   if [[ ${exportCurrentValues} == "true" ]]; then
@@ -81,11 +100,7 @@ function writeConfigFile() {
     done
   fi
 
-  if [[ ! -d "${valetConfigFile%/*}" ]]; then
-    mkdir -p "${valetConfigFile%/*}"
-  fi
-
-  local valetConfigFileContent="#!/usr/bin/env bash
+  RETURNED_VALUE="#!/usr/bin/env bash
 # description: This script declares global variables used to configure Valet
 # shellcheck disable=SC2034
 
@@ -277,6 +292,4 @@ VALET_COLOR_FSFS_COUNT_RESET=\"\${VALET_COLOR_FSFS_COUNT_RESET:-${EXPORTED_VALET
 VALET_CONFIG_BUMP_VERSION_ON_BUILD=\"\${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-${EXPORTED_VALET_CONFIG_BUMP_VERSION_ON_BUILD:-}}\"
 
 "
-
-  printf '%s\n' "${valetConfigFileContent}" >"${valetConfigFile}"
 }

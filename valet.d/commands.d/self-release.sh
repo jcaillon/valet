@@ -14,6 +14,8 @@ fi
 source string
 # shellcheck source=../lib-kurl
 source kurl
+# shellcheck source=../lib-interactive
+source interactive
 
 #===============================================================
 # >>> self release valet
@@ -28,6 +30,10 @@ description: |-
   Release a new version of valet.
 
   It will:
+  - write the current version in the self-install script,
+  - commit the file,
+  - update the documentation,
+  - commit the changes,
   - creates a git tag and pushes it to the remote repository,
   - bump the version of valet,
   - commit the new version.
@@ -39,7 +45,7 @@ options:
   description: |-
     The semver level to bump the version.
 
-    Can be either: major or minor.
+    Can be either: major or minor. Defaults to minor.
 - name: --dry-run
   description: |-
     Do not perform the release, just show what would be done.
@@ -87,6 +93,9 @@ function createRelease() {
   bumpLevel="${2:-minor}"
   dryRun="${3:-false}"
 
+  io::invoke git rev-parse HEAD
+  local currentHead="${RETURNED_VALUE}"
+
   if [[ "${dryRun:-}" != "true" ]]; then
     # check that we got the necessary token
     if [[ -z "${githubReleaseToken:-}" ]]; then
@@ -109,6 +118,9 @@ function createRelease() {
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."
 
+  # update the documentation
+  updateDocumentation
+
   # write the current version in the self-install script
   # then commit the file
   if [[ "${dryRun:-}" != "true" ]]; then
@@ -116,7 +128,6 @@ function createRelease() {
 
     io::invoke git add "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
     io::invoke git commit -m ":rocket: releasing version ${version}"
-    io::invoke git push origin main
     log::success "The new version has been committed."
   fi
 
@@ -141,10 +152,20 @@ function createRelease() {
     tagMessage+="- ${line}"$'\n'
   done
   IFS=$' '
-  log::info "The tag message is:"$'\n'"${tagMessage}"
+  log::info "The tag message is:"
+  log::printFileString "${tagMessage}"
 
-  # create a new git tag with the version and push it
+  if ! interactive::askForConfirmation "Do you want to continue with the release of version ${version}?"; then
+    # reset to the original head
+    if [[ "${dryRun:-}" != "true" ]]; then
+      io::invoke git reset --hard "${currentHead}"
+    fi
+    core::fail "The release has been canceled."
+  fi
+
+  # create a new git tag with the version and push everything
   if [[ "${dryRun:-}" != "true" ]]; then
+    io::invoke git push origin main
     io::invoke git tag -a "v${version}" -m "Release version ${version}"
     io::invoke git push origin "v${version}"
     log::success "The new version has been tagged and pushed to the remote repository."
@@ -230,4 +251,26 @@ function uploadArtifact() {
   rm -f "${artifactPath}"
   popd 1>/dev/null
   rm -Rf "${tempDir}"
+}
+
+function updateDocumentation() {
+  # export the valet config valet to the documentation
+  core::sourceFunction selfConfig
+  config::getFileContent false
+  local configFileContent='```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'
+
+  if [[ "${dryRun:-}" != "true" ]]; then
+    printf '%s' "${configFileContent}" >"${GLOBAL_VALET_HOME}/docs/static/config.md"
+  fi
+
+  # export the documentation for each library
+
+
+  # commit the changes to the documentation
+  if [[ "${dryRun:-}" != "true" ]]; then
+    io::invoke git add "${GLOBAL_VALET_HOME}/docs/static/config.md"
+    io::invoke git add "${GLOBAL_VALET_HOME}/docs/300.libraries/"*
+    io::invoke git commit -m ":memo: updating the documentation"
+    log::success "The documentation update has been committed."
+  fi
 }

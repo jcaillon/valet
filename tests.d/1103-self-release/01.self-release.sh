@@ -45,6 +45,10 @@ function io::invoke() {
   RETURNED_VALUE2=""
 }
 
+function interactive::askForConfirmation() {
+  return 0
+}
+
 function kurl::toVar() {
   echo "▶ called kurl::toVar $*" 1>&2
   if [[ $* == *"tag_name"* ]]; then
