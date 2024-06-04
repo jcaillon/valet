@@ -269,7 +269,8 @@ function updateDocumentation() {
   # commit the changes to the documentation
   if [[ "${dryRun:-}" != "true" ]]; then
     io::invoke git add "${GLOBAL_VALET_HOME}/docs/static/config.md"
-    io::invoke git add "${GLOBAL_VALET_HOME}/docs/300.libraries/"*
+    io::listFiles "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries"
+    io::invoke git add "${RETURNED_ARRAY[@]}"
     io::invoke git commit -m ":memo: updating the documentation"
     log::success "The documentation update has been committed."
   fi
