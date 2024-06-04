@@ -17,8 +17,8 @@ function testSelfRelease() {
 }
 
 # need to override git, kurl
-function io::invoke5() {
-  echo "▶ called io::invoke5 $*" 1>&2
+function io::invokef5() {
+  echo "▶ called io::invokef5 $*" 1>&2
   if [[ ${5} == "uname" ]]; then
     echo -n "x86_64" > "${GLOBAL_TEMPORARY_STDOUT_FILE}"
     RETURNED_VALUE="${GLOBAL_TEMPORARY_STDOUT_FILE}"

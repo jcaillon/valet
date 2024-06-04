@@ -6,30 +6,30 @@ function testIo::invoke5() {
 
   echo "Input stream content from a file" >"${tmpFile}"
 
-  echo "→ io::invoke5 false 0 false inputStreamValue fakeexec --std-in --error"
-  io::invoke5 false 0 false inputStreamValue fakeexec --std-in --error && exitCode=0 || exitCode=$?
+  echo "→ io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error"
+  io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} true
   test::endTest "Testing io::invoke5, should return 1, input stream from string" ${exitCode}
 
-  echo "→ io::invoke5 true 0 false inputStreamValue fakeexec --std-in --error"
-  (io::invoke5 true 0 false inputStreamValue fakeexec --std-in --error) && exitCode=0 || exitCode=$?
+  echo "→ io::invokef5 true 0 false inputStreamValue fakeexec --std-in --error"
+  (io::invokef5 true 0 false inputStreamValue fakeexec --std-in --error) && exitCode=0 || exitCode=$?
   echo "exitcode=${exitCode}"
   test::endTest "Testing io::invoke5, should fail" ${exitCode}
 
-  echo "→ io::invoke5 true 0,1,2 true '' fakeexec --error"
-  io::invoke5 true 0,1,2 true '' fakeexec --error && exitCode=0 || exitCode=$?
+  echo "→ io::invokef5 true 0,1,2 true '' fakeexec --error"
+  io::invokef5 true 0,1,2 true '' fakeexec --error && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} true
   test::endTest "Testing io::invoke5, should translate error 1 to 0" ${exitCode}
 
-  echo "→ io::invoke5var false 0 true 'tmpFile' fakeexec --std-in"
-  io::invoke5var false 0 true "${tmpFile}" fakeexec --std-in && exitCode=0 || exitCode=$?
+  echo "→ io::invoke5 false 0 true 'tmpFile' fakeexec --std-in"
+  io::invoke5 false 0 true "${tmpFile}" fakeexec --std-in && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} false
   test::endTest "Testing io::invoke5var, input stream for file, should get stdout/stderr from var" ${exitCode}
 
   # test trace mode
-  echo "→ io::invoke5 false 0 false inputStreamValue fakeexec --std-in --error"
+  echo "→ io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error"
   log::setLevel trace
-  io::invoke5 false 0 false inputStreamValue fakeexec --std-in --error && exitCode=0 || exitCode=$?
+  io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} true
   log::setLevel info
   test::endTest "Testing io::invoke5, with trace mode on" ${exitCode}
@@ -38,13 +38,13 @@ function testIo::invoke5() {
 function testIo::invoke2() {
   local -i exitCode
 
-  echo "→ io::invoke2 false fakeexec --option argument1 argument2"
-  io::invoke2 false fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
+  echo "→ io::invokef2 false fakeexec --option argument1 argument2"
+  io::invokef2 false fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} true
   test::endTest "Testing io::invoke2, output to files" ${exitCode}
 
-  echo "→ io::invoke2var false fakeexec --option argument1 argument2"
-  io::invoke2var false fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
+  echo "→ io::invoke2 false fakeexec --option argument1 argument2"
+  io::invoke2 false fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} false
   test::endTest "Testing io::invoke2var, output to var" ${exitCode}
 }
@@ -66,13 +66,13 @@ function testIo::invoke() {
 function testIo::invoke2piped() {
   local -i exitCode
 
-  echo "→ io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2"
-  io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
+  echo "→ io::invokef2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2"
+  io::invokef2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} true
   test::endTest "Testing io::invoke2piped, stdin as string, output to files" ${exitCode}
 
-  echo "→ io::invoke2pipedvar true 'this is an stdin' fakeexec --std-in --option argument1 argument2"
-  io::invoke2pipedvar true 'this is an stdin' fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
+  echo "→ io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2"
+  io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
   echoio::invokeOutput ${exitCode} false
   test::endTest "Testing io::invoke2pipedvar, stdin as string, output to vars" ${exitCode}
 }

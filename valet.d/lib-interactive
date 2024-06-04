@@ -14,7 +14,7 @@ source ansi-codes
 #
 # Ask the user to press the button to continue.
 #
-# - 1: the prompt to display
+# - $1: the prompt to display
 #
 # Returns:
 #

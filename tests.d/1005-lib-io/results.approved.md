@@ -170,7 +170,7 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ io::invoke5 false 0 false inputStreamValue fakeexec --std-in --error
+→ io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error
 io::invoke function ended with exit code ⌈1⌉.
 stdout from file:
 ⌈▶ called fakeexec --std-in --error
@@ -190,7 +190,7 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ io::invoke5 true 0 false inputStreamValue fakeexec --std-in --error
+→ io::invokef5 true 0 false inputStreamValue fakeexec --std-in --error
 exitcode=1
 ```
 
@@ -215,7 +215,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::invoke5 true 0,1,2 true '' fakeexec --error
+→ io::invokef5 true 0,1,2 true '' fakeexec --error
 io::invoke function ended with exit code ⌈0⌉.
 stdout from file:
 ⌈▶ called fakeexec --error
@@ -234,7 +234,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::invoke5var false 0 true 'tmpFile' fakeexec --std-in
+→ io::invoke5 false 0 true 'tmpFile' fakeexec --std-in
 io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
 ⌈▶ called fakeexec --std-in
@@ -255,7 +255,7 @@ Exit code: `1`
 **Standard** output:
 
 ```plaintext
-→ io::invoke5 false 0 false inputStreamValue fakeexec --std-in --error
+→ io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error
 io::invoke function ended with exit code ⌈1⌉.
 stdout from file:
 ⌈▶ called fakeexec --std-in --error
@@ -294,7 +294,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::invoke2 false fakeexec --option argument1 argument2
+→ io::invokef2 false fakeexec --option argument1 argument2
 io::invoke function ended with exit code ⌈0⌉.
 stdout from file:
 ⌈▶ called fakeexec --option argument1 argument2
@@ -312,7 +312,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::invoke2var false fakeexec --option argument1 argument2
+→ io::invoke2 false fakeexec --option argument1 argument2
 io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
 ⌈▶ called fakeexec --option argument1 argument2
@@ -375,7 +375,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2
+→ io::invokef2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2
 io::invoke function ended with exit code ⌈0⌉.
 stdout from file:
 ⌈▶ called fakeexec --std-in --option argument1 argument2
@@ -394,7 +394,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ io::invoke2pipedvar true 'this is an stdin' fakeexec --std-in --option argument1 argument2
+→ io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2
 io::invoke function ended with exit code ⌈0⌉.
 stdout from var:
 ⌈▶ called fakeexec --std-in --option argument1 argument2

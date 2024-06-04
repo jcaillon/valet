@@ -56,8 +56,8 @@ githubReleaseToken="token"
 bumpLevel="minor"
 
 DEBUG    Checking if the workarea is clean
-▶ called io::invoke5 false 0   git update-index --really-refresh
-▶ called io::invoke5 false 0   git diff-index --quiet HEAD
+▶ called io::invokef5 false 0   git update-index --really-refresh
+▶ called io::invokef5 false 0   git diff-index --quiet HEAD
 INFO     The current version of valet is: 1.2.3.
 ▶ called io::invoke sed -E -i s/VALET_VERSION="[0-9]+\.[^"]+"/VALET_VERSION="1.2.3"/ $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh

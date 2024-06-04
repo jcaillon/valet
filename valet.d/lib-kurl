@@ -32,7 +32,7 @@ function kurl::toFile() {
   # call curl
   local -i exitCode=0
   local httpStatusCode errors
-  io::invoke5var "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{http_code}" "--output" "${outputFile}" "$@" || exitCode=$?
+  io::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{http_code}" "--output" "${outputFile}" "$@" || exitCode=$?
   httpStatusCode="${RETURNED_VALUE}"
   errors="${RETURNED_VALUE2}"
 
