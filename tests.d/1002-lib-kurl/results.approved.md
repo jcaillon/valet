@@ -49,10 +49,10 @@ Exit code: `1`
 **Error** output:
 
 ```log
+TRACE    Curl error output stream:
+   1 ░ ▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
+   2 ░ 
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://hello.com⌝.
-Error output:
-⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
-⌝
 ```
 
 ### Testing kurl::toFile, http code 500 is now acceptable return 0
@@ -99,6 +99,10 @@ DEBUG    Executing the command ⌜curl⌝ with arguments (quoted):
 '--silent' '--show-error' '--location' '--write-out' '%{http_code}' '--output' '/tmp/valet.d/kurl-test' '--code' '400' '--error' 'https://hello.com/bla' '--otherOpt'
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜1⌝.
 DEBUG    The curl command for url ⌜https://hello.com/bla⌝ ended with exit code ⌜1⌝, the http return code was ⌜400⌝.
+TRACE    Curl error output stream:
+   1 ░ ▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt
+   2 ░ Returning 1 from curl.
+   3 ░ 
 DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜https://hello.com/bla⌝.
 ```
 
@@ -162,10 +166,10 @@ Exit code: `1`
 **Error** output:
 
 ```log
+TRACE    Curl error output stream:
+   1 ░ ▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 500 http://hello.com
+   2 ░ 
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜http://hello.com⌝.
-Error output:
-⌜▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 500 http://hello.com
-⌝
 ```
 
 ### Testing kurl, debug mode, with content http code 400
@@ -195,6 +199,9 @@ DEBUG    Executing the command ⌜curl⌝ with arguments (quoted):
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
 DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜400⌝.
+TRACE    Curl error output stream:
+   1 ░ ▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 400 http://hello.com
+   2 ░ 
 DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜http://hello.com⌝.
 ```
 

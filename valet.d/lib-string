@@ -3,22 +3,29 @@ set -Eeu -o pipefail
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
+# ## string::cutField
+#
 # Allows to get the nth element of a string separated by a given separator.
 # This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
 # but it uses pure bash to go faster.
 #
-# $1: the string to cut
-# $2: the field number to get (starting at 0)
-# $3: the separator (default to tab if not provided)
+# - $1: the string to cut
+# - $2: the field number to get (starting at 0)
+# - $3: the separator (default to tab if not provided)
 #
-# Usage:
-#  string::cutField "field1 field2 field3" 1 " " && local field="${RETURNED_VALUE}"
-#  printf '%s' "${field}" # will output "field2"
+# Returns:
 #
-# Notes:
-#  This is faster than:
-#  - using read into an array from a here string
-#  - using bash parameter expansion to remove before/after the separator
+# - `RETURNED_VALUE`: the extracted field
+#
+# ```bash
+# string::cutField "field1 field2 field3" 1 " " && local field="${RETURNED_VALUE}"
+# printf '%s' "${field}" # will output "field2"
+# ```
+#
+# > This is faster than:
+# >
+# > - using read into an array from a here string
+# > - using bash parameter expansion to remove before/after the separator
 function string::cutField() {
   local str fieldNumber separator
   str="${1}"
@@ -37,14 +44,23 @@ function string::cutField() {
   RETURNED_VALUE=""
 }
 
+# ## string::bumpSemanticVersion
+#
 # This function allows to bump a semantic version formatted like:
 # major.minor.patch-prerelease+build
-# $1: the version to bump
-# $2: the level to bump (major, minor, patch)
-# $3: clear the prerelease and build (optional, defaults to true)
 #
-# Usage:
-#   string::bumpSemanticVersion "1.2.3-prerelease+build" "major" && local newVersion="${RETURNED_VALUE}"
+# - $1: the version to bump
+# - $2: the level to bump (major, minor, patch)
+# - $3: clear the prerelease and build (optional, defaults to true)
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the new version string
+#
+# ```bash
+# string::bumpSemanticVersion "1.2.3-prerelease+build" "major"
+# local newVersion="${RETURNED_VALUE}"
+# ```
 function string::bumpSemanticVersion() {
   local version level clearPreRelease
   version="${1}"
@@ -83,17 +99,21 @@ function string::bumpSemanticVersion() {
   RETURNED_VALUE="${newVersion}"
 }
 
+# ## string::camelCaseToSnakeCase
+#
 # This function convert a camelCase string to a SNAKE_CASE string.
 # It uses pure bash.
 # Removes all leading underscores.
 #
-# $1: The camelCase string to convert.
+# - $1: The camelCase string to convert.
 #
 # Returns:
-#   RETURNED_VALUE: The SNAKE_CASE string.
 #
-# Usage:
-#   string::camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
+# - `RETURNED_VALUE`: The SNAKE_CASE string.
+#
+# ```bash
+# string::camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
+# ```
 function string::camelCaseToSnakeCase() {
   local camelCase="${1}"
   local snakeCase=""
@@ -113,17 +133,21 @@ function string::camelCaseToSnakeCase() {
   RETURNED_VALUE="${snakeCase}"
 }
 
+# ## string::kebabCaseToSnakeCase
+#
 # This function convert a kebab-case string to a SNAKE_CASE string.
 # It uses pure bash.
 # Removes all leading dashes.
 #
-# $1: The kebab-case string to convert.
+# - $1: The kebab-case string to convert.
 #
 # Returns:
-#   RETURNED_VALUE: The SNAKE_CASE string.
 #
-# Usage:
-#   string::kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
+# - `RETURNED_VALUE`: The SNAKE_CASE string.
+#
+# ```bash
+# string::kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
+# ```
 function string::kebabCaseToSnakeCase() {
   local kebabCase="${1}"
   local snakeCase=""
@@ -143,17 +167,21 @@ function string::kebabCaseToSnakeCase() {
   RETURNED_VALUE="${snakeCase}"
 }
 
+# ## string::kebabCaseToCamelCase
+#
 # This function convert a kebab-case string to a camelCase string.
 # It uses pure bash.
 # Removes all leading dashes.
 #
-# $1: The kebab-case string to convert.
+# - $1: The kebab-case string to convert.
 #
 # Returns:
-#   RETURNED_VALUE: The camelCase string.
 #
-# Usage:
-#   string::kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
+# - `RETURNED_VALUE`: The camelCase string.
+#
+# ```bash
+# string::kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
+# ```
 function string::kebabCaseToCamelCase() {
   local kebabCase="${1}"
   local camelCase=""
@@ -173,15 +201,19 @@ function string::kebabCaseToCamelCase() {
   RETURNED_VALUE="${camelCase,}"
 }
 
+# ## string::trimAll
+#
 # Trim all whitespaces and truncate spaces.
 #
-# $1: The string to trim.
+# - $1: The string to trim.
 #
 # Returns:
-#   RETURNED_VALUE: The trimmed string.
 #
-# Usage:
-#   string::trimAll "   example   string    " && local trimmedString="${RETURNED_VALUE}"
+# - `RETURNED_VALUE`: The trimmed string.
+#
+# ```bash
+# string::trimAll "   example   string    " && local trimmedString="${RETURNED_VALUE}"
+# ```
 function string::trimAll() {
   set -f
   # shellcheck disable=SC2086
@@ -191,32 +223,40 @@ function string::trimAll() {
   set +f
 }
 
+# ## string::trim
+#
 # Trim leading and trailing whitespaces.
 #
-# $1: The string to trim.
+# -$1: The string to trim.
 #
 # Returns:
-#   RETURNED_VALUE: The trimmed string.
 #
-# Usage:
-#   string::trim "   example string    " && local trimmedString="${RETURNED_VALUE}"
+# - `RETURNED_VALUE`: The trimmed string.
+#
+# ```bash
+# string::trim "   example string    " && local trimmedString="${RETURNED_VALUE}"
+# ```
 function string::trim() {
   RETURNED_VALUE="${1#"${1%%[![:space:]]*}"}"
   RETURNED_VALUE="${RETURNED_VALUE%"${RETURNED_VALUE##*[![:space:]]}"}"
 }
 
+# ## string::indexOf
+#
 # Find the first index of a string within another string.
 #
-# $1: the string in which to search
-# $2: the string to search
-# $3: the starting index (default to 0)
+# - $1: the string in which to search
+# - $2: the string to search
+# - $3: the starting index (default to 0)
 #
 # Returns:
-#  The index of the substring in the string or -1 if not found in the global variable RETURNED_VALUE.
 #
-# Usage:
-#  string::indexOf "This is a long text" "long" && local index="${RETURNED_VALUE}"
-#  string::indexOf "This is a long text" "long" 10 && local index="${RETURNED_VALUE}"
+# - `RETURNED_VALUE`: the index of the substring in the string or -1 if not found.
+#
+# ```bash
+# string::indexOf "This is a long text" "long" && local index="${RETURNED_VALUE}"
+# string::indexOf "This is a long text" "long" 10 && local index="${RETURNED_VALUE}"
+# ```
 function string::indexOf() {
   local search string
   local -i startingIndex
@@ -260,21 +300,26 @@ function string::indexOf() {
   return 0
 }
 
+# ## string::extractBetween
+#
 # Extract the text between two strings within a string.
 # Search for the first occurence of the start string and the first occurence
 # (after the start index) of the end string.
 # Both start and end strings are excluded in the extracted text.
 # Both start and end strings must be found to extract something.
 #
-# $1: the string in which to search
-# $2: the start string (if empty, then it will extract from the beginning of the string)
-# $3: the end string (if empty, then it will extract until the end of the string)
+# - $1: the string in which to search
+# - $2: the start string (if empty, then it will extract from the beginning of the string)
+# - $3: the end string (if empty, then it will extract until the end of the string)
 #
 # Returns:
-#  The extracted text in the global variable RETURNED_VALUE.
 #
-# Usage:
-#  string::extractBetween "This is a long text" "is a " " text" && local extractedText="${RETURNED_VALUE}"
+# - `RETURNED_VALUE`: the extracted text
+#
+# ```bash
+# string::extractBetween "This is a long text" "is a " " text"
+# local extractedText="${RETURNED_VALUE}"
+# ```
 function string::extractBetween() {
   local string start end
   string="${1}"
@@ -310,59 +355,68 @@ function string::extractBetween() {
   RETURNED_VALUE="${string:${startIndex}:${extractedLength}}"
 }
 
+# ## string::count
+#
 # Counts the number of occurences of a substring in a string.
 #
-# $1: the string in which to search
-# $2: the substring to count
+# - $1: the string in which to search
+# - $2: the substring to count
 #
 # Returns:
-#  The number of occurences in the global variable RETURNED_VALUE.
 #
-# Usage:
-#  string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
+# - `RETURNED_VALUE`: the number of occurences
 #
-# Notes:
-#   - This is faster than looping over the string and check the substring.
+# ```bash
+# string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
+# ```
+#
+# > This is faster than looping over the string and check the substring.
 function string::count() {
   local string="${1}"
   local newString="${string//"${2}"/}"
   RETURNED_VALUE=$(((${#string} - ${#newString}) / ${#2}))
 }
 
+# ## string::split
+#
 # Split a string into an array using a separator.
 #
-# $1: the string to split
-# $2: the separator (must be a single character!)
+# - $1: the string to split
+# - $2: the separator (must be a single character!)
 #
 # Returns:
-#   The array in the global variable RETURNED_ARRAY.
 #
-# Usage:
-#   string::split "name,firstname,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
+# - `RETURNED_ARRAY`: the array of strings
 #
-# Notes:
-#   - This is faster than using read into an array from a here string.
+# ```bash
+# string::split "name,firstname,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
+# ```
+#
+# > This is faster than using read into an array from a here string.
 function string::split() {
   local IFS="${2}"
   # shellcheck disable=SC2206
   RETURNED_ARRAY=(${1})
 }
 
+# ## string::regexGetFirst
+#
 # Matches a string against a regex and returns the first capture group of the matched string.
 #
-# $1: the string to match
-# $2: the regex
+# - $1: the string to match
+# - $2: the regex
 #
 # Returns:
-#   The first capture group in the global variable RETURNED_VALUE.
-#   Empty if no match.
 #
-# Usage:
-#   string::regexGetFirst "name: julien" "name:(.*)"
-#   echo "${RETURNED_VALUE}"
+# - `RETURNED_VALUE`: the first capture group in the matched string.
+#                     Empty if no match.
 #
-# Notes:
-#   Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+# ```bash
+# string::regexGetFirst "name: julien" "name:(.*)"
+# echo "${RETURNED_VALUE}"
+# ```
+#
+# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 function string::regexGetFirst() {
   # Usage: regex "string" "regex"
   if [[ ${1} =~ ${2} ]]; then
