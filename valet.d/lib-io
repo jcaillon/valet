@@ -568,3 +568,76 @@ function io::readStdIn() {
 function io::countArgs() {
   RETURNED_VALUE="$#"
 }
+
+# ## io::listPaths
+#
+# List all the paths in the given directory.
+#
+# - $1: the directory to list
+# - $2: (optional) true to list recursively, false otherwise (default to false)
+# - $3: (optional) true to list hidden paths, false otherwise (default to false)
+# - $4: (optional) a function name that is called to filter the paths
+#       The function should return 0 if the path is to be kept, 1 otherwise.
+#       The function is called with the path as the first argument.
+# - $5: (optional) a function name that is called to filter the directories (for recursive listing)
+#       The function should return 0 if the path is to be kept, 1 otherwise.
+#       The function is called with the path as the first argument.
+#
+# Returns:
+#
+# - `RETURNED_ARRAY`: An array with the list of all the paths.
+#
+# ```bash
+# io::listPaths "/path/to/directory" "true" "myFilterFunction"
+# for path in "${RETURNED_ARRAY[@]}"; do
+#   printf '%s' "${path}"
+# done
+# ```
+#
+# > - It will correctly list files under symbolic link directories.
+function io::listPaths() {
+  local directory="${1}"
+  local recursive="${2:-false}"
+  local includeHidden="${3:-false}"
+  local filterFunction="${4:-}"
+  local filterDirectoryFunction="${5:-}"
+
+  local IFS=' '
+
+  local activatedHidden=false
+  if [[ ${includeHidden} == "true" ]] && ! shopt -p dotglob; then
+    # change the shell options to include hidden files
+    log::debug "Activating the dotglob shell option."
+    shopt -s dotglob
+    activatedHidden=true
+  fi
+
+  RETURNED_ARRAY=()
+
+  local path listOfDirectories currentDirectory
+
+  listOfDirectories="${directory}"$'\n'
+  while [[ -n "${listOfDirectories}" ]]; do
+    currentDirectory="${listOfDirectories%%$'\n'*}"
+    listOfDirectories="${listOfDirectories#*$'\n'}"
+
+    log::trace "Listing paths in ⌜${currentDirectory}⌝."
+
+    for path in "${currentDirectory}"/*; do
+      if [[ ${recursive} == "true" && -d "${path}" ]]; then
+        if [[ -z ${filterDirectoryFunction} ]] || ${filterDirectoryFunction} "${path}"; then
+          listOfDirectories+="${path}"$'\n'
+          log::trace "Adding directory ⌜${path}⌝ to the search list."
+        fi
+      fi
+      if [[ -n ${filterFunction} ]] && ! ${filterFunction} "${path}"; then
+        continue
+      fi
+      RETURNED_ARRAY+=("${path}")
+    done
+  done
+
+  if [[ ${activatedHidden} == "true" ]]; then
+    shopt -u dotglob
+  fi
+}
