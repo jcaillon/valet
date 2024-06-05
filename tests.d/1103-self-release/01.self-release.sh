@@ -78,8 +78,12 @@ function main() {
   mv -f "${tmpFile}" "${GLOBAL_VALET_HOME}/valet.d/version"
 }
 
-function io::writeFile() {
-  echo "▶ called io::writeFile $*" 1>&2
+function io::writeToFile() {
+  echo "▶ called io::writeToFile $*" 1>&2
+}
+
+function io::writeToFileFromRef() {
+  echo "▶ called io::writeToFileFromRef $*" 1>&2
 }
 
 main

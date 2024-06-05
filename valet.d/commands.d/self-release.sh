@@ -259,35 +259,161 @@ function updateDocumentation() {
 
   system::date "%(%F)T"
   local currentDate="${RETURNED_VALUE}"
+  local pageFooter=$'\n'$'\n'"> Documentation generated for the version ${version} (${currentDate})."$'\n'
+
+  # export the documentation for each library
+  getAllFunctionsDocumentation
+
+  # write each function documentation to a file
+  if [[ "${dryRun:-}" != "true" ]]; then
+    writeAllFunctionsDocumentation "${pageFooter}"
+  fi
 
   # export the valet config valet to the documentation
   core::sourceFunction selfConfig
   config::getFileContent false
-  CONFIG_FILE_CONTENT='```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'$'\n'$'\n'"> Config for the version ${version} (${currentDate})."
 
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::writeFile "${GLOBAL_VALET_HOME}/docs/static/config.md" CONFIG_FILE_CONTENT
+    io::writeToFile "${GLOBAL_VALET_HOME}/docs/static/config.md" '```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'"${pageFooter}"
   fi
-  unset -v CONFIG_FILE_CONTENT
-
-  # export the documentation for each library
-
 
   # commit the changes to the documentation
   if [[ "${dryRun:-}" != "true" ]]; then
     io::invoke git add "${GLOBAL_VALET_HOME}/docs/static/config.md"
     io::listFiles "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries"
-    # remove _index.md
-    local -a files
-    local file
-    for file in "${RETURNED_ARRAY[@]}"; do
-      if [[ ${file} == *"_index.md" ]]; then
-        continue
-      fi
-      files+=("${file}")
-    done
-    io::invoke git add "${files[@]}"
+    io::invoke git add "${RETURNED_ARRAY[@]}"
     io::invoke git commit -m ":memo: updating the documentation"
     log::success "The documentation update has been committed."
+  fi
+}
+
+function writeAllFunctionsDocumentation() {
+  local pageFooter="${1:-}"
+
+  # delete the existing files
+  io::listFiles "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries"
+  local file
+  for file in "${RETURNED_ARRAY[@]}"; do
+    if [[ ${file} == *"_index.md" ]]; then
+      continue
+    fi
+    rm -f "${file}"
+  done
+
+  # write the new files
+  local key
+  for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
+    local functionName="${key}"
+    string::regexGetFirst "${functionName}" '([[:alnum:]]+)::'
+    local packageName="${RETURNED_VALUE}"
+    if [[ -z "${packageName}" ]]; then
+      packageName="core"
+    fi
+
+    local path="${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries/${packageName}.md"
+
+    # init the file if necessary
+    if [[ ! -f "${path}" ]]; then
+      io::writeToFile "${path}" "---
+title: 📂 ${packageName}
+cascade:
+  type: docs
+url: /docs/libraries/${packageName}
+---
+
+"
+    fi
+
+    # append the function documentation
+    io::writeToFileFromRef "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries/${packageName}.md" "RETURNED_ASSOCIATIVE_ARRAY[${key}]" true
+    io::writeToFile "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries/${packageName}.md" $'\n'$'\n' true
+  done
+
+  # add footer
+  io::listFiles "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries"
+  local file
+  for file in "${RETURNED_ARRAY[@]}"; do
+    if [[ ${file} == *"_index.md" ]]; then
+      continue
+    fi
+    io::writeToFile "${file}" "${pageFooter}" true
+  done
+}
+
+# Returns an associative array of all the function names and their documentation.
+# The key is the function name and the value is the documentation.
+# The documentation is the content of the comment block above the function.
+# The comment block should start with a `# ##` to be considered as a documentation block.
+#
+# Returns:
+#
+# - `RETURNED_ASSOCIATIVE_ARRAY` an associative array of all the function names and their documentation.
+#
+# ```bash
+# getAllFunctionsDocumentation
+# ```
+function getAllFunctionsDocumentation() {
+
+  # get all the files in the valet.d directory
+  io::listFiles "${GLOBAL_VALET_HOME}/valet.d"
+  local -a filesToAnalyze=("${RETURNED_ARRAY[@]}")
+
+  # special case for the test:: functions
+  filesToAnalyze+=("${GLOBAL_VALET_HOME}/valet.d/commands.d/self-test-utils")
+
+  local IFS=$'\n'
+  if log::isDebugEnabled; then
+    log::debug "Analyzing the following files:"
+    log::printFileString "${filesToAnalyze[*]}"
+  fi
+
+  unset -v RETURNED_ASSOCIATIVE_ARRAY
+  declare -g -A RETURNED_ASSOCIATIVE_ARRAY=()
+
+  # for each file to analyse
+  local file
+  for file in "${filesToAnalyze[@]}"; do
+    local functionName functionDocumentation
+    local reading=false
+
+    # loop through lines
+    # collect the documentation from comments starting with `# ##`
+    local line
+    while IFS= read -r line || [[ -n ${line:-} ]]; do
+      if [[ ${reading} == "false" ]]; then
+        if [[ ${line} == "# ##"* ]]; then
+          reading=true
+        else
+          continue
+        fi
+      fi
+
+      if [[ ${line} != "#"* ]]; then
+        reading=false
+        string::extractBetween "${functionDocumentation}" "## " $'\n'
+        string::trim "${RETURNED_VALUE}"
+        functionName="${RETURNED_VALUE}"
+        log::debug "Found function: ⌜${functionName}⌝"
+        RETURNED_ASSOCIATIVE_ARRAY["${functionName}"]="${functionDocumentation}"
+        functionDocumentation=""
+      else
+        if [[ ${line} == "#" ]]; then
+          functionDocumentation+="${line:1}"$'\n'
+        else
+          functionDocumentation+="${line:2}"$'\n'
+        fi
+      fi
+    done <"${file}"
+  done
+
+  log::info "Found ${#RETURNED_ASSOCIATIVE_ARRAY[@]} functions with documentation."
+
+  if log::isTraceEnabled; then
+    log::trace "The functions with their documentation are:"
+    local key
+    for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
+      log::trace "Function: ⌜${key}⌝"
+      log::printFileString "${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"
+    done
   fi
 }

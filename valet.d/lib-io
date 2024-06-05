@@ -408,24 +408,54 @@ function io::readFile() {
   fi
 }
 
-## io::writeFile
+## io::writeToFile
 #
 # Write the content to a file.
 #
 # - $1: the file path to write
-# - $2: the name of the variable with the content to write
+# - $2: the content to write
+# - $3: (optional) true to append the content to the file, false otherwise (default to false
 #
 # ```bash
-# io::writeFile "/path/to/file" "myVariable"
+# io::writeToFile "/path/to/file" "content"
 # ```
 #
 # > - This function will overwrite the file if it already exists.
 # > - If the file path does not exist, the function will create the directory tree.
 # > - The main use case is to be able to mock this function during tests...
-function io::writeFile() {
+function io::writeToFile() {
   io::createFilePathIfNeeded "${1}"
-  printf '%s' "${!2}" >"${1}"
+  if [[ ${3:-false} == "true" ]]; then
+    printf '%s' "${2}" >>"${1}"
+  else
+    printf '%s' "${2}" >"${1}"
+  fi
 }
+
+## io::writeToFileFromRef
+#
+# Write the content to a file.
+#
+# - $1: the file path to write
+# - $2: the name of the variable with the content to write
+# - $3: (optional) true to append the content to the file, false otherwise (default to false
+#
+# ```bash
+# io::writeToFileFromRef "/path/to/file" "myVariable"
+# ```
+#
+# > - This function will overwrite the file if it already exists.
+# > - If the file path does not exist, the function will create the directory tree.
+# > - The main use case is to be able to mock this function during tests...
+function io::writeToFileFromRef() {
+  io::createFilePathIfNeeded "${1}"
+  if [[ ${3:-false} == "true" ]]; then
+    printf '%s' "${!2}" >>"${1}"
+  else
+    printf '%s' "${!2}" >"${1}"
+  fi
+}
+
 
 # ## io::checkAndFail
 #
