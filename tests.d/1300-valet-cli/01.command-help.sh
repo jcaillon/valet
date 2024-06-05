@@ -10,7 +10,7 @@ function testHelp() {
 
   # Testing to fuzzy find an help
   echo "→ valet hel sel mo3"
-  ("${GLOBAL_VALET_HOME}/valet" hel sel mo3)
+  (main::parseMainArguments hel sel mo3)
   test::endTest "Testing to fuzzy find an help" $?
 
   # testing help options

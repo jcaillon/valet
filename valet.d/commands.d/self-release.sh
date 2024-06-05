@@ -281,7 +281,16 @@ function updateDocumentation() {
   if [[ "${dryRun:-}" != "true" ]]; then
     io::invoke git add "${GLOBAL_VALET_HOME}/docs/static/config.md"
     io::listFiles "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries"
-    io::invoke git add "${RETURNED_ARRAY[@]}"
+    # remove _index.md (otherwise not consistent tests on the CI...)
+    local -a files
+    local file
+    for file in "${RETURNED_ARRAY[@]}"; do
+      if [[ ${file} == *"_index.md" ]]; then
+        continue
+      fi
+      files+=("${file}")
+    done
+    io::invoke git add "${files[@]}"
     io::invoke git commit -m ":memo: updating the documentation"
     log::success "The documentation update has been committed."
   fi
@@ -297,7 +306,7 @@ function writeAllFunctionsDocumentation() {
     if [[ ${file} == *"_index.md" ]]; then
       continue
     fi
-    rm -f "${file}"
+    io::invoke rm -f "${file}"
   done
 
   # write the new files
