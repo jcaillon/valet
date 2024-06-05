@@ -132,3 +132,7 @@ languages:
     weight: 1
 
 enableInlineShortcodes: true
+
+services:
+  googleAnalytics:
+    ID: G-BM2Y6TPH1J
