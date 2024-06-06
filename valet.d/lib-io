@@ -551,7 +551,6 @@ function io::sleep() {
       rm "${IO_SLEEP_FIFO}"
     fi
     read -rt "${timeout}" -u 6 || :
-    exec 6>&-
   else
     # when everything else failed...
     sleep "${timeout}"
