@@ -51,4 +51,4 @@ kurl::toVar false 200,201 https://example.com || core::fail "The curl command fa
 
 
 
-> Documentation generated for the version 0.17.92 (2024-06-05).
+> Documentation generated for the version 0.17.112 (2024-06-06).

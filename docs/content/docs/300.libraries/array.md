@@ -154,4 +154,4 @@ array::isInArray myArray "b" && printf '%s\n' "b is in the array"
 
 
 
-> Documentation generated for the version 0.17.92 (2024-06-05).
+> Documentation generated for the version 0.17.112 (2024-06-06).
