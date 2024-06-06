@@ -49,7 +49,7 @@ if [[ -z "${BASH_VERSION:-}" ]]; then
 fi
 
 if [[ -z "${VALET_VERSION:-}" ]]; then
-  VALET_VERSION="0.16.9"
+  VALET_VERSION="0.17.112"
 fi
 
 # import the core script (should always be skipped if the command is run from valet)
