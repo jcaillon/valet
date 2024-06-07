@@ -48,6 +48,10 @@ function selfExport() {
   io::invoke declare -p ${!VALET_CONFIG_*} ${!GLOBAL_*}
   output+="${RETURNED_VALUE//declare -? /}"$'\n'
 
+  # export core::fail
+  io::invoke declare -f core::fail
+  output+="${RETURNED_VALUE//declare -? /}"$'\n'
+
   # export all the log functions
   exportFunctionsForLibrary log
   output+="${RETURNED_VALUE//declare -? /}"$'\n'

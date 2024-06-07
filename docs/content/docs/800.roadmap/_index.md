@@ -40,5 +40,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - Generate vscode snippets from each function in core and lib-* to provide autocompletion for users.
   Alternatively, generate a single sh containing all the function definitions with comments...
 - add valet in brew
+- conditionally replace diff with git delta
+
 
 [valet-issues]: https://github.com/jcaillon/valet/issues
