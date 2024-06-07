@@ -170,6 +170,8 @@ function runTestSuites() {
   _TEST_REPORT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-report"
   _TEST_TEMP_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-tempfile"
 
+  setupDiffCommand
+
   # save the original important variables so we can restore them after the test suite
   log::getLevel
   ORIGINAL_GLOBAL_LOG_LEVEL="${RETURNED_VALUE}"
@@ -249,6 +251,31 @@ function runTestSuites() {
   NB_FAILED_TEST_SUITES=$((NB_FAILED_TEST_SUITES + failedTestSuites))
 }
 
+function setupDiffCommand() {
+  _TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
+  if [[ -z ${_TEST_DIFF_COMMAND} ]]; then
+    if command -v delta &>/dev/null; then
+      log::info "Using delta as diff command."
+      _TEST_DIFF_COMMAND="delta --paging=never --no-gitconfig --line-numbers --side-by-side %APPROVED_FILE% %RECEIVED_FILE%"
+    elif command -v diff &>/dev/null; then
+      log::info "Using diff as diff command."
+      _TEST_DIFF_COMMAND="diff --color -u %APPROVED_FILE% %RECEIVED_FILE%"
+    elif command -v cmp &>/dev/null; then
+      log::warning "Using cmp as diff command, consider setting up a diff tool using the VALET_CONFIG_TEST_DIFF_COMMAND config variable."
+      _TEST_DIFF_COMMAND="cmp %APPROVED_FILE% %RECEIVED_FILE%"
+    else
+      log::warning "Using internal comparison function, consider setting up a diff tool using the VALET_CONFIG_TEST_DIFF_COMMAND config variable."
+      _TEST_DIFF_COMMAND="internalCompare %APPROVED_FILE% %RECEIVED_FILE%"
+    fi
+  else
+    string::cutField "${_TEST_DIFF_COMMAND}" 0 " "
+    local diffExecutable="${RETURNED_VALUE}"
+    if ! command -v "${diffExecutable}" &>/dev/null; then
+      log::warning "The user diff command ⌜${diffExecutable}⌝ set with VALET_CONFIG_TEST_DIFF_COMMAND is not available, using the internal comparison function."
+    fi
+  fi
+}
+
 function runHookScript() {
   # run a custom script if it exists
   if [[ -f "${1}" ]]; then
@@ -324,15 +351,18 @@ function compareWithApproved() {
     : >"${approvedFile}"
   fi
 
-  if diff --color -u "${approvedFile}" "${receivedFileToCopy}" 1>&2; then
-    log::debug "🧪 ${testName}: OK, equal to approved file."
+  local command="${_TEST_DIFF_COMMAND//%APPROVED_FILE%/"${approvedFile}"}"
+  command="${command//%RECEIVED_FILE%/"${receivedFileToCopy}"}"
+
+  if ${command} 1>&2; then
+    log::debug "🧪 ${testName}: OK, received file is equal to the approved file."
     if [[ -f "${receivedFile}" ]]; then
       rm -f "${receivedFile}" 1>/dev/null
     fi
     return 0
   else
-    log::printString "${receivedFile} is different than ${approvedFile} (see above)"
-    log::error "🧪 ${testName}: KO, differs from approved file (see difference above)."
+    log::printString "${receivedFile} is different than ${approvedFile}."
+    log::error "🧪 ${testName}: KO, received file differs from the approved file."
   fi
 
   # if the option is activated, we approve the received file
@@ -509,4 +539,33 @@ function echoFileSubstitutingPath() {
     fi
     printf '%s' "${line}"
   done <"${file}"
+}
+
+# This function allows to compare the content two files.
+# It mimics the diff command.
+#
+# - $1: the first file to compare
+# - $2: the second file to compare
+#
+# Returns:
+#
+# -$?: 0 if the files are the same, 1 otherwise
+#
+# ```bash
+# internalCompare file1 file2
+# ```
+function internalCompare() {
+  local file1="${1}"
+  local file2="${2}"
+
+  local content1 content2
+  io::readFile "${file1}"
+  content1="${RETURNED_VALUE}"
+  io::readFile "${file2}"
+  content2="${RETURNED_VALUE}"
+
+  if [[ "${content1}" != "${content2}" ]]; then
+    return 1
+  fi
+  return 0
 }

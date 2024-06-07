@@ -83,6 +83,17 @@ VALET_CONFIG_REMEMBER_LAST_CHOICES="${VALET_CONFIG_REMEMBER_LAST_CHOICES:-}"
 # Defaults to the '.env' file in the current directory.
 VALET_CONFIG_DOT_ENV_SCRIPT="${VALET_CONFIG_DOT_ENV_SCRIPT:-}"
 
+# The command (with arguments) that will be used to diff files in the Valet test command.
+# The command should have 2 placeholders: %APPROVED_FILE% and %RECEIVED_FILE%. They
+# will be replaced by the paths of the approved and received files.
+# You can change that command to use your favorite diff tool.
+#
+# This defaults to:
+# - 'delta --paging=never --no-gitconfig --line-numbers --side-by-side %APPROVED_FILE% %RECEIVED_FILE%' if delta is available
+# - 'diff --color -u %APPROVED_FILE% %RECEIVED_FILE%' if diff is available
+# - 'internalCompare %APPROVED_FILE% %RECEIVED_FILE%' otherwise (internalCompare is a bash function that compares 2 files)
+VALET_CONFIG_TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
+
 # -----------
 # Log/output configuration
 # -----------
@@ -328,6 +339,17 @@ VALET_CONFIG_REMEMBER_LAST_CHOICES="${VALET_CONFIG_REMEMBER_LAST_CHOICES:-}"
 # will be available in Valet.
 # Defaults to the '.env' file in the current directory.
 VALET_CONFIG_DOT_ENV_SCRIPT="${VALET_CONFIG_DOT_ENV_SCRIPT:-}"
+
+# The command (with arguments) that will be used to diff files in the Valet test command.
+# The command should have 2 placeholders: %APPROVED_FILE% and %RECEIVED_FILE%. They
+# will be replaced by the paths of the approved and received files.
+# You can change that command to use your favorite diff tool.
+#
+# This defaults to:
+# - 'delta --paging=never --no-gitconfig --line-numbers --side-by-side %APPROVED_FILE% %RECEIVED_FILE%' if delta is available
+# - 'diff --color -u %APPROVED_FILE% %RECEIVED_FILE%' if diff is available
+# - 'internalCompare %APPROVED_FILE% %RECEIVED_FILE%' otherwise (internalCompare is a bash function that compares 2 files)
+VALET_CONFIG_TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
 
 # -----------
 # Log/output configuration

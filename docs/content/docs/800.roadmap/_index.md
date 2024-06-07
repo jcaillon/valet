@@ -22,7 +22,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Add a command self package that build the user commands into a single script file.
 - fix running tests with verbose mode on.
 - Replace awk with bash.
-- Provide an alternative bash function if diff is not found.
 - Allow to separate commands from options/arguments with `--`.
 - Have a consistent look and feel for interactive functions.
 - Reimplement usage of main::sortCommands / main::addLastChoice.
@@ -40,7 +39,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Generate vscode snippets from each function in core and lib-* to provide autocompletion for users.
   Alternatively, generate a single sh containing all the function definitions with comments...
 - add valet in brew
-- conditionally replace diff with git delta
 
 
 [valet-issues]: https://github.com/jcaillon/valet/issues
