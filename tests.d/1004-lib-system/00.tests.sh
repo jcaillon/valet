@@ -48,10 +48,29 @@ function testSystem::date() {
   test::endTest "Testing system::date" 0
 }
 
+function testSystem::getUndeclaredVariables() {
+
+  echo "→ system::getUndeclaredVariables"
+  if ! system::getUndeclaredVariables; then
+    echo "No undeclared variables found.${RETURNED_ARRAY[*]}"
+  fi
+
+  echo
+  local abc="ok"
+  echo "→ system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE"
+  system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE abc dfg NOP
+  if system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE abc dfg NOP; then
+    echo "Found undeclared variables: ⌜${RETURNED_ARRAY[*]}⌝."
+  fi
+
+  test::endTest "Testing system::date" 0
+}
+
 function main() {
   testSystem::os
   testSystem::env
   testSystem::date
+  testSystem::getUndeclaredVariables
 }
 
 main

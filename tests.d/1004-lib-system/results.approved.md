@@ -48,3 +48,17 @@ Returned date with length 22.
 Returned date with length 8.
 ```
 
+### Testing system::date
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ system::getUndeclaredVariables
+No undeclared variables found.
+
+→ system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE
+Found undeclared variables: ⌜dfg NOP⌝.
+```
+
