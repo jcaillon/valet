@@ -259,7 +259,7 @@ function updateDocumentation() {
 
   system::date "%(%F)T"
   local currentDate="${RETURNED_VALUE}"
-  local pageFooter=$'\n'$'\n'"> Documentation generated for the version ${version} (${currentDate})."$'\n'
+  local pageFooter="Documentation generated for the version ${version} (${currentDate})."
 
   # export the documentation for each library
   getAllFunctionsDocumentation
@@ -269,12 +269,17 @@ function updateDocumentation() {
     writeAllFunctionsDocumentation "${pageFooter}"
   fi
 
+  # write each function to a file
+  if [[ "${dryRun:-}" != "true" ]]; then
+    writeAllFunctionsToExtrasScript "${pageFooter}"
+  fi
+
   # export the valet config valet to the documentation
   core::sourceFunction selfConfig
   config::getFileContent false
 
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::writeToFile "${GLOBAL_VALET_HOME}/docs/static/config.md" '```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'"${pageFooter}"
+    io::writeToFile "${GLOBAL_VALET_HOME}/docs/static/config.md" '```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'$'\n'$'\n'"> ${pageFooter}"$'\n'
   fi
 
   # commit the changes to the documentation
@@ -296,6 +301,8 @@ function updateDocumentation() {
   fi
 }
 
+# This function writes all the functions documentation to the documentation files
+# under the `docs/content/docs/300.libraries` directory.
 function writeAllFunctionsDocumentation() {
   local pageFooter="${1:-}"
 
@@ -345,8 +352,38 @@ url: /docs/libraries/${packageName}
     if [[ ${file} == *"_index.md" ]]; then
       continue
     fi
-    io::writeToFile "${file}" "${pageFooter}" true
+    io::writeToFile "${file}" $'\n'$'\n'"> ${pageFooter}"$'\n' true
   done
+}
+
+# This function writes all the functions to the extras/all-valet-functions.sh script.
+# Each function will be defined with a { return 0; } body.
+function writeAllFunctionsToExtrasScript() {
+  local pageFooter="${1:-}"
+
+  local content="#!/usr/bin/env bash
+# This script contains the documentation of all the valet library functions.
+# It can be used in your editor to provide auto-completion and documentation.
+#
+# ${pageFooter}
+
+"
+
+  local key functionName documentation line
+  for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
+    functionName="${key}"
+    documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
+    # add # to each line of the documentation
+
+    local IFS
+    while IFS=$'\n' read -rd $'\n' line; do
+      content+="# ${line}"$'\n'
+    done <<<"${!documentation}"
+
+    content+="function ${functionName}() { return 0; }"$'\n'$'\n'
+  done
+
+  io::writeToFile "${GLOBAL_VALET_HOME}/extras/all-valet-functions.sh" "${content}"
 }
 
 # Returns an associative array of all the function names and their documentation.

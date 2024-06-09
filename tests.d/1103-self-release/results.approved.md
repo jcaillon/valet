@@ -384,6 +384,7 @@ INFO     Found 95 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/all-valet-functions.sh
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/static/config.md
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/static/config.md
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/kurl.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
