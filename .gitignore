@@ -1,6 +1,7 @@
 ### VS Code ###
 .vscode/**
 !.vscode/extensions.json
+!.vscode/valet.code-snippets
 
 ### WINDOWS ###
 desktop.ini

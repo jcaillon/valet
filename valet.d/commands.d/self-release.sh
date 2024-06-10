@@ -274,6 +274,11 @@ function updateDocumentation() {
     writeAllFunctionsToExtrasScript "${pageFooter}"
   fi
 
+  # write each function to the snippet file
+  if [[ "${dryRun:-}" != "true" ]]; then
+    writeAllFunctionsToExtrasCodeSnippets "${pageFooter}"
+  fi
+
   # export the valet config valet to the documentation
   core::sourceFunction selfConfig
   config::getFileContent false
@@ -384,6 +389,44 @@ function writeAllFunctionsToExtrasScript() {
   done
 
   io::writeToFile "${GLOBAL_VALET_HOME}/extras/all-valet-functions.sh" "${content}"
+}
+
+# This function writes all the functions to the extras/valet.code-snippets.
+function writeAllFunctionsToExtrasCodeSnippets() {
+  local pageFooter="${1:-}"
+
+  # load the existing file content
+  io::readFile "${GLOBAL_VALET_HOME}/.vscode/valet.code-snippets"
+  local originalContent="${RETURNED_VALUE}"
+
+  # remove the first line
+  originalContent="${originalContent#*$'\n'}"
+
+  local content="{"$'\n'"// ${pageFooter}"$'\n'
+
+  local key functionName documentation firstSentence
+  for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
+    functionName="${key}"
+    documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
+
+    string::extractBetween "${!documentation}" $'\n' "."
+    firstSentence="${RETURNED_VALUE#$'\n'}"
+    firstSentence="${firstSentence//\/\\}"
+    firstSentence="${firstSentence//'"'/'\"'}"
+    firstSentence="${firstSentence//$'\n'/ }"
+
+    content+="
+		\"${functionName}\": {
+		\"prefix\": \"${functionName}\",
+		\"description\": \"${firstSentence}...\",
+		\"scope\": \"\",
+		\"body\": [ \"${functionName}\" ]
+	},"$'\n'
+  done
+
+  content+="${originalContent}"
+
+  io::writeToFile "${GLOBAL_VALET_HOME}/extras/valet.code-snippets" "${content}"
 }
 
 # Returns an associative array of all the function names and their documentation.

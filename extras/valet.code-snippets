@@ -1,0 +1,712 @@
+{
+// Documentation generated for the version 0.18.67 (2024-06-10).
+
+		"io::toAbsolutePath": {
+		"prefix": "io::toAbsolutePath",
+		"description": "This function returns the absolute path of a file...",
+		"scope": "",
+		"body": [ "io::toAbsolutePath" ]
+	},
+
+		"io::listPaths": {
+		"prefix": "io::listPaths",
+		"description": "List all the paths in the given directory...",
+		"scope": "",
+		"body": [ "io::listPaths" ]
+	},
+
+		"string::wrapSentence": {
+		"prefix": "string::wrapSentence",
+		"description": "Allows to soft wrap the given sentence (without new lines) at the given width...",
+		"scope": "",
+		"body": [ "string::wrapSentence" ]
+	},
+
+		"io::createFilePathIfNeeded": {
+		"prefix": "io::createFilePathIfNeeded",
+		"description": "Make sure that the given file path exists...",
+		"scope": "",
+		"body": [ "io::createFilePathIfNeeded" ]
+	},
+
+		"io::checkAndFail": {
+		"prefix": "io::checkAndFail",
+		"description": "Check last return code and fail (exit) if it is an error...",
+		"scope": "",
+		"body": [ "io::checkAndFail" ]
+	},
+
+		"core::sourceUserCommands": {
+		"prefix": "core::sourceUserCommands",
+		"description": "Source the user 'commands' file from the valet user directory...",
+		"scope": "",
+		"body": [ "core::sourceUserCommands" ]
+	},
+
+		"log::warning": {
+		"prefix": "log::warning",
+		"description": "Displays a warning...",
+		"scope": "",
+		"body": [ "log::warning" ]
+	},
+
+		"core::resetIncludedFiles": {
+		"prefix": "core::resetIncludedFiles",
+		"description": "Allows to reset the included files...",
+		"scope": "",
+		"body": [ "core::resetIncludedFiles" ]
+	},
+
+		"core::getConfigurationDirectory": {
+		"prefix": "core::getConfigurationDirectory",
+		"description": "Returns the path to the valet configuration directory...",
+		"scope": "",
+		"body": [ "core::getConfigurationDirectory" ]
+	},
+
+		"interactive::switchBackFromFullScreen": {
+		"prefix": "interactive::switchBackFromFullScreen",
+		"description": "Call this function to switch back from the full screen mode...",
+		"scope": "",
+		"body": [ "interactive::switchBackFromFullScreen" ]
+	},
+
+		"interactive::displayAnswer": {
+		"prefix": "interactive::displayAnswer",
+		"description": "Displays an answer to a previous question...",
+		"scope": "",
+		"body": [ "interactive::displayAnswer" ]
+	},
+
+		"string::split": {
+		"prefix": "string::split",
+		"description": "Split a string into an array using a separator...",
+		"scope": "",
+		"body": [ "string::split" ]
+	},
+
+		"array::makeArraysSameSize": {
+		"prefix": "array::makeArraysSameSize",
+		"description": "This function makes sure that all the arrays have the same size...",
+		"scope": "",
+		"body": [ "array::makeArraysSameSize" ]
+	},
+
+		"log::isDebugEnabled": {
+		"prefix": "log::isDebugEnabled",
+		"description": "Check if the debug mode is active...",
+		"scope": "",
+		"body": [ "log::isDebugEnabled" ]
+	},
+
+		"array::fuzzyFilterSort": {
+		"prefix": "array::fuzzyFilterSort",
+		"description": "Allows to fuzzy sort an array against a given pattern...",
+		"scope": "",
+		"body": [ "array::fuzzyFilterSort" ]
+	},
+
+		"string::extractBetween": {
+		"prefix": "string::extractBetween",
+		"description": "Extract the text between two strings within a string...",
+		"scope": "",
+		"body": [ "string::extractBetween" ]
+	},
+
+		"log::setLevel": {
+		"prefix": "log::setLevel",
+		"description": "Set the log level...",
+		"scope": "",
+		"body": [ "log::setLevel" ]
+	},
+
+		"core::showHelp": {
+		"prefix": "core::showHelp",
+		"description": "Show the help for the current function...",
+		"scope": "",
+		"body": [ "core::showHelp" ]
+	},
+
+		"io::listFiles": {
+		"prefix": "io::listFiles",
+		"description": "List all the files in the given directory...",
+		"scope": "",
+		"body": [ "io::listFiles" ]
+	},
+
+		"interactive::createSpace": {
+		"prefix": "interactive::createSpace",
+		"description": "This function creates some new lines after the current cursor position...",
+		"scope": "",
+		"body": [ "interactive::createSpace" ]
+	},
+
+		"log::printString": {
+		"prefix": "log::printString",
+		"description": "Display a string in the log...",
+		"scope": "",
+		"body": [ "log::printString" ]
+	},
+
+		"interactive::promptYesNoRaw": {
+		"prefix": "interactive::promptYesNoRaw",
+		"description": "Ask the user to yes or no...",
+		"scope": "",
+		"body": [ "interactive::promptYesNoRaw" ]
+	},
+
+		"test::endTest": {
+		"prefix": "test::endTest",
+		"description": "Call this function after each test to write the test results to the report file...",
+		"scope": "",
+		"body": [ "test::endTest" ]
+	},
+
+		"string::wrapCharacters": {
+		"prefix": "string::wrapCharacters",
+		"description": "Allows to hard wrap the given string (without new lines) at the given width...",
+		"scope": "",
+		"body": [ "string::wrapCharacters" ]
+	},
+
+		"interactive::getCursorPosition": {
+		"prefix": "interactive::getCursorPosition",
+		"description": "Get the current cursor position...",
+		"scope": "",
+		"body": [ "interactive::getCursorPosition" ]
+	},
+
+		"ansi-codes::*": {
+		"prefix": "ansi-codes::*",
+		"description": "ANSI codes for text attributes, colors, cursor control, and other common escape sequences...",
+		"scope": "",
+		"body": [ "ansi-codes::*" ]
+	},
+
+		"io::cleanupTempFiles": {
+		"prefix": "io::cleanupTempFiles",
+		"description": "Removes all the temporary files and directories that were created by the io::createTempFile and io::createTempDirectory functions...",
+		"scope": "",
+		"body": [ "io::cleanupTempFiles" ]
+	},
+
+		"interactive::switchToFullScreen": {
+		"prefix": "interactive::switchToFullScreen",
+		"description": "Call this function to start an interactive session in full screen mode...",
+		"scope": "",
+		"body": [ "interactive::switchToFullScreen" ]
+	},
+
+		"system::env": {
+		"prefix": "system::env",
+		"description": "Get the list of all the environment variables...",
+		"scope": "",
+		"body": [ "system::env" ]
+	},
+
+		"string::count": {
+		"prefix": "string::count",
+		"description": "Counts the number of occurences of a substring in a string...",
+		"scope": "",
+		"body": [ "string::count" ]
+	},
+
+		"interactive::testKeys": {
+		"prefix": "interactive::testKeys",
+		"description": "Wait for a user input and prints the character that bash sees...",
+		"scope": "",
+		"body": [ "interactive::testKeys" ]
+	},
+
+		"array::sort": {
+		"prefix": "array::sort",
+		"description": "Sorts an array using the > bash operator (lexicographic order)...",
+		"scope": "",
+		"body": [ "array::sort" ]
+	},
+
+		"string::indexOf": {
+		"prefix": "string::indexOf",
+		"description": "Find the first index of a string within another string...",
+		"scope": "",
+		"body": [ "string::indexOf" ]
+	},
+
+		"source": {
+		"prefix": "source",
+		"description": "Allows to include a library file or sources a file...",
+		"scope": "",
+		"body": [ "source" ]
+	},
+
+		"log::trace": {
+		"prefix": "log::trace",
+		"description": "Displays a trace message...",
+		"scope": "",
+		"body": [ "log::trace" ]
+	},
+
+		"string::camelCaseToSnakeCase": {
+		"prefix": "string::camelCaseToSnakeCase",
+		"description": "This function convert a camelCase string to a SNAKE_CASE string...",
+		"scope": "",
+		"body": [ "string::camelCaseToSnakeCase" ]
+	},
+
+		"io::listDirectories": {
+		"prefix": "io::listDirectories",
+		"description": "List all the directories in the given directory...",
+		"scope": "",
+		"body": [ "io::listDirectories" ]
+	},
+
+		"log::success": {
+		"prefix": "log::success",
+		"description": "Displays a success message...",
+		"scope": "",
+		"body": [ "log::success" ]
+	},
+
+		"interactive::displayDialogBox": {
+		"prefix": "interactive::displayDialogBox",
+		"description": "Displays a dialog box with a speaker and a text...",
+		"scope": "",
+		"body": [ "interactive::displayDialogBox" ]
+	},
+
+		"array::fuzzyFilter": {
+		"prefix": "array::fuzzyFilter",
+		"description": "Allows to fuzzy match an array against a given pattern...",
+		"scope": "",
+		"body": [ "array::fuzzyFilter" ]
+	},
+
+		"io::cat": {
+		"prefix": "io::cat",
+		"description": "Print the content of a file to stdout...",
+		"scope": "",
+		"body": [ "io::cat" ]
+	},
+
+		"string::cutField": {
+		"prefix": "string::cutField",
+		"description": "Allows to get the nth element of a string separated by a given separator...",
+		"scope": "",
+		"body": [ "string::cutField" ]
+	},
+
+		"io::countArgs": {
+		"prefix": "io::countArgs",
+		"description": "Returns the number of arguments passed...",
+		"scope": "",
+		"body": [ "io::countArgs" ]
+	},
+
+		"log::printCallStack": {
+		"prefix": "log::printCallStack",
+		"description": "This function prints the current function stack in the logs...",
+		"scope": "",
+		"body": [ "log::printCallStack" ]
+	},
+
+		"log::isTraceEnabled": {
+		"prefix": "log::isTraceEnabled",
+		"description": "Check if the trace mode is active...",
+		"scope": "",
+		"body": [ "log::isTraceEnabled" ]
+	},
+
+		"core::getUserDirectory": {
+		"prefix": "core::getUserDirectory",
+		"description": "Returns the path to the valet user directory...",
+		"scope": "",
+		"body": [ "core::getUserDirectory" ]
+	},
+
+		"io::createTempFile": {
+		"prefix": "io::createTempFile",
+		"description": "Creates a temporary file and return its path...",
+		"scope": "",
+		"body": [ "io::createTempFile" ]
+	},
+
+		"fsfs::itemSelector": {
+		"prefix": "fsfs::itemSelector",
+		"description": "Displays a menu where the user can search and select an item...",
+		"scope": "",
+		"body": [ "fsfs::itemSelector" ]
+	},
+
+		"io::invoke2piped": {
+		"prefix": "io::invoke2piped",
+		"description": "This function call an executable and its arguments and input a given string as stdin...",
+		"scope": "",
+		"body": [ "io::invoke2piped" ]
+	},
+
+		"string::trimAll": {
+		"prefix": "string::trimAll",
+		"description": "Trim all whitespaces and truncate spaces...",
+		"scope": "",
+		"body": [ "string::trimAll" ]
+	},
+
+		"core::checkParseResults": {
+		"prefix": "core::checkParseResults",
+		"description": "A convenience function to check the parsing results and fails with an error message if there are parsing errors...",
+		"scope": "",
+		"body": [ "core::checkParseResults" ]
+	},
+
+		"system::exportTerminalSize": {
+		"prefix": "system::exportTerminalSize",
+		"description": "This function exports the terminal size...",
+		"scope": "",
+		"body": [ "system::exportTerminalSize" ]
+	},
+
+		"io::invokef2piped": {
+		"prefix": "io::invokef2piped",
+		"description": "This function call an executable and its arguments and input a given string as stdin...",
+		"scope": "",
+		"body": [ "io::invokef2piped" ]
+	},
+
+		"log::printRaw": {
+		"prefix": "log::printRaw",
+		"description": "Display something in the log stream...",
+		"scope": "",
+		"body": [ "log::printRaw" ]
+	},
+
+		"log::error": {
+		"prefix": "log::error",
+		"description": "Displays an error message...",
+		"scope": "",
+		"body": [ "log::error" ]
+	},
+
+		"kurl::toFile": {
+		"prefix": "kurl::toFile",
+		"description": "This function is a wrapper around curl...",
+		"scope": "",
+		"body": [ "kurl::toFile" ]
+	},
+
+		"interactive::askForConfirmationRaw": {
+		"prefix": "interactive::askForConfirmationRaw",
+		"description": "Ask the user to press the button to continue...",
+		"scope": "",
+		"body": [ "interactive::askForConfirmationRaw" ]
+	},
+
+		"log::info": {
+		"prefix": "log::info",
+		"description": "Displays an info message...",
+		"scope": "",
+		"body": [ "log::info" ]
+	},
+
+		"core::sourceFunction": {
+		"prefix": "core::sourceFunction",
+		"description": "Source the file associated with a command function...",
+		"scope": "",
+		"body": [ "core::sourceFunction" ]
+	},
+
+		"string::bumpSemanticVersion": {
+		"prefix": "string::bumpSemanticVersion",
+		"description": "This function allows to bump a semantic version formatted like: major...",
+		"scope": "",
+		"body": [ "string::bumpSemanticVersion" ]
+	},
+
+		"test::commentTest": {
+		"prefix": "test::commentTest",
+		"description": "Call this function to add a paragraph in the report file...",
+		"scope": "",
+		"body": [ "test::commentTest" ]
+	},
+
+		"io::invoke": {
+		"prefix": "io::invoke",
+		"description": "This function call an executable and its arguments...",
+		"scope": "",
+		"body": [ "io::invoke" ]
+	},
+
+		"interactive::displayQuestion": {
+		"prefix": "interactive::displayQuestion",
+		"description": "Displays a question to the user...",
+		"scope": "",
+		"body": [ "interactive::displayQuestion" ]
+	},
+
+		"interactive::waitForKey": {
+		"prefix": "interactive::waitForKey",
+		"description": "Wait for a user input (single key)...",
+		"scope": "",
+		"body": [ "interactive::waitForKey" ]
+	},
+
+		"io::createTempDirectory": {
+		"prefix": "io::createTempDirectory",
+		"description": "Creates a temporary directory...",
+		"scope": "",
+		"body": [ "io::createTempDirectory" ]
+	},
+
+		"io::sleep": {
+		"prefix": "io::sleep",
+		"description": "Sleep for the given amount of time...",
+		"scope": "",
+		"body": [ "io::sleep" ]
+	},
+
+		"core::failWithCode": {
+		"prefix": "core::failWithCode",
+		"description": "Displays an error message and then exit the program with error...",
+		"scope": "",
+		"body": [ "core::failWithCode" ]
+	},
+
+		"system::os": {
+		"prefix": "system::os",
+		"description": "Returns the name of the current OS...",
+		"scope": "",
+		"body": [ "system::os" ]
+	},
+
+		"array::appendIfNotPresent": {
+		"prefix": "array::appendIfNotPresent",
+		"description": "Add a value to an array if it is not already present...",
+		"scope": "",
+		"body": [ "array::appendIfNotPresent" ]
+	},
+
+		"system::getUndeclaredVariables": {
+		"prefix": "system::getUndeclaredVariables",
+		"description": "This function returns the list of undeclared variables for the given names...",
+		"scope": "",
+		"body": [ "system::getUndeclaredVariables" ]
+	},
+
+		"io::invokef2": {
+		"prefix": "io::invokef2",
+		"description": "This function call an executable and its arguments...",
+		"scope": "",
+		"body": [ "io::invokef2" ]
+	},
+
+		"log::printFileString": {
+		"prefix": "log::printFileString",
+		"description": "Display a file content with line numbers in the logs...",
+		"scope": "",
+		"body": [ "log::printFileString" ]
+	},
+
+		"io::invokef5": {
+		"prefix": "io::invokef5",
+		"description": "This function call an executable and its arguments...",
+		"scope": "",
+		"body": [ "io::invokef5" ]
+	},
+
+		"string::regexGetFirst": {
+		"prefix": "string::regexGetFirst",
+		"description": "Matches a string against a regex and returns the first capture group of the matched string...",
+		"scope": "",
+		"body": [ "string::regexGetFirst" ]
+	},
+
+		"system::date": {
+		"prefix": "system::date",
+		"description": "Get the current date in the given format...",
+		"scope": "",
+		"body": [ "system::date" ]
+	},
+
+		"kurl::toVar": {
+		"prefix": "kurl::toVar",
+		"description": "This function is a wrapper around curl...",
+		"scope": "",
+		"body": [ "kurl::toVar" ]
+	},
+
+		"core::getLocalStateDirectory": {
+		"prefix": "core::getLocalStateDirectory",
+		"description": "Returns the path to the valet locla state directory...",
+		"scope": "",
+		"body": [ "core::getLocalStateDirectory" ]
+	},
+
+		"interactive::askForConfirmation": {
+		"prefix": "interactive::askForConfirmation",
+		"description": "Ask the user to press the button to continue...",
+		"scope": "",
+		"body": [ "interactive::askForConfirmation" ]
+	},
+
+		"core::fail": {
+		"prefix": "core::fail",
+		"description": "Displays an error message and then exit the program with error...",
+		"scope": "",
+		"body": [ "core::fail" ]
+	},
+
+		"string::kebabCaseToCamelCase": {
+		"prefix": "string::kebabCaseToCamelCase",
+		"description": "This function convert a kebab-case string to a camelCase string...",
+		"scope": "",
+		"body": [ "string::kebabCaseToCamelCase" ]
+	},
+
+		"log::debug": {
+		"prefix": "log::debug",
+		"description": "Displays a debug message...",
+		"scope": "",
+		"body": [ "log::debug" ]
+	},
+
+		"log::getLevel": {
+		"prefix": "log::getLevel",
+		"description": "Get the current log level...",
+		"scope": "",
+		"body": [ "log::getLevel" ]
+	},
+
+		"interactive::promptYesNo": {
+		"prefix": "interactive::promptYesNo",
+		"description": "Ask the user to yes or no...",
+		"scope": "",
+		"body": [ "interactive::promptYesNo" ]
+	},
+
+		"string::trim": {
+		"prefix": "string::trim",
+		"description": "Trim leading and trailing whitespaces...",
+		"scope": "",
+		"body": [ "string::trim" ]
+	},
+
+		"string::kebabCaseToSnakeCase": {
+		"prefix": "string::kebabCaseToSnakeCase",
+		"description": "This function convert a kebab-case string to a SNAKE_CASE string...",
+		"scope": "",
+		"body": [ "string::kebabCaseToSnakeCase" ]
+	},
+
+		"core::reloadUserCommands": {
+		"prefix": "core::reloadUserCommands",
+		"description": "Forcibly source again the user 'commands' file from the valet user directory...",
+		"scope": "",
+		"body": [ "core::reloadUserCommands" ]
+	},
+
+		"array::sortWithCriteria": {
+		"prefix": "array::sortWithCriteria",
+		"description": "Sorts an array using mulitple criteria...",
+		"scope": "",
+		"body": [ "array::sortWithCriteria" ]
+	},
+
+		"array::isInArray": {
+		"prefix": "array::isInArray",
+		"description": "Check if a value is in an array...",
+		"scope": "",
+		"body": [ "array::isInArray" ]
+	},
+
+		"log::printFile": {
+		"prefix": "log::printFile",
+		"description": "Display a file content with line numbers in the logs...",
+		"scope": "",
+		"body": [ "log::printFile" ]
+	},
+
+		"io::readFile": {
+		"prefix": "io::readFile",
+		"description": "Reads the content of a file and returns it in the global variable RETURNED_VALUE...",
+		"scope": "",
+		"body": [ "io::readFile" ]
+	},
+
+		"core::parseArguments": {
+		"prefix": "core::parseArguments",
+		"description": "Parse the arguments and options of a function and return a string that can be evaluated to set the variables...",
+		"scope": "",
+		"body": [ "core::parseArguments" ]
+	},
+
+		"io::checkAndWarn": {
+		"prefix": "io::checkAndWarn",
+		"description": "Check last return code and warn the user in case the return code is not 0...",
+		"scope": "",
+		"body": [ "io::checkAndWarn" ]
+	},
+
+		"log::errorTrace": {
+		"prefix": "log::errorTrace",
+		"description": "Displays an error trace message...",
+		"scope": "",
+		"body": [ "log::errorTrace" ]
+	},
+
+		"io::invoke2": {
+		"prefix": "io::invoke2",
+		"description": "This function call an executable and its arguments...",
+		"scope": "",
+		"body": [ "io::invoke2" ]
+	},
+
+		"io::readStdIn": {
+		"prefix": "io::readStdIn",
+		"description": "Read the content of the standard input...",
+		"scope": "",
+		"body": [ "io::readStdIn" ]
+	},
+	"read file to array and loop": {
+		"prefix": "read file to array and loop",
+		"description": "Read file to array and loop",
+		"scope": "",
+		"body": [
+			"readarray -d $'\\n' fileLines < file",
+			"for myString in \"${fileLines[@]}\"; do",
+			"  # the difference is also that myString will end with the delimiter, so you might want to remove it",
+			"  # Alternatively, you can run readarray with -t but in that case you will not have an array element for empty lines",
+			"  echo \"${myString%$'\\n'}\"",
+			"done"
+		]
+	},
+	"loop through lines of string": {
+		"prefix": "loop through lines of string",
+		"description": "Loop through each line of a string (keep empty lines)",
+		"scope": "",
+		"body": [
+			"while read -r line; do",
+			"  echo \"${line}\"",
+			"done <<< \"${var1}\""
+		]
+	},
+	"loop through lines of string (for)": {
+		"prefix": "loop through lines of string (for)",
+		"description": "Loop through each line of a string (does not keep empty lines)",
+		"scope": "",
+		"body": [
+			"local IFS=$'\\n'",
+			"for line in ${var1}; do",
+			"  echo \"${line}\"",
+			"done"
+		]
+	},
+	"read file loop on all lines": {
+		"prefix": "read file loop on all lines",
+		"description": "Read a file, line by line",
+		"scope": "",
+		"body": [
+			"while read -r line || [[ -n ${line:-} ]]; do",
+			"  echo \"${line}\"",
+			"done < file"
+		]
+	}
+}
