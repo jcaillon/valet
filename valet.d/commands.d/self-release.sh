@@ -226,7 +226,7 @@ function uploadArtifact() {
   pushd "${tempDir}" 1>/dev/null
 
   local -a files
-  files=(examples.d valet.d valet)
+  files=(examples.d valet.d extras valet)
 
   # copy each file from valet dir to current dir
   local file

@@ -33,21 +33,29 @@ Here is a list of recommended extensions to work on bash scripts:
 - [Snippets for bash scripts](https://marketplace.visualstudio.com/items?itemName=Remisa.shellman)
 - [Snippets for shebang](https://marketplace.visualstudio.com/items?itemName=rpinski.shebang-snippets)
 
-GitHub Copilot is of great help if you can have it.
+GitHub Copilot is of great help if you can have it. You can also find the list of [extensions here](https://github.com/jcaillon/valet/blob/main/.vscode/extensions.json).
 
 ## VS code settings
 
-You can open your `~/.valet.d` directory as a workspace on vscode. I recommend to copy (or link) the `valet.d` directory from the Valet installation to `~/.valet.d/.valet.libs` in your workspace folder and add the following settings in your `~/.valet.d/.vscode/settings.json`:
+You can open your `~/.valet.d` directory as a workspace on vscode.
+
+I recommend to copy (or link) the [extras/all-valet-functions.sh](https://github.com/jcaillon/valet/blob/main/extras/all-valet-functions.sh) file present in the Valet installation to `~/.valet.d/.vscode/all-valet-functions.sh` in your workspace folder and add the following settings in your `~/.valet.d/.vscode/settings.json`:
 
 ```json
 {
-  // https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
-  "bashIde.globPattern": "**/@(*@(.sh|.inc|.bash|.command|core)|lib-*)",
   "bashIde.includeAllWorkspaceSymbols": true
 }
 ```
 
-This allows you to have autocompletion of the core and libraries functions from your command scripts.
+This allows you to have autocompletion and help on the core and libraries functions:
+
+![autocompletion](image.png)
+
+{{< callout type="info" >}}
+This is done for you if you use the automated installer of Valet.
+{{< /callout >}}
+
+Alternatively, you can use the Valet [vscode snippets](https://github.com/jcaillon/valet/edit/main/extras/valet.code-snippets) but vscode does not allow having a long description for snippets so you will have an undocumented list of functions
 
 ## Where to start your bash journey
 
