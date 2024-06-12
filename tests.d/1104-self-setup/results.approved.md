@@ -108,12 +108,10 @@ An information icon: II
 ```log
 INFO     Now setting up Valet.
 CININFO    II  CDE Creating the valet config file CHI⌜/tmp/valet.d/f1-0⌝CDE.
-CWAWARNING IW  CDE The tool CHI⌜awk⌝CDE is missing. It is needed for cleaning the profiler logs.
-CWAWARNING IW  CDE The tool CHI⌜diff⌝CDE is missing. It is needed for the self test command.
 CWAWARNING IW  CDE The tool CHI⌜curl⌝CDE is missing. It is needed for the self update command.
 CWAWARNING IW  CDE You are missing some tools, please install them to use Valet to its full potential.
-You can install them using your package manager, e.g., CHI⌜sudo apt install gawk diffutils curl⌝CDE.
-You can also install them using a package manager like brew, e.g., CHI⌜brew install gawk diffutils curl⌝CDE
+You can install them using your package manager, e.g., CHI⌜sudo apt install curl⌝CDE.
+You can also install them using a package manager like brew, e.g., CHI⌜brew install curl⌝CDE
 CSUSUCCESS IS  CDE You are all set!
 CININFO    II  CDE As a reminder, you can modify the configuration done during this set up by either:
 - replaying the command CHI⌜valet self setup⌝CDE,

@@ -12,12 +12,8 @@ function testselfSetup() {
   rm -f "${configFile}"
 
   # shellcheck disable=SC2317
-  function awk() { return 0; }
-  # shellcheck disable=SC2317
-  function diff() { return 0; }
-  # shellcheck disable=SC2317
   function curl() { return 0; }
-  export -f awk diff curl
+  export -f curl
 
   echo "→ echo nnn | selfSetup"
   echo nnn 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
@@ -25,7 +21,7 @@ function testselfSetup() {
   test::endTest "Testing selfSetup 1" ${exitCode}
 
   rm -f "${configFile}"
-  unset -f awk diff curl
+  unset -f curl
   local originalPath="${PATH}"
   export PATH=""
 

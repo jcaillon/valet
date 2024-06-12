@@ -163,8 +163,14 @@ function main::disableProfiler() {
   set +x
   unset BASH_XTRACEFD PS4 PROFILING
   exec 5>&-
-  main::cleanProfilerFile
+  if [[ -v PROFILER_FILE ]]; then
+    main::cleanProfilerFile
+  fi
 }
+
+if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
+  main::enableProfiler "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}.txt"}"
+fi
 
 # Allows to pretty format the profiler file and remove stuff the user does not need.
 #
@@ -187,24 +193,26 @@ function main::cleanProfilerFile() {
     clearLine=true
   fi
 
-  # we do this one in awk for now because it was a good place to learn awk
-  # TODO: could be replaced with bash later but im not sure how to do decimal math in bash
-  if ! command -v awk 1>/dev/null 2>&1; then
-    log::warning "The awk command is required to clean the profiler file. It was not found on the PATH so we skip the cleaning."
+  # we do this one in awk if present, but in bash otherwise
+  if [[ ${VALET_CONFIG_LOG_CLEANUP_USING_BASH:-false} == "true" ]] || ! command -v awk 1>/dev/null 2>&1; then
+    log::debug "Cleaning the profiler file using bash."
+    mainCleanProfileFile "${timePrecision}" "${clearLine}" >"${newProfilerFile}"
+    mv -f "${newProfilerFile}" "${PROFILER_FILE}"
     return 0
   fi
+
+  log::debug "Cleaning the profiler file using awk."
 
   awk -F $'\t' -v timePrecision="${timePrecision}" -v clearCoreLine="${clearLine}" '
   BEGIN {
     printf "%s\n\n", "(D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)";
     printf "%s\n", "D  I  S  timer  delta                           source:line function                                 → command";
     lastLineWasSkipped = 0;
-    lastLineLength = 0;
     lastTimer = 0;
     baseStackLength = 99999;
   }
   {
-    if (clearCoreLine == "true" && $3 ~ /(valet.d\/core|valet.d\/main|valet.d\/lib-[a-z0-9])$/) {
+    if (clearCoreLine == "true" && $3 ~ /(valet.d\/core|valet.d\/main|valet.d\/lib-[a-z0-9]+)$/) {
       lastLineWasSkipped = 1;
       next;
     }
@@ -245,20 +253,104 @@ function main::cleanProfilerFile() {
       theRest = theRest $x;
     }
     deltaTimer = timer - lastTimer;
+    lastTimer = timer;
 
 
     printf "%02d %02d %02d %.4f %.4f %30s:%-4d %-40s → %s\n", stackLength, indirectionLevel, subShellLevel, timer, deltaTimer, programShorten, lineNumber, fun, theRest;
-    lastTimer = timer;
-    lastLineLength = length($0) - length(theRest);
   }
   ' <"${PROFILER_FILE}" >"${newProfilerFile}"
 
   mv -f "${newProfilerFile}" "${PROFILER_FILE}"
 }
 
-if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
-  main::enableProfiler "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}.txt"}"
-fi
+# Clean the profiler file in bash if awk is not present.
+function mainCleanProfileFile() {
+  local timePrecision="${1}"
+  local clearCoreLine="${2}"
+
+  printf "%s\n\n" "(D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)"
+  printf "%s\n" "D  I  S  timer    delta                             source:line function                                 → command"
+
+  local lastLineWasSkipped=0
+  local lastTimer=0
+  local baseStackLength=99999
+
+  local -i deltaTimer
+  local -i lastTimer=0
+  local totalElaspedTime lastElaspedTime
+  local IFS indirectionLevel timer program lineNumber fun subShellLevel depth theRest arrow
+  while IFS=$'\t' read -r indirectionLevel timer program lineNumber fun subShellLevel depth arrow theRest; do
+    if [[ ${clearCoreLine} == "true" && ${program} =~ (valet.d/core|valet.d/main|valet.d/lib-[a-z0-9]*)$ ]]; then
+      lastLineWasSkipped=1
+      continue
+    fi
+    if [[ ${indirectionLevel} =~ ^\++$ ]]; then
+      if [[ ${clearCoreLine} == "true" ]]; then
+        lastLineWasSkipped=0
+      fi
+    else
+      if [[ ${lastLineWasSkipped} == "1" ]]; then
+        continue
+      fi
+      # print the raw line
+      printf "%107s%s\n" "" "${indirectionLevel}"$'\t'"${timer}"$'\t'"${program}"$'\t'"${lineNumber}"$'\t'"${fun}"$'\t'"${subShellLevel}"$'\t'"${depth}"$'\t'"${arrow}"$'\t'"${theRest}"
+      continue
+    fi
+    if [[ ${baseStackLength} == 99999 ]]; then
+      baseStackLength=${depth}
+    fi
+
+    microsecondsToSeconds "${timer}" 4
+    totalElaspedTime="${RETURNED_VALUE}"
+
+    deltaTimer=$((timer - lastTimer))
+    lastTimer=${timer}
+
+    microsecondsToSeconds "${deltaTimer}" 4
+    lastElaspedTime=${RETURNED_VALUE}
+
+    # shorten the program name if it is too long
+    if (( ${#program} > 30)); then
+      program="...${program:${#program}-27}"
+    fi
+
+    # shorten the function name if it is too long
+    if (( ${#fun} > 31)); then
+      fun="...${fun:${#fun}-28}"
+    fi
+    fun="${fun}()"
+
+    stackLength=$((depth - baseStackLength))
+
+    printf "%02d %02d %02d %-8s %-8s %31s:%-4d %-40s → %s\n" "${stackLength}" "${#indirectionLevel}" "${subShellLevel}" "${totalElaspedTime}" "${lastElaspedTime}" "${program}" "${lineNumber}" "${fun}" "${theRest}"
+
+  done <"${PROFILER_FILE}"
+}
+
+# Convert a microseconds integer to seconds float.
+# e.g. 1234567 → 1.234567
+#
+# - $1: The microseconds integer.
+# - $2: The precision to get (number of digits after the dot).
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The seconds (float number).
+#
+# ```bash
+# microsecondsToSeconds 1234567
+# echo "${RETURNED_VALUE}"
+# ```
+function microsecondsToSeconds() {
+  local microseconds="${1}"
+  if [[ ${#microseconds} -gt 6 ]]; then
+    local ms="${microseconds:${#microseconds}-6}"
+    RETURNED_VALUE="${microseconds:0:${#microseconds}-6}.${ms:0:${2}}"
+  else
+    printf -v RETURNED_VALUE "%06d" "${microseconds}"
+    printf -v RETURNED_VALUE "0.%s" "${RETURNED_VALUE:0:${2}}"
+  fi
+}
 
 #===============================================================
 # >>> Help

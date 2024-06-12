@@ -13,15 +13,27 @@ function testProfiler() {
   export VALET_CONFIG_STARTUP_PROFILING_FILE
 
   echo "→ valet -x self mock2 arg1 arg2"
+  ("${GLOBAL_VALET_HOME}/valet" -x self mock2 arg1 arg2)
 
   echo
   echo "→ cat 'profiler.log'"
-  ("${GLOBAL_VALET_HOME}/valet" -x self mock2 arg1 arg2)
   if [[ -s "${VALET_CONFIG_COMMAND_PROFILING_FILE}" ]]; then
     echoFileWithSubstitution "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
   fi
 
   test::endTest "Testing profiling for command" 0
+
+  echo
+  echo "→ VALET_CONFIG_LOG_CLEANUP_USING_BASH=true valet -x self mock2 arg1 arg2"
+  (VALET_CONFIG_LOG_CLEANUP_USING_BASH=true "${GLOBAL_VALET_HOME}/valet" -x self mock2 arg1 arg2)
+
+  echo
+  echo "→ cat 'profiler.log'"
+  if [[ -s "${VALET_CONFIG_COMMAND_PROFILING_FILE}" ]]; then
+    echoFileWithSubstitution "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
+  fi
+
+  test::endTest "Testing profiling for command but with bash as cleanup" 0
 
   echo "→ VALET_CONFIG_STARTUP_PROFILING=true valet --log-level error -x self mock1 logging-level"
 

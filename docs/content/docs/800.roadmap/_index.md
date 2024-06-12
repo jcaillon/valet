@@ -20,7 +20,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Allow to regroup single letter options (e.g. -fsSL).
 - Add a command self package that build the user commands into a single script file.
 - fix running tests with verbose mode on.
-- Replace awk with bash.
 - Allow to separate commands from options/arguments with `--`.
 - Have a consistent look and feel for interactive functions.
 - Reimplement usage of main::sortCommands / main::addLastChoice.
@@ -30,10 +29,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - Betters checks in self build!
 - Support alternative single comments `# ## VALET COMMAND` instead of multiline comments for command declaration (see we can have help in autocompletion).
 - A command can declare dependencies to auto check if some tools are installed before running the command.
-- Try to add a variable that allows to output the logs to a given file in addition to &2 and we generate a unique file for each time valet is run.
 - Add test:: and also add a snippet to create a new function.
-- Generate vscode snippets from each function in core and lib-* to provide autocompletion for users.
-  Alternatively, generate a single sh containing all the function definitions with comments...
 - add valet in brew
 - Improve the self install script / check for updates by comparing the version number / suggest the user to git pull the repositories existing under .valet.d
 

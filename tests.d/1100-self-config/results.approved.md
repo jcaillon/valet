@@ -129,6 +129,12 @@ VALET_CONFIG_LOG_TO_DIRECTORY="${VALET_CONFIG_LOG_TO_DIRECTORY:-}"
 # printf -v logFile '%s%(%F_%Hh%Mm%Ss)T%s' 'valet-' ${EPOCHSECONDS} '.log'
 VALET_CONFIG_LOG_FILENAME_PATTERN="${VALET_CONFIG_LOG_FILENAME_PATTERN:-}"
 
+# The bash profiler logs will automatically be cleaned up and improved to make them
+# more readable.
+# This process can be done in awk (by default if found on your system) or
+# you can force to use bash by setting this property to true.
+VALET_CONFIG_LOG_CLEANUP_USING_BASH="${VALET_CONFIG_LOG_CLEANUP_USING_BASH:-}"
+
 # -----------
 # Log icons configuration
 # -----------
@@ -385,6 +391,12 @@ VALET_CONFIG_LOG_TO_DIRECTORY="${VALET_CONFIG_LOG_TO_DIRECTORY:-}"
 # The default is equivalent to setting this string to:
 # printf -v logFile '%s%(%F_%Hh%Mm%Ss)T%s' 'valet-' ${EPOCHSECONDS} '.log'
 VALET_CONFIG_LOG_FILENAME_PATTERN="${VALET_CONFIG_LOG_FILENAME_PATTERN:-}"
+
+# The bash profiler logs will automatically be cleaned up and improved to make them
+# more readable.
+# This process can be done in awk (by default if found on your system) or
+# you can force to use bash by setting this property to true.
+VALET_CONFIG_LOG_CLEANUP_USING_BASH="${VALET_CONFIG_LOG_CLEANUP_USING_BASH:-}"
 
 # -----------
 # Log icons configuration
