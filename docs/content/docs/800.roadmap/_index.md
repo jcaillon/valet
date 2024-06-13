@@ -32,6 +32,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - Add test:: and also add a snippet to create a new function.
 - add valet in brew
 - Improve the self install script / check for updates by comparing the version number / suggest the user to git pull the repositories existing under .valet.d
+- For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.
 
 
 [valet-issues]: https://github.com/jcaillon/valet/issues
