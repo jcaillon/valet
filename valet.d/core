@@ -178,17 +178,19 @@ trap system::exportTerminalSize SIGWINCH
 
 # ## log::setLevel
 #
-# Set the log level. The log level can be set to one of the following values:
+# Set the log level.
 #
-# - trace
-# - debug
-# - info
-# - success
-# - warning
-# - error
-#
-# - $1: the log level to set (or defaults to info)
-# - $2: true to silently switch log level (does not print a message)
+# - $1: **log level** _as string_:
+#      the log level to set (or defaults to info), acceptable values are:
+#   - trace
+#   - debug
+#   - info
+#   - success
+#   - warning
+#   - error
+# - $2: silent _as bool_:
+#      (optional) true to silently switch log level, i.e. does not print a message
+#      (defaults to false)
 #
 # ```bash
 # log::setLevel debug
@@ -237,7 +239,7 @@ function log::getLevel() {
 # - $1: the color level of the log message (TRACE, DEBUG...)
 # - $2: the icon to display in the log message (utf8 character from nerdicons)
 # - $3: the severity (max 7 chars)
-# - $4+: the content of the log message (each arg will be separated by a new line)
+# - $@: the content of the log message (each arg will be separated by a new line)
 #
 # ```bash
 # log::print "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
@@ -250,8 +252,10 @@ function log::print() { return 0; }
 # Display a file content with line numbers in the logs.
 # The file content will be aligned with the current log output and hard wrapped if necessary.
 #
-# - $1: the file path to display.
-# - $2: (optional) max lines to display (default to 0 which prints all lines).
+# - $1: **path** _as string_:
+#      the file path to display.
+# - $2: max lines _as int_:
+#      (optional) max lines to display (defaults to 0 which prints all lines).
 #
 # ```bash
 # log::printFile "/my/file/path"
@@ -264,8 +268,10 @@ function log::printFile() { return 0; }
 # Display a file content with line numbers in the logs.
 # The file content will be aligned with the current log output and hard wrapped if necessary.
 #
-# - $1: the file content.
-# - $2: (optional) max lines to display (default to 0 which prints all lines).
+# - $1: **content** _as string_:
+#      the file content.
+# - $2: **max lines** _as int_:
+#      (optional) max lines to display (defaults to 0 which prints all lines).
 #
 # ```bash
 # log::printFileString "myfilecontent"
@@ -279,8 +285,11 @@ function log::printFileString() { return 0; }
 # The string will be aligned with the current log output and hard wrapped if necessary.
 # Does not check the log level.
 #
-# - $1: the content to log (can contain new lines)
-# - $2: the string with which to prepend each wrapped line (empty by default)
+# - $1: **content** _as string_:
+#      the content to log (can contain new lines)
+# - $2: new line pad string _as string_:
+#      (optional) the string with which to prepend each wrapped line
+#      (empty by default)
 #
 # ```bash
 # log::printString "my line"
@@ -293,7 +302,8 @@ function log::printString() { return 0; }
 # Display something in the log stream.
 # Does not check the log level.
 #
-# - $1: the content to print (can contain new lines)
+# - $1: **content** _as string_:
+#      the content to print (can contain new lines)
 #
 # ```bash
 # log::printRaw "my line"
@@ -533,7 +543,8 @@ eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 #
 # Displays an error message and then exit the program with error.
 #
-# - $@: the error message to display
+# - $@: **message** _as string_:
+#      the error message to display
 #
 # ```bash
 # core::fail "This is an error message."
@@ -549,8 +560,10 @@ function core::fail() {
 #
 # Displays an error message and then exit the program with error.
 #
-# - $1: the exit code to use, should be between 1 and 255
-# - $2+: the error message to display
+# - $1: **exit code** _as int_:
+#      the exit code to use, should be between 1 and 255
+# - $@: **message** _as string_:
+#      the error message to display
 #
 # ```bash
 # core::failWithCode 255 "This is an error message."
@@ -568,7 +581,8 @@ function core::failWithCode() {
 #
 # Displays an error message.
 #
-# - $@: the error messages to display
+# - $@: **message** _as string_:
+#      the error messages to display
 #
 # ```bash
 # log::error "This is an error message."
@@ -586,7 +600,8 @@ function log::error() {
 #
 # Displays a warning.
 #
-# - $@: the warning messages to display
+# - $@: **message** _as string_:
+#      the warning messages to display
 #
 # ```bash
 # log::warning "This is a warning message."
@@ -603,7 +618,8 @@ function log::warning() {
 #
 # Displays a success message.
 #
-# - $@: the success messages to display
+# - $@: **message** _as string_:
+#      the success messages to display
 #
 # ```bash
 # log::success "This is a success message."
@@ -620,7 +636,8 @@ function log::success() {
 #
 # Displays an info message.
 #
-# - $@: the info messages to display
+# - $@: **message** _as string_:
+#      the info messages to display
 #
 # ```bash
 # log::info "This is an info message."
@@ -637,7 +654,8 @@ function log::info() {
 #
 # Displays a debug message.
 #
-# - $@: the debug messages to display
+# - $@: **message** _as string_:
+#      the debug messages to display
 #
 # ```bash
 # log::debug "This is a debug message."
@@ -654,7 +672,8 @@ function log::debug() {
 #
 # Displays a trace message.
 #
-# - $@: the trace messages to display
+# - $@: **message** _as string_:
+#      the trace messages to display
 #
 # ```bash
 # log::trace "This is a trace message."
@@ -673,7 +692,8 @@ function log::trace() {
 # This is a trace message that is always displayed, independently of the log level.
 # It can be used before a fatal error to display useful information.
 #
-# - $@: the trace messages to display
+# - $@: **message** _as string_:
+#      the trace messages to display
 #
 # ```bash
 # log::errorTrace "This is a debug message."
@@ -685,11 +705,13 @@ function log::errorTrace() {
 
 # ## log::isDebugEnabled
 #
-# Check if the debug mode is active.
+# Check if the debug mode is enabled.
 #
 # Returns:
 #
-# - $?: 0 if debug mode (log debug level) is active, 1 otherwise.
+# - $?:
+#   - 0 if debug mode is enabled (log level is debug)
+#   - 1 if disabled
 #
 # ```bash
 # if log::isDebugEnabled; then printf '%s\n' "Debug mode is active."; fi
@@ -703,11 +725,13 @@ function log::isDebugEnabled() {
 
 # ## log::isTraceEnabled
 #
-# Check if the trace mode is active.
+# Check if the trace mode is enabled.
 #
 # Returns:
 #
-# - $?: 0 if trace mode (log debug level) is active, 1 otherwise.
+# - $?:
+#   - 0 if trace mode is enabled (log level is trace)
+#   - 1 if disabled
 #
 # ```bash
 # if log::isTraceEnabled; then printf '%s\n' "Debug mode is active."; fi
@@ -723,7 +747,8 @@ function log::isTraceEnabled() {
 #
 # This function prints the current function stack in the logs.
 #
-# - $1: the number of levels to skip (default to 2 which skips this function
+# - $1: **stack to skip** _as int_:
+#      the number of stack to skip (defaults to 2 which skips this function
 #       and the first calling function which is usually the onError function)
 #
 # ```bash
@@ -766,11 +791,15 @@ function log::printCallStack() {
 # ## source
 #
 # Allows to include a library file or sources a file.
-# It replaces the builtin source command to make sure that we do not include the same file twice.
-# This also allows us to specify to spellcheck the included file.
 #
-# - $1: the name of the library (array, interactive, string...) or the file path to include.
-# - $2+: the arguments to pass to the included file (mimics the builtin source command).
+# It replaces the builtin source command to make sure that we do not include the same file twice.
+# We replace source instead of creating a new function to allow us to
+# specify the included file for spellcheck.
+#
+# - $1: **library name** _as string_:
+#      the name of the library (array, interactive, string...) or the file path to include.
+# - $@: arguments _as any_:
+#      (optional) the arguments to pass to the included file (mimics the builtin source command).
 #
 # ```bash
 #   source string array system
@@ -821,7 +850,8 @@ function core::resetIncludedFiles() {
 # Source the file associated with a command function.
 # This allows you to call a command function without having to source the file manually.
 #
-# - $1: the function name
+# - $1: **function name** _as string_:
+#      the function name
 #
 # ```bash
 # core::sourceFunction "functionName"
@@ -914,10 +944,17 @@ function core::reloadUserCommands() {
 # Wrapping is done at word boundaries.
 # Optionally applies left padding to each new line.
 #
-# - $1: the text to wrap
-# - $2: the width to wrap the text at
-# - $3: the padding to apply to each new line (default to 0)
-# - $4: true/false if the padding should be applied to the first line (default to false)
+# - $1: **text** _as string_:
+#      the text to wrap
+# - $2: wrap width _as int_:
+#      (optional) the width to wrap the text at
+#      (defaults to GLOBAL_COLUMNS)
+# - $3: padding _as int_:
+#      (optional) the padding to apply to each new line
+#      (defaults to 0)
+# - $4: apply padding on first line _as bool_:
+#      (optional) true/false if the padding should be applied to the first line
+#      (defaults to false)
 #
 # Returns:
 #
@@ -980,9 +1017,14 @@ function string::wrapText() {
 # Allows to soft wrap the given sentence (without new lines) at the given width.
 # Optionally applies a prefix on each new line.
 #
-# - $1: the text to wrap
-# - $2: the width to wrap the text at
-# - $3: the prefix to apply to each new line (default to "")
+# - $1: **text** _as string_:
+#      the text to wrap
+# - $2: wrap width _as int_:
+#      (optional) the width to wrap the text at
+#      (defaults to GLOBAL_COLUMNS)
+# - $3:*new line pad string _as string_:
+#      (optional) the prefix to apply to each new line
+#      (defaults to "")
 #
 # Returns:
 #
@@ -1080,10 +1122,17 @@ function string::wrapSentence() {
 # Wrapping is done at character boundaries without taking spaces into consideration.
 # Optionally applies a prefix on each new line.
 #
-# - $1: the text to wrap
-# - $2: the width to wrap the text at
-# - $3: (optional) the prefix to apply to each new line (default to "")
-# - $4: (optional) the width to wrap the text for each new line (default to the width)
+# - $1: **text** _as string_:
+#      the text to wrap
+# - $2: wrap width _as string_:
+#      (optional) the width to wrap the text at
+#      (defaults to GLOBAL_COLUMNS)
+# - $3: new line pad string _as string_:
+#      (optional) the prefix to apply to each new line
+#      (defaults to "")
+# - $4: new line wrap width _as string_:
+#      (optional) the width to wrap the text for each new line
+#      (defaults to the width)
 #
 # Returns:
 #
@@ -1127,8 +1176,10 @@ function string::wrapCharacters() {
 # Allows to fuzzy match an array against a given pattern.
 # Returns an array containing only the lines matching the pattern.
 #
-# - $1: the pattern to match
-# - $2: the initial array name
+# - $1: **pattern** _as string_:
+#      the pattern to match
+# - $2: **array name** _as string_:
+#      the initial array name
 #
 # Returns:
 #
@@ -1314,7 +1365,8 @@ function core::showHelp() {
 # See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#-implement-your-command>.
 #
 #
-# - $@: the arguments to parse
+# - $@: **arguments** _as any_:
+#      the arguments to parse
 #
 # Returns:
 #
@@ -1336,7 +1388,7 @@ function core::parseArguments() {
   # get the function name of the calling function
   functionName="${FUNCNAME[1]}"
 
-  main::parseFunctionArgumentsOrmain::goInteractive "${functionName}" "$@"
+  main::parseFunctionArgumentsOrGoInteractive "${functionName}" "$@"
 }
 
 # ## core::checkParseResults
@@ -1347,9 +1399,13 @@ function core::parseArguments() {
 #
 # This should be called from a command function for which you want to check the parsing results.
 #
-# - $1: the help option
-# - $2: the parsing errors
-# - $3: the function name (optional, default to the calling function)
+# - $1: **display help** _as bool_:
+#      the help option
+# - $2: **parsing errors** _as string_:
+#      the parsing errors
+# - $3: function name _as string_:
+#      (optional) the function name
+#      (defaults to the calling function)
 #
 # ```bash
 # core::checkParseResults "${help:-}" "${parsingErrors:-}"
@@ -1362,7 +1418,7 @@ function core::checkParseResults() {
   help="${1:-}"
   parsingErrors="${2:-}"
 
-  if [[ -n "${help}" ]]; then
+  if [[ ${help} == "true" ]]; then
     main::printHelp function "${functionName}"
     exit 0
   fi

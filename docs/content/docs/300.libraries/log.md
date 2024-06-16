@@ -90,7 +90,7 @@ log::success "This is a success message."
 
 This function prints the current function stack in the logs.
 
-- $1: the number of levels to skip (default to 2 which skips this function
+- $1: the number of levels to skip (defaults to 2 which skips this function
       and the first calling function which is usually the onError function)
 
 ```bash
@@ -154,7 +154,7 @@ Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
 
 - $1: the file content.
-- $2: (optional) max lines to display (default to 0 which prints all lines).
+- $2: (optional) max lines to display (defaults to 0 which prints all lines).
 
 ```bash
 log::printFileString "myfilecontent"
@@ -193,7 +193,7 @@ Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
 
 - $1: the file path to display.
-- $2: (optional) max lines to display (default to 0 which prints all lines).
+- $2: (optional) max lines to display (defaults to 0 which prints all lines).
 
 ```bash
 log::printFile "/my/file/path"

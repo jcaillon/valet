@@ -12,7 +12,7 @@ Optionally applies a prefix on each new line.
 
 - $1: the text to wrap
 - $2: the width to wrap the text at
-- $3: the prefix to apply to each new line (default to "")
+- $3: the prefix to apply to each new line (defaults to "")
 
 Returns:
 
@@ -75,8 +75,8 @@ Optionally applies a prefix on each new line.
 
 - $1: the text to wrap
 - $2: the width to wrap the text at
-- $3: (optional) the prefix to apply to each new line (default to "")
-- $4: (optional) the width to wrap the text for each new line (default to the width)
+- $3: (optional) the prefix to apply to each new line (defaults to "")
+- $4: (optional) the width to wrap the text for each new line (defaults to the width)
 
 Returns:
 
@@ -114,7 +114,7 @@ Find the first index of a string within another string.
 
 - $1: the string in which to search
 - $2: the string to search
-- $3: the starting index (default to 0)
+- $3: the starting index (defaults to 0)
 
 Returns:
 
@@ -151,7 +151,7 @@ but it uses pure bash to go faster.
 
 - $1: the string to cut
 - $2: the field number to get (starting at 0)
-- $3: the separator (default to tab if not provided)
+- $3: the separator (defaults to tab if not provided)
 
 Returns:
 

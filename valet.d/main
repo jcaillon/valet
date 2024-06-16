@@ -1287,8 +1287,8 @@ function main::fuzzyFindOption() {
 # See the @core::parseArguments function for more details on parsing.
 #
 # Usage:
-#   main::parseFunctionArgumentsOrmain::goInteractive "functionName" "$@" && eval "${RETURNED_VALUE}"
-function main::parseFunctionArgumentsOrmain::goInteractive() {
+#   main::parseFunctionArgumentsOrGoInteractive "functionName" "$@" && eval "${RETURNED_VALUE}"
+function main::parseFunctionArgumentsOrGoInteractive() {
   local functionName
   functionName="${1}"
   shift

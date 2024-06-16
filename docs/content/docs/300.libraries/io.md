@@ -26,8 +26,8 @@ local myFileAbsolutePath="${RETURNED_VALUE}"
 List all the paths in the given directory.
 
 - $1: the directory to list
-- $2: (optional) true to list recursively, false otherwise (default to false)
-- $3: (optional) true to list hidden paths, false otherwise (default to false)
+- $2: (optional) true to list recursively, false otherwise (defaults to false)
+- $3: (optional) true to list hidden paths, false otherwise (defaults to false)
 - $4: (optional) a function name that is called to filter the paths that will be listed
       The function should return 0 if the path is to be kept, 1 otherwise.
       The function is called with the path as the first argument.
@@ -82,8 +82,8 @@ command_that_could_fail || io::checkAndFail "$?" "The command that could fail ha
 List all the files in the given directory.
 
 - $1: the directory to list
-- $2: (optional) true to list recursively, false otherwise (default to false)
-- $3: (optional) true to list hidden paths, false otherwise (default to false)
+- $2: (optional) true to list recursively, false otherwise (defaults to false)
+- $3: (optional) true to list hidden paths, false otherwise (defaults to false)
 - $4: (optional) a function name that is called to filter the directories (for recursive listing)
       The function should return 0 if the path is to be kept, 1 otherwise.
       The function is called with the path as the first argument.
@@ -116,8 +116,8 @@ shellcheck disable=SC2016
 List all the directories in the given directory.
 
 - $1: the directory to list
-- $2: (optional) true to list recursively, false otherwise (default to false)
-- $3: (optional) true to list hidden paths, false otherwise (default to false)
+- $2: (optional) true to list recursively, false otherwise (defaults to false)
+- $3: (optional) true to list hidden paths, false otherwise (defaults to false)
 - $4: (optional) a function name that is called to filter the sub directories (for recursive listing)
       The function should return 0 if the path is to be kept, 1 otherwise.
       The function is called with the path as the first argument.
@@ -190,7 +190,7 @@ This function call an executable and its arguments and input a given string as s
 It redirects the stdout and stderr to environment variables.
 Equivalent to io::invoke5 "${1}" 0 false "${2}" "${@:3}"
 
-- $1: true/false to indicate if the function should fail in case the execution fails.
+- $1 _[bool: fail]_: true/false to indicate if the function should fail in case the execution fails.
       If true and the execution fails, the script will exit.
 - $2: the stdin to pass to the executable
 - $3: the executable or function to execute
@@ -221,7 +221,7 @@ This function call an executable and its arguments and input a given string as s
 It redirects the stdout and stderr to temporary files.
 Equivalent to io::invokef5 "${1}" 0 false "${2}" "${@:3}"
 
-- $1: true/false to indicate if the function should fail in case the execution fails.
+- $1 _[bool: fail]_: true/false to indicate if the function should fail in case the execution fails.
       If true and the execution fails, the script will exit.
 - $2: the stdin to pass to the executable
 - $3: the executable or function to execute
@@ -307,7 +307,7 @@ This function call an executable and its arguments.
 It redirects the stdout and stderr to temporary files.
 Equivalent to io::invokef5 "${1}" 0 "" "" "${@:2}"
 
-- $1: true/false to indicate if the function should fail in case the execution fails.
+- $1 _[bool: fail]_: true/false to indicate if the function should fail in case the execution fails.
       If true and the execution fails, the script will exit.
 - $2: the executable or function to execute
 - $3+: the arguments to pass to the executable
@@ -332,7 +332,7 @@ stderrFilePath="${RETURNED_VALUE2}"
 This function call an executable and its arguments.
 It redirects the stdout and stderr to temporary files.
 
-- $1: true/false to indicate if the function should fail in case the execution fails.
+- $1 _[bool: fail]_: true/false to indicate if the function should fail in case the execution fails.
   If true and the execution fails, the script will exit.
 - $2: the acceptable error codes, comma separated
   (if the error code is matched, then set the output error code to 0)
@@ -399,7 +399,7 @@ This function call an executable and its arguments.
 It redirects the stdout and stderr to environment variables.
 Equivalent to io::invoke5 "${1}" 0 "" "" "${@:2}"
 
-- $1: true/false to indicate if the function should fail in case the execution fails.
+- $1 _[bool: fail]_: true/false to indicate if the function should fail in case the execution fails.
       If true and the execution fails, the script will exit.
 - $2: the executable or function to execute
 - $3+: the arguments to pass to the executable

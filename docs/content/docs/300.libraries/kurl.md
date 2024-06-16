@@ -11,8 +11,8 @@ This function is a wrapper around curl.
 It allows you to check the http status code and return 1 if it is not acceptable.
 It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o ${2}.
 
-- $1: true/false to indicate if the function should fail in case the execution fails
-- $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
+- $1 _[bool: fail]_: true/false to indicate if the function should fail in case the execution fails
+- $2: a list of http status codes that are acceptable, comma separated (defaults to 200,201,202,204,301,304,308)
 - $3: the file in which to save the output of curl
 - $4+: options for curl
 
@@ -33,8 +33,8 @@ This function is a wrapper around curl.
 It allows you to check the http status code and return 1 if it is not acceptable.
 It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o "tempfile".
 
-- $1: true/false to indicate if the function should fail in case the execution fails
-- $2: a list of http status codes that are acceptable, comma separated (default to 200,201,202,204,301,304,308)
+- $1 _[bool: fail]_: true/false to indicate if the function should fail in case the execution fails
+- $2: a list of http status codes that are acceptable, comma separated (defaults to 200,201,202,204,301,304,308)
 - $3+: options for curl
 
 Returns:
@@ -50,5 +50,23 @@ kurl::toVar false 200,201 https://example.com || core::fail "The curl command fa
 
 
 
+## string::count
+
+Counts the number of occurences of a substring in a string.
+
+- $1 **string** _string_:
+      the string in which to search
+- $2 **substring** _string_: 
+      the substring to count
+
+Returns:
+
+- `RETURNED_VALUE`: the number of occurences
+
+```bash
+string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
+```
+
+> This is faster than looping over the string and check the substring.
 
 > Documentation generated for the version 0.17.112 (2024-06-06).

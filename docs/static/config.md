@@ -90,7 +90,7 @@ VALET_CONFIG_DISABLE_LOG_TIME="${VALET_CONFIG_DISABLE_LOG_TIME:-}"
 # If true, will print a timestamp instead of simple time in the logs.
 VALET_CONFIG_ENABLE_LOG_TIMESTAMP="${VALET_CONFIG_ENABLE_LOG_TIMESTAMP:-}"
 
-# The file descriptor to use for the logs (default to 2 to output to stderr).
+# The file descriptor to use for the logs (defaults to 2 to output to stderr).
 VALET_CONFIG_LOG_FD="${VALET_CONFIG_LOG_FD:-}"
 
 # A path to directory in which we will create 1 log file per valet execution, which
