@@ -406,7 +406,7 @@ function writeAllFunctionsToExtrasCodeSnippets() {
 
   local content="{"$'\n'"// ${pageFooter}"$'\n'
 
-  local key functionName documentation firstSentence body
+  local key functionName documentation firstSentence body commentedDocumentation
   for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
     functionName="${key}"
     documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
@@ -437,6 +437,23 @@ function writeAllFunctionsToExtrasCodeSnippets() {
 		  \"description\": \"${firstSentence}...\",
 		  \"scope\": \"\",
 		  \"body\": [ \"${body//\"/\\\"}\" ]
+	  },"$'\n'
+
+    commentedDocumentation=""
+    while IFS=$'\n' read -rd $'\n' line; do
+      commentedDocumentation+="# ${line}"$'\n'
+    done <<<"${!documentation}"
+    commentedDocumentation="${commentedDocumentation//\\/\\\\}"
+    commentedDocumentation="${commentedDocumentation//\"/\\\"}"
+    commentedDocumentation="${commentedDocumentation//$/\\\\\$}"
+    commentedDocumentation="${commentedDocumentation//$'\n'/\\n}"
+
+    content+="
+		\"${functionName}#withdoc\": {
+		  \"prefix\": \"${functionName}#withdoc\",
+		  \"description\": \"${firstSentence}...\",
+		  \"scope\": \"\",
+		  \"body\": [ \"${commentedDocumentation}${body//\"/\\\"}\" ]
 	  },"$'\n'
   done
 
