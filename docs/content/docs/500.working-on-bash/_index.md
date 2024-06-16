@@ -51,11 +51,14 @@ This allows you to have autocompletion and help on the core and libraries functi
 
 ![autocompletion](image.png)
 
+Alternatively, you can use the Valet [vscode snippets](https://github.com/jcaillon/valet/edit/main/extras/valet.code-snippets):
+
+- copy this file in your repository under the `.vscode` directory (you can chose to ignore this in git or push it).
+- or copy this file as `shellscript.json` in your user snippets folder (`%APPDATA%\Code\User\snippets` in windows).
+
 {{< callout type="info" >}}
 This is done for you if you use the automated installer of Valet.
 {{< /callout >}}
-
-Alternatively, you can use the Valet [vscode snippets](https://github.com/jcaillon/valet/edit/main/extras/valet.code-snippets) but vscode does not allow having a long description for snippets so you will have an undocumented list of functions
 
 ## Where to start your bash journey
 

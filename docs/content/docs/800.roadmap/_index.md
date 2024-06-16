@@ -31,7 +31,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - A command can declare dependencies to auto check if some tools are installed before running the command.
 - Add test:: and also add a snippet to create a new function.
 - add valet in brew
-- Improve the self install script / check for updates by comparing the version number / suggest the user to git pull the repositories existing under .valet.d
+- Improve the self install script / check for updates by comparing the version number / suggest the user to git pull the repositories existing under .valet.d. Also add snippets and all functions...
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.
 
 

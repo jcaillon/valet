@@ -404,7 +404,7 @@ function writeAllFunctionsToExtrasCodeSnippets() {
 
   local content="{"$'\n'"// ${pageFooter}"$'\n'
 
-  local key functionName documentation firstSentence
+  local key functionName documentation firstSentence body
   for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
     functionName="${key}"
     documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
@@ -415,13 +415,27 @@ function writeAllFunctionsToExtrasCodeSnippets() {
     firstSentence="${firstSentence//'"'/'\"'}"
     firstSentence="${firstSentence//$'\n'/ }"
 
+    body="${functionName}"
+
+    local IFS=$'\n'
+    for line in ${!documentation}; do
+      if [[ "${line}" =~ "- \$"([0-9@])": "([^_]+)" _as "([^_]+)"_:" ]]; then
+        if [[ "${BASH_REMATCH[1]:-}" == "@" ]]; then
+          body+=" \"\${99:${BASH_REMATCH[2]}}\""
+        else
+          body+=" \"\${${BASH_REMATCH[1]}:${BASH_REMATCH[2]}}\""
+        fi
+      fi
+    done
+    body+="\$0"
+
     content+="
 		\"${functionName}\": {
-		\"prefix\": \"${functionName}\",
-		\"description\": \"${firstSentence}...\",
-		\"scope\": \"\",
-		\"body\": [ \"${functionName}\" ]
-	},"$'\n'
+		  \"prefix\": \"${functionName}\",
+		  \"description\": \"${firstSentence}...\",
+		  \"scope\": \"\",
+		  \"body\": [ \"${body//\"/\\\"}\" ]
+	  },"$'\n'
   done
 
   content+="${originalContent}"
