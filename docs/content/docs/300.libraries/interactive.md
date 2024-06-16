@@ -30,8 +30,11 @@ The text is wrapped and put inside a box like so:
 /└────────────┘
 ```
 
-- $1: the answer to display
-- $2: (optional) the maximum width of the dialog box
+- $1: **answer** _as string_:
+     the answer to display
+- $2: max width _as int_:
+     (optional) the maximum width of the dialog box
+     (defaults to GLOBAL_COLUMNS)
 
 ```bash
 interactive::displayAnswer "My answer."
@@ -45,7 +48,8 @@ Then it moves back to its original position.
 This effectively creates a space in the terminal (scroll up if we are at the bottom).
 It does not create more space than the number of lines in the terminal.
 
-- $1: the number of lines to create
+- $1: **number of lines** _as int_:
+     the number of lines to create
 
 ```bash
 interactive::createSpace 5
@@ -62,11 +66,15 @@ Ask the user to yes or no.
 
 This raw version does not display the prompt or the answer.
 
-$1: (optional) the default value (true or false) - defaults to true
+- $1: default _as bool_:
+     (optional) the default value to select
+     (defaults to true)
 
 Returns:
 
-- $?: 0 if true, 1 if false.
+- $?:
+  - 0 if the user answered yes
+  - 1 otherwise
 - `RETURNED_VALUE`: true or false.
 
 ```bash
@@ -117,9 +125,13 @@ interactive::testKeys
 
 Displays a dialog box with a speaker and a text.
 
-- $1: the speaker (system or user)
-- $2: the text to display
-- $3: (optional) the maximum width of the dialog box
+- $1: **speaker** _as string_:
+     the speaker (system or user)
+- $2: **text** _as string_:
+     the text to display
+- $3: max width _as int_:
+     (optional) the maximum width of the dialog box
+     (defaults to GLOBAL_COLUMNS)
 
 ```bash
 interactive::displayDialogBox "system" "This is a system message."
@@ -134,7 +146,9 @@ This raw version does not display the prompt or the answer.
 
 Returns:
 
-- $?: 0 if the user pressed enter, 1 otherwise.
+- $?:
+  - 0 if the user pressed enter
+  - 1 otherwise
 
 ```bash
 interactive::askForConfirmationRaw
@@ -153,8 +167,11 @@ The text is wrapped and put inside a box like so:
   └────────────┘\
 ```
 
-- $1: the prompt to display
-- $2: (optional) the maximum width of the dialog box
+- $1: **prompt** _as string_:
+     the prompt to display
+- $2: max width _as int_:
+     (optional) the maximum width of the dialog box
+     (defaults to GLOBAL_COLUMNS)
 
 ```bash
 interactive::displayPrompt "Do you want to continue?"
@@ -169,11 +186,14 @@ You can pass additional parameters to the read command (e.g. to wait for a set a
 Some special keys are translated into more readable strings:
 UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
 
-- $@: additional parameters to pass to the read command
+- $@: **read parameters** _as any_:
+     additional parameters to pass to the read command
 
 Returns:
 
-- $?: 0 if a key was pressed, 1 otherwise.
+- $?:
+  - 0 if a key was pressed
+  - 1 otherwise
 - `LAST_KEY_PRESSED`: the key pressed.
 
 ```bash
@@ -188,11 +208,14 @@ interactive::waitForKey -t 0.1
 
 Ask the user to press the button to continue.
 
-- $1: the prompt to display
+- $1: **prompt** _as string_:
+     the prompt to display
 
 Returns:
 
-- $?: 0 if the user pressed enter, 1 otherwise.
+- $?:
+  - 0 if the user pressed enter
+  - 1 otherwise
 
 ```bash
 interactive::askForConfirmation "Press enter to continue."
@@ -207,12 +230,17 @@ Ask the user to yes or no.
 - The user can validate the choice with the enter key.
 - The user can also validate immediately with the y or n key.
 
-- $1: the prompt to display
-- $2: (optional) the default value (true or false) - defaults to true
+- $1: **prompt** _as string_:
+     the prompt to display
+- $2: default _as bool_:
+     (optional) the default value to select
+     (defaults to true)
 
 Returns:
 
-- $?: 0 if true, 1 if false.
+- $?:
+  - 0 if the user answered yes
+  - 1 otherwise
 - `RETURNED_VALUE`: true or false.
 
 ```bash
@@ -222,4 +250,4 @@ if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else e
 
 
 
-> Documentation generated for the version 0.17.112 (2024-06-06).
+> Documentation generated for the version 0.18.87 (2024-06-16).

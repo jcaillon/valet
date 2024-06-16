@@ -9,7 +9,8 @@ url: /docs/libraries/log
 
 Displays a warning.
 
-- $@: the warning messages to display
+- $@: **message** _as string_:
+     the warning messages to display
 
 ```bash
 log::warning "This is a warning message."
@@ -18,11 +19,13 @@ log::warning "This is a warning message."
 
 ## log::isDebugEnabled
 
-Check if the debug mode is active.
+Check if the debug mode is enabled.
 
 Returns:
 
-- $?: 0 if debug mode (log debug level) is active, 1 otherwise.
+- $?:
+  - 0 if debug mode is enabled (log level is debug)
+  - 1 if disabled
 
 ```bash
 if log::isDebugEnabled; then printf '%s\n' "Debug mode is active."; fi
@@ -31,17 +34,19 @@ if log::isDebugEnabled; then printf '%s\n' "Debug mode is active."; fi
 
 ## log::setLevel
 
-Set the log level. The log level can be set to one of the following values:
+Set the log level.
 
-- trace
-- debug
-- info
-- success
-- warning
-- error
-
-- $1: the log level to set (or defaults to info)
-- $2: true to silently switch log level (does not print a message)
+- $1: **log level** _as string_:
+     the log level to set (or defaults to info), acceptable values are:
+  - trace
+  - debug
+  - info
+  - success
+  - warning
+  - error
+- $2: silent _as bool_:
+     (optional) true to silently switch log level, i.e. does not print a message
+     (defaults to false)
 
 ```bash
 log::setLevel debug
@@ -55,8 +60,11 @@ Display a string in the log.
 The string will be aligned with the current log output and hard wrapped if necessary.
 Does not check the log level.
 
-- $1: the content to log (can contain new lines)
-- $2: the string with which to prepend each wrapped line (empty by default)
+- $1: **content** _as string_:
+     the content to log (can contain new lines)
+- $2: new line pad string _as string_:
+     (optional) the string with which to prepend each wrapped line
+     (empty by default)
 
 ```bash
 log::printString "my line"
@@ -68,7 +76,8 @@ shellcheck disable=SC2317
 
 Displays a trace message.
 
-- $@: the trace messages to display
+- $@: **message** _as string_:
+     the trace messages to display
 
 ```bash
 log::trace "This is a trace message."
@@ -79,7 +88,8 @@ log::trace "This is a trace message."
 
 Displays a success message.
 
-- $@: the success messages to display
+- $@: **message** _as string_:
+     the success messages to display
 
 ```bash
 log::success "This is a success message."
@@ -90,7 +100,8 @@ log::success "This is a success message."
 
 This function prints the current function stack in the logs.
 
-- $1: the number of levels to skip (defaults to 2 which skips this function
+- $1: **stack to skip** _as int_:
+     the number of stack to skip (defaults to 2 which skips this function
       and the first calling function which is usually the onError function)
 
 ```bash
@@ -100,11 +111,13 @@ log::printCallStack 2
 
 ## log::isTraceEnabled
 
-Check if the trace mode is active.
+Check if the trace mode is enabled.
 
 Returns:
 
-- $?: 0 if trace mode (log debug level) is active, 1 otherwise.
+- $?:
+  - 0 if trace mode is enabled (log level is trace)
+  - 1 if disabled
 
 ```bash
 if log::isTraceEnabled; then printf '%s\n' "Debug mode is active."; fi
@@ -116,7 +129,8 @@ if log::isTraceEnabled; then printf '%s\n' "Debug mode is active."; fi
 Display something in the log stream.
 Does not check the log level.
 
-- $1: the content to print (can contain new lines)
+- $1: **content** _as string_:
+     the content to print (can contain new lines)
 
 ```bash
 log::printRaw "my line"
@@ -128,7 +142,8 @@ shellcheck disable=SC2317
 
 Displays an error message.
 
-- $@: the error messages to display
+- $@: **message** _as string_:
+     the error messages to display
 
 ```bash
 log::error "This is an error message."
@@ -141,7 +156,8 @@ log::error "This is an error message."
 
 Displays an info message.
 
-- $@: the info messages to display
+- $@: **message** _as string_:
+     the info messages to display
 
 ```bash
 log::info "This is an info message."
@@ -153,8 +169,10 @@ log::info "This is an info message."
 Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
 
-- $1: the file content.
-- $2: (optional) max lines to display (defaults to 0 which prints all lines).
+- $1: **content** _as string_:
+     the file content.
+- $2: **max lines** _as int_:
+     (optional) max lines to display (defaults to 0 which prints all lines).
 
 ```bash
 log::printFileString "myfilecontent"
@@ -166,7 +184,8 @@ shellcheck disable=SC2317
 
 Displays a debug message.
 
-- $@: the debug messages to display
+- $@: **message** _as string_:
+     the debug messages to display
 
 ```bash
 log::debug "This is a debug message."
@@ -192,8 +211,10 @@ printf '%s\n' "The log level is ⌜${RETURNED_VALUE}⌝."
 Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
 
-- $1: the file path to display.
-- $2: (optional) max lines to display (defaults to 0 which prints all lines).
+- $1: **path** _as string_:
+     the file path to display.
+- $2: max lines _as int_:
+     (optional) max lines to display (defaults to 0 which prints all lines).
 
 ```bash
 log::printFile "/my/file/path"
@@ -207,7 +228,8 @@ Displays an error trace message.
 This is a trace message that is always displayed, independently of the log level.
 It can be used before a fatal error to display useful information.
 
-- $@: the trace messages to display
+- $@: **message** _as string_:
+     the trace messages to display
 
 ```bash
 log::errorTrace "This is a debug message."
@@ -216,4 +238,4 @@ log::errorTrace "This is a debug message."
 
 
 
-> Documentation generated for the version 0.17.112 (2024-06-06).
+> Documentation generated for the version 0.18.87 (2024-06-16).

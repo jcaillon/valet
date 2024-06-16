@@ -69,6 +69,17 @@ VALET_CONFIG_REMEMBER_LAST_CHOICES="${VALET_CONFIG_REMEMBER_LAST_CHOICES:-}"
 # Defaults to the '.env' file in the current directory.
 VALET_CONFIG_DOT_ENV_SCRIPT="${VALET_CONFIG_DOT_ENV_SCRIPT:-}"
 
+# The command (with arguments) that will be used to diff files in the Valet test command.
+# The command should have 2 placeholders: %APPROVED_FILE% and %RECEIVED_FILE%. They
+# will be replaced by the paths of the approved and received files.
+# You can change that command to use your favorite diff tool.
+#
+# This defaults to:
+# - 'delta --paging=never --no-gitconfig --line-numbers --side-by-side %APPROVED_FILE% %RECEIVED_FILE%' if delta is available
+# - 'diff --color -u %APPROVED_FILE% %RECEIVED_FILE%' if diff is available
+# - 'internalCompare %APPROVED_FILE% %RECEIVED_FILE%' otherwise (internalCompare is a bash function that compares 2 files)
+VALET_CONFIG_TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
+
 # -----------
 # Log/output configuration
 # -----------
@@ -103,6 +114,12 @@ VALET_CONFIG_LOG_TO_DIRECTORY="${VALET_CONFIG_LOG_TO_DIRECTORY:-}"
 # The default is equivalent to setting this string to:
 # printf -v logFile '%s%(%F_%Hh%Mm%Ss)T%s' 'valet-' ${EPOCHSECONDS} '.log'
 VALET_CONFIG_LOG_FILENAME_PATTERN="${VALET_CONFIG_LOG_FILENAME_PATTERN:-}"
+
+# The bash profiler logs will automatically be cleaned up and improved to make them
+# more readable.
+# This process can be done in awk (by default if found on your system) or
+# you can force to use bash by setting this property to true.
+VALET_CONFIG_LOG_CLEANUP_USING_BASH="${VALET_CONFIG_LOG_CLEANUP_USING_BASH:-}"
 
 # -----------
 # Log icons configuration
@@ -193,4 +210,4 @@ VALET_CONFIG_BUMP_VERSION_ON_BUILD="${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-}"
 
 ```
 
-> Documentation generated for the version 0.17.112 (2024-06-06).
+> Documentation generated for the version 0.18.87 (2024-06-16).

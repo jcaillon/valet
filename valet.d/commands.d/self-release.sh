@@ -301,6 +301,8 @@ function updateDocumentation() {
       files+=("${file}")
     done
     io::invoke git add "${files[@]}"
+    io::listFiles "${GLOBAL_VALET_HOME}/extras"
+    io::invoke git add "${RETURNED_ARRAY[@]}"
     io::invoke git commit -m ":memo: updating the documentation"
     log::success "The documentation update has been committed."
   fi

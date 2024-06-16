@@ -10,7 +10,8 @@ url: /docs/libraries/array
 This function makes sure that all the arrays have the same size.
 It will add empty strings to the arrays that are too short.
 
-- $1+: The arrays (global variable names) to make the same size.
+- $@: **array names** _as string_:
+     The arrays (global variable names) to make the same size.
 
 ```bash
 array::makeArraysSameSize "array1" "array2" "array3"
@@ -26,12 +27,20 @@ The array is sorted by (in order):
 - the index of the first matched character in the line
 - the distance between the characters in the line
 
-- $1: the pattern to match
-- $2: the initial array name
-- $3: (optional) string to add before each matched char
-- $4: (optional) string to add after each matched char
-- $5: (optional) The maximum length to keep for the matched lines
-    Does not count the strings added/before after each matched char.
+- $1: **pattern** _as string_:
+     the pattern to match
+- $2: **array name** _as string_:
+     the initial array name
+- $3: prefix matched char _as string_:
+     (optional) string to add before each matched char
+     (defaults to empty string)
+- $4: suffix matched char _as string_:
+     (optional) string to add after each matched char
+     (defaults to empty string)
+- $5: max line length _as int_:
+     (optional) The maximum length to keep for the matched lines,
+     does not count the strings added/before after each matched char
+     (defaults to 9999999)
 
 Returns:
 
@@ -53,7 +62,8 @@ array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${
 
 Sorts an array using the > bash operator (lexicographic order).
 
-- $1: The global variable name of array to sort.
+- $1: **array name** _as string_:
+     The global variable name of array to sort.
 
 ```bash
 declare -g myArray=( "z" "a" "b" )
@@ -67,8 +77,10 @@ printf '%s\n' "${myArray[@]}"
 Allows to fuzzy match an array against a given pattern.
 Returns an array containing only the lines matching the pattern.
 
-- $1: the pattern to match
-- $2: the initial array name
+- $1: **pattern** _as string_:
+     the pattern to match
+- $2: **array name** _as string_:
+     the initial array name
 
 Returns:
 
@@ -92,12 +104,16 @@ fi
 
 Add a value to an array if it is not already present.
 
-- $1: The global variable name of the array.
-- $2: The value to add.
+- $1: **array name** _as string_:
+     The global variable name of the array.
+- $2: **value** _as any:
+     The value to add.
 
 Returns:
 
-- $?: 0 if the value was added, 1 if it was already present.
+- $?:
+  - 0 if the value was added
+  - 1 if it was already present
 
 ```bash
 declare -g myArray=( "a" "b" )
@@ -115,8 +131,10 @@ Each criteria array must have the same size as the array to sort.
 Each criteria array must containing integers representing the order of the elements.
 We first sort using the first criteria (from smallest to biggest), then the second, etc.
 
-- $1: the name of the array to sort (it is sorted in place)
-- $2+: the names of the arrays to use as criteria
+- $1: **array name** _as string_:
+     the name of the array to sort (it is sorted in place)
+- $@: **criteria array names** _as string_:
+     the names of the arrays to use as criteria
 
 Returns:
 
@@ -139,8 +157,10 @@ printf '%s\n' "${RETURNED_ARRAY[@]}"
 Check if a value is in an array.
 It uses pure bash.
 
-- $1: The global variable name of the array.
-- $2: The value to check.
+- $1: **array name** _as string_:
+     The global variable name of the array.
+- $2: **value** _as any:
+     The value to check.
 
 Returns:
 
@@ -154,4 +174,4 @@ array::isInArray myArray "b" && printf '%s\n' "b is in the array"
 
 
 
-> Documentation generated for the version 0.17.112 (2024-06-06).
+> Documentation generated for the version 0.18.87 (2024-06-16).

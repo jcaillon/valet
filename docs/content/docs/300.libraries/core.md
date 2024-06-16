@@ -54,11 +54,15 @@ core::showHelp
 ## source
 
 Allows to include a library file or sources a file.
-It replaces the builtin source command to make sure that we do not include the same file twice.
-This also allows us to specify to spellcheck the included file.
 
-- $1: the name of the library (array, interactive, string...) or the file path to include.
-- $2+: the arguments to pass to the included file (mimics the builtin source command).
+It replaces the builtin source command to make sure that we do not include the same file twice.
+We replace source instead of creating a new function to allow us to
+specify the included file for spellcheck.
+
+- $1: **library name** _as string_:
+     the name of the library (array, interactive, string...) or the file path to include.
+- $@: arguments _as any_:
+     (optional) the arguments to pass to the included file (mimics the builtin source command).
 
 ```bash
   source string array system
@@ -93,9 +97,13 @@ Will also display the help if the help option is true.
 
 This should be called from a command function for which you want to check the parsing results.
 
-- $1: the help option
-- $2: the parsing errors
-- $3: the function name (optional, default to the calling function)
+- $1: **display help** _as bool_:
+     the help option
+- $2: **parsing errors** _as string_:
+     the parsing errors
+- $3: function name _as string_:
+     (optional) the function name
+     (defaults to the calling function)
 
 ```bash
 core::checkParseResults "${help:-}" "${parsingErrors:-}"
@@ -108,7 +116,8 @@ core::checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
 Source the file associated with a command function.
 This allows you to call a command function without having to source the file manually.
 
-- $1: the function name
+- $1: **function name** _as string_:
+     the function name
 
 ```bash
 core::sourceFunction "functionName"
@@ -119,8 +128,10 @@ core::sourceFunction "functionName"
 
 Displays an error message and then exit the program with error.
 
-- $1: the exit code to use, should be between 1 and 255
-- $2+: the error message to display
+- $1: **exit code** _as int_:
+     the exit code to use, should be between 1 and 255
+- $@: **message** _as string_:
+     the error message to display
 
 ```bash
 core::failWithCode 255 "This is an error message."
@@ -147,7 +158,8 @@ local directory="${RETURNED_VALUE}"
 
 Displays an error message and then exit the program with error.
 
-- $@: the error message to display
+- $@: **message** _as string_:
+     the error message to display
 
 ```bash
 core::fail "This is an error message."
@@ -171,7 +183,8 @@ This should be called from a command function for which you want to parse the ar
 See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#-implement-your-command>.
 
 
-- $@: the arguments to parse
+- $@: **arguments** _as any_:
+     the arguments to parse
 
 Returns:
 
@@ -192,4 +205,4 @@ core::parseArguments "$@" && eval "${RETURNED_VALUE}"
 
 
 
-> Documentation generated for the version 0.17.112 (2024-06-06).
+> Documentation generated for the version 0.18.87 (2024-06-16).
