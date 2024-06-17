@@ -4,6 +4,9 @@
 # shellcheck disable=SC1091
 source interactive
 
+# shellcheck disable=SC1091
+source fsfs
+
 #===============================================================
 # >>> command: showcase interactive
 #===============================================================
@@ -19,9 +22,47 @@ function showcaseInteractive() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
+  log::info "Getting the cursor size:"
   interactive::getCursorPosition
-  echo "CURSOR_LINE: ${CURSOR_LINE}"
-  echo "CURSOR_COLUMN: ${CURSOR_COLUMN}"
+  log::info "CURSOR_LINE: ⌜${CURSOR_LINE}⌝"
+  log::info "CURSOR_COLUMN: ⌜${CURSOR_COLUMN}⌝"
 
-  interactive::askForConfirmationRaw
+  log::info "Getting the terminal size:"
+  system::exportTerminalSize
+  log::info "GLOBAL_LINES: ⌜${GLOBAL_LINES}⌝"
+  log::info "GLOBAL_COLUMNS: ⌜${GLOBAL_COLUMNS}⌝"
+
+  log::info "Getting user confirmation:"
+  interactive::askForConfirmation "Please press ENTER to continue."
+
+  log::info "Getting user yes/no:"
+  if interactive::promptYesNo "Do you want to abort this demo?" false; then
+    log::warning "Aborting the demo."
+    return 0
+  fi
+
+  log::info "Displaying a question box."
+  interactive::displayQuestion "What is your favorite color?"
+
+  # log::info "Getting user input"
+
+  log::info "Displaying an answer box."
+  interactive::displayAnswer "My favorite color is blue."
+
+  log::info "Creating some space below this line."
+  interactive::createSpace 4
+
+  log::info "Display a full screen selection."
+
+  declare -g -a SELECTION_ARRAY
+  # shellcheck disable=SC2034
+  SELECTION_ARRAY=("blue" "red" "green" "yellow")
+  # shellcheck disable=SC2317
+
+  function getColorSample() { local -n color="AC__FG_${1^^}"; RETURNED_VALUE="${color}AC__FG_${1^^}${AC__TEXT_RESET}"; }
+  fsfs::itemSelector "What's your favorite color?" SELECTION_ARRAY "getColorSample" "Color sample"
+
+  log::info "End of demo!"
+
+
 }

@@ -1,4 +1,92 @@
 {
+	"quote": {
+		"prefix": "quote",
+		"description": "",
+		"scope": "",
+		"body": [
+			"⌜$1⌝$0"
+		]
+	},
+  "CURSOR_LINE": {
+    "prefix": "CURSOR_LINE",
+    "description": "",
+    "scope": "",
+    "body": [
+      "CURSOR_LINE$0"
+    ]
+  },
+  "CURSOR_COLUMN": {
+    "prefix": "CURSOR_COLUMN",
+    "description": "",
+    "scope": "",
+    "body": [
+      "CURSOR_COLUMN$0"
+    ]
+  },
+  "RETURNED_VALUE": {
+    "prefix": "RETURNED_VALUE",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_VALUE$0"
+    ]
+  },
+  "RETURNED_VALUE2": {
+    "prefix": "RETURNED_VALUE2",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_VALUE2$0"
+    ]
+  },
+  "RETURNED_VALUE3": {
+    "prefix": "RETURNED_VALUE3",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_VALUE3$0"
+    ]
+  },
+  "RETURNED_ARRAY": {
+    "prefix": "RETURNED_ARRAY",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_ARRAY$0"
+    ]
+  },
+  "RETURNED_ARRAY2": {
+    "prefix": "RETURNED_ARRAY2",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_ARRAY2$0"
+    ]
+  },
+  "RETURNED_ARRAY3": {
+    "prefix": "RETURNED_ARRAY3",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_ARRAY3$0"
+    ]
+  },
+  "LAST_KEY_PRESSED": {
+    "prefix": "LAST_KEY_PRESSED",
+    "description": "",
+    "scope": "",
+    "body": [
+      "LAST_KEY_PRESSED$0"
+    ]
+  },
+  "RETURNED_ASSOCIATIVE_ARRAY": {
+    "prefix": "RETURNED_ASSOCIATIVE_ARRAY",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_ASSOCIATIVE_ARRAY$0"
+    ]
+  },
 	"read file to array and loop": {
 		"prefix": "read file to array and loop",
 		"description": "Read file to array and loop",
