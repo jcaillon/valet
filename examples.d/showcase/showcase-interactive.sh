@@ -32,6 +32,14 @@ function showcaseInteractive() {
   log::info "GLOBAL_LINES: ⌜${GLOBAL_LINES}⌝"
   log::info "GLOBAL_COLUMNS: ⌜${GLOBAL_COLUMNS}⌝"
 
+  log::info "Displaying a question box."
+  interactive::displayQuestion "What is your favorite color?"
+
+  # log::info "Getting user input"
+
+  log::info "Displaying an answer box."
+  interactive::displayAnswer "My favorite color is blue."
+
   log::info "Getting user confirmation:"
   interactive::askForConfirmation "Please press ENTER to continue."
 
@@ -40,14 +48,6 @@ function showcaseInteractive() {
     log::warning "Aborting the demo."
     return 0
   fi
-
-  log::info "Displaying a question box."
-  interactive::displayQuestion "What is your favorite color?"
-
-  # log::info "Getting user input"
-
-  log::info "Displaying an answer box."
-  interactive::displayAnswer "My favorite color is blue."
 
   log::info "Creating some space below this line."
   interactive::createSpace 4
@@ -61,6 +61,7 @@ function showcaseInteractive() {
 
   function getColorSample() { local -n color="AC__FG_${1^^}"; RETURNED_VALUE="${color}AC__FG_${1^^}${AC__TEXT_RESET}"; }
   fsfs::itemSelector "What's your favorite color?" SELECTION_ARRAY "getColorSample" "Color sample"
+  log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
 
   log::info "End of demo!"
 

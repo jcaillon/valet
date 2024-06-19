@@ -44,8 +44,8 @@ function main::onExitInternal() {
     onExit
   fi
   # if we ran an interactive function, make sure to restore the cursor
-  if [[ -n ${cursorShow:-} ]]; then
-    printf '%s' "${cursorShow}"
+  if [[ -n ${AC__CURSOR_SHOW:-} ]]; then
+    printf '%s' "${AC__CURSOR_SHOW}"
   fi
   # always call cleanUp before exiting
   main::onCleanUpInternal

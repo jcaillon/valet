@@ -14,13 +14,13 @@ Exit code: `0`
 CINThis is a COLOR CHECK, this line should be COLORED (in cyan by default).CDE
 CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
 ─────────────────────────────────────
-[2m   ┌─[56b─┐[0m
-[2m   │[0m Do you see the colors in the color check above the line? [2m│[0m
-[2m   └─[56b─┘\[0m
+[2m░─[56b─┐[0m
+[2m  [0mDo you see the colors in the color check above the line? [60G[2m│[0m
+[2m░─[56b─┘[0m
 [1G[0J
-[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
-[2m │[0m No. [2m│[0m
-[2m/└─[3b─┘[0m
+[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9993G┌─[3b─░[0m
+[2m[9993G│[0m No.[2m[0m
+[2m[9993G└─[3b─░[0m
 ─────────────────────────────────────
 This is a nerd icon check, check out the next lines:
 A cross within a square: IE
@@ -28,20 +28,20 @@ A warning sign: IW
 A checked box: IS
 An information icon: II
 ─────────────────────────────────────
-[2m   ┌─[69b─┐[0m
-[2m   │[0m Do you correctly see the nerd icons in the icon check above the line? [2m│[0m
-[2m   └─[69b─┘\[0m
+[2m░─[69b─┐[0m
+[2m  [0mDo you correctly see the nerd icons in the icon check above the line? [73G[2m│[0m
+[2m░─[69b─┘[0m
 [1G[0J
-[1F[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
-[2m │[0m No. [2m│[0m
-[2m/└─[3b─┘[0m
-[2m   ┌─[41b─┐[0m
-[2m   │[0m Do you want to enable the icons in Valet? [2m│[0m
-[2m   └─[41b─┘\[0m
+[1F[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m[9993G┌─[3b─░[0m
+[2m[9993G│[0m No.[2m[0m
+[2m[9993G└─[3b─░[0m
+[2m░─[41b─┐[0m
+[2m  [0mDo you want to enable the icons in Valet? [45G[2m│[0m
+[2m░─[41b─┘[0m
 [1G[0J
-[1F[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
-[2m │[0m No. [2m│[0m
-[2m/└─[3b─┘[0m
+[1F[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m[9993G┌─[3b─░[0m
+[2m[9993G│[0m No.[2m[0m
+[2m[9993G└─[3b─░[0m
 ```
 
 **Error** output:
@@ -73,13 +73,13 @@ Exit code: `0`
 CINThis is a COLOR CHECK, this line should be COLORED (in cyan by default).CDE
 CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
 ─────────────────────────────────────
-[2m   ┌─[56b─┐[0m
-[2m   │[0m Do you see the colors in the color check above the line? [2m│[0m
-[2m   └─[56b─┘\[0m
+[2m░─[56b─┐[0m
+[2m  [0mDo you see the colors in the color check above the line? [60G[2m│[0m
+[2m░─[56b─┘[0m
 [1G[0J
-[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m ┌─[4b─┐[0m
-[2m │[0m Yes. [2m│[0m
-[2m/└─[4b─┘[0m
+[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9992G┌─[4b─░[0m
+[2m[9992G│[0m Yes.[2m[0m
+[2m[9992G└─[4b─░[0m
 ─────────────────────────────────────
 This is a nerd icon check, check out the next lines:
 A cross within a square: IE
@@ -87,20 +87,18 @@ A warning sign: IW
 A checked box: IS
 An information icon: II
 ─────────────────────────────────────
-[2m   ┌─[69b─┐[0m
-[2m   │[0m Do you correctly see the nerd icons in the icon check above the line? [2m│[0m
-[2m   └─[69b─┘\[0m
+[2m░─[69b─┐[0m
+[2m  [0mDo you correctly see the nerd icons in the icon check above the line? [73G[2m│[0m
+[2m░─[69b─┘[0m
 [1G[0J
-[1F[?25l[7mCUB   (Y)ES   [0m   [7mCAB   (N)O   [0m[1G[0K[?25h[2m ┌─[4b─┐[0m
-[2m │[0m Yes. [2m│[0m
-[2m/└─[4b─┘[0m
-[2m   ┌─[32b─┐[0m
-[2m   │[0m Did you read the warnings above? [2m│[0m
-[2m   └─[32b─┘\[0m
+[1F[?25l[7mCUB   (Y)ES   [0m   [7mCAB   (N)O   [0m[1G[0K[?25h[2m[9992G┌─[4b─░[0m
+[2m[9992G│[0m Yes.[2m[0m
+[2m[9992G└─[4b─░[0m
+[2m░─[32b─┐[0m
+[2m  [0mDid you read the warnings above? [36G[2m│[0m
+[2m░─[32b─┘[0m
 [1G[0J
-[1F[?25l[7mCAB   (O)K   [0m[1G[0K[?25h[2m ┌─[3b─┐[0m
-[2m │[0m Ok. [2m│[0m
-[2m/└─[3b─┘[0m
+[1F[?25l[7mCAB   (O)K   [0m[1G[0K[?25h
 ```
 
 **Error** output:

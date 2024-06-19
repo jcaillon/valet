@@ -974,6 +974,10 @@ function string::wrapText() {
   leftPadding="${3:-0}"
   appendPaddingToFirstLine="${4:-false}"
 
+  if (( width < 10 )); then
+    width=10
+  fi
+
   # compute padding in number of spaces
   local messageLeftPadding
   messageLeftPadding=""
