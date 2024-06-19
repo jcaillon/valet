@@ -86,6 +86,9 @@ function fsfs::itemSelector() {
   interactive::switchToFullScreen
   fsfsDrawScreen "${prompt}"
 
+  # before starting to wait for inputs, we clear up the key pressed
+  interactive::clearKeyPressed
+
   # main loop
   while true; do
     if interactive::waitForKey -t 0.05; then
@@ -545,7 +548,9 @@ function changeRightPaneStartIndex() {
   local newIndex=$((FSFS_RIGHT_PANE_START_INDEX + delta))
   if ((newIndex < 0)); then
     newIndex=0
-  elif [[ ! -v FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY || newIndex -ge ${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} ]]; then
+  elif [[ ! -v FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY ]]; then
+    newIndex=0
+  elif [[ newIndex -ge ${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} ]]; then
     newIndex=$((${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} - 1))
   fi
   FSFS_RIGHT_PANE_START_INDEX=${newIndex}

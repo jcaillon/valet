@@ -413,6 +413,18 @@ function interactive::waitForKey() {
   return 0
 }
 
+# ## interactive::clearKeyPressed
+#
+# This function reads all the inputs from the user, effectively discarding them.
+#
+# ```bash
+# interactive::clearKeyPressed
+# ```
+function interactive::clearKeyPressed() {
+  local IFS
+  IFS='' read "$@" -d '' -srn 1 -t 0 LAST_KEY_PRESSED || :
+}
+
 # ## interactive::createSpace
 #
 # This function creates some new lines after the current cursor position.
