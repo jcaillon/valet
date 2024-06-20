@@ -150,8 +150,9 @@ more=(
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
-parsingErrors="Option ⌜-o⌝ was given after the first argument, it should come before that."
+parsingErrors=""
 firstArg="arg"
+option1="true"
 more=(
 "more1"
 "more2"
@@ -183,6 +184,16 @@ parsingErrors=""
 firstArg="arg1"
 secondArg="arg2"
 
+
+→ main::parseFunctionArguments selfMock2 -- --arg1-- --arg2--
+local parsingErrors option1 thisIsOption2 help firstArg
+local -a more
+thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+parsingErrors=""
+firstArg="--arg1--"
+more=(
+"--arg2--"
+)
 ```
 
 ## Test script 99.tests

@@ -447,15 +447,20 @@ function main::getHelpText() {
   if [[ ${functionName} == "this" ]]; then
     usage="valet"
   else
-    usage="valet ${command}"
+    usage="valet ${cOption}[global options]${cDefault} ${command}"
   fi
   if [[ -n "${functionOptions:-}" ]]; then
-    usage+=" ${cOption}[options]${cDefault}"
+    if [[ ${functionName} == "this" ]]; then
+      usage+=" ${cOption}[global options]${cDefault}"
+    else
+      usage+=" ${cOption}[options]${cDefault}"
+    fi
   fi
   if [[ -n "${functionCommands:-}" ]]; then
     usage+=" ${cCommand}[command]${cDefault}"
   else
     if [[ -n "${functionArguments:-}" ]]; then
+      usage+=" [--]"
       for argument in "${functionArguments[@]}"; do
         if [[ ${argument} == *\?* ]]; then
           usage+=" ${cArgument}[${argument//\?/}]${cDefault}"
@@ -468,12 +473,18 @@ function main::getHelpText() {
   string::wrapText "${usage}" "${helpWidth}" 2 "true"
   usage="${RETURNED_VALUE}"
 
+  # global options
+  local options="${cTitle}GLOBAL OPTIONS${cDefault}"$'\n'$'\n'
+  main::writeAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "this"
+  options+="${RETURNED_VALUE}"$'\n'
+
   # options
-  local options
-  if [[ -n "${functionOptions:-}" ]]; then
-    options="${cTitle}OPTIONS${cDefault}"$'\n'$'\n'
-    main::writeAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
-    options+="${RETURNED_VALUE}"$'\n'
+  if [[ ${functionName} != "this" ]]; then
+    if [[ -n "${functionOptions:-}" ]]; then
+      options+="${cTitle}OPTIONS${cDefault}"$'\n'$'\n'
+      main::writeAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
+      options+="${RETURNED_VALUE}"$'\n'
+    fi
   fi
 
   # arguments
@@ -1111,7 +1122,7 @@ function main::parseFunctionArguments() {
   startedArguments="false"
   while [[ $# -gt 0 ]]; do
 
-    if [[ ${1} == "-"* ]]; then
+    if [[ ${1} == "-"* && ${startedArguments} != "true" ]]; then
       matchedIndex=-1
 
       # we are matching an option
@@ -1129,24 +1140,24 @@ function main::parseFunctionArguments() {
 
       if [[ matchedIndex -ne -1 ]]; then
         # it's a match!
-        if [[ ${startedArguments} == "true" ]]; then
-          outputErrors+=("Option ⌜${1}⌝ was given after the first argument, it should come before that.")
-        else
-          optionValue="${optionsHasValue[${matchedIndex}]:-}"
-          optionName="${optionsName[${matchedIndex}]}"
-          matchedOptionsIndex+=("${matchedIndex}")
+        optionValue="${optionsHasValue[${matchedIndex}]:-}"
+        optionName="${optionsName[${matchedIndex}]}"
+        matchedOptionsIndex+=("${matchedIndex}")
 
-          if [[ ${optionValue} == "true" ]]; then
-            shift
-            if [[ $# -eq 0 ]]; then
-              outputErrors+=("Missing value for option ⌜${optionName}⌝.")
-            else
-              outputSetLine+=("${optionName}=\"${1//\"/\\\"}\"")
-            fi
+        if [[ ${optionValue} == "true" ]]; then
+          shift
+          if [[ $# -eq 0 ]]; then
+            outputErrors+=("Missing value for option ⌜${optionName}⌝.")
           else
-            outputSetLine+=("${optionName}=\"true\"")
+            outputSetLine+=("${optionName}=\"${1//\"/\\\"}\"")
           fi
+        else
+          outputSetLine+=("${optionName}=\"true\"")
         fi
+
+      elif [[ ${1} == "--" ]]; then
+        # if we have -- we stop parsing options
+        startedArguments="true"
 
       else
         # if we didn't match any option, flag it as unknown option and add it to the leftOver
@@ -1156,9 +1167,7 @@ function main::parseFunctionArguments() {
       fi
 
     else
-
       # we are matching an argument
-      startedArguments="true"
 
       if [[ argumentPosition -ge totalNbArguments ]]; then
         outputErrors+=("Expecting ${totalNbArguments} argument(s), got extra argument ⌜${1}⌝.")

@@ -33,6 +33,10 @@ function testMain::parseFunctionArguments() {
   echo "→ main::parseFunctionArguments selfMock4 arg1 arg2"
   main::parseFunctionArguments selfMock4 arg1 arg2 && echo "${RETURNED_VALUE}"
 
+  echo
+  echo "→ main::parseFunctionArguments selfMock2 -- --arg1-- --arg2--"
+  main::parseFunctionArguments selfMock2 -- --arg1-- --arg2-- && echo "${RETURNED_VALUE}"
+
   test::endTest "Testing main::parseFunctionArguments" 0
 }
 

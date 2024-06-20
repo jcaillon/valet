@@ -20,7 +20,36 @@ ABOUT
 
 USAGE
 
-  valet self mock2 [options] <firstArg> <more...>
+  valet [global options] self mock2 [options] [--] <firstArg> <more...>
+
+GLOBAL OPTIONS
+
+  -x, --profiling
+      Turn on profiling (with debug mode) before running the required command.
+      It will output to ~/valet-profiler-{PID}-command.txt.
+      This is useful to debug your command and understand what takes a long time to execute.
+      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable 
+      VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
+      This option can be set by exporting the variable VALET_PROFILING='true'.
+  -l, --log-level, --log <level>
+      Set the log level of valet (defaults to info).
+      Possible values are: trace, debug, success, info, success, warning, error.
+      This option can be set by exporting the variable VALET_LOG_LEVEL,='<level>'.
+  -v, --verbose
+      Output verbose information.
+      This is the equivalent of setting the log level to debug.
+      This option can be set by exporting the variable VALET_VERBOSE='true'.
+  -w, --very-verbose
+      Output very verbose information.
+      This is the equivalent of setting the log level to trace.
+      This option can be set by exporting the variable VALET_VERY_VERBOSE='true'.
+  -i, --force-interactive-mode
+      Enter interactive mode for commands even if arguments are not required or provided.
+      This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
+  --version
+      Display the current version of valet.
+  -h, --help
+      Display the help for this command.
 
 OPTIONS
 
@@ -64,7 +93,35 @@ ABOUT
 
 USAGE
 
-  valet self mock3 [options]
+  valet [global options] self mock3 [options]
+
+GLOBAL OPTIONS
+
+  -x, --profiling
+      Turn on profiling (with debug mode) before running the required command.
+      It will output to ~/valet-profiler-{PID}-command.txt.
+      This is useful to debug your command and understand what takes a long time to execute.
+      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
+      This option can be set by exporting the variable VALET_PROFILING='true'.
+  -l, --log-level, --log <level>
+      Set the log level of valet (defaults to info).
+      Possible values are: trace, debug, success, info, success, warning, error.
+      This option can be set by exporting the variable VALET_LOG_LEVEL,='<level>'.
+  -v, --verbose
+      Output verbose information.
+      This is the equivalent of setting the log level to debug.
+      This option can be set by exporting the variable VALET_VERBOSE='true'.
+  -w, --very-verbose
+      Output very verbose information.
+      This is the equivalent of setting the log level to trace.
+      This option can be set by exporting the variable VALET_VERY_VERBOSE='true'.
+  -i, --force-interactive-mode
+      Enter interactive mode for commands even if arguments are not required or provided.
+      This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
+  --version
+      Display the current version of valet.
+  -h, --help
+      Display the help for this command.
 
 OPTIONS
 
@@ -98,7 +155,56 @@ ABOUT
 
 USAGE
 
-  valet help [options] [commands...]
+  valet [global options] help [options] [--] 
+  [commands...]
+
+GLOBAL OPTIONS
+
+  -x, --profiling
+      Turn on profiling (with debug mode) before
+      running the required command.
+      It will output to 
+      ~/valet-profiler-{PID}-command.txt.
+      This is useful to debug your command and 
+      understand what takes a long time to 
+      execute.
+      The profiler log will be cleanup to only 
+      keep lines relevant for your command 
+      script. You can disable this behavior by 
+      setting the environment variable 
+      VALET_CONFIG_KEEP_ALL_PROFILER_LINES to 
+      true.
+      This option can be set by exporting the 
+      variable VALET_PROFILING='true'.
+  -l, --log-level, --log <level>
+      Set the log level of valet (defaults to 
+      info).
+      Possible values are: trace, debug, 
+      success, info, success, warning, error.
+      This option can be set by exporting the 
+      variable VALET_LOG_LEVEL,='<level>'.
+  -v, --verbose
+      Output verbose information.
+      This is the equivalent of setting the log 
+      level to debug.
+      This option can be set by exporting the 
+      variable VALET_VERBOSE='true'.
+  -w, --very-verbose
+      Output very verbose information.
+      This is the equivalent of setting the log 
+      level to trace.
+      This option can be set by exporting the 
+      variable VALET_VERY_VERBOSE='true'.
+  -i, --force-interactive-mode
+      Enter interactive mode for commands even 
+      if arguments are not required or provided.
+      This option can be set by exporting the 
+      variable 
+      VALET_FORCE_INTERACTIVE_MODE='true'.
+  --version
+      Display the current version of valet.
+  -h, --help
+      Display the help for this command.
 
 OPTIONS
 
@@ -179,7 +285,36 @@ ABOUT
 
 USAGE
 
-  valet selfMock1 [options]
+  valet [global options] selfMock1 [options]
+
+GLOBAL OPTIONS
+
+  -x, --profiling
+      Turn on profiling (with debug mode) before running the required command.
+      It will output to ~/valet-profiler-{PID}-command.txt.
+      This is useful to debug your command and understand what takes a long time to execute.
+      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable 
+      VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
+      This option can be set by exporting the variable VALET_PROFILING='true'.
+  -l, --log-level, --log <level>
+      Set the log level of valet (defaults to info).
+      Possible values are: trace, debug, success, info, success, warning, error.
+      This option can be set by exporting the variable VALET_LOG_LEVEL,='<level>'.
+  -v, --verbose
+      Output verbose information.
+      This is the equivalent of setting the log level to debug.
+      This option can be set by exporting the variable VALET_VERBOSE='true'.
+  -w, --very-verbose
+      Output very verbose information.
+      This is the equivalent of setting the log level to trace.
+      This option can be set by exporting the variable VALET_VERY_VERBOSE='true'.
+  -i, --force-interactive-mode
+      Enter interactive mode for commands even if arguments are not required or provided.
+      This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
+  --version
+      Display the current version of valet.
+  -h, --help
+      Display the help for this command.
 
 OPTIONS
 
@@ -894,7 +1029,36 @@ ABOUT
 
 USAGE
 
-  valet self [options] [command]
+  valet [global options] self [options] [command]
+
+GLOBAL OPTIONS
+
+  -x, --profiling
+      Turn on profiling (with debug mode) before running the required command.
+      It will output to ~/valet-profiler-{PID}-command.txt.
+      This is useful to debug your command and understand what takes a long time to execute.
+      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable 
+      VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
+      This option can be set by exporting the variable VALET_PROFILING='true'.
+  -l, --log-level, --log <level>
+      Set the log level of valet (defaults to info).
+      Possible values are: trace, debug, success, info, success, warning, error.
+      This option can be set by exporting the variable VALET_LOG_LEVEL,='<level>'.
+  -v, --verbose
+      Output verbose information.
+      This is the equivalent of setting the log level to debug.
+      This option can be set by exporting the variable VALET_VERBOSE='true'.
+  -w, --very-verbose
+      Output very verbose information.
+      This is the equivalent of setting the log level to trace.
+      This option can be set by exporting the variable VALET_VERY_VERBOSE='true'.
+  -i, --force-interactive-mode
+      Enter interactive mode for commands even if arguments are not required or provided.
+      This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
+  --version
+      Display the current version of valet.
+  -h, --help
+      Display the help for this command.
 
 OPTIONS
 

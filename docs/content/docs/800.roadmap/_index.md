@@ -8,7 +8,6 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- rename CMD_ variables.
 - Add full support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Generate an autocompletion script for bash and zsh.
@@ -20,7 +19,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Allow to regroup single letter options (e.g. -fsSL).
 - Add a command self package that build the user commands into a single script file.
 - fix running tests with verbose mode on.
-- Allow to separate commands from options/arguments with `--`.
 - Have a consistent look and feel for interactive functions.
 - Reimplement usage of main::sortCommands / main::addLastChoice.
 - Add a default value for options.
