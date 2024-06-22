@@ -276,15 +276,14 @@ _CMD_INCLUDED=1
 # CMD_OPTS_HAS_VALUE_xxx = array which indicates for each option if it has a value or not
 # CMD_OPTS_NAME_xxx = array with each option names in camel case
 # CMD_OPTS_NAME_SC_xxx = array with each option names in snake case
+# CMD_OPTS_DEFAULT_xxx = contains the default value for this option
 # CMD_ARGS_NAME_xxx = array with each argument names in camel case
 # CMD_ARGS_LAST_IS_ARRAY_xxx = true/false to indicate if the last argument of the function is an array (contains ...)
 # CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (contains ?)
 
 "
     io::invoke declare -p ${!CMD_*}
-    local IFS=$'\n'
     local line
-    local IFS=':'
     while read -r -d $'\n' line; do
       printf '%s\n' "${line#declare -? }"
     done <<< "${RETURNED_VALUE}"

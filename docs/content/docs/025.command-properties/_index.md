@@ -8,6 +8,38 @@ url: /docs/command-properties
 
 This page describes the properties available to define a command.
 
+Here is a definition example that uses all the properties:
+
+```yaml {linenos=table,linenostart=1}
+command: command
+function: functionName
+shortDescription: A short sentence.
+description: |-
+  A long description that can use ⌜quotes⌝.
+sudo: false
+hideInMenu: false
+arguments:
+- name: firstArg
+  description: |-
+    First argument.
+- name: more...
+  description: |-
+    Will be an an array of strings.
+options:
+- name: -o, --option1
+  description: |-
+    First option.
+  noEnvironmentVariable: true
+- name: -2, --this-is-option2 <level>
+  description: |-
+    An option with a value.
+  noEnvironmentVariable: false
+examples:
+- name: command -o -2 value1 arg1 more1 more2
+  description: |-
+    Call command with option1, option2 and some arguments.
+```
+
 You can check the [showcase commands][showcase-examples] to get definition examples.
 
 ## 🫚 Top level properties
@@ -163,6 +195,28 @@ The description for this option. It will be used to display the help/usage of th
 | Mandatory? | Default value? |
 |----------|---------------|
 | yes ✔️ | N/A |
+
+### noEnvironmentVariable
+
+By default, an option that can have a value (e.g. `--option <something>`) will be parsed to a local variable which default to a global variable if not value was passed by the user.
+
+For instance, the option `--option1` will be parsed to the local variable `option1` with the following definition: `local option1="${VALET_OPTION1:-}"`. This allows to define options through environment variable.
+
+This behavior can be changed by setting `noEnvironmentVariable: true` which will always make the local variable for the option empty.
+
+| Mandatory? | Default value? |
+|----------|---------------|
+| no | false |
+
+### default
+
+The default value to give to the local variable parsed from the option. The global variable will take precedence (see noEnvironmentVariable).
+
+The local variable will be defined like this: `local option1="${VALET_OPTION1:-"default value"}"`. Where `default value` is the value of this option.
+
+| Mandatory? | Default value? |
+|----------|---------------|
+| no | N/A |
 
 ## 🎈 Examples
 

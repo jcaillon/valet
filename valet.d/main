@@ -903,6 +903,7 @@ function main::parseFunctionArguments() {
   local -n optionsHasValue="CMD_OPTS_HAS_VALUE_${functionName}"
   local -n optionsName="CMD_OPTS_NAME_${functionName}"
   local -n optionsNameSc="CMD_OPTS_NAME_SC_${functionName}"
+  local -n optionsDefault="CMD_OPTS_DEFAULT_${functionName}"
 
   # shortcut if the function expect no arguments and no options
   if [[ totalNbArguments -eq 0 && totalNbOptions -eq 0 ]]; then
@@ -1017,7 +1018,7 @@ function main::parseFunctionArguments() {
   fi
 
   # assign all unmatched options to the corresponding global variable
-  local optionIndex optionName optionMatched matchedIndex optionNameSc
+  local optionIndex optionName optionMatched matchedIndex optionNameSc optionDefault
   for optionIndex in "${!options[@]}"; do
     optionMatched="false"
     for matchedIndex in "${matchedOptionsIndex[@]}"; do
@@ -1029,8 +1030,14 @@ function main::parseFunctionArguments() {
     if [[ ${optionMatched} == "false" ]]; then
       optionName="${optionsName[${optionIndex}]}"
       optionNameSc="${optionsNameSc[${optionIndex}]:-}"
+      optionDefault="${optionsDefault[${optionIndex}]:-}"
       if [[ -n "${optionNameSc}" ]]; then
-        outputString+="${optionsName[${optionIndex}]}=\"\${${optionNameSc}:-}\""$'\n'
+        if [[ -n "${optionDefault}" ]]; then
+          optionDefault="\"${optionDefault}\""
+        fi
+        outputString+="${optionsName[${optionIndex}]}=\"\${${optionNameSc}:-${optionDefault}}\""$'\n'
+      else
+        outputString+="${optionsName[${optionIndex}]}=\"${optionDefault}\""$'\n'
       fi
     fi
   done

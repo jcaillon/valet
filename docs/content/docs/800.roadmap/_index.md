@@ -8,21 +8,21 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- Add a default value for options.
 - We can have fuzzy matching on options too; just make sure it is not ambiguous.
+- Show the arguments required when a command parsing fails.
+- Allow to regroup single letter options (e.g. -fsSL).
 - Add full support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Generate an autocompletion script for bash and zsh.
 - Self-command to create a new command interactively.
 - Create a valet-community-commands where everyone can contribute to new default commands for Valet.
 - head / tail from file.
-- Allow to regroup single letter options (e.g. -fsSL).
 - Add a command self package that build the user commands into a single script file.
 - fix running tests with verbose mode on.
 - Have a consistent look and feel for interactive functions.
 - Reimplement usage of main::sortCommands / main::addLastChoice.
-- Add a default value for options.
 - Implement regex replace in pure bash.
-- Show the arguments required when a command parsing fails.
 - Betters checks in self build!
 - Support alternative single comments `### VALET COMMAND` instead of multiline comments for command declaration (see we can have help in autocompletion).
 - A command can declare dependencies to auto check if some tools are installed before running the command.

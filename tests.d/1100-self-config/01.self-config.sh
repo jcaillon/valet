@@ -30,7 +30,7 @@ function testSelfConfig() {
 
   echo "→ (selfConfig --override --export-current-values)"
   (
-    unset ${!VALET_CONFIG_*} VALET_USER_DIRECTORY
+    unset -v ${!VALET_CONFIG_*} VALET_USER_DIRECTORY
     export VALET_CONFIG_FILE="${configFile}"
     export VALET_CONFIG_COLOR_DEBUG=$'\e[44m'
     export VALET_CONFIG_LOG_COLUMNS=20

@@ -251,7 +251,7 @@ function extractCommandDefinitionsToVariables() {
       TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${GLOBAL_VALET_HOME}"/}"
 
       # make sure that all these arrays exists and have the same size
-      array::makeArraysSameSize TEMP_CMD_BUILD_options_name TEMP_CMD_BUILD_options_description TEMP_CMD_BUILD_options_noEnvironmentVariable
+      array::makeArraysSameSize TEMP_CMD_BUILD_options_name TEMP_CMD_BUILD_options_description TEMP_CMD_BUILD_options_noEnvironmentVariable TEMP_CMD_BUILD_options_default
       array::makeArraysSameSize TEMP_CMD_BUILD_arguments_name TEMP_CMD_BUILD_arguments_description
       array::makeArraysSameSize TEMP_CMD_BUILD_examples_name TEMP_CMD_BUILD_examples_description
 
@@ -406,10 +406,13 @@ function declareFinalCommandDefinitionHelpVariables() {
 }
 
 # Declare the following variables:
+#
 # CMD_OPTS_xxx = array with each option separated by a space
 # CMD_OPTS_HAS_VALUE_xxx = array which indicates for each option if it has a value or not
 # CMD_OPTS_NAME_xxx = array with each option names in camel case
 # CMD_OPTS_NAME_SC_xxx = array with each option names in snake case
+# CMD_OPTS_DEFAULT_xxx = contains the default value for this option
+#
 # CMD_ARGS_NAME_xxx = array with each argument names in camel case
 # CMD_ARGS_LAST_IS_ARRAY_xxx = true/false to indicate if the last argument of the function is an array (contains with ...)
 # CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (contains ?)
@@ -442,6 +445,7 @@ function declareFinalCommandDefinitionParserVariables() {
     eval "CMD_OPTS_HAS_VALUE_${function}+=(\"${optionHasValue}\")"
     eval "CMD_OPTS_NAME_${function}+=(\"${optionNameCc}\")"
     eval "CMD_OPTS_NAME_SC_${function}+=(\"${optionNameSc}\")"
+    eval "CMD_OPTS_DEFAULT_${function}+=(\"${TEMP_CMD_BUILD_options_default[index]:-}\")"
   done
 
   # for each arguments

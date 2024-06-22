@@ -29,6 +29,7 @@ options:
 - name: -2, --this-is-option2 <level>
   description: |-
     An option with a value.
+  default: two
 examples:
 - name: showcase command1 -o -2 value1 arg1 more1 more2
   description: |-

@@ -108,7 +108,9 @@ Exit code: `0`
 → main::parseFunctionArguments selfMock2
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
+option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+help=""
 parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝."
 more=(
 )
@@ -116,6 +118,7 @@ more=(
 → main::parseFunctionArguments selfMock2 -o -2 optionValue2 arg1 more1 more2
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
+help=""
 parsingErrors=""
 option1="true"
 thisIsOption2="optionValue2"
@@ -128,6 +131,7 @@ more=(
 → main::parseFunctionArguments selfMock2 -o -2 optionValue2 arg1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
+help=""
 parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝."
 option1="true"
 thisIsOption2="optionValue2"
@@ -138,7 +142,9 @@ more=(
 → main::parseFunctionArguments selfMock2 -unknown -what optionValue2 arg
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
+option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+help=""
 parsingErrors="Unknown option ⌜-unknown⌝.
 Unknown option ⌜-what⌝."
 firstArg="optionValue2"
@@ -150,6 +156,7 @@ more=(
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+help=""
 parsingErrors=""
 firstArg="arg"
 option1="true"
@@ -161,7 +168,9 @@ more=(
 → main::parseFunctionArguments selfMock2 -this arg more1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
+option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+help=""
 parsingErrors="Unknown option ⌜-this⌝ (did you mean ⌜--this-is-option2⌝?)."
 firstArg="arg"
 more=(
@@ -171,6 +180,8 @@ more=(
 → main::parseFunctionArguments selfMock2 --this-is-option2 --option1 arg more1
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
+option1=""
+help=""
 parsingErrors=""
 thisIsOption2="--option1"
 firstArg="arg"
@@ -180,6 +191,7 @@ more=(
 
 → main::parseFunctionArguments selfMock4 arg1 arg2
 local parsingErrors help firstArg secondArg
+help=""
 parsingErrors=""
 firstArg="arg1"
 secondArg="arg2"
@@ -188,7 +200,9 @@ secondArg="arg2"
 → main::parseFunctionArguments selfMock2 -- --arg1-- --arg2--
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
+option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+help=""
 parsingErrors=""
 firstArg="--arg1--"
 more=(

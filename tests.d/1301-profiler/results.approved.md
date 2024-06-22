@@ -24,7 +24,9 @@ D  I  S  timer  delta                           source:line function            
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  selfMock2()                              → core::parseArguments arg1 arg2
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  selfMock2()                              → eval 'local parsingErrors option1 thisIsOption2 help firstArg
                                                                                                        local -a more
+                                                                                                       option1=""
                                                                                                        thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+                                                                                                       help=""
                                                                                                        parsingErrors=""
                                                                                                        firstArg="arg1"
                                                                                                        more=(
@@ -32,10 +34,12 @@ D  I  S  timer  delta                           source:line function            
                                                                                                        )'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  selfMock2()                              → local parsingErrors option1 thisIsOption2 help firstArg
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:171  selfMock2()                              → local -a more
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:172  selfMock2()                              → thisIsOption2=
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → parsingErrors=
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:174  selfMock2()                              → firstArg=arg1
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:177  selfMock2()                              → more=("arg2")
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:172  selfMock2()                              → option1=
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → thisIsOption2=
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:174  selfMock2()                              → help=
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:175  selfMock2()                              → parsingErrors=
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:176  selfMock2()                              → firstArg=arg1
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:179  selfMock2()                              → more=("arg2")
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:171  selfMock2()                              → core::checkParseResults '' ''
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → log::info 'First argument: arg1.'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:174  selfMock2()                              → log::info 'Option 1: .'
@@ -76,7 +80,9 @@ D  I  S  timer    delta                             source:line function        
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  selfMock2()                              → core::parseArguments arg1 arg2
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  selfMock2()                              → eval 'local parsingErrors option1 thisIsOption2 help firstArg
                                                                                                            local -a more								
+                                                                                                           option1=""								
                                                                                                            thisIsOption2="${VALET_THIS_IS_OPTION2:-}"								
+                                                                                                           help=""								
                                                                                                            parsingErrors=""								
                                                                                                            firstArg="arg1"								
                                                                                                            more=(								
@@ -84,10 +90,12 @@ D  I  S  timer    delta                             source:line function        
                                                                                                            )'								
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  selfMock2()                              → local parsingErrors option1 thisIsOption2 help firstArg
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:171  selfMock2()                              → local -a more
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:172  selfMock2()                              → thisIsOption2=
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → parsingErrors=
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:174  selfMock2()                              → firstArg=arg1
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:177  selfMock2()                              → more=("arg2")
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:172  selfMock2()                              → option1=
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → thisIsOption2=
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:174  selfMock2()                              → help=
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:175  selfMock2()                              → parsingErrors=
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:176  selfMock2()                              → firstArg=arg1
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:179  selfMock2()                              → more=("arg2")
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:171  selfMock2()                              → core::checkParseResults '' ''
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → log::info 'First argument: arg1.'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:174  selfMock2()                              → log::info 'Option 1: .'
