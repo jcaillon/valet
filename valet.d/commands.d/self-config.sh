@@ -181,6 +181,16 @@ VALET_CONFIG_DOT_ENV_SCRIPT=\"\${VALET_CONFIG_DOT_ENV_SCRIPT:-${EXPORTED_VALET_C
 # - 'internalCompare %APPROVED_FILE% %RECEIVED_FILE%' otherwise (internalCompare is a bash function that compares 2 files)
 VALET_CONFIG_TEST_DIFF_COMMAND=\"\${VALET_CONFIG_TEST_DIFF_COMMAND:-${EXPORTED_VALET_CONFIG_TEST_DIFF_COMMAND:-}}\"
 
+# Set this to 'true' to disable fuzzy matching of commands and options.
+#
+# By default, Valet will try to match the command or option you typed with the closest
+# command or option available. If you set this to 'true', Valet will only match
+# commands and options that are exactly the same as what you typed.
+#
+# This is useful in a CI environment where you want to make sure that the command
+# you typed is the exact command that will be executed.
+VALET_CONFIG_STRICT_MATCHING=\"\${VALET_CONFIG_STRICT_MATCHING:-${EXPORTED_VALET_CONFIG_STRICT_MATCHING:-}}\"
+
 # -----------
 # Log/output configuration
 # -----------

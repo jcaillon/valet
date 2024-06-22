@@ -1015,6 +1015,10 @@ function main::fuzzyMatchCommandtoFunctionNameOrFail() {
       break
     fi
 
+    if [[ ${VALET_CONFIG_STRICT_MATCHING:-false} == "true" ]]; then
+      continue
+    fi
+
     # case where the command is not exact, we try to fuzzy match it
     array::fuzzyFilter "${command}" CMD_ALL_COMMANDS_ARRAY
     if (( ${#RETURNED_ARRAY[@]} > 1)); then
@@ -1034,7 +1038,13 @@ function main::fuzzyMatchCommandtoFunctionNameOrFail() {
   done
 
   if [[ -z "${functionName:-}" ]]; then
-    core::fail "Could not find a matching command for ⌜${command}⌝, use ⌜--help⌝ to get a list of valid commands."
+    local messageDetails
+    if [[ ${VALET_CONFIG_STRICT_MATCHING:-false} == "true" ]]; then
+      messageDetails="an exact command"
+    else
+      messageDetails="a matching command"
+    fi
+    core::fail "Could not find ${messageDetails} for ⌜${command}⌝, use ⌜--help⌝ to get a list of valid commands."
   fi
 
   RETURNED_VALUE="${functionName:-}"

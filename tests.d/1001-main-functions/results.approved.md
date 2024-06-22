@@ -221,6 +221,9 @@ selfBuild
 2
 self build
 
+→ VALET_CONFIG_STRICT_MATCHING=true main::fuzzyMatchCommandtoFunctionNameOrFail 'se bu other stuff dont care'
+Failed as expected because strict mode is activated
+
 → main::fuzzyMatchCommandtoFunctionNameOrFail 'sf' 'nop' 'other' 'stuff' 'dont care'
 Failed as expected on ambiguous result
 ```
@@ -229,6 +232,7 @@ Failed as expected on ambiguous result
 
 ```log
 INFO     Fuzzy matching the command ⌜se bu⌝ to ⌜self build⌝.
+ERROR    Could not find an exact command for ⌜se⌝, use ⌜--help⌝ to get a list of valid commands.
 ERROR    Found multiple matches for the command ⌜sf⌝, please be more specific:
 CHIsCDEelCHIfCDE build
 CHIsCDEelCHIfCDE config
