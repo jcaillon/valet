@@ -55,8 +55,8 @@ function system::env() {
 # Get the current date in the given format.
 #
 # - $1: format _as string_:
-#      (optional) the format of the date to return
-#      (defaults to %(%F_%Hh%Mm%Ss)T).
+#       (optional) the format of the date to return
+#       (defaults to %(%F_%Hh%Mm%Ss)T).
 #
 # Returns:
 #
@@ -79,7 +79,7 @@ function system::date() {
 # This function returns the list of undeclared variables for the given names.
 #
 # - $@: **variable names** _as string_:
-#      the list of variable names to check.
+#       the list of variable names to check.
 #
 # Returns:
 #

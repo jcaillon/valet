@@ -45,6 +45,7 @@ For more details, please check the documentation on each library:
   {{< card link="io" icon="lightning-bolt" title="io" subtitle="Functions for file manipulation, command execution..." >}}
   {{< card link="kurl" icon="cloud-download" title="kurl" subtitle="Wrapper functions around curl." >}}
   {{< card link="log" icon="pencil-alt" title="log" subtitle="Logging functions." >}}
+  {{< card link="profiler" icon="finger-print" title="profiler" subtitle="Functions enable and disable the bash profiler." >}}
   {{< card link="string" icon="menu-alt-2" title="string" subtitle="Functions for string manipulation." >}}
   {{< card link="system" icon="desktop-computer" title="system" subtitle="Functions to get system/user information." >}}
 {{< /cards >}}

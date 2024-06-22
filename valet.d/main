@@ -32,7 +32,7 @@ function main::onExitInternal() {
   local rc=$?
 
   # disable the profiler if still on
-  if [[ ${PROFILING:-} == "1" ]]; then main::disableProfiler; fi
+  if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
 
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
   if command -v onExitTest 1>/dev/null 2>&1; then
@@ -118,240 +118,11 @@ function command_not_found_handle() {
 #===============================================================
 # >>> Profiler
 #===============================================================
-# Enables the profiler and start writing to the given file.
-#
-# $1: the file to write to.
-#
-# Usage:
-#   main::enableProfiler "${HOME}/valet-profiler-${BASHPID}.txt"
-function main::enableProfiler() {
-  local file
-  file="${1}"
-
-  # Nested profiling not supported
-  if [[ -n "${PROFILING:-}" ]]; then return 0; fi
-  PROFILING=1
-
-  # create the directory for file and reset it
-  mkdir -p "${file%/*}"
-  : "${file}"
-
-  log::info "Starting profiler, writing in ⌜${file}⌝. ${FUNCNAME[3]:-}"
-
-  # we can only get the function depth if we call the main::enableProfiler from a function
-  if [[ -n "${FUNCNAME[3]:-}" ]]; then
-    functionDepthExpression='${#FUNCNAME[@]}'
-  else
-    functionDepthExpression='0'
-  fi
-
-  PS4='+'$'\011''$(("${EPOCHREALTIME//./}" - PROFILER_START_REALTIME))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
-
-  exec 5>"${file}"
-
-  export PROFILER_FILE="${file}"
-  export PROFILER_START_REALTIME="${EPOCHREALTIME//./}"
-  export BASH_XTRACEFD=5
-  set -x
-}
-
-# Disable the profiler.
-#
-# Usage:
-#   main::disableProfiler
-function main::disableProfiler() {
-  log::info "Disabling profiler."
-  set +x
-  unset BASH_XTRACEFD PS4 PROFILING
-  exec 5>&-
-  if [[ -v PROFILER_FILE ]]; then
-    main::cleanProfilerFile
-  fi
-}
-
 if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
-  main::enableProfiler "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}.txt"}"
+  # shellcheck source=lib-profiler
+  source profiler
+  profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}.txt"}"
 fi
-
-# Allows to pretty format the profiler file and remove stuff the user does not need.
-#
-# Usage:
-#   main::cleanProfilerFile
-function main::cleanProfilerFile() {
-  io::createTempFile && local newProfilerFile="${RETURNED_VALUE}"
-
-  local timePrecision=${EPOCHREALTIME#*.}
-  timePrecision=${#timePrecision}
-
-  local clearLine
-  if [[ ${VALET_CONFIG_KEEP_ALL_PROFILER_LINES:-false} == "true" ]]; then
-    clearLine=false
-  fi
-  if [[ -z "${clearLine:-}" && "${VALET_CONFIG_STARTUP_PROFILING:-false}" == "true" ]]; then
-    clearLine=false
-  fi
-  if [[ -z "${clearLine:-}" ]]; then
-    clearLine=true
-  fi
-
-  # we do this one in awk if present, but in bash otherwise
-  if [[ ${VALET_CONFIG_LOG_CLEANUP_USING_BASH:-false} == "true" ]] || ! command -v awk 1>/dev/null 2>&1; then
-    log::debug "Cleaning the profiler file using bash."
-    mainCleanProfileFile "${timePrecision}" "${clearLine}" >"${newProfilerFile}"
-    mv -f "${newProfilerFile}" "${PROFILER_FILE}"
-    return 0
-  fi
-
-  log::debug "Cleaning the profiler file using awk."
-
-  awk -F $'\t' -v timePrecision="${timePrecision}" -v clearCoreLine="${clearLine}" '
-  BEGIN {
-    printf "%s\n\n", "(D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)";
-    printf "%s\n", "D  I  S  timer  delta                           source:line function                                 → command";
-    lastLineWasSkipped = 0;
-    lastTimer = 0;
-    baseStackLength = 99999;
-  }
-  {
-    if (clearCoreLine == "true" && $3 ~ /(valet.d\/core|valet.d\/main|valet.d\/lib-[a-z0-9]+)$/) {
-      lastLineWasSkipped = 1;
-      next;
-    }
-    if ($0 ~ /^\+/) {
-      if (clearCoreLine == "true") {
-        lastLineWasSkipped = 0;
-      }
-    } else {
-      if (lastLineWasSkipped == 1) {
-        next;
-      }
-      printf "%103s%s\n", "", $0;
-      next;
-    }
-    if (baseStackLength == 99999) {
-      baseStackLength = $7;
-    }
-
-    indirectionLevel = length($1);
-    timer = $2 / (10 ^ timePrecision);
-    program = $3;
-    lineNumber = $4;
-    if (length(program) > 30) {
-      programShorten = "..." substr(program, length(program)-27);
-    } else {
-      programShorten = program;
-    }
-    fun = $5 "()";
-    if (length(fun) > 40) {
-      funShorten = "..." substr(fun, length(fun)-37);
-    } else {
-      funShorten = fun;
-    }
-    subShellLevel = $6;
-    stackLength = $7 - baseStackLength;
-    theRest = "";
-    for (x = 9; x <= NF; x++) {
-      theRest = theRest $x;
-    }
-    deltaTimer = timer - lastTimer;
-    lastTimer = timer;
-
-
-    printf "%02d %02d %02d %.4f %.4f %30s:%-4d %-40s → %s\n", stackLength, indirectionLevel, subShellLevel, timer, deltaTimer, programShorten, lineNumber, fun, theRest;
-  }
-  ' <"${PROFILER_FILE}" >"${newProfilerFile}"
-
-  mv -f "${newProfilerFile}" "${PROFILER_FILE}"
-}
-
-# Clean the profiler file in bash if awk is not present.
-function mainCleanProfileFile() {
-  local timePrecision="${1}"
-  local clearCoreLine="${2}"
-
-  printf "%s\n\n" "(D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)"
-  printf "%s\n" "D  I  S  timer    delta                             source:line function                                 → command"
-
-  local lastLineWasSkipped=0
-  local lastTimer=0
-  local baseStackLength=99999
-
-  local -i deltaTimer
-  local -i lastTimer=0
-  local totalElaspedTime lastElaspedTime
-  local IFS indirectionLevel timer program lineNumber fun subShellLevel depth theRest arrow
-  while IFS=$'\t' read -r indirectionLevel timer program lineNumber fun subShellLevel depth arrow theRest; do
-    if [[ ${clearCoreLine} == "true" && ${program} =~ (valet.d/core|valet.d/main|valet.d/lib-[a-z0-9]*)$ ]]; then
-      lastLineWasSkipped=1
-      continue
-    fi
-    if [[ ${indirectionLevel} =~ ^\++$ ]]; then
-      if [[ ${clearCoreLine} == "true" ]]; then
-        lastLineWasSkipped=0
-      fi
-    else
-      if [[ ${lastLineWasSkipped} == "1" ]]; then
-        continue
-      fi
-      # print the raw line
-      printf "%107s%s\n" "" "${indirectionLevel}"$'\t'"${timer}"$'\t'"${program}"$'\t'"${lineNumber}"$'\t'"${fun}"$'\t'"${subShellLevel}"$'\t'"${depth}"$'\t'"${arrow}"$'\t'"${theRest}"
-      continue
-    fi
-    if [[ ${baseStackLength} == 99999 ]]; then
-      baseStackLength=${depth}
-    fi
-
-    mainMicrosecondsToSeconds "${timer}" 4
-    totalElaspedTime="${RETURNED_VALUE}"
-
-    deltaTimer=$((timer - lastTimer))
-    lastTimer=${timer}
-
-    mainMicrosecondsToSeconds "${deltaTimer}" 4
-    lastElaspedTime=${RETURNED_VALUE}
-
-    # shorten the program name if it is too long
-    if (( ${#program} > 30)); then
-      program="...${program:${#program}-27}"
-    fi
-
-    # shorten the function name if it is too long
-    if (( ${#fun} > 31)); then
-      fun="...${fun:${#fun}-28}"
-    fi
-    fun="${fun}()"
-
-    stackLength=$((depth - baseStackLength))
-
-    printf "%02d %02d %02d %-8s %-8s %31s:%-4d %-40s → %s\n" "${stackLength}" "${#indirectionLevel}" "${subShellLevel}" "${totalElaspedTime}" "${lastElaspedTime}" "${program}" "${lineNumber}" "${fun}" "${theRest}"
-
-  done <"${PROFILER_FILE}"
-}
-
-# Convert a microseconds integer to seconds float.
-# e.g. 1234567 → 1.234567
-#
-# - $1: The microseconds integer.
-# - $2: The precision to get (number of digits after the dot).
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: The seconds (float number).
-#
-# ```bash
-# mainMicrosecondsToSeconds 1234567
-# echo "${RETURNED_VALUE}"
-# ```
-function mainMicrosecondsToSeconds() {
-  local microseconds="${1}"
-  if [[ ${#microseconds} -gt 6 ]]; then
-    local ms="${microseconds:${#microseconds}-6}"
-    RETURNED_VALUE="${microseconds:0:${#microseconds}-6}.${ms:0:${2}}"
-  else
-    printf -v RETURNED_VALUE "%06d" "${microseconds}"
-    printf -v RETURNED_VALUE "0.%s" "${RETURNED_VALUE:0:${2}}"
-  fi
-}
 
 #===============================================================
 # >>> Help
@@ -373,13 +144,19 @@ function main::printHelp() {
 
 # Get the help text of a function or a command.
 #
-# $1: the type help to print (function or menu).
-# $2: the name of the function or the command in the case of a menu.
-# $3: (optional) whether to use colors or not (true to not use colors).
-# $4: (optional) the maximum columns for the help text.
+# - $1: the type help to print (function or menu).
+# - $2: the name of the function or the command in the case of a menu.
+# - $3: (optional) whether to use colors or not (true to not use colors).
+# - $4: (optional) the maximum columns for the help text.
 #
-# Usage:
-#   main::getHelpText function "this" "false" "${GLOBAL_COLUMNS}"
+# Returns:
+#
+# - `RETURNED_VALUE`: the help text
+# - `RETURNED_VALUE2`: the command usage text
+#
+# ```bash
+# main::getHelpText function "this" "false" "${GLOBAL_COLUMNS}"
+# ```
 function main::getHelpText() {
   local type=${1:-function}
   local name="${2:-this}"
@@ -390,8 +167,6 @@ function main::getHelpText() {
     noColor=true
   fi
 
-  # sudo apt-get install colortest
-  # colortest-16b
   local cDefault cTitle cHighlight cOption cArgument cCommand
   if [[ ${noColor} == "true" ]]; then
     cDefault=""
@@ -471,6 +246,7 @@ function main::getHelpText() {
       done
     fi
   fi
+  RETURNED_VALUE2="${usage}"
   string::wrapText "${usage}" "${helpWidth}" 2 "true"
   usage="${RETURNED_VALUE}"
 
@@ -689,17 +465,19 @@ function main::runFunction() {
 
   # disable startup profile and enable command profile, if needed
   if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
-    main::disableProfiler
+    profiler::disable
   fi
   if [[ ${PROFIL_COMMAND:-} == "true" ]]; then
-    main::enableProfiler "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}-command.txt"}"
+    # shellcheck source=lib-profiler
+    source profiler
+    profiler::enable "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}-command.txt"}"
   fi
 
   # execute the function
   "${functionName}" "$@"
 
   if [[ ${PROFIL_COMMAND:-} == "true" ]]; then
-    main::disableProfiler
+    profiler::disable
   fi
 
   exit 0

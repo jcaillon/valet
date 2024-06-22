@@ -10,12 +10,12 @@ set -Eeu -o pipefail
 # but it uses pure bash to go faster.
 #
 # - $1: **string to cut** _as string_:
-#      the string to cut
+#       the string to cut
 # - $2: **field number** _as int_:
-#      the field number to get (starting at 0)
+#       the field number to get (starting at 0)
 # - $3: separator _as string_:
-#      the separator
-#      (defaults to tab if not provided)
+#       the separator
+#       (defaults to tab if not provided)
 #
 # Returns:
 #
@@ -54,12 +54,12 @@ function string::cutField() {
 # major.minor.patch-prerelease+build
 #
 # - $1: **version** _as string_:
-#      the version to bump
+#       the version to bump
 # - $2: **level** _as string_:
-#      the level to bump (major, minor, patch)
+#       the level to bump (major, minor, patch)
 # - $3: clear build and prerelease _as bool_:
-#      (optional) clear the prerelease and build
-#      (defaults to true)
+#       (optional) clear the prerelease and build
+#       (defaults to true)
 #
 # Returns:
 #
@@ -114,7 +114,7 @@ function string::bumpSemanticVersion() {
 # Removes all leading underscores.
 #
 # - $1: **camelCase string** _as string_:
-#      The camelCase string to convert.
+#       The camelCase string to convert.
 #
 # Returns:
 #
@@ -149,7 +149,7 @@ function string::camelCaseToSnakeCase() {
 # Removes all leading dashes.
 #
 # - $1: **kebab-case string** _as string_:
-#      The kebab-case string to convert.
+#       The kebab-case string to convert.
 #
 # Returns:
 #
@@ -184,7 +184,7 @@ function string::kebabCaseToSnakeCase() {
 # Removes all leading dashes.
 #
 # - $1: **kebab-case string** _as string_:
-#      The kebab-case string to convert.
+#       The kebab-case string to convert.
 #
 # Returns:
 #
@@ -217,7 +217,7 @@ function string::kebabCaseToCamelCase() {
 # Trim all whitespaces and truncate spaces.
 #
 # - $1: **string to trim** _as string_:
-#      The string to trim.
+#       The string to trim.
 #
 # Returns:
 #
@@ -240,7 +240,7 @@ function string::trimAll() {
 # Trim leading and trailing whitespaces.
 #
 # - $1: **string to trim** _as string_:
-#      The string to trim.
+#       The string to trim.
 #
 # Returns:
 #
@@ -259,12 +259,12 @@ function string::trim() {
 # Find the first index of a string within another string.
 #
 # - $1: **string** _as string_:
-#      the string in which to search
+#       the string in which to search
 # - $2: **search** _as string_:
-#      the string to search
+#       the string to search
 # - $3: start index _as int_:
-#      (optional) the starting index
-#      (defaults to 0)
+#       (optional) the starting index
+#       (defaults to 0)
 #
 # Returns:
 #
@@ -326,13 +326,13 @@ function string::indexOf() {
 # Both start and end strings must be found to extract something.
 #
 # - $1: **string** _as string_:
-#      the string in which to search
+#       the string in which to search
 # - $2: **start string** _as string_:
-#      the start string
-#      (if empty, then it will extract from the beginning of the string)
+#       the start string
+#       (if empty, then it will extract from the beginning of the string)
 # - $3: **end string** _as string_:
-#      the end string
-#      (if empty, then it will extract until the end of the string)
+#       the end string
+#       (if empty, then it will extract until the end of the string)
 #
 # Returns:
 #
@@ -382,9 +382,9 @@ function string::extractBetween() {
 # Counts the number of occurences of a substring in a string.
 #
 # - $1: **string** _as string_:
-#      the string in which to search
+#       the string in which to search
 # - $2: **substring** _as string_:
-#      the substring to count
+#       the substring to count
 #
 # Returns:
 #
@@ -406,9 +406,9 @@ function string::count() {
 # Split a string into an array using a separator.
 #
 # - $1: **string** _as string_:
-#      the string to split
+#       the string to split
 # - $2: **separator** _as string_:
-#      the separator (must be a single character!)
+#       the separator (must be a single character!)
 #
 # Returns:
 #
@@ -430,9 +430,9 @@ function string::split() {
 # Matches a string against a regex and returns the first capture group of the matched string.
 #
 # - $1: **string** _as string_:
-#      the string to match
+#       the string to match
 # - $2: **regex** _as string_:
-#      the regex
+#       the regex
 #
 # Returns:
 #

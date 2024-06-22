@@ -8,11 +8,11 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- We can have fuzzy matching on options too; just make sure it is not ambiguous.
 - Add full support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Generate an autocompletion script for bash and zsh.
 - Self-command to create a new command interactively.
-- We can have fuzzy matching on options too; just make sure it is not ambiguous.
 - Create a valet-community-commands where everyone can contribute to new default commands for Valet.
 - head / tail from file.
 - Allow to regroup single letter options (e.g. -fsSL).

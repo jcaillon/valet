@@ -18,7 +18,7 @@ Exit code: `0`
 INFO     Dry run mode is enabled, no changes will be made.
 ▶ called io::invoke git rev-parse HEAD
 INFO     The current version of valet is: 1.2.3.
-INFO     Found 96 functions with documentation.
+INFO     Found 98 functions with documentation.
 ▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
@@ -70,11 +70,12 @@ DEBUG    Analyzing the following files:
    5 ░ $GLOBAL_VALET_HOME/valet.d/lib-interactive
    6 ░ $GLOBAL_VALET_HOME/valet.d/lib-io
    7 ░ $GLOBAL_VALET_HOME/valet.d/lib-kurl
-   8 ░ $GLOBAL_VALET_HOME/valet.d/lib-string
-   9 ░ $GLOBAL_VALET_HOME/valet.d/lib-system
-  10 ░ $GLOBAL_VALET_HOME/valet.d/main
-  11 ░ $GLOBAL_VALET_HOME/valet.d/version
-  12 ░ $GLOBAL_VALET_HOME/valet.d/commands.d/self-test-utils
+   8 ░ $GLOBAL_VALET_HOME/valet.d/lib-profiler
+   9 ░ $GLOBAL_VALET_HOME/valet.d/lib-string
+  10 ░ $GLOBAL_VALET_HOME/valet.d/lib-system
+  11 ░ $GLOBAL_VALET_HOME/valet.d/main
+  12 ░ $GLOBAL_VALET_HOME/valet.d/version
+  13 ░ $GLOBAL_VALET_HOME/valet.d/commands.d/self-test-utils
 DEBUG    Found function: ⌜io::createTempFile⌝
 DEBUG    Found function: ⌜io::createTempDirectory⌝
 DEBUG    Found function: ⌜io::cleanupTempFiles⌝
@@ -154,6 +155,8 @@ DEBUG    Found function: ⌜io::listFiles⌝
 DEBUG    Found function: ⌜io::listDirectories⌝
 DEBUG    Found function: ⌜kurl::toFile⌝
 DEBUG    Found function: ⌜kurl::toVar⌝
+DEBUG    Found function: ⌜profiler::enable⌝
+DEBUG    Found function: ⌜profiler::disable⌝
 DEBUG    Found function: ⌜string::cutField⌝
 DEBUG    Found function: ⌜string::bumpSemanticVersion⌝
 DEBUG    Found function: ⌜string::camelCaseToSnakeCase⌝
@@ -172,7 +175,7 @@ DEBUG    Found function: ⌜system::date⌝
 DEBUG    Found function: ⌜system::getUndeclaredVariables⌝
 DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 96 functions with documentation.
+INFO     Found 98 functions with documentation.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -254,6 +257,9 @@ INFO     Found 96 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
@@ -336,6 +342,9 @@ INFO     Found 96 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/kurl.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/kurl.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
