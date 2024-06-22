@@ -9,20 +9,19 @@ function testGetFunctionNameFromCommand() {
 
 function testFuzzyMatchCommandtoFunctionName() {
 
-  echo "→ main::fuzzyMatchCommandtoFunctionName 'se bu other stuff dont care'"
-  main::fuzzyMatchCommandtoFunctionName "se bu other stuff dont care"
+  # fuzzy match with single result
+  echo "→ main::fuzzyMatchCommandtoFunctionNameOrFail 'se bu other stuff dont care'"
+  main::fuzzyMatchCommandtoFunctionNameOrFail "se bu other stuff dont care"
   echo "${RETURNED_VALUE}"
   echo "${RETURNED_VALUE2}"
   echo "${RETURNED_VALUE3}"
 
+  # fuzzy match with ambiguous result
   echo
-  echo "→ main::fuzzyMatchCommandtoFunctionName 'sf' 'nop' 'other' 'stuff' 'dont care'"
-  main::fuzzyMatchCommandtoFunctionName "sf" "nop" "other" "stuff" "dont care"
-  echo "${RETURNED_VALUE}"
-  echo "${RETURNED_VALUE2}"
-  echo "${RETURNED_VALUE3}"
+  echo "→ main::fuzzyMatchCommandtoFunctionNameOrFail 'sf' 'nop' 'other' 'stuff' 'dont care'"
+  (main::fuzzyMatchCommandtoFunctionNameOrFail "sf" "nop" "other" "stuff" "dont care") || echo "Failed as expected on ambiguous result"
 
-  test::endTest "Testing main::fuzzyMatchCommandtoFunctionName" 0
+  test::endTest "Testing main::fuzzyMatchCommandtoFunctionNameOrFail" 0
 }
 
 function testGetMaxPossibleCommandLevel() {

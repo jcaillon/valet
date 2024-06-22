@@ -209,28 +209,38 @@ Exit code: `0`
 selfBuild
 ```
 
-### Testing main::fuzzyMatchCommandtoFunctionName
+### Testing main::fuzzyMatchCommandtoFunctionNameOrFail
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ main::fuzzyMatchCommandtoFunctionName 'se bu other stuff dont care'
+→ main::fuzzyMatchCommandtoFunctionNameOrFail 'se bu other stuff dont care'
 selfBuild
 2
 self build
 
-→ main::fuzzyMatchCommandtoFunctionName 'sf' 'nop' 'other' 'stuff' 'dont care'
-
-0
-
+→ main::fuzzyMatchCommandtoFunctionNameOrFail 'sf' 'nop' 'other' 'stuff' 'dont care'
+Failed as expected on ambiguous result
 ```
 
 **Error** output:
 
 ```log
 INFO     Fuzzy matching the command ⌜se bu⌝ to ⌜self build⌝.
+ERROR    Found multiple matches for the command ⌜sf⌝, please be more specific:
+CHIsCDEelCHIfCDE build
+CHIsCDEelCHIfCDE config
+CHIsCDEelCHIfCDE export
+CHIsCDEelCHIfCDE mock1
+CHIsCDEelCHIfCDE mock2
+CHIsCDEelCHIfCDE mock3
+CHIsCDEelCHIfCDE mock4
+CHIsCDEelCHIfCDE release
+CHIsCDEelCHIfCDE setup
+CHIsCDEelCHIfCDE test
+CHIsCDEelCHIfCDE update
 ```
 
 ### Testing main::getMaxPossibleCommandLevel

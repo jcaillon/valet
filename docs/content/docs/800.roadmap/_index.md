@@ -12,9 +12,9 @@ This page lists the features that I would like to implement in Valet. They come 
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Generate an autocompletion script for bash and zsh.
 - Self-command to create a new command interactively.
+- Optional strict mode (env var) to disable fuzzy matching (to not mistakenly execute a command on ci for instance).
 - We can have fuzzy matching on options too; just make sure it is not ambiguous.
 - Create a valet-community-commands where everyone can contribute to new default commands for Valet.
-- Optional strict mode (env var) to disable fuzzy matching (to not mistakenly execute a command on ci for instance).
 - head / tail from file.
 - Allow to regroup single letter options (e.g. -fsSL).
 - Add a command self package that build the user commands into a single script file.

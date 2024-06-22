@@ -58,12 +58,9 @@ function showCommandHelp() {
   fi
 
   local functionName exactCommand
-  main::fuzzyMatchCommandtoFunctionName "${commands[@]}"
+  main::fuzzyMatchCommandtoFunctionNameOrFail "${commands[@]}"
   functionName="${RETURNED_VALUE:-}"
   exactCommand="${RETURNED_VALUE3:-}"
-  if [[ -z "${functionName}" ]]; then
-    core::fail "Could not show the help because the command ⌜${commands[*]}⌝ does not exist or is ambiguous."
-  fi
 
   if [[ ${functionName} == "_menu" ]]; then
     main::printHelp menu "${exactCommand}" "${noColors:-}" "${columns:-}"

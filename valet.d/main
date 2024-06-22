@@ -102,7 +102,8 @@ function main::onCleanUpInternal() {
   fi
 }
 
-# Introducing our own function to handle commands not found, so we can display a better message
+# Introducing our own function to handle commands not found, so we can display a better message.
+# The name of this function is a bash convention.
 function command_not_found_handle() {
   if [[ ${1:-} == "curl" ]]; then
     core::fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
@@ -300,13 +301,13 @@ function mainCleanProfileFile() {
       baseStackLength=${depth}
     fi
 
-    microsecondsToSeconds "${timer}" 4
+    mainMicrosecondsToSeconds "${timer}" 4
     totalElaspedTime="${RETURNED_VALUE}"
 
     deltaTimer=$((timer - lastTimer))
     lastTimer=${timer}
 
-    microsecondsToSeconds "${deltaTimer}" 4
+    mainMicrosecondsToSeconds "${deltaTimer}" 4
     lastElaspedTime=${RETURNED_VALUE}
 
     # shorten the program name if it is too long
@@ -338,10 +339,10 @@ function mainCleanProfileFile() {
 # - `RETURNED_VALUE`: The seconds (float number).
 #
 # ```bash
-# microsecondsToSeconds 1234567
+# mainMicrosecondsToSeconds 1234567
 # echo "${RETURNED_VALUE}"
 # ```
-function microsecondsToSeconds() {
+function mainMicrosecondsToSeconds() {
   local microseconds="${1}"
   if [[ ${#microseconds} -gt 6 ]]; then
     local ms="${microseconds:${#microseconds}-6}"
@@ -475,14 +476,14 @@ function main::getHelpText() {
 
   # global options
   local options="${cTitle}GLOBAL OPTIONS${cDefault}"$'\n'$'\n'
-  main::writeAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "this"
+  mainWriteAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "this"
   options+="${RETURNED_VALUE}"$'\n'
 
   # options
   if [[ ${functionName} != "this" ]]; then
     if [[ -n "${functionOptions:-}" ]]; then
       options+="${cTitle}OPTIONS${cDefault}"$'\n'$'\n'
-      main::writeAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
+      mainWriteAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
       options+="${RETURNED_VALUE}"$'\n'
     fi
   fi
@@ -491,7 +492,7 @@ function main::getHelpText() {
   local arguments
   if [[ -z "${functionCommands:-}" && -n "${functionArguments:-}" ]]; then
     arguments="${cTitle}ARGUMENTS${cDefault}"$'\n'$'\n'
-    main::writeAsTable "${helpWidth}" "${cArgument}" "CMD_ARGUMENTS" "${functionName}"
+    mainWriteAsTable "${helpWidth}" "${cArgument}" "CMD_ARGUMENTS" "${functionName}"
     arguments+="${RETURNED_VALUE}"$'\n'
   fi
 
@@ -499,7 +500,7 @@ function main::getHelpText() {
   local commands
   if [[ -n "${functionCommands:-}" ]]; then
     commands="${cTitle}COMMANDS${cDefault}"$'\n'$'\n'
-    main::writeAsTable "${helpWidth}" "${cCommand}" "CMD_COMMANDS" "${functionName}"
+    mainWriteAsTable "${helpWidth}" "${cCommand}" "CMD_COMMANDS" "${functionName}"
     commands+="${RETURNED_VALUE}"$'\n'
   fi
 
@@ -507,7 +508,7 @@ function main::getHelpText() {
   local examples
   if [[ -n "${functionExamples:-}" ]]; then
     examples="${cTitle}EXAMPLES${cDefault}"$'\n'$'\n'
-    main::writeAsTable "${helpWidth}" "" "CMD_EXAMPLES" "${functionName}"
+    mainWriteAsTable "${helpWidth}" "" "CMD_EXAMPLES" "${functionName}"
     examples+="${RETURNED_VALUE}"$'\n'
   fi
 
@@ -535,7 +536,7 @@ ${options:-}${arguments:-}${commands:-}${examples:-}"
 #   text1
 #           text2
 # text1 can be showed in color and we respect a maximum width
-function main::writeAsTable() {
+function mainWriteAsTable() {
   local width color prefix functionName
   width="${1}"
   color="${2}"
@@ -635,13 +636,10 @@ function main::parseMainArguments() {
   fi
 
   local functionName nbArgs exactCommand
-  main::fuzzyMatchCommandtoFunctionName "${commands[@]}"
+  main::fuzzyMatchCommandtoFunctionNameOrFail "${commands[@]}"
   functionName="${RETURNED_VALUE:-}"
   nbArgs="${RETURNED_VALUE2:-}"
   exactCommand="${RETURNED_VALUE3:-}"
-  if [[ -z "${functionName}" ]]; then
-    core::fail "Could not find a command for ⌜${commands[*]}⌝."
-  fi
 
   log::debug "Function name found ⌜${functionName}⌝."
 
@@ -978,23 +976,27 @@ function main::getFunctionNameFromCommand() {
 # If we do not find an exact match, we return try to fuzzy find the command
 # and then return its function name.
 #
-# $@: the commands to find
+# This function will fail with an error if the command does not match
+# any function or if the command is ambiguous.
+#
+# - $@: the commands to find
 #
 # Returns:
-#   the function name in the global variable RETURNED_VALUE
-#   the level of the command in the global variable RETURNED_VALUE2
-#   the exact command in the global variable RETURNED_VALUE3
 #
-# Usage:
-#  main::fuzzyMatchCommandtoFunctionName "self" "build" && printf '%s\n' "${RETURNED_VALUE}"
-function main::fuzzyMatchCommandtoFunctionName() {
-  local level loopI functionName command exactCommand
+# - `RETURNED_VALUE`: The function name.
+# - `RETURNED_VALUE2`: The level of the command.
+# - `RETURNED_VALUE3`: The exact command.
+#
+# ```bash
+# main::fuzzyMatchCommandtoFunctionNameOrFail "self" "build" && printf '%s\n' "${RETURNED_VALUE}"
+# ```
+function main::fuzzyMatchCommandtoFunctionNameOrFail() {
   if [[ $# -eq 0 ]]; then
     return 0
   fi
 
   main::getMaxPossibleCommandLevel "$@"
-  level="${RETURNED_VALUE}"
+  local level="${RETURNED_VALUE}"
 
   # we put the arguments into an array so we can interpret 'my' 'sub'
   # and 'my sub' as the same command (we split everything by space)
@@ -1002,6 +1004,7 @@ function main::fuzzyMatchCommandtoFunctionName() {
   # shellcheck disable=SC2206
   commandArrray=($*)
 
+  local loopI functionName command exactCommand
   for ((loopI = level; loopI >= 1; loopI--)); do
     command="${commandArrray[*]:0:${loopI}}"
 
@@ -1014,17 +1017,25 @@ function main::fuzzyMatchCommandtoFunctionName() {
 
     # case where the command is not exact, we try to fuzzy match it
     array::fuzzyFilter "${command}" CMD_ALL_COMMANDS_ARRAY
-    if (( ${#RETURNED_ARRAY[@]} > 1 )); then
-      local IFS=$'\n'
-      log::debug "Ambiguous matching for the command ⌜${command}⌝:"$'\n'"${RETURNED_ARRAY[*]}"
-      unset IFS
+    if (( ${#RETURNED_ARRAY[@]} > 1)); then
+        # case of ambiguous command, show the list of possible commands
+        local IFS=$'\n'
+        # shellcheck disable=SC1091
+        source array
+        array::fuzzyFilterSort "${command}" RETURNED_ARRAY "${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"}" "${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
+        core::fail "Found multiple matches for the command ⌜${command}⌝, please be more specific:"$'\n'"${RETURNED_ARRAY[*]}"
     elif (( ${#RETURNED_ARRAY[@]} == 1 )); then
+      # case of a single match, we can match the function immediately
       exactCommand="${RETURNED_ARRAY[0]}"
       main::getFunctionNameFromCommand "${exactCommand}" && functionName="${RETURNED_VALUE}"
       log::info "Fuzzy matching the command ⌜${command}⌝ to ⌜${exactCommand}⌝."
       break
     fi
   done
+
+  if [[ -z "${functionName:-}" ]]; then
+    core::fail "Could not find a matching command for ⌜${command}⌝, use ⌜--help⌝ to get a list of valid commands."
+  fi
 
   RETURNED_VALUE="${functionName:-}"
   RETURNED_VALUE2="${loopI}"
