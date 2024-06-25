@@ -388,7 +388,7 @@ function main::parseMainArguments() {
     -*)
       # shellcheck disable=SC2048 disable=SC2086
       main::fuzzyFindOption "${1}" ${CMD_OPTS_this[*]}
-      core::fail "Unknown option ⌜${1}⌝${RETURNED_VALUE:-}."
+      core::fail "${RETURNED_VALUE}"
       ;;
     *)
       commands+=("${1}")
@@ -512,6 +512,10 @@ function main::checkSudo() {
 function main::runMenuWithSubCommands() {
   local command="${1}"
   shift
+
+  # export the command name for the menu
+  # shellcheck disable=SC2034
+  CMD_COMMAND__menu="${command}"
 
   local parsedArguments
   main::parseFunctionArguments "_menu" "$@"
@@ -794,7 +798,7 @@ function main::fuzzyMatchCommandtoFunctionNameOrFail() {
       break
     fi
 
-    if [[ ${VALET_CONFIG_STRICT_MATCHING:-false} == "true" ]]; then
+    if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
       continue
     fi
 
@@ -802,10 +806,10 @@ function main::fuzzyMatchCommandtoFunctionNameOrFail() {
     array::fuzzyFilter "${command}" CMD_ALL_COMMANDS_ARRAY
     if (( ${#RETURNED_ARRAY[@]} > 1)); then
         # case of ambiguous command, show the list of possible commands
-        local IFS=$'\n'
         # shellcheck disable=SC1091
         source array
         array::fuzzyFilterSort "${command}" RETURNED_ARRAY "${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"}" "${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
+        local IFS=$'\n'
         core::fail "Found multiple matches for the command ⌜${command}⌝, please be more specific:"$'\n'"${RETURNED_ARRAY[*]}"
     elif (( ${#RETURNED_ARRAY[@]} == 1 )); then
       # case of a single match, we can match the function immediately
@@ -818,7 +822,7 @@ function main::fuzzyMatchCommandtoFunctionNameOrFail() {
 
   if [[ -z "${functionName:-}" ]]; then
     local messageDetails
-    if [[ ${VALET_CONFIG_STRICT_MATCHING:-false} == "true" ]]; then
+    if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
       messageDetails="an exact command"
     else
       messageDetails="a matching command"
@@ -901,6 +905,7 @@ function main::parseFunctionArguments() {
   else
     totalNbOptions=0;
   fi
+  # shellcheck disable=SC2034
   local -n optionsHasValue="CMD_OPTS_HAS_VALUE_${functionName}"
   local -n optionsName="CMD_OPTS_NAME_${functionName}"
   local -n optionsNameSc="CMD_OPTS_NAME_SC_${functionName}"
@@ -919,54 +924,79 @@ function main::parseFunctionArguments() {
 
   local badArguments=false
 
+  # we define reusable pieces of code that will be used to parse the options
+  # shellcheck disable=SC2016
+  local optionFinder='
+  # we are matching an option
+  # try to match the argument with one of the option name
+  if [[ totalNbOptions -gt 0 ]]; then
+    for optionIndex in "${!options[@]}"; do
+      for option in ${options[${optionIndex}]}; do
+        if [[ ${option} == "${1}" ]]; then
+          matchedIndex="${optionIndex}"
+          break 2
+        fi
+      done
+    done
+  fi
+
+  if [[ matchedIndex -ne -1 ]]; then
+    # its a match!
+    optionValue="${optionsHasValue[${matchedIndex}]:-}"
+    optionName="${optionsName[${matchedIndex}]}"
+    matchedOptionsIndex+=("${matchedIndex}")
+  fi
+  '
+
+  # shellcheck disable=SC2016
+  local registerOption='
+  if [[ ${optionValue} == "true" ]]; then
+    shift
+    if [[ $# -eq 0 ]]; then
+      outputErrors+=("Missing value for option ⌜${optionName}⌝.")
+    else
+      outputSetLine+=("${optionName}=\"${1//\"/\\\"}\"")
+    fi
+  else
+    outputSetLine+=("${optionName}=\"true\"")
+  fi
+  '
+
   # parse each arguments
   local -i optionIndex matchedIndex
-  local option startedArguments optionValue optionName argumentName
+  # shellcheck disable=SC2034
+  local optionValue
+  local option startedArguments optionName argumentName
   startedArguments="false"
   while [[ $# -gt 0 ]]; do
 
     if [[ ${1} == "-"* && ${startedArguments} != "true" ]]; then
+      # we are matching an option, try to find the option index
       matchedIndex=-1
-
-      # we are matching an option
-      # try to match the argument with one of the option name
-      if [[ totalNbOptions -gt 0 ]]; then
-        for optionIndex in "${!options[@]}"; do
-          for option in ${options[${optionIndex}]}; do
-            if [[ ${option} == "${1}" ]]; then
-              matchedIndex="${optionIndex}"
-              break 2
-            fi
-          done
-        done
-      fi
+      eval "${optionFinder}"
 
       if [[ matchedIndex -ne -1 ]]; then
-        # it's a match!
-        optionValue="${optionsHasValue[${matchedIndex}]:-}"
-        optionName="${optionsName[${matchedIndex}]}"
-        matchedOptionsIndex+=("${matchedIndex}")
-
-        if [[ ${optionValue} == "true" ]]; then
-          shift
-          if [[ $# -eq 0 ]]; then
-            outputErrors+=("Missing value for option ⌜${optionName}⌝.")
-          else
-            outputSetLine+=("${optionName}=\"${1//\"/\\\"}\"")
-          fi
-        else
-          outputSetLine+=("${optionName}=\"true\"")
-        fi
+        # it's a match! register the option
+        eval "${registerOption}"
 
       elif [[ ${1} == "--" ]]; then
         # if we have -- we stop parsing options
         startedArguments="true"
 
       else
-        # if we didn't match any option, flag it as unknown option and add it to the leftOver
+        # if we didn't match any known option, try to fuzzy find it
         # shellcheck disable=SC2048 disable=SC2086
         main::fuzzyFindOption "${1}" ${options[*]}
-        outputErrors+=("Unknown option ⌜${1}⌝${RETURNED_VALUE:-}.")
+
+        if [[ -n "${RETURNED_VALUE2}" ]]; then
+          # we found a single match!
+          matchedIndex=-1
+          eval "${optionFinder//"\${1}"/"${RETURNED_VALUE2}"}"
+          eval "${registerOption}"
+        else
+          # we found multiple matches or no match
+          outputErrors+=("${RETURNED_VALUE}")
+        fi
       fi
 
     else
@@ -1043,6 +1073,7 @@ function main::parseFunctionArguments() {
       fi
     done
     if [[ ${optionMatched} == "false" ]]; then
+      # shellcheck disable=SC2034
       optionName="${optionsName[${optionIndex}]}"
       optionNameSc="${optionsNameSc[${optionIndex}]:-}"
       optionDefault="${optionsDefault[${optionIndex}]:-}"
@@ -1087,29 +1118,54 @@ function main::parseFunctionArguments() {
   RETURNED_VALUE="${outputString}"
 }
 
-# Tries to help the user by suggesting a fix for an unknown option
-# we receive the function options and the unknown option string
+# Tries to find a match for an inexact option.
+# If the strict matching is enabled, we will only suggest a fix (if we find a match).
+# If strict matching is disabled and we have found a single match, we can return it.
 #
-# $1: the user string to match
-# $2+: options to match against
+# - $1: the user string to match
+# - $2+: options to match against
 #
-# Usage:
-#  main::fuzzyFindOption opt1 option1 option2 option3 && fuzzyOption="${RETURNED_VALUE}"
+# Returns:
+#
+# - `RETURNED_VALUE`: An error message with the suggested option(s).
+# - `RETURNED_VALUE2`: The single matched option that we can use.
+#
+# ```bash
+# main::fuzzyFindOption opt1 option1 option2 option3 && fuzzyOption="${RETURNED_VALUE}"
+# ```
 function main::fuzzyFindOption() {
   local unknownOption suggestedOption
   unknownOption="${1}"
   shift
   _OPTIONS_TO_MATCH=("$@")
 
+  local singleMatchedOption
+  local IFS=$'\n'
+
   # split to get one possible option per line
   array::fuzzyFilter "${unknownOption}" _OPTIONS_TO_MATCH
   if (( ${#RETURNED_ARRAY[@]} == 1 )); then
-    suggestedOption=" (did you mean ⌜${RETURNED_ARRAY[0]}⌝?)"
+    if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
+      suggestedOption="Unknown option ⌜${unknownOption}⌝, did you mean ⌜${RETURNED_ARRAY[0]}⌝?"
+    else
+      log::info "Fuzzy matching the option ⌜${unknownOption}⌝ to ⌜${RETURNED_ARRAY[0]}⌝."
+      singleMatchedOption="${RETURNED_ARRAY[0]}"
+    fi
   elif (( ${#RETURNED_ARRAY[@]} > 1 )); then
-    suggestedOption=" (did you mean one of ⌜${RETURNED_ARRAY[*]}⌝?)"
+    # shellcheck disable=SC1091
+    source array
+    array::fuzzyFilterSort "${unknownOption}" _OPTIONS_TO_MATCH "${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"}" "${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
+    if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
+      suggestedOption="Unknown option ⌜${unknownOption}⌝, valid matches are:"$'\n'"${RETURNED_ARRAY[*]}"
+    else
+      suggestedOption="Found multiple matches for the option ⌜${unknownOption}⌝, please be more specific:"$'\n'"${RETURNED_ARRAY[*]}"
+    fi
+  else
+    suggestedOption="Unknown option ⌜${unknownOption}⌝, valid options are:"$'\n'"${_OPTIONS_TO_MATCH[*]}"
   fi
 
   RETURNED_VALUE="${suggestedOption:-}"
+  RETURNED_VALUE2="${singleMatchedOption:-}"
 }
 
 # Parse the arguments and options of a function.

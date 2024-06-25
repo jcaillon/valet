@@ -160,6 +160,13 @@ options:
 - name: -2, --this-is-option2 <level>
   description: |-
     An option with a value.
+- name: -3, --flag3
+  description: |-
+    Third option.
+- name: -4, --with-default <val>
+  description: |-
+    An option with a default value.
+  default: cool
 examples:
 - name: self mock2 -o -2 value1 arg1 more1 more2
   description: |-

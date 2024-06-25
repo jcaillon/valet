@@ -106,10 +106,12 @@ Exit code: `0`
 
 ```plaintext
 → main::parseFunctionArguments selfMock2
-local parsingErrors option1 thisIsOption2 help firstArg
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+flag3="${VALET_FLAG3:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝.
 Use ⌜valet self mock2 --help⌝ to get help.
@@ -120,8 +122,10 @@ more=(
 )
 
 → main::parseFunctionArguments selfMock2 -o -2 optionValue2 arg1 more1 more2
-local parsingErrors option1 thisIsOption2 help firstArg
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
+flag3="${VALET_FLAG3:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 parsingErrors=""
 option1="true"
@@ -133,8 +137,10 @@ more=(
 )
 
 → main::parseFunctionArguments selfMock2 -o -2 optionValue2 arg1
-local parsingErrors option1 thisIsOption2 help firstArg
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
+flag3="${VALET_FLAG3:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
 Use ⌜valet self mock2 --help⌝ to get help.
@@ -148,23 +154,39 @@ more=(
 )
 
 → main::parseFunctionArguments selfMock2 -unknown -what optionValue2 arg
-local parsingErrors option1 thisIsOption2 help firstArg
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+flag3="${VALET_FLAG3:-}"
 help=""
-parsingErrors="Unknown option ⌜-unknown⌝.
-Unknown option ⌜-what⌝.
-Use ⌜valet self mock2 --help⌝ to get help."
-firstArg="optionValue2"
+parsingErrors="Unknown option ⌜-unknown⌝, valid options are:
+-o
+--option1
+-2
+--this-is-option2
+-3
+--flag3
+-4
+--with-default
+-h
+--help
+Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
+Use ⌜valet self mock2 --help⌝ to get help.
+
+Usage:
+valet [global options] self mock2 [options] [--] <firstArg> <more...>"
+withDefault="optionValue2"
+firstArg="arg"
 more=(
-"arg"
 )
 
 → main::parseFunctionArguments selfMock2 arg more1 more2 -o
-local parsingErrors option1 thisIsOption2 help firstArg
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+flag3="${VALET_FLAG3:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 parsingErrors=""
 firstArg="arg"
@@ -175,22 +197,28 @@ more=(
 )
 
 → main::parseFunctionArguments selfMock2 -this arg more1
-local parsingErrors option1 thisIsOption2 help firstArg
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
-thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+flag3="${VALET_FLAG3:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors="Unknown option ⌜-this⌝ (did you mean ⌜--this-is-option2⌝?).
-Use ⌜valet self mock2 --help⌝ to get help."
-firstArg="arg"
+parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
+Use ⌜valet self mock2 --help⌝ to get help.
+
+Usage:
+valet [global options] self mock2 [options] [--] <firstArg> <more...>"
+thisIsOption2="arg"
+firstArg="more1"
 more=(
-"more1"
 )
 
 → main::parseFunctionArguments selfMock2 --this-is-option2 --option1 arg more1
-local parsingErrors option1 thisIsOption2 help firstArg
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
+flag3="${VALET_FLAG3:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 parsingErrors=""
 thisIsOption2="--option1"
@@ -208,16 +236,44 @@ secondArg="arg2"
 
 
 → main::parseFunctionArguments selfMock2 -- --arg1-- --arg2--
-local parsingErrors option1 thisIsOption2 help firstArg
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+flag3="${VALET_FLAG3:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 parsingErrors=""
 firstArg="--arg1--"
 more=(
 "--arg2--"
 )
+
+
+→ main::parseFunctionArguments selfMock2 arg1 arg2 --th
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+local -a more
+option1=""
+thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+flag3="${VALET_FLAG3:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
+help=""
+parsingErrors="Found multiple matches for the option ⌜--th⌝, please be more specific:
+CHI-CDECHI-CDECHItCDECHIhCDEis-is-option2
+CHI-CDECHI-CDEwiCHItCDECHIhCDE-default
+Use ⌜valet self mock2 --help⌝ to get help."
+firstArg="arg1"
+more=(
+"arg2"
+)
+
+```
+
+**Error** output:
+
+```log
+INFO     Fuzzy matching the option ⌜-what⌝ to ⌜--with-default⌝.
+INFO     Fuzzy matching the option ⌜-this⌝ to ⌜--this-is-option2⌝.
 ```
 
 ## Test script 99.tests
@@ -298,13 +354,37 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ main::fuzzyFindOption '--opt1 --derp2 --allo3' 'de'
- (did you mean ⌜--derp2⌝?)
+→ VALET_CONFIG_STRICT_MATCHING=true main::fuzzyFindOption de --opt1 --derp2 --allo3
+Unknown option ⌜de⌝, did you mean ⌜--derp2⌝?
 
-→ main::fuzzyFindOption '--opt1 --derp2 --allo3' '-a'
- (did you mean ⌜--allo3⌝?)
 
-→ main::fuzzyFindOption '--opt1 --derp2 --allo3' 'thing'
+→ main::fuzzyFindOption de --opt1 --derp2 --allo3
 
+--derp2
+
+→ VALET_CONFIG_STRICT_MATCHING=true main::fuzzyFindOption -a --opt1 --derp2 --allo3
+Unknown option ⌜-p⌝, valid matches are:
+CHI-CDE-oCHIpCDEt1
+CHI-CDE-derCHIpCDE2
+
+
+→ main::fuzzyFindOption -a --opt1 --derp2 --allo3
+Found multiple matches for the option ⌜-p⌝, please be more specific:
+CHI-CDE-oCHIpCDEt1
+CHI-CDE-derCHIpCDE2
+
+
+→ main::fuzzyFindOption thing --opt1 --derp2 --allo3
+Unknown option ⌜thing⌝, valid options are:
+--opt1
+--derp2
+--allo3
+
+```
+
+**Error** output:
+
+```log
+INFO     Fuzzy matching the option ⌜de⌝ to ⌜--derp2⌝.
 ```
 

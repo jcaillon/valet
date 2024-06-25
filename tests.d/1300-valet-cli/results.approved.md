@@ -58,6 +58,12 @@ OPTIONS
   -2, --this-is-option2 <level>
       An option with a value.
       This option can be set by exporting the variable VALET_THIS_IS_OPTION2='<level>'.
+  -3, --flag3
+      Third option.
+      This option can be set by exporting the variable VALET_FLAG3='true'.
+  -4, --with-default <val>
+      An option with a default value.
+      This option can be set by exporting the variable VALET_WITH_DEFAULT='<val>'.
   -h, --help
       Display the help for this command.
 
@@ -255,8 +261,14 @@ Failed as expected.
 **Error** output:
 
 ```log
-ERROR    Unknown option ⌜--unknown⌝.
-Unknown option ⌜-colo⌝ (did you mean ⌜--no-colors⌝?).
+INFO     Fuzzy matching the option ⌜-colo⌝ to ⌜--no-colors⌝.
+ERROR    Unknown option ⌜--unknown⌝, valid options are:
+-n
+--no-colors
+-c
+--columns
+-h
+--help
 Use ⌜valet help --help⌝ to get help.
 ```
 
@@ -340,7 +352,9 @@ Failed as expected.
 
 ```log
 ERROR    Expecting 1 argument(s), got extra argument ⌜nonNeededArg1⌝.
-Unknown option ⌜-derp⌝.
+Unknown option ⌜-derp⌝, valid options are:
+-h
+--help
 Expecting 1 argument(s), got extra argument ⌜anotherArg⌝.
 Use ⌜valet self mock1 --help⌝ to get help.
 
@@ -947,7 +961,8 @@ Failed as expected.
 **Error** output:
 
 ```log
-ERROR    Unknown option ⌜-prof⌝ (did you mean ⌜--profiling⌝?).
+INFO     Fuzzy matching the option ⌜-prof⌝ to ⌜--profiling⌝.
+ERROR    
 ```
 
 ### Testing temp files/directories creation, cleaning and custom cleanUp
@@ -1111,11 +1126,9 @@ Failed as expected.
 **Error** output:
 
 ```log
-$GLOBAL_VALET_HOME/valet.d/main: line 1009: command: unbound variable
-EXIT     Exiting with code 1, stack:
-├─ in main::parseFunctionArguments() at $GLOBAL_VALET_HOME/valet.d/main:1
-├─ in main::runMenuWithSubCommands() at $GLOBAL_VALET_HOME/valet.d/main:517
-├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:425
-└─ in main() at $GLOBAL_VALET_HOME/valet:104
+ERROR    Unknown option ⌜--unknown⌝, valid options are:
+-h
+--help
+Use ⌜valet self --help⌝ to get help.
 ```
 

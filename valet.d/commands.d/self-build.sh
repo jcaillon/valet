@@ -89,9 +89,9 @@ function selfBuild() {
         # shellcheck disable=SC2086
         main::fuzzyFindOption "${1}" ${CMD_OPTS_selfBuild[*]}
       else
-        RETURNED_VALUE=""
+        RETURNED_VALUE="Unknown option ⌜${1}⌝"
       fi
-      core::fail "Unknown option ⌜${1}⌝${RETURNED_VALUE:-}." ;;
+      core::fail "${RETURNED_VALUE}" ;;
     *) core::fail "This command takes no arguments." ;;
     esac
     shift
