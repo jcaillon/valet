@@ -8,9 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- Add a default value for options.
 - We can have fuzzy matching on options too; just make sure it is not ambiguous.
-- Show the arguments required when a command parsing fails.
 - Allow to regroup single letter options (e.g. -fsSL).
 - Add full support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.

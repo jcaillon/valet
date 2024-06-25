@@ -257,7 +257,7 @@ Failed as expected.
 ```log
 ERROR    Unknown option ⌜--unknown⌝.
 Unknown option ⌜-colo⌝ (did you mean ⌜--no-colors⌝?).
-Use valet help --help to get help.
+Use ⌜valet help --help⌝ to get help.
 ```
 
 ### Testing that no arguments show the valet help
@@ -342,7 +342,10 @@ Failed as expected.
 ERROR    Expecting 1 argument(s), got extra argument ⌜nonNeededArg1⌝.
 Unknown option ⌜-derp⌝.
 Expecting 1 argument(s), got extra argument ⌜anotherArg⌝.
-Use valet self mock1 --help to get help.
+Use ⌜valet self mock1 --help⌝ to get help.
+
+Usage:
+valet [global options] self mock1 [options] [--] <action>
 ```
 
 ### Testing that a command with sudo ask for sudo privileges
@@ -1108,7 +1111,11 @@ Failed as expected.
 **Error** output:
 
 ```log
-ERROR    Unknown option ⌜--unknown⌝.
-Use valet self --help to get help.
+$GLOBAL_VALET_HOME/valet.d/main: line 1009: command: unbound variable
+EXIT     Exiting with code 1, stack:
+├─ in main::parseFunctionArguments() at $GLOBAL_VALET_HOME/valet.d/main:1
+├─ in main::runMenuWithSubCommands() at $GLOBAL_VALET_HOME/valet.d/main:517
+├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:425
+└─ in main() at $GLOBAL_VALET_HOME/valet:104
 ```
 

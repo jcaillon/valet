@@ -130,13 +130,14 @@ fi
 
 # Prints the help text of a function or a command.
 #
-# $1: the type help to print (function or menu).
-# $2: the name of the function or the command in the case of a menu.
-# $3: (optional) whether to use colors or not (true to not use color).
-# $4: (optional) the maximum columns for the help text.
+# - $1: the type help to print (function or menu).
+# - $2: the name of the function or the command in the case of a menu.
+# - $3: (optional) whether to use colors or not (true to not use color).
+# - $4: (optional) the maximum columns for the help text.
 #
-# Usage:
-#   main::printHelp function "this" "false" "${GLOBAL_COLUMNS}"
+# ```bash
+# main::printHelp function "this" "false" "${GLOBAL_COLUMNS}"
+# ```
 function main::printHelp() {
   main::getHelpText "$@"
   printf '%s' "${RETURNED_VALUE}"
@@ -527,7 +528,7 @@ function main::runMenuWithSubCommands() {
   fi
 
   if [[ -n "${parsingErrors:-}" ]]; then
-    core::fail "${parsingErrors}"$'\n'"Use valet ${command} --help to get help."
+    core::fail "${parsingErrors}"
   fi
 
   # filter the commands to only keep the sub commands of the function
@@ -912,9 +913,11 @@ function main::parseFunctionArguments() {
   fi
 
   local -a lastArgumentValues=()
-  local -a outputErrors
+  local -a outputErrors=()
   local -a outputSetLine
   local -a matchedOptionsIndex
+
+  local badArguments=false
 
   # parse each arguments
   local -i optionIndex matchedIndex
@@ -971,6 +974,7 @@ function main::parseFunctionArguments() {
 
       if [[ argumentPosition -ge totalNbArguments ]]; then
         outputErrors+=("Expecting ${totalNbArguments} argument(s), got extra argument ⌜${1}⌝.")
+        badArguments=true
       else
         argumentName="${argumentsName[${argumentPosition}]}"
 
@@ -997,7 +1001,18 @@ function main::parseFunctionArguments() {
   local -i nbExpectedArgs=$((totalNbArguments - nbOptionalArgs))
   if [[ argumentPosition -lt nbExpectedArgs ]]; then
     outputErrors+=("Expecting ⌜${nbExpectedArgs}⌝ argument(s) but got ⌜${argumentPosition}⌝.")
+    badArguments=true
   fi
+
+  if (( ${#outputErrors[@]} > 0 )); then
+    local -n command="CMD_COMMAND_${functionName}"
+    outputErrors+=("Use ⌜valet ${command} --help⌝ to get help.")
+    if [[ ${badArguments} == "true" ]]; then
+      main::getHelpText function "${functionName}" "true"
+      outputErrors+=($'\n'"Usage:"$'\n'"${RETURNED_VALUE2}")
+    fi
+  fi
+
 
   local outputString
 

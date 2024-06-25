@@ -111,7 +111,11 @@ local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 help=""
-parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝."
+parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝.
+Use ⌜valet self mock2 --help⌝ to get help.
+
+Usage:
+valet [global options] self mock2 [options] [--] <firstArg> <more...>"
 more=(
 )
 
@@ -132,7 +136,11 @@ more=(
 local parsingErrors option1 thisIsOption2 help firstArg
 local -a more
 help=""
-parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝."
+parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
+Use ⌜valet self mock2 --help⌝ to get help.
+
+Usage:
+valet [global options] self mock2 [options] [--] <firstArg> <more...>"
 option1="true"
 thisIsOption2="optionValue2"
 firstArg="arg1"
@@ -146,7 +154,8 @@ option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 help=""
 parsingErrors="Unknown option ⌜-unknown⌝.
-Unknown option ⌜-what⌝."
+Unknown option ⌜-what⌝.
+Use ⌜valet self mock2 --help⌝ to get help."
 firstArg="optionValue2"
 more=(
 "arg"
@@ -171,7 +180,8 @@ local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 help=""
-parsingErrors="Unknown option ⌜-this⌝ (did you mean ⌜--this-is-option2⌝?)."
+parsingErrors="Unknown option ⌜-this⌝ (did you mean ⌜--this-is-option2⌝?).
+Use ⌜valet self mock2 --help⌝ to get help."
 firstArg="arg"
 more=(
 "more1"

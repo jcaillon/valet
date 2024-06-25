@@ -1429,7 +1429,7 @@ function core::checkParseResults() {
 
   if [[ -n "${parsingErrors:-}" ]]; then
     local -n commandName="CMD_COMMAND_${functionName}"
-    core::fail "${parsingErrors}"$'\n'"Use valet ${commandName} --help to get help."
+    core::fail "${parsingErrors}"
   fi
 }
 
