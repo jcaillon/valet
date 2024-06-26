@@ -16,6 +16,8 @@ set ERROR_CODE=0
 if not "%VALET_BIN_BASH%"=="" goto GotBinBash
 set "VALET_BIN_BASH=C:\Program Files\Git\bin\bash.exe"
 if exist "%VALET_BIN_BASH%" goto GotBinBash
+set "VALET_BIN_BASH=%LOCALAPPDATA%\Programs\Git\bin\bash.exe"
+if exist "%VALET_BIN_BASH%" goto GotBinBash
 for %%i in (bash.exe) do set "VALET_BIN_BASH=%%~$PATH:i"
 if exist "%VALET_BIN_BASH%" goto chkMHome
 echo The VALET_BIN_BASH environment variable is not defined correctly, >&2
@@ -42,9 +44,9 @@ set VALET_HOME=%VALET_HOME:\=/%
 set VALET_HOME=%VALET_HOME::=%
 
 @REM trim the trailing slash
-if "%VALET_HOME:~-1%"=="\" set VALET_HOME=%VALET_HOME:~0,-1%
+if "%VALET_HOME:~-1%"=="/" set VALET_HOME=%VALET_HOME:~0,-1%
 
-bash.exe -c "/%VALET_HOME%/valet %*"
+"%VALET_BIN_BASH%" -c "/%VALET_HOME%/valet %*"
 
 if ERRORLEVEL 1 goto error
 goto end

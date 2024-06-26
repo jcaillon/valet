@@ -45,22 +45,26 @@ D  I  S  timer  delta                           source:line function            
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:185  selfMock2()                              → firstArg=arg1
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:188  selfMock2()                              → more=("arg2")
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:178  selfMock2()                              → core::checkParseResults '' ''
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:180  selfMock2()                              → log::info 'First argument: arg1.'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:181  selfMock2()                              → log::info 'Option 1: .'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:182  selfMock2()                              → log::info 'Option 2: .'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:183  selfMock2()                              → log::info 'More: arg2.'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:185  selfMock2()                              → aSubFunctionInselfMock2
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:192  aSubFunctionInselfMock2()                → log::debug 'This is a sub function.'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:187  selfMock2()                              → printf '%s\n' 'That'\''s it!'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:180  selfMock2()                              → log::info 'Option 1 (option1): .'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:181  selfMock2()                              → log::info 'Option 2 (thisIsOption2): .'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:182  selfMock2()                              → log::info 'Option 3 (flag3): .'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:183  selfMock2()                              → log::info 'Option 4 (withDefault): cool.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:184  selfMock2()                              → log::info 'First argument: arg1.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:185  selfMock2()                              → log::info 'More: arg2.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:187  selfMock2()                              → aSubFunctionInselfMock2
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:194  aSubFunctionInselfMock2()                → log::debug 'This is a sub function.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:189  selfMock2()                              → printf '%s\n' 'That'\''s it!'
 ```
 
 **Error** output:
 
 ```log
 INFO     Starting profiler, writing in ⌜/tmp/valet.d/f1-0⌝. main
+INFO     Option 1 (option1): .
+INFO     Option 2 (thisIsOption2): .
+INFO     Option 3 (flag3): .
+INFO     Option 4 (withDefault): cool.
 INFO     First argument: arg1.
-INFO     Option 1: .
-INFO     Option 2: .
 INFO     More: arg2.
 INFO     Disabling profiler.
 ```
@@ -105,22 +109,26 @@ D  I  S  timer    delta                             source:line function        
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:185  selfMock2()                              → firstArg=arg1
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:188  selfMock2()                              → more=("arg2")
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:178  selfMock2()                              → core::checkParseResults '' ''
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:180  selfMock2()                              → log::info 'First argument: arg1.'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:181  selfMock2()                              → log::info 'Option 1: .'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:182  selfMock2()                              → log::info 'Option 2: .'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:183  selfMock2()                              → log::info 'More: arg2.'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:185  selfMock2()                              → aSubFunctionInselfMock2
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:192  aSubFunctionInselfMock2()                → log::debug 'This is a sub function.'
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:187  selfMock2()                              → printf '%s\n' 'That'\''s it!'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:180  selfMock2()                              → log::info 'Option 1 (option1): .'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:181  selfMock2()                              → log::info 'Option 2 (thisIsOption2): .'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:182  selfMock2()                              → log::info 'Option 3 (flag3): .'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:183  selfMock2()                              → log::info 'Option 4 (withDefault): cool.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:184  selfMock2()                              → log::info 'First argument: arg1.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:185  selfMock2()                              → log::info 'More: arg2.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:187  selfMock2()                              → aSubFunctionInselfMock2
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:194  aSubFunctionInselfMock2()                → log::debug 'This is a sub function.'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:189  selfMock2()                              → printf '%s\n' 'That'\''s it!'
 ```
 
 **Error** output:
 
 ```log
 INFO     Starting profiler, writing in ⌜/tmp/valet.d/f1-0⌝. main
+INFO     Option 1 (option1): .
+INFO     Option 2 (thisIsOption2): .
+INFO     Option 3 (flag3): .
+INFO     Option 4 (withDefault): cool.
 INFO     First argument: arg1.
-INFO     Option 1: .
-INFO     Option 2: .
 INFO     More: arg2.
 INFO     Disabling profiler.
 ```

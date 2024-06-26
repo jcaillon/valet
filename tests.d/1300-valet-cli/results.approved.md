@@ -261,14 +261,11 @@ Failed as expected.
 **Error** output:
 
 ```log
-INFO     Fuzzy matching the option ⌜-colo⌝ to ⌜--no-colors⌝.
+INFO     Fuzzy matching the option ⌜--colo⌝ to ⌜--no-colors⌝.
 ERROR    Unknown option ⌜--unknown⌝, valid options are:
--n
---no-colors
--c
---columns
--h
---help
+-n --no-colors
+-c --columns
+-h --help
 Use ⌜valet help --help⌝ to get help.
 ```
 
@@ -352,9 +349,10 @@ Failed as expected.
 
 ```log
 ERROR    Expecting 1 argument(s), got extra argument ⌜nonNeededArg1⌝.
-Unknown option ⌜-derp⌝, valid options are:
--h
---help
+Unknown option letter ⌜d⌝ in group ⌜-derp⌝. Valid single letter options are: ⌜h⌝.
+Unknown option letter ⌜e⌝ in group ⌜-derp⌝. Valid single letter options are: ⌜h⌝.
+Unknown option letter ⌜r⌝ in group ⌜-derp⌝. Valid single letter options are: ⌜h⌝.
+Unknown option letter ⌜p⌝ in group ⌜-derp⌝. Valid single letter options are: ⌜h⌝.
 Expecting 1 argument(s), got extra argument ⌜anotherArg⌝.
 Use ⌜valet self mock1 --help⌝ to get help.
 
@@ -947,7 +945,7 @@ Exit code: `0`
 OK, we got a version.
 ```
 
-### Testing unknown option, corrected with fuzzy match
+### Testing unknown single letter
 
 Exit code: `1`
 
@@ -961,8 +959,46 @@ Failed as expected.
 **Error** output:
 
 ```log
-INFO     Fuzzy matching the option ⌜-prof⌝ to ⌜--profiling⌝.
-ERROR    
+ERROR    Unknown option letter ⌜p⌝ in group ⌜-p⌝. Valid single letter options are: ⌜x⌝, ⌜l⌝, ⌜v⌝, ⌜w⌝, ⌜i⌝, ⌜h⌝.
+```
+
+### Testing option corrected with fuzzy match
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ valet --versin
+```
+
+**Error** output:
+
+```log
+INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
+```
+
+### Testing option corrected with fuzzy match
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ valet -vwvw --versin
+```
+
+**Error** output:
+
+```log
+DEBUG    Log level set to debug.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
+DEBUG    Log level set to trace.
+DEBUG    Log level set to debug.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
+DEBUG    Log level set to trace.
+INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
+DEBUG    Exiting with code 0 after Xs.
 ```
 
 ### Testing temp files/directories creation, cleaning and custom cleanUp
@@ -1127,8 +1163,7 @@ Failed as expected.
 
 ```log
 ERROR    Unknown option ⌜--unknown⌝, valid options are:
--h
---help
+-h --help
 Use ⌜valet self --help⌝ to get help.
 ```
 

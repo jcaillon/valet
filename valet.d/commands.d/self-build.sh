@@ -87,7 +87,7 @@ function selfBuild() {
       if [[ -v CMD_OPTS_selfBuild ]]; then
         # shellcheck disable=SC2048
         # shellcheck disable=SC2086
-        main::fuzzyFindOption "${1}" ${CMD_OPTS_selfBuild[*]}
+        main::fuzzyFindOption "${1}" "${CMD_OPTS_selfBuild[@]}"
       else
         RETURNED_VALUE="Unknown option ⌜${1}⌝"
       fi

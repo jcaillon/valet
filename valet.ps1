@@ -20,6 +20,11 @@ function Main {
     $bashPath = "C:\Program Files\Git\bin\bash.exe"
   }
 
+  # check if the path exists, otherwise try a hard coded value
+  if (-Not (Test-Path $bashPath)) {
+    $bashPath = "$env:LOCALAPPDATA\Programs\Git\bin\bash.exe"
+  }
+
   # check if the path exists, otherwise try to find bash.exe in the path
   if (-Not (Test-Path $bashPath)) {
     $bashPath = Get-Command bash.exe | Select-Object -ExpandProperty Source
@@ -55,9 +60,6 @@ function Main {
 
   # convert arguments to a string where each argument is separated by a space
   [string] $quotedArgs = $args | ForEach-Object { $_ + " " }
-
-  # echo the command that will be run
-  Write-Host "$bashPath -c $valetHome/valet $quotedArgs"
 
   # run bash with the valet script, throw an error if the exit code is not 0
   & $bashPath -c "$valetHome/valet $quotedArgs"

@@ -105,6 +105,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
+# missing argument
 → main::parseFunctionArguments selfMock2
 local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
@@ -121,6 +122,7 @@ valet [global options] self mock2 [options] [--] <firstArg> <more...>"
 more=(
 )
 
+# ok
 → main::parseFunctionArguments selfMock2 -o -2 optionValue2 arg1 more1 more2
 local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
@@ -136,6 +138,7 @@ more=(
 "more2"
 )
 
+# missing argument
 → main::parseFunctionArguments selfMock2 -o -2 optionValue2 arg1
 local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
@@ -153,24 +156,20 @@ firstArg="arg1"
 more=(
 )
 
-→ main::parseFunctionArguments selfMock2 -unknown -what optionValue2 arg
+# unknown options
+→ main::parseFunctionArguments selfMock2 --unknown --what optionValue2 arg
 local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 flag3="${VALET_FLAG3:-}"
 help=""
-parsingErrors="Unknown option ⌜-unknown⌝, valid options are:
--o
---option1
--2
---this-is-option2
--3
---flag3
--4
---with-default
--h
---help
+parsingErrors="Unknown option ⌜--unknown⌝, valid options are:
+-o --option1
+-2 --this-is-option2
+-3 --flag3
+-4 --with-default
+-h --help
 Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
 Use ⌜valet self mock2 --help⌝ to get help.
 
@@ -181,6 +180,7 @@ firstArg="arg"
 more=(
 )
 
+# ok with the option at the end
 → main::parseFunctionArguments selfMock2 arg more1 more2 -o
 local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
@@ -196,7 +196,8 @@ more=(
 "more2"
 )
 
-→ main::parseFunctionArguments selfMock2 -this arg more1
+# fuzzy match the option --this
+→ main::parseFunctionArguments selfMock2 --this arg more1
 local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
@@ -213,6 +214,7 @@ firstArg="more1"
 more=(
 )
 
+# ok, --option1 is interpreted as the value for --this-is-option2
 → main::parseFunctionArguments selfMock2 --this-is-option2 --option1 arg more1
 local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
@@ -227,6 +229,7 @@ more=(
 "more1"
 )
 
+# ok only args
 → main::parseFunctionArguments selfMock4 arg1 arg2
 local parsingErrors help firstArg secondArg
 help=""
@@ -235,6 +238,7 @@ firstArg="arg1"
 secondArg="arg2"
 
 
+# ok with -- to separate options from args
 → main::parseFunctionArguments selfMock2 -- --arg1-- --arg2--
 local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
@@ -249,7 +253,22 @@ more=(
 "--arg2--"
 )
 
+# missing a value for the option 2
+→ main::parseFunctionArguments selfMock2 arg1 arg2 --this-is-option2
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+local -a more
+option1=""
+flag3="${VALET_FLAG3:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
+help=""
+parsingErrors="Missing value for option ⌜thisIsOption2⌝.
+Use ⌜valet self mock2 --help⌝ to get help."
+firstArg="arg1"
+more=(
+"arg2"
+)
 
+# ambiguous fuzzy match
 → main::parseFunctionArguments selfMock2 arg1 arg2 --th
 local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
@@ -267,13 +286,94 @@ more=(
 "arg2"
 )
 
+# ok single letter options grouped together
+→ main::parseFunctionArguments selfMock2 -o3 allo1 allo2 allo3 allo4
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+local -a more
+thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
+help=""
+parsingErrors=""
+option1="true"
+flag3="true"
+firstArg="allo1"
+more=(
+"allo2"
+"allo3"
+"allo4"
+)
+
+# ok single letter options, consume argument as option values
+→ main::parseFunctionArguments selfMock2 -o243 allo1 allo2 allo3 allo4
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+local -a more
+help=""
+parsingErrors=""
+option1="true"
+thisIsOption2="allo1"
+withDefault="allo2"
+flag3="true"
+firstArg="allo3"
+more=(
+"allo4"
+)
+
+# ko, single letter options, invalid one
+→ main::parseFunctionArguments selfMock2 -3ao allo1 allo2
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+local -a more
+thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+withDefault="${VALET_WITH_DEFAULT:-"cool"}"
+help=""
+parsingErrors="Unknown option letter ⌜a⌝ in group ⌜-3ao⌝. Valid single letter options are: ⌜o⌝, ⌜2⌝, ⌜3⌝, ⌜4⌝, ⌜h⌝.
+Use ⌜valet self mock2 --help⌝ to get help."
+flag3="true"
+option1="true"
+firstArg="allo1"
+more=(
+"allo2"
+)
+
+# ko, missing a value for the option 4
+→ main::parseFunctionArguments selfMock2 arg1 arg2 -4
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+local -a more
+option1=""
+thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+flag3="${VALET_FLAG3:-}"
+help=""
+parsingErrors="Missing value for option ⌜withDefault⌝.
+Use ⌜valet self mock2 --help⌝ to get help."
+firstArg="arg1"
+more=(
+"arg2"
+)
+
+# ko, missing multiple values in a group
+→ main::parseFunctionArguments selfMock2 arg1 arg2 -4444
+local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+local -a more
+option1=""
+thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+flag3="${VALET_FLAG3:-}"
+help=""
+parsingErrors="Missing value for option ⌜withDefault⌝.
+Missing value for option ⌜withDefault⌝.
+Missing value for option ⌜withDefault⌝.
+Missing value for option ⌜withDefault⌝.
+Use ⌜valet self mock2 --help⌝ to get help."
+firstArg="arg1"
+more=(
+"arg2"
+)
+
 ```
 
 **Error** output:
 
 ```log
-INFO     Fuzzy matching the option ⌜-what⌝ to ⌜--with-default⌝.
-INFO     Fuzzy matching the option ⌜-this⌝ to ⌜--this-is-option2⌝.
+INFO     Fuzzy matching the option ⌜--what⌝ to ⌜--with-default⌝.
+INFO     Fuzzy matching the option ⌜--this⌝ to ⌜--this-is-option2⌝.
 ```
 
 ## Test script 99.tests
@@ -386,5 +486,16 @@ Unknown option ⌜thing⌝, valid options are:
 
 ```log
 INFO     Fuzzy matching the option ⌜de⌝ to ⌜--derp2⌝.
+```
+
+### Testing main::getSingleLetterOptions
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ main::getSingleLetterOptions -a --opt1 --derp2 -b --allo3 -c
+Valid single letter options are: ⌜a⌝, ⌜b⌝, ⌜c⌝.
 ```
 

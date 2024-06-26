@@ -8,6 +8,11 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- document somewhere about grouping option letters
+- fix option parsing for self build
+- Improve the self install script / check for updates by comparing the version number / suggest the user to git pull the repositories existing under .valet.d. Also add snippets and all functions...
+  - rebuild
+  - add path to valet on windows as well
 - Add full support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - Generate an autocompletion script for bash and zsh.
@@ -24,9 +29,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - A command can declare dependencies to auto check if some tools are installed before running the command.
 - Add test:: and also add a snippet to create a new function.
 - add valet in brew
-- Improve the self install script / check for updates by comparing the version number / suggest the user to git pull the repositories existing under .valet.d. Also add snippets and all functions...
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.
-- Allow to regroup single letter options (e.g. -fsSL).
 
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

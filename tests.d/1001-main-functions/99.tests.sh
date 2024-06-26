@@ -80,11 +80,19 @@ function testFuzzyFindOption() {
   test::endTest "Testing main::fuzzyFindOption" 0
 }
 
+function testMainGetSingleLetterOptions() {
+  echo "→ main::getSingleLetterOptions -a --opt1 --derp2 -b --allo3 -c"
+  main::getSingleLetterOptions -a --opt1 --derp2 -b --allo3 -c && echo "${RETURNED_VALUE}"
+
+  test::endTest "Testing main::getSingleLetterOptions" 0
+}
+
 function main() {
   testGetFunctionNameFromCommand
   testFuzzyMatchCommandtoFunctionName
   testGetMaxPossibleCommandLevel
   testFuzzyFindOption
+  testMainGetSingleLetterOptions
 }
 
 main

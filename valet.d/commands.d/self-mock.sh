@@ -177,9 +177,11 @@ function selfMock2() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
+  log::info "Option 1 (option1): ${option1:-}."
+  log::info "Option 2 (thisIsOption2): ${thisIsOption2:-}."
+  log::info "Option 3 (flag3): ${flag3:-}."
+  log::info "Option 4 (withDefault): ${withDefault:-}."
   log::info "First argument: ${firstArg:-}."
-  log::info "Option 1: ${option1:-}."
-  log::info "Option 2: ${thisIsOption2:-}."
   log::info "More: ${more[*]}."
 
   aSubFunctionInselfMock2

@@ -345,75 +345,34 @@ function mainWriteAsTable() {
 
 # parse the user arguments for the main program.
 function main::parseMainArguments() {
-  local -a commands=()
-  local -a subCommandArgs=()
-
-  local maxNbCommands
-  maxNbCommands=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
-
-  # Parsing the options from environment variables
-  if [[ ${VALET_PROFILING:-} == "true" ]]; then
-    PROFIL_COMMAND=true
-  fi
+  _PARSED_COMMANDS=()
+  _PARSED_COMMAND_ARGS=()
 
   # for the main command, we parse the arguments manually
   # this is for performance reasons, we want to stop parsing as soon as possible
-  while [[ $# -gt 0 ]]; do
-    if [[ ${#commands[@]} -gt 0 && "${1}" == "-"* ]]; then
+  while (( $# > 0 )); do
+    if [[ ${#_PARSED_COMMANDS[@]} -gt 0 && "${1}" == "-"* ]]; then
       # we matched the commands and we found an option for the sub command
       break
     fi
-    case "${1}" in
-    -x | --profiling)
-      PROFIL_COMMAND=true
-      ;;
-    -l | --log | --log-level)
-      shift
-      log::setLevel "${1}"
-      ;;
-    -v | --verbose)
-      log::setLevel debug
-      ;;
-    -w | --very-verbose)
-      log::setLevel trace
-      ;;
-    --version)
-      cat "${GLOBAL_VALET_HOME}/valet.d/version"
-      exit 0
-      ;;
-    -h | --help)
-      main::printHelp function "this"
-      exit 0
-      ;;
-    -*)
-      # shellcheck disable=SC2048 disable=SC2086
-      main::fuzzyFindOption "${1}" ${CMD_OPTS_this[*]}
-      core::fail "${RETURNED_VALUE}"
-      ;;
-    *)
-      commands+=("${1}")
-      # we don't expect more than maxNbCommands commands so if we matched enough, break
-      if [[ "${#commands[@]}" -ge "${maxNbCommands}" ]]; then
-        break
-      fi
-      # if we matched the first command, we can extract the arguments for the sub command
-      if [[ "${#commands[@]}" -eq "1" ]]; then
-        subCommandArgs=("$@")
-      fi
-      ;;
-    esac
+    main::parseMainArgumentsSwitch "$@"
+    if (( RETURNED_VALUE < 0 )); then
+      break;
+    elif (( RETURNED_VALUE > 0 )); then
+      shift "${RETURNED_VALUE}"
+    fi
     shift
   done
 
-  log::debug "Command found ⌜${commands[*]}⌝."
+  log::debug "Command found ⌜${_PARSED_COMMANDS[*]}⌝."
 
-  if [[ ${#commands[@]} -eq 0 ]]; then
+  if [[ ${#_PARSED_COMMANDS[@]} -eq 0 ]]; then
     # no command provided, we show the commands menu
     main::showCommandsMenuAndRun "main-menu" CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY
   fi
 
   local functionName nbArgs exactCommand
-  main::fuzzyMatchCommandtoFunctionNameOrFail "${commands[@]}"
+  main::fuzzyMatchCommandtoFunctionNameOrFail "${_PARSED_COMMANDS[@]}"
   functionName="${RETURNED_VALUE:-}"
   nbArgs="${RETURNED_VALUE2:-}"
   exactCommand="${RETURNED_VALUE3:-}"
@@ -422,11 +381,91 @@ function main::parseMainArguments() {
 
   if [[ ${functionName} == "_menu" ]]; then
     # run a menu with the list of sub commands
-    main::runMenuWithSubCommands "${exactCommand}" "${subCommandArgs[@]:${nbArgs}}"
+    main::runMenuWithSubCommands "${exactCommand}" "${_PARSED_COMMAND_ARGS[@]:${nbArgs}}"
   else
     # run the function without the matched commands in the arguments
-    main::runFunction "${functionName}" "${subCommandArgs[@]:${nbArgs}}"
+    main::runFunction "${functionName}" "${_PARSED_COMMAND_ARGS[@]:${nbArgs}}"
   fi
+}
+
+function main::parseMainArgumentsSwitch() {
+  case "${1}" in
+  -x | --profiling)
+    VALET_PROFILING=true
+    ;;
+  -l | --log | --log-level)
+    if (( $# <= 1 )); then core::fail "Missing value for option ⌜${1}⌝."; fi
+    shift
+    log::setLevel "${1}"
+    RETURNED_VALUE=1
+    return 0
+    ;;
+  -v | --verbose)
+    log::setLevel debug
+    ;;
+  -w | --very-verbose)
+    log::setLevel trace
+    ;;
+  --version)
+    cat "${GLOBAL_VALET_HOME}/valet.d/version"
+    exit 0
+    ;;
+  -h | --help)
+    main::printHelp function "this"
+    exit 0
+    ;;
+  --)
+    RETURNED_VALUE=-1
+    return 0
+    ;;
+  --*)
+    # if we didn't match any known long option, try to fuzzy find it
+    main::fuzzyFindOption "${1}" "${CMD_OPTS_this[@]}"
+
+    if [[ -n "${RETURNED_VALUE2}" ]]; then
+      # we found a single match! need to parse it
+      main::parseMainArgumentsSwitch "${RETURNED_VALUE2}" "${@:2}"
+      return 0
+    else
+      # we found multiple matches or no match
+      core::fail "${RETURNED_VALUE}"
+    fi
+    ;;
+  -*)
+    # a single dash and single letter, we don't have a match
+    if (( ${#1} <= 2 )); then
+      main::getSingleLetterOptions "${CMD_OPTS_this[@]}"
+      core::fail "Unknown option letter ⌜${optionLetter}⌝ in group ⌜${1}⌝. ${RETURNED_VALUE}"
+    fi
+
+    # many letters, we can resolve each letter as an option
+    local -i letterIndex optionLength=${#1}
+    local optionLetter
+    local -i argsToShift=0
+    for ((letterIndex = 1; letterIndex < optionLength; letterIndex++)); do
+      optionLetter="${1:${letterIndex}:1}"
+      main::parseMainArgumentsSwitch "-${optionLetter}" "${@:$(( 2 + argsToShift ))}"
+      if (( RETURNED_VALUE > 0 )); then
+        argsToShift+=RETURNED_VALUE
+      fi
+    done
+    RETURNED_VALUE=${argsToShift}
+    return 0
+    ;;
+  *)
+    _PARSED_COMMANDS+=("${1}")
+    # we don't expect more than CMD_MAX_SUB_COMMAND_LEVEL + 1 commands so if we matched enough, break
+    if (( ${#_PARSED_COMMANDS[@]} >= CMD_MAX_SUB_COMMAND_LEVEL + 1 )); then
+      RETURNED_VALUE=-1
+      return 0
+    fi
+    # if we matched the first command, we can extract the arguments for the sub command
+    if [[ "${#_PARSED_COMMANDS[@]}" -eq "1" ]]; then
+      _PARSED_COMMAND_ARGS=("$@")
+    fi
+    ;;
+  esac
+  RETURNED_VALUE=0
 }
 
 # Run a given function
@@ -468,7 +507,7 @@ function main::runFunction() {
   if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
     profiler::disable
   fi
-  if [[ ${PROFIL_COMMAND:-} == "true" ]]; then
+  if [[ ${VALET_PROFILING:-} == "true" ]]; then
     # shellcheck source=lib-profiler
     source profiler
     profiler::enable "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}-command.txt"}"
@@ -477,7 +516,7 @@ function main::runFunction() {
   # execute the function
   "${functionName}" "$@"
 
-  if [[ ${PROFIL_COMMAND:-} == "true" ]]; then
+  if [[ ${VALET_PROFILING:-} == "true" ]]; then
     profiler::disable
   fi
 
@@ -951,10 +990,10 @@ function main::parseFunctionArguments() {
   # shellcheck disable=SC2016
   local registerOption='
   if [[ ${optionValue} == "true" ]]; then
-    shift
-    if [[ $# -eq 0 ]]; then
+    if (( $# == 1 )); then
       outputErrors+=("Missing value for option ⌜${optionName}⌝.")
     else
+      shift
       outputSetLine+=("${optionName}=\"${1//\"/\\\"}\"")
     fi
   else
@@ -963,12 +1002,12 @@ function main::parseFunctionArguments() {
   '
 
   # parse each arguments
-  local -i optionIndex matchedIndex
+  local -i optionIndex matchedIndex optionLength letterIndex
   # shellcheck disable=SC2034
   local optionValue
-  local option startedArguments optionName argumentName
+  local option startedArguments optionName argumentName optionLetter optionLetters
   startedArguments="false"
-  while [[ $# -gt 0 ]]; do
+  while (( $# > 0 )); do
 
     if [[ ${1} == "-"* && ${startedArguments} != "true" ]]; then
       # we are matching an option, try to find the option index
@@ -983,10 +1022,9 @@ function main::parseFunctionArguments() {
         # if we have -- we stop parsing options
         startedArguments="true"
 
-      else
-        # if we didn't match any known option, try to fuzzy find it
-        # shellcheck disable=SC2048 disable=SC2086
-        main::fuzzyFindOption "${1}" ${options[*]}
+      elif [[ ${1} == "--"* ]]; then
+        # if we didn't match any known long option, try to fuzzy find it
+        main::fuzzyFindOption "${1}" "${options[@]}"
 
         if [[ -n "${RETURNED_VALUE2}" ]]; then
           # we found a single match!
@@ -997,6 +1035,23 @@ function main::parseFunctionArguments() {
           # we found multiple matches or no match
           outputErrors+=("${RETURNED_VALUE}")
         fi
+
+      else
+        # a single dash, we can resolve each letter as an option
+        optionLetters="${1}"
+        optionLength=${#optionLetters}
+        for ((letterIndex = 1; letterIndex < optionLength; letterIndex++)); do
+          optionLetter="${optionLetters:${letterIndex}:1}"
+          matchedIndex=-1
+          eval "${optionFinder//"\${1}"/"-${optionLetter}"}"
+          if [[ matchedIndex -ne -1 ]]; then
+            eval "${registerOption}"
+          else
+            main::getSingleLetterOptions "${options[@]}"
+            outputErrors+=("Unknown option letter ⌜${optionLetter}⌝ in group ⌜${optionLetters}⌝. ${RETURNED_VALUE}")
+          fi
+        done
+
       fi
 
     else
@@ -1019,7 +1074,9 @@ function main::parseFunctionArguments() {
       fi
     fi
 
-    shift
+    if (( $# > 0 )); then
+      shift
+    fi
   done
 
   # increase argument position if the last arg is an array because we don't do it in the loop
@@ -1137,7 +1194,8 @@ function main::fuzzyFindOption() {
   local unknownOption suggestedOption
   unknownOption="${1}"
   shift
-  _OPTIONS_TO_MATCH=("$@")
+  # shellcheck disable=SC2206
+  _OPTIONS_TO_MATCH=($*)
 
   local singleMatchedOption
   local IFS=$'\n'
@@ -1161,11 +1219,42 @@ function main::fuzzyFindOption() {
       suggestedOption="Found multiple matches for the option ⌜${unknownOption}⌝, please be more specific:"$'\n'"${RETURNED_ARRAY[*]}"
     fi
   else
-    suggestedOption="Unknown option ⌜${unknownOption}⌝, valid options are:"$'\n'"${_OPTIONS_TO_MATCH[*]}"
+    suggestedOption="Unknown option ⌜${unknownOption}⌝, valid options are:"$'\n'"$*"
   fi
+
+  unset _OPTIONS_TO_MATCH
 
   RETURNED_VALUE="${suggestedOption:-}"
   RETURNED_VALUE2="${singleMatchedOption:-}"
+}
+
+# Helps to build a message for the user to inform them
+# about the valid single letter options.
+#
+# - $@: the options
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The message to display to the user.
+#
+# ```bash
+# options=("opt1" "option1" "option2" "option3")
+# main::getSingleLetterOptions "${options[@]}" && message="${RETURNED_VALUE}"
+# ```
+function main::getSingleLetterOptions() {
+  local -a options
+  # shellcheck disable=SC2206
+  options=($*)
+
+  RETURNED_VALUE="Valid single letter options are: "
+
+  for option in "${options[@]}"; do
+    if [[ ${#option} -eq 2 ]]; then
+      RETURNED_VALUE+="⌜${option:1:1}⌝, "
+    fi
+  done
+
+  RETURNED_VALUE="${RETURNED_VALUE%, }."
 }
 
 # Parse the arguments and options of a function.

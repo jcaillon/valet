@@ -20,7 +20,7 @@ function testHelp() {
 
   # test that we catch option errors
   echo "→ valet help --unknown -colo"
-  ("${GLOBAL_VALET_HOME}/valet" help --unknown -colo) || echo "Failed as expected."
+  ("${GLOBAL_VALET_HOME}/valet" help --unknown --colo) || echo "Failed as expected."
   test::endTest "Testing that we catch option errors in help" 1
 
   # test that no arguments show the valet help

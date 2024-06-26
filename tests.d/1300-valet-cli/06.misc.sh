@@ -14,10 +14,20 @@ function testMainOptions() {
   fi
   test::endTest "Testing version option" $?
 
-  # testing unknown option, corrected with fuzzy match
+  # testing unknown single letter flag
   echo "→ valet -prof"
   ("${GLOBAL_VALET_HOME}/valet" -prof) || echo "Failed as expected."
-  test::endTest "Testing unknown option, corrected with fuzzy match" 1
+  test::endTest "Testing unknown single letter" 1
+
+  # testing option corrected with fuzzy match
+  echo "→ valet --versin"
+  ("${GLOBAL_VALET_HOME}/valet" --versin 1>/dev/null)
+  test::endTest "Testing option corrected with fuzzy match" 0
+
+  # testing group of single letter options
+  echo "→ valet -vwvw --versin"
+  ("${GLOBAL_VALET_HOME}/valet" -vwvw --versin 1>/dev/null)
+  test::endTest "Testing option corrected with fuzzy match" 0
 }
 
 function testCleaning() {
