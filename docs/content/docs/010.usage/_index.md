@@ -10,11 +10,34 @@ url: /docs/usage
 
 Valet is a CLI tool that accepts **options** (e.g. `--help` or `-v`) and **commands** (e.g. `valet help`) or **sub commands** (e.g. `valet self update`).
 
-Each command has properties that enable Valet to display its usage (e.g. a description, some examples...) and also parse the options and arguments of that command.
+Each command has properties that enable Valet to display its usage (e.g. a description, some examples...) and also parse the **options** and **arguments** of that command.
+
+You can access the help of a command by either typing `valet help my-command` or `valet my-command --help`.
 
 Commands can be _nested_ under another parent command which is what we call _sub commands_. E.g. the `self update` command is a sub command of the `self` command. There is no limit to the level of nesting for sub commands.
 
+{{< callout type="info" >}}
+By default, Valet will try to match a miss-spelled command or option in a process called _fuzzy finding_. For instance, typing `mcmd` can match the command `mycommand` if it exists. You can opt-out of this behavior through [configuration](../configuration).
+{{< /callout >}}
+
 Behind the scene, a command refers to a **bash function** written in a bash script file which is _source'd_ before calling the function. Commands are indexed ahead of time in a process called **build** (the `valet self build` command) in order to not waste time during Valet execution.
+
+## 🤔 About options and arguments
+
+### Options
+
+Options can have multiple long name (`--my-option` is long name) and up to one short name (`-v` is a short composed of a single letter).
+
+Short names can be grouped together, e.g. `-fsL` is equivalent to `-f -s -L` or equivalent to the long name options `--force --silent --follow`.
+
+- Options can be simple flags (i.e. we check if the option is present or not) 
+- Or can have a value, in which case they are represented as such: `--my-option <value>` and the user is expected to provide a value.
+
+## Arguments
+
+Arguments are always mandatory and must be provided by the user.
+
+An argument that starts with a `-` character can be wrongly interpreted as an option. You can use `--` to mark the separation between options and commands. E.g. `valet my-command -- -my-argument-` allows to interpret `-my-argument-` as the first and only argument of `my-command` instead of an option.
 
 ## ✒️ Adding your own commands
 

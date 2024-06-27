@@ -8,7 +8,6 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- document somewhere about grouping option letters
 - fix option parsing for self build
 - Improve the self install script / check for updates by comparing the version number / suggest the user to git pull the repositories existing under .valet.d. Also add snippets and all functions...
   - rebuild

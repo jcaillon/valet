@@ -184,6 +184,8 @@ Example of a valid option names and their corresponding variable name:
 - `--thing` → `local thing`
 - `-l, --log-level, --log <level>` → `local logLevel`
 
+Short names can be grouped together when calling the command. E.g. `-fsL` is equivalent to `-f -s -L` or equivalent to the long name options `--force --silent --follow`.
+
 | Mandatory? | Default value? |
 |----------|---------------|
 | yes ✔️ | N/A |
