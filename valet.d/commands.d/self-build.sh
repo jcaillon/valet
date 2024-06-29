@@ -7,31 +7,6 @@ set -Eeu -o pipefail
 #                You can call this script directly in case calling ⌜valet self build⌝ is broken:
 #                $ ./valet.d/commands.d/self-build.sh
 
-_CMD_INCLUDED=1
-
-if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
-  _NOT_EXECUTED_FROM_VALET=true
-
-  _VALETD_DIR="${BASH_SOURCE[0]:-"${0}"}"
-  if [[ "${_VALETD_DIR}" != /* ]]; then
-    if pushd "${_VALETD_DIR%/*}" &>/dev/null; then _VALETD_DIR="${PWD}"; popd &>/dev/null || :;
-    else _VALETD_DIR="${PWD}"; fi
-  else _VALETD_DIR="${_VALETD_DIR%/*}"; fi
-
-  # shellcheck source=../core
-  source "${_VALETD_DIR%/*}/core"
-fi
-# --- END OF COMMAND COMMON PART
-
-# shellcheck source=self-build-utils
-source "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build-utils"
-# shellcheck source=../lib-array
-source "${GLOBAL_VALET_HOME}/valet.d/lib-array"
-# shellcheck source=../lib-io
-source "${GLOBAL_VALET_HOME}/valet.d/lib-io"
-# shellcheck source=../lib-string
-source "${GLOBAL_VALET_HOME}/valet.d/lib-string"
-
 #===============================================================
 # >>> command: self build
 #===============================================================
@@ -43,16 +18,17 @@ shortDescription: Re-build the menu of valet from your commands.
 description: |-
   This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
 
-  Please check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.
+  Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.
 
   This scripts:
-    - Makes a list of all the elligible files in which we could find command definitions.
-    - For each file in this list, extract the command definitions.
-    - Build your commands file (in your valet user directory) from these definitions.
+
+  - Makes a list of all the elligible files in which we could find command definitions.
+  - For each file in this list, extract the command definitions.
+  - Build your commands file (in your valet user directory) from these definitions.
 
   You can call this script directly in case calling ⌜valet self build⌝ is broken:
 
-  → ./valet.d/commands.d.sh
+  → valet.d/commands.d/self-build.sh
 options:
 - name: -d, --user-directory <path>
   description: |-
@@ -61,85 +37,106 @@ options:
     This defaults to the path defined in the environment variable VALET_USER_DIRECTORY=\"my/path\" or to ⌜~/.valet.d⌝.
 
     Can be empty to only build the core commands.
+- name: -C, --core-only
+  description: |-
+    Build only the core commands (under commands.d).
 - name: -o, --output <path>
   description: |-
     Specify the file path in which to write the command definition variables.
 
     This defaults to the ⌜commands⌝ file in your Valet user directory.
+- name: -O, --no-output
+  description: |-
+    Do not write the command definition variables to a file.
 
-    Can be empty to not write the file.
+    This will just create the variables.
 ---"
 function selfBuild() {
-  local userDirectory outputFile
+  local userDirectory outputFile coreOnly noOutput
 
-  # parse arguments manually otherwise we have to count on cmd to be valid
-  while [[ $# -gt 0 ]]; do
-    case "${1}" in
-    -d | --user-directory)
+  # if this script is run directly
+  if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
+    # parse arguments manually (basic parsing only)
+    while [[ $# -gt 0 ]]; do
+      case "${1}" in
+      -d | --user-directory)
+        shift
+        userDirectory="${1}"
+        ;;
+      -o | --output)
+        shift
+        outputFile="${1}"
+        ;;
+      -C | --core-only)
+        coreOnly="true"
+        ;;
+      -O | --noOutput)
+        noOutput="true"
+        ;;
+      -*)
+        if [[ -v CMD_OPTS_selfBuild ]]; then
+          # shellcheck disable=SC2048
+          # shellcheck disable=SC2086
+          main::fuzzyFindOption "${1}" "${CMD_OPTS_selfBuild[@]}"
+        else
+          RETURNED_VALUE="Unknown option ⌜${1}⌝"
+        fi
+        core::fail "${RETURNED_VALUE}"
+        ;;
+      *) core::fail "This command takes no arguments." ;;
+      esac
       shift
-      userDirectory="${1}"
-      ;;
-    -o | --output)
-      shift
-      outputFile="${1}"
-      ;;
-    -*)
-      if [[ -v CMD_OPTS_selfBuild ]]; then
-        # shellcheck disable=SC2048
-        # shellcheck disable=SC2086
-        main::fuzzyFindOption "${1}" "${CMD_OPTS_selfBuild[@]}"
-      else
-        RETURNED_VALUE="Unknown option ⌜${1}⌝"
-      fi
-      core::fail "${RETURNED_VALUE}" ;;
-    *) core::fail "This command takes no arguments." ;;
-    esac
-    shift
-  done
+    done
+  else
+    core::parseArguments "$@" && eval "${RETURNED_VALUE}"
+    core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  fi
 
-  core::getUserDirectory && userDirectory="${userDirectory-${RETURNED_VALUE}}"
-  outputFile="${outputFile-${userDirectory}/commands}"
+  core::getUserDirectory && userDirectory="${userDirectory:-${RETURNED_VALUE}}"
+  outputFile="${outputFile:-${userDirectory}/commands}"
 
   io::toAbsolutePath "${GLOBAL_VALET_HOME}" && GLOBAL_VALET_HOME="${RETURNED_VALUE}"
 
   # list all the files in which we need to find command definitions
-  log::info "Building the valet user commands from the user directory ⌜${userDirectory}⌝."
   local -a commandDefinitionFiles
   commandDefinitionFiles=(
     "${GLOBAL_VALET_HOME}/valet"
     "${GLOBAL_VALET_HOME}/valet.d/commands.d"/*.sh
   )
-  if [[ -d "${userDirectory}" ]]; then
-    local file listOfDirectories currentDirectory
+  if [[ ${coreOnly:-} != "true" ]]; then
+    if [[ -d "${userDirectory}" ]]; then
+      log::info "Building the valet user commands from the user directory ⌜${userDirectory}⌝."
+      local file listOfDirectories currentDirectory
 
-    # the shopt globstar does not include files under symbolic link directories
-    # so we need to manually force the search in these directories
-    listOfDirectories="${userDirectory}"$'\n'
-    while [[ -n "${listOfDirectories}" ]]; do
-      currentDirectory="${listOfDirectories%%$'\n'*}"
-      listOfDirectories="${listOfDirectories#*$'\n'}"
-      log::trace "Searching for command definitions in ⌜${currentDirectory}⌝."
-      log::trace "listOfDirectories: ⌜${listOfDirectories}⌝."
-      for file in "${currentDirectory}"/**; do
-        local fileBasename="${file##*/}"
-        if [[ -d "${file}" && ${fileBasename} != "."* && ${fileBasename} != "tests.d" ]]; then
-          # if directory we need to add it to the search list
-          # except if it starts with a . or if it is a tests.d directory
-          listOfDirectories+="${file}"$'\n'
-          log::trace "adding directory ⌜${file}⌝ to the search list."
-          continue
-        elif [[ "${file}" != *".sh" ]]; then
-          # skip all files not ending with .sh
-          continue
-        fi
-        log::debug "Considering file ⌜${file}⌝."
-        commandDefinitionFiles+=("${file}")
+      # the shopt globstar does not include files under symbolic link directories
+      # so we need to manually force the search in these directories
+      listOfDirectories="${userDirectory}"$'\n'
+      while [[ -n "${listOfDirectories}" ]]; do
+        currentDirectory="${listOfDirectories%%$'\n'*}"
+        listOfDirectories="${listOfDirectories#*$'\n'}"
+        log::trace "Searching for command definitions in ⌜${currentDirectory}⌝."
+        log::trace "listOfDirectories: ⌜${listOfDirectories}⌝."
+        for file in "${currentDirectory}"/**; do
+          local fileBasename="${file##*/}"
+          if [[ -d "${file}" && ${fileBasename} != "."* && ${fileBasename} != "tests.d" ]]; then
+            # if directory we need to add it to the search list
+            # except if it starts with a . or if it is a tests.d directory
+            listOfDirectories+="${file}"$'\n'
+            log::trace "adding directory ⌜${file}⌝ to the search list."
+            continue
+          elif [[ "${file}" != *".sh" ]]; then
+            # skip all files not ending with .sh
+            continue
+          fi
+          log::debug "Considering file ⌜${file}⌝."
+          commandDefinitionFiles+=("${file}")
+        done
       done
-    done
-  elif [[ -n "${userDirectory}" ]]; then
-    log::warning "Skipping user directory ⌜${userDirectory}⌝ because it does not exist."
+    else
+      log::warning "Skipping user directory ⌜${userDirectory}⌝ because it does not exist."
+    fi
   else
-    log::info "Skipping user directory because it was empty."
+    log::info "Skipping user directory (building core commands only)."
   fi
 
   if log::isDebugEnabled; then
@@ -164,7 +161,7 @@ function selfBuild() {
     core::fail "The valet user commands have not been successfully built. Please check the following errors:"$'\n'"${SELF_BUILD_ERRORS}"
   fi
 
-  if [[ -n "${outputFile}" ]]; then
+  if [[ ${noOutput:-} != "true" ]]; then
     writeCommandDefinitionVariablesToFile "${outputFile}"
     log::info "The command definition variables have been written to ⌜${outputFile}⌝."
   fi
@@ -233,7 +230,10 @@ function extractCommandDefinitionsToVariables() {
     local content
     for content in "${RETURNED_ARRAY[@]}"; do
 
-      if log::isTraceEnabled; then log::trace "Extracting command definition for:"; log::printFileString "${content%%$'\n'*}"; fi
+      if log::isTraceEnabled; then
+        log::trace "Extracting command definition for:"
+        log::printFileString "${content%%$'\n'*}"
+      fi
 
       extractCommandDefinitionToVariables "${content}"
 
@@ -507,9 +507,9 @@ function declareOtherCommmandVariables() {
 
     # declare the command menu body
     if [[ ${hideInMenu:-false} == "true" ]]; then
-      CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY+=("${line}");
+      CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY+=("${line}")
     else
-      CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY+=("${line}");
+      CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY+=("${line}")
     fi
 
     # declare the sub commands for the main menu
@@ -611,6 +611,34 @@ function verifyCommandDefinition() {
 #===============================================================
 # >>> Main
 #===============================================================
+
+if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
+  _NOT_EXECUTED_FROM_VALET=true
+
+  # do not read the commands in that case
+  _CMD_INCLUDED=1
+
+  _VALETD_DIR="${BASH_SOURCE[0]:-"${0}"}"
+  if [[ "${_VALETD_DIR}" != /* ]]; then
+    if pushd "${_VALETD_DIR%/*}" &>/dev/null; then
+      _VALETD_DIR="${PWD}"
+      popd &>/dev/null || :
+    else _VALETD_DIR="${PWD}"; fi
+  else _VALETD_DIR="${_VALETD_DIR%/*}"; fi
+
+  # shellcheck source=../core
+  source "${_VALETD_DIR%/*}/core"
+fi
+# --- END OF COMMAND COMMON PART
+
+# shellcheck source=self-build-utils
+source self-build-utils
+# shellcheck source=../lib-array
+source array
+# shellcheck source=../lib-io
+source io
+# shellcheck source=../lib-string
+source string
 
 # if this script is run directly, execute the function, otherwise valet will do it
 if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then

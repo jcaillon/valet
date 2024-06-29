@@ -84,7 +84,7 @@ function selfTest() {
 
     # rebuild the commands for the user dir
     log::info "Rebuilding the commands for the user directory ⌜${userDirectory}⌝."
-    rebuildCommands "${userDirectory}"
+    rebuildCommands --user-directory "${userDirectory}"
 
     # change the shell options to include hidden files
     shopt -s dotglob

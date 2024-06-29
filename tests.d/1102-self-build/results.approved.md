@@ -57,7 +57,7 @@ CMD_COMMAND_selfUpdate='self update'
 CMD_COMMAND_showCommandHelp='help'
 CMD_COMMAND_this=''
 CMD_DESCRIPTION__menu='Show a menu with sub commands for the current command.'
-CMD_DESCRIPTION_selfBuild=$'This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.\n\nPlease check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or check the examples in examples.d directory to learn how to create and modified your commands.\n\nThis scripts:\n  - Makes a list of all the elligible files in which we could find command definitions.\n  - For each file in this list, extract the command definitions.\n  - Build your commands file (in your valet user directory) from these definitions.\n\nYou can call this script directly in case calling valet self build is broken:\n\n ./valet.d/commands.d.sh'
+CMD_DESCRIPTION_selfBuild=$'This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.\n\nPlease check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in examples.d directory to learn how to create and modified your commands.\n\nThis scripts:\n\n- Makes a list of all the elligible files in which we could find command definitions.\n- For each file in this list, extract the command definitions.\n- Build your commands file (in your valet user directory) from these definitions.\n\nYou can call this script directly in case calling valet self build is broken:\n\n valet.d/commands.d/self-build.sh'
 CMD_DESCRIPTION_selfConfig=$'Open the configuration file of Valet with your default editor.\n\nThis allows you to set advanced options for Valet.'
 CMD_DESCRIPTION_selfExport=$'If you want to use Valet functions directly in bash, you can use this command like this:\n\n"\'\neval "$(valet self export)"\n\'"\n\nThis will export all the necessary functions and variables to use the Valet log library by default.\n\nYou can optionally export all the functions if needed.'
 CMD_DESCRIPTION_selfMock1='A command that only for testing valet core functions.'
@@ -69,7 +69,7 @@ CMD_DESCRIPTION_selfSetup=$'The command run after the installation of Valet to s
 CMD_DESCRIPTION_selfTest='Test your valet custom commands using approval tests approach.'
 CMD_DESCRIPTION_selfUpdate=$'Update valet using the latest release on GitHub.\n'
 CMD_DESCRIPTION_showCommandHelp=$'Show the help this program or of the help of a specific command.\n\nYou can show the help with or without colors and set the maximum columns for the help text.'
-CMD_DESCRIPTION_this=$'Valet helps you browse, understand and execute your custom bash commands.\n\nOnline documentation is available at https://github.com/jcaillon/valet.\n\nYou can call valet without any commands to start an interactive session.\n\nExit codes:\n\n- 0: everything went well\n- 1+: an error occured\n\nCreate your own commands:\n\nYou can create your own commands and have them available in valet, please check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or the examples under examples.d to do so.\nValet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).\nOnce you have created your new command script, run the valet self build command to update the valet menu.\n\nConfiguration through environment variables:\n\nIn addition to the environment variables defined for each options, you can define environment variables to configure valet.\n\nThese variables are conviently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the VALET_CONFIG_FILE environment variable).\n\nYou can run valet self config to open the configuration file with your default editor (the file will get created if it does not yet exist).\n\nDeveloper notes:\n\nYou can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/valet-profiler-{PID}.txt).'
+CMD_DESCRIPTION_this=$'Valet helps you browse, understand and execute your custom bash commands.\n\nOnline documentation is available at https://jcaillon.github.io/valet/.\n\nYou can call valet without any commands to start an interactive session.\n\nExit codes:\n\n- 0: everything went well\n- 1+: an error occured\n\nCreate your own commands:\n\nYou can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ or the examples under examples.d to do so.\nValet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).\nOnce you have created your new command script, run the valet self build command to update the valet menu.\n\nConfiguration through environment variables:\n\nIn addition to the environment variables defined for each options, you can define environment variables to configure valet.\n\nThese variables are conviently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the VALET_CONFIG_FILE environment variable).\n\nYou can run valet self config to open the configuration file with your default editor (the file will get created if it does not yet exist).\n\nDeveloper notes:\n\nYou can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/valet-profiler-{PID}.txt).'
 CMD_EXAMPLES_DESCRIPTION_selfMock2=0 $'Call command1 with option1, option2 and some arguments.\n'
 CMD_EXAMPLES_DESCRIPTION_showCommandHelp=0 "Shows the help for the command cmd" 1 "Shows the help for the sub command ⌜subCmd⌝ of the command ⌜cmd⌝" 2 $'Shows the help for the program without any color and with a maximum of 50 columns\n'
 CMD_EXAMPLES_DESCRIPTION_this=0 "Displays this help text." 1 $'Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.\n'
@@ -113,7 +113,7 @@ CMD_HIDEINMENU_selfSetup='true'
 CMD_MAX_COMMAND_WIDTH='12'
 CMD_MAX_SUB_COMMAND_LEVEL='1'
 CMD_OPTIONS_DESCRIPTION__menu='Display the help for this command.'
-CMD_OPTIONS_DESCRIPTION_selfBuild=0 $'Specify the directory in which to look for your command scripts.\n\nThis defaults to the path defined in the environment variable VALET_USER_DIRECTORY=\\my/path\\ or to ~/.valet.d.\n\nCan be empty to only build the core commands.\nThis option can be set by exporting the variable VALET_USER_DIRECTORY=\'<path>\'.' 1 $'Specify the file path in which to write the command definition variables.\n\nThis defaults to the ⌜commands⌝ file in your Valet user directory.\n\nCan be empty to not write the file.\n\nThis option can be set by exporting the variable VALET_OUTPUT=\'<path>\'.' 2 "Display the help for this command."
+CMD_OPTIONS_DESCRIPTION_selfBuild=0 $'Specify the directory in which to look for your command scripts.\n\nThis defaults to the path defined in the environment variable VALET_USER_DIRECTORY=\\my/path\\ or to ~/.valet.d.\n\nCan be empty to only build the core commands.\nThis option can be set by exporting the variable VALET_USER_DIRECTORY=\'<path>\'.' 1 $'Build only the core commands (under commands.d).\nThis option can be set by exporting the variable VALET_CORE_ONLY=\'true\'.' 2 $'Specify the file path in which to write the command definition variables.\n\nThis defaults to the ⌜commands⌝ file in your Valet user directory.\nThis option can be set by exporting the variable VALET_OUTPUT=\'<path>\'.' 3 $'Do not write the command definition variables to a file.\n\nThis will just create the variables.\n\nThis option can be set by exporting the variable VALET_NO_OUTPUT=\'true\'.' 4 "Display the help for this command."
 CMD_OPTIONS_DESCRIPTION_selfConfig=0 $'Create the configuration file if it does not exist but do not open it.\nThis option can be set by exporting the variable VALET_NO_EDIT=\'true\'.' 1 $'Override of the configuration file even if it already exists.\nUnless the option --export-current-values is used, the existing values will be reset.\nThis option can be set by exporting the variable VALET_OVERRIDE=\'true\'.' 2 $'When writing the configuration file, export the current values of the variables.\n\nThis option can be set by exporting the variable VALET_EXPORT_CURRENT_VALUES=\'true\'.' 3 "Display the help for this command."
 CMD_OPTIONS_DESCRIPTION_selfExport=0 $'Export all the libraries.\n\nThis option can be set by exporting the variable VALET_EXPORT_ALL=\'true\'.' 1 "Display the help for this command."
 CMD_OPTIONS_DESCRIPTION_selfMock1=0 "Display the help for this command."
@@ -127,7 +127,7 @@ CMD_OPTIONS_DESCRIPTION_selfUpdate=0 "Display the help for this command."
 CMD_OPTIONS_DESCRIPTION_showCommandHelp=0 $'Do not use any colors in the output\nThis option can be set by exporting the variable VALET_NO_COLORS=\'true\'.' 1 $'Set the maximum columns for the help text\nThis option can be set by exporting the variable VALET_COLUMNS=\'<number>\'.' 2 "Display the help for this command."
 CMD_OPTIONS_DESCRIPTION_this=0 $'Turn on profiling (with debug mode) before running the required command.\nIt will output to ~/valet-profiler-{PID}-command.txt.\nThis is useful to debug your command and understand what takes a long time to execute.\nThe profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.\nThis option can be set by exporting the variable VALET_PROFILING=\'true\'.' 1 $'Set the log level of valet (defaults to info).\nPossible values are: trace, debug, success, info, success, warning, error.\nThis option can be set by exporting the variable VALET_LOG_LEVEL,=\'<level>\'.' 2 $'Output verbose information.\nThis is the equivalent of setting the log level to debug.\nThis option can be set by exporting the variable VALET_VERBOSE=\'true\'.' 3 $'Output very verbose information.\nThis is the equivalent of setting the log level to trace.\nThis option can be set by exporting the variable VALET_VERY_VERBOSE=\'true\'.' 4 $'Enter interactive mode for commands even if arguments are not required or provided.\nThis option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE=\'true\'.' 5 "Display the current version of valet." 6 "Display the help for this command."
 CMD_OPTIONS_NAME__menu='-h, --help'
-CMD_OPTIONS_NAME_selfBuild=0 "-d, --user-directory <path>" 1 "-o, --output <path>" 2 "-h, --help"
+CMD_OPTIONS_NAME_selfBuild=0 "-d, --user-directory <path>" 1 "-C, --core-only" 2 "-o, --output <path>" 3 "-O, --no-output" 4 "-h, --help"
 CMD_OPTIONS_NAME_selfConfig=0 "--no-edit" 1 "--override" 2 "--export-current-values" 3 "-h, --help"
 CMD_OPTIONS_NAME_selfExport=0 "-a, --export-all" 1 "-h, --help"
 CMD_OPTIONS_NAME_selfMock1=0 "-h, --help"
@@ -140,7 +140,7 @@ CMD_OPTIONS_NAME_selfTest=0 "-d, --user-directory <path>" 1 "-a, --auto-approve"
 CMD_OPTIONS_NAME_selfUpdate=0 "-h, --help"
 CMD_OPTIONS_NAME_showCommandHelp=0 "-n, --no-colors" 1 "-c, --columns <number>" 2 "-h, --help"
 CMD_OPTIONS_NAME_this=0 "-x, --profiling" 1 "-l, --log-level, --log <level>" 2 "-v, --verbose" 3 "-w, --very-verbose" 4 "-i, --force-interactive-mode" 5 "--version" 6 "-h, --help"
-CMD_OPTS_DEFAULT_selfBuild=0 "" 1 "" 2 ""
+CMD_OPTS_DEFAULT_selfBuild=0 "" 1 "" 2 "" 3 "" 4 ""
 CMD_OPTS_DEFAULT_selfConfig=0 "" 1 "" 2 "" 3 ""
 CMD_OPTS_DEFAULT_selfExport=0 "" 1 ""
 CMD_OPTS_DEFAULT_selfMock1=0 ""
@@ -153,7 +153,7 @@ CMD_OPTS_DEFAULT_selfTest=0 "" 1 "" 2 "" 3 "" 4 "" 5 "" 6 ""
 CMD_OPTS_DEFAULT_selfUpdate=0 ""
 CMD_OPTS_DEFAULT_showCommandHelp=0 "" 1 "" 2 ""
 CMD_OPTS_DEFAULT_this=0 "" 1 "" 2 "" 3 "" 4 "" 5 "" 6 ""
-CMD_OPTS_HAS_VALUE_selfBuild=0 "true" 1 "true" 2 "false"
+CMD_OPTS_HAS_VALUE_selfBuild=0 "true" 1 "false" 2 "true" 3 "false" 4 "false"
 CMD_OPTS_HAS_VALUE_selfConfig=0 "false" 1 "false" 2 "false" 3 "false"
 CMD_OPTS_HAS_VALUE_selfExport=0 "false" 1 "false"
 CMD_OPTS_HAS_VALUE_selfMock1=0 "false"
@@ -166,7 +166,7 @@ CMD_OPTS_HAS_VALUE_selfTest=0 "true" 1 "false" 2 "false" 3 "false" 4 "true" 5 "t
 CMD_OPTS_HAS_VALUE_selfUpdate=0 "false"
 CMD_OPTS_HAS_VALUE_showCommandHelp=0 "false" 1 "true" 2 "false"
 CMD_OPTS_HAS_VALUE_this=0 "false" 1 "true" 2 "false" 3 "false" 4 "false" 5 "false" 6 "false"
-CMD_OPTS_NAME_SC_selfBuild=0 "VALET_USER_DIRECTORY" 1 "VALET_OUTPUT" 2 ""
+CMD_OPTS_NAME_SC_selfBuild=0 "VALET_USER_DIRECTORY" 1 "VALET_CORE_ONLY" 2 "VALET_OUTPUT" 3 "VALET_NO_OUTPUT" 4 ""
 CMD_OPTS_NAME_SC_selfConfig=0 "VALET_NO_EDIT" 1 "VALET_OVERRIDE" 2 "VALET_EXPORT_CURRENT_VALUES" 3 ""
 CMD_OPTS_NAME_SC_selfExport=0 "VALET_EXPORT_ALL" 1 ""
 CMD_OPTS_NAME_SC_selfMock1=0 ""
@@ -180,7 +180,7 @@ CMD_OPTS_NAME_SC_selfUpdate=0 ""
 CMD_OPTS_NAME_SC_showCommandHelp=0 "VALET_NO_COLORS" 1 "VALET_COLUMNS" 2 ""
 CMD_OPTS_NAME_SC_this=0 "VALET_PROFILING" 1 "VALET_LOG_LEVEL" 2 "VALET_VERBOSE" 3 "VALET_VERY_VERBOSE" 4 "VALET_FORCE_INTERACTIVE_MODE" 5 "" 6 ""
 CMD_OPTS_NAME__menu=0 "help"
-CMD_OPTS_NAME_selfBuild=0 "userDirectory" 1 "output" 2 "help"
+CMD_OPTS_NAME_selfBuild=0 "userDirectory" 1 "coreOnly" 2 "output" 3 "noOutput" 4 "help"
 CMD_OPTS_NAME_selfConfig=0 "noEdit" 1 "override" 2 "exportCurrentValues" 3 "help"
 CMD_OPTS_NAME_selfExport=0 "exportAll" 1 "help"
 CMD_OPTS_NAME_selfMock1=0 "help"
@@ -194,7 +194,7 @@ CMD_OPTS_NAME_selfUpdate=0 "help"
 CMD_OPTS_NAME_showCommandHelp=0 "noColors" 1 "columns" 2 "help"
 CMD_OPTS_NAME_this=0 "profiling" 1 "logLevel" 2 "verbose" 3 "veryVerbose" 4 "forceInteractiveMode" 5 "version" 6 "help"
 CMD_OPTS__menu=0 "-h --help"
-CMD_OPTS_selfBuild=0 "-d --user-directory" 1 "-o --output" 2 "-h --help"
+CMD_OPTS_selfBuild=0 "-d --user-directory" 1 "-C --core-only" 2 "-o --output" 3 "-O --no-output" 4 "-h --help"
 CMD_OPTS_selfConfig=0 "--no-edit" 1 "--override" 2 "--export-current-values" 3 "-h --help"
 CMD_OPTS_selfExport=0 "-a --export-all" 1 "-h --help"
 CMD_OPTS_selfMock1=0 "-h --help"
@@ -226,8 +226,7 @@ CMD_SUDO_selfMock3='true'
 **Error** output:
 
 ```log
-INFO     Building the valet user commands from the user directory ⌜⌝.
-INFO     Skipping user directory because it was empty.
+INFO     Skipping user directory (building core commands only).
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet⌝.
 INFO                              ├── ⌜⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/help.sh⌝.

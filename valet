@@ -14,7 +14,7 @@ shortDescription: Your personal assistant in the terminal!
 description: |-
   Valet helps you browse, understand and execute your custom bash commands.
 
-  Online documentation is available at https://github.com/jcaillon/valet.
+  Online documentation is available at https://jcaillon.github.io/valet/.
 
   You can call valet without any commands to start an interactive session.
 
@@ -25,7 +25,7 @@ description: |-
 
   ⌜Create your own commands:⌝
 
-  You can create your own commands and have them available in valet, please check https://github.com/jcaillon/valet/blob/main/docs/create-new-command.md or the examples under examples.d to do so.
+  You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ or the examples under examples.d to do so.
   Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).
   Once you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.
 

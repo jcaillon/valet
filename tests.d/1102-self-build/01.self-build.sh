@@ -5,7 +5,7 @@ function testSelfBuild() {
 
   (
     export VALET_CONFIG_BUMP_VERSION_ON_BUILD=false
-    "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh" --output "${tempFile}" --user-directory ""
+    "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh" --output "${tempFile}" --core-only
 
     local varName var
     for varName in ${!CMD_*}; do

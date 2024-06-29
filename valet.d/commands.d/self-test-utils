@@ -116,7 +116,7 @@ function runCoreTests() {
   fi
 
   # we need to rebuild the commands for the core commands only
-  rebuildCommands "" ""
+  rebuildCommands --core-only --noOutput
 
   # we should always run the test suite from the valet home directory to have consistent paths
   # in the report files
@@ -130,7 +130,7 @@ function runCoreTests() {
     log::warning "The valet examples directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝ does not exist, cannot run the tests on the core examples."
   else
     # we need to rebuild the commands for the examples only
-    rebuildCommands "${GLOBAL_VALET_HOME}/examples.d" ""
+    rebuildCommands --user-directory "${GLOBAL_VALET_HOME}/examples.d" --noOutput
 
     log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝."
     runTestSuites "${GLOBAL_VALET_HOME}/examples.d/showcase/tests.d"
@@ -147,11 +147,7 @@ function rebuildCommands() {
   log::getLevel && originalLogLevel="${RETURNED_VALUE}"
   log::setLevel warning true
   core::sourceFunction selfBuild
-  if (($# == 1)); then
-    selfBuild --user-directory "${1:-}"
-  else
-    selfBuild --user-directory "${1:-}" --output "${2}"
-  fi
+  selfBuild "$@"
   log::setLevel "${originalLogLevel}" true
 }
 
