@@ -10,6 +10,10 @@ array:
 
 echo "Hello, World!"
 
+##<<VALET_COMMAND
+# yep!
+##VALET_COMMAND
+
 : "---
 And another one!
 ---"

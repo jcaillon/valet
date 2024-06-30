@@ -86,6 +86,18 @@ If your new command name contains one or more spaces, you are defining a sub com
 
 For more examples, take a look at the [showcase command definitions][showcase-commands].
 
+Alternatively, you can add a new command definition using bash comments and the following format:
+
+```bash
+##<<VALET_COMMAND
+# command: hello-world
+# function: helloWorld
+# shortDescription: A dummy command.
+# description: |-
+#   This command says hello world.
+##VALET_COMMAND
+```
+
 ### ✒️ Implement your command
 
 Once the command properties are set, the next step is to implement the command function.

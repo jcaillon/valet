@@ -6,79 +6,79 @@ if [[ ${BASH_VERSINFO[0]:-0} -lt 5 ]]; then
   exit 1
 fi
 
-: "---
-command: valet
-function: this
-author: github.com/jcaillon
-shortDescription: Your personal assistant in the terminal!
-description: |-
-  Valet helps you browse, understand and execute your custom bash commands.
-
-  Online documentation is available at https://jcaillon.github.io/valet/.
-
-  You can call valet without any commands to start an interactive session.
-
-  ⌜Exit codes:⌝
-
-  - 0: everything went well
-  - 1+: an error occured
-
-  ⌜Create your own commands:⌝
-
-  You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ or the examples under examples.d to do so.
-  Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).
-  Once you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.
-
-  ⌜Configuration through environment variables:⌝
-
-  In addition to the environment variables defined for each options, you can define environment variables to configure valet.
-
-  These variables are conviently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the VALET_CONFIG_FILE environment variable).
-
-  You can run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).
-
-  ⌜Developer notes:⌝
-
-  You can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/valet-profiler-{PID}.txt).
-arguments:
-- name: commands?...
-  description: |-
-    The command or sub commands to execute.
-    See the commands section for more information.
-options:
-- name: -x, --profiling
-  description: |-
-    Turn on profiling (with debug mode) before running the required command.
-    It will output to ~/valet-profiler-{PID}-command.txt.
-    This is useful to debug your command and understand what takes a long time to execute.
-    The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
-- name: -l, --log-level, --log <level>
-  description: |-
-    Set the log level of valet (defaults to info).
-    Possible values are: trace, debug, success, info, success, warning, error.
-- name: -v, --verbose
-  description: |-
-    Output verbose information.
-    This is the equivalent of setting the log level to debug.
-- name: -w, --very-verbose
-  description: |-
-    Output very verbose information.
-    This is the equivalent of setting the log level to trace.
-- name: -i, --force-interactive-mode
-  description: |-
-    Enter interactive mode for commands even if arguments are not required or provided.
-- name: --version
-  description: |-
-    Display the current version of valet.
-  noEnvironmentVariable: true
-examples:
-- name: --help
-  description: |-
-    Displays this help text.
-- name: -v a-command and-sub-command
-  description: |-
-    Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
----"
+##<<VALET_COMMAND
+# command: valet
+# function: this
+# author: github.com/jcaillon
+# shortDescription: Your personal assistant in the terminal!
+# description: |-
+#   Valet helps you browse, understand and execute your custom bash commands.
+#
+#   Online documentation is available at https://jcaillon.github.io/valet/.
+#
+#   You can call valet without any commands to start an interactive session.
+#
+#   ⌜Exit codes:⌝
+#
+#   - 0: everything went well
+#   - 1+: an error occured
+#
+#   ⌜Create your own commands:⌝
+#
+#   You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ or the examples under examples.d to do so.
+#   Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).
+#   Once you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.
+#
+#   ⌜Configuration through environment variables:⌝
+#
+#   In addition to the environment variables defined for each options, you can define environment variables to configure valet.
+#
+#   These variables are conviently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the VALET_CONFIG_FILE environment variable).
+#
+#   You can run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).
+#
+#   ⌜Developer notes:⌝
+#
+#   You can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/valet-profiler-{PID}.txt).
+# arguments:
+# - name: commands?...
+#   description: |-
+#     The command or sub commands to execute.
+#     See the commands section for more information.
+# options:
+# - name: -x, --profiling
+#   description: |-
+#     Turn on profiling (with debug mode) before running the required command.
+#     It will output to ~/valet-profiler-{PID}-command.txt.
+#     This is useful to debug your command and understand what takes a long time to execute.
+#     The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
+# - name: -l, --log-level, --log <level>
+#   description: |-
+#     Set the log level of valet (defaults to info).
+#     Possible values are: trace, debug, success, info, success, warning, error.
+# - name: -v, --verbose
+#   description: |-
+#     Output verbose information.
+#     This is the equivalent of setting the log level to debug.
+# - name: -w, --very-verbose
+#   description: |-
+#     Output very verbose information.
+#     This is the equivalent of setting the log level to trace.
+# - name: -i, --force-interactive-mode
+#   description: |-
+#     Enter interactive mode for commands even if arguments are not required or provided.
+# - name: --version
+#   description: |-
+#     Display the current version of valet.
+#   noEnvironmentVariable: true
+# examples:
+# - name: --help
+#   description: |-
+#     Displays this help text.
+# - name: -v a-command and-sub-command
+#   description: |-
+#     Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
+##VALET_COMMAND
 
 #===============================================================
 # >>> Include core/utils

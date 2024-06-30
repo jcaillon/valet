@@ -58,7 +58,7 @@ INFO     As a reminder, you can modify the configuration done during this set up
 - replaying the command ⌜valet self setup⌝,
 - running the command ⌜valet self config⌝.
 INFO     Run ⌜valet --help⌝ to get started.
-INFO     You can create your own commands and have them available in valet, please check ⌜https://jcaillon.github.io/valet/docs/new-commands/⌝ to do so.
+INFO     You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ to do so.
 ```
 
 ### Testing selfSetup 2
@@ -115,6 +115,6 @@ CININFO    II  CDE As a reminder, you can modify the configuration done during t
 - replaying the command CHI⌜valet self setup⌝CDE,
 - running the command CHI⌜valet self config⌝CDE.
 CININFO    II  CDE Run CHI⌜valet --help⌝CDE to get started.
-CININFO    II  CDE You can create your own commands and have them available in valet, please check CHI⌜https://jcaillon.github.io/valet/docs/new-commands/⌝CDE to do so.
+CININFO    II  CDE You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ to do so.
 ```
 

@@ -187,7 +187,7 @@ function main::getHelpText() {
 
   local -i helpWidth
   helpWidth="${maxColumns}"
-  if [[ helpWidth -gt ${GLOBAL_COLUMNS} ]]; then helpWidth=${GLOBAL_COLUMNS}; fi
+  if (( helpWidth > GLOBAL_COLUMNS )); then helpWidth=${GLOBAL_COLUMNS}; fi
 
   if [[ ${type} == "function" ]]; then
     # case of a function; we will get the description from CMD_ vars directly

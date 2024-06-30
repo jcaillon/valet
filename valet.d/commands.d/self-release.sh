@@ -83,7 +83,7 @@ function selfRelease() {
     uploadArtifact "${uploadUrl}"
   fi
 
-  log::success "The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝."
+  log::success "The new version has been released, check: https://github.com/jcaillon/valet/releases/latest."
 
   return 0
 }

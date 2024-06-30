@@ -23,7 +23,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Reimplement usage of main::sortCommands / main::addLastChoice.
 - Implement regex replace in pure bash.
 - Betters checks in self build!
-- Support alternative single comments `### VALET COMMAND` instead of multiline comments for command declaration (see we can have help in autocompletion).
 - A command can declare dependencies to auto check if some tools are installed before running the command.
 - Add test:: and also add a snippet to create a new function.
 - add valet in brew

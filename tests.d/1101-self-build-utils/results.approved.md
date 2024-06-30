@@ -17,6 +17,9 @@ INFO     content:
    5 ░   - item3
    6 ░ 
 INFO     content:
+   1 ░ yep!
+   2 ░ 
+INFO     content:
    1 ░ And another one!
    2 ░ 
 ```

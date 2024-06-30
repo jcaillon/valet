@@ -17,27 +17,38 @@ function extractCommandYamls() {
 
   local firstLine=": \"---"
   local lastLine="---\""
+  local firstLineAlt="##<<VALET_COMMAND"
+  local lastLineAlt="##VALET_COMMAND"
 
   declare -a contentArray
 
   local line content
-  local -i firstLineMatched=0 lastLineMatched=1
+  local -i firstLineMatched=0 lastLineMatched=1 indentation=0
   while IFS= read -r line || [[ -n ${line:-} ]]; do
     if [[ firstLineMatched -eq 0 ]]; then
-      if [[ ${line} == "${firstLine}" ]]; then
+      if [[ ${line} == "${firstLine}" || ${line} == "${firstLineAlt}" ]]; then
         firstLineMatched=1
         lastLineMatched=0
         content=""
+        if [[ ${line} == "${firstLineAlt}" ]]; then
+          indentation=2
+        else
+          indentation=0
+        fi
         continue
       fi
     elif [[ lastLineMatched -eq 0 ]]; then
-      if [[ ${line} == "${lastLine}" ]]; then
+      if [[ ${line} == "${lastLine}" || ${line} == "${lastLineAlt}" ]]; then
         lastLineMatched=1
         firstLineMatched=0
         contentArray+=("${content}")
         continue
       fi
-      content+="${line}"$'\n'
+      if ((indentation > 0)); then
+        content+="${line:indentation}"$'\n'
+      else
+        content+="${line}"$'\n'
+      fi
     fi
   done <"${file}"
 

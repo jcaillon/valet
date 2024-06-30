@@ -31,7 +31,7 @@ INFO     The tag message is:
    6 ░ - 🐞 fix
    7 ░ 
 INFO     The new version of valet is: 2.0.0.
-SUCCESS  The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝.
+SUCCESS  The new version has been released, check: https://github.com/jcaillon/valet/releases/latest.
 ```
 
 ### Testing selfRelease, minor version
@@ -452,6 +452,6 @@ DEBUG    The artifact has been created at ⌜valet.tar.gz⌝ with:
 
 INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 ▶ called kurl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz
-SUCCESS  The new version has been released, check: ⌜https://github.com/jcaillon/valet/releases/latest⌝.
+SUCCESS  The new version has been released, check: https://github.com/jcaillon/valet/releases/latest.
 ```
 
