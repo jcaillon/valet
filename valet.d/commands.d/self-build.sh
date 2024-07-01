@@ -394,8 +394,19 @@ function declareFinalCommandDefinitionHelpVariables() {
     fi
   done
 
+  # for each example, prepend valet to the example name
+  local example
+  local -a examples=()
+  for example in "${TEMP_CMD_BUILD_examples_name[@]}"; do
+    if [[ ${example} == "!"* ]]; then
+      examples+=("${example:1}")
+    else
+      examples+=("valet ${example}")
+    fi
+  done
+
   # declare examples, arguments and options for the help
-  if [[ "${#TEMP_CMD_BUILD_examples_name[@]}" -gt 0 ]]; then eval "CMD_EXAMPLES_NAME_${function}=(\"\${TEMP_CMD_BUILD_examples_name[@]}\")"; fi
+  if [[ "${#examples[@]}" -gt 0 ]]; then eval "CMD_EXAMPLES_NAME_${function}=(\"\${examples[@]}\")"; fi
   if [[ "${#TEMP_CMD_BUILD_examples_description[@]}" -gt 0 ]]; then eval "CMD_EXAMPLES_DESCRIPTION_${function}=(\"\${TEMP_CMD_BUILD_examples_description[@]}\")"; fi
   eval "CMD_OPTIONS_NAME_${function}=(\"\${TEMP_CMD_BUILD_options_name[@]}\")"
   eval "CMD_OPTIONS_DESCRIPTION_${function}=(\"\${TEMP_CMD_BUILD_options_description[@]}\")"

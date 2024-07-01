@@ -226,7 +226,9 @@ Examples are used in the command help/usage and let the user quickly understand 
 
 ### ✔️ name
 
-The command for this example. You should not include `valet` as it will be preprended automatically.
+The command for this example.
+
+You should not include `valet` as it will be prepended automatically. If you do not want to prepend it, start the name with `!` (useful to illustrate a more complex command line).
 
 | Mandatory? | Default value? |
 |----------|---------------|

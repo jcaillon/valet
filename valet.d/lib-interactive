@@ -192,11 +192,11 @@ function interactive::promptYesNoRaw() {
       $'\n' | ' ')
         break
         ;;
-      y)
+      y | Y)
         state=true
         break
         ;;
-      n)
+      n | N)
         state=false
         break
         ;;

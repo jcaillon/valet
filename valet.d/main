@@ -285,7 +285,7 @@ function main::getHelpText() {
   local examples
   if [[ -n "${functionExamples:-}" ]]; then
     examples="${cTitle}EXAMPLES${cDefault}"$'\n'$'\n'
-    mainWriteAsTable "${helpWidth}" "" "CMD_EXAMPLES" "${functionName}"
+    mainWriteAsTable "${helpWidth}" "${cCommand}" "CMD_EXAMPLES" "${functionName}"
     examples+="${RETURNED_VALUE}"$'\n'
   fi
 

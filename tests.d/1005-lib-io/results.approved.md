@@ -161,6 +161,19 @@ Exit code: `0`
 3
 ```
 
+### Testing io::isDirectoryWritable
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::isDirectoryWritable '/tmp'
+Writable
+→ io::isDirectoryWritable '/notexisting'
+Not writable
+```
+
 ## Test script 01.invoke
 
 ### Testing io::invoke5, should return 1, input stream from string
