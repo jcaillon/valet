@@ -824,3 +824,33 @@ function io::listDirectories() {
   }
   io::listPaths "${1}" "${2:-false}" "${3:-false}" ioListDirectoriesReturnTrueIfDirectory "${4:-}"
 }
+
+# ## io::isDirectoryWritable
+#
+# Check if the directory is writable. Expects that the directory already exists.
+#
+# - $1: **directory** _as string_:
+#       the directory to check
+#
+# Returns:
+#
+# - $?:
+#   - 0 if the directory is writable
+#   - 1 otherwise
+#
+# ```bash
+# if io::isDirectoryWritable "/path/to/directory"; then
+#   echo "The directory is writable."
+# fi
+# ```
+function io::isDirectoryWritable() {
+  path="${1:-}/writable-test"
+  if (: >"${path}") &>/dev/null; then
+    if ! rm "${path}" 1>/dev/null; then
+      return 1
+    fi
+    return 0
+  else
+    return 1
+  fi
+}

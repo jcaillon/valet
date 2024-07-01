@@ -109,6 +109,25 @@ function testIo::countArgs() {
   test::endTest "Testing io::countArgs" 0
 }
 
+function testIo::isDirectoryWritable() {
+
+  echo "→ io::isDirectoryWritable '/tmp'"
+  if io::isDirectoryWritable '/tmp'; then
+    echo "Writable"
+  else
+    echo "Not writable"
+  fi
+
+  echo "→ io::isDirectoryWritable '/notexisting'"
+  if io::isDirectoryWritable '/notexisting'; then
+    echo "Writable"
+  else
+    echo "Not writable"
+  fi
+
+  test::endTest "Testing io::isDirectoryWritable" 0
+}
+
 function main() {
   testIo::toAbsolutePath
   testIo::readFile
@@ -117,6 +136,7 @@ function main() {
   testIo::cat
   testIo::readStdIn
   testIo::countArgs
+  testIo::isDirectoryWritable
 }
 
 main
