@@ -5,8 +5,8 @@
 		"scope": "",
 		"body": [
 			"##<<VALET_COMMAND",
-			"# command: command",
-			"# function: functionName",
+			"# command: $1",
+			"# function: $2",
 			"# shortDescription: A short sentence.",
 			"# description: |-",
 			"#   A long description that can use ⌜quotes⌝.",
@@ -32,7 +32,12 @@
 			"# - name: command -o -2 value1 arg1 more1 more2",
 			"#   description: |-",
 			"#     Call command with option1, option2 and some arguments.",
-			"##VALET_COMMAND"
+			"##VALET_COMMAND",
+			"function $2() {",
+			"  core::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  core::checkParseResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  $0",
+			"}"
 		]
 	},
 	"new command": {
@@ -41,8 +46,8 @@
 		"scope": "",
 		"body": [
 			": \"---",
-			"command: command",
-			"function: functionName",
+			"command: $1",
+			"function: $2",
 			"shortDescription: A short sentence.",
 			"description: |-",
 			"  A long description that can use ⌜quotes⌝.",
@@ -68,7 +73,12 @@
 			"- name: command -o -2 value1 arg1 more1 more2",
 			"  description: |-",
 			"    Call command with option1, option2 and some arguments.",
-			": \"---"
+			": \"---",
+			"function $2() {",
+			"  core::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  core::checkParseResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  $0",
+			"}"
 		]
 	},
 	"comment section": {

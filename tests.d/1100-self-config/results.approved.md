@@ -24,6 +24,8 @@ cat ${configFile}
 # Empty variables will be replaced by the default values during the execution.
 # You should not define all the variables, only the ones you want to change.
 
+# Do not add custom code to this script, use the custom startup script instead.
+
 # If you break this file, valet will fail to start.
 # You can delete it and run the 'valet self config' command to recreate it.
 
@@ -296,6 +298,8 @@ cat ${configFile}
 #
 # Empty variables will be replaced by the default values during the execution.
 # You should not define all the variables, only the ones you want to change.
+
+# Do not add custom code to this script, use the custom startup script instead.
 
 # If you break this file, valet will fail to start.
 # You can delete it and run the 'valet self config' command to recreate it.

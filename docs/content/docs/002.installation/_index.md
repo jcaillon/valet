@@ -28,13 +28,13 @@ Please review the [installation script](https://github.com/jcaillon/valet/blob/m
 
 1. Download the package from the [latest release from GitHub][latest-release].
 2. Extract the archive to your favorite installation directory.
-3. Add this directory to your PATH (or link Valet to `/usr/local/bin`) so you can call `valet` from your terminal.
+3. Add this directory to your PATH so you can call `valet` from your terminal.
 4. Call `valet` to get started with the example commands!
 
 ## 🔨 Manual installation from sources
 
 1. You can clone this project or download the source from the latest release into the directory of your choice.
-2. Add this directory to your PATH (or link Valet to `/usr/local/bin`) so you can call `valet` from your terminal.
+2. Add this directory to your PATH so you can call `valet` from your terminal.
 3. Call `valet` to get started with the example commands!
 
 {{< cards >}}

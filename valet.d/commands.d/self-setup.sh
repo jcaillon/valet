@@ -74,17 +74,6 @@ function selfSetup() {
   core::sourceFunction selfConfig
   selfConfig --export-current-values --no-edit --override
 
-  # verify that we have the tools required
-  local -i nbMissingTools=0
-  if ! command -v curl &>/dev/null; then
-    log::warning "The tool ⌜curl⌝ is missing. It is needed for the self update command."
-    nbMissingTools+=1
-  fi
-  if [[ nbMissingTools -gt 0 ]]; then
-    log::warning "You are missing some tools, please install them to use Valet to its full potential."$'\n'"You can install them using your package manager, e.g., ⌜sudo apt install curl⌝."$'\n'"You can also install them using a package manager like brew, e.g., ⌜brew install curl⌝"
-    interactive::askForConfirmation "Did you read the warnings above?"
-  fi
-
   log::success "You are all set!"
 
   # tell the user about what's next todo

@@ -504,7 +504,7 @@ Exit code: `0`
 self build      Re-build the menu of valet from your commands.
 self config     Open the configuration file of Valet with your default editor.
 self test       Test your valet custom commands.
-self update     Update valet using the latest release on GitHub.⌉
+self update     Install or update valet using the latest release on GitHub.⌉
 ```
 
 ## Test script 05.logging
@@ -1068,7 +1068,7 @@ Exit code: `0`
 ⌈self build      Re-build the menu of valet from your commands.
 self config     Open the configuration file of Valet with your default editor.
 self test       Test your valet custom commands.
-self update     Update valet using the latest release on GitHub.⌉
+self update     Install or update valet using the latest release on GitHub.⌉
 ```
 
 ### Testing that we can display the help of a sub menu
@@ -1144,7 +1144,7 @@ COMMANDS
   self test
       Test your valet custom commands.
   self update
-      Update valet using the latest release on GitHub.
+      Install or update valet using the latest release on GitHub.
 
 ```
 

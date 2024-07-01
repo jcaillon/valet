@@ -94,11 +94,6 @@ An information icon: II
 [1F[?25l[7mCUB   (Y)ES   [0m   [7mCAB   (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
 [2m[9G│[0m Yes. [16G[2m├──░[0m
 [2m[9G└─[4b─┘[0m
-[2m   ┌─[32b─┐[0m
-[2m░──┤[0m Did you read the warnings above? [39G[2m│[0m
-[2m   └─[32b─┘[0m
-[1G[0J
-[1F[?25l[7mCAB   (O)K   [0m[1G[0K[?25h
 ```
 
 **Error** output:
@@ -106,10 +101,6 @@ An information icon: II
 ```log
 INFO     Now setting up Valet.
 CININFO    II  CDE Creating the valet config file CHI⌜/tmp/valet.d/f1-0⌝CDE.
-CWAWARNING IW  CDE The tool CHI⌜curl⌝CDE is missing. It is needed for the self update command.
-CWAWARNING IW  CDE You are missing some tools, please install them to use Valet to its full potential.
-You can install them using your package manager, e.g., CHI⌜sudo apt install curl⌝CDE.
-You can also install them using a package manager like brew, e.g., CHI⌜brew install curl⌝CDE
 CSUSUCCESS IS  CDE You are all set!
 CININFO    II  CDE As a reminder, you can modify the configuration done during this set up by either:
 - replaying the command CHI⌜valet self setup⌝CDE,

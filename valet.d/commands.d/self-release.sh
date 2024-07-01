@@ -125,7 +125,7 @@ function createRelease() {
   # write the current version in the self-install script
   # then commit the file
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke sed -E -i "s/VALET_VERSION=\"[0-9]+\.[^\"]+\"/VALET_VERSION=\"${version}\"/" "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
+    io::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
 
     io::invoke git add "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
     io::invoke git commit -m ":rocket: releasing version ${version}"
