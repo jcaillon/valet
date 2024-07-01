@@ -76,7 +76,7 @@ ARGUMENTS
 
 EXAMPLES
 
-  self mock2 -o -2 value1 arg1 more1 more2
+  valet self mock2 -o -2 value1 arg1 more1 more2
       Call command1 with option1, option2 and some arguments.
       
 
@@ -235,12 +235,12 @@ ARGUMENTS
 
 EXAMPLES
 
-  help cmd
+  valet help cmd
       Shows the help for the command ⌜cmd⌝
-  help cmd subCmd
+  valet help cmd subCmd
       Shows the help for the sub command 
       ⌜subCmd⌝ of the command ⌜cmd⌝
-  help --no-colors --columns 50
+  valet help --no-colors --columns 50
       Shows the help for the program without any
       color and with a maximum of 50 columns
       
@@ -1144,7 +1144,7 @@ COMMANDS
   self test
       Test your valet custom commands.
   self update
-      Update valet using the latest release on GitHub.
+      Install or update valet using the latest release on GitHub.
 
 ```
 

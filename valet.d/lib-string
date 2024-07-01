@@ -48,6 +48,55 @@ function string::cutField() {
   RETURNED_VALUE=""
 }
 
+# ## string::compareSemanticVersion
+#
+# This function allows to compare two semantic versions formatted like:
+# major.minor.patch-prerelease+build
+#
+# - $1: **version1** _as string_:
+#       the first version to compare
+# - $2: **version2** _as string_:
+#       the second version to compare
+#
+# Returns:
+#
+# - `RETURNED_VALUE`:
+#   - 0 if the versions are equal,
+#   - 1 if version1 is greater,
+#   - -1 if version2 is greater
+#
+# ```bash
+# string::compareSemanticVersion "2.3.4-prerelease+build" "1.2.3-prerelease+build"
+# local comparison="${RETURNED_VALUE}"
+# ```
+#
+# > The prerelease and build are ignored in the comparison.
+function string::compareSemanticVersion() {
+  local version1="${1#v}"
+  local version2="${2#v}"
+
+  local -i semVerIndex
+  local semVerNumber1 semVerNumber2
+  for semVerIndex in {0..2}; do
+    string::cutField "${version1}" "${semVerIndex}" "."
+    semVerNumber1="${RETURNED_VALUE%%-*}"
+    semVerNumber1="${semVerNumber1%%+*}"
+    string::cutField "${version2}" "${semVerIndex}" "."
+    semVerNumber2="${RETURNED_VALUE%%-*}"
+    semVerNumber2="${semVerNumber2%%+*}"
+    if [[ ! ${semVerNumber1} =~ ^[0-9]+$ || ! ${semVerNumber2} =~ ^[0-9]+$ ]]; then
+      core::fail "Failed to compare versions ⌜${version1}⌝ and ⌜${version2}⌝ because they are not valid semantic versions."
+    elif (( semVerNumber1 > semVerNumber2 )); then
+      RETURNED_VALUE=1
+      return 0
+    elif (( semVerNumber1 < semVerNumber2 )); then
+      RETURNED_VALUE=-1
+      return 0
+    fi
+  done
+  RETURNED_VALUE=0
+}
+
 # ## string::bumpSemanticVersion
 #
 # This function allows to bump a semantic version formatted like:
@@ -92,7 +141,11 @@ function string::bumpSemanticVersion() {
   if [[ ${bumpLevel:-} == "minor" ]]; then level=1; fi
   local newVersion semVerString
   for semVerIndex in {0..2}; do
-    string::cutField "${version}" "${semVerIndex}" "." && semVerString="${RETURNED_VALUE%-*}"
+    string::cutField "${version}" "${semVerIndex}" "."
+    semVerString="${RETURNED_VALUE%-*}"
+    if [[ ! ${semVerString} =~ ^[0-9]+$ ]]; then
+      core::fail "Failed to bump the version ⌜${version}⌝ because it is not valid semantic version."
+    fi
     semVerNumber="${semVerString%+}"
     if [[ semVerIndex -eq level ]]; then semVerNumber=$((semVerNumber + 1)); fi
     if [[ semVerIndex -gt level ]]; then semVerNumber=0; fi

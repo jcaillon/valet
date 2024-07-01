@@ -844,13 +844,9 @@ function io::listDirectories() {
 # fi
 # ```
 function io::isDirectoryWritable() {
-  path="${1:-}/writable-test"
-  if (: >"${path}") &>/dev/null; then
-    if ! rm "${path}" 1>/dev/null; then
-      return 1
-    fi
-    return 0
-  else
+  local path="${1:-}/writable-test-${BASHPID}"
+  if ! (: >"${path}") &>/dev/null || ! rm "${path}" 1>/dev/null; then
     return 1
   fi
+  return 0
 }

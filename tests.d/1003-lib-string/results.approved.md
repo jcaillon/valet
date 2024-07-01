@@ -26,6 +26,15 @@ Exit code: `0`
 
 → bumping 1.2.3-alpha patch false
 1.2.157-alpha
+
+→ bumping aze patch false
+Failed as expected
+```
+
+**Error** output:
+
+```log
+ERROR    Failed to bump the version ⌜aze⌝ because it is not valid semantic version.
 ```
 
 ### Testing string::kebabCaseToSnakeCase
@@ -236,5 +245,40 @@ hello=⌜hello⌝
 
 → string::trim $'\n'$'\t''  hello'$'\n'$'\t'' '
 hello=⌜hello⌝
+```
+
+### Testing string::compareSemanticVersion function
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::compareSemanticVersion '1.2.3' '1.2.3'
+0=0
+
+→ string::compareSemanticVersion '1.2.3-alpha' '1.2.4+az123'
+-1=-1
+
+→ string::compareSemanticVersion '1.2.3' '1.2.2'
+1=1
+
+→ string::compareSemanticVersion '2.2.3' '1.2.3-alpha'
+1=1
+
+→ string::compareSemanticVersion '1.2.3+a1212' '1.3.3'
+-1=-1
+
+→ string::compareSemanticVersion '1.2.3-alpha+a123123' '1.2.3-alpha+123zer'
+0=0
+
+→ string::compareSemanticVersion '1.2a.3' '1.2.3derp'
+Failed as expected
+```
+
+**Error** output:
+
+```log
+ERROR    Failed to compare versions ⌜1.2a.3⌝ and ⌜1.2.3derp⌝ because they are not valid semantic versions.
 ```
 

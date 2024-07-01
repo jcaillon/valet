@@ -28,6 +28,10 @@ function testString::bumpSemanticVersion() {
   echo "→ bumping 1.2.3-alpha patch false"
   string::bumpSemanticVersion "1.2.156-alpha" "patch" "false" && echo "${RETURNED_VALUE}"
 
+  echo
+  echo "→ bumping aze patch false"
+  (string::bumpSemanticVersion "aze" "patch" "false") || echo "Failed as expected"
+
   test::endTest "Testing string::bumpSemanticVersion" 0
 }
 
@@ -220,6 +224,31 @@ function testString::trim() {
   test::endTest "Testing string::trim function" 0
 }
 
+function testString::compareSemanticVersion() {
+  echo "→ string::compareSemanticVersion '1.2.3' '1.2.3'"
+  string::compareSemanticVersion '1.2.3' '1.2.3' && echo "0=${RETURNED_VALUE}"
+  echo
+  echo "→ string::compareSemanticVersion '1.2.3-alpha' '1.2.4+az123'"
+  string::compareSemanticVersion '1.2.3-alpha' '1.2.4+az123' && echo "-1=${RETURNED_VALUE}"
+  echo
+  echo "→ string::compareSemanticVersion '1.2.3' '1.2.2'"
+  string::compareSemanticVersion '1.2.3' '1.2.2' && echo "1=${RETURNED_VALUE}"
+  echo
+  echo "→ string::compareSemanticVersion '2.2.3' '1.2.3-alpha'"
+  string::compareSemanticVersion '2.2.3' '1.2.3-alpha' && echo "1=${RETURNED_VALUE}"
+  echo
+  echo "→ string::compareSemanticVersion '1.2.3+a1212' '1.3.3'"
+  string::compareSemanticVersion '1.2.3+a1212' '1.3.3' && echo "-1=${RETURNED_VALUE}"
+  echo
+  echo "→ string::compareSemanticVersion '1.2.3-alpha+a123123' '1.2.3-alpha+123zer'"
+  string::compareSemanticVersion '1.2.3-alpha+a123123' '1.2.3-alpha+123zer' && echo "0=${RETURNED_VALUE}"
+  echo
+  echo "→ string::compareSemanticVersion '1.2a.3' '1.2.3derp'"
+  (string::compareSemanticVersion '1.2a.3' '1.2.3derp') || echo "Failed as expected"
+
+  test::endTest "Testing string::compareSemanticVersion function" 0
+}
+
 function main() {
   testString::bumpSemanticVersion
   testString::kebabCaseToSnakeCase
@@ -233,6 +262,7 @@ function main() {
   testString::split
   testString::regexGetFirst
   testString::trim
+  testString::compareSemanticVersion
 }
 
 main
