@@ -104,3 +104,34 @@ function system::getUndeclaredVariables() {
   fi
   return 1
 }
+
+# ## system::getNotExistingCommands
+#
+# This function returns the list of not existing commands for the given names.
+#
+# - $@: **command names** _as string_:
+#       the list of command names to check.
+#
+# Returns:
+#
+# - $? = 0 if there are not existing commands, 1 otherwise.
+# - `RETURNED_ARRAY`: the list of not existing commands.
+#
+# ```bash
+# if system::getNotExistingCommands "command1" "command2"; then
+#   printf 'The following commands do not exist: %s' "${RETURNED_ARRAY[*]}"
+# fi
+# ```
+function system::getNotExistingCommands() {
+  RETURNED_ARRAY=()
+  local cmd
+  for cmd in "$@"; do
+    if ! command -v "${cmd}" &>/dev/null; then
+      RETURNED_ARRAY+=("${cmd}")
+    fi
+  done
+  if [[ ${#RETURNED_ARRAY[@]} -gt 0 ]]; then
+    return 0
+  fi
+  return 1
+}

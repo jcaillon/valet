@@ -66,11 +66,28 @@ function testSystem::getUndeclaredVariables() {
   test::endTest "Testing system::date" 0
 }
 
+function testSystem::getNotExistingCommands() {
+
+  echo "→ system::getNotExistingCommands"
+  if ! system::getNotExistingCommands; then
+    echo "No not existing commands found.${RETURNED_ARRAY[*]}"
+  fi
+
+  echo
+  echo "→ system::getNotExistingCommands NONEXISTINGSTUFF system::getNotExistingCommands rm YETANOTHERONEMISSING"
+  if system::getNotExistingCommands NONEXISTINGSTUFF system::getNotExistingCommands rm YETANOTHERONEMISSING; then
+    echo "Found not existing commands: ⌜${RETURNED_ARRAY[*]}⌝."
+  fi
+
+  test::endTest "Testing system::getNotExistingCommands" 0
+}
+
 function main() {
   testSystem::os
   testSystem::env
   testSystem::date
   testSystem::getUndeclaredVariables
+  testSystem::getNotExistingCommands
 }
 
 main

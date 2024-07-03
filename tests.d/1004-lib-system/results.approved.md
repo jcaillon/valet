@@ -62,3 +62,17 @@ No undeclared variables found.
 Found undeclared variables: ⌜dfg NOP⌝.
 ```
 
+### Testing system::getNotExistingCommands
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ system::getNotExistingCommands
+No not existing commands found.
+
+→ system::getNotExistingCommands NONEXISTINGSTUFF system::getNotExistingCommands rm YETANOTHERONEMISSING
+Found not existing commands: ⌜NONEXISTINGSTUFF YETANOTHERONEMISSING⌝.
+```
+
