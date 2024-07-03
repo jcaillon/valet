@@ -82,12 +82,35 @@ function testSystem::getNotExistingCommands() {
   test::endTest "Testing system::getNotExistingCommands" 0
 }
 
+function testSystem::commandExists() {
+
+  echo "→ system::commandExists"
+  if ! system::commandExists; then
+    echo "Command not found."
+  fi
+
+  echo
+  echo "→ system::commandExists NONEXISTINGSTUFF"
+  if ! system::commandExists NONEXISTINGSTUFF; then
+    echo "Command not found."
+  fi
+
+  echo
+  echo "→ system::commandExists rm ls"
+  if system::commandExists rm ls; then
+    echo "Found command."
+  fi
+
+  test::endTest "Testing system::commandExists" 0
+}
+
 function main() {
   testSystem::os
   testSystem::env
   testSystem::date
   testSystem::getUndeclaredVariables
   testSystem::getNotExistingCommands
+  testSystem::commandExists
 }
 
 main

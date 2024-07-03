@@ -83,7 +83,9 @@ function system::date() {
 #
 # Returns:
 #
-# - $? = 0 if there are variable undeclared, 1 otherwise.
+# - $?
+#   - 0 if there are variable undeclared
+#   - 1 otherwise.
 # - `RETURNED_ARRAY`: the list of undeclared variables.
 #
 # ```bash
@@ -114,7 +116,9 @@ function system::getUndeclaredVariables() {
 #
 # Returns:
 #
-# - $? = 0 if there are not existing commands, 1 otherwise.
+# - $?
+#   - 0 if there are not existing commands
+#   - 1 otherwise.
 # - `RETURNED_ARRAY`: the list of not existing commands.
 #
 # ```bash
@@ -131,6 +135,31 @@ function system::getNotExistingCommands() {
     fi
   done
   if [[ ${#RETURNED_ARRAY[@]} -gt 0 ]]; then
+    return 0
+  fi
+  return 1
+}
+
+# ## system::commandExists
+#
+# Check if the given command exists.
+#
+# - $1: **command name** _as string_:
+#       the command name to check.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the command exists
+#   - 1 otherwise.
+#
+# ```bash
+# if system::commandExists "command1"; then
+#   printf 'The command exists.'
+# fi
+# ```
+function system::commandExists() {
+  if command -v "${1:-}" &>/dev/null; then
     return 0
   fi
   return 1

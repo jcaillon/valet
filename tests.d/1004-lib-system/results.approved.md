@@ -76,3 +76,20 @@ No not existing commands found.
 Found not existing commands: ⌜NONEXISTINGSTUFF YETANOTHERONEMISSING⌝.
 ```
 
+### Testing system::commandExists
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ system::commandExists
+Command not found.
+
+→ system::commandExists NONEXISTINGSTUFF
+Command not found.
+
+→ system::commandExists rm ls
+Found command.
+```
+
