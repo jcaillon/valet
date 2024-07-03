@@ -18,7 +18,7 @@ Exit code: `0`
 INFO     Dry run mode is enabled, no changes will be made.
 ▶ called io::invoke git rev-parse HEAD
 INFO     The current version of valet is: 1.2.3.
-INFO     Found 100 functions with documentation.
+INFO     Found 102 functions with documentation.
 ▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
@@ -176,9 +176,11 @@ DEBUG    Found function: ⌜system::os⌝
 DEBUG    Found function: ⌜system::env⌝
 DEBUG    Found function: ⌜system::date⌝
 DEBUG    Found function: ⌜system::getUndeclaredVariables⌝
+DEBUG    Found function: ⌜system::getNotExistingCommands⌝
+DEBUG    Found function: ⌜system::commandExists⌝
 DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 100 functions with documentation.
+INFO     Found 102 functions with documentation.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -191,6 +193,8 @@ INFO     Found 100 functions with documentation.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
@@ -299,6 +303,8 @@ INFO     Found 100 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md

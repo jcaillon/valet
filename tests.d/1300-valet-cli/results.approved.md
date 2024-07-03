@@ -1144,7 +1144,7 @@ COMMANDS
   self test
       Test your valet custom commands.
   self update
-      Install or update valet using the latest release on GitHub.
+      Update valet using the latest release on GitHub.
 
 ```
 
