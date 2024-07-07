@@ -170,8 +170,8 @@ Exit code: `0`
 ```plaintext
 → io::isDirectoryWritable '/tmp'
 Writable
-→ io::isDirectoryWritable '/notexisting'
-Not writable
+→ io::isDirectoryWritable '/tmp/notexisting'
+Writable
 ```
 
 ## Test script 01.invoke

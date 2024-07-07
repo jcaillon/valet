@@ -118,8 +118,8 @@ function testIo::isDirectoryWritable() {
     echo "Not writable"
   fi
 
-  echo "→ io::isDirectoryWritable '/notexisting'"
-  if io::isDirectoryWritable '/notexisting'; then
+  echo "→ io::isDirectoryWritable '/tmp/notexisting'"
+  if io::isDirectoryWritable '/tmp/notexisting'; then
     echo "Writable"
   else
     echo "Not writable"

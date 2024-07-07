@@ -231,15 +231,15 @@ function interactive::promptYesNoRaw() {
 # The text is wrapped and put inside a box like so:
 #
 # ```text
-#   ┌────────────░
-#   │ My prompt.
-#   └────────────░
+#    ┌────────────────────────────────┐
+# ░──┤ Is this an important question? │
+#    └────────────────────────────────┘
 # ```
 #
 # - $1: **prompt** _as string_:
 #       the prompt to display
 # - $2: max width _as int_:
-#       (optional) the maximum width of the dialog box
+#       (optional) the maximum width of text in the dialog box
 #       (defaults to GLOBAL_COLUMNS)
 #
 # ```bash
@@ -256,15 +256,15 @@ function interactive::displayQuestion() {
 # The text is wrapped and put inside a box like so:
 #
 # ```text
-# ░────────────┐
-#   My answer. │
-# ░────────────┘
+#     ┌─────┐
+#     │ No. ├──░
+#     └─────┘
 # ```)
 #
 # - $1: **answer** _as string_:
 #       the answer to display
 # - $2: max width _as int_:
-#       (optional) the maximum width of the dialog box
+#       (optional) the maximum width of the text in the dialog box
 #       (defaults to GLOBAL_COLUMNS)
 #
 # ```bash
@@ -283,7 +283,7 @@ function interactive::displayAnswer() {
 # - $2: **text** _as string_:
 #       the text to display
 # - $3: max width _as int_:
-#       (optional) the maximum width of the dialog box
+#       (optional) the maximum width of the text in the dialog box
 #       (defaults to GLOBAL_COLUMNS)
 #
 # ```bash
@@ -292,40 +292,63 @@ function interactive::displayAnswer() {
 interactive::displayDialogBox() {
   local speaker="${1}"
   local text="${2}"
-  local dialogMaxWidth="${3:-${GLOBAL_COLUMNS}}"
+  local requiredMaxTextWidth="${3:-${GLOBAL_COLUMNS}}"
 
-  local -i maxDialogWidth=$((GLOBAL_COLUMNS - 4))
-  if [[ ${#dialogMaxWidth} -lt ${maxDialogWidth} ]]; then
-    maxDialogWidth=${dialogMaxWidth}
+  local -i maxTextWidth=$((GLOBAL_COLUMNS - 7))
+  if (( requiredMaxTextWidth >= maxTextWidth )); then
+    requiredMaxTextWidth=${maxTextWidth}
   fi
-  local -i maxTextWidth=$((maxDialogWidth - 4))
-  if [[ ${#text} -lt ${maxTextWidth} ]]; then
-    maxTextWidth=${#text}
-    maxDialogWidth=$((maxTextWidth + 4))
+  local -i textWidth=${requiredMaxTextWidth}
+  if (( ${#text} < textWidth )); then
+    textWidth=${#text}
   fi
 
-  string::wrapText "${text}" "${maxTextWidth}"
+  string::wrapText "${text}" "${textWidth}"
   local wrappedText="${RETURNED_VALUE}"
 
-  local finalString line
+  local finalString line sideString
+  local -i lineNumber=0
+
+  local -i maxLineLength=0
+  while read -r line; do
+    if (( ${#line} > maxLineLength )); then
+      maxLineLength=${#line}
+    fi
+  done <<<"${wrappedText}"
+  textWidth=${maxLineLength}
 
   if [[ ${speaker} == "user" ]]; then
 
-    local startColumn=$((GLOBAL_COLUMNS - maxDialogWidth + 1))
+    local -i startColumn=$((GLOBAL_COLUMNS - textWidth - 7))
+    startColumn=$((startColumn >= 0 ? startColumn : 0))
+    startColumn=$((startColumn <= 8 ? startColumn : 8))
+    startColumn+=1
 
-    finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}┌─${AC__REPEAT__}${maxTextWidth}${__AC__LAST_CHAR}─░${AC__TEXT_RESET}"$'\n'
+    finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}┌─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┐${AC__TEXT_RESET}"$'\n'
     while read -r line; do
-      finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}│${AC__TEXT_RESET} ${line}${AC__TEXT_FAINT}${AC__TEXT_RESET}"$'\n'
+      if (( lineNumber == 0 )); then
+        sideString="├──░"
+      else
+        sideString="│"
+      fi
+      finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}│${AC__TEXT_RESET} ${line} ${AC__CURSOR_MOVE__}$((textWidth + 3 + startColumn))${__AC__COLUMN}${AC__TEXT_FAINT}${sideString}${AC__TEXT_RESET}"$'\n'
+      lineNumber+=1
     done <<<"${wrappedText}"
-    finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}└─${AC__REPEAT__}${maxTextWidth}${__AC__LAST_CHAR}─░${AC__TEXT_RESET}"$'\n'
+    finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}└─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┘${AC__TEXT_RESET}"$'\n'
 
   elif [[ ${speaker} == "system" ]]; then
 
-    finalString+="${AC__TEXT_FAINT}░─${AC__REPEAT__}${maxTextWidth}${__AC__LAST_CHAR}─┐${AC__TEXT_RESET}"$'\n'
+    finalString+="${AC__TEXT_FAINT}   ┌─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┐${AC__TEXT_RESET}"$'\n'
     while read -r line; do
-      finalString+="${AC__TEXT_FAINT}  ${AC__TEXT_RESET}${line} ${AC__CURSOR_MOVE__}$((maxTextWidth + 4))${__AC__COLUMN}${AC__TEXT_FAINT}│${AC__TEXT_RESET}"$'\n'
+      if (( lineNumber == 0 )); then
+        sideString="░──┤"
+      else
+        sideString="   │"
+      fi
+      finalString+="${AC__TEXT_FAINT}${sideString}${AC__TEXT_RESET} ${line} ${AC__CURSOR_MOVE__}$((textWidth + 7))${__AC__COLUMN}${AC__TEXT_FAINT}│${AC__TEXT_RESET}"$'\n'
+      lineNumber+=1
     done <<<"${wrappedText}"
-    finalString+="${AC__TEXT_FAINT}░─${AC__REPEAT__}${maxTextWidth}${__AC__LAST_CHAR}─┘${AC__TEXT_RESET}"$'\n'
+    finalString+="${AC__TEXT_FAINT}   └─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┘${AC__TEXT_RESET}"$'\n'
 
   fi
 

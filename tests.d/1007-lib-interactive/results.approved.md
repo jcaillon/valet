@@ -10,13 +10,13 @@ Exit code: `0`
 
 ```plaintext
 echo y | interactive::promptYesNo 'Do you see this message?'
-[2m░─[24b─┐[0m
-[2m  [0mDo you see this message? [28G[2m│[0m
-[2m░─[24b─┘[0m
+[2m   ┌─[24b─┐[0m
+[2m░──┤[0m Do you see this message? [31G[2m│[0m
+[2m   └─[24b─┘[0m
 [1G[0J
-[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9992G┌─[4b─░[0m
-[2m[9992G│[0m Yes.[2m[0m
-[2m[9992G└─[4b─░[0m
+[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
+[2m[9G│[0m Yes. [16G[2m├──░[0m
+[2m[9G└─[4b─┘[0m
 ```
 
 ### Testing interactive::promptYesNo
@@ -28,13 +28,13 @@ Exit code: `1`
 ```plaintext
 
 echo n | interactive::promptYesNo 'Do you see this message?'
-[2m░─[24b─┐[0m
-[2m  [0mDo you see this message? [28G[2m│[0m
-[2m░─[24b─┘[0m
+[2m   ┌─[24b─┐[0m
+[2m░──┤[0m Do you see this message? [31G[2m│[0m
+[2m   └─[24b─┘[0m
 [1G[0J
-[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9993G┌─[3b─░[0m
-[2m[9993G│[0m No.[2m[0m
-[2m[9993G└─[3b─░[0m
+[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
+[2m[9G│[0m No. [15G[2m├──░[0m
+[2m[9G└─[3b─┘[0m
 ```
 
 ### test interactive::askForConfirmation with yes
@@ -45,9 +45,9 @@ Exit code: `0`
 
 ```plaintext
 echo y | interactive::askForConfirmation 'Please press OK.'
-[2m░─[16b─┐[0m
-[2m  [0mPlease press OK. [20G[2m│[0m
-[2m░─[16b─┘[0m
+[2m   ┌─[16b─┐[0m
+[2m░──┤[0m Please press OK. [23G[2m│[0m
+[2m   └─[16b─┘[0m
 [1G[0J
 [1F[?25l[7m   (O)K   [0m[1G[0K[?25h
 ```

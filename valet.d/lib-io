@@ -827,10 +827,12 @@ function io::listDirectories() {
 
 # ## io::isDirectoryWritable
 #
-# Check if the directory is writable. Expects that the directory already exists.
+# Check if the directory is writable. Creates the directory if it does not exist.
 #
 # - $1: **directory** _as string_:
 #       the directory to check
+# - $2: test file name _as string_:
+#       (optional) the name of the file to create in the directory to test the write access
 #
 # Returns:
 #
@@ -844,9 +846,17 @@ function io::listDirectories() {
 # fi
 # ```
 function io::isDirectoryWritable() {
-  local path="${1:-}/writable-test-${BASHPID}"
-  if ! (: >"${path}") &>/dev/null || ! rm "${path}" 1>/dev/null; then
+  local directory="${1%/}"
+  local testFile="${2:-writable-test-${BASHPID}}"
+  if ! mkdir -p "${directory}" &>/dev/null; then
     return 1
   fi
-  return 0
+  local path="${1}/${testFile}"
+  if (: >"${path}") &>/dev/null; then
+    if ! rm -f "${path}" 1>/dev/null; then
+      return 1
+    fi
+    return 0
+  fi
+  return 1
 }

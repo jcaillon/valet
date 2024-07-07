@@ -28,6 +28,11 @@ This page lists the features that I would like to implement in Valet. They come 
 - add valet in brew
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.
 - allow to do that: `eval "$(valet self uninstall)"` to clean everything up
+- implement a long running task wait spinner using coproc
+- functions:
+  - head / tail from file.
+  - test if folder is writeable
+  - Implement regex replace in pure bash.
 
 
 [valet-issues]: https://github.com/jcaillon/valet/issues
