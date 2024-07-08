@@ -417,8 +417,16 @@ function selfUpdate::updateGitRepository() {
     local branch="${BASH_REMATCH[1]:-}"
     branch="${branch%%$'\n'*}"
     log::info "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
-    git fetch -q
-    git merge -q --ff-only "origin/${branch}" || return 1
+    pushd "${1}" &>/dev/null || core::fail "Could not change to the directory ⌜${1}⌝."
+    if ! git fetch -q; then
+      popd &>/dev/null || :
+      return 1
+    fi
+    if ! git merge -q --ff-only "origin/${branch}" &>/dev/null; then
+      popd &>/dev/null || :
+      return 1
+    fi
+    popd &>/dev/null || :
     log::success "The git repository ⌜${1}⌝ has been updated."
     return 0
   fi
