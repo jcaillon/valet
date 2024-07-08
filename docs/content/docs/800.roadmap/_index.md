@@ -16,7 +16,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Create a valet-community-commands where everyone can contribute to new default commands for Valet.
 - Add a command self package that build the user commands into a single script file.
 - fix running tests with verbose mode on.
-- Have a consistent look and feel for interactive functions.
 - Reimplement usage of main::sortCommands / main::addLastChoice.
 - Betters checks in self build!
 - A command can declare dependencies to auto check if some tools are installed before running the command.

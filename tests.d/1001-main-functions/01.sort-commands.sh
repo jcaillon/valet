@@ -38,6 +38,7 @@ another3  	This is another command 3"
   test::endTest "Testing main::sortCommands for another id, the order of commands should be the initial one" $?
 
   # testing that after adding more than x commands, we only keep the last x
+  VALET_CONFIG_REMEMBER_LAST_CHOICES=5
   local -i i
   for i in {1..10}; do
     main::addLastChoice "myid1" "cm${i}"
