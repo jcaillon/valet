@@ -12,14 +12,14 @@ It allows you to check the http status code and return 1 if it is not acceptable
 It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o ${2}.
 
 - $1: **fail** _as bool_:
-     true/false to indicate if the function should fail in case the execution fails
+      true/false to indicate if the function should fail in case the execution fails
 - $2: **acceptable codes** _as string_:
-     list of http status codes that are acceptable, comma separated
-     (defaults to 200,201,202,204,301,304,308 if left empty)
+      list of http status codes that are acceptable, comma separated
+      (defaults to 200,201,202,204,301,304,308 if left empty)
 - $3: **path** _as string_:
-     the file in which to save the output of curl
+      the file in which to save the output of curl
 - $@: **curl arguments** _as any_:
-     options for curl
+      options for curl
 
 Returns:
 
@@ -41,12 +41,12 @@ It allows you to check the http status code and return 1 if it is not acceptable
 It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o "tempfile".
 
 - $1: **fail** _as bool_:
-     true/false to indicate if the function should fail in case the execution fails
+      true/false to indicate if the function should fail in case the execution fails
 - $2: **acceptable codes** _as string_:
-     list of http status codes that are acceptable, comma separated
-     (defaults to 200,201,202,204,301,304,308 if left empty)
+      list of http status codes that are acceptable, comma separated
+      (defaults to 200,201,202,204,301,304,308 if left empty)
 - $@: **curl arguments** _as any_:
-     options for curl
+      options for curl
 
 Returns:
 
@@ -64,4 +64,4 @@ kurl::toVar false 200,201 https://example.com || core::fail "The curl command fa
 
 
 
-> Documentation generated for the version 0.18.87 (2024-06-16).
+> Documentation generated for the version 0.18.426 (2024-07-08).

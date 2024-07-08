@@ -60,9 +60,9 @@ We replace source instead of creating a new function to allow us to
 specify the included file for spellcheck.
 
 - $1: **library name** _as string_:
-     the name of the library (array, interactive, string...) or the file path to include.
+      the name of the library (array, interactive, string...) or the file path to include.
 - $@: arguments _as any_:
-     (optional) the arguments to pass to the included file (mimics the builtin source command).
+      (optional) the arguments to pass to the included file (mimics the builtin source command).
 
 ```bash
   source string array system
@@ -98,12 +98,12 @@ Will also display the help if the help option is true.
 This should be called from a command function for which you want to check the parsing results.
 
 - $1: **display help** _as bool_:
-     the help option
+      the help option
 - $2: **parsing errors** _as string_:
-     the parsing errors
+      the parsing errors
 - $3: function name _as string_:
-     (optional) the function name
-     (defaults to the calling function)
+      (optional) the function name
+      (defaults to the calling function)
 
 ```bash
 core::checkParseResults "${help:-}" "${parsingErrors:-}"
@@ -117,7 +117,7 @@ Source the file associated with a command function.
 This allows you to call a command function without having to source the file manually.
 
 - $1: **function name** _as string_:
-     the function name
+      the function name
 
 ```bash
 core::sourceFunction "functionName"
@@ -129,9 +129,9 @@ core::sourceFunction "functionName"
 Displays an error message and then exit the program with error.
 
 - $1: **exit code** _as int_:
-     the exit code to use, should be between 1 and 255
+      the exit code to use, should be between 1 and 255
 - $@: **message** _as string_:
-     the error message to display
+      the error message to display
 
 ```bash
 core::failWithCode 255 "This is an error message."
@@ -159,7 +159,7 @@ local directory="${RETURNED_VALUE}"
 Displays an error message and then exit the program with error.
 
 - $@: **message** _as string_:
-     the error message to display
+      the error message to display
 
 ```bash
 core::fail "This is an error message."
@@ -184,7 +184,7 @@ See the documentation for more details on the parser: <https://jcaillon.github.i
 
 
 - $@: **arguments** _as any_:
-     the arguments to parse
+      the arguments to parse
 
 Returns:
 
@@ -205,4 +205,4 @@ core::parseArguments "$@" && eval "${RETURNED_VALUE}"
 
 
 
-> Documentation generated for the version 0.18.87 (2024-06-16).
+> Documentation generated for the version 0.18.426 (2024-07-08).

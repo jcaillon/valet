@@ -2,7 +2,28 @@
 # This script contains the documentation of all the valet library functions.
 # It can be used in your editor to provide auto-completion and documentation.
 #
-# Documentation generated for the version 0.18.146 (2024-06-22).
+# Documentation generated for the version 0.18.426 (2024-07-08).
+
+# ## system::commandExists
+# 
+# Check if the given command exists.
+# 
+# - $1: **command name** _as string_:
+#       the command name to check.
+# 
+# Returns:
+# 
+# - $?
+#   - 0 if the command exists
+#   - 1 otherwise.
+# 
+# ```bash
+# if system::commandExists "command1"; then
+#   printf 'The command exists.'
+# fi
+# ```
+# 
+function system::commandExists() { return 0; }
 
 # ## io::toAbsolutePath
 # 
@@ -196,15 +217,15 @@ function interactive::switchBackFromFullScreen() { return 0; }
 # The text is wrapped and put inside a box like so:
 # 
 # ```text
-# ░────────────┐
-#   My answer. │
-# ░────────────┘
+#     ┌─────┐
+#     │ No. ├──░
+#     └─────┘
 # ```)
 # 
 # - $1: **answer** _as string_:
 #       the answer to display
 # - $2: max width _as int_:
-#       (optional) the maximum width of the dialog box
+#       (optional) the maximum width of the text in the dialog box
 #       (defaults to GLOBAL_COLUMNS)
 # 
 # ```bash
@@ -805,7 +826,7 @@ function log::success() { return 0; }
 # - $2: **text** _as string_:
 #       the text to display
 # - $3: max width _as int_:
-#       (optional) the maximum width of the dialog box
+#       (optional) the maximum width of the text in the dialog box
 #       (defaults to GLOBAL_COLUMNS)
 # 
 # ```bash
@@ -1089,6 +1110,29 @@ function string::trimAll() { return 0; }
 # 
 function core::checkParseResults() { return 0; }
 
+# ## io::isDirectoryWritable
+# 
+# Check if the directory is writable. Creates the directory if it does not exist.
+# 
+# - $1: **directory** _as string_:
+#       the directory to check
+# - $2: test file name _as string_:
+#       (optional) the name of the file to create in the directory to test the write access
+# 
+# Returns:
+# 
+# - $?:
+#   - 0 if the directory is writable
+#   - 1 otherwise
+# 
+# ```bash
+# if io::isDirectoryWritable "/path/to/directory"; then
+#   echo "The directory is writable."
+# fi
+# ```
+# 
+function io::isDirectoryWritable() { return 0; }
+
 # ## system::exportTerminalSize
 # 
 # This function exports the terminal size.
@@ -1104,6 +1148,28 @@ function core::checkParseResults() { return 0; }
 # ```
 # 
 function system::exportTerminalSize() { return 0; }
+
+# ## system::getNotExistingCommands
+# 
+# This function returns the list of not existing commands for the given names.
+# 
+# - $@: **command names** _as string_:
+#       the list of command names to check.
+# 
+# Returns:
+# 
+# - $?
+#   - 0 if there are not existing commands
+#   - 1 otherwise.
+# - `RETURNED_ARRAY`: the list of not existing commands.
+# 
+# ```bash
+# if system::getNotExistingCommands "command1" "command2"; then
+#   printf 'The following commands do not exist: %s' "${RETURNED_ARRAY[*]}"
+# fi
+# ```
+# 
+function system::getNotExistingCommands() { return 0; }
 
 # ## io::invokef2piped
 # 
@@ -1318,15 +1384,15 @@ function io::invoke() { return 0; }
 # The text is wrapped and put inside a box like so:
 # 
 # ```text
-#   ┌────────────░
-#   │ My prompt.
-#   └────────────░
+#    ┌────────────────────────────────┐
+# ░──┤ Is this an important question? │
+#    └────────────────────────────────┘
 # ```
 # 
 # - $1: **prompt** _as string_:
 #       the prompt to display
 # - $2: max width _as int_:
-#       (optional) the maximum width of the dialog box
+#       (optional) the maximum width of text in the dialog box
 #       (defaults to GLOBAL_COLUMNS)
 # 
 # ```bash
@@ -1458,7 +1524,9 @@ function array::appendIfNotPresent() { return 0; }
 # 
 # Returns:
 # 
-# - $? = 0 if there are variable undeclared, 1 otherwise.
+# - $?
+#   - 0 if there are variable undeclared
+#   - 1 otherwise.
 # - `RETURNED_ARRAY`: the list of undeclared variables.
 # 
 # ```bash
@@ -1945,6 +2013,32 @@ function core::parseArguments() { return 0; }
 # ```
 # 
 function io::checkAndWarn() { return 0; }
+
+# ## string::compareSemanticVersion
+# 
+# This function allows to compare two semantic versions formatted like:
+# major.minor.patch-prerelease+build
+# 
+# - $1: **version1** _as string_:
+#       the first version to compare
+# - $2: **version2** _as string_:
+#       the second version to compare
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`:
+#   - 0 if the versions are equal,
+#   - 1 if version1 is greater,
+#   - -1 if version2 is greater
+# 
+# ```bash
+# string::compareSemanticVersion "2.3.4-prerelease+build" "1.2.3-prerelease+build"
+# local comparison="${RETURNED_VALUE}"
+# ```
+# 
+# > The prerelease and build are ignored in the comparison.
+# 
+function string::compareSemanticVersion() { return 0; }
 
 # ## log::errorTrace
 # 

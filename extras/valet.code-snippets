@@ -1,5 +1,19 @@
 {
-// Documentation generated for the version 0.18.146 (2024-06-22).
+// Documentation generated for the version 0.18.426 (2024-07-08).
+
+		"system::commandExists": {
+		  "prefix": "system::commandExists",
+		  "description": "Check if the given command exists...",
+		  "scope": "",
+		  "body": [ "system::commandExists \"${1:**command name**}\"$0" ]
+	  },
+
+		"system::commandExists#withdoc": {
+		  "prefix": "system::commandExists#withdoc",
+		  "description": "Check if the given command exists...",
+		  "scope": "",
+		  "body": [ "# ## system::commandExists\n# \n# Check if the given command exists.\n# \n# - \\$1: **command name** _as string_:\n#       the command name to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command exists\n#   - 1 otherwise.\n# \n# ```bash\n# if system::commandExists \"command1\"; then\n#   printf 'The command exists.'\n# fi\n# ```\n# \nsystem::commandExists \"${1:**command name**}\"$0" ]
+	  },
 
 		"io::toAbsolutePath": {
 		  "prefix": "io::toAbsolutePath",
@@ -152,7 +166,7 @@
 		  "prefix": "interactive::displayAnswer#withdoc",
 		  "description": "Displays an answer to a previous question...",
 		  "scope": "",
-		  "body": [ "# ## interactive::displayAnswer\n# \n# Displays an answer to a previous question.\n# \n# The text is wrapped and put inside a box like so:\n# \n# ```text\n# ░────────────┐\n#   My answer. │\n# ░────────────┘\n# ```)\n# \n# - \\$1: **answer** _as string_:\n#       the answer to display\n# - \\$2: max width _as int_:\n#       (optional) the maximum width of the dialog box\n#       (defaults to GLOBAL_COLUMNS)\n# \n# ```bash\n# interactive::displayAnswer \"My answer.\"\n# ```\n# \ninteractive::displayAnswer \"${1:**answer**}\" \"${2:max width}\"$0" ]
+		  "body": [ "# ## interactive::displayAnswer\n# \n# Displays an answer to a previous question.\n# \n# The text is wrapped and put inside a box like so:\n# \n# ```text\n#     ┌─────┐\n#     │ No. ├──░\n#     └─────┘\n# ```)\n# \n# - \\$1: **answer** _as string_:\n#       the answer to display\n# - \\$2: max width _as int_:\n#       (optional) the maximum width of the text in the dialog box\n#       (defaults to GLOBAL_COLUMNS)\n# \n# ```bash\n# interactive::displayAnswer \"My answer.\"\n# ```\n# \ninteractive::displayAnswer \"${1:**answer**}\" \"${2:max width}\"$0" ]
 	  },
 
 		"string::split": {
@@ -572,7 +586,7 @@
 		  "prefix": "interactive::displayDialogBox#withdoc",
 		  "description": "Displays a dialog box with a speaker and a text...",
 		  "scope": "",
-		  "body": [ "# ## interactive::displayDialogBox\n# \n# Displays a dialog box with a speaker and a text.\n# \n# - \\$1: **speaker** _as string_:\n#       the speaker (system or user)\n# - \\$2: **text** _as string_:\n#       the text to display\n# - \\$3: max width _as int_:\n#       (optional) the maximum width of the dialog box\n#       (defaults to GLOBAL_COLUMNS)\n# \n# ```bash\n# interactive::displayDialogBox \"system\" \"This is a system message.\"\n# ```\n# \ninteractive::displayDialogBox \"${1:**speaker**}\" \"${2:**text**}\" \"${3:max width}\"$0" ]
+		  "body": [ "# ## interactive::displayDialogBox\n# \n# Displays a dialog box with a speaker and a text.\n# \n# - \\$1: **speaker** _as string_:\n#       the speaker (system or user)\n# - \\$2: **text** _as string_:\n#       the text to display\n# - \\$3: max width _as int_:\n#       (optional) the maximum width of the text in the dialog box\n#       (defaults to GLOBAL_COLUMNS)\n# \n# ```bash\n# interactive::displayDialogBox \"system\" \"This is a system message.\"\n# ```\n# \ninteractive::displayDialogBox \"${1:**speaker**}\" \"${2:**text**}\" \"${3:max width}\"$0" ]
 	  },
 
 		"array::fuzzyFilter": {
@@ -743,6 +757,20 @@
 		  "body": [ "# ## core::checkParseResults\n# \n# A convenience function to check the parsing results and fails with an error message if there are\n# parsing errors.\n# Will also display the help if the help option is true.\n# \n# This should be called from a command function for which you want to check the parsing results.\n# \n# - \\$1: **display help** _as bool_:\n#       the help option\n# - \\$2: **parsing errors** _as string_:\n#       the parsing errors\n# - \\$3: function name _as string_:\n#       (optional) the function name\n#       (defaults to the calling function)\n# \n# ```bash\n# core::checkParseResults \"\\${help:-}\" \"\\${parsingErrors:-}\"\n# core::checkParseResults \"\\${help:-}\" \"\\${parsingErrors:-}\" \"myFunctionName\"\n# ```\n# \ncore::checkParseResults \"${1:**display help**}\" \"${2:**parsing errors**}\" \"${3:function name}\"$0" ]
 	  },
 
+		"io::isDirectoryWritable": {
+		  "prefix": "io::isDirectoryWritable",
+		  "description": "Check if the directory is writable...",
+		  "scope": "",
+		  "body": [ "io::isDirectoryWritable \"${1:**directory**}\" \"${2:test file name}\"$0" ]
+	  },
+
+		"io::isDirectoryWritable#withdoc": {
+		  "prefix": "io::isDirectoryWritable#withdoc",
+		  "description": "Check if the directory is writable...",
+		  "scope": "",
+		  "body": [ "# ## io::isDirectoryWritable\n# \n# Check if the directory is writable. Creates the directory if it does not exist.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to check\n# - \\$2: test file name _as string_:\n#       (optional) the name of the file to create in the directory to test the write access\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the directory is writable\n#   - 1 otherwise\n# \n# ```bash\n# if io::isDirectoryWritable \"/path/to/directory\"; then\n#   echo \"The directory is writable.\"\n# fi\n# ```\n# \nio::isDirectoryWritable \"${1:**directory**}\" \"${2:test file name}\"$0" ]
+	  },
+
 		"system::exportTerminalSize": {
 		  "prefix": "system::exportTerminalSize",
 		  "description": "This function exports the terminal size...",
@@ -755,6 +783,20 @@
 		  "description": "This function exports the terminal size...",
 		  "scope": "",
 		  "body": [ "# ## system::exportTerminalSize\n# \n# This function exports the terminal size.\n# \n# Returns:\n# \n# - `GLOBAL_COLUMNS`: The number of columns in the terminal.\n# - `GLOBAL_LINES`: The number of lines in the terminal.\n# \n# ```bash\n# system::exportTerminalSize\n# printf '%s\\n' \"The terminal has ⌜\\${GLOBAL_COLUMNS}⌝ columns and ⌜\\${GLOBAL_LINES}⌝ lines.\"\n# ```\n# \nsystem::exportTerminalSize$0" ]
+	  },
+
+		"system::getNotExistingCommands": {
+		  "prefix": "system::getNotExistingCommands",
+		  "description": "This function returns the list of not existing commands for the given names...",
+		  "scope": "",
+		  "body": [ "system::getNotExistingCommands \"${99:**command names**}\"$0" ]
+	  },
+
+		"system::getNotExistingCommands#withdoc": {
+		  "prefix": "system::getNotExistingCommands#withdoc",
+		  "description": "This function returns the list of not existing commands for the given names...",
+		  "scope": "",
+		  "body": [ "# ## system::getNotExistingCommands\n# \n# This function returns the list of not existing commands for the given names.\n# \n# - \\$@: **command names** _as string_:\n#       the list of command names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are not existing commands\n#   - 1 otherwise.\n# - `RETURNED_ARRAY`: the list of not existing commands.\n# \n# ```bash\n# if system::getNotExistingCommands \"command1\" \"command2\"; then\n#   printf 'The following commands do not exist: %s' \"\\${RETURNED_ARRAY[*]}\"\n# fi\n# ```\n# \nsystem::getNotExistingCommands \"${99:**command names**}\"$0" ]
 	  },
 
 		"io::invokef2piped": {
@@ -908,7 +950,7 @@
 		  "prefix": "interactive::displayQuestion#withdoc",
 		  "description": "Displays a question to the user...",
 		  "scope": "",
-		  "body": [ "# ## interactive::displayQuestion\n# \n# Displays a question to the user.\n# \n# The text is wrapped and put inside a box like so:\n# \n# ```text\n#   ┌────────────░\n#   │ My prompt.\n#   └────────────░\n# ```\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# - \\$2: max width _as int_:\n#       (optional) the maximum width of the dialog box\n#       (defaults to GLOBAL_COLUMNS)\n# \n# ```bash\n# interactive::displayPrompt \"Do you want to continue?\"\n# ```\n# \ninteractive::displayQuestion \"${1:**prompt**}\" \"${2:max width}\"$0" ]
+		  "body": [ "# ## interactive::displayQuestion\n# \n# Displays a question to the user.\n# \n# The text is wrapped and put inside a box like so:\n# \n# ```text\n#    ┌────────────────────────────────┐\n# ░──┤ Is this an important question? │\n#    └────────────────────────────────┘\n# ```\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# - \\$2: max width _as int_:\n#       (optional) the maximum width of text in the dialog box\n#       (defaults to GLOBAL_COLUMNS)\n# \n# ```bash\n# interactive::displayPrompt \"Do you want to continue?\"\n# ```\n# \ninteractive::displayQuestion \"${1:**prompt**}\" \"${2:max width}\"$0" ]
 	  },
 
 		"interactive::waitForKey": {
@@ -1006,7 +1048,7 @@
 		  "prefix": "system::getUndeclaredVariables#withdoc",
 		  "description": "This function returns the list of undeclared variables for the given names...",
 		  "scope": "",
-		  "body": [ "# ## system::getUndeclaredVariables\n# \n# This function returns the list of undeclared variables for the given names.\n# \n# - \\$@: **variable names** _as string_:\n#       the list of variable names to check.\n# \n# Returns:\n# \n# - \\$? = 0 if there are variable undeclared, 1 otherwise.\n# - `RETURNED_ARRAY`: the list of undeclared variables.\n# \n# ```bash\n# if system::getUndeclaredVariables \"var1\" \"var2\"; then\n#   printf 'The following variables are not declared: %s' \"\\${RETURNED_ARRAY[*]}\"\n# fi\n# ```\n# \nsystem::getUndeclaredVariables \"${99:**variable names**}\"$0" ]
+		  "body": [ "# ## system::getUndeclaredVariables\n# \n# This function returns the list of undeclared variables for the given names.\n# \n# - \\$@: **variable names** _as string_:\n#       the list of variable names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are variable undeclared\n#   - 1 otherwise.\n# - `RETURNED_ARRAY`: the list of undeclared variables.\n# \n# ```bash\n# if system::getUndeclaredVariables \"var1\" \"var2\"; then\n#   printf 'The following variables are not declared: %s' \"\\${RETURNED_ARRAY[*]}\"\n# fi\n# ```\n# \nsystem::getUndeclaredVariables \"${99:**variable names**}\"$0" ]
 	  },
 
 		"io::invokef2": {
@@ -1331,6 +1373,20 @@
 		  "body": [ "# ## io::checkAndWarn\n# \n# Check last return code and warn the user in case the return code is not 0.\n# \n# - \\$1: **exit code** _as int_:\n#       the last return code\n# - \\$@: **message** _as string_:\n#       the warning message to display in case of error\n# \n# ```bash\n# command_that_could_fail || io::checkAndWarn \"\\$?\" \"The command that could fail has failed!\"\n# ```\n# \nio::checkAndWarn \"${1:**exit code**}\" \"${99:**message**}\"$0" ]
 	  },
 
+		"string::compareSemanticVersion": {
+		  "prefix": "string::compareSemanticVersion",
+		  "description": "This function allows to compare two semantic versions formatted like: major...",
+		  "scope": "",
+		  "body": [ "string::compareSemanticVersion \"${1:**version1**}\" \"${2:**version2**}\"$0" ]
+	  },
+
+		"string::compareSemanticVersion#withdoc": {
+		  "prefix": "string::compareSemanticVersion#withdoc",
+		  "description": "This function allows to compare two semantic versions formatted like: major...",
+		  "scope": "",
+		  "body": [ "# ## string::compareSemanticVersion\n# \n# This function allows to compare two semantic versions formatted like:\n# major.minor.patch-prerelease+build\n# \n# - \\$1: **version1** _as string_:\n#       the first version to compare\n# - \\$2: **version2** _as string_:\n#       the second version to compare\n# \n# Returns:\n# \n# - `RETURNED_VALUE`:\n#   - 0 if the versions are equal,\n#   - 1 if version1 is greater,\n#   - -1 if version2 is greater\n# \n# ```bash\n# string::compareSemanticVersion \"2.3.4-prerelease+build\" \"1.2.3-prerelease+build\"\n# local comparison=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > The prerelease and build are ignored in the comparison.\n# \nstring::compareSemanticVersion \"${1:**version1**}\" \"${2:**version2**}\"$0" ]
+	  },
+
 		"log::errorTrace": {
 		  "prefix": "log::errorTrace",
 		  "description": "Displays an error trace message...",
@@ -1372,6 +1428,99 @@
 		  "scope": "",
 		  "body": [ "# ## io::readStdIn\n# \n# Read the content of the standard input.\n# Will immediately return if the standard input is empty.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The content of the standard input.\n# \n# ```bash\n# io::readStdIn && local stdIn=\"\\${RETURNED_VALUE}\"\n# ```\n# \nio::readStdIn$0" ]
 	  },
+	"new command alt": {
+		"prefix": "new command alt",
+		"description": "A new command alternative definition for Valet",
+		"scope": "",
+		"body": [
+			"##<<VALET_COMMAND",
+			"# command: $1",
+			"# function: $2",
+			"# shortDescription: A short sentence.",
+			"# description: |-",
+			"#   A long description that can use ⌜quotes⌝.",
+			"# sudo: false",
+			"# hideInMenu: false",
+			"# arguments:",
+			"# - name: firstArg",
+			"#   description: |-",
+			"#     First argument.",
+			"# - name: more...",
+			"#   description: |-",
+			"#     Will be an an array of strings.",
+			"# options:",
+			"# - name: -o, --option1",
+			"#   description: |-",
+			"#     First option.",
+			"#   noEnvironmentVariable: true",
+			"# - name: -2, --this-is-option2 <level>",
+			"#   description: |-",
+			"#     An option with a value.",
+			"#   noEnvironmentVariable: false",
+			"# examples:",
+			"# - name: command -o -2 value1 arg1 more1 more2",
+			"#   description: |-",
+			"#     Call command with option1, option2 and some arguments.",
+			"##VALET_COMMAND",
+			"function $2() {",
+			"  core::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  core::checkParseResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  $0",
+			"}"
+		]
+	},
+	"new command": {
+		"prefix": "new command",
+		"description": "A new command definition for Valet",
+		"scope": "",
+		"body": [
+			": \"---",
+			"command: $1",
+			"function: $2",
+			"shortDescription: A short sentence.",
+			"description: |-",
+			"  A long description that can use ⌜quotes⌝.",
+			"sudo: false",
+			"hideInMenu: false",
+			"arguments:",
+			"- name: firstArg",
+			"  description: |-",
+			"    First argument.",
+			"- name: more...",
+			"  description: |-",
+			"    Will be an an array of strings.",
+			"options:",
+			"- name: -o, --option1",
+			"  description: |-",
+			"    First option.",
+			"  noEnvironmentVariable: true",
+			"- name: -2, --this-is-option2 <level>",
+			"  description: |-",
+			"    An option with a value.",
+			"  noEnvironmentVariable: false",
+			"examples:",
+			"- name: command -o -2 value1 arg1 more1 more2",
+			"  description: |-",
+			"    Call command with option1, option2 and some arguments.",
+			": \"---",
+			"function $2() {",
+			"  core::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  core::checkParseResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  $0",
+			"}"
+		]
+	},
+	"comment section": {
+		"prefix": "comment section",
+		"description": "",
+		"scope": "",
+		"body": [
+			"#===============================================================",
+			"# >>> $1",
+			"#===============================================================",
+			"$0"
+		]
+	},
 	"quote": {
 		"prefix": "quote",
 		"description": "",

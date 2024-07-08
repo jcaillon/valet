@@ -10,7 +10,7 @@ url: /docs/libraries/io
 This function returns the absolute path of a path.
 
 - $1: **path** _as string_:
-     The path to translate to absolute path.
+      The path to translate to absolute path.
 
 Returns:
 
@@ -29,23 +29,23 @@ local myFileAbsolutePath="${RETURNED_VALUE}"
 List all the paths in the given directory.
 
 - $1: **directory** _as string_:
-     the directory to list
+      the directory to list
 - $2: recursive _as bool_:
-     (optional) true to list recursively, false otherwise
-     (defaults to false)
+      (optional) true to list recursively, false otherwise
+      (defaults to false)
 - $3: hidden _as bool_:
-     (optional) true to list hidden paths, false otherwise
-     (defaults to false)
+      (optional) true to list hidden paths, false otherwise
+      (defaults to false)
 - $4: path filter function name _as string_:
-     (optional) a function name that is called to filter the paths that will be listed
-     The function should return 0 if the path is to be kept, 1 otherwise.
-     The function is called with the path as the first argument.
-     (defaults to empty string, no filter)
+      (optional) a function name that is called to filter the paths that will be listed
+      The function should return 0 if the path is to be kept, 1 otherwise.
+      The function is called with the path as the first argument.
+      (defaults to empty string, no filter)
 - $5: directory filter function name _as string_:
-     (optional) a function name that is called to filter the directories (for recursive listing)
-     The function should return 0 if the path is to be kept, 1 otherwise.
-     The function is called with the path as the first argument.
-     (defaults to empty string, no filter)
+      (optional) a function name that is called to filter the directories (for recursive listing)
+      The function should return 0 if the path is to be kept, 1 otherwise.
+      The function is called with the path as the first argument.
+      (defaults to empty string, no filter)
 
 Returns:
 
@@ -67,7 +67,7 @@ Make sure that the given file path exists.
 Create the directory tree and the file if needed.
 
 - $1: **path** _as string_:
-     the file path to create
+      the file path to create
 
 Returns:
 
@@ -83,9 +83,9 @@ io::createFilePathIfNeeded "myFile"
 Check last return code and fail (exit) if it is an error.
 
 - $1: **exit code** _as int_:
-     the return code
+      the return code
 - $@: **message** _as string_:
-     the error message to display in case of error
+      the error message to display in case of error
 
 ```bash
 command_that_could_fail || io::checkAndFail "$?" "The command that could fail has failed!"
@@ -97,18 +97,18 @@ command_that_could_fail || io::checkAndFail "$?" "The command that could fail ha
 List all the files in the given directory.
 
 - $1: **directory** _as string_:
-     the directory to list
+      the directory to list
 - $2: recursive _as bool_:
-     (optional) true to list recursively, false otherwise
-     (defaults to false)
+      (optional) true to list recursively, false otherwise
+      (defaults to false)
 - $3: hidden _as bool_:
-     (optional) true to list hidden paths, false otherwise
-     (defaults to false)
+      (optional) true to list hidden paths, false otherwise
+      (defaults to false)
 - $4: directory filter function name _as string_:
-     (optional) a function name that is called to filter the directories (for recursive listing)
-     The function should return 0 if the path is to be kept, 1 otherwise.
-     The function is called with the path as the first argument.
-     (defaults to empty string, no filter)
+      (optional) a function name that is called to filter the directories (for recursive listing)
+      The function should return 0 if the path is to be kept, 1 otherwise.
+      The function is called with the path as the first argument.
+      (defaults to empty string, no filter)
 
 Returns:
 
@@ -138,18 +138,18 @@ shellcheck disable=SC2016
 List all the directories in the given directory.
 
 - $1: **directory** _as string_:
-     the directory to list
+      the directory to list
 - $2: recursive _as bool_:
-     (optional) true to list recursively, false otherwise
-     (defaults to false)
+      (optional) true to list recursively, false otherwise
+      (defaults to false)
 - $3: hidden _as bool_:
-     (optional) true to list hidden paths, false otherwise
-     (defaults to false)
+      (optional) true to list hidden paths, false otherwise
+      (defaults to false)
 - $4: directory filter function name _as string_:
-     (optional) a function name that is called to filter the sub directories (for recursive listing)
-     The function should return 0 if the path is to be kept, 1 otherwise.
-     The function is called with the path as the first argument.
-     (defaults to empty string, no filter)
+      (optional) a function name that is called to filter the sub directories (for recursive listing)
+      The function should return 0 if the path is to be kept, 1 otherwise.
+      The function is called with the path as the first argument.
+      (defaults to empty string, no filter)
 
 Returns:
 
@@ -169,7 +169,7 @@ Print the content of a file to stdout.
 This is a pure bash equivalent of cat.
 
 - $1: **path** _as string_:
-     the file to print
+      the file to print
 
 ```bash
 io::cat "myFile"
@@ -190,7 +190,7 @@ A convenient function that can be used to:
   `io::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
 
 - $@: **arguments** _as any_:
-     the arguments to count
+      the arguments to count
 
 Returns:
 
@@ -225,14 +225,14 @@ It redirects the stdout and stderr to environment variables.
 Equivalent to io::invoke5 "${1}" 0 false "${2}" "${@:3}"
 
 - $1: **fail** _as bool_:
-     true/false to indicate if the function should fail in case the execution fails.
+      true/false to indicate if the function should fail in case the execution fails.
       If true and the execution fails, the script will exit.
 - $2: **stdin** _as string_:
-     the stdin to pass to the executable
+      the stdin to pass to the executable
 - $3: **executable** _as string_:
-     the executable or function to execute
+      the executable or function to execute
 - $@: **arguments** _as any_:
-     the arguments to pass to the executable
+      the arguments to pass to the executable
 
 Returns:
 
@@ -253,6 +253,28 @@ stderr="${RETURNED_VALUE2}"
 > See io::invokef5 for more information.
 
 
+## io::isDirectoryWritable
+
+Check if the directory is writable. Creates the directory if it does not exist.
+
+- $1: **directory** _as string_:
+      the directory to check
+- $2: test file name _as string_:
+      (optional) the name of the file to create in the directory to test the write access
+
+Returns:
+
+- $?:
+  - 0 if the directory is writable
+  - 1 otherwise
+
+```bash
+if io::isDirectoryWritable "/path/to/directory"; then
+  echo "The directory is writable."
+fi
+```
+
+
 ## io::invokef2piped
 
 This function call an executable and its arguments and input a given string as stdin.
@@ -260,14 +282,14 @@ It redirects the stdout and stderr to temporary files.
 Equivalent to io::invokef5 "${1}" 0 false "${2}" "${@:3}"
 
 - $1: **fail** _as bool_:
-     true/false to indicate if the function should fail in case the execution fails.
+      true/false to indicate if the function should fail in case the execution fails.
       If true and the execution fails, the script will exit.
 - $2: **stdin** _as string_:
-     the stdin to pass to the executable
+      the stdin to pass to the executable
 - $3: **executable** _as string_:
-     the executable or function to execute
+      the executable or function to execute
 - $@: **arguments** _as any_:
-     the arguments to pass to the executable
+      the arguments to pass to the executable
 
 Returns:
 
@@ -298,9 +320,9 @@ It redirects the stdout and stderr to environment variables.
 Equivalent to io::invoke5 true 0 '' '' "${@}"
 
 - $1: **executable** _as string_:
-     the executable or command
+      the executable or command
 - $@: **arguments** _as any_:
-     the command and its arguments
+      the command and its arguments
 
 Returns:
 
@@ -338,7 +360,7 @@ Sleep for the given amount of time.
 This is a pure bash replacement of sleep.
 
 - $1: **time** _as float_:
-     the time to sleep in seconds (can be a float)
+      the time to sleep in seconds (can be a float)
 
 ```bash
 io:sleep 1.5
@@ -354,12 +376,12 @@ It redirects the stdout and stderr to temporary files.
 Equivalent to io::invokef5 "${1}" 0 "" "" "${@:2}"
 
 - $1: **fail** _as bool_:
-     true/false to indicate if the function should fail in case the execution fails.
+      true/false to indicate if the function should fail in case the execution fails.
       If true and the execution fails, the script will exit.
 - $2: **executable** _as string_:
-     the executable or function to execute
+      the executable or function to execute
 - $@: **arguments** _as any_:
-     the arguments to pass to the executable
+      the arguments to pass to the executable
 
 Returns:
 
@@ -382,19 +404,19 @@ This function call an executable and its arguments.
 It redirects the stdout and stderr to temporary files.
 
 - $1: **fail** _as bool_:
-     true/false to indicate if the function should fail in case the execution fails.
+      true/false to indicate if the function should fail in case the execution fails.
                      If true and the execution fails, the script will exit.
 - $2: **acceptable codes** _as string_:
-     the acceptable error codes, comma separated
+      the acceptable error codes, comma separated
         (if the error code is matched, then set the output error code to 0)
 - $3: **fail** _as bool_:
-     true/false to indicate if the 4th argument represents a file path or directly the content for stdin
+      true/false to indicate if the 4th argument represents a file path or directly the content for stdin
 - $4: **sdtin** _as string_:
-     the stdin (can be empty)
+      the stdin (can be empty)
 - $5: **executable** _as string_:
-     the executable or function to execute
+      the executable or function to execute
 - $@: **arguments** _as any_:
-     the arguments to pass to the executable
+      the arguments to pass to the executable
 
 Returns:
 
@@ -422,10 +444,10 @@ Reads the content of a file and returns it in the global variable RETURNED_VALUE
 Uses pure bash.
 
 - $1: **path** _as string_:
-     the file path to read
+      the file path to read
 - $2: max char _as int_:
-     (optional) the maximum number of characters to read
-     (defaults to 0, which means read the whole file)
+      (optional) the maximum number of characters to read
+      (defaults to 0, which means read the whole file)
 
 > If the file does not exist, the function will return an empty string instead of failing.
 
@@ -444,9 +466,9 @@ io::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
 Check last return code and warn the user in case the return code is not 0.
 
 - $1: **exit code** _as int_:
-     the last return code
+      the last return code
 - $@: **message** _as string_:
-     the warning message to display in case of error
+      the warning message to display in case of error
 
 ```bash
 command_that_could_fail || io::checkAndWarn "$?" "The command that could fail has failed!"
@@ -460,12 +482,12 @@ It redirects the stdout and stderr to environment variables.
 Equivalent to io::invoke5 "${1}" 0 "" "" "${@:2}"
 
 - $1: **fail** _as bool_:
-     true/false to indicate if the function should fail in case the execution fails.
+      true/false to indicate if the function should fail in case the execution fails.
       If true and the execution fails, the script will exit.
 - $2: **executable** _as string_:
-     the executable or function to execute
+      the executable or function to execute
 - $@: **arguments** _as any_:
-     the arguments to pass to the executable
+      the arguments to pass to the executable
 
 Returns:
 
@@ -498,4 +520,4 @@ io::readStdIn && local stdIn="${RETURNED_VALUE}"
 
 
 
-> Documentation generated for the version 0.18.87 (2024-06-16).
+> Documentation generated for the version 0.18.426 (2024-07-08).

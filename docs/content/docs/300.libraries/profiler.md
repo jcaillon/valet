@@ -30,4 +30,4 @@ profiler::disable
 
 
 
-> Documentation generated for the version 0.18.146 (2024-06-22).
+> Documentation generated for the version 0.18.426 (2024-07-08).

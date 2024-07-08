@@ -10,6 +10,8 @@
 # Empty variables will be replaced by the default values during the execution.
 # You should not define all the variables, only the ones you want to change.
 
+# Do not add custom code to this script, use the custom startup script instead.
+
 # If you break this file, valet will fail to start.
 # You can delete it and run the 'valet self config' command to recreate it.
 
@@ -79,6 +81,16 @@ VALET_CONFIG_DOT_ENV_SCRIPT="${VALET_CONFIG_DOT_ENV_SCRIPT:-}"
 # - 'diff --color -u %APPROVED_FILE% %RECEIVED_FILE%' if diff is available
 # - 'internalCompare %APPROVED_FILE% %RECEIVED_FILE%' otherwise (internalCompare is a bash function that compares 2 files)
 VALET_CONFIG_TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
+
+# Set this to 'true' to disable fuzzy matching of commands and options.
+#
+# By default, Valet will try to match the command or option you typed with the closest
+# command or option available. If you set this to 'true', Valet will only match
+# commands and options that are exactly the same as what you typed.
+#
+# This is useful in a CI environment where you want to make sure that the command
+# you typed is the exact command that will be executed.
+VALET_CONFIG_STRICT_MATCHING="${VALET_CONFIG_STRICT_MATCHING:-}"
 
 # -----------
 # Log/output configuration
@@ -210,4 +222,4 @@ VALET_CONFIG_BUMP_VERSION_ON_BUILD="${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-}"
 
 ```
 
-> Documentation generated for the version 0.18.87 (2024-06-16).
+> Documentation generated for the version 0.18.426 (2024-07-08).

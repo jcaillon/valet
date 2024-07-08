@@ -25,16 +25,16 @@ Displays an answer to a previous question.
 The text is wrapped and put inside a box like so:
 
 ```text
- ┌────────────┐
- │ My answer. │
-/└────────────┘
-```
+    ┌─────┐
+    │ No. ├──░
+    └─────┘
+```)
 
 - $1: **answer** _as string_:
-     the answer to display
+      the answer to display
 - $2: max width _as int_:
-     (optional) the maximum width of the dialog box
-     (defaults to GLOBAL_COLUMNS)
+      (optional) the maximum width of the text in the dialog box
+      (defaults to GLOBAL_COLUMNS)
 
 ```bash
 interactive::displayAnswer "My answer."
@@ -49,7 +49,7 @@ This effectively creates a space in the terminal (scroll up if we are at the bot
 It does not create more space than the number of lines in the terminal.
 
 - $1: **number of lines** _as int_:
-     the number of lines to create
+      the number of lines to create
 
 ```bash
 interactive::createSpace 5
@@ -67,8 +67,8 @@ Ask the user to yes or no.
 This raw version does not display the prompt or the answer.
 
 - $1: default _as bool_:
-     (optional) the default value to select
-     (defaults to true)
+      (optional) the default value to select
+      (defaults to true)
 
 Returns:
 
@@ -93,6 +93,15 @@ Returns:
 
 ```bash
 interactive::getCursorPosition
+```
+
+
+## interactive::clearKeyPressed
+
+This function reads all the inputs from the user, effectively discarding them.
+
+```bash
+interactive::clearKeyPressed
 ```
 
 
@@ -126,12 +135,12 @@ interactive::testKeys
 Displays a dialog box with a speaker and a text.
 
 - $1: **speaker** _as string_:
-     the speaker (system or user)
+      the speaker (system or user)
 - $2: **text** _as string_:
-     the text to display
+      the text to display
 - $3: max width _as int_:
-     (optional) the maximum width of the dialog box
-     (defaults to GLOBAL_COLUMNS)
+      (optional) the maximum width of the text in the dialog box
+      (defaults to GLOBAL_COLUMNS)
 
 ```bash
 interactive::displayDialogBox "system" "This is a system message."
@@ -162,16 +171,16 @@ Displays a question to the user.
 The text is wrapped and put inside a box like so:
 
 ```text
-  ┌────────────┐
-  │ My prompt. │
-  └────────────┘\
+   ┌────────────────────────────────┐
+░──┤ Is this an important question? │
+   └────────────────────────────────┘
 ```
 
 - $1: **prompt** _as string_:
-     the prompt to display
+      the prompt to display
 - $2: max width _as int_:
-     (optional) the maximum width of the dialog box
-     (defaults to GLOBAL_COLUMNS)
+      (optional) the maximum width of text in the dialog box
+      (defaults to GLOBAL_COLUMNS)
 
 ```bash
 interactive::displayPrompt "Do you want to continue?"
@@ -187,7 +196,7 @@ Some special keys are translated into more readable strings:
 UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
 
 - $@: **read parameters** _as any_:
-     additional parameters to pass to the read command
+      additional parameters to pass to the read command
 
 Returns:
 
@@ -209,7 +218,7 @@ interactive::waitForKey -t 0.1
 Ask the user to press the button to continue.
 
 - $1: **prompt** _as string_:
-     the prompt to display
+      the prompt to display
 
 Returns:
 
@@ -231,10 +240,10 @@ Ask the user to yes or no.
 - The user can also validate immediately with the y or n key.
 
 - $1: **prompt** _as string_:
-     the prompt to display
+      the prompt to display
 - $2: default _as bool_:
-     (optional) the default value to select
-     (defaults to true)
+      (optional) the default value to select
+      (defaults to true)
 
 Returns:
 
@@ -250,4 +259,4 @@ if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else e
 
 
 
-> Documentation generated for the version 0.18.87 (2024-06-16).
+> Documentation generated for the version 0.18.426 (2024-07-08).

@@ -5,6 +5,26 @@ cascade:
 url: /docs/libraries/system
 ---
 
+## system::commandExists
+
+Check if the given command exists.
+
+- $1: **command name** _as string_:
+      the command name to check.
+
+Returns:
+
+- $?
+  - 0 if the command exists
+  - 1 otherwise.
+
+```bash
+if system::commandExists "command1"; then
+  printf 'The command exists.'
+fi
+```
+
+
 ## system::env
 
 Get the list of all the environment variables.
@@ -39,6 +59,27 @@ printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_
 ```
 
 
+## system::getNotExistingCommands
+
+This function returns the list of not existing commands for the given names.
+
+- $@: **command names** _as string_:
+      the list of command names to check.
+
+Returns:
+
+- $?
+  - 0 if there are not existing commands
+  - 1 otherwise.
+- `RETURNED_ARRAY`: the list of not existing commands.
+
+```bash
+if system::getNotExistingCommands "command1" "command2"; then
+  printf 'The following commands do not exist: %s' "${RETURNED_ARRAY[*]}"
+fi
+```
+
+
 ## system::os
 
 Returns the name of the current OS.
@@ -58,11 +99,13 @@ local osName="${RETURNED_VALUE}"
 This function returns the list of undeclared variables for the given names.
 
 - $@: **variable names** _as string_:
-     the list of variable names to check.
+      the list of variable names to check.
 
 Returns:
 
-- $? = 0 if there are variable undeclared, 1 otherwise.
+- $?
+  - 0 if there are variable undeclared
+  - 1 otherwise.
 - `RETURNED_ARRAY`: the list of undeclared variables.
 
 ```bash
@@ -77,8 +120,8 @@ fi
 Get the current date in the given format.
 
 - $1: format _as string_:
-     (optional) the format of the date to return
-     (defaults to %(%F_%Hh%Mm%Ss)T).
+      (optional) the format of the date to return
+      (defaults to %(%F_%Hh%Mm%Ss)T).
 
 Returns:
 
@@ -94,4 +137,4 @@ local date="${RETURNED_VALUE}"
 
 
 
-> Documentation generated for the version 0.18.87 (2024-06-16).
+> Documentation generated for the version 0.18.426 (2024-07-08).
