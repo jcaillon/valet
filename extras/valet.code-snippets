@@ -1,5 +1,5 @@
 {
-// Documentation generated for the version 0.18.426 (2024-07-08).
+// Documentation generated for the version 0.19.31 (2024-07-08).
 
 		"system::commandExists": {
 		  "prefix": "system::commandExists",
@@ -376,7 +376,7 @@
 		  "prefix": "ansi-codes::*#withdoc",
 		  "description": "ANSI codes for text attributes, colors, cursor control, and other common escape sequences...",
 		  "scope": "",
-		  "body": [ "# ## ansi-codes::*\n# \n# ANSI codes for text attributes, colors, cursor control, and other common escape sequences.\n# These codes can be used to format text in the terminal.\n# \n# They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:\n# <https://github.com/jcaillon/valet/blob/main/valet.d/lib-ansi-codes>\n# \n# References:\n# \n# - https://en.wikipedia.org/wiki/ANSI_escape_code\n# - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797\n# - https://paulbourke.net/dataformats/ascii/\n# - https://www.aivosto.com/articles/control-characters.html\n# - https://github.com/tmux/tmux/blob/master/tools/ansicode.txt\n# - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_\n# - https://vt100.net/docs/vt102-ug/chapter5.html\n# - https://vt100.net/docs/vt100-ug/chapter3.html#S3.3.1\n# \n# Ascii graphics:\n# \n# - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9\n# \n# > While it could be very handy to define a function for each of these instructions,\n# > it would also be slower to execute (function overhead + multiple printf calls).\n# \nansi-codes::*$0" ]
+		  "body": [ "# ## ansi-codes::*\n# \n# ANSI codes for text attributes, colors, cursor control, and other common escape sequences.\n# These codes can be used to format text in the terminal.\n# \n# They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:\n# <https://github.com/jcaillon/valet/blob/latest/valet.d/lib-ansi-codes>\n# \n# References:\n# \n# - https://en.wikipedia.org/wiki/ANSI_escape_code\n# - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797\n# - https://paulbourke.net/dataformats/ascii/\n# - https://www.aivosto.com/articles/control-characters.html\n# - https://github.com/tmux/tmux/blob/master/tools/ansicode.txt\n# - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_\n# - https://vt100.net/docs/vt102-ug/chapter5.html\n# - https://vt100.net/docs/vt100-ug/chapter3.html#S3.3.1\n# \n# Ascii graphics:\n# \n# - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9\n# \n# > While it could be very handy to define a function for each of these instructions,\n# > it would also be slower to execute (function overhead + multiple printf calls).\n# \nansi-codes::*$0" ]
 	  },
 
 		"io::cleanupTempFiles": {

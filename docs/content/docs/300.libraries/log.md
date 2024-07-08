@@ -238,4 +238,4 @@ log::errorTrace "This is a debug message."
 
 
 
-> Documentation generated for the version 0.18.426 (2024-07-08).
+> Documentation generated for the version 0.19.31 (2024-07-08).
