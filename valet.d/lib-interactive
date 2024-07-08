@@ -406,15 +406,9 @@ function interactive::waitForKey() {
   # special key detection, need to read more characters (up to 4 for F1-F12 keys)
   if [[ ${LAST_KEY_PRESSED} == $'\e' ]]; then
     IFS='' read -t 0.01 -d '' -rsn 4 || :
-    # if there are several ESC then it means we read too much; we can assume it is
-    # the same length as the previous ESC key and thus we can read a set number of
-    # chars. We might miss some inputs but at least we wil not read incomplete
-    # sequences on the next read.
+    # we might have several ESC which means we read too much
     local addedChars="${REPLY%%$'\e'*}"
     LAST_KEY_PRESSED+="${addedChars}"
-    if (( ${#REPLY} != ${#addedChars} )); then
-      IFS='' read -t 0.01 -d '' -rsn $((${#LAST_KEY_PRESSED} - (${#REPLY} - ${#addedChars}))) || :
-    fi
 
     # translate some common inputs into more readable strings
     case ${LAST_KEY_PRESSED} in
@@ -432,6 +426,9 @@ function interactive::waitForKey() {
     $'\eOP') LAST_KEY_PRESSED="F1" ;;
     $'\e'?) LAST_KEY_PRESSED="ALT+${LAST_KEY_PRESSED#$'\e'}" ;;
     esac
+
+    # we clear the buffer to avoid reading incomplete sequences on the next read
+    IFS='' read "$@" -d '' -srn 1 -t 0 LAST_KEY_PRESSED || :
   else
     case ${LAST_KEY_PRESSED} in
     $'\177' | $'\b') LAST_KEY_PRESSED="BACKSPACE" ;;
