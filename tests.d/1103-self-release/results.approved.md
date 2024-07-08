@@ -30,7 +30,8 @@ INFO     The tag message is:
    5 ░ - ✨ feature
    6 ░ - 🐞 fix
    7 ░ 
-INFO     The new version of valet is: 2.0.0.
+INFO     The current version of valet is: 1.2.3.
+INFO     The bumped version of valet is: 2.0.0.
 SUCCESS  The new version has been released, check: https://github.com/jcaillon/valet/releases/latest.
 ```
 
@@ -436,11 +437,6 @@ INFO     The tag message is:
 ▶ called io::invoke git tag -a v1.2.3 -m Release version 1.2.3
 ▶ called io::invoke git push origin v1.2.3
 SUCCESS  The new version has been tagged and pushed to the remote repository.
-INFO     The new version of valet is: 1.3.0.
-▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/version
-▶ called io::invoke git commit -m :bookmark: bump version to 1.3.0
-▶ called io::invoke git push origin main
-SUCCESS  The new version has been committed.
 DEBUG    The release payload is: ⌜{
     "tag_name": "v1.2.3",
     "body": "# Release of version 1.2.3\n\nChangelog: \n\n- ✨ feature\n- 🐞 fix\n",
@@ -464,6 +460,12 @@ DEBUG    The artifact has been created at ⌜valet.tar.gz⌝ with:
 
 INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 ▶ called kurl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz
+INFO     The current version of valet is: 1.2.3.
+INFO     The bumped version of valet is: 1.3.0.
+▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/version
+▶ called io::invoke git commit -m :bookmark: bump version to 1.3.0
+▶ called io::invoke git push origin main
+SUCCESS  The bumped version has been committed.
 SUCCESS  The new version has been released, check: https://github.com/jcaillon/valet/releases/latest.
 ```
 

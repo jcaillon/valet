@@ -89,3 +89,5 @@ function io::writeToFileFromRef() {
 main
 
 core::resetIncludedFiles
+source io
+source kurl

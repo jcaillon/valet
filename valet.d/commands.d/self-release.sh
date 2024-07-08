@@ -64,7 +64,7 @@ function selfRelease() {
 
   if [[ "${uploadArtifactsOnly:-}" != "true" ]]; then
     # create a new release
-    createRelease "${githubReleaseToken:-}" "${bumpLevel:-}" "${dryRun:-}"
+    selfRelease::createRelease "${githubReleaseToken:-}" "${bumpLevel:-}" "${dryRun:-}"
     createdReleaseJson="${RETURNED_VALUE}"
   else
     # get the latest release
@@ -80,15 +80,17 @@ function selfRelease() {
   fi
 
   if [[ "${dryRun:-}" != "true" ]]; then
-    uploadArtifact "${uploadUrl}"
+    selfRelease::uploadArtifact "${uploadUrl}"
   fi
+
+  selfRelease::bumpVersion "${bumpLevel:-}" "${dryRun:-}"
 
   log::success "The new version has been released, check: https://github.com/jcaillon/valet/releases/latest."
 
   return 0
 }
 
-function createRelease() {
+function selfRelease::createRelease() {
   local githubReleaseToken bumpLevel dryRun
   githubReleaseToken="${1:-}"
   bumpLevel="${2:-minor}"
@@ -120,7 +122,7 @@ function createRelease() {
   log::info "The current version of valet is: ${version}."
 
   # update the documentation
-  updateDocumentation "${version}"
+  selfRelease::updateDocumentation "${version}"
 
   # write the current version in the self-install script
   # then commit the file
@@ -172,19 +174,6 @@ function createRelease() {
     log::success "The new version has been tagged and pushed to the remote repository."
   fi
 
-  # bump the version
-  string::bumpSemanticVersion "${version}" "${bumpLevel:-minor}" && newVersion="${RETURNED_VALUE}"
-  if [[ "${dryRun:-}" != "true" ]]; then printf '%s' "${newVersion}" >"${GLOBAL_VALET_HOME}/valet.d/version"; fi
-  log::info "The new version of valet is: ${newVersion}."
-
-  # commit the new version and push it
-  if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke git add "${GLOBAL_VALET_HOME}/valet.d/version"
-    io::invoke git commit -m ":bookmark: bump version to ${newVersion}"
-    io::invoke git push origin main
-    log::success "The new version has been committed."
-  fi
-
   # prepare the release payload
   local prerelease=false
   if [[ ${version} == *"-"* ]]; then prerelease=true; fi
@@ -216,7 +205,7 @@ function createRelease() {
   RETURNED_VALUE="${createdReleaseJson:-}"
 }
 
-function uploadArtifact() {
+function selfRelease::uploadArtifact() {
   local uploadUrl="${1}"
 
   # prepare a temp folder to store the release
@@ -254,7 +243,31 @@ function uploadArtifact() {
   rm -Rf "${tempDir}"
 }
 
-function updateDocumentation() {
+function selfRelease::bumpVersion() {
+  local bumpLevel="${1:-minor}"
+  local dryRun="${2:-false}"
+
+  # read the version from the valet file
+  io::readFile "${GLOBAL_VALET_HOME}/valet.d/version"
+  local version="${RETURNED_VALUE}"
+  version="${version%%$'\n'*}"
+  log::info "The current version of valet is: ${version}."
+
+  # bump the version
+  string::bumpSemanticVersion "${version}" "${bumpLevel}" && newVersion="${RETURNED_VALUE}"
+  if [[ "${dryRun:-}" != "true" ]]; then printf '%s' "${newVersion}" >"${GLOBAL_VALET_HOME}/valet.d/version"; fi
+  log::info "The bumped version of valet is: ${newVersion}."
+
+  # commit the new version and push it
+  if [[ "${dryRun:-}" != "true" ]]; then
+    io::invoke git add "${GLOBAL_VALET_HOME}/valet.d/version"
+    io::invoke git commit -m ":bookmark: bump version to ${newVersion}"
+    io::invoke git push origin main
+    log::success "The bumped version has been committed."
+  fi
+}
+
+function selfRelease::updateDocumentation() {
   local version="${1}"
 
   system::date "%(%F)T"
@@ -262,21 +275,21 @@ function updateDocumentation() {
   local pageFooter="Documentation generated for the version ${version} (${currentDate})."
 
   # export the documentation for each library
-  getAllFunctionsDocumentation
+  selfRelease::getAllFunctionsDocumentation
 
   # write each function documentation to a file
   if [[ "${dryRun:-}" != "true" ]]; then
-    writeAllFunctionsDocumentation "${pageFooter}"
+    selfRelease::writeAllFunctionsDocumentation "${pageFooter}"
   fi
 
   # write each function to a file
   if [[ "${dryRun:-}" != "true" ]]; then
-    writeAllFunctionsToExtrasScript "${pageFooter}"
+    selfRelease::writeAllFunctionsToExtrasScript "${pageFooter}"
   fi
 
   # write each function to the snippet file
   if [[ "${dryRun:-}" != "true" ]]; then
-    writeAllFunctionsToExtrasCodeSnippets "${pageFooter}"
+    selfRelease::writeAllFunctionsToExtrasCodeSnippets "${pageFooter}"
   fi
 
   # export the valet config valet to the documentation
@@ -310,7 +323,7 @@ function updateDocumentation() {
 
 # This function writes all the functions documentation to the documentation files
 # under the `docs/content/docs/300.libraries` directory.
-function writeAllFunctionsDocumentation() {
+function selfRelease::writeAllFunctionsDocumentation() {
   local pageFooter="${1:-}"
 
   # delete the existing files
@@ -365,7 +378,7 @@ url: /docs/libraries/${packageName}
 
 # This function writes all the functions to the extras/all-valet-functions.sh script.
 # Each function will be defined with a { return 0; } body.
-function writeAllFunctionsToExtrasScript() {
+function selfRelease::writeAllFunctionsToExtrasScript() {
   local pageFooter="${1:-}"
 
   local content="#!/usr/bin/env bash
@@ -394,7 +407,7 @@ function writeAllFunctionsToExtrasScript() {
 }
 
 # This function writes all the functions to the extras/valet.code-snippets.
-function writeAllFunctionsToExtrasCodeSnippets() {
+function selfRelease::writeAllFunctionsToExtrasCodeSnippets() {
   local pageFooter="${1:-}"
 
   # load the existing file content
@@ -472,9 +485,9 @@ function writeAllFunctionsToExtrasCodeSnippets() {
 # - `RETURNED_ASSOCIATIVE_ARRAY` an associative array of all the function names and their documentation.
 #
 # ```bash
-# getAllFunctionsDocumentation
+# selfRelease::getAllFunctionsDocumentation
 # ```
-function getAllFunctionsDocumentation() {
+function selfRelease::getAllFunctionsDocumentation() {
 
   # get all the files in the valet.d directory
   io::listFiles "${GLOBAL_VALET_HOME}/valet.d"

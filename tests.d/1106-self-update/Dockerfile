@@ -38,5 +38,4 @@ RUN export NONINTERACTIVE=1 && \
   export CI=1 && \
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-COPY ./self-install.sh /root
-COPY --chown=me:me ./self-install.sh /home/me
+# COPY --chown=me:me ./self-install.sh /home/me
