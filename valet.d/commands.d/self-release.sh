@@ -202,6 +202,12 @@ function selfRelease::createRelease() {
     log::success "The new version has been released on GitHub."
   fi
 
+  # update the latest branch with this new version
+  if [[ "${dryRun:-}" != "true" ]]; then
+    io::invoke git push origin -f main:latest
+    log::success "The distant ⌜latest⌝ branch has been updated."
+  fi
+
   RETURNED_VALUE="${createdReleaseJson:-}"
 }
 

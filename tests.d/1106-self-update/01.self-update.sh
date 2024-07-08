@@ -2,6 +2,12 @@
 
 core::sourceFunction "selfUpdate"
 
+function testSelfUpdateDocumentation() {
+  echo "→ ./self-update.sh --help"
+  (selfUpdate --help)
+  test::endTest "Install script usage" 0
+}
+
 function testSelfUpdateNothingToDo() {
   local -i exitCode
 
@@ -22,6 +28,7 @@ function testSelfUpdateNothingToDo() {
 # }
 
 function main() {
+  testSelfUpdateDocumentation
   testSelfUpdateNothingToDo
   # testSelfInstall
 }

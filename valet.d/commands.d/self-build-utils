@@ -167,17 +167,18 @@ function extractCommandDefinitionToVariables() {
 
 function createGlobalVariable() {
   local name="${1}"
-  local value="${2//\"/\\\"}"
+  local value="${2}"
   local arrayLength="${3}"
-
-  value="${value//\$/\\\$}"
-  value="${value//\`/\\\`}"
 
   log::trace "Setting variable ⌜TEMP_CMD_BUILD_${name}⌝ (array length=${arrayLength})."
   if [[ arrayLength -le -1 ]]; then
     # simple variable
     declare -g "TEMP_CMD_BUILD_${name}"="${value}"
   else
+    value="${value//\"/\\\"}"
+    value="${value//\$/\\\$}"
+    value="${value//\`/\\\`}"
+
     # array variable
     local -n array="TEMP_CMD_BUILD_${name}"
     if [[ -v array && "${#array[@]}" -gt 0 ]]; then

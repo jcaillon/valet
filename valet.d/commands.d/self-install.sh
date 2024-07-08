@@ -24,40 +24,44 @@ fi
 #
 #   This script can be used as a standalone script to install Valet:
 #
-#   ```bash
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/valet.d/commands.d/self-install.sh)"
-#   ```
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)"
 #
-#   If you need to pass options (e.g. `--single-user-installation`) to the script, you can do it like this:
+#   If you need to pass options (e.g. --single-user-installation) to the script, you can do it like this:
 #
-#   ```bash
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/valet.d/commands.d/self-install.sh)" -s --single-user-installation
-#   ```
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --single-user-installation
 #
-#   The default behavior is to install Valet for all users, which might require you
-#   to type your password on sudo commands (do not run this script with sudo, it will
+#   The default behavior is to install Valet for all users, in /opt/valet, which might require
+#   you to type your password on sudo commands (you don't have to run this script with sudo, it will
 #   ask for your password when needed).
 #
 #   This script will:
 #
-#   - Download the given release from GitHub (latest by default).
-#   - Copy it in the Valet home directory, which defaults to:
-#     - `/opt/valet` in case of a multi user installation
-#     - `~/.local/valet` otherwise
-#   - Add a shim script to redirect to the Valet executable in:
-#     - `/usr/local/bin` in case of a multi user installation
-#     - `~/.local/bin` otherwise
-#   - Copy the examples in the user valet directory `~/.valet.d`.
-#   - Run self setup command (in case of an installation).
+#   - 1. Download the given release from GitHub (latest by default).
+#
+#   - 2. Copy it in the Valet home directory, which defaults to:
+#     * /opt/valet in case of a multi user installation
+#     * ~/.local/valet otherwise
+#
+#   - 3. Make the valet script readable and executable, either by adding a shim
+#        in a bin directory already present in your PATH, or by adding the Valet
+#        directory to your PATH on shell startup.
+#
+#   - 4. Copy the examples in the user valet directory ~/.valet.d.
+#
+#   - 5. Copy the extras (vscode snippets) in the user valet directory ~/.valet.d.
+#
+#   - 6. Run self setup command (in case of an installation).
+#
+#   - 7. Try to update (fetch merge -ff-only) the git repositories under your valet user directory.
 #
 # options:
 # - name: -u, --unattended
 #   description: |-
-#     Set to `true` to not enter interactive mode for the setup (useful for automated installation).
+#     Set to true to not enter interactive mode for the setup (useful for automated installation).
 #   default: false
 # - name: -s, --single-user-installation
 #   description: |-
-#     Set to `true` to install Valet for the current user only.
+#     Set to true to install Valet for the current user only.
 #
 #     Note: for windows, the installation is always for the current user.
 #   default: false
@@ -72,40 +76,43 @@ fi
 #   description: |-
 #     The directory where Valet will be installed.
 #
-#     Defaults to `/opt/valet` for a multi user installation and `~/.local/valet` otherwise.
+#     Defaults to /opt/valet for a multi user installation and ~/.local/valet otherwise.
 # - name: -S, --no-shim
 #   description: |-
-#     Set to `true` to not create the shim script in /usr/local/bin.
+#     Set to true to not create the shim script in /usr/local/bin.
 #   default: false
 # - name: -P, --no-path
 #   description: |-
-#     Set to `true` to not add the Valet directory to the PATH (append to your .bashrc file).
+#     Set to true to not add the Valet directory to the PATH (append to your .bashrc file).
 #   default: false
 # - name: --no-extras
 #   description: |-
-#     Set to `true` to to not copy the extras (vscode code snippets) to the valet user directory (~/.valet.d).
+#     Set to true to to not copy the extras (vscode code snippets) to the valet user directory (~/.valet.d).
 #   default: false
 # - name: -E, --no-examples
 #   description: |-
-#     Set to `true` to to not copy the examples (showcase) to the valet user directory (~/.valet.d).
+#     Set to true to to not copy the examples (showcase) to the valet user directory (~/.valet.d).
 #
-#     This will be done only if the directory does not already exist. But you can force this behavior with the `--override-examples` option.
+#     This will be done only if the directory does not already exist. But you can force this behavior with the --override-examples option.
 #   default: false
 # - name: -e, --override-examples
 #   description: |-
-#     Set to `true` to override the examples (showcase) in the valet user directory (~/.valet.d).
+#     Set to true to override the examples (showcase) in the valet user directory (~/.valet.d).
 #   default: false
 # - name: -G, --skip-git-update
 #   description: |-
-#     Set to `true` to not attempt to update the git repositories under the valet user directory (~/.valet.d).
+#     Set to true to not attempt to update the git repositories under the valet user directory (~/.valet.d).
 #   default: false
 # examples:
 # - name: self update
 #   description: |-
-#     Install Valet for the current user only.
-# - name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/main/valet.d/commands.d/self-install.sh)"
+#     Update Valet to the latest version.
+# - name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)"
 #   description: |-
-#     Install Valet without any user interaction.
+#     Install the latest version of Valet, using all the default options.
+# - name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --single-user-installation --unattended
+#   description: |-
+#     Install the latest version of Valet in the user home directory and disable all interaction during the install process.
 ##VALET_COMMAND
 function selfUpdate() {
   local unattended singleUserInstallation version installationDirectory noShim noPath noExamples overrideExamples noExtras skipGitUpdate

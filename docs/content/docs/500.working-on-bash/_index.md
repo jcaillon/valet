@@ -33,13 +33,13 @@ Here is a list of recommended extensions to work on bash scripts:
 - [Snippets for bash scripts](https://marketplace.visualstudio.com/items?itemName=Remisa.shellman)
 - [Snippets for shebang](https://marketplace.visualstudio.com/items?itemName=rpinski.shebang-snippets)
 
-GitHub Copilot is of great help if you can have it. You can also find the list of [extensions here](https://github.com/jcaillon/valet/blob/main/.vscode/extensions.json).
+GitHub Copilot is of great help if you can have it. You can also find the list of [extensions here](https://github.com/jcaillon/valet/blob/latest/.vscode/extensions.json).
 
 ## VS code settings
 
 You can open your `~/.valet.d` directory as a workspace on vscode.
 
-I recommend to copy (or link) the [extras/all-valet-functions.sh](https://github.com/jcaillon/valet/blob/main/extras/all-valet-functions.sh) file present in the Valet installation to `~/.valet.d/.vscode/all-valet-functions.sh` in your workspace folder and add the following settings in your `~/.valet.d/.vscode/settings.json`:
+I recommend to copy (or link) the [extras/all-valet-functions.sh](https://github.com/jcaillon/valet/blob/latest/extras/all-valet-functions.sh) file present in the Valet installation to `~/.valet.d/.vscode/all-valet-functions.sh` in your workspace folder and add the following settings in your `~/.valet.d/.vscode/settings.json`:
 
 ```json
 {

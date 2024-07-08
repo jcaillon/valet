@@ -154,8 +154,8 @@ In addition to the test scripts, you can create other specific scripts which wil
   {{< card icon="arrow-circle-right" link="../libraries" title="Libraries" >}}
 {{< /cards >}}
 
-[valet-test-suites]: https://github.com/jcaillon/valet/tree/main/tests.d
-[valet-string-tests-report]: https://github.com/jcaillon/valet/blob/main/tests.d/1003-lib-string/results.approved.md
-[valet-string-lib-tests]: https://github.com/jcaillon/valet/blob/main/tests.d/1003-lib-string/00.tests.sh
-[showcase-tests]: https://github.com/jcaillon/valet/blob/main/examples.d/showcase/tests.d/001-showcase-test-suite/00.tests.sh
+[valet-test-suites]: https://github.com/jcaillon/valet/tree/latest/tests.d
+[valet-string-tests-report]: https://github.com/jcaillon/valet/blob/latest/tests.d/1003-lib-string/results.approved.md
+[valet-string-lib-tests]: https://github.com/jcaillon/valet/blob/latest/tests.d/1003-lib-string/00.tests.sh
+[showcase-tests]: https://github.com/jcaillon/valet/blob/latest/examples.d/showcase/tests.d/001-showcase-test-suite/00.tests.sh
 [libraries-tests]: ../libraries/test

@@ -450,6 +450,8 @@ DEBUG    The release payload is: ⌜{
     "prerelease": false
   } https://api.github.com/repos/jcaillon/valet/releases
 SUCCESS  The new version has been released on GitHub.
+▶ called io::invoke git push origin -f main:latest
+SUCCESS  The distant ⌜latest⌝ branch has been updated.
 DEBUG    The upload URL is: https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/examples.d .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet.d .
