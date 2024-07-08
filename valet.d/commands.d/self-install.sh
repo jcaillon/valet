@@ -410,6 +410,10 @@ function selfUpdate::updateGitRepository() {
     core::fail "The directory ⌜${1}⌝ is not a git repository."
   fi
 
+  if ! command -v git; then
+    core::fail "The command ⌜git⌝ is not installed or not found in your PATH."
+  fi
+
   log::debug "Updating the git repository ⌜${1}⌝."
 
   io::readFile "${1}/.git/HEAD"
@@ -594,6 +598,11 @@ function selfUpdate::updateUserRepositories() {
   fi
 
   log::info "Attempting to update the git repositories in ⌜${userDirectory}⌝."
+
+  if ! command -v git; then
+    log::warning "The command ⌜git⌝ is not installed or not found in your PATH, skipping git update."
+    return 0
+  fi
 
   function filterGitRepositories() {
     if [[ -d "${1}/.git" ]]; then

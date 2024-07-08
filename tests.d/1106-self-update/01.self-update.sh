@@ -3,7 +3,7 @@
 core::sourceFunction "selfUpdate"
 
 function testSelfUpdateDocumentation() {
-  echo "→ ./self-update.sh --help"
+  echo "→ valet self update --help"
   (selfUpdate --help)
   test::endTest "Install script usage" 0
 }

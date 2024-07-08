@@ -9,7 +9,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ ./self-update.sh --help
+→ valet self update --help
 ABOUT
 
   Update valet using the latest release on GitHub.
