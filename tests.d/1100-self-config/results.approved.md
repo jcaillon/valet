@@ -29,9 +29,10 @@ cat ${configFile}
 # If you break this file, valet will fail to start.
 # You can delete it and run the 'valet self config' command to recreate it.
 
-# -----------
-# Custom startup script
-# -----------
+## -----------
+## Custom startup script
+## -----------
+
 # You can define a custom startup script that will be sourced by Valet on startup.*
 # This allows you to define custom functions or variables that will be available in Valet.
 # For example, it is convenient to translate CI_* variables to VALET_* variables.
@@ -49,9 +50,10 @@ if [[ -f "${_CONFIG_DIR}/startup" ]]; then
   source "${_CONFIG_DIR}/startup"
 fi
 
-# -----------
-# General config
-# -----------
+## -----------
+## General config
+## -----------
+
 # The path to this Valet config file: MUST BE declared outside this file!
 # Default to the 'config' file in your config directory.
 # VALET_CONFIG_FILE
@@ -106,9 +108,10 @@ VALET_CONFIG_TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
 # you typed is the exact command that will be executed.
 VALET_CONFIG_STRICT_MATCHING="${VALET_CONFIG_STRICT_MATCHING:-}"
 
-# -----------
-# Log/output configuration
-# -----------
+## -----------
+## Log/output configuration
+## -----------
+
 # If true, will enable the icons (using nerd font).
 VALET_CONFIG_ENABLE_NERDFONT_ICONS="${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-}"
 
@@ -147,9 +150,10 @@ VALET_CONFIG_LOG_FILENAME_PATTERN="${VALET_CONFIG_LOG_FILENAME_PATTERN:-}"
 # you can force to use bash by setting this property to true.
 VALET_CONFIG_LOG_CLEANUP_USING_BASH="${VALET_CONFIG_LOG_CLEANUP_USING_BASH:-}"
 
-# -----------
-# Log icons configuration
-# -----------
+## -----------
+## Log icons configuration
+## -----------
+
 # The icon to use for the logs.
 VALET_CONFIG_ICON_ERROR="${VALET_CONFIG_ICON_ERROR:-}"
 VALET_CONFIG_ICON_WARNING="${VALET_CONFIG_ICON_WARNING:-}"
@@ -162,9 +166,10 @@ VALET_CONFIG_ICON_EXIT="${VALET_CONFIG_ICON_EXIT:-}"
 VALET_CONFIG_ICON_STOPPED="${VALET_CONFIG_ICON_STOPPED:-}"
 VALET_CONFIG_ICON_KILLED="${VALET_CONFIG_ICON_KILLED:-}"
 
-# -----------
-# Profiler configuration
-# -----------
+## -----------
+## Profiler configuration
+## -----------
+
 # The path to the file in which to write the profiling information for the command.
 # Defaults to the ~/valet-profiler-{PID}-command.txt file.
 VALET_CONFIG_COMMAND_PROFILING_FILE="${VALET_CONFIG_COMMAND_PROFILING_FILE:-}"
@@ -182,9 +187,10 @@ VALET_CONFIG_STARTUP_PROFILING="${VALET_CONFIG_STARTUP_PROFILING:-}"
 # Defaults to the ~/valet-profiler-{PID}.txt file.
 VALET_CONFIG_STARTUP_PROFILING_FILE="${VALET_CONFIG_STARTUP_PROFILING_FILE:-}"
 
-# -----------
-# Colors to use in Valet.
-# -----------
+## -----------
+## Colors to use in Valet.
+## -----------
+
 # You should define a color using an ANSI escape sequence.
 # See https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797.
 # E.g., this will set the INFO levels logs to blue:
@@ -212,22 +218,42 @@ VALET_CONFIG_COLOR_ACTIVE_BUTTON="${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-}"
 VALET_CONFIG_COLOR_UNACTIVE_BUTTON="${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}"
 
 # Colors for fsfs
-VALET_COLOR_FSFS_RESET_TEXT="${VALET_COLOR_FSFS_RESET_TEXT:-}"
-VALET_COLOR_FSFS_STATIC="${VALET_COLOR_FSFS_STATIC:-}"
-VALET_COLOR_FSFS_FOCUS="${VALET_COLOR_FSFS_FOCUS:-}"
-VALET_COLOR_FSFS_FOCUS_RESET="${VALET_COLOR_FSFS_FOCUS_RESET:-}"
-VALET_COLOR_FSFS_LETTER_HIGHLIGHT="${VALET_COLOR_FSFS_LETTER_HIGHLIGHT:-}"
-VALET_COLOR_FSFS_LETTER_HIGHLIGHT_RESET="${VALET_COLOR_FSFS_LETTER_HIGHLIGHT_RESET:-}"
-VALET_COLOR_FSFS_SELECTED_ITEM="${VALET_COLOR_FSFS_SELECTED_ITEM:-}"
-VALET_COLOR_FSFS_SELECTED_ITEM_RESET="${VALET_COLOR_FSFS_SELECTED_ITEM_RESET:-}"
-VALET_COLOR_FSFS_PROMPT_STRING="${VALET_COLOR_FSFS_PROMPT_STRING:-}"
-VALET_COLOR_FSFS_PROMPT_STRING_RESET="${VALET_COLOR_FSFS_PROMPT_STRING_RESET:-}"
-VALET_COLOR_FSFS_COUNT="${VALET_COLOR_FSFS_COUNT:-}"
-VALET_COLOR_FSFS_COUNT_RESET="${VALET_COLOR_FSFS_COUNT_RESET:-}"
+VALET_CONFIG_FSFS_RESET_TEXT="${VALET_CONFIG_FSFS_RESET_TEXT:-}"
+VALET_CONFIG_FSFS_STATIC="${VALET_CONFIG_FSFS_STATIC:-}"
+VALET_CONFIG_FSFS_FOCUS="${VALET_CONFIG_FSFS_FOCUS:-}"
+VALET_CONFIG_FSFS_FOCUS_RESET="${VALET_CONFIG_FSFS_FOCUS_RESET:-}"
+VALET_CONFIG_FSFS_LETTER_HIGHLIGHT="${VALET_CONFIG_FSFS_LETTER_HIGHLIGHT:-}"
+VALET_CONFIG_FSFS_LETTER_HIGHLIGHT_RESET="${VALET_CONFIG_FSFS_LETTER_HIGHLIGHT_RESET:-}"
+VALET_CONFIG_FSFS_SELECTED_ITEM="${VALET_CONFIG_FSFS_SELECTED_ITEM:-}"
+VALET_CONFIG_FSFS_SELECTED_ITEM_RESET="${VALET_CONFIG_FSFS_SELECTED_ITEM_RESET:-}"
+VALET_CONFIG_FSFS_PROMPT_STRING="${VALET_CONFIG_FSFS_PROMPT_STRING:-}"
+VALET_CONFIG_FSFS_PROMPT_STRING_RESET="${VALET_CONFIG_FSFS_PROMPT_STRING_RESET:-}"
+VALET_CONFIG_FSFS_COUNT="${VALET_CONFIG_FSFS_COUNT:-}"
+VALET_CONFIG_FSFS_COUNT_RESET="${VALET_CONFIG_FSFS_COUNT_RESET:-}"
 
-# -----------
-# Other configs.
-# -----------
+## -----------
+## Interactive mode configuration.
+## -----------
+
+# Change the default time between 2 frames for a spinner (in seconds, can be a float number).
+VALET_CONFIG_SPINNER_DELAY="${VALET_CONFIG_SPINNER_DELAY:-}"
+
+# Change the default spinner characters (one character represents one frame of the animation).
+# Examples:
+#
+# - ◐◓◑◒
+# - ▖▘▝▗
+# - ⣾⣽⣻⢿⡿⣟⣯⣷
+# - ⢄⢂⢁⡁⡈⡐⡠
+# - ◡⊙◠
+# - ▌▀▐▄
+# - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
+VALET_CONFIG_SPINNER_CHARACTERS="${VALET_CONFIG_SPINNER_CHARACTERS:-}"
+
+
+## -----------
+## Other configs.
+## -----------
 
 # If true, will enable the automatic bump of the version of Valet on build.
 # Intended for Valet developers only.
@@ -304,9 +330,10 @@ cat ${configFile}
 # If you break this file, valet will fail to start.
 # You can delete it and run the 'valet self config' command to recreate it.
 
-# -----------
-# Custom startup script
-# -----------
+## -----------
+## Custom startup script
+## -----------
+
 # You can define a custom startup script that will be sourced by Valet on startup.*
 # This allows you to define custom functions or variables that will be available in Valet.
 # For example, it is convenient to translate CI_* variables to VALET_* variables.
@@ -324,9 +351,10 @@ if [[ -f "${_CONFIG_DIR}/startup" ]]; then
   source "${_CONFIG_DIR}/startup"
 fi
 
-# -----------
-# General config
-# -----------
+## -----------
+## General config
+## -----------
+
 # The path to this Valet config file: MUST BE declared outside this file!
 # Default to the 'config' file in your config directory.
 # VALET_CONFIG_FILE
@@ -381,9 +409,10 @@ VALET_CONFIG_TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
 # you typed is the exact command that will be executed.
 VALET_CONFIG_STRICT_MATCHING="${VALET_CONFIG_STRICT_MATCHING:-}"
 
-# -----------
-# Log/output configuration
-# -----------
+## -----------
+## Log/output configuration
+## -----------
+
 # If true, will enable the icons (using nerd font).
 VALET_CONFIG_ENABLE_NERDFONT_ICONS="${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-}"
 
@@ -422,9 +451,10 @@ VALET_CONFIG_LOG_FILENAME_PATTERN="${VALET_CONFIG_LOG_FILENAME_PATTERN:-}"
 # you can force to use bash by setting this property to true.
 VALET_CONFIG_LOG_CLEANUP_USING_BASH="${VALET_CONFIG_LOG_CLEANUP_USING_BASH:-}"
 
-# -----------
-# Log icons configuration
-# -----------
+## -----------
+## Log icons configuration
+## -----------
+
 # The icon to use for the logs.
 VALET_CONFIG_ICON_ERROR="${VALET_CONFIG_ICON_ERROR:-}"
 VALET_CONFIG_ICON_WARNING="${VALET_CONFIG_ICON_WARNING:-}"
@@ -437,9 +467,10 @@ VALET_CONFIG_ICON_EXIT="${VALET_CONFIG_ICON_EXIT:-}"
 VALET_CONFIG_ICON_STOPPED="${VALET_CONFIG_ICON_STOPPED:-}"
 VALET_CONFIG_ICON_KILLED="${VALET_CONFIG_ICON_KILLED:-}"
 
-# -----------
-# Profiler configuration
-# -----------
+## -----------
+## Profiler configuration
+## -----------
+
 # The path to the file in which to write the profiling information for the command.
 # Defaults to the ~/valet-profiler-{PID}-command.txt file.
 VALET_CONFIG_COMMAND_PROFILING_FILE="${VALET_CONFIG_COMMAND_PROFILING_FILE:-}"
@@ -457,9 +488,10 @@ VALET_CONFIG_STARTUP_PROFILING="${VALET_CONFIG_STARTUP_PROFILING:-}"
 # Defaults to the ~/valet-profiler-{PID}.txt file.
 VALET_CONFIG_STARTUP_PROFILING_FILE="${VALET_CONFIG_STARTUP_PROFILING_FILE:-}"
 
-# -----------
-# Colors to use in Valet.
-# -----------
+## -----------
+## Colors to use in Valet.
+## -----------
+
 # You should define a color using an ANSI escape sequence.
 # See https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797.
 # E.g., this will set the INFO levels logs to blue:
@@ -487,22 +519,42 @@ VALET_CONFIG_COLOR_ACTIVE_BUTTON="${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-}"
 VALET_CONFIG_COLOR_UNACTIVE_BUTTON="${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}"
 
 # Colors for fsfs
-VALET_COLOR_FSFS_RESET_TEXT="${VALET_COLOR_FSFS_RESET_TEXT:-}"
-VALET_COLOR_FSFS_STATIC="${VALET_COLOR_FSFS_STATIC:-}"
-VALET_COLOR_FSFS_FOCUS="${VALET_COLOR_FSFS_FOCUS:-}"
-VALET_COLOR_FSFS_FOCUS_RESET="${VALET_COLOR_FSFS_FOCUS_RESET:-}"
-VALET_COLOR_FSFS_LETTER_HIGHLIGHT="${VALET_COLOR_FSFS_LETTER_HIGHLIGHT:-}"
-VALET_COLOR_FSFS_LETTER_HIGHLIGHT_RESET="${VALET_COLOR_FSFS_LETTER_HIGHLIGHT_RESET:-}"
-VALET_COLOR_FSFS_SELECTED_ITEM="${VALET_COLOR_FSFS_SELECTED_ITEM:-}"
-VALET_COLOR_FSFS_SELECTED_ITEM_RESET="${VALET_COLOR_FSFS_SELECTED_ITEM_RESET:-}"
-VALET_COLOR_FSFS_PROMPT_STRING="${VALET_COLOR_FSFS_PROMPT_STRING:-}"
-VALET_COLOR_FSFS_PROMPT_STRING_RESET="${VALET_COLOR_FSFS_PROMPT_STRING_RESET:-}"
-VALET_COLOR_FSFS_COUNT="${VALET_COLOR_FSFS_COUNT:-}"
-VALET_COLOR_FSFS_COUNT_RESET="${VALET_COLOR_FSFS_COUNT_RESET:-}"
+VALET_CONFIG_FSFS_RESET_TEXT="${VALET_CONFIG_FSFS_RESET_TEXT:-}"
+VALET_CONFIG_FSFS_STATIC="${VALET_CONFIG_FSFS_STATIC:-}"
+VALET_CONFIG_FSFS_FOCUS="${VALET_CONFIG_FSFS_FOCUS:-}"
+VALET_CONFIG_FSFS_FOCUS_RESET="${VALET_CONFIG_FSFS_FOCUS_RESET:-}"
+VALET_CONFIG_FSFS_LETTER_HIGHLIGHT="${VALET_CONFIG_FSFS_LETTER_HIGHLIGHT:-}"
+VALET_CONFIG_FSFS_LETTER_HIGHLIGHT_RESET="${VALET_CONFIG_FSFS_LETTER_HIGHLIGHT_RESET:-}"
+VALET_CONFIG_FSFS_SELECTED_ITEM="${VALET_CONFIG_FSFS_SELECTED_ITEM:-}"
+VALET_CONFIG_FSFS_SELECTED_ITEM_RESET="${VALET_CONFIG_FSFS_SELECTED_ITEM_RESET:-}"
+VALET_CONFIG_FSFS_PROMPT_STRING="${VALET_CONFIG_FSFS_PROMPT_STRING:-}"
+VALET_CONFIG_FSFS_PROMPT_STRING_RESET="${VALET_CONFIG_FSFS_PROMPT_STRING_RESET:-}"
+VALET_CONFIG_FSFS_COUNT="${VALET_CONFIG_FSFS_COUNT:-}"
+VALET_CONFIG_FSFS_COUNT_RESET="${VALET_CONFIG_FSFS_COUNT_RESET:-}"
 
-# -----------
-# Other configs.
-# -----------
+## -----------
+## Interactive mode configuration.
+## -----------
+
+# Change the default time between 2 frames for a spinner (in seconds, can be a float number).
+VALET_CONFIG_SPINNER_DELAY="${VALET_CONFIG_SPINNER_DELAY:-}"
+
+# Change the default spinner characters (one character represents one frame of the animation).
+# Examples:
+#
+# - ◐◓◑◒
+# - ▖▘▝▗
+# - ⣾⣽⣻⢿⡿⣟⣯⣷
+# - ⢄⢂⢁⡁⡈⡐⡠
+# - ◡⊙◠
+# - ▌▀▐▄
+# - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
+VALET_CONFIG_SPINNER_CHARACTERS="${VALET_CONFIG_SPINNER_CHARACTERS:-}"
+
+
+## -----------
+## Other configs.
+## -----------
 
 # If true, will enable the automatic bump of the version of Valet on build.
 # Intended for Valet developers only.

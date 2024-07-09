@@ -63,6 +63,20 @@ function showcaseInteractive() {
   fsfs::itemSelector "What's your favorite color?" SELECTION_ARRAY "getColorSample" "Color sample"
   log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
 
+
+  log::info "Now displaying a spinner"
+
+  interactive::startSpinner
+
+  IDX=0
+  while [[ ${IDX} -lt 5 ]]; do
+    IDX=$((IDX + 1))
+    log::info "We can still output logs while the spinner runs..."
+    sleep 1
+  done
+
+  interactive::stopSpinner
+
   log::info "End of demo!"
 
 

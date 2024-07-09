@@ -484,9 +484,9 @@ function interactive::createSpace() {
 # interactive::getCursorPosition
 # ```
 function interactive::getCursorPosition() {
-  local escapeCode IFS
+  local _escapeCode IFS
   # we request the position and first read \e[
-  IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr escapeCode || :
+  IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr _escapeCode || :
   # then read line;colR
   IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || :
 }
@@ -552,4 +552,71 @@ function interactive::switchBackFromFullScreen() {
     io::readFile "${FSFS_TEMPORARY_ERROR_FILE}"
     log::error "Error messages during the interactive session:"$'\n'"${RETURNED_VALUE%$'\n'}"
   fi
+}
+
+#===============================================================
+# >>> Wait spinner
+#===============================================================
+
+function interactiveStartBackgroundSpinner() {
+  local frameDelay="${1:-${VALET_CONFIG_SPINNER_DELAY:-0.1}}"
+  local maxFrames="${2:-${VALET_CONFIG_SPINNER_MAX_FRAMES:-9223372036854775807}}"
+  local spinner="${3:-${VALET_CONFIG_SPINNER_CHARACTERS:-"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"}}"
+
+  # shellcheck source=lib-io
+  source io
+
+  # Hide the cursor
+  printf "%s" $'\e[?25l'
+
+  local -i spinnerIndex=0
+  local -i loop=0
+  while [[ ${loop} -lt ${maxFrames} ]]; do
+    printf '%s%s' "${spinner:${spinnerIndex}:1}" $'\b' 1>&2
+    spinnerIndex=$((spinnerIndex >= ${#spinner} - 1 ? 0 : spinnerIndex + 1))
+    loop+=1
+    io::sleep "${frameDelay}"
+  done
+}
+
+# ## interactive::startSpinner
+#
+# Starts a wait spinner animation that will be displayed until interactive::stopSpinner is called.
+#
+# Outputs to stderr.
+# Contrary to interactive::startSpinner, this spinner will run in the background and will not block the main thread.
+# The main thread can continue to output logs while this spinner is running.
+#
+# - $1: frame delay _as float_:
+#       the time in seconds between each frame of the spinner
+#       (defaults to VALET_CONFIG_SPINNER_DELAY=0.1)
+# - $2: max frames _as int_:
+#       the maximum number of frames to display
+#       (defaults to 9223372036854775807)
+# - $3: spinner _as string_:
+#       the spinner to display (each character is a frame)
+#       (defaults to VALET_CONFIG_SPINNER_CHARACTERS="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+#
+# ```bash
+# interactive::startSpinner 0.05 999 "⢄⢂⢁⡁⡈⡐⡠"
+# ```
+function interactive::startSpinner() {
+  coproc { interactiveStartBackgroundSpinner "$@"; } 1>&2
+  _SPINNER_PID="${COPROC_PID:-${NAME_PID:-}}"
+}
+
+# ## interactive::stopSpinner
+#
+# Stops the wait spinner animation started by interactive::startSpinner.
+#
+# ```bash
+# interactive::stopSpinner
+# ```
+function interactive::stopSpinner() {
+  if [[ -n "${_SPINNER_PID}" ]]; then
+    kill "${_SPINNER_PID}" 1>/dev/null || :
+    unset -v _SPINNER_PID
+  fi
+  # Show the cursor
+  printf "%s" $'\e[?25h'
 }

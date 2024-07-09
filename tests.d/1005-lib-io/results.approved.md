@@ -12,6 +12,12 @@ Exit code: `0`
 → io::toAbsolutePath ${PWD}/01.invoke.sh
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh
 
+→ io::toAbsolutePath .
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io
+
+→ io::toAbsolutePath ..
+$GLOBAL_VALET_HOME/tests.d
+
 → io::toAbsolutePath 01.invoke.sh
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/01.invoke.sh
 

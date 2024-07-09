@@ -18,7 +18,7 @@ Exit code: `0`
 INFO     Dry run mode is enabled, no changes will be made.
 ▶ called io::invoke git rev-parse HEAD
 INFO     The current version of valet is: 1.2.3.
-INFO     Found 102 functions with documentation.
+INFO     Found 104 functions with documentation.
 ▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
@@ -137,6 +137,8 @@ DEBUG    Found function: ⌜interactive::createSpace⌝
 DEBUG    Found function: ⌜interactive::getCursorPosition⌝
 DEBUG    Found function: ⌜interactive::switchToFullScreen⌝
 DEBUG    Found function: ⌜interactive::switchBackFromFullScreen⌝
+DEBUG    Found function: ⌜interactive::startSpinner⌝
+DEBUG    Found function: ⌜interactive::stopSpinner⌝
 DEBUG    Found function: ⌜io::toAbsolutePath⌝
 DEBUG    Found function: ⌜io::invokef5⌝
 DEBUG    Found function: ⌜io::invokef2⌝
@@ -181,7 +183,7 @@ DEBUG    Found function: ⌜system::getNotExistingCommands⌝
 DEBUG    Found function: ⌜system::commandExists⌝
 DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 102 functions with documentation.
+INFO     Found 104 functions with documentation.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -382,6 +384,8 @@ INFO     Found 102 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
@@ -398,6 +402,8 @@ INFO     Found 102 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md

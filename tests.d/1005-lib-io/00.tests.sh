@@ -9,6 +9,14 @@ function testIo::toAbsolutePath() {
   io::toAbsolutePath "${PWD}/01.invoke.sh" && echo "${RETURNED_VALUE}"
 
   echo
+  echo "→ io::toAbsolutePath ."
+  io::toAbsolutePath . && echo "${RETURNED_VALUE}"
+
+  echo
+  echo "→ io::toAbsolutePath .."
+  io::toAbsolutePath .. && echo "${RETURNED_VALUE}"
+
+  echo
   echo "→ io::toAbsolutePath 01.invoke.sh"
   io::toAbsolutePath 01.invoke.sh && echo "${RETURNED_VALUE}"
 

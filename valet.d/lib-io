@@ -29,6 +29,15 @@ function io::toAbsolutePath() {
     return 0
   fi
 
+  # if the file is relative path starting with .
+  if [[ ${file} == "." ]]; then
+    RETURNED_VALUE="${PWD}"
+    return 0
+  elif [[ ${file} == ".." ]]; then
+    RETURNED_VALUE="${PWD%/*}"
+    return 0
+  fi
+
   # if the file is a relative path (not containing ..), we return the absolute path
   RETURNED_VALUE="${PWD}/${file#./}"
   if [[ ${file} != *".."* && -e "${RETURNED_VALUE}" ]]; then
@@ -42,9 +51,7 @@ function io::toAbsolutePath() {
     return 0
   fi
 
-  # other cases of relative paths not handled:
-  # - file directory does not exist
-  # - the path is .. or .
+  # other cases of relative paths not handled.
   RETURNED_VALUE="${PWD}/${file#./}"
 }
 

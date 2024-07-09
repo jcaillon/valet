@@ -34,6 +34,11 @@ function main::onExitInternal() {
   # disable the profiler if still on
   if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
 
+  # kill spinner if still running
+  if [[ -n ${_SPINNER_PID:-} ]]; then
+    kill -9 "${_SPINNER_PID}" &>/dev/null || :
+  fi
+
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
   if command -v onExitTest 1>/dev/null 2>&1; then
     # this is for the self test command, we need to inform the user in case of an
