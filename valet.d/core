@@ -402,10 +402,18 @@ function log::createPrintFunction() {
 
   if [[ -z ${VALET_CONFIG_LOG_FD:-} || ${#VALET_CONFIG_LOG_FD} == 1 ]]; then
     # it is a numbered file descriptor
-    printStatement='
-    printf "'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_CONFIG_LOG_FD:-2}"
-    standardPrintStatement='
-    printf "%s" "${toPrint:-}" 1>&'"${VALET_CONFIG_LOG_FD:-2}"
+
+    # clear the line before printing if we are display a progress bar/spinner
+    local cleanStatements='
+    local eraseLine
+    if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" ]]; then
+      eraseLine=$'"'"'\e[2K'"'"'
+    fi
+    '
+    printStatement="${cleanStatements}"'
+    printf "${eraseLine:-}'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_CONFIG_LOG_FD:-2}"
+    standardPrintStatement="${cleanStatements}"'
+    printf "${eraseLine:-}%s" "${toPrint:-}" 1>&'"${VALET_CONFIG_LOG_FD:-2}"
   else
     # it is a file
     printStatement='

@@ -34,9 +34,9 @@ function main::onExitInternal() {
   # disable the profiler if still on
   if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
 
-  # kill spinner if still running
-  if [[ -n ${_SPINNER_PID:-} ]]; then
-    kill -9 "${_SPINNER_PID}" &>/dev/null || :
+  # kill coproc (spinner/progress bar...) if still running
+  if [[ -n ${_PROGRESS_BAR_COPROC_PID:-} ]]; then
+    kill "${_PROGRESS_BAR_COPROC_PID}" 1>/dev/null || :
   fi
 
   log::debug "Exiting with code ${rc} after ${SECONDS}s."

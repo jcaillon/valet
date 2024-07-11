@@ -235,19 +235,23 @@ VALET_CONFIG_FSFS_COUNT_RESET="${VALET_CONFIG_FSFS_COUNT_RESET:-}"
 ## Interactive mode configuration.
 ## -----------
 
-# Change the default time between 2 frames for a spinner (in seconds, can be a float number).
-VALET_CONFIG_SPINNER_DELAY="${VALET_CONFIG_SPINNER_DELAY:-}"
+# Change the default progress bar template.
+# See interactive::startProgress.
+VALET_CONFIG_PROGRESS_BAR_TEMPLATE="${VALET_CONFIG_PROGRESS_BAR_TEMPLATE:-}"
+
+# Change the default progress bar size
+VALET_CONFIG_PROGRESS_BAR_SIZE="${VALET_CONFIG_PROGRESS_BAR_SIZE:-}"
+
+# Change the default time between two frames for the animation of the spinner in the progress
+# (in seconds, can be a float number).
+# See interactive::startProgress.
+VALET_CONFIG_PROGRESS_ANIMATION_DELAY="${VALET_CONFIG_PROGRESS_ANIMATION_DELAY:-}"
+
+# The default number of animation frames to wait between two updates of the progress bar.
+VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL="${VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL:-}"
 
 # Change the default spinner characters (one character represents one frame of the animation).
-# Examples:
-#
-# - ◐◓◑◒
-# - ▖▘▝▗
-# - ⣾⣽⣻⢿⡿⣟⣯⣷
-# - ⢄⢂⢁⡁⡈⡐⡠
-# - ◡⊙◠
-# - ▌▀▐▄
-# - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
+# See interactive::startProgress.
 VALET_CONFIG_SPINNER_CHARACTERS="${VALET_CONFIG_SPINNER_CHARACTERS:-}"
 
 
@@ -536,19 +540,23 @@ VALET_CONFIG_FSFS_COUNT_RESET="${VALET_CONFIG_FSFS_COUNT_RESET:-}"
 ## Interactive mode configuration.
 ## -----------
 
-# Change the default time between 2 frames for a spinner (in seconds, can be a float number).
-VALET_CONFIG_SPINNER_DELAY="${VALET_CONFIG_SPINNER_DELAY:-}"
+# Change the default progress bar template.
+# See interactive::startProgress.
+VALET_CONFIG_PROGRESS_BAR_TEMPLATE="${VALET_CONFIG_PROGRESS_BAR_TEMPLATE:-}"
+
+# Change the default progress bar size
+VALET_CONFIG_PROGRESS_BAR_SIZE="${VALET_CONFIG_PROGRESS_BAR_SIZE:-}"
+
+# Change the default time between two frames for the animation of the spinner in the progress
+# (in seconds, can be a float number).
+# See interactive::startProgress.
+VALET_CONFIG_PROGRESS_ANIMATION_DELAY="${VALET_CONFIG_PROGRESS_ANIMATION_DELAY:-}"
+
+# The default number of animation frames to wait between two updates of the progress bar.
+VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL="${VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL:-}"
 
 # Change the default spinner characters (one character represents one frame of the animation).
-# Examples:
-#
-# - ◐◓◑◒
-# - ▖▘▝▗
-# - ⣾⣽⣻⢿⡿⣟⣯⣷
-# - ⢄⢂⢁⡁⡈⡐⡠
-# - ◡⊙◠
-# - ▌▀▐▄
-# - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
+# See interactive::startProgress.
 VALET_CONFIG_SPINNER_CHARACTERS="${VALET_CONFIG_SPINNER_CHARACTERS:-}"
 
 

@@ -81,7 +81,7 @@ AC__FG_RESET=$'\e[39m'
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
 AC__FG_COLOR__=$'\e[38;5;'
-__AC__CODE=$'m' # "${fgColor}2${_code}"
+__AC__CODE=$'m' # "${AC__FG_COLOR__}2${__AC__CODE}"
 
 # background colors
 AC__BG_BLACK=$'\e[40m'
@@ -104,7 +104,7 @@ AC__BG_BRIGHT_WHITE=$'\e[107m'
 AC__BG_RESET=$'\e[49m'
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
-AC__BG_COLOR=$'\e[48;5;' # "${bgColor}2${_code}"
+AC__BG_COLOR=$'\e[48;5;' # "${AC__BG_COLOR}2${__AC__CODE}"
 
 
 #===============================================================

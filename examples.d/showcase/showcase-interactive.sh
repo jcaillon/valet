@@ -35,13 +35,19 @@ function showcaseInteractive() {
   log::info "Displaying a question box."
   interactive::displayQuestion "What is your favorite color?"
 
-  # log::info "Getting user input"
-
   log::info "Displaying an answer box."
   interactive::displayAnswer "My favorite color is blue."
 
+  ############################
+  # Confirmation
+  ############################
+
   log::info "Getting user confirmation:"
   interactive::askForConfirmation "Please press ENTER to continue."
+
+  ############################
+  # Yes/no
+  ############################
 
   log::info "Getting user yes/no:"
   if interactive::promptYesNo "Do you want to abort this demo?" false; then
@@ -52,7 +58,11 @@ function showcaseInteractive() {
   log::info "Creating some space below this line."
   interactive::createSpace 4
 
-  log::info "Display a full screen selection."
+  ############################
+  # Fsfs
+  ############################
+
+  log::warning "Display a full screen selection."
 
   declare -g -a SELECTION_ARRAY
   # shellcheck disable=SC2034
@@ -63,19 +73,40 @@ function showcaseInteractive() {
   fsfs::itemSelector "What's your favorite color?" SELECTION_ARRAY "getColorSample" "Color sample"
   log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
 
+  ############################
+  # Spinner
+  ############################
 
-  log::info "Now displaying a spinner"
+  log::warning "Now displaying a spinner"
 
-  interactive::startSpinner
+  interactive::startProgress "#spinner" "" 0.05 "" "" "⢄⢂⢁⡁⡈⡐⡠"
 
   IDX=0
-  while [[ ${IDX} -lt 5 ]]; do
+  while [[ ${IDX} -lt 3 ]]; do
     IDX=$((IDX + 1))
     log::info "We can still output logs while the spinner runs..."
     sleep 1
   done
 
-  interactive::stopSpinner
+  interactive::stopProgress
+
+
+  ############################
+  # Progress bar
+  ############################
+
+  log::warning "Now displaying a progress bar."
+
+  IDX=0
+  while [[ ${IDX} -le 50 ]]; do
+    interactive::updateProgress $((IDX * 2)) "doing something ${IDX}..."
+    IDX=$((IDX + 1))
+    # log::info "alright ${IDX}..."
+    sleep 0.1
+  done
+
+  interactive::stopProgress
+
 
   log::info "End of demo!"
 

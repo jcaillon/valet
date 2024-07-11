@@ -80,3 +80,29 @@ printf '\e[%sR' '123;456' | interactive::getCursorPosition
 CURSOR_LINE: 123; CURSOR_COLUMN: 456
 ```
 
+### Testing interactiveGetProgressBarString
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+interactiveGetProgressBarString 0 20
+⌜                    ⌝
+
+interactiveGetProgressBarString 11 10
+⌜█         ⌝
+
+interactiveGetProgressBarString 15 10
+⌜█▌        ⌝
+
+interactiveGetProgressBarString 50 10
+⌜█████▉    ⌝
+
+interactiveGetProgressBarString 83 20
+⌜████████████████▌   ⌝
+
+interactiveGetProgressBarString 100 15
+⌜███████████████⌝
+```
+
