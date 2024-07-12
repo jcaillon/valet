@@ -707,7 +707,7 @@ function interactiveStartProgressBar() {
 # done
 # ```
 function interactive::startProgress() {
-  if [[ -n "${_PROGRESS_BAR_COPROC_PID:-}" ]]; then
+  if [[ -n "${_PROGRESS_BAR_PID:-}" ]]; then
     core::fail "A spinner or progress bar is already running."
   fi
 
@@ -718,8 +718,10 @@ function interactive::startProgress() {
   _PROGRESS_BAR_UPDATE_FILE="${RETURNED_VALUE}"
   _PROGRESS_BAR_RUNNING=true
 
-  coproc { interactiveStartProgressBar "${_PROGRESS_BAR_UPDATE_FILE}" "$@"; } 1>&2
-  _PROGRESS_BAR_COPROC_PID="${COPROC_PID:-${NAME_PID:-}}"
+  shopt -u -o monitor
+  exec 4>&2
+  { { interactiveStartProgressBar "${_PROGRESS_BAR_UPDATE_FILE}" "$@"; } & } 2>/dev/null 1>&4
+  _PROGRESS_BAR_PID="$!"
 }
 
 # ## interactive::updateProgress
@@ -767,11 +769,13 @@ function interactive::updateProgress() {
 # interactive::stopProgress
 # ```
 function interactive::stopProgress() {
-  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n "${_PROGRESS_BAR_COPROC_PID:-}" ]]; then
+  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n "${_PROGRESS_BAR_PID:-}" ]]; then
     _PROGRESS_BAR_RUNNING=false
-    kill "${_PROGRESS_BAR_COPROC_PID}" &>/dev/null || :
+    shopt -s -o monitor
+    kill "${_PROGRESS_BAR_PID}" &>/dev/null || :
     rm -f "${_PROGRESS_BAR_UPDATE_FILE}" &>/dev/null || :
-    unset -v _PROGRESS_BAR_COPROC_PID _PROGRESS_BAR_UPDATE_FILE _PROGRESS_BAR_RUNNING
+    exec 4>&-
+    unset -v _PROGRESS_BAR_PID _PROGRESS_BAR_UPDATE_FILE _PROGRESS_BAR_RUNNING
   fi
 
   printf "%s" "${AC__ERASE_LINE}${AC__CURSOR_SHOW}"
