@@ -57,6 +57,9 @@ options:
     The name of the test suite is given by the name of the directory containing the .sh test files.
 
     Example: --exclude '(1|commands)'
+- name: -P, --no-parallel-tests
+  description: |-
+    Disable the default behavior of running the tests in parallel. Will run the tests sequentially.
 ---"
 function selfTest() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
@@ -77,7 +80,8 @@ function selfTest() {
   # set the options
   unset TEST_AUTO_APPROVE \
     TEST_INCLUDE_PATTERN \
-    TEST_EXCLUDE_PATTERN
+    TEST_EXCLUDE_PATTERN \
+    TEST_NO_PARALLEL_TESTS
   if [[ -n "${autoApprove:-}" ]]; then
     TEST_AUTO_APPROVE="true"
   fi
@@ -88,6 +92,10 @@ function selfTest() {
   if [[ -n "${exclude:-}" ]]; then
     log::info "Excluding all test suites that match the pattern ⌜${exclude}⌝."
     TEST_EXCLUDE_PATTERN="${exclude}"
+  fi
+  if [[ -n "${noParallelTests:-}" ]]; then
+    log::info "Running all tests sequentially."
+    TEST_NO_PARALLEL_TESTS="true"
   fi
 
   declare -i NB_TEST_SUITES=0 NB_FAILED_TEST_SUITES=0

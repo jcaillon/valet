@@ -132,7 +132,9 @@ function selfTestUtils_runTestSuites() {
   # run a custom user script before the tests if it exists
   selfTestUtils_runHookScript "${testSuiteDirectory}/before-tests"
 
-  local -a testSuitePids=()
+  declare -g -a _TEST_SUITE_PIDS=()
+
+  local -i failedTestSuites=0
 
   # for each test file in the test directory
   local testDirectory testDirectoryName testScript
@@ -159,33 +161,38 @@ function selfTestUtils_runTestSuites() {
     # we want shopt -u -o monitor to avoid the "[x]   Done" message when a background process is finished
     shopt -u -o monitor
     (selfTestUtils_runTestSuite "${testDirectory}"; ) &
-    testSuitePids+=("$!")
-  done
+    _TEST_SUITE_PIDS+=("$!")
 
-  # wait for all the test suites to finish
-  local -i failedTestSuites=0
-  local -i exitCode
-  local -i idx
-  local pid
-  for idx in "${!testSuitePids[@]}"; do
-    pid="${testSuitePids[idx]}"
-    exitCode=0
-    # interactive::updateProgress $((idx * 100 / ${#testSuitePids[@]})) "Waiting for test suite with PID ${pid}."
-    wait "${pid}" || exitCode=$?
-    if (( exitCode != 0 )); then
-      failedTestSuites+=1
+    if [[ ${TEST_NO_PARALLEL_TESTS:-} == "true" ]]; then
+      wait "${_TEST_SUITE_PIDS[-1]}" || failedTestSuites+=1
     fi
   done
 
-  # interactive::stopProgress
+  if [[ ${TEST_NO_PARALLEL_TESTS:-} != "true" ]]; then
+    # wait for all the test suites to finish
+    local -i idx
+    local pid
+    for idx in "${!_TEST_SUITE_PIDS[@]}"; do
+      pid="${_TEST_SUITE_PIDS[idx]}"
+      wait "${pid}" || failedTestSuites+=1
+    done
+  fi
 
   shopt -s -o monitor
 
   # run a custom user script after the tests if it exists
   selfTestUtils_runHookScript "${testSuiteDirectory}/after-tests"
 
-  NB_TEST_SUITES=$((NB_TEST_SUITES + ${#testSuitePids[@]}))
+  NB_TEST_SUITES=$((NB_TEST_SUITES + ${#_TEST_SUITE_PIDS[@]}))
   NB_FAILED_TEST_SUITES=$((NB_FAILED_TEST_SUITES + failedTestSuites))
+}
+
+function cleanUpTest() {
+  # kill all the test suites
+  log::info "Killing all test suites."
+  for pid in "${_TEST_SUITE_PIDS[@]}"; do
+    kill -9 "${pid}" &>/dev/null || :
+  done
 }
 
 function selfTestUtils_runTestSuite() {
@@ -197,10 +204,23 @@ function selfTestUtils_runTestSuite() {
   _TEST_STANDARD_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-stderr-${_TEST_SUITE_NAME}"
   _TEST_REPORT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-report-${_TEST_SUITE_NAME}"
 
-  # reregister the traps, remove cleanup we only want to do it after all test suites
-  main::registrerTraps
   # setup the temp locations for this test suite
   _TEST_BASE_TEMPORARY_DIRECTORY="${TMPDIR:-/tmp}/valet-tests-${BASHPID}-${_TEST_SUITE_NAME}"
+
+  # export the function to clean up the
+  if command -v "cleanUpTest" &>/dev/null; then
+    unset -f cleanUpTest
+  fi
+  # shellcheck disable=SC2317
+  function cleanUpTest() {
+    # remove the temporary directory
+    if [[ -n ${_TEST_BASE_TEMPORARY_DIRECTORY:-} && -d ${_TEST_BASE_TEMPORARY_DIRECTORY:-} ]]; then
+      rm -Rf "${_TEST_BASE_TEMPORARY_DIRECTORY}"
+    fi
+  }
+
+  # reregister the traps, remove cleanup we only want to do it after all test suites
+  main::registrerTraps
 
   log::debug "Executing test suite ⌜${testDirectoryName}⌝."
 
@@ -395,13 +415,6 @@ function selfTestUtils_displayTestSuiteOutputs() {
   fi
 }
 
-function cleanUpTest() {
-  # remove the temporary directory
-  if [[ -n ${_TEST_BASE_TEMPORARY_DIRECTORY:-} && -d ${_TEST_BASE_TEMPORARY_DIRECTORY:-} ]]; then
-    rm -Rf "${_TEST_BASE_TEMPORARY_DIRECTORY}"
-  fi
-}
-
 # After this function call, everything written to stdout and stderr will be redirected
 # to the test output files.
 # Call selfTestUtils_resetFdRedirection to reset the redirection.
@@ -469,6 +482,9 @@ function selfTestUtils_setEvalVariables() {
   export VALET_CONFIG_DISABLE_PROGRESS=true
 
   export GLOBAL_COLUMNS=9999
+
+  export GLOBAL_LOG_LEVEL_INT=1
+  export GLOBAL_LOG_LEVEL=info
   "
 
   eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
