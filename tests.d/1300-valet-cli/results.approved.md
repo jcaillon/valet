@@ -498,7 +498,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
-▶ called main::showInteractiveCommandsMenu main-menu Please select the command to run. CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY⌉
+▶ called main::showInteractiveCommandsMenu Please select the command to run. _COPIED_COMMMANDS_ARRAY⌉
 ▶ received array was:
 ⌈help            Show the help this program or of a specific command.
 self build      Re-build the menu of valet from your commands.
@@ -1063,7 +1063,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
-▶ called main::showInteractiveCommandsMenu self Please select the command to run. FILTERED_COMMANDS_FOR_SUB_MENU⌉
+▶ called main::showInteractiveCommandsMenu Please select the command to run. FILTERED_COMMANDS_FOR_SUB_MENU⌉
 ▶ received array was:
 ⌈self build      Re-build the menu of valet from your commands.
 self config     Open the configuration file of Valet with your default editor.

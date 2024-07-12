@@ -8,7 +8,7 @@ export -f sudo
 
 # shellcheck disable=SC2317
 function main::showInteractiveCommandsMenu() {
-  local -n array="${3}"
+  local -n array="${2}"
 
   echo "▶ called main::showInteractiveCommandsMenu $*⌉" 1>&2
   echo "▶ received array was:" 1>&2

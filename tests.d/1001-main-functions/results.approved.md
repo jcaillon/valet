@@ -10,11 +10,11 @@ Exit code: `0`
 
 ```plaintext
 → main::sortCommands myid1 "${commands}"
-cm1  	This is command 1
-cm2  	This is command 2
-sub cmd1  	This is sub command 1
-sub cmd2  	This is sub command 2
-another3  	This is another command 3
+cm1  This is command 1
+cm2  This is command 2
+sub cmd1  This is sub command 1
+sub cmd2  This is sub command 2
+another3  This is another command 3
 ```
 
 ### Testing main::sortCommands after choosing another3 then cm2
@@ -27,11 +27,11 @@ Exit code: `0`
 → main::addLastChoice myid1 another3
 → main::addLastChoice myid1 cm2
 → main::sortCommands myid1 "${commands}"
-cm2  	This is command 2
-another3  	This is another command 3
-cm1  	This is command 1
-sub cmd1  	This is sub command 1
-sub cmd2  	This is sub command 2
+cm2  This is command 2
+another3  This is another command 3
+cm1  This is command 1
+sub cmd1  This is sub command 1
+sub cmd2  This is sub command 2
 ```
 
 ### Testing main::sortCommands, with VALET_CONFIG_REMEMBER_LAST_CHOICES=0 the order does not change
@@ -42,11 +42,11 @@ Exit code: `0`
 
 ```plaintext
 → VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands myid1 "${commands}"
-cm1  	This is command 1
-cm2  	This is command 2
-sub cmd1  	This is sub command 1
-sub cmd2  	This is sub command 2
-another3  	This is another command 3
+cm1  This is command 1
+cm2  This is command 2
+sub cmd1  This is sub command 1
+sub cmd2  This is sub command 2
+another3  This is another command 3
 ```
 
 ### Testing main::sortCommands for another id, the order of commands should be the initial one
@@ -57,11 +57,11 @@ Exit code: `0`
 
 ```plaintext
 → main::sortCommands myid2 "${commands}"
-cm1  	This is command 1
-cm2  	This is command 2
-sub cmd1  	This is sub command 1
-sub cmd2  	This is sub command 2
-another3  	This is another command 3
+cm1  This is command 1
+cm2  This is command 2
+sub cmd1  This is sub command 1
+sub cmd2  This is sub command 2
+another3  This is another command 3
 ```
 
 ### Testing main::addLastChoice after adding more than 5 commands, we only keep the last 5

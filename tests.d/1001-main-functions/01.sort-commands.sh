@@ -6,15 +6,20 @@ function testSortCommandsAndLastChoice() {
   VALET_CONFIG_LOCAL_STATE_DIRECTORY="${localStateDirectory}"
   VALET_CONFIG_REMEMBER_LAST_CHOICES=5
 
-  local commands="cm1  	This is command 1
-cm2  	This is command 2
-sub cmd1  	This is sub command 1
-sub cmd2  	This is sub command 2
-another3  	This is another command 3"
+  local -a commands=("cm1  This is command 1"
+"cm2  This is command 2"
+"sub cmd1  This is sub command 1"
+"sub cmd2  This is sub command 2"
+"another3  This is another command 3")
+
+  declare -a -g _COMMANDS
+
+  local IFS=$'\n'
 
   # testing commands sort and that without prior choices, the order of commands is kept
   echo "→ main::sortCommands myid1 \"\${commands}\""
-  main::sortCommands "myid1" "${commands}" && echo "${RETURNED_VALUE}"
+  _COMMANDS=("${commands[@]}")
+  main::sortCommands "myid1" _COMMANDS && echo "${_COMMANDS[*]}"
   test::endTest "Testing main::sortCommands without prior choices, the order of commands is kept" $?
 
   # testing commands sort after choosing another3 then cm2
@@ -23,18 +28,21 @@ another3  	This is another command 3"
   echo "→ main::sortCommands myid1 \"\${commands}\""
   main::addLastChoice "myid1" "another3"
   main::addLastChoice "myid1" "cm2"
-  main::sortCommands "myid1" "${commands}" && echo "${RETURNED_VALUE}"
+  _COMMANDS=("${commands[@]}")
+  main::sortCommands "myid1" _COMMANDS && echo "${_COMMANDS[*]}"
   test::endTest "Testing main::sortCommands after choosing another3 then cm2" $?
 
   # testing with VALET_CONFIG_REMEMBER_LAST_CHOICES=0
   echo "→ VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands myid1 \"\${commands}\""
-  VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands "myid1" "${commands}" && echo "${RETURNED_VALUE}"
+  _COMMANDS=("${commands[@]}")
+  VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands "myid1" _COMMANDS && echo "${_COMMANDS[*]}"
   test::endTest "Testing main::sortCommands, with VALET_CONFIG_REMEMBER_LAST_CHOICES=0 the order does not change" $?
   VALET_CONFIG_REMEMBER_LAST_CHOICES=5
 
   # testing commands sort for another id, the order of commands should be the initial one
   echo "→ main::sortCommands myid2 \"\${commands}\""
-  main::sortCommands "myid2" "${commands}" && echo "${RETURNED_VALUE}"
+  _COMMANDS=("${commands[@]}")
+  main::sortCommands "myid2" _COMMANDS && echo "${_COMMANDS[*]}"
   test::endTest "Testing main::sortCommands for another id, the order of commands should be the initial one" $?
 
   # testing that after adding more than x commands, we only keep the last x
@@ -56,8 +64,6 @@ another3  	This is another command 3"
   echo "Content of last-choices-myid1:"
   echo "${content}"
   test::endTest "Testing main::addLastChoice after adding the same command multiple times only keeps the last one" 0
-
-  unset core::getLocalStateDirectory
 }
 
 function main() {

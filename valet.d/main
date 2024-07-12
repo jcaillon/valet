@@ -373,7 +373,15 @@ function main::parseMainArguments() {
 
   if [[ ${#_PARSED_COMMANDS[@]} -eq 0 ]]; then
     # no command provided, we show the commands menu
-    main::showCommandsMenuAndRun "main-menu" CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY
+
+    if [[ "${VALET_CONFIG_REMEMBER_LAST_CHOICES:-3}" -eq 0 ]]; then
+      # if the user does not want to remember the last choices
+      main::showCommandsMenuAndRun "main-menu" CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY
+    else
+      _COPIED_COMMMANDS_ARRAY=("${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[@]}")
+      main::showCommandsMenuAndRun "main-menu" _COPIED_COMMMANDS_ARRAY
+    fi
+
   fi
 
   local functionName nbArgs exactCommand
@@ -604,11 +612,11 @@ function main::showCommandsMenuAndRun() {
   menuId="${1}"
   commandSelectionItemsArrayName="${2}"
 
-  # display the menu
-  # TODO: reimplement usage of main::sortCommands
+  # sort the commands according to the last choices
+  main::sortCommands "${menuId}" "${commandSelectionItemsArrayName}"
 
   local commandChoice
-  main::showInteractiveCommandsMenu "${menuId}" "Please select the command to run." "${commandSelectionItemsArrayName}"
+  main::showInteractiveCommandsMenu "Please select the command to run." "${commandSelectionItemsArrayName}"
   commandChoice="${RETURNED_VALUE}"
 
   log::debug "Command choice ⌜${commandChoice}⌝."
@@ -617,19 +625,19 @@ function main::showCommandsMenuAndRun() {
     # the user pressed escape or ctrl-c
     exit 0
   fi
-  # TODO: reimplement usage of main::addLastChoice
-  # main::addLastChoice "${menuId}" "${commandChoice}"
+
+  main::addLastChoice "${menuId}" "${commandChoice}"
 
   # get the function name from the command by replacing spaces and hyphens with _
   local functionName
-  main::getFunctionNameFromCommand "${commandChoice}" && functionName="${RETURNED_VALUE}"
+  main::getFunctionNameFromCommand "${commandChoice}"
+  functionName="${RETURNED_VALUE}"
 
   main::runFunction "${functionName}"
 }
 
-# TODO: simplify this by directly storing and sourcing bash arrays
-# This function sorts the commands in the menu
-# by reading a file that contains the last used commands (last on top).
+# This function sorts the commands in the menu by reading
+# a file that contains the last used commands (last on top).
 # The file is located in the configuration directory of the program.
 # $1: the id of the menu (used in the file name)
 # $2: the menu body
@@ -637,13 +645,11 @@ function main::showCommandsMenuAndRun() {
 # Usage:
 #  main::sortCommands "id" "${commands}" && sortedCommands="${RETURNED_VALUE}"
 function main::sortCommands() {
-  local menuId commands
-  menuId="${1}"
-  commands="${2}"
+  local menuId="${1}"
+  local -n commands="${2}"
 
   # if the user does not want to remember the last choices, we return
   if [[ "${VALET_CONFIG_REMEMBER_LAST_CHOICES:-3}" -eq 0 ]]; then
-    RETURNED_VALUE="${commands}"
     return 0
   fi
 
@@ -651,20 +657,20 @@ function main::sortCommands() {
   core::getLocalStateDirectory
   lastChoicesFile="${RETURNED_VALUE}/last-choices-${menuId}"
   if [[ ! -f "${lastChoicesFile}" ]]; then
-    RETURNED_VALUE="${commands}"
     return 0
   fi
 
   local lastChoices
   readarray -d $'\n' -t lastChoices <"${lastChoicesFile}"
 
+  local -a unplayedCommands=()
+  local -a playedCommands=()
+
   # list all the unplayed commands
   local unplayedCommands line command lastChoice played
   local -a commandsArray
-  local IFS=$'\n'
-  for line in ${commands}; do
-    command="${line%%$'\t'*}"
-    command="${command%%  *}"
+  for line in "${commands[@]}"; do
+    command="${line%%  *}"
     # check if the command has not been played yet
     played=false
     for lastChoice in "${lastChoices[@]}"; do
@@ -675,7 +681,7 @@ function main::sortCommands() {
     done
     # if not played, add it to the list
     if [[ ${played} == "false" ]]; then
-      unplayedCommands+="${line}"$'\n'
+      unplayedCommands+=("${line}")
     fi
     commandsArray+=("${line}")
   done
@@ -685,17 +691,16 @@ function main::sortCommands() {
   for lastChoice in "${lastChoices[@]}"; do
     # find the corresponding line in the commands, if any
     for line in "${commandsArray[@]}"; do
-      command="${line%%$'\t'*}"
-      command="${command%%  *}"
+      command="${line%%  *}"
       if [[ ${command} == "${lastChoice}" ]]; then
-        playedCommands+="${line}"$'\n'
+        playedCommands+=("${line}")
         break
       fi
     done
   done
 
-  commands="${playedCommands:-}${unplayedCommands:-}"
-  RETURNED_VALUE="${commands%$'\n'}"
+  commands=("${playedCommands[@]}")
+  commands+=("${unplayedCommands[@]}")
 }
 
 # This function adds the user command choice to the last choices file.
@@ -719,31 +724,33 @@ function main::addLastChoice() {
 
   # load last choices from the file into an array
   local lastChoicesFile
+  local -a lastChoices
   core::getLocalStateDirectory
   lastChoicesFile="${RETURNED_VALUE}/last-choices-${menuId}"
-  if [[ ! -f "${lastChoicesFile}" ]]; then
-    :>"${lastChoicesFile}"
+  if [[ -f "${lastChoicesFile}" ]]; then
+    readarray -d $'\n' -t lastChoices <"${lastChoicesFile}"
+  else
+    lastChoices=()
   fi
 
-  local lastChoices
-  readarray -d $'\n' -t lastChoices <"${lastChoicesFile}"
+  {
+    # write the command first
+    printf '%s\n' "${command}"
 
-  # write the command first
-  printf '%s\n' "${command}" >"${lastChoicesFile}"
-
-  # loop through the last choices and add them to the file, limit to 20 total
-  local -i total index
-  total="${#lastChoices[@]}"
-  if [[ total -gt maxNumberOfLastChoice ]]; then total=$((maxNumberOfLastChoice - 1)); fi
-  index=0
-  for ((index = 0; index < total; index++)); do
-    if [[ "${lastChoices[${index}]}" != "${command}" ]]; then
-      printf '%s\n' "${lastChoices[${index}]}" >>"${lastChoicesFile}"
-    else
-      total+=1
-      if [[ total -gt ${#lastChoices[@]} ]]; then total=${#lastChoices[@]}; fi
-    fi
-  done
+    # loop through the last choices and add them to the file, limit to 20 total
+    local -i total index
+    total="${#lastChoices[@]}"
+    if [[ total -gt maxNumberOfLastChoice ]]; then total=$((maxNumberOfLastChoice - 1)); fi
+    index=0
+    for ((index = 0; index < total; index++)); do
+      if [[ "${lastChoices[${index}]}" != "${command}" ]]; then
+        printf '%s\n' "${lastChoices[${index}]}"
+      else
+        total+=1
+        if [[ total -gt ${#lastChoices[@]} ]]; then total=${#lastChoices[@]}; fi
+      fi
+    done
+  } >"${lastChoicesFile}"
 }
 
 # show an interactive menu for commands
@@ -755,11 +762,9 @@ function main::addLastChoice() {
 # Usage:
 #  main::showInteractiveCommandsMenu "menuId" "header" ARRAY_NAME && choice="${RETURNED_VALUE}"
 function main::showInteractiveCommandsMenu() {
-  local menuId menuHeader commandSelectionItemsArrayName
-  menuId="${1}"
-  menuHeader="${2}"
-  commandSelectionItemsArrayName="${3}"
-  shift 2
+  local menuHeader commandSelectionItemsArrayName
+  menuHeader="${1}"
+  commandSelectionItemsArrayName="${2}"
 
   # shellcheck source=lib-fsfs
   source fsfs

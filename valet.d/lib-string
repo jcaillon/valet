@@ -506,3 +506,4 @@ function string::regexGetFirst() {
     RETURNED_VALUE=""
   fi
 }
+
