@@ -507,3 +507,69 @@ function string::regexGetFirst() {
   fi
 }
 
+# ## string::microsecondsToHuman
+#
+# Convert microseconds to human readable format.
+#
+# - $1: **microseconds** _as int_:
+#       the microseconds to convert
+# - $2: **format** _as string_:
+#      the format to use (defaults to "HH:MM:SS")
+#      Usable formats:
+#      - %HH: hours
+#      - %MM: minutes
+#      - %SS: seconds
+#      - %UU: microseconds
+#      - %hh: hours without leading zero
+#      - %ll: minutes without leading zero
+#      - %ss: seconds without leading zero
+#      - %uu: microseconds without leading zero
+#      - %M: total minutes
+#      - %S: total seconds
+#      - %U: total milliseconds
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the human readable format
+#
+# ```bash
+# string::microsecondsToHuman 123456789
+# echo "${RETURNED_VALUE}"
+# ```
+function string::microsecondsToHuman() {
+  local -i ms="${1}"
+  local format="${2:-HH:MM:SS}"
+
+  local -i hours=$((ms / 3600 / 1000000))
+  local -i minutes=$(((ms / 60 / 1000000) % 60))
+  local -i seconds=$(((ms / 1000000) % 60))
+  local -i milliseconds=$((ms % 1000000))
+
+  local humanFormat="${format}"
+  if [[ ${hours} -lt 10 ]]; then
+    humanFormat="${humanFormat//%HH/0${hours}}"
+  else
+    humanFormat="${humanFormat//%HH/${hours}}"
+  fi
+  if [[ ${minutes} -lt 10 ]]; then
+    humanFormat="${humanFormat//%MM/0${minutes}}"
+  else
+    humanFormat="${humanFormat//%MM/${minutes}}"
+  fi
+  if [[ ${seconds} -lt 10 ]]; then
+    humanFormat="${humanFormat//%SS/0${seconds}}"
+  else
+    humanFormat="${humanFormat//%SS/${seconds}}"
+  fi
+  humanFormat="${humanFormat//%UU/${milliseconds}}"
+  humanFormat="${humanFormat//%h/${hours}}"
+  humanFormat="${humanFormat//%m/${minutes}}"
+  humanFormat="${humanFormat//%s/${seconds}}"
+  humanFormat="${humanFormat//%M/$((hours * 60 + minutes))}"
+  humanFormat="${humanFormat//%S/$((hours * 3600 + minutes * 60 + seconds))}"
+  humanFormat="${humanFormat//%U/$((ms))}"
+
+  RETURNED_VALUE="${humanFormat}"
+}
+
+

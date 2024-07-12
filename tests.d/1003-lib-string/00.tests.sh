@@ -249,6 +249,27 @@ function testString::compareSemanticVersion() {
   test::endTest "Testing string::compareSemanticVersion function" 0
 }
 
+function testString::microsecondsToHuman() {
+  local -i ms=$((234 + 1000000 * 1 + 1000000 * 60 * 2 + 1000000 * 60 * 60 * 3))
+  echo "→ string::microsecondsToHuman ${ms}"
+  string::microsecondsToHuman ${ms} "Hours: %HH
+Minutes: %MM
+Seconds: %SS
+Microseconds: %UU
+
+Hours: %h
+Minutes: %m
+Seconds: %s
+
+Total minutes: %M
+Total seconds: %S
+Total microseconds: %U"
+  echo "${RETURNED_VALUE}"
+  echo
+  echo "→ string::microsecondsToHuman"
+  test::endTest "Testing string::microsecondsToHuman function" 0
+}
+
 function main() {
   testString::bumpSemanticVersion
   testString::kebabCaseToSnakeCase
@@ -263,6 +284,7 @@ function main() {
   testString::regexGetFirst
   testString::trim
   testString::compareSemanticVersion
+  testString::microsecondsToHuman
 }
 
 main

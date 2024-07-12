@@ -282,3 +282,27 @@ Failed as expected
 ERROR    Failed to compare versions ⌜1.2a.3⌝ and ⌜1.2.3derp⌝ because they are not valid semantic versions.
 ```
 
+### Testing string::microsecondsToHuman function
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::microsecondsToHuman 10921000234
+Hours: 03
+Minutes: 02
+Seconds: 01
+Microseconds: 234
+
+Hours: 3
+Minutes: 2
+Seconds: 1
+
+Total minutes: 182
+Total seconds: 10921
+Total microseconds: 10921000234
+
+→ string::microsecondsToHuman
+```
+
