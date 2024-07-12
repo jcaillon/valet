@@ -707,6 +707,11 @@ function interactiveStartProgressBar() {
 # done
 # ```
 function interactive::startProgress() {
+  if [[ ! -t 2 ]]; then
+    # we are not in an interactive session
+    return 0
+  fi
+
   if [[ -n "${_PROGRESS_BAR_PID:-}" ]]; then
     core::fail "A spinner or progress bar is already running."
   fi
@@ -719,8 +724,8 @@ function interactive::startProgress() {
   _PROGRESS_BAR_RUNNING=true
 
   shopt -u -o monitor
-  exec 4>&2
-  { { interactiveStartProgressBar "${_PROGRESS_BAR_UPDATE_FILE}" "$@"; } & } 2>/dev/null 1>&4
+  exec 7>&2
+  { { interactiveStartProgressBar "${_PROGRESS_BAR_UPDATE_FILE}" "$@"; } & } 2>/dev/null 1>&7
   _PROGRESS_BAR_PID="$!"
 }
 
@@ -742,6 +747,11 @@ function interactive::startProgress() {
 function interactive::updateProgress() {
   local percent="${1}"
   local message="${2:-}"
+
+  if [[ ! -t 2 ]]; then
+    # we are not in an interactive session
+    return 0
+  fi
 
   if [[ ${percent} -lt 0 ]]; then
     return
@@ -769,12 +779,18 @@ function interactive::updateProgress() {
 # interactive::stopProgress
 # ```
 function interactive::stopProgress() {
+  if [[ ! -t 2 ]]; then
+    # we are not in an interactive session
+    return 0
+  fi
+
   if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n "${_PROGRESS_BAR_PID:-}" ]]; then
     _PROGRESS_BAR_RUNNING=false
-    shopt -s -o monitor
+    shopt -u -o monitor
     kill "${_PROGRESS_BAR_PID}" &>/dev/null || :
     rm -f "${_PROGRESS_BAR_UPDATE_FILE}" &>/dev/null || :
-    exec 4>&-
+    shopt -s -o monitor
+    exec 7>&-
     unset -v _PROGRESS_BAR_PID _PROGRESS_BAR_UPDATE_FILE _PROGRESS_BAR_RUNNING
   fi
 

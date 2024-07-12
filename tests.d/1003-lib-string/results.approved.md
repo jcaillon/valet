@@ -289,19 +289,22 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ string::microsecondsToHuman 10921000234
-Hours: 03
-Minutes: 02
-Seconds: 01
-Microseconds: 234
+→ string::microsecondsToHuman 18243002234
+Hours: 05
+Minutes: 04
+Seconds: 03
+Milliseconds: 002
 
-Hours: 3
-Minutes: 2
-Seconds: 1
+Hours: 5
+Minutes: 4
+Seconds: 3
+Milliseconds: 2
+Microseconds: 2234
 
-Total minutes: 182
-Total seconds: 10921
-Total microseconds: 10921000234
+Total minutes: 304
+Total seconds: 18243
+Total milliseconds: 4320003002
+Total microseconds: 18243002234
 
 → string::microsecondsToHuman
 ```

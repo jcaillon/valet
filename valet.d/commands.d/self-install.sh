@@ -209,7 +209,7 @@ function selfUpdate() {
   if [[ ${firstInstallation} != "true" ]]; then
 
     # get the current version
-    io::readFile "${GLOBAL_VALET_HOME}/valet.d/version"
+    core::getVersion
     local currentVersion="${RETURNED_VALUE}"
     currentVersion="${currentVersion%%$'\n'*}"
 

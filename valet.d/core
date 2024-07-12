@@ -39,19 +39,23 @@ fi
 # >>> Temporay files and folders
 #===============================================================
 
-# get unique file names for the stdout, stderr and temporary directory
-# to be fast, we do not create anything until we really need it
-# this could lead to issues, altough it is very unlikely
-GLOBAL_TEMPORARY_PREFIX="${TMPDIR:-/tmp}/temp-"
-GLOBAL_TEMPORARY_IN_MEM_PREFIX="${VALET_CONFIG_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/temp-"
-GLOBAL_TEMPORARY_WORK_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-work"
-while [[ -e "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; do GLOBAL_TEMPORARY_WORK_FILE+="x"; done
-GLOBAL_TEMPORARY_STDOUT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stdout"
-while [[ -e "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; do GLOBAL_TEMPORARY_STDOUT_FILE+="x"; done
-GLOBAL_TEMPORARY_STDERR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stderr"
-while [[ -e "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; do GLOBAL_TEMPORARY_STDERR_FILE+="x"; done
-GLOBAL_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_PREFIX}${BASHPID}.valet.d"
-while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; do GLOBAL_TEMPORARY_DIRECTORY+="x"; done
+# Setup global variables that will be used for temporary files and folders.
+function io::setupTempFileGlobalVariable() {
+  # get unique file names for the stdout, stderr and temporary directory
+  # to be fast, we do not create anything until we really need it
+  # this could lead to issues, altough it is very unlikely
+  GLOBAL_TEMPORARY_PREFIX="${TMPDIR:-/tmp}/temp-"
+  GLOBAL_TEMPORARY_IN_MEM_PREFIX="${VALET_CONFIG_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/temp-"
+  GLOBAL_TEMPORARY_WORK_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-work"
+  while [[ -e "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; do GLOBAL_TEMPORARY_WORK_FILE+="x"; done
+  GLOBAL_TEMPORARY_STDOUT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stdout"
+  while [[ -e "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; do GLOBAL_TEMPORARY_STDOUT_FILE+="x"; done
+  GLOBAL_TEMPORARY_STDERR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stderr"
+  while [[ -e "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; do GLOBAL_TEMPORARY_STDERR_FILE+="x"; done
+  GLOBAL_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_PREFIX}${BASHPID}.valet.d"
+  while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; do GLOBAL_TEMPORARY_DIRECTORY+="x"; done
+}
+io::setupTempFileGlobalVariable
 
 # ## io::createTempFile
 #
@@ -200,19 +204,19 @@ function log::setLevel() {
   # log level, defaults to info
   GLOBAL_LOG_LEVEL="${1:-${VALET_LOG_LEVEL:-info}}"
   case "${GLOBAL_LOG_LEVEL}" in
-  error) LOG_LEVEL_INT=4 ;;
-  warning) LOG_LEVEL_INT=3 ;;
-  success) LOG_LEVEL_INT=2 ;;
-  debug) LOG_LEVEL_INT=0 ;;
-  trace) LOG_LEVEL_INT=-1 ;;
-  *) LOG_LEVEL_INT=1 ;;
+  error) GLOBAL_LOG_LEVEL_INT=4 ;;
+  warning) GLOBAL_LOG_LEVEL_INT=3 ;;
+  success) GLOBAL_LOG_LEVEL_INT=2 ;;
+  debug) GLOBAL_LOG_LEVEL_INT=0 ;;
+  trace) GLOBAL_LOG_LEVEL_INT=-1 ;;
+  *) GLOBAL_LOG_LEVEL_INT=1 ;;
   esac
 
   if [[ ${2:-false} != "true" ]]; then
-    if [[ ${LOG_LEVEL_INT} -ne 1 ]]; then
+    if [[ ${GLOBAL_LOG_LEVEL_INT} -ne 1 ]]; then
       log::debug "Log level set to ${GLOBAL_LOG_LEVEL}."
     fi
-    if [[ ${LOG_LEVEL_INT} -eq 0 ]]; then
+    if [[ ${GLOBAL_LOG_LEVEL_INT} -eq 0 ]]; then
       log::warning "Beware that debug log level might lead to secret leak, use it only if necessary."
     fi
   fi
@@ -615,7 +619,7 @@ function log::error() {
 # log::warning "This is a warning message."
 # ```
 function log::warning() {
-  if ((${LOG_LEVEL_INT:-1} > 3)); then
+  if ((${GLOBAL_LOG_LEVEL_INT:-1} > 3)); then
     return 0
   fi
   log::print "WARNING" "${VALET_CONFIG_ICON_WARNING:-$'\uf071'}" "WARNING" "$@"
@@ -633,7 +637,7 @@ function log::warning() {
 # log::success "This is a success message."
 # ```
 function log::success() {
-  if ((${LOG_LEVEL_INT:-1} > 2)); then
+  if ((${GLOBAL_LOG_LEVEL_INT:-1} > 2)); then
     return 0
   fi
   log::print "SUCCESS" "${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}" "SUCCESS" "$@"
@@ -651,7 +655,7 @@ function log::success() {
 # log::info "This is an info message."
 # ```
 function log::info() {
-  if ((${LOG_LEVEL_INT:-1} > 1)); then
+  if ((${GLOBAL_LOG_LEVEL_INT:-1} > 1)); then
     return 0
   fi
   log::print "INFO" "${VALET_CONFIG_ICON_INFO:-$'\uf05a'}" "INFO" "$@"
@@ -669,7 +673,7 @@ function log::info() {
 # log::debug "This is a debug message."
 # ```
 function log::debug() {
-  if ((${LOG_LEVEL_INT:-1} > 0)); then
+  if ((${GLOBAL_LOG_LEVEL_INT:-1} > 0)); then
     return 0
   fi
   log::print "DEBUG" "${VALET_CONFIG_ICON_DEBUG:-$'\uf188'}" "DEBUG" "$@"
@@ -687,7 +691,7 @@ function log::debug() {
 # log::trace "This is a trace message."
 # ```
 function log::trace() {
-  if ((${LOG_LEVEL_INT:-1} > -1)); then
+  if ((${GLOBAL_LOG_LEVEL_INT:-1} > -1)); then
     return 0
   fi
   log::print "TRACE" "${VALET_CONFIG_ICON_TRACE:-$'\ue241'}" "TRACE" "$@"
@@ -725,7 +729,7 @@ function log::errorTrace() {
 # if log::isDebugEnabled; then printf '%s\n' "Debug mode is active."; fi
 # ```
 function log::isDebugEnabled() {
-  if ((${LOG_LEVEL_INT:-1} <= 0)); then
+  if ((${GLOBAL_LOG_LEVEL_INT:-1} <= 0)); then
     return 0
   fi
   return 1
@@ -745,7 +749,7 @@ function log::isDebugEnabled() {
 # if log::isTraceEnabled; then printf '%s\n' "Debug mode is active."; fi
 # ```
 function log::isTraceEnabled() {
-  if ((${LOG_LEVEL_INT:-1} <= -1)); then
+  if ((${GLOBAL_LOG_LEVEL_INT:-1} <= -1)); then
     return 0
   fi
   return 1
@@ -940,6 +944,24 @@ function core::reloadUserCommands() {
   # shellcheck disable=SC2086
   unset -v ${!CMD_*} _CMD_INCLUDED
   core::sourceUserCommands
+}
+
+# ## core::getVersion
+#
+# Returns the version of Valet.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The version of Valet.
+#
+# ```bash
+# core::getVersion
+# printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
+# ```
+function core::getVersion() {
+  # shellcheck source=lib-io
+  source io
+  io::readFile "${GLOBAL_VALET_HOME}/valet.d/version"
 }
 
 #===============================================================

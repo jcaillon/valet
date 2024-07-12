@@ -195,6 +195,10 @@ VALET_CONFIG_TEST_DIFF_COMMAND=\"\${VALET_CONFIG_TEST_DIFF_COMMAND:-${EXPORTED_V
 # you typed is the exact command that will be executed.
 VALET_CONFIG_STRICT_MATCHING=\"\${VALET_CONFIG_STRICT_MATCHING:-${EXPORTED_VALET_CONFIG_STRICT_MATCHING:-}}\"
 
+# Set this to 'true' to disable all progress bars / spinners in Valet.
+# Useful in a CI environment where you want to disable all animations.
+VALET_CONFIG_DISABLE_PROGRESS=\"\${VALET_CONFIG_DISABLE_PROGRESS:-${EXPORTED_VALET_CONFIG_DISABLE_PROGRESS:-}}\"
+
 ## -----------
 ## Log/output configuration
 ## -----------

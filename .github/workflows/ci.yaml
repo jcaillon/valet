@@ -37,4 +37,5 @@ jobs:
           chmod +x valet
           chmod +x valet.d/commands.d/self-build.sh
           export VALET_CONFIG_ENABLE_COLORS=true
+          export VALET_CONFIG_DISABLE_PROGRESS=true
           ./valet self test -C

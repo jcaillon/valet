@@ -116,7 +116,7 @@ function selfRelease::createRelease() {
   fi
 
   # read the version from the valet file
-  io::readFile "${GLOBAL_VALET_HOME}/valet.d/version"
+  core::getVersion
   local version="${RETURNED_VALUE}"
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."
@@ -254,7 +254,7 @@ function selfRelease::bumpVersion() {
   local dryRun="${2:-false}"
 
   # read the version from the valet file
-  io::readFile "${GLOBAL_VALET_HOME}/valet.d/version"
+  core::getVersion
   local version="${RETURNED_VALUE}"
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."

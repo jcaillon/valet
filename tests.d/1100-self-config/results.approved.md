@@ -10,7 +10,7 @@ Exit code: `0`
 
 ```plaintext
 → selfConfig
-▶ called myEditor: /tmp/valet.d/f1-0
+▶ called myEditor: /tmp/valet.d/f1-1
 
 cat ${configFile}
 #!/usr/bin/env bash
@@ -107,6 +107,10 @@ VALET_CONFIG_TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
 # This is useful in a CI environment where you want to make sure that the command
 # you typed is the exact command that will be executed.
 VALET_CONFIG_STRICT_MATCHING="${VALET_CONFIG_STRICT_MATCHING:-}"
+
+# Set this to 'true' to disable all progress bars / spinners in Valet.
+# Useful in a CI environment where you want to disable all animations.
+VALET_CONFIG_DISABLE_PROGRESS="${VALET_CONFIG_DISABLE_PROGRESS:-}"
 
 ## -----------
 ## Log/output configuration
@@ -270,8 +274,8 @@ VALET_CONFIG_BUMP_VERSION_ON_BUILD="${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-}"
 **Error** output:
 
 ```log
-INFO     Creating the valet config file ⌜/tmp/valet.d/f1-0⌝.
-INFO     Opening the valet config file ⌜/tmp/valet.d/f1-0⌝.
+INFO     Creating the valet config file ⌜/tmp/valet.d/f1-1⌝.
+INFO     Opening the valet config file ⌜/tmp/valet.d/f1-1⌝.
 ```
 
 ### Testing selfConfig (should only open, file exists)
@@ -282,13 +286,13 @@ Exit code: `0`
 
 ```plaintext
 → selfConfig
-▶ called myEditor: /tmp/valet.d/f1-0
+▶ called myEditor: /tmp/valet.d/f1-1
 ```
 
 **Error** output:
 
 ```log
-INFO     Opening the valet config file ⌜/tmp/valet.d/f1-0⌝.
+INFO     Opening the valet config file ⌜/tmp/valet.d/f1-1⌝.
 ```
 
 ### Testing selfConfig override no edit
@@ -304,7 +308,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
-INFO     Creating the valet config file ⌜/tmp/valet.d/f1-0⌝.
+INFO     Creating the valet config file ⌜/tmp/valet.d/f1-1⌝.
 ```
 
 ### Testing selfConfig override export
@@ -315,7 +319,7 @@ Exit code: `0`
 
 ```plaintext
 → (selfConfig --override --export-current-values)
-▶ called myEditor: /tmp/valet.d/f1-0
+▶ called myEditor: /tmp/valet.d/f1-1
 
 cat ${configFile}
 #!/usr/bin/env bash
@@ -412,6 +416,10 @@ VALET_CONFIG_TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
 # This is useful in a CI environment where you want to make sure that the command
 # you typed is the exact command that will be executed.
 VALET_CONFIG_STRICT_MATCHING="${VALET_CONFIG_STRICT_MATCHING:-}"
+
+# Set this to 'true' to disable all progress bars / spinners in Valet.
+# Useful in a CI environment where you want to disable all animations.
+VALET_CONFIG_DISABLE_PROGRESS="${VALET_CONFIG_DISABLE_PROGRESS:-}"
 
 ## -----------
 ## Log/output configuration
@@ -575,7 +583,7 @@ VALET_CONFIG_BUMP_VERSION_ON_BUILD="${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-}"
 **Error** output:
 
 ```log
-INFO     Creating the valet config file ⌜/tmp/valet.d/f1-0⌝.
-INFO     Opening the valet config file ⌜/tmp/valet.d/f1-0⌝.
+INFO     Creating the valet config file ⌜/tmp/valet.d/f1-1⌝.
+INFO     Opening the valet config file ⌜/tmp/valet.d/f1-1⌝.
 ```
 

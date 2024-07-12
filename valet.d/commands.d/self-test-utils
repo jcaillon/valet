@@ -38,19 +38,12 @@ function test::commentTest() {
 #       (defaults to "")
 #
 # ```bash
-#   test::endTest "Testing something" $?
+# test::endTest "Testing something" $?
 # ```
 function test::endTest() {
   local testTitle="${1:-}"
   local exitCode="${2:-}"
   local testDescription="${3:-}"
-
-  local fdRedirectionReset=false
-  if [[ ${ORIGINAL_GLOBAL_LOG_LEVEL} == "debug" ]]; then
-    resetFdRedirection
-    fdRedirectionReset=true
-    log::debug "Ended test ⌜${testTitle}⌝ with exit code ⌜${exitCode}⌝."
-  fi
 
   {
     # write the test title
@@ -67,14 +60,14 @@ function test::endTest() {
     # write the standard output if any
     if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
       printf "%s\n\n%s\n" "**Standard** output:" "\`\`\`plaintext"
-      echoFileSubstitutingPath "${_TEST_STANDARD_OUTPUT_FILE}"
+      selfTestUtils_echoFileSubstitutingPath "${_TEST_STANDARD_OUTPUT_FILE}"
       printf "\n%s\n\n" "\`\`\`"
     fi
 
     # write the error output if any
     if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
       printf "%s\n\n%s\n" "**Error** output:" "\`\`\`log"
-      echoFileSubstitutingPath "${_TEST_STANDARD_ERROR_FILE}"
+      selfTestUtils_echoFileSubstitutingPath "${_TEST_STANDARD_ERROR_FILE}"
       printf "\n%s\n\n" "\`\`\`"
     fi
 
@@ -83,12 +76,16 @@ function test::endTest() {
   # reset the standard output and error output files
   : >"${_TEST_STANDARD_OUTPUT_FILE}"
   : >"${_TEST_STANDARD_ERROR_FILE}"
-
-  if [[ ${fdRedirectionReset} == "true" ]]; then
-    setFdRedirection
-  fi
 }
 
+# Replaces the line numbers from an error log in the given file with XXX.
+#
+# - $1: **file path** _as string_:
+#       the path of the file in which the output is stored
+#
+# ```bash
+# test::echoFileWithLineNumberSubstitution myFile.log
+# ```
 function test::echoFileWithLineNumberSubstitution() {
   local file="${1}"
   local line
@@ -108,41 +105,7 @@ function test::echoFileWithLineNumberSubstitution() {
 # >>> Internal tests functions
 #===============================================================
 
-# Allows to run the core tests of Valet (tests.d directory in the repo) as
-# well as the examples (examples.d in the repo).
-function runCoreTests() {
-  if [[ ! -d "${GLOBAL_VALET_HOME}/tests.d" ]]; then
-    core::fail "The valet core tests directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝ does not exist, cannot run core tests."
-  fi
-
-  # we need to rebuild the commands for the core commands only
-  rebuildCommands --core-only --noOutput
-
-  # we should always run the test suite from the valet home directory to have consistent paths
-  # in the report files
-  pushd "${GLOBAL_VALET_HOME}" 1>/dev/null
-
-  log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝."
-  runTestSuites "${GLOBAL_VALET_HOME}/tests.d"
-
-  # now we can also test the commands in examples.d if the directory is there
-  if [[ ! -d "${GLOBAL_VALET_HOME}/examples.d" ]]; then
-    log::warning "The valet examples directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝ does not exist, cannot run the tests on the core examples."
-  else
-    # we need to rebuild the commands for the examples only
-    rebuildCommands --user-directory "${GLOBAL_VALET_HOME}/examples.d" --noOutput
-
-    log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝."
-    runTestSuites "${GLOBAL_VALET_HOME}/examples.d/showcase/tests.d"
-  fi
-
-  popd 1>/dev/null
-
-  # reload the orignal commands
-  core::reloadUserCommands
-}
-
-function rebuildCommands() {
+function selfTestUtils_rebuildCommands() {
   local originalLogLevel
   log::getLevel && originalLogLevel="${RETURNED_VALUE}"
   log::setLevel warning true
@@ -162,34 +125,17 @@ function rebuildCommands() {
 #   the number of failed test suites (increments the global variable NB_FAILED_TEST_SUITES)
 #
 # Usage:
-#   runTestSuites "${GLOBAL_VALET_HOME}/tests.d"
-function runTestSuites() {
+#   selfTestUtils_runTestSuites "${GLOBAL_VALET_HOME}/tests.d"
+function selfTestUtils_runTestSuites() {
   local testSuiteDirectory="${1}"
 
-  _TEST_STANDARD_OUTPUT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-stdout"
-  _TEST_STANDARD_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-stderr"
-  _TEST_REPORT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-report"
-  _TEST_TEMP_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-tempfile"
-
-  setupDiffCommand
-
-  # save the original important variables so we can restore them after the test suite
-  log::getLevel
-  ORIGINAL_GLOBAL_LOG_LEVEL="${RETURNED_VALUE}"
-  ORIGINAL_GLOBAL_LOG_PRINT_FUNCTION="${GLOBAL_LOG_PRINT_FUNCTION}"
-  setOriginalImportantVariables
-  setSimplifiedImportantVariables
-  resetOriginalImportantVariables
-
-  local -i failedTestSuites nbTestSuites
-  failedTestSuites=0
-  nbTestSuites=0
-
   # run a custom user script before the tests if it exists
-  runHookScript "${testSuiteDirectory}/before-tests"
+  selfTestUtils_runHookScript "${testSuiteDirectory}/before-tests"
+
+  local -a testSuitePids=()
 
   # for each test file in the test directory
-  local testDirectory exitCode testDirectoryName testScript
+  local testDirectory testDirectoryName testScript
   for testDirectory in "${testSuiteDirectory}/"*; do
     testDirectoryName="${testDirectory##*/}"
 
@@ -207,77 +153,143 @@ function runTestSuites() {
       continue
     fi
 
-    # reset the temp files
-    io::cleanupTempFiles
+    log::debug "Starting test suite in directory ⌜${testDirectory}⌝."
 
-    log::info "Running test suite ⌜${testDirectoryName}⌝."
-    log::debug "Test suite directory is ⌜${testDirectory}⌝."
-
-    # run a custom user script before the test suite if it exists
-    runHookScript "${testSuiteDirectory}/before-each-test-suite"
-
-    # write the test suite title
-    printf "%s\n\n" "# Test suite ${testDirectoryName}" >"${_TEST_REPORT_FILE}"
-
-    # for each .sh script in the test directory, run the test
-    for testScript in "${testDirectory}"/*.sh; do
-      # skip if not a file
-      if [[ ! -f "${testScript}" ]]; then continue; fi
-
-      log::info "Running test       ├── ⌜${testScript##*/}⌝."
-
-      runTest "${testDirectory}" "${testScript}"
-    done
-
-    exitCode=0
-    compareWithApproved "${testDirectory}" "${_TEST_REPORT_FILE}" || exitCode=$?
-    nbTestSuites+=1
-
-    if [[ "${exitCode}" -eq 0 ]]; then
-      log::success "Test suite ${testDirectoryName} passed."
-    else
-      log::error "Test suite ${testDirectoryName} failed."
-      failedTestSuites+=1
-    fi
-
-    # run a custom user script after the test suite if it exists
-    runHookScript "${testSuiteDirectory}/after-each-test-suite"
-
+    # run the test suite in the background
+    # we want shopt -u -o monitor to avoid the "[x]   Done" message when a background process is finished
+    shopt -u -o monitor
+    (selfTestUtils_runTestSuite "${testDirectory}"; ) &
+    testSuitePids+=("$!")
   done
 
-  # run a custom user script after the tests if it exists
-  runHookScript "${testSuiteDirectory}/after-tests"
+  # wait for all the test suites to finish
+  local -i failedTestSuites=0
+  local -i exitCode
+  local -i idx
+  local pid
+  for idx in "${!testSuitePids[@]}"; do
+    pid="${testSuitePids[idx]}"
+    exitCode=0
+    # interactive::updateProgress $((idx * 100 / ${#testSuitePids[@]})) "Waiting for test suite with PID ${pid}."
+    wait "${pid}" || exitCode=$?
+    if (( exitCode != 0 )); then
+      failedTestSuites+=1
+    fi
+  done
 
-  NB_TEST_SUITES=$((NB_TEST_SUITES + nbTestSuites))
+  # interactive::stopProgress
+
+  shopt -s -o monitor
+
+  # run a custom user script after the tests if it exists
+  selfTestUtils_runHookScript "${testSuiteDirectory}/after-tests"
+
+  NB_TEST_SUITES=$((NB_TEST_SUITES + ${#testSuitePids[@]}))
   NB_FAILED_TEST_SUITES=$((NB_FAILED_TEST_SUITES + failedTestSuites))
 }
 
-function setupDiffCommand() {
-  _TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
-  if [[ -z ${_TEST_DIFF_COMMAND} ]]; then
-    if command -v delta &>/dev/null; then
-      log::info "Using delta as diff command."
-      _TEST_DIFF_COMMAND="delta --paging=never --no-gitconfig --line-numbers --side-by-side %APPROVED_FILE% %RECEIVED_FILE%"
-    elif command -v diff &>/dev/null; then
-      log::info "Using diff as diff command."
-      _TEST_DIFF_COMMAND="diff --color -u %APPROVED_FILE% %RECEIVED_FILE%"
-    elif command -v cmp &>/dev/null; then
-      log::warning "Using cmp as diff command, consider setting up a diff tool using the VALET_CONFIG_TEST_DIFF_COMMAND config variable."
-      _TEST_DIFF_COMMAND="cmp %APPROVED_FILE% %RECEIVED_FILE%"
-    else
-      log::warning "Using internal comparison function, consider setting up a diff tool using the VALET_CONFIG_TEST_DIFF_COMMAND config variable."
-      _TEST_DIFF_COMMAND="internalCompare %APPROVED_FILE% %RECEIVED_FILE%"
+function selfTestUtils_runTestSuite() {
+  local testSuiteDirectory="${1}"
+
+  _TEST_SUITE_NAME="${testSuiteDirectory##*/}"
+
+  _TEST_STANDARD_OUTPUT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-stdout-${_TEST_SUITE_NAME}"
+  _TEST_STANDARD_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-stderr-${_TEST_SUITE_NAME}"
+  _TEST_REPORT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-report-${_TEST_SUITE_NAME}"
+
+  # reregister the traps, remove cleanup we only want to do it after all test suites
+  main::registrerTraps
+  # setup the temp locations for this test suite
+  _TEST_BASE_TEMPORARY_DIRECTORY="${TMPDIR:-/tmp}/valet-tests-${BASHPID}-${_TEST_SUITE_NAME}"
+
+  log::debug "Executing test suite ⌜${testDirectoryName}⌝."
+
+  # run a custom user script before the test suite if it exists
+  selfTestUtils_runHookScript "${testSuiteDirectory}/before-each-test-suite"
+
+  # write the test suite title
+  printf "%s\n\n" "# Test suite ${testDirectoryName}" >"${_TEST_REPORT_FILE}"
+
+  local testLogLines="Executed test suite ⌜${testDirectoryName}⌝."$'\n'
+
+  # for each .sh script in the test directory, run the test
+  for testScript in "${testDirectory}"/*.sh; do
+    # skip if not a file
+    if [[ ! -f "${testScript}" ]]; then
+      continue
     fi
-  else
-    string::cutField "${_TEST_DIFF_COMMAND}" 0 " "
-    local diffExecutable="${RETURNED_VALUE}"
-    if ! command -v "${diffExecutable}" &>/dev/null; then
-      log::warning "The user diff command ⌜${diffExecutable}⌝ set with VALET_CONFIG_TEST_DIFF_COMMAND is not available, using the internal comparison function."
-    fi
+
+    _TEST_SUITE_SCRIPT_NAME="${testScript##*/}"
+    testLogLines+="                    ├── ⌜${_TEST_SUITE_SCRIPT_NAME}⌝."$'\n'
+
+    selfTestUtils_runTest "${testDirectory}" "${testScript}"
+  done
+
+  # run a custom user script after the test suite if it exists
+  selfTestUtils_runHookScript "${testSuiteDirectory}/after-each-test-suite"
+
+  GLOBAL_ERROR_DISPLAYED=1
+  selfTestUtils_compareWithApproved "${testDirectory}" "${_TEST_REPORT_FILE}" "${testLogLines}" || exit 1
+  exit 0
+}
+
+function selfTestUtils_runTest() {
+  local testDirectory="${1}"
+  local testScript="${2}"
+
+  # make sure we set the options to fail on error, pipe erors and on unset variables
+  set -Eeu -o pipefail
+
+  # set a simplified log print function to have consistent results in tests
+  selfTestUtils_evalSimplifiedImportantVariables
+
+  # reset the temporary location (to have consistency when using io::createTempDirectory for example)
+  if [[ -d ${_TEST_BASE_TEMPORARY_DIRECTORY} ]]; then
+    rm -Rf "${_TEST_BASE_TEMPORARY_DIRECTORY}"
+  fi
+  TMPDIR="${_TEST_BASE_TEMPORARY_DIRECTORY}"
+  VALET_CONFIG_WORK_FILES_DIRECTORY="${_TEST_BASE_TEMPORARY_DIRECTORY}"
+  io::setupTempFileGlobalVariable
+  mkdir -p "${_TEST_BASE_TEMPORARY_DIRECTORY}"
+  TEMPORARY_FILE_NUMBER=0
+  TEMPORARY_DIRECTORY_NUMBER=0
+  GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-tempfile"
+
+  # redirect the standard output and error output to files
+  selfTestUtils_SetFdRedirection
+
+  # make sure that, if we exit in the test, we catch that and explain to the user
+  # why this should not happen
+  eval "function onExitTest() { selfTestUtils_onExitTestInternal "\$@"; }"
+
+  # used in selfTestUtils_echoFileSubstitutingPath to replace this path with .
+  CURRENT_DIRECTORY="${PWD}"
+
+  # write the test script name
+  printf "%s\n\n" "## Test script ${_TEST_SUITE_SCRIPT_NAME%.sh}" >>"${_TEST_REPORT_FILE}"
+
+  # run the test
+  pushd "${testDirectory}" >/dev/null
+  # shellcheck disable=SC1090
+  builtin source "${testScript}"
+  popd >/dev/null
+
+  # remove the onExitTest function, we can exit safely now
+  unset -f onExitTest
+
+  selfTestUtils_resetFdRedirection
+
+  # restore the important variables
+  selfTestUtils_evalOriginalImportantVariables
+
+  # test if the user forgot to call test::endTest
+  if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" || -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
+    selfTestUtils_displayTestSuiteOutputs
+    core::fail "The test ⌜${_TEST_SUITE_NAME}⌝ → ⌜${_TEST_SUITE_SCRIPT_NAME}⌝ did not call test::endTest OR it had outputs after the last test::endTest call."$'\n'"Make sure to conclude all tests by calling the test::endTest function."
   fi
 }
 
-function runHookScript() {
+function selfTestUtils_runHookScript() {
   # run a custom script if it exists
   if [[ -f "${1}" ]]; then
     log::info "Running (source) ${1##*/} script."
@@ -289,92 +301,53 @@ function runHookScript() {
   fi
 }
 
-function runTest() {
+function selfTestUtils_compareWithApproved() {
   local testDirectory="${1}"
-  local testScript="${2}"
+  local receivedFileToCopy="${2}"
+  local testLogLines="${3}"
 
-  # make sure we set the options to fail on error, pipe erors and on unset variables
-  set -Eeu -o pipefail
-
-  # set a simplified log print function to have consistent results in tests
-  eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
-
-  # redirect the standard output and error output to files
-  setFdRedirection
-
-  # make sure that, if we exit in the test, we catch that and explain to the user
-  # why this should not happen
-  eval "function onExitTest() { onExitTestInternal "\$@"; }"
-
-  # used in echoFileSubstitutingPath to replace this path with .
-  CURRENT_DIRECTORY="${PWD}"
-
-  # write the test script name
-  local scriptName="${testScript##*/}"
-  scriptName="${scriptName%.sh}"
-  printf "%s\n\n" "## Test script ${scriptName}" >>"${_TEST_REPORT_FILE}"
-
-  # run the test
-  pushd "${testDirectory}" >/dev/null
-  # shellcheck disable=SC1090
-  builtin source "${testScript}"
-  popd >/dev/null
-
-  # remove the onExitTest function, we can exit safely now
-  unset -f onExitTest
-
-  resetFdRedirection
-
-  # restore the important variables
-  resetOriginalImportantVariables
-
-  # test if the user forgot to call test::endTest
-  if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" || -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
-    local content1 content2
-    io::readFile "${_TEST_STANDARD_OUTPUT_FILE}" && content1="${RETURNED_VALUE}"
-    io::readFile "${_TEST_STANDARD_ERROR_FILE}" && content2="${RETURNED_VALUE}"
-    core::fail "The test script ⌜${testScript}⌝ did not call test::endTest OR it had outputs after the last test::endTest call."$'\n'"Standard output"$'\n'"⌜${content1}⌝"$'\n'"Error output:"$'\n'"⌜${content2}⌝"
-  fi
-
-}
-
-function compareWithApproved() {
-  local testDirectory exitCode approvedFile receivedFile receivedFileToCopy
-  testDirectory="${1}"
-  receivedFileToCopy="${2}"
-  testName="${testDirectory##*/}"
+  local exitCode approvedFile receivedFile
 
   approvedFile="${testDirectory}/results.approved.md"
   receivedFile="${testDirectory}/results.received.md"
 
   if [[ ! -f "${approvedFile}" ]]; then
-    log::debug "🧪 ${testName}: no approved file, creating one."
     : >"${approvedFile}"
   fi
 
   local command="${_TEST_DIFF_COMMAND//%APPROVED_FILE%/"${approvedFile}"}"
   command="${command//%RECEIVED_FILE%/"${receivedFileToCopy}"}"
 
+  if [[ -n ${VALET_CONFIG_TEST_REPORT_FILE_MODE:-} ]]; then
+    chmod "${VALET_CONFIG_TEST_REPORT_FILE_MODE}" "${receivedFileToCopy}"
+  fi
+
   if ${command} 1>&2; then
-    log::debug "🧪 ${testName}: OK, received file is equal to the approved file."
+    log::success "${testLogLines}→ test suite has passed."
     if [[ -f "${receivedFile}" ]]; then
       rm -f "${receivedFile}" 1>/dev/null
     fi
     return 0
   else
     log::printString "${receivedFile} is different than ${approvedFile}."
-    log::error "🧪 ${testName}: KO, received file differs from the approved file."
+    log::error "${testLogLines}→ test suite KO, received file differs from the approved file."
   fi
 
   # if the option is activated, we approve the received file
   if [[ ${TEST_AUTO_APPROVE:-false} == "true" ]]; then
-    log::info "🧪 ${testName}: Auto-approving"
+    log::info "${testLogLines}→ test suite KO but auto-approving."
     cp -f "${receivedFileToCopy}" "${approvedFile}"
+    if [[ -n ${VALET_CONFIG_TEST_REPORT_FILE_MODE:-} ]]; then
+      chmod "${VALET_CONFIG_TEST_REPORT_FILE_MODE}" "${approvedFile}"
+    fi
     if [[ -f "${receivedFile}" ]]; then
       rm -f "${receivedFile}" 1>/dev/null
     fi
   else
     cp -f "${receivedFileToCopy}" "${receivedFile}"
+    if [[ -n ${VALET_CONFIG_TEST_REPORT_FILE_MODE:-} ]]; then
+      chmod "${VALET_CONFIG_TEST_REPORT_FILE_MODE}" "${approvedFile}"
+    fi
   fi
 
   return 1
@@ -382,84 +355,80 @@ function compareWithApproved() {
 
 # Allows to explicitly warn the user that a test made Valet exit (it should not).
 # Give guidance on what to do to fix this.
-function onExitTestInternal() {
+function selfTestUtils_onExitTestInternal() {
   local rc="${1:-}"
 
-  resetFdRedirection
-  resetOriginalImportantVariables
+  selfTestUtils_resetFdRedirection
 
-  if [[ -s "${_TEST_REPORT_FILE}" ]]; then
-    log::errorTrace "Current test report:"
-    log::printFile "${_TEST_REPORT_FILE}"
-  else
-    log::errorTrace "No test report yet for the current test."
-  fi
+  # restore the important variables
+  selfTestUtils_evalOriginalImportantVariables
 
-  if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
-    log::errorTrace "Current test standard output:"
-    io::readFile "${_TEST_STANDARD_OUTPUT_FILE}"
-    log::printFileString "${RETURNED_VALUE}"
-  else
-    log::errorTrace "No standard output for the current test."
-  fi
+  selfTestUtils_displayTestSuiteOutputs
 
-  if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
-    log::errorTrace "Current test error output:"
-    io::readFile "${_TEST_STANDARD_ERROR_FILE}"
-    log::printFileString "${RETURNED_VALUE}"
-  else
-    log::errorTrace "No error output for the current test."
-  fi
-
-  log::error "The program has exit during a test with code ${rc}. If you expect the tested function/program to exit or fail, then run it in a subshell and capture the exit code like that:"$'\n'"(myFunctionThatFails) || exitCode=\$?"
+  log::error "The program has exit during the test ⌜${_TEST_SUITE_NAME}⌝ → ⌜${_TEST_SUITE_SCRIPT_NAME}⌝ with code ⌜${rc}⌝."$'\n'"If you expect the tested function/program to exit or fail, then run it in a subshell and capture the exit code like that:"$'\n'"(myFunctionThatFails) || exitCode=\$?"
 
   GLOBAL_ERROR_DISPLAYED=1
 }
 
+function selfTestUtils_displayTestSuiteOutputs() {
+  if [[ -s "${_TEST_REPORT_FILE}" ]]; then
+    log::errorTrace "Test suite report for ⌜${_TEST_SUITE_NAME}⌝:"
+    log::printFile "${_TEST_REPORT_FILE}"
+  else
+    log::errorTrace "Empty report for the test suite ⌜${_TEST_SUITE_NAME}⌝."
+  fi
+
+  if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
+    log::errorTrace "Test suite standard output for ⌜${_TEST_SUITE_NAME}⌝:"
+    io::readFile "${_TEST_STANDARD_OUTPUT_FILE}"
+    log::printFileString "${RETURNED_VALUE}"
+  else
+    log::errorTrace "Empty standard output for the test suite ⌜${_TEST_SUITE_NAME}⌝."
+  fi
+
+  if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
+    log::errorTrace "Test suite error output for ⌜${_TEST_SUITE_NAME}⌝:"
+    io::readFile "${_TEST_STANDARD_ERROR_FILE}"
+    log::printFileString "${RETURNED_VALUE}"
+  else
+    log::errorTrace "Empty error output for the test suite ⌜${_TEST_SUITE_NAME}⌝."
+  fi
+}
+
+function cleanUpTest() {
+  # remove the temporary directory
+  if [[ -n ${_TEST_BASE_TEMPORARY_DIRECTORY:-} && -d ${_TEST_BASE_TEMPORARY_DIRECTORY:-} ]]; then
+    rm -Rf "${_TEST_BASE_TEMPORARY_DIRECTORY}"
+  fi
+}
+
 # After this function call, everything written to stdout and stderr will be redirected
 # to the test output files.
-# Call resetFdRedirection to reset the redirection.
-function setFdRedirection() {
+# Call selfTestUtils_resetFdRedirection to reset the redirection.
+function selfTestUtils_SetFdRedirection() {
   # redirect the standard output and error output to files
   exec 3>&1 1>"${_TEST_STANDARD_OUTPUT_FILE}"
   exec 4>&2 2>"${_TEST_STANDARD_ERROR_FILE}"
-
-  # sets up a simpler log function for the tests
-  # so we can have consistent results independent of the environment
-  log::setLevel info true
-  eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
 }
 
 # Restores the standard output and error output.
-# Call this function after setFdRedirection.
-function resetFdRedirection() {
+# Call this function after selfTestUtils_SetFdRedirection.
+function selfTestUtils_resetFdRedirection() {
   # reset the standard output and error output
   exec 1>&3 3>&-
   exec 2>&4 4>&-
-
-  # reset the original logs
-  log::setLevel "${ORIGINAL_GLOBAL_LOG_LEVEL}" true
-  eval "${ORIGINAL_GLOBAL_LOG_PRINT_FUNCTION}"
 }
 
-# This function returns a string that can be evaluated to reset all
-# valet config and global variables to their original values.
-# As well as the log line function.
-function setOriginalImportantVariables() {
+# This function creates strings that can be evaluated:
+# - to reset all valet config and global variables to their original values,
+#   as well as the log line function.
+# - valet config and global variables to simpler values
+#   in order to have consistent results in the tests.
+#   As well as a simplified log line function.
+function selfTestUtils_setEvalVariables() {
   io::invoke declare -p ${!VALET_CONFIG_*} ${!GLOBAL_*}
   ORIGINAL_IMPORTANT_VARIABLES="${GLOBAL_LOG_PRINT_FUNCTION}"$'\n'"${RETURNED_VALUE//declare -? /}"
-}
 
-function resetOriginalImportantVariables() {
-  unset -v ${!VALET_CONFIG_*} ${!GLOBAL_*}
-  eval "${ORIGINAL_IMPORTANT_VARIABLES}"
-}
-
-# This function returns a string that can be evaluated to set all
-# valet config and global variables to simpler values
-# in order to have consistent results in the tests.
-# As well as a simplified log line function.
-function setSimplifiedImportantVariables() {
   # unset all VALET_ variables to not have the user variables interfere with the tests
   SIMPLIFIED_IMPORTANT_VARIABLES="
   unset -v ${!VALET_*}
@@ -497,9 +466,9 @@ function setSimplifiedImportantVariables() {
 
   export VALET_CONFIG_DOT_ENV_SCRIPT=false
 
-  export GLOBAL_COLUMNS=9999
+  export VALET_CONFIG_DISABLE_PROGRESS=true
 
-  export GLOBAL_TEST_TEMP_FILE=\"${_TEST_TEMP_FILE}\"
+  export GLOBAL_COLUMNS=9999
   "
 
   eval "${SIMPLIFIED_IMPORTANT_VARIABLES}"
@@ -507,6 +476,18 @@ function setSimplifiedImportantVariables() {
   SIMPLIFIED_IMPORTANT_VARIABLES+="
   ${GLOBAL_LOG_PRINT_FUNCTION}
   "
+
+  selfTestUtils_evalOriginalImportantVariables
+}
+
+function selfTestUtils_evalSimplifiedImportantVariables() {
+  unset -v ${!VALET_CONFIG_*} ${!GLOBAL_*}
+  eval "${ORIGINAL_IMPORTANT_VARIABLES}"$'\n'"${SIMPLIFIED_IMPORTANT_VARIABLES}"
+}
+
+function selfTestUtils_evalOriginalImportantVariables() {
+  unset -v ${!VALET_CONFIG_*} ${!GLOBAL_*}
+  eval "${ORIGINAL_IMPORTANT_VARIABLES}"
 }
 
 # This function is used to print the content of a file with some substitutions.
@@ -519,8 +500,8 @@ function setSimplifiedImportantVariables() {
 #
 # Usage:
 #   myCommandThatProducesLinesWithValetDirectoryPath 2> "${GLOBAL_TEST_TEMP_FILE}"
-#   echoFileSubstitutingPath "${GLOBAL_TEST_TEMP_FILE}" 1>&2
-function echoFileSubstitutingPath() {
+#   selfTestUtils_echoFileSubstitutingPath "${GLOBAL_TEST_TEMP_FILE}" 1>&2
+function selfTestUtils_echoFileSubstitutingPath() {
   local file="${1}"
   local line
   local IFS=$'\n'
@@ -542,6 +523,35 @@ function echoFileSubstitutingPath() {
   done <"${file}"
 }
 
+function selfTestUtils_setupDiffCommand() {
+  _TEST_DIFF_COMMAND="${VALET_CONFIG_TEST_DIFF_COMMAND:-}"
+  if [[ -z ${_TEST_DIFF_COMMAND} ]]; then
+    if command -v delta &>/dev/null; then
+      log::info "Using delta as diff command."
+      _TEST_DIFF_COMMAND="delta --paging=never --no-gitconfig --line-numbers --side-by-side %APPROVED_FILE% %RECEIVED_FILE%"
+      if [[ -z ${VALET_CONFIG_TEST_REPORT_FILE_MODE:-} ]]; then
+        # delta compares the file modes, so we need to match them
+        VALET_CONFIG_TEST_REPORT_FILE_MODE="644"
+      fi
+    elif command -v diff &>/dev/null; then
+      log::info "Using diff as diff command."
+      _TEST_DIFF_COMMAND="diff --color -u %APPROVED_FILE% %RECEIVED_FILE%"
+    elif command -v cmp &>/dev/null; then
+      log::warning "Using cmp as diff command, consider setting up a diff tool using the VALET_CONFIG_TEST_DIFF_COMMAND config variable."
+      _TEST_DIFF_COMMAND="cmp %APPROVED_FILE% %RECEIVED_FILE%"
+    else
+      log::warning "Using internal comparison function, consider setting up a diff tool using the VALET_CONFIG_TEST_DIFF_COMMAND config variable."
+      _TEST_DIFF_COMMAND="selfTestUtils_internalCompare %APPROVED_FILE% %RECEIVED_FILE%"
+    fi
+  else
+    string::cutField "${_TEST_DIFF_COMMAND}" 0 " "
+    local diffExecutable="${RETURNED_VALUE}"
+    if ! command -v "${diffExecutable}" &>/dev/null; then
+      log::warning "The user diff command ⌜${diffExecutable}⌝ set with VALET_CONFIG_TEST_DIFF_COMMAND is not available, using the internal comparison function."
+    fi
+  fi
+}
+
 # This function allows to compare the content two files.
 # It mimics the diff command.
 #
@@ -553,9 +563,9 @@ function echoFileSubstitutingPath() {
 # -$?: 0 if the files are the same, 1 otherwise
 #
 # ```bash
-# internalCompare file1 file2
+# selfTestUtils_internalCompare file1 file2
 # ```
-function internalCompare() {
+function selfTestUtils_internalCompare() {
   local file1="${1}"
   local file2="${2}"
 

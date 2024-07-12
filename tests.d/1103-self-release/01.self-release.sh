@@ -68,14 +68,12 @@ function kurl::toFile() {
   RETURNED_VALUE2=200
 }
 
+function core::getVersion() {
+  RETURNED_VALUE="1.2.3"
+}
+
 function main() {
-  io::createTempFile && local tmpFile="${RETURNED_VALUE}"
-  cp -f "${GLOBAL_VALET_HOME}/valet.d/version" "${tmpFile}"
-  echo -n "1.2.3" > "${GLOBAL_VALET_HOME}/valet.d/version"
-
   testSelfRelease
-
-  mv -f "${tmpFile}" "${GLOBAL_VALET_HOME}/valet.d/version"
 }
 
 function io::writeToFile() {

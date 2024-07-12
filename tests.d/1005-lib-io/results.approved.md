@@ -458,29 +458,29 @@ $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1
 shopt -u dotglob
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-file
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/file1
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/file13
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/file10
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4/file14
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/file1
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/.hidden-file2
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/file2
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/subfolder2
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/file13
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4/file14
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/subfolder2/.hidden-file3
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/subfolder2/file3
 
 fileNamedFile() { if [[ ${1##*/} =~ ^file[[:digit:]]+$ ]]; then return 0; else return 1; fi; }
 → io::listPaths ${PWD}/resources/search true true fileNamedFile
 shopt -u dotglob
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/file1
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/file10
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/file2
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/file13
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/file10
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4/file14
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/file1
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/file2
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/subfolder2/file3
 
 fileNamedFile() { if [[ ${1##*/} =~ ^file[[:digit:]]+$ ]]; then return 0; else return 1; fi; }
@@ -488,13 +488,13 @@ fileNamedFile() { if [[ ${1##*/} =~ ^file[[:digit:]]+$ ]]; then return 0; else r
 shopt -u dotglob
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-file
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/file1
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/file10
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/file13
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/file10
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/file1
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1
 ```
 
 ### Testing io::listFiles
@@ -515,14 +515,14 @@ $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/subfolder2/fi
 → io::listFiles ${PWD}/resources/search true true
 shopt -u dotglob
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-file
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/file1
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/file10
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/.hidden-file2
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/file2
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/file13
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/file10
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4/file14
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/file1
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/.hidden-file2
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/file2
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/subfolder2/.hidden-file3
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/subfolder2/file3
 
@@ -530,10 +530,10 @@ fileNamedFile() { if [[ ${1##*/} =~ ^file[[:digit:]]+$ ]]; then return 0; else r
 → io::listFiles ${PWD}/resources/search true true folderNamedHidden
 shopt -u dotglob
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-file
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/file1
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/file10
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3/file13
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/file10
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/file1
 ```
 
 ### Testing io::listDirectories
@@ -553,17 +553,17 @@ $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/subfolder2
 → io::listDirectories ${PWD}/resources/search true true
 shopt -u dotglob
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1/subfolder2
 
 fileNamedFile() { if [[ ${1##*/} =~ ^file[[:digit:]]+$ ]]; then return 0; else return 1; fi; }
 → io::listDirectories ${PWD}/resources/search true true folderNamedHidden
 shopt -u dotglob
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder
-$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/.hidden3
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/.hidden-subfolder/subfolder4
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/search/subfolder1
 ```
 

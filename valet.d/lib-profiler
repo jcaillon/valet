@@ -20,17 +20,18 @@ function profiler::enable() {
   file="${1}"
 
   # Nested profiling not supported
-  if [[ -n "${_ACTIVE_PROFILER:-}" ]]; then return 0; fi
+  if [[ -n ${_ACTIVE_PROFILER:-} ]]; then return 0; fi
   _ACTIVE_PROFILER=1
 
   # create the directory for file and reset it
   mkdir -p "${file%/*}"
   : "${file}"
 
-  log::info "Starting profiler, writing in ⌜${file}⌝. ${FUNCNAME[3]:-}"
+  log::info "Starting profiler, writing in ⌜${file}⌝."
 
   # we can only get the function depth if we call the profiler::enable from a function
   if [[ -n "${FUNCNAME[3]:-}" ]]; then
+    # shellcheck disable=SC2016
     functionDepthExpression='${#FUNCNAME[@]}'
   else
     functionDepthExpression='0'
@@ -54,6 +55,8 @@ function profiler::enable() {
 # profiler::disable
 # ```
 function profiler::disable() {
+  if [[ ${_ACTIVE_PROFILER:-} != "1" ]]; then return 0; fi
+
   log::info "Disabling profiler."
   set +x
   unset BASH_XTRACEFD PS4 _ACTIVE_PROFILER

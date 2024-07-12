@@ -15,7 +15,6 @@ CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY=0 "help            Show the help this prog
 CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfConfig\nselfExport\nselfUpdate\nselfMock1\nselfMock2\nselfMock3\nselfMock4\nselfRelease\nselfSetup\nselfTest'
 CMD_ALL_FUNCTIONS_ARRAY=0 "this" 1 "showCommandHelp" 2 "selfBuild" 3 "selfConfig" 4 "selfExport" 5 "selfUpdate" 6 "selfMock1" 7 "selfMock2" 8 "selfMock3" 9 "selfMock4" 10 "selfRelease" 11 "selfSetup" 12 "selfTest"
 CMD_ALL_MENU_COMMANDS_ARRAY=0 "self"
-CMD_ARGS_LAST_IS_ARRAY_selfConfig='false'
 CMD_ARGS_LAST_IS_ARRAY_selfMock1='false'
 CMD_ARGS_LAST_IS_ARRAY_selfMock2='true'
 CMD_ARGS_LAST_IS_ARRAY_selfMock4='false'
@@ -277,7 +276,7 @@ self mock4      A command that only for testing valet core functions.
 self release    Release a new version of valet.
 self setup      The command run after the installation of Valet to setup the tool.
 
-INFO     The command definition variables have been written to ⌜/tmp/valet.d/f1-0⌝.
+INFO     The command definition variables have been written to ⌜/tmp/valet.d/f1-1⌝.
 SUCCESS  The valet user commands have been successfully built
 ```
 

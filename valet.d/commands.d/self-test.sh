@@ -13,6 +13,9 @@ fi
 # shellcheck source=self-test-utils
 source self-test-utils
 
+# shellcheck source=../lib-string
+source string
+
 #===============================================================
 # >>> command: self test
 #===============================================================
@@ -59,6 +62,18 @@ function selfTest() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
+  # can't have the profiler on
+  if command -v profiler::disable &> /dev/null; then
+    profiler::disable
+  fi
+
+  local startTime="${EPOCHREALTIME}"
+
+  # set global variables that can be evaluated to export vars/functions in a way that
+  # we have consistent results in the test suites
+  selfTestUtils_setupDiffCommand
+  selfTestUtils_setEvalVariables
+
   # set the options
   unset TEST_AUTO_APPROVE \
     TEST_INCLUDE_PATTERN \
@@ -84,7 +99,7 @@ function selfTest() {
 
     # rebuild the commands for the user dir
     log::info "Rebuilding the commands for the user directory ⌜${userDirectory}⌝."
-    rebuildCommands --user-directory "${userDirectory}"
+    selfTestUtils_rebuildCommands --user-directory "${userDirectory}"
 
     # change the shell options to include hidden files
     shopt -s dotglob
@@ -110,7 +125,7 @@ function selfTest() {
           # in the report files
           pushd "${testsDirectory}" 1> /dev/null
 
-          runTestSuites "${testsDirectory}"
+          selfTestUtils_runTestSuites "${testsDirectory}"
           popd 1> /dev/null
         elif [[ ${testsDirectory##*/} != "."* ]]; then
           # we need the directory to the search list except if it starts with a .
@@ -125,8 +140,11 @@ function selfTest() {
   fi
 
   if [[ -n "${withCore:-}" || ${onlyCore:-false} == "true" ]]; then
-    runCoreTests
+    selfTestRunCoreTests
   fi
+
+  string::microsecondsToHuman $((${EPOCHREALTIME//./} - ${startTime//./})) "%S seconds and %l ms"
+  log::info "Total time running tests: ⌜${RETURNED_VALUE}⌝."
 
   if [[ NB_FAILED_TEST_SUITES -gt 0 ]]; then
     local failMessage
@@ -135,7 +153,8 @@ function selfTest() {
       failMessage+=$'\n'"The received test result files were automatically approved."
       log::warning "${failMessage}"
     else
-      failMessage+=$'\n'"You should review the difference in the logs above or by comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
+      failMessage+=$'\n'"Check for eventual test errors in the logs above."
+      failMessage+=$'\n'"You should review the difference in the logs above or by manually comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
       failMessage+=$'\n'"If the differences are legitimate, then approve the changes by running this command again with the option ⌜-a⌝."
       core::fail "${failMessage}"
     fi
@@ -144,4 +163,38 @@ function selfTest() {
   else
     log::warning "No elligible test suites found."
   fi
+}
+
+# Allows to run the core tests of Valet (tests.d directory in the repo) as
+# well as the examples (examples.d in the repo).
+function selfTestRunCoreTests() {
+  if [[ ! -d "${GLOBAL_VALET_HOME}/tests.d" ]]; then
+    core::fail "The valet core tests directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝ does not exist, cannot run core tests."
+  fi
+
+  # we need to rebuild the commands for the core commands only
+  selfTestUtils_rebuildCommands --core-only --noOutput
+
+  # we should always run the test suite from the valet home directory to have consistent paths
+  # in the report files
+  pushd "${GLOBAL_VALET_HOME}" 1>/dev/null
+
+  log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝."
+  selfTestUtils_runTestSuites "${GLOBAL_VALET_HOME}/tests.d"
+
+  # now we can also test the commands in examples.d if the directory is there
+  if [[ ! -d "${GLOBAL_VALET_HOME}/examples.d" ]]; then
+    log::warning "The valet examples directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝ does not exist, cannot run the tests on the core examples."
+  else
+    # we need to rebuild the commands for the examples only
+    selfTestUtils_rebuildCommands --user-directory "${GLOBAL_VALET_HOME}/examples.d" --noOutput
+
+    log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝."
+    selfTestUtils_runTestSuites "${GLOBAL_VALET_HOME}/examples.d/showcase/tests.d"
+  fi
+
+  popd 1>/dev/null
+
+  # reload the orignal commands
+  core::reloadUserCommands
 }

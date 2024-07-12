@@ -26,8 +26,6 @@ function main::onErrorInternal() {
   GLOBAL_ERROR_DISPLAYED=1
 }
 
-trap 'main::onErrorInternal $?' ERR
-
 function main::onExitInternal() {
   local rc=$?
 
@@ -40,12 +38,12 @@ function main::onExitInternal() {
   fi
 
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
-  if command -v onExitTest 1>/dev/null 2>&1; then
+  if command -v onExitTest &>/dev/null; then
     # this is for the self test command, we need to inform the user in case of an
     # unexpected exit because they would not see the logs otherwise
     onExitTest "${rc}"
   fi
-  if command -v onExit 1>/dev/null 2>&1; then
+  if command -v onExit &>/dev/null; then
     onExit
   fi
   # if we ran an interactive function, make sure to restore the cursor
@@ -61,8 +59,6 @@ function main::onExitInternal() {
   fi
 }
 
-trap main::onExitInternal EXIT
-
 function main::onInterruptInternal() {
   printf '\n' # Set cursor to the next line of '^C'
   log::print "WARNING" "${VALET_CONFIG_ICON_STOPPED:-$'\uf256'}" "STOPPED" "Program interrupted by the user."
@@ -73,7 +69,7 @@ function main::onInterruptInternal() {
   fi
 
   # check if the function exists
-  if command -v onInterrupt 1>/dev/null 2>&1; then
+  if command -v onInterrupt &>/dev/null; then
     if onInterrupt; then
       # if onInterrupt returns 0, then we cancel the interrupt
       return 0
@@ -81,9 +77,6 @@ function main::onInterruptInternal() {
   fi
   exit 1
 }
-
-# Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
-trap main::onInterruptInternal SIGINT SIGQUIT
 
 function main::onTerminateInternal() {
   log::print "ERROR" "${VALET_CONFIG_ICON_KILLED:-$'\uf05e'}" "KILLED" "Program killed."
@@ -97,13 +90,24 @@ function main::onTerminateInternal() {
   exit 1
 }
 
-# Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
-trap main::onTerminateInternal SIGHUP SIGTERM
+function main::registrerTraps() {
+  trap 'main::onErrorInternal $?' ERR
+  trap main::onExitInternal EXIT
+  # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
+  trap main::onInterruptInternal SIGINT SIGQUIT
+  # Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
+  trap main::onTerminateInternal SIGHUP SIGTERM
+}
+
+main::registrerTraps
 
 function main::onCleanUpInternal() {
   io::cleanupTempFiles
   if command -v cleanUp 1>/dev/null 2>&1; then
     cleanUp
+  fi
+  if command -v cleanUpTest &>/dev/null; then
+    cleanUpTest
   fi
 }
 
@@ -420,7 +424,8 @@ function main::parseMainArgumentsSwitch() {
     log::setLevel trace
     ;;
   --version)
-    cat "${GLOBAL_VALET_HOME}/valet.d/version"
+    core::getVersion
+    printf '%s\n' "${RETURNED_VALUE}"
     exit 0
     ;;
   -h | --help)

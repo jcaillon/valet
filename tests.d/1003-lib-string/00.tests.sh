@@ -250,19 +250,22 @@ function testString::compareSemanticVersion() {
 }
 
 function testString::microsecondsToHuman() {
-  local -i ms=$((234 + 1000000 * 1 + 1000000 * 60 * 2 + 1000000 * 60 * 60 * 3))
+  local -i ms=$((234 + 1000 * 2 + 1000000 * 3 + 1000000 * 60 * 4 + 1000000 * 60 * 60 * 5))
   echo "→ string::microsecondsToHuman ${ms}"
   string::microsecondsToHuman ${ms} "Hours: %HH
 Minutes: %MM
 Seconds: %SS
-Microseconds: %UU
+Milliseconds: %LL
 
 Hours: %h
 Minutes: %m
 Seconds: %s
+Milliseconds: %l
+Microseconds: %u
 
 Total minutes: %M
 Total seconds: %S
+Total milliseconds: %L
 Total microseconds: %U"
   echo "${RETURNED_VALUE}"
   echo

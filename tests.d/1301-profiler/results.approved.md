@@ -59,7 +59,7 @@ D  I  S  timer  delta                           source:line function            
 **Error** output:
 
 ```log
-INFO     Starting profiler, writing in ⌜/tmp/valet.d/f1-0⌝. main
+INFO     Starting profiler, writing in ⌜/tmp/valet.d/f1-1⌝.
 INFO     Option 1 (option1): .
 INFO     Option 2 (thisIsOption2): .
 INFO     Option 3 (flag3): .
@@ -123,7 +123,7 @@ D  I  S  timer    delta                             source:line function        
 **Error** output:
 
 ```log
-INFO     Starting profiler, writing in ⌜/tmp/valet.d/f1-0⌝. main
+INFO     Starting profiler, writing in ⌜/tmp/valet.d/f1-1⌝.
 INFO     Option 1 (option1): .
 INFO     Option 2 (thisIsOption2): .
 INFO     Option 3 (flag3): .
@@ -148,7 +148,7 @@ A command profiling file has been created to log everything happening in the cho
 **Error** output:
 
 ```log
-INFO     Starting profiler, writing in ⌜/tmp/valet.d/f2-0⌝. 
+INFO     Starting profiler, writing in ⌜/tmp/valet.d/f2-1⌝.
 TRACE    This is an error trace message which is always displayed.
 ```
 
