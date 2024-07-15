@@ -8,25 +8,25 @@ function testIo::listPaths() {
 
   echo "→ io::listPaths \${PWD}/resources/search"
   io::listPaths "${PWD}/resources/search"
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
   echo "→ io::listPaths \${PWD}/resources/search" true
   io::listPaths "${PWD}/resources/search" true
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
   echo "→ io::listPaths \${PWD}/resources/search" false true
   io::listPaths "${PWD}/resources/search" false true
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
   echo "→ io::listPaths \${PWD}/resources/search" true true
   io::listPaths "${PWD}/resources/search" true true
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
@@ -34,7 +34,7 @@ function testIo::listPaths() {
   echo 'fileNamedFile() { if [[ ${1##*/} =~ ^file[[:digit:]]+$ ]]; then return 0; else return 1; fi; }'
   echo "→ io::listPaths \${PWD}/resources/search" true true fileNamedFile
   io::listPaths "${PWD}/resources/search" true true fileNamedFile
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
@@ -42,7 +42,7 @@ function testIo::listPaths() {
   echo 'fileNamedFile() { if [[ ${1##*/} =~ ^file[[:digit:]]+$ ]]; then return 0; else return 1; fi; }'
   echo "→ io::listPaths \${PWD}/resources/search" true true '' folderNamedHidden
   io::listPaths "${PWD}/resources/search" true true '' folderNamedHidden
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   test::endTest "Testing io::listPaths" 0
@@ -53,19 +53,19 @@ function testIo::listFiles() {
 
   echo "→ io::listFiles \${PWD}/resources/search"
   io::listFiles "${PWD}/resources/search"
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
   echo "→ io::listFiles \${PWD}/resources/search" true
   io::listFiles "${PWD}/resources/search" true
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
   echo "→ io::listFiles \${PWD}/resources/search" true true
   io::listFiles "${PWD}/resources/search" true true
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
@@ -73,7 +73,7 @@ function testIo::listFiles() {
   echo 'fileNamedFile() { if [[ ${1##*/} =~ ^file[[:digit:]]+$ ]]; then return 0; else return 1; fi; }'
   echo "→ io::listFiles \${PWD}/resources/search" true true folderNamedHidden
   io::listFiles "${PWD}/resources/search" true true folderNamedHidden
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   test::endTest "Testing io::listFiles" 0
@@ -84,19 +84,19 @@ function testIo::listDirectories() {
 
   echo "→ io::listDirectories \${PWD}/resources/search"
   io::listDirectories "${PWD}/resources/search"
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
   echo "→ io::listDirectories \${PWD}/resources/search" true
   io::listDirectories "${PWD}/resources/search" true
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
   echo "→ io::listDirectories \${PWD}/resources/search" true true
   io::listDirectories "${PWD}/resources/search" true true
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   echo
@@ -104,31 +104,23 @@ function testIo::listDirectories() {
   echo 'fileNamedFile() { if [[ ${1##*/} =~ ^file[[:digit:]]+$ ]]; then return 0; else return 1; fi; }'
   echo "→ io::listDirectories \${PWD}/resources/search" true true folderNamedHidden
   io::listDirectories "${PWD}/resources/search" true true folderNamedHidden
-  specialArraySort RETURNED_ARRAY
+  array::sort RETURNED_ARRAY
   echo "${RETURNED_ARRAY[*]}"
 
   test::endTest "Testing io::listDirectories" 0
 }
 
-function specialArraySort() {
-  local -n array=${1}
-  local -i i j
-  local temp
-  for ((i = 0; i < ${#array[@]}; i++)); do
-    for ((j = i + 1; j < ${#array[@]}; j++)); do
-      if [[ ( ${array[i]} != "."* && ${array[j]} == "."* ) || ${array[i]} > ${array[j]} ]]; then
-        temp="${array[i]}"
-        array[i]="${array[j]}"
-        array[j]="${temp}"
-      fi
-    done
-  done
-}
-
 function main() {
+  local original_lc_all=${LC_ALL:-}
+  # make sure the sort is consistent!
+  LC_ALL=C
   testIo::listPaths
   testIo::listFiles
   testIo::listDirectories
+  unset LC_ALL
+  if [[ -n ${original_lc_all} ]]; then
+    export LC_ALL=${original_lc_all}
+  fi
 }
 
 main
