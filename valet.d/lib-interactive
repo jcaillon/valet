@@ -719,6 +719,13 @@ function interactive::startProgress() {
   # shellcheck source=lib-io
   source io
 
+  printf '%s' "${AC__CURSOR_HIDE}"
+
+  # disable echoing when we type something
+  if command -v stty &>/dev/null; then
+    stty -echo &>/dev/null || :
+  fi
+
   io::createTempFile
   _PROGRESS_BAR_UPDATE_FILE="${RETURNED_VALUE}"
   _PROGRESS_BAR_RUNNING=true
@@ -793,4 +800,9 @@ function interactive::stopProgress() {
   fi
 
   printf "%s" "${AC__ERASE_LINE}${AC__CURSOR_SHOW}"
+
+  # restore the key echoing
+  if command -v stty &>/dev/null; then
+    stty echo &>/dev/null || :
+  fi
 }
