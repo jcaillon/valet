@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# shellcheck source=lib-ansi-codes
+source ansi-codes
+
+# shellcheck source=lib-interactive
+source interactive
+
+# ## autocompletion::start
+#
+# Displays an autocompletion box starting at a given location. Allows
+# the user to type a text in the given row betwen a starting column and
+# ending column (included). Longer text are shifted to fit between
+# the two columns.
+#
+# The user can type character to filter down a list of suggestions,
+# navigate up and down between suggestions, insert a suggestion using
+# TAB or ENTER, press ESC to close the autocompletion box, and ALT+ENTER to
+# submit the input (or just ENTER when the box is closed).
+#
+# The autocompletion box will position itself depending on the screen size
+# and the starting position of the text.
+#
+# The multiple options allows to use this function to ask for any user input
+# as long as it is on a single line.
+#
+# - $1: **start line** _as int_:
+#       The line/row at which the autocompleted text starts (this is used to
+#       compute how to display the box).
+# - $2: **start column** _as int_:
+#       The column at which the autocompleted text starts (this is used to
+#       compute how to display the box).
+# - $3: **stop column** _as int_:
+#       The column at which to stop showing the autocompleted text.
+#       Longer texts get shifted to display the end of the user input.
+# - $4: **array name** _as string_:
+#       The items to display (name of a global array which contains the items).
+# - $5: initial filter _as string_:
+#       (optional) The initial filter string, which corresponds to the text already entered
+#       by the user at the moment the autocompletion box shows up.
+#       (defaults to empty)
+# - $6: max lines _as int_:
+#       optional) The maximum number of lines/rows to use for the autocompletion box.
+#       (defaults to a maximized auto-computed value depending on the items and screen size)
+# - $7: force box below _as bool_:
+#       (optional) If true, the box is forced to be displayed below the input text.
+#       Otherwise it will depend on the space required and space available below/above.
+#       (defaults to false)
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The entered value (or empty).
+# - `RETURNED_VALUE2`: The string displayed on the screen between the 2 columns at the
+#                      moment when the autocompletion was closed.
+#
+# ```bash
+# autocompletion::start "Select an item" item_array_name "onItemSelected" "Details"
+# ```
+function autocompletion::start() {
+  AUTOCOMPLETION_START_LINE="${1}"
+  AUTOCOMPLETION_START_COLUMN="${2}"
+  AUTOCOMPLETION_STOP_COLUMN="${3}"
+
+  if [[ -n "${4:-}" ]]; then
+    local -n originalItems="${4}"
+    AUTOCOMPLETION_ORIGINAL_ITEMS=("${originalItems[@]}")
+  else
+    AUTOCOMPLETION_ORIGINAL_ITEMS=()
+  fi
+  AUTOCOMPLETION_USER_STRING="${5:-}"
+
+  system::exportTerminalSize
+  autocompletionComputeSize "${6:-}" "${7:-}" "${AUTOCOMPLETION_START_LINE}" "${AUTOCOMPLETION_START_COLUMN}" "${#AUTOCOMPLETION_ORIGINAL_ITEMS[@]}"
+
+  AUTOCOMPLETION_FILTERED_ITEMS=()
+
+
+  RETURNED_VALUE=aaaa
+  RETURNED_VALUE2=bb
+}
+
+# compute the size of the autocompletion box and top/left location
+# AUTOCOMPLETION_HEIGHT / AUTOCOMPLETION_TOP
+# AUTOCOMPLETION_WIDTH / AUTOCOMPLETION_LEFT
+function autocompletionComputeSize() {
+  local maxLines="${1:-9999}"
+  local forceBelow="${2:-}"
+  local startLine="${3}"
+  local startColumn="${4}"
+  local nbItems="${5}"
+  local maxItemLength="${6}"
+
+
+  local below=true
+  local maxAvailableLines=$((GLOBAL_LINES - startLine))
+  if [[ ${forceBelow} != "true" ]]; then
+    if (( nbItems > maxAvailableLines && startLine - 1 > maxAvailableLines )); then
+      maxAvailableLines=$(( startLine - 1 ))
+      below=false
+    fi
+  fi
+  maxLines=$(( maxLines >= maxAvailableLines ? maxAvailableLines : maxLines ))
+  AUTOCOMPLETION_HEIGHT=$(( nbItems >= maxLines ? maxLines : nbItems ))
+  if [[ ${below} == "true" ]]; then
+    AUTOCOMPLETION_TOP=$(( startLine + 1 ))
+  else
+    AUTOCOMPLETION_TOP=$(( startLine - AUTOCOMPLETION_HEIGHT ))
+  fi
+
+  AUTOCOMPLETION_WIDTH=$(( maxItemLength >= GLOBAL_COLUMNS ? GLOBAL_COLUMNS : maxItemLength ))
+  AUTOCOMPLETION_LEFT=$(( GLOBAL_COLUMNS - startColumn + 1 > AUTOCOMPLETION_WIDTH ? startColumn : GLOBAL_COLUMNS - AUTOCOMPLETION_WIDTH + 1 ))
+}
