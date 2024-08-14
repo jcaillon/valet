@@ -1,5 +1,5 @@
 {
-// Documentation generated for the version 0.19.31 (2024-07-08).
+// Documentation generated for the version 0.20.345 (2024-08-14).
 
 		"system::commandExists": {
 		  "prefix": "system::commandExists",
@@ -211,6 +211,20 @@
 		  "body": [ "# ## log::isDebugEnabled\n# \n# Check if the debug mode is enabled.\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if debug mode is enabled (log level is debug)\n#   - 1 if disabled\n# \n# ```bash\n# if log::isDebugEnabled; then printf '%s\\n' \"Debug mode is active.\"; fi\n# ```\n# \nlog::isDebugEnabled$0" ]
 	  },
 
+		"string::microsecondsToHuman": {
+		  "prefix": "string::microsecondsToHuman",
+		  "description": "Convert microseconds to human readable format...",
+		  "scope": "",
+		  "body": [ "string::microsecondsToHuman \"${1:**microseconds**}\" \"${2:**format**}\"$0" ]
+	  },
+
+		"string::microsecondsToHuman#withdoc": {
+		  "prefix": "string::microsecondsToHuman#withdoc",
+		  "description": "Convert microseconds to human readable format...",
+		  "scope": "",
+		  "body": [ "# ## string::microsecondsToHuman\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\$2: **format** _as string_:\n#      the format to use (defaults to \"HH:MM:SS\")\n#      Usable formats:\n#      - %HH: hours\n#      - %MM: minutes\n#      - %SS: seconds\n#      - %LL: milliseconds\n#      - %h: hours without leading zero\n#      - %m: minutes without leading zero\n#      - %s: seconds without leading zero\n#      - %l: milliseconds without leading zero\n#      - %u: microseconds without leading zero\n#      - %M: total minutes\n#      - %S: total seconds\n#      - %L: total milliseconds\n#      - %U: total microseconds\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the human readable format\n# \n# ```bash\n# string::microsecondsToHuman 123456789\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::microsecondsToHuman \"${1:**microseconds**}\" \"${2:**format**}\"$0" ]
+	  },
+
 		"array::fuzzyFilterSort": {
 		  "prefix": "array::fuzzyFilterSort",
 		  "description": "Allows to fuzzy sort an array against a given pattern...",
@@ -334,7 +348,7 @@
 		  "prefix": "test::endTest#withdoc",
 		  "description": "Call this function after each test to write the test results to the report file...",
 		  "scope": "",
-		  "body": [ "# ## test::endTest\n# \n# Call this function after each test to write the test results to the report file.\n# This create a new H3 section in the report file with the test description and the exit code.\n# \n# - \\$1: **title** _as string_:\n#       the title of the test\n# - \\$2: **exit code** _as int_:\n#       the exit code of the test\n# - \\$3: comment _as string_:\n#       (optional) a text to explain what is being tested\n#       (defaults to \"\")\n# \n# ```bash\n#   test::endTest \"Testing something\" \\$?\n# ```\n# \ntest::endTest \"${1:**title**}\" \"${2:**exit code**}\" \"${3:comment}\"$0" ]
+		  "body": [ "# ## test::endTest\n# \n# Call this function after each test to write the test results to the report file.\n# This create a new H3 section in the report file with the test description and the exit code.\n# \n# - \\$1: **title** _as string_:\n#       the title of the test\n# - \\$2: **exit code** _as int_:\n#       the exit code of the test\n# - \\$3: comment _as string_:\n#       (optional) a text to explain what is being tested\n#       (defaults to \"\")\n# \n# ```bash\n# test::endTest \"Testing something\" \\$?\n# ```\n# \ntest::endTest \"${1:**title**}\" \"${2:**exit code**}\" \"${3:comment}\"$0" ]
 	  },
 
 		"string::wrapCharacters": {
@@ -447,6 +461,34 @@
 		  "description": "Counts the number of occurences of a substring in a string...",
 		  "scope": "",
 		  "body": [ "# ## string::count\n# \n# Counts the number of occurences of a substring in a string.\n# \n# - \\$1: **string** _as string_:\n#       the string in which to search\n# - \\$2: **substring** _as string_:\n#       the substring to count\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the number of occurences\n# \n# ```bash\n# string::count \"name,firstname,address\" \",\" && local count=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This is faster than looping over the string and check the substring.\n# \nstring::count \"${1:**string**}\" \"${2:**substring**}\"$0" ]
+	  },
+
+		"interactive::stopProgress": {
+		  "prefix": "interactive::stopProgress",
+		  "description": "Stop the progress bar...",
+		  "scope": "",
+		  "body": [ "interactive::stopProgress$0" ]
+	  },
+
+		"interactive::stopProgress#withdoc": {
+		  "prefix": "interactive::stopProgress#withdoc",
+		  "description": "Stop the progress bar...",
+		  "scope": "",
+		  "body": [ "# ## interactive::stopProgress\n# \n# Stop the progress bar.\n# \n# ```bash\n# interactive::stopProgress\n# ```\n# \ninteractive::stopProgress$0" ]
+	  },
+
+		"interactive::updateProgress": {
+		  "prefix": "interactive::updateProgress",
+		  "description": "Update the progress bar with a new percentage and message...",
+		  "scope": "",
+		  "body": [ "interactive::updateProgress \"${1:**percent**}\" \"${2:message}\"$0" ]
+	  },
+
+		"interactive::updateProgress#withdoc": {
+		  "prefix": "interactive::updateProgress#withdoc",
+		  "description": "Update the progress bar with a new percentage and message...",
+		  "scope": "",
+		  "body": [ "# ## interactive::updateProgress\n# \n# Update the progress bar with a new percentage and message.\n# \n# The animation can be started with interactive::startProgress for more options.\n# The animation will stop if the updated percentage is 100.\n# \n# - \\$1: **percent** _as int_:\n#       the percentage of the progress bar (0 to 100)\n# - \\$2: message _as string_:\n#       (optional) the message to display\n# \n# ```bash\n# interactive::updateProgress 50 \"Doing something...\"\n# ```\n# \ninteractive::updateProgress \"${1:**percent**}\" \"${2:message}\"$0" ]
 	  },
 
 		"interactive::testKeys": {
@@ -855,6 +897,20 @@
 		  "body": [ "# ##  kurl::toFile\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It io::invokes curl with the following options (do not repeat them): -sSL -w \"%{http_code}\" -o \\${2}.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$3: **path** _as string_:\n#       the file in which to save the output of curl\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of stderr\n# - `RETURNED_VALUE2`: the http status code\n# \n# ```bash\n# kurl::toFile \"true\" \"200,201\" \"/filePath\" \"https://example.com\" || core::fail \"The curl command failed.\"\n# ```\n# \nkurl::toFile \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
 	  },
 
+		"interactive::startProgress": {
+		  "prefix": "interactive::startProgress",
+		  "description": "Shows a spinner / progress animation with configurable output including a progress bar...",
+		  "scope": "",
+		  "body": [ "interactive::startProgress \"${1:output template}\" \"${2:max width}\" \"${3:frame delay}\" \"${4:refresh every x frames}\" \"${5:max frames}\" \"${6:spinner}\"$0" ]
+	  },
+
+		"interactive::startProgress#withdoc": {
+		  "prefix": "interactive::startProgress#withdoc",
+		  "description": "Shows a spinner / progress animation with configurable output including a progress bar...",
+		  "scope": "",
+		  "body": [ "# ## interactive::startProgress\n# \n# Shows a spinner / progress animation with configurable output including a progress bar.\n# \n# The animation will be displayed until interactive::stopProgress is called\n# or if the max number of frames is reached.\n# \n# Outputs to stderr.\n# This will run in the background and will not block the main thread.\n# The main thread can continue to output logs while this animation is running.\n# \n# - \\$1: output template _as string_:\n#       (optional) the template to display\n#       (defaults to VALET_CONFIG_PROGRESS_BAR_TEMPLATE=\"#spinner #percent ░#bar░ #message\")\n# - \\$2: max width _as int_:\n#       (optional) the maximum width of the progress bar\n#       (defaults to VALET_CONFIG_PROGRESS_BAR_SIZE=20)\n# - \\$3: frame delay _as float_:\n#       (optional) the time in seconds between each frame of the spinner\n#       (defaults to VALET_CONFIG_PROGRESS_ANIMATION_DELAY=0.1)\n# - \\$4: refresh every x frames _as int_:\n#       (optional) the number of frames of the spinner to wait before refreshing the progress bar\n#       (defaults to VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL=3)\n# - \\$5: max frames _as int_:\n#       (optional) the maximum number of frames to display\n#       (defaults to 9223372036854775807)\n# - \\$6: spinner _as string_:\n#       (optional) the spinner to display (each character is a frame)\n#       (defaults to VALET_CONFIG_SPINNER_CHARACTERS=\"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏\")\n#       Examples:\n#       - ◐◓◑◒\n#       - ▖▘▝▗\n#       - ⣾⣽⣻⢿⡿⣟⣯⣷\n#       - ⢄⢂⢁⡁⡈⡐⡠\n#       - ◡⊙◠\n#       - ▌▀▐▄\n#       - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆\n# \n# ```bash\n# interactive::startProgress \"#spinner\" \"\" 0.05 \"\" \"\" \"⢄⢂⢁⡁⡈⡐⡠\"\n# wait 4\n# interactive::stopProgress\n# \n# interactive::startProgress \"#spinner #percent ░#bar░ #message\" 30 0.05 1\n# IDX=0\n# while [[ \\${IDX} -le 50 ]]; do\n#   interactive::updateProgress \\$((IDX * 2)) \"Doing something \\${IDX}/50...\"\n#   IDX=\\$((IDX + 1))\n#   sleep 0.1\n# done\n# ```\n# \ninteractive::startProgress \"${1:output template}\" \"${2:max width}\" \"${3:frame delay}\" \"${4:refresh every x frames}\" \"${5:max frames}\" \"${6:spinner}\"$0" ]
+	  },
+
 		"interactive::askForConfirmationRaw": {
 		  "prefix": "interactive::askForConfirmationRaw",
 		  "description": "Ask the user to press the button to continue...",
@@ -1021,6 +1077,20 @@
 		  "description": "Returns the name of the current OS...",
 		  "scope": "",
 		  "body": [ "# ## system::os\n# \n# Returns the name of the current OS.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the name of the current OS: \"darwin\", \"linux\" or \"windows\".\n# \n# ```bash\n# system::os\n# local osName=\"\\${RETURNED_VALUE}\"\n# ```\n# \nsystem::os$0" ]
+	  },
+
+		"core::getVersion": {
+		  "prefix": "core::getVersion",
+		  "description": "Returns the version of Valet...",
+		  "scope": "",
+		  "body": [ "core::getVersion$0" ]
+	  },
+
+		"core::getVersion#withdoc": {
+		  "prefix": "core::getVersion#withdoc",
+		  "description": "Returns the version of Valet...",
+		  "scope": "",
+		  "body": [ "# ## core::getVersion\n# \n# Returns the version of Valet.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The version of Valet.\n# \n# ```bash\n# core::getVersion\n# printf '%s\\n' \"The version of Valet is ⌜\\${RETURNED_VALUE}⌝.\"\n# ```\n# \ncore::getVersion$0" ]
 	  },
 
 		"array::appendIfNotPresent": {

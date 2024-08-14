@@ -120,6 +120,32 @@ interactive::switchToFullScreen
 ```
 
 
+## interactive::stopProgress
+
+Stop the progress bar.
+
+```bash
+interactive::stopProgress
+```
+
+
+## interactive::updateProgress
+
+Update the progress bar with a new percentage and message.
+
+The animation can be started with interactive::startProgress for more options.
+The animation will stop if the updated percentage is 100.
+
+- $1: **percent** _as int_:
+      the percentage of the progress bar (0 to 100)
+- $2: message _as string_:
+      (optional) the message to display
+
+```bash
+interactive::updateProgress 50 "Doing something..."
+```
+
+
 ## interactive::testKeys
 
 Wait for a user input and prints the character that bash sees.
@@ -144,6 +170,59 @@ Displays a dialog box with a speaker and a text.
 
 ```bash
 interactive::displayDialogBox "system" "This is a system message."
+```
+
+
+## interactive::startProgress
+
+Shows a spinner / progress animation with configurable output including a progress bar.
+
+The animation will be displayed until interactive::stopProgress is called
+or if the max number of frames is reached.
+
+Outputs to stderr.
+This will run in the background and will not block the main thread.
+The main thread can continue to output logs while this animation is running.
+
+- $1: output template _as string_:
+      (optional) the template to display
+      (defaults to VALET_CONFIG_PROGRESS_BAR_TEMPLATE="#spinner #percent ░#bar░ #message")
+- $2: max width _as int_:
+      (optional) the maximum width of the progress bar
+      (defaults to VALET_CONFIG_PROGRESS_BAR_SIZE=20)
+- $3: frame delay _as float_:
+      (optional) the time in seconds between each frame of the spinner
+      (defaults to VALET_CONFIG_PROGRESS_ANIMATION_DELAY=0.1)
+- $4: refresh every x frames _as int_:
+      (optional) the number of frames of the spinner to wait before refreshing the progress bar
+      (defaults to VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL=3)
+- $5: max frames _as int_:
+      (optional) the maximum number of frames to display
+      (defaults to 9223372036854775807)
+- $6: spinner _as string_:
+      (optional) the spinner to display (each character is a frame)
+      (defaults to VALET_CONFIG_SPINNER_CHARACTERS="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+      Examples:
+      - ◐◓◑◒
+      - ▖▘▝▗
+      - ⣾⣽⣻⢿⡿⣟⣯⣷
+      - ⢄⢂⢁⡁⡈⡐⡠
+      - ◡⊙◠
+      - ▌▀▐▄
+      - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
+
+```bash
+interactive::startProgress "#spinner" "" 0.05 "" "" "⢄⢂⢁⡁⡈⡐⡠"
+wait 4
+interactive::stopProgress
+
+interactive::startProgress "#spinner #percent ░#bar░ #message" 30 0.05 1
+IDX=0
+while [[ ${IDX} -le 50 ]]; do
+  interactive::updateProgress $((IDX * 2)) "Doing something ${IDX}/50..."
+  IDX=$((IDX + 1))
+  sleep 0.1
+done
 ```
 
 
@@ -259,4 +338,4 @@ if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else e
 
 
 
-> Documentation generated for the version 0.19.31 (2024-07-08).
+> Documentation generated for the version 0.20.345 (2024-08-14).

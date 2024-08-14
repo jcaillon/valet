@@ -52,6 +52,39 @@ string::split "name,firstname,address" "," && local -a array=("${RETURNED_ARRAY[
 > This is faster than using read into an array from a here string.
 
 
+## string::microsecondsToHuman
+
+Convert microseconds to human readable format.
+
+- $1: **microseconds** _as int_:
+      the microseconds to convert
+- $2: **format** _as string_:
+     the format to use (defaults to "HH:MM:SS")
+     Usable formats:
+     - %HH: hours
+     - %MM: minutes
+     - %SS: seconds
+     - %LL: milliseconds
+     - %h: hours without leading zero
+     - %m: minutes without leading zero
+     - %s: seconds without leading zero
+     - %l: milliseconds without leading zero
+     - %u: microseconds without leading zero
+     - %M: total minutes
+     - %S: total seconds
+     - %L: total milliseconds
+     - %U: total microseconds
+
+Returns:
+
+- `RETURNED_VALUE`: the human readable format
+
+```bash
+string::microsecondsToHuman 123456789
+echo "${RETURNED_VALUE}"
+```
+
+
 ## string::extractBetween
 
 Extract the text between two strings within a string.
@@ -338,4 +371,4 @@ local comparison="${RETURNED_VALUE}"
 
 
 
-> Documentation generated for the version 0.19.31 (2024-07-08).
+> Documentation generated for the version 0.20.345 (2024-08-14).

@@ -19,7 +19,7 @@ This create a new H3 section in the report file with the test description and th
       (defaults to "")
 
 ```bash
-  test::endTest "Testing something" $?
+test::endTest "Testing something" $?
 ```
 
 
@@ -37,4 +37,4 @@ test::commentTest "This is a comment."
 
 
 
-> Documentation generated for the version 0.19.31 (2024-07-08).
+> Documentation generated for the version 0.20.345 (2024-08-14).

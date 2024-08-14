@@ -2,7 +2,7 @@
 # This script contains the documentation of all the valet library functions.
 # It can be used in your editor to provide auto-completion and documentation.
 #
-# Documentation generated for the version 0.19.31 (2024-07-08).
+# Documentation generated for the version 0.20.345 (2024-08-14).
 
 # ## system::commandExists
 # 
@@ -285,6 +285,40 @@ function array::makeArraysSameSize() { return 0; }
 # 
 function log::isDebugEnabled() { return 0; }
 
+# ## string::microsecondsToHuman
+# 
+# Convert microseconds to human readable format.
+# 
+# - $1: **microseconds** _as int_:
+#       the microseconds to convert
+# - $2: **format** _as string_:
+#      the format to use (defaults to "HH:MM:SS")
+#      Usable formats:
+#      - %HH: hours
+#      - %MM: minutes
+#      - %SS: seconds
+#      - %LL: milliseconds
+#      - %h: hours without leading zero
+#      - %m: minutes without leading zero
+#      - %s: seconds without leading zero
+#      - %l: milliseconds without leading zero
+#      - %u: microseconds without leading zero
+#      - %M: total minutes
+#      - %S: total seconds
+#      - %L: total milliseconds
+#      - %U: total microseconds
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: the human readable format
+# 
+# ```bash
+# string::microsecondsToHuman 123456789
+# echo "${RETURNED_VALUE}"
+# ```
+# 
+function string::microsecondsToHuman() { return 0; }
+
 # ## array::fuzzyFilterSort
 # 
 # Allows to fuzzy sort an array against a given pattern.
@@ -495,7 +529,7 @@ function interactive::promptYesNoRaw() { return 0; }
 #       (defaults to "")
 # 
 # ```bash
-#   test::endTest "Testing something" $?
+# test::endTest "Testing something" $?
 # ```
 # 
 function test::endTest() { return 0; }
@@ -652,6 +686,34 @@ function system::env() { return 0; }
 # > This is faster than looping over the string and check the substring.
 # 
 function string::count() { return 0; }
+
+# ## interactive::stopProgress
+# 
+# Stop the progress bar.
+# 
+# ```bash
+# interactive::stopProgress
+# ```
+# 
+function interactive::stopProgress() { return 0; }
+
+# ## interactive::updateProgress
+# 
+# Update the progress bar with a new percentage and message.
+# 
+# The animation can be started with interactive::startProgress for more options.
+# The animation will stop if the updated percentage is 100.
+# 
+# - $1: **percent** _as int_:
+#       the percentage of the progress bar (0 to 100)
+# - $2: message _as string_:
+#       (optional) the message to display
+# 
+# ```bash
+# interactive::updateProgress 50 "Doing something..."
+# ```
+# 
+function interactive::updateProgress() { return 0; }
 
 # ## interactive::testKeys
 # 
@@ -1267,6 +1329,60 @@ function log::error() { return 0; }
 # 
 function kurl::toFile() { return 0; }
 
+# ## interactive::startProgress
+# 
+# Shows a spinner / progress animation with configurable output including a progress bar.
+# 
+# The animation will be displayed until interactive::stopProgress is called
+# or if the max number of frames is reached.
+# 
+# Outputs to stderr.
+# This will run in the background and will not block the main thread.
+# The main thread can continue to output logs while this animation is running.
+# 
+# - $1: output template _as string_:
+#       (optional) the template to display
+#       (defaults to VALET_CONFIG_PROGRESS_BAR_TEMPLATE="#spinner #percent ░#bar░ #message")
+# - $2: max width _as int_:
+#       (optional) the maximum width of the progress bar
+#       (defaults to VALET_CONFIG_PROGRESS_BAR_SIZE=20)
+# - $3: frame delay _as float_:
+#       (optional) the time in seconds between each frame of the spinner
+#       (defaults to VALET_CONFIG_PROGRESS_ANIMATION_DELAY=0.1)
+# - $4: refresh every x frames _as int_:
+#       (optional) the number of frames of the spinner to wait before refreshing the progress bar
+#       (defaults to VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL=3)
+# - $5: max frames _as int_:
+#       (optional) the maximum number of frames to display
+#       (defaults to 9223372036854775807)
+# - $6: spinner _as string_:
+#       (optional) the spinner to display (each character is a frame)
+#       (defaults to VALET_CONFIG_SPINNER_CHARACTERS="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+#       Examples:
+#       - ◐◓◑◒
+#       - ▖▘▝▗
+#       - ⣾⣽⣻⢿⡿⣟⣯⣷
+#       - ⢄⢂⢁⡁⡈⡐⡠
+#       - ◡⊙◠
+#       - ▌▀▐▄
+#       - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
+# 
+# ```bash
+# interactive::startProgress "#spinner" "" 0.05 "" "" "⢄⢂⢁⡁⡈⡐⡠"
+# wait 4
+# interactive::stopProgress
+# 
+# interactive::startProgress "#spinner #percent ░#bar░ #message" 30 0.05 1
+# IDX=0
+# while [[ ${IDX} -le 50 ]]; do
+#   interactive::updateProgress $((IDX * 2)) "Doing something ${IDX}/50..."
+#   IDX=$((IDX + 1))
+#   sleep 0.1
+# done
+# ```
+# 
+function interactive::startProgress() { return 0; }
+
 # ## interactive::askForConfirmationRaw
 # 
 # Ask the user to press the button to continue.
@@ -1491,6 +1607,21 @@ function core::failWithCode() { return 0; }
 # ```
 # 
 function system::os() { return 0; }
+
+# ## core::getVersion
+# 
+# Returns the version of Valet.
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: The version of Valet.
+# 
+# ```bash
+# core::getVersion
+# printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
+# ```
+# 
+function core::getVersion() { return 0; }
 
 # ## array::appendIfNotPresent
 # 

@@ -138,6 +138,20 @@ core::failWithCode 255 "This is an error message."
 ```
 
 
+## core::getVersion
+
+Returns the version of Valet.
+
+Returns:
+
+- `RETURNED_VALUE`: The version of Valet.
+
+```bash
+core::getVersion
+printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
+```
+
+
 ## core::getLocalStateDirectory
 
 Returns the path to the valet locla state directory.
@@ -205,4 +219,4 @@ core::parseArguments "$@" && eval "${RETURNED_VALUE}"
 
 
 
-> Documentation generated for the version 0.19.31 (2024-07-08).
+> Documentation generated for the version 0.20.345 (2024-08-14).
