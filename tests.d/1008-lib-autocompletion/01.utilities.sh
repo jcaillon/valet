@@ -46,24 +46,24 @@ function testAutocompletionGetDisplayedPromptString() {
   AUTOCOMPLETION_PROMPT_WIDTH=5
   echo "AUTOCOMPLETION_PROMPT_WIDTH=${AUTOCOMPLETION_PROMPT_WIDTH}"
 
-  testAutocompletionGetDisplayedPromptStringFunc ""       0 "_"
-  testAutocompletionGetDisplayedPromptStringFunc "a"      1 "a_"
-  testAutocompletionGetDisplayedPromptStringFunc "ab"     2 "ab_"
-  testAutocompletionGetDisplayedPromptStringFunc "abc"    3 "abc_"
-  testAutocompletionGetDisplayedPromptStringFunc "abcd"   4 "abcd_"
-  testAutocompletionGetDisplayedPromptStringFunc "abcde"  0 "#bcde"
-  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 4 "…cd#f"
-  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 3 "abc#…"
-  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 1 "a#cd…"
+  testAutocompletionGetDisplayedPromptStringFunc ""       0 "" 0
+  testAutocompletionGetDisplayedPromptStringFunc "a"      1 "a" 1
+  testAutocompletionGetDisplayedPromptStringFunc "ab"     2 "ab" 2
+  testAutocompletionGetDisplayedPromptStringFunc "abc"    3 "abc" 3
+  testAutocompletionGetDisplayedPromptStringFunc "abcd"   4 "abcd" 4
+  testAutocompletionGetDisplayedPromptStringFunc "abcde"  0 "abcde" 0
+  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 4 "…cdef" 3
+  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 3 "abcd…" 3
+  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 1 "abcd…" 1
   #                                               012345
 
-  testAutocompletionGetDisplayedPromptStringFunc "abcde"  5 "…cde_"
-  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 6 "…def_"
-  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 5 "…cde#"
-  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 4 "…cd#f"
-  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 3 "…bc#…"
+  testAutocompletionGetDisplayedPromptStringFunc "abcde"  5 "…cde_" 4
+  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 6 "…def_" 4
+  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 5 "…cdef" 4
+  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 4 "…cdef" 3
+  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 3 "abcd…" 3
   #                                               012345
-  testAutocompletionGetDisplayedPromptStringFunc "abcdefghij" 6 "…ef#…"
+  testAutocompletionGetDisplayedPromptStringFunc "abcdefghij" 6 "…efg…" 3
   #                                               0123456789
   #                                               012345
   test::endTest "Testing autocompletionGetDisplayedPromptString" 0
@@ -76,7 +76,7 @@ function testAutocompletionGetDisplayedPromptStringFunc() {
   autocompletionGetDisplayedPromptString
   # echo " ░${RETURNED_VALUE:0:${RETURNED_VALUE2}}_${RETURNED_VALUE:$((RETURNED_VALUE2 + 1))}░"
   echo " ░${RETURNED_VALUE}░ ${RETURNED_VALUE2}"
-  echo "=░${3}░"
+  echo "=░${3}░ ${4}"
 }
 
 function main() {

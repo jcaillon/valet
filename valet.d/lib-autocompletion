@@ -255,63 +255,70 @@ function drawPrompt() {
 # - AUTOCOMPLETION_PROMPT_WIDTH
 # It returns the prompt string to display and the relative position
 # of the cursor whithin this prompt string.
+# It correctly cuts the user string and adds the necessary ellipsis
+# - RETURNED_VALUE: the string to display
+# - RETURNED_VALUE2: the position of the cursor within this string
 function autocompletionGetDisplayedPromptString() {
-  # check if we need to shorten the prompt
-  local prompt="${AUTOCOMPLETION_USER_STRING}"
+  local -i initialPromptLength=${#AUTOCOMPLETION_USER_STRING}
   local -i cursorIndex
 
   # compute where we will display the cursor in the prompt
   if ((AUTOCOMPLETION_PROMPT_CURSOR_INDEX >= AUTOCOMPLETION_PROMPT_WIDTH)); then
-    if ((AUTOCOMPLETION_PROMPT_CURSOR_INDEX >= ${#prompt} - 1)); then
+    if ((AUTOCOMPLETION_PROMPT_CURSOR_INDEX >= initialPromptLength - 1)); then
+      # we display it in the last position if it is at the end of the string
       cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 1))
     else
+      # we display at the second last position if it is not at the end
       cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 2))
     fi
   else
-    cursorIndex=${AUTOCOMPLETION_PROMPT_CURSOR_INDEX}
-  fi
-
-  # compute the distance between the cursor and the end/begin of the prompt
-  # to know if we need to cut the prompt
-  if ((AUTOCOMPLETION_PROMPT_CURSOR_INDEX >= AUTOCOMPLETION_PROMPT_WIDTH)); then
-    cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 1 - cursorPositionDelta))
-    prompt="…${AUTOCOMPLETION_USER_STRING:$((AUTOCOMPLETION_PROMPT_CURSOR_INDEX - AUTOCOMPLETION_PROMPT_WIDTH + 1 + cutDelta + cursorPositionDelta)):$((AUTOCOMPLETION_PROMPT_WIDTH - cutDelta))}"
-
-    if ((cursorPositionDelta == 1 && ${#prompt} - AUTOCOMPLETION_PROMPT_CURSOR_INDEX > 1)); then
-      prompt="${prompt}…"
-    fi
-
-  elif ((${#prompt} > AUTOCOMPLETION_PROMPT_WIDTH)); then
-    cursorIndex=${AUTOCOMPLETION_PROMPT_CURSOR_INDEX}
-    prompt="${AUTOCOMPLETION_USER_STRING:0:$((AUTOCOMPLETION_PROMPT_WIDTH - 1))}…"
-  fi
-
-  if ((${#prompt} <= AUTOCOMPLETION_PROMPT_WIDTH)); then
-
-  # case where the cursor is within prompt display range
-  if ((AUTOCOMPLETION_PROMPT_CURSOR_INDEX < AUTOCOMPLETION_PROMPT_WIDTH)); then
-    cursorIndex=${AUTOCOMPLETION_PROMPT_CURSOR_INDEX}
-
-    if ((${#prompt} <= AUTOCOMPLETION_PROMPT_WIDTH)); then
-      prompt="${AUTOCOMPLETION_USER_STRING}"
+    if ((initialPromptLength - AUTOCOMPLETION_PROMPT_CURSOR_INDEX == 2)); then
+      cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 2))
     else
-      prompt="${AUTOCOMPLETION_USER_STRING:0:$((AUTOCOMPLETION_PROMPT_WIDTH - 1))}…"
-
+      # if it is already within the prompt, we display it at the right position
+      cursorIndex=${AUTOCOMPLETION_PROMPT_CURSOR_INDEX}
     fi
   fi
 
+  local -i displayedLeftLength=$((cursorIndex))
+  local -i realLeftLength=$((AUTOCOMPLETION_PROMPT_CURSOR_INDEX))
 
-  if ((AUTOCOMPLETION_PROMPT_CURSOR_INDEX >= AUTOCOMPLETION_PROMPT_WIDTH)); then
-    cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 1 - cursorPositionDelta))
-    prompt="…${prompt:$((AUTOCOMPLETION_PROMPT_CURSOR_INDEX - AUTOCOMPLETION_PROMPT_WIDTH + 1 + cutDelta + cursorPositionDelta)):$((AUTOCOMPLETION_PROMPT_WIDTH - cutDelta))}"
+  local prompt=""
 
-    if ((cursorPositionDelta == 1 && ${#prompt} - AUTOCOMPLETION_PROMPT_CURSOR_INDEX > 1)); then
-      prompt="${prompt}…"
+  # compute what to display at the left of the character under the caret (if any)
+  if ((displayedLeftLength > 0)); then
+    if ((realLeftLength > displayedLeftLength)); then
+      # we can't display the whole left string, so we display ellipsis
+      if ((displayedLeftLength > 1)); then
+        prompt+="…${AUTOCOMPLETION_USER_STRING:$((realLeftLength - displayedLeftLength + 1)):$((displayedLeftLength - 1))}"
+      else
+        prompt+="…"
+      fi
+    else
+      prompt+="${AUTOCOMPLETION_USER_STRING:$((realLeftLength - displayedLeftLength)):$((displayedLeftLength))}"
     fi
+  fi
 
-  elif ((${#prompt} > AUTOCOMPLETION_PROMPT_WIDTH)); then
-    cursorIndex=${AUTOCOMPLETION_PROMPT_CURSOR_INDEX}
-    prompt="${AUTOCOMPLETION_USER_STRING:0:$((AUTOCOMPLETION_PROMPT_WIDTH - 1))}…"
+  # compute the character to display under the caret (if any)
+  if ((initialPromptLength > 0 && AUTOCOMPLETION_PROMPT_CURSOR_INDEX <= initialPromptLength)); then
+    prompt+="${AUTOCOMPLETION_USER_STRING:$((AUTOCOMPLETION_PROMPT_CURSOR_INDEX)):1}"
+  fi
+
+  # compute what to display at the right of the character under the caret (if any)
+  local -i displayedRightLength=$((AUTOCOMPLETION_PROMPT_WIDTH - cursorIndex - 1))
+  local -i realRightLength=$((initialPromptLength - AUTOCOMPLETION_PROMPT_CURSOR_INDEX - 1))
+
+  if ((displayedRightLength > 0)); then
+    if ((realRightLength > displayedRightLength)); then
+      # we can't display the whole right string, so we display ellipsis
+      if ((displayedRightLength > 1)); then
+        prompt+="${AUTOCOMPLETION_USER_STRING:$((initialPromptLength - realRightLength)):$((displayedRightLength - 1))}…"
+      else
+        prompt+="…"
+      fi
+    else
+      prompt+="${AUTOCOMPLETION_USER_STRING:$((initialPromptLength - realRightLength)):$((displayedRightLength))}"
+    fi
   fi
 
   RETURNED_VALUE="${prompt}"
