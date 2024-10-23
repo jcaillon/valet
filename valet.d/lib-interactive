@@ -402,13 +402,28 @@ function interactive::testKeys() {
 #
 # > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>
 function interactive::waitForKey() {
-  IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || return 1
+  LAST_KEY_PRESSED=""
+  IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || :
+
+  LAST_KEY_PRESSED="${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:-}${LAST_KEY_PRESSED}"
+  PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
+
+  if [[ -z ${#LAST_KEY_PRESSED} ]]; then
+    return 1
+  fi
+
   # special key detection, need to read more characters (up to 4 for F1-F12 keys)
-  if [[ ${LAST_KEY_PRESSED} == $'\e' ]]; then
+  if [[ ${LAST_KEY_PRESSED} == *$'\e'* ]]; then
+    REPLY=""
     IFS='' read -t 0.01 -d '' -rsn 4 || :
+
     # we might have several ESC which means we read too much
-    local addedChars="${REPLY%%$'\e'*}"
-    LAST_KEY_PRESSED+="${addedChars}"
+    local wholeChain="${LAST_KEY_PRESSED#$'\e'}${REPLY}"
+    LAST_KEY_PRESSED=$'\e'"${wholeChain%%$'\e'*}"
+
+    if [[ ${wholeChain} == *$'\e'* ]]; then
+      PREVIOUS_KEY_PRESSED_EXTRA_CHARS=$'\e'"${wholeChain#*$'\e'}"
+    fi
 
     # translate some common inputs into more readable strings
     case ${LAST_KEY_PRESSED} in
@@ -426,9 +441,6 @@ function interactive::waitForKey() {
     $'\eOP') LAST_KEY_PRESSED="F1" ;;
     $'\e'?) LAST_KEY_PRESSED="ALT+${LAST_KEY_PRESSED#$'\e'}" ;;
     esac
-
-    # we clear the buffer to avoid reading incomplete sequences on the next read
-    IFS='' read "$@" -d '' -srn 1 -t 0 LAST_KEY_PRESSED || :
   else
     case ${LAST_KEY_PRESSED} in
     $'\177' | $'\b') LAST_KEY_PRESSED="BACKSPACE" ;;
@@ -436,6 +448,7 @@ function interactive::waitForKey() {
   fi
   return 0
 }
+
 
 # ## interactive::clearKeyPressed
 #
@@ -446,7 +459,8 @@ function interactive::waitForKey() {
 # ```
 function interactive::clearKeyPressed() {
   local IFS
-  IFS='' read "$@" -d '' -srn 1 -t 0 LAST_KEY_PRESSED || :
+  IFS='' read -d '' -sr -t 0 LAST_KEY_PRESSED || :
+  PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
 }
 
 # ## interactive::createSpace

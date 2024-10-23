@@ -38,9 +38,10 @@ source interactive
 #       Longer texts get shifted to display the end of the user input.
 # - $4: **array name** _as string_:
 #       The items to display (name of a global array which contains the items).
-# - $5: initial filter _as string_:
-#       (optional) The initial filter string, which corresponds to the text already entered
+# - $5: initial text _as string_:
+#       (optional) The initial string, which corresponds to the text already entered
 #       by the user at the moment the autocompletion box shows up.
+#       Allows to prefilter the autocompletion.
 #       (defaults to empty)
 # - $6: max lines _as int_:
 #       optional) The maximum number of lines/rows to use for the autocompletion box.

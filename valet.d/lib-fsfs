@@ -613,13 +613,6 @@ function onKeyPressed() {
       ;;
     # normal key
     ?)
-      # if we pressed a special key less than 0.4s after the previous one,
-      # we ignore it
-      if ((${EPOCHREALTIME//./} - ${LAST_KEY_PRESS_TIME:-"-99999"} < 400000)); then
-        return 0
-      fi
-      LAST_KEY_PRESS_TIME=-999999
-
       FSFS_SEARCH_STRING+="${LAST_KEY_PRESSED}"
       drawLeftPane
       ;;
@@ -628,7 +621,6 @@ function onKeyPressed() {
     return 0
     ;;
   esac
-  LAST_KEY_PRESS_TIME="${EPOCHREALTIME//./}"
   drawPrompt
 }
 
