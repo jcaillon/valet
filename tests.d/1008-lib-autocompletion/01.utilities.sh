@@ -57,8 +57,8 @@ function testAutocompletionGetDisplayedPromptString() {
   testAutocompletionGetDisplayedPromptStringFunc "abcdef" 1 "abcd…" 1
   #                                               012345
 
-  testAutocompletionGetDisplayedPromptStringFunc "abcde"  5 "…cde_" 4
-  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 6 "…def_" 4
+  testAutocompletionGetDisplayedPromptStringFunc "abcde"  5 "…cde" 4
+  testAutocompletionGetDisplayedPromptStringFunc "abcdef" 6 "…def" 4
   testAutocompletionGetDisplayedPromptStringFunc "abcdef" 5 "…cdef" 4
   testAutocompletionGetDisplayedPromptStringFunc "abcdef" 4 "…cdef" 3
   testAutocompletionGetDisplayedPromptStringFunc "abcdef" 3 "abcd…" 3
@@ -66,13 +66,16 @@ function testAutocompletionGetDisplayedPromptString() {
   testAutocompletionGetDisplayedPromptStringFunc "abcdefghij" 6 "…efg…" 3
   #                                               0123456789
   #                                               012345
+
+  AUTOCOMPLETION_PROMPT_WIDTH=4
+  testAutocompletionGetDisplayedPromptStringFunc "bl" 0 "bl" 0
   test::endTest "Testing autocompletionGetDisplayedPromptString" 0
 }
 
 function testAutocompletionGetDisplayedPromptStringFunc() {
   AUTOCOMPLETION_USER_STRING="${1}"
-  AUTOCOMPLETION_PROMPT_CURSOR_INDEX="${2}"
-  echo "AUTOCOMPLETION_USER_STRING=${AUTOCOMPLETION_USER_STRING} AUTOCOMPLETION_PROMPT_CURSOR_INDEX=${AUTOCOMPLETION_PROMPT_CURSOR_INDEX} autocompletionGetDisplayedPromptString"
+  AUTOCOMPLETION_PROMPT_INDEX="${2}"
+  echo "AUTOCOMPLETION_USER_STRING=${AUTOCOMPLETION_USER_STRING} AUTOCOMPLETION_PROMPT_INDEX=${AUTOCOMPLETION_PROMPT_INDEX} autocompletionGetDisplayedPromptString"
   autocompletionGetDisplayedPromptString
   # echo " ░${RETURNED_VALUE:0:${RETURNED_VALUE2}}_${RETURNED_VALUE:$((RETURNED_VALUE2 + 1))}░"
   echo " ░${RETURNED_VALUE}░ ${RETURNED_VALUE2}"

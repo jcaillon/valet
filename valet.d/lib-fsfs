@@ -600,6 +600,7 @@ function onKeyPressed() {
     ;;
   DEL)
     FSFS_SEARCH_STRING=""
+    drawPrompt
     drawLeftPane
     ;;
   # filter any special key
@@ -609,19 +610,18 @@ function onKeyPressed() {
     case ${LAST_KEY_PRESSED} in
     BACKSPACE)
       FSFS_SEARCH_STRING="${FSFS_SEARCH_STRING%?}"
+      drawPrompt
       drawLeftPane
       ;;
     # normal key
     ?)
       FSFS_SEARCH_STRING+="${LAST_KEY_PRESSED}"
+      drawPrompt
       drawLeftPane
       ;;
     esac
-    drawPrompt
-    return 0
     ;;
   esac
-  drawPrompt
 }
 
 # Called when the user interrupts the session (CTRL+C).

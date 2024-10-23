@@ -81,7 +81,7 @@ function autocompletion::start() {
   AUTOCOMPLETION_USER_STRING="${5:-}"
 
   AUTOCOMPLETION_PROMPT_WIDTH=$((AUTOCOMPLETION_STOP_COLUMN - AUTOCOMPLETION_START_COLUMN + 1))
-  AUTOCOMPLETION_PROMPT_CURSOR_INDEX=0
+  AUTOCOMPLETION_PROMPT_INDEX=0
 
   system::exportTerminalSize
   autocompletionComputeSize "${6:-}" "${7:-}" "${AUTOCOMPLETION_START_LINE}" "${AUTOCOMPLETION_START_COLUMN}" "${#AUTOCOMPLETION_ORIGINAL_ITEMS[@]}" "${maxItemLength}"
@@ -109,15 +109,13 @@ function autocompletion::start() {
     AUTOCOMPLETION_COLOR_COUNT_RESET=""
   fi
 
-
   AUTOCOMPLETION_CLOSE_INTERACTIVE_SESSION=false
-
 
   # before starting to wait for inputs, we clear up the key pressed
   interactive::clearKeyPressed
 
-  drawAutocompletionBox
   drawPrompt
+  drawAutocompletionBox
 
   # main loop
   while true; do
@@ -189,20 +187,12 @@ function onKeyPressed() {
     return 0
     ;;
   PAGE_DOWN)
-    changeRightPaneStartIndex 3
-    drawRightPane
+    changeSelectedItemIndex 10
+    drawAutocompletionBox
     ;;
   PAGE_UP)
-    changeRightPaneStartIndex -3
-    drawRightPane
-    ;;
-  RIGHT)
-    changeRightPaneStartIndex 1
-    drawRightPane
-    ;;
-  LEFT)
-    changeRightPaneStartIndex -1
-    drawRightPane
+    changeSelectedItemIndex -10
+    drawAutocompletionBox
     ;;
   UP)
     changeSelectedItemIndex -1
@@ -212,47 +202,58 @@ function onKeyPressed() {
     changeSelectedItemIndex 1
     drawAutocompletionBox
     ;;
+  RIGHT)
+    changePromptCursorIndex 1
+    drawPrompt
+    ;;
+  LEFT)
+    changePromptCursorIndex -1
+    drawPrompt
+    ;;
   DEL)
     AUTOCOMPLETION_USER_STRING=""
-    drawAutocompletionBox
+    drawPrompt
     ;;
   *)
     # Case of keys that are supposed to only affect the search string
     case ${LAST_KEY_PRESSED} in
     BACKSPACE)
       AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING%?}"
+      changePromptCursorIndex -1
+      drawPrompt
       drawAutocompletionBox
+      ;;
+    # CTRL+A
+    $'\000')
+      changePromptCursorIndex -9999
+      drawPrompt
+      ;;
+    # CTRL+E
+    $'\005')
+      changePromptCursorIndex 9999
+      drawPrompt
       ;;
     # normal key
     ?)
-      # if we pressed a special key less than 0.4s after the previous one,
-      # we ignore it
-      if ((${EPOCHREALTIME//./} - ${LAST_KEY_PRESS_TIME:-"-99999"} < 400000)); then
-        return 0
-      fi
-      LAST_KEY_PRESS_TIME=-999999
-
       AUTOCOMPLETION_USER_STRING+="${LAST_KEY_PRESSED}"
+      changePromptCursorIndex ${#LAST_KEY_PRESSED}
+      drawPrompt
       drawAutocompletionBox
       ;;
     esac
-    drawPrompt
-    return 0
     ;;
   esac
-  LAST_KEY_PRESS_TIME="${EPOCHREALTIME//./}"
-  drawPrompt
 }
 
 # Draw the prompt line
 function drawPrompt() {
-
-  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((AUTOCOMPLETION_LEFT_PANE_FIRST_LINE));$((AUTOCOMPLETION_PROMPT_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"$'\r'"${AUTOCOMPLETION_COLOR_STATIC}> ${AUTOCOMPLETION_COLOR_RESET_TEXT}${AUTOCOMPLETION_COLOR_FOCUS}${prompt}${AC__CURSOR_SHOW}"
+  autocompletionGetDisplayedPromptString
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((AUTOCOMPLETION_TOP));$((AUTOCOMPLETION_LEFT))${__AC__TO}${AC__ERASE__}$((AUTOCOMPLETION_WIDTH))${__AC_CHARS}"$'\r'"${AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT}${RETURNED_VALUE}${AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT_RESET}${AC__CURSOR_MOVE__}$((AUTOCOMPLETION_TOP));$((AUTOCOMPLETION_LEFT + RETURNED_VALUE2))${__AC__TO}${AC__CURSOR_SHOW}"
 }
 
 # This method uses the following global variables:
 # - AUTOCOMPLETION_USER_STRING
-# - AUTOCOMPLETION_PROMPT_CURSOR_INDEX
+# - AUTOCOMPLETION_PROMPT_INDEX
 # - AUTOCOMPLETION_PROMPT_WIDTH
 # It returns the prompt string to display and the relative position
 # of the cursor whithin this prompt string.
@@ -264,8 +265,8 @@ function autocompletionGetDisplayedPromptString() {
   local -i cursorIndex
 
   # compute where we will display the cursor in the prompt
-  if ((AUTOCOMPLETION_PROMPT_CURSOR_INDEX >= AUTOCOMPLETION_PROMPT_WIDTH)); then
-    if ((AUTOCOMPLETION_PROMPT_CURSOR_INDEX >= initialPromptLength - 1)); then
+  if ((AUTOCOMPLETION_PROMPT_INDEX >= AUTOCOMPLETION_PROMPT_WIDTH )); then
+    if (( AUTOCOMPLETION_PROMPT_INDEX >= initialPromptLength - 1 )); then
       # we display it in the last position if it is at the end of the string
       cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 1))
     else
@@ -273,24 +274,24 @@ function autocompletionGetDisplayedPromptString() {
       cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 2))
     fi
   else
-    if ((initialPromptLength - AUTOCOMPLETION_PROMPT_CURSOR_INDEX == 2)); then
+    if (( initialPromptLength > AUTOCOMPLETION_PROMPT_WIDTH && initialPromptLength - AUTOCOMPLETION_PROMPT_INDEX == 2 )); then
       cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 2))
     else
       # if it is already within the prompt, we display it at the right position
-      cursorIndex=${AUTOCOMPLETION_PROMPT_CURSOR_INDEX}
+      cursorIndex=${AUTOCOMPLETION_PROMPT_INDEX}
     fi
   fi
 
   local -i displayedLeftLength=$((cursorIndex))
-  local -i realLeftLength=$((AUTOCOMPLETION_PROMPT_CURSOR_INDEX))
+  local -i realLeftLength=$((AUTOCOMPLETION_PROMPT_INDEX))
 
   local prompt=""
 
   # compute what to display at the left of the character under the caret (if any)
-  if ((displayedLeftLength > 0)); then
-    if ((realLeftLength > displayedLeftLength)); then
+  if (( displayedLeftLength > 0 )); then
+    if (( realLeftLength > displayedLeftLength )); then
       # we can't display the whole left string, so we display ellipsis
-      if ((displayedLeftLength > 1)); then
+      if (( displayedLeftLength > 1 )); then
         prompt+="…${AUTOCOMPLETION_USER_STRING:$((realLeftLength - displayedLeftLength + 1)):$((displayedLeftLength - 1))}"
       else
         prompt+="…"
@@ -301,18 +302,18 @@ function autocompletionGetDisplayedPromptString() {
   fi
 
   # compute the character to display under the caret (if any)
-  if ((initialPromptLength > 0 && AUTOCOMPLETION_PROMPT_CURSOR_INDEX <= initialPromptLength)); then
-    prompt+="${AUTOCOMPLETION_USER_STRING:$((AUTOCOMPLETION_PROMPT_CURSOR_INDEX)):1}"
+  if (( initialPromptLength > 0 && AUTOCOMPLETION_PROMPT_INDEX <= initialPromptLength )); then
+    prompt+="${AUTOCOMPLETION_USER_STRING:$((AUTOCOMPLETION_PROMPT_INDEX)):1}"
   fi
 
   # compute what to display at the right of the character under the caret (if any)
   local -i displayedRightLength=$((AUTOCOMPLETION_PROMPT_WIDTH - cursorIndex - 1))
-  local -i realRightLength=$((initialPromptLength - AUTOCOMPLETION_PROMPT_CURSOR_INDEX - 1))
+  local -i realRightLength=$((initialPromptLength - AUTOCOMPLETION_PROMPT_INDEX - 1))
 
-  if ((displayedRightLength > 0)); then
-    if ((realRightLength > displayedRightLength)); then
+  if (( displayedRightLength > 0 )); then
+    if (( realRightLength > displayedRightLength )); then
       # we can't display the whole right string, so we display ellipsis
-      if ((displayedRightLength > 1)); then
+      if (( displayedRightLength > 1 )); then
         prompt+="${AUTOCOMPLETION_USER_STRING:$((initialPromptLength - realRightLength)):$((displayedRightLength - 1))}…"
       else
         prompt+="…"
@@ -326,9 +327,9 @@ function autocompletionGetDisplayedPromptString() {
   RETURNED_VALUE2=${cursorIndex}
 }
 
-
 # Draw the autocompletion box
 function drawAutocompletionBox() {
+  return 0
   local IFS
   local toPrint="${AC__CURSOR_HIDE}${AUTOCOMPLETION_COLOR_RESET_TEXT}"
 
@@ -446,4 +447,23 @@ function changeSelectedItemIndex() {
   fi
 
   AUTOCOMPLETION_SELECTED_FILTERED_ITEM_INDEX=${newIndex}
+}
+
+# Modifies the cursor position in the prompt line.
+# Make it loop.
+#
+# $1: The delta to apply to the current position.
+#
+# Usage:
+#   changePromptCursorIndex 1
+function changePromptCursorIndex() {
+  local delta="${1:-0}"
+
+  AUTOCOMPLETION_PROMPT_INDEX=$((AUTOCOMPLETION_PROMPT_INDEX + delta))
+
+  if (( AUTOCOMPLETION_PROMPT_INDEX < 0 )); then
+    AUTOCOMPLETION_PROMPT_INDEX=0
+  elif (( AUTOCOMPLETION_PROMPT_INDEX > ${#AUTOCOMPLETION_USER_STRING} )); then
+    AUTOCOMPLETION_PROMPT_INDEX=${#AUTOCOMPLETION_USER_STRING}
+  fi
 }

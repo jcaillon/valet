@@ -37,50 +37,53 @@ Exit code: `0`
 
 ```plaintext
 AUTOCOMPLETION_PROMPT_WIDTH=5
-AUTOCOMPLETION_USER_STRING= AUTOCOMPLETION_PROMPT_CURSOR_INDEX=0 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING= AUTOCOMPLETION_PROMPT_INDEX=0 autocompletionGetDisplayedPromptString
  ░░ 0
 =░░ 0
-AUTOCOMPLETION_USER_STRING=a AUTOCOMPLETION_PROMPT_CURSOR_INDEX=1 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=a AUTOCOMPLETION_PROMPT_INDEX=1 autocompletionGetDisplayedPromptString
  ░a░ 1
 =░a░ 1
-AUTOCOMPLETION_USER_STRING=ab AUTOCOMPLETION_PROMPT_CURSOR_INDEX=2 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=ab AUTOCOMPLETION_PROMPT_INDEX=2 autocompletionGetDisplayedPromptString
  ░ab░ 2
 =░ab░ 2
-AUTOCOMPLETION_USER_STRING=abc AUTOCOMPLETION_PROMPT_CURSOR_INDEX=3 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=abc AUTOCOMPLETION_PROMPT_INDEX=3 autocompletionGetDisplayedPromptString
  ░abc░ 3
 =░abc░ 3
-AUTOCOMPLETION_USER_STRING=abcd AUTOCOMPLETION_PROMPT_CURSOR_INDEX=4 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=abcd AUTOCOMPLETION_PROMPT_INDEX=4 autocompletionGetDisplayedPromptString
  ░abcd░ 4
 =░abcd░ 4
-AUTOCOMPLETION_USER_STRING=abcde AUTOCOMPLETION_PROMPT_CURSOR_INDEX=0 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=abcde AUTOCOMPLETION_PROMPT_INDEX=0 autocompletionGetDisplayedPromptString
  ░abcde░ 0
 =░abcde░ 0
-AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_CURSOR_INDEX=4 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_INDEX=4 autocompletionGetDisplayedPromptString
  ░…cdef░ 3
 =░…cdef░ 3
-AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_CURSOR_INDEX=3 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_INDEX=3 autocompletionGetDisplayedPromptString
  ░abcd…░ 3
 =░abcd…░ 3
-AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_CURSOR_INDEX=1 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_INDEX=1 autocompletionGetDisplayedPromptString
  ░abcd…░ 1
 =░abcd…░ 1
-AUTOCOMPLETION_USER_STRING=abcde AUTOCOMPLETION_PROMPT_CURSOR_INDEX=5 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=abcde AUTOCOMPLETION_PROMPT_INDEX=5 autocompletionGetDisplayedPromptString
  ░…cde░ 4
-=░…cde_░ 4
-AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_CURSOR_INDEX=6 autocompletionGetDisplayedPromptString
+=░…cde░ 4
+AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_INDEX=6 autocompletionGetDisplayedPromptString
  ░…def░ 4
-=░…def_░ 4
-AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_CURSOR_INDEX=5 autocompletionGetDisplayedPromptString
+=░…def░ 4
+AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_INDEX=5 autocompletionGetDisplayedPromptString
  ░…cdef░ 4
 =░…cdef░ 4
-AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_CURSOR_INDEX=4 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_INDEX=4 autocompletionGetDisplayedPromptString
  ░…cdef░ 3
 =░…cdef░ 3
-AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_CURSOR_INDEX=3 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_INDEX=3 autocompletionGetDisplayedPromptString
  ░abcd…░ 3
 =░abcd…░ 3
-AUTOCOMPLETION_USER_STRING=abcdefghij AUTOCOMPLETION_PROMPT_CURSOR_INDEX=6 autocompletionGetDisplayedPromptString
+AUTOCOMPLETION_USER_STRING=abcdefghij AUTOCOMPLETION_PROMPT_INDEX=6 autocompletionGetDisplayedPromptString
  ░…efg…░ 3
 =░…efg…░ 3
+AUTOCOMPLETION_USER_STRING=bl AUTOCOMPLETION_PROMPT_INDEX=0 autocompletionGetDisplayedPromptString
+ ░bl░ 0
+=░bl░ 0
 ```
 
