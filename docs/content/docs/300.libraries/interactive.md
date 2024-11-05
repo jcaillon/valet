@@ -28,7 +28,7 @@ The text is wrapped and put inside a box like so:
     ┌─────┐
     │ No. ├──░
     └─────┘
-```)
+```
 
 - $1: **answer** _as string_:
       the answer to display

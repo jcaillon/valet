@@ -48,5 +48,6 @@ For more details, please check the documentation on each library:
   {{< card link="profiler" icon="finger-print" title="profiler" subtitle="Functions enable and disable the bash profiler." >}}
   {{< card link="string" icon="menu-alt-2" title="string" subtitle="Functions for string manipulation." >}}
   {{< card link="system" icon="desktop-computer" title="system" subtitle="Functions to get system/user information." >}}
+  {{< card link="test" icon="badge-check" title="test" subtitle="Functions usable in your test scripts." >}}
 {{< /cards >}}
 

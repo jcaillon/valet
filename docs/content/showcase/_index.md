@@ -55,7 +55,7 @@ Auto parsing of arguments and options based on your command configuration:
 
 ## 🧩 Libraries of function
 
-Make your scripts more performant and write code faster by using Valet libraries for string manipulation, interactive prompt, pure bash I/O and more... Some examples:
+Make your scripts more performant and write code faster by using Valet [libraries][libraries-link] for string manipulation, interactive prompt, pure bash I/O and more... Some examples:
 
 ```python {linenos=table,linenostart=1,filename="script.sh"}
 myFunction() {
@@ -76,3 +76,9 @@ This showcase was recorded with the [windows terminal][windows-terminal], [debia
 [oh-my-zsh]: https://ohmyz.sh/
 [dracula-theme]: https://draculatheme.com/windows-terminal
 {{< /callout >}}
+
+{{< cards >}}
+  {{< card icon="document-text" link="../docs" title="Ready to get started?" subtitle="Check out the documentation" >}}
+{{< /cards >}}
+
+[libraries-link]: ../docs/libraries/

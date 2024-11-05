@@ -91,7 +91,7 @@ if (document.documentElement.style.colorScheme === "dark") {
     link="showcase"
     icon="play"
     title="Made for CI/CD automation"
-    subtitle="Valet only requires bash has a lot of options to for log output, which makes it a great candidate as a core framework to build your CI/CD jobs."
+    subtitle="Valet only requires bash, has advanced logging capabilities and can be entirely configured through environment variables, which makes it a great candidate as a core framework to build your CI/CD jobs."
     class="hx-aspect-auto md:hx-aspect-[1.1/1] max-md:hx-min-h-[340px]"
   >}}
   {{< hextra/feature-card

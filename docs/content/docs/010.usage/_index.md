@@ -33,6 +33,8 @@ Short names can be grouped together, e.g. `-fsL` is equivalent to `-f -s -L` or 
 - Options can be simple flags (i.e. we check if the option is present or not) 
 - Or can have a value, in which case they are represented as such: `--my-option <value>` and the user is expected to provide a value.
 
+Each option can be set using a environment variable matching the option long name in `UPPER_SNAKE_CASE` (e.g. --my-option can be set using `export MY_OPTION="value"`).
+ 
 ## Arguments
 
 Arguments are always mandatory and must be provided by the user.
