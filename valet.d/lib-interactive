@@ -259,7 +259,7 @@ function interactive::displayQuestion() {
 #     ┌─────┐
 #     │ No. ├──░
 #     └─────┘
-# ```)
+# ```
 #
 # - $1: **answer** _as string_:
 #       the answer to display

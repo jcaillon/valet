@@ -161,10 +161,10 @@ function fsfsInitialize() {
 
   # contains the current search st+ring of the user
   FSFS_SEARCH_STRING=""
+  FSFS_PROMPT=""
 
   # switched to true when the user wants to close the session
   FSFS_CLOSE_INTERACTIVE_SESSION=false
-  FSFS_SEARCH_STRING=""
 
   # set up colors
   if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
@@ -381,6 +381,9 @@ function drawLeftPane() {
     toPrint+="${AC__CURSOR_MOVE__}${line};${FSFS_LEFT_PANE_WIDTH}${__AC__TO}${AC__ERASE_CHARS_LEFT}"
   done
 
+  # reposition the cursor
+  toPrint+="${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE));$((3 + ${#FSFS_PROMPT}))${__AC__TO}${AC__CURSOR_SHOW}"
+
   printf '%s' "${toPrint}"
 }
 
@@ -473,19 +476,22 @@ function drawRightPane() {
     toPrint+="${AC__CURSOR_MOVE__}$((FSFS_RIGHT_PANE_FIRST_CONTENT_LINE + FSFS_RIGHT_PANE_LINES / 2));$((FSFS_LEFT_PANE_WIDTH + 2 + FSFS_RIGHT_PANE_WIDTH / 2 - ${#loadingMessage} / 2))${__AC__TO}${loadingMessage}"
   fi
 
+  # reposition the cursor
+  toPrint+="${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE));$((3 + ${#FSFS_PROMPT}))${__AC__TO}${AC__CURSOR_SHOW}"
+
   printf '%s' "${toPrint}"
 }
 
 # Draw the prompt line
 function drawPrompt() {
   # check if we need to shorten the prompt
-  local prompt="${FSFS_SEARCH_STRING}"
+  FSFS_PROMPT="${FSFS_SEARCH_STRING}"
   if ((${#FSFS_SEARCH_STRING} > FSFS_LEFT_PANE_WIDTH - 4)); then
-    prompt="…${FSFS_SEARCH_STRING:$((${#FSFS_SEARCH_STRING} - (FSFS_LEFT_PANE_WIDTH - 4) + 1))}"
+    FSFS_PROMPT="…${FSFS_SEARCH_STRING:$((${#FSFS_SEARCH_STRING} - (FSFS_LEFT_PANE_WIDTH - 4) + 1))}"
   else
-    prompt="${FSFS_SEARCH_STRING}"
+    FSFS_PROMPT="${FSFS_SEARCH_STRING}"
   fi
-  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE));$((FSFS_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"$'\r'"${FSFS_COLOR_STATIC}> ${FSFS_COLOR_RESET_TEXT}${FSFS_COLOR_FOCUS}${prompt}${AC__CURSOR_SHOW}"
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE));$((FSFS_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"$'\r'"${FSFS_COLOR_STATIC}> ${FSFS_COLOR_RESET_TEXT}${FSFS_COLOR_FOCUS}${FSFS_PROMPT}${AC__CURSOR_SHOW}"
 }
 
 # Returns the index of the item in the original array (if any, or -1).

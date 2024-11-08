@@ -19,6 +19,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - Betters checks in self build!
 - A command can declare dependencies to auto check if some tools are installed before running the command.
 - add valet in brew
+- add man page for valet
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.
 - allow to do that: `eval "$(valet self uninstall)"` to clean everything up
 - functions:
