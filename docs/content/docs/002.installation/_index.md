@@ -21,7 +21,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/va
 ```
 
 {{< callout type="info" emoji="💡" >}}
-Please review the [installation script](https://github.com/jcaillon/valet/blob/latest/valet.d/commands.d/self-install.sh) or the [self install command usage](https://github.com/jcaillon/valet/blob/latest/tests.d/1106-self-update/results.approved.md) to learn about the different installer options.
+Please review the [installation script][selfInstallScriptLink] or the [self install command usage][selfInstallCommandUsageLink] to learn about the different installer options.
 {{< /callout >}}
 
 Here is an example command to install Valet with the option `--unattended`:
@@ -48,7 +48,16 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/va
   {{< card icon="arrow-circle-right" link="../usage" title="Usage" >}}
 {{< /cards >}}
 
+## 🪟 Use Valet on windows
+
+It is recommended to use Git bash, installed with [Git for Windows][git-for-windows-link] and [Windows terminal][windows-terminal-link] as your terminal program. You can also use Valet with any Linux distribution and [Windows Subsystem for Linux][wsl-installation-link] (WSL).
+
 [curl]: https://curl.se/
 [tar]: https://www.gnu.org/software/tar/
 [latest-release]: https://github.com/jcaillon/valet/releases/latest
 [gnu-core-utils]: https://www.gnu.org/software/coreutils/
+[git-for-windows-link]: https://gitforwindows.org/
+[wsl-installation-link]: https://learn.microsoft.com/en-us/windows/wsl/install
+[windows-terminal-link]: https://github.com/microsoft/terminal
+[selfInstallScriptLink]: https://github.com/jcaillon/valet/blob/latest/valet.d/commands.d/self-install.sh
+[selfInstallCommandUsageLink]: https://github.com/jcaillon/valet/blob/latest/tests.d/1106-self-update/results.approved.md

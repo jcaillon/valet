@@ -153,8 +153,8 @@ Exit code: `0`
 → valet help --columns 48 help
 ABOUT
 
-  Show the help this program or of the help of a
-  specific command.
+  Show the help of this program or of the help 
+  of a specific command.
   
   You can show the help with or without colors 
   and set the maximum columns for the help text.
@@ -500,7 +500,7 @@ Exit code: `0`
 ```log
 ▶ called main::showInteractiveCommandsMenu Please select the command to run. _COPIED_COMMMANDS_ARRAY⌉
 ▶ received array was:
-⌈help            Show the help this program or of a specific command.
+⌈help            Show the help of this program or of a specific command.
 self build      Re-build the menu of valet from your commands.
 self config     Open the configuration file of Valet with your default editor.
 self test       Test your valet custom commands.
@@ -1040,7 +1040,7 @@ Exit code: `1`
 ```log
 INFO     The valet user directory ⌜/tmp/valet.d/d1-1/non-existing⌝ does not contain a built ⌜commands⌝ file.
 Now building it using ⌜valet self build⌝ command.
-WARNING  Skipping user directory ⌜/tmp/valet.d/d1-1/non-existing⌝ because it does not exist.
+WARNING  Skipping the build of scripts in user directory ⌜/tmp/valet.d/d1-1/non-existing⌝ because it does not exist.
 TRACE    This is an error trace message which is always displayed.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 SUCCESS  This is a success message.

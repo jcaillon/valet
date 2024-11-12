@@ -599,7 +599,7 @@ function selfUpdate::updateUserRepositories() {
 
   log::info "Attempting to update the git repositories in ⌜${userDirectory}⌝."
 
-  if ! command -v git; then
+  if ! command -v git 1>/dev/null; then
     log::warning "The command ⌜git⌝ is not installed or not found in your PATH, skipping git update."
     return 0
   fi

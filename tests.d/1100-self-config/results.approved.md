@@ -258,6 +258,13 @@ VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL="${VALET_CONFIG_PROGRESS_BAR_UPDATE_IN
 # See interactive::startProgress.
 VALET_CONFIG_SPINNER_CHARACTERS="${VALET_CONFIG_SPINNER_CHARACTERS:-}"
 
+# The default character to use to represent the selected item in the interactive mode.
+# Used in fsfs, autocompletion, etc...
+VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-}"
+
+# The default character to use to represent the prompt in the interactive mode.
+VALET_CONFIG_INTERACTIVE_PROMPT_CHARACTER="${VALET_CONFIG_INTERACTIVE_PROMPT_CHARACTER:-}"
+
 
 ## -----------
 ## Other configs.
@@ -566,6 +573,13 @@ VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL="${VALET_CONFIG_PROGRESS_BAR_UPDATE_IN
 # Change the default spinner characters (one character represents one frame of the animation).
 # See interactive::startProgress.
 VALET_CONFIG_SPINNER_CHARACTERS="${VALET_CONFIG_SPINNER_CHARACTERS:-}"
+
+# The default character to use to represent the selected item in the interactive mode.
+# Used in fsfs, autocompletion, etc...
+VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-}"
+
+# The default character to use to represent the prompt in the interactive mode.
+VALET_CONFIG_INTERACTIVE_PROMPT_CHARACTER="${VALET_CONFIG_INTERACTIVE_PROMPT_CHARACTER:-}"
 
 
 ## -----------

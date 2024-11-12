@@ -38,6 +38,7 @@ source interactive
 #       Longer texts get shifted to display the end of the user input.
 # - $4: **array name** _as string_:
 #       The items to display (name of a global array which contains the items).
+#       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.
 # - $5: initial text _as string_:
 #       (optional) The initial string, which corresponds to the text already entered
 #       by the user at the moment the autocompletion box shows up.
@@ -50,6 +51,28 @@ source interactive
 #       (optional) If true, the box is forced to be displayed below the input text.
 #       Otherwise it will depend on the space required and space available below/above.
 #       (defaults to false)
+# - $8: show prompt _as bool_:
+#       (optional) If true, the prompt is displayed. If false, the prompt is hidden.
+#       Useful to turn this into a simple multiple choice list.
+#       (defaults to true)
+# - $9: force show count _as bool_:
+#       (optional) If true, the count of items is always displayed.
+#       If false, the count is only displayed when we can'y display all the items at once.
+#       (defaults to false)
+# - $10: show left cursors _as bool_:
+#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
+#       Useful to display the most simple auto-completion when false.
+#       (defaults to true)
+# - $11: filters from n chars _as int_:
+#       (optional) The minimum number of characters to type before starting to filter the items.
+#       By default, the list is shown full and the user can start typing to filter.
+#       Put a value superior to 0 to make it behave like a standard autocompletion.
+#       When non-zero, the user can CTRL+SPACE to show the full list.
+#       (defaults to 0)
+# - $12: accept any value _as bool_:
+#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
+#       Useful to display the most simple auto-completion when false.
+#       (defaults to true)
 #
 # Returns:
 #
@@ -71,42 +94,72 @@ function autocompletion::start() {
     AUTOCOMPLETION_ORIGINAL_ITEMS=("${originalItems[@]}")
     local item
     for item in "${AUTOCOMPLETION_ORIGINAL_ITEMS[@]}"; do
-      if (( ${#item} > maxItemLength )); then
+      if ((${#item} > maxItemLength)); then
         maxItemLength=${#item}
       fi
     done
+    AUTOCOMPLETION_SHOW_AUTOCOMPLETION_BOX=true
   else
     AUTOCOMPLETION_ORIGINAL_ITEMS=()
+    AUTOCOMPLETION_SHOW_AUTOCOMPLETION_BOX=false
   fi
   AUTOCOMPLETION_USER_STRING="${5:-}"
+  AUTOCOMPLETION_PROMPT_INDEX=${#AUTOCOMPLETION_USER_STRING}
 
   AUTOCOMPLETION_PROMPT_WIDTH=$((AUTOCOMPLETION_STOP_COLUMN - AUTOCOMPLETION_START_COLUMN + 1))
-  AUTOCOMPLETION_PROMPT_INDEX=0
+  AUTOCOMPLETION_FINAL_SELECTION_INDEX=-1
+
+  AUTOCOMPLETION_SHOW_PROMPT="${8:-true}"
+  AUTOCOMPLETION_FORCE_SHOW_COUNT="${9:-false}"
+  AUTOCOMPLETION_SHOW_LEFT_CURSORS="${10:-true}"
+  AUTOCOMPLETION_FILTERS_FROM_N_CHARS="${11:-0}"
+  AUTOCOMPLETION_ACCEPT_ANY_VALUE="${12:-true}"
 
   system::exportTerminalSize
-  autocompletionComputeSize "${6:-}" "${7:-}" "${AUTOCOMPLETION_START_LINE}" "${AUTOCOMPLETION_START_COLUMN}" "${#AUTOCOMPLETION_ORIGINAL_ITEMS[@]}" "${maxItemLength}"
+  if [[ ${AUTOCOMPLETION_SHOW_LEFT_CURSORS} == "true" ]]; then
+    maxItemLength+=2
+  fi
+  autocompletionComputeSize "${6:-}" "${7:-}" "${AUTOCOMPLETION_START_LINE}" "${AUTOCOMPLETION_START_COLUMN}" "${#AUTOCOMPLETION_ORIGINAL_ITEMS[@]}" "${maxItemLength}" "${AUTOCOMPLETION_SHOW_PROMPT}"
 
   AUTOCOMPLETION_FILTERED_ITEMS=()
 
+
   # set up colors
   if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
-    AUTOCOMPLETION_COLOR_RESET_TEXT="${VALET_CONFIG_AUTOCOMPLETION_RESET_TEXT:-"${AC__TEXT_RESET}"}"
-    AUTOCOMPLETION_COLOR_STATIC="${VALET_CONFIG_AUTOCOMPLETION_STATIC:-"${AC__FG_BRIGHT_BLACK}"}"
+    AUTOCOMPLETION_COLOR_PROMPT="${VALET_CONFIG_AUTOCOMPLETION_COLOR_PROMPT:-"${AC__FG_MAGENTA}"}"
+    AUTOCOMPLETION_COLOR_PROMPT_RESET="${VALET_CONFIG_AUTOCOMPLETION_COLOR_PROMPT_RESET:-"${AC__FG_RESET}"}"
     AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT="${VALET_CONFIG_AUTOCOMPLETION_LETTER_HIGHLIGHT:-"${AC__TEXT_INVERSE}${AC__FG_MAGENTA}"}"
     AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT_RESET="${VALET_CONFIG_AUTOCOMPLETION_LETTER_HIGHLIGHT_RESET:-"${AC__TEXT_NO_INVERSE}${AC__FG_RESET}"}"
-    AUTOCOMPLETION_COLOR_SELECTED_ITEM="${VALET_CONFIG_AUTOCOMPLETION_SELECTED_ITEM:-"${AC__BG_BLACK}"}"
-    AUTOCOMPLETION_COLOR_SELECTED_ITEM_RESET="${VALET_CONFIG_AUTOCOMPLETION_SELECTED_ITEM_RESET:-"${AC__BG_RESET}"}"
+    AUTOCOMPLETION_COLOR_STATIC="${VALET_CONFIG_AUTOCOMPLETION_STATIC:-"${AC__FG_BRIGHT_BLACK}"}"
+    AUTOCOMPLETION_COLOR_STATIC_RESET="${VALET_CONFIG_AUTOCOMPLETION_STATIC:-"${AC__FG_RESET}"}"
+    AUTOCOMPLETION_COLOR_SELECTED_ITEM="${VALET_CONFIG_AUTOCOMPLETION_SELECTED_ITEM:-"${AC__BG_BLACK}${AC__FG_WHITE}"}"
+    AUTOCOMPLETION_COLOR_SELECTED_ITEM_RESET="${VALET_CONFIG_AUTOCOMPLETION_SELECTED_ITEM_RESET:-"${AC__BG_RESET}${AC__FG_RESET}"}"
     AUTOCOMPLETION_COLOR_COUNT="${VALET_CONFIG_AUTOCOMPLETION_COUNT:-"${AC__FG_YELLOW}"}"
     AUTOCOMPLETION_COLOR_COUNT_RESET="${VALET_CONFIG_AUTOCOMPLETION_COUNT_RESET:-"${AC__TEXT_RESET}"}"
   else
-    AUTOCOMPLETION_COLOR_RESET_TEXT=""
-    AUTOCOMPLETION_COLOR_STATIC=""
-    AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT="${AC__TEXT_INVERSE}"
-    AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT_RESET="${AC__TEXT_NO_INVERSE}"
-    AUTOCOMPLETION_COLOR_SELECTED_ITEM=""
-    AUTOCOMPLETION_COLOR_SELECTED_ITEM_RESET=""
-    AUTOCOMPLETION_COLOR_COUNT=""
-    AUTOCOMPLETION_COLOR_COUNT_RESET=""
+    AUTOCOMPLETION_COLOR_PROMPT="${VALET_CONFIG_AUTOCOMPLETION_COLOR_PROMPT:-""}"
+    AUTOCOMPLETION_COLOR_PROMPT_RESET="${VALET_CONFIG_AUTOCOMPLETION_COLOR_PROMPT_RESET:-""}"
+    AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT="${VALET_CONFIG_AUTOCOMPLETION_LETTER_HIGHLIGHT:-"${AC__TEXT_UNDERLINE}"}"
+    AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT_RESET="${VALET_CONFIG_AUTOCOMPLETION_LETTER_HIGHLIGHT_RESET:-"${AC__TEXT_NO_UNDERLINE}"}"
+    AUTOCOMPLETION_COLOR_STATIC="${VALET_CONFIG_AUTOCOMPLETION_STATIC:-""}"
+    AUTOCOMPLETION_COLOR_STATIC_RESET="${VALET_CONFIG_AUTOCOMPLETION_STATIC:-""}"
+    AUTOCOMPLETION_COLOR_SELECTED_ITEM="${VALET_CONFIG_AUTOCOMPLETION_SELECTED_ITEM:-"${AC__TEXT_INVERSE}"}"
+    AUTOCOMPLETION_COLOR_SELECTED_ITEM_RESET="${VALET_CONFIG_AUTOCOMPLETION_SELECTED_ITEM_RESET:-"${AC__TEXT_NO_INVERSE}"}"
+    AUTOCOMPLETION_COLOR_COUNT="${VALET_CONFIG_AUTOCOMPLETION_COUNT:-""}"
+    AUTOCOMPLETION_COLOR_COUNT_RESET="${VALET_CONFIG_AUTOCOMPLETION_COUNT_RESET:-""}"
+  fi
+
+
+  if [[ ${AUTOCOMPLETION_SHOW_LEFT_CURSORS} == "true" ]]; then
+    AUTOCOMPLETION_LEFT_CURSOR_PROMPT="${AUTOCOMPLETION_COLOR_STATIC}${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-">"} ${AUTOCOMPLETION_COLOR_STATIC_RESET}"
+    AUTOCOMPLETION_LEFT_CURSOR_PROMPT_LENGTH=2
+    AUTOCOMPLETION_LEFT_CURSOR_SELECTED_ITEM="${AUTOCOMPLETION_COLOR_SELECTED_ITEM}${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-"◆"} ${AUTOCOMPLETION_COLOR_SELECTED_ITEM_RESET}"
+    AUTOCOMPLETION_LEFT_CURSOR_UNSELECTED_ITEM="${AUTOCOMPLETION_COLOR_STATIC}$░ ${AUTOCOMPLETION_COLOR_STATIC_RESET}"
+  else
+    AUTOCOMPLETION_LEFT_CURSOR_PROMPT=""
+    AUTOCOMPLETION_LEFT_CURSOR_PROMPT_LENGTH=0
+    AUTOCOMPLETION_LEFT_CURSOR_SELECTED_ITEM=""
+    AUTOCOMPLETION_LEFT_CURSOR_UNSELECTED_ITEM=""
   fi
 
   AUTOCOMPLETION_CLOSE_INTERACTIVE_SESSION=false
@@ -127,9 +180,13 @@ function autocompletion::start() {
     if [[ ! -t 1 || ${AUTOCOMPLETION_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
   done
 
-
-  RETURNED_VALUE=aaaa
-  RETURNED_VALUE2=bb
+  RETURNED_VALUE="${AUTOCOMPLETION_USER_STRING}"
+  if ((AUTOCOMPLETION_FINAL_SELECTION_INDEX >= 0)); then
+    RETURNED_VALUE2="${AUTOCOMPLETION_ORIGINAL_ITEMS[${AUTOCOMPLETION_FINAL_SELECTION_INDEX}]}"
+  else
+    RETURNED_VALUE2=""
+  fi
+  RETURNED_VALUE3=${AUTOCOMPLETION_FINAL_SELECTION_INDEX}
 }
 
 # compute the size of the autocompletion box and top/left location
@@ -142,37 +199,47 @@ function autocompletionComputeSize() {
   local startColumn="${4}"
   local nbItems="${5}"
   local maxItemLength="${6}"
+  local showPrompt="${7:-true}"
 
+  local extraLine=1
+  if [[ ${showPrompt} == "true" ]]; then
+    extraLine=0
+  fi
 
   local below=true
-  local maxAvailableLines=$((GLOBAL_LINES - startLine))
+  local -i maxAvailableLines=$((GLOBAL_LINES - startLine + extraLine))
   if [[ ${forceBelow} != "true" ]]; then
-    if (( nbItems > maxAvailableLines && startLine - 1 > maxAvailableLines )); then
-      maxAvailableLines=$(( startLine - 1 ))
+    local maxAvailableLinesAbove=$((startLine - 1 + extraLine))
+    if ((nbItems > maxAvailableLines && maxAvailableLinesAbove > maxAvailableLines)); then
+      maxAvailableLines=${maxAvailableLinesAbove}
       below=false
     fi
   fi
-  maxLines=$(( maxLines >= maxAvailableLines ? maxAvailableLines : maxLines ))
-  AUTOCOMPLETION_HEIGHT=$(( nbItems >= maxLines ? maxLines : nbItems ))
+
+  maxLines=$((maxLines >= maxAvailableLines ? maxAvailableLines : maxLines))
+  AUTOCOMPLETION_HEIGHT=$((nbItems >= maxLines ? maxLines : nbItems))
   if [[ ${below} == "true" ]]; then
-    AUTOCOMPLETION_TOP=$(( startLine + 1 ))
+    AUTOCOMPLETION_TOP=$((startLine + 1 - extraLine))
   else
-    AUTOCOMPLETION_TOP=$(( startLine - AUTOCOMPLETION_HEIGHT ))
+    AUTOCOMPLETION_TOP=$((startLine - AUTOCOMPLETION_HEIGHT + extraLine))
   fi
 
-  AUTOCOMPLETION_WIDTH=$(( maxItemLength >= GLOBAL_COLUMNS ? GLOBAL_COLUMNS : maxItemLength ))
-  AUTOCOMPLETION_LEFT=$(( GLOBAL_COLUMNS - startColumn + 1 > AUTOCOMPLETION_WIDTH ? startColumn : GLOBAL_COLUMNS - AUTOCOMPLETION_WIDTH + 1 ))
+  AUTOCOMPLETION_WIDTH=$((maxItemLength >= GLOBAL_COLUMNS ? GLOBAL_COLUMNS : maxItemLength))
+  AUTOCOMPLETION_LEFT=$((GLOBAL_COLUMNS - startColumn + 1 > AUTOCOMPLETION_WIDTH ? startColumn : GLOBAL_COLUMNS - AUTOCOMPLETION_WIDTH + 1))
 
-  if (( AUTOCOMPLETION_WIDTH < 10 )); then
-    AUTOCOMPLETION_WIDTH=10
+  if ((AUTOCOMPLETION_WIDTH < 1)); then
+    AUTOCOMPLETION_WIDTH=1
   fi
-  if (( AUTOCOMPLETION_HEIGHT < 1 )); then
+  if ((AUTOCOMPLETION_HEIGHT < 1)); then
     AUTOCOMPLETION_HEIGHT=1
   fi
 }
 
 # Called when a key is pressed.
 function onKeyPressed() {
+  # display the last key pressed on top left corner
+  printf '%s' "${AC__CURSOR_MOVE__}1;1${__AC__TO}${AC__ERASE__}15${__AC_CHARS}"$'\r'"${LAST_KEY_PRESSED}"
+
   case ${LAST_KEY_PRESSED} in
   ESC)
     AUTOCOMPLETION_CLOSE_INTERACTIVE_SESSION=true
@@ -182,6 +249,10 @@ function onKeyPressed() {
     # if we selected index is within the range of the filtered items
     # we can return the corresponding index in the original items
     getCurrentInitialItemsIndex
+    if [[ ${AUTOCOMPLETION_ACCEPT_ANY_VALUE} != "true" && ${RETURNED_VALUE} -eq -1 ]]; then
+      # make enter have no effect if we are not on a valid item and we don't accept any value
+      return 0
+    fi
     AUTOCOMPLETION_FINAL_SELECTION_INDEX=${RETURNED_VALUE}
     AUTOCOMPLETION_CLOSE_INTERACTIVE_SESSION=true
     return 0
@@ -247,8 +318,12 @@ function onKeyPressed() {
 
 # Draw the prompt line
 function drawPrompt() {
+  if [[ ${AUTOCOMPLETION_SHOW_PROMPT} != "true" ]]; then
+    return 0
+  fi
+
   autocompletionGetDisplayedPromptString
-  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((AUTOCOMPLETION_TOP));$((AUTOCOMPLETION_LEFT))${__AC__TO}${AC__ERASE__}$((AUTOCOMPLETION_WIDTH))${__AC_CHARS}"$'\r'"${AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT}${RETURNED_VALUE}${AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT_RESET}${AC__CURSOR_MOVE__}$((AUTOCOMPLETION_TOP));$((AUTOCOMPLETION_LEFT + RETURNED_VALUE2))${__AC__TO}${AC__CURSOR_SHOW}"
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((AUTOCOMPLETION_TOP));$((AUTOCOMPLETION_LEFT))${__AC__TO}${AC__ERASE__}$((AUTOCOMPLETION_WIDTH))${__AC_CHARS}"$'\r'"${AUTOCOMPLETION_LEFT_CURSOR_PROMPT}${AUTOCOMPLETION_COLOR_PROMPT}${RETURNED_VALUE}${AUTOCOMPLETION_COLOR_PROMPT_RESET}${AC__CURSOR_MOVE__}$((AUTOCOMPLETION_TOP));$((AUTOCOMPLETION_LEFT_CURSOR_PROMPT_LENGTH + AUTOCOMPLETION_LEFT + RETURNED_VALUE2))${__AC__TO}${AC__CURSOR_SHOW}"
 }
 
 # This method uses the following global variables:
@@ -265,8 +340,8 @@ function autocompletionGetDisplayedPromptString() {
   local -i cursorIndex
 
   # compute where we will display the cursor in the prompt
-  if ((AUTOCOMPLETION_PROMPT_INDEX >= AUTOCOMPLETION_PROMPT_WIDTH )); then
-    if (( AUTOCOMPLETION_PROMPT_INDEX >= initialPromptLength - 1 )); then
+  if ((AUTOCOMPLETION_PROMPT_INDEX >= AUTOCOMPLETION_PROMPT_WIDTH)); then
+    if ((AUTOCOMPLETION_PROMPT_INDEX >= initialPromptLength - 1)); then
       # we display it in the last position if it is at the end of the string
       cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 1))
     else
@@ -274,11 +349,16 @@ function autocompletionGetDisplayedPromptString() {
       cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 2))
     fi
   else
-    if (( initialPromptLength > AUTOCOMPLETION_PROMPT_WIDTH && initialPromptLength - AUTOCOMPLETION_PROMPT_INDEX == 2 )); then
+    if ((initialPromptLength > AUTOCOMPLETION_PROMPT_WIDTH && initialPromptLength - AUTOCOMPLETION_PROMPT_INDEX == 2)); then
       cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 2))
     else
-      # if it is already within the prompt, we display it at the right position
-      cursorIndex=${AUTOCOMPLETION_PROMPT_INDEX}
+      if ((initialPromptLength > AUTOCOMPLETION_PROMPT_WIDTH && AUTOCOMPLETION_PROMPT_WIDTH - AUTOCOMPLETION_PROMPT_INDEX == 1)); then
+        # if within the prompt but at the last character and we will need to display ellipsis...
+        cursorIndex=$((AUTOCOMPLETION_PROMPT_WIDTH - 2))
+      else
+        # if it is already within the prompt, we display it at the right position
+        cursorIndex=${AUTOCOMPLETION_PROMPT_INDEX}
+      fi
     fi
   fi
 
@@ -288,10 +368,10 @@ function autocompletionGetDisplayedPromptString() {
   local prompt=""
 
   # compute what to display at the left of the character under the caret (if any)
-  if (( displayedLeftLength > 0 )); then
-    if (( realLeftLength > displayedLeftLength )); then
+  if ((displayedLeftLength > 0)); then
+    if ((realLeftLength > displayedLeftLength)); then
       # we can't display the whole left string, so we display ellipsis
-      if (( displayedLeftLength > 1 )); then
+      if ((displayedLeftLength > 1)); then
         prompt+="…${AUTOCOMPLETION_USER_STRING:$((realLeftLength - displayedLeftLength + 1)):$((displayedLeftLength - 1))}"
       else
         prompt+="…"
@@ -302,7 +382,7 @@ function autocompletionGetDisplayedPromptString() {
   fi
 
   # compute the character to display under the caret (if any)
-  if (( initialPromptLength > 0 && AUTOCOMPLETION_PROMPT_INDEX <= initialPromptLength )); then
+  if ((initialPromptLength > 0 && AUTOCOMPLETION_PROMPT_INDEX <= initialPromptLength)); then
     prompt+="${AUTOCOMPLETION_USER_STRING:$((AUTOCOMPLETION_PROMPT_INDEX)):1}"
   fi
 
@@ -310,10 +390,10 @@ function autocompletionGetDisplayedPromptString() {
   local -i displayedRightLength=$((AUTOCOMPLETION_PROMPT_WIDTH - cursorIndex - 1))
   local -i realRightLength=$((initialPromptLength - AUTOCOMPLETION_PROMPT_INDEX - 1))
 
-  if (( displayedRightLength > 0 )); then
-    if (( realRightLength > displayedRightLength )); then
+  if ((displayedRightLength > 0)); then
+    if ((realRightLength > displayedRightLength)); then
       # we can't display the whole right string, so we display ellipsis
-      if (( displayedRightLength > 1 )); then
+      if ((displayedRightLength > 1)); then
         prompt+="${AUTOCOMPLETION_USER_STRING:$((initialPromptLength - realRightLength)):$((displayedRightLength - 1))}…"
       else
         prompt+="…"
@@ -329,7 +409,12 @@ function autocompletionGetDisplayedPromptString() {
 
 # Draw the autocompletion box
 function drawAutocompletionBox() {
-  return 0
+  if [[ ${AUTOCOMPLETION_SHOW_AUTOCOMPLETION_BOX} != "true" ]]; then
+    return 0
+  fi
+
+return 0
+
   local IFS
   local toPrint="${AC__CURSOR_HIDE}${AUTOCOMPLETION_COLOR_RESET_TEXT}"
 
@@ -340,16 +425,16 @@ function drawAutocompletionBox() {
   # Compute filtered items
   if [[ -n ${AUTOCOMPLETION_USER_STRING} ]]; then
 
-    array::fuzzyFilterSort "${AUTOCOMPLETION_USER_STRING}" AUTOCOMPLETION_ORIGINAL_ITEMS "${AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT}" "${AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT_RESET}" "$((AUTOCOMPLETION_LEFT_PANE_WIDTH - 4))"
+    array::fuzzyFilterSort "${AUTOCOMPLETION_USER_STRING}" AUTOCOMPLETION_ORIGINAL_ITEMS "${AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT}" "${AUTOCOMPLETION_COLOR_LETTER_HIGHLIGHT_RESET}" "$((AUTOCOMPLETION_WIDTH))"
     AUTOCOMPLETION_FILTERED_ITEMS=("${RETURNED_ARRAY[@]}")
     AUTOCOMPLETION_FILTERED_ITEMS_CORRESPONDANCES=("${RETURNED_ARRAY2[@]}")
   else
-    # for each item longer than the left width, cut and add ellipsis
+    # for each item longer than the width, cut and add ellipsis
     AUTOCOMPLETION_FILTERED_ITEMS=()
     local line
     for line in "${AUTOCOMPLETION_ORIGINAL_ITEMS[@]}"; do
-      if ((${#line} > AUTOCOMPLETION_LEFT_PANE_WIDTH - 3)); then
-        line="${line:0:$((AUTOCOMPLETION_LEFT_PANE_WIDTH - 4))}…"
+      if ((${#line} > AUTOCOMPLETION_WIDTH - 1)); then
+        line="${line:0:$((AUTOCOMPLETION_WIDTH - 2))}…"
       fi
       AUTOCOMPLETION_FILTERED_ITEMS+=("${line}")
     done
@@ -363,14 +448,6 @@ function drawAutocompletionBox() {
   # make sure to select an existing index regarding the newly filtered items +
   # make sure it is in the view
   changeSelectedItemIndex 0
-
-  # if we are not pointing to the same original item, we need to
-  # recompute the right pane content
-  getCurrentInitialItemsIndex
-  local newOriginalIndex=${RETURNED_VALUE}
-  if [[ ${initialOriginalIndex} -ne ${newOriginalIndex} ]]; then
-    AUTOCOMPLETION_RECOMPUTE_RIGHT_PANE_CONTENT=${AUTOCOMPLETION_HAS_PREVIEW}
-  fi
 
   # draw the items count
   if ((${#AUTOCOMPLETION_FILTERED_ITEMS[@]} != initialNbFilteredItems)); then
@@ -461,9 +538,9 @@ function changePromptCursorIndex() {
 
   AUTOCOMPLETION_PROMPT_INDEX=$((AUTOCOMPLETION_PROMPT_INDEX + delta))
 
-  if (( AUTOCOMPLETION_PROMPT_INDEX < 0 )); then
+  if ((AUTOCOMPLETION_PROMPT_INDEX < 0)); then
     AUTOCOMPLETION_PROMPT_INDEX=0
-  elif (( AUTOCOMPLETION_PROMPT_INDEX > ${#AUTOCOMPLETION_USER_STRING} )); then
+  elif ((AUTOCOMPLETION_PROMPT_INDEX > ${#AUTOCOMPLETION_USER_STRING})); then
     AUTOCOMPLETION_PROMPT_INDEX=${#AUTOCOMPLETION_USER_STRING}
   fi
 }

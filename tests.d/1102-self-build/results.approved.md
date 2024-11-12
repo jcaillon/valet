@@ -11,7 +11,7 @@ Exit code: `0`
 ```plaintext
 CMD_ALL_COMMANDS=$'self\nhelp\nself build\nself config\nself export\nself mock1\nself mock2\nself mock3\nself mock4\nself release\nself setup\nself test\nself update'
 CMD_ALL_COMMANDS_ARRAY=0 "help" 1 "self build" 2 "self config" 3 "self export" 4 "self mock1" 5 "self mock2" 6 "self mock3" 7 "self mock4" 8 "self release" 9 "self setup" 10 "self test" 11 "self update"
-CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY=0 "help            Show the help this program or of a specific command." 1 "self build      Re-build the menu of valet from your commands." 2 "self config     Open the configuration file of Valet with your default editor." 3 "self test       Test your valet custom commands." 4 "self update     Install or update valet using the latest release on GitHub."
+CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY=0 "help            Show the help of this program or of a specific command." 1 "self build      Re-build the menu of valet from your commands." 2 "self config     Open the configuration file of Valet with your default editor." 3 "self test       Test your valet custom commands." 4 "self update     Install or update valet using the latest release on GitHub."
 CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfConfig\nselfExport\nselfUpdate\nselfMock1\nselfMock2\nselfMock3\nselfMock4\nselfRelease\nselfSetup\nselfTest'
 CMD_ALL_FUNCTIONS_ARRAY=0 "this" 1 "showCommandHelp" 2 "selfBuild" 3 "selfConfig" 4 "selfExport" 5 "selfUpdate" 6 "selfMock1" 7 "selfMock2" 8 "selfMock3" 9 "selfMock4" 10 "selfRelease" 11 "selfSetup" 12 "selfTest"
 CMD_ALL_MENU_COMMANDS_ARRAY=0 "self"
@@ -40,7 +40,7 @@ CMD_ARGUMENTS_NAME_selfMock2=0 "firstArg" 1 "more..."
 CMD_ARGUMENTS_NAME_selfMock4=0 "firstArg" 1 "secondArg"
 CMD_ARGUMENTS_NAME_showCommandHelp=0 "commands?..."
 CMD_ARGUMENTS_NAME_this=0 "commands?..."
-CMD_COMMANDS_DESCRIPTION_this=0 "Show the help this program or of a specific command." 1 "Re-build the menu of valet from your commands." 2 "Open the configuration file of Valet with your default editor." 3 "Returns a string that can be evaluated to have Valet functions in bash." 4 "A command that only for testing valet core functions." 5 "A command that only for testing valet core functions." 6 "A command that only for testing valet core functions." 7 "A command that only for testing valet core functions." 8 "Release a new version of valet." 9 "The command run after the installation of Valet to setup the tool." 10 "Test your valet custom commands." 11 "Install or update valet using the latest release on GitHub."
+CMD_COMMANDS_DESCRIPTION_this=0 "Show the help of this program or of a specific command." 1 "Re-build the menu of valet from your commands." 2 "Open the configuration file of Valet with your default editor." 3 "Returns a string that can be evaluated to have Valet functions in bash." 4 "A command that only for testing valet core functions." 5 "A command that only for testing valet core functions." 6 "A command that only for testing valet core functions." 7 "A command that only for testing valet core functions." 8 "Release a new version of valet." 9 "The command run after the installation of Valet to setup the tool." 10 "Test your valet custom commands." 11 "Install or update valet using the latest release on GitHub."
 CMD_COMMANDS_NAME_this=0 "help" 1 "self build" 2 "self config" 3 "self export" 4 "self mock1" 5 "self mock2" 6 "self mock3" 7 "self mock4" 8 "self release" 9 "self setup" 10 "self test" 11 "self update"
 CMD_COMMAND_selfBuild='self build'
 CMD_COMMAND_selfConfig='self config'
@@ -67,7 +67,7 @@ CMD_DESCRIPTION_selfRelease=$'Release a new version of valet.\n\nIt will:\n- wri
 CMD_DESCRIPTION_selfSetup=$'The command run after the installation of Valet to setup the tool.\n\nAdjust the Valet configuration according to the user environment.\nLet the user know what to do next.\n'
 CMD_DESCRIPTION_selfTest='Test your valet custom commands using approval tests approach.'
 CMD_DESCRIPTION_selfUpdate=$'Update valet using the latest release on GitHub.\n\nThis script can be used as a standalone script to install Valet:\n\nbash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)"\n\nIf you need to pass options (e.g. --single-user-installation) to the script, you can do it like this:\n\nbash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --single-user-installation\n\nThe default behavior is to install Valet for all users, in /opt/valet, which might require\nyou to type your password on sudo commands (you don\'t have to run this script with sudo, it will\nask for your password when needed).\n\nThis script will:\n\n- 1. Download the given release from GitHub (latest by default).\n\n- 2. Copy it in the Valet home directory, which defaults to:\n  * /opt/valet in case of a multi user installation\n  * ~/.local/valet otherwise\n\n- 3. Make the valet script readable and executable, either by adding a shim\n     in a bin directory already present in your PATH, or by adding the Valet\n     directory to your PATH on shell startup.\n\n- 4. Copy the examples in the user valet directory ~/.valet.d.\n\n- 5. Copy the extras (vscode snippets) in the user valet directory ~/.valet.d.\n\n- 6. Run self setup command (in case of an installation).\n\n- 7. Try to update (fetch merge -ff-only) the git repositories under your valet user directory.\n'
-CMD_DESCRIPTION_showCommandHelp=$'Show the help this program or of the help of a specific command.\n\nYou can show the help with or without colors and set the maximum columns for the help text.'
+CMD_DESCRIPTION_showCommandHelp=$'Show the help of this program or of the help of a specific command.\n\nYou can show the help with or without colors and set the maximum columns for the help text.'
 CMD_DESCRIPTION_this=$'Valet helps you browse, understand and execute your custom bash commands.\n\nOnline documentation is available at https://jcaillon.github.io/valet/.\n\nYou can call valet without any commands to start an interactive session.\n\nExit codes:\n\n- 0: everything went well\n- 1+: an error occured\n\nCreate your own commands:\n\nYou can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ or the examples under examples.d to do so.\nValet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).\nOnce you have created your new command script, run the valet self build command to update the valet menu.\n\nConfiguration through environment variables:\n\nIn addition to the environment variables defined for each options, you can define environment variables to configure valet.\n\nThese variables are conviently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the VALET_CONFIG_FILE environment variable).\n\nYou can run valet self config to open the configuration file with your default editor (the file will get created if it does not yet exist).\n\nDeveloper notes:\n\nYou can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/valet-profiler-{PID}.txt).'
 CMD_EXAMPLES_DESCRIPTION_selfMock2=0 $'Call command1 with option1, option2 and some arguments.\n'
 CMD_EXAMPLES_DESCRIPTION_selfUpdate=0 "Update Valet to the latest version." 1 "Install the latest version of Valet, using all the default options." 2 $'Install the latest version of Valet in the user home directory and disable all interaction during the install process.\n'
@@ -219,7 +219,7 @@ CMD_SHORT_DESCRIPTION_selfRelease='Release a new version of valet.'
 CMD_SHORT_DESCRIPTION_selfSetup='The command run after the installation of Valet to setup the tool.'
 CMD_SHORT_DESCRIPTION_selfTest='Test your valet custom commands.'
 CMD_SHORT_DESCRIPTION_selfUpdate='Install or update valet using the latest release on GitHub.'
-CMD_SHORT_DESCRIPTION_showCommandHelp='Show the help this program or of a specific command.'
+CMD_SHORT_DESCRIPTION_showCommandHelp='Show the help of this program or of a specific command.'
 CMD_SHORT_DESCRIPTION_this='Your personal assistant in the terminal!'
 CMD_SUDO_selfMock3='true'
 ```
@@ -227,7 +227,7 @@ CMD_SUDO_selfMock3='true'
 **Error** output:
 
 ```log
-INFO     Skipping user directory (building core commands only).
+INFO     Skipping the build of scripts in user directory (building core commands only).
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet⌝.
 INFO                              ├── ⌜⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/help.sh⌝.
@@ -260,7 +260,7 @@ INFO     == Summary of the commands ==
 
 == List of all the commands ==
 
-help            Show the help this program or of a specific command.
+help            Show the help of this program or of a specific command.
 self build      Re-build the menu of valet from your commands.
 self config     Open the configuration file of Valet with your default editor.
 self test       Test your valet custom commands.
@@ -277,6 +277,6 @@ self release    Release a new version of valet.
 self setup      The command run after the installation of Valet to setup the tool.
 
 INFO     The command definition variables have been written to ⌜/tmp/valet.d/f1-1⌝.
-SUCCESS  The valet user commands have been successfully built
+SUCCESS  The valet user commands have been successfully built.
 ```
 

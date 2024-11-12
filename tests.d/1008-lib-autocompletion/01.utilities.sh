@@ -38,6 +38,41 @@ function testAutocompletionComputeSize() {
   autocompletionComputeSize '' true 7 7 10 10
   echo "${AUTOCOMPLETION_WIDTH} x ${AUTOCOMPLETION_HEIGHT} at ${AUTOCOMPLETION_LEFT}:${AUTOCOMPLETION_TOP}"
 
+  echo
+  echo
+  echo "autocompletionComputeSize '' '' 1 1 20 20" false
+  autocompletionComputeSize '' '' 1 1 20 20 false
+  echo "${AUTOCOMPLETION_WIDTH} x ${AUTOCOMPLETION_HEIGHT} at ${AUTOCOMPLETION_LEFT}:${AUTOCOMPLETION_TOP}"
+  echo
+
+  echo "autocompletionComputeSize 2 '' 1 1 20 20" false
+  autocompletionComputeSize 2 '' 1 1 20 20 false
+  echo "${AUTOCOMPLETION_WIDTH} x ${AUTOCOMPLETION_HEIGHT} at ${AUTOCOMPLETION_LEFT}:${AUTOCOMPLETION_TOP}"
+
+  echo
+  echo "autocompletionComputeSize '' '' 1 1 5 5" false
+  autocompletionComputeSize '' '' 1 1 5 5 false
+  echo "${AUTOCOMPLETION_WIDTH} x ${AUTOCOMPLETION_HEIGHT} at ${AUTOCOMPLETION_LEFT}:${AUTOCOMPLETION_TOP}"
+
+  echo
+  echo "autocompletionComputeSize '' '' 5 5 6 9" false
+  autocompletionComputeSize '' '' 5 5 6 9 false
+  echo "${AUTOCOMPLETION_WIDTH} x ${AUTOCOMPLETION_HEIGHT} at ${AUTOCOMPLETION_LEFT}:${AUTOCOMPLETION_TOP}"
+
+  echo
+  echo "autocompletionComputeSize '' '' 7 7 10 4" false
+  autocompletionComputeSize '' '' 7 7 10 4 false
+  echo "${AUTOCOMPLETION_WIDTH} x ${AUTOCOMPLETION_HEIGHT} at ${AUTOCOMPLETION_LEFT}:${AUTOCOMPLETION_TOP}"
+
+  echo
+  echo "autocompletionComputeSize '' '' 7 7 4 4" false
+  autocompletionComputeSize '' '' 7 7 4 4 false
+  echo "${AUTOCOMPLETION_WIDTH} x ${AUTOCOMPLETION_HEIGHT} at ${AUTOCOMPLETION_LEFT}:${AUTOCOMPLETION_TOP}"
+
+  echo
+  echo "autocompletionComputeSize '' true 7 7 10 10" false
+  autocompletionComputeSize '' true 7 7 10 10 false
+  echo "${AUTOCOMPLETION_WIDTH} x ${AUTOCOMPLETION_HEIGHT} at ${AUTOCOMPLETION_LEFT}:${AUTOCOMPLETION_TOP}"
   test::endTest "Testing autocompletionComputeSize" 0
 }
 
@@ -66,6 +101,9 @@ function testAutocompletionGetDisplayedPromptString() {
   testAutocompletionGetDisplayedPromptStringFunc "abcdefghij" 6 "…efg…" 3
   #                                               0123456789
   #                                               012345
+  testAutocompletionGetDisplayedPromptStringFunc "abcdefghij" 3 "abcd…" 3
+  testAutocompletionGetDisplayedPromptStringFunc "abcdefghij" 4 "…cde…" 3
+  testAutocompletionGetDisplayedPromptStringFunc "abcdefghij" 5 "…def…" 3
 
   AUTOCOMPLETION_PROMPT_WIDTH=4
   testAutocompletionGetDisplayedPromptStringFunc "bl" 0 "bl" 0

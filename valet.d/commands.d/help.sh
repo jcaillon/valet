@@ -13,9 +13,9 @@ fi
 : "---
 command: help
 function: showCommandHelp
-shortDescription: Show the help this program or of a specific command.
+shortDescription: Show the help of this program or of a specific command.
 description: |-
-  Show the help this program or of the help of a specific command.
+  Show the help of this program or of the help of a specific command.
 
   You can show the help with or without colors and set the maximum columns for the help text.
 arguments:

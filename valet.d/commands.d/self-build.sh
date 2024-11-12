@@ -133,10 +133,10 @@ function selfBuild() {
         done
       done
     else
-      log::warning "Skipping user directory ⌜${userDirectory}⌝ because it does not exist."
+      log::warning "Skipping the build of scripts in user directory ⌜${userDirectory}⌝ because it does not exist."
     fi
   else
-    log::info "Skipping user directory (building core commands only)."
+    log::info "Skipping the build of scripts in user directory (building core commands only)."
   fi
 
   if log::isDebugEnabled; then
@@ -170,7 +170,7 @@ function selfBuild() {
     bumpValetBuildVersion
   fi
 
-  log::success "The valet user commands have been successfully built"
+  log::success "The valet user commands have been successfully built."
 }
 
 #===============================================================

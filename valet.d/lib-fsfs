@@ -240,6 +240,7 @@ function fsfsDrawScreen() {
   FSFS_RIGHT_PANE_FIRST_CONTENT_LINE=$((FSFS_RIGHT_PANE_FIRST_LINE + 1))
   FSFS_RIGHT_PANE_LINES=$((GLOBAL_LINES - (FSFS_RIGHT_PANE_FIRST_LINE - 1) - 2))
   FSFS_RIGHT_PANE_LINES=$((FSFS_RIGHT_PANE_LINES > 0 ? FSFS_RIGHT_PANE_LINES : 1))
+  FSFS_RIGHT_PANE_MAX_DISPLAYED_LINES=$((FSFS_RIGHT_PANE_LINES - 1 - FSFS_RIGHT_PANE_START_INDEX))
 
   # 2. draw the left help text
   local leftHelpWidth=$((${#FSFS_LEFT_PANE_HELP_TEXT} + 2))
@@ -354,10 +355,14 @@ function drawLeftPane() {
 
   # draw the items count
   if ((${#FSFS_FILTERED_ITEMS[@]} != initialNbFilteredItems)); then
-    local itemCount="${#FSFS_ORIGINAL_ITEMS[@]}"
+    local totalItemCount="${#FSFS_ORIGINAL_ITEMS[@]}"
+    local itemCount="${#FSFS_FILTERED_ITEMS[@]}"
+    if (( itemCount > FSFS_LEFT_PANE_LINES )); then
+      itemCount="${FSFS_LEFT_PANE_LINES}"
+    fi
     local itemsCounter
-    printf -v itemsCounter " %s%0${#itemCount}i%s/%i%s " "${FSFS_COLOR_COUNT}" "${#FSFS_FILTERED_ITEMS[@]}" "${FSFS_COLOR_COUNT_RESET}${FSFS_COLOR_STATIC}" "${#FSFS_ORIGINAL_ITEMS[@]}" "${FSFS_COLOR_RESET_TEXT}"
-    local itemCounterLength=$((3 + ${#itemCount} * 2))
+    printf -v itemsCounter " %s%0${#totalItemCount}i%s/%i%s " "${FSFS_COLOR_COUNT}" "${itemCount}" "${FSFS_COLOR_COUNT_RESET}${FSFS_COLOR_STATIC}" "${totalItemCount}" "${FSFS_COLOR_RESET_TEXT}"
+    local itemCounterLength=$((3 + ${#totalItemCount} * 2))
     toPrint+="${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE + 1));$((FSFS_LEFT_PANE_WIDTH - itemCounterLength))${__AC__TO}${itemsCounter}"
   fi
 
@@ -368,7 +373,7 @@ function drawLeftPane() {
   max=$((max > ${#FSFS_FILTERED_ITEMS[@]} - 1 ? ${#FSFS_FILTERED_ITEMS[@]} - 1 : max))
   for ((index = FSFS_LEFT_PANE_START_INDEX; index <= max; index++)); do
     if ((index == FSFS_SELECTED_FILTERED_ITEM_INDEX)); then
-      itemPrefix="${FSFS_COLOR_SELECTED_ITEM}${FSFS_COLOR_FOCUS}◆ ${FSFS_COLOR_FOCUS_RESET}"
+      itemPrefix="${FSFS_COLOR_SELECTED_ITEM}${FSFS_COLOR_FOCUS}${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-"◆"} ${FSFS_COLOR_FOCUS_RESET}"
     else
       itemPrefix="  "
     fi
@@ -413,7 +418,7 @@ function computeRightPaneContent() {
 
     local originalItem="${FSFS_ORIGINAL_ITEMS[${originalItemIndex}]}"
     "${FSFS_ITEM_SELECTED_CALLBACK}" "${originalItem}" "${originalItemIndex}" "$((FSFS_RIGHT_PANE_WIDTH - 3))"
-    local content="${RETURNED_VALUE}"
+    local content="${RETURNED_VALUE%$'\n'}"
 
     array=()
     local line IFS
@@ -445,7 +450,7 @@ function drawRightPane() {
   local itemsCounter
   local itemsCounterLength
   if ((contentLength > 0)); then
-    local itemCount="${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]}"
+    local itemCount="$((${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} - FSFS_RIGHT_PANE_MAX_DISPLAYED_LINES - 1))"
     printf -v itemsCounter " %s%0${#itemCount}i%s/%i%s " "${FSFS_COLOR_COUNT}" "${FSFS_RIGHT_PANE_START_INDEX}" "${FSFS_COLOR_COUNT_RESET}${FSFS_COLOR_STATIC}" "${itemCount}" "${FSFS_COLOR_RESET_TEXT}"
     itemsCounterLength=$((3 + ${#itemCount} * 2))
   else
@@ -491,7 +496,7 @@ function drawPrompt() {
   else
     FSFS_PROMPT="${FSFS_SEARCH_STRING}"
   fi
-  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE));$((FSFS_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"$'\r'"${FSFS_COLOR_STATIC}> ${FSFS_COLOR_RESET_TEXT}${FSFS_COLOR_FOCUS}${FSFS_PROMPT}${AC__CURSOR_SHOW}"
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((FSFS_LEFT_PANE_FIRST_LINE));$((FSFS_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"$'\r'"${FSFS_COLOR_STATIC}${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-">"} ${FSFS_COLOR_RESET_TEXT}${FSFS_COLOR_FOCUS}${FSFS_PROMPT}${AC__CURSOR_SHOW}"
 }
 
 # Returns the index of the item in the original array (if any, or -1).
@@ -559,8 +564,8 @@ function changeRightPaneStartIndex() {
     newIndex=0
   elif [[ ! -v FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY ]]; then
     newIndex=0
-  elif [[ newIndex -ge ${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} ]]; then
-    newIndex=$((${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} - 1))
+  elif (( newIndex >= ${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} - FSFS_RIGHT_PANE_MAX_DISPLAYED_LINES )); then
+    newIndex=$((${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} - 1 - FSFS_RIGHT_PANE_MAX_DISPLAYED_LINES))
   fi
   FSFS_RIGHT_PANE_START_INDEX=${newIndex}
 }
@@ -586,6 +591,14 @@ function onKeyPressed() {
     ;;
   PAGE_UP)
     changeRightPaneStartIndex -3
+    drawRightPane
+    ;;
+  HOME)
+    changeRightPaneStartIndex -999999
+    drawRightPane
+    ;;
+  END)
+    changeRightPaneStartIndex 999999
     drawRightPane
     ;;
   RIGHT)

@@ -17,16 +17,38 @@ autocompletionComputeSize 2 '' 1 1 20 20
 10 x 2 at 1:2
 
 autocompletionComputeSize '' '' 1 1 5 5
-10 x 5 at 1:2
+5 x 5 at 1:2
 
 autocompletionComputeSize '' '' 5 5 6 9
-10 x 5 at 2:6
+9 x 5 at 2:6
 
 autocompletionComputeSize '' '' 7 7 10 4
-10 x 6 at 7:1
+4 x 6 at 7:1
 
 autocompletionComputeSize '' true 7 7 10 10
 10 x 3 at 1:8
+
+
+autocompletionComputeSize '' '' 1 1 20 20 false
+10 x 10 at 1:1
+
+autocompletionComputeSize 2 '' 1 1 20 20 false
+10 x 2 at 1:1
+
+autocompletionComputeSize '' '' 1 1 5 5 false
+5 x 5 at 1:1
+
+autocompletionComputeSize '' '' 5 5 6 9 false
+9 x 6 at 2:5
+
+autocompletionComputeSize '' '' 7 7 10 4 false
+4 x 7 at 7:1
+
+autocompletionComputeSize '' '' 7 7 4 4 false
+4 x 4 at 7:7
+
+autocompletionComputeSize '' true 7 7 10 10 false
+10 x 4 at 1:7
 ```
 
 ### Testing autocompletionGetDisplayedPromptString
@@ -82,6 +104,15 @@ AUTOCOMPLETION_USER_STRING=abcdef AUTOCOMPLETION_PROMPT_INDEX=3 autocompletionGe
 AUTOCOMPLETION_USER_STRING=abcdefghij AUTOCOMPLETION_PROMPT_INDEX=6 autocompletionGetDisplayedPromptString
  ░…efg…░ 3
 =░…efg…░ 3
+AUTOCOMPLETION_USER_STRING=abcdefghij AUTOCOMPLETION_PROMPT_INDEX=3 autocompletionGetDisplayedPromptString
+ ░abcd…░ 3
+=░abcd…░ 3
+AUTOCOMPLETION_USER_STRING=abcdefghij AUTOCOMPLETION_PROMPT_INDEX=4 autocompletionGetDisplayedPromptString
+ ░…cde…░ 3
+=░…cde…░ 3
+AUTOCOMPLETION_USER_STRING=abcdefghij AUTOCOMPLETION_PROMPT_INDEX=5 autocompletionGetDisplayedPromptString
+ ░…def…░ 3
+=░…def…░ 3
 AUTOCOMPLETION_USER_STRING=bl AUTOCOMPLETION_PROMPT_INDEX=0 autocompletionGetDisplayedPromptString
  ░bl░ 0
 =░bl░ 0

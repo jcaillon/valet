@@ -408,7 +408,7 @@ function interactive::waitForKey() {
   LAST_KEY_PRESSED="${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:-}${LAST_KEY_PRESSED}"
   PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
 
-  if [[ -z ${#LAST_KEY_PRESSED} ]]; then
+  if [[ -z ${LAST_KEY_PRESSED} ]]; then
     return 1
   fi
 
