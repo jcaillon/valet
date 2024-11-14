@@ -368,7 +368,7 @@ interactive::displayDialogBox() {
 # interactive::testKeys
 # ```
 function interactive::testKeys() {
-  printf '%s\n' "Press any key to see the character that bash sees (CTRL + C to interrupt).${AC__CURSOR_HIDE}"
+  printf '%s\n' "Press any key to see the character that bash reads (CTRL + C to interrupt).${AC__CURSOR_HIDE}"
   while true; do
     if interactive::waitForKey -t 1; then
       printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
@@ -381,6 +381,12 @@ function interactive::testKeys() {
 #
 # Wait for a user input (single key).
 # You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
+#
+# It uses the read builtin command. This will not detect all key combinations.
+# To be able to use CTRL combinations, you can use interactive::waitForKeymap.
+# The advantage of this function is that pressing the ESC key will immediately translate
+# into \e, whereas with interactive::waitForKeymap, you would need to press another key or wait
+# for the timeout to get the \e character.
 #
 # Some special keys are translated into more readable strings:
 # UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
@@ -444,11 +450,129 @@ function interactive::waitForKey() {
   else
     case ${LAST_KEY_PRESSED} in
     $'\177' | $'\b') LAST_KEY_PRESSED="BACKSPACE" ;;
+    $'\r') LAST_KEY_PRESSED=$"\n" ;;
     esac
   fi
   return 0
 }
 
+# ## interactive::waitForKeymap
+#
+# Wait for a user input (single key).
+# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
+#
+# It uses the read builtin command with the option `-e` to use readline behind the scene.
+# This means we can detect more key combinations but all keys needs to be binded first...
+# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
+# You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.
+# Moreover, because handling a special will not directly produce a character for the bash read function,
+# you need to set a timeout to the read command. If the timeout is reached and no simple keys were pressed,
+# then we consider special keys pressed in the interval of time... *If you know better way to do this, please let me know.*
+#
+# - $@: **read parameters** _as any_:
+#       additional parameters to pass to the read command
+#
+# Returns:
+#
+# - $?:
+#   - 0 if a key was pressed
+#   - 1 otherwise
+# - `LAST_KEY_PRESSED`: the key pressed.
+#
+# ```bash
+# interactive::waitForKeymap
+# interactive::waitForKeymap -t 0.1
+# ```
+#
+# > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll
+# > even when nothing is read... Make sure to not position the cursor at the end of the screen.
+function interactive::waitForKeymap() {
+  LAST_KEY_PRESSED=""
+  REPLY=""
+  IFS='' read "$@" -e -d '' -srn 1 REPLY || :
+  if [[ -z ${REPLY} ]]; then
+    if [[ -n ${LAST_KEY_PRESSED} ]]; then
+      return 0
+    fi
+    return 1
+  fi
+  LAST_KEY_PRESSED="${REPLY}"
+  return 0
+}
+
+# ## interactive::rebindKeymap
+#
+# Rebinds all special keys to output their text equivalent.
+# This allows to use the `-e` option with the read command and receive special
+# keys as actual characters.
+#
+# This function should be called before using interactive::waitForKeymap.
+#
+# ```bash
+# interactive::rebindKeymap
+# ```
+#
+# > We do not bother to have a restore function because valet should not be sourced and
+# > thus, modifications to the keymap are local to this script.
+function interactive::rebindKeymap() {
+  # remove all existing bindings except the self-insert ones
+  # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
+  # shellcheck source=lib-io
+  source io
+  io::invoke "bind" "-p"
+  local bindings="${RETURNED_VALUE}"
+  local IFS=$'\n'
+  local line
+  for line in ${bindings}; do
+    if [[ ${line} == "#"* || ${line} == *"self-insert" ]]; then
+      continue
+    fi
+    local key="${line%% *}"
+    key="${key//\"/}"
+    bind -r "${key%:}" &>/dev/null
+  done
+
+  # make sure that readline will not wait the default 1s after a special key (like \e ESC) is pressed
+  # to read a longer sequence of keys
+  bind 'set keyseq-timeout 1' &>/dev/null
+
+  # add the one we are interested in
+  bind -x '"\e": interactiveRegisterSpecialKeyPress ESC' &>/dev/null
+  bind -x '"\e\e": interactiveRegisterSpecialKeyPress ESC' &>/dev/null
+  bind -x '"\e\e\e": interactiveRegisterSpecialKeyPress ESC' &>/dev/null
+
+  bind -x '"\C-a": interactiveRegisterSpecialKeyPress CTRL+A' &>/dev/null
+  bind -x '"\e[1;5C": interactiveRegisterSpecialKeyPress CTRL+RIGHT' &>/dev/null
+
+
+  # bind '"\C-a": "^C-a"'
+
+  # bind '"\C-f": "^LEFT1"'
+  # bind '"\eOC": "^LEFT2"'
+  # bind '"\e[C": "^L3"'
+
+  # bind '"\e\e[C": "^C-LEFT4"'
+  # bind '"\ef": "^C-LEFT5"'
+
+
+  # bind '"\M-OC": "LEFT"'
+  # bind '"\M-[C": "^LEFT"'
+  # bind '"\M-\C-OC": "^KEYPAD-LEFT"'
+  # bind '"\M-\C-[C": "^KEYPAD-LEFT"'
+
+  # bind '"\C-\eOC": "^C-LEFT"'
+  # bind '"\C-\eOC": "^C-LEFT"'
+  # bind '"\C-[D": "^C-LEFT"'
+  # bind '"\C-OD": "^C-LEFT"'
+
+  # bind '"\M-\C-[D": "^C-LEFT"'
+
+  # bind -p
+}
+
+function interactiveRegisterSpecialKeyPress() {
+  LAST_KEY_PRESSED="${1}"
+}
 
 # ## interactive::clearKeyPressed
 #
@@ -502,6 +626,7 @@ function interactive::getCursorPosition() {
   # we request the position and first read \e[
   IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr _escapeCode || :
   # then read line;colR
+  # shellcheck disable=SC2034
   IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || :
 }
 
@@ -518,9 +643,9 @@ function interactive::sttyInit() {
       # shellcheck source=lib-io
       source io
       io::invoke "stty" "-g"
-      INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE}"
+      INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
+      stty -echo &>/dev/null || :
     fi
-    # stty -echo &>/dev/null || :
   fi
 }
 
@@ -532,12 +657,11 @@ function interactive::sttyInit() {
 # interactive::sttyRestore
 # ```
 function interactive::sttyRestore() {
-  log::info "restoring stty config2"
   if [[ -n ${INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
     if command -v stty &>/dev/null; then
-      log::info "restoring stty config"
-      stty "${INTERACTIVE_STTY_SAVED_CONFIG}"
+      stty "${INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
     fi
+    unset -v INTERACTIVE_STTY_SAVED_CONFIG
   fi
 }
 
@@ -558,9 +682,6 @@ function interactive::switchToFullScreen() {
   if [[ ! -t 2 ]]; then
     core::fail "This function can only be used in an interactive session. Did you already called interactive::switchBackFromFullScreen?"
   fi
-
-  # disable echoing when we type something
-  interactive::sttyInit
 
   # switch to the alternate screen, hide the cursor and clear the screen
   printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
@@ -589,9 +710,6 @@ function interactive::switchBackFromFullScreen() {
   fi
   # restore the terminal state
   printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
-
-  # restore the key echoing
-  interactive::sttyRestore
 
   # restore the error output and display them if any
   exec 2>&4 4>&-
