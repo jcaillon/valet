@@ -237,9 +237,6 @@ function autocompletionComputeSize() {
 
 # Called when a key is pressed.
 function onKeyPressed() {
-  # display the last key pressed on top left corner
-  printf '%s' "${AC__CURSOR_MOVE__}1;1${__AC__TO}${AC__ERASE__}15${__AC_CHARS}"$'\r'"${LAST_KEY_PRESSED}"
-
   case ${LAST_KEY_PRESSED} in
   ESC)
     AUTOCOMPLETION_CLOSE_INTERACTIVE_SESSION=true
@@ -282,31 +279,53 @@ function onKeyPressed() {
     drawPrompt
     ;;
   DEL)
-    AUTOCOMPLETION_USER_STRING=""
+    # delete the character under the cursor
+    local tempUserString
+    if (( AUTOCOMPLETION_PROMPT_INDEX > 0 )); then
+      tempUserString="${AUTOCOMPLETION_USER_STRING:0:${AUTOCOMPLETION_PROMPT_INDEX}}"
+    else
+      tempUserString=""
+    fi
+    if (( AUTOCOMPLETION_PROMPT_INDEX < ${#AUTOCOMPLETION_USER_STRING} - 1 )); then
+      tempUserString+="${AUTOCOMPLETION_USER_STRING:$((AUTOCOMPLETION_PROMPT_INDEX + 1))}"
+    fi
+    AUTOCOMPLETION_USER_STRING="${tempUserString}"
     drawPrompt
     ;;
   *)
     # Case of keys that are supposed to only affect the search string
     case ${LAST_KEY_PRESSED} in
     BACKSPACE)
-      AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING%?}"
+      # delete the character before the cursor
+      if (( AUTOCOMPLETION_PROMPT_INDEX > 0 )); then
+        if (( AUTOCOMPLETION_PROMPT_INDEX > 1 )); then
+          AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING:0:$((AUTOCOMPLETION_PROMPT_INDEX - 1))}${AUTOCOMPLETION_USER_STRING:${AUTOCOMPLETION_PROMPT_INDEX}}"
+        else
+          AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING:${AUTOCOMPLETION_PROMPT_INDEX}}"
+        fi
+      fi
       changePromptCursorIndex -1
       drawPrompt
       drawAutocompletionBox
       ;;
     # CTRL+A
-    $'\000')
-      changePromptCursorIndex -9999
+    $'\001')
+      changePromptCursorIndex -9999999
       drawPrompt
       ;;
     # CTRL+E
     $'\005')
-      changePromptCursorIndex 9999
+      changePromptCursorIndex 9999999
       drawPrompt
       ;;
     # normal key
     ?)
-      AUTOCOMPLETION_USER_STRING+="${LAST_KEY_PRESSED}"
+      # insert the character at the cursor position
+      if (( AUTOCOMPLETION_PROMPT_INDEX > 0 )); then
+        AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING:0:${AUTOCOMPLETION_PROMPT_INDEX}}${LAST_KEY_PRESSED}${AUTOCOMPLETION_USER_STRING:${AUTOCOMPLETION_PROMPT_INDEX}}"
+      else
+        AUTOCOMPLETION_USER_STRING="${LAST_KEY_PRESSED}${AUTOCOMPLETION_USER_STRING}"
+      fi
       changePromptCursorIndex ${#LAST_KEY_PRESSED}
       drawPrompt
       drawAutocompletionBox

@@ -37,6 +37,11 @@ function main::onExitInternal() {
     kill "${_PROGRESS_BAR_PID}" 1>/dev/null || :
   fi
 
+  # restore tty settings if needed
+  if command -v interactive::sttyRestore &>/dev/null; then
+    interactive::sttyRestore
+  fi
+
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
   if command -v onExitTest &>/dev/null; then
     # this is for the self test command, we need to inform the user in case of an

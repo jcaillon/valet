@@ -505,6 +505,42 @@ function interactive::getCursorPosition() {
   IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || :
 }
 
+# ## interactive::sttyInit
+#
+# Disable the echo of the tty. Will no longer display the characters typed by the user.
+#
+# ```bash
+# interactive::sttyInit
+# ```
+function interactive::sttyInit() {
+  if command -v stty &>/dev/null; then
+    if [[ -z ${INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
+      # shellcheck source=lib-io
+      source io
+      io::invoke "stty" "-g"
+      INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE}"
+    fi
+    # stty -echo &>/dev/null || :
+  fi
+}
+
+# ## interactive::sttyRestore
+#
+# Enable the echo of the tty. Will display the characters typed by the user.
+#
+# ```bash
+# interactive::sttyRestore
+# ```
+function interactive::sttyRestore() {
+  log::info "restoring stty config2"
+  if [[ -n ${INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
+    if command -v stty &>/dev/null; then
+      log::info "restoring stty config"
+      stty "${INTERACTIVE_STTY_SAVED_CONFIG}"
+    fi
+  fi
+}
+
 # ## interactive::switchToFullScreen
 #
 # Call this function to start an interactive session in full screen mode.
@@ -524,9 +560,8 @@ function interactive::switchToFullScreen() {
   fi
 
   # disable echoing when we type something
-  if command -v stty &>/dev/null; then
-    stty -echo &>/dev/null || :
-  fi
+  interactive::sttyInit
+
   # switch to the alternate screen, hide the cursor and clear the screen
   printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
 
@@ -552,13 +587,11 @@ function interactive::switchBackFromFullScreen() {
     # already in the normal terminal mode
     return
   fi
-
   # restore the terminal state
   printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
+
   # restore the key echoing
-  if command -v stty &>/dev/null; then
-    stty echo &>/dev/null || :
-  fi
+  interactive::sttyRestore
 
   # restore the error output and display them if any
   exec 2>&4 4>&-
@@ -736,9 +769,7 @@ function interactive::startProgress() {
   printf '%s' "${AC__CURSOR_HIDE}"
 
   # disable echoing when we type something
-  if command -v stty &>/dev/null; then
-    stty -echo &>/dev/null || :
-  fi
+  interactive::sttyInit
 
   io::createTempFile
   _PROGRESS_BAR_UPDATE_FILE="${RETURNED_VALUE}"
@@ -816,7 +847,5 @@ function interactive::stopProgress() {
   printf "%s" "${AC__ERASE_LINE}${AC__CURSOR_SHOW}"
 
   # restore the key echoing
-  if command -v stty &>/dev/null; then
-    stty echo &>/dev/null || :
-  fi
+  interactive::sttyRestore
 }
