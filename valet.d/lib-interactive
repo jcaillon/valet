@@ -373,9 +373,12 @@ interactive::displayDialogBox() {
 # interactive::testWaitForChar
 # ```
 function interactive::testWaitForChar() {
-  printf '%s\n' "Press any key to see the character that bash reads (CTRL + C to interrupt).${AC__CURSOR_HIDE}"
+  printf '%s\n' "Press any key to see the returned character (Press Q to quit).${AC__CURSOR_HIDE}"
   while true; do
     if interactive::waitForChar -t 1; then
+      if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
+        break
+      fi
       printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
     fi
     if [[ ! -t 1 ]]; then break; fi
@@ -483,9 +486,12 @@ function interactive::testWaitForKeyPress() {
     printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${key@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
   }
 
-  printf '%s\n' "Press any key to see the character that bash sees (CTRL + C to interrupt)."
+  printf '%s\n' "Press any key to see the returned code (press Q to quit)."
   while true; do
     if interactive::waitForKeyPress -t 0.3; then
+      if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
+        break
+      fi
       printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
     fi
     if [[ ! -t 1 ]]; then break; fi
@@ -526,20 +532,15 @@ function interactive::testWaitForKeyPress() {
 # > even when nothing is read... Make sure to not position the cursor at the end of the screen.
 function interactive::waitForKeyPress() {
   LAST_KEY_PRESSED=""
-  REPLY=""
   # here we redirect the error output to null because of a bug in bash, it
   # prints a newline each time read is called with -e, idk why...
-  IFS='' read "$@" -e -d '' -s -r -n 1 REPLY 2>/dev/null || :
-  if [[ -z ${REPLY} ]]; then
-    if [[ -n ${LAST_KEY_PRESSED} ]]; then
-      return 0
-    fi
+  IFS='' read "$@" -e -d '' -s -r -n 1 LAST_KEY_PRESSED 2>/dev/null || :
+  if [[ -z ${LAST_KEY_PRESSED} ]]; then
     return 1
   fi
-  LAST_KEY_PRESSED="${REPLY}"
   case ${LAST_KEY_PRESSED} in
     $'\177' | $'\b') LAST_KEY_PRESSED="BACKSPACE" ;;
-    $'\r') LAST_KEY_PRESSED=$"\n" ;;
+    $'\r') LAST_KEY_PRESSED=$'\n' ;;
   esac
   return 0
 }
@@ -609,7 +610,8 @@ function interactive::rebindKeymap() {
   local -i modeIndex
   for((index=0;index<${#normalKeys};index++)); do
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
-      bind -x "\"${modifiers[modeIndex + 1]}${normalKeys:${index}:1}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${normalKeys:${index}:1}" &>/dev/null
+      key="${normalKeys:${index}:1}"
+      bind -x "\"${modifiers[modeIndex + 1]}${key}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${key^^}" &>/dev/null
     done
   done
 
@@ -725,6 +727,10 @@ function interactive::rebindKeymap() {
   bind -x '"\b": interactiveOnKeyBindingPress CTRL+BACKSPACE' &>/dev/null
   bind -x '"\177": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
   bind -x '"RUBOUT": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
+  bind -x '"\C-?": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
+
+  bind -x '"TAB": interactiveOnKeyBindingPress TAB' &>/dev/null
+  bind -x '"\t": interactiveOnKeyBindingPress TAB' &>/dev/null
 
   # allow the user to override bindings with a custom function
   if command -v interactiveRebindOverride &>/dev/null; then
@@ -809,7 +815,7 @@ function interactive::sttyInit() {
       # -echo is to suppress echoing characters typed by the user
       # All the other options are there to enable a satisfying behavior for the GNU readline library
       # used when we call read -e
-      stty -ixon nl0 cr0 tab0 ff0 -icrnl -icanon erase ^B werase ^W -echo -echok -echonl -echoe -echoke -ctlecho -onlret &>/dev/null || :
+      stty -ixon nl0 cr0 tab0 ff0 icrnl -inlcr -onlret -icanon erase ^B werase ^W -echo -echok -echonl -echoe -echoke -ctlecho &>/dev/null || :
     fi
   fi
 }

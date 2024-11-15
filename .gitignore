@@ -19,6 +19,7 @@ docs/hugo.exe
 bin/
 .tmp/
 sandbox.sh
+sandbox2.sh
 valet.tar.gz
 **.tag.gz
 **.zip
