@@ -146,13 +146,13 @@ interactive::updateProgress 50 "Doing something..."
 ```
 
 
-## interactive::testKeys
+## interactive::testWaitForChar
 
 Wait for a user input and prints the character that bash sees.
 Useful to program key bindings.
 
 ```bash
-interactive::testKeys
+interactive::testWaitForChar
 ```
 
 
@@ -266,7 +266,7 @@ interactive::displayPrompt "Do you want to continue?"
 ```
 
 
-## interactive::waitForKey
+## interactive::waitForChar
 
 Wait for a user input (single key).
 You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
@@ -285,8 +285,8 @@ Returns:
 - `LAST_KEY_PRESSED`: the key pressed.
 
 ```bash
-interactive::waitForKey
-interactive::waitForKey -t 0.1
+interactive::waitForChar
+interactive::waitForChar -t 0.1
 ```
 
 > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>

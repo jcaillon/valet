@@ -491,18 +491,18 @@
 		  "body": [ "# ## interactive::updateProgress\n# \n# Update the progress bar with a new percentage and message.\n# \n# The animation can be started with interactive::startProgress for more options.\n# The animation will stop if the updated percentage is 100.\n# \n# - \\$1: **percent** _as int_:\n#       the percentage of the progress bar (0 to 100)\n# - \\$2: message _as string_:\n#       (optional) the message to display\n# \n# ```bash\n# interactive::updateProgress 50 \"Doing something...\"\n# ```\n# \ninteractive::updateProgress \"${1:**percent**}\" \"${2:message}\"$0" ]
 	  },
 
-		"interactive::testKeys": {
-		  "prefix": "interactive::testKeys",
+		"interactive::testWaitForChar": {
+		  "prefix": "interactive::testWaitForChar",
 		  "description": "Wait for a user input and prints the character that bash sees...",
 		  "scope": "",
-		  "body": [ "interactive::testKeys$0" ]
+		  "body": [ "interactive::testWaitForChar$0" ]
 	  },
 
-		"interactive::testKeys#withdoc": {
-		  "prefix": "interactive::testKeys#withdoc",
+		"interactive::testWaitForChar#withdoc": {
+		  "prefix": "interactive::testWaitForChar#withdoc",
 		  "description": "Wait for a user input and prints the character that bash sees...",
 		  "scope": "",
-		  "body": [ "# ## interactive::testKeys\n# \n# Wait for a user input and prints the character that bash sees.\n# Useful to program key bindings.\n# \n# ```bash\n# interactive::testKeys\n# ```\n# \ninteractive::testKeys$0" ]
+		  "body": [ "# ## interactive::testWaitForChar\n# \n# Wait for a user input and prints the character that bash sees.\n# Useful to program key bindings.\n# \n# ```bash\n# interactive::testWaitForChar\n# ```\n# \ninteractive::testWaitForChar$0" ]
 	  },
 
 		"array::sort": {
@@ -1009,18 +1009,18 @@
 		  "body": [ "# ## interactive::displayQuestion\n# \n# Displays a question to the user.\n# \n# The text is wrapped and put inside a box like so:\n# \n# ```text\n#    ┌────────────────────────────────┐\n# ░──┤ Is this an important question? │\n#    └────────────────────────────────┘\n# ```\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# - \\$2: max width _as int_:\n#       (optional) the maximum width of text in the dialog box\n#       (defaults to GLOBAL_COLUMNS)\n# \n# ```bash\n# interactive::displayPrompt \"Do you want to continue?\"\n# ```\n# \ninteractive::displayQuestion \"${1:**prompt**}\" \"${2:max width}\"$0" ]
 	  },
 
-		"interactive::waitForKey": {
-		  "prefix": "interactive::waitForKey",
+		"interactive::waitForChar": {
+		  "prefix": "interactive::waitForChar",
 		  "description": "Wait for a user input (single key)...",
 		  "scope": "",
-		  "body": [ "interactive::waitForKey \"${99:**read parameters**}\"$0" ]
+		  "body": [ "interactive::waitForChar \"${99:**read parameters**}\"$0" ]
 	  },
 
-		"interactive::waitForKey#withdoc": {
-		  "prefix": "interactive::waitForKey#withdoc",
+		"interactive::waitForChar#withdoc": {
+		  "prefix": "interactive::waitForChar#withdoc",
 		  "description": "Wait for a user input (single key)...",
 		  "scope": "",
-		  "body": [ "# ## interactive::waitForKey\n# \n# Wait for a user input (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# Some special keys are translated into more readable strings:\n# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...\n# \n# - \\$@: **read parameters** _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# interactive::waitForKey\n# interactive::waitForKey -t 0.1\n# ```\n# \n# > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>\n# \ninteractive::waitForKey \"${99:**read parameters**}\"$0" ]
+		  "body": [ "# ## interactive::waitForChar\n# \n# Wait for a user input (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# Some special keys are translated into more readable strings:\n# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...\n# \n# - \\$@: **read parameters** _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# interactive::waitForChar\n# interactive::waitForChar -t 0.1\n# ```\n# \n# > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>\n# \ninteractive::waitForChar \"${99:**read parameters**}\"$0" ]
 	  },
 
 		"io::createTempDirectory": {

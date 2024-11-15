@@ -94,7 +94,7 @@ function fsfs::itemSelector() {
 
   # main loop
   while true; do
-    if interactive::waitForKey -t 0.05; then
+    if interactive::waitForChar -t 0.05; then
       onKeyPressed "${LAST_KEY_PRESSED}"
     fi
 

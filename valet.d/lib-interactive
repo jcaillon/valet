@@ -66,7 +66,7 @@ function interactive::askForConfirmationRaw() {
 
   while true; do
     # wait and handle key press
-    if interactive::waitForKey -t 1; then
+    if interactive::waitForChar -t 1; then
       case ${LAST_KEY_PRESSED} in
       $'\n' | ' ' | o)
         break
@@ -187,7 +187,7 @@ function interactive::promptYesNoRaw() {
       "${AC__TEXT_RESET}${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
 
     # wait and handle key press
-    if interactive::waitForKey -t 1; then
+    if interactive::waitForChar -t 1; then
       case ${LAST_KEY_PRESSED} in
       $'\n' | ' ')
         break
@@ -359,34 +359,39 @@ interactive::displayDialogBox() {
 # >>> Interactive utilities
 #===============================================================
 
-# ## interactive::testKeys
+# ## interactive::testWaitForChar
 #
-# Wait for a user input and prints the character that bash sees.
-# Useful to program key bindings.
+# Wait for the user to send a character to stdin (i.e. wait for a key press)
+# and prints the character that bash reads.
+#
+# Useful to test the `interactive::waitForChar` function and see the char sequence we
+# get when pressing a key in a given terminal.
+#
+# See @interactive::waitForChar for more information.
 #
 # ```bash
-# interactive::testKeys
+# interactive::testWaitForChar
 # ```
-function interactive::testKeys() {
+function interactive::testWaitForChar() {
   printf '%s\n' "Press any key to see the character that bash reads (CTRL + C to interrupt).${AC__CURSOR_HIDE}"
   while true; do
-    if interactive::waitForKey -t 1; then
+    if interactive::waitForChar -t 1; then
       printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
     fi
     if [[ ! -t 1 ]]; then break; fi
   done
 }
 
-# ## interactive::waitForKey
+# ## interactive::waitForChar
 #
-# Wait for a user input (single key).
+# Wait for a user input (single char).
 # You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
 #
 # It uses the read builtin command. This will not detect all key combinations.
-# To be able to use CTRL combinations, you can use interactive::waitForKeymap.
-# The advantage of this function is that pressing the ESC key will immediately translate
-# into \e, whereas with interactive::waitForKeymap, you would need to press another key or wait
-# for the timeout to get the \e character.
+# The output will depend on the terminal used and the character sequences it sends on each key press.
+#
+# For more advanced use cases, you can use interactive::waitForKeyPress.
+# This simple implementation does not rely on GNU readline and does not require stty to be initialized.
 #
 # Some special keys are translated into more readable strings:
 # UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
@@ -397,17 +402,17 @@ function interactive::testKeys() {
 # Returns:
 #
 # - $?:
-#   - 0 if a key was pressed
+#   - 0 if a char was retrieved
 #   - 1 otherwise
-# - `LAST_KEY_PRESSED`: the key pressed.
+# - `LAST_KEY_PRESSED`: the last char (key) retrieved.
 #
 # ```bash
-# interactive::waitForKey
-# interactive::waitForKey -t 0.1
+# interactive::waitForChar
+# interactive::waitForChar -t 0.1
 # ```
 #
 # > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>
-function interactive::waitForKey() {
+function interactive::waitForChar() {
   LAST_KEY_PRESSED=""
   IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || :
 
@@ -421,7 +426,7 @@ function interactive::waitForKey() {
   # special key detection, need to read more characters (up to 4 for F1-F12 keys)
   if [[ ${LAST_KEY_PRESSED} == *$'\e'* ]]; then
     REPLY=""
-    IFS='' read -t 0.01 -d '' -rsn 4 || :
+    IFS='' read -t 0.01 -d '' -rsn 4 &>/dev/null || :
 
     # we might have several ESC which means we read too much
     local wholeChain="${LAST_KEY_PRESSED#$'\e'}${REPLY}"
@@ -434,17 +439,17 @@ function interactive::waitForKey() {
     # translate some common inputs into more readable strings
     case ${LAST_KEY_PRESSED} in
     $'\e[A' | $'\eOA') LAST_KEY_PRESSED="UP" ;;
-    $'\e[B' | $'\eOA') LAST_KEY_PRESSED="DOWN" ;;
-    $'\e[C' | $'\eOA') LAST_KEY_PRESSED="RIGHT" ;;
-    $'\e[D' | $'\eOA') LAST_KEY_PRESSED="LEFT" ;;
+    $'\e[B' | $'\eOB') LAST_KEY_PRESSED="DOWN" ;;
+    $'\e[C' | $'\eOC') LAST_KEY_PRESSED="RIGHT" ;;
+    $'\e[D' | $'\eOD') LAST_KEY_PRESSED="LEFT" ;;
+    $'\e[1~' | $'\e[H' | $'\e[7~') LAST_KEY_PRESSED="HOME" ;;
     $'\e[2~') LAST_KEY_PRESSED="INSERT" ;;
     $'\e[3~') LAST_KEY_PRESSED="DEL" ;;
+    $'\e[4~' | $'\e[F' | $'\e[8~') LAST_KEY_PRESSED="END" ;;
     $'\e[5~') LAST_KEY_PRESSED="PAGE_UP" ;;
     $'\e[6~') LAST_KEY_PRESSED="PAGE_DOWN" ;;
-    $'\e[H') LAST_KEY_PRESSED="HOME" ;;
-    $'\e[F') LAST_KEY_PRESSED="END" ;;
     $'\e') LAST_KEY_PRESSED="ESC" ;;
-    $'\eOP') LAST_KEY_PRESSED="F1" ;;
+    $'\eOP' | $'\e[11~') LAST_KEY_PRESSED="F1" ;;
     $'\e'?) LAST_KEY_PRESSED="ALT+${LAST_KEY_PRESSED#$'\e'}" ;;
     esac
   else
@@ -456,18 +461,51 @@ function interactive::waitForKey() {
   return 0
 }
 
-# ## interactive::waitForKeymap
+# ## interactive::testWaitForKeyPress
 #
-# Wait for a user input (single key).
+# Wait for the user to press a key and prints it to the screen.
+# This function is used to test the `interactive::waitForKeyPress` function.
+#
+# See @interactive::waitForKeyPress for more information.
+#
+# ```bash
+# interactive::testWaitForKeyPress
+# ```
+function interactive::testWaitForKeyPress() {
+  # setup the terminal before anything else
+  interactive::sttyInit
+  # rebind some keys to call the callback function interactiveOnKeyBindingPress
+  interactive::rebindKeymap
+  # define the callback function called when a special key is pressed
+  # shellcheck disable=SC2317
+  function interactiveOnKeyBindingPress() {
+    local key="${1}"
+    printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${key@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+  }
+
+  printf '%s\n' "Press any key to see the character that bash sees (CTRL + C to interrupt)."
+  while true; do
+    if interactive::waitForKeyPress -t 0.3; then
+      printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+    fi
+    if [[ ! -t 1 ]]; then break; fi
+  done
+
+  interactive::sttyRestore
+}
+
+# ## interactive::waitForKeyPress
+#
+# Wait for a key press (single key).
 # You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
 #
 # It uses the read builtin command with the option `-e` to use readline behind the scene.
 # This means we can detect more key combinations but all keys needs to be binded first...
 # Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
+#
 # You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.
-# Moreover, because handling a special will not directly produce a character for the bash read function,
-# you need to set a timeout to the read command. If the timeout is reached and no simple keys were pressed,
-# then we consider special keys pressed in the interval of time... *If you know better way to do this, please let me know.*
+# You must also redefine the function `interactiveOnKeyBindingPress` to react to a binded key press.
+# See @interactive::testWaitForKeyPress for an implementation example.
 #
 # - $@: **read parameters** _as any_:
 #       additional parameters to pass to the read command
@@ -480,16 +518,18 @@ function interactive::waitForKey() {
 # - `LAST_KEY_PRESSED`: the key pressed.
 #
 # ```bash
-# interactive::waitForKeymap
-# interactive::waitForKeymap -t 0.1
+# interactive::waitForKeyPress
+# interactive::waitForKeyPress -t 0.1
 # ```
 #
 # > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll
 # > even when nothing is read... Make sure to not position the cursor at the end of the screen.
-function interactive::waitForKeymap() {
+function interactive::waitForKeyPress() {
   LAST_KEY_PRESSED=""
   REPLY=""
-  IFS='' read "$@" -e -d '' -srn 1 REPLY || :
+  # here we redirect the error output to null because of a bug in bash, it
+  # prints a newline each time read is called with -e, idk why...
+  IFS='' read "$@" -e -d '' -s -r -n 1 REPLY 2>/dev/null || :
   if [[ -z ${REPLY} ]]; then
     if [[ -n ${LAST_KEY_PRESSED} ]]; then
       return 0
@@ -497,16 +537,28 @@ function interactive::waitForKeymap() {
     return 1
   fi
   LAST_KEY_PRESSED="${REPLY}"
+  case ${LAST_KEY_PRESSED} in
+    $'\177' | $'\b') LAST_KEY_PRESSED="BACKSPACE" ;;
+    $'\r') LAST_KEY_PRESSED=$"\n" ;;
+  esac
   return 0
 }
 
 # ## interactive::rebindKeymap
 #
-# Rebinds all special keys to output their text equivalent.
-# This allows to use the `-e` option with the read command and receive special
-# keys as actual characters.
+# Rebinds all special keys to call a callback function `interactiveOnKeyBindingPress`.
 #
-# This function should be called before using interactive::waitForKeymap.
+# This allows to use the `-e` option with the read command and receive events for special key press.
+#
+# Key binding is a mess because binding is based on the sequence of characters that gets
+# generated by the terminal when a key is pressed and this is not standard across all terminals.
+# We do our best here to cover most cases but it is by no mean perfect.
+# A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.
+#
+# Users of this function can completely change the bindings afterward by implementing
+# the `interactiveRebindOverride` function.
+#
+# This function should be called before using interactive::waitForKeyPress.
 #
 # ```bash
 # interactive::rebindKeymap
@@ -523,11 +575,12 @@ function interactive::rebindKeymap() {
   local bindings="${RETURNED_VALUE}"
   local IFS=$'\n'
   local line
+  local key
   for line in ${bindings}; do
     if [[ ${line} == "#"* || ${line} == *"self-insert" ]]; then
       continue
     fi
-    local key="${line%% *}"
+    key="${line%% *}"
     key="${key//\"/}"
     bind -r "${key%:}" &>/dev/null
   done
@@ -537,40 +590,149 @@ function interactive::rebindKeymap() {
   bind 'set keyseq-timeout 1' &>/dev/null
 
   # add the one we are interested in
-  bind -x '"\e": interactiveRegisterSpecialKeyPress ESC' &>/dev/null
-  bind -x '"\e\e": interactiveRegisterSpecialKeyPress ESC' &>/dev/null
-  bind -x '"\e\e\e": interactiveRegisterSpecialKeyPress ESC' &>/dev/null
 
-  bind -x '"\C-a": interactiveRegisterSpecialKeyPress CTRL+A' &>/dev/null
-  bind -x '"\e[1;5C": interactiveRegisterSpecialKeyPress CTRL+RIGHT' &>/dev/null
+  # Escape key
+  bind -x '"\e": interactiveOnKeyBindingPress ESC' &>/dev/null
+  bind -x '"\e\e": interactiveOnKeyBindingPress ESC' &>/dev/null
+  bind -x '"\e\e\e": interactiveOnKeyBindingPress ESC' &>/dev/null
+  bind -x '"ESC": interactiveOnKeyBindingPress ESC' &>/dev/null
+  bind -x '"ESCAPE": interactiveOnKeyBindingPress ESC' &>/dev/null
 
+  # for each normal key, bind it with the different modifiers
+  local normalKeys="abcdefghijklmnopqrstuvwxyz"
+  local -a modifiers=(
+    "CTRL+" "\C-"
+    "ALT+" "\e"
+    "CTRL+ALT+" "\e\C-"
+  )
+  local -i index
+  local -i modeIndex
+  for((index=0;index<${#normalKeys};index++)); do
+    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+      bind -x "\"${modifiers[modeIndex + 1]}${normalKeys:${index}:1}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${normalKeys:${index}:1}" &>/dev/null
+    done
+  done
 
-  # bind '"\C-a": "^C-a"'
+  # VT sequences + xterm sequences
+  local specialKeys=(
+    "[1?~" "HOME"
+    "[2?~" "INSERT"
+    "[3?~" "DEL"
+    "[4?~" "END"
+    "[5?~" "PAGE_UP"
+    "[6?~" "PAGE_DOWN"
+    "[7?~" "HOME"
+    "[8?~" "END"
+    "[11?~" "F1"
+    "[12?~" "F2"
+    "[13?~" "F3"
+    "[14?~" "F4"
+    "[15?~" "F5"
+    "[17?~" "F6"
+    "[18?~" "F7"
+    "[19?~" "F8"
+    "[20?~" "F9"
+    "[21?~" "F10"
+    "[23?~" "F11"
+    "[24?~" "F12"
+    "[25?~" "F13"
+    "[26?~" "F14"
+    "[28?~" "F15"
+    "[29?~" "F16"
+    "[31?~" "F17"
+    "[32?~" "F18"
+    "[33?~" "F19"
+    "[34?~" "F20"
+  )
+  modifiers=(
+    "" ""
+    "SHIFT+" ";2"
+    "ALT+" ";3"
+    "CTRL+" ";5"
+    "CTRL+SHIFT+" ";6"
+    "CTRL+ALT+" ";7"
+  )
+  for((index=0;index<${#specialKeys[@]};index+=2)); do
+    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+      key="${specialKeys[index]}"
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
+      # I have noticed that something the terminal sends the sequence without the \e...
+      # so we need to bind it without the \e as well
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
+    done
+  done
 
-  # bind '"\C-f": "^LEFT1"'
-  # bind '"\eOC": "^LEFT2"'
-  # bind '"\e[C": "^L3"'
+  local specialKeys2=(
+    "[?A" "UP"
+    "[?B" "DOWN"
+    "[?C" "RIGHT"
+    "[?D" "LEFT"
+    "[?F" "END"
+    "[?H" "HOME"
+    "[?P" "F1"
+    "[?Q" "F2"
+    "[?R" "F3"
+    "[?S" "F4"
+    "[?I" "TAB"
+    "[?M" "NEWLINE"
+    "[?j" "*"
+    "[?k" "+"
+    "[?l" ","
+    "[?m" "-"
+    "[?n" "."
+    "[?o" "/"
+    "[?p" "0"
+    "[?q" "1"
+    "[?r" "2"
+    "[?s" "3"
+    "[?t" "4"
+    "[?u" "5"
+    "[?v" "6"
+    "[?w" "7"
+    "[?x" "8"
+    "[?y" "9"
+    "[?X" "="
+  )
+  modifiers=(
+    "" ""
+    "SHIFT+" "1;2"
+    "ALT+" "1;3"
+    "CTRL+" "1;5"
+    "CTRL+SHIFT+" "1;6"
+    "CTRL+ALT+" "1;7"
+  )
+  for((index=0;index<${#specialKeys2[@]};index+=2)); do
+    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+      key="${specialKeys2[index]}"
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      # I have noticed that something the terminal sends the sequence without the \e...
+      # so we need to bind it without the \e as well
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      # We also handle the case where SS3 (\eO) is sent instead of CSI (\e[)
+      key="${key//[/O}"
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+    done
+  done
 
-  # bind '"\e\e[C": "^C-LEFT4"'
-  # bind '"\ef": "^C-LEFT5"'
+  # special key bindings
+  bind -x '"NEWLINE": interactiveOnKeyBindingPress NEWLINE' &>/dev/null
+  bind -x '"RET": interactiveOnKeyBindingPress NEWLINE' &>/dev/null
+  bind -x '"RETURN": interactiveOnKeyBindingPress NEWLINE' &>/dev/null
 
+  bind -x '"DEL": interactiveOnKeyBindingPress DEL' &>/dev/null
+  bind -x '"\d": interactiveOnKeyBindingPress DEL' &>/dev/null
+  bind -x '"\b": interactiveOnKeyBindingPress CTRL+BACKSPACE' &>/dev/null
+  bind -x '"\177": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
+  bind -x '"RUBOUT": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
 
-  # bind '"\M-OC": "LEFT"'
-  # bind '"\M-[C": "^LEFT"'
-  # bind '"\M-\C-OC": "^KEYPAD-LEFT"'
-  # bind '"\M-\C-[C": "^KEYPAD-LEFT"'
-
-  # bind '"\C-\eOC": "^C-LEFT"'
-  # bind '"\C-\eOC": "^C-LEFT"'
-  # bind '"\C-[D": "^C-LEFT"'
-  # bind '"\C-OD": "^C-LEFT"'
-
-  # bind '"\M-\C-[D": "^C-LEFT"'
-
-  # bind -p
+  # allow the user to override bindings with a custom function
+  if command -v interactiveRebindOverride &>/dev/null; then
+    interactiveRebindOverride
+  fi
 }
 
-function interactiveRegisterSpecialKeyPress() {
+function interactiveOnKeyBindingPress() {
   LAST_KEY_PRESSED="${1}"
 }
 
@@ -644,7 +806,10 @@ function interactive::sttyInit() {
       source io
       io::invoke "stty" "-g"
       INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
-      stty -echo &>/dev/null || :
+      # -echo is to suppress echoing characters typed by the user
+      # All the other options are there to enable a satisfying behavior for the GNU readline library
+      # used when we call read -e
+      stty -ixon nl0 cr0 tab0 ff0 -icrnl -icanon erase ^B werase ^W -echo -echok -echonl -echoe -echoke -ctlecho -onlret &>/dev/null || :
     fi
   fi
 }
