@@ -319,7 +319,7 @@ function autocompletionOnKeyPressed() {
   TAB | CTRL+I)
     drawPrompt
     ;;
-  ESC)
+  ESC | CTRL+Q)
     AUTOCOMPLETION_CLOSE_INTERACTIVE_SESSION=true
     return 0
     ;;
@@ -343,42 +343,19 @@ function autocompletionOnKeyPressed() {
     ;;
   CTRL+LEFT)
     # move to beggining of the previous word
-    local -i index=${AUTOCOMPLETION_PROMPT_INDEX}
-    index+=-1
-    while [[ ${index} -gt 0 && ${AUTOCOMPLETION_USER_STRING:index:1} =~ [[:space:]] ]]; do
-      index+=-1
-    done
-    while [[ ${index} -gt 0 && ${AUTOCOMPLETION_USER_STRING:index:1} =~ [^[:space:]] ]]; do
-      if [[ ${index} -ge 1 && ${AUTOCOMPLETION_USER_STRING:$((index - 1)):1} =~ [[:space:]] ]]; then
-        break
-      fi
-      index=$((index - 1))
-    done
-    AUTOCOMPLETION_PROMPT_INDEX=$((index >= 0 ? index : 0))
+    autocompletionMoveCursorToBegginingOfPreviousWord
     drawPrompt
     ;;
   CTRL+RIGHT)
-    # move to the end of the next word
-    local -i index=${AUTOCOMPLETION_PROMPT_INDEX}
-    index+=1
-    while [[ ${index} -lt ${#AUTOCOMPLETION_USER_STRING} && ${AUTOCOMPLETION_USER_STRING:index:1} =~ [[:space:]] ]]; do
-      index+=1
-    done
-    while [[ ${index} -lt ${#AUTOCOMPLETION_USER_STRING} && ${AUTOCOMPLETION_USER_STRING:index:1} =~ [^[:space:]] ]]; do
-      if [[ ${index} -le ${#AUTOCOMPLETION_USER_STRING} && ${AUTOCOMPLETION_USER_STRING:$((index + 1)):1} =~ [[:space:]] ]]; then
-        break
-      fi
-      index=$((index + 1))
-    done
-    AUTOCOMPLETION_PROMPT_INDEX=$((index <= ${#AUTOCOMPLETION_USER_STRING} ? index : ${#AUTOCOMPLETION_USER_STRING}))
+    autocompletionMoveCursorToEndOfWord
     drawPrompt
     ;;
 
   # modify the text
   CTRL+K)
     # kill the line from cursor to the end
+    AUTOCOMPLETION_KILLED_STRING="${AUTOCOMPLETION_USER_STRING:${AUTOCOMPLETION_PROMPT_INDEX}}"
     if ((AUTOCOMPLETION_PROMPT_INDEX > 0)); then
-      AUTOCOMPLETION_KILLED_STRING="${AUTOCOMPLETION_USER_STRING:${AUTOCOMPLETION_PROMPT_INDEX}}"
       AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING:0:${AUTOCOMPLETION_PROMPT_INDEX}}"
     else
       AUTOCOMPLETION_USER_STRING=""
@@ -409,20 +386,6 @@ function autocompletionOnKeyPressed() {
     drawPrompt
     drawAutocompletionBox
     ;;
-  CTRL+BACKSPACE | CTRL+W)
-    # delete the word before the cursor
-    local -i index=${AUTOCOMPLETION_PROMPT_INDEX}
-    while [[ ${index} -gt 0 && ${AUTOCOMPLETION_USER_STRING:index:1} =~ [[:space:]] ]]; do
-      index+=-1
-    done
-    while [[ ${index} -gt 0 && ${AUTOCOMPLETION_USER_STRING:index:1} =~ [^[:space:]] ]]; do
-      index+=-1
-    done
-    AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING:0:${index}}"
-    AUTOCOMPLETION_PROMPT_INDEX=${index}
-    drawPrompt
-    drawAutocompletionBox
-    ;;
   BACKSPACE | CTRL+H)
     # delete the character before the cursor
     if ((AUTOCOMPLETION_PROMPT_INDEX > 0)); then
@@ -433,6 +396,37 @@ function autocompletionOnKeyPressed() {
       fi
     fi
     changePromptCursorIndex -1
+    drawPrompt
+    drawAutocompletionBox
+    ;;
+  CTRL+DEL)
+    # delete all chars from the cursor to the end of (this or next) word
+    local -i oldIndex=${AUTOCOMPLETION_PROMPT_INDEX}
+    autocompletionMoveCursorToEndOfWord
+    if ((AUTOCOMPLETION_PROMPT_INDEX > oldIndex)); then
+      AUTOCOMPLETION_KILLED_STRING="${AUTOCOMPLETION_USER_STRING:${oldIndex}:$((AUTOCOMPLETION_PROMPT_INDEX - oldIndex))}"
+      if ((oldIndex > 0)); then
+        AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING:0:${oldIndex}}${AUTOCOMPLETION_USER_STRING:${AUTOCOMPLETION_PROMPT_INDEX}}"
+      else
+        AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING:${AUTOCOMPLETION_PROMPT_INDEX}}"
+      fi
+      AUTOCOMPLETION_PROMPT_INDEX=${oldIndex}
+    fi
+    drawPrompt
+    drawAutocompletionBox
+    ;;
+  CTRL+BACKSPACE | CTRL+W)
+    # delete all chars before the cursor until reaching a space
+    local -i oldIndex=${AUTOCOMPLETION_PROMPT_INDEX}
+    autocompletionMoveCursorToBegginingOfPreviousWord
+    if ((oldIndex > AUTOCOMPLETION_PROMPT_INDEX)); then
+      AUTOCOMPLETION_KILLED_STRING="${AUTOCOMPLETION_USER_STRING:${AUTOCOMPLETION_PROMPT_INDEX}:$((oldIndex - AUTOCOMPLETION_PROMPT_INDEX))}"
+      if ((AUTOCOMPLETION_PROMPT_INDEX > 0)); then
+        AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING:0:${AUTOCOMPLETION_PROMPT_INDEX}}${AUTOCOMPLETION_USER_STRING:${oldIndex}}"
+      else
+        AUTOCOMPLETION_USER_STRING="${AUTOCOMPLETION_USER_STRING:${oldIndex}}"
+      fi
+    fi
     drawPrompt
     drawAutocompletionBox
     ;;
@@ -459,6 +453,37 @@ function autocompletionInsertTextAtCursorPosition() {
     AUTOCOMPLETION_USER_STRING="${1}${AUTOCOMPLETION_USER_STRING}"
   fi
   changePromptCursorIndex ${#1}
+}
+
+# Change the cursor position, move to the end of the word (if any).
+function autocompletionMoveCursorToEndOfWord() {
+  # move to the end of the word
+  local -i index=${AUTOCOMPLETION_PROMPT_INDEX}
+  index+=1
+  while [[ ${index} -lt ${#AUTOCOMPLETION_USER_STRING} && ${AUTOCOMPLETION_USER_STRING:index:1} =~ [[:space:]] ]]; do
+    index+=1
+  done
+  while [[ ${index} -lt ${#AUTOCOMPLETION_USER_STRING} && ${AUTOCOMPLETION_USER_STRING:index:1} =~ [^[:space:]] ]]; do
+    index=$((index + 1))
+  done
+  AUTOCOMPLETION_PROMPT_INDEX=$((index <= ${#AUTOCOMPLETION_USER_STRING} ? index : ${#AUTOCOMPLETION_USER_STRING}))
+}
+
+# Change the cursor position, move to the beginning of the previous word (if any).
+function autocompletionMoveCursorToBegginingOfPreviousWord() {
+  # move to beggining of the previous word
+  local -i index=${AUTOCOMPLETION_PROMPT_INDEX}
+  index+=-1
+  while [[ ${index} -gt 0 && ${AUTOCOMPLETION_USER_STRING:index:1} =~ [[:space:]] ]]; do
+    index+=-1
+  done
+  while [[ ${index} -gt 0 && ${AUTOCOMPLETION_USER_STRING:index:1} =~ [^[:space:]] ]]; do
+    if [[ ${index} -ge 1 && ${AUTOCOMPLETION_USER_STRING:$((index - 1)):1} =~ [[:space:]] ]]; then
+      break
+    fi
+    index=$((index - 1))
+  done
+  AUTOCOMPLETION_PROMPT_INDEX=$((index >= 0 ? index : 0))
 }
 
 # Draw the prompt line

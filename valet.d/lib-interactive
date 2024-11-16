@@ -355,8 +355,156 @@ interactive::displayDialogBox() {
   printf '%s' "${finalString}"
 }
 
+
 #===============================================================
 # >>> Interactive utilities
+#===============================================================
+
+# ## interactive::createSpace
+#
+# This function creates some new lines after the current cursor position.
+# Then it moves back to its original position.
+# This effectively creates a space in the terminal (scroll up if we are at the bottom).
+# It does not create more space than the number of lines in the terminal.
+#
+# - $1: **number of lines** _as int_:
+#       the number of lines to create
+#
+# ```bash
+# interactive::createSpace 5
+# ```
+function interactive::createSpace() {
+  local -i lines="${1}"
+  lines=$((lines - 1 > GLOBAL_LINES ? GLOBAL_LINES : lines - 1))
+  local -i loop
+  local newLines
+  for ((loop = 0; loop < lines; loop++)); do newLines+=$'\n'; done
+  printf '%s' "${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${newLines}${AC__CURSOR_MOVE__}${lines}${__AC__START_OF_LINE_UP}"
+}
+
+# ## interactive::getCursorPosition
+#
+# Get the current cursor position.
+#
+# Returns:
+#
+# - `CURSOR_LINE`: the line number
+# - `CURSOR_COLUMN`: the column number
+#
+# ```bash
+# interactive::getCursorPosition
+# ```
+function interactive::getCursorPosition() {
+  local _escapeCode IFS
+  # we request the position and first read \e[
+  IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr _escapeCode || :
+  # then read line;colR
+  # shellcheck disable=SC2034
+  IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || :
+}
+
+# ## interactive::switchToFullScreen
+#
+# Call this function to start an interactive session in full screen mode.
+# This function will switch to the alternate screen, hide the cursor and clear the screen.
+# It will also disable echoing when we type something.
+#
+# You should call interactive::switchBackFromFullScreen at the end of the interactive session.
+#
+# In the alternate screen, we don't see the error messages so we capture them somewhere else.
+#
+# ```bash
+# interactive::switchToFullScreen
+# ```
+function interactive::switchToFullScreen() {
+  if [[ ! -t 2 ]]; then
+    core::fail "This function can only be used in an interactive session. Did you already called interactive::switchBackFromFullScreen?"
+  fi
+
+  # disable echoing when we type something
+  interactive::sttyInit
+
+  # switch to the alternate screen, hide the cursor and clear the screen
+  printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
+
+  # in full screen mode, we don't see the error messages so we capture them somewhere else
+  FSFS_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-interactive.err"
+  while [[ -e "${FSFS_TEMPORARY_ERROR_FILE}" ]]; do FSFS_TEMPORARY_ERROR_FILE+="x"; done
+  exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
+}
+
+# ## interactive::switchBackFromFullScreen
+#
+# Call this function to switch back from the full screen mode.
+#
+# - This function will restore the terminal state and show the cursor.
+# - It will also restore the key echoing.
+# - If there were error messages during the interactive session, they will be displayed at the end.
+#
+# ```bash
+# interactive::switchBackFromFullScreen
+# ```
+function interactive::switchBackFromFullScreen() {
+  if [[ -t 2 ]]; then
+    # already in the normal terminal mode
+    return
+  fi
+
+  # restore the terminal state
+  printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
+
+  # restore stty
+  interactive::sttyRestore
+
+  # restore the error output and display them if any
+  exec 2>&4 4>&-
+  if [[ -s "${FSFS_TEMPORARY_ERROR_FILE}" ]]; then
+    io::readFile "${FSFS_TEMPORARY_ERROR_FILE}"
+    log::error "Error messages during the interactive session:"$'\n'"${RETURNED_VALUE%$'\n'}"
+  fi
+}
+
+# ## interactive::sttyInit
+#
+# Disable the echo of the tty. Will no longer display the characters typed by the user.
+#
+# ```bash
+# interactive::sttyInit
+# ```
+function interactive::sttyInit() {
+  if command -v stty &>/dev/null; then
+    if [[ -z ${INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
+      # shellcheck source=lib-io
+      source io
+      io::invoke "stty" "-g"
+      INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
+      # -echo is to suppress echoing characters typed by the user
+      # All the other options are there to enable a satisfying behavior for the GNU readline library
+      # used when we call read -e
+      stty -ixon nl0 cr0 tab0 ff0 icrnl -inlcr -onlret -icanon erase ^B werase ^W -echo -echok -echonl -echoe -echoke -ctlecho &>/dev/null || :
+    fi
+  fi
+}
+
+# ## interactive::sttyRestore
+#
+# Enable the echo of the tty. Will display the characters typed by the user.
+#
+# ```bash
+# interactive::sttyRestore
+# ```
+function interactive::sttyRestore() {
+  if [[ -n ${INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
+    if command -v stty &>/dev/null; then
+      stty "${INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
+    fi
+    unset -v INTERACTIVE_STTY_SAVED_CONFIG
+  fi
+}
+
+
+#===============================================================
+# >>> Key press detection
 #===============================================================
 
 # ## interactive::testWaitForChar
@@ -457,7 +605,7 @@ function interactive::waitForChar() {
     esac
   else
     case ${LAST_KEY_PRESSED} in
-    $'\177' | $'\b') LAST_KEY_PRESSED="BACKSPACE" ;;
+    $'\b' | $'\177') LAST_KEY_PRESSED="BACKSPACE" ;;
     $'\r') LAST_KEY_PRESSED=$"\n" ;;
     esac
   fi
@@ -483,7 +631,7 @@ function interactive::testWaitForKeyPress() {
   # shellcheck disable=SC2317
   function interactiveOnKeyBindingPress() {
     local key="${1}"
-    printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${key@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+    printf "%sYou pressed (binding): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${key@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
   }
 
   printf '%s\n' "Press any key to see the returned code (press Q to quit)."
@@ -492,7 +640,7 @@ function interactive::testWaitForKeyPress() {
       if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
         break
       fi
-      printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+      printf "%sYou pressed (normal key): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
     fi
     if [[ ! -t 1 ]]; then break; fi
   done
@@ -539,7 +687,8 @@ function interactive::waitForKeyPress() {
     return 1
   fi
   case ${LAST_KEY_PRESSED} in
-    $'\177' | $'\b') LAST_KEY_PRESSED="BACKSPACE" ;;
+    $'\b' | $'\177') LAST_KEY_PRESSED="BACKSPACE" ;;
+    $'\023') LAST_KEY_PRESSED="CTRL+BACKSPACE" ;;
     $'\r') LAST_KEY_PRESSED=$'\n' ;;
   esac
   return 0
@@ -567,6 +716,7 @@ function interactive::waitForKeyPress() {
 #
 # > We do not bother to have a restore function because valet should not be sourced and
 # > thus, modifications to the keymap are local to this script.
+# > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
 function interactive::rebindKeymap() {
   # remove all existing bindings except the self-insert ones
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
@@ -724,10 +874,11 @@ function interactive::rebindKeymap() {
 
   bind -x '"DEL": interactiveOnKeyBindingPress DEL' &>/dev/null
   bind -x '"\d": interactiveOnKeyBindingPress DEL' &>/dev/null
-  bind -x '"\b": interactiveOnKeyBindingPress CTRL+BACKSPACE' &>/dev/null
   bind -x '"\177": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
   bind -x '"RUBOUT": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
   bind -x '"\C-?": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
+  bind -x '"\b": interactiveOnKeyBindingPress CTRL+BACKSPACE' &>/dev/null
+  bind -x '"\023": interactiveOnKeyBindingPress CTRL+BACKSPACE' &>/dev/null
 
   bind -x '"TAB": interactiveOnKeyBindingPress TAB' &>/dev/null
   bind -x '"\t": interactiveOnKeyBindingPress TAB' &>/dev/null
@@ -753,141 +904,6 @@ function interactive::clearKeyPressed() {
   local IFS
   IFS='' read -d '' -sr -t 0 LAST_KEY_PRESSED || :
   PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
-}
-
-# ## interactive::createSpace
-#
-# This function creates some new lines after the current cursor position.
-# Then it moves back to its original position.
-# This effectively creates a space in the terminal (scroll up if we are at the bottom).
-# It does not create more space than the number of lines in the terminal.
-#
-# - $1: **number of lines** _as int_:
-#       the number of lines to create
-#
-# ```bash
-# interactive::createSpace 5
-# ```
-function interactive::createSpace() {
-  local -i lines="${1}"
-  lines=$((lines - 1 > GLOBAL_LINES ? GLOBAL_LINES : lines - 1))
-  local -i loop
-  local newLines
-  for ((loop = 0; loop < lines; loop++)); do newLines+=$'\n'; done
-  printf '%s' "${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${newLines}${AC__CURSOR_MOVE__}${lines}${__AC__START_OF_LINE_UP}"
-}
-
-# ## interactive::getCursorPosition
-#
-# Get the current cursor position.
-#
-# Returns:
-#
-# - `CURSOR_LINE`: the line number
-# - `CURSOR_COLUMN`: the column number
-#
-# ```bash
-# interactive::getCursorPosition
-# ```
-function interactive::getCursorPosition() {
-  local _escapeCode IFS
-  # we request the position and first read \e[
-  IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr _escapeCode || :
-  # then read line;colR
-  # shellcheck disable=SC2034
-  IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || :
-}
-
-# ## interactive::sttyInit
-#
-# Disable the echo of the tty. Will no longer display the characters typed by the user.
-#
-# ```bash
-# interactive::sttyInit
-# ```
-function interactive::sttyInit() {
-  if command -v stty &>/dev/null; then
-    if [[ -z ${INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
-      # shellcheck source=lib-io
-      source io
-      io::invoke "stty" "-g"
-      INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
-      # -echo is to suppress echoing characters typed by the user
-      # All the other options are there to enable a satisfying behavior for the GNU readline library
-      # used when we call read -e
-      stty -ixon nl0 cr0 tab0 ff0 icrnl -inlcr -onlret -icanon erase ^B werase ^W -echo -echok -echonl -echoe -echoke -ctlecho &>/dev/null || :
-    fi
-  fi
-}
-
-# ## interactive::sttyRestore
-#
-# Enable the echo of the tty. Will display the characters typed by the user.
-#
-# ```bash
-# interactive::sttyRestore
-# ```
-function interactive::sttyRestore() {
-  if [[ -n ${INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
-    if command -v stty &>/dev/null; then
-      stty "${INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
-    fi
-    unset -v INTERACTIVE_STTY_SAVED_CONFIG
-  fi
-}
-
-# ## interactive::switchToFullScreen
-#
-# Call this function to start an interactive session in full screen mode.
-# This function will switch to the alternate screen, hide the cursor and clear the screen.
-# It will also disable echoing when we type something.
-#
-# You should call interactive::switchBackFromFullScreen at the end of the interactive session.
-#
-# In the alternate screen, we don't see the error messages so we capture them somewhere else.
-#
-# ```bash
-# interactive::switchToFullScreen
-# ```
-function interactive::switchToFullScreen() {
-  if [[ ! -t 2 ]]; then
-    core::fail "This function can only be used in an interactive session. Did you already called interactive::switchBackFromFullScreen?"
-  fi
-
-  # switch to the alternate screen, hide the cursor and clear the screen
-  printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
-
-  # in full screen mode, we don't see the error messages so we capture them somewhere else
-  FSFS_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-interactive.err"
-  while [[ -e "${FSFS_TEMPORARY_ERROR_FILE}" ]]; do FSFS_TEMPORARY_ERROR_FILE+="x"; done
-  exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
-}
-
-# ## interactive::switchBackFromFullScreen
-#
-# Call this function to switch back from the full screen mode.
-#
-# - This function will restore the terminal state and show the cursor.
-# - It will also restore the key echoing.
-# - If there were error messages during the interactive session, they will be displayed at the end.
-#
-# ```bash
-# interactive::switchBackFromFullScreen
-# ```
-function interactive::switchBackFromFullScreen() {
-  if [[ -t 2 ]]; then
-    # already in the normal terminal mode
-    return
-  fi
-  # restore the terminal state
-  printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
-
-  # restore the error output and display them if any
-  exec 2>&4 4>&-
-  if [[ -s "${FSFS_TEMPORARY_ERROR_FILE}" ]]; then
-    io::readFile "${FSFS_TEMPORARY_ERROR_FILE}"
-    log::error "Error messages during the interactive session:"$'\n'"${RETURNED_VALUE%$'\n'}"
-  fi
 }
 
 #===============================================================

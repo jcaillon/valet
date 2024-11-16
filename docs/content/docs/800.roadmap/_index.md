@@ -9,6 +9,7 @@ url: /docs/roadmap
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
 - Finish autocompletion and interactive functions.
+- Sort the commands when building the release so they are in alphabetical order in the docs.
 - Push a Valet image to DockerHub using github actions.
 - Add full support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.

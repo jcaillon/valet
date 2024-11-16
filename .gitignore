@@ -20,6 +20,7 @@ bin/
 .tmp/
 sandbox.sh
 sandbox2.sh
+try.sh
 valet.tar.gz
 **.tag.gz
 **.zip
