@@ -116,7 +116,7 @@ declare -a RETURNED_ARRAY2=([0]="10" [1]="6" [2]="8")
 declare -a myArray=([0]="On the" [1]="One of the most beautiful" [2]="One of this happy end" [3]="thaerty" [4]="thazrerty")
 
 → array::fuzzyFilterSort the myArray ⌜ ⌝ 6
-declare -a RETURNED_ARRAY=([0]="⌜t⌝⌜h⌝a⌜e⌝r…" [1]="⌜t⌝⌜h⌝azr…" [2]="On ⌜t⌝⌜h⌝…" [3]="…⌜t⌝⌜h⌝⌜e⌝ …" [4]="…⌜t⌝⌜h⌝is…")
+declare -a RETURNED_ARRAY=([0]="⌜t⌝⌜h⌝a⌜e⌝r…" [1]="⌜t⌝⌜h⌝azr…" [2]="On ⌜t⌝⌜h⌝⌜e⌝" [3]="…⌜t⌝⌜h⌝⌜e⌝ …" [4]="…⌜t⌝⌜h⌝is…")
 declare -a RETURNED_ARRAY2=([0]="3" [1]="4" [2]="0" [3]="1" [4]="2")
 ```
 

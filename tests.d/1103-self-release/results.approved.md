@@ -68,12 +68,12 @@ DEBUG    Analyzing the following files:
    1 ░ $GLOBAL_VALET_HOME/valet.d/core
    2 ░ $GLOBAL_VALET_HOME/valet.d/lib-ansi-codes
    3 ░ $GLOBAL_VALET_HOME/valet.d/lib-array
-   4 ░ $GLOBAL_VALET_HOME/valet.d/lib-autocompletion
-   5 ░ $GLOBAL_VALET_HOME/valet.d/lib-fsfs
-   6 ░ $GLOBAL_VALET_HOME/valet.d/lib-interactive
-   7 ░ $GLOBAL_VALET_HOME/valet.d/lib-io
-   8 ░ $GLOBAL_VALET_HOME/valet.d/lib-kurl
-   9 ░ $GLOBAL_VALET_HOME/valet.d/lib-profiler
+   4 ░ $GLOBAL_VALET_HOME/valet.d/lib-fsfs
+   5 ░ $GLOBAL_VALET_HOME/valet.d/lib-interactive
+   6 ░ $GLOBAL_VALET_HOME/valet.d/lib-io
+   7 ░ $GLOBAL_VALET_HOME/valet.d/lib-kurl
+   8 ░ $GLOBAL_VALET_HOME/valet.d/lib-profiler
+   9 ░ $GLOBAL_VALET_HOME/valet.d/lib-prompt
   10 ░ $GLOBAL_VALET_HOME/valet.d/lib-string
   11 ░ $GLOBAL_VALET_HOME/valet.d/lib-system
   12 ░ $GLOBAL_VALET_HOME/valet.d/main
@@ -124,7 +124,6 @@ DEBUG    Found function: ⌜array::isInArray⌝
 DEBUG    Found function: ⌜array::makeArraysSameSize⌝
 DEBUG    Found function: ⌜array::sortWithCriteria⌝
 DEBUG    Found function: ⌜array::fuzzyFilterSort⌝
-DEBUG    Found function: ⌜autocompletion::start⌝
 DEBUG    Found function: ⌜fsfs::itemSelector⌝
 DEBUG    Found function: ⌜interactive::askForConfirmation⌝
 DEBUG    Found function: ⌜interactive::askForConfirmationRaw⌝
@@ -171,6 +170,7 @@ DEBUG    Found function: ⌜kurl::toFile⌝
 DEBUG    Found function: ⌜kurl::toVar⌝
 DEBUG    Found function: ⌜profiler::enable⌝
 DEBUG    Found function: ⌜profiler::disable⌝
+DEBUG    Found function: ⌜prompt::autocompletion⌝
 DEBUG    Found function: ⌜string::cutField⌝
 DEBUG    Found function: ⌜string::compareSemanticVersion⌝
 DEBUG    Found function: ⌜string::bumpSemanticVersion⌝
@@ -256,6 +256,9 @@ INFO     Found 113 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/prompt.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/prompt.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/prompt.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
@@ -296,9 +299,6 @@ INFO     Found 113 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/autocompletion.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/autocompletion.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/autocompletion.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md

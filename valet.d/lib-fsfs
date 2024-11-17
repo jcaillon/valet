@@ -20,7 +20,7 @@ source array
 #===============================================================
 
 FSFS_LEFT_PANE_HELP_TEXT="↑/↓: Move | Enter: Select | Esc: Quit"
-FSFS_RIGHT_PANE_HELP_TEXT="←/→: Scroll | Page up/down: Scroll x3"
+FSFS_RIGHT_PANE_HELP_TEXT="←/→: Scroll | Page up/down: Scroll+"
 
 #===============================================================
 # >>> Custom drawing functions
@@ -84,7 +84,7 @@ function fsfs::itemSelector() {
   trap 'interactive::switchBackFromFullScreen; main::onExitInternal;' EXIT
 
   # interrupting closes the interactive session
-  trap 'onSessionInterrupted;' SIGINT SIGQUIT
+  trap 'FSFS_CLOSE_INTERACTIVE_SESSION=true;' SIGINT SIGQUIT
 
   interactive::switchToFullScreen
   fsfsDrawScreen "${prompt}"
@@ -586,11 +586,11 @@ function onKeyPressed() {
     return 0
     ;;
   PAGE_DOWN)
-    changeRightPaneStartIndex 3
+    changeRightPaneStartIndex "$((FSFS_RIGHT_PANE_MAX_DISPLAYED_LINES - 1))"
     drawRightPane
     ;;
   PAGE_UP)
-    changeRightPaneStartIndex -3
+    changeRightPaneStartIndex "-$((FSFS_RIGHT_PANE_MAX_DISPLAYED_LINES - 1))"
     drawRightPane
     ;;
   HOME)
@@ -641,11 +641,6 @@ function onKeyPressed() {
     esac
     ;;
   esac
-}
-
-# Called when the user interrupts the session (CTRL+C).
-function onSessionInterrupted() {
-  FSFS_CLOSE_INTERACTIVE_SESSION=true
 }
 
 # Called when the user resizes the terminal.

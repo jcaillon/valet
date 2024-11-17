@@ -15,6 +15,8 @@ set -Eeu -o pipefail
 # array::sort myArray
 # printf '%s\n' "${myArray[@]}"
 # ```
+#
+# > TODO: Update this basic exchange sort implementation.
 function array::sort() {
   local -n array=${1}
   local -i i j
@@ -166,6 +168,8 @@ function array::makeArraysSameSize() {
 # printf '%s\n' "${RETURNED_ARRAY[@]}"
 # # 3 2 1
 # ```
+#
+# > TODO: Update this basic exchange sort implementation.
 function array::sortWithCriteria() {
   local -n array="${1}"
   shift
@@ -183,7 +187,6 @@ function array::sortWithCriteria() {
   # sort the indexes
   for ((i = 0; i < ${#array[@]}; i++)); do
     for ((j = i + 1; j < ${#array[@]}; j++)); do
-
       for ((k = 0; k < ${#criteria[@]}; k++)); do
         local -n criterion="${criteria[k]}"
         if ((criterion[indexes[i]] > criterion[indexes[j]])); then
@@ -299,7 +302,7 @@ function array::fuzzyFilterSort() {
             matchedLineLength=2
             hasBeginEllipsis=true
 
-          elif ((matchedLineLength + 1 + lineCharIndex - lastLineCharIndex < maxMatchedLineLength)); then
+          elif ((matchedLineLength + 1 + lineCharIndex - lastLineCharIndex < maxMatchedLineLength || (matchedLineLength + 1 + lineCharIndex - lastLineCharIndex <= maxMatchedLineLength && lineCharIndex == lineLength - 1))); then
             if ((lineCharIndex - lastLineCharIndex > 0)); then
               # add the characters before the matched character
               matchedLine+="${line:${lastLineCharIndex}:$((lineCharIndex - lastLineCharIndex))}"

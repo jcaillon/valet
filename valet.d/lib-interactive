@@ -421,6 +421,8 @@ function interactive::switchToFullScreen() {
     core::fail "This function can only be used in an interactive session. Did you already called interactive::switchBackFromFullScreen?"
   fi
 
+  INTERACTIVE_FULL_SCREEN_MODE=true
+
   # disable echoing when we type something
   interactive::sttyInit
 
@@ -450,6 +452,8 @@ function interactive::switchBackFromFullScreen() {
     return
   fi
 
+  INTERACTIVE_FULL_SCREEN_MODE=false
+
   # restore the terminal state
   printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
 
@@ -458,7 +462,7 @@ function interactive::switchBackFromFullScreen() {
 
   # restore the error output and display them if any
   exec 2>&4 4>&-
-  if [[ -s "${FSFS_TEMPORARY_ERROR_FILE}" ]]; then
+  if [[ -s "${FSFS_TEMPORARY_ERROR_FILE:-}" ]]; then
     io::readFile "${FSFS_TEMPORARY_ERROR_FILE}"
     log::error "Error messages during the interactive session:"$'\n'"${RETURNED_VALUE%$'\n'}"
   fi
@@ -490,10 +494,20 @@ function interactive::sttyInit() {
 #
 # Enable the echo of the tty. Will display the characters typed by the user.
 #
+# - $1: **force** _as bool_:
+#       (optional) force the restoration of the stty configuration
+#       stty state will not be restored if
+#       (defaults to false)
+#
 # ```bash
 # interactive::sttyRestore
 # ```
+# shellcheck disable=SC2120
 function interactive::sttyRestore() {
+  if [[ ${INTERACTIVE_FULL_SCREEN_MODE:-} == "true" && ${1:-} != "true" ]]; then
+    return 0
+  fi
+
   if [[ -n ${INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
     if command -v stty &>/dev/null; then
       stty "${INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
@@ -625,14 +639,14 @@ function interactive::waitForChar() {
 function interactive::testWaitForKeyPress() {
   # setup the terminal before anything else
   interactive::sttyInit
-  # rebind some keys to call the callback function interactiveOnKeyBindingPress
-  interactive::rebindKeymap
   # define the callback function called when a special key is pressed
   # shellcheck disable=SC2317
   function interactiveOnKeyBindingPress() {
     local key="${1}"
     printf "%sYou pressed (binding): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${key@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
   }
+  # rebind some keys to call the callback function interactiveOnKeyBindingPress
+  interactive::rebindKeymap
 
   printf '%s\n' "Press any key to see the returned code (press Q to quit)."
   while true; do
@@ -718,6 +732,10 @@ function interactive::waitForKeyPress() {
 # > thus, modifications to the keymap are local to this script.
 # > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
 function interactive::rebindKeymap() {
+  if ! command -v interactiveOnKeyBindingPress &>/dev/null; then
+    core::fail "The function interactiveOnKeyBindingPress must be defined before calling interactive::rebindKeymap."
+  fi
+
   # remove all existing bindings except the self-insert ones
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
   # shellcheck source=lib-io
@@ -887,10 +905,6 @@ function interactive::rebindKeymap() {
   if command -v interactiveRebindOverride &>/dev/null; then
     interactiveRebindOverride
   fi
-}
-
-function interactiveOnKeyBindingPress() {
-  LAST_KEY_PRESSED="${1}"
 }
 
 # ## interactive::clearKeyPressed

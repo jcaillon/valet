@@ -39,7 +39,7 @@ function main::onExitInternal() {
 
   # restore tty settings if needed
   if command -v interactive::sttyRestore &>/dev/null; then
-    interactive::sttyRestore
+    interactive::sttyRestore true
   fi
 
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
