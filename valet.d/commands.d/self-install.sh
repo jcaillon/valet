@@ -674,7 +674,7 @@ function selfUpdate::sourceDependencies() {
 
 # set the version to download by default
 # this is automatically updated by the self release command
-VALET_RELEASED_VERSION="1.3.1"
+VALET_RELEASED_VERSION="0.21.567"
 
 # import the core script (should always be skipped if the command is run from valet)
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
