@@ -88,7 +88,7 @@ function selfRelease() {
   if [[ -n "${lastReleaseJson}" && ${latestReleaseVersion} == "${lastLocalTag}" ]]; then
     selfRelease::extractUploadUrl "${lastReleaseJson}"
     uploadUrl="${RETURNED_VALUE}"
-    if [[ ${lastReleaseJson} == *"browser_download_url"* ]]; then
+    if [[ ${lastReleaseJson} != *"browser_download_url"* ]]; then
       uploadArtifactsOnly=true
       log::info "The release has already been created, we will only upload the artifacts."
     fi
