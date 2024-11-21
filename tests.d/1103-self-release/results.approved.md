@@ -482,12 +482,14 @@ SUCCESS  The new version has been pushed to the remote repository.
 ▶ called io::invoke git push origin -f main:latest
 SUCCESS  The distant ⌜latest⌝ branch has been updated.
 DEBUG    The release payload is: ⌜{
+    "name": "v1.2.3",
     "tag_name": "v1.2.3",
     "body": "# Release of version 1.2.3\n\nChangelog: \n\n- ✨ feature\n- 🐞 fix\n",
     "draft": false,
     "prerelease": false
   }⌝
 ▶ called kurl::toVar true 201,422 -X POST -H Authorization: token token -H Accept: application/vnd.github.v3+json -H Content-type: application/json; charset=utf-8 -d {
+    "name": "v1.2.3",
     "tag_name": "v1.2.3",
     "body": "# Release of version 1.2.3\n\nChangelog: \n\n- ✨ feature\n- 🐞 fix\n",
     "draft": false,

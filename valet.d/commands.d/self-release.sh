@@ -231,6 +231,7 @@ function selfRelease::createRelease() {
   if [[ ${version} == *"-"* ]]; then prerelease=true; fi
   local releasePayload
   releasePayload="{
+    \"name\": \"v${version}\",
     \"tag_name\": \"v${version}\",
     \"body\": \"${tagMessage//$'\n'/\\n}\",
     \"draft\": false,

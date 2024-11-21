@@ -51,7 +51,7 @@ function interactive::promptYesNo() {
 
 function kurl::toVar() {
   echo "▶ called kurl::toVar $*" 1>&2
-  RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}", "tag_name": "v1.2.3" }'
+  RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}", "tag_name": "v1.2.3", "browser_download_url": "https:///fake" }'
   RETURNED_VALUE2=""
   RETURNED_VALUE3=200
 }
