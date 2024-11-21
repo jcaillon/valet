@@ -2,7 +2,7 @@
 # This script contains the documentation of all the valet library functions.
 # It can be used in your editor to provide auto-completion and documentation.
 #
-# Documentation generated for the version 1.3.1 (2024-11-21).
+# Documentation generated for the version 0.21.567 (2024-11-21).
 
 # ## ansi-codes::*
 # 
@@ -1447,7 +1447,7 @@ function io::toAbsolutePath() { return 0; }
 # 
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o ${2}.
+# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
 # 
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails
@@ -1477,7 +1477,7 @@ function kurl::toFile() { return 0; }
 # 
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o "tempfile".
+# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
 # 
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails

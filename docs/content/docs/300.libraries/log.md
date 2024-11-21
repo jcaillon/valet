@@ -238,4 +238,4 @@ log::warning "This is a warning message."
 
 
 
-> Documentation generated for the version 1.3.1 (2024-11-21).
+> Documentation generated for the version 0.21.567 (2024-11-21).
