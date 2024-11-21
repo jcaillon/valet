@@ -140,14 +140,14 @@ function selfRelease::createRelease() {
     fi
   fi
 
+  # read the version from the valet file
+  core::getVersion
+  local version="${RETURNED_VALUE}"
+  version="${version%%$'\n'*}"
+  log::info "The current version of valet is: ${version}."
+
 
   if [[ "${uploadExistingTag:-}" != "true" ]]; then
-
-    # read the version from the valet file
-    core::getVersion
-    local version="${RETURNED_VALUE}"
-    version="${version%%$'\n'*}"
-    log::info "The current version of valet is: ${version}."
 
     # update the documentation
     selfRelease::updateDocumentation "${version}"
