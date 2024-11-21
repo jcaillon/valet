@@ -52,9 +52,6 @@ options:
 - name: --dry-run
   description: |-
     Do not perform the release, just show what would be done.
-- name: --upload-artifacts-only
-  description: |-
-    Do no create the release, just upload the artifacts to the latest release.
 ---"
 function selfRelease() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
@@ -64,21 +61,48 @@ function selfRelease() {
     log::info "Dry run mode is enabled, no changes will be made."
   fi
 
-  if [[ "${uploadArtifactsOnly:-}" != "true" ]]; then
-    # create a new release
-    selfRelease::createRelease "${githubReleaseToken:-}" "${bumpLevel:-}" "${dryRun:-}"
-    createdReleaseJson="${RETURNED_VALUE}"
+  # get the current latest tag
+  local lastLocalTag
+  io::invoke git tag --sort=version:refname --no-color
+  lastLocalTag="${RETURNED_VALUE}"
+  lastLocalTag="${lastLocalTag%%$'\n'}"
+  lastLocalTag="${lastLocalTag##*$'\n'}"
+  log::info "The last tag is: ${lastLocalTag}."
+
+  # get the latest release
+  local latestReleaseVersion
+  kurl::toVar true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
+  lastReleaseJson="${RETURNED_VALUE}"
+  if [[ ${lastReleaseJson} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
+    latestReleaseVersion="v${BASH_REMATCH[2]}"
+    log::info "The latest release on GitHub is: ${latestReleaseVersion}."
   else
-    # get the latest release
-    kurl::toVar true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
-    createdReleaseJson="${RETURNED_VALUE}"
+    log::debug "${RETURNED_VALUE}"
+    log::warning "Could not get the latest version from GitHub (did not find tag_name)."
+    latestReleaseVersion="${lastLocalTag}"
   fi
 
-  if [[ -n "${createdReleaseJson}" ]]; then
-    string::extractBetween "${createdReleaseJson}" '"upload_url":' '{?name,label}"'
-    string::extractBetween "${RETURNED_VALUE}" '"' ''
+  # check if the release has already been created and we just need to upload the artifact
+  local uploadUrl
+  local uploadArtifactsOnly=false
+  if [[ -n "${lastReleaseJson}" && ${latestReleaseVersion} == "${lastLocalTag}" ]]; then
+    selfRelease::extractUploadUrl "${lastReleaseJson}"
     uploadUrl="${RETURNED_VALUE}"
-    log::debug "The upload URL is: ${uploadUrl:-}"
+    if [[ ${lastReleaseJson} == *"browser_download_url"* ]]; then
+      uploadArtifactsOnly=true
+      log::info "The release has already been created, we will only upload the artifacts."
+    fi
+  fi
+
+  if [[ "${uploadArtifactsOnly:-}" != "true" ]]; then
+    # create a new release
+    selfRelease::createRelease "${githubReleaseToken:-}" "${bumpLevel:-}" "${dryRun:-}" "${lastLocalTag}" "${latestReleaseVersion}"
+    lastReleaseJson="${RETURNED_VALUE}"
+
+    if [[ -n "${lastReleaseJson}" ]]; then
+      selfRelease::extractUploadUrl "${lastReleaseJson}"
+      uploadUrl="${RETURNED_VALUE}"
+    fi
   fi
 
   if [[ "${dryRun:-}" != "true" ]]; then
@@ -97,27 +121,17 @@ function selfRelease::createRelease() {
   githubReleaseToken="${1:-}"
   bumpLevel="${2:-minor}"
   dryRun="${3:-false}"
+  lastLocalTag="${4}"
+  latestReleaseVersion="${5}"
 
   io::invoke git rev-parse HEAD
   local currentHead="${RETURNED_VALUE%%$'\n'*}"
 
-  # get the current latest tag
-  local lastTag
-  io::invoke git tag --sort=version:refname --no-color
-  lastTag="${RETURNED_VALUE}"
-  lastTag="${lastTag%%$'\n'}"
-  lastTag="${lastTag##*$'\n'}"
-  log::info "The last tag is: ${lastTag}."
-
-  # get the distant latest release
-  selfRelease::getLatestReleaseVersion
-  local latestReleaseVersion="${RETURNED_VALUE}"
-
   # check if the latest release is the same as the last tag
   local uploadExistingTag=false
-  if [[ "${latestReleaseVersion}" != "${lastTag}" ]]; then
-    log::info "The latest release on GitHub is ${latestReleaseVersion} but the local latest tag is ${lastTag}."
-    if ! interactive::promptYesNo "Do you want to upload this tag (${lastTag}) as a new version?" false; then
+  if [[ ${latestReleaseVersion} != "${lastLocalTag}" ]]; then
+    log::info "The latest release on GitHub is ${latestReleaseVersion} but the local latest tag is ${lastLocalTag}."
+    if ! interactive::promptYesNo "Do you want to upload this tag (${lastLocalTag}) as a new version?" false; then
       core::fail "The release has been canceled."
     else
       uploadExistingTag=true
@@ -146,6 +160,21 @@ function selfRelease::createRelease() {
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."
 
+  # prepare the tag message
+  local tagMessage line
+  tagMessage="# Release of version ${version}"$'\n'$'\n'
+  tagMessage+="Changelog: "$'\n'$'\n'
+  io::invoke git log --pretty=format:"%s" "${lastLocalTag}..HEAD"
+  local IFS=$'\n'
+  for line in ${RETURNED_VALUE}; do
+    if [[ ${line} == ":bookmark:"* ]]; then
+      continue
+    fi
+    tagMessage+="- ${line}"$'\n'
+  done
+  IFS=$' '
+  log::info "The tag message is:"
+  log::printFileString "${tagMessage}"
 
   if [[ "${uploadExistingTag:-}" != "true" ]]; then
 
@@ -161,22 +190,6 @@ function selfRelease::createRelease() {
       io::invoke git commit -m ":rocket: releasing version ${version}"
       log::success "The new version has been committed."
     fi
-
-    # prepare the tag message
-    local tagMessage line
-    tagMessage="# Release of version ${version}"$'\n'$'\n'
-    tagMessage+="Changelog: "$'\n'$'\n'
-    io::invoke git log --pretty=format:"%s" "${lastTag}..HEAD"
-    local IFS=$'\n'
-    for line in ${RETURNED_VALUE}; do
-      if [[ ${line} == ":bookmark:"* ]]; then
-        continue
-      fi
-      tagMessage+="- ${line}"$'\n'
-    done
-    IFS=$' '
-    log::info "The tag message is:"
-    log::printFileString "${tagMessage}"
 
     if ! interactive::promptYesNo "Do you want to continue with the release of version ${version}?" false; then
       # reset to the original head
@@ -244,16 +257,6 @@ function selfRelease::createRelease() {
   RETURNED_VALUE="${createdReleaseJson:-}"
 }
 
-function selfRelease::getLatestReleaseVersion() {
-  kurl::toVar true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
-  if [[ ${RETURNED_VALUE} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
-    RETURNED_VALUE="v${BASH_REMATCH[2]}"
-  else
-    log::debug "${RETURNED_VALUE}"
-    core::fail "Could not get the latest version from GitHub (did not find tag_name)."
-  fi
-}
-
 function selfRelease::uploadArtifact() {
   local uploadUrl="${1}"
 
@@ -292,6 +295,15 @@ function selfRelease::uploadArtifact() {
   rm -Rf "${tempDir}"
 }
 
+function selfRelease::extractUploadUrl() {
+  local releaseJson="${1}"
+  string::extractBetween "${releaseJson}" '"upload_url":' '{?name,label}"'
+  string::extractBetween "${RETURNED_VALUE}" '"' ''
+  uploadUrl="${RETURNED_VALUE}"
+  log::debug "The upload URL is: ${uploadUrl:-}"
+  RETURNED_VALUE="${uploadUrl}"
+}
+
 function selfRelease::bumpVersion() {
   local bumpLevel="${1:-minor}"
   local dryRun="${2:-false}"
@@ -304,7 +316,7 @@ function selfRelease::bumpVersion() {
 
   # bump the version
   string::bumpSemanticVersion "${version}" "${bumpLevel}" && newVersion="${RETURNED_VALUE}"
-  if [[ "${dryRun:-}" != "true" ]]; then printf '%s' "${newVersion}" >"${GLOBAL_VALET_HOME}/valet.d/version"; fi
+  if [[ "${dryRun:-}" != "true" ]]; then io::writeToFile "${GLOBAL_VALET_HOME}/valet.d/version" "${newVersion}"; fi
   log::info "The bumped version of valet is: ${newVersion}."
 
   # commit the new version and push it
@@ -479,7 +491,7 @@ function selfRelease::writeAllFunctionsToExtrasCodeSnippets() {
 
     string::extractBetween "${!documentation}" $'\n' "."
     firstSentence="${RETURNED_VALUE#$'\n'}"
-    firstSentence="${firstSentence//\/\\}"
+    firstSentence="${firstSentence//\/\\/}"
     firstSentence="${firstSentence//'"'/'\"'}"
     firstSentence="${firstSentence//$'\n'/ }"
 

@@ -16,12 +16,12 @@ Exit code: `0`
 
 ```log
 INFO     Dry run mode is enabled, no changes will be made.
-▶ called io::invoke git rev-parse HEAD
 ▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
 ▶ called kurl::toVar true 200 -H Accept: application/vnd.github.v3+json https://api.github.com/repos/jcaillon/valet/releases/latest
+INFO     The latest release on GitHub is: v1.2.3.
+▶ called io::invoke git rev-parse HEAD
 INFO     The current version of valet is: 1.2.3.
-INFO     Found 113 functions with documentation.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
 INFO     The tag message is:
    1 ░ # Release of version 1.2.3
@@ -31,6 +31,7 @@ INFO     The tag message is:
    5 ░ - ✨ feature
    6 ░ - 🐞 fix
    7 ░ 
+INFO     Found 113 functions with documentation.
 INFO     The current version of valet is: 1.2.3.
 INFO     The bumped version of valet is: 2.0.0.
 SUCCESS  The new version has been released, check: https://github.com/jcaillon/valet/releases/latest.
@@ -52,22 +53,32 @@ Exit code: `0`
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Parsed arguments:
-local parsingErrors githubReleaseToken bumpLevel dryRun uploadArtifactsOnly help
+local parsingErrors githubReleaseToken bumpLevel dryRun help
 dryRun="${VALET_DRY_RUN:-}"
-uploadArtifactsOnly="${VALET_UPLOAD_ARTIFACTS_ONLY:-}"
 help=""
 parsingErrors=""
 githubReleaseToken="token"
 bumpLevel="minor"
 
-▶ called io::invoke git rev-parse HEAD
 ▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
 ▶ called kurl::toVar true 200 -H Accept: application/vnd.github.v3+json https://api.github.com/repos/jcaillon/valet/releases/latest
+INFO     The latest release on GitHub is: v1.2.3.
+DEBUG    The upload URL is: https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets
+▶ called io::invoke git rev-parse HEAD
 DEBUG    Checking if the workarea is clean
 ▶ called io::invokef5 false 0   git update-index --really-refresh
 ▶ called io::invokef5 false 0   git diff-index --quiet HEAD
 INFO     The current version of valet is: 1.2.3.
+▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
+INFO     The tag message is:
+   1 ░ # Release of version 1.2.3
+   2 ░ 
+   3 ░ Changelog: 
+   4 ░ 
+   5 ░ - ✨ feature
+   6 ░ - 🐞 fix
+   7 ░ 
 DEBUG    Analyzing the following files:
    1 ░ $GLOBAL_VALET_HOME/valet.d/core
    2 ░ $GLOBAL_VALET_HOME/valet.d/lib-ansi-codes
@@ -461,15 +472,6 @@ SUCCESS  The documentation update has been committed.
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
 ▶ called io::invoke git commit -m :rocket: releasing version 1.2.3
 SUCCESS  The new version has been committed.
-▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
-INFO     The tag message is:
-   1 ░ # Release of version 1.2.3
-   2 ░ 
-   3 ░ Changelog: 
-   4 ░ 
-   5 ░ - ✨ feature
-   6 ░ - 🐞 fix
-   7 ░ 
 ▶ called io::invoke git tag -a v1.2.3 -m Release version 1.2.3
 SUCCESS  The new version has been tagged.
 ▶ called io::invoke git push origin -f main:latest
@@ -503,6 +505,7 @@ DEBUG    The artifact has been created at ⌜valet.tar.gz⌝ with:
 INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 ▶ called kurl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz
 INFO     The current version of valet is: 1.2.3.
+▶ called io::writeToFile $GLOBAL_VALET_HOME/valet.d/version
 INFO     The bumped version of valet is: 1.3.0.
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/version
 ▶ called io::invoke git commit -m :bookmark: bump version to 1.3.0
