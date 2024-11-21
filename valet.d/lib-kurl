@@ -10,7 +10,7 @@ source io
 #
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o ${2}.
+# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails
@@ -43,9 +43,22 @@ function kurl::toFile() {
   # call curl
   local -i exitCode=0
   local httpStatusCode errors
-  io::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{http_code}" "--output" "${outputFile}" "$@" || exitCode=$?
+  io::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{response_code}" "--output" "${outputFile}" "$@" || exitCode=$?
   httpStatusCode="${RETURNED_VALUE}"
   errors="${RETURNED_VALUE2}"
+
+  # workaround in case of unknown args in curl
+  # and for a bug in curl https://github.com/Homebrew/homebrew-core/issues/173294
+  if [[ ${exitCode} != "0" && (${errors} == *"bad argument"* || ${errors} == *"is unknown"*) ]]; then
+    log::debug "Trying to use curl without the many options."
+    io::invoke5 "false" "0" "false" "" "curl" "--location" "-v" "--output" "${outputFile}" "$@" || exitCode=$?
+    if [[ ${RETURNED_VALUE}${RETURNED_VALUE2} =~ "< HTTP/"([0-9.]+)" "([0-9]+)" " ]]; then
+      httpStatusCode="${BASH_REMATCH[2]}"
+    else
+      httpStatusCode="??? Could not read from verbose curl output."
+    fi
+    errors="${RETURNED_VALUE2}"
+  fi
 
   local url="$*"
   url="http${url##*http}"
@@ -80,7 +93,7 @@ function kurl::toFile() {
 #
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{http_code}" -o "tempfile".
+# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails

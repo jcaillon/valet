@@ -36,10 +36,13 @@ Returns:
                      Or -1 if the user cancelled the selection
 
 ```bash
-fsfs::itemSelector "Select an item" item_array_name "onItemSelected" "Details"
+declare -g -a SELECTION_ARRAY
+SELECTION_ARRAY=("blue" "red" "green" "yellow")
+fsfs::itemSelector "What's your favorite color?" SELECTION_ARRAY
+log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
 ```
 
 
 
 
-> Documentation generated for the version 0.20.345 (2024-08-14).
+> Documentation generated for the version 1.3.1 (2024-11-21).

@@ -5,17 +5,55 @@ cascade:
 url: /docs/libraries/array
 ---
 
-## array::makeArraysSameSize
 
-This function makes sure that all the arrays have the same size.
-It will add empty strings to the arrays that are too short.
+## array::appendIfNotPresent
 
-- $@: **array names** _as string_:
-      The arrays (global variable names) to make the same size.
+Add a value to an array if it is not already present.
+
+- $1: **array name** _as string_:
+      The global variable name of the array.
+- $2: **value** _as any:
+      The value to add.
+
+Returns:
+
+- $?:
+  - 0 if the value was added
+  - 1 if it was already present
 
 ```bash
-array::makeArraysSameSize "array1" "array2" "array3"
+declare -g myArray=( "a" "b" )
+array::appendIfNotPresent myArray "c"
+printf '%s\n' "${myArray[@]}"
 ```
+
+
+## array::fuzzyFilter
+
+Allows to fuzzy match an array against a given pattern.
+Returns an array containing only the lines matching the pattern.
+
+- $1: **pattern** _as string_:
+      the pattern to match
+- $2: **array name** _as string_:
+      the initial array name
+
+Returns:
+
+- `RETURNED_ARRAY`: an array containing only the lines matching the pattern
+- `RETURNED_ARRAY2`: an array of the same size that contains the start index of the match
+- `RETURNED_ARRAY3`: an array of the same size that contains the distance of the match
+
+```bash
+array::fuzzyFilter "pattern" "myarray"
+if (( ${#RETURNED_ARRAY[@]} == 1 )); then
+  singleMatch="${RETURNED_ARRAY[0]}"
+fi
+```
+
+> - All characters in the pattern must be found in the same order in the matched line.
+> - The function is case insensitive.
+> - This function does not sort the results, it only filters them.
 
 
 ## array::fuzzyFilterSort
@@ -58,6 +96,39 @@ array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${
 > - This function does not sort the results, it only filters them.
 
 
+## array::isInArray
+
+Check if a value is in an array.
+It uses pure bash.
+
+- $1: **array name** _as string_:
+      The global variable name of the array.
+- $2: **value** _as any:
+      The value to check.
+
+Returns:
+
+- $?: 0 if the value is in the array, 1 otherwise.
+
+```bash
+declare -g myArray=( "a" "b" )
+array::isInArray myArray "b" && printf '%s\n' "b is in the array"
+```
+
+
+## array::makeArraysSameSize
+
+This function makes sure that all the arrays have the same size.
+It will add empty strings to the arrays that are too short.
+
+- $@: **array names** _as string_:
+      The arrays (global variable names) to make the same size.
+
+```bash
+array::makeArraysSameSize "array1" "array2" "array3"
+```
+
+
 ## array::sort
 
 Sorts an array using the > bash operator (lexicographic order).
@@ -71,55 +142,7 @@ array::sort myArray
 printf '%s\n' "${myArray[@]}"
 ```
 
-
-## array::fuzzyFilter
-
-Allows to fuzzy match an array against a given pattern.
-Returns an array containing only the lines matching the pattern.
-
-- $1: **pattern** _as string_:
-      the pattern to match
-- $2: **array name** _as string_:
-      the initial array name
-
-Returns:
-
-- `RETURNED_ARRAY`: an array containing only the lines matching the pattern
-- `RETURNED_ARRAY2`: an array of the same size that contains the start index of the match
-- `RETURNED_ARRAY3`: an array of the same size that contains the distance of the match
-
-```bash
-array::fuzzyFilter "pattern" "myarray"
-if (( ${#RETURNED_ARRAY[@]} == 1 )); then
-  singleMatch="${RETURNED_ARRAY[0]}"
-fi
-```
-
-> - All characters in the pattern must be found in the same order in the matched line.
-> - The function is case insensitive.
-> - This function does not sort the results, it only filters them.
-
-
-## array::appendIfNotPresent
-
-Add a value to an array if it is not already present.
-
-- $1: **array name** _as string_:
-      The global variable name of the array.
-- $2: **value** _as any:
-      The value to add.
-
-Returns:
-
-- $?:
-  - 0 if the value was added
-  - 1 if it was already present
-
-```bash
-declare -g myArray=( "a" "b" )
-array::appendIfNotPresent myArray "c"
-printf '%s\n' "${myArray[@]}"
-```
+> TODO: Update this basic exchange sort implementation.
 
 
 ## array::sortWithCriteria
@@ -151,27 +174,9 @@ printf '%s\n' "${RETURNED_ARRAY[@]}"
 # 3 2 1
 ```
 
-
-## array::isInArray
-
-Check if a value is in an array.
-It uses pure bash.
-
-- $1: **array name** _as string_:
-      The global variable name of the array.
-- $2: **value** _as any:
-      The value to check.
-
-Returns:
-
-- $?: 0 if the value is in the array, 1 otherwise.
-
-```bash
-declare -g myArray=( "a" "b" )
-array::isInArray myArray "b" && printf '%s\n' "b is in the array"
-```
+> TODO: Update this basic exchange sort implementation.
 
 
 
 
-> Documentation generated for the version 0.20.345 (2024-08-14).
+> Documentation generated for the version 1.3.1 (2024-11-21).

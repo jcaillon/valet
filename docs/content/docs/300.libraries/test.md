@@ -5,6 +5,18 @@ cascade:
 url: /docs/libraries/test
 ---
 
+## test::commentTest
+
+Call this function to add a paragraph in the report file.
+
+- $1: **comment** _as string_:
+      the text to add in the report file
+
+```bash
+test::commentTest "This is a comment."
+```
+
+
 ## test::endTest
 
 Call this function after each test to write the test results to the report file.
@@ -23,18 +35,6 @@ test::endTest "Testing something" $?
 ```
 
 
-## test::commentTest
-
-Call this function to add a paragraph in the report file.
-
-- $1: **comment** _as string_:
-      the text to add in the report file
-
-```bash
-test::commentTest "This is a comment."
-```
 
 
-
-
-> Documentation generated for the version 0.20.345 (2024-08-14).
+> Documentation generated for the version 1.3.1 (2024-11-21).

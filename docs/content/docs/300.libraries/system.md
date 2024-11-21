@@ -25,6 +25,26 @@ fi
 ```
 
 
+## system::date
+
+Get the current date in the given format.
+
+- $1: format _as string_:
+      (optional) the format of the date to return
+      (defaults to %(%F_%Hh%Mm%Ss)T).
+
+Returns:
+
+- `RETURNED_VALUE`: the current date in the given format.
+
+```bash
+system::date
+local date="${RETURNED_VALUE}"
+```
+
+> This function avoid to call $(date) in a subshell (date is a an external executable).
+
+
 ## system::env
 
 Get the list of all the environment variables.
@@ -80,20 +100,6 @@ fi
 ```
 
 
-## system::os
-
-Returns the name of the current OS.
-
-Returns:
-
-- `RETURNED_VALUE`: the name of the current OS: "darwin", "linux" or "windows".
-
-```bash
-system::os
-local osName="${RETURNED_VALUE}"
-```
-
-
 ## system::getUndeclaredVariables
 
 This function returns the list of undeclared variables for the given names.
@@ -115,26 +121,20 @@ fi
 ```
 
 
-## system::date
+## system::os
 
-Get the current date in the given format.
-
-- $1: format _as string_:
-      (optional) the format of the date to return
-      (defaults to %(%F_%Hh%Mm%Ss)T).
+Returns the name of the current OS.
 
 Returns:
 
-- `RETURNED_VALUE`: the current date in the given format.
+- `RETURNED_VALUE`: the name of the current OS: "darwin", "linux" or "windows".
 
 ```bash
-system::date
-local date="${RETURNED_VALUE}"
+system::os
+local osName="${RETURNED_VALUE}"
 ```
 
-> This function avoid to call $(date) in a subshell (date is a an external executable).
 
 
 
-
-> Documentation generated for the version 0.20.345 (2024-08-14).
+> Documentation generated for the version 1.3.1 (2024-11-21).

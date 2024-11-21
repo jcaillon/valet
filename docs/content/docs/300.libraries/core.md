@@ -5,90 +5,6 @@ cascade:
 url: /docs/libraries/core
 ---
 
-## core::sourceUserCommands
-
-Source the user 'commands' file from the valet user directory.
-If the file does not exist, we build it on the fly.
-
-```bash
-core::sourceUserCommands
-```
-
-
-## core::resetIncludedFiles
-
-Allows to reset the included files.
-When calling the source function, it will source all the files again.
-This is useful when we want to reload the libraries.
-
-```bash
-core::resetIncludedFiles
-```
-
-
-## core::getConfigurationDirectory
-
-Returns the path to the valet configuration directory.
-Creates it if missing.
-
-Returns:
-
-- `RETURNED_VALUE`: the path to the valet configuration directory
-
-```bash
-core::getConfigurationDirectory
-local directory="${RETURNED_VALUE}"
-```
-
-
-## core::showHelp
-
-Show the help for the current function.
-This should be called directly from a command function for which you want to display the help text.
-
-```bash
-core::showHelp
-```
-
-
-## source
-
-Allows to include a library file or sources a file.
-
-It replaces the builtin source command to make sure that we do not include the same file twice.
-We replace source instead of creating a new function to allow us to
-specify the included file for spellcheck.
-
-- $1: **library name** _as string_:
-      the name of the library (array, interactive, string...) or the file path to include.
-- $@: arguments _as any_:
-      (optional) the arguments to pass to the included file (mimics the builtin source command).
-
-```bash
-  source string array system
-  source ./my/path my/other/path
-```
-
-> - The file can be relative to the current script (script that calls this function).
-> - This function makes sure that we do not include the same file twice.
-> - Use `builtin source` if you want to include the file even if it was already included.
-
-
-## core::getUserDirectory
-
-Returns the path to the valet user directory.
-Does not create it if missing.
-
-Returns:
-
-- `RETURNED_VALUE`: the path to the valet user directory
-
-```bash
-core::getUserDirectory
-local directory="${RETURNED_VALUE}"
-```
-
-
 ## core::checkParseResults
 
 A convenience function to check the parsing results and fails with an error message if there are
@@ -111,16 +27,15 @@ core::checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
 ```
 
 
-## core::sourceFunction
+## core::fail
 
-Source the file associated with a command function.
-This allows you to call a command function without having to source the file manually.
+Displays an error message and then exit the program with error.
 
-- $1: **function name** _as string_:
-      the function name
+- $@: **message** _as string_:
+      the error message to display
 
 ```bash
-core::sourceFunction "functionName"
+core::fail "This is an error message."
 ```
 
 
@@ -138,17 +53,18 @@ core::failWithCode 255 "This is an error message."
 ```
 
 
-## core::getVersion
+## core::getConfigurationDirectory
 
-Returns the version of Valet.
+Returns the path to the valet configuration directory.
+Creates it if missing.
 
 Returns:
 
-- `RETURNED_VALUE`: The version of Valet.
+- `RETURNED_VALUE`: the path to the valet configuration directory
 
 ```bash
-core::getVersion
-printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
+core::getConfigurationDirectory
+local directory="${RETURNED_VALUE}"
 ```
 
 
@@ -168,24 +84,32 @@ local directory="${RETURNED_VALUE}"
 ```
 
 
-## core::fail
+## core::getUserDirectory
 
-Displays an error message and then exit the program with error.
+Returns the path to the valet user directory.
+Does not create it if missing.
 
-- $@: **message** _as string_:
-      the error message to display
+Returns:
+
+- `RETURNED_VALUE`: the path to the valet user directory
 
 ```bash
-core::fail "This is an error message."
+core::getUserDirectory
+local directory="${RETURNED_VALUE}"
 ```
 
 
-## core::reloadUserCommands
+## core::getVersion
 
-Forcibly source again the user 'commands' file from the valet user directory.
+Returns the version of Valet.
+
+Returns:
+
+- `RETURNED_VALUE`: The version of Valet.
 
 ```bash
-core::reloadUserCommands
+core::getVersion
+printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
 ```
 
 
@@ -217,6 +141,82 @@ core::parseArguments "$@" && eval "${RETURNED_VALUE}"
 ```
 
 
+## core::reloadUserCommands
+
+Forcibly source again the user 'commands' file from the valet user directory.
+
+```bash
+core::reloadUserCommands
+```
 
 
-> Documentation generated for the version 0.20.345 (2024-08-14).
+## core::resetIncludedFiles
+
+Allows to reset the included files.
+When calling the source function, it will source all the files again.
+This is useful when we want to reload the libraries.
+
+```bash
+core::resetIncludedFiles
+```
+
+
+## core::showHelp
+
+Show the help for the current function.
+This should be called directly from a command function for which you want to display the help text.
+
+```bash
+core::showHelp
+```
+
+
+## core::sourceFunction
+
+Source the file associated with a command function.
+This allows you to call a command function without having to source the file manually.
+
+- $1: **function name** _as string_:
+      the function name
+
+```bash
+core::sourceFunction "functionName"
+```
+
+
+## core::sourceUserCommands
+
+Source the user 'commands' file from the valet user directory.
+If the file does not exist, we build it on the fly.
+
+```bash
+core::sourceUserCommands
+```
+
+
+## source
+
+Allows to include a library file or sources a file.
+
+It replaces the builtin source command to make sure that we do not include the same file twice.
+We replace source instead of creating a new function to allow us to
+specify the included file for spellcheck.
+
+- $1: **library name** _as string_:
+      the name of the library (array, interactive, string...) or the file path to include.
+- $@: arguments _as any_:
+      (optional) the arguments to pass to the included file (mimics the builtin source command).
+
+```bash
+  source string array system
+  source ./my/path my/other/path
+```
+
+> - The file can be relative to the current script (script that calls this function).
+> - This function makes sure that we do not include the same file twice.
+> - Use `builtin source` if you want to include the file even if it was already included.
+
+
+
+
+> Documentation generated for the version 1.3.1 (2024-11-21).

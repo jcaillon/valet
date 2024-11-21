@@ -18,6 +18,8 @@ source kurl
 source interactive
 # shellcheck source=../lib-system
 source system
+# shellcheck source=../lib-array
+source array
 #===============================================================
 # >>> self release valet
 #===============================================================
@@ -99,6 +101,29 @@ function selfRelease::createRelease() {
   io::invoke git rev-parse HEAD
   local currentHead="${RETURNED_VALUE%%$'\n'*}"
 
+  # get the current latest tag
+  local lastTag
+  io::invoke git tag --sort=version:refname --no-color
+  lastTag="${RETURNED_VALUE}"
+  lastTag="${lastTag%%$'\n'}"
+  lastTag="${lastTag##*$'\n'}"
+  log::info "The last tag is: ${lastTag}."
+
+  # get the distant latest release
+  selfRelease::getLatestReleaseVersion
+  local latestReleaseVersion="${RETURNED_VALUE}"
+
+  # check if the latest release is the same as the last tag
+  local uploadExistingTag=false
+  if [[ "${latestReleaseVersion}" != "${lastTag}" ]]; then
+    log::info "The latest release on GitHub is ${latestReleaseVersion} but the local latest tag is ${lastTag}."
+    if ! interactive::promptYesNo "Do you want to upload this tag (${lastTag}) as a new version?" false; then
+      core::fail "The release has been canceled."
+    else
+      uploadExistingTag=true
+    fi
+  fi
+
   if [[ "${dryRun:-}" != "true" ]]; then
     # check that we got the necessary token
     if [[ -z "${githubReleaseToken:-}" ]]; then
@@ -115,63 +140,77 @@ function selfRelease::createRelease() {
     fi
   fi
 
-  # read the version from the valet file
-  core::getVersion
-  local version="${RETURNED_VALUE}"
-  version="${version%%$'\n'*}"
-  log::info "The current version of valet is: ${version}."
 
-  # update the documentation
-  selfRelease::updateDocumentation "${version}"
+  if [[ "${uploadExistingTag:-}" != "true" ]]; then
 
-  # write the current version in the self-install script
-  # then commit the file
-  if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
+    # read the version from the valet file
+    core::getVersion
+    local version="${RETURNED_VALUE}"
+    version="${version%%$'\n'*}"
+    log::info "The current version of valet is: ${version}."
 
-    io::invoke git add "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
-    io::invoke git commit -m ":rocket: releasing version ${version}"
-    log::success "The new version has been committed."
-  fi
+    # update the documentation
+    selfRelease::updateDocumentation "${version}"
 
-  # get the current latest tag
-  local lastTag
-  io::invoke git tag --sort=version:refname --no-color
-  lastTag="${RETURNED_VALUE}"
-  lastTag="${lastTag%%$'\n'}"
-  lastTag="${lastTag##*$'\n'}"
-  log::info "The last tag is: ${lastTag}."
-
-  # prepare the tag message
-  local tagMessage line
-  tagMessage="# Release of version ${version}"$'\n'$'\n'
-  tagMessage+="Changelog: "$'\n'$'\n'
-  io::invoke git log --pretty=format:"%s" "${lastTag}..HEAD"
-  local IFS=$'\n'
-  for line in ${RETURNED_VALUE}; do
-    if [[ ${line} == ":bookmark:"* ]]; then
-      continue
-    fi
-    tagMessage+="- ${line}"$'\n'
-  done
-  IFS=$' '
-  log::info "The tag message is:"
-  log::printFileString "${tagMessage}"
-
-  if ! interactive::promptYesNo "Do you want to continue with the release of version ${version}?" false; then
-    # reset to the original head
+    # write the current version in the self-install script
+    # then commit the file
     if [[ "${dryRun:-}" != "true" ]]; then
-      io::invoke git reset --hard "${currentHead}"
+      io::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
+
+      io::invoke git add "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
+      io::invoke git commit -m ":rocket: releasing version ${version}"
+      log::success "The new version has been committed."
     fi
-    core::fail "The release has been canceled."
+
+    # prepare the tag message
+    local tagMessage line
+    tagMessage="# Release of version ${version}"$'\n'$'\n'
+    tagMessage+="Changelog: "$'\n'$'\n'
+    io::invoke git log --pretty=format:"%s" "${lastTag}..HEAD"
+    local IFS=$'\n'
+    for line in ${RETURNED_VALUE}; do
+      if [[ ${line} == ":bookmark:"* ]]; then
+        continue
+      fi
+      tagMessage+="- ${line}"$'\n'
+    done
+    IFS=$' '
+    log::info "The tag message is:"
+    log::printFileString "${tagMessage}"
+
+    if ! interactive::promptYesNo "Do you want to continue with the release of version ${version}?" false; then
+      # reset to the original head
+      if [[ "${dryRun:-}" != "true" ]]; then
+        io::invoke git reset --hard "${currentHead}"
+      fi
+      core::fail "The release has been canceled."
+    fi
+
+    # create a new git tag with the version
+    if [[ "${dryRun:-}" != "true" ]]; then
+      io::invoke git tag -a "v${version}" -m "Release version ${version}"
+      log::success "The new version has been tagged."
+    fi
+
+    # update the latest branch with this new version
+    if [[ "${dryRun:-}" != "true" ]]; then
+      io::invoke git push origin -f main:latest
+      log::success "The distant ⌜latest⌝ branch has been updated."
+    fi
+
   fi
 
   # create a new git tag with the version and push everything
   if [[ "${dryRun:-}" != "true" ]]; then
     io::invoke git push origin main
-    io::invoke git tag -a "v${version}" -m "Release version ${version}"
     io::invoke git push origin "v${version}"
-    log::success "The new version has been tagged and pushed to the remote repository."
+    log::success "The new version has been pushed to the remote repository."
+  fi
+
+  # update the latest branch with this new version
+  if [[ "${dryRun:-}" != "true" ]]; then
+    io::invoke git push origin -f main:latest
+    log::success "The distant ⌜latest⌝ branch has been updated."
   fi
 
   # prepare the release payload
@@ -202,13 +241,17 @@ function selfRelease::createRelease() {
     log::success "The new version has been released on GitHub."
   fi
 
-  # update the latest branch with this new version
-  if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke git push origin -f main:latest
-    log::success "The distant ⌜latest⌝ branch has been updated."
-  fi
-
   RETURNED_VALUE="${createdReleaseJson:-}"
+}
+
+function selfRelease::getLatestReleaseVersion() {
+  kurl::toVar true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
+  if [[ ${RETURNED_VALUE} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
+    RETURNED_VALUE="v${BASH_REMATCH[2]}"
+  else
+    log::debug "${RETURNED_VALUE}"
+    core::fail "Could not get the latest version from GitHub (did not find tag_name)."
+  fi
 }
 
 function selfRelease::uploadArtifact() {
@@ -283,6 +326,10 @@ function selfRelease::updateDocumentation() {
   # export the documentation for each library
   selfRelease::getAllFunctionsDocumentation
 
+  # sort the functions by name
+  declare -a SORTED_FUNCTION_NAMES=("${!RETURNED_ASSOCIATIVE_ARRAY[@]}")
+  array::sort "SORTED_FUNCTION_NAMES"
+
   # write each function documentation to a file
   if [[ "${dryRun:-}" != "true" ]]; then
     selfRelease::writeAllFunctionsDocumentation "${pageFooter}"
@@ -344,7 +391,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
 
   # write the new files
   local key
-  for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
+  for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     local functionName="${key}"
     string::regexGetFirst "${functionName}" '([[:alnum:]]+)::'
     local packageName="${RETURNED_VALUE}"
@@ -396,7 +443,7 @@ function selfRelease::writeAllFunctionsToExtrasScript() {
 "
 
   local key functionName documentation line
-  for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
+  for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     functionName="${key}"
     documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
     # add # to each line of the documentation
@@ -426,7 +473,7 @@ function selfRelease::writeAllFunctionsToExtrasCodeSnippets() {
   local content="{"$'\n'"// ${pageFooter}"$'\n'
 
   local key functionName documentation firstSentence body commentedDocumentation
-  for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
+  for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     functionName="${key}"
     documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
 
@@ -552,7 +599,7 @@ function selfRelease::getAllFunctionsDocumentation() {
   if log::isTraceEnabled; then
     log::trace "The functions with their documentation are:"
     local key
-    for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
+    for key in "${SORTED_FUNCTION_NAMES[@]}"; do
       log::trace "Function: ⌜${key}⌝"
       log::printFileString "${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"
     done
