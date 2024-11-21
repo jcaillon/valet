@@ -17,10 +17,11 @@ Exit code: `0`
 ```log
 INFO     Dry run mode is enabled, no changes will be made.
 ▶ called io::invoke git rev-parse HEAD
-INFO     The current version of valet is: 1.2.3.
-INFO     Found 113 functions with documentation.
 ▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
+▶ called kurl::toVar true 200 -H Accept: application/vnd.github.v3+json https://api.github.com/repos/jcaillon/valet/releases/latest
+INFO     The current version of valet is: 1.2.3.
+INFO     Found 113 functions with documentation.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
 INFO     The tag message is:
    1 ░ # Release of version 1.2.3
@@ -60,6 +61,9 @@ githubReleaseToken="token"
 bumpLevel="minor"
 
 ▶ called io::invoke git rev-parse HEAD
+▶ called io::invoke git tag --sort=version:refname --no-color
+INFO     The last tag is: v1.2.3.
+▶ called kurl::toVar true 200 -H Accept: application/vnd.github.v3+json https://api.github.com/repos/jcaillon/valet/releases/latest
 DEBUG    Checking if the workarea is clean
 ▶ called io::invokef5 false 0   git update-index --really-refresh
 ▶ called io::invokef5 false 0   git diff-index --quiet HEAD
@@ -457,8 +461,6 @@ SUCCESS  The documentation update has been committed.
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
 ▶ called io::invoke git commit -m :rocket: releasing version 1.2.3
 SUCCESS  The new version has been committed.
-▶ called io::invoke git tag --sort=version:refname --no-color
-INFO     The last tag is: v1.2.3.
 ▶ called io::invoke git log --pretty=format:%s v1.2.3..HEAD
 INFO     The tag message is:
    1 ░ # Release of version 1.2.3
@@ -468,10 +470,15 @@ INFO     The tag message is:
    5 ░ - ✨ feature
    6 ░ - 🐞 fix
    7 ░ 
-▶ called io::invoke git push origin main
 ▶ called io::invoke git tag -a v1.2.3 -m Release version 1.2.3
+SUCCESS  The new version has been tagged.
+▶ called io::invoke git push origin -f main:latest
+SUCCESS  The distant ⌜latest⌝ branch has been updated.
+▶ called io::invoke git push origin main
 ▶ called io::invoke git push origin v1.2.3
-SUCCESS  The new version has been tagged and pushed to the remote repository.
+SUCCESS  The new version has been pushed to the remote repository.
+▶ called io::invoke git push origin -f main:latest
+SUCCESS  The distant ⌜latest⌝ branch has been updated.
 DEBUG    The release payload is: ⌜{
     "tag_name": "v1.2.3",
     "body": "# Release of version 1.2.3\n\nChangelog: \n\n- ✨ feature\n- 🐞 fix\n",
@@ -485,8 +492,6 @@ DEBUG    The release payload is: ⌜{
     "prerelease": false
   } https://api.github.com/repos/jcaillon/valet/releases
 SUCCESS  The new version has been released on GitHub.
-▶ called io::invoke git push origin -f main:latest
-SUCCESS  The distant ⌜latest⌝ branch has been updated.
 DEBUG    The upload URL is: https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/examples.d .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet.d .

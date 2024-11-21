@@ -15,7 +15,7 @@ http return code was ⌈200⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 200 -curlOption1 --fakeOpt2 https://hello.com
+⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/kurl-test --code 200 -curlOption1 --fakeOpt2 https://hello.com
 ⌉
 ```
 
@@ -32,7 +32,7 @@ http return code was ⌈500⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
+⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
 ⌉
 ```
 
@@ -50,7 +50,7 @@ Exit code: `1`
 
 ```log
 TRACE    Curl error output stream:
-   1 ░ ▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
+   1 ░ ▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
    2 ░ 
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://hello.com⌝.
 ```
@@ -68,7 +68,7 @@ http return code was ⌈500⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
+⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/kurl-test --code 500 https://hello.com
 ⌉
 ```
 
@@ -85,7 +85,7 @@ http return code was ⌈400⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt
+⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt
 Returning 1 from curl.
 ⌉
 ```
@@ -96,11 +96,11 @@ Returning 1 from curl.
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
-'--silent' '--show-error' '--location' '--write-out' '%{http_code}' '--output' '/tmp/valet.d/kurl-test' '--code' '400' '--error' 'https://hello.com/bla' '--otherOpt'
+'--silent' '--show-error' '--location' '--write-out' '%{response_code}' '--output' '/tmp/valet.d/kurl-test' '--code' '400' '--error' 'https://hello.com/bla' '--otherOpt'
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜1⌝.
 DEBUG    The curl command for url ⌜https://hello.com/bla⌝ ended with exit code ⌜1⌝, the http return code was ⌜400⌝.
 TRACE    Curl error output stream:
-   1 ░ ▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt
+   1 ░ ▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/kurl-test --code 400 --error https://hello.com/bla --otherOpt
    2 ░ Returning 1 from curl.
    3 ░ 
 DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜https://hello.com/bla⌝.
@@ -119,7 +119,7 @@ http return code was ⌈200⌉
 Content of downloaded file:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet.d/kurl-test --code 200 http://hello.com
+⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/kurl-test --code 200 http://hello.com
 ⌉
 ```
 
@@ -129,7 +129,7 @@ stderr:
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
-'--silent' '--show-error' '--location' '--write-out' '%{http_code}' '--output' '/tmp/valet.d/kurl-test' '--code' '200' 'http://hello.com'
+'--silent' '--show-error' '--location' '--write-out' '%{response_code}' '--output' '/tmp/valet.d/kurl-test' '--code' '200' 'http://hello.com'
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
 DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
@@ -149,7 +149,7 @@ http return code was ⌈200⌉
 stdout:
 ⌈⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 200 http://hello.com
+⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work --code 200 http://hello.com
 ⌉
 ```
 
@@ -167,7 +167,7 @@ Exit code: `1`
 
 ```log
 TRACE    Curl error output stream:
-   1 ░ ▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 500 http://hello.com
+   1 ░ ▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work --code 500 http://hello.com
    2 ░ 
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜http://hello.com⌝.
 ```
@@ -185,7 +185,7 @@ http return code was ⌈400⌉
 stdout:
 ⌈Writing stuff to file because the --output option was given.⌉
 stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 400 http://hello.com
+⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work --code 400 http://hello.com
 ⌉
 ```
 
@@ -195,12 +195,12 @@ stderr:
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
-'--silent' '--show-error' '--location' '--write-out' '%{http_code}' '--output' '/tmp/valet-work' '--code' '400' 'http://hello.com'
+'--silent' '--show-error' '--location' '--write-out' '%{response_code}' '--output' '/tmp/valet-work' '--code' '400' 'http://hello.com'
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
 The error code ⌜0⌝ is acceptable and has been reset to 0.
 DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜400⌝.
 TRACE    Curl error output stream:
-   1 ░ ▶ called curl --silent --show-error --location --write-out %{http_code} --output /tmp/valet-work --code 400 http://hello.com
+   1 ░ ▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work --code 400 http://hello.com
    2 ░ 
 DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜http://hello.com⌝.
 ```

@@ -51,12 +51,7 @@ function interactive::promptYesNo() {
 
 function kurl::toVar() {
   echo "▶ called kurl::toVar $*" 1>&2
-  if [[ $* == *"tag_name"* ]]; then
-    # post on the release endpoint
-    RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}" }'
-  else
-    RETURNED_VALUE=""
-  fi
+  RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}", "tag_name": "v1.2.3" }'
   RETURNED_VALUE2=""
   RETURNED_VALUE3=200
 }
