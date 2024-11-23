@@ -1,4 +1,4 @@
-# This is a basic workflow to help you get started with Actions
+# The workflow triggering on each push to the main branch.
 name: CI
 
 # Controls when the workflow will run
@@ -35,7 +35,6 @@ jobs:
       - name: Run valet tests
         run: |
           chmod +x valet
-          chmod +x valet.d/commands.d/self-build.sh
           export VALET_CONFIG_ENABLE_COLORS=true
           export VALET_CONFIG_DISABLE_PROGRESS=true
           ./valet self test -C
