@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -Eeu -o pipefail
 # Title:         valet.d/commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon

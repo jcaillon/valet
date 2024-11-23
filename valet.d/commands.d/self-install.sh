@@ -410,7 +410,7 @@ function selfUpdate::updateGitRepository() {
     core::fail "The directory ⌜${1}⌝ is not a git repository."
   fi
 
-  if ! command -v git; then
+  if ! command -v git &>/dev/null; then
     core::fail "The command ⌜git⌝ is not installed or not found in your PATH."
   fi
 
@@ -508,7 +508,7 @@ function selfUpdate::addToPath() {
   local configFile configContent
   for shellName in "bash" "zsh" "tcsh" "csh" "xonsh" "fish"; do
     # shellcheck disable=SC2088
-    if ! command -v "${shellName}" 1>/dev/null; then
+    if ! command -v "${shellName}" &>/dev/null; then
       continue
     fi
 
@@ -580,9 +580,9 @@ function selfUpdate::download() {
   local url="${1}"
   local output="${2}"
 
-  if command -v curl 1>/dev/null; then
+  if command -v curl &>/dev/null; then
     curl --fail --silent --show-error --location --output "${output}" "${url}" || core::fail "Could not download from ⌜${url}⌝ to ⌜${output}⌝."
-  elif command -v wget 1>/dev/null; then
+  elif command -v wget &>/dev/null; then
     wget --quiet --output-document="${output}" "${url}" || core::fail "Could not download from ⌜${url}⌝ to ⌜${output}⌝."
   else
     core::fail "You need ⌜curl⌝ or ⌜wget⌝ installed and in your PATH."
@@ -599,7 +599,7 @@ function selfUpdate::updateUserRepositories() {
 
   log::info "Attempting to update the git repositories in ⌜${userDirectory}⌝."
 
-  if ! command -v git 1>/dev/null; then
+  if ! command -v git &>/dev/null; then
     log::warning "The command ⌜git⌝ is not installed or not found in your PATH, skipping git update."
     return 0
   fi

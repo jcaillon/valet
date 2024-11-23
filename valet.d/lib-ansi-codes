@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeu -o pipefail
+# shellcheck disable=SC2034
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
@@ -179,25 +179,22 @@ AC__RESTORE_SCREEN=$'\e[?47l'
 # >>> Uncommon Private Modes (should probably delete these)
 #===============================================================
 
-AC__LIMIT_SCROLLING__=$'\e[1;'
-__AC__LINES=$'r' # "${limitScrolling}20${_lines}"
-
 # Change cursor style
 # 0 blinking block.
 # 1 blinking block (default).
 # 2 steady block.
 # 3 blinking underline.
 # 4 steady underline.
-AC__CHANGE_CURSOR__=$'\e['
-__AC__STYLE=$' q' # "${changeCursor}1${_style}"
+# AC__CHANGE_CURSOR__=$'\e['
+# __AC__STYLE=$' q' # "${changeCursor}1${_style}"
 
 # change the cursor color (only works in xterm)
 # https://gist.github.com/anonymous/8f1e6c22b5213faf8170dcfc2b0f5b93
 # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/admin-guide/vga-softcursor.rst
-AC__CHANGE_CURSOR_TO_PROMPT=$'\e[1 q'$'\e[?16;0;80;c'
-AC__CHANGE_CURSOR_TO_NORMAL=$'\e[0 q'$'\e[?0;c'
+# AC__CHANGE_CURSOR_TO_PROMPT=$'\e[1 q'$'\e[?16;0;80;c'
+# AC__CHANGE_CURSOR_TO_NORMAL=$'\e[0 q'$'\e[?0;c'
 
 # change line wrapping option
-AC__DISABLE_LINE_WRAPPING=$'\e[?7l'
-AC__ENABLE_LINE_WRAPPING=$'\e[?7h'
+# AC__DISABLE_LINE_WRAPPING=$'\e[?7l'
+# AC__ENABLE_LINE_WRAPPING=$'\e[?7h'
 

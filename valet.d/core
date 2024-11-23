@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -Eeu -o pipefail
 # Title:          valet.d/core
 # Description:    this script contains the core functions and variables and it
 #                 should be sourced, not called directly

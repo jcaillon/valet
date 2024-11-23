@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -Eeu -o pipefail
 # Title:         valet.d/commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
@@ -40,7 +41,7 @@ options:
     Also test the valet core functions.
 
     This is only if you modified valet core functions themselves.
-- name: -C, --only-core
+- name: -C, --core-only
   description: |-
     Only test the valet core functions. Skips the tests for user commands.
 - name: -i, --include <pattern>
@@ -100,7 +101,7 @@ function selfTest() {
 
   declare -i NB_TEST_SUITES=0 NB_FAILED_TEST_SUITES=0
 
-  if [[ ${onlyCore:-false} != "true" ]]; then
+  if [[ ${coreOnly:-false} != "true" ]]; then
     # get the user directory
     core::getUserDirectory
     userDirectory="${userDirectory:-${RETURNED_VALUE}}"
@@ -147,7 +148,7 @@ function selfTest() {
     shopt -u dotglob
   fi
 
-  if [[ -n "${withCore:-}" || ${onlyCore:-false} == "true" ]]; then
+  if [[ -n "${withCore:-}" || ${coreOnly:-false} == "true" ]]; then
     selfTestRunCoreTests
   fi
 

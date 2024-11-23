@@ -70,7 +70,7 @@ Any new feature that you implement should be accompanied with a test suite.
 In any cases, you must then run all the tests to make sure nothing broke:
 
 ```bash
-VALET_USER_DIRECTORY=examples.d valet self test --auto-approve --with-core
+valet self test --auto-approve --core-only
 ```
 
 ### Code Review
