@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- Add a config to remove commands from being built.
 - Finish autocompletion and interactive functions.
 - Sort the commands when building the release so they are in alphabetical order in the docs.
 - Add full support for interactive mode.
