@@ -263,4 +263,4 @@ VALET_CONFIG_BUMP_VERSION_ON_BUILD="${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-}"
 
 ```
 
-> Documentation generated for the version 0.21.567 (2024-11-21).
+> Documentation generated for the version 0.22.31 (2024-11-23).
