@@ -19,6 +19,8 @@
 *.zshrc text
 *.gitconfig text
 *.gitattributes text
+*.dockerignore text
+Dockerfile text
 VERSION text
 
 # docs
