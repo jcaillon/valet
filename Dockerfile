@@ -19,6 +19,7 @@ COPY valet /opt/valet/valet
 RUN \
 printf '%s\n%s "$@"' "#/usr/bin/env bash" "/opt/valet/valet" > /usr/local/bin/valet; \
 chmod +x /opt/valet/valet; \
+chmod +x /opt/valet/valet/valet.d/commands.d/self-build.sh; \
 chmod +x /usr/local/bin/valet; \
 valet self config --no-edit --override --export-current-values
 

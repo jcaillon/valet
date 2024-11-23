@@ -5,6 +5,9 @@ function testSelfBuild() {
 
   (
     export VALET_CONFIG_BUMP_VERSION_ON_BUILD=false
+    if [[ ! -x "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh" ]]; then
+      chmod +x "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh"
+    fi
     "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh" --output "${tempFile}" --core-only
 
     local varName var
