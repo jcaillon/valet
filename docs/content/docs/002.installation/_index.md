@@ -30,6 +30,8 @@ Here is an example command to install Valet with the option `--unattended`:
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --unattended
 ```
 
+Finally, call `valet` to get started with the example commands!
+
 ## 🪛 Manual installation
 
 1. Download the package from the [latest release from GitHub][latest-release].
@@ -52,6 +54,20 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/va
 
 It is recommended to use Git bash, installed with [Git for Windows][git-for-windows-link] and [Windows terminal][windows-terminal-link] as your terminal program. You can also use Valet with any Linux distribution and [Windows Subsystem for Linux][wsl-installation-link] (WSL).
 
+## 🐋 Run Valet in a container
+
+With a container engine (such as [Docker][docker] or [Podman][podman]), you can run a containerized version of Valet as such:
+
+```bash
+docker run --rm -it ghcr.io/jcaillon/valet
+```
+
+Find the list of image tags under [Valet packages][valetImageTagsLink].
+
+{{< callout type="info" emoji="💡" >}}
+Alternatively, use `docker run --rm -it noyacode/valet` to pull and run the image stored on [DockerHub][dockerHubLink].
+{{< /callout >}}
+
 [curl]: https://curl.se/
 [tar]: https://www.gnu.org/software/tar/
 [latest-release]: https://github.com/jcaillon/valet/releases/latest
@@ -61,3 +77,7 @@ It is recommended to use Git bash, installed with [Git for Windows][git-for-wind
 [windows-terminal-link]: https://github.com/microsoft/terminal
 [selfInstallScriptLink]: https://github.com/jcaillon/valet/blob/latest/valet.d/commands.d/self-install.sh
 [selfInstallCommandUsageLink]: https://github.com/jcaillon/valet/blob/latest/tests.d/1106-self-update/results.approved.md
+[docker]: https://www.docker.com/
+[podman]: https://podman.io/
+[dockerHubLink]: https://hub.docker.com
+[valetImageTagsLink]: https://github.com/jcaillon/valet/pkgs/container/valet

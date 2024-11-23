@@ -7,12 +7,12 @@ SHELL ["/bin/bash", "-o", "errexit", "-o", "nounset", "-o", "pipefail", "-c", "-
 
 ARG STANDARD_PACKAGES="curl ca-certificates locales"
 
-RUN install_packages ${STANDARD_PACKAGES}
-
+# ✅ install packages
 # ✅ set up locale
 ARG LOCALE=en_US
 ENV LANG=${LOCALE}.UTF-8
 RUN \
+install_packages ${STANDARD_PACKAGES} ; \
 localedef -i ${LOCALE} -c -f UTF-8 -A /usr/share/locale/locale.alias ${LOCALE}.UTF-8; \
 echo "LC_ALL=${LOCALE}.UTF-8" >> /etc/environment; \
 echo "${LOCALE}.UTF-8 UTF-8" >> /etc/locale.gen; \
@@ -25,7 +25,8 @@ COPY valet.d/ /opt/valet/valet.d/
 COPY extras/ /opt/valet/extras/
 COPY valet /opt/valet/valet
 
-# ✅ add the valet binary to the path and self config/build
+# ✅ add the valet binary to the path
+# ✅ self config + build
 RUN \
 echo -e "#"'!'"/usr/bin/env bash"$'\n'"/opt/valet/valet \"\$@\"" > /usr/local/bin/valet; \
 chmod +x /opt/valet/valet; \

@@ -10,7 +10,6 @@ This page lists the features that I would like to implement in Valet. They come 
 
 - Finish autocompletion and interactive functions.
 - Sort the commands when building the release so they are in alphabetical order in the docs.
-- Push a Valet image to DockerHub using github actions.
 - Add full support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.

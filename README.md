@@ -19,8 +19,11 @@ With Valet, you can setup and execute tests for your scripts, code an interactiv
 
 Learn more on the [Valet documentation website][valet-site].
 
+Installation instructions can be found [here][installationLink].
+
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest
 [license]: ./LICENSE
 [bash]: https://www.gnu.org/software/bash/
 [valet-site]: https://jcaillon.github.io/valet/
+[installationLink]: https://jcaillon.github.io/valet/docs/installation/
