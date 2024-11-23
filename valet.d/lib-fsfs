@@ -448,8 +448,13 @@ function drawRightPane() {
   # display the page counter
   local itemsCounter
   local itemsCounterLength
+  local itemCount
   if ((contentLength > 0)); then
-    local itemCount="$((${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} - FSFS_RIGHT_PANE_MAX_DISPLAYED_LINES - 1))"
+    itemCount="$((${#FSFS_RIGHT_PANE_CONTENT_CURRENT_ARRAY[@]} - FSFS_RIGHT_PANE_MAX_DISPLAYED_LINES - 1))"
+  else
+    itemCount=0
+  fi
+  if ((itemCount > 0)); then
     printf -v itemsCounter " %s%0${#itemCount}i%s/%i%s " "${FSFS_COLOR_COUNT}" "${FSFS_RIGHT_PANE_START_INDEX}" "${FSFS_COLOR_COUNT_RESET}${FSFS_COLOR_STATIC}" "${itemCount}" "${FSFS_COLOR_RESET_TEXT}"
     itemsCounterLength=$((3 + ${#itemCount} * 2))
   else
