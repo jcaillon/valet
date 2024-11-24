@@ -173,10 +173,9 @@ function selfUpdate() {
   if [[ ${firstInstallation} != "true" ]]; then
     log::debug "Executing a self update from Valet."
   elif command -v valet &>/dev/null; then
-    log::warning "Valet is already installed but executing the install script externally."
-    if [[ ${unattended} == "true" ]] || interactive::promptYesNo "Execute the self update for the existing installation?" "true"; then
-      (valet self update "$@")
-      exit 0
+    log::warning "Valet is already installed but you are executing the install script. It could be updated using the 'valet self update' command."
+    if [[ ${unattended} != "true" ]] && ! interactive::promptYesNo "Execute this installation script?" "true"; then
+      core::fail "Installation aborted."
     fi
   fi
 
