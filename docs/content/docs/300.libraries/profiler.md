@@ -30,4 +30,4 @@ profiler::enable "${HOME}/valet-profiler-${BASHPID}.txt"
 
 
 
-> Documentation generated for the version 0.23.13 (2024-11-24).
+> Documentation generated for the version 0.24.6 (2024-11-24).
