@@ -211,8 +211,8 @@ function selfUpdate() {
       log::info "The current local version ⌜${currentVersion}⌝ is higher or equal to the distant version ⌜${version}⌝."
       log::success "You already have the latest version."
       if [[ ${skipExtensionsUpdate} != "true" ]]; then
-        source "lib-update-extensions"
-        updateExtensions::do "${userDirectory}"
+        core::sourceFunction selfExtend
+        selfExtend:updateExtensions "${userDirectory}"
       fi
       return 0
     fi
@@ -326,8 +326,8 @@ function selfUpdate() {
   fi
 
   if [[ ${skipExtensionsUpdate} != "true" ]]; then
-    source "lib-update-extensions"
-    updateExtensions::do "${userDirectory}"
+    core::sourceFunction selfExtend
+    selfExtend::updateExtensions "${userDirectory}"
   fi
 
   # run the post install command

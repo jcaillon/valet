@@ -417,6 +417,7 @@ ERROR    Found multiple matches for the command ⌜sf⌝, please be more specifi
 CHIsCDEelCHIfCDE build
 CHIsCDEelCHIfCDE config
 CHIsCDEelCHIfCDE export
+CHIsCDEelCHIfCDE extend
 CHIsCDEelCHIfCDE mock1
 CHIsCDEelCHIfCDE mock2
 CHIsCDEelCHIfCDE mock3
