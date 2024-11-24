@@ -2,7 +2,7 @@
 # This script contains the documentation of all the valet library functions.
 # It can be used in your editor to provide auto-completion and documentation.
 #
-# Documentation generated for the version 0.24.6 (2024-11-24).
+# Documentation generated for the version 0.25.3 (2024-11-24).
 
 # ## ansi-codes::*
 # 
