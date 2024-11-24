@@ -65,7 +65,7 @@ function selfExtend() {
 }
 
 # Attempts to update each git repository found in the user directory.
-function selfExtend:updateExtensions() {
+function selfExtend::updateExtensions() {
   local userDirectory="${1}"
 
   if [[ ! -d "${userDirectory}" ]]; then

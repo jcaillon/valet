@@ -212,7 +212,7 @@ function selfUpdate() {
       log::success "You already have the latest version."
       if [[ ${skipExtensionsUpdate} != "true" ]]; then
         core::sourceFunction selfExtend
-        selfExtend:updateExtensions "${userDirectory}"
+        selfExtend::updateExtensions "${userDirectory}"
       fi
       return 0
     fi
