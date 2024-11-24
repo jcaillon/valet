@@ -472,7 +472,13 @@ SUCCESS  The documentation update has been committed.
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
 ▶ called io::invoke git commit -m :rocket: releasing version 1.2.3
 SUCCESS  The new version has been committed.
-▶ called io::invoke git tag -a v1.2.3 -m Release version 1.2.3
+▶ called io::invoke git tag -a v1.2.3 -m # Release of version 1.2.3
+
+Changelog: 
+
+- ✨ feature
+- 🐞 fix
+
 SUCCESS  The new version has been tagged.
 ▶ called io::invoke git push origin main
 ▶ called io::invoke git push origin v1.2.3

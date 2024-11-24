@@ -202,7 +202,7 @@ function selfRelease::createRelease() {
 
     # create a new git tag with the version
     if [[ "${dryRun:-}" != "true" ]]; then
-      io::invoke git tag -a "v${version}" -m "Release version ${version}"
+      io::invoke git tag -a "v${version}" -m "${tagMessage}"
       log::success "The new version has been tagged."
     fi
 
