@@ -639,8 +639,8 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
 fi
 # --- END OF COMMAND COMMON PART
 
-# shellcheck source=lib-build-utils
-source lib-build-utils
+# shellcheck source=self-build-utils
+source self-build-utils
 # shellcheck source=../lib-array
 source array
 # shellcheck source=../lib-io

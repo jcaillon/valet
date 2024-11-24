@@ -206,25 +206,19 @@ function selfRelease::createRelease() {
       log::success "The new version has been tagged."
     fi
 
-    # update the latest branch with this new version
-    if [[ "${dryRun:-}" != "true" ]]; then
-      io::invoke git push origin -f main:latest
-      log::success "The distant ⌜latest⌝ branch has been updated."
-    fi
-
   fi
 
-  # create a new git tag with the version and push everything
+  # push main and the new tag
   if [[ "${dryRun:-}" != "true" ]]; then
     io::invoke git push origin main
     io::invoke git push origin "v${version}"
-    log::success "The new version has been pushed to the remote repository."
+    log::success "The ⌜main⌝ branch and the new version ⌜v${version}⌝ has been pushed."
   fi
 
-  # update the latest branch with this new version
+  # force push the latest branch
   if [[ "${dryRun:-}" != "true" ]]; then
     io::invoke git push origin -f main:latest
-    log::success "The distant ⌜latest⌝ branch has been updated."
+    log::success "The ⌜latest⌝ branch has been updated."
   fi
 
   # prepare the release payload

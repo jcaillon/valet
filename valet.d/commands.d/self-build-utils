@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -Eeu -o pipefail
 # author: github.com/jcaillon
 # description: Utility functions for the self-build script.
 

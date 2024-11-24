@@ -474,13 +474,11 @@ SUCCESS  The documentation update has been committed.
 SUCCESS  The new version has been committed.
 ▶ called io::invoke git tag -a v1.2.3 -m Release version 1.2.3
 SUCCESS  The new version has been tagged.
-▶ called io::invoke git push origin -f main:latest
-SUCCESS  The distant ⌜latest⌝ branch has been updated.
 ▶ called io::invoke git push origin main
 ▶ called io::invoke git push origin v1.2.3
-SUCCESS  The new version has been pushed to the remote repository.
+SUCCESS  The ⌜main⌝ branch and the new version ⌜v1.2.3⌝ has been pushed.
 ▶ called io::invoke git push origin -f main:latest
-SUCCESS  The distant ⌜latest⌝ branch has been updated.
+SUCCESS  The ⌜latest⌝ branch has been updated.
 DEBUG    The release payload is: ⌜{
     "name": "v1.2.3",
     "tag_name": "v1.2.3",

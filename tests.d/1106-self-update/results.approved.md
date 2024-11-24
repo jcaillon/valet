@@ -112,14 +112,11 @@ OPTIONS
   -E, --no-examples
       Set to true to to not copy the examples (showcase) to the valet user directory (~/.valet.d).
       
-      This will be done only if the directory does not already exist. But you can force this behavior with the --override-examples option.
+      If you do not set this option, newer examples will override the existing ones.
       This option can be set by exporting the variable VALET_NO_EXAMPLES='true'.
-  -e, --override-examples
-      Set to true to override the examples (showcase) in the valet user directory (~/.valet.d).
-      This option can be set by exporting the variable VALET_OVERRIDE_EXAMPLES='true'.
-  -G, --skip-git-update
+  -U, --skip-extensions-update
       Set to true to not attempt to update the git repositories under the valet user directory (~/.valet.d).
-      This option can be set by exporting the variable VALET_SKIP_GIT_UPDATE='true'.
+      This option can be set by exporting the variable VALET_SKIP_EXTENSIONS_UPDATE='true'.
   -h, --help
       Display the help for this command.
 
@@ -135,14 +132,14 @@ EXAMPLES
 
 ```
 
-### Testing SelfUpdate, nothing to do (already up to date)
+### Testing selfUpdate, nothing to do (already up to date)
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ SelfUpdate --skip-git-update
+→ selfUpdate --skip-extensions-update
 ```
 
 **Error** output:

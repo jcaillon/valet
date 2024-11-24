@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: Utility functions for the self-install/self-update script.
+
+# Attempts to update each git repository found in the user directory.
+function updateExtensions::do() {
+  local userDirectory="${1}"
+
+  if [[ ! -d "${userDirectory}" ]]; then
+    return 0
+  fi
+
+  log::info "Attempting to update the git repositories in ⌜${userDirectory}⌝."
+
+  # shellcheck disable=SC2317
+  function filterGitRepositories() {
+    if [[ -d "${1}/.git" ]]; then
+      return 1
+    fi
+    return 0
+  }
+
+  io::listDirectories "${userDirectory}" true false filterGitRepositories
+  local path
+  local allUpdateSuccess=true
+  local -i count=0
+  for path in "${RETURNED_ARRAY[@]}"; do
+    if [[ -d "${path}/.git" ]]; then
+      log::debug "Found a git repository ⌜${path}⌝."
+      if ! command -v git &>/dev/null; then
+        log::warning "The command ⌜git⌝ is not installed or not found in your PATH, skipping git update for repo ⌜${path}⌝."
+        continue
+      fi
+      if ! updateExtensions::updateGitRepository "${path}"; then
+        allUpdateSuccess=false
+        log::warning "Failed to update the git repository ⌜${path}⌝, clean your workarea first (e.g. git stash, or git commit)."
+      else
+        log::success "The git repository ⌜${path}⌝ has been updated."
+        count+=1
+      fi
+    fi
+  done
+
+  if [[ ${allUpdateSuccess} == "true" ]]; then
+    if ((count == 0)); then
+      log::info "No git repositories found in ⌜${userDirectory}⌝."
+    else
+      log::success "A total of ${count} git repositories in ⌜${userDirectory}⌝ have been updated."
+    fi
+  else
+    log::warning "Some git repositories in ⌜${userDirectory}⌝ could not be updated, ${count} updated successfully."
+  fi
+
+}
+
+
+function updateExtensions::updateGitRepository() {
+  local repoPath="${1}"
+
+  if [[ ! -f "${repoPath}/.git/HEAD" ]]; then
+    core::fail "The directory ⌜${repoPath}⌝ is not a git repository."
+  fi
+
+  if ! command -v git &>/dev/null; then
+    core::fail "The command ⌜git⌝ is not installed or not found in your PATH."
+  fi
+
+  log::debug "Updating the git repository ⌜${repoPath}⌝."
+
+  io::readFile "${repoPath}/.git/HEAD"
+  if [[ ${RETURNED_VALUE} =~ ^"ref: refs/heads/"(.+) ]]; then
+    local branch="${BASH_REMATCH[1]:-}"
+    branch="${branch%%$'\n'*}"
+    log::info "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
+    pushd "${repoPath}" &>/dev/null || core::fail "Could not change to the directory ⌜${repoPath}⌝."
+    if ! git fetch -q; then
+      popd &>/dev/null || :
+      return 1
+    fi
+    if ! git merge -q --ff-only "origin/${branch}" &>/dev/null; then
+      popd &>/dev/null || :
+      return 1
+    fi
+    popd &>/dev/null || :
+    return 0
+  fi
+
+  core::fail "The git repository ⌜${repoPath}⌝ does not have a checked out branch to pull."
+}

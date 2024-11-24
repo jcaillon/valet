@@ -1,4 +1,4 @@
-# Test suite 1101-lib-build-utils
+# Test suite 1101-self-build-utils
 
 ## Test script 00.self-build-utils
 

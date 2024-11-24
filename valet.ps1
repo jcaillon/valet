@@ -7,7 +7,6 @@ Call windows Git bash and run valet command.
 
 .EXAMPLE
 ./valet.ps1
-./valet.ps1 -shouldExit 1
 #>
 function Main {
   # Find the path to bash.exe

@@ -65,8 +65,13 @@ docker run --rm -it ghcr.io/jcaillon/valet
 Find the list of image tags under [Valet packages][valetImageTagsLink].
 
 {{< callout type="info" emoji="💡" >}}
-Alternatively, use `docker run --rm -it noyacode/valet` to pull and run the image stored on [DockerHub][dockerHubLink].
+Alternatively, use `docker run --rm -it noyacode/valet` to pull and run the image stored on [DockerHub](https://hub.docker.com).
 {{< /callout >}}
+
+{{< cards >}}
+  {{< card icon="arrow-circle-left" link="../introduction" title="What is Valet?" >}}
+  {{< card icon="arrow-circle-right" link="../usage" title="Learn how to use Valet" >}}
+{{< /cards >}}
 
 [curl]: https://curl.se/
 [tar]: https://www.gnu.org/software/tar/
@@ -79,5 +84,4 @@ Alternatively, use `docker run --rm -it noyacode/valet` to pull and run the imag
 [selfInstallCommandUsageLink]: https://github.com/jcaillon/valet/blob/latest/tests.d/1106-self-update/results.approved.md
 [docker]: https://www.docker.com/
 [podman]: https://podman.io/
-[dockerHubLink]: https://hub.docker.com
 [valetImageTagsLink]: https://github.com/jcaillon/valet/pkgs/container/valet

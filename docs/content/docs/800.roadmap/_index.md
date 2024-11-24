@@ -9,8 +9,15 @@ url: /docs/roadmap
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
 - Add a config to remove commands from being built.
+- In self setup allow to install additional commands from a git repository.
+- Allow repos under .valet user dir:
+  - to have `lib.d` folders: on self build we add these path as targets for 'source' in addition to `valet.d/lib-*` and we also add a `valet self generate-snippets` to export the snippets under valet dir which include all functions from said libs.
+  - to have a setup.sh that is played on install or update
+- Add HOW TO documentation:
+  - how to build and share a CLI application with Valet
+  - how to use valet from your bash prompt
+  - how to use valet in your existing scripts 
 - Finish autocompletion and interactive functions.
-- Sort the commands when building the release so they are in alphabetical order in the docs.
 - Add full support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.

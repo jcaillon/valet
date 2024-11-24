@@ -93,13 +93,9 @@ fi
 #   description: |-
 #     Set to true to to not copy the examples (showcase) to the valet user directory (~/.valet.d).
 #
-#     This will be done only if the directory does not already exist. But you can force this behavior with the --override-examples option.
+#     If you do not set this option, newer examples will override the existing ones.
 #   default: false
-# - name: -e, --override-examples
-#   description: |-
-#     Set to true to override the examples (showcase) in the valet user directory (~/.valet.d).
-#   default: false
-# - name: -G, --skip-git-update
+# - name: -U, --skip-extensions-update
 #   description: |-
 #     Set to true to not attempt to update the git repositories under the valet user directory (~/.valet.d).
 #   default: false
@@ -115,7 +111,7 @@ fi
 #     Install the latest version of Valet in the user home directory and disable all interaction during the install process.
 ##VALET_COMMAND
 function selfUpdate() {
-  local unattended singleUserInstallation version installationDirectory noShim noPath noExamples overrideExamples noExtras skipGitUpdate
+  local unattended singleUserInstallation version installationDirectory noShim noPath noExamples noExtras skipExtensionsUpdate
 
   # if this script is run directly
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
@@ -130,12 +126,12 @@ function selfUpdate() {
         ;;
       -v | --version)
         shift
-        [[ $# -eq 0 ]] && core::fail "Missing version number after --version."
+        [[ $# -eq 0 ]] && core::fail "Missing value for 'version number' after the option --version."
         version="${1}"
         ;;
       -d | --installation-directory)
         shift
-        [[ $# -eq 0 ]] && core::fail "Installation directory missing --installation-directory."
+        [[ $# -eq 0 ]] && core::fail "Missing value for 'the installation directory' after the option --installation-directory."
         installationDirectory="${1}"
         ;;
       -S | --no-shim)
@@ -150,11 +146,8 @@ function selfUpdate() {
       -A | --no-extras)
         noExtras="true"
         ;;
-      -e | --override-examples)
-        overrideExamples="true"
-        ;;
-      -G | --skip-git-update)
-        skipGitUpdate="true"
+      -U | --skip-extensions-update)
+        skipExtensionsUpdate="true"
         ;;
       -*) core::fail "Unknown option ⌜${1}⌝." ;;
       *) core::fail "This command takes no arguments." ;;
@@ -168,9 +161,8 @@ function selfUpdate() {
     noShim="${noShim:-"${VALET_NO_SHIM:-"false"}"}"
     noPath="${noPath:-"${VALET_NO_PATH:-"false"}"}"
     noExamples="${noExamples:-"${VALET_NO_EXAMPLES:-"false"}"}"
-    overrideExamples="${overrideExamples:-"${VALET_OVERRIDE_EXAMPLES:-"false"}"}"
     noExtras="${noExtras:-"${VALET_NO_EXTRAS:-"false"}"}"
-    skipGitUpdate="${skipGitUpdate:-"${VALET_SKIP_GIT_UPDATE:-"false"}"}"
+    skipExtensionsUpdate="${skipExtensionsUpdate:-"${VALET_SKIP_EXTENSIONS_UPDATE:-"false"}"}"
   else
     core::parseArguments "$@" && eval "${RETURNED_VALUE}"
     core::checkParseResults "${help:-}" "${parsingErrors:-}"
@@ -200,7 +192,7 @@ function selfUpdate() {
   # get the latest version if needed
   if [[ ${version:-"latest"} == "latest" ]]; then
     log::debug "Getting the latest version from GitHub."
-    selfUpdate::getLatestReleaseVersion
+    selfUpdate_getLatestReleaseVersion
     version="${RETURNED_VALUE}"
     log::info "The latest version of Valet found on GitHub is ⌜${version}⌝."
   fi
@@ -218,8 +210,9 @@ function selfUpdate() {
     if [[ ${RETURNED_VALUE} == "0" || ${RETURNED_VALUE} == "1" ]]; then
       log::info "The current local version ⌜${currentVersion}⌝ is higher or equal to the distant version ⌜${version}⌝."
       log::success "You already have the latest version."
-      if [[ ${skipGitUpdate} != "true" ]]; then
-        selfUpdate::updateUserRepositories "${userDirectory}"
+      if [[ ${skipExtensionsUpdate} != "true" ]]; then
+        source "lib-update-extensions"
+        updateExtensions::do "${userDirectory}"
       fi
       return 0
     fi
@@ -244,7 +237,7 @@ function selfUpdate() {
   # check if one of the bin directories is in the PATH
   local dir binDirectory=""
   for dir in "${binDirectories[@]}"; do
-    if selfUpdate::isDirectoryInPath "${dir}"; then
+    if selfUpdate_isDirectoryInPath "${dir}"; then
       binDirectory="${dir}"
       break
     fi
@@ -253,33 +246,33 @@ function selfUpdate() {
   # display a recap to the user
   local createShim=false addToPath=false copyExamples=false copyExtras=false
   printf '\n  %s\n\n' "${AC__TEXT_UNDERLINE}Valet installation recap:${AC__TEXT_RESET}"
-  selfUpdate::printRecapLine "Operating system:" "${os}"
+  selfUpdate_printRecapLine "Operating system:" "${os}"
   if [[ ${firstInstallation} != "true" ]]; then
-    selfUpdate::printRecapLine "First installation:" "${firstInstallation}"
-    selfUpdate::printRecapLine "Current Valet version:" "${currentVersion}"
+    selfUpdate_printRecapLine "First installation:" "${firstInstallation}"
+    selfUpdate_printRecapLine "Current Valet version:" "${currentVersion}"
   fi
-  selfUpdate::printRecapLine "Version to install:" "${version}"
-  selfUpdate::printRecapLine "Download URL:" "${releaseUrl}"
-  selfUpdate::printRecapLine "Installation dir:" "${GLOBAL_VALET_HOME}"
+  selfUpdate_printRecapLine "Version to install:" "${version}"
+  selfUpdate_printRecapLine "Download URL:" "${releaseUrl}"
+  selfUpdate_printRecapLine "Installation dir:" "${GLOBAL_VALET_HOME}"
   if [[ ${noShim} != "true" && -n ${binDirectory} ]]; then
-    selfUpdate::printRecapLine "Create shim in dir:" "${binDirectory}"
+    selfUpdate_printRecapLine "Create shim in dir:" "${binDirectory}"
     createShim=true
   fi
-  if [[ ${noPath} != "true" && -z ${binDirectory} ]] && ! selfUpdate::isDirectoryInPath "${GLOBAL_VALET_HOME}"; then
-    selfUpdate::printRecapLine "Add install dir to PATH:" "true"
+  if [[ ${noPath} != "true" && -z ${binDirectory} ]] && ! selfUpdate_isDirectoryInPath "${GLOBAL_VALET_HOME}"; then
+    selfUpdate_printRecapLine "Add install dir to PATH:" "true"
     addToPath=true
   fi
-  if [[ ${noExamples} != "true" && (! -d ${userDirectory}/examples.d || ${overrideExamples} == "true") ]]; then
-    selfUpdate::printRecapLine "Copy examples to:" "${userDirectory}"
+  if [[ ${noExamples} != "true" ]]; then
+    selfUpdate_printRecapLine "Copy examples to:" "${userDirectory}"
     copyExamples=true
   else
-    selfUpdate::printRecapLine "Skip examples copy:" "true"
+    selfUpdate_printRecapLine "Skip examples copy:" "true"
   fi
   if [[ ${noExtras} != "true" ]]; then
-    selfUpdate::printRecapLine "Copy extras to:" "${userDirectory}"
+    selfUpdate_printRecapLine "Copy extras to:" "${userDirectory}"
     copyExtras=true
   else
-    selfUpdate::printRecapLine "Skip extras copy:" "true"
+    selfUpdate_printRecapLine "Skip extras copy:" "true"
   fi
   printf '\n'
 
@@ -288,7 +281,20 @@ function selfUpdate() {
     interactive::promptYesNo "Proceed with the installation?" "true" || core::fail "Installation aborted."
   fi
 
-  selfUpdate::install "${releaseUrl}" "${binDirectory}" "${unattended}"
+  selfUpdate_testCommand "chmod"
+
+  # install valet
+  if [[ -d "${GLOBAL_VALET_HOME}/.git" ]]; then
+    # case where valet directory is a git repository
+    log::info "The Valet directory ⌜${GLOBAL_VALET_HOME}⌝ already exists and is a git repository, it will be updated using git."
+    selfUpdate_updateGitRepository "${GLOBAL_VALET_HOME}" || core::fail "Failed to update the git repository ⌜${GLOBAL_VALET_HOME}⌝, clean your workarea first (e.g. git stash, or git commit)."
+
+    chmod +x "${GLOBAL_VALET_HOME}/valet"
+    return 0
+  else
+    # download and install valet
+    selfUpdate_install "${releaseUrl}" "${binDirectory}" "${unattended}"
+  fi
 
   # remove the user commands to rebuild them
   if [[ -f "${userDirectory}/commands" ]]; then
@@ -298,29 +304,30 @@ function selfUpdate() {
   if [[ ${firstInstallation} == "true" ]]; then
     # shellcheck source=../core
     source "${GLOBAL_VALET_HOME}/valet.d/core"
-    selfUpdate::sourceDependencies
+    selfUpdate_sourceDependencies
   else
     core::sourceUserCommands
   fi
 
   if [[ ${copyExamples} == "true" ]]; then
-    selfUpdate::copyExamples "${userDirectory}"
+    selfUpdate_copyExamples "${userDirectory}"
   fi
 
   if [[ ${copyExtras} == "true" ]]; then
-    selfUpdate::copyExtras "${userDirectory}"
+    selfUpdate_copyExtras "${userDirectory}"
   fi
 
   if [[ ${createShim} == "true" ]]; then
-    selfUpdate::createShim "${binDirectory}"
+    selfUpdate_createShim "${binDirectory}"
   fi
 
   if [[ ${addToPath} == "true" ]]; then
-    selfUpdate::addToPath "${GLOBAL_VALET_HOME}" "${unattended}"
+    selfUpdate_addToPath "${GLOBAL_VALET_HOME}" "${unattended}"
   fi
 
-  if [[ ${skipGitUpdate} != "true" ]]; then
-    selfUpdate::updateUserRepositories "${userDirectory}"
+  if [[ ${skipExtensionsUpdate} != "true" ]]; then
+    source "lib-update-extensions"
+    updateExtensions::do "${userDirectory}"
   fi
 
   # run the post install command
@@ -335,33 +342,21 @@ function selfUpdate() {
   fi
 }
 
-function selfUpdate::printRecapLine() {
+function selfUpdate_printRecapLine() {
   printf '  - %s%-30s%s%s\n' "${AC__TEXT_BOLD}" "${1}" "${AC__FG_MAGENTA}${2}" "${AC__TEXT_RESET}"
 }
 
-function selfUpdate::install() {
+# Install Valet using the given release URL.
+function selfUpdate_install() {
   local releaseUrl="${1}"
   local binDirectory="${2}"
   local unattended="${3}"
 
-  selfUpdate::testCommand "chmod"
-
-  # case where valet directory is a git repository
-  if [[ -d "${GLOBAL_VALET_HOME}/.git" ]]; then
-    selfUpdate::testCommand "git"
-
-    log::info "The Valet directory ⌜${GLOBAL_VALET_HOME}⌝ already exists and is a git repository, it will be updated using git."
-    selfUpdate::updateGitRepository "${GLOBAL_VALET_HOME}" || core::fail "Failed to update the git repository ⌜${GLOBAL_VALET_HOME}⌝, clean your workarea first (e.g. git stash, or git commit)."
-
-    chmod +x "${GLOBAL_VALET_HOME}/valet"
-    return 0
-  fi
-
-  selfUpdate::testCommand "tar"
-  selfUpdate::testCommand "mkdir"
-  selfUpdate::testCommand "touch"
-  selfUpdate::testCommand "rm"
-  selfUpdate::testCommand "mv"
+  selfUpdate_testCommand "tar"
+  selfUpdate_testCommand "mkdir"
+  selfUpdate_testCommand "touch"
+  selfUpdate_testCommand "rm"
+  selfUpdate_testCommand "mv"
 
   # temporary directory for the installation
   local tempDirectory
@@ -379,15 +374,15 @@ function selfUpdate::install() {
   # download the release and unpack it
   local releaseFile="${tempDirectory}/valet.tar.gz"
 
-  log::debug "Downloading the release ⌜${VALET_VERSION}⌝ from ⌜${releaseUrl}⌝."
-  selfUpdate::download "${releaseUrl}" "${releaseFile}"
+  log::debug "Downloading the release from ⌜${releaseUrl}⌝."
+  selfUpdate_download "${releaseUrl}" "${releaseFile}"
 
   log::debug "Unpacking the release in ⌜${GLOBAL_VALET_HOME}⌝."
   tar -xzf "${releaseFile}" -C "${tempDirectory}" || core::fail "Could not unpack the release ⌜${releaseFile}⌝ using tar."
   log::debug "The release has been unpacked in ⌜${GLOBAL_VALET_HOME}⌝ with:"$'\n'"${RETURNED_VALUE}."
 
   # figure out if we need to use sudo
-  selfUpdate::setSudoIfNeeded "${GLOBAL_VALET_HOME}"
+  selfUpdate_setSudoIfNeeded "${GLOBAL_VALET_HOME}"
 
   # remove the old valet directory and move the new one
   ${_SUDO} rm -f "${releaseFile}"
@@ -405,40 +400,8 @@ function selfUpdate::install() {
   log::success "Valet has been installed in ⌜${GLOBAL_VALET_HOME}⌝."
 }
 
-function selfUpdate::updateGitRepository() {
-  if [[ ! -f "${1}/.git/HEAD" ]]; then
-    core::fail "The directory ⌜${1}⌝ is not a git repository."
-  fi
-
-  if ! command -v git &>/dev/null; then
-    core::fail "The command ⌜git⌝ is not installed or not found in your PATH."
-  fi
-
-  log::debug "Updating the git repository ⌜${1}⌝."
-
-  io::readFile "${1}/.git/HEAD"
-  if [[ ${RETURNED_VALUE} =~ ^"ref: refs/heads/"(.+) ]]; then
-    local branch="${BASH_REMATCH[1]:-}"
-    branch="${branch%%$'\n'*}"
-    log::info "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
-    pushd "${1}" &>/dev/null || core::fail "Could not change to the directory ⌜${1}⌝."
-    if ! git fetch -q; then
-      popd &>/dev/null || :
-      return 1
-    fi
-    if ! git merge -q --ff-only "origin/${branch}" &>/dev/null; then
-      popd &>/dev/null || :
-      return 1
-    fi
-    popd &>/dev/null || :
-    log::success "The git repository ⌜${1}⌝ has been updated."
-    return 0
-  fi
-
-  core::fail "The git repository ⌜${1}⌝ does not have a checked out branch to pull."
-}
-
-function selfUpdate::copyExamples() {
+# Copy the examples to the user directory.
+function selfUpdate_copyExamples() {
   local userDirectory="${1}"
 
   mkdir -p "${userDirectory}" || core::fail "Could not create the user directory ⌜${userDirectory}⌝."
@@ -452,9 +415,10 @@ function selfUpdate::copyExamples() {
   log::success "The examples have been copied to ⌜${userDirectory}/examples.d⌝."
 }
 
-function selfUpdate::setSudoIfNeeded() {
+# Set the _SUDO variable if needed.
+function selfUpdate_setSudoIfNeeded() {
   _SUDO=""
-  if ! selfUpdate::isDirectoryWritable "${1}" "${2:-}"; then
+  if ! selfUpdate_isDirectoryWritable "${1}" "${2:-}"; then
     if [[ ${unattended} == "true" ]]; then
       core::fail "The directory ⌜${1}⌝ is not writable: try to run this command using sudo?"
     elif ! command -v sudo &>/dev/null; then
@@ -462,14 +426,15 @@ function selfUpdate::setSudoIfNeeded() {
     else
       log::warning "The directory ⌜${1}⌝ is not writable, attempting to run the command using sudo."
       _SUDO='sudo'
-      if ! selfUpdate::isDirectoryWritable "${1}" "${2:-}"; then
+      if ! selfUpdate_isDirectoryWritable "${1}" "${2:-}"; then
         core::fail "The directory ⌜${1}⌝ is not writable even with sudo."
       fi
     fi
   fi
 }
 
-function selfUpdate::isDirectoryWritable() {
+# Check if a directory is writable.
+function selfUpdate_isDirectoryWritable() {
   local directory="${1%/}"
   local testFile="${2:-writable-test-${BASHPID}}"
   if ! ${_SUDO} mkdir -p "${directory}" &>/dev/null; then
@@ -485,11 +450,12 @@ function selfUpdate::isDirectoryWritable() {
   return 1
 }
 
-function selfUpdate::createShim() {
+# Create a shim (script that calls valet) in a bin directory.
+function selfUpdate_createShim() {
   local binDirectory="${1}"
 
   # figure out if we need to use sudo
-  selfUpdate::setSudoIfNeeded "${binDirectory}" "valet"
+  selfUpdate_setSudoIfNeeded "${binDirectory}" "valet"
 
   # create the shim in the bin directory
   local valetBin="${binDirectory}/valet"
@@ -499,7 +465,8 @@ function selfUpdate::createShim() {
   ${_SUDO} chmod +x "${valetBin}"
 }
 
-function selfUpdate::addToPath() {
+# Add the given directory path to the PATH.
+function selfUpdate_addToPath() {
   local binDirectory="${1}"
   local unattended="${2}"
 
@@ -549,8 +516,43 @@ function selfUpdate::addToPath() {
   fi
 }
 
+# Update a git repository.
+function selfUpdate_updateGitRepository() {
+  local repoPath="${1}"
+
+  if [[ ! -f "${repoPath}/.git/HEAD" ]]; then
+    core::fail "The directory ⌜${repoPath}⌝ is not a git repository."
+  fi
+
+  if ! command -v git &>/dev/null; then
+    core::fail "The command ⌜git⌝ is not installed or not found in your PATH."
+  fi
+
+  log::debug "Updating the git repository ⌜${repoPath}⌝."
+
+  io::readFile "${repoPath}/.git/HEAD"
+  if [[ ${RETURNED_VALUE} =~ ^"ref: refs/heads/"(.+) ]]; then
+    local branch="${BASH_REMATCH[1]:-}"
+    branch="${branch%%$'\n'*}"
+    log::info "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
+    pushd "${repoPath}" &>/dev/null || core::fail "Could not change to the directory ⌜${repoPath}⌝."
+    if ! git fetch -q; then
+      popd &>/dev/null || :
+      return 1
+    fi
+    if ! git merge -q --ff-only "origin/${branch}" &>/dev/null; then
+      popd &>/dev/null || :
+      return 1
+    fi
+    popd &>/dev/null || :
+    return 0
+  fi
+
+  core::fail "The git repository ⌜${repoPath}⌝ does not have a checked out branch to pull."
+}
+
 # Check if a given directory is in the PATH.
-function selfUpdate::isDirectoryInPath() {
+function selfUpdate_isDirectoryInPath() {
   local directory="${1}"
   local IFS=':'
   for p in ${PATH}; do
@@ -562,9 +564,9 @@ function selfUpdate::isDirectoryInPath() {
 }
 
 # Get the version number of the latest release on GitHub.
-function selfUpdate::getLatestReleaseVersion() {
+function selfUpdate_getLatestReleaseVersion() {
   local jsonFile="${TMPDIR:-/tmp}/valet.latest.json"
-  selfUpdate::download "https://api.github.com/repos/jcaillon/valet/releases/latest" "${jsonFile}"
+  selfUpdate_download "https://api.github.com/repos/jcaillon/valet/releases/latest" "${jsonFile}"
   io::readFile "${jsonFile}"
   rm -f "${jsonFile}" 1>/dev/null
   if [[ ${RETURNED_VALUE} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
@@ -576,7 +578,7 @@ function selfUpdate::getLatestReleaseVersion() {
 }
 
 # Downloads a file to a specific location.
-function selfUpdate::download() {
+function selfUpdate_download() {
   local url="${1}"
   local output="${2}"
 
@@ -589,56 +591,7 @@ function selfUpdate::download() {
   fi
 }
 
-# Attempts to update each git repository found in the user directory.
-function selfUpdate::updateUserRepositories() {
-  local userDirectory="${1}"
-
-  if [[ ! -d "${userDirectory}" ]]; then
-    return 0
-  fi
-
-  log::info "Attempting to update the git repositories in ⌜${userDirectory}⌝."
-
-  if ! command -v git &>/dev/null; then
-    log::warning "The command ⌜git⌝ is not installed or not found in your PATH, skipping git update."
-    return 0
-  fi
-
-  function filterGitRepositories() {
-    if [[ -d "${1}/.git" ]]; then
-      return 1
-    fi
-    return 0
-  }
-  io::listDirectories "${userDirectory}" true false filterGitRepositories
-  local path
-  local allUpdateSuccess=true
-  local -i count=0
-  for path in "${RETURNED_ARRAY[@]}"; do
-    if [[ -d "${path}/.git" ]]; then
-      log::debug "Found a git repository ⌜${path}⌝."
-      if ! selfUpdate::updateGitRepository "${path}"; then
-        allUpdateSuccess=false
-        log::warning "Failed to update the git repository ⌜${path}⌝, clean your workarea first (e.g. git stash, or git commit)."
-      else
-        count+=1
-      fi
-    fi
-  done
-
-  if [[ ${allUpdateSuccess} == "true" ]]; then
-    if (( count == 0 )); then
-      log::info "No git repositories found in ⌜${userDirectory}⌝."
-    else
-      log::success "A total of ${count} git repositories in ⌜${userDirectory}⌝ have been updated."
-    fi
-  else
-    log::warning "Some git repositories in ⌜${userDirectory}⌝ could not be updated, ${count} updated successfully."
-  fi
-
-}
-
-function selfUpdate::copyExtras() {
+function selfUpdate_copyExtras() {
   local userDirectory="${1}"
 
   mkdir -p "${userDirectory}" || core::fail "Could not create the user directory ⌜${userDirectory}⌝."
@@ -649,13 +602,14 @@ function selfUpdate::copyExtras() {
 }
 
 # verify the presence of a command or fail if it does not exist
-function selfUpdate::testCommand() {
+function selfUpdate_testCommand() {
   if ! command -v "${1}" &>/dev/null; then
     core::fail "⌜${1}⌝ is required but is not installed or not found in your PATH."
   fi
 }
 
-function selfUpdate::sourceDependencies() {
+# source the dependencies of this script
+function selfUpdate_sourceDependencies() {
   # shellcheck source=../lib-system
   source system
   # shellcheck source=../lib-interactive
@@ -684,7 +638,7 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
 
   VALET_VERSION="${VALET_VERSION:-${VALET_RELEASED_VERSION}}"
 
-  # determine if we support colors (can be overriden by the user with VALET_CONFIG_ENABLE_COLORS)
+  # determine if we support colors (can be overridden by the user with VALET_CONFIG_ENABLE_COLORS)
   case "${TERM:-}" in
   xterm-color | xterm-256color | linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}" ;;
   xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
@@ -760,7 +714,7 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
 
   VALET_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
 else
-  selfUpdate::sourceDependencies
+  selfUpdate_sourceDependencies
 fi
 
 # This is put in braces to ensure that the script does not run until it is downloaded completely.

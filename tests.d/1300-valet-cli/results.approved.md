@@ -503,6 +503,7 @@ Exit code: `0`
 ⌈help            Show the help of this program or of a specific command.
 self build      Re-build the menu of valet from your commands.
 self config     Open the configuration file of Valet with your default editor.
+self extend     Extends Valet by downloading a new application or library in the user directory.
 self test       Test your valet custom commands.
 self update     Install or update valet using the latest release on GitHub.⌉
 ```
@@ -1067,6 +1068,7 @@ Exit code: `0`
 ▶ received array was:
 ⌈self build      Re-build the menu of valet from your commands.
 self config     Open the configuration file of Valet with your default editor.
+self extend     Extends Valet by downloading a new application or library in the user directory.
 self test       Test your valet custom commands.
 self update     Install or update valet using the latest release on GitHub.⌉
 ```
@@ -1129,6 +1131,8 @@ COMMANDS
       Open the configuration file of Valet with your default editor.
   self export
       Returns a string that can be evaluated to have Valet functions in bash.
+  self extend
+      Extends Valet by downloading a new application or library in the user directory.
   self mock1
       A command that only for testing valet core functions.
   self mock2

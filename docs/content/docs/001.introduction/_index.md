@@ -14,7 +14,7 @@ This tool was initially created to solve the following problem:
 
 > I am building a set of bash scripts to automate various tasks. In each of these scripts, I am writing the same functions to log messages, parse the arguments, display an usage text, handle errors etc... I need generic functions that do these jobs for me, and which I can source in each of my scripts.
 
-Once this basic requirement was fulfilled, more and more features were added **to make writing code in bash somewhat enjoyable** (I may have an issue with weakly typed languages 😅).
+Once this basic requirement was fulfilled, more and more features were added **to make writing code in bash enjoyable** (I may have an issue with weakly typed languages 😅).
 
 With Valet, you can setup and execute tests for your scripts, code an interactive experience for your users, navigate and execute your scripts (called *commands*) from a searchable menu interface. It **provides libraries of functions that can be source'd** to solve standard programming needs such as string, array or file manipulation, and so on...
 
