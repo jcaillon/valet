@@ -22,6 +22,7 @@
 *.dockerignore text
 Dockerfile text
 VERSION text
+*.ps1 text
 
 # docs
 *.css text
@@ -34,7 +35,6 @@ VERSION text
 *.svg text
 
 # Windows text files that should be normalized to crlf
-*.ps1 text eol=crlf
 *.cmd text eol=crlf
 *.bat text eol=crlf
 
