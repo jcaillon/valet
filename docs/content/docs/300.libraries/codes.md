@@ -34,4 +34,4 @@ Ascii graphics:
 
 
 
-> Documentation generated for the version 0.25.3 (2024-11-24).
+> Documentation generated for the version 0.26.6 (2024-11-24).
