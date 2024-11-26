@@ -914,13 +914,11 @@ function core::sourceUserCommands() {
   if [[ ! -f "${commandsFile}" ]]; then
     log::info "The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'"Now building it using ⌜valet self build⌝ command."
 
-    local originalLogLevel
-    log::getLevel && originalLogLevel="${RETURNED_VALUE}"
-    log::setLevel warning true
     # shellcheck disable=SC1091
+    unset _CMD_INCLUDED
+    # shellcheck source=commands.d/self-build.sh
     source "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh"
-    selfBuild
-    log::setLevel "${originalLogLevel}" true
+    selfBuild --silent
 
     if [[ ! -f "${commandsFile}" ]]; then
       core::fail "Could not build the commands file, please check the error above."
@@ -945,6 +943,20 @@ function core::reloadUserCommands() {
   # shellcheck disable=SC2086
   unset -v ${!CMD_*} _CMD_INCLUDED
   core::sourceUserCommands
+}
+
+# ## core::deleteUserCommands
+#
+# Delete the user 'commands' file from the valet user directory.
+#
+# You probably want to reload the user commands afterward using `core::reloadUserCommands`.
+#
+# ```bash
+# core::deleteUserCommands
+# ```
+function core::deleteUserCommands() {
+  core::getUserDirectory
+  rm -f "${RETURNED_VALUE}/commands"
 }
 
 # ## core::getVersion
