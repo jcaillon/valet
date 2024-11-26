@@ -428,6 +428,9 @@ function main::parseMainArgumentsSwitch() {
   -w | --very-verbose)
     log::setLevel trace
     ;;
+  --disable-progress-bars)
+    VALET_DISABLE_PROGRESS_BARS=true
+    ;;
   --version)
     core::getVersion
     printf '%s\n' "${RETURNED_VALUE}"

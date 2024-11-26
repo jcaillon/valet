@@ -1076,6 +1076,9 @@ function interactive::startProgress() {
     # we are not in an interactive session
     return 0
   fi
+  if [[ ${VALET_DISABLE_PROGRESS_BARS:-} == "true" ]]; then
+    return 0
+  fi
 
   if [[ -n "${_PROGRESS_BAR_PID:-}" ]]; then
     core::fail "A spinner or progress bar is already running."
@@ -1121,6 +1124,9 @@ function interactive::updateProgress() {
     # we are not in an interactive session
     return 0
   fi
+  if [[ ${VALET_DISABLE_PROGRESS_BARS:-} == "true" ]]; then
+    return 0
+  fi
 
   if [[ ${percent} -lt 0 ]]; then
     return
@@ -1150,6 +1156,9 @@ function interactive::updateProgress() {
 function interactive::stopProgress() {
   if [[ ! -t 2 ]]; then
     # we are not in an interactive session
+    return 0
+  fi
+  if [[ ${VALET_DISABLE_PROGRESS_BARS:-} == "true" ]]; then
     return 0
   fi
 
