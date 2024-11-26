@@ -10,52 +10,52 @@ set -Eeu -o pipefail
 #===============================================================
 # >>> command: self build
 #===============================================================
-: "---
-command: self build
-function: selfBuild
-author: github.com/jcaillon
-shortDescription: Re-build the menu of valet from your commands.
-description: |-
-  This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
-
-  Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.
-
-  This scripts:
-
-  - Makes a list of all the elligible files in which we could find command definitions.
-  - For each file in this list, extract the command definitions.
-  - Build your commands file (in your valet user directory) from these definitions.
-
-  You can call this script directly in case calling ⌜valet self build⌝ is broken:
-
-  → valet.d/commands.d/self-build.sh
-options:
-- name: -d, --user-directory <path>
-  description: |-
-    Specify the directory in which to look for your command scripts.
-
-    This defaults to the path defined in the environment variable VALET_USER_DIRECTORY=\"my/path\" or to ⌜~/.valet.d⌝.
-
-    Can be empty to only build the core commands.
-- name: -C, --core-only
-  description: |-
-    Build only the core commands (under commands.d).
-- name: -o, --output <path>
-  description: |-
-    Specify the file path in which to write the command definition variables.
-
-    This defaults to the ⌜commands⌝ file in your Valet user directory.
-- name: -O, --no-output
-  description: |-
-    Do not write the command definition variables to a file.
-
-    This will just create the variables.
----"
+##<<VALET_COMMAND
+# command: self build
+# function: selfBuild
+# author: github.com/jcaillon
+# shortDescription: Re-build the menu of valet from your commands.
+# description: |-
+#   This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
+#
+#   Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.
+#
+#   This scripts:
+#
+#   - Makes a list of all the eligible files in which we could find command definitions.
+#   - For each file in this list, extract the command definitions.
+#   - Build your commands file (in your valet user directory) from these definitions.
+#
+#   You can call this script directly in case calling ⌜valet self build⌝ is broken:
+#
+#   → valet.d/commands.d/self-build.sh
+# options:
+# - name: -d, --user-directory <path>
+#   description: |-
+#     Specify the directory in which to look for your command scripts.
+#     Defaults to the valet user directory.
+# - name: -C, --core-only
+#   description: |-
+#     Build only the core commands (under commands.d).
+# - name: -o, --output <path>
+#   description: |-
+#     Specify the file path in which to write the command definition variables.
+#
+#     This defaults to the ⌜commands⌝ file in your Valet user directory.
+# - name: -O, --no-output
+#   description: |-
+#     Do not write the command definition variables to a file.
+#
+#     This will just create the variables.
+# - name: -s, --silent
+#   description: |-
+#     Build silently without any info logs.
+##VALET_COMMAND
 function selfBuild() {
-  local userDirectory outputFile coreOnly noOutput
+  local userDirectory outputFile coreOnly noOutput silent
 
   # if this script is run directly
-  if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
+  if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || -z "${_CMD_INCLUDED:-}" ]]; then
     # parse arguments manually (basic parsing only)
     while [[ $# -gt 0 ]]; do
       case "${1}" in
@@ -68,10 +68,13 @@ function selfBuild() {
         outputFile="${1}"
         ;;
       -C | --core-only)
-        coreOnly="true"
+        coreOnly=true
         ;;
       -O | --noOutput)
-        noOutput="true"
+        noOutput=true
+        ;;
+      -s | --silent)
+        silent=true
         ;;
       -*)
         if [[ -v CMD_OPTS_selfBuild ]]; then
@@ -90,6 +93,13 @@ function selfBuild() {
   else
     core::parseArguments "$@" && eval "${RETURNED_VALUE}"
     core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  fi
+
+  local originalLogLevel
+  if [[ ${silent:-} == "true" ]]; then
+    log::debug "Building the valet user commands silently."
+    log::getLevel && originalLogLevel="${RETURNED_VALUE}"
+    log::setLevel warning true
   fi
 
   core::getUserDirectory && userDirectory="${userDirectory:-${RETURNED_VALUE}}"
@@ -152,6 +162,7 @@ function selfBuild() {
 
   # extract the command definitions to variables
   extractCommandDefinitionsToVariables "${commandDefinitionFiles[@]}"
+  local duplicatedCommands="${RETURNED_VALUE:-0}"
 
   summarize
 
@@ -170,7 +181,15 @@ function selfBuild() {
     bumpValetBuildVersion
   fi
 
+  if [[ ${silent:-} == "true" ]]; then
+    log::setLevel "${originalLogLevel}" true
+  fi
+
   log::success "The valet user commands have been successfully built."
+
+  if ((duplicatedCommands > 0)); then
+    log::warning "There are ${duplicatedCommands} duplicated commands, please remove them or you will probably not get the expected behavior!"
+  fi
 }
 
 #===============================================================
@@ -219,6 +238,7 @@ function bumpValetBuildVersion() {
 #
 # $@: The files to extract from.
 function extractCommandDefinitionsToVariables() {
+  local -i duplicates=0
   while [[ $# -gt 0 ]]; do
     local file="${1}"
     shift
@@ -242,7 +262,14 @@ function extractCommandDefinitionsToVariables() {
       command="${command#valet }"
       command="${command#valet}"
 
-      log::info "                         ├── ⌜${command}⌝."
+      if array::isInArray CMD_ALL_COMMANDS_ARRAY "${command}"; then
+        log::warning "                         ├── Skipping ⌜${command}⌝ (already defined)."
+        duplicates+=1
+        continue
+      else
+        log::info "                         ├── ⌜${command}⌝."
+      fi
+
 
       io::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${RETURNED_VALUE}"
       TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${GLOBAL_VALET_HOME}"/}"
@@ -275,6 +302,8 @@ function extractCommandDefinitionsToVariables() {
 
   # declare complementary variables
   declareOtherCommmandVariables
+
+  RETURNED_VALUE=${duplicates}
 }
 
 # This function uses the global TEMP_CMD_BUILD_* variables to declare the final
