@@ -77,7 +77,7 @@ function array::appendIfNotPresent() {
 #
 # - $1: **array name** _as string_:
 #       The global variable name of the array.
-# - $2: **value** _as any:
+# - $2: **value** _as any_:
 #       The value to check.
 #
 # Returns:

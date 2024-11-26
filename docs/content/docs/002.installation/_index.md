@@ -45,18 +45,13 @@ Finally, call `valet` to get started with the example commands!
 2. Add this directory to your PATH so you can call `valet` from your terminal.
 3. Call `valet` to get started with the example commands!
 
-{{< cards >}}
-  {{< card icon="arrow-circle-left" link="../introduction" title="Introduction" >}}
-  {{< card icon="arrow-circle-right" link="../usage" title="Usage" >}}
-{{< /cards >}}
-
 ## 🪟 Use Valet on windows
 
 It is recommended to use Git bash, installed with [Git for Windows][git-for-windows-link] and [Windows terminal][windows-terminal-link] as your terminal program. You can also use Valet with any Linux distribution and [Windows Subsystem for Linux][wsl-installation-link] (WSL).
 
 ## 🐋 Run Valet in a container
 
-With a container engine (such as [Docker][docker] or [Podman][podman]), you can run a containerized version of Valet as such:
+With a container engine (such as [Docker][docker] or [Podman][podman]), you can run a containerized version of Valet:
 
 ```bash
 docker run --rm -it ghcr.io/jcaillon/valet
