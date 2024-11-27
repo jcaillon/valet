@@ -40,11 +40,9 @@ ABOUT
   
   - 4. Copy the examples in the user valet directory ~/.valet.d.
   
-  - 5. Copy the extras (vscode snippets) in the user valet directory ~/.valet.d.
+  - 6. Run self setup command (in case of a new installation) or re-export the config.
   
-  - 6. Run self setup command (in case of an installation).
-  
-  - 7. Try to update (fetch merge -ff-only) the git repositories and all installed extensions in your valet user directory.
+  - 7. Try to update (fetch merge --ff-only) the git repositories and all installed extensions in your valet user directory.
   
 
 USAGE
@@ -109,13 +107,12 @@ OPTIONS
   -P, --no-path
       Set to true to not add the Valet directory to the PATH (append to your .bashrc file).
       This option can be set by exporting the variable VALET_NO_PATH='true'.
-  --no-extras
-      Set to true to to not copy the extras (vscode code snippets) to the valet user directory (~/.valet.d).
-      This option can be set by exporting the variable VALET_NO_EXTRAS='true'.
   -E, --no-examples
       Set to true to to not copy the examples (showcase) to the valet user directory (~/.valet.d).
       
       If you do not set this option, newer examples will override the existing ones.
+      
+      In case of an update, if the showcase directory does not exist, the examples will not be copied.
       This option can be set by exporting the variable VALET_NO_EXAMPLES='true'.
   -U, --skip-extensions
       Set to true to not attempt to update the installed extensions under the valet user directory (~/.valet.d).
@@ -123,6 +120,11 @@ OPTIONS
   -e, --only-extensions
       Set to true to only update the installed extensions under the valet user directory (~/.valet.d).
       This option can be set by exporting the variable VALET_ONLY_EXTENSIONS='true'.
+  -b, --use-branch
+      Set to true to download Valet from a branch tarball instead of a release.
+      In that case, the version is the branch name.
+      Only works for new installations, not for updates.
+      This option can be set by exporting the variable VALET_USE_BRANCH='true'.
   -h, --help
       Display the help for this command.
 

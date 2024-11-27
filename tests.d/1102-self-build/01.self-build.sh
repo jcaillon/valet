@@ -12,6 +12,9 @@ function testSelfBuild() {
 
     local varName var
     for varName in ${!CMD_*}; do
+      if [[ ! -v "${varName}" ]]; then
+        continue
+      fi
       local -n var="${varName}"
       var="${var//[⌜⌝→]/}"
       echo "${varName}=${var[*]@K}"

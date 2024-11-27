@@ -1,0 +1,29 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=827846 to learn about workspace recommendations.
+	// Extension identifier format: ${publisher}.${name}. Example: vscode.csharp
+
+	// List of extensions which should be recommended for users of this workspace.
+	"recommendations": [
+    "rogalmic.bash-debug",
+    "mads-hartmann.bash-ide-vscode",
+    "aaron-bond.better-comments",
+    "jeff-hykin.better-shellscript-syntax",
+    "streetsidesoftware.code-spell-checker",
+    "editorconfig.editorconfig",
+    "csholmq.excel-to-markdown-table",
+    "oderwat.indent-rainbow",
+    "yzhang.markdown-all-in-one",
+    "telesoho.vscode-markdown-paste-image",
+    "davidanson.vscode-markdownlint",
+    "pombadev.pbbs",
+    "foxundermoon.shell-format",
+    "timonwong.shellcheck",
+    "tetradresearch.vscode-h2o",
+    "rpinski.shebang-snippets",
+    "remisa.shellman",
+    "zjffun.snippetsmanager",
+    "gruntfuggly.todo-tree",
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker-french"
+	]
+}

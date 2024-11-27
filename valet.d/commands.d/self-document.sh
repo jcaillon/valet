@@ -26,9 +26,9 @@ source array
 # command: self document
 # function: selfDocument
 # author: github.com/jcaillon
-# shortDescription: Generate the documentation for all the library functions of Valet.
+# shortDescription: Generate the documentation and code snippets for all the library functions of Valet.
 # description: |-
-#   Generate the documentation for all the library functions of Valet.
+#   Generate the documentation and code snippets for all the library functions of Valet.
 #
 #   It will parse all the library files and generate:
 #
@@ -69,16 +69,16 @@ function selfDocument() {
   array::sort SORTED_FUNCTION_NAMES
 
   # write each function documentation to a file
-  selfRelease_writeAllFunctionsToMarkdown "${pageFooter}" "${output}/VALET_LIBRARIES.md"
-  log::success "The documentation has been generated in ⌜${output}/VALET_LIBRARIES.md⌝."
+  selfRelease_writeAllFunctionsToMarkdown "${pageFooter}" "${output}/lib-valet.md"
+  log::info "The documentation has been generated in ⌜${output}/lib-valet.md⌝."
 
   # write each function to a file
   selfRelease_writeAllFunctionsToPrototypeScript "${pageFooter}" "${output}/lib-valet"
-  log::success "The prototype script has been generated in ⌜${output}/lib-valet⌝."
+  log::info "The prototype script has been generated in ⌜${output}/lib-valet⌝."
 
   # write each function to the snippet file
   selfRelease_writeAllFunctionsToCodeSnippets "${pageFooter}" "${output}/.vscode/valet.code-snippets"
-  log::success "The vscode snippets have been generated in ⌜${output}/.vscode/valet.code-snippets⌝."
+  log::info "The vscode snippets have been generated in ⌜${output}/.vscode/valet.code-snippets⌝."
 }
 
 # Returns the footer for the documentation.
@@ -125,6 +125,15 @@ function selfDocument::getAllFunctionsDocumentation() {
   # get all the files in the valet.d directory
   io::listFiles "${GLOBAL_VALET_HOME}/valet.d"
   local -a filesToAnalyze=("${RETURNED_ARRAY[@]}")
+
+  # add each file of each user library directory
+  if [[ ${coreOnly} != "true" ]]; then
+    local libraryDirectory
+    for libraryDirectory in "${CMD_LIBRARY_DIRECTORIES[@]}"; do
+      io::listFiles "${libraryDirectory}"
+      filesToAnalyze+=("${RETURNED_ARRAY[@]}")
+    done
+  fi
 
   local IFS=$'\n'
   if log::isDebugEnabled; then
@@ -189,17 +198,19 @@ function selfRelease_writeAllFunctionsToMarkdown() {
   local outputFile="${2:-}"
 
   io::createFilePathIfNeeded "${outputFile}"
-  io::writeToFile "${outputFile}" "# Valet functions documentation"$'\n'$'\n'"> ${pageFooter}"$'\n'$'\n'
+
+  local content="# Valet functions documentation"$'\n'$'\n'"> ${pageFooter}"$'\n'$'\n'
 
   # append each function documentation to the file
-  local key
+  local key documentation
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
-    io::writeToFileFromRef "${outputFile}" "RETURNED_ASSOCIATIVE_ARRAY[${key}]" true
-    io::writeToFile "${outputFile}" $'\n'$'\n' true
+    documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
+    content+="${!documentation}"$'\n'$'\n'
   done
 
   # add footer
-  io::writeToFile "${outputFile}" $'\n'$'\n'"> ${pageFooter}"
+  content+=$'\n'$'\n'"> ${pageFooter}"
+  io::writeToFile "${outputFile}" "${content}"
 }
 
 # This function writes all the function prototypes in a file.

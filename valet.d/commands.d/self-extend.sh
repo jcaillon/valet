@@ -127,8 +127,9 @@ function selfExtend() {
   core::deleteUserCommands
   core::reloadUserCommands
 
-  # rebuild the snippets
-  # TODO: rebuild the snippets
+  # rebuild the documentation
+  core::sourceFunction selfDocument
+  selfDocument
 }
 
 # Download the source tarball for a given repository and reference.
@@ -183,7 +184,6 @@ function selfExtend_downloadTarball() {
   io::writeToFile "${targetDirectory}/.sha1" "${sha1}"
   io::writeToFile "${targetDirectory}/.tarball-url" "${tarballUrlPattern}"
 }
-
 
 # Get the sha1 from a git server API.
 #

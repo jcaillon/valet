@@ -516,9 +516,9 @@ Exit code: `0`
 ▶ called main::showInteractiveCommandsMenu Please select the command to run. _COPIED_COMMMANDS_ARRAY⌉
 ▶ received array was:
 ⌈help             Show the help of this program or of a specific command.
-self build       Re-build the menu of valet from your commands.
+self build       Index all the commands and libraries present in the valet user directory and installation directory.
 self config      Open the configuration file of Valet with your default editor.
-self document    Generate the documentation for all the library functions of Valet.
+self document    Generate the documentation and code snippets for all the library functions of Valet.
 self extend      Extends Valet by downloading a new application or library in the user directory.
 self test        Test your valet custom commands.
 self update      Update valet and its extensions to the latest releases.⌉
@@ -1083,9 +1083,9 @@ Exit code: `0`
 ```log
 ▶ called main::showInteractiveCommandsMenu Please select the command to run. FILTERED_COMMANDS_FOR_SUB_MENU⌉
 ▶ received array was:
-⌈self build       Re-build the menu of valet from your commands.
+⌈self build       Index all the commands and libraries present in the valet user directory and installation directory.
 self config      Open the configuration file of Valet with your default editor.
-self document    Generate the documentation for all the library functions of Valet.
+self document    Generate the documentation and code snippets for all the library functions of Valet.
 self extend      Extends Valet by downloading a new application or library in the user directory.
 self test        Test your valet custom commands.
 self update      Update valet and its extensions to the latest releases.⌉
@@ -1147,11 +1147,11 @@ OPTIONS
 COMMANDS
 
   self build
-      Re-build the menu of valet from your commands.
+      Index all the commands and libraries present in the valet user directory and installation directory.
   self config
       Open the configuration file of Valet with your default editor.
   self document
-      Generate the documentation for all the library functions of Valet.
+      Generate the documentation and code snippets for all the library functions of Valet.
   self export
       Returns a string that can be evaluated to have Valet functions in bash.
   self extend

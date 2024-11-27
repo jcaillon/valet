@@ -12,8 +12,8 @@ function testSelfDocument() {
   selfDocument --output "${directory}" --core-only
 
   echo
-  echo "→ cat ${directory}/VALET_LIBRARIES.md"
-  io::cat "${directory}/VALET_LIBRARIES.md"
+  echo "→ cat ${directory}/lib-valet.md"
+  io::cat "${directory}/lib-valet.md"
   echo
   echo "→ cat ${directory}/lib-valet"
   io::cat "${directory}/lib-valet"

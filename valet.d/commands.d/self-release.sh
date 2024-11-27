@@ -272,9 +272,6 @@ function selfRelease::uploadArtifact() {
     io::invoke cp -R "${GLOBAL_VALET_HOME}/${file}" .
   done
 
-  # extra files to copy
-  io::invoke cp "${GLOBAL_VALET_HOME}/.vscode/extensions.json" ./extras/.vscode/extensions.json
-
   # prepare artifact
   local artifactPath="valet.tar.gz"
   io::invoke tar -czvf "${artifactPath}" "${files[@]}"
@@ -352,6 +349,7 @@ function selfRelease::updateDocumentation() {
   if [[ "${dryRun:-}" != "true" ]]; then
     io::invoke git add "${GLOBAL_VALET_HOME}/docs/static/config.md"
     io::listFiles "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries"
+    array::sort RETURNED_ARRAY
     # remove _index.md (otherwise not consistent tests on the CI...)
     local -a files
     local file
@@ -363,6 +361,7 @@ function selfRelease::updateDocumentation() {
     done
     io::invoke git add "${files[@]}"
     io::listFiles "${GLOBAL_VALET_HOME}/extras"
+    array::sort RETURNED_ARRAY
     io::invoke git add "${RETURNED_ARRAY[@]}"
     io::invoke git commit -m ":memo: updating the documentation"
     log::success "The documentation update has been committed."
@@ -391,7 +390,8 @@ function selfRelease::writeAllFunctionsDocumentation() {
     string::regexGetFirst "${functionName}" '([[:alnum:]]+)::'
     local packageName="${RETURNED_VALUE}"
     if [[ -z "${packageName}" ]]; then
-      packageName="misc"
+      # case for "source" function
+      packageName="core"
     fi
 
     local path="${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries/${packageName}.md"

@@ -10,12 +10,15 @@ set -Eeu -o pipefail
 #===============================================================
 # >>> command: self build
 #===============================================================
+
 ##<<VALET_COMMAND
 # command: self build
 # function: selfBuild
 # author: github.com/jcaillon
-# shortDescription: Re-build the menu of valet from your commands.
+# shortDescription: Index all the commands and libraries present in the valet user directory and installation directory.
 # description: |-
+#   Index all the command and libraries present in the valet user directory and installation directory.
+#
 #   This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
 #
 #   Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.
@@ -25,6 +28,7 @@ set -Eeu -o pipefail
 #   - Makes a list of all the eligible files in which we could find command definitions.
 #   - For each file in this list, extract the command definitions.
 #   - Build your commands file (in your valet user directory) from these definitions.
+#   - Makes a list of all `libs.d` directories found in the user directory.
 #
 #   You can call this script directly in case calling ⌜valet self build⌝ is broken:
 #
@@ -110,8 +114,8 @@ function selfBuild() {
   GLOBAL_VALET_HOME="${RETURNED_VALUE}"
 
   # list all the files in which we need to find command definitions
-  local -a commandDefinitionFiles
-  commandDefinitionFiles=(
+  local -a libraryDirectories=()
+  local -a commandDefinitionFiles=(
     "${GLOBAL_VALET_HOME}/valet"
     "${GLOBAL_VALET_HOME}/valet.d/commands.d"/*.sh
   )
@@ -126,15 +130,21 @@ function selfBuild() {
       while [[ -n "${listOfDirectories}" ]]; do
         currentDirectory="${listOfDirectories%%$'\n'*}"
         listOfDirectories="${listOfDirectories#*$'\n'}"
+
         log::trace "Searching for command definitions in ⌜${currentDirectory}⌝."
         log::trace "listOfDirectories: ⌜${listOfDirectories}⌝."
         for file in "${currentDirectory}"/**; do
           local fileBasename="${file##*/}"
-          if [[ -d "${file}" && ${fileBasename} != "."* && ${fileBasename} != "tests.d" ]]; then
+          if [[ -d ${file} && ${fileBasename} != "."* && ${fileBasename} != "tests.d" ]]; then
             # if directory we need to add it to the search list
-            # except if it starts with a . or if it is a tests.d directory
-            listOfDirectories+="${file}"$'\n'
-            log::trace "adding directory ⌜${file}⌝ to the search list."
+            # except if it starts with a . or if it is a tests.d or libs.d directory
+            if [[ ${fileBasename} == "libs.d" ]]; then
+              # if directory is named libs.d, we need to add it to libraryDirectories
+              libraryDirectories+=("${file}")
+            else
+              listOfDirectories+="${file}"$'\n'
+              log::trace "adding directory ⌜${file}⌝ to the search list."
+            fi
             continue
           elif [[ "${file}" != *".sh" ]]; then
             # skip all files not ending with .sh
@@ -161,6 +171,9 @@ function selfBuild() {
   # shellcheck disable=SC2086
   unset -v ${!CMD_*} \
     SELF_BUILD_ERRORS
+
+  # add the list of library directories
+  CMD_LIBRARY_DIRECTORIES=("${libraryDirectories[@]}")
 
   # extract the command definitions to variables
   extractCommandDefinitionsToVariables "${commandDefinitionFiles[@]}"
@@ -205,14 +218,21 @@ function summarize() {
   message+="- Number of variables declared: ⌜${numberOfVars}⌝."$'\n'
   message+="- Number of functions: ⌜${#CMD_ALL_FUNCTIONS_ARRAY[@]}⌝."$'\n'
   message+="- Number of commands: ⌜${#CMD_ALL_COMMANDS_ARRAY[@]}⌝."$'\n'
+  message+="- Number of user library directories found: ⌜${#CMD_LIBRARY_DIRECTORIES[@]}⌝."$'\n'
   message+="- Maximum sub command level: ⌜${CMD_MAX_SUB_COMMAND_LEVEL:-0}⌝."$'\n'
 
-  message+=$'\n'"== List of all the commands =="$'\n\n'
   local IFS=$'\n'
-  message+="${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]}"$'\n'
+
+  if ((${#CMD_LIBRARY_DIRECTORIES[@]} > 0)); then
+    message+=$'\n'"== List of user library directories =="$'\n\n'
+    message+="${CMD_LIBRARY_DIRECTORIES[*]}"$'\n'
+  fi
 
   message+=$'\n'"== List of all the hidden commands =="$'\n\n'
   message+="${CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY[*]}"$'\n'
+
+  message+=$'\n'"== List of all the commands =="$'\n\n'
+  message+="${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]}"$'\n'
 
   log::info "${message}"
 }

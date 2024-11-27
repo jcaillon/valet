@@ -41,7 +41,9 @@ You can open your `~/.valet.d` directory as a workspace on vscode.
 
 ### Autocompletion on Valet library functions
 
-You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/edit/main/extras/valet.code-snippets):
+You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/edit/main/extras/valet.code-snippets) which should be generated locally using the `valet self document` command.
+
+Then:
 
 - copy this file in your repository under the `.vscode` directory (you can chose to ignore this in git or push it).
 - or copy this file as `shellscript.json` in your user snippets folder (`%APPDATA%\Code\User\snippets` in windows).
@@ -56,7 +58,7 @@ This allows you to have autocompletion and help on the core and libraries functi
 
 ### Autocompletion - alternative way
 
-Alternatively, you copy (or link) the [extras/lib-valet](https://github.com/jcaillon/valet/blob/latest/extras/lib-valet) file present in the Valet installation to `./lib-valet`. It is a file that defines all the function prototypes from Valet, allowing autocompletion with vscode bash IDE extension.
+Alternatively, you copy (or link) the [lib-valet](https://github.com/jcaillon/valet/blob/latest/extras/lib-valet) file to `./lib-valet`. It is a file that defines all the function prototypes from Valet, allowing autocompletion with vscode bash IDE extension. It can be generated locally using the command `valet self document`.
 
 If you have installed the recommended extensions, you will also have shellcheck which will attempt to following the sourced files in your project. You should annotate each `source` statement for shellcheck to use the `lib-valet` file:
 

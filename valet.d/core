@@ -823,16 +823,34 @@ function log::printCallStack() {
 # > - This function makes sure that we do not include the same file twice.
 # > - Use `builtin source` if you want to include the file even if it was already included.
 function source() {
-  local filePathToInclude includedFile
+  local filePathToInclude
   if [[ -f "${GLOBAL_VALET_HOME}/valet.d/lib-${1}" ]]; then
+    # source the lib from the valet core libs
     filePathToInclude="${GLOBAL_VALET_HOME}/valet.d/lib-${1}"
-  elif [[ -f "${BASH_SOURCE[1]%/*}/${1}" ]]; then
-    filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
-  elif [[ -f "${1}" ]]; then
-    filePathToInclude="${1}"
   else
-    core::fail "Cannot source the file ${1} because it does not exist."
+    # source the lib from user libs
+    if [[ -v CMD_LIBRARY_DIRECTORIES ]]; then
+      local libraryDirectory
+      for libraryDirectory in "${CMD_LIBRARY_DIRECTORIES[@]}"; do
+        if [[ -f "${libraryDirectory}/lib-${1}" ]]; then
+          filePathToInclude="${libraryDirectory}/lib-${1}"
+        fi
+      done
+    fi
+    if [[ -z "${filePathToInclude:-}" ]]; then
+      if [[ -f "${BASH_SOURCE[1]%/*}/${1}" ]]; then
+        # source a file next to the file that calls this function
+        filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
+      elif [[ -f "${1}" ]]; then
+        # source a file with an absolute path or in the current directory
+        filePathToInclude="${1}"
+      else
+        core::fail "Cannot source the file ⌜${1}⌝ because it does not exist."$'\n'"If you meant to source a library, make sure it is either in the valet core or user libraries and do not include the ⌜lib-⌝ prefix."
+      fi
+    fi
   fi
+
+  local includeFile
   for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
     if [[ ${includedFile} == "${filePathToInclude}" ]]; then
       return 0
@@ -905,7 +923,8 @@ function core::sourceUserCommands() {
 
   # source the user commands
   local userDirectory
-  core::getUserDirectory && userDirectory="${RETURNED_VALUE}"
+  core::getUserDirectory
+  userDirectory="${RETURNED_VALUE}"
 
   local commandsFile
   commandsFile="${userDirectory}/commands"

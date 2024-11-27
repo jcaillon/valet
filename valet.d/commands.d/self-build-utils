@@ -253,6 +253,7 @@ _CMD_INCLUDED=1
 # ====================
 # Common variables
 # ====================
+# CMD_LIBRARY_DIRECTORIES = array of all the libs.d directories found in the user directory
 # CMD_ALL_FUNCTIONS_ARRAY = array of all the functions callable with a command
 # CMD_ALL_FUNCTIONS = list all the functions callable with a command
 # CMD_ALL_COMMANDS_ARRAY = array of all the commands

@@ -48,11 +48,9 @@ fi
 #
 #   - 4. Copy the examples in the user valet directory ~/.valet.d.
 #
-#   - 5. Copy the extras (vscode snippets) in the user valet directory ~/.valet.d.
+#   - 6. Run self setup command (in case of a new installation) or re-export the config.
 #
-#   - 6. Run self setup command (in case of an installation).
-#
-#   - 7. Try to update (fetch merge -ff-only) the git repositories and all installed extensions in your valet user directory.
+#   - 7. Try to update (fetch merge --ff-only) the git repositories and all installed extensions in your valet user directory.
 #
 # options:
 # - name: -u, --unattended
@@ -85,15 +83,13 @@ fi
 #   description: |-
 #     Set to true to not add the Valet directory to the PATH (append to your .bashrc file).
 #   default: false
-# - name: --no-extras
-#   description: |-
-#     Set to true to to not copy the extras (vscode code snippets) to the valet user directory (~/.valet.d).
-#   default: false
 # - name: -E, --no-examples
 #   description: |-
 #     Set to true to to not copy the examples (showcase) to the valet user directory (~/.valet.d).
 #
 #     If you do not set this option, newer examples will override the existing ones.
+#
+#     In case of an update, if the showcase directory does not exist, the examples will not be copied.
 #   default: false
 # - name: -U, --skip-extensions
 #   description: |-
@@ -102,6 +98,12 @@ fi
 # - name: -e, --only-extensions
 #   description: |-
 #     Set to true to only update the installed extensions under the valet user directory (~/.valet.d).
+#   default: false
+# - name: -b, --use-branch
+#   description: |-
+#     Set to true to download Valet from a branch tarball instead of a release.
+#     In that case, the version is the branch name.
+#     Only works for new installations, not for updates.
 #   default: false
 # examples:
 # - name: self update
@@ -115,7 +117,7 @@ fi
 #     Install the latest version of Valet in the user home directory and disable all interaction during the install process.
 ##VALET_COMMAND
 function selfUpdate() {
-  local unattended singleUserInstallation version installationDirectory noShim noPath noExamples noExtras skipExtensions onlyExtensions
+  local unattended singleUserInstallation version installationDirectory noShim noPath noExamples skipExtensions onlyExtensions useBranch
 
   # if this script is run directly
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
@@ -147,14 +149,14 @@ function selfUpdate() {
       -E | --no-examples)
         noExamples="true"
         ;;
-      -A | --no-extras)
-        noExtras="true"
-        ;;
       -U | --skip-extensions)
         skipExtensions="true"
         ;;
       -e | --only-extensions)
         onlyExtensions="true"
+        ;;
+      -b | --use-branch)
+        useBranch="true"
         ;;
       -*) core::fail "Unknown option ⌜${1}⌝." ;;
       *) core::fail "This command takes no arguments." ;;
@@ -168,7 +170,6 @@ function selfUpdate() {
     noShim="${noShim:-"${VALET_NO_SHIM:-"false"}"}"
     noPath="${noPath:-"${VALET_NO_PATH:-"false"}"}"
     noExamples="${noExamples:-"${VALET_NO_EXAMPLES:-"false"}"}"
-    noExtras="${noExtras:-"${VALET_NO_EXTRAS:-"false"}"}"
     skipExtensions="${skipExtensions:-"${VALET_SKIP_EXTENSION:-"false"}"}"
     onlyExtensions="${onlyExtensions:-"${VALET_ONLY_EXTENSION:-"false"}"}"
   else
@@ -188,6 +189,9 @@ function selfUpdate() {
       return 0
     fi
 
+    # force use branch to false
+    useBranch="false"
+
   elif command -v valet &>/dev/null; then
     log::warning "Valet is already installed but you are executing the install script. It could be updated using the 'valet self update' command."
     if [[ ${unattended} != "true" ]] && ! interactive::promptYesNo "Execute this installation script?" "true"; then
@@ -205,7 +209,7 @@ function selfUpdate() {
   local userDirectory="${RETURNED_VALUE}"
 
   # get the latest version if needed
-  if [[ ${version:-"latest"} == "latest" ]]; then
+  if [[ ${useBranch} != "true" && ${version:-"latest"} == "latest" ]]; then
     log::debug "Getting the latest version from GitHub."
     selfUpdate_getLatestReleaseVersion
     version="${RETURNED_VALUE}"
@@ -235,6 +239,9 @@ function selfUpdate() {
 
   # compute the release URL
   local releaseUrl="https://github.com/jcaillon/valet/releases/download/v${version}/valet.tar.gz"
+  if [[ ${useBranch} == "true" ]]; then
+    releaseUrl="https://github.com/jcaillon/valet/archive/${version}.tar.gz"
+  fi
 
   # compute the target directories
   local -a binDirectories
@@ -259,7 +266,7 @@ function selfUpdate() {
   done
 
   # display a recap to the user
-  local createShim=false addToPath=false copyExamples=false copyExtras=false
+  local createShim=false addToPath=false copyExamples=false
   printf '\n  %s\n\n' "${AC__TEXT_UNDERLINE}Valet installation recap:${AC__TEXT_RESET}"
   selfUpdate_printRecapLine "Operating system:" "${os}"
   if [[ ${firstInstallation} != "true" ]]; then
@@ -277,17 +284,11 @@ function selfUpdate() {
     selfUpdate_printRecapLine "Add install dir to PATH:" "true"
     addToPath=true
   fi
-  if [[ ${noExamples} != "true" ]]; then
+  if [[ ${noExamples} != "true" && (${firstInstallation} == "true" || -d "${userDirectory}/examples.d" ) ]]; then
     selfUpdate_printRecapLine "Copy examples to:" "${userDirectory}"
     copyExamples=true
   else
     selfUpdate_printRecapLine "Skip examples copy:" "true"
-  fi
-  if [[ ${noExtras} != "true" ]]; then
-    selfUpdate_printRecapLine "Copy extras to:" "${userDirectory}"
-    copyExtras=true
-  else
-    selfUpdate_printRecapLine "Skip extras copy:" "true"
   fi
   printf '\n'
 
@@ -311,6 +312,10 @@ function selfUpdate() {
     selfUpdate_install "${releaseUrl}" "${binDirectory}" "${unattended}"
   fi
 
+  if [[ ${copyExamples} == "true" ]]; then
+    selfUpdate_copyExamples "${userDirectory}"
+  fi
+
   # remove the user commands to rebuild them
   if [[ -f "${userDirectory}/commands" ]]; then
     rm -f "${userDirectory}/commands" 1>/dev/null || :
@@ -322,14 +327,6 @@ function selfUpdate() {
     selfUpdate_sourceDependencies
   else
     core::sourceUserCommands
-  fi
-
-  if [[ ${copyExamples} == "true" ]]; then
-    selfUpdate_copyExamples "${userDirectory}"
-  fi
-
-  if [[ ${copyExtras} == "true" ]]; then
-    selfUpdate_copyExtras "${userDirectory}"
   fi
 
   if [[ ${createShim} == "true" ]]; then
@@ -609,16 +606,6 @@ function selfUpdate_download() {
   else
     core::fail "You need ⌜curl⌝ or ⌜wget⌝ installed and in your PATH."
   fi
-}
-
-function selfUpdate_copyExtras() {
-  local userDirectory="${1}"
-
-  mkdir -p "${userDirectory}" || core::fail "Could not create the user directory ⌜${userDirectory}⌝."
-
-  mkdir -p "${userDirectory}/.vscode" || core::fail "Could not create the .vscode directory under the user directory ⌜${userDirectory}⌝."
-  cp -f "${GLOBAL_VALET_HOME}/extras/valet.code-snippets" "${userDirectory}/.vscode" || core::fail "Could not copy the examples to ⌜${userDirectory}⌝."
-  log::success "The vscode code snippets have been copied to ⌜${userDirectory}/.vscode/valet.code-snippets⌝."
 }
 
 # verify the presence of a command or fail if it does not exist

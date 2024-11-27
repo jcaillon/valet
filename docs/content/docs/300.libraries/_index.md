@@ -32,7 +32,70 @@ log::info "Cool logs!"
 if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
 ```
 
-## 🎀 Available libraries
+## 📗 Add a new library
+
+You can add your own libraries as you can add new commands to extend Valet functionalities.
+
+User libraries are read from the Valet user directory which defaults to `~/.valet.d`. They are expected to be bash scripts starting with `lib-` directly placed under a `libs.d` directory.
+
+Here is an example content for your user directory:
+
+{{< filetree/container >}}
+  {{< filetree/folder name="~/.valet.d" >}}
+    {{< filetree/folder name="libs.d" >}}
+      {{< filetree/file name="lib-gitlab" >}}
+      {{< filetree/file name="lib-github" >}}
+    {{< /filetree/folder >}}
+    {{< filetree/folder name="personal" >}}
+      {{< filetree/folder name="libs.d" >}}
+        {{< filetree/file name="lib-git" >}}
+      {{< /filetree/folder >}}
+    {{< /filetree/folder >}}
+  {{< /filetree/folder >}}
+{{< /filetree/container >}}
+
+Each function that you want to expose as a library function should be commented following a strict format. Many illustrations can be found in the [extras/lib-valet][valetLibraryReference] script or in the core library scripts.
+
+An example is given below:
+
+```bash
+# ## mylib::myfunction
+# 
+# A description of my function.
+#
+# Can be done in multiple paragraph and should be formatted as **markdown**.
+#
+# The following argument descriptions should be formatted precisely in order to generate
+# the correct vscode snippets.
+# 
+# - $1: **argument name** _as type_:
+#       The description of the first mandatory argument.
+#
+#       Can also be on multiple lines, be careful of the indentation.
+# - $2: optional argument name _as string_:
+#       (optional) This one is optional. It should not be emphasized (like the previous **argument name**).
+#       (defaults to empty string)
+# - $@: more args _as string_:
+#       For functions that take an undetermined number of arguments, you can use $@.
+# 
+# Returns:
+# 
+# - $?: 0 if ok, 1 otherwise.
+# - `RETURNED_VALUE`: The first returned value
+# - `RETURNED_ARRAY`: A second returned value, as array
+# 
+# ```bash
+# mylib::myfunction arg1 && echo "${RETURNED_VALUE}"
+# mylib::myfunction arg1 optional_arg2 && echo "${RETURNED_VALUE}"
+# ```
+# 
+# > A comment on this particular function.
+function mylib::myfunction() { :; }
+```
+
+Once defined, run `valet self build` to let Valet find your custom libraries. Finally, you can use `valet self document` to update your libraries documentation and vscode snippets.
+
+## 🎀 Available core libraries
 
 For more details, please check the documentation on each library:
 
@@ -51,3 +114,4 @@ For more details, please check the documentation on each library:
   {{< card link="test" icon="badge-check" title="test" subtitle="Functions usable in your test scripts." >}}
 {{< /cards >}}
 
+[valetLibraryReference]: https://github.com/jcaillon/valet/blob/latest/extras/lib-valet
