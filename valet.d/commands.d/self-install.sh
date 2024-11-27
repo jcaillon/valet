@@ -17,12 +17,12 @@ fi
 # command: self update
 # function: selfUpdate
 # author: github.com/jcaillon
-# shortDescription: Install or update valet using the latest release on GitHub.
+# shortDescription: Update valet and its extensions to the latest releases.
 #
 # description: |-
-#   Update valet using the latest release on GitHub.
+#   Update valet using the latest release on GitHub. Also update all installed extensions.
 #
-#   This script can be used as a standalone script to install Valet:
+#   This script can also be used as a standalone script to install Valet:
 #
 #   bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)"
 #
@@ -52,7 +52,7 @@ fi
 #
 #   - 6. Run self setup command (in case of an installation).
 #
-#   - 7. Try to update (fetch merge -ff-only) the git repositories under your valet user directory.
+#   - 7. Try to update (fetch merge -ff-only) the git repositories and all installed extensions in your valet user directory.
 #
 # options:
 # - name: -u, --unattended
@@ -95,9 +95,13 @@ fi
 #
 #     If you do not set this option, newer examples will override the existing ones.
 #   default: false
-# - name: -U, --skip-extensions-update
+# - name: -U, --skip-extensions
 #   description: |-
-#     Set to true to not attempt to update the git repositories under the valet user directory (~/.valet.d).
+#     Set to true to not attempt to update the installed extensions under the valet user directory (~/.valet.d).
+#   default: false
+# - name: -e, --only-extensions
+#   description: |-
+#     Set to true to only update the installed extensions under the valet user directory (~/.valet.d).
 #   default: false
 # examples:
 # - name: self update
@@ -111,7 +115,7 @@ fi
 #     Install the latest version of Valet in the user home directory and disable all interaction during the install process.
 ##VALET_COMMAND
 function selfUpdate() {
-  local unattended singleUserInstallation version installationDirectory noShim noPath noExamples noExtras skipExtensionsUpdate
+  local unattended singleUserInstallation version installationDirectory noShim noPath noExamples noExtras skipExtensions onlyExtensions
 
   # if this script is run directly
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
@@ -146,8 +150,11 @@ function selfUpdate() {
       -A | --no-extras)
         noExtras="true"
         ;;
-      -U | --skip-extensions-update)
-        skipExtensionsUpdate="true"
+      -U | --skip-extensions)
+        skipExtensions="true"
+        ;;
+      -e | --only-extensions)
+        onlyExtensions="true"
         ;;
       -*) core::fail "Unknown option ⌜${1}⌝." ;;
       *) core::fail "This command takes no arguments." ;;
@@ -162,7 +169,8 @@ function selfUpdate() {
     noPath="${noPath:-"${VALET_NO_PATH:-"false"}"}"
     noExamples="${noExamples:-"${VALET_NO_EXAMPLES:-"false"}"}"
     noExtras="${noExtras:-"${VALET_NO_EXTRAS:-"false"}"}"
-    skipExtensionsUpdate="${skipExtensionsUpdate:-"${VALET_SKIP_EXTENSIONS_UPDATE:-"false"}"}"
+    skipExtensions="${skipExtensions:-"${VALET_SKIP_EXTENSION:-"false"}"}"
+    onlyExtensions="${onlyExtensions:-"${VALET_ONLY_EXTENSION:-"false"}"}"
   else
     core::parseArguments "$@" && eval "${RETURNED_VALUE}"
     core::checkParseResults "${help:-}" "${parsingErrors:-}"
@@ -172,6 +180,14 @@ function selfUpdate() {
   local firstInstallation="${_NOT_EXECUTED_FROM_VALET:-false}"
   if [[ ${firstInstallation} != "true" ]]; then
     log::debug "Executing a self update from Valet."
+
+    # only update extensions ?
+    if [[ ${onlyExtensions} == "true" ]]; then
+      core::sourceFunction selfExtend
+      selfExtend::updateExtensions "${userDirectory}"
+      return 0
+    fi
+
   elif command -v valet &>/dev/null; then
     log::warning "Valet is already installed but you are executing the install script. It could be updated using the 'valet self update' command."
     if [[ ${unattended} != "true" ]] && ! interactive::promptYesNo "Execute this installation script?" "true"; then
@@ -209,7 +225,7 @@ function selfUpdate() {
     if [[ ${RETURNED_VALUE} == "0" || ${RETURNED_VALUE} == "1" ]]; then
       log::info "The current local version ⌜${currentVersion}⌝ is higher or equal to the distant version ⌜${version}⌝."
       log::success "You already have the latest version."
-      if [[ ${skipExtensionsUpdate} != "true" ]]; then
+      if [[ ${skipExtensions} != "true" ]]; then
         core::sourceFunction selfExtend
         selfExtend::updateExtensions "${userDirectory}"
       fi
@@ -324,11 +340,6 @@ function selfUpdate() {
     selfUpdate_addToPath "${GLOBAL_VALET_HOME}" "${unattended}"
   fi
 
-  if [[ ${skipExtensionsUpdate} != "true" ]]; then
-    core::sourceFunction selfExtend
-    selfExtend::updateExtensions "${userDirectory}"
-  fi
-
   # run the post install command
   if [[ ${unattended} != "true" && ${firstInstallation} == "true" ]]; then
     log::info "Running the self setup command."
@@ -338,6 +349,12 @@ function selfUpdate() {
     # re-export the config file to be up to date (done in setup as well)
     core::sourceFunction selfConfig
     selfConfig --no-edit --override --export-current-values
+  fi
+
+  # update the extensions
+  if [[ ${firstInstallation} != "true" && ${skipExtensions} != "true" ]]; then
+    core::sourceFunction selfExtend
+    selfExtend::updateExtensions "${userDirectory}"
   fi
 }
 
@@ -374,7 +391,9 @@ function selfUpdate_install() {
   local releaseFile="${tempDirectory}/valet.tar.gz"
 
   log::debug "Downloading the release from ⌜${releaseUrl}⌝."
+  interactive::startProgress "#spinner Downloading valet..."
   selfUpdate_download "${releaseUrl}" "${releaseFile}"
+  interactive::stopProgress
 
   log::debug "Unpacking the release in ⌜${GLOBAL_VALET_HOME}⌝."
   tar -xzf "${releaseFile}" -C "${tempDirectory}" || core::fail "Could not unpack the release ⌜${releaseFile}⌝ using tar."
@@ -565,7 +584,9 @@ function selfUpdate_isDirectoryInPath() {
 # Get the version number of the latest release on GitHub.
 function selfUpdate_getLatestReleaseVersion() {
   local jsonFile="${TMPDIR:-/tmp}/valet.latest.json"
+  interactive::startProgress "#spinner Fetching the latest version from GitHub API..."
   selfUpdate_download "https://api.github.com/repos/jcaillon/valet/releases/latest" "${jsonFile}"
+  interactive::stopProgress
   io::readFile "${jsonFile}"
   rm -f "${jsonFile}" 1>/dev/null
   if [[ ${RETURNED_VALUE} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
@@ -715,6 +736,8 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
 else
   selfUpdate_sourceDependencies
 fi
+function interactive::startProgress() { :; }
+function interactive::stopProgress() { :; }
 
 # This is put in braces to ensure that the script does not run until it is downloaded completely.
 {
