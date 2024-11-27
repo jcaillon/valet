@@ -16,7 +16,7 @@ function testSelfRelease() {
   test::endTest "Testing selfRelease, minor version" ${exitCode}
 }
 
-# need to override git, kurl
+# need to override git, curl
 function io::invokef5() {
   echo "▶ called io::invokef5 $*" 1>&2
   if [[ ${5} == "uname" ]]; then
@@ -49,16 +49,16 @@ function interactive::promptYesNo() {
   return 0
 }
 
-function kurl::toVar() {
-  echo "▶ called kurl::toVar $*" 1>&2
+function curl::toVar() {
+  echo "▶ called curl::toVar $*" 1>&2
   RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}", "tag_name": "v1.2.3", "browser_download_url": "https:///fake" }'
   RETURNED_VALUE2=""
   RETURNED_VALUE3=200
 }
 
 
-function kurl::toFile() {
-  echo "▶ called kurl::toFile $*" 1>&2
+function curl::toFile() {
+  echo "▶ called curl::toFile $*" 1>&2
   RETURNED_VALUE=""
   RETURNED_VALUE2=200
 }
@@ -83,4 +83,4 @@ main
 
 core::resetIncludedFiles
 source io
-source kurl
+source curl

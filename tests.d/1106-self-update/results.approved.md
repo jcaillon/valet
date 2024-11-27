@@ -12,9 +12,9 @@ Exit code: `0`
 → valet self update --help
 ABOUT
 
-  Update valet using the latest release on GitHub.
+  Update valet using the latest release on GitHub. Also update all installed extensions.
   
-  This script can be used as a standalone script to install Valet:
+  This script can also be used as a standalone script to install Valet:
   
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)"
   
@@ -44,7 +44,7 @@ ABOUT
   
   - 6. Run self setup command (in case of an installation).
   
-  - 7. Try to update (fetch merge -ff-only) the git repositories under your valet user directory.
+  - 7. Try to update (fetch merge -ff-only) the git repositories and all installed extensions in your valet user directory.
   
 
 USAGE
@@ -71,6 +71,9 @@ GLOBAL OPTIONS
       Output very verbose information.
       This is the equivalent of setting the log level to trace.
       This option can be set by exporting the variable VALET_VERY_VERBOSE='true'.
+  --disable-progress-bars
+      Disable all progress bars for commands that use them.
+      This option can be set by exporting the variable VALET_DISABLE_PROGRESS_BARS='true'.
   -i, --force-interactive-mode
       Enter interactive mode for commands even if arguments are not required or provided.
       This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
@@ -114,9 +117,12 @@ OPTIONS
       
       If you do not set this option, newer examples will override the existing ones.
       This option can be set by exporting the variable VALET_NO_EXAMPLES='true'.
-  -U, --skip-extensions-update
-      Set to true to not attempt to update the git repositories under the valet user directory (~/.valet.d).
-      This option can be set by exporting the variable VALET_SKIP_EXTENSIONS_UPDATE='true'.
+  -U, --skip-extensions
+      Set to true to not attempt to update the installed extensions under the valet user directory (~/.valet.d).
+      This option can be set by exporting the variable VALET_SKIP_EXTENSIONS='true'.
+  -e, --only-extensions
+      Set to true to only update the installed extensions under the valet user directory (~/.valet.d).
+      This option can be set by exporting the variable VALET_ONLY_EXTENSIONS='true'.
   -h, --help
       Display the help for this command.
 
@@ -139,7 +145,7 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ selfUpdate --skip-extensions-update
+→ selfUpdate --skip-extensions
 ```
 
 **Error** output:

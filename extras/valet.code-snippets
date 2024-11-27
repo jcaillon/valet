@@ -925,32 +925,32 @@
 		  "body": [ "# ## io::toAbsolutePath\n# \n# This function returns the absolute path of a path.\n# \n# - \\$1: **path** _as string_:\n#       The path to translate to absolute path.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The absolute path of the path.\n# \n# ```bash\n# io::toAbsolutePath \"myFile\"\n# local myFileAbsolutePath=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# \nio::toAbsolutePath \"${1:**path**}\"$0" ]
 	  },
 
-		"kurl::toFile": {
-		  "prefix": "kurl::toFile",
+		"curl::toFile": {
+		  "prefix": "curl::toFile",
 		  "description": "This function is a wrapper around curl...",
 		  "scope": "",
-		  "body": [ "kurl::toFile \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
+		  "body": [ "curl::toFile \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
 	  },
 
-		"kurl::toFile#withdoc": {
-		  "prefix": "kurl::toFile#withdoc",
+		"curl::toFile#withdoc": {
+		  "prefix": "curl::toFile#withdoc",
 		  "description": "This function is a wrapper around curl...",
 		  "scope": "",
-		  "body": [ "# ##  kurl::toFile\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It io::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \\${2}.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$3: **path** _as string_:\n#       the file in which to save the output of curl\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of stderr\n# - `RETURNED_VALUE2`: the http status code\n# \n# ```bash\n# kurl::toFile \"true\" \"200,201\" \"/filePath\" \"https://example.com\" || core::fail \"The curl command failed.\"\n# ```\n# \nkurl::toFile \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
+		  "body": [ "# ##  curl::toFile\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It io::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \\${2}.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$3: **path** _as string_:\n#       the file in which to save the output of curl\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of stderr\n# - `RETURNED_VALUE2`: the http status code\n# \n# ```bash\n# curl::toFile \"true\" \"200,201\" \"/filePath\" \"https://example.com\" || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::toFile \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
 	  },
 
-		"kurl::toVar": {
-		  "prefix": "kurl::toVar",
+		"curl::toVar": {
+		  "prefix": "curl::toVar",
 		  "description": "This function is a wrapper around curl...",
 		  "scope": "",
-		  "body": [ "kurl::toVar \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${99:**curl arguments**}\"$0" ]
+		  "body": [ "curl::toVar \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${99:**curl arguments**}\"$0" ]
 	  },
 
-		"kurl::toVar#withdoc": {
-		  "prefix": "kurl::toVar#withdoc",
+		"curl::toVar#withdoc": {
+		  "prefix": "curl::toVar#withdoc",
 		  "description": "This function is a wrapper around curl...",
 		  "scope": "",
-		  "body": [ "# ## kurl::toVar\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It io::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \"tempfile\".\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of the request\n# - `RETURNED_VALUE2`: the content of stderr\n# - `RETURNED_VALUE3`: the http status code\n# \n# ```bash\n# kurl::toVar false 200,201 https://example.com || core::fail \"The curl command failed.\"\n# ```\n# \nkurl::toVar \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${99:**curl arguments**}\"$0" ]
+		  "body": [ "# ## curl::toVar\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It io::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \"tempfile\".\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of the request\n# - `RETURNED_VALUE2`: the content of stderr\n# - `RETURNED_VALUE3`: the http status code\n# \n# ```bash\n# curl::toVar false 200,201 https://example.com || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::toVar \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${99:**curl arguments**}\"$0" ]
 	  },
 
 		"log::debug": {

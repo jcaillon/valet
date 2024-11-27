@@ -13,8 +13,8 @@ fi
 
 # shellcheck source=../lib-string
 source string
-# shellcheck source=../lib-kurl
-source kurl
+# shellcheck source=../lib-curl
+source curl
 # shellcheck source=../lib-interactive
 source interactive
 # shellcheck source=../lib-system
@@ -72,7 +72,7 @@ function selfRelease() {
 
   # get the latest release
   local latestReleaseVersion
-  kurl::toVar true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
+  curl::toVar true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
   lastReleaseJson="${RETURNED_VALUE}"
   if [[ ${lastReleaseJson} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
     latestReleaseVersion="v${BASH_REMATCH[2]}"
@@ -238,7 +238,7 @@ function selfRelease::createRelease() {
   local uploadUrl
   local createdReleaseJson
   if [[ "${dryRun:-}" != "true" ]]; then
-    kurl::toVar true '201,422' -X POST \
+    curl::toVar true '201,422' -X POST \
       -H "Authorization: token ${githubReleaseToken:-}" \
       -H "Accept: application/vnd.github.v3+json" \
       -H "Content-type: application/json; charset=utf-8" \
@@ -279,7 +279,7 @@ function selfRelease::uploadArtifact() {
   # upload the artifact
   if [[ "${dryRun:-}" != "true" && -n "${uploadUrl}" ]]; then
     log::info "Uploading the artifact ⌜${artifactPath}⌝ to ⌜${uploadUrl}⌝."
-    kurl::toVar true '' -X POST \
+    curl::toVar true '' -X POST \
       -H "Authorization: token ${githubReleaseToken:-}" \
       -H "Content-Type: application/tar+gzip" \
       --data-binary "@${artifactPath}" \

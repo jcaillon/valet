@@ -19,8 +19,8 @@ source string
 source system
 # shellcheck source=../lib-interactive
 source interactive
-# shellcheck source=../lib-kurl
-source kurl
+# shellcheck source=../lib-curl
+source curl
 
 #===============================================================
 # >>> command: self extend
@@ -169,7 +169,7 @@ function selfExtend_downloadTarball() {
   # download the tarball
   log::info "Downloading the extension from the URL ⌜${tarballUrl}⌝ for sha1 ⌜${sha1}⌝."
   interactive::startProgress "#spinner Download in progress, please wait..."
-  kurl::toFile true 200,302 "${tempDirectory}/${sha1}.tar.gz" "${tarballUrl}"
+  curl::toFile true 200,302 "${tempDirectory}/${sha1}.tar.gz" "${tarballUrl}"
   interactive::stopProgress
 
   # untar
@@ -205,9 +205,9 @@ function selfExtend_getSha1() {
     RETURNED_VALUE=""
     interactive::startProgress "#spinner Fetching reference information from GitHub..."
     local url="https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${reference}"
-    if ! kurl::toVar false '200' -H "Accept: application/vnd.github.v3+json" "${url}"; then
+    if ! curl::toVar false '200' -H "Accept: application/vnd.github.v3+json" "${url}"; then
       url="https://api.github.com/repos/${owner}/${repo}/git/refs/tags/${reference}"
-      kurl::toVar false '200' -H "Accept: application/vnd.github.v3+json" "${url}" || :
+      curl::toVar false '200' -H "Accept: application/vnd.github.v3+json" "${url}" || :
     fi
     interactive::stopProgress
 

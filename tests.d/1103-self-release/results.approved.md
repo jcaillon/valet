@@ -18,7 +18,7 @@ Exit code: `0`
 INFO     Dry run mode is enabled, no changes will be made.
 ▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
-▶ called kurl::toVar true 200 -H Accept: application/vnd.github.v3+json https://api.github.com/repos/jcaillon/valet/releases/latest
+▶ called curl::toVar true 200 -H Accept: application/vnd.github.v3+json https://api.github.com/repos/jcaillon/valet/releases/latest
 INFO     The latest release on GitHub is: v1.2.3.
 ▶ called io::invoke git rev-parse HEAD
 INFO     The current version of valet is: 1.2.3.
@@ -31,7 +31,7 @@ INFO     The tag message is:
    5 ░ - ✨ feature
    6 ░ - 🐞 fix
    7 ░ 
-INFO     Found 113 functions with documentation.
+INFO     Found 114 functions with documentation.
 INFO     The current version of valet is: 1.2.3.
 INFO     The bumped version of valet is: 2.0.0.
 SUCCESS  The new version has been released, check: https://github.com/jcaillon/valet/releases/latest.
@@ -62,7 +62,7 @@ bumpLevel="minor"
 
 ▶ called io::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
-▶ called kurl::toVar true 200 -H Accept: application/vnd.github.v3+json https://api.github.com/repos/jcaillon/valet/releases/latest
+▶ called curl::toVar true 200 -H Accept: application/vnd.github.v3+json https://api.github.com/repos/jcaillon/valet/releases/latest
 INFO     The latest release on GitHub is: v1.2.3.
 DEBUG    The upload URL is: https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets
 ▶ called io::invoke git rev-parse HEAD
@@ -83,10 +83,10 @@ DEBUG    Analyzing the following files:
    1 ░ $GLOBAL_VALET_HOME/valet.d/core
    2 ░ $GLOBAL_VALET_HOME/valet.d/lib-ansi-codes
    3 ░ $GLOBAL_VALET_HOME/valet.d/lib-array
-   4 ░ $GLOBAL_VALET_HOME/valet.d/lib-fsfs
-   5 ░ $GLOBAL_VALET_HOME/valet.d/lib-interactive
-   6 ░ $GLOBAL_VALET_HOME/valet.d/lib-io
-   7 ░ $GLOBAL_VALET_HOME/valet.d/lib-kurl
+   4 ░ $GLOBAL_VALET_HOME/valet.d/lib-curl
+   5 ░ $GLOBAL_VALET_HOME/valet.d/lib-fsfs
+   6 ░ $GLOBAL_VALET_HOME/valet.d/lib-interactive
+   7 ░ $GLOBAL_VALET_HOME/valet.d/lib-io
    8 ░ $GLOBAL_VALET_HOME/valet.d/lib-profiler
    9 ░ $GLOBAL_VALET_HOME/valet.d/lib-prompt
   10 ░ $GLOBAL_VALET_HOME/valet.d/lib-string
@@ -121,6 +121,7 @@ DEBUG    Found function: ⌜core::resetIncludedFiles⌝
 DEBUG    Found function: ⌜core::sourceFunction⌝
 DEBUG    Found function: ⌜core::sourceUserCommands⌝
 DEBUG    Found function: ⌜core::reloadUserCommands⌝
+DEBUG    Found function: ⌜core::deleteUserCommands⌝
 DEBUG    Found function: ⌜core::getVersion⌝
 DEBUG    Found function: ⌜string::wrapCharacters⌝
 DEBUG    Found function: ⌜string::wrapSentence⌝
@@ -139,6 +140,8 @@ DEBUG    Found function: ⌜array::isInArray⌝
 DEBUG    Found function: ⌜array::makeArraysSameSize⌝
 DEBUG    Found function: ⌜array::sortWithCriteria⌝
 DEBUG    Found function: ⌜array::fuzzyFilterSort⌝
+DEBUG    Found function: ⌜curl::toFile⌝
+DEBUG    Found function: ⌜curl::toVar⌝
 DEBUG    Found function: ⌜fsfs::itemSelector⌝
 DEBUG    Found function: ⌜interactive::askForConfirmation⌝
 DEBUG    Found function: ⌜interactive::askForConfirmationRaw⌝
@@ -181,8 +184,6 @@ DEBUG    Found function: ⌜io::listPaths⌝
 DEBUG    Found function: ⌜io::listFiles⌝
 DEBUG    Found function: ⌜io::listDirectories⌝
 DEBUG    Found function: ⌜io::isDirectoryWritable⌝
-DEBUG    Found function: ⌜kurl::toFile⌝
-DEBUG    Found function: ⌜kurl::toVar⌝
 DEBUG    Found function: ⌜profiler::enable⌝
 DEBUG    Found function: ⌜profiler::disable⌝
 DEBUG    Found function: ⌜prompt::autocompletion⌝
@@ -208,7 +209,7 @@ DEBUG    Found function: ⌜system::getNotExistingCommands⌝
 DEBUG    Found function: ⌜system::commandExists⌝
 DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 113 functions with documentation.
+INFO     Found 114 functions with documentation.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -263,6 +264,14 @@ INFO     Found 113 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
@@ -353,10 +362,6 @@ INFO     Found 113 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/kurl.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/kurl.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/kurl.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/kurl.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
@@ -492,7 +497,7 @@ DEBUG    The release payload is: ⌜{
     "draft": false,
     "prerelease": false
   }⌝
-▶ called kurl::toVar true 201,422 -X POST -H Authorization: token token -H Accept: application/vnd.github.v3+json -H Content-type: application/json; charset=utf-8 -d {
+▶ called curl::toVar true 201,422 -X POST -H Authorization: token token -H Accept: application/vnd.github.v3+json -H Content-type: application/json; charset=utf-8 -d {
     "name": "v1.2.3",
     "tag_name": "v1.2.3",
     "body": "# Release of version 1.2.3\n\nChangelog: \n\n- ✨ feature\n- 🐞 fix\n",
@@ -509,7 +514,7 @@ DEBUG    The upload URL is: https://uploads.github.com/repos/jcaillon/valet/rele
 DEBUG    The artifact has been created at ⌜valet.tar.gz⌝ with:
 
 INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
-▶ called kurl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz
+▶ called curl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz
 INFO     The current version of valet is: 1.2.3.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/valet.d/version
 INFO     The bumped version of valet is: 1.3.0.

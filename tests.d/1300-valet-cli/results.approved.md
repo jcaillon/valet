@@ -43,6 +43,9 @@ GLOBAL OPTIONS
       Output very verbose information.
       This is the equivalent of setting the log level to trace.
       This option can be set by exporting the variable VALET_VERY_VERBOSE='true'.
+  --disable-progress-bars
+      Disable all progress bars for commands that use them.
+      This option can be set by exporting the variable VALET_DISABLE_PROGRESS_BARS='true'.
   -i, --force-interactive-mode
       Enter interactive mode for commands even if arguments are not required or provided.
       This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
@@ -121,6 +124,9 @@ GLOBAL OPTIONS
       Output very verbose information.
       This is the equivalent of setting the log level to trace.
       This option can be set by exporting the variable VALET_VERY_VERBOSE='true'.
+  --disable-progress-bars
+      Disable all progress bars for commands that use them.
+      This option can be set by exporting the variable VALET_DISABLE_PROGRESS_BARS='true'.
   -i, --force-interactive-mode
       Enter interactive mode for commands even if arguments are not required or provided.
       This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
@@ -201,6 +207,12 @@ GLOBAL OPTIONS
       level to trace.
       This option can be set by exporting the 
       variable VALET_VERY_VERBOSE='true'.
+  --disable-progress-bars
+      Disable all progress bars for commands 
+      that use them.
+      This option can be set by exporting the 
+      variable 
+      VALET_DISABLE_PROGRESS_BARS='true'.
   -i, --force-interactive-mode
       Enter interactive mode for commands even 
       if arguments are not required or provided.
@@ -317,6 +329,9 @@ GLOBAL OPTIONS
       Output very verbose information.
       This is the equivalent of setting the log level to trace.
       This option can be set by exporting the variable VALET_VERY_VERBOSE='true'.
+  --disable-progress-bars
+      Disable all progress bars for commands that use them.
+      This option can be set by exporting the variable VALET_DISABLE_PROGRESS_BARS='true'.
   -i, --force-interactive-mode
       Enter interactive mode for commands even if arguments are not required or provided.
       This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
@@ -505,7 +520,7 @@ self build      Re-build the menu of valet from your commands.
 self config     Open the configuration file of Valet with your default editor.
 self extend     Extends Valet by downloading a new application or library in the user directory.
 self test       Test your valet custom commands.
-self update     Install or update valet using the latest release on GitHub.⌉
+self update     Update valet and its extensions to the latest releases.⌉
 ```
 
 ## Test script 05.logging
@@ -1042,6 +1057,7 @@ Exit code: `1`
 INFO     The valet user directory ⌜/tmp/valet.d/d1-1/non-existing⌝ does not contain a built ⌜commands⌝ file.
 Now building it using ⌜valet self build⌝ command.
 WARNING  Skipping the build of scripts in user directory ⌜/tmp/valet.d/d1-1/non-existing⌝ because it does not exist.
+SUCCESS  The valet user commands have been successfully built.
 TRACE    This is an error trace message which is always displayed.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 SUCCESS  This is a success message.
@@ -1070,7 +1086,7 @@ Exit code: `0`
 self config     Open the configuration file of Valet with your default editor.
 self extend     Extends Valet by downloading a new application or library in the user directory.
 self test       Test your valet custom commands.
-self update     Install or update valet using the latest release on GitHub.⌉
+self update     Update valet and its extensions to the latest releases.⌉
 ```
 
 ### Testing that we can display the help of a sub menu
@@ -1110,6 +1126,9 @@ GLOBAL OPTIONS
       Output very verbose information.
       This is the equivalent of setting the log level to trace.
       This option can be set by exporting the variable VALET_VERY_VERBOSE='true'.
+  --disable-progress-bars
+      Disable all progress bars for commands that use them.
+      This option can be set by exporting the variable VALET_DISABLE_PROGRESS_BARS='true'.
   -i, --force-interactive-mode
       Enter interactive mode for commands even if arguments are not required or provided.
       This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
