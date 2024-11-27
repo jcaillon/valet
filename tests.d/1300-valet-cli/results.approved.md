@@ -515,12 +515,13 @@ Exit code: `0`
 ```log
 ▶ called main::showInteractiveCommandsMenu Please select the command to run. _COPIED_COMMMANDS_ARRAY⌉
 ▶ received array was:
-⌈help            Show the help of this program or of a specific command.
-self build      Re-build the menu of valet from your commands.
-self config     Open the configuration file of Valet with your default editor.
-self extend     Extends Valet by downloading a new application or library in the user directory.
-self test       Test your valet custom commands.
-self update     Update valet and its extensions to the latest releases.⌉
+⌈help             Show the help of this program or of a specific command.
+self build       Re-build the menu of valet from your commands.
+self config      Open the configuration file of Valet with your default editor.
+self document    Generate the documentation for all the library functions of Valet.
+self extend      Extends Valet by downloading a new application or library in the user directory.
+self test        Test your valet custom commands.
+self update      Update valet and its extensions to the latest releases.⌉
 ```
 
 ## Test script 05.logging
@@ -1082,11 +1083,12 @@ Exit code: `0`
 ```log
 ▶ called main::showInteractiveCommandsMenu Please select the command to run. FILTERED_COMMANDS_FOR_SUB_MENU⌉
 ▶ received array was:
-⌈self build      Re-build the menu of valet from your commands.
-self config     Open the configuration file of Valet with your default editor.
-self extend     Extends Valet by downloading a new application or library in the user directory.
-self test       Test your valet custom commands.
-self update     Update valet and its extensions to the latest releases.⌉
+⌈self build       Re-build the menu of valet from your commands.
+self config      Open the configuration file of Valet with your default editor.
+self document    Generate the documentation for all the library functions of Valet.
+self extend      Extends Valet by downloading a new application or library in the user directory.
+self test        Test your valet custom commands.
+self update      Update valet and its extensions to the latest releases.⌉
 ```
 
 ### Testing that we can display the help of a sub menu
@@ -1148,6 +1150,8 @@ COMMANDS
       Re-build the menu of valet from your commands.
   self config
       Open the configuration file of Valet with your default editor.
+  self document
+      Generate the documentation for all the library functions of Valet.
   self export
       Returns a string that can be evaluated to have Valet functions in bash.
   self extend
@@ -1167,7 +1171,7 @@ COMMANDS
   self test
       Test your valet custom commands.
   self update
-      Install or update valet using the latest release on GitHub.
+      Update valet and its extensions to the latest releases.
 
 ```
 

@@ -45,7 +45,7 @@ function selfConfig() {
 
   if [[ ! -f "${valetConfigFile}" || ${override:-} == "true" ]]; then
     log::info "Creating the valet config file ⌜${valetConfigFile}⌝."
-    writeConfigFile "${exportCurrentValues:-}"
+    selfConfig_writeConfigFile "${exportCurrentValues:-}"
   fi
 
   if [[ ${noEdit:-} == "true" ]]; then
@@ -62,12 +62,12 @@ function selfConfig() {
   "${EDITOR:-vi}" "${valetConfigFile}"
 }
 
-function writeConfigFile() {
+function selfConfig_writeConfigFile() {
   if [[ ! -d "${valetConfigFile%/*}" ]]; then
     mkdir -p "${valetConfigFile%/*}"
   fi
 
-  config::getFileContent "${@}"
+  selfConfig::getFileContent "${@}"
 
   printf '%s\n' "${RETURNED_VALUE}" >"${valetConfigFile}"
 }
@@ -80,7 +80,7 @@ function writeConfigFile() {
 # Returns:
 #
 # - `RETURNED_VALUE`: the content of the valet config file.
-function config::getFileContent() {
+function selfConfig::getFileContent() {
   local exportCurrentValues="${1}"
 
   # shellcheck disable=SC2086
@@ -101,7 +101,7 @@ function config::getFileContent() {
     done
   fi
 
-  RETURNED_VALUE="#!/usr/bin/env bash
+  RETURNED_VALUE="#""!/usr/bin/env bash
 # description: This script declares global variables used to configure Valet
 # shellcheck disable=SC2034
 

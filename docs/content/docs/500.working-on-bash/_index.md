@@ -39,19 +39,9 @@ GitHub Copilot is of great help if you can have it. You can also find the list o
 
 You can open your `~/.valet.d` directory as a workspace on vscode.
 
-I recommend to copy (or link) the [extras/all-valet-functions.sh](https://github.com/jcaillon/valet/blob/latest/extras/all-valet-functions.sh) file present in the Valet installation to `~/.valet.d/.vscode/all-valet-functions.sh` in your workspace folder and add the following settings in your `~/.valet.d/.vscode/settings.json`:
+### Autocompletion on Valet library functions
 
-```json
-{
-  "bashIde.includeAllWorkspaceSymbols": true
-}
-```
-
-This allows you to have autocompletion and help on the core and libraries functions:
-
-![autocompletion](image.png)
-
-Alternatively, you can use the Valet [vscode snippets](https://github.com/jcaillon/valet/edit/main/extras/valet.code-snippets):
+You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/edit/main/extras/valet.code-snippets):
 
 - copy this file in your repository under the `.vscode` directory (you can chose to ignore this in git or push it).
 - or copy this file as `shellscript.json` in your user snippets folder (`%APPDATA%\Code\User\snippets` in windows).
@@ -59,6 +49,30 @@ Alternatively, you can use the Valet [vscode snippets](https://github.com/jcaill
 {{< callout type="info" >}}
 This is done for you if you use the automated installer of Valet.
 {{< /callout >}}
+
+This allows you to have autocompletion and help on the core and libraries functions:
+
+![autocompletion](image.png)
+
+### Autocompletion - alternative way
+
+Alternatively, you copy (or link) the [extras/lib-valet](https://github.com/jcaillon/valet/blob/latest/extras/lib-valet) file present in the Valet installation to `./lib-valet`. It is a file that defines all the function prototypes from Valet, allowing autocompletion with vscode bash IDE extension.
+
+If you have installed the recommended extensions, you will also have shellcheck which will attempt to following the sourced files in your project. You should annotate each `source` statement for shellcheck to use the `lib-valet` file:
+
+```bash
+# shellcheck source=../lib-valet
+source mylib
+```
+
+If you don't want to use shellcheck, you can add the following settings in your `./.vscode/settings.json`:
+
+```json
+{
+  "bashIde.globPattern": "**/@(*@(.sh|.inc|.bash|.command|core|main)|lib-*)",
+  "bashIde.includeAllWorkspaceSymbols": true
+}
+```
 
 ## Where to start your bash journey
 

@@ -5,7 +5,7 @@
 # shellcheck source=lib-io
 source io
 
-# ##  curl::toFile
+# ## curl::toFile
 #
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.

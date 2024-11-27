@@ -67,16 +67,16 @@ function core::getVersion() {
   RETURNED_VALUE="1.2.3"
 }
 
-function main() {
-  testSelfRelease
-}
-
 function io::writeToFile() {
   echo "▶ called io::writeToFile $1" 1>&2
 }
 
 function io::writeToFileFromRef() {
   echo "▶ called io::writeToFileFromRef $1" 1>&2
+}
+
+function main() {
+  testSelfRelease
 }
 
 main

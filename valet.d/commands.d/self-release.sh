@@ -21,6 +21,7 @@ source interactive
 source system
 # shellcheck source=../lib-array
 source array
+
 #===============================================================
 # >>> self release valet
 #===============================================================
@@ -180,7 +181,7 @@ function selfRelease::createRelease() {
   if [[ "${uploadExistingTag:-}" != "true" ]]; then
 
     # update the documentation
-    selfRelease::updateDocumentation "${version}"
+    selfRelease::updateDocumentation
 
     # write the current version in the self-install script
     # then commit the file
@@ -271,6 +272,9 @@ function selfRelease::uploadArtifact() {
     io::invoke cp -R "${GLOBAL_VALET_HOME}/${file}" .
   done
 
+  # extra files to copy
+  io::invoke cp "${GLOBAL_VALET_HOME}/.vscode/extensions.json" ./extras/.vscode/extensions.json
+
   # prepare artifact
   local artifactPath="valet.tar.gz"
   io::invoke tar -czvf "${artifactPath}" "${files[@]}"
@@ -325,37 +329,20 @@ function selfRelease::bumpVersion() {
 }
 
 function selfRelease::updateDocumentation() {
-  local version="${1}"
+  core::sourceFunction selfDocument
 
-  system::date "%(%F)T"
-  local currentDate="${RETURNED_VALUE}"
-  local pageFooter="Documentation generated for the version ${version} (${currentDate})."
+  selfDocument::getFooter
+  local pageFooter="${RETURNED_VALUE}"
 
-  # export the documentation for each library
-  selfRelease::getAllFunctionsDocumentation
-
-  # sort the functions by name
-  declare -a SORTED_FUNCTION_NAMES=("${!RETURNED_ASSOCIATIVE_ARRAY[@]}")
-  array::sort "SORTED_FUNCTION_NAMES"
-
-  # write each function documentation to a file
   if [[ "${dryRun:-}" != "true" ]]; then
+    selfDocument --core-only --output "${GLOBAL_VALET_HOME}/extras"
+
     selfRelease::writeAllFunctionsDocumentation "${pageFooter}"
-  fi
-
-  # write each function to a file
-  if [[ "${dryRun:-}" != "true" ]]; then
-    selfRelease::writeAllFunctionsToExtrasScript "${pageFooter}"
-  fi
-
-  # write each function to the snippet file
-  if [[ "${dryRun:-}" != "true" ]]; then
-    selfRelease::writeAllFunctionsToExtrasCodeSnippets "${pageFooter}"
   fi
 
   # export the valet config valet to the documentation
   core::sourceFunction selfConfig
-  config::getFileContent false
+  selfConfig::getFileContent false
 
   if [[ "${dryRun:-}" != "true" ]]; then
     io::writeToFile "${GLOBAL_VALET_HOME}/docs/static/config.md" '```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'$'\n'$'\n'"> ${pageFooter}"$'\n'
@@ -404,7 +391,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
     string::regexGetFirst "${functionName}" '([[:alnum:]]+)::'
     local packageName="${RETURNED_VALUE}"
     if [[ -z "${packageName}" ]]; then
-      packageName="core"
+      packageName="misc"
     fi
 
     local path="${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries/${packageName}.md"
@@ -435,181 +422,4 @@ url: /docs/libraries/${packageName}
     fi
     io::writeToFile "${file}" $'\n'$'\n'"> ${pageFooter}"$'\n' true
   done
-}
-
-# This function writes all the functions to the extras/all-valet-functions.sh script.
-# Each function will be defined with a { return 0; } body.
-function selfRelease::writeAllFunctionsToExtrasScript() {
-  local pageFooter="${1:-}"
-
-  local content="#!/usr/bin/env bash
-# This script contains the documentation of all the valet library functions.
-# It can be used in your editor to provide auto-completion and documentation.
-#
-# ${pageFooter}
-
-"
-
-  local key functionName documentation line
-  for key in "${SORTED_FUNCTION_NAMES[@]}"; do
-    functionName="${key}"
-    documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
-    # add # to each line of the documentation
-
-    local IFS
-    while IFS=$'\n' read -rd $'\n' line; do
-      content+="# ${line}"$'\n'
-    done <<<"${!documentation}"
-
-    content+="function ${functionName}() { return 0; }"$'\n'$'\n'
-  done
-
-  io::writeToFile "${GLOBAL_VALET_HOME}/extras/all-valet-functions.sh" "${content}"
-}
-
-# This function writes all the functions to the extras/valet.code-snippets.
-function selfRelease::writeAllFunctionsToExtrasCodeSnippets() {
-  local pageFooter="${1:-}"
-
-  # load the existing file content
-  io::readFile "${GLOBAL_VALET_HOME}/.vscode/valet.code-snippets"
-  local originalContent="${RETURNED_VALUE}"
-
-  # remove the first line
-  originalContent="${originalContent#*$'\n'}"
-
-  local content="{"$'\n'"// ${pageFooter}"$'\n'
-
-  local key functionName documentation firstSentence body commentedDocumentation
-  for key in "${SORTED_FUNCTION_NAMES[@]}"; do
-    functionName="${key}"
-    documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
-
-    string::extractBetween "${!documentation}" $'\n' "."
-    firstSentence="${RETURNED_VALUE#$'\n'}"
-    firstSentence="${firstSentence//\/\\/}"
-    firstSentence="${firstSentence//'"'/'\"'}"
-    firstSentence="${firstSentence//$'\n'/ }"
-
-    body="${functionName}"
-
-    local IFS=$'\n'
-    for line in ${!documentation}; do
-      if [[ "${line}" =~ "- \$"([0-9@])": "([^_]+)" _as "([^_]+)"_:" ]]; then
-        if [[ "${BASH_REMATCH[1]:-}" == "@" ]]; then
-          body+=" \"\${99:${BASH_REMATCH[2]}}\""
-        else
-          body+=" \"\${${BASH_REMATCH[1]}:${BASH_REMATCH[2]}}\""
-        fi
-      fi
-    done
-    body+="\$0"
-
-    content+="
-		\"${functionName}\": {
-		  \"prefix\": \"${functionName}\",
-		  \"description\": \"${firstSentence}...\",
-		  \"scope\": \"\",
-		  \"body\": [ \"${body//\"/\\\"}\" ]
-	  },"$'\n'
-
-    commentedDocumentation=""
-    while IFS=$'\n' read -rd $'\n' line; do
-      commentedDocumentation+="# ${line}"$'\n'
-    done <<<"${!documentation}"
-    commentedDocumentation="${commentedDocumentation//\\/\\\\}"
-    commentedDocumentation="${commentedDocumentation//\"/\\\"}"
-    commentedDocumentation="${commentedDocumentation//$/\\\\\$}"
-    commentedDocumentation="${commentedDocumentation//$'\n'/\\n}"
-
-    content+="
-		\"${functionName}#withdoc\": {
-		  \"prefix\": \"${functionName}#withdoc\",
-		  \"description\": \"${firstSentence}...\",
-		  \"scope\": \"\",
-		  \"body\": [ \"${commentedDocumentation}${body//\"/\\\"}\" ]
-	  },"$'\n'
-  done
-
-  content+="${originalContent}"
-
-  io::writeToFile "${GLOBAL_VALET_HOME}/extras/valet.code-snippets" "${content}"
-}
-
-# Returns an associative array of all the function names and their documentation.
-# The key is the function name and the value is the documentation.
-# The documentation is the content of the comment block above the function.
-# The comment block should start with a `# ##` to be considered as a documentation block.
-#
-# Returns:
-#
-# - `RETURNED_ASSOCIATIVE_ARRAY` an associative array of all the function names and their documentation.
-#
-# ```bash
-# selfRelease::getAllFunctionsDocumentation
-# ```
-function selfRelease::getAllFunctionsDocumentation() {
-
-  # get all the files in the valet.d directory
-  io::listFiles "${GLOBAL_VALET_HOME}/valet.d"
-  local -a filesToAnalyze=("${RETURNED_ARRAY[@]}")
-
-  # special case for the test:: functions
-  filesToAnalyze+=("${GLOBAL_VALET_HOME}/valet.d/commands.d/self-test-utils")
-
-  local IFS=$'\n'
-  if log::isDebugEnabled; then
-    log::debug "Analyzing the following files:"
-    log::printFileString "${filesToAnalyze[*]}"
-  fi
-
-  unset -v RETURNED_ASSOCIATIVE_ARRAY
-  declare -g -A RETURNED_ASSOCIATIVE_ARRAY=()
-
-  # for each file to analyse
-  local file
-  for file in "${filesToAnalyze[@]}"; do
-    local functionName functionDocumentation
-    local reading=false
-
-    # loop through lines
-    # collect the documentation from comments starting with `# ##`
-    local line
-    while IFS= read -r line || [[ -n ${line:-} ]]; do
-      if [[ ${reading} == "false" ]]; then
-        if [[ ${line} == "# ##"* ]]; then
-          reading=true
-        else
-          continue
-        fi
-      fi
-
-      if [[ ${line} != "#"* ]]; then
-        reading=false
-        string::extractBetween "${functionDocumentation}" "## " $'\n'
-        string::trim "${RETURNED_VALUE}"
-        functionName="${RETURNED_VALUE}"
-        log::debug "Found function: ⌜${functionName}⌝"
-        RETURNED_ASSOCIATIVE_ARRAY["${functionName}"]="${functionDocumentation}"
-        functionDocumentation=""
-      else
-        if [[ ${line} == "#" ]]; then
-          functionDocumentation+="${line:1}"$'\n'
-        else
-          functionDocumentation+="${line:2}"$'\n'
-        fi
-      fi
-    done <"${file}"
-  done
-
-  log::info "Found ${#RETURNED_ASSOCIATIVE_ARRAY[@]} functions with documentation."
-
-  if log::isTraceEnabled; then
-    log::trace "The functions with their documentation are:"
-    local key
-    for key in "${SORTED_FUNCTION_NAMES[@]}"; do
-      log::trace "Function: ⌜${key}⌝"
-      log::printFileString "${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"
-    done
-  fi
 }

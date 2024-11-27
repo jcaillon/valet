@@ -31,7 +31,6 @@ INFO     The tag message is:
    5 ░ - ✨ feature
    6 ░ - 🐞 fix
    7 ░ 
-INFO     Found 114 functions with documentation.
 INFO     The current version of valet is: 1.2.3.
 INFO     The bumped version of valet is: 2.0.0.
 SUCCESS  The new version has been released, check: https://github.com/jcaillon/valet/releases/latest.
@@ -79,6 +78,14 @@ INFO     The tag message is:
    5 ░ - ✨ feature
    6 ░ - 🐞 fix
    7 ░ 
+DEBUG    Parsed arguments:
+local parsingErrors output coreOnly help
+help=""
+parsingErrors=""
+coreOnly="true"
+output="$GLOBAL_VALET_HOME/extras"
+
+INFO     Generating documentation for the core functions only.
 DEBUG    Analyzing the following files:
    1 ░ $GLOBAL_VALET_HOME/valet.d/core
    2 ░ $GLOBAL_VALET_HOME/valet.d/lib-ansi-codes
@@ -91,9 +98,9 @@ DEBUG    Analyzing the following files:
    9 ░ $GLOBAL_VALET_HOME/valet.d/lib-prompt
   10 ░ $GLOBAL_VALET_HOME/valet.d/lib-string
   11 ░ $GLOBAL_VALET_HOME/valet.d/lib-system
-  12 ░ $GLOBAL_VALET_HOME/valet.d/main
-  13 ░ $GLOBAL_VALET_HOME/valet.d/version
-  14 ░ $GLOBAL_VALET_HOME/valet.d/commands.d/self-test-utils
+  12 ░ $GLOBAL_VALET_HOME/valet.d/lib-test
+  13 ░ $GLOBAL_VALET_HOME/valet.d/main
+  14 ░ $GLOBAL_VALET_HOME/valet.d/version
 DEBUG    Found function: ⌜io::createTempFile⌝
 DEBUG    Found function: ⌜io::createTempDirectory⌝
 DEBUG    Found function: ⌜io::cleanupTempFiles⌝
@@ -175,6 +182,7 @@ DEBUG    Found function: ⌜io::invoke⌝
 DEBUG    Found function: ⌜io::readFile⌝
 DEBUG    Found function: ⌜io::checkAndFail⌝
 DEBUG    Found function: ⌜io::checkAndWarn⌝
+DEBUG    Found function: ⌜io::createDirectoryIfNeeded⌝
 DEBUG    Found function: ⌜io::createFilePathIfNeeded⌝
 DEBUG    Found function: ⌜io::sleep⌝
 DEBUG    Found function: ⌜io::cat⌝
@@ -209,7 +217,245 @@ DEBUG    Found function: ⌜system::getNotExistingCommands⌝
 DEBUG    Found function: ⌜system::commandExists⌝
 DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 114 functions with documentation.
+INFO     Found 115 functions with documentation.
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
+SUCCESS  The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md⌝.
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet
+SUCCESS  The prototype script has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet⌝.
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/.vscode/valet.code-snippets
+SUCCESS  The vscode snippets have been generated in ⌜$GLOBAL_VALET_HOME/extras/.vscode/valet.code-snippets⌝.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -222,237 +468,6 @@ INFO     Found 114 functions with documentation.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/prompt.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/prompt.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/prompt.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -465,12 +480,10 @@ INFO     Found 114 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/all-valet-functions.sh
-▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/valet.code-snippets
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/static/config.md
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/static/config.md
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/kurl.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
-▶ called io::invoke git add $GLOBAL_VALET_HOME/extras/all-valet-functions.sh $GLOBAL_VALET_HOME/extras/valet.code-snippets
+▶ called io::invoke git add $GLOBAL_VALET_HOME/extras/base.code-snippets $GLOBAL_VALET_HOME/extras/lib-valet $GLOBAL_VALET_HOME/extras/VALET_LIBRARIES.md
 ▶ called io::invoke git commit -m :memo: updating the documentation
 SUCCESS  The documentation update has been committed.
 ▶ called io::invoke sed -E -i s/VALET_RELEASED_VERSION="[0-9]+\.[^"]+"/VALET_RELEASED_VERSION="1.2.3"/ $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
@@ -510,6 +523,7 @@ DEBUG    The upload URL is: https://uploads.github.com/repos/jcaillon/valet/rele
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet.d .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/extras .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet .
+▶ called io::invoke cp $GLOBAL_VALET_HOME/.vscode/extensions.json ./extras/.vscode/extensions.json
 ▶ called io::invoke tar -czvf valet.tar.gz examples.d valet.d extras valet
 DEBUG    The artifact has been created at ⌜valet.tar.gz⌝ with:
 

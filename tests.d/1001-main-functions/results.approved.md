@@ -416,6 +416,7 @@ ERROR    Could not find an exact command for ⌜se⌝, use ⌜--help⌝ to get a
 ERROR    Found multiple matches for the command ⌜sf⌝, please be more specific:
 CHIsCDEelCHIfCDE build
 CHIsCDEelCHIfCDE config
+CHIsCDEelCHIfCDE document
 CHIsCDEelCHIfCDE export
 CHIsCDEelCHIfCDE extend
 CHIsCDEelCHIfCDE mock1

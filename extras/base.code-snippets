@@ -1,4 +1,15 @@
 {
+	"source": {
+		"prefix": "source",
+		"description": "Source a file for Valet, add the necessary comment for shellcheck.",
+		"scope": "",
+		"body": [
+			"# shellcheck source=../lib-valet",
+			"source $1",
+			"$0",
+			""
+		]
+	},
 	"new command alt": {
 		"prefix": "new command alt",
 		"description": "A new command alternative definition for Valet",

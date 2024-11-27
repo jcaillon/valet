@@ -102,10 +102,12 @@ function selfBuild() {
     log::setLevel warning true
   fi
 
-  core::getUserDirectory && userDirectory="${userDirectory:-${RETURNED_VALUE}}"
+  core::getUserDirectory
+  userDirectory="${userDirectory:-${RETURNED_VALUE}}"
   outputFile="${outputFile:-${userDirectory}/commands}"
 
-  io::toAbsolutePath "${GLOBAL_VALET_HOME}" && GLOBAL_VALET_HOME="${RETURNED_VALUE}"
+  io::toAbsolutePath "${GLOBAL_VALET_HOME}"
+  GLOBAL_VALET_HOME="${RETURNED_VALUE}"
 
   # list all the files in which we need to find command definitions
   local -a commandDefinitionFiles
@@ -162,7 +164,6 @@ function selfBuild() {
 
   # extract the command definitions to variables
   extractCommandDefinitionsToVariables "${commandDefinitionFiles[@]}"
-  local duplicatedCommands="${RETURNED_VALUE:-0}"
 
   summarize
 
@@ -186,10 +187,6 @@ function selfBuild() {
   fi
 
   log::success "The valet user commands have been successfully built."
-
-  if ((duplicatedCommands > 0)); then
-    log::warning "There are ${duplicatedCommands} duplicated commands, please remove them or you will probably not get the expected behavior!"
-  fi
 }
 
 #===============================================================
@@ -238,7 +235,7 @@ function bumpValetBuildVersion() {
 #
 # $@: The files to extract from.
 function extractCommandDefinitionsToVariables() {
-  local -i duplicates=0
+  local -i duplicatedCommands=0
   while [[ $# -gt 0 ]]; do
     local file="${1}"
     shift
@@ -264,7 +261,7 @@ function extractCommandDefinitionsToVariables() {
 
       if array::isInArray CMD_ALL_COMMANDS_ARRAY "${command}"; then
         log::warning "                         ├── Skipping ⌜${command}⌝ (already defined)."
-        duplicates+=1
+        duplicatedCommands+=1
         continue
       else
         log::info "                         ├── ⌜${command}⌝."
@@ -303,7 +300,9 @@ function extractCommandDefinitionsToVariables() {
   # declare complementary variables
   declareOtherCommmandVariables
 
-  RETURNED_VALUE=${duplicates}
+  if ((duplicatedCommands > 0)); then
+    core::fail "There are ${duplicatedCommands} duplicated commands, please remove them. Do you have a duplicated folder in your valet user directory?"
+  fi
 }
 
 # This function uses the global TEMP_CMD_BUILD_* variables to declare the final

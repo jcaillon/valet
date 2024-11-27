@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# ## test::commentTest
+#
+# Call this function to add a paragraph in the report file.
+#
+# - $1: **comment** _as string_:
+#       the text to add in the report file
+#
+# ```bash
+# test::commentTest "This is a comment."
+# ```
+function test::commentTest() {
+  printf "%s\n\n" "${1:-}" >>"${_TEST_REPORT_FILE}"
+}
+
+# ## test::endTest
+#
+# Call this function after each test to write the test results to the report file.
+# This create a new H3 section in the report file with the test description and the exit code.
+#
+# - $1: **title** _as string_:
+#       the title of the test
+# - $2: **exit code** _as int_:
+#       the exit code of the test
+# - $3: comment _as string_:
+#       (optional) a text to explain what is being tested
+#       (defaults to "")
+#
+# ```bash
+# test::endTest "Testing something" $?
+# ```
+function test::endTest() {
+  local testTitle="${1:-}"
+  local exitCode="${2:-}"
+  local testDescription="${3:-}"
+
+  {
+    # write the test title
+    printf "%s\n\n" "### ${testTitle:-test}"
+
+    # write the test description if any
+    if [[ -n "${testDescription}" ]]; then
+      printf "%s\n\n" "${testDescription}"
+    fi
+
+    # write the exit code
+    printf "%s\n\n" "Exit code: \`${exitCode}\`"
+
+    # write the standard output if any
+    if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
+      printf "%s\n\n%s\n" "**Standard** output:" "\`\`\`plaintext"
+      selfTestUtils_echoFileSubstitutingPath "${_TEST_STANDARD_OUTPUT_FILE}"
+      printf "\n%s\n\n" "\`\`\`"
+    fi
+
+    # write the error output if any
+    if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
+      printf "%s\n\n%s\n" "**Error** output:" "\`\`\`log"
+      selfTestUtils_echoFileSubstitutingPath "${_TEST_STANDARD_ERROR_FILE}"
+      printf "\n%s\n\n" "\`\`\`"
+    fi
+
+  } >>"${_TEST_REPORT_FILE}"
+
+  # reset the standard output and error output files
+  : >"${_TEST_STANDARD_OUTPUT_FILE}"
+  : >"${_TEST_STANDARD_ERROR_FILE}"
+}
+
+# Replaces the line numbers from an error log in the given file with XXX.
+#
+# - $1: **file path** _as string_:
+#       the path of the file in which the output is stored
+#
+# ```bash
+# test::echoFileWithLineNumberSubstitution myFile.log
+# ```
+function test::echoFileWithLineNumberSubstitution() {
+  local file="${1}"
+  local line
+  local IFS=$'\n'
+  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
+    if [[ ${line} =~ :[0-9]{1,4}$ ]]; then
+      line="${line/%:[[:digit:]]/:XXX}"
+      line="${line/%:[[:digit:]][[:digit:]]/:XXX}"
+      line="${line/%:[[:digit:]][[:digit:]][[:digit:]]/:XXX}"
+      line="${line/%:[[:digit:]][[:digit:]][[:digit:]][[:digit:]]/:XXX}"
+    fi
+    printf '%s\n' "${line}"
+  done <"${file}"
+}

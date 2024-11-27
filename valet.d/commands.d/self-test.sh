@@ -13,7 +13,6 @@ fi
 
 # shellcheck source=self-test-utils
 source self-test-utils
-
 # shellcheck source=../lib-string
 source string
 
