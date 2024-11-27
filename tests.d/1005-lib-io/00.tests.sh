@@ -62,15 +62,39 @@ function testIo::readFile() {
   test::endTest "Testing io::readFile unlimited" 0
 }
 
+function testIo::createDirectoryIfNeeded() {
+
+  echo "→ io::createDirectoryIfNeeded 'resources/dir/subdir'"
+  io::createDirectoryIfNeeded resources/dir/subdir
+  echo "${RETURNED_VALUE}"
+
+  echo "→ io::createDirectoryIfNeeded 'resources/dir/subdir/file1'"
+  (io::createDirectoryIfNeeded resources/dir/subdir/file1) || echo "Failed as expected because its a file"
+
+  echo "→ io::createDirectoryIfNeeded 'resources/gitignored/derp'"
+  io::createDirectoryIfNeeded resources/gitignored/derp
+  echo "${RETURNED_VALUE}"
+  if [[ -d resources/gitignored/derp ]]; then
+    echo "Directory created successfully!"
+  fi
+  rm -Rf resources/gitignored
+
+  test::endTest "Testing io::createDirectoryIfNeeded" 0
+}
+
 function testIo::createFilePathIfNeeded() {
 
   echo "→ io::createFilePathIfNeeded 'resources/dir/subdir/file1'"
   io::createFilePathIfNeeded resources/dir/subdir/file1
   echo "${RETURNED_VALUE}"
 
-  if [[ -f resources/dir/subdir/file1 ]]; then
+  echo "→ io::createFilePathIfNeeded 'resources/gitignored/allo/file1'"
+  io::createFilePathIfNeeded resources/gitignored/allo/file1
+  echo "${RETURNED_VALUE}"
+  if [[ -f resources/gitignored/allo/file1 ]]; then
     echo "File created successfully!"
   fi
+  rm -Rf resources/gitignored
 
   test::endTest "Testing io::createFilePathIfNeeded" 0
 }
@@ -139,6 +163,7 @@ function testIo::isDirectoryWritable() {
 function main() {
   testIo::toAbsolutePath
   testIo::readFile
+  testIo::createDirectoryIfNeeded
   testIo::createFilePathIfNeeded
   testIo::sleep
   testIo::cat

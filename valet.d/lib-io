@@ -46,7 +46,7 @@ function io::toAbsolutePath() {
   # the file contains .., we need to resolve the path by cd'ing into the directory
   if pushd "${file%/*}" &>/dev/null; then
     RETURNED_VALUE="${PWD}/${file##*/}"
-    popd 1>/dev/null
+    popd 1>/dev/null || core::fail "Failed to popd."
     return 0
   fi
 
@@ -546,6 +546,31 @@ function io::checkAndWarn() {
   return 0
 }
 
+# ## io::createDirectoryIfNeeded
+#
+# Create the directory tree if needed.
+#
+# - $1: **path** _as string_:
+#       The directory path to create.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The absolute path to the directory.
+#
+# ```bash
+# io::createDirectoryIfNeeded "/my/directory"
+# ```
+function io::createDirectoryIfNeeded() {
+  io::toAbsolutePath "${1}"
+  local dirPath="${RETURNED_VALUE}"
+
+  if [[ ! -d "${dirPath}" ]]; then
+    mkdir -p "${dirPath}" 1>/dev/null || core::fail "Failed to create the directory ⌜${dirPath}⌝."
+  fi
+
+  RETURNED_VALUE="${dirPath}"
+}
+
 # ## io::createFilePathIfNeeded
 #
 # Make sure that the given file path exists.
@@ -566,9 +591,7 @@ function io::createFilePathIfNeeded() {
   local filePath="${RETURNED_VALUE}"
   local parentDir="${filePath%/*}"
 
-  if [[ ! -d "${parentDir}" ]]; then
-    mkdir -p "${parentDir}" 1>/dev/null || core::fail "Failed to create the directory ⌜${parentDir}⌝ for the file ⌜${filePath}⌝."
-  fi
+  io::createDirectoryIfNeeded "${parentDir}"
 
   if [[ ! -f "${filePath}" ]]; then
     : >"${filePath}"

@@ -84,6 +84,29 @@ The production of meat and other animal derived products places a heavy burden o
 Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there's never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it's the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.
 ```
 
+### Testing io::createDirectoryIfNeeded
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::createDirectoryIfNeeded 'resources/dir/subdir'
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/dir/subdir
+→ io::createDirectoryIfNeeded 'resources/dir/subdir/file1'
+Failed as expected because its a file
+→ io::createDirectoryIfNeeded 'resources/gitignored/derp'
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/derp
+Directory created successfully!
+```
+
+**Error** output:
+
+```log
+mkdir: cannot create directory ‘$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/dir/subdir/file1’: File exists
+ERROR    Failed to create the directory ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/dir/subdir/file1⌝.
+```
+
 ### Testing io::createFilePathIfNeeded
 
 Exit code: `0`
@@ -93,6 +116,8 @@ Exit code: `0`
 ```plaintext
 → io::createFilePathIfNeeded 'resources/dir/subdir/file1'
 $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/dir/subdir/file1
+→ io::createFilePathIfNeeded 'resources/gitignored/allo/file1'
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/allo/file1
 File created successfully!
 ```
 
