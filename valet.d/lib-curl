@@ -131,6 +131,7 @@ function curl::toVar() {
 
   io::readFile "${GLOBAL_TEMPORARY_WORK_FILE}"
   RETURNED_VALUE2="${errors}"
+  # shellcheck disable=SC2034
   RETURNED_VALUE3="${httpStatusCode}"
   return ${exitCode}
 }

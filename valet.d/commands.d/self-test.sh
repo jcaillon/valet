@@ -169,7 +169,7 @@ function selfTest() {
   elif [[ NB_TEST_SUITES -gt 0 ]]; then
     log::success "A total of ⌜${NB_TEST_SUITES}⌝ tests passed!"
   else
-    log::warning "No elligible test suites found."
+    log::warning "No eligible test suites found."
   fi
 }
 
@@ -203,6 +203,6 @@ function selfTestRunCoreTests() {
 
   popd 1>/dev/null
 
-  # reload the orignal commands
+  # reload the original commands
   core::reloadUserCommands
 }

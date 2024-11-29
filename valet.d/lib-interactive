@@ -153,13 +153,13 @@ function interactive::promptYesNoRaw() {
 
   # colors
   local styleActiveButton
-  local styleUnactiveButton
+  local styleInactiveButton
   if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
     styleActiveButton="${AC__TEXT_INVERSE}${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${AC__FG_MAGENTA}}"
-    styleUnactiveButton="${AC__TEXT_INVERSE}${VALET_CONFIG_COLOR_UNACTIVE_BUTTON:-}"
+    styleInactiveButton="${AC__TEXT_INVERSE}${VALET_CONFIG_COLOR_INACTIVE_BUTTON:-}"
   else
     styleActiveButton="${AC__TEXT_INVERSE}"
-    styleUnactiveButton=""
+    styleInactiveButton=""
   fi
 
   interactive::createSpace 2
@@ -170,9 +170,9 @@ function interactive::promptYesNoRaw() {
   while true; do
     if [[ ${state} == "true" ]]; then
       yesColor="${styleActiveButton}"
-      noColor="${styleUnactiveButton}"
+      noColor="${styleInactiveButton}"
     else
-      yesColor="${styleUnactiveButton}"
+      yesColor="${styleInactiveButton}"
       noColor="${styleActiveButton}"
     fi
 
@@ -667,11 +667,11 @@ function interactive::testWaitForKeyPress() {
 # You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
 #
 # It uses the read builtin command with the option `-e` to use readline behind the scene.
-# This means we can detect more key combinations but all keys needs to be binded first...
+# This means we can detect more key combinations but all keys needs to be bound first...
 # Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 #
 # You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.
-# You must also redefine the function `interactiveOnKeyBindingPress` to react to a binded key press.
+# You must also redefine the function `interactiveOnKeyBindingPress` to react to a bound key press.
 # See @interactive::testWaitForKeyPress for an implementation example.
 #
 # - $@: **read parameters** _as any_:

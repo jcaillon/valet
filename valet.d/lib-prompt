@@ -14,7 +14,7 @@ source array
 # ## prompt::autocompletion
 #
 # Displays an autocompletion input starting at a given location. Allows
-# the user to type a text in the given row betwen a starting column and
+# the user to type a text in the given row between a starting column and
 # ending column (included). Longer text are shifted to fit between
 # the two columns.
 #
@@ -54,7 +54,7 @@ source array
 # - $5: initial text _as string_:
 #       (optional) The initial string, which corresponds to the text already entered
 #       by the user at the moment the autocompletion box shows up.
-#       Allows to prefilter the autocompletion.
+#       Allows to pre-filter the autocompletion.
 #       (defaults to empty)
 # - $6: max lines _as int_:
 #       optional) The maximum number of lines/rows to use for the autocompletion box.
@@ -119,7 +119,7 @@ function prompt::autocompletion() {
   _PROMPT_ORIGINAL_ITEMS_COUNT=${#_PROMPT_ORIGINAL_ITEMS[@]}
   _PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX=-1
   _PROMPT_FILTERED_ITEMS=()
-  _PROMPT_FILTERED_ITEMS_CORRESPONDANCES=()
+  _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
   _PROMPT_FILTERED_ITEMS_START_INDEX=0
   _PROMPT_FILTERED_ITEMS_SELECTED_INDEX=0
 
@@ -198,7 +198,7 @@ function prompt::autocompletion() {
     _PROMPT_COLOR_VALIDATION_ERROR_RESET="${AC__TEXT_NO_INVERSE}"
   fi
 
-  # set up the left symboles (> for prompt and the > for selected item)
+  # set up the left symbols (> for prompt and the > for selected item)
   if [[ ${_PROMPT_SHOW_SYMBOL} == "true" ]]; then
     _PROMPT_SYMBOL="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-">"} "
     _PROMPT_SYMBOL_LENGTH=2
@@ -405,8 +405,8 @@ function prompt_onKeyPressed() {
     prompt_drawPrompt
     ;;
   CTRL+LEFT)
-    # move to beggining of the previous word
-    prompt_moveCursorToBegginingOfWord
+    # move to beginning of the previous word
+    prompt_moveCursorToBeginningOfWord
     prompt_drawPrompt
     ;;
   CTRL+RIGHT)
@@ -481,7 +481,7 @@ function prompt_onKeyPressed() {
   CTRL+BACKSPACE | CTRL+W)
     # delete all chars before the cursor until reaching a space
     local -i oldIndex=${_PROMPT_STRING_INDEX}
-    prompt_moveCursorToBegginingOfWord
+    prompt_moveCursorToBeginningOfWord
     if ((oldIndex > _PROMPT_STRING_INDEX)); then
       _PROMPT_KILLED_STRING="${_PROMPT_STRING:${_PROMPT_STRING_INDEX}:$((oldIndex - _PROMPT_STRING_INDEX))}"
       if ((_PROMPT_STRING_INDEX > 0)); then
@@ -571,7 +571,7 @@ function prompt_drawAutocompletionBox() {
 
     array::fuzzyFilterSort "${filterString}" _PROMPT_ORIGINAL_ITEMS "${_PROMPT_COLOR_LETTER_HIGHLIGHT}" "${_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET}" "$((_PROMPT_AUTOCOMPLETION_BOX_WIDTH - _PROMPT_AUTOCOMPLETION_BOX_SYMBOL_LENGTH))"
     _PROMPT_FILTERED_ITEMS=("${RETURNED_ARRAY[@]}")
-    _PROMPT_FILTERED_ITEMS_CORRESPONDANCES=("${RETURNED_ARRAY2[@]}")
+    _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=("${RETURNED_ARRAY2[@]}")
   else
     # for each item longer than the width, cut and add ellipsis
     _PROMPT_FILTERED_ITEMS=()
@@ -582,9 +582,9 @@ function prompt_drawAutocompletionBox() {
       fi
       _PROMPT_FILTERED_ITEMS+=("${line}")
     done
-    _PROMPT_FILTERED_ITEMS_CORRESPONDANCES=()
+    _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
     for ((i = 0; i < _PROMPT_ORIGINAL_ITEMS_COUNT; i++)); do
-      _PROMPT_FILTERED_ITEMS_CORRESPONDANCES+=("${i}")
+      _PROMPT_FILTERED_ITEMS_CORRESPONDENCES+=("${i}")
     done
   fi
 
@@ -795,8 +795,8 @@ function prompt_moveCursorToEndOfWord() {
 }
 
 # Change the cursor position, move to the beginning of the word (or previous).
-function prompt_moveCursorToBegginingOfWord() {
-  # move to beggining of the previous word
+function prompt_moveCursorToBeginningOfWord() {
+  # move to beginning of the previous word
   local -i index=${_PROMPT_STRING_INDEX}
   index+=-1
   while [[ ${index} -gt 0 && ${_PROMPT_STRING:index:1} =~ [[:space:]] ]]; do
@@ -814,8 +814,8 @@ function prompt_moveCursorToBegginingOfWord() {
 # Returns the index of the item in the original array (if any, or -1).
 # It returns in the RETURNED_VALUE variable.
 function prompt_getCurrentInitialItemsIndex() {
-  if ((_PROMPT_FILTERED_ITEMS_SELECTED_INDEX >= 0 && _PROMPT_FILTERED_ITEMS_SELECTED_INDEX < ${#_PROMPT_FILTERED_ITEMS_CORRESPONDANCES[@]})); then
-    RETURNED_VALUE=${_PROMPT_FILTERED_ITEMS_CORRESPONDANCES[${_PROMPT_FILTERED_ITEMS_SELECTED_INDEX}]}
+  if ((_PROMPT_FILTERED_ITEMS_SELECTED_INDEX >= 0 && _PROMPT_FILTERED_ITEMS_SELECTED_INDEX < ${#_PROMPT_FILTERED_ITEMS_CORRESPONDENCES[@]})); then
+    RETURNED_VALUE=${_PROMPT_FILTERED_ITEMS_CORRESPONDENCES[${_PROMPT_FILTERED_ITEMS_SELECTED_INDEX}]}
     return 0
   fi
   RETURNED_VALUE=-1
@@ -880,7 +880,7 @@ function prompt_getAutocompletionBoxSize() {
 # - _PROMPT_STRING_WIDTH
 #
 # It returns the prompt string to display and the relative position
-# of the cursor whithin this prompt string.
+# of the cursor within this prompt string.
 # It correctly cuts the user string and adds the necessary ellipsis
 #
 # - RETURNED_VALUE: the string to display

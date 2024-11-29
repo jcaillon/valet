@@ -90,7 +90,7 @@ function io::toAbsolutePath() {
 # >   `io::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
 # >   than doing:
 # >   `myvar="$(mycommand)".`
-# > - On linux, it is slighly faster (but it might be slower if you don't have SSD?).
+# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
 # > - On linux, you can use a tmpfs directory for massive gains over subshells.
 function io::invokef5() {
   local failIfFails acceptableErrorCodes stdInFromFile stdIn executable

@@ -360,7 +360,7 @@ function string::indexOf() {
   tempString="${string%%"${search}"*}"
   local -i tempStringLength="${#tempString}"
 
-  # the index is the length of the temp string if it is different than the initial string lenght
+  # the index is the length of the temp string if it is different than the initial string length
   if [[ tempStringLength -ne stringLength ]]; then
     RETURNED_VALUE=$((tempStringLength + startingIndex))
   else
@@ -372,7 +372,7 @@ function string::indexOf() {
 # ## string::extractBetween
 #
 # Extract the text between two strings within a string.
-# Search for the first occurence of the start string and the first occurence
+# Search for the first occurrence of the start string and the first occurrence
 # (after the start index) of the end string.
 # Both start and end strings are excluded in the extracted text.
 # Both start and end strings must be found to extract something.
@@ -431,7 +431,7 @@ function string::extractBetween() {
 
 # ## string::count
 #
-# Counts the number of occurences of a substring in a string.
+# Counts the number of occurrences of a substring in a string.
 #
 # - $1: **string** _as string_:
 #       the string in which to search
@@ -440,7 +440,7 @@ function string::extractBetween() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the number of occurences
+# - `RETURNED_VALUE`: the number of occurrences
 #
 # ```bash
 # string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
@@ -467,13 +467,14 @@ function string::count() {
 # - `RETURNED_ARRAY`: the array of strings
 #
 # ```bash
-# string::split "name,firstname,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
+# string::split "name,first name,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
 # ```
 #
 # > This is faster than using read into an array from a here string.
 function string::split() {
   local IFS="${2}"
   # shellcheck disable=SC2206
+  # shellcheck disable=SC2034
   RETURNED_ARRAY=(${1})
 }
 
@@ -538,14 +539,14 @@ function string::regexGetFirst() {
 # echo "${RETURNED_VALUE}"
 # ```
 function string::microsecondsToHuman() {
-  local -i microsecs="${1}"
+  local -i ms="${1}"
   local format="${2:-HH:MM:SS}"
 
-  local -i hours=$((microsecs / 3600 / 1000000))
-  local -i minutes=$(((microsecs / 60 / 1000000) % 60))
-  local -i seconds=$(((microsecs / 1000000) % 60))
-  local -i milliseconds=$((microsecs / 1000 % 1000))
-  local -i microseconds=$((microsecs % 1000000))
+  local -i hours=$((ms / 3600 / 1000000))
+  local -i minutes=$(((ms / 60 / 1000000) % 60))
+  local -i seconds=$(((ms / 1000000) % 60))
+  local -i milliseconds=$((ms / 1000 % 1000))
+  local -i microseconds=$((ms % 1000000))
 
   local humanFormat="${format}"
   if [[ ${hours} -lt 10 ]]; then
@@ -578,7 +579,7 @@ function string::microsecondsToHuman() {
   humanFormat="${humanFormat//%M/$((hours * 60 + minutes))}"
   humanFormat="${humanFormat//%S/$((hours * 3600 + minutes * 60 + seconds))}"
   humanFormat="${humanFormat//%L/$(((hours * 3600 * + minutes * 60 + seconds) * 1000 + milliseconds))}"
-  humanFormat="${humanFormat//%U/$((microsecs))}"
+  humanFormat="${humanFormat//%U/$((ms))}"
 
   RETURNED_VALUE="${humanFormat}"
 }

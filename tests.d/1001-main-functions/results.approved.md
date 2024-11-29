@@ -389,22 +389,22 @@ Exit code: `0`
 selfBuild
 ```
 
-### Testing main::fuzzyMatchCommandtoFunctionNameOrFail
+### Testing main::fuzzyMatchCommandToFunctionNameOrFail
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ main::fuzzyMatchCommandtoFunctionNameOrFail 'se bu other stuff dont care'
+→ main::fuzzyMatchCommandToFunctionNameOrFail 'se bu other stuff dont care'
 selfBuild
 2
 self build
 
-→ VALET_CONFIG_STRICT_MATCHING=true main::fuzzyMatchCommandtoFunctionNameOrFail 'se bu other stuff dont care'
+→ VALET_CONFIG_STRICT_MATCHING=true main::fuzzyMatchCommandToFunctionNameOrFail 'se bu other stuff dont care'
 Failed as expected because strict mode is activated
 
-→ main::fuzzyMatchCommandtoFunctionNameOrFail 'sf' 'nop' 'other' 'stuff' 'dont care'
+→ main::fuzzyMatchCommandToFunctionNameOrFail 'sf' 'nop' 'other' 'stuff' 'dont care'
 Failed as expected on ambiguous result
 ```
 

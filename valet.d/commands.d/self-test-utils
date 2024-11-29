@@ -127,7 +127,7 @@ function selfTestUtils_runTestSuite() {
   }
 
   # reregister the traps, remove cleanup we only want to do it after all test suites
-  main::registrerTraps
+  main::registerTraps
 
   log::debug "Executing test suite ⌜${testDirectoryName}⌝."
 
@@ -164,7 +164,7 @@ function selfTestUtils_runTest() {
   local testDirectory="${1}"
   local testScript="${2}"
 
-  # make sure we set the options to fail on error, pipe erors and on unset variables
+  # make sure we set the options to fail on error, pipe errors and on unset variables
   set -Eeu -o pipefail
 
   # set a simplified log print function to have consistent results in tests
@@ -175,11 +175,15 @@ function selfTestUtils_runTest() {
     rm -Rf "${_TEST_BASE_TEMPORARY_DIRECTORY}"
   fi
   TMPDIR="${_TEST_BASE_TEMPORARY_DIRECTORY}"
+  # shellcheck disable=SC2034
   VALET_CONFIG_WORK_FILES_DIRECTORY="${_TEST_BASE_TEMPORARY_DIRECTORY}"
   io::setupTempFileGlobalVariable
   mkdir -p "${_TEST_BASE_TEMPORARY_DIRECTORY}"
+  # shellcheck disable=SC2034
   TEMPORARY_FILE_NUMBER=0
+  # shellcheck disable=SC2034
   TEMPORARY_DIRECTORY_NUMBER=0
+  # shellcheck disable=SC2034
   GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-tempfile"
 
   # redirect the standard output and error output to files
@@ -294,6 +298,7 @@ function selfTestUtils_onExitTestInternal() {
 
   log::error "The program has exit during the test ⌜${_TEST_SUITE_NAME}⌝ → ⌜${_TEST_SUITE_SCRIPT_NAME}⌝ with code ⌜${rc}⌝."$'\n'"If you expect the tested function/program to exit or fail, then run it in a subshell and capture the exit code like that:"$'\n'"(myFunctionThatFails) || exitCode=\$?"
 
+  # shellcheck disable=SC2034
   GLOBAL_ERROR_DISPLAYED=1
 }
 
@@ -382,7 +387,7 @@ function selfTestUtils_setEvalVariables() {
   export VALET_CONFIG_COLOR_ARGUMENT=CAR
   export VALET_CONFIG_COLOR_COMMAND=CCO
   export VALET_CONFIG_COLOR_ACTIVE_BUTTON=CAB
-  export VALET_CONFIG_COLOR_UNACTIVE_BUTTON=CUB
+  export VALET_CONFIG_COLOR_INACTIVE_BUTTON=CUB
 
   export VALET_CONFIG_DOT_ENV_SCRIPT=false
 
@@ -404,11 +409,13 @@ function selfTestUtils_setEvalVariables() {
 }
 
 function selfTestUtils_evalSimplifiedImportantVariables() {
+  # shellcheck disable=SC2086
   unset -v ${!VALET_CONFIG_*} ${!GLOBAL_*}
   eval "${ORIGINAL_IMPORTANT_VARIABLES}"$'\n'"${SIMPLIFIED_IMPORTANT_VARIABLES}"
 }
 
 function selfTestUtils_evalOriginalImportantVariables() {
+  # shellcheck disable=SC2086
   unset -v ${!VALET_CONFIG_*} ${!GLOBAL_*}
   eval "${ORIGINAL_IMPORTANT_VARIABLES}"
 }

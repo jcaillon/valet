@@ -513,7 +513,7 @@ Exit code: `0`
 **Error** output:
 
 ```log
-▶ called main::showInteractiveCommandsMenu Please select the command to run. _COPIED_COMMMANDS_ARRAY⌉
+▶ called main::showInteractiveCommandsMenu Please select the command to run. _COPIED_COMMANDS_ARRAY⌉
 ▶ received array was:
 ⌈help             Show the help of this program or of a specific command.
 self build       Index all the commands and libraries present in the valet user directory and installation directory.

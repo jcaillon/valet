@@ -10,23 +10,23 @@ function testGetFunctionNameFromCommand() {
 function testFuzzyMatchCommandtoFunctionName() {
 
   # fuzzy match with single result
-  echo "→ main::fuzzyMatchCommandtoFunctionNameOrFail 'se bu other stuff dont care'"
-  main::fuzzyMatchCommandtoFunctionNameOrFail "se bu other stuff dont care"
+  echo "→ main::fuzzyMatchCommandToFunctionNameOrFail 'se bu other stuff dont care'"
+  main::fuzzyMatchCommandToFunctionNameOrFail "se bu other stuff dont care"
   echo "${RETURNED_VALUE}"
   echo "${RETURNED_VALUE2}"
   echo "${RETURNED_VALUE3}"
 
   # fuzzy match by strict mode is enabled so it fails
   echo
-  echo "→ VALET_CONFIG_STRICT_MATCHING=true main::fuzzyMatchCommandtoFunctionNameOrFail 'se bu other stuff dont care'"
-  (VALET_CONFIG_STRICT_MATCHING=true main::fuzzyMatchCommandtoFunctionNameOrFail "se bu other stuff dont care") || echo "Failed as expected because strict mode is activated"
+  echo "→ VALET_CONFIG_STRICT_MATCHING=true main::fuzzyMatchCommandToFunctionNameOrFail 'se bu other stuff dont care'"
+  (VALET_CONFIG_STRICT_MATCHING=true main::fuzzyMatchCommandToFunctionNameOrFail "se bu other stuff dont care") || echo "Failed as expected because strict mode is activated"
 
   # fuzzy match with ambiguous result
   echo
-  echo "→ main::fuzzyMatchCommandtoFunctionNameOrFail 'sf' 'nop' 'other' 'stuff' 'dont care'"
-  (main::fuzzyMatchCommandtoFunctionNameOrFail "sf" "nop" "other" "stuff" "dont care") || echo "Failed as expected on ambiguous result"
+  echo "→ main::fuzzyMatchCommandToFunctionNameOrFail 'sf' 'nop' 'other' 'stuff' 'dont care'"
+  (main::fuzzyMatchCommandToFunctionNameOrFail "sf" "nop" "other" "stuff" "dont care") || echo "Failed as expected on ambiguous result"
 
-  test::endTest "Testing main::fuzzyMatchCommandtoFunctionNameOrFail" 0
+  test::endTest "Testing main::fuzzyMatchCommandToFunctionNameOrFail" 0
 }
 
 function testGetMaxPossibleCommandLevel() {

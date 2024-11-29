@@ -209,8 +209,8 @@ function selfBuild() {
 # This function summarizes the command definitions that have been extracted for the user.
 function summarize() {
   local -i numberOfVars=0
-  local var
-  for var in ${!CMD_*}; do
+  local _var
+  for _var in ${!CMD_*}; do
     numberOfVars+=1
   done
 
@@ -318,7 +318,7 @@ function extractCommandDefinitionsToVariables() {
   done
 
   # declare complementary variables
-  declareOtherCommmandVariables
+  declareOtherCommandVariables
 
   if ((duplicatedCommands > 0)); then
     core::fail "There are ${duplicatedCommands} duplicated commands, please remove them. Do you have a duplicated folder in your valet user directory?"
@@ -540,7 +540,7 @@ function declareFinalCommandDefinitionParserVariables() {
 # CMD_ALL_FUNCTIONS = list all the functions callable with a command
 # CMD_ALL_COMMANDS = list all the commands
 # shellcheck disable=SC2034
-function declareOtherCommmandVariables() {
+function declareOtherCommandVariables() {
   # sort commands in alphabetical order
   array::sort CMD_ALL_COMMANDS_ARRAY
 

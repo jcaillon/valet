@@ -54,9 +54,11 @@ Here is an example content for your user directory:
   {{< /filetree/folder >}}
 {{< /filetree/container >}}
 
-Each function that you want to expose as a library function should be commented following a strict format. Many illustrations can be found in the [extras/lib-valet][valetLibraryReference] script or in the core library scripts.
+With the example above, you will be able to `source gitlab` or `source git` to source your library files.
 
-An example is given below:
+Each function that you want to expose as a library function should be named following the `lib::functionName` convention and commented with a strict format. Many illustrations can be found in the [extras/lib-valet][valetLibraryReference] script or in the core library scripts.
+
+An example is given below for a `mylib` library:
 
 ```bash
 # ## mylib::myfunction

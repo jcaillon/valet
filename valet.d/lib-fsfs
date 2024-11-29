@@ -2,7 +2,7 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# fsfs stands for full srceen fuzzy search.
+# fsfs stands for full screen fuzzy search.
 # This script uses a lot of "private" variables (starting with _).
 
 # shellcheck source=lib-ansi-codes
@@ -127,7 +127,7 @@ function fsfs::itemSelector() {
   RETURNED_VALUE2="${FSFS_FINAL_SELECTION_INDEX}"
 }
 
-# Initialises the state for fsfs menu.
+# Initializes the state for fsfs menu.
 function fsfsInitialize() {
   local itemsArrayName="${1}"
 
@@ -144,10 +144,10 @@ function fsfsInitialize() {
   FSFS_ORIGINAL_ITEMS=("${originalItems[@]}")
 
   # the list of items filtered with the search string
-  # and the correspondance between the currently displayed indexes with
+  # and the correspondence between the currently displayed indexes with
   # the original items indexes
   FSFS_FILTERED_ITEMS=()
-  FSFS_FILTERED_ITEMS_CORRESPONDANCES=()
+  FSFS_FILTERED_ITEMS_CORRESPONDENCES=()
 
   FSFS_FINAL_SELECTION_INDEX=-1
   FSFS_SELECTED_FILTERED_ITEM_INDEX=0
@@ -322,7 +322,7 @@ function drawLeftPane() {
   if [[ -n ${FSFS_SEARCH_STRING} ]]; then
     array::fuzzyFilterSort "${FSFS_SEARCH_STRING}" FSFS_ORIGINAL_ITEMS "${FSFS_COLOR_LETTER_HIGHLIGHT}" "${FSFS_COLOR_LETTER_HIGHLIGHT_RESET}" "$((FSFS_LEFT_PANE_WIDTH - 4))"
     FSFS_FILTERED_ITEMS=("${RETURNED_ARRAY[@]}")
-    FSFS_FILTERED_ITEMS_CORRESPONDANCES=("${RETURNED_ARRAY2[@]}")
+    FSFS_FILTERED_ITEMS_CORRESPONDENCES=("${RETURNED_ARRAY2[@]}")
   else
     # for each item longer than the left width, cut and add ellipsis
     FSFS_FILTERED_ITEMS=()
@@ -333,9 +333,9 @@ function drawLeftPane() {
       fi
       FSFS_FILTERED_ITEMS+=("${line}")
     done
-    FSFS_FILTERED_ITEMS_CORRESPONDANCES=()
+    FSFS_FILTERED_ITEMS_CORRESPONDENCES=()
     for ((i = 0; i < ${#FSFS_ORIGINAL_ITEMS[@]}; i++)); do
-      FSFS_FILTERED_ITEMS_CORRESPONDANCES+=("${i}")
+      FSFS_FILTERED_ITEMS_CORRESPONDENCES+=("${i}")
     done
     initialOriginalIndex=-1
   fi
@@ -506,8 +506,8 @@ function drawPrompt() {
 # Returns the index of the item in the original array (if any, or -1).
 # It returns in the RETURNED_VALUE variable.
 function getCurrentInitialItemsIndex() {
-  if ((FSFS_SELECTED_FILTERED_ITEM_INDEX >= 0 && FSFS_SELECTED_FILTERED_ITEM_INDEX < ${#FSFS_FILTERED_ITEMS_CORRESPONDANCES[@]})); then
-    RETURNED_VALUE=${FSFS_FILTERED_ITEMS_CORRESPONDANCES[${FSFS_SELECTED_FILTERED_ITEM_INDEX}]}
+  if ((FSFS_SELECTED_FILTERED_ITEM_INDEX >= 0 && FSFS_SELECTED_FILTERED_ITEM_INDEX < ${#FSFS_FILTERED_ITEMS_CORRESPONDENCES[@]})); then
+    RETURNED_VALUE=${FSFS_FILTERED_ITEMS_CORRESPONDENCES[${FSFS_SELECTED_FILTERED_ITEM_INDEX}]}
     return 0
   fi
   RETURNED_VALUE=-1

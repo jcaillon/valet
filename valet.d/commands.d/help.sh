@@ -59,7 +59,7 @@ function showCommandHelp() {
   fi
 
   local functionName exactCommand
-  main::fuzzyMatchCommandtoFunctionNameOrFail "${commands[@]}"
+  main::fuzzyMatchCommandToFunctionNameOrFail "${commands[@]}"
   functionName="${RETURNED_VALUE:-}"
   exactCommand="${RETURNED_VALUE3:-}"
 

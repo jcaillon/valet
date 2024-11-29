@@ -31,14 +31,14 @@ ABOUT
   - 1. Download the given release from GitHub (latest by default).
   
   - 2. Copy it in the Valet home directory, which defaults to:
-  * /opt/valet in case of a multi user installation
-  * ~/.local/valet otherwise
+  - /opt/valet in case of a multi user installation
+  - ~/.local/valet otherwise
   
   - 3. Make the valet script readable and executable, either by adding a shim
   in a bin directory already present in your PATH, or by adding the Valet
   directory to your PATH on shell startup.
   
-  - 4. Copy the examples in the user valet directory ~/.valet.d.
+  - 4. Copy the examples in the valet user directory ~/.valet.d.
   
   - 6. Run self setup command (in case of a new installation) or re-export the config.
   

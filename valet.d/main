@@ -51,10 +51,12 @@ function main::onExitInternal() {
   if command -v onExit &>/dev/null; then
     onExit
   fi
+
   # if we ran an interactive function, make sure to restore the cursor
   if [[ -n ${AC__CURSOR_SHOW:-} ]]; then
     printf '%s' "${AC__CURSOR_SHOW}"
   fi
+
   # always call cleanUp before exiting
   main::onCleanUpInternal
   if [[ "${GLOBAL_ERROR_DISPLAYED:-0}" != "1" && "${rc}" != "0" ]]; then
@@ -95,7 +97,7 @@ function main::onTerminateInternal() {
   exit 1
 }
 
-function main::registrerTraps() {
+function main::registerTraps() {
   trap 'main::onErrorInternal $?' ERR
   trap main::onExitInternal EXIT
   # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
@@ -104,7 +106,7 @@ function main::registrerTraps() {
   trap main::onTerminateInternal SIGHUP SIGTERM
 }
 
-main::registrerTraps
+main::registerTraps
 
 function main::onCleanUpInternal() {
   io::cleanupTempFiles
@@ -380,21 +382,21 @@ function main::parseMainArguments() {
 
   log::debug "Command found ⌜${_PARSED_COMMANDS[*]}⌝."
 
-  if [[ ${#_PARSED_COMMANDS[@]} -eq 0 ]]; then
+  if (( ${#_PARSED_COMMANDS[@]} == 0 )); then
     # no command provided, we show the commands menu
 
-    if [[ "${VALET_CONFIG_REMEMBER_LAST_CHOICES:-3}" -eq 0 ]]; then
+    if [[ ${VALET_CONFIG_REMEMBER_LAST_CHOICES:-3} -eq 0 ]]; then
       # if the user does not want to remember the last choices
       main::showCommandsMenuAndRun "main-menu" CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY
     else
-      _COPIED_COMMMANDS_ARRAY=("${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[@]}")
-      main::showCommandsMenuAndRun "main-menu" _COPIED_COMMMANDS_ARRAY
+      _COPIED_COMMANDS_ARRAY=("${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[@]}")
+      main::showCommandsMenuAndRun "main-menu" _COPIED_COMMANDS_ARRAY
     fi
 
   fi
 
   local functionName nbArgs exactCommand
-  main::fuzzyMatchCommandtoFunctionNameOrFail "${_PARSED_COMMANDS[@]}"
+  main::fuzzyMatchCommandToFunctionNameOrFail "${_PARSED_COMMANDS[@]}"
   functionName="${RETURNED_VALUE:-}"
   nbArgs="${RETURNED_VALUE2:-}"
   exactCommand="${RETURNED_VALUE3:-}"
@@ -833,9 +835,9 @@ function main::getFunctionNameFromCommand() {
 # - `RETURNED_VALUE3`: The exact command.
 #
 # ```bash
-# main::fuzzyMatchCommandtoFunctionNameOrFail "self" "build" && printf '%s\n' "${RETURNED_VALUE}"
+# main::fuzzyMatchCommandToFunctionNameOrFail "self" "build" && printf '%s\n' "${RETURNED_VALUE}"
 # ```
-function main::fuzzyMatchCommandtoFunctionNameOrFail() {
+function main::fuzzyMatchCommandToFunctionNameOrFail() {
   if [[ $# -eq 0 ]]; then
     return 0
   fi
@@ -845,13 +847,13 @@ function main::fuzzyMatchCommandtoFunctionNameOrFail() {
 
   # we put the arguments into an array so we can interpret 'my' 'sub'
   # and 'my sub' as the same command (we split everything by space)
-  local -a commandArrray
+  local -a commandArray
   # shellcheck disable=SC2206
-  commandArrray=($*)
+  commandArray=($*)
 
   local loopI functionName command exactCommand
   for ((loopI = level; loopI >= 1; loopI--)); do
-    command="${commandArrray[*]:0:${loopI}}"
+    command="${commandArray[*]:0:${loopI}}"
 
     # case where the command is exact, we can match the function immediately
     main::getFunctionNameFromCommand "${command}" && functionName="${RETURNED_VALUE}"
@@ -960,6 +962,7 @@ function main::parseFunctionArguments() {
   if [[ -z "${isLastArgumentAnArray:-}" ]]; then isLastArgumentAnArray=false; fi
   local -i argumentPosition=0
 
+  # shellcheck disable=SC2178
   local -n options="CMD_OPTS_${functionName}"
   local -i totalNbOptions
   if [[ -v options && ${#options[@]} -gt 0 ]]; then

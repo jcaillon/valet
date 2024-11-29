@@ -184,7 +184,7 @@ printf '%s\n' "${myArray[@]}"
 
 ## array::sortWithCriteria
 
-Sorts an array using mulitple criteria.
+Sorts an array using multiple criteria.
 Excepts multiple arrays. The first array is the one to sort.
 The other arrays are used as criteria. Criteria are used in the order they are given.
 Each criteria array must have the same size as the array to sort.
@@ -918,11 +918,11 @@ Wait for a key press (single key).
 You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
 
 It uses the read builtin command with the option `-e` to use readline behind the scene.
-This means we can detect more key combinations but all keys needs to be binded first...
+This means we can detect more key combinations but all keys needs to be bound first...
 Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 
 You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.
-You must also redefine the function `interactiveOnKeyBindingPress` to react to a binded key press.
+You must also redefine the function `interactiveOnKeyBindingPress` to react to a bound key press.
 See @interactive::testWaitForKeyPress for an implementation example.
 
 - $@: **read parameters** _as any_:
@@ -1279,7 +1279,7 @@ stderrFilePath="${RETURNED_VALUE2}"
 >   `io::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
 >   than doing:
 >   `myvar="$(mycommand)".`
-> - On linux, it is slighly faster (but it might be slower if you don't have SSD?).
+> - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
 > - On linux, you can use a tmpfs directory for massive gains over subshells.
 
 
@@ -1730,7 +1730,7 @@ profiler::enable "${HOME}/valet-profiler-${BASHPID}.txt"
 ## prompt::autocompletion
 
 Displays an autocompletion input starting at a given location. Allows
-the user to type a text in the given row betwen a starting column and
+the user to type a text in the given row between a starting column and
 ending column (included). Longer text are shifted to fit between
 the two columns.
 
@@ -1770,7 +1770,7 @@ You can define several callback functions that are called on different events:
 - $5: initial text _as string_:
       (optional) The initial string, which corresponds to the text already entered
       by the user at the moment the autocompletion box shows up.
-      Allows to prefilter the autocompletion.
+      Allows to pre-filter the autocompletion.
       (defaults to empty)
 - $6: max lines _as int_:
       optional) The maximum number of lines/rows to use for the autocompletion box.
@@ -1907,7 +1907,7 @@ local comparison="${RETURNED_VALUE}"
 
 ## string::count
 
-Counts the number of occurences of a substring in a string.
+Counts the number of occurrences of a substring in a string.
 
 - $1: **string** _as string_:
       the string in which to search
@@ -1916,7 +1916,7 @@ Counts the number of occurences of a substring in a string.
 
 Returns:
 
-- `RETURNED_VALUE`: the number of occurences
+- `RETURNED_VALUE`: the number of occurrences
 
 ```bash
 string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
@@ -1957,7 +1957,7 @@ printf '%s' "${field}" # will output "field2"
 ## string::extractBetween
 
 Extract the text between two strings within a string.
-Search for the first occurence of the start string and the first occurence
+Search for the first occurrence of the start string and the first occurrence
 (after the start index) of the end string.
 Both start and end strings are excluded in the extracted text.
 Both start and end strings must be found to extract something.
@@ -2108,7 +2108,7 @@ Returns:
 - `RETURNED_ARRAY`: the array of strings
 
 ```bash
-string::split "name,firstname,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
+string::split "name,first name,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
 ```
 
 > This is faster than using read into an array from a here string.
@@ -2549,7 +2549,7 @@ function array::sort() { :; }
 
 # ## array::sortWithCriteria
 # 
-# Sorts an array using mulitple criteria.
+# Sorts an array using multiple criteria.
 # Excepts multiple arrays. The first array is the one to sort.
 # The other arrays are used as criteria. Criteria are used in the order they are given.
 # Each criteria array must have the same size as the array to sort.
@@ -3322,11 +3322,11 @@ function interactive::waitForChar() { :; }
 # You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
 # 
 # It uses the read builtin command with the option `-e` to use readline behind the scene.
-# This means we can detect more key combinations but all keys needs to be binded first...
+# This means we can detect more key combinations but all keys needs to be bound first...
 # Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 # 
 # You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.
-# You must also redefine the function `interactiveOnKeyBindingPress` to react to a binded key press.
+# You must also redefine the function `interactiveOnKeyBindingPress` to react to a bound key press.
 # See @interactive::testWaitForKeyPress for an implementation example.
 # 
 # - $@: **read parameters** _as any_:
@@ -3698,7 +3698,7 @@ function io::invokef2piped() { :; }
 # >   `io::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
 # >   than doing:
 # >   `myvar="$(mycommand)".`
-# > - On linux, it is slighly faster (but it might be slower if you don't have SSD?).
+# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
 # > - On linux, you can use a tmpfs directory for massive gains over subshells.
 # 
 function io::invokef5() { :; }
@@ -4176,7 +4176,7 @@ function profiler::enable() { :; }
 # ## prompt::autocompletion
 # 
 # Displays an autocompletion input starting at a given location. Allows
-# the user to type a text in the given row betwen a starting column and
+# the user to type a text in the given row between a starting column and
 # ending column (included). Longer text are shifted to fit between
 # the two columns.
 # 
@@ -4216,7 +4216,7 @@ function profiler::enable() { :; }
 # - $5: initial text _as string_:
 #       (optional) The initial string, which corresponds to the text already entered
 #       by the user at the moment the autocompletion box shows up.
-#       Allows to prefilter the autocompletion.
+#       Allows to pre-filter the autocompletion.
 #       (defaults to empty)
 # - $6: max lines _as int_:
 #       optional) The maximum number of lines/rows to use for the autocompletion box.
@@ -4358,7 +4358,7 @@ function string::compareSemanticVersion() { :; }
 
 # ## string::count
 # 
-# Counts the number of occurences of a substring in a string.
+# Counts the number of occurrences of a substring in a string.
 # 
 # - $1: **string** _as string_:
 #       the string in which to search
@@ -4367,7 +4367,7 @@ function string::compareSemanticVersion() { :; }
 # 
 # Returns:
 # 
-# - `RETURNED_VALUE`: the number of occurences
+# - `RETURNED_VALUE`: the number of occurrences
 # 
 # ```bash
 # string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
@@ -4410,7 +4410,7 @@ function string::cutField() { :; }
 # ## string::extractBetween
 # 
 # Extract the text between two strings within a string.
-# Search for the first occurence of the start string and the first occurence
+# Search for the first occurrence of the start string and the first occurrence
 # (after the start index) of the end string.
 # Both start and end strings are excluded in the extracted text.
 # Both start and end strings must be found to extract something.
@@ -4567,7 +4567,7 @@ function string::regexGetFirst() { :; }
 # - `RETURNED_ARRAY`: the array of strings
 # 
 # ```bash
-# string::split "name,firstname,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
+# string::split "name,first name,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
 # ```
 # 
 # > This is faster than using read into an array from a here string.
@@ -4942,16 +4942,16 @@ function test::endTest() { :; }
 
 		"array::sortWithCriteria": {
 		  "prefix": "array::sortWithCriteria",
-		  "description": "Sorts an array using mulitple criteria...",
+		  "description": "Sorts an array using multiple criteria...",
 		  "scope": "",
 		  "body": [ "array::sortWithCriteria \"${1:**array name**}\" \"${99:**criteria array names**}\"$0" ]
 	  },
 
 		"array::sortWithCriteria#withdoc": {
 		  "prefix": "array::sortWithCriteria#withdoc",
-		  "description": "Sorts an array using mulitple criteria...",
+		  "description": "Sorts an array using multiple criteria...",
 		  "scope": "",
-		  "body": [ "# ## array::sortWithCriteria\n# \n# Sorts an array using mulitple criteria.\n# Excepts multiple arrays. The first array is the one to sort.\n# The other arrays are used as criteria. Criteria are used in the order they are given.\n# Each criteria array must have the same size as the array to sort.\n# Each criteria array must containing integers representing the order of the elements.\n# We first sort using the first criteria (from smallest to biggest), then the second, etc.\n# \n# - \\$1: **array name** _as string_:\n#       the name of the array to sort (it is sorted in place)\n# - \\$@: **criteria array names** _as string_:\n#       the names of the arrays to use as criteria\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array that contains the corresponding indexes of the sorted array in the original array\n# \n# ```bash\n# declare -g myArray=( \"a\" \"b\" \"c\" )\n# declare -g criteria1=( 3 2 2 )\n# declare -g criteria2=( 1 3 2 )\n# array::sortWithCriteria myArray criteria1 criteria2\n# printf '%s\\n' \"\\${myArray[@]}\"\n# # c b a\n# printf '%s\\n' \"\\${RETURNED_ARRAY[@]}\"\n# # 3 2 1\n# ```\n# \n# > TODO: Update this basic exchange sort implementation.\n# \narray::sortWithCriteria \"${1:**array name**}\" \"${99:**criteria array names**}\"$0" ]
+		  "body": [ "# ## array::sortWithCriteria\n# \n# Sorts an array using multiple criteria.\n# Excepts multiple arrays. The first array is the one to sort.\n# The other arrays are used as criteria. Criteria are used in the order they are given.\n# Each criteria array must have the same size as the array to sort.\n# Each criteria array must containing integers representing the order of the elements.\n# We first sort using the first criteria (from smallest to biggest), then the second, etc.\n# \n# - \\$1: **array name** _as string_:\n#       the name of the array to sort (it is sorted in place)\n# - \\$@: **criteria array names** _as string_:\n#       the names of the arrays to use as criteria\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array that contains the corresponding indexes of the sorted array in the original array\n# \n# ```bash\n# declare -g myArray=( \"a\" \"b\" \"c\" )\n# declare -g criteria1=( 3 2 2 )\n# declare -g criteria2=( 1 3 2 )\n# array::sortWithCriteria myArray criteria1 criteria2\n# printf '%s\\n' \"\\${myArray[@]}\"\n# # c b a\n# printf '%s\\n' \"\\${RETURNED_ARRAY[@]}\"\n# # 3 2 1\n# ```\n# \n# > TODO: Update this basic exchange sort implementation.\n# \narray::sortWithCriteria \"${1:**array name**}\" \"${99:**criteria array names**}\"$0" ]
 	  },
 
 		"core::checkParseResults": {
@@ -5497,7 +5497,7 @@ function test::endTest() { :; }
 		  "prefix": "interactive::waitForKeyPress#withdoc",
 		  "description": "Wait for a key press (single key)...",
 		  "scope": "",
-		  "body": [ "# ## interactive::waitForKeyPress\n# \n# Wait for a key press (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command with the option `-e` to use readline behind the scene.\n# This means we can detect more key combinations but all keys needs to be binded first...\n# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.\n# \n# You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.\n# You must also redefine the function `interactiveOnKeyBindingPress` to react to a binded key press.\n# See @interactive::testWaitForKeyPress for an implementation example.\n# \n# - \\$@: **read parameters** _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# interactive::waitForKeyPress\n# interactive::waitForKeyPress -t 0.1\n# ```\n# \n# > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll\n# > even when nothing is read... Make sure to not position the cursor at the end of the screen.\n# \ninteractive::waitForKeyPress \"${99:**read parameters**}\"$0" ]
+		  "body": [ "# ## interactive::waitForKeyPress\n# \n# Wait for a key press (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command with the option `-e` to use readline behind the scene.\n# This means we can detect more key combinations but all keys needs to be bound first...\n# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.\n# \n# You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.\n# You must also redefine the function `interactiveOnKeyBindingPress` to react to a bound key press.\n# See @interactive::testWaitForKeyPress for an implementation example.\n# \n# - \\$@: **read parameters** _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# interactive::waitForKeyPress\n# interactive::waitForKeyPress -t 0.1\n# ```\n# \n# > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll\n# > even when nothing is read... Make sure to not position the cursor at the end of the screen.\n# \ninteractive::waitForKeyPress \"${99:**read parameters**}\"$0" ]
 	  },
 
 		"io::cat": {
@@ -5707,7 +5707,7 @@ function test::endTest() { :; }
 		  "prefix": "io::invokef5#withdoc",
 		  "description": "This function call an executable and its arguments...",
 		  "scope": "",
-		  "body": [ "# ## io::invokef5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#                      If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#         (if the error code is matched, then set the output error code to 0)\n# - \\$3: **fail** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **sdtin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?: The exit code of the executable.\n# - `RETURNED_VALUE`: The file path containing the stdout of the executable.\n# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.\n# \n# ```bash\n# io::invokef5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > - In windows, this is tremendously faster to do (or any other invoke flavor):\n# >   `io::invokef5 false 0 false '' mycommand && myvar=\"\\${RETURNED_VALUE}\"`\n# >   than doing:\n# >   `myvar=\"\\$(mycommand)\".`\n# > - On linux, it is slighly faster (but it might be slower if you don't have SSD?).\n# > - On linux, you can use a tmpfs directory for massive gains over subshells.\n# \nio::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**fail**}\" \"${4:**sdtin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
+		  "body": [ "# ## io::invokef5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#                      If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#         (if the error code is matched, then set the output error code to 0)\n# - \\$3: **fail** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **sdtin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?: The exit code of the executable.\n# - `RETURNED_VALUE`: The file path containing the stdout of the executable.\n# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.\n# \n# ```bash\n# io::invokef5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > - In windows, this is tremendously faster to do (or any other invoke flavor):\n# >   `io::invokef5 false 0 false '' mycommand && myvar=\"\\${RETURNED_VALUE}\"`\n# >   than doing:\n# >   `myvar=\"\\$(mycommand)\".`\n# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).\n# > - On linux, you can use a tmpfs directory for massive gains over subshells.\n# \nio::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**fail**}\" \"${4:**sdtin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
 	  },
 
 		"io::isDirectoryWritable": {
@@ -6085,7 +6085,7 @@ function test::endTest() { :; }
 		  "prefix": "prompt::autocompletion#withdoc",
 		  "description": "Displays an autocompletion input starting at a given location...",
 		  "scope": "",
-		  "body": [ "# ## prompt::autocompletion\n# \n# Displays an autocompletion input starting at a given location. Allows\n# the user to type a text in the given row betwen a starting column and\n# ending column (included). Longer text are shifted to fit between\n# the two columns.\n# \n# This component is a replacement for the `read -e` command, which allows\n# to limit the input to a single line and to provide autocompletion.\n# \n# The autocompletion box can be hidden, or displayed below/above the input text\n# depending on the space available on the screen.\n# \n# The user can type character to filter down a list of suggestions,\n# navigate up and down between suggestions, insert a suggestion using\n# TAB or ENTER, press ESC to close the autocompletion box, and ALT+ENTER to\n# submit the input (or just ENTER when the box is closed).\n# \n# The autocompletion box will position itself depending on the screen size\n# and the starting position of the text.\n# \n# The multiple options allows to use this function to ask for any user input\n# as long as it is on a single line.\n# \n# You can define several callback functions that are called on different events:\n# \n# - `autocompletionOnTextUpdate`: Called when the text is updated (after each key press).\n# \n# - \\$1: **start line** _as int_:\n#       The line/row at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$2: **start column** _as int_:\n#       The column at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$3: **stop column** _as int_:\n#       The column at which to stop showing the autocompleted text.\n#       Longer texts get shifted to display the end of the user input.\n# - \\$4: **array name** _as string_:\n#       The items to display (name of a global array which contains the items).\n#       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.\n# - \\$5: initial text _as string_:\n#       (optional) The initial string, which corresponds to the text already entered\n#       by the user at the moment the autocompletion box shows up.\n#       Allows to prefilter the autocompletion.\n#       (defaults to empty)\n# - \\$6: max lines _as int_:\n#       optional) The maximum number of lines/rows to use for the autocompletion box.\n#       (defaults to a maximized auto-computed value depending on the items and screen size)\n# - \\$7: force box below _as bool_:\n#       (optional) If true, the box is forced to be displayed below the input text.\n#       Otherwise it will depend on the space required and space available below/above.\n#       (defaults to false)\n# - \\$8: show prompt _as bool_:\n#       (optional) If true, the prompt is displayed. If false, the prompt is hidden.\n#       Useful to turn this into a simple multiple choice list.\n#       (defaults to true)\n# - \\$9: force show count _as bool_:\n#       (optional) If true, the count of items is always displayed.\n#       If false, the count is only displayed when we can'y display all the items at once.\n#       (defaults to false)\n# - \\$10: show left cursors _as bool_:\n#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       (defaults to true)\n# - \\$11: filters from n chars _as int_:\n#       (optional) The minimum number of characters to type before starting to filter the items.\n#       By default, the list is shown full and the user can start typing to filter.\n#       Put a value superior to 0 to make it behave like a standard autocompletion.\n#       When non-zero, the user can CTRL+SPACE to show the full list.\n#       (defaults to 0)\n# - \\$12: accept any value _as bool_:\n#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0: The user pressed ENTER to validate the text.\n#   - 1: The user pressed ESC to close the text box.\n# - `RETURNED_VALUE`: The entered value (or empty).\n# - `RETURNED_VALUE2`: The string displayed on the screen between the 2 columns at the\n#                      moment when the autocompletion was closed.\n# \n# ```bash\n# prompt::autocompletion \"Select an item\" item_array_name \"onItemSelected\" \"Details\"\n# ```\n# \nprompt::autocompletion \"${1:**start line**}\" \"${2:**start column**}\" \"${3:**stop column**}\" \"${4:**array name**}\" \"${5:initial text}\" \"${6:max lines}\" \"${7:force box below}\" \"${8:show prompt}\" \"${9:force show count}\"$0" ]
+		  "body": [ "# ## prompt::autocompletion\n# \n# Displays an autocompletion input starting at a given location. Allows\n# the user to type a text in the given row between a starting column and\n# ending column (included). Longer text are shifted to fit between\n# the two columns.\n# \n# This component is a replacement for the `read -e` command, which allows\n# to limit the input to a single line and to provide autocompletion.\n# \n# The autocompletion box can be hidden, or displayed below/above the input text\n# depending on the space available on the screen.\n# \n# The user can type character to filter down a list of suggestions,\n# navigate up and down between suggestions, insert a suggestion using\n# TAB or ENTER, press ESC to close the autocompletion box, and ALT+ENTER to\n# submit the input (or just ENTER when the box is closed).\n# \n# The autocompletion box will position itself depending on the screen size\n# and the starting position of the text.\n# \n# The multiple options allows to use this function to ask for any user input\n# as long as it is on a single line.\n# \n# You can define several callback functions that are called on different events:\n# \n# - `autocompletionOnTextUpdate`: Called when the text is updated (after each key press).\n# \n# - \\$1: **start line** _as int_:\n#       The line/row at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$2: **start column** _as int_:\n#       The column at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$3: **stop column** _as int_:\n#       The column at which to stop showing the autocompleted text.\n#       Longer texts get shifted to display the end of the user input.\n# - \\$4: **array name** _as string_:\n#       The items to display (name of a global array which contains the items).\n#       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.\n# - \\$5: initial text _as string_:\n#       (optional) The initial string, which corresponds to the text already entered\n#       by the user at the moment the autocompletion box shows up.\n#       Allows to pre-filter the autocompletion.\n#       (defaults to empty)\n# - \\$6: max lines _as int_:\n#       optional) The maximum number of lines/rows to use for the autocompletion box.\n#       (defaults to a maximized auto-computed value depending on the items and screen size)\n# - \\$7: force box below _as bool_:\n#       (optional) If true, the box is forced to be displayed below the input text.\n#       Otherwise it will depend on the space required and space available below/above.\n#       (defaults to false)\n# - \\$8: show prompt _as bool_:\n#       (optional) If true, the prompt is displayed. If false, the prompt is hidden.\n#       Useful to turn this into a simple multiple choice list.\n#       (defaults to true)\n# - \\$9: force show count _as bool_:\n#       (optional) If true, the count of items is always displayed.\n#       If false, the count is only displayed when we can'y display all the items at once.\n#       (defaults to false)\n# - \\$10: show left cursors _as bool_:\n#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       (defaults to true)\n# - \\$11: filters from n chars _as int_:\n#       (optional) The minimum number of characters to type before starting to filter the items.\n#       By default, the list is shown full and the user can start typing to filter.\n#       Put a value superior to 0 to make it behave like a standard autocompletion.\n#       When non-zero, the user can CTRL+SPACE to show the full list.\n#       (defaults to 0)\n# - \\$12: accept any value _as bool_:\n#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0: The user pressed ENTER to validate the text.\n#   - 1: The user pressed ESC to close the text box.\n# - `RETURNED_VALUE`: The entered value (or empty).\n# - `RETURNED_VALUE2`: The string displayed on the screen between the 2 columns at the\n#                      moment when the autocompletion was closed.\n# \n# ```bash\n# prompt::autocompletion \"Select an item\" item_array_name \"onItemSelected\" \"Details\"\n# ```\n# \nprompt::autocompletion \"${1:**start line**}\" \"${2:**start column**}\" \"${3:**stop column**}\" \"${4:**array name**}\" \"${5:initial text}\" \"${6:max lines}\" \"${7:force box below}\" \"${8:show prompt}\" \"${9:force show count}\"$0" ]
 	  },
 
 		"source": {
@@ -6146,16 +6146,16 @@ function test::endTest() { :; }
 
 		"string::count": {
 		  "prefix": "string::count",
-		  "description": "Counts the number of occurences of a substring in a string...",
+		  "description": "Counts the number of occurrences of a substring in a string...",
 		  "scope": "",
 		  "body": [ "string::count \"${1:**string**}\" \"${2:**substring**}\"$0" ]
 	  },
 
 		"string::count#withdoc": {
 		  "prefix": "string::count#withdoc",
-		  "description": "Counts the number of occurences of a substring in a string...",
+		  "description": "Counts the number of occurrences of a substring in a string...",
 		  "scope": "",
-		  "body": [ "# ## string::count\n# \n# Counts the number of occurences of a substring in a string.\n# \n# - \\$1: **string** _as string_:\n#       the string in which to search\n# - \\$2: **substring** _as string_:\n#       the substring to count\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the number of occurences\n# \n# ```bash\n# string::count \"name,firstname,address\" \",\" && local count=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This is faster than looping over the string and check the substring.\n# \nstring::count \"${1:**string**}\" \"${2:**substring**}\"$0" ]
+		  "body": [ "# ## string::count\n# \n# Counts the number of occurrences of a substring in a string.\n# \n# - \\$1: **string** _as string_:\n#       the string in which to search\n# - \\$2: **substring** _as string_:\n#       the substring to count\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the number of occurrences\n# \n# ```bash\n# string::count \"name,firstname,address\" \",\" && local count=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This is faster than looping over the string and check the substring.\n# \nstring::count \"${1:**string**}\" \"${2:**substring**}\"$0" ]
 	  },
 
 		"string::cutField": {
@@ -6183,7 +6183,7 @@ function test::endTest() { :; }
 		  "prefix": "string::extractBetween#withdoc",
 		  "description": "Extract the text between two strings within a string...",
 		  "scope": "",
-		  "body": [ "# ## string::extractBetween\n# \n# Extract the text between two strings within a string.\n# Search for the first occurence of the start string and the first occurence\n# (after the start index) of the end string.\n# Both start and end strings are excluded in the extracted text.\n# Both start and end strings must be found to extract something.\n# \n# - \\$1: **string** _as string_:\n#       the string in which to search\n# - \\$2: **start string** _as string_:\n#       the start string\n#       (if empty, then it will extract from the beginning of the string)\n# - \\$3: **end string** _as string_:\n#       the end string\n#       (if empty, then it will extract until the end of the string)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the extracted text\n# \n# ```bash\n# string::extractBetween \"This is a long text\" \"is a \" \" text\"\n# local extractedText=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::extractBetween \"${1:**string**}\" \"${2:**start string**}\" \"${3:**end string**}\"$0" ]
+		  "body": [ "# ## string::extractBetween\n# \n# Extract the text between two strings within a string.\n# Search for the first occurrence of the start string and the first occurrence\n# (after the start index) of the end string.\n# Both start and end strings are excluded in the extracted text.\n# Both start and end strings must be found to extract something.\n# \n# - \\$1: **string** _as string_:\n#       the string in which to search\n# - \\$2: **start string** _as string_:\n#       the start string\n#       (if empty, then it will extract from the beginning of the string)\n# - \\$3: **end string** _as string_:\n#       the end string\n#       (if empty, then it will extract until the end of the string)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the extracted text\n# \n# ```bash\n# string::extractBetween \"This is a long text\" \"is a \" \" text\"\n# local extractedText=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::extractBetween \"${1:**string**}\" \"${2:**start string**}\" \"${3:**end string**}\"$0" ]
 	  },
 
 		"string::indexOf": {
@@ -6267,7 +6267,7 @@ function test::endTest() { :; }
 		  "prefix": "string::split#withdoc",
 		  "description": "Split a string into an array using a separator...",
 		  "scope": "",
-		  "body": [ "# ## string::split\n# \n# Split a string into an array using a separator.\n# \n# - \\$1: **string** _as string_:\n#       the string to split\n# - \\$2: **separator** _as string_:\n#       the separator (must be a single character!)\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: the array of strings\n# \n# ```bash\n# string::split \"name,firstname,address\" \",\" && local -a array=(\"\\${RETURNED_ARRAY[@]}\")\n# ```\n# \n# > This is faster than using read into an array from a here string.\n# \nstring::split \"${1:**string**}\" \"${2:**separator**}\"$0" ]
+		  "body": [ "# ## string::split\n# \n# Split a string into an array using a separator.\n# \n# - \\$1: **string** _as string_:\n#       the string to split\n# - \\$2: **separator** _as string_:\n#       the separator (must be a single character!)\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: the array of strings\n# \n# ```bash\n# string::split \"name,first name,address\" \",\" && local -a array=(\"\\${RETURNED_ARRAY[@]}\")\n# ```\n# \n# > This is faster than using read into an array from a here string.\n# \nstring::split \"${1:**string**}\" \"${2:**separator**}\"$0" ]
 	  },
 
 		"string::trim": {

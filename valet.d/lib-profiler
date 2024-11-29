@@ -171,7 +171,7 @@ function profilerBashCleanFile() {
 
   local -i deltaTimer
   local -i lastTimer=0
-  local totalElaspedTime lastElaspedTime
+  local totalElapsedTime lastElapsedTime
   local IFS indirectionLevel timer program lineNumber fun subShellLevel depth theRest arrow
   while IFS=$'\t' read -r indirectionLevel timer program lineNumber fun subShellLevel depth arrow theRest; do
     if [[ ${clearCoreLine} == "true" && ${program} =~ (valet.d/core|valet.d/main|valet.d/lib-[a-z0-9]*)$ ]]; then
@@ -195,13 +195,13 @@ function profilerBashCleanFile() {
     fi
 
     profilerMicrosecondsToSeconds "${timer}" 4
-    totalElaspedTime="${RETURNED_VALUE}"
+    totalElapsedTime="${RETURNED_VALUE}"
 
     deltaTimer=$((timer - lastTimer))
     lastTimer=${timer}
 
     profilerMicrosecondsToSeconds "${deltaTimer}" 4
-    lastElaspedTime=${RETURNED_VALUE}
+    lastElapsedTime=${RETURNED_VALUE}
 
     # shorten the program name if it is too long
     if (( ${#program} > 30)); then
@@ -216,7 +216,7 @@ function profilerBashCleanFile() {
 
     stackLength=$((depth - baseStackLength))
 
-    printf "%02d %02d %02d %-8s %-8s %31s:%-4d %-40s → %s\n" "${stackLength}" "${#indirectionLevel}" "${subShellLevel}" "${totalElaspedTime}" "${lastElaspedTime}" "${program}" "${lineNumber}" "${fun}" "${theRest}"
+    printf "%02d %02d %02d %-8s %-8s %31s:%-4d %-40s → %s\n" "${stackLength}" "${#indirectionLevel}" "${subShellLevel}" "${totalElapsedTime}" "${lastElapsedTime}" "${program}" "${lineNumber}" "${fun}" "${theRest}"
 
   done <"${_PROFILER_OUTPUT_FILE}"
 }

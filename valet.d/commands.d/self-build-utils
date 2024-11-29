@@ -67,6 +67,7 @@ function extractCommandDefinitionToVariables() {
   local commandDefinition="${1}"
 
   # make sure to unset all previous TEMP_CMD_BUILD_* variables
+  # shellcheck disable=SC2086
   unset -v ${!TEMP_CMD_BUILD_*}
 
   # loop through lines
@@ -297,6 +298,7 @@ _CMD_INCLUDED=1
 # CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (contains ?)
 
 "
+    # shellcheck disable=SC2086
     io::invoke declare -p ${!CMD_*}
     local line
     while read -r -d $'\n' line; do

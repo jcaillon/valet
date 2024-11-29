@@ -37,14 +37,14 @@ if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_S
 fi
 
 #===============================================================
-# >>> Temporay files and folders
+# >>> Temporary files and folders
 #===============================================================
 
 # Setup global variables that will be used for temporary files and folders.
 function io::setupTempFileGlobalVariable() {
   # get unique file names for the stdout, stderr and temporary directory
   # to be fast, we do not create anything until we really need it
-  # this could lead to issues, altough it is very unlikely
+  # this could lead to issues, although it is very unlikely
   GLOBAL_TEMPORARY_PREFIX="${TMPDIR:-/tmp}/temp-"
   GLOBAL_TEMPORARY_IN_MEM_PREFIX="${VALET_CONFIG_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/temp-"
   GLOBAL_TEMPORARY_WORK_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-work"
@@ -144,7 +144,7 @@ function io::cleanupTempFiles() {
 # >>> Logging
 #===============================================================
 
-# determine if we support colors (can be overriden by the user with VALET_CONFIG_ENABLE_COLORS)
+# determine if we support colors (can be overridden by the user with VALET_CONFIG_ENABLE_COLORS)
 case "${TERM:-}" in
 xterm-color | xterm-256color | linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}" ;;
 xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;

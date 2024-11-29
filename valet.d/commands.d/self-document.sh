@@ -144,7 +144,7 @@ function selfDocument::getAllFunctionsDocumentation() {
   unset -v RETURNED_ASSOCIATIVE_ARRAY
   declare -g -A RETURNED_ASSOCIATIVE_ARRAY=()
 
-  # for each file to analyse
+  # for each file to analyze
   local file
   for file in "${filesToAnalyze[@]}"; do
     local functionName functionDocumentation

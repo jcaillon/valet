@@ -15,27 +15,27 @@ fi
 # >>> command: self export
 #===============================================================
 
-: "---
-command: self export
-function: selfExport
-hideInMenu: true
-author: github.com/jcaillon
-shortDescription: Returns a string that can be evaluated to have Valet functions in bash.
-description: |-
-  If you want to use Valet functions directly in bash, you can use this command like this:
-
-  "'
-  eval "$(valet self export)"
-  '"
-
-  This will export all the necessary functions and variables to use the Valet log library by default.
-
-  You can optionally export all the functions if needed.
-options:
-- name: -a, --export-all
-  description: |-
-    Export all the libraries.
----"
+##<<VALET_COMMAND
+# command: self export
+# function: selfExport
+# hideInMenu: true
+# author: github.com/jcaillon
+# shortDescription: Returns a string that can be evaluated to have Valet functions in bash.
+# description: |-
+#   If you want to use Valet functions directly in bash, you can use this command like this:
+#
+#   ```bash
+#   eval "$(valet self export)"
+#   ```
+#
+#   This will export all the necessary functions and variables to use the Valet log library by default.
+#
+#   You can optionally export all the functions if needed.
+# options:
+# - name: -a, --export-all
+#   description: |-
+#     Export all the libraries.
+##VALET_COMMAND
 function selfExport() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
@@ -46,20 +46,22 @@ function selfExport() {
   source io
 
   # export all the necessary variables
+  # shellcheck disable=SC2086
   io::invoke declare -p ${!VALET_CONFIG_*} ${!GLOBAL_*}
   output+="${RETURNED_VALUE//declare -? /}"$'\n'
 
-  # export core::fail
-  io::invoke declare -f core::fail
+  # export all self sufficient functions from the core library
+  io::invoke declare -f \
+    core::fail \
+    core::failWithCode \
+    io::createTempFile \
+    io::createTempDirectory \
+    io::cleanupTempFiles
   output+="${RETURNED_VALUE//declare -? /}"$'\n'
-
-  # export all the log functions
-  exportFunctionsForLibrary log
-  output+="${RETURNED_VALUE//declare -? /}"$'\n'
-
-  # export all the log functions
-  exportFunctionsForLibrary string
-  output+="${RETURNED_VALUE//declare -? /}"$'\n'
+  exportFunctionsForLibrary log && output+="${RETURNED_VALUE}"$'\n'
+  exportFunctionsForLibrary string && output+="${RETURNED_VALUE}"$'\n'
+  exportFunctionsForLibrary array && output+="${RETURNED_VALUE}"$'\n'
+  exportFunctionsForLibrary system && output+="${RETURNED_VALUE}"$'\n'
 
   # export all libraries
   if [[ ${exportAll:-} == "true" ]]; then
