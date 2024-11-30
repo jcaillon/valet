@@ -63,9 +63,10 @@ rm -Rf "'"${localStateDirectory}"'"
 rm -Rf "'"${userDirectory}"'"
 # remove a possible symlink
 rm -f "'"$(which valet)"'" 2>/dev/null || :
+echo "Valet has been uninstalled."
 '
   else
-    log::info "To uninstall Valet, you can run the following commands:"$'\n' \
+    log::warning "To uninstall Valet, you can run the following commands:"$'\n' \
       "bash -c 'eval \"\$(valet self uninstall --script 2>/dev/null)\"'"
   fi
 }

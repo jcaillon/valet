@@ -1,4 +1,4 @@
-name: build-image-on-tag
+name: Build and push image
 
 # Run on tags and push to the latest branch
 on:

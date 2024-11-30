@@ -1,0 +1,41 @@
+name: Self test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Default to bash
+defaults:
+  run:
+    shell: bash -o errexit -o nounset -o pipefail -x {0}
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  self-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      # Runs our tests
+      - name: Run valet self test
+        env:
+          VALET_CONFIG_ENABLE_COLORS: true
+          VALET_CONFIG_DISABLE_PROGRESS: true
+        run: |
+          chmod +x valet
+          ./valet self test -C

@@ -684,6 +684,8 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
 
   # shellcheck source=../core
   source "${_VALETD_DIR%/*}/core"
+else
+  unset _NOT_EXECUTED_FROM_VALET
 fi
 # --- END OF COMMAND COMMON PART
 

@@ -23,13 +23,14 @@ rm -Rf "/c/Users/jcaillon/.local/share/valet"
 rm -Rf "/c/Users/jcaillon/.valet.d"
 # remove a possible symlink
 rm -f "$GLOBAL_VALET_HOME/valet" 2>/dev/null || :
+echo "Valet has been uninstalled."
 
 ```
 
 **Error** output:
 
 ```log
-INFO     To uninstall Valet, you can run the following commands:
+WARNING  To uninstall Valet, you can run the following commands:
 
 bash -c 'eval "$(valet self uninstall --script 2>/dev/null)"'
 ```

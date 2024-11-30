@@ -8,13 +8,14 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- Test install and extend commands.
-- Add utility functions to install stuff from the valet.setup.sh scripts `powershell.exe -NoProfile -NonInteractive -Command "echo ok" 2>/dev/null`.
-- Add `valet.cmd` to the package, in self setup we can optionally add the valet install dir to the windows PATH.
-- In self setup, we can also play the self document command.
+- selfExtend: with `.` it setup the current directory as an extension. With `name` it creates a new extension under the valet user directory (as a git repo if git found).
+- Add utility functions to install stuff from the extension.setup.sh scripts `powershell.exe -NoProfile -NonInteractive -Command "echo ok" 2>/dev/null`:
+  - windows::runPs1Command
+  - windows::mklink
+  - system::addToPath
+  - system::addToPathIfNotPresent
 - Finish prompt and interactive functions.
-- Add a command to setup a git repo as a Valet commands dir
-- Self-command to create a new command interactively. It can create a new git repo under the valet directory if git is found.
+- Self-command to create a new command interactively.
 - Add full support for interactive mode.
 - Add HOW TO documentation:
   - how to build and share a CLI application with Valet
@@ -29,10 +30,10 @@ This page lists the features that I would like to implement in Valet. They come 
 - A command can declare dependencies to auto check if some tools are installed before running the command. Add `self download-dependencies` and `self check-dependencies` commands. Dependencies should not be checked/download in each command. Add a hint to play the commands if a tool is missing (exception caught).
 - add valet in brew
 - add man page for valet
-- allow to do that: `eval "$(valet self uninstall)"` to clean everything up
 - functions:
   - head / tail from file.
   - test if folder is writeable
   - Implement regex replace in pure bash.
+- Add `valet.cmd` to the package, in self setup we can optionally add the valet install dir to the windows PATH.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

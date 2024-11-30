@@ -1,6 +1,7 @@
 ### VS Code ###
 .vscode/**
 !.vscode/extensions.json
+!.vscode/settings.json
 
 ### WINDOWS ###
 desktop.ini

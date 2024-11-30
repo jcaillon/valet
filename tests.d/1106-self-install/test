@@ -17,6 +17,9 @@ function main() {
     # we are running this locally
     if command -v docker &> /dev/null; then
       echo "Running the test in a container."
+      # To build the image:
+      # - cd tests.d/1106-self-install/docker-valet-test
+      # - docker build -t valet-test .
       docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash valet-test -c -o errexit -o nounset -o pipefail "chmod +x ./tests.d/1106-self-install/test; ./tests.d/1106-self-install/test"
       return 0
     fi
@@ -26,6 +29,9 @@ function main() {
 
   # we are running the following test on a container
   BRANCH_NAME="${BRANCH_NAME:-main}"
+  export BRANCH_NAME
+
+
 
   echo "================================================"
   echo "Installing Valet: --unattended --use-branch --version ${BRANCH_NAME}."
@@ -35,11 +41,180 @@ function main() {
   chmod +x ./valet.d/commands.d/self-install.sh
   ./valet.d/commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}"
 
-  # bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/valet.d/commands.d/self-install.sh")" --unattended --use-branch --version "${BRANCH_NAME}"
+  echo "================================================"
+  echo "Built commands:"
+  echo "================================================"
+  # shellcheck disable=SC1090
+  source ~/.valet.d/commands
+  local IFS=$'\n'
+  echo "${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]}"
+  # check if CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY contains "showcase"
+  if [[ ! ${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]} =~ "showcase" ]]; then
+    echo "Command 'showcase' not found."
+    exit 1
+  fi
+  # shellcheck disable=SC2086
+  unset -v ${!CMD_*}
+
+  export VALET_VERBOSE=false
+
+
 
   echo "================================================"
-  echo "Installing Valet: --unattended --use-branch --version ${BRANCH_NAME}."
+  echo "Install extension: extension-1 using git."
   echo "================================================"
+
+  export VALET_DISABLE_PROGRESS_BARS=true
+  valet self extend https://github.com/jcaillon/valet --version extension-1 --name extension-1
+
+  echo "================================================"
+  echo "Install extension: extension-2 using tarball."
+  echo "================================================"
+
+  mv /usr/bin/git /usr/bin/git2
+  valet self extend https://github.com/jcaillon/valet.git --version extension-2 --name extension-2
+  mv /usr/bin/git2 /usr/bin/git
+
+  echo "================================================"
+  echo "Install extension: extension-3 using git, skip setup."
+  echo "================================================"
+
+  valet self extend https://github.com/jcaillon/valet --version extension-3 --name extension-3 --skip-setup
+
+  echo "================================================"
+  echo "Built commands:"
+  echo "================================================"
+  # shellcheck disable=SC1090
+  source ~/.valet.d/commands
+  echo "${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]}"
+  # check if CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY contains "showcase"
+  if [[ ! ${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]} =~ "extension" ]]; then
+    echo "Command 'extension' not found."
+    exit 1
+  fi
+  # shellcheck disable=SC2086
+  unset -v ${!CMD_*}
+
+  echo "================================================"
+  echo "Update extension: nothing to do."
+  echo "================================================"
+
+  valet self update --only-extensions
+
+  echo "================================================"
+  echo "Update extension: 1 & 2 updated."
+  echo "================================================"
+
+  # reset extension-3 to the previous commit
+  pushd ~/.valet.d/extension-3 &>/dev/null
+  git reset --hard HEAD^
+  popd &>/dev/null
+  # remove sha1 in extension-2
+  rm -f ~/.valet.d/extension-2/.sha1
+
+  echo "y" | valet self update
+
+
+
+  echo "================================================"
+  echo "Updating Valet: --skip-extensions."
+  echo "================================================"
+
+  valet self update --skip-extensions
+
+  echo "================================================"
+  echo "Updating Valet: no args (nothing to do)."
+  echo "================================================"
+
+  valet self update
+
+  echo "================================================"
+  echo "Updating Valet: after modifying the current version (update from latest release)."
+  echo "================================================"
+
+  echo "Previous version:"
+  valet --version
+  echo "0.0.0" > /opt/valet/valet.d/version
+  #echo "y" | valet self update
+
+  echo "Latest release version:"
+  valet --version
+
+  echo "================================================"
+  echo "Updating Valet: rerunning the install script."
+  echo "================================================"
+
+  echo "yynnn" | bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/valet.d/commands.d/self-install.sh")" -s --use-branch --version "${BRANCH_NAME}"
+
+  echo "Version after a force install:"
+  valet --version
+
+  echo "================================================"
+  echo "Uninstalling Valet."
+  echo "================================================"
+
+  bash -c 'eval "$(valet self uninstall --script 2>/dev/null)"'
+  which valet || echo "No valet command found."
+  [[ -d /opt/valet ]] || echo "Valet directory removed."
+
+
+  echo "================================================"
+  echo "Installing Valet: --unattended --use-branch --version ${BRANCH_NAME} --installation-directory /valet --no-shim --no-examples."
+  echo "================================================"
+
+  ./valet.d/commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}" --installation-directory /valet --no-shim --no-examples
+
+  echo "================================================"
+  echo "Uninstalling Valet."
+  echo "================================================"
+
+  bash -c 'eval "$(valet self uninstall --script 2>/dev/null)"'
+
+
+
+
+  echo "================================================"
+  echo "Installing Valet as me: --use-branch --version ${BRANCH_NAME}."
+  echo "================================================"
+
+  # shellcheck disable=SC2016
+  runuser -l me -c '
+  bash -c "export VALET_VERSION='"${BRANCH_NAME}"';
+  export VALET_UNATTENDED=true;
+  export VALET_USE_BRANCH=true;
+  export VALET_SINGLE_USER_INSTALLATION=true;
+  function zsh() { :; };
+  function tcsh() { :; };
+  function csh() { :; };
+  function xonsh() { :; };
+  function fish() { :; };
+  $(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/'"${BRANCH_NAME}"'/valet.d/commands.d/self-install.sh")"
+  '
+
+  echo "================================================"
+  echo "Uninstalling Valet."
+  echo "================================================"
+
+  bash -c 'eval "$(valet self uninstall --script 2>/dev/null)"'
+
+
+
+  echo "================================================"
+  echo "Installing Valet: --use-branch --version ${BRANCH_NAME} --unattended --single-user-installation --no-examples."
+  echo "================================================"
+
+  bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/valet.d/commands.d/self-install.sh")" -s --use-branch --version "${BRANCH_NAME}" --unattended --single-user-installation --no-examples
+  export PATH="/root/.local/valet:${PATH}"
+
+  echo "================================================"
+  echo "Built commands:"
+  echo "================================================"
+  # shellcheck disable=SC1090
+  source ~/.valet.d/commands
+  echo "${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]}"
+  # shellcheck disable=SC2086
+  unset -v ${!CMD_*}
+
 }
 
 main

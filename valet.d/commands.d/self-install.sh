@@ -90,7 +90,7 @@ fi
 #
 #     If you do not set this option, newer examples will override the existing ones.
 #
-#     In case of an update, if the showcase directory does not exist, the examples will not be copied.
+#     In case of an update, if the examples.d directory does not exist, the examples will not be copied.
 #   default: false
 # - name: -U, --skip-extensions
 #   description: |-
@@ -99,6 +99,10 @@ fi
 # - name: -e, --only-extensions
 #   description: |-
 #     Set to true to only update the installed extensions under the valet user directory (~/.valet.d).
+#   default: false
+# - name: --skip-extensions-setup
+#   description: |-
+#     Set to true to skip the execution of extension setup scripts (if any, when updating extensions).
 #   default: false
 # - name: -b, --use-branch
 #   description: |-
@@ -118,10 +122,11 @@ fi
 #     Install the latest version of Valet in the user home directory and disable all interaction during the install process.
 ##VALET_COMMAND
 function selfUpdate() {
-  local unattended singleUserInstallation version installationDirectory noShim noPath noExamples skipExtensions onlyExtensions useBranch
+  local unattended singleUserInstallation version installationDirectory noShim noPath noExamples skipExtensions onlyExtensions useBranch skipExtensionsSetup
 
   # if this script is run directly
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
+    log::debug "Parsing arguments manually (basic parsing only): ⌜${*}⌝."
     # parse arguments manually (basic parsing only)
     while (( $# > 0 )); do
       case "${1}" in
@@ -159,6 +164,9 @@ function selfUpdate() {
       -b | --use-branch)
         useBranch="true"
         ;;
+      --skip-extensions-setup)
+        skipExtensionsSetup="true"
+        ;;
       -*) core::fail "Unknown option ⌜${1}⌝." ;;
       *) core::fail "This command takes no arguments, did not understand ⌜${1}⌝." ;;
       esac
@@ -173,10 +181,22 @@ function selfUpdate() {
     noExamples="${noExamples:-"${VALET_NO_EXAMPLES:-"false"}"}"
     skipExtensions="${skipExtensions:-"${VALET_SKIP_EXTENSION:-"false"}"}"
     onlyExtensions="${onlyExtensions:-"${VALET_ONLY_EXTENSION:-"false"}"}"
+    useBranch="${useBranch:-"${VALET_USE_BRANCH:-"false"}"}"
+    skipExtensionsSetup="${skipExtensionsSetup:-"${VALET_SKIP_EXTENSIONS_SETUP:-"false"}"}"
   else
+    log::debug "Parsing the arguments using the core functions."
     core::parseArguments "$@" && eval "${RETURNED_VALUE}"
     core::checkParseResults "${help:-}" "${parsingErrors:-}"
   fi
+
+  # get the os
+  system::os
+  local os="${RETURNED_VALUE}"
+  log::debug "The current OS is ⌜${os}⌝."
+
+  # get the user directory
+  core::getUserDirectory
+  local userDirectory="${RETURNED_VALUE}"
 
   # check if valet already exists
   local firstInstallation="${_NOT_EXECUTED_FROM_VALET:-false}"
@@ -186,12 +206,9 @@ function selfUpdate() {
     # only update extensions ?
     if [[ ${onlyExtensions} == "true" ]]; then
       core::sourceFunction selfExtend
-      selfExtend::updateExtensions "${userDirectory}"
+      selfExtend::updateExtensions "${userDirectory}" "${skipExtensionsSetup}"
       return 0
     fi
-
-    # force use branch to false
-    useBranch="false"
 
   elif command -v valet &>/dev/null; then
     log::warning "Valet is already installed but you are executing the install script. It could be updated using the 'valet self update' command."
@@ -200,14 +217,6 @@ function selfUpdate() {
     fi
   fi
 
-  # get the os
-  system::os
-  local os="${RETURNED_VALUE}"
-  log::debug "The current OS is ⌜${os}⌝."
-
-  # get the user directory where to copy the examples
-  core::getUserDirectory
-  local userDirectory="${RETURNED_VALUE}"
 
   # get the latest version if needed
   if [[ ${useBranch} != "true" && ${version:-"latest"} == "latest" ]]; then
@@ -232,7 +241,7 @@ function selfUpdate() {
       log::success "You already have the latest version."
       if [[ ${skipExtensions} != "true" ]]; then
         core::sourceFunction selfExtend
-        selfExtend::updateExtensions "${userDirectory}"
+        selfExtend::updateExtensions "${userDirectory}" "${skipExtensionsSetup}"
       fi
       return 0
     fi
@@ -265,6 +274,11 @@ function selfUpdate() {
       break
     fi
   done
+  if [[ ${firstInstallation} != "true" ]] && command -v valet &>/dev/null; then
+    # on update, do not create a shim or add to PATH
+    noPath=true
+    noShim=true
+  fi
 
   # display a recap to the user
   local createShim=false addToPath=false copyExamples=false
@@ -275,6 +289,9 @@ function selfUpdate() {
     selfUpdate_printRecapLine "Current Valet version:" "${currentVersion}"
   fi
   selfUpdate_printRecapLine "Version to install:" "${version}"
+  if [[ ${useBranch} == "true" ]]; then
+    selfUpdate_printRecapLine "Download from a branch:" "true"
+  fi
   selfUpdate_printRecapLine "Download URL:" "${releaseUrl}"
   selfUpdate_printRecapLine "Installation dir:" "${GLOBAL_VALET_HOME}"
   if [[ ${noShim} != "true" && -n ${binDirectory} ]]; then
@@ -307,10 +324,9 @@ function selfUpdate() {
     selfUpdate_updateGitRepository "${GLOBAL_VALET_HOME}" || core::fail "Failed to update the git repository ⌜${GLOBAL_VALET_HOME}⌝, clean your workarea first (e.g. git stash, or git commit)."
 
     chmod +x "${GLOBAL_VALET_HOME}/valet"
-    return 0
   else
     # download and install valet
-    selfUpdate_install "${releaseUrl}" "${binDirectory}" "${unattended}" "${useBranch}" "${version}"
+    selfUpdate_install "${releaseUrl}" "${unattended}" "${useBranch}" "${version}"
   fi
 
   if [[ ${copyExamples} == "true" ]]; then
@@ -325,6 +341,7 @@ function selfUpdate() {
   if [[ ${firstInstallation} == "true" ]]; then
     # shellcheck source=../core
     source "${GLOBAL_VALET_HOME}/valet.d/core"
+    log::debug "Sourcing the core functions from valet."
     selfUpdate_sourceDependencies
   else
     core::sourceUserCommands
@@ -352,7 +369,7 @@ function selfUpdate() {
   # update the extensions
   if [[ ${firstInstallation} != "true" && ${skipExtensions} != "true" ]]; then
     core::sourceFunction selfExtend
-    selfExtend::updateExtensions "${userDirectory}"
+    selfExtend::updateExtensions "${userDirectory}" "${skipExtensionsSetup}"
   fi
 }
 
@@ -363,10 +380,9 @@ function selfUpdate_printRecapLine() {
 # Install Valet using the given release URL.
 function selfUpdate_install() {
   local releaseUrl="${1}"
-  local binDirectory="${2}"
-  local unattended="${3}"
-  local useBranch="${4}"
-  local version="${5}"
+  local unattended="${2}"
+  local useBranch="${3}"
+  local version="${4}"
 
   selfUpdate_testCommand "tar"
   selfUpdate_testCommand "mkdir"
@@ -397,7 +413,7 @@ function selfUpdate_install() {
 
   log::debug "Unpacking the release in ⌜${GLOBAL_VALET_HOME}⌝."
   tar -xzf "${releaseFile}" -C "${tempDirectory}" || core::fail "Could not unpack the release ⌜${releaseFile}⌝ using tar."
-  log::debug "The release has been unpacked in ⌜${GLOBAL_VALET_HOME}⌝ with:"$'\n'"${RETURNED_VALUE}."
+  log::debug "The release has been unpacked in ⌜${GLOBAL_VALET_HOME}⌝."
 
   if [[ ${useBranch} == "true" ]]; then
     # when downloaded from a tarball, a sub director named valet-version is created
@@ -408,6 +424,7 @@ function selfUpdate_install() {
     fi
     log::debug "Moving the content of ⌜${subDirectory}⌝ to ⌜${tempDirectory}⌝."
     mv -f "${subDirectory}"/* "${tempDirectory}" || core::fail "Could not move the content of ⌜${subDirectory}⌝ to ⌜${tempDirectory}⌝."
+    rm -Rf "${subDirectory}" 1>/dev/null || :
   fi
 
   # figure out if we need to use sudo
@@ -418,6 +435,11 @@ function selfUpdate_install() {
   ${_SUDO} rm -Rf "${GLOBAL_VALET_HOME}"
   ${_SUDO} mv -f "${tempDirectory}" "${GLOBAL_VALET_HOME}"
   log::info "Valet has been copied in ⌜${GLOBAL_VALET_HOME}⌝."
+
+  if [[ -n ${_SUDO} ]]; then
+    # make the valet directory readable by anyone
+    ${_SUDO} chown -R 644 "${GLOBAL_VALET_HOME}"
+  fi
 
   # make valet executable
   ${_SUDO} chmod +x "${GLOBAL_VALET_HOME}/valet"
@@ -449,7 +471,7 @@ function selfUpdate_setSudoIfNeeded() {
   _SUDO=""
   if ! selfUpdate_isDirectoryWritable "${1}" "${2:-}"; then
     if [[ ${unattended} == "true" ]]; then
-      core::fail "The directory ⌜${1}⌝ is not writable: try to run this command using sudo?"
+      core::fail "The directory ⌜${1}⌝ is not writable: run this command with sudo or use the option ⌜--single-user-installation⌝."
     elif ! command -v sudo &>/dev/null; then
       core::fail "The directory ⌜${1}⌝ is not writable and you do not have sudo installed."
     else
@@ -477,107 +499,6 @@ function selfUpdate_isDirectoryWritable() {
     return 0
   fi
   return 1
-}
-
-# Create a shim (script that calls valet) in a bin directory.
-function selfUpdate_createShim() {
-  local binDirectory="${1}"
-
-  # figure out if we need to use sudo
-  selfUpdate_setSudoIfNeeded "${binDirectory}" "valet"
-
-  # create the shim in the bin directory
-  local valetBin="${binDirectory}/valet"
-
-  log::info "Creating a shim ⌜${valetBin}⌝ → ⌜${GLOBAL_VALET_HOME}/valet⌝."
-  ${_SUDO} bash -c "printf '#%s\n%s \"\$@\"' \"!/usr/bin/env bash\" \"'${GLOBAL_VALET_HOME}/valet'\" 1> \"${valetBin}\""
-  ${_SUDO} chmod +x "${valetBin}"
-}
-
-# Add the given directory path to the PATH.
-function selfUpdate_addToPath() {
-  local binDirectory="${1}"
-  local unattended="${2}"
-
-  log::info "Attempting to add the Valet directory ⌜${binDirectory}⌝ to the PATH."
-
-  local configFile configContent
-  for shellName in "bash" "zsh" "tcsh" "csh" "xonsh" "fish"; do
-    # shellcheck disable=SC2088
-    if ! command -v "${shellName}" &>/dev/null; then
-      continue
-    fi
-
-    configFile="${HOME}/.${shellName}rc"
-
-    case ${shellName} in
-    fish)
-      # shellcheck disable=SC2088
-      configFile="${HOME}/.config/fish/config.fish"
-      configContent="fish_add_path '${binDirectory}'"
-      ;;
-    tcsh | csh)
-      configContent="set path = (\$path '${binDirectory}')"
-      ;;
-    xonsh)
-      configContent="\$PATH.append('${binDirectory}')"
-      ;;
-    *)
-      # shellcheck disable=SC2016
-      printf -v configContent 'export PATH="%s:${PATH}"' "${binDirectory}"
-      ;;
-    esac
-
-    printf '\n  %s\n\n' "${AC__TEXT_UNDERLINE}Append to${AC__TEXT_RESET}: ${AC__FG_MAGENTA}${configFile}${AC__TEXT_RESET}"
-    printf '    %s%s%s\n\n' "${AC__TEXT_BOLD}" "${configContent}" "${AC__TEXT_RESET}"
-
-    if [[ ${unattended} != "true" ]]; then
-      if ! interactive::promptYesNo "Do you want to modify ⌜${configFile}⌝ as described above ?" "true"; then
-        continue
-      fi
-    fi
-
-    printf '\n\n%s\n' "${configContent}" >> "${configFile}"
-  done
-
-  if ! command -v valet &>/dev/null; then
-    log::warning "Please login again to apply the changes to your path and make valet available."
-  fi
-}
-
-# Update a git repository.
-function selfUpdate_updateGitRepository() {
-  local repoPath="${1}"
-
-  if [[ ! -f "${repoPath}/.git/HEAD" ]]; then
-    core::fail "The directory ⌜${repoPath}⌝ is not a git repository."
-  fi
-
-  if ! command -v git &>/dev/null; then
-    core::fail "The command ⌜git⌝ is not installed or not found in your PATH."
-  fi
-
-  log::debug "Updating the git repository ⌜${repoPath}⌝."
-
-  io::readFile "${repoPath}/.git/HEAD"
-  if [[ ${RETURNED_VALUE} =~ ^"ref: refs/heads/"(.+) ]]; then
-    local branch="${BASH_REMATCH[1]:-}"
-    branch="${branch%%$'\n'*}"
-    log::info "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
-    pushd "${repoPath}" &>/dev/null || core::fail "Could not change to the directory ⌜${repoPath}⌝."
-    if ! git fetch -q; then
-      popd &>/dev/null || :
-      return 1
-    fi
-    if ! git merge -q --ff-only "origin/${branch}" &>/dev/null; then
-      popd &>/dev/null || :
-      return 1
-    fi
-    popd &>/dev/null || :
-    return 0
-  fi
-
-  core::fail "The git repository ⌜${repoPath}⌝ does not have a checked out branch to pull."
 }
 
 # Check if a given directory is in the PATH.
@@ -629,6 +550,41 @@ function selfUpdate_testCommand() {
   fi
 }
 
+# Update a git repository.
+function selfUpdate_updateGitRepository() {
+  local repoPath="${1}"
+
+  if [[ ! -f "${repoPath}/.git/HEAD" ]]; then
+    core::fail "The directory ⌜${repoPath}⌝ is not a git repository."
+  fi
+
+  if ! command -v git &>/dev/null; then
+    core::fail "The command ⌜git⌝ is not installed or not found in your PATH."
+  fi
+
+  log::debug "Updating the git repository ⌜${repoPath}⌝."
+
+  io::readFile "${repoPath}/.git/HEAD"
+  if [[ ${RETURNED_VALUE} =~ ^"ref: refs/heads/"(.+) ]]; then
+    local branch="${BASH_REMATCH[1]:-}"
+    branch="${branch%%$'\n'*}"
+    log::info "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
+    pushd "${repoPath}" &>/dev/null || core::fail "Could not change to the directory ⌜${repoPath}⌝."
+    if ! git fetch -q; then
+      popd &>/dev/null || :
+      return 1
+    fi
+    if ! git merge -q --ff-only "origin/${branch}" &>/dev/null; then
+      popd &>/dev/null || :
+      return 1
+    fi
+    popd &>/dev/null || :
+    return 0
+  fi
+
+  core::fail "The git repository ⌜${repoPath}⌝ does not have a checked out branch to pull."
+}
+
 # source the dependencies of this script
 function selfUpdate_sourceDependencies() {
   # shellcheck source=../lib-system
@@ -642,6 +598,71 @@ function selfUpdate_sourceDependencies() {
   # shellcheck source=../lib-string
   source string
 }
+
+# Create a shim (script that calls valet) in a bin directory.
+function selfUpdate_createShim() {
+  local binDirectory="${1}"
+
+  # figure out if we need to use sudo
+  selfUpdate_setSudoIfNeeded "${binDirectory}" "valet"
+
+  # create the shim in the bin directory
+  local valetBin="${binDirectory}/valet"
+
+  log::info "Creating a shim ⌜${valetBin}⌝ → ⌜${GLOBAL_VALET_HOME}/valet⌝."
+  ${_SUDO} bash -c "printf '#%s\n%s \"\$@\"' \"!/usr/bin/env bash\" \"'${GLOBAL_VALET_HOME}/valet'\" 1> \"${valetBin}\""
+  ${_SUDO} chmod +x "${valetBin}"
+}
+
+# Add the given directory path to the PATH.
+function selfUpdate_addToPath() {
+  local binDirectory="${1}"
+  local unattended="${2}"
+
+  log::info "Attempting to add the Valet directory ⌜${binDirectory}⌝ to the PATH."
+
+  local configFile configContent
+  for shellName in "bash" "zsh" "tcsh" "csh" "xonsh" "fish"; do
+    # shellcheck disable=SC2088
+    if ! command -v "${shellName}" &>/dev/null; then
+      continue
+    fi
+
+    configFile="${HOME}/.${shellName}rc"
+
+    case ${shellName} in
+    fish)
+      # shellcheck disable=SC2088
+      configFile="${HOME}/.config/fish/config.fish"
+      mkdir -p "${HOME}/.config/fish"
+      configContent="fish_add_path '${binDirectory}'"
+      ;;
+    tcsh | csh)
+      configContent="set path = (\$path '${binDirectory}')"
+      ;;
+    xonsh)
+      configContent="\$PATH.append('${binDirectory}')"
+      ;;
+    *)
+      # shellcheck disable=SC2016
+      printf -v configContent 'export PATH="%s:${PATH}"' "${binDirectory}"
+      ;;
+    esac
+
+    printf '\n  %s\n\n' "${AC__TEXT_UNDERLINE}Append to${AC__TEXT_RESET}: ${AC__FG_MAGENTA}${configFile}${AC__TEXT_RESET}"
+    printf '    %s%s%s\n\n' "${AC__TEXT_BOLD}" "${configContent}" "${AC__TEXT_RESET}"
+
+    if [[ ${unattended} != "true" ]] && ! interactive::promptYesNo "Do you want to modify ⌜${configFile}⌝ as described above ?" "true"; then
+      continue
+    fi
+
+    printf '\n\n%s\n' "${configContent}" >> "${configFile}"
+  done
+
+  export PATH="${binDirectory}:${PATH}"
+  log::warning "Please login again to apply the changes to your path and make valet available."
+}
+
 
 #===============================================================
 # >>> main
@@ -732,13 +753,13 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
     return 1
   }
   function io::readFile() { RETURNED_VALUE="$(<"${1}")"; }
+  function interactive::startProgress() { :; }
+  function interactive::stopProgress() { :; }
 
   VALET_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
 else
   selfUpdate_sourceDependencies
 fi
-function interactive::startProgress() { :; }
-function interactive::stopProgress() { :; }
 
 # This is put in braces to ensure that the script does not run until it is downloaded completely.
 {

@@ -3,7 +3,7 @@ name: Deploy pages
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
+    branches: ["latest"]
     paths:
       - 'docs/**'
 
@@ -29,7 +29,7 @@ defaults:
 
 jobs:
   # Build job
-  build:
+  hugo-build-pages:
     runs-on: ubuntu-latest
     env:
       HUGO_VERSION: 0.121.2
@@ -56,6 +56,7 @@ jobs:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: |
+          sed -i 's/copyright: "© Noyacode"/copyright: "© Noyacode for Valet v'"$(cat ./valet.d/version) updated on $(date +%F)"'"/' ./docs/i18n/en.yaml
           cd docs
           hugo \
             --gc --minify \
@@ -66,7 +67,7 @@ jobs:
           path: ./docs/public
 
   # Deployment job
-  deploy:
+  deploy-pages:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
