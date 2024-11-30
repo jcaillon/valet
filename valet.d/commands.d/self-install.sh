@@ -160,7 +160,7 @@ function selfUpdate() {
         useBranch="true"
         ;;
       -*) core::fail "Unknown option ⌜${1}⌝." ;;
-      *) core::fail "This command takes no arguments." ;;
+      *) core::fail "This command takes no arguments, did not understand ⌜${1}⌝." ;;
       esac
       shift
     done
@@ -310,7 +310,7 @@ function selfUpdate() {
     return 0
   else
     # download and install valet
-    selfUpdate_install "${releaseUrl}" "${binDirectory}" "${unattended}"
+    selfUpdate_install "${releaseUrl}" "${binDirectory}" "${unattended}" "${useBranch}" "${version}"
   fi
 
   if [[ ${copyExamples} == "true" ]]; then
@@ -365,6 +365,8 @@ function selfUpdate_install() {
   local releaseUrl="${1}"
   local binDirectory="${2}"
   local unattended="${3}"
+  local useBranch="${4}"
+  local version="${5}"
 
   selfUpdate_testCommand "tar"
   selfUpdate_testCommand "mkdir"
@@ -396,6 +398,16 @@ function selfUpdate_install() {
   log::debug "Unpacking the release in ⌜${GLOBAL_VALET_HOME}⌝."
   tar -xzf "${releaseFile}" -C "${tempDirectory}" || core::fail "Could not unpack the release ⌜${releaseFile}⌝ using tar."
   log::debug "The release has been unpacked in ⌜${GLOBAL_VALET_HOME}⌝ with:"$'\n'"${RETURNED_VALUE}."
+
+  if [[ ${useBranch} == "true" ]]; then
+    # when downloaded from a tarball, a sub director named valet-version is created
+    # we need to move the content of this directory to the parent directory
+    local subDirectory="${tempDirectory}/valet-${version}"
+    if [[ ! -d ${subDirectory} ]]; then
+      core::fail "The downloaded branch tarball does not contain the expected directory ⌜${subDirectory}⌝."
+    fi
+    mv -f "${subDirectory}"/* "${tempDirectory}" || core::fail "Could not move the content of ⌜${subDirectory}⌝ to ⌜${tempDirectory}⌝."
+  fi
 
   # figure out if we need to use sudo
   selfUpdate_setSudoIfNeeded "${GLOBAL_VALET_HOME}"

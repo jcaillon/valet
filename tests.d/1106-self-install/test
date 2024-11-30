@@ -30,7 +30,7 @@ function main() {
   echo "Installing Valet from branch ${BRANCH_NAME}."
 
   chmod +x ./valet.d/commands.d/self-install.sh
-  ./valet.d/commands.d/self-install.sh --unattended --use-branch "${BRANCH_NAME}"
+  ./valet.d/commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}"
 
   # bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/valet.d/commands.d/self-install.sh")" --unattended --branch "${BRANCH_NAME}"
 }
