@@ -250,6 +250,7 @@ INFO     The vscode snippets have been generated in ⌜$GLOBAL_VALET_HOME/extras
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/static/config.md
+▶ called io::invoke cp $GLOBAL_VALET_HOME/.vscode/extensions.json $GLOBAL_VALET_HOME/extras/extensions.json
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/static/config.md
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/kurl.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/extras/base.code-snippets $GLOBAL_VALET_HOME/extras/lib-valet $GLOBAL_VALET_HOME/extras/lib-valet.md

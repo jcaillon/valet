@@ -1,7 +1,6 @@
-# The workflow build and push a docker image on new tags and the latest branch.
 name: build-image-on-tag
 
-# Controls when the workflow will run
+# Run on tags and push to the latest branch
 on:
   push:
     tags:
