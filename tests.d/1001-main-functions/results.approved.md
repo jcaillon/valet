@@ -426,6 +426,7 @@ CHIsCDEelCHIfCDE mock4
 CHIsCDEelCHIfCDE release
 CHIsCDEelCHIfCDE setup
 CHIsCDEelCHIfCDE test
+CHIsCDEelCHIfCDE uninstall
 CHIsCDEelCHIfCDE update
 ```
 

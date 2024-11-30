@@ -406,6 +406,7 @@ function selfUpdate_install() {
     if [[ ! -d ${subDirectory} ]]; then
       core::fail "The downloaded branch tarball does not contain the expected directory ⌜${subDirectory}⌝."
     fi
+    log::debug "Moving the content of ⌜${subDirectory}⌝ to ⌜${tempDirectory}⌝."
     mv -f "${subDirectory}"/* "${tempDirectory}" || core::fail "Could not move the content of ⌜${subDirectory}⌝ to ⌜${tempDirectory}⌝."
   fi
 

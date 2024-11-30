@@ -515,13 +515,13 @@ Exit code: `0`
 ```log
 ▶ called main::showInteractiveCommandsMenu Please select the command to run. _COPIED_COMMANDS_ARRAY⌉
 ▶ received array was:
-⌈help             Show the help of this program or of a specific command.
-self build       Index all the commands and libraries present in the valet user directory and installation directory.
-self config      Open the configuration file of Valet with your default editor.
-self document    Generate the documentation and code snippets for all the library functions of Valet.
-self extend      Extends Valet by downloading a new application or library in the user directory.
-self test        Test your valet custom commands.
-self update      Update valet and its extensions to the latest releases.⌉
+⌈help              Show the help of this program or of a specific command.
+self build        Index all the commands and libraries present in the valet user directory and installation directory.
+self config       Open the configuration file of Valet with your default editor.
+self document     Generate the documentation and code snippets for all the library functions of Valet.
+self extend       Extends Valet by downloading a new application or library in the user directory.
+self test         Test your valet custom commands.
+self update       Update valet and its extensions to the latest releases.⌉
 ```
 
 ## Test script 05.logging
@@ -1083,12 +1083,12 @@ Exit code: `0`
 ```log
 ▶ called main::showInteractiveCommandsMenu Please select the command to run. FILTERED_COMMANDS_FOR_SUB_MENU⌉
 ▶ received array was:
-⌈self build       Index all the commands and libraries present in the valet user directory and installation directory.
-self config      Open the configuration file of Valet with your default editor.
-self document    Generate the documentation and code snippets for all the library functions of Valet.
-self extend      Extends Valet by downloading a new application or library in the user directory.
-self test        Test your valet custom commands.
-self update      Update valet and its extensions to the latest releases.⌉
+⌈self build        Index all the commands and libraries present in the valet user directory and installation directory.
+self config       Open the configuration file of Valet with your default editor.
+self document     Generate the documentation and code snippets for all the library functions of Valet.
+self extend       Extends Valet by downloading a new application or library in the user directory.
+self test         Test your valet custom commands.
+self update       Update valet and its extensions to the latest releases.⌉
 ```
 
 ### Testing that we can display the help of a sub menu
@@ -1170,6 +1170,8 @@ COMMANDS
       The command run after the installation of Valet to setup the tool.
   self test
       Test your valet custom commands.
+  self uninstall
+      A command to uninstall Valet.
   self update
       Update valet and its extensions to the latest releases.
 

@@ -25,7 +25,7 @@ fi
 #   If you want to use Valet functions directly in bash, you can use this command like this:
 #
 #   ```bash
-#   eval "$(valet self export)"
+#   eval "$(valet self export 2>/dev/null)"
 #   ```
 #
 #   This will export all the necessary functions and variables to use the Valet log library by default.

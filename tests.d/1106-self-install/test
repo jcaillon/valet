@@ -27,12 +27,19 @@ function main() {
   # we are running the following test on a container
   BRANCH_NAME="${BRANCH_NAME:-main}"
 
-  echo "Installing Valet from branch ${BRANCH_NAME}."
+  echo "================================================"
+  echo "Installing Valet: --unattended --use-branch --version ${BRANCH_NAME}."
+  echo "================================================"
 
+  export VALET_VERBOSE=true
   chmod +x ./valet.d/commands.d/self-install.sh
   ./valet.d/commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}"
 
-  # bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/valet.d/commands.d/self-install.sh")" --unattended --branch "${BRANCH_NAME}"
+  # bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/valet.d/commands.d/self-install.sh")" --unattended --use-branch --version "${BRANCH_NAME}"
+
+  echo "================================================"
+  echo "Installing Valet: --unattended --use-branch --version ${BRANCH_NAME}."
+  echo "================================================"
 }
 
 main
