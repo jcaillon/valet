@@ -50,7 +50,8 @@ fi
 #
 #   - 6. Run self setup command (in case of a new installation) or re-export the config.
 #
-#   - 7. Try to update (fetch merge --ff-only) the git repositories and all installed extensions in your valet user directory.
+#   - 7. Try to update (fetch merge --ff-only) the git repositories and all
+#        installed extensions in your valet user directory.
 #
 # options:
 # - name: -u, --unattended

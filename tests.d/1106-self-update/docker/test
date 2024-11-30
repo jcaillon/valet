@@ -1,7 +1,0 @@
-push debian
-docker build -t valet-test-debian .
-popd
-docker run --rm -it --name test valet-test-debian
-docker cp ./valet.d/commands.d/self-install.sh test:/self-install.sh
-
-chmod +x /self-install.sh && /self-install.sh

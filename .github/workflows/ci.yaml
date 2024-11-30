@@ -19,7 +19,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  self-test:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -32,9 +32,42 @@ jobs:
           submodules: recursive
 
       # Runs our tests
-      - name: Run valet tests
+      - name: Run valet self test
+        shell: bash -o errexit -o nounset -o pipefail -x {0}
+        env:
+          VALET_CONFIG_ENABLE_COLORS: true
+          VALET_CONFIG_DISABLE_PROGRESS: true
         run: |
           chmod +x valet
-          export VALET_CONFIG_ENABLE_COLORS=true
-          export VALET_CONFIG_DISABLE_PROGRESS=true
           ./valet self test -C
+
+  self-install-test:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    container: ubuntu:latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      # Runs our tests
+      - name: Run valet self install && self update && self extend
+        shell: bash -o errexit -o nounset -o pipefail -x {0}
+        env:
+          VALET_CONFIG_ENABLE_COLORS: true
+          VALET_CONFIG_DISABLE_PROGRESS: true
+          RUNNING_IN_DOCKER: true
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          # Install dependencies
+          apt-get update -qq
+          apt-get install -qq -y curl sudo makepasswd uidmap 1>/dev/null
+          # Create the 'me' user with sudo privileges
+          echo 'me' > /tmp/pw
+          useradd -m -u 1000 -U -p "$(makepasswd --crypt-md5 --clearfrom=/tmp/pw)" me
+          echo "me ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers.d/me-sudo
+

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+
+# This is a test that is executed either in GitHub Actions or locally which tests the
+# installation of Valet and its extensions, as well as the update.
+
+# Run locally from valet directory:
+# ./tests.d/1106-self-install/test
+
+# We expect this script to run in a Docker container, with curl installed
+# and a 'me' user with sudo privileges.
+
+# We start this script as root.
+
+function main() {
+  if [[ -z ${RUNNING_IN_DOCKER:-} ]]; then
+    # we are running this locally
+    if command -v docker &> /dev/null; then
+      echo "Running the test in a container."
+      docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash valet-test -c -o errexit -o nounset -o pipefail "chmod +x ./tests.d/1106-self-install/test; ./tests.d/1106-self-install/test"
+      return 0
+    fi
+    echo "Need docker to run this test."
+    exit 1
+  fi
+
+  # we are running the following test on a container
+  BRANCH_NAME="${BRANCH_NAME:-main}"
+
+  echo "Installing Valet from branch ${BRANCH_NAME}."
+
+  chmod +x ./valet.d/commands.d/self-install.sh
+  ./valet.d/commands.d/self-install.sh --unattended --use-branch "${BRANCH_NAME}"
+
+  # bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/valet.d/commands.d/self-install.sh")" --unattended --branch "${BRANCH_NAME}"
+}
+
+main
+
+eval "$(valet self export -a)"
+log::success "Self install test passed."

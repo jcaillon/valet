@@ -345,6 +345,11 @@ function selfRelease::updateDocumentation() {
     io::writeToFile "${GLOBAL_VALET_HOME}/docs/static/config.md" '```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'$'\n'$'\n'"> ${pageFooter}"$'\n'
   fi
 
+  # copy the vscode recommended extensions
+  if [[ "${dryRun:-}" != "true" ]]; then
+    io::invoke cp "${GLOBAL_VALET_HOME}/.vscode/extensions.json" "${GLOBAL_VALET_HOME}/extras/extensions.json"
+  fi
+
   # commit the changes to the documentation
   if [[ "${dryRun:-}" != "true" ]]; then
     io::invoke git add "${GLOBAL_VALET_HOME}/docs/static/config.md"
@@ -360,7 +365,7 @@ function selfRelease::updateDocumentation() {
       files+=("${file}")
     done
     io::invoke git add "${files[@]}"
-    io::listFiles "${GLOBAL_VALET_HOME}/extras"
+    io::listFiles "${GLOBAL_VALET_HOME}/extras" true
     array::sort RETURNED_ARRAY
     io::invoke git add "${RETURNED_ARRAY[@]}"
     io::invoke git commit -m ":memo: updating the documentation"

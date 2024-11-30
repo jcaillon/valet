@@ -34,9 +34,9 @@ if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else e
 
 ## 📗 Add a new library
 
-You can add your own libraries as you can add new commands to extend Valet functionalities.
+You can add your own libraries to extend Valet functionalities and to use them in your commands.
 
-User libraries are read from the Valet user directory which defaults to `~/.valet.d`. They are expected to be bash scripts starting with `lib-` directly placed under a `libs.d` directory.
+User libraries are read from the Valet user directory which defaults to `~/.valet.d`. They are expected to be bash scripts prefixed with `lib-` directly placed under a `libs.d` directory.
 
 Here is an example content for your user directory:
 
