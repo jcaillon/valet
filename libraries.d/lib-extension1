@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# ## extension1::doNothing
+#
+# Does nothing
+#
+# ```bash
+# extension1::doNothing
+# ```
+function extension1::doNothing() {
+  log::info "Do nothing..."
+}

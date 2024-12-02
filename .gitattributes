@@ -1,0 +1,54 @@
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+
+# By default, all text files should have the "lf" (Unix) line endings
+* text eol=lf
+
+# Common files
+*.yml text
+*.xml text
+*.yaml text
+*.md text
+*.txt text
+*.json text
+*.editorconfig text
+*.config text
+*.service text
+*.sh text
+*.zsh text
+*.zshrc text
+*.gitconfig text
+*.gitattributes text
+*.dockerignore text
+Dockerfile text
+VERSION text
+
+# docs
+*.css text
+*.html text
+*.js text
+*.ts text
+*.stylelintrc text
+*.scss text
+*.webmanifest text
+*.svg text
+
+# Windows text files that should be normalized to crlf
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binary files that should not be normalized or diffed
+*.png binary
+*.gif binary
+*.jpg binary
+*.bmp binary
+*.ico binary
+*.ttf binary
+*.pdf binary
+*.7z  binary
+*.zip binary
+
+
+# To list all file extensions present in the repo in ps1:
+# Get-Childitem -Recurse | Select-Object Extension -Unique
