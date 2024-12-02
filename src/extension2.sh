@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../libs.d/lib-extension1
-source extension1
+# shellcheck source=../libs.d/lib-extension2
+source extension2
 
 #===============================================================
-# >>> command: extension1
+# >>> command: extension2
 #===============================================================
 
 ##<<VALET_COMMAND
-# command: extension1
-# function: extension1
+# command: extension2
+# function: extension2
 # shortDescription: Do nothing.
 # description: |-
 #   Really, it does nothing.
 # examples:
-# - name: extension1
+# - name: extension2
 #   description: |-
 #     Just run the command and do nothing.
 ##VALET_COMMAND
-function extension1() {
+function extension2() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  extension1::doNothing
+  extension2::doNothing
   :;
 }
