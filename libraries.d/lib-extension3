@@ -2,13 +2,13 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# ## extension2::doNothing
+# ## extension3::doNothing
 #
 # Does nothing
 #
 # ```bash
-# extension2::doNothing
+# extension3::doNothing
 # ```
-function extension2::doNothing() {
+function extension3::doNothing() {
   log::info "Do nothing..."
 }
