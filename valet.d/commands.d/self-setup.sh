@@ -58,13 +58,11 @@ function selfSetup() {
   printf '%s\n' "─────────────────────────────────────"
 
   if ! interactive::promptYesNo "Do you correctly see the nerd icons in the icon check above the line?" false; then
-    log::info "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."$'\n'"You can also choose to enable the icons in Valet if you plan to install a nerd font."
-
-    if interactive::promptYesNo "Do you want to enable the icons in Valet?" false; then
-      export VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
-    else
-      export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
-    fi
+    log::info "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal." \
+    "You can download any font here: https://www.nerdfonts.com/font-downloads and install it." \
+    "After that, you need to setup your terminal to use this newly installed font." \
+    "You can run the command ⌜valet self setup⌝ again after that."
+    export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
   else
     export VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
   fi

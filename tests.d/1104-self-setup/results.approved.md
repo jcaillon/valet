@@ -35,13 +35,6 @@ An information icon: II
 [1F[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
 [2m[9G│[0m No. [15G[2m├──░[0m
 [2m[9G└─[3b─┘[0m
-[2m   ┌─[41b─┐[0m
-[2m░──┤[0m Do you want to enable the icons in Valet? [48G[2m│[0m
-[2m   └─[41b─┘[0m
-[1G[0J
-[1F[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
-[2m[9G│[0m No. [15G[2m├──░[0m
-[2m[9G└─[3b─┘[0m
 ```
 
 **Error** output:
@@ -51,7 +44,7 @@ INFO     Now setting up Valet.
 INFO     If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal.
 You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
 After that, you need to setup your terminal to use this newly installed font.
-You can also choose to enable the icons in Valet if you plan to install a nerd font.
+You can run the command ⌜valet self setup⌝ again after that.
 INFO     Creating the valet config file ⌜/tmp/valet.d/f1-1⌝.
 SUCCESS  You are all set!
 INFO     As a reminder, you can modify the configuration done during this set up by either:

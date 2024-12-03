@@ -2277,6 +2277,21 @@ local wrappedText="${RETURNED_VALUE}"
 > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 
 
+## system::addToPath
+
+Add the given path to the PATH environment variable for various shells,
+by adding the appropriate export command to the appropriate file.
+
+Will also export the PATH variable in the current bash.
+
+- $1: **path** _as string_:
+      the path to add to the PATH environment variable.
+
+```bash
+system::addToPath "/path/to/bin"
+```
+
+
 ## system::commandExists
 
 Check if the given command exists.
@@ -2389,6 +2404,23 @@ Returns:
 ```bash
 if system::getUndeclaredVariables "var1" "var2"; then
   printf 'The following variables are not declared: %s' "${RETURNED_ARRAY[*]}"
+fi
+```
+
+
+## system::isRoot
+
+Check if the script is running as root.
+
+Returns:
+
+- $?
+  - 0 if the script is running as root
+  - 1 otherwise.
+
+```bash
+if system::isRoot; then
+  printf 'The script is running as root.'
 fi
 ```
 
@@ -4818,6 +4850,22 @@ function string::wrapCharacters() { :; }
 # 
 function string::wrapSentence() { :; }
 
+# ## system::addToPath
+# 
+# Add the given path to the PATH environment variable for various shells,
+# by adding the appropriate export command to the appropriate file.
+# 
+# Will also export the PATH variable in the current bash.
+# 
+# - $1: **path** _as string_:
+#       the path to add to the PATH environment variable.
+# 
+# ```bash
+# system::addToPath "/path/to/bin"
+# ```
+# 
+function system::addToPath() { :; }
+
 # ## system::commandExists
 # 
 # Check if the given command exists.
@@ -4939,6 +4987,24 @@ function system::getNotExistingCommands() { :; }
 # ```
 # 
 function system::getUndeclaredVariables() { :; }
+
+# ## system::isRoot
+# 
+# Check if the script is running as root.
+# 
+# Returns:
+# 
+# - $?
+#   - 0 if the script is running as root
+#   - 1 otherwise.
+# 
+# ```bash
+# if system::isRoot; then
+#   printf 'The script is running as root.'
+# fi
+# ```
+# 
+function system::isRoot() { :; }
 
 # ## system::os
 # 
@@ -6519,6 +6585,20 @@ function test::endTest() { :; }
 		  "body": [ "# ## string::wrapSentence\n# \n# Allows to soft wrap the given sentence (without new lines) at the given width.\n# Optionally applies a prefix on each new line.\n# \n# - \\$1: **text** _as string_:\n#       the text to wrap\n# - \\$2: wrap width _as int_:\n#       (optional) the width to wrap the text at\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3:*new line pad string _as string_:\n#       (optional) the prefix to apply to each new line\n#       (defaults to \"\")\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the wrapped text\n# \n# ```bash\n# string::wrapSentence \"This is a long text that should be wrapped at 20 characters.\" 20\n# local wrappedText=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).\n# \nstring::wrapSentence \"${1:**text**}\" \"${2:wrap width}\"$0" ]
 	  },
 
+		"system::addToPath": {
+		  "prefix": "system::addToPath",
+		  "description": "Add the given path to the PATH environment variable for various shells, by adding the appropriate export command to the appropriate file...",
+		  "scope": "",
+		  "body": [ "system::addToPath \"${1:**path**}\"$0" ]
+	  },
+
+		"system::addToPath#withdoc": {
+		  "prefix": "system::addToPath#withdoc",
+		  "description": "Add the given path to the PATH environment variable for various shells, by adding the appropriate export command to the appropriate file...",
+		  "scope": "",
+		  "body": [ "# ## system::addToPath\n# \n# Add the given path to the PATH environment variable for various shells,\n# by adding the appropriate export command to the appropriate file.\n# \n# Will also export the PATH variable in the current bash.\n# \n# - \\$1: **path** _as string_:\n#       the path to add to the PATH environment variable.\n# \n# ```bash\n# system::addToPath \"/path/to/bin\"\n# ```\n# \nsystem::addToPath \"${1:**path**}\"$0" ]
+	  },
+
 		"system::commandExists": {
 		  "prefix": "system::commandExists",
 		  "description": "Check if the given command exists...",
@@ -6601,6 +6681,20 @@ function test::endTest() { :; }
 		  "description": "This function returns the list of undeclared variables for the given names...",
 		  "scope": "",
 		  "body": [ "# ## system::getUndeclaredVariables\n# \n# This function returns the list of undeclared variables for the given names.\n# \n# - \\$@: **variable names** _as string_:\n#       the list of variable names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are variable undeclared\n#   - 1 otherwise.\n# - `RETURNED_ARRAY`: the list of undeclared variables.\n# \n# ```bash\n# if system::getUndeclaredVariables \"var1\" \"var2\"; then\n#   printf 'The following variables are not declared: %s' \"\\${RETURNED_ARRAY[*]}\"\n# fi\n# ```\n# \nsystem::getUndeclaredVariables \"${99:**variable names**}\"$0" ]
+	  },
+
+		"system::isRoot": {
+		  "prefix": "system::isRoot",
+		  "description": "Check if the script is running as root...",
+		  "scope": "",
+		  "body": [ "system::isRoot$0" ]
+	  },
+
+		"system::isRoot#withdoc": {
+		  "prefix": "system::isRoot#withdoc",
+		  "description": "Check if the script is running as root...",
+		  "scope": "",
+		  "body": [ "# ## system::isRoot\n# \n# Check if the script is running as root.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the script is running as root\n#   - 1 otherwise.\n# \n# ```bash\n# if system::isRoot; then\n#   printf 'The script is running as root.'\n# fi\n# ```\n# \nsystem::isRoot$0" ]
 	  },
 
 		"system::os": {
@@ -6887,7 +6981,7 @@ function test::endTest() { :; }
 
 ```log
 INFO     Generating documentation for the core functions only.
-INFO     Found 118 functions with documentation.
+INFO     Found 120 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-1/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-1/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/valet.code-snippets⌝.

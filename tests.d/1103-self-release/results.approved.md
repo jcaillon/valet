@@ -218,9 +218,11 @@ DEBUG    Found function: ⌜system::date⌝
 DEBUG    Found function: ⌜system::getUndeclaredVariables⌝
 DEBUG    Found function: ⌜system::getNotExistingCommands⌝
 DEBUG    Found function: ⌜system::commandExists⌝
+DEBUG    Found function: ⌜system::isRoot⌝
+DEBUG    Found function: ⌜system::addToPath⌝
 DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 118 functions with documentation.
+INFO     Found 120 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet.md⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet
