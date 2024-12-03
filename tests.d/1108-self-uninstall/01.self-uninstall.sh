@@ -10,7 +10,10 @@ function testSelfUninstall() {
 
   echo
   echo "→ selfUninstall --script"
-  selfUninstall --script
+  io::invoke selfUninstall --script
+  if [[ ${RETURNED_VALUE} == *"Valet has been uninstalled."* ]]; then
+    echo "ok"
+  fi
 
   test::endTest "Testing selfUninstall" 0
 }

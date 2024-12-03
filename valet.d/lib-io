@@ -22,6 +22,12 @@
 function io::toAbsolutePath() {
   local file="${1%/}"
 
+  # if file starts with ~, we replace it with the home directory
+  if [[ ${file} == "~"* ]]; then
+    RETURNED_VALUE="${HOME}${file:1}"
+    return 0
+  fi
+
   # if the file is already an absolute path, we return it
   if [[ ${file} == "/"* ]]; then
     RETURNED_VALUE="${file}"
@@ -888,4 +894,161 @@ function io::isDirectoryWritable() {
     return 0
   fi
   return 1
+}
+
+# ## io::runPs1Command
+#
+# Runs a PowerShell command.
+# This is mostly useful on Windows.
+#
+# - $1: **command** _as string_:
+#       the command to run.
+# - $2: run as administrator _as boolean_:
+#       (optional) whether to run the command as administrator.
+#       (defaults to false).
+#
+# Returns:
+#
+# - $?
+#   - 0 if the command was successful
+#   - 1 otherwise.
+#
+# ```bash
+# io::runPs1Command "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
+# ```
+function io::runPs1Command() {
+  local command="${1}"
+  local runAsAdmin="${2:-false}"
+
+  local exitCode=0
+
+  if [[ "${runAsAdmin}" == true ]]; then
+    powershell -NoProfile -NonInteractive -Command "\$process = Start-Process powershell \"-NoProfile -NonInteractive -Command \`\"${command//\"/\`\\\`\"}\`\"\" -PassThru -Wait -Verb RunAs; exit \$process.ExitCode" || exitCode=$?
+  else
+    powershell -NoProfile -NonInteractive -Command "${command}" || exitCode=$?
+  fi
+
+  return ${exitCode}
+}
+
+# ## io::createLink
+#
+# Create a soft or hard link (original ← link).
+#
+# Reminder:
+#
+# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the
+#   form of an absolute or relative path.
+# - A hard link is a directory entry that associates a new pathname with an existing
+#   file (inode + data block) on a file system.
+#
+# This function allows to create a symbolic link on Windows as well as on Unix.
+#
+# - $1: **linked path** _as string_:
+#       the path to link to (the original file)
+# - $2: **link path** _as string_:
+#       the path where to create the link
+# - $3: hard link _as boolean_:
+#       (optional) true to create a hard link, false to create a symbolic link
+#       (defaults to false)
+# - $4: force _as boolean_:
+#       (optional) true to overwrite the link or file if it already exists.
+#       Otherwise, the function will fail on an existing link.
+#       (defaults to true)
+#
+# ```bash
+# io::createLink "/path/to/link" "/path/to/linked"
+# io::createLink "/path/to/link" "/path/to/linked" true
+# ```
+#
+# > On unix, the function uses the `ln` command.
+# > On Windows, the function uses `powershell`.
+function io::createLink() {
+  local linkedPath="${1}"
+  local linkPath="${2}"
+  local hardLink="${3:-false}"
+  local force="${3:-true}"
+
+  io::toAbsolutePath "${linkedPath}"
+  linkedPath="${RETURNED_VALUE}"
+  io::toAbsolutePath "${linkPath}"
+  linkPath="${RETURNED_VALUE}"
+
+  # check if the linked path exists
+  if [[ ! -e "${linkedPath}" ]]; then
+    core::fail "Failed to create a link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the linked path does not exist."
+  fi
+
+  # check the link path
+  if [[ -f ${linkPath} || -L ${linkPath} ]]; then
+    # if force, delete the link (or file) if it exists
+    if [[ ${force} == true ]]; then
+      rm -f "${linkPath}" || core::fail "Failed to delete the existing link ⌜${linkPath}⌝ to replace it."
+    else
+      core::fail "Failed to create a link to ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the link pathname already exists."
+    fi
+  fi
+
+  # create link parent directory if needed
+  local linkParentPath="${linkPath%/*}"
+  local linkFileName="${linkPath##*/}"
+  mkdir -p "${linkParentPath}" 1>/dev/null || core::fail "Failed to create the parent directory ⌜${linkParentPath}⌝ for the link ⌜${linkedPath}⌝."
+
+  # create link
+  if [[ "${OSTYPE:-}" == "msys"* ]]; then
+    io::convertToWindowsPath "${linkPath}"
+    linkPath="${RETURNED_VALUE}"
+    io::convertToWindowsPath "${linkParentPath}"
+    linkParentPath="${RETURNED_VALUE}"
+    io::convertToWindowsPath "${linkedPath}"
+    linkedPath="${RETURNED_VALUE}"
+
+    log::debug "Using powershell to link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+    if [[ ${hardLink} == "true" ]]; then
+      io::runPs1Command "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true || core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+    else
+      io::runPs1Command "New-Item -ItemType SymbolicLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true || core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+    fi
+  else
+    if [[ ${hardLink} == "true" ]]; then
+      ln "${linkedPath}" "${linkPath}" || core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+    else
+      ln -s "${linkedPath}" "${linkPath}" || core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+    fi
+  fi
+
+  local linkType="symbolic"
+  if [[ ${hardLink} == "true" ]]; then
+    linkType="hard"
+  fi
+  log::info "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+}
+
+# ## io::convertToWindowsPath
+#
+# Convert a unix path to a Windows path.
+#
+# - $1: **path** _as string_:
+#       the path to convert
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The Windows path.
+#
+# ```bash
+# io::convertToWindowsPath "/path/to/file"
+# ```
+#
+# > Handles paths starting with `/mnt/x/` or `/x/`.
+function io::convertToWindowsPath() {
+  local path="${1}"
+  if [[ ${path} != "/"* ]]; then
+    io::toAbsolutePath "${path}"
+    path="${RETURNED_VALUE}"
+  fi
+  if [[ ${path} =~ ^"/mnt/"([a-z])"/" || ${path} =~ ^"/"([a-z])"/" ]]; then
+    path="${BASH_REMATCH[1]}:/${path/"${BASH_REMATCH[0]}"/}"
+    path="${path^?}"
+  fi
+  RETURNED_VALUE="${path//\//\\}"
 }

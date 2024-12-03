@@ -160,6 +160,58 @@ function testIo::isDirectoryWritable() {
   test::endTest "Testing io::isDirectoryWritable" 0
 }
 
+function test_io::runPs1Command() {
+  function powershell() { echo "$*"; }
+
+  echo "→ io::runPs1Command 'Get-Process'"
+  io::runPs1Command 'Get-Process'
+  echo "$?"
+
+  echo "→ io::runPs1Command 'echo \\\"ok\\\"' true"
+  io::runPs1Command 'echo "ok"' true
+  echo "$?"
+
+  unset -f powershell
+  test::endTest "Testing io::runPs1Command" 0
+}
+
+function test_io::convertToWindowsPath() {
+  echo "→ io::convertToWindowsPath '/tmp/file'"
+  io::convertToWindowsPath '/tmp/file'
+  echo "${RETURNED_VALUE}"
+
+  echo "→ io::convertToWindowsPath '/mnt/d/Users/username'"
+  io::convertToWindowsPath '/mnt/d/Users/username'
+  echo "${RETURNED_VALUE}"
+
+  echo "→ io::convertToWindowsPath '/c/data/file'"
+  io::convertToWindowsPath '/c/data/file'
+  echo "${RETURNED_VALUE}"
+
+  test::endTest "Testing io::convertToWindowsPath" 0
+}
+
+function test_io::createLink() {
+  function ln() { echo "ln: $*"; }
+  local osType="${OSTYPE:-}"
+  OSTYPE="linux-gnu"
+
+  mkdir -p resources/gitignored
+  :> resources/gitignored/file
+
+  echo "→ io::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' true"
+  io::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' true
+  echo "${RETURNED_VALUE}"
+
+  echo "→ io::createLink 'resources/gitignored/try' 'resources/gitignored/new'"
+  io::createLink 'resources/gitignored/try' 'resources/gitignored/new'
+  echo "${RETURNED_VALUE}"
+
+  OSTYPE="${osType}"
+  unset -f ln
+  test::endTest "Testing io::createLink" 0
+}
+
 function main() {
   testIo::toAbsolutePath
   testIo::readFile
@@ -170,6 +222,9 @@ function main() {
   testIo::readStdIn
   testIo::countArgs
   testIo::isDirectoryWritable
+  test_io::runPs1Command
+  test_io::convertToWindowsPath
+  test_io::createLink
 }
 
 main

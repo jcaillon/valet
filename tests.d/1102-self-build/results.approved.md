@@ -276,7 +276,6 @@ CMD_SUDO_selfMock3='true'
 INFO     Skipping the build of scripts in user directory (building core commands only).
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet⌝.
 INFO                              ├── ⌜⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/extension-init.sh⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/help.sh⌝.
 INFO                              ├── ⌜help⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-build.sh⌝.

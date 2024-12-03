@@ -192,6 +192,9 @@ DEBUG    Found function: ⌜io::listPaths⌝
 DEBUG    Found function: ⌜io::listFiles⌝
 DEBUG    Found function: ⌜io::listDirectories⌝
 DEBUG    Found function: ⌜io::isDirectoryWritable⌝
+DEBUG    Found function: ⌜io::runPs1Command⌝
+DEBUG    Found function: ⌜io::createLink⌝
+DEBUG    Found function: ⌜io::convertToWindowsPath⌝
 DEBUG    Found function: ⌜profiler::enable⌝
 DEBUG    Found function: ⌜profiler::disable⌝
 DEBUG    Found function: ⌜prompt::autocompletion⌝
@@ -217,7 +220,7 @@ DEBUG    Found function: ⌜system::getNotExistingCommands⌝
 DEBUG    Found function: ⌜system::commandExists⌝
 DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 115 functions with documentation.
+INFO     Found 118 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet.md⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet

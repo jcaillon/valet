@@ -41,7 +41,7 @@ You can open your `~/.valet.d` directory as a workspace on vscode.
 
 ### Autocompletion on Valet library functions
 
-You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/edit/main/extras/valet.code-snippets) which should be generated locally using the `valet self document` command.
+You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/blob/latest/extras/.vscode/valet.code-snippets) which should be generated locally using the `valet self document` command.
 
 Then:
 

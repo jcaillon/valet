@@ -205,6 +205,58 @@ Writable
 Writable
 ```
 
+### Testing io::runPs1Command
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::runPs1Command 'Get-Process'
+-NoProfile -NonInteractive -Command Get-Process
+0
+→ io::runPs1Command 'echo \"ok\"' true
+-NoProfile -NonInteractive -Command $process = Start-Process powershell "-NoProfile -NonInteractive -Command `"echo `\`"ok`\`"`"" -PassThru -Wait -Verb RunAs; exit $process.ExitCode
+0
+```
+
+### Testing io::convertToWindowsPath
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::convertToWindowsPath '/tmp/file'
+\tmp\file
+→ io::convertToWindowsPath '/mnt/d/Users/username'
+D:\Users\username
+→ io::convertToWindowsPath '/c/data/file'
+C:\data\file
+```
+
+### Testing io::createLink
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' true
+ln: $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/file $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try/file2
+Created hard link: ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/file⌝ ← ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try/file2⌝.
+→ io::createLink 'resources/gitignored/try' 'resources/gitignored/new'
+ln: -s $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/new
+Created symbolic link: ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try⌝ ← ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/new⌝.
+```
+
+**Error** output:
+
+```log
+INFO     Created hard link: ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/file⌝ ← ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try/file2⌝.
+INFO     Created symbolic link: ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try⌝ ← ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/new⌝.
+```
+
 ## Test script 01.invoke
 
 ### Testing io::invoke5, should return 1, input stream from string

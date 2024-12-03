@@ -998,6 +998,24 @@ io::cleanupTempFiles
 shellcheck disable=SC2016
 
 
+## io::convertToWindowsPath
+
+Convert a unix path to a Windows path.
+
+- $1: **path** _as string_:
+      the path to convert
+
+Returns:
+
+- `RETURNED_VALUE`: The Windows path.
+
+```bash
+io::convertToWindowsPath "/path/to/file"
+```
+
+> Handles paths starting with `/mnt/x/` or `/x/`.
+
+
 ## io::countArgs
 
 Returns the number of arguments passed.
@@ -1052,6 +1070,40 @@ Returns:
 ```bash
 io::createFilePathIfNeeded "myFile"
 ```
+
+
+## io::createLink
+
+Create a soft or hard link (original ← link).
+
+Reminder:
+
+- A soft (symbolic) link is a new file that contains a reference to another file or directory in the
+  form of an absolute or relative path.
+- A hard link is a directory entry that associates a new pathname with an existing
+  file (inode + data block) on a file system.
+
+This function allows to create a symbolic link on Windows as well as on Unix.
+
+- $1: **linked path** _as string_:
+      the path to link to (the original file)
+- $2: **link path** _as string_:
+      the path where to create the link
+- $3: hard link _as boolean_:
+      (optional) true to create a hard link, false to create a symbolic link
+      (defaults to false)
+- $4: force _as boolean_:
+      (optional) true to overwrite the link or file if it already exists.
+      Otherwise, the function will fail on an existing link.
+      (defaults to true)
+
+```bash
+io::createLink "/path/to/link" "/path/to/linked"
+io::createLink "/path/to/link" "/path/to/linked" true
+```
+
+> On unix, the function uses the `ln` command.
+> On Windows, the function uses `powershell`.
 
 
 ## io::createTempDirectory
@@ -1436,6 +1488,28 @@ Returns:
 
 ```bash
 io::readStdIn && local stdIn="${RETURNED_VALUE}"
+```
+
+
+## io::runPs1Command
+
+Runs a PowerShell command.
+This is mostly useful on Windows.
+
+- $1: **command** _as string_:
+      the command to run.
+- $2: run as administrator _as boolean_:
+      (optional) whether to run the command as administrator.
+      (defaults to false).
+
+Returns:
+
+- $?
+  - 0 if the command was successful
+  - 1 otherwise.
+
+```bash
+io::runPs1Command "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
 ```
 
 
@@ -3407,6 +3481,25 @@ function io::checkAndWarn() { :; }
 # 
 function io::cleanupTempFiles() { :; }
 
+# ## io::convertToWindowsPath
+# 
+# Convert a unix path to a Windows path.
+# 
+# - $1: **path** _as string_:
+#       the path to convert
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: The Windows path.
+# 
+# ```bash
+# io::convertToWindowsPath "/path/to/file"
+# ```
+# 
+# > Handles paths starting with `/mnt/x/` or `/x/`.
+# 
+function io::convertToWindowsPath() { :; }
+
 # ## io::countArgs
 # 
 # Returns the number of arguments passed.
@@ -3465,6 +3558,41 @@ function io::createDirectoryIfNeeded() { :; }
 # ```
 # 
 function io::createFilePathIfNeeded() { :; }
+
+# ## io::createLink
+# 
+# Create a soft or hard link (original ← link).
+# 
+# Reminder:
+# 
+# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the
+#   form of an absolute or relative path.
+# - A hard link is a directory entry that associates a new pathname with an existing
+#   file (inode + data block) on a file system.
+# 
+# This function allows to create a symbolic link on Windows as well as on Unix.
+# 
+# - $1: **linked path** _as string_:
+#       the path to link to (the original file)
+# - $2: **link path** _as string_:
+#       the path where to create the link
+# - $3: hard link _as boolean_:
+#       (optional) true to create a hard link, false to create a symbolic link
+#       (defaults to false)
+# - $4: force _as boolean_:
+#       (optional) true to overwrite the link or file if it already exists.
+#       Otherwise, the function will fail on an existing link.
+#       (defaults to true)
+# 
+# ```bash
+# io::createLink "/path/to/link" "/path/to/linked"
+# io::createLink "/path/to/link" "/path/to/linked" true
+# ```
+# 
+# > On unix, the function uses the `ln` command.
+# > On Windows, the function uses `powershell`.
+# 
+function io::createLink() { :; }
 
 # ## io::createTempDirectory
 # 
@@ -3864,6 +3992,29 @@ function io::readFile() { :; }
 # ```
 # 
 function io::readStdIn() { :; }
+
+# ## io::runPs1Command
+# 
+# Runs a PowerShell command.
+# This is mostly useful on Windows.
+# 
+# - $1: **command** _as string_:
+#       the command to run.
+# - $2: run as administrator _as boolean_:
+#       (optional) whether to run the command as administrator.
+#       (defaults to false).
+# 
+# Returns:
+# 
+# - $?
+#   - 0 if the command was successful
+#   - 1 otherwise.
+# 
+# ```bash
+# io::runPs1Command "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
+# ```
+# 
+function io::runPs1Command() { :; }
 
 # ## io::sleep
 # 
@@ -5556,6 +5707,20 @@ function test::endTest() { :; }
 		  "body": [ "# ## io::cleanupTempFiles\n# \n# Removes all the temporary files and directories that were created by the\n# io::createTempFile and io::createTempDirectory functions.\n# \n# ```bash\n# io::cleanupTempFiles\n# ```\n# shellcheck disable=SC2016\n# \nio::cleanupTempFiles$0" ]
 	  },
 
+		"io::convertToWindowsPath": {
+		  "prefix": "io::convertToWindowsPath",
+		  "description": "Convert a unix path to a Windows path...",
+		  "scope": "",
+		  "body": [ "io::convertToWindowsPath \"${1:**path**}\"$0" ]
+	  },
+
+		"io::convertToWindowsPath#withdoc": {
+		  "prefix": "io::convertToWindowsPath#withdoc",
+		  "description": "Convert a unix path to a Windows path...",
+		  "scope": "",
+		  "body": [ "# ## io::convertToWindowsPath\n# \n# Convert a unix path to a Windows path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The Windows path.\n# \n# ```bash\n# io::convertToWindowsPath \"/path/to/file\"\n# ```\n# \n# > Handles paths starting with `/mnt/x/` or `/x/`.\n# \nio::convertToWindowsPath \"${1:**path**}\"$0" ]
+	  },
+
 		"io::countArgs": {
 		  "prefix": "io::countArgs",
 		  "description": "Returns the number of arguments passed...",
@@ -5596,6 +5761,20 @@ function test::endTest() { :; }
 		  "description": "Make sure that the given file path exists...",
 		  "scope": "",
 		  "body": [ "# ## io::createFilePathIfNeeded\n# \n# Make sure that the given file path exists.\n# Create the directory tree and the file if needed.\n# \n# - \\$1: **path** _as string_:\n#       the file path to create\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The absolute path of the file.\n# \n# ```bash\n# io::createFilePathIfNeeded \"myFile\"\n# ```\n# \nio::createFilePathIfNeeded \"${1:**path**}\"$0" ]
+	  },
+
+		"io::createLink": {
+		  "prefix": "io::createLink",
+		  "description": "Create a soft or hard link (original ← link)...",
+		  "scope": "",
+		  "body": [ "io::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
+	  },
+
+		"io::createLink#withdoc": {
+		  "prefix": "io::createLink#withdoc",
+		  "description": "Create a soft or hard link (original ← link)...",
+		  "scope": "",
+		  "body": [ "# ## io::createLink\n# \n# Create a soft or hard link (original ← link).\n# \n# Reminder:\n# \n# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the\n#   form of an absolute or relative path.\n# - A hard link is a directory entry that associates a new pathname with an existing\n#   file (inode + data block) on a file system.\n# \n# This function allows to create a symbolic link on Windows as well as on Unix.\n# \n# - \\$1: **linked path** _as string_:\n#       the path to link to (the original file)\n# - \\$2: **link path** _as string_:\n#       the path where to create the link\n# - \\$3: hard link _as boolean_:\n#       (optional) true to create a hard link, false to create a symbolic link\n#       (defaults to false)\n# - \\$4: force _as boolean_:\n#       (optional) true to overwrite the link or file if it already exists.\n#       Otherwise, the function will fail on an existing link.\n#       (defaults to true)\n# \n# ```bash\n# io::createLink \"/path/to/link\" \"/path/to/linked\"\n# io::createLink \"/path/to/link\" \"/path/to/linked\" true\n# ```\n# \n# > On unix, the function uses the `ln` command.\n# > On Windows, the function uses `powershell`.\n# \nio::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
 	  },
 
 		"io::createTempDirectory": {
@@ -5792,6 +5971,20 @@ function test::endTest() { :; }
 		  "description": "Read the content of the standard input...",
 		  "scope": "",
 		  "body": [ "# ## io::readStdIn\n# \n# Read the content of the standard input.\n# Will immediately return if the standard input is empty.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The content of the standard input.\n# \n# ```bash\n# io::readStdIn && local stdIn=\"\\${RETURNED_VALUE}\"\n# ```\n# \nio::readStdIn$0" ]
+	  },
+
+		"io::runPs1Command": {
+		  "prefix": "io::runPs1Command",
+		  "description": "Runs a PowerShell command...",
+		  "scope": "",
+		  "body": [ "io::runPs1Command \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
+	  },
+
+		"io::runPs1Command#withdoc": {
+		  "prefix": "io::runPs1Command#withdoc",
+		  "description": "Runs a PowerShell command...",
+		  "scope": "",
+		  "body": [ "# ## io::runPs1Command\n# \n# Runs a PowerShell command.\n# This is mostly useful on Windows.\n# \n# - \\$1: **command** _as string_:\n#       the command to run.\n# - \\$2: run as administrator _as boolean_:\n#       (optional) whether to run the command as administrator.\n#       (defaults to false).\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# \n# ```bash\n# io::runPs1Command \"Write-Host \\\"Press any key:\\\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());\"\n# ```\n# \nio::runPs1Command \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
 	  },
 
 		"io::sleep": {
@@ -6694,7 +6887,7 @@ function test::endTest() { :; }
 
 ```log
 INFO     Generating documentation for the core functions only.
-INFO     Found 115 functions with documentation.
+INFO     Found 118 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-1/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-1/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/.vscode/valet.code-snippets⌝.

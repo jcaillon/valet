@@ -12,19 +12,7 @@ Exit code: `0`
 → selfUninstall
 
 → selfUninstall --script
-#!/usr/bin/env bash
-# remove main installation of Valet
-rm -Rf "$GLOBAL_VALET_HOME"
-# remove the user configuration
-rm -Rf "/c/Users/jcaillon/.config/valet"
-# remove the user state
-rm -Rf "/c/Users/jcaillon/.local/share/valet"
-# remove the user directory
-rm -Rf "/c/Users/jcaillon/.valet.d"
-# remove a possible symlink
-rm -f "$GLOBAL_VALET_HOME/valet" 2>/dev/null || :
-echo "Valet has been uninstalled."
-
+ok
 ```
 
 **Error** output:
