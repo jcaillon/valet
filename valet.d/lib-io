@@ -571,7 +571,9 @@ function io::createDirectoryIfNeeded() {
   local dirPath="${RETURNED_VALUE}"
 
   if [[ ! -d "${dirPath}" ]]; then
-    mkdir -p "${dirPath}" 1>/dev/null || core::fail "Failed to create the directory ⌜${dirPath}⌝."
+    if ! mkdir -p "${dirPath}" 1>/dev/null; then
+      core::fail "Failed to create the directory ⌜${dirPath}⌝."
+    fi
   fi
 
   RETURNED_VALUE="${dirPath}"
@@ -923,9 +925,9 @@ function io::runPs1Command() {
   local exitCode=0
 
   if [[ "${runAsAdmin}" == true ]]; then
-    powershell -NoProfile -NonInteractive -Command "\$process = Start-Process powershell \"-NoProfile -NonInteractive -Command \`\"${command//\"/\`\\\`\"}\`\"\" -PassThru -Wait -Verb RunAs; exit \$process.ExitCode" || exitCode=$?
+    powershell -NoProfile -NonInteractive -Command "\$ErrorActionPreference = 'Stop'; \$process = Start-Process powershell \"-NoProfile -NonInteractive -Command \`\"\$ErrorActionPreference = 'Stop'; ${command//\"/\`\\\`\"}; exit \$LASTEXITCODE;\`\"\" -PassThru -Wait -Verb RunAs; exit \$process.ExitCode" || exitCode=1
   else
-    powershell -NoProfile -NonInteractive -Command "${command}" || exitCode=$?
+    powershell -NoProfile -NonInteractive -Command "\$ErrorActionPreference = 'Stop'; ${command}; exit \$LASTEXITCODE;" || exitCode=1
   fi
 
   return ${exitCode}
@@ -992,7 +994,9 @@ function io::createLink() {
 
     # if force, delete the link (or file) if it exists
     if [[ ${force} == true ]]; then
-      rm -f "${linkPath}" || core::fail "Failed to delete the existing link ⌜${linkPath}⌝ to replace it."
+      if ! rm -f "${linkPath}"; then
+        core::fail "Failed to delete the existing link ⌜${linkPath}⌝ to replace it."
+      fi
     else
       core::fail "Failed to create a link to ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the link pathname already exists."
     fi
@@ -1001,7 +1005,7 @@ function io::createLink() {
   # create link parent directory if needed
   local linkParentPath="${linkPath%/*}"
   local linkFileName="${linkPath##*/}"
-  mkdir -p "${linkParentPath}" 1>/dev/null || core::fail "Failed to create the parent directory ⌜${linkParentPath}⌝ for the link ⌜${linkedPath}⌝."
+  io::createDirectoryIfNeeded "${linkParentPath}"
 
   # create link
   if [[ "${OSTYPE:-}" == "msys"* ]]; then
@@ -1014,15 +1018,23 @@ function io::createLink() {
 
     log::info "Creating a new link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝ using powershell."
     if [[ ${hardLink} == "true" ]]; then
-      io::runPs1Command "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true || core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+      if ! io::runPs1Command "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
+        core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+      fi
     else
-      io::runPs1Command "New-Item -ItemType SymbolicLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true || core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+      if ! io::runPs1Command "New-Item -ItemType SymbolicLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
+        core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+      fi
     fi
   else
     if [[ ${hardLink} == "true" ]]; then
-      ln "${linkedPath}" "${linkPath}" || core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+      if ! ln "${linkedPath}" "${linkPath}"; then
+        core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+      fi
     else
-      ln -s "${linkedPath}" "${linkPath}" || core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+      if ! ln -s "${linkedPath}" "${linkPath}"; then
+        core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+      fi
     fi
   fi
 

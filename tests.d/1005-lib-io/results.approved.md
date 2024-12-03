@@ -213,10 +213,10 @@ Exit code: `0`
 
 ```plaintext
 → io::runPs1Command 'Get-Process'
--NoProfile -NonInteractive -Command Get-Process
+-NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop'; Get-Process; exit $LASTEXITCODE;
 0
 → io::runPs1Command 'echo \"ok\"' true
--NoProfile -NonInteractive -Command $process = Start-Process powershell "-NoProfile -NonInteractive -Command `"echo `\`"ok`\`"`"" -PassThru -Wait -Verb RunAs; exit $process.ExitCode
+-NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop'; $process = Start-Process powershell "-NoProfile -NonInteractive -Command `"$ErrorActionPreference = 'Stop'; echo `\`"ok`\`"; exit $LASTEXITCODE;`"" -PassThru -Wait -Verb RunAs; exit $process.ExitCode
 0
 ```
 

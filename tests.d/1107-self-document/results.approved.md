@@ -2439,6 +2439,11 @@ local osName="${RETURNED_VALUE}"
 ```
 
 
+## system::windowsAddToPath
+
+Add the given path to the PATH environment variable on Windows.
+
+Will also export the PATH variable in the current bash.
 ## test::commentTest
 
 Call this function to add a paragraph in the report file.
@@ -2449,6 +2454,22 @@ Call this function to add a paragraph in the report file.
 ```bash
 test::commentTest "This is a comment."
 ```
+
+
+## system::windowsSetEnvVar
+
+Set an environment variable for the current user on Windows.
+
+- $1: **variable name** _as string_:
+      the name of the environment variable to set.
+- $2: **variable value** _as string_:
+      the value of the environment variable to set.
+
+```bash
+system::windowsSetEnvVar "MY_VAR" "my_value"
+```
+
+> This function is only available on Windows, it uses `powershell`.
 
 
 ## test::endTest
@@ -5021,6 +5042,11 @@ function system::isRoot() { :; }
 # 
 function system::os() { :; }
 
+# ## system::windowsAddToPath
+# 
+# Add the given path to the PATH environment variable on Windows.
+# 
+# Will also export the PATH variable in the current bash.
 # ## test::commentTest
 # 
 # Call this function to add a paragraph in the report file.
@@ -5032,7 +5058,24 @@ function system::os() { :; }
 # test::commentTest "This is a comment."
 # ```
 # 
-function test::commentTest() { :; }
+function system::windowsAddToPath() { :; }
+
+# ## system::windowsSetEnvVar
+# 
+# Set an environment variable for the current user on Windows.
+# 
+# - $1: **variable name** _as string_:
+#       the name of the environment variable to set.
+# - $2: **variable value** _as string_:
+#       the value of the environment variable to set.
+# 
+# ```bash
+# system::windowsSetEnvVar "MY_VAR" "my_value"
+# ```
+# 
+# > This function is only available on Windows, it uses `powershell`.
+# 
+function system::windowsSetEnvVar() { :; }
 
 # ## test::endTest
 # 
@@ -6711,18 +6754,32 @@ function test::endTest() { :; }
 		  "body": [ "# ## system::os\n# \n# Returns the name of the current OS.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the name of the current OS: \"darwin\", \"linux\" or \"windows\".\n# \n# ```bash\n# system::os\n# local osName=\"\\${RETURNED_VALUE}\"\n# ```\n# \nsystem::os$0" ]
 	  },
 
-		"test::commentTest": {
-		  "prefix": "test::commentTest",
-		  "description": "Call this function to add a paragraph in the report file...",
+		"system::windowsAddToPath": {
+		  "prefix": "system::windowsAddToPath",
+		  "description": "Add the given path to the PATH environment variable on Windows...",
 		  "scope": "",
-		  "body": [ "test::commentTest \"${1:**comment**}\"$0" ]
+		  "body": [ "system::windowsAddToPath \"${1:**comment**}\"$0" ]
 	  },
 
-		"test::commentTest#withdoc": {
-		  "prefix": "test::commentTest#withdoc",
-		  "description": "Call this function to add a paragraph in the report file...",
+		"system::windowsAddToPath#withdoc": {
+		  "prefix": "system::windowsAddToPath#withdoc",
+		  "description": "Add the given path to the PATH environment variable on Windows...",
 		  "scope": "",
-		  "body": [ "# ## test::commentTest\n# \n# Call this function to add a paragraph in the report file.\n# \n# - \\$1: **comment** _as string_:\n#       the text to add in the report file\n# \n# ```bash\n# test::commentTest \"This is a comment.\"\n# ```\n# \ntest::commentTest \"${1:**comment**}\"$0" ]
+		  "body": [ "# ## system::windowsAddToPath\n# \n# Add the given path to the PATH environment variable on Windows.\n# \n# Will also export the PATH variable in the current bash.\n# ## test::commentTest\n# \n# Call this function to add a paragraph in the report file.\n# \n# - \\$1: **comment** _as string_:\n#       the text to add in the report file\n# \n# ```bash\n# test::commentTest \"This is a comment.\"\n# ```\n# \nsystem::windowsAddToPath \"${1:**comment**}\"$0" ]
+	  },
+
+		"system::windowsSetEnvVar": {
+		  "prefix": "system::windowsSetEnvVar",
+		  "description": "Set an environment variable for the current user on Windows...",
+		  "scope": "",
+		  "body": [ "system::windowsSetEnvVar \"${1:**variable name**}\" \"${2:**variable value**}\"$0" ]
+	  },
+
+		"system::windowsSetEnvVar#withdoc": {
+		  "prefix": "system::windowsSetEnvVar#withdoc",
+		  "description": "Set an environment variable for the current user on Windows...",
+		  "scope": "",
+		  "body": [ "# ## system::windowsSetEnvVar\n# \n# Set an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to set.\n# - \\$2: **variable value** _as string_:\n#       the value of the environment variable to set.\n# \n# ```bash\n# system::windowsSetEnvVar \"MY_VAR\" \"my_value\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell`.\n# \nsystem::windowsSetEnvVar \"${1:**variable name**}\" \"${2:**variable value**}\"$0" ]
 	  },
 
 		"test::endTest": {
@@ -6981,7 +7038,7 @@ function test::endTest() { :; }
 
 ```log
 INFO     Generating documentation for the core functions only.
-INFO     Found 120 functions with documentation.
+INFO     Found 121 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-1/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-1/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/valet.code-snippets⌝.

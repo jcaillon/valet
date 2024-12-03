@@ -147,3 +147,19 @@ INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜fish⌝ shell
 INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
 ```
 
+### Testing system::windowsSetEnvVar
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ system::windowsSetEnvVar VAR VALUE
+powershell: -NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop'; [Environment]::SetEnvironmentVariable('VAR', 'VALUE', [System.EnvironmentVariableTarget]::User); exit $LASTEXITCODE;
+
+→ system::windowsSetEnvVar VAR ''
+powershell: -NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop'; [Environment]::SetEnvironmentVariable('VAR', '', [System.EnvironmentVariableTarget]::User); exit $LASTEXITCODE;
+powershell: -NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop'; [Environment]::SetEnvironmentVariable('VAR', [NullString]::Value, [System.EnvironmentVariableTarget]::User); exit $LASTEXITCODE;
+
+```
+

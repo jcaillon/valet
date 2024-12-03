@@ -29,7 +29,7 @@ function testSystem::env() {
   RETURNED_ARRAY=()
   echo "→ system::env"
   system::env
-  if (( ${#RETURNED_ARRAY[*]} > 0 )); then
+  if ((${#RETURNED_ARRAY[*]} > 0)); then
     echo "Found environment variables."
   fi
 
@@ -105,35 +105,50 @@ function testSystem::commandExists() {
 }
 
 function test_system::addToPath() {
-    local oldHome="${HOME}"
+  local oldHome="${HOME}"
 
-    HOME="resources/gitignored"
-    function zsh() { :; };
-    function tcsh() { :; };
-    function csh() { :; };
-    function xonsh() { :; };
-    function fish() { :; };
-    function ksh() { :; };
-    function nu() { :; };
+  HOME="resources/gitignored"
+  function zsh() { :; }
+  function tcsh() { :; }
+  function csh() { :; }
+  function xonsh() { :; }
+  function fish() { :; }
+  function ksh() { :; }
+  function nu() { :; }
 
-    echo "→ system::addToPath"
-    system::addToPath "/coucou"
-    echo
-    echo "content of files:"
-    cat resources/gitignored/.zshrc
-    cat resources/gitignored/.tcshrc
-    cat resources/gitignored/.cshrc
-    cat resources/gitignored/.xonshrc
-    cat resources/gitignored/.config/fish/config.fish
-    cat resources/gitignored/.kshrc
-    cat resources/gitignored/.config/nushell/env.nu
+  echo "→ system::addToPath"
+  system::addToPath "/coucou"
+  echo
+  echo "content of files:"
+  cat resources/gitignored/.zshrc
+  cat resources/gitignored/.tcshrc
+  cat resources/gitignored/.cshrc
+  cat resources/gitignored/.xonshrc
+  cat resources/gitignored/.config/fish/config.fish
+  cat resources/gitignored/.kshrc
+  cat resources/gitignored/.config/nushell/env.nu
 
-    system::addToPath "/coucou"
+  system::addToPath "/coucou"
 
-    unset -f zsh tcsh csh xonsh fish ksh nu
-    HOME="${oldHome}"
-    test::endTest "Testing system::addToPath" 0
-  }
+  unset -f zsh tcsh csh xonsh fish ksh nu
+  HOME="${oldHome}"
+  test::endTest "Testing system::addToPath" 0
+}
+
+function test_system::windowsSetEnvVar() {
+  # shellcheck disable=SC2317
+  function powershell() { echo "powershell: $*"; }
+
+  echo "→ system::windowsSetEnvVar VAR VALUE"
+  system::windowsSetEnvVar VAR VALUE
+  echo
+  echo "→ system::windowsSetEnvVar VAR ''"
+  system::windowsSetEnvVar VAR ''
+  echo
+
+  unset -f powershell
+  test::endTest "Testing system::windowsSetEnvVar" 0
+}
 
 function main() {
   testSystem::os
@@ -143,6 +158,7 @@ function main() {
   testSystem::getNotExistingCommands
   testSystem::commandExists
   test_system::addToPath
+  test_system::windowsSetEnvVar
 }
 
 main
