@@ -132,6 +132,7 @@ function test_system::addToPath() {
 
   unset -f zsh tcsh csh xonsh fish ksh nu
   HOME="${oldHome}"
+  rm -Rf resources/gitignored
   test::endTest "Testing system::addToPath" 0
 }
 
@@ -140,14 +141,26 @@ function test_system::windowsSetEnvVar() {
   function powershell() { echo "powershell: $*"; }
 
   echo "→ system::windowsSetEnvVar VAR VALUE"
-  system::windowsSetEnvVar VAR VALUE
+  OSTYPE=msys system::windowsSetEnvVar VAR VALUE
   echo
   echo "→ system::windowsSetEnvVar VAR ''"
-  system::windowsSetEnvVar VAR ''
+  OSTYPE=msys system::windowsSetEnvVar VAR ''
   echo
 
   unset -f powershell
   test::endTest "Testing system::windowsSetEnvVar" 0
+}
+
+function test_system::windowsAddToPath() {
+  # shellcheck disable=SC2317
+  function powershell() { echo "powershell: $*"; }
+
+  echo "→ system::windowsAddToPath /coucou"
+  OSTYPE=msys system::windowsAddToPath /coucou
+  echo
+
+  unset -f powershell
+  test::endTest "Testing system::windowsAddToPath" 0
 }
 
 function main() {
@@ -159,6 +172,7 @@ function main() {
   testSystem::commandExists
   test_system::addToPath
   test_system::windowsSetEnvVar
+  test_system::windowsAddToPath
 }
 
 main

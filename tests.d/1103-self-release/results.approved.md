@@ -222,8 +222,9 @@ DEBUG    Found function: ⌜system::isRoot⌝
 DEBUG    Found function: ⌜system::addToPath⌝
 DEBUG    Found function: ⌜system::windowsSetEnvVar⌝
 DEBUG    Found function: ⌜system::windowsAddToPath⌝
+DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 121 functions with documentation.
+INFO     Found 122 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet.md⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet

@@ -242,8 +242,7 @@ function system::addToPath() {
       ;;
     esac
 
-    io::readFile "${configFile}"
-    if [[ "${RETURNED_VALUE}" == *"${configContent}"* ]]; then
+    if [[ -f "${configFile}" ]] && io::readFile "${configFile}" && [[ "${RETURNED_VALUE}" == *"${configContent}"* ]]; then
       log::info "The directory ⌜${pathToAdd}⌝ is already in the PATH for ⌜${shellName}⌝ shell."
       continue
     fi
@@ -277,25 +276,78 @@ function system::addToPath() {
 # system::windowsSetEnvVar "MY_VAR" "my_value"
 # ```
 #
-# > This function is only available on Windows, it uses `powershell`.
+# > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 function system::windowsSetEnvVar() {
   local varName="${1:-}"
   local varValue="${2:-}"
+
+  system::os
+  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
+    core::fail "This function is only available on Windows."
+  fi
 
   if [[ -z ${varName} ]]; then
     core::fail "The variable name is missing."
   fi
 
-  if ! io::runPs1Command "[Environment]::SetEnvironmentVariable('${varName//\'/\'\'}', '${varValue//\'/\'\'}', [System.EnvironmentVariableTarget]::User)"; then
-    core::fail "Failed to set the environment variable ⌜${varName}⌝."
-  fi
+  if [[ -n ${varValue} ]]; then
+    if ! io::runPs1Command "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.SetValue('${varName//\'/\'\'}', '${varValue//\'/\'\'}', 'ExpandString');"; then
+      core::fail "Failed to set the environment variable ⌜${varName}⌝."
+    fi
+  else
 
-  # due to a bug in powershell, we seem to have several ways to unset a variable
-  # depending on the powershell version
-  # we try the second one here
-  if [[ -z ${varValue} ]]; then
-    if ! io::runPs1Command "[Environment]::SetEnvironmentVariable('${varName//\'/\'\'}', [NullString]::Value, [System.EnvironmentVariableTarget]::User)"; then
-      log::debug "Failed to unset the environment variable ⌜${varName}⌝ using null string."
+    if ! io::runPs1Command "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.DeleteValue('${varName//\'/\'\'}');"; then
+      core::fail "Failed to unset the environment variable ⌜${varName}⌝ using null string."
     fi
   fi
+}
+
+# ## system::windowsAddToPath
+#
+# Add the given path to the PATH environment variable on Windows (current user only).
+#
+# Will also export the PATH variable in the current bash.
+#
+# - $1: **path** _as string_:
+#       the path to add to the PATH environment variable.
+#       The path can be in unix format, it will be converted to windows format.
+#
+# ```bash
+# system::windowsAddToPath "/path/to/bin"
+# ```
+#
+# > This function is only available on Windows, it uses `powershell` to directly modify the registry.
+function system::windowsAddToPath() {
+  local pathToAdd="${1:-}"
+
+  system::os
+  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
+    core::fail "This function is only available on Windows."
+  fi
+
+  log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
+
+  if [[ -z ${pathToAdd} ]]; then
+    core::fail "The path to add to the PATH is missing."
+  fi
+
+  io::convertToWindowsPath "${pathToAdd}"
+  pathToAdd="${RETURNED_VALUE}"
+
+  local script="
+  \$pathToAdd = '${pathToAdd//\'/\'\'}';
+  \$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true);
+  \$oldPath = \$key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
+  if (\$currentPath -notlike \"*\$pathToAdd*\") {
+      \$newPath = '{0}{1}{2}' -f \$oldPath, [IO.Path]::PathSeparator, \$pathToAdd;
+      \$key.SetValue('Path', \$newPath, 'ExpandString');
+  };
+  \$key.Dispose();
+  "
+
+  if ! io::runPs1Command "${script}"; then
+    core::fail "Failed to add the directory ⌜${pathToAdd}⌝ to the PATH."
+  fi
+
+  log::info "The directory ⌜${pathToAdd}⌝ has been added to the windows user PATH."
 }

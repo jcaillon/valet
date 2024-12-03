@@ -2441,19 +2441,19 @@ local osName="${RETURNED_VALUE}"
 
 ## system::windowsAddToPath
 
-Add the given path to the PATH environment variable on Windows.
+Add the given path to the PATH environment variable on Windows (current user only).
 
 Will also export the PATH variable in the current bash.
-## test::commentTest
 
-Call this function to add a paragraph in the report file.
-
-- $1: **comment** _as string_:
-      the text to add in the report file
+- $1: **path** _as string_:
+      the path to add to the PATH environment variable.
+      The path can be in unix format, it will be converted to windows format.
 
 ```bash
-test::commentTest "This is a comment."
+system::windowsAddToPath "/path/to/bin"
 ```
+
+> This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
 
 ## system::windowsSetEnvVar
@@ -2469,7 +2469,19 @@ Set an environment variable for the current user on Windows.
 system::windowsSetEnvVar "MY_VAR" "my_value"
 ```
 
-> This function is only available on Windows, it uses `powershell`.
+> This function is only available on Windows, it uses `powershell` to directly modify the registry.
+
+
+## test::commentTest
+
+Call this function to add a paragraph in the report file.
+
+- $1: **comment** _as string_:
+      the text to add in the report file
+
+```bash
+test::commentTest "This is a comment."
+```
 
 
 ## test::endTest
@@ -5044,19 +5056,19 @@ function system::os() { :; }
 
 # ## system::windowsAddToPath
 # 
-# Add the given path to the PATH environment variable on Windows.
+# Add the given path to the PATH environment variable on Windows (current user only).
 # 
 # Will also export the PATH variable in the current bash.
-# ## test::commentTest
 # 
-# Call this function to add a paragraph in the report file.
-# 
-# - $1: **comment** _as string_:
-#       the text to add in the report file
+# - $1: **path** _as string_:
+#       the path to add to the PATH environment variable.
+#       The path can be in unix format, it will be converted to windows format.
 # 
 # ```bash
-# test::commentTest "This is a comment."
+# system::windowsAddToPath "/path/to/bin"
 # ```
+# 
+# > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 # 
 function system::windowsAddToPath() { :; }
 
@@ -5073,9 +5085,22 @@ function system::windowsAddToPath() { :; }
 # system::windowsSetEnvVar "MY_VAR" "my_value"
 # ```
 # 
-# > This function is only available on Windows, it uses `powershell`.
+# > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 # 
 function system::windowsSetEnvVar() { :; }
+
+# ## test::commentTest
+# 
+# Call this function to add a paragraph in the report file.
+# 
+# - $1: **comment** _as string_:
+#       the text to add in the report file
+# 
+# ```bash
+# test::commentTest "This is a comment."
+# ```
+# 
+function test::commentTest() { :; }
 
 # ## test::endTest
 # 
@@ -6756,16 +6781,16 @@ function test::endTest() { :; }
 
 		"system::windowsAddToPath": {
 		  "prefix": "system::windowsAddToPath",
-		  "description": "Add the given path to the PATH environment variable on Windows...",
+		  "description": "Add the given path to the PATH environment variable on Windows (current user only)...",
 		  "scope": "",
-		  "body": [ "system::windowsAddToPath \"${1:**comment**}\"$0" ]
+		  "body": [ "system::windowsAddToPath \"${1:**path**}\"$0" ]
 	  },
 
 		"system::windowsAddToPath#withdoc": {
 		  "prefix": "system::windowsAddToPath#withdoc",
-		  "description": "Add the given path to the PATH environment variable on Windows...",
+		  "description": "Add the given path to the PATH environment variable on Windows (current user only)...",
 		  "scope": "",
-		  "body": [ "# ## system::windowsAddToPath\n# \n# Add the given path to the PATH environment variable on Windows.\n# \n# Will also export the PATH variable in the current bash.\n# ## test::commentTest\n# \n# Call this function to add a paragraph in the report file.\n# \n# - \\$1: **comment** _as string_:\n#       the text to add in the report file\n# \n# ```bash\n# test::commentTest \"This is a comment.\"\n# ```\n# \nsystem::windowsAddToPath \"${1:**comment**}\"$0" ]
+		  "body": [ "# ## system::windowsAddToPath\n# \n# Add the given path to the PATH environment variable on Windows (current user only).\n# \n# Will also export the PATH variable in the current bash.\n# \n# - \\$1: **path** _as string_:\n#       the path to add to the PATH environment variable.\n#       The path can be in unix format, it will be converted to windows format.\n# \n# ```bash\n# system::windowsAddToPath \"/path/to/bin\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell` to directly modify the registry.\n# \nsystem::windowsAddToPath \"${1:**path**}\"$0" ]
 	  },
 
 		"system::windowsSetEnvVar": {
@@ -6779,7 +6804,21 @@ function test::endTest() { :; }
 		  "prefix": "system::windowsSetEnvVar#withdoc",
 		  "description": "Set an environment variable for the current user on Windows...",
 		  "scope": "",
-		  "body": [ "# ## system::windowsSetEnvVar\n# \n# Set an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to set.\n# - \\$2: **variable value** _as string_:\n#       the value of the environment variable to set.\n# \n# ```bash\n# system::windowsSetEnvVar \"MY_VAR\" \"my_value\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell`.\n# \nsystem::windowsSetEnvVar \"${1:**variable name**}\" \"${2:**variable value**}\"$0" ]
+		  "body": [ "# ## system::windowsSetEnvVar\n# \n# Set an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to set.\n# - \\$2: **variable value** _as string_:\n#       the value of the environment variable to set.\n# \n# ```bash\n# system::windowsSetEnvVar \"MY_VAR\" \"my_value\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell` to directly modify the registry.\n# \nsystem::windowsSetEnvVar \"${1:**variable name**}\" \"${2:**variable value**}\"$0" ]
+	  },
+
+		"test::commentTest": {
+		  "prefix": "test::commentTest",
+		  "description": "Call this function to add a paragraph in the report file...",
+		  "scope": "",
+		  "body": [ "test::commentTest \"${1:**comment**}\"$0" ]
+	  },
+
+		"test::commentTest#withdoc": {
+		  "prefix": "test::commentTest#withdoc",
+		  "description": "Call this function to add a paragraph in the report file...",
+		  "scope": "",
+		  "body": [ "# ## test::commentTest\n# \n# Call this function to add a paragraph in the report file.\n# \n# - \\$1: **comment** _as string_:\n#       the text to add in the report file\n# \n# ```bash\n# test::commentTest \"This is a comment.\"\n# ```\n# \ntest::commentTest \"${1:**comment**}\"$0" ]
 	  },
 
 		"test::endTest": {
@@ -7038,7 +7077,7 @@ function test::endTest() { :; }
 
 ```log
 INFO     Generating documentation for the core functions only.
-INFO     Found 121 functions with documentation.
+INFO     Found 122 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-1/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-1/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/valet.code-snippets⌝.
