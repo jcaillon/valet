@@ -24,10 +24,10 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/va
 Please review the [installation script][selfInstallScriptLink] or the [self install command usage][selfInstallCommandUsageLink] to learn about the different installer options.
 {{< /callout >}}
 
-Here is an example command to install Valet with the option `--unattended`:
+Here is an example command to install Valet with the options `--unattended --single-user-installation` (no interactive prompt during installation and installs itself in the home directory of the user):
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --unattended
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --unattended --single-user-installation
 ```
 
 Finally, call `valet` to get started with the example commands!

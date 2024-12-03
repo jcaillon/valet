@@ -8,10 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- selfExtend: with `.` it setup the current directory as an extension. With `name` it creates a new extension under the valet user directory (as a git repo if git found).
 - Add utility functions to install stuff from the extension.setup.sh scripts `powershell.exe -NoProfile -NonInteractive -Command "echo ok" 2>/dev/null`:
-  - windows::runPs1Command
-  - windows::mklink
   - system::addToPath
   - system::addToPathIfNotPresent
 - Finish prompt and interactive functions.

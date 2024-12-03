@@ -206,6 +206,8 @@ function main() {
   function csh() { :; };
   function xonsh() { :; };
   function fish() { :; };
+  function ksh() { :; };
+  function nu() { :; };
   $(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/'"${BRANCH_NAME}"'/valet.d/commands.d/self-install.sh")"
   '
 

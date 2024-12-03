@@ -344,7 +344,7 @@ function selfUpdate() {
     log::debug "Sourcing the core functions from valet."
     selfUpdate_sourceDependencies
   else
-    core::sourceUserCommands
+    core::reloadUserCommands
   fi
 
   if [[ ${createShim} == "true" ]]; then
@@ -352,7 +352,7 @@ function selfUpdate() {
   fi
 
   if [[ ${addToPath} == "true" ]]; then
-    selfUpdate_addToPath "${GLOBAL_VALET_HOME}" "${unattended}"
+    system::addToPath "${GLOBAL_VALET_HOME}"
   fi
 
   # run the post install command
@@ -622,7 +622,7 @@ function selfUpdate_addToPath() {
   log::info "Attempting to add the Valet directory ⌜${binDirectory}⌝ to the PATH."
 
   local configFile configContent
-  for shellName in "bash" "zsh" "tcsh" "csh" "xonsh" "fish"; do
+  for shellName in "bash" "ksh" "zsh" "tcsh" "csh" "xonsh" "fish" "nushell"; do
     # shellcheck disable=SC2088
     if ! command -v "${shellName}" &>/dev/null; then
       continue

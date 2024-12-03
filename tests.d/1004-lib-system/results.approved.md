@@ -93,3 +93,57 @@ Command not found.
 Found command.
 ```
 
+### Testing system::addToPath
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ system::addToPath
+
+content of files:
+
+
+export PATH="/coucou:${PATH}"
+
+
+set path = ($path '/coucou')
+
+
+set path = ($path '/coucou')
+
+
+$PATH.append('/coucou')
+
+
+fish_add_path '/coucou'
+
+
+export PATH="/coucou:${PATH}"
+
+
+$env.PATH = ($env.PATH | split row (char esep) | append "/coucou")
+```
+
+**Error** output:
+
+```log
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜bash⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜ksh⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜zsh⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜tcsh⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜csh⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜xonsh⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜fish⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜bash⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜ksh⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜zsh⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜tcsh⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜csh⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜xonsh⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜fish⌝ shell.
+INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
+```
+

@@ -27,3 +27,4 @@ valet.tar.gz
 
 # tests
 tests.d/1005-lib-io/resources/gitignored/**
+tests.d/1004-lib-system/resources/gitignored/**

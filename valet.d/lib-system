@@ -2,6 +2,9 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
+# shellcheck source=lib-io
+source io
+
 # ## system::os
 #
 # Returns the name of the current OS.
@@ -162,4 +165,101 @@ function system::commandExists() {
     return 0
   fi
   return 1
+}
+
+# ## system::isRoot
+#
+# Check if the script is running as root.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the script is running as root
+#   - 1 otherwise.
+#
+# ```bash
+# if system::isRoot; then
+#   printf 'The script is running as root.'
+# fi
+# ```
+function system::isRoot() {
+  if [[ ${EUID:-${UID}} -eq 0 ]]; then
+    return 0
+  fi
+  return 1
+}
+
+# ## system::addToPath
+#
+# Add the given path to the PATH environment variable for various shells,
+# by adding the appropriate export command to the appropriate file.
+#
+# Will also export the PATH variable in the current bash.
+#
+# - $1: **path** _as string_:
+#       the path to add to the PATH environment variable.
+#
+# ```bash
+# system::addToPath "/path/to/bin"
+# ```
+function system::addToPath() {
+  local pathToAdd="${1:-}"
+
+  log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
+
+  io::createDirectoryIfNeeded "${HOME}"
+
+  local -i count=0
+  local shellName
+  for shellName in "bash" "ksh" "zsh" "tcsh" "csh" "xonsh" "fish" "nu"; do
+    if ! command -v "${shellName}" &>/dev/null; then
+      continue
+    fi
+    local configContent
+    local configFile="${HOME}/.${shellName}rc"
+
+    case ${shellName} in
+    nu)
+      configFile="${HOME}/.config/nushell/env.nu"
+      io::createDirectoryIfNeeded "${HOME}/.config/nushell"
+      configContent="\$env.PATH = (\$env.PATH | split row (char esep) | append \"${pathToAdd}\")"
+      ;;
+    fish)
+      # shellcheck disable=SC2088
+      configFile="${HOME}/.config/fish/config.fish"
+      io::createDirectoryIfNeeded "${HOME}/.config/fish"
+      configContent="fish_add_path '${pathToAdd}'"
+      ;;
+    tcsh | csh)
+      configContent="set path = (\$path '${pathToAdd}')"
+      ;;
+    xonsh)
+      configContent="\$PATH.append('${pathToAdd}')"
+      ;;
+    *)
+      # shellcheck disable=SC2016
+      printf -v configContent 'export PATH="%s:${PATH}"' "${pathToAdd}"
+      ;;
+    esac
+
+    io::readFile "${configFile}"
+    if [[ "${RETURNED_VALUE}" == *"${configContent}"* ]]; then
+      log::info "The directory ⌜${pathToAdd}⌝ is already in the PATH for ⌜${shellName}⌝ shell."
+      continue
+    fi
+
+    log::info "Adding directory ⌜${pathToAdd}⌝ to the PATH for ⌜${shellName}⌝ shell." \
+      "Appending to ⌜${configFile}⌝:" \
+      "${configContent}"
+
+    printf '\n\n%s\n' "${configContent}" >> "${configFile}"
+    count+=1
+  done
+
+  export PATH="${pathToAdd}:${PATH}"
+
+  if (( count > 0 )); then
+    log::warning "The directory ⌜${pathToAdd}⌝ has been added to the PATH for ${count} shells." \
+      "Please login again to apply the changes on your current shell if you are not using bash."
+  fi
 }

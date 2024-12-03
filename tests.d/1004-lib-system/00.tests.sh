@@ -104,6 +104,37 @@ function testSystem::commandExists() {
   test::endTest "Testing system::commandExists" 0
 }
 
+function test_system::addToPath() {
+    local oldHome="${HOME}"
+
+    HOME="resources/gitignored"
+    function zsh() { :; };
+    function tcsh() { :; };
+    function csh() { :; };
+    function xonsh() { :; };
+    function fish() { :; };
+    function ksh() { :; };
+    function nu() { :; };
+
+    echo "→ system::addToPath"
+    system::addToPath "/coucou"
+    echo
+    echo "content of files:"
+    cat resources/gitignored/.zshrc
+    cat resources/gitignored/.tcshrc
+    cat resources/gitignored/.cshrc
+    cat resources/gitignored/.xonshrc
+    cat resources/gitignored/.config/fish/config.fish
+    cat resources/gitignored/.kshrc
+    cat resources/gitignored/.config/nushell/env.nu
+
+    system::addToPath "/coucou"
+
+    unset -f zsh tcsh csh xonsh fish ksh nu
+    HOME="${oldHome}"
+    test::endTest "Testing system::addToPath" 0
+  }
+
 function main() {
   testSystem::os
   testSystem::env
@@ -111,6 +142,7 @@ function main() {
   testSystem::getUndeclaredVariables
   testSystem::getNotExistingCommands
   testSystem::commandExists
+  test_system::addToPath
 }
 
 main
