@@ -962,7 +962,7 @@ function io::runPs1Command() {
 # ```
 #
 # > On unix, the function uses the `ln` command.
-# > On Windows, the function uses `powershell`.
+# > On Windows, the function uses `powershell` (and optionally ls to check the existing link).
 function io::createLink() {
   local linkedPath="${1}"
   local linkPath="${2}"
@@ -981,6 +981,15 @@ function io::createLink() {
 
   # check the link path
   if [[ -f ${linkPath} || -L ${linkPath} ]]; then
+    # on windows, creating a link is costly so don't do it if it's already good
+    if [[ "${OSTYPE:-}" == "msys"* ]] && command -v ls &>/dev/null; then
+      io::invoke ls -l "${linkPath}"
+      if [[ ${RETURNED_VALUE%%$'\n'*} == *"${linkedPath}" ]]; then
+        log::debug "The link ⌜${linkPath}⌝ already exists and points to ⌜${linkedPath}⌝."
+        return 0
+      fi
+    fi
+
     # if force, delete the link (or file) if it exists
     if [[ ${force} == true ]]; then
       rm -f "${linkPath}" || core::fail "Failed to delete the existing link ⌜${linkPath}⌝ to replace it."
@@ -1003,7 +1012,7 @@ function io::createLink() {
     io::convertToWindowsPath "${linkedPath}"
     linkedPath="${RETURNED_VALUE}"
 
-    log::debug "Using powershell to link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+    log::info "Creating a new link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝ using powershell."
     if [[ ${hardLink} == "true" ]]; then
       io::runPs1Command "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true || core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
     else

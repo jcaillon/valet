@@ -18,8 +18,8 @@ function testSelfDocument() {
   echo "→ cat ${directory}/lib-valet"
   io::cat "${directory}/lib-valet"
   echo
-  echo "→ cat ${directory}/.vscode/valet.code-snippets"
-  io::cat "${directory}/.vscode/valet.code-snippets"
+  echo "→ cat ${directory}/valet.code-snippets"
+  io::cat "${directory}/valet.code-snippets"
 
   test::endTest "Testing selfDocument" 0
 }

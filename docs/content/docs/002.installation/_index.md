@@ -45,6 +45,11 @@ Finally, call `valet` to get started with the example commands!
 2. Add this directory to your PATH so you can call `valet` from your terminal.
 3. Call `valet` to get started with the example commands!
 
+## ⚙️ Extra config for your terminal
+
+- **Nerd font**: Valet can make use of [Nerd fonts][nerdFontsLink] to display icons in the logs and interactive sessions. You can download any nerd font from [here][nerdFontsLink], install it, and configure your terminal to use that font.
+- **Word separator**: Valet usually prints important values between ⌜quotes⌝ using the UTF8 top left and top right corners (respectively U+231C and U+231D). You can add these two characters as word separators in your terminal for quick double click selection: `⌜⌝`.
+
 ## 🪟 Use Valet on windows
 
 It is recommended to use Git bash, installed with [Git for Windows][git-for-windows-link] and [Windows terminal][windows-terminal-link] as your terminal program. You can also use Valet with any Linux distribution and [Windows Subsystem for Linux][wsl-installation-link] (WSL).
@@ -80,3 +85,4 @@ Alternatively, use `docker run --rm -it noyacode/valet` to pull and run the imag
 [docker]: https://www.docker.com/
 [podman]: https://podman.io/
 [valetImageTagsLink]: https://github.com/jcaillon/valet/pkgs/container/valet
+[nerdFontsLink]: https://www.nerdfonts.com/font-downloads

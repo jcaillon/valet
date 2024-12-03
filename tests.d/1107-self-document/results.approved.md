@@ -1103,7 +1103,7 @@ io::createLink "/path/to/link" "/path/to/linked" true
 ```
 
 > On unix, the function uses the `ln` command.
-> On Windows, the function uses `powershell`.
+> On Windows, the function uses `powershell` (and optionally ls to check the existing link).
 
 
 ## io::createTempDirectory
@@ -3590,7 +3590,7 @@ function io::createFilePathIfNeeded() { :; }
 # ```
 # 
 # > On unix, the function uses the `ln` command.
-# > On Windows, the function uses `powershell`.
+# > On Windows, the function uses `powershell` (and optionally ls to check the existing link).
 # 
 function io::createLink() { :; }
 
@@ -4989,7 +4989,7 @@ function test::endTest() { :; }
 
 
 
-→ cat /tmp/valet.d/d1-1/.vscode/valet.code-snippets
+→ cat /tmp/valet.d/d1-1/valet.code-snippets
 {
 // Documentation generated for the version 1.2.3 (2013-11-10).
 
@@ -5774,7 +5774,7 @@ function test::endTest() { :; }
 		  "prefix": "io::createLink#withdoc",
 		  "description": "Create a soft or hard link (original ← link)...",
 		  "scope": "",
-		  "body": [ "# ## io::createLink\n# \n# Create a soft or hard link (original ← link).\n# \n# Reminder:\n# \n# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the\n#   form of an absolute or relative path.\n# - A hard link is a directory entry that associates a new pathname with an existing\n#   file (inode + data block) on a file system.\n# \n# This function allows to create a symbolic link on Windows as well as on Unix.\n# \n# - \\$1: **linked path** _as string_:\n#       the path to link to (the original file)\n# - \\$2: **link path** _as string_:\n#       the path where to create the link\n# - \\$3: hard link _as boolean_:\n#       (optional) true to create a hard link, false to create a symbolic link\n#       (defaults to false)\n# - \\$4: force _as boolean_:\n#       (optional) true to overwrite the link or file if it already exists.\n#       Otherwise, the function will fail on an existing link.\n#       (defaults to true)\n# \n# ```bash\n# io::createLink \"/path/to/link\" \"/path/to/linked\"\n# io::createLink \"/path/to/link\" \"/path/to/linked\" true\n# ```\n# \n# > On unix, the function uses the `ln` command.\n# > On Windows, the function uses `powershell`.\n# \nio::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
+		  "body": [ "# ## io::createLink\n# \n# Create a soft or hard link (original ← link).\n# \n# Reminder:\n# \n# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the\n#   form of an absolute or relative path.\n# - A hard link is a directory entry that associates a new pathname with an existing\n#   file (inode + data block) on a file system.\n# \n# This function allows to create a symbolic link on Windows as well as on Unix.\n# \n# - \\$1: **linked path** _as string_:\n#       the path to link to (the original file)\n# - \\$2: **link path** _as string_:\n#       the path where to create the link\n# - \\$3: hard link _as boolean_:\n#       (optional) true to create a hard link, false to create a symbolic link\n#       (defaults to false)\n# - \\$4: force _as boolean_:\n#       (optional) true to overwrite the link or file if it already exists.\n#       Otherwise, the function will fail on an existing link.\n#       (defaults to true)\n# \n# ```bash\n# io::createLink \"/path/to/link\" \"/path/to/linked\"\n# io::createLink \"/path/to/link\" \"/path/to/linked\" true\n# ```\n# \n# > On unix, the function uses the `ln` command.\n# > On Windows, the function uses `powershell` (and optionally ls to check the existing link).\n# \nio::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
 	  },
 
 		"io::createTempDirectory": {
@@ -6890,6 +6890,6 @@ INFO     Generating documentation for the core functions only.
 INFO     Found 118 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-1/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-1/lib-valet⌝.
-INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/.vscode/valet.code-snippets⌝.
+INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/valet.code-snippets⌝.
 ```
 

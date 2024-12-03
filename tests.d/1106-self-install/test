@@ -116,6 +116,24 @@ function main() {
 
 
 
+
+  echo "================================================"
+  echo "Create extension: test-extension1."
+  echo "================================================"
+
+  valet self extend test-extension1
+
+  echo "================================================"
+  echo "Setup extension directory: test-extension2."
+  echo "================================================"
+
+  mkdir -p ~/.valet.d/test-extension2
+  pushd ~/.valet.d/test-extension2 &>/dev/null
+  valet self extend .
+  popd &>/dev/null
+
+
+
   echo "================================================"
   echo "Updating Valet: --skip-extensions."
   echo "================================================"
@@ -219,5 +237,4 @@ function main() {
 
 main
 
-eval "$(valet self export -a)"
-log::success "Self install test passed."
+echo "Self install test passed."

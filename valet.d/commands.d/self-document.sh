@@ -77,8 +77,8 @@ function selfDocument() {
   log::info "The prototype script has been generated in ⌜${output}/lib-valet⌝."
 
   # write each function to the snippet file
-  selfRelease_writeAllFunctionsToCodeSnippets "${pageFooter}" "${output}/.vscode/valet.code-snippets"
-  log::info "The vscode snippets have been generated in ⌜${output}/.vscode/valet.code-snippets⌝."
+  selfRelease_writeAllFunctionsToCodeSnippets "${pageFooter}" "${output}/valet.code-snippets"
+  log::info "The vscode snippets have been generated in ⌜${output}/valet.code-snippets⌝."
 }
 
 # Returns the footer for the documentation.

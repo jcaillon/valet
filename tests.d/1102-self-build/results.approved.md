@@ -11,7 +11,7 @@ Exit code: `0`
 ```plaintext
 CMD_ALL_COMMANDS=$'self\nhelp\nself build\nself config\nself document\nself export\nself extend\nself mock1\nself mock2\nself mock3\nself mock4\nself release\nself setup\nself test\nself uninstall\nself update'
 CMD_ALL_COMMANDS_ARRAY=0 "help" 1 "self build" 2 "self config" 3 "self document" 4 "self export" 5 "self extend" 6 "self mock1" 7 "self mock2" 8 "self mock3" 9 "self mock4" 10 "self release" 11 "self setup" 12 "self test" 13 "self uninstall" 14 "self update"
-CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY=0 "help              Show the help of this program or of a specific command." 1 "self build        Index all the commands and libraries present in the valet user directory and installation directory." 2 "self config       Open the configuration file of Valet with your default editor." 3 "self document     Generate the documentation and code snippets for all the library functions of Valet." 4 "self extend       Extends Valet by downloading a new application or library in the user directory." 5 "self test         Test your valet custom commands." 6 "self update       Update valet and its extensions to the latest releases."
+CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY=0 "help              Show the help of this program or of a specific command." 1 "self build        Index all the commands and libraries present in the valet user directory and installation directory." 2 "self config       Open the configuration file of Valet with your default editor." 3 "self document     Generate the documentation and code snippets for all the library functions of Valet." 4 "self extend       Extends Valet by creating or downloading a new extension in the user directory." 5 "self test         Test your valet custom commands." 6 "self update       Update valet and its extensions to the latest releases."
 CMD_ALL_FUNCTIONS=$'this\nshowCommandHelp\nselfBuild\nselfConfig\nselfDocument\nselfExport\nselfExtend\nselfUpdate\nselfMock1\nselfMock2\nselfMock3\nselfMock4\nselfRelease\nselfSetup\nselfTest\nselfUninstall'
 CMD_ALL_FUNCTIONS_ARRAY=0 "this" 1 "showCommandHelp" 2 "selfBuild" 3 "selfConfig" 4 "selfDocument" 5 "selfExport" 6 "selfExtend" 7 "selfUpdate" 8 "selfMock1" 9 "selfMock2" 10 "selfMock3" 11 "selfMock4" 12 "selfRelease" 13 "selfSetup" 14 "selfTest" 15 "selfUninstall"
 CMD_ALL_MENU_COMMANDS_ARRAY=0 "self"
@@ -21,7 +21,7 @@ CMD_ARGS_LAST_IS_ARRAY_selfMock2='true'
 CMD_ARGS_LAST_IS_ARRAY_selfMock4='false'
 CMD_ARGS_LAST_IS_ARRAY_showCommandHelp='true'
 CMD_ARGS_LAST_IS_ARRAY_this='true'
-CMD_ARGS_NAME_selfExtend=0 "repositoryUri"
+CMD_ARGS_NAME_selfExtend=0 "extensionUri"
 CMD_ARGS_NAME_selfMock1=0 "action"
 CMD_ARGS_NAME_selfMock2=0 "firstArg" 1 "more"
 CMD_ARGS_NAME_selfMock4=0 "firstArg" 1 "secondArg"
@@ -33,19 +33,19 @@ CMD_ARGS_NB_OPTIONAL_selfMock2='0'
 CMD_ARGS_NB_OPTIONAL_selfMock4='0'
 CMD_ARGS_NB_OPTIONAL_showCommandHelp='1'
 CMD_ARGS_NB_OPTIONAL_this='1'
-CMD_ARGUMENTS_DESCRIPTION_selfExtend=0 $'The URL of the repository to download and install in Valet.\n\nUsually a GitHub or GitLab repository URL such as `https://github.com/jcaillon/valet-devops-toolbox.git`.\n\nIf the repository is private, you can pass the URL with the username and password like this:\n`https://username:password@my.gitlab.private/group/project.git`.'
+CMD_ARGUMENTS_DESCRIPTION_selfExtend=0 $'The URI of the extension to install or create.\n\n1. If you want to create a new extension, this argument should be the name of your\n   new extension (e.g. `my-new-extension`).\n2. If you want to setup an existing directory as an extension, this argument should be `.`.\n3. If you want to download an extension, this argument should be the URL of the repository.\n   Usually a GitHub or GitLab repository URL such as `https://github.com/jcaillon/valet-devops-toolbox.git`.\n\n> If the repository is private, you can pass the URL with the username and password like this:\n> `https://username:password@my.gitlab.private/group/project.git`.'
 CMD_ARGUMENTS_DESCRIPTION_selfMock1=0 $'The action to perform.\nOne of the following options:\n\n- error\n- fail\n- fail2\n- exit\n- unknown-command\n- create-temp-files\n- logging-level\n- wait-indefinitely\n- show-help\n- print-raw-and-file\n'
 CMD_ARGUMENTS_DESCRIPTION_selfMock2=0 "First argument." 1 "Will be an an array of strings."
 CMD_ARGUMENTS_DESCRIPTION_selfMock4=0 "First argument." 1 $'Second argument.\n'
 CMD_ARGUMENTS_DESCRIPTION_showCommandHelp=0 $'The name of the command to show the help for.\nIf not provided, show the help for the program.'
 CMD_ARGUMENTS_DESCRIPTION_this=0 $'The command or sub commands to execute.\nSee the commands section for more information.'
-CMD_ARGUMENTS_NAME_selfExtend=0 "repositoryUri"
+CMD_ARGUMENTS_NAME_selfExtend=0 "extensionUri"
 CMD_ARGUMENTS_NAME_selfMock1=0 "action"
 CMD_ARGUMENTS_NAME_selfMock2=0 "firstArg" 1 "more..."
 CMD_ARGUMENTS_NAME_selfMock4=0 "firstArg" 1 "secondArg"
 CMD_ARGUMENTS_NAME_showCommandHelp=0 "commands?..."
 CMD_ARGUMENTS_NAME_this=0 "commands?..."
-CMD_COMMANDS_DESCRIPTION_this=0 "Show the help of this program or of a specific command." 1 "Index all the commands and libraries present in the valet user directory and installation directory." 2 "Open the configuration file of Valet with your default editor." 3 "Generate the documentation and code snippets for all the library functions of Valet." 4 "Returns a string that can be evaluated to have Valet functions in bash." 5 "Extends Valet by downloading a new application or library in the user directory." 6 "A command that only for testing valet core functions." 7 "A command that only for testing valet core functions." 8 "A command that only for testing valet core functions." 9 "A command that only for testing valet core functions." 10 "Release a new version of valet." 11 "The command run after the installation of Valet to setup the tool." 12 "Test your valet custom commands." 13 "A command to uninstall Valet." 14 "Update valet and its extensions to the latest releases."
+CMD_COMMANDS_DESCRIPTION_this=0 "Show the help of this program or of a specific command." 1 "Index all the commands and libraries present in the valet user directory and installation directory." 2 "Open the configuration file of Valet with your default editor." 3 "Generate the documentation and code snippets for all the library functions of Valet." 4 "Returns a string that can be evaluated to have Valet functions in bash." 5 "Extends Valet by creating or downloading a new extension in the user directory." 6 "A command that only for testing valet core functions." 7 "A command that only for testing valet core functions." 8 "A command that only for testing valet core functions." 9 "A command that only for testing valet core functions." 10 "Release a new version of valet." 11 "The command run after the installation of Valet to setup the tool." 12 "Test your valet custom commands." 13 "A command to uninstall Valet." 14 "Update valet and its extensions to the latest releases."
 CMD_COMMANDS_NAME_this=0 "help" 1 "self build" 2 "self config" 3 "self document" 4 "self export" 5 "self extend" 6 "self mock1" 7 "self mock2" 8 "self mock3" 9 "self mock4" 10 "self release" 11 "self setup" 12 "self test" 13 "self uninstall" 14 "self update"
 CMD_COMMAND_selfBuild='self build'
 CMD_COMMAND_selfConfig='self config'
@@ -68,7 +68,7 @@ CMD_DESCRIPTION_selfBuild=$'Index all the command and libraries present in the v
 CMD_DESCRIPTION_selfConfig=$'Open the configuration file of Valet with your default editor.\n\nThis allows you to set advanced options for Valet.'
 CMD_DESCRIPTION_selfDocument=$'Generate the documentation and code snippets for all the library functions of Valet.\n\nIt will parse all the library files and generate:\n\n- A markdown file with the documentation.\n- A bash file with the prototype of each function.\n- A vscode snippet file for each function.'
 CMD_DESCRIPTION_selfExport=$'If you want to use Valet functions directly in bash, you can use this command like this:\n\n```bash\neval "$(valet self export 2>/dev/null)"\n```\n\nThis will export all the necessary functions and variables to use the Valet log library by default.\n\nYou can optionally export all the functions if needed.'
-CMD_DESCRIPTION_selfExtend=$'Extends Valet by downloading a new application or library in the user directory.\n\n- Applications usually add new commands to Valet.\n- Libraries usually add new callable functions to Valet.\n\nThis command will download the given repository and install it in the Valet user directory.\nIf a `extension.setup.sh` script is present in the repository root directory, it will be executed.\n\nFor GitHub and GitLab repositories, this command will:\n\n1. If git is installed, clone the repository for the given reference (version option).\n2. Otherwise, download source tarball for the given reference and extract it.\n\nOnce an extension is installed, you can use the `valet self update` command to update it.'
+CMD_DESCRIPTION_selfExtend=$'Extends Valet by creating or downloading a new extension in the user directory.\nExtensions can add new commands or functions to Valet.\n\nThis command will either:\n\n- Create and setup a new extension directory under the valet user directory,\n- setup an existing directory as a valet extension,\n- or download the given extension (repository) and install it in the Valet user directory.\n\nFor downloaded extensions, all GIT repositories are supported.\nFor the specific cases of GitHub and GitLab repositories, this command will:\n\n1. If git is installed, clone the repository for the given reference (version option).\n2. If git is not installed, download source tarball for the given reference and extract it.\n\nFor downloaded extensions, if a `extension.setup.sh` script is present in the repository root directory,\nit will be executed. This gives the extension the opportunity to setup itself.\n\nOnce an extension is installed, you can use the `valet self update` command to update it.'
 CMD_DESCRIPTION_selfMock1='A command that only for testing valet core functions.'
 CMD_DESCRIPTION_selfMock2=$'An example of description.\n\nYou can put any text here, it will be wrapped to fit the terminal width.\n\nYou can highlight some text as well.'
 CMD_DESCRIPTION_selfMock3=$'Before starting this command, valet will check if sudo is available.\n\nIf so, it will require the user to enter the sudo password and use sudo inside the command\n'
@@ -255,7 +255,7 @@ CMD_SHORT_DESCRIPTION_selfBuild='Index all the commands and libraries present in
 CMD_SHORT_DESCRIPTION_selfConfig='Open the configuration file of Valet with your default editor.'
 CMD_SHORT_DESCRIPTION_selfDocument='Generate the documentation and code snippets for all the library functions of Valet.'
 CMD_SHORT_DESCRIPTION_selfExport='Returns a string that can be evaluated to have Valet functions in bash.'
-CMD_SHORT_DESCRIPTION_selfExtend='Extends Valet by downloading a new application or library in the user directory.'
+CMD_SHORT_DESCRIPTION_selfExtend='Extends Valet by creating or downloading a new extension in the user directory.'
 CMD_SHORT_DESCRIPTION_selfMock1='A command that only for testing valet core functions.'
 CMD_SHORT_DESCRIPTION_selfMock2='A command that only for testing valet core functions.'
 CMD_SHORT_DESCRIPTION_selfMock3='A command that only for testing valet core functions.'
@@ -328,7 +328,7 @@ help              Show the help of this program or of a specific command.
 self build        Index all the commands and libraries present in the valet user directory and installation directory.
 self config       Open the configuration file of Valet with your default editor.
 self document     Generate the documentation and code snippets for all the library functions of Valet.
-self extend       Extends Valet by downloading a new application or library in the user directory.
+self extend       Extends Valet by creating or downloading a new extension in the user directory.
 self test         Test your valet custom commands.
 self update       Update valet and its extensions to the latest releases.
 

@@ -519,7 +519,7 @@ Exit code: `0`
 self build        Index all the commands and libraries present in the valet user directory and installation directory.
 self config       Open the configuration file of Valet with your default editor.
 self document     Generate the documentation and code snippets for all the library functions of Valet.
-self extend       Extends Valet by downloading a new application or library in the user directory.
+self extend       Extends Valet by creating or downloading a new extension in the user directory.
 self test         Test your valet custom commands.
 self update       Update valet and its extensions to the latest releases.⌉
 ```
@@ -1086,7 +1086,7 @@ Exit code: `0`
 ⌈self build        Index all the commands and libraries present in the valet user directory and installation directory.
 self config       Open the configuration file of Valet with your default editor.
 self document     Generate the documentation and code snippets for all the library functions of Valet.
-self extend       Extends Valet by downloading a new application or library in the user directory.
+self extend       Extends Valet by creating or downloading a new extension in the user directory.
 self test         Test your valet custom commands.
 self update       Update valet and its extensions to the latest releases.⌉
 ```
@@ -1155,7 +1155,7 @@ COMMANDS
   self export
       Returns a string that can be evaluated to have Valet functions in bash.
   self extend
-      Extends Valet by downloading a new application or library in the user directory.
+      Extends Valet by creating or downloading a new extension in the user directory.
   self mock1
       A command that only for testing valet core functions.
   self mock2

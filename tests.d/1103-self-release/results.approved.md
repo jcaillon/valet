@@ -226,8 +226,8 @@ INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/li
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet
 INFO     The prototype script has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet⌝.
-▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/.vscode/valet.code-snippets
-INFO     The vscode snippets have been generated in ⌜$GLOBAL_VALET_HOME/extras/.vscode/valet.code-snippets⌝.
+▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/valet.code-snippets
+INFO     The vscode snippets have been generated in ⌜$GLOBAL_VALET_HOME/extras/valet.code-snippets⌝.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -256,7 +256,7 @@ INFO     The vscode snippets have been generated in ⌜$GLOBAL_VALET_HOME/extras
 ▶ called io::invoke cp $GLOBAL_VALET_HOME/.vscode/extensions.json $GLOBAL_VALET_HOME/extras/extensions.json
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/static/config.md
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/kurl.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/log.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/profiler.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
-▶ called io::invoke git add $GLOBAL_VALET_HOME/extras/base.code-snippets $GLOBAL_VALET_HOME/extras/lib-valet $GLOBAL_VALET_HOME/extras/lib-valet.md
+▶ called io::invoke git add $GLOBAL_VALET_HOME/extras/base.code-snippets $GLOBAL_VALET_HOME/extras/lib-valet $GLOBAL_VALET_HOME/extras/lib-valet.md $GLOBAL_VALET_HOME/extras/valet.code-snippets
 ▶ called io::invoke git commit -m :memo: updating the documentation
 SUCCESS  The documentation update has been committed.
 ▶ called io::invoke sed -E -i s/VALET_RELEASED_VERSION="[0-9]+\.[^"]+"/VALET_RELEASED_VERSION="1.2.3"/ $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh

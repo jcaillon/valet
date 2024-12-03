@@ -30,31 +30,40 @@ source curl
 # command: self extend
 # function: selfExtend
 # author: github.com/jcaillon
-# shortDescription: Extends Valet by downloading a new application or library in the user directory.
+# shortDescription: Extends Valet by creating or downloading a new extension in the user directory.
 # description: |-
-#   Extends Valet by downloading a new application or library in the user directory.
+#   Extends Valet by creating or downloading a new extension in the user directory.
+#   Extensions can add new commands or functions to Valet.
 #
-#   - Applications usually add new commands to Valet.
-#   - Libraries usually add new callable functions to Valet.
+#   This command will either:
 #
-#   This command will download the given repository and install it in the Valet user directory.
-#   If a `extension.setup.sh` script is present in the repository root directory, it will be executed.
+#   - Create and setup a new extension directory under the valet user directory,
+#   - setup an existing directory as a valet extension,
+#   - or download the given extension (repository) and install it in the Valet user directory.
 #
-#   For GitHub and GitLab repositories, this command will:
+#   For downloaded extensions, all GIT repositories are supported.
+#   For the specific cases of GitHub and GitLab repositories, this command will:
 #
 #   1. If git is installed, clone the repository for the given reference (version option).
-#   2. Otherwise, download source tarball for the given reference and extract it.
+#   2. If git is not installed, download source tarball for the given reference and extract it.
+#
+#   For downloaded extensions, if a `extension.setup.sh` script is present in the repository root directory,
+#   it will be executed. This gives the extension the opportunity to setup itself.
 #
 #   Once an extension is installed, you can use the `valet self update` command to update it.
 # arguments:
-# - name: repositoryUri
+# - name: extensionUri
 #   description: |-
-#     The URL of the repository to download and install in Valet.
+#     The URI of the extension to install or create.
 #
-#     Usually a GitHub or GitLab repository URL such as `https://github.com/jcaillon/valet-devops-toolbox.git`.
+#     1. If you want to create a new extension, this argument should be the name of your
+#        new extension (e.g. `my-new-extension`).
+#     2. If you want to setup an existing directory as an extension, this argument should be `.`.
+#     3. If you want to download an extension, this argument should be the URL of the repository.
+#        Usually a GitHub or GitLab repository URL such as `https://github.com/jcaillon/valet-devops-toolbox.git`.
 #
-#     If the repository is private, you can pass the URL with the username and password like this:
-#     `https://username:password@my.gitlab.private/group/project.git`.
+#     > If the repository is private, you can pass the URL with the username and password like this:
+#     > `https://username:password@my.gitlab.private/group/project.git`.
 # options:
 # - name: -v, --version <version>
 #   description: |-
@@ -74,12 +83,12 @@ source curl
 #     Download the latest version of the valet-devops-toolbox application and install it for Valet.
 ##VALET_COMMAND
 function selfExtend() {
-  local repositoryUri version skipSetup name
+  local extensionUri version skipSetup name
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   local action="created"
-  if [[ ${repositoryUri} =~ ^(https|git) ]]; then
+  if [[ ${extensionUri} =~ ^(https|git) ]]; then
     action="installed"
   fi
 
@@ -88,12 +97,18 @@ function selfExtend() {
   local userDirectory="${RETURNED_VALUE}"
   io::createDirectoryIfNeeded "${userDirectory}"
 
+  # case of extension creation
+  if [[ ${action} == "created" ]]; then
+    selfExtend_createExtension "${extensionUri}" "${userDirectory}"
+    return 0
+  fi
+
   local repositoryName
-  if [[ ${repositoryUri} =~ .*/([^/]+) ]]; then
+  if [[ ${extensionUri} =~ .*/([^/]+) ]]; then
     repositoryName="${BASH_REMATCH[1]:-}"
     repositoryName="${repositoryName%.git}"
   fi
-  local extensionName="${name:-${repositoryName:-${repositoryUri}}}"
+  local extensionName="${name:-${repositoryName:-${extensionUri}}}"
   local extensionDirectory="${userDirectory}/${extensionName}"
   log::info "The extension will be ${action} under ⌜${extensionDirectory}⌝."
 
@@ -106,15 +121,9 @@ function selfExtend() {
     fi
   fi
 
-  # case of extension creation
-  if [[ ${action} == "created" ]]; then
-    selfExtend_createExtension "${extensionName}" "${extensionDirectory}"
-    return 0
-  fi
-
   # if Git is installed, we simply clone the repository for the correct reference
   if command -v git &>/dev/null; then
-    selfExtend_gitClone "${repositoryUri}" "${version}" "${extensionDirectory}"
+    selfExtend_gitClone "${extensionUri}" "${version}" "${extensionDirectory}"
 
   else
     # if Git is not installed, we download the source tarball and extract it
@@ -126,8 +135,8 @@ function selfExtend() {
     fi
 
     # get the sha1 of the reference, fail if not found
-    selfExtend_getSha1 "${repositoryUri}" "${version}"
-    selfExtend_downloadTarball "${repositoryUri}"  "${version}" "${extensionDirectory}" "${RETURNED_VALUE}"
+    selfExtend_getSha1 "${extensionUri}" "${version}"
+    selfExtend_downloadTarball "${extensionUri}"  "${version}" "${extensionDirectory}" "${RETURNED_VALUE}"
   fi
 
   # execute the setup script of the extension, if any
@@ -151,13 +160,67 @@ function selfExtend() {
 # Create a new extension for Valet.
 function selfExtend_createExtension() {
   local extensionName="${1}"
-  local extensionDirectory="${2}"
+  local userDirectory="${2}"
 
-  log::info "Creating the extension ⌜${extensionName}⌝ in ⌜${extensionDirectory}⌝."
+  local extensionDirectory
 
-  io::createDirectoryIfNeeded "${extensionDirectory}"
+  if [[ ${extensionName} == "." ]]; then
+    # setup an existing directory as an extension
+    extensionName="${PWD##*/}"
+    log::info "Setting up the current directory ⌜${extensionName}⌝ as an extension."
 
-  log::success "The extension ⌜${extensionName}⌝ has been created in ⌜${extensionDirectory}⌝."
+    if [[ ${PWD} != "${userDirectory}"* ]]; then
+      core::fail "Extension directories must be created in the user directory ⌜${userDirectory}⌝, the current directory is ⌜${PWD}⌝."
+    fi
+    extensionDirectory="${PWD}"
+  else
+    # create a new extension directory
+    extensionDirectory="${userDirectory}/${extensionName}"
+    log::info "Creating the extension ⌜${extensionName}⌝ in ⌜${extensionDirectory}⌝."
+
+    if [[ -d "${extensionDirectory}" ]]; then
+      core::fail "The extension ⌜${extensionName}⌝ already exists in ⌜${extensionDirectory}⌝."
+    fi
+
+    local -a subDirectories=(src libs.d tests.d)
+    local subdir
+    for subdir in "${subDirectories[@]}"; do
+      io::createDirectoryIfNeeded "${extensionDirectory}/${subdir}"
+    done
+  fi
+
+  # verify that we have lib-valet generated in the user directory
+  if [[ ! -f "${userDirectory}/lib-valet" ]]; then
+    log::info "Rebuilding the documentation because ⌜${userDirectory}/lib-valet⌝ is missing."
+    core::sourceFunction selfDocument
+    selfDocument
+  fi
+
+  # vscode stuff
+  if command -v code &>/dev/null; then
+    io::createDirectoryIfNeeded "${extensionDirectory}/.vscode"
+    cp -n "${GLOBAL_VALET_HOME}/extras/.vscode/settings.json" "${extensionDirectory}/.vscode/settings.json" || log::error "Could not copy the vscode settings file."
+    cp -n "${GLOBAL_VALET_HOME}/extras/.vscode/extensions.json" "${extensionDirectory}/.vscode/extensions.json" || log::error "Could not copy the vscode extensions file."
+
+    # link the snippets
+    io::createLink "${userDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets"
+  fi
+
+  # git stuff
+  if command -v git &>/dev/null; then
+    io::createFilePathIfNeeded "${extensionDirectory}/.gitignore"
+    io::readFile "${extensionDirectory}/.gitignore"
+    if [[ ${RETURNED_VALUE} != *"### Valet ###"* ]]; then
+      local content=$'\n'$'\n'"### Valet ###"$'\n'"lib-valet"$'\n'"lib-valet.md"$'\n'".vscode/valet.code-snippets"
+      io::writeToFile "${extensionDirectory}/.gitignore" "${content}" true
+    fi
+  fi
+
+  # link lib-valet
+  io::createLink "${userDirectory}/lib-valet" "${extensionDirectory}/lib-valet"
+  io::createLink "${userDirectory}/lib-valet.md" "${extensionDirectory}/lib-valet.md"
+
+  log::success "The extension ⌜${extensionName}⌝ has been setup in ⌜${extensionDirectory}⌝."
 }
 
 # Download the source tarball for a given repository and reference.
@@ -169,24 +232,24 @@ function selfExtend_createExtension() {
 # It stores the sha1 of the downloaded commit in the extension directory.
 # It allows to know when we actually have updates.
 function selfExtend_downloadTarball() {
-  local repositoryUri="${1}"
+  local repositoryUrl="${1}"
   local reference="${2}"
   local targetDirectory="${3}"
   local sha1="${4}"
 
-  log::info "Attempting to download the source tarball for ⌜${repositoryUri}⌝ in ⌜${targetDirectory}⌝."
+  log::info "Attempting to download the source tarball for ⌜${repositoryUrl}⌝ in ⌜${targetDirectory}⌝."
 
   local tarballUrlPattern
 
   # get tarball for github api
-  if [[ ${repositoryUri} =~ "https://github.com/"([^/]+)"/"([^/]+) ]]; then
+  if [[ ${repositoryUrl} =~ "https://github.com/"([^/]+)"/"([^/]+) ]]; then
     local repoName="${BASH_REMATCH[2]:-}"
     repoName="${repoName%.git}"
     tarballUrlPattern="https://github.com/${BASH_REMATCH[1]:-}/${repoName}/archive/%SHA1%.tar.gz"
   fi
 
   if [[ -z ${tarballUrlPattern} || -z ${sha1} ]]; then
-    core::fail "Cannot download the source tarball for the repository ⌜${repositoryUri}⌝. Consider installing git so that the extension can be git cloned."
+    core::fail "Cannot download the source tarball for the repository ⌜${repositoryUrl}⌝. Consider installing git so that the extension can be git cloned."
   fi
 
   local tarballUrl="${tarballUrlPattern/"%SHA1%"/"${sha1}"}"
@@ -204,8 +267,8 @@ function selfExtend_downloadTarball() {
   tar -xzf "${tempDirectory}/${sha1}.tar.gz" -C "${tempDirectory}" || core::fail "Could not untar the extension tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ using tar."
 
   # move the files to the target directory
-  rm -Rf "${targetDirectory}"
-  mkdir -p "${targetDirectory}" || core::fail "Could not create the directory ⌜${targetDirectory}⌝."
+  rm -Rf "${targetDirectory}" 1>/dev/null || core::fail "Could not remove the existing files in ⌜${targetDirectory}⌝."
+  io::createDirectoryIfNeeded "${targetDirectory}"
   io::listDirectories "${tempDirectory}" false
   if (( ${#RETURNED_ARRAY[@]} != 1 )); then
     core::fail "The tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ did not contain a single directory."
@@ -215,7 +278,7 @@ function selfExtend_downloadTarball() {
   # write the sha1 to the targetDirectory so we known which commit we fetched
   io::writeToFile "${targetDirectory}/.sha1" "${sha1}"
   io::writeToFile "${targetDirectory}/.reference" "${reference}"
-  io::writeToFile "${targetDirectory}/.repo" "${repositoryUri}"
+  io::writeToFile "${targetDirectory}/.repo" "${repositoryUrl}"
 }
 
 # Get the sha1 from a git server API.
@@ -224,19 +287,19 @@ function selfExtend_downloadTarball() {
 #
 # - GitHub: It will use the GitHub API to get the sha1 of the reference.
 function selfExtend_getSha1() {
-  local repositoryUri="${1}"
+  local repositoryUrl="${1}"
   local reference="${2}"
 
-  log::info "Getting the head commit for the reference ⌜${reference}⌝ in the repository ⌜${repositoryUri}⌝."
+  log::info "Getting the head commit for the reference ⌜${reference}⌝ in the repository ⌜${repositoryUrl}⌝."
 
   local sha1
 
   # get sha1 from github api
-  if [[ ${repositoryUri} =~ "https://github.com/"([^/]+)"/"([^/]+) ]]; then
+  if [[ ${repositoryUrl} =~ "https://github.com/"([^/]+)"/"([^/]+) ]]; then
     local owner="${BASH_REMATCH[1]:-}"
     local repo="${BASH_REMATCH[2]:-}"
     repo="${repo%.git}"
-    log::debug "Found owner ⌜${owner}⌝ and repo ⌜${repo}⌝ for the repository ⌜${repositoryUri}⌝."
+    log::debug "Found owner ⌜${owner}⌝ and repo ⌜${repo}⌝ for the repository ⌜${repositoryUrl}⌝."
 
     # get the sha1
     RETURNED_VALUE=""
@@ -252,7 +315,7 @@ function selfExtend_getSha1() {
     interactive::stopProgress
 
     if [[ ${httpCode} == 404 ]]; then
-      core::fail "Could not find a branch or tag for the reference ⌜${reference}⌝ in repository ⌜${repositoryUri}⌝: ${response}${error}."
+      core::fail "Could not find a branch or tag for the reference ⌜${reference}⌝ in repository ⌜${repositoryUrl}⌝: ${response}${error}."
     elif [[ ${httpCode} != 200 ]]; then
       log::warning "Unexpected error returned from the GitHub API for the URL ⌜${url}⌝: ${response}${error}"
     fi
@@ -260,12 +323,12 @@ function selfExtend_getSha1() {
       sha1="${BASH_REMATCH[2]:-}"
     else
       # sha1="ok"
-      core::fail "Could not find the sha1 for the reference ⌜${reference}⌝ in the repository ⌜${repositoryUri}⌝ using GitHub API. Check the version for this extension. Consider installing git so that the extension can be git cloned."
+      core::fail "Could not find the sha1 for the reference ⌜${reference}⌝ in the repository ⌜${repositoryUrl}⌝ using GitHub API. Check the version for this extension. Consider installing git so that the extension can be git cloned."
     fi
   fi
 
   if [[ -n ${sha1} ]]; then
-    log::debug "Found sha1 for ⌜${repositoryUri}⌝ and reference ⌜${reference}⌝: ${sha1}."
+    log::debug "Found sha1 for ⌜${repositoryUrl}⌝ and reference ⌜${reference}⌝: ${sha1}."
   fi
 
   RETURNED_VALUE="${sha1}"
