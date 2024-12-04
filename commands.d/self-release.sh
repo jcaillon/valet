@@ -1,25 +1,25 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
-# Title:         valet.d/commands.d/*
+# Title:         commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
-  # shellcheck source=../core
-  source "$(dirname -- "$(command -v valet)")/valet.d/core"
+  # shellcheck source=../libraries.d/core
+  source "$(dirname -- "$(command -v valet)")/libraries.d/core"
 fi
 # --- END OF COMMAND COMMON PART
 
-# shellcheck source=../lib-string
+# shellcheck source=../libraries.d/lib-string
 source string
-# shellcheck source=../lib-curl
+# shellcheck source=../libraries.d/lib-curl
 source curl
-# shellcheck source=../lib-interactive
+# shellcheck source=../libraries.d/lib-interactive
 source interactive
-# shellcheck source=../lib-system
+# shellcheck source=../libraries.d/lib-system
 source system
-# shellcheck source=../lib-array
+# shellcheck source=../libraries.d/lib-array
 source array
 
 #===============================================================
@@ -186,9 +186,9 @@ function selfRelease::createRelease() {
     # write the current version in the self-install script
     # then commit the file
     if [[ "${dryRun:-}" != "true" ]]; then
-      io::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
+      io::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_VALET_HOME}/commands.d/self-install.sh"
 
-      io::invoke git add "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-install.sh"
+      io::invoke git add "${GLOBAL_VALET_HOME}/commands.d/self-install.sh"
       io::invoke git commit -m ":rocket: releasing version ${version}"
       log::success "The new version has been committed."
     fi
@@ -264,7 +264,7 @@ function selfRelease::uploadArtifact() {
   pushd "${tempDir}" 1>/dev/null
 
   local -a files
-  files=(examples.d valet.d extras valet)
+  files=(examples.d libraries.d extras valet)
 
   # copy each file from valet dir to current dir
   local file
@@ -313,12 +313,12 @@ function selfRelease::bumpVersion() {
 
   # bump the version
   string::bumpSemanticVersion "${version}" "${bumpLevel}" && newVersion="${RETURNED_VALUE}"
-  if [[ "${dryRun:-}" != "true" ]]; then io::writeToFile "${GLOBAL_VALET_HOME}/valet.d/version" "${newVersion}"; fi
+  if [[ "${dryRun:-}" != "true" ]]; then io::writeToFile "${GLOBAL_VALET_HOME}/version" "${newVersion}"; fi
   log::info "The bumped version of valet is: ${newVersion}."
 
   # commit the new version and push it
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke git add "${GLOBAL_VALET_HOME}/valet.d/version"
+    io::invoke git add "${GLOBAL_VALET_HOME}/version"
     io::invoke git commit -m ":bookmark: bump version to ${newVersion}"
     io::invoke git push origin main
     log::success "The bumped version has been committed."

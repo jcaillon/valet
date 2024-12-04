@@ -19,7 +19,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.
 - Generate an autocompletion script for bash and zsh.
 - Add a command `self package` that build the user commands into a single script file. We want to add options to the build command so we can exclude some commands. It will include all source required and try to minify the bash script. In addition, we can rebrand *valet* into another name.
-- fix running tests with verbose mode on.
 - Betters checks in self build!
 - A command can declare dependencies to auto check if some tools are installed before running the command. Add `self download-dependencies` and `self check-dependencies` commands. Dependencies should not be checked/download in each command. Add a hint to play the commands if a tool is missing (exception caught).
 - add valet in brew

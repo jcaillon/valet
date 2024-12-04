@@ -7,13 +7,13 @@ on:
     branches: [ "main" ]
     paths:
       - 'tests.d/1106-self-install/**'
-      - 'valet.d/commands.d/self-install.sh'
-      - 'valet.d/commands.d/self-extend.sh'
+      - 'commands.d/self-install.sh'
+      - 'commands.d/self-extend.sh'
   pull_request:
     paths:
       - 'tests.d/1106-self-install/**'
-      - 'valet.d/commands.d/self-install.sh'
-      - 'valet.d/commands.d/self-extend.sh'
+      - 'commands.d/self-install.sh'
+      - 'commands.d/self-extend.sh'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:

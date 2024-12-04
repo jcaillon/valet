@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
-# Title:         valet.d/commands.d/*
+# Title:         commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
-  # shellcheck source=../core
-  source "$(dirname -- "$(command -v valet)")/valet.d/core"
+  # shellcheck source=../libraries.d/core
+  source "$(dirname -- "$(command -v valet)")/libraries.d/core"
 fi
 # --- END OF COMMAND COMMON PART
 
@@ -66,11 +66,12 @@ function selfExport() {
   # export all libraries
   if [[ ${exportAll:-} == "true" ]]; then
     local library
-    for library in "${GLOBAL_VALET_HOME}/valet.d/lib-"*; do
+    for library in "${GLOBAL_VALET_HOME}/libraries.d/lib-"*; do
       local -i lineNumber=0
 
       # read the library file line by line
-      while IFS=$'\n' read -r line|| [[ -n ${line:-} ]]; do
+      local IFS
+      while IFS=$'\n' read -r -d $'\n' line|| [[ -n ${line:-} ]]; do
         if [[ ${lineNumber} -gt 1 && ${line} != "source "* ]]; then
           output+="${line}"$'\n'
         fi

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../../valet.d/lib-prompt
+# shellcheck source=../../libraries.d/lib-prompt
 source prompt
 
 

@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
-# Title:         valet.d/commands.d/*
+# Title:         commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
-  # shellcheck source=../core
-  source "$(dirname -- "$(command -v valet)")/valet.d/core"
+  # shellcheck source=../libraries.d/core
+  source "$(dirname -- "$(command -v valet)")/libraries.d/core"
 fi
 # --- END OF COMMAND COMMON PART
 
-# shellcheck source=../lib-string
+# shellcheck source=../libraries.d/lib-string
 source string
-# shellcheck source=../lib-system
+# shellcheck source=../libraries.d/lib-system
 source system
-# shellcheck source=../lib-array
+# shellcheck source=../libraries.d/lib-array
 source array
 
 #===============================================================
@@ -122,8 +122,8 @@ function selfDocument::getAllFunctionsDocumentation() {
     log::info "Generating documentation for all the functions."
   fi
 
-  # get all the files in the valet.d directory
-  io::listFiles "${GLOBAL_VALET_HOME}/valet.d"
+  # get all the files in the libraries.d directory
+  io::listFiles "${GLOBAL_VALET_HOME}/libraries.d"
   local -a filesToAnalyze=("${RETURNED_ARRAY[@]}")
 
   # add each file of each user library directory
@@ -281,12 +281,12 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
     body+="\$0"
 
     content+="
-		\"${functionName}\": {
-		  \"prefix\": \"${functionName}\",
-		  \"description\": \"${firstSentence}...\",
-		  \"scope\": \"\",
-		  \"body\": [ \"${body//\"/\\\"}\" ]
-	  },"$'\n'
+\"${functionName}\": {
+  \"prefix\": \"${functionName}\",
+  \"description\": \"${firstSentence}...\",
+  \"scope\": \"\",
+  \"body\": [ \"${body//\"/\\\"}\" ]
+},"$'\n'
 
     commentedDocumentation=""
     while IFS=$'\n' read -rd $'\n' line; do
@@ -298,12 +298,12 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
     commentedDocumentation="${commentedDocumentation//$'\n'/\\n}"
 
     content+="
-		\"${functionName}#withdoc\": {
-		  \"prefix\": \"${functionName}#withdoc\",
-		  \"description\": \"${firstSentence}...\",
-		  \"scope\": \"\",
-		  \"body\": [ \"${commentedDocumentation}${body//\"/\\\"}\" ]
-	  },"$'\n'
+\"${functionName}#withdoc\": {
+  \"prefix\": \"${functionName}#withdoc\",
+  \"description\": \"${firstSentence}...\",
+  \"scope\": \"\",
+  \"body\": [ \"${commentedDocumentation}${body//\"/\\\"}\" ]
+},"$'\n'
   done
 
   # load the existing file content

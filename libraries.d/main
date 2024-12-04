@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
-# Title:          valet.d/main
+# Title:          libraries.d/main
 # Description:    this script contains the main code for our bash programs and
 #                 it should be sourced, not called directly
 # Author:         github.com/jcaillon
@@ -949,6 +949,8 @@ function main::parseFunctionArguments() {
   functionName="${1}"
   shift
 
+  local IFS=$' '
+
   local -n argumentsName="CMD_ARGS_NAME_${functionName}"
   local -i totalNbArguments
   if [[ -v argumentsName && ${#argumentsName[@]} -gt 0 ]]; then
@@ -1206,7 +1208,7 @@ function main::parseFunctionArguments() {
 # If strict matching is disabled and we have found a single match, we can return it.
 #
 # - $1: the user string to match
-# - $2+: options to match against
+# - $2+: list of options to match against
 #
 # Returns:
 #
@@ -1221,10 +1223,12 @@ function main::fuzzyFindOption() {
   unknownOption="${1}"
   shift
   # shellcheck disable=SC2206
+  local IFS=$' '
+  # shellcheck disable=SC2206
   _OPTIONS_TO_MATCH=($*)
 
   local singleMatchedOption
-  local IFS=$'\n'
+  IFS=$'\n'
 
   # split to get one possible option per line
   array::fuzzyFilter "${unknownOption}" _OPTIONS_TO_MATCH

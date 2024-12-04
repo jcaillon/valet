@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../../valet.d/lib-io
+# shellcheck source=../../libraries.d/lib-io
 source io
 
 function testIo::listPaths() {

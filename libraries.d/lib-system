@@ -291,12 +291,12 @@ function system::windowsSetEnvVar() {
   fi
 
   if [[ -n ${varValue} ]]; then
-    if ! io::runPs1Command "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.SetValue('${varName//\'/\'\'}', '${varValue//\'/\'\'}', 'ExpandString');"; then
+    if ! io::windowsRunInPowershell "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.SetValue('${varName//\'/\'\'}', '${varValue//\'/\'\'}', 'ExpandString');"; then
       core::fail "Failed to set the environment variable ⌜${varName}⌝."
     fi
   else
 
-    if ! io::runPs1Command "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.DeleteValue('${varName//\'/\'\'}');"; then
+    if ! io::windowsRunInPowershell "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.DeleteValue('${varName//\'/\'\'}');"; then
       core::fail "Failed to unset the environment variable ⌜${varName}⌝ using null string."
     fi
   fi
@@ -336,7 +336,7 @@ function system::windowsGetEnvVar() {
   Write-Output \$value;
   "
 
-  if ! io::runPs1Command "${script}"; then
+  if ! io::windowsRunInPowershell "${script}"; then
     core::fail "Failed to get the environment variable ⌜${varName}⌝."
   fi
 }
@@ -384,9 +384,7 @@ function system::windowsAddToPath() {
   \$key.Dispose();
   "
 
-  if ! io::runPs1Command "${script}"; then
+  if ! io::windowsRunInPowershell "${script}"; then
     core::fail "Failed to add the directory ⌜${pathToAdd}⌝ to the PATH."
   fi
-
-  log::info "The directory ⌜${pathToAdd}⌝ has been added to the windows user PATH."
 }

@@ -898,7 +898,7 @@ function io::isDirectoryWritable() {
   return 1
 }
 
-# ## io::runPs1Command
+# ## io::windowsRunInPowershell
 #
 # Runs a PowerShell command.
 # This is mostly useful on Windows.
@@ -918,9 +918,9 @@ function io::isDirectoryWritable() {
 # - `RETURNED_VALUE2`: The content of stderr.
 #
 # ```bash
-# io::runPs1Command "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
+# io::windowsRunInPowershell "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
 # ```
-function io::runPs1Command() {
+function io::windowsRunInPowershell() {
   local command="${1}"
   local runAsAdmin="${2:-false}"
 
@@ -934,10 +934,10 @@ function io::runPs1Command() {
 
   # there seem to be no simple way to capture the output of several commands...
   # we run the commands in a subprocess for which we capture the outputs
-  io::createWindowsTempFile
+  io::windowsCreateTempFile
   local stdoutFileWindows="${RETURNED_VALUE}"
   local stdoutFile="${RETURNED_VALUE2}"
-  io::createWindowsTempFile
+  io::windowsCreateTempFile
   local stderrFileWindows="${RETURNED_VALUE}"
   local stderrFile="${RETURNED_VALUE2}"
 
@@ -966,9 +966,10 @@ function io::runPs1Command() {
   if [[ "${runAsAdmin}" == true ]]; then
     # if we need to run as admin, we need to create a script that will run the commands
     # and we run this script as an admin
-    io::createWindowsTempDirectory
+    io::windowsCreateTempDirectory
     local scriptFileWindows="${RETURNED_VALUE}\\valet-run-ps1-as-admin.ps1"
-    io::writeToFile "${scriptFileWindows}" "${script}"
+    local scriptFileLinux="${RETURNED_VALUE2}/valet-run-ps1-as-admin.ps1"
+    io::writeToFile "${scriptFileLinux}" "${script}"
     # shellcheck disable=SC2016
     script='
     $ErrorActionPreference = '"'Stop'"';
@@ -985,6 +986,69 @@ function io::runPs1Command() {
   RETURNED_VALUE="${stdout}"
 
   return ${exitCode}
+}
+
+# ## io::windowsPowershellBatchStart
+#
+# After running this function, all commands that should be executed by
+# `io::windowsRunInPowershell` will be added to a batch that will only be played
+# when `io::windowsPowershellBatchEnd` is called.
+#
+# This is a convenient way to run multiple commands in a single PowerShell session.
+# It makes up for the fact that running a new PowerShell session for each command is slow.
+#
+# ```bash
+# io::windowsPowershellBatchStart
+# io::windowsRunInPowershell "Write-Host \"Hello\""
+# io::windowsRunInPowershell "Write-Host \"World\""
+# io::windowsPowershellBatchEnd
+# ```
+function io::windowsPowershellBatchStart() {
+  _IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS=""
+  _IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN=false
+
+  # save the original function before overriding it
+  io::invoke declare -f io::windowsRunInPowershell
+  _IO_WINDOWS_POWERSHELL_FUNCTION="${RETURNED_VALUE//declare -? /}"
+
+  # shellcheck disable=SC2317
+  function io::windowsRunInPowershell() {
+    _IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS+="${1};"
+    if [[ "${2:-false}" == true ]]; then
+      _IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN=true
+    fi
+  }
+}
+
+# ## io::windowsPowershellBatchEnd
+#
+# This function will run all the commands that were batched with `io::windowsPowershellBatchStart`.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the command was successful
+#   - 1 otherwise.
+# - `RETURNED_VALUE`: The content of stdout.
+# - `RETURNED_VALUE2`: The content of stderr.
+#
+# ```bash
+# io::windowsPowershellBatchStart
+# io::windowsRunInPowershell "Write-Host \"Hello\""
+# io::windowsRunInPowershell "Write-Host \"World\""
+# io::windowsPowershellBatchEnd
+# ```
+function io::windowsPowershellBatchEnd() {
+  if [[ -z ${_IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS} ]]; then
+    RETURNED_VALUE=""
+    RETURNED_VALUE2=""
+    return 0
+  fi
+  # restore the original function
+  eval "${_IO_WINDOWS_POWERSHELL_FUNCTION}"
+
+  io::windowsRunInPowershell "${_IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS}" "${_IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN}"
+  unset -v _IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS _IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN _IO_WINDOWS_POWERSHELL_FUNCTION
 }
 
 # ## io::createLink
@@ -1072,11 +1136,11 @@ function io::createLink() {
 
     log::debug "Creating a new link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝ using powershell."
     if [[ ${hardLink} == "true" ]]; then
-      if ! io::runPs1Command "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
+      if ! io::windowsRunInPowershell "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
         core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
       fi
     else
-      if ! io::runPs1Command "New-Item -ItemType SymbolicLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
+      if ! io::windowsRunInPowershell "New-Item -ItemType SymbolicLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
         core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
       fi
     fi
@@ -1156,7 +1220,7 @@ function io::convertFromWindowsPath() {
   RETURNED_VALUE="${path//\\//}"
 }
 
-# ## io::createWindowsTempFile
+# ## io::windowsCreateTempFile
 #
 # Create a temporary file on Windows and return the path both for Windows and Unix.
 #
@@ -1168,17 +1232,17 @@ function io::convertFromWindowsPath() {
 # - `RETURNED_VALUE2`: The Unix path.
 #
 # ```bash
-# io::createWindowsTempFile
+# io::windowsCreateTempFile
 # ```
 #
 # > Files created this way are automatically cleaned up by the io::cleanupTempFiles
 # > function when valet ends.
-function io::createWindowsTempFile() {
+function io::windowsCreateTempFile() {
   local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
 
-  if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
+  if [[ -z ${_IO_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
     io::convertFromWindowsPath "${windowsTemporaryDirectory}"
-    GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
+    _IO_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
   fi
 
   local windowsPath linuxPath
@@ -1198,7 +1262,7 @@ function io::createWindowsTempFile() {
   done
 }
 
-# ## io::createWindowsTempDirectory
+# ## io::windowsCreateTempDirectory
 #
 # Create a temporary directory on Windows and return the path both for Windows and Unix.
 #
@@ -1210,17 +1274,17 @@ function io::createWindowsTempFile() {
 # - `RETURNED_VALUE2`: The Unix path.
 #
 # ```bash
-# io::createWindowsTempDirectory
+# io::windowsCreateTempDirectory
 # ```
 #
 # > Directories created this way are automatically cleaned up by the io::cleanupTempFiles
 # > function when valet ends.
-function io::createWindowsTempDirectory() {
+function io::windowsCreateTempDirectory() {
   local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
 
-  if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
+  if [[ -z ${_IO_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
     io::convertFromWindowsPath "${windowsTemporaryDirectory}"
-    GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
+    _IO_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
   fi
 
   local windowsPath linuxPath

@@ -6,19 +6,15 @@
 # >>> Functions that can be used in the test scripts
 #===============================================================
 
-# shellcheck source=../lib-io
+# shellcheck source=../libraries.d/lib-io
 source io
-# shellcheck source=../lib-test
+# shellcheck source=../libraries.d/lib-test
 source test
 
 # Rebuild all the commands silently.
 function selfTestUtils_rebuildCommands() {
-  local originalLogLevel
-  log::getLevel && originalLogLevel="${RETURNED_VALUE}"
-  log::setLevel warning true
   core::sourceFunction selfBuild
-  selfBuild "$@"
-  log::setLevel "${originalLogLevel}" true
+  selfBuild "$@" --silent
 }
 
 # Run all the test suites in the given directory.
@@ -434,9 +430,9 @@ function selfTestUtils_evalOriginalImportantVariables() {
 function selfTestUtils_echoFileSubstitutingPath() {
   local file="${1}"
   local line
-  local IFS=$'\n'
   local -i firstLine=1
-  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
+  local IFS
+  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
     if [[ firstLine -eq 1 ]]; then
       firstLine=0
     else

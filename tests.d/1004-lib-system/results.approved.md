@@ -173,10 +173,10 @@ Exit code: `0`
 
 ```plaintext
 → system::windowsSetEnvVar VAR VALUE
-io::runPs1Command: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.SetValue('VAR', 'VALUE', 'ExpandString');
+io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.SetValue('VAR', 'VALUE', 'ExpandString');
 
 → system::windowsSetEnvVar VAR ''
-io::runPs1Command: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.DeleteValue('VAR');
+io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.DeleteValue('VAR');
 
 ```
 
@@ -188,7 +188,7 @@ Exit code: `0`
 
 ```plaintext
 → system::windowsGetEnvVar VAR
-io::runPs1Command: 
+io::windowsRunInPowershell: 
   $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
   $value = $key.GetValue('VAR', '', 'DoNotExpandEnvironmentNames');
   $key.Dispose();
@@ -205,7 +205,7 @@ Exit code: `0`
 
 ```plaintext
 → system::windowsAddToPath /coucou
-io::runPs1Command: 
+io::windowsRunInPowershell: 
   $pathToAdd = '\coucou';
   $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
   $oldPath = $key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
@@ -216,11 +216,5 @@ io::runPs1Command:
   $key.Dispose();
   
 
-```
-
-**Error** output:
-
-```log
-INFO     The directory ⌜\coucou⌝ has been added to the windows user PATH.
 ```
 

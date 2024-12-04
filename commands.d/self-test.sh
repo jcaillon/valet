@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
-# Title:         valet.d/commands.d/*
+# Title:         commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
-  # shellcheck source=../core
-  source "$(dirname -- "$(command -v valet)")/valet.d/core"
+  # shellcheck source=../libraries.d/core
+  source "$(dirname -- "$(command -v valet)")/libraries.d/core"
 fi
 # --- END OF COMMAND COMMON PART
 
 # shellcheck source=self-test-utils
 source self-test-utils
-# shellcheck source=../lib-string
+# shellcheck source=../libraries.d/lib-string
 source string
 
 #===============================================================
@@ -181,7 +181,7 @@ function selfTestRunCoreTests() {
   fi
 
   # we need to rebuild the commands for the core commands only
-  selfTestUtils_rebuildCommands --core-only --noOutput
+  selfTestUtils_rebuildCommands --core-only --no-output
 
   # we should always run the test suite from the valet home directory to have consistent paths
   # in the report files

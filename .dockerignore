@@ -1,5 +1,6 @@
 *
 !examples.d/*
-!valet.d/*
+!libraries.d/*
+!commands.d/*
 !extras/*
 !valet

@@ -23,6 +23,7 @@ function extractCommandYamls() {
 
   local line content
   local -i firstLineMatched=0 lastLineMatched=1 indentation=0
+  local IFS
   while IFS= read -r line || [[ -n ${line:-} ]]; do
     if [[ firstLineMatched -eq 0 ]]; then
       if [[ ${line} == "${firstLine}" || ${line} == "${firstLineAlt}" ]]; then
@@ -254,7 +255,7 @@ _CMD_INCLUDED=1
 # ====================
 # Common variables
 # ====================
-# CMD_LIBRARY_DIRECTORIES = array of all the libs.d directories found in the user directory
+# CMD_LIBRARY_DIRECTORIES = array of all the libraries.d directories found in the user directory
 # CMD_ALL_FUNCTIONS_ARRAY = array of all the functions callable with a command
 # CMD_ALL_FUNCTIONS = list all the functions callable with a command
 # CMD_ALL_COMMANDS_ARRAY = array of all the commands
@@ -301,7 +302,8 @@ _CMD_INCLUDED=1
     # shellcheck disable=SC2086
     io::invoke declare -p ${!CMD_*}
     local line
-    while read -r -d $'\n' line; do
+    local IFS
+    while IFS=$'\n' read -r -d $'\n' line; do
       printf '%s\n' "${line#declare -? }"
     done <<< "${RETURNED_VALUE}"
   } >"${outputFile}"

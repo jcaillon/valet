@@ -112,7 +112,7 @@ CMD_COMMAND_showcaseCommand1="showcase command1"
 CMD_COMMAND_showcaseInteractive="showcase interactive"
 CMD_COMMAND_this=""
 CMD_DESCRIPTION__menu="Show a menu with sub commands for the current command."
-CMD_DESCRIPTION_selfBuild=$'This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.\n\nPlease check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.\n\nThis scripts:\n\n- Makes a list of all the elligible files in which we could find command definitions.\n- For each file in this list, extract the command definitions.\n- Build your commands file (in your valet user directory) from these definitions.\n\nYou can call this script directly in case calling ⌜valet self build⌝ is broken:\n\n→ valet.d/commands.d/self-build.sh'
+CMD_DESCRIPTION_selfBuild=$'This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.\n\nPlease check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.\n\nThis scripts:\n\n- Makes a list of all the elligible files in which we could find command definitions.\n- For each file in this list, extract the command definitions.\n- Build your commands file (in your valet user directory) from these definitions.\n\nYou can call this script directly in case calling ⌜valet self build⌝ is broken:\n\n→ commands.d/self-build.sh'
 CMD_DESCRIPTION_selfConfig=$'Open the configuration file of Valet with your default editor.\n\nThis allows you to set advanced options for Valet.'
 CMD_DESCRIPTION_selfExport=$'If you want to use Valet functions directly in bash, you can use this command like this:\n\n"\'\neval "$(valet self export)"\n\'"\n\nThis will export all the necessary functions and variables to use the Valet log library by default.\n\nYou can optionally export all the functions if needed.'
 CMD_DESCRIPTION_selfMock1="A command that only for testing valet core functions."
@@ -122,7 +122,7 @@ CMD_DESCRIPTION_selfMock4="An example of description."
 CMD_DESCRIPTION_selfRelease=$'Release a new version of valet.\n\nIt will:\n- write the current version in the self-install script,\n- commit the file,\n- update the documentation,\n- commit the changes,\n- creates a git tag and pushes it to the remote repository,\n- bump the version of valet,\n- commit the new version.'
 CMD_DESCRIPTION_selfSetup=$'The command run after the installation of Valet to setup the tool.\n\nAdjust the Valet configuration according to the user environment.\nLet the user know what to do next.\n'
 CMD_DESCRIPTION_selfTest="Test your valet custom commands using approval tests approach."
-CMD_DESCRIPTION_selfUpdate=$'Update valet using the latest release on GitHub.\n\nThis script can be used as a standalone script to install Valet:\n\nbash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)"\n\nIf you need to pass options (e.g. --single-user-installation) to the script, you can do it like this:\n\nbash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --single-user-installation\n\nThe default behavior is to install Valet for all users, in /opt/valet, which might require\nyou to type your password on sudo commands (you don\'t have to run this script with sudo, it will\nask for your password when needed).\n\nThis script will:\n\n- 1. Download the given release from GitHub (latest by default).\n\n- 2. Copy it in the Valet home directory, which defaults to:\n  * /opt/valet in case of a multi user installation\n  * ~/.local/valet otherwise\n\n- 3. Make the valet script readable and executable, either by adding a shim\n     in a bin directory already present in your PATH, or by adding the Valet\n     directory to your PATH on shell startup.\n\n- 4. Copy the examples in the user valet directory ~/.valet.d.\n\n- 5. Copy the extras (vscode snippets) in the user valet directory ~/.valet.d.\n\n- 6. Run self setup command (in case of an installation).\n\n- 7. Try to update (fetch merge -ff-only) the git repositories under your valet user directory.\n'
+CMD_DESCRIPTION_selfUpdate=$'Update valet using the latest release on GitHub.\n\nThis script can be used as a standalone script to install Valet:\n\nbash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)"\n\nIf you need to pass options (e.g. --single-user-installation) to the script, you can do it like this:\n\nbash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)" -s --single-user-installation\n\nThe default behavior is to install Valet for all users, in /opt/valet, which might require\nyou to type your password on sudo commands (you don\'t have to run this script with sudo, it will\nask for your password when needed).\n\nThis script will:\n\n- 1. Download the given release from GitHub (latest by default).\n\n- 2. Copy it in the Valet home directory, which defaults to:\n  * /opt/valet in case of a multi user installation\n  * ~/.local/valet otherwise\n\n- 3. Make the valet script readable and executable, either by adding a shim\n     in a bin directory already present in your PATH, or by adding the Valet\n     directory to your PATH on shell startup.\n\n- 4. Copy the examples in the user valet directory ~/.valet.d.\n\n- 5. Copy the extras (vscode snippets) in the user valet directory ~/.valet.d.\n\n- 6. Run self setup command (in case of an installation).\n\n- 7. Try to update (fetch merge -ff-only) the git repositories under your valet user directory.\n'
 CMD_DESCRIPTION_showCaseSudo=$'Before starting this command, valet will check if sudo is available.\n\nIf so, it will require the user to enter the sudo password and you can use the \\${SUDO} variable inside the command\n'
 CMD_DESCRIPTION_showCommandHelp=$'Show the help of this program or of the help of a specific command.\n\nYou can show the help with or without colors and set the maximum columns for the help text.'
 CMD_DESCRIPTION_showcaseCommand1=$'An example of description.\n\nYou can put any text here, it will be wrapped to fit the terminal width.\n\nYou can ⌜highlight⌝ some text as well.'
@@ -134,23 +134,23 @@ CMD_EXAMPLES_DESCRIPTION_showCommandHelp=([0]="Shows the help for the command �
 CMD_EXAMPLES_DESCRIPTION_showcaseCommand1=([0]=$'Call command1 with option1, option2 and some arguments.\n')
 CMD_EXAMPLES_DESCRIPTION_this=([0]="Displays this help text." [1]=$'Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.\n')
 CMD_EXAMPLES_NAME_selfMock2=([0]="valet self mock2 -o -2 value1 arg1 more1 more2")
-CMD_EXAMPLES_NAME_selfUpdate=([0]="valet self update" [1]="bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)\"" [2]="bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)\" -s --single-user-installation --unattended")
+CMD_EXAMPLES_NAME_selfUpdate=([0]="valet self update" [1]="bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)\"" [2]="bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)\" -s --single-user-installation --unattended")
 CMD_EXAMPLES_NAME_showCommandHelp=([0]="valet help cmd" [1]="valet help cmd subCmd" [2]="valet help --no-colors --columns 50")
 CMD_EXAMPLES_NAME_showcaseCommand1=([0]="valet showcase command1 -o -2 value1 arg1 more1 more2")
 CMD_EXAMPLES_NAME_this=([0]="valet --help" [1]="valet -v a-command and-sub-command")
-CMD_FILETOSOURCE_selfBuild="valet.d/commands.d/self-build.sh"
-CMD_FILETOSOURCE_selfConfig="valet.d/commands.d/self-config.sh"
-CMD_FILETOSOURCE_selfExport="valet.d/commands.d/self-export.sh"
-CMD_FILETOSOURCE_selfMock1="valet.d/commands.d/self-mock.sh"
-CMD_FILETOSOURCE_selfMock2="valet.d/commands.d/self-mock.sh"
-CMD_FILETOSOURCE_selfMock3="valet.d/commands.d/self-mock.sh"
-CMD_FILETOSOURCE_selfMock4="valet.d/commands.d/self-mock.sh"
-CMD_FILETOSOURCE_selfRelease="valet.d/commands.d/self-release.sh"
-CMD_FILETOSOURCE_selfSetup="valet.d/commands.d/self-setup.sh"
-CMD_FILETOSOURCE_selfTest="valet.d/commands.d/self-test.sh"
-CMD_FILETOSOURCE_selfUpdate="valet.d/commands.d/self-install.sh"
+CMD_FILETOSOURCE_selfBuild="commands.d/self-build.sh"
+CMD_FILETOSOURCE_selfConfig="commands.d/self-config.sh"
+CMD_FILETOSOURCE_selfExport="commands.d/self-export.sh"
+CMD_FILETOSOURCE_selfMock1="commands.d/self-mock.sh"
+CMD_FILETOSOURCE_selfMock2="commands.d/self-mock.sh"
+CMD_FILETOSOURCE_selfMock3="commands.d/self-mock.sh"
+CMD_FILETOSOURCE_selfMock4="commands.d/self-mock.sh"
+CMD_FILETOSOURCE_selfRelease="commands.d/self-release.sh"
+CMD_FILETOSOURCE_selfSetup="commands.d/self-setup.sh"
+CMD_FILETOSOURCE_selfTest="commands.d/self-test.sh"
+CMD_FILETOSOURCE_selfUpdate="commands.d/self-install.sh"
 CMD_FILETOSOURCE_showCaseSudo="examples.d/showcase/showcase.sh"
-CMD_FILETOSOURCE_showCommandHelp="valet.d/commands.d/help.sh"
+CMD_FILETOSOURCE_showCommandHelp="commands.d/help.sh"
 CMD_FILETOSOURCE_showcaseCommand1="examples.d/showcase/showcase.sh"
 CMD_FILETOSOURCE_showcaseInteractive="examples.d/showcase/showcase-interactive.sh"
 CMD_FILETOSOURCE_this="valet"

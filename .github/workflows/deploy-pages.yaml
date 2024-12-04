@@ -56,7 +56,7 @@ jobs:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: |
-          sed -i 's/copyright: "© Noyacode"/copyright: "© Noyacode for Valet v'"$(cat ./valet.d/version) updated on $(date +%F)"'"/' ./docs/i18n/en.yaml
+          sed -i 's/copyright: "© Noyacode"/copyright: "© Noyacode for Valet v'"$(cat ./version) updated on $(date +%F)"'"/' ./docs/i18n/en.yaml
           cd docs
           hugo \
             --gc --minify \

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../../valet.d/commands.d/self-build-utils
-source "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build-utils"
+# shellcheck source=../../commands.d/self-build-utils
+source "${GLOBAL_VALET_HOME}/commands.d/self-build-utils"
 
 _VALID_YAML="
 command: test

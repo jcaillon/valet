@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
 # author: github.com/jcaillon
-# Title:         valet.d/build
+# Title:         libraries.d/build
 # Description:   This script is called during development to build the commands script.
 #                It reads all the files in which we could find command definitions and generates commands script.
 #                You can call this script directly in case calling ⌜valet self build⌝ is broken:
-#                $ ./valet.d/commands.d/self-build.sh
+#                $ ./commands.d/self-build.sh
 
 #===============================================================
 # >>> command: self build
@@ -28,11 +28,11 @@ set -Eeu -o pipefail
 #   - Makes a list of all the eligible files in which we could find command definitions.
 #   - For each file in this list, extract the command definitions.
 #   - Build your commands file (in your valet user directory) from these definitions.
-#   - Makes a list of all `libs.d` directories found in the user directory.
+#   - Makes a list of all `libraries.d` directories found in the user directory.
 #
 #   You can call this script directly in case calling ⌜valet self build⌝ is broken:
 #
-#   → valet.d/commands.d/self-build.sh
+#   → commands.d/self-build.sh
 # options:
 # - name: -d, --user-directory <path>
 #   description: |-
@@ -99,11 +99,19 @@ function selfBuild() {
     core::checkParseResults "${help:-}" "${parsingErrors:-}"
   fi
 
+  log::debug "Building the valet user commands."
+
   local originalLogLevel
   if [[ ${silent:-} == "true" ]]; then
-    log::debug "Building the valet user commands silently."
-    log::getLevel && originalLogLevel="${RETURNED_VALUE}"
-    log::setLevel warning true
+    log::getLevel
+    if [[ ${RETURNED_VALUE} == "debug" || ${RETURNED_VALUE} == "trace" ]]; then
+      log::info "The silent option has been ignored because of the current log level."
+      silent=false
+    else
+      log::debug "Building the valet user commands silently."
+      log::getLevel && originalLogLevel="${RETURNED_VALUE}"
+      log::setLevel warning true
+    fi
   fi
 
   core::getUserDirectory
@@ -117,7 +125,7 @@ function selfBuild() {
   local -a libraryDirectories=()
   local -a commandDefinitionFiles=(
     "${GLOBAL_VALET_HOME}/valet"
-    "${GLOBAL_VALET_HOME}/valet.d/commands.d"/*.sh
+    "${GLOBAL_VALET_HOME}/commands.d"/*.sh
   )
   if [[ ${coreOnly:-} != "true" ]]; then
     if [[ -d "${userDirectory}" ]]; then
@@ -137,9 +145,9 @@ function selfBuild() {
           local fileBasename="${file##*/}"
           if [[ -d ${file} && ${fileBasename} != "."* && ${fileBasename} != "tests.d" ]]; then
             # if directory we need to add it to the search list
-            # except if it starts with a . or if it is a tests.d or libs.d directory
-            if [[ ${fileBasename} == "libs.d" ]]; then
-              # if directory is named libs.d, we need to add it to libraryDirectories
+            # except if it starts with a . or if it is a tests.d or libraries.d directory
+            if [[ ${fileBasename} == "libraries.d" ]]; then
+              # if directory is named libraries.d, we need to add it to libraryDirectories
               libraryDirectories+=("${file}")
             else
               listOfDirectories+="${file}"$'\n'
@@ -245,7 +253,7 @@ function bumpValetBuildVersion() {
 
   string::bumpSemanticVersion "${currentVersion}" "patch" "false"
 
-  printf '%s' "${RETURNED_VALUE}" >"${GLOBAL_VALET_HOME}/valet.d/version"
+  printf '%s' "${RETURNED_VALUE}" >"${GLOBAL_VALET_HOME}/version"
 
   log::info "The valet build version has been bumped to ⌜${RETURNED_VALUE}⌝."
 }
@@ -674,16 +682,16 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   # do not read the commands in that case
   _CMD_INCLUDED=1
 
-  _VALETD_DIR="${BASH_SOURCE[0]:-"${0}"}"
-  if [[ "${_VALETD_DIR}" != /* ]]; then
-    if pushd "${_VALETD_DIR%/*}" &>/dev/null; then
-      _VALETD_DIR="${PWD}"
+  _COMMANDS_DIR="${BASH_SOURCE[0]:-"${0}"}"
+  if [[ "${_COMMANDS_DIR}" != /* ]]; then
+    if pushd "${_COMMANDS_DIR%/*}" &>/dev/null; then
+      _COMMANDS_DIR="${PWD}"
       popd &>/dev/null || :
-    else _VALETD_DIR="${PWD}"; fi
-  else _VALETD_DIR="${_VALETD_DIR%/*}"; fi
+    else _COMMANDS_DIR="${PWD}"; fi
+  else _COMMANDS_DIR="${_COMMANDS_DIR%/*}"; fi
 
-  # shellcheck source=../core
-  source "${_VALETD_DIR%/*}/core"
+  # shellcheck source=../libraries.d/core
+  source "${_COMMANDS_DIR%/*}/libraries.d/core"
 else
   unset _NOT_EXECUTED_FROM_VALET
 fi
@@ -691,11 +699,11 @@ fi
 
 # shellcheck source=self-build-utils
 source self-build-utils
-# shellcheck source=../lib-array
+# shellcheck source=../libraries.d/lib-array
 source array
-# shellcheck source=../lib-io
+# shellcheck source=../libraries.d/lib-io
 source io
-# shellcheck source=../lib-string
+# shellcheck source=../libraries.d/lib-string
 source string
 
 # if this script is run directly, execute the function, otherwise valet will do it

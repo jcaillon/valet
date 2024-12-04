@@ -411,9 +411,9 @@ Failed as expected.
 ```log
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 ERROR    Error code 1 in selfMock1(), stack:
-├─ in selfMock1() at $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ in main::runFunction() at $GLOBAL_VALET_HOME/valet.d/main:XXX
-├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ in selfMock1() at $GLOBAL_VALET_HOME/commands.d/self-mock.sh:XXX
+├─ in main::runFunction() at $GLOBAL_VALET_HOME/libraries.d/main:XXX
+├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/libraries.d/main:XXX
 └─ in main() at $GLOBAL_VALET_HOME/valet:XXX
 ```
 
@@ -434,9 +434,9 @@ Failed as expected.
 WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
-├─ in selfMock1() at $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ in main::runFunction() at $GLOBAL_VALET_HOME/valet.d/main:XXX
-├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ in selfMock1() at $GLOBAL_VALET_HOME/commands.d/self-mock.sh:XXX
+├─ in main::runFunction() at $GLOBAL_VALET_HOME/libraries.d/main:XXX
+├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/libraries.d/main:XXX
 └─ in main() at $GLOBAL_VALET_HOME/valet:XXX
 ```
 
@@ -492,9 +492,9 @@ WARNING  This is for testing valet core functions, the next statement will call 
 ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
 ERROR    Error code 1 in selfMock1(), stack:
-├─ in selfMock1() at $GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh:XXX
-├─ in main::runFunction() at $GLOBAL_VALET_HOME/valet.d/main:XXX
-├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/valet.d/main:XXX
+├─ in selfMock1() at $GLOBAL_VALET_HOME/commands.d/self-mock.sh:XXX
+├─ in main::runFunction() at $GLOBAL_VALET_HOME/libraries.d/main:XXX
+├─ in main::parseMainArguments() at $GLOBAL_VALET_HOME/libraries.d/main:XXX
 └─ in main() at $GLOBAL_VALET_HOME/valet:XXX
 ```
 
@@ -580,7 +580,7 @@ DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Command found ⌜self mock1⌝.
 DEBUG    Function name found ⌜selfMock1⌝.
-DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
+DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/commands.d/self-mock.sh⌝.
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
 local parsingErrors help action
@@ -614,7 +614,7 @@ Exit code: `0`
 DEBUG    Log level set to trace.
 DEBUG    Command found ⌜self mock1⌝.
 DEBUG    Function name found ⌜selfMock1⌝.
-DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
+DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/commands.d/self-mock.sh⌝.
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
 local parsingErrors help action

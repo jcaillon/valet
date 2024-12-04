@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
-# Title:         valet.d/commands.d/*
+# Title:         commands.d/*
 # Author:        github.com/jcaillon
 
 # if not executing in bash, we can stop here
@@ -24,11 +24,11 @@ fi
 #
 #   This script can also be used as a standalone script to install Valet:
 #
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)"
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)"
 #
 #   If you need to pass options (e.g. --single-user-installation) to the script, you can do it like this:
 #
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --single-user-installation
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)" -s --single-user-installation
 #
 #   The default behavior is to install Valet for all users, in /opt/valet, which might require
 #   you to type your password on sudo commands (you don't have to run this script with sudo, it will
@@ -114,10 +114,10 @@ fi
 # - name: self update
 #   description: |-
 #     Update Valet to the latest version.
-# - name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)"
+# - name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)"
 #   description: |-
 #     Install the latest version of Valet, using all the default options.
-# - name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --single-user-installation --unattended
+# - name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)" -s --single-user-installation --unattended
 #   description: |-
 #     Install the latest version of Valet in the user home directory and disable all interaction during the install process.
 ##VALET_COMMAND
@@ -339,8 +339,8 @@ function selfUpdate() {
   fi
 
   if [[ ${firstInstallation} == "true" ]]; then
-    # shellcheck source=../core
-    source "${GLOBAL_VALET_HOME}/valet.d/core"
+    # shellcheck source=../libraries.d/core
+    source "${GLOBAL_VALET_HOME}/libraries.d/core"
     log::debug "Sourcing the core functions from valet."
     selfUpdate_sourceDependencies
   else
@@ -587,15 +587,15 @@ function selfUpdate_updateGitRepository() {
 
 # source the dependencies of this script
 function selfUpdate_sourceDependencies() {
-  # shellcheck source=../lib-system
+  # shellcheck source=../libraries.d/lib-system
   source system
-  # shellcheck source=../lib-interactive
+  # shellcheck source=../libraries.d/lib-interactive
   source interactive
-  # shellcheck source=../lib-ansi-codes
+  # shellcheck source=../libraries.d/lib-ansi-codes
   source ansi-codes
-  # shellcheck source=../lib-io
+  # shellcheck source=../libraries.d/lib-io
   source io
-  # shellcheck source=../lib-string
+  # shellcheck source=../libraries.d/lib-string
   source string
 }
 
@@ -739,7 +739,8 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
     else
       printf "%s [y/N] " "${question}"
     fi
-    IFS='' read -d '' -srn 1 LAST_KEY_PRESSED
+    local IFS=''
+    read -d '' -srn 1 LAST_KEY_PRESSED
     case "${LAST_KEY_PRESSED}" in
     y | Y | $'\n') RETURNED_VALUE="true" ;;
     n | N) RETURNED_VALUE="false" ;;

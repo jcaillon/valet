@@ -87,20 +87,19 @@ output="$GLOBAL_VALET_HOME/extras"
 
 INFO     Generating documentation for the core functions only.
 DEBUG    Analyzing the following files:
-   1 ░ $GLOBAL_VALET_HOME/valet.d/core
-   2 ░ $GLOBAL_VALET_HOME/valet.d/lib-ansi-codes
-   3 ░ $GLOBAL_VALET_HOME/valet.d/lib-array
-   4 ░ $GLOBAL_VALET_HOME/valet.d/lib-curl
-   5 ░ $GLOBAL_VALET_HOME/valet.d/lib-fsfs
-   6 ░ $GLOBAL_VALET_HOME/valet.d/lib-interactive
-   7 ░ $GLOBAL_VALET_HOME/valet.d/lib-io
-   8 ░ $GLOBAL_VALET_HOME/valet.d/lib-profiler
-   9 ░ $GLOBAL_VALET_HOME/valet.d/lib-prompt
-  10 ░ $GLOBAL_VALET_HOME/valet.d/lib-string
-  11 ░ $GLOBAL_VALET_HOME/valet.d/lib-system
-  12 ░ $GLOBAL_VALET_HOME/valet.d/lib-test
-  13 ░ $GLOBAL_VALET_HOME/valet.d/main
-  14 ░ $GLOBAL_VALET_HOME/valet.d/version
+   1 ░ $GLOBAL_VALET_HOME/libraries.d/core
+   2 ░ $GLOBAL_VALET_HOME/libraries.d/lib-ansi-codes
+   3 ░ $GLOBAL_VALET_HOME/libraries.d/lib-array
+   4 ░ $GLOBAL_VALET_HOME/libraries.d/lib-curl
+   5 ░ $GLOBAL_VALET_HOME/libraries.d/lib-fsfs
+   6 ░ $GLOBAL_VALET_HOME/libraries.d/lib-interactive
+   7 ░ $GLOBAL_VALET_HOME/libraries.d/lib-io
+   8 ░ $GLOBAL_VALET_HOME/libraries.d/lib-profiler
+   9 ░ $GLOBAL_VALET_HOME/libraries.d/lib-prompt
+  10 ░ $GLOBAL_VALET_HOME/libraries.d/lib-string
+  11 ░ $GLOBAL_VALET_HOME/libraries.d/lib-system
+  12 ░ $GLOBAL_VALET_HOME/libraries.d/lib-test
+  13 ░ $GLOBAL_VALET_HOME/libraries.d/main
 DEBUG    Found function: ⌜io::createTempFile⌝
 DEBUG    Found function: ⌜io::createTempDirectory⌝
 DEBUG    Found function: ⌜io::cleanupTempFiles⌝
@@ -192,12 +191,14 @@ DEBUG    Found function: ⌜io::listPaths⌝
 DEBUG    Found function: ⌜io::listFiles⌝
 DEBUG    Found function: ⌜io::listDirectories⌝
 DEBUG    Found function: ⌜io::isDirectoryWritable⌝
-DEBUG    Found function: ⌜io::runPs1Command⌝
+DEBUG    Found function: ⌜io::windowsRunInPowershell⌝
+DEBUG    Found function: ⌜io::windowsPowershellBatchStart⌝
+DEBUG    Found function: ⌜io::windowsPowershellBatchEnd⌝
 DEBUG    Found function: ⌜io::createLink⌝
 DEBUG    Found function: ⌜io::convertToWindowsPath⌝
 DEBUG    Found function: ⌜io::convertFromWindowsPath⌝
-DEBUG    Found function: ⌜io::createWindowsTempFile⌝
-DEBUG    Found function: ⌜io::createWindowsTempDirectory⌝
+DEBUG    Found function: ⌜io::windowsCreateTempFile⌝
+DEBUG    Found function: ⌜io::windowsCreateTempDirectory⌝
 DEBUG    Found function: ⌜profiler::enable⌝
 DEBUG    Found function: ⌜profiler::disable⌝
 DEBUG    Found function: ⌜prompt::autocompletion⌝
@@ -228,7 +229,7 @@ DEBUG    Found function: ⌜system::windowsGetEnvVar⌝
 DEBUG    Found function: ⌜system::windowsAddToPath⌝
 DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 126 functions with documentation.
+INFO     Found 128 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet.md⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet
@@ -267,8 +268,8 @@ INFO     The vscode snippets have been generated in ⌜$GLOBAL_VALET_HOME/extras
 ▶ called io::invoke git add $GLOBAL_VALET_HOME/extras/base.code-snippets $GLOBAL_VALET_HOME/extras/lib-valet $GLOBAL_VALET_HOME/extras/lib-valet.md $GLOBAL_VALET_HOME/extras/valet.code-snippets
 ▶ called io::invoke git commit -m :memo: updating the documentation
 SUCCESS  The documentation update has been committed.
-▶ called io::invoke sed -E -i s/VALET_RELEASED_VERSION="[0-9]+\.[^"]+"/VALET_RELEASED_VERSION="1.2.3"/ $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
-▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh
+▶ called io::invoke sed -E -i s/VALET_RELEASED_VERSION="[0-9]+\.[^"]+"/VALET_RELEASED_VERSION="1.2.3"/ $GLOBAL_VALET_HOME/commands.d/self-install.sh
+▶ called io::invoke git add $GLOBAL_VALET_HOME/commands.d/self-install.sh
 ▶ called io::invoke git commit -m :rocket: releasing version 1.2.3
 SUCCESS  The new version has been committed.
 ▶ called io::invoke git tag -a v1.2.3 -m # Release of version 1.2.3
@@ -301,18 +302,18 @@ DEBUG    The release payload is: ⌜{
 SUCCESS  The new version has been released on GitHub.
 DEBUG    The upload URL is: https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/examples.d .
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet.d .
+▶ called io::invoke cp -R $GLOBAL_VALET_HOME/libraries.d .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/extras .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet .
-▶ called io::invoke tar -czvf valet.tar.gz examples.d valet.d extras valet
+▶ called io::invoke tar -czvf valet.tar.gz examples.d libraries.d extras valet
 DEBUG    The artifact has been created at ⌜valet.tar.gz⌝ with:
 
 INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 ▶ called curl::toVar true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz
 INFO     The current version of valet is: 1.2.3.
-▶ called io::writeToFile $GLOBAL_VALET_HOME/valet.d/version
+▶ called io::writeToFile $GLOBAL_VALET_HOME/version
 INFO     The bumped version of valet is: 1.3.0.
-▶ called io::invoke git add $GLOBAL_VALET_HOME/valet.d/version
+▶ called io::invoke git add $GLOBAL_VALET_HOME/version
 ▶ called io::invoke git commit -m :bookmark: bump version to 1.3.0
 ▶ called io::invoke git push origin main
 SUCCESS  The bumped version has been committed.

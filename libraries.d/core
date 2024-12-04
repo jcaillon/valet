@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
-# Title:          valet.d/core
+# Title:          libraries.d/core
 # Description:    this script contains the core functions and variables and it
 #                 should be sourced, not called directly
 # Author:         github.com/jcaillon
@@ -20,7 +20,7 @@ if [[ -z "${GLOBAL_VALET_HOME:-}" ]]; then
   else
     GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip filename
   fi
-  GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip valet.d directory
+  GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip libraries.d directory
 fi
 
 # First thing we do is to source the valet configuration from the user config dir
@@ -138,7 +138,7 @@ function io::cleanupTempFiles() {
     rm -f "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-"* 1>/dev/null
     break
   done
-  # for files created in  io::createWindowsTempFile
+  # for files created in  io::windowsCreateTempFile
   if [[ -n ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} && -d ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY} ]]; then
     log::debug "Deleting windows temporary directory."
     rm -Rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" 1>/dev/null
@@ -829,9 +829,9 @@ function log::printCallStack() {
 # > - Use `builtin source` if you want to include the file even if it was already included.
 function source() {
   local filePathToInclude
-  if [[ -f "${GLOBAL_VALET_HOME}/valet.d/lib-${1}" ]]; then
+  if [[ -f "${GLOBAL_VALET_HOME}/libraries.d/lib-${1}" ]]; then
     # source the lib from the valet core libs
-    filePathToInclude="${GLOBAL_VALET_HOME}/valet.d/lib-${1}"
+    filePathToInclude="${GLOBAL_VALET_HOME}/libraries.d/lib-${1}"
   else
     # source the lib from user libs
     if [[ -v CMD_LIBRARY_DIRECTORIES ]]; then
@@ -940,8 +940,8 @@ function core::sourceUserCommands() {
 
     # shellcheck disable=SC1091
     unset _CMD_INCLUDED
-    # shellcheck source=commands.d/self-build.sh
-    source "${GLOBAL_VALET_HOME}/valet.d/commands.d/self-build.sh"
+    # shellcheck source=../commands.d/self-build.sh
+    source "${GLOBAL_VALET_HOME}/commands.d/self-build.sh"
     selfBuild --silent
 
     if [[ ! -f "${commandsFile}" ]]; then
@@ -998,7 +998,7 @@ function core::deleteUserCommands() {
 function core::getVersion() {
   # shellcheck source=lib-io
   source io
-  io::readFile "${GLOBAL_VALET_HOME}/valet.d/version"
+  io::readFile "${GLOBAL_VALET_HOME}/version"
 }
 
 #===============================================================
@@ -1535,5 +1535,5 @@ fi
 # Include main if not already included
 if [[ -z "${GLOBAL_MAIN_INCLUDED:-}" ]]; then
   # shellcheck source=main
-  source "${GLOBAL_VALET_HOME}/valet.d/main"
+  source "${GLOBAL_VALET_HOME}/libraries.d/main"
 fi

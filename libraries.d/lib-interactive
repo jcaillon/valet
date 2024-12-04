@@ -578,6 +578,7 @@ function interactive::testWaitForChar() {
 # > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>
 function interactive::waitForChar() {
   LAST_KEY_PRESSED=""
+  local IFS
   IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || :
 
   LAST_KEY_PRESSED="${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:-}${LAST_KEY_PRESSED}"
@@ -695,6 +696,7 @@ function interactive::waitForKeyPress() {
   LAST_KEY_PRESSED=""
   # here we redirect the error output to null because of a bug in bash, it
   # prints a newline each time read is called with -e, idk why...
+  local IFS
   IFS='' read "$@" -e -d '' -s -r -n 1 LAST_KEY_PRESSED 2>/dev/null || :
   if [[ -z ${LAST_KEY_PRESSED} ]]; then
     return 1

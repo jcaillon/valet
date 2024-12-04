@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../../valet.d/lib-interactive
+# shellcheck source=../../libraries.d/lib-interactive
 source interactive
 
 function testInteractive::createSpace() {

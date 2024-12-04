@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../../valet.d/lib-array
+# shellcheck source=../../libraries.d/lib-array
 source array
 
 function testArray::sort() {

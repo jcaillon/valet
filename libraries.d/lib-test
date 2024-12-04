@@ -81,8 +81,8 @@ function test::endTest() {
 function test::echoFileWithLineNumberSubstitution() {
   local file="${1}"
   local line
-  local IFS=$'\n'
-  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
+  local IFS
+  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
     if [[ ${line} =~ :[0-9]{1,4}$ ]]; then
       line="${line/%:[[:digit:]]/:XXX}"
       line="${line/%:[[:digit:]][[:digit:]]/:XXX}"

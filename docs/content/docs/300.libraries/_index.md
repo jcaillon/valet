@@ -36,18 +36,18 @@ if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else e
 
 You can add your own libraries to extend Valet functionalities and to use them in your commands.
 
-User libraries are read from the Valet user directory which defaults to `~/.valet.d`. They are expected to be bash scripts prefixed with `lib-` directly placed under a `libs.d` directory.
+User libraries are read from the Valet user directory which defaults to `~/.valet.d`. They are expected to be bash scripts prefixed with `lib-` directly placed under a `libraries.d` directory.
 
 Here is an example content for your user directory:
 
 {{< filetree/container >}}
   {{< filetree/folder name="~/.valet.d" >}}
-    {{< filetree/folder name="libs.d" >}}
+    {{< filetree/folder name="libraries.d" >}}
       {{< filetree/file name="lib-gitlab" >}}
       {{< filetree/file name="lib-github" >}}
     {{< /filetree/folder >}}
     {{< filetree/folder name="personal" >}}
-      {{< filetree/folder name="libs.d" >}}
+      {{< filetree/folder name="libraries.d" >}}
         {{< filetree/file name="lib-git" >}}
       {{< /filetree/folder >}}
     {{< /filetree/folder >}}

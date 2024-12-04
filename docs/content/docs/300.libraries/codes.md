@@ -11,7 +11,7 @@ ANSI codes for text attributes, colors, cursor control, and other common escape 
 These codes can be used to format text in the terminal.
 
 They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:
-<https://github.com/jcaillon/valet/blob/latest/valet.d/lib-ansi-codes>
+<https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>
 
 References:
 

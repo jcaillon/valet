@@ -98,8 +98,8 @@ fi
 #===============================================================
 # >>> Source main functions
 #===============================================================
-# shellcheck source=valet.d/main
-source "${GLOBAL_VALET_HOME}/valet.d/main"
+# shellcheck source=libraries.d/main
+source "${GLOBAL_VALET_HOME}/libraries.d/main"
 
 #===============================================================
 # >>> Run the main function

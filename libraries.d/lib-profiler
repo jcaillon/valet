@@ -106,7 +106,7 @@ function profilerCleanFile() {
     baseStackLength = 99999;
   }
   {
-    if (clearCoreLine == "true" && $3 ~ /(valet.d\/core|valet.d\/main|valet.d\/lib-[a-z0-9]+)$/) {
+    if (clearCoreLine == "true" && $3 ~ /(libraries.d\/core|libraries.d\/main|libraries.d\/lib-[a-z0-9]+)$/) {
       lastLineWasSkipped = 1;
       next;
     }
@@ -174,7 +174,7 @@ function profilerBashCleanFile() {
   local totalElapsedTime lastElapsedTime
   local IFS indirectionLevel timer program lineNumber fun subShellLevel depth theRest arrow
   while IFS=$'\t' read -r indirectionLevel timer program lineNumber fun subShellLevel depth arrow theRest; do
-    if [[ ${clearCoreLine} == "true" && ${program} =~ (valet.d/core|valet.d/main|valet.d/lib-[a-z0-9]*)$ ]]; then
+    if [[ ${clearCoreLine} == "true" && ${program} =~ (libraries.d/core|libraries.d/main|libraries.d/lib-[a-z0-9]*)$ ]]; then
       lastLineWasSkipped=1
       continue
     fi

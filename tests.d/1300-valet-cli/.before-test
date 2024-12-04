@@ -30,8 +30,8 @@ export TEST_VALET_CONFIG_LOCAL_STATE_DIRECTORY="${RETURNED_VALUE}"
 function echoTempFileWithTimeStampSubstitution() {
   local file="${GLOBAL_TEST_TEMP_FILE}"
   local line
-  local IFS=$'\n'
-  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
+  local IFS
+  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
     line="${line//??:??:??/HH:MM:SS}"
     line="${line//????-??-??/YYYY:MM:DD}"
     echo "${line}"

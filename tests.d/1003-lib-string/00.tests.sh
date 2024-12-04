@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../../valet.d/lib-string
+# shellcheck source=../../libraries.d/lib-string
 source string
 
 function testString::bumpSemanticVersion() {

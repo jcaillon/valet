@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../../valet.d/lib-curl
+# shellcheck source=../../libraries.d/lib-curl
 source curl
 
 function testCurl::toFile() {

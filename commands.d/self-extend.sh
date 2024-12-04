@@ -1,25 +1,25 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
-# Title:         valet.d/commands.d/*
+# Title:         commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
-  # shellcheck source=../core
-  source "$(dirname -- "$(command -v valet)")/valet.d/core"
+  # shellcheck source=../libraries.d/core
+  source "$(dirname -- "$(command -v valet)")/libraries.d/core"
 fi
 # --- END OF COMMAND COMMON PART
 
-# shellcheck source=../lib-io
+# shellcheck source=../libraries.d/lib-io
 source io
-# shellcheck source=../lib-string
+# shellcheck source=../libraries.d/lib-string
 source string
-# shellcheck source=../lib-system
+# shellcheck source=../libraries.d/lib-system
 source system
-# shellcheck source=../lib-interactive
+# shellcheck source=../libraries.d/lib-interactive
 source interactive
-# shellcheck source=../lib-curl
+# shellcheck source=../libraries.d/lib-curl
 source curl
 
 #===============================================================
@@ -178,11 +178,17 @@ function selfExtend_createExtension() {
     extensionDirectory="${userDirectory}/${extensionName}"
     log::info "Creating the extension ⌜${extensionName}⌝ in ⌜${extensionDirectory}⌝."
 
+    # if the extension already exists, ask the user for a confirmation
     if [[ -d "${extensionDirectory}" ]]; then
-      core::fail "The extension ⌜${extensionName}⌝ already exists in ⌜${extensionDirectory}⌝."
+      log::warning "The extension ⌜${extensionName}⌝ already exists in ⌜${extensionDirectory}⌝."
+      if ! interactive::promptYesNo "Do you want to overwrite the existing ⌜${extensionName}⌝ extension?" true; then
+        log::info "The extension ⌜${extensionName}⌝ will not be created."
+        return 0
+      fi
+      rm -Rf "${extensionDirectory}"
     fi
 
-    local -a subDirectories=(src libs.d tests.d)
+    local -a subDirectories=(src libraries.d tests.d)
     local subdir
     for subdir in "${subDirectories[@]}"; do
       io::createDirectoryIfNeeded "${extensionDirectory}/${subdir}"
@@ -196,6 +202,10 @@ function selfExtend_createExtension() {
     selfDocument
   fi
 
+  # on windows, creating links will prompt the user for admin permissions
+  # we can group all the ps1 commands and run it once at the end
+  io::windowsPowershellBatchStart
+
   # vscode stuff
   if command -v code &>/dev/null; then
     io::createDirectoryIfNeeded "${extensionDirectory}/.vscode"
@@ -203,7 +213,7 @@ function selfExtend_createExtension() {
     cp -n "${GLOBAL_VALET_HOME}/extras/.vscode/extensions.json" "${extensionDirectory}/.vscode/extensions.json" || log::error "Could not copy the vscode extensions file."
 
     # link the snippets
-    io::createLink "${userDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets"
+    io::createLink "${userDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets" || log::error "Could not create a symbolic link to the vscode snippets."
   fi
 
   # git stuff
@@ -217,8 +227,10 @@ function selfExtend_createExtension() {
   fi
 
   # link lib-valet
-  io::createLink "${userDirectory}/lib-valet" "${extensionDirectory}/lib-valet"
-  io::createLink "${userDirectory}/lib-valet.md" "${extensionDirectory}/lib-valet.md"
+  io::createLink "${userDirectory}/lib-valet" "${extensionDirectory}/lib-valet" || log::error "Could not create a symbolic link to the lib-valet."
+  io::createLink "${userDirectory}/lib-valet.md" "${extensionDirectory}/lib-valet.md" || log::error "Could not create a symbolic link to the lib-valet.md."
+
+  io::windowsPowershellBatchEnd
 
   log::success "The extension ⌜${extensionName}⌝ has been setup in ⌜${extensionDirectory}⌝."
 }

@@ -17,7 +17,7 @@ url: /docs/installation
 Run the following command to install Valet:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)"
 ```
 
 {{< callout type="info" emoji="💡" >}}
@@ -27,7 +27,7 @@ Please review the [installation script][selfInstallScriptLink] or the [self inst
 Here is an example command to install Valet with the options `--unattended --single-user-installation` (no interactive prompt during installation and installs itself in the home directory of the user):
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --unattended --single-user-installation
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)" -s --unattended --single-user-installation
 ```
 
 Finally, call `valet` to get started with the example commands!
@@ -80,7 +80,7 @@ Alternatively, use `docker run --rm -it noyacode/valet` to pull and run the imag
 [git-for-windows-link]: https://gitforwindows.org/
 [wsl-installation-link]: https://learn.microsoft.com/en-us/windows/wsl/install
 [windows-terminal-link]: https://github.com/microsoft/terminal
-[selfInstallScriptLink]: https://github.com/jcaillon/valet/blob/latest/valet.d/commands.d/self-install.sh
+[selfInstallScriptLink]: https://github.com/jcaillon/valet/blob/latest/commands.d/self-install.sh
 [selfInstallCommandUsageLink]: https://github.com/jcaillon/valet/blob/latest/tests.d/1106-self-update/results.approved.md
 [docker]: https://www.docker.com/
 [podman]: https://podman.io/

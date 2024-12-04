@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../../valet.d/lib-system
+# shellcheck source=../../libraries.d/lib-system
 source system
-# shellcheck source=../../valet.d/lib-io
+# shellcheck source=../../libraries.d/lib-io
 source io
 
 function testSystem::os() {
@@ -176,13 +176,13 @@ function main() {
 }
 
 # backup original function
-io::invoke declare -f io::runPs1Command
+io::invoke declare -f io::windowsRunInPowershell
 _ORIGINAL_FUNCTION="${RETURNED_VALUE//declare -? /}"
 
 # shellcheck disable=SC2317
-function io::runPs1Command() { echo "io::runPs1Command: $*"; }
+function io::windowsRunInPowershell() { echo "io::windowsRunInPowershell: $*"; }
 
 main
 
-unset -f io::runPs1Command
+unset -f io::windowsRunInPowershell
 eval "${_ORIGINAL_FUNCTION}"

@@ -64,7 +64,7 @@ CMD_COMMAND_selfUpdate='self update'
 CMD_COMMAND_showCommandHelp='help'
 CMD_COMMAND_this=''
 CMD_DESCRIPTION__menu='Show a menu with sub commands for the current command.'
-CMD_DESCRIPTION_selfBuild=$'Index all the command and libraries present in the valet user directory and installation directory.\n\nThis command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.\n\nPlease check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in examples.d directory to learn how to create and modified your commands.\n\nThis scripts:\n\n- Makes a list of all the eligible files in which we could find command definitions.\n- For each file in this list, extract the command definitions.\n- Build your commands file (in your valet user directory) from these definitions.\n- Makes a list of all `libs.d` directories found in the user directory.\n\nYou can call this script directly in case calling valet self build is broken:\n\n valet.d/commands.d/self-build.sh'
+CMD_DESCRIPTION_selfBuild=$'Index all the command and libraries present in the valet user directory and installation directory.\n\nThis command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.\n\nPlease check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in examples.d directory to learn how to create and modified your commands.\n\nThis scripts:\n\n- Makes a list of all the eligible files in which we could find command definitions.\n- For each file in this list, extract the command definitions.\n- Build your commands file (in your valet user directory) from these definitions.\n- Makes a list of all `libraries.d` directories found in the user directory.\n\nYou can call this script directly in case calling valet self build is broken:\n\n commands.d/self-build.sh'
 CMD_DESCRIPTION_selfConfig=$'Open the configuration file of Valet with your default editor.\n\nThis allows you to set advanced options for Valet.'
 CMD_DESCRIPTION_selfDocument=$'Generate the documentation and code snippets for all the library functions of Valet.\n\nIt will parse all the library files and generate:\n\n- A markdown file with the documentation.\n- A bash file with the prototype of each function.\n- A vscode snippet file for each function.'
 CMD_DESCRIPTION_selfExport=$'If you want to use Valet functions directly in bash, you can use this command like this:\n\n```bash\neval "$(valet self export 2>/dev/null)"\n```\n\nThis will export all the necessary functions and variables to use the Valet log library by default.\n\nYou can optionally export all the functions if needed.'
@@ -77,7 +77,7 @@ CMD_DESCRIPTION_selfRelease=$'Release a new version of valet.\n\nIt will:\n- wri
 CMD_DESCRIPTION_selfSetup=$'The command run after the installation of Valet to setup the tool.\n\nAdjust the Valet configuration according to the user environment.\nLet the user know what to do next.\n'
 CMD_DESCRIPTION_selfTest='Test your valet custom commands using approval tests approach.'
 CMD_DESCRIPTION_selfUninstall=$'Generate a bash script that can be used to uninstall Valet.\nWithout any option, this script will print instructions instead.\n\nUsage:\n\n```bash\neval "$(valet self uninstall --script)"\n```'
-CMD_DESCRIPTION_selfUpdate=$'Update valet using the latest release on GitHub. Also update all installed extensions.\n\nThis script can also be used as a standalone script to install Valet:\n\nbash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)"\n\nIf you need to pass options (e.g. --single-user-installation) to the script, you can do it like this:\n\nbash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)" -s --single-user-installation\n\nThe default behavior is to install Valet for all users, in /opt/valet, which might require\nyou to type your password on sudo commands (you don\'t have to run this script with sudo, it will\nask for your password when needed).\n\nThis script will:\n\n- 1. Download the given release from GitHub (latest by default).\n\n- 2. Copy it in the Valet home directory, which defaults to:\n  - /opt/valet in case of a multi user installation\n  - ~/.local/valet otherwise\n\n- 3. Make the valet script readable and executable, either by adding a shim\n     in a bin directory already present in your PATH, or by adding the Valet\n     directory to your PATH on shell startup.\n\n- 4. Copy the examples in the valet user directory ~/.valet.d.\n\n- 6. Run self setup command (in case of a new installation) or re-export the config.\n\n- 7. Try to update (fetch merge --ff-only) the git repositories and all\n     installed extensions in your valet user directory.\n'
+CMD_DESCRIPTION_selfUpdate=$'Update valet using the latest release on GitHub. Also update all installed extensions.\n\nThis script can also be used as a standalone script to install Valet:\n\nbash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)"\n\nIf you need to pass options (e.g. --single-user-installation) to the script, you can do it like this:\n\nbash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)" -s --single-user-installation\n\nThe default behavior is to install Valet for all users, in /opt/valet, which might require\nyou to type your password on sudo commands (you don\'t have to run this script with sudo, it will\nask for your password when needed).\n\nThis script will:\n\n- 1. Download the given release from GitHub (latest by default).\n\n- 2. Copy it in the Valet home directory, which defaults to:\n  - /opt/valet in case of a multi user installation\n  - ~/.local/valet otherwise\n\n- 3. Make the valet script readable and executable, either by adding a shim\n     in a bin directory already present in your PATH, or by adding the Valet\n     directory to your PATH on shell startup.\n\n- 4. Copy the examples in the valet user directory ~/.valet.d.\n\n- 6. Run self setup command (in case of a new installation) or re-export the config.\n\n- 7. Try to update (fetch merge --ff-only) the git repositories and all\n     installed extensions in your valet user directory.\n'
 CMD_DESCRIPTION_showCommandHelp=$'Show the help of this program or of the help of a specific command.\n\nYou can show the help with or without colors and set the maximum columns for the help text.'
 CMD_DESCRIPTION_this=$'Valet helps you browse, understand and execute your custom bash commands.\n\nOnline documentation is available at https://jcaillon.github.io/valet/.\n\nYou can call valet without any commands to start an interactive session.\n\nExit codes:\n\n- 0: everything went well\n- 1+: an error occured\n\nCreate your own commands:\n\nYou can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ or the examples under examples.d to do so.\nValet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).\nOnce you have created your new command script, run the valet self build command to update the valet menu.\n\nConfiguration through environment variables:\n\nIn addition to the environment variables defined for each options, you can define environment variables to configure valet.\n\nThese variables are conviently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the VALET_CONFIG_FILE environment variable).\n\nYou can run valet self config to open the configuration file with your default editor (the file will get created if it does not yet exist).\n\nDeveloper notes:\n\nYou can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/valet-profiler-{PID}.txt).'
 CMD_EXAMPLES_DESCRIPTION_selfDocument=0 $'Generate the documentation for all the library functions of Valet and output to the default directory.\n'
@@ -89,24 +89,24 @@ CMD_EXAMPLES_DESCRIPTION_this=0 "Displays this help text." 1 $'Active ⌜verbose
 CMD_EXAMPLES_NAME_selfDocument=0 "valet self document"
 CMD_EXAMPLES_NAME_selfExtend=0 "valet self extend https://github.com/jcaillon/valet-devops-toolbox.git --version latest"
 CMD_EXAMPLES_NAME_selfMock2=0 "valet self mock2 -o -2 value1 arg1 more1 more2"
-CMD_EXAMPLES_NAME_selfUpdate=0 "valet self update" 1 "bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)\"" 2 "bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/valet.d/commands.d/self-install.sh)\" -s --single-user-installation --unattended"
+CMD_EXAMPLES_NAME_selfUpdate=0 "valet self update" 1 "bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)\"" 2 "bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)\" -s --single-user-installation --unattended"
 CMD_EXAMPLES_NAME_showCommandHelp=0 "valet help cmd" 1 "valet help cmd subCmd" 2 "valet help --no-colors --columns 50"
 CMD_EXAMPLES_NAME_this=0 "valet --help" 1 "valet -v a-command and-sub-command"
-CMD_FILETOSOURCE_selfBuild='valet.d/commands.d/self-build.sh'
-CMD_FILETOSOURCE_selfConfig='valet.d/commands.d/self-config.sh'
-CMD_FILETOSOURCE_selfDocument='valet.d/commands.d/self-document.sh'
-CMD_FILETOSOURCE_selfExport='valet.d/commands.d/self-export.sh'
-CMD_FILETOSOURCE_selfExtend='valet.d/commands.d/self-extend.sh'
-CMD_FILETOSOURCE_selfMock1='valet.d/commands.d/self-mock.sh'
-CMD_FILETOSOURCE_selfMock2='valet.d/commands.d/self-mock.sh'
-CMD_FILETOSOURCE_selfMock3='valet.d/commands.d/self-mock.sh'
-CMD_FILETOSOURCE_selfMock4='valet.d/commands.d/self-mock.sh'
-CMD_FILETOSOURCE_selfRelease='valet.d/commands.d/self-release.sh'
-CMD_FILETOSOURCE_selfSetup='valet.d/commands.d/self-setup.sh'
-CMD_FILETOSOURCE_selfTest='valet.d/commands.d/self-test.sh'
-CMD_FILETOSOURCE_selfUninstall='valet.d/commands.d/self-uninstall.sh'
-CMD_FILETOSOURCE_selfUpdate='valet.d/commands.d/self-install.sh'
-CMD_FILETOSOURCE_showCommandHelp='valet.d/commands.d/help.sh'
+CMD_FILETOSOURCE_selfBuild='commands.d/self-build.sh'
+CMD_FILETOSOURCE_selfConfig='commands.d/self-config.sh'
+CMD_FILETOSOURCE_selfDocument='commands.d/self-document.sh'
+CMD_FILETOSOURCE_selfExport='commands.d/self-export.sh'
+CMD_FILETOSOURCE_selfExtend='commands.d/self-extend.sh'
+CMD_FILETOSOURCE_selfMock1='commands.d/self-mock.sh'
+CMD_FILETOSOURCE_selfMock2='commands.d/self-mock.sh'
+CMD_FILETOSOURCE_selfMock3='commands.d/self-mock.sh'
+CMD_FILETOSOURCE_selfMock4='commands.d/self-mock.sh'
+CMD_FILETOSOURCE_selfRelease='commands.d/self-release.sh'
+CMD_FILETOSOURCE_selfSetup='commands.d/self-setup.sh'
+CMD_FILETOSOURCE_selfTest='commands.d/self-test.sh'
+CMD_FILETOSOURCE_selfUninstall='commands.d/self-uninstall.sh'
+CMD_FILETOSOURCE_selfUpdate='commands.d/self-install.sh'
+CMD_FILETOSOURCE_showCommandHelp='commands.d/help.sh'
 CMD_FILETOSOURCE_this='valet'
 CMD_FUNCTION_NAME_='this'
 CMD_FUNCTION_NAME_help='showCommandHelp'
@@ -276,32 +276,32 @@ CMD_SUDO_selfMock3='true'
 INFO     Skipping the build of scripts in user directory (building core commands only).
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet⌝.
 INFO                              ├── ⌜⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/help.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/help.sh⌝.
 INFO                              ├── ⌜help⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-build.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-build.sh⌝.
 INFO                              ├── ⌜self build⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-config.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-config.sh⌝.
 INFO                              ├── ⌜self config⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-document.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-document.sh⌝.
 INFO                              ├── ⌜self document⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-export.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-export.sh⌝.
 INFO                              ├── ⌜self export⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-extend.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-extend.sh⌝.
 INFO                              ├── ⌜self extend⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-install.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-install.sh⌝.
 INFO                              ├── ⌜self update⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-mock.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-mock.sh⌝.
 INFO                              ├── ⌜self mock1⌝.
 INFO                              ├── ⌜self mock2⌝.
 INFO                              ├── ⌜self mock3⌝.
 INFO                              ├── ⌜self mock4⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-release.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-release.sh⌝.
 INFO                              ├── ⌜self release⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-setup.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-setup.sh⌝.
 INFO                              ├── ⌜self setup⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-test.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-test.sh⌝.
 INFO                              ├── ⌜self test⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet.d/commands.d/self-uninstall.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-uninstall.sh⌝.
 INFO                              ├── ⌜self uninstall⌝.
 INFO     == Summary of the commands ==
 

@@ -21,7 +21,8 @@ locale-gen ${LOCALE}.UTF-8
 
 # ✅ copy files
 COPY examples.d/ /root/.valet.d/examples.d/
-COPY valet.d/ /opt/valet/valet.d/
+COPY libraries.d/ /opt/valet/libraries.d/
+COPY commands.d/ /opt/valet/commands.d/
 COPY extras/ /opt/valet/extras/
 COPY valet /opt/valet/valet
 
@@ -30,7 +31,7 @@ COPY valet /opt/valet/valet
 RUN \
 echo -e "#"'!'"/usr/bin/env bash"$'\n'"/opt/valet/valet \"\$@\"" > /usr/local/bin/valet; \
 chmod +x /opt/valet/valet; \
-chmod +x /opt/valet/valet.d/commands.d/self-build.sh; \
+chmod +x /opt/valet/commands.d/self-build.sh; \
 chmod +x /usr/local/bin/valet; \
 export VALET_CONFIG_ENABLE_COLORS=true; \
 valet self config --no-edit --override --export-current-values

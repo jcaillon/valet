@@ -38,8 +38,8 @@ function main() {
   echo "================================================"
 
   export VALET_VERBOSE=true
-  chmod +x ./valet.d/commands.d/self-install.sh
-  ./valet.d/commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}"
+  chmod +x ./commands.d/self-install.sh
+  ./commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}"
 
   echo "================================================"
   echo "Built commands:"
@@ -152,7 +152,7 @@ function main() {
 
   echo "Previous version:"
   valet --version
-  echo "0.0.0" > /opt/valet/valet.d/version
+  echo "0.0.0" > /opt/valet/version
   #echo "y" | valet self update
 
   echo "Latest release version:"
@@ -162,7 +162,7 @@ function main() {
   echo "Updating Valet: rerunning the install script."
   echo "================================================"
 
-  echo "yynnn" | bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/valet.d/commands.d/self-install.sh")" -s --use-branch --version "${BRANCH_NAME}"
+  echo "yynnn" | bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/commands.d/self-install.sh")" -s --use-branch --version "${BRANCH_NAME}"
 
   echo "Version after a force install:"
   valet --version
@@ -180,7 +180,7 @@ function main() {
   echo "Installing Valet: --unattended --use-branch --version ${BRANCH_NAME} --installation-directory /valet --no-shim --no-examples."
   echo "================================================"
 
-  ./valet.d/commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}" --installation-directory /valet --no-shim --no-examples
+  ./commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}" --installation-directory /valet --no-shim --no-examples
 
   echo "================================================"
   echo "Uninstalling Valet."
@@ -208,7 +208,7 @@ function main() {
   function fish() { :; };
   function ksh() { :; };
   function nu() { :; };
-  $(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/'"${BRANCH_NAME}"'/valet.d/commands.d/self-install.sh")"
+  $(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/'"${BRANCH_NAME}"'/commands.d/self-install.sh")"
   '
 
   echo "================================================"
@@ -223,7 +223,7 @@ function main() {
   echo "Installing Valet: --use-branch --version ${BRANCH_NAME} --unattended --single-user-installation --no-examples."
   echo "================================================"
 
-  bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/valet.d/commands.d/self-install.sh")" -s --use-branch --version "${BRANCH_NAME}" --unattended --single-user-installation --no-examples
+  bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/commands.d/self-install.sh")" -s --use-branch --version "${BRANCH_NAME}" --unattended --single-user-installation --no-examples
   export PATH="/root/.local/valet:${PATH}"
 
   echo "================================================"
