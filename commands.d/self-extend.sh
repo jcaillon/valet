@@ -78,9 +78,20 @@ source curl
 #   description: |-
 #     Skip the execution of the `extension.setup.sh` script even if it exists.
 # examples:
-# - name: self extend https://github.com/jcaillon/valet-devops-toolbox.git --version latest
+# - name: self extend my-new-extension
+#   description: |-
+#     Create a new extension named ⌜my-new-extension⌝ in the user directory.
+# - name: self extend .
+#   description: |-
+#     Setup the current directory as an extension in the user directory.
+# - name: self extend https://github.com/jcaillon/valet-devops-toolbox.git
 #   description: |-
 #     Download the latest version of the valet-devops-toolbox application and install it for Valet.
+# - name: self extend https://github.com/jcaillon/valet --version extension-1 --name extension-1 --skip-setup
+#   description: |-
+#     Download the ⌜extension-1⌝ reference of the valet repository and install it as ⌜extension-1⌝ for Valet.
+#     Skip the execution of the `extension.setup.sh` script.
+#     (This is actually a fake extension for testing purposes).
 ##VALET_COMMAND
 function selfExtend() {
   local extensionUri version skipSetup name
@@ -188,7 +199,7 @@ function selfExtend_createExtension() {
       rm -Rf "${extensionDirectory}"
     fi
 
-    local -a subDirectories=(src libraries.d tests.d)
+    local -a subDirectories=(commands.d libraries.d tests.d)
     local subdir
     for subdir in "${subDirectories[@]}"; do
       io::createDirectoryIfNeeded "${extensionDirectory}/${subdir}"

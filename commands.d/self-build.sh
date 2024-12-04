@@ -54,6 +54,13 @@ set -Eeu -o pipefail
 # - name: -s, --silent
 #   description: |-
 #     Build silently without any info logs.
+# examples:
+# - name: self build
+#   description: |-
+#     Build the valet user commands.
+# - name: self build -d ~/my-valet-directory --silent
+#   description: |-
+#     Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
 ##VALET_COMMAND
 function selfBuild() {
   local userDirectory outputFile coreOnly noOutput silent
@@ -74,7 +81,7 @@ function selfBuild() {
       -C | --core-only)
         coreOnly=true
         ;;
-      -O | --noOutput)
+      -O | --no-output)
         noOutput=true
         ;;
       -s | --silent)

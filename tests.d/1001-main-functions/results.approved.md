@@ -414,6 +414,8 @@ Failed as expected on ambiguous result
 INFO     Fuzzy matching the command ⌜se bu⌝ to ⌜self build⌝.
 ERROR    Could not find an exact command for ⌜se⌝, use ⌜--help⌝ to get a list of valid commands.
 ERROR    Found multiple matches for the command ⌜sf⌝, please be more specific:
+CHIsCDEelCHIfCDE add-command
+CHIsCDEelCHIfCDE add-library
 CHIsCDEelCHIfCDE build
 CHIsCDEelCHIfCDE config
 CHIsCDEelCHIfCDE document

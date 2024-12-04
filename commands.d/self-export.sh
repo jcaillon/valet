@@ -35,6 +35,11 @@ fi
 # - name: -a, --export-all
 #   description: |-
 #     Export all the libraries.
+# examples:
+# - name: !eval "$(valet self export -a)"
+#   description: |-
+#     Export all the functions defined in the Valet libraries.
+#     Then can then be used directly in your bash scripts or from the bash prompt.
 ##VALET_COMMAND
 function selfExport() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"

@@ -35,6 +35,13 @@ options:
 - name: --export-current-values
   description: |-
     When writing the configuration file, export the current values of the variables.
+examples:
+- name: self config
+  description: |-
+    Open the configuration file of Valet with your default editor.
+- name: self config --no-edit --override --export-current-values
+  description: |-
+    Create (or recreate) the configuration file of Valet reusing the possible current values of the variables.
 ---"
 function selfConfig() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"

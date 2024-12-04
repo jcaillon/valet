@@ -60,6 +60,16 @@ options:
 - name: -P, --no-parallel-tests
   description: |-
     Disable the default behavior of running the tests in parallel. Will run the tests sequentially.
+examples:
+- name: self test
+  description: |-
+    Run all the tests found in the valet user directory.
+- name: self test -a
+  description: |-
+    Run all the tests found in the valet user directory and automatically approve the results.
+- name: self test -i '(my-thing|my-stuff)'
+  description: |-
+    Run only the test suites that match the regex pattern ⌜(my-thing|my-stuff)⌝.
 ---"
 function selfTest() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
@@ -195,7 +205,7 @@ function selfTestRunCoreTests() {
     log::warning "The valet examples directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝ does not exist, cannot run the tests on the core examples."
   else
     # we need to rebuild the commands for the examples only
-    selfTestUtils_rebuildCommands --user-directory "${GLOBAL_VALET_HOME}/examples.d" --noOutput
+    selfTestUtils_rebuildCommands --user-directory "${GLOBAL_VALET_HOME}/examples.d" --no-output
 
     log::info "Running all test suites in directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝."
     selfTestUtils_runTestSuites "${GLOBAL_VALET_HOME}/examples.d/showcase/tests.d"

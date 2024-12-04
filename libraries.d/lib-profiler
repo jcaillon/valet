@@ -100,7 +100,7 @@ function profilerCleanFile() {
   awk -F $'\t' -v timePrecision="${timePrecision}" -v clearCoreLine="${clearLine}" '
   BEGIN {
     printf "%s\n\n", "(D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)";
-    printf "%s\n", "D  I  S  timer  delta                           source:line function                                 → command";
+    printf "%s\n", "D  I  S  timer  delta                          source:line function                                 → command";
     lastLineWasSkipped = 0;
     lastTimer = 0;
     baseStackLength = 99999;
@@ -163,7 +163,7 @@ function profilerBashCleanFile() {
   local clearCoreLine="${2}"
 
   printf "%s\n\n" "(D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)"
-  printf "%s\n" "D  I  S  timer    delta                             source:line function                                 → command"
+  printf "%s\n" "D  I  S  timer  delta                          source:line function                                 → command"
 
   local lastLineWasSkipped=0
   local lastTimer=0

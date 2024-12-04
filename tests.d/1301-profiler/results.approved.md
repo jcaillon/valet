@@ -19,7 +19,7 @@ That's it!
 → cat 'profiler.log'
 (D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)
 
-D  I  S  timer  delta                           source:line function                                 → command
+D  I  S  timer  delta                          source:line function                                 → command
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:177  selfMock2()                              → local -a more
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:178  selfMock2()                              → core::parseArguments arg1 arg2
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:178  selfMock2()                              → eval 'local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
@@ -83,7 +83,7 @@ That's it!
 → cat 'profiler.log'
 (D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)
 
-D  I  S  timer    delta                             source:line function                                 → command
+D  I  S  timer  delta                          source:line function                                 → command
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:177  selfMock2()                              → local -a more
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:178  selfMock2()                              → core::parseArguments arg1 arg2
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:178  selfMock2()                              → eval 'local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
