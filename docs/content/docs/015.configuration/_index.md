@@ -11,7 +11,7 @@ Valet is configurable through environment variables.
 There are several ways to make that configuration (and thus the Valet variables) permanent:
 
 - Define variables in your `~/.bashrc` script which is sourced when starting bash.
-- Other methods: `/etc/environment`, `~/.profile` or `~/.bash_profile`
+- Other (not guaranteed) methods include: `/etc/environment`, `~/.profile` or `~/.bash_profile`. _They are not recommended._
 
 In Valet, you can also set variables in special bash scripts which are sourced when the program starts. These scripts are:
 
@@ -34,5 +34,5 @@ We give below the default content of the configuration file, which contains comm
 
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../usage" title="Usage" >}}
-  {{< card icon="arrow-circle-right" link="../new-commands" title="New commands" >}}
+  {{< card icon="arrow-circle-right" link="../new-extensions" title="Create an extension" >}}
 {{< /cards >}}

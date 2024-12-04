@@ -72,7 +72,7 @@ function main() {
   echo "================================================"
 
   mv /usr/bin/git /usr/bin/git2
-  valet self extend https://github.com/jcaillon/valet.git --version extension-2 --name extension-2
+  echo y | valet self extend https://github.com/jcaillon/valet.git --version extension-2 --name extension-2
   mv /usr/bin/git2 /usr/bin/git
 
   echo "================================================"
@@ -112,7 +112,7 @@ function main() {
   # remove sha1 in extension-2
   rm -f ~/.valet.d/extension-2/.sha1
 
-  echo "y" | valet self update
+  echo "yyy" | valet self update
 
 
 

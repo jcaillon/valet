@@ -7,7 +7,7 @@
 
 [![icon](docs/static/logo.png)][valet-site]
 
-Valet is a framework that helps you build CLI applications in bash.
+Valet is a zero dependency tool that helps you build fast, robust, testable and interactive CLI applications in bash.
 
 With Valet, you can setup and execute tests, code interactive experiences for your users, navigate and execute your scripts (called *commands*) from a searchable menu interface, and more! It **provides libraries of functions that can be sourced** to solve standard programming needs such as string, array or file manipulation, prompting the user, and so on...
 

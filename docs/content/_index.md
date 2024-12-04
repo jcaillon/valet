@@ -19,7 +19,7 @@ keywords:
 
 <div class="hx-mb-12">
 {{< hextra/hero-subtitle >}}
-  Valet is a zero dependency framework that helps you build fast, robust, testable and interactive bash scripts.
+  Valet is a zero dependency tool that helps you build fast, robust, testable and interactive CLI applications in bash.
 {{< /hextra/hero-subtitle >}}
 </div>
 
@@ -43,7 +43,7 @@ if (document.documentElement.style.colorScheme === "dark") {
     link="showcase"
     icon="shield-check"
     title="Build professional CLI tools"
-    subtitle="Valet gives you the framework and functions required to **build awesome tools, effortlessly**, in bash. Get everything you expect from a good CLI software (e.g. git, docker...) in a few lines of bash code."
+    subtitle="Valet gives you the framework and functions required to **build awesome tools, effortlessly**, in bash. Get everything you expect from a good CLI software (e.g. git, docker...) in a few lines of bash code and YAML configuration."
     class="hx-aspect-auto md:hx-aspect-[1.1/1] max-md:hx-min-h-[340px]"
     style="background: radial-gradient(ellipse at 50% 80%,rgba(21,19,110,0.15),hsla(0,0%,100%,0));"
   >}}
@@ -51,7 +51,7 @@ if (document.documentElement.style.colorScheme === "dark") {
     link="showcase"
     icon="terminal"
     title="Turn your scripts into commands"
-    subtitle="Valet enables you to easily create **commands** that can take arguments and/or options automatically parsed by the framework. Exceptions are gracefully handled with the error stack printed to the user."
+    subtitle="Valet enables you to easily create **commands** that can take arguments and/or options automatically parsed by the Valet. Exceptions are gracefully handled with the error stack printed to the user."
     class="hx-aspect-auto md:hx-aspect-[1.1/1] max-md:hx-min-h-[340px]"
     style="background: radial-gradient(ellipse at 50% 80%,rgba(221,210,59,0.15),hsla(0,0%,100%,0));"
   >}}
@@ -67,7 +67,7 @@ if (document.documentElement.style.colorScheme === "dark") {
     link="showcase"
     icon="puzzle"
     title="Libraries of pure bash functions"
-    subtitle="Make your scripts more performant and write code faster by using Valet libraries for string manipulation, interactive prompt, pure bash I/O and more..."
+    subtitle="Make your scripts more performant and write code faster by using Valet libraries for string manipulation, interactive prompt, pure bash I/O and more... You can also extend Valet by creating and sharing your own libraries!"
     class="hx-aspect-auto md:hx-aspect-[1.1/1] max-lg:hx-min-h-[340px]"
     style="background: radial-gradient(ellipse at 50% 80%,rgba(38,116,56,0.15),hsla(0,0%,100%,0));"
   >}}
@@ -83,7 +83,7 @@ if (document.documentElement.style.colorScheme === "dark") {
     link="showcase"
     icon="book-open"
     title="Clear and standardized help"
-    subtitle="Declare properties for your commands which are used to automatically display a user friendly documentation."
+    subtitle="Declare properties for your commands with YAML which are used to automatically display a user friendly documentation."
     class="hx-aspect-auto md:hx-aspect-[1.1/1] max-lg:hx-min-h-[340px]"
     style="background: radial-gradient(ellipse at 50% 80%,rgba(142,53,74,0.15),hsla(0,0%,100%,0));"
   >}}

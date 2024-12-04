@@ -6,9 +6,9 @@ weight: 20
 url: /docs/new-commands
 ---
 
-This page describes how to add your own commands in Valet. Make sure to review the [Valet usage][usage] first to get a good understanding of what is a command.
+This page describes how to add your own commands in Valet. Make sure to review the [Valet introduction][introduction] and [Valet usage][usage] pages first to get a good understanding of what is an **extension** and what is a **command**.
 
-The section [working on bash][work-on-bash-scripts] helps you set up a coding environment for bash.
+The section [working on bash][work-on-bash-scripts] will help you set up a coding environment for bash.
 
 For command examples, take a look at the [showcase command definitions][showcase-commands].
 
@@ -278,6 +278,7 @@ You can activate the debug log level with Valet `-v` option, e.g. `valet -v my c
 {{< /cards >}}
 
 [usage]: ../usage
+[introduction]: ../introduction
 [work-on-bash-scripts]: ../work-on-bash-scripts
 [performance-tips]: performance-tips
 [configuration]: ../configuration

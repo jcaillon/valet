@@ -10,7 +10,7 @@ url: /docs/installation
 
 - Bash version 5 or superior is required (might work with older versions but it is not guaranteed).
 - From [GNU coreutils][gnu-core-utils]: it uses `rm`, `mv`, `mkdir` for all commands. It uses `cp`, `chmod`, `touch` for the installation/updates. *You most likely already have all of these!*
-- [curl][curl] and [tar][tar] are needed only if you want to use the self-update command.
+- [curl][curl] and [tar][tar] are needed only if you want to use the `self update` or `self extend` command.
 
 ## 🚚 Automated installation
 
@@ -21,7 +21,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/co
 ```
 
 {{< callout type="info" emoji="💡" >}}
-Please review the [installation script][selfInstallScriptLink] or the [self install command usage][selfInstallCommandUsageLink] to learn about the different installer options.
+Please review the [installation script](https://github.com/jcaillon/valet/blob/latest/commands.d/self-install.sh) or the [self install command usage](https://github.com/jcaillon/valet/blob/latest/tests.d/1106-self-update/results.approved.md) to learn about the different installer options.
 {{< /callout >}}
 
 Here is an example command to install Valet with the options `--unattended --single-user-installation` (no interactive prompt during installation and installs itself in the home directory of the user):
@@ -80,8 +80,6 @@ Alternatively, use `docker run --rm -it noyacode/valet` to pull and run the imag
 [git-for-windows-link]: https://gitforwindows.org/
 [wsl-installation-link]: https://learn.microsoft.com/en-us/windows/wsl/install
 [windows-terminal-link]: https://github.com/microsoft/terminal
-[selfInstallScriptLink]: https://github.com/jcaillon/valet/blob/latest/commands.d/self-install.sh
-[selfInstallCommandUsageLink]: https://github.com/jcaillon/valet/blob/latest/tests.d/1106-self-update/results.approved.md
 [docker]: https://www.docker.com/
 [podman]: https://podman.io/
 [valetImageTagsLink]: https://github.com/jcaillon/valet/pkgs/container/valet

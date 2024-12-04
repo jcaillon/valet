@@ -394,6 +394,14 @@ function selfExtend_executeSetupScript() {
     return 0
   fi
 
+  log::info "Found setup script for the extension ⌜${extensionName}⌝: ⌜${extensionDirectory}/extension.setup.sh⌝."
+
+  # ask for confirmation before executing the setup script
+  if ! interactive::promptYesNo "Do you trust the setup script for the extension ⌜${extensionName}⌝ and wish to execute it?" true; then
+    log::info "The setup script for the extension ⌜${extensionName}⌝ was not trusted, skipping the setup."
+    return 0
+  fi
+
   log::info "Executing the setup script for the extension ⌜${extensionName}⌝: ⌜${extensionDirectory}/extension.setup.sh⌝."
   # shellcheck disable=SC1091
   if ! (source "${extensionDirectory}/extension.setup.sh"); then
