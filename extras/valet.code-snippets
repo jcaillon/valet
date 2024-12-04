@@ -1,1 +1,239 @@
-{}
+{
+// Documentation generated for the version 0.27.285 (2024-12-05).
+	"source": {
+		"prefix": "source",
+		"description": "Source a file for Valet, add the necessary comment for shellcheck.",
+		"scope": "",
+		"body": [
+			"# shellcheck source=../lib-valet",
+			"source $1",
+			"$0",
+			""
+		]
+	},
+	"new command alt": {
+		"prefix": "new command alt",
+		"description": "A new command alternative definition for Valet",
+		"scope": "",
+		"body": [
+			"##<<VALET_COMMAND",
+			"# command: $1",
+			"# function: $2",
+			"# shortDescription: A short sentence.",
+			"# description: |-",
+			"#   A long description that can use ⌜quotes⌝.",
+			"# sudo: false",
+			"# hideInMenu: false",
+			"# arguments:",
+			"# - name: firstArg",
+			"#   description: |-",
+			"#     First argument.",
+			"# - name: more...",
+			"#   description: |-",
+			"#     Will be an an array of strings.",
+			"# options:",
+			"# - name: -o, --option1",
+			"#   description: |-",
+			"#     First option.",
+			"#   noEnvironmentVariable: true",
+			"# - name: -2, --this-is-option2 <level>",
+			"#   description: |-",
+			"#     An option with a value.",
+			"#   noEnvironmentVariable: false",
+			"# examples:",
+			"# - name: command -o -2 value1 arg1 more1 more2",
+			"#   description: |-",
+			"#     Call command with option1, option2 and some arguments.",
+			"##VALET_COMMAND",
+			"function $2() {",
+			"  core::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  core::checkParseResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  $0",
+			"}"
+		]
+	},
+	"new command": {
+		"prefix": "new command",
+		"description": "A new command definition for Valet",
+		"scope": "",
+		"body": [
+			": \"---",
+			"command: $1",
+			"function: $2",
+			"shortDescription: A short sentence.",
+			"description: |-",
+			"  A long description that can use ⌜quotes⌝.",
+			"sudo: false",
+			"hideInMenu: false",
+			"arguments:",
+			"- name: firstArg",
+			"  description: |-",
+			"    First argument.",
+			"- name: more...",
+			"  description: |-",
+			"    Will be an an array of strings.",
+			"options:",
+			"- name: -o, --option1",
+			"  description: |-",
+			"    First option.",
+			"  noEnvironmentVariable: true",
+			"- name: -2, --this-is-option2 <level>",
+			"  description: |-",
+			"    An option with a value.",
+			"  noEnvironmentVariable: false",
+			"examples:",
+			"- name: command -o -2 value1 arg1 more1 more2",
+			"  description: |-",
+			"    Call command with option1, option2 and some arguments.",
+			": \"---",
+			"function $2() {",
+			"  core::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  core::checkParseResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  $0",
+			"}"
+		]
+	},
+	"comment section": {
+		"prefix": "comment section",
+		"description": "",
+		"scope": "",
+		"body": [
+			"#===============================================================",
+			"# >>> $1",
+			"#===============================================================",
+			"$0"
+		]
+	},
+	"quote": {
+		"prefix": "quote",
+		"description": "",
+		"scope": "",
+		"body": [
+			"⌜$1⌝$0"
+		]
+	},
+  "CURSOR_LINE": {
+    "prefix": "CURSOR_LINE",
+    "description": "",
+    "scope": "",
+    "body": [
+      "CURSOR_LINE$0"
+    ]
+  },
+  "CURSOR_COLUMN": {
+    "prefix": "CURSOR_COLUMN",
+    "description": "",
+    "scope": "",
+    "body": [
+      "CURSOR_COLUMN$0"
+    ]
+  },
+  "RETURNED_VALUE": {
+    "prefix": "RETURNED_VALUE",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_VALUE$0"
+    ]
+  },
+  "RETURNED_VALUE2": {
+    "prefix": "RETURNED_VALUE2",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_VALUE2$0"
+    ]
+  },
+  "RETURNED_VALUE3": {
+    "prefix": "RETURNED_VALUE3",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_VALUE3$0"
+    ]
+  },
+  "RETURNED_ARRAY": {
+    "prefix": "RETURNED_ARRAY",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_ARRAY$0"
+    ]
+  },
+  "RETURNED_ARRAY2": {
+    "prefix": "RETURNED_ARRAY2",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_ARRAY2$0"
+    ]
+  },
+  "RETURNED_ARRAY3": {
+    "prefix": "RETURNED_ARRAY3",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_ARRAY3$0"
+    ]
+  },
+  "LAST_KEY_PRESSED": {
+    "prefix": "LAST_KEY_PRESSED",
+    "description": "",
+    "scope": "",
+    "body": [
+      "LAST_KEY_PRESSED$0"
+    ]
+  },
+  "RETURNED_ASSOCIATIVE_ARRAY": {
+    "prefix": "RETURNED_ASSOCIATIVE_ARRAY",
+    "description": "",
+    "scope": "",
+    "body": [
+      "RETURNED_ASSOCIATIVE_ARRAY$0"
+    ]
+  },
+	"read file to array and loop": {
+		"prefix": "read file to array and loop",
+		"description": "Read file to array and loop",
+		"scope": "",
+		"body": [
+			"readarray -d $'\\n' fileLines < file",
+			"for myString in \"${fileLines[@]}\"; do",
+			"  # the difference is also that myString will end with the delimiter, so you might want to remove it",
+			"  # Alternatively, you can run readarray with -t but in that case you will not have an array element for empty lines",
+			"  echo \"${myString%$'\\n'}\"",
+			"done"
+		]
+	},
+	"loop through lines of string": {
+		"prefix": "loop through lines of string",
+		"description": "Loop through each line of a string (keep empty lines)",
+		"scope": "",
+		"body": [
+			"while read -r line; do",
+			"  echo \"${line}\"",
+			"done <<< \"${var1}\""
+		]
+	},
+	"loop through lines of string (for)": {
+		"prefix": "loop through lines of string (for)",
+		"description": "Loop through each line of a string (does not keep empty lines)",
+		"scope": "",
+		"body": [
+			"local IFS=$'\\n'",
+			"for line in ${var1}; do",
+			"  echo \"${line}\"",
+			"done"
+		]
+	},
+	"read file loop on all lines": {
+		"prefix": "read file loop on all lines",
+		"description": "Read a file, line by line",
+		"scope": "",
+		"body": [
+			"while read -r line || [[ -n ${line:-} ]]; do",
+			"  echo \"${line}\"",
+			"done < file"
+		]
+	}
+}

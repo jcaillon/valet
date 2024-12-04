@@ -64,10 +64,6 @@ function selfDocument() {
   # export the documentation for each library
   selfDocument::getAllFunctionsDocumentation "${coreOnly}"
 
-  # sort the functions by name
-  declare -a SORTED_FUNCTION_NAMES=("${!RETURNED_ASSOCIATIVE_ARRAY[@]}")
-  array::sort SORTED_FUNCTION_NAMES
-
   # write each function documentation to a file
   selfRelease_writeAllFunctionsToMarkdown "${pageFooter}" "${output}/lib-valet.md"
   log::info "The documentation has been generated in ⌜${output}/lib-valet.md⌝."
@@ -141,7 +137,7 @@ function selfDocument::getAllFunctionsDocumentation() {
     log::printFileString "${filesToAnalyze[*]}"
   fi
 
-  unset -v RETURNED_ASSOCIATIVE_ARRAY
+  unset -v RETURNED_ASSOCIATIVE_ARRAY SORTED_FUNCTION_NAMES
   declare -g -A RETURNED_ASSOCIATIVE_ARRAY=()
 
   # for each file to analyze
@@ -190,6 +186,10 @@ function selfDocument::getAllFunctionsDocumentation() {
       log::printFileString "${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"
     done
   fi
+
+  # sort the functions by name
+  declare -g -a SORTED_FUNCTION_NAMES=("${!RETURNED_ASSOCIATIVE_ARRAY[@]}")
+  array::sort SORTED_FUNCTION_NAMES
 }
 
 # This function writes all the functions documentation to a given file.
