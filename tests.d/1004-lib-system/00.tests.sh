@@ -2,6 +2,8 @@
 
 # shellcheck source=../../valet.d/lib-system
 source system
+# shellcheck source=../../valet.d/lib-io
+source io
 
 function testSystem::os() {
 
@@ -137,29 +139,26 @@ function test_system::addToPath() {
 }
 
 function test_system::windowsSetEnvVar() {
-  # shellcheck disable=SC2317
-  function powershell() { echo "powershell: $*"; }
-
   echo "→ system::windowsSetEnvVar VAR VALUE"
   OSTYPE=msys system::windowsSetEnvVar VAR VALUE
   echo
   echo "→ system::windowsSetEnvVar VAR ''"
   OSTYPE=msys system::windowsSetEnvVar VAR ''
   echo
-
-  unset -f powershell
   test::endTest "Testing system::windowsSetEnvVar" 0
 }
 
-function test_system::windowsAddToPath() {
-  # shellcheck disable=SC2317
-  function powershell() { echo "powershell: $*"; }
+function test_system::windowsGetEnvVar() {
+  echo "→ system::windowsGetEnvVar VAR"
+  OSTYPE=msys system::windowsGetEnvVar VAR
+  echo
+  test::endTest "Testing system::windowsGetEnvVar" 0
+}
 
+function test_system::windowsAddToPath() {
   echo "→ system::windowsAddToPath /coucou"
   OSTYPE=msys system::windowsAddToPath /coucou
   echo
-
-  unset -f powershell
   test::endTest "Testing system::windowsAddToPath" 0
 }
 
@@ -172,7 +171,18 @@ function main() {
   testSystem::commandExists
   test_system::addToPath
   test_system::windowsSetEnvVar
+  test_system::windowsGetEnvVar
   test_system::windowsAddToPath
 }
 
+# backup original function
+io::invoke declare -f io::runPs1Command
+_ORIGINAL_FUNCTION="${RETURNED_VALUE//declare -? /}"
+
+# shellcheck disable=SC2317
+function io::runPs1Command() { echo "io::runPs1Command: $*"; }
+
 main
+
+unset -f io::runPs1Command
+eval "${_ORIGINAL_FUNCTION}"

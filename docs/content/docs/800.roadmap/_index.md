@@ -8,16 +8,13 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- Add utility functions to install stuff from the extension.setup.sh scripts `powershell.exe -NoProfile -NonInteractive -Command "echo ok" 2>/dev/null`:
-  - system::addToPath
-  - system::addToPathIfNotPresent
-- Finish prompt and interactive functions.
 - Self-command to create a new command interactively.
-- Add full support for interactive mode.
 - Add HOW TO documentation:
   - how to build and share a CLI application with Valet
   - how to use valet from your bash prompt
   - how to use valet in your existing scripts
+- Finish prompt and interactive functions.
+- Add full support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.
 - Generate an autocompletion script for bash and zsh.
@@ -32,5 +29,6 @@ This page lists the features that I would like to implement in Valet. They come 
   - test if folder is writeable
   - Implement regex replace in pure bash.
 - Add `valet.cmd` to the package, in self setup we can optionally add the valet install dir to the windows PATH.
+- Also export user defined functions.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

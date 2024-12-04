@@ -128,7 +128,7 @@ function io::createTempDirectory() {
 # ```
 # shellcheck disable=SC2016
 function io::cleanupTempFiles() {
-  if [[ -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
+  if [[ -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
     log::debug "Deleting temporary directory."
     rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
     unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
@@ -138,6 +138,11 @@ function io::cleanupTempFiles() {
     rm -f "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-"* 1>/dev/null
     break
   done
+  # for files created in  io::createWindowsTempFile
+  if [[ -n ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} && -d ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY} ]]; then
+    log::debug "Deleting windows temporary directory."
+    rm -Rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" 1>/dev/null
+  fi
 }
 
 #===============================================================

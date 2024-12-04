@@ -160,21 +160,6 @@ function testIo::isDirectoryWritable() {
   test::endTest "Testing io::isDirectoryWritable" 0
 }
 
-function test_io::runPs1Command() {
-  function powershell() { echo "$*"; }
-
-  echo "→ io::runPs1Command 'Get-Process'"
-  io::runPs1Command 'Get-Process'
-  echo "$?"
-
-  echo "→ io::runPs1Command 'echo \\\"ok\\\"' true"
-  io::runPs1Command 'echo "ok"' true
-  echo "$?"
-
-  unset -f powershell
-  test::endTest "Testing io::runPs1Command" 0
-}
-
 function test_io::convertToWindowsPath() {
   echo "→ io::convertToWindowsPath '/tmp/file'"
   io::convertToWindowsPath '/tmp/file'
@@ -189,6 +174,18 @@ function test_io::convertToWindowsPath() {
   echo "${RETURNED_VALUE}"
 
   test::endTest "Testing io::convertToWindowsPath" 0
+}
+
+function test_io::convertFromWindowsPath() {
+  printf "%s\n" "→ io::convertFromWindowsPath 'C:\\Users\\username'"
+  io::convertFromWindowsPath 'C:\Users\username'
+  echo "${RETURNED_VALUE}"
+
+  printf "%s\n" "→ io::convertFromWindowsPath 'D:\\data\\file'"
+  io::convertFromWindowsPath 'D:\data\file'
+  echo "${RETURNED_VALUE}"
+
+  test::endTest "Testing io::convertFromWindowsPath" 0
 }
 
 function test_io::createLink() {
@@ -222,9 +219,9 @@ function main() {
   testIo::readStdIn
   testIo::countArgs
   testIo::isDirectoryWritable
-  test_io::runPs1Command
   test_io::convertToWindowsPath
   test_io::createLink
+  test_io::convertFromWindowsPath
 }
 
 main

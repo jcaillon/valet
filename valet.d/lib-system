@@ -302,6 +302,45 @@ function system::windowsSetEnvVar() {
   fi
 }
 
+# ## system::windowsGetEnvVar
+#
+# Get the value of an environment variable for the current user on Windows.
+#
+# - $1: **variable name** _as string_:
+#       the name of the environment variable to get.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the value of the environment variable.
+#
+# ```bash
+# system::windowsGetEnvVar "MY_VAR"
+# echo "${RETURNED_VALUE}"
+# ```
+function system::windowsGetEnvVar() {
+  local varName="${1:-}"
+
+  system::os
+  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
+    core::fail "This function is only available on Windows."
+  fi
+
+  if [[ -z ${varName} ]]; then
+    core::fail "The variable name is missing."
+  fi
+
+  local script="
+  \$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true);
+  \$value = \$key.GetValue('${varName//\'/\'\'}', '', 'DoNotExpandEnvironmentNames');
+  \$key.Dispose();
+  Write-Output \$value;
+  "
+
+  if ! io::runPs1Command "${script}"; then
+    core::fail "Failed to get the environment variable ⌜${varName}⌝."
+  fi
+}
+
 # ## system::windowsAddToPath
 #
 # Add the given path to the PATH environment variable on Windows (current user only).

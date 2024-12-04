@@ -173,10 +173,27 @@ Exit code: `0`
 
 ```plaintext
 → system::windowsSetEnvVar VAR VALUE
-powershell: -NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop'; $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.SetValue('VAR', 'VALUE', 'ExpandString');; exit $LASTEXITCODE;
+io::runPs1Command: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.SetValue('VAR', 'VALUE', 'ExpandString');
 
 → system::windowsSetEnvVar VAR ''
-powershell: -NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop'; $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.DeleteValue('VAR');; exit $LASTEXITCODE;
+io::runPs1Command: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.DeleteValue('VAR');
+
+```
+
+### Testing system::windowsGetEnvVar
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ system::windowsGetEnvVar VAR
+io::runPs1Command: 
+  $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
+  $value = $key.GetValue('VAR', '', 'DoNotExpandEnvironmentNames');
+  $key.Dispose();
+  Write-Output $value;
+  
 
 ```
 
@@ -188,7 +205,7 @@ Exit code: `0`
 
 ```plaintext
 → system::windowsAddToPath /coucou
-powershell: -NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop'; 
+io::runPs1Command: 
   $pathToAdd = '\coucou';
   $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
   $oldPath = $key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
@@ -197,7 +214,7 @@ powershell: -NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop';
       $key.SetValue('Path', $newPath, 'ExpandString');
   };
   $key.Dispose();
-  ; exit $LASTEXITCODE;
+  
 
 ```
 

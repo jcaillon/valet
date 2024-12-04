@@ -998,6 +998,24 @@ io::cleanupTempFiles
 shellcheck disable=SC2016
 
 
+## io::convertFromWindowsPath
+
+Convert a Windows path to a unix path.
+
+- $1: **path** _as string_:
+      the path to convert
+
+Returns:
+
+- `RETURNED_VALUE`: The unix path.
+
+```bash
+io::convertFromWindowsPath "C:\path\to\file"
+```
+
+> Handles paths starting with `X:\`.
+
+
 ## io::convertToWindowsPath
 
 Convert a unix path to a Windows path.
@@ -1134,6 +1152,44 @@ Returns:
 ```bash
 io::createTempFile
 local file="${RETURNED_VALUE}"
+```
+
+> Files created this way are automatically cleaned up by the io::cleanupTempFiles
+> function when valet ends.
+
+
+## io::createWindowsTempDirectory
+
+Create a temporary directory on Windows and return the path both for Windows and Unix.
+
+This is useful for creating temporary directories that can be used in both Windows and Unix.
+
+Returns:
+
+- `RETURNED_VALUE`: The Windows path.
+- `RETURNED_VALUE2`: The Unix path.
+
+```bash
+io::createWindowsTempDirectory
+```
+
+> Directories created this way are automatically cleaned up by the io::cleanupTempFiles
+> function when valet ends.
+
+
+## io::createWindowsTempFile
+
+Create a temporary file on Windows and return the path both for Windows and Unix.
+
+This is useful for creating temporary files that can be used in both Windows and Unix.
+
+Returns:
+
+- `RETURNED_VALUE`: The Windows path.
+- `RETURNED_VALUE2`: The Unix path.
+
+```bash
+io::createWindowsTempFile
 ```
 
 > Files created this way are automatically cleaned up by the io::cleanupTempFiles
@@ -1507,6 +1563,8 @@ Returns:
 - $?
   - 0 if the command was successful
   - 1 otherwise.
+- `RETURNED_VALUE`: The content of stdout.
+- `RETURNED_VALUE2`: The content of stderr.
 
 ```bash
 io::runPs1Command "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
@@ -2454,6 +2512,23 @@ system::windowsAddToPath "/path/to/bin"
 ```
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
+
+
+## system::windowsGetEnvVar
+
+Get the value of an environment variable for the current user on Windows.
+
+- $1: **variable name** _as string_:
+      the name of the environment variable to get.
+
+Returns:
+
+- `RETURNED_VALUE`: the value of the environment variable.
+
+```bash
+system::windowsGetEnvVar "MY_VAR"
+echo "${RETURNED_VALUE}"
+```
 
 
 ## system::windowsSetEnvVar
@@ -3546,6 +3621,25 @@ function io::checkAndWarn() { :; }
 # 
 function io::cleanupTempFiles() { :; }
 
+# ## io::convertFromWindowsPath
+# 
+# Convert a Windows path to a unix path.
+# 
+# - $1: **path** _as string_:
+#       the path to convert
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: The unix path.
+# 
+# ```bash
+# io::convertFromWindowsPath "C:\path\to\file"
+# ```
+# 
+# > Handles paths starting with `X:\`.
+# 
+function io::convertFromWindowsPath() { :; }
+
 # ## io::convertToWindowsPath
 # 
 # Convert a unix path to a Windows path.
@@ -3694,6 +3788,46 @@ function io::createTempDirectory() { :; }
 # > function when valet ends.
 # 
 function io::createTempFile() { :; }
+
+# ## io::createWindowsTempDirectory
+# 
+# Create a temporary directory on Windows and return the path both for Windows and Unix.
+# 
+# This is useful for creating temporary directories that can be used in both Windows and Unix.
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: The Windows path.
+# - `RETURNED_VALUE2`: The Unix path.
+# 
+# ```bash
+# io::createWindowsTempDirectory
+# ```
+# 
+# > Directories created this way are automatically cleaned up by the io::cleanupTempFiles
+# > function when valet ends.
+# 
+function io::createWindowsTempDirectory() { :; }
+
+# ## io::createWindowsTempFile
+# 
+# Create a temporary file on Windows and return the path both for Windows and Unix.
+# 
+# This is useful for creating temporary files that can be used in both Windows and Unix.
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: The Windows path.
+# - `RETURNED_VALUE2`: The Unix path.
+# 
+# ```bash
+# io::createWindowsTempFile
+# ```
+# 
+# > Files created this way are automatically cleaned up by the io::cleanupTempFiles
+# > function when valet ends.
+# 
+function io::createWindowsTempFile() { :; }
 
 # ## io::invoke
 # 
@@ -4074,6 +4208,8 @@ function io::readStdIn() { :; }
 # - $?
 #   - 0 if the command was successful
 #   - 1 otherwise.
+# - `RETURNED_VALUE`: The content of stdout.
+# - `RETURNED_VALUE2`: The content of stderr.
 # 
 # ```bash
 # io::runPs1Command "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
@@ -5072,6 +5208,24 @@ function system::os() { :; }
 # 
 function system::windowsAddToPath() { :; }
 
+# ## system::windowsGetEnvVar
+# 
+# Get the value of an environment variable for the current user on Windows.
+# 
+# - $1: **variable name** _as string_:
+#       the name of the environment variable to get.
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: the value of the environment variable.
+# 
+# ```bash
+# system::windowsGetEnvVar "MY_VAR"
+# echo "${RETURNED_VALUE}"
+# ```
+# 
+function system::windowsGetEnvVar() { :; }
+
 # ## system::windowsSetEnvVar
 # 
 # Set an environment variable for the current user on Windows.
@@ -5841,6 +5995,20 @@ function test::endTest() { :; }
 		  "body": [ "# ## io::cleanupTempFiles\n# \n# Removes all the temporary files and directories that were created by the\n# io::createTempFile and io::createTempDirectory functions.\n# \n# ```bash\n# io::cleanupTempFiles\n# ```\n# shellcheck disable=SC2016\n# \nio::cleanupTempFiles$0" ]
 	  },
 
+		"io::convertFromWindowsPath": {
+		  "prefix": "io::convertFromWindowsPath",
+		  "description": "Convert a Windows path to a unix path...",
+		  "scope": "",
+		  "body": [ "io::convertFromWindowsPath \"${1:**path**}\"$0" ]
+	  },
+
+		"io::convertFromWindowsPath#withdoc": {
+		  "prefix": "io::convertFromWindowsPath#withdoc",
+		  "description": "Convert a Windows path to a unix path...",
+		  "scope": "",
+		  "body": [ "# ## io::convertFromWindowsPath\n# \n# Convert a Windows path to a unix path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The unix path.\n# \n# ```bash\n# io::convertFromWindowsPath \"C:\\path\\to\\file\"\n# ```\n# \n# > Handles paths starting with `X:\\`.\n# \nio::convertFromWindowsPath \"${1:**path**}\"$0" ]
+	  },
+
 		"io::convertToWindowsPath": {
 		  "prefix": "io::convertToWindowsPath",
 		  "description": "Convert a unix path to a Windows path...",
@@ -5937,6 +6105,34 @@ function test::endTest() { :; }
 		  "description": "Creates a temporary file and return its path...",
 		  "scope": "",
 		  "body": [ "# ## io::createTempFile\n# \n# Creates a temporary file and return its path.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The created path.\n# \n# ```bash\n# io::createTempFile\n# local file=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Files created this way are automatically cleaned up by the io::cleanupTempFiles\n# > function when valet ends.\n# \nio::createTempFile$0" ]
+	  },
+
+		"io::createWindowsTempDirectory": {
+		  "prefix": "io::createWindowsTempDirectory",
+		  "description": "Create a temporary directory on Windows and return the path both for Windows and Unix...",
+		  "scope": "",
+		  "body": [ "io::createWindowsTempDirectory$0" ]
+	  },
+
+		"io::createWindowsTempDirectory#withdoc": {
+		  "prefix": "io::createWindowsTempDirectory#withdoc",
+		  "description": "Create a temporary directory on Windows and return the path both for Windows and Unix...",
+		  "scope": "",
+		  "body": [ "# ## io::createWindowsTempDirectory\n# \n# Create a temporary directory on Windows and return the path both for Windows and Unix.\n# \n# This is useful for creating temporary directories that can be used in both Windows and Unix.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The Windows path.\n# - `RETURNED_VALUE2`: The Unix path.\n# \n# ```bash\n# io::createWindowsTempDirectory\n# ```\n# \n# > Directories created this way are automatically cleaned up by the io::cleanupTempFiles\n# > function when valet ends.\n# \nio::createWindowsTempDirectory$0" ]
+	  },
+
+		"io::createWindowsTempFile": {
+		  "prefix": "io::createWindowsTempFile",
+		  "description": "Create a temporary file on Windows and return the path both for Windows and Unix...",
+		  "scope": "",
+		  "body": [ "io::createWindowsTempFile$0" ]
+	  },
+
+		"io::createWindowsTempFile#withdoc": {
+		  "prefix": "io::createWindowsTempFile#withdoc",
+		  "description": "Create a temporary file on Windows and return the path both for Windows and Unix...",
+		  "scope": "",
+		  "body": [ "# ## io::createWindowsTempFile\n# \n# Create a temporary file on Windows and return the path both for Windows and Unix.\n# \n# This is useful for creating temporary files that can be used in both Windows and Unix.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The Windows path.\n# - `RETURNED_VALUE2`: The Unix path.\n# \n# ```bash\n# io::createWindowsTempFile\n# ```\n# \n# > Files created this way are automatically cleaned up by the io::cleanupTempFiles\n# > function when valet ends.\n# \nio::createWindowsTempFile$0" ]
 	  },
 
 		"io::invoke": {
@@ -6118,7 +6314,7 @@ function test::endTest() { :; }
 		  "prefix": "io::runPs1Command#withdoc",
 		  "description": "Runs a PowerShell command...",
 		  "scope": "",
-		  "body": [ "# ## io::runPs1Command\n# \n# Runs a PowerShell command.\n# This is mostly useful on Windows.\n# \n# - \\$1: **command** _as string_:\n#       the command to run.\n# - \\$2: run as administrator _as boolean_:\n#       (optional) whether to run the command as administrator.\n#       (defaults to false).\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# \n# ```bash\n# io::runPs1Command \"Write-Host \\\"Press any key:\\\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());\"\n# ```\n# \nio::runPs1Command \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
+		  "body": [ "# ## io::runPs1Command\n# \n# Runs a PowerShell command.\n# This is mostly useful on Windows.\n# \n# - \\$1: **command** _as string_:\n#       the command to run.\n# - \\$2: run as administrator _as boolean_:\n#       (optional) whether to run the command as administrator.\n#       (defaults to false).\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# io::runPs1Command \"Write-Host \\\"Press any key:\\\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());\"\n# ```\n# \nio::runPs1Command \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
 	  },
 
 		"io::sleep": {
@@ -6793,6 +6989,20 @@ function test::endTest() { :; }
 		  "body": [ "# ## system::windowsAddToPath\n# \n# Add the given path to the PATH environment variable on Windows (current user only).\n# \n# Will also export the PATH variable in the current bash.\n# \n# - \\$1: **path** _as string_:\n#       the path to add to the PATH environment variable.\n#       The path can be in unix format, it will be converted to windows format.\n# \n# ```bash\n# system::windowsAddToPath \"/path/to/bin\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell` to directly modify the registry.\n# \nsystem::windowsAddToPath \"${1:**path**}\"$0" ]
 	  },
 
+		"system::windowsGetEnvVar": {
+		  "prefix": "system::windowsGetEnvVar",
+		  "description": "Get the value of an environment variable for the current user on Windows...",
+		  "scope": "",
+		  "body": [ "system::windowsGetEnvVar \"${1:**variable name**}\"$0" ]
+	  },
+
+		"system::windowsGetEnvVar#withdoc": {
+		  "prefix": "system::windowsGetEnvVar#withdoc",
+		  "description": "Get the value of an environment variable for the current user on Windows...",
+		  "scope": "",
+		  "body": [ "# ## system::windowsGetEnvVar\n# \n# Get the value of an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to get.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the value of the environment variable.\n# \n# ```bash\n# system::windowsGetEnvVar \"MY_VAR\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nsystem::windowsGetEnvVar \"${1:**variable name**}\"$0" ]
+	  },
+
 		"system::windowsSetEnvVar": {
 		  "prefix": "system::windowsSetEnvVar",
 		  "description": "Set an environment variable for the current user on Windows...",
@@ -7077,7 +7287,7 @@ function test::endTest() { :; }
 
 ```log
 INFO     Generating documentation for the core functions only.
-INFO     Found 122 functions with documentation.
+INFO     Found 126 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-1/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-1/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/valet.code-snippets⌝.

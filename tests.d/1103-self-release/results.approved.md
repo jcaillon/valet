@@ -195,6 +195,9 @@ DEBUG    Found function: ⌜io::isDirectoryWritable⌝
 DEBUG    Found function: ⌜io::runPs1Command⌝
 DEBUG    Found function: ⌜io::createLink⌝
 DEBUG    Found function: ⌜io::convertToWindowsPath⌝
+DEBUG    Found function: ⌜io::convertFromWindowsPath⌝
+DEBUG    Found function: ⌜io::createWindowsTempFile⌝
+DEBUG    Found function: ⌜io::createWindowsTempDirectory⌝
 DEBUG    Found function: ⌜profiler::enable⌝
 DEBUG    Found function: ⌜profiler::disable⌝
 DEBUG    Found function: ⌜prompt::autocompletion⌝
@@ -221,10 +224,11 @@ DEBUG    Found function: ⌜system::commandExists⌝
 DEBUG    Found function: ⌜system::isRoot⌝
 DEBUG    Found function: ⌜system::addToPath⌝
 DEBUG    Found function: ⌜system::windowsSetEnvVar⌝
+DEBUG    Found function: ⌜system::windowsGetEnvVar⌝
 DEBUG    Found function: ⌜system::windowsAddToPath⌝
 DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 122 functions with documentation.
+INFO     Found 126 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet.md⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet

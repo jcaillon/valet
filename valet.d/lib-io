@@ -914,6 +914,8 @@ function io::isDirectoryWritable() {
 # - $?
 #   - 0 if the command was successful
 #   - 1 otherwise.
+# - `RETURNED_VALUE`: The content of stdout.
+# - `RETURNED_VALUE2`: The content of stderr.
 #
 # ```bash
 # io::runPs1Command "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
@@ -924,11 +926,63 @@ function io::runPs1Command() {
 
   local exitCode=0
 
-  if [[ "${runAsAdmin}" == true ]]; then
-    powershell -NoProfile -NonInteractive -Command "\$ErrorActionPreference = 'Stop'; \$process = Start-Process powershell \"-NoProfile -NonInteractive -Command \`\"\$ErrorActionPreference = 'Stop'; ${command//\"/\`\\\`\"}; exit \$LASTEXITCODE;\`\"\" -PassThru -Wait -Verb RunAs; exit \$process.ExitCode" || exitCode=1
-  else
-    powershell -NoProfile -NonInteractive -Command "\$ErrorActionPreference = 'Stop'; ${command}; exit \$LASTEXITCODE;" || exitCode=1
+  if ! command -v powershell &>/dev/null; then
+    core::fail "The PowerShell command is not available."
   fi
+
+  command="${command//\$/\`\$}"
+
+  # there seem to be no simple way to capture the output of several commands...
+  # we run the commands in a subprocess for which we capture the outputs
+  io::createWindowsTempFile
+  local stdoutFileWindows="${RETURNED_VALUE}"
+  local stdoutFile="${RETURNED_VALUE2}"
+  io::createWindowsTempFile
+  local stderrFileWindows="${RETURNED_VALUE}"
+  local stderrFile="${RETURNED_VALUE2}"
+
+  # shellcheck disable=SC2016
+  local script='
+  $ErrorActionPreference = '"'Stop'"';
+  $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
+  $processInfo.FileName = "powershell.exe"
+  $processInfo.Verb = "runas";
+  $processInfo.RedirectStandardError = $true;
+  $processInfo.RedirectStandardOutput = $true;
+  $processInfo.UseShellExecute = $false;
+  $processInfo.CreateNoWindow = $true;
+  $processInfo.Arguments = @("-NoProfile","-NonInteractive","-Command","`$ErrorActionPreference = '"'Stop'"'; '"${command//\"/\`\"}"'; exit `$LASTEXITCODE;")
+  $p = New-Object System.Diagnostics.Process;
+  $p.StartInfo = $processInfo;
+  $p.Start() | Out-Null;
+  $stdout = $p.StandardOutput.ReadToEnd();
+  $stderr = $p.StandardError.ReadToEnd();
+  $p.WaitForExit();
+  $stdout | Out-File -FilePath '"'${stdoutFileWindows}'"' -Encoding utf8;
+  $stderr | Out-File -FilePath '"'${stderrFileWindows}'"' -Encoding utf8;
+  exit $p.ExitCode;
+  '
+
+  if [[ "${runAsAdmin}" == true ]]; then
+    # if we need to run as admin, we need to create a script that will run the commands
+    # and we run this script as an admin
+    io::createWindowsTempDirectory
+    local scriptFileWindows="${RETURNED_VALUE}\\valet-run-ps1-as-admin.ps1"
+    io::writeToFile "${scriptFileWindows}" "${script}"
+    # shellcheck disable=SC2016
+    script='
+    $ErrorActionPreference = '"'Stop'"';
+    $process = Start-Process -FilePath powershell.exe -ArgumentList @("-NoProfile","-NonInteractive","-File","'"${scriptFileWindows}"'") -PassThru -Wait -Verb RunAs -WindowStyle Hidden;
+    exit $process.ExitCode
+    '
+  fi
+  powershell -NoProfile -NonInteractive -Command "${script}" || exitCode=1
+
+  io::readFile "${stdoutFile}"
+  stdout="${RETURNED_VALUE//$'\r'/}"
+  io::readFile "${stderrFile}"
+  RETURNED_VALUE2="${RETURNED_VALUE//$'\r'/}"
+  RETURNED_VALUE="${stdout}"
 
   return ${exitCode}
 }
@@ -1016,7 +1070,7 @@ function io::createLink() {
     io::convertToWindowsPath "${linkedPath}"
     linkedPath="${RETURNED_VALUE}"
 
-    log::info "Creating a new link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝ using powershell."
+    log::debug "Creating a new link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝ using powershell."
     if [[ ${hardLink} == "true" ]]; then
       if ! io::runPs1Command "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
         core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
@@ -1042,7 +1096,7 @@ function io::createLink() {
   if [[ ${hardLink} == "true" ]]; then
     linkType="hard"
   fi
-  log::info "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+  log::debug "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
 }
 
 # ## io::convertToWindowsPath
@@ -1072,4 +1126,116 @@ function io::convertToWindowsPath() {
     path="${path^?}"
   fi
   RETURNED_VALUE="${path//\//\\}"
+}
+
+# ## io::convertFromWindowsPath
+#
+# Convert a Windows path to a unix path.
+#
+# - $1: **path** _as string_:
+#       the path to convert
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The unix path.
+#
+# ```bash
+# io::convertFromWindowsPath "C:\path\to\file"
+# ```
+#
+# > Handles paths starting with `X:\`.
+function io::convertFromWindowsPath() {
+  local path="${1}"
+  if [[ ${path} =~ ^([a-zA-Z])":" ]]; then
+    if [[ -d "/mnt/${BASH_REMATCH[1],}" ]]; then
+      path="/mnt/${BASH_REMATCH[1],}${path:2}"
+    else
+      path="/${BASH_REMATCH[1],}${path:2}"
+    fi
+  fi
+  RETURNED_VALUE="${path//\\//}"
+}
+
+# ## io::createWindowsTempFile
+#
+# Create a temporary file on Windows and return the path both for Windows and Unix.
+#
+# This is useful for creating temporary files that can be used in both Windows and Unix.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The Windows path.
+# - `RETURNED_VALUE2`: The Unix path.
+#
+# ```bash
+# io::createWindowsTempFile
+# ```
+#
+# > Files created this way are automatically cleaned up by the io::cleanupTempFiles
+# > function when valet ends.
+function io::createWindowsTempFile() {
+  local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
+
+  if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
+    io::convertFromWindowsPath "${windowsTemporaryDirectory}"
+    GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
+  fi
+
+  local windowsPath linuxPath
+  TEMPORARY_FILE_NUMBER=${TEMPORARY_FILE_NUMBER:-0}
+  while true; do
+    TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
+    windowsPath="${windowsTemporaryDirectory}\\f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
+    io::convertFromWindowsPath "${windowsPath}"
+    linuxPath="${RETURNED_VALUE}"
+    if [[ ! -f "${linuxPath}" ]]; then
+      io::createFilePathIfNeeded "${linuxPath}"
+
+      RETURNED_VALUE="${windowsPath}"
+      RETURNED_VALUE2="${linuxPath}"
+      return 0
+    fi
+  done
+}
+
+# ## io::createWindowsTempDirectory
+#
+# Create a temporary directory on Windows and return the path both for Windows and Unix.
+#
+# This is useful for creating temporary directories that can be used in both Windows and Unix.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The Windows path.
+# - `RETURNED_VALUE2`: The Unix path.
+#
+# ```bash
+# io::createWindowsTempDirectory
+# ```
+#
+# > Directories created this way are automatically cleaned up by the io::cleanupTempFiles
+# > function when valet ends.
+function io::createWindowsTempDirectory() {
+  local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
+
+  if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
+    io::convertFromWindowsPath "${windowsTemporaryDirectory}"
+    GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
+  fi
+
+  local windowsPath linuxPath
+  TEMPORARY_DIRECTORY_NUMBER=${TEMPORARY_DIRECTORY_NUMBER:-0}
+  while true; do
+    TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
+    windowsPath="${windowsTemporaryDirectory}\\d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
+    io::convertFromWindowsPath "${windowsPath}"
+    linuxPath="${RETURNED_VALUE}"
+    if [[ ! -d "${linuxPath}" ]]; then
+      io::createDirectoryIfNeeded "${linuxPath}"
+
+      RETURNED_VALUE="${windowsPath}"
+      RETURNED_VALUE2="${linuxPath}"
+      return 0
+    fi
+  done
 }

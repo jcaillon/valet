@@ -205,21 +205,6 @@ Writable
 Writable
 ```
 
-### Testing io::runPs1Command
-
-Exit code: `0`
-
-**Standard** output:
-
-```plaintext
-→ io::runPs1Command 'Get-Process'
--NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop'; Get-Process; exit $LASTEXITCODE;
-0
-→ io::runPs1Command 'echo \"ok\"' true
--NoProfile -NonInteractive -Command $ErrorActionPreference = 'Stop'; $process = Start-Process powershell "-NoProfile -NonInteractive -Command `"$ErrorActionPreference = 'Stop'; echo `\`"ok`\`"; exit $LASTEXITCODE;`"" -PassThru -Wait -Verb RunAs; exit $process.ExitCode
-0
-```
-
 ### Testing io::convertToWindowsPath
 
 Exit code: `0`
@@ -244,17 +229,23 @@ Exit code: `0`
 ```plaintext
 → io::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' true
 ln: $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/file $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try/file2
-Created hard link: ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/file⌝ ← ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try/file2⌝.
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try
 → io::createLink 'resources/gitignored/try' 'resources/gitignored/new'
 ln: -s $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try $GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/new
-Created symbolic link: ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try⌝ ← ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/new⌝.
+$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored
 ```
 
-**Error** output:
+### Testing io::convertFromWindowsPath
 
-```log
-INFO     Created hard link: ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/file⌝ ← ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try/file2⌝.
-INFO     Created symbolic link: ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/try⌝ ← ⌜$GLOBAL_VALET_HOME/tests.d/1005-lib-io/resources/gitignored/new⌝.
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ io::convertFromWindowsPath 'C:\Users\username'
+/c/Users/username
+→ io::convertFromWindowsPath 'D:\data\file'
+/d/data/file
 ```
 
 ## Test script 01.invoke
