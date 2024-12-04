@@ -9,10 +9,10 @@ function test_selfAddLibrary() {
   pushd resources/gitignored &>/dev/null || core::fail "Unable to change directory"
 
   echo "→ selfAddLibrary 'new-cool-lib'"
-  echo y | selfAddLibrary 'new-cool-lib'
+  selfAddLibrary 'new-cool-lib'
 
   echo "→ selfAddLibrary 'new-cool-lib'"
-  echo y | selfAddLibrary 'new-cool-lib'
+  selfAddLibrary 'new-cool-lib'
 
   echo
   echo "→ cat commands.d/new-cool-command.sh"
@@ -30,10 +30,10 @@ function test_selfAddCommand() {
   pushd resources/gitignored &>/dev/null || core::fail "Unable to change directory"
 
   echo "→ selfAddCommand 'new cool command'"
-  echo y | selfAddCommand 'new cool command'
+  selfAddCommand 'new cool command'
 
   echo "→ selfAddCommand 'new cool command'"
-  echo y | selfAddCommand 'new cool command'
+  selfAddCommand 'new cool command'
 
   echo
   echo "→ cat commands.d/new-cool-command.sh"
@@ -50,9 +50,16 @@ function main() {
   test_selfAddLibrary
 }
 
+function interactive::promptYesNo() {
+  echo "prompt: $1"
+  return 0
+}
+
 _OLD_HOME="${HOME}"
 HOME="/nop"
 
 main
 
 HOME="${_OLD_HOME}"
+core::resetIncludedFiles
+source interactive

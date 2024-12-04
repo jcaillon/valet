@@ -10,21 +10,9 @@ Exit code: `0`
 
 ```plaintext
 → selfAddCommand 'new cool command'
-[2m   ┌─[197b─┐[0m
-[2m░──┤[0m It does not look like the current directory ⌜$GLOBAL_VALET_HOME/tests.d/1109-self-add-x/resources/gitignored⌝ is a valet extension, do you want to proceed anyway? [204G[2m│[0m
-[2m   └─[197b─┘[0m
-[1G[0J
-[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
-[2m[9G│[0m Yes. [16G[2m├──░[0m
-[2m[9G└─[4b─┘[0m
+prompt: It does not look like the current directory ⌜$GLOBAL_VALET_HOME/tests.d/1109-self-add-x/resources/gitignored⌝ is a valet extension, do you want to proceed anyway?
 → selfAddCommand 'new cool command'
-[2m   ┌─[50b─┐[0m
-[2m░──┤[0m Do you want to override the existing command file? [57G[2m│[0m
-[2m   └─[50b─┘[0m
-[1G[0J
-[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
-[2m[9G│[0m Yes. [16G[2m├──░[0m
-[2m[9G└─[4b─┘[0m
+prompt: Do you want to override the existing command file?
 
 → cat commands.d/new-cool-command.sh
 #!/usr/bin/env bash
@@ -100,21 +88,9 @@ Exit code: `0`
 
 ```plaintext
 → selfAddLibrary 'new-cool-lib'
-[2m   ┌─[197b─┐[0m
-[2m░──┤[0m It does not look like the current directory ⌜$GLOBAL_VALET_HOME/tests.d/1109-self-add-x/resources/gitignored⌝ is a valet extension, do you want to proceed anyway? [204G[2m│[0m
-[2m   └─[197b─┘[0m
-[1G[0J
-[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
-[2m[9G│[0m Yes. [16G[2m├──░[0m
-[2m[9G└─[4b─┘[0m
+prompt: It does not look like the current directory ⌜$GLOBAL_VALET_HOME/tests.d/1109-self-add-x/resources/gitignored⌝ is a valet extension, do you want to proceed anyway?
 → selfAddLibrary 'new-cool-lib'
-[2m   ┌─[50b─┐[0m
-[2m░──┤[0m Do you want to override the existing library file? [57G[2m│[0m
-[2m   └─[50b─┘[0m
-[1G[0J
-[1F[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
-[2m[9G│[0m Yes. [16G[2m├──░[0m
-[2m[9G└─[4b─┘[0m
+prompt: Do you want to override the existing library file?
 
 → cat commands.d/new-cool-command.sh
 
