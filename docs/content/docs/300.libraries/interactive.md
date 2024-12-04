@@ -414,11 +414,11 @@ Wait for a key press (single key).
 You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
 
 It uses the read builtin command with the option `-e` to use readline behind the scene.
-This means we can detect more key combinations but all keys needs to be binded first...
+This means we can detect more key combinations but all keys needs to be bound first...
 Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 
 You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.
-You must also redefine the function `interactiveOnKeyBindingPress` to react to a binded key press.
+You must also redefine the function `interactiveOnKeyBindingPress` to react to a bound key press.
 See @interactive::testWaitForKeyPress for an implementation example.
 
 - $@: **read parameters** _as any_:
@@ -442,4 +442,4 @@ interactive::waitForKeyPress -t 0.1
 
 
 
-> Documentation generated for the version 0.26.6 (2024-11-24).
+> Documentation generated for the version 0.27.285 (2024-12-05).

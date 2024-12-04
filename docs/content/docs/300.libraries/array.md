@@ -102,7 +102,7 @@ It uses pure bash.
 
 - $1: **array name** _as string_:
       The global variable name of the array.
-- $2: **value** _as any:
+- $2: **value** _as any_:
       The value to check.
 
 Returns:
@@ -146,7 +146,7 @@ printf '%s\n' "${myArray[@]}"
 
 ## array::sortWithCriteria
 
-Sorts an array using mulitple criteria.
+Sorts an array using multiple criteria.
 Excepts multiple arrays. The first array is the one to sort.
 The other arrays are used as criteria. Criteria are used in the order they are given.
 Each criteria array must have the same size as the array to sort.
@@ -178,4 +178,4 @@ printf '%s\n' "${RETURNED_ARRAY[@]}"
 
 
 
-> Documentation generated for the version 0.26.6 (2024-11-24).
+> Documentation generated for the version 0.27.285 (2024-12-05).

@@ -5,6 +5,21 @@ cascade:
 url: /docs/libraries/system
 ---
 
+## system::addToPath
+
+Add the given path to the PATH environment variable for various shells,
+by adding the appropriate export command to the appropriate file.
+
+Will also export the PATH variable in the current bash.
+
+- $1: **path** _as string_:
+      the path to add to the PATH environment variable.
+
+```bash
+system::addToPath "/path/to/bin"
+```
+
+
 ## system::commandExists
 
 Check if the given command exists.
@@ -121,6 +136,23 @@ fi
 ```
 
 
+## system::isRoot
+
+Check if the script is running as root.
+
+Returns:
+
+- $?
+  - 0 if the script is running as root
+  - 1 otherwise.
+
+```bash
+if system::isRoot; then
+  printf 'The script is running as root.'
+fi
+```
+
+
 ## system::os
 
 Returns the name of the current OS.
@@ -135,6 +167,56 @@ local osName="${RETURNED_VALUE}"
 ```
 
 
+## system::windowsAddToPath
+
+Add the given path to the PATH environment variable on Windows (current user only).
+
+Will also export the PATH variable in the current bash.
+
+- $1: **path** _as string_:
+      the path to add to the PATH environment variable.
+      The path can be in unix format, it will be converted to windows format.
+
+```bash
+system::windowsAddToPath "/path/to/bin"
+```
+
+> This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
 
-> Documentation generated for the version 0.26.6 (2024-11-24).
+## system::windowsGetEnvVar
+
+Get the value of an environment variable for the current user on Windows.
+
+- $1: **variable name** _as string_:
+      the name of the environment variable to get.
+
+Returns:
+
+- `RETURNED_VALUE`: the value of the environment variable.
+
+```bash
+system::windowsGetEnvVar "MY_VAR"
+echo "${RETURNED_VALUE}"
+```
+
+
+## system::windowsSetEnvVar
+
+Set an environment variable for the current user on Windows.
+
+- $1: **variable name** _as string_:
+      the name of the environment variable to set.
+- $2: **variable value** _as string_:
+      the value of the environment variable to set.
+
+```bash
+system::windowsSetEnvVar "MY_VAR" "my_value"
+```
+
+> This function is only available on Windows, it uses `powershell` to directly modify the registry.
+
+
+
+
+> Documentation generated for the version 0.27.285 (2024-12-05).

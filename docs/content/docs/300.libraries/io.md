@@ -59,6 +59,42 @@ io::cleanupTempFiles
 shellcheck disable=SC2016
 
 
+## io::convertFromWindowsPath
+
+Convert a Windows path to a unix path.
+
+- $1: **path** _as string_:
+      the path to convert
+
+Returns:
+
+- `RETURNED_VALUE`: The unix path.
+
+```bash
+io::convertFromWindowsPath "C:\path\to\file"
+```
+
+> Handles paths starting with `X:\`.
+
+
+## io::convertToWindowsPath
+
+Convert a unix path to a Windows path.
+
+- $1: **path** _as string_:
+      the path to convert
+
+Returns:
+
+- `RETURNED_VALUE`: The Windows path.
+
+```bash
+io::convertToWindowsPath "/path/to/file"
+```
+
+> Handles paths starting with `/mnt/x/` or `/x/`.
+
+
 ## io::countArgs
 
 Returns the number of arguments passed.
@@ -82,6 +118,22 @@ io::countArgs 1 2 3
 ```
 
 
+## io::createDirectoryIfNeeded
+
+Create the directory tree if needed.
+
+- $1: **path** _as string_:
+      The directory path to create.
+
+Returns:
+
+- `RETURNED_VALUE`: The absolute path to the directory.
+
+```bash
+io::createDirectoryIfNeeded "/my/directory"
+```
+
+
 ## io::createFilePathIfNeeded
 
 Make sure that the given file path exists.
@@ -97,6 +149,40 @@ Returns:
 ```bash
 io::createFilePathIfNeeded "myFile"
 ```
+
+
+## io::createLink
+
+Create a soft or hard link (original ← link).
+
+Reminder:
+
+- A soft (symbolic) link is a new file that contains a reference to another file or directory in the
+  form of an absolute or relative path.
+- A hard link is a directory entry that associates a new pathname with an existing
+  file (inode + data block) on a file system.
+
+This function allows to create a symbolic link on Windows as well as on Unix.
+
+- $1: **linked path** _as string_:
+      the path to link to (the original file)
+- $2: **link path** _as string_:
+      the path where to create the link
+- $3: hard link _as boolean_:
+      (optional) true to create a hard link, false to create a symbolic link
+      (defaults to false)
+- $4: force _as boolean_:
+      (optional) true to overwrite the link or file if it already exists.
+      Otherwise, the function will fail on an existing link.
+      (defaults to true)
+
+```bash
+io::createLink "/path/to/link" "/path/to/linked"
+io::createLink "/path/to/link" "/path/to/linked" true
+```
+
+> On unix, the function uses the `ln` command.
+> On Windows, the function uses `powershell` (and optionally ls to check the existing link).
 
 
 ## io::createTempDirectory
@@ -324,7 +410,7 @@ stderrFilePath="${RETURNED_VALUE2}"
 >   `io::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
 >   than doing:
 >   `myvar="$(mycommand)".`
-> - On linux, it is slighly faster (but it might be slower if you don't have SSD?).
+> - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
 > - On linux, you can use a tmpfs directory for massive gains over subshells.
 
 
@@ -518,6 +604,105 @@ local myFileAbsolutePath="${RETURNED_VALUE}"
 > This is a pure bash alternative to `realpath` or `readlink`.
 
 
+## io::windowsCreateTempDirectory
+
+Create a temporary directory on Windows and return the path both for Windows and Unix.
+
+This is useful for creating temporary directories that can be used in both Windows and Unix.
+
+Returns:
+
+- `RETURNED_VALUE`: The Windows path.
+- `RETURNED_VALUE2`: The Unix path.
+
+```bash
+io::windowsCreateTempDirectory
+```
+
+> Directories created this way are automatically cleaned up by the io::cleanupTempFiles
+> function when valet ends.
 
 
-> Documentation generated for the version 0.26.6 (2024-11-24).
+## io::windowsCreateTempFile
+
+Create a temporary file on Windows and return the path both for Windows and Unix.
+
+This is useful for creating temporary files that can be used in both Windows and Unix.
+
+Returns:
+
+- `RETURNED_VALUE`: The Windows path.
+- `RETURNED_VALUE2`: The Unix path.
+
+```bash
+io::windowsCreateTempFile
+```
+
+> Files created this way are automatically cleaned up by the io::cleanupTempFiles
+> function when valet ends.
+
+
+## io::windowsPowershellBatchEnd
+
+This function will run all the commands that were batched with `io::windowsPowershellBatchStart`.
+
+Returns:
+
+- $?
+  - 0 if the command was successful
+  - 1 otherwise.
+- `RETURNED_VALUE`: The content of stdout.
+- `RETURNED_VALUE2`: The content of stderr.
+
+```bash
+io::windowsPowershellBatchStart
+io::windowsRunInPowershell "Write-Host \"Hello\""
+io::windowsRunInPowershell "Write-Host \"World\""
+io::windowsPowershellBatchEnd
+```
+
+
+## io::windowsPowershellBatchStart
+
+After running this function, all commands that should be executed by
+`io::windowsRunInPowershell` will be added to a batch that will only be played
+when `io::windowsPowershellBatchEnd` is called.
+
+This is a convenient way to run multiple commands in a single PowerShell session.
+It makes up for the fact that running a new PowerShell session for each command is slow.
+
+```bash
+io::windowsPowershellBatchStart
+io::windowsRunInPowershell "Write-Host \"Hello\""
+io::windowsRunInPowershell "Write-Host \"World\""
+io::windowsPowershellBatchEnd
+```
+
+
+## io::windowsRunInPowershell
+
+Runs a PowerShell command.
+This is mostly useful on Windows.
+
+- $1: **command** _as string_:
+      the command to run.
+- $2: run as administrator _as boolean_:
+      (optional) whether to run the command as administrator.
+      (defaults to false).
+
+Returns:
+
+- $?
+  - 0 if the command was successful
+  - 1 otherwise.
+- `RETURNED_VALUE`: The content of stdout.
+- `RETURNED_VALUE2`: The content of stderr.
+
+```bash
+io::windowsRunInPowershell "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
+```
+
+
+
+
+> Documentation generated for the version 0.27.285 (2024-12-05).

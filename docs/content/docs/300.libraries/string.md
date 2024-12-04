@@ -73,7 +73,7 @@ local comparison="${RETURNED_VALUE}"
 
 ## string::count
 
-Counts the number of occurences of a substring in a string.
+Counts the number of occurrences of a substring in a string.
 
 - $1: **string** _as string_:
       the string in which to search
@@ -82,7 +82,7 @@ Counts the number of occurences of a substring in a string.
 
 Returns:
 
-- `RETURNED_VALUE`: the number of occurences
+- `RETURNED_VALUE`: the number of occurrences
 
 ```bash
 string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
@@ -123,7 +123,7 @@ printf '%s' "${field}" # will output "field2"
 ## string::extractBetween
 
 Extract the text between two strings within a string.
-Search for the first occurence of the start string and the first occurence
+Search for the first occurrence of the start string and the first occurrence
 (after the start index) of the end string.
 Both start and end strings are excluded in the extracted text.
 Both start and end strings must be found to extract something.
@@ -274,7 +274,7 @@ Returns:
 - `RETURNED_ARRAY`: the array of strings
 
 ```bash
-string::split "name,firstname,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
+string::split "name,first name,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
 ```
 
 > This is faster than using read into an array from a here string.
@@ -371,4 +371,4 @@ local wrappedText="${RETURNED_VALUE}"
 
 
 
-> Documentation generated for the version 0.26.6 (2024-11-24).
+> Documentation generated for the version 0.27.285 (2024-12-05).

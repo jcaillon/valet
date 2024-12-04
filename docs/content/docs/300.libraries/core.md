@@ -27,6 +27,17 @@ core::checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
 ```
 
 
+## core::deleteUserCommands
+
+Delete the user 'commands' file from the valet user directory.
+
+You probably want to reload the user commands afterward using `core::reloadUserCommands`.
+
+```bash
+core::deleteUserCommands
+```
+
+
 ## core::fail
 
 Displays an error message and then exit the program with error.
@@ -219,4 +230,4 @@ specify the included file for spellcheck.
 
 
 
-> Documentation generated for the version 0.26.6 (2024-11-24).
+> Documentation generated for the version 0.27.285 (2024-12-05).
