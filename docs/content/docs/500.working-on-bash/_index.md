@@ -9,13 +9,19 @@ url: /docs/work-on-bash-scripts
 > [!INFORMATION]
 > Disclaimer: This page is just one opinion. This is not the best way to work on bash scripts, this is just an explanation of how I work.
 
-## IDE
+## 🧑‍💻 VS Code
 
-I work with VS code on windows + WSL.
+I work with [VS code]((https://code.visualstudio.com/download)) and [git bash](https://gitforwindows.org/) on Windows.
 
-Install VS code from [here](https://code.visualstudio.com/download).
+WSL and the GitHub actions allow me to test Valet on different Linux distributions.
 
-## VS code extensions
+### ⚙️ Settings
+
+After [creating a new extension](../new-extensions), you can open the extension directory as a workspace on vscode.
+
+It will come pre-configured with vscode snippets, settings, and extension recommendations.
+
+### 🧩 Extensions
 
 Here is a list of recommended extensions to work on bash scripts:
 
@@ -33,50 +39,38 @@ Here is a list of recommended extensions to work on bash scripts:
 - [Snippets for bash scripts](https://marketplace.visualstudio.com/items?itemName=Remisa.shellman)
 - [Snippets for shebang](https://marketplace.visualstudio.com/items?itemName=rpinski.shebang-snippets)
 
-GitHub Copilot is of great help if you can have it. You can also find the list of [extensions here](https://github.com/jcaillon/valet/blob/latest/.vscode/extensions.json).
+A more up-to-date list can be found [here](https://raw.githubusercontent.com/jcaillon/valet/refs/heads/latest/extras/.vscode/extensions.json).
 
-## VS code settings
+### 🆎 Autocompletion on Valet library functions
 
-You can open your `~/.valet.d` directory as a workspace on vscode.
+You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/blob/latest/extras/valet.code-snippets) which should already be present in your extension directory. If not, you can setup your directory with `valet self extend .`.
 
-### Autocompletion on Valet library functions
+Additionally, the already configured `.vscode/settings.json` will contain the following settings:
 
-You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/blob/latest/extras/valet.code-snippets) which should be generated locally using the `valet self document` command.
+```json
+{
+  "bashIde.globPattern": "**/@(lib-*|commands.d/*.sh)",
+  "bashIde.includeAllWorkspaceSymbols": true,
+  "terminal.integrated.wordSeparators": " ()[]{}',\"`─‘’“”|⌜⌝"
+}
+```
 
-Then:
+It will allow you to navigate to the function definitions with `F12` and `Ctrl+click` on the function calls.
 
-- copy this file in your repository under the `.vscode` directory (you can chose to ignore this in git or push it).
-- or copy this file as `shellscript.json` in your user snippets folder (`%APPDATA%\Code\User\snippets` in windows).
-
-{{< callout type="info" >}}
-This is done for you if you use the automated installer of Valet.
-{{< /callout >}}
-
-This allows you to have autocompletion and help on the core and libraries functions:
+You should have autocompletion and help on all ibrary functions:
 
 ![autocompletion](image.png)
 
-### Autocompletion - alternative way
-
-Alternatively, you copy (or link) the [lib-valet](https://github.com/jcaillon/valet/blob/latest/extras/lib-valet) file to `./lib-valet`. It is a file that defines all the function prototypes from Valet, allowing autocompletion with vscode bash IDE extension. It can be generated locally using the command `valet self document`.
+### 👮 shellcheck
 
 If you have installed the recommended extensions, you will also have shellcheck which will attempt to following the sourced files in your project. You should annotate each `source` statement for shellcheck to use the `lib-valet` file:
 
 ```bash
 # shellcheck source=../lib-valet
-source mylib
+source string
 ```
 
-If you don't want to use shellcheck, you can add the following settings in your `./.vscode/settings.json`:
-
-```json
-{
-  "bashIde.globPattern": "**/@(*@(.sh|.inc|.bash|.command|core|main)|lib-*)",
-  "bashIde.includeAllWorkspaceSymbols": true
-}
-```
-
-## Where to start your bash journey
+## 🚲 Where to start your bash journey
 
 - [The official bash documentation](https://www.gnu.org/software/bash/manual/bash.html) / [Alternate view on devdocs.io](https://devdocs.io/bash/)
 - [Advanced bash scripting guide](https://tldp.org/LDP/abs/html/index.html)

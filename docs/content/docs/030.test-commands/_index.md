@@ -1,12 +1,12 @@
 ---
-title: 🧪 Test commands
+title: 🧪 Create a test
 cascade:
   type: docs
 weight: 30
 url: /docs/test-commands
 ---
 
-Valet comes with a standardized way to implement and run tests for your commands and functions.
+Valet comes with a standardized way to implement and run tests for your commands and library functions.
 
 ## 🤵 Test suites
 
@@ -24,10 +24,10 @@ In your test scripts, you will call your command functions or run any code that 
 
 Instead:
 
-1. You will just print what you want to the stdout `&1` (e.g. `echo stuff`) or stderr `&2` (e.g. `echo thing 1>&2`) file descriptors. 
-2. These outputs will be captured and appended to a test report file named `results.received.md`. 
-3. This file will then be compared to an existing file named `results.approved.md` which is supposed to be committed with your sources and which contains the expected test report. 
-4. If the files are different but the new received test if correct (or if the approved version does not exist yet), you can approve it and `results.received.md` will be the new `results.approved.md`. 
+1. You will just print what you want to the stdout `&1` (e.g. `echo stuff`) or stderr `&2` (e.g. `echo thing 1>&2`) file descriptors.
+2. These outputs will be captured and appended to a test report file named `results.received.md`.
+3. This file will then be compared to an existing file named `results.approved.md` which is supposed to be committed with your sources and which contains the expected test report.
+4. If the files are different but the new received test if correct (or if the approved version does not exist yet), you can approve it and `results.received.md` will be the new `results.approved.md`.
 5. When you run the test again, the 2 files will be identical, ensuring you that your tests still lead to the same results.
 
 You can check an example of [test report for the string library of Valet][valet-string-tests-report].
@@ -151,7 +151,7 @@ In addition to the test scripts, you can create other specific scripts which wil
 
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../command-properties" title="Command properties" >}}
-  {{< card icon="arrow-circle-right" link="../libraries" title="Libraries" >}}
+  {{< card icon="arrow-circle-right" link="../new-libraries" title="Create a library" >}}
 {{< /cards >}}
 
 [valet-test-suites]: https://github.com/jcaillon/valet/tree/latest/tests.d

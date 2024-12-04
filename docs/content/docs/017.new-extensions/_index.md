@@ -67,6 +67,16 @@ Others can then install your extension with the `valet self extend` command. For
   You can also install a specific version of the extension by providing the git reference `--version my-ref`. See `valet self extend --help` for more options.
 {{< /callout >}}
 
+## 🚧 Install dependencies
+
+If your extension requires additional dependencies, you can create a `extension.setup.sh` script at the root of your extension directory.
+
+This script will be sourced from Valet when installing or updating the extension. You can use Valet functions as if you were coding a command.
+
+{{< callout type="info" >}}
+The user will have the possibility to skip the execution of this script.
+{{< /callout >}}
+
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../configuration" title="Configuration" >}}
   {{< card icon="arrow-circle-right" link="../new-commands" title="Create a new command" >}}

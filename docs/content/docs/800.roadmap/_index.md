@@ -8,7 +8,8 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- Self-command to create a new command interactively.
+- add-test
+- Filter build command for `commands.d` ?
 - Add HOW TO documentation:
   - how to build and share a CLI application with Valet
   - how to use valet from your bash prompt

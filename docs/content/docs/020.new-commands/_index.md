@@ -1,22 +1,16 @@
 ---
-title: ✨ New commands
+title: ✨ Create a command
 cascade:
   type: docs
 weight: 20
 url: /docs/new-commands
 ---
 
-This page describes how to add your own commands in Valet. Make sure to review the [Valet introduction][introduction] and [Valet usage][usage] pages first to get a good understanding of what is an **extension** and what is a **command**.
+Once you have created an extension and opened its directory, you can start creating your new commands.
 
-The section [working on bash][work-on-bash-scripts] will help you set up a coding environment for bash.
+## 📂 Command files location
 
-For command examples, take a look at the [showcase command definitions][showcase-commands].
-
-## 📂 Commands file location
-
-Commands are found and indexed by Valet if they are defined in `*.sh` bash scripts located under your user directory which defaults to `~/.valet.d`. This directory can be changed with the variable `VALET_USER_DIRECTORY`, see [configuration][configuration].
-
-It is recommended to organize commands in subdirectories which has the added benefice of allowing you to share commands with other, by cloning repositories under your `~/.valet.d` directory.
+Commands are found and indexed by Valet if they are defined in `*.sh` bash scripts located in the `commands.d` directory of your extensions.
 
 Commands can be defined individually in separated files or can be regrouped in a single script. Keep in mind that the bash script of the command function will be sourced, so you might want to keep them light/short.
 
@@ -24,16 +18,11 @@ Here is an example content for your user directory:
 
 {{< filetree/container >}}
   {{< filetree/folder name="~/.valet.d" >}}
-    {{< filetree/folder name="showcase" >}}
-      {{< filetree/file name="showcase.sh" >}}
-      {{< filetree/file name="showcase-interactive.sh" >}}
-    {{< /filetree/folder >}}
-    {{< filetree/folder name="personal" >}}
-      {{< filetree/file name="myawesomecmd.sh" >}}
-      {{< filetree/file name="another.sh" >}}
-    {{< /filetree/folder >}}
-    {{< filetree/folder name="shared-commands" state="closed" >}}
-      {{< filetree/file name="file.sh" >}}
+    {{< filetree/folder name="my-extension" >}}
+      {{< filetree/folder name="commands.d" >}}
+        {{< filetree/file name="my-awesome-cmd.sh" >}}
+        {{< filetree/file name="another.sh" >}}
+      {{< /filetree/folder >}}
     {{< /filetree/folder >}}
   {{< /filetree/folder >}}
 {{< /filetree/container >}}
@@ -42,25 +31,21 @@ Here is an example content for your user directory:
 
 {{% steps %}}
 
+### 🧑‍💻 Setup your development environment
+
+The section [working on bash][work-on-bash-scripts] will help you set up a coding environment for bash.
+
+Open your existing extension directory or [create a new one][newLibraryLink].
+
 ### 📄 Add a new command file
 
 {{< callout type="info" >}}
 This step is optional, you can add a command in an existing file.
 {{< /callout >}}
 
-Create a new bash script with the file extension `.sh` under your user directory. E.g.:
+Run the command `valet self add-command my-command` to create a new command file named `my-command.sh` in the `commands.d` directory of your extension. _Replace `my-command` with the name of your command._
 
-{{< filetree/container >}}
-  {{< filetree/folder name="~/.valet.d" >}}
-    {{< filetree/file name="command.sh" >}}
-  {{< /filetree/folder >}}
-{{< /filetree/container >}}
-
-Add the bash [shebang][shebang] at the beginning of the file to help your editor identifying the correct shell:
-
-```bash
-#!/usr/bin/env bash
-```
+Alternatively, create the file manually.
 
 ### 🔤 Define your new command
 
@@ -191,6 +176,8 @@ source string
 
 You can find a list of [all the libraries here][libraries].
 
+Additionally, you can create your own library functions. See the [create a library][newLibraryLink] section for more information.
+
 #### Error handling and return values
 
 Although you can simply `exit` from a command function, it is recommended to:
@@ -241,7 +228,7 @@ You don't have to remember all the Valet functions or look at the documentation 
 
 ### 🧪 (optional) Test your command
 
-Please check the [test command](../test-commands) section.
+Please check the [create a test](../test-commands) section.
 
 ### 🛠️ Rebuild valet menu
 
@@ -255,7 +242,7 @@ The build process consists of updating the `~/.valet.d/commands` file by extract
 In case of an issue with your `~/.valet.d/commands` file you might be unable to run the `self build` command. In which case you can execute the build directly by calling `${VALET_HOME}/commands.d/self-build.sh` (`VALET_HOME` being your Valet installation directory).
 {{< /callout >}}
 
-During the build, all files matching `*.sh` will be read by Valet to look for command definitions, and the search is recursive. Directories named `tests.d` or hidden directory (starting with a `.`) will be ignored. Consider these rules to lower the build time if it becomes too important.
+During the build, all files matching `*.sh` will be read by Valet to look for command definitions, and the search is recursive. Hidden directories (starting with a `.`) will be ignored, consider this rule to lower the build time if it becomes too important.
 
 {{% /steps %}}
 
@@ -277,15 +264,13 @@ You can activate the debug log level with Valet `-v` option, e.g. `valet -v my c
   {{< card icon="arrow-circle-right" link="../command-properties" title="Command properties" >}}
 {{< /cards >}}
 
-[usage]: ../usage
-[introduction]: ../introduction
 [work-on-bash-scripts]: ../work-on-bash-scripts
 [performance-tips]: performance-tips
-[configuration]: ../configuration
-[shebang]: https://en.wikipedia.org/wiki/Shebang_(Unix)
 [showcase-commands]: https://github.com/jcaillon/valet/tree/latest/examples.d/showcase
 [command-properties]: ../command-properties
 [core-library]: ../libraries/core/
 [bash-manual-set]: https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html#index-set
 [profiler-output-example]: https://github.com/jcaillon/valet/blob/latest/tests.d/1301-profiler/results.approved.md
 [libraries]: ../libraries
+[newExtensionsLink]: ../new-extensions
+[newLibraryLink]: ../new-libraries

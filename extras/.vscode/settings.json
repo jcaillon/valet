@@ -1,6 +1,6 @@
 {
   // https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
-  "bashIde.globPattern": "**/@(lib-*|src/*.sh)",
+  "bashIde.globPattern": "**/@(lib-*|commands.d/*.sh)",
   "bashIde.includeAllWorkspaceSymbols": true,
   "terminal.integrated.wordSeparators": " ()[]{}',\"`─‘’“”|⌜⌝"
 }

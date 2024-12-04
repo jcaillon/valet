@@ -72,7 +72,7 @@ This makes Valet particularly suitable for automation (in CI/CD pipelines for in
 
 Additionally, at the beginning of its execution, Valet will `source` a file named `.env` located in the current directory, which enables you to set up command options (this file name can be changed if needed).
 
-## ✒️ Adding your own commands
+## ✒️ Adding your own commands and libraries
 
 Valet is pre-configured with some example commands so you can try it immediately and see how it feels.
 
@@ -80,9 +80,23 @@ However, the main goal is to extend Valet and create your own commands. Valet ta
 
 To create a new command, follow this [documentation][new-commands].
 
+To create a new library, follow this [documentation][new-libraries].
+
+## 🪄 Use Valet library functions directly in bash
+
+Thanks to the `self export` command, you can export Valet functions so they are usable directly in your bash session:
+
+```bash
+eval "$(valet self export -a)"
+
+log::info "Cool logs!"
+if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
+```
+
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../installation" title="Installation" >}}
   {{< card icon="arrow-circle-right" link="../configuration" title="Valet configuration" >}}
 {{< /cards >}}
 
 [new-commands]: ../new-commands
+[new-libraries]: ../new-libraries
