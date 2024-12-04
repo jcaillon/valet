@@ -670,7 +670,7 @@ function selfUpdate_addToPath() {
 
 # set the version to download by default
 # this is automatically updated by the self release command
-VALET_RELEASED_VERSION="0.26.6"
+VALET_RELEASED_VERSION="0.27.285"
 
 # import the core script (should always be skipped if the command is run from valet)
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
