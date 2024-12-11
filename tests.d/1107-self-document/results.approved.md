@@ -1249,6 +1249,42 @@ stderr="${RETURNED_VALUE2}"
 > See io::invokef5 for more information.
 
 
+## io::invoke5
+
+This function call an executable and its arguments.
+It redirects the stdout and stderr to environment variables.
+It calls invoke5 and reads the files to set the environment variables.
+
+- $1: **fail** _as bool_:
+      true/false to indicate if the function should fail in case the execution fails.
+      If true and the execution fails, the script will exit.
+- $2: **acceptable codes** _as string_:
+      the acceptable error codes, comma separated
+      (if the error code is matched, then set the output error code to 0)
+- $3: **stdin from file** _as bool_:
+      true/false to indicate if the 4th argument represents a file path or directly the content for stdin
+- $4: **stdin** _as string_:
+      the stdin (can be empty)
+- $5: **executable** _as string_:
+      the executable or function to execute
+- $@: **arguments** _as any_:
+      the arguments to pass to the executable
+
+Returns:
+
+- $?: The exit code of the executable.
+- `RETURNED_VALUE`: The content of stdout.
+- `RETURNED_VALUE2`: The content of stderr.
+
+```bash
+io::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
+stdout="${RETURNED_VALUE}"
+stderr="${RETURNED_VALUE2}"
+```
+
+> See io::invokef5 for more information.
+
+
 ## io::invokef2
 
 This function call an executable and its arguments.
@@ -1324,7 +1360,7 @@ It redirects the stdout and stderr to temporary files.
 - $2: **acceptable codes** _as string_:
       the acceptable error codes, comma separated
         (if the error code is matched, then set the output error code to 0)
-- $3: **fail** _as bool_:
+- $3: **sdtin from file** _as bool_:
       true/false to indicate if the 4th argument represents a file path or directly the content for stdin
 - $4: **sdtin** _as string_:
       the stdin (can be empty)
@@ -3920,6 +3956,43 @@ function io::invoke2() { :; }
 # 
 function io::invoke2piped() { :; }
 
+# ## io::invoke5
+# 
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to environment variables.
+# It calls invoke5 and reads the files to set the environment variables.
+# 
+# - $1: **fail** _as bool_:
+#       true/false to indicate if the function should fail in case the execution fails.
+#       If true and the execution fails, the script will exit.
+# - $2: **acceptable codes** _as string_:
+#       the acceptable error codes, comma separated
+#       (if the error code is matched, then set the output error code to 0)
+# - $3: **stdin from file** _as bool_:
+#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin
+# - $4: **stdin** _as string_:
+#       the stdin (can be empty)
+# - $5: **executable** _as string_:
+#       the executable or function to execute
+# - $@: **arguments** _as any_:
+#       the arguments to pass to the executable
+# 
+# Returns:
+# 
+# - $?: The exit code of the executable.
+# - `RETURNED_VALUE`: The content of stdout.
+# - `RETURNED_VALUE2`: The content of stderr.
+# 
+# ```bash
+# io::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
+# stdout="${RETURNED_VALUE}"
+# stderr="${RETURNED_VALUE2}"
+# ```
+# 
+# > See io::invokef5 for more information.
+# 
+function io::invoke5() { :; }
+
 # ## io::invokef2
 # 
 # This function call an executable and its arguments.
@@ -3997,7 +4070,7 @@ function io::invokef2piped() { :; }
 # - $2: **acceptable codes** _as string_:
 #       the acceptable error codes, comma separated
 #         (if the error code is matched, then set the output error code to 0)
-# - $3: **fail** _as bool_:
+# - $3: **sdtin from file** _as bool_:
 #       true/false to indicate if the 4th argument represents a file path or directly the content for stdin
 # - $4: **sdtin** _as string_:
 #       the stdin (can be empty)
@@ -6225,6 +6298,20 @@ function test::endTest() { :; }
   "body": [ "# ## io::invoke2piped\n# \n# This function call an executable and its arguments and input a given string as stdin.\n# It redirects the stdout and stderr to environment variables.\n# Equivalent to io::invoke5 \"\\${1}\" 0 false \"\\${2}\" \"\\${@:3}\"\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **stdin** _as string_:\n#       the stdin to pass to the executable\n# - \\$3: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?: The exit code of the executable.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# io::invoke2piped true \"key: val\" yq -o json -p yaml -\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > This is the equivalent of:\n# > `myvar=\"\\$(printf '%s\\n' \"mystring\" | mycommand)\"`\n# > But without using a subshell.\n# >\n# > See io::invokef5 for more information.\n# \nio::invoke2piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
+"io::invoke5": {
+  "prefix": "io::invoke5",
+  "description": "This function call an executable and its arguments...",
+  "scope": "",
+  "body": [ "io::invoke5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**stdin from file**}\" \"${4:**stdin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
+},
+
+"io::invoke5#withdoc": {
+  "prefix": "io::invoke5#withdoc",
+  "description": "This function call an executable and its arguments...",
+  "scope": "",
+  "body": [ "# ## io::invoke5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to environment variables.\n# It calls invoke5 and reads the files to set the environment variables.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#       (if the error code is matched, then set the output error code to 0)\n# - \\$3: **stdin from file** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **stdin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?: The exit code of the executable.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# io::invoke5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > See io::invokef5 for more information.\n# \nio::invoke5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**stdin from file**}\" \"${4:**stdin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
+},
+
 "io::invokef2": {
   "prefix": "io::invokef2",
   "description": "This function call an executable and its arguments...",
@@ -6257,14 +6344,14 @@ function test::endTest() { :; }
   "prefix": "io::invokef5",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "io::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**fail**}\" \"${4:**sdtin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "io::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**sdtin from file**}\" \"${4:**sdtin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
 "io::invokef5#withdoc": {
   "prefix": "io::invokef5#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## io::invokef5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#                      If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#         (if the error code is matched, then set the output error code to 0)\n# - \\$3: **fail** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **sdtin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?: The exit code of the executable.\n# - `RETURNED_VALUE`: The file path containing the stdout of the executable.\n# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.\n# \n# ```bash\n# io::invokef5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > - In windows, this is tremendously faster to do (or any other invoke flavor):\n# >   `io::invokef5 false 0 false '' mycommand && myvar=\"\\${RETURNED_VALUE}\"`\n# >   than doing:\n# >   `myvar=\"\\$(mycommand)\".`\n# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).\n# > - On linux, you can use a tmpfs directory for massive gains over subshells.\n# \nio::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**fail**}\" \"${4:**sdtin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "# ## io::invokef5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#                      If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#         (if the error code is matched, then set the output error code to 0)\n# - \\$3: **sdtin from file** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **sdtin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?: The exit code of the executable.\n# - `RETURNED_VALUE`: The file path containing the stdout of the executable.\n# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.\n# \n# ```bash\n# io::invokef5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > - In windows, this is tremendously faster to do (or any other invoke flavor):\n# >   `io::invokef5 false 0 false '' mycommand && myvar=\"\\${RETURNED_VALUE}\"`\n# >   than doing:\n# >   `myvar=\"\\$(mycommand)\".`\n# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).\n# > - On linux, you can use a tmpfs directory for massive gains over subshells.\n# \nio::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**sdtin from file**}\" \"${4:**sdtin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
 "io::isDirectoryWritable": {
@@ -7391,7 +7478,7 @@ function test::endTest() { :; }
 
 ```log
 INFO     Generating documentation for the core functions only.
-INFO     Found 128 functions with documentation.
+INFO     Found 129 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-1/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-1/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/valet.code-snippets⌝.
