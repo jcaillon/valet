@@ -21,7 +21,7 @@ fi
 #   ⌜Exit codes:⌝
 #
 #   - 0: everything went well
-#   - 1+: an error occured
+#   - 1+: an error occurred
 #
 #   ⌜Create your own commands:⌝
 #
@@ -33,7 +33,7 @@ fi
 #
 #   In addition to the environment variables defined for each options, you can define environment variables to configure valet.
 #
-#   These variables are conviently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the VALET_CONFIG_FILE environment variable).
+#   These variables are contently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the VALET_CONFIG_FILE environment variable).
 #
 #   You can run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).
 #

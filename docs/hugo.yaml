@@ -5,6 +5,16 @@ module:
   imports:
     - path: github.com/imfing/hextra
 
+# enableRobotsTXT: true
+# enableGitInfo: true
+# enableEmoji: false
+# hasCJKLanguage: true
+
+# outputs:
+#   home: [HTML]
+#   page: [HTML]
+#   section: [HTML, RSS]
+
 markup:
   # allow raw html
   goldmark:
@@ -68,7 +78,8 @@ params:
       width: 50
 
   footer:
-    displayCopyright: false
+    enable: true
+    displayCopyright: true
     displayPoweredBy: false
 
   editURL:
@@ -107,6 +118,12 @@ params:
       # date | lastmod | publishDate | title | weight
       sortBy: date
       sortOrder: desc # or "asc"
+
+  highlight:
+    copy:
+      enable: true
+      # hover | always
+      display: hover
 
   comments:
     enable: false

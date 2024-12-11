@@ -71,7 +71,7 @@ function io::toAbsolutePath() {
 # - $2: **acceptable codes** _as string_:
 #       the acceptable error codes, comma separated
 #         (if the error code is matched, then set the output error code to 0)
-# - $3: **fail** _as bool_:
+# - $3: **sdtin from file** _as bool_:
 #       true/false to indicate if the 4th argument represents a file path or directly the content for stdin
 # - $4: **sdtin** _as string_:
 #       the stdin (can be empty)
@@ -190,7 +190,7 @@ function io::invokef5() {
   return ${exitCode}
 }
 
-# io::invoke5
+# ## io::invoke5
 #
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to environment variables.
@@ -202,7 +202,7 @@ function io::invokef5() {
 # - $2: **acceptable codes** _as string_:
 #       the acceptable error codes, comma separated
 #       (if the error code is matched, then set the output error code to 0)
-# - $3: **fail** _as bool_:
+# - $3: **stdin from file** _as bool_:
 #       true/false to indicate if the 4th argument represents a file path or directly the content for stdin
 # - $4: **stdin** _as string_:
 #       the stdin (can be empty)
@@ -973,7 +973,7 @@ function io::windowsRunInPowershell() {
     # shellcheck disable=SC2016
     script='
     $ErrorActionPreference = '"'Stop'"';
-    $process = Start-Process -FilePath powershell.exe -ArgumentList @("-NoProfile","-NonInteractive","-File","'"${scriptFileWindows}"'") -PassThru -Wait -Verb RunAs -WindowStyle Hidden;
+    $process = Start-Process -FilePath powershell.exe -ArgumentList @("-NoProfile","-NonInteractive","-File","'"${scriptFileWindows}"'") -Wait -Verb RunAs -WindowStyle Hidden;
     exit $process.ExitCode
     '
   fi

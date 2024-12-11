@@ -1,5 +1,5 @@
-module github.com/username/my-site
+module github.com/jcaillon/valet
 
-go 1.22.2
+go 1.23
 
-require github.com/imfing/hextra v0.7.3 // indirect
+require github.com/imfing/hextra v0.8.6 // indirect

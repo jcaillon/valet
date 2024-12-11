@@ -8,6 +8,8 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
+- make `source` able to source multiple libraries that are called the same.
 - add-test
 - Filter build command for `commands.d` ?
 - Add HOW TO documentation:
