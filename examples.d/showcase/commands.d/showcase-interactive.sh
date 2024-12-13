@@ -28,7 +28,7 @@ function showcaseInteractive() {
   log::info "CURSOR_COLUMN: ⌜${CURSOR_COLUMN}⌝"
 
   log::info "Getting the terminal size:"
-  system::exportTerminalSize
+  interactive::getTerminalSize
   log::info "GLOBAL_LINES: ⌜${GLOBAL_LINES}⌝"
   log::info "GLOBAL_COLUMNS: ⌜${GLOBAL_COLUMNS}⌝"
 

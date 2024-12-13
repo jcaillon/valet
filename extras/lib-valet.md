@@ -2432,7 +2432,7 @@ done
 > This is faster than using mapfile on <(compgen -v).
 
 
-## system::exportTerminalSize
+## interactive::getTerminalSize
 
 This function exports the terminal size.
 
@@ -2442,7 +2442,7 @@ Returns:
 - `GLOBAL_LINES`: The number of lines in the terminal.
 
 ```bash
-system::exportTerminalSize
+interactive::getTerminalSize
 printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
 ```
 

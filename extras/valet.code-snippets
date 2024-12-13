@@ -1653,18 +1653,18 @@
   "body": [ "# ## system::env\n# \n# Get the list of all the environment variables.\n# In pure bash, no need for env or printenv.\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array with the list of all the environment variables.\n# \n# ```bash\n# system::env\n# for var in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s=%s\\n' \"\\${var}\" \"\\${!var}\"\n# done\n# ```\n# \n# > This is faster than using mapfile on <(compgen -v).\n# \nsystem::env$0" ]
 },
 
-"system::exportTerminalSize": {
-  "prefix": "system::exportTerminalSize",
+"interactive::getTerminalSize": {
+  "prefix": "interactive::getTerminalSize",
   "description": "This function exports the terminal size...",
   "scope": "",
-  "body": [ "system::exportTerminalSize$0" ]
+  "body": [ "interactive::getTerminalSize$0" ]
 },
 
-"system::exportTerminalSize#withdoc": {
-  "prefix": "system::exportTerminalSize#withdoc",
+"interactive::getTerminalSize#withdoc": {
+  "prefix": "interactive::getTerminalSize#withdoc",
   "description": "This function exports the terminal size...",
   "scope": "",
-  "body": [ "# ## system::exportTerminalSize\n# \n# This function exports the terminal size.\n# \n# Returns:\n# \n# - `GLOBAL_COLUMNS`: The number of columns in the terminal.\n# - `GLOBAL_LINES`: The number of lines in the terminal.\n# \n# ```bash\n# system::exportTerminalSize\n# printf '%s\\n' \"The terminal has ⌜\\${GLOBAL_COLUMNS}⌝ columns and ⌜\\${GLOBAL_LINES}⌝ lines.\"\n# ```\n# \nsystem::exportTerminalSize$0" ]
+  "body": [ "# ## interactive::getTerminalSize\n# \n# This function exports the terminal size.\n# \n# Returns:\n# \n# - `GLOBAL_COLUMNS`: The number of columns in the terminal.\n# - `GLOBAL_LINES`: The number of lines in the terminal.\n# \n# ```bash\n# interactive::getTerminalSize\n# printf '%s\\n' \"The terminal has ⌜\\${GLOBAL_COLUMNS}⌝ columns and ⌜\\${GLOBAL_LINES}⌝ lines.\"\n# ```\n# \ninteractive::getTerminalSize$0" ]
 },
 
 "system::getNotExistingCommands": {

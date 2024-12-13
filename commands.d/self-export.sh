@@ -25,7 +25,7 @@ fi
 #   If you want to use Valet functions directly in bash, you can use this command like this:
 #
 #   ```bash
-#   eval "$(valet self export 2>/dev/null)"
+#   eval "$(valet self export)"
 #   ```
 #
 #   This will export all the necessary functions and variables to use the Valet log library by default.
@@ -35,6 +35,9 @@ fi
 # - name: -a, --export-all
 #   description: |-
 #     Export all the libraries.
+# - name: -E, --no-exit
+#   description: |-
+#     Override the ⌜core::fail⌝ and ⌜core::failWithCode⌝ functions to not exit the script.
 # examples:
 # - name: !eval "$(valet self export -a)"
 #   description: |-
@@ -66,13 +69,14 @@ function selfExport() {
   exportFunctionsForLibrary log && output+="${RETURNED_VALUE}"$'\n'
   exportFunctionsForLibrary string && output+="${RETURNED_VALUE}"$'\n'
   exportFunctionsForLibrary array && output+="${RETURNED_VALUE}"$'\n'
-  exportFunctionsForLibrary system && output+="${RETURNED_VALUE}"$'\n'
+  exportFunctionsForLibrary interactive && output+="${RETURNED_VALUE}"$'\n'
 
   # export all libraries
   if [[ ${exportAll:-} == "true" ]]; then
     local library
     for library in "${GLOBAL_VALET_HOME}/libraries.d/lib-"*; do
       local -i lineNumber=0
+      log::debug "Exporting library: ⌜${library}⌝."
 
       # read the library file line by line
       local IFS
@@ -83,6 +87,11 @@ function selfExport() {
         lineNumber+=1
       done < "${library}"
     done
+  fi
+
+  if [[ ${noExit:-} == "true" ]]; then
+    output+="core::fail() { log::error \"\$@\"; }"$'\n'
+    output+="core::failWithCode() { local exitCode=\"\${1}\"; shift; log::error \"\$@\"; log::error \"Exit code: \$exitCode\"; }"$'\n'
   fi
 
   echo "${output}"
@@ -101,6 +110,8 @@ function selfExport() {
 #   exportFunctionsForLibrary log
 function exportFunctionsForLibrary() {
   local libraryName="${1}"
+
+  log::debug "Exporting functions for library: ⌜${libraryName}⌝."
 
   io::invoke compgen -A 'function' "${libraryName}::"
   local filteredListOfFunctions="${RETURNED_VALUE//$'\n'/ }"

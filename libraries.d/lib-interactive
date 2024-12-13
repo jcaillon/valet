@@ -4,6 +4,8 @@
 
 # shellcheck source=lib-ansi-codes
 source ansi-codes
+# shellcheck source=lib-io
+source io
 
 #===============================================================
 # >>> Interactive prompts
@@ -76,8 +78,8 @@ function interactive::askForConfirmationRaw() {
       esac
     fi
 
-    # break if fd 1 is closed or does not refer to a terminal.
-    if [[ ! -t 1 ]]; then break; fi
+    # break if fd 0 is closed or does not refer to a terminal.
+    if [[ ! -t 0 ]]; then break; fi
   done
 
   printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}"
@@ -208,8 +210,8 @@ function interactive::promptYesNoRaw() {
       esac
     fi
 
-    # break if fd 1 is closed or does not refer to a terminal.
-    if [[ ! -t 1 ]]; then break; fi
+    # break if fd 0 is closed or does not refer to a terminal.
+    if [[ ! -t 0 ]]; then break; fi
   done
 
   printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}"
@@ -375,10 +377,13 @@ interactive::displayDialogBox() {
 function interactive::createSpace() {
   local -i lines="${1}"
   lines=$((lines - 1 > GLOBAL_LINES ? GLOBAL_LINES : lines - 1))
+  if (( lines <= 1 )); then
+    return 0
+  fi
   local -i loop
   local newLines
   for ((loop = 0; loop < lines; loop++)); do newLines+=$'\n'; done
-  printf '%s' "${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${newLines}${AC__CURSOR_MOVE__}${lines}${__AC__START_OF_LINE_UP}"
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${newLines}${AC__CURSOR_MOVE__}${lines}${__AC__START_OF_LINE_UP}${AC__CURSOR_SHOW}"
 }
 
 # ## interactive::getCursorPosition
@@ -420,7 +425,7 @@ function interactive::switchToFullScreen() {
     core::fail "This function can only be used in an interactive session. Did you already called interactive::switchBackFromFullScreen?"
   fi
 
-  INTERACTIVE_FULL_SCREEN_MODE=true
+  _INTERACTIVE_FULL_SCREEN_MODE=true
 
   # disable echoing when we type something
   interactive::sttyInit
@@ -451,7 +456,7 @@ function interactive::switchBackFromFullScreen() {
     return
   fi
 
-  INTERACTIVE_FULL_SCREEN_MODE=false
+  _INTERACTIVE_FULL_SCREEN_MODE=false
 
   # restore the terminal state
   printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
@@ -476,11 +481,9 @@ function interactive::switchBackFromFullScreen() {
 # ```
 function interactive::sttyInit() {
   if command -v stty &>/dev/null; then
-    if [[ -z ${INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
-      # shellcheck source=lib-io
-      source io
+    if [[ -z ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
       io::invoke "stty" "-g"
-      INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
+      _INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
       # -echo is to suppress echoing characters typed by the user
       # All the other options are there to enable a satisfying behavior for the GNU readline library
       # used when we call read -e
@@ -503,16 +506,263 @@ function interactive::sttyInit() {
 # ```
 # shellcheck disable=SC2120
 function interactive::sttyRestore() {
-  if [[ ${INTERACTIVE_FULL_SCREEN_MODE:-} == "true" && ${1:-} != "true" ]]; then
+  if [[ ${_INTERACTIVE_FULL_SCREEN_MODE:-} == "true" && ${1:-} != "true" ]]; then
     return 0
   fi
 
-  if [[ -n ${INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
+  if [[ -n ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
     if command -v stty &>/dev/null; then
-      stty "${INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
+      stty "${_INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
     fi
-    unset -v INTERACTIVE_STTY_SAVED_CONFIG
+    unset -v _INTERACTIVE_STTY_SAVED_CONFIG
   fi
+}
+
+# ## interactive::clearBox
+#
+# Clear a "box" in the terminal.
+# Will return the cursor at the current position at the end (using CURSOR_LINE and CURSOR_COLUMN).
+#
+# - $1: **top** _as int_:
+#       the left position of the box
+# - $2: **left** _as int_:
+#       the top position of the box
+# - $3: **width** _as int_:
+#       the width of the box
+# - $4: **height** _as int_:
+#       the height of the box
+#
+# ```bash
+# interactive::getCursorPosition
+# interactive::clearBox 1 1 10 5
+# ```
+function interactive::clearBox() {
+  local top="${1}"
+  local left="${2}"
+  local width="${3}"
+  local height="${4}"
+
+  local toPrint="${AC__CURSOR_HIDE}"
+  local lineNumber=0
+  for ((lineNumber = top; lineNumber < top + height; lineNumber++)); do
+    toPrint+="${AC__CURSOR_MOVE__}${lineNumber};${left}${__AC__TO}${AC__ERASE__}${width}${__AC_CHARS}"
+  done
+  printf '%s%s' "${toPrint}" "${AC__CURSOR_MOVE__}${CURSOR_LINE};${CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
+}
+
+# ## interactive::getBestAutocompleteBox
+#
+# This function returns the best position and size for an autocomplete box that would open
+# at the given position.
+#
+# - The box will be placed below the current position if possible, but can be placed
+#   above if there is not enough space below.
+# - The box will be placed on the same column as the current position if possible, but can be placed
+#   on the left side if there is not enough space on the right to display the full width of the box.
+# - The box will have the desired height and width if possible, but will be reduced if there is
+#   not enough space in the terminal.
+# - The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.
+#   Otherwise it can use the current position line.
+#
+# - $1: **current line** _as int_:
+#       the current line of the cursor (1 based)
+# - $2: **current column** _as int_:
+#       the current column of the cursor (1 based)
+# - $3: **desired height** _as int_:
+#       the desired height of the box
+# - $4: **desiredWidth** _as int_:
+#       the desired width of the box
+# - $5: **max height** _as int_:
+#       the maximum height of the box
+# - $6: force below _as bool_:
+#       (optional) force the box to be below the current position
+#       (defaults to false)
+# - $7: not on current line _as bool_:
+#       (optional) the box will not be placed on the same line as the current position
+#       (defaults to true)
+# - $8: terminal width _as int_:
+#       (optional) the width of the terminal
+#       (defaults to GLOBAL_COLUMNS)
+# - $9: terminal height _as int_:
+#       (optional) the height of the terminal
+#       (defaults to GLOBAL_LINES)
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the top position of the box (1 based)
+# - `RETURNED_VALUE2`: the left position of the box (1 based)
+# - `RETURNED_VALUE3`: the width of the box
+# - `RETURNED_VALUE4`: the height of the box
+#
+# ```bash
+# interactive::getBestAutocompleteBox 1 1 10 5
+# ```
+function interactive::getBestAutocompleteBox() {
+  local currentLine="${1}"
+  local currentColumn="${2}"
+  local desiredHeight="${3}"
+  local desiredWidth="${4}"
+  local maxHeight="${5:-${GLOBAL_LINES:-9999}}"
+  local forceBelow="${6:-false}"
+  local notOnCurrentLine="${7:-true}"
+  local terminalWidth="${8:-${GLOBAL_COLUMNS:-9999}}"
+  local terminalHeight="${9:-${GLOBAL_LINES:-9999}}"
+
+  local left top width height
+
+  local extraLine=1
+  if [[ ${notOnCurrentLine} == "true" ]]; then
+    extraLine=0
+  fi
+
+  local below=true
+  local -i maxAvailableLines=$((terminalHeight - currentLine + extraLine))
+  if [[ ${forceBelow} != "true" ]]; then
+    local maxAvailableLinesAbove=$((currentLine - 1 + extraLine))
+    if ((desiredHeight > maxAvailableLines && maxAvailableLinesAbove > maxAvailableLines)); then
+      maxAvailableLines=${maxAvailableLinesAbove}
+      below=false
+    fi
+  fi
+
+  maxHeight=$((maxAvailableLines >= maxHeight ? maxHeight : maxAvailableLines))
+  height=$((desiredHeight >= maxHeight ? maxHeight : desiredHeight))
+  if [[ ${below} == "true" ]]; then
+    top=$((currentLine + 1 - extraLine))
+  else
+    top=$((currentLine - height + extraLine))
+  fi
+
+  width=$((desiredWidth >= terminalWidth ? terminalWidth : desiredWidth))
+  left=$((terminalWidth - currentColumn + 1 > width ? currentColumn : terminalWidth - width + 1))
+
+  if ((width < 1)); then
+    width=1
+  fi
+  if ((height < 0)); then
+    height=0
+  fi
+
+  RETURNED_VALUE="${top}"
+  RETURNED_VALUE2="${left}"
+  # shellcheck disable=SC2034
+  RETURNED_VALUE3="${width}"
+  # shellcheck disable=SC2034
+  RETURNED_VALUE4="${height}"
+}
+
+# ## interactive::showStringInScreen
+#
+# This function return a string that can be printed in a terminal in order to display a text
+# and position the cursor at a given index in the input text.
+#
+# If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed
+# at the beginning and/or at the end of the string.
+#
+# The cursor will be displayed under the character at the given index of the input text and
+# it makes sure that the cursor is always visible in the screen.
+#
+# This function is useful to display a long prompt on a single line.
+#
+# An example:
+#
+# ```text
+# inputString="This is a long string that will be displayed in the screen."
+# #                                ^ input index 20
+# interactive::showStringInScreen "${inputString}" 20 10
+# # output: "…g string…"
+# #                  ^ screen cursor (at index 8)
+# ```
+#
+# - $1: **input string** _as string_:
+#       the string to display
+# - $2: **input index** _as int_:
+#       the index of the character (in the input string) that should be under the cursor
+# - $3: **screen width** _as int_:
+#       the width of the screen
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the string to display in the screen
+# - `RETURNED_VALUE2`: the index at which to position the cursor on screen
+#
+# ```bash
+# interactive::showStringInScreen "This is a long string that will be displayed in the screen." 20 10
+# ```
+function interactive::showStringInScreen() {
+  local inputString="${1}"
+  local -i inputIndex="${2}"
+  local -i screenWidth="${3}"
+
+  local -i inputLength=${#inputString}
+  local -i screenIndex
+
+  # compute where we will display the cursor in the display
+  if ((inputIndex >= screenWidth)); then
+    if ((inputIndex >= inputLength - 1)); then
+      # we display it in the last position if it is at the end of the string
+      screenIndex=$((screenWidth - 1))
+    else
+      # we display at the second last position if it is not at the end
+      screenIndex=$((screenWidth - 2))
+    fi
+  else
+    if ((inputLength > screenWidth && inputLength - inputIndex == 2)); then
+      screenIndex=$((screenWidth - 2))
+    else
+      if ((inputLength > screenWidth && screenWidth - inputIndex == 1)); then
+        # if within the display but at the last character and we will need to display ellipsis...
+        screenIndex=$((screenWidth - 2))
+      else
+        # if it is already within the display, we display it at the right position
+        screenIndex=${inputIndex}
+      fi
+    fi
+  fi
+
+  local -i screenLeftLength=$((screenIndex))
+  local -i realLeftLength=$((inputIndex))
+
+  local screenString=""
+
+  # compute what to display at the left of the character under the caret (if any)
+  if ((screenLeftLength > 0)); then
+    if ((realLeftLength > screenLeftLength)); then
+      # we can't display the whole left string, so we display ellipsis
+      if ((screenLeftLength > 1)); then
+        screenString+="…${inputString:$((realLeftLength - screenLeftLength + 1)):$((screenLeftLength - 1))}"
+      else
+        screenString+="…"
+      fi
+    else
+      screenString+="${inputString:$((realLeftLength - screenLeftLength)):$((screenLeftLength))}"
+    fi
+  fi
+
+  # compute the character to display under the caret (if any)
+  if ((inputLength > 0 && inputIndex <= inputLength)); then
+    screenString+="${inputString:$((inputIndex)):1}"
+  fi
+
+  # compute what to display at the right of the character under the caret (if any)
+  local -i screenRightLength=$((screenWidth - screenIndex - 1))
+  local -i realRightLength=$((inputLength - inputIndex - 1))
+
+  if ((screenRightLength > 0)); then
+    if ((realRightLength > screenRightLength)); then
+      # we can't display the whole right string, so we display ellipsis
+      if ((screenRightLength > 1)); then
+        screenString+="${inputString:$((inputLength - realRightLength)):$((screenRightLength - 1))}…"
+      else
+        screenString+="…"
+      fi
+    else
+      screenString+="${inputString:$((inputLength - realRightLength)):$((screenRightLength))}"
+    fi
+  fi
+
+  RETURNED_VALUE="${screenString}"
+  RETURNED_VALUE2=${screenIndex}
 }
 
 
@@ -542,7 +792,7 @@ function interactive::testWaitForChar() {
       fi
       printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
     fi
-    if [[ ! -t 1 ]]; then break; fi
+    if [[ ! -t 0 ]]; then break; fi
   done
 }
 
@@ -641,12 +891,11 @@ function interactive::testWaitForKeyPress() {
   interactive::sttyInit
   # define the callback function called when a special key is pressed
   # shellcheck disable=SC2317
-  function interactiveOnKeyBindingPress() {
+  function interactiveOnKeyBindingPressTestFunction() {
     local key="${1}"
     printf "%sYou pressed (binding): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${key@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
   }
-  # rebind some keys to call the callback function interactiveOnKeyBindingPress
-  interactive::rebindKeymap
+  interactive::rebindKeymap interactiveOnKeyBindingPressTestFunction
 
   printf '%s\n' "Press any key to see the returned code (press Q to quit)."
   while true; do
@@ -656,7 +905,7 @@ function interactive::testWaitForKeyPress() {
       fi
       printf "%sYou pressed (normal key): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED@E}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
     fi
-    if [[ ! -t 1 ]]; then break; fi
+    if [[ ! -t 0 ]]; then break; fi
   done
 
   interactive::sttyRestore
@@ -672,8 +921,6 @@ function interactive::testWaitForKeyPress() {
 # Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 #
 # You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.
-# You must also redefine the function `interactiveOnKeyBindingPress` to react to a bound key press.
-# See @interactive::testWaitForKeyPress for an implementation example.
 #
 # - $@: **read parameters** _as any_:
 #       additional parameters to pass to the read command
@@ -711,7 +958,8 @@ function interactive::waitForKeyPress() {
 
 # ## interactive::rebindKeymap
 #
-# Rebinds all special keys to call a callback function `interactiveOnKeyBindingPress`.
+# Rebinds all special keys to call a given callback function.
+# See @interactive::testWaitForKeyPress for an implementation example.
 #
 # This allows to use the `-e` option with the read command and receive events for special key press.
 #
@@ -725,23 +973,33 @@ function interactive::waitForKeyPress() {
 #
 # This function should be called before using interactive::waitForKeyPress.
 #
+# You can call `interactive::resetBindings` to restore the default bindings. However, this is not
+# necessary as the bindings are local to the script.
+#
 # ```bash
 # interactive::rebindKeymap
 # ```
 #
-# > We do not bother to have a restore function because valet should not be sourced and
-# > thus, modifications to the keymap are local to this script.
 # > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
 function interactive::rebindKeymap() {
-  if ! command -v interactiveOnKeyBindingPress &>/dev/null; then
-    core::fail "The function interactiveOnKeyBindingPress must be defined before calling interactive::rebindKeymap."
+  local callBackFunction="${1:-}"
+
+  if ! command -v "${callBackFunction}" &>/dev/null; then
+    core::fail "The function ⌜${callBackFunction}⌝ must be defined before calling interactive::rebindKeymap."
+  fi
+
+  if [[ -n ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
+    # already done
+    return 0
   fi
 
   # remove all existing bindings except the self-insert ones
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
-  # shellcheck source=lib-io
-  source io
-  io::invoke "bind" "-p"
+  io::createTempFile
+  _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
+  io::invokef2 true bind -p
+  \mv -f "${RETURNED_VALUE}" "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+  io::readFile "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
   local bindings="${RETURNED_VALUE}"
   local IFS=$'\n'
   local line
@@ -762,11 +1020,11 @@ function interactive::rebindKeymap() {
   # add the one we are interested in
 
   # Escape key
-  bind -x '"\e": interactiveOnKeyBindingPress ESC' &>/dev/null
-  bind -x '"\e\e": interactiveOnKeyBindingPress ESC' &>/dev/null
-  bind -x '"\e\e\e": interactiveOnKeyBindingPress ESC' &>/dev/null
-  bind -x '"ESC": interactiveOnKeyBindingPress ESC' &>/dev/null
-  bind -x '"ESCAPE": interactiveOnKeyBindingPress ESC' &>/dev/null
+  bind -x '"\e": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"\e\e": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"\e\e\e": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"ESC": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"ESCAPE": '"${callBackFunction}"' ESC' &>/dev/null
 
   # for each normal key, bind it with the different modifiers
   local normalKeys="abcdefghijklmnopqrstuvwxyz"
@@ -780,7 +1038,7 @@ function interactive::rebindKeymap() {
   for((index=0;index<${#normalKeys};index++)); do
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
       key="${normalKeys:${index}:1}"
-      bind -x "\"${modifiers[modeIndex + 1]}${key}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${key^^}" &>/dev/null
+      bind -x "\"${modifiers[modeIndex + 1]}${key}\": ${callBackFunction} ${modifiers[modeIndex]}${key^^}" &>/dev/null
     done
   done
 
@@ -826,10 +1084,10 @@ function interactive::rebindKeymap() {
   for((index=0;index<${#specialKeys[@]};index+=2)); do
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
       key="${specialKeys[index]}"
-      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
       # I have noticed that something the terminal sends the sequence without the \e...
       # so we need to bind it without the \e as well
-      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
     done
   done
 
@@ -875,37 +1133,70 @@ function interactive::rebindKeymap() {
   for((index=0;index<${#specialKeys2[@]};index+=2)); do
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
       key="${specialKeys2[index]}"
-      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
       # I have noticed that something the terminal sends the sequence without the \e...
       # so we need to bind it without the \e as well
-      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
       # We also handle the case where SS3 (\eO) is sent instead of CSI (\e[)
       key="${key//[/O}"
-      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
-      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": interactiveOnKeyBindingPress ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
     done
   done
 
   # special key bindings
-  bind -x '"NEWLINE": interactiveOnKeyBindingPress NEWLINE' &>/dev/null
-  bind -x '"RET": interactiveOnKeyBindingPress NEWLINE' &>/dev/null
-  bind -x '"RETURN": interactiveOnKeyBindingPress NEWLINE' &>/dev/null
+  bind -x '"NEWLINE": '"${callBackFunction}"' NEWLINE' &>/dev/null
+  bind -x '"RET": '"${callBackFunction}"' NEWLINE' &>/dev/null
+  bind -x '"RETURN": '"${callBackFunction}"' NEWLINE' &>/dev/null
 
-  bind -x '"DEL": interactiveOnKeyBindingPress DEL' &>/dev/null
-  bind -x '"\d": interactiveOnKeyBindingPress DEL' &>/dev/null
-  bind -x '"\177": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
-  bind -x '"RUBOUT": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
-  bind -x '"\C-?": interactiveOnKeyBindingPress BACKSPACE' &>/dev/null
-  bind -x '"\b": interactiveOnKeyBindingPress CTRL+BACKSPACE' &>/dev/null
-  bind -x '"\023": interactiveOnKeyBindingPress CTRL+BACKSPACE' &>/dev/null
+  bind -x '"DEL": '"${callBackFunction}"' DEL' &>/dev/null
+  bind -x '"\d": '"${callBackFunction}"' DEL' &>/dev/null
+  bind -x '"\177": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+  bind -x '"RUBOUT": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+  bind -x '"\C-?": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+  bind -x '"\b": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
+  bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
 
-  bind -x '"TAB": interactiveOnKeyBindingPress TAB' &>/dev/null
-  bind -x '"\t": interactiveOnKeyBindingPress TAB' &>/dev/null
+  bind -x '"TAB": '"${callBackFunction}"' TAB' &>/dev/null
+  bind -x '"\t": '"${callBackFunction}"' TAB' &>/dev/null
 
   # allow the user to override bindings with a custom function
   if command -v interactiveRebindOverride &>/dev/null; then
     interactiveRebindOverride
   fi
+}
+
+# ## interactive::resetBindings
+#
+# Reset the key bindings to the default ones.
+#
+# ```bash
+# interactive::resetBindings
+# ```
+function interactive::resetBindings() {
+  if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
+    return 0
+  fi
+
+  # try to remove all bindings
+  io::invoke bind -p
+  local bindings="${RETURNED_VALUE}"
+  local IFS=$'\n'
+  local line
+  local key
+  for line in ${bindings}; do
+    if [[ ${line} == "#"* ]]; then
+      continue
+    fi
+    key="${line%% *}"
+    key="${key//\"/}"
+    bind -r "${key%:}" &>/dev/null
+  done
+
+  # restore the default bindings
+  bind -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}" &>/dev/null
+  rm -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+  unset -v _INTERACTIVE_SAVED_BINDINGS_FILE
 }
 
 # ## interactive::clearKeyPressed
@@ -962,7 +1253,10 @@ function interactiveGetProgressBarString() {
 }
 
 # Starts a wait spinner animation that will loop for a set number of frames.
-function interactiveStartProgressBar() {
+#
+# This function runs in a background process (subshell) and will not block the main thread.
+# It reads the progress from a file shared with the main thread.
+function interactive_runProgressBarAnimation() {
   local progressFilePath="${1}"
   local barTemplate="${2:-${VALET_CONFIG_PROGRESS_BAR_TEMPLATE:-"#spinner #percent ░#bar░ #message"}}"
   local progressBarSize="${3:-${VALET_CONFIG_PROGRESS_BAR_SIZE:-20}}"
@@ -1086,9 +1380,6 @@ function interactive::startProgress() {
     core::fail "A spinner or progress bar is already running."
   fi
 
-  # shellcheck source=lib-io
-  source io
-
   printf '%s' "${AC__CURSOR_HIDE}"
 
   # disable echoing when we type something
@@ -1099,7 +1390,7 @@ function interactive::startProgress() {
   _PROGRESS_BAR_RUNNING=true
 
   shopt -u -o monitor
-  ( interactiveStartProgressBar "${_PROGRESS_BAR_UPDATE_FILE}" "$@" 1>&2; ) &
+  ( interactive_runProgressBarAnimation "${_PROGRESS_BAR_UPDATE_FILE}" "$@" 1>&2; ) &
   _PROGRESS_BAR_PID="$!"
 }
 

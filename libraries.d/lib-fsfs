@@ -97,11 +97,11 @@ function fsfs::itemSelector() {
       onKeyPressed "${LAST_KEY_PRESSED}"
     fi
 
-    # break if fd 1 is closed or does not refer to a terminal.
-    if [[ ! -t 1 || ${FSFS_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
+    # break if fd 0 is closed or does not refer to a terminal.
+    if [[ ! -t 0 || ${FSFS_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then break; fi
 
     # redraw the screen if the terminal was resized
-    if [[ ${FSFS_REDRAW_REQUIRED:-false} == "true" ]]; then
+    if [[ ${GLOBAL_SCREEN_REDRAW_REQUIRED:-false} == "true" ]]; then
       fsfsDrawScreen "${prompt}"
     fi
 
@@ -199,8 +199,6 @@ function fsfsInitialize() {
 function fsfsDrawScreen() {
   local prompt="${1}"
   local toPrint="${AC__CURSOR_HIDE}${FSFS_COLOR_STATIC}"
-
-  FSFS_REDRAW_REQUIRED=false
 
   # clear the screen, move to the top left corner
   toPrint+="${AC__ERASE_SCREEN}${AC__CURSOR_MOVE__}1;1${__AC__TO}"
@@ -652,7 +650,7 @@ function onResize() {
   # export terminal size does not work if both 1 and 2 fd
   # are not the terminal. We need to temporarily redirect
   exec 2>&4 4>&-
-  system::exportTerminalSize
+  interactive::getTerminalSize
   exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
-  FSFS_REDRAW_REQUIRED=true
+  GLOBAL_SCREEN_REDRAW_REQUIRED=true;
 }

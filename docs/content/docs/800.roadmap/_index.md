@@ -8,6 +8,8 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- For all the optional arguments of exported functions, allow to set them using a global variable in addition to the positional argument.
+- Finish prompt and interactive functions.
 - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
 - make `source` able to source multiple libraries that are called the same.
 - add-test
@@ -16,7 +18,6 @@ This page lists the features that I would like to implement in Valet. They come 
   - how to build and share a CLI application with Valet
   - how to use valet from your bash prompt
   - how to use valet in your existing scripts
-- Finish prompt and interactive functions.
 - Add full support for interactive mode.
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.

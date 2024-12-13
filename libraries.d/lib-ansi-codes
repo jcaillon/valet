@@ -25,6 +25,8 @@
 # Ascii graphics:
 #
 # - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9
+# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing
+# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements
 #
 # > While it could be very handy to define a function for each of these instructions,
 # > it would also be slower to execute (function overhead + multiple printf calls).

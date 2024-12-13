@@ -103,7 +103,7 @@ DEBUG    Analyzing the following files:
 DEBUG    Found function: ⌜io::createTempFile⌝
 DEBUG    Found function: ⌜io::createTempDirectory⌝
 DEBUG    Found function: ⌜io::cleanupTempFiles⌝
-DEBUG    Found function: ⌜system::exportTerminalSize⌝
+DEBUG    Found function: ⌜interactive::getTerminalSize⌝
 DEBUG    Found function: ⌜log::setLevel⌝
 DEBUG    Found function: ⌜log::getLevel⌝
 DEBUG    Found function: ⌜log::printFile⌝
@@ -162,11 +162,15 @@ DEBUG    Found function: ⌜interactive::switchToFullScreen⌝
 DEBUG    Found function: ⌜interactive::switchBackFromFullScreen⌝
 DEBUG    Found function: ⌜interactive::sttyInit⌝
 DEBUG    Found function: ⌜interactive::sttyRestore⌝
+DEBUG    Found function: ⌜interactive::clearBox⌝
+DEBUG    Found function: ⌜interactive::getBestAutocompleteBox⌝
+DEBUG    Found function: ⌜interactive::showStringInScreen⌝
 DEBUG    Found function: ⌜interactive::testWaitForChar⌝
 DEBUG    Found function: ⌜interactive::waitForChar⌝
 DEBUG    Found function: ⌜interactive::testWaitForKeyPress⌝
 DEBUG    Found function: ⌜interactive::waitForKeyPress⌝
 DEBUG    Found function: ⌜interactive::rebindKeymap⌝
+DEBUG    Found function: ⌜interactive::resetBindings⌝
 DEBUG    Found function: ⌜interactive::clearKeyPressed⌝
 DEBUG    Found function: ⌜interactive::startProgress⌝
 DEBUG    Found function: ⌜interactive::updateProgress⌝
@@ -202,7 +206,7 @@ DEBUG    Found function: ⌜io::windowsCreateTempFile⌝
 DEBUG    Found function: ⌜io::windowsCreateTempDirectory⌝
 DEBUG    Found function: ⌜profiler::enable⌝
 DEBUG    Found function: ⌜profiler::disable⌝
-DEBUG    Found function: ⌜prompt::autocompletion⌝
+DEBUG    Found function: ⌜prompt::input⌝
 DEBUG    Found function: ⌜string::cutField⌝
 DEBUG    Found function: ⌜string::compareSemanticVersion⌝
 DEBUG    Found function: ⌜string::bumpSemanticVersion⌝
@@ -230,7 +234,7 @@ DEBUG    Found function: ⌜system::windowsGetEnvVar⌝
 DEBUG    Found function: ⌜system::windowsAddToPath⌝
 DEBUG    Found function: ⌜test::commentTest⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 129 functions with documentation.
+INFO     Found 133 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet.md⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet
@@ -238,7 +242,7 @@ INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/li
 INFO     The prototype script has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/valet.code-snippets
 INFO     The vscode snippets have been generated in ⌜$GLOBAL_VALET_HOME/extras/valet.code-snippets⌝.
-INFO     Writing the 129 functions documentation to the core libraries docs.
+INFO     Writing the 133 functions documentation to the core libraries docs.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -301,6 +305,16 @@ INFO     Writing the 129 functions documentation to the core libraries docs.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
@@ -482,8 +496,6 @@ INFO     Writing the 129 functions documentation to the core libraries docs.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md

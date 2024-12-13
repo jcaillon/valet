@@ -28,8 +28,8 @@ GLOBAL OPTIONS
       Turn on profiling (with debug mode) before running the required command.
       It will output to ~/valet-profiler-{PID}-command.txt.
       This is useful to debug your command and understand what takes a long time to execute.
-      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable 
-      VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
+      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this 
+      behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
       This option can be set by exporting the variable VALET_PROFILING='true'.
   -l, --log-level, --log <level>
       Set the log level of valet (defaults to info).
@@ -314,8 +314,8 @@ GLOBAL OPTIONS
       Turn on profiling (with debug mode) before running the required command.
       It will output to ~/valet-profiler-{PID}-command.txt.
       This is useful to debug your command and understand what takes a long time to execute.
-      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable 
-      VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
+      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this 
+      behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
       This option can be set by exporting the variable VALET_PROFILING='true'.
   -l, --log-level, --log <level>
       Set the log level of valet (defaults to info).
@@ -1117,8 +1117,8 @@ GLOBAL OPTIONS
       Turn on profiling (with debug mode) before running the required command.
       It will output to ~/valet-profiler-{PID}-command.txt.
       This is useful to debug your command and understand what takes a long time to execute.
-      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable 
-      VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
+      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this 
+      behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
       This option can be set by exporting the variable VALET_PROFILING='true'.
   -l, --log-level, --log <level>
       Set the log level of valet (defaults to info).

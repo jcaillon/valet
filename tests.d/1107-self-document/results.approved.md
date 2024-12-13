@@ -38,6 +38,8 @@ References:
 Ascii graphics:
 
 - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9
+- https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing
+- https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements
 
 > While it could be very handy to define a function for each of these instructions,
 > it would also be slower to execute (function overhead + multiple printf calls).
@@ -544,6 +546,26 @@ interactive::askForConfirmationRaw
 ```
 
 
+## interactive::clearBox
+
+Clear a "box" in the terminal.
+Will return the cursor at the current position at the end (using CURSOR_LINE and CURSOR_COLUMN).
+
+- $1: **top** _as int_:
+      the left position of the box
+- $2: **left** _as int_:
+      the top position of the box
+- $3: **width** _as int_:
+      the width of the box
+- $4: **height** _as int_:
+      the height of the box
+
+```bash
+interactive::getCursorPosition
+interactive::clearBox 1 1 10 5
+```
+
+
 ## interactive::clearKeyPressed
 
 This function reads all the inputs from the user, effectively discarding them.
@@ -631,6 +653,55 @@ interactive::displayPrompt "Do you want to continue?"
 ```
 
 
+## interactive::getBestAutocompleteBox
+
+This function returns the best position and size for an autocomplete box that would open
+at the given position.
+
+- The box will be placed below the current position if possible, but can be placed
+  above if there is not enough space below.
+- The box will be placed on the same column as the current position if possible, but can be placed
+  on the left side if there is not enough space on the right to display the full width of the box.
+- The box will have the desired height and width if possible, but will be reduced if there is
+  not enough space in the terminal.
+- The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.
+  Otherwise it can use the current position line.
+
+- $1: **current line** _as int_:
+      the current line of the cursor (1 based)
+- $2: **current column** _as int_:
+      the current column of the cursor (1 based)
+- $3: **desired height** _as int_:
+      the desired height of the box
+- $4: **desiredWidth** _as int_:
+      the desired width of the box
+- $5: **max height** _as int_:
+      the maximum height of the box
+- $6: force below _as bool_:
+      (optional) force the box to be below the current position
+      (defaults to false)
+- $7: not on current line _as bool_:
+      (optional) the box will not be placed on the same line as the current position
+      (defaults to true)
+- $8: terminal width _as int_:
+      (optional) the width of the terminal
+      (defaults to GLOBAL_COLUMNS)
+- $9: terminal height _as int_:
+      (optional) the height of the terminal
+      (defaults to GLOBAL_LINES)
+
+Returns:
+
+- `RETURNED_VALUE`: the top position of the box (1 based)
+- `RETURNED_VALUE2`: the left position of the box (1 based)
+- `RETURNED_VALUE3`: the width of the box
+- `RETURNED_VALUE4`: the height of the box
+
+```bash
+interactive::getBestAutocompleteBox 1 1 10 5
+```
+
+
 ## interactive::getCursorPosition
 
 Get the current cursor position.
@@ -642,6 +713,21 @@ Returns:
 
 ```bash
 interactive::getCursorPosition
+```
+
+
+## interactive::getTerminalSize
+
+This function exports the terminal size.
+
+Returns:
+
+- `GLOBAL_COLUMNS`: The number of columns in the terminal.
+- `GLOBAL_LINES`: The number of lines in the terminal.
+
+```bash
+interactive::getTerminalSize
+printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
 ```
 
 
@@ -699,7 +785,8 @@ interactive::promptYesNoRaw "Do you want to continue?" && local answer="${RETURN
 
 ## interactive::rebindKeymap
 
-Rebinds all special keys to call a callback function `interactiveOnKeyBindingPress`.
+Rebinds all special keys to call a given callback function.
+See @interactive::testWaitForKeyPress for an implementation example.
 
 This allows to use the `-e` option with the read command and receive events for special key press.
 
@@ -713,13 +800,63 @@ the `interactiveRebindOverride` function.
 
 This function should be called before using interactive::waitForKeyPress.
 
+You can call `interactive::resetBindings` to restore the default bindings. However, this is not
+necessary as the bindings are local to the script.
+
 ```bash
 interactive::rebindKeymap
 ```
 
-> We do not bother to have a restore function because valet should not be sourced and
-> thus, modifications to the keymap are local to this script.
 > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
+
+
+## interactive::resetBindings
+
+Reset the key bindings to the default ones.
+
+```bash
+interactive::resetBindings
+```
+
+
+## interactive::showStringInScreen
+
+This function return a string that can be printed in a terminal in order to display a text
+and position the cursor at a given index in the input text.
+
+If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed
+at the beginning and/or at the end of the string.
+
+The cursor will be displayed under the character at the given index of the input text and
+it makes sure that the cursor is always visible in the screen.
+
+This function is useful to display a long prompt on a single line.
+
+An example:
+
+```text
+inputString="This is a long string that will be displayed in the screen."
+#                                ^ input index 20
+interactive::showStringInScreen "${inputString}" 20 10
+# output: "…g string…"
+#                  ^ screen cursor (at index 8)
+```
+
+- $1: **input string** _as string_:
+      the string to display
+- $2: **input index** _as int_:
+      the index of the character (in the input string) that should be under the cursor
+- $3: **screen width** _as int_:
+      the width of the screen
+
+Returns:
+
+- `RETURNED_VALUE`: the string to display in the screen
+- `RETURNED_VALUE2`: the index at which to position the cursor on screen
+
+```bash
+interactive::showStringInScreen "This is a long string that will be displayed in the screen." 20 10
+```
 
 
 ## interactive::startProgress
@@ -922,8 +1059,6 @@ This means we can detect more key combinations but all keys needs to be bound fi
 Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 
 You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.
-You must also redefine the function `interactiveOnKeyBindingPress` to react to a bound key press.
-See @interactive::testWaitForKeyPress for an implementation example.
 
 - $@: **read parameters** _as any_:
       additional parameters to pass to the read command
@@ -1932,15 +2067,16 @@ profiler::enable "${HOME}/valet-profiler-${BASHPID}.txt"
 > There can be only one profiler active at a time.
 
 
-## prompt::autocompletion
+## prompt::input
 
-Displays an autocompletion input starting at a given location. Allows
-the user to type a text in the given row between a starting column and
+Displays a user prompt at a given location.
+
+Allows the user to type a text in the given row between a starting column and
 ending column (included). Longer text are shifted to fit between
 the two columns.
 
 This component is a replacement for the `read -e` command, which allows
-to limit the input to a single line and to provide autocompletion.
+to limit the input to a single line and which provides autocompletion.
 
 The autocompletion box can be hidden, or displayed below/above the input text
 depending on the space available on the screen.
@@ -1966,46 +2102,106 @@ You can define several callback functions that are called on different events:
 - $2: **start column** _as int_:
       The column at which the autocompleted text starts (this is used to
       compute how to display the box).
-- $3: **stop column** _as int_:
-      The column at which to stop showing the autocompleted text.
+- $3: stop column _as int_:
+      (optional) The column at which to stop showing the autocompleted text.
       Longer texts get shifted to display the end of the user input.
-- $4: **array name** _as string_:
+      Can be set using the variable `PROMPT_STOP_COLUMN`.
+      (defaults to the end of the screen)
+- $4: items array name _as string_:
       The items to display (name of a global array which contains the items).
       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.
+      Can be set using the variable `PROMPT_ITEMS_ARRAY_NAME`.
+      (defaults to empty)
 - $5: initial text _as string_:
       (optional) The initial string, which corresponds to the text already entered
       by the user at the moment the autocompletion box shows up.
       Allows to pre-filter the autocompletion.
+      Can be set using the variable `PROMPT_STRING`.
       (defaults to empty)
-- $6: max lines _as int_:
+- $6: items box max lines _as int_:
       optional) The maximum number of lines/rows to use for the autocompletion box.
+      If the number of items is greater than this value, the box will be scrollable.
+      Can be set using the variable `PROMPT_ITEMS_BOX_MAX_HEIGHT`.
       (defaults to a maximized auto-computed value depending on the items and screen size)
-- $7: force box below _as bool_:
+- $7: force items box below _as bool_:
       (optional) If true, the box is forced to be displayed below the input text.
       Otherwise it will depend on the space required and space available below/above.
+      Can be set using the variable `PROMPT_ITEMS_BOX_FORCE_BELOW`.
       (defaults to false)
 - $8: show prompt _as bool_:
       (optional) If true, the prompt is displayed. If false, the prompt is hidden.
       Useful to turn this into a simple multiple choice list.
+      Can be set using the variable `PROMPT_SHOW_AUTOCOMPLETE`.
       (defaults to true)
 - $9: force show count _as bool_:
       (optional) If true, the count of items is always displayed.
-      If false, the count is only displayed when we can'y display all the items at once.
+      If false, the count is only displayed when we can't display all the items at once.
+      Can be set using the variable `PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT`.
       (defaults to false)
-- $10: show left cursors _as bool_:
-      (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
+- $10: show left symbols _as bool_:
+      (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
       Useful to display the most simple auto-completion when false.
+      Can be set using the variable `PROMPT_SHOW_SYMBOL`.
       (defaults to true)
 - $11: filters from n chars _as int_:
       (optional) The minimum number of characters to type before starting to filter the items.
       By default, the list is shown full and the user can start typing to filter.
       Put a value superior to 0 to make it behave like a standard autocompletion.
-      When non-zero, the user can CTRL+SPACE to show the full list.
+      When non-zero, the user can TAB to show the full list.
+      Can be set using the variable `PROMPT_FILTERS_FROM_N_CHARS`.
       (defaults to 0)
 - $12: accept any value _as bool_:
       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
       Useful to display the most simple auto-completion when false.
+      Can be set using the variable `PROMPT_ACCEPT_ANY_VALUE`.
       (defaults to true)
+- $13: placeholder _as string_:
+      (optional) The placeholder to display when the input is empty.
+      Can be set using the variable `PROMPT_PLACEHOLDER`.
+      (defaults to empty)
+- $14: max length _as int_:
+      (optional) The maximum length of the input string.
+      If the user types more characters, they are truncated and an error message is displayed.
+      Can be set using the variable `PROMPT_STRING_MAX_LENGTH`.
+      (defaults to 99999)
+- $15: autocomplete whole line _as bool_:
+      (optional) If true, the whole line is autocompleted (all characters are considered to filter)
+      the items. If false, only the word characters before the cursor are considered.
+      Can be set using the variable `PROMPT_AUTOCOMPLETE_WHOLE_LINE`.
+      (defaults to true)
+- $16: tab opens items box _as bool_:
+      (optional) If true, the tab key opens the items box if it is not already open.
+      Can be set using the variable `PROMPT_TAB_OPENS_ITEMS_BOX`.
+      (defaults to true)
+- $17: items box allow filtering _as bool_:
+      (optional) If true, the items can be filtered by typing characters.
+      If false, the items are displayed as is.
+      Can be set using the variable `PROMPT_ITEMS_BOX_ALLOW_FILTERING`.
+      (defaults to the value of `PROMPT_SHOW_AUTOCOMPLETE` or true)
+- $18: password mode _as bool_:
+      (optional) If true, the input is displayed as a series of stars *.
+      This mode can be activated/deactivated by pressing CTRL+P.
+      Can be set using the variable `PROMPT_PASSWORD_MODE`.
+      (defaults to false)
+- $19: callback function on text update _as string_:
+      (optional) The name of a function to call each time the text is updated.
+      Can be used to validate the input and display an error message.
+      The function is called with no arguments but you can use the global variable `PROMPT_STRING` and
+      `PROMPT_STRING_INDEX` to access the current text and cursor position.
+      You must set:
+      - `RETURNED_VALUE`: The error message to display (or empty).
+      - `RETURNED_VALUE2`: A boolean to indicate if the autocompletion box should be redrawn.
+      Can be set using the variable `PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.
+      (defaults to empty)
+- $20: callback function on key pressed _as string_:
+      (optional) The name of a function to call each time a key is pressed.
+      Can be used to customize the behavior of the prompt.
+      The function is called with the following arguments:
+      - $1: The key that was pressed, including special keys (CTRL+, ALT+, TAB, etc...).
+      - $2: The last character that was sent by the terminal, if any (can be empty when key is not empty).
+      The function must return 0 if the key press was handled, 1 otherwise.
+      Can be set using the variable `PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED`.
+      (defaults to empty)
 
 Returns:
 
@@ -2017,7 +2213,7 @@ Returns:
                      moment when the autocompletion was closed.
 
 ```bash
-prompt::autocompletion "Select an item" item_array_name "onItemSelected" "Details"
+prompt::input "Select an item" item_array_name "onItemSelected" "Details"
 ```
 
 
@@ -2482,21 +2678,6 @@ done
 > This is faster than using mapfile on <(compgen -v).
 
 
-## system::exportTerminalSize
-
-This function exports the terminal size.
-
-Returns:
-
-- `GLOBAL_COLUMNS`: The number of columns in the terminal.
-- `GLOBAL_LINES`: The number of lines in the terminal.
-
-```bash
-system::exportTerminalSize
-printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
-```
-
-
 ## system::getNotExistingCommands
 
 This function returns the list of not existing commands for the given names.
@@ -2683,6 +2864,8 @@ test::endTest "Testing something" $?
 # Ascii graphics:
 # 
 # - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9
+# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing
+# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements
 # 
 # > While it could be very handy to define a function for each of these instructions,
 # > it would also be slower to execute (function overhead + multiple printf calls).
@@ -3216,6 +3399,27 @@ function interactive::askForConfirmation() { :; }
 # 
 function interactive::askForConfirmationRaw() { :; }
 
+# ## interactive::clearBox
+# 
+# Clear a "box" in the terminal.
+# Will return the cursor at the current position at the end (using CURSOR_LINE and CURSOR_COLUMN).
+# 
+# - $1: **top** _as int_:
+#       the left position of the box
+# - $2: **left** _as int_:
+#       the top position of the box
+# - $3: **width** _as int_:
+#       the width of the box
+# - $4: **height** _as int_:
+#       the height of the box
+# 
+# ```bash
+# interactive::getCursorPosition
+# interactive::clearBox 1 1 10 5
+# ```
+# 
+function interactive::clearBox() { :; }
+
 # ## interactive::clearKeyPressed
 # 
 # This function reads all the inputs from the user, effectively discarding them.
@@ -3308,6 +3512,56 @@ function interactive::displayDialogBox() { :; }
 # 
 function interactive::displayQuestion() { :; }
 
+# ## interactive::getBestAutocompleteBox
+# 
+# This function returns the best position and size for an autocomplete box that would open
+# at the given position.
+# 
+# - The box will be placed below the current position if possible, but can be placed
+#   above if there is not enough space below.
+# - The box will be placed on the same column as the current position if possible, but can be placed
+#   on the left side if there is not enough space on the right to display the full width of the box.
+# - The box will have the desired height and width if possible, but will be reduced if there is
+#   not enough space in the terminal.
+# - The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.
+#   Otherwise it can use the current position line.
+# 
+# - $1: **current line** _as int_:
+#       the current line of the cursor (1 based)
+# - $2: **current column** _as int_:
+#       the current column of the cursor (1 based)
+# - $3: **desired height** _as int_:
+#       the desired height of the box
+# - $4: **desiredWidth** _as int_:
+#       the desired width of the box
+# - $5: **max height** _as int_:
+#       the maximum height of the box
+# - $6: force below _as bool_:
+#       (optional) force the box to be below the current position
+#       (defaults to false)
+# - $7: not on current line _as bool_:
+#       (optional) the box will not be placed on the same line as the current position
+#       (defaults to true)
+# - $8: terminal width _as int_:
+#       (optional) the width of the terminal
+#       (defaults to GLOBAL_COLUMNS)
+# - $9: terminal height _as int_:
+#       (optional) the height of the terminal
+#       (defaults to GLOBAL_LINES)
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: the top position of the box (1 based)
+# - `RETURNED_VALUE2`: the left position of the box (1 based)
+# - `RETURNED_VALUE3`: the width of the box
+# - `RETURNED_VALUE4`: the height of the box
+# 
+# ```bash
+# interactive::getBestAutocompleteBox 1 1 10 5
+# ```
+# 
+function interactive::getBestAutocompleteBox() { :; }
+
 # ## interactive::getCursorPosition
 # 
 # Get the current cursor position.
@@ -3322,6 +3576,22 @@ function interactive::displayQuestion() { :; }
 # ```
 # 
 function interactive::getCursorPosition() { :; }
+
+# ## interactive::getTerminalSize
+# 
+# This function exports the terminal size.
+# 
+# Returns:
+# 
+# - `GLOBAL_COLUMNS`: The number of columns in the terminal.
+# - `GLOBAL_LINES`: The number of lines in the terminal.
+# 
+# ```bash
+# interactive::getTerminalSize
+# printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
+# ```
+# 
+function interactive::getTerminalSize() { :; }
 
 # ## interactive::promptYesNo
 # 
@@ -3379,7 +3649,8 @@ function interactive::promptYesNoRaw() { :; }
 
 # ## interactive::rebindKeymap
 # 
-# Rebinds all special keys to call a callback function `interactiveOnKeyBindingPress`.
+# Rebinds all special keys to call a given callback function.
+# See @interactive::testWaitForKeyPress for an implementation example.
 # 
 # This allows to use the `-e` option with the read command and receive events for special key press.
 # 
@@ -3393,15 +3664,67 @@ function interactive::promptYesNoRaw() { :; }
 # 
 # This function should be called before using interactive::waitForKeyPress.
 # 
+# You can call `interactive::resetBindings` to restore the default bindings. However, this is not
+# necessary as the bindings are local to the script.
+# 
 # ```bash
 # interactive::rebindKeymap
 # ```
 # 
-# > We do not bother to have a restore function because valet should not be sourced and
-# > thus, modifications to the keymap are local to this script.
 # > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
 # 
 function interactive::rebindKeymap() { :; }
+
+# ## interactive::resetBindings
+# 
+# Reset the key bindings to the default ones.
+# 
+# ```bash
+# interactive::resetBindings
+# ```
+# 
+function interactive::resetBindings() { :; }
+
+# ## interactive::showStringInScreen
+# 
+# This function return a string that can be printed in a terminal in order to display a text
+# and position the cursor at a given index in the input text.
+# 
+# If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed
+# at the beginning and/or at the end of the string.
+# 
+# The cursor will be displayed under the character at the given index of the input text and
+# it makes sure that the cursor is always visible in the screen.
+# 
+# This function is useful to display a long prompt on a single line.
+# 
+# An example:
+# 
+# ```text
+# inputString="This is a long string that will be displayed in the screen."
+# #                                ^ input index 20
+# interactive::showStringInScreen "${inputString}" 20 10
+# # output: "…g string…"
+# #                  ^ screen cursor (at index 8)
+# ```
+# 
+# - $1: **input string** _as string_:
+#       the string to display
+# - $2: **input index** _as int_:
+#       the index of the character (in the input string) that should be under the cursor
+# - $3: **screen width** _as int_:
+#       the width of the screen
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: the string to display in the screen
+# - `RETURNED_VALUE2`: the index at which to position the cursor on screen
+# 
+# ```bash
+# interactive::showStringInScreen "This is a long string that will be displayed in the screen." 20 10
+# ```
+# 
+function interactive::showStringInScreen() { :; }
 
 # ## interactive::startProgress
 # 
@@ -3613,8 +3936,6 @@ function interactive::waitForChar() { :; }
 # Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 # 
 # You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.
-# You must also redefine the function `interactiveOnKeyBindingPress` to react to a bound key press.
-# See @interactive::testWaitForKeyPress for an implementation example.
 # 
 # - $@: **read parameters** _as any_:
 #       additional parameters to pass to the read command
@@ -4674,15 +4995,16 @@ function profiler::disable() { :; }
 # 
 function profiler::enable() { :; }
 
-# ## prompt::autocompletion
+# ## prompt::input
 # 
-# Displays an autocompletion input starting at a given location. Allows
-# the user to type a text in the given row between a starting column and
+# Displays a user prompt at a given location.
+# 
+# Allows the user to type a text in the given row between a starting column and
 # ending column (included). Longer text are shifted to fit between
 # the two columns.
 # 
 # This component is a replacement for the `read -e` command, which allows
-# to limit the input to a single line and to provide autocompletion.
+# to limit the input to a single line and which provides autocompletion.
 # 
 # The autocompletion box can be hidden, or displayed below/above the input text
 # depending on the space available on the screen.
@@ -4708,46 +5030,106 @@ function profiler::enable() { :; }
 # - $2: **start column** _as int_:
 #       The column at which the autocompleted text starts (this is used to
 #       compute how to display the box).
-# - $3: **stop column** _as int_:
-#       The column at which to stop showing the autocompleted text.
+# - $3: stop column _as int_:
+#       (optional) The column at which to stop showing the autocompleted text.
 #       Longer texts get shifted to display the end of the user input.
-# - $4: **array name** _as string_:
+#       Can be set using the variable `PROMPT_STOP_COLUMN`.
+#       (defaults to the end of the screen)
+# - $4: items array name _as string_:
 #       The items to display (name of a global array which contains the items).
 #       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.
+#       Can be set using the variable `PROMPT_ITEMS_ARRAY_NAME`.
+#       (defaults to empty)
 # - $5: initial text _as string_:
 #       (optional) The initial string, which corresponds to the text already entered
 #       by the user at the moment the autocompletion box shows up.
 #       Allows to pre-filter the autocompletion.
+#       Can be set using the variable `PROMPT_STRING`.
 #       (defaults to empty)
-# - $6: max lines _as int_:
+# - $6: items box max lines _as int_:
 #       optional) The maximum number of lines/rows to use for the autocompletion box.
+#       If the number of items is greater than this value, the box will be scrollable.
+#       Can be set using the variable `PROMPT_ITEMS_BOX_MAX_HEIGHT`.
 #       (defaults to a maximized auto-computed value depending on the items and screen size)
-# - $7: force box below _as bool_:
+# - $7: force items box below _as bool_:
 #       (optional) If true, the box is forced to be displayed below the input text.
 #       Otherwise it will depend on the space required and space available below/above.
+#       Can be set using the variable `PROMPT_ITEMS_BOX_FORCE_BELOW`.
 #       (defaults to false)
 # - $8: show prompt _as bool_:
 #       (optional) If true, the prompt is displayed. If false, the prompt is hidden.
 #       Useful to turn this into a simple multiple choice list.
+#       Can be set using the variable `PROMPT_SHOW_AUTOCOMPLETE`.
 #       (defaults to true)
 # - $9: force show count _as bool_:
 #       (optional) If true, the count of items is always displayed.
-#       If false, the count is only displayed when we can'y display all the items at once.
+#       If false, the count is only displayed when we can't display all the items at once.
+#       Can be set using the variable `PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT`.
 #       (defaults to false)
-# - $10: show left cursors _as bool_:
-#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
+# - $10: show left symbols _as bool_:
+#       (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
 #       Useful to display the most simple auto-completion when false.
+#       Can be set using the variable `PROMPT_SHOW_SYMBOL`.
 #       (defaults to true)
 # - $11: filters from n chars _as int_:
 #       (optional) The minimum number of characters to type before starting to filter the items.
 #       By default, the list is shown full and the user can start typing to filter.
 #       Put a value superior to 0 to make it behave like a standard autocompletion.
-#       When non-zero, the user can CTRL+SPACE to show the full list.
+#       When non-zero, the user can TAB to show the full list.
+#       Can be set using the variable `PROMPT_FILTERS_FROM_N_CHARS`.
 #       (defaults to 0)
 # - $12: accept any value _as bool_:
 #       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
 #       Useful to display the most simple auto-completion when false.
+#       Can be set using the variable `PROMPT_ACCEPT_ANY_VALUE`.
 #       (defaults to true)
+# - $13: placeholder _as string_:
+#       (optional) The placeholder to display when the input is empty.
+#       Can be set using the variable `PROMPT_PLACEHOLDER`.
+#       (defaults to empty)
+# - $14: max length _as int_:
+#       (optional) The maximum length of the input string.
+#       If the user types more characters, they are truncated and an error message is displayed.
+#       Can be set using the variable `PROMPT_STRING_MAX_LENGTH`.
+#       (defaults to 99999)
+# - $15: autocomplete whole line _as bool_:
+#       (optional) If true, the whole line is autocompleted (all characters are considered to filter)
+#       the items. If false, only the word characters before the cursor are considered.
+#       Can be set using the variable `PROMPT_AUTOCOMPLETE_WHOLE_LINE`.
+#       (defaults to true)
+# - $16: tab opens items box _as bool_:
+#       (optional) If true, the tab key opens the items box if it is not already open.
+#       Can be set using the variable `PROMPT_TAB_OPENS_ITEMS_BOX`.
+#       (defaults to true)
+# - $17: items box allow filtering _as bool_:
+#       (optional) If true, the items can be filtered by typing characters.
+#       If false, the items are displayed as is.
+#       Can be set using the variable `PROMPT_ITEMS_BOX_ALLOW_FILTERING`.
+#       (defaults to the value of `PROMPT_SHOW_AUTOCOMPLETE` or true)
+# - $18: password mode _as bool_:
+#       (optional) If true, the input is displayed as a series of stars *.
+#       This mode can be activated/deactivated by pressing CTRL+P.
+#       Can be set using the variable `PROMPT_PASSWORD_MODE`.
+#       (defaults to false)
+# - $19: callback function on text update _as string_:
+#       (optional) The name of a function to call each time the text is updated.
+#       Can be used to validate the input and display an error message.
+#       The function is called with no arguments but you can use the global variable `PROMPT_STRING` and
+#       `PROMPT_STRING_INDEX` to access the current text and cursor position.
+#       You must set:
+#       - `RETURNED_VALUE`: The error message to display (or empty).
+#       - `RETURNED_VALUE2`: A boolean to indicate if the autocompletion box should be redrawn.
+#       Can be set using the variable `PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.
+#       (defaults to empty)
+# - $20: callback function on key pressed _as string_:
+#       (optional) The name of a function to call each time a key is pressed.
+#       Can be used to customize the behavior of the prompt.
+#       The function is called with the following arguments:
+#       - $1: The key that was pressed, including special keys (CTRL+, ALT+, TAB, etc...).
+#       - $2: The last character that was sent by the terminal, if any (can be empty when key is not empty).
+#       The function must return 0 if the key press was handled, 1 otherwise.
+#       Can be set using the variable `PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED`.
+#       (defaults to empty)
 # 
 # Returns:
 # 
@@ -4759,10 +5141,10 @@ function profiler::enable() { :; }
 #                      moment when the autocompletion was closed.
 # 
 # ```bash
-# prompt::autocompletion "Select an item" item_array_name "onItemSelected" "Details"
+# prompt::input "Select an item" item_array_name "onItemSelected" "Details"
 # ```
 # 
-function prompt::autocompletion() { :; }
+function prompt::input() { :; }
 
 # ## source
 # 
@@ -5246,22 +5628,6 @@ function system::date() { :; }
 # 
 function system::env() { :; }
 
-# ## system::exportTerminalSize
-# 
-# This function exports the terminal size.
-# 
-# Returns:
-# 
-# - `GLOBAL_COLUMNS`: The number of columns in the terminal.
-# - `GLOBAL_LINES`: The number of lines in the terminal.
-# 
-# ```bash
-# system::exportTerminalSize
-# printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
-# ```
-# 
-function system::exportTerminalSize() { :; }
-
 # ## system::getNotExistingCommands
 # 
 # This function returns the list of not existing commands for the given names.
@@ -5441,7 +5807,7 @@ function test::endTest() { :; }
   "prefix": "ansi-codes::*#withdoc",
   "description": "ANSI codes for text attributes, colors, cursor control, and other common escape sequences...",
   "scope": "",
-  "body": [ "# ## ansi-codes::*\n# \n# ANSI codes for text attributes, colors, cursor control, and other common escape sequences.\n# These codes can be used to format text in the terminal.\n# \n# They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:\n# <https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>\n# \n# References:\n# \n# - https://en.wikipedia.org/wiki/ANSI_escape_code\n# - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797\n# - https://paulbourke.net/dataformats/ascii/\n# - https://www.aivosto.com/articles/control-characters.html\n# - https://github.com/tmux/tmux/blob/master/tools/ansicode.txt\n# - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_\n# - https://vt100.net/docs/vt102-ug/chapter5.html\n# - https://vt100.net/docs/vt100-ug/chapter3.html#S3.3.1\n# \n# Ascii graphics:\n# \n# - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9\n# \n# > While it could be very handy to define a function for each of these instructions,\n# > it would also be slower to execute (function overhead + multiple printf calls).\n# \nansi-codes::*$0" ]
+  "body": [ "# ## ansi-codes::*\n# \n# ANSI codes for text attributes, colors, cursor control, and other common escape sequences.\n# These codes can be used to format text in the terminal.\n# \n# They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:\n# <https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>\n# \n# References:\n# \n# - https://en.wikipedia.org/wiki/ANSI_escape_code\n# - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797\n# - https://paulbourke.net/dataformats/ascii/\n# - https://www.aivosto.com/articles/control-characters.html\n# - https://github.com/tmux/tmux/blob/master/tools/ansicode.txt\n# - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_\n# - https://vt100.net/docs/vt102-ug/chapter5.html\n# - https://vt100.net/docs/vt100-ug/chapter3.html#S3.3.1\n# \n# Ascii graphics:\n# \n# - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9\n# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing\n# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements\n# \n# > While it could be very handy to define a function for each of these instructions,\n# > it would also be slower to execute (function overhead + multiple printf calls).\n# \nansi-codes::*$0" ]
 },
 
 "array::appendIfNotPresent": {
@@ -5808,6 +6174,20 @@ function test::endTest() { :; }
   "body": [ "# ## interactive::askForConfirmationRaw\n# \n# Ask the user to press the button to continue.\n# \n# This raw version does not display the prompt or the answer.\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user pressed enter\n#   - 1 otherwise\n# \n# ```bash\n# interactive::askForConfirmationRaw\n# ```\n# \ninteractive::askForConfirmationRaw$0" ]
 },
 
+"interactive::clearBox": {
+  "prefix": "interactive::clearBox",
+  "description": "Clear a \"box\" in the terminal...",
+  "scope": "",
+  "body": [ "interactive::clearBox \"${1:**top**}\" \"${2:**left**}\" \"${3:**width**}\" \"${4:**height**}\"$0" ]
+},
+
+"interactive::clearBox#withdoc": {
+  "prefix": "interactive::clearBox#withdoc",
+  "description": "Clear a \"box\" in the terminal...",
+  "scope": "",
+  "body": [ "# ## interactive::clearBox\n# \n# Clear a \"box\" in the terminal.\n# Will return the cursor at the current position at the end (using CURSOR_LINE and CURSOR_COLUMN).\n# \n# - \\$1: **top** _as int_:\n#       the left position of the box\n# - \\$2: **left** _as int_:\n#       the top position of the box\n# - \\$3: **width** _as int_:\n#       the width of the box\n# - \\$4: **height** _as int_:\n#       the height of the box\n# \n# ```bash\n# interactive::getCursorPosition\n# interactive::clearBox 1 1 10 5\n# ```\n# \ninteractive::clearBox \"${1:**top**}\" \"${2:**left**}\" \"${3:**width**}\" \"${4:**height**}\"$0" ]
+},
+
 "interactive::clearKeyPressed": {
   "prefix": "interactive::clearKeyPressed",
   "description": "This function reads all the inputs from the user, effectively discarding them...",
@@ -5878,6 +6258,20 @@ function test::endTest() { :; }
   "body": [ "# ## interactive::displayQuestion\n# \n# Displays a question to the user.\n# \n# The text is wrapped and put inside a box like so:\n# \n# ```text\n#    ┌────────────────────────────────┐\n# ░──┤ Is this an important question? │\n#    └────────────────────────────────┘\n# ```\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# - \\$2: max width _as int_:\n#       (optional) the maximum width of text in the dialog box\n#       (defaults to GLOBAL_COLUMNS)\n# \n# ```bash\n# interactive::displayPrompt \"Do you want to continue?\"\n# ```\n# \ninteractive::displayQuestion \"${1:**prompt**}\" \"${2:max width}\"$0" ]
 },
 
+"interactive::getBestAutocompleteBox": {
+  "prefix": "interactive::getBestAutocompleteBox",
+  "description": "This function returns the best position and size for an autocomplete box that would open at the given position...",
+  "scope": "",
+  "body": [ "interactive::getBestAutocompleteBox \"${1:**current line**}\" \"${2:**current column**}\" \"${3:**desired height**}\" \"${4:**desiredWidth**}\" \"${5:**max height**}\" \"${6:force below}\" \"${7:not on current line}\" \"${8:terminal width}\" \"${9:terminal height}\"$0" ]
+},
+
+"interactive::getBestAutocompleteBox#withdoc": {
+  "prefix": "interactive::getBestAutocompleteBox#withdoc",
+  "description": "This function returns the best position and size for an autocomplete box that would open at the given position...",
+  "scope": "",
+  "body": [ "# ## interactive::getBestAutocompleteBox\n# \n# This function returns the best position and size for an autocomplete box that would open\n# at the given position.\n# \n# - The box will be placed below the current position if possible, but can be placed\n#   above if there is not enough space below.\n# - The box will be placed on the same column as the current position if possible, but can be placed\n#   on the left side if there is not enough space on the right to display the full width of the box.\n# - The box will have the desired height and width if possible, but will be reduced if there is\n#   not enough space in the terminal.\n# - The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.\n#   Otherwise it can use the current position line.\n# \n# - \\$1: **current line** _as int_:\n#       the current line of the cursor (1 based)\n# - \\$2: **current column** _as int_:\n#       the current column of the cursor (1 based)\n# - \\$3: **desired height** _as int_:\n#       the desired height of the box\n# - \\$4: **desiredWidth** _as int_:\n#       the desired width of the box\n# - \\$5: **max height** _as int_:\n#       the maximum height of the box\n# - \\$6: force below _as bool_:\n#       (optional) force the box to be below the current position\n#       (defaults to false)\n# - \\$7: not on current line _as bool_:\n#       (optional) the box will not be placed on the same line as the current position\n#       (defaults to true)\n# - \\$8: terminal width _as int_:\n#       (optional) the width of the terminal\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$9: terminal height _as int_:\n#       (optional) the height of the terminal\n#       (defaults to GLOBAL_LINES)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the top position of the box (1 based)\n# - `RETURNED_VALUE2`: the left position of the box (1 based)\n# - `RETURNED_VALUE3`: the width of the box\n# - `RETURNED_VALUE4`: the height of the box\n# \n# ```bash\n# interactive::getBestAutocompleteBox 1 1 10 5\n# ```\n# \ninteractive::getBestAutocompleteBox \"${1:**current line**}\" \"${2:**current column**}\" \"${3:**desired height**}\" \"${4:**desiredWidth**}\" \"${5:**max height**}\" \"${6:force below}\" \"${7:not on current line}\" \"${8:terminal width}\" \"${9:terminal height}\"$0" ]
+},
+
 "interactive::getCursorPosition": {
   "prefix": "interactive::getCursorPosition",
   "description": "Get the current cursor position...",
@@ -5890,6 +6284,20 @@ function test::endTest() { :; }
   "description": "Get the current cursor position...",
   "scope": "",
   "body": [ "# ## interactive::getCursorPosition\n# \n# Get the current cursor position.\n# \n# Returns:\n# \n# - `CURSOR_LINE`: the line number\n# - `CURSOR_COLUMN`: the column number\n# \n# ```bash\n# interactive::getCursorPosition\n# ```\n# \ninteractive::getCursorPosition$0" ]
+},
+
+"interactive::getTerminalSize": {
+  "prefix": "interactive::getTerminalSize",
+  "description": "This function exports the terminal size...",
+  "scope": "",
+  "body": [ "interactive::getTerminalSize$0" ]
+},
+
+"interactive::getTerminalSize#withdoc": {
+  "prefix": "interactive::getTerminalSize#withdoc",
+  "description": "This function exports the terminal size...",
+  "scope": "",
+  "body": [ "# ## interactive::getTerminalSize\n# \n# This function exports the terminal size.\n# \n# Returns:\n# \n# - `GLOBAL_COLUMNS`: The number of columns in the terminal.\n# - `GLOBAL_LINES`: The number of lines in the terminal.\n# \n# ```bash\n# interactive::getTerminalSize\n# printf '%s\\n' \"The terminal has ⌜\\${GLOBAL_COLUMNS}⌝ columns and ⌜\\${GLOBAL_LINES}⌝ lines.\"\n# ```\n# \ninteractive::getTerminalSize$0" ]
 },
 
 "interactive::promptYesNo": {
@@ -5922,16 +6330,44 @@ function test::endTest() { :; }
 
 "interactive::rebindKeymap": {
   "prefix": "interactive::rebindKeymap",
-  "description": "Rebinds all special keys to call a callback function `interactiveOnKeyBindingPress`...",
+  "description": "Rebinds all special keys to call a given callback function...",
   "scope": "",
   "body": [ "interactive::rebindKeymap$0" ]
 },
 
 "interactive::rebindKeymap#withdoc": {
   "prefix": "interactive::rebindKeymap#withdoc",
-  "description": "Rebinds all special keys to call a callback function `interactiveOnKeyBindingPress`...",
+  "description": "Rebinds all special keys to call a given callback function...",
   "scope": "",
-  "body": [ "# ## interactive::rebindKeymap\n# \n# Rebinds all special keys to call a callback function `interactiveOnKeyBindingPress`.\n# \n# This allows to use the `-e` option with the read command and receive events for special key press.\n# \n# Key binding is a mess because binding is based on the sequence of characters that gets\n# generated by the terminal when a key is pressed and this is not standard across all terminals.\n# We do our best here to cover most cases but it is by no mean perfect.\n# A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.\n# \n# Users of this function can completely change the bindings afterward by implementing\n# the `interactiveRebindOverride` function.\n# \n# This function should be called before using interactive::waitForKeyPress.\n# \n# ```bash\n# interactive::rebindKeymap\n# ```\n# \n# > We do not bother to have a restore function because valet should not be sourced and\n# > thus, modifications to the keymap are local to this script.\n# > `showkey -a` is a good program to see the sequence of characters sent by the terminal.\n# \ninteractive::rebindKeymap$0" ]
+  "body": [ "# ## interactive::rebindKeymap\n# \n# Rebinds all special keys to call a given callback function.\n# See @interactive::testWaitForKeyPress for an implementation example.\n# \n# This allows to use the `-e` option with the read command and receive events for special key press.\n# \n# Key binding is a mess because binding is based on the sequence of characters that gets\n# generated by the terminal when a key is pressed and this is not standard across all terminals.\n# We do our best here to cover most cases but it is by no mean perfect.\n# A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.\n# \n# Users of this function can completely change the bindings afterward by implementing\n# the `interactiveRebindOverride` function.\n# \n# This function should be called before using interactive::waitForKeyPress.\n# \n# You can call `interactive::resetBindings` to restore the default bindings. However, this is not\n# necessary as the bindings are local to the script.\n# \n# ```bash\n# interactive::rebindKeymap\n# ```\n# \n# > `showkey -a` is a good program to see the sequence of characters sent by the terminal.\n# \ninteractive::rebindKeymap$0" ]
+},
+
+"interactive::resetBindings": {
+  "prefix": "interactive::resetBindings",
+  "description": "Reset the key bindings to the default ones...",
+  "scope": "",
+  "body": [ "interactive::resetBindings$0" ]
+},
+
+"interactive::resetBindings#withdoc": {
+  "prefix": "interactive::resetBindings#withdoc",
+  "description": "Reset the key bindings to the default ones...",
+  "scope": "",
+  "body": [ "# ## interactive::resetBindings\n# \n# Reset the key bindings to the default ones.\n# \n# ```bash\n# interactive::resetBindings\n# ```\n# \ninteractive::resetBindings$0" ]
+},
+
+"interactive::showStringInScreen": {
+  "prefix": "interactive::showStringInScreen",
+  "description": "This function return a string that can be printed in a terminal in order to display a text and position the cursor at a given index in the input text...",
+  "scope": "",
+  "body": [ "interactive::showStringInScreen \"${1:**input string**}\" \"${2:**input index**}\" \"${3:**screen width**}\"$0" ]
+},
+
+"interactive::showStringInScreen#withdoc": {
+  "prefix": "interactive::showStringInScreen#withdoc",
+  "description": "This function return a string that can be printed in a terminal in order to display a text and position the cursor at a given index in the input text...",
+  "scope": "",
+  "body": [ "# ## interactive::showStringInScreen\n# \n# This function return a string that can be printed in a terminal in order to display a text\n# and position the cursor at a given index in the input text.\n# \n# If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed\n# at the beginning and/or at the end of the string.\n# \n# The cursor will be displayed under the character at the given index of the input text and\n# it makes sure that the cursor is always visible in the screen.\n# \n# This function is useful to display a long prompt on a single line.\n# \n# An example:\n# \n# ```text\n# inputString=\"This is a long string that will be displayed in the screen.\"\n# #                                ^ input index 20\n# interactive::showStringInScreen \"\\${inputString}\" 20 10\n# # output: \"…g string…\"\n# #                  ^ screen cursor (at index 8)\n# ```\n# \n# - \\$1: **input string** _as string_:\n#       the string to display\n# - \\$2: **input index** _as int_:\n#       the index of the character (in the input string) that should be under the cursor\n# - \\$3: **screen width** _as int_:\n#       the width of the screen\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the string to display in the screen\n# - `RETURNED_VALUE2`: the index at which to position the cursor on screen\n# \n# ```bash\n# interactive::showStringInScreen \"This is a long string that will be displayed in the screen.\" 20 10\n# ```\n# \ninteractive::showStringInScreen \"${1:**input string**}\" \"${2:**input index**}\" \"${3:**screen width**}\"$0" ]
 },
 
 "interactive::startProgress": {
@@ -6085,7 +6521,7 @@ function test::endTest() { :; }
   "prefix": "interactive::waitForKeyPress#withdoc",
   "description": "Wait for a key press (single key)...",
   "scope": "",
-  "body": [ "# ## interactive::waitForKeyPress\n# \n# Wait for a key press (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command with the option `-e` to use readline behind the scene.\n# This means we can detect more key combinations but all keys needs to be bound first...\n# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.\n# \n# You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.\n# You must also redefine the function `interactiveOnKeyBindingPress` to react to a bound key press.\n# See @interactive::testWaitForKeyPress for an implementation example.\n# \n# - \\$@: **read parameters** _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# interactive::waitForKeyPress\n# interactive::waitForKeyPress -t 0.1\n# ```\n# \n# > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll\n# > even when nothing is read... Make sure to not position the cursor at the end of the screen.\n# \ninteractive::waitForKeyPress \"${99:**read parameters**}\"$0" ]
+  "body": [ "# ## interactive::waitForKeyPress\n# \n# Wait for a key press (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command with the option `-e` to use readline behind the scene.\n# This means we can detect more key combinations but all keys needs to be bound first...\n# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.\n# \n# You must call `interactive::rebindKeymap` and `interactive::sttyInit` before using this function.\n# \n# - \\$@: **read parameters** _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# interactive::waitForKeyPress\n# interactive::waitForKeyPress -t 0.1\n# ```\n# \n# > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll\n# > even when nothing is read... Make sure to not position the cursor at the end of the screen.\n# \ninteractive::waitForKeyPress \"${99:**read parameters**}\"$0" ]
 },
 
 "io::cat": {
@@ -6788,18 +7224,18 @@ function test::endTest() { :; }
   "body": [ "# ## profiler::enable\n# \n# Enables the profiler and start writing to the given file.\n# \n# - \\$1: **path** _as string_:\n#       the file to write to.\n# \n# ```bash\n# profiler::enable \"\\${HOME}/valet-profiler-\\${BASHPID}.txt\"\n# ```\n# \n# > There can be only one profiler active at a time.\n# \nprofiler::enable \"${1:**path**}\"$0" ]
 },
 
-"prompt::autocompletion": {
-  "prefix": "prompt::autocompletion",
-  "description": "Displays an autocompletion input starting at a given location...",
+"prompt::input": {
+  "prefix": "prompt::input",
+  "description": "Displays a user prompt at a given location...",
   "scope": "",
-  "body": [ "prompt::autocompletion \"${1:**start line**}\" \"${2:**start column**}\" \"${3:**stop column**}\" \"${4:**array name**}\" \"${5:initial text}\" \"${6:max lines}\" \"${7:force box below}\" \"${8:show prompt}\" \"${9:force show count}\"$0" ]
+  "body": [ "prompt::input \"${1:**start line**}\" \"${2:**start column**}\" \"${3:stop column}\" \"${4:items array name}\" \"${5:initial text}\" \"${6:items box max lines}\" \"${7:force items box below}\" \"${8:show prompt}\" \"${9:force show count}\"$0" ]
 },
 
-"prompt::autocompletion#withdoc": {
-  "prefix": "prompt::autocompletion#withdoc",
-  "description": "Displays an autocompletion input starting at a given location...",
+"prompt::input#withdoc": {
+  "prefix": "prompt::input#withdoc",
+  "description": "Displays a user prompt at a given location...",
   "scope": "",
-  "body": [ "# ## prompt::autocompletion\n# \n# Displays an autocompletion input starting at a given location. Allows\n# the user to type a text in the given row between a starting column and\n# ending column (included). Longer text are shifted to fit between\n# the two columns.\n# \n# This component is a replacement for the `read -e` command, which allows\n# to limit the input to a single line and to provide autocompletion.\n# \n# The autocompletion box can be hidden, or displayed below/above the input text\n# depending on the space available on the screen.\n# \n# The user can type character to filter down a list of suggestions,\n# navigate up and down between suggestions, insert a suggestion using\n# TAB or ENTER, press ESC to close the autocompletion box, and ALT+ENTER to\n# submit the input (or just ENTER when the box is closed).\n# \n# The autocompletion box will position itself depending on the screen size\n# and the starting position of the text.\n# \n# The multiple options allows to use this function to ask for any user input\n# as long as it is on a single line.\n# \n# You can define several callback functions that are called on different events:\n# \n# - `autocompletionOnTextUpdate`: Called when the text is updated (after each key press).\n# \n# - \\$1: **start line** _as int_:\n#       The line/row at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$2: **start column** _as int_:\n#       The column at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$3: **stop column** _as int_:\n#       The column at which to stop showing the autocompleted text.\n#       Longer texts get shifted to display the end of the user input.\n# - \\$4: **array name** _as string_:\n#       The items to display (name of a global array which contains the items).\n#       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.\n# - \\$5: initial text _as string_:\n#       (optional) The initial string, which corresponds to the text already entered\n#       by the user at the moment the autocompletion box shows up.\n#       Allows to pre-filter the autocompletion.\n#       (defaults to empty)\n# - \\$6: max lines _as int_:\n#       optional) The maximum number of lines/rows to use for the autocompletion box.\n#       (defaults to a maximized auto-computed value depending on the items and screen size)\n# - \\$7: force box below _as bool_:\n#       (optional) If true, the box is forced to be displayed below the input text.\n#       Otherwise it will depend on the space required and space available below/above.\n#       (defaults to false)\n# - \\$8: show prompt _as bool_:\n#       (optional) If true, the prompt is displayed. If false, the prompt is hidden.\n#       Useful to turn this into a simple multiple choice list.\n#       (defaults to true)\n# - \\$9: force show count _as bool_:\n#       (optional) If true, the count of items is always displayed.\n#       If false, the count is only displayed when we can'y display all the items at once.\n#       (defaults to false)\n# - \\$10: show left cursors _as bool_:\n#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       (defaults to true)\n# - \\$11: filters from n chars _as int_:\n#       (optional) The minimum number of characters to type before starting to filter the items.\n#       By default, the list is shown full and the user can start typing to filter.\n#       Put a value superior to 0 to make it behave like a standard autocompletion.\n#       When non-zero, the user can CTRL+SPACE to show the full list.\n#       (defaults to 0)\n# - \\$12: accept any value _as bool_:\n#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0: The user pressed ENTER to validate the text.\n#   - 1: The user pressed ESC to close the text box.\n# - `RETURNED_VALUE`: The entered value (or empty).\n# - `RETURNED_VALUE2`: The string displayed on the screen between the 2 columns at the\n#                      moment when the autocompletion was closed.\n# \n# ```bash\n# prompt::autocompletion \"Select an item\" item_array_name \"onItemSelected\" \"Details\"\n# ```\n# \nprompt::autocompletion \"${1:**start line**}\" \"${2:**start column**}\" \"${3:**stop column**}\" \"${4:**array name**}\" \"${5:initial text}\" \"${6:max lines}\" \"${7:force box below}\" \"${8:show prompt}\" \"${9:force show count}\"$0" ]
+  "body": [ "# ## prompt::input\n# \n# Displays a user prompt at a given location.\n# \n# Allows the user to type a text in the given row between a starting column and\n# ending column (included). Longer text are shifted to fit between\n# the two columns.\n# \n# This component is a replacement for the `read -e` command, which allows\n# to limit the input to a single line and which provides autocompletion.\n# \n# The autocompletion box can be hidden, or displayed below/above the input text\n# depending on the space available on the screen.\n# \n# The user can type character to filter down a list of suggestions,\n# navigate up and down between suggestions, insert a suggestion using\n# TAB or ENTER, press ESC to close the autocompletion box, and ALT+ENTER to\n# submit the input (or just ENTER when the box is closed).\n# \n# The autocompletion box will position itself depending on the screen size\n# and the starting position of the text.\n# \n# The multiple options allows to use this function to ask for any user input\n# as long as it is on a single line.\n# \n# You can define several callback functions that are called on different events:\n# \n# - `autocompletionOnTextUpdate`: Called when the text is updated (after each key press).\n# \n# - \\$1: **start line** _as int_:\n#       The line/row at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$2: **start column** _as int_:\n#       The column at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$3: stop column _as int_:\n#       (optional) The column at which to stop showing the autocompleted text.\n#       Longer texts get shifted to display the end of the user input.\n#       Can be set using the variable `PROMPT_STOP_COLUMN`.\n#       (defaults to the end of the screen)\n# - \\$4: items array name _as string_:\n#       The items to display (name of a global array which contains the items).\n#       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.\n#       Can be set using the variable `PROMPT_ITEMS_ARRAY_NAME`.\n#       (defaults to empty)\n# - \\$5: initial text _as string_:\n#       (optional) The initial string, which corresponds to the text already entered\n#       by the user at the moment the autocompletion box shows up.\n#       Allows to pre-filter the autocompletion.\n#       Can be set using the variable `PROMPT_STRING`.\n#       (defaults to empty)\n# - \\$6: items box max lines _as int_:\n#       optional) The maximum number of lines/rows to use for the autocompletion box.\n#       If the number of items is greater than this value, the box will be scrollable.\n#       Can be set using the variable `PROMPT_ITEMS_BOX_MAX_HEIGHT`.\n#       (defaults to a maximized auto-computed value depending on the items and screen size)\n# - \\$7: force items box below _as bool_:\n#       (optional) If true, the box is forced to be displayed below the input text.\n#       Otherwise it will depend on the space required and space available below/above.\n#       Can be set using the variable `PROMPT_ITEMS_BOX_FORCE_BELOW`.\n#       (defaults to false)\n# - \\$8: show prompt _as bool_:\n#       (optional) If true, the prompt is displayed. If false, the prompt is hidden.\n#       Useful to turn this into a simple multiple choice list.\n#       Can be set using the variable `PROMPT_SHOW_AUTOCOMPLETE`.\n#       (defaults to true)\n# - \\$9: force show count _as bool_:\n#       (optional) If true, the count of items is always displayed.\n#       If false, the count is only displayed when we can't display all the items at once.\n#       Can be set using the variable `PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT`.\n#       (defaults to false)\n# - \\$10: show left symbols _as bool_:\n#       (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       Can be set using the variable `PROMPT_SHOW_SYMBOL`.\n#       (defaults to true)\n# - \\$11: filters from n chars _as int_:\n#       (optional) The minimum number of characters to type before starting to filter the items.\n#       By default, the list is shown full and the user can start typing to filter.\n#       Put a value superior to 0 to make it behave like a standard autocompletion.\n#       When non-zero, the user can TAB to show the full list.\n#       Can be set using the variable `PROMPT_FILTERS_FROM_N_CHARS`.\n#       (defaults to 0)\n# - \\$12: accept any value _as bool_:\n#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       Can be set using the variable `PROMPT_ACCEPT_ANY_VALUE`.\n#       (defaults to true)\n# - \\$13: placeholder _as string_:\n#       (optional) The placeholder to display when the input is empty.\n#       Can be set using the variable `PROMPT_PLACEHOLDER`.\n#       (defaults to empty)\n# - \\$14: max length _as int_:\n#       (optional) The maximum length of the input string.\n#       If the user types more characters, they are truncated and an error message is displayed.\n#       Can be set using the variable `PROMPT_STRING_MAX_LENGTH`.\n#       (defaults to 99999)\n# - \\$15: autocomplete whole line _as bool_:\n#       (optional) If true, the whole line is autocompleted (all characters are considered to filter)\n#       the items. If false, only the word characters before the cursor are considered.\n#       Can be set using the variable `PROMPT_AUTOCOMPLETE_WHOLE_LINE`.\n#       (defaults to true)\n# - \\$16: tab opens items box _as bool_:\n#       (optional) If true, the tab key opens the items box if it is not already open.\n#       Can be set using the variable `PROMPT_TAB_OPENS_ITEMS_BOX`.\n#       (defaults to true)\n# - \\$17: items box allow filtering _as bool_:\n#       (optional) If true, the items can be filtered by typing characters.\n#       If false, the items are displayed as is.\n#       Can be set using the variable `PROMPT_ITEMS_BOX_ALLOW_FILTERING`.\n#       (defaults to the value of `PROMPT_SHOW_AUTOCOMPLETE` or true)\n# - \\$18: password mode _as bool_:\n#       (optional) If true, the input is displayed as a series of stars *.\n#       This mode can be activated/deactivated by pressing CTRL+P.\n#       Can be set using the variable `PROMPT_PASSWORD_MODE`.\n#       (defaults to false)\n# - \\$19: callback function on text update _as string_:\n#       (optional) The name of a function to call each time the text is updated.\n#       Can be used to validate the input and display an error message.\n#       The function is called with no arguments but you can use the global variable `PROMPT_STRING` and\n#       `PROMPT_STRING_INDEX` to access the current text and cursor position.\n#       You must set:\n#       - `RETURNED_VALUE`: The error message to display (or empty).\n#       - `RETURNED_VALUE2`: A boolean to indicate if the autocompletion box should be redrawn.\n#       Can be set using the variable `PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.\n#       (defaults to empty)\n# - \\$20: callback function on key pressed _as string_:\n#       (optional) The name of a function to call each time a key is pressed.\n#       Can be used to customize the behavior of the prompt.\n#       The function is called with the following arguments:\n#       - \\$1: The key that was pressed, including special keys (CTRL+, ALT+, TAB, etc...).\n#       - \\$2: The last character that was sent by the terminal, if any (can be empty when key is not empty).\n#       The function must return 0 if the key press was handled, 1 otherwise.\n#       Can be set using the variable `PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED`.\n#       (defaults to empty)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0: The user pressed ENTER to validate the text.\n#   - 1: The user pressed ESC to close the text box.\n# - `RETURNED_VALUE`: The entered value (or empty).\n# - `RETURNED_VALUE2`: The string displayed on the screen between the 2 columns at the\n#                      moment when the autocompletion was closed.\n# \n# ```bash\n# prompt::input \"Select an item\" item_array_name \"onItemSelected\" \"Details\"\n# ```\n# \nprompt::input \"${1:**start line**}\" \"${2:**start column**}\" \"${3:stop column}\" \"${4:items array name}\" \"${5:initial text}\" \"${6:items box max lines}\" \"${7:force items box below}\" \"${8:show prompt}\" \"${9:force show count}\"$0" ]
 },
 
 "source": {
@@ -7096,20 +7532,6 @@ function test::endTest() { :; }
   "body": [ "# ## system::env\n# \n# Get the list of all the environment variables.\n# In pure bash, no need for env or printenv.\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array with the list of all the environment variables.\n# \n# ```bash\n# system::env\n# for var in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s=%s\\n' \"\\${var}\" \"\\${!var}\"\n# done\n# ```\n# \n# > This is faster than using mapfile on <(compgen -v).\n# \nsystem::env$0" ]
 },
 
-"system::exportTerminalSize": {
-  "prefix": "system::exportTerminalSize",
-  "description": "This function exports the terminal size...",
-  "scope": "",
-  "body": [ "system::exportTerminalSize$0" ]
-},
-
-"system::exportTerminalSize#withdoc": {
-  "prefix": "system::exportTerminalSize#withdoc",
-  "description": "This function exports the terminal size...",
-  "scope": "",
-  "body": [ "# ## system::exportTerminalSize\n# \n# This function exports the terminal size.\n# \n# Returns:\n# \n# - `GLOBAL_COLUMNS`: The number of columns in the terminal.\n# - `GLOBAL_LINES`: The number of lines in the terminal.\n# \n# ```bash\n# system::exportTerminalSize\n# printf '%s\\n' \"The terminal has ⌜\\${GLOBAL_COLUMNS}⌝ columns and ⌜\\${GLOBAL_LINES}⌝ lines.\"\n# ```\n# \nsystem::exportTerminalSize$0" ]
-},
-
 "system::getNotExistingCommands": {
   "prefix": "system::getNotExistingCommands",
   "description": "This function returns the list of not existing commands for the given names...",
@@ -7235,6 +7657,934 @@ function test::endTest() { :; }
   "scope": "",
   "body": [ "# ## test::endTest\n# \n# Call this function after each test to write the test results to the report file.\n# This create a new H3 section in the report file with the test description and the exit code.\n# \n# - \\$1: **title** _as string_:\n#       the title of the test\n# - \\$2: **exit code** _as int_:\n#       the exit code of the test\n# - \\$3: comment _as string_:\n#       (optional) a text to explain what is being tested\n#       (defaults to \"\")\n# \n# ```bash\n# test::endTest \"Testing something\" \\$?\n# ```\n# \ntest::endTest \"${1:**title**}\" \"${2:**exit code**}\" \"${3:comment}\"$0" ]
 },
+	"BASHOPTS": {
+		"prefix": "BASHOPTS",
+		"body": [
+			"BASHOPTS$0"
+		],
+		"scope": "",
+		"description": "A colon-separated list of enabled shell options. Each word in the list is a valid argument for the -s option to the shopt builtin command (see The Shopt Builtin). The options appearing in BASHOPTS are those reported as ‘on’ by ‘shopt’. If this variable is in the environment when Bash starts up, each shell option in the list will be enabled before reading any startup files. This variable is readonly."
+	},
+	"BASHPID": {
+		"prefix": "BASHPID",
+		"body": [
+			"BASHPID$0"
+		],
+		"scope": "",
+		"description": "Expands to the process ID of the current Bash process. This differs from $$ under certain circumstances, such as subshells that do not require Bash to be re-initialized. Assignments to BASHPID have no effect. If BASHPID is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"BASH_ALIASES": {
+		"prefix": "BASH_ALIASES",
+		"body": [
+			"BASH_ALIASES$0"
+		],
+		"scope": "",
+		"description": "An associative array variable whose members correspond to the internal list of aliases as maintained by the alias builtin. (see Bourne Shell Builtins). Elements added to this array appear in the alias list; however, unsetting array elements currently does not cause aliases to be removed from the alias list. If BASH_ALIASES is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"BASH_ARGC": {
+		"prefix": "BASH_ARGC",
+		"body": [
+			"BASH_ARGC$0"
+		],
+		"scope": "",
+		"description": "An array variable whose values are the number of parameters in each frame of the current bash execution call stack. The number of parameters to the current subroutine (shell function or script executed with . or source) is at the top of the stack. When a subroutine is executed, the number of parameters passed is pushed onto BASH_ARGC. The shell sets BASH_ARGC only when in extended debugging mode (see The Shopt Builtin for a description of the extdebug option to the shopt builtin). Setting extdebug after the shell has started to execute a script, or referencing this variable when extdebug is not set, may result in inconsistent values."
+	},
+	"BASH_ARGV": {
+		"prefix": "BASH_ARGV",
+		"body": [
+			"BASH_ARGV$0"
+		],
+		"scope": "",
+		"description": "An array variable containing all of the parameters in the current bash execution call stack. The final parameter of the last subroutine call is at the top of the stack; the first parameter of the initial call is at the bottom. When a subroutine is executed, the parameters supplied are pushed onto BASH_ARGV. The shell sets BASH_ARGV only when in extended debugging mode (see The Shopt Builtin for a description of the extdebug option to the shopt builtin). Setting extdebug after the shell has started to execute a script, or referencing this variable when extdebug is not set, may result in inconsistent values."
+	},
+	"BASH_ARGV0": {
+		"prefix": "BASH_ARGV0",
+		"body": [
+			"BASH_ARGV0$0"
+		],
+		"scope": "",
+		"description": "When referenced, this variable expands to the name of the shell or shell script (identical to $0; See Special Parameters, for the description of special parameter 0). Assignment to BASH_ARGV0 causes the value assigned to also be assigned to $0. If BASH_ARGV0 is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"BASH_CMDS": {
+		"prefix": "BASH_CMDS",
+		"body": [
+			"BASH_CMDS$0"
+		],
+		"scope": "",
+		"description": "An associative array variable whose members correspond to the internal hash table of commands as maintained by the hash builtin (see Bourne Shell Builtins). Elements added to this array appear in the hash table; however, unsetting array elements currently does not cause command names to be removed from the hash table. If BASH_CMDS is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"BASH_COMMAND": {
+		"prefix": "BASH_COMMAND",
+		"body": [
+			"BASH_COMMAND$0"
+		],
+		"scope": "",
+		"description": "The command currently being executed or about to be executed, unless the shell is executing a command as the result of a trap, in which case it is the command executing at the time of the trap. If BASH_COMMAND is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"BASH_COMPAT": {
+		"prefix": "BASH_COMPAT",
+		"body": [
+			"BASH_COMPAT$0"
+		],
+		"scope": "",
+		"description": "The value is used to set the shell’s compatibility level. See Shell Compatibility Mode, for a description of the various compatibility levels and their effects. The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42) corresponding to the desired compatibility level. If BASH_COMPAT is unset or set to the empty string, the compatibility level is set to the default for the current version. If BASH_COMPAT is set to a value that is not one of the valid compatibility levels, the shell prints an error message and sets the compatibility level to the default for the current version. The valid values correspond to the compatibility levels described below (see Shell Compatibility Mode). For example, 4.2 and 42 are valid values that correspond to the compat42 shopt option and set the compatibility level to 42. The current version is also a valid value."
+	},
+	"BASH_ENV": {
+		"prefix": "BASH_ENV",
+		"body": [
+			"BASH_ENV$0"
+		],
+		"scope": "",
+		"description": "If this variable is set when Bash is invoked to execute a shell script, its value is expanded and used as the name of a startup file to read before executing the script. See Bash Startup Files."
+	},
+	"BASH_EXECUTION_STRING": {
+		"prefix": "BASH_EXECUTION_STRING",
+		"body": [
+			"BASH_EXECUTION_STRING$0"
+		],
+		"scope": "",
+		"description": "The command argument to the -c invocation option."
+	},
+	"BASH_LINENO": {
+		"prefix": "BASH_LINENO",
+		"body": [
+			"BASH_LINENO$0"
+		],
+		"scope": "",
+		"description": "An array variable whose members are the line numbers in source files where each corresponding member of FUNCNAME was invoked. ${BASH_LINENO[$i]} is the line number in the source file (${BASH_SOURCE[$i+1]}) where ${FUNCNAME[$i]} was called (or ${BASH_LINENO[$i-1]} if referenced within another shell function). Use LINENO to obtain the current line number."
+	},
+	"BASH_LOADABLES_PATH": {
+		"prefix": "BASH_LOADABLES_PATH",
+		"body": [
+			"BASH_LOADABLES_PATH$0"
+		],
+		"scope": "",
+		"description": "A colon-separated list of directories in which the shell looks for dynamically loadable builtins specified by the enable command."
+	},
+	"BASH_REMATCH": {
+		"prefix": "BASH_REMATCH",
+		"body": [
+			"BASH_REMATCH$0"
+		],
+		"scope": "",
+		"description": "An array variable whose members are assigned by the ‘=~’ binary operator to the [[ conditional command (see Conditional Constructs). The element with index 0 is the portion of the string matching the entire regular expression. The element with index n is the portion of the string matching the nth parenthesized subexpression."
+	},
+	"BASH_SOURCE": {
+		"prefix": "BASH_SOURCE",
+		"body": [
+			"BASH_SOURCE$0"
+		],
+		"scope": "",
+		"description": "An array variable whose members are the source filenames where the corresponding shell function names in the FUNCNAME array variable are defined. The shell function ${FUNCNAME[$i]} is defined in the file ${BASH_SOURCE[$i]} and called from ${BASH_SOURCE[$i+1]}"
+	},
+	"BASH_SUBSHELL": {
+		"prefix": "BASH_SUBSHELL",
+		"body": [
+			"BASH_SUBSHELL$0"
+		],
+		"scope": "",
+		"description": "Incremented by one within each subshell or subshell environment when the shell begins executing in that environment. The initial value is 0. If BASH_SUBSHELL is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"BASH_VERSINFO": {
+		"prefix": "BASH_VERSINFO",
+		"body": [
+			"BASH_VERSINFO$0"
+		],
+		"scope": "",
+		"description": "A readonly array variable (see Arrays) whose members hold version information for this instance of Bash. The values assigned to the array members are as follows:"
+	},
+	"BASH_VERSINFO[0]": {
+		"prefix": "BASH_VERSINFO[0]",
+		"body": [
+			"BASH_VERSINFO[0]$0"
+		],
+		"scope": "",
+		"description": "The major version number (the release)."
+	},
+	"BASH_VERSINFO[1]": {
+		"prefix": "BASH_VERSINFO[1]",
+		"body": [
+			"BASH_VERSINFO[1]$0"
+		],
+		"scope": "",
+		"description": "The minor version number (the version)."
+	},
+	"BASH_VERSINFO[2]": {
+		"prefix": "BASH_VERSINFO[2]",
+		"body": [
+			"BASH_VERSINFO[2]$0"
+		],
+		"scope": "",
+		"description": "The patch level."
+	},
+	"BASH_VERSINFO[3]": {
+		"prefix": "BASH_VERSINFO[3]",
+		"body": [
+			"BASH_VERSINFO[3]$0"
+		],
+		"scope": "",
+		"description": "The build version."
+	},
+	"BASH_VERSINFO[4]": {
+		"prefix": "BASH_VERSINFO[4]",
+		"body": [
+			"BASH_VERSINFO[4]$0"
+		],
+		"scope": "",
+		"description": "The release status (e.g., beta1)."
+	},
+	"BASH_VERSINFO[5]": {
+		"prefix": "BASH_VERSINFO[5]",
+		"body": [
+			"BASH_VERSINFO[5]$0"
+		],
+		"scope": "",
+		"description": "The value of MACHTYPE. "
+	},
+	"BASH_VERSION": {
+		"prefix": "BASH_VERSION",
+		"body": [
+			"BASH_VERSION$0"
+		],
+		"scope": "",
+		"description": "The version number of the current instance of Bash."
+	},
+	"BASH_XTRACEFD": {
+		"prefix": "BASH_XTRACEFD",
+		"body": [
+			"BASH_XTRACEFD$0"
+		],
+		"scope": "",
+		"description": "If set to an integer corresponding to a valid file descriptor, Bash will write the trace output generated when ‘set -x’ is enabled to that file descriptor. This allows tracing output to be separated from diagnostic and error messages. The file descriptor is closed when BASH_XTRACEFD is unset or assigned a new value. Unsetting BASH_XTRACEFD or assigning it the empty string causes the trace output to be sent to the standard error. Note that setting BASH_XTRACEFD to 2 (the standard error file descriptor) and then unsetting it will result in the standard error being closed."
+	},
+	"CHILD_MAX": {
+		"prefix": "CHILD_MAX",
+		"body": [
+			"CHILD_MAX$0"
+		],
+		"scope": "",
+		"description": "Set the number of exited child status values for the shell to remember. Bash will not allow this value to be decreased below a POSIX-mandated minimum, and there is a maximum value (currently 8192) that this may not exceed. The minimum value is system-dependent."
+	},
+	"COLUMNS": {
+		"prefix": "COLUMNS",
+		"body": [
+			"COLUMNS$0"
+		],
+		"scope": "",
+		"description": "Used by the select command to determine the terminal width when printing selection lists. Automatically set if the checkwinsize option is enabled (see The Shopt Builtin), or in an interactive shell upon receipt of a SIGWINCH."
+	},
+	"COMP_CWORD": {
+		"prefix": "COMP_CWORD",
+		"body": [
+			"COMP_CWORD$0"
+		],
+		"scope": "",
+		"description": "An index into ${COMP_WORDS} of the word containing the current cursor position. This variable is available only in shell functions invoked by the programmable completion facilities (see Programmable Completion)."
+	},
+	"COMP_LINE": {
+		"prefix": "COMP_LINE",
+		"body": [
+			"COMP_LINE$0"
+		],
+		"scope": "",
+		"description": "The current command line. This variable is available only in shell functions and external commands invoked by the programmable completion facilities (see Programmable Completion)."
+	},
+	"COMP_POINT": {
+		"prefix": "COMP_POINT",
+		"body": [
+			"COMP_POINT$0"
+		],
+		"scope": "",
+		"description": "The index of the current cursor position relative to the beginning of the current command. If the current cursor position is at the end of the current command, the value of this variable is equal to ${#COMP_LINE}. This variable is available only in shell functions and external commands invoked by the programmable completion facilities (see Programmable Completion)."
+	},
+	"COMP_TYPE": {
+		"prefix": "COMP_TYPE",
+		"body": [
+			"COMP_TYPE$0"
+		],
+		"scope": "",
+		"description": "Set to an integer value corresponding to the type of completion attempted that caused a completion function to be called: TAB, for normal completion, ‘?’, for listing completions after successive tabs, ‘!’, for listing alternatives on partial word completion, ‘@’, to list completions if the word is not unmodified, or ‘%’, for menu completion. This variable is available only in shell functions and external commands invoked by the programmable completion facilities (see Programmable Completion)."
+	},
+	"COMP_KEY": {
+		"prefix": "COMP_KEY",
+		"body": [
+			"COMP_KEY$0"
+		],
+		"scope": "",
+		"description": "The key (or final key of a key sequence) used to invoke the current completion function."
+	},
+	"COMP_WORDBREAKS": {
+		"prefix": "COMP_WORDBREAKS",
+		"body": [
+			"COMP_WORDBREAKS$0"
+		],
+		"scope": "",
+		"description": "The set of characters that the Readline library treats as word separators when performing word completion. If COMP_WORDBREAKS is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"COMP_WORDS": {
+		"prefix": "COMP_WORDS",
+		"body": [
+			"COMP_WORDS$0"
+		],
+		"scope": "",
+		"description": "An array variable consisting of the individual words in the current command line. The line is split into words as Readline would split it, using COMP_WORDBREAKS as described above. This variable is available only in shell functions invoked by the programmable completion facilities (see Programmable Completion)."
+	},
+	"COMPREPLY": {
+		"prefix": "COMPREPLY",
+		"body": [
+			"COMPREPLY$0"
+		],
+		"scope": "",
+		"description": "An array variable from which Bash reads the possible completions generated by a shell function invoked by the programmable completion facility (see Programmable Completion). Each array element contains one possible completion."
+	},
+	"COPROC": {
+		"prefix": "COPROC",
+		"body": [
+			"COPROC$0"
+		],
+		"scope": "",
+		"description": "An array variable created to hold the file descriptors for output from and input to an unnamed coprocess (see Coprocesses)."
+	},
+	"DIRSTACK": {
+		"prefix": "DIRSTACK",
+		"body": [
+			"DIRSTACK$0"
+		],
+		"scope": "",
+		"description": "An array variable containing the current contents of the directory stack. Directories appear in the stack in the order they are displayed by the dirs builtin. Assigning to members of this array variable may be used to modify directories already in the stack, but the pushd and popd builtins must be used to add and remove directories. Assignment to this variable will not change the current directory. If DIRSTACK is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"EMACS": {
+		"prefix": "EMACS",
+		"body": [
+			"EMACS$0"
+		],
+		"scope": "",
+		"description": "If Bash finds this variable in the environment when the shell starts with value ‘t’, it assumes that the shell is running in an Emacs shell buffer and disables line editing."
+	},
+	"ENV": {
+		"prefix": "ENV",
+		"body": [
+			"ENV$0"
+		],
+		"scope": "",
+		"description": "Expanded and executed similarly to BASH_ENV (see Bash Startup Files) when an interactive shell is invoked in POSIX Mode (see Bash POSIX Mode)."
+	},
+	"EPOCHREALTIME": {
+		"prefix": "EPOCHREALTIME",
+		"body": [
+			"EPOCHREALTIME$0"
+		],
+		"scope": "",
+		"description": "Each time this parameter is referenced, it expands to the number of seconds since the Unix Epoch as a floating point value with micro-second granularity (see the documentation for the C library function time for the definition of Epoch). Assignments to EPOCHREALTIME are ignored. If EPOCHREALTIME is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"EPOCHSECONDS": {
+		"prefix": "EPOCHSECONDS",
+		"body": [
+			"EPOCHSECONDS$0"
+		],
+		"scope": "",
+		"description": "Each time this parameter is referenced, it expands to the number of seconds since the Unix Epoch (see the documentation for the C library function time for the definition of Epoch). Assignments to EPOCHSECONDS are ignored. If EPOCHSECONDS is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"EUID": {
+		"prefix": "EUID",
+		"body": [
+			"EUID$0"
+		],
+		"scope": "",
+		"description": "The numeric effective user id of the current user. This variable is readonly."
+	},
+	"EXECIGNORE": {
+		"prefix": "EXECIGNORE",
+		"body": [
+			"EXECIGNORE$0"
+		],
+		"scope": "",
+		"description": "A colon-separated list of shell patterns (see Pattern Matching) defining the list of filenames to be ignored by command search using PATH. Files whose full pathnames match one of these patterns are not considered executable files for the purposes of completion and command execution via PATH lookup. This does not affect the behavior of the [, test, and [[ commands. Full pathnames in the command hash table are not subject to EXECIGNORE. Use this variable to ignore shared library files that have the executable bit set, but are not executable files. The pattern matching honors the setting of the extglob shell option."
+	},
+	"FCEDIT": {
+		"prefix": "FCEDIT",
+		"body": [
+			"FCEDIT$0"
+		],
+		"scope": "",
+		"description": "The editor used as a default by the -e option to the fc builtin command."
+	},
+	"FIGNORE": {
+		"prefix": "FIGNORE",
+		"body": [
+			"FIGNORE$0"
+		],
+		"scope": "",
+		"description": "A colon-separated list of suffixes to ignore when performing filename completion. A filename whose suffix matches one of the entries in FIGNORE is excluded from the list of matched filenames. A sample value is ‘.o:~’"
+	},
+	"FUNCNAME": {
+		"prefix": "FUNCNAME",
+		"body": [
+			"FUNCNAME$0"
+		],
+		"scope": "",
+		"description": "An array variable containing the names of all shell functions currently in the execution call stack. The element with index 0 is the name of any currently-executing shell function. The bottom-most element (the one with the highest index) is main. This variable exists only when a shell function is executing. Assignments to FUNCNAME have no effect. If FUNCNAME is unset, it loses its special properties, even if it is subsequently reset. This variable can be used with BASH_LINENO and BASH_SOURCE. Each element of FUNCNAME has corresponding elements in BASH_LINENO and BASH_SOURCE to describe the call stack. For instance, ${FUNCNAME[$i]} was called from the file ${BASH_SOURCE[$i+1]} at line number ${BASH_LINENO[$i]}. The caller builtin displays the current call stack using this information."
+	},
+	"FUNCNEST": {
+		"prefix": "FUNCNEST",
+		"body": [
+			"FUNCNEST$0"
+		],
+		"scope": "",
+		"description": "If set to a numeric value greater than 0, defines a maximum function nesting level. Function invocations that exceed this nesting level will cause the current command to abort."
+	},
+	"GLOBIGNORE": {
+		"prefix": "GLOBIGNORE",
+		"body": [
+			"GLOBIGNORE$0"
+		],
+		"scope": "",
+		"description": "A colon-separated list of patterns defining the set of file names to be ignored by filename expansion. If a file name matched by a filename expansion pattern also matches one of the patterns in GLOBIGNORE, it is removed from the list of matches. The pattern matching honors the setting of the extglob shell option."
+	},
+	"GROUPS": {
+		"prefix": "GROUPS",
+		"body": [
+			"GROUPS$0"
+		],
+		"scope": "",
+		"description": "An array variable containing the list of groups of which the current user is a member. Assignments to GROUPS have no effect. If GROUPS is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"histchars": {
+		"prefix": "histchars",
+		"body": [
+			"histchars$0"
+		],
+		"scope": "",
+		"description": "Up to three characters which control history expansion, quick substitution, and tokenization (see History Expansion). The first character is the history expansion character, that is, the character which signifies the start of a history expansion, normally ‘!’. The second character is the character which signifies ‘quick substitution’ when seen as the first character on a line, normally ‘^’. The optional third character is the character which indicates that the remainder of the line is a comment when found as the first character of a word, usually ‘#’. The history comment character causes history substitution to be skipped for the remaining words on the line. It does not necessarily cause the shell parser to treat the rest of the line as a comment."
+	},
+	"HISTCMD": {
+		"prefix": "HISTCMD",
+		"body": [
+			"HISTCMD$0"
+		],
+		"scope": "",
+		"description": "The history number, or index in the history list, of the current command. Assignments to HISTCMD are ignored. If HISTCMD is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"HISTCONTROL": {
+		"prefix": "HISTCONTROL",
+		"body": [
+			"HISTCONTROL$0"
+		],
+		"scope": "",
+		"description": "A colon-separated list of values controlling how commands are saved on the history list. If the list of values includes ‘ignorespace’, lines which begin with a space character are not saved in the history list. A value of ‘ignoredups’ causes lines which match the previous history entry to not be saved. A value of ‘ignoreboth’ is shorthand for ‘ignorespace’ and ‘ignoredups’. A value of ‘erasedups’ causes all previous lines matching the current line to be removed from the history list before that line is saved. Any value not in the above list is ignored. If HISTCONTROL is unset, or does not include a valid value, all lines read by the shell parser are saved on the history list, subject to the value of HISTIGNORE. The second and subsequent lines of a multi-line compound command are not tested, and are added to the history regardless of the value of HISTCONTROL."
+	},
+	"HISTFILE": {
+		"prefix": "HISTFILE",
+		"body": [
+			"HISTFILE$0"
+		],
+		"scope": "",
+		"description": "The name of the file to which the command history is saved. The default value is ~/.bash_history."
+	},
+	"HISTFILESIZE": {
+		"prefix": "HISTFILESIZE",
+		"body": [
+			"HISTFILESIZE$0"
+		],
+		"scope": "",
+		"description": "The maximum number of lines contained in the history file. When this variable is assigned a value, the history file is truncated, if necessary, to contain no more than that number of lines by removing the oldest entries. The history file is also truncated to this size after writing it when a shell exits. If the value is 0, the history file is truncated to zero size. Non-numeric values and numeric values less than zero inhibit truncation. The shell sets the default value to the value of HISTSIZE after reading any startup files."
+	},
+	"HISTIGNORE": {
+		"prefix": "HISTIGNORE",
+		"body": [
+			"HISTIGNORE$0"
+		],
+		"scope": "",
+		"description": "A colon-separated list of patterns used to decide which command lines should be saved on the history list. Each pattern is anchored at the beginning of the line and must match the complete line (no implicit ‘*’ is appended). Each pattern is tested against the line after the checks specified by HISTCONTROL are applied. In addition to the normal shell pattern matching characters, ‘&’ matches the previous history line. ‘&’ may be escaped using a backslash; the backslash is removed before attempting a match. The second and subsequent lines of a multi-line compound command are not tested, and are added to the history regardless of the value of HISTIGNORE. The pattern matching honors the setting of the extglob shell option. HISTIGNORE subsumes the function of HISTCONTROL. A pattern of ‘&’ is identical to ignoredups, and a pattern of ‘[ ]*’ is identical to ignorespace. Combining these two patterns, separating them with a colon, provides the functionality of ignoreboth."
+	},
+	"HISTSIZE": {
+		"prefix": "HISTSIZE",
+		"body": [
+			"HISTSIZE$0"
+		],
+		"scope": "",
+		"description": "The maximum number of commands to remember on the history list. If the value is 0, commands are not saved in the history list. Numeric values less than zero result in every command being saved on the history list (there is no limit). The shell sets the default value to 500 after reading any startup files."
+	},
+	"HISTTIMEFORMAT": {
+		"prefix": "HISTTIMEFORMAT",
+		"body": [
+			"HISTTIMEFORMAT$0"
+		],
+		"scope": "",
+		"description": "If this variable is set and not null, its value is used as a format string for strftime to print the time stamp associated with each history entry displayed by the history builtin. If this variable is set, time stamps are written to the history file so they may be preserved across shell sessions. This uses the history comment character to distinguish timestamps from other history lines."
+	},
+	"HOSTFILE": {
+		"prefix": "HOSTFILE",
+		"body": [
+			"HOSTFILE$0"
+		],
+		"scope": "",
+		"description": "Contains the name of a file in the same format as /etc/hosts that should be read when the shell needs to complete a hostname. The list of possible hostname completions may be changed while the shell is running; the next time hostname completion is attempted after the value is changed, Bash adds the contents of the new file to the existing list. If HOSTFILE is set, but has no value, or does not name a readable file, Bash attempts to read /etc/hosts to obtain the list of possible hostname completions. When HOSTFILE is unset, the hostname list is cleared."
+	},
+	"HOSTNAME": {
+		"prefix": "HOSTNAME",
+		"body": [
+			"HOSTNAME$0"
+		],
+		"scope": "",
+		"description": "The name of the current host."
+	},
+	"HOSTTYPE": {
+		"prefix": "HOSTTYPE",
+		"body": [
+			"HOSTTYPE$0"
+		],
+		"scope": "",
+		"description": "A string describing the machine Bash is running on."
+	},
+	"IGNOREEOF": {
+		"prefix": "IGNOREEOF",
+		"body": [
+			"IGNOREEOF$0"
+		],
+		"scope": "",
+		"description": "Controls the action of the shell on receipt of an EOF character as the sole input. If set, the value denotes the number of consecutive EOF characters that can be read as the first character on an input line before the shell will exit. If the variable exists but does not have a numeric value, or has no value, then the default is 10. If the variable does not exist, then EOF signifies the end of input to the shell. This is only in effect for interactive shells."
+	},
+	"INPUTRC": {
+		"prefix": "INPUTRC",
+		"body": [
+			"INPUTRC$0"
+		],
+		"scope": "",
+		"description": "The name of the Readline initialization file, overriding the default of ~/.inputrc."
+	},
+	"INSIDE_EMACS": {
+		"prefix": "INSIDE_EMACS",
+		"body": [
+			"INSIDE_EMACS$0"
+		],
+		"scope": "",
+		"description": "If Bash finds this variable in the environment when the shell starts, it assumes that the shell is running in an Emacs shell buffer and may disable line editing depending on the value of TERM."
+	},
+	"LANG": {
+		"prefix": "LANG",
+		"body": [
+			"LANG$0"
+		],
+		"scope": "",
+		"description": "Used to determine the locale category for any category not specifically selected with a variable starting with LC_."
+	},
+	"LC_ALL": {
+		"prefix": "LC_ALL",
+		"body": [
+			"LC_ALL$0"
+		],
+		"scope": "",
+		"description": "This variable overrides the value of LANG and any other LC_ variable specifying a locale category."
+	},
+	"LC_COLLATE": {
+		"prefix": "LC_COLLATE",
+		"body": [
+			"LC_COLLATE$0"
+		],
+		"scope": "",
+		"description": "This variable determines the collation order used when sorting the results of filename expansion, and determines the behavior of range expressions, equivalence classes, and collating sequences within filename expansion and pattern matching (see Filename Expansion)."
+	},
+	"LC_CTYPE": {
+		"prefix": "LC_CTYPE",
+		"body": [
+			"LC_CTYPE$0"
+		],
+		"scope": "",
+		"description": "This variable determines the interpretation of characters and the behavior of character classes within filename expansion and pattern matching (see Filename Expansion)."
+	},
+	"LC_MESSAGES": {
+		"prefix": "LC_MESSAGES",
+		"body": [
+			"LC_MESSAGES$0"
+		],
+		"scope": "",
+		"description": "This variable determines the locale used to translate double-quoted strings preceded by a ‘$’ (see Locale-Specific Translation)."
+	},
+	"LC_NUMERIC": {
+		"prefix": "LC_NUMERIC",
+		"body": [
+			"LC_NUMERIC$0"
+		],
+		"scope": "",
+		"description": "This variable determines the locale category used for number formatting."
+	},
+	"LC_TIME": {
+		"prefix": "LC_TIME",
+		"body": [
+			"LC_TIME$0"
+		],
+		"scope": "",
+		"description": "This variable determines the locale category used for data and time formatting."
+	},
+	"LINENO": {
+		"prefix": "LINENO",
+		"body": [
+			"LINENO$0"
+		],
+		"scope": "",
+		"description": "The line number in the script or shell function currently executing. If LINENO is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"LINES": {
+		"prefix": "LINES",
+		"body": [
+			"LINES$0"
+		],
+		"scope": "",
+		"description": "Used by the select command to determine the column length for printing selection lists. Automatically set if the checkwinsize option is enabled (see The Shopt Builtin), or in an interactive shell upon receipt of a SIGWINCH."
+	},
+	"MACHTYPE": {
+		"prefix": "MACHTYPE",
+		"body": [
+			"MACHTYPE$0"
+		],
+		"scope": "",
+		"description": "A string that fully describes the system type on which Bash is executing, in the standard GNU cpu-company-system format."
+	},
+	"MAILCHECK": {
+		"prefix": "MAILCHECK",
+		"body": [
+			"MAILCHECK$0"
+		],
+		"scope": "",
+		"description": "How often (in seconds) that the shell should check for mail in the files specified in the MAILPATH or MAIL variables. The default is 60 seconds. When it is time to check for mail, the shell does so before displaying the primary prompt. If this variable is unset, or set to a value that is not a number greater than or equal to zero, the shell disables mail checking."
+	},
+	"MAPFILE": {
+		"prefix": "MAPFILE",
+		"body": [
+			"MAPFILE$0"
+		],
+		"scope": "",
+		"description": "An array variable created to hold the text read by the mapfile builtin when no variable name is supplied."
+	},
+	"OLDPWD": {
+		"prefix": "OLDPWD",
+		"body": [
+			"OLDPWD$0"
+		],
+		"scope": "",
+		"description": "The previous working directory as set by the cd builtin."
+	},
+	"OPTERR": {
+		"prefix": "OPTERR",
+		"body": [
+			"OPTERR$0"
+		],
+		"scope": "",
+		"description": "If set to the value 1, Bash displays error messages generated by the getopts builtin command."
+	},
+	"OSTYPE": {
+		"prefix": "OSTYPE",
+		"body": [
+			"OSTYPE$0"
+		],
+		"scope": "",
+		"description": "A string describing the operating system Bash is running on."
+	},
+	"PIPESTATUS": {
+		"prefix": "PIPESTATUS",
+		"body": [
+			"PIPESTATUS$0"
+		],
+		"scope": "",
+		"description": "An array variable (see Arrays) containing a list of exit status values from the processes in the most-recently-executed foreground pipeline (which may contain only a single command)."
+	},
+	"POSIXLY_CORRECT": {
+		"prefix": "POSIXLY_CORRECT",
+		"body": [
+			"POSIXLY_CORRECT$0"
+		],
+		"scope": "",
+		"description": "If this variable is in the environment when Bash starts, the shell enters POSIX mode (see Bash POSIX Mode) before reading the startup files, as if the --posix invocation option had been supplied. If it is set while the shell is running, Bash enables POSIX mode, as if the command set -o posix had been executed. When the shell enters POSIX mode, it sets this variable if it was not already set."
+	},
+	"PPID": {
+		"prefix": "PPID",
+		"body": [
+			"PPID$0"
+		],
+		"scope": "",
+		"description": "The process ID of the shell’s parent process. This variable is readonly."
+	},
+	"PROMPT_COMMAND": {
+		"prefix": "PROMPT_COMMAND",
+		"body": [
+			"PROMPT_COMMAND$0"
+		],
+		"scope": "",
+		"description": "If this variable is set, and is an array, the value of each set element is interpreted as a command to execute before printing the primary prompt ($PS1). If this is set but not an array variable, its value is used as a command to execute instead."
+	},
+	"PROMPT_DIRTRIM": {
+		"prefix": "PROMPT_DIRTRIM",
+		"body": [
+			"PROMPT_DIRTRIM$0"
+		],
+		"scope": "",
+		"description": "If set to a number greater than zero, the value is used as the number of trailing directory components to retain when expanding the \\w and \\W prompt string escapes (see Controlling the Prompt). Characters removed are replaced with an ellipsis."
+	},
+	"PS0": {
+		"prefix": "PS0",
+		"body": [
+			"PS0$0"
+		],
+		"scope": "",
+		"description": "The value of this parameter is expanded like PS1 and displayed by interactive shells after reading a command and before the command is executed."
+	},
+	"PS3": {
+		"prefix": "PS3",
+		"body": [
+			"PS3$0"
+		],
+		"scope": "",
+		"description": "The value of this variable is used as the prompt for the select command. If this variable is not set, the select command prompts with ‘#? ’"
+	},
+	"PS4": {
+		"prefix": "PS4",
+		"body": [
+			"PS4$0"
+		],
+		"scope": "",
+		"description": "The value of this parameter is expanded like PS1 and the expanded value is the prompt printed before the command line is echoed when the -x option is set (see The Set Builtin). The first character of the expanded value is replicated multiple times, as necessary, to indicate multiple levels of indirection. The default is ‘+ ’."
+	},
+	"PWD": {
+		"prefix": "PWD",
+		"body": [
+			"PWD$0"
+		],
+		"scope": "",
+		"description": "The current working directory as set by the cd builtin."
+	},
+	"RANDOM": {
+		"prefix": "RANDOM",
+		"body": [
+			"RANDOM$0"
+		],
+		"scope": "",
+		"description": "Each time this parameter is referenced, it expands to a random integer between 0 and 32767. Assigning a value to this variable seeds the random number generator. If RANDOM is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"READLINE_ARGUMENT": {
+		"prefix": "READLINE_ARGUMENT",
+		"body": [
+			"READLINE_ARGUMENT$0"
+		],
+		"scope": "",
+		"description": "Any numeric argument given to a Readline command that was defined using ‘bind -x’ (see Bash Builtin Commands when it was invoked."
+	},
+	"READLINE_LINE": {
+		"prefix": "READLINE_LINE",
+		"body": [
+			"READLINE_LINE$0"
+		],
+		"scope": "",
+		"description": "The contents of the Readline line buffer, for use with ‘bind -x’ (see Bash Builtin Commands)."
+	},
+	"READLINE_MARK": {
+		"prefix": "READLINE_MARK",
+		"body": [
+			"READLINE_MARK$0"
+		],
+		"scope": "",
+		"description": "The position of the mark (saved insertion point) in the Readline line buffer, for use with ‘bind -x’ (see Bash Builtin Commands). The characters between the insertion point and the mark are often called the region."
+	},
+	"READLINE_POINT": {
+		"prefix": "READLINE_POINT",
+		"body": [
+			"READLINE_POINT$0"
+		],
+		"scope": "",
+		"description": "The position of the insertion point in the Readline line buffer, for use with ‘bind -x’ (see Bash Builtin Commands)."
+	},
+	"REPLY": {
+		"prefix": "REPLY",
+		"body": [
+			"REPLY$0"
+		],
+		"scope": "",
+		"description": "The default variable for the read builtin."
+	},
+	"SECONDS": {
+		"prefix": "SECONDS",
+		"body": [
+			"SECONDS$0"
+		],
+		"scope": "",
+		"description": "This variable expands to the number of seconds since the shell was started. Assignment to this variable resets the count to the value assigned, and the expanded value becomes the value assigned plus the number of seconds since the assignment. The number of seconds at shell invocation and the current time are always determined by querying the system clock. If SECONDS is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"SHELL": {
+		"prefix": "SHELL",
+		"body": [
+			"SHELL$0"
+		],
+		"scope": "",
+		"description": "This environment variable expands to the full pathname to the shell. If it is not set when the shell starts, Bash assigns to it the full pathname of the current user’s login shell."
+	},
+	"SHELLOPTS": {
+		"prefix": "SHELLOPTS",
+		"body": [
+			"SHELLOPTS$0"
+		],
+		"scope": "",
+		"description": "A colon-separated list of enabled shell options. Each word in the list is a valid argument for the -o option to the set builtin command (see The Set Builtin). The options appearing in SHELLOPTS are those reported as ‘on’ by ‘set -o’. If this variable is in the environment when Bash starts up, each shell option in the list will be enabled before reading any startup files. This variable is readonly."
+	},
+	"SHLVL": {
+		"prefix": "SHLVL",
+		"body": [
+			"SHLVL$0"
+		],
+		"scope": "",
+		"description": "Incremented by one each time a new instance of Bash is started. This is intended to be a count of how deeply your Bash shells are nested."
+	},
+	"SRANDOM": {
+		"prefix": "SRANDOM",
+		"body": [
+			"SRANDOM$0"
+		],
+		"scope": "",
+		"description": "This variable expands to a 32-bit pseudo-random number each time it is referenced. The random number generator is not linear on systems that support /dev/urandom or arc4random, so each returned number has no relationship to the numbers preceding it. The random number generator cannot be seeded, so assignments to this variable have no effect. If SRANDOM is unset, it loses its special properties, even if it is subsequently reset."
+	},
+	"TIMEFORMAT": {
+		"prefix": "TIMEFORMAT",
+		"body": [
+			"TIMEFORMAT$0"
+		],
+		"scope": "",
+		"description": "The value of this parameter is used as a format string specifying how the timing information for pipelines prefixed with the time reserved word should be displayed. The ‘%’ character introduces an escape sequence that is expanded to a time value or other information. If the value is null, no timing information is displayed. A trailing newline is added when the format string is displayed."
+	},
+	"TMOUT": {
+		"prefix": "TMOUT",
+		"body": [
+			"TMOUT$0"
+		],
+		"scope": "",
+		"description": "If set to a value greater than zero, TMOUT is treated as the default timeout for the read builtin (see Bash Builtin Commands). The select command (see Conditional Constructs) terminates if input does not arrive after TMOUT seconds when input is coming from a terminal. In an interactive shell, the value is interpreted as the number of seconds to wait for a line of input after issuing the primary prompt. Bash terminates after waiting for that number of seconds if a complete line of input does not arrive."
+	},
+	"TMPDIR": {
+		"prefix": "TMPDIR",
+		"body": [
+			"TMPDIR$0"
+		],
+		"scope": "",
+		"description": "If set, Bash uses its value as the name of a directory in which Bash creates temporary files for the shell’s use."
+	},
+	"UID": {
+		"prefix": "UID",
+		"body": [
+			"UID$0"
+		],
+		"scope": "",
+		"description": "The numeric real user id of the current user. This variable is readonly."
+	},
+	"BASH": {
+		"prefix": "BASH",
+		"description": "The full pathname used to execute the current instance of Bash. ",
+		"scope": "",
+		"body": [
+			"BASH$0"
+		]
+	},
+	"$_": {
+		"prefix": "$_",
+		"description": "",
+		"scope": "",
+		"body": [
+			"\\$_$0"
+		]
+	},
+	"CDPATH": {
+		"prefix": "CDPATH",
+		"description": "A colon-separated list of directories used as a search path for the cd builtin command.",
+		"scope": "",
+		"body": [
+			"CDPATH$0"
+		]
+	},
+	"PS2": {
+		"prefix": "PS2",
+		"description": "The secondary prompt string. The default value is ‘> ’. PS2 is expanded in the same way as PS1 before being displayed.",
+		"scope": "",
+		"body": [
+			"PS2$0"
+		]
+	},
+	"PS1": {
+		"prefix": "PS1",
+		"description": "The primary prompt string. The default value is ‘\\s-\\v\\$ ’. See Controlling the Prompt, for the complete list of escape sequences that are expanded before PS1 is displayed. ",
+		"scope": "",
+		"body": [
+			"PS1$0"
+		]
+	},
+	"PATH": {
+		"prefix": "PATH",
+		"description": "A colon-separated list of directories in which the shell looks for commands. A zero-length (null) directory name in the value of PATH indicates the current directory. A null directory name may appear as two adjacent colons, or as an initial or trailing colon. ",
+		"scope": "",
+		"body": [
+			"PATH$0"
+		]
+	},
+	"OPTIND": {
+		"prefix": "OPTIND",
+		"description": "The index of the last option argument processed by the getopts builtin. ",
+		"scope": "",
+		"body": [
+			"OPTIND$0"
+		]
+	},
+	"OPTARG": {
+		"prefix": "OPTARG",
+		"description": "The value of the last option argument processed by the getopts builtin.",
+		"scope": "",
+		"body": [
+			"OPTARG$0"
+		]
+	},
+	"MAILPATH": {
+		"prefix": "MAILPATH",
+		"description": "A colon-separated list of filenames which the shell periodically checks for new mail. Each list entry can specify the message that is printed when new mail arrives in the mail file by separating the filename from the message with a ‘?’. When used in the text of the message, $_ expands to the name of the current mail file.",
+		"scope": "",
+		"body": [
+			"MAILPATH$0"
+		]
+	},
+	"MAIL": {
+		"prefix": "MAIL",
+		"description": "If this parameter is set to a filename or directory name and the MAILPATH variable is not set, Bash informs the user of the arrival of mail in the specified file or Maildir-format directory.",
+		"scope": "",
+		"body": [
+			"MAIL$0"
+		]
+	},
+	"IFS": {
+		"prefix": "IFS",
+		"description": "A list of characters that separate fields; used when the shell splits words as part of expansion. ",
+		"scope": "",
+		"body": [
+			"IFS$0"
+		]
+	},
+	"HOME": {
+		"prefix": "HOME",
+		"description": "The current user’s home directory; the default for the cd builtin command. The value of this variable is also used by tilde expansion.",
+		"scope": "",
+		"body": [
+			"HOME$0"
+		]
+	},
+	"GLOBAL_COLUMNS": {
+		"prefix": "GLOBAL_COLUMNS",
+		"description": "The current number or columns displayed by the terminal, refresh by interactive::getTerminalSize on resize.",
+		"scope": "",
+		"body": [
+			"GLOBAL_COLUMNS$0"
+		]
+	},
+	"GLOBAL_LINES": {
+		"prefix": "GLOBAL_LINES",
+		"description": "The current number or lines displayed by the terminal, refresh by interactive::getTerminalSize on resize.",
+		"scope": "",
+		"body": [
+			"GLOBAL_LINES$0"
+		]
+	},
 	"source": {
 		"prefix": "source",
 		"description": "Source a file for Valet, add the necessary comment for shellcheck.",
@@ -7349,7 +8699,7 @@ function test::endTest() { :; }
 	},
   "CURSOR_LINE": {
     "prefix": "CURSOR_LINE",
-    "description": "",
+    "description": "The position of the cursor. You need to refresh it by calling interactive::getCursorPosition.",
     "scope": "",
     "body": [
       "CURSOR_LINE$0"
@@ -7357,7 +8707,7 @@ function test::endTest() { :; }
   },
   "CURSOR_COLUMN": {
     "prefix": "CURSOR_COLUMN",
-    "description": "",
+    "description": "The position of the cursor. You need to refresh it by calling interactive::getCursorPosition.",
     "scope": "",
     "body": [
       "CURSOR_COLUMN$0"
@@ -7478,7 +8828,7 @@ function test::endTest() { :; }
 
 ```log
 INFO     Generating documentation for the core functions only.
-INFO     Found 129 functions with documentation.
+INFO     Found 133 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-1/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-1/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/valet.code-snippets⌝.

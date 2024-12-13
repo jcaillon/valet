@@ -156,7 +156,7 @@ xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CO
 *) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
 esac
 
-# ## system::exportTerminalSize
+# ## interactive::getTerminalSize
 #
 # This function exports the terminal size.
 #
@@ -166,10 +166,10 @@ esac
 # - `GLOBAL_LINES`: The number of lines in the terminal.
 #
 # ```bash
-# system::exportTerminalSize
+# interactive::getTerminalSize
 # printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
 # ```
-function system::exportTerminalSize() {
+function interactive::getTerminalSize() {
   shopt -s checkwinsize
   # the following subshell is required to correctly compute the columns and lines
   # the bash manual says it these are computed after the execution of an external command
@@ -177,14 +177,20 @@ function system::exportTerminalSize() {
     :
     :
   )
-  GLOBAL_COLUMNS="${COLUMNS:-160}"
+  GLOBAL_COLUMNS="${COLUMNS:-120}"
   GLOBAL_LINES="${LINES:-30}"
   shopt -u checkwinsize
 }
-system::exportTerminalSize
 
-# Re export terminal size on window resize.
-trap system::exportTerminalSize SIGWINCH
+# Export terminal size on window resize if we are in interactive mode.
+if [[ -t 2 ]]; then
+  interactive::getTerminalSize
+  GLOBAL_SCREEN_REDRAW_REQUIRED=false
+  trap 'interactive::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true;' SIGWINCH
+else
+  GLOBAL_COLUMNS="${VALET_DEFAULT_COLUMNS:-120}"
+  GLOBAL_LINES="${VALET_DEFAULT_LINES:-30}"
+fi
 
 # ## log::setLevel
 #
