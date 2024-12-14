@@ -8,8 +8,8 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- For all the optional arguments of exported functions, allow to set them using a global variable in addition to the positional argument.
-- Finish prompt and interactive functions.
+- For all the optional arguments of exported functions, allow to set them using a global variable `_OPTION_*` in addition to the positional argument. Add this in the documentation about functions.
+- Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.
 - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
 - make `source` able to source multiple libraries that are called the same.
 - add-test
@@ -33,5 +33,6 @@ This page lists the features that I would like to implement in Valet. They come 
   - Implement regex replace in pure bash.
 - Add `valet.cmd` to the package, in self setup we can optionally add the valet install dir to the windows PATH.
 - Also export user defined functions.
+- Allow self release to release extensions.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

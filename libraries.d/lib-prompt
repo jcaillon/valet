@@ -4,12 +4,12 @@
 
 # shellcheck source=lib-ansi-codes
 source ansi-codes
-
 # shellcheck source=lib-interactive
 source interactive
-
 # shellcheck source=lib-array
 source array
+# shellcheck source=lib-string
+source string
 
 # ## prompt::input
 #
@@ -49,93 +49,93 @@ source array
 # - $3: stop column _as int_:
 #       (optional) The column at which to stop showing the autocompleted text.
 #       Longer texts get shifted to display the end of the user input.
-#       Can be set using the variable `PROMPT_STOP_COLUMN`.
+#       Can be set using the variable `_OPTION_STOP_COLUMN`.
 #       (defaults to the end of the screen)
 # - $4: items array name _as string_:
 #       The items to display (name of a global array which contains the items).
 #       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.
-#       Can be set using the variable `PROMPT_ITEMS_ARRAY_NAME`.
+#       Can be set using the variable `_OPTION_ITEMS_ARRAY_NAME`.
 #       (defaults to empty)
 # - $5: initial text _as string_:
 #       (optional) The initial string, which corresponds to the text already entered
 #       by the user at the moment the autocompletion box shows up.
 #       Allows to pre-filter the autocompletion.
-#       Can be set using the variable `PROMPT_STRING`.
+#       Can be set using the variable `_OPTION_STRING`.
 #       (defaults to empty)
 # - $6: items box max lines _as int_:
 #       optional) The maximum number of lines/rows to use for the autocompletion box.
 #       If the number of items is greater than this value, the box will be scrollable.
-#       Can be set using the variable `PROMPT_ITEMS_BOX_MAX_HEIGHT`.
+#       Can be set using the variable `_OPTION_ITEMS_BOX_MAX_HEIGHT`.
 #       (defaults to a maximized auto-computed value depending on the items and screen size)
 # - $7: force items box below _as bool_:
 #       (optional) If true, the box is forced to be displayed below the input text.
 #       Otherwise it will depend on the space required and space available below/above.
-#       Can be set using the variable `PROMPT_ITEMS_BOX_FORCE_BELOW`.
+#       Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_BELOW`.
 #       (defaults to false)
 # - $8: show prompt _as bool_:
 #       (optional) If true, the prompt is displayed. If false, the prompt is hidden.
 #       Useful to turn this into a simple multiple choice list.
-#       Can be set using the variable `PROMPT_SHOW_AUTOCOMPLETE`.
+#       Can be set using the variable `_OPTION_SHOW_AUTOCOMPLETE`.
 #       (defaults to true)
 # - $9: force show count _as bool_:
 #       (optional) If true, the count of items is always displayed.
 #       If false, the count is only displayed when we can't display all the items at once.
-#       Can be set using the variable `PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT`.
+#       Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT`.
 #       (defaults to false)
 # - $10: show left symbols _as bool_:
 #       (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
 #       Useful to display the most simple auto-completion when false.
-#       Can be set using the variable `PROMPT_SHOW_SYMBOL`.
+#       Can be set using the variable `_OPTION_SHOW_SYMBOL`.
 #       (defaults to true)
 # - $11: filters from n chars _as int_:
 #       (optional) The minimum number of characters to type before starting to filter the items.
 #       By default, the list is shown full and the user can start typing to filter.
 #       Put a value superior to 0 to make it behave like a standard autocompletion.
 #       When non-zero, the user can TAB to show the full list.
-#       Can be set using the variable `PROMPT_FILTERS_FROM_N_CHARS`.
+#       Can be set using the variable `_OPTION_FILTERS_FROM_N_CHARS`.
 #       (defaults to 0)
 # - $12: accept any value _as bool_:
 #       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
 #       Useful to display the most simple auto-completion when false.
-#       Can be set using the variable `PROMPT_ACCEPT_ANY_VALUE`.
+#       Can be set using the variable `_OPTION_ACCEPT_ANY_VALUE`.
 #       (defaults to true)
 # - $13: placeholder _as string_:
 #       (optional) The placeholder to display when the input is empty.
-#       Can be set using the variable `PROMPT_PLACEHOLDER`.
+#       Can be set using the variable `_OPTION_PLACEHOLDER`.
 #       (defaults to empty)
 # - $14: max length _as int_:
 #       (optional) The maximum length of the input string.
 #       If the user types more characters, they are truncated and an error message is displayed.
-#       Can be set using the variable `PROMPT_STRING_MAX_LENGTH`.
+#       Can be set using the variable `_OPTION_STRING_MAX_LENGTH`.
 #       (defaults to 99999)
 # - $15: autocomplete whole line _as bool_:
 #       (optional) If true, the whole line is autocompleted (all characters are considered to filter)
 #       the items. If false, only the word characters before the cursor are considered.
-#       Can be set using the variable `PROMPT_AUTOCOMPLETE_WHOLE_LINE`.
+#       Can be set using the variable `_OPTION_AUTOCOMPLETE_WHOLE_LINE`.
 #       (defaults to true)
 # - $16: tab opens items box _as bool_:
 #       (optional) If true, the tab key opens the items box if it is not already open.
-#       Can be set using the variable `PROMPT_TAB_OPENS_ITEMS_BOX`.
+#       Can be set using the variable `_OPTION_TAB_OPENS_ITEMS_BOX`.
 #       (defaults to true)
 # - $17: items box allow filtering _as bool_:
 #       (optional) If true, the items can be filtered by typing characters.
 #       If false, the items are displayed as is.
-#       Can be set using the variable `PROMPT_ITEMS_BOX_ALLOW_FILTERING`.
-#       (defaults to the value of `PROMPT_SHOW_AUTOCOMPLETE` or true)
+#       Can be set using the variable `_OPTION_ITEMS_BOX_ALLOW_FILTERING`.
+#       (defaults to the value of `_OPTION_SHOW_AUTOCOMPLETE` or true)
 # - $18: password mode _as bool_:
 #       (optional) If true, the input is displayed as a series of stars *.
 #       This mode can be activated/deactivated by pressing CTRL+P.
-#       Can be set using the variable `PROMPT_PASSWORD_MODE`.
+#       Can be set using the variable `_OPTION_PASSWORD_MODE`.
 #       (defaults to false)
 # - $19: callback function on text update _as string_:
 #       (optional) The name of a function to call each time the text is updated.
 #       Can be used to validate the input and display an error message.
-#       The function is called with no arguments but you can use the global variable `PROMPT_STRING` and
-#       `PROMPT_STRING_INDEX` to access the current text and cursor position.
+#       The function is called with no arguments but you can use the global variable `_OPTION_STRING` and
+#       `_OPTION_STRING_INDEX` to access the current text and cursor position.
 #       You must set:
 #       - `RETURNED_VALUE`: The error message to display (or empty).
 #       - `RETURNED_VALUE2`: A boolean to indicate if the autocompletion box should be redrawn.
-#       Can be set using the variable `PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.
+#       Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.
 #       (defaults to empty)
 # - $20: callback function on key pressed _as string_:
 #       (optional) The name of a function to call each time a key is pressed.
@@ -144,7 +144,7 @@ source array
 #       - $1: The key that was pressed, including special keys (CTRL+, ALT+, TAB, etc...).
 #       - $2: The last character that was sent by the terminal, if any (can be empty when key is not empty).
 #       The function must return 0 if the key press was handled, 1 otherwise.
-#       Can be set using the variable `PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED`.
+#       Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED`.
 #       (defaults to empty)
 #
 # Returns:
@@ -162,10 +162,10 @@ source array
 function prompt::input() {
   _PROMPT_START_LINE="${1}"
   _PROMPT_START_COLUMN="${2}"
-  _PROMPT_STOP_COLUMN="${3:-${PROMPT_STOP_COLUMN:-${GLOBAL_COLUMNS}}}"
+  _PROMPT_STOP_COLUMN="${3:-${_OPTION_STOP_COLUMN:-${GLOBAL_COLUMNS}}}"
 
   _PROMPT_ITEMS_BOX_REQUIRED_WIDTH=0
-  _PROMPT_ITEMS_ARRAY_NAME="${4:-${PROMPT_ITEMS_ARRAY_NAME:-}}"
+  _PROMPT_ITEMS_ARRAY_NAME="${4:-${_OPTION_ITEMS_ARRAY_NAME:-}}"
   if [[ -n "${_PROMPT_ITEMS_ARRAY_NAME}" ]]; then
     local -n originalItems="${_PROMPT_ITEMS_ARRAY_NAME}"
     _PROMPT_ORIGINAL_ITEMS=("${originalItems[@]}")
@@ -194,19 +194,19 @@ function prompt::input() {
     _PROMPT_ITEMS_BOX_REQUIRED_WIDTH=$((2 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 2))
   fi
 
-  _PROMPT_STRING="${5:-${PROMPT_STRING:-}}"
+  _PROMPT_STRING="${5:-${_OPTION_STRING:-}}"
   _PROMPT_STRING_INDEX=${#_PROMPT_STRING}
   _PROMPT_CURSOR_COLUMN=$((_PROMPT_START_COLUMN + _PROMPT_STRING_INDEX))
   _PROMPT_KILLED_STRING=""
 
-  _PROMPT_ITEMS_BOX_MAX_HEIGHT="${6:-${PROMPT_ITEMS_BOX_MAX_HEIGHT:-}}"
-  _PROMPT_ITEMS_BOX_FORCE_BELOW="${7:-${PROMPT_ITEMS_BOX_FORCE_BELOW:-false}}"
+  _PROMPT_ITEMS_BOX_MAX_HEIGHT="${6:-${_OPTION_ITEMS_BOX_MAX_HEIGHT:-}}"
+  _PROMPT_ITEMS_BOX_FORCE_BELOW="${7:-${_OPTION_ITEMS_BOX_FORCE_BELOW:-false}}"
 
-  _PROMPT_SHOW_AUTOCOMPLETE="${8:-${PROMPT_SHOW_AUTOCOMPLETE:-true}}"
-  _PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT="${9:-${PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT:-false}}"
+  _PROMPT_SHOW_AUTOCOMPLETE="${8:-${_OPTION_SHOW_AUTOCOMPLETE:-true}}"
+  _PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT="${9:-${_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT:-false}}"
 
-  _PROMPT_SHOW_SYMBOL="${10:-${PROMPT_SHOW_SYMBOL:-true}}"
-  _PROMPT_FILTERS_FROM_N_CHARS="${11:-${PROMPT_FILTERS_FROM_N_CHARS:-0}}"
+  _PROMPT_SHOW_SYMBOL="${10:-${_OPTION_SHOW_SYMBOL:-true}}"
+  _PROMPT_FILTERS_FROM_N_CHARS="${11:-${_OPTION_FILTERS_FROM_N_CHARS:-0}}"
 
   # check if we display the autocompletion box, and the initial state of the box (shown or hidden)
   if ((_PROMPT_ORIGINAL_ITEMS_COUNT > 0)); then
@@ -222,7 +222,7 @@ function prompt::input() {
   fi
   _PROMPT_ERROR_BOX_SHOWN=false
 
-  _PROMPT_ACCEPT_ANY_VALUE="${12:-${PROMPT_ACCEPT_ANY_VALUE:-true}}"
+  _PROMPT_ACCEPT_ANY_VALUE="${12:-${_OPTION_ACCEPT_ANY_VALUE:-true}}"
   if [[ ${_PROMPT_ITEMS_BOX_ENABLED} != "true" ]]; then
     # if we don't show the box, we necessarily accept any value
     _PROMPT_ACCEPT_ANY_VALUE=true
@@ -231,21 +231,21 @@ function prompt::input() {
     _PROMPT_ACCEPT_ANY_VALUE=false
   fi
 
-  _PROMPT_PLACEHOLDER="${13:-${PROMPT_PLACEHOLDER:-}}"
-  _PROMPT_STRING_MAX_LENGTH="${14:-${PROMPT_STRING_MAX_LENGTH:-99999}}"
+  _PROMPT_PLACEHOLDER="${13:-${_OPTION_PLACEHOLDER:-}}"
+  _PROMPT_STRING_MAX_LENGTH="${14:-${_OPTION_STRING_MAX_LENGTH:-99999}}"
 
-  _PROMPT_AUTOCOMPLETE_WHOLE_LINE="${15:-${PROMPT_AUTOCOMPLETE_WHOLE_LINE:-true}}"
-  _PROMPT_TAB_OPENS_ITEMS_BOX="${16:-${PROMPT_TAB_OPENS_ITEMS_BOX:-true}}"
-  _PROMPT_ITEMS_BOX_ALLOW_FILTERING="${17:-${PROMPT_ITEMS_BOX_ALLOW_FILTERING:-${_PROMPT_SHOW_AUTOCOMPLETE}}}"
-  _PROMPT_PASSWORD_MODE="${18:-${PROMPT_PASSWORD_MODE:-false}}"
+  _PROMPT_AUTOCOMPLETE_WHOLE_LINE="${15:-${_OPTION_AUTOCOMPLETE_WHOLE_LINE:-true}}"
+  _PROMPT_TAB_OPENS_ITEMS_BOX="${16:-${_OPTION_TAB_OPENS_ITEMS_BOX:-true}}"
+  _PROMPT_ITEMS_BOX_ALLOW_FILTERING="${17:-${_OPTION_ITEMS_BOX_ALLOW_FILTERING:-${_PROMPT_SHOW_AUTOCOMPLETE}}}"
+  _PROMPT_PASSWORD_MODE="${18:-${_OPTION_PASSWORD_MODE:-false}}"
 
 
-  _PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE="${19:-${PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE:-}}"
+  _PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE="${19:-${_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE:-}}"
     if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE} ]] && ! command -v "${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}" &>/dev/null; then
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}⌝ does not exist."
   fi
 
-  _PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED="${20:-${PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED:-}}"
+  _PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED="${20:-${_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED:-}}"
   if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED} ]] && ! command -v "${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED}" &>/dev/null; then
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED}⌝ does not exist."
   fi
@@ -895,8 +895,8 @@ function prompt_clearErrorBox() {
 #
 # Returns:
 #
-# - `_PROMPT_FILTERED_ITEMS_SELECTED_INDEX`: The new index.
-# - `_PROMPT_FILTERED_ITEMS_START_INDEX`: The new start index if needed.
+# - `_OPTION_FILTERED_ITEMS_SELECTED_INDEX`: The new index.
+# - `_OPTION_FILTERED_ITEMS_START_INDEX`: The new start index if needed.
 #
 # ```bash
 # prompt_changeSelectedItemIndex 1
@@ -910,12 +910,21 @@ function prompt_changeSelectedItemIndex() {
     return 0
   fi
 
-  # compute the new index (cycle through)
-  local newIndex=$((_PROMPT_FILTERED_ITEMS_SELECTED_INDEX + delta))
-  if ((newIndex < 0)); then
+  local newIndex
+
+  # compute the new index
+  # cycle through if it was already at the end/beginning
+  if ((_PROMPT_FILTERED_ITEMS_SELECTED_INDEX <= 0 && delta < 0)); then
     newIndex=$((${#_PROMPT_FILTERED_ITEMS[@]} - 1))
-  elif ((newIndex >= ${#_PROMPT_FILTERED_ITEMS[@]})); then
+  elif ((_PROMPT_FILTERED_ITEMS_SELECTED_INDEX >= ${#_PROMPT_FILTERED_ITEMS[@]} - 1 && delta > 0)); then
     newIndex=0
+  else
+    newIndex=$((_PROMPT_FILTERED_ITEMS_SELECTED_INDEX + delta))
+    if ((newIndex < 0)); then
+      newIndex=0
+    elif ((newIndex >= ${#_PROMPT_FILTERED_ITEMS[@]})); then
+      newIndex=$((${#_PROMPT_FILTERED_ITEMS[@]} - 1))
+    fi
   fi
 
   # now we need to adjust the start index if needed
@@ -936,7 +945,7 @@ function prompt_changeSelectedItemIndex() {
 #
 # Returns:
 #
-# - `_PROMPT_STRING_INDEX`: The new index.
+# - `_OPTION_STRING_INDEX`: The new index.
 #
 # ```bash
 # prompt_changePromptCursorIndex 1
@@ -1005,6 +1014,7 @@ function prompt_autocompleteWithSelectedItem() {
       _PROMPT_STRING_INDEX=$((beginIndexToReplace + ${#selectedItem}))
     fi
   fi
+
 }
 
 # Change the cursor position, move to the end of the word (or next).
@@ -1048,18 +1058,7 @@ function prompt_getCurrentInitialItemsIndex() {
   RETURNED_VALUE=-1
 }
 
-# we redefine interactive::showStringInScreen to a new function that uses global variables
+# we redefine string::FitStringInScreen to a new function that uses global variables
 # this is to avoid copying parameters to the function and hopefully be faster
-io::invoke declare -f interactive::showStringInScreen
-_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION="${RETURNED_VALUE}"
-_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION=${_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION/interactive::showStringInScreen/prompt_getDisplayedPromptString}
-# shellcheck disable=SC2016
-_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION=${_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION/'local inputString="${1}";'/}
-# shellcheck disable=SC2016
-_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION=${_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION/'local -i inputIndex="${2}";'/}
-# shellcheck disable=SC2016
-_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION=${_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION/'local -i screenWidth="${3}";'/}
-_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION=${_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION//'inputString'/'_PROMPT_STRING'}
-_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION=${_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION//'inputIndex'/'_PROMPT_STRING_INDEX'}
-_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION=${_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION//'screenWidth'/'_PROMPT_STRING_SCREEN_WIDTH'}
-eval "${_PROMPT_COMPUTE_PROMPT_STRING_FUNCTION}"
+function prompt_getDisplayedPromptString() { :; }
+core::reExportFuncToUseGlobalVars string::fitStringInScreen prompt_getDisplayedPromptString _PROMPT_STRING _PROMPT_STRING_INDEX _PROMPT_STRING_SCREEN_WIDTH

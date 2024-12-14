@@ -273,6 +273,54 @@ Total microseconds: %U"
   test::endTest "Testing string::microsecondsToHuman function" 0
 }
 
+
+function test_string::fitStringInScreen() {
+  _PROMPT_STRING_WIDTH=5
+  echo "_PROMPT_STRING_WIDTH=${_PROMPT_STRING_WIDTH}"
+
+  test_string_fitStringInScreen 5 ""       0 "" 0
+  test_string_fitStringInScreen 5 "a"      1 "a" 1
+  test_string_fitStringInScreen 5 "ab"     2 "ab" 2
+  test_string_fitStringInScreen 5 "abc"    3 "abc" 3
+  test_string_fitStringInScreen 5 "abcd"   4 "abcd" 4
+  test_string_fitStringInScreen 5 "abcde"  0 "abcde" 0
+  test_string_fitStringInScreen 5 "abcdef" 4 "…cdef" 3
+  test_string_fitStringInScreen 5 "abcdef" 3 "abcd…" 3
+  test_string_fitStringInScreen 5 "abcdef" 1 "abcd…" 1
+  #                                               012345
+
+  test_string_fitStringInScreen 5 "abcde"  5 "…cde" 4
+  test_string_fitStringInScreen 5 "abcdef" 6 "…def" 4
+  test_string_fitStringInScreen 5 "abcdef" 5 "…cdef" 4
+  test_string_fitStringInScreen 5 "abcdef" 4 "…cdef" 3
+  test_string_fitStringInScreen 5 "abcdef" 3 "abcd…" 3
+  #                                               012345
+  test_string_fitStringInScreen 5 "abcdefghij" 6 "…efg…" 3
+  #                                               0123456789
+  #                                               012345
+  test_string_fitStringInScreen 5 "abcdefghij" 3 "abcd…" 3
+  test_string_fitStringInScreen 5 "abcdefghij" 4 "…cde…" 3
+  test_string_fitStringInScreen 5 "abcdefghij" 5 "…def…" 3
+
+  test_string_fitStringInScreen 10 "This is a long string that will be displayed in the screen." 20 "…g string…" 8
+
+  _PROMPT_STRING_WIDTH=4
+  echo "_PROMPT_STRING_WIDTH=${_PROMPT_STRING_WIDTH}"
+  test_string_fitStringInScreen 4 "bl" 0 "bl" 0
+  test::endTest "Testing string::fitStringInScreen" 0
+}
+
+function test_string_fitStringInScreen() {
+  echo "string::fitStringInScreen '${2}' '${3}' '${1}'"
+  string::fitStringInScreen "${2}" "${3}" "${1}"
+  echo " ░${RETURNED_VALUE}░ ${RETURNED_VALUE2}"
+
+  if [[ "░${RETURNED_VALUE}░ ${RETURNED_VALUE2}" != "░${4}░ ${5}" ]]; then
+    echo "Expected: ░${4}░ ${5}"
+    exit 1
+  fi
+}
+
 function main() {
   testString::bumpSemanticVersion
   testString::kebabCaseToSnakeCase
@@ -288,6 +336,7 @@ function main() {
   testString::trim
   testString::compareSemanticVersion
   testString::microsecondsToHuman
+  test_string::fitStringInScreen
 }
 
 main

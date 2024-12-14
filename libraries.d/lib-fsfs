@@ -528,12 +528,21 @@ function changeSelectedItemIndex() {
     return 0
   fi
 
-  # compute the new index (cycle through)
-  local newIndex=$((FSFS_SELECTED_FILTERED_ITEM_INDEX + delta))
-  if ((newIndex < 0)); then
+  local -i newIndex
+
+  # compute the new index
+  # cycle through if it was already at the end/beginning
+  if ((FSFS_SELECTED_FILTERED_ITEM_INDEX <= 0 && delta < 0)); then
     newIndex=$((${#FSFS_FILTERED_ITEMS[@]} - 1))
-  elif ((newIndex >= ${#FSFS_FILTERED_ITEMS[@]})); then
+  elif ((FSFS_SELECTED_FILTERED_ITEM_INDEX >= ${#FSFS_FILTERED_ITEMS[@]} - 1 && delta > 0)); then
     newIndex=0
+  else
+    newIndex=$((FSFS_SELECTED_FILTERED_ITEM_INDEX + delta))
+    if ((newIndex < 0)); then
+      newIndex=0
+    elif ((newIndex >= ${#FSFS_FILTERED_ITEMS[@]})); then
+      newIndex=$((${#FSFS_FILTERED_ITEMS[@]} - 1))
+    fi
   fi
 
   # now we need to adjust the start index if needed

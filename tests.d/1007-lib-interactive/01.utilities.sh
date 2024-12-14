@@ -137,59 +137,11 @@ function test_interactive::getBestAutocompleteBox() {
   test::endTest "Testing interactive::getBestAutocompleteBox" 0
 }
 
-function test_interactive::showStringInScreen() {
-  _PROMPT_STRING_WIDTH=5
-  echo "_PROMPT_STRING_WIDTH=${_PROMPT_STRING_WIDTH}"
-
-  test_interactive_showStringInScreen 5 ""       0 "" 0
-  test_interactive_showStringInScreen 5 "a"      1 "a" 1
-  test_interactive_showStringInScreen 5 "ab"     2 "ab" 2
-  test_interactive_showStringInScreen 5 "abc"    3 "abc" 3
-  test_interactive_showStringInScreen 5 "abcd"   4 "abcd" 4
-  test_interactive_showStringInScreen 5 "abcde"  0 "abcde" 0
-  test_interactive_showStringInScreen 5 "abcdef" 4 "…cdef" 3
-  test_interactive_showStringInScreen 5 "abcdef" 3 "abcd…" 3
-  test_interactive_showStringInScreen 5 "abcdef" 1 "abcd…" 1
-  #                                               012345
-
-  test_interactive_showStringInScreen 5 "abcde"  5 "…cde" 4
-  test_interactive_showStringInScreen 5 "abcdef" 6 "…def" 4
-  test_interactive_showStringInScreen 5 "abcdef" 5 "…cdef" 4
-  test_interactive_showStringInScreen 5 "abcdef" 4 "…cdef" 3
-  test_interactive_showStringInScreen 5 "abcdef" 3 "abcd…" 3
-  #                                               012345
-  test_interactive_showStringInScreen 5 "abcdefghij" 6 "…efg…" 3
-  #                                               0123456789
-  #                                               012345
-  test_interactive_showStringInScreen 5 "abcdefghij" 3 "abcd…" 3
-  test_interactive_showStringInScreen 5 "abcdefghij" 4 "…cde…" 3
-  test_interactive_showStringInScreen 5 "abcdefghij" 5 "…def…" 3
-
-  test_interactive_showStringInScreen 10 "This is a long string that will be displayed in the screen." 20 "…g string…" 8
-
-  _PROMPT_STRING_WIDTH=4
-  echo "_PROMPT_STRING_WIDTH=${_PROMPT_STRING_WIDTH}"
-  test_interactive_showStringInScreen 4 "bl" 0 "bl" 0
-  test::endTest "Testing interactive::showStringInScreen" 0
-}
-
-function test_interactive_showStringInScreen() {
-  echo "interactive::showStringInScreen '${2}' '${3}' '${1}'"
-  interactive::showStringInScreen "${2}" "${3}" "${1}"
-  echo " ░${RETURNED_VALUE}░ ${RETURNED_VALUE2}"
-
-  if [[ "░${RETURNED_VALUE}░ ${RETURNED_VALUE2}" != "░${4}░ ${5}" ]]; then
-    echo "Expected: ░${4}░ ${5}"
-    exit 1
-  fi
-}
-
 function main() {
   test_interactive::createSpace
   test_interactive::getCursorPosition
   test_interactiveGetProgressBarString
   test_interactive::getBestAutocompleteBox
-  test_interactive::showStringInScreen
 }
 
 main

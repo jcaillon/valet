@@ -164,7 +164,6 @@ DEBUG    Found function: ⌜interactive::sttyInit⌝
 DEBUG    Found function: ⌜interactive::sttyRestore⌝
 DEBUG    Found function: ⌜interactive::clearBox⌝
 DEBUG    Found function: ⌜interactive::getBestAutocompleteBox⌝
-DEBUG    Found function: ⌜interactive::showStringInScreen⌝
 DEBUG    Found function: ⌜interactive::testWaitForChar⌝
 DEBUG    Found function: ⌜interactive::waitForChar⌝
 DEBUG    Found function: ⌜interactive::testWaitForKeyPress⌝
@@ -221,6 +220,7 @@ DEBUG    Found function: ⌜string::count⌝
 DEBUG    Found function: ⌜string::split⌝
 DEBUG    Found function: ⌜string::regexGetFirst⌝
 DEBUG    Found function: ⌜string::microsecondsToHuman⌝
+DEBUG    Found function: ⌜string::fitStringInScreen⌝
 DEBUG    Found function: ⌜system::os⌝
 DEBUG    Found function: ⌜system::env⌝
 DEBUG    Found function: ⌜system::date⌝
@@ -305,8 +305,6 @@ INFO     Writing the 133 functions documentation to the core libraries docs.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/curl.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/fsfs.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
@@ -464,6 +462,8 @@ INFO     Writing the 133 functions documentation to the core libraries docs.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/prompt.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md

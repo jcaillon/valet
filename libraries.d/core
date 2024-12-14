@@ -36,6 +36,10 @@ if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_S
   source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
 fi
 
+# Since we use _OPTION_* variables to pass optional options to functions, we want to make sure
+# to not create collisions so we unset them here.
+unset -v ${!_OPTION_*}
+
 #===============================================================
 # >>> Temporary files and folders
 #===============================================================
@@ -899,8 +903,7 @@ function core::resetIncludedFiles() {
 # core::sourceFunction "functionName"
 # ```
 function core::sourceFunction() {
-  local functionName
-  functionName="${1}"
+  local functionName="${1}"
 
   local fileToSource
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
@@ -1007,6 +1010,60 @@ function core::getVersion() {
   io::readFile "${GLOBAL_VALET_HOME}/version"
 }
 
+# ## core::reExportFuncToUseGlobalVars (private)
+#
+# This function can be used to re-export an existing function
+# and replace the use of positional parameters by global variables.
+#
+# This can be useful for performance reasons when a function is called many times,
+# to avoid copying the positional parameters each time.
+#
+# - $1: **function name** _as string_:
+#       the name of the function to re-export
+# - $2: **new function name** _as string_:
+#       the name of the new function to create
+# - $@: **global variable name** _as string_:
+#       the name of the global variable to use instead of the positional parameters
+#       (can be repeated multiple times, for each parameter)
+#
+# ```bash
+# core::reExportFuncToUseGlobalVars "myFunction" "myFunctionWithGlobalVars" "GLOBAL_VAR1" "GLOBAL_VAR2"
+# ```
+function core::reExportFuncToUseGlobalVars() {
+  local functionName="${1}"
+  local newFunctionName="${2}"
+  shift 2
+
+  io::invoke declare -f "${functionName}"
+  local functionDefinition="${RETURNED_VALUE/"${functionName}"/"${newFunctionName}"}"
+
+  # find the mapping between the positional parameters and the new global variable names
+  local -A globalVars=()
+  local -a positionalParameters=("$@")
+  local IFS=$'\n'
+  local line varName varPosition
+  local modifiedFunctionDefinition=""
+  for line in ${functionDefinition}; do
+    if (( ${#positionalParameters[@]} != ${#globalVars[@]} )); then
+      if [[ "${line}" =~ ^\ *local\ +(-[[:alpha:]]+\ )?([[:alpha:]]+)=[^$]*\$\{?([[:digit:]]+) ]]; then
+        varName="${BASH_REMATCH[2]}"
+        varPosition="${BASH_REMATCH[3]}"
+        globalVars["${varName}"]="${positionalParameters[$((varPosition - 1))]}"
+        log::debug "found local ${varName}=\${${varPosition}} -> remapped to ${globalVars[${varName}]}"
+        continue
+      fi
+    fi
+    modifiedFunctionDefinition+="${line}"$'\n'
+  done
+
+  # modify the function to use the global variables instead of the positional parameters
+  for varName in "${!globalVars[@]}"; do
+    modifiedFunctionDefinition="${modifiedFunctionDefinition//${varName}/"${globalVars[${varName}]}"}"
+  done
+
+  eval "${modifiedFunctionDefinition}"
+}
+
 #===============================================================
 # >>> String utilities
 #===============================================================
@@ -1041,11 +1098,10 @@ function core::getVersion() {
 # > - This function is written in pure bash and is faster than calling the fold command.
 # > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 function string::wrapText() {
-  local text width leftPadding appendPaddingToFirstLine
-  text="${1}"
-  width="${2:-${GLOBAL_COLUMNS}}"
-  leftPadding="${3:-0}"
-  appendPaddingToFirstLine="${4:-false}"
+  local text="${1}"
+  local width="${2:-${GLOBAL_COLUMNS}}"
+  local leftPadding="${3:-0}"
+  local appendPaddingToFirstLine="${4:-false}"
 
   if (( width < 10 )); then
     width=10
@@ -1115,11 +1171,9 @@ function string::wrapText() {
 # > - This function is written in pure bash and is faster than calling the fold command.
 # > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 function string::wrapSentence() {
-  local text newLinePrefix
-  local -i width
-  text="${1}"
-  width="${2}"
-  newLinePrefix="${3:-}"
+  local text="${1}"
+  local -i width="${2}"
+  local newLinePrefix="${3:-}"
 
   # short cut in case the text is already shorter than the width
   if [[ "${#text}" -le width ]]; then
@@ -1489,11 +1543,9 @@ function core::parseArguments() {
 # core::checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
 # ```
 function core::checkParseResults() {
-  local functionName help parsingErrors
-  functionName="${3:-${FUNCNAME[1]}}"
-
-  help="${1:-}"
-  parsingErrors="${2:-}"
+  local help="${1:-}"
+  local parsingErrors="${2:-}"
+  local functionName="${3:-${FUNCNAME[1]}}"
 
   if [[ ${help} == "true" ]]; then
     main::printHelp function "${functionName}"

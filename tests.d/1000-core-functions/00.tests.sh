@@ -84,10 +84,39 @@ function testString::wrapCharacters() {
 
 }
 
+function test_core::reExportFuncToUseGlobalVars() {
+  # shellcheck disable=SC2317
+  function eval() { echo "$*"; }
+
+  # shellcheck disable=SC2317
+  function test_function_to_reexport() {
+    local -i firstArg=$1
+    local secondArg="${2}"
+    local -A thirdArg="${3:-egez}"
+
+    if (( firstArg == 0 )); then
+      echo "cool"
+    fi
+    if [[ "${secondArg}" == "cool" ]]; then
+      echo "${secondArg}"
+    fi
+    if [[ "${thirdArg[cool]}" == "cool" ]]; then
+      echo "${thirdArg[cool]}"
+    fi
+  }
+
+  echo "core::reExportFuncToUseGlobalVars test_function_to_reexport new_name FIRST_ARG SECOND_ARG THIRD_ARG"
+  core::reExportFuncToUseGlobalVars test_function_to_reexport new_name FIRST_ARG SECOND_ARG THIRD_ARG
+
+  unset -f eval test_function_to_reexport
+  test::endTest "Testing core::reExportFuncToUseGlobalVars" 0
+}
+
 function main() {
   testString::wrapText
   testArray::fuzzyFilter
   testString::wrapCharacters
+  test_core::reExportFuncToUseGlobalVars
 }
 
 main

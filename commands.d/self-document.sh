@@ -151,7 +151,7 @@ function selfDocument::getAllFunctionsDocumentation() {
     local line
     while IFS= read -r line || [[ -n ${line:-} ]]; do
       if [[ ${reading} == "false" ]]; then
-        if [[ ${line} == "# ##"* ]]; then
+        if [[ ${line} == "# ##"* && ${line} != *"(private)"* ]]; then
           reading=true
         else
           continue

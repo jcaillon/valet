@@ -584,4 +584,116 @@ function string::microsecondsToHuman() {
   RETURNED_VALUE="${humanFormat}"
 }
 
+# ## string::fitStringInScreen
+#
+# This function return a string that can be printed in a terminal in order to display a text
+# and position the cursor at a given index in the input text.
+#
+# If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed
+# at the beginning and/or at the end of the string.
+#
+# The cursor will be displayed under the character at the given index of the input text and
+# it makes sure that the cursor is always visible in the screen.
+#
+# This function is useful to display a long prompt on a single line.
+#
+# An example:
+#
+# ```text
+# inputString="This is a long string that will be displayed in the screen."
+# #                                ^ input index 20
+# string::fitStringInScreen "${inputString}" 20 10
+# # output: "…g string…"
+# #                  ^ screen cursor (at index 8)
+# ```
+#
+# - $1: **input string** _as string_:
+#       the string to display
+# - $2: **input index** _as int_:
+#       the index of the character (in the input string) that should be under the cursor
+# - $3: **screen width** _as int_:
+#       the width of the screen
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the string to display in the screen
+# - `RETURNED_VALUE2`: the index at which to position the cursor on screen
+#
+# ```bash
+# string::fitStringInScreen "This is a long string that will be displayed in the screen." 20 10
+# ```
+function string::fitStringInScreen() {
+  local inputString="${1}"
+  local -i inputIndex="${2}"
+  local -i screenWidth="${3}"
 
+  local -i inputLength=${#inputString}
+  local -i screenIndex
+
+  # compute where we will display the cursor in the display
+  if ((inputIndex >= screenWidth)); then
+    if ((inputIndex >= inputLength - 1)); then
+      # we display it in the last position if it is at the end of the string
+      screenIndex=$((screenWidth - 1))
+    else
+      # we display at the second last position if it is not at the end
+      screenIndex=$((screenWidth - 2))
+    fi
+  else
+    if ((inputLength > screenWidth && inputLength - inputIndex == 2)); then
+      screenIndex=$((screenWidth - 2))
+    else
+      if ((inputLength > screenWidth && screenWidth - inputIndex == 1)); then
+        # if within the display but at the last character and we will need to display ellipsis...
+        screenIndex=$((screenWidth - 2))
+      else
+        # if it is already within the display, we display it at the right position
+        screenIndex=${inputIndex}
+      fi
+    fi
+  fi
+
+  local -i screenLeftLength=$((screenIndex))
+  local -i realLeftLength=$((inputIndex))
+
+  local screenString=""
+
+  # compute what to display at the left of the character under the caret (if any)
+  if ((screenLeftLength > 0)); then
+    if ((realLeftLength > screenLeftLength)); then
+      # we can't display the whole left string, so we display ellipsis
+      if ((screenLeftLength > 1)); then
+        screenString+="…${inputString:$((realLeftLength - screenLeftLength + 1)):$((screenLeftLength - 1))}"
+      else
+        screenString+="…"
+      fi
+    else
+      screenString+="${inputString:$((realLeftLength - screenLeftLength)):$((screenLeftLength))}"
+    fi
+  fi
+
+  # compute the character to display under the caret (if any)
+  if ((inputLength > 0 && inputIndex <= inputLength)); then
+    screenString+="${inputString:$((inputIndex)):1}"
+  fi
+
+  # compute what to display at the right of the character under the caret (if any)
+  local -i screenRightLength=$((screenWidth - screenIndex - 1))
+  local -i realRightLength=$((inputLength - inputIndex - 1))
+
+  if ((screenRightLength > 0)); then
+    if ((realRightLength > screenRightLength)); then
+      # we can't display the whole right string, so we display ellipsis
+      if ((screenRightLength > 1)); then
+        screenString+="${inputString:$((inputLength - realRightLength)):$((screenRightLength - 1))}…"
+      else
+        screenString+="…"
+      fi
+    else
+      screenString+="${inputString:$((inputLength - realRightLength)):$((screenRightLength))}"
+    fi
+  fi
+
+  RETURNED_VALUE="${screenString}"
+  RETURNED_VALUE2=${screenIndex}
+}

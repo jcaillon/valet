@@ -309,3 +309,54 @@ Total microseconds: 18243002234
 → string::microsecondsToHuman
 ```
 
+### Testing string::fitStringInScreen
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+_PROMPT_STRING_WIDTH=5
+string::fitStringInScreen '' '0' '5'
+ ░░ 0
+string::fitStringInScreen 'a' '1' '5'
+ ░a░ 1
+string::fitStringInScreen 'ab' '2' '5'
+ ░ab░ 2
+string::fitStringInScreen 'abc' '3' '5'
+ ░abc░ 3
+string::fitStringInScreen 'abcd' '4' '5'
+ ░abcd░ 4
+string::fitStringInScreen 'abcde' '0' '5'
+ ░abcde░ 0
+string::fitStringInScreen 'abcdef' '4' '5'
+ ░…cdef░ 3
+string::fitStringInScreen 'abcdef' '3' '5'
+ ░abcd…░ 3
+string::fitStringInScreen 'abcdef' '1' '5'
+ ░abcd…░ 1
+string::fitStringInScreen 'abcde' '5' '5'
+ ░…cde░ 4
+string::fitStringInScreen 'abcdef' '6' '5'
+ ░…def░ 4
+string::fitStringInScreen 'abcdef' '5' '5'
+ ░…cdef░ 4
+string::fitStringInScreen 'abcdef' '4' '5'
+ ░…cdef░ 3
+string::fitStringInScreen 'abcdef' '3' '5'
+ ░abcd…░ 3
+string::fitStringInScreen 'abcdefghij' '6' '5'
+ ░…efg…░ 3
+string::fitStringInScreen 'abcdefghij' '3' '5'
+ ░abcd…░ 3
+string::fitStringInScreen 'abcdefghij' '4' '5'
+ ░…cde…░ 3
+string::fitStringInScreen 'abcdefghij' '5' '5'
+ ░…def…░ 3
+string::fitStringInScreen 'This is a long string that will be displayed in the screen.' '20' '10'
+ ░…g string…░ 8
+_PROMPT_STRING_WIDTH=4
+string::fitStringInScreen 'bl' '0' '4'
+ ░bl░ 0
+```
+

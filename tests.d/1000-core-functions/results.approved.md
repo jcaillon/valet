@@ -196,3 +196,26 @@ y days are more impo
 rtant.
 ```
 
+### Testing core::reExportFuncToUseGlobalVars
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+core::reExportFuncToUseGlobalVars test_function_to_reexport new_name FIRST_ARG SECOND_ARG THIRD_ARG
+new_name () 
+{ 
+    if (( FIRST_ARG == 0 )); then
+        echo "cool";
+    fi;
+    if [[ "${SECOND_ARG}" == "cool" ]]; then
+        echo "${SECOND_ARG}";
+    fi;
+    if [[ "${THIRD_ARG[cool]}" == "cool" ]]; then
+        echo "${THIRD_ARG[cool]}";
+    fi
+}
+
+```
+
