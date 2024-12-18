@@ -220,6 +220,10 @@ echo "${myUnsureVariable:-default value}"
 You can also revert these bash options in your function. However, they are very good options to catch unexpected errors in your code, and they force you to pay attention at each possible conditional branches.
 {{< /callout >}}
 
+#### Notable information
+
+Valet uses the the 3rd, 4th, 5th and 6 file descriptors for various internal purposes. If you need to use file descriptors in your command, you should use the 7th, 8th or 9th file descriptors.
+
 #### Implementation tips
 
 The section [performance tips][performance-tips] gives you pointer to write scripts that are fast to execute.

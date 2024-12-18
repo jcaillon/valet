@@ -372,16 +372,19 @@ Exit code: `0`
 
 ```plaintext
 string::truncateVisibleCharacters '${AC__FG_CYAN}Hello${AC__FG_RESET}world' 5
-[36mHell…
+[36mHello[0m …
 
 string::truncateVisibleCharacters '${AC__FG_CYAN}Hello${AC__FG_RESET}world' 10
-[36mHello[0m wor…
+[36mHello[0m world
 
 string::truncateVisibleCharacters '${AC__FG_CYAN}Hello${AC__FG_RESET}world' 11
-[36mHello[0m worl…
+[36mHello[0m world
 
 string::truncateVisibleCharacters '${AC__FG_CYAN}Hello${AC__FG_RESET}world' 12
 [36mHello[0m world
+
+string::truncateVisibleCharacters '[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit code once the spinner is stopped' 71
+[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" messa…
 
 ```
 

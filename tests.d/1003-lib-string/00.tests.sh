@@ -350,6 +350,10 @@ function test_string::truncateVisibleCharacters() {
   string::truncateVisibleCharacters "${FG_CYAN}Hello${FG_RESET} world" 12
   echo "${RETURNED_VALUE}"
   echo
+  echo "string::truncateVisibleCharacters '[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the \"Terminated\" message with exit code once the spinner is stopped' 71"
+  string::truncateVisibleCharacters '[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit code once the spinner is stopped' 71
+  echo "${RETURNED_VALUE}"
+  echo
 
   test::endTest "Testing string::truncateVisibleCharacters" 0
 }

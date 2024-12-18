@@ -229,7 +229,7 @@ function prompt::input() {
   fi
 
   _PROMPT_DO_NOT_SET_TRAP=false
-  _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=true
+  _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=""
 
   # set up colors
   if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
@@ -321,9 +321,10 @@ function prompt::input() {
   _PROMPT_LAST_KEY_PRESSED_TIME=0
   _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
 
-  _PROMPT_CLOSE_INTERACTIVE_SESSION=false
-  _PROMPT_CANCELLED=false
+  GLOBAL_CLOSE_INTERACTIVE_SESSION=false
+  _PROMPT_CANCELLED=true
 
+  # TODO: interactive function to set trap and restore them, use GLOBAL_CLOSE_INTERACTIVE_SESSION
   local originalTraps
   if [[ ${_PROMPT_DO_NOT_SET_TRAP} != "true" ]]; then
     # save the original traps so we can restore them later
@@ -331,7 +332,7 @@ function prompt::input() {
     originalTraps="${RETURNED_VALUE}"
 
     # interrupting closes the interactive session
-    trap '_PROMPT_CLOSE_INTERACTIVE_SESSION=true; _PROMPT_CANCELLED=true;' SIGINT SIGQUIT
+    trap 'GLOBAL_CLOSE_INTERACTIVE_SESSION=true;' SIGINT SIGQUIT
   fi
 
   # before starting to wait for inputs, we clear up the key pressed
@@ -370,7 +371,7 @@ function prompt::input() {
     fi
 
     # break if fd 0 is closed or does not refer to a terminal.
-    if [[ ! -t 0 || ${_PROMPT_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then
+    if [[ ! -t 0 || ${GLOBAL_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then
       break
     fi
   done
@@ -424,7 +425,7 @@ function prompt_setSizeVariables() {
   _PROMPT_WIDTH=$((_PROMPT_STOP_COLUMN - _PROMPT_START_COLUMN + 1))
 
   if [[ ${_PROMPT_SHOW_SYMBOL} == "true" ]]; then
-    _PROMPT_STRING_SCREEN_WIDTH=$((_PROMPT_WIDTH - 2))
+    _PROMPT_STRING_SCREEN_WIDTH=$((_PROMPT_WIDTH - _PROMPT_SYMBOL_LENGTH))
   else
     _PROMPT_STRING_SCREEN_WIDTH=${_PROMPT_WIDTH}
   fi
@@ -456,7 +457,7 @@ function prompt_setItemsListVariables() {
   _PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX=-1
 
   if [[ ${_PROMPT_SHOW_SYMBOL} == "true" ]]; then
-    _PROMPT_ITEMS_BOX_PREFERRED_WIDTH=$((_PROMPT_ITEMS_BOX_PREFERRED_WIDTH + 2))
+    _PROMPT_ITEMS_BOX_PREFERRED_WIDTH=$((_PROMPT_ITEMS_BOX_PREFERRED_WIDTH + _PROMPT_ITEMS_BOX_SYMBOL_LENGTH))
   fi
 
   if (( _PROMPT_ITEMS_BOX_PREFERRED_WIDTH < 2 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 2 )); then
@@ -539,7 +540,8 @@ function prompt_onKeyPressed() {
       prompt_showError "Please enter a value!"
       return 0
     fi
-    _PROMPT_CLOSE_INTERACTIVE_SESSION=true
+    GLOBAL_CLOSE_INTERACTIVE_SESSION=true
+    _PROMPT_CANCELLED=false
     return 0
     ;;
   TAB | CTRL+I)
@@ -563,12 +565,10 @@ function prompt_onKeyPressed() {
       prompt_clearItemsBox
       return 0
     fi
-    _PROMPT_CLOSE_INTERACTIVE_SESSION=true
-    _PROMPT_CANCELLED=true
+    GLOBAL_CLOSE_INTERACTIVE_SESSION=true
     ;;
   CTRL+Q)
-    _PROMPT_CLOSE_INTERACTIVE_SESSION=true
-    _PROMPT_CANCELLED=true
+    GLOBAL_CLOSE_INTERACTIVE_SESSION=true
     ;;
 
   # move the cursor
@@ -892,6 +892,7 @@ function prompt_filterItems() {
     _PROMPT_ITEMS_BOX_FILTER_STRING="${_PROMPT_CURRENT_WORD}"
     prompt_filterItemsSync
   else
+    # TODO: implement async filtering
     # run the filtering in a coprocess
     _PROMPT_ITEMS_BOX_FILTER_STRING=""
 
@@ -919,9 +920,8 @@ function prompt_filterItemsSync() {
   # Compute filtered items
   if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} == "true" && -n ${_PROMPT_ITEMS_BOX_FILTER_STRING} ]]; then
 
-    array::fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS "${_PROMPT_COLOR_LETTER_HIGHLIGHT}" "${_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET}" "$((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH))"
-
-    declare -g _PROMPT_FILTERED_ITEMS=("${RETURNED_ARRAY[@]}")
+    prompt::fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
+    _PROMPT_FILTERED_ITEMS=("${RETURNED_ARRAY[@]}")
     _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=("${RETURNED_ARRAY2[@]}")
     
   else
@@ -962,6 +962,10 @@ function prompt_drawItemsBox() {
   local showCountAtTop=0
   if [[ ${_PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT} == "true" || ${#_PROMPT_FILTERED_ITEMS[@]} -gt ${_PROMPT_ITEMS_BOX_HEIGHT} || ${#_PROMPT_FILTERED_ITEMS[@]} -ne ${_PROMPT_ORIGINAL_ITEMS_COUNT} ]]; then
     if (( _PROMPT_ITEMS_BOX_HEIGHT > 1 || ( _PROMPT_ITEMS_BOX_HEIGHT == 1 && ${#_PROMPT_FILTERED_ITEMS[@]} == 0 ) )); then
+      # we show the count if:
+      # - we force its display
+      # - we have more items than the box can display
+      # - we display less items than the original items
       showCount=true
       if [[ ${_PROMPT_ITEMS_BOX_SHOW_COUNT_AT_TOP} == "true" ]]; then
         showCountAtTop=1
@@ -970,7 +974,7 @@ function prompt_drawItemsBox() {
     fi
   fi
 
-  # make sure to select an existing index regarding the newly filtered items +
+  # make sure to select an existing index regarding the filtered items +
   # make sure it is in the view
   prompt_changeSelectedItemIndex 0
 
@@ -995,11 +999,14 @@ function prompt_drawItemsBox() {
       continue
     fi
 
+    # TODO: here we can call a custom callback to get the displayed string
+    prompt_getItemDisplayedString "${_PROMPT_FILTERED_ITEMS[index]}" "$((_PROMPT_ITEMS_BOX_WIDTH - 2))"
+
     if ((index == _PROMPT_FILTERED_ITEMS_SELECTED_INDEX)); then
       # highlight the selected item
-      itemString="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${_PROMPT_FILTERED_ITEMS[index]}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
+      itemString="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${RETURNED_VALUE}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
     else
-      itemString="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${_PROMPT_FILTERED_ITEMS[index]}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
+      itemString="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${RETURNED_VALUE}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
     fi
 
     shownLines+=1
@@ -1042,6 +1049,16 @@ function prompt_clearItemsBox() {
   interactive::clearBox "${_PROMPT_ITEMS_BOX_TOP}" "${_PROMPT_ITEMS_BOX_LEFT}" "${_PROMPT_ITEMS_BOX_WIDTH}" "${_PROMPT_ITEMS_BOX_HEIGHT}"
 
   _PROMPT_ITEMS_BOX_SHOWN=false
+}
+
+function prompt_getItemDisplayedString() {
+  # TODO: check why this is called twice when typing a letter
+  if (( ${#1} < ${2} )); then
+    RETURNED_VALUE="${1}"
+    return 0
+  fi
+  echo "${1}" "${2}">>file
+  string::truncateVisibleCharacters "${1}" "${2}"
 }
 
 # A function to show an error message
