@@ -34,5 +34,10 @@ This page lists the features that I would like to implement in Valet. They come 
 - Add `valet.cmd` to the package, in self setup we can optionally add the valet install dir to the windows PATH.
 - Also export user defined functions.
 - Allow self release to release extensions.
+- Prompt improvements:
+  - handle shift + arrows to highlight text
+  - add a stack for kill/yank
+  - add a stack for undo/redo
+  - handle copy to prompt in one go
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

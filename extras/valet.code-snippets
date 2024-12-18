@@ -460,7 +460,7 @@
   "prefix": "interactive::getCursorPosition#withdoc",
   "description": "Get the current cursor position...",
   "scope": "",
-  "body": [ "# ## interactive::getCursorPosition\n# \n# Get the current cursor position.\n# \n# Returns:\n# \n# - `CURSOR_LINE`: the line number\n# - `CURSOR_COLUMN`: the column number\n# \n# ```bash\n# interactive::getCursorPosition\n# ```\n# \ninteractive::getCursorPosition$0" ]
+  "body": [ "# ## interactive::getCursorPosition\n# \n# Get the current cursor position.\n# \n# Returns:\n# \n# - `GLOBAL_CURSOR_LINE`: the line number\n# - `GLOBAL_CURSOR_COLUMN`: the column number\n# \n# ```bash\n# interactive::getCursorPosition\n# ```\n# \ninteractive::getCursorPosition$0" ]
 },
 
 "interactive::promptYesNo": {
@@ -1904,20 +1904,20 @@
 			"⌜$1⌝$0"
 		]
 	},
-  "CURSOR_LINE": {
-    "prefix": "CURSOR_LINE",
+  "GLOBAL_CURSOR_LINE": {
+    "prefix": "GLOBAL_CURSOR_LINE",
     "description": "",
     "scope": "",
     "body": [
-      "CURSOR_LINE$0"
+      "GLOBAL_CURSOR_LINE$0"
     ]
   },
-  "CURSOR_COLUMN": {
-    "prefix": "CURSOR_COLUMN",
+  "GLOBAL_CURSOR_COLUMN": {
+    "prefix": "GLOBAL_CURSOR_COLUMN",
     "description": "",
     "scope": "",
     "body": [
-      "CURSOR_COLUMN$0"
+      "GLOBAL_CURSOR_COLUMN$0"
     ]
   },
   "RETURNED_VALUE": {

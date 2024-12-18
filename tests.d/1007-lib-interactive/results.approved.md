@@ -74,7 +74,7 @@ Exit code: `0`
 
 ```plaintext
 printf '\e[%sR' '123;456' | interactive::getCursorPosition
-CURSOR_LINE: 123; CURSOR_COLUMN: 456
+GLOBAL_CURSOR_LINE: 123; GLOBAL_CURSOR_COLUMN: 456
 ```
 
 ### Testing interactiveGetProgressBarString

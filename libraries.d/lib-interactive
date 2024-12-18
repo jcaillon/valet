@@ -392,8 +392,8 @@ function interactive::createSpace() {
 #
 # Returns:
 #
-# - `CURSOR_LINE`: the line number
-# - `CURSOR_COLUMN`: the column number
+# - `GLOBAL_CURSOR_LINE`: the line number
+# - `GLOBAL_CURSOR_COLUMN`: the column number
 #
 # ```bash
 # interactive::getCursorPosition
@@ -404,7 +404,7 @@ function interactive::getCursorPosition() {
   IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr _escapeCode || :
   # then read line;colR
   # shellcheck disable=SC2034
-  IFS=';' read -d 'R' -sr CURSOR_LINE CURSOR_COLUMN || :
+  IFS=';' read -d 'R' -sr GLOBAL_CURSOR_LINE GLOBAL_CURSOR_COLUMN || :
 }
 
 # ## interactive::switchToFullScreen
@@ -521,7 +521,7 @@ function interactive::sttyRestore() {
 # ## interactive::clearBox
 #
 # Clear a "box" in the terminal.
-# Will return the cursor at the current position at the end (using CURSOR_LINE and CURSOR_COLUMN).
+# Will return the cursor at the current position at the end (using GLOBAL_CURSOR_LINE and GLOBAL_CURSOR_COLUMN).
 #
 # - $1: **top** _as int_:
 #       the left position of the box
@@ -547,7 +547,7 @@ function interactive::clearBox() {
   for ((lineNumber = top; lineNumber < top + height; lineNumber++)); do
     toPrint+="${AC__CURSOR_MOVE__}${lineNumber};${left}${__AC__TO}${AC__ERASE__}${width}${__AC_CHARS}"
   done
-  printf '%s%s' "${toPrint}" "${AC__CURSOR_MOVE__}${CURSOR_LINE};${CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
+  printf '%s%s' "${toPrint}" "${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
 }
 
 # ## interactive::getBestAutocompleteBox
@@ -570,7 +570,7 @@ function interactive::clearBox() {
 #       the current column of the cursor (1 based)
 # - $3: **desired height** _as int_:
 #       the desired height of the box
-# - $4: **desiredWidth** _as int_:
+# - $4: **desired width** _as int_:
 #       the desired width of the box
 # - $5: **max height** _as int_:
 #       the maximum height of the box
@@ -1262,7 +1262,7 @@ function interactive::startProgress() {
     return 0
   fi
 
-  if [[ -n "${_PROGRESS_BAR_PID:-}" ]]; then
+  if [[ -n "${GLOBAL_PROGRESS_BAR_JOB_PID:-}" ]]; then
     core::fail "A spinner or progress bar is already running."
   fi
 
@@ -1275,9 +1275,10 @@ function interactive::startProgress() {
   _PROGRESS_BAR_UPDATE_FILE="${RETURNED_VALUE}"
   _PROGRESS_BAR_RUNNING=true
 
+  # disable the monitor mode to avoid the "Terminated" message with exit code once the spinner is stopped
   shopt -u -o monitor
   ( interactive_runProgressBarAnimation "${_PROGRESS_BAR_UPDATE_FILE}" "$@" 1>&2; ) &
-  _PROGRESS_BAR_PID="$!"
+  GLOBAL_PROGRESS_BAR_JOB_PID="$!"
 }
 
 # ## interactive::updateProgress
@@ -1341,13 +1342,13 @@ function interactive::stopProgress() {
     return 0
   fi
 
-  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n "${_PROGRESS_BAR_PID:-}" ]]; then
+  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n "${GLOBAL_PROGRESS_BAR_JOB_PID:-}" ]]; then
     _PROGRESS_BAR_RUNNING=false
     shopt -u -o monitor
-    kill "${_PROGRESS_BAR_PID}" &>/dev/null || :
+    kill "${GLOBAL_PROGRESS_BAR_JOB_PID}" &>/dev/null || :
     rm -f "${_PROGRESS_BAR_UPDATE_FILE}" &>/dev/null || :
     shopt -s -o monitor
-    unset -v _PROGRESS_BAR_PID _PROGRESS_BAR_UPDATE_FILE _PROGRESS_BAR_RUNNING
+    unset -v GLOBAL_PROGRESS_BAR_JOB_PID _PROGRESS_BAR_UPDATE_FILE _PROGRESS_BAR_RUNNING
   fi
 
   printf "%s" "${AC__ERASE_LINE}${AC__CURSOR_SHOW}"

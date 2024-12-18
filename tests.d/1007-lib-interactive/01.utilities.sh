@@ -14,7 +14,7 @@ function test_interactive::getCursorPosition() {
   echo "printf '\e[%sR' '123;456' | interactive::getCursorPosition"
   printf '\e[%sR' '123;456' 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
   interactive::getCursorPosition < "${GLOBAL_TEMPORARY_WORK_FILE}"
-  echo "CURSOR_LINE: ${CURSOR_LINE}; CURSOR_COLUMN: ${CURSOR_COLUMN}"
+  echo "GLOBAL_CURSOR_LINE: ${GLOBAL_CURSOR_LINE}; GLOBAL_CURSOR_COLUMN: ${GLOBAL_CURSOR_COLUMN}"
 
   test::endTest "Testing interactive::getCursorPosition" 0
 }

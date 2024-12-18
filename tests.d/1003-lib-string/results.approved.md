@@ -306,7 +306,11 @@ Total seconds: 18243
 Total milliseconds: 4320003002
 Total microseconds: 18243002234
 
-→ string::microsecondsToHuman
+→ string::microsecondsToHuman 18243002234
+05:04:03
+
+→ _OPTION_FORMAT='%U' string::microsecondsToHuman 18243002234
+18243002234
 ```
 
 ### Testing string::fitStringInScreen
@@ -358,5 +362,26 @@ string::fitStringInScreen 'This is a long string that will be displayed in the s
 _PROMPT_STRING_WIDTH=4
 string::fitStringInScreen 'bl' '0' '4'
  ░bl░ 0
+```
+
+### Testing string::truncateVisibleCharacters
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+string::truncateVisibleCharacters '${AC__FG_CYAN}Hello${AC__FG_RESET}world' 5
+[36mHell…
+
+string::truncateVisibleCharacters '${AC__FG_CYAN}Hello${AC__FG_RESET}world' 10
+[36mHello[0m wor…
+
+string::truncateVisibleCharacters '${AC__FG_CYAN}Hello${AC__FG_RESET}world' 11
+[36mHello[0m worl…
+
+string::truncateVisibleCharacters '${AC__FG_CYAN}Hello${AC__FG_RESET}world' 12
+[36mHello[0m world
+
 ```
 

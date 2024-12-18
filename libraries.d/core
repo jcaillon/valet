@@ -1010,6 +1010,31 @@ function core::getVersion() {
   io::readFile "${GLOBAL_VALET_HOME}/version"
 }
 
+GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
+
+# ## core::getProgramElapsedMicroseconds
+#
+# Get the elapsed time in µs since the program started.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the elapsed time in µs since the program started.
+#
+# ```bash
+# core::getElapsedProgramTime
+# echo "${RETURNED_VALUE}"
+# string::microsecondsToHuman "${RETURNED_VALUE}"
+# echo "Human time: ${RETURNED_VALUE}"
+# ```
+#
+# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
+function core::getProgramElapsedMicroseconds() {
+  # we need to strip all leading zeros from the microseconds
+  local us="${EPOCHREALTIME##*\.}"
+  us="${us#"${us%%[!0]*}"}"
+  RETURNED_VALUE=$(( ( (${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 ) + us ))
+}
+
 # ## core::reExportFuncToUseGlobalVars (private)
 #
 # This function can be used to re-export an existing function
@@ -1348,6 +1373,8 @@ function array::fuzzyFilter() {
   for line in "${array[@]}"; do
     lineLength="${#line}"
 
+    distance=0
+
     # for each character in the pattern
     patternCharIndex=0
     lineCharIndex=0
@@ -1361,10 +1388,10 @@ function array::fuzzyFilter() {
 
         if [[ ${lineChar} == "${patternChar}" ]]; then
           # if we find the character, mark the distance
-          distance=$((lineCharIndex - lastLineCharIndex))
+          distance=$((distance + (lineCharIndex - lastLineCharIndex)))
           lastLineCharIndex=$((lineCharIndex + 1))
 
-          # if it is the first char of the pattern, remmember the index
+          # if it is the first char of the pattern, remember the index
           if [[ patternCharIndex -eq 0 ]]; then
             patternFirstCharIndex=${lineCharIndex}
           fi

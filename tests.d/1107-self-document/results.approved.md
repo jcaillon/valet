@@ -549,7 +549,7 @@ interactive::askForConfirmationRaw
 ## interactive::clearBox
 
 Clear a "box" in the terminal.
-Will return the cursor at the current position at the end (using CURSOR_LINE and CURSOR_COLUMN).
+Will return the cursor at the current position at the end (using GLOBAL_CURSOR_LINE and GLOBAL_CURSOR_COLUMN).
 
 - $1: **top** _as int_:
       the left position of the box
@@ -708,8 +708,8 @@ Get the current cursor position.
 
 Returns:
 
-- `CURSOR_LINE`: the line number
-- `CURSOR_COLUMN`: the column number
+- `GLOBAL_CURSOR_LINE`: the line number
+- `GLOBAL_CURSOR_COLUMN`: the column number
 
 ```bash
 interactive::getCursorPosition
@@ -3402,7 +3402,7 @@ function interactive::askForConfirmationRaw() { :; }
 # ## interactive::clearBox
 # 
 # Clear a "box" in the terminal.
-# Will return the cursor at the current position at the end (using CURSOR_LINE and CURSOR_COLUMN).
+# Will return the cursor at the current position at the end (using GLOBAL_CURSOR_LINE and GLOBAL_CURSOR_COLUMN).
 # 
 # - $1: **top** _as int_:
 #       the left position of the box
@@ -3568,8 +3568,8 @@ function interactive::getBestAutocompleteBox() { :; }
 # 
 # Returns:
 # 
-# - `CURSOR_LINE`: the line number
-# - `CURSOR_COLUMN`: the column number
+# - `GLOBAL_CURSOR_LINE`: the line number
+# - `GLOBAL_CURSOR_COLUMN`: the column number
 # 
 # ```bash
 # interactive::getCursorPosition
@@ -6185,7 +6185,7 @@ function test::endTest() { :; }
   "prefix": "interactive::clearBox#withdoc",
   "description": "Clear a \"box\" in the terminal...",
   "scope": "",
-  "body": [ "# ## interactive::clearBox\n# \n# Clear a \"box\" in the terminal.\n# Will return the cursor at the current position at the end (using CURSOR_LINE and CURSOR_COLUMN).\n# \n# - \\$1: **top** _as int_:\n#       the left position of the box\n# - \\$2: **left** _as int_:\n#       the top position of the box\n# - \\$3: **width** _as int_:\n#       the width of the box\n# - \\$4: **height** _as int_:\n#       the height of the box\n# \n# ```bash\n# interactive::getCursorPosition\n# interactive::clearBox 1 1 10 5\n# ```\n# \ninteractive::clearBox \"${1:**top**}\" \"${2:**left**}\" \"${3:**width**}\" \"${4:**height**}\"$0" ]
+  "body": [ "# ## interactive::clearBox\n# \n# Clear a \"box\" in the terminal.\n# Will return the cursor at the current position at the end (using GLOBAL_CURSOR_LINE and GLOBAL_CURSOR_COLUMN).\n# \n# - \\$1: **top** _as int_:\n#       the left position of the box\n# - \\$2: **left** _as int_:\n#       the top position of the box\n# - \\$3: **width** _as int_:\n#       the width of the box\n# - \\$4: **height** _as int_:\n#       the height of the box\n# \n# ```bash\n# interactive::getCursorPosition\n# interactive::clearBox 1 1 10 5\n# ```\n# \ninteractive::clearBox \"${1:**top**}\" \"${2:**left**}\" \"${3:**width**}\" \"${4:**height**}\"$0" ]
 },
 
 "interactive::clearKeyPressed": {
@@ -6283,7 +6283,7 @@ function test::endTest() { :; }
   "prefix": "interactive::getCursorPosition#withdoc",
   "description": "Get the current cursor position...",
   "scope": "",
-  "body": [ "# ## interactive::getCursorPosition\n# \n# Get the current cursor position.\n# \n# Returns:\n# \n# - `CURSOR_LINE`: the line number\n# - `CURSOR_COLUMN`: the column number\n# \n# ```bash\n# interactive::getCursorPosition\n# ```\n# \ninteractive::getCursorPosition$0" ]
+  "body": [ "# ## interactive::getCursorPosition\n# \n# Get the current cursor position.\n# \n# Returns:\n# \n# - `GLOBAL_CURSOR_LINE`: the line number\n# - `GLOBAL_CURSOR_COLUMN`: the column number\n# \n# ```bash\n# interactive::getCursorPosition\n# ```\n# \ninteractive::getCursorPosition$0" ]
 },
 
 "interactive::getTerminalSize": {
@@ -8000,20 +8000,20 @@ function test::endTest() { :; }
 			"\\${GLOBAL_LINES}$0"
 		]
 	},
-	"$CURSOR_LINE": {
-		"prefix": "$CURSOR_LINE",
+	"$GLOBAL_CURSOR_LINE": {
+		"prefix": "$GLOBAL_CURSOR_LINE",
 		"description": "The position of the cursor. You need to refresh it by calling interactive::getCursorPosition.",
 		"scope": "",
 		"body": [
-			"\\${CURSOR_LINE}$0"
+			"\\${GLOBAL_CURSOR_LINE}$0"
 		]
 	},
-	"$CURSOR_COLUMN": {
-		"prefix": "$CURSOR_COLUMN",
+	"$GLOBAL_CURSOR_COLUMN": {
+		"prefix": "$GLOBAL_CURSOR_COLUMN",
 		"description": "The position of the cursor. You need to refresh it by calling interactive::getCursorPosition.",
 		"scope": "",
 		"body": [
-			"\\${CURSOR_COLUMN}$0"
+			"\\${GLOBAL_CURSOR_COLUMN}$0"
 		]
 	},
 	"$LAST_KEY_PRESSED": {

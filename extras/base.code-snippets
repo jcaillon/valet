@@ -342,20 +342,20 @@
 			"\\${GLOBAL_LINES}$0"
 		]
 	},
-	"$CURSOR_LINE": {
-		"prefix": "$CURSOR_LINE",
+	"$GLOBAL_CURSOR_LINE": {
+		"prefix": "$GLOBAL_CURSOR_LINE",
 		"description": "The position of the cursor. You need to refresh it by calling interactive::getCursorPosition.",
 		"scope": "",
 		"body": [
-			"\\${CURSOR_LINE}$0"
+			"\\${GLOBAL_CURSOR_LINE}$0"
 		]
 	},
-	"$CURSOR_COLUMN": {
-		"prefix": "$CURSOR_COLUMN",
+	"$GLOBAL_CURSOR_COLUMN": {
+		"prefix": "$GLOBAL_CURSOR_COLUMN",
 		"description": "The position of the cursor. You need to refresh it by calling interactive::getCursorPosition.",
 		"scope": "",
 		"body": [
-			"\\${CURSOR_COLUMN}$0"
+			"\\${GLOBAL_CURSOR_COLUMN}$0"
 		]
 	},
 	"$LAST_KEY_PRESSED": {

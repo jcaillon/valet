@@ -513,8 +513,9 @@ function string::regexGetFirst() {
 #
 # - $1: **microseconds** _as int_:
 #       the microseconds to convert
-# - $2: **format** _as string_:
-#      the format to use (defaults to "HH:MM:SS")
+# - $2: format _as string_:
+#      (optional) Can be set using the variable `_OPTION_FORMAT`.
+#      the format to use (defaults to "%HH:%MM:%SS")
 #      Usable formats:
 #      - %HH: hours
 #      - %MM: minutes
@@ -540,7 +541,7 @@ function string::regexGetFirst() {
 # ```
 function string::microsecondsToHuman() {
   local -i ms="${1}"
-  local format="${2:-HH:MM:SS}"
+  local format="${2:-${_OPTION_FORMAT:-"%HH:%MM:%SS"}}"
 
   local -i hours=$((ms / 3600 / 1000000))
   local -i minutes=$(((ms / 60 / 1000000) % 60))
@@ -696,4 +697,57 @@ function string::fitStringInScreen() {
 
   RETURNED_VALUE="${screenString}"
   RETURNED_VALUE2=${screenIndex}
+}
+
+# ## string::truncateVisibleCharacters
+#
+# Truncate a string to a given number of visible characters.
+# Adds an ellipsis at the end if the string is truncated.
+#
+# This function will truncate a string without taking into account
+# the ANSI escape sequences for text formatting (i.e. the `\e[*m` format).
+#
+# - $1: **string** _as string_:
+#       the string to truncate
+# - $2: **visible characters** _as int_:
+#       the number of visible characters
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the truncated string
+#
+# ```bash
+# string::truncateVisibleCharacters "This is a long string that will be displayed in the screen." 20
+# echo "${RETURNED_VALUE}"
+# ```
+function string::truncateVisibleCharacters() {
+  local string="${1}"
+  local -i visibleCharacters="${2}"
+
+  local -i stringLength=${#string}
+  if ((stringLength <= visibleCharacters)); then
+    RETURNED_VALUE="${string}"
+    return 0
+  fi
+
+  local -i index
+  local -i visibleLength=0
+  for ((index = 0; index < stringLength; index++)); do
+    if [[ ${string:index:1} == $'\e' ]]; then
+      while [[ ${string:index:1} != "m" ]]; do
+        index=$((index + 1))
+      done
+      index=$((index + 1))
+    fi
+    visibleLength=$((visibleLength + 1))
+    if ((visibleLength >= visibleCharacters)); then
+      break
+    fi
+  done
+
+  if ((index < stringLength)); then
+    RETURNED_VALUE="${string:0:index}…"
+  else
+    RETURNED_VALUE="${string}"
+  fi
 }

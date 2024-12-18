@@ -734,7 +734,7 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   function interactive::promptYesNo() {
     local question="${1}"
     local default="${2:-false}"
-    if [[ ${default} == "yes" ]]; then
+    if [[ ${default} == "true" ]]; then
       printf "%s [Y/n] " "${question}"
     else
       printf "%s [y/N] " "${question}"

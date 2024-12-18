@@ -133,8 +133,8 @@ Get the current cursor position.
 
 Returns:
 
-- `CURSOR_LINE`: the line number
-- `CURSOR_COLUMN`: the column number
+- `GLOBAL_CURSOR_LINE`: the line number
+- `GLOBAL_CURSOR_COLUMN`: the column number
 
 ```bash
 interactive::getCursorPosition

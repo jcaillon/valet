@@ -268,8 +268,17 @@ Total seconds: %S
 Total milliseconds: %L
 Total microseconds: %U"
   echo "${RETURNED_VALUE}"
+
   echo
-  echo "→ string::microsecondsToHuman"
+  echo "→ string::microsecondsToHuman ${ms}"
+  string::microsecondsToHuman ${ms}
+  echo "${RETURNED_VALUE}"
+
+  echo
+  echo "→ _OPTION_FORMAT='%U' string::microsecondsToHuman ${ms}"
+  _OPTION_FORMAT='%U' string::microsecondsToHuman ${ms}
+  echo "${RETURNED_VALUE}"
+
   test::endTest "Testing string::microsecondsToHuman function" 0
 }
 
@@ -321,6 +330,30 @@ function test_string_fitStringInScreen() {
   fi
 }
 
+function test_string::truncateVisibleCharacters() {
+  local FG_CYAN=$'\033[36m'
+  local FG_RESET=$'\033[0m'
+
+  echo "string::truncateVisibleCharacters '\${AC__FG_CYAN}Hello\${AC__FG_RESET}world' 5"
+  string::truncateVisibleCharacters "${FG_CYAN}Hello${FG_RESET} world" 5
+  echo "${RETURNED_VALUE}"
+  echo
+  echo "string::truncateVisibleCharacters '\${AC__FG_CYAN}Hello\${AC__FG_RESET}world' 10"
+  string::truncateVisibleCharacters "${FG_CYAN}Hello${FG_RESET} world" 10
+  echo "${RETURNED_VALUE}"
+  echo
+  echo "string::truncateVisibleCharacters '\${AC__FG_CYAN}Hello\${AC__FG_RESET}world' 11"
+  string::truncateVisibleCharacters "${FG_CYAN}Hello${FG_RESET} world" 11
+  echo "${RETURNED_VALUE}"
+  echo
+  echo "string::truncateVisibleCharacters '\${AC__FG_CYAN}Hello\${AC__FG_RESET}world' 12"
+  string::truncateVisibleCharacters "${FG_CYAN}Hello${FG_RESET} world" 12
+  echo "${RETURNED_VALUE}"
+  echo
+
+  test::endTest "Testing string::truncateVisibleCharacters" 0
+}
+
 function main() {
   testString::bumpSemanticVersion
   testString::kebabCaseToSnakeCase
@@ -337,6 +370,7 @@ function main() {
   testString::compareSemanticVersion
   testString::microsecondsToHuman
   test_string::fitStringInScreen
+  test_string::truncateVisibleCharacters
 }
 
 main

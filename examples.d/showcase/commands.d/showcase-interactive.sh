@@ -24,8 +24,8 @@ function showcaseInteractive() {
 
   log::info "Getting the cursor size:"
   interactive::getCursorPosition
-  log::info "CURSOR_LINE: ⌜${CURSOR_LINE}⌝"
-  log::info "CURSOR_COLUMN: ⌜${CURSOR_COLUMN}⌝"
+  log::info "GLOBAL_CURSOR_LINE: ⌜${GLOBAL_CURSOR_LINE}⌝"
+  log::info "GLOBAL_CURSOR_COLUMN: ⌜${GLOBAL_CURSOR_COLUMN}⌝"
 
   log::info "Getting the terminal size:"
   interactive::getTerminalSize
