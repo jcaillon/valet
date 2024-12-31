@@ -1086,7 +1086,7 @@ function core::reExportFuncToUseGlobalVars() {
     modifiedFunctionDefinition="${modifiedFunctionDefinition//${varName}/"${globalVars[${varName}]}"}"
   done
 
-  eval "${modifiedFunctionDefinition}"
+  RETURNED_VALUE="${modifiedFunctionDefinition}"
 }
 
 #===============================================================
@@ -1256,8 +1256,8 @@ function string::wrapSentence() {
           if [[ partialWordLength -gt spaceLeft ]]; then
             partialWordLength="${spaceLeft}"
           fi
-          wrappedText+="${word:0:${partialWordLength}}"
-          word="${word:${partialWordLength}}"
+          wrappedText+="${word:0:partialWordLength}"
+          word="${word:partialWordLength}"
           wordLength=$((wordLength - partialWordLength))
           spaceLeft=$((spaceLeft - partialWordLength))
           if [[ spaceLeft -eq 0 && wordLength -gt 0 ]]; then
@@ -1380,11 +1380,11 @@ function array::fuzzyFilter() {
     lineCharIndex=0
     lastLineCharIndex=0
     while [[ patternCharIndex -lt patternLength ]]; do
-      patternChar="${pattern:${patternCharIndex}:1}"
+      patternChar="${pattern:patternCharIndex:1}"
 
       # find the character in the line
       while [[ lineCharIndex -lt lineLength ]]; do
-        lineChar="${line:${lineCharIndex}:1}"
+        lineChar="${line:lineCharIndex:1}"
 
         if [[ ${lineChar} == "${patternChar}" ]]; then
           # if we find the character, mark the distance

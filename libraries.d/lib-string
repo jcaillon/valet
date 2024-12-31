@@ -344,7 +344,7 @@ function string::indexOf() {
     fi
 
     # otherwise we keep only what is after this index
-    string="${string:${startingIndex}}"
+    string="${string:startingIndex}"
   fi
 
   stringLength="${#string}"
@@ -420,13 +420,13 @@ function string::extractBetween() {
       return 0
     fi
   else
-    RETURNED_VALUE="${string:${startIndex}}"
+    RETURNED_VALUE="${string:startIndex}"
     return 0
   fi
 
   local -i extractedLength
   extractedLength=$((endIndex - startIndex))
-  RETURNED_VALUE="${string:${startIndex}:${extractedLength}}"
+  RETURNED_VALUE="${string:startIndex:extractedLength}"
 }
 
 # ## string::count
@@ -664,18 +664,18 @@ function string::fitStringInScreen() {
     if ((realLeftLength > screenLeftLength)); then
       # we can't display the whole left string, so we display ellipsis
       if ((screenLeftLength > 1)); then
-        screenString+="…${inputString:$((realLeftLength - screenLeftLength + 1)):$((screenLeftLength - 1))}"
+        screenString+="…${inputString:realLeftLength - screenLeftLength + 1:screenLeftLength - 1}"
       else
         screenString+="…"
       fi
     else
-      screenString+="${inputString:$((realLeftLength - screenLeftLength)):$((screenLeftLength))}"
+      screenString+="${inputString:realLeftLength - screenLeftLength:screenLeftLength}"
     fi
   fi
 
   # compute the character to display under the caret (if any)
   if ((inputLength > 0 && inputIndex <= inputLength)); then
-    screenString+="${inputString:$((inputIndex)):1}"
+    screenString+="${inputString:inputIndex:1}"
   fi
 
   # compute what to display at the right of the character under the caret (if any)
@@ -686,12 +686,12 @@ function string::fitStringInScreen() {
     if ((realRightLength > screenRightLength)); then
       # we can't display the whole right string, so we display ellipsis
       if ((screenRightLength > 1)); then
-        screenString+="${inputString:$((inputLength - realRightLength)):$((screenRightLength - 1))}…"
+        screenString+="${inputString:inputLength - realRightLength:screenRightLength - 1}…"
       else
         screenString+="…"
       fi
     else
-      screenString+="${inputString:$((inputLength - realRightLength)):$((screenRightLength))}"
+      screenString+="${inputString:inputLength - realRightLength:screenRightLength}"
     fi
   fi
 
@@ -751,90 +751,4 @@ function string::truncateVisibleCharacters() {
   else
     RETURNED_VALUE="${string}"
   fi
-}
-
-function prompt::fuzzyFilterSort() {
-  local pattern="${1}"
-  local -n array="${2}"
-
-  local -a originalIndexes
-  declare -g -a ARRAY_MATCHES=()
-  declare -g -a ARRAY_INDEXES=()
-  declare -g -a ARRAY_DISTANCES=()
-
-  local -i patternLength lineLength
-  patternLength="${#pattern}"
-
-  # make all match case insensitive
-  shopt -s nocasematch
-
-  local line patternChar lineChar
-  local -i lineCharIndex patternCharIndex lastLineCharIndex distance patternFirstCharIndex itemIndex=-1
-
-  for line in "${array[@]}"; do
-    itemIndex+=1
-    lineLength="${#line}"
-    distance=0
-
-    # for each character in the pattern
-    patternCharIndex=0
-    lineCharIndex=0
-    lastLineCharIndex=0
-    while (( patternCharIndex < patternLength )); do
-      patternChar="${pattern:${patternCharIndex}:1}"
-
-      # find the character in the line
-      while (( lineCharIndex < lineLength )); do
-        lineChar="${line:${lineCharIndex}:1}"
-
-        if [[ ${lineChar} == "${patternChar}" ]]; then
-          # if we find the character, mark the distance
-          distance=$((distance + (lineCharIndex - lastLineCharIndex)))
-          lastLineCharIndex=$((lineCharIndex + 1))
-
-          # if it is the first char of the pattern, remember the index
-          if (( patternCharIndex == 0 )); then
-            patternFirstCharIndex=${lineCharIndex}
-          fi
-
-          # loop on the next pattern character
-          break
-        fi
-
-        lineCharIndex+=1
-      done
-
-      # if we don't find the character in the line, the line is not a match
-      if (( lineCharIndex >= lineLength )); then
-        break
-      else
-        lineCharIndex+=1
-      fi
-
-      patternCharIndex+=1
-    done
-
-    # if we found all the characters in the pattern
-    if (( patternCharIndex >= patternLength )); then
-      ARRAY_MATCHES+=("${line}")
-      ARRAY_INDEXES+=("${patternFirstCharIndex}")
-      ARRAY_DISTANCES+=("${distance}")
-      originalIndexes+=("${itemIndex}")
-    fi
-
-  done
-
-  shopt -u nocasematch
-  
-  # sort the results
-  array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
-
-  # create the final correspondence array
-  RETURNED_ARRAY2=()
-  for i in "${RETURNED_ARRAY[@]}"; do
-    RETURNED_ARRAY2+=("${originalIndexes[i]}")
-  done
-  RETURNED_ARRAY=("${ARRAY_MATCHES[@]}")
-  
-  unset ARRAY_INDEXES ARRAY_DISTANCES
 }

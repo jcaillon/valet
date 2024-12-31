@@ -285,11 +285,11 @@ function array::fuzzyFilterSort() {
     lineCharIndex=0
     lastLineCharIndex=0
     while [[ patternCharIndex -lt patternLength ]]; do
-      patternChar="${pattern:${patternCharIndex}:1}"
+      patternChar="${pattern:patternCharIndex:1}"
 
       # find the character in the line
       while [[ lineCharIndex -lt lineLength ]]; do
-        lineChar="${line:${lineCharIndex}:1}"
+        lineChar="${line:lineCharIndex:1}"
 
         if [[ ${lineChar} == "${patternChar}" ]]; then
 
@@ -304,7 +304,7 @@ function array::fuzzyFilterSort() {
           elif ((matchedLineLength + 1 + lineCharIndex - lastLineCharIndex < maxMatchedLineLength || (matchedLineLength + 1 + lineCharIndex - lastLineCharIndex <= maxMatchedLineLength && lineCharIndex == lineLength - 1))); then
             if ((lineCharIndex - lastLineCharIndex > 0)); then
               # add the characters before the matched character
-              matchedLine+="${line:${lastLineCharIndex}:$((lineCharIndex - lastLineCharIndex))}"
+              matchedLine+="${line:lastLineCharIndex:lineCharIndex - lastLineCharIndex}"
               matchedLineLength+=$((lineCharIndex - lastLineCharIndex))
             fi
             matchedLine+="${beforeChar}${lineChar}${afterChar}"
@@ -313,7 +313,7 @@ function array::fuzzyFilterSort() {
           elif [[ ${hasEndEllipsis} != "true" ]]; then
             local -i remainingChars=$((maxMatchedLineLength - 1 - matchedLineLength))
             if ((remainingChars > 0)); then
-              matchedLine+="${line:${lastLineCharIndex}:${remainingChars}}"
+              matchedLine+="${line:lastLineCharIndex:remainingChars}"
               matchedLineLength+=${remainingChars}
             fi
             matchedLine+="…"
@@ -358,7 +358,7 @@ function array::fuzzyFilterSort() {
           hasEllipsis=true
         fi
         if ((remainingChars > 0)); then
-          matchedLine+="${line:${lastLineCharIndex}:${remainingChars}}"
+          matchedLine+="${line:lastLineCharIndex:remainingChars}"
         fi
         if [[ ${hasEllipsis} == "true" && ${hasEndEllipsis} != "true" ]]; then
           matchedLine+="…"
@@ -389,4 +389,71 @@ function array::fuzzyFilterSort() {
   RETURNED_ARRAY=("${ARRAY_MATCHES[@]}")
 
   unset ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
+}
+
+
+function prompt::fuzzyFilterSort() {
+  local pattern="${1}"
+  local -n array="${2}"
+
+  # nothing to filter
+  if [[ -z ${pattern} ]]; then
+    RETURNED_ARRAY=("${array[@]}")
+    eval "RETURNED_ARRAY2=( {0..$(( ${#array[@]} - 1 ))} )"
+    return 0
+  fi
+
+  # prepare the regex for the pattern
+  # the -> '([^t]*)(t[^h]*h[^e]*e)'
+  local patternRegex="([^${pattern:0:1}]*)(${pattern:0:1}"
+  local -i index
+  for ((index = 1; index < ${#pattern}; index++)); do
+    patternRegex+="[^${pattern:index:1}]*${pattern:index:1}"
+  done
+  patternRegex+=")"
+
+  # make all match case insensitive
+  shopt -s nocasematch
+
+  local -a -i originalIndexes firstCharacters matchedLengths sortedIndexes=()
+
+  local -i itemIndex matchedIndex=-1 firstCharacter matchedLength loopIndex
+
+  for(( itemIndex = 0 ; itemIndex< ${#array[@]}; itemIndex++ )); do
+    if [[ ${array[itemIndex]} =~ ${patternRegex} ]]; then
+      matchedIndex+=1
+      firstCharacter="${#BASH_REMATCH[1]}"
+      matchedLength="${#BASH_REMATCH[2]}"
+    else
+      continue
+    fi
+    # we have a match, now we need to sort it by firstCharacters then matchedLengths
+    # the sortedIndexes array will contain the indexes of the sorted array
+    loopIndex=0
+    while (( loopIndex < ${#sortedIndexes[@]} )); do
+      if ((firstCharacters[sortedIndexes[loopIndex]] > firstCharacter)); then
+        break
+      elif ((firstCharacters[sortedIndexes[loopIndex]] == firstCharacter && matchedLengths[sortedIndexes[loopIndex]] > matchedLength)); then
+        break
+      fi
+      loopIndex+=1
+    done
+    sortedIndexes=("${sortedIndexes[@]:0:loopIndex}" "${matchedIndex}" "${sortedIndexes[@]:loopIndex}")
+
+    originalIndexes+=("${itemIndex}")
+    firstCharacters+=("${firstCharacter}")
+    matchedLengths+=("${matchedLength}")
+  done
+
+  shopt -u nocasematch
+
+  # will contain the matched lines, sorted
+  RETURNED_ARRAY=()
+  # will contain the original indexes corresponding to the sorted array
+  RETURNED_ARRAY2=()
+
+  for(( itemIndex = 0 ; itemIndex< ${#sortedIndexes[@]}; itemIndex++ )); do
+    RETURNED_ARRAY+=("${array[originalIndexes[sortedIndexes[itemIndex]]]}")
+    RETURNED_ARRAY2+=("${originalIndexes[sortedIndexes[itemIndex]]}")
+  done
 }

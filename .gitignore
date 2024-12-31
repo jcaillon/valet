@@ -25,6 +25,7 @@ valet.tar.gz
 **.tag.gz
 **.zip
 file
+file2
 
 # tests
 tests.d/1005-lib-io/resources/gitignored/**

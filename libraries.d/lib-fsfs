@@ -327,7 +327,7 @@ function drawLeftPane() {
     local line
     for line in "${FSFS_ORIGINAL_ITEMS[@]}"; do
       if ((${#line} > FSFS_LEFT_PANE_WIDTH - 3)); then
-        line="${line:0:$((FSFS_LEFT_PANE_WIDTH - 4))}…"
+        line="${line:0:FSFS_LEFT_PANE_WIDTH - 4}…"
       fi
       FSFS_FILTERED_ITEMS+=("${line}")
     done
@@ -494,7 +494,7 @@ function drawPrompt() {
   # check if we need to shorten the prompt
   FSFS_PROMPT="${FSFS_SEARCH_STRING}"
   if ((${#FSFS_SEARCH_STRING} > FSFS_LEFT_PANE_WIDTH - 4)); then
-    FSFS_PROMPT="…${FSFS_SEARCH_STRING:$((${#FSFS_SEARCH_STRING} - (FSFS_LEFT_PANE_WIDTH - 4) + 1))}"
+    FSFS_PROMPT="…${FSFS_SEARCH_STRING:${#FSFS_SEARCH_STRING} - (FSFS_LEFT_PANE_WIDTH - 4) + 1}"
   else
     FSFS_PROMPT="${FSFS_SEARCH_STRING}"
   fi

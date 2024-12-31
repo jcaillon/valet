@@ -923,7 +923,7 @@ function interactive::rebindKeymap() {
   local -i modeIndex
   for((index=0;index<${#normalKeys};index++)); do
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
-      key="${normalKeys:${index}:1}"
+      key="${normalKeys:index:1}"
       bind -x "\"${modifiers[modeIndex + 1]}${key}\": ${callBackFunction} ${modifiers[modeIndex]}${key^^}" &>/dev/null
     done
   done
@@ -1131,7 +1131,7 @@ function interactiveGetProgressBarString() {
     RETURNED_VALUE+="${progressBarFull}"
   done
   if ((extraCharIndex > 0)); then
-    RETURNED_VALUE+="${progressBarChars:${extraCharIndex}:1}"
+    RETURNED_VALUE+="${progressBarChars:extraCharIndex:1}"
   fi
   for ((i = ${#RETURNED_VALUE}; i < size; i++)); do
     RETURNED_VALUE+=" "
@@ -1184,7 +1184,7 @@ function interactive_runProgressBarAnimation() {
       loopProgressRefresh+=1
     fi
 
-    displayedString="${barTemplate//"#spinner"/"${spinner:${spinnerIndex}:1}"}"
+    displayedString="${barTemplate//"#spinner"/"${spinner:spinnerIndex:1}"}"
 
     printf -v computeString "%4s" "${percent}%"
     displayedString="${displayedString//"#percent"/"${computeString}"}"

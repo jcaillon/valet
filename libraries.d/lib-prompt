@@ -231,6 +231,9 @@ function prompt::input() {
   _PROMPT_DO_NOT_SET_TRAP=false
   _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=""
 
+  # TODO: in this mode, we use grep to filter the items, then grep -o | wc -c to get the index of the fist matched letter + same for the distance
+  _PROMPT_ITEMS_BOX_FILTER_USING_GREP=""
+
   # set up colors
   if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
     _PROMPT_COLOR_STRING="${VALET_CONFIG_PROMPT_COLOR_STRING:-"${AC__FG_MAGENTA}"}"
@@ -603,9 +606,9 @@ function prompt_onKeyPressed() {
   # modify the text
   CTRL+K)
     # kill the line from cursor to the end
-    _PROMPT_KILLED_STRING="${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
+    _PROMPT_KILLED_STRING="${_PROMPT_STRING:_PROMPT_STRING_INDEX}"
     if ((_PROMPT_STRING_INDEX > 0)); then
-      _PROMPT_STRING="${_PROMPT_STRING:0:${_PROMPT_STRING_INDEX}}"
+      _PROMPT_STRING="${_PROMPT_STRING:0:_PROMPT_STRING_INDEX}"
     else
       _PROMPT_STRING=""
     fi
@@ -628,7 +631,7 @@ function prompt_onKeyPressed() {
       tempUserString=""
     fi
     if ((_PROMPT_STRING_INDEX < ${#_PROMPT_STRING} - 1)); then
-      tempUserString+="${_PROMPT_STRING:$((_PROMPT_STRING_INDEX + 1))}"
+      tempUserString+="${_PROMPT_STRING:_PROMPT_STRING_INDEX + 1}"
     fi
     _PROMPT_STRING="${tempUserString}"
     prompt_onTextChanged
@@ -637,7 +640,7 @@ function prompt_onKeyPressed() {
     # delete the character before the cursor
     if ((_PROMPT_STRING_INDEX > 0)); then
       if ((_PROMPT_STRING_INDEX > 1)); then
-        _PROMPT_STRING="${_PROMPT_STRING:0:$((_PROMPT_STRING_INDEX - 1))}${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
+        _PROMPT_STRING="${_PROMPT_STRING:0:_PROMPT_STRING_INDEX - 1}${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
       else
         _PROMPT_STRING="${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
       fi
@@ -651,7 +654,7 @@ function prompt_onKeyPressed() {
     prompt_getIndexDeltaToEndOfWord
     prompt_changePromptCursorIndex "${RETURNED_VALUE}"
     if ((_PROMPT_STRING_INDEX > oldIndex)); then
-      _PROMPT_KILLED_STRING="${_PROMPT_STRING:${oldIndex}:$((_PROMPT_STRING_INDEX - oldIndex))}"
+      _PROMPT_KILLED_STRING="${_PROMPT_STRING:${oldIndex}:_PROMPT_STRING_INDEX - oldIndex}"
       if ((oldIndex > 0)); then
         _PROMPT_STRING="${_PROMPT_STRING:0:${oldIndex}}${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
       else
@@ -667,11 +670,11 @@ function prompt_onKeyPressed() {
     prompt_getIndexDeltaToBeginningOfWord
     prompt_changePromptCursorIndex "${RETURNED_VALUE}"
     if ((oldIndex > _PROMPT_STRING_INDEX)); then
-      _PROMPT_KILLED_STRING="${_PROMPT_STRING:${_PROMPT_STRING_INDEX}:$((oldIndex - _PROMPT_STRING_INDEX))}"
+      _PROMPT_KILLED_STRING="${_PROMPT_STRING:_PROMPT_STRING_INDEX:oldIndex - _PROMPT_STRING_INDEX}"
       if ((_PROMPT_STRING_INDEX > 0)); then
-        _PROMPT_STRING="${_PROMPT_STRING:0:${_PROMPT_STRING_INDEX}}${_PROMPT_STRING:${oldIndex}}"
+        _PROMPT_STRING="${_PROMPT_STRING:0:_PROMPT_STRING_INDEX}${_PROMPT_STRING:oldIndex}"
       else
-        _PROMPT_STRING="${_PROMPT_STRING:${oldIndex}}"
+        _PROMPT_STRING="${_PROMPT_STRING:oldIndex}"
       fi
     fi
     prompt_onTextChanged
@@ -734,7 +737,7 @@ function prompt_onKeyPressed() {
       else
         # count the number of characters that are not spaces before the cursor
         local -i count=0
-        while [[ ${count} -lt ${_PROMPT_FILTERS_FROM_N_CHARS} && $((_PROMPT_STRING_INDEX - count - 1)) -gt 0 && ${_PROMPT_STRING:$((_PROMPT_STRING_INDEX - count - 1)):1} == [^[:space:]] ]]; do
+        while [[ ${count} -lt ${_PROMPT_FILTERS_FROM_N_CHARS} && $((_PROMPT_STRING_INDEX - count - 1)) -gt 0 && ${_PROMPT_STRING:_PROMPT_STRING_INDEX - count - 1:1} == [^[:space:]] ]]; do
           count+=1
         done
         if ((count >= _PROMPT_FILTERS_FROM_N_CHARS)); then
@@ -757,7 +760,7 @@ function prompt_onTextChanged() {
 
   # truncate the string if it is too long and warn the user
   if (( ${#_PROMPT_STRING} > _PROMPT_STRING_MAX_LENGTH )); then
-    _PROMPT_STRING="${_PROMPT_STRING:0:${_PROMPT_STRING_MAX_LENGTH}}"
+    _PROMPT_STRING="${_PROMPT_STRING:0:_PROMPT_STRING_MAX_LENGTH}"
     if (( _PROMPT_STRING_INDEX > _PROMPT_STRING_MAX_LENGTH )); then
       _PROMPT_STRING_INDEX=${_PROMPT_STRING_MAX_LENGTH}
     fi
@@ -848,7 +851,7 @@ function prompt_openItemsBox() {
 
 function prompt_updateItemsBox() {
   # if the box is opened and the previous character is a space, we close the box
-  if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" && ${_PROMPT_AUTOCOMPLETE_WHOLE_LINE} != "true" && ${_PROMPT_STRING_INDEX} -gt 0 && ${_PROMPT_STRING:$((_PROMPT_STRING_INDEX - 1)):1} == [[:space:]] ]]; then
+  if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" && ${_PROMPT_AUTOCOMPLETE_WHOLE_LINE} != "true" && ${_PROMPT_STRING_INDEX} -gt 0 && ${_PROMPT_STRING:_PROMPT_STRING_INDEX - 1:1} == [[:space:]] ]]; then
     prompt_clearItemsBox
   fi
 
@@ -867,13 +870,13 @@ function prompt_setCurrentWord() {
     _PROMPT_CURRENT_WORD="${_PROMPT_STRING}"
   else
     # we take the current word
-    if [[ ${_PROMPT_STRING_INDEX} -eq 0 || ${_PROMPT_STRING:$((_PROMPT_STRING_INDEX - 1)):1} == [[:space:]] ]]; then
+    if [[ ${_PROMPT_STRING_INDEX} -eq 0 || ${_PROMPT_STRING:_PROMPT_STRING_INDEX - 1:1} == [[:space:]] ]]; then
       # if we are at the beginning of the line, or the previous character is a space
       _PROMPT_CURRENT_WORD=""
     else
       prompt_getIndexDeltaToBeginningOfWord
       if ((RETURNED_VALUE < 0)); then
-        _PROMPT_CURRENT_WORD="${_PROMPT_STRING:$((_PROMPT_STRING_INDEX + RETURNED_VALUE)):$((-1 * RETURNED_VALUE))}"
+        _PROMPT_CURRENT_WORD="${_PROMPT_STRING:_PROMPT_STRING_INDEX + RETURNED_VALUE:-1 * RETURNED_VALUE}"
       else
         _PROMPT_CURRENT_WORD=""
       fi
@@ -919,29 +922,12 @@ function prompt_filterItemsAsync() {
 function prompt_filterItemsSync() {
   # Compute filtered items
   if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} == "true" && -n ${_PROMPT_ITEMS_BOX_FILTER_STRING} ]]; then
-
     prompt::fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
     _PROMPT_FILTERED_ITEMS=("${RETURNED_ARRAY[@]}")
     _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=("${RETURNED_ARRAY2[@]}")
-    
   else
-    # for each item longer than the width, cut and add ellipsis
-    # shellcheck disable=SC2178
-    # declare -g -n _PROMPT_FILTERED_ITEMS=_PROMPT_ORIGINAL_ITEMS
-    # _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
     _PROMPT_FILTERED_ITEMS=("${_PROMPT_ORIGINAL_ITEMS[@]}")
     _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
-    # local line
-    # for line in "${_PROMPT_ORIGINAL_ITEMS[@]}"; do
-    #   if ((${#line} > _PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH)); then
-    #     line="${line:0:$((_PROMPT_ITEMS_BOX_WIDTH - 1 - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH))}…"
-    #   fi
-    #   _PROMPT_FILTERED_ITEMS+=("${line}")
-    # done
-    # _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
-    # for ((i = 0; i < _PROMPT_ORIGINAL_ITEMS_COUNT; i++)); do
-    #   _PROMPT_FILTERED_ITEMS_CORRESPONDENCES+=("${i}")
-    # done
   fi
 }
 
@@ -978,9 +964,42 @@ function prompt_drawItemsBox() {
   # make sure it is in the view
   prompt_changeSelectedItemIndex 0
 
+
+  # TODO: check why this is called twice when typing a letter
+  local -i levelToSkip="0"
+  local index stackSize func linen="${LINENO}" src
+  stackSize=${#FUNCNAME[@]}
+  treeString="├─"
+  for ((index = levelToSkip; index < stackSize; index++)); do
+    func="${FUNCNAME[${index}]}"
+    if [[ -z ${func} ]]; then
+      func=ROOT
+    else
+      func="${func}()"
+    fi
+    if ((index > 0)); then
+      linen="${BASH_LINENO[$((index - 1))]}"
+    fi
+    src="${BASH_SOURCE[${index}]}"
+    if [[ -z "${src}" ]]; then
+      src=non_file_source
+    elif [[ -f "${src/#.\//"${PWD}"\/}" ]]; then
+      src="${src/#.\//"${PWD}"\/}"
+    elif [[ -f "${src/#.\//"${GLOBAL_VALET_HOME}"\/}" ]]; then
+      src="${src/#.\//"${GLOBAL_VALET_HOME}"\/}"
+    fi
+    if ((index == stackSize - 1)); then
+      treeString="└─"
+    fi
+    echo "${treeString} in ${func} at ${src}:${linen}" >> file
+  done
+
+
   local toPrint="${AC__CURSOR_HIDE}"
 
   # draw the items
+  _PROMPT_ITEMS_BOX_ITEM_WIDTH="$((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH))"
+
   local itemString
   local -i line
   local -i showAtLine
@@ -999,14 +1018,17 @@ function prompt_drawItemsBox() {
       continue
     fi
 
-    # TODO: here we can call a custom callback to get the displayed string
-    prompt_getItemDisplayedString "${_PROMPT_FILTERED_ITEMS[index]}" "$((_PROMPT_ITEMS_BOX_WIDTH - 2))"
+    _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${_PROMPT_FILTERED_ITEMS[index]}"
+    if [[ -n ${_PROMPT_ITEMS_BOX_FILTER_STRING} || ${#_PROMPT_ITEMS_BOX_ITEM_DISPLAYED} -gt ${_PROMPT_ITEMS_BOX_ITEM_WIDTH} ]]; then
+      # TODO: here we can call a custom callback to get the displayed string
+      prompt::getItemDisplayedString
+    fi
 
     if ((index == _PROMPT_FILTERED_ITEMS_SELECTED_INDEX)); then
       # highlight the selected item
-      itemString="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${RETURNED_VALUE}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
+      itemString="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
     else
-      itemString="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${RETURNED_VALUE}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
+      itemString="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
     fi
 
     shownLines+=1
@@ -1051,14 +1073,78 @@ function prompt_clearItemsBox() {
   _PROMPT_ITEMS_BOX_SHOWN=false
 }
 
-function prompt_getItemDisplayedString() {
-  # TODO: check why this is called twice when typing a letter
-  if (( ${#1} < ${2} )); then
-    RETURNED_VALUE="${1}"
+# ## prompt::getItemDisplayedString (private)
+#
+# Truncate a string to a given number of visible characters.
+# Adds an ellipsis at the end if the string is truncated.
+#
+# This function will truncate a string without taking into account
+# the ANSI escape sequences for text formatting (i.e. the `\e[*m` format).
+#
+# - $1: **string** _as string_:
+#       the string to truncate
+# - $2: **visible characters** _as int_:
+#       the number of visible characters
+# - $3: **search string** _as string_:
+#       the string to search for in the string
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the truncated string
+#
+# ```bash
+# prompt::getItemDisplayedString "This is a long string that will be displayed in the screen." 20
+# echo "${RETURNED_VALUE}"
+# ```
+function prompt::getItemDisplayedString() {
+  local -i stringLength=${#_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}
+
+  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_STRING} && ${stringLength} -le ${_PROMPT_ITEMS_BOX_ITEM_WIDTH} ]]; then
     return 0
   fi
-  echo "${1}" "${2}">>file
-  string::truncateVisibleCharacters "${1}" "${2}"
+
+  local itemDisplayed=""
+
+  local -i searchStringIndex
+  local searchStringCharacter="${_PROMPT_ITEMS_BOX_FILTER_STRING:0:1}"
+
+  local -i index startEscapeIndex
+  local currentCharacter
+  local -i visibleLength=0
+  for ((index = 0; index < stringLength; index++)); do
+    currentCharacter="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED:index:1}"
+
+    # skip ANSI escape sequences
+    if [[ ${currentCharacter} == $'\e' ]]; then
+      startEscapeIndex=${index}
+      index=$((index + 3))
+      while [[ ${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED:index:1} != "m" ]]; do
+        index=$((index + 1))
+      done
+      itemDisplayed+="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED:startEscapeIndex:index - startEscapeIndex + 1}"
+      continue
+    fi
+
+    # highlight the letter if necessary
+    if [[ ${currentCharacter} == "${searchStringCharacter}" ]]; then
+      searchStringIndex+=1
+      searchStringCharacter="${_PROMPT_ITEMS_BOX_FILTER_STRING:searchStringIndex:1}"
+      itemDisplayed+="${_PROMPT_COLOR_LETTER_HIGHLIGHT}${currentCharacter}${_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET}"
+    else
+      itemDisplayed+="${currentCharacter}"
+    fi
+
+    # stop when we reached the desired size
+    visibleLength=$((visibleLength + 1))
+    if ((visibleLength >= _PROMPT_ITEMS_BOX_ITEM_WIDTH)); then
+      break
+    fi
+  done
+
+  _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${itemDisplayed}"
+  if ((index < stringLength)); then
+    _PROMPT_ITEMS_BOX_ITEM_DISPLAYED+="…"
+  fi
 }
 
 # A function to show an error message
@@ -1212,7 +1298,7 @@ function prompt_insertTextAtCurrentIndex() {
     if ((_PROMPT_STRING_INDEX >= ${#_PROMPT_STRING})); then
       _PROMPT_STRING="${_PROMPT_STRING}${1}"
     else
-      _PROMPT_STRING="${_PROMPT_STRING:0:${_PROMPT_STRING_INDEX}}${1}${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
+      _PROMPT_STRING="${_PROMPT_STRING:0:_PROMPT_STRING_INDEX}${1}${_PROMPT_STRING:_PROMPT_STRING_INDEX}"
     fi
   else
     _PROMPT_STRING="${1}${_PROMPT_STRING}"
@@ -1244,9 +1330,9 @@ function prompt_autocompleteWithSelectedItem() {
     # we replace the current word with the autocompleted one
     local -i beginIndexToReplace=$((_PROMPT_STRING_INDEX -${#_PROMPT_CURRENT_WORD}))
     if ((beginIndexToReplace > 0)); then
-      _PROMPT_STRING="${_PROMPT_STRING:0:${beginIndexToReplace}}${selectedItem}${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
+      _PROMPT_STRING="${_PROMPT_STRING:0:beginIndexToReplace}${selectedItem}${_PROMPT_STRING:_PROMPT_STRING_INDEX}"
     else
-      _PROMPT_STRING="${selectedItem}${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
+      _PROMPT_STRING="${selectedItem}${_PROMPT_STRING:_PROMPT_STRING_INDEX}"
     fi
     _PROMPT_STRING_INDEX=$((beginIndexToReplace + ${#selectedItem}))
   fi
@@ -1264,7 +1350,7 @@ function prompt_getIndexDeltaToBeginningOfWord() {
     index+=-1
   done
   while [[ ${index} -gt 0 && ${_PROMPT_STRING:index:1} == [^[:space:]] ]]; do
-    if [[ ${index} -ge 1 && ${_PROMPT_STRING:$((index - 1)):1} == [[:space:]] ]]; then
+    if [[ ${index} -ge 1 && ${_PROMPT_STRING:index - 1:1} == [[:space:]] ]]; then
       break
     fi
     index=$((index - 1))
@@ -1304,3 +1390,4 @@ function prompt_getCurrentInitialItemsIndex() {
 # this is to avoid copying parameters to the function and hopefully be faster
 function prompt_getDisplayedPromptString() { :; }
 core::reExportFuncToUseGlobalVars string::fitStringInScreen prompt_getDisplayedPromptString _PROMPT_STRING _PROMPT_STRING_INDEX _PROMPT_STRING_SCREEN_WIDTH
+eval "${RETURNED_VALUE}"
