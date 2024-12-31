@@ -1329,7 +1329,7 @@ function string::wrapCharacters() {
 
 # ## array::fuzzyFilter
 #
-# Allows to fuzzy match an array against a given pattern.
+# Allows to fuzzy sort an array against a given pattern.
 # Returns an array containing only the lines matching the pattern.
 #
 # - $1: **pattern** _as string_:
@@ -1339,95 +1339,51 @@ function string::wrapCharacters() {
 #
 # Returns:
 #
-# - `RETURNED_ARRAY`: an array containing only the lines matching the pattern
-# - `RETURNED_ARRAY2`: an array of the same size that contains the start index of the match
-# - `RETURNED_ARRAY3`: an array of the same size that contains the distance of the match
+# - `RETURNED_ARRAY`: An array containing the filtered items
+# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array
 #
 # ```bash
-# array::fuzzyFilter "pattern" "myarray"
-# if (( ${#RETURNED_ARRAY[@]} == 1 )); then
-#   singleMatch="${RETURNED_ARRAY[0]}"
-# fi
+# array::fuzzyFilter "pattern" "myarray" && local filteredArray="${RETURNED_ARRAY}"
+# array::fuzzyFilter "pattern" "myarray" ⌜ ⌝ && local filteredArray="${RETURNED_ARRAY}"
+# array::fuzzyFilter "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${RETURNED_ARRAY}"
 # ```
 #
 # > - All characters in the pattern must be found in the same order in the matched line.
-# > - The function is case insensitive.
-# > - This function does not sort the results, it only filters them.
+# > - Use `shopt -s nocasematch` to make this function is case insensitive.
 function array::fuzzyFilter() {
   local pattern="${1}"
   local -n array="${2}"
 
-  local -a matches=()
-  local -a indexes=()
-  local -a distances=()
+  # nothing to filter
+  if [[ -z ${pattern} ]]; then
+    RETURNED_ARRAY=("${array[@]}")
+    eval "RETURNED_ARRAY2=( {0..$(( ${#array[@]} - 1 ))} )"
+    return 0
+  fi
 
-  local -i patternLength lineLength
-  patternLength="${#pattern}"
-
-  # make all match case insensitive
-  shopt -s nocasematch
-
-  local line patternChar lineChar
-  local -i lineCharIndex patternCharIndex lastLineCharIndex distance patternFirstCharIndex
-
-  for line in "${array[@]}"; do
-    lineLength="${#line}"
-
-    distance=0
-
-    # for each character in the pattern
-    patternCharIndex=0
-    lineCharIndex=0
-    lastLineCharIndex=0
-    while [[ patternCharIndex -lt patternLength ]]; do
-      patternChar="${pattern:patternCharIndex:1}"
-
-      # find the character in the line
-      while [[ lineCharIndex -lt lineLength ]]; do
-        lineChar="${line:lineCharIndex:1}"
-
-        if [[ ${lineChar} == "${patternChar}" ]]; then
-          # if we find the character, mark the distance
-          distance=$((distance + (lineCharIndex - lastLineCharIndex)))
-          lastLineCharIndex=$((lineCharIndex + 1))
-
-          # if it is the first char of the pattern, remember the index
-          if [[ patternCharIndex -eq 0 ]]; then
-            patternFirstCharIndex=${lineCharIndex}
-          fi
-
-          # loop on the next pattern character
-          break
-        fi
-
-        lineCharIndex+=1
-      done
-
-      # if we don't find the character in the line, the line is not a match
-      if [[ lineCharIndex -ge lineLength ]]; then
-        break
-      else
-        lineCharIndex+=1
-      fi
-
-      patternCharIndex+=1
-    done
-
-    # if we found all the characters in the pattern
-    if [[ patternCharIndex -ge patternLength ]]; then
-      matches+=("${line}")
-      indexes+=("${patternFirstCharIndex}")
-      distances+=("${distance}")
-    fi
-
+  # prepare the regex for the pattern
+  # the -> '([^t]*)(t[^h]*h[^e]*e)'
+  local patternRegex="([^${pattern:0:1}]*)(${pattern:0:1}"
+  local -i index
+  for ((index = 1; index < ${#pattern}; index++)); do
+    patternRegex+="[^${pattern:index:1}]*${pattern:index:1}"
   done
+  patternRegex+=")"
 
-  shopt -u nocasematch
+  # will contain the matched lines, sorted
+  RETURNED_ARRAY=()
+  # will contain the original indexes corresponding to the sorted array
+  RETURNED_ARRAY2=()
 
-  RETURNED_ARRAY=("${matches[@]}")
-  RETURNED_ARRAY2=("${indexes[@]}")
-  RETURNED_ARRAY3=("${distances[@]}")
+  local -i itemIndex
+  for(( itemIndex = 0 ; itemIndex< ${#array[@]}; itemIndex++ )); do
+    if [[ ${array[itemIndex]} =~ ${patternRegex} ]]; then
+      RETURNED_ARRAY+=("${array[itemIndex]}")
+      RETURNED_ARRAY2+=("${itemIndex}")
+    fi
+  done
 }
+
 
 #===============================================================
 # >>> Valet files and directories

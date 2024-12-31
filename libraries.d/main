@@ -26,21 +26,9 @@ function main::onErrorInternal() {
   GLOBAL_ERROR_DISPLAYED=1
 }
 
+# This function is called when the program exits (on error, on success, on exit, on interrupt).
 function main::onExitInternal() {
   local rc=$?
-
-  # disable the profiler if still on
-  if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
-
-  # kill coproc (spinner/progress bar...) if still running
-  if [[ -n ${GLOBAL_PROGRESS_BAR_JOB_PID:-} ]]; then
-    kill "${GLOBAL_PROGRESS_BAR_JOB_PID}" 1>/dev/null || :
-  fi
-
-  # restore tty settings if needed
-  if command -v interactive::sttyRestore &>/dev/null; then
-    interactive::sttyRestore true
-  fi
 
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
   if command -v onExitTest &>/dev/null; then
@@ -50,11 +38,6 @@ function main::onExitInternal() {
   fi
   if command -v onExit &>/dev/null; then
     onExit
-  fi
-
-  # if we ran an interactive function, make sure to restore the cursor
-  if [[ -n ${AC__CURSOR_SHOW:-} ]]; then
-    printf '%s' "${AC__CURSOR_SHOW}"
   fi
 
   # always call cleanUp before exiting
@@ -110,6 +93,33 @@ main::registerTraps
 
 function main::onCleanUpInternal() {
   io::cleanupTempFiles
+
+  # disable the profiler if still on
+  if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
+
+  # kill background job if still running
+  if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
+    shopt -u -o monitor
+    kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
+    shopt -s -o monitor
+  fi
+
+  # kill coproc (spinner/progress bar...) if still running
+  if [[ -n ${GLOBAL_PROGRESS_BAR_JOB_PID:-} ]]; then
+    kill "${GLOBAL_PROGRESS_BAR_JOB_PID}" 1>/dev/null || :
+  fi
+
+  # restore tty settings if needed
+  if command -v interactive::sttyRestore &>/dev/null; then
+    interactive::sttyRestore true
+  fi
+
+  # if we ran an interactive function, make sure to restore the cursor
+  if [[ -n ${AC__CURSOR_SHOW:-} ]]; then
+    printf '%s' "${AC__CURSOR_SHOW}"
+  fi
+
+  # call the clean up functions if they exist
   if command -v cleanUp 1>/dev/null 2>&1; then
     cleanUp
   fi
@@ -845,6 +855,8 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
     return 0
   fi
 
+  shopt -s nocasematch
+
   main::getMaxPossibleCommandLevel "$@"
   local level="${RETURNED_VALUE}"
 
@@ -896,6 +908,8 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
     fi
     core::fail "Could not find ${messageDetails} for ⌜${command}⌝, use ⌜--help⌝ to get a list of valid commands."
   fi
+
+  shopt -u nocasematch
 
   RETURNED_VALUE="${functionName:-}"
   RETURNED_VALUE2="${loopI}"
@@ -1232,6 +1246,7 @@ function main::fuzzyFindOption() {
 
   local singleMatchedOption
   IFS=$'\n'
+  shopt -s nocasematch
 
   # split to get one possible option per line
   array::fuzzyFilter "${unknownOption}" _OPTIONS_TO_MATCH
@@ -1254,6 +1269,8 @@ function main::fuzzyFindOption() {
   else
     suggestedOption="Unknown option ⌜${unknownOption}⌝, valid options are:"$'\n'"$*"
   fi
+
+  shopt -u nocasematch
 
   unset _OPTIONS_TO_MATCH
 

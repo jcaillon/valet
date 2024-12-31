@@ -109,28 +109,23 @@ declare -a lines=([0]="this is a word" [1]="very unbelievable" [2]="unbelievable
 
 → array::fuzzyFilter evle lines
 declare -a RETURNED_ARRAY=([0]="very unbelievable" [1]="unbelievable" [2]="ublievable")
-declare -a RETURNED_ARRAY2=([0]="1" [1]="3" [2]="4")
-declare -a RETURNED_ARRAY3=([0]="0" [1]="0" [2]="0")
+declare -a RETURNED_ARRAY2=([0]="1" [1]="2" [2]="5")
 
-→ array::fuzzyFilter SC2 lines
+→ shopt -s nocasematch; array::fuzzyFilter SC2 lines; shopt -u nocasematch
 declare -a RETURNED_ARRAY=([0]="self mock2")
-declare -a RETURNED_ARRAY2=([0]="0")
-declare -a RETURNED_ARRAY3=([0]="1")
+declare -a RETURNED_ARRAY2=([0]="4")
 
 → array::fuzzyFilter u lines
 declare -a RETURNED_ARRAY=([0]="very unbelievable" [1]="unbelievable" [2]="ublievable")
-declare -a RETURNED_ARRAY2=([0]="5" [1]="0" [2]="0")
-declare -a RETURNED_ARRAY3=([0]="5" [1]="0" [2]="0")
+declare -a RETURNED_ARRAY2=([0]="1" [1]="2" [2]="5")
 
-→ array::fuzzyFilter seLf lines
+→ array::fuzzyFilter self lines
 declare -a RETURNED_ARRAY=([0]="self mock1" [1]="self mock2")
-declare -a RETURNED_ARRAY2=([0]="0" [1]="0")
-declare -a RETURNED_ARRAY3=([0]="0" [1]="0")
+declare -a RETURNED_ARRAY2=([0]="3" [1]="4")
 
 → array::fuzzyFilter nomatch lines
 declare -a RETURNED_ARRAY=()
 declare -a RETURNED_ARRAY2=()
-declare -a RETURNED_ARRAY3=()
 ```
 
 ### Wrapping characters at column 30 with new line prefix

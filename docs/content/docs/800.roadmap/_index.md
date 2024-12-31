@@ -8,6 +8,9 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- with debug mode on, we can compute the time spent on each line of a function and try to improve the fuzzy filter sort.
+- add snippets for the Ansi codes. Add snippets on the global variables.
+- check usage of array::fuzzyFilterSort and add back the colors.
 - Demo with ascii cinema: https://asciinema.org.
 - For all the optional arguments of exported functions, allow to set them using a global variable `_OPTION_*` in addition to the positional argument. Add this in the documentation about functions.
 - Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.

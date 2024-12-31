@@ -518,6 +518,42 @@ function interactive::sttyRestore() {
   fi
 }
 
+# ## interactive::setInterruptTrap
+#
+# Set a trap to catch the interrupt signal (SIGINT).
+# When the user presses Ctrl+C, the GLOBAL_SESSION_INTERRUPTED variable will be set to true.
+#
+# ```bash
+# interactive::setInterruptTrap
+# ```
+function interactive::setInterruptTrap() {
+  # shellcheck disable=SC2034
+  GLOBAL_SESSION_INTERRUPTED=false
+  if [[ -z ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
+    # save the original traps so we can restore them later
+    io::invoke trap -p SIGINT SIGQUIT
+    _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP="${RETURNED_VALUE}"
+
+    # interrupting sets GLOBAL_SESSION_INTERRUPTED to true
+    trap 'GLOBAL_SESSION_INTERRUPTED=true;' SIGINT SIGQUIT
+  fi
+}
+
+# ## interactive::restoreInterruptTrap
+#
+# Restore the original trap for the interrupt signal (SIGINT).
+# To be called after interactive::setInterruptTrap.
+#
+# ```bash
+# interactive::restoreInterruptTrap
+# ```
+function interactive::restoreInterruptTrap() {
+  if [[ -n ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
+    eval "${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP}"
+    unset -v _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP
+  fi
+}
+
 # ## interactive::clearBox
 #
 # Clear a "box" in the terminal.
@@ -1277,7 +1313,7 @@ function interactive::startProgress() {
 
   # disable the monitor mode to avoid the "Terminated" message with exit code once the spinner is stopped
   shopt -u -o monitor
-  ( interactive_runProgressBarAnimation "${_PROGRESS_BAR_UPDATE_FILE}" "$@" 1>&2; ) &
+  interactive_runProgressBarAnimation "${_PROGRESS_BAR_UPDATE_FILE}" "$@" 1>&2 &
   GLOBAL_PROGRESS_BAR_JOB_PID="$!"
 }
 

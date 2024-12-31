@@ -228,11 +228,8 @@ function prompt::input() {
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED}⌝ does not exist."
   fi
 
-  _PROMPT_DO_NOT_SET_TRAP=false
   _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=""
-
-  # TODO: in this mode, we use grep to filter the items, then grep -o | wc -c to get the index of the fist matched letter + same for the distance
-  _PROMPT_ITEMS_BOX_FILTER_USING_GREP=""
+  _PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING=""
 
   # set up colors
   if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
@@ -293,6 +290,7 @@ function prompt::input() {
   GLOBAL_CURSOR_COLUMN=$((_PROMPT_START_COLUMN + _PROMPT_SYMBOL_LENGTH + _PROMPT_STRING_INDEX))
 
   prompt_setItemsListVariables
+  prompt_reExportFuzzyFilterFunction
 
   # check if we display the autocompletion box, and the initial state of the box (shown or hidden)
   if ((_PROMPT_ORIGINAL_ITEMS_COUNT > 0)); then
@@ -324,29 +322,21 @@ function prompt::input() {
   _PROMPT_LAST_KEY_PRESSED_TIME=0
   _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
 
-  GLOBAL_CLOSE_INTERACTIVE_SESSION=false
   _PROMPT_CANCELLED=true
 
-  # TODO: interactive function to set trap and restore them, use GLOBAL_CLOSE_INTERACTIVE_SESSION
-  local originalTraps
-  if [[ ${_PROMPT_DO_NOT_SET_TRAP} != "true" ]]; then
-    # save the original traps so we can restore them later
-    io::invoke trap -p SIGINT SIGQUIT
-    originalTraps="${RETURNED_VALUE}"
-
-    # interrupting closes the interactive session
-    trap 'GLOBAL_CLOSE_INTERACTIVE_SESSION=true;' SIGINT SIGQUIT
-  fi
-
+  # set trap so that interrupt signal sets GLOBAL_SESSION_INTERRUPTED to true
+  interactive::setInterruptTrap
   # before starting to wait for inputs, we clear up the key pressed
   interactive::clearKeyPressed
   # setup the terminal to be ready for readline
   interactive::sttyInit
-  # define the callback function called when a special key is pressed
-  # shellcheck disable=SC2317
-  function prompt_onKeyBindingPress() { prompt_onKeyPressed "${1}" ""; }
   # rebind some keys to call the callback function prompt_onKeyBindingPress
   interactive::rebindKeymap prompt_onKeyBindingPress
+
+  # disable the monitor mode to avoid the "Terminated" message with exit code once the job is stopped
+  shopt -u -o monitor
+  # make all match case insensitive
+  shopt -s nocasematch
 
   if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" ]]; then
     prompt_openItemsBox
@@ -373,26 +363,35 @@ function prompt::input() {
       GLOBAL_SCREEN_REDRAW_REQUIRED=false
     fi
 
+    # check if the background job for async filtering is done
+    if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} && -f ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
+      unset -v GLOBAL_BACKGROUND_JOB1_PID
+      # read the items from the file
+      if [[ -s ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE} ]]; then
+        readarray -t _PROMPT_FILTERED_ITEMS <"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+        readarray -t _PROMPT_FILTERED_ITEMS_CORRESPONDENCES <"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+      else
+        _PROMPT_FILTERED_ITEMS=()
+        _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
+      fi
+      prompt_drawItemsBox
+    fi
+
     # break if fd 0 is closed or does not refer to a terminal.
-    if [[ ! -t 0 || ${GLOBAL_CLOSE_INTERACTIVE_SESSION} == "true" ]]; then
+    if [[ ! -t 0 || ${GLOBAL_SESSION_INTERRUPTED} == "true" ]]; then
       break
     fi
   done
 
   # clean up
+  prompt_filterItemsAsyncKill
   prompt_clearErrorBox
   prompt_clearItemsBox
   prompt_clearPrompt
-
   interactive::sttyRestore
-
-  # restore the initial traps
-  if [[ ${_PROMPT_DO_NOT_SET_TRAP} != "true" ]]; then
-    eval "${originalTraps}"
-  fi
-
-  # clean up
-  unset -f prompt_onKeyBindingPress 2>/dev/null || :
+  interactive::restoreInterruptTrap
+  shopt -s -o monitor
+  shopt -u nocasematch
 
   if [[ ${_PROMPT_CANCELLED:-} == "true" ]]; then
     return 1
@@ -474,6 +473,20 @@ function prompt_setItemsListVariables() {
   _PROMPT_FILTERED_ITEMS_SELECTED_INDEX=-1
 
   _PROMPT_ITEMS_BOX_FILTER_STRING=$'\0'
+
+  # if the items are too many, we will filter them asynchronously/do not sort them
+  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 100 ]]; then
+    _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY="false"
+  fi
+  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1000 ]]; then
+    _PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING="true"
+  fi
+}
+
+# define the callback function called when a special key is pressed
+# shellcheck disable=SC2317
+function prompt_onKeyBindingPress() {
+  prompt_onKeyPressed "${1}" "";
 }
 
 # Called when a key is pressed.
@@ -495,19 +508,19 @@ function prompt_onKeyPressed() {
 
   # autocompletion box
   PAGE_UP)
-    prompt_changeSelectedItemIndex -10
+    prompt_changeSelectedItemIndex "-$((${_PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS:-10} - 1))"
     prompt_drawItemsBox
     ;;
   PAGE_DOWN)
-    prompt_changeSelectedItemIndex 10
+    prompt_changeSelectedItemIndex "$((${_PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS:-10} - 1))"
     prompt_drawItemsBox
     ;;
   HOME | CTRL+UP)
-    prompt_changeSelectedItemIndex -99999
+    prompt_changeSelectedItemIndex "-$((_PROMPT_ORIGINAL_ITEMS_COUNT + 1))"
     prompt_drawItemsBox
     ;;
   END | CTRL+DOWN)
-    prompt_changeSelectedItemIndex 99999
+    prompt_changeSelectedItemIndex "$((_PROMPT_ORIGINAL_ITEMS_COUNT + 1))"
     prompt_drawItemsBox
     ;;
   UP)
@@ -543,7 +556,7 @@ function prompt_onKeyPressed() {
       prompt_showError "Please enter a value!"
       return 0
     fi
-    GLOBAL_CLOSE_INTERACTIVE_SESSION=true
+    GLOBAL_SESSION_INTERRUPTED=true
     _PROMPT_CANCELLED=false
     return 0
     ;;
@@ -568,38 +581,44 @@ function prompt_onKeyPressed() {
       prompt_clearItemsBox
       return 0
     fi
-    GLOBAL_CLOSE_INTERACTIVE_SESSION=true
+    GLOBAL_SESSION_INTERRUPTED=true
     ;;
   CTRL+Q)
-    GLOBAL_CLOSE_INTERACTIVE_SESSION=true
+    GLOBAL_SESSION_INTERRUPTED=true
     ;;
 
   # move the cursor
   CTRL+A)
     prompt_changePromptCursorIndex -9999999
+    prompt_updateItemsBox
     prompt_drawPrompt
     ;;
   CTRL+E)
     prompt_changePromptCursorIndex 9999999
+    prompt_updateItemsBox
     prompt_drawPrompt
     ;;
   LEFT | CTRL+B)
     prompt_changePromptCursorIndex -1
+    prompt_updateItemsBox
     prompt_drawPrompt
     ;;
   RIGHT | CTRL+F)
     prompt_changePromptCursorIndex 1
+    prompt_updateItemsBox
     prompt_drawPrompt
     ;;
   CTRL+LEFT)
     # move to beginning of the previous word
     prompt_getIndexDeltaToBeginningOfWord
     prompt_changePromptCursorIndex "${RETURNED_VALUE}"
+    prompt_updateItemsBox
     prompt_drawPrompt
     ;;
   CTRL+RIGHT)
     prompt_getIndexDeltaToEndOfWord
     prompt_changePromptCursorIndex "${RETURNED_VALUE}"
+    prompt_updateItemsBox
     prompt_drawPrompt
     ;;
 
@@ -885,46 +904,57 @@ function prompt_setCurrentWord() {
 }
 
 function prompt_filterItems() {
-  # if nothing to filer, declare global -n filter=original, do not define the correspondences
-  # set the filter string here to know if the filtered items are up to date
+  _PROMPT_ITEMS_BOX_FILTER_STRING="${_PROMPT_CURRENT_WORD}"
 
   if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY:-true} == "true" ]]; then
-    # if [[ ${_PROMPT_ITEMS_BOX_FILTER_STRING} == "${_PROMPT_CURRENT_WORD:-}" ]]; then
-    #   return 0
-    # fi
-    _PROMPT_ITEMS_BOX_FILTER_STRING="${_PROMPT_CURRENT_WORD}"
     prompt_filterItemsSync
   else
-    # TODO: implement async filtering
-    # run the filtering in a coprocess
-    _PROMPT_ITEMS_BOX_FILTER_STRING=""
+    # asynchronous filtering
+    if [[ -z ${_PROMPT_CURRENT_WORD} ]]; then
+      # case where we can return the original items
+      _PROMPT_FILTERED_ITEMS=("${_PROMPT_ORIGINAL_ITEMS[@]}")
+      _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
+      return 0
+    fi
 
-    io::createTempFile
-    _PROMPT_ITEMS_BOX_ASYNC_ERROR_FILE="${RETURNED_VALUE}"
-    io::createTempFile
-    _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE="${RETURNED_VALUE}"
-    io::createTempFile
-    _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
+    if [[ -z ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
+      io::createTempFile
+      _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE="${RETURNED_VALUE}"
+      io::createTempFile
+      _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
+    fi
 
-    # disable the monitor mode to avoid the "Terminated" message with exit code once the spinner is stopped
-    shopt -u -o monitor
-    ( prompt_filterItemsAsync 1>&2; ) &
+    # kill an already running background job
+    prompt_filterItemsAsyncKill
+    rm -f "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}" &>/dev/null || :
+
+    prompt_filterItemsAsync 1>&2 &
     GLOBAL_BACKGROUND_JOB1_PID="$!"
-
   fi
 }
 
 function prompt_filterItemsAsync() {
-  _PROMPT_ITEMS_BOX_FILTER_STRING="${_PROMPT_CURRENT_WORD}"
   prompt_filterItemsSync
+  local IFS=$'\n'
+  if (( ${#_PROMPT_FILTERED_ITEMS[@]} > 0 )); then
+    echo "${_PROMPT_FILTERED_ITEMS[*]}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+    echo "${_PROMPT_FILTERED_ITEMS_CORRESPONDENCES[*]}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+  else
+    : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+  fi
+}
+
+function prompt_filterItemsAsyncKill() {
+  if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
+    kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
+    unset -v GLOBAL_BACKGROUND_JOB1_PID
+  fi
 }
 
 function prompt_filterItemsSync() {
   # Compute filtered items
   if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} == "true" && -n ${_PROMPT_ITEMS_BOX_FILTER_STRING} ]]; then
-    prompt::fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
-    _PROMPT_FILTERED_ITEMS=("${RETURNED_ARRAY[@]}")
-    _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=("${RETURNED_ARRAY2[@]}")
+    prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
   else
     _PROMPT_FILTERED_ITEMS=("${_PROMPT_ORIGINAL_ITEMS[@]}")
     _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
@@ -963,37 +993,6 @@ function prompt_drawItemsBox() {
   # make sure to select an existing index regarding the filtered items +
   # make sure it is in the view
   prompt_changeSelectedItemIndex 0
-
-
-  # TODO: check why this is called twice when typing a letter
-  local -i levelToSkip="0"
-  local index stackSize func linen="${LINENO}" src
-  stackSize=${#FUNCNAME[@]}
-  treeString="├─"
-  for ((index = levelToSkip; index < stackSize; index++)); do
-    func="${FUNCNAME[${index}]}"
-    if [[ -z ${func} ]]; then
-      func=ROOT
-    else
-      func="${func}()"
-    fi
-    if ((index > 0)); then
-      linen="${BASH_LINENO[$((index - 1))]}"
-    fi
-    src="${BASH_SOURCE[${index}]}"
-    if [[ -z "${src}" ]]; then
-      src=non_file_source
-    elif [[ -f "${src/#.\//"${PWD}"\/}" ]]; then
-      src="${src/#.\//"${PWD}"\/}"
-    elif [[ -f "${src/#.\//"${GLOBAL_VALET_HOME}"\/}" ]]; then
-      src="${src/#.\//"${GLOBAL_VALET_HOME}"\/}"
-    fi
-    if ((index == stackSize - 1)); then
-      treeString="└─"
-    fi
-    echo "${treeString} in ${func} at ${src}:${linen}" >> file
-  done
-
 
   local toPrint="${AC__CURSOR_HIDE}"
 
@@ -1259,6 +1258,13 @@ function prompt_changeSelectedItemIndex() {
   elif ((newIndex > _PROMPT_FILTERED_ITEMS_START_INDEX + _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS - 1)); then
     _PROMPT_FILTERED_ITEMS_START_INDEX=$((newIndex - _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS + 1))
   fi
+  # also to make sure that we use all the space available on screen
+  if ((_PROMPT_FILTERED_ITEMS_START_INDEX + _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS > ${#_PROMPT_FILTERED_ITEMS[@]})); then
+    _PROMPT_FILTERED_ITEMS_START_INDEX=$((${#_PROMPT_FILTERED_ITEMS[@]} - _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS))
+    if ((_PROMPT_FILTERED_ITEMS_START_INDEX < 0)); then
+      _PROMPT_FILTERED_ITEMS_START_INDEX=0
+    fi
+  fi
 
   _PROMPT_FILTERED_ITEMS_SELECTED_INDEX=${newIndex}
 }
@@ -1285,8 +1291,6 @@ function prompt_changePromptCursorIndex() {
   elif ((_PROMPT_STRING_INDEX > ${#_PROMPT_STRING})); then
     _PROMPT_STRING_INDEX=${#_PROMPT_STRING}
   fi
-
-  prompt_updateItemsBox
 }
 
 # Insert a text at the cursor position.
@@ -1391,3 +1395,18 @@ function prompt_getCurrentInitialItemsIndex() {
 function prompt_getDisplayedPromptString() { :; }
 core::reExportFuncToUseGlobalVars string::fitStringInScreen prompt_getDisplayedPromptString _PROMPT_STRING _PROMPT_STRING_INDEX _PROMPT_STRING_SCREEN_WIDTH
 eval "${RETURNED_VALUE}"
+
+# we will redefine array::fuzzyFilterSort to a new function that uses global variables
+# this is to avoid copying parameters to the function and hopefully be faster
+function prompt_fuzzyFilterSort() { :; }
+function prompt_reExportFuzzyFilterFunction() {
+  unset -f prompt_fuzzyFilterSort &>/dev/null || :
+  local functionToReExport=array::fuzzyFilterSort
+  if [[ ${_PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING:-false} == "true" ]]; then
+    functionToReExport=array::fuzzyFilter
+  fi
+  core::reExportFuncToUseGlobalVars "${functionToReExport}" prompt_fuzzyFilterSort _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ORIGINAL_ITEMS
+  RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY2/_PROMPT_FILTERED_ITEMS_CORRESPONDENCES}"
+  RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY/_PROMPT_FILTERED_ITEMS}"
+  eval "${RETURNED_VALUE}"
+}

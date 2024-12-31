@@ -27,6 +27,36 @@ function testArray::sort() {
   test::endTest "testArray::ing array::sort" 0
 }
 
+function testArray::sortWithCriteria() {
+  declare -g   myArray=(a b c d e f g)
+  declare -g criteria1=(3 2 2 1 1 4 0)
+  declare -g criteria2=(1 3 2 5 0 2 9)
+
+  declare -p myArray criteria1 criteria2
+
+  echo
+  echo "→ array::sortWithCriteria myArray criteria1 criteria2"
+  array::sortWithCriteria myArray criteria1 criteria2
+  declare -p RETURNED_ARRAY myArray
+  echo "expected: g e d c b a f"
+
+  declare -a ARRAY_MATCHES=([0]="one the" [1]="the breakdown" [2]="holding the baby" [3]="the d day")
+  declare -a ARRAY_INDEXES=([0]="4" [1]="0" [2]="8" [3]="0")
+  declare -a ARRAY_DISTANCES=([0]="0" [1]="0" [2]="0" [3]="0")
+
+  declare -p ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
+
+  echo
+  echo "→ array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES"
+  array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
+
+  declare -p RETURNED_ARRAY ARRAY_MATCHES
+
+  unset ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
+
+  test::endTest "tesing array::sortWithCriteria" 0
+}
+
 function testArray::appendIfNotPresent() {
 
   declare -g MYARRAY=(
@@ -99,36 +129,6 @@ function testArray::makeArraysSameSize {
   test::endTest "testArray::ing array::makeArraysSameSize" 0
 }
 
-function testArray::sortWithCriteria() {
-  declare -g   myArray=(a b c d e f g)
-  declare -g criteria1=(3 2 2 1 1 4 0)
-  declare -g criteria2=(1 3 2 5 0 2 9)
-
-  declare -p myArray criteria1 criteria2
-
-  echo
-  echo "→ array::sortWithCriteria myArray criteria1 criteria2"
-  array::sortWithCriteria myArray criteria1 criteria2
-  declare -p RETURNED_ARRAY myArray
-  echo "expected: g e d c b a f"
-
-  declare -a ARRAY_MATCHES=([0]="one the" [1]="the breakdown" [2]="holding the baby" [3]="the d day")
-  declare -a ARRAY_INDEXES=([0]="4" [1]="0" [2]="8" [3]="0")
-  declare -a ARRAY_DISTANCES=([0]="0" [1]="0" [2]="0" [3]="0")
-
-  declare -p ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
-
-  echo
-  echo "→ array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES"
-  array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
-
-  declare -p RETURNED_ARRAY ARRAY_MATCHES
-
-  unset ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
-
-  test::endTest "tesing array::sortWithCriteria" 0
-}
-
 function testArray::fuzzyFilterSort() {
   myArray=(
     "one the"
@@ -153,8 +153,8 @@ function testArray::fuzzyFilterSort() {
   declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
   echo
-  echo "→ array::fuzzyFilterSort elv myArray ⌜ ⌝"
-  array::fuzzyFilterSort elv myArray ⌜ ⌝
+  echo "→ shopt -s nocasematch; array::fuzzyFilterSort ELV myArray; shopt -u nocasematch"
+  shopt -s nocasematch; array::fuzzyFilterSort ELV myArray; shopt -u nocasematch
 
   declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
@@ -170,8 +170,8 @@ function testArray::fuzzyFilterSort() {
   declare -p myArray
 
   echo
-  echo "→ array::fuzzyFilterSort the myArray ⌜ ⌝ 6"
-  array::fuzzyFilterSort the myArray ⌜ ⌝ 6
+  echo "→ array::fuzzyFilterSort the myArray"
+  array::fuzzyFilterSort the myArray
 
   declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
@@ -182,10 +182,10 @@ function testArray::fuzzyFilterSort() {
 
 function main() {
   testArray::sort
+  testArray::sortWithCriteria
   testArray::appendIfNotPresent
   testArray::isInArray
   testArray::makeArraysSameSize
-  testArray::sortWithCriteria
   testArray::fuzzyFilterSort
 }
 

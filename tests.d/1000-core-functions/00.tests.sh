@@ -39,27 +39,27 @@ function testArray::fuzzyFilter() {
   echo
   echo "→ array::fuzzyFilter evle lines"
   array::fuzzyFilter "evle" lines
-  declare -p RETURNED_ARRAY RETURNED_ARRAY2 RETURNED_ARRAY3
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
   echo
-  echo "→ array::fuzzyFilter SC2 lines"
-  array::fuzzyFilter "SC2" lines
-  declare -p RETURNED_ARRAY RETURNED_ARRAY2 RETURNED_ARRAY3
+  echo "→ shopt -s nocasematch; array::fuzzyFilter SC2 lines; shopt -u nocasematch"
+  shopt -s nocasematch; array::fuzzyFilter SC2 lines; shopt -u nocasematch
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
   echo
   echo "→ array::fuzzyFilter u lines"
   array::fuzzyFilter "u" lines
-  declare -p RETURNED_ARRAY RETURNED_ARRAY2 RETURNED_ARRAY3
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
   echo
-  echo "→ array::fuzzyFilter seLf lines"
-  array::fuzzyFilter "seLf" lines
-  declare -p RETURNED_ARRAY RETURNED_ARRAY2 RETURNED_ARRAY3
+  echo "→ array::fuzzyFilter self lines"
+  array::fuzzyFilter "self" lines
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
   echo
   echo "→ array::fuzzyFilter nomatch lines"
   array::fuzzyFilter "nomatch" lines
-  declare -p RETURNED_ARRAY RETURNED_ARRAY2 RETURNED_ARRAY3
+  declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
   unset lines
 
@@ -86,9 +86,6 @@ function testString::wrapCharacters() {
 
 function test_core::reExportFuncToUseGlobalVars() {
   # shellcheck disable=SC2317
-  function eval() { echo "$*"; }
-
-  # shellcheck disable=SC2317
   function test_function_to_reexport() {
     local -i firstArg=$1
     local secondArg="${2}"
@@ -107,8 +104,8 @@ function test_core::reExportFuncToUseGlobalVars() {
 
   echo "core::reExportFuncToUseGlobalVars test_function_to_reexport new_name FIRST_ARG SECOND_ARG THIRD_ARG"
   core::reExportFuncToUseGlobalVars test_function_to_reexport new_name FIRST_ARG SECOND_ARG THIRD_ARG
+  echo "${RETURNED_VALUE}"
 
-  unset -f eval test_function_to_reexport
   test::endTest "Testing core::reExportFuncToUseGlobalVars" 0
 }
 

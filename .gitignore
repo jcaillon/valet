@@ -18,14 +18,16 @@ docs/hugo.exe
 **.received.md
 bin/
 .tmp/
-sandbox.sh
-benchmark.sh
-try.sh
 valet.tar.gz
 **.tag.gz
 **.zip
+
+# playground files
+sandbox.sh
+benchmark.sh
+try.sh
 file
-file2
+file?
 
 # tests
 tests.d/1005-lib-io/resources/gitignored/**
