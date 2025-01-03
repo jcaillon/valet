@@ -8,6 +8,8 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- Add a full screen view with the keyboard shortcuts in edit mode (new interactive::showFullScreenHelp ?).
+- Filtering.. + better count status
 - with debug mode on, we can compute the time spent on each line of a function and try to improve the fuzzy filter sort.
 - add snippets for the Ansi codes. Add snippets on the global variables.
 - check usage of array::fuzzyFilterSort and add back the colors.

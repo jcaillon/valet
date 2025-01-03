@@ -228,6 +228,15 @@ function prompt::input() {
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED}⌝ does not exist."
   fi
 
+  _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY=""
+  if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY} ]]; then
+    if ! command -v "${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}" &>/dev/null; then
+      core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}⌝ does not exist."
+    fi
+  else
+    _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY="prompt::getItemDisplayedString"
+  fi
+
   _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=""
   _PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING=""
 
@@ -270,16 +279,18 @@ function prompt::input() {
 
   # set up the left symbols (> for prompt and the > for selected item)
   if [[ ${_PROMPT_SHOW_SYMBOL} == "true" ]]; then
-    _PROMPT_SYMBOL="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-">"} "
-    _PROMPT_SYMBOL_LENGTH=2
-    _PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-"◆"} "
+    _PROMPT_SYMBOL="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-"> "}"
+    _PROMPT_SYMBOL_LENGTH=${#_PROMPT_SYMBOL}
+    _PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-"█ "}"
     _PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM="░ "
-    _PROMPT_ITEMS_BOX_SYMBOL_LENGTH=2
+    _PROMPT_ITEMS_BOX_SYMBOL_COUNTER="░░"
+    _PROMPT_ITEMS_BOX_SYMBOL_LENGTH=${#_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}
   else
     _PROMPT_SYMBOL=""
     _PROMPT_SYMBOL_LENGTH=0
     _PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM=""
     _PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM=""
+    _PROMPT_ITEMS_BOX_SYMBOL_COUNTER=""
     _PROMPT_ITEMS_BOX_SYMBOL_LENGTH=0
   fi
   _PROMPT_ERROR_BOX_SYMBOL="█ "
@@ -458,21 +469,25 @@ function prompt_setItemsListVariables() {
   _PROMPT_ORIGINAL_ITEMS_COUNT=${#_PROMPT_ORIGINAL_ITEMS[@]}
   _PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX=-1
 
+  local itemCountWidth=$((8 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 4))
+  if (( _PROMPT_ITEMS_BOX_PREFERRED_WIDTH < itemCountWidth )); then
+    # the width necessary to display the count of items
+    _PROMPT_ITEMS_BOX_PREFERRED_WIDTH=${itemCountWidth}
+  fi
+
   if [[ ${_PROMPT_SHOW_SYMBOL} == "true" ]]; then
     _PROMPT_ITEMS_BOX_PREFERRED_WIDTH=$((_PROMPT_ITEMS_BOX_PREFERRED_WIDTH + _PROMPT_ITEMS_BOX_SYMBOL_LENGTH))
   fi
 
-  if (( _PROMPT_ITEMS_BOX_PREFERRED_WIDTH < 2 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 2 )); then
-    # the width necessary to display the count of items
-    _PROMPT_ITEMS_BOX_PREFERRED_WIDTH=$((2 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 2))
+  if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} == "true" ]]; then
+    _PROMPT_FILTERED_ITEMS=()
+  else
+    _PROMPT_FILTERED_ITEMS=("${_PROMPT_ORIGINAL_ITEMS[@]}")
   fi
-
-  _PROMPT_FILTERED_ITEMS=()
   _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
   _PROMPT_FILTERED_ITEMS_START_INDEX=0
   _PROMPT_FILTERED_ITEMS_SELECTED_INDEX=-1
-
-  _PROMPT_ITEMS_BOX_FILTER_STRING=$'\0'
+  _PROMPT_ITEMS_BOX_FILTER_STRING=""
 
   # if the items are too many, we will filter them asynchronously/do not sort them
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 100 ]]; then
@@ -480,6 +495,14 @@ function prompt_setItemsListVariables() {
   fi
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1000 ]]; then
     _PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING="true"
+  fi
+
+  # initial setup of files for async filtering if not done
+  if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY:-true} != "true" && -z ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
+    io::createTempFile
+    _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE="${RETURNED_VALUE}"
+    io::createTempFile
+    _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
   fi
 }
 
@@ -904,30 +927,29 @@ function prompt_setCurrentWord() {
 }
 
 function prompt_filterItems() {
+  if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} != "true" ]]; then
+    return 0
+  fi
+
+  if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY:-true} != "true" ]]; then
+    # asynchronous filtering, kill an already running background job
+    prompt_filterItemsAsyncKill
+  fi
+
   _PROMPT_ITEMS_BOX_FILTER_STRING="${_PROMPT_CURRENT_WORD}"
+
+  # case where we can return the original items
+  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_STRING} ]]; then
+    _PROMPT_FILTERED_ITEMS=("${_PROMPT_ORIGINAL_ITEMS[@]}")
+    _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
+    return 0
+  fi
 
   if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY:-true} == "true" ]]; then
     prompt_filterItemsSync
   else
     # asynchronous filtering
-    if [[ -z ${_PROMPT_CURRENT_WORD} ]]; then
-      # case where we can return the original items
-      _PROMPT_FILTERED_ITEMS=("${_PROMPT_ORIGINAL_ITEMS[@]}")
-      _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
-      return 0
-    fi
-
-    if [[ -z ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
-      io::createTempFile
-      _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE="${RETURNED_VALUE}"
-      io::createTempFile
-      _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
-    fi
-
-    # kill an already running background job
-    prompt_filterItemsAsyncKill
     rm -f "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}" &>/dev/null || :
-
     prompt_filterItemsAsync 1>&2 &
     GLOBAL_BACKGROUND_JOB1_PID="$!"
   fi
@@ -953,7 +975,7 @@ function prompt_filterItemsAsyncKill() {
 
 function prompt_filterItemsSync() {
   # Compute filtered items
-  if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} == "true" && -n ${_PROMPT_ITEMS_BOX_FILTER_STRING} ]]; then
+  if [[ -n ${_PROMPT_ITEMS_BOX_FILTER_STRING} ]]; then
     prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
   else
     _PROMPT_FILTERED_ITEMS=("${_PROMPT_ORIGINAL_ITEMS[@]}")
@@ -999,10 +1021,8 @@ function prompt_drawItemsBox() {
   # draw the items
   _PROMPT_ITEMS_BOX_ITEM_WIDTH="$((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH))"
 
-  local itemString
   local -i line
   local -i showAtLine
-  local -i shownLines=0
   for ((line = 0; line < _PROMPT_ITEMS_BOX_HEIGHT - showCountAtTop; line++)); do
     if [[ ${_PROMPT_ITEMS_BOX_REVERSE_MODE} == "true" ]]; then
       showAtLine=$((_PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_HEIGHT - 1 - line - showCountAtTop))
@@ -1011,45 +1031,79 @@ function prompt_drawItemsBox() {
     fi
     index=$((_PROMPT_FILTERED_ITEMS_START_INDEX + line))
 
+    # position and erase the line
+    toPrint+="${AC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__AC__TO}${AC__ERASE__}${_PROMPT_ITEMS_BOX_WIDTH}${__AC_CHARS}"
+
     if ((index >= ${#_PROMPT_FILTERED_ITEMS[@]})); then
-      # erase the line
-      toPrint+="${AC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__AC__TO}${AC__ERASE__}${_PROMPT_ITEMS_BOX_WIDTH}${__AC_CHARS}"
+      # nothing to show for this line
       continue
     fi
 
-    _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${_PROMPT_FILTERED_ITEMS[index]}"
-    if [[ -n ${_PROMPT_ITEMS_BOX_FILTER_STRING} || ${#_PROMPT_ITEMS_BOX_ITEM_DISPLAYED} -gt ${_PROMPT_ITEMS_BOX_ITEM_WIDTH} ]]; then
-      # TODO: here we can call a custom callback to get the displayed string
-      prompt::getItemDisplayedString
+    if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED} ]]; then
+      if "${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED}" "${_PROMPT_ITEMS_BOX_TOP}" "${_PROMPT_ITEMS_BOX_LEFT}" "${_PROMPT_ITEMS_BOX_WIDTH}" "${_PROMPT_ITEMS_BOX_HEIGHT}"; then
+        return 0
+      fi
     fi
+
+    # get the item display string in RETURNED_VALUE
+    _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${_PROMPT_FILTERED_ITEMS[${index}]}"
+    "${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}"
 
     if ((index == _PROMPT_FILTERED_ITEMS_SELECTED_INDEX)); then
       # highlight the selected item
-      itemString="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
+      toPrint+="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
     else
-      itemString="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
+      toPrint+="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
     fi
-
-    shownLines+=1
-    toPrint+="${AC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__AC__TO}${AC__ERASE__}${_PROMPT_ITEMS_BOX_WIDTH}${__AC_CHARS}${itemString}"
   done
 
-  # display the items count (nb displayed items/nb total items)
+  # display the items count (nb filtered items/nb total items)
   if [[ ${showCount} == "true" ]]; then
     local itemsCounter
-    local itemCounterLength=$((2 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 2))
-    printf -v itemsCounter " %s%0${#_PROMPT_ORIGINAL_ITEMS_COUNT}i%s/%i%s" "${_PROMPT_COLOR_COUNT}" "${shownLines}" "${_PROMPT_COLOR_COUNT_RESET}${_PROMPT_COLOR_STATIC}" "${_PROMPT_ORIGINAL_ITEMS_COUNT}" "${_PROMPT_COLOR_STATIC_RESET}"
-    if ((itemCounterLength > _PROMPT_ITEMS_BOX_WIDTH - 2)); then
-      # case where we do not have the space to display the count
-      itemCounterLength=0
-      itemsCounter=""
-    fi
-    if [[ ${_PROMPT_ITEMS_BOX_REVERSE_MODE} == "true" ]]; then
-      showAtLine=$((showCountAtTop == 1 ? _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_HEIGHT - 1 : _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_HEIGHT - 1 - shownLines))
+    local -i itemCounterLength
+
+    if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
+      # case where we are filtering asynchronously, we display a loading message
+      if ((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH >= 11)); then
+        itemsCounter=" ${_PROMPT_COLOR_COUNT}Filtering…${_PROMPT_COLOR_COUNT_RESET}"
+        itemCounterLength=11
+      else
+        itemsCounter=" ${_PROMPT_COLOR_COUNT}…${_PROMPT_COLOR_COUNT_RESET}"
+        itemCounterLength=2
+      fi
     else
-      showAtLine=$((showCountAtTop == 1 ? _PROMPT_ITEMS_BOX_TOP : _PROMPT_ITEMS_BOX_TOP + shownLines))
+      # case where we display the count
+      local lastItemNumber=$(( _PROMPT_FILTERED_ITEMS_START_INDEX + _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS ))
+      if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} != "true" ]]; then
+        # case of ' 00-00'
+        local itemCounterLength=$((2 + ${#lastItemNumber} * 2))
+        printf -v itemsCounter " %s%0${#lastItemNumber}i-%i%s" "${_PROMPT_COLOR_COUNT}" "${_PROMPT_FILTERED_ITEMS_START_INDEX}" "${lastItemNumber}" "${_PROMPT_COLOR_COUNT_RESET}"
+      else
+        itemCounterLength=$((7 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 2 + ${#lastItemNumber} * 2))
+        if ((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH >= itemCounterLength && _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS > 1)); then
+          # case of ' 00-00 of 00/00'
+          printf -v itemsCounter " %s%0${#lastItemNumber}i-%i%s of %s%0${#_PROMPT_ORIGINAL_ITEMS_COUNT}i%s/%i%s" "${_PROMPT_COLOR_COUNT}" "${_PROMPT_FILTERED_ITEMS_START_INDEX}" "${lastItemNumber}" "${_PROMPT_COLOR_COUNT_RESET}${_PROMPT_COLOR_STATIC}" "${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_COUNT}" "${#_PROMPT_FILTERED_ITEMS[@]}" "${_PROMPT_COLOR_COUNT_RESET}${_PROMPT_COLOR_STATIC}" "${_PROMPT_ORIGINAL_ITEMS_COUNT}" "${_PROMPT_COLOR_STATIC_RESET}"
+        else
+          # case of ' 00/00'
+          local itemCounterLength=$((2 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 2))
+          printf -v itemsCounter " %s%0${#_PROMPT_ORIGINAL_ITEMS_COUNT}i%s/%i%s" "${_PROMPT_COLOR_COUNT}" "${#_PROMPT_FILTERED_ITEMS[@]}" "${_PROMPT_COLOR_COUNT_RESET}${_PROMPT_COLOR_STATIC}" "${_PROMPT_ORIGINAL_ITEMS_COUNT}" "${_PROMPT_COLOR_STATIC_RESET}"
+        fi
+      fi
+
+      if ((itemCounterLength > _PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH)); then
+        # case where we do not have the space to display the count
+        itemCounterLength=0
+        itemsCounter=""
+      fi
     fi
-    toPrint+="${AC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__AC__TO}${_PROMPT_COLOR_STATIC}░─${AC__REPEAT__}$((_PROMPT_ITEMS_BOX_WIDTH - 2 - itemCounterLength))${__AC__LAST_CHAR}${_PROMPT_COLOR_STATIC_RESET}${itemsCounter}"
+
+    if [[ ${_PROMPT_ITEMS_BOX_REVERSE_MODE} == "true" ]]; then
+      showAtLine=$((showCountAtTop == 1 ? _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_HEIGHT - 1 : _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_HEIGHT - 1 - _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS))
+    else
+      showAtLine=$((showCountAtTop == 1 ? _PROMPT_ITEMS_BOX_TOP : _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS))
+    fi
+
+    toPrint+="${AC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__AC__TO}${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_COUNTER}${AC__REPEAT__}$((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH - itemCounterLength))${__AC__LAST_CHAR}${_PROMPT_COLOR_STATIC_RESET}${itemsCounter}"
   fi
 
   printf '%s%s' "${toPrint}" "${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
@@ -1099,51 +1153,51 @@ function prompt::getItemDisplayedString() {
   local -i stringLength=${#_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}
 
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_STRING} && ${stringLength} -le ${_PROMPT_ITEMS_BOX_ITEM_WIDTH} ]]; then
+    # no filter string, no need to truncate
     return 0
   fi
 
-  local itemDisplayed=""
-
-  local -i searchStringIndex
+  local itemDisplayed="" itemChunk itemChunkPiece
+  local -i searchStringIndex=0 itemDisplayedLength=0
   local searchStringCharacter="${_PROMPT_ITEMS_BOX_FILTER_STRING:0:1}"
 
-  local -i index startEscapeIndex
-  local currentCharacter
-  local -i visibleLength=0
-  for ((index = 0; index < stringLength; index++)); do
-    currentCharacter="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED:index:1}"
+  while (( ${#_PROMPT_ITEMS_BOX_ITEM_DISPLAYED} > 0 )); do
+    # take the first chunk that does not contain an escape character
+    itemChunk="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED%%$'\e'*}"
 
-    # skip ANSI escape sequences
-    if [[ ${currentCharacter} == $'\e' ]]; then
-      startEscapeIndex=${index}
-      index=$((index + 3))
-      while [[ ${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED:index:1} != "m" ]]; do
-        index=$((index + 1))
-      done
-      itemDisplayed+="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED:startEscapeIndex:index - startEscapeIndex + 1}"
-      continue
-    fi
-
-    # highlight the letter if necessary
-    if [[ ${currentCharacter} == "${searchStringCharacter}" ]]; then
-      searchStringIndex+=1
-      searchStringCharacter="${_PROMPT_ITEMS_BOX_FILTER_STRING:searchStringIndex:1}"
-      itemDisplayed+="${_PROMPT_COLOR_LETTER_HIGHLIGHT}${currentCharacter}${_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET}"
+    if (( itemDisplayedLength + ${#itemChunk} >= _PROMPT_ITEMS_BOX_ITEM_WIDTH )); then
+      # we reached the desired size
+      itemChunk="${itemChunk:0:$((_PROMPT_ITEMS_BOX_ITEM_WIDTH - 1 - itemDisplayedLength))}…"
+      _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=""
     else
-      itemDisplayed+="${currentCharacter}"
+      # otherwise we will continue in the next loop
+      _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED:${#itemChunk}}"
+      itemDisplayedLength+=${#itemChunk}
     fi
 
-    # stop when we reached the desired size
-    visibleLength=$((visibleLength + 1))
-    if ((visibleLength >= _PROMPT_ITEMS_BOX_ITEM_WIDTH)); then
-      break
+    if [[ -n ${itemChunk} ]]; then
+      # colorize the search string in this chunk
+      while [[ -n ${searchStringCharacter} && ${itemChunk} == *"${searchStringCharacter}"* ]]; do
+        itemChunkPiece="${itemChunk%%"${searchStringCharacter}"*}"
+        itemDisplayed+="${itemChunkPiece}${_PROMPT_COLOR_LETTER_HIGHLIGHT}${searchStringCharacter}${_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET}"
+        itemChunk="${itemChunk:${#itemChunkPiece} + 1}"
+        searchStringIndex+=1
+        searchStringCharacter="${_PROMPT_ITEMS_BOX_FILTER_STRING:searchStringIndex:1}"
+      done
+
+      itemDisplayed+="${itemChunk}"
     fi
+
+    while [[ ${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED} == $'\e'* ]]; do
+      # case where we have an escape sequence at the beginning of the string
+      # we only consider escape sequences for text formatting, they end with m
+      itemChunk="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED%%"m"*}m"
+      itemDisplayed+="${itemChunk}"
+      _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED:${#itemChunk}}"
+    done
   done
 
   _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${itemDisplayed}"
-  if ((index < stringLength)); then
-    _PROMPT_ITEMS_BOX_ITEM_DISPLAYED+="…"
-  fi
 }
 
 # A function to show an error message

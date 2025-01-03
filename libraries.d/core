@@ -1362,17 +1362,16 @@ function array::fuzzyFilter() {
   fi
 
   # prepare the regex for the pattern
-  # the -> '([^t]*)(t[^h]*h[^e]*e)'
-  local patternRegex="([^${pattern:0:1}]*)(${pattern:0:1}"
+  # the -> '[^t]*t[^h]*h[^e]*e'
+  local patternRegex="[^${pattern:0:1}]*${pattern:0:1}"
   local -i index
   for ((index = 1; index < ${#pattern}; index++)); do
     patternRegex+="[^${pattern:index:1}]*${pattern:index:1}"
   done
-  patternRegex+=")"
 
-  # will contain the matched lines, sorted
+  # will contain the matched lines
   RETURNED_ARRAY=()
-  # will contain the original indexes corresponding to the sorted array
+  # will contain the original indexes
   RETURNED_ARRAY2=()
 
   local -i itemIndex
