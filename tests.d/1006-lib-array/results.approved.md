@@ -2,7 +2,7 @@
 
 ## Test script 00.tests
 
-### testArray::ing array::sort
+### Testing array::sort
 
 Exit code: `0`
 
@@ -15,7 +15,7 @@ declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="conventional" [3]=
 declare -a MYARRAY=([0]="abundant" [1]="baby" [2]="breakdown" [3]="constitutional" [4]="conventional" [5]="deliver" [6]="economics" [7]="holiday" [8]="position")
 ```
 
-### tesing array::sortWithCriteria
+### Testing array::sortWithCriteria
 
 Exit code: `0`
 
@@ -29,17 +29,11 @@ declare -a criteria2=([0]="1" [1]="3" [2]="2" [3]="5" [4]="0" [5]="2" [6]="9")
 → array::sortWithCriteria myArray criteria1 criteria2
 declare -a RETURNED_ARRAY=([0]="6" [1]="4" [2]="3" [3]="2" [4]="1" [5]="0" [6]="5")
 declare -a myArray=([0]="g" [1]="e" [2]="d" [3]="c" [4]="b" [5]="a" [6]="f")
+got:      g e d c b a f
 expected: g e d c b a f
-declare -a ARRAY_MATCHES=([0]="one the" [1]="the breakdown" [2]="holding the baby" [3]="the d day")
-declare -a ARRAY_INDEXES=([0]="4" [1]="0" [2]="8" [3]="0")
-declare -a ARRAY_DISTANCES=([0]="0" [1]="0" [2]="0" [3]="0")
-
-→ array::sortWithCriteria ARRAY_MATCHES ARRAY_INDEXES ARRAY_DISTANCES
-declare -a RETURNED_ARRAY=([0]="1" [1]="3" [2]="0" [3]="2")
-declare -a ARRAY_MATCHES=([0]="the breakdown" [1]="the d day" [2]="one the" [3]="holding the baby")
 ```
 
-### testArray::ing array::appendIfNotPresent
+### Testing array::appendIfNotPresent
 
 Exit code: `0`
 
@@ -53,8 +47,7 @@ declare -a MYARRAY=([0]="breakdown" [1]="constitutional")
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
 
 → array::appendIfNotPresent MYARRAY 'breakdown'
-Failed as expected
-0
+1
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
 
 → array::appendIfNotPresent MYARRAY 'holiday'
@@ -62,7 +55,7 @@ declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="holiday")
 ```
 
-### testArray::ing array::isInArray
+### Testing array::isInArray
 
 Exit code: `0`
 
@@ -78,7 +71,7 @@ declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="posi
 1
 ```
 
-### testArray::ing array::makeArraysSameSize
+### Testing array::makeArraysSameSize
 
 Exit code: `0`
 
@@ -96,7 +89,7 @@ declare -a array3=([0]="x" [1]="y" [2]="z" [3]="w")
 declare -a array4=([0]="" [1]="" [2]="" [3]="")
 ```
 
-### testing array::fuzzyFilterSort
+### Testing array::fuzzyFilterSort
 
 Exit code: `0`
 
@@ -118,5 +111,27 @@ declare -a myArray=([0]="On the" [1]="One of the most beautiful" [2]="One of thi
 → array::fuzzyFilterSort the myArray
 declare -a RETURNED_ARRAY=([0]="thaerty" [1]="thazrerty" [2]="On the" [3]="One of the most beautiful" [4]="One of this happy end")
 declare -a RETURNED_ARRAY2=([0]="3" [1]="4" [2]="0" [3]="1" [4]="2")
+```
+
+### Testing array::fuzzyFilter
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+declare -a lines=([0]="this is a word" [1]="very unbelievable" [2]="unbelievable" [3]="self mock1" [4]="self mock2" [5]="ublievable")
+
+→ array::fuzzyFilter evle lines
+declare -a RETURNED_ARRAY=([0]="very unbelievable" [1]="unbelievable" [2]="ublievable")
+declare -a RETURNED_ARRAY2=([0]="1" [1]="2" [2]="5")
+
+→ shopt -s nocasematch; array::fuzzyFilter SC2 lines; shopt -u nocasematch
+declare -a RETURNED_ARRAY=([0]="self mock2")
+declare -a RETURNED_ARRAY2=([0]="4")
+
+→ array::fuzzyFilter nomatch lines
+declare -a RETURNED_ARRAY=()
+declare -a RETURNED_ARRAY2=()
 ```
 

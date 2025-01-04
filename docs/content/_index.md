@@ -1,14 +1,31 @@
 ---
-title: Valet
+title: Valet, a zero dependency tool that helps you build fast, robust, testable and interactive CLI applications in bash.
 layout: hextra-home
 keywords:
+  - valet
   - bash
   - script
   - windows
-  - interactive
-  - menu
   - search
   - string
+  - cli
+  - alternative
+  - parser
+  - library
+  - autocompletion
+  - interactive
+  - fzf
+  - argument-parser
+  - functions
+  - menu
+  - bash-script
+  - bash-scripting
+  - pure-bash
+  - gum
+  - options-parser
+  - jcaillon
+  - framework
+description: With Valet, you can setup and execute tests, code interactive experiences for your users, navigate and execute your scripts (called commands) from a searchable menu interface, and more! It provides libraries of functions that can be sourced to solve standard programming needs such as string, array or file manipulation, prompting the user, and so on...
 ---
 
 <div class="hx-mt-6 hx-mb-6">

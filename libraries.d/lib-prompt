@@ -8,8 +8,6 @@ source ansi-codes
 source interactive
 # shellcheck source=lib-array
 source array
-# shellcheck source=lib-string
-source string
 
 # ## prompt::input
 #
@@ -946,7 +944,7 @@ function prompt_filterItems() {
   fi
 
   if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY:-true} == "true" ]]; then
-    prompt_filterItemsSync
+    prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
   else
     # asynchronous filtering
     rm -f "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}" &>/dev/null || :
@@ -956,7 +954,7 @@ function prompt_filterItems() {
 }
 
 function prompt_filterItemsAsync() {
-  prompt_filterItemsSync
+  prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
   local IFS=$'\n'
   if (( ${#_PROMPT_FILTERED_ITEMS[@]} > 0 )); then
     echo "${_PROMPT_FILTERED_ITEMS[*]}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
@@ -970,16 +968,6 @@ function prompt_filterItemsAsyncKill() {
   if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
     kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
     unset -v GLOBAL_BACKGROUND_JOB1_PID
-  fi
-}
-
-function prompt_filterItemsSync() {
-  # Compute filtered items
-  if [[ -n ${_PROMPT_ITEMS_BOX_FILTER_STRING} ]]; then
-    prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
-  else
-    _PROMPT_FILTERED_ITEMS=("${_PROMPT_ORIGINAL_ITEMS[@]}")
-    _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
   fi
 }
 
@@ -1260,8 +1248,7 @@ function prompt_clearErrorBox() {
   _PROMPT_ERROR_BOX_SHOWN=false
 }
 
-# Modifies the selected item index.
-# Make it loop.
+# Modifies the selected item index and adjust the start index if necessary.
 #
 # - $1: **delta** _as integer_:
 #       The delta to apply to the current index.
@@ -1324,6 +1311,7 @@ function prompt_changeSelectedItemIndex() {
 }
 
 # Modifies the cursor index in the user string.
+# Makes sure that the index is within the string boundaries.
 #
 # - $1: **delta** _as integer_:
 #       The delta to apply to the current cursor index.
@@ -1351,6 +1339,10 @@ function prompt_changePromptCursorIndex() {
 #
 # - $1: **text** _as string_:
 #       The text to insert.
+#
+# ```bash
+# prompt_insertTextAtCurrentIndex "text to insert"
+# ```
 function prompt_insertTextAtCurrentIndex() {
   if ((_PROMPT_STRING_INDEX > 0)); then
     if ((_PROMPT_STRING_INDEX >= ${#_PROMPT_STRING})); then
@@ -1364,7 +1356,14 @@ function prompt_insertTextAtCurrentIndex() {
   prompt_changePromptCursorIndex ${#1}
 }
 
-# Change the prompt text, replacing the whole line or the word under the cursor.
+# Change the prompt text, replacing the whole line or the word under the cursor
+# by the currently selected item in the items box.
+#
+# If no item is selected, nothing is done.
+#
+# ```bash
+# prompt_autocompleteWithSelectedItem
+# ```
 function prompt_autocompleteWithSelectedItem() {
   if [[ ${_PROMPT_ITEMS_BOX_SHOWN} != "true" ]]; then
     return 0
@@ -1444,9 +1443,123 @@ function prompt_getCurrentInitialItemsIndex() {
   RETURNED_VALUE=-1
 }
 
+
+# ## prompt_getDisplayedPromptString
+#
+# This function return a string that can be printed in a terminal in order to display a text
+# and position the cursor at a given index in the input text.
+#
+# If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed
+# at the beginning and/or at the end of the string.
+#
+# The cursor will be displayed under the character at the given index of the input text and
+# it makes sure that the cursor is always visible in the screen.
+#
+# This function is useful to display a long prompt on a single line.
+#
+# An example:
+#
+# ```text
+# _PROMPT_STRING_SCREEN_WIDTH=10
+# _PROMPT_STRING_INDEX=20
+# _PROMPT_STRING="This is a long string that will be displayed in the screen."
+# #                                ^ input index 20
+# prompt_getDisplayedPromptString 20 10
+# # output: "…g string…"
+# #                  ^ screen cursor (at index 8)
+# ```
+#
+# - $1: **input string** _as string_:
+#       the string to display
+# - $2: **input index** _as int_:
+#       the index of the character (in the input string) that should be under the cursor
+# - $3: **screen width** _as int_:
+#       the width of the screen
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the string to display in the screen
+# - `RETURNED_VALUE2`: the index at which to position the cursor on screen
+#
+# ```bash
+# prompt_getDisplayedPromptString "This is a long string that will be displayed in the screen." 20 10
+# ```
+function prompt_getDisplayedPromptString() {
+  local -i inputLength=${#_PROMPT_STRING}
+  local -i screenIndex
+
+  # compute where we will display the cursor in the display
+  if ((_PROMPT_STRING_INDEX >= _PROMPT_STRING_SCREEN_WIDTH)); then
+    if ((_PROMPT_STRING_INDEX >= inputLength - 1)); then
+      # we display it in the last position if it is at the end of the string
+      screenIndex=$((_PROMPT_STRING_SCREEN_WIDTH - 1))
+    else
+      # we display at the second last position if it is not at the end
+      screenIndex=$((_PROMPT_STRING_SCREEN_WIDTH - 2))
+    fi
+  else
+    if ((inputLength > _PROMPT_STRING_SCREEN_WIDTH && inputLength - _PROMPT_STRING_INDEX == 2)); then
+      screenIndex=$((_PROMPT_STRING_SCREEN_WIDTH - 2))
+    else
+      if ((inputLength > _PROMPT_STRING_SCREEN_WIDTH && _PROMPT_STRING_SCREEN_WIDTH - _PROMPT_STRING_INDEX == 1)); then
+        # if within the display but at the last character and we will need to display ellipsis...
+        screenIndex=$((_PROMPT_STRING_SCREEN_WIDTH - 2))
+      else
+        # if it is already within the display, we display it at the right position
+        screenIndex=${_PROMPT_STRING_INDEX}
+      fi
+    fi
+  fi
+
+  local -i screenLeftLength=$((screenIndex))
+  local -i realLeftLength=$((_PROMPT_STRING_INDEX))
+
+  local screenString=""
+
+  # compute what to display at the left of the character under the caret (if any)
+  if ((screenLeftLength > 0)); then
+    if ((realLeftLength > screenLeftLength)); then
+      # we can't display the whole left string, so we display ellipsis
+      if ((screenLeftLength > 1)); then
+        screenString+="…${_PROMPT_STRING:realLeftLength - screenLeftLength + 1:screenLeftLength - 1}"
+      else
+        screenString+="…"
+      fi
+    else
+      screenString+="${_PROMPT_STRING:realLeftLength - screenLeftLength:screenLeftLength}"
+    fi
+  fi
+
+  # compute the character to display under the caret (if any)
+  if ((inputLength > 0 && _PROMPT_STRING_INDEX <= inputLength)); then
+    screenString+="${_PROMPT_STRING:_PROMPT_STRING_INDEX:1}"
+  fi
+
+  # compute what to display at the right of the character under the caret (if any)
+  local -i screenRightLength=$((_PROMPT_STRING_SCREEN_WIDTH - screenIndex - 1))
+  local -i realRightLength=$((inputLength - _PROMPT_STRING_INDEX - 1))
+
+  if ((screenRightLength > 0)); then
+    if ((realRightLength > screenRightLength)); then
+      # we can't display the whole right string, so we display ellipsis
+      if ((screenRightLength > 1)); then
+        screenString+="${_PROMPT_STRING:inputLength - realRightLength:screenRightLength - 1}…"
+      else
+        screenString+="…"
+      fi
+    else
+      screenString+="${_PROMPT_STRING:inputLength - realRightLength:screenRightLength}"
+    fi
+  fi
+
+  RETURNED_VALUE="${screenString}"
+  RETURNED_VALUE2=${screenIndex}
+}
+
+
+
 # we redefine string::FitStringInScreen to a new function that uses global variables
 # this is to avoid copying parameters to the function and hopefully be faster
-function prompt_getDisplayedPromptString() { :; }
 core::reExportFuncToUseGlobalVars string::fitStringInScreen prompt_getDisplayedPromptString _PROMPT_STRING _PROMPT_STRING_INDEX _PROMPT_STRING_SCREEN_WIDTH
 eval "${RETURNED_VALUE}"
 

@@ -4,6 +4,7 @@ cascade:
   type: docs
 weight: 2
 url: /docs/installation
+description: Learn how to install Valet on your system.
 ---
 
 ## 📦 Dependencies
