@@ -50,7 +50,7 @@ function benchmark::run() {
   fi
   local IFS=','
   local function
-  local longestFunctionNameLength=0
+  local longestFunctionNameLength=13
 
   if [[ -n ${functions} ]]; then
     for function in ${functions}; do
@@ -132,13 +132,13 @@ function benchmark::run() {
 
   # print the results
   local line
-  printf -v line "%-${longestFunctionNameLength}s ░ %-13s ░ %s\n" "Function name" "Average time" "% slower than fastest"
+  printf -v line "%-${longestFunctionNameLength}s ░ %-13s ░ %s\n" "Function name" "Average time" "Compared to fastest"
   local result="Benchmark results from fastest to slowest:"$'\n'$'\n'"${line}░${AC__REPEAT__}$((longestFunctionNameLength + 39))${__AC__LAST_CHAR}"$'\n'
-  local fastestElapsed="${_BENCHMARK_ELAPSED_TIMES[0]}"
+  local fastestElapsed="${functionsElapsed["${_BENCHMARK_FUNCTIONS[0]}"]}"
   local -i index=0
   for function in "${_BENCHMARK_FUNCTIONS[@]}"; do
     local averageTime="$((functionsElapsed[${function}] / baselineRuns))"
-    local percentSlowerThanFastest="$(( (functionsElapsed[${function}] - fastestElapsed) * 100 / fastestElapsed ))%"
+    local percentSlowerThanFastest="+$(( (functionsElapsed[${function}] - fastestElapsed) * 100 / fastestElapsed ))%"
     string::microsecondsToHuman "${averageTime}" "%SS.%LLs %UUµs"
     if (( index == 0 )); then
       percentSlowerThanFastest="N/A"
@@ -147,5 +147,8 @@ function benchmark::run() {
     result+="${line}"
     index+=1
   done
+
+  unset -v _BENCHMARK_FUNCTIONS _BENCHMARK_ELAPSED_TIMES
+
   log::success "${result}"
 }

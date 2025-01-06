@@ -273,6 +273,7 @@ function array::fuzzyFilterSort() {
 
     # we have a match, now we need to sort it by firstCharacters then matchedLengths
     # the sortedIndexes array will contain the indexes of the sorted array
+    #TODO: implement a quicksort
     loopIndex=0
     while (( loopIndex < ${#sortedIndexes[@]} )); do
       if ((firstCharacters[sortedIndexes[loopIndex]] > firstCharacter)); then

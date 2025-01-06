@@ -212,7 +212,7 @@ function prompt::input() {
   _PROMPT_PASSWORD_MODE="${19:-${_OPTION_PASSWORD_MODE:-false}}"
 
   _PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE="${20:-${_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE:-}}"
-    if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE} ]] && ! command -v "${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}" &>/dev/null; then
+  if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE} ]] && ! command -v "${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}" &>/dev/null; then
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}⌝ does not exist."
   fi
 
@@ -237,6 +237,7 @@ function prompt::input() {
 
   _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=""
   _PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING=""
+  _PROMPT_ITEMS_BOX_FILTER_USING_GREP=""
 
   # set up colors
   if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
@@ -451,7 +452,7 @@ function prompt_setItemsListVariables() {
     for item in "${_PROMPT_ORIGINAL_ITEMS[@]}"; do
       if ((${#item} > _PROMPT_ITEMS_BOX_PREFERRED_WIDTH)); then
         _PROMPT_ITEMS_BOX_PREFERRED_WIDTH=${#item}
-        if (( _PROMPT_ITEMS_BOX_PREFERRED_WIDTH > GLOBAL_COLUMNS )); then
+        if ((_PROMPT_ITEMS_BOX_PREFERRED_WIDTH > GLOBAL_COLUMNS)); then
           break
         fi
       fi
@@ -468,7 +469,7 @@ function prompt_setItemsListVariables() {
   _PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX=-1
 
   local itemCountWidth=$((8 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 4))
-  if (( _PROMPT_ITEMS_BOX_PREFERRED_WIDTH < itemCountWidth )); then
+  if ((_PROMPT_ITEMS_BOX_PREFERRED_WIDTH < itemCountWidth)); then
     # the width necessary to display the count of items
     _PROMPT_ITEMS_BOX_PREFERRED_WIDTH=${itemCountWidth}
   fi
@@ -487,12 +488,17 @@ function prompt_setItemsListVariables() {
   _PROMPT_FILTERED_ITEMS_SELECTED_INDEX=-1
   _PROMPT_ITEMS_BOX_FILTER_STRING=""
 
-  # if the items are too many, we will filter them asynchronously/do not sort them
-  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 100 ]]; then
+  # if the items are too many, we will filter them asynchronously/filter with grep
+  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 150 ]]; then
     _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY="false"
   fi
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1000 ]]; then
     _PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING="true"
+  fi
+  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1000 ]]; then
+    if command -v grep &>/dev/null && command -v awk &>/dev/null; then
+      _PROMPT_ITEMS_BOX_FILTER_USING_GREP="true"
+    fi
   fi
 
   # initial setup of files for async filtering if not done
@@ -502,12 +508,22 @@ function prompt_setItemsListVariables() {
     io::createTempFile
     _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
   fi
+
+  # initial setup of files for grep filtering
+  if [[ ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP:-true} != "true" && -z ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
+    io::createTempFile
+    _PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS="${RETURNED_VALUE}"
+    local IFS=$'\n'
+    echo "${_PROMPT_ORIGINAL_ITEMS[*]}" >"${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}"
+    io::createTempFile
+    _PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1="${RETURNED_VALUE}"
+  fi
 }
 
 # define the callback function called when a special key is pressed
 # shellcheck disable=SC2317
 function prompt_onKeyBindingPress() {
-  prompt_onKeyPressed "${1}" "";
+  prompt_onKeyPressed "${1}" ""
 }
 
 # Called when a key is pressed.
@@ -671,7 +687,7 @@ function prompt_onKeyPressed() {
       tempUserString=""
     fi
     if ((_PROMPT_STRING_INDEX < ${#_PROMPT_STRING} - 1)); then
-      tempUserString+="${_PROMPT_STRING:_PROMPT_STRING_INDEX + 1}"
+      tempUserString+="${_PROMPT_STRING:_PROMPT_STRING_INDEX+1}"
     fi
     _PROMPT_STRING="${tempUserString}"
     prompt_onTextChanged
@@ -680,7 +696,7 @@ function prompt_onKeyPressed() {
     # delete the character before the cursor
     if ((_PROMPT_STRING_INDEX > 0)); then
       if ((_PROMPT_STRING_INDEX > 1)); then
-        _PROMPT_STRING="${_PROMPT_STRING:0:_PROMPT_STRING_INDEX - 1}${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
+        _PROMPT_STRING="${_PROMPT_STRING:0:_PROMPT_STRING_INDEX-1}${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
       else
         _PROMPT_STRING="${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
       fi
@@ -694,7 +710,7 @@ function prompt_onKeyPressed() {
     prompt_getIndexDeltaToEndOfWord
     prompt_changePromptCursorIndex "${RETURNED_VALUE}"
     if ((_PROMPT_STRING_INDEX > oldIndex)); then
-      _PROMPT_KILLED_STRING="${_PROMPT_STRING:${oldIndex}:_PROMPT_STRING_INDEX - oldIndex}"
+      _PROMPT_KILLED_STRING="${_PROMPT_STRING:${oldIndex}:_PROMPT_STRING_INDEX-oldIndex}"
       if ((oldIndex > 0)); then
         _PROMPT_STRING="${_PROMPT_STRING:0:${oldIndex}}${_PROMPT_STRING:${_PROMPT_STRING_INDEX}}"
       else
@@ -710,7 +726,7 @@ function prompt_onKeyPressed() {
     prompt_getIndexDeltaToBeginningOfWord
     prompt_changePromptCursorIndex "${RETURNED_VALUE}"
     if ((oldIndex > _PROMPT_STRING_INDEX)); then
-      _PROMPT_KILLED_STRING="${_PROMPT_STRING:_PROMPT_STRING_INDEX:oldIndex - _PROMPT_STRING_INDEX}"
+      _PROMPT_KILLED_STRING="${_PROMPT_STRING:_PROMPT_STRING_INDEX:oldIndex-_PROMPT_STRING_INDEX}"
       if ((_PROMPT_STRING_INDEX > 0)); then
         _PROMPT_STRING="${_PROMPT_STRING:0:_PROMPT_STRING_INDEX}${_PROMPT_STRING:oldIndex}"
       else
@@ -736,7 +752,7 @@ function prompt_onKeyPressed() {
     fi
 
     # if it is too long warn the user
-    if (( ${#_PROMPT_STRING} >= _PROMPT_STRING_MAX_LENGTH )); then
+    if ((${#_PROMPT_STRING} >= _PROMPT_STRING_MAX_LENGTH)); then
       prompt_showError "The input can't exceed a maximum of ${_PROMPT_STRING_MAX_LENGTH} characters."
       # read the stream until the end to clear the buffer
       local IFS
@@ -777,7 +793,7 @@ function prompt_onKeyPressed() {
       else
         # count the number of characters that are not spaces before the cursor
         local -i count=0
-        while [[ ${count} -lt ${_PROMPT_FILTERS_FROM_N_CHARS} && $((_PROMPT_STRING_INDEX - count - 1)) -gt 0 && ${_PROMPT_STRING:_PROMPT_STRING_INDEX - count - 1:1} == [^[:space:]] ]]; do
+        while [[ ${count} -lt ${_PROMPT_FILTERS_FROM_N_CHARS} && $((_PROMPT_STRING_INDEX - count - 1)) -gt 0 && ${_PROMPT_STRING:_PROMPT_STRING_INDEX-count-1:1} == [^[:space:]] ]]; do
           count+=1
         done
         if ((count >= _PROMPT_FILTERS_FROM_N_CHARS)); then
@@ -799,9 +815,9 @@ function prompt_onTextChanged() {
   fi
 
   # truncate the string if it is too long and warn the user
-  if (( ${#_PROMPT_STRING} > _PROMPT_STRING_MAX_LENGTH )); then
+  if ((${#_PROMPT_STRING} > _PROMPT_STRING_MAX_LENGTH)); then
     _PROMPT_STRING="${_PROMPT_STRING:0:_PROMPT_STRING_MAX_LENGTH}"
-    if (( _PROMPT_STRING_INDEX > _PROMPT_STRING_MAX_LENGTH )); then
+    if ((_PROMPT_STRING_INDEX > _PROMPT_STRING_MAX_LENGTH)); then
       _PROMPT_STRING_INDEX=${_PROMPT_STRING_MAX_LENGTH}
     fi
     prompt_showError "The input exceeds the maximum of ${_PROMPT_STRING_MAX_LENGTH} characters, it has been truncated."
@@ -881,7 +897,7 @@ function prompt_openItemsBox() {
   _PROMPT_ITEMS_BOX_HEIGHT="${RETURNED_VALUE4}"
 
   _PROMPT_ITEMS_BOX_REVERSE_MODE="false"
-  if (( _PROMPT_ITEMS_BOX_TOP < _PROMPT_START_LINE )); then
+  if ((_PROMPT_ITEMS_BOX_TOP < _PROMPT_START_LINE)); then
     _PROMPT_ITEMS_BOX_REVERSE_MODE="true"
   fi
 
@@ -891,7 +907,7 @@ function prompt_openItemsBox() {
 
 function prompt_updateItemsBox() {
   # if the box is opened and the previous character is a space, we close the box
-  if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" && ${_PROMPT_AUTOCOMPLETE_WHOLE_LINE} != "true" && ${_PROMPT_STRING_INDEX} -gt 0 && ${_PROMPT_STRING:_PROMPT_STRING_INDEX - 1:1} == [[:space:]] ]]; then
+  if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" && ${_PROMPT_AUTOCOMPLETE_WHOLE_LINE} != "true" && ${_PROMPT_STRING_INDEX} -gt 0 && ${_PROMPT_STRING:_PROMPT_STRING_INDEX-1:1} == [[:space:]] ]]; then
     prompt_clearItemsBox
   fi
 
@@ -910,13 +926,13 @@ function prompt_setCurrentWord() {
     _PROMPT_CURRENT_WORD="${_PROMPT_STRING}"
   else
     # we take the current word
-    if [[ ${_PROMPT_STRING_INDEX} -eq 0 || ${_PROMPT_STRING:_PROMPT_STRING_INDEX - 1:1} == [[:space:]] ]]; then
+    if [[ ${_PROMPT_STRING_INDEX} -eq 0 || ${_PROMPT_STRING:_PROMPT_STRING_INDEX-1:1} == [[:space:]] ]]; then
       # if we are at the beginning of the line, or the previous character is a space
       _PROMPT_CURRENT_WORD=""
     else
       prompt_getIndexDeltaToBeginningOfWord
       if ((RETURNED_VALUE < 0)); then
-        _PROMPT_CURRENT_WORD="${_PROMPT_STRING:_PROMPT_STRING_INDEX + RETURNED_VALUE:-1 * RETURNED_VALUE}"
+        _PROMPT_CURRENT_WORD="${_PROMPT_STRING:_PROMPT_STRING_INDEX+RETURNED_VALUE:-1*RETURNED_VALUE}"
       else
         _PROMPT_CURRENT_WORD=""
       fi
@@ -954,13 +970,71 @@ function prompt_filterItems() {
 }
 
 function prompt_filterItemsAsync() {
-  prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
-  local IFS=$'\n'
-  if (( ${#_PROMPT_FILTERED_ITEMS[@]} > 0 )); then
-    echo "${_PROMPT_FILTERED_ITEMS[*]}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
-    echo "${_PROMPT_FILTERED_ITEMS_CORRESPONDENCES[*]}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+  if [[ ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} == "true" ]]; then
+    # sort with grep and awk
+    grep '[^t]*t[^h]*h[^e]*e' "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}" >"${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}"
+    awk '
+      # Store each line and its key for sorting
+      {
+        if (match($0, /([^t]*)(t[^h]*h[^e]*e)/, m)) {
+          idx = idx + 1;
+          # Store the full line
+          lines[idx] = $0
+          # Store the keys for sorting
+          keys[idx] = sprintf("%d%04d", length(m[1]), length(m[2]))
+        }
+      }
+      END {
+        # Sort and print the data
+        n = length(lines)
+        quicksort(keys, lines, 1, n)
+
+        # Print sorted results
+        for (i = 1; i <= n; i++) {
+          print lines[i]
+        }
+      }
+      # Quicksort implementation from https://stackoverflow.com/questions/17048188/how-to-use-awk-sort-by-column-3
+      function quicksort(keys, lines, left, right) {
+        if (left >= right) return
+
+        # Choose pivot (middle element)
+        pivot_idx = int((left + right) / 2)
+        pivot = keys[pivot_idx]
+
+        # Partition
+        i = left
+        j = right
+        while (i <= j) {
+          while (compare(keys[i], pivot) < 0) i++
+          while (compare(keys[j], pivot) > 0) j--
+          if (i <= j) {
+            temp_key = keys[i]
+            temp_line = lines[i]
+            keys[i] = keys[j]
+            lines[i] = lines[j]
+            keys[j] = temp_key
+            lines[j] = temp_line
+            i++
+            j--
+          }
+        }
+        # Recursive calls
+        if (left < j) quicksort(keys, lines, left, j)
+        if (i < right) quicksort(keys, lines, i, right)
+      }
+      function compare(a, b) { return (a + 0) - (b + 0) }
+    ' "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
   else
-    : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+    # sort with bash
+    prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
+    local IFS=$'\n'
+    if ((${#_PROMPT_FILTERED_ITEMS[@]} > 0)); then
+      echo "${_PROMPT_FILTERED_ITEMS[*]}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+      echo "${_PROMPT_FILTERED_ITEMS_CORRESPONDENCES[*]}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+    else
+      : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+    fi
   fi
 }
 
@@ -987,7 +1061,7 @@ function prompt_drawItemsBox() {
   local showCount=false
   local showCountAtTop=0
   if [[ ${_PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT} == "true" || ${#_PROMPT_FILTERED_ITEMS[@]} -gt ${_PROMPT_ITEMS_BOX_HEIGHT} || ${#_PROMPT_FILTERED_ITEMS[@]} -ne ${_PROMPT_ORIGINAL_ITEMS_COUNT} ]]; then
-    if (( _PROMPT_ITEMS_BOX_HEIGHT > 1 || ( _PROMPT_ITEMS_BOX_HEIGHT == 1 && ${#_PROMPT_FILTERED_ITEMS[@]} == 0 ) )); then
+    if ((_PROMPT_ITEMS_BOX_HEIGHT > 1 || (_PROMPT_ITEMS_BOX_HEIGHT == 1 && ${#_PROMPT_FILTERED_ITEMS[@]} == 0))); then
       # we show the count if:
       # - we force its display
       # - we have more items than the box can display
@@ -1061,7 +1135,7 @@ function prompt_drawItemsBox() {
       fi
     else
       # case where we display the count
-      local lastItemNumber=$(( _PROMPT_FILTERED_ITEMS_START_INDEX + _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS ))
+      local lastItemNumber=$((_PROMPT_FILTERED_ITEMS_START_INDEX + _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS))
       if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} != "true" ]]; then
         # case of ' 00-00'
         local itemCounterLength=$((2 + ${#lastItemNumber} * 2))
@@ -1149,11 +1223,11 @@ function prompt::getItemDisplayedString() {
   local -i searchStringIndex=0 itemDisplayedLength=0
   local searchStringCharacter="${_PROMPT_ITEMS_BOX_FILTER_STRING:0:1}"
 
-  while (( ${#_PROMPT_ITEMS_BOX_ITEM_DISPLAYED} > 0 )); do
+  while ((${#_PROMPT_ITEMS_BOX_ITEM_DISPLAYED} > 0)); do
     # take the first chunk that does not contain an escape character
     itemChunk="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED%%$'\e'*}"
 
-    if (( itemDisplayedLength + ${#itemChunk} > _PROMPT_ITEMS_BOX_ITEM_WIDTH )); then
+    if ((itemDisplayedLength + ${#itemChunk} > _PROMPT_ITEMS_BOX_ITEM_WIDTH)); then
       # we reached the desired size
       itemChunk="${itemChunk:0:$((_PROMPT_ITEMS_BOX_ITEM_WIDTH - 1 - itemDisplayedLength))}…"
       _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=""
@@ -1168,7 +1242,7 @@ function prompt::getItemDisplayedString() {
       while [[ -n ${searchStringCharacter} && ${itemChunk} == *"${searchStringCharacter}"* ]]; do
         itemChunkPiece="${itemChunk%%"${searchStringCharacter}"*}"
         itemDisplayed+="${itemChunkPiece}${_PROMPT_COLOR_LETTER_HIGHLIGHT}${searchStringCharacter}${_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET}"
-        itemChunk="${itemChunk:${#itemChunkPiece} + 1}"
+        itemChunk="${itemChunk:${#itemChunkPiece}+1}"
         searchStringIndex+=1
         searchStringCharacter="${_PROMPT_ITEMS_BOX_FILTER_STRING:searchStringIndex:1}"
       done
@@ -1385,7 +1459,7 @@ function prompt_autocompleteWithSelectedItem() {
     prompt_insertTextAtCurrentIndex "${selectedItem}"
   else
     # we replace the current word with the autocompleted one
-    local -i beginIndexToReplace=$((_PROMPT_STRING_INDEX -${#_PROMPT_CURRENT_WORD}))
+    local -i beginIndexToReplace=$((_PROMPT_STRING_INDEX - ${#_PROMPT_CURRENT_WORD}))
     if ((beginIndexToReplace > 0)); then
       _PROMPT_STRING="${_PROMPT_STRING:0:beginIndexToReplace}${selectedItem}${_PROMPT_STRING:_PROMPT_STRING_INDEX}"
     else
@@ -1407,7 +1481,7 @@ function prompt_getIndexDeltaToBeginningOfWord() {
     index+=-1
   done
   while [[ ${index} -gt 0 && ${_PROMPT_STRING:index:1} == [^[:space:]] ]]; do
-    if [[ ${index} -ge 1 && ${_PROMPT_STRING:index - 1:1} == [[:space:]] ]]; then
+    if [[ ${index} -ge 1 && ${_PROMPT_STRING:index-1:1} == [[:space:]] ]]; then
       break
     fi
     index=$((index - 1))
@@ -1442,7 +1516,6 @@ function prompt_getCurrentInitialItemsIndex() {
   fi
   RETURNED_VALUE=-1
 }
-
 
 # ## prompt_getDisplayedPromptString
 #
@@ -1521,12 +1594,12 @@ function prompt_getDisplayedPromptString() {
     if ((realLeftLength > screenLeftLength)); then
       # we can't display the whole left string, so we display ellipsis
       if ((screenLeftLength > 1)); then
-        screenString+="…${_PROMPT_STRING:realLeftLength - screenLeftLength + 1:screenLeftLength - 1}"
+        screenString+="…${_PROMPT_STRING:realLeftLength-screenLeftLength+1:screenLeftLength-1}"
       else
         screenString+="…"
       fi
     else
-      screenString+="${_PROMPT_STRING:realLeftLength - screenLeftLength:screenLeftLength}"
+      screenString+="${_PROMPT_STRING:realLeftLength-screenLeftLength:screenLeftLength}"
     fi
   fi
 
@@ -1543,12 +1616,12 @@ function prompt_getDisplayedPromptString() {
     if ((realRightLength > screenRightLength)); then
       # we can't display the whole right string, so we display ellipsis
       if ((screenRightLength > 1)); then
-        screenString+="${_PROMPT_STRING:inputLength - realRightLength:screenRightLength - 1}…"
+        screenString+="${_PROMPT_STRING:inputLength-realRightLength:screenRightLength-1}…"
       else
         screenString+="…"
       fi
     else
-      screenString+="${_PROMPT_STRING:inputLength - realRightLength:screenRightLength}"
+      screenString+="${_PROMPT_STRING:inputLength-realRightLength:screenRightLength}"
     fi
   fi
 

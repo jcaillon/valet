@@ -28,6 +28,7 @@ For more details, please check the documentation on each library:
 {{< cards >}}
   {{< card link="ansi-codes" icon="code" title="ansi-code" subtitle="This library exports variables containing ASCII escape codes, enabling interactive programs." >}}
   {{< card link="array" icon="clipboard-list" title="array" subtitle="Functions to manipulate bash arrays." >}}
+  {{< card link="benchmark" icon="trending-up" title="benchmark" subtitle="Functions to benchmark bash functions." >}}
   {{< card link="core" icon="star" title="core" subtitle="The core functions of Valet." >}}
   {{< card link="fsfs" icon="table" title="fsfs" subtitle="Functions to display a full screen fuzzy search, which is used for the Valet menus." >}}
   {{< card link="interactive" icon="cursor-click" title="interactive" subtitle="Functions to make your program interactive." >}}

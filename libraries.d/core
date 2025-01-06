@@ -8,6 +8,9 @@ set -Eeu -o pipefail
 # we check for this variable to know if this script has already been included
 GLOBAL_CORE_INCLUDED=1
 
+# Remember the time the program started (nb of seconds since epoch)
+GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
+
 # Handle the case where this script was io::invoked outside of valet
 if [[ -z "${GLOBAL_VALET_HOME:-}" ]]; then
   GLOBAL_VALET_HOME="${BASH_SOURCE[0]}"
@@ -36,10 +39,6 @@ if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_S
   source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
 fi
 
-# Since we use _OPTION_* variables to pass optional options to functions, we want to make sure
-# to not create collisions so we unset them here.
-unset -v ${!_OPTION_*}
-
 #===============================================================
 # >>> Temporary files and folders
 #===============================================================
@@ -60,7 +59,6 @@ function io::setupTempFileGlobalVariable() {
   GLOBAL_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_PREFIX}${BASHPID}.valet.d"
   while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; do GLOBAL_TEMPORARY_DIRECTORY+="x"; done
 }
-io::setupTempFileGlobalVariable
 
 # ## io::createTempFile
 #
@@ -153,13 +151,6 @@ function io::cleanupTempFiles() {
 # >>> Logging
 #===============================================================
 
-# determine if we support colors (can be overridden by the user with VALET_CONFIG_ENABLE_COLORS)
-case "${TERM:-}" in
-xterm-color | xterm-256color | linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}" ;;
-xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
-*) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
-esac
-
 # ## interactive::getTerminalSize
 #
 # This function exports the terminal size.
@@ -185,16 +176,6 @@ function interactive::getTerminalSize() {
   GLOBAL_LINES="${LINES:-30}"
   shopt -u checkwinsize
 }
-
-# Export terminal size on window resize if we are in interactive mode.
-if [[ -t 2 ]]; then
-  interactive::getTerminalSize
-  GLOBAL_SCREEN_REDRAW_REQUIRED=false
-  trap 'interactive::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true;' SIGWINCH
-else
-  GLOBAL_COLUMNS="${VALET_DEFAULT_COLUMNS:-120}"
-  GLOBAL_LINES="${VALET_DEFAULT_LINES:-30}"
-fi
 
 # ## log::setLevel
 #
@@ -564,8 +545,6 @@ function log::createPrintFunction() {
     '"${standardPrintStatement}"'
   }'
 }
-log::createPrintFunction
-eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
 # ## core::fail
 #
@@ -1010,8 +989,6 @@ function core::getVersion() {
   io::readFile "${GLOBAL_VALET_HOME}/version"
 }
 
-GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
-
 # ## core::getProgramElapsedMicroseconds
 #
 # Get the elapsed time in µs since the program started.
@@ -1093,7 +1070,7 @@ function core::reExportFuncToUseGlobalVars() {
 # >>> String utilities
 #===============================================================
 
-# ## string::wrapCharacters
+# ## string::wrapText
 #
 # Allows to soft wrap the given text at the given width.
 # Wrapping is done at word boundaries.
@@ -1543,6 +1520,34 @@ function core::checkParseResults() {
 #===============================================================
 # >>> Main
 #===============================================================
+
+# Setup global variables that will be used for temporary files and folders.
+io::setupTempFileGlobalVariable
+
+# Since we use _OPTION_* variables to pass optional options to functions, we want to make sure
+# to not create collisions so we unset them here.
+unset -v ${!_OPTION_*}
+
+# determine if we support colors (can be overridden by the user with VALET_CONFIG_ENABLE_COLORS)
+case "${TERM:-}" in
+xterm-color | xterm-256color | linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}" ;;
+xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
+*) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
+esac
+
+# Export terminal size on window resize if we are in interactive mode.
+if [[ -t 2 ]]; then
+  interactive::getTerminalSize
+  GLOBAL_SCREEN_REDRAW_REQUIRED=false
+  trap 'interactive::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true;' SIGWINCH
+else
+  GLOBAL_COLUMNS="${VALET_DEFAULT_COLUMNS:-120}"
+  GLOBAL_LINES="${VALET_DEFAULT_LINES:-30}"
+fi
+
+# Declare the print functions
+log::createPrintFunction
+eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
 # Parsing the options from environment variables
 if [[ -n "${VALET_LOG_LEVEL:-}" ]]; then
