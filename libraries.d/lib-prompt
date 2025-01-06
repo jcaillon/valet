@@ -839,7 +839,7 @@ function prompt_drawPrompt() {
     return 0
   fi
 
-  # use interactive::showStringInScreen with global the variables: _PROMPT_STRING, _PROMPT_STRING_INDEX, _PROMPT_WIDTH
+  # use interactive::showStringInScreen with global the variables: _PROMPT_STRING, _PROMPT_STRING_INDEX, _PROMPT_STRING_SCREEN_WIDTH
   prompt_getDisplayedPromptString
   GLOBAL_CURSOR_LINE="${_PROMPT_START_LINE}"
   GLOBAL_CURSOR_COLUMN=$((_PROMPT_START_COLUMN + _PROMPT_SYMBOL_LENGTH + RETURNED_VALUE2))
@@ -1122,11 +1122,11 @@ function prompt_clearItemsBox() {
 # This function will truncate a string without taking into account
 # the ANSI escape sequences for text formatting (i.e. the `\e[*m` format).
 #
-# - $1: **string** _as string_:
+# - $_PROMPT_ITEMS_BOX_ITEM_DISPLAYED: **string** _as string_:
 #       the string to truncate
-# - $2: **visible characters** _as int_:
+# - $_PROMPT_ITEMS_BOX_ITEM_WIDTH: **visible characters** _as int_:
 #       the number of visible characters
-# - $3: **search string** _as string_:
+# - $_PROMPT_ITEMS_BOX_FILTER_STRING: **search string** _as string_:
 #       the string to search for in the string
 #
 # Returns:
@@ -1153,7 +1153,7 @@ function prompt::getItemDisplayedString() {
     # take the first chunk that does not contain an escape character
     itemChunk="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED%%$'\e'*}"
 
-    if (( itemDisplayedLength + ${#itemChunk} >= _PROMPT_ITEMS_BOX_ITEM_WIDTH )); then
+    if (( itemDisplayedLength + ${#itemChunk} > _PROMPT_ITEMS_BOX_ITEM_WIDTH )); then
       # we reached the desired size
       itemChunk="${itemChunk:0:$((_PROMPT_ITEMS_BOX_ITEM_WIDTH - 1 - itemDisplayedLength))}…"
       _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=""
@@ -1469,11 +1469,11 @@ function prompt_getCurrentInitialItemsIndex() {
 # #                  ^ screen cursor (at index 8)
 # ```
 #
-# - $1: **input string** _as string_:
+# - $_PROMPT_STRING: **input string** _as string_:
 #       the string to display
-# - $2: **input index** _as int_:
+# - $_PROMPT_STRING_INDEX: **input index** _as int_:
 #       the index of the character (in the input string) that should be under the cursor
-# - $3: **screen width** _as int_:
+# - $_PROMPT_STRING_SCREEN_WIDTH: **screen width** _as int_:
 #       the width of the screen
 #
 # Returns:
@@ -1555,13 +1555,6 @@ function prompt_getDisplayedPromptString() {
   RETURNED_VALUE="${screenString}"
   RETURNED_VALUE2=${screenIndex}
 }
-
-
-
-# we redefine string::FitStringInScreen to a new function that uses global variables
-# this is to avoid copying parameters to the function and hopefully be faster
-core::reExportFuncToUseGlobalVars string::fitStringInScreen prompt_getDisplayedPromptString _PROMPT_STRING _PROMPT_STRING_INDEX _PROMPT_STRING_SCREEN_WIDTH
-eval "${RETURNED_VALUE}"
 
 # we will redefine array::fuzzyFilterSort to a new function that uses global variables
 # this is to avoid copying parameters to the function and hopefully be faster

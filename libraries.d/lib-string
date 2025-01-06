@@ -547,7 +547,7 @@ function string::microsecondsToHuman() {
   local -i minutes=$(((ms / 60 / 1000000) % 60))
   local -i seconds=$(((ms / 1000000) % 60))
   local -i milliseconds=$((ms / 1000 % 1000))
-  local -i microseconds=$((ms % 1000000))
+  local -i microseconds=$((ms % 1000))
 
   local humanFormat="${format}"
   if [[ ${hours} -lt 10 ]]; then
@@ -571,6 +571,13 @@ function string::microsecondsToHuman() {
     humanFormat="${humanFormat//%LL/0${milliseconds}}"
   else
     humanFormat="${humanFormat//%LL/${milliseconds}}"
+  fi
+  if [[ ${microseconds} -lt 10 ]]; then
+    humanFormat="${humanFormat//%UU/00${microseconds}}"
+  elif [[ ${microseconds} -lt 100 ]]; then
+    humanFormat="${humanFormat//%UU/0${microseconds}}"
+  else
+    humanFormat="${humanFormat//%UU/${microseconds}}"
   fi
   humanFormat="${humanFormat//%h/${hours}}"
   humanFormat="${humanFormat//%m/${minutes}}"

@@ -257,6 +257,7 @@ function test_string::microsecondsToHuman() {
 Minutes: %MM
 Seconds: %SS
 Milliseconds: %LL
+Microseconds: %UU
 
 Hours: %h
 Minutes: %m

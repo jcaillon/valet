@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# shellcheck source=lib-io
+source io
+# shellcheck source=lib-array
+source array
+# shellcheck source=lib-string
+source string
+# shellcheck source=lib-ansi-codes
+source ansi-codes
+
+
+# ## benchmark::run
+#
+# This function runs a benchmark on given functions.
+#
+# First, it will run the 1st function (the baseline) for a given number of time and
+# mark the number of times it was able to run it in that given time.
+#
+# Then, it will run all the functions for the same number of time and
+# print the difference between the baseline and the other functions.
+#
+# - $1: **baseline** _as string_:
+#       the name of the function to use as baseline
+# - $2: **functions** _as string_:
+#       The names of the functions to benchmark, comma separated.
+# - $3: time _as int_:
+#       (optional) Can be set using the variable `_OPTION_TIME`.
+#       The time in seconds for which to run the baseline.
+#       (defaults to 3s)
+# - $4: max runs _as int_:
+#       (optional) Can be set using the variable `_OPTION_MAX_RUNS`.
+#       The maximum number of runs to do for each function.
+#       (defaults to -1 which means no limit)
+#
+# ```bash
+# benchmark::run "baseline" "function1,function2" 1 100
+# ```
+function benchmark::run() {
+  local baseline="${1}"
+  local functions="${2:-}"
+  local time="${3:-${_OPTION_TIME:-3}}"
+  local maxRuns="${4:-${_OPTION_MAX_RUNS:--1}}"
+
+  # check functions
+  if ! declare -f "${baseline}" >/dev/null; then
+    core::fail "The baseline function ⌜${baseline}⌝ does not exist."
+  fi
+  local IFS=','
+  local function
+  local longestFunctionNameLength=0
+
+  if [[ -n ${functions} ]]; then
+    for function in ${functions}; do
+      if ! declare -f "${function}" >/dev/null; then
+        core::fail "The function ⌜${function}⌝ does not exist."
+      fi
+      if (( ${#function} > longestFunctionNameLength )); then
+        longestFunctionNameLength=${#function}
+      fi
+    done
+  fi
+
+  local -i baselineRuns
+  local -A functionsElapsed
+
+  # Run the baseline
+  log::info "Running the baseline ⌜${baseline}⌝ for ⌜${time}s⌝."
+
+  core::getProgramElapsedMicroseconds
+  local startTimeInUs="${RETURNED_VALUE}"
+
+  local -i baselineRuns
+  # shellcheck disable=SC2323
+  # ^(this is to avoid a bug in the syntax coloration)
+  for ((baselineRuns = 0; (baselineRuns < maxRuns || maxRuns == -1); baselineRuns++)); do
+    "${baseline}"
+    core::getProgramElapsedMicroseconds
+    if (( RETURNED_VALUE - startTimeInUs > time * 1000000 )); then
+      break
+    fi
+  done
+
+  core::getProgramElapsedMicroseconds
+  local elapsedTimeInUs=$((RETURNED_VALUE - startTimeInUs))
+  string::microsecondsToHuman "${elapsedTimeInUs}" %SS.%LL
+  log::info "The baseline ⌜${baseline}⌝ was initially run ⌜${baselineRuns}⌝ times in ⌜${RETURNED_VALUE}s⌝."
+
+  # Run the other functions
+  if [[ -n ${functions} ]]; then
+    for function in ${functions}; do
+      log::debug "Running the function ⌜${function}⌝ ⌜${baselineRuns}⌝ times."
+
+      core::getProgramElapsedMicroseconds
+      startTimeInUs="${RETURNED_VALUE}"
+      local -i runs
+      for ((runs = 0; runs < baselineRuns; runs++)); do
+        "${function}"
+      done
+
+      core::getProgramElapsedMicroseconds
+      local elapsedTimeInUs=$((RETURNED_VALUE - startTimeInUs))
+      functionsElapsed["${function}"]="${elapsedTimeInUs}"
+      string::microsecondsToHuman "${elapsedTimeInUs}" %SS.%LL
+
+      log::info "The function ⌜${function}⌝ was run ⌜${runs}⌝ times in ⌜${RETURNED_VALUE}s⌝."
+    done
+  fi
+
+  # Re run the baseline to get the average time
+  log::debug "Running the baseline ⌜${baseline}⌝ ⌜${baselineRuns}⌝ times."
+  core::getProgramElapsedMicroseconds
+  startTimeInUs="${RETURNED_VALUE}"
+  local -i runs
+  for ((runs = 0; runs < baselineRuns; runs++)); do
+    "${baseline}"
+  done
+  core::getProgramElapsedMicroseconds
+  local elapsedTimeInUs=$((RETURNED_VALUE - startTimeInUs))
+  functionsElapsed["${baseline}"]="${elapsedTimeInUs}"
+  string::microsecondsToHuman "${elapsedTimeInUs}" %SS.%LL
+
+  log::info "The function ⌜${baseline}⌝ was run ⌜${runs}⌝ times in ⌜${RETURNED_VALUE}s⌝."
+
+
+  # sort the functions by elapsed time
+  _BENCHMARK_FUNCTIONS=("${!functionsElapsed[@]}")
+  _BENCHMARK_ELAPSED_TIMES=("${functionsElapsed[@]}")
+  array::sortWithCriteria _BENCHMARK_FUNCTIONS _BENCHMARK_ELAPSED_TIMES
+
+  # print the results
+  local line
+  printf -v line "%-${longestFunctionNameLength}s ░ %-13s ░ %s\n" "Function name" "Average time" "% slower than fastest"
+  local result="Benchmark results from fastest to slowest:"$'\n'$'\n'"${line}░${AC__REPEAT__}$((longestFunctionNameLength + 39))${__AC__LAST_CHAR}"$'\n'
+  local fastestElapsed="${_BENCHMARK_ELAPSED_TIMES[0]}"
+  local -i index=0
+  for function in "${_BENCHMARK_FUNCTIONS[@]}"; do
+    local averageTime="$((functionsElapsed[${function}] / baselineRuns))"
+    local percentSlowerThanFastest="$(( (functionsElapsed[${function}] - fastestElapsed) * 100 / fastestElapsed ))%"
+    string::microsecondsToHuman "${averageTime}" "%SS.%LLs %UUµs"
+    if (( index == 0 )); then
+      percentSlowerThanFastest="N/A"
+    fi
+    printf -v line "%-${longestFunctionNameLength}s ░ %s ░ %s\n" "${function}" "${RETURNED_VALUE}" "${percentSlowerThanFastest}"
+    result+="${line}"
+    index+=1
+  done
+  log::success "${result}"
+}

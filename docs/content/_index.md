@@ -88,6 +88,13 @@ imageClass="hx-top-[40%] hx-left-[36px] hx-w-[110%] sm:hx-w-[110%] dark:hx-opaci
   >}}
   {{< hextra/feature-card
     link="showcase"
+    icon="share"
+    title="Fetch and share extensions"
+    subtitle="You commands are wrapped into extensions that can easily be shared with coworkers or the internet."
+    style="background: radial-gradient(ellipse at 50% 80%,rgba(142,53,74,0.15),hsla(0,0%,100%,0));"
+  >}}
+  {{< hextra/feature-card
+    link="showcase"
     icon="puzzle"
     title="Libraries of pure bash functions"
     subtitle="Make your scripts more performant and write code faster by using Valet libraries for string manipulation, interactive prompt, pure bash I/O and more... You can also extend Valet by creating and sharing your own libraries!"
@@ -105,7 +112,6 @@ imageClass="hx-top-[40%] hx-left-[36px] hx-w-[110%] sm:hx-w-[110%] dark:hx-opaci
     icon="book-open"
     title="Clear and standardized help"
     subtitle="Declare properties for your commands with YAML which are used to automatically display a user friendly documentation."
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(142,53,74,0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
     link="showcase"
@@ -117,7 +123,7 @@ imageClass="hx-top-[40%] hx-left-[36px] hx-w-[110%] sm:hx-w-[110%] dark:hx-opaci
     link="showcase"
     icon="cube-transparent"
     title="Pure bash, zero dependencies"
-    subtitle="Simply run the install script which copies Valet and you are good to go, you will only ever need bash!"
+    subtitle="Simply run the install script which copies Valet and you are good to go, you will only ever need bash! And thanks to bash scripting nature, you can highly customize Valet itself by re-declaring functions to your liking."
   >}}
   {{< hextra/feature-card
     link="showcase"
