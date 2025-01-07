@@ -296,6 +296,7 @@ Exit code: `0`
 Minutes: %MM
 Seconds: %SS
 Milliseconds: %LL
+Microseconds: %UU
 
 Hours: %h
 Minutes: %m
@@ -312,12 +313,13 @@ Hours: 05
 Minutes: 04
 Seconds: 03
 Milliseconds: 002
+Microseconds: 234
 
 Hours: 5
 Minutes: 4
 Seconds: 3
 Milliseconds: 2
-Microseconds: 2234
+Microseconds: 234
 
 Total minutes: 304
 Total seconds: 18243
@@ -338,121 +340,218 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-→ string::wrapText "${shortText}" 30
+→ string::wrapText "${shortText}" 20
 ------------------------------
-You don't get better on the 
-days when you feel like going.
-You get better on the days 
-when you don't want to go, but
-you go anyway. If you can 
-overcome the negative energy 
-coming from your tired body or
-unmotivated mind, you will 
-grow and become better. It 
-won't be the best workout you 
-have, you won't accomplish as 
-much as what you usually do 
-when you actually feel good, 
-but that doesn't matter. 
-Growth is a long term game, 
-and the crappy days are more 
-important.
+You don't [36m[36m[36mget better[39m[39m[39m
+on the days when you
+feel like going. You
+get better on the 
+days when you don't 
+want to go, but you 
+go anyway. If you 
+can [34movercome the 
+negative energy[39m 
+coming from your 
+tired body or 
+unmotivated mind, 
+you will grow and 
+become better. It 
+won't be the best 
+workout you have, 
+you won't accomplish
+as much as what you 
+usually do when you 
+actually feel good, 
+but that doesn't 
+matter. Growth is a 
+long term game, and 
+the crappy days are 
+more important.
 
-As long as I focus on what I 
-feel and don't worry about 
-where I'm going, it works out.
-Having no expectations but 
-being open to everything is 
-what makes wonderful things 
-happen. If I don't worry, 
-there's no obstruction and 
-life flows easily. It sounds 
-impractical, but 'Expect 
-nothing; be open to 
-everything' is really all it 
-is.
+As long as I focus 
+on what I feel and 
+don't worry about 
+where I'm going, it 
+works out. Having no
+expectations but 
+being open to 
+everything is what 
+makes wonderful 
+things happen. If I 
+don't worry, there's
+no obstruction and 
+life flows easily. 
+It sounds 
+impractical, but 
+'Expect nothing; be 
+open to everything' 
+is really all it is.
+01234567890123456789
+on new line 01234567
+890123456789234 line
+new line.
 
+https://en.wikipedia
+.org/wiki/Veganism
 
-There were 2 new lines before 
-this.
+There were 2 new 
+lines before this.
 ```
 
-### Wrapping text at column 90 with padding of 4 on new lines
+### Wrapping text at column 50 with padding of 4 on new lines
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ string::wrapText "${shortText}" 90 4 false
+→ string::wrapText "${shortText}" 90 '    '
 ------------------------------------------------------------------------------------------
-You don't get better on the days when you feel like going. You get better on the days 
-    when you don't want to go, but you go anyway. If you can overcome the negative energy 
-    coming from your tired body or unmotivated mind, you will grow and become better. It 
-    won't be the best workout you have, you won't accomplish as much as what you usually 
-    do when you actually feel good, but that doesn't matter. Growth is a long term game, 
-    and the crappy days are more important.
+You don't [36m[36m[36mget better[39m[39m[39m on the days when you feel 
+    like going. You get better on the days when 
+    you don't want to go, but you go anyway. If 
+    you can [34movercome the negative energy[39m coming 
+    from your tired body or unmotivated mind, you 
+    will grow and become better. It won't be the 
+    best workout you have, you won't accomplish as
+    much as what you usually do when you actually 
+    feel good, but that doesn't matter. Growth is 
+    a long term game, and the crappy days are more
+    important.
     
-    As long as I focus on what I feel and don't worry about where I'm going, it works out.
-    Having no expectations but being open to everything is what makes wonderful things 
-    happen. If I don't worry, there's no obstruction and life flows easily. It sounds 
-    impractical, but 'Expect nothing; be open to everything' is really all it is.
+    As long as I focus on what I feel and don't 
+    worry about where I'm going, it works out. 
+    Having no expectations but being open to 
+    everything is what makes wonderful things 
+    happen. If I don't worry, there's no 
+    obstruction and life flows easily. It sounds 
+    impractical, but 'Expect nothing; be open to 
+    everything' is really all it is. 
+    01234567890123456789 on new line 
+    01234567890123456789234 line new line.
     
+    https://en.wikipedia.org/wiki/Veganism
     
     There were 2 new lines before this.
 ```
 
-### Wrapping text at column 90 with padding of 2 on all lines
+### Wrapping text at column 20 with padding of 3 on all lines
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ string::wrapText "${shortText}" 90 2 true
+→ string::wrapText "${shortText}" 90 '  ' 88
 ------------------------------------------------------------------------------------------
-  You don't get better on the days when you feel like going. You get better on the days 
-  when you don't want to go, but you go anyway. If you can overcome the negative energy 
-  coming from your tired body or unmotivated mind, you will grow and become better. It 
-  won't be the best workout you have, you won't accomplish as much as what you usually do 
-  when you actually feel good, but that doesn't matter. Growth is a long term game, and 
-  the crappy days are more important.
-  
-  As long as I focus on what I feel and don't worry about where I'm going, it works out. 
-  Having no expectations but being open to everything is what makes wonderful things 
-  happen. If I don't worry, there's no obstruction and life flows easily. It sounds 
-  impractical, but 'Expect nothing; be open to everything' is really all it is.
-  
-  
-  There were 2 new lines before this.
+  $ {RETURNED_VALUE}
 ```
 
-### Wrapping characters at column 30 with new line prefix
+### Wrapping words, shortcut because the message is a short single line
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ string::wrapCharacters "${shortText}" 30 "  " 28
-------------------------------
-You don't get better on the da
-  ys when you feel like going.
-   You get better on the days 
-  when you don't want to go, b
-  ut you go anyway. If you can
-   overcome the negative energ
-  y coming from your tired bod
-  y or unmotivated mind, you w
-  ill grow and become better. 
-  It won't be the best workout
-   you have, you won't accompl
-  ish as much as what you usua
-  lly do when you actually fee
-  l good, but that doesn't mat
-  ter. Growth is a long term g
-  ame, and the crappy days are
-   more important.
+→ string::wrapText 'A message.' 80
+A message.
+```
+
+### Wrapping words, no shortcut!
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::wrapText 'A message.' 80 '' 5
+A 
+message.
+```
+
+### Wrapping words
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::wrapText 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
+[36m░░░[0mA message.
+[36m░░░[0mA new line
+```
+
+### Wrapping characters at column 20 with padding of 3 on all lines
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::wrapCharacters "${shortText}" 20 "   " 17
+--------------------
+   You don't [36m[36m[36mget bet
+   ter[39m[39m[39m on the days w
+   hen you feel like
+   going. You get be
+   tter on the days 
+   when you don't wa
+   nt to go, but you
+   go anyway. If you
+   can [34movercome the 
+   negative energy[39m c
+   oming from your t
+   ired body or unmo
+   tivated mind, you
+   will grow and bec
+   ome better. It wo
+   n't be the best w
+   orkout you have, 
+   you won't accompl
+   ish as much as wh
+   at you usually do
+   when you actually
+   feel good, but th
+   at doesn't matter
+   . Growth is a lon
+   g term game, and 
+   the crappy days a
+   re more important
+   .
+   
+   As long as I focu
+   s on what I feel 
+   and don't worry a
+   bout where I'm go
+   ing, it works out
+   . Having no expec
+   tations but being
+   open to everythin
+   g is what makes w
+   onderful things h
+   appen. If I don't
+   worry, there's no
+   obstruction and l
+   ife flows easily.
+   It sounds impract
+   ical, but 'Expect
+   nothing; be open 
+   to everything' is
+   really all it is.
+   01234567890123456
+   789 on new line 0
+   12345678901234567
+   89234 line new li
+   ne.
+   
+   https://en.wikipe
+   dia.org/wiki/Vega
+   nism
+   
+   There were 2 new 
+   lines before this
+   .
 ```
 
 ### Wrapping characters at 20, no other options
@@ -464,29 +563,100 @@ Exit code: `0`
 ```plaintext
 → string::wrapCharacters "${shortText}" 20
 --------------------
-You don't get better
- on the days when yo
-u feel like going. Y
-ou get better on the
- days when you don't
- want to go, but you
- go anyway. If you c
-an overcome the nega
-tive energy coming f
-rom your tired body 
-or unmotivated mind,
- you will grow and b
-ecome better. It won
-'t be the best worko
-ut you have, you won
-'t accomplish as muc
-h as what you usuall
-y do when you actual
-ly feel good, but th
-at doesn't matter. G
-rowth is a long term
- game, and the crapp
-y days are more impo
-rtant.
+You don't [36m[36m[36mget better[39m[39m[39m
+on the days when you
+feel like going. You
+get better on the da
+ys when you don't wa
+nt to go, but you go
+anyway. If you can [34mo
+vercome the negative
+energy[39m coming from y
+our tired body or un
+motivated mind, you 
+will grow and become
+better. It won't be 
+the best workout you
+have, you won't acco
+mplish as much as wh
+at you usually do wh
+en you actually feel
+good, but that doesn
+'t matter. Growth is
+a long term game, an
+d the crappy days ar
+e more important.
+
+As long as I focus o
+n what I feel and do
+n't worry about wher
+e I'm going, it work
+s out. Having no exp
+ectations but being 
+open to everything i
+s what makes wonderf
+ul things happen. If
+I don't worry, there
+'s no obstruction an
+d life flows easily.
+It sounds impractica
+l, but 'Expect nothi
+ng; be open to every
+thing' is really all
+it is. 0123456789012
+3456789 on new line 
+01234567890123456789
+234 line new line.
+
+https://en.wikipedia
+.org/wiki/Veganism
+
+There were 2 new lin
+es before this.
+```
+
+### Wrapping characters
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::wrapCharacters 01234567890123456789234 17 '   ' 1
+-----------------
+                0
+   12345678901234
+   56789234
+```
+
+### Wrapping characters
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::wrapCharacters 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
+[36m░░░[0mA message.
+[36m░░░[0mA new line
+```
+
+### Wrapping characters, spaces at the beginning of the line are kept
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 1
+-----------------
+     Start With s
+   paces that mus
+   t be kept! Oth
+   er spaces can 
+   be ignored at 
+   wrapping.
+     Also start w
+   ith spaces
 ```
 

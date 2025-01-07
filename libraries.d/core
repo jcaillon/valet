@@ -11,6 +11,9 @@ GLOBAL_CORE_INCLUDED=1
 # Remember the time the program started (nb of seconds since epoch)
 GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
 
+# Remember the original working directory
+GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
+
 # Handle the case where this script was io::invoked outside of valet
 if [[ -z "${GLOBAL_VALET_HOME:-}" ]]; then
   GLOBAL_VALET_HOME="${BASH_SOURCE[0]}"
@@ -210,10 +213,10 @@ function log::setLevel() {
   esac
 
   if [[ ${2:-false} != "true" ]]; then
-    if [[ ${GLOBAL_LOG_LEVEL_INT} -ne 1 ]]; then
+    if ((GLOBAL_LOG_LEVEL_INT != 1)); then
       log::debug "Log level set to ${GLOBAL_LOG_LEVEL}."
     fi
-    if [[ ${GLOBAL_LOG_LEVEL_INT} -eq 0 ]]; then
+    if ((GLOBAL_LOG_LEVEL_INT <= 0)); then
       log::warning "Beware that debug log level might lead to secret leak, use it only if necessary."
     fi
   fi
@@ -235,15 +238,21 @@ function log::getLevel() {
   RETURNED_VALUE="${GLOBAL_LOG_LEVEL:-info}"
 }
 
+# ## log::print (private)
+#
 # Display log messages in the terminal.
 #
-# - $1: the color level of the log message (TRACE, DEBUG...)
-# - $2: the icon to display in the log message (utf8 character from nerdicons)
-# - $3: the severity (max 7 chars)
-# - $@: the content of the log message (each arg will be separated by a new line)
+# - $1: **log level** _as string_:
+#       The level of the log message, which gives the color to use (TRACE, DEBUG...).
+# - $2: **icon** _as string_:
+#       The icon to display in the log message (utf8 character from nerdicons).
+# - $3: **severity** _as string_:
+#       The severity to display (max 7 chars).
+# - $@: **message** _as string_:
+#       The content of the log message (each arg will be separated by a new line).
 #
 # ```bash
-# log::print "GREEN" $'\uf14a' "SUCCESS" "This is a success message."
+# log::print "SUCCESS" $'\uf14a' "OK" "This is a success message."
 # ```
 # shellcheck disable=SC2317
 function log::print() { return 0; }
@@ -312,6 +321,8 @@ function log::printString() { return 0; }
 # shellcheck disable=SC2317
 function log::printRaw() { return 0; }
 
+# ## log::createPrintFunction (private)
+#
 # We build the log line function dynamically to adapt to the user options.
 # This avoid to have to check the options at each log message.
 #
@@ -355,19 +366,22 @@ function log::createPrintFunction() {
 
   local wrapStatement
   local wrapTextColumns="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
+  local wrapPaddingCharacters=""
   local wrapPaddingLength=20
-  if [[ "${VALET_CONFIG_DISABLE_LOG_WRAP:-}" != "true" ]]; then
-
-    if [[ ${VALET_CONFIG_DISABLE_LOG_TIME:-} == "true" ]]; then
+  if [[ "${VALET_CONFIG_LOG_DISABLE_WRAP:-}" != "true" ]]; then
+    if [[ ${VALET_CONFIG_LOG_DISABLE_TIME:-} == "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 9))
     fi
-
     if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} != "true" ]]; then
       wrapPaddingLength=$((wrapPaddingLength - 2))
     fi
+    # string with the number of spaces necessary to align with other log messages
+    for ((i = 0; i < wrapPaddingLength; i++)); do
+      wrapPaddingCharacters+=" "
+    done
 
     wrapStatement='
-    string::wrapText "${RETURNED_VALUE}" '"${wrapTextColumns}"' '"${wrapPaddingLength}"''
+    string::wrapText "${RETURNED_VALUE}" '"${wrapTextColumns}"' '"'${wrapPaddingCharacters}'"' '"$((wrapTextColumns - wrapPaddingLength))"''
   else
     wrapPaddingLength=0
   fi
@@ -378,9 +392,9 @@ function log::createPrintFunction() {
   local printfArguments
 
   # timestamp
-  if [[ ${VALET_CONFIG_DISABLE_LOG_TIME:-} == "true" ]]; then
+  if [[ ${VALET_CONFIG_LOG_DISABLE_TIME:-} == "true" ]]; then
     printfFormat+=""
-  elif [[ ${VALET_CONFIG_ENABLE_LOG_TIMESTAMP:-} == "true" ]]; then
+  elif [[ ${VALET_CONFIG_LOG_ENABLE_TIMESTAMP:-} == "true" ]]; then
     printfFormat+="%(%F_%H:%M:%S)T "
     printfArguments+='"${EPOCHSECONDS}" '
   else
@@ -444,20 +458,27 @@ function log::createPrintFunction() {
     fi
   fi
 
-  # string with the number of spaces necessary to align with other log messages
-  local messageLeftPadding
-  messageLeftPadding=""
-  for ((i = 0; i < wrapPaddingLength; i++)); do
-    messageLeftPadding+=" "
-  done
+  # log::printFile function
+  local insideTheLoop='
+        string::wrapCharacters "${line}" "${wrapTextColumns}" "${wrapPaddingCharacters}     '"${cDebug:-}"'░'"${cDefault:-}"' " "$((wrapTextColumns - 7 - ${#wrapPaddingCharacters}))"
+        toPrint+="${wrapPaddingCharacters}${lineNumberPadding}'"${cDebug:-}"'${lineNumber} ░'"${cDefault:-}"' ${RETURNED_VALUE}"'"$'\n'"'
+        lineNumber+=1
+        if (( ${#lineNumber} > currentLineNumberLength )); then
+          lineNumberPadding="${lineNumberPadding%?}"
+          currentLineNumberLength+=1
+        fi
+        if (( maxLines != 0 && lineNumber > maxLines )); then
+          toPrint+="${wrapPaddingCharacters}   '"${cDebug:-}"'… ░ (truncated)'"${cDefault:-}"'"'"$'\n'"'
+          break;
+        fi
+  '
 
   # log::print function
   GLOBAL_LOG_PRINT_FUNCTION='
   function log::print() {
-    local icon severity
     local colorCode="${1}"
-    icon="${2}"
-    severity="${3}"
+    local icon="${2}"
+    local severity="${3}"
     shift 3
     local IFS='"$'\n'"'
     RETURNED_VALUE="$*"
@@ -470,27 +491,12 @@ function log::createPrintFunction() {
     '"${printStatement}"'
   }'
 
-  # log::printFile function
-  local insideTheLoop='
-        string::wrapCharacters "${line}" "${wrapTextColumns}" "${messageLeftPadding}     ░ "
-        toPrint+="${messageLeftPadding}${lineNumberPadding}${lineNumber} ░ ${RETURNED_VALUE}"'"$'\n'"'
-        lineNumber+=1
-        if (( ${#lineNumber} > currentLineNumberLength )); then
-          lineNumberPadding="${lineNumberPadding%?}"
-          currentLineNumberLength+=1
-        fi
-        if (( maxLines != 0 && lineNumber > maxLines )); then
-          toPrint+="${messageLeftPadding}   … ░ (truncated)"'"$'\n'"'
-          break;
-        fi
-  '
-
   GLOBAL_LOG_PRINT_FUNCTION+='
   function log::printFile() {
     local filePath="${1}"
     local maxLines="${2:-0}"
-    local wrapTextColumns='"$((wrapTextColumns - wrapPaddingLength - 7))"'
-    local messageLeftPadding="'"${messageLeftPadding}"'"
+    local wrapTextColumns='"${wrapTextColumns}"'
+    local wrapPaddingCharacters="'"${wrapPaddingCharacters}"'"
     local line toPrint
     local lineNumberPadding="   "
     local -i lineNumber=1 currentLineNumberLength=1
@@ -510,8 +516,8 @@ function log::createPrintFunction() {
   function log::printFileString() {
     local content="${1}"
     local maxLines="${2:-0}"
-    local wrapTextColumns='"$((wrapTextColumns - wrapPaddingLength - 7))"'
-    local messageLeftPadding="'"${messageLeftPadding}"'"
+    local wrapTextColumns='"${wrapTextColumns}"'
+    local wrapPaddingCharacters="'"${wrapPaddingCharacters}"'"
     local line toPrint
     local lineNumberPadding="   "
     local -i lineNumber=1 currentLineNumberLength=1
@@ -527,13 +533,13 @@ function log::createPrintFunction() {
   function log::printString() {
     local content="${1}"
     local wrappedLineLeftPaddingString="${2:-}"
-    local wrapTextColumns='"$((wrapTextColumns - wrapPaddingLength))"'
-    local messageLeftPadding="'"${messageLeftPadding}"'"
+    local wrapTextColumns='"${wrapTextColumns}"'
+    local wrapPaddingCharacters="'"${wrapPaddingCharacters}"'"
     local line toPrint
     local IFS=
     while IFS= read -r line; do
-        string::wrapCharacters "${line}" "${wrapTextColumns}" "${messageLeftPadding}${wrappedLineLeftPaddingString}" "$((wrapTextColumns - ${#wrappedLineLeftPaddingString}))"
-        toPrint+="${messageLeftPadding}${RETURNED_VALUE}"'"$'\n'"'
+        string::wrapCharacters "${line}" "${wrapTextColumns}" "${wrapPaddingCharacters}${wrappedLineLeftPaddingString}" "$((wrapTextColumns - ${#wrapPaddingCharacters}))"
+        toPrint+="${wrapPaddingCharacters}${RETURNED_VALUE}"'"$'\n'"'
     done <<<"${content}"
     '"${standardPrintStatement}"'
   }'
@@ -544,44 +550,7 @@ function log::createPrintFunction() {
     local toPrint="${1}"
     '"${standardPrintStatement}"'
   }'
-}
 
-# ## core::fail
-#
-# Displays an error message and then exit the program with error.
-#
-# - $@: **message** _as string_:
-#       the error message to display
-#
-# ```bash
-# core::fail "This is an error message."
-# ```
-function core::fail() {
-  log::error "$@"
-  # shellcheck disable=SC2034
-  GLOBAL_ERROR_DISPLAYED=1
-  exit 1
-}
-
-# ## core::failWithCode
-#
-# Displays an error message and then exit the program with error.
-#
-# - $1: **exit code** _as int_:
-#       the exit code to use, should be between 1 and 255
-# - $@: **message** _as string_:
-#       the error message to display
-#
-# ```bash
-# core::failWithCode 255 "This is an error message."
-# ```
-function core::failWithCode() {
-  local exitCode="${1}"
-  shift
-  log::error "$@"
-  # shellcheck disable=SC2034
-  GLOBAL_ERROR_DISPLAYED=1
-  exit "${exitCode}"
 }
 
 # ## log::error
@@ -754,46 +723,87 @@ function log::isTraceEnabled() {
 #
 # This function prints the current function stack in the logs.
 #
-# - $1: **stack to skip** _as int_:
-#       the number of stack to skip (defaults to 2 which skips this function
-#       and the first calling function which is usually the onError function)
+# - $1: Stack to skip _as int_:
+#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
+#       The number of stack to skip.
+#       (defaults to 2 which skips this function and the first calling function
+#       which is usually the onError function)
 #
 # ```bash
-# log::printCallStack 2
+# log::printCallStack
+# log::printCallStack 0
 # ```
 function log::printCallStack() {
-  local -i levelToSkip="${1:-2}"
-  local i stackSize func linen="${LINENO}" src
+  local -i levelToSkip="${1:-${_OPTION_STACK_TO_SKIP:-2}}"
+  local -i idx stackSize
+  local functionName lineNumber="${LINENO}" sourceFile
   stackSize=${#FUNCNAME[@]}
-  treeString="├─"
-  for ((i = levelToSkip; i < stackSize; i++)); do
-    func="${FUNCNAME[${i}]}"
-    if [[ -z ${func} ]]; then
-      func=ROOT
+  local treeString="├─" treePadding="│  "
+  for ((idx = levelToSkip; idx < stackSize; idx++)); do
+    functionName="${FUNCNAME[${idx}]}"
+    if [[ -z ${functionName} ]]; then
+      functionName=ROOT
     else
-      func="${func}()"
+      functionName="${functionName}()"
     fi
-    if ((i > 0)); then
-      linen="${BASH_LINENO[$((i - 1))]}"
+    if ((idx > 0)); then
+      lineNumber="${BASH_LINENO[$((idx - 1))]}"
     fi
-    src="${BASH_SOURCE[${i}]}"
-    if [[ -z "${src}" ]]; then
-      src=non_file_source
-    elif [[ -f "${src/#.\//"${PWD}"\/}" ]]; then
-      src="${src/#.\//"${PWD}"\/}"
-    elif [[ -f "${src/#.\//"${GLOBAL_VALET_HOME}"\/}" ]]; then
-      src="${src/#.\//"${GLOBAL_VALET_HOME}"\/}"
+    sourceFile="${BASH_SOURCE[${idx}]}"
+    if [[ -z "${sourceFile}" ]]; then
+      sourceFile=non_file_source
     fi
-    if ((i == stackSize - 1)); then
+    sourceFile="${sourceFile#"./"}"
+    sourceFile="${sourceFile#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"}"
+    if ((idx == stackSize - 1)); then
       treeString="└─"
+      treePadding="   "
     fi
-    log::printString "${treeString} in ${func} at ${src}:${linen}" "│  "
+    log::printString "${treeString} in ${functionName} at ${sourceFile}:${lineNumber}" "${treePadding}"
   done
 }
 
 #===============================================================
 # >>> Core utilities
 #===============================================================
+
+# ## core::fail
+#
+# Displays an error message and then exit the program with error.
+#
+# - $@: **message** _as string_:
+#       the error message to display
+#
+# ```bash
+# core::fail "This is an error message."
+# ```
+function core::fail() {
+  log::error "$@"
+  # shellcheck disable=SC2034
+  GLOBAL_ERROR_DISPLAYED=1
+  exit 1
+}
+
+# ## core::failWithCode
+#
+# Displays an error message and then exit the program with error.
+#
+# - $1: **exit code** _as int_:
+#       the exit code to use, should be between 1 and 255
+# - $@: **message** _as string_:
+#       the error message to display
+#
+# ```bash
+# core::failWithCode 255 "This is an error message."
+# ```
+function core::failWithCode() {
+  local exitCode="${1}"
+  shift
+  log::error "$@"
+  # shellcheck disable=SC2034
+  GLOBAL_ERROR_DISPLAYED=1
+  exit "${exitCode}"
+}
 
 # ## source
 #
@@ -1009,7 +1019,7 @@ function core::getProgramElapsedMicroseconds() {
   # we need to strip all leading zeros from the microseconds
   local us="${EPOCHREALTIME##*\.}"
   us="${us#"${us%%[!0]*}"}"
-  RETURNED_VALUE=$(( ( (${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 ) + us ))
+  RETURNED_VALUE=$((((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000) + us))
 }
 
 # ## core::reExportFuncToUseGlobalVars (private)
@@ -1046,7 +1056,7 @@ function core::reExportFuncToUseGlobalVars() {
   local line varName varPosition
   local modifiedFunctionDefinition=""
   for line in ${functionDefinition}; do
-    if (( ${#positionalParameters[@]} != ${#globalVars[@]} )); then
+    if ((${#positionalParameters[@]} != ${#globalVars[@]})); then
       if [[ "${line}" =~ ^\ *local\ +(-[[:alpha:]]+\ )?([[:alpha:]]+)=[^$]*\$\{?([[:digit:]]+) ]]; then
         varName="${BASH_REMATCH[2]}"
         varPosition="${BASH_REMATCH[3]}"
@@ -1074,234 +1084,211 @@ function core::reExportFuncToUseGlobalVars() {
 #
 # Allows to soft wrap the given text at the given width.
 # Wrapping is done at word boundaries.
-# Optionally applies left padding to each new line.
+# Optionally appends padding characters on each new line.
 #
 # - $1: **text** _as string_:
-#       the text to wrap
-# - $2: wrap width _as int_:
-#       (optional) the width to wrap the text at
+#       The text to wrap.
+# - $2: wrap width _as string_:
+#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
+#       The width to wrap the text at.
+#       Note that length of the optional padding characters are subtracted from the
+#       width to make sure the text fits in the given width.
 #       (defaults to GLOBAL_COLUMNS)
-# - $3: padding _as int_:
-#       (optional) the padding to apply to each new line
+# - $3: padding characters _as string_:
+#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
+#       The characters to apply as padding on the left of each new line.
+#       E.g. '  ' will add 2 spaces on the left of each new line.
 #       (defaults to 0)
-# - $4: apply padding on first line _as bool_:
-#       (optional) true/false if the padding should be applied to the first line
-#       (defaults to false)
+# - $4: first line width _as int_:
+#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
+#       The width to use for the first line.
+#       (defaults to the width)
 #
 # Returns:
 #
 # - `RETURNED_VALUE`: the wrapped text
 #
 # ```bash
-# string::wrapText "This is a long text that should be wrapped at 20 characters." 20 2 false
-# local wrappedText="${RETURNED_VALUE}"
+# string::wrapText "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
+# echo "${RETURNED_VALUE}"
 # ```
 #
 # > - This function is written in pure bash and is faster than calling the fold command.
 # > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
+# > - It considers escape sequence for text formatting and does not count them as visible characters.
 function string::wrapText() {
   local text="${1}"
-  local width="${2:-${GLOBAL_COLUMNS}}"
-  local leftPadding="${3:-0}"
-  local appendPaddingToFirstLine="${4:-false}"
-
-  if (( width < 10 )); then
-    width=10
-  fi
-
-  # compute padding in number of spaces
-  local messageLeftPadding
-  messageLeftPadding=""
-  for ((i = 0; i < leftPadding; i++)); do
-    messageLeftPadding+=" "
-  done
-
-  local sentenceWidth=$((width - leftPadding))
-
-  local wrappedText
-
-  if [[ "${text}" == *$'\n'* ]]; then
-    # we call string::wrapSentence for each line of the text
-    local firstLine="1"
-    local line
-    while read -r line; do
-      wrappedText+=$'\n'
-      string::wrapSentence "${line}" "${sentenceWidth}" "${messageLeftPadding}"
-      if [[ ${firstLine} == "1" ]]; then
-        firstLine="0"
-      else
-        wrappedText+="${messageLeftPadding}"
-      fi
-      wrappedText+="${RETURNED_VALUE}"
-    done <<<"${text}"
-  else
-    string::wrapSentence "${text}" "${sentenceWidth}" "${messageLeftPadding}"
-    wrappedText="${RETURNED_VALUE}"
-  fi
-
-  # add left padding on the first line (or not)
-  if [[ ${appendPaddingToFirstLine} == "true" ]]; then
-    RETURNED_VALUE="${messageLeftPadding}${wrappedText#$'\n'}"
-  else
-    RETURNED_VALUE="${wrappedText#$'\n'}"
-  fi
-}
-
-# ## string::wrapSentence
-#
-# Allows to soft wrap the given sentence (without new lines) at the given width.
-# Optionally applies a prefix on each new line.
-#
-# - $1: **text** _as string_:
-#       the text to wrap
-# - $2: wrap width _as int_:
-#       (optional) the width to wrap the text at
-#       (defaults to GLOBAL_COLUMNS)
-# - $3:*new line pad string _as string_:
-#       (optional) the prefix to apply to each new line
-#       (defaults to "")
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: the wrapped text
-#
-# ```bash
-# string::wrapSentence "This is a long text that should be wrapped at 20 characters." 20
-# local wrappedText="${RETURNED_VALUE}"
-# ```
-#
-# > - This function is written in pure bash and is faster than calling the fold command.
-# > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
-function string::wrapSentence() {
-  local text="${1}"
-  local -i width="${2}"
-  local newLinePrefix="${3:-}"
+  local -i width="${2:-${_OPTION_WRAP_WIDTH:-${GLOBAL_COLUMNS}}}"
+  local leftPaddingChars="${3:-${_OPTION_PADDING_CHARS:-}}"
+  local -i firstLineWidth="${4:-${_OPTION_FIRST_LINE_WIDTH:-${width}}}"
 
   # short cut in case the text is already shorter than the width
-  if [[ "${#text}" -le width ]]; then
+  if [[ ${#text} -le ${firstLineWidth} && ${text} != *$'\n'* ]]; then
     RETURNED_VALUE="${text}"
     return 0
   fi
 
-  # new line to append
-  local newLine
-  newLine=$'\n'"${newLinePrefix}"
+  local IFS=$' \t' output="" line word realWord
+  local leftPaddingVisibleChars="${leftPaddingChars//$'\e['[0-9][0-9]m/}"
+  leftPaddingVisibleChars="${leftPaddingVisibleChars//$'\e['[0-9]m/}"
+  local -i sentenceWidth=$((width - ${#leftPaddingVisibleChars})) realWordLength=0 firstWord=1
+  local -i lineLength=$((sentenceWidth - firstLineWidth))
 
-  local wrappedText word
-  local -i spaceLeft wordLength partialWordLength
-  wrappedText=""
-  spaceLeft=${width}
-  local firstWord="1"
-  local IFS=' '
-  for word in ${text}; do
+  while ((${#text} > 0)); do
+    line="${text%%$'\n'*}"
+    text="${text:${#line}+1}"
 
-    if [[ ${firstWord} == "1" ]]; then
-      firstWord="0"
-    else
-      # we just added a word
-      if [[ spaceLeft -gt 0 ]]; then
-        # if we have space left, we add a space
-        wrappedText+=" "
-        spaceLeft=$((spaceLeft - 1))
-      else
-        # otherwise we add a new line
-        wrappedText+="${newLine}"
-        spaceLeft=${width}
-      fi
+    output+=$'\n'"${leftPaddingChars}"
+
+    # short cut in case the text is already shorter than the width
+    if ((lineLength + ${#line} <= sentenceWidth)); then
+      output+="${line}"
+      continue
     fi
 
-    wordLength=${#word}
+    firstWord=1
 
-    if [[ wordLength -le spaceLeft ]]; then
-      # we have the space to add the word
-      wrappedText+="${word}"
-      spaceLeft=$((spaceLeft - wordLength))
-    else
-      # we don't have the space to add the word
-
-      # will the word fit in the width of the next line?
-      if [[ wordLength -le width ]]; then
-        # then we add the word to the next line
-        wrappedText+="${newLine}${word}"
-        spaceLeft=$((width - wordLength))
+    for word in ${line}; do
+      if [[ ${word} == *$'\e'* ]]; then
+        realWord="${word//$'\e['[0-9][0-9]m/}"
+        realWord="${realWord//$'\e['[0-9]m/}"
+        realWordLength="${#realWord}"
       else
-        # the word doesn't fit in the width of the next line
-        # we can add the partial word to the current line
-        # and the rest on the next lines until we have the full word
-        while [[ wordLength -gt 0 ]]; do
-          partialWordLength="${wordLength}"
-          if [[ partialWordLength -gt spaceLeft ]]; then
-            partialWordLength="${spaceLeft}"
-          fi
-          wrappedText+="${word:0:partialWordLength}"
-          word="${word:partialWordLength}"
-          wordLength=$((wordLength - partialWordLength))
-          spaceLeft=$((spaceLeft - partialWordLength))
-          if [[ spaceLeft -eq 0 && wordLength -gt 0 ]]; then
-            wrappedText+="${newLine}"
-            spaceLeft="${width}"
-          fi
-        done
+        realWordLength="${#word}"
       fi
-    fi
+
+      if ((lineLength < sentenceWidth && firstWord == 0)); then
+        output+=" "
+        lineLength+=1
+      else
+        firstWord=0
+      fi
+
+      if ((lineLength + realWordLength <= sentenceWidth)); then
+        # add the word to the current line
+        output+="${word}"
+        lineLength+=realWordLength
+      else
+        # not enough space left, check if the word fits on the next line
+        if ((realWordLength <= sentenceWidth)); then
+          output+=$'\n'"${leftPaddingChars}${word}"
+          lineLength=realWordLength
+        else
+          # the word is too long to fit on a line, split it in multiple lines
+          string::wrapCharacters "${word}" "${width}" "${leftPaddingChars}" "$((sentenceWidth - lineLength))"
+          output+="${RETURNED_VALUE}"
+          lineLength=${RETURNED_VALUE2}
+        fi
+      fi
+
+    done
+
+    lineLength=0
   done
 
-  RETURNED_VALUE="${wrappedText}"
+  RETURNED_VALUE="${output#$'\n'"${leftPaddingChars}"}"
 }
 
 # ## string::wrapCharacters
 #
-# Allows to hard wrap the given string (without new lines) at the given width.
-# Wrapping is done at character boundaries without taking spaces into consideration.
-# Optionally applies a prefix on each new line.
+# Allows to hard wrap the given string at the given width.
+# Wrapping is done at character boundaries, see string::warpText for word wrapping.
+# Optionally appends padding characters on each new line.
 #
 # - $1: **text** _as string_:
-#       the text to wrap
+#       The text to wrap.
 # - $2: wrap width _as string_:
-#       (optional) the width to wrap the text at
+#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
+#       The width to wrap the text at.
+#       Note that length of the optional padding characters are subtracted from the
+#       width to make sure the text fits in the given width.
 #       (defaults to GLOBAL_COLUMNS)
-# - $3: new line pad string _as string_:
-#       (optional) the prefix to apply to each new line
-#       (defaults to "")
-# - $4: new line wrap width _as string_:
-#       (optional) the width to wrap the text for each new line
+# - $3: padding characters _as string_:
+#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
+#       The characters to apply as padding on the left of each new line.
+#       E.g. '  ' will add 2 spaces on the left of each new line.
+#       (defaults to 0)
+# - $4: first line width _as int_:
+#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
+#       The width to use for the first line.
 #       (defaults to the width)
 #
 # Returns:
 #
 # - `RETURNED_VALUE`: the wrapped string
+# - `RETURNED_VALUE2`: the length taken on the last line
 #
 # ```bash
-# string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 ---
-# local wrappedString="${RETURNED_VALUE}"
+# string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 --- 5
+# echo "${RETURNED_VALUE}"
 # ```
 #
-# > This function is written in pure bash and is faster than calling the fold command.
+# > - This function is written in pure bash and is faster than calling the fold command.
+# > - It considers escape sequence for text formatting and does not count them as visible characters.
+# > - Leading spaces after a newly wrapped line are removed.
 function string::wrapCharacters() {
   local text="${1}"
-  local -i width="${2:-${GLOBAL_COLUMNS}}"
-  local newLinePrefix="${3:-}"
-  local -i newLineWidth="${4:-"${width}"}"
+  local -i width="${2:-${_OPTION_WRAP_WIDTH:-${GLOBAL_COLUMNS}}}"
+  local leftPaddingChars="${3:-${_OPTION_PADDING_CHARS:-}}"
+  local -i firstLineWidth="${4:-${_OPTION_FIRST_LINE_WIDTH:-${width}}}"
 
-  # short cut in case the text is already shorter than the width
-  if [[ "${#text}" -le width ]]; then
-    RETURNED_VALUE="${text}"
-    return 0
+  local itemChunk spaces
+  local leftPaddingVisibleChars="${leftPaddingChars//$'\e['[0-9][0-9]m/}"
+  leftPaddingVisibleChars="${leftPaddingVisibleChars//$'\e['[0-9]m/}"
+  width=$((width - ${#leftPaddingVisibleChars}))
+  local -i lineLength=$((width - firstLineWidth)) isWrapping=0
+
+  if ((width <= 0)); then
+    RETURNED_VALUE=""
+    RETURNED_VALUE2=0
+    return
   fi
 
   RETURNED_VALUE=""
-  local -i textLength="${#text}" i nbLines=-1
-  local first=true
-  for ((i = 0; i < textLength; i += width)); do
-    if ((nbLines == 0)); then
-      width=${newLineWidth}
+  while ((${#text} > 0)); do
+    # take the first chunk that does not contain an escape character
+    itemChunk="${text%%$'\e'*}"
+    itemChunk="${itemChunk%%$'\n'*}"
+
+    spaces="${itemChunk%%[^ ]*}"
+    if [[ -n ${spaces} && lineLength -eq 0 && isWrapping -eq 1 ]]; then
+      # if the chunk contains heading spaces, we can remove them
+      itemChunk="${itemChunk:${#spaces}}"
+      text="${text:${#spaces}}"
     fi
-    if ((nbLines >= 0)); then
-      RETURNED_VALUE+=$'\n'"${newLinePrefix}"
+
+    if ((lineLength < width)); then
+      itemChunk="${itemChunk:0:$((width - lineLength))}"
+      text="${text:${#itemChunk}}"
+      lineLength+=${#itemChunk}
+      RETURNED_VALUE+="${itemChunk}"
+      isWrapping=1
+
+      while [[ ${text} == $'\e'* ]]; do
+        # case where we have an escape sequence at the beginning of the string
+        # we only consider escape sequences for text formatting, they end with 'm'
+        itemChunk="${text%%"m"*}m"
+        RETURNED_VALUE+="${itemChunk}"
+        text="${text:${#itemChunk}}"
+      done
+
+      while [[ ${text} == $'\n'* ]]; do
+        RETURNED_VALUE+=$'\n'"${leftPaddingChars}"
+        text="${text:1}"
+        lineLength=0
+        isWrapping=0
+      done
     fi
-    RETURNED_VALUE+="${text:i:width}"
-    nbLines+=1
+
+    if ((lineLength >= width)); then
+      # we reached the desired size
+      lineLength=0
+      RETURNED_VALUE+=$'\n'"${leftPaddingChars}"
+    fi
   done
+
+  RETURNED_VALUE="${RETURNED_VALUE%$'\n'"${leftPaddingChars}"}"
+  RETURNED_VALUE2=${lineLength}
 }
 
 # ## array::fuzzyFilter
@@ -1320,9 +1307,8 @@ function string::wrapCharacters() {
 # - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array
 #
 # ```bash
-# array::fuzzyFilter "pattern" "myarray" && local filteredArray="${RETURNED_ARRAY}"
-# array::fuzzyFilter "pattern" "myarray" ⌜ ⌝ && local filteredArray="${RETURNED_ARRAY}"
-# array::fuzzyFilter "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${RETURNED_ARRAY}"
+# array::fuzzyFilter "pattern" "myarray"
+# IFS=$'\n' echo "${RETURNED_ARRAY[*]}"
 # ```
 #
 # > - All characters in the pattern must be found in the same order in the matched line.
@@ -1334,7 +1320,7 @@ function array::fuzzyFilter() {
   # nothing to filter
   if [[ -z ${pattern} ]]; then
     RETURNED_ARRAY=("${array[@]}")
-    eval "RETURNED_ARRAY2=( {0..$(( ${#array[@]} - 1 ))} )"
+    eval "RETURNED_ARRAY2=( {0..$((${#array[@]} - 1))} )"
     return 0
   fi
 
@@ -1352,14 +1338,13 @@ function array::fuzzyFilter() {
   RETURNED_ARRAY2=()
 
   local -i itemIndex
-  for(( itemIndex = 0 ; itemIndex< ${#array[@]}; itemIndex++ )); do
+  for ((itemIndex = 0; itemIndex < ${#array[@]}; itemIndex++)); do
     if [[ ${array[itemIndex]} =~ ${patternRegex} ]]; then
       RETURNED_ARRAY+=("${array[itemIndex]}")
       RETURNED_ARRAY2+=("${itemIndex}")
     fi
   done
 }
-
 
 #===============================================================
 # >>> Valet files and directories
@@ -1389,7 +1374,7 @@ function core::getConfigurationDirectory() {
 
 # ## core::getLocalStateDirectory
 #
-# Returns the path to the valet locla state directory.
+# Returns the path to the valet local state directory.
 # The base directory relative to which user-specific state files should be stored.
 # Creates it if missing.
 #
@@ -1444,7 +1429,7 @@ function core::showHelp() {
   # get the function name of the calling function
   functionName="${FUNCNAME[1]}"
 
-  main::printHelp funtion "${functionName}"
+  main::printHelp function "${functionName}"
 }
 
 # ## core::parseArguments

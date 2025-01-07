@@ -69,7 +69,7 @@ printf '%s\n' "${myArray[@]}"
 
 ## array::fuzzyFilter
 
-Allows to fuzzy match an array against a given pattern.
+Allows to fuzzy sort an array against a given pattern.
 Returns an array containing only the lines matching the pattern.
 
 - $1: **pattern** _as string_:
@@ -79,20 +79,16 @@ Returns an array containing only the lines matching the pattern.
 
 Returns:
 
-- `RETURNED_ARRAY`: an array containing only the lines matching the pattern
-- `RETURNED_ARRAY2`: an array of the same size that contains the start index of the match
-- `RETURNED_ARRAY3`: an array of the same size that contains the distance of the match
+- `RETURNED_ARRAY`: An array containing the filtered items
+- `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array
 
 ```bash
 array::fuzzyFilter "pattern" "myarray"
-if (( ${#RETURNED_ARRAY[@]} == 1 )); then
-  singleMatch="${RETURNED_ARRAY[0]}"
-fi
+IFS=$'\n' echo "${RETURNED_ARRAY[*]}"
 ```
 
 > - All characters in the pattern must be found in the same order in the matched line.
-> - The function is case insensitive.
-> - This function does not sort the results, it only filters them.
+> - Use `shopt -s nocasematch` to make this function is case insensitive.
 
 
 ## array::fuzzyFilterSort
@@ -102,22 +98,12 @@ Returns an array containing only the lines matching the pattern.
 The array is sorted by (in order):
 
 - the index of the first matched character in the line
-- the distance between the characters in the line
+- the distance between the first and last matched characters in the line
 
 - $1: **pattern** _as string_:
       the pattern to match
 - $2: **array name** _as string_:
       the initial array name
-- $3: prefix matched char _as string_:
-      (optional) string to add before each matched char
-      (defaults to empty string)
-- $4: suffix matched char _as string_:
-      (optional) string to add after each matched char
-      (defaults to empty string)
-- $5: max line length _as int_:
-      (optional) The maximum length to keep for the matched lines,
-      does not count the strings added/before after each matched char
-      (defaults to 9999999)
 
 Returns:
 
@@ -131,8 +117,7 @@ array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${
 ```
 
 > - All characters in the pattern must be found in the same order in the matched line.
-> - The function is case insensitive.
-> - This function does not sort the results, it only filters them.
+> - Use `shopt -s nocasematch` to make this function is case insensitive.
 
 
 ## array::isInArray
@@ -216,6 +201,34 @@ printf '%s\n' "${RETURNED_ARRAY[@]}"
 > TODO: Update this basic exchange sort implementation.
 
 
+## benchmark::run
+
+This function runs a benchmark on given functions.
+
+First, it will run the 1st function (the baseline) for a given number of time and
+mark the number of times it was able to run it in that given time.
+
+Then, it will run all the functions for the same number of time and
+print the difference between the baseline and the other functions.
+
+- $1: **baseline** _as string_:
+      the name of the function to use as baseline
+- $2: **functions** _as string_:
+      The names of the functions to benchmark, comma separated.
+- $3: time _as int_:
+      (optional) Can be set using the variable `_OPTION_TIME`.
+      The time in seconds for which to run the baseline.
+      (defaults to 3s)
+- $4: max runs _as int_:
+      (optional) Can be set using the variable `_OPTION_MAX_RUNS`.
+      The maximum number of runs to do for each function.
+      (defaults to -1 which means no limit)
+
+```bash
+benchmark::run "baseline" "function1,function2" 1 100
+```
+
+
 ## core::checkParseResults
 
 A convenience function to check the parsing results and fails with an error message if there are
@@ -292,7 +305,7 @@ local directory="${RETURNED_VALUE}"
 
 ## core::getLocalStateDirectory
 
-Returns the path to the valet locla state directory.
+Returns the path to the valet local state directory.
 The base directory relative to which user-specific state files should be stored.
 Creates it if missing.
 
@@ -304,6 +317,24 @@ Returns:
 core::getLocalStateDirectory
 local directory="${RETURNED_VALUE}"
 ```
+
+
+## core::getProgramElapsedMicroseconds
+
+Get the elapsed time in µs since the program started.
+
+Returns:
+
+- `RETURNED_VALUE`: the elapsed time in µs since the program started.
+
+```bash
+core::getElapsedProgramTime
+echo "${RETURNED_VALUE}"
+string::microsecondsToHuman "${RETURNED_VALUE}"
+echo "Human time: ${RETURNED_VALUE}"
+```
+
+> Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 
 
 ## core::getUserDirectory
@@ -673,7 +704,7 @@ at the given position.
       the current column of the cursor (1 based)
 - $3: **desired height** _as int_:
       the desired height of the box
-- $4: **desiredWidth** _as int_:
+- $4: **desired width** _as int_:
       the desired width of the box
 - $5: **max height** _as int_:
       the maximum height of the box
@@ -816,6 +847,26 @@ Reset the key bindings to the default ones.
 
 ```bash
 interactive::resetBindings
+```
+
+
+## interactive::restoreInterruptTrap
+
+Restore the original trap for the interrupt signal (SIGINT).
+To be called after interactive::setInterruptTrap.
+
+```bash
+interactive::restoreInterruptTrap
+```
+
+
+## interactive::setInterruptTrap
+
+Set a trap to catch the interrupt signal (SIGINT).
+When the user presses Ctrl+C, the GLOBAL_SESSION_INTERRUPTED variable will be set to true.
+
+```bash
+interactive::setInterruptTrap
 ```
 
 
@@ -1873,12 +1924,15 @@ if log::isTraceEnabled; then printf '%s\n' "Debug mode is active."; fi
 
 This function prints the current function stack in the logs.
 
-- $1: **stack to skip** _as int_:
-      the number of stack to skip (defaults to 2 which skips this function
-      and the first calling function which is usually the onError function)
+- $1: Stack to skip _as int_:
+      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
+      The number of stack to skip.
+      (defaults to 2 which skips this function and the first calling function
+      which is usually the onError function)
 
 ```bash
-log::printCallStack 2
+log::printCallStack
+log::printCallStack 0
 ```
 
 
@@ -2063,104 +2117,125 @@ You can define several callback functions that are called on different events:
       The column at which the autocompleted text starts (this is used to
       compute how to display the box).
 - $3: stop column _as int_:
-      (optional) The column at which to stop showing the autocompleted text.
+      (optional) Can be set using the variable `_OPTION_STOP_COLUMN`.
+      The column at which to stop showing the autocompleted text.
       Longer texts get shifted to display the end of the user input.
-      Can be set using the variable `_OPTION_STOP_COLUMN`.
       (defaults to the end of the screen)
 - $4: items array name _as string_:
+      (optional) Can be set using the variable `_OPTION_ITEMS_ARRAY_NAME`.
       The items to display (name of a global array which contains the items).
       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.
-      Can be set using the variable `_OPTION_ITEMS_ARRAY_NAME`.
       (defaults to empty)
 - $5: initial text _as string_:
-      (optional) The initial string, which corresponds to the text already entered
+      (optional) Can be set using the variable `_OPTION_STRING`.
+      The initial string, which corresponds to the text already entered
       by the user at the moment the autocompletion box shows up.
       Allows to pre-filter the autocompletion.
-      Can be set using the variable `_OPTION_STRING`.
       (defaults to empty)
 - $6: items box max lines _as int_:
-      optional) The maximum number of lines/rows to use for the autocompletion box.
+      (optional) Can be set using the variable `_OPTION_ITEMS_BOX_MAX_HEIGHT`.
+      The maximum number of lines/rows to use for the autocompletion box.
       If the number of items is greater than this value, the box will be scrollable.
-      Can be set using the variable `_OPTION_ITEMS_BOX_MAX_HEIGHT`.
       (defaults to a maximized auto-computed value depending on the items and screen size)
 - $7: force items box below _as bool_:
-      (optional) If true, the box is forced to be displayed below the input text.
+      (optional) Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_BELOW`.
+      If true, the box is forced to be displayed below the input text.
       Otherwise it will depend on the space required and space available below/above.
-      Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_BELOW`.
       (defaults to false)
 - $8: show prompt _as bool_:
-      (optional) If true, the prompt is displayed. If false, the prompt is hidden.
+      (optional) Can be set using the variable `_OPTION_ENABLE_PROMPT`.
+      If true, the prompt is displayed. If false, the prompt is hidden.
       Useful to turn this into a simple multiple choice list.
-      Can be set using the variable `_OPTION_SHOW_AUTOCOMPLETE`.
       (defaults to true)
 - $9: force show count _as bool_:
-      (optional) If true, the count of items is always displayed.
+      (optional) Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT`.
+      If true, the count of items is always displayed.
       If false, the count is only displayed when we can't display all the items at once.
-      Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT`.
       (defaults to false)
-- $10: show left symbols _as bool_:
-      (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
+- $10: show count at top _as bool_:
+      (optional) Can be set using the variable `_OPTION_ITEMS_BOX_SHOW_COUNT_AT_TOP`.
+      If true, the count of items will be displayed at the top of the box instead of the bottom.
+      (defaults to false)
+- $11: show left symbols _as bool_:
+      (optional) Can be set using the variable `_OPTION_SHOW_SYMBOL`.
+      If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
       Useful to display the most simple auto-completion when false.
-      Can be set using the variable `_OPTION_SHOW_SYMBOL`.
       (defaults to true)
-- $11: filters from n chars _as int_:
-      (optional) The minimum number of characters to type before starting to filter the items.
+- $12: filters from n chars _as int_:
+      (optional) Can be set using the variable `_OPTION_FILTERS_FROM_N_CHARS`.
+      The minimum number of characters to type before starting to filter the items.
       By default, the list is shown full and the user can start typing to filter.
       Put a value superior to 0 to make it behave like a standard autocompletion.
       When non-zero, the user can TAB to show the full list.
-      Can be set using the variable `_OPTION_FILTERS_FROM_N_CHARS`.
       (defaults to 0)
-- $12: accept any value _as bool_:
-      (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
+- $13: accept any value _as bool_:
+      (optional) Can be set using the variable `_OPTION_ACCEPT_ANY_VALUE`.
+      If true, the left cursors are displayed (> for prompt and the > for selected item).
       Useful to display the most simple auto-completion when false.
-      Can be set using the variable `_OPTION_ACCEPT_ANY_VALUE`.
       (defaults to true)
-- $13: placeholder _as string_:
-      (optional) The placeholder to display when the input is empty.
-      Can be set using the variable `_OPTION_PLACEHOLDER`.
+- $14: placeholder _as string_:
+      (optional) Can be set using the variable `_OPTION_PLACEHOLDER`.
+      The placeholder to display when the input is empty.
       (defaults to empty)
-- $14: max length _as int_:
-      (optional) The maximum length of the input string.
+- $15: max length _as int_:
+      (optional) Can be set using the variable `_OPTION_STRING_MAX_LENGTH`.
+      The maximum length of the input string.
       If the user types more characters, they are truncated and an error message is displayed.
-      Can be set using the variable `_OPTION_STRING_MAX_LENGTH`.
       (defaults to 99999)
-- $15: autocomplete whole line _as bool_:
-      (optional) If true, the whole line is autocompleted (all characters are considered to filter)
+- $16: autocomplete whole line _as bool_:
+      (optional) Can be set using the variable `_OPTION_AUTOCOMPLETE_WHOLE_LINE`.
+      If true, the whole line is autocompleted (all characters are considered to filter)
       the items. If false, only the word characters before the cursor are considered.
-      Can be set using the variable `_OPTION_AUTOCOMPLETE_WHOLE_LINE`.
       (defaults to true)
-- $16: tab opens items box _as bool_:
-      (optional) If true, the tab key opens the items box if it is not already open.
-      Can be set using the variable `_OPTION_TAB_OPENS_ITEMS_BOX`.
+- $17: tab opens items box _as bool_:
+      (optional) Can be set using the variable `_OPTION_TAB_OPENS_ITEMS_BOX`.
+      If true, the tab key opens the items box if it is not already open.
       (defaults to true)
-- $17: items box allow filtering _as bool_:
-      (optional) If true, the items can be filtered by typing characters.
+- $18: items box allow filtering _as bool_:
+      (optional) Can be set using the variable `_OPTION_ITEMS_BOX_ALLOW_FILTERING`.
+      If true, the items can be filtered by typing characters.
       If false, the items are displayed as is.
-      Can be set using the variable `_OPTION_ITEMS_BOX_ALLOW_FILTERING`.
-      (defaults to the value of `_OPTION_SHOW_AUTOCOMPLETE` or true)
-- $18: password mode _as bool_:
-      (optional) If true, the input is displayed as a series of stars *.
+      (defaults to the value of `_OPTION_ENABLE_PROMPT` or true)
+- $19: password mode _as bool_:
+      (optional) Can be set using the variable `_OPTION_PASSWORD_MODE`.
+      If true, the input is displayed as a series of stars *.
       This mode can be activated/deactivated by pressing CTRL+P.
-      Can be set using the variable `_OPTION_PASSWORD_MODE`.
       (defaults to false)
-- $19: callback function on text update _as string_:
-      (optional) The name of a function to call each time the text is updated.
+- $20: callback function on text update _as string_:
+      (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.
+      The name of a function to call each time the text is updated.
       Can be used to validate the input and display an error message.
       The function is called with no arguments but you can use the global variable `_OPTION_STRING` and
       `_OPTION_STRING_INDEX` to access the current text and cursor position.
       You must set:
+
       - `RETURNED_VALUE`: The error message to display (or empty).
       - `RETURNED_VALUE2`: A boolean to indicate if the autocompletion box should be redrawn.
-      Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.
+
       (defaults to empty)
-- $20: callback function on key pressed _as string_:
-      (optional) The name of a function to call each time a key is pressed.
+- $21: callback function on key pressed _as string_:
+      (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED`.
+      The name of a function to call each time a key is pressed.
       Can be used to customize the behavior of the prompt.
       The function is called with the following arguments:
+
       - $1: The key that was pressed, including special keys (CTRL+, ALT+, TAB, etc...).
       - $2: The last character that was sent by the terminal, if any (can be empty when key is not empty).
+
       The function must return 0 if the key press was handled, 1 otherwise.
-      Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED`.
+      (defaults to empty)
+- $22: callback function on box closed _as string_:
+      (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_BOX_CLOSED`.
+      The name of a function to call when the autocompletion box is closed.
+      Can be used to clean up resources or to update the screen.
+      The function is called with arguments:
+
+      - $1: The top line number of the box that was just closed.
+      - $2: The left column of the box.
+      - $3: The width of the box.
+      - $4: The height of the box.
+
+      The function must return 0 to state that prompt does not have to be redrawn, 1 otherwise.
       (defaults to empty)
 
 Returns:
@@ -2174,6 +2249,48 @@ Returns:
 
 ```bash
 prompt::input "Select an item" item_array_name "onItemSelected" "Details"
+```
+
+
+## prompt_getDisplayedPromptString
+
+This function return a string that can be printed in a terminal in order to display a text
+and position the cursor at a given index in the input text.
+
+If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed
+at the beginning and/or at the end of the string.
+
+The cursor will be displayed under the character at the given index of the input text and
+it makes sure that the cursor is always visible in the screen.
+
+This function is useful to display a long prompt on a single line.
+
+An example:
+
+```text
+_PROMPT_STRING_SCREEN_WIDTH=10
+_PROMPT_STRING_INDEX=20
+_PROMPT_STRING="This is a long string that will be displayed in the screen."
+#                                ^ input index 20
+prompt_getDisplayedPromptString 20 10
+# output: "…g string…"
+#                  ^ screen cursor (at index 8)
+```
+
+- $_PROMPT_STRING: **input string** _as string_:
+      the string to display
+- $_PROMPT_STRING_INDEX: **input index** _as int_:
+      the index of the character (in the input string) that should be under the cursor
+- $_PROMPT_STRING_SCREEN_WIDTH: **screen width** _as int_:
+      the width of the screen
+
+Returns:
+
+- `RETURNED_VALUE`: the string to display in the screen
+- `RETURNED_VALUE2`: the index at which to position the cursor on screen
+
+```bash
+prompt_getDisplayedPromptString "This is a long string that will be displayed in the screen." 20 10
 ```
 
 
@@ -2342,46 +2459,6 @@ local extractedText="${RETURNED_VALUE}"
 ```
 
 
-## string::fitStringInScreen
-
-This function return a string that can be printed in a terminal in order to display a text
-and position the cursor at a given index in the input text.
-
-If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed
-at the beginning and/or at the end of the string.
-
-The cursor will be displayed under the character at the given index of the input text and
-it makes sure that the cursor is always visible in the screen.
-
-This function is useful to display a long prompt on a single line.
-
-An example:
-
-```text
-inputString="This is a long string that will be displayed in the screen."
-#                                ^ input index 20
-string::fitStringInScreen "${inputString}" 20 10
-# output: "…g string…"
-#                  ^ screen cursor (at index 8)
-```
-
-- $1: **input string** _as string_:
-      the string to display
-- $2: **input index** _as int_:
-      the index of the character (in the input string) that should be under the cursor
-- $3: **screen width** _as int_:
-      the width of the screen
-
-Returns:
-
-- `RETURNED_VALUE`: the string to display in the screen
-- `RETURNED_VALUE2`: the index at which to position the cursor on screen
-
-```bash
-string::fitStringInScreen "This is a long string that will be displayed in the screen." 20 10
-```
-
-
 ## string::indexOf
 
 Find the first index of a string within another string.
@@ -2446,8 +2523,9 @@ Convert microseconds to human readable format.
 
 - $1: **microseconds** _as int_:
       the microseconds to convert
-- $2: **format** _as string_:
-     the format to use (defaults to "HH:MM:SS")
+- $2: format _as string_:
+     (optional) Can be set using the variable `_OPTION_FORMAT`.
+     the format to use (defaults to "%HH:%MM:%SS")
      Usable formats:
      - %HH: hours
      - %MM: minutes
@@ -2549,59 +2627,79 @@ string::trimAll "   example   string    " && local trimmedString="${RETURNED_VAL
 
 ## string::wrapCharacters
 
-Allows to hard wrap the given string (without new lines) at the given width.
-Wrapping is done at character boundaries without taking spaces into consideration.
-Optionally applies a prefix on each new line.
+Allows to hard wrap the given string at the given width.
+Wrapping is done at character boundaries, see string::warpText for word wrapping.
+Optionally appends padding characters on each new line.
 
 - $1: **text** _as string_:
-      the text to wrap
+      The text to wrap.
 - $2: wrap width _as string_:
-      (optional) the width to wrap the text at
+      (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
+      The width to wrap the text at.
+      Note that length of the optional padding characters are subtracted from the
+      width to make sure the text fits in the given width.
       (defaults to GLOBAL_COLUMNS)
-- $3: new line pad string _as string_:
-      (optional) the prefix to apply to each new line
-      (defaults to "")
-- $4: new line wrap width _as string_:
-      (optional) the width to wrap the text for each new line
+- $3: padding characters _as string_:
+      (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
+      The characters to apply as padding on the left of each new line.
+      E.g. '  ' will add 2 spaces on the left of each new line.
+      (defaults to 0)
+- $4: first line width _as int_:
+      (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
+      The width to use for the first line.
       (defaults to the width)
 
 Returns:
 
 - `RETURNED_VALUE`: the wrapped string
+- `RETURNED_VALUE2`: the length taken on the last line
 
 ```bash
-string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 ---
-local wrappedString="${RETURNED_VALUE}"
+string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 --- 5
+echo "${RETURNED_VALUE}"
 ```
 
-> This function is written in pure bash and is faster than calling the fold command.
+> - This function is written in pure bash and is faster than calling the fold command.
+> - It considers escape sequence for text formatting and does not count them as visible characters.
+> - Leading spaces after a newly wrapped line are removed.
 
 
-## string::wrapSentence
+## string::wrapText
 
-Allows to soft wrap the given sentence (without new lines) at the given width.
-Optionally applies a prefix on each new line.
+Allows to soft wrap the given text at the given width.
+Wrapping is done at word boundaries.
+Optionally appends padding characters on each new line.
 
 - $1: **text** _as string_:
-      the text to wrap
-- $2: wrap width _as int_:
-      (optional) the width to wrap the text at
+      The text to wrap.
+- $2: wrap width _as string_:
+      (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
+      The width to wrap the text at.
+      Note that length of the optional padding characters are subtracted from the
+      width to make sure the text fits in the given width.
       (defaults to GLOBAL_COLUMNS)
-- $3:*new line pad string _as string_:
-      (optional) the prefix to apply to each new line
-      (defaults to "")
+- $3: padding characters _as string_:
+      (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
+      The characters to apply as padding on the left of each new line.
+      E.g. '  ' will add 2 spaces on the left of each new line.
+      (defaults to 0)
+- $4: first line width _as int_:
+      (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
+      The width to use for the first line.
+      (defaults to the width)
 
 Returns:
 
 - `RETURNED_VALUE`: the wrapped text
 
 ```bash
-string::wrapSentence "This is a long text that should be wrapped at 20 characters." 20
-local wrappedText="${RETURNED_VALUE}"
+string::wrapText "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
+echo "${RETURNED_VALUE}"
 ```
 
 > - This function is written in pure bash and is faster than calling the fold command.
 > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
+> - It considers escape sequence for text formatting and does not count them as visible characters.
 
 
 ## system::addToPath
@@ -2897,7 +2995,7 @@ function array::appendIfNotPresent() { :; }
 
 # ## array::fuzzyFilter
 # 
-# Allows to fuzzy match an array against a given pattern.
+# Allows to fuzzy sort an array against a given pattern.
 # Returns an array containing only the lines matching the pattern.
 # 
 # - $1: **pattern** _as string_:
@@ -2907,20 +3005,16 @@ function array::appendIfNotPresent() { :; }
 # 
 # Returns:
 # 
-# - `RETURNED_ARRAY`: an array containing only the lines matching the pattern
-# - `RETURNED_ARRAY2`: an array of the same size that contains the start index of the match
-# - `RETURNED_ARRAY3`: an array of the same size that contains the distance of the match
+# - `RETURNED_ARRAY`: An array containing the filtered items
+# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array
 # 
 # ```bash
 # array::fuzzyFilter "pattern" "myarray"
-# if (( ${#RETURNED_ARRAY[@]} == 1 )); then
-#   singleMatch="${RETURNED_ARRAY[0]}"
-# fi
+# IFS=$'\n' echo "${RETURNED_ARRAY[*]}"
 # ```
 # 
 # > - All characters in the pattern must be found in the same order in the matched line.
-# > - The function is case insensitive.
-# > - This function does not sort the results, it only filters them.
+# > - Use `shopt -s nocasematch` to make this function is case insensitive.
 # 
 function array::fuzzyFilter() { :; }
 
@@ -2931,22 +3025,12 @@ function array::fuzzyFilter() { :; }
 # The array is sorted by (in order):
 # 
 # - the index of the first matched character in the line
-# - the distance between the characters in the line
+# - the distance between the first and last matched characters in the line
 # 
 # - $1: **pattern** _as string_:
 #       the pattern to match
 # - $2: **array name** _as string_:
 #       the initial array name
-# - $3: prefix matched char _as string_:
-#       (optional) string to add before each matched char
-#       (defaults to empty string)
-# - $4: suffix matched char _as string_:
-#       (optional) string to add after each matched char
-#       (defaults to empty string)
-# - $5: max line length _as int_:
-#       (optional) The maximum length to keep for the matched lines,
-#       does not count the strings added/before after each matched char
-#       (defaults to 9999999)
 # 
 # Returns:
 # 
@@ -2960,8 +3044,7 @@ function array::fuzzyFilter() { :; }
 # ```
 # 
 # > - All characters in the pattern must be found in the same order in the matched line.
-# > - The function is case insensitive.
-# > - This function does not sort the results, it only filters them.
+# > - Use `shopt -s nocasematch` to make this function is case insensitive.
 # 
 function array::fuzzyFilterSort() { :; }
 
@@ -3050,6 +3133,35 @@ function array::sort() { :; }
 # 
 function array::sortWithCriteria() { :; }
 
+# ## benchmark::run
+# 
+# This function runs a benchmark on given functions.
+# 
+# First, it will run the 1st function (the baseline) for a given number of time and
+# mark the number of times it was able to run it in that given time.
+# 
+# Then, it will run all the functions for the same number of time and
+# print the difference between the baseline and the other functions.
+# 
+# - $1: **baseline** _as string_:
+#       the name of the function to use as baseline
+# - $2: **functions** _as string_:
+#       The names of the functions to benchmark, comma separated.
+# - $3: time _as int_:
+#       (optional) Can be set using the variable `_OPTION_TIME`.
+#       The time in seconds for which to run the baseline.
+#       (defaults to 3s)
+# - $4: max runs _as int_:
+#       (optional) Can be set using the variable `_OPTION_MAX_RUNS`.
+#       The maximum number of runs to do for each function.
+#       (defaults to -1 which means no limit)
+# 
+# ```bash
+# benchmark::run "baseline" "function1,function2" 1 100
+# ```
+# 
+function benchmark::run() { :; }
+
 # ## core::checkParseResults
 # 
 # A convenience function to check the parsing results and fails with an error message if there are
@@ -3131,7 +3243,7 @@ function core::getConfigurationDirectory() { :; }
 
 # ## core::getLocalStateDirectory
 # 
-# Returns the path to the valet locla state directory.
+# Returns the path to the valet local state directory.
 # The base directory relative to which user-specific state files should be stored.
 # Creates it if missing.
 # 
@@ -3145,6 +3257,25 @@ function core::getConfigurationDirectory() { :; }
 # ```
 # 
 function core::getLocalStateDirectory() { :; }
+
+# ## core::getProgramElapsedMicroseconds
+# 
+# Get the elapsed time in µs since the program started.
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: the elapsed time in µs since the program started.
+# 
+# ```bash
+# core::getElapsedProgramTime
+# echo "${RETURNED_VALUE}"
+# string::microsecondsToHuman "${RETURNED_VALUE}"
+# echo "Human time: ${RETURNED_VALUE}"
+# ```
+# 
+# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
+# 
+function core::getProgramElapsedMicroseconds() { :; }
 
 # ## core::getUserDirectory
 # 
@@ -3532,7 +3663,7 @@ function interactive::displayQuestion() { :; }
 #       the current column of the cursor (1 based)
 # - $3: **desired height** _as int_:
 #       the desired height of the box
-# - $4: **desiredWidth** _as int_:
+# - $4: **desired width** _as int_:
 #       the desired width of the box
 # - $5: **max height** _as int_:
 #       the maximum height of the box
@@ -3684,6 +3815,28 @@ function interactive::rebindKeymap() { :; }
 # ```
 # 
 function interactive::resetBindings() { :; }
+
+# ## interactive::restoreInterruptTrap
+# 
+# Restore the original trap for the interrupt signal (SIGINT).
+# To be called after interactive::setInterruptTrap.
+# 
+# ```bash
+# interactive::restoreInterruptTrap
+# ```
+# 
+function interactive::restoreInterruptTrap() { :; }
+
+# ## interactive::setInterruptTrap
+# 
+# Set a trap to catch the interrupt signal (SIGINT).
+# When the user presses Ctrl+C, the GLOBAL_SESSION_INTERRUPTED variable will be set to true.
+# 
+# ```bash
+# interactive::setInterruptTrap
+# ```
+# 
+function interactive::setInterruptTrap() { :; }
 
 # ## interactive::startProgress
 # 
@@ -4789,12 +4942,15 @@ function log::isTraceEnabled() { :; }
 # 
 # This function prints the current function stack in the logs.
 # 
-# - $1: **stack to skip** _as int_:
-#       the number of stack to skip (defaults to 2 which skips this function
-#       and the first calling function which is usually the onError function)
+# - $1: Stack to skip _as int_:
+#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
+#       The number of stack to skip.
+#       (defaults to 2 which skips this function and the first calling function
+#       which is usually the onError function)
 # 
 # ```bash
-# log::printCallStack 2
+# log::printCallStack
+# log::printCallStack 0
 # ```
 # 
 function log::printCallStack() { :; }
@@ -4990,104 +5146,125 @@ function profiler::enable() { :; }
 #       The column at which the autocompleted text starts (this is used to
 #       compute how to display the box).
 # - $3: stop column _as int_:
-#       (optional) The column at which to stop showing the autocompleted text.
+#       (optional) Can be set using the variable `_OPTION_STOP_COLUMN`.
+#       The column at which to stop showing the autocompleted text.
 #       Longer texts get shifted to display the end of the user input.
-#       Can be set using the variable `_OPTION_STOP_COLUMN`.
 #       (defaults to the end of the screen)
 # - $4: items array name _as string_:
+#       (optional) Can be set using the variable `_OPTION_ITEMS_ARRAY_NAME`.
 #       The items to display (name of a global array which contains the items).
 #       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.
-#       Can be set using the variable `_OPTION_ITEMS_ARRAY_NAME`.
 #       (defaults to empty)
 # - $5: initial text _as string_:
-#       (optional) The initial string, which corresponds to the text already entered
+#       (optional) Can be set using the variable `_OPTION_STRING`.
+#       The initial string, which corresponds to the text already entered
 #       by the user at the moment the autocompletion box shows up.
 #       Allows to pre-filter the autocompletion.
-#       Can be set using the variable `_OPTION_STRING`.
 #       (defaults to empty)
 # - $6: items box max lines _as int_:
-#       optional) The maximum number of lines/rows to use for the autocompletion box.
+#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_MAX_HEIGHT`.
+#       The maximum number of lines/rows to use for the autocompletion box.
 #       If the number of items is greater than this value, the box will be scrollable.
-#       Can be set using the variable `_OPTION_ITEMS_BOX_MAX_HEIGHT`.
 #       (defaults to a maximized auto-computed value depending on the items and screen size)
 # - $7: force items box below _as bool_:
-#       (optional) If true, the box is forced to be displayed below the input text.
+#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_BELOW`.
+#       If true, the box is forced to be displayed below the input text.
 #       Otherwise it will depend on the space required and space available below/above.
-#       Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_BELOW`.
 #       (defaults to false)
 # - $8: show prompt _as bool_:
-#       (optional) If true, the prompt is displayed. If false, the prompt is hidden.
+#       (optional) Can be set using the variable `_OPTION_ENABLE_PROMPT`.
+#       If true, the prompt is displayed. If false, the prompt is hidden.
 #       Useful to turn this into a simple multiple choice list.
-#       Can be set using the variable `_OPTION_SHOW_AUTOCOMPLETE`.
 #       (defaults to true)
 # - $9: force show count _as bool_:
-#       (optional) If true, the count of items is always displayed.
+#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT`.
+#       If true, the count of items is always displayed.
 #       If false, the count is only displayed when we can't display all the items at once.
-#       Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT`.
 #       (defaults to false)
-# - $10: show left symbols _as bool_:
-#       (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
+# - $10: show count at top _as bool_:
+#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_SHOW_COUNT_AT_TOP`.
+#       If true, the count of items will be displayed at the top of the box instead of the bottom.
+#       (defaults to false)
+# - $11: show left symbols _as bool_:
+#       (optional) Can be set using the variable `_OPTION_SHOW_SYMBOL`.
+#       If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
 #       Useful to display the most simple auto-completion when false.
-#       Can be set using the variable `_OPTION_SHOW_SYMBOL`.
 #       (defaults to true)
-# - $11: filters from n chars _as int_:
-#       (optional) The minimum number of characters to type before starting to filter the items.
+# - $12: filters from n chars _as int_:
+#       (optional) Can be set using the variable `_OPTION_FILTERS_FROM_N_CHARS`.
+#       The minimum number of characters to type before starting to filter the items.
 #       By default, the list is shown full and the user can start typing to filter.
 #       Put a value superior to 0 to make it behave like a standard autocompletion.
 #       When non-zero, the user can TAB to show the full list.
-#       Can be set using the variable `_OPTION_FILTERS_FROM_N_CHARS`.
 #       (defaults to 0)
-# - $12: accept any value _as bool_:
-#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
+# - $13: accept any value _as bool_:
+#       (optional) Can be set using the variable `_OPTION_ACCEPT_ANY_VALUE`.
+#       If true, the left cursors are displayed (> for prompt and the > for selected item).
 #       Useful to display the most simple auto-completion when false.
-#       Can be set using the variable `_OPTION_ACCEPT_ANY_VALUE`.
 #       (defaults to true)
-# - $13: placeholder _as string_:
-#       (optional) The placeholder to display when the input is empty.
-#       Can be set using the variable `_OPTION_PLACEHOLDER`.
+# - $14: placeholder _as string_:
+#       (optional) Can be set using the variable `_OPTION_PLACEHOLDER`.
+#       The placeholder to display when the input is empty.
 #       (defaults to empty)
-# - $14: max length _as int_:
-#       (optional) The maximum length of the input string.
+# - $15: max length _as int_:
+#       (optional) Can be set using the variable `_OPTION_STRING_MAX_LENGTH`.
+#       The maximum length of the input string.
 #       If the user types more characters, they are truncated and an error message is displayed.
-#       Can be set using the variable `_OPTION_STRING_MAX_LENGTH`.
 #       (defaults to 99999)
-# - $15: autocomplete whole line _as bool_:
-#       (optional) If true, the whole line is autocompleted (all characters are considered to filter)
+# - $16: autocomplete whole line _as bool_:
+#       (optional) Can be set using the variable `_OPTION_AUTOCOMPLETE_WHOLE_LINE`.
+#       If true, the whole line is autocompleted (all characters are considered to filter)
 #       the items. If false, only the word characters before the cursor are considered.
-#       Can be set using the variable `_OPTION_AUTOCOMPLETE_WHOLE_LINE`.
 #       (defaults to true)
-# - $16: tab opens items box _as bool_:
-#       (optional) If true, the tab key opens the items box if it is not already open.
-#       Can be set using the variable `_OPTION_TAB_OPENS_ITEMS_BOX`.
+# - $17: tab opens items box _as bool_:
+#       (optional) Can be set using the variable `_OPTION_TAB_OPENS_ITEMS_BOX`.
+#       If true, the tab key opens the items box if it is not already open.
 #       (defaults to true)
-# - $17: items box allow filtering _as bool_:
-#       (optional) If true, the items can be filtered by typing characters.
+# - $18: items box allow filtering _as bool_:
+#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_ALLOW_FILTERING`.
+#       If true, the items can be filtered by typing characters.
 #       If false, the items are displayed as is.
-#       Can be set using the variable `_OPTION_ITEMS_BOX_ALLOW_FILTERING`.
-#       (defaults to the value of `_OPTION_SHOW_AUTOCOMPLETE` or true)
-# - $18: password mode _as bool_:
-#       (optional) If true, the input is displayed as a series of stars *.
+#       (defaults to the value of `_OPTION_ENABLE_PROMPT` or true)
+# - $19: password mode _as bool_:
+#       (optional) Can be set using the variable `_OPTION_PASSWORD_MODE`.
+#       If true, the input is displayed as a series of stars *.
 #       This mode can be activated/deactivated by pressing CTRL+P.
-#       Can be set using the variable `_OPTION_PASSWORD_MODE`.
 #       (defaults to false)
-# - $19: callback function on text update _as string_:
-#       (optional) The name of a function to call each time the text is updated.
+# - $20: callback function on text update _as string_:
+#       (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.
+#       The name of a function to call each time the text is updated.
 #       Can be used to validate the input and display an error message.
 #       The function is called with no arguments but you can use the global variable `_OPTION_STRING` and
 #       `_OPTION_STRING_INDEX` to access the current text and cursor position.
 #       You must set:
+# 
 #       - `RETURNED_VALUE`: The error message to display (or empty).
 #       - `RETURNED_VALUE2`: A boolean to indicate if the autocompletion box should be redrawn.
-#       Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.
+# 
 #       (defaults to empty)
-# - $20: callback function on key pressed _as string_:
-#       (optional) The name of a function to call each time a key is pressed.
+# - $21: callback function on key pressed _as string_:
+#       (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED`.
+#       The name of a function to call each time a key is pressed.
 #       Can be used to customize the behavior of the prompt.
 #       The function is called with the following arguments:
+# 
 #       - $1: The key that was pressed, including special keys (CTRL+, ALT+, TAB, etc...).
 #       - $2: The last character that was sent by the terminal, if any (can be empty when key is not empty).
+# 
 #       The function must return 0 if the key press was handled, 1 otherwise.
-#       Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED`.
+#       (defaults to empty)
+# - $22: callback function on box closed _as string_:
+#       (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_BOX_CLOSED`.
+#       The name of a function to call when the autocompletion box is closed.
+#       Can be used to clean up resources or to update the screen.
+#       The function is called with arguments:
+# 
+#       - $1: The top line number of the box that was just closed.
+#       - $2: The left column of the box.
+#       - $3: The width of the box.
+#       - $4: The height of the box.
+# 
+#       The function must return 0 to state that prompt does not have to be redrawn, 1 otherwise.
 #       (defaults to empty)
 # 
 # Returns:
@@ -5104,6 +5281,49 @@ function profiler::enable() { :; }
 # ```
 # 
 function prompt::input() { :; }
+
+# ## prompt_getDisplayedPromptString
+# 
+# This function return a string that can be printed in a terminal in order to display a text
+# and position the cursor at a given index in the input text.
+# 
+# If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed
+# at the beginning and/or at the end of the string.
+# 
+# The cursor will be displayed under the character at the given index of the input text and
+# it makes sure that the cursor is always visible in the screen.
+# 
+# This function is useful to display a long prompt on a single line.
+# 
+# An example:
+# 
+# ```text
+# _PROMPT_STRING_SCREEN_WIDTH=10
+# _PROMPT_STRING_INDEX=20
+# _PROMPT_STRING="This is a long string that will be displayed in the screen."
+# #                                ^ input index 20
+# prompt_getDisplayedPromptString 20 10
+# # output: "…g string…"
+# #                  ^ screen cursor (at index 8)
+# ```
+# 
+# - $_PROMPT_STRING: **input string** _as string_:
+#       the string to display
+# - $_PROMPT_STRING_INDEX: **input index** _as int_:
+#       the index of the character (in the input string) that should be under the cursor
+# - $_PROMPT_STRING_SCREEN_WIDTH: **screen width** _as int_:
+#       the width of the screen
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: the string to display in the screen
+# - `RETURNED_VALUE2`: the index at which to position the cursor on screen
+# 
+# ```bash
+# prompt_getDisplayedPromptString "This is a long string that will be displayed in the screen." 20 10
+# ```
+# 
+function prompt_getDisplayedPromptString() { :; }
 
 # ## source
 # 
@@ -5277,47 +5497,6 @@ function string::cutField() { :; }
 # 
 function string::extractBetween() { :; }
 
-# ## string::fitStringInScreen
-# 
-# This function return a string that can be printed in a terminal in order to display a text
-# and position the cursor at a given index in the input text.
-# 
-# If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed
-# at the beginning and/or at the end of the string.
-# 
-# The cursor will be displayed under the character at the given index of the input text and
-# it makes sure that the cursor is always visible in the screen.
-# 
-# This function is useful to display a long prompt on a single line.
-# 
-# An example:
-# 
-# ```text
-# inputString="This is a long string that will be displayed in the screen."
-# #                                ^ input index 20
-# string::fitStringInScreen "${inputString}" 20 10
-# # output: "…g string…"
-# #                  ^ screen cursor (at index 8)
-# ```
-# 
-# - $1: **input string** _as string_:
-#       the string to display
-# - $2: **input index** _as int_:
-#       the index of the character (in the input string) that should be under the cursor
-# - $3: **screen width** _as int_:
-#       the width of the screen
-# 
-# Returns:
-# 
-# - `RETURNED_VALUE`: the string to display in the screen
-# - `RETURNED_VALUE2`: the index at which to position the cursor on screen
-# 
-# ```bash
-# string::fitStringInScreen "This is a long string that will be displayed in the screen." 20 10
-# ```
-# 
-function string::fitStringInScreen() { :; }
-
 # ## string::indexOf
 # 
 # Find the first index of a string within another string.
@@ -5385,8 +5564,9 @@ function string::kebabCaseToSnakeCase() { :; }
 # 
 # - $1: **microseconds** _as int_:
 #       the microseconds to convert
-# - $2: **format** _as string_:
-#      the format to use (defaults to "HH:MM:SS")
+# - $2: format _as string_:
+#      (optional) Can be set using the variable `_OPTION_FORMAT`.
+#      the format to use (defaults to "%HH:%MM:%SS")
 #      Usable formats:
 #      - %HH: hours
 #      - %MM: minutes
@@ -5493,62 +5673,82 @@ function string::trimAll() { :; }
 
 # ## string::wrapCharacters
 # 
-# Allows to hard wrap the given string (without new lines) at the given width.
-# Wrapping is done at character boundaries without taking spaces into consideration.
-# Optionally applies a prefix on each new line.
+# Allows to hard wrap the given string at the given width.
+# Wrapping is done at character boundaries, see string::warpText for word wrapping.
+# Optionally appends padding characters on each new line.
 # 
 # - $1: **text** _as string_:
-#       the text to wrap
+#       The text to wrap.
 # - $2: wrap width _as string_:
-#       (optional) the width to wrap the text at
+#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
+#       The width to wrap the text at.
+#       Note that length of the optional padding characters are subtracted from the
+#       width to make sure the text fits in the given width.
 #       (defaults to GLOBAL_COLUMNS)
-# - $3: new line pad string _as string_:
-#       (optional) the prefix to apply to each new line
-#       (defaults to "")
-# - $4: new line wrap width _as string_:
-#       (optional) the width to wrap the text for each new line
+# - $3: padding characters _as string_:
+#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
+#       The characters to apply as padding on the left of each new line.
+#       E.g. '  ' will add 2 spaces on the left of each new line.
+#       (defaults to 0)
+# - $4: first line width _as int_:
+#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
+#       The width to use for the first line.
 #       (defaults to the width)
 # 
 # Returns:
 # 
 # - `RETURNED_VALUE`: the wrapped string
+# - `RETURNED_VALUE2`: the length taken on the last line
 # 
 # ```bash
-# string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 ---
-# local wrappedString="${RETURNED_VALUE}"
+# string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 --- 5
+# echo "${RETURNED_VALUE}"
 # ```
 # 
-# > This function is written in pure bash and is faster than calling the fold command.
+# > - This function is written in pure bash and is faster than calling the fold command.
+# > - It considers escape sequence for text formatting and does not count them as visible characters.
+# > - Leading spaces after a newly wrapped line are removed.
 # 
 function string::wrapCharacters() { :; }
 
-# ## string::wrapSentence
+# ## string::wrapText
 # 
-# Allows to soft wrap the given sentence (without new lines) at the given width.
-# Optionally applies a prefix on each new line.
+# Allows to soft wrap the given text at the given width.
+# Wrapping is done at word boundaries.
+# Optionally appends padding characters on each new line.
 # 
 # - $1: **text** _as string_:
-#       the text to wrap
-# - $2: wrap width _as int_:
-#       (optional) the width to wrap the text at
+#       The text to wrap.
+# - $2: wrap width _as string_:
+#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
+#       The width to wrap the text at.
+#       Note that length of the optional padding characters are subtracted from the
+#       width to make sure the text fits in the given width.
 #       (defaults to GLOBAL_COLUMNS)
-# - $3:*new line pad string _as string_:
-#       (optional) the prefix to apply to each new line
-#       (defaults to "")
+# - $3: padding characters _as string_:
+#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
+#       The characters to apply as padding on the left of each new line.
+#       E.g. '  ' will add 2 spaces on the left of each new line.
+#       (defaults to 0)
+# - $4: first line width _as int_:
+#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
+#       The width to use for the first line.
+#       (defaults to the width)
 # 
 # Returns:
 # 
 # - `RETURNED_VALUE`: the wrapped text
 # 
 # ```bash
-# string::wrapSentence "This is a long text that should be wrapped at 20 characters." 20
-# local wrappedText="${RETURNED_VALUE}"
+# string::wrapText "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
+# echo "${RETURNED_VALUE}"
 # ```
 # 
 # > - This function is written in pure bash and is faster than calling the fold command.
 # > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
+# > - It considers escape sequence for text formatting and does not count them as visible characters.
 # 
-function string::wrapSentence() { :; }
+function string::wrapText() { :; }
 
 # ## system::addToPath
 # 
@@ -5826,30 +6026,30 @@ function test::endTest() { :; }
 
 "array::fuzzyFilter": {
   "prefix": "array::fuzzyFilter",
-  "description": "Allows to fuzzy match an array against a given pattern...",
+  "description": "Allows to fuzzy sort an array against a given pattern...",
   "scope": "",
   "body": [ "array::fuzzyFilter \"${1:**pattern**}\" \"${2:**array name**}\"$0" ]
 },
 
 "array::fuzzyFilter#withdoc": {
   "prefix": "array::fuzzyFilter#withdoc",
-  "description": "Allows to fuzzy match an array against a given pattern...",
+  "description": "Allows to fuzzy sort an array against a given pattern...",
   "scope": "",
-  "body": [ "# ## array::fuzzyFilter\n# \n# Allows to fuzzy match an array against a given pattern.\n# Returns an array containing only the lines matching the pattern.\n# \n# - \\$1: **pattern** _as string_:\n#       the pattern to match\n# - \\$2: **array name** _as string_:\n#       the initial array name\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: an array containing only the lines matching the pattern\n# - `RETURNED_ARRAY2`: an array of the same size that contains the start index of the match\n# - `RETURNED_ARRAY3`: an array of the same size that contains the distance of the match\n# \n# ```bash\n# array::fuzzyFilter \"pattern\" \"myarray\"\n# if (( \\${#RETURNED_ARRAY[@]} == 1 )); then\n#   singleMatch=\"\\${RETURNED_ARRAY[0]}\"\n# fi\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - The function is case insensitive.\n# > - This function does not sort the results, it only filters them.\n# \narray::fuzzyFilter \"${1:**pattern**}\" \"${2:**array name**}\"$0" ]
+  "body": [ "# ## array::fuzzyFilter\n# \n# Allows to fuzzy sort an array against a given pattern.\n# Returns an array containing only the lines matching the pattern.\n# \n# - \\$1: **pattern** _as string_:\n#       the pattern to match\n# - \\$2: **array name** _as string_:\n#       the initial array name\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array containing the filtered items\n# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array\n# \n# ```bash\n# array::fuzzyFilter \"pattern\" \"myarray\"\n# IFS=\\$'\\n' echo \"\\${RETURNED_ARRAY[*]}\"\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - Use `shopt -s nocasematch` to make this function is case insensitive.\n# \narray::fuzzyFilter \"${1:**pattern**}\" \"${2:**array name**}\"$0" ]
 },
 
 "array::fuzzyFilterSort": {
   "prefix": "array::fuzzyFilterSort",
   "description": "Allows to fuzzy sort an array against a given pattern...",
   "scope": "",
-  "body": [ "array::fuzzyFilterSort \"${1:**pattern**}\" \"${2:**array name**}\" \"${3:prefix matched char}\" \"${4:suffix matched char}\" \"${5:max line length}\"$0" ]
+  "body": [ "array::fuzzyFilterSort \"${1:**pattern**}\" \"${2:**array name**}\"$0" ]
 },
 
 "array::fuzzyFilterSort#withdoc": {
   "prefix": "array::fuzzyFilterSort#withdoc",
   "description": "Allows to fuzzy sort an array against a given pattern...",
   "scope": "",
-  "body": [ "# ## array::fuzzyFilterSort\n# \n# Allows to fuzzy sort an array against a given pattern.\n# Returns an array containing only the lines matching the pattern.\n# The array is sorted by (in order):\n# \n# - the index of the first matched character in the line\n# - the distance between the characters in the line\n# \n# - \\$1: **pattern** _as string_:\n#       the pattern to match\n# - \\$2: **array name** _as string_:\n#       the initial array name\n# - \\$3: prefix matched char _as string_:\n#       (optional) string to add before each matched char\n#       (defaults to empty string)\n# - \\$4: suffix matched char _as string_:\n#       (optional) string to add after each matched char\n#       (defaults to empty string)\n# - \\$5: max line length _as int_:\n#       (optional) The maximum length to keep for the matched lines,\n#       does not count the strings added/before after each matched char\n#       (defaults to 9999999)\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array containing the items sorted and filtered\n# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array\n# \n# ```bash\n# array::fuzzyFilterSort \"pattern\" \"myarray\" && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# array::fuzzyFilterSort \"pattern\" \"myarray\" ⌜ ⌝ && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# array::fuzzyFilterSort \"pattern\" \"myarray\" ⌜ ⌝ 10 && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - The function is case insensitive.\n# > - This function does not sort the results, it only filters them.\n# \narray::fuzzyFilterSort \"${1:**pattern**}\" \"${2:**array name**}\" \"${3:prefix matched char}\" \"${4:suffix matched char}\" \"${5:max line length}\"$0" ]
+  "body": [ "# ## array::fuzzyFilterSort\n# \n# Allows to fuzzy sort an array against a given pattern.\n# Returns an array containing only the lines matching the pattern.\n# The array is sorted by (in order):\n# \n# - the index of the first matched character in the line\n# - the distance between the first and last matched characters in the line\n# \n# - \\$1: **pattern** _as string_:\n#       the pattern to match\n# - \\$2: **array name** _as string_:\n#       the initial array name\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array containing the items sorted and filtered\n# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array\n# \n# ```bash\n# array::fuzzyFilterSort \"pattern\" \"myarray\" && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# array::fuzzyFilterSort \"pattern\" \"myarray\" ⌜ ⌝ && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# array::fuzzyFilterSort \"pattern\" \"myarray\" ⌜ ⌝ 10 && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - Use `shopt -s nocasematch` to make this function is case insensitive.\n# \narray::fuzzyFilterSort \"${1:**pattern**}\" \"${2:**array name**}\"$0" ]
 },
 
 "array::isInArray": {
@@ -5906,6 +6106,20 @@ function test::endTest() { :; }
   "description": "Sorts an array using multiple criteria...",
   "scope": "",
   "body": [ "# ## array::sortWithCriteria\n# \n# Sorts an array using multiple criteria.\n# Excepts multiple arrays. The first array is the one to sort.\n# The other arrays are used as criteria. Criteria are used in the order they are given.\n# Each criteria array must have the same size as the array to sort.\n# Each criteria array must containing integers representing the order of the elements.\n# We first sort using the first criteria (from smallest to biggest), then the second, etc.\n# \n# - \\$1: **array name** _as string_:\n#       the name of the array to sort (it is sorted in place)\n# - \\$@: **criteria array names** _as string_:\n#       the names of the arrays to use as criteria\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array that contains the corresponding indexes of the sorted array in the original array\n# \n# ```bash\n# declare -g myArray=( \"a\" \"b\" \"c\" )\n# declare -g criteria1=( 3 2 2 )\n# declare -g criteria2=( 1 3 2 )\n# array::sortWithCriteria myArray criteria1 criteria2\n# printf '%s\\n' \"\\${myArray[@]}\"\n# # c b a\n# printf '%s\\n' \"\\${RETURNED_ARRAY[@]}\"\n# # 3 2 1\n# ```\n# \n# > TODO: Update this basic exchange sort implementation.\n# \narray::sortWithCriteria \"${1:**array name**}\" \"${99:**criteria array names**}\"$0" ]
+},
+
+"benchmark::run": {
+  "prefix": "benchmark::run",
+  "description": "This function runs a benchmark on given functions...",
+  "scope": "",
+  "body": [ "benchmark::run \"${1:**baseline**}\" \"${2:**functions**}\" \"${3:time}\" \"${4:max runs}\"$0" ]
+},
+
+"benchmark::run#withdoc": {
+  "prefix": "benchmark::run#withdoc",
+  "description": "This function runs a benchmark on given functions...",
+  "scope": "",
+  "body": [ "# ## benchmark::run\n# \n# This function runs a benchmark on given functions.\n# \n# First, it will run the 1st function (the baseline) for a given number of time and\n# mark the number of times it was able to run it in that given time.\n# \n# Then, it will run all the functions for the same number of time and\n# print the difference between the baseline and the other functions.\n# \n# - \\$1: **baseline** _as string_:\n#       the name of the function to use as baseline\n# - \\$2: **functions** _as string_:\n#       The names of the functions to benchmark, comma separated.\n# - \\$3: time _as int_:\n#       (optional) Can be set using the variable `_OPTION_TIME`.\n#       The time in seconds for which to run the baseline.\n#       (defaults to 3s)\n# - \\$4: max runs _as int_:\n#       (optional) Can be set using the variable `_OPTION_MAX_RUNS`.\n#       The maximum number of runs to do for each function.\n#       (defaults to -1 which means no limit)\n# \n# ```bash\n# benchmark::run \"baseline\" \"function1,function2\" 1 100\n# ```\n# \nbenchmark::run \"${1:**baseline**}\" \"${2:**functions**}\" \"${3:time}\" \"${4:max runs}\"$0" ]
 },
 
 "core::checkParseResults": {
@@ -5980,16 +6194,30 @@ function test::endTest() { :; }
 
 "core::getLocalStateDirectory": {
   "prefix": "core::getLocalStateDirectory",
-  "description": "Returns the path to the valet locla state directory...",
+  "description": "Returns the path to the valet local state directory...",
   "scope": "",
   "body": [ "core::getLocalStateDirectory$0" ]
 },
 
 "core::getLocalStateDirectory#withdoc": {
   "prefix": "core::getLocalStateDirectory#withdoc",
-  "description": "Returns the path to the valet locla state directory...",
+  "description": "Returns the path to the valet local state directory...",
   "scope": "",
-  "body": [ "# ## core::getLocalStateDirectory\n# \n# Returns the path to the valet locla state directory.\n# The base directory relative to which user-specific state files should be stored.\n# Creates it if missing.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the path to the valet local state directory\n# \n# ```bash\n# core::getLocalStateDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \ncore::getLocalStateDirectory$0" ]
+  "body": [ "# ## core::getLocalStateDirectory\n# \n# Returns the path to the valet local state directory.\n# The base directory relative to which user-specific state files should be stored.\n# Creates it if missing.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the path to the valet local state directory\n# \n# ```bash\n# core::getLocalStateDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \ncore::getLocalStateDirectory$0" ]
+},
+
+"core::getProgramElapsedMicroseconds": {
+  "prefix": "core::getProgramElapsedMicroseconds",
+  "description": "Get the elapsed time in µs since the program started...",
+  "scope": "",
+  "body": [ "core::getProgramElapsedMicroseconds$0" ]
+},
+
+"core::getProgramElapsedMicroseconds#withdoc": {
+  "prefix": "core::getProgramElapsedMicroseconds#withdoc",
+  "description": "Get the elapsed time in µs since the program started...",
+  "scope": "",
+  "body": [ "# ## core::getProgramElapsedMicroseconds\n# \n# Get the elapsed time in µs since the program started.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the elapsed time in µs since the program started.\n# \n# ```bash\n# core::getElapsedProgramTime\n# echo \"\\${RETURNED_VALUE}\"\n# string::microsecondsToHuman \"\\${RETURNED_VALUE}\"\n# echo \"Human time: \\${RETURNED_VALUE}\"\n# ```\n# \n# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.\n# \ncore::getProgramElapsedMicroseconds$0" ]
 },
 
 "core::getUserDirectory": {
@@ -6262,14 +6490,14 @@ function test::endTest() { :; }
   "prefix": "interactive::getBestAutocompleteBox",
   "description": "This function returns the best position and size for an autocomplete box that would open at the given position...",
   "scope": "",
-  "body": [ "interactive::getBestAutocompleteBox \"${1:**current line**}\" \"${2:**current column**}\" \"${3:**desired height**}\" \"${4:**desiredWidth**}\" \"${5:**max height**}\" \"${6:force below}\" \"${7:not on current line}\" \"${8:terminal width}\" \"${9:terminal height}\"$0" ]
+  "body": [ "interactive::getBestAutocompleteBox \"${1:**current line**}\" \"${2:**current column**}\" \"${3:**desired height**}\" \"${4:**desired width**}\" \"${5:**max height**}\" \"${6:force below}\" \"${7:not on current line}\" \"${8:terminal width}\" \"${9:terminal height}\"$0" ]
 },
 
 "interactive::getBestAutocompleteBox#withdoc": {
   "prefix": "interactive::getBestAutocompleteBox#withdoc",
   "description": "This function returns the best position and size for an autocomplete box that would open at the given position...",
   "scope": "",
-  "body": [ "# ## interactive::getBestAutocompleteBox\n# \n# This function returns the best position and size for an autocomplete box that would open\n# at the given position.\n# \n# - The box will be placed below the current position if possible, but can be placed\n#   above if there is not enough space below.\n# - The box will be placed on the same column as the current position if possible, but can be placed\n#   on the left side if there is not enough space on the right to display the full width of the box.\n# - The box will have the desired height and width if possible, but will be reduced if there is\n#   not enough space in the terminal.\n# - The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.\n#   Otherwise it can use the current position line.\n# \n# - \\$1: **current line** _as int_:\n#       the current line of the cursor (1 based)\n# - \\$2: **current column** _as int_:\n#       the current column of the cursor (1 based)\n# - \\$3: **desired height** _as int_:\n#       the desired height of the box\n# - \\$4: **desiredWidth** _as int_:\n#       the desired width of the box\n# - \\$5: **max height** _as int_:\n#       the maximum height of the box\n# - \\$6: force below _as bool_:\n#       (optional) force the box to be below the current position\n#       (defaults to false)\n# - \\$7: not on current line _as bool_:\n#       (optional) the box will not be placed on the same line as the current position\n#       (defaults to true)\n# - \\$8: terminal width _as int_:\n#       (optional) the width of the terminal\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$9: terminal height _as int_:\n#       (optional) the height of the terminal\n#       (defaults to GLOBAL_LINES)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the top position of the box (1 based)\n# - `RETURNED_VALUE2`: the left position of the box (1 based)\n# - `RETURNED_VALUE3`: the width of the box\n# - `RETURNED_VALUE4`: the height of the box\n# \n# ```bash\n# interactive::getBestAutocompleteBox 1 1 10 5\n# ```\n# \ninteractive::getBestAutocompleteBox \"${1:**current line**}\" \"${2:**current column**}\" \"${3:**desired height**}\" \"${4:**desiredWidth**}\" \"${5:**max height**}\" \"${6:force below}\" \"${7:not on current line}\" \"${8:terminal width}\" \"${9:terminal height}\"$0" ]
+  "body": [ "# ## interactive::getBestAutocompleteBox\n# \n# This function returns the best position and size for an autocomplete box that would open\n# at the given position.\n# \n# - The box will be placed below the current position if possible, but can be placed\n#   above if there is not enough space below.\n# - The box will be placed on the same column as the current position if possible, but can be placed\n#   on the left side if there is not enough space on the right to display the full width of the box.\n# - The box will have the desired height and width if possible, but will be reduced if there is\n#   not enough space in the terminal.\n# - The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.\n#   Otherwise it can use the current position line.\n# \n# - \\$1: **current line** _as int_:\n#       the current line of the cursor (1 based)\n# - \\$2: **current column** _as int_:\n#       the current column of the cursor (1 based)\n# - \\$3: **desired height** _as int_:\n#       the desired height of the box\n# - \\$4: **desired width** _as int_:\n#       the desired width of the box\n# - \\$5: **max height** _as int_:\n#       the maximum height of the box\n# - \\$6: force below _as bool_:\n#       (optional) force the box to be below the current position\n#       (defaults to false)\n# - \\$7: not on current line _as bool_:\n#       (optional) the box will not be placed on the same line as the current position\n#       (defaults to true)\n# - \\$8: terminal width _as int_:\n#       (optional) the width of the terminal\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$9: terminal height _as int_:\n#       (optional) the height of the terminal\n#       (defaults to GLOBAL_LINES)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the top position of the box (1 based)\n# - `RETURNED_VALUE2`: the left position of the box (1 based)\n# - `RETURNED_VALUE3`: the width of the box\n# - `RETURNED_VALUE4`: the height of the box\n# \n# ```bash\n# interactive::getBestAutocompleteBox 1 1 10 5\n# ```\n# \ninteractive::getBestAutocompleteBox \"${1:**current line**}\" \"${2:**current column**}\" \"${3:**desired height**}\" \"${4:**desired width**}\" \"${5:**max height**}\" \"${6:force below}\" \"${7:not on current line}\" \"${8:terminal width}\" \"${9:terminal height}\"$0" ]
 },
 
 "interactive::getCursorPosition": {
@@ -6354,6 +6582,34 @@ function test::endTest() { :; }
   "description": "Reset the key bindings to the default ones...",
   "scope": "",
   "body": [ "# ## interactive::resetBindings\n# \n# Reset the key bindings to the default ones.\n# \n# ```bash\n# interactive::resetBindings\n# ```\n# \ninteractive::resetBindings$0" ]
+},
+
+"interactive::restoreInterruptTrap": {
+  "prefix": "interactive::restoreInterruptTrap",
+  "description": "Restore the original trap for the interrupt signal (SIGINT)...",
+  "scope": "",
+  "body": [ "interactive::restoreInterruptTrap$0" ]
+},
+
+"interactive::restoreInterruptTrap#withdoc": {
+  "prefix": "interactive::restoreInterruptTrap#withdoc",
+  "description": "Restore the original trap for the interrupt signal (SIGINT)...",
+  "scope": "",
+  "body": [ "# ## interactive::restoreInterruptTrap\n# \n# Restore the original trap for the interrupt signal (SIGINT).\n# To be called after interactive::setInterruptTrap.\n# \n# ```bash\n# interactive::restoreInterruptTrap\n# ```\n# \ninteractive::restoreInterruptTrap$0" ]
+},
+
+"interactive::setInterruptTrap": {
+  "prefix": "interactive::setInterruptTrap",
+  "description": "Set a trap to catch the interrupt signal (SIGINT)...",
+  "scope": "",
+  "body": [ "interactive::setInterruptTrap$0" ]
+},
+
+"interactive::setInterruptTrap#withdoc": {
+  "prefix": "interactive::setInterruptTrap#withdoc",
+  "description": "Set a trap to catch the interrupt signal (SIGINT)...",
+  "scope": "",
+  "body": [ "# ## interactive::setInterruptTrap\n# \n# Set a trap to catch the interrupt signal (SIGINT).\n# When the user presses Ctrl+C, the GLOBAL_SESSION_INTERRUPTED variable will be set to true.\n# \n# ```bash\n# interactive::setInterruptTrap\n# ```\n# \ninteractive::setInterruptTrap$0" ]
 },
 
 "interactive::startProgress": {
@@ -7060,14 +7316,14 @@ function test::endTest() { :; }
   "prefix": "log::printCallStack",
   "description": "This function prints the current function stack in the logs...",
   "scope": "",
-  "body": [ "log::printCallStack \"${1:**stack to skip**}\"$0" ]
+  "body": [ "log::printCallStack \"${1:Stack to skip}\"$0" ]
 },
 
 "log::printCallStack#withdoc": {
   "prefix": "log::printCallStack#withdoc",
   "description": "This function prints the current function stack in the logs...",
   "scope": "",
-  "body": [ "# ## log::printCallStack\n# \n# This function prints the current function stack in the logs.\n# \n# - \\$1: **stack to skip** _as int_:\n#       the number of stack to skip (defaults to 2 which skips this function\n#       and the first calling function which is usually the onError function)\n# \n# ```bash\n# log::printCallStack 2\n# ```\n# \nlog::printCallStack \"${1:**stack to skip**}\"$0" ]
+  "body": [ "# ## log::printCallStack\n# \n# This function prints the current function stack in the logs.\n# \n# - \\$1: Stack to skip _as int_:\n#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.\n#       The number of stack to skip.\n#       (defaults to 2 which skips this function and the first calling function\n#       which is usually the onError function)\n# \n# ```bash\n# log::printCallStack\n# log::printCallStack 0\n# ```\n# \nlog::printCallStack \"${1:Stack to skip}\"$0" ]
 },
 
 "log::printFile": {
@@ -7221,7 +7477,21 @@ function test::endTest() { :; }
   "prefix": "prompt::input#withdoc",
   "description": "Displays a user prompt at a given location...",
   "scope": "",
-  "body": [ "# ## prompt::input\n# \n# Displays a user prompt at a given location.\n# \n# Allows the user to type a text in the given row between a starting column and\n# ending column (included). Longer text are shifted to fit between\n# the two columns.\n# \n# This component is a replacement for the `read -e` command, which allows\n# to limit the input to a single line and which provides autocompletion.\n# \n# The autocompletion box can be hidden, or displayed below/above the input text\n# depending on the space available on the screen.\n# \n# The user can type character to filter down a list of suggestions,\n# navigate up and down between suggestions, insert a suggestion using\n# TAB or ENTER, press ESC to close the autocompletion box, and ALT+ENTER to\n# submit the input (or just ENTER when the box is closed).\n# \n# The autocompletion box will position itself depending on the screen size\n# and the starting position of the text.\n# \n# The multiple options allows to use this function to ask for any user input\n# as long as it is on a single line.\n# \n# You can define several callback functions that are called on different events:\n# \n# - `autocompletionOnTextUpdate`: Called when the text is updated (after each key press).\n# \n# - \\$1: **start line** _as int_:\n#       The line/row at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$2: **start column** _as int_:\n#       The column at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$3: stop column _as int_:\n#       (optional) The column at which to stop showing the autocompleted text.\n#       Longer texts get shifted to display the end of the user input.\n#       Can be set using the variable `_OPTION_STOP_COLUMN`.\n#       (defaults to the end of the screen)\n# - \\$4: items array name _as string_:\n#       The items to display (name of a global array which contains the items).\n#       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.\n#       Can be set using the variable `_OPTION_ITEMS_ARRAY_NAME`.\n#       (defaults to empty)\n# - \\$5: initial text _as string_:\n#       (optional) The initial string, which corresponds to the text already entered\n#       by the user at the moment the autocompletion box shows up.\n#       Allows to pre-filter the autocompletion.\n#       Can be set using the variable `_OPTION_STRING`.\n#       (defaults to empty)\n# - \\$6: items box max lines _as int_:\n#       optional) The maximum number of lines/rows to use for the autocompletion box.\n#       If the number of items is greater than this value, the box will be scrollable.\n#       Can be set using the variable `_OPTION_ITEMS_BOX_MAX_HEIGHT`.\n#       (defaults to a maximized auto-computed value depending on the items and screen size)\n# - \\$7: force items box below _as bool_:\n#       (optional) If true, the box is forced to be displayed below the input text.\n#       Otherwise it will depend on the space required and space available below/above.\n#       Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_BELOW`.\n#       (defaults to false)\n# - \\$8: show prompt _as bool_:\n#       (optional) If true, the prompt is displayed. If false, the prompt is hidden.\n#       Useful to turn this into a simple multiple choice list.\n#       Can be set using the variable `_OPTION_SHOW_AUTOCOMPLETE`.\n#       (defaults to true)\n# - \\$9: force show count _as bool_:\n#       (optional) If true, the count of items is always displayed.\n#       If false, the count is only displayed when we can't display all the items at once.\n#       Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT`.\n#       (defaults to false)\n# - \\$10: show left symbols _as bool_:\n#       (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       Can be set using the variable `_OPTION_SHOW_SYMBOL`.\n#       (defaults to true)\n# - \\$11: filters from n chars _as int_:\n#       (optional) The minimum number of characters to type before starting to filter the items.\n#       By default, the list is shown full and the user can start typing to filter.\n#       Put a value superior to 0 to make it behave like a standard autocompletion.\n#       When non-zero, the user can TAB to show the full list.\n#       Can be set using the variable `_OPTION_FILTERS_FROM_N_CHARS`.\n#       (defaults to 0)\n# - \\$12: accept any value _as bool_:\n#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       Can be set using the variable `_OPTION_ACCEPT_ANY_VALUE`.\n#       (defaults to true)\n# - \\$13: placeholder _as string_:\n#       (optional) The placeholder to display when the input is empty.\n#       Can be set using the variable `_OPTION_PLACEHOLDER`.\n#       (defaults to empty)\n# - \\$14: max length _as int_:\n#       (optional) The maximum length of the input string.\n#       If the user types more characters, they are truncated and an error message is displayed.\n#       Can be set using the variable `_OPTION_STRING_MAX_LENGTH`.\n#       (defaults to 99999)\n# - \\$15: autocomplete whole line _as bool_:\n#       (optional) If true, the whole line is autocompleted (all characters are considered to filter)\n#       the items. If false, only the word characters before the cursor are considered.\n#       Can be set using the variable `_OPTION_AUTOCOMPLETE_WHOLE_LINE`.\n#       (defaults to true)\n# - \\$16: tab opens items box _as bool_:\n#       (optional) If true, the tab key opens the items box if it is not already open.\n#       Can be set using the variable `_OPTION_TAB_OPENS_ITEMS_BOX`.\n#       (defaults to true)\n# - \\$17: items box allow filtering _as bool_:\n#       (optional) If true, the items can be filtered by typing characters.\n#       If false, the items are displayed as is.\n#       Can be set using the variable `_OPTION_ITEMS_BOX_ALLOW_FILTERING`.\n#       (defaults to the value of `_OPTION_SHOW_AUTOCOMPLETE` or true)\n# - \\$18: password mode _as bool_:\n#       (optional) If true, the input is displayed as a series of stars *.\n#       This mode can be activated/deactivated by pressing CTRL+P.\n#       Can be set using the variable `_OPTION_PASSWORD_MODE`.\n#       (defaults to false)\n# - \\$19: callback function on text update _as string_:\n#       (optional) The name of a function to call each time the text is updated.\n#       Can be used to validate the input and display an error message.\n#       The function is called with no arguments but you can use the global variable `_OPTION_STRING` and\n#       `_OPTION_STRING_INDEX` to access the current text and cursor position.\n#       You must set:\n#       - `RETURNED_VALUE`: The error message to display (or empty).\n#       - `RETURNED_VALUE2`: A boolean to indicate if the autocompletion box should be redrawn.\n#       Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.\n#       (defaults to empty)\n# - \\$20: callback function on key pressed _as string_:\n#       (optional) The name of a function to call each time a key is pressed.\n#       Can be used to customize the behavior of the prompt.\n#       The function is called with the following arguments:\n#       - \\$1: The key that was pressed, including special keys (CTRL+, ALT+, TAB, etc...).\n#       - \\$2: The last character that was sent by the terminal, if any (can be empty when key is not empty).\n#       The function must return 0 if the key press was handled, 1 otherwise.\n#       Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED`.\n#       (defaults to empty)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0: The user pressed ENTER to validate the text.\n#   - 1: The user pressed ESC to close the text box.\n# - `RETURNED_VALUE`: The entered value (or empty).\n# - `RETURNED_VALUE2`: The string displayed on the screen between the 2 columns at the\n#                      moment when the autocompletion was closed.\n# \n# ```bash\n# prompt::input \"Select an item\" item_array_name \"onItemSelected\" \"Details\"\n# ```\n# \nprompt::input \"${1:**start line**}\" \"${2:**start column**}\" \"${3:stop column}\" \"${4:items array name}\" \"${5:initial text}\" \"${6:items box max lines}\" \"${7:force items box below}\" \"${8:show prompt}\" \"${9:force show count}\"$0" ]
+  "body": [ "# ## prompt::input\n# \n# Displays a user prompt at a given location.\n# \n# Allows the user to type a text in the given row between a starting column and\n# ending column (included). Longer text are shifted to fit between\n# the two columns.\n# \n# This component is a replacement for the `read -e` command, which allows\n# to limit the input to a single line and which provides autocompletion.\n# \n# The autocompletion box can be hidden, or displayed below/above the input text\n# depending on the space available on the screen.\n# \n# The user can type character to filter down a list of suggestions,\n# navigate up and down between suggestions, insert a suggestion using\n# TAB or ENTER, press ESC to close the autocompletion box, and ALT+ENTER to\n# submit the input (or just ENTER when the box is closed).\n# \n# The autocompletion box will position itself depending on the screen size\n# and the starting position of the text.\n# \n# The multiple options allows to use this function to ask for any user input\n# as long as it is on a single line.\n# \n# You can define several callback functions that are called on different events:\n# \n# - `autocompletionOnTextUpdate`: Called when the text is updated (after each key press).\n# \n# - \\$1: **start line** _as int_:\n#       The line/row at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$2: **start column** _as int_:\n#       The column at which the autocompleted text starts (this is used to\n#       compute how to display the box).\n# - \\$3: stop column _as int_:\n#       (optional) Can be set using the variable `_OPTION_STOP_COLUMN`.\n#       The column at which to stop showing the autocompleted text.\n#       Longer texts get shifted to display the end of the user input.\n#       (defaults to the end of the screen)\n# - \\$4: items array name _as string_:\n#       (optional) Can be set using the variable `_OPTION_ITEMS_ARRAY_NAME`.\n#       The items to display (name of a global array which contains the items).\n#       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.\n#       (defaults to empty)\n# - \\$5: initial text _as string_:\n#       (optional) Can be set using the variable `_OPTION_STRING`.\n#       The initial string, which corresponds to the text already entered\n#       by the user at the moment the autocompletion box shows up.\n#       Allows to pre-filter the autocompletion.\n#       (defaults to empty)\n# - \\$6: items box max lines _as int_:\n#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_MAX_HEIGHT`.\n#       The maximum number of lines/rows to use for the autocompletion box.\n#       If the number of items is greater than this value, the box will be scrollable.\n#       (defaults to a maximized auto-computed value depending on the items and screen size)\n# - \\$7: force items box below _as bool_:\n#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_BELOW`.\n#       If true, the box is forced to be displayed below the input text.\n#       Otherwise it will depend on the space required and space available below/above.\n#       (defaults to false)\n# - \\$8: show prompt _as bool_:\n#       (optional) Can be set using the variable `_OPTION_ENABLE_PROMPT`.\n#       If true, the prompt is displayed. If false, the prompt is hidden.\n#       Useful to turn this into a simple multiple choice list.\n#       (defaults to true)\n# - \\$9: force show count _as bool_:\n#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT`.\n#       If true, the count of items is always displayed.\n#       If false, the count is only displayed when we can't display all the items at once.\n#       (defaults to false)\n# - \\$10: show count at top _as bool_:\n#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_SHOW_COUNT_AT_TOP`.\n#       If true, the count of items will be displayed at the top of the box instead of the bottom.\n#       (defaults to false)\n# - \\$11: show left symbols _as bool_:\n#       (optional) Can be set using the variable `_OPTION_SHOW_SYMBOL`.\n#       If true, the left cursors are displayed (> for prompt and the ◆ for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       (defaults to true)\n# - \\$12: filters from n chars _as int_:\n#       (optional) Can be set using the variable `_OPTION_FILTERS_FROM_N_CHARS`.\n#       The minimum number of characters to type before starting to filter the items.\n#       By default, the list is shown full and the user can start typing to filter.\n#       Put a value superior to 0 to make it behave like a standard autocompletion.\n#       When non-zero, the user can TAB to show the full list.\n#       (defaults to 0)\n# - \\$13: accept any value _as bool_:\n#       (optional) Can be set using the variable `_OPTION_ACCEPT_ANY_VALUE`.\n#       If true, the left cursors are displayed (> for prompt and the > for selected item).\n#       Useful to display the most simple auto-completion when false.\n#       (defaults to true)\n# - \\$14: placeholder _as string_:\n#       (optional) Can be set using the variable `_OPTION_PLACEHOLDER`.\n#       The placeholder to display when the input is empty.\n#       (defaults to empty)\n# - \\$15: max length _as int_:\n#       (optional) Can be set using the variable `_OPTION_STRING_MAX_LENGTH`.\n#       The maximum length of the input string.\n#       If the user types more characters, they are truncated and an error message is displayed.\n#       (defaults to 99999)\n# - \\$16: autocomplete whole line _as bool_:\n#       (optional) Can be set using the variable `_OPTION_AUTOCOMPLETE_WHOLE_LINE`.\n#       If true, the whole line is autocompleted (all characters are considered to filter)\n#       the items. If false, only the word characters before the cursor are considered.\n#       (defaults to true)\n# - \\$17: tab opens items box _as bool_:\n#       (optional) Can be set using the variable `_OPTION_TAB_OPENS_ITEMS_BOX`.\n#       If true, the tab key opens the items box if it is not already open.\n#       (defaults to true)\n# - \\$18: items box allow filtering _as bool_:\n#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_ALLOW_FILTERING`.\n#       If true, the items can be filtered by typing characters.\n#       If false, the items are displayed as is.\n#       (defaults to the value of `_OPTION_ENABLE_PROMPT` or true)\n# - \\$19: password mode _as bool_:\n#       (optional) Can be set using the variable `_OPTION_PASSWORD_MODE`.\n#       If true, the input is displayed as a series of stars *.\n#       This mode can be activated/deactivated by pressing CTRL+P.\n#       (defaults to false)\n# - \\$20: callback function on text update _as string_:\n#       (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.\n#       The name of a function to call each time the text is updated.\n#       Can be used to validate the input and display an error message.\n#       The function is called with no arguments but you can use the global variable `_OPTION_STRING` and\n#       `_OPTION_STRING_INDEX` to access the current text and cursor position.\n#       You must set:\n# \n#       - `RETURNED_VALUE`: The error message to display (or empty).\n#       - `RETURNED_VALUE2`: A boolean to indicate if the autocompletion box should be redrawn.\n# \n#       (defaults to empty)\n# - \\$21: callback function on key pressed _as string_:\n#       (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED`.\n#       The name of a function to call each time a key is pressed.\n#       Can be used to customize the behavior of the prompt.\n#       The function is called with the following arguments:\n# \n#       - \\$1: The key that was pressed, including special keys (CTRL+, ALT+, TAB, etc...).\n#       - \\$2: The last character that was sent by the terminal, if any (can be empty when key is not empty).\n# \n#       The function must return 0 if the key press was handled, 1 otherwise.\n#       (defaults to empty)\n# - \\$22: callback function on box closed _as string_:\n#       (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_BOX_CLOSED`.\n#       The name of a function to call when the autocompletion box is closed.\n#       Can be used to clean up resources or to update the screen.\n#       The function is called with arguments:\n# \n#       - \\$1: The top line number of the box that was just closed.\n#       - \\$2: The left column of the box.\n#       - \\$3: The width of the box.\n#       - \\$4: The height of the box.\n# \n#       The function must return 0 to state that prompt does not have to be redrawn, 1 otherwise.\n#       (defaults to empty)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0: The user pressed ENTER to validate the text.\n#   - 1: The user pressed ESC to close the text box.\n# - `RETURNED_VALUE`: The entered value (or empty).\n# - `RETURNED_VALUE2`: The string displayed on the screen between the 2 columns at the\n#                      moment when the autocompletion was closed.\n# \n# ```bash\n# prompt::input \"Select an item\" item_array_name \"onItemSelected\" \"Details\"\n# ```\n# \nprompt::input \"${1:**start line**}\" \"${2:**start column**}\" \"${3:stop column}\" \"${4:items array name}\" \"${5:initial text}\" \"${6:items box max lines}\" \"${7:force items box below}\" \"${8:show prompt}\" \"${9:force show count}\"$0" ]
+},
+
+"prompt_getDisplayedPromptString": {
+  "prefix": "prompt_getDisplayedPromptString",
+  "description": "This function return a string that can be printed in a terminal in order to display a text and position the cursor at a given index in the input text...",
+  "scope": "",
+  "body": [ "prompt_getDisplayedPromptString$0" ]
+},
+
+"prompt_getDisplayedPromptString#withdoc": {
+  "prefix": "prompt_getDisplayedPromptString#withdoc",
+  "description": "This function return a string that can be printed in a terminal in order to display a text and position the cursor at a given index in the input text...",
+  "scope": "",
+  "body": [ "# ## prompt_getDisplayedPromptString\n# \n# This function return a string that can be printed in a terminal in order to display a text\n# and position the cursor at a given index in the input text.\n# \n# If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed\n# at the beginning and/or at the end of the string.\n# \n# The cursor will be displayed under the character at the given index of the input text and\n# it makes sure that the cursor is always visible in the screen.\n# \n# This function is useful to display a long prompt on a single line.\n# \n# An example:\n# \n# ```text\n# _PROMPT_STRING_SCREEN_WIDTH=10\n# _PROMPT_STRING_INDEX=20\n# _PROMPT_STRING=\"This is a long string that will be displayed in the screen.\"\n# #                                ^ input index 20\n# prompt_getDisplayedPromptString 20 10\n# # output: \"…g string…\"\n# #                  ^ screen cursor (at index 8)\n# ```\n# \n# - \\$_PROMPT_STRING: **input string** _as string_:\n#       the string to display\n# - \\$_PROMPT_STRING_INDEX: **input index** _as int_:\n#       the index of the character (in the input string) that should be under the cursor\n# - \\$_PROMPT_STRING_SCREEN_WIDTH: **screen width** _as int_:\n#       the width of the screen\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the string to display in the screen\n# - `RETURNED_VALUE2`: the index at which to position the cursor on screen\n# \n# ```bash\n# prompt_getDisplayedPromptString \"This is a long string that will be displayed in the screen.\" 20 10\n# ```\n# \nprompt_getDisplayedPromptString$0" ]
 },
 
 "source": {
@@ -7322,20 +7592,6 @@ function test::endTest() { :; }
   "body": [ "# ## string::extractBetween\n# \n# Extract the text between two strings within a string.\n# Search for the first occurrence of the start string and the first occurrence\n# (after the start index) of the end string.\n# Both start and end strings are excluded in the extracted text.\n# Both start and end strings must be found to extract something.\n# \n# - \\$1: **string** _as string_:\n#       the string in which to search\n# - \\$2: **start string** _as string_:\n#       the start string\n#       (if empty, then it will extract from the beginning of the string)\n# - \\$3: **end string** _as string_:\n#       the end string\n#       (if empty, then it will extract until the end of the string)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the extracted text\n# \n# ```bash\n# string::extractBetween \"This is a long text\" \"is a \" \" text\"\n# local extractedText=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::extractBetween \"${1:**string**}\" \"${2:**start string**}\" \"${3:**end string**}\"$0" ]
 },
 
-"string::fitStringInScreen": {
-  "prefix": "string::fitStringInScreen",
-  "description": "This function return a string that can be printed in a terminal in order to display a text and position the cursor at a given index in the input text...",
-  "scope": "",
-  "body": [ "string::fitStringInScreen \"${1:**input string**}\" \"${2:**input index**}\" \"${3:**screen width**}\"$0" ]
-},
-
-"string::fitStringInScreen#withdoc": {
-  "prefix": "string::fitStringInScreen#withdoc",
-  "description": "This function return a string that can be printed in a terminal in order to display a text and position the cursor at a given index in the input text...",
-  "scope": "",
-  "body": [ "# ## string::fitStringInScreen\n# \n# This function return a string that can be printed in a terminal in order to display a text\n# and position the cursor at a given index in the input text.\n# \n# If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed\n# at the beginning and/or at the end of the string.\n# \n# The cursor will be displayed under the character at the given index of the input text and\n# it makes sure that the cursor is always visible in the screen.\n# \n# This function is useful to display a long prompt on a single line.\n# \n# An example:\n# \n# ```text\n# inputString=\"This is a long string that will be displayed in the screen.\"\n# #                                ^ input index 20\n# string::fitStringInScreen \"\\${inputString}\" 20 10\n# # output: \"…g string…\"\n# #                  ^ screen cursor (at index 8)\n# ```\n# \n# - \\$1: **input string** _as string_:\n#       the string to display\n# - \\$2: **input index** _as int_:\n#       the index of the character (in the input string) that should be under the cursor\n# - \\$3: **screen width** _as int_:\n#       the width of the screen\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the string to display in the screen\n# - `RETURNED_VALUE2`: the index at which to position the cursor on screen\n# \n# ```bash\n# string::fitStringInScreen \"This is a long string that will be displayed in the screen.\" 20 10\n# ```\n# \nstring::fitStringInScreen \"${1:**input string**}\" \"${2:**input index**}\" \"${3:**screen width**}\"$0" ]
-},
-
 "string::indexOf": {
   "prefix": "string::indexOf",
   "description": "Find the first index of a string within another string...",
@@ -7382,14 +7638,14 @@ function test::endTest() { :; }
   "prefix": "string::microsecondsToHuman",
   "description": "Convert microseconds to human readable format...",
   "scope": "",
-  "body": [ "string::microsecondsToHuman \"${1:**microseconds**}\" \"${2:**format**}\"$0" ]
+  "body": [ "string::microsecondsToHuman \"${1:**microseconds**}\" \"${2:format}\"$0" ]
 },
 
 "string::microsecondsToHuman#withdoc": {
   "prefix": "string::microsecondsToHuman#withdoc",
   "description": "Convert microseconds to human readable format...",
   "scope": "",
-  "body": [ "# ## string::microsecondsToHuman\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\$2: **format** _as string_:\n#      the format to use (defaults to \"HH:MM:SS\")\n#      Usable formats:\n#      - %HH: hours\n#      - %MM: minutes\n#      - %SS: seconds\n#      - %LL: milliseconds\n#      - %h: hours without leading zero\n#      - %m: minutes without leading zero\n#      - %s: seconds without leading zero\n#      - %l: milliseconds without leading zero\n#      - %u: microseconds without leading zero\n#      - %M: total minutes\n#      - %S: total seconds\n#      - %L: total milliseconds\n#      - %U: total microseconds\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the human readable format\n# \n# ```bash\n# string::microsecondsToHuman 123456789\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::microsecondsToHuman \"${1:**microseconds**}\" \"${2:**format**}\"$0" ]
+  "body": [ "# ## string::microsecondsToHuman\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\$2: format _as string_:\n#      (optional) Can be set using the variable `_OPTION_FORMAT`.\n#      the format to use (defaults to \"%HH:%MM:%SS\")\n#      Usable formats:\n#      - %HH: hours\n#      - %MM: minutes\n#      - %SS: seconds\n#      - %LL: milliseconds\n#      - %h: hours without leading zero\n#      - %m: minutes without leading zero\n#      - %s: seconds without leading zero\n#      - %l: milliseconds without leading zero\n#      - %u: microseconds without leading zero\n#      - %M: total minutes\n#      - %S: total seconds\n#      - %L: total milliseconds\n#      - %U: total microseconds\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the human readable format\n# \n# ```bash\n# string::microsecondsToHuman 123456789\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::microsecondsToHuman \"${1:**microseconds**}\" \"${2:format}\"$0" ]
 },
 
 "string::regexGetFirst": {
@@ -7450,30 +7706,30 @@ function test::endTest() { :; }
 
 "string::wrapCharacters": {
   "prefix": "string::wrapCharacters",
-  "description": "Allows to hard wrap the given string (without new lines) at the given width...",
+  "description": "Allows to hard wrap the given string at the given width...",
   "scope": "",
-  "body": [ "string::wrapCharacters \"${1:**text**}\" \"${2:wrap width}\" \"${3:new line pad string}\" \"${4:new line wrap width}\"$0" ]
+  "body": [ "string::wrapCharacters \"${1:**text**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
 },
 
 "string::wrapCharacters#withdoc": {
   "prefix": "string::wrapCharacters#withdoc",
-  "description": "Allows to hard wrap the given string (without new lines) at the given width...",
+  "description": "Allows to hard wrap the given string at the given width...",
   "scope": "",
-  "body": [ "# ## string::wrapCharacters\n# \n# Allows to hard wrap the given string (without new lines) at the given width.\n# Wrapping is done at character boundaries without taking spaces into consideration.\n# Optionally applies a prefix on each new line.\n# \n# - \\$1: **text** _as string_:\n#       the text to wrap\n# - \\$2: wrap width _as string_:\n#       (optional) the width to wrap the text at\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3: new line pad string _as string_:\n#       (optional) the prefix to apply to each new line\n#       (defaults to \"\")\n# - \\$4: new line wrap width _as string_:\n#       (optional) the width to wrap the text for each new line\n#       (defaults to the width)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the wrapped string\n# \n# ```bash\n# string::wrapCharacters \"This is a long text that should be wrapped at 20 characters.\" 20 ---\n# local wrappedString=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This function is written in pure bash and is faster than calling the fold command.\n# \nstring::wrapCharacters \"${1:**text**}\" \"${2:wrap width}\" \"${3:new line pad string}\" \"${4:new line wrap width}\"$0" ]
+  "body": [ "# ## string::wrapCharacters\n# \n# Allows to hard wrap the given string at the given width.\n# Wrapping is done at character boundaries, see string::warpText for word wrapping.\n# Optionally appends padding characters on each new line.\n# \n# - \\$1: **text** _as string_:\n#       The text to wrap.\n# - \\$2: wrap width _as string_:\n#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.\n#       The width to wrap the text at.\n#       Note that length of the optional padding characters are subtracted from the\n#       width to make sure the text fits in the given width.\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3: padding characters _as string_:\n#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.\n#       The characters to apply as padding on the left of each new line.\n#       E.g. '  ' will add 2 spaces on the left of each new line.\n#       (defaults to 0)\n# - \\$4: first line width _as int_:\n#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.\n#       The width to use for the first line.\n#       (defaults to the width)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the wrapped string\n# - `RETURNED_VALUE2`: the length taken on the last line\n# \n# ```bash\n# string::wrapCharacters \"This is a long text that should be wrapped at 20 characters.\" 20 --- 5\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - It considers escape sequence for text formatting and does not count them as visible characters.\n# > - Leading spaces after a newly wrapped line are removed.\n# \nstring::wrapCharacters \"${1:**text**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
 },
 
-"string::wrapSentence": {
-  "prefix": "string::wrapSentence",
-  "description": "Allows to soft wrap the given sentence (without new lines) at the given width...",
+"string::wrapText": {
+  "prefix": "string::wrapText",
+  "description": "Allows to soft wrap the given text at the given width...",
   "scope": "",
-  "body": [ "string::wrapSentence \"${1:**text**}\" \"${2:wrap width}\"$0" ]
+  "body": [ "string::wrapText \"${1:**text**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
 },
 
-"string::wrapSentence#withdoc": {
-  "prefix": "string::wrapSentence#withdoc",
-  "description": "Allows to soft wrap the given sentence (without new lines) at the given width...",
+"string::wrapText#withdoc": {
+  "prefix": "string::wrapText#withdoc",
+  "description": "Allows to soft wrap the given text at the given width...",
   "scope": "",
-  "body": [ "# ## string::wrapSentence\n# \n# Allows to soft wrap the given sentence (without new lines) at the given width.\n# Optionally applies a prefix on each new line.\n# \n# - \\$1: **text** _as string_:\n#       the text to wrap\n# - \\$2: wrap width _as int_:\n#       (optional) the width to wrap the text at\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3:*new line pad string _as string_:\n#       (optional) the prefix to apply to each new line\n#       (defaults to \"\")\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the wrapped text\n# \n# ```bash\n# string::wrapSentence \"This is a long text that should be wrapped at 20 characters.\" 20\n# local wrappedText=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).\n# \nstring::wrapSentence \"${1:**text**}\" \"${2:wrap width}\"$0" ]
+  "body": [ "# ## string::wrapText\n# \n# Allows to soft wrap the given text at the given width.\n# Wrapping is done at word boundaries.\n# Optionally appends padding characters on each new line.\n# \n# - \\$1: **text** _as string_:\n#       The text to wrap.\n# - \\$2: wrap width _as string_:\n#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.\n#       The width to wrap the text at.\n#       Note that length of the optional padding characters are subtracted from the\n#       width to make sure the text fits in the given width.\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3: padding characters _as string_:\n#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.\n#       The characters to apply as padding on the left of each new line.\n#       E.g. '  ' will add 2 spaces on the left of each new line.\n#       (defaults to 0)\n# - \\$4: first line width _as int_:\n#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.\n#       The width to use for the first line.\n#       (defaults to the width)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the wrapped text\n# \n# ```bash\n# string::wrapText \"This is a long text that should be wrapped at 20 characters.\" 20 '  ' 5\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).\n# > - It considers escape sequence for text formatting and does not count them as visible characters.\n# \nstring::wrapText \"${1:**text**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
 },
 
 "system::addToPath": {
@@ -8999,7 +9255,7 @@ function test::endTest() { :; }
 
 ```log
 INFO     Generating documentation for the core functions only.
-INFO     Found 133 functions with documentation.
+INFO     Found 137 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-1/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-1/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/valet.code-snippets⌝.

@@ -207,27 +207,27 @@ VALET_CONFIG_STRICT_MATCHING=\"\${VALET_CONFIG_STRICT_MATCHING:-${EXPORTED_VALET
 # Useful in a CI environment where you want to disable all animations.
 VALET_CONFIG_DISABLE_PROGRESS=\"\${VALET_CONFIG_DISABLE_PROGRESS:-${EXPORTED_VALET_CONFIG_DISABLE_PROGRESS:-}}\"
 
-## -----------
-## Log/output configuration
-## -----------
-
 # If true, will enable the icons (using nerd font).
 VALET_CONFIG_ENABLE_NERDFONT_ICONS=\"\${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-${EXPORTED_VALET_CONFIG_ENABLE_NERDFONT_ICONS:-}}\"
 
 # If true, will forcibly enable the color output (otherwise we try to detect color support on start).
 VALET_CONFIG_ENABLE_COLORS=\"\${VALET_CONFIG_ENABLE_COLORS:-${EXPORTED_VALET_CONFIG_ENABLE_COLORS:-}}\"
 
+## -----------
+## Log/output configuration
+## -----------
+
 # If true, will disable the text wrapping for logs.
-VALET_CONFIG_DISABLE_LOG_WRAP=\"\${VALET_CONFIG_DISABLE_LOG_WRAP:-${EXPORTED_VALET_CONFIG_DISABLE_LOG_WRAP:-}}\"
+VALET_CONFIG_LOG_DISABLE_WRAP=\"\${VALET_CONFIG_LOG_DISABLE_WRAP:-${EXPORTED_VALET_CONFIG_LOG_DISABLE_WRAP:-}}\"
 
 # Sets the maximum width for the log output (used only when log wrapping is enabled).
 VALET_CONFIG_LOG_COLUMNS=\"\${VALET_CONFIG_LOG_COLUMNS:-${EXPORTED_VALET_CONFIG_LOG_COLUMNS:-}}\"
 
 # If true, will disable the time for logs.
-VALET_CONFIG_DISABLE_LOG_TIME=\"\${VALET_CONFIG_DISABLE_LOG_TIME:-${EXPORTED_VALET_CONFIG_DISABLE_LOG_TIME:-}}\"
+VALET_CONFIG_LOG_DISABLE_TIME=\"\${VALET_CONFIG_LOG_DISABLE_TIME:-${EXPORTED_VALET_CONFIG_LOG_DISABLE_TIME:-}}\"
 
 # If true, will print a timestamp instead of simple time in the logs.
-VALET_CONFIG_ENABLE_LOG_TIMESTAMP=\"\${VALET_CONFIG_ENABLE_LOG_TIMESTAMP:-${EXPORTED_VALET_CONFIG_ENABLE_LOG_TIMESTAMP:-}}\"
+VALET_CONFIG_LOG_ENABLE_TIMESTAMP=\"\${VALET_CONFIG_LOG_ENABLE_TIMESTAMP:-${EXPORTED_VALET_CONFIG_LOG_ENABLE_TIMESTAMP:-}}\"
 
 # The file descriptor to use for the logs (defaults to 2 to output to stderr).
 VALET_CONFIG_LOG_FD=\"\${VALET_CONFIG_LOG_FD:-${EXPORTED_VALET_CONFIG_LOG_FD:-}}\"

@@ -8,13 +8,14 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.
+- core::checkParseResults typo...
 - Add a full screen view with the keyboard shortcuts in edit mode (new interactive::showFullScreenHelp ?).
 - In benchmark, with debug mode on, we can compute the time spent on each line of a function (+ try to improve the fuzzy filter sort).
 - add snippets for the Ansi codes. Add snippets on the global variables.
 - check usage of array::fuzzyFilterSort and add back the colors.
 - Demo with ascii cinema: https://asciinema.org.
 - For all the optional arguments of exported functions, allow to set them using a global variable `_OPTION_*` in addition to the positional argument. Add this in the documentation about functions.
-- Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.
 - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
 - make `source` able to source multiple libraries that are called the same.
 - add-test
@@ -43,6 +44,5 @@ This page lists the features that I would like to implement in Valet. They come 
   - handle shift + arrows to highlight text
   - add a stack for kill/yank
   - add a stack for undo/redo
-  - handle copy to prompt in one go
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

@@ -15,8 +15,7 @@
 #
 # > There can be only one profiler active at a time.
 function profiler::enable() {
-  local file
-  file="${1}"
+  local file="${1}"
 
   # Nested profiling not supported
   if [[ -n ${_ACTIVE_PROFILER:-} ]]; then return 0; fi
@@ -24,7 +23,7 @@ function profiler::enable() {
 
   # create the directory for file and reset it
   mkdir -p "${file%/*}"
-  : "${file}"
+  : >"${file}"
 
   log::info "Starting profiler, writing in ⌜${file}⌝."
 
@@ -64,7 +63,6 @@ function profiler::disable() {
     profilerCleanFile
   fi
 }
-
 
 # Allows to pretty format the profiler file and remove stuff the user does not need.
 #
@@ -204,12 +202,12 @@ function profilerBashCleanFile() {
     lastElapsedTime=${RETURNED_VALUE}
 
     # shorten the program name if it is too long
-    if (( ${#program} > 30)); then
+    if ((${#program} > 30)); then
       program="...${program:${#program}-27}"
     fi
 
     # shorten the function name if it is too long
-    if (( ${#fun} > 31)); then
+    if ((${#fun} > 31)); then
       fun="...${fun:${#fun}-28}"
     fi
     fun="${fun}()"

@@ -242,8 +242,8 @@ function main::getHelpText() {
   local -n functionExamples="CMD_EXAMPLES_NAME_${functionName}"
 
   # description
-  string::wrapText "${description}" "${helpWidth}" 2 "true"
-  local wrappedDescription="${RETURNED_VALUE}"
+  string::wrapText "${description}" "${helpWidth}" "  " "$((helpWidth - 2))"
+  local wrappedDescription="  ${RETURNED_VALUE}"
 
   # usage
   local usage
@@ -274,8 +274,8 @@ function main::getHelpText() {
     fi
   fi
   RETURNED_VALUE2="${usage}"
-  string::wrapText "${usage}" "${helpWidth}" 2 "true"
-  usage="${RETURNED_VALUE}"
+  string::wrapText "${usage}" "${helpWidth}" "  " "$((helpWidth - 2))"
+  usage="  ${RETURNED_VALUE}"
 
   # global options
   local options="${cTitle}GLOBAL OPTIONS${cDefault}"$'\n'$'\n'
@@ -340,11 +340,10 @@ ${options:-}${arguments:-}${commands:-}${examples:-}"
 #           text2
 # text1 can be showed in color and we respect a maximum width
 function mainWriteAsTable() {
-  local width color prefix functionName
-  width="${1}"
-  color="${2}"
-  prefix="${3}"
-  functionName="${4}"
+  local width="${1}"
+  local color="${2}"
+  local prefix="${3}"
+  local functionName="${4}"
 
   local -n names="${prefix}_NAME_${functionName}"
   local -n descriptions="${prefix}_DESCRIPTION_${functionName}"
@@ -354,11 +353,11 @@ function mainWriteAsTable() {
 
   output=""
   for index in "${!names[@]}"; do
-    string::wrapText "${names[${index}]}" "${helpWidth}" 2 "true"
-    output+="${color}${RETURNED_VALUE}${cDefault:-}"$'\n'
+    string::wrapText "${names[${index}]}" "${width}" "  " "$((width - 2))"
+    output+="  ${color}${RETURNED_VALUE}${cDefault:-}"$'\n'
 
-    string::wrapText "${descriptions[${index}]}" "${helpWidth}" 6 "true"
-    output+="${RETURNED_VALUE}"$'\n'
+    string::wrapText "${descriptions[${index}]}" "${width}" "      " "$((width - 6))"
+    output+="      ${RETURNED_VALUE}"$'\n'
   done
 
   RETURNED_VALUE="${output}"

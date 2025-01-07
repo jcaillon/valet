@@ -288,45 +288,76 @@ Total microseconds: %U"
 }
 
 function test_string::wrapText() {
-  local shortText
+  local shortText="You don't [36m[36m[36mget better[39m[39m[39m on the days when you feel like going. You get better on the days when you don't want to go, but you go anyway. If you can [34movercome the negative energy[39m coming from your tired body or unmotivated mind, you will grow and become better. It won't be the best workout you have, you won't accomplish as much as what you usually do when you actually feel good, but that doesn't matter. Growth is a long term game, and the crappy days are more important.
 
-  shortText="You don't get better on the days when you feel like going. You get better on the days when you don't want to go, but you go anyway. If you can overcome the negative energy coming from your tired body or unmotivated mind, you will grow and become better. It won't be the best workout you have, you won't accomplish as much as what you usually do when you actually feel good, but that doesn't matter. Growth is a long term game, and the crappy days are more important.
+As long as I focus on what I feel and don't worry about where I'm going, it works out. Having no expectations but being open to everything is what makes wonderful things happen. If I don't worry, there's no obstruction and life flows easily. It sounds impractical, but 'Expect nothing; be open to everything' is really all it is. 01234567890123456789 on new line 01234567890123456789234 line new line.
 
-As long as I focus on what I feel and don't worry about where I'm going, it works out. Having no expectations but being open to everything is what makes wonderful things happen. If I don't worry, there's no obstruction and life flows easily. It sounds impractical, but 'Expect nothing; be open to everything' is really all it is.
-
+https://en.wikipedia.org/wiki/Veganism
 
 There were 2 new lines before this."
 
-  echo "→ string::wrapText \"\${shortText}\" 30"
+  echo "→ string::wrapText \"\${shortText}\" 20"
   echo "------------------------------"
-  string::wrapText "${shortText}" 30 && echo "${RETURNED_VALUE}"
+  string::wrapText "${shortText}" 20 && echo "${RETURNED_VALUE}"
   test::endTest "Wrapping text at column 30 with no padding" 0
 
-  echo "→ string::wrapText \"\${shortText}\" 90 4 false"
+  echo "→ string::wrapText \"\${shortText}\" 90 '    '"
   echo "------------------------------------------------------------------------------------------"
-  string::wrapText "${shortText}" 90 4 false && echo "${RETURNED_VALUE}"
-  test::endTest "Wrapping text at column 90 with padding of 4 on new lines" 0
+  string::wrapText "${shortText}" 50 '    ' && echo "${RETURNED_VALUE}"
+  test::endTest "Wrapping text at column 50 with padding of 4 on new lines" 0
 
-  echo "→ string::wrapText \"\${shortText}\" 90 2 true"
+  echo "→ string::wrapText \"\${shortText}\" 90 '  ' 88"
   echo "------------------------------------------------------------------------------------------"
-  string::wrapText "${shortText}" 90 2 true && echo "${RETURNED_VALUE}"
-  test::endTest "Wrapping text at column 90 with padding of 2 on all lines" 0
+  string::wrapText "${shortText}" 20 '   ' 17 && echo "  $ {RETURNED_VALUE}"
+  test::endTest "Wrapping text at column 20 with padding of 3 on all lines" 0
+
+  echo "→ string::wrapText 'A message.' 80"
+  string::wrapText 'A message.' 80 && echo "${RETURNED_VALUE}"
+  test::endTest "Wrapping words, shortcut because the message is a short single line" 0
+
+  echo "→ string::wrapText 'A message.' 80 '' 5"
+  string::wrapText 'A message.' 80 '' 5 && echo "${RETURNED_VALUE}"
+  test::endTest "Wrapping words, no shortcut!" 0
+
+  # shellcheck disable=SC2028
+  echo "→ string::wrapText 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10"
+  string::wrapText 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10 && echo "[36m░░░[0m${RETURNED_VALUE}"
+  test::endTest "Wrapping words" 0
 }
 
 function test_string::wrapCharacters() {
-  local shortText
+  local shortText="You don't [36m[36m[36mget better[39m[39m[39m on the days when you feel like going. You get better on the days when you don't want to go, but you go anyway. If you can [34movercome the negative energy[39m coming from your tired body or unmotivated mind, you will grow and become better. It won't be the best workout you have, you won't accomplish as much as what you usually do when you actually feel good, but that doesn't matter. Growth is a long term game, and the crappy days are more important.
 
-  shortText="You don't get better on the days when you feel like going. You get better on the days when you don't want to go, but you go anyway. If you can overcome the negative energy coming from your tired body or unmotivated mind, you will grow and become better. It won't be the best workout you have, you won't accomplish as much as what you usually do when you actually feel good, but that doesn't matter. Growth is a long term game, and the crappy days are more important."
+As long as I focus on what I feel and don't worry about where I'm going, it works out. Having no expectations but being open to everything is what makes wonderful things happen. If I don't worry, there's no obstruction and life flows easily. It sounds impractical, but 'Expect nothing; be open to everything' is really all it is. 01234567890123456789 on new line 01234567890123456789234 line new line.
 
-  echo "→ string::wrapCharacters \"\${shortText}\" 30 \"  \"" 28
-  echo "------------------------------"
-  string::wrapCharacters "${shortText}" 30 "  " 28 && echo "${RETURNED_VALUE}"
-  test::endTest "Wrapping characters at column 30 with new line prefix" 0
+https://en.wikipedia.org/wiki/Veganism
+
+There were 2 new lines before this."
+
+  echo "→ string::wrapCharacters \"\${shortText}\" 20 \"   \"" 17
+  echo "--------------------"
+  string::wrapCharacters "${shortText}" 20 "   " 17 && echo "   ${RETURNED_VALUE}"
+  test::endTest "Wrapping characters at column 20 with padding of 3 on all lines" 0
 
   echo "→ string::wrapCharacters \"\${shortText}\" 20"
   echo "--------------------"
   string::wrapCharacters "${shortText}" 20 && echo "${RETURNED_VALUE}"
   test::endTest "Wrapping characters at 20, no other options" 0
+
+  echo "→ string::wrapCharacters 01234567890123456789234 17 '   ' 1"
+  echo "-----------------"
+  string::wrapCharacters 01234567890123456789234 17 '   ' 1 && echo "                ${RETURNED_VALUE}"
+  test::endTest "Wrapping characters" 0
+
+  # shellcheck disable=SC2028
+  echo "→ string::wrapCharacters 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10"
+  string::wrapCharacters 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10 && echo "[36m░░░[0m${RETURNED_VALUE}"
+  test::endTest "Wrapping characters" 0
+
+  echo "→ string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 1"
+  echo "-----------------"
+  string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 14 && echo "   ${RETURNED_VALUE}"
+  test::endTest "Wrapping characters, spaces at the beginning of the line are kept" 0
 }
 
 

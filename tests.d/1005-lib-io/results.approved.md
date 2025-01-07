@@ -359,6 +359,7 @@ returning 1 from fakeexec⌉
 
 ```log
 DEBUG    Log level set to trace.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Executing the command ⌜fakeexec⌝ with arguments (quoted): 
 '--std-in' '--error'
 TRACE    Fakeexec standard input from string:

@@ -27,14 +27,24 @@ function test_benchmark::run() {
   echo
   echo "→ benchmark::run test_function_1 test_function_2,test_function_3 3 5"
   benchmark::run test_function_1 test_function_2,test_function_3 3 5
-
-  test::endTest "Testing benchmark::run function" 0
-
 }
 
 
 function main() {
-  test_benchmark::run
+  test_benchmark::run 2>"${GLOBAL_TEST_TEMP_FILE}"
+  echoFileWithSubstitution "${GLOBAL_TEST_TEMP_FILE}"
+  test::endTest "Testing benchmark::run function" 0
+}
+
+function echoFileWithSubstitution() {
+  local file="${1}"
+  local line
+  local IFS
+  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
+    line="${line//[0-9]/X}"
+    line="${line//⌜XX⌝/⌜X⌝}"
+    echo "${line}"
+  done <"${file}"
 }
 
 main

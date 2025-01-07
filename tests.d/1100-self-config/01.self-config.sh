@@ -34,7 +34,7 @@ function testSelfConfig() {
     export VALET_CONFIG_FILE="${configFile}"
     export VALET_CONFIG_COLOR_DEBUG=$'\e[44m'
     export VALET_CONFIG_LOG_COLUMNS=20
-    export VALET_CONFIG_ENABLE_LOG_TIMESTAMP=true
+    export VALET_CONFIG_LOG_ENABLE_TIMESTAMP=true
     selfConfig --override --export-current-values
   ) && exitCode=0 || exitCode=$?
   echo
