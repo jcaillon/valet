@@ -138,23 +138,23 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="Hello world"
+declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="HellO wOrld"
 declare -- _PROMPT_ITEMS_BOX_ITEM_WIDTH="5"
-declare -- _PROMPT_ITEMS_BOX_FILTER_STRING="elor"
+declare -- _PROMPT_ITEMS_BOX_FILTER_STRING="eLor"
 → prompt::getItemDisplayedString
 H>e<>l<l…
 
-declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[36mHello\E[0m world'
+declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[36mHellO\E[0m wOrld'
 declare -- _PROMPT_ITEMS_BOX_ITEM_WIDTH="10"
-declare -- _PROMPT_ITEMS_BOX_FILTER_STRING="elor"
+declare -- _PROMPT_ITEMS_BOX_FILTER_STRING="eLor"
 → prompt::getItemDisplayedString
-[36mH>e<>l<l>o<[0m wo>r<…
+[36mH>e<>l<l>O<[0m wO>r<…
 
-declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[36mHello\E[0m world'
+declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[36mHellO\E[0m wOrld'
 declare -- _PROMPT_ITEMS_BOX_ITEM_WIDTH="11"
-declare -- _PROMPT_ITEMS_BOX_FILTER_STRING="elor"
+declare -- _PROMPT_ITEMS_BOX_FILTER_STRING="eLor"
 → prompt::getItemDisplayedString
-[36mH>e<>l<l>o<[0m wo>r<ld
+[36mH>e<>l<l>O<[0m wO>r<ld
 
 declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[7m\E[35md\E[27m\E[39m\E[7m\E[35mi\E[27m\E[39msable the \E[93mmonitor mode to avoid\E[39m the "Terminated" message with exit code once the spinner is stopped'
 declare -- _PROMPT_ITEMS_BOX_ITEM_WIDTH="71"

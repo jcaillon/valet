@@ -251,7 +251,7 @@ function array::fuzzyFilterSort() {
 
   # prepare the regex for the pattern
   # the -> '([^t]*)(t[^h]*h[^e]*e)'
-  local patternRegex="([^${pattern:0:1}]*)(${pattern:0:1}"
+  local patternRegex="^([^${pattern:0:1}]*)(${pattern:0:1}"
   local -i index
   for ((index = 1; index < ${#pattern}; index++)); do
     patternRegex+="[^${pattern:index:1}]*${pattern:index:1}"

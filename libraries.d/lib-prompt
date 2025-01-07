@@ -510,13 +510,17 @@ function prompt_setItemsListVariables() {
   fi
 
   # initial setup of files for grep filtering
-  if [[ ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP:-true} != "true" && -z ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
-    io::createTempFile
-    _PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS="${RETURNED_VALUE}"
+  if [[ ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP:-true} == "true" ]]; then
+    if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS:-} ]]; then
+      io::createTempFile
+      _PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS="${RETURNED_VALUE}"
+      io::createTempFile
+      _PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1="${RETURNED_VALUE}"
+      io::createTempFile
+      _PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP2="${RETURNED_VALUE}"
+    fi
     local IFS=$'\n'
     echo "${_PROMPT_ORIGINAL_ITEMS[*]}" >"${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}"
-    io::createTempFile
-    _PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1="${RETURNED_VALUE}"
   fi
 }
 
@@ -972,26 +976,44 @@ function prompt_filterItems() {
 function prompt_filterItemsAsync() {
   if [[ ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} == "true" ]]; then
     # sort with grep and awk
-    grep '[^t]*t[^h]*h[^e]*e' "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}" >"${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}"
-    awk '
+    : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+    rm "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP2}" &>/dev/null || :
+
+    # prepare the regex for the pattern
+    # the -> '([^t]*)(t[^h]*h[^e]*e)'
+    local patternRegex="([^${_PROMPT_ITEMS_BOX_FILTER_STRING:0:1}]*)(${_PROMPT_ITEMS_BOX_FILTER_STRING:0:1}"
+    local -i index
+    for ((index = 1; index < ${#_PROMPT_ITEMS_BOX_FILTER_STRING}; index++)); do
+      patternRegex+="[^${_PROMPT_ITEMS_BOX_FILTER_STRING:index:1}]*${_PROMPT_ITEMS_BOX_FILTER_STRING:index:1}"
+    done
+    patternRegex+=")"
+
+    grep --ignore-case --line-number "${patternRegex//[()]/}" "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}" >"${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}"
+    awk "
+      BEGIN {
+        IGNORECASE = 1;
+      }
       # Store each line and its key for sorting
       {
-        if (match($0, /([^t]*)(t[^h]*h[^e]*e)/, m)) {
+        if (match(\$0, /^[0-9]+:${patternRegex}/, m)) {
           idx = idx + 1;
           # Store the full line
-          lines[idx] = $0
+          lines[idx] = \$0
           # Store the keys for sorting
-          keys[idx] = sprintf("%d%04d", length(m[1]), length(m[2]))
+          keys[idx] = sprintf(\"%d%04d%04d\", length(m[1]), length(m[2]), length(lines[idx]))
         }
       }
       END {
-        # Sort and print the data
+        # Sort the data
         n = length(lines)
         quicksort(keys, lines, 1, n)
 
         # Print sorted results
         for (i = 1; i <= n; i++) {
-          print lines[i]
+          semiColonIndex = index(lines[i], \":\");
+          idx = substr(lines[i], 0, semiColonIndex - 1) - 1;
+          print substr(lines[i], semiColonIndex + 1) >> \"${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP2}\"
+          print idx >> \"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}\"
         }
       }
       # Quicksort implementation from https://stackoverflow.com/questions/17048188/how-to-use-awk-sort-by-column-3
@@ -1024,7 +1046,13 @@ function prompt_filterItemsAsync() {
         if (i < right) quicksort(keys, lines, i, right)
       }
       function compare(a, b) { return (a + 0) - (b + 0) }
-    ' "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+    " "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}"
+
+    if [[ -f ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP2} ]]; then
+      mv "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP2}" "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+    else
+      : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+    fi
   else
     # sort with bash
     prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
@@ -1213,7 +1241,6 @@ function prompt_clearItemsBox() {
 # ```
 function prompt::getItemDisplayedString() {
   local -i stringLength=${#_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}
-
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_STRING} && ${stringLength} -le ${_PROMPT_ITEMS_BOX_ITEM_WIDTH} ]]; then
     # no filter string, no need to truncate
     return 0
@@ -1240,8 +1267,8 @@ function prompt::getItemDisplayedString() {
     if [[ -n ${itemChunk} ]]; then
       # colorize the search string in this chunk
       while [[ -n ${searchStringCharacter} && ${itemChunk} == *"${searchStringCharacter}"* ]]; do
-        itemChunkPiece="${itemChunk%%"${searchStringCharacter}"*}"
-        itemDisplayed+="${itemChunkPiece}${_PROMPT_COLOR_LETTER_HIGHLIGHT}${searchStringCharacter}${_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET}"
+        itemChunkPiece="${itemChunk%%["${searchStringCharacter^}${searchStringCharacter,}"]*}"
+        itemDisplayed+="${itemChunkPiece}${_PROMPT_COLOR_LETTER_HIGHLIGHT}${itemChunk:${#itemChunkPiece}:1}${_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET}"
         itemChunk="${itemChunk:${#itemChunkPiece}+1}"
         searchStringIndex+=1
         searchStringCharacter="${_PROMPT_ITEMS_BOX_FILTER_STRING:searchStringIndex:1}"

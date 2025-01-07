@@ -54,18 +54,20 @@ function test_prompt::getItemDisplayedString() {
   local FG_CYAN=$'\033[36m'
   local FG_RESET=$'\033[0m'
 
+  shopt -s nocasematch
+
   _PROMPT_COLOR_LETTER_HIGHLIGHT=">"
   _PROMPT_COLOR_LETTER_HIGHLIGHT_RESET="<"
   _PROMPT_ITEMS_BOX_ITEM_WIDTH=5
-  _PROMPT_ITEMS_BOX_FILTER_STRING="elor"
-  _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="Hello world"
+  _PROMPT_ITEMS_BOX_FILTER_STRING="eLor"
+  _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="HellO wOrld"
   declare -p _PROMPT_ITEMS_BOX_ITEM_DISPLAYED _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING
   echo "→ prompt::getItemDisplayedString"
   prompt::getItemDisplayedString
   echo "${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}"
 
   echo
-  _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${FG_CYAN}Hello${FG_RESET} world"
+  _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${FG_CYAN}HellO${FG_RESET} wOrld"
   _PROMPT_ITEMS_BOX_ITEM_WIDTH=10
   declare -p _PROMPT_ITEMS_BOX_ITEM_DISPLAYED _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING
   echo "→ prompt::getItemDisplayedString"
@@ -73,7 +75,7 @@ function test_prompt::getItemDisplayedString() {
   echo "${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}"
 
   echo
-  _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${FG_CYAN}Hello${FG_RESET} world"
+  _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${FG_CYAN}HellO${FG_RESET} wOrld"
   _PROMPT_ITEMS_BOX_ITEM_WIDTH=11
   declare -p _PROMPT_ITEMS_BOX_ITEM_DISPLAYED _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING
   echo "→ prompt::getItemDisplayedString"
@@ -92,6 +94,8 @@ function test_prompt::getItemDisplayedString() {
   echo "→ prompt::getItemDisplayedString"
   prompt::getItemDisplayedString
   echo "${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}"
+
+  shopt -u nocasematch
 
   test::endTest "Testing prompt::getItemDisplayedString" 0
 }
