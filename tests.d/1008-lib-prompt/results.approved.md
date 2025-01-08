@@ -144,19 +144,19 @@ declare -- _PROMPT_ITEMS_BOX_FILTER_STRING="eLor"
 → prompt::getItemDisplayedString
 H>e<>l<l…
 
-declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[36mHellO\E[0m wOrld'
+_PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[36mHellO\E[0m wOrld'
 declare -- _PROMPT_ITEMS_BOX_ITEM_WIDTH="10"
 declare -- _PROMPT_ITEMS_BOX_FILTER_STRING="eLor"
 → prompt::getItemDisplayedString
 [36mH>e<>l<l>O<[0m wO>r<…
 
-declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[36mHellO\E[0m wOrld'
+_PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[36mHellO\E[0m wOrld'
 declare -- _PROMPT_ITEMS_BOX_ITEM_WIDTH="11"
 declare -- _PROMPT_ITEMS_BOX_FILTER_STRING="eLor"
 → prompt::getItemDisplayedString
 [36mH>e<>l<l>O<[0m wO>r<ld
 
-declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[7m\E[35md\E[27m\E[39m\E[7m\E[35mi\E[27m\E[39msable the \E[93mmonitor mode to avoid\E[39m the "Terminated" message with exit code once the spinner is stopped'
+_PROMPT_ITEMS_BOX_ITEM_DISPLAYED=$'\E[7m\E[35md\E[27m\E[39m\E[7m\E[35mi\E[27m\E[39msable the \E[93mmonitor mode to avoid\E[39m the "Terminated" message with exit code once the spinner is stopped'
 declare -- _PROMPT_ITEMS_BOX_ITEM_WIDTH="71"
 declare -- _PROMPT_ITEMS_BOX_FILTER_STRING="abomamwesspp"
 → prompt::getItemDisplayedString

@@ -40,11 +40,11 @@ ERROR    This is an error
          ├─ in myCmd::subFunct
          │  ion() at tests.d/1
          │  010-lib-log/00.tes
-         │  ts.sh:168
+         │  ts.sh:169
          └─ in myCmd::function
             () at tests.d/1010
             -lib-log/00.tests.
-            sh:174
+            sh:175
 
 → log::warning 'This is a warning message.'
 WARNING  This is a warning 
@@ -101,11 +101,11 @@ ERROR    This is an error
          ├─ in myCmd::subFunct
          │  ion() at tests.d/1
          │  010-lib-log/00.tes
-         │  ts.sh:168
+         │  ts.sh:169
          └─ in myCmd::function
             () at tests.d/1010
             -lib-log/00.tests.
-            sh:174
+            sh:175
 
 → log::warning 'This is a warning message.'
 WARNING  This is a warning 
@@ -274,7 +274,7 @@ Exit code: `0`
 → log::createPrintFunction
 
 → log::print SUCCESS   OK ...
-1987-05-25_03:00:00 CSUOK       CDE 012345678901234567890123456789
+1987-05-25_01:00:00 CSUOK       CDE 012345678901234567890123456789
                     012345678901234567890123456789
                     012345678901234567890123456789
                     012345678901234567890123456789
@@ -321,12 +321,12 @@ INFO     Next up is a big line with a
          7890123456789012345678901234567
          890123456789012345678901234567
 
-→ log::printFile file 2
+→ log::printFile file-to-read 2
             1 ░ What is Lorem Ipsum?
             2 ░ 
             … ░ (truncated)
 
-→ log::printFile file
+→ log::printFile file-to-read
             1 ░ What is Lorem Ipsum?
             2 ░ 
             3 ░ Lorem Ipsum is simply du
