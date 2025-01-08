@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function testMain::parseFunctionArguments() {
+function test_main::parseFunctionArguments() {
 
   echo "# missing argument"
   echo "→ main::parseFunctionArguments selfMock2"
@@ -86,7 +86,7 @@ function testMain::parseFunctionArguments() {
 }
 
 function main() {
-  testMain::parseFunctionArguments
+  test_main::parseFunctionArguments
 }
 
 main

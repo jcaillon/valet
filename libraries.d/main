@@ -884,11 +884,9 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
     array::fuzzyFilter "${command}" CMD_ALL_COMMANDS_ARRAY
     if (( ${#RETURNED_ARRAY[@]} > 1)); then
         # case of ambiguous command, show the list of possible commands
-        # shellcheck disable=SC1091
-        source array
-        array::fuzzyFilterSort "${command}" RETURNED_ARRAY "${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"}" "${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
+        main::getDisplayableFilteredArray "${command}" CMD_ALL_COMMANDS_ARRAY
         local IFS=$'\n'
-        core::fail "Found multiple matches for the command ⌜${command}⌝, please be more specific:"$'\n'"${RETURNED_ARRAY[*]}"
+        core::fail "Found multiple matches for the command ⌜${command}⌝, please be more specific:"$'\n'"${RETURNED_VALUE}"
     elif (( ${#RETURNED_ARRAY[@]} == 1 )); then
       # case of a single match, we can match the function immediately
       exactCommand="${RETURNED_ARRAY[0]}"
@@ -1257,13 +1255,11 @@ function main::fuzzyFindOption() {
       singleMatchedOption="${RETURNED_ARRAY[0]}"
     fi
   elif (( ${#RETURNED_ARRAY[@]} > 1 )); then
-    # shellcheck disable=SC1091
-    source array
-    array::fuzzyFilterSort "${unknownOption}" _OPTIONS_TO_MATCH "${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"}" "${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}"
+    main::getDisplayableFilteredArray "${unknownOption}" _OPTIONS_TO_MATCH
     if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
-      suggestedOption="Unknown option ⌜${unknownOption}⌝, valid matches are:"$'\n'"${RETURNED_ARRAY[*]}"
+      suggestedOption="Unknown option ⌜${unknownOption}⌝, valid matches are:"$'\n'"${RETURNED_VALUE}"
     else
-      suggestedOption="Found multiple matches for the option ⌜${unknownOption}⌝, please be more specific:"$'\n'"${RETURNED_ARRAY[*]}"
+      suggestedOption="Found multiple matches for the option ⌜${unknownOption}⌝, please be more specific:"$'\n'"${RETURNED_VALUE}"
     fi
   else
     suggestedOption="Unknown option ⌜${unknownOption}⌝, valid options are:"$'\n'"$*"
@@ -1275,6 +1271,24 @@ function main::fuzzyFindOption() {
 
   RETURNED_VALUE="${suggestedOption:-}"
   RETURNED_VALUE2="${singleMatchedOption:-}"
+}
+
+function main::getDisplayableFilteredArray() {
+  local pattern="${1}"
+  local arrayName="${2}"
+
+  # shellcheck source=lib-array
+  source array
+  array::fuzzyFilterSort "${pattern}" "${arrayName}"
+
+  local line output=""
+  local IFS=$'\n'
+  for line in "${RETURNED_ARRAY[@]}"; do
+    string::highlight "${line}" "${pattern}"
+    output+="${RETURNED_VALUE}"$'\n'
+  done
+
+  RETURNED_VALUE="${output}"
 }
 
 # Helps to build a message for the user to inform them

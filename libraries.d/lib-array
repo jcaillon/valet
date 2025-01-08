@@ -243,7 +243,7 @@ function array::fuzzyFilterSort() {
   local -n array="${2}"
 
   # nothing to filter
-  if [[ -z ${pattern} ]]; then
+  if [[ -z ${pattern} || ${#array[@]} -eq 0 ]]; then
     RETURNED_ARRAY=("${array[@]}")
     eval "RETURNED_ARRAY2=( {0..$(( ${#array[@]} - 1 ))} )"
     return 0

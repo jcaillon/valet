@@ -354,12 +354,32 @@ There were 2 new lines before this."
   string::wrapCharacters 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10 && echo "[36m░░░[0m${RETURNED_VALUE}"
   test::endTest "Wrapping characters" 0
 
+  # shellcheck disable=SC2028
   echo "→ string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 1"
   echo "-----------------"
   string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 14 && echo "   ${RETURNED_VALUE}"
   test::endTest "Wrapping characters, spaces at the beginning of the line are kept" 0
 }
 
+function test_string::highlight() {
+
+  echo "→ string::highlight 'This is a text to highlight.' 'ttttt'"
+  string::highlight 'This is a text to highlight.' 'ttttt' && echo "${RETURNED_VALUE}"
+
+  echo
+  echo "→ string::highlight 'This is a text to highlight.' 'ttttt' '>' '<'"
+  string::highlight 'This is a text to highlight.' 'ttttt' '>' '<' && echo "${RETURNED_VALUE}"
+
+  echo
+  echo "→ string::highlight '' 'ttttt'"
+  string::highlight '' 'ttttt' && echo "${RETURNED_VALUE}"
+
+  echo
+  echo "→ string::highlight 'This is a text to highlight.' ''"
+  string::highlight 'This is a text to highlight.' '' && echo "${RETURNED_VALUE}"
+
+  test::endTest "Testing string::highlight" 0
+}
 
 function main() {
   test_string::cutField
@@ -378,6 +398,7 @@ function main() {
   test_string::microsecondsToHuman
   test_string::wrapText
   test_string::wrapCharacters
+  test_string::highlight
 }
 
 main

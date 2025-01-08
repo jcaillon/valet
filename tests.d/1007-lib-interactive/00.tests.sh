@@ -3,7 +3,7 @@
 # shellcheck source=../../libraries.d/lib-interactive
 source interactive
 
-function testInteractive::promptYesNo() {
+function test_interactive::promptYesNo() {
   echo "echo y | interactive::promptYesNo 'Do you see this message?'"
   echo y 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
   interactive::promptYesNo 'Do you see this message?' <"${GLOBAL_TEMPORARY_WORK_FILE}"
@@ -18,7 +18,7 @@ function testInteractive::promptYesNo() {
   test::endTest "Testing interactive::promptYesNo" 1
 }
 
-function testInteractive::askForConfirmation() {
+function test_interactive::askForConfirmation() {
   echo "echo y | interactive::askForConfirmation 'Please press OK.'"
   interactive::askForConfirmation 'Please press OK.' <"${GLOBAL_TEMPORARY_WORK_FILE}"
 
@@ -26,8 +26,8 @@ function testInteractive::askForConfirmation() {
 }
 
 function main() {
-  testInteractive::promptYesNo
-  testInteractive::askForConfirmation
+  test_interactive::promptYesNo
+  test_interactive::askForConfirmation
 }
 
 main

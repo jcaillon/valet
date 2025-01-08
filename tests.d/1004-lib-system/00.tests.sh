@@ -5,7 +5,7 @@ source system
 # shellcheck source=../../libraries.d/lib-io
 source io
 
-function testSystem::os() {
+function test_system::os() {
 
   echo "→ OSTYPE=linux-bsd system::os"
   OSTYPE=linux-bsd system::os && echo "${RETURNED_VALUE}"
@@ -26,7 +26,7 @@ function testSystem::os() {
   test::endTest "Testing system::os" 0
 }
 
-function testSystem::env() {
+function test_system::env() {
 
   RETURNED_ARRAY=()
   echo "→ system::env"
@@ -38,7 +38,7 @@ function testSystem::env() {
   test::endTest "Testing system::env" 0
 }
 
-function testSystem::date() {
+function test_system::date() {
 
   echo "→ system::date"
   system::date && echo "Returned date with length ${#RETURNED_VALUE}."
@@ -50,7 +50,7 @@ function testSystem::date() {
   test::endTest "Testing system::date" 0
 }
 
-function testSystem::getUndeclaredVariables() {
+function test_system::getUndeclaredVariables() {
 
   echo "→ system::getUndeclaredVariables"
   if ! system::getUndeclaredVariables; then
@@ -68,7 +68,7 @@ function testSystem::getUndeclaredVariables() {
   test::endTest "Testing system::date" 0
 }
 
-function testSystem::getNotExistingCommands() {
+function test_system::getNotExistingCommands() {
 
   echo "→ system::getNotExistingCommands"
   if ! system::getNotExistingCommands; then
@@ -84,7 +84,7 @@ function testSystem::getNotExistingCommands() {
   test::endTest "Testing system::getNotExistingCommands" 0
 }
 
-function testSystem::commandExists() {
+function test_system::commandExists() {
 
   echo "→ system::commandExists"
   if ! system::commandExists; then
@@ -163,12 +163,12 @@ function test_system::windowsAddToPath() {
 }
 
 function main() {
-  testSystem::os
-  testSystem::env
-  testSystem::date
-  testSystem::getUndeclaredVariables
-  testSystem::getNotExistingCommands
-  testSystem::commandExists
+  test_system::os
+  test_system::env
+  test_system::date
+  test_system::getUndeclaredVariables
+  test_system::getNotExistingCommands
+  test_system::commandExists
   test_system::addToPath
   test_system::windowsSetEnvVar
   test_system::windowsGetEnvVar

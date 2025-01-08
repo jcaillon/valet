@@ -3,7 +3,7 @@
 # shellcheck source=../../libraries.d/lib-io
 source io
 
-function testIo::listPaths() {
+function test_io::listPaths() {
   local IFS=$'\n'
 
   echo "→ io::listPaths \${PWD}/resources/search"
@@ -48,7 +48,7 @@ function testIo::listPaths() {
   test::endTest "Testing io::listPaths" 0
 }
 
-function testIo::listFiles() {
+function test_io::listFiles() {
   local IFS=$'\n'
 
   echo "→ io::listFiles \${PWD}/resources/search"
@@ -79,7 +79,7 @@ function testIo::listFiles() {
   test::endTest "Testing io::listFiles" 0
 }
 
-function testIo::listDirectories() {
+function test_io::listDirectories() {
   local IFS=$'\n'
 
   echo "→ io::listDirectories \${PWD}/resources/search"
@@ -114,9 +114,9 @@ function main() {
   local original_lc_all=${LC_ALL:-}
   # make sure the sort is consistent!
   LC_ALL=C
-  testIo::listPaths
-  testIo::listFiles
-  testIo::listDirectories
+  test_io::listPaths
+  test_io::listFiles
+  test_io::listDirectories
   unset LC_ALL
   if [[ -n ${original_lc_all} ]]; then
     export LC_ALL=${original_lc_all}

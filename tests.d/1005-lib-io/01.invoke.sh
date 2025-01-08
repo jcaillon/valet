@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function testIo::invoke5() {
+function test_io::invoke5() {
   io::createTempFile && local tmpFile="${RETURNED_VALUE}"
   local -i exitCode
 
@@ -35,7 +35,7 @@ function testIo::invoke5() {
   test::endTest "Testing io::invoke5, with trace mode on" ${exitCode}
 }
 
-function testIo::invoke2() {
+function test_io::invoke2() {
   local -i exitCode
 
   echo "→ io::invokef2 false fakeexec --option argument1 argument2"
@@ -49,7 +49,7 @@ function testIo::invoke2() {
   test::endTest "Testing io::invoke2var, output to var" ${exitCode}
 }
 
-function testIo::invoke() {
+function test_io::invoke() {
   local -i exitCode
 
   echo "→ io::invoke fakeexec --error"
@@ -63,7 +63,7 @@ function testIo::invoke() {
   test::endTest "Testing io::invoke, output to var" ${exitCode}
 }
 
-function testIo::invoke2piped() {
+function test_io::invoke2piped() {
   local -i exitCode
 
   echo "→ io::invokef2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2"
@@ -117,10 +117,10 @@ function fakeexec() {
 }
 
 function main() {
-  testIo::invoke5
-  testIo::invoke2
-  testIo::invoke
-  testIo::invoke2piped
+  test_io::invoke5
+  test_io::invoke2
+  test_io::invoke
+  test_io::invoke2piped
 }
 
 main

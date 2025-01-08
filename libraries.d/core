@@ -1291,6 +1291,75 @@ function string::wrapCharacters() {
   RETURNED_VALUE2=${lineLength}
 }
 
+# ## string::highlight
+#
+# Highlight a pattern (each character of this pattern) in a string.
+#
+# - $1: **text** _as string_:
+#       The text to highlight.
+# - $2: **pattern** _as string_:
+#       The pattern to highlight.
+# - $3: highlight ansi code _as string_:
+#       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.
+#       The ANSI code to use for highlighting.
+#       (defaults to VALET_CONFIG_COLOR_HIGHLIGHT)
+# - $4: reset ansi code _as string_:
+#       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.
+#       The ANSI code to use for resetting the highlighting.
+#       (defaults to VALET_CONFIG_COLOR_DEFAULT)
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the highlighted text
+#
+# ```bash
+# string::highlight "This is a text to highlight." "ttttt"
+# echo "${RETURNED_VALUE}"
+# ```
+#
+# > - All characters in the pattern must be found in the same order in the matched line.
+# > - Use `shopt -s nocasematch` to make this function is case insensitive.
+function string::highlight() {
+  local text="${1}"
+  local pattern="${2}"
+  local highlightCode="${3:-${_OPTION_HIGHLIGHT_ANSI:-${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"}}}"
+  local resetCode="${4:-${_OPTION_RESET_ANSI:-${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}}}"
+
+  local itemChunk itemChunkPiece
+  local -i searchStringIndex=0
+  local searchStringCharacter="${pattern:0:1}"
+
+  RETURNED_VALUE=""
+
+  while ((${#text} > 0)); do
+    # take the first chunk that does not contain an escape character
+    itemChunk="${text%%$'\e'*}"
+    text="${text:${#itemChunk}}"
+
+    if [[ -n ${itemChunk} ]]; then
+      # colorize the search string in this chunk
+      while [[ -n ${searchStringCharacter} && ${itemChunk} == *"${searchStringCharacter}"* ]]; do
+        itemChunkPiece="${itemChunk%%["${searchStringCharacter^}${searchStringCharacter,}"]*}"
+        RETURNED_VALUE+="${itemChunkPiece}${highlightCode}${itemChunk:${#itemChunkPiece}:1}${resetCode}"
+        itemChunk="${itemChunk:${#itemChunkPiece}+1}"
+        searchStringIndex+=1
+        searchStringCharacter="${pattern:searchStringIndex:1}"
+      done
+
+      RETURNED_VALUE+="${itemChunk}"
+    fi
+
+    while [[ ${text} == $'\e'* ]]; do
+      # case where we have an escape sequence at the beginning of the string
+      # we only consider escape sequences for text formatting, they end with m
+      itemChunk="${text%%"m"*}m"
+      RETURNED_VALUE+="${itemChunk}"
+      text="${text:${#itemChunk}}"
+    done
+  done
+}
+
+
 # ## array::fuzzyFilter
 #
 # Allows to fuzzy sort an array against a given pattern.

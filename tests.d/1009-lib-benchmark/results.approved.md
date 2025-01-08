@@ -26,26 +26,26 @@ test_function_3 ()
 
 → benchmark::run test_function_1 test_function_2,test_function_3 3 5
 INFO     Running the baseline ⌜test_function_X⌝ for ⌜Xs⌝.
-INFO     The baseline ⌜test_function_X⌝ was initially run ⌜X⌝ times in ⌜XX.XXXs⌝.
-INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜XX.XXXs⌝.
+INFO     The baseline ⌜test_function_X⌝ was initially run ⌜X⌝ times in ⌜X.Xs⌝.
+INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜X.Xs⌝.
 SUCCESS  Benchmark results from fastest to slowest:
 
 Function name ░ Average time  ░ Compared to fastest
-░[XXb
-test_function_X ░ XX.XXXs XXXµs ░ N/A
+░[Xb
+test_function_X ░ X.Xs Xµs ░ N/A
 
 INFO     Running the baseline ⌜test_function_X⌝ for ⌜Xs⌝.
-INFO     The baseline ⌜test_function_X⌝ was initially run ⌜X⌝ times in ⌜XX.XXXs⌝.
-INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜XX.XXXs⌝.
-INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜XX.XXXs⌝.
-INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜XX.XXXs⌝.
+INFO     The baseline ⌜test_function_X⌝ was initially run ⌜X⌝ times in ⌜X.Xs⌝.
+INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜X.Xs⌝.
+INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜X.Xs⌝.
+INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜X.Xs⌝.
 SUCCESS  Benchmark results from fastest to slowest:
 
 Function name   ░ Average time  ░ Compared to fastest
-░[XXb
-test_function_X ░ XX.XXXs XXXµs ░ N/A
-test_function_X ░ XX.XXXs XXXµs ░ +XXX%
-test_function_X ░ XX.XXXs XXXµs ░ +XXX%
+░[Xb
+test_function_X ░ X.Xs Xµs ░ N/A
+test_function_X ░ X.Xs Xµs ░ +X%
+test_function_X ░ X.Xs Xµs ░ +X%
 
 ```
 

@@ -2459,6 +2459,36 @@ local extractedText="${RETURNED_VALUE}"
 ```
 
 
+## string::highlight
+
+Highlight a pattern (each character of this pattern) in a string.
+
+- $1: **text** _as string_:
+      The text to highlight.
+- $2: **pattern** _as string_:
+      The pattern to highlight.
+- $3: highlight ansi code _as string_:
+      (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.
+      The ANSI code to use for highlighting.
+      (defaults to VALET_CONFIG_COLOR_HIGHLIGHT)
+- $4: reset ansi code _as string_:
+      (optional) Can be set using the variable `_OPTION_RESET_ANSI`.
+      The ANSI code to use for resetting the highlighting.
+      (defaults to VALET_CONFIG_COLOR_DEFAULT)
+
+Returns:
+
+- `RETURNED_VALUE`: the highlighted text
+
+```bash
+string::highlight "This is a text to highlight." "ttttt"
+echo "${RETURNED_VALUE}"
+```
+
+> - All characters in the pattern must be found in the same order in the matched line.
+> - Use `shopt -s nocasematch` to make this function is case insensitive.
+
+
 ## string::indexOf
 
 Find the first index of a string within another string.
@@ -5497,6 +5527,37 @@ function string::cutField() { :; }
 # 
 function string::extractBetween() { :; }
 
+# ## string::highlight
+# 
+# Highlight a pattern (each character of this pattern) in a string.
+# 
+# - $1: **text** _as string_:
+#       The text to highlight.
+# - $2: **pattern** _as string_:
+#       The pattern to highlight.
+# - $3: highlight ansi code _as string_:
+#       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.
+#       The ANSI code to use for highlighting.
+#       (defaults to VALET_CONFIG_COLOR_HIGHLIGHT)
+# - $4: reset ansi code _as string_:
+#       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.
+#       The ANSI code to use for resetting the highlighting.
+#       (defaults to VALET_CONFIG_COLOR_DEFAULT)
+# 
+# Returns:
+# 
+# - `RETURNED_VALUE`: the highlighted text
+# 
+# ```bash
+# string::highlight "This is a text to highlight." "ttttt"
+# echo "${RETURNED_VALUE}"
+# ```
+# 
+# > - All characters in the pattern must be found in the same order in the matched line.
+# > - Use `shopt -s nocasematch` to make this function is case insensitive.
+# 
+function string::highlight() { :; }
+
 # ## string::indexOf
 # 
 # Find the first index of a string within another string.
@@ -7592,6 +7653,20 @@ function test::endTest() { :; }
   "body": [ "# ## string::extractBetween\n# \n# Extract the text between two strings within a string.\n# Search for the first occurrence of the start string and the first occurrence\n# (after the start index) of the end string.\n# Both start and end strings are excluded in the extracted text.\n# Both start and end strings must be found to extract something.\n# \n# - \\$1: **string** _as string_:\n#       the string in which to search\n# - \\$2: **start string** _as string_:\n#       the start string\n#       (if empty, then it will extract from the beginning of the string)\n# - \\$3: **end string** _as string_:\n#       the end string\n#       (if empty, then it will extract until the end of the string)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the extracted text\n# \n# ```bash\n# string::extractBetween \"This is a long text\" \"is a \" \" text\"\n# local extractedText=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::extractBetween \"${1:**string**}\" \"${2:**start string**}\" \"${3:**end string**}\"$0" ]
 },
 
+"string::highlight": {
+  "prefix": "string::highlight",
+  "description": "Highlight a pattern (each character of this pattern) in a string...",
+  "scope": "",
+  "body": [ "string::highlight \"${1:**text**}\" \"${2:**pattern**}\" \"${3:highlight ansi code}\" \"${4:reset ansi code}\"$0" ]
+},
+
+"string::highlight#withdoc": {
+  "prefix": "string::highlight#withdoc",
+  "description": "Highlight a pattern (each character of this pattern) in a string...",
+  "scope": "",
+  "body": [ "# ## string::highlight\n# \n# Highlight a pattern (each character of this pattern) in a string.\n# \n# - \\$1: **text** _as string_:\n#       The text to highlight.\n# - \\$2: **pattern** _as string_:\n#       The pattern to highlight.\n# - \\$3: highlight ansi code _as string_:\n#       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.\n#       The ANSI code to use for highlighting.\n#       (defaults to VALET_CONFIG_COLOR_HIGHLIGHT)\n# - \\$4: reset ansi code _as string_:\n#       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.\n#       The ANSI code to use for resetting the highlighting.\n#       (defaults to VALET_CONFIG_COLOR_DEFAULT)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the highlighted text\n# \n# ```bash\n# string::highlight \"This is a text to highlight.\" \"ttttt\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - Use `shopt -s nocasematch` to make this function is case insensitive.\n# \nstring::highlight \"${1:**text**}\" \"${2:**pattern**}\" \"${3:highlight ansi code}\" \"${4:reset ansi code}\"$0" ]
+},
+
 "string::indexOf": {
   "prefix": "string::indexOf",
   "description": "Find the first index of a string within another string...",
@@ -9255,7 +9330,7 @@ function test::endTest() { :; }
 
 ```log
 INFO     Generating documentation for the core functions only.
-INFO     Found 137 functions with documentation.
+INFO     Found 138 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-1/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-1/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-1/valet.code-snippets⌝.

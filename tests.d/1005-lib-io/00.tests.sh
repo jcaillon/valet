@@ -3,7 +3,7 @@
 # shellcheck source=../../libraries.d/lib-io
 source io
 
-function testIo::toAbsolutePath() {
+function test_io::toAbsolutePath() {
 
   echo "→ io::toAbsolutePath \${PWD}/01.invoke.sh"
   io::toAbsolutePath "${PWD}/01.invoke.sh" && echo "${RETURNED_VALUE}"
@@ -47,7 +47,7 @@ function outputTextToStdErr() {
   echo "This is an error message" 1>&2
 }
 
-function testIo::readFile() {
+function test_io::readFile() {
 
   echo "→ io::readFile 'resources/file-to-read' 100"
   io::readFile 'resources/file-to-read' 100
@@ -62,7 +62,7 @@ function testIo::readFile() {
   test::endTest "Testing io::readFile unlimited" 0
 }
 
-function testIo::createDirectoryIfNeeded() {
+function test_io::createDirectoryIfNeeded() {
 
   echo "→ io::createDirectoryIfNeeded 'resources/dir/subdir'"
   io::createDirectoryIfNeeded resources/dir/subdir
@@ -82,7 +82,7 @@ function testIo::createDirectoryIfNeeded() {
   test::endTest "Testing io::createDirectoryIfNeeded" 0
 }
 
-function testIo::createFilePathIfNeeded() {
+function test_io::createFilePathIfNeeded() {
 
   echo "→ io::createFilePathIfNeeded 'resources/dir/subdir/file1'"
   io::createFilePathIfNeeded resources/dir/subdir/file1
@@ -99,7 +99,7 @@ function testIo::createFilePathIfNeeded() {
   test::endTest "Testing io::createFilePathIfNeeded" 0
 }
 
-function testIo::sleep() {
+function test_io::sleep() {
 
   echo "→ io::sleep 0.001"
   io::sleep 0.001
@@ -107,7 +107,7 @@ function testIo::sleep() {
   test::endTest "Testing io::sleep" 0
 }
 
-function testIo::cat() {
+function test_io::cat() {
 
   echo "→ io::cat 'resources/file-to-read'"
   io::cat 'resources/file-to-read'
@@ -115,7 +115,7 @@ function testIo::cat() {
   test::endTest "Testing io::cat" 0
 }
 
-function testIo::readStdIn() {
+function test_io::readStdIn() {
 
   echo "→ io::readStdIn <<<'coucou'"
   io::readStdIn <<<"coucou"
@@ -128,7 +128,7 @@ function testIo::readStdIn() {
   test::endTest "Testing io::readStdIn" 0
 }
 
-function testIo::countArgs() {
+function test_io::countArgs() {
 
   echo "→ io::countArgs 'arg1' 'arg2' 'arg3'"
   io::countArgs 'arg1' 'arg2' 'arg3'
@@ -141,7 +141,7 @@ function testIo::countArgs() {
   test::endTest "Testing io::countArgs" 0
 }
 
-function testIo::isDirectoryWritable() {
+function test_io::isDirectoryWritable() {
 
   echo "→ io::isDirectoryWritable '/tmp'"
   if io::isDirectoryWritable '/tmp'; then
@@ -210,15 +210,15 @@ function test_io::createLink() {
 }
 
 function main() {
-  testIo::toAbsolutePath
-  testIo::readFile
-  testIo::createDirectoryIfNeeded
-  testIo::createFilePathIfNeeded
-  testIo::sleep
-  testIo::cat
-  testIo::readStdIn
-  testIo::countArgs
-  testIo::isDirectoryWritable
+  test_io::toAbsolutePath
+  test_io::readFile
+  test_io::createDirectoryIfNeeded
+  test_io::createFilePathIfNeeded
+  test_io::sleep
+  test_io::cat
+  test_io::readStdIn
+  test_io::countArgs
+  test_io::isDirectoryWritable
   test_io::convertToWindowsPath
   test_io::createLink
   test_io::convertFromWindowsPath

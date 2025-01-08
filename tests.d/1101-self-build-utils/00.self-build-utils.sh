@@ -127,6 +127,7 @@ function main() {
   testDeclareFinalVariables
   testVerifyCommandDefinition
 }
+
 # save all CMD_* variables into a temporary string
 io::invoke declare -p ${!CMD_*}
 _ALL_CMD_VARIABLES="${RETURNED_VALUE//declare -? /}"

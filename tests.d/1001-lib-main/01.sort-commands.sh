@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function testSortCommandsAndLastChoice() {
+function test_main::sortCommands() {
   # overriding core::getLocalStateDirectory to return a temporary directory
   io::createTempDirectory && local localStateDirectory="${RETURNED_VALUE}"
   VALET_CONFIG_LOCAL_STATE_DIRECTORY="${localStateDirectory}"
@@ -67,7 +67,7 @@ function testSortCommandsAndLastChoice() {
 }
 
 function main() {
-  testSortCommandsAndLastChoice
+  test_main::sortCommands
 }
 
 main

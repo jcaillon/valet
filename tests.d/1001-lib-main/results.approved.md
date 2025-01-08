@@ -1,4 +1,4 @@
-# Test suite 1001-main-functions
+# Test suite 1001-lib-main
 
 ## Test script 01.sort-commands
 
@@ -280,6 +280,7 @@ help=""
 parsingErrors="Found multiple matches for the option ⌜--th⌝, please be more specific:
 CHI-CDECHI-CDECHItCDECHIhCDEis-is-option2
 CHI-CDECHI-CDEwiCHItCDECHIhCDE-default
+
 Use ⌜valet self mock2 --help⌝ to get help."
 firstArg="arg1"
 more=(
@@ -430,6 +431,7 @@ CHIsCDEelCHIfCDE setup
 CHIsCDEelCHIfCDE test
 CHIsCDEelCHIfCDE uninstall
 CHIsCDEelCHIfCDE update
+
 ```
 
 ### Testing main::getMaxPossibleCommandLevel
@@ -473,10 +475,12 @@ CHI-CDE-oCHIpCDEt1
 CHI-CDE-derCHIpCDE2
 
 
+
 → main::fuzzyFindOption -a --opt1 --derp2 --allo3
 Found multiple matches for the option ⌜-p⌝, please be more specific:
 CHI-CDE-oCHIpCDEt1
 CHI-CDE-derCHIpCDE2
+
 
 
 → main::fuzzyFindOption thing --opt1 --derp2 --allo3
@@ -502,5 +506,19 @@ Exit code: `0`
 ```plaintext
 → main::getSingleLetterOptions -a --opt1 --derp2 -b --allo3 -c
 Valid single letter options are: ⌜a⌝, ⌜b⌝, ⌜c⌝.
+```
+
+### Testing main::getDisplayableFilteredArray
+
+Exit code: `0`
+
+**Standard** output:
+
+```plaintext
+→ main::getDisplayableFilteredArray ae ARRAY
+CHIaCDEpplCHIeCDE
+grCHIaCDEpCHIeCDE
+orCHIaCDEngCHIeCDE
+
 ```
 

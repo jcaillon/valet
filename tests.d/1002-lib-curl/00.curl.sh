@@ -3,7 +3,7 @@
 # shellcheck source=../../libraries.d/lib-curl
 source curl
 
-function testCurl::toFile() {
+function test_curl::toFile() {
   mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" &>/dev/null
   local tmpFile="${GLOBAL_TEMPORARY_DIRECTORY}/curl-test"
   local exitCode
@@ -60,7 +60,7 @@ function echoOutputCurlToFile() {
   echo "${debugMessage}"
 }
 
-function testCurl::toVar() {
+function test_curl::toVar() {
   local -i exitCode
 
   export NO_CURL_CONTENT=true
@@ -100,8 +100,8 @@ function echoOutputCurlToVar() {
 }
 
 function main() {
-  testCurl::toFile
-  testCurl::toVar
+  test_curl::toFile
+  test_curl::toVar
 }
 
 # Override curl for tests
