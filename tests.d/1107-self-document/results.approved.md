@@ -67,30 +67,6 @@ printf '%s\n' "${myArray[@]}"
 ```
 
 
-## array::fuzzyFilter
-
-Allows to fuzzy sort an array against a given pattern.
-Returns an array containing only the lines matching the pattern.
-
-- $1: **pattern** _as string_:
-      the pattern to match
-- $2: **array name** _as string_:
-      the initial array name
-
-Returns:
-
-- `RETURNED_ARRAY`: An array containing the filtered items
-- `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array
-
-```bash
-array::fuzzyFilter "pattern" "myarray"
-IFS=$'\n' echo "${RETURNED_ARRAY[*]}"
-```
-
-> - All characters in the pattern must be found in the same order in the matched line.
-> - Use `shopt -s nocasematch` to make this function is case insensitive.
-
-
 ## array::fuzzyFilterSort
 
 Allows to fuzzy sort an array against a given pattern.
@@ -118,6 +94,32 @@ array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${
 
 > - All characters in the pattern must be found in the same order in the matched line.
 > - Use `shopt -s nocasematch` to make this function is case insensitive.
+
+
+## array::fuzzyFilterSortFileWithGrepAndAwk
+
+Allows to fuzzy sort a file against a given pattern.
+Outputs a file containing only the lines matching the pattern.
+The array is sorted by (in order):
+
+- the index of the first matched character in the line
+- the distance between the first and last matched characters in the line
+
+- $1: **pattern** _as string_:
+      The pattern to filter the file with.
+- $2: **file to filer** _as string_:
+      The input file to filter.
+- $3: **output filtered file** _as string_:
+      The output file containing the filtered lines.
+- $4: **output correspondences file** _as string_:
+      The output file containing the indexes of the matched lines in the original file.
+
+```bash
+array::fuzzyFilterSortFileWithGrepAndAwk file.txt filtered.txt correspondences.txt
+```
+
+> This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.
+> This function is useful for very large arrays.
 
 
 ## array::isInArray
@@ -3023,31 +3025,6 @@ function ansi-codes::*() { :; }
 # 
 function array::appendIfNotPresent() { :; }
 
-# ## array::fuzzyFilter
-# 
-# Allows to fuzzy sort an array against a given pattern.
-# Returns an array containing only the lines matching the pattern.
-# 
-# - $1: **pattern** _as string_:
-#       the pattern to match
-# - $2: **array name** _as string_:
-#       the initial array name
-# 
-# Returns:
-# 
-# - `RETURNED_ARRAY`: An array containing the filtered items
-# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array
-# 
-# ```bash
-# array::fuzzyFilter "pattern" "myarray"
-# IFS=$'\n' echo "${RETURNED_ARRAY[*]}"
-# ```
-# 
-# > - All characters in the pattern must be found in the same order in the matched line.
-# > - Use `shopt -s nocasematch` to make this function is case insensitive.
-# 
-function array::fuzzyFilter() { :; }
-
 # ## array::fuzzyFilterSort
 # 
 # Allows to fuzzy sort an array against a given pattern.
@@ -3077,6 +3054,33 @@ function array::fuzzyFilter() { :; }
 # > - Use `shopt -s nocasematch` to make this function is case insensitive.
 # 
 function array::fuzzyFilterSort() { :; }
+
+# ## array::fuzzyFilterSortFileWithGrepAndAwk
+# 
+# Allows to fuzzy sort a file against a given pattern.
+# Outputs a file containing only the lines matching the pattern.
+# The array is sorted by (in order):
+# 
+# - the index of the first matched character in the line
+# - the distance between the first and last matched characters in the line
+# 
+# - $1: **pattern** _as string_:
+#       The pattern to filter the file with.
+# - $2: **file to filer** _as string_:
+#       The input file to filter.
+# - $3: **output filtered file** _as string_:
+#       The output file containing the filtered lines.
+# - $4: **output correspondences file** _as string_:
+#       The output file containing the indexes of the matched lines in the original file.
+# 
+# ```bash
+# array::fuzzyFilterSortFileWithGrepAndAwk file.txt filtered.txt correspondences.txt
+# ```
+# 
+# > This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.
+# > This function is useful for very large arrays.
+# 
+function array::fuzzyFilterSortFileWithGrepAndAwk() { :; }
 
 # ## array::isInArray
 # 
@@ -6085,20 +6089,6 @@ function test::endTest() { :; }
   "body": [ "# ## array::appendIfNotPresent\n# \n# Add a value to an array if it is not already present.\n# \n# - \\$1: **array name** _as string_:\n#       The global variable name of the array.\n# - \\$2: **value** _as any:\n#       The value to add.\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the value was added\n#   - 1 if it was already present\n# \n# ```bash\n# declare -g myArray=( \"a\" \"b\" )\n# array::appendIfNotPresent myArray \"c\"\n# printf '%s\\n' \"\\${myArray[@]}\"\n# ```\n# \narray::appendIfNotPresent \"${1:**array name**}\"$0" ]
 },
 
-"array::fuzzyFilter": {
-  "prefix": "array::fuzzyFilter",
-  "description": "Allows to fuzzy sort an array against a given pattern...",
-  "scope": "",
-  "body": [ "array::fuzzyFilter \"${1:**pattern**}\" \"${2:**array name**}\"$0" ]
-},
-
-"array::fuzzyFilter#withdoc": {
-  "prefix": "array::fuzzyFilter#withdoc",
-  "description": "Allows to fuzzy sort an array against a given pattern...",
-  "scope": "",
-  "body": [ "# ## array::fuzzyFilter\n# \n# Allows to fuzzy sort an array against a given pattern.\n# Returns an array containing only the lines matching the pattern.\n# \n# - \\$1: **pattern** _as string_:\n#       the pattern to match\n# - \\$2: **array name** _as string_:\n#       the initial array name\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array containing the filtered items\n# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array\n# \n# ```bash\n# array::fuzzyFilter \"pattern\" \"myarray\"\n# IFS=\\$'\\n' echo \"\\${RETURNED_ARRAY[*]}\"\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - Use `shopt -s nocasematch` to make this function is case insensitive.\n# \narray::fuzzyFilter \"${1:**pattern**}\" \"${2:**array name**}\"$0" ]
-},
-
 "array::fuzzyFilterSort": {
   "prefix": "array::fuzzyFilterSort",
   "description": "Allows to fuzzy sort an array against a given pattern...",
@@ -6111,6 +6101,20 @@ function test::endTest() { :; }
   "description": "Allows to fuzzy sort an array against a given pattern...",
   "scope": "",
   "body": [ "# ## array::fuzzyFilterSort\n# \n# Allows to fuzzy sort an array against a given pattern.\n# Returns an array containing only the lines matching the pattern.\n# The array is sorted by (in order):\n# \n# - the index of the first matched character in the line\n# - the distance between the first and last matched characters in the line\n# \n# - \\$1: **pattern** _as string_:\n#       the pattern to match\n# - \\$2: **array name** _as string_:\n#       the initial array name\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array containing the items sorted and filtered\n# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array\n# \n# ```bash\n# array::fuzzyFilterSort \"pattern\" \"myarray\" && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# array::fuzzyFilterSort \"pattern\" \"myarray\" ⌜ ⌝ && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# array::fuzzyFilterSort \"pattern\" \"myarray\" ⌜ ⌝ 10 && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - Use `shopt -s nocasematch` to make this function is case insensitive.\n# \narray::fuzzyFilterSort \"${1:**pattern**}\" \"${2:**array name**}\"$0" ]
+},
+
+"array::fuzzyFilterSortFileWithGrepAndAwk": {
+  "prefix": "array::fuzzyFilterSortFileWithGrepAndAwk",
+  "description": "Allows to fuzzy sort a file against a given pattern...",
+  "scope": "",
+  "body": [ "array::fuzzyFilterSortFileWithGrepAndAwk \"${1:**pattern**}\" \"${2:**file to filer**}\" \"${3:**output filtered file**}\" \"${4:**output correspondences file**}\"$0" ]
+},
+
+"array::fuzzyFilterSortFileWithGrepAndAwk#withdoc": {
+  "prefix": "array::fuzzyFilterSortFileWithGrepAndAwk#withdoc",
+  "description": "Allows to fuzzy sort a file against a given pattern...",
+  "scope": "",
+  "body": [ "# ## array::fuzzyFilterSortFileWithGrepAndAwk\n# \n# Allows to fuzzy sort a file against a given pattern.\n# Outputs a file containing only the lines matching the pattern.\n# The array is sorted by (in order):\n# \n# - the index of the first matched character in the line\n# - the distance between the first and last matched characters in the line\n# \n# - \\$1: **pattern** _as string_:\n#       The pattern to filter the file with.\n# - \\$2: **file to filer** _as string_:\n#       The input file to filter.\n# - \\$3: **output filtered file** _as string_:\n#       The output file containing the filtered lines.\n# - \\$4: **output correspondences file** _as string_:\n#       The output file containing the indexes of the matched lines in the original file.\n# \n# ```bash\n# array::fuzzyFilterSortFileWithGrepAndAwk file.txt filtered.txt correspondences.txt\n# ```\n# \n# > This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.\n# > This function is useful for very large arrays.\n# \narray::fuzzyFilterSortFileWithGrepAndAwk \"${1:**pattern**}\" \"${2:**file to filer**}\" \"${3:**output filtered file**}\" \"${4:**output correspondences file**}\"$0" ]
 },
 
 "array::isInArray": {

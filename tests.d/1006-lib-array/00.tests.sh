@@ -2,6 +2,8 @@
 
 # shellcheck source=../../libraries.d/lib-array
 source array
+# shellcheck source=../../libraries.d/lib-io
+source io
 
 function test_array::sort() {
 
@@ -27,7 +29,7 @@ function test_array::sort() {
 }
 
 function test_array::sortWithCriteria() {
-  declare -g   myArray=(a b c d e f g)
+  declare -g myArray=(a b c d e f g)
   declare -g criteria1=(3 2 2 1 1 4 0)
   declare -g criteria2=(1 3 2 5 0 2 9)
 
@@ -135,7 +137,9 @@ function test_array::fuzzyFilterSort() {
 
   echo
   echo "→ shopt -s nocasematch; array::fuzzyFilterSort ELV myArray; shopt -u nocasematch"
-  shopt -s nocasematch; array::fuzzyFilterSort ELV myArray; shopt -u nocasematch
+  shopt -s nocasematch
+  array::fuzzyFilterSort ELV myArray
+  shopt -u nocasematch
 
   declare -p RETURNED_ARRAY RETURNED_ARRAY2
 
@@ -161,34 +165,56 @@ function test_array::fuzzyFilterSort() {
   test::endTest "Testing array::fuzzyFilterSort" 0
 }
 
-function test_array::fuzzyFilter() {
-  lines=("this is a word"
-    "very unbelievable"
-    "unbelievable"
-    "self mock1"
-    "self mock2"
-    "ublievable")
+function test_array::fuzzyFilterSortFileWithGrepAndAwk() {
+  io::createTempFile
+  local outputFilteredFile="${RETURNED_VALUE}"
+  io::createTempFile
+  local outputCorrespondenceFile="${RETURNED_VALUE}"
 
-  declare -p lines
+  echo "→ array::fuzzyFilterSortFileWithGrepAndAwk words out1 out2"
 
-  echo
-  echo "→ array::fuzzyFilter evle lines"
-  array::fuzzyFilter "evle" lines
-  declare -p RETURNED_ARRAY RETURNED_ARRAY2
+  if ! command -v grep &>/dev/null || ! command -v awk &>/dev/null; then
+    echo "The result is the same as the pure bash implementation."
+    return 0
+  fi
+  array::fuzzyFilterSortFileWithGrepAndAwk ea words "${outputFilteredFile}" "${outputCorrespondenceFile}"
 
-  echo
-  echo "→ shopt -s nocasematch; array::fuzzyFilter SC2 lines; shopt -u nocasematch"
-  shopt -s nocasematch; array::fuzzyFilter SC2 lines; shopt -u nocasematch
-  declare -p RETURNED_ARRAY RETURNED_ARRAY2
+  io::readFile "${outputFilteredFile}"
+  local awkedLines="${RETURNED_VALUE%$'\n'}"
+  io::readFile "${outputCorrespondenceFile}"
+  local awkedCorrespondences="${RETURNED_VALUE%$'\n'}"
 
-  echo
-  echo "→ array::fuzzyFilter nomatch lines"
-  array::fuzzyFilter "nomatch" lines
-  declare -p RETURNED_ARRAY RETURNED_ARRAY2
+  mapfile -t _MY_ARRAY <words
+  shopt -s nocasematch
+  array::fuzzyFilterSort ea _MY_ARRAY
+  shopt -u nocasematch
+  local IFS=$'\n'
+  local bashLines="${RETURNED_ARRAY[*]}"
+  local bashCorrespondences="${RETURNED_ARRAY2[*]}"
 
-  unset lines
+  # check that the lines are the same
+  if [[ "${awkedLines}" != "${bashLines}" ]]; then
+    echo "Outputs are different!"
+    echo "awkedLines:"
+    echo "${awkedLines}"
+    echo
+    echo "bashLines:"
+    echo "${bashLines}"
+    exit 1
+  fi
+  if [[ "${awkedCorrespondences}" != "${bashCorrespondences}" ]]; then
+    echo "Correspondences are different!"
+    echo "awkedCorrespondences:"
+    echo "${awkedCorrespondences}"
+    echo
+    echo "bashCorrespondences:"
+    echo "${bashCorrespondences}"
+    exit 1
+  fi
 
-  test::endTest "Testing array::fuzzyFilter" 0
+  echo "The result is the same as the pure bash implementation."
+
+  test::endTest "Testing that array::fuzzyFilterSortFileWithGrepAndAwk produces the same as fuzzyFilterSort" 0
 }
 
 function main() {
@@ -198,7 +224,7 @@ function main() {
   test_array::isInArray
   test_array::makeArraysSameSize
   test_array::fuzzyFilterSort
-  test_array::fuzzyFilter
+  test_array::fuzzyFilterSortFileWithGrepAndAwk
 }
 
 main

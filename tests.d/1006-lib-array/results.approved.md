@@ -113,25 +113,14 @@ declare -a RETURNED_ARRAY=([0]="thaerty" [1]="thazrerty" [2]="On the" [3]="One o
 declare -a RETURNED_ARRAY2=([0]="3" [1]="4" [2]="0" [3]="1" [4]="2")
 ```
 
-### Testing array::fuzzyFilter
+### Testing that array::fuzzyFilterSortFileWithGrepAndAwk produces the same as fuzzyFilterSort
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-declare -a lines=([0]="this is a word" [1]="very unbelievable" [2]="unbelievable" [3]="self mock1" [4]="self mock2" [5]="ublievable")
-
-→ array::fuzzyFilter evle lines
-declare -a RETURNED_ARRAY=([0]="very unbelievable" [1]="unbelievable" [2]="ublievable")
-declare -a RETURNED_ARRAY2=([0]="1" [1]="2" [2]="5")
-
-→ shopt -s nocasematch; array::fuzzyFilter SC2 lines; shopt -u nocasematch
-declare -a RETURNED_ARRAY=([0]="self mock2")
-declare -a RETURNED_ARRAY2=([0]="4")
-
-→ array::fuzzyFilter nomatch lines
-declare -a RETURNED_ARRAY=()
-declare -a RETURNED_ARRAY2=()
+→ array::fuzzyFilterSortFileWithGrepAndAwk words out1 out2
+The result is the same as the pure bash implementation.
 ```
 

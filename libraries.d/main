@@ -854,6 +854,7 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
     return 0
   fi
 
+  # ignore case
   shopt -s nocasematch
 
   main::getMaxPossibleCommandLevel "$@"
@@ -881,10 +882,10 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
     fi
 
     # case where the command is not exact, we try to fuzzy match it
-    array::fuzzyFilter "${command}" CMD_ALL_COMMANDS_ARRAY
+    array::fuzzyFilterSort "${command}" CMD_ALL_COMMANDS_ARRAY
     if (( ${#RETURNED_ARRAY[@]} > 1)); then
         # case of ambiguous command, show the list of possible commands
-        main::getDisplayableFilteredArray "${command}" CMD_ALL_COMMANDS_ARRAY
+        main::getDisplayableFilteredArray "${command}" RETURNED_ARRAY
         local IFS=$'\n'
         core::fail "Found multiple matches for the command ⌜${command}⌝, please be more specific:"$'\n'"${RETURNED_VALUE}"
     elif (( ${#RETURNED_ARRAY[@]} == 1 )); then
@@ -1243,10 +1244,12 @@ function main::fuzzyFindOption() {
 
   local singleMatchedOption
   IFS=$'\n'
+
+  # ignore case
   shopt -s nocasematch
 
   # split to get one possible option per line
-  array::fuzzyFilter "${unknownOption}" _OPTIONS_TO_MATCH
+  array::fuzzyFilterSort "${unknownOption}" _OPTIONS_TO_MATCH
   if (( ${#RETURNED_ARRAY[@]} == 1 )); then
     if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
       suggestedOption="Unknown option ⌜${unknownOption}⌝, did you mean ⌜${RETURNED_ARRAY[0]}⌝?"
@@ -1255,7 +1258,7 @@ function main::fuzzyFindOption() {
       singleMatchedOption="${RETURNED_ARRAY[0]}"
     fi
   elif (( ${#RETURNED_ARRAY[@]} > 1 )); then
-    main::getDisplayableFilteredArray "${unknownOption}" _OPTIONS_TO_MATCH
+    main::getDisplayableFilteredArray "${unknownOption}" RETURNED_ARRAY
     if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
       suggestedOption="Unknown option ⌜${unknownOption}⌝, valid matches are:"$'\n'"${RETURNED_VALUE}"
     else
@@ -1273,20 +1276,35 @@ function main::fuzzyFindOption() {
   RETURNED_VALUE2="${singleMatchedOption:-}"
 }
 
+# ## main::getDisplayableFilteredArray (private)
+#
+# Outputs a string that displays an array where each item gets highlighted
+# letters based on a pattern.
+#
+# - $1: **pattern** _as string_:
+#       The pattern to highlight in the array items.
+# - $2: **array** _as string:
+#       The name of the global array to display.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The string to display.
+#
 function main::getDisplayableFilteredArray() {
   local pattern="${1}"
-  local arrayName="${2}"
+  local -n array="${2}"
 
-  # shellcheck source=lib-array
-  source array
-  array::fuzzyFilterSort "${pattern}" "${arrayName}"
+  # ignore case
+  shopt -s nocasematch
 
   local line output=""
   local IFS=$'\n'
-  for line in "${RETURNED_ARRAY[@]}"; do
+  for line in "${array[@]}"; do
     string::highlight "${line}" "${pattern}"
     output+="${RETURNED_VALUE}"$'\n'
   done
+
+  shopt -u nocasematch
 
   RETURNED_VALUE="${output}"
 }

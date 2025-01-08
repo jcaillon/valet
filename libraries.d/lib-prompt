@@ -6,8 +6,6 @@
 source ansi-codes
 # shellcheck source=lib-interactive
 source interactive
-# shellcheck source=lib-array
-source array
 
 # ## prompt::input
 #
@@ -236,7 +234,6 @@ function prompt::input() {
   fi
 
   _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=""
-  _PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING=""
   _PROMPT_ITEMS_BOX_FILTER_USING_GREP=""
 
   # set up colors
@@ -300,7 +297,6 @@ function prompt::input() {
   GLOBAL_CURSOR_COLUMN=$((_PROMPT_START_COLUMN + _PROMPT_SYMBOL_LENGTH + _PROMPT_STRING_INDEX))
 
   prompt_setItemsListVariables
-  prompt_reExportFuzzyFilterFunction
 
   # check if we display the autocompletion box, and the initial state of the box (shown or hidden)
   if ((_PROMPT_ORIGINAL_ITEMS_COUNT > 0)); then
@@ -492,12 +488,11 @@ function prompt_setItemsListVariables() {
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 150 ]]; then
     _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY="false"
   fi
-  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1000 ]]; then
-    _PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING="true"
-  fi
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1000 ]]; then
     if command -v grep &>/dev/null && command -v awk &>/dev/null; then
       _PROMPT_ITEMS_BOX_FILTER_USING_GREP="true"
+      # shellcheck source=lib-array
+      source array
     fi
   fi
 
@@ -516,8 +511,6 @@ function prompt_setItemsListVariables() {
       _PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS="${RETURNED_VALUE}"
       io::createTempFile
       _PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1="${RETURNED_VALUE}"
-      io::createTempFile
-      _PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP2="${RETURNED_VALUE}"
     fi
     local IFS=$'\n'
     echo "${_PROMPT_ORIGINAL_ITEMS[*]}" >"${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}"
@@ -977,79 +970,12 @@ function prompt_filterItemsAsync() {
   if [[ ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} == "true" ]]; then
     # sort with grep and awk
     : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
-    rm "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP2}" &>/dev/null || :
+    rm "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" &>/dev/null || :
 
-    # prepare the regex for the pattern
-    # the -> '([^t]*)(t[^h]*h[^e]*e)'
-    local patternRegex="([^${_PROMPT_ITEMS_BOX_FILTER_STRING:0:1}]*)(${_PROMPT_ITEMS_BOX_FILTER_STRING:0:1}"
-    local -i index
-    for ((index = 1; index < ${#_PROMPT_ITEMS_BOX_FILTER_STRING}; index++)); do
-      patternRegex+="[^${_PROMPT_ITEMS_BOX_FILTER_STRING:index:1}]*${_PROMPT_ITEMS_BOX_FILTER_STRING:index:1}"
-    done
-    patternRegex+=")"
+    array::fuzzyFilterSortFileWithGrepAndAwk "${_PROMPT_ITEMS_BOX_FILTER_STRING}" "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}" "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
 
-    grep --ignore-case --line-number "${patternRegex//[()]/}" "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}" >"${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}"
-    awk "
-      BEGIN {
-        IGNORECASE = 1;
-      }
-      # Store each line and its key for sorting
-      {
-        if (match(\$0, /^[0-9]+:${patternRegex}/, m)) {
-          idx = idx + 1;
-          # Store the full line
-          lines[idx] = \$0
-          # Store the keys for sorting
-          keys[idx] = sprintf(\"%d%04d%04d\", length(m[1]), length(m[2]), length(lines[idx]))
-        }
-      }
-      END {
-        # Sort the data
-        n = length(lines)
-        quicksort(keys, lines, 1, n)
-
-        # Print sorted results
-        for (i = 1; i <= n; i++) {
-          semiColonIndex = index(lines[i], \":\");
-          idx = substr(lines[i], 0, semiColonIndex - 1) - 1;
-          print substr(lines[i], semiColonIndex + 1) >> \"${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP2}\"
-          print idx >> \"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}\"
-        }
-      }
-      # Quicksort implementation from https://stackoverflow.com/questions/17048188/how-to-use-awk-sort-by-column-3
-      function quicksort(keys, lines, left, right) {
-        if (left >= right) return
-
-        # Choose pivot (middle element)
-        pivot_idx = int((left + right) / 2)
-        pivot = keys[pivot_idx]
-
-        # Partition
-        i = left
-        j = right
-        while (i <= j) {
-          while (compare(keys[i], pivot) < 0) i++
-          while (compare(keys[j], pivot) > 0) j--
-          if (i <= j) {
-            temp_key = keys[i]
-            temp_line = lines[i]
-            keys[i] = keys[j]
-            lines[i] = lines[j]
-            keys[j] = temp_key
-            lines[j] = temp_line
-            i++
-            j--
-          }
-        }
-        # Recursive calls
-        if (left < j) quicksort(keys, lines, left, j)
-        if (i < right) quicksort(keys, lines, i, right)
-      }
-      function compare(a, b) { return (a + 0) - (b + 0) }
-    " "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}"
-
-    if [[ -f ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP2} ]]; then
-      mv "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP2}" "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+    if [[ -f ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1} ]]; then
+      mv "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
     else
       : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
     fi
@@ -1659,14 +1585,7 @@ function prompt_getDisplayedPromptString() {
 # we will redefine array::fuzzyFilterSort to a new function that uses global variables
 # this is to avoid copying parameters to the function and hopefully be faster
 function prompt_fuzzyFilterSort() { :; }
-function prompt_reExportFuzzyFilterFunction() {
-  unset -f prompt_fuzzyFilterSort &>/dev/null || :
-  local functionToReExport=array::fuzzyFilterSort
-  if [[ ${_PROMPT_ITEMS_BOX_FILTER_WITHOUT_SORTING:-false} == "true" ]]; then
-    functionToReExport=array::fuzzyFilter
-  fi
-  core::reExportFuncToUseGlobalVars "${functionToReExport}" prompt_fuzzyFilterSort _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ORIGINAL_ITEMS
-  RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY2/_PROMPT_FILTERED_ITEMS_CORRESPONDENCES}"
-  RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY/_PROMPT_FILTERED_ITEMS}"
-  eval "${RETURNED_VALUE}"
-}
+core::reExportFuncToUseGlobalVars array::fuzzyFilterSort prompt_fuzzyFilterSort _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ORIGINAL_ITEMS
+RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY2/_PROMPT_FILTERED_ITEMS_CORRESPONDENCES}"
+RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY/_PROMPT_FILTERED_ITEMS}"
+eval "${RETURNED_VALUE}"

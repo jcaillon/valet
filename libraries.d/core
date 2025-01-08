@@ -1359,11 +1359,14 @@ function string::highlight() {
   done
 }
 
-
-# ## array::fuzzyFilter
+# ## array::fuzzyFilterSort
 #
 # Allows to fuzzy sort an array against a given pattern.
 # Returns an array containing only the lines matching the pattern.
+# The array is sorted by (in order):
+#
+# - the index of the first matched character in the line
+# - the distance between the first and last matched characters in the line
 #
 # - $1: **pattern** _as string_:
 #       the pattern to match
@@ -1372,48 +1375,80 @@ function string::highlight() {
 #
 # Returns:
 #
-# - `RETURNED_ARRAY`: An array containing the filtered items
+# - `RETURNED_ARRAY`: An array containing the items sorted and filtered
 # - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array
 #
 # ```bash
-# array::fuzzyFilter "pattern" "myarray"
-# IFS=$'\n' echo "${RETURNED_ARRAY[*]}"
+# array::fuzzyFilterSort "pattern" "myarray" && local filteredArray="${RETURNED_ARRAY}"
+# array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ && local filteredArray="${RETURNED_ARRAY}"
+# array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${RETURNED_ARRAY}"
 # ```
 #
 # > - All characters in the pattern must be found in the same order in the matched line.
 # > - Use `shopt -s nocasematch` to make this function is case insensitive.
-function array::fuzzyFilter() {
+function array::fuzzyFilterSort() {
   local pattern="${1}"
   local -n array="${2}"
 
   # nothing to filter
-  if [[ -z ${pattern} ]]; then
+  if [[ -z ${pattern} || ${#array[@]} -eq 0 ]]; then
     RETURNED_ARRAY=("${array[@]}")
-    eval "RETURNED_ARRAY2=( {0..$((${#array[@]} - 1))} )"
+    eval "RETURNED_ARRAY2=( {0..$(( ${#array[@]} - 1 ))} )"
     return 0
   fi
 
   # prepare the regex for the pattern
-  # the -> '[^t]*t[^h]*h[^e]*e'
-  local patternRegex="[^${pattern:0:1}]*${pattern:0:1}"
+  # the -> '([^t]*)(t[^h]*h[^e]*e)'
+  local patternRegex="^([^${pattern:0:1}]*)(${pattern:0:1}"
   local -i index
   for ((index = 1; index < ${#pattern}; index++)); do
     patternRegex+="[^${pattern:index:1}]*${pattern:index:1}"
   done
+  patternRegex+=")"
 
-  # will contain the matched lines
+  local -a -i originalIndexes firstCharacters matchedLengths sortedIndexes=()
+
+  local -i itemIndex matchedIndex=-1 firstCharacter matchedLength loopIndex
+
+  for(( itemIndex = 0 ; itemIndex< ${#array[@]}; itemIndex++ )); do
+    if [[ ${array[itemIndex]} =~ ${patternRegex} ]]; then
+      matchedIndex+=1
+      firstCharacter="${#BASH_REMATCH[1]}"
+      matchedLength="${#BASH_REMATCH[2]}"
+    else
+      continue
+    fi
+
+    # we have a match, now we need to sort it by firstCharacters then matchedLengths
+    # the sortedIndexes array will contain the indexes of the sorted array
+    #TODO: implement a quicksort
+    loopIndex=0
+    while (( loopIndex < ${#sortedIndexes[@]} )); do
+      if ((firstCharacters[sortedIndexes[loopIndex]] > firstCharacter)); then
+        break
+      elif ((firstCharacters[sortedIndexes[loopIndex]] == firstCharacter && matchedLengths[sortedIndexes[loopIndex]] > matchedLength)); then
+        break
+      fi
+      loopIndex+=1
+    done
+    sortedIndexes=("${sortedIndexes[@]:0:loopIndex}" "${matchedIndex}" "${sortedIndexes[@]:loopIndex}")
+
+    originalIndexes+=("${itemIndex}")
+    firstCharacters+=("${firstCharacter}")
+    matchedLengths+=("${matchedLength}")
+  done
+
+  # will contain the matched lines, sorted
   RETURNED_ARRAY=()
-  # will contain the original indexes
+  # will contain the original indexes corresponding to the sorted array
   RETURNED_ARRAY2=()
 
-  local -i itemIndex
-  for ((itemIndex = 0; itemIndex < ${#array[@]}; itemIndex++)); do
-    if [[ ${array[itemIndex]} =~ ${patternRegex} ]]; then
-      RETURNED_ARRAY+=("${array[itemIndex]}")
-      RETURNED_ARRAY2+=("${itemIndex}")
-    fi
+  for(( itemIndex = 0 ; itemIndex< ${#sortedIndexes[@]}; itemIndex++ )); do
+    RETURNED_ARRAY+=("${array[originalIndexes[sortedIndexes[itemIndex]]]}")
+    RETURNED_ARRAY2+=("${originalIndexes[sortedIndexes[itemIndex]]}")
   done
 }
+
 
 #===============================================================
 # >>> Valet files and directories

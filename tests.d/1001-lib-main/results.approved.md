@@ -516,9 +516,12 @@ Exit code: `0`
 
 ```plaintext
 → main::getDisplayableFilteredArray ae ARRAY
+bCHIaCDEnana
 CHIaCDEpplCHIeCDE
-grCHIaCDEpCHIeCDE
 orCHIaCDEngCHIeCDE
+grCHIaCDEpCHIeCDE
+CHIaCDEnanas
+lemon
 
 ```
 

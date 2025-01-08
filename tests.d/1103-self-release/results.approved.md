@@ -134,7 +134,7 @@ DEBUG    Found function: ⌜core::getProgramElapsedMicroseconds⌝
 DEBUG    Found function: ⌜string::wrapText⌝
 DEBUG    Found function: ⌜string::wrapCharacters⌝
 DEBUG    Found function: ⌜string::highlight⌝
-DEBUG    Found function: ⌜array::fuzzyFilter⌝
+DEBUG    Found function: ⌜array::fuzzyFilterSort⌝
 DEBUG    Found function: ⌜core::getConfigurationDirectory⌝
 DEBUG    Found function: ⌜core::getLocalStateDirectory⌝
 DEBUG    Found function: ⌜core::getUserDirectory⌝
@@ -147,7 +147,7 @@ DEBUG    Found function: ⌜array::sortWithCriteria⌝
 DEBUG    Found function: ⌜array::appendIfNotPresent⌝
 DEBUG    Found function: ⌜array::isInArray⌝
 DEBUG    Found function: ⌜array::makeArraysSameSize⌝
-DEBUG    Found function: ⌜array::fuzzyFilterSort⌝
+DEBUG    Found function: ⌜array::fuzzyFilterSortFileWithGrepAndAwk⌝
 DEBUG    Found function: ⌜benchmark::run⌝
 DEBUG    Found function: ⌜curl::toFile⌝
 DEBUG    Found function: ⌜curl::toVar⌝
