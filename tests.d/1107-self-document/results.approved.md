@@ -75,6 +75,7 @@ The array is sorted by (in order):
 
 - the index of the first matched character in the line
 - the distance between the first and last matched characters in the line
+- the original order in the list
 
 - $1: **pattern** _as string_:
       the pattern to match
@@ -94,6 +95,7 @@ array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${
 
 > - All characters in the pattern must be found in the same order in the matched line.
 > - Use `shopt -s nocasematch` to make this function is case insensitive.
+> - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndAwk` for large arrays.
 
 
 ## array::fuzzyFilterSortFileWithGrepAndAwk
@@ -3033,6 +3035,7 @@ function array::appendIfNotPresent() { :; }
 # 
 # - the index of the first matched character in the line
 # - the distance between the first and last matched characters in the line
+# - the original order in the list
 # 
 # - $1: **pattern** _as string_:
 #       the pattern to match
@@ -3052,6 +3055,7 @@ function array::appendIfNotPresent() { :; }
 # 
 # > - All characters in the pattern must be found in the same order in the matched line.
 # > - Use `shopt -s nocasematch` to make this function is case insensitive.
+# > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndAwk` for large arrays.
 # 
 function array::fuzzyFilterSort() { :; }
 
@@ -6100,7 +6104,7 @@ function test::endTest() { :; }
   "prefix": "array::fuzzyFilterSort#withdoc",
   "description": "Allows to fuzzy sort an array against a given pattern...",
   "scope": "",
-  "body": [ "# ## array::fuzzyFilterSort\n# \n# Allows to fuzzy sort an array against a given pattern.\n# Returns an array containing only the lines matching the pattern.\n# The array is sorted by (in order):\n# \n# - the index of the first matched character in the line\n# - the distance between the first and last matched characters in the line\n# \n# - \\$1: **pattern** _as string_:\n#       the pattern to match\n# - \\$2: **array name** _as string_:\n#       the initial array name\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array containing the items sorted and filtered\n# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array\n# \n# ```bash\n# array::fuzzyFilterSort \"pattern\" \"myarray\" && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# array::fuzzyFilterSort \"pattern\" \"myarray\" ⌜ ⌝ && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# array::fuzzyFilterSort \"pattern\" \"myarray\" ⌜ ⌝ 10 && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - Use `shopt -s nocasematch` to make this function is case insensitive.\n# \narray::fuzzyFilterSort \"${1:**pattern**}\" \"${2:**array name**}\"$0" ]
+  "body": [ "# ## array::fuzzyFilterSort\n# \n# Allows to fuzzy sort an array against a given pattern.\n# Returns an array containing only the lines matching the pattern.\n# The array is sorted by (in order):\n# \n# - the index of the first matched character in the line\n# - the distance between the first and last matched characters in the line\n# - the original order in the list\n# \n# - \\$1: **pattern** _as string_:\n#       the pattern to match\n# - \\$2: **array name** _as string_:\n#       the initial array name\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array containing the items sorted and filtered\n# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array\n# \n# ```bash\n# array::fuzzyFilterSort \"pattern\" \"myarray\" && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# array::fuzzyFilterSort \"pattern\" \"myarray\" ⌜ ⌝ && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# array::fuzzyFilterSort \"pattern\" \"myarray\" ⌜ ⌝ 10 && local filteredArray=\"\\${RETURNED_ARRAY}\"\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - Use `shopt -s nocasematch` to make this function is case insensitive.\n# > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndAwk` for large arrays.\n# \narray::fuzzyFilterSort \"${1:**pattern**}\" \"${2:**array name**}\"$0" ]
 },
 
 "array::fuzzyFilterSortFileWithGrepAndAwk": {

@@ -1367,6 +1367,7 @@ function string::highlight() {
 #
 # - the index of the first matched character in the line
 # - the distance between the first and last matched characters in the line
+# - the original order in the list
 #
 # - $1: **pattern** _as string_:
 #       the pattern to match
@@ -1394,7 +1395,7 @@ function array::fuzzyFilterSort() {
   # nothing to filter
   if [[ -z ${pattern} || ${#array[@]} -eq 0 ]]; then
     RETURNED_ARRAY=("${array[@]}")
-    eval "RETURNED_ARRAY2=( {0..$(( ${#array[@]} - 1 ))} )"
+    eval "RETURNED_ARRAY2=( {0..$((${#array[@]} - 1))} )"
     return 0
   fi
 
@@ -1407,47 +1408,69 @@ function array::fuzzyFilterSort() {
   done
   patternRegex+=")"
 
-  local -a -i originalIndexes firstCharacters matchedLengths sortedIndexes=()
-
-  local -i itemIndex matchedIndex=-1 firstCharacter matchedLength loopIndex
-
-  for(( itemIndex = 0 ; itemIndex< ${#array[@]}; itemIndex++ )); do
-    if [[ ${array[itemIndex]} =~ ${patternRegex} ]]; then
-      matchedIndex+=1
-      firstCharacter="${#BASH_REMATCH[1]}"
-      matchedLength="${#BASH_REMATCH[2]}"
-    else
-      continue
-    fi
-
-    # we have a match, now we need to sort it by firstCharacters then matchedLengths
-    # the sortedIndexes array will contain the indexes of the sorted array
-    #TODO: implement a quicksort
-    loopIndex=0
-    while (( loopIndex < ${#sortedIndexes[@]} )); do
-      if ((firstCharacters[sortedIndexes[loopIndex]] > firstCharacter)); then
-        break
-      elif ((firstCharacters[sortedIndexes[loopIndex]] == firstCharacter && matchedLengths[sortedIndexes[loopIndex]] > matchedLength)); then
-        break
-      fi
-      loopIndex+=1
-    done
-    sortedIndexes=("${sortedIndexes[@]:0:loopIndex}" "${matchedIndex}" "${sortedIndexes[@]:loopIndex}")
-
-    originalIndexes+=("${itemIndex}")
-    firstCharacters+=("${firstCharacter}")
-    matchedLengths+=("${matchedLength}")
-  done
-
-  # will contain the matched lines, sorted
-  RETURNED_ARRAY=()
+  # will contain a key that allows to sort the items, it is a combination of the length before the pattern,
+  # the length of the matched pattern and the initial position of the item
+  _ARRAY_FUZZY_FILTER_KEYS=()
   # will contain the original indexes corresponding to the sorted array
   RETURNED_ARRAY2=()
 
-  for(( itemIndex = 0 ; itemIndex< ${#sortedIndexes[@]}; itemIndex++ )); do
-    RETURNED_ARRAY+=("${array[originalIndexes[sortedIndexes[itemIndex]]]}")
-    RETURNED_ARRAY2+=("${originalIndexes[sortedIndexes[itemIndex]]}")
+  for ((index = 0; index < ${#array[@]}; index++)); do
+    if [[ ${array[index]} =~ ${patternRegex} ]]; then
+      _ARRAY_FUZZY_FILTER_KEYS+=($((${#BASH_REMATCH[1]} * 10000000 + ${#BASH_REMATCH[2]} * 10000 + index)))
+      RETURNED_ARRAY2+=($((index)))
+    fi
   done
+
+  # we have a special quicksort implementation here that only compare numbers
+  # and uses global arrays to go faster
+  if ! declare -f array::fuzzyFilterSortQuicksort &>/dev/null; then
+    function array::fuzzyFilterSortQuicksort() {
+      local -i low=${1}
+      local -i high=${2}
+      if ((low >= high)); then
+        return 0
+      fi
+
+      local pivot=${_ARRAY_FUZZY_FILTER_KEYS[$((low + SRANDOM % (high - low)))]}
+
+      local -i ii=${low}
+      local -i jj=${high}
+      local tmpKey tempValue
+      while ((ii <= jj)); do
+        while ((_ARRAY_FUZZY_FILTER_KEYS[ii] < pivot)); do
+          ii+=1
+        done
+        while ((_ARRAY_FUZZY_FILTER_KEYS[jj] > pivot)); do
+          jj=$((jj - 1))
+        done
+        if ((ii <= jj)); then
+          tmpKey=${_ARRAY_FUZZY_FILTER_KEYS[ii]}
+          tempValue=${RETURNED_ARRAY2[ii]}
+          _ARRAY_FUZZY_FILTER_KEYS[ii]=${_ARRAY_FUZZY_FILTER_KEYS[jj]}
+          RETURNED_ARRAY2[ii]=${RETURNED_ARRAY2[jj]}
+          _ARRAY_FUZZY_FILTER_KEYS[jj]=${tmpKey}
+          RETURNED_ARRAY2[jj]=${tempValue}
+          ii+=1
+          jj=$((jj - 1))
+        fi
+      done
+      # recursion
+      if ((low < jj)); then
+        array::fuzzyFilterSortQuicksort "${low}" "${jj}"
+      fi
+      if ((ii < high)); then
+        array::fuzzyFilterSortQuicksort "${ii}" "${high}"
+      fi
+    }
+  fi
+  array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
+
+  # will contain the matched lines, sorted
+  RETURNED_ARRAY=()
+  for ((index = 0; index < ${#RETURNED_ARRAY2[@]}; index++)); do
+    RETURNED_ARRAY+=("${array[RETURNED_ARRAY2[index]]}")
+  done
+  unset -v _ARRAY_FUZZY_FILTER_KEYS
 }
 
 
