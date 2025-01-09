@@ -1406,7 +1406,8 @@ function array::fuzzyFilterSort() {
   for ((index = 1; index < ${#pattern}; index++)); do
     patternRegex+="[^${pattern:index:1}]*${pattern:index:1}"
   done
-  patternRegex+=")"
+  patternRegex+=")(.?)"
+  local -i patternLength=${#pattern}
 
   # will contain a key that allows to sort the items, it is a combination of the length before the pattern,
   # the length of the matched pattern and the initial position of the item
@@ -1416,7 +1417,11 @@ function array::fuzzyFilterSort() {
 
   for ((index = 0; index < ${#array[@]}; index++)); do
     if [[ ${array[index]} =~ ${patternRegex} ]]; then
-      _ARRAY_FUZZY_FILTER_KEYS+=($((${#BASH_REMATCH[1]} * 10000000 + ${#BASH_REMATCH[2]} * 10000 + index)))
+      if ((${#BASH_REMATCH[3]} == 0 && patternLength == ${#BASH_REMATCH[0]})); then
+        _ARRAY_FUZZY_FILTER_KEYS+=($((index)))
+      else
+        _ARRAY_FUZZY_FILTER_KEYS+=($((${#BASH_REMATCH[1]} * 10000000 + ${#BASH_REMATCH[2]} * 10000 + index)))
+      fi
       RETURNED_ARRAY2+=($((index)))
     fi
   done
@@ -1430,9 +1435,7 @@ function array::fuzzyFilterSort() {
       if ((low >= high)); then
         return 0
       fi
-
-      local pivot=${_ARRAY_FUZZY_FILTER_KEYS[$((low + SRANDOM % (high - low)))]}
-
+      local pivot=${_ARRAY_FUZZY_FILTER_KEYS[low]}
       local -i ii=${low}
       local -i jj=${high}
       local tmpKey tempValue
@@ -1440,7 +1443,7 @@ function array::fuzzyFilterSort() {
         while ((_ARRAY_FUZZY_FILTER_KEYS[ii] < pivot)); do
           ii+=1
         done
-        while ((_ARRAY_FUZZY_FILTER_KEYS[jj] > pivot)); do
+        while ((pivot < _ARRAY_FUZZY_FILTER_KEYS[jj])); do
           jj=$((jj - 1))
         done
         if ((ii <= jj)); then
@@ -1454,12 +1457,11 @@ function array::fuzzyFilterSort() {
           jj=$((jj - 1))
         fi
       done
-      # recursion
       if ((low < jj)); then
-        array::fuzzyFilterSortQuicksort "${low}" "${jj}"
+        array::fuzzyFilterSortQuicksort ${low} ${jj}
       fi
       if ((ii < high)); then
-        array::fuzzyFilterSortQuicksort "${ii}" "${high}"
+        array::fuzzyFilterSortQuicksort ${ii} ${high}
       fi
     }
   fi

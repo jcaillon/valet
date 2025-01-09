@@ -170,8 +170,6 @@ array::sort myArray
 printf '%s\n' "${myArray[@]}"
 ```
 
-> TODO: Update this basic exchange sort implementation.
-
 
 ## array::sortWithCriteria
 
@@ -3133,8 +3131,6 @@ function array::makeArraysSameSize() { :; }
 # array::sort myArray
 # printf '%s\n' "${myArray[@]}"
 # ```
-# 
-# > TODO: Update this basic exchange sort implementation.
 # 
 function array::sort() { :; }
 
@@ -6160,7 +6156,7 @@ function test::endTest() { :; }
   "prefix": "array::sort#withdoc",
   "description": "Sorts an array using the > bash operator (lexicographic order)...",
   "scope": "",
-  "body": [ "# ## array::sort\n# \n# Sorts an array using the > bash operator (lexicographic order).\n# \n# - \\$1: **array name** _as string_:\n#       The global variable name of array to sort.\n# \n# ```bash\n# declare -g myArray=( \"z\" \"a\" \"b\" )\n# array::sort myArray\n# printf '%s\\n' \"\\${myArray[@]}\"\n# ```\n# \n# > TODO: Update this basic exchange sort implementation.\n# \narray::sort \"${1:**array name**}\"$0" ]
+  "body": [ "# ## array::sort\n# \n# Sorts an array using the > bash operator (lexicographic order).\n# \n# - \\$1: **array name** _as string_:\n#       The global variable name of array to sort.\n# \n# ```bash\n# declare -g myArray=( \"z\" \"a\" \"b\" )\n# array::sort myArray\n# printf '%s\\n' \"\\${myArray[@]}\"\n# ```\n# \narray::sort \"${1:**array name**}\"$0" ]
 },
 
 "array::sortWithCriteria": {

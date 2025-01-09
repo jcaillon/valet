@@ -14,61 +14,64 @@
 # array::sort myArray
 # printf '%s\n' "${myArray[@]}"
 # ```
-#
-# > TODO: Update this basic exchange sort implementation.
 function array::sort() {
-  local -n array=${1}
-  local -i i j
-  local temp
-  for ((i = 0; i < ${#array[@]}; i++)); do
-    for ((j = i + 1; j < ${#array[@]}; j++)); do
-      if [[ "${array[i]}" > "${array[j]}" ]]; then
-        temp="${array[i]}"
-        array[i]="${array[j]}"
-        array[j]="${temp}"
-      fi
-    done
-  done
+  local arrayName=${1}
+  local -n array=${arrayName}
+
+  local IFS=" "
+  array::quicksort "array_sortCompareCallBack ${arrayName}" "array_sortSwapCallBack ${arrayName}" 0 $(( ${#array[@]} - 1 ))
 }
 
-quicksort() {
-  local -i low=${1}
-  local -i high=${2}
+function array::quicksort() {
+  local compareCallBack="${1}"
+  local swapCallBack="${2}"
+  local -i low=${3}
+  local -i high=${4}
+
   if ((low >= high)); then
     return 0
   fi
 
-  # we choose a pivot here, we could also select a random element
-  local pivot=${KEYS[$(((low + high) / 2))]}
-
-  local -i i=${low}
-  local -i j=${high}
-  local tmpKey tempValue
-  while ((i <= j)); do
-    while ((KEYS[i] < pivot)); do
-      i+=1
+  local -i pivotIndex=$((low))
+  local -i ii=${low}
+  local -i jj=${high}
+  while ((ii <= jj)); do
+    while ${compareCallBack} ${pivotIndex} ${ii}; do # pivot > ii
+      ii+=1
     done
-    while ((KEYS[j] > pivot)); do
-      j=$((j - 1))
+    while ${compareCallBack} ${jj} ${pivotIndex}; do  # jj > pivot
+      jj=$((jj - 1))
     done
-    if ((i <= j)); then
-      tmpKey=${KEYS[i]}
-      tempValue=${VALUES[i]}
-      KEYS[i]=${KEYS[j]}
-      VALUES[i]=${VALUES[j]}
-      KEYS[j]=${tmpKey}
-      VALUES[j]=${tempValue}
-      i+=1
-      j=$((j - 1))
+    if ((ii <= jj)); then
+      ${swapCallBack} ii jj
+      ii+=1
+      jj=$((jj - 1))
     fi
   done
-  # recursion
-  if ((low < j)); then
-    quicksort "${low}" "${j}"
+
+  if ((low < jj)); then
+    array::quicksort "${compareCallBack}" "${swapCallBack}" ${low} ${jj}
   fi
-  if ((i < high)); then
-    quicksort "${i}" "${high}"
+  if ((ii < high)); then
+    array::quicksort "${compareCallBack}" "${swapCallBack}" ${ii} ${high}
   fi
+}
+
+function array_sortCompareCallBack() {
+  local -n array="${1}"
+  local -i first=${2}
+  local -i second=${3}
+  [[ "${array[first]}" > "${array[second]}" ]] || return 1
+  return 0
+}
+
+function array_sortSwapCallBack() {
+  local -n array="${1}"
+  local -i first=${2}
+  local -i second=${3}
+  local tmp="${array[first]}"
+  array[first]="${array[second]}"
+  array[second]="${tmp}"
 }
 
 # ## array::sortWithCriteria
@@ -302,69 +305,67 @@ function array::fuzzyFilterSortFileWithGrepAndAwk() {
   # we use grep to pre-filter the lines.
   # We could do everything in awk but it would be slower for hugh files.
   grep --ignore-case --line-number "${patternRegex//[()]/}" "${fileToFilter}" >"${_ARRAY_TEMP_FILTER_FILE}"
+  patternRegex="${patternRegex}(.?)"
   awk "
     BEGIN {
+      # Ignore case when matching the pattern
       IGNORECASE = 1;
     }
-    # Store each line and its key for sorting
     {
+      # Store each line and its key for sorting (each line is prefixed by 'line_number:' from grep)
       if (match(\$0, /^[0-9]+:${patternRegex}/, m)) {
         idx = idx + 1;
-        # Store the full line
         lines[idx] = \$0
-        originalLine = substr(\$0, 0, index(\$0, \":\") - 1)
-        if (length(m[0]) == (length(originalLine) + 1 + ${#pattern})) {
-          # exact match
-          keys[idx] = substr(\$0, 0, index(\$0, \":\") - 1)
+        lineNumber = substr(\$0, 0, index(\$0, \":\") - 1)
+        if (length(m[3]) == 0 && length(m[0]) == (length(lineNumber) + 1 + ${#pattern})) {
+          # exact match should always be first
+          keys[idx] = lineNumber
         } else {
           # Store the keys for sorting (size of the first match, size of the second match, original line number)
-          keys[idx] = sprintf(\"%d%04d%04d\", length(m[1]), length(m[2]), originalLine)
+          keys[idx] = sprintf(\"%d%04d%04d\", length(m[1]), length(m[2]), lineNumber)
         }
       }
     }
     END {
-      # Sort the data
-      n = length(lines)
-      quicksort(keys, lines, 1, n)
+      # Sort the lines
+      nbLines = length(lines)
+      quickSort(keys, lines, 1, nbLines)
 
-      # Print sorted results
-      for (i = 1; i <= n; i++) {
+      # Output the sorted lines in one file, and the correspondences in another
+      for (i = 1; i <= nbLines; i++) {
         semiColonIndex = index(lines[i], \":\");
         idx = substr(lines[i], 0, semiColonIndex - 1) - 1;
         print substr(lines[i], semiColonIndex + 1) >> \"${_ARRAY_TEMP_FILTERED_FILE}\"
         print idx >> \"${outputCorrespondencesFile}\"
       }
     }
-    # Quicksort implementation from https://stackoverflow.com/questions/17048188/how-to-use-awk-sort-by-column-3
-    function quicksort(keys, lines, left, right) {
+    function quickSort(keys, lines, left, right) {
       if (left >= right) return
 
-      # Choose pivot (middle element)
-      pivot_idx = int((left + right) / 2)
-      pivot = keys[pivot_idx]
+      # Choose pivot, random element between left and right
+      pivot = keys[left] + 0
 
       # Partition
-      i = left
-      j = right
-      while (i <= j) {
-        while (compare(keys[i], pivot) < 0) i++
-        while (compare(keys[j], pivot) > 0) j--
-        if (i <= j) {
-          temp_key = keys[i]
-          temp_line = lines[i]
-          keys[i] = keys[j]
-          lines[i] = lines[j]
-          keys[j] = temp_key
-          lines[j] = temp_line
-          i++
-          j--
+      ii = left
+      jj = right
+      while (ii <= jj) {
+        while (keys[ii] + 0 < pivot + 0) ii++
+        while (pivot < keys[jj] + 0) jj--
+        if (ii <= jj) {
+          tempKey = keys[ii]
+          tempLine = lines[ii]
+          keys[ii] = keys[jj]
+          lines[ii] = lines[jj]
+          keys[jj] = tempKey
+          lines[jj] = tempLine
+          ii++
+          jj--
         }
       }
       # Recursive calls
-      if (left < j) quicksort(keys, lines, left, j)
-      if (i < right) quicksort(keys, lines, i, right)
+      if (left < jj) quickSort(keys, lines, left, jj)
+      if (ii < right) quickSort(keys, lines, ii, right)
     }
-    function compare(a, b) { return (a + 0) - (b + 0) }
   " "${_ARRAY_TEMP_FILTER_FILE}"
   mv "${_ARRAY_TEMP_FILTERED_FILE}" "${outputFilteredFile}"
 }

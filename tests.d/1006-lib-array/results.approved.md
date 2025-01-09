@@ -96,15 +96,15 @@ Exit code: `0`
 **Standard** output:
 
 ```plaintext
-declare -a myArray=([0]="one the" [1]="the breakdown" [2]="constitutional" [3]="conventional" [4]="hold the baby" [5]="holiday inn" [6]="deliver" [7]="abundant" [8]="make a living" [9]="the d day" [10]="elevator")
+declare -a myArray=([0]="one the" [1]="the breakdown" [2]="constitutional" [3]="conventional" [4]="hold the baby" [5]="holiday inn" [6]="deliver" [7]="eLv1" [8]="eLv" [9]="abundant" [10]="make a living" [11]="the d day" [12]="elevator")
 
 → array::fuzzyFilterSort the myArray
 declare -a RETURNED_ARRAY=([0]="the breakdown" [1]="the d day" [2]="one the" [3]="hold the baby")
-declare -a RETURNED_ARRAY2=([0]="1" [1]="9" [2]="0" [3]="4")
+declare -a RETURNED_ARRAY2=([0]="1" [1]="11" [2]="0" [3]="4")
 
 → shopt -s nocasematch; array::fuzzyFilterSort ELV myArray; shopt -u nocasematch
-declare -a RETURNED_ARRAY=([0]="elevator" [1]="deliver" [2]="make a living")
-declare -a RETURNED_ARRAY2=([0]="10" [1]="6" [2]="8")
+declare -a RETURNED_ARRAY=([0]="eLv" [1]="eLv1" [2]="elevator" [3]="deliver" [4]="make a living")
+declare -a RETURNED_ARRAY2=([0]="8" [1]="7" [2]="12" [3]="6" [4]="10")
 
 declare -a myArray=([0]="On the" [1]="One of the most beautiful" [2]="One of this happy end" [3]="thaerty" [4]="thazrerty")
 
@@ -121,6 +121,109 @@ Exit code: `0`
 
 ```plaintext
 → array::fuzzyFilterSortFileWithGrepAndAwk words out1 out2
+ea
+ea1
+eat
+eavesdropper
+Earvin
+evades
+Ekaterina
+Evarts
+elated
+Edwardsian
+extradotal
+epexegetical
+encyclopediac
+beader
+pearlashes
+weatherbreak
+sea-gray
+Jeanne
+headwords
+beagles
+decancellated
+medakas
+mesal
+rewarding
+rewa-rewa
+delates
+repacked
+defrauded
+termatic
+remeant
+Sequan
+geolatry
+Kenward
+well-ankled
+oedema
+dehepatize
+reproachlessness
+kelpware
+rerummage
+Lemuela
+reinflatable
+sense-data
+perpetrating
+veil-wearing
+retrofracted
+perspicable
+yellow-washed
+Berkeleianism
+rectiserial
+semimoderate
+Gesellschaft
+mesethmoidal
+semifictionally
+stearolactone
+idealizes
+ameban
+Chevalier
+overpainfully
+overeater
+sterigma
+Ctenoplana
+preinsurance
+plectognath
+overcommercialized
+pseudosymptomatic
+hylean
+spreagh
+moderantism
+underacting
+superarrogance
+abietate
+liberations
+hyperanarchy
+underlapped
+waterward
+arrentation
+orientation
+Asteropaeus
+unregularised
+intermediates
+underspreading
+superengrave
+aggregation
+oxycephaly
+protestable
+Castella
+washerman
+ischemia
+house-place
+apprehendable
+palaeontographic
+nontechnological
+billheads
+hyponeas
+Dinoceratidae
+uninvestable
+hatcheryman
+antiresonance
+unobjectionable
+low-breasted
+haminoea
+blockheaded
+Dictyosiphonaceae
 The result is the same as the pure bash implementation.
 ```
 

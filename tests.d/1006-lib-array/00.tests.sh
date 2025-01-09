@@ -121,6 +121,8 @@ function test_array::fuzzyFilterSort() {
     "hold the baby"
     "holiday inn"
     "deliver"
+    "eLv1"
+    "eLv"
     "abundant"
     "make a living"
     "the d day"
@@ -191,6 +193,7 @@ function test_array::fuzzyFilterSortFileWithGrepAndAwk() {
   local IFS=$'\n'
   local bashLines="${RETURNED_ARRAY[*]}"
   local bashCorrespondences="${RETURNED_ARRAY2[*]}"
+  echo "${RETURNED_ARRAY[*]}"
 
   # check that the lines are the same
   if [[ "${awkedLines}" != "${bashLines}" ]]; then

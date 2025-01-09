@@ -485,7 +485,7 @@ function prompt_setItemsListVariables() {
   _PROMPT_ITEMS_BOX_FILTER_STRING=""
 
   # if the items are too many, we will filter them asynchronously/filter with grep
-  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 150 ]]; then
+  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 200 ]]; then
     _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY="false"
   fi
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1000 ]]; then
