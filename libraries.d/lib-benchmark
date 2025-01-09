@@ -75,7 +75,7 @@ function benchmark::run() {
   local -i baselineRuns
   # shellcheck disable=SC2323
   # ^(this is to avoid a bug in the syntax coloration)
-  for ((baselineRuns = 0; (baselineRuns < maxRuns || maxRuns == -1); baselineRuns++)); do
+  for ((baselineRuns = 1; (baselineRuns <= maxRuns || maxRuns == -1); baselineRuns++)); do
     "${baseline}"
     core::getProgramElapsedMicroseconds
     if (( RETURNED_VALUE - startTimeInUs > time * 1000000 )); then

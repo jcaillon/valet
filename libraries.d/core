@@ -1386,6 +1386,7 @@ function string::highlight() {
 #
 # > - All characters in the pattern must be found in the same order in the matched line.
 # > - Use `shopt -s nocasematch` to make this function is case insensitive.
+# > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndAwk` for large arrays.
 function array::fuzzyFilterSort() {
   local pattern="${1}"
   local -n array="${2}"
@@ -1628,7 +1629,8 @@ esac
 if [[ -t 2 ]]; then
   interactive::getTerminalSize
   GLOBAL_SCREEN_REDRAW_REQUIRED=false
-  trap 'interactive::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true;' SIGWINCH
+  # shellcheck disable=SC2090
+  trap 'interactive::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::createPrintFunction; eval "${GLOBAL_LOG_PRINT_FUNCTION}"' SIGWINCH
 else
   GLOBAL_COLUMNS="${VALET_DEFAULT_COLUMNS:-120}"
   GLOBAL_LINES="${VALET_DEFAULT_LINES:-30}"

@@ -31,6 +31,46 @@ function array::sort() {
   done
 }
 
+quicksort() {
+  local -i low=${1}
+  local -i high=${2}
+  if ((low >= high)); then
+    return 0
+  fi
+
+  # we choose a pivot here, we could also select a random element
+  local pivot=${KEYS[$(((low + high) / 2))]}
+
+  local -i i=${low}
+  local -i j=${high}
+  local tmpKey tempValue
+  while ((i <= j)); do
+    while ((KEYS[i] < pivot)); do
+      i+=1
+    done
+    while ((KEYS[j] > pivot)); do
+      j=$((j - 1))
+    done
+    if ((i <= j)); then
+      tmpKey=${KEYS[i]}
+      tempValue=${VALUES[i]}
+      KEYS[i]=${KEYS[j]}
+      VALUES[i]=${VALUES[j]}
+      KEYS[j]=${tmpKey}
+      VALUES[j]=${tempValue}
+      i+=1
+      j=$((j - 1))
+    fi
+  done
+  # recursion
+  if ((low < j)); then
+    quicksort "${low}" "${j}"
+  fi
+  if ((i < high)); then
+    quicksort "${i}" "${high}"
+  fi
+}
+
 # ## array::sortWithCriteria
 #
 # Sorts an array using multiple criteria.
@@ -272,8 +312,14 @@ function array::fuzzyFilterSortFileWithGrepAndAwk() {
         idx = idx + 1;
         # Store the full line
         lines[idx] = \$0
-        # Store the keys for sorting
-        keys[idx] = sprintf(\"%d%04d%04d\", length(m[1]), length(m[2]), substr(\$0, 0, index(\$0, \":\") - 1))
+        originalLine = substr(\$0, 0, index(\$0, \":\") - 1)
+        if (length(m[0]) == (length(originalLine) + 1 + ${#pattern})) {
+          # exact match
+          keys[idx] = substr(\$0, 0, index(\$0, \":\") - 1)
+        } else {
+          # Store the keys for sorting (size of the first match, size of the second match, original line number)
+          keys[idx] = sprintf(\"%d%04d%04d\", length(m[1]), length(m[2]), originalLine)
+        }
       }
     }
     END {

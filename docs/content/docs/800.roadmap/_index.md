@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- Refactor the logging functions to be more readable, see if we really need to precalculate them or if we can just compute on the fly.
 - Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.
 - core::checkParseResults typo...
 - Add a full screen view with the keyboard shortcuts in edit mode (new interactive::showFullScreenHelp ?).
