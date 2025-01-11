@@ -668,10 +668,10 @@ Exit code: `0`
 
 ```plaintext
 → string::highlight 'This is a text to highlight.' 'ttttt'
-CHITCDEhis is a CHItCDEexCHItCDE CHItCDEo highlighCHItCDE.
+CHITCDEhis is a CHITCDEexCHItCDE CHItCDEo highlighCHItCDE.
 
-→ string::highlight 'This is a text to highlight.' 'ttttt' '>' '<'
->T<his is a >t<ex>t< >t<o highligh>t<.
+→ string::highlight 'This is a text to highlight.' 'TTTTT' '>' '<'
+>T<his is a >t<ex>T< >t<o highligh>t<.
 
 → string::highlight '' 'ttttt'
 

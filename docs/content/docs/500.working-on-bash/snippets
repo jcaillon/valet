@@ -1,11 +1,10 @@
-
+#!/usr/bin/env bash
 
 # run four different processes; two exit status 0, one exits status 1, on exits status 2
 # ...exits happen at delays ranging between 2-5 seconds.
 delays=( 1 5 2 4 )
 exits=(  0 0 1 2 )
 pids=()
-shopt -u -o monitor
 
 exec 3>&2
 
@@ -20,5 +19,4 @@ exit_status=0
 for pid in "${pids[@]}"; do
   { wait "$pid"; (( exit_status |= $? )) } 2>/dev/null
 done
-shopt -s -o monitor
 echo "Combined exit status is $exit_status"

@@ -60,14 +60,13 @@ function selfTestUtils_runTestSuites() {
 
     log::debug "Starting test suite in directory ⌜${testDirectory}⌝."
 
-    # run the test suite in the background
-    # we want shopt -u -o monitor to avoid the "[x]   Done" message when a background process is finished
-    shopt -u -o monitor
-    (selfTestUtils_runTestSuite "${testDirectory}"; ) &
-    _TEST_SUITE_PIDS+=("$!")
 
     if [[ ${TEST_NO_PARALLEL_TESTS:-} == "true" ]]; then
-      wait "${_TEST_SUITE_PIDS[-1]}" || failedTestSuites+=1
+      ( selfTestUtils_runTestSuite "${testDirectory}"; ) || failedTestSuites+=1
+    else
+      # run the test suite in the background
+      ( selfTestUtils_runTestSuite "${testDirectory}"; ) &
+      _TEST_SUITE_PIDS+=("$!")
     fi
   done
 
@@ -80,8 +79,6 @@ function selfTestUtils_runTestSuites() {
       wait "${pid}" || failedTestSuites+=1
     done
   fi
-
-  shopt -s -o monitor
 
   # run a custom user script after the tests if it exists
   selfTestUtils_runHookScript "${testSuiteDirectory}/after-tests"

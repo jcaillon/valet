@@ -24,7 +24,7 @@
 #       The index of the last element to sort.
 #
 # ```bash
-# declare -g myArray=( "z" "a" "b" )
+# declare -g myArray=(z f b h a j)
 # array::quicksort "array_sortCompareCallBack" "array_sortSwapCallBack" 0 2
 # echo "${myArray[@]}"
 # ```
@@ -73,9 +73,9 @@ function array::quicksort() {
 #       The global variable name of array to sort.
 #
 # ```bash
-# declare -g myArray=( "z" "a" "b" )
+# declare -g myArray=(z f b h a j)
 # array::sort myArray
-# printf '%s\n' "${myArray[@]}"
+# echo "${myArray[*]}"
 # ```
 #
 # > - This function uses a quicksort algorithm.
@@ -84,95 +84,56 @@ function array::sort() {
   local arrayName=${1}
   local -n array=${arrayName}
 
-  local IFS=" "
-  array::quicksort "array_sortLexicographicCompareCallBack ${arrayName}" "array_sortSwapCallBack 1 ${arrayName}" 0 $(( ${#array[@]} - 1 ))
-}
+  _ARRAY_SWAP_COMMAND="
+  tmp=\"\${${arrayName}[first]}\"
+  ${arrayName}[first]=\"\${${arrayName}[second]}\"
+  ${arrayName}[second]=\"\${tmp}\"
+  "
+  _ARRAY_COMPARE_COMMAND="
+  if [[ \${${arrayName}[first]} > \"\${${arrayName}[second]}\" ]]; then
+    return 0
+  fi
+  "
 
-# ## array_sortLexicographicCompareCallBack (private)
-#
-# Compare two elements of an array in lexicographic order.
-#
-# - $1: **array name** _as string_:
-#       The global variable name of the array to compare.
-# - $2: **first index** _as integer_:
-#       The index of the first element to compare.
-# - $3: **second index** _as integer_:
-#       The index of the second element to compare.
-#
-# Returns:
-#
-# - $?: 0 if the first element is greater than the second, 1 otherwise.
-function array_sortLexicographicCompareCallBack() {
-  local -n array="${1}"
-  local -i first=${2}
-  local -i second=${3}
-  [[ "${array[first]}" > "${array[second]}" ]] || return 1
-  return 0
+  local IFS=" "
+  array::quicksort "array_sortCompareCallBack" "array_sortSwapCallBack" 0 $(( ${#array[@]} - 1 ))
+
+  unset -v _ARRAY_COMPARE_COMMAND _ARRAY_SWAP_COMMAND
 }
 
 # ## array_sortSwapCallBack (private)
 #
-# Swap two elements in multiple arrays.
+# Swap two elements.
 #
-# - $1: **number of arrays to swap** _as integer_:
-#       The number of arrays to swap.
-# - $@: **array names to swap** _as string_:
-#       The names of the arrays to swap.
-# - $2: **first index** _as integer_:
+# - $1: **first index** _as integer_:
 #       The index of the first element to swap.
-# - $3: **second index** _as integer_:
+# - $2: **second index** _as integer_:
 #       The index of the second element to swap.
+# shellcheck disable=SC2034
 function array_sortSwapCallBack() {
-  local -i nbOfArraysToSwap="${1}"
-  local -a arrayNamesToSwap=("${@:2:nbOfArraysToSwap}")
-  shift $(( nbOfArraysToSwap + 1 ))
-  local first="${1}"
-  local second="${2}"
-
-  # swap the elements
-  local arrayNameToSwap
-  for arrayNameToSwap in "${arrayNamesToSwap[@]}"; do
-    local -n array="${arrayNameToSwap}"
-    # swap the elements
-    local tmp="${array[first]}"
-    array[first]="${array[second]}"
-    array[second]="${tmp}"
-  done
+  local -i first="${1}"
+  local -i second="${2}"
+  local tmp
+  eval "${_ARRAY_SWAP_COMMAND}"
 }
 
 # ## array_sortMultiIntegerCriteriaCompareCallBack (private)
 #
-# Compare two elements using multiple criteria arrays.
+# Compare two elements.
 #
-# - $1: **number of criteria arrays** _as integer_:
-#       The number of criteria arrays to use.
-# - $@: **criteria array names** _as string_:
-#       The names of the arrays to use as criteria.
-# - $2: **first index** _as integer_:
+# - $1: **first index** _as integer_:
 #       The index of the first element to compare.
-# - $3: **second index** _as integer_:
+# - $2: **second index** _as integer_:
 #       The index of the second element to compare.
 #
 # Returns:
 #
 # - $?: 0 if the first element is greater than the second, 1 otherwise.
-function array_sortMultiIntegerCriteriaCompareCallBack() {
-  local -i nbOfCriteria="${1}"
-  local -a criteriaArrayNames=("${@:2:nbOfCriteria}")
-  shift $(( nbOfCriteria + 1 ))
-  local first="${1}"
-  local second="${2}"
-
-  local criteriaArrayName
-  for criteriaArrayName in "${criteriaArrayNames[@]}"; do
-    local -n criteriaArray="${criteriaArrayName}"
-    if (( criteriaArray[first] == criteriaArray[second] )); then
-      continue
-    elif (( criteriaArray[first] > criteriaArray[second] )); then
-      return 0
-    fi
-    break
-  done
+# shellcheck disable=SC2034
+function array_sortCompareCallBack() {
+  local -i first="${1}"
+  local -i second="${2}"
+  eval "${_ARRAY_COMPARE_COMMAND}"
   return 1
 }
 
@@ -209,16 +170,44 @@ function array_sortMultiIntegerCriteriaCompareCallBack() {
 # > - This function uses a quicksort algorithm.
 # > - It is not appropriate for large array, use the `sort` binary for such cases.
 function array::sortWithCriteria() {
-  local arrayName=${1}
-  local -n array=${arrayName}
+  local arrayName="${1}"
+  local -n array="${arrayName}"
   shift
   local -a criteriaArrayNames=("${@}")
 
   # an array of indices
   eval "RETURNED_ARRAY=( {0..$((${#array[@]} - 1))} )"
 
+  # prepare the commands to compare and swap the elements
+  _ARRAY_COMPARE_COMMAND=""
+  _ARRAY_SWAP_COMMAND="
+    tmp=\"\${${arrayName}[first]}\"
+    ${arrayName}[first]=\"\${${arrayName}[second]}\"
+    ${arrayName}[second]=\"\${tmp}\"
+    tmp=\"\${RETURNED_ARRAY[first]}\"
+    RETURNED_ARRAY[first]=\"\${RETURNED_ARRAY[second]}\"
+    RETURNED_ARRAY[second]=\"\${tmp}\"
+  "
+  local name
+  for name in "${criteriaArrayNames[@]}"; do
+    _ARRAY_SWAP_COMMAND="${_ARRAY_SWAP_COMMAND}
+    tmp=\"\${${name}[first]}\"
+    ${name}[first]=\"\${${name}[second]}\"
+    ${name}[second]=\"\${tmp}\"
+    "
+    _ARRAY_COMPARE_COMMAND="${_ARRAY_COMPARE_COMMAND}
+      if (( ${name}[first] < ${name}[second] )); then
+        return 1
+      elif (( ${name}[first] > ${name}[second] )); then
+        return 0
+      fi
+    "
+  done
+
   local IFS=" "
-  array::quicksort "array_sortMultiIntegerCriteriaCompareCallBack ${#criteriaArrayNames[@]} ${criteriaArrayNames[*]}" "array_sortSwapCallBack $((${#criteriaArrayNames[@]} + 2)) ${arrayName} RETURNED_ARRAY ${criteriaArrayNames[*]}" 0 $(( ${#array[@]} - 1 ))
+  array::quicksort "array_sortCompareCallBack" "array_sortSwapCallBack" 0 $(( ${#array[@]} - 1 ))
+
+  unset -v _ARRAY_COMPARE_COMMAND _ARRAY_SWAP_COMMAND
 }
 
 # ## array::appendIfNotPresent

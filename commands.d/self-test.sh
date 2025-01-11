@@ -119,11 +119,9 @@ function selfTest() {
     log::info "Rebuilding the commands for the user directory ⌜${userDirectory}⌝."
     selfTestUtils_rebuildCommands --user-directory "${userDirectory}"
 
-    # change the shell options to include hidden files
-    shopt -s dotglob
     local testsDirectory listOfDirectories currentDirectory
 
-    # the shopt globstar does not include files under symbolic link directories
+    # the file expansion does not include files under symbolic link directories
     # so we need to manually force the search in these directories
     listOfDirectories="${userDirectory}"$'\n'
     while [[ -n "${listOfDirectories}" ]]; do
@@ -152,9 +150,6 @@ function selfTest() {
         fi
       done
     done
-
-    # reset glob options
-    shopt -u dotglob
   fi
 
   if [[ -n "${withCore:-}" || ${coreOnly:-false} == "true" ]]; then

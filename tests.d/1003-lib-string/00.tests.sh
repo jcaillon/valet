@@ -364,11 +364,11 @@ There were 2 new lines before this."
 function test_string::highlight() {
 
   echo "→ string::highlight 'This is a text to highlight.' 'ttttt'"
-  string::highlight 'This is a text to highlight.' 'ttttt' && echo "${RETURNED_VALUE}"
+  string::highlight 'This is a Text to highlight.' 'ttttt' && echo "${RETURNED_VALUE}"
 
   echo
-  echo "→ string::highlight 'This is a text to highlight.' 'ttttt' '>' '<'"
-  string::highlight 'This is a text to highlight.' 'ttttt' '>' '<' && echo "${RETURNED_VALUE}"
+  echo "→ string::highlight 'This is a text to highlight.' 'TTTTT' '>' '<'"
+  string::highlight 'This is a texT to highlight.' 'TTTTT' '>' '<' && echo "${RETURNED_VALUE}"
 
   echo
   echo "→ string::highlight '' 'ttttt'"

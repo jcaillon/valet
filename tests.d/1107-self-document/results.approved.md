@@ -165,10 +165,13 @@ Sorts an array using the > bash operator (lexicographic order).
       The global variable name of array to sort.
 
 ```bash
-declare -g myArray=( "z" "a" "b" )
+declare -g myArray=(z f b h a j)
 array::sort myArray
-printf '%s\n' "${myArray[@]}"
+echo "${myArray[*]}"
 ```
+
+> - This function uses a quicksort algorithm.
+> - It is not appropriate for large array, use the `sort` binary for such cases.
 
 
 ## array::sortWithCriteria
@@ -181,9 +184,10 @@ Each criteria array must containing integers representing the order of the eleme
 We first sort using the first criteria (from smallest to biggest), then the second, etc.
 
 - $1: **array name** _as string_:
-      the name of the array to sort (it is sorted in place)
+      The name of the array to sort (it will be sorted in place).
 - $@: **criteria array names** _as string_:
-      the names of the arrays to use as criteria
+      The names of the arrays to use as criteria.
+      Each array must have the same size as the array to sort and contain only numbers.
 
 Returns:
 
@@ -194,13 +198,14 @@ declare -g myArray=( "a" "b" "c" )
 declare -g criteria1=( 3 2 2 )
 declare -g criteria2=( 1 3 2 )
 array::sortWithCriteria myArray criteria1 criteria2
-printf '%s\n' "${myArray[@]}"
+echo "${myArray[@]}"
 # c b a
-printf '%s\n' "${RETURNED_ARRAY[@]}"
+echo "${RETURNED_ARRAY[@]}"
 # 3 2 1
 ```
 
-> TODO: Update this basic exchange sort implementation.
+> - This function uses a quicksort algorithm.
+> - It is not appropriate for large array, use the `sort` binary for such cases.
 
 
 ## benchmark::run
@@ -2488,7 +2493,7 @@ echo "${RETURNED_VALUE}"
 ```
 
 > - All characters in the pattern must be found in the same order in the matched line.
-> - Use `shopt -s nocasematch` to make this function is case insensitive.
+> - This functions is case insensitive.
 
 
 ## string::indexOf
@@ -3127,10 +3132,13 @@ function array::makeArraysSameSize() { :; }
 #       The global variable name of array to sort.
 # 
 # ```bash
-# declare -g myArray=( "z" "a" "b" )
+# declare -g myArray=(z f b h a j)
 # array::sort myArray
-# printf '%s\n' "${myArray[@]}"
+# echo "${myArray[*]}"
 # ```
+# 
+# > - This function uses a quicksort algorithm.
+# > - It is not appropriate for large array, use the `sort` binary for such cases.
 # 
 function array::sort() { :; }
 
@@ -3144,9 +3152,10 @@ function array::sort() { :; }
 # We first sort using the first criteria (from smallest to biggest), then the second, etc.
 # 
 # - $1: **array name** _as string_:
-#       the name of the array to sort (it is sorted in place)
+#       The name of the array to sort (it will be sorted in place).
 # - $@: **criteria array names** _as string_:
-#       the names of the arrays to use as criteria
+#       The names of the arrays to use as criteria.
+#       Each array must have the same size as the array to sort and contain only numbers.
 # 
 # Returns:
 # 
@@ -3157,13 +3166,14 @@ function array::sort() { :; }
 # declare -g criteria1=( 3 2 2 )
 # declare -g criteria2=( 1 3 2 )
 # array::sortWithCriteria myArray criteria1 criteria2
-# printf '%s\n' "${myArray[@]}"
+# echo "${myArray[@]}"
 # # c b a
-# printf '%s\n' "${RETURNED_ARRAY[@]}"
+# echo "${RETURNED_ARRAY[@]}"
 # # 3 2 1
 # ```
 # 
-# > TODO: Update this basic exchange sort implementation.
+# > - This function uses a quicksort algorithm.
+# > - It is not appropriate for large array, use the `sort` binary for such cases.
 # 
 function array::sortWithCriteria() { :; }
 
@@ -5558,7 +5568,7 @@ function string::extractBetween() { :; }
 # ```
 # 
 # > - All characters in the pattern must be found in the same order in the matched line.
-# > - Use `shopt -s nocasematch` to make this function is case insensitive.
+# > - This functions is case insensitive.
 # 
 function string::highlight() { :; }
 
@@ -6156,7 +6166,7 @@ function test::endTest() { :; }
   "prefix": "array::sort#withdoc",
   "description": "Sorts an array using the > bash operator (lexicographic order)...",
   "scope": "",
-  "body": [ "# ## array::sort\n# \n# Sorts an array using the > bash operator (lexicographic order).\n# \n# - \\$1: **array name** _as string_:\n#       The global variable name of array to sort.\n# \n# ```bash\n# declare -g myArray=( \"z\" \"a\" \"b\" )\n# array::sort myArray\n# printf '%s\\n' \"\\${myArray[@]}\"\n# ```\n# \narray::sort \"${1:**array name**}\"$0" ]
+  "body": [ "# ## array::sort\n# \n# Sorts an array using the > bash operator (lexicographic order).\n# \n# - \\$1: **array name** _as string_:\n#       The global variable name of array to sort.\n# \n# ```bash\n# declare -g myArray=(z f b h a j)\n# array::sort myArray\n# echo \"\\${myArray[*]}\"\n# ```\n# \n# > - This function uses a quicksort algorithm.\n# > - It is not appropriate for large array, use the `sort` binary for such cases.\n# \narray::sort \"${1:**array name**}\"$0" ]
 },
 
 "array::sortWithCriteria": {
@@ -6170,7 +6180,7 @@ function test::endTest() { :; }
   "prefix": "array::sortWithCriteria#withdoc",
   "description": "Sorts an array using multiple criteria...",
   "scope": "",
-  "body": [ "# ## array::sortWithCriteria\n# \n# Sorts an array using multiple criteria.\n# Excepts multiple arrays. The first array is the one to sort.\n# The other arrays are used as criteria. Criteria are used in the order they are given.\n# Each criteria array must have the same size as the array to sort.\n# Each criteria array must containing integers representing the order of the elements.\n# We first sort using the first criteria (from smallest to biggest), then the second, etc.\n# \n# - \\$1: **array name** _as string_:\n#       the name of the array to sort (it is sorted in place)\n# - \\$@: **criteria array names** _as string_:\n#       the names of the arrays to use as criteria\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array that contains the corresponding indexes of the sorted array in the original array\n# \n# ```bash\n# declare -g myArray=( \"a\" \"b\" \"c\" )\n# declare -g criteria1=( 3 2 2 )\n# declare -g criteria2=( 1 3 2 )\n# array::sortWithCriteria myArray criteria1 criteria2\n# printf '%s\\n' \"\\${myArray[@]}\"\n# # c b a\n# printf '%s\\n' \"\\${RETURNED_ARRAY[@]}\"\n# # 3 2 1\n# ```\n# \n# > TODO: Update this basic exchange sort implementation.\n# \narray::sortWithCriteria \"${1:**array name**}\" \"${99:**criteria array names**}\"$0" ]
+  "body": [ "# ## array::sortWithCriteria\n# \n# Sorts an array using multiple criteria.\n# Excepts multiple arrays. The first array is the one to sort.\n# The other arrays are used as criteria. Criteria are used in the order they are given.\n# Each criteria array must have the same size as the array to sort.\n# Each criteria array must containing integers representing the order of the elements.\n# We first sort using the first criteria (from smallest to biggest), then the second, etc.\n# \n# - \\$1: **array name** _as string_:\n#       The name of the array to sort (it will be sorted in place).\n# - \\$@: **criteria array names** _as string_:\n#       The names of the arrays to use as criteria.\n#       Each array must have the same size as the array to sort and contain only numbers.\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array that contains the corresponding indexes of the sorted array in the original array\n# \n# ```bash\n# declare -g myArray=( \"a\" \"b\" \"c\" )\n# declare -g criteria1=( 3 2 2 )\n# declare -g criteria2=( 1 3 2 )\n# array::sortWithCriteria myArray criteria1 criteria2\n# echo \"\\${myArray[@]}\"\n# # c b a\n# echo \"\\${RETURNED_ARRAY[@]}\"\n# # 3 2 1\n# ```\n# \n# > - This function uses a quicksort algorithm.\n# > - It is not appropriate for large array, use the `sort` binary for such cases.\n# \narray::sortWithCriteria \"${1:**array name**}\" \"${99:**criteria array names**}\"$0" ]
 },
 
 "benchmark::run": {
@@ -7668,7 +7678,7 @@ function test::endTest() { :; }
   "prefix": "string::highlight#withdoc",
   "description": "Highlight a pattern (each character of this pattern) in a string...",
   "scope": "",
-  "body": [ "# ## string::highlight\n# \n# Highlight a pattern (each character of this pattern) in a string.\n# \n# - \\$1: **text** _as string_:\n#       The text to highlight.\n# - \\$2: **pattern** _as string_:\n#       The pattern to highlight.\n# - \\$3: highlight ansi code _as string_:\n#       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.\n#       The ANSI code to use for highlighting.\n#       (defaults to VALET_CONFIG_COLOR_HIGHLIGHT)\n# - \\$4: reset ansi code _as string_:\n#       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.\n#       The ANSI code to use for resetting the highlighting.\n#       (defaults to VALET_CONFIG_COLOR_DEFAULT)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the highlighted text\n# \n# ```bash\n# string::highlight \"This is a text to highlight.\" \"ttttt\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - Use `shopt -s nocasematch` to make this function is case insensitive.\n# \nstring::highlight \"${1:**text**}\" \"${2:**pattern**}\" \"${3:highlight ansi code}\" \"${4:reset ansi code}\"$0" ]
+  "body": [ "# ## string::highlight\n# \n# Highlight a pattern (each character of this pattern) in a string.\n# \n# - \\$1: **text** _as string_:\n#       The text to highlight.\n# - \\$2: **pattern** _as string_:\n#       The pattern to highlight.\n# - \\$3: highlight ansi code _as string_:\n#       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.\n#       The ANSI code to use for highlighting.\n#       (defaults to VALET_CONFIG_COLOR_HIGHLIGHT)\n# - \\$4: reset ansi code _as string_:\n#       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.\n#       The ANSI code to use for resetting the highlighting.\n#       (defaults to VALET_CONFIG_COLOR_DEFAULT)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the highlighted text\n# \n# ```bash\n# string::highlight \"This is a text to highlight.\" \"ttttt\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - All characters in the pattern must be found in the same order in the matched line.\n# > - This functions is case insensitive.\n# \nstring::highlight \"${1:**text**}\" \"${2:**pattern**}\" \"${3:highlight ansi code}\" \"${4:reset ansi code}\"$0" ]
 },
 
 "string::indexOf": {

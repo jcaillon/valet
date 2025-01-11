@@ -1230,7 +1230,7 @@ function interactive_runProgressBarAnimation() {
 
     displayedString="${displayedString//"#message"/"${message:-}"}"
 
-    printf "%s%.${GLOBAL_COLUMNS}s%s" "${AC__ERASE_LINE}" "${displayedString}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+    printf "%-${GLOBAL_COLUMNS}s%s" "${displayedString}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
 
     spinnerIndex=$((spinnerIndex >= ${#spinner} - 1 ? 0 : spinnerIndex + 1))
     loop+=1
@@ -1298,7 +1298,7 @@ function interactive::startProgress() {
     return 0
   fi
 
-  if [[ -n "${GLOBAL_PROGRESS_BAR_JOB_PID:-}" ]]; then
+  if [[ -n "${GLOBAL_BACKGROUND_JOB1_PID:-}" ]]; then
     core::fail "A spinner or progress bar is already running."
   fi
 
@@ -1311,10 +1311,8 @@ function interactive::startProgress() {
   _PROGRESS_BAR_UPDATE_FILE="${RETURNED_VALUE}"
   _PROGRESS_BAR_RUNNING=true
 
-  # disable the monitor mode to avoid the "Terminated" message with exit code once the spinner is stopped
-  shopt -u -o monitor
   interactive_runProgressBarAnimation "${_PROGRESS_BAR_UPDATE_FILE}" "$@" 1>&2 &
-  GLOBAL_PROGRESS_BAR_JOB_PID="$!"
+  GLOBAL_BACKGROUND_JOB1_PID="$!"
 }
 
 # ## interactive::updateProgress
@@ -1378,13 +1376,11 @@ function interactive::stopProgress() {
     return 0
   fi
 
-  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n "${GLOBAL_PROGRESS_BAR_JOB_PID:-}" ]]; then
+  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n "${GLOBAL_BACKGROUND_JOB1_PID:-}" ]]; then
     _PROGRESS_BAR_RUNNING=false
-    shopt -u -o monitor
-    kill "${GLOBAL_PROGRESS_BAR_JOB_PID}" &>/dev/null || :
+    kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
     rm -f "${_PROGRESS_BAR_UPDATE_FILE}" &>/dev/null || :
-    shopt -s -o monitor
-    unset -v GLOBAL_PROGRESS_BAR_JOB_PID _PROGRESS_BAR_UPDATE_FILE _PROGRESS_BAR_RUNNING
+    unset -v GLOBAL_BACKGROUND_JOB1_PID _PROGRESS_BAR_UPDATE_FILE _PROGRESS_BAR_RUNNING
   fi
 
   printf "%s" "${AC__ERASE_LINE}${AC__CURSOR_SHOW}"

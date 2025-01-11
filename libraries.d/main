@@ -65,6 +65,8 @@ function main::onInterruptInternal() {
       return 0
     fi
   fi
+  # reset the trap to not call this function again
+  trap ':' SIGINT SIGQUIT
   exit 1
 }
 
@@ -77,6 +79,8 @@ function main::onTerminateInternal() {
       return 0
     fi
   fi
+  # reset the trap to not call this function again
+  trap ':' SIGHUP SIGTERM
   exit 1
 }
 
@@ -99,14 +103,7 @@ function main::onCleanUpInternal() {
 
   # kill background job if still running
   if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
-    shopt -u -o monitor
     kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
-    shopt -s -o monitor
-  fi
-
-  # kill coproc (spinner/progress bar...) if still running
-  if [[ -n ${GLOBAL_PROGRESS_BAR_JOB_PID:-} ]]; then
-    kill "${GLOBAL_PROGRESS_BAR_JOB_PID}" 1>/dev/null || :
   fi
 
   # restore tty settings if needed

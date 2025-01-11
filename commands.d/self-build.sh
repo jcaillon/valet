@@ -139,7 +139,7 @@ function selfBuild() {
       log::info "Building the valet user commands from the user directory ⌜${userDirectory}⌝."
       local file listOfDirectories currentDirectory
 
-      # the shopt globstar does not include files under symbolic link directories
+      # the file expansion does not include files under symbolic link directories
       # so we need to manually force the search in these directories
       listOfDirectories="${userDirectory}"$'\n'
       while [[ -n "${listOfDirectories}" ]]; do
@@ -148,7 +148,7 @@ function selfBuild() {
 
         log::trace "Searching for command definitions in ⌜${currentDirectory}⌝."
         log::trace "listOfDirectories: ⌜${listOfDirectories}⌝."
-        for file in "${currentDirectory}"/**; do
+        for file in "${currentDirectory}"/*; do
           local fileBasename="${file##*/}"
           if [[ -d ${file} && ${fileBasename} != "."* && ${fileBasename} != "tests.d" ]]; then
             # if directory we need to add it to the search list

@@ -339,8 +339,6 @@ function prompt::input() {
   # rebind some keys to call the callback function prompt_onKeyBindingPress
   interactive::rebindKeymap prompt_onKeyBindingPress
 
-  # disable the monitor mode to avoid the "Terminated" message with exit code once the job is stopped
-  shopt -u -o monitor
   # make all match case insensitive
   shopt -s nocasematch
 
@@ -396,7 +394,6 @@ function prompt::input() {
   prompt_clearPrompt
   interactive::sttyRestore
   interactive::restoreInterruptTrap
-  shopt -s -o monitor
   shopt -u nocasematch
 
   if [[ ${_PROMPT_CANCELLED:-} == "true" ]]; then

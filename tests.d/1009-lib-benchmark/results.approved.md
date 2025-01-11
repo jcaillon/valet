@@ -23,12 +23,11 @@ test_function_3 ()
 }
 
 → benchmark::run test_function_1 test_function_2,test_function_3 3 5
-INFO     Running the baseline ⌜test_function_X⌝ for ⌜Xs⌝.
 INFO     The baseline ⌜test_function_X⌝ was initially run ⌜X⌝ times in ⌜X.Xs⌝.
 INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜X.Xs⌝.
 INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜X.Xs⌝.
 INFO     The function ⌜test_function_X⌝ was run ⌜X⌝ times in ⌜X.Xs⌝.
-SUCCESS  Benchmark results from fastest to slowest:
+SUCCESS  Benchmark results from fastest to slowest for X runs:
 
 Function name   ░ Average time  ░ Compared to fastest
 ░[Xb

@@ -53,27 +53,28 @@ function selfExport() {
   # shellcheck disable=SC1091
   source io
 
-  # export all the necessary variables
-  # shellcheck disable=SC2086
-  io::invoke declare -p ${!VALET_CONFIG_*} ${!GLOBAL_*}
-  output+="${RETURNED_VALUE//declare -? /}"$'\n'
-
   # export all self sufficient functions from the core library
   io::invoke declare -f \
     core::fail \
     core::failWithCode \
     io::createTempFile \
     io::createTempDirectory \
-    io::cleanupTempFiles
+    io::cleanupTempFiles \
+    core::reExportFuncToUseGlobalVars \
+    source
   output+="${RETURNED_VALUE//declare -? /}"$'\n'
   exportFunctionsForLibrary log && output+="${RETURNED_VALUE}"$'\n'
   exportFunctionsForLibrary string && output+="${RETURNED_VALUE}"$'\n'
   exportFunctionsForLibrary array && output+="${RETURNED_VALUE}"$'\n'
-  exportFunctionsForLibrary interactive && output+="${RETURNED_VALUE}"$'\n'
+
+  if [[ ${noExit:-} == "true" ]]; then
+    output+="function core::fail() { log::error \"\$@\"; }"$'\n'
+    output+="function core::failWithCode() { local exitCode=\"\${1}\"; shift; log::error \"\$@\"; log::error \"Exit code: \$exitCode\"; }"$'\n'
+  fi
 
   # export all libraries
+  local library
   if [[ ${exportAll:-} == "true" ]]; then
-    local library
     for library in "${GLOBAL_VALET_HOME}/libraries.d/lib-"*; do
       local -i lineNumber=0
       log::debug "Exporting library: ⌜${library}⌝."
@@ -87,12 +88,20 @@ function selfExport() {
         lineNumber+=1
       done < "${library}"
     done
+
+    # add important shell options for interactive functions
+    output+=$'\n'"set +o monitor +o notify"$'\n'
   fi
 
-  if [[ ${noExit:-} == "true" ]]; then
-    output+="core::fail() { log::error \"\$@\"; }"$'\n'
-    output+="core::failWithCode() { local exitCode=\"\${1}\"; shift; log::error \"\$@\"; log::error \"Exit code: \$exitCode\"; }"$'\n'
-  fi
+  # replace all source * calls
+  for library in "${GLOBAL_VALET_HOME}/libraries.d/lib-"*; do
+    output="${output//source ${library}/:}"
+  done
+
+  # export all the necessary variables
+  # shellcheck disable=SC2086
+  io::invoke declare -p ${!VALET_CONFIG_*} ${!GLOBAL_*}
+  output+="${RETURNED_VALUE//declare -? /}"$'\n'
 
   echo "${output}"
 }

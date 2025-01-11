@@ -10,6 +10,8 @@ source array
 source string
 # shellcheck source=lib-ansi-codes
 source ansi-codes
+# shellcheck source=lib-interactive
+source interactive
 
 
 # ## benchmark::run
@@ -67,7 +69,7 @@ function benchmark::run() {
   local -A functionsElapsed
 
   # Run the baseline
-  log::info "Running the baseline ⌜${baseline}⌝ for ⌜${time}s⌝."
+  interactive::startProgress "#spinner Running the baseline ⌜${baseline}⌝ for ⌜${time}s⌝."
 
   core::getProgramElapsedMicroseconds
   local startTimeInUs="${RETURNED_VALUE}"
@@ -83,15 +85,17 @@ function benchmark::run() {
     fi
   done
 
+  interactive::stopProgress
+
   core::getProgramElapsedMicroseconds
   local elapsedTimeInUs=$((RETURNED_VALUE - startTimeInUs))
-  string::microsecondsToHuman "${elapsedTimeInUs}" %SS.%LL
+  string::microsecondsToHuman "${elapsedTimeInUs}" '%S.%LL'
   log::info "The baseline ⌜${baseline}⌝ was initially run ⌜${baselineRuns}⌝ times in ⌜${RETURNED_VALUE}s⌝."
 
   # Run the other functions
   if [[ -n ${functions} ]]; then
     for function in ${functions}; do
-      log::debug "Running the function ⌜${function}⌝ ⌜${baselineRuns}⌝ times."
+      interactive::startProgress "#spinner Running the function ⌜${function}⌝ ⌜${baselineRuns}⌝ times."
 
       core::getProgramElapsedMicroseconds
       startTimeInUs="${RETURNED_VALUE}"
@@ -103,14 +107,16 @@ function benchmark::run() {
       core::getProgramElapsedMicroseconds
       local elapsedTimeInUs=$((RETURNED_VALUE - startTimeInUs))
       functionsElapsed["${function}"]="${elapsedTimeInUs}"
-      string::microsecondsToHuman "${elapsedTimeInUs}" %SS.%LL
-
+      string::microsecondsToHuman "${elapsedTimeInUs}" %S.%LL
       log::info "The function ⌜${function}⌝ was run ⌜${runs}⌝ times in ⌜${RETURNED_VALUE}s⌝."
+
+      interactive::stopProgress
     done
   fi
 
   # Re run the baseline to get the average time
-  log::debug "Running the baseline ⌜${baseline}⌝ ⌜${baselineRuns}⌝ times."
+  interactive::startProgress "#spinner Running the baseline ⌜${baseline}⌝ ⌜${baselineRuns}⌝ times."
+
   core::getProgramElapsedMicroseconds
   startTimeInUs="${RETURNED_VALUE}"
   local -i runs
@@ -120,9 +126,10 @@ function benchmark::run() {
   core::getProgramElapsedMicroseconds
   local elapsedTimeInUs=$((RETURNED_VALUE - startTimeInUs))
   functionsElapsed["${baseline}"]="${elapsedTimeInUs}"
-  string::microsecondsToHuman "${elapsedTimeInUs}" %SS.%LL
-
+  string::microsecondsToHuman "${elapsedTimeInUs}" %S.%LL
   log::info "The function ⌜${baseline}⌝ was run ⌜${runs}⌝ times in ⌜${RETURNED_VALUE}s⌝."
+
+  interactive::stopProgress
 
 
   # sort the functions by elapsed time
@@ -133,13 +140,13 @@ function benchmark::run() {
   # print the results
   local line
   printf -v line "%-${longestFunctionNameLength}s ░ %-13s ░ %s\n" "Function name" "Average time" "Compared to fastest"
-  local result="Benchmark results from fastest to slowest:"$'\n'$'\n'"${line}░${AC__REPEAT__}$((longestFunctionNameLength + 39))${__AC__LAST_CHAR}"$'\n'
+  local result="Benchmark results from fastest to slowest for ${baselineRuns} runs:"$'\n'$'\n'"${line}░${AC__REPEAT__}$((longestFunctionNameLength + 39))${__AC__LAST_CHAR}"$'\n'
   local fastestElapsed="${functionsElapsed["${_BENCHMARK_FUNCTIONS[0]}"]}"
   local -i index=0
   for function in "${_BENCHMARK_FUNCTIONS[@]}"; do
     local averageTime="$((functionsElapsed[${function}] / baselineRuns))"
     local percentSlowerThanFastest="+$(( (functionsElapsed[${function}] - fastestElapsed) * 100 / fastestElapsed ))%"
-    string::microsecondsToHuman "${averageTime}" "%SS.%LLs %UUµs"
+    string::microsecondsToHuman "${averageTime}" "%S.%LLs %UUµs"
     if (( index == 0 )); then
       percentSlowerThanFastest="N/A"
     fi

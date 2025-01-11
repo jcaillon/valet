@@ -753,7 +753,7 @@ function io::listPaths() {
   local IFS=' '
 
   local activatedHidden=false
-  if [[ ${includeHidden} == "true" ]] && ! shopt -p dotglob; then
+  if [[ ${includeHidden} == "true" ]]; then
     # change the shell options to include hidden files
     log::debug "Activating the dotglob shell option."
     shopt -s dotglob

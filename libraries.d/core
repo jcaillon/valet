@@ -1,9 +1,30 @@
 #!/usr/bin/env bash
-set -Eeu -o pipefail
 # Title:          libraries.d/core
 # Description:    this script contains the core functions and variables and it
 #                 should be sourced, not called directly
 # Author:         github.com/jcaillon
+
+# Set the important shell attributes to ensure consistency in execution (-enable, +disable).
+# -pipefail: the $? of a pipeline is the status of the last command to exit with a non-zero status
+# -braceexpand: {1..3} will be expanded to 1 2 3
+# -errexit: exit immediately if a command exits with a non-zero status
+# -errtrace: ERR trap is inherited in subshell
+# -functrace: DEBUG and RETURN traps are inherited in subshell
+# -nounset: exit when script tries to use undeclared variables
+# -hashall: enable hashing of all commands (for performance)
+# +histexpand: disable history expansion
+# +monitor: disable job control monitor (will not report status of background jobs)
+# +noclobber: enable overwriting files during redirection
+# +noglob: enable filename expansion (globbing)
+# +notify: disable immediate report status of background jobs
+set -o pipefail -o braceexpand -o errexit -o errtrace -o functrace -o nounset -o hashall +o histexpand +o monitor +o noclobber +o noglob +o notify
+# -globasciiranges: use C locale for [] character ranges in match patterns
+# +checkwinsize: do not check the window size after each external command
+# +dotglob: disable inclusion of hidden files in filename expansion
+# +expand_aliases: disable alias expansion
+# +nocasematch: disable case-insensitive matching
+shopt -s extquote globasciiranges globskipdots huponexit interactive_comments patsub_replacement progcomp
+shopt -u assoc_expand_once cdable_vars checkhash checkjobs checkwinsize compat31 compat32 compat40 compat41 compat42 compat43 compat44 globstar localvar_inherit localvar_unset nocaseglob nocasematch noexpand_translation progcomp_alias shift_verbose varredir_close xpg_echo nullglob direxpand dirspell dotglob extglob failglob execfail expand_aliases inherit_errexit
 
 # we check for this variable to know if this script has already been included
 GLOBAL_CORE_INCLUDED=1
@@ -170,7 +191,8 @@ function io::cleanupTempFiles() {
 function interactive::getTerminalSize() {
   shopt -s checkwinsize
   # the following subshell is required to correctly compute the columns and lines
-  # the bash manual says it these are computed after the execution of an external command
+  # the bash manual says these are computed after the execution of an external command
+  # but it works with a subshell
   (
     :
     :
@@ -1318,7 +1340,7 @@ function string::wrapCharacters() {
 # ```
 #
 # > - All characters in the pattern must be found in the same order in the matched line.
-# > - Use `shopt -s nocasematch` to make this function is case insensitive.
+# > - This functions is case insensitive.
 function string::highlight() {
   local text="${1}"
   local pattern="${2}"
@@ -1328,6 +1350,7 @@ function string::highlight() {
   local itemChunk itemChunkPiece
   local -i searchStringIndex=0
   local searchStringCharacter="${pattern:0:1}"
+  local searchStringCharacters="${searchStringCharacter,}${searchStringCharacter^}"
 
   RETURNED_VALUE=""
 
@@ -1338,12 +1361,13 @@ function string::highlight() {
 
     if [[ -n ${itemChunk} ]]; then
       # colorize the search string in this chunk
-      while [[ -n ${searchStringCharacter} && ${itemChunk} == *"${searchStringCharacter}"* ]]; do
-        itemChunkPiece="${itemChunk%%["${searchStringCharacter^}${searchStringCharacter,}"]*}"
+      while [[ -n ${searchStringCharacter} && ${itemChunk} == *["${searchStringCharacters}"]* ]]; do
+        itemChunkPiece="${itemChunk%%["${searchStringCharacters}"]*}"
         RETURNED_VALUE+="${itemChunkPiece}${highlightCode}${itemChunk:${#itemChunkPiece}:1}${resetCode}"
         itemChunk="${itemChunk:${#itemChunkPiece}+1}"
         searchStringIndex+=1
         searchStringCharacter="${pattern:searchStringIndex:1}"
+        searchStringCharacters="${searchStringCharacter,}${searchStringCharacter^}"
       done
 
       RETURNED_VALUE+="${itemChunk}"
@@ -1358,6 +1382,10 @@ function string::highlight() {
     done
   done
 }
+
+#===============================================================
+# >>> Array utilities
+#===============================================================
 
 # ## array::fuzzyFilterSort
 #

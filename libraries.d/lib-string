@@ -279,12 +279,15 @@ function string::kebabCaseToCamelCase() {
 # string::trimAll "   example   string    " && local trimmedString="${RETURNED_VALUE}"
 # ```
 function string::trimAll() {
-  set -f
+  set -o noglob +o braceexpand
+  # shellcheck disable=SC2086
+  # shellcheck disable=SC2048
+  local IFS=" "$'\t'$'\n'
   # shellcheck disable=SC2086
   # shellcheck disable=SC2048
   set -- $*
   RETURNED_VALUE="$*"
-  set +f
+  set +o noglob -o braceexpand
 }
 
 # ## string::trim

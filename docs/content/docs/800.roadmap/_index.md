@@ -12,7 +12,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.
 - core::checkParseResults typo...
 - Add a full screen view with the keyboard shortcuts in edit mode (new interactive::showFullScreenHelp ?).
-- In benchmark, with debug mode on, we can compute the time spent on each line of a function (+ try to improve the fuzzy filter sort).
+- In benchmark, with debug mode on, we can compute the time spent on each line of a function (+ try to improve the fuzzy filter sort). See extdebug shopt.
 - add snippets for the Ansi codes. Add snippets on the global variables.
 - check usage of array::fuzzyFilterSort and add back the colors.
 - Demo with ascii cinema: https://asciinema.org.

@@ -42,7 +42,7 @@ function profiler::enable() {
   export _PROFILER_OUTPUT_FILE="${file}"
   export _PROFILER_START_REALTIME="${EPOCHREALTIME//./}"
   export BASH_XTRACEFD=5
-  set -x
+  set -o xtrace
 }
 
 # ## profiler::disable
@@ -56,7 +56,7 @@ function profiler::disable() {
   if [[ ${_ACTIVE_PROFILER:-} != "1" ]]; then return 0; fi
 
   log::info "Disabling profiler."
-  set +x
+  set +o xtrace
   unset BASH_XTRACEFD PS4 _ACTIVE_PROFILER
   exec 5>&-
   if [[ -v _PROFILER_OUTPUT_FILE ]]; then
