@@ -5,21 +5,13 @@ core::sourceFunction "selfExport"
 source io
 
 function testSelfExport() {
-  echo "→ selfExport"
-  selfExport 1>"${GLOBAL_TEST_TEMP_FILE}"
+  echo "→ valet self export"
+  bash -c 'eval "$(valet self export)"'
+  test::endTest "Testing self export" 0
 
-  if [[ -s "${GLOBAL_TEST_TEMP_FILE:-}" ]]; then
-    echo "successfully output to file"
-  fi
-  test::endTest "Testing selfExport" 0
-
-  echo "→ selfExport -a"
-  selfExport -a 1>"${GLOBAL_TEST_TEMP_FILE}"
-
-  if [[ -s "${GLOBAL_TEST_TEMP_FILE:-}" ]]; then
-    echo "successfully output to file"
-  fi
-  test::endTest "Testing selfExport with libraries" 0
+  echo "→ valet self export -a"
+  bash -c 'eval "$(valet self export -a)"'
+  test::endTest "Testing self export with library functions only" 0
 }
 
 function main() {

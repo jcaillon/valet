@@ -28,29 +28,56 @@ fi
 #   eval "$(valet self export)"
 #   ```
 #
-#   This will export all the necessary functions and variables to use the Valet log library by default.
+#   This will source valet to be able to use its functions as if you were in a command script.
 #
 #   You can optionally export all the functions if needed.
 # options:
-# - name: -a, --export-all
+# - name: -a, --source-all-functions
 #   description: |-
-#     Export all the libraries.
+#     Will immediately source all the libraries functions.
 # - name: -E, --no-exit
 #   description: |-
 #     Override the ⌜core::fail⌝ and ⌜core::failWithCode⌝ functions to not exit the script.
 # examples:
-# - name: !eval "$(valet self export -a)"
+# - name: !eval "$(valet self export)"
 #   description: |-
-#     Export all the functions defined in the Valet libraries.
-#     Then can then be used directly in your bash scripts or from the bash prompt.
+#     Source valet functions in your bash script or bash prompt.
+#     You can then can then use valet function as if you were in a command script.
 ##VALET_COMMAND
 function selfExport() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  local output
+  local output=""
 
-  # shellcheck disable=SC1091
+  # source valet core library, disable some traps
+  output+="source \"${GLOBAL_VALET_HOME}/libraries.d/core\""$'\n'
+  output+="trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;"$'\n'
+
+  if [[ ${sourceAllFunctions:-} == "true" ]]; then
+    # source all libraries
+    local library
+    for library in "${GLOBAL_VALET_HOME}/libraries.d/lib-"*; do
+      local libraryName="${library##*lib-}"
+      libraryName="${libraryName%lib-}"
+      log::debug "Exporting library: ⌜${libraryName}⌝."
+      output+="source ${libraryName}"$'\n'
+    done
+  fi
+
+  if [[ ${noExit:-} == "true" ]]; then
+    output+="function core::fail() { log::error \"\$@\"; }"$'\n'
+    output+="function core::failWithCode() { local exitCode=\"\${1}\"; shift; log::error \"\$@\"; log::error \"Exit code: \$exitCode\"; }"$'\n'
+    output+="set +o errexit"
+  fi
+
+  echo "${output}"
+}
+
+# Adds all the core function definitions and variables to the output variable.
+# Optionally adds all the library functions as well.
+function selfExport_declareFunctions() {
+# shellcheck disable=SC1091
   source io
 
   # export all self sufficient functions from the core library
@@ -63,18 +90,13 @@ function selfExport() {
     core::reExportFuncToUseGlobalVars \
     source
   output+="${RETURNED_VALUE//declare -? /}"$'\n'
-  exportFunctionsForLibrary log && output+="${RETURNED_VALUE}"$'\n'
-  exportFunctionsForLibrary string && output+="${RETURNED_VALUE}"$'\n'
-  exportFunctionsForLibrary array && output+="${RETURNED_VALUE}"$'\n'
-
-  if [[ ${noExit:-} == "true" ]]; then
-    output+="function core::fail() { log::error \"\$@\"; }"$'\n'
-    output+="function core::failWithCode() { local exitCode=\"\${1}\"; shift; log::error \"\$@\"; log::error \"Exit code: \$exitCode\"; }"$'\n'
-  fi
+  selfExport_functionsForLibrary log && output+="${RETURNED_VALUE}"$'\n'
+  selfExport_functionsForLibrary string && output+="${RETURNED_VALUE}"$'\n'
+  selfExport_functionsForLibrary array && output+="${RETURNED_VALUE}"$'\n'
 
   # export all libraries
   local library
-  if [[ ${exportAll:-} == "true" ]]; then
+  if [[ ${declareAllFunctions:-} == "true" ]]; then
     for library in "${GLOBAL_VALET_HOME}/libraries.d/lib-"*; do
       local -i lineNumber=0
       log::debug "Exporting library: ⌜${library}⌝."
@@ -102,8 +124,6 @@ function selfExport() {
   # shellcheck disable=SC2086
   io::invoke declare -p ${!VALET_CONFIG_*} ${!GLOBAL_*}
   output+="${RETURNED_VALUE//declare -? /}"$'\n'
-
-  echo "${output}"
 }
 
 # Export all the functions for a library.
@@ -116,8 +136,8 @@ function selfExport() {
 #   Returns 1 no functions were found.
 #
 # Usage:
-#   exportFunctionsForLibrary log
-function exportFunctionsForLibrary() {
+#   selfExport_functionsForLibrary log
+function selfExport_functionsForLibrary() {
   local libraryName="${1}"
 
   log::debug "Exporting functions for library: ⌜${libraryName}⌝."

@@ -21,8 +21,12 @@ function main::onErrorInternal() {
   if [[ ${GLOBAL_ERROR_DISPLAYED:-0} == "1" ]]; then
     return 0
   fi
-  log::error "Error code ${1} in ${FUNCNAME[1]}(), stack:"
-  log::printCallStack 2
+  if [[ -n ${FUNCNAME[1]:-} ]]; then
+    log::error "Error code ${1} in ${FUNCNAME[1]:-}(), stack:"
+    log::printCallStack 2
+  else
+    log::error "Error code ${1} in the main program."
+  fi
   GLOBAL_ERROR_DISPLAYED=1
 }
 

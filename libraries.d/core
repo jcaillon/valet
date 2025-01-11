@@ -868,7 +868,7 @@ function source() {
       done
     fi
     if [[ -z "${filePathToInclude:-}" ]]; then
-      if [[ -f "${BASH_SOURCE[1]%/*}/${1}" ]]; then
+      if [[ -n ${BASH_SOURCE[1]:-} && -f "${BASH_SOURCE[1]%/*}/${1}" ]]; then
         # source a file next to the file that calls this function
         filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
       elif [[ -f "${1}" ]]; then

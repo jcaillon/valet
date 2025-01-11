@@ -2,25 +2,24 @@
 
 ## Test script 01.self-export
 
-### Testing selfExport
+### Testing self export
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ selfExport
-successfully output to file
+→ valet self export
 ```
 
-### Testing selfExport with libraries
+### Testing self export with library functions only
 
 Exit code: `0`
 
 **Standard** output:
 
 ```plaintext
-→ selfExport -a
-successfully output to file
+→ valet self export -a
+[?25h
 ```
 
