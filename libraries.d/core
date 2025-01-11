@@ -3,6 +3,10 @@
 # Description:    this script contains the core functions and variables and it
 #                 should be sourced, not called directly
 # Author:         github.com/jcaillon
+if [[ ${BASH_VERSINFO[0]:-0} -lt 5 ]]; then
+  printf '%s\n' "Bash 5 or higher is required to run valet."
+  exit 1
+fi
 
 # Set the important shell attributes to ensure consistency in execution (-enable, +disable).
 # -pipefail: the $? of a pipeline is the status of the last command to exit with a non-zero status
@@ -1458,45 +1462,6 @@ function array::fuzzyFilterSort() {
     fi
   done
 
-  # we have a special quicksort implementation here that only compare numbers
-  # and uses global arrays to go faster
-  if ! declare -f array::fuzzyFilterSortQuicksort &>/dev/null; then
-    function array::fuzzyFilterSortQuicksort() {
-      local -i low=${1}
-      local -i high=${2}
-      if ((low >= high)); then
-        return 0
-      fi
-      local pivot=${_ARRAY_FUZZY_FILTER_KEYS[low]}
-      local -i ii=${low}
-      local -i jj=${high}
-      local tmpKey tempValue
-      while ((ii <= jj)); do
-        while ((_ARRAY_FUZZY_FILTER_KEYS[ii] < pivot)); do
-          ii+=1
-        done
-        while ((pivot < _ARRAY_FUZZY_FILTER_KEYS[jj])); do
-          jj=$((jj - 1))
-        done
-        if ((ii <= jj)); then
-          tmpKey=${_ARRAY_FUZZY_FILTER_KEYS[ii]}
-          tempValue=${RETURNED_ARRAY2[ii]}
-          _ARRAY_FUZZY_FILTER_KEYS[ii]=${_ARRAY_FUZZY_FILTER_KEYS[jj]}
-          RETURNED_ARRAY2[ii]=${RETURNED_ARRAY2[jj]}
-          _ARRAY_FUZZY_FILTER_KEYS[jj]=${tmpKey}
-          RETURNED_ARRAY2[jj]=${tempValue}
-          ii+=1
-          jj=$((jj - 1))
-        fi
-      done
-      if ((low < jj)); then
-        array::fuzzyFilterSortQuicksort ${low} ${jj}
-      fi
-      if ((ii < high)); then
-        array::fuzzyFilterSortQuicksort ${ii} ${high}
-      fi
-    }
-  fi
   array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
 
   # will contain the matched lines, sorted
@@ -1507,6 +1472,55 @@ function array::fuzzyFilterSort() {
   unset -v _ARRAY_FUZZY_FILTER_KEYS
 }
 
+# ## array::fuzzyFilterSortQuicksort (private)
+#
+# A special quicksort implementation dedicated to `array::fuzzyFilterSort`
+# that only compare numbers and that uses _ARRAY_FUZZY_FILTER_KEYS as
+# a global arrays to go faster.
+#
+# - $1: **low** _as int_:
+#       The low index of the _ARRAY_FUZZY_FILTER_KEYS array.
+# - $2: **high** _as int_:
+#       The high index of the _ARRAY_FUZZY_FILTER_KEYS array.
+#
+# ```bash
+# array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
+# ```
+function array::fuzzyFilterSortQuicksort() {
+  local -i low=${1}
+  local -i high=${2}
+  if ((low >= high)); then
+    return 0
+  fi
+  local pivot=${_ARRAY_FUZZY_FILTER_KEYS[low]}
+  local -i ii=${low}
+  local -i jj=${high}
+  local tmpKey tempValue
+  while ((ii <= jj)); do
+    while ((_ARRAY_FUZZY_FILTER_KEYS[ii] < pivot)); do
+      ii+=1
+    done
+    while ((pivot < _ARRAY_FUZZY_FILTER_KEYS[jj])); do
+      jj=$((jj - 1))
+    done
+    if ((ii <= jj)); then
+      tmpKey=${_ARRAY_FUZZY_FILTER_KEYS[ii]}
+      tempValue=${RETURNED_ARRAY2[ii]}
+      _ARRAY_FUZZY_FILTER_KEYS[ii]=${_ARRAY_FUZZY_FILTER_KEYS[jj]}
+      RETURNED_ARRAY2[ii]=${RETURNED_ARRAY2[jj]}
+      _ARRAY_FUZZY_FILTER_KEYS[jj]=${tmpKey}
+      RETURNED_ARRAY2[jj]=${tempValue}
+      ii+=1
+      jj=$((jj - 1))
+    fi
+  done
+  if ((low < jj)); then
+    array::fuzzyFilterSortQuicksort ${low} ${jj}
+  fi
+  if ((ii < high)); then
+    array::fuzzyFilterSortQuicksort ${ii} ${high}
+  fi
+}
 
 #===============================================================
 # >>> Valet files and directories
