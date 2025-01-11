@@ -960,6 +960,7 @@ function prompt_filterItems() {
     rm -f "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}" &>/dev/null || :
     prompt_filterItemsAsync 1>&2 &
     GLOBAL_BACKGROUND_JOB1_PID="$!"
+
   fi
 }
 

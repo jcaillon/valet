@@ -23,8 +23,12 @@ set -o pipefail -o braceexpand -o errexit -o errtrace -o functrace -o nounset -o
 # +dotglob: disable inclusion of hidden files in filename expansion
 # +expand_aliases: disable alias expansion
 # +nocasematch: disable case-insensitive matching
-shopt -s extquote globasciiranges globskipdots huponexit interactive_comments patsub_replacement progcomp
-shopt -u assoc_expand_once cdable_vars checkhash checkjobs checkwinsize compat31 compat32 compat40 compat41 compat42 compat43 compat44 globstar localvar_inherit localvar_unset nocaseglob nocasematch noexpand_translation progcomp_alias shift_verbose varredir_close xpg_echo nullglob direxpand dirspell dotglob extglob failglob execfail expand_aliases inherit_errexit
+shopt -s extquote globasciiranges huponexit interactive_comments progcomp
+shopt -u assoc_expand_once cdable_vars checkhash checkjobs checkwinsize compat31 compat32 compat40 compat41 compat42 compat43 compat44 globstar localvar_inherit localvar_unset nocaseglob nocasematch progcomp_alias shift_verbose xpg_echo nullglob direxpand dirspell dotglob extglob failglob execfail expand_aliases inherit_errexit
+if (( ${BASH_VERSINFO[1]} >= 2)); then
+  shopt -s globskipdots patsub_replacement
+  shopt -u varredir_close
+fi
 
 # we check for this variable to know if this script has already been included
 GLOBAL_CORE_INCLUDED=1

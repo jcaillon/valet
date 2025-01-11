@@ -20,6 +20,8 @@ function main() {
       # To build the image:
       # - cd tests.d/1106-self-install/docker-valet-test
       # - docker build -t valet-test .
+      # Then to run it:
+      # - docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash valet-test
       docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash valet-test -c -o errexit -o nounset -o pipefail "chmod +x ./tests.d/1106-self-install/test; ./tests.d/1106-self-install/test"
       return 0
     fi

@@ -610,7 +610,7 @@ function selfUpdate_createShim() {
   local valetBin="${binDirectory}/valet"
 
   log::info "Creating a shim ⌜${valetBin}⌝ → ⌜${GLOBAL_VALET_HOME}/valet⌝."
-  ${_SUDO} bash -c "printf '#%s\n%s \"\$@\"' \"!/usr/bin/env bash\" \"'${GLOBAL_VALET_HOME}/valet'\" 1> \"${valetBin}\""
+  ${_SUDO} bash -c "printf '#%s\nsource %s \"\$@\"' \"!/usr/bin/env bash\" \"'${GLOBAL_VALET_HOME}/valet'\" 1> \"${valetBin}\""
   ${_SUDO} chmod +x "${valetBin}"
 }
 
