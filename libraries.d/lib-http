@@ -48,9 +48,10 @@ source io
 #
 # ```bash
 # VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS=true
-# http::request GET http://httpbin.org/get
-# http::request GET https://api.ip2location.io/ true "" test.json
 # http::request "GET" "http://example.com" "false" "200,201" "" "true" "1" || core::fail "The HTTP request failed."
+# http::request GET https://api.ip2location.io/ true "" test.json
+# http::request GET http://httpbin.org/get
+# echo "Returns HTTP code was ${RETURNED_VALUE3}, response:"$'\n'"${RETURNED_VALUE}"$'\n'"${RETURNED_VALUE2}"
 # ```
 function http::request() {
   local verb="${1}"

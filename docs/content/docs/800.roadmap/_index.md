@@ -21,6 +21,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
 - make `source` able to source multiple libraries that are called the same.
 - add-test
+- for major version and breaking changes, we can add a lib `compat-x.x` which can be sourced by functions and declares functions as in version x.x.
 - Filter build command for `commands.d` ?
 - Add HOW TO documentation:
   - how to build and share a CLI application with Valet

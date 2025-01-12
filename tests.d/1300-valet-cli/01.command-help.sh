@@ -10,7 +10,7 @@ function testHelp() {
 
   # Testing to fuzzy find an help
   echo "→ valet hel sel mo3"
-  main::parseMainArguments hel sel mo3
+  (main::parseMainArguments hel sel mo3) && echo "Exiting with code 0."
   test::endTest "Testing to fuzzy find an help" $?
 
   # testing help options

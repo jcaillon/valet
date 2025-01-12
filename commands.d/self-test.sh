@@ -92,18 +92,18 @@ function selfTest() {
     TEST_INCLUDE_PATTERN \
     TEST_EXCLUDE_PATTERN \
     TEST_NO_PARALLEL_TESTS
-  if [[ -n "${autoApprove:-}" ]]; then
+  if [[ -n ${autoApprove:-} ]]; then
     TEST_AUTO_APPROVE="true"
   fi
-  if [[ -n "${include:-}" ]]; then
+  if [[ -n ${include:-} ]]; then
     log::info "Including only test suites that match the pattern ⌜${include}⌝."
     TEST_INCLUDE_PATTERN="${include}"
   fi
-  if [[ -n "${exclude:-}" ]]; then
+  if [[ -n ${exclude:-} ]]; then
     log::info "Excluding all test suites that match the pattern ⌜${exclude}⌝."
     TEST_EXCLUDE_PATTERN="${exclude}"
   fi
-  if [[ -n "${noParallelTests:-}" ]]; then
+  if [[ -n ${noParallelTests:-} ]]; then
     log::info "Running all tests sequentially."
     TEST_NO_PARALLEL_TESTS="true"
   fi
@@ -124,13 +124,13 @@ function selfTest() {
     # the file expansion does not include files under symbolic link directories
     # so we need to manually force the search in these directories
     listOfDirectories="${userDirectory}"$'\n'
-    while [[ -n "${listOfDirectories}" ]]; do
+    while [[ -n ${listOfDirectories} ]]; do
       currentDirectory="${listOfDirectories%%$'\n'*}"
       listOfDirectories="${listOfDirectories#*$'\n'}"
       log::trace "Searching for test suites directory in ⌜${currentDirectory}⌝."
       log::trace "listOfDirectories: ⌜${listOfDirectories}⌝."
       for testsDirectory in "${currentDirectory}"/*; do
-        if [[ ! -d "${testsDirectory}" ]]; then
+        if [[ ! -d ${testsDirectory} ]]; then
           # if the directory is not a directory, skip
           continue
         elif [[ ${testsDirectory} == *"/tests.d" ]]; then
@@ -152,14 +152,14 @@ function selfTest() {
     done
   fi
 
-  if [[ -n "${withCore:-}" || ${coreOnly:-false} == "true" ]]; then
+  if [[ -n ${withCore:-} || ${coreOnly:-false} == "true" ]]; then
     selfTestRunCoreTests
   fi
 
   string::microsecondsToHuman $((${EPOCHREALTIME//./} - ${startTime//./})) "%S seconds and %l ms"
   log::info "Total time running tests: ⌜${RETURNED_VALUE}⌝."
 
-  if [[ NB_FAILED_TEST_SUITES -gt 0 ]]; then
+  if (( NB_FAILED_TEST_SUITES > 0 )); then
     local failMessage
     failMessage="A total of ⌜${NB_FAILED_TEST_SUITES}⌝/⌜${NB_TEST_SUITES}⌝ test(s) failed."
     if [[ ${TEST_AUTO_APPROVE:-false} == "true" ]]; then
@@ -171,7 +171,7 @@ function selfTest() {
       failMessage+=$'\n'"If the differences are legitimate, then approve the changes by running this command again with the option ⌜-a⌝."
       core::fail "${failMessage}"
     fi
-  elif [[ NB_TEST_SUITES -gt 0 ]]; then
+  elif (( NB_TEST_SUITES > 0 )); then
     log::success "A total of ⌜${NB_TEST_SUITES}⌝ tests passed!"
   else
     log::warning "No eligible test suites found."

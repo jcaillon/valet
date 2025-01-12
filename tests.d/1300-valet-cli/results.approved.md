@@ -138,6 +138,7 @@ OPTIONS
   -h, --help
       Display the help for this command.
 
+Exiting with code 0.
 ```
 
 **Error** output:
