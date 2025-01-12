@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- add progress in self test; use the number of jobs for %.
 - Refactor the logging functions to be more readable, see if we really need to precalculate them or if we can just compute on the fly. Remove createPrintFunction on SIGWINCH.
 - Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.
 - core::checkParseResults typo...

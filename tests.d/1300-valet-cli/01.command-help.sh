@@ -5,17 +5,17 @@ builtin source ".before-test"
 function testHelp() {
   # testing to get help for the self mock2 command
   echo "→ valet help self mock2"
-  ("${GLOBAL_VALET_HOME}/valet" help self mock2)
+  "${GLOBAL_VALET_HOME}/valet" help self mock2
   test::endTest "Testing help for the self mock2 command" $?
 
   # Testing to fuzzy find an help
   echo "→ valet hel sel mo3"
-  (main::parseMainArguments hel sel mo3)
+  main::parseMainArguments hel sel mo3
   test::endTest "Testing to fuzzy find an help" $?
 
   # testing help options
   echo "→ valet help --columns 48 help"
-  ("${GLOBAL_VALET_HOME}/valet" help --columns 48 help)
+  "${GLOBAL_VALET_HOME}/valet" help --columns 48 help
   test::endTest "Testing help with columns 48" $?
 
   # test that we catch option errors

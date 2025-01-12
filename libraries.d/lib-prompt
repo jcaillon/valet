@@ -7,7 +7,7 @@ source ansi-codes
 # shellcheck source=lib-interactive
 source interactive
 
-# ## prompt::input
+# ## prompt::input (private)
 #
 # Displays a user prompt at a given location.
 #

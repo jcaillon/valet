@@ -289,7 +289,9 @@ function selfTestUtils_onExitTestInternal() {
 
   selfTestUtils_displayTestSuiteOutputs
 
-  log::error "The program has exit during the test ⌜${_TEST_SUITE_NAME}⌝ → ⌜${_TEST_SUITE_SCRIPT_NAME}⌝ with code ⌜${rc}⌝."$'\n'"If you expect the tested function/program to exit or fail, then run it in a subshell and capture the exit code like that:"$'\n'"(myFunctionThatFails) || exitCode=\$?"
+  log::error "The program has exit during the test ⌜${_TEST_SUITE_NAME}⌝ → ⌜${_TEST_SUITE_SCRIPT_NAME}⌝ with code ⌜${rc}⌝."
+  log::printCallStack 4
+  log::printString $'\n'"If you expect the tested function/program to exit or fail, then run it in a subshell and capture the exit code like that:"$'\n'"⌜(myFunctionThatFails) || echo 'failed as expected'⌝"
 
   # shellcheck disable=SC2034
   GLOBAL_ERROR_DISPLAYED=1
@@ -488,6 +490,8 @@ function selfTestUtils_setupDiffCommand() {
 # ```bash
 # selfTestUtils_internalCompare file1 file2
 # ```
+#
+#TODO: print a better display of the differences
 function selfTestUtils_internalCompare() {
   local file1="${1}"
   local file2="${2}"

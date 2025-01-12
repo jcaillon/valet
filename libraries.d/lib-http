@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# shellcheck source=lib-io
+source io
+
+# ## http::request (private)
+#
+# This function exists to demonstrate how to make a simple HTTP request using pure bash.
+# It should not be used for anything serious as it is seriously limited.
+# BUG: It only handles pure text responses (can't download anything else than plain text, json and such).
+# **Seriously, use curl instead!**
+#
+# - $1: **verb** _as string_:
+#       The HTTP verb to use (GET, POST, PUT, DELETE, etc.).
+# - $2: **url** _as string_:
+#       The URL to request. Can be http or https but it will only send a request to port 80 anyway.
+# - $3: fail on error _as bool_:
+#       (optional) Can be set using the variable `_OPTION_FAIL_ON_ERROR`.
+#       If true, the function will use core::fail if the HTTP status code is not acceptable.
+#       (defaults to false)
+# - $4: acceptable status codes _as string_:
+#       (optional) Can be set using the variable `_OPTION_ACCEPTABLE_STATUS_CODES`.
+#       The list of acceptable status codes, comma separated.
+#       (defaults to 200,201,202,204,301,304,308)
+# - $5: output file _as string_:
+#       (optional) Can be set using the variable `_OPTION_OUTPUT_FILE`.
+#       The file in which to save the output of the request.
+#       (defaults to "" which means the body will be returned in the variable `RETURNED_VALUE2`)
+# - $6: follow redirection _as bool_:
+#       (optional) Can be set using the variable `_OPTION_FOLLOW_REDIRECTION`.
+#       If true, the function will follow redirections.
+#       (defaults to true)
+# - $7: response timeout _as int_:
+#       (optional) Can be set using the variable `_OPTION_RESPONSE_TIMEOUT`.
+#       The timeout in seconds for the response.
+#       (defaults to 1)
+#
+# Returns:
+#
+# - $?:
+#   - 0 if the http status code is acceptable
+#   - 1 otherwise
+# - `RETURNED_VALUE`: the headers of the response
+# - `RETURNED_VALUE2`: the body of the response or the path to the file where it was saved
+# - `RETURNED_VALUE3`: the http status code
+#
+# ```bash
+# VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS=true
+# http::request GET http://httpbin.org/get
+# http::request GET https://api.ip2location.io/ true "" test.json
+# http::request "GET" "http://example.com" "false" "200,201" "" "true" "1" || core::fail "The HTTP request failed."
+# ```
+function http::request() {
+  local verb="${1}"
+  local url="${2}"
+  local failOnError="${3:-${_OPTION_FAIL_ON_ERROR:-false}}"
+  local acceptableStatusCodes="${4:-${_OPTION_ACCEPTABLE_STATUS_CODES:-200,201,202,204,301,304,308}}"
+  local outputFile="${5:-${_OPTION_OUTPUT_FILE:-}}"
+  local followRedirection="${6:-${_OPTION_FOLLOW_REDIRECTION:-true}}"
+  local -i responseTimeout="${7:-${_OPTION_RESPONSE_TIMEOUT:-1}}"
+
+  if [[ ${VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS:-} != "true" ]]; then
+    core::fail "For security reasons, insecure web requests are disabled by default. Please explicitly enable them by setting VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS to true."
+  fi
+
+  if [[ -n ${outputFile} ]]; then
+    io::createFilePathIfNeeded "${outputFile}"
+    : >"${outputFile}"
+  fi
+
+  # parse url
+  local host path
+  if [[ ${url} =~ ^https?://([^/]+)(/.*)$ ]]; then
+    host="${BASH_REMATCH[1]}"
+    path="${BASH_REMATCH[2]}"
+  else
+    log::error "The URL is invalid: ⌜${url}⌝."
+    return 1
+  fi
+  log::debug "Getting URL for host ⌜${host}⌝ and path ⌜${path@Q}⌝."
+
+  # open connection
+  exec 3<>"/dev/tcp/${host}/80"
+
+  local IFS=$'\n'
+
+  # send request with headers
+  local -a headers=(
+    "${verb} ${path} HTTP/1.1"
+    "Host: ${host}"
+    "Accept: */*"
+    "Connection: close"
+    ""
+  )
+  printf '%s\r\n' "${headers[@]}" >&3
+  log::debug "Headers sent:"
+  if log::isDebugEnabled; then
+    log::printString "${headers[*]}"
+  fi
+
+  # read response
+  log::debug "Headers received:"
+  local headers body httpCode line contentLength
+  local -i readBody=0 exitCode=0
+  while IFS=$'\n' read -r -d $'\n' -u 3 -t "${responseTimeout}" line || [[ -n ${line:-} ]]; do
+
+    if [[ ${readBody} -eq 0 && -n ${line%$'\r'} ]]; then
+      # we are still in the headers
+      line="${line%$'\r'}"
+      headers+="${line}"$'\n'
+      if log::isDebugEnabled; then
+        log::printString "${line}"
+      fi
+    elif [[ -z ${line%$'\r'} ]]; then
+      # we are at the end of the headers
+      readBody=1
+      if [[ -n ${outputFile} ]]; then
+        # read the whole body to a file
+        local buffer
+        log::debug "Reading body with content length: ${contentLength:-0}"
+        if [[ -n ${contentLength:-} ]]; then
+          while IFS= read -sr -d '' -u 3 buffer || [[ -n ${buffer:-} ]]; do
+            printf '%s' "${buffer}" >>"${outputFile}"
+          done
+        else
+          : >"${outputFile}"
+        fi
+      else
+        if [[ -n ${contentLength:-} ]]; then
+          while IFS= read -sr -d '' -u 3 buffer || [[ -n ${buffer:-} ]]; do
+            body+="${buffer}"
+          done
+        fi
+      fi
+      break
+    fi
+
+    # get http code and interpret headers
+    if [[ -z "${httpCode:-}" && ${line} =~ ^HTTP/1\.[01]\ ([0-9]{3})\ .*$ ]]; then
+      httpCode="${BASH_REMATCH[1]}"
+      log::debug "Got HTTP code ⌜${httpCode}⌝."
+
+    elif [[ ${line} =~ ^Content-Length:\ ([0-9]+)$ ]]; then
+      contentLength="${BASH_REMATCH[1]}"
+      log::debug "Got Content-Length: ${contentLength}"
+
+    elif [[ ${followRedirection} == "true" && ${httpCode:-} == 301 && ${line} =~ ^Location:\ (.*)$ ]]; then
+      local location="${BASH_REMATCH[1]}"
+      # test if it is the same URL but with https
+      if [[ ${location} == "https://${host}${path}" ]]; then
+        log::error "HTTPS redirection detected for ⌜${url}⌝, we cannot follow (HTTP request was sent but we got 301 and the location is the HTTPS url)."
+        exitCode=1
+      fi
+      log::debug "Following redirection to: ${location}"
+      http::get "${location}"
+      return 0
+    fi
+  done
+
+  # close connection
+  exec 3<&-
+  exec 3>&-
+
+  if [[ ,${acceptableStatusCodes}, == *",${httpCode},"* ]]; then
+    exitCode=0
+    log::debug "The HTTP return code ⌜${httpCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
+  else
+    exitCode=1
+  fi
+  if (( exitCode != 0 )); then
+    if log::isDebugEnabled || [[ ${failOnError} == "true" ]]; then
+      log::errorTrace "HTTP response:"
+      log::printFileString "${headers}"$'\n'"${body:-}"
+    fi
+    local message="The HTTP return code ⌜${httpCode}⌝ is not acceptable for url ⌜${url}⌝."
+    if [[ ${failOnError} == "true" ]]; then
+      core::fail "${message}"
+    fi
+    log::debug "${message}"
+  fi
+
+  RETURNED_VALUE="${headers}"
+  RETURNED_VALUE2="${body:-${outputFile}}"
+  RETURNED_VALUE3="${httpCode}"
+
+  return ${exitCode}
+}
