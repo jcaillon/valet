@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 core::sourceFunction "selfDocument"
+
 # shellcheck disable=SC1091
 source io
 
@@ -12,14 +13,14 @@ function testSelfDocument() {
   selfDocument --output "${directory}" --core-only
 
   echo
-  echo "→ cat ${directory}/lib-valet.md"
-  io::cat "${directory}/lib-valet.md"
+  echo "→ head --lines 40 ${directory}/lib-valet.md"
+  io::head "${directory}/lib-valet.md" 40
   echo
-  echo "→ cat ${directory}/lib-valet"
-  io::cat "${directory}/lib-valet"
+  echo "→ head --lines 40 ${directory}/lib-valet"
+  io::head "${directory}/lib-valet" 40
   echo
-  echo "→ cat ${directory}/valet.code-snippets"
-  io::cat "${directory}/valet.code-snippets"
+  echo "→ head --lines 40 ${directory}/valet.code-snippets"
+  io::head "${directory}/valet.code-snippets" 40
 
   test::endTest "Testing selfDocument" 0
 }
@@ -38,6 +39,3 @@ function main() {
 }
 
 main
-
-core::resetIncludedFiles
-source system

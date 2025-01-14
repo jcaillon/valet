@@ -209,6 +209,50 @@ function test_io::createLink() {
   test::endTest "Testing io::createLink" 0
 }
 
+function test_io::head() {
+
+  echo "→ io::head 'resources/file-to-read' 10"
+  io::head 'resources/file-to-read' 10
+
+  test::endTest "Testing io::head limited to 10 lines" 0
+
+  echo "→ io::head 'resources/file-to-read' 0"
+  io::head 'resources/file-to-read' 0
+
+  test::endTest "Testing io::head limited to 0 lines" 0
+
+  echo "→ io::head 'resources/file-to-read' 99"
+  io::head 'resources/file-to-read' 99
+
+  test::endTest "Testing io::head limited to 99 lines" 0
+
+  echo "→ io::head 'resources/file-to-read' 10 true"
+  io::head 'resources/file-to-read' 10 true
+  echo "${RETURNED_VALUE}"
+
+  test::endTest "Testing io::head to var" 0
+}
+
+function test_io::captureOutput() {
+
+  echo "→ io::captureOutput 'echo coucou'"
+  io::captureOutput 'echo coucou'
+  echo "${RETURNED_VALUE}"
+
+  echo
+  echo "→ io::captureOutput 'declare -f io::captureOutput'"
+  io::captureOutput 'declare -f io::captureOutput'
+  echo "${RETURNED_VALUE}"
+
+  test::endTest "Testing io::captureOutput" 0
+
+  echo "→ io::captureOutput '[[ 1 -eq 0 ]]'"
+  io::captureOutput '[[ 1 -eq 0 ]]' || echo "Failed as expected"
+
+  test::endTest "Testing io::captureOutput when command is failing" 0
+}
+
+
 function main() {
   test_io::toAbsolutePath
   test_io::readFile
@@ -222,6 +266,8 @@ function main() {
   test_io::convertToWindowsPath
   test_io::createLink
   test_io::convertFromWindowsPath
+  test_io::head
+  test_io::captureOutput
 }
 
 main

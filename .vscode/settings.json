@@ -2,5 +2,8 @@
   // https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
   "bashIde.globPattern": "**/@(core|main|lib-!(valet)|self-*)",
   "bashIde.includeAllWorkspaceSymbols": true,
-  "terminal.integrated.wordSeparators": " ()[]{}',\"`─‘’“”|⌜⌝"
+  "terminal.integrated.wordSeparators": " ()[]{}',\"`─‘’“”|⌜⌝",
+  "cSpell.words": [
+    "Pids"
+  ]
 }

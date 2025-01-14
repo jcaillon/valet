@@ -8,6 +8,10 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- after logging, if progress bar is in progress, we need to redraw it immediately.
+- for interactive mode, a first iteration is to prompt the user in the scrolling terminal. Then we add an option to instead open a full screen editor.
+- might be able to improve the quicksort if we use direct statements instead of functions.
+- for the log functions, we can optionally display the function name and the line number of the caller + pid + shlvl. +ISO8601 time `printf "%(%FT%H:%M:%S%z)T" "${EPOCHSECONDS}"`. Let user customize the log format with a var? `[%t] %-5level %36logger %msg`. Show them how to output as json!
 - add progress in self test; use the number of jobs for %.
 - Refactor the logging functions to be more readable, see if we really need to precalculate them or if we can just compute on the fly. Remove createPrintFunction on SIGWINCH.
 - Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.
@@ -16,7 +20,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - In benchmark, with debug mode on, we can compute the time spent on each line of a function (+ try to improve the fuzzy filter sort). See extdebug shopt.
 - add snippets for the Ansi codes. Add snippets on the global variables.
 - check usage of array::fuzzyFilterSort and add back the colors.
-- Demo with ascii cinema: https://asciinema.org.
+- Demo with ascii cinema: https://asciinema.org. Put the showcase in the index page instead.
 - For all the optional arguments of exported functions, allow to set them using a global variable `_OPTION_*` in addition to the positional argument. Add this in the documentation about functions.
 - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
 - make `source` able to source multiple libraries that are called the same.

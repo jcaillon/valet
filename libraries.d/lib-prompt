@@ -1583,7 +1583,7 @@ function prompt_getDisplayedPromptString() {
 # we will redefine array::fuzzyFilterSort to a new function that uses global variables
 # this is to avoid copying parameters to the function and hopefully be faster
 function prompt_fuzzyFilterSort() { :; }
-core::reExportFuncToUseGlobalVars array::fuzzyFilterSort prompt_fuzzyFilterSort _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ORIGINAL_ITEMS
+bash::getFunctionDefinitionWithGlobalVars array::fuzzyFilterSort prompt_fuzzyFilterSort _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ORIGINAL_ITEMS
 RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY2/_PROMPT_FILTERED_ITEMS_CORRESPONDENCES}"
 RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY/_PROMPT_FILTERED_ITEMS}"
 eval "${RETURNED_VALUE}"

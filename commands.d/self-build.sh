@@ -210,11 +210,11 @@ function selfBuild() {
     bumpValetBuildVersion
   fi
 
+  log::success "The valet user commands have been successfully built."
+
   if [[ ${silent:-} == "true" ]]; then
     log::setLevel "${originalLogLevel}" true
   fi
-
-  log::success "The valet user commands have been successfully built."
 }
 
 #===============================================================

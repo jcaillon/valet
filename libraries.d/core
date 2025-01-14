@@ -8,35 +8,45 @@ if [[ ${BASH_VERSINFO[0]:-0} -lt 5 ]]; then
   exit 1
 fi
 
-# Set the important shell attributes to ensure consistency in execution (-enable, +disable).
-# -pipefail: the $? of a pipeline is the status of the last command to exit with a non-zero status
-# -braceexpand: {1..3} will be expanded to 1 2 3
-# -errexit: exit immediately if a command exits with a non-zero status
-# -errtrace: ERR trap is inherited in subshell
-# -functrace: DEBUG and RETURN traps are inherited in subshell
-# -nounset: exit when script tries to use undeclared variables
-# -hashall: enable hashing of all commands (for performance)
-# +histexpand: disable history expansion
-# +monitor: disable job control monitor (will not report status of background jobs)
-# +noclobber: enable overwriting files during redirection
-# +noglob: enable filename expansion (globbing)
-# +notify: disable immediate report status of background jobs
-set -o pipefail -o braceexpand -o errexit -o errtrace -o functrace -o nounset -o hashall +o histexpand +o monitor +o noclobber +o noglob +o notify
-# -globasciiranges: use C locale for [] character ranges in match patterns
-# +checkwinsize: do not check the window size after each external command
-# +dotglob: disable inclusion of hidden files in filename expansion
-# +expand_aliases: disable alias expansion
-# +nocasematch: disable case-insensitive matching
-shopt -s extquote globasciiranges huponexit interactive_comments progcomp
-shopt -u assoc_expand_once cdable_vars checkhash checkjobs checkwinsize compat31 compat32 compat40 compat41 compat42 compat43 compat44 globstar localvar_inherit localvar_unset nocaseglob nocasematch progcomp_alias shift_verbose xpg_echo nullglob direxpand dirspell dotglob extglob failglob execfail expand_aliases inherit_errexit
-if (( ${BASH_VERSINFO[1]} >= 2)); then
-  shopt -s globskipdots patsub_replacement
-  shopt -u varredir_close
+# ## core::setShellOptions
+function core::setShellOptions() {
+  # Set the important shell attributes to ensure consistency in execution (-enable, +disable).
+  # -pipefail: the $? of a pipeline is the status of the last command to exit with a non-zero status
+  # -braceexpand: {1..3} will be expanded to 1 2 3
+  # -errexit: exit immediately if a command exits with a non-zero status
+  # -errtrace: ERR trap is inherited in subshell
+  # -functrace: DEBUG and RETURN traps are inherited in subshell
+  # -nounset: exit when script tries to use undeclared variables
+  # -hashall: enable hashing of all commands (for performance)
+  # +histexpand: disable history expansion
+  # +monitor: disable job control monitor (will not report status of background jobs)
+  # +noclobber: enable overwriting files during redirection
+  # +noglob: enable filename expansion (globbing)
+  # +notify: disable immediate report status of background jobs
+  set -o pipefail -o braceexpand -o errexit -o errtrace -o functrace -o nounset -o hashall +o histexpand +o monitor +o noclobber +o noglob +o notify
+  # -globasciiranges: use C locale for [] character ranges in match patterns
+  # +checkwinsize: do not check the window size after each external command
+  # +dotglob: disable inclusion of hidden files in filename expansion
+  # +expand_aliases: disable alias expansion
+  # +nocasematch: disable case-insensitive matching
+  shopt -s extquote globasciiranges huponexit interactive_comments progcomp
+  shopt -u assoc_expand_once cdable_vars checkhash checkjobs checkwinsize compat31 compat32 compat40 compat41 compat42 compat43 compat44 globstar localvar_inherit localvar_unset nocaseglob nocasematch progcomp_alias shift_verbose xpg_echo nullglob direxpand dirspell dotglob extglob failglob execfail expand_aliases inherit_errexit
+  if (( ${BASH_VERSINFO[1]} >= 2)); then
+    shopt -s globskipdots patsub_replacement
+    shopt -u varredir_close
+  fi
+}
+
+core::setShellOptions
+
+if [[ -n ${GLOBAL_CORE_INCLUDED:-} ]] && declare -f log::warning &>/dev/null; then
+  log::warning "The core library has already been included but was called again, remove the unnecessary call."
+  log::printCallStack
+  return 0
 fi
 
 # we check for this variable to know if this script has already been included
 GLOBAL_CORE_INCLUDED=1
-
 # Remember the time the program started (nb of seconds since epoch)
 GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
 
@@ -165,18 +175,13 @@ function io::cleanupTempFiles() {
   if [[ -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
     log::debug "Deleting temporary directory."
     rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
-    unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
   fi
   local _file
   for _file in "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet"*; do
     rm -f "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-"* 1>/dev/null
     break
   done
-  # for files created in  io::windowsCreateTempFile
-  if [[ -n ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} && -d ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY} ]]; then
-    log::debug "Deleting windows temporary directory."
-    rm -Rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" 1>/dev/null
-  fi
+  unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
 }
 
 #===============================================================
@@ -758,28 +763,48 @@ function log::isTraceEnabled() {
 #       The number of stack to skip.
 #       (defaults to 2 which skips this function and the first calling function
 #       which is usually the onError function)
+# - $2: Stack to skip at end _as int_:
+#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.
+#       The number of stack to skip at the end.
+#       (defaults to 0)
 #
 # ```bash
 # log::printCallStack
 # log::printCallStack 0
 # ```
+#
+# > For test purposes, you can set the `_STACK_FUNCTION_NAMES`, `_STACK_SOURCE_FILES` and `_STACK_LINE_NUMBERS`
+# > variables to simulate a call stack.
 function log::printCallStack() {
   local -i levelToSkip="${1:-${_OPTION_STACK_TO_SKIP:-2}}"
+  local -i levelToSkipAtEnd="${2:-${_OPTION_STACK_TO_SKIP_AT_END:-0}}"
   local -i idx stackSize
+
+  local -a stackFunctionNames stackSourceFiles stackLineNumbers
+  if [[ -n ${_STACK_FUNCTION_NAMES:-} ]]; then
+    stackFunctionNames=("${_STACK_FUNCTION_NAMES[@]}")
+    stackSourceFiles=("${_STACK_SOURCE_FILES[@]}")
+    stackLineNumbers=("${_STACK_LINE_NUMBERS[@]}")
+  else
+    stackFunctionNames=("${FUNCNAME[@]}")
+    stackSourceFiles=("${BASH_SOURCE[@]}")
+    stackLineNumbers=("${BASH_LINENO[@]}")
+  fi
+
+  stackSize=$((${#stackFunctionNames[@]} - levelToSkipAtEnd))
   local functionName lineNumber="${LINENO}" sourceFile
-  stackSize=${#FUNCNAME[@]}
   local treeString="├─" treePadding="│  "
   for ((idx = levelToSkip; idx < stackSize; idx++)); do
-    functionName="${FUNCNAME[${idx}]}"
+    functionName="${stackFunctionNames[${idx}]}"
     if [[ -z ${functionName} ]]; then
       functionName=ROOT
     else
       functionName="${functionName}()"
     fi
     if ((idx > 0)); then
-      lineNumber="${BASH_LINENO[$((idx - 1))]}"
+      lineNumber="${stackLineNumbers[$((idx - 1))]}"
     fi
-    sourceFile="${BASH_SOURCE[${idx}]}"
+    sourceFile="${stackSourceFiles[${idx}]}"
     if [[ -z "${sourceFile}" ]]; then
       sourceFile=non_file_source
     fi
@@ -791,319 +816,6 @@ function log::printCallStack() {
     fi
     log::printString "${treeString} in ${functionName} at ${sourceFile}:${lineNumber}" "${treePadding}"
   done
-}
-
-#===============================================================
-# >>> Core utilities
-#===============================================================
-
-# ## core::fail
-#
-# Displays an error message and then exit the program with error.
-#
-# - $@: **message** _as string_:
-#       the error message to display
-#
-# ```bash
-# core::fail "This is an error message."
-# ```
-function core::fail() {
-  log::error "$@"
-  # shellcheck disable=SC2034
-  GLOBAL_ERROR_DISPLAYED=1
-  exit 1
-}
-
-# ## core::failWithCode
-#
-# Displays an error message and then exit the program with error.
-#
-# - $1: **exit code** _as int_:
-#       the exit code to use, should be between 1 and 255
-# - $@: **message** _as string_:
-#       the error message to display
-#
-# ```bash
-# core::failWithCode 255 "This is an error message."
-# ```
-function core::failWithCode() {
-  local exitCode="${1}"
-  shift
-  log::error "$@"
-  # shellcheck disable=SC2034
-  GLOBAL_ERROR_DISPLAYED=1
-  exit "${exitCode}"
-}
-
-# ## source
-#
-# Allows to include a library file or sources a file.
-#
-# It replaces the builtin source command to make sure that we do not include the same file twice.
-# We replace source instead of creating a new function to allow us to
-# specify the included file for spellcheck.
-#
-# - $1: **library name** _as string_:
-#       the name of the library (array, interactive, string...) or the file path to include.
-# - $@: arguments _as any_:
-#       (optional) the arguments to pass to the included file (mimics the builtin source command).
-#
-# ```bash
-#   source string array system
-#   source ./my/path my/other/path
-# ```
-#
-# > - The file can be relative to the current script (script that calls this function).
-# > - This function makes sure that we do not include the same file twice.
-# > - Use `builtin source` if you want to include the file even if it was already included.
-function source() {
-  local filePathToInclude
-  if [[ -f "${GLOBAL_VALET_HOME}/libraries.d/lib-${1}" ]]; then
-    # source the lib from the valet core libs
-    filePathToInclude="${GLOBAL_VALET_HOME}/libraries.d/lib-${1}"
-  else
-    # source the lib from user libs
-    if [[ -v CMD_LIBRARY_DIRECTORIES ]]; then
-      local libraryDirectory
-      for libraryDirectory in "${CMD_LIBRARY_DIRECTORIES[@]}"; do
-        if [[ -f "${libraryDirectory}/lib-${1}" ]]; then
-          filePathToInclude="${libraryDirectory}/lib-${1}"
-        fi
-      done
-    fi
-    if [[ -z "${filePathToInclude:-}" ]]; then
-      if [[ -n ${BASH_SOURCE[1]:-} && -f "${BASH_SOURCE[1]%/*}/${1}" ]]; then
-        # source a file next to the file that calls this function
-        filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
-      elif [[ -f "${1}" ]]; then
-        # source a file with an absolute path or in the current directory
-        filePathToInclude="${1}"
-      else
-        core::fail "Cannot source the file ⌜${1}⌝ because it does not exist."$'\n'"If you meant to source a library, make sure it is either in the valet core or user libraries and do not include the ⌜lib-⌝ prefix."
-      fi
-    fi
-  fi
-
-  local includeFile
-  for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
-    if [[ ${includedFile} == "${filePathToInclude}" ]]; then
-      return 0
-    fi
-  done
-  shift
-  # shellcheck source=/dev/null
-  builtin source "${filePathToInclude}" "$@"
-  _LIST_OF_INCLUDED_FILES+=("${filePathToInclude}")
-}
-_LIST_OF_INCLUDED_FILES=()
-
-# ## core::resetIncludedFiles
-#
-# Allows to reset the included files.
-# When calling the source function, it will source all the files again.
-# This is useful when we want to reload the libraries.
-#
-# ```bash
-# core::resetIncludedFiles
-# ```
-function core::resetIncludedFiles() {
-  _LIST_OF_INCLUDED_FILES=()
-}
-
-# ## core::sourceFunction
-#
-# Source the file associated with a command function.
-# This allows you to call a command function without having to source the file manually.
-#
-# - $1: **function name** _as string_:
-#       the function name
-#
-# ```bash
-# core::sourceFunction "functionName"
-# ```
-function core::sourceFunction() {
-  local functionName="${1}"
-
-  local fileToSource
-  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
-    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
-    if [[ -f "${fileToSource}" ]]; then
-      # shellcheck disable=SC1090
-      source "${fileToSource}"
-      log::debug "Loaded file ⌜${fileToSource}⌝."
-    elif [[ -f "${GLOBAL_VALET_HOME:-}/${fileToSource}" ]]; then
-      # shellcheck disable=SC1090
-      source "${GLOBAL_VALET_HOME:-}/${fileToSource}"
-      log::debug "Loaded file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝."
-    else
-      log::warning "The source file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
-    fi
-  fi
-}
-
-# ## core::sourceUserCommands
-#
-# Source the user 'commands' file from the valet user directory.
-# If the file does not exist, we build it on the fly.
-#
-# ```bash
-# core::sourceUserCommands
-# ```
-function core::sourceUserCommands() {
-  if [[ -n "${_CMD_INCLUDED:-}" ]]; then
-    return 0
-  fi
-
-  # source the user commands
-  local userDirectory
-  core::getUserDirectory
-  userDirectory="${RETURNED_VALUE}"
-
-  local commandsFile
-  commandsFile="${userDirectory}/commands"
-
-  # if the commands file does not exist, we build it.
-  if [[ ! -f "${commandsFile}" ]]; then
-    log::info "The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'"Now building it using ⌜valet self build⌝ command."
-
-    # shellcheck disable=SC1091
-    unset _CMD_INCLUDED
-    # shellcheck source=../commands.d/self-build.sh
-    source "${GLOBAL_VALET_HOME}/commands.d/self-build.sh"
-    selfBuild --silent
-
-    if [[ ! -f "${commandsFile}" ]]; then
-      core::fail "Could not build the commands file, please check the error above."
-    fi
-  fi
-
-  log::debug "Sourcing the user commands from ⌜${commandsFile}⌝."
-
-  # source commands (use builtin to not use our custom source function)
-  builtin source "${commandsFile}"
-}
-
-# ## core::reloadUserCommands
-#
-# Forcibly source again the user 'commands' file from the valet user directory.
-#
-# ```bash
-# core::reloadUserCommands
-# ```
-function core::reloadUserCommands() {
-  # delete previous variables
-  # shellcheck disable=SC2086
-  unset -v ${!CMD_*} _CMD_INCLUDED
-  core::sourceUserCommands
-}
-
-# ## core::deleteUserCommands
-#
-# Delete the user 'commands' file from the valet user directory.
-#
-# You probably want to reload the user commands afterward using `core::reloadUserCommands`.
-#
-# ```bash
-# core::deleteUserCommands
-# ```
-function core::deleteUserCommands() {
-  core::getUserDirectory
-  rm -f "${RETURNED_VALUE}/commands"
-}
-
-# ## core::getVersion
-#
-# Returns the version of Valet.
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: The version of Valet.
-#
-# ```bash
-# core::getVersion
-# printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
-# ```
-function core::getVersion() {
-  # shellcheck source=lib-io
-  source io
-  io::readFile "${GLOBAL_VALET_HOME}/version"
-}
-
-# ## core::getProgramElapsedMicroseconds
-#
-# Get the elapsed time in µs since the program started.
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: the elapsed time in µs since the program started.
-#
-# ```bash
-# core::getElapsedProgramTime
-# echo "${RETURNED_VALUE}"
-# string::microsecondsToHuman "${RETURNED_VALUE}"
-# echo "Human time: ${RETURNED_VALUE}"
-# ```
-#
-# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
-function core::getProgramElapsedMicroseconds() {
-  # we need to strip all leading zeros from the microseconds
-  local us="${EPOCHREALTIME##*\.}"
-  us="${us#"${us%%[!0]*}"}"
-  RETURNED_VALUE=$((((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000) + us))
-}
-
-# ## core::reExportFuncToUseGlobalVars (private)
-#
-# This function can be used to re-export an existing function
-# and replace the use of positional parameters by global variables.
-#
-# This can be useful for performance reasons when a function is called many times,
-# to avoid copying the positional parameters each time.
-#
-# - $1: **function name** _as string_:
-#       the name of the function to re-export
-# - $2: **new function name** _as string_:
-#       the name of the new function to create
-# - $@: **global variable name** _as string_:
-#       the name of the global variable to use instead of the positional parameters
-#       (can be repeated multiple times, for each parameter)
-#
-# ```bash
-# core::reExportFuncToUseGlobalVars "myFunction" "myFunctionWithGlobalVars" "GLOBAL_VAR1" "GLOBAL_VAR2"
-# ```
-function core::reExportFuncToUseGlobalVars() {
-  local functionName="${1}"
-  local newFunctionName="${2}"
-  shift 2
-
-  io::invoke declare -f "${functionName}"
-  local functionDefinition="${RETURNED_VALUE/"${functionName}"/"${newFunctionName}"}"
-
-  # find the mapping between the positional parameters and the new global variable names
-  local -A globalVars=()
-  local -a positionalParameters=("$@")
-  local IFS=$'\n'
-  local line varName varPosition
-  local modifiedFunctionDefinition=""
-  for line in ${functionDefinition}; do
-    if ((${#positionalParameters[@]} != ${#globalVars[@]})); then
-      if [[ "${line}" =~ ^\ *local\ +(-[[:alpha:]]+\ )?([[:alpha:]]+)=[^$]*\$\{?([[:digit:]]+) ]]; then
-        varName="${BASH_REMATCH[2]}"
-        varPosition="${BASH_REMATCH[3]}"
-        globalVars["${varName}"]="${positionalParameters[$((varPosition - 1))]}"
-        log::debug "found local ${varName}=\${${varPosition}} -> remapped to ${globalVars[${varName}]}"
-        continue
-      fi
-    fi
-    modifiedFunctionDefinition+="${line}"$'\n'
-  done
-
-  # modify the function to use the global variables instead of the positional parameters
-  for varName in "${!globalVars[@]}"; do
-    modifiedFunctionDefinition="${modifiedFunctionDefinition//${varName}/"${globalVars[${varName}]}"}"
-  done
-
-  RETURNED_VALUE="${modifiedFunctionDefinition}"
 }
 
 #===============================================================
@@ -1520,6 +1232,335 @@ function array::fuzzyFilterSortQuicksort() {
   if ((ii < high)); then
     array::fuzzyFilterSortQuicksort ${ii} ${high}
   fi
+}
+
+#===============================================================
+# >>> Bash utilities
+#===============================================================
+
+# ## bash::getFunctionDefinitionWithGlobalVars
+#
+# This function can be used to get the definition of an existing function,
+# rename it, and replace the use of positional parameters by global variables.
+#
+# This can be useful for performance reasons when a function is called many times,
+# to avoid copying the positional parameters each time.
+#
+# - $1: **function name** _as string_:
+#       the name of the function to re-export
+# - $2: **new function name** _as string_:
+#       the name of the new function to create
+# - $@: global variable name _as string_:
+#       the name of the global variable to use instead of the positional parameters
+#       (can be repeated multiple times, for each parameter)
+#
+# Returns:
+#
+# - $?:
+#   - 0 if the function was successfully re-exported
+#   - 1 if the function does not exist
+# - `RETURNED_VALUE`: the modified function definition
+#
+# ```bash
+# bash::getFunctionDefinitionWithGlobalVars "myFunction" "myFunctionWithGlobalVars" "GLOBAL_VAR1" "GLOBAL_VAR2"
+# ```
+function bash::getFunctionDefinitionWithGlobalVars() {
+  local functionName="${1}"
+  local newFunctionName="${2}"
+  shift 2
+
+  local IFS=''
+  local functionDefinition
+  declare -f "${functionName}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
+  read -rd '' functionDefinition <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || [[ -n ${functionDefinition} ]]
+  functionDefinition="${functionDefinition/"${functionName}"/"${newFunctionName}"}"
+
+  # find the mapping between the positional parameters and the new global variable names
+  local -A globalVars=()
+  local -a positionalParameters=("$@")
+  local IFS=$'\n'
+  local line varName varPosition
+  local modifiedFunctionDefinition=""
+  for line in ${functionDefinition}; do
+    if ((${#positionalParameters[@]} != ${#globalVars[@]})); then
+      if [[ "${line}" =~ ^\ *local\ +(-[[:alpha:]]+\ )?([[:alpha:]]+)=[^$]*\$\{?([[:digit:]]+) ]]; then
+        varName="${BASH_REMATCH[2]}"
+        varPosition="${BASH_REMATCH[3]}"
+        if [[ -n ${positionalParameters[$((varPosition - 1))]} ]]; then
+          globalVars["${varName}"]="${positionalParameters[$((varPosition - 1))]}"
+          log::debug "found local ${varName}=\${${varPosition}} -> remapped to ${globalVars[${varName}]}"
+          continue
+        fi
+      fi
+    fi
+    modifiedFunctionDefinition+="${line}"$'\n'
+  done
+
+  # modify the function to use the global variables instead of the positional parameters
+  for varName in "${!globalVars[@]}"; do
+    modifiedFunctionDefinition="${modifiedFunctionDefinition//${varName}/"${globalVars[${varName}]}"}"
+  done
+
+  RETURNED_VALUE="${modifiedFunctionDefinition}"
+}
+
+#===============================================================
+# >>> Core utilities
+#===============================================================
+
+# ## core::fail
+#
+# Displays an error message and then exit the program with error.
+#
+# - $@: **message** _as string_:
+#       the error message to display
+#
+# ```bash
+# core::fail "This is an error message."
+# ```
+function core::fail() {
+  log::error "$@"
+  # shellcheck disable=SC2034
+  GLOBAL_ERROR_DISPLAYED=1
+  exit 1
+}
+
+# ## core::failWithCode
+#
+# Displays an error message and then exit the program with error.
+#
+# - $1: **exit code** _as int_:
+#       the exit code to use, should be between 1 and 255
+# - $@: **message** _as string_:
+#       the error message to display
+#
+# ```bash
+# core::failWithCode 255 "This is an error message."
+# ```
+function core::failWithCode() {
+  local exitCode="${1}"
+  shift
+  log::error "$@"
+  # shellcheck disable=SC2034
+  GLOBAL_ERROR_DISPLAYED=1
+  exit "${exitCode}"
+}
+
+# ## source
+#
+# Allows to include a library file or sources a file.
+#
+# It replaces the builtin source command to make sure that we do not include the same file twice.
+# We replace source instead of creating a new function to allow us to
+# specify the included file for spellcheck.
+#
+# - $1: **library name** _as string_:
+#       the name of the library (array, interactive, string...) or the file path to include.
+# - $@: arguments _as any_:
+#       (optional) the arguments to pass to the included file (mimics the builtin source command).
+#
+# ```bash
+#   source string array system
+#   source ./my/path my/other/path
+# ```
+#
+# > - The file can be relative to the current script (script that calls this function).
+# > - This function makes sure that we do not include the same file twice.
+# > - Use `builtin source` if you want to include the file even if it was already included.
+function source() {
+  local filePathToInclude
+  if [[ -f "${GLOBAL_VALET_HOME}/libraries.d/lib-${1}" ]]; then
+    # source the lib from the valet core libs
+    filePathToInclude="${GLOBAL_VALET_HOME}/libraries.d/lib-${1}"
+  else
+    # source the lib from user libs
+    if [[ -v CMD_LIBRARY_DIRECTORIES ]]; then
+      local libraryDirectory
+      for libraryDirectory in "${CMD_LIBRARY_DIRECTORIES[@]}"; do
+        if [[ -f "${libraryDirectory}/lib-${1}" ]]; then
+          filePathToInclude="${libraryDirectory}/lib-${1}"
+        fi
+      done
+    fi
+    if [[ -z "${filePathToInclude:-}" ]]; then
+      if [[ -n ${BASH_SOURCE[1]:-} && -f "${BASH_SOURCE[1]%/*}/${1}" ]]; then
+        # source a file next to the file that calls this function
+        filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
+      elif [[ -f "${1}" ]]; then
+        # source a file with an absolute path or in the current directory
+        filePathToInclude="${1}"
+      else
+        core::fail "Cannot source the file ⌜${1}⌝ because it does not exist."$'\n'"If you meant to source a library, make sure it is either in the valet core or user libraries and do not include the ⌜lib-⌝ prefix."
+      fi
+    fi
+  fi
+
+  local includeFile
+  for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
+    if [[ ${includedFile} == "${filePathToInclude}" ]]; then
+      return 0
+    fi
+  done
+  shift
+  # shellcheck source=/dev/null
+  builtin source "${filePathToInclude}" "$@"
+  _LIST_OF_INCLUDED_FILES+=("${filePathToInclude}")
+}
+_LIST_OF_INCLUDED_FILES=()
+
+# ## core::resetIncludedFiles
+#
+# Allows to reset the included files.
+# When calling the source function, it will source all the files again.
+# This is useful when we want to reload the libraries.
+#
+# ```bash
+# core::resetIncludedFiles
+# ```
+function core::resetIncludedFiles() {
+  _LIST_OF_INCLUDED_FILES=()
+}
+
+# ## core::sourceFunction
+#
+# Source the file associated with a command function.
+# This allows you to call a command function without having to source the file manually.
+#
+# - $1: **function name** _as string_:
+#       the function name
+#
+# ```bash
+# core::sourceFunction "functionName"
+# ```
+function core::sourceFunction() {
+  local functionName="${1}"
+
+  local fileToSource
+  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
+    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
+    if [[ -f "${fileToSource}" ]]; then
+      # shellcheck disable=SC1090
+      source "${fileToSource}"
+      log::debug "Loaded file ⌜${fileToSource}⌝."
+    elif [[ -f "${GLOBAL_VALET_HOME:-}/${fileToSource}" ]]; then
+      # shellcheck disable=SC1090
+      source "${GLOBAL_VALET_HOME:-}/${fileToSource}"
+      log::debug "Loaded file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝."
+    else
+      log::warning "The source file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
+    fi
+  fi
+}
+
+# ## core::sourceUserCommands
+#
+# Source the user 'commands' file from the valet user directory.
+# If the file does not exist, we build it on the fly.
+#
+# ```bash
+# core::sourceUserCommands
+# ```
+function core::sourceUserCommands() {
+  if [[ -n "${_CMD_INCLUDED:-}" ]]; then
+    return 0
+  fi
+
+  # source the user commands
+  local userDirectory
+  core::getUserDirectory
+  userDirectory="${RETURNED_VALUE}"
+
+  local commandsFile
+  commandsFile="${userDirectory}/commands"
+
+  # if the commands file does not exist, we build it.
+  if [[ ! -f "${commandsFile}" ]]; then
+    log::info "The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'"Now building it using ⌜valet self build⌝ command."
+
+    # shellcheck disable=SC1091
+    unset _CMD_INCLUDED
+    # shellcheck source=../commands.d/self-build.sh
+    source "${GLOBAL_VALET_HOME}/commands.d/self-build.sh"
+    selfBuild --silent
+
+    if [[ ! -f "${commandsFile}" ]]; then
+      core::fail "Could not build the commands file, please check the error above."
+    fi
+  fi
+
+  log::debug "Sourcing the user commands from ⌜${commandsFile}⌝."
+
+  # source commands (use builtin to not use our custom source function)
+  builtin source "${commandsFile}"
+}
+
+# ## core::reloadUserCommands
+#
+# Forcibly source again the user 'commands' file from the valet user directory.
+#
+# ```bash
+# core::reloadUserCommands
+# ```
+function core::reloadUserCommands() {
+  # delete previous variables
+  # shellcheck disable=SC2086
+  unset -v ${!CMD_*} _CMD_INCLUDED
+  core::sourceUserCommands
+}
+
+# ## core::deleteUserCommands
+#
+# Delete the user 'commands' file from the valet user directory.
+#
+# You probably want to reload the user commands afterward using `core::reloadUserCommands`.
+#
+# ```bash
+# core::deleteUserCommands
+# ```
+function core::deleteUserCommands() {
+  core::getUserDirectory
+  rm -f "${RETURNED_VALUE}/commands"
+}
+
+# ## core::getVersion
+#
+# Returns the version of Valet.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The version of Valet.
+#
+# ```bash
+# core::getVersion
+# printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
+# ```
+function core::getVersion() {
+  # shellcheck source=lib-io
+  source io
+  io::readFile "${GLOBAL_VALET_HOME}/version"
+}
+
+# ## core::getProgramElapsedMicroseconds
+#
+# Get the elapsed time in µs since the program started.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the elapsed time in µs since the program started.
+#
+# ```bash
+# core::getElapsedProgramTime
+# echo "${RETURNED_VALUE}"
+# string::microsecondsToHuman "${RETURNED_VALUE}"
+# echo "Human time: ${RETURNED_VALUE}"
+# ```
+#
+# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
+function core::getProgramElapsedMicroseconds() {
+  # we need to strip all leading zeros from the microseconds
+  local us="${EPOCHREALTIME##*\.}"
+  us="${us#"${us%%[!0]*}"}"
+  RETURNED_VALUE=$((((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000) + us))
 }
 
 #===============================================================

@@ -13,7 +13,7 @@
 # test::commentTest "This is a comment."
 # ```
 function test::commentTest() {
-  printf "%s\n\n" "${1:-}" >>"${_TEST_REPORT_FILE}"
+  printf "%s\n\n" "${1:-}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
 # ## test::endTest
@@ -50,24 +50,58 @@ function test::endTest() {
     printf "%s\n\n" "Exit code: \`${exitCode}\`"
 
     # write the standard output if any
-    if [[ -s "${_TEST_STANDARD_OUTPUT_FILE}" ]]; then
+    if [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" ]]; then
       printf "%s\n\n%s\n" "**Standard** output:" "\`\`\`plaintext"
-      selfTestUtils_echoFileSubstitutingPath "${_TEST_STANDARD_OUTPUT_FILE}"
+      test::echoFileSubstitutingPath "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
       printf "\n%s\n\n" "\`\`\`"
     fi
 
     # write the error output if any
-    if [[ -s "${_TEST_STANDARD_ERROR_FILE}" ]]; then
+    if [[ -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
       printf "%s\n\n%s\n" "**Error** output:" "\`\`\`log"
-      selfTestUtils_echoFileSubstitutingPath "${_TEST_STANDARD_ERROR_FILE}"
+      test::echoFileSubstitutingPath "${GLOBAL_TEST_STANDARD_ERROR_FILE}"
       printf "\n%s\n\n" "\`\`\`"
     fi
 
-  } >>"${_TEST_REPORT_FILE}"
+  } >>"${GLOBAL_TEST_REPORT_FILE}"
 
   # reset the standard output and error output files
-  : >"${_TEST_STANDARD_OUTPUT_FILE}"
-  : >"${_TEST_STANDARD_ERROR_FILE}"
+  : >"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
+  : >"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
+}
+
+# This function is used to print the content of a file with some substitutions.
+# The substitutions are:
+# - replace the GLOBAL_VALET_HOME with $GLOBAL_VALET_HOME
+# - replace the current test directory with a dot
+# - replace a line with ${TMPDIR}/valet-*/ (temp directory) by /valet/
+#
+# This allows to have consistent results across different execution environments for the tests.
+#
+# Usage:
+#   myCommandThatProducesLinesWithValetDirectoryPath 2> "${GLOBAL_TEST_TEMP_FILE}"
+#   selfTestUtils_echoFileSubstitutingPath "${GLOBAL_TEST_TEMP_FILE}" 1>&2
+function test::echoFileSubstitutingPath() {
+  local file="${1}"
+  local line
+  local -i firstLine=1
+  local IFS
+  # IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
+    if [[ firstLine -eq 1 ]]; then
+      firstLine=0
+    else
+      echo
+    fi
+    line="${line//${GLOBAL_VALET_HOME}/\$GLOBAL_VALET_HOME}"
+    line="${line//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
+    line="${line//${GLOBAL_TEMPORARY_PREFIX}*.valet/\/tmp/valet}"
+    line="${line//${GLOBAL_TEMPORARY_IN_MEM_PREFIX}*.valet/\/tmp/valet}"
+    if [[ ${line} =~ "after "[0-9]{1,}s.$ ]]; then
+      line="${line/%after */after Xs.}"
+    fi
+    printf '%s' "${line}"
+  done <"${file}"
 }
 
 # Replaces the line numbers from an error log in the given file with XXX.

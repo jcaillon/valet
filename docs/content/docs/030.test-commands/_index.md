@@ -8,15 +8,50 @@ url: /docs/test-commands
 
 Valet comes with a standardized way to implement and run tests for your commands and library functions.
 
-## 🤵 Test suites
+Once you have created an extension and opened its directory, you can start creating your new tests.
 
-Tests are organized in thematic groups which are called _test suites_. A test suite is a directory which contains test scripts. All test suite directories should be created under a parent `tests.d` directory.
+## 📂 Test suites and test files
 
-You can check the [test suites defined for Valet][valet-test-suites] to have an example.
+Tests are organized in thematic groups which are called _test suites_. A test suite is a directory which contains test scripts. All test suite directories should be created in the `tests.d` directory if your extensions.
 
 A test suite can, for example, regroup tests for a particular command. Organize them as you please, you can even define a single test suite for all your tests.
 
+{{< callout type="info" >}}
+Test suites are run independently from each other and in parallel by default.
+{{< /callout >}}
+
 The tests are then coded in `.sh` scripts directly under a test suite directory.
+
+You can check the [test suites defined for Valet][valet-test-suites] to have an example.
+
+Here is an example of directory structure for your user directory:
+
+{{< filetree/container >}}
+  {{< filetree/folder name="~/.valet.d" >}}
+    {{< filetree/folder name="showcase" >}}
+      {{< filetree/folder name="tests.d" >}}
+        {{< filetree/folder name="test-suite1" >}}
+          {{< filetree/file name="test.sh" >}}
+        {{< /filetree/folder >}}
+      {{< /filetree/folder >}}
+    {{< /filetree/folder >}}
+    {{< filetree/folder name="personal" >}}
+      {{< filetree/folder name="tests.d" >}}
+        {{< filetree/file name="before-tests" >}}
+        {{< filetree/folder name="personal-test-suite2" >}}
+          {{< filetree/file name="test2.sh" >}}
+        {{< /filetree/folder >}}
+      {{< /filetree/folder >}}
+    {{< /filetree/folder >}}
+    {{< filetree/folder name="shared-commands" >}}
+      {{< filetree/folder name="tests.d" >}}
+        {{< filetree/folder name="test-suite3" >}}
+          {{< filetree/file name="test.sh" >}}
+        {{< /filetree/folder >}}
+      {{< /filetree/folder >}}
+    {{< /filetree/folder >}}
+  {{< /filetree/folder >}}
+{{< /filetree/container >}}
 
 ## ✅ Approval testing
 
@@ -24,7 +59,7 @@ In your test scripts, you will call your command functions or run any code that 
 
 Instead:
 
-1. You will just print what you want to the stdout `&1` (e.g. `echo stuff`) or stderr `&2` (e.g. `echo thing 1>&2`) file descriptors.
+1. You will just print what you want to the stdout (e.g. `echo stuff`) or stderr (e.g. `echo thing >&2`) file descriptors.
 2. These outputs will be captured and appended to a test report file named `results.received.md`.
 3. This file will then be compared to an existing file named `results.approved.md` which is supposed to be committed with your sources and which contains the expected test report.
 4. If the files are different but the new received test if correct (or if the approved version does not exist yet), you can approve it and `results.received.md` will be the new `results.approved.md`.
@@ -86,37 +121,6 @@ While you can test a command by invoking valet (e.g. `valet my-command argument1
 - and this avoid bash to create a fork and start another bash process (for `valet`), which would slow down your tests.
 
 ## 🏃‍♂️ Run tests
-
-All your test suites directories (i.e. the `tests.d` directories) should be located under your Valet user directory (`~/.valet.d` by default).
-
-Here is an example of directory structure for your user directory:
-
-{{< filetree/container >}}
-  {{< filetree/folder name="~/.valet.d" >}}
-    {{< filetree/folder name="showcase" >}}
-      {{< filetree/folder name="tests.d" >}}
-        {{< filetree/folder name="test-suite1" >}}
-          {{< filetree/file name="test.sh" >}}
-        {{< /filetree/folder >}}
-      {{< /filetree/folder >}}
-    {{< /filetree/folder >}}
-    {{< filetree/folder name="personal" >}}
-      {{< filetree/folder name="tests.d" >}}
-        {{< filetree/file name="before-tests" >}}
-        {{< filetree/folder name="personal-test-suite2" >}}
-          {{< filetree/file name="test2.sh" >}}
-        {{< /filetree/folder >}}
-      {{< /filetree/folder >}}
-    {{< /filetree/folder >}}
-    {{< filetree/folder name="shared-commands" >}}
-      {{< filetree/folder name="tests.d" >}}
-        {{< filetree/folder name="test-suite3" >}}
-          {{< filetree/file name="test.sh" >}}
-        {{< /filetree/folder >}}
-      {{< /filetree/folder >}}
-    {{< /filetree/folder >}}
-  {{< /filetree/folder >}}
-{{< /filetree/container >}}
 
 You can run all your tests with:
 

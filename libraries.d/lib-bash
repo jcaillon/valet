@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# shellcheck source=../libraries.d/lib-io
+source io
+
+# ## bash::countJobs
+#
+# This function counts the number of jobs currently running in the background.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the number of jobs currently running in the background.
+#
+# ```bash
+# bash::countJobs
+# echo "There are currently ${RETURNED_VALUE} jobs running in the background."
+# ```
+function bash::countJobs() {
+  local -i jobsCount=0
+  io::captureOutput jobs -r
+  local IFS=$'\n'
+  for _ in ${RETURNED_VALUE}; do
+    jobsCount+=1
+  done
+  RETURNED_VALUE="${jobsCount}"
+}
+
+# ## bash::runInParallel
+#
+# This function runs a list of commands in parallel with a maximum number of parallel jobs.
+#
+# - $1: **job names array name** _as string_:
+#       The name of the array containing the names of the jobs to run.
+# - $2: **job commands array name** _as string_:
+#       The name of the array containing the commands to run.
+# - $3: max parallel jobs _as integer_:
+#       (optional) Can be set using the variable `_OPTION_MAX_PARALLEL_JOBS`.
+#       The maximum number of parallel jobs to run.
+#       (defaults to 1)
+# - $4: job completed callback _as string_:
+#       (optional) Can be set using the variable `_OPTION_JOB_COMPLETED_CALLBACK`.
+#       The name of the function to call when a job is completed.
+#       The function will receive the following arguments:
+#       - the job index
+#       - the job name
+#       - the job exit code
+#       - the percentage of jobs completed
+#       If the function returns 1, the script will exit early.
+#       (defaults to "")
+# - $5: timeout between checks _as float_:
+#       (optional) Can be set using the variable `_OPTION_TIMEOUT_BETWEEN_CHECKS`.
+#       The time to wait between checks for completed jobs (when no jobs finished
+#       when we last checked).
+#       (defaults to 0.2)
+#
+# Returns:
+#
+# - $?:
+#   - 0: if all the jobs completed successfully.
+#   - 1: if the job completed callback returned 1.
+# - `RETURNED_ARRAY`: an array containing the exit codes of the jobs.
+#
+# ```bash
+# declare -a jobNames=("job1" "job2" "job3")
+# declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
+# bash::runInParallel jobNames jobCommands 2
+# ```
+function bash::runInParallel() {
+  local -n jobNames="${1}"
+  local -n jobCommands="${2}"
+  local -i maxParallelJobs="${3:-${_OPTION_MAX_PARALLEL_JOBS:-1}}"
+  local jobCompletedCallback="${4:-${_OPTION_JOB_COMPLETED_CALLBACK:-}}"
+  local timeoutBetweenChecks="${5:-${_OPTION_TIMEOUT_BETWEEN_CHECKS:-0.2}}"
+
+  # inject the code to kill the running jobs when the program exits
+  bash::injectCodeInFunction cleanUp 'bash::killRunningJobs' true
+  eval "${RETURNED_VALUE}"
+  local originalFunction="${RETURNED_VALUE2}"
+
+  local IFS=' '$'\t'$'\n' runningsJobs jobName
+  local -A -i jobIndexFromPid=()
+  declare -g -a -i _BASH_RUNNING_JOB_PIDS=()
+  local -a -i exitCodes=()
+  local -i index=0 jobIndex exitCode nbJobsCompleted=0 pid
+
+  for ((index = 0; index < ${#jobNames[@]}; index++)); do
+    eval "{
+      : ID=${index};
+      main::unregisterTraps;
+      ${jobCommands[index]};
+    } &"
+    _BASH_RUNNING_JOB_PIDS+=("${!}")
+    jobIndexFromPid["${!}"]="${index}"
+    # we could get the job number using 'jobs %%' but since it displays the command, we will
+    # check for ID=x in the jobs output
+
+    log::debug "Running job (${index}) ⌜${jobNames[index]}⌝ with PID ${!}."
+
+    while ((${#_BASH_RUNNING_JOB_PIDS[@]} >= maxParallelJobs || (index + 1 == ${#jobNames[@]}))); do
+      # wait for one of the test suites to finish (or all of them for the last batch)
+      nbJobsCompleted=0
+      io::captureOutput jobs -r
+      runningsJobs="${RETURNED_VALUE}"
+      if log::isTraceEnabled; then
+        log::trace "Running jobs: ${runningsJobs}"
+      fi
+
+      for pid in "${_BASH_RUNNING_JOB_PIDS[@]}"; do
+        jobIndex="${jobIndexFromPid[${pid}]}"
+        jobName="${jobNames[jobIndex]}"
+
+        if [[ ${runningsJobs} != *": ID=${jobIndex};"* ]]; then
+          exitCode=0
+          wait -f "${pid}" || exitCode=$?
+          exitCodes+=("${exitCode}")
+          log::debug "Job (${jobIndex}) ⌜${jobName}⌝ with pid ⌜${pid}⌝ completed with exit code ⌜${exitCode}⌝."":${jobCommands[${jobIndex}]}"
+
+          # remove the pid from the running pids
+          # shellcheck disable=SC2206
+          _BASH_RUNNING_JOB_PIDS=(${_BASH_RUNNING_JOB_PIDS[*]/${pid}})
+
+          if [[ -n ${jobCompletedCallback} ]]; then
+            if ! ${jobCompletedCallback} "${jobIndex}" "${jobName}" "${exitCode}" "$((${#exitCodes[@]} * 100 / ${#jobNames[@]}))"; then
+              log::debug "Exiting early."
+              bash::killRunningJobs
+              break 3
+            fi
+          fi
+          nbJobsCompleted+=1
+        else
+          log::debug "Job ⌜${jobName}⌝ with pid ⌜${pid}⌝ is still running."
+        fi
+      done
+
+      if ((nbJobsCompleted == 0)); then
+        io::sleep "${timeoutBetweenChecks}"
+      fi
+
+      if ((${#exitCodes[@]} == ${#jobNames[@]})); then
+        break
+      fi
+    done
+  done
+
+  # restore the original function
+  if [[ -n ${originalFunction} ]]; then
+    eval "${originalFunction}"
+  fi
+
+  RETURNED_ARRAY=("${exitCodes[@]}")
+  ((${#exitCodes[@]} != ${#jobNames[@]})) && return 1
+  return 0
+}
+
+# ## bash::killRunningJobs (private)
+#
+# This function kills all the jobs currently running in the background from bash::runInParallel.
+# Called automatically when Valet exits.
+#
+# ```bash
+# bash::killRunningJobs
+# ```
+function bash::killRunningJobs() {
+  # kill all the test suites
+  if [[ -n ${_BASH_RUNNING_JOB_PIDS[0]:-} ]]; then
+    log::debug "Killing all running jobs."
+    for pid in "${_BASH_RUNNING_JOB_PIDS[@]}"; do
+      kill "${pid}" &>/dev/null || :
+    done
+  fi
+}
+
+# ## bash::injectCodeInFunction
+#
+# This function injects code at the beginning or the end of a function and
+# returns the modified function to be evaluated.
+#
+# - $1: **function name** _as string_:
+#       The name of the function to inject the code into.
+# - $2: **code** _as string_:
+#       The code to inject.
+# - $3: inject at beginning _as boolean_:
+#       (optional) Can be set using the variable `_OPTION_INJECT_AT_BEGINNING`.
+#       Whether to inject the code at the beginning of the function (or at the end).
+#       (defaults to false)
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the modified function.
+# - `RETURNED_VALUE2`: the original function.
+#
+# ```bash
+# bash::injectCodeInFunction myFunction "echo 'Hello world!'" true
+# eval "${RETURNED_VALUE}"
+# myFunction
+# ```
+function bash::injectCodeInFunction() {
+  local functionName="${1}"
+  local code="${2}"
+  local injectAtBeginning="${3:-${_OPTION_INJECT_AT_BEGINNING:-false}}"
+
+  local IFS=''
+  local functionDefinition modifiedFunctionDefinition
+  if declare -f "${functionName}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
+    read -rd '' functionDefinition <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || [[ -n ${functionDefinition} ]]
+    modifiedFunctionDefinition="${functionDefinition}"
+  else
+    modifiedFunctionDefinition="function ${functionName}() {"$'\n'"}"
+  fi
+
+  if [[ ${injectAtBeginning} == true ]]; then
+    modifiedFunctionDefinition="${modifiedFunctionDefinition%%"{"*}{"$'\n'"${code}""${modifiedFunctionDefinition#*"{"}"
+  else
+    modifiedFunctionDefinition="${modifiedFunctionDefinition%"}"*}${code}"$'\n'"}"
+  fi
+
+  RETURNED_VALUE="${modifiedFunctionDefinition}"
+  RETURNED_VALUE2="${functionDefinition:-}"
+}

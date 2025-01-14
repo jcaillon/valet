@@ -8,7 +8,7 @@ set -Eeu -o pipefail
 # we check for this variable to know if this script has already been included
 GLOBAL_MAIN_INCLUDED=1
 
-if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
+if [[ -z ${GLOBAL_CORE_INCLUDED:-} ]]; then
   # shellcheck source=core
   source "${BASH_SOURCE[0]%/*}/core"
 fi
@@ -35,13 +35,8 @@ function main::onExitInternal() {
   local rc=$?
 
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
-  if command -v onExitTest &>/dev/null; then
-    # this is for the self test command, we need to inform the user in case of an
-    # unexpected exit because they would not see the logs otherwise
-    onExitTest "${rc}"
-  fi
   if command -v onExit &>/dev/null; then
-    onExit
+    onExit "${rc}"
   fi
 
   # always call cleanUp before exiting
@@ -54,7 +49,9 @@ function main::onExitInternal() {
 }
 
 function main::onInterruptInternal() {
-  printf '\n' # Set cursor to the next line of '^C'
+  if ! command -v interactive::sttyRestore &>/dev/null; then
+    printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
+  fi
   log::print "WARNING" "${VALET_CONFIG_ICON_STOPPED:-$'\uf256'}" "STOPPED" "Program interrupted by the user."
 
   if log::isDebugEnabled; then
@@ -97,6 +94,13 @@ function main::registerTraps() {
   trap main::onTerminateInternal SIGHUP SIGTERM
 }
 
+function main::unregisterTraps() {
+  trap ERR
+  trap EXIT
+  trap SIGINT; trap SIGQUIT
+  trap SIGHUP; trap SIGTERM
+}
+
 main::registerTraps
 
 function main::onCleanUpInternal() {
@@ -110,11 +114,6 @@ function main::onCleanUpInternal() {
     kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
   fi
 
-  # restore tty settings if needed
-  if command -v interactive::sttyRestore &>/dev/null; then
-    interactive::sttyRestore true
-  fi
-
   # if we ran an interactive function, make sure to restore the cursor
   if [[ -n ${AC__CURSOR_SHOW:-} ]]; then
     printf '%s' "${AC__CURSOR_SHOW}"
@@ -124,8 +123,10 @@ function main::onCleanUpInternal() {
   if command -v cleanUp 1>/dev/null 2>&1; then
     cleanUp
   fi
-  if command -v cleanUpTest &>/dev/null; then
-    cleanUpTest
+
+  # restore tty settings if needed
+  if command -v interactive::sttyRestore &>/dev/null; then
+    interactive::sttyRestore true
   fi
 }
 

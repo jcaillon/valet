@@ -43,7 +43,7 @@ INFO     If you see the replacement character ? in my terminal, it means you don
 You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
 After that, you need to setup your terminal to use this newly installed font.
 You can run the command ⌜valet self setup⌝ again after that.
-INFO     Creating the valet config file ⌜/tmp/valet.d/f1-1⌝.
+INFO     Creating the valet config file ⌜/tmp/valet.d/f1-2⌝.
 SUCCESS  You are all set!
 INFO     As a reminder, you can modify the configuration done during this set up by either:
 - replaying the command ⌜valet self setup⌝,
@@ -89,7 +89,7 @@ An information icon: II
 
 ```log
 INFO     Now setting up Valet.
-CININFO    II  CDE Creating the valet config file CHI⌜/tmp/valet.d/f1-1⌝CDE.
+CININFO    II  CDE Creating the valet config file CHI⌜/tmp/valet.d/f1-2⌝CDE.
 CSUSUCCESS IS  CDE You are all set!
 CININFO    II  CDE As a reminder, you can modify the configuration done during this set up by either:
 - replaying the command CHI⌜valet self setup⌝CDE,

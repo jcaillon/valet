@@ -531,7 +531,7 @@ function interactive::setInterruptTrap() {
   GLOBAL_SESSION_INTERRUPTED=false
   if [[ -z ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
     # save the original traps so we can restore them later
-    io::invoke trap -p SIGINT SIGQUIT
+    io::captureOutput trap -p SIGINT SIGQUIT
     _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP="${RETURNED_VALUE}"
 
     # interrupting sets GLOBAL_SESSION_INTERRUPTED to true
