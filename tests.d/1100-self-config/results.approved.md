@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → selfConfig
 ▶ called myEditor: /tmp/valet.d/f1-2
 
@@ -278,9 +278,9 @@ VALET_CONFIG_BUMP_VERSION_ON_BUILD="${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-}"
 
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Creating the valet config file ⌜/tmp/valet.d/f1-2⌝.
 INFO     Opening the valet config file ⌜/tmp/valet.d/f1-2⌝.
 ```
@@ -289,16 +289,16 @@ INFO     Opening the valet config file ⌜/tmp/valet.d/f1-2⌝.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → selfConfig
 ▶ called myEditor: /tmp/valet.d/f1-2
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Opening the valet config file ⌜/tmp/valet.d/f1-2⌝.
 ```
 
@@ -306,15 +306,15 @@ INFO     Opening the valet config file ⌜/tmp/valet.d/f1-2⌝.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → selfConfig --override --no-edit
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Creating the valet config file ⌜/tmp/valet.d/f1-2⌝.
 ```
 
@@ -322,9 +322,9 @@ INFO     Creating the valet config file ⌜/tmp/valet.d/f1-2⌝.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → (selfConfig --override --export-current-values)
 ▶ called myEditor: /tmp/valet.d/f1-2
 
@@ -594,9 +594,9 @@ VALET_CONFIG_BUMP_VERSION_ON_BUILD="${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-}"
 
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Creating the valet config file ⌜/tmp/valet.d/f1-2⌝.
 INFO     Opening the valet config file ⌜/tmp/valet.d/f1-2⌝.
 ```

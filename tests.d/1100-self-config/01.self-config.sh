@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 core::sourceFunction "selfConfig"
+
 # shellcheck disable=SC1091
 source io
 
@@ -53,6 +54,6 @@ function main() {
   testSelfConfig
 }
 
-EDITOR=myEditor
+export EDITOR=myEditor
 
 main

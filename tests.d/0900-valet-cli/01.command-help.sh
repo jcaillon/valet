@@ -3,15 +3,10 @@
 builtin source ".before-test"
 
 function testHelp() {
-  # testing to get help for the self mock2 command
-  echo "→ valet help self mock2"
-  "${GLOBAL_VALET_HOME}/valet" help self mock2
-  test::endTest "Testing help for the self mock2 command" $?
-
-  # Testing to fuzzy find an help
+  # Get help for self mock3 using fuzzy matching
   echo "→ valet hel sel mo3"
   (main::parseMainArguments hel sel mo3) && echo "Exiting with code 0."
-  test::endTest "Testing to fuzzy find an help" $?
+  test::endTest "Get help for self mock3 using fuzzy matching" $?
 
   # testing help options
   echo "→ valet help --columns 48 help"

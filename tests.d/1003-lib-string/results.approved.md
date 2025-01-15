@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::cutField 'field1 field2 field3' 0 ' '
 field1
 
@@ -31,9 +31,9 @@ line3 seems so
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::compareSemanticVersion '1.2.3' '1.2.3'
 0
 
@@ -56,9 +56,9 @@ Exit code: `0`
 Failed as expected
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 ERROR    Failed to compare versions ⌜1.2a.3⌝ and ⌜1.2.3derp⌝ because they are not valid semantic versions.
 ```
 
@@ -66,9 +66,9 @@ ERROR    Failed to compare versions ⌜1.2a.3⌝ and ⌜1.2.3derp⌝ because the
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → bumping 0.0.0 minor
 0.1.0
 
@@ -91,9 +91,9 @@ Exit code: `0`
 Failed as expected
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 ERROR    Failed to bump the version ⌜aze⌝ because it is not valid semantic version.
 ```
 
@@ -101,9 +101,9 @@ ERROR    Failed to bump the version ⌜aze⌝ because it is not valid semantic v
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::kebabCaseToSnakeCase this-is-a-test0
 THIS_IS_A_TEST0
 
@@ -115,9 +115,9 @@ ANOTHER_TEST
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::kebabCaseToSnakeCase this-is-a-test0
 THIS_IS_A_TEST0
 
@@ -129,9 +129,9 @@ ANOTHER_TEST
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::kebabCaseToCamelCase this-is-a-test0
 thisIsATest0
 
@@ -146,9 +146,9 @@ last
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::trimAll '  a  super test  '
 ⌜a super test⌝
 
@@ -163,9 +163,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::trim '  hello  world  '
 ⌜hello  world⌝
 
@@ -183,9 +183,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::indexOf 'hello' 'l'
 2
 
@@ -210,9 +210,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::extractBetween 'hello' 'e' 'o'
 ⌜ll⌝
 
@@ -246,9 +246,9 @@ multilinetext="1 line one
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::count 'name,firstname,address' ','
 ⌜2⌝
 
@@ -260,9 +260,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string:::split 'name:firstname:address' ':'
 name
 firstname
@@ -278,9 +278,9 @@ three
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::regexGetFirst 'name: julien' 'name:[[:space:]]*([[:alnum:]]*)'
 julien
 ```
@@ -289,9 +289,9 @@ julien
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::microsecondsToHuman 18243002234 'Hours: %HH
 Minutes: %MM
 Seconds: %SS
@@ -337,9 +337,9 @@ Total microseconds: 18243002234
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapText "${shortText}" 20
 ------------------------------
 You don't [36m[36m[36mget better[39m[39m[39m
@@ -402,9 +402,9 @@ lines before this.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapText "${shortText}" 90 '    '
 ------------------------------------------------------------------------------------------
 You don't [36m[36m[36mget better[39m[39m[39m on the days when you feel 
@@ -439,9 +439,9 @@ You don't [36m[36m[36mget better[39m[39m[39m on the days when you feel
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapText "${shortText}" 90 '  ' 88
 ------------------------------------------------------------------------------------------
   $ {RETURNED_VALUE}
@@ -451,9 +451,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapText 'A message.' 80
 A message.
 ```
@@ -462,9 +462,9 @@ A message.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapText 'A message.' 80 '' 5
 A 
 message.
@@ -474,9 +474,9 @@ message.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapText 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
 [36m░░░[0mA message.
 [36m░░░[0mA new line
@@ -486,9 +486,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapCharacters "${shortText}" 20 "   " 17
 --------------------
    You don't [36m[36m[36mget bet
@@ -558,9 +558,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapCharacters "${shortText}" 20
 --------------------
 You don't [36m[36m[36mget better[39m[39m[39m
@@ -619,9 +619,9 @@ es before this.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapCharacters 01234567890123456789234 17 '   ' 1
 -----------------
                 0
@@ -633,9 +633,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapCharacters 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
 [36m░░░[0mA message.
 [36m░░░[0mA new line
@@ -645,9 +645,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 1
 -----------------
      Start With s
@@ -664,9 +664,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → string::highlight 'This is a text to highlight.' 'ttttt'
 CHITCDEhis is a CHITCDEexCHItCDE CHItCDEo highlighCHItCDE.
 

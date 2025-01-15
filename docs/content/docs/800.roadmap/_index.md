@@ -8,6 +8,8 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- test the new bash:: lib
+- refacto progress bar; use signal to tell the bg job to redraw the progress bar after displaying a log.
 - after logging, if progress bar is in progress, we need to redraw it immediately.
 - for interactive mode, a first iteration is to prompt the user in the scrolling terminal. Then we add an option to instead open a full screen editor.
 - might be able to improve the quicksort if we use direct statements instead of functions.

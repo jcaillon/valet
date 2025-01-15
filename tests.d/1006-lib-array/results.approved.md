@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="conventional" [3]="baby" [4]="holiday" [5]="abundant" [6]="deliver" [7]="position" [8]="economics")
 
 → array::sort MYARRAY
@@ -19,9 +19,9 @@ declare -a MYARRAY=([0]="abundant" [1]="baby" [2]="breakdown" [3]="constitutiona
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 declare -a myArray=([0]="a" [1]="b" [2]="c" [3]="d" [4]="e" [5]="f" [6]="g")
 declare -a criteria1=([0]="3" [1]="2" [2]="2" [3]="1" [4]="1" [5]="4" [6]="0")
 declare -a criteria2=([0]="1" [1]="3" [2]="2" [3]="5" [4]="0" [5]="2" [6]="9")
@@ -37,9 +37,9 @@ expected: g e d c b a f
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional")
 
 → array::appendIfNotPresent MYARRAY 'deliver'
@@ -59,9 +59,9 @@ declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="holi
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="position" [4]="economics")
 
 → array::isInArray MYARRAY 'deliver'
@@ -75,9 +75,9 @@ declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="posi
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 declare -a array1=([0]="a" [1]="b" [2]="c")
 declare -a array2=([0]="" [1]="2")
 declare -a array3=([0]="x" [1]="y" [2]="z" [3]="w")
@@ -93,9 +93,9 @@ declare -a array4=([0]="" [1]="" [2]="" [3]="")
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 declare -a myArray=([0]="one the" [1]="the breakdown" [2]="constitutional" [3]="conventional" [4]="hold the baby" [5]="holiday inn" [6]="deliver" [7]="eLv1" [8]="eLv" [9]="abundant" [10]="make a living" [11]="the d day" [12]="elevator")
 
 → array::fuzzyFilterSort the myArray
@@ -117,9 +117,9 @@ declare -a RETURNED_ARRAY2=([0]="3" [1]="4" [2]="0" [3]="1" [4]="2")
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → array::fuzzyFilterSortFileWithGrepAndAwk words out1 out2
 ea
 ea1

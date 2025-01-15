@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Skipping the build of scripts in user directory (building core commands only).
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet⌝.
 INFO                              ├── ⌜⌝.

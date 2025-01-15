@@ -1,4 +1,4 @@
-# Test suite 1301-profiler
+# Test suite 0901-profiler
 
 ## Test script 00.profiler
 
@@ -10,9 +10,9 @@ Notice that the profiling file has been cleanup after the command execution to m
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet -x self mock2 arg1 arg2
 That's it!
 
@@ -56,9 +56,9 @@ D  I  S  timer  delta                          source:line function             
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:190  selfMock2()                              → printf '%s\n' 'That'\''s it!'
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Starting profiler, writing in ⌜/tmp/valet.d/f1-2⌝.
 INFO     Option 1 (option1): .
 INFO     Option 2 (thisIsOption2): .
@@ -73,9 +73,9 @@ INFO     Disabling profiler.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 
 → VALET_CONFIG_LOG_CLEANUP_USING_BASH=true valet -x self mock2 arg1 arg2
 That's it!
@@ -120,9 +120,9 @@ D  I  S  timer  delta                          source:line function             
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:190  selfMock2()                              → printf '%s\n' 'That'\''s it!'
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Starting profiler, writing in ⌜/tmp/valet.d/f1-2⌝.
 INFO     Option 1 (option1): .
 INFO     Option 2 (thisIsOption2): .
@@ -137,17 +137,17 @@ INFO     Disabling profiler.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_CONFIG_STARTUP_PROFILING=true valet --log-level error -x self mock1 logging-level
 A startup profiling file has been created to log everything happening from the start of Valet to the start of the chosen command.
 A command profiling file has been created to log everything happening in the chosen command execution.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Starting profiler, writing in ⌜/tmp/valet.d/f2-2⌝.
 TRACE    This is an error trace message which is always displayed.
 ```

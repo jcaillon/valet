@@ -6,16 +6,16 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
 That's it!
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     First argument: arg1.
 INFO     Option 1: true.
 INFO     Option 2: optionValue2.
@@ -27,9 +27,9 @@ INFO     Extracted text is: ⌜My bold text⌝
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → showCaseSudo
 whoami
 ```
@@ -38,9 +38,9 @@ whoami
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → onInterrupt
 onInterrupt is working
 ```

@@ -8,38 +8,38 @@ function test_curl::toFile() {
   local tmpFile="${GLOBAL_TEMPORARY_DIRECTORY}/curl-test"
   local exitCode
 
-  echo "→ curl::toFile false '' \"\${tmpFile}\" --code 200 -curlOption1 --fakeOpt2 https://hello.com"
-  curl::toFile false '' "${tmpFile}" --code 200 -curlOption1 --fakeOpt2 https://hello.com && exitCode=0 || exitCode=$?
+  echo "→ curl::toFile false '' \"\${tmpFile}\" --code 200 -curlOption1 --fakeOpt2 https://fuu"
+  curl::toFile false '' "${tmpFile}" --code 200 -curlOption1 --fakeOpt2 https://fuu && exitCode=0 || exitCode=$?
   echoOutputCurlToFile ${exitCode} "${tmpFile}"
   test::endTest "Testing curl::toFile, should write to file" ${exitCode}
 
-  echo "→ curl::toFile false '' \"\${tmpFile}\" --code 500 https://hello.com"
-  curl::toFile false '' "${tmpFile}" --code 500 https://hello.com && exitCode=0 || exitCode=$?
+  echo "→ curl::toFile false '' \"\${tmpFile}\" --code 500 https://fuu"
+  curl::toFile false '' "${tmpFile}" --code 500 https://fuu && exitCode=0 || exitCode=$?
   echoOutputCurlToFile ${exitCode} "${tmpFile}"
   test::endTest "Testing curl::toFile, http code 500 not acceptable return 1" ${exitCode}
 
-  echo "→ curl::toFile true '' \"\${tmpFile}\" --code 500 https://hello.com"
+  echo "→ curl::toFile true '' \"\${tmpFile}\" --code 500 https://fuu"
   export GLOBAL_ERROR_DISPLAYED=1
-  (curl::toFile true '' "${tmpFile}" --code 500 https://hello.com) && exitCode=0 || exitCode=$?
+  (curl::toFile true '' "${tmpFile}" --code 500 https://fuu) && exitCode=0 || exitCode=$?
   unset GLOBAL_ERROR_DISPLAYED
   test::endTest "Testing curl::toFile, http code 500 not acceptable fails" ${exitCode}
 
-  echo "→ curl::toFile false '300,500,999' \"\${tmpFile}\" --code 500 https://hello.com"
-  curl::toFile false '300,500,999' "${tmpFile}" --code 500 https://hello.com && exitCode=0 || exitCode=$?
+  echo "→ curl::toFile false '300,500,999' \"\${tmpFile}\" --code 500 https://fuu"
+  curl::toFile false '300,500,999' "${tmpFile}" --code 500 https://fuu && exitCode=0 || exitCode=$?
   echoOutputCurlToFile ${exitCode} "${tmpFile}"
   test::endTest "Testing curl::toFile, http code 500 is now acceptable return 0" ${exitCode}
 
   # test debug mode
-  echo "→ curl::toFile false '' \"\${tmpFile}\" --code 400 --error https://hello.com/bla --otherOpt"
+  echo "→ curl::toFile false '' \"\${tmpFile}\" --code 400 --error https://fuu/bla --otherOpt"
   log::setLevel debug
-  curl::toFile false '' "${tmpFile}" --code 400 --error https://hello.com/bla --otherOpt && exitCode=0 || exitCode=$?
+  curl::toFile false '' "${tmpFile}" --code 400 --error https://fuu/bla --otherOpt && exitCode=0 || exitCode=$?
   echoOutputCurlToFile ${exitCode} "${tmpFile}"
   test::endTest "Testing curl::toFile, testing debug mode https code 400" ${exitCode}
   log::setLevel info
 
-  echo "→ curl::toFile false '' \"\${tmpFile}\" --code 200 http://hello.com"
+  echo "→ curl::toFile false '' \"\${tmpFile}\" --code 200 http://fuu"
   log::setLevel debug
-  curl::toFile false '' "${tmpFile}" --code 200 http://hello.com && exitCode=0 || exitCode=$?
+  curl::toFile false '' "${tmpFile}" --code 200 http://fuu && exitCode=0 || exitCode=$?
   echoOutputCurlToFile ${exitCode} "${tmpFile}"
   test::endTest "Testing curl::toFile, testing debug mode http code 200" ${exitCode}
   log::setLevel info

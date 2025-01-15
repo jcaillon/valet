@@ -8,7 +8,7 @@ url: /docs/test-commands
 
 Valet comes with a standardized way to implement and run tests for your commands and library functions.
 
-Once you have created an extension and opened its directory, you can start creating your new tests.
+Once you have [created an extension][newExtensionsLink] and opened its directory, you can start creating your new tests.
 
 ## 📂 Test suites and test files
 
@@ -46,6 +46,7 @@ Here is an example of directory structure for your user directory:
     {{< filetree/folder name="shared-commands" >}}
       {{< filetree/folder name="tests.d" >}}
         {{< filetree/folder name="test-suite3" >}}
+          {{< filetree/file name="before-each-test" >}}
           {{< filetree/file name="test.sh" >}}
         {{< /filetree/folder >}}
       {{< /filetree/folder >}}
@@ -113,6 +114,8 @@ Find another example for [the showcase here][showcase-tests].
 It is very important to note that tests, like commands, are executed with the bash options `set -Eeu -o pipefail`. If you expect a function or a command to return a code different than 0, you must handle it or the test (and thus the whole program) will exit.
 
 E.g. do `myFunctionThatReturnsOne || echo "Failed as expected"`.
+
+And if your function calls `exit` at some point, do: `(myFunctionThatReturnsOne) || echo "Exited as expected"`.
 {{< /callout >}}
 
 While you can test a command by invoking valet (e.g. `valet my-command argument1`), it is recommended to test the command function itself (e.g. `myCommandFunction argument1`):
@@ -142,6 +145,15 @@ You can also exclude or include test suite using `-i` and `-e` options (check `v
 valet self test -i my-test-suite
 ```
 
+{{< callout type="info" >}}
+Some additional information about the test execution:
+
+- Each test suite is executed in a separate subshell.
+- Each test script is executed in a separate subshell (within the subshell of the test suite).
+
+This allow you to modify the shell as you wish in the hooks and test implementation without impacting the other tests.
+{{< /callout >}}
+
 ## 🪝 Test hooks
 
 In addition to the test scripts, you can create other specific scripts which will be source'd at different time during the tests execution:
@@ -152,6 +164,8 @@ In addition to the test scripts, you can create other specific scripts which wil
 | `tests.d/after-tests` | Source'd after all the test suites inside the tests.d folder are executed. |
 | `tests.d/before-each-test-suite` | Source'd before the execution of each test suite. |
 | `tests.d/after-each-test-suite` | Source'd after the execution of each test suite. |
+| `tests.d/{test-suite}/before-each-test` | Source'd before the execution of each test script. |
+| `tests.d/{test-suite}/after-each-test` | Source'd after the execution of each test script. |
 
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../command-properties" title="Command properties" >}}
@@ -163,3 +177,4 @@ In addition to the test scripts, you can create other specific scripts which wil
 [valet-string-lib-tests]: https://github.com/jcaillon/valet/blob/latest/tests.d/1003-lib-string/00.tests.sh
 [showcase-tests]: https://github.com/jcaillon/valet/blob/latest/examples.d/showcase/tests.d/001-showcase-test-suite/00.tests.sh
 [libraries-tests]: ../libraries/test
+[newExtensionsLink]: ../new-extensions

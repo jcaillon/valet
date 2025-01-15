@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self export
 ```
 
@@ -16,9 +16,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self export -a
 [?25h
 ```

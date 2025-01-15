@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+if [[ ${GLOBAL_TEST_SUITE_NAME:-} == "1013-lib-test" ]]; then
+  TESTING_HOOKS+="after-each-test"$'\n'
+  echo "→ "
+  echo "${TESTING_HOOKS}"
+  test::endTest "Testing the self test hooks" 0 "We can't check for after each test suites/tests hooks because they are executed after the test."
+fi

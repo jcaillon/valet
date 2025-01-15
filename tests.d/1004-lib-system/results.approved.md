@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → OSTYPE=linux-bsd system::os
 linux
 
@@ -27,9 +27,9 @@ unknown
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → system::env
 Found environment variables.
 ```
@@ -38,9 +38,9 @@ Found environment variables.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → system::date
 Returned date with length 22.
 
@@ -52,9 +52,9 @@ Returned date with length 8.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → system::getUndeclaredVariables
 No undeclared variables found.
 
@@ -66,9 +66,9 @@ Found undeclared variables: ⌜dfg NOP⌝.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → system::getNotExistingCommands
 No not existing commands found.
 
@@ -80,9 +80,9 @@ Found not existing commands: ⌜NONEXISTINGSTUFF YETANOTHERONEMISSING⌝.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → system::commandExists
 Command not found.
 
@@ -97,9 +97,9 @@ Found command.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → system::addToPath
 
 content of files:
@@ -126,9 +126,9 @@ export PATH="/coucou:${PATH}"
 $env.PATH = ($env.PATH | split row (char esep) | append "/coucou")
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Adding directory ⌜/coucou⌝ to the PATH for ⌜bash⌝ shell.
 Appending to ⌜resources/gitignored/.bashrc⌝:
 export PATH="/coucou:${PATH}"
@@ -169,9 +169,9 @@ INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → system::windowsSetEnvVar VAR VALUE
 io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.SetValue('VAR', 'VALUE', 'ExpandString');
 
@@ -184,9 +184,9 @@ io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenS
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → system::windowsGetEnvVar VAR
 io::windowsRunInPowershell: 
   $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
@@ -201,9 +201,9 @@ io::windowsRunInPowershell:
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → system::windowsAddToPath /coucou
 io::windowsRunInPowershell: 
   $pathToAdd = '\coucou';

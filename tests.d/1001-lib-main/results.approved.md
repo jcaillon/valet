@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → main::sortCommands myid1 "${commands}"
 cm1  This is command 1
 cm2  This is command 2
@@ -21,9 +21,9 @@ another3  This is another command 3
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → main::addLastChoice myid1 another3
 → main::addLastChoice myid1 cm2
 → main::sortCommands myid1 "${commands}"
@@ -38,9 +38,9 @@ sub cmd2  This is sub command 2
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands myid1 "${commands}"
 cm1  This is command 1
 cm2  This is command 2
@@ -53,9 +53,9 @@ another3  This is another command 3
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → main::sortCommands myid2 "${commands}"
 cm1  This is command 1
 cm2  This is command 2
@@ -68,9 +68,9 @@ another3  This is another command 3
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 Content of last-choices-myid1:
 cm10
 cm9
@@ -84,9 +84,9 @@ cm6
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 Content of last-choices-myid1:
 another3
 cm10
@@ -102,9 +102,9 @@ cm7
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 # missing argument
 → main::parseFunctionArguments selfMock2
 local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
@@ -370,9 +370,9 @@ more=(
 
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Fuzzy matching the option ⌜--what⌝ to ⌜--with-default⌝.
 INFO     Fuzzy matching the option ⌜--this⌝ to ⌜--this-is-option2⌝.
 ```
@@ -383,9 +383,9 @@ INFO     Fuzzy matching the option ⌜--this⌝ to ⌜--this-is-option2⌝.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → main::getFunctionNameFromCommand 'self build'
 selfBuild
 ```
@@ -394,9 +394,9 @@ selfBuild
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → main::fuzzyMatchCommandToFunctionNameOrFail 'se bu other stuff dont care'
 selfBuild
 2
@@ -409,9 +409,9 @@ Failed as expected because strict mode is activated
 Failed as expected on ambiguous result
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Fuzzy matching the command ⌜se bu⌝ to ⌜self build⌝.
 ERROR    Could not find an exact command for ⌜se⌝, use ⌜--help⌝ to get a list of valid commands.
 ERROR    Found multiple matches for the command ⌜sf⌝, please be more specific:
@@ -438,9 +438,9 @@ CHIsCDEelCHIfCDE update
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → main::getMaxPossibleCommandLevel '1' '2' '3'
 2
 
@@ -458,9 +458,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_CONFIG_STRICT_MATCHING=true main::fuzzyFindOption de --opt1 --derp2 --allo3
 Unknown option ⌜de⌝, did you mean ⌜--derp2⌝?
 
@@ -491,9 +491,9 @@ Unknown option ⌜thing⌝, valid options are:
 
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Fuzzy matching the option ⌜de⌝ to ⌜--derp2⌝.
 ```
 
@@ -501,9 +501,9 @@ INFO     Fuzzy matching the option ⌜de⌝ to ⌜--derp2⌝.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → main::getSingleLetterOptions -a --opt1 --derp2 -b --allo3 -c
 Valid single letter options are: ⌜a⌝, ⌜b⌝, ⌜c⌝.
 ```
@@ -512,9 +512,9 @@ Valid single letter options are: ⌜a⌝, ⌜b⌝, ⌜c⌝.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → main::getDisplayableFilteredArray ae ARRAY
 bCHIaCDEnana
 CHIaCDEpplCHIeCDE

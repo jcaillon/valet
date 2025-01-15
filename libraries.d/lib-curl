@@ -33,10 +33,9 @@ source io
 # curl::toFile "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
 # ```
 function curl::toFile() {
-  local failIfFails acceptableStatusCodes outputFile url
-  failIfFails="${1:-false}"
-  acceptableStatusCodes="${2:-200,201,202,204,301,304,308}"
-  outputFile="${3}"
+  local failIfFails="${1:-false}"
+  local acceptableStatusCodes="${2:-200,201,202,204,301,304,308}"
+  local outputFile="${3}"
   shift 3
 
   # call curl
@@ -115,9 +114,8 @@ function curl::toFile() {
 # curl::toVar false 200,201 https://example.com || core::fail "The curl command failed."
 # ```
 function curl::toVar() {
-  local acceptableStatusCodes
-  failIfFails="${1:-false}"
-  acceptableStatusCodes="${2:-}"
+  local failIfFails="${1:-false}"
+  local acceptableStatusCodes="${2:-}"
   shift 2
 
   # reset the temporary file, only if needed

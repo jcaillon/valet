@@ -309,10 +309,13 @@ function selfTest_parallelCallback() {
 #
 function selfTest_runSingleTestSuite() {
   local testSuiteDirectory="${1}"
-  local testsDotDirectory="${testSuiteDirectory%/*}"
-  log::debug "Running test suite ⌜${testSuiteDirectory}⌝."
 
   core::setShellOptions
+  main::unregisterTraps
+
+  GLOBAL_TEST_SUITE_NAME="${testSuiteDirectory##*/}"
+  local testsDotDirectory="${testSuiteDirectory%/*}"
+  log::debug "Running test suite ⌜${testSuiteDirectory}⌝."
 
   # make a list of all test scripts
   local -a testScripts=()
@@ -330,43 +333,43 @@ function selfTest_runSingleTestSuite() {
     return 0
   fi
 
-  _TEST_SUITE_NAME="${testSuiteDirectory##*/}"
-  GLOBAL_TEST_STANDARD_OUTPUT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-stdout-${_TEST_SUITE_NAME}"
-  GLOBAL_TEST_STANDARD_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-stderr-${_TEST_SUITE_NAME}"
-  GLOBAL_TEST_REPORT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-report-${_TEST_SUITE_NAME}"
-  _TEST_STACK_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-stack-${_TEST_SUITE_NAME}"
-  _TEST_LOG_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-log-${_TEST_SUITE_NAME}"
+  # setup the temp locations for this test suite (cleanup is done at self test command level since
+  # we create everything in the original temp directory)
+  GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY}/tmp-${BASHPID}.${GLOBAL_TEST_SUITE_NAME}"
+  unset -v VALET_CONFIG_WORK_FILES_DIRECTORY
+  TMPDIR="${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
 
-  # setup the temp locations for this test suite
-  _TEST_BASE_TEMPORARY_DIRECTORY="${TMPDIR:-/tmp}/valet-tests-${BASHPID}-${_TEST_SUITE_NAME}"
+  GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY}/output-${BASHPID}.${GLOBAL_TEST_SUITE_NAME}"
+  GLOBAL_TEST_STANDARD_OUTPUT_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/stdout"
+  GLOBAL_TEST_STANDARD_ERROR_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/stderr"
+  GLOBAL_TEST_REPORT_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/report"
+  GLOBAL_TEST_STACK_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/stack"
+  GLOBAL_TEST_LOG_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/log"
+  mkdir -p "${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}"
 
-  if [[ -d ${_TEST_BASE_TEMPORARY_DIRECTORY:-} ]]; then
-    log::debug "Removing existing temporary test files ⌜${_TEST_BASE_TEMPORARY_DIRECTORY}⌝."
-    rm -Rf "${_TEST_BASE_TEMPORARY_DIRECTORY}" &>/dev/null || :
-    rm -f "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" "${GLOBAL_TEST_STANDARD_ERROR_FILE}" \
-      "${GLOBAL_TEST_REPORT_FILE}" "${_TEST_STACK_FILE}" "${_TEST_LOG_FILE}" &>/dev/null || :
-  fi
+  # trap to cleanup the temp files
+  # shellcheck disable=SC2064
+  # trap "rm -Rf '${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}'; rm -Rf '${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}';" EXIT
 
   # run a custom user script before the test suite if it exists
   selfTestUtils_runHookScript "${testsDotDirectory}/before-each-test-suite"
 
   # write the test suite title
-  printf "%s\n\n" "# Test suite ${_TEST_SUITE_NAME}" >"${GLOBAL_TEST_REPORT_FILE}"
+  printf "%s\n\n" "# Test suite ${GLOBAL_TEST_SUITE_NAME}" >"${GLOBAL_TEST_REPORT_FILE}"
 
   pushd "${testSuiteDirectory}" 1>/dev/null
 
   # run the test scripts
-  log::printString "█████████████████████"
-  log::info "⌜${_TEST_SUITE_NAME}⌝:"
+  log::info "⌜${GLOBAL_TEST_SUITE_NAME}⌝:"
   local treeString="  ├─" treePadding="  │  "
   local -i nbScriptsDone=0 nbOfScriptsWithErrors=0
   for testScript in "${testScripts[@]}"; do
-    _TEST_SUITE_SCRIPT_NAME="${testScript##*/}"
+    GLOBAL_TEST_SUITE_SCRIPT_NAME="${testScript##*/}"
     if ((nbScriptsDone == ${#testScripts[@]} - 1)); then
       treeString="  └─"
       treePadding="     "
     fi
-    log::printString "${treeString} ${_TEST_SUITE_SCRIPT_NAME}" "${treePadding}"
+    log::printString "${treeString} ${GLOBAL_TEST_SUITE_SCRIPT_NAME}" "${treePadding}"
 
     # Run the test script in a subshell.
     # This way each test can define any vars or functions without polluting
@@ -375,7 +378,7 @@ function selfTest_runSingleTestSuite() {
       core::setShellOptions
       trap 'selfTest_onExitTestInternal $? ' EXIT;
       selfTest_runSingleTest "${testSuiteDirectory}" "${testScript}" || exit $?
-    ) >"${_TEST_STACK_FILE}" 2>"${_TEST_LOG_FILE}"; then
+    ) >"${GLOBAL_TEST_STACK_FILE}" 2>"${GLOBAL_TEST_LOG_FILE}"; then
 
       # Handle an error that occurred in the test script.
       # We trapped the EXIT signal in the subshell that runs the test and we make it output the
@@ -383,7 +386,7 @@ function selfTest_runSingleTestSuite() {
       local exitCode="${PIPESTATUS[0]:-}"
 
       # get the stack trace at script exit
-      io::readFile "${_TEST_STACK_FILE}"
+      io::readFile "${GLOBAL_TEST_STACK_FILE}"
       eval "${RETURNED_VALUE//declare -a/}"
 
       selfTestUtils_displayTestLogs
@@ -455,21 +458,19 @@ function selfTest_runSingleTest() {
 
   # set a simplified log print function to have consistent results in tests
   selfTestUtils_setupValetForConsistency
-  declare -f log::print >&2
 
   # reset the temporary location (to have consistency when using io::createTempDirectory for example)
-  if [[ -d ${_TEST_BASE_TEMPORARY_DIRECTORY} ]]; then
-    rm -Rf "${_TEST_BASE_TEMPORARY_DIRECTORY}"
+  if [[ -d ${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY} ]]; then
+    rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
   fi
-  unset -v VALET_CONFIG_WORK_FILES_DIRECTORY
-  TMPDIR="${_TEST_BASE_TEMPORARY_DIRECTORY}"
   io::setupTempFileGlobalVariable
+
   io::cleanupTempFiles
-  mkdir -p "${_TEST_BASE_TEMPORARY_DIRECTORY}"
+  mkdir -p "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
 
   # The following file can be used by tests during tests.
   # shellcheck disable=SC2034
-  GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-test-tempfile"
+  GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}${BASHPID}.valet-test-tempfile"
 
   # redirect the standard output and error output to files
   exec 3>&1 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
@@ -480,7 +481,7 @@ function selfTest_runSingleTest() {
   GLOBAL_TEST_CURRENT_DIRECTORY="${PWD}"
 
   # write the test script name
-  printf "%s\n\n" "## Test script ${_TEST_SUITE_SCRIPT_NAME%.sh}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf "%s\n\n" "## Test script ${GLOBAL_TEST_SUITE_SCRIPT_NAME%.sh}" >>"${GLOBAL_TEST_REPORT_FILE}"
 
   # run a custom user script before the test if it exists
   selfTestUtils_runHookScript "${testDirectory}/before-each-test"
@@ -491,4 +492,7 @@ function selfTest_runSingleTest() {
 
   # run a custom user script after the test if it exists
   selfTestUtils_runHookScript "${testDirectory}/after-each-test"
+
+  exec 3>&-
+  exec 4>&-
 }

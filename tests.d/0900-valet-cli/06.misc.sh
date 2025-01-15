@@ -26,14 +26,14 @@ function testMainOptions() {
 
   # testing group of single letter options
   echo "→ valet -vwvw --versin"
-  ("${GLOBAL_VALET_HOME}/valet" -vwvw --versin 1>/dev/null)
+  (unset SECONDS; SECONDS=0; "${GLOBAL_VALET_HOME}/valet" -vwvw --versin 1>/dev/null)
   test::endTest "Testing option corrected with fuzzy match" 0
 }
 
 function testCleaning() {
   # testing temp files/directories creation, cleaning and custom cleanUp
   echo "→ valet self mock1 create-temp-files"
-  ("${GLOBAL_VALET_HOME}/valet" self mock1 create-temp-files)
+  (unset SECONDS; SECONDS=0; "${GLOBAL_VALET_HOME}/valet" self mock1 create-temp-files)
   test::endTest "Testing temp files/directories creation, cleaning and custom cleanUp" $?
 }
 

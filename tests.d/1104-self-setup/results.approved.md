@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → echo nnn | selfSetup
 ─────────────────────────────────────
 CINThis is a COLOR CHECK, this line should be COLORED (in cyan by default).CDE
@@ -35,9 +35,9 @@ An information icon: II
 [2m[9G└─[3b─┘[0m
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Now setting up Valet.
 INFO     If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal.
 You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
@@ -56,9 +56,9 @@ INFO     You can create your own commands and have them available in valet, plea
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → echo yyo | selfSetup
 ─────────────────────────────────────
 CINThis is a COLOR CHECK, this line should be COLORED (in cyan by default).CDE
@@ -85,9 +85,9 @@ An information icon: II
 [2m[9G└─[4b─┘[0m
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Now setting up Valet.
 CININFO    II  CDE Creating the valet config file CHI⌜/tmp/valet.d/f1-2⌝CDE.
 CSUSUCCESS IS  CDE You are all set!

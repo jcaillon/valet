@@ -6,18 +6,18 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → selfUninstall
 
 → selfUninstall --script
 ok
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 WARNING  To uninstall Valet, you can run the following commands:
 
 bash -c 'eval "$(valet self uninstall --script 2>/dev/null)"'

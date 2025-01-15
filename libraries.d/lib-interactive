@@ -434,7 +434,7 @@ function interactive::switchToFullScreen() {
   printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
 
   # in full screen mode, we don't see the error messages so we capture them somewhere else
-  FSFS_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-interactive.err"
+  FSFS_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}${BASHPID}.valet-interactive.err"
   while [[ -e "${FSFS_TEMPORARY_ERROR_FILE}" ]]; do FSFS_TEMPORARY_ERROR_FILE+="x"; done
   exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
 }

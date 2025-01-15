@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 
 → log::setLevel trace
 DEBUG    Log level set to 
@@ -267,9 +267,9 @@ TRACE    This is a errorTrace
 
 Exit code: `0`
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 
 → log::createPrintFunction
 

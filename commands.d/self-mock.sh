@@ -77,10 +77,10 @@ function selfMock1() {
     io::createTempFile && tmp2="${RETURNED_VALUE}"
     io::createTempDirectory && tmp3="${RETURNED_VALUE}"
     io::createTempDirectory && tmp4="${RETURNED_VALUE}"
-    log::info "Created temp file: ${tmp1//${GLOBAL_TEMPORARY_PREFIX}*.valet/\/tmp/valet}."
-    log::info "Created temp file: ${tmp2//${GLOBAL_TEMPORARY_PREFIX}*.valet/\/tmp/valet}."
-    log::info "Created temp directory: ${tmp3//${GLOBAL_TEMPORARY_PREFIX}*.valet/\/tmp/valet}."
-    log::info "Created temp directory: ${tmp4//${GLOBAL_TEMPORARY_PREFIX}*.valet/\/tmp/valet}."
+    log::info "Created temp file: ${tmp1//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
+    log::info "Created temp file: ${tmp2//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
+    log::info "Created temp directory: ${tmp3//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
+    log::info "Created temp directory: ${tmp4//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
     # activating debug log to see the cleanup
     log::setLevel debug
     ;;

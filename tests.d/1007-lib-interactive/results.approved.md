@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 echo y | interactive::promptYesNo 'Do you see this message?'
 [2m   ┌─[24b─┐[0m
 [2m░──┤[0m Do you see this message? [31G[2m│[0m
@@ -22,9 +22,9 @@ echo y | interactive::promptYesNo 'Do you see this message?'
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 
 echo n | interactive::promptYesNo 'Do you see this message?'
 [2m   ┌─[24b─┐[0m
@@ -39,9 +39,9 @@ echo n | interactive::promptYesNo 'Do you see this message?'
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 echo y | interactive::askForConfirmation 'Please press OK.'
 [2m   ┌─[16b─┐[0m
 [2m░──┤[0m Please press OK. [23G[2m│[0m
@@ -55,9 +55,9 @@ echo y | interactive::askForConfirmation 'Please press OK.'
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 interactive::createSpace 5
 [?25l[1G[0J
 
@@ -70,9 +70,9 @@ interactive::createSpace 5
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 printf '\e[%sR' '123;456' | interactive::getCursorPosition
 GLOBAL_CURSOR_LINE: 123; GLOBAL_CURSOR_COLUMN: 456
 ```
@@ -81,9 +81,9 @@ GLOBAL_CURSOR_LINE: 123; GLOBAL_CURSOR_COLUMN: 456
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 interactiveGetProgressBarString 0 20
 ⌜                    ⌝
 
@@ -107,9 +107,9 @@ interactiveGetProgressBarString 100 15
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 GLOBAL_LINES=10
 GLOBAL_COLUMNS=10
 interactive::getBestAutocompleteBox 1 1 20 20

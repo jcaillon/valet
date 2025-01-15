@@ -6,7 +6,7 @@ weight: 20
 url: /docs/new-commands
 ---
 
-Once you have created an extension and opened its directory, you can start creating your new commands.
+Once you have [created an extension][newExtensionsLink] and opened its directory, you can start creating your new commands.
 
 ## 📂 Command files location
 
@@ -274,7 +274,7 @@ You can activate the debug log level with Valet `-v` option, e.g. `valet -v my c
 [command-properties]: ../command-properties
 [core-library]: ../libraries/core/
 [bash-manual-set]: https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html#index-set
-[profiler-output-example]: https://github.com/jcaillon/valet/blob/latest/tests.d/1301-profiler/results.approved.md
+[profiler-output-example]: https://github.com/jcaillon/valet/blob/latest/tests.d/0901-profiler/results.approved.md
 [libraries]: ../libraries
 [newExtensionsLink]: ../new-extensions
 [newLibraryLink]: ../new-libraries

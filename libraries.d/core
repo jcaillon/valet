@@ -38,6 +38,7 @@ function core::setShellOptions() {
 }
 
 core::setShellOptions
+IFS=' '$'\t'$'\n'
 
 if [[ -n ${GLOBAL_CORE_INCLUDED:-} ]] && declare -f log::warning &>/dev/null; then
   log::warning "The core library has already been included but was called again, remove the unnecessary call."
@@ -90,16 +91,19 @@ function io::setupTempFileGlobalVariable() {
   # get unique file names for the stdout, stderr and temporary directory
   # to be fast, we do not create anything until we really need it
   # this could lead to issues, although it is very unlikely
-  GLOBAL_TEMPORARY_PREFIX="${TMPDIR:-/tmp}/temp-"
-  GLOBAL_TEMPORARY_IN_MEM_PREFIX="${VALET_CONFIG_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/temp-"
-  GLOBAL_TEMPORARY_WORK_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-work"
-  while [[ -e "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; do GLOBAL_TEMPORARY_WORK_FILE+="x"; done
-  GLOBAL_TEMPORARY_STDOUT_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stdout"
-  while [[ -e "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; do GLOBAL_TEMPORARY_STDOUT_FILE+="x"; done
-  GLOBAL_TEMPORARY_STDERR_FILE="${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-stderr"
-  while [[ -e "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; do GLOBAL_TEMPORARY_STDERR_FILE+="x"; done
-  GLOBAL_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_PREFIX}${BASHPID}.valet.d"
-  while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; do GLOBAL_TEMPORARY_DIRECTORY+="x"; done
+  GLOBAL_TEMPORARY_DIRECTORY_PREFIX="${TMPDIR:-/tmp}/vt-${BASHPID}"
+  GLOBAL_TEMPORARY_FILE_PREFIX="${VALET_CONFIG_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/vt-${BASHPID}"
+
+  while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.d" ]]; do
+    # just in case we have a collision
+    GLOBAL_TEMPORARY_DIRECTORY_PREFIX+="x"
+    GLOBAL_TEMPORARY_FILE_PREFIX+="x"
+  done
+
+  GLOBAL_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.d"
+  GLOBAL_TEMPORARY_WORK_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-work.f"
+  GLOBAL_TEMPORARY_STDOUT_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-stdout.f"
+  GLOBAL_TEMPORARY_STDERR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-stderr.f"
 }
 
 # ## io::createTempFile
@@ -174,13 +178,9 @@ function io::createTempDirectory() {
 function io::cleanupTempFiles() {
   if [[ -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
     log::debug "Deleting temporary directory."
-    rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
+    rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null || :
   fi
-  local _file
-  for _file in "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet"*; do
-    rm -f "${GLOBAL_TEMPORARY_IN_MEM_PREFIX}${BASHPID}.valet-"* 1>/dev/null
-    break
-  done
+  rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* 1>/dev/null || :
   unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
 }
 

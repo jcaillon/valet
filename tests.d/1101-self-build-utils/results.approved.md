@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     content:
    1 ░ A content between tags
    2 ░ array:
@@ -28,9 +28,9 @@ INFO     content:
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 TEMP_CMD_BUILD_arguments_description=0 "Description of arg 1." 1 "Description of arg 2." 2 "Description of arg 3."
 TEMP_CMD_BUILD_arguments_fourthProp=0 "" 1 "" 2 "ok3"
 TEMP_CMD_BUILD_arguments_name=0 "arg1" 1 "arg2" 2 "arg3"
@@ -50,9 +50,9 @@ TEMP_CMD_BUILD_shortDescription='Short description.'
 TEMP_CMD_BUILD_sudo='false'
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
    1 ░ 
    2 ░ command: test
    3 ░ author: github.com/jcaillon
@@ -105,9 +105,9 @@ TEMP_CMD_BUILD_sudo='false'
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → extractFirstLongNameFromOptionString '-x, --profiling'
 --profiling
 ```
@@ -116,9 +116,9 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 CMD_ALL_COMMANDS_ARRAY=0 "cmd"
 CMD_ALL_FUNCTIONS_ARRAY=0 "func"
 CMD_ARGS_LAST_IS_ARRAY_func='false'
@@ -145,9 +145,9 @@ CMD_SHORT_DESCRIPTION_func='Short description.'
 CMD_SUDO_func='false'
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
    1 ░ 
    2 ░ command: test
    3 ░ author: github.com/jcaillon
@@ -200,16 +200,16 @@ CMD_SUDO_func='false'
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 
 
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
    1 ░ 
    2 ░ command: test
    3 ░ author: github.com/jcaillon

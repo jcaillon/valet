@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → selfDocument --output /tmp/valet.d/d1-2 --core-only
 
 → head --lines 40 /tmp/valet.d/d1-2/lib-valet.md
@@ -138,11 +138,11 @@ function ansi-codes::*() { :; }
   "prefix": "array::fuzzyFilterSort#withdoc",
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Generating documentation for the core functions only.
-INFO     Found 144 functions with documentation.
+INFO     Found 148 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-2/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-2/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-2/valet.code-snippets⌝.

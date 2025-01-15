@@ -99,12 +99,11 @@ function io::toAbsolutePath() {
 # > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
 # > - On linux, you can use a tmpfs directory for massive gains over subshells.
 function io::invokef5() {
-  local failIfFails acceptableErrorCodes stdInFromFile stdIn executable
-  failIfFails="${1}"
-  acceptableErrorCodes="${2}"
-  stdInFromFile="${3}"
-  stdIn="${4}"
-  executable="${5}"
+  local failIfFails="${1}"
+  local acceptableErrorCodes="${2}"
+  local stdInFromFile="${3}"
+  local stdIn="${4}"
+  local executable="${5}"
   shift 5
 
   # if debug mode is on, print some info
@@ -149,7 +148,7 @@ function io::invokef5() {
   local debugMessage="The command ⌜${executable}⌝ originally ended with exit code ⌜${exitCode}⌝."
 
   # if the error code is acceptable, then we set it to 0
-  if [[ ,${acceptableErrorCodes}, == *",${exitCode},"* ]]; then
+  if [[ ${exitCode} -ne "0" && ,${acceptableErrorCodes}, == *",${exitCode},"* ]]; then
     exitCode=0
     debugMessage+=$'\n'"The error code ⌜${exitCode}⌝ is acceptable and has been reset to 0."
   fi
@@ -450,9 +449,7 @@ function io::readFile() {
     read -rd '' RETURNED_VALUE <"${filePath}" || [[ -n ${RETURNED_VALUE} ]] || RETURNED_VALUE=""
     # fail safe for cases where the file is suppose to not be empty but we get null string
     if [[ -z "${RETURNED_VALUE}" ]]; then
-      {
-        RETURNED_VALUE="$(<"${filePath}")"
-      } &>/dev/null
+      RETURNED_VALUE="$(<"${filePath}")"
     fi
   fi
 }

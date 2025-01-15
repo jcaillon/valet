@@ -6,9 +6,9 @@
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → selfAddCommand 'new cool command'
 prompt: It does not look like the current directory ⌜$GLOBAL_VALET_HOME/tests.d/1109-self-add-x/resources/gitignored⌝ is a valet extension, do you want to proceed anyway?
 → selfAddCommand 'new cool command'
@@ -71,9 +71,9 @@ function newCoolCommand() {
 }
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 WARNING  The current directory is not under the valet user directory ⌜/nop/.valet.d⌝.
 SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$GLOBAL_VALET_HOME/tests.d/1109-self-add-x/resources/gitignored/commands.d/new-cool-command.sh⌝.
 WARNING  The command file ⌜$GLOBAL_VALET_HOME/tests.d/1109-self-add-x/resources/gitignored/commands.d/new-cool-command.sh⌝ already exists.
@@ -84,9 +84,9 @@ SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$G
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → selfAddLibrary 'new-cool-lib'
 prompt: It does not look like the current directory ⌜$GLOBAL_VALET_HOME/tests.d/1109-self-add-x/resources/gitignored⌝ is a valet extension, do you want to proceed anyway?
 → selfAddLibrary 'new-cool-lib'
@@ -96,9 +96,9 @@ prompt: Do you want to override the existing library file?
 
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 WARNING  The current directory is not under the valet user directory ⌜/nop/.valet.d⌝.
 SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_VALET_HOME/tests.d/1109-self-add-x/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
 WARNING  The library file ⌜$GLOBAL_VALET_HOME/tests.d/1109-self-add-x/resources/gitignored/libraries.d/lib-new-cool-lib⌝ already exists.

@@ -1,96 +1,14 @@
-# Test suite 1300-valet-cli
+# Test suite 0900-valet-cli
 
 ## Test script 01.command-help
 
-### Testing help for the self mock2 command
+### Get help for self mock3 using fuzzy matching
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
-→ valet help self mock2
-ABOUT
-
-  An example of description.
-  
-  You can put any text here, it will be wrapped to fit the terminal width.
-  
-  You can ⌜highlight⌝ some text as well.
-
-USAGE
-
-  valet [global options] self mock2 [options] [--] <firstArg> <more...>
-
-GLOBAL OPTIONS
-
-  -x, --profiling
-      Turn on profiling (with debug mode) before running the required command.
-      It will output to ~/valet-profiler-{PID}-command.txt.
-      This is useful to debug your command and understand what takes a long time to execute.
-      The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this 
-      behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
-      This option can be set by exporting the variable VALET_PROFILING='true'.
-  -l, --log-level, --log <level>
-      Set the log level of valet (defaults to info).
-      Possible values are: trace, debug, success, info, success, warning, error.
-      This option can be set by exporting the variable VALET_LOG_LEVEL,='<level>'.
-  -v, --verbose
-      Output verbose information.
-      This is the equivalent of setting the log level to debug.
-      This option can be set by exporting the variable VALET_VERBOSE='true'.
-  -w, --very-verbose
-      Output very verbose information.
-      This is the equivalent of setting the log level to trace.
-      This option can be set by exporting the variable VALET_VERY_VERBOSE='true'.
-  --disable-progress-bars
-      Disable all progress bars for commands that use them.
-      This option can be set by exporting the variable VALET_DISABLE_PROGRESS_BARS='true'.
-  -i, --force-interactive-mode
-      Enter interactive mode for commands even if arguments are not required or provided.
-      This option can be set by exporting the variable VALET_FORCE_INTERACTIVE_MODE='true'.
-  --version
-      Display the current version of valet.
-  -h, --help
-      Display the help for this command.
-
-OPTIONS
-
-  -o, --option1
-      First option.
-  -2, --this-is-option2 <level>
-      An option with a value.
-      This option can be set by exporting the variable VALET_THIS_IS_OPTION2='<level>'.
-  -3, --flag3
-      Third option.
-      This option can be set by exporting the variable VALET_FLAG3='true'.
-  -4, --with-default <val>
-      An option with a default value.
-      This option can be set by exporting the variable VALET_WITH_DEFAULT='<val>'.
-  -h, --help
-      Display the help for this command.
-
-ARGUMENTS
-
-  firstArg
-      First argument.
-  more...
-      Will be an an array of strings.
-
-EXAMPLES
-
-  valet self mock2 -o -2 value1 arg1 more1 more2
-      Call command1 with option1, option2 and some arguments.
-
-```
-
-### Testing to fuzzy find an help
-
-Exit code: `0`
-
-**Standard** output:
-
-```plaintext
+```text
 → valet hel sel mo3
 ABOUT
 
@@ -141,9 +59,9 @@ OPTIONS
 Exiting with code 0.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Fuzzy matching the command ⌜hel⌝ to ⌜help⌝.
 INFO     Fuzzy matching the command ⌜sel mo3⌝ to ⌜self mock3⌝.
 ```
@@ -152,9 +70,9 @@ INFO     Fuzzy matching the command ⌜sel mo3⌝ to ⌜self mock3⌝.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet help --columns 48 help
 ABOUT
 
@@ -261,16 +179,16 @@ EXAMPLES
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet help --unknown -colo
 Failed as expected.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Fuzzy matching the option ⌜--colo⌝ to ⌜--no-colors⌝.
 ERROR    Unknown option ⌜--unknown⌝, valid options are:
 -n --no-colors
@@ -283,9 +201,9 @@ Use ⌜valet help --help⌝ to get help.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet help
 OK, we got the valet help.
 ```
@@ -294,9 +212,9 @@ OK, we got the valet help.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self mock1 show-help
 ABOUT
 
@@ -368,16 +286,16 @@ ARGUMENTS
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self mock1 non-existing-option nonNeededArg1 -derp anotherArg
 Failed as expected.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 ERROR    Expecting 1 argument(s), got extra argument ⌜nonNeededArg1⌝.
 Unknown option letter ⌜d⌝ in group ⌜-derp⌝. Valid single letter options are: ⌜h⌝.
 Unknown option letter ⌜e⌝ in group ⌜-derp⌝. Valid single letter options are: ⌜h⌝.
@@ -394,15 +312,15 @@ valet [global options] self mock1 [options] [--] <action>
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self mock3
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     This command requires sudo privileges.
 ▶ called sudo printf %s alright
 ▶ called sudo whoami
@@ -414,16 +332,16 @@ INFO     This command requires sudo privileges.
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self mock1 error
 Failed as expected.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 ERROR    Error code 1 in selfMock1(), stack:
 ├─ in selfMock1() at $GLOBAL_VALET_HOME/commands.d/self-mock.sh:XXX
@@ -436,16 +354,16 @@ ERROR    Error code 1 in selfMock1(), stack:
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self mock1 exit
 Failed as expected.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
@@ -459,16 +377,16 @@ EXIT     Exiting with code 5, stack:
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self mock1 fail
 Failed as expected.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 ERROR    This is for testing valet core functions, failing now.
 ```
 
@@ -476,16 +394,16 @@ ERROR    This is for testing valet core functions, failing now.
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self mock1 fail2
 Failed as expected with code 255.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 ERROR    This is for testing valet core functions, failing now with exit code 255.
 ```
 
@@ -493,16 +411,16 @@ ERROR    This is for testing valet core functions, failing now with exit code 25
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self mock1 unknown-command
 Failed as expected.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 WARNING  This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle.
 ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
@@ -519,15 +437,15 @@ ERROR    Error code 1 in selfMock1(), stack:
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 ▶ called main::showInteractiveCommandsMenu Please select the command to run. _COPIED_COMMANDS_ARRAY⌉
 ▶ received array was:
 ⌈help                Show the help of this program or of a specific command.
@@ -547,15 +465,15 @@ self update         Update valet and its extensions to the latest releases.⌉
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_LOG_LEVEL=success valet self mock1 logging-level
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 TRACE    This is an error trace message which is always displayed.
 SUCCESS  This is a success message.
 WARNING  This is a warning message.
@@ -566,15 +484,15 @@ With a second line.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet --log-level warning self mock1 logging-level
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 TRACE    This is an error trace message which is always displayed.
 WARNING  This is a warning message.
 With a second line.
@@ -584,15 +502,15 @@ With a second line.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet -v self mock1 logging-level
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Command found ⌜self mock1⌝.
@@ -612,22 +530,22 @@ SUCCESS  This is a success message.
 WARNING  This is a warning message.
 With a second line.
 The debug mode is activated!
-DEBUG    Exiting with code 0 after Xs.
+DEBUG    Exiting with code 0 after 0s.
 ```
 
 ### Testing log with trace level
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet -w self mock1 logging-level
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 DEBUG    Log level set to trace.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Command found ⌜self mock1⌝.
@@ -649,22 +567,22 @@ WARNING  This is a warning message.
 With a second line.
 The debug mode is activated!
 The trace mode is activated!
-DEBUG    Exiting with code 0 after Xs.
+DEBUG    Exiting with code 0 after 0s.
 ```
 
 ### Testing default logging
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self mock1 logging-level
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 HH:MM:SS TRACE    This is an error trace message which is always displayed.
 HH:MM:SS INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in 
                   its donation. You are not important because of how long you live, you are important because of how 
@@ -680,15 +598,15 @@ HH:MM:SS WARNING  This is a warning message.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true valet self mock1 logging-level
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 CTIHH:MM:SS CDBTRACE    CDE This is an error trace message which is always displayed.
 CTIHH:MM:SS CININFO    II  CDE This is an info message with a super long sentence. The value of life is not in its duration, but in
                     its donation. You are not important because of how long you live, you are important because of how 
@@ -704,15 +622,15 @@ CTIHH:MM:SS CWAWARNING IW  CDE This is a warning message.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_CONFIG_LOG_DISABLE_WRAP=true VALET_CONFIG_LOG_DISABLE_TIME=true valet self mock1 logging-level
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 TRACE    This is an error trace message which is always displayed.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
 SUCCESS  This is a success message.
@@ -724,15 +642,15 @@ With a second line.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_CONFIG_LOG_ENABLE_TIMESTAMP= true VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 logging-level
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 YYYY:MM:DD_HH:MM:SS TRACE    This is an error trace message which is always displayed.
 YYYY:MM:DD_HH:MM:SS INFO     This is an info message with a super long sentence. The value 
                   of life is not in its duration, but in its donation. You are 
@@ -751,15 +669,15 @@ YYYY:MM:DD_HH:MM:SS WARNING  This is a warning message.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_CONFIG_LOG_DISABLE_TIME=true VALET_CONFIG_LOG_DISABLE_WRAP=false VALET_CONFIG_LOG_COLUMNS=80 valet self mock1 print-raw-and-file
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     This is to test the printString function.
          Preventing the exploitation of animals is not the only reason for becom
          ###ing vegan, but for many it remains the key factor in their decision 
@@ -886,18 +804,18 @@ INFO     This is to test the printFile function from a string.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d2-2 VALET_CONFIG_LOG_DISABLE_TIME=true valet self mock1 logging-level
 
 → io::countArgs /tmp/valet.d/d2-2/*
 1
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 TRACE    This is an error trace message which is always displayed.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its 
          donation. You are not important because of how long you live, you are important because of how effective you 
@@ -913,9 +831,9 @@ WARNING  This is a warning message.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_CONFIG_LOG_FILENAME_PATTERN='logFile=test.log' VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d2-2 VALET_CONFIG_LOG_DISABLE_TIME=true valet self mock1 logging-level
 
 → cat /tmp/valet.d/d2-2/test.log
@@ -931,9 +849,9 @@ WARNING  This is a warning message.
 
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 TRACE    This is an error trace message which is always displayed.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its 
          donation. You are not important because of how long you live, you are important because of how effective you 
@@ -949,9 +867,9 @@ WARNING  This is a warning message.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_CONFIG_LOG_FD=/tmp/valet.d/d2-2/test2.log VALET_CONFIG_LOG_DISABLE_TIME=true valet self mock1 logging-level
 
 → cat /tmp/valet.d/d2-2/test2.log
@@ -973,9 +891,9 @@ WARNING  This is a warning message.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet --version
 OK, we got a version.
 ```
@@ -984,16 +902,16 @@ OK, we got a version.
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet -prof
 Failed as expected.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 ERROR    Unknown option letter ⌜p⌝ in group ⌜-p⌝. Valid single letter options are: ⌜x⌝, ⌜l⌝, ⌜v⌝, ⌜w⌝, ⌜i⌝, ⌜h⌝.
 ```
 
@@ -1001,15 +919,15 @@ ERROR    Unknown option letter ⌜p⌝ in group ⌜-p⌝. Valid single letter op
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet --versin
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
 ```
 
@@ -1017,15 +935,15 @@ INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet -vwvw --versin
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Log level set to trace.
@@ -1035,29 +953,29 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 DEBUG    Log level set to trace.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
-DEBUG    Exiting with code 0 after Xs.
+DEBUG    Exiting with code 0 after 0s.
 ```
 
 ### Testing temp files/directories creation, cleaning and custom cleanUp
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self mock1 create-temp-files
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     Created temp file: /tmp/valet.d/f1-0.
 INFO     Created temp file: /tmp/valet.d/f2-0.
 INFO     Created temp directory: /tmp/valet.d/d1-0.
 INFO     Created temp directory: /tmp/valet.d/d2-0.
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Exiting with code 0 after Xs.
+DEBUG    Exiting with code 0 after 0s.
 DEBUG    Deleting temporary directory.
 WARNING  This is a custom clean up function.
 ```
@@ -1066,15 +984,15 @@ WARNING  This is a custom clean up function.
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → VALET_USER_DIRECTORY=non-existing self mock1 logging-level
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 INFO     The valet user directory ⌜/tmp/valet.d/d2-2/non-existing⌝ does not contain a built ⌜commands⌝ file.
 Now building it using ⌜valet self build⌝ command.
 WARNING  Skipping the build of scripts in user directory ⌜/tmp/valet.d/d2-2/non-existing⌝ because it does not exist.
@@ -1091,15 +1009,15 @@ With a second line.
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 ▶ called main::showInteractiveCommandsMenu Please select the command to run. FILTERED_COMMANDS_FOR_SUB_MENU⌉
 ▶ received array was:
 ⌈self add-command    Add a new command to the current extension.
@@ -1116,9 +1034,9 @@ self update         Update valet and its extensions to the latest releases.⌉
 
 Exit code: `0`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self -h
 ABOUT
 
@@ -1206,16 +1124,16 @@ COMMANDS
 
 Exit code: `1`
 
-**Standard** output:
+**Standard output**:
 
-```plaintext
+```text
 → valet self --unknown
 Failed as expected.
 ```
 
-**Error** output:
+**Error output**:
 
-```log
+```text
 ERROR    Unknown option ⌜--unknown⌝, valid options are:
 -h --help
 Use ⌜valet self --help⌝ to get help.
