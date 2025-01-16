@@ -300,7 +300,7 @@ _CMD_INCLUDED=1
 
 "
     # shellcheck disable=SC2086
-    io::invoke declare -p ${!CMD_*}
+    io::captureOutput declare -p ${!CMD_*}
     local line
     local IFS
     while IFS=$'\n' read -r -d $'\n' line; do

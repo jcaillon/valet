@@ -555,6 +555,9 @@ function main::runFunction() {
     profiler::enable "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}-command.txt"}"
   fi
 
+  # reset IFS to ensure consistent behavior
+  local IFS=' '$'\t'$'\n'
+
   # execute the function
   "${functionName}" "$@"
 

@@ -376,7 +376,7 @@ function selfTest_runSingleTestSuite() {
     # the global execution of the tests.
     if ! (
       core::setShellOptions
-      trap 'selfTest_onExitTestInternal $? ' EXIT;
+      trap 'selfTest_onExitTestInternal $?' EXIT; trap 'selfTest_onErrTestInternal' ERR;
       selfTest_runSingleTest "${testSuiteDirectory}" "${testScript}" || exit $?
     ) >"${GLOBAL_TEST_STACK_FILE}" 2>"${GLOBAL_TEST_LOG_FILE}"; then
 
@@ -390,26 +390,57 @@ function selfTest_runSingleTestSuite() {
       eval "${RETURNED_VALUE//declare -a/}"
 
       selfTestUtils_displayTestLogs
-      if log::isDebugEnabled; then
-        selfTestUtils_displayTestLogs
-      fi
       selfTestUtils_displayTestSuiteOutputs
 
-      log::error "The program exited with code ⌜${exitCode}⌝."$'\n'"Test scripts must not exit or return an error (do not forget that shell options are set to exit on error)."$'\n'$'\n'"If you expect a tested function or command to exit or fail, then run it in a subshell and capture the exit code like that:"$'\n'"⌜(myFunctionThatFails) || echo 'failed as expected with code \${PIPESTATUS[0]:-}'⌝"$'\n'$'\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
-      log::printCallStack 1 7
+      if (( exitCode == 142 )); then
+        # the function test::fail was called, there was a coding mistake in the test script that we caught
+        io::readFile "${GLOBAL_TEST_LOG_FILE}"
+        log::error "The test script ⌜${testScript##*/}⌝ failed because of a bad test implementation." \
+          "" \
+          "${RETURNED_VALUE}" \
+          "" \
+          "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
+
+      elif [[ -n ${_STACK_FUNCTION_NAMES_ERR:-} ]]; then
+        log::error "The test script ⌜${testScript##*/}⌝ had an error  and exited with code ⌜${exitCode}⌝." \
+          "Test scripts will exit if a command ends with an error (shell option to exit on error)." \
+          ""\
+          "If you expect a tested function or command to fail, use one of these two methods to display the failure without exiting the script:" \
+          ""\
+          "- ⌜myCommandThatFails || echo 'failed as expected with code \$?'⌝" \
+          "- ⌜test::exec myCommandThatFails⌝" \
+          ""\
+          "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
+        _STACK_FUNCTION_NAMES=("${_STACK_FUNCTION_NAMES_ERR[@]}")
+        _STACK_SOURCE_FILES=("${_STACK_SOURCE_FILES_ERR[@]}")
+        _STACK_LINE_NUMBERS=("${_STACK_LINE_NUMBERS_ERR[@]}")
+        # print the last line of the err output, which is supposed to be the bash error message
+        io::tail "${GLOBAL_TEST_STANDARD_ERROR_FILE}" 1 true
+        if [[ -n ${RETURNED_ARRAY[0]:-} ]]; then
+          log::printString "░ ${RETURNED_ARRAY[0]:-}" "░ "
+        fi
+        log::printCallStack 2 7
+      else
+        log::error "The test script ⌜${testScript##*/}⌝ exited with code ⌜${exitCode}⌝." \
+        "Test scripts must not exit or return an error (shell options are set to exit on error)." \
+        "" \
+        "If you expect a tested function or command to exit, run it in a subshell using one of these two methods:" \
+        "" \
+        "- ⌜(myCommandThatFails) || echo 'failed as expected with code \${PIPESTATUS[0]:-}'⌝" \
+        "- ⌜test::exit myCommandThatFails⌝" \
+        "" \
+        "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
+        log::printCallStack 1 7
+      fi
 
       nbOfScriptsWithErrors+=1
 
     else
-      # end of test
-      if log::isDebugEnabled; then
-        selfTestUtils_displayTestLogs
-      fi
-
       # check if the user forgot to call test::endTest
       if [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" || -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
         selfTestUtils_displayTestSuiteOutputs
-        log::error "Test script did not call ⌜test::endTest⌝ or it had outputs after the last call or ⌜test::endTest⌝."$'\n'$'\n'"Make sure to conclude all tests by calling the ⌜test::endTest⌝ function (nothing should be printed to the standard or error output after that)."$'\n'$'\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
+        selfTestUtils_displayTestLogs
+        log::error "The test script had un-flushed when it ended."$'\n'$'\n'"Make sure to conclude all test scripts by calling the ⌜test::flush⌝ or ⌜test::endTest⌝ functions (nothing should be printed to the standard or error output after that)."$'\n'$'\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
         nbOfScriptsWithErrors+=1
       fi
 
@@ -423,8 +454,20 @@ function selfTest_runSingleTestSuite() {
   # run a custom user script after the test suite if it exists
   selfTestUtils_runHookScript "${testsDotDirectory}/after-each-test-suite"
 
-  ((nbOfScriptsWithErrors > 0)) && return 1
-  selfTestUtils_compareWithApproved "${testSuiteDirectory}" "${GLOBAL_TEST_REPORT_FILE}" || return 1
+  # exit with an error if there were errors in the test scripts
+  if ((nbOfScriptsWithErrors > 0)); then
+    return 1
+  fi
+
+  # compare the test suite outputs with the approved files
+  if selfTestUtils_compareWithApproved "${testSuiteDirectory}" "${GLOBAL_TEST_REPORT_FILE}"; then
+    selfTestUtils_displayTestLogs
+    return 1
+  fi
+
+  if log::isDebugEnabled; then
+    selfTestUtils_displayTestLogs
+  fi
   return 0
 }
 
@@ -434,7 +477,7 @@ function selfTest_runSingleTestSuite() {
 # It will output the stack trace in a file.
 # We need to capture the stack trace within the subshell that runs the test script.
 function selfTest_onExitTestInternal() {
-  # handle an error in the test script
+  # handle an exit in the test script
   local exitCode="${1}"
 
   if ((exitCode == 0)); then
@@ -445,6 +488,18 @@ function selfTest_onExitTestInternal() {
   _STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
   _STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
   declare -p _STACK_FUNCTION_NAMES _STACK_SOURCE_FILES _STACK_LINE_NUMBERS 1>&3
+}
+
+# ## selfTest_onErrTestInternal
+#
+# Will be called if a test script has an error.
+# We need to capture the stack trace within the subshell that runs the test script.
+function selfTest_onErrTestInternal() {
+  # handle an error in the test script
+  _STACK_FUNCTION_NAMES_ERR=("${FUNCNAME[@]}")
+  _STACK_SOURCE_FILES_ERR=("${BASH_SOURCE[@]}")
+  _STACK_LINE_NUMBERS_ERR=("${BASH_LINENO[@]}")
+  declare -p _STACK_FUNCTION_NAMES_ERR _STACK_SOURCE_FILES_ERR _STACK_LINE_NUMBERS_ERR 1>&3
 }
 
 # ## selfTest_runSingleTest

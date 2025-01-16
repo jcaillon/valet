@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- document the test; use the lib-test test as an example, and also link to the test:: lib.
 - test the new bash:: lib
 - refacto progress bar; use signal to tell the bg job to redraw the progress bar after displaying a log.
 - after logging, if progress bar is in progress, we need to redraw it immediately.

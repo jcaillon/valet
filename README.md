@@ -3,7 +3,7 @@
 [![Latest Release](https://img.shields.io/github/v/release/jcaillon/valet?sort=date&style=flat&logo=github&logoColor=white&label=Latest%20release&color=%2350C878)][latest-release]
 [![Total downloads](https://img.shields.io/github/downloads/jcaillon/valet/total.svg?style=flat)][releases]
 [![MIT license](https://img.shields.io/badge/License-MIT-74A5C2.svg?style=flat)][license]
-[![bash 5+ required](https://img.shields.io/badge/Requires-bash%20v5+-865FC5.svg?logo=gnubash&logoColor=white)][bash]
+[![bash 5.1+ required](https://img.shields.io/badge/Requires-bash%20v5.1+-865FC5.svg?logo=gnubash&logoColor=white)][bash]
 
 [![icon](docs/static/logo.png)][valet-site]
 

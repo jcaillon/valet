@@ -2,6 +2,22 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
+# ## test::log
+#
+# Call this function to log a message during a test.
+# This log will only show in case of a script error or when the debug
+# log level is enabled when running the tests.
+#
+# - $@: **messages** _as string_:
+#       The messages to log.
+#
+# ```bash
+# test::log "This is a log message."
+# ```
+function test::log() {
+  printf '%s\n' "${@}" >&4
+}
+
 # ## test::title
 #
 # Call this function to add an H3 title in the report file.
@@ -16,25 +32,42 @@ function test::title() {
   printf "%s\n\n" "### ${1:-"Test"}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
-# ## test::commentTest
+# ## test::comment
 #
 # Call this function to add a paragraph in the report file.
 #
-# - $1: **comment** _as string_:
-#       The text to add in the report file.
+# - $@: **comment paragraphs** _as string_:
+#       The paragraphs to add in the report file.
 #
 # ```bash
-# test::commentTest "This is a comment."
+# test::comment "This is a comment."
 # ```
-function test::commentTest() {
-  printf "%s\n\n" "${1:-}" >>"${GLOBAL_TEST_REPORT_FILE}"
+function test::comment() {
+  printf "%s\n\n" "${@}" >>"${GLOBAL_TEST_REPORT_FILE}"
+}
+
+# ## test::func
+#
+# Call this function to test a function that returns a value using the valet
+# conventions (RETURNED_VALUE, RETURNED_ARRAY, etc...).
+#
+# It will write the command and its output to the report file.
+#
+# - $@: **command** _as string_:
+#       The command to execute (function and its arguments).
+#
+# ```bash
+# test::func myFunction
+# ```
+function test::func() {
+  test_exec false true "$@"
 }
 
 # ## test::exec
 #
 # Call this function to execute a command and write the command and its output to the report file.
 # The command can fail, in which case the returned exit code is written to the report file.
-# However, the command must not call `exit` (in which case, use test::execExiting).
+# However, the command must not call `exit` (in which case, use test::exit).
 #
 # - $@: **command** _as string_:
 #       The command to execute.
@@ -43,10 +76,10 @@ function test::commentTest() {
 # test::exec echo "Hello, world!"
 # ```
 function test::exec() {
-  test_execInternal false "$@"
+  test_exec false false "$@"
 }
 
-# ## test::execExiting
+# ## test::exit
 #
 # Call this function to execute a command that can call `exit` and write the command and its output to the report file.
 # The command is executed in a subshell to catch the exit.
@@ -55,96 +88,185 @@ function test::exec() {
 #       The command to execute.
 #
 # ```bash
-# test::execExiting exit 3
+# test::exit exit 3
 # ```
-function test::execExiting() {
-  test_execInternal true "$@"
+function test::exit() {
+  test_exec true false "$@"
 }
 
-# ## test_execInternal (private)
+# ## test::
+
+# ## test_exec (private)
 #
-# This function is called by test::exec and test::execExiting to execute a command and
+# This function is called by test::exec and test::exit to execute a command and
 # write the command and its output to the report file.
 #
-# - $1: **canExit** _as boolean_:
+# - $1: **can exit** _as boolean_:
 #       Whether the command can call `exit`.
+# - $2: **display returned values** _as boolean_:
+#       Whether the returned values should be displayed in the report.
+#       (e.g. RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY...)
 # - $@: **command** _as string_:
 #       The command to execute.
 #
 # ```bash
-# test_execInternal false echo "Hello, world!"
+# test_exec false echo "Hello, world!"
 # ```
-function test_execInternal() {
+function test_exec() {
   local canExit="${1}"
-  shift 1
-  local arg
-  local reportSection="Prompt:"$'\n'$'\n'"\`\`\`bash"$'\n'
-  for arg in "$@"; do
-    if [[ ${arg} == *[[:space:]]* ]]; then
-      reportSection+="\"${arg}\" "
-    else
-      reportSection+="${arg} "
-    fi
-  done
-  reportSection="${reportSection% }"$'\n'"\`\`\`"$'\n'$'\n'
+  local displayReturnedValues="${2}"
+  shift 2
 
-  printf '%s' "${reportSection}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  local IFS=' '
+  # compute the command to run, escaping special characters
+  local compoundCommand="${*//[\\[:space:]]/\\&}"
 
-  # reset the standard output and error output files
-  # It is necessary to first close the file descriptors before resetting the files
-  exec 1>&-
-  exec 2>&-
-  : >"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
-  : >"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
-  exec 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
-  exec 2>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
+  # shellcheck disable=SC2016
+  printf 'Prompt:\n\n```bash\n%s\n```\n\n' "${compoundCommand}" >>"${GLOBAL_TEST_REPORT_FILE}"
+
+  if [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" || -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
+    test::fail "⌜${FUNCNAME[1]}⌝ was called in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝ but the standard/error output were not empty, call ⌜test::flush⌝ first or do not write to these streams."
+  fi
+
+  if [[ ${displayReturnedValues} == "true" ]]; then
+    local RETURNED_VALUE RETURNED_VALUE2 RETURNED_VALUE3 RETURNED_VALUE4
+    local -a RETURNED_ARRAY RETURNED_ARRAY2
+    local -A RETURNED_ASSOCIATIVE_ARRAY
+  fi
+
+  # reset IFS to ensure consistent behavior
+  IFS=' '$'\t'$'\n'
 
   # execute the command
   local -i exitCode=0
   if [[ ${canExit} == "true" ]]; then
-    if ! ("$@") 1>>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" 2>>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"; then
+    if ! (eval "${compoundCommand}") 1>>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" 2>>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"; then
       exitCode=${PIPESTATUS[0]:-}
     fi
   else
-    if ! "$@" 1>>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" 2>>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"; then
+    if ! eval "${compoundCommand}" 1>>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" 2>>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"; then
       exitCode=$?
     fi
   fi
 
-  if (( exitCode != 0 )); then
-    printf '%s\n\n' "Exited with code: \`${exitCode}\`" >>"${GLOBAL_TEST_REPORT_FILE}"
+  if ((exitCode != 0)); then
+    # shellcheck disable=SC2016
+    printf 'Exited with code: `%s`\n\n' "${exitCode}" >>"${GLOBAL_TEST_REPORT_FILE}"
   fi
 
-  test::flushFdToCodeBlock 1 true
-  test::flushFdToCodeBlock 2 true
+  test_flushFdToCodeBlock 1 "Standard output"
+  test_flushFdToCodeBlock 2 "Error output"
+
+  if [[ ${displayReturnedValues} == "true" ]]; then
+    test::revealReturnedVars
+  fi
 }
 
-# ## test::flushFdToCodeBlock
+# ## test::revealReturnedVars
+#
+# This function can be called to display the returned values,
+# e.g. RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY...
+# They will each be displayed in a code block in the report file.
+#
+# ```bash
+# test::revealReturnedVars
+# ```
+function test::revealReturnedVars() {
+  local IFS=$'\n' output key
+  if [[ -n ${RETURNED_VALUE:-} ]]; then
+    # shellcheck disable=SC2016
+    printf 'RETURNED_VALUE:\n\n```text\n%s\n```\n\n' "${RETURNED_VALUE}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  fi
+  if [[ -n ${RETURNED_VALUE2:-} ]]; then
+    # shellcheck disable=SC2016
+    printf 'RETURNED_VALUE2:\n\n```text\n%s\n```\n\n' "${RETURNED_VALUE2}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  fi
+  if [[ -n ${RETURNED_VALUE3:-} ]]; then
+    # shellcheck disable=SC2016
+    printf 'RETURNED_VALUE3:\n\n```text\n%s\n```\n\n' "${RETURNED_VALUE3}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  fi
+  if [[ -n ${RETURNED_VALUE4:-} ]]; then
+    # shellcheck disable=SC2016
+    printf 'RETURNED_VALUE4:\n\n```text\n%s\n```\n\n' "${RETURNED_VALUE4}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  fi
+  if [[ -n ${RETURNED_ARRAY:-} ]]; then
+    for key in "${!RETURNED_ARRAY[@]}"; do
+      output+="[${key}]=${RETURNED_ARRAY[${key}]}"$'\n'
+    done
+    # shellcheck disable=SC2016
+    printf 'RETURNED_ARRAY:\n\n```text\n%s\n```\n\n' "${output}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  fi
+  if [[ -n ${RETURNED_ARRAY2:-} ]]; then
+    for key in "${!RETURNED_ARRAY2[@]}"; do
+      output+="[${key}]=${RETURNED_ARRAY2[${key}]}"$'\n'
+    done
+    # shellcheck disable=SC2016
+    printf 'RETURNED_ARRAY2:\n\n```text\n%s\n```\n\n' "${output}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  fi
+  if [[ -n ${RETURNED_ASSOCIATIVE_ARRAY:-} ]]; then
+    for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
+      output+="[${key}]=${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"$'\n'
+    done
+    # shellcheck disable=SC2016
+    printf 'RETURNED_ASSOCIATIVE_ARRAY:\n\n```text\n%s\n```\n\n' "${output}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  fi
+}
+
+# ## test::resetReturnedVars
+#
+# Resets the value of each RETURNED_ variable.
+#
+# ```bash
+# test::resetReturnedVars
+# ```
+function test::resetReturnedVars() {
+  local IFS=' '
+  # shellcheck disable=SC2086
+  unset ${!RETURNED_*}
+}
+
+# ## test::revealVars
+#
+# This function can be called to display the global variables in the report file.
+# They will displayed in a code block in the report file.
+#
+# - $@: **variables** _as string_:
+#       The variables to display.
+#
+# ```bash
+# test::revealVars myVar
+# ```
+function test::revealVars() {
+  local IFS=$'\n' output
+  io::captureOutput declare -p "${@}"
+  output="${RETURNED_VALUE//declare -? /}"
+    # shellcheck disable=SC2016
+    printf '```text\n%s\n```\n\n' "${output}" >>"${GLOBAL_TEST_REPORT_FILE}"
+}
+
+# ## test_flushFdToCodeBlock (private)
 #
 # This function write the captured standard and error outputs to the report file
 # and reset these file descriptors.
 #
 # - $1: **fdNumber** _as int_:
 #       The file descriptor number to flush (1 or 2).
-# - $2: **blockTitle** _as boolean_:
+# - $2: **blockTitle** _as string_:
 #       (optional) Can be set using the variable `_OPTION_BLOCK_TITLE`.
-#       Whether to add a title to the code block.
-#       (defaults to false)
+#       Add a 'title' to the code block (`**title**:` before the code block).
+#       (defaults to '' which will not add a title)
 #
 # ```bash
-# test::flushFdToCodeBlock 1 true
+# test_flushFdToCodeBlock 1 true
 # ```
-function test::flushFdToCodeBlock() {
+function test_flushFdToCodeBlock() {
   local -i fdNumber="${1}"
-  local blockTitle="${2:-${_OPTION_BLOCK_TITLE:-false}}"
+  local blockTitle="${2:-${_OPTION_BLOCK_TITLE:-}}"
   local file
-  local codeBlockName
-  if (( fdNumber == 1 )); then
+  if ((fdNumber == 1)); then
     file="${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
-    codeBlockName="Standard output"
   else
     file="${GLOBAL_TEST_STANDARD_ERROR_FILE}"
-    codeBlockName="Error output"
   fi
   if [[ ! -s "${file}" ]]; then
     return 0
@@ -156,9 +278,9 @@ function test::flushFdToCodeBlock() {
   text="${text//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
   text="${text//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
 
-  if [[ ${blockTitle} == "true" ]]; then
+  if [[ -n ${blockTitle} ]]; then
     # shellcheck disable=SC2016
-    printf '**%s**:\n\n```text\n%s\n```\n\n' "${codeBlockName}" "${text%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    printf '**%s**:\n\n```text\n%s\n```\n\n' "${blockTitle}" "${text%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   else
     # shellcheck disable=SC2016
     printf '```text\n%s\n```\n\n' "${text%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
@@ -168,25 +290,66 @@ function test::flushFdToCodeBlock() {
   eval " exec ${fdNumber}>&-; : >'${file}'; exec ${fdNumber}>'${file}';"
 }
 
-
+# ## test::flush
+#
+# Call this function to flush the standard and error outputs to the report file.
+# They will be added as code blocks in the report file (one for the standard
+# output, one for the standard error).
+#
+# ```bash
+# test::flush
+# ```
 function test::flush() {
-  test::flushFdToCodeBlock 1 true
-  test::flushFdToCodeBlock 2 true
+  test_flushFdToCodeBlock 1 "Standard output"
+  test_flushFdToCodeBlock 2 "Error output"
+}
+
+# ## test::flushStdout
+#
+# Call this function to flush the standard output to the report file.
+# It will be added as a code block in the report file.
+#
+# - $1: blockTitle _as string_:
+#       (optional) Can be set using the variable `_OPTION_BLOCK_TITLE`.
+#       Add a 'title' to the code block (`**title**:` before the code block).
+#       (defaults to '' which will not add a title)
+#
+# ```bash
+# test::flushStdout
+# ```
+function test::flushStdout() {
+  test_flushFdToCodeBlock 1 "${1:-${_OPTION_BLOCK_TITLE:-}}"
+}
+
+# ## test::flushStderr
+#
+# Call this function to flush the standard error to the report file.
+# It will be added as a code block in the report file.
+#
+# - $1: blockTitle _as string_:
+#       (optional) Can be set using the variable `_OPTION_BLOCK_TITLE`.
+#       Add a 'title' to the code block (`**title**:` before the code block).
+#       (defaults to '' which will not add a title)
+#
+# ```bash
+# test::flushStderr
+# ```
+function test::flushStderr() {
+  test_flushFdToCodeBlock 2 "${1:-${_OPTION_BLOCK_TITLE:-}}"
 }
 
 # ## test::endTest
 #
 # Call this function after a test to write a test result section to the report file.
+#
 # This create a new H3 section in the report file with the given test description,
-# the exit code, and the standard and error outputs (if any).
-#
-#
+# the exit code, and the standard and error outputs captured from the last flush (if any).
 #
 # - $1: **title** _as string_:
 #       The title of the test.
 # - $2: **exit code** _as int_:
 #       The exit code of the test.
-# - $3: comment _as string_:
+# - $@: comments _as string_:
 #       (optional) Can be set using the variable `_OPTION_COMMENT`.
 #       A text to explain what is being tested.
 #       (defaults to "")
@@ -197,23 +360,36 @@ function test::flush() {
 function test::endTest() {
   local testTitle="${1:-}"
   local exitCode="${2:-}"
-  local testDescription="${3:-${_OPTION_COMMENT:-}}"
-
-  # write the test title
-  local reportSection="### ${testTitle:-test}"
-
-  # write the test description if any
-  if [[ -n "${testDescription}" ]]; then
-    reportSection+=$'\n'$'\n'"${testDescription}"
+  local testDescription IFS=$'\n'
+  if [[ -n ${3:-} ]]; then
+    printf -v testDescription '%s\n\n' "${@:3}"
+  else
+    testDescription+="${_OPTION_COMMENT:-}"$'\n'$'\n'
   fi
 
-  # write the exit code
-  reportSection+=$'\n'$'\n'"Exit code: \`${exitCode}\`"
+  # shellcheck disable=SC2183
+  # shellcheck disable=SC2016
+  printf '### %s\n\n%sExit code: `%s`\n\n' "${testTitle:-test}" "${testDescription}" "${exitCode}" >>"${GLOBAL_TEST_REPORT_FILE}"
 
-  printf '%s\n\n' "${reportSection}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  test_flushFdToCodeBlock 1 "Standard output"
+  test_flushFdToCodeBlock 2 "Error output"
+}
 
-  test::flushFdToCodeBlock 1 true
-  test::flushFdToCodeBlock 2 true
+# ## test::fail
+#
+# Call this function to log a message and exit with the status 142, which
+# indicates to the self test command that the test failed and that we know the
+# reason (it is a bad implementation of the test itself).
+#
+# - $@: **message** _as string_:
+#       The message to log.
+#
+# ```bash
+# test::fail "This is a failure message with a clear reason."
+# ```
+function test::fail() {
+  test::log "$@"
+  exit 142
 }
 
 # Replaces the line numbers from an error log in the given file with XXX.

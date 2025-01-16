@@ -9,7 +9,7 @@ description: Learn how to install Valet on your system.
 
 ## 📦 Dependencies
 
-- Bash version 5 or superior is required (it uses bash `EPOCHREALTIME`).
+- Bash version 5.1 or superior is required (it uses bash `EPOCHREALTIME`).
 - From [GNU coreutils][gnu-core-utils]: it uses `rm`, `mv`, `mkdir` for all commands. It uses `cp`, `chmod`, `touch` for the installation/updates. *You most likely already have all of these!*
 - [curl][curl] and [tar][tar] are needed only if you want to use the `self update` or `self extend` command.
 

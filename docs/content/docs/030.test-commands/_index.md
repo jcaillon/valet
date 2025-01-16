@@ -80,7 +80,7 @@ Tests are implemented in `.sh` scripts directly under a test suite directory. Th
 
 You have 2 extra functions at your disposal in test scripts (see [libraries/test][libraries-tests] for more details):
 
-- `test::commentTest "comment"`: Add a text paragraph in the test result file. E.g. `test::commentTest "Here we are testing that 1+1 is equal to 2. Awesome."`
+- `test::comment "comment"`: Add a text paragraph in the test result file. E.g. `test::comment "Here we are testing that 1+1 is equal to 2. Awesome."`
 - `test::endTest "title" $? "description"`: Call this function after each test to append the test results to the report file. This create a new `h3` header with the title, write the given exit code and include the stdout and stderr of the test inside markdown code. It optionally can add a description to the test.
 
 You can check a script example to [test the Valet string library here][valet-string-lib-tests].

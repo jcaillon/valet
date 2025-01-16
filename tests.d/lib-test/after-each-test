@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+if [[ ${GLOBAL_TEST_SUITE_NAME:-} == "lib-test" ]]; then
+  TESTING_HOOKS+="after-each-test"$'\n'
+  echo "${TESTING_HOOKS}"
+  test::endTest "🪝 Testing the self test hooks" 0 "This shows which hook have been executed. This test is written in the 'after-each-test' script. We can't see the 'after-each-test-suites' and 'after-tests' because they are executed after the test script exits, thus we can't output their results in this report."
+fi

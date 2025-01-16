@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
-set -Eeu -o pipefail
 # Title:         commands.d/*
 # Author:        github.com/jcaillon
 
-# if not executing in bash, we can stop here
-if [[ -z "${BASH_VERSION:-}" ]]; then
-  printf '%s\n' "❌ This script must be run with bash." 1>&2
-  exit 1
-fi
-if [[ ${BASH_VERSINFO[0]:-0} -lt 5 ]]; then
-  printf '%s\n' "❌ Bash 5 or higher is required to run valet." 1>&2
+# check the bash version (and that we are running in bash), make it POSIX compliant
+# shellcheck disable=SC2292
+# shellcheck disable=SC2086
+# shellcheck disable=SC2128
+if [ ${BASH_VERSINFO:-0} -lt 5 ] || { [ ${BASH_VERSINFO} -eq 5 ] && [ ${BASH_VERSINFO[1]:-0} -lt 1 ]; }; then
+  printf '%s\n' "❌ Bash 5.1 or higher is required to run valet."
   exit 1
 fi
 
