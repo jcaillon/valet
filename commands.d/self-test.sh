@@ -347,8 +347,6 @@ function selfTest_runSingleTestSuite() {
   GLOBAL_TEST_REPORT_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/report"
   GLOBAL_TEST_STACK_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/stack"
   GLOBAL_TEST_LOG_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/log"
-  # shellcheck disable=SC2034
-  GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}/temp"
   mkdir -p "${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}"
   # shellcheck disable=SC2034
   GLOBAL_TEST_CURRENT_DIRECTORY="${testSuiteDirectory}"
@@ -406,6 +404,7 @@ function selfTest_runSingleTestSuite() {
           "${RETURNED_VALUE}" \
           "" \
           "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
+        log::printCallStack 1 7
 
       elif [[ -n ${GLOBAL_STACK_FUNCTION_NAMES_ERR:-} ]]; then
         log::error "The test script ⌜${testScript##*/}⌝ had an error  and exited with code ⌜${exitCode}⌝." \
@@ -493,10 +492,12 @@ function selfTest_onExitTestInternal() {
     return 0
   fi
 
-  GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
-  GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
-  GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
-  declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS 1>&3
+  if [[ ! -v GLOBAL_STACK_FUNCTION_NAMES ]]; then
+    GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
+    GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
+    GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
+    declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS 1>&3
+  fi
 }
 
 # ## selfTest_onErrTestInternal
@@ -535,6 +536,9 @@ function selfTest_runSingleTest() {
   # valet from a test
   cp -R "${GLOBAL_TEST_VALET_USER_DIRECTORY}" "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
   export VALET_USER_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
+
+  # shellcheck disable=SC2034
+  GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-temp"
 
   # redirect the standard output and error output to files
   exec 3>&1 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"

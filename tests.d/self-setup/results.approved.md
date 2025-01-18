@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → echo nnn | selfSetup
@@ -37,7 +37,7 @@ An information icon: II
 [2m[9G└─[3b─┘[0m
 ```
 
-**Error output**:
+Error output
 
 ```text
 INFO     Now setting up Valet.
@@ -60,7 +60,7 @@ INFO     You can create your own commands and have them available in valet, plea
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → echo yyo | selfSetup
@@ -89,7 +89,7 @@ An information icon: II
 [2m[9G└─[4b─┘[0m
 ```
 
-**Error output**:
+Error output
 
 ```text
 INFO     Now setting up Valet.

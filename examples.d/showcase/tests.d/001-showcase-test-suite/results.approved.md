@@ -8,14 +8,14 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
 That's it!
 ```
 
-**Error output**:
+Error output
 
 ```text
 INFO     First argument: arg1.
@@ -31,7 +31,7 @@ INFO     Extracted text is: ⌜My bold text⌝
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → showCaseSudo
@@ -44,7 +44,7 @@ whoami
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → onInterrupt

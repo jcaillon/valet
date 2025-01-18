@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Error output**:
+Error output
 
 ```text
 INFO     Added the test commands to the build.

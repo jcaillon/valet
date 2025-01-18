@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Error output**:
+Error output
 
 ```text
 
@@ -257,7 +257,7 @@ TRACE    This is a errorTrace
 
 Exit code: `0`
 
-**Error output**:
+Error output
 
 ```text
 

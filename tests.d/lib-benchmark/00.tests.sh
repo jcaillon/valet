@@ -3,6 +3,10 @@
 # shellcheck source=../../libraries.d/lib-benchmark
 source benchmark
 
+function main() {
+  test_benchmark::run
+}
+
 # override core::getProgramElapsedMicroseconds to return a fake incremental time
 function core::getProgramElapsedMicroseconds() {
   if [[ -z ${_FAKE_TIME:-} ]]; then
@@ -26,16 +30,10 @@ function test_function_3() {
 }
 
 function test_benchmark::run() {
-  declare -f test_function_1 test_function_2 test_function_3
+  test::title "✅ Testing benchmark::run"
 
-  echo
-  echo "→ benchmark::run test_function_1 test_function_2,test_function_3 3 5"
-  benchmark::run test_function_1 test_function_2,test_function_3 3 5
-}
-
-function main() {
-  test_benchmark::run
-  test::endTest "Testing benchmark::run function" 0
+  test::exec declare -f test_function_1 test_function_2 test_function_3
+  test::exec benchmark::run test_function_1 test_function_2,test_function_3 3 5
 }
 
 main

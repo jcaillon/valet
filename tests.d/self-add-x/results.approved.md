@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → selfAddCommand 'new cool command'
@@ -73,7 +73,7 @@ function newCoolCommand() {
 }
 ```
 
-**Error output**:
+Error output
 
 ```text
 WARNING  The current directory is not under the valet user directory ⌜/tmp/valet.valet.d⌝.
@@ -88,7 +88,7 @@ SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$G
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → selfAddLibrary 'new-cool-lib'
@@ -100,7 +100,7 @@ prompt: Do you want to override the existing library file?
 
 ```
 
-**Error output**:
+Error output
 
 ```text
 WARNING  The current directory is not under the valet user directory ⌜/tmp/valet.valet.d⌝.

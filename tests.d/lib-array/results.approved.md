@@ -4,10 +4,6 @@
 
 ### ✅ Testing array::sort
 
-Global array:
-
-Variables:
-
 ```text
 MY_ARRAY=(
 [0]='breakdown'
@@ -24,8 +20,6 @@ MY_ARRAY=(
 
 ❯ `array::sort MY_ARRAY`
 
-Variables:
-
 ```text
 MY_ARRAY=(
 [0]='abundant'
@@ -40,14 +34,19 @@ MY_ARRAY=(
 )
 ```
 
-### ✅ Testing array::sortWithCriteria
+Testing with an empty array:
 
-Global arrays:
-
-Variables:
+❯ `array::sort MY_ARRAY`
 
 ```text
-myArray=(
+MY_ARRAY=(
+)
+```
+
+### ✅ Testing array::sortWithCriteria
+
+```text
+MY_ARRAY=(
 [0]='a'
 [1]='b'
 [2]='c'
@@ -56,7 +55,7 @@ myArray=(
 [5]='f'
 [6]='g'
 )
-criteria1=(
+MY_CRITERIA1=(
 [0]='3'
 [1]='2'
 [2]='2'
@@ -65,7 +64,7 @@ criteria1=(
 [5]='4'
 [6]='0'
 )
-criteria2=(
+MY_CRITERIA2=(
 [0]='1'
 [1]='3'
 [2]='2'
@@ -76,7 +75,7 @@ criteria2=(
 )
 ```
 
-❯ `array::sortWithCriteria myArray criteria1 criteria2`
+❯ `array::sortWithCriteria MY_ARRAY MY_CRITERIA1 MY_CRITERIA2`
 
 Returned variables:
 
@@ -92,10 +91,8 @@ RETURNED_ARRAY=(
 )
 ```
 
-Variables:
-
 ```text
-myArray=(
+MY_ARRAY=(
 [0]='g'
 [1]='e'
 [2]='d'
@@ -113,104 +110,189 @@ got:      g e d c b a f
 expected: g e d c b a f
 ```
 
-### Testing array::appendIfNotPresent
-
-
-
-Exit code: `0`
-
-**Standard output**:
+### ✅ Testing array::appendIfNotPresent
 
 ```text
-declare -a MY_ARRAY=([0]="breakdown" [1]="constitutional")
-
-→ array::appendIfNotPresent MY_ARRAY 'deliver'
-0
-declare -a MY_ARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
-
-→ array::appendIfNotPresent MY_ARRAY 'breakdown'
-1
-declare -a MY_ARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
-
-→ array::appendIfNotPresent MY_ARRAY 'holiday'
-0
-declare -a MY_ARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="holiday")
+MY_ARRAY=(
+[0]='breakdown'
+[1]='constitutional'
+)
 ```
 
-### Testing array::isInArray
-
-
-
-Exit code: `0`
-
-**Standard output**:
+❯ `array::appendIfNotPresent MY_ARRAY deliver`
 
 ```text
-declare -a MY_ARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="position" [4]="economics")
-
-→ array::isInArray MY_ARRAY 'deliver'
-0
-
-→ array::isInArray MY_ARRAY 'holiday'
-1
+MY_ARRAY=(
+[0]='breakdown'
+[1]='constitutional'
+[2]='deliver'
+)
 ```
 
-### Testing array::makeArraysSameSize
+❯ `array::appendIfNotPresent MY_ARRAY breakdown`
 
-
-
-Exit code: `0`
-
-**Standard output**:
+Exited with code: `1`
 
 ```text
-declare -a array1=([0]="a" [1]="b" [2]="c")
-declare -a array2=([0]="" [1]="2")
-declare -a array3=([0]="x" [1]="y" [2]="z" [3]="w")
-
-→ array::makeArraysSameSize array1 array2 array3 array4
-declare -a array1=([0]="a" [1]="b" [2]="c" [3]="")
-declare -a array2=([0]="" [1]="2" [2]="" [3]="")
-declare -a array3=([0]="x" [1]="y" [2]="z" [3]="w")
-declare -a array4=([0]="" [1]="" [2]="" [3]="")
+MY_ARRAY=(
+[0]='breakdown'
+[1]='constitutional'
+[2]='deliver'
+)
 ```
 
-### Testing array::fuzzyFilterSort
-
-
-
-Exit code: `0`
-
-**Standard output**:
+### ✅ Testing array::isInArray
 
 ```text
-declare -a myArray=([0]="one the" [1]="the breakdown" [2]="constitutional" [3]="conventional" [4]="hold the baby" [5]="holiday inn" [6]="deliver" [7]="eLv1" [8]="eLv" [9]="abundant" [10]="make a living" [11]="the d day" [12]="elevator")
-
-→ array::fuzzyFilterSort the myArray
-declare -a RETURNED_ARRAY=([0]="the breakdown" [1]="the d day" [2]="one the" [3]="hold the baby")
-declare -a RETURNED_ARRAY2=([0]="1" [1]="11" [2]="0" [3]="4")
-
-→ shopt -s nocasematch; array::fuzzyFilterSort ELV myArray; shopt -u nocasematch
-declare -a RETURNED_ARRAY=([0]="eLv" [1]="eLv1" [2]="elevator" [3]="deliver" [4]="make a living")
-declare -a RETURNED_ARRAY2=([0]="8" [1]="7" [2]="12" [3]="6" [4]="10")
-
-declare -a myArray=([0]="On the" [1]="One of the most beautiful" [2]="One of this happy end" [3]="thaerty" [4]="thazrerty")
-
-→ array::fuzzyFilterSort the myArray
-declare -a RETURNED_ARRAY=([0]="thaerty" [1]="thazrerty" [2]="On the" [3]="One of the most beautiful" [4]="One of this happy end")
-declare -a RETURNED_ARRAY2=([0]="3" [1]="4" [2]="0" [3]="1" [4]="2")
+MY_ARRAY=(
+[0]='breakdown'
+[1]='deliver'
+[2]='economics'
+)
 ```
 
-### Testing that array::fuzzyFilterSortFileWithGrepAndAwk produces the same as fuzzyFilterSort
+❯ `array::isInArray MY_ARRAY deliver`
 
+```text
+MY_ARRAY=(
+[0]='breakdown'
+[1]='deliver'
+[2]='economics'
+)
+```
 
+❯ `array::isInArray MY_ARRAY holiday`
 
-Exit code: `0`
+Exited with code: `1`
+
+```text
+MY_ARRAY=(
+[0]='breakdown'
+[1]='deliver'
+[2]='economics'
+)
+```
+
+### ✅ Testing array::makeArraysSameSize
+
+```text
+MY_ARRAY1=(
+[0]='a'
+[1]='b'
+[2]='c'
+)
+MY_ARRAY2=(
+[0]=''
+[1]='2'
+)
+MY_ARRAY3=(
+[0]='x'
+[1]='y'
+[2]='z'
+[3]='w'
+)
+```
+
+❯ `array::makeArraysSameSize MY_ARRAY1 MY_ARRAY2 MY_ARRAY3 MY_ARRAY4`
+
+```text
+MY_ARRAY1=(
+[0]='a'
+[1]='b'
+[2]='c'
+[3]=''
+)
+MY_ARRAY2=(
+[0]=''
+[1]='2'
+[2]=''
+[3]=''
+)
+MY_ARRAY3=(
+[0]='x'
+[1]='y'
+[2]='z'
+[3]='w'
+)
+MY_ARRAY4=(
+[0]=''
+[1]=''
+[2]=''
+[3]=''
+)
+```
+
+### ✅ Testing array::fuzzyFilterSort
+
+```text
+MY_ARRAY=(
+[0]='one the'
+[1]='the breakdown'
+[2]='constitutional'
+[3]='conventional'
+[4]='hold the baby'
+[5]='holiday inn'
+[6]='deliver'
+[7]='eLv1'
+[8]='eLv'
+[9]='abundant'
+[10]='make a living'
+[11]='the d day'
+[12]='elevator'
+)
+```
+
+❯ `array::fuzzyFilterSort the MY_ARRAY`
+
+Returned variables:
+
+```text
+RETURNED_ARRAY=(
+[0]='the breakdown'
+[1]='the d day'
+[2]='one the'
+[3]='hold the baby'
+)
+RETURNED_ARRAY2=(
+[0]='1'
+[1]='11'
+[2]='0'
+[3]='4'
+)
+```
+
+❯ `shopt -s nocasematch`
+
+❯ `array::fuzzyFilterSort ELV MY_ARRAY`
+
+Returned variables:
+
+```text
+RETURNED_ARRAY=(
+[0]='eLv'
+[1]='eLv1'
+[2]='elevator'
+[3]='deliver'
+[4]='make a living'
+)
+RETURNED_ARRAY2=(
+[0]='8'
+[1]='7'
+[2]='12'
+[3]='6'
+[4]='10'
+)
+```
+
+### ✅ Testing array::fuzzyFilterSortFileWithGrepAndAwk
+
+❯ `array::fuzzyFilterSortFileWithGrepAndAwk /words /out1 /out2`
+
+❯ `io::head /out1 10`
 
 **Standard output**:
 
 ```text
-→ array::fuzzyFilterSortFileWithGrepAndAwk words out1 out2
 ea
 ea1
 eat
@@ -221,99 +303,7 @@ Ekaterina
 Evarts
 elated
 Edwardsian
-extradotal
-epexegetical
-encyclopediac
-beader
-pearlashes
-weatherbreak
-sea-gray
-Jeanne
-headwords
-beagles
-decancellated
-medakas
-mesal
-rewarding
-rewa-rewa
-delates
-repacked
-defrauded
-termatic
-remeant
-Sequan
-geolatry
-Kenward
-well-ankled
-oedema
-dehepatize
-reproachlessness
-kelpware
-rerummage
-Lemuela
-reinflatable
-sense-data
-perpetrating
-veil-wearing
-retrofracted
-perspicable
-yellow-washed
-Berkeleianism
-rectiserial
-semimoderate
-Gesellschaft
-mesethmoidal
-semifictionally
-stearolactone
-idealizes
-ameban
-Chevalier
-overpainfully
-overeater
-sterigma
-Ctenoplana
-preinsurance
-plectognath
-overcommercialized
-pseudosymptomatic
-hylean
-spreagh
-moderantism
-underacting
-superarrogance
-abietate
-liberations
-hyperanarchy
-underlapped
-waterward
-arrentation
-orientation
-Asteropaeus
-unregularised
-intermediates
-underspreading
-superengrave
-aggregation
-oxycephaly
-protestable
-Castella
-washerman
-ischemia
-house-place
-apprehendable
-palaeontographic
-nontechnological
-billheads
-hyponeas
-Dinoceratidae
-uninvestable
-hatcheryman
-antiresonance
-unobjectionable
-low-breasted
-haminoea
-blockheaded
-Dictyosiphonaceae
-The result is the same as the pure bash implementation.
 ```
+
+The result is the same as the pure bash implementation.
 

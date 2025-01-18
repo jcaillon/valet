@@ -2,222 +2,163 @@
 
 ## Test script 00.curl
 
-### Testing curl::toFile, should write to file
+### ✅ Testing curl::toFile
 
+Writing to an output file:
 
+❯ `curl::toFile true 200 /tmp/valet-temp --code 200 https://fuu`
 
-Exit code: `0`
+Returned variables:
+
+```text
+RETURNED_VALUE=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 200 https://fuu\n'
+RETURNED_VALUE2='200'
+```
+
+❯ `io::cat /tmp/valet-temp`
 
 **Standard output**:
 
 ```text
-→ curl::toFile false '' "${tmpFile}" --code 200 -curlOption1 --fakeOpt2 https://fuu
-curl::toFile false function ended with exit code ⌈0⌉.
-http return code was ⌈200⌉
-Content of downloaded file:
-⌈Writing stuff to file because the --output option was given.⌉
-stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/curl-test --code 200 -curlOption1 --fakeOpt2 https://fuu
-⌉
+(request body response) Writing stuff to file because the --output option was given.
 ```
 
-### Testing curl::toFile, http code 500 not acceptable return 1
+Getting a 500 error with fail mode on:
 
+❯ `curl::toFile true 200 /tmp/valet-temp --code 500 https://fuu`
 
-
-Exit code: `1`
-
-**Standard output**:
-
-```text
-→ curl::toFile false '' "${tmpFile}" --code 500 https://fuu
-curl::toFile false function ended with exit code ⌈1⌉.
-http return code was ⌈500⌉
-Content of downloaded file:
-⌈Writing stuff to file because the --output option was given.⌉
-stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/curl-test --code 500 https://fuu
-⌉
-```
-
-### Testing curl::toFile, http code 500 not acceptable fails
-
-
-
-Exit code: `1`
-
-**Standard output**:
-
-```text
-→ curl::toFile true '' "${tmpFile}" --code 500 https://fuu
-```
+Exited with code: `1`
 
 **Error output**:
 
 ```text
 TRACE    Curl error output stream:
-   1 ░ ▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/curl-test --code 500 https://fuu
+   1 ░ (curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 500 https://fuu
    2 ░ 
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝.
 ```
 
-### Testing curl::toFile, http code 500 is now acceptable return 0
+Getting a 500 error with fail mode off:
 
+❯ `curl::toFile false 200 /tmp/valet-temp --code 500 https://fuu`
 
+Exited with code: `1`
 
-Exit code: `0`
-
-**Standard output**:
-
-```text
-→ curl::toFile false '300,500,999' "${tmpFile}" --code 500 https://fuu
-curl::toFile false function ended with exit code ⌈0⌉.
-http return code was ⌈500⌉
-Content of downloaded file:
-⌈Writing stuff to file because the --output option was given.⌉
-stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/curl-test --code 500 https://fuu
-⌉
-```
-
-### Testing curl::toFile, testing debug mode https code 400
-
-
-
-Exit code: `1`
-
-**Standard output**:
+Returned variables:
 
 ```text
-→ curl::toFile false '' "${tmpFile}" --code 400 --error https://fuu/bla --otherOpt
-curl::toFile false function ended with exit code ⌈1⌉.
-http return code was ⌈400⌉
-Content of downloaded file:
-⌈Writing stuff to file because the --output option was given.⌉
-stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/curl-test --code 400 --error https://fuu/bla --otherOpt
-Returning 1 from curl.
-⌉
+RETURNED_VALUE=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 500 https://fuu\n'
+RETURNED_VALUE2='500'
 ```
+
+Getting an acceptable 400 error with fail mode:
+
+❯ `curl::toFile true 200,400,401 /tmp/valet-temp --code 400 https://fuu`
+
+Returned variables:
+
+```text
+RETURNED_VALUE=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 400 https://fuu\n'
+RETURNED_VALUE2='400'
+```
+
+Getting an acceptable 201 with debug mode on
+
+❯ `log::setLevel debug`
 
 **Error output**:
 
 ```text
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
-'--silent' '--show-error' '--location' '--write-out' '%{response_code}' '--output' '/tmp/valet.d/curl-test' '--code' '400' '--error' 'https://fuu/bla' '--otherOpt'
-DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜1⌝.
-DEBUG    The curl command for url ⌜https://fuu/bla⌝ ended with exit code ⌜1⌝, the http return code was ⌜400⌝.
-TRACE    Curl error output stream:
-   1 ░ ▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/curl-test --code 400 --error https://fuu/bla --otherOpt
-   2 ░ Returning 1 from curl.
-   3 ░ 
-DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜https://fuu/bla⌝.
 ```
 
-### Testing curl::toFile, testing debug mode http code 200
-
-
-
-Exit code: `0`
-
-**Standard output**:
-
-```text
-→ curl::toFile false '' "${tmpFile}" --code 200 http://fuu
-curl::toFile false function ended with exit code ⌈0⌉.
-http return code was ⌈200⌉
-Content of downloaded file:
-⌈Writing stuff to file because the --output option was given.⌉
-stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet.d/curl-test --code 200 http://fuu
-⌉
-```
+❯ `curl::toFile false '' /tmp/valet-temp --code 201 https://fuu`
 
 **Error output**:
 
 ```text
-DEBUG    Log level set to debug.
-WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
-'--silent' '--show-error' '--location' '--write-out' '%{response_code}' '--output' '/tmp/valet.d/curl-test' '--code' '200' 'http://fuu'
+'--silent' '--show-error' '--location' '--write-out' '%{response_code}' '--output' '/tmp/valet-temp' '--code' '201' 'https://fuu'
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
-DEBUG    The curl command for url ⌜http://fuu⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
+DEBUG    The curl command for url ⌜https://fuu⌝ ended with exit code ⌜0⌝, the http return code was ⌜201⌝.
+DEBUG    The http return code ⌜201⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
+```
+
+Returned variables:
+
+```text
+RETURNED_VALUE=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 201 https://fuu\n'
+RETURNED_VALUE2='201'
+```
+
+❯ `log::setLevel info`
+
+### ✅ Testing curl::toVar
+
+Getting 200:
+
+❯ `curl::toVar true 200 /tmp/valet-temp --code 200 https://fuu`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='(request body response) Writing stuff to file because the --output option was given.'
+RETURNED_VALUE2=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu\n'
+RETURNED_VALUE3='200'
+```
+
+Getting 500 with fail mode off:
+
+❯ `curl::toVar false '' /tmp/valet-temp --code 500 https://fuu`
+
+Exited with code: `1`
+
+Getting 500 with fail mode on:
+
+❯ `curl::toVar true 200 /tmp/valet-temp --code 500 https://fuu`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+TRACE    Curl error output stream:
+   1 ░ (curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 500 https://fuu
+   2 ░ 
+ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝.
+```
+
+Getting 200 with no content and debug mode on:
+
+❯ `log::setLevel debug`
+
+**Error output**:
+
+```text
+DEBUG    Log level set to debug.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
+```
+
+❯ `curl::toVar true 200 /tmp/valet-temp --code 200 https://fuu`
+
+**Error output**:
+
+```text
+DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
+'--silent' '--show-error' '--location' '--write-out' '%{response_code}' '--output' '/tmp/valet-work.f' '/tmp/valet-temp' '--code' '200' 'https://fuu'
+DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
+DEBUG    The curl command for url ⌜https://fuu⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
 DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
 ```
 
-### Testing curl, with no content http code 200
-
-
-
-Exit code: `0`
-
-**Standard output**:
+Returned variables:
 
 ```text
-→ curl::toVar false '' --code 200 http://hello.com
-curl::toVar function ended with exit code ⌈0⌉.
-http return code was ⌈200⌉
-stdout:
-⌈⌉
-stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f --code 200 http://hello.com
-⌉
+RETURNED_VALUE=''
+RETURNED_VALUE2=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu\n'
+RETURNED_VALUE3='200'
 ```
 
-### Testing curl, with no content http code 500, fails
-
-
-
-Exit code: `1`
-
-**Standard output**:
-
-```text
-→ curl::toVar false '' --code 500 http://hello.com
-```
-
-**Error output**:
-
-```text
-TRACE    Curl error output stream:
-   1 ░ ▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f --code 500 http://hello.com
-   2 ░ 
-ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜http://hello.com⌝.
-```
-
-### Testing curl, debug mode, with content http code 400
-
-
-
-Exit code: `1`
-
-**Standard output**:
-
-```text
-→ curl::toVar false '' --code 400 http://hello.com
-curl::toVar function ended with exit code ⌈1⌉.
-http return code was ⌈400⌉
-stdout:
-⌈Writing stuff to file because the --output option was given.⌉
-stderr:
-⌈▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f --code 400 http://hello.com
-⌉
-```
-
-**Error output**:
-
-```text
-DEBUG    Log level set to debug.
-WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
-'--silent' '--show-error' '--location' '--write-out' '%{response_code}' '--output' '/tmp/valet-work.f' '--code' '400' 'http://hello.com'
-DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
-DEBUG    The curl command for url ⌜http://hello.com⌝ ended with exit code ⌜0⌝, the http return code was ⌜400⌝.
-TRACE    Curl error output stream:
-   1 ░ ▶ called curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f --code 400 http://hello.com
-   2 ░ 
-DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜http://hello.com⌝.
-```
+❯ `log::setLevel info`
 

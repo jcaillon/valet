@@ -390,15 +390,16 @@ The fifth line."
 
   test::title "✅ Testing string::head"
 
+  test::markdown "**Global variables:**"
   test::printVars _TEST_MULTILINE_STRING
 
-  test::comment "Testing string::head with 3 lines"
+  test::markdown "Testing string::head with 3 lines"
   test::func string::head "${_TEST_MULTILINE_STRING}" 3
 
-  test::comment "Testing string::head with 0 line"
+  test::markdown "Testing string::head with 0 line"
   test::func string::head "${_TEST_MULTILINE_STRING}" 0
 
-  test::comment "Testing string::head with 10 lines"
+  test::markdown "Testing string::head with 10 lines"
   test::func string::head "${_TEST_MULTILINE_STRING}" 10
 }
 

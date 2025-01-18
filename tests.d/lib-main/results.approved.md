@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → main::sortCommands myid1 "${commands}"
@@ -25,7 +25,7 @@ another3  This is another command 3
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → main::addLastChoice myid1 another3
@@ -44,7 +44,7 @@ sub cmd2  This is sub command 2
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands myid1 "${commands}"
@@ -61,7 +61,7 @@ another3  This is another command 3
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → main::sortCommands myid2 "${commands}"
@@ -78,7 +78,7 @@ another3  This is another command 3
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 Content of last-choices-myid1:
@@ -96,7 +96,7 @@ cm6
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 Content of last-choices-myid1:
@@ -116,7 +116,7 @@ cm7
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 # missing argument
@@ -379,7 +379,7 @@ more=(
 
 ```
 
-**Error output**:
+Error output
 
 ```text
 INFO     Fuzzy matching the option ⌜--what⌝ to ⌜--with-default⌝.
@@ -394,7 +394,7 @@ INFO     Fuzzy matching the option ⌜--this⌝ to ⌜--this-is-option2⌝.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → main::getFunctionNameFromCommand 'self build'
@@ -407,7 +407,7 @@ selfBuild
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → main::fuzzyMatchCommandToFunctionNameOrFail 'se bu other stuff dont care'
@@ -422,7 +422,7 @@ Failed as expected because strict mode is activated
 Failed as expected on ambiguous result
 ```
 
-**Error output**:
+Error output
 
 ```text
 INFO     Fuzzy matching the command ⌜se bu⌝ to ⌜self build⌝.
@@ -452,7 +452,7 @@ CHIsCDEelCHIfCDE update
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → main::getMaxPossibleCommandLevel '1' '2' '3'
@@ -474,7 +474,7 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → VALET_CONFIG_STRICT_MATCHING=true main::fuzzyFindOption de --opt1 --derp2 --allo3
@@ -507,7 +507,7 @@ Unknown option ⌜thing⌝, valid options are:
 
 ```
 
-**Error output**:
+Error output
 
 ```text
 INFO     Fuzzy matching the option ⌜de⌝ to ⌜--derp2⌝.
@@ -519,7 +519,7 @@ INFO     Fuzzy matching the option ⌜de⌝ to ⌜--derp2⌝.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → main::getSingleLetterOptions -a --opt1 --derp2 -b --allo3 -c
@@ -532,7 +532,7 @@ Valid single letter options are: ⌜a⌝, ⌜b⌝, ⌜c⌝.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → main::getDisplayableFilteredArray ae ARRAY

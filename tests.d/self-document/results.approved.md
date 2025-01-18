@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → selfDocument --output /tmp/valet.d/d1-2 --core-only
@@ -140,7 +140,7 @@ function ansi-codes::*() { :; }
   "prefix": "array::fuzzyFilterSort#withdoc",
 ```
 
-**Error output**:
+Error output
 
 ```text
 INFO     Generating documentation for the core functions only.

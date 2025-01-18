@@ -34,26 +34,42 @@ function test::title() {
   printf "%s\n\n" "### ${1:-${_OPTION_TITLE:-"Test"}}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
-# ## test::comment
+# ## test::markdown
 #
-# Call this function to add a paragraph in the report file.
+# Call this function to add some markdown in the report file.
 #
-# - $@: **comment paragraphs** _as string_:
-#       The paragraphs to add in the report file.
+# - $@: **markdown** _as string_:
+#       The markdown to add in the report file.
 #
 # ```bash
-# test::comment "This is a comment."
+# test::markdown "> This is a **quote**."
 # ```
-function test::comment() {
+function test::markdown() {
   printf "%s\n\n" "${@}" >>"${GLOBAL_TEST_REPORT_FILE}"
+}
+
+# ## test::prompt
+#
+# Call this function to print a 'prompt' (markdown that looks like a prompt) in the report file.
+#
+# - $@: **command** _as string_:
+#       The command to print as a prompt.
+#
+# ```bash
+# test::prompt "echo 'Hello, world!'"
+# ```
+function test::prompt() {
+  # shellcheck disable=SC2016
+  printf '❯ `%s`\n\n' "${*}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
 # ## test::func
 #
 # Call this function to test a function that returns a value using the valet
-# conventions (RETURNED_VALUE, RETURNED_ARRAY, etc...).
+# conventions (RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY, etc...).
 #
 # It will write the command and its output to the report file.
+# It will also print the returned values.
 #
 # - $@: **command** _as string_:
 #       The command to execute (function and its arguments).
@@ -103,8 +119,8 @@ function test::exit() {
 #
 # - $1: **can exit** _as boolean_:
 #       Whether the command can call `exit`.
-# - $2: **display returned values** _as boolean_:
-#       Whether the returned values should be displayed in the report.
+# - $2: **print returned values** _as boolean_:
+#       Whether the returned values should be printed in the report.
 #       (e.g. RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY...)
 # - $@: **command** _as string_:
 #       The command to execute.
@@ -115,7 +131,7 @@ function test::exit() {
 # shellcheck disable=SC2034
 function test_exec() {
   local canExit="${1}"
-  local displayReturnedValues="${2}"
+  local printReturnedValues="${2}"
   shift 2
 
   if (($# == 0)); then
@@ -128,7 +144,9 @@ function test_exec() {
   compoundCommand="${compoundCommand//$'\n'/"$'\n'"}"
 
   _TEST_OUTPUT="${compoundCommand}"
-  test_replaceDynamicStrings
+  if declare -f test::transformTextBeforeFlushing &>/dev/null; then
+    test::transformTextBeforeFlushing
+  fi
 
   # shellcheck disable=SC2016
   printf '❯ `%s`\n\n' "${_TEST_OUTPUT}" >>"${GLOBAL_TEST_REPORT_FILE}"
@@ -137,7 +155,7 @@ function test_exec() {
     test::fail "⌜${FUNCNAME[1]:-}⌝ was called in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝ but the standard/error output were not empty, call ⌜test::flush⌝ first or do not write to these streams."
   fi
 
-  if [[ ${displayReturnedValues} == "true" ]]; then
+  if [[ ${printReturnedValues} == "true" ]]; then
     local RETURNED_VALUE
     local RETURNED_VALUE2
     local RETURNED_VALUE3
@@ -169,19 +187,19 @@ function test_exec() {
     printf 'Exited with code: `%s`\n\n' "${exitCode}" >>"${GLOBAL_TEST_REPORT_FILE}"
   fi
 
-  test_flushFdToCodeBlock 1 "Standard output"
-  test_flushFdToCodeBlock 2 "Error output"
+  test_flushFdToCodeBlock 1 "**Standard output**:"
+  test_flushFdToCodeBlock 2 "**Error output**:"
 
-  if [[ ${displayReturnedValues} == "true" ]]; then
+  if [[ ${printReturnedValues} == "true" ]]; then
     test::printReturnedVars
   fi
 }
 
 # ## test::printReturnedVars
 #
-# This function can be called to display the returned values,
+# This function can be called to print the returned values,
 # e.g. RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY...
-# They will each be displayed in a code block in the report file.
+# They will each be printed in a code block in the report file.
 #
 # ```bash
 # test::printReturnedVars
@@ -211,7 +229,9 @@ function test::printReturnedVars() {
     _TEST_OUTPUT+=")"$'\n'
   fi
   if [[ -n ${_TEST_OUTPUT} ]]; then
-    test_replaceDynamicStrings
+    if declare -f test::transformTextBeforeFlushing &>/dev/null; then
+      test::transformTextBeforeFlushing
+    fi
     # shellcheck disable=SC2016
     printf 'Returned variables:\n\n```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   fi
@@ -232,11 +252,11 @@ function test::resetReturnedVars() {
 
 # ## test::printVars
 #
-# This function can be called to display the global variables in the report file.
-# They will displayed in a code block in the report file.
+# This function can be called to print the global variables in the report file.
+# They will printed in a code block in the report file.
 #
 # - $@: **variables** _as string_:
-#       The variables to display.
+#       The variables to print.
 #
 # ```bash
 # test::printVars myVar
@@ -244,16 +264,23 @@ function test::resetReturnedVars() {
 function test::printVars() {
   local IFS=$'\n'
   local chunk varName
-  io::captureOutput declare -p "${@}"
+  if ! io::captureOutput declare -p "${@}"; then
+    local varName
+    for varName in "${@}"; do
+      if ! io::captureOutput declare -p "${varName}"; then
+        IFS=' '
+        test::fail "Variable ⌜${varName}⌝ does not exist, could not execute ⌜test::printVars $*⌝."
+      fi
+    done
+  fi
   _TEST_OUTPUT=""
   while [[ -n ${RETURNED_VALUE} ]]; do
     chunk="${RETURNED_VALUE%%$'\n'*}"
     RETURNED_VALUE="${RETURNED_VALUE:${#chunk} + 1}"
 
     if [[ ${chunk} =~ "declare -"[aA][ilnrtux]*" "([^=]+)"=" ]]; then
-      # we display an array
+      # we print an array
       varName="${BASH_REMATCH[1]}"
-      test::log "Printing variable: ⌜${varName}⌝"
       local -n array="${varName}"
       _TEST_OUTPUT+="${varName}=("$'\n'
       for key in "${!array[@]}"; do
@@ -261,15 +288,17 @@ function test::printVars() {
       done
       _TEST_OUTPUT+=")"$'\n'
     elif [[ ${chunk} =~ "declare -"[^[:space:]]+" " ]]; then
-      # we display a simple variable
+      # we print a simple variable
       _TEST_OUTPUT+="${chunk//"${BASH_REMATCH[0]}"/}"$'\n'
     else
       test::fail "Could not parse variable declaration: ⌜${chunk}⌝."
     fi
   done
-  test_replaceDynamicStrings
+  if declare -f test::transformTextBeforeFlushing &>/dev/null; then
+    test::transformTextBeforeFlushing
+  fi
   # shellcheck disable=SC2016
-  printf 'Variables:\n\n```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf '```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
 # ## test_flushFdToCodeBlock (private)
@@ -303,35 +332,21 @@ function test_flushFdToCodeBlock() {
   local IFS=''
   read -rd '' _TEST_OUTPUT <"${file}" || :
 
-  test_replaceDynamicStrings
+  if declare -f test::transformTextBeforeFlushing &>/dev/null; then
+    test::transformTextBeforeFlushing
+  fi
 
   if [[ -n ${blockTitle} ]]; then
     # shellcheck disable=SC2016
-    printf '**%s**:\n\n```text\n%s\n```\n\n' "${blockTitle}" "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    printf '%s\n\n```text\n%s\n```\n\n' "${blockTitle}" "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   else
     # shellcheck disable=SC2016
     printf '```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   fi
 
+  # reset the file content (must close/open the file descriptor in between)
   # shellcheck disable=SC2093
-  eval " exec ${fdNumber}>&-; : >'${file}'; exec ${fdNumber}>'${file}';"
-}
-
-# ## test_replaceDynamicStrings (private)
-#
-# This function replaces various strings in the given text.
-# It is important to make the tests runnable in different environments and on different machines.
-#
-# It replaces stuff in the global variable `_TEST_OUTPUT`.
-#
-# ```bash
-# test_replaceDynamicStrings
-# ```
-function test_replaceDynamicStrings() {
-  # If a callback is defined, call it to modify the text before adding it to the report
-  if declare -f test::transformTextBeforeFlushing &>/dev/null; then
-    test::transformTextBeforeFlushing
-  fi
+  eval "exec ${fdNumber}>&-; : >'${file}'; exec ${fdNumber}>'${file}';"
 }
 
 # ## test::transformTextBeforeFlushing
@@ -358,8 +373,8 @@ function test_replaceDynamicStrings() {
 # test::flush
 # ```
 function test::flush() {
-  test_flushFdToCodeBlock 1 "Standard output"
-  test_flushFdToCodeBlock 2 "Error output"
+  test_flushFdToCodeBlock 1 "**Standard output**:"
+  test_flushFdToCodeBlock 2 "**Error output**:"
 }
 
 # ## test::flushStdout
@@ -396,7 +411,7 @@ function test::flushStderr() {
   test_flushFdToCodeBlock 2 "${1:-${_OPTION_BLOCK_TITLE:-}}"
 }
 
-# ## test::endTest
+# ## test::endTest (deprecated)
 #
 # Call this function after a test to write a test result section to the report file.
 #
@@ -446,6 +461,11 @@ function test::endTest() {
 # test::fail "This is a failure message with a clear reason."
 # ```
 function test::fail() {
+  GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
+  GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
+  GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
+  declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS 1>&3
+
   test::log "$@"
   exit "${GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS}"
 }

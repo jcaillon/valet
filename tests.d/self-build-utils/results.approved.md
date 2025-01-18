@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Error output**:
+Error output
 
 ```text
 INFO     content:
@@ -32,7 +32,7 @@ INFO     content:
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 TEMP_CMD_BUILD_arguments_description=0 "Description of arg 1." 1 "Description of arg 2." 2 "Description of arg 3."
@@ -54,7 +54,7 @@ TEMP_CMD_BUILD_shortDescription='Short description.'
 TEMP_CMD_BUILD_sudo='false'
 ```
 
-**Error output**:
+Error output
 
 ```text
    1 ░ 
@@ -111,7 +111,7 @@ TEMP_CMD_BUILD_sudo='false'
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → extractFirstLongNameFromOptionString '-x, --profiling'
@@ -124,7 +124,7 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 CMD_ALL_COMMANDS_ARRAY=0 "cmd"
@@ -153,7 +153,7 @@ CMD_SHORT_DESCRIPTION_func='Short description.'
 CMD_SUDO_func='false'
 ```
 
-**Error output**:
+Error output
 
 ```text
    1 ░ 
@@ -210,14 +210,14 @@ CMD_SUDO_func='false'
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 
 
 ```
 
-**Error output**:
+Error output
 
 ```text
    1 ░ 

@@ -20,9 +20,11 @@ source io
 function bash::countJobs() {
   local -i jobsCount=0
   io::captureOutput jobs -r
-  local IFS=$'\n'
-  for _ in ${RETURNED_VALUE}; do
-    jobsCount+=1
+  local IFS=$'\n' line
+  for line in ${RETURNED_VALUE}; do
+    if [[ ${line} == "["* ]]; then
+      jobsCount+=1
+    fi
   done
   RETURNED_VALUE="${jobsCount}"
 }

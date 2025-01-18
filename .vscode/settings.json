@@ -4,6 +4,7 @@
   "bashIde.includeAllWorkspaceSymbols": true,
   "terminal.integrated.wordSeparators": " ()[]{}',\"`─‘’“”|⌜⌝",
   "cSpell.words": [
+    "nocasematch",
     "Pids"
   ]
 }

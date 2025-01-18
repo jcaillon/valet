@@ -2,11 +2,9 @@
 
 ## Test script 00.tests
 
-### Testing benchmark::run function
+### ✅ Testing benchmark::run
 
-
-
-Exit code: `0`
+❯ `declare -f test_function_1 test_function_2 test_function_3`
 
 **Standard output**:
 
@@ -23,9 +21,9 @@ test_function_3 ()
 { 
     :
 }
-
-→ benchmark::run test_function_1 test_function_2,test_function_3 3 5
 ```
+
+❯ `benchmark::run test_function_1 test_function_2,test_function_3 3 5`
 
 **Error output**:
 

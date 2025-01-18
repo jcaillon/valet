@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 echo y | interactive::promptYesNo 'Do you see this message?'
@@ -26,7 +26,7 @@ echo y | interactive::promptYesNo 'Do you see this message?'
 
 Exit code: `1`
 
-**Standard output**:
+Standard output
 
 ```text
 
@@ -45,7 +45,7 @@ echo n | interactive::promptYesNo 'Do you see this message?'
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 echo y | interactive::askForConfirmation 'Please press OK.'
@@ -63,7 +63,7 @@ echo y | interactive::askForConfirmation 'Please press OK.'
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 interactive::createSpace 5
@@ -80,7 +80,7 @@ interactive::createSpace 5
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 printf '\e[%sR' '123;456' | interactive::getCursorPosition
@@ -93,7 +93,7 @@ GLOBAL_CURSOR_LINE: 123; GLOBAL_CURSOR_COLUMN: 456
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 interactiveGetProgressBarString 0 20
@@ -121,7 +121,7 @@ interactiveGetProgressBarString 100 15
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 GLOBAL_LINES=10

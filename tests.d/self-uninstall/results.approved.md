@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → selfUninstall
@@ -17,7 +17,7 @@ Exit code: `0`
 ok
 ```
 
-**Error output**:
+Error output
 
 ```text
 WARNING  To uninstall Valet, you can run the following commands:

@@ -31,32 +31,59 @@ This was written to the standard output using: echo '...'
 Then flushed with test::flushStdout
 ```
 
-**Optional title for the code block:**:
+**Optional title for the code block:**
 
 ```text
 This was written to the error output using: echo '...' 1>&2
 Then flushed with test::flushStderr
 ```
 
-### 🧫 Testing using test::endTest
+### 🧪 Generic testing method
 
-One way to test your commands is to simply call them, let them write their output to the standard or error (logs) file descriptors as they normally do.
+The generic way to test your commands is to simply call them. They will write their output to the standard or error (logs) file descriptors as they normally do.
+
+You can then use `test::flush` to print their output to the report.
+
+❯ `functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0`
+
+**Standard output**:
+
+```text
+I am testing functionToTest.
+```
+
+**Error output**:
+
+```text
+This is supposed to be in the error output
+```
 
 An important thing to keep in mind is that shell options are set to exit on error, and exiting during a test is considered a failure.
 
 You can use the `commandThatFails || echo "Failed as expected."` pattern to handle expected failures (unexpected failure are supposed to crash your tests anyway).
 
-For commands that directly call `exit`, you must run them in a subshell to avoid the test script to exit as well: `(myCommandThatExit) || || echo "Failed as expected."`.
-
-Exit code: `42`
+❯ `functionToTest "Second test." "Second test." 2 || echo "Failed as expected because functionToTest returned $?."`
 
 **Standard output**:
 
 ```text
-❯ functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0
-I am testing functionToTest.
 Second test.
 Failed as expected because functionToTest returned 2.
+```
+
+**Error output**:
+
+```text
+Second test.
+```
+
+For commands that directly call `exit`, you must run them in a subshell to avoid the test script to exit as well: `(myCommandThatExit) || || echo "Failed as expected."`.
+
+❯ `(functionThatExit "Third test." "Third test." 3) || echo "Failed as expected because functionToTest returned ${PIPESTATUS[0]}."`
+
+**Standard output**:
+
+```text
 Third test.
 Failed as expected because functionToTest returned 3.
 ```
@@ -64,8 +91,6 @@ Failed as expected because functionToTest returned 3.
 **Error output**:
 
 ```text
-This is supposed to be in the error output
-Second test.
 Third test.
 ```
 
@@ -79,36 +104,36 @@ This convenient function also logs the command that was executed, handles errors
 
 > However, it is not adapted to handle commands that `exit`, see the next test on `test::exit` for that.
 
-❯ `functionToTest I\ am\ testing\ functionToTest. This\ is\ supposed\ to\ be\ in\ the\ error\ output 0`
+❯ `functionToTest OK Success 0`
 
 **Standard output**:
 
 ```text
-I am testing functionToTest.
+OK
 ```
 
 **Error output**:
 
 ```text
-This is supposed to be in the error output
+Success
 ```
 
 In this second test, we expect the command to fail and return the exit code 2.
 
-❯ `functionToTest Second\ test. Second\ test. 2`
+❯ `functionToTest KO Failure 2`
 
 Exited with code: `2`
 
 **Standard output**:
 
 ```text
-Second test.
+KO
 ```
 
 **Error output**:
 
 ```text
-Second test.
+Failure
 ```
 
 ### 👋 Testing an exiting command with test::exit
@@ -117,20 +142,20 @@ The `test::exit` function is a variant of `test::exec` that is adapted to handle
 
 It will run the command in a subshell and output the same format as `test::exec`.
 
-❯ `functionThatExit I\ am\ testing\ functionThatExit. This\ is\ supposed\ to\ be\ in\ the\ error\ output 3`
+❯ `functionThatExit KO Exiting 3`
 
 Exited with code: `3`
 
 **Standard output**:
 
 ```text
-I am testing functionThatExit.
+KO
 ```
 
 **Error output**:
 
 ```text
-This is supposed to be in the error output
+Exiting
 ```
 
 ### 🔬 Testing a function with test::func
@@ -141,30 +166,30 @@ Meaning functions that usually return values in a variables named `RETURNED_VALU
 
 It function will be executed and its output will be added the report, including any declare `RETURNED_*` variable.
 
-❯ `typicalValetFunction Function\ output A\ log\ line.`
+❯ `functionWithReturnedVariables VALUE Running\ functionWithReturnedVariables`
 
 **Standard output**:
 
 ```text
-OUTPUT: Function output
+OUTPUT: VALUE
 ```
 
 **Error output**:
 
 ```text
-LOG: A log line.
+LOG: Running functionWithReturnedVariables
 ```
 
 Returned variables:
 
 ```text
-RETURNED_VALUE='This is the returned value.'
+RETURNED_VALUE='This is the returned value'
 RETURNED_ARRAY=(
 [0]='This'
 [1]='is'
 [2]='the'
 [3]='returned'
-[4]='array.'
+[4]='array'
 )
 ```
 
@@ -196,13 +221,7 @@ RETURNED_ARRAY2=(
 
 You can manually report the definition of any variable using the `test::printVars` function.
 
-**Command executed in the test script:**:
-
-```text
-> test::printVars GLOBAL_VAR1 GLOBAL_VAR2
-```
-
-Variables:
+❯ `test::printVars GLOBAL_VAR1 GLOBAL_VAR2 GLOBAL_VAR3`
 
 ```text
 GLOBAL_VAR1="This is the value of a global string"
@@ -214,22 +233,53 @@ GLOBAL_VAR2=(
 [4]='of'
 [5]='a'
 [6]='global'
-[7]='array.'
+[7]='array'
 )
+GLOBAL_VAR3=(
+[key2]='2'
+[key3]='3'
+[key1]='1'
+)
+```
+
+### 🧫 Testing using test::endTest (deprecated)
+
+A last way to test your commands is to simply call them, let them write their output to the standard or error (logs) file descriptors as they normally do.
+
+An important thing to keep in mind is that shell options are set to exit on error, and exiting during a test is considered a failure.
+
+You can use the `commandThatFails || echo "Failed as expected."` pattern to handle expected failures (unexpected failure are supposed to crash your tests anyway).
+
+For commands that directly call `exit`, you must run them in a subshell to avoid the test script to exit as well: `(myCommandThatExit) || || echo "Failed as expected."`.
+
+Exit code: `42`
+
+Standard output
+
+```text
+❯ functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0
+I am testing functionToTest.
+Second test.
+Failed as expected because functionToTest returned 2.
+Third test.
+Failed as expected because functionToTest returned 3.
+```
+
+Error output
+
+```text
+This is supposed to be in the error output
+Second test.
+Third test.
 ```
 
 ### 🪝 Testing the self test hooks
 
-This shows which hook have been executed. This test is written in the 'after-each-test' script. We can't see the 'after-each-test-suites' and 'after-tests' because they are executed after the test script exits, thus we can't output their results in this report.
+The variable TESTING_HOOKS shows that the hooks [before-tests](../before-tests), [before-each-test-suite](../before-each-test-suite), [before-each-test](before-each-test) have been executed.
 
-Exit code: `0`
-
-**Standard output**:
+This test is written in the [after-each-test](after-each-test) script. The `after-each-test-suites` and `after-tests` are executed after the test script exits, thus we can't output their results in this report.
 
 ```text
-before-tests
-before-each-test-suite
-after-each-test
-
+TESTING_HOOKS="before-tests,before-each-test-suite,after-each-test"
 ```
 

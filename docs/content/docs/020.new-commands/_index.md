@@ -274,7 +274,7 @@ You can activate the debug log level with Valet `-v` option, e.g. `valet -v my c
 [command-properties]: ../command-properties
 [core-library]: ../libraries/core/
 [bash-manual-set]: https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html#index-set
-[profiler-output-example]: https://github.com/jcaillon/valet/blob/latest/tests.d/0901-profiler/results.approved.md
+[profiler-output-example]: https://github.com/jcaillon/valet/blob/latest/tests.d/cli-profiler/results.approved.md
 [libraries]: ../libraries
 [newExtensionsLink]: ../new-extensions
 [newLibraryLink]: ../new-libraries

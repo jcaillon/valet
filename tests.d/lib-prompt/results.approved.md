@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 
@@ -139,7 +139,7 @@ declare -- _PROMPT_STRING_SCREEN_WIDTH="4"
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 declare -- _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="HellO wOrld"

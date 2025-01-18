@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → OSTYPE=linux-bsd system::os
@@ -31,7 +31,7 @@ unknown
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → system::env
@@ -44,7 +44,7 @@ Found environment variables.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → system::date
@@ -60,7 +60,7 @@ Returned date with length 8.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → system::getUndeclaredVariables
@@ -76,7 +76,7 @@ Found undeclared variables: ⌜dfg NOP⌝.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → system::getNotExistingCommands
@@ -92,7 +92,7 @@ Found not existing commands: ⌜NONEXISTINGSTUFF YETANOTHERONEMISSING⌝.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → system::commandExists
@@ -111,7 +111,7 @@ Found command.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → system::addToPath
@@ -140,7 +140,7 @@ export PATH="/coucou:${PATH}"
 $env.PATH = ($env.PATH | split row (char esep) | append "/coucou")
 ```
 
-**Error output**:
+Error output
 
 ```text
 INFO     Adding directory ⌜/coucou⌝ to the PATH for ⌜bash⌝ shell.
@@ -185,7 +185,7 @@ INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → system::windowsSetEnvVar VAR VALUE
@@ -202,7 +202,7 @@ io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenS
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → system::windowsGetEnvVar VAR
@@ -221,7 +221,7 @@ io::windowsRunInPowershell:
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → system::windowsAddToPath /coucou

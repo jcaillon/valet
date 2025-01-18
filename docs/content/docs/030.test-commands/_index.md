@@ -66,7 +66,7 @@ Instead:
 4. If the files are different but the new received test if correct (or if the approved version does not exist yet), you can approve it and `results.received.md` will be the new `results.approved.md`.
 5. When you run the test again, the 2 files will be identical, ensuring you that your tests still lead to the same results.
 
-You can check an example of [test report for the string library of Valet][valet-string-tests-report].
+You can check an example of [test report for the **test** library of Valet][valet-test-lib-report].
 
 Each test suite will generate a different test results markdown file that can be approved.
 
@@ -78,12 +78,14 @@ Valet uses a diff tool to compare the received and the approved files. It is str
 
 Tests are implemented in `.sh` scripts directly under a test suite directory. The name of the script will determine the `h2` header of the report file while the name of the test suite directory will determine the `h1` header. You can have several scripts or one script per test suite.
 
-You have 2 extra functions at your disposal in test scripts (see [libraries/test][libraries-tests] for more details):
+You have many functions that you can use in your test scripts to build up the report file: [libraries/test][libraries-tests].
 
-- `test::comment "comment"`: Add a text paragraph in the test result file. E.g. `test::comment "Here we are testing that 1+1 is equal to 2. Awesome."`
-- `test::endTest "title" $? "description"`: Call this function after each test to append the test results to the report file. This create a new `h3` header with the title, write the given exit code and include the stdout and stderr of the test inside markdown code. It optionally can add a description to the test.
+Check out this example to get started quickly:
 
-You can check a script example to [test the Valet string library here][valet-string-lib-tests].
+- [The test script][valet-test-lib-tests].
+- [The test report generated][valet-test-lib-report].
+
+The Valet [tests.d][[valet-test-suites]] directory contains many other examples.
 
 ## ✒️ Implement tests
 
@@ -173,8 +175,8 @@ In addition to the test scripts, you can create other specific scripts which wil
 {{< /cards >}}
 
 [valet-test-suites]: https://github.com/jcaillon/valet/tree/latest/tests.d
-[valet-string-tests-report]: https://github.com/jcaillon/valet/blob/latest/tests.d/1003-lib-string/results.approved.md
-[valet-string-lib-tests]: https://github.com/jcaillon/valet/blob/latest/tests.d/1003-lib-string/00.tests.sh
+[valet-test-lib-report]: https://github.com/jcaillon/valet/blob/latest/tests.d/lib-test/results.approved.md
+[valet-test-lib-tests]: https://github.com/jcaillon/valet/blob/latest/tests.d/lib-test/00.tests.sh
 [showcase-tests]: https://github.com/jcaillon/valet/blob/latest/examples.d/showcase/tests.d/001-showcase-test-suite/00.tests.sh
 [libraries-tests]: ../libraries/test
 [newExtensionsLink]: ../new-extensions

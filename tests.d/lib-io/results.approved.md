@@ -8,7 +8,7 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::toAbsolutePath ${PWD}/01.invoke.sh
@@ -45,7 +45,7 @@ $GLOBAL_VALET_HOME/tests.d/lib-io/missing-file
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::readFile 'resources/file-to-read' 100
@@ -60,7 +60,7 @@ Source: <https:/
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::readFile 'resources/file-to-read'
@@ -96,7 +96,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::createDirectoryIfNeeded 'resources/dir/subdir'
@@ -108,7 +108,7 @@ $GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored/derp
 Directory created successfully!
 ```
 
-**Error output**:
+Error output
 
 ```text
 mkdir: cannot create directory ‘$GLOBAL_VALET_HOME/tests.d/lib-io/resources/dir/subdir/file1’: File exists
@@ -121,7 +121,7 @@ ERROR    Failed to create the directory ⌜$GLOBAL_VALET_HOME/tests.d/lib-io/res
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::createFilePathIfNeeded 'resources/dir/subdir/file1'
@@ -137,7 +137,7 @@ File created successfully!
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::sleep 0.001
@@ -149,7 +149,7 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::cat 'resources/file-to-read'
@@ -185,7 +185,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::readStdIn <<<'coucou'
@@ -201,7 +201,7 @@ coucou
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::countArgs 'arg1' 'arg2' 'arg3'
@@ -216,7 +216,7 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::isDirectoryWritable '/tmp'
@@ -231,7 +231,7 @@ Writable
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::convertToWindowsPath '/tmp/file'
@@ -248,7 +248,7 @@ C:\data\file
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' true
@@ -265,7 +265,7 @@ $GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::convertFromWindowsPath 'C:\Users\username'
@@ -280,7 +280,7 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::head 'resources/file-to-read' 10
@@ -302,7 +302,7 @@ Preventing the exploitation of animals is not the only reason for becoming vegan
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::head 'resources/file-to-read' 0
@@ -314,7 +314,7 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::head 'resources/file-to-read' 99
@@ -350,7 +350,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::head 'resources/file-to-read' 3 true
@@ -365,7 +365,7 @@ Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::captureOutput 'echo coucou'
@@ -389,7 +389,7 @@ io::captureOutput ()
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::captureOutput '[[ 1 -eq 0 ]]'
@@ -402,7 +402,7 @@ Failed as expected
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::tail 'resources/file-to-read' 3
@@ -417,7 +417,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::tail 'resources/file-to-read' 0
@@ -430,7 +430,7 @@ Exit code: `0`
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::tail 'resources/file-to-read' 99
@@ -466,7 +466,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::tail 'resources/file-to-read' 3 true
@@ -483,7 +483,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 Exit code: `1`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error
@@ -505,14 +505,14 @@ returning 1 from fakeexec⌉
 
 Exit code: `1`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invokef5 true 0 false inputStreamValue fakeexec --std-in --error
 exitcode=1
 ```
 
-**Error output**:
+Error output
 
 ```text
 TRACE    Fakeexec standard output stream:
@@ -532,7 +532,7 @@ ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invokef5 true 0,1,2 true '' fakeexec --error
@@ -553,7 +553,7 @@ returning 1 from fakeexec⌉
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invoke5 false 0 true 'tmpFile' fakeexec --std-in
@@ -576,7 +576,7 @@ stderr from var:
 
 Exit code: `1`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error
@@ -592,7 +592,7 @@ returning 1 from fakeexec⌉
 
 ```
 
-**Error output**:
+Error output
 
 ```text
 DEBUG    Log level set to trace.
@@ -618,7 +618,7 @@ DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invokef2 false fakeexec --option argument1 argument2
@@ -638,7 +638,7 @@ stderr from file:
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invoke2 false fakeexec --option argument1 argument2
@@ -660,13 +660,13 @@ stderr from var:
 
 Exit code: `1`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invoke fakeexec --error
 ```
 
-**Error output**:
+Error output
 
 ```text
 TRACE    Fakeexec standard output stream:
@@ -685,7 +685,7 @@ ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invoke fakeexec --option argument1 argument2
@@ -707,7 +707,7 @@ stderr from var:
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invokef2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2
@@ -728,7 +728,7 @@ stderr from file:
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2
@@ -753,7 +753,7 @@ stderr from var:
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::listPaths ${PWD}/resources/search
@@ -819,7 +819,7 @@ $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::listFiles ${PWD}/resources/search
@@ -858,7 +858,7 @@ $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → io::listDirectories ${PWD}/resources/search

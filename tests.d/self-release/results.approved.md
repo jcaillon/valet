@@ -8,13 +8,13 @@
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → selfRelease -t token -b major --dry-run
 ```
 
-**Error output**:
+Error output
 
 ```text
 INFO     Dry run mode is enabled, no changes will be made.
@@ -44,13 +44,13 @@ SUCCESS  The new version has been released, check: https://github.com/jcaillon/v
 
 Exit code: `0`
 
-**Standard output**:
+Standard output
 
 ```text
 → selfRelease -t token -b minor
 ```
 
-**Error output**:
+Error output
 
 ```text
 DEBUG    Log level set to debug.
@@ -253,7 +253,8 @@ DEBUG    Found function: ⌜system::windowsGetEnvVar⌝
 DEBUG    Found function: ⌜system::windowsAddToPath⌝
 DEBUG    Found function: ⌜test::log⌝
 DEBUG    Found function: ⌜test::title⌝
-DEBUG    Found function: ⌜test::comment⌝
+DEBUG    Found function: ⌜test::markdown⌝
+DEBUG    Found function: ⌜test::prompt⌝
 DEBUG    Found function: ⌜test::func⌝
 DEBUG    Found function: ⌜test::exec⌝
 DEBUG    Found function: ⌜test::exit⌝
@@ -264,7 +265,6 @@ DEBUG    Found function: ⌜test::transformTextBeforeFlushing⌝
 DEBUG    Found function: ⌜test::flush⌝
 DEBUG    Found function: ⌜test::flushStdout⌝
 DEBUG    Found function: ⌜test::flushStderr⌝
-DEBUG    Found function: ⌜test::endTest⌝
 DEBUG    Found function: ⌜test::fail⌝
 INFO     Found 159 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
