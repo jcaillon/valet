@@ -77,6 +77,10 @@ function selfTestUtils_setupValetForConsistency() {
   export EPOCHSECONDS=548902800
   export EPOCHREALTIME=548902800.000000
 
+  # set a new user directory so that commands are correctly recreated if calling
+  # valet from a test
+  export VALET_USER_DIRECTORY="${GLOBAL_TEST_VALET_USER_DIRECTORY}"
+
   log::createPrintFunction
   eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 }

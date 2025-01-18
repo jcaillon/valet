@@ -4,6 +4,8 @@
 
 ### Testing system::os
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -25,6 +27,8 @@ unknown
 
 ### Testing system::env
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -35,6 +39,8 @@ Found environment variables.
 ```
 
 ### Testing system::date
+
+
 
 Exit code: `0`
 
@@ -50,6 +56,8 @@ Returned date with length 8.
 
 ### Testing system::date
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -64,6 +72,8 @@ Found undeclared variables: ⌜dfg NOP⌝.
 
 ### Testing system::getNotExistingCommands
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -77,6 +87,8 @@ Found not existing commands: ⌜NONEXISTINGSTUFF YETANOTHERONEMISSING⌝.
 ```
 
 ### Testing system::commandExists
+
+
 
 Exit code: `0`
 
@@ -94,6 +106,8 @@ Found command.
 ```
 
 ### Testing system::addToPath
+
+
 
 Exit code: `0`
 
@@ -167,6 +181,8 @@ INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
 
 ### Testing system::windowsSetEnvVar
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -181,6 +197,8 @@ io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenS
 ```
 
 ### Testing system::windowsGetEnvVar
+
+
 
 Exit code: `0`
 
@@ -198,6 +216,8 @@ io::windowsRunInPowershell:
 ```
 
 ### Testing system::windowsAddToPath
+
+
 
 Exit code: `0`
 

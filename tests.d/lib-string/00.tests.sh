@@ -381,6 +381,27 @@ function test_string::highlight() {
   test::endTest "Testing string::highlight" 0
 }
 
+function test_string::head() {
+  _TEST_MULTILINE_STRING="The first line.
+The second line.
+The third line.
+The fourth line.
+The fifth line."
+
+  test::title "✅ Testing string::head"
+
+  test::revealVars _TEST_MULTILINE_STRING
+
+  test::comment "Testing string::head with 3 lines"
+  test::func string::head "${_TEST_MULTILINE_STRING}" 3
+
+  test::comment "Testing string::head with 0 line"
+  test::func string::head "${_TEST_MULTILINE_STRING}" 0
+
+  test::comment "Testing string::head with 10 lines"
+  test::func string::head "${_TEST_MULTILINE_STRING}" 10
+}
+
 function main() {
   test_string::cutField
   test_string::compareSemanticVersion
@@ -399,6 +420,7 @@ function main() {
   test_string::wrapText
   test_string::wrapCharacters
   test_string::highlight
+  test_string::head
 }
 
 main

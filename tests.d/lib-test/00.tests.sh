@@ -35,7 +35,6 @@ function main() {
   'For commands that directly call `exit`, you must run them in a subshell to avoid the test script to exit as well: `(myCommandThatExit) || || echo "Failed as expected."`.'
 
 
-
   test::title "🧪 Testing any command with test::exec"
   test::comment 'Another approach is to use `test::exec` to run any command.' \
   'The command will be executed and its output will be captured then automatically flushed to the test report.' \
@@ -56,13 +55,17 @@ function main() {
   test::comment 'The `test::func` function is a variant of `test::exec` that is adapted to handle functions developed using the coding style of Valet.' \
   'Meaning functions that usually return values in a variables named `RETURNED_VALUE...` (or `RETURNED_ARRAY...`) and that can optionally print results to the standard output and push logs to the error output.' \
   'It function will be executed and its output will be added the report, including any declare `RETURNED_*` variable.'
+  RETURNED_VALUE="This will be overridden"
+  RETURNED_ARRAY=("This" "will" "be" "overridden.")
+  test::func typicalValetFunction "\"{ 'output': 'this function outputs json format' }\"" "A log line."
 
 
   test::title "🙈 Display reporting RETURNED variables"
   test::comment 'You can manually report the content of the `RETURNED_*` variables using the `test::revealReturnedVars` function.' \
   'The function `test::resetReturnedVars` can also be used to reset the content of the `RETURNED_*` variables.'
-  RETURNED_VALUE="This will be overridden".
   test::resetReturnedVars
+  RETURNED_VALUE2="This is the value of a returned string for RETURNED_VALUE2"
+  RETURNED_ARRAY2=("This" "is" "the" "value" "of" "a" "returned" "array" "for" "RETURNED_ARRAY2")
   test::revealReturnedVars
 
 

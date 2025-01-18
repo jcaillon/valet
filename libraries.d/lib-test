@@ -22,14 +22,16 @@ function test::log() {
 #
 # Call this function to add an H3 title in the report file.
 #
-# - $1: **title** _as string_:
+# - $1: title _as string_:
+#       (optional) Can be set using the variable `_OPTION_TITLE`.
 #       The title of the test.
+#      (defaults to "Test")
 #
 # ```bash
 # test::title "Testing something"
 # ```
 function test::title() {
-  printf "%s\n\n" "### ${1:-"Test"}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf "%s\n\n" "### ${1:-${_OPTION_TITLE:-"Test"}}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
 # ## test::comment
@@ -94,8 +96,6 @@ function test::exit() {
   test_exec true false "$@"
 }
 
-# ## test::
-
 # ## test_exec (private)
 #
 # This function is called by test::exec and test::exit to execute a command and
@@ -117,20 +117,39 @@ function test_exec() {
   local displayReturnedValues="${2}"
   shift 2
 
+  if (($# == 0)); then
+    test::fail "No command provided to ⌜${FUNCNAME[1]:-}⌝ in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝."
+  fi
+
   local IFS=' '
   # compute the command to run, escaping special characters
-  local compoundCommand="${*//[\\[:space:]]/\\&}"
+  local compoundCommand="${*//[\\ ]/\\&}"
+  compoundCommand="${compoundCommand//$'\n'/"$'\n'"}"
+  compoundCommand="${compoundCommand//$'\t'/"$'\t'"}"
+
+  _TEST_OUTPUT="${compoundCommand}"
+  _TEST_OUTPUT="${_TEST_OUTPUT//main::parseMainArguments/valet}"
+  test_replaceDynamicStrings
 
   # shellcheck disable=SC2016
-  printf 'Prompt:\n\n```bash\n%s\n```\n\n' "${compoundCommand}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf 'Prompt:\n\n```bash\n%s\n```\n\n' "${_TEST_OUTPUT}" >>"${GLOBAL_TEST_REPORT_FILE}"
 
   if [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" || -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
-    test::fail "⌜${FUNCNAME[1]}⌝ was called in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝ but the standard/error output were not empty, call ⌜test::flush⌝ first or do not write to these streams."
+    test::fail "⌜${FUNCNAME[1]:-}⌝ was called in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝ but the standard/error output were not empty, call ⌜test::flush⌝ first or do not write to these streams."
   fi
 
   if [[ ${displayReturnedValues} == "true" ]]; then
-    local RETURNED_VALUE RETURNED_VALUE2 RETURNED_VALUE3 RETURNED_VALUE4
-    local -a RETURNED_ARRAY RETURNED_ARRAY2
+    # shellcheck disable=SC2034
+    local RETURNED_VALUE
+    # shellcheck disable=SC2034
+    local RETURNED_VALUE2
+    # shellcheck disable=SC2034
+    local RETURNED_VALUE3
+    # shellcheck disable=SC2034
+    local RETURNED_VALUE4
+    # shellcheck disable=SC2034
+    local -a RETURNED_ARRAY
+    local -a RETURNED_ARRAY2
     local -A RETURNED_ASSOCIATIVE_ARRAY
   fi
 
@@ -144,7 +163,9 @@ function test_exec() {
       exitCode=${PIPESTATUS[0]:-}
     fi
   else
-    if ! eval "${compoundCommand}" 1>>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" 2>>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"; then
+    if eval "${compoundCommand}" 1>>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" 2>>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"; then
+      :
+    else
       exitCode=$?
     fi
   fi
@@ -172,43 +193,36 @@ function test_exec() {
 # test::revealReturnedVars
 # ```
 function test::revealReturnedVars() {
-  local IFS=$'\n' output key
-  if [[ -n ${RETURNED_VALUE:-} ]]; then
-    # shellcheck disable=SC2016
-    printf 'RETURNED_VALUE:\n\n```text\n%s\n```\n\n' "${RETURNED_VALUE}" >>"${GLOBAL_TEST_REPORT_FILE}"
-  fi
-  if [[ -n ${RETURNED_VALUE2:-} ]]; then
-    # shellcheck disable=SC2016
-    printf 'RETURNED_VALUE2:\n\n```text\n%s\n```\n\n' "${RETURNED_VALUE2}" >>"${GLOBAL_TEST_REPORT_FILE}"
-  fi
-  if [[ -n ${RETURNED_VALUE3:-} ]]; then
-    # shellcheck disable=SC2016
-    printf 'RETURNED_VALUE3:\n\n```text\n%s\n```\n\n' "${RETURNED_VALUE3}" >>"${GLOBAL_TEST_REPORT_FILE}"
-  fi
-  if [[ -n ${RETURNED_VALUE4:-} ]]; then
-    # shellcheck disable=SC2016
-    printf 'RETURNED_VALUE4:\n\n```text\n%s\n```\n\n' "${RETURNED_VALUE4}" >>"${GLOBAL_TEST_REPORT_FILE}"
-  fi
-  if [[ -n ${RETURNED_ARRAY:-} ]]; then
-    for key in "${!RETURNED_ARRAY[@]}"; do
-      output+="[${key}]=${RETURNED_ARRAY[${key}]}"$'\n'
-    done
-    # shellcheck disable=SC2016
-    printf 'RETURNED_ARRAY:\n\n```text\n%s\n```\n\n' "${output}" >>"${GLOBAL_TEST_REPORT_FILE}"
-  fi
-  if [[ -n ${RETURNED_ARRAY2:-} ]]; then
-    for key in "${!RETURNED_ARRAY2[@]}"; do
-      output+="[${key}]=${RETURNED_ARRAY2[${key}]}"$'\n'
-    done
-    # shellcheck disable=SC2016
-    printf 'RETURNED_ARRAY2:\n\n```text\n%s\n```\n\n' "${output}" >>"${GLOBAL_TEST_REPORT_FILE}"
-  fi
-  if [[ -n ${RETURNED_ASSOCIATIVE_ARRAY:-} ]]; then
+  local IFS=$'\n' output key varName
+  test::log "${RETURNED_ARRAY[*]} ${RETURNED_ARRAY2[*]}"
+  for varName in RETURNED_VALUE RETURNED_VALUE2 RETURNED_VALUE3 RETURNED_VALUE4; do
+    if [[ -v ${varName} ]]; then
+      _TEST_OUTPUT="${!varName}"
+      test_replaceDynamicStrings
+      # shellcheck disable=SC2016
+      printf '%s:\n\n```text\n%s\n```\n\n' "${varName}" "${_TEST_OUTPUT}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    fi
+  done
+  for varName in RETURNED_ARRAY RETURNED_ARRAY2; do
+    if [[ -v ${varName} ]]; then
+      _TEST_OUTPUT=''
+      local -n array="${varName}"
+      for key in "${!array[@]}"; do
+        _TEST_OUTPUT+="[${key}]=${array[${key}]}"$'\n'
+      done
+      test_replaceDynamicStrings
+      # shellcheck disable=SC2016
+      printf '%s:\n\n```text\n%s\n```\n\n' "${varName}" "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    fi
+  done
+  if declare -p RETURNED_ASSOCIATIVE_ARRAY &>/dev/null; then
+    _TEST_OUTPUT=''
     for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
-      output+="[${key}]=${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"$'\n'
+      _TEST_OUTPUT+="[${key}]=${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"$'\n'
     done
+    test_replaceDynamicStrings
     # shellcheck disable=SC2016
-    printf 'RETURNED_ASSOCIATIVE_ARRAY:\n\n```text\n%s\n```\n\n' "${output}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    printf 'RETURNED_ASSOCIATIVE_ARRAY:\n\n```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   fi
 }
 
@@ -237,11 +251,12 @@ function test::resetReturnedVars() {
 # test::revealVars myVar
 # ```
 function test::revealVars() {
-  local IFS=$'\n' output
+  local IFS=$'\n'
   io::captureOutput declare -p "${@}"
-  output="${RETURNED_VALUE//declare -? /}"
-    # shellcheck disable=SC2016
-    printf '```text\n%s\n```\n\n' "${output}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  _TEST_OUTPUT="${RETURNED_VALUE//declare -? /}"
+  test_replaceDynamicStrings
+  # shellcheck disable=SC2016
+  printf '```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
 # ## test_flushFdToCodeBlock (private)
@@ -271,24 +286,60 @@ function test_flushFdToCodeBlock() {
   if [[ ! -s "${file}" ]]; then
     return 0
   fi
-  local text IFS=''
-  read -rd '' text <"${file}" || :
-  text="${text//${GLOBAL_VALET_HOME}/\$GLOBAL_VALET_HOME}"
-  text="${text//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
-  text="${text//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
-  text="${text//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
+  _TEST_OUTPUT=''
+  local IFS=''
+  read -rd '' _TEST_OUTPUT <"${file}" || :
+
+  test_replaceDynamicStrings
 
   if [[ -n ${blockTitle} ]]; then
     # shellcheck disable=SC2016
-    printf '**%s**:\n\n```text\n%s\n```\n\n' "${blockTitle}" "${text%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    printf '**%s**:\n\n```text\n%s\n```\n\n' "${blockTitle}" "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   else
     # shellcheck disable=SC2016
-    printf '```text\n%s\n```\n\n' "${text%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    printf '```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   fi
 
   # shellcheck disable=SC2093
   eval " exec ${fdNumber}>&-; : >'${file}'; exec ${fdNumber}>'${file}';"
 }
+
+# ## test_replaceDynamicStrings (private)
+#
+# This function replaces various strings in the given text.
+# It is important to make the tests runnable in different environments and on different machines.
+#
+# It replaces stuff in the global variable `_TEST_OUTPUT`.
+#
+# ```bash
+# test_replaceDynamicStrings
+# ```
+function test_replaceDynamicStrings() {
+  _TEST_OUTPUT="${_TEST_OUTPUT//${GLOBAL_VALET_HOME}\/valet/valet}"
+  _TEST_OUTPUT="${_TEST_OUTPUT//${GLOBAL_VALET_HOME}/\$GLOBAL_VALET_HOME}"
+  _TEST_OUTPUT="${_TEST_OUTPUT//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
+  _TEST_OUTPUT="${_TEST_OUTPUT//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
+  _TEST_OUTPUT="${_TEST_OUTPUT//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
+
+  # If a callback is defined, call it to modify the text before adding it to the report
+  if declare -f test::transformTextBeforeFlushing &>/dev/null; then
+    test::transformTextBeforeFlushing
+  fi
+}
+
+# ## test::transformTextBeforeFlushing
+#
+# This function can be defined to modify the flushed text before adding it to the report.
+#
+# The text to transform is in the global variable `_TEST_OUTPUT`.
+#
+# Returns:
+#
+# - `_TEST_OUTPUT`: The modified text.
+#
+# > You can define this function directly in the test script, or in a test hook if
+# > you need it to be available for multiple tests.
+# > Note however that this function can be called very often, so it should be optimized.
 
 # ## test::flush
 #
@@ -358,8 +409,8 @@ function test::flushStderr() {
 # test::endTest "Testing something" $?
 # ```
 function test::endTest() {
-  local testTitle="${1:-}"
-  local exitCode="${2:-}"
+  local testTitle="${1:-"Test"}"
+  local exitCode="${2:-0}"
   local testDescription IFS=$'\n'
   if [[ -n ${3:-} ]]; then
     printf -v testDescription '%s\n\n' "${@:3}"
@@ -369,7 +420,7 @@ function test::endTest() {
 
   # shellcheck disable=SC2183
   # shellcheck disable=SC2016
-  printf '### %s\n\n%sExit code: `%s`\n\n' "${testTitle:-test}" "${testDescription}" "${exitCode}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf '### %s\n\n%sExit code: `%s`\n\n' "${testTitle}" "${testDescription}" "${exitCode}" >>"${GLOBAL_TEST_REPORT_FILE}"
 
   test_flushFdToCodeBlock 1 "Standard output"
   test_flushFdToCodeBlock 2 "Error output"
@@ -389,28 +440,5 @@ function test::endTest() {
 # ```
 function test::fail() {
   test::log "$@"
-  exit 142
-}
-
-# Replaces the line numbers from an error log in the given file with XXX.
-#
-# - $1: **file path** _as string_:
-#       The path of the file in which the output is stored.
-#
-# ```bash
-# test::echoFileWithLineNumberSubstitution myFile.log
-# ```
-function test::echoFileWithLineNumberSubstitution() {
-  local file="${1}"
-  local line
-  local IFS
-  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
-    if [[ ${line} =~ :[0-9]{1,4}$ ]]; then
-      line="${line/%:[[:digit:]]/:XXX}"
-      line="${line/%:[[:digit:]][[:digit:]]/:XXX}"
-      line="${line/%:[[:digit:]][[:digit:]][[:digit:]]/:XXX}"
-      line="${line/%:[[:digit:]][[:digit:]][[:digit:]][[:digit:]]/:XXX}"
-    fi
-    printf '%s\n' "${line}"
-  done <"${file}"
+  exit "${GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS}"
 }

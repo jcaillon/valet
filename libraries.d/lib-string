@@ -594,3 +594,37 @@ function string::microsecondsToHuman() {
 
   RETURNED_VALUE="${humanFormat}"
 }
+
+# ## string::head
+#
+# Get the first n lines of a string.
+#
+# - $1: **string** _as string_:
+#       The string to extract from.
+# - $2: **lines** _as int_:
+#       The number of lines to extract.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The extracted string.
+#
+# ```bash
+# string::head "line1\nline2\nline3" 2
+# echo "${RETURNED_VALUE}"
+# ```
+function string::head() {
+  local string="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
+  local -i nbLines="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
+  local chunk output
+  local -i ii=0
+  while ((ii < nbLines)); do
+    chunk="${string%%$'\n'*}"
+    output+="${chunk}"$'\n'
+    string="${string:${#chunk} + 1}"
+    if [[ -z ${string} ]]; then
+      break
+    fi
+    ii+=1
+  done
+  RETURNED_VALUE="${output:-}"
+}

@@ -2,25 +2,12 @@
 
 ## Test script 01.logging
 
-### Passing logging level through an environment variable
+### ✅ Logging level through an environment variable
 
 Prompt:
 
 ```bash
-printf %s\\n coucou hello\ 2nd
-```
-
-**Standard output**:
-
-```text
-coucou
-hello 2nd
-```
-
-Prompt:
-
-```bash
-VALET_LOG_LEVEL=success ${GLOBAL_VALET_HOME}/valet self mock1 logging-level
+VALET_LOG_LEVEL=success valet self mock1 logging-level
 ```
 
 **Error output**:
@@ -30,5 +17,203 @@ TRACE    This is an error trace message which is always displayed.
 SUCCESS  This is a success message.
 WARNING  This is a warning message.
 With a second line.
+```
+
+### ✅ Logging level with --log-level option
+
+Prompt:
+
+```bash
+valet --log-level warning self mock1 logging-level
+```
+
+**Error output**:
+
+```text
+TRACE    This is an error trace message which is always displayed.
+WARNING  This is a warning message.
+With a second line.
+```
+
+### ✅ Logging level with --verbose option
+
+Prompt:
+
+```bash
+valet -v self mock1 logging-level
+```
+
+**Error output**:
+
+```text
+DEBUG    Log level set to debug.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
+DEBUG    Command found ⌜self mock1⌝.
+DEBUG    Function name found ⌜selfMock1⌝.
+DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/tests.d/commands.d/self-mock.sh⌝.
+DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
+DEBUG    Parsed arguments:
+local parsingErrors help action
+help=""
+parsingErrors=""
+action="logging-level"
+
+TRACE    This is an error trace message which is always displayed.
+DEBUG    This is a debug message.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
+The debug mode is activated!
+DEBUG    Exiting with code 0 after 0s.
+```
+
+### ✅ Logging level with --very-verbose option
+
+Prompt:
+
+```bash
+valet -w self mock1 logging-level
+```
+
+**Error output**:
+
+```text
+DEBUG    Log level set to trace.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
+DEBUG    Command found ⌜self mock1⌝.
+DEBUG    Function name found ⌜selfMock1⌝.
+DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/tests.d/commands.d/self-mock.sh⌝.
+DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
+DEBUG    Parsed arguments:
+local parsingErrors help action
+help=""
+parsingErrors=""
+action="logging-level"
+
+TRACE    This is an error trace message which is always displayed.
+TRACE    This is a trace message.
+DEBUG    This is a debug message.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
+The debug mode is activated!
+The trace mode is activated!
+DEBUG    Exiting with code 0 after 0s.
+```
+
+### ✅ Testing that we can change the log display options
+
+Prompt:
+
+```bash
+VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true VALET_CONFIG_LOG_DISABLE_WRAP=true valet self mock1 logging-level
+```
+
+**Error output**:
+
+```text
+CDBTRACE    CDE This is an error trace message which is always displayed.
+CININFO    II  CDE This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+CSUSUCCESS IS  CDE This is a success message.
+CWAWARNING IW  CDE This is a warning message.
+With a second line.
+```
+
+### ✅ Testing that we can output the logs to a directory additionally to console
+
+Prompt:
+
+```bash
+VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d1-2 valet self mock1 logging-level
+```
+
+**Error output**:
+
+```text
+TRACE    This is an error trace message which is always displayed.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
+```
+
+Prompt:
+
+```bash
+io::listFiles /tmp/valet.d/d1-2
+```
+
+RETURNED_ARRAY:
+
+```text
+[0]=/tmp/valet.d/d1-2/valet-2025-01-17_21h29m41s.log
+```
+
+RETURNED_ASSOCIATIVE_ARRAY:
+
+```text
+
+```
+
+### ✅ Testing that we can output the logs to a specific file name additionally to console
+
+Prompt:
+
+```bash
+VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=test.log VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d1-2 valet self mock1 logging-level
+```
+
+**Error output**:
+
+```text
+TRACE    This is an error trace message which is always displayed.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
+```
+
+Prompt:
+
+```bash
+io::cat /tmp/valet.d/d1-2/test.log
+```
+
+**Standard output**:
+
+```text
+TRACE    This is an error trace message which is always displayed.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
+
+```
+
+### ✅ Testing that we can output the logs to a specific file descriptor
+
+Prompt:
+
+```bash
+VALET_CONFIG_LOG_FD=/tmp/valet.d/d1-2/test2.log valet self mock1 logging-level
+```
+
+Prompt:
+
+```bash
+io::cat /tmp/valet.d/d1-2/test2.log
+```
+
+**Standard output**:
+
+```text
+TRACE    This is an error trace message which is always displayed.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
+
 ```
 

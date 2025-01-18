@@ -66,7 +66,7 @@ function selfBuild() {
   local userDirectory outputFile coreOnly noOutput silent
 
   # if this script is run directly
-  if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || -z "${_CMD_INCLUDED:-}" ]]; then
+  if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || -z "${GLOBAL_CMD_INCLUDED:-}" ]]; then
     # parse arguments manually (basic parsing only)
     while [[ $# -gt 0 ]]; do
       case "${1}" in
@@ -134,6 +134,10 @@ function selfBuild() {
     "${GLOBAL_VALET_HOME}/valet"
     "${GLOBAL_VALET_HOME}/commands.d"/*.sh
   )
+  if [[ -d "${GLOBAL_VALET_HOME}/tests.d/commands.d" ]]; then
+    commandDefinitionFiles+=("${GLOBAL_VALET_HOME}/tests.d/commands.d"/*.sh)
+    log::info "Added the test commands to the build."
+  fi
   if [[ ${coreOnly:-} != "true" ]]; then
     if [[ -d "${userDirectory}" ]]; then
       log::info "Building the valet user commands from the user directory ⌜${userDirectory}⌝."
@@ -687,7 +691,7 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   _NOT_EXECUTED_FROM_VALET=true
 
   # do not read the commands in that case
-  _CMD_INCLUDED=1
+  GLOBAL_CMD_INCLUDED=1
 
   _COMMANDS_DIR="${BASH_SOURCE[0]:-"${0}"}"
   if [[ "${_COMMANDS_DIR}" != /* ]]; then

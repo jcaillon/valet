@@ -4,6 +4,8 @@
 
 ### test interactive::promptYesNo with yes
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -19,6 +21,8 @@ echo y | interactive::promptYesNo 'Do you see this message?'
 ```
 
 ### Testing interactive::promptYesNo
+
+
 
 Exit code: `1`
 
@@ -37,6 +41,8 @@ echo n | interactive::promptYesNo 'Do you see this message?'
 
 ### test interactive::askForConfirmation with yes
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -53,6 +59,8 @@ echo y | interactive::askForConfirmation 'Please press OK.'
 
 ### Testing interactive::createSpace
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -68,6 +76,8 @@ interactive::createSpace 5
 
 ### Testing interactive::getCursorPosition
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -78,6 +88,8 @@ GLOBAL_CURSOR_LINE: 123; GLOBAL_CURSOR_COLUMN: 456
 ```
 
 ### Testing interactiveGetProgressBarString
+
+
 
 Exit code: `0`
 
@@ -104,6 +116,8 @@ interactiveGetProgressBarString 100 15
 ```
 
 ### Testing interactive::getBestAutocompleteBox
+
+
 
 Exit code: `0`
 

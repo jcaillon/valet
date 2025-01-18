@@ -4,6 +4,8 @@
 
 ### Testing io::toAbsolutePath
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -39,6 +41,8 @@ $GLOBAL_VALET_HOME/tests.d/lib-io/missing-file
 
 ### Testing io::readFile limited to x chars
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -51,6 +55,8 @@ Source: <https:/
 ```
 
 ### Testing io::readFile unlimited
+
+
 
 Exit code: `0`
 
@@ -86,6 +92,8 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ### Testing io::createDirectoryIfNeeded
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -109,6 +117,8 @@ ERROR    Failed to create the directory ⌜$GLOBAL_VALET_HOME/tests.d/lib-io/res
 
 ### Testing io::createFilePathIfNeeded
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -123,6 +133,8 @@ File created successfully!
 
 ### Testing io::sleep
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -132,6 +144,8 @@ Exit code: `0`
 ```
 
 ### Testing io::cat
+
+
 
 Exit code: `0`
 
@@ -167,6 +181,8 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ### Testing io::readStdIn
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -181,6 +197,8 @@ coucou
 
 ### Testing io::countArgs
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -194,6 +212,8 @@ Exit code: `0`
 
 ### Testing io::isDirectoryWritable
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -206,6 +226,8 @@ Writable
 ```
 
 ### Testing io::convertToWindowsPath
+
+
 
 Exit code: `0`
 
@@ -222,6 +244,8 @@ C:\data\file
 
 ### Testing io::createLink
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -237,6 +261,8 @@ $GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored
 
 ### Testing io::convertFromWindowsPath
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -249,6 +275,8 @@ Exit code: `0`
 ```
 
 ### Testing io::head limited to 10 lines
+
+
 
 Exit code: `0`
 
@@ -270,6 +298,8 @@ Preventing the exploitation of animals is not the only reason for becoming vegan
 
 ### Testing io::head limited to 0 lines
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -279,6 +309,8 @@ Exit code: `0`
 ```
 
 ### Testing io::head limited to 99 lines
+
+
 
 Exit code: `0`
 
@@ -314,6 +346,8 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ### Testing io::head to var
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -326,6 +360,8 @@ Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
 ```
 
 ### Testing io::captureOutput
+
+
 
 Exit code: `0`
 
@@ -349,6 +385,8 @@ io::captureOutput ()
 
 ### Testing io::captureOutput when command is failing
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -359,6 +397,8 @@ Failed as expected
 ```
 
 ### Testing io::tail limited to 3 lines
+
+
 
 Exit code: `0`
 
@@ -373,6 +413,8 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ### Testing io::tail limited to 0 lines
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -383,6 +425,8 @@ Exit code: `0`
 ```
 
 ### Testing io::tail limited to 99 lines
+
+
 
 Exit code: `0`
 
@@ -418,6 +462,8 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ### Testing io::tail to var
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -432,6 +478,8 @@ Just like veganism is the sustainable option when it comes to looking after our 
 ## Test script 01.invoke
 
 ### Testing io::invoke5, should return 1, input stream from string
+
+
 
 Exit code: `1`
 
@@ -452,6 +500,8 @@ returning 1 from fakeexec⌉
 ```
 
 ### Testing io::invoke5, should fail
+
+
 
 Exit code: `1`
 
@@ -478,6 +528,8 @@ ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 
 ### Testing io::invoke5, should translate error 1 to 0
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -496,6 +548,8 @@ returning 1 from fakeexec⌉
 ```
 
 ### Testing io::invoke5var, input stream for file, should get stdout/stderr from var
+
+
 
 Exit code: `0`
 
@@ -517,6 +571,8 @@ stderr from var:
 ```
 
 ### Testing io::invoke5, with trace mode on
+
+
 
 Exit code: `1`
 
@@ -558,6 +614,8 @@ DEBUG    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 
 ### Testing io::invoke2, output to files
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -575,6 +633,8 @@ stderr from file:
 ```
 
 ### Testing io::invoke2var, output to var
+
+
 
 Exit code: `0`
 
@@ -595,6 +655,8 @@ stderr from var:
 ```
 
 ### Testing io::invoke, should fail
+
+
 
 Exit code: `1`
 
@@ -619,6 +681,8 @@ ERROR    The command ⌜fakeexec⌝ originally ended with exit code ⌜1⌝.
 
 ### Testing io::invoke, output to var
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -639,6 +703,8 @@ stderr from var:
 
 ### Testing io::invoke2piped, stdin as string, output to files
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -657,6 +723,8 @@ stderr from file:
 ```
 
 ### Testing io::invoke2pipedvar, stdin as string, output to vars
+
+
 
 Exit code: `0`
 
@@ -680,6 +748,8 @@ stderr from var:
 ## Test script 02.listPaths
 
 ### Testing io::listPaths
+
+
 
 Exit code: `0`
 
@@ -745,6 +815,8 @@ $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1
 
 ### Testing io::listFiles
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -781,6 +853,8 @@ $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1
 ```
 
 ### Testing io::listDirectories
+
+
 
 Exit code: `0`
 

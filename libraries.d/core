@@ -225,7 +225,7 @@ function interactive::getTerminalSize() {
 # Set the log level.
 #
 # - $1: **log level** _as string_:
-#       the log level to set (or defaults to info), acceptable values are:
+#       The log level to set (or defaults to info), acceptable values are:
 #   - trace
 #   - debug
 #   - info
@@ -242,7 +242,7 @@ function interactive::getTerminalSize() {
 # ```
 function log::setLevel() {
   # log level, defaults to info
-  GLOBAL_LOG_LEVEL="${1:-${VALET_LOG_LEVEL:-info}}"
+  GLOBAL_LOG_LEVEL="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
   case "${GLOBAL_LOG_LEVEL}" in
   error) GLOBAL_LOG_LEVEL_INT=4 ;;
   warning) GLOBAL_LOG_LEVEL_INT=3 ;;
@@ -778,7 +778,7 @@ function log::isTraceEnabled() {
 # log::printCallStack 0
 # ```
 #
-# > For test purposes, you can set the `_STACK_FUNCTION_NAMES`, `_STACK_SOURCE_FILES` and `_STACK_LINE_NUMBERS`
+# > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
 # > variables to simulate a call stack.
 function log::printCallStack() {
   local -i levelToSkip="${1:-${_OPTION_STACK_TO_SKIP:-2}}"
@@ -786,10 +786,10 @@ function log::printCallStack() {
   local -i idx stackSize
 
   local -a stackFunctionNames stackSourceFiles stackLineNumbers
-  if [[ -n ${_STACK_FUNCTION_NAMES:-} ]]; then
-    stackFunctionNames=("${_STACK_FUNCTION_NAMES[@]}")
-    stackSourceFiles=("${_STACK_SOURCE_FILES[@]}")
-    stackLineNumbers=("${_STACK_LINE_NUMBERS[@]}")
+  if [[ -n ${GLOBAL_STACK_FUNCTION_NAMES:-} ]]; then
+    stackFunctionNames=("${GLOBAL_STACK_FUNCTION_NAMES[@]}")
+    stackSourceFiles=("${GLOBAL_STACK_SOURCE_FILES[@]}")
+    stackLineNumbers=("${GLOBAL_STACK_LINE_NUMBERS[@]}")
   else
     stackFunctionNames=("${FUNCNAME[@]}")
     stackSourceFiles=("${BASH_SOURCE[@]}")
@@ -1466,7 +1466,7 @@ function core::sourceFunction() {
 # core::sourceUserCommands
 # ```
 function core::sourceUserCommands() {
-  if [[ -n "${_CMD_INCLUDED:-}" ]]; then
+  if [[ -n "${GLOBAL_CMD_INCLUDED:-}" ]]; then
     return 0
   fi
 
@@ -1483,7 +1483,7 @@ function core::sourceUserCommands() {
     log::info "The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'"Now building it using ⌜valet self build⌝ command."
 
     # shellcheck disable=SC1091
-    unset _CMD_INCLUDED
+    unset GLOBAL_CMD_INCLUDED
     # shellcheck source=../commands.d/self-build.sh
     source "${GLOBAL_VALET_HOME}/commands.d/self-build.sh"
     selfBuild --silent
@@ -1509,7 +1509,7 @@ function core::sourceUserCommands() {
 function core::reloadUserCommands() {
   # delete previous variables
   # shellcheck disable=SC2086
-  unset -v ${!CMD_*} _CMD_INCLUDED
+  unset -v ${!CMD_*} GLOBAL_CMD_INCLUDED
   core::sourceUserCommands
 }
 
@@ -1649,7 +1649,7 @@ function core::getUserDirectory() {
 function core::showHelp() {
   local functionName
   # get the function name of the calling function
-  functionName="${FUNCNAME[1]}"
+  functionName="${FUNCNAME[1]?"This function must be called from a command function."}"
 
   main::printHelp function "${functionName}"
 }
@@ -1683,7 +1683,7 @@ function core::showHelp() {
 function core::parseArguments() {
   local functionName
   # get the function name of the calling function
-  functionName="${FUNCNAME[1]}"
+  functionName="${FUNCNAME[1]?"This function must be called from a command function."}"
 
   main::parseFunctionArgumentsOrGoInteractive "${functionName}" "$@"
 }
@@ -1711,7 +1711,7 @@ function core::parseArguments() {
 function core::checkParseResults() {
   local help="${1:-}"
   local parsingErrors="${2:-}"
-  local functionName="${3:-${FUNCNAME[1]}}"
+  local functionName="${3:-${FUNCNAME[1]?"This function must be called from a command function."}}"
 
   if [[ ${help} == "true" ]]; then
     main::printHelp function "${functionName}"
@@ -1790,3 +1790,4 @@ if [[ -z "${GLOBAL_MAIN_INCLUDED:-}" ]]; then
   # shellcheck source=main
   source "${GLOBAL_VALET_HOME}/libraries.d/main"
 fi
+

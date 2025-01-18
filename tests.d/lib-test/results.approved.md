@@ -104,6 +104,8 @@ Prompt:
 functionToTest Second\ test. Second\ test. 2
 ```
 
+Exited with code: `2`
+
 **Standard output**:
 
 ```text
@@ -150,11 +152,77 @@ Meaning functions that usually return values in a variables named `RETURNED_VALU
 
 It function will be executed and its output will be added the report, including any declare `RETURNED_*` variable.
 
+Prompt:
+
+```bash
+typicalValetFunction "{\ 'output':\ 'this\ function\ outputs\ json\ format'\ }" A\ log\ line.
+```
+
+**Standard output**:
+
+```text
+OUTPUT: {\ 'output':\ 'this\ function\ outputs\ json\ format'\ }
+```
+
+**Error output**:
+
+```text
+LOG: A log line.
+```
+
+RETURNED_VALUE:
+
+```text
+This is the returned value.
+```
+
+RETURNED_ARRAY:
+
+```text
+[0]=This
+[1]=is
+[2]=the
+[3]=returned
+[4]=array.
+```
+
+RETURNED_ASSOCIATIVE_ARRAY:
+
+```text
+[key6]=array.
+[key4]=returned
+[key5]=associative
+[key2]=is
+[key3]=the
+[key1]=This
+```
+
 ### 🙈 Display reporting RETURNED variables
 
 You can manually report the content of the `RETURNED_*` variables using the `test::revealReturnedVars` function.
 
 The function `test::resetReturnedVars` can also be used to reset the content of the `RETURNED_*` variables.
+
+RETURNED_VALUE2:
+
+```text
+This is the value of a returned string for RETURNED_VALUE2
+```
+
+RETURNED_ARRAY2:
+
+```text
+[0]=This
+[1]=is
+[2]=the
+[3]=value
+[4]=of
+[5]=a
+[6]=returned
+[7]=array
+[8]=for
+[9]=RETURNED_ARRAY2
+```
 
 ### 👁️ Display the value of any variable
 
@@ -169,7 +237,6 @@ You can manually report the definition of any variable using the `test::revealVa
 ```text
 GLOBAL_VAR1="This is the value of a global string"
 GLOBAL_VAR2=([0]="This" [1]="is" [2]="the" [3]="value" [4]="of" [5]="a" [6]="global" [7]="array.")
-
 ```
 
 ### 🪝 Testing the self test hooks
@@ -182,6 +249,7 @@ Exit code: `0`
 
 ```text
 before-tests
+before-each-test-suite
 after-each-test
 
 ```

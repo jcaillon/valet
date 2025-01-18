@@ -4,6 +4,8 @@
 
 ### Testing string::cutField
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -28,6 +30,8 @@ line3 seems so
 ```
 
 ### Testing string::compareSemanticVersion function
+
+
 
 Exit code: `0`
 
@@ -64,6 +68,8 @@ ERROR    Failed to compare versions ⌜1.2a.3⌝ and ⌜1.2.3derp⌝ because the
 
 ### Testing string::bumpSemanticVersion
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -99,6 +105,8 @@ ERROR    Failed to bump the version ⌜aze⌝ because it is not valid semantic v
 
 ### Testing string::kebabCaseToSnakeCase
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -113,6 +121,8 @@ ANOTHER_TEST
 
 ### Testing string::kebabCaseToSnakeCase
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -126,6 +136,8 @@ ANOTHER_TEST
 ```
 
 ### Testing string::kebabCaseToCamelCase
+
+
 
 Exit code: `0`
 
@@ -144,6 +156,8 @@ last
 
 ### Testing string::trimAll
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -160,6 +174,8 @@ Exit code: `0`
 ```
 
 ### Testing string::trim function
+
+
 
 Exit code: `0`
 
@@ -180,6 +196,8 @@ Exit code: `0`
 ```
 
 ### Testing string::indexOf function
+
+
 
 Exit code: `0`
 
@@ -207,6 +225,8 @@ Exit code: `0`
 ```
 
 ### Testing string::extractBetween function
+
+
 
 Exit code: `0`
 
@@ -244,6 +264,8 @@ multilinetext="1 line one
 
 ### Testing string::count function
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -257,6 +279,8 @@ Exit code: `0`
 ```
 
 ### Testing string::split function
+
+
 
 Exit code: `0`
 
@@ -276,6 +300,8 @@ three
 
 ### Testing string::regexGetFirst function
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -286,6 +312,8 @@ julien
 ```
 
 ### Testing string::microsecondsToHuman function
+
+
 
 Exit code: `0`
 
@@ -334,6 +362,8 @@ Total microseconds: 18243002234
 ```
 
 ### Wrapping text at column 30 with no padding
+
+
 
 Exit code: `0`
 
@@ -400,6 +430,8 @@ lines before this.
 
 ### Wrapping text at column 50 with padding of 4 on new lines
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -437,6 +469,8 @@ You don't [36m[36m[36mget better[39m[39m[39m on the days when you feel
 
 ### Wrapping text at column 20 with padding of 3 on all lines
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -449,6 +483,8 @@ Exit code: `0`
 
 ### Wrapping words, shortcut because the message is a short single line
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -459,6 +495,8 @@ A message.
 ```
 
 ### Wrapping words, no shortcut!
+
+
 
 Exit code: `0`
 
@@ -472,6 +510,8 @@ message.
 
 ### Wrapping words
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -483,6 +523,8 @@ Exit code: `0`
 ```
 
 ### Wrapping characters at column 20 with padding of 3 on all lines
+
+
 
 Exit code: `0`
 
@@ -556,6 +598,8 @@ Exit code: `0`
 
 ### Wrapping characters at 20, no other options
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -617,6 +661,8 @@ es before this.
 
 ### Wrapping characters
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -631,6 +677,8 @@ Exit code: `0`
 
 ### Wrapping characters
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -642,6 +690,8 @@ Exit code: `0`
 ```
 
 ### Wrapping characters, spaces at the beginning of the line are kept
+
+
 
 Exit code: `0`
 
@@ -662,6 +712,8 @@ Exit code: `0`
 
 ### Testing string::highlight
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -678,5 +730,79 @@ CHITCDEhis is a CHITCDEexCHItCDE CHItCDEo highlighCHItCDE.
 
 → string::highlight 'This is a text to highlight.' ''
 This is a text to highlight.
+```
+
+### ✅ Testing string::head
+
+```text
+_TEST_MULTILINE_STRING=$'The first line.\nThe second line.\nThe third line.\nThe fourth line.\nThe fifth line.'
+```
+
+Testing string::head with 3 lines
+
+Prompt:
+
+```bash
+string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 3
+```
+
+RETURNED_VALUE:
+
+```text
+The first line.
+The second line.
+The third line.
+
+```
+
+RETURNED_ASSOCIATIVE_ARRAY:
+
+```text
+
+```
+
+Testing string::head with 0 line
+
+Prompt:
+
+```bash
+string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 0
+```
+
+RETURNED_VALUE:
+
+```text
+
+```
+
+RETURNED_ASSOCIATIVE_ARRAY:
+
+```text
+
+```
+
+Testing string::head with 10 lines
+
+Prompt:
+
+```bash
+string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 10
+```
+
+RETURNED_VALUE:
+
+```text
+The first line.
+The second line.
+The third line.
+The fourth line.
+The fifth line.
+
+```
+
+RETURNED_ASSOCIATIVE_ARRAY:
+
+```text
+
 ```
 

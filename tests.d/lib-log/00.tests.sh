@@ -61,9 +61,9 @@ function test_log_log_one_of_each_level() {
   log::isDebugEnabled && echo 0 || echo 1
 
   # fix stuff for printCallStack
-  _STACK_FUNCTION_NAMES=(log::printCallStack log::error myCmd::subFunction myCmd::function)
-  _STACK_SOURCE_FILES=("" "core" "${PWD}/path/to/subFunction.sh" "${PWD}/path/to/function.sh")
-  _STACK_LINE_NUMBERS=(100 200 300)
+  GLOBAL_STACK_FUNCTION_NAMES=(log::printCallStack log::error myCmd::subFunction myCmd::function)
+  GLOBAL_STACK_SOURCE_FILES=("" "core" "${PWD}/path/to/subFunction.sh" "${PWD}/path/to/function.sh")
+  GLOBAL_STACK_LINE_NUMBERS=(100 200 300)
 
   echo
   echo "→ log::error 'This is an error message.'"

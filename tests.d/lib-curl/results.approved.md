@@ -4,6 +4,8 @@
 
 ### Testing curl::toFile, should write to file
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -21,6 +23,8 @@ stderr:
 
 ### Testing curl::toFile, http code 500 not acceptable return 1
 
+
+
 Exit code: `1`
 
 **Standard output**:
@@ -37,6 +41,8 @@ stderr:
 ```
 
 ### Testing curl::toFile, http code 500 not acceptable fails
+
+
 
 Exit code: `1`
 
@@ -57,6 +63,8 @@ ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu
 
 ### Testing curl::toFile, http code 500 is now acceptable return 0
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -73,6 +81,8 @@ stderr:
 ```
 
 ### Testing curl::toFile, testing debug mode https code 400
+
+
 
 Exit code: `1`
 
@@ -108,6 +118,8 @@ DEBUG    The http return code ⌜400⌝ is not acceptable for url ⌜https://fuu
 
 ### Testing curl::toFile, testing debug mode http code 200
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -137,6 +149,8 @@ DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been res
 
 ### Testing curl, with no content http code 200
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -153,6 +167,8 @@ stderr:
 ```
 
 ### Testing curl, with no content http code 500, fails
+
+
 
 Exit code: `1`
 
@@ -172,6 +188,8 @@ ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜http://hell
 ```
 
 ### Testing curl, debug mode, with content http code 400
+
+
 
 Exit code: `1`
 

@@ -3,76 +3,45 @@
 # shellcheck source=../../libraries.d/lib-io
 source io
 
-test::comment "The profiler is an excellent tool to debug your command. The following example shows what you would get when you enable it."$'\n\n'"Notice that the profiling file has been cleanup after the command execution to maximize readability."
-
-function testProfiler() {
-  # testing command profiling + startup
-  io::createTempFile && export VALET_CONFIG_COMMAND_PROFILING_FILE="${RETURNED_VALUE}"
-  io::createTempFile && export VALET_CONFIG_STARTUP_PROFILING_FILE="${RETURNED_VALUE}"
-  export VALET_CONFIG_COMMAND_PROFILING_FILE
-  export VALET_CONFIG_STARTUP_PROFILING_FILE
-
-  echo "→ valet -x self mock2 arg1 arg2"
-  ("${GLOBAL_VALET_HOME}/valet" -x self mock2 arg1 arg2)
-
-  echo
-  echo "→ cat 'profiler.log'"
-  if [[ -s "${VALET_CONFIG_COMMAND_PROFILING_FILE}" ]]; then
-    echoFileWithSubstitution "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
-  fi
-
-  test::endTest "Testing profiling for command" 0
-
-  echo
-  echo "→ VALET_CONFIG_LOG_CLEANUP_USING_BASH=true valet -x self mock2 arg1 arg2"
-  (VALET_CONFIG_LOG_CLEANUP_USING_BASH=true "${GLOBAL_VALET_HOME}/valet" -x self mock2 arg1 arg2)
-
-  echo
-  echo "→ cat 'profiler.log'"
-  if [[ -s "${VALET_CONFIG_COMMAND_PROFILING_FILE}" ]]; then
-    echoFileWithSubstitution "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
-  fi
-
-  test::endTest "Testing profiling for command but with bash as cleanup" 0
-
-  echo "→ VALET_CONFIG_STARTUP_PROFILING=true valet --log-level error -x self mock1 logging-level"
-
-  (VALET_CONFIG_STARTUP_PROFILING=true "${GLOBAL_VALET_HOME}/valet" --log-level error -x self mock1 logging-level)
-  if [[ -s "${VALET_CONFIG_STARTUP_PROFILING_FILE}" ]]; then
-    echo "A startup profiling file has been created to log everything happening from the start of Valet to the start of the chosen command."
-  fi
-  if [[ -s "${VALET_CONFIG_COMMAND_PROFILING_FILE}" ]]; then
-    echo "A command profiling file has been created to log everything happening in the chosen command execution."
-  fi
-
-  test::endTest "Testing profiling for command and startup" 0
-
-  unset VALET_CONFIG_STARTUP_PROFILING \
-    VALET_CONFIG_COMMAND_PROFILING_FILE \
-    VALET_CONFIG_STARTUP_PROFILING_FILE
-}
-
-function testCommandProfiler() {
-  # testing command profiling
-  io::createTempFile && export VALET_CONFIG_COMMAND_PROFILING_FILE="${RETURNED_VALUE}"
-  export VALET_CONFIG_COMMAND_PROFILING_FILE
-
-  unset VALET_CONFIG_COMMAND_PROFILING_FILE
-}
-
-function echoFileWithSubstitution() {
-  local file="${1}"
-  local line
-  local IFS
-  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
-    line="${line/*self-mock.sh:/00 00 00 0.0XXX 0.0XXX                    self-mock.sh:}"
-    echo "${line}"
-  done <"${file}"
-}
+test::comment "The profiler is an excellent tool to debug your command. The following example shows what you would get when you enable it."$'\n\n'"Notice that the profiling file is cleaned up after the command execution to maximize readability."
 
 function main() {
-  testProfiler
-  testCommandProfiler
+  io::createTempFile
+  export VALET_CONFIG_COMMAND_PROFILING_FILE="${RETURNED_VALUE}"
+  io::createTempFile
+  export VALET_CONFIG_STARTUP_PROFILING_FILE="${RETURNED_VALUE}"
+
+  test::comment "**Exported variables:**"
+  test::revealVars VALET_CONFIG_COMMAND_PROFILING_FILE VALET_CONFIG_STARTUP_PROFILING_FILE
+
+
+  test::title "Testing the profiler cli option"
+  test::exec "${GLOBAL_VALET_HOME}/valet" -x self mock2 arg1 arg2
+  test::exec io::cat "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
+  rm -f "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
+
+
+  test::title "Testing the profiler with cleanup using bash"
+  test::exec VALET_CONFIG_LOG_CLEANUP_USING_BASH=true "${GLOBAL_VALET_HOME}/valet" -x self mock2 arg1 arg2
+  test::exec io::cat "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
+  rm -f "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
+
+
+  test::title "Testing to enable the profiler on Valet startup"
+  test::exec VALET_CONFIG_STARTUP_PROFILING=true "${GLOBAL_VALET_HOME}/valet" --log-level error -x self mock1 logging-level
+  if [[ ! -s "${VALET_CONFIG_STARTUP_PROFILING_FILE}" ]]; then
+    test::fail "The startup profiling file is empty."
+  fi
+}
+
+
+function test::transformTextBeforeFlushing() {
+  local line text=""
+  local IFS=$'\n'
+  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
+    text+="${line/*self-mock.sh:/00 00 00 0.0XXX 0.0XXX                    self-mock.sh:}"$'\n'
+  done <<<"${_TEST_OUTPUT}"
+  _TEST_OUTPUT="${text%$'\n'}"
 }
 
 main

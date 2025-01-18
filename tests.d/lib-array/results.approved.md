@@ -4,6 +4,8 @@
 
 ### Testing array::sort
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -16,6 +18,8 @@ declare -a MYARRAY=([0]="abundant" [1]="baby" [2]="breakdown" [3]="constitutiona
 ```
 
 ### Testing array::sortWithCriteria
+
+
 
 Exit code: `0`
 
@@ -34,6 +38,8 @@ expected: g e d c b a f
 ```
 
 ### Testing array::appendIfNotPresent
+
+
 
 Exit code: `0`
 
@@ -57,6 +63,8 @@ declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="holi
 
 ### Testing array::isInArray
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -72,6 +80,8 @@ declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="posi
 ```
 
 ### Testing array::makeArraysSameSize
+
+
 
 Exit code: `0`
 
@@ -90,6 +100,8 @@ declare -a array4=([0]="" [1]="" [2]="" [3]="")
 ```
 
 ### Testing array::fuzzyFilterSort
+
+
 
 Exit code: `0`
 
@@ -114,6 +126,8 @@ declare -a RETURNED_ARRAY2=([0]="3" [1]="4" [2]="0" [3]="1" [4]="2")
 ```
 
 ### Testing that array::fuzzyFilterSortFileWithGrepAndAwk produces the same as fuzzyFilterSort
+
+
 
 Exit code: `0`
 

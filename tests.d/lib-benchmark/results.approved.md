@@ -4,6 +4,8 @@
 
 ### Testing benchmark::run function
 
+
+
 Exit code: `0`
 
 **Standard output**:

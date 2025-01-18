@@ -404,6 +404,7 @@ function main::parseMainArguments() {
       main::showCommandsMenuAndRun "main-menu" _COPIED_COMMANDS_ARRAY
     fi
 
+    return 0
   fi
 
   local functionName nbArgs exactCommand
@@ -421,6 +422,7 @@ function main::parseMainArguments() {
     # run the function without the matched commands in the arguments
     main::runFunction "${functionName}" "${_PARSED_COMMAND_ARGS[@]:nbArgs}"
   fi
+  return 0
 }
 
 function main::parseMainArgumentsSwitch() {
@@ -565,7 +567,7 @@ function main::runFunction() {
     profiler::disable
   fi
 
-  exit 0
+  return 0
 }
 
 # This function checks if the user has sudo privileges.
@@ -612,7 +614,7 @@ function main::runMenuWithSubCommands() {
 
   if [[ -n "${help:-}" ]]; then
     main::printHelp menu "${command}"
-    exit 0
+    return 0
   fi
 
   if [[ -n "${parsingErrors:-}" ]]; then
@@ -655,7 +657,7 @@ function main::showCommandsMenuAndRun() {
 
   if [[ -z "${commandChoice}" ]]; then
     # the user pressed escape or ctrl-c
-    exit 0
+    return 0
   fi
 
   main::addLastChoice "${menuId}" "${commandChoice}"

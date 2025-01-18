@@ -4,6 +4,8 @@
 
 ### Testing main::sortCommands without prior choices, the order of commands is kept
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -18,6 +20,8 @@ another3  This is another command 3
 ```
 
 ### Testing main::sortCommands after choosing another3 then cm2
+
+
 
 Exit code: `0`
 
@@ -36,6 +40,8 @@ sub cmd2  This is sub command 2
 
 ### Testing main::sortCommands, with VALET_CONFIG_REMEMBER_LAST_CHOICES=0 the order does not change
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -50,6 +56,8 @@ another3  This is another command 3
 ```
 
 ### Testing main::sortCommands for another id, the order of commands should be the initial one
+
+
 
 Exit code: `0`
 
@@ -66,6 +74,8 @@ another3  This is another command 3
 
 ### Testing main::addLastChoice after adding more than 5 commands, we only keep the last 5
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -81,6 +91,8 @@ cm6
 ```
 
 ### Testing main::addLastChoice after adding the same command multiple times only keeps the last one
+
+
 
 Exit code: `0`
 
@@ -99,6 +111,8 @@ cm7
 ## Test script 02.arguments-parser
 
 ### Testing main::parseFunctionArguments
+
+
 
 Exit code: `0`
 
@@ -381,6 +395,8 @@ INFO     Fuzzy matching the option ⌜--this⌝ to ⌜--this-is-option2⌝.
 
 ### Testing main::getFunctionNameFromCommand
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -391,6 +407,8 @@ selfBuild
 ```
 
 ### Testing main::fuzzyMatchCommandToFunctionNameOrFail
+
+
 
 Exit code: `0`
 
@@ -436,6 +454,8 @@ CHIsCDEelCHIfCDE update
 
 ### Testing main::getMaxPossibleCommandLevel
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -455,6 +475,8 @@ Exit code: `0`
 ```
 
 ### Testing main::fuzzyFindOption
+
+
 
 Exit code: `0`
 
@@ -499,6 +521,8 @@ INFO     Fuzzy matching the option ⌜de⌝ to ⌜--derp2⌝.
 
 ### Testing main::getSingleLetterOptions
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -509,6 +533,8 @@ Valid single letter options are: ⌜a⌝, ⌜b⌝, ⌜c⌝.
 ```
 
 ### Testing main::getDisplayableFilteredArray
+
+
 
 Exit code: `0`
 

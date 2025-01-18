@@ -4,6 +4,8 @@
 
 ### Testing prompt_getDisplayedPromptString
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -132,6 +134,8 @@ declare -- _PROMPT_STRING_SCREEN_WIDTH="4"
 ```
 
 ### Testing prompt::getItemDisplayedString
+
+
 
 Exit code: `0`
 

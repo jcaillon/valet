@@ -114,6 +114,9 @@ function selfTest() {
     _TEST_PARALLEL_RUN_QUALIFIER="in parallel (max ${_TEST_NB_PARALLEL_TEST_SUITES})"
   fi
 
+  GLOBAL_TEST_APPROVAL_FAILURE_STATUS=141
+  GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS=142
+  declare -g -i _TEST_FAILURE_STATUS=0
   declare -g -i _TEST_TEST_SUITES_COUNT=0
   declare -g -a _TEST_FAILED_TEST_SUITES=()
 
@@ -141,8 +144,11 @@ function selfTest() {
       core::fail "The valet core tests directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝ does not exist, cannot run core tests."
     fi
 
+    io::createTempDirectory
+    GLOBAL_TEST_VALET_USER_DIRECTORY="${RETURNED_VALUE}"
+
     # we need to rebuild the commands for the core commands only
-    selfTestUtils_rebuildCommands --core-only --no-output
+    selfTestUtils_rebuildCommands --core-only --user-directory "${GLOBAL_TEST_VALET_USER_DIRECTORY}"
     selfTest_runSingleTestSuites "${GLOBAL_VALET_HOME}/tests.d"
 
     # now we can also test the commands in examples.d if the directory is there
@@ -177,8 +183,10 @@ function selfTest() {
       log::warning "${failMessage}"
     else
       failMessage+=$'\n'$'\n'"Check for the test errors in the logs above."
-      failMessage+=$'\n'"You should review the difference in the logs above or by manually comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
-      failMessage+=$'\n'$'\n'"If the differences are OK, approve the changes by running this command again with the option ⌜-a⌝."
+      if ((_TEST_FAILURE_STATUS == GLOBAL_TEST_APPROVAL_FAILURE_STATUS)); then
+        failMessage+=$'\n'$'\n'"You should review the difference in the logs above or by manually comparing each ⌜**.received.md⌝ files with ⌜**.approved.md⌝ files."
+        failMessage+=$'\n'$'\n'"If the differences are OK, approve the changes by running this command again with the option ⌜-a⌝."
+      fi
       core::fail "${failMessage}"
     fi
   elif ((_TEST_TEST_SUITES_COUNT > 0)); then
@@ -241,7 +249,6 @@ function selfTest_runSingleTestSuites() {
 
   interactive::startProgress
   interactive::updateProgress 0 "Running test suites."
-
 
   # sequential run
   if ((_TEST_NB_PARALLEL_TEST_SUITES == 0 || ${#testSuiteDirectories[@]} == 1)); then
@@ -347,10 +354,6 @@ function selfTest_runSingleTestSuite() {
   GLOBAL_TEST_LOG_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/log"
   mkdir -p "${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}"
 
-  # trap to cleanup the temp files
-  # shellcheck disable=SC2064
-  # trap "rm -Rf '${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}'; rm -Rf '${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}';" EXIT
-
   # run a custom user script before the test suite if it exists
   selfTestUtils_runHookScript "${testsDotDirectory}/before-each-test-suite"
 
@@ -376,7 +379,8 @@ function selfTest_runSingleTestSuite() {
     # the global execution of the tests.
     if ! (
       core::setShellOptions
-      trap 'selfTest_onExitTestInternal $?' EXIT; trap 'selfTest_onErrTestInternal' ERR;
+      trap 'selfTest_onExitTestInternal $?' EXIT
+      trap 'selfTest_onErrTestInternal' ERR
       selfTest_runSingleTest "${testSuiteDirectory}" "${testScript}" || exit $?
     ) >"${GLOBAL_TEST_STACK_FILE}" 2>"${GLOBAL_TEST_LOG_FILE}"; then
 
@@ -392,28 +396,28 @@ function selfTest_runSingleTestSuite() {
       selfTestUtils_displayTestLogs
       selfTestUtils_displayTestSuiteOutputs
 
-      if (( exitCode == 142 )); then
+      if ((exitCode == GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS)); then
         # the function test::fail was called, there was a coding mistake in the test script that we caught
         io::readFile "${GLOBAL_TEST_LOG_FILE}"
-        log::error "The test script ⌜${testScript##*/}⌝ failed because of a bad test implementation." \
+        log::error "The test script ⌜${testScript##*/}⌝ failed because an error was explicitly thrown in the test script:" \
           "" \
           "${RETURNED_VALUE}" \
           "" \
           "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
 
-      elif [[ -n ${_STACK_FUNCTION_NAMES_ERR:-} ]]; then
+      elif [[ -n ${GLOBAL_STACK_FUNCTION_NAMES_ERR:-} ]]; then
         log::error "The test script ⌜${testScript##*/}⌝ had an error  and exited with code ⌜${exitCode}⌝." \
           "Test scripts will exit if a command ends with an error (shell option to exit on error)." \
-          ""\
+          "" \
           "If you expect a tested function or command to fail, use one of these two methods to display the failure without exiting the script:" \
-          ""\
+          "" \
           "- ⌜myCommandThatFails || echo 'failed as expected with code \$?'⌝" \
           "- ⌜test::exec myCommandThatFails⌝" \
-          ""\
+          "" \
           "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
-        _STACK_FUNCTION_NAMES=("${_STACK_FUNCTION_NAMES_ERR[@]}")
-        _STACK_SOURCE_FILES=("${_STACK_SOURCE_FILES_ERR[@]}")
-        _STACK_LINE_NUMBERS=("${_STACK_LINE_NUMBERS_ERR[@]}")
+        GLOBAL_STACK_FUNCTION_NAMES=("${GLOBAL_STACK_FUNCTION_NAMES_ERR[@]}")
+        GLOBAL_STACK_SOURCE_FILES=("${GLOBAL_STACK_SOURCE_FILES_ERR[@]}")
+        GLOBAL_STACK_LINE_NUMBERS=("${GLOBAL_STACK_LINE_NUMBERS_ERR[@]}")
         # print the last line of the err output, which is supposed to be the bash error message
         io::tail "${GLOBAL_TEST_STANDARD_ERROR_FILE}" 1 true
         if [[ -n ${RETURNED_ARRAY[0]:-} ]]; then
@@ -422,14 +426,14 @@ function selfTest_runSingleTestSuite() {
         log::printCallStack 2 7
       else
         log::error "The test script ⌜${testScript##*/}⌝ exited with code ⌜${exitCode}⌝." \
-        "Test scripts must not exit or return an error (shell options are set to exit on error)." \
-        "" \
-        "If you expect a tested function or command to exit, run it in a subshell using one of these two methods:" \
-        "" \
-        "- ⌜(myCommandThatFails) || echo 'failed as expected with code \${PIPESTATUS[0]:-}'⌝" \
-        "- ⌜test::exit myCommandThatFails⌝" \
-        "" \
-        "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
+          "Test scripts must not exit or return an error (shell options are set to exit on error)." \
+          "" \
+          "If you expect a tested function or command to exit, run it in a subshell using one of these two methods:" \
+          "" \
+          "- ⌜(myCommandThatFails) || echo 'failed as expected with code \${PIPESTATUS[0]:-}'⌝" \
+          "- ⌜test::exit myCommandThatFails⌝" \
+          "" \
+          "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
         log::printCallStack 1 7
       fi
 
@@ -438,8 +442,8 @@ function selfTest_runSingleTestSuite() {
     else
       # check if the user forgot to call test::endTest
       if [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" || -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
-        selfTestUtils_displayTestSuiteOutputs
         selfTestUtils_displayTestLogs
+        selfTestUtils_displayTestSuiteOutputs
         log::error "The test script had un-flushed when it ended."$'\n'$'\n'"Make sure to conclude all test scripts by calling the ⌜test::flush⌝ or ⌜test::endTest⌝ functions (nothing should be printed to the standard or error output after that)."$'\n'$'\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
         nbOfScriptsWithErrors+=1
       fi
@@ -460,9 +464,12 @@ function selfTest_runSingleTestSuite() {
   fi
 
   # compare the test suite outputs with the approved files
-  if selfTestUtils_compareWithApproved "${testSuiteDirectory}" "${GLOBAL_TEST_REPORT_FILE}"; then
+  if ! selfTestUtils_compareWithApproved "${testSuiteDirectory}" "${GLOBAL_TEST_REPORT_FILE}"; then
     selfTestUtils_displayTestLogs
-    return 1
+    if ((_TEST_FAILURE_STATUS <= GLOBAL_TEST_APPROVAL_FAILURE_STATUS)); then
+      _TEST_FAILURE_STATUS="${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
+    fi
+    return "${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
   fi
 
   if log::isDebugEnabled; then
@@ -484,10 +491,10 @@ function selfTest_onExitTestInternal() {
     return 0
   fi
 
-  _STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
-  _STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
-  _STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
-  declare -p _STACK_FUNCTION_NAMES _STACK_SOURCE_FILES _STACK_LINE_NUMBERS 1>&3
+  GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
+  GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
+  GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
+  declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS 1>&3
 }
 
 # ## selfTest_onErrTestInternal
@@ -496,10 +503,10 @@ function selfTest_onExitTestInternal() {
 # We need to capture the stack trace within the subshell that runs the test script.
 function selfTest_onErrTestInternal() {
   # handle an error in the test script
-  _STACK_FUNCTION_NAMES_ERR=("${FUNCNAME[@]}")
-  _STACK_SOURCE_FILES_ERR=("${BASH_SOURCE[@]}")
-  _STACK_LINE_NUMBERS_ERR=("${BASH_LINENO[@]}")
-  declare -p _STACK_FUNCTION_NAMES_ERR _STACK_SOURCE_FILES_ERR _STACK_LINE_NUMBERS_ERR 1>&3
+  GLOBAL_STACK_FUNCTION_NAMES_ERR=("${FUNCNAME[@]}")
+  GLOBAL_STACK_SOURCE_FILES_ERR=("${BASH_SOURCE[@]}")
+  GLOBAL_STACK_LINE_NUMBERS_ERR=("${BASH_LINENO[@]}")
+  declare -p GLOBAL_STACK_FUNCTION_NAMES_ERR GLOBAL_STACK_SOURCE_FILES_ERR GLOBAL_STACK_LINE_NUMBERS_ERR 1>&3
 }
 
 # ## selfTest_runSingleTest
@@ -522,6 +529,11 @@ function selfTest_runSingleTest() {
 
   io::cleanupTempFiles
   mkdir -p "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
+
+  # set a new user directory so that commands are correctly recreated if calling
+  # valet from a test
+  cp -R "${GLOBAL_TEST_VALET_USER_DIRECTORY}" "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}/valet.d"
+  export VALET_USER_DIRECTORY="${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}/valet.d"
 
   # The following file can be used by tests during tests.
   # shellcheck disable=SC2034

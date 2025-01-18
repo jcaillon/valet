@@ -4,6 +4,8 @@
 
 ### Testing log level
 
+
+
 Exit code: `0`
 
 **Error output**:
@@ -30,21 +32,14 @@ trace
 → log::error 'This is an error message.'
 ERROR    This is an error 
          message.
-         ├─ in log::printCallS
-         │  tack() at tests.d/
-         │  lib-log/00.tests.s
-         │  h:72
-         ├─ in log::error() at
-         │  tests.d/lib-log/00
-         │  .tests.sh:17
          ├─ in myCmd::subFunct
          │  ion() at tests.d/l
-         │  ib-log/00.tests.sh
-         │  :169
+         │  ib-log/path/to/sub
+         │  Function.sh:200
          └─ in myCmd::function
             () at tests.d/lib-
-            log/00.tests.sh:17
-            5
+            log/path/to/functi
+            on.sh:300
 
 → log::warning 'This is a warning message.'
 WARNING  This is a warning 
@@ -91,21 +86,14 @@ debug
 → log::error 'This is an error message.'
 ERROR    This is an error 
          message.
-         ├─ in log::printCallS
-         │  tack() at tests.d/
-         │  lib-log/00.tests.s
-         │  h:72
-         ├─ in log::error() at
-         │  tests.d/lib-log/00
-         │  .tests.sh:23
          ├─ in myCmd::subFunct
          │  ion() at tests.d/l
-         │  ib-log/00.tests.sh
-         │  :169
+         │  ib-log/path/to/sub
+         │  Function.sh:200
          └─ in myCmd::function
             () at tests.d/lib-
-            log/00.tests.sh:17
-            5
+            log/path/to/functi
+            on.sh:300
 
 → log::warning 'This is a warning message.'
 WARNING  This is a warning 
@@ -264,6 +252,8 @@ TRACE    This is a errorTrace
 ```
 
 ### Testing log::xx functions
+
+
 
 Exit code: `0`
 
