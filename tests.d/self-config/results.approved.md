@@ -4,6 +4,8 @@
 
 ### Testing selfConfig
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -287,6 +289,8 @@ INFO     Opening the valet config file ⌜/tmp/valet.d/f1-2⌝.
 
 ### Testing selfConfig (should only open, file exists)
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -304,6 +308,8 @@ INFO     Opening the valet config file ⌜/tmp/valet.d/f1-2⌝.
 
 ### Testing selfConfig override no edit
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -319,6 +325,8 @@ INFO     Creating the valet config file ⌜/tmp/valet.d/f1-2⌝.
 ```
 
 ### Testing selfConfig override export
+
+
 
 Exit code: `0`
 

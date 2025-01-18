@@ -4,11 +4,7 @@
 
 ### ✅ Testing that we correctly parse arguments and options and fail if they don't match
 
-Prompt:
-
-```bash
-valet self mock1 non-existing-option nonNeededArg1 -derp anotherArg
-```
+❯ `main::parseMainArguments self mock1 non-existing-option nonNeededArg1 -derp anotherArg`
 
 Exited with code: `1`
 
@@ -29,11 +25,7 @@ valet [global options] self mock1 [options] [--] <action>
 
 ### ✅ Testing that a command with sudo ask for sudo privileges
 
-Prompt:
-
-```bash
-valet self mock3
-```
+❯ `main::parseMainArguments self mock3`
 
 **Error output**:
 
@@ -45,11 +37,7 @@ INFO     This command requires sudo privileges.
 
 ### ✅ Testing that valet can be called without any arguments and show the menu
 
-Prompt:
-
-```bash
-valet
-```
+❯ `main::parseMainArguments`
 
 **Error output**:
 
@@ -61,11 +49,7 @@ declare -n array="_COPIED_COMMANDS_ARRAY"
 
 ### ✅ Testing that we go into the interactive sub menu with no arguments
 
-Prompt:
-
-```bash
-valet self
-```
+❯ `main::parseMainArguments self`
 
 **Error output**:
 
@@ -77,12 +61,8 @@ declare -n array="FILTERED_COMMANDS_FOR_SUB_MENU"
 
 ### ✅ Testing that we can display the help of a sub menu
 
-Prompt:
-
-```bash
-valet self -h
-
-```
+❯ `main::parseMainArguments self -h
+`
 
 **Standard output**:
 
@@ -101,11 +81,7 @@ GLOBAL OPTIONS
 
 ### ✅ Testing that we catch option errors of a sub menu
 
-Prompt:
-
-```bash
-valet self --unknown
-```
+❯ `main::parseMainArguments self --unknown`
 
 Exited with code: `1`
 

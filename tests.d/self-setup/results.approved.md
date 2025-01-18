@@ -4,6 +4,8 @@
 
 ### Testing selfSetup 1
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -53,6 +55,8 @@ INFO     You can create your own commands and have them available in valet, plea
 ```
 
 ### Testing selfSetup 2
+
+
 
 Exit code: `0`
 

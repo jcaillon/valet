@@ -6,10 +6,13 @@ set -Eeu -o pipefail
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
 if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
-  # shellcheck source=../libraries.d/core
+  # shellcheck source=../../libraries.d/core
   source "$(dirname -- "$(command -v valet)")/libraries.d/core"
 fi
 # --- END OF COMMAND COMMON PART
+
+# shellcheck source=../../libraries.d/lib-io
+source io
 
 #===============================================================
 # >>> command: self mock1
@@ -99,10 +102,7 @@ function selfMock1() {
     ;;
   wait-indefinitely)
     log::info "This is for testing valet core functions, waiting indefinitely."
-    while true; do
-      # sleep for 1s
-      read -rt 1 <> <(:) || :
-    done
+    io::sleep 999
     ;;
   show-help)
     core::showHelp

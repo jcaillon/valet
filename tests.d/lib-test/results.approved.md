@@ -2,7 +2,7 @@
 
 ## Test script 00.tests
 
-### #️⃣ Testing the basic functions of lib-test
+### ✅ Testing the basic functions of lib-test
 
 You can insert comments that will appear as a paragraph in the test report.
 
@@ -53,6 +53,7 @@ Exit code: `42`
 **Standard output**:
 
 ```text
+❯ functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0
 I am testing functionToTest.
 Second test.
 Failed as expected because functionToTest returned 2.
@@ -78,11 +79,7 @@ This convenient function also logs the command that was executed, handles errors
 
 > However, it is not adapted to handle commands that `exit`, see the next test on `test::exit` for that.
 
-Prompt:
-
-```bash
-functionToTest I\ am\ testing\ functionToTest. This\ is\ supposed\ to\ be\ in\ the\ error\ output 0
-```
+❯ `functionToTest I\ am\ testing\ functionToTest. This\ is\ supposed\ to\ be\ in\ the\ error\ output 0`
 
 **Standard output**:
 
@@ -98,11 +95,7 @@ This is supposed to be in the error output
 
 In this second test, we expect the command to fail and return the exit code 2.
 
-Prompt:
-
-```bash
-functionToTest Second\ test. Second\ test. 2
-```
+❯ `functionToTest Second\ test. Second\ test. 2`
 
 Exited with code: `2`
 
@@ -124,11 +117,7 @@ The `test::exit` function is a variant of `test::exec` that is adapted to handle
 
 It will run the command in a subshell and output the same format as `test::exec`.
 
-Prompt:
-
-```bash
-functionThatExit I\ am\ testing\ functionThatExit. This\ is\ supposed\ to\ be\ in\ the\ error\ output 3
-```
+❯ `functionThatExit I\ am\ testing\ functionThatExit. This\ is\ supposed\ to\ be\ in\ the\ error\ output 3`
 
 Exited with code: `3`
 
@@ -152,16 +141,12 @@ Meaning functions that usually return values in a variables named `RETURNED_VALU
 
 It function will be executed and its output will be added the report, including any declare `RETURNED_*` variable.
 
-Prompt:
-
-```bash
-typicalValetFunction "{\ 'output':\ 'this\ function\ outputs\ json\ format'\ }" A\ log\ line.
-```
+❯ `typicalValetFunction Function\ output A\ log\ line.`
 
 **Standard output**:
 
 ```text
-OUTPUT: {\ 'output':\ 'this\ function\ outputs\ json\ format'\ }
+OUTPUT: Function output
 ```
 
 **Error output**:
@@ -170,73 +155,67 @@ OUTPUT: {\ 'output':\ 'this\ function\ outputs\ json\ format'\ }
 LOG: A log line.
 ```
 
-RETURNED_VALUE:
+Returned variables:
 
 ```text
-This is the returned value.
-```
-
-RETURNED_ARRAY:
-
-```text
-[0]=This
-[1]=is
-[2]=the
-[3]=returned
-[4]=array.
-```
-
-RETURNED_ASSOCIATIVE_ARRAY:
-
-```text
-[key6]=array.
-[key4]=returned
-[key5]=associative
-[key2]=is
-[key3]=the
-[key1]=This
+RETURNED_VALUE='This is the returned value.'
+RETURNED_ARRAY=(
+[0]='This'
+[1]='is'
+[2]='the'
+[3]='returned'
+[4]='array.'
+)
 ```
 
 ### 🙈 Display reporting RETURNED variables
 
-You can manually report the content of the `RETURNED_*` variables using the `test::revealReturnedVars` function.
+You can manually report the content of the `RETURNED_*` variables using the `test::printReturnedVars` function.
 
 The function `test::resetReturnedVars` can also be used to reset the content of the `RETURNED_*` variables.
 
-RETURNED_VALUE2:
+Returned variables:
 
 ```text
-This is the value of a returned string for RETURNED_VALUE2
-```
-
-RETURNED_ARRAY2:
-
-```text
-[0]=This
-[1]=is
-[2]=the
-[3]=value
-[4]=of
-[5]=a
-[6]=returned
-[7]=array
-[8]=for
-[9]=RETURNED_ARRAY2
+RETURNED_VALUE2='This is the value of a returned string for RETURNED_VALUE2'
+RETURNED_ARRAY2=(
+[0]='This'
+[1]='is'
+[2]='the'
+[3]='value'
+[4]='of'
+[5]='a'
+[6]='returned'
+[7]='array'
+[8]='for'
+[9]='RETURNED_ARRAY2'
+)
 ```
 
 ### 👁️ Display the value of any variable
 
-You can manually report the definition of any variable using the `test::revealVars` function.
+You can manually report the definition of any variable using the `test::printVars` function.
 
 **Command executed in the test script:**:
 
 ```text
-> test::revealVars GLOBAL_VAR1 GLOBAL_VAR2
+> test::printVars GLOBAL_VAR1 GLOBAL_VAR2
 ```
+
+Variables:
 
 ```text
 GLOBAL_VAR1="This is the value of a global string"
-GLOBAL_VAR2=([0]="This" [1]="is" [2]="the" [3]="value" [4]="of" [5]="a" [6]="global" [7]="array.")
+GLOBAL_VAR2=(
+[0]='This'
+[1]='is'
+[2]='the'
+[3]='value'
+[4]='of'
+[5]='a'
+[6]='global'
+[7]='array.'
+)
 ```
 
 ### 🪝 Testing the self test hooks

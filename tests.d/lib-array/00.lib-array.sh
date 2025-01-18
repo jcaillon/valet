@@ -5,9 +5,19 @@ source array
 # shellcheck source=../../libraries.d/lib-io
 source io
 
-function test_array::sort() {
+function main() {
+  test_array::sort
+  test_array::sortWithCriteria
+  test_array::appendIfNotPresent
+  test_array::isInArray
+  test_array::makeArraysSameSize
+  test_array::fuzzyFilterSort
+  test_array::fuzzyFilterSortFileWithGrepAndAwk
+}
 
-  declare -g MYARRAY=(
+function test_array::sort() {
+  test::title "✅ Testing array::sort"
+  declare -g MY_ARRAY=(
     breakdown
     constitutional
     conventional
@@ -18,64 +28,58 @@ function test_array::sort() {
     position
     economics
   )
-
-  declare -p MYARRAY
-  echo
-  echo "→ array::sort MYARRAY"
-  array::sort MYARRAY
-  declare -p MYARRAY
-
-  test::endTest "Testing array::sort" 0
+  test::comment "Global array:"
+  test::printVars MY_ARRAY
+  test::func array::sort MY_ARRAY
+  test::printVars MY_ARRAY
 }
 
+# shellcheck disable=SC2034
 function test_array::sortWithCriteria() {
+  test::title "✅ Testing array::sortWithCriteria"
   declare -g myArray=(a b c d e f g)
   declare -g criteria1=(3 2 2 1 1 4 0)
   declare -g criteria2=(1 3 2 5 0 2 9)
 
-  declare -p myArray criteria1 criteria2
-  echo
-  echo "→ array::sortWithCriteria myArray criteria1 criteria2"
-  array::sortWithCriteria myArray criteria1 criteria2
-  declare -p RETURNED_ARRAY myArray
+  test::comment "Global arrays:"
+  test::printVars myArray criteria1 criteria2
+  test::func array::sortWithCriteria myArray criteria1 criteria2
+  test::printVars myArray
   echo "got:      ${myArray[*]}"
   echo "expected: g e d c b a f"
-
-  unset myArray criteria1 criteria2
-
-  test::endTest "Testing array::sortWithCriteria" 0
+  test::flush
 }
 
 function test_array::appendIfNotPresent() {
 
-  declare -g MYARRAY=(
+  declare -g MY_ARRAY=(
     breakdown
     constitutional
   )
 
-  declare -p MYARRAY
+  declare -p MY_ARRAY
 
   echo
-  echo "→ array::appendIfNotPresent MYARRAY 'deliver'"
-  array::appendIfNotPresent MYARRAY 'deliver' && echo "$?"
-  declare -p MYARRAY
+  echo "→ array::appendIfNotPresent MY_ARRAY 'deliver'"
+  array::appendIfNotPresent MY_ARRAY 'deliver' && echo "$?"
+  declare -p MY_ARRAY
 
   echo
-  echo "→ array::appendIfNotPresent MYARRAY 'breakdown'"
-  array::appendIfNotPresent MYARRAY 'breakdown' || echo "$?"
-  declare -p MYARRAY
+  echo "→ array::appendIfNotPresent MY_ARRAY 'breakdown'"
+  array::appendIfNotPresent MY_ARRAY 'breakdown' || echo "$?"
+  declare -p MY_ARRAY
 
   echo
-  echo "→ array::appendIfNotPresent MYARRAY 'holiday'"
-  array::appendIfNotPresent MYARRAY 'holiday' && echo "$?"
-  declare -p MYARRAY
+  echo "→ array::appendIfNotPresent MY_ARRAY 'holiday'"
+  array::appendIfNotPresent MY_ARRAY 'holiday' && echo "$?"
+  declare -p MY_ARRAY
 
   test::endTest "Testing array::appendIfNotPresent" 0
 }
 
 function test_array::isInArray() {
 
-  declare -g MYARRAY=(
+  declare -g MY_ARRAY=(
     breakdown
     constitutional
     deliver
@@ -83,15 +87,15 @@ function test_array::isInArray() {
     economics
   )
 
-  declare -p MYARRAY
+  declare -p MY_ARRAY
 
   echo
-  echo "→ array::isInArray MYARRAY 'deliver'"
-  array::isInArray MYARRAY 'deliver' && echo "$?"
+  echo "→ array::isInArray MY_ARRAY 'deliver'"
+  array::isInArray MY_ARRAY 'deliver' && echo "$?"
 
   echo
-  echo "→ array::isInArray MYARRAY 'holiday'"
-  array::isInArray MYARRAY 'holiday' || echo "$?"
+  echo "→ array::isInArray MY_ARRAY 'holiday'"
+  array::isInArray MY_ARRAY 'holiday' || echo "$?"
 
   test::endTest "Testing array::isInArray" 0
 }
@@ -218,16 +222,6 @@ function test_array::fuzzyFilterSortFileWithGrepAndAwk() {
   echo "The result is the same as the pure bash implementation."
 
   test::endTest "Testing that array::fuzzyFilterSortFileWithGrepAndAwk produces the same as fuzzyFilterSort" 0
-}
-
-function main() {
-  test_array::sort
-  test_array::sortWithCriteria
-  test_array::appendIfNotPresent
-  test_array::isInArray
-  test_array::makeArraysSameSize
-  test_array::fuzzyFilterSort
-  test_array::fuzzyFilterSortFileWithGrepAndAwk
 }
 
 main

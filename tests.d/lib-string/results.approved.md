@@ -734,75 +734,39 @@ This is a text to highlight.
 
 ### ✅ Testing string::head
 
+Variables:
+
 ```text
 _TEST_MULTILINE_STRING=$'The first line.\nThe second line.\nThe third line.\nThe fourth line.\nThe fifth line.'
 ```
 
 Testing string::head with 3 lines
 
-Prompt:
+❯ `string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 3`
 
-```bash
-string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 3
-```
-
-RETURNED_VALUE:
+Returned variables:
 
 ```text
-The first line.
-The second line.
-The third line.
-
-```
-
-RETURNED_ASSOCIATIVE_ARRAY:
-
-```text
-
+RETURNED_VALUE=$'The first line.\nThe second line.\nThe third line.\n'
 ```
 
 Testing string::head with 0 line
 
-Prompt:
+❯ `string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 0`
 
-```bash
-string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 0
-```
-
-RETURNED_VALUE:
+Returned variables:
 
 ```text
-
-```
-
-RETURNED_ASSOCIATIVE_ARRAY:
-
-```text
-
+RETURNED_VALUE=''
 ```
 
 Testing string::head with 10 lines
 
-Prompt:
+❯ `string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 10`
 
-```bash
-string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 10
-```
-
-RETURNED_VALUE:
+Returned variables:
 
 ```text
-The first line.
-The second line.
-The third line.
-The fourth line.
-The fifth line.
-
-```
-
-RETURNED_ASSOCIATIVE_ARRAY:
-
-```text
-
+RETURNED_VALUE=$'The first line.\nThe second line.\nThe third line.\nThe fourth line.\nThe fifth line.\n'
 ```
 

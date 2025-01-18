@@ -17,7 +17,9 @@
 function profiler::enable() {
   local file="${1}"
   # Nested profiling not supported
-  if [[ -n ${_ACTIVE_PROFILER:-} ]]; then return 0; fi
+  if [[ -n ${_ACTIVE_PROFILER:-} ]]; then
+    return 0
+  fi
   _ACTIVE_PROFILER=1
 
   # create the directory for file and reset it
@@ -34,7 +36,7 @@ function profiler::enable() {
     functionDepthExpression='0'
   fi
 
-  PS4='+'$'\011''$(("${EPOCHREALTIME//./}" - _PROFILER_START_REALTIME))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
+  export PS4='+'$'\011''$(("${EPOCHREALTIME//./}" - _PROFILER_START_REALTIME))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL:-}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
 
   exec 5>"${file}"
 

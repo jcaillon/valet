@@ -80,11 +80,6 @@ function selfTest() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  # can't have the profiler on
-  if command -v profiler::disable &>/dev/null; then
-    profiler::disable
-  fi
-
   local startTime="${EPOCHREALTIME}"
 
   # check what will be used to display the diff between received and approved files
@@ -352,7 +347,11 @@ function selfTest_runSingleTestSuite() {
   GLOBAL_TEST_REPORT_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/report"
   GLOBAL_TEST_STACK_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/stack"
   GLOBAL_TEST_LOG_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/log"
+  # shellcheck disable=SC2034
+  GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}/temp"
   mkdir -p "${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}"
+  # shellcheck disable=SC2034
+  GLOBAL_TEST_CURRENT_DIRECTORY="${testSuiteDirectory}"
 
   # run a custom user script before the test suite if it exists
   selfTestUtils_runHookScript "${testsDotDirectory}/before-each-test-suite"
@@ -373,6 +372,9 @@ function selfTest_runSingleTestSuite() {
       treePadding="     "
     fi
     log::printString "${treeString} ${GLOBAL_TEST_SUITE_SCRIPT_NAME}" "${treePadding}"
+
+    # write the test script name
+    printf "%s\n\n" "## Test script ${GLOBAL_TEST_SUITE_SCRIPT_NAME%.sh}" >>"${GLOBAL_TEST_REPORT_FILE}"
 
     # Run the test script in a subshell.
     # This way each test can define any vars or functions without polluting
@@ -526,29 +528,17 @@ function selfTest_runSingleTest() {
     rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
   fi
   io::setupTempFileGlobalVariable
-
   io::cleanupTempFiles
   mkdir -p "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
 
   # set a new user directory so that commands are correctly recreated if calling
   # valet from a test
-  cp -R "${GLOBAL_TEST_VALET_USER_DIRECTORY}" "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}/valet.d"
-  export VALET_USER_DIRECTORY="${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}/valet.d"
-
-  # The following file can be used by tests during tests.
-  # shellcheck disable=SC2034
-  GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}${BASHPID}.valet-test-tempfile"
+  cp -R "${GLOBAL_TEST_VALET_USER_DIRECTORY}" "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
+  export VALET_USER_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
 
   # redirect the standard output and error output to files
   exec 3>&1 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
   exec 4>&2 2>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
-
-  # used in test library to replace this path with .
-  # shellcheck disable=SC2034
-  GLOBAL_TEST_CURRENT_DIRECTORY="${PWD}"
-
-  # write the test script name
-  printf "%s\n\n" "## Test script ${GLOBAL_TEST_SUITE_SCRIPT_NAME%.sh}" >>"${GLOBAL_TEST_REPORT_FILE}"
 
   # run a custom user script before the test if it exists
   selfTestUtils_runHookScript "${testDirectory}/before-each-test"
@@ -562,4 +552,20 @@ function selfTest_runSingleTest() {
 
   exec 3>&-
   exec 4>&-
+
+  self_makeReplacementsInReport
+}
+
+# ## self_makeReplacementsInReport
+#
+# In order to have consistent results in tests, we need to replace to replace
+# values that could be different on each run/machine.
+function self_makeReplacementsInReport() {
+  io::readFile "${GLOBAL_TEST_REPORT_FILE}"
+  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_VALET_HOME}\/valet/valet}"
+  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_VALET_HOME}/\$GLOBAL_VALET_HOME}"
+  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
+  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
+  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
+  printf "%s" "${RETURNED_VALUE}" >"${GLOBAL_TEST_REPORT_FILE}"
 }

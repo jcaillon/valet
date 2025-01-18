@@ -4,6 +4,8 @@
 
 ### Testing selfRelease, dry run major version
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -37,6 +39,8 @@ SUCCESS  The new version has been released, check: https://github.com/jcaillon/v
 ```
 
 ### Testing selfRelease, minor version
+
+
 
 Exit code: `0`
 
@@ -235,6 +239,7 @@ DEBUG    Found function: ⌜string::count⌝
 DEBUG    Found function: ⌜string::split⌝
 DEBUG    Found function: ⌜string::regexGetFirst⌝
 DEBUG    Found function: ⌜string::microsecondsToHuman⌝
+DEBUG    Found function: ⌜string::head⌝
 DEBUG    Found function: ⌜system::os⌝
 DEBUG    Found function: ⌜system::env⌝
 DEBUG    Found function: ⌜system::date⌝
@@ -248,15 +253,20 @@ DEBUG    Found function: ⌜system::windowsGetEnvVar⌝
 DEBUG    Found function: ⌜system::windowsAddToPath⌝
 DEBUG    Found function: ⌜test::log⌝
 DEBUG    Found function: ⌜test::title⌝
-DEBUG    Found function: ⌜test::commentTest⌝
+DEBUG    Found function: ⌜test::comment⌝
+DEBUG    Found function: ⌜test::func⌝
 DEBUG    Found function: ⌜test::exec⌝
-DEBUG    Found function: ⌜test::execExiting⌝
-DEBUG    Found function: ⌜test::flushFdToCodeBlock⌝
+DEBUG    Found function: ⌜test::exit⌝
+DEBUG    Found function: ⌜test::printReturnedVars⌝
+DEBUG    Found function: ⌜test::resetReturnedVars⌝
+DEBUG    Found function: ⌜test::printVars⌝
+DEBUG    Found function: ⌜test::transformTextBeforeFlushing⌝
 DEBUG    Found function: ⌜test::flush⌝
 DEBUG    Found function: ⌜test::flushStdout⌝
 DEBUG    Found function: ⌜test::flushStderr⌝
 DEBUG    Found function: ⌜test::endTest⌝
-INFO     Found 153 functions with documentation.
+DEBUG    Found function: ⌜test::fail⌝
+INFO     Found 159 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet.md⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet
@@ -264,7 +274,7 @@ INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/li
 INFO     The prototype script has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/valet.code-snippets
 INFO     The vscode snippets have been generated in ⌜$GLOBAL_VALET_HOME/extras/valet.code-snippets⌝.
-INFO     Writing the 153 functions documentation to the core libraries docs.
+INFO     Writing the 159 functions documentation to the core libraries docs.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -546,6 +556,8 @@ INFO     Writing the 153 functions documentation to the core libraries docs.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
@@ -568,6 +580,16 @@ INFO     Writing the 153 functions documentation to the core libraries docs.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/test.md
@@ -644,7 +666,7 @@ DEBUG    The upload URL is: https://uploads.github.com/repos/jcaillon/valet/rele
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/commands.d .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/libraries.d .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/extras .
-▶ called io::invoke cp -R $GLOBAL_VALET_HOME/valet .
+▶ called io::invoke cp -R valet .
 ▶ called io::invoke cp -R $GLOBAL_VALET_HOME/version .
 ▶ called io::invoke tar -czvf valet.tar.gz examples.d commands.d libraries.d extras valet version
 DEBUG    The artifact has been created at ⌜valet.tar.gz⌝ with:

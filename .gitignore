@@ -27,8 +27,7 @@ sandbox.sh
 benchmark.sh
 try.sh
 sort.sh
-file
-file?
+f?
 
 # tests
 tests.d/1005-lib-io/resources/gitignored/**

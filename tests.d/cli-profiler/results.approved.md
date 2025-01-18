@@ -8,18 +8,16 @@ Notice that the profiling file is cleaned up after the command execution to maxi
 
 **Exported variables:**
 
+Variables:
+
 ```text
 VALET_CONFIG_COMMAND_PROFILING_FILE="/tmp/valet.d/f1-2"
 VALET_CONFIG_STARTUP_PROFILING_FILE="/tmp/valet.d/f2-2"
 ```
 
-### Testing the profiler cli option
+### ✅ Testing the profiler cli option
 
-Prompt:
-
-```bash
-valet -x self mock2 arg1 arg2
-```
+❯ `valet -x self mock2 arg1 arg2`
 
 **Standard output**:
 
@@ -40,11 +38,7 @@ INFO     More: arg2.
 INFO     Disabling profiler.
 ```
 
-Prompt:
-
-```bash
-io::cat /tmp/valet.d/f1-2
-```
+❯ `io::cat /tmp/valet.d/f1-2`
 
 **Standard output**:
 
@@ -89,13 +83,9 @@ D  I  S  timer  delta                          source:line function             
 
 ```
 
-### Testing the profiler with cleanup using bash
+### ✅ Testing the profiler with cleanup using bash
 
-Prompt:
-
-```bash
-VALET_CONFIG_LOG_CLEANUP_USING_BASH=true valet -x self mock2 arg1 arg2
-```
+❯ `VALET_CONFIG_LOG_CLEANUP_USING_BASH=true valet -x self mock2 arg1 arg2`
 
 **Standard output**:
 
@@ -116,11 +106,7 @@ INFO     More: arg2.
 INFO     Disabling profiler.
 ```
 
-Prompt:
-
-```bash
-io::cat /tmp/valet.d/f1-2
-```
+❯ `io::cat /tmp/valet.d/f1-2`
 
 **Standard output**:
 
@@ -165,13 +151,9 @@ D  I  S  timer  delta                          source:line function             
 
 ```
 
-### Testing to enable the profiler on Valet startup
+### ✅ Testing to enable the profiler on Valet startup
 
-Prompt:
-
-```bash
-VALET_CONFIG_STARTUP_PROFILING=true valet --log-level error -x self mock1 logging-level
-```
+❯ `VALET_CONFIG_STARTUP_PROFILING=true valet --log-level error -x self mock1 logging-level`
 
 **Error output**:
 

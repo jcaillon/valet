@@ -4,11 +4,7 @@
 
 ### ✅ Logging level through an environment variable
 
-Prompt:
-
-```bash
-VALET_LOG_LEVEL=success valet self mock1 logging-level
-```
+❯ `VALET_LOG_LEVEL=success valet self mock1 logging-level`
 
 **Error output**:
 
@@ -21,11 +17,7 @@ With a second line.
 
 ### ✅ Logging level with --log-level option
 
-Prompt:
-
-```bash
-valet --log-level warning self mock1 logging-level
-```
+❯ `valet --log-level warning self mock1 logging-level`
 
 **Error output**:
 
@@ -37,11 +29,7 @@ With a second line.
 
 ### ✅ Logging level with --verbose option
 
-Prompt:
-
-```bash
-valet -v self mock1 logging-level
-```
+❯ `valet -v self mock1 logging-level`
 
 **Error output**:
 
@@ -50,7 +38,7 @@ DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Command found ⌜self mock1⌝.
 DEBUG    Function name found ⌜selfMock1⌝.
-DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/tests.d/commands.d/self-mock.sh⌝.
+DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/tests.d/.commands.d/self-mock.sh⌝.
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
 local parsingErrors help action
@@ -70,11 +58,7 @@ DEBUG    Exiting with code 0 after 0s.
 
 ### ✅ Logging level with --very-verbose option
 
-Prompt:
-
-```bash
-valet -w self mock1 logging-level
-```
+❯ `valet -w self mock1 logging-level`
 
 **Error output**:
 
@@ -83,7 +67,7 @@ DEBUG    Log level set to trace.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Command found ⌜self mock1⌝.
 DEBUG    Function name found ⌜selfMock1⌝.
-DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/tests.d/commands.d/self-mock.sh⌝.
+DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/tests.d/.commands.d/self-mock.sh⌝.
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
 local parsingErrors help action
@@ -105,11 +89,7 @@ DEBUG    Exiting with code 0 after 0s.
 
 ### ✅ Testing that we can change the log display options
 
-Prompt:
-
-```bash
-VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true VALET_CONFIG_LOG_DISABLE_WRAP=true valet self mock1 logging-level
-```
+❯ `VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true VALET_CONFIG_LOG_DISABLE_WRAP=true valet self mock1 logging-level`
 
 **Error output**:
 
@@ -123,11 +103,7 @@ With a second line.
 
 ### ✅ Testing that we can output the logs to a directory additionally to console
 
-Prompt:
-
-```bash
-VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d1-2 valet self mock1 logging-level
-```
+❯ `VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d1-2 valet self mock1 logging-level`
 
 **Error output**:
 
@@ -139,31 +115,19 @@ WARNING  This is a warning message.
 With a second line.
 ```
 
-Prompt:
+❯ `io::listFiles /tmp/valet.d/d1-2`
 
-```bash
-io::listFiles /tmp/valet.d/d1-2
-```
-
-RETURNED_ARRAY:
+Returned variables:
 
 ```text
-[0]=/tmp/valet.d/d1-2/valet-2025-01-17_21h29m41s.log
-```
-
-RETURNED_ASSOCIATIVE_ARRAY:
-
-```text
-
+RETURNED_ARRAY=(
+[0]='/tmp/valet.d/d1-2/valet-2025-01-17_21h29m41s.log'
+)
 ```
 
 ### ✅ Testing that we can output the logs to a specific file name additionally to console
 
-Prompt:
-
-```bash
-VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=test.log VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d1-2 valet self mock1 logging-level
-```
+❯ `VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=test.log VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d1-2 valet self mock1 logging-level`
 
 **Error output**:
 
@@ -175,11 +139,7 @@ WARNING  This is a warning message.
 With a second line.
 ```
 
-Prompt:
-
-```bash
-io::cat /tmp/valet.d/d1-2/test.log
-```
+❯ `io::cat /tmp/valet.d/d1-2/test.log`
 
 **Standard output**:
 
@@ -194,17 +154,9 @@ With a second line.
 
 ### ✅ Testing that we can output the logs to a specific file descriptor
 
-Prompt:
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet.d/d1-2/test2.log valet self mock1 logging-level`
 
-```bash
-VALET_CONFIG_LOG_FD=/tmp/valet.d/d1-2/test2.log valet self mock1 logging-level
-```
-
-Prompt:
-
-```bash
-io::cat /tmp/valet.d/d1-2/test2.log
-```
+❯ `io::cat /tmp/valet.d/d1-2/test2.log`
 
 **Standard output**:
 

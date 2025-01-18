@@ -4,6 +4,8 @@
 
 ### Testing selfDocument
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -142,7 +144,7 @@ function ansi-codes::*() { :; }
 
 ```text
 INFO     Generating documentation for the core functions only.
-INFO     Found 153 functions with documentation.
+INFO     Found 159 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-2/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-2/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-2/valet.code-snippets⌝.

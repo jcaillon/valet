@@ -4,13 +4,16 @@
 
 ### Testing self build
 
+
+
 Exit code: `0`
 
 **Error output**:
 
 ```text
+INFO     Added the test commands to the build.
 INFO     Skipping the build of scripts in user directory (building core commands only).
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/valet⌝.
+INFO     Extracting commands from ⌜valet⌝.
 INFO                              ├── ⌜⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/help.sh⌝.
 INFO                              ├── ⌜help⌝.
@@ -30,11 +33,6 @@ INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-extend.s
 INFO                              ├── ⌜self extend⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-install.sh⌝.
 INFO                              ├── ⌜self update⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-mock.sh⌝.
-INFO                              ├── ⌜self mock1⌝.
-INFO                              ├── ⌜self mock2⌝.
-INFO                              ├── ⌜self mock3⌝.
-INFO                              ├── ⌜self mock4⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-release.sh⌝.
 INFO                              ├── ⌜self release⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-setup.sh⌝.
@@ -43,11 +41,15 @@ INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-test.sh�
 INFO                              ├── ⌜self test⌝.
 INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-uninstall.sh⌝.
 INFO                              ├── ⌜self uninstall⌝.
+INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/tests.d/.commands.d/self-mock.sh⌝.
+INFO                              ├── ⌜self mock1⌝.
+INFO                              ├── ⌜self mock2⌝.
+INFO                              ├── ⌜self mock3⌝.
 INFO     == Summary of the commands ==
 
-- Number of variables declared: ⌜307⌝.
-- Number of functions: ⌜18⌝.
-- Number of commands: ⌜17⌝.
+- Number of variables declared: ⌜289⌝.
+- Number of functions: ⌜17⌝.
+- Number of commands: ⌜16⌝.
 - Number of user library directories found: ⌜0⌝.
 - Maximum sub command level: ⌜1⌝.
 
@@ -57,7 +59,6 @@ self export         Returns a string that can be evaluated to have Valet functio
 self mock1          A command that only for testing valet core functions.
 self mock2          A command that only for testing valet core functions.
 self mock3          A command that only for testing valet core functions.
-self mock4          A command that only for testing valet core functions.
 self release        Release a new version of valet.
 self setup          The command run after the installation of Valet to setup the tool.
 self uninstall      A command to uninstall Valet.

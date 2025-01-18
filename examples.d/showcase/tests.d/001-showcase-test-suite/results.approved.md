@@ -4,6 +4,8 @@
 
 ### Testing the showcase command1
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -25,6 +27,8 @@ INFO     Extracted text is: ⌜My bold text⌝
 
 ### Testing the showcase sudo command by replacing sudo with echo
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -35,6 +39,8 @@ whoami
 ```
 
 ### Testing the behavior of onInterrupt
+
+
 
 Exit code: `0`
 

@@ -390,7 +390,7 @@ The fifth line."
 
   test::title "✅ Testing string::head"
 
-  test::revealVars _TEST_MULTILINE_STRING
+  test::printVars _TEST_MULTILINE_STRING
 
   test::comment "Testing string::head with 3 lines"
   test::func string::head "${_TEST_MULTILINE_STRING}" 3

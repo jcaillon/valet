@@ -4,7 +4,7 @@
 # shellcheck disable=SC2034
 function main() {
 
-  test::title "#️⃣ Testing the basic functions of lib-test"
+  test::title "✅ Testing the basic functions of lib-test"
   test::log "This push logs for debugging purposes. They will only appear if the test fails."
   test::comment "You can insert comments that will appear as a paragraph in the test report." \
     "Everything written to the standard or error output (file descriptor 1 and 2 respectively) is captured and can then be flushed to the test report (usually as a code block)." \
@@ -26,6 +26,7 @@ function main() {
 
 
   # 🧫 Testing using test::endTest
+  echo '❯ functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0'
   functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0
   functionToTest "Second test." "Second test." 2 || echo "Failed as expected because functionToTest returned $?."
   (functionThatExit "Third test." "Third test." 3) || echo "Failed as expected because functionToTest returned ${PIPESTATUS[0]}."
@@ -57,25 +58,25 @@ function main() {
   'It function will be executed and its output will be added the report, including any declare `RETURNED_*` variable.'
   RETURNED_VALUE="This will be overridden"
   RETURNED_ARRAY=("This" "will" "be" "overridden.")
-  test::func typicalValetFunction "\"{ 'output': 'this function outputs json format' }\"" "A log line."
+  test::func typicalValetFunction "Function output" "A log line."
 
 
   test::title "🙈 Display reporting RETURNED variables"
-  test::comment 'You can manually report the content of the `RETURNED_*` variables using the `test::revealReturnedVars` function.' \
+  test::comment 'You can manually report the content of the `RETURNED_*` variables using the `test::printReturnedVars` function.' \
   'The function `test::resetReturnedVars` can also be used to reset the content of the `RETURNED_*` variables.'
   test::resetReturnedVars
   RETURNED_VALUE2="This is the value of a returned string for RETURNED_VALUE2"
   RETURNED_ARRAY2=("This" "is" "the" "value" "of" "a" "returned" "array" "for" "RETURNED_ARRAY2")
-  test::revealReturnedVars
+  test::printReturnedVars
 
 
   test::title "👁️ Display the value of any variable"
-  test::comment 'You can manually report the definition of any variable using the `test::revealVars` function.'
+  test::comment 'You can manually report the definition of any variable using the `test::printVars` function.'
   GLOBAL_VAR1="This is the value of a global string"
   GLOBAL_VAR2=("This" "is" "the" "value" "of" "a" "global" "array.")
-  echo "> test::revealVars GLOBAL_VAR1 GLOBAL_VAR2"
+  echo "> test::printVars GLOBAL_VAR1 GLOBAL_VAR2"
   test::flushStdout "Command executed in the test script:"
-  test::revealVars GLOBAL_VAR1 GLOBAL_VAR2
+  test::printVars GLOBAL_VAR1 GLOBAL_VAR2
 }
 
 function functionToTest() {

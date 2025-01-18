@@ -112,6 +112,7 @@ function test::exit() {
 # ```bash
 # test_exec false echo "Hello, world!"
 # ```
+# shellcheck disable=SC2034
 function test_exec() {
   local canExit="${1}"
   local displayReturnedValues="${2}"
@@ -123,31 +124,24 @@ function test_exec() {
 
   local IFS=' '
   # compute the command to run, escaping special characters
-  local compoundCommand="${*//[\\ ]/\\&}"
+  local compoundCommand="${*//[\\ $'\t']/\\&}"
   compoundCommand="${compoundCommand//$'\n'/"$'\n'"}"
-  compoundCommand="${compoundCommand//$'\t'/"$'\t'"}"
 
   _TEST_OUTPUT="${compoundCommand}"
-  _TEST_OUTPUT="${_TEST_OUTPUT//main::parseMainArguments/valet}"
   test_replaceDynamicStrings
 
   # shellcheck disable=SC2016
-  printf 'Prompt:\n\n```bash\n%s\n```\n\n' "${_TEST_OUTPUT}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf '❯ `%s`\n\n' "${_TEST_OUTPUT}" >>"${GLOBAL_TEST_REPORT_FILE}"
 
   if [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" || -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
     test::fail "⌜${FUNCNAME[1]:-}⌝ was called in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝ but the standard/error output were not empty, call ⌜test::flush⌝ first or do not write to these streams."
   fi
 
   if [[ ${displayReturnedValues} == "true" ]]; then
-    # shellcheck disable=SC2034
     local RETURNED_VALUE
-    # shellcheck disable=SC2034
     local RETURNED_VALUE2
-    # shellcheck disable=SC2034
     local RETURNED_VALUE3
-    # shellcheck disable=SC2034
     local RETURNED_VALUE4
-    # shellcheck disable=SC2034
     local -a RETURNED_ARRAY
     local -a RETURNED_ARRAY2
     local -A RETURNED_ASSOCIATIVE_ARRAY
@@ -179,50 +173,47 @@ function test_exec() {
   test_flushFdToCodeBlock 2 "Error output"
 
   if [[ ${displayReturnedValues} == "true" ]]; then
-    test::revealReturnedVars
+    test::printReturnedVars
   fi
 }
 
-# ## test::revealReturnedVars
+# ## test::printReturnedVars
 #
 # This function can be called to display the returned values,
 # e.g. RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY...
 # They will each be displayed in a code block in the report file.
 #
 # ```bash
-# test::revealReturnedVars
+# test::printReturnedVars
 # ```
-function test::revealReturnedVars() {
-  local IFS=$'\n' output key varName
-  test::log "${RETURNED_ARRAY[*]} ${RETURNED_ARRAY2[*]}"
+function test::printReturnedVars() {
+  local IFS=$'\n' key varName _TEST_OUTPUT=""
   for varName in RETURNED_VALUE RETURNED_VALUE2 RETURNED_VALUE3 RETURNED_VALUE4; do
     if [[ -v ${varName} ]]; then
-      _TEST_OUTPUT="${!varName}"
-      test_replaceDynamicStrings
-      # shellcheck disable=SC2016
-      printf '%s:\n\n```text\n%s\n```\n\n' "${varName}" "${_TEST_OUTPUT}" >>"${GLOBAL_TEST_REPORT_FILE}"
+      _TEST_OUTPUT+="${varName}=${!varName@Q}"$'\n'
     fi
   done
   for varName in RETURNED_ARRAY RETURNED_ARRAY2; do
     if [[ -v ${varName} ]]; then
-      _TEST_OUTPUT=''
+      _TEST_OUTPUT+="${varName}=("$'\n'
       local -n array="${varName}"
       for key in "${!array[@]}"; do
-        _TEST_OUTPUT+="[${key}]=${array[${key}]}"$'\n'
+        _TEST_OUTPUT+="[${key}]=${array[${key}]@Q}"$'\n'
       done
-      test_replaceDynamicStrings
-      # shellcheck disable=SC2016
-      printf '%s:\n\n```text\n%s\n```\n\n' "${varName}" "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+      _TEST_OUTPUT+=")"$'\n'
     fi
   done
-  if declare -p RETURNED_ASSOCIATIVE_ARRAY &>/dev/null; then
-    _TEST_OUTPUT=''
+  if [[ -v RETURNED_ASSOCIATIVE_ARRAY || -v RETURNED_ASSOCIATIVE_ARRAY[@] ]]; then
+      _TEST_OUTPUT+="RETURNED_ASSOCIATIVE_ARRAY=("$'\n'
     for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
-      _TEST_OUTPUT+="[${key}]=${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"$'\n'
+      _TEST_OUTPUT+="[${key}]=${RETURNED_ASSOCIATIVE_ARRAY[${key}]@Q}"$'\n'
     done
+    _TEST_OUTPUT+=")"$'\n'
+  fi
+  if [[ -n ${_TEST_OUTPUT} ]]; then
     test_replaceDynamicStrings
     # shellcheck disable=SC2016
-    printf 'RETURNED_ASSOCIATIVE_ARRAY:\n\n```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    printf 'Returned variables:\n\n```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   fi
 }
 
@@ -239,7 +230,7 @@ function test::resetReturnedVars() {
   unset ${!RETURNED_*}
 }
 
-# ## test::revealVars
+# ## test::printVars
 #
 # This function can be called to display the global variables in the report file.
 # They will displayed in a code block in the report file.
@@ -248,15 +239,37 @@ function test::resetReturnedVars() {
 #       The variables to display.
 #
 # ```bash
-# test::revealVars myVar
+# test::printVars myVar
 # ```
-function test::revealVars() {
+function test::printVars() {
   local IFS=$'\n'
+  local chunk varName
   io::captureOutput declare -p "${@}"
-  _TEST_OUTPUT="${RETURNED_VALUE//declare -? /}"
+  _TEST_OUTPUT=""
+  while [[ -n ${RETURNED_VALUE} ]]; do
+    chunk="${RETURNED_VALUE%%$'\n'*}"
+    RETURNED_VALUE="${RETURNED_VALUE:${#chunk} + 1}"
+
+    if [[ ${chunk} =~ "declare -"[aA][ilnrtux]*" "([^=]+)"=" ]]; then
+      # we display an array
+      varName="${BASH_REMATCH[1]}"
+      test::log "Printing variable: ⌜${varName}⌝"
+      local -n array="${varName}"
+      _TEST_OUTPUT+="${varName}=("$'\n'
+      for key in "${!array[@]}"; do
+        _TEST_OUTPUT+="[${key}]=${array[${key}]@Q}"$'\n'
+      done
+      _TEST_OUTPUT+=")"$'\n'
+    elif [[ ${chunk} =~ "declare -"[^[:space:]]+" " ]]; then
+      # we display a simple variable
+      _TEST_OUTPUT+="${chunk//"${BASH_REMATCH[0]}"/}"$'\n'
+    else
+      test::fail "Could not parse variable declaration: ⌜${chunk}⌝."
+    fi
+  done
   test_replaceDynamicStrings
   # shellcheck disable=SC2016
-  printf '```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf 'Variables:\n\n```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
 # ## test_flushFdToCodeBlock (private)
@@ -315,12 +328,6 @@ function test_flushFdToCodeBlock() {
 # test_replaceDynamicStrings
 # ```
 function test_replaceDynamicStrings() {
-  _TEST_OUTPUT="${_TEST_OUTPUT//${GLOBAL_VALET_HOME}\/valet/valet}"
-  _TEST_OUTPUT="${_TEST_OUTPUT//${GLOBAL_VALET_HOME}/\$GLOBAL_VALET_HOME}"
-  _TEST_OUTPUT="${_TEST_OUTPUT//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
-  _TEST_OUTPUT="${_TEST_OUTPUT//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
-  _TEST_OUTPUT="${_TEST_OUTPUT//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
-
   # If a callback is defined, call it to modify the text before adding it to the report
   if declare -f test::transformTextBeforeFlushing &>/dev/null; then
     test::transformTextBeforeFlushing

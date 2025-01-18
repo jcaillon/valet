@@ -245,11 +245,6 @@ more=(
 
 # ok only args
 → main::parseFunctionArguments selfMock4 arg1 arg2
-local parsingErrors help firstArg secondArg
-help=""
-parsingErrors=""
-firstArg="arg1"
-secondArg="arg2"
 
 
 # ok with -- to separate options from args
@@ -443,7 +438,6 @@ CHIsCDEelCHIfCDE extend
 CHIsCDEelCHIfCDE mock1
 CHIsCDEelCHIfCDE mock2
 CHIsCDEelCHIfCDE mock3
-CHIsCDEelCHIfCDE mock4
 CHIsCDEelCHIfCDE release
 CHIsCDEelCHIfCDE setup
 CHIsCDEelCHIfCDE test

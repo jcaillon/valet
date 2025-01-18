@@ -4,11 +4,7 @@
 
 ### ✅ Get help for self mock3 using fuzzy matching
 
-Prompt:
-
-```bash
-valet hel sel mo3
-```
+❯ `main::parseMainArguments hel sel mo3`
 
 **Standard output**:
 
@@ -34,11 +30,7 @@ INFO     Fuzzy matching the command ⌜sel mo3⌝ to ⌜self mock3⌝.
 
 ### ✅ Testing help with columns 48
 
-Prompt:
-
-```bash
-valet help --columns 48 help
-```
+❯ `main::parseMainArguments help --columns 48 help`
 
 **Standard output**:
 
@@ -57,11 +49,7 @@ USAGE
 
 ### ✅ Testing that no arguments show the valet help
 
-Prompt:
-
-```bash
-valet help
-```
+❯ `main::parseMainArguments help`
 
 **Standard output**:
 
@@ -80,11 +68,7 @@ ABOUT
 
 ### ✅ Testing that we can display the help of a function using core::showHelp
 
-Prompt:
-
-```bash
-valet self mock1 show-help
-```
+❯ `valet self mock1 show-help`
 
 **Standard output**:
 

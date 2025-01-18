@@ -4,6 +4,8 @@
 
 ### Testing self export
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -13,6 +15,8 @@ Exit code: `0`
 ```
 
 ### Testing self export with library functions only
+
+
 
 Exit code: `0`
 

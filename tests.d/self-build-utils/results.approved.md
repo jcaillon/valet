@@ -4,6 +4,8 @@
 
 ### Testing extractCommandYamls
 
+
+
 Exit code: `0`
 
 **Error output**:
@@ -25,6 +27,8 @@ INFO     content:
 ```
 
 ### Testing extractCommandDefinitionToVariables
+
+
 
 Exit code: `0`
 
@@ -103,6 +107,8 @@ TEMP_CMD_BUILD_sudo='false'
 
 ### Testing extractFirstLongNameFromOptionString
 
+
+
 Exit code: `0`
 
 **Standard output**:
@@ -113,6 +119,8 @@ Exit code: `0`
 ```
 
 ### Testing declareFinalCommandDefinition*
+
+
 
 Exit code: `0`
 
@@ -197,6 +205,8 @@ CMD_SUDO_func='false'
 ```
 
 ### Testing verifyCommandDefinition
+
+
 
 Exit code: `0`
 

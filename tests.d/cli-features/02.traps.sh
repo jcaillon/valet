@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
 function main() {
-  testEventHandlers
+  test_traps
 }
 
-function testEventHandlers() {
+function test_traps() {
   test::title "✅ Testing error handling (a statement returns != 0)"
   test::exec "${GLOBAL_VALET_HOME}/valet" self mock1 error
-
 
   test::title "✅ Testing exit code (exit 5) and custom exit function"
   test::exec "${GLOBAL_VALET_HOME}/valet" self mock1 exit
@@ -27,8 +26,8 @@ function testEventHandlers() {
   # test::flushStdout "**Prompt**"
   # "${GLOBAL_VALET_HOME}/valet" self mock1 wait-indefinitely &
   # local processId=$!
-  # kill -TERM ${processId}
-  # wait ${processId} || :
+  # kill -9 ${processId}
+  # wait -f ${processId} || :
   # test::flush
 }
 

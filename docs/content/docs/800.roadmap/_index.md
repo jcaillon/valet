@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- propagate the set -x in self test subshells to have profiling enabled. We can create a new method in lib-profiler to profiler::reapply.
 - test the "sudo" feature: it runs the command by forking. We could add an option to instead rerun valet with sudo.
 - document the test; use the lib-test test as an example, and also link to the test:: lib.
 - test the new bash:: lib

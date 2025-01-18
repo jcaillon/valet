@@ -12,22 +12,22 @@ function main() {
   export VALET_CONFIG_STARTUP_PROFILING_FILE="${RETURNED_VALUE}"
 
   test::comment "**Exported variables:**"
-  test::revealVars VALET_CONFIG_COMMAND_PROFILING_FILE VALET_CONFIG_STARTUP_PROFILING_FILE
+  test::printVars VALET_CONFIG_COMMAND_PROFILING_FILE VALET_CONFIG_STARTUP_PROFILING_FILE
 
 
-  test::title "Testing the profiler cli option"
+  test::title "✅ Testing the profiler cli option"
   test::exec "${GLOBAL_VALET_HOME}/valet" -x self mock2 arg1 arg2
   test::exec io::cat "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
   rm -f "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
 
 
-  test::title "Testing the profiler with cleanup using bash"
+  test::title "✅ Testing the profiler with cleanup using bash"
   test::exec VALET_CONFIG_LOG_CLEANUP_USING_BASH=true "${GLOBAL_VALET_HOME}/valet" -x self mock2 arg1 arg2
   test::exec io::cat "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
   rm -f "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
 
 
-  test::title "Testing to enable the profiler on Valet startup"
+  test::title "✅ Testing to enable the profiler on Valet startup"
   test::exec VALET_CONFIG_STARTUP_PROFILING=true "${GLOBAL_VALET_HOME}/valet" --log-level error -x self mock1 logging-level
   if [[ ! -s "${VALET_CONFIG_STARTUP_PROFILING_FILE}" ]]; then
     test::fail "The startup profiling file is empty."

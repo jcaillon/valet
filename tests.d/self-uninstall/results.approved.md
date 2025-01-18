@@ -4,6 +4,8 @@
 
 ### Testing selfUninstall
 
+
+
 Exit code: `0`
 
 **Standard output**:

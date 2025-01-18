@@ -134,8 +134,8 @@ function selfBuild() {
     "${GLOBAL_VALET_HOME}/valet"
     "${GLOBAL_VALET_HOME}/commands.d"/*.sh
   )
-  if [[ -d "${GLOBAL_VALET_HOME}/tests.d/commands.d" ]]; then
-    commandDefinitionFiles+=("${GLOBAL_VALET_HOME}/tests.d/commands.d"/*.sh)
+  if [[ -d "${GLOBAL_VALET_HOME}/tests.d/.commands.d" ]]; then
+    commandDefinitionFiles+=("${GLOBAL_VALET_HOME}/tests.d/.commands.d"/*.sh)
     log::info "Added the test commands to the build."
   fi
   if [[ ${coreOnly:-} != "true" ]]; then

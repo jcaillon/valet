@@ -4,11 +4,7 @@
 
 ### ✅ Testing unknown option
 
-Prompt:
-
-```bash
-valet --logging-leeeevel
-```
+❯ `main::parseMainArguments --logging-leeeevel`
 
 Exited with code: `1`
 
@@ -28,11 +24,7 @@ ERROR    Unknown option ⌜--logging-leeeevel⌝, valid options are:
 
 ### ✅ Testing unknown single letter
 
-Prompt:
-
-```bash
-valet -prof
-```
+❯ `main::parseMainArguments -prof`
 
 Exited with code: `1`
 
@@ -44,11 +36,7 @@ ERROR    Unknown option letter ⌜p⌝ in group ⌜-p⌝. Valid single letter op
 
 ### ✅ Testing option --version corrected with fuzzy match
 
-Prompt:
-
-```bash
-valet --versin
-```
+❯ `main::parseMainArguments --versin`
 
 **Standard output**:
 
@@ -64,11 +52,7 @@ INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
 
 ### ✅ Testing group of single letter options
 
-Prompt:
-
-```bash
-valet -vwvw --versin
-```
+❯ `main::parseMainArguments -vwvw --versin`
 
 **Standard output**:
 

@@ -1,38 +1,114 @@
 # Test suite lib-array
 
-## Test script 00.tests
+## Test script 00.lib-array
 
-### Testing array::sort
+### ✅ Testing array::sort
 
+Global array:
 
-
-Exit code: `0`
-
-**Standard output**:
+Variables:
 
 ```text
-declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="conventional" [3]="baby" [4]="holiday" [5]="abundant" [6]="deliver" [7]="position" [8]="economics")
-
-→ array::sort MYARRAY
-declare -a MYARRAY=([0]="abundant" [1]="baby" [2]="breakdown" [3]="constitutional" [4]="conventional" [5]="deliver" [6]="economics" [7]="holiday" [8]="position")
+MY_ARRAY=(
+[0]='breakdown'
+[1]='constitutional'
+[2]='conventional'
+[3]='baby'
+[4]='holiday'
+[5]='abundant'
+[6]='deliver'
+[7]='position'
+[8]='economics'
+)
 ```
 
-### Testing array::sortWithCriteria
+❯ `array::sort MY_ARRAY`
 
+Variables:
 
+```text
+MY_ARRAY=(
+[0]='abundant'
+[1]='baby'
+[2]='breakdown'
+[3]='constitutional'
+[4]='conventional'
+[5]='deliver'
+[6]='economics'
+[7]='holiday'
+[8]='position'
+)
+```
 
-Exit code: `0`
+### ✅ Testing array::sortWithCriteria
+
+Global arrays:
+
+Variables:
+
+```text
+myArray=(
+[0]='a'
+[1]='b'
+[2]='c'
+[3]='d'
+[4]='e'
+[5]='f'
+[6]='g'
+)
+criteria1=(
+[0]='3'
+[1]='2'
+[2]='2'
+[3]='1'
+[4]='1'
+[5]='4'
+[6]='0'
+)
+criteria2=(
+[0]='1'
+[1]='3'
+[2]='2'
+[3]='5'
+[4]='0'
+[5]='2'
+[6]='9'
+)
+```
+
+❯ `array::sortWithCriteria myArray criteria1 criteria2`
+
+Returned variables:
+
+```text
+RETURNED_ARRAY=(
+[0]='6'
+[1]='4'
+[2]='3'
+[3]='2'
+[4]='1'
+[5]='0'
+[6]='5'
+)
+```
+
+Variables:
+
+```text
+myArray=(
+[0]='g'
+[1]='e'
+[2]='d'
+[3]='c'
+[4]='b'
+[5]='a'
+[6]='f'
+)
+```
 
 **Standard output**:
 
 ```text
-declare -a myArray=([0]="a" [1]="b" [2]="c" [3]="d" [4]="e" [5]="f" [6]="g")
-declare -a criteria1=([0]="3" [1]="2" [2]="2" [3]="1" [4]="1" [5]="4" [6]="0")
-declare -a criteria2=([0]="1" [1]="3" [2]="2" [3]="5" [4]="0" [5]="2" [6]="9")
-
-→ array::sortWithCriteria myArray criteria1 criteria2
-declare -a RETURNED_ARRAY=([0]="6" [1]="4" [2]="3" [3]="2" [4]="1" [5]="0" [6]="5")
-declare -a myArray=([0]="g" [1]="e" [2]="d" [3]="c" [4]="b" [5]="a" [6]="f")
 got:      g e d c b a f
 expected: g e d c b a f
 ```
@@ -46,19 +122,19 @@ Exit code: `0`
 **Standard output**:
 
 ```text
-declare -a MYARRAY=([0]="breakdown" [1]="constitutional")
+declare -a MY_ARRAY=([0]="breakdown" [1]="constitutional")
 
-→ array::appendIfNotPresent MYARRAY 'deliver'
+→ array::appendIfNotPresent MY_ARRAY 'deliver'
 0
-declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
+declare -a MY_ARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
 
-→ array::appendIfNotPresent MYARRAY 'breakdown'
+→ array::appendIfNotPresent MY_ARRAY 'breakdown'
 1
-declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
+declare -a MY_ARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver")
 
-→ array::appendIfNotPresent MYARRAY 'holiday'
+→ array::appendIfNotPresent MY_ARRAY 'holiday'
 0
-declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="holiday")
+declare -a MY_ARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="holiday")
 ```
 
 ### Testing array::isInArray
@@ -70,12 +146,12 @@ Exit code: `0`
 **Standard output**:
 
 ```text
-declare -a MYARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="position" [4]="economics")
+declare -a MY_ARRAY=([0]="breakdown" [1]="constitutional" [2]="deliver" [3]="position" [4]="economics")
 
-→ array::isInArray MYARRAY 'deliver'
+→ array::isInArray MY_ARRAY 'deliver'
 0
 
-→ array::isInArray MYARRAY 'holiday'
+→ array::isInArray MY_ARRAY 'holiday'
 1
 ```
 

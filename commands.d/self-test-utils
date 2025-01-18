@@ -73,13 +73,9 @@ function selfTestUtils_setupValetForConsistency() {
 
   # fix the time to a known value
   export TZ=Etc/GMT+0
-  unset EPOCHSECONDS EPOCHREALTIME
+  # unset EPOCHSECONDS EPOCHREALTIME
   export EPOCHSECONDS=548902800
   export EPOCHREALTIME=548902800.000000
-
-  # set a new user directory so that commands are correctly recreated if calling
-  # valet from a test
-  export VALET_USER_DIRECTORY="${GLOBAL_TEST_VALET_USER_DIRECTORY}"
 
   log::createPrintFunction
   eval "${GLOBAL_LOG_PRINT_FUNCTION}"
@@ -185,7 +181,7 @@ function selfTestUtils_setupDiffCommand() {
   if [[ -z ${GLOBAL_TEST_DIFF_COMMAND} ]]; then
     if command -v delta &>/dev/null; then
       log::debug "Using delta as diff command."
-      GLOBAL_TEST_DIFF_COMMAND="delta --paging=never --no-gitconfig --line-numbers --side-by-side %APPROVED_FILE% %RECEIVED_FILE%"
+      GLOBAL_TEST_DIFF_COMMAND="delta --paging=never --no-gitconfig --line-numbers --width ${GLOBAL_COLUMNS} --side-by-side %APPROVED_FILE% %RECEIVED_FILE%"
       # delta compares the file modes, so we need to match them
       GLOBAL_TEST_REPORT_FILE_MODE="${VALET_CONFIG_TEST_REPORT_FILE_MODE:-644}"
     elif command -v diff &>/dev/null; then
