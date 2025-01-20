@@ -23,6 +23,10 @@ Standard output
 ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
 These codes can be used to format text in the terminal.
 
+These codes were selected because they are widely supported by terminals and they
+probably will cover all use cases. It is also advised to stick to the 4-bit colors
+which allows your application to adopt the color scheme of the terminal.
+
 They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:
 <https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>
 
@@ -51,10 +55,6 @@ Ascii graphics:
 
 Add a value to an array if it is not already present.
 
-- $1: **array name** _as string_:
-      The global variable name of the array.
-- $2: **value** _as any:
-
 → head --lines 40 /tmp/valet.d/d1-2/lib-valet
 #!/usr/bin/env bash
 # This script contains the documentation of all the valet library functions.
@@ -66,6 +66,10 @@ Add a value to an array if it is not already present.
 # 
 # ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
 # These codes can be used to format text in the terminal.
+# 
+# These codes were selected because they are widely supported by terminals and they
+# probably will cover all use cases. It is also advised to stick to the 4-bit colors
+# which allows your application to adopt the color scheme of the terminal.
 # 
 # They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:
 # <https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>
@@ -92,10 +96,6 @@ Add a value to an array if it is not already present.
 # 
 function ansi-codes::*() { :; }
 
-# ## array::appendIfNotPresent
-# 
-# Add a value to an array if it is not already present.
-# 
 
 → head --lines 40 /tmp/valet.d/d1-2/valet.code-snippets
 {
@@ -112,7 +112,7 @@ function ansi-codes::*() { :; }
   "prefix": "ansi-codes::*#withdoc",
   "description": "ANSI codes for text attributes, colors, cursor control, and other common escape sequences...",
   "scope": "",
-  "body": [ "# ## ansi-codes::*\n# \n# ANSI codes for text attributes, colors, cursor control, and other common escape sequences.\n# These codes can be used to format text in the terminal.\n# \n# They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:\n# <https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>\n# \n# References:\n# \n# - https://en.wikipedia.org/wiki/ANSI_escape_code\n# - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797\n# - https://paulbourke.net/dataformats/ascii/\n# - https://www.aivosto.com/articles/control-characters.html\n# - https://github.com/tmux/tmux/blob/master/tools/ansicode.txt\n# - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_\n# - https://vt100.net/docs/vt102-ug/chapter5.html\n# - https://vt100.net/docs/vt100-ug/chapter3.html#S3.3.1\n# \n# Ascii graphics:\n# \n# - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9\n# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing\n# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements\n# \n# > While it could be very handy to define a function for each of these instructions,\n# > it would also be slower to execute (function overhead + multiple printf calls).\n# \nansi-codes::*$0" ]
+  "body": [ "# ## ansi-codes::*\n# \n# ANSI codes for text attributes, colors, cursor control, and other common escape sequences.\n# These codes can be used to format text in the terminal.\n# \n# These codes were selected because they are widely supported by terminals and they\n# probably will cover all use cases. It is also advised to stick to the 4-bit colors\n# which allows your application to adopt the color scheme of the terminal.\n# \n# They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:\n# <https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>\n# \n# References:\n# \n# - https://en.wikipedia.org/wiki/ANSI_escape_code\n# - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797\n# - https://paulbourke.net/dataformats/ascii/\n# - https://www.aivosto.com/articles/control-characters.html\n# - https://github.com/tmux/tmux/blob/master/tools/ansicode.txt\n# - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_\n# - https://vt100.net/docs/vt102-ug/chapter5.html\n# - https://vt100.net/docs/vt100-ug/chapter3.html#S3.3.1\n# \n# Ascii graphics:\n# \n# - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9\n# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing\n# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements\n# \n# > While it could be very handy to define a function for each of these instructions,\n# > it would also be slower to execute (function overhead + multiple printf calls).\n# \nansi-codes::*$0" ]
 },
 
 "array::appendIfNotPresent": {

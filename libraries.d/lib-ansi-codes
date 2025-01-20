@@ -8,6 +8,10 @@
 # ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
 # These codes can be used to format text in the terminal.
 #
+# These codes were selected because they are widely supported by terminals and they
+# probably will cover all use cases. It is also advised to stick to the 4-bit colors
+# which allows your application to adopt the color scheme of the terminal.
+#
 # They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:
 # <https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>
 #
@@ -58,8 +62,9 @@ AC__TEXT_NO_STRIKE=$'\e[29m'
 # >>> SGR: Colors
 #===============================================================
 # https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit
-
 AC__COLOR_RESET=$'\e[49m'$'\e[39m'
+AC__FG_RESET=$'\e[39m'
+AC__BG_RESET=$'\e[49m'
 
 # Text colors
 AC__FG_BLACK=$'\e[30m'
@@ -79,12 +84,6 @@ AC__FG_BRIGHT_CYAN=$'\e[96m'
 AC__FG_WHITE=$'\e[37m'
 AC__FG_BRIGHT_WHITE=$'\e[97m'
 
-AC__FG_RESET=$'\e[39m'
-
-# https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
-AC__FG_COLOR__=$'\e[38;5;'
-__AC__CODE=$'m' # "${AC__FG_COLOR__}2${__AC__CODE}"
-
 # background colors
 AC__BG_BLACK=$'\e[40m'
 AC__BG_BRIGHT_BLACK=$'\e[100m'
@@ -103,10 +102,10 @@ AC__BG_BRIGHT_CYAN=$'\e[106m'
 AC__BG_WHITE=$'\e[47m'
 AC__BG_BRIGHT_WHITE=$'\e[107m'
 
-AC__BG_RESET=$'\e[49m'
-
 # https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
+AC__FG_COLOR__=$'\e[38;5;' # "${AC__FG_COLOR__}2${__AC__CODE}"
 AC__BG_COLOR=$'\e[48;5;' # "${AC__BG_COLOR}2${__AC__CODE}"
+__AC__CODE=$'m'
 
 
 #===============================================================
@@ -128,11 +127,9 @@ __AC__START_OF_LINE_UP=$'F'   # "${cursorMove}1${_startOfLine}"
 __AC__COLUMN=$'G'      # "${cursorMove}2${_column}"
 __AC__TO=$'H'          # "${cursorMove}1;1${_to}" (row;col)
 
-__AC__TAB_BACKWARD=$'Z' # "${cursorMove}2${_tabBackward}"
-__AC__TAB_FORWARD=$'I'  # "${cursorMove}2${_tabForward}"
-
 __AC__SCROLL_UP=$'S'    # "${cursorMove}2${_scrollUp}" Scroll whole page up by n (default 1) lines. New lines are added at the bottom.
 __AC__SCROLL_DOWN=$'T'  # "${cursorMove}2${_scrollDown}" Scroll whole page down by n (default 1) lines. New lines are added at the top.
+
 AC__REQUEST_CURSOR_POSITION=$'\e[6n' # Reports the cursor position to the application as (as ESC[n;mR), where n is the line and m is the column.
 
 # erase in display or line
@@ -166,37 +163,9 @@ AC__BACKSPACE=$'\b' # Moves the cursor left (but may "backwards wrap" if cursor 
 #===============================================================
 
 # cursor
-AC__CURSOR_RESTORE_POS=$'\e8'
-AC__CURSOR_SAVE_POS=$'\e7'
 AC__CURSOR_HIDE=$'\e[?25l'
 AC__CURSOR_SHOW=$'\e[?25h'
 
 # display
 AC__ENABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049h'
 AC__DISABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049l'
-AC__SAVE_SCREEN=$'\e[?47h'
-AC__RESTORE_SCREEN=$'\e[?47l'
-
-#===============================================================
-# >>> Uncommon Private Modes (should probably delete these)
-#===============================================================
-
-# Change cursor style
-# 0 blinking block.
-# 1 blinking block (default).
-# 2 steady block.
-# 3 blinking underline.
-# 4 steady underline.
-# AC__CHANGE_CURSOR__=$'\e['
-# __AC__STYLE=$' q' # "${changeCursor}1${_style}"
-
-# change the cursor color (only works in xterm)
-# https://gist.github.com/anonymous/8f1e6c22b5213faf8170dcfc2b0f5b93
-# https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/admin-guide/vga-softcursor.rst
-# AC__CHANGE_CURSOR_TO_PROMPT=$'\e[1 q'$'\e[?16;0;80;c'
-# AC__CHANGE_CURSOR_TO_NORMAL=$'\e[0 q'$'\e[?0;c'
-
-# change line wrapping option
-# AC__DISABLE_LINE_WRAPPING=$'\e[?7l'
-# AC__ENABLE_LINE_WRAPPING=$'\e[?7h'
-
