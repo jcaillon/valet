@@ -9,8 +9,8 @@ Notice that the profiling file is cleaned up after the command execution to maxi
 **Exported variables:**
 
 ```text
-VALET_CONFIG_COMMAND_PROFILING_FILE="/tmp/valet.d/f1-2"
-VALET_CONFIG_STARTUP_PROFILING_FILE="/tmp/valet.d/f2-2"
+VALET_CONFIG_COMMAND_PROFILING_FILE='/tmp/valet.d/f1-2'
+VALET_CONFIG_STARTUP_PROFILING_FILE='/tmp/valet.d/f2-2'
 ```
 
 ### ✅ Testing the profiler cli option

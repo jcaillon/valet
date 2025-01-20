@@ -154,7 +154,7 @@ DEBUG    Found function: ⌜array::sortWithCriteria⌝
 DEBUG    Found function: ⌜array::appendIfNotPresent⌝
 DEBUG    Found function: ⌜array::isInArray⌝
 DEBUG    Found function: ⌜array::makeArraysSameSize⌝
-DEBUG    Found function: ⌜array::fuzzyFilterSortFileWithGrepAndAwk⌝
+DEBUG    Found function: ⌜array::fuzzyFilterSortFileWithGrepAndGawk⌝
 DEBUG    Found function: ⌜bash::countJobs⌝
 DEBUG    Found function: ⌜bash::runInParallel⌝
 DEBUG    Found function: ⌜bash::injectCodeInFunction⌝

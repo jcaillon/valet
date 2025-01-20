@@ -486,7 +486,7 @@ function prompt_setItemsListVariables() {
     _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY="false"
   fi
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1000 ]]; then
-    if command -v grep &>/dev/null && command -v awk &>/dev/null; then
+    if command -v grep &>/dev/null && command -v gawk &>/dev/null; then
       _PROMPT_ITEMS_BOX_FILTER_USING_GREP="true"
       # shellcheck source=lib-array
       source array
@@ -970,7 +970,7 @@ function prompt_filterItemsAsync() {
     : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
     rm "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" &>/dev/null || :
 
-    array::fuzzyFilterSortFileWithGrepAndAwk "${_PROMPT_ITEMS_BOX_FILTER_STRING}" "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}" "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+    array::fuzzyFilterSortFileWithGrepAndGawk "${_PROMPT_ITEMS_BOX_FILTER_STRING}" "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}" "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
 
     if [[ -f ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1} ]]; then
       mv "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"

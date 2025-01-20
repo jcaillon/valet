@@ -41,7 +41,7 @@ function core::setShellOptions() {
   # +nocasematch: disable case-insensitive matching
   shopt -s extquote globasciiranges huponexit interactive_comments progcomp
   shopt -u assoc_expand_once cdable_vars checkhash checkjobs checkwinsize compat31 compat32 compat40 compat41 compat42 compat43 compat44 globstar localvar_inherit localvar_unset nocaseglob nocasematch progcomp_alias shift_verbose xpg_echo nullglob direxpand dirspell dotglob extglob failglob execfail expand_aliases inherit_errexit
-  if (( ${BASH_VERSINFO[1]} >= 2)); then
+  if (( BASH_VERSINFO[1] >= 2)); then
     shopt -s globskipdots patsub_replacement
     shopt -u varredir_close
   fi
@@ -1154,7 +1154,7 @@ function string::highlight() {
 #
 # > - All characters in the pattern must be found in the same order in the matched line.
 # > - Use `shopt -s nocasematch` to make this function is case insensitive.
-# > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndAwk` for large arrays.
+# > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.
 function array::fuzzyFilterSort() {
   local pattern="${1}"
   local -n array="${2}"

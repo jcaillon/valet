@@ -737,7 +737,11 @@ This is a text to highlight.
 **Global variables:**
 
 ```text
-_TEST_MULTILINE_STRING=$'The first line.\nThe second line.\nThe third line.\nThe fourth line.\nThe fifth line.'
+_TEST_MULTILINE_STRING='The first line.
+The second line.
+The third line.
+The fourth line.
+The fifth line.'
 ```
 
 Testing string::head with 3 lines

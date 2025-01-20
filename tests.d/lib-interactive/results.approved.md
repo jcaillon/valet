@@ -62,8 +62,8 @@ Exited with code: `1`
 ❯ `printf '\e[%sR' '123;456' | interactive::getCursorPosition`
 
 ```text
-GLOBAL_CURSOR_LINE="123"
-GLOBAL_CURSOR_COLUMN="456"
+GLOBAL_CURSOR_LINE='123'
+GLOBAL_CURSOR_COLUMN='456'
 ```
 
 ### ✅ Testing interactiveGetProgressBarString
@@ -135,8 +135,8 @@ RETURNED_VALUE='█████████████████████�
 ### ✅ Testing interactive::clearBox
 
 ```text
-GLOBAL_CURSOR_LINE="42"
-GLOBAL_CURSOR_COLUMN="42"
+GLOBAL_CURSOR_LINE='42'
+GLOBAL_CURSOR_COLUMN='42'
 ```
 
 ❯ `interactive::clearBox 1 1 10 10`
@@ -158,8 +158,8 @@ GLOBAL_CURSOR_COLUMN="42"
 ### ✅ Testing interactive::getBestAutocompleteBox
 
 ```text
-GLOBAL_LINES="10"
-GLOBAL_COLUMNS="10"
+GLOBAL_LINES='10'
+GLOBAL_COLUMNS='10'
 ```
 
 ❯ `interactive::getBestAutocompleteBox 1 1 20 20`

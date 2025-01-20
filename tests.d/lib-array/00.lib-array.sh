@@ -12,7 +12,7 @@ function main() {
   test_array::isInArray
   test_array::makeArraysSameSize
   test_array::fuzzyFilterSort
-  test_array::fuzzyFilterSortFileWithGrepAndAwk
+  test_array::fuzzyFilterSortFileWithGrepAndGawk
 }
 
 function test_array::sort() {
@@ -130,15 +130,15 @@ function test_array::fuzzyFilterSort() {
   shopt -u nocasematch
 }
 
-function test_array::fuzzyFilterSortFileWithGrepAndAwk() {
-  test::title "✅ Testing array::fuzzyFilterSortFileWithGrepAndAwk"
+function test_array::fuzzyFilterSortFileWithGrepAndGawk() {
+  test::title "✅ Testing array::fuzzyFilterSortFileWithGrepAndGawk"
 
   mapfile -t _MY_ARRAY <words
   shopt -s nocasematch
   array::fuzzyFilterSort ea _MY_ARRAY
   shopt -u nocasematch
 
-  test::prompt "array::fuzzyFilterSortFileWithGrepAndAwk /words /out1 /out2"
+  test::prompt "array::fuzzyFilterSortFileWithGrepAndGawk /words /out1 /out2"
   test::prompt "io::head /out1 10"
   local value
   local -i nb=0
@@ -157,12 +157,12 @@ function test_array::fuzzyFilterSortFileWithGrepAndAwk() {
   io::createTempFile
   local outputCorrespondenceFile="${RETURNED_VALUE}"
 
-  if ! command -v grep &>/dev/null || ! command -v awk &>/dev/null; then
+  if ! command -v grep &>/dev/null || ! command -v gawk &>/dev/null; then
     test::markdown "> The result is the same as the pure bash implementation."
     return 0
   fi
 
-  array::fuzzyFilterSortFileWithGrepAndAwk ea words "${outputFilteredFile}" "${outputCorrespondenceFile}"
+  array::fuzzyFilterSortFileWithGrepAndGawk ea words "${outputFilteredFile}" "${outputCorrespondenceFile}"
 
   io::readFile "${outputFilteredFile}"
   local awkLines="${RETURNED_VALUE%$'\n'}"

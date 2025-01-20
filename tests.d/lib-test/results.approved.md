@@ -224,7 +224,7 @@ You can manually report the definition of any variable using the `test::printVar
 ❯ `test::printVars GLOBAL_VAR1 GLOBAL_VAR2 GLOBAL_VAR3`
 
 ```text
-GLOBAL_VAR1="This is the value of a global string"
+GLOBAL_VAR1='This is the value of a global string'
 GLOBAL_VAR2=(
 [0]='This'
 [1]='is'
@@ -280,6 +280,6 @@ The variable TESTING_HOOKS shows that the hooks [before-tests](../before-tests),
 This test is written in the [after-each-test](after-each-test) script. The `after-each-test-suites` and `after-tests` are executed after the test script exits, thus we can't output their results in this report.
 
 ```text
-TESTING_HOOKS="before-tests,before-each-test-suite,after-each-test"
+TESTING_HOOKS='before-tests,before-each-test-suite,after-each-test'
 ```
 

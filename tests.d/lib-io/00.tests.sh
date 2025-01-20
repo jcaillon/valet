@@ -177,15 +177,13 @@ function test_io::convertToWindowsPath() {
 }
 
 function test_io::convertFromWindowsPath() {
-  printf "%s\n" "→ io::convertFromWindowsPath 'C:\\Users\\username'"
-  io::convertFromWindowsPath 'C:\Users\username'
-  echo "${RETURNED_VALUE}"
+  test::title "✅ Testing io::convertFromWindowsPath"
 
-  printf "%s\n" "→ io::convertFromWindowsPath 'D:\\data\\file'"
-  io::convertFromWindowsPath 'D:\data\file'
-  echo "${RETURNED_VALUE}"
-
-  test::endTest "Testing io::convertFromWindowsPath" 0
+  # shellcheck disable=SC2317
+  function test::transformTextBeforeFlushing() { _TEST_OUTPUT="${_TEST_OUTPUT//\/mnt}"; }
+  test::func io::convertFromWindowsPath 'C:\Users\username'
+  test::func io::convertFromWindowsPath 'D:\data\file'
+  unset test::transformTextBeforeFlushing
 }
 
 function test_io::createLink() {

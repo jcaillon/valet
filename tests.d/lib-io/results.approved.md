@@ -259,19 +259,22 @@ ln: -s $GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored/try $GLOBAL_VALET_
 $GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored
 ```
 
-### Testing io::convertFromWindowsPath
+### ✅ Testing io::convertFromWindowsPath
 
+❯ `io::convertFromWindowsPath C:\\Users\\username`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ io::convertFromWindowsPath 'C:\Users\username'
-/c/Users/username
-→ io::convertFromWindowsPath 'D:\data\file'
-/d/data/file
+RETURNED_VALUE='/c/Users/username'
+```
+
+❯ `io::convertFromWindowsPath D:\\data\\file`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='/d/data/file'
 ```
 
 ### Testing io::head limited to 10 lines

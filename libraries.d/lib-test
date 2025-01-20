@@ -138,10 +138,17 @@ function test_exec() {
     test::fail "No command provided to ⌜${FUNCNAME[1]:-}⌝ in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝."
   fi
 
-  local IFS=' '
+  local IFS=' ' compoundCommand
   # compute the command to run, escaping special characters
-  local compoundCommand="${*//[\\ $'\t']/\\&}"
+  if (( BASH_VERSINFO[1] >= 2)); then
+    compoundCommand="${*//[\\ $'\t']/\\&}"
+  else
+    local params=("${@//\\/\\\\}")
+    params=("${params[@]// /\\ }")
+    compoundCommand="${params[*]//$'\t'/\\$'\t'}"
+  fi
   compoundCommand="${compoundCommand//$'\n'/"$'\n'"}"
+
 
   _TEST_OUTPUT="${compoundCommand}"
   if declare -f test::transformTextBeforeFlushing &>/dev/null; then
@@ -221,7 +228,7 @@ function test::printReturnedVars() {
       _TEST_OUTPUT+=")"$'\n'
     fi
   done
-  if [[ -v RETURNED_ASSOCIATIVE_ARRAY || -v RETURNED_ASSOCIATIVE_ARRAY[@] ]]; then
+  if [[ -v RETURNED_ASSOCIATIVE_ARRAY && -v RETURNED_ASSOCIATIVE_ARRAY[@] ]]; then
       _TEST_OUTPUT+="RETURNED_ASSOCIATIVE_ARRAY=("$'\n'
     for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
       _TEST_OUTPUT+="[${key}]=${RETURNED_ASSOCIATIVE_ARRAY[${key}]@Q}"$'\n'
@@ -287,10 +294,11 @@ function test::printVars() {
         _TEST_OUTPUT+="[${key}]=${array[${key}]@Q}"$'\n'
       done
       _TEST_OUTPUT+=")"$'\n'
-    elif [[ ${chunk} =~ "declare -"[^[:space:]]+" " ]]; then
+    elif [[ ${chunk} =~ "declare -"[^[:space:]]+" "([^=]+)"=" ]]; then
       # we print a simple variable
-      _TEST_OUTPUT+="${chunk//"${BASH_REMATCH[0]}"/}"$'\n'
-    else
+      varName="${BASH_REMATCH[1]}"
+      _TEST_OUTPUT+="${varName}='${!varName//\'/\'\"\'\"\'}'"$'\n'
+    elif [[ ${chunk} == "declare -"* ]]; then
       test::fail "Could not parse variable declaration: ⌜${chunk}⌝."
     fi
   done

@@ -319,7 +319,7 @@ function array::makeArraysSameSize() {
   done
 }
 
-# ## array::fuzzyFilterSortFileWithGrepAndAwk
+# ## array::fuzzyFilterSortFileWithGrepAndGawk
 #
 # Allows to fuzzy sort a file against a given pattern.
 # Outputs a file containing only the lines matching the pattern.
@@ -338,12 +338,12 @@ function array::makeArraysSameSize() {
 #       The output file containing the indexes of the matched lines in the original file.
 #
 # ```bash
-# array::fuzzyFilterSortFileWithGrepAndAwk file.txt filtered.txt correspondences.txt
+# array::fuzzyFilterSortFileWithGrepAndGawk file.txt filtered.txt correspondences.txt
 # ```
 #
 # > This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.
 # > This function is useful for very large arrays.
-function array::fuzzyFilterSortFileWithGrepAndAwk() {
+function array::fuzzyFilterSortFileWithGrepAndGawk() {
   local pattern="${1}"
   local fileToFilter="${2}"
   local outputFilteredFile="${3}"
@@ -368,10 +368,10 @@ function array::fuzzyFilterSortFileWithGrepAndAwk() {
   patternRegex+=")"
 
   # we use grep to pre-filter the lines.
-  # We could do everything in awk but it would be slower for hugh files.
+  # We could do everything in gawk but it would be slower for hugh files.
   grep --ignore-case --line-number "${patternRegex//[()]/}" "${fileToFilter}" >"${_ARRAY_TEMP_FILTER_FILE}"
   patternRegex="${patternRegex}(.?)"
-  awk "
+  gawk "
     BEGIN {
       # Ignore case when matching the pattern
       IGNORECASE = 1;

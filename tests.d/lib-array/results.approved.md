@@ -284,9 +284,9 @@ RETURNED_ARRAY2=(
 )
 ```
 
-### ✅ Testing array::fuzzyFilterSortFileWithGrepAndAwk
+### ✅ Testing array::fuzzyFilterSortFileWithGrepAndGawk
 
-❯ `array::fuzzyFilterSortFileWithGrepAndAwk /words /out1 /out2`
+❯ `array::fuzzyFilterSortFileWithGrepAndGawk /words /out1 /out2`
 
 ❯ `io::head /out1 10`
 
