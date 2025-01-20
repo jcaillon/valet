@@ -36,11 +36,13 @@ function profiler::enable() {
     functionDepthExpression='0'
   fi
 
-  export PS4='+'$'\011''$(("${EPOCHREALTIME//./}" - _PROFILER_START_REALTIME))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL:-}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
+  export PS4='+'$'\011''$(((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*\.} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL:-}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
 
   exec 5>"${file}"
 
   export _PROFILER_OUTPUT_FILE="${file}"
+  export _PROFILER_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
+  export _PROFILER_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
   export _PROFILER_START_REALTIME="${EPOCHREALTIME//./}"
   export BASH_XTRACEFD=5
   set -o xtrace

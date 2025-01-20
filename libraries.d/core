@@ -13,9 +13,14 @@ if [ ${BASH_VERSINFO:-0} -lt 5 ] || { [ ${BASH_VERSINFO} -eq 5 ] && [ ${BASH_VER
   exit 1
 fi
 
-# ## core::setShellOptions
+# ## core::setShellOptions (private)
+#
+# Set the important shell attributes to ensure consistency in execution (-enable, +disable).
+#
+# ```bash
+# core::setShellOptions
+# ```
 function core::setShellOptions() {
-  # Set the important shell attributes to ensure consistency in execution (-enable, +disable).
   # -pipefail: the $? of a pipeline is the status of the last command to exit with a non-zero status
   # -braceexpand: {1..3} will be expanded to 1 2 3
   # -errexit: exit immediately if a command exits with a non-zero status
@@ -40,10 +45,18 @@ function core::setShellOptions() {
     shopt -s globskipdots patsub_replacement
     shopt -u varredir_close
   fi
+
+  # default IFS
+  IFS=' '$'\t'$'\n'
+
+  # set a fixed locale (otherwise we would risk to have comma as decimal separator
+  # for EPOCHREALTIME for instance)
+  LC_ALL=en_US.UTF-8
+  LANG=en_US.UTF-8
 }
 
+# set different options for the shell, to have consistent behavior on all machines
 core::setShellOptions
-IFS=' '$'\t'$'\n'
 
 if [[ -n ${GLOBAL_CORE_INCLUDED:-} ]] && declare -f log::warning &>/dev/null; then
   log::warning "The core library has already been included but was called again, remove the unnecessary call."
@@ -55,6 +68,7 @@ fi
 GLOBAL_CORE_INCLUDED=1
 # Remember the time the program started (nb of seconds since epoch)
 GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
+GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
 
 # Remember the original working directory
 GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
@@ -1562,10 +1576,7 @@ function core::getVersion() {
 #
 # > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 function core::getProgramElapsedMicroseconds() {
-  # we need to strip all leading zeros from the microseconds
-  local us="${EPOCHREALTIME##*\.}"
-  us="${us#"${us%%[!0]*}"}"
-  RETURNED_VALUE=$((((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000) + us))
+  RETURNED_VALUE=$(((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*\.} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))
 }
 
 #===============================================================

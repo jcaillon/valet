@@ -80,7 +80,8 @@ function selfTest() {
   core::parseArguments "$@" && eval "${RETURNED_VALUE}"
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
-  local startTime="${EPOCHREALTIME}"
+  core::getProgramElapsedMicroseconds
+  local startTimeInMicroSeconds="${RETURNED_VALUE}"
 
   # check what will be used to display the diff between received and approved files
   selfTestUtils_setupDiffCommand
@@ -156,7 +157,8 @@ function selfTest() {
     fi
   fi
 
-  string::microsecondsToHuman $((${EPOCHREALTIME//./} - ${startTime//./})) "%S seconds and %l ms"
+  core::getProgramElapsedMicroseconds
+  string::microsecondsToHuman $((RETURNED_VALUE - startTimeInMicroSeconds)) "%S seconds and %l ms"
   log::info "Total time running tests: ⌜${RETURNED_VALUE}⌝."
 
   if ((${#_TEST_FAILED_TEST_SUITES[@]} > 0)); then

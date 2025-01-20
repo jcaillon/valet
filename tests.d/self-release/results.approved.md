@@ -107,7 +107,6 @@ DEBUG    Analyzing the following files:
   14 ░ $GLOBAL_VALET_HOME/libraries.d/lib-system
   15 ░ $GLOBAL_VALET_HOME/libraries.d/lib-test
   16 ░ $GLOBAL_VALET_HOME/libraries.d/main
-DEBUG    Found function: ⌜core::setShellOptions⌝
 DEBUG    Found function: ⌜io::createTempFile⌝
 DEBUG    Found function: ⌜io::createTempDirectory⌝
 DEBUG    Found function: ⌜io::cleanupTempFiles⌝
@@ -266,7 +265,7 @@ DEBUG    Found function: ⌜test::flush⌝
 DEBUG    Found function: ⌜test::flushStdout⌝
 DEBUG    Found function: ⌜test::flushStderr⌝
 DEBUG    Found function: ⌜test::fail⌝
-INFO     Found 159 functions with documentation.
+INFO     Found 158 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet.md⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet
@@ -274,7 +273,7 @@ INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/li
 INFO     The prototype script has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet⌝.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/valet.code-snippets
 INFO     The vscode snippets have been generated in ⌜$GLOBAL_VALET_HOME/extras/valet.code-snippets⌝.
-INFO     Writing the 159 functions documentation to the core libraries docs.
+INFO     Writing the 158 functions documentation to the core libraries docs.
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -318,8 +317,6 @@ INFO     Writing the 159 functions documentation to the core libraries docs.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/benchmark.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/benchmark.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/benchmark.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
