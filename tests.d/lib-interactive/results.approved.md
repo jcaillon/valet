@@ -2,71 +2,61 @@
 
 ## Test script 00.tests
 
-### test interactive::promptYesNo with yes
+### ✅ Testing interactive::promptYesNo
 
+❯ `echo y | interactive::promptYesNo 'Do you see this message?'`
 
-
-Exit code: `0`
-
-Standard output
+**Standard output**:
 
 ```text
-echo y | interactive::promptYesNo 'Do you see this message?'
 [2m   ┌─[24b─┐[0m
 [2m░──┤[0m Do you see this message? [31G[2m│[0m
 [2m   └─[24b─┘[0m
-[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
+[?25l[1G[0J
+[1F[?25h[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
 [2m[9G│[0m Yes. [16G[2m├──░[0m
 [2m[9G└─[4b─┘[0m
 ```
 
-### Testing interactive::promptYesNo
+❯ `echo echo n | interactive::promptYesNo 'Do you see this message?'`
 
+Exited with code: `1`
 
-
-Exit code: `1`
-
-Standard output
+**Standard output**:
 
 ```text
-
-echo n | interactive::promptYesNo 'Do you see this message?'
 [2m   ┌─[24b─┐[0m
 [2m░──┤[0m Do you see this message? [31G[2m│[0m
 [2m   └─[24b─┘[0m
-[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
+[?25l[1G[0J
+[1F[?25h[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
 [2m[9G│[0m No. [15G[2m├──░[0m
 [2m[9G└─[3b─┘[0m
 ```
 
-### test interactive::askForConfirmation with yes
+### ✅ Testing interactive::askForConfirmation
 
+❯ `echo y | interactive::askForConfirmation 'Please press OK.'`
 
-
-Exit code: `0`
-
-Standard output
+**Standard output**:
 
 ```text
-echo y | interactive::askForConfirmation 'Please press OK.'
 [2m   ┌─[16b─┐[0m
 [2m░──┤[0m Please press OK. [23G[2m│[0m
 [2m   └─[16b─┘[0m
-[?25l[7m   (O)K   [0m[1G[0K[?25h
+[?25l[1G[0J
+[1F[?25h[?25l[7m   (O)K   [0m[1G[0K[?25h
 ```
 
 ## Test script 01.utilities
 
-### Testing interactive::createSpace
+### ✅ Testing interactive::createSpace
 
+❯ `interactive::createSpace 5`
 
-
-Exit code: `0`
-
-Standard output
+**Standard output**:
 
 ```text
-interactive::createSpace 5
 [?25l[1G[0J
 
 
@@ -74,17 +64,13 @@ interactive::createSpace 5
 [4F[?25h
 ```
 
-### Testing interactive::getCursorPosition
+### ✅ Testing interactive::getCursorPosition
 
-
-
-Exit code: `0`
-
-Standard output
+❯ `printf '\e[%sR' '123;456' | interactive::getCursorPosition`
 
 ```text
-printf '\e[%sR' '123;456' | interactive::getCursorPosition
-GLOBAL_CURSOR_LINE: 123; GLOBAL_CURSOR_COLUMN: 456
+GLOBAL_CURSOR_LINE="123"
+GLOBAL_CURSOR_COLUMN="456"
 ```
 
 ### Testing interactiveGetProgressBarString

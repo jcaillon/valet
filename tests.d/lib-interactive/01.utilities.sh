@@ -4,19 +4,18 @@
 source interactive
 
 function test_interactive::createSpace() {
-  echo "interactive::createSpace 5"
-  interactive::createSpace 5
+  test::title "✅ Testing interactive::createSpace"
 
-  test::endTest "Testing interactive::createSpace" 0
+  test::exec interactive::createSpace 5
 }
 
 function test_interactive::getCursorPosition() {
-  echo "printf '\e[%sR' '123;456' | interactive::getCursorPosition"
+  test::title "✅ Testing interactive::getCursorPosition"
+
+  test::prompt "printf '\e[%sR' '123;456' | interactive::getCursorPosition"
   printf '\e[%sR' '123;456' 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
   interactive::getCursorPosition < "${GLOBAL_TEMPORARY_WORK_FILE}"
-  echo "GLOBAL_CURSOR_LINE: ${GLOBAL_CURSOR_LINE}; GLOBAL_CURSOR_COLUMN: ${GLOBAL_CURSOR_COLUMN}"
-
-  test::endTest "Testing interactive::getCursorPosition" 0
+  test::printVars GLOBAL_CURSOR_LINE GLOBAL_CURSOR_COLUMN
 }
 
 function test_interactiveGetProgressBarString() {

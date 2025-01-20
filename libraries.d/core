@@ -389,8 +389,8 @@ function log::createPrintFunction() {
   local cTimestamp=""
   local colorStatement
   if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
-    cTimestamp=${VALET_CONFIG_COLOR_TIMESTAMP:-$'\e'"[90m"} # Bright Black (Gray)
-    cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
+    cTimestamp=${VALET_CONFIG_COLOR_TIMESTAMP:-$'\e'"[90m"}       # Bright Black (Gray)
+    cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}            # Text reset
     local cDebug=${VALET_CONFIG_COLOR_DEBUG:-$'\e'"[90m"}         # Bright Black (Gray)
     local cInfo=${VALET_CONFIG_COLOR_INFO:-$'\e'"[36m"}           # Cyan
     local cWarning=${VALET_CONFIG_COLOR_WARNING:-$'\e'"[33m"}     # Yellow
@@ -1574,6 +1574,8 @@ function core::getVersion() {
 # echo "Human time: ${RETURNED_VALUE}"
 # ```
 #
+# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.
+# > The 10# forces the base 10 conversion to avoid issues with leading zeros.
 # > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 function core::getProgramElapsedMicroseconds() {
   RETURNED_VALUE=$(((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*\.} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))

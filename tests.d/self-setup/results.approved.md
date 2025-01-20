@@ -19,7 +19,8 @@ CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
 [2m   ┌─[56b─┐[0m
 [2m░──┤[0m Do you see the colors in the color check above the line? [63G[2m│[0m
 [2m   └─[56b─┘[0m
-[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
+[?25l[1G[0J
+[1F[?25h[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
 [2m[9G│[0m No. [15G[2m├──░[0m
 [2m[9G└─[3b─┘[0m
 ─────────────────────────────────────
@@ -32,7 +33,8 @@ An information icon: II
 [2m   ┌─[69b─┐[0m
 [2m░──┤[0m Do you correctly see the nerd icons in the icon check above the line? [76G[2m│[0m
 [2m   └─[69b─┘[0m
-[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
+[?25l[1G[0J
+[1F[?25h[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
 [2m[9G│[0m No. [15G[2m├──░[0m
 [2m[9G└─[3b─┘[0m
 ```
@@ -71,7 +73,8 @@ CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
 [2m   ┌─[56b─┐[0m
 [2m░──┤[0m Do you see the colors in the color check above the line? [63G[2m│[0m
 [2m   └─[56b─┘[0m
-[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
+[?25l[1G[0J
+[1F[?25h[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
 [2m[9G│[0m Yes. [16G[2m├──░[0m
 [2m[9G└─[4b─┘[0m
 ─────────────────────────────────────
@@ -84,7 +87,8 @@ An information icon: II
 [2m   ┌─[69b─┐[0m
 [2m░──┤[0m Do you correctly see the nerd icons in the icon check above the line? [76G[2m│[0m
 [2m   └─[69b─┘[0m
-[?25l[7mCUB   (Y)ES   [0m   [7mCAB   (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
+[?25l[1G[0J
+[1F[?25h[?25l[7mCUB   (Y)ES   [0m   [7mCAB   (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
 [2m[9G│[0m Yes. [16G[2m├──░[0m
 [2m[9G└─[4b─┘[0m
 ```

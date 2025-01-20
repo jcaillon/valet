@@ -363,8 +363,11 @@ interactive::displayDialogBox() {
 
 # ## interactive::createSpace
 #
-# This function creates some new lines after the current cursor position.
-# Then it moves back to its original position.
+# This function creates empty lines from the current cursor position.
+# Then it moves back to its original line (at the column 1).
+# The current cursor line counts, meaning that `interactive::createSpace 1` will
+# not do anything but clear the current line.
+#
 # This effectively creates a space in the terminal (scroll up if we are at the bottom).
 # It does not create more space than the number of lines in the terminal.
 #
@@ -375,15 +378,17 @@ interactive::displayDialogBox() {
 # interactive::createSpace 5
 # ```
 function interactive::createSpace() {
-  local -i lines="${1}"
-  lines=$((lines - 1 > GLOBAL_LINES ? GLOBAL_LINES : lines - 1))
-  if (( lines <= 1 )); then
+  local -i nbLines="${1}"
+  nbLines=$((nbLines > GLOBAL_LINES ? GLOBAL_LINES : nbLines))
+  if (( nbLines <= 1 )); then
+    printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINE}${AC__CURSOR_SHOW}"
     return 0
   fi
+  nbLines=$((nbLines - 1))
   local -i loop
   local newLines
-  for ((loop = 0; loop < lines; loop++)); do newLines+=$'\n'; done
-  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${newLines}${AC__CURSOR_MOVE__}${lines}${__AC__START_OF_LINE_UP}${AC__CURSOR_SHOW}"
+  for ((loop = 0; loop < nbLines; loop++)); do newLines+=$'\n'; done
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${newLines}${AC__CURSOR_MOVE__}${nbLines}${__AC__START_OF_LINE_UP}${AC__CURSOR_SHOW}"
 }
 
 # ## interactive::getCursorPosition

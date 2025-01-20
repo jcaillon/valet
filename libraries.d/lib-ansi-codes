@@ -57,7 +57,6 @@ AC__TEXT_NO_INVERSE=$'\e[27m'
 AC__TEXT_STRIKE=$'\e[9m'
 AC__TEXT_NO_STRIKE=$'\e[29m'
 
-
 #===============================================================
 # >>> SGR: Colors
 #===============================================================
@@ -103,10 +102,11 @@ AC__BG_WHITE=$'\e[47m'
 AC__BG_BRIGHT_WHITE=$'\e[107m'
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
-AC__FG_COLOR__=$'\e[38;5;' # "${AC__FG_COLOR__}2${__AC__CODE}"
-AC__BG_COLOR=$'\e[48;5;' # "${AC__BG_COLOR}2${__AC__CODE}"
+# "${AC__FG_COLOR__}2${__AC__CODE}"
+AC__FG_COLOR__=$'\e[38;5;'
+# "${AC__BG_COLOR}2${__AC__CODE}"
+AC__BG_COLOR=$'\e[48;5;'
 __AC__CODE=$'m'
-
 
 #===============================================================
 # >>> CSI: Cursor control
@@ -117,55 +117,78 @@ __AC__CODE=$'m'
 
 # cursor movement
 AC__CURSOR_MOVE__=$'\e['
-__AC__UP=$'A'          # "${cursorMove}2${_up}"
-__AC__DOWN=$'B'        # "${cursorMove}2${_down}"
-__AC__RIGHT=$'C'       # "${cursorMove}2${_right}"
-__AC__LEFT=$'D'        # "${cursorMove}2${_left}"
-# Moves cursor to beginning of the line n lines down/up. If the active position is at the bottom margin, a scroll up is performed
-__AC__START_OF_LINE_DOWN=$'E' # "${cursorMove}1${_startOfLine}"
-__AC__START_OF_LINE_UP=$'F'   # "${cursorMove}1${_startOfLine}"
-__AC__COLUMN=$'G'      # "${cursorMove}2${_column}"
-__AC__TO=$'H'          # "${cursorMove}1;1${_to}" (row;col)
+# "${AC__CURSOR_MOVE__}2${__AC__UP}"
+__AC__UP=$'A'
+# "${AC__CURSOR_MOVE__}2${__AC__DOWN}"
+__AC__DOWN=$'B'
+# "${AC__CURSOR_MOVE__}2${__AC__RIGHT}"
+__AC__RIGHT=$'C'
+# "${AC__CURSOR_MOVE__}2${__AC__LEFT}"
+__AC__LEFT=$'D'
+# Moves cursor to beginning of the line n lines down. If the active position is at the bottom margin, a scroll up is performed. "${AC__CURSOR_MOVE__}1${__AC__START_OF_LINE_DOWN}"
+__AC__START_OF_LINE_DOWN=$'E'
+# Moves cursor to beginning of the line n lines up. If the active position is at the bottom margin, a scroll up is performed. "${AC__CURSOR_MOVE__}1${__AC__START_OF_LINE_UP}"
+__AC__START_OF_LINE_UP=$'F'
+# Move the cursor to the given column (1 based). "${AC__CURSOR_MOVE__}2${__AC__COLUMN}"
+__AC__COLUMN=$'G'
+# Move the cursor to given position. "${AC__CURSOR_MOVE__}1;1${__AC__TO}" (row;col)
+__AC__TO=$'H'
 
-__AC__SCROLL_UP=$'S'    # "${cursorMove}2${_scrollUp}" Scroll whole page up by n (default 1) lines. New lines are added at the bottom.
-__AC__SCROLL_DOWN=$'T'  # "${cursorMove}2${_scrollDown}" Scroll whole page down by n (default 1) lines. New lines are added at the top.
+# Scroll whole page up by n (default 1) lines. New lines are added at the bottom. "${AC__CURSOR_MOVE__}2${__AC__SCROLL_UP}"
+__AC__SCROLL_UP=$'S'
+# Scroll whole page down by n (default 1) lines. New lines are added at the top. "${AC__CURSOR_MOVE__}2${__AC__SCROLL_DOWN}"
+__AC__SCROLL_DOWN=$'T'
 
-AC__REQUEST_CURSOR_POSITION=$'\e[6n' # Reports the cursor position to the application as (as ESC[n;mR), where n is the line and m is the column.
+# Reports the cursor position to the application as (as ESC[n;mR), where n is the line and m is the column.
+AC__REQUEST_CURSOR_POSITION=$'\e[6n'
 
 # erase in display or line
-AC__ERASE_LINES_BELOW=$'\e[0J' # clear from cursor to end of screen
-AC__ERASE_LINES_ABOVE=$'\e[1J' # clear from cursor to beginning of the screen
-AC__ERASE_SCREEN=$'\e[2J'     # clear entire screen
-AC__ERASE_CHARS_RIGHT=$'\e[0K' # clear from cursor to the end of the line
-AC__ERASE_CHARS_LEFT=$'\e[1K'  # clear from cursor to the beginning of the line
-AC__ERASE_LINE=$'\e[2K'       # clear entire line
+# clear from cursor to end of screen
+AC__ERASE_LINES_BELOW=$'\e[0J'
+# clear from cursor to beginning of the screen
+AC__ERASE_LINES_ABOVE=$'\e[1J'
+# clear entire screen
+AC__ERASE_SCREEN=$'\e[2J'
+# clear from cursor to the end of the line
+AC__ERASE_CHARS_RIGHT=$'\e[0K'
+# clear from cursor to the beginning of the line
+AC__ERASE_CHARS_LEFT=$'\e[1K'
+# clear entire line
+AC__ERASE_LINE=$'\e[2K'
 
-# Erase a set number of characters
+# Erase a set number of characters "${AC__ERASE__}2${__AC_CHARS}"
 AC__ERASE__=$'\e['
-__AC_CHARS=$'X' # "${AC__ERASE__}2${__AC_CHARS}"
+__AC_CHARS=$'X'
 
-# Repeat last displayed character n times
+# Repeat last displayed (visible only) character n times "${AC__REPEAT__}2${__AC__LAST_CHAR}"
 AC__REPEAT__=$'\e['
-__AC__LAST_CHAR=$'b'  # "${repeat}2${_lastChar}"
+__AC__LAST_CHAR=$'b'
 
 #===============================================================
 # >>> General ASCII Codes
 #===============================================================
 
 AC__RING_BELL=$'\a'
-AC__RETURN_CARRIAGE=$'\r' # Moves the cursor to the first column.
-AC__NEW_LINE=$'\n' # Moves to next line, scrolls the display up if at bottom of the screen. Usually does not move horizontally, though programs should not rely on this.
-AC__TAB=$'\t' #  	Moves the cursor right to next multiple of 8.
-AC__BACKSPACE=$'\b' # Moves the cursor left (but may "backwards wrap" if cursor is at start of line).
+# Moves the cursor to the first column.
+AC__RETURN_CARRIAGE=$'\r'
+# Moves to next line, scrolls the display up if at bottom of the screen.
+# Usually does not move horizontally, though programs should not rely on this.
+AC__NEW_LINE=$'\n'
+#  	Moves the cursor right to next multiple of 8.
+AC__TAB=$'\t'
+# Moves the cursor left (but may "backwards wrap" if cursor is at start of line).
+AC__BACKSPACE=$'\b'
 
 #===============================================================
 # >>> Other Common Private Modes
 #===============================================================
 
-# cursor
+# Hides the cursor.
 AC__CURSOR_HIDE=$'\e[?25l'
+# Shows the cursor.
 AC__CURSOR_SHOW=$'\e[?25h'
 
-# display
+# Switch to the alternate screen buffer.
 AC__ENABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049h'
+# Switch back from the alternate screen buffer.
 AC__DISABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049l'
