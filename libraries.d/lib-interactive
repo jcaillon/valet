@@ -385,10 +385,7 @@ function interactive::createSpace() {
     return 0
   fi
   nbLines=$((nbLines - 1))
-  local -i loop
-  local newLines
-  for ((loop = 0; loop < nbLines; loop++)); do newLines+=$'\n'; done
-  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${newLines}${AC__CURSOR_MOVE__}${nbLines}${__AC__START_OF_LINE_UP}${AC__CURSOR_SHOW}"
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${AC__CURSOR_MOVE__}${nbLines}${__AC__SCROLL_UP}${AC__CURSOR_MOVE__}${nbLines}${__AC__START_OF_LINE_UP}${AC__CURSOR_SHOW}"
 }
 
 # ## interactive::getCursorPosition
@@ -1160,23 +1157,26 @@ function interactive::clearKeyPressed() {
 function interactiveGetProgressBarString() {
   local percent="${1}"
   local size="${2}"
-  local progressBarFull="█"
   local progressBarChars=" ▏▎▍▌▋▊▉"
 
   local -i nbFullChars=$((size * percent / 100))
   local -i extraCharIndex=$(((size * percent - nbFullChars * 100) * 8 / 100))
 
-  RETURNED_VALUE=""
-  local -i i
-  for ((i = 0; i < nbFullChars; i++)); do
-    RETURNED_VALUE+="${progressBarFull}"
-  done
+  local IFS=""
+  if ((nbFullChars > 0)); then
+    eval "local -a array=( {0..$((nbFullChars - 1))} )"
+    # shellcheck disable=SC2154
+    RETURNED_VALUE="${array[*]//*/█}"
+  else
+    RETURNED_VALUE=""
+  fi
   if ((extraCharIndex > 0)); then
     RETURNED_VALUE+="${progressBarChars:extraCharIndex:1}"
   fi
-  for ((i = ${#RETURNED_VALUE}; i < size; i++)); do
-    RETURNED_VALUE+=" "
-  done
+  if ((size - ${#RETURNED_VALUE} - 1 >= 0)); then
+    eval "local -a array=( {0..$((size - ${#RETURNED_VALUE} - 1))} )"
+    RETURNED_VALUE+="${array[*]//*/ }"
+  fi
 }
 
 # Starts a wait spinner animation that will loop for a set number of frames.

@@ -7,6 +7,13 @@ function main() {
   test_benchmark::run
 }
 
+function test_benchmark::run() {
+  test::title "✅ Testing benchmark::run"
+
+  test::exec declare -f test_function_1 test_function_2 test_function_3
+  test::exec benchmark::run test_function_1 test_function_2,test_function_3 3 5
+}
+
 # override core::getProgramElapsedMicroseconds to return a fake incremental time
 function core::getProgramElapsedMicroseconds() {
   if [[ -z ${_FAKE_TIME:-} ]]; then
@@ -27,13 +34,6 @@ function test_function_2() {
 
 function test_function_3() {
   :
-}
-
-function test_benchmark::run() {
-  test::title "✅ Testing benchmark::run"
-
-  test::exec declare -f test_function_1 test_function_2 test_function_3
-  test::exec benchmark::run test_function_1 test_function_2,test_function_3 3 5
 }
 
 main
