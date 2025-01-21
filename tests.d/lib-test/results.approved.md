@@ -275,9 +275,9 @@ Third test.
 
 ### 🪝 Testing the self test hooks
 
-The variable TESTING_HOOKS shows that the hooks [before-tests](../before-tests), [before-each-test-suite](../before-each-test-suite), [before-each-test](before-each-test) have been executed.
+The variable TESTING_HOOKS shows that the hooks [before-tests](../before-tests), [before-each-test-suite](../before-each-test-suite), [before-each-test](../before-each-test) have been executed.
 
-This test is written in the [after-each-test](after-each-test) script. The `after-each-test-suites` and `after-tests` are executed after the test script exits, thus we can't output their results in this report.
+This test is written in the [after-each-test](../after-each-test) script. The `after-each-test-suites` and `after-tests` are executed after the test script exits, thus we can't output their results in this report.
 
 ```text
 TESTING_HOOKS='before-tests,before-each-test-suite,before-each-test,after-each-test'

@@ -5,163 +5,6 @@ source system
 # shellcheck source=../../libraries.d/lib-io
 source io
 
-function test_system::os() {
-
-  echo "→ OSTYPE=linux-bsd system::os"
-  OSTYPE=linux-bsd system::os && echo "${RETURNED_VALUE}"
-  echo
-
-  echo "→ OSTYPE=msys system::os"
-  OSTYPE=msys system::os && echo "${RETURNED_VALUE}"
-  echo
-
-  echo "→ OSTYPE=darwin-stuff system::os"
-  OSTYPE=darwin-stuff system::os && echo "${RETURNED_VALUE}"
-  echo
-
-  echo "→ OSTYPE=nop system::os"
-  OSTYPE=nop system::os && echo "${RETURNED_VALUE}"
-  echo
-
-  test::endTest "Testing system::os" 0
-}
-
-function test_system::env() {
-
-  RETURNED_ARRAY=()
-  echo "→ system::env"
-  system::env
-  if ((${#RETURNED_ARRAY[*]} > 0)); then
-    echo "Found environment variables."
-  fi
-
-  test::endTest "Testing system::env" 0
-}
-
-function test_system::date() {
-
-  echo "→ system::date"
-  system::date && echo "Returned date with length ${#RETURNED_VALUE}."
-  echo
-
-  echo "→ system::date %(%H:%M:%S)T"
-  system::date '%(%H:%M:%S)T' && echo "Returned date with length ${#RETURNED_VALUE}."
-
-  test::endTest "Testing system::date" 0
-}
-
-function test_system::getUndeclaredVariables() {
-
-  echo "→ system::getUndeclaredVariables"
-  if ! system::getUndeclaredVariables; then
-    echo "No undeclared variables found.${RETURNED_ARRAY[*]}"
-  fi
-
-  echo
-  local abc="ok"
-  echo "→ system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE"
-  system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE abc dfg NOP
-  if system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE abc dfg NOP; then
-    echo "Found undeclared variables: ⌜${RETURNED_ARRAY[*]}⌝."
-  fi
-
-  test::endTest "Testing system::date" 0
-}
-
-function test_system::getNotExistingCommands() {
-
-  echo "→ system::getNotExistingCommands"
-  if ! system::getNotExistingCommands; then
-    echo "No not existing commands found.${RETURNED_ARRAY[*]}"
-  fi
-
-  echo
-  echo "→ system::getNotExistingCommands NONEXISTINGSTUFF system::getNotExistingCommands rm YETANOTHERONEMISSING"
-  if system::getNotExistingCommands NONEXISTINGSTUFF system::getNotExistingCommands rm YETANOTHERONEMISSING; then
-    echo "Found not existing commands: ⌜${RETURNED_ARRAY[*]}⌝."
-  fi
-
-  test::endTest "Testing system::getNotExistingCommands" 0
-}
-
-function test_system::commandExists() {
-
-  echo "→ system::commandExists"
-  if ! system::commandExists; then
-    echo "Command not found."
-  fi
-
-  echo
-  echo "→ system::commandExists NONEXISTINGSTUFF"
-  if ! system::commandExists NONEXISTINGSTUFF; then
-    echo "Command not found."
-  fi
-
-  echo
-  echo "→ system::commandExists rm ls"
-  if system::commandExists rm ls; then
-    echo "Found command."
-  fi
-
-  test::endTest "Testing system::commandExists" 0
-}
-
-function test_system::addToPath() {
-  local oldHome="${HOME}"
-
-  HOME="resources/gitignored"
-  function zsh() { :; }
-  function tcsh() { :; }
-  function csh() { :; }
-  function xonsh() { :; }
-  function fish() { :; }
-  function ksh() { :; }
-  function nu() { :; }
-
-  echo "→ system::addToPath"
-  system::addToPath "/coucou"
-  echo
-  echo "content of files:"
-  cat resources/gitignored/.zshrc
-  cat resources/gitignored/.tcshrc
-  cat resources/gitignored/.cshrc
-  cat resources/gitignored/.xonshrc
-  cat resources/gitignored/.config/fish/config.fish
-  cat resources/gitignored/.kshrc
-  cat resources/gitignored/.config/nushell/env.nu
-
-  system::addToPath "/coucou"
-
-  unset -f zsh tcsh csh xonsh fish ksh nu
-  HOME="${oldHome}"
-  rm -Rf resources/gitignored
-  test::endTest "Testing system::addToPath" 0
-}
-
-function test_system::windowsSetEnvVar() {
-  echo "→ system::windowsSetEnvVar VAR VALUE"
-  OSTYPE=msys system::windowsSetEnvVar VAR VALUE
-  echo
-  echo "→ system::windowsSetEnvVar VAR ''"
-  OSTYPE=msys system::windowsSetEnvVar VAR ''
-  echo
-  test::endTest "Testing system::windowsSetEnvVar" 0
-}
-
-function test_system::windowsGetEnvVar() {
-  echo "→ system::windowsGetEnvVar VAR"
-  OSTYPE=msys system::windowsGetEnvVar VAR
-  echo
-  test::endTest "Testing system::windowsGetEnvVar" 0
-}
-
-function test_system::windowsAddToPath() {
-  echo "→ system::windowsAddToPath /coucou"
-  OSTYPE=msys system::windowsAddToPath /coucou
-  echo
-  test::endTest "Testing system::windowsAddToPath" 0
-}
-
 function main() {
   test_system::os
   test_system::env
@@ -175,14 +18,107 @@ function main() {
   test_system::windowsAddToPath
 }
 
-# backup original function
-io::invoke declare -f io::windowsRunInPowershell
-_ORIGINAL_FUNCTION="${RETURNED_VALUE//declare -? /}"
+function test_system::os() {
+  test::title "✅ Testing system::os"
+
+  test::func OSTYPE=linux-bsd system::os
+  test::func OSTYPE=msys system::os
+  test::func OSTYPE=darwin-stuff system::os
+  test::func OSTYPE=nop system::os
+}
+
+function test_system::env() {
+  test::title "✅ Testing system::env"
+
+  RETURNED_ARRAY=()
+  test::exec system::env
+  if ((${#RETURNED_ARRAY[*]} > 0)); then
+    test::markdown "Found environment variables in RETURNED_ARRAY."
+  fi
+}
+
+function test_system::date() {
+  test::title "✅ Testing system::date"
+
+  test::func system::date
+  test::func system::date "'%(%H:%M:%S)T'"
+}
+
+function test_system::getUndeclaredVariables() {
+  test::title "✅ Testing system::getUndeclaredVariables"
+
+  test::func system::getUndeclaredVariables
+  test::exec ABC="ok"
+  test::func system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE dfg ABC NOP
+}
+
+function test_system::getNotExistingCommands() {
+  test::title "✅ Testing system::getNotExistingCommands"
+
+  test::func system::getNotExistingCommands
+
+  test::func system::getNotExistingCommands NONEXISTINGSTUFF system::getNotExistingCommands rm YETANOTHERONEMISSING
+}
+
+function test_system::commandExists() {
+  test::title "✅ Testing system::commandExists"
+
+  test::exec system::commandExists
+  test::exec system::commandExists NONEXISTINGSTUFF
+  test::exec system::commandExists rm
+}
 
 # shellcheck disable=SC2317
-function io::windowsRunInPowershell() { echo "io::windowsRunInPowershell: $*"; }
+function test_system::addToPath() {
+  test::title "✅ Testing system::addToPath"
+
+  HOME="resources/gitignored"
+  function zsh() { :; }
+  function tcsh() { :; }
+  function csh() { :; }
+  function xonsh() { :; }
+  function fish() { :; }
+  function ksh() { :; }
+  function nu() { :; }
+
+  test::exec system::addToPath "/coucou"
+
+  test::exec io::cat resources/gitignored/.zshrc
+  test::exec io::cat resources/gitignored/.tcshrc
+  test::exec io::cat resources/gitignored/.cshrc
+  test::exec io::cat resources/gitignored/.xonshrc
+  test::exec io::cat resources/gitignored/.config/fish/config.fish
+  test::exec io::cat resources/gitignored/.kshrc
+  test::exec io::cat resources/gitignored/.config/nushell/env.nu
+
+  test::exec system::addToPath "/coucou"
+
+  rm -Rf resources/gitignored
+}
+
+function test_system::windowsSetEnvVar() {
+  test::title "✅ Testing system::windowsSetEnvVar"
+
+  test::exec OSTYPE=msys system::windowsSetEnvVar VAR VALUE
+  test::exec OSTYPE=msys system::windowsSetEnvVar VAR "''"
+}
+
+function test_system::windowsGetEnvVar() {
+  test::title "✅ Testing system::windowsGetEnvVar"
+
+  test::exec OSTYPE=msys system::windowsGetEnvVar VAR
+}
+
+function test_system::windowsAddToPath() {
+  test::title "✅ Testing system::windowsAddToPath"
+
+  test::exec OSTYPE=msys system::windowsAddToPath /coucou
+}
+
+# mocking windowsRunInPowershell function
+# shellcheck disable=SC2317
+function io::windowsRunInPowershell() {
+  echo "🙈 mocking io::windowsRunInPowershell: $*";
+}
 
 main
-
-unset -f io::windowsRunInPowershell
-eval "${_ORIGINAL_FUNCTION}"

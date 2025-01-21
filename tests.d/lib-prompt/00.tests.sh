@@ -3,7 +3,14 @@
 # shellcheck source=../../libraries.d/lib-prompt
 source prompt
 
+function main() {
+  test_prompt_getDisplayedPromptString
+  test_prompt::getItemDisplayedString
+}
+
 function test_prompt_getDisplayedPromptString() {
+  test::title "✅ Testing prompt_getDisplayedPromptString"
+
   test_prompt_internal 5 ""       0 "" 0
   test_prompt_internal 5 "a"      1 "a" 1
   test_prompt_internal 5 "ab"     2 "ab" 2
@@ -31,19 +38,15 @@ function test_prompt_getDisplayedPromptString() {
   test_prompt_internal 10 "This is a long string that will be displayed in the screen." 20 "…g string…" 8
 
   test_prompt_internal 4 "bl" 0 "bl" 0
-
-  test::endTest "Testing prompt_getDisplayedPromptString" 0
 }
 
 function test_prompt_internal() {
   _PROMPT_STRING_SCREEN_WIDTH="${1}"
   _PROMPT_STRING="${2}"
   _PROMPT_STRING_INDEX="${3}"
-  echo
-  declare -p _PROMPT_STRING _PROMPT_STRING_INDEX _PROMPT_STRING_SCREEN_WIDTH
-  echo "→ prompt_getDisplayedPromptString"
-  prompt_getDisplayedPromptString
-  echo " ░${RETURNED_VALUE}░ ${RETURNED_VALUE2}"
+  test::printVars _PROMPT_STRING _PROMPT_STRING_INDEX _PROMPT_STRING_SCREEN_WIDTH
+  test::exec prompt_getDisplayedPromptString
+  test::markdown "\`░${RETURNED_VALUE}░ ${RETURNED_VALUE2}\`"
   if [[ "░${RETURNED_VALUE}░ ${RETURNED_VALUE2}" != "░${4}░ ${5}" ]]; then
     echo "Expected: ░${4}░ ${5}"
     exit 1
@@ -51,6 +54,8 @@ function test_prompt_internal() {
 }
 
 function test_prompt::getItemDisplayedString() {
+  test::title "✅ Testing prompt::getItemDisplayedString"
+
   local FG_CYAN=$'\033[36m'
   local FG_RESET=$'\033[0m'
 
@@ -61,51 +66,36 @@ function test_prompt::getItemDisplayedString() {
   _PROMPT_ITEMS_BOX_ITEM_WIDTH=5
   _PROMPT_ITEMS_BOX_FILTER_STRING="eLor"
   _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="HellO wOrld"
-  declare -p _PROMPT_ITEMS_BOX_ITEM_DISPLAYED _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING
-  echo "→ prompt::getItemDisplayedString"
-  prompt::getItemDisplayedString
-  echo "${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}"
 
-  echo
+  test::printVars _PROMPT_COLOR_LETTER_HIGHLIGHT _PROMPT_COLOR_LETTER_HIGHLIGHT_RESET _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ITEMS_BOX_ITEM_DISPLAYED
+  test::exec prompt::getItemDisplayedString
+  test::markdown "\`${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}\`"
+
   _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${FG_CYAN}HellO${FG_RESET} wOrld"
   _PROMPT_ITEMS_BOX_ITEM_WIDTH=10
-  echo "_PROMPT_ITEMS_BOX_ITEM_DISPLAYED=${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED@Q}"
-  declare -p _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING
-  echo "→ prompt::getItemDisplayedString"
-  prompt::getItemDisplayedString
-  echo "${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}"
 
-  echo
+  test::printVars _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_ITEM_DISPLAYED
+  test::exec prompt::getItemDisplayedString
+  test::markdown "\`${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}\`"
+
   _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${FG_CYAN}HellO${FG_RESET} wOrld"
   _PROMPT_ITEMS_BOX_ITEM_WIDTH=11
-  echo "_PROMPT_ITEMS_BOX_ITEM_DISPLAYED=${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED@Q}"
-  declare -p _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING
-  echo "→ prompt::getItemDisplayedString"
-  prompt::getItemDisplayedString
-  echo "${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}"
 
-  echo
-  # shellcheck disable=SC2089
+  test::printVars _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_ITEM_DISPLAYED
+  test::exec prompt::getItemDisplayedString
+  test::markdown "\`${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}\`"
+
   _PROMPT_COLOR_LETTER_HIGHLIGHT=$'\033[4m'
   _PROMPT_COLOR_LETTER_HIGHLIGHT_RESET=$'\033[24m'
   _PROMPT_ITEMS_BOX_ITEM_DISPLAYED='[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit code once the spinner is stopped'
   _PROMPT_ITEMS_BOX_FILTER_STRING="abomamwesspp"
   _PROMPT_ITEMS_BOX_ITEM_WIDTH=71
-  # shellcheck disable=SC2090
-  echo "_PROMPT_ITEMS_BOX_ITEM_DISPLAYED=${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED@Q}"
-  declare -p _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING
-  echo "→ prompt::getItemDisplayedString"
-  prompt::getItemDisplayedString
-  echo "${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}"
+
+  test::printVars _PROMPT_COLOR_LETTER_HIGHLIGHT _PROMPT_COLOR_LETTER_HIGHLIGHT_RESET _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ITEMS_BOX_ITEM_DISPLAYED
+  test::exec prompt::getItemDisplayedString
+  test::markdown "\`${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}\`"
 
   shopt -u nocasematch
-
-  test::endTest "Testing prompt::getItemDisplayedString" 0
-}
-
-function main() {
-  test_prompt_getDisplayedPromptString
-  test_prompt::getItemDisplayedString
 }
 
 main

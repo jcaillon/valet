@@ -2,325 +2,321 @@
 
 ## Test script 00.tests
 
-### Testing string::cutField
+### ✅ Testing string::cutField
 
+❯ `string::cutField field1\ field2\ field3 0 \ `
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::cutField 'field1 field2 field3' 0 ' '
-field1
-
-→ string::cutField 'field1 field2 field3' 1 ' '
-field2
-
-→ string::cutField 'field1,field2,field3' 2 ','
-field3
-
-→ string::cutField 'field1,field2,field3' 4 ','
-
-
-→ string::cutField 'line1 hm I wonder
-line2 does it work on lines?
-line3 seems so' 2 $'\n'
-line3 seems so
+RETURNED_VALUE='field1'
 ```
 
-### Testing string::compareSemanticVersion function
+❯ `string::cutField field1\ field2\ field3 1 \ `
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::compareSemanticVersion '1.2.3' '1.2.3'
-0
-
-→ string::compareSemanticVersion '1.2.3-alpha' '1.2.4+az123'
--1
-
-→ string::compareSemanticVersion '1.2.3' '1.2.2'
-1
-
-→ string::compareSemanticVersion '2.2.3' '1.2.3-alpha'
-1
-
-→ string::compareSemanticVersion '1.2.3+a1212' '1.3.3'
--1
-
-→ string::compareSemanticVersion '1.2.3-alpha+a123123' '1.2.3-alpha+123zer'
-0
-
-→ string::compareSemanticVersion '1.2a.3' '1.2.3derp'
-Failed as expected
+RETURNED_VALUE='field2'
 ```
 
-Error output
+❯ `string::cutField field1,field2,field3 2 ,`
+
+Returned variables:
 
 ```text
-ERROR    Failed to compare versions ⌜1.2a.3⌝ and ⌜1.2.3derp⌝ because they are not valid semantic versions.
+RETURNED_VALUE='field3'
 ```
 
-### Testing string::bumpSemanticVersion
+❯ `string::cutField field1,field2,field3 4 ,`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ bumping 0.0.0 minor
-0.1.0
-
-→ bumping 1.2.3-alpha+zae345 major
-2.0.0
-
-→ bumping 1.2.3-alpha+zae345 minor
-1.3.0
-
-→ bumping 1.2.3-alpha+zae345 patch
-1.2.4
-
-→ bumping 1.2.3-alpha+zae345 major false
-2.0.0-alpha+zae345
-
-→ bumping 1.2.3-alpha patch false
-1.2.157-alpha
-
-→ bumping aze patch false
-Failed as expected
+RETURNED_VALUE=''
 ```
 
-Error output
+❯ `string::cutField line1\ hm\ I\ wonder$'\n'line2\ does\ it\ work\ on\ lines?$'\n'line3\ seems\ so 2 $'\n'`
+
+Returned variables:
 
 ```text
-ERROR    Failed to bump the version ⌜aze⌝ because it is not valid semantic version.
+RETURNED_VALUE='line3 seems so'
 ```
 
-### Testing string::kebabCaseToSnakeCase
+### ✅ Testing string::kebabCaseToSnakeCase
 
+❯ `string::kebabCaseToSnakeCase this-is-a-test0`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::kebabCaseToSnakeCase this-is-a-test0
-THIS_IS_A_TEST0
-
-→ string::kebabCaseToSnakeCase --another-test
-ANOTHER_TEST
+RETURNED_VALUE='THIS_IS_A_TEST0'
 ```
 
-### Testing string::kebabCaseToSnakeCase
+❯ `string::kebabCaseToSnakeCase --another-test`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::kebabCaseToSnakeCase this-is-a-test0
-THIS_IS_A_TEST0
-
-→ string::kebabCaseToSnakeCase --another-test
-ANOTHER_TEST
+RETURNED_VALUE='ANOTHER_TEST'
 ```
 
-### Testing string::kebabCaseToCamelCase
+### ✅ Testing string::kebabCaseToSnakeCase
 
+❯ `string::kebabCaseToSnakeCase this-is-a-test0`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::kebabCaseToCamelCase this-is-a-test0
-thisIsATest0
-
-→ string::kebabCaseToCamelCase --another-test
-anotherTest
-
-→ string::kebabCaseToSnakeCase --last--
-last
+RETURNED_VALUE='THIS_IS_A_TEST0'
 ```
 
-### Testing string::trimAll
+❯ `string::kebabCaseToSnakeCase --another-test`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::trimAll '  a  super test  '
-⌜a super test⌝
-
-→ string::trimAll 'this is a command  '
-⌜this is a command⌝
-
-→ string::trimAll '\t\nthis is a \tcommand  '
-⌜this is a command⌝
+RETURNED_VALUE='ANOTHER_TEST'
 ```
 
-### Testing string::trim function
+### ✅ Testing string::kebabCaseToCamelCase
 
+❯ `string::kebabCaseToCamelCase this-is-a-test0`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::trim '  hello  world  '
-⌜hello  world⌝
-
-→ string::trim 'hello  '
-⌜hello⌝
-
-→ string::trim '  hello'
-⌜hello⌝
-
-→ string::trim $'\n'$'\t''  hello'$'\n'$'\t'' '
-⌜hello⌝
+RETURNED_VALUE='thisIsATest0'
 ```
 
-### Testing string::indexOf function
+❯ `string::kebabCaseToCamelCase --another-test`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::indexOf 'hello' 'l'
-2
-
-→ string::indexOf 'hello' 'he'
-0
-
-→ string::indexOf 'hello' 'he' 10
--1
-
-→ string::indexOf 'yesyes' 'ye' 1
-3
-
-→ string::indexOf 'yesyes' 'yes' 3
-3
-
-→ string::indexOf 'yesyes' 'yes' 5
--1
-
+RETURNED_VALUE='anotherTest'
 ```
 
-### Testing string::extractBetween function
+❯ `string::kebabCaseToCamelCase --last--`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::extractBetween 'hello' 'e' 'o'
-⌜ll⌝
+RETURNED_VALUE='last'
+```
 
-→ string::extractBetween 'hello' '' 'l'
-⌜he⌝
+### ✅ Testing string::trimAll
 
-→ string::extractBetween 'hello' 'e' ''
-⌜llo⌝
+❯ `string::trimAll \ \ a\ \ super\ test\ \ `
 
-→ string::extractBetween 'hello' 'a' ''
-⌜⌝
+Returned variables:
 
-→ string::extractBetween 'hello' 'h' 'a'
-⌜⌝
+```text
+RETURNED_VALUE='a super test'
+```
 
-multilinetext="1 line one
+❯ `string::trimAll this\ is\ a\ command\ \ `
+
+Returned variables:
+
+```text
+RETURNED_VALUE='this is a command'
+```
+
+❯ `string::trimAll \	$'\n'this\ is\ a\ \	command\ \ `
+
+Returned variables:
+
+```text
+RETURNED_VALUE='this is a command'
+```
+
+### ✅ Testing string::trim
+
+❯ `string::trim \ \ hello\ \ world\ \ `
+
+Returned variables:
+
+```text
+RETURNED_VALUE='hello  world'
+```
+
+❯ `string::trim hello\ \  \ `
+
+Returned variables:
+
+```text
+RETURNED_VALUE='hello'
+```
+
+❯ `string::trim \ \ hello`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='hello'
+```
+
+❯ `string::trim $'\n'\	\ \ hello$'\n'\	\ `
+
+Returned variables:
+
+```text
+RETURNED_VALUE='hello'
+```
+
+### ✅ Testing string::indexOf function
+
+❯ `string::indexOf hello l`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='2'
+```
+
+❯ `string::indexOf hello he`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='0'
+```
+
+❯ `string::indexOf hello he 10`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-1'
+```
+
+❯ `string::indexOf yes-yes ye 1`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='4'
+```
+
+❯ `string::indexOf yes-yes yes 5`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-1'
+```
+
+### ✅ Testing string::extractBetween function
+
+❯ `string::extractBetween hello e o`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='ll'
+```
+
+❯ `string::extractBetween hello e ''`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='llo'
+```
+
+❯ `string::extractBetween hello h a`
+
+Returned variables:
+
+```text
+RETURNED_VALUE=''
+```
+
+```text
+MULTI_LINES_TEXT2='1 line one
 2 line two
 3 line three
-4 line four"
+4 line four'
+```
 
-→ string::extractBetween "${multilinetext}" "one"$'\n' '4'
-⌜2 line two
+❯ `string::extractBetween "${MULTI_LINES_TEXT2}" one$'\n' 4`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='2 line two
 3 line three
-⌝
-
-→ string::extractBetween "${multilinetext}" "2 " $'\n'
-⌜line two⌝
+'
 ```
 
-### Testing string::count function
+❯ `string::extractBetween "${MULTI_LINES_TEXT2}" 2\  $'\n'`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::count 'name,firstname,address' ','
-⌜2⌝
-
-→ string::count 'bonjour mon bon ami, bonne journée!' 'bo'
-⌜3⌝
+RETURNED_VALUE='line two'
 ```
 
-### Testing string::split function
+### ✅ Testing string::count function
 
+❯ `string::count name,firstname,address ,`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string:::split 'name:firstname:address' ':'
-name
-firstname
-address
-
-→ string::split 'one\ntwo\nthree' '\n'
-one
-two
-three
+RETURNED_VALUE='2'
 ```
 
-### Testing string::regexGetFirst function
+❯ `string::count bonjour\ mon\ bon\ ami,\ bonne\ journée! bo`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::regexGetFirst 'name: julien' 'name:[[:space:]]*([[:alnum:]]*)'
-julien
+RETURNED_VALUE='3'
 ```
 
-### Testing string::microsecondsToHuman function
+### ✅ Testing string::split function
 
+❯ `string::split name:firstname:address :`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::microsecondsToHuman 18243002234 'Hours: %HH
+RETURNED_ARRAY=(
+[0]='name'
+[1]='firstname'
+[2]='address'
+)
+```
+
+❯ `string::split one$'\n'two$'\n'three $'\n'`
+
+Returned variables:
+
+```text
+RETURNED_ARRAY=(
+[0]='one'
+[1]='two'
+[2]='three'
+)
+```
+
+### ✅ Testing string::regexGetFirst function
+
+❯ `string::regexGetFirst name:\ julien 'name:[[:space:]]*([[:alnum:]]*)'`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='julien'
+```
+
+### ✅ Testing string::microsecondsToHuman function
+
+```text
+format='Hours: %HH
 Minutes: %MM
 Seconds: %SS
 Milliseconds: %LL
@@ -336,8 +332,14 @@ Total minutes: %M
 Total seconds: %S
 Total milliseconds: %L
 Total microseconds: %U'
+```
 
-Hours: 05
+❯ `string::microsecondsToHuman 18243002234 "${format}"`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='Hours: 05
 Minutes: 04
 Seconds: 03
 Milliseconds: 002
@@ -352,193 +354,235 @@ Microseconds: 234
 Total minutes: 304
 Total seconds: 18243
 Total milliseconds: 4320003002
-Total microseconds: 18243002234
-
-→ string::microsecondsToHuman 18243002234
-05:04:03
-
-→ _OPTION_FORMAT='%U' string::microsecondsToHuman 18243002234
-18243002234
+Total microseconds: 18243002234'
 ```
 
-### Wrapping text at column 30 with no padding
+❯ `string::microsecondsToHuman 18243002234`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapText "${shortText}" 20
-------------------------------
-You don't [36m[36m[36mget better[39m[39m[39m
-on the days when you
-feel like going. You
-get better on the 
-days when you don't 
-want to go, but you 
-go anyway. If you 
-can [34movercome the 
-negative energy[39m 
-coming from your 
-tired body or 
-unmotivated mind, 
-you will grow and 
-become better. It 
-won't be the best 
-workout you have, 
-you won't accomplish
-as much as what you 
-usually do when you 
-actually feel good, 
-but that doesn't 
-matter. Growth is a 
-long term game, and 
-the crappy days are 
-more important.
+RETURNED_VALUE='05:04:03'
+```
 
-As long as I focus 
-on what I feel and 
-don't worry about 
-where I'm going, it 
-works out. Having no
-expectations but 
-being open to 
-everything is what 
-makes wonderful 
-things happen. If I 
-don't worry, there's
-no obstruction and 
-life flows easily. 
-It sounds 
-impractical, but 
-'Expect nothing; be 
-open to everything' 
-is really all it is.
-01234567890123456789
-on new line 01234567
-890123456789234 line
+❯ `_OPTION_FORMAT=%U string::microsecondsToHuman 18243002234`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='18243002234'
+```
+
+### ✅ Testing string::wrapText
+
+Wrapping text at column 30 with no padding
+
+❯ `string::wrapText "${MULTI_LINES_TEXT}" 30`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='You don`t [36m[36m[36mget better[39m[39m[39m on the 
+days when you feel like going.
+You get better on the days 
+when you don`t want to go, but
+you go anyway. If you can 
+[34movercome the negative energy[39m 
+coming from your tired body or
+unmotivated mind, you will 
+grow and become better. It 
+won`t be the best workout you 
+have, you won`t accomplish as 
+much as what you usually do 
+when you actually feel good, 
+but that doesn`t matter. 
+Growth is a long term game, 
+and the crappy days are more 
+important.
+
+As long as I focus on what I 
+feel and don`t worry about 
+where I`m going, it works out.
+Having no expectations but 
+being open to everything is 
+what makes wonderful things 
+happen. If I don`t worry, 
+there`s no obstruction and 
+life flows easily. It sounds 
+impractical, but `Expect 
+nothing; be open to 
+everything` is really all it 
+is. 01234567890123456789 on 
+new line 
+01234567890123456789234 line 
 new line.
 
-https://en.wikipedia
-.org/wiki/Veganism
+https://en.wikipedia.org/wiki/
+Veganism
 
-There were 2 new 
-lines before this.
+There were 2 new lines before 
+this.'
+RETURNED_VALUE2='8'
 ```
 
-### Wrapping text at column 50 with padding of 4 on new lines
+Wrapping text at column 50 with padding of 4 on new lines
 
+❯ `string::wrapText "${MULTI_LINES_TEXT}" 50 \ \ \ \ `
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapText "${shortText}" 90 '    '
-------------------------------------------------------------------------------------------
-You don't [36m[36m[36mget better[39m[39m[39m on the days when you feel 
+RETURNED_VALUE='You don`t [36m[36m[36mget better[39m[39m[39m on the days when you feel 
     like going. You get better on the days when 
-    you don't want to go, but you go anyway. If 
+    you don`t want to go, but you go anyway. If 
     you can [34movercome the negative energy[39m coming 
     from your tired body or unmotivated mind, you 
-    will grow and become better. It won't be the 
-    best workout you have, you won't accomplish as
+    will grow and become better. It won`t be the 
+    best workout you have, you won`t accomplish as
     much as what you usually do when you actually 
-    feel good, but that doesn't matter. Growth is 
+    feel good, but that doesn`t matter. Growth is 
     a long term game, and the crappy days are more
     important.
     
-    As long as I focus on what I feel and don't 
-    worry about where I'm going, it works out. 
+    As long as I focus on what I feel and don`t 
+    worry about where I`m going, it works out. 
     Having no expectations but being open to 
     everything is what makes wonderful things 
-    happen. If I don't worry, there's no 
+    happen. If I don`t worry, there`s no 
     obstruction and life flows easily. It sounds 
-    impractical, but 'Expect nothing; be open to 
-    everything' is really all it is. 
+    impractical, but `Expect nothing; be open to 
+    everything` is really all it is. 
     01234567890123456789 on new line 
     01234567890123456789234 line new line.
     
     https://en.wikipedia.org/wiki/Veganism
     
-    There were 2 new lines before this.
+    There were 2 new lines before this.'
 ```
 
-### Wrapping text at column 20 with padding of 3 on all lines
+Wrapping text at column 20 with padding of 3 on all lines
 
+❯ `string::wrapText "${MULTI_LINES_TEXT}" 20 \ \ \  17`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapText "${shortText}" 90 '  ' 88
-------------------------------------------------------------------------------------------
-  $ {RETURNED_VALUE}
+RETURNED_VALUE='You don`t [36m[36m[36mget 
+   better[39m[39m[39m on the 
+   days when you 
+   feel like going. 
+   You get better on
+   the days when you
+   don`t want to go,
+   but you go 
+   anyway. If you 
+   can [34movercome the 
+   negative energy[39m 
+   coming from your 
+   tired body or 
+   unmotivated mind,
+   you will grow and
+   become better. It
+   won`t be the best
+   workout you have,
+   you won`t 
+   accomplish as 
+   much as what you 
+   usually do when 
+   you actually feel
+   good, but that 
+   doesn`t matter. 
+   Growth is a long 
+   term game, and 
+   the crappy days 
+   are more 
+   important.
+   
+   As long as I 
+   focus on what I 
+   feel and don`t 
+   worry about where
+   I`m going, it 
+   works out. Having
+   no expectations 
+   but being open to
+   everything is 
+   what makes 
+   wonderful things 
+   happen. If I 
+   don`t worry, 
+   there`s no 
+   obstruction and 
+   life flows 
+   easily. It sounds
+   impractical, but 
+   `Expect nothing; 
+   be open to 
+   everything` is 
+   really all it is.
+   01234567890123456
+   789 on new line 0
+   12345678901234567
+   89234 line new 
+   line.
+   
+   https://en.wikipe
+   dia.org/wiki/Vega
+   nism
+   
+   There were 2 new 
+   lines before 
+   this.'
+RETURNED_VALUE2='4'
 ```
 
-### Wrapping words, shortcut because the message is a short single line
+Wrapping words, shortcut because the message is a short single line
 
+❯ `string::wrapText A\ message. 80`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapText 'A message.' 80
-A message.
+RETURNED_VALUE='A message.'
 ```
 
-### Wrapping words, no shortcut!
+Wrapping words, no shortcut!
 
+❯ `string::wrapText A\ message. 80 '' 5`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapText 'A message.' 80 '' 5
-A 
-message.
+RETURNED_VALUE='A 
+message.'
 ```
 
-### Wrapping words
+Wrapping words
 
+❯ `string::wrapText A\ message.$'\n'A\ new\ line 13 [36m░░░[0m 10`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapText 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
-[36m░░░[0mA message.
-[36m░░░[0mA new line
+RETURNED_VALUE='A message.
+[36m░░░[0mA new line'
 ```
 
-### Wrapping characters at column 20 with padding of 3 on all lines
+### ✅ Testing string::wrapCharacters
 
+Wrapping characters at column 20 with padding of 3 on all lines
 
+❯ `string::wrapCharacters "${MULTI_LINES_TEXT}" 20 \ \ \  17`
 
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapCharacters "${shortText}" 20 "   " 17
---------------------
-   You don't [36m[36m[36mget bet
+RETURNED_VALUE='You don`t [36m[36m[36mget bet
    ter[39m[39m[39m on the days w
    hen you feel like
    going. You get be
    tter on the days 
-   when you don't wa
+   when you don`t wa
    nt to go, but you
    go anyway. If you
    can [34movercome the 
@@ -548,14 +592,14 @@ Standard output
    tivated mind, you
    will grow and bec
    ome better. It wo
-   n't be the best w
+   n`t be the best w
    orkout you have, 
-   you won't accompl
+   you won`t accompl
    ish as much as wh
    at you usually do
    when you actually
    feel good, but th
-   at doesn't matter
+   at doesn`t matter
    . Growth is a lon
    g term game, and 
    the crappy days a
@@ -564,22 +608,22 @@ Standard output
    
    As long as I focu
    s on what I feel 
-   and don't worry a
-   bout where I'm go
+   and don`t worry a
+   bout where I`m go
    ing, it works out
    . Having no expec
    tations but being
    open to everythin
    g is what makes w
    onderful things h
-   appen. If I don't
-   worry, there's no
+   appen. If I don`t
+   worry, there`s no
    obstruction and l
    ife flows easily.
    It sounds impract
-   ical, but 'Expect
+   ical, but `Expect
    nothing; be open 
-   to everything' is
+   to everything` is
    really all it is.
    01234567890123456
    789 on new line 0
@@ -593,25 +637,22 @@ Standard output
    
    There were 2 new 
    lines before this
-   .
+   .'
+RETURNED_VALUE2='1'
 ```
 
-### Wrapping characters at 20, no other options
+Wrapping characters at 20, no other options
 
+❯ `string::wrapCharacters "${MULTI_LINES_TEXT}" 20`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapCharacters "${shortText}" 20
---------------------
-You don't [36m[36m[36mget better[39m[39m[39m
+RETURNED_VALUE='You don`t [36m[36m[36mget better[39m[39m[39m
 on the days when you
 feel like going. You
 get better on the da
-ys when you don't wa
+ys when you don`t wa
 nt to go, but you go
 anyway. If you can [34mo
 vercome the negative
@@ -619,34 +660,34 @@ energy[39m coming from y
 our tired body or un
 motivated mind, you 
 will grow and become
-better. It won't be 
+better. It won`t be 
 the best workout you
-have, you won't acco
+have, you won`t acco
 mplish as much as wh
 at you usually do wh
 en you actually feel
 good, but that doesn
-'t matter. Growth is
+`t matter. Growth is
 a long term game, an
 d the crappy days ar
 e more important.
 
 As long as I focus o
 n what I feel and do
-n't worry about wher
-e I'm going, it work
+n`t worry about wher
+e I`m going, it work
 s out. Having no exp
 ectations but being 
 open to everything i
 s what makes wonderf
 ul things happen. If
-I don't worry, there
-'s no obstruction an
+I don`t worry, there
+`s no obstruction an
 d life flows easily.
 It sounds impractica
-l, but 'Expect nothi
+l, but `Expect nothi
 ng; be open to every
-thing' is really all
+thing` is really all
 it is. 0123456789012
 3456789 on new line 
 01234567890123456789
@@ -656,110 +697,111 @@ https://en.wikipedia
 .org/wiki/Veganism
 
 There were 2 new lin
-es before this.
+es before this.'
+RETURNED_VALUE2='15'
 ```
 
-### Wrapping characters
+Wrapping characters
 
+❯ `string::wrapCharacters 01234567890123456789234 17 \ \ \  1`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapCharacters 01234567890123456789234 17 '   ' 1
------------------
-                0
+RETURNED_VALUE='0
    12345678901234
-   56789234
+   56789234'
+RETURNED_VALUE2='8'
 ```
 
-### Wrapping characters
+Wrapping characters
 
+❯ `string::wrapCharacters A\ message.$'\n'A\ new\ line 13 [36m░░░[0m 10`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapCharacters 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
-[36m░░░[0mA message.
-[36m░░░[0mA new line
+RETURNED_VALUE='A message.
+[36m░░░[0mA new line'
+RETURNED_VALUE2='0'
 ```
 
-### Wrapping characters, spaces at the beginning of the line are kept
+Wrapping characters, spaces at the beginning of the line are kept
 
+❯ `string::wrapCharacters \ \ Start\ With\ spaces\ that\ must\ be\ kept!\ Other\ spaces\ can\ be\ ignored\ at\ wrapping.$'\n'\ \ Also\ start\ with\ spaces 17 \ \ \  14`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 1
------------------
-     Start With s
+RETURNED_VALUE='  Start With s
    paces that mus
    t be kept! Oth
    er spaces can 
    be ignored at 
    wrapping.
      Also start w
-   ith spaces
+   ith spaces'
+RETURNED_VALUE2='10'
 ```
 
-### Testing string::highlight
+### ✅ Testing string::highlight
 
-
-
-Exit code: `0`
-
-Standard output
-
-```text
-→ string::highlight 'This is a text to highlight.' 'ttttt'
-CHITCDEhis is a CHITCDEexCHItCDE CHItCDEo highlighCHItCDE.
-
-→ string::highlight 'This is a text to highlight.' 'TTTTT' '>' '<'
->T<his is a >t<ex>T< >t<o highligh>t<.
-
-→ string::highlight '' 'ttttt'
-
-
-→ string::highlight 'This is a text to highlight.' ''
-This is a text to highlight.
-```
-
-### ✅ Testing string::head
-
-**Global variables:**
-
-```text
-_TEST_MULTILINE_STRING='The first line.
-The second line.
-The third line.
-The fourth line.
-The fifth line.'
-```
-
-Testing string::head with 3 lines
-
-❯ `string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 3`
+❯ `string::highlight This\ is\ a\ Text\ to\ highlight. ttttt`
 
 Returned variables:
 
 ```text
-RETURNED_VALUE='The first line.
-The second line.
-The third line.
+RETURNED_VALUE='CHITCDEhis is a CHITCDEexCHItCDE CHItCDEo highlighCHItCDE.'
+```
+
+❯ `string::highlight This\ is\ a\ texT\ to\ highlight. TTTTT '>' '<'`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='>T<his is a >t<ex>T< >t<o highligh>t<.'
+```
+
+❯ `string::highlight '' ttttt`
+
+Returned variables:
+
+```text
+RETURNED_VALUE=''
+```
+
+❯ `string::highlight This\ is\ a\ text\ to\ highlight. ''`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='This is a text to highlight.'
+```
+
+### ✅ Testing string::head
+
+```text
+MULTI_LINES_TEXT2='1 line one
+2 line two
+3 line three
+4 line four'
+```
+
+Testing string::head with 2 lines
+
+❯ `string::head "${MULTI_LINES_TEXT2}" 2`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='1 line one
+2 line two
 '
 ```
 
 Testing string::head with 0 line
 
-❯ `string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 0`
+❯ `string::head "${MULTI_LINES_TEXT2}" 0`
 
 Returned variables:
 
@@ -769,16 +811,15 @@ RETURNED_VALUE=''
 
 Testing string::head with 10 lines
 
-❯ `string::head The\ first\ line.$'\n'The\ second\ line.$'\n'The\ third\ line.$'\n'The\ fourth\ line.$'\n'The\ fifth\ line. 10`
+❯ `string::head "${MULTI_LINES_TEXT2}" 10`
 
 Returned variables:
 
 ```text
-RETURNED_VALUE='The first line.
-The second line.
-The third line.
-The fourth line.
-The fifth line.
+RETURNED_VALUE='1 line one
+2 line two
+3 line three
+4 line four
 '
 ```
 

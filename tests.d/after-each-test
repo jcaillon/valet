@@ -2,7 +2,7 @@
 if [[ ${GLOBAL_TEST_SUITE_NAME:-} == "lib-test" ]]; then
   TESTING_HOOKS+="after-each-test"
   test::title "🪝 Testing the self test hooks"
-  test::markdown "The variable TESTING_HOOKS shows that the hooks [before-tests](../before-tests), [before-each-test-suite](../before-each-test-suite), [before-each-test](before-each-test) have been executed." \
-  "This test is written in the [after-each-test](after-each-test) script. The \`after-each-test-suites\` and \`after-tests\` are executed after the test script exits, thus we can't output their results in this report."
+  test::markdown "The variable TESTING_HOOKS shows that the hooks [before-tests](../before-tests), [before-each-test-suite](../before-each-test-suite), [before-each-test](../before-each-test) have been executed." \
+  "This test is written in the [after-each-test](../after-each-test) script. The \`after-each-test-suites\` and \`after-tests\` are executed after the test script exits, thus we can't output their results in this report."
   test::printVars TESTING_HOOKS
 fi

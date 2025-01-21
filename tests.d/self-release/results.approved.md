@@ -108,7 +108,8 @@ DEBUG    Analyzing the following files:
   15 ░ $GLOBAL_VALET_HOME/libraries.d/lib-system
   16 ░ $GLOBAL_VALET_HOME/libraries.d/lib-test
   17 ░ $GLOBAL_VALET_HOME/libraries.d/lib-tui
-  18 ░ $GLOBAL_VALET_HOME/libraries.d/main
+  18 ░ $GLOBAL_VALET_HOME/libraries.d/lib-version
+  19 ░ $GLOBAL_VALET_HOME/libraries.d/main
 DEBUG    Found function: ⌜io::createTempFile⌝
 DEBUG    Found function: ⌜io::createTempDirectory⌝
 DEBUG    Found function: ⌜io::cleanupTempFiles⌝
@@ -210,8 +211,6 @@ DEBUG    Found function: ⌜progress::update⌝
 DEBUG    Found function: ⌜progress::stop⌝
 DEBUG    Found function: ⌜prompt_getDisplayedPromptString⌝
 DEBUG    Found function: ⌜string::cutField⌝
-DEBUG    Found function: ⌜string::compareSemanticVersion⌝
-DEBUG    Found function: ⌜string::bumpSemanticVersion⌝
 DEBUG    Found function: ⌜string::camelCaseToSnakeCase⌝
 DEBUG    Found function: ⌜string::kebabCaseToSnakeCase⌝
 DEBUG    Found function: ⌜string::kebabCaseToCamelCase⌝
@@ -268,6 +267,8 @@ DEBUG    Found function: ⌜tui::waitForKeyPress⌝
 DEBUG    Found function: ⌜tui::rebindKeymap⌝
 DEBUG    Found function: ⌜tui::resetBindings⌝
 DEBUG    Found function: ⌜tui::clearKeyPressed⌝
+DEBUG    Found function: ⌜version::compare⌝
+DEBUG    Found function: ⌜version::bump⌝
 INFO     Found 159 functions with documentation.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet.md⌝.
@@ -521,10 +522,6 @@ INFO     Writing the 159 functions documentation to the core libraries docs.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
-▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/string.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/system.md
@@ -633,6 +630,12 @@ INFO     Writing the 159 functions documentation to the core libraries docs.
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/tui.md
 ▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/tui.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/tui.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/version.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/version.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/version.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/version.md
+▶ called io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/version.md
+▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/version.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 ▶ called io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md

@@ -49,8 +49,11 @@ function core::setShellOptions() {
   # default IFS
   IFS=' '$'\t'$'\n'
 
-  # set a fixed locale (otherwise we would risk to have comma as decimal separator
-  # for EPOCHREALTIME for instance).
+  # Set a locale otherwise we will face inconsistencies in the output of commands:
+  # - file listing will not sort the same way
+  # - string comparison < and > will not have the same behavior
+  # - `EPOCHREALTIME` can output with a comma as decimal separator instead of a dot
+  # - ...
   # If the user does not have the locale, they will get a warning here.
   # In which case they must either generate the locale C.utf8 or set an existing locale
   # listed in `locale -a` via the VALET_CONFIG_LOCALE environment variable.
@@ -1706,7 +1709,7 @@ function core::parseArguments() {
   # get the function name of the calling function
   functionName="${FUNCNAME[1]?"This function must be called from a command function."}"
 
-  main::parseFunctionArgumentsOrGoInteractive "${functionName}" "$@"
+  main::parseCmdFunctionArgumentsOrGoInteractive "${functionName}" "$@"
 }
 
 # ## core::checkParseResults

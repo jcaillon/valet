@@ -233,7 +233,7 @@ function selfUpdate() {
     currentVersion="${currentVersion%%$'\n'*}"
 
     # compare local and distant versions
-    string::compareSemanticVersion "${currentVersion}" "${version}"
+    version::compare "${currentVersion}" "${version}"
     if [[ ${RETURNED_VALUE} == "0" || ${RETURNED_VALUE} == "1" ]]; then
       log::info "The current local version ⌜${currentVersion}⌝ is higher or equal to the distant version ⌜${version}⌝."
       log::success "You already have the latest version."
@@ -597,6 +597,8 @@ function selfUpdate_sourceDependencies() {
   source io
   # shellcheck source=../libraries.d/lib-string
   source string
+  # shellcheck source=../libraries.d/lib-version
+  source version
 }
 
 # Create a shim (script that calls valet) in a bin directory.

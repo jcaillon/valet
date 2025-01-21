@@ -3,7 +3,6 @@
 # shellcheck disable=SC2016
 # shellcheck disable=SC2034
 function main() {
-
   test::title "✅ Testing the basic functions of lib-test"
   test::log "This push logs for debugging purposes. They will only appear if the test fails."
   test::markdown "You can insert comments that will appear as a paragraph in the test report." \

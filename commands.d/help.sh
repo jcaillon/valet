@@ -47,7 +47,7 @@ examples:
 function showCommandHelp() {
   local -a commands
   local parsingErrors help columns noColors help
-  main::parseFunctionArguments "${FUNCNAME[0]:-}" "$@"
+  command::parseFunctionArguments "${FUNCNAME[0]:-}" "$@"
   eval "${RETURNED_VALUE}"
 
   core::checkParseResults "${help:-}" "${parsingErrors:-}"

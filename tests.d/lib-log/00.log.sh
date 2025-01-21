@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+function main() {
+  test::title "✅ Testing log::createPrintFunction"
+
+  export VALET_CONFIG_ENABLE_COLORS=true
+  export VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
+  export VALET_CONFIG_LOG_DISABLE_TIME=false
+  export VALET_CONFIG_LOG_DISABLE_WRAP=false
+  export VALET_CONFIG_LOG_ENABLE_TIMESTAMP=true
+  export VALET_CONFIG_LOG_COLUMNS=50
+
+  # fix the time to a known value
+  export TZ=Etc/GMT+0
+  unset EPOCHSECONDS EPOCHREALTIME
+  export EPOCHSECONDS=548902800
+  export EPOCHREALTIME=548902800.000000
+
+  test::printVars VALET_CONFIG_ENABLE_COLORS VALET_CONFIG_ENABLE_NERDFONT_ICONS VALET_CONFIG_LOG_DISABLE_TIME VALET_CONFIG_LOG_COLUMNS VALET_CONFIG_LOG_DISABLE_WRAP VALET_CONFIG_LOG_ENABLE_TIMESTAMP TZ EPOCHSECONDS EPOCHREALTIME
+
+  test::exec log::createPrintFunction
+  test::prompt eval "\${GLOBAL_LOG_PRINT_FUNCTION}"
+  eval "${GLOBAL_LOG_PRINT_FUNCTION}"
+
+  test::title "✅ Testing log::print"
+  test::exec log::print SUCCESS   OK '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567' '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'
+
+  export VALET_CONFIG_ENABLE_COLORS=false
+  export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
+  export VALET_CONFIG_LOG_DISABLE_TIME=true
+  export VALET_CONFIG_LOG_COLUMNS=40
+
+  test::printVars VALET_CONFIG_ENABLE_COLORS VALET_CONFIG_ENABLE_NERDFONT_ICONS VALET_CONFIG_LOG_DISABLE_TIME VALET_CONFIG_LOG_COLUMNS
+
+  test::exec log::createPrintFunction
+  test::prompt eval "\${GLOBAL_LOG_PRINT_FUNCTION}"
+  eval "${GLOBAL_LOG_PRINT_FUNCTION}"
+
+  test::exec log::info 'Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.' '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567' '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'
+
+  test::title "✅ Testing log::printFile"
+  test::exec log::printFile file-to-read 2
+  test::exec log::printFile file-to-read
+
+  # shellcheck disable=SC2034
+  local text="What is Lorem Ipsum?
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
+It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+
+Why do we use it?
+
+It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.
+The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.
+Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.
+Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like)."
+  test::printVars text
+
+  test::title "✅ Testing log::printFileString"
+  test::exec log::printFileString "\"\${text}\"" 2
+  test::exec log::printFileString "\"\${text}\""
+}
+
+main

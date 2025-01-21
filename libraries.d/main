@@ -447,6 +447,7 @@ function main::parseMainArgumentsSwitch() {
     VALET_FORCE_INTERACTIVE_MODE=true
     ;;
   --disable-progress-bars)
+    # shellcheck disable=SC2034
     VALET_DISABLE_PROGRESS_BARS=true
     ;;
   --version)
@@ -604,7 +605,7 @@ function main::runMenuWithSubCommands() {
   CMD_COMMAND__menu="${command}"
 
   local parsedArguments
-  main::parseFunctionArguments "_menu" "$@"
+  command::parseFunctionArguments "_menu" "$@"
   parsedArguments="${RETURNED_VALUE}"
   if log::isDebugEnabled; then
     log::debug "Parsed arguments:"
@@ -932,19 +933,17 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
 # Usage:
 #  main::getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3" && level="${RETURNED_VALUE}"
 function main::getMaxPossibleCommandLevel() {
-  local command commandPart level maxLevel
-  # count the number of spaces
-  command="${*}"
+  local level maxLevel
+  local IFS=' '
   level=0
-  # shellcheck disable=SC2034
-  for commandPart in ${command}; do
+  # shellcheck disable=SC2048
+  for _ in ${*}; do
     level=$((level + 1))
   done
   maxLevel=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
-  if [[ "${level}" -gt "${maxLevel}" ]]; then
+  if (( level > CMD_MAX_SUB_COMMAND_LEVEL + 1 )); then
     level="${maxLevel}"
   fi
-
   RETURNED_VALUE="${level}"
 }
 
@@ -954,7 +953,7 @@ function main::getMaxPossibleCommandLevel() {
 
 # Parses the arguments and options of a function.
 # Usage:
-#  main::parseFunctionArguments "functionName" "$@" && eval "${RETURNED_VALUE}"
+#  command::parseFunctionArguments "functionName" "$@" && eval "${RETURNED_VALUE}"
 #
 # Notes:
 # - It will return a string that can be evaluated to set the variables
@@ -966,7 +965,7 @@ function main::getMaxPossibleCommandLevel() {
 # - It will also set the variable parsingErrors if there are any errors.
 # - Variable name for an option is taken from the first --long version of the option.
 # - It will set the variable as an array if the (last) argument name ends with '...'
-function main::parseFunctionArguments() {
+function command::parseFunctionArguments() {
   local functionName
   functionName="${1}"
   shift
@@ -1350,13 +1349,13 @@ function main::getSingleLetterOptions() {
 # See the @core::parseArguments function for more details on parsing.
 #
 # Usage:
-#   main::parseFunctionArgumentsOrGoInteractive "functionName" "$@" && eval "${RETURNED_VALUE}"
-function main::parseFunctionArgumentsOrGoInteractive() {
+#   main::parseCmdFunctionArgumentsOrGoInteractive "functionName" "$@" && eval "${RETURNED_VALUE}"
+function main::parseCmdFunctionArgumentsOrGoInteractive() {
   local functionName
   functionName="${1}"
   shift
 
-  main::parseFunctionArguments "${functionName}" "$@"
+  command::parseFunctionArguments "${functionName}" "$@"
   local parsedArguments="${RETURNED_VALUE}"
   if log::isDebugEnabled; then
     log::debug "Parsed arguments:"

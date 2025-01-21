@@ -71,7 +71,7 @@ function system::env() {
 #
 # > This function avoid to call $(date) in a subshell (date is a an external executable).
 function system::date() {
-  local format="${1:-'%(%F_%Hh%Mm%Ss)T'}"
+  local format="${1:-"%(%F_%Hh%Mm%Ss)T"}"
   # shellcheck disable=SC2059
   printf -v RETURNED_VALUE "${format}" "${EPOCHSECONDS}"
 }

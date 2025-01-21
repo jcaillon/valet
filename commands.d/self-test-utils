@@ -73,8 +73,9 @@ function selfTestUtils_setupValetForConsistency() {
 
   # fix the time to a known value
   export TZ=Etc/GMT+0
-  # unset EPOCHSECONDS EPOCHREALTIME
+  unset EPOCHSECONDS
   export EPOCHSECONDS=548902800
+  # can't unset EPOCHREALTIME because we use it in PS4 during debug, #TODO: need to fix that
   export EPOCHREALTIME=548902800.000000
 
   log::createPrintFunction

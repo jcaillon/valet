@@ -57,5 +57,6 @@ This page lists the features that I would like to implement in Valet. They come 
   - handle shift + arrows to highlight text
   - add a stack for kill/yank
   - add a stack for undo/redo
+- add a new command self diagnostic that will run a series of tests to check the environment and help figure out what's wrong.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

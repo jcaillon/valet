@@ -2,145 +2,117 @@
 
 ## Test script 00.tests
 
-### Testing system::os
+### ✅ Testing system::os
 
+❯ `OSTYPE=linux-bsd system::os`
 
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ OSTYPE=linux-bsd system::os
-linux
-
-→ OSTYPE=msys system::os
-windows
-
-→ OSTYPE=darwin-stuff system::os
-darwin
-
-→ OSTYPE=nop system::os
-unknown
-
+RETURNED_VALUE='linux'
 ```
 
-### Testing system::env
+❯ `OSTYPE=msys system::os`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ system::env
-Found environment variables.
+RETURNED_VALUE='windows'
 ```
 
-### Testing system::date
+❯ `OSTYPE=darwin-stuff system::os`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ system::date
-Returned date with length 22.
-
-→ system::date %(%H:%M:%S)T
-Returned date with length 8.
+RETURNED_VALUE='darwin'
 ```
 
-### Testing system::date
+❯ `OSTYPE=nop system::os`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ system::getUndeclaredVariables
-No undeclared variables found.
-
-→ system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE
-Found undeclared variables: ⌜dfg NOP⌝.
+RETURNED_VALUE='unknown'
 ```
 
-### Testing system::getNotExistingCommands
+### ✅ Testing system::env
 
+❯ `system::env`
 
+Found environment variables in RETURNED_ARRAY.
 
-Exit code: `0`
+### ✅ Testing system::date
 
-Standard output
+❯ `system::date`
+
+Returned variables:
 
 ```text
-→ system::getNotExistingCommands
-No not existing commands found.
-
-→ system::getNotExistingCommands NONEXISTINGSTUFF system::getNotExistingCommands rm YETANOTHERONEMISSING
-Found not existing commands: ⌜NONEXISTINGSTUFF YETANOTHERONEMISSING⌝.
+RETURNED_VALUE='1987-05-25_01h00m00s'
 ```
 
-### Testing system::commandExists
+❯ `system::date '%(%H:%M:%S)T'`
 
-
-
-Exit code: `0`
-
-Standard output
+Returned variables:
 
 ```text
-→ system::commandExists
-Command not found.
-
-→ system::commandExists NONEXISTINGSTUFF
-Command not found.
-
-→ system::commandExists rm ls
-Found command.
+RETURNED_VALUE='01:00:00'
 ```
 
-### Testing system::addToPath
+### ✅ Testing system::getUndeclaredVariables
 
+❯ `system::getUndeclaredVariables`
 
+Returned code: `1`
 
-Exit code: `0`
+❯ `ABC=ok`
 
-Standard output
+❯ `system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE dfg ABC NOP`
+
+Returned variables:
 
 ```text
-→ system::addToPath
-
-content of files:
-
-
-export PATH="/coucou:${PATH}"
-
-
-set path = ($path '/coucou')
-
-
-set path = ($path '/coucou')
-
-
-$PATH.append('/coucou')
-
-
-fish_add_path '/coucou'
-
-
-export PATH="/coucou:${PATH}"
-
-
-$env.PATH = ($env.PATH | split row (char esep) | append "/coucou")
+RETURNED_ARRAY=(
+[0]='dfg'
+[1]='NOP'
+)
 ```
 
-Error output
+### ✅ Testing system::getNotExistingCommands
+
+❯ `system::getNotExistingCommands`
+
+Returned code: `1`
+
+❯ `system::getNotExistingCommands NONEXISTINGSTUFF system::getNotExistingCommands rm YETANOTHERONEMISSING`
+
+Returned variables:
+
+```text
+RETURNED_ARRAY=(
+[0]='NONEXISTINGSTUFF'
+[1]='YETANOTHERONEMISSING'
+)
+```
+
+### ✅ Testing system::commandExists
+
+❯ `system::commandExists`
+
+Returned code: `1`
+
+❯ `system::commandExists NONEXISTINGSTUFF`
+
+Returned code: `1`
+
+❯ `system::commandExists rm`
+
+### ✅ Testing system::addToPath
+
+❯ `system::addToPath /coucou`
+
+**Error output**:
 
 ```text
 INFO     Adding directory ⌜/coucou⌝ to the PATH for ⌜bash⌝ shell.
@@ -169,6 +141,90 @@ Appending to ⌜resources/gitignored/.config/nushell/env.nu⌝:
 $env.PATH = ($env.PATH | split row (char esep) | append "/coucou")
 WARNING  The directory ⌜/coucou⌝ has been added to the PATH for 8 shells.
 Please login again to apply the changes on your current shell if you are not using bash.
+```
+
+❯ `io::cat resources/gitignored/.zshrc`
+
+**Standard output**:
+
+```text
+
+
+export PATH="/coucou:${PATH}"
+
+```
+
+❯ `io::cat resources/gitignored/.tcshrc`
+
+**Standard output**:
+
+```text
+
+
+set path = ($path '/coucou')
+
+```
+
+❯ `io::cat resources/gitignored/.cshrc`
+
+**Standard output**:
+
+```text
+
+
+set path = ($path '/coucou')
+
+```
+
+❯ `io::cat resources/gitignored/.xonshrc`
+
+**Standard output**:
+
+```text
+
+
+$PATH.append('/coucou')
+
+```
+
+❯ `io::cat resources/gitignored/.config/fish/config.fish`
+
+**Standard output**:
+
+```text
+
+
+fish_add_path '/coucou'
+
+```
+
+❯ `io::cat resources/gitignored/.kshrc`
+
+**Standard output**:
+
+```text
+
+
+export PATH="/coucou:${PATH}"
+
+```
+
+❯ `io::cat resources/gitignored/.config/nushell/env.nu`
+
+**Standard output**:
+
+```text
+
+
+$env.PATH = ($env.PATH | split row (char esep) | append "/coucou")
+
+```
+
+❯ `system::addToPath /coucou`
+
+**Error output**:
+
+```text
 INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜bash⌝ shell.
 INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜ksh⌝ shell.
 INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜zsh⌝ shell.
@@ -179,53 +235,47 @@ INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜fish⌝ shell
 INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
 ```
 
-### Testing system::windowsSetEnvVar
+### ✅ Testing system::windowsSetEnvVar
 
+❯ `OSTYPE=msys system::windowsSetEnvVar VAR VALUE`
 
-
-Exit code: `0`
-
-Standard output
+**Standard output**:
 
 ```text
-→ system::windowsSetEnvVar VAR VALUE
-io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.SetValue('VAR', 'VALUE', 'ExpandString');
-
-→ system::windowsSetEnvVar VAR ''
-io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.DeleteValue('VAR');
-
+🙈 mocking io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.SetValue('VAR', 'VALUE', 'ExpandString');
 ```
 
-### Testing system::windowsGetEnvVar
+❯ `OSTYPE=msys system::windowsSetEnvVar VAR ''`
 
-
-
-Exit code: `0`
-
-Standard output
+**Standard output**:
 
 ```text
-→ system::windowsGetEnvVar VAR
-io::windowsRunInPowershell: 
+🙈 mocking io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.DeleteValue('VAR');
+```
+
+### ✅ Testing system::windowsGetEnvVar
+
+❯ `OSTYPE=msys system::windowsGetEnvVar VAR`
+
+**Standard output**:
+
+```text
+🙈 mocking io::windowsRunInPowershell: 
   $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
   $value = $key.GetValue('VAR', '', 'DoNotExpandEnvironmentNames');
   $key.Dispose();
   Write-Output $value;
   
-
 ```
 
-### Testing system::windowsAddToPath
+### ✅ Testing system::windowsAddToPath
 
+❯ `OSTYPE=msys system::windowsAddToPath /coucou`
 
-
-Exit code: `0`
-
-Standard output
+**Standard output**:
 
 ```text
-→ system::windowsAddToPath /coucou
-io::windowsRunInPowershell: 
+🙈 mocking io::windowsRunInPowershell: 
   $pathToAdd = '\coucou';
   $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
   $oldPath = $key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
@@ -235,6 +285,5 @@ io::windowsRunInPowershell:
   };
   $key.Dispose();
   
-
 ```
 

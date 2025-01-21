@@ -21,6 +21,8 @@ source interactive
 source system
 # shellcheck source=../libraries.d/lib-array
 source array
+# shellcheck source=../libraries.d/lib-version
+source version
 
 #===============================================================
 # >>> self release valet
@@ -312,7 +314,7 @@ function selfRelease::bumpVersion() {
   log::info "The current version of valet is: ${version}."
 
   # bump the version
-  string::bumpSemanticVersion "${version}" "${bumpLevel}" && newVersion="${RETURNED_VALUE}"
+  version::bump "${version}" "${bumpLevel}" && newVersion="${RETURNED_VALUE}"
   if [[ "${dryRun:-}" != "true" ]]; then io::writeToFile "${GLOBAL_VALET_HOME}/version" "${newVersion}"; fi
   log::info "The bumped version of valet is: ${newVersion}."
 

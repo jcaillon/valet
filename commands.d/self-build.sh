@@ -262,7 +262,7 @@ function bumpValetBuildVersion() {
   local currentVersion="${RETURNED_VALUE:-0.0.0}"
   currentVersion="${currentVersion%%$'\n'*}"
 
-  string::bumpSemanticVersion "${currentVersion}" "patch" "false"
+  version::bump "${currentVersion}" "patch" "false"
 
   printf '%s' "${RETURNED_VALUE}" >"${GLOBAL_VALET_HOME}/version"
 
@@ -716,6 +716,8 @@ source array
 source io
 # shellcheck source=../libraries.d/lib-string
 source string
+# shellcheck source=../libraries.d/lib-version
+source version
 
 # if this script is run directly, execute the function, otherwise valet will do it
 if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
