@@ -2,26 +2,19 @@
 
 ## Test script 01.self-uninstall
 
-### Testing selfUninstall
+### ✅ Testing self uninstall command
 
+❯ `selfUninstall`
 
-
-Exit code: `0`
-
-Standard output
-
-```text
-→ selfUninstall
-
-→ selfUninstall --script
-ok
-```
-
-Error output
+**Error output**:
 
 ```text
 WARNING  To uninstall Valet, you can run the following commands:
 
 bash -c 'eval "$(valet self uninstall --script 2>/dev/null)"'
 ```
+
+❯ `io::invoke selfUninstall --script`
+
+The uninstallation script contains 'Valet has been uninstalled'.
 

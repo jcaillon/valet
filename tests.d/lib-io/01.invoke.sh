@@ -13,7 +13,7 @@ function main() {
 function test_io::invoke5() {
   test::title "✅ Testing io::invoke5"
 
-  echo "Input stream content from a file" >"${GLOBAL_TEST_TEMP_FILE}"
+  printf '%s' "Input stream content from a file" >"${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Input stream from string, returns an error:"
   test::func io::invoke5 false 0 false "'input_stream'" fake --std-in --error
@@ -77,7 +77,7 @@ function fake() {
   local IFS=" "
   echo "🙈 mocking fake $*"
   if [[ -n ${inputStreamContent:-} ]]; then
-    echo "Input stream: <${inputStreamContent%$'\n'}>"
+    echo "Input stream: <${inputStreamContent}>"
   fi
 
   echo "INFO: log line from fake mock" 1>&2

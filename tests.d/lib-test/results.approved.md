@@ -2,24 +2,42 @@
 
 ## Test script 00.tests
 
-### ✅ Testing the basic functions of lib-test
+### ✅ test::log
 
-You can insert comments that will appear as a paragraph in the test report.
+You can add logs during tests using `test::log` for debugging purposes. These log will only appear if the test fails.
+
+❯ `test::log Logged!`
+
+### ✅ test::markdown
+
+You can insert markdown in the test report using `test::markdown`.
+
+❯ `test::markdown **Added.**`
+
+**Added.**
+
+### ✅ test::flush
 
 Everything written to the standard or error output (file descriptor 1 and 2 respectively) is captured and can then be flushed to the test report (usually as a code block).
 
 You can use the `test::flush` function to flush both captured outputs.
 
+❯ `echo "This was written to the standard output using: echo ..."`
+
+❯ `echo "This was written to the error output using: echo ... 1>&2" 1>&2`
+
+❯ `test::flush`
+
 **Standard output**:
 
 ```text
-This was written to the standard output using: echo '...'
+This was written to the standard output using: echo ...
 ```
 
 **Error output**:
 
 ```text
-This was written to the error output using: echo '...' 1>&2
+This was written to the error output using: echo ... 1>&2
 ```
 
 ### 🚽 Testing the more flushing functions
@@ -242,36 +260,14 @@ GLOBAL_VAR3=(
 )
 ```
 
-### 🧫 Testing using test::endTest (deprecated)
+### ❤️ Recommendations for tests
 
-A last way to test your commands is to simply call them, let them write their output to the standard or error (logs) file descriptors as they normally do.
+It is also recommended to implement tests in bash functions and make use of local variables.
 
-An important thing to keep in mind is that shell options are set to exit on error, and exiting during a test is considered a failure.
+While you can test a command by invoking valet (e.g. `test::exec valet my-command argument1`), it is recommended to test the command function itself (e.g. `test::exec myCommandFunction argument1`):
 
-You can use the `commandThatFails || echo "Failed as expected."` pattern to handle expected failures (unexpected failure are supposed to crash your tests anyway).
-
-For commands that directly call `exit`, you must run them in a subshell to avoid the test script to exit as well: `(myCommandThatExit) || || echo "Failed as expected."`.
-
-Exit code: `42`
-
-Standard output
-
-```text
-❯ functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0
-I am testing functionToTest.
-Second test.
-Failed as expected because functionToTest returned 2.
-Third test.
-Failed as expected because functionToTest returned 3.
-```
-
-Error output
-
-```text
-This is supposed to be in the error output
-Second test.
-Third test.
-```
+- The result is the same (and you are not testing valet, you are testing your command implementation),
+- and this avoid bash to create a fork and start another bash process (for `valet`), which would slow down your tests.
 
 ### 🪝 Testing the self test hooks
 

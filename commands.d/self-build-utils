@@ -10,8 +10,8 @@
 #   RETURNED_ARRAY: Each extracted content in an array.
 #
 # Usage:
-#   extractCommandYamls "myfile"
-function extractCommandYamls() {
+#   selfBuild_extractCommandYamls "myfile"
+function selfBuild_extractCommandYamls() {
   local file="${1}"
 
   local firstLine=": \"---"
@@ -63,8 +63,8 @@ function extractCommandYamls() {
 # $1: The command definition (yaml text) to extract from.
 #
 # Usage:
-#   extractCommandDefinitionToVariables "commandDefinition Yaml content"
-function extractCommandDefinitionToVariables() {
+#   selfBuild_extractCommandDefinitionToVariables "commandDefinition Yaml content"
+function selfBuild_extractCommandDefinitionToVariables() {
   local commandDefinition="${1}"
 
   # make sure to unset all previous TEMP_CMD_BUILD_* variables
@@ -101,7 +101,7 @@ function extractCommandDefinitionToVariables() {
       # if we were on a multi line property, we store it
       if [[ readingMultiLine -eq 1 ]]; then
         IFS=_ propertyName="${propertyNames[*]}"; IFS=' '
-        createGlobalVariable "${propertyName}" "${propertyValue%$'\n'}" "${arrayLength}"
+        selfBuild_createGlobalVariable "${propertyName}" "${propertyValue%$'\n'}" "${arrayLength}"
         readingMultiLine=0
         unset "propertyNames[-1]"
       fi
@@ -144,7 +144,7 @@ function extractCommandDefinitionToVariables() {
         else
           IFS=_ propertyName="${propertyNames[*]}"; IFS=' '
         fi
-        createGlobalVariable "${propertyName}" "${newPropertyValue}" "${arrayLength}"
+        selfBuild_createGlobalVariable "${propertyName}" "${newPropertyValue}" "${arrayLength}"
       fi
 
       newIndentationLevel="${#newIndentation}"
@@ -166,7 +166,7 @@ function extractCommandDefinitionToVariables() {
   done <<<"${commandDefinition}"$'\n'"end:"
 }
 
-function createGlobalVariable() {
+function selfBuild_createGlobalVariable() {
   local name="${1}"
   local value="${2}"
   local arrayLength="${3}"
@@ -208,8 +208,8 @@ function createGlobalVariable() {
 #   RETURNED_VALUE: The first long name of the option.
 #
 # Usage:
-#   extractFirstLongNameFromOptionString "--option -o" && local firstLongName="${RETURNED_VALUE}"
-function extractFirstLongNameFromOptionString() {
+#   selfBuild_extractFirstLongNameFromOptionString "--option -o" && local firstLongName="${RETURNED_VALUE}"
+function selfBuild_extractFirstLongNameFromOptionString() {
   local optionString="${1}"
   local word
   # shellcheck disable=SC2034
@@ -230,8 +230,8 @@ function extractFirstLongNameFromOptionString() {
 # $1: The file to write to.
 #
 # Usage:
-#   writeCommandDefinitionVariablesToFile "myfile"
-function writeCommandDefinitionVariablesToFile() {
+#   selfBuild_writeCommandDefinitionVariablesToFile "myfile"
+function selfBuild_writeCommandDefinitionVariablesToFile() {
   local outputFile="${1}"
   local content
 
@@ -307,4 +307,79 @@ GLOBAL_CMD_INCLUDED=1
       printf '%s\n' "${line#declare -? }"
     done <<< "${RETURNED_VALUE}"
   } >"${outputFile}"
+}
+
+# This function verifies the global TEMP_CMD_BUILD_* variables to make sure that the command
+# definition is valid.
+# It write any error the global variable SELF_BUILD_ERRORS.
+#
+# Usage:
+#   selfBuild_verifyCommandDefinition
+function selfBuild_verifyCommandDefinition() {
+  local function="${1}"
+  local command="${2}"
+
+  local message=""
+
+  if [[ "${function}" != "this" ]]; then
+    if [[ -z "${command}" ]]; then
+      SELF_BUILD_ERRORS+="- is missing the command name."$'\n'
+    else
+      # the command can only contain letters, numbers, hyphens and spaces
+      if [[ ! "${command}" =~ ^[[:alnum:]\ -]+$ ]]; then
+        SELF_BUILD_ERRORS+="- has an invalid command name, it can only contain letters, numbers, hyphens and spaces."$'\n'
+      fi
+    fi
+  fi
+  if [[ -z "${function:-}" ]]; then
+    SELF_BUILD_ERRORS+="- has an empty function name."$'\n'
+  else
+    # the function can only contain letters, numbers, hyphens and spaces
+    if [[ ! "${function}" =~ ^[[:alnum:]\ -]+$ ]]; then
+      SELF_BUILD_ERRORS+="- has an invalid function name, it can only contain letters, numbers, hyphens and spaces."$'\n'
+    fi
+  fi
+  if [[ -z "${TEMP_CMD_BUILD_shortDescription:-}" ]]; then
+    SELF_BUILD_ERRORS+="- does not have a short description."$'\n'
+  fi
+  if [[ -z "${TEMP_CMD_BUILD_description:-}" ]]; then
+    SELF_BUILD_ERRORS+="- does not have a description."$'\n'
+  fi
+  if [[ -z "${TEMP_CMD_BUILD_fileToSource:-}" ]]; then
+    SELF_BUILD_ERRORS+="- does not have a file to source to find the function."$'\n'
+  fi
+
+  # check for each option
+  local -i index
+  local option optionName
+  for ((index = 0; index < ${#TEMP_CMD_BUILD_options_name[@]}; index++)); do
+    option="${TEMP_CMD_BUILD_options_name[index]}"
+    optionNames="${option}"
+
+    # make sure that there is only one short option and that is has only 1 character
+    if [[ ${optionNames} == *"<"* ]]; then
+      optionNames="${optionNames%%<*}"
+    fi
+    optionNames="${optionNames//,/ }"
+    string::trimAll "${optionNames}" && optionNames=" ${RETURNED_VALUE} "
+    # remove the first short option
+    optionNames="${optionNames/ -? /}"
+    # if there still are short options, it means that there are more than one or that one has more than one character
+    if [[ ${optionNames} =~ " -"[^-]+ ]]; then
+      SELF_BUILD_ERRORS+="- has an invalid option ⌜${option}⌝, it can only have one short option (single -) and the short option must have a single character."$'\n'
+    fi
+  done
+
+  # TODO: validate that each option is different, same for arguments
+  # only the last argument can end with ...
+  # only the last arguments can be optional
+  # check the syntax for options
+  # check the alphanumeric characters for options and arguments
+  # for short option, only one character is allowed
+  #
+  #
+
+  if [[ -n "${message}" ]]; then
+    SELF_BUILD_ERRORS+="The command definition ⌜${command}⌝ for function ⌜${function}⌝:"$'\n'"${message}"
+  fi
 }

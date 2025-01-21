@@ -78,52 +78,25 @@ Valet uses a diff tool to compare the received and the approved files. It is str
 
 Tests are implemented in `.sh` scripts directly under a test suite directory. The name of the script will determine the `h2` header of the report file while the name of the test suite directory will determine the `h1` header. You can have several scripts or one script per test suite.
 
-You have many functions that you can use in your test scripts to build up the report file: [libraries/test][libraries-tests].
-
-Check out this example to get started quickly:
-
-- [The test script][valet-test-lib-tests].
-- [The test report generated][valet-test-lib-report].
-
-The Valet [tests.d][[valet-test-suites]] directory contains many other examples.
-
 ## ✒️ Implement tests
 
 Here is a very simple example of script to test a command function `myCommand`:
 
 ```bash {linenos=table,linenostart=1,filename="test.sh"}
 #!/usr/bin/env bash
-myCommand
-test::endTest "Testing my command" 0
+test::exec myCommand
 ```
 
-This assumes that `myCommand` will print logs or something to the stdout/stderr, otherwise the test report will just contain the exit code equal to 0 (and headers).
+This assumes that `myCommand` will print logs or something to the stdout/stderr, in which case the function output will appear in the test report.
 
-We can improve this by capturing the return code of the function and display it in the test report:
+In addition `test::exec`, you have access to many functions that you can use in your test scripts to build up the report file: [libraries/test][libraries-tests].
 
-```bash {linenos=table,linenostart=1,filename="test.sh"}
-#!/usr/bin/env bash
-returnCode=0
-myCommand || returnCode=$?
-test::endTest "Testing my command" ${returnCode}
-```
+You are advised to check the tests for the test library, which also documents how to use each function:
 
-It is also recommended to implement tests in bash functions and make use of local variables.
+- [The test report generated][valet-test-lib-report].
+- [The test script][valet-test-lib-tests].
 
-Find another example for [the showcase here][showcase-tests].
-
-{{< callout type="warning" >}}
-It is very important to note that tests, like commands, are executed with the bash options `set -Eeu -o pipefail`. If you expect a function or a command to return a code different than 0, you must handle it or the test (and thus the whole program) will exit.
-
-E.g. do `myFunctionThatReturnsOne || echo "Failed as expected"`.
-
-And if your function calls `exit` at some point, do: `(myFunctionThatReturnsOne) || echo "Exited as expected"`.
-{{< /callout >}}
-
-While you can test a command by invoking valet (e.g. `valet my-command argument1`), it is recommended to test the command function itself (e.g. `myCommandFunction argument1`):
-
-- The result is the same (and you are not testing valet, you are testing your command implementation),
-- and this avoid bash to create a fork and start another bash process (for `valet`), which would slow down your tests.
+The Valet [tests.d][[valet-test-suites]] directory contains many other examples.
 
 ## 🏃‍♂️ Run tests
 
@@ -177,6 +150,5 @@ In addition to the test scripts, you can create other specific scripts which wil
 [valet-test-suites]: https://github.com/jcaillon/valet/tree/latest/tests.d
 [valet-test-lib-report]: https://github.com/jcaillon/valet/blob/latest/tests.d/lib-test/results.approved.md
 [valet-test-lib-tests]: https://github.com/jcaillon/valet/blob/latest/tests.d/lib-test/00.tests.sh
-[showcase-tests]: https://github.com/jcaillon/valet/blob/latest/examples.d/showcase/tests.d/001-showcase-test-suite/00.tests.sh
 [libraries-tests]: ../libraries/test
 [newExtensionsLink]: ../new-extensions

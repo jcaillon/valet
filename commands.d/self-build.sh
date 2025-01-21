@@ -206,7 +206,7 @@ function selfBuild() {
   fi
 
   if [[ ${noOutput:-} != "true" ]]; then
-    writeCommandDefinitionVariablesToFile "${outputFile}"
+    selfBuild_writeCommandDefinitionVariablesToFile "${outputFile}"
     log::info "The command definition variables have been written to ⌜${outputFile}⌝."
   fi
 
@@ -279,7 +279,7 @@ function extractCommandDefinitionsToVariables() {
     local file="${1}"
     shift
     log::info "Extracting commands from ⌜${file}⌝."
-    extractCommandYamls "${file}"
+    selfBuild_extractCommandYamls "${file}"
     local content
     for content in "${RETURNED_ARRAY[@]}"; do
 
@@ -288,7 +288,7 @@ function extractCommandDefinitionsToVariables() {
         log::printFileString "${content%%$'\n'*}"
       fi
 
-      extractCommandDefinitionToVariables "${content}"
+      selfBuild_extractCommandDefinitionToVariables "${content}"
 
       local function command
       string::trimAll "${TEMP_CMD_BUILD_function:-}" && function="${RETURNED_VALUE}"
@@ -323,7 +323,7 @@ function extractCommandDefinitionsToVariables() {
       fi
 
       # verify that the command definition is valid
-      verifyCommandDefinition "${function}" "${command}"
+      selfBuild_verifyCommandDefinition "${function}" "${command}"
 
       # declare common variables
       declareFinalCommandDefinitionCommonVariables "${function}" "${command}"
@@ -452,7 +452,7 @@ function declareFinalCommandDefinitionHelpVariables() {
     if [[ "${TEMP_CMD_BUILD_options_noEnvironmentVariable[index]}" != "true" ]]; then
       optionValue="${TEMP_CMD_BUILD_options_name[index]}"
       if [[ ${optionValue} == *"<"* ]]; then optionValue="<${optionValue##*<}"; else optionValue="true"; fi
-      extractFirstLongNameFromOptionString "${TEMP_CMD_BUILD_options_name[index]}"
+      selfBuild_extractFirstLongNameFromOptionString "${TEMP_CMD_BUILD_options_name[index]}"
       string::kebabCaseToSnakeCase "${RETURNED_VALUE}"
       TEMP_CMD_BUILD_options_description[index]+=$'\n'"This option can be set by exporting the variable VALET_${RETURNED_VALUE}='${optionValue}'."
     fi
@@ -508,7 +508,7 @@ function declareFinalCommandDefinitionParserVariables() {
     fi
     option="${option//,/ }"
     string::trimAll "${option}" && option="${RETURNED_VALUE}"
-    extractFirstLongNameFromOptionString "${option}" && optionName="${RETURNED_VALUE}"
+    selfBuild_extractFirstLongNameFromOptionString "${option}" && optionName="${RETURNED_VALUE}"
     string::kebabCaseToCamelCase "${optionName}" && optionNameCc="${RETURNED_VALUE}"
     if [[ "${optionNoEnvVar}" != "true" ]]; then
       string::kebabCaseToSnakeCase "${optionName}" && optionNameSc="VALET_${RETURNED_VALUE}"
@@ -608,80 +608,6 @@ function declareOtherCommandVariables() {
   return 0
 }
 
-# This function verifies the global TEMP_CMD_BUILD_* variables to make sure that the command
-# definition is valid.
-# It write any error the global variable SELF_BUILD_ERRORS.
-#
-# Usage:
-#   verifyCommandDefinition
-function verifyCommandDefinition() {
-  local function="${1}"
-  local command="${2}"
-
-  local message=""
-
-  if [[ "${function}" != "this" ]]; then
-    if [[ -z "${command}" ]]; then
-      SELF_BUILD_ERRORS+="- is missing the command name."$'\n'
-    else
-      # the command can only contain letters, numbers, hyphens and spaces
-      if [[ ! "${command}" =~ ^[[:alnum:]\ -]+$ ]]; then
-        SELF_BUILD_ERRORS+="- has an invalid command name, it can only contain letters, numbers, hyphens and spaces."$'\n'
-      fi
-    fi
-  fi
-  if [[ -z "${function:-}" ]]; then
-    SELF_BUILD_ERRORS+="- has an empty function name."$'\n'
-  else
-    # the function can only contain letters, numbers, hyphens and spaces
-    if [[ ! "${function}" =~ ^[[:alnum:]\ -]+$ ]]; then
-      SELF_BUILD_ERRORS+="- has an invalid function name, it can only contain letters, numbers, hyphens and spaces."$'\n'
-    fi
-  fi
-  if [[ -z "${TEMP_CMD_BUILD_shortDescription:-}" ]]; then
-    SELF_BUILD_ERRORS+="- does not have a short description."$'\n'
-  fi
-  if [[ -z "${TEMP_CMD_BUILD_description:-}" ]]; then
-    SELF_BUILD_ERRORS+="- does not have a description."$'\n'
-  fi
-  if [[ -z "${TEMP_CMD_BUILD_fileToSource:-}" ]]; then
-    SELF_BUILD_ERRORS+="- does not have a file to source to find the function."$'\n'
-  fi
-
-  # check for each option
-  local -i index
-  local option optionName
-  for ((index = 0; index < ${#TEMP_CMD_BUILD_options_name[@]}; index++)); do
-    option="${TEMP_CMD_BUILD_options_name[index]}"
-    optionNames="${option}"
-
-    # make sure that there is only one short option and that is has only 1 character
-    if [[ ${optionNames} == *"<"* ]]; then
-      optionNames="${optionNames%%<*}"
-    fi
-    optionNames="${optionNames//,/ }"
-    string::trimAll "${optionNames}" && optionNames=" ${RETURNED_VALUE} "
-    # remove the first short option
-    optionNames="${optionNames/ -? /}"
-    # if there still are short options, it means that there are more than one or that one has more than one character
-    if [[ ${optionNames} =~ " -"[^-]+ ]]; then
-      SELF_BUILD_ERRORS+="- has an invalid option ⌜${option}⌝, it can only have one short option (single -) and the short option must have a single character."$'\n'
-    fi
-  done
-
-  # TODO: validate that each option is different, same for arguments
-  # only the last argument can end with ...
-  # only the last arguments can be optional
-  # check the syntax for options
-  # check the alphanumeric characters for options and arguments
-  # for short option, only one character is allowed
-  #
-  #
-
-  if [[ -n "${message}" ]]; then
-    SELF_BUILD_ERRORS+="The command definition ⌜${command}⌝ for function ⌜${function}⌝:"$'\n'"${message}"
-  fi
-}
 
 #===============================================================
 # >>> Main

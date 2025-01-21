@@ -3,40 +3,26 @@
 core::sourceFunction "selfRelease"
 
 function main() {
-  testSelfRelease
-}
-
-function testSelfRelease() {
-  local -i exitCode
+  test::title "✅ Testing self release command"
 
   LAST_GIT_TAG="v1.2.3"
-  echo "→ selfRelease -t token -b major --dry-run"
-  selfRelease -t token -b major --dry-run && exitCode=0 || exitCode=$?
-  test::endTest "Testing selfRelease, dry run major version" ${exitCode}
 
-  log::setLevel debug
-  echo "→ selfRelease -t token -b minor"
-  selfRelease -t token -b minor && exitCode=0 || exitCode=$?
-  test::endTest "Testing selfRelease, minor version" ${exitCode}
+  test::markdown "Testing selfRelease, dry run major version"
+  test::exec selfRelease -t token -b major --dry-run
 
-  log::setLevel info true
+  test::markdown "Testing selfRelease, minor version"
+  test::exec selfRelease -t token -b minor
 }
 
 # need to override git, curl
 function io::invokef5() {
-  echo "▶ called io::invokef5 $*" 1>&2
-  if [[ ${5} == "uname" ]]; then
-    echo -n "x86_64" > "${GLOBAL_TEMPORARY_STDOUT_FILE}"
-    RETURNED_VALUE="${GLOBAL_TEMPORARY_STDOUT_FILE}"
-    RETURNED_VALUE2=""
-    return 0
-  fi
+  echo "🙈 mocked io::invokef5 $*" 1>&2
   RETURNED_VALUE=""
   RETURNED_VALUE2=""
 }
 
 function io::invoke() {
-  echo "▶ called io::invoke $*" 1>&2
+  echo "🙈 mocked io::invoke $*" 1>&2
   if [[ ${1} == "git" ]]; then
     while [[ $# -gt 0 ]]; do
       case "${1}" in
@@ -52,11 +38,12 @@ function io::invoke() {
 }
 
 function interactive::promptYesNo() {
+  echo "🙈 mocked interactive::promptYesNo $*" 1>&2
   return 0
 }
 
 function curl::toVar() {
-  echo "▶ called curl::toVar $*" 1>&2
+  echo "🙈 mocked curl::toVar $*" 1>&2
   RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}", "tag_name": "v1.2.3", "browser_download_url": "https:///fake" }'
   RETURNED_VALUE2=""
   RETURNED_VALUE3=200
@@ -64,7 +51,7 @@ function curl::toVar() {
 
 
 function curl::toFile() {
-  echo "▶ called curl::toFile $*" 1>&2
+  echo "🙈 mocked curl::toFile $*" 1>&2
   RETURNED_VALUE=""
   RETURNED_VALUE2=200
 }
@@ -74,15 +61,11 @@ function core::getVersion() {
 }
 
 function io::writeToFile() {
-  echo "▶ called io::writeToFile $1" 1>&2
+  echo "🙈 mocked io::writeToFile $1" 1>&2
 }
 
 function io::writeToFileFromRef() {
-  echo "▶ called io::writeToFileFromRef $1" 1>&2
+  echo "🙈 mocked io::writeToFileFromRef $1" 1>&2
 }
 
 main
-
-core::resetIncludedFiles
-source io
-source curl

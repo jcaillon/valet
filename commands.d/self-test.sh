@@ -444,11 +444,11 @@ function selfTest_runSingleTestSuite() {
       nbOfScriptsWithErrors+=1
 
     else
-      # check if the user forgot to call test::endTest
+      # check if the user forgot to call flush
       if [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" || -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
         selfTestUtils_displayTestLogs
         selfTestUtils_displayTestSuiteOutputs
-        log::error "The test script had un-flushed when it ended."$'\n'$'\n'"Make sure to conclude all test scripts by calling the ⌜test::flush⌝ or ⌜test::endTest⌝ functions (nothing should be printed to the standard or error output after that)."$'\n'$'\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
+        log::error "The test script had un-flushed when it ended."$'\n'$'\n'"Everything that gets printed to the standard or error output during a test must be flushed to the report. You can use ⌜test::flush⌝ to do that (or other test functions)."$'\n'$'\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
         nbOfScriptsWithErrors+=1
       fi
 

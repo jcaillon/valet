@@ -521,8 +521,7 @@ fake ()
     local IFS=" ";
     echo "🙈 mocking fake $*";
     if [[ -n ${inputStreamContent:-} ]]; then
-        echo "Input stream: <${inputStreamContent%'
-'}>";
+        echo "Input stream: <${inputStreamContent}>";
     fi;
     echo "INFO: log line from fake mock" 1>&2;
     if [[ $* == *"--error"* ]]; then
@@ -544,7 +543,8 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='🙈 mocking fake --std-in --error
-Input stream: <input_stream>
+Input stream: <input_stream
+>
 '
 RETURNED_VALUE2='INFO: log line from fake mock
 ERROR: returning error from fake
@@ -562,7 +562,8 @@ Exited with code: `1`
 ```text
 TRACE    Fake standard output stream:
    1 ░ 🙈 mocking fake --std-in --error
-   2 ░ Input stream: <input_stream>
+   2 ░ Input stream: <input_stream
+   3 ░ >
 TRACE    Fake standard error stream:
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
@@ -713,7 +714,8 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='🙈 mocking fake --std-in --option argument1 argument2
-Input stream: <input_stream>
+Input stream: <input_stream
+>
 '
 RETURNED_VALUE2='INFO: log line from fake mock
 '

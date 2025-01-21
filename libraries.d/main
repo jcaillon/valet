@@ -115,8 +115,8 @@ function main::onCleanUpInternal() {
   fi
 
   # if we ran an interactive function, make sure to restore the cursor
-  if [[ -n ${AC__CURSOR_SHOW:-} ]]; then
-    printf '%s' "${AC__CURSOR_SHOW}"
+  if [[ -t 2 && -n ${AC__CURSOR_SHOW:-} ]]; then
+    printf '%s' "${AC__CURSOR_SHOW}" 1>&2
   fi
 
   # call the clean up functions if they exist

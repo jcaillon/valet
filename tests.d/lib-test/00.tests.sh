@@ -3,16 +3,24 @@
 # shellcheck disable=SC2016
 # shellcheck disable=SC2034
 function main() {
-  test::title "✅ Testing the basic functions of lib-test"
-  test::log "This push logs for debugging purposes. They will only appear if the test fails."
-  test::markdown "You can insert comments that will appear as a paragraph in the test report." \
-    "Everything written to the standard or error output (file descriptor 1 and 2 respectively) is captured and can then be flushed to the test report (usually as a code block)." \
+  test::title "✅ test::log"
+  test::markdown "You can add logs during tests using \`test::log\` for debugging purposes. These log will only appear if the test fails."
+  test::exec test::log "Logged!"
+
+  test::title "✅ test::markdown"
+  test::markdown "You can insert markdown in the test report using \`test::markdown\`."
+  test::exec test::markdown "**Added.**"
+
+  test::title "✅ test::flush"
+  test::markdown "Everything written to the standard or error output (file descriptor 1 and 2 respectively) is captured and can then be flushed to the test report (usually as a code block)." \
     'You can use the `test::flush` function to flush both captured outputs.'
 
-  echo "This was written to the standard output using: echo '...'"
-  echo "This was written to the error output using: echo '...' 1>&2" 1>&2
+  test::prompt 'echo "This was written to the standard output using: echo ..."'
+  test::prompt 'echo "This was written to the error output using: echo ... 1>&2" 1>&2'
+  test::prompt test::flush
+  echo "This was written to the standard output using: echo ..."
+  echo "This was written to the error output using: echo ... 1>&2" 1>&2
   test::flush
-
 
   test::title "🚽 Testing the more flushing functions"
   test::markdown 'You can flush a specific file descriptor using the `test::flushStdout` or `test::flushStderr` function.'
@@ -86,17 +94,11 @@ function main() {
   test::prompt "test::printVars GLOBAL_VAR1 GLOBAL_VAR2 GLOBAL_VAR3"
   test::printVars GLOBAL_VAR1 GLOBAL_VAR2 GLOBAL_VAR3
 
-
-  # <-- TO BE REMOVED -->
-  echo '❯ functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0'
-  functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0
-  functionToTest "Second test." "Second test." 2 || echo "Failed as expected because functionToTest returned $?."
-  (functionThatExit "Third test." "Third test." 3) || echo "Failed as expected because functionToTest returned ${PIPESTATUS[0]}."
-  test::endTest "🧫 Testing using test::endTest (deprecated)" 42 'A last way to test your commands is to simply call them, let them write their output to the standard or error (logs) file descriptors as they normally do.' \
-  'An important thing to keep in mind is that shell options are set to exit on error, and exiting during a test is considered a failure.' \
-  'You can use the `commandThatFails || echo "Failed as expected."` pattern to handle expected failures (unexpected failure are supposed to crash your tests anyway).' \
-  'For commands that directly call `exit`, you must run them in a subshell to avoid the test script to exit as well: `(myCommandThatExit) || || echo "Failed as expected."`.'
-  # <-- /TO BE REMOVED -->
+  test::title "❤️ Recommendations for tests"
+  test::markdown "It is also recommended to implement tests in bash functions and make use of local variables." \
+    "While you can test a command by invoking valet (e.g. \`test::exec valet my-command argument1\`), it is recommended to test the command function itself (e.g. \`test::exec myCommandFunction argument1\`):" \
+    "- The result is the same (and you are not testing valet, you are testing your command implementation),
+- and this avoid bash to create a fork and start another bash process (for \`valet\`), which would slow down your tests."
 }
 
 function functionToTest() {

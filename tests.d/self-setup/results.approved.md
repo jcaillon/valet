@@ -2,16 +2,15 @@
 
 ## Test script 00.self-setup
 
-### Testing selfSetup 1
+### ✅ Testing self setup command
 
+❯ `rm -f "${VALET_CONFIG_FILE}"`
 
+❯ `echo nn | selfSetup`
 
-Exit code: `0`
-
-Standard output
+**Standard output**:
 
 ```text
-→ echo nnn | selfSetup
 ─────────────────────────────────────
 CINThis is a COLOR CHECK, this line should be COLORED (in cyan by default).CDE
 CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
@@ -37,7 +36,7 @@ An information icon: II
 [2m[9G└─[3b─┘[0m
 ```
 
-Error output
+**Error output**:
 
 ```text
 INFO     Now setting up Valet.
@@ -45,7 +44,7 @@ INFO     If you see the replacement character ? in my terminal, it means you don
 You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
 After that, you need to setup your terminal to use this newly installed font.
 You can run the command ⌜valet self setup⌝ again after that.
-INFO     Creating the valet config file ⌜/tmp/valet.d/f1-2⌝.
+INFO     Creating the valet config file ⌜/tmp/valet-temp⌝.
 SUCCESS  You are all set!
 INFO     As a reminder, you can modify the configuration done during this set up by either:
 - replaying the command ⌜valet self setup⌝,
@@ -54,16 +53,27 @@ INFO     Run ⌜valet --help⌝ to get started.
 INFO     You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ to do so.
 ```
 
-### Testing selfSetup 2
+```text
+VALET_CONFIG_ENABLE_COLORS='false'
+VALET_CONFIG_ENABLE_NERDFONT_ICONS='false'
+```
 
+❯ `io::head /tmp/valet-temp 3`
 
-
-Exit code: `0`
-
-Standard output
+**Standard output**:
 
 ```text
-→ echo yyo | selfSetup
+#!/usr/bin/env bash
+# description: This script declares global variables used to configure Valet
+# shellcheck disable=SC2034
+```
+
+❯ `rm -f "${VALET_CONFIG_FILE}"`
+
+**Standard output**:
+
+```text
+→ echo yy | selfSetup
 ─────────────────────────────────────
 CINThis is a COLOR CHECK, this line should be COLORED (in cyan by default).CDE
 CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
@@ -89,16 +99,31 @@ An information icon: II
 [2m[9G└─[4b─┘[0m
 ```
 
-Error output
+**Error output**:
 
 ```text
 INFO     Now setting up Valet.
-CININFO    II  CDE Creating the valet config file CHI⌜/tmp/valet.d/f1-2⌝CDE.
+CININFO    II  CDE Creating the valet config file CHI⌜/tmp/valet-temp⌝CDE.
 CSUSUCCESS IS  CDE You are all set!
 CININFO    II  CDE As a reminder, you can modify the configuration done during this set up by either:
 - replaying the command CHI⌜valet self setup⌝CDE,
 - running the command CHI⌜valet self config⌝CDE.
 CININFO    II  CDE Run CHI⌜valet --help⌝CDE to get started.
 CININFO    II  CDE You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ to do so.
+```
+
+```text
+VALET_CONFIG_ENABLE_COLORS='true'
+VALET_CONFIG_ENABLE_NERDFONT_ICONS='true'
+```
+
+❯ `io::head /tmp/valet-temp 3`
+
+**Standard output**:
+
+```text
+#!/usr/bin/env bash
+# description: This script declares global variables used to configure Valet
+# shellcheck disable=SC2034
 ```
 

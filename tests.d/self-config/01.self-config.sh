@@ -5,55 +5,39 @@ core::sourceFunction "selfConfig"
 # shellcheck disable=SC1091
 source io
 
-function testSelfConfig() {
-  local -i exitCode
-  local originalConfigFile="${VALET_CONFIG_FILE:-}"
-  local configFile
-  io::createTempFile && configFile="${RETURNED_VALUE}"
-  VALET_CONFIG_FILE="${configFile}"
+function main() {
+  test::title "✅ Testing self config command"
 
-  rm -f "${configFile}"
+  export EDITOR=myEditor
 
-  echo "→ selfConfig"
-  selfConfig && exitCode=0 || exitCode=$?
-  echo
-  echo "cat \${configFile}"
-  io::cat "${configFile}"
-  test::endTest "Testing selfConfig" ${exitCode}
+  # shellcheck disable=SC2086
+  unset -v ${!VALET_CONFIG_*}
+  # shellcheck disable=SC2034
+  VALET_CONFIG_FILE="${GLOBAL_TEST_TEMP_FILE}"
 
-  echo "→ selfConfig"
-  selfConfig && exitCode=0 || exitCode=$?
-  test::endTest "Testing selfConfig (should only open, file exists)" ${exitCode}
+  rm -f "${GLOBAL_TEST_TEMP_FILE}"
 
-  echo "→ selfConfig --override --no-edit"
-  selfConfig --override --no-edit && exitCode=0 || exitCode=$?
-  test::endTest "Testing selfConfig override no edit" ${exitCode}
+  test::exec selfConfig
+  test::exec io::head "${GLOBAL_TEST_TEMP_FILE}" 3
 
-  echo "→ (selfConfig --override --export-current-values)"
-  (
-    unset -v ${!VALET_CONFIG_*} VALET_USER_DIRECTORY
-    export VALET_CONFIG_FILE="${configFile}"
-    export VALET_CONFIG_COLOR_DEBUG=$'\e[44m'
-    export VALET_CONFIG_LOG_COLUMNS=20
-    export VALET_CONFIG_LOG_ENABLE_TIMESTAMP=true
-    selfConfig --override --export-current-values
-  ) && exitCode=0 || exitCode=$?
-  echo
-  echo "cat \${configFile}"
-  io::cat "${configFile}"
-  test::endTest "Testing selfConfig override export" ${exitCode}
+  test::markdown "Testing selfConfig (should only open, file does not exist)"
+  test::exec selfConfig
 
-  VALET_CONFIG_FILE="${originalConfigFile}"
+  test::markdown "Testing selfConfig override no edit"
+  test::exec selfConfig --override --no-edit
+
+  test::markdown "Testing to export the current values"
+  export VALET_CONFIG_LOCALE="${GLOBAL_TEST_TEMP_FILE}"
+  test::printVars VALET_CONFIG_LOCALE
+  test::exec selfConfig --override --export-current-values
+  io::readFile "${GLOBAL_TEST_TEMP_FILE}"
+  if [[ ${RETURNED_VALUE} == *"${GLOBAL_TEST_TEMP_FILE}"* ]]; then
+    test::markdown "The path ${GLOBAL_TEST_TEMP_FILE} is in the config file as expected."
+  fi
 }
 
 function myEditor() {
-  echo "▶ called myEditor: $*"
+  echo "🙈 mocking myEditor: $*"
 }
-
-function main() {
-  testSelfConfig
-}
-
-export EDITOR=myEditor
 
 main

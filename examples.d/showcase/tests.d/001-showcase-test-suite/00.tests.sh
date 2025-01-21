@@ -1,45 +1,35 @@
 #!/usr/bin/env bash
 
 # This function demonstrates how to test a function within your script
-function testShowcaseCommand1() {
-  echo "→ showcaseCommand1 -o -2 optionValue2 arg1 more1 more2"
-  showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
-  test::endTest "Testing the showcase command1" 0
-}
-
-# Another example that reminds you that you can override existing functions
-# or variables to test your script
-function testShowCaseSudo() {
-  SUDO="echo"
-  echo "→ showCaseSudo"
-  showCaseSudo
-  test::endTest "Testing the showcase sudo command by replacing sudo with echo" 0
-}
-
-# This demonstrates a custom test where we output what we want in the test results file
-function testOnInterrupt() {
-  echo "→ onInterrupt"
-  if onInterrupt; then
-    echo "onInterrupt is working"
-  else
-    echo "onInterrupt is not working"
-  fi
-  test::endTest "Testing the behavior of onInterrupt" 0
-}
-
 function main() {
   # make sure to source the file in which these known functions are defined
   core::sourceFunction "showcaseCommand1" 2> /dev/null
   core::sourceFunction "showCaseSudo" 2> /dev/null
 
-  testShowcaseCommand1
+  test::title "✅ Testing showcaseCommand1"
+  test::exec showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
+
   testShowCaseSudo
   testOnInterrupt
 }
 
-main
+# Another example that reminds you that you can override existing functions
+# or variables to test your script
+function testShowCaseSudo() {
+  test::title "✅ Testing showcaseSudo"
+  export SUDO="echo"
+  test::exec showCaseSudo
+}
 
-# If you need to see something in the console when running the tests,
-# you can redirect to the file descriptor 3 (for standard output)
-# or 4 (for standard error) like this:
-# echo "This is a message that I will see in the terminal when running tests" >&3
+# This demonstrates a custom test where we output what we want in the test results file
+function testOnInterrupt() {
+  test::prompt "onInterrupt"
+  if onInterrupt; then
+    echo "onInterrupt is working"
+  else
+    echo "onInterrupt is not working"
+  fi
+  test::flush
+}
+
+main

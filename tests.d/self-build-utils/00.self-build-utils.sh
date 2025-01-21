@@ -3,6 +3,61 @@
 # shellcheck source=../../commands.d/self-build-utils
 source "${GLOBAL_VALET_HOME}/commands.d/self-build-utils"
 
+function main() {
+  unset -v ${!CMD_*}
+  test_selfBuild_extractCommandYamls
+  test_selfBuild_extractFirstLongNameFromOptionString
+  test_selfBuild_commandVariables
+}
+
+
+function test_selfBuild_extractCommandYamls() {
+  test::title "✅ Testing selfBuild_extractCommandYamls"
+
+  test::func selfBuild_extractCommandYamls "resources/extract-command-yamls-test-file"
+}
+
+function test_selfBuild_extractFirstLongNameFromOptionString() {
+  test::title "✅ Testing selfBuild_extractFirstLongNameFromOptionString"
+
+  test::func selfBuild_extractFirstLongNameFromOptionString "-x, --profiling"
+}
+
+function test_selfBuild_commandVariables() {
+  test::title "✅ Testing to extract command definition to variables"
+
+  test::printVars _VALID_YAML
+
+  test::exec selfBuild_extractCommandDefinitionToVariables "\"\${_VALID_YAML}\""
+
+  # shellcheck disable=SC2086
+  test::printVars ${!TEMP_CMD_BUILD_*}
+
+  # declare common variables
+  test::exec declareFinalCommandDefinitionCommonVariables "func" "cmd"
+
+  # declare help variables
+  test::exec declareFinalCommandDefinitionHelpVariables "func"
+
+  # declare options and arguments for the parser
+  test::exec declareFinalCommandDefinitionParserVariables "func"
+
+  # shellcheck disable=SC2086
+  test::printVars ${!CMD_*}
+
+  # verify that the command definition is valid
+  test::exec selfBuild_verifyCommandDefinition "func" "cmd"
+  # test::printVars SELF_BUILD_ERRORS
+}
+
+function printVars() {
+  local varName var
+  for varName in "$@"; do
+    local -n var="${varName}"
+    printf "%s=%q\n" "${varName}" "${var[*]}"
+  done
+}
+
 _VALID_YAML="
 command: test
 author: github.com/jcaillon
@@ -50,92 +105,4 @@ examples:
     Call command with option1, option2 and some arguments.
 "
 
-function testExtractCommandYamls() {
-
-  extractCommandYamls "resources/extract-command-yamls-test-file"
-
-  local content
-  for content in "${RETURNED_ARRAY[@]}"; do
-    log::info "content:"
-    log::printFileString "${content}"
-  done
-
-  test::endTest "Testing extractCommandYamls" 0
-}
-
-function testExtractCommandDefinitionToVariables() {
-  log::printFileString "${_VALID_YAML}"
-
-  extractCommandDefinitionToVariables "${_VALID_YAML}"
-
-  printVars ${!TEMP_CMD_BUILD_*}
-
-  test::endTest "Testing extractCommandDefinitionToVariables" 0
-}
-
-function testExtractFirstLongNameFromOptionString() {
-
-  local optionString="-x, --profiling"
-
-  echo "→ extractFirstLongNameFromOptionString '${optionString}'"
-  extractFirstLongNameFromOptionString "${optionString}" && echo "${RETURNED_VALUE}"
-
-  test::endTest "Testing extractFirstLongNameFromOptionString" 0
-}
-
-function testDeclareFinalVariables() {
-  log::printFileString "${_VALID_YAML}"
-
-  # declare common variables
-  declareFinalCommandDefinitionCommonVariables "func" "cmd"
-
-  # declare help variables
-  declareFinalCommandDefinitionHelpVariables "func"
-
-  # declare options and arguments for the parser
-  declareFinalCommandDefinitionParserVariables "func"
-
-  printVars ${!CMD_*}
-
-  test::endTest "Testing declareFinalCommandDefinition*" 0
-}
-
-function testVerifyCommandDefinition() {
-  log::printFileString "${_VALID_YAML}"
-
-  # verify that the command definition is valid
-  verifyCommandDefinition "func" "cmd"
-  echo
-  echo "${SELF_BUILD_ERRORS:-}"
-
-  test::endTest "Testing verifyCommandDefinition" 0
-}
-
-function printVars() {
-  local varName var
-  for varName in "$@"; do
-    local -n var="${varName}"
-    printf "%s=%q\n" "${varName}" "${var[*]}"
-  done
-}
-
-function main() {
-  testExtractCommandYamls
-  testExtractCommandDefinitionToVariables
-  testExtractFirstLongNameFromOptionString
-
-  testDeclareFinalVariables
-  testVerifyCommandDefinition
-}
-
-# save all CMD_* variables into a temporary string
-io::invoke declare -p ${!CMD_*}
-_ALL_CMD_VARIABLES="${RETURNED_VALUE//declare -? /}"
-unset -v ${!CMD_*} _LINE
-
 main
-
-# reset all CMD_* as they were
-unset -v _VALID_YAML
-unset -v ${!CMD_*}
-eval "${_ALL_CMD_VARIABLES}"
