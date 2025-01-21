@@ -1152,9 +1152,9 @@ function interactive::clearKeyPressed() {
 # - `RETURNED_VALUE`: the progress bar string
 #
 # ```bash
-# interactiveGetProgressBarString 50 20
+# interactive_getProgressBarString 50 20
 # ```
-function interactiveGetProgressBarString() {
+function interactive_getProgressBarString() {
   local percent="${1}"
   local size="${2}"
   local progressBarChars=" ▏▎▍▌▋▊▉"
@@ -1162,20 +1162,23 @@ function interactiveGetProgressBarString() {
   local -i nbFullChars=$((size * percent / 100))
   local -i extraCharIndex=$(((size * percent - nbFullChars * 100) * 8 / 100))
 
-  local IFS=""
-  if ((nbFullChars > 0)); then
-    eval "local -a array=( {0..$((nbFullChars - 1))} )"
-    # shellcheck disable=SC2154
-    RETURNED_VALUE="${array[*]//*/█}"
+  if ((nbFullChars > 1)); then
+    RETURNED_VALUE="█${AC__REPEAT__}$((nbFullChars - 1))${__AC__LAST_CHAR}"
+    size=$((size - (nbFullChars - 1) - 1))
+  elif ((nbFullChars == 1)); then
+    RETURNED_VALUE="█"
+    size=$((size - 1))
   else
     RETURNED_VALUE=""
   fi
   if ((extraCharIndex > 0)); then
     RETURNED_VALUE+="${progressBarChars:extraCharIndex:1}"
+    size=$((size - 1))
   fi
-  if ((size - ${#RETURNED_VALUE} - 1 >= 0)); then
-    eval "local -a array=( {0..$((size - ${#RETURNED_VALUE} - 1))} )"
-    RETURNED_VALUE+="${array[*]//*/ }"
+  if ((size > 1)); then
+    RETURNED_VALUE+=" ${AC__REPEAT__}$((size - 1))${__AC__LAST_CHAR}"
+  elif ((size == 1)); then
+    RETURNED_VALUE+=" "
   fi
 }
 
@@ -1230,7 +1233,7 @@ function interactive_runProgressBarAnimation() {
     printf -v computeString "%4s" "${percent}%"
     displayedString="${displayedString//"#percent"/"${computeString}"}"
 
-    interactiveGetProgressBarString "${percent}" "${progressBarSize}"
+    interactive_getProgressBarString "${percent}" "${progressBarSize}"
     displayedString="${displayedString//"#bar"/"${RETURNED_VALUE}"}"
 
     displayedString="${displayedString//"#message"/"${message:-}"}"

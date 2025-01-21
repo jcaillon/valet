@@ -6,7 +6,7 @@ source interactive
 function main() {
   test_interactive::createSpace
   test_interactive::getCursorPosition
-  test_interactiveGetProgressBarString
+  test_interactive_getProgressBarString
   test_interactive::clearBox
   test_interactive::getBestAutocompleteBox
 }
@@ -26,17 +26,17 @@ function test_interactive::getCursorPosition() {
   test::printVars GLOBAL_CURSOR_LINE GLOBAL_CURSOR_COLUMN
 }
 
-function test_interactiveGetProgressBarString() {
-  test::title "✅ Testing interactiveGetProgressBarString"
+function test_interactive_getProgressBarString() {
+  test::title "✅ Testing interactive_getProgressBarString"
 
-  test::func interactiveGetProgressBarString 0 1
-  test::func interactiveGetProgressBarString 10 1
-  test::func interactiveGetProgressBarString 50 1
-  test::func interactiveGetProgressBarString 90 1
-  test::func interactiveGetProgressBarString 100 1
-  test::func interactiveGetProgressBarString 22 10
-  test::func interactiveGetProgressBarString 50 15
-  test::func interactiveGetProgressBarString 83 30
+  test::func interactive_getProgressBarString 0 1
+  test::func interactive_getProgressBarString 10 1
+  test::func interactive_getProgressBarString 50 1
+  test::func interactive_getProgressBarString 90 1
+  test::func interactive_getProgressBarString 100 1
+  test::func interactive_getProgressBarString 22 10
+  test::func interactive_getProgressBarString 50 15
+  test::func interactive_getProgressBarString 83 30
 }
 
 function test_interactive::clearBox() {

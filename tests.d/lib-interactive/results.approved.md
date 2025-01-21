@@ -113,7 +113,7 @@ RETURNED_VALUE='█'
 Returned variables:
 
 ```text
-RETURNED_VALUE='██▏       '
+RETURNED_VALUE=$'█\E[1b▏ \E[6b'
 ```
 
 ❯ `interactiveGetProgressBarString 50 15`
@@ -121,7 +121,7 @@ RETURNED_VALUE='██▏       '
 Returned variables:
 
 ```text
-RETURNED_VALUE='███████▌       '
+RETURNED_VALUE=$'█\E[6b▌ \E[6b'
 ```
 
 ❯ `interactiveGetProgressBarString 83 30`
@@ -129,7 +129,7 @@ RETURNED_VALUE='███████▌       '
 Returned variables:
 
 ```text
-RETURNED_VALUE='████████████████████████▉     '
+RETURNED_VALUE=$'█\E[23b▉ \E[4b'
 ```
 
 ### ✅ Testing interactive::clearBox
