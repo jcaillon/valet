@@ -2,6 +2,10 @@
 
 core::sourceFunction "selfRelease"
 
+function main() {
+  testSelfRelease
+}
+
 function testSelfRelease() {
   local -i exitCode
 
@@ -14,6 +18,8 @@ function testSelfRelease() {
   echo "→ selfRelease -t token -b minor"
   selfRelease -t token -b minor && exitCode=0 || exitCode=$?
   test::endTest "Testing selfRelease, minor version" ${exitCode}
+
+  log::setLevel info true
 }
 
 # need to override git, curl
@@ -73,10 +79,6 @@ function io::writeToFile() {
 
 function io::writeToFileFromRef() {
   echo "▶ called io::writeToFileFromRef $1" 1>&2
-}
-
-function main() {
-  testSelfRelease
 }
 
 main

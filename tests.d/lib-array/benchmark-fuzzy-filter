@@ -56,7 +56,7 @@ function array::fuzzyFilterSort2() {
 
   # we have a special quicksort implementation here that only compare numbers
   # and uses global arrays to go faster
-  if ! declare -f array::fuzzyFilterSortQuicksort2 &>/dev/null; then
+  if ! command -v array::fuzzyFilterSortQuicksort2 &>/dev/null; then
     function array::fuzzyFilterSortQuicksort2() {
       local -i low=${1}
       local -i high=${2}

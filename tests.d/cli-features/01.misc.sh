@@ -12,6 +12,7 @@ function main() {
   export VALET_USER_DIRECTORY="${RETURNED_VALUE}/non-existing"
   test::exec VALET_LOG_LEVEL=warning "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level
 
+  log::setLevel info true
 }
 
 main

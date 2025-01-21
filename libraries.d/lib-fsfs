@@ -7,8 +7,8 @@
 
 # shellcheck source=lib-ansi-codes
 source ansi-codes
-# shellcheck source=lib-interactive
-source interactive
+# shellcheck source=lib-tui
+source tui
 # shellcheck source=lib-io
 source io
 # shellcheck source=lib-array
@@ -80,20 +80,20 @@ function fsfs::itemSelector() {
   trap 'onResize;' SIGWINCH
 
   # still need to handle the exit, but we also need to reset the terminal when exiting.
-  trap 'interactive::switchBackFromFullScreen; main::onExitInternal;' EXIT
+  trap 'tui::switchBackFromFullScreen; main::onExitInternal;' EXIT
 
   # interrupting closes the interactive session
   trap 'FSFS_CLOSE_INTERACTIVE_SESSION=true;' SIGINT SIGQUIT
 
-  interactive::switchToFullScreen
+  tui::switchToFullScreen
   fsfsDrawScreen "${prompt}"
 
   # before starting to wait for inputs, we clear up the key pressed
-  interactive::clearKeyPressed
+  tui::clearKeyPressed
 
   # main loop
   while true; do
-    if interactive::waitForChar -t 0.05; then
+    if tui::waitForChar -t 0.05; then
       onKeyPressed "${LAST_KEY_PRESSED}"
     fi
 
@@ -117,7 +117,7 @@ function fsfs::itemSelector() {
 
   # restore the initial traps
   eval "${originalTraps}"
-  interactive::switchBackFromFullScreen
+  tui::switchBackFromFullScreen
 
   if ((FSFS_FINAL_SELECTION_INDEX >= 0)); then
     RETURNED_VALUE="${FSFS_ORIGINAL_ITEMS[${FSFS_FINAL_SELECTION_INDEX}]}"
@@ -659,7 +659,7 @@ function onResize() {
   # export terminal size does not work if both 1 and 2 fd
   # are not the terminal. We need to temporarily redirect
   exec 2>&4 4>&-
-  interactive::getTerminalSize
+  tui::getTerminalSize
   exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
   GLOBAL_SCREEN_REDRAW_REQUIRED=true;
 }

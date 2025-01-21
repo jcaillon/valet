@@ -115,7 +115,7 @@ function printVars() {
   local varName var
   for varName in "$@"; do
     local -n var="${varName}"
-    echo "${varName}=${var[*]@K}"
+    printf "%s=%q\n" "${varName}" "${var[*]}"
   done
 }
 

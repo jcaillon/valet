@@ -36,7 +36,7 @@ With a second line.
 
 ❯ `valet self mock1 error`
 
-Exited with code: `1`
+Returned code: `1`
 
 **Error output**:
 
@@ -53,7 +53,7 @@ ERROR    Error code 1 in selfMock1(), stack:
 
 ❯ `valet self mock1 exit`
 
-Exited with code: `5`
+Returned code: `5`
 
 **Error output**:
 
@@ -71,7 +71,7 @@ EXIT     Exiting with code 5, stack:
 
 ❯ `valet self mock1 fail`
 
-Exited with code: `1`
+Returned code: `1`
 
 **Error output**:
 
@@ -83,7 +83,7 @@ ERROR    This is for testing valet core functions, failing now.
 
 ❯ `valet self mock1 fail2`
 
-Exited with code: `255`
+Returned code: `255`
 
 **Error output**:
 
@@ -95,7 +95,7 @@ ERROR    This is for testing valet core functions, failing now with exit code 25
 
 ❯ `valet self mock1 unknown-command`
 
-Exited with code: `1`
+Returned code: `1`
 
 **Error output**:
 

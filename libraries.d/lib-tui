@@ -1,0 +1,787 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# shellcheck source=lib-ansi-codes
+source ansi-codes
+# shellcheck source=lib-io
+source io
+
+#===============================================================
+# >>> Interactive utilities
+#===============================================================
+
+# ## tui::createSpace
+#
+# This function creates empty lines from the current cursor position.
+# Then it moves back to its original line (at the column 1).
+# The current cursor line counts, meaning that `tui::createSpace 1` will
+# not do anything but clear the current line.
+#
+# This effectively creates a space in the terminal (scroll up if we are at the bottom).
+# It does not create more space than the number of lines in the terminal.
+#
+# - $1: **number of lines** _as int_:
+#       the number of lines to create
+#
+# ```bash
+# tui::createSpace 5
+# ```
+function tui::createSpace() {
+  local -i nbLines="${1}"
+  nbLines=$((nbLines > GLOBAL_LINES ? GLOBAL_LINES : nbLines))
+  if (( nbLines <= 1 )); then
+    printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINE}${AC__CURSOR_SHOW}"
+    return 0
+  fi
+  nbLines=$((nbLines - 1))
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${AC__CURSOR_MOVE__}${nbLines}${__AC__SCROLL_UP}${AC__CURSOR_MOVE__}${nbLines}${__AC__START_OF_LINE_UP}${AC__CURSOR_SHOW}"
+}
+
+# ## tui::getCursorPosition
+#
+# Get the current cursor position.
+#
+# Returns:
+#
+# - `GLOBAL_CURSOR_LINE`: the line number
+# - `GLOBAL_CURSOR_COLUMN`: the column number
+#
+# ```bash
+# tui::getCursorPosition
+# ```
+function tui::getCursorPosition() {
+  local _escapeCode IFS
+  # we request the position and first read \e[
+  IFS='' read -d '' -p "${AC__REQUEST_CURSOR_POSITION}" -n 2 -sr _escapeCode || :
+  # then read line;colR
+  # shellcheck disable=SC2034
+  IFS=';' read -d 'R' -sr GLOBAL_CURSOR_LINE GLOBAL_CURSOR_COLUMN || :
+}
+
+# ## tui::switchToFullScreen
+#
+# Call this function to start an interactive session in full screen mode.
+# This function will switch to the alternate screen, hide the cursor and clear the screen.
+# It will also disable echoing when we type something.
+#
+# You should call tui::switchBackFromFullScreen at the end of the interactive session.
+#
+# In the alternate screen, we don't see the error messages so we capture them somewhere else.
+#
+# ```bash
+# tui::switchToFullScreen
+# ```
+function tui::switchToFullScreen() {
+  if [[ ! -t 2 ]]; then
+    core::fail "This function can only be used in an interactive session. Did you already called tui::switchBackFromFullScreen?"
+  fi
+
+  _INTERACTIVE_FULL_SCREEN_MODE=true
+
+  # disable echoing when we type something
+  tui::sttyInit
+
+  # switch to the alternate screen, hide the cursor and clear the screen
+  printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
+
+  # in full screen mode, we don't see the error messages so we capture them somewhere else
+  FSFS_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}${BASHPID}.valet-interactive.err"
+  while [[ -e "${FSFS_TEMPORARY_ERROR_FILE}" ]]; do FSFS_TEMPORARY_ERROR_FILE+="x"; done
+  exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
+}
+
+# ## tui::switchBackFromFullScreen
+#
+# Call this function to switch back from the full screen mode.
+#
+# - This function will restore the terminal state and show the cursor.
+# - It will also restore the key echoing.
+# - If there were error messages during the interactive session, they will be displayed at the end.
+#
+# ```bash
+# tui::switchBackFromFullScreen
+# ```
+function tui::switchBackFromFullScreen() {
+  if [[ -t 2 ]]; then
+    # already in the normal terminal mode
+    return
+  fi
+
+  _INTERACTIVE_FULL_SCREEN_MODE=false
+
+  # restore the terminal state
+  printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
+
+  # restore stty
+  tui::sttyRestore
+
+  # restore the error output and display them if any
+  exec 2>&4 4>&-
+  if [[ -s "${FSFS_TEMPORARY_ERROR_FILE:-}" ]]; then
+    io::readFile "${FSFS_TEMPORARY_ERROR_FILE}"
+    log::error "Error messages during the interactive session:"$'\n'"${RETURNED_VALUE%$'\n'}"
+  fi
+}
+
+# ## tui::sttyInit
+#
+# Disable the echo of the tty. Will no longer display the characters typed by the user.
+#
+# ```bash
+# tui::sttyInit
+# ```
+function tui::sttyInit() {
+  if command -v stty &>/dev/null; then
+    if [[ -z ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
+      io::invoke "stty" "-g"
+      _INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
+      # -echo is to suppress echoing characters typed by the user
+      # All the other options are there to enable a satisfying behavior for the GNU readline library
+      # used when we call read -e
+      stty -ixon nl0 cr0 tab0 ff0 icrnl -inlcr -onlret -icanon erase ^B werase ^W -echo -echok -echonl -echoe -echoke -ctlecho &>/dev/null || :
+    fi
+  fi
+}
+
+# ## tui::sttyRestore
+#
+# Enable the echo of the tty. Will display the characters typed by the user.
+#
+# - $1: **force** _as bool_:
+#       (optional) force the restoration of the stty configuration
+#       stty state will not be restored if
+#       (defaults to false)
+#
+# ```bash
+# tui::sttyRestore
+# ```
+# shellcheck disable=SC2120
+function tui::sttyRestore() {
+  if [[ ${_INTERACTIVE_FULL_SCREEN_MODE:-} == "true" && ${1:-} != "true" ]]; then
+    return 0
+  fi
+
+  if [[ -n ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
+    if command -v stty &>/dev/null; then
+      stty "${_INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
+    fi
+    unset -v _INTERACTIVE_STTY_SAVED_CONFIG
+  fi
+}
+
+# ## tui::setInterruptTrap
+#
+# Set a trap to catch the interrupt signal (SIGINT).
+# When the user presses Ctrl+C, the GLOBAL_SESSION_INTERRUPTED variable will be set to true.
+#
+# ```bash
+# tui::setInterruptTrap
+# ```
+function tui::setInterruptTrap() {
+  # shellcheck disable=SC2034
+  GLOBAL_SESSION_INTERRUPTED=false
+  if [[ -z ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
+    # save the original traps so we can restore them later
+    io::captureOutput trap -p SIGINT SIGQUIT
+    _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP="${RETURNED_VALUE}"
+
+    # interrupting sets GLOBAL_SESSION_INTERRUPTED to true
+    trap 'GLOBAL_SESSION_INTERRUPTED=true;' SIGINT SIGQUIT
+  fi
+}
+
+# ## tui::restoreInterruptTrap
+#
+# Restore the original trap for the interrupt signal (SIGINT).
+# To be called after tui::setInterruptTrap.
+#
+# ```bash
+# tui::restoreInterruptTrap
+# ```
+function tui::restoreInterruptTrap() {
+  if [[ -n ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
+    eval "${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP}"
+    unset -v _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP
+  fi
+}
+
+# ## tui::clearBox
+#
+# Clear a "box" in the terminal.
+# Will return the cursor at the current position at the end (using GLOBAL_CURSOR_LINE and GLOBAL_CURSOR_COLUMN).
+#
+# - $1: **top** _as int_:
+#       the left position of the box
+# - $2: **left** _as int_:
+#       the top position of the box
+# - $3: **width** _as int_:
+#       the width of the box
+# - $4: **height** _as int_:
+#       the height of the box
+#
+# ```bash
+# tui::getCursorPosition
+# tui::clearBox 1 1 10 5
+# ```
+function tui::clearBox() {
+  local top="${1}"
+  local left="${2}"
+  local width="${3}"
+  local height="${4}"
+
+  local toPrint="${AC__CURSOR_HIDE}"
+  local lineNumber=0
+  for ((lineNumber = top; lineNumber < top + height; lineNumber++)); do
+    toPrint+="${AC__CURSOR_MOVE__}${lineNumber};${left}${__AC__TO}${AC__ERASE__}${width}${__AC_CHARS}"
+  done
+  printf '%s%s' "${toPrint}" "${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
+}
+
+# ## tui::getBestAutocompleteBox
+#
+# This function returns the best position and size for an autocomplete box that would open
+# at the given position.
+#
+# - The box will be placed below the current position if possible, but can be placed
+#   above if there is not enough space below.
+# - The box will be placed on the same column as the current position if possible, but can be placed
+#   on the left side if there is not enough space on the right to display the full width of the box.
+# - The box will have the desired height and width if possible, but will be reduced if there is
+#   not enough space in the terminal.
+# - The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.
+#   Otherwise it can use the current position line.
+#
+# - $1: **current line** _as int_:
+#       the current line of the cursor (1 based)
+# - $2: **current column** _as int_:
+#       the current column of the cursor (1 based)
+# - $3: **desired height** _as int_:
+#       the desired height of the box
+# - $4: **desired width** _as int_:
+#       the desired width of the box
+# - $5: **max height** _as int_:
+#       the maximum height of the box
+# - $6: force below _as bool_:
+#       (optional) force the box to be below the current position
+#       (defaults to false)
+# - $7: not on current line _as bool_:
+#       (optional) the box will not be placed on the same line as the current position
+#       (defaults to true)
+# - $8: terminal width _as int_:
+#       (optional) the width of the terminal
+#       (defaults to GLOBAL_COLUMNS)
+# - $9: terminal height _as int_:
+#       (optional) the height of the terminal
+#       (defaults to GLOBAL_LINES)
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the top position of the box (1 based)
+# - `RETURNED_VALUE2`: the left position of the box (1 based)
+# - `RETURNED_VALUE3`: the width of the box
+# - `RETURNED_VALUE4`: the height of the box
+#
+# ```bash
+# tui::getBestAutocompleteBox 1 1 10 5
+# ```
+function tui::getBestAutocompleteBox() {
+  local currentLine="${1}"
+  local currentColumn="${2}"
+  local desiredHeight="${3}"
+  local desiredWidth="${4}"
+  local maxHeight="${5:-${GLOBAL_LINES:-9999}}"
+  local forceBelow="${6:-false}"
+  local notOnCurrentLine="${7:-true}"
+  local terminalWidth="${8:-${GLOBAL_COLUMNS:-9999}}"
+  local terminalHeight="${9:-${GLOBAL_LINES:-9999}}"
+
+  local left top width height
+
+  local extraLine=1
+  if [[ ${notOnCurrentLine} == "true" ]]; then
+    extraLine=0
+  fi
+
+  local below=true
+  local -i maxAvailableLines=$((terminalHeight - currentLine + extraLine))
+  if [[ ${forceBelow} != "true" ]]; then
+    local maxAvailableLinesAbove=$((currentLine - 1 + extraLine))
+    if ((desiredHeight > maxAvailableLines && maxAvailableLinesAbove > maxAvailableLines)); then
+      maxAvailableLines=${maxAvailableLinesAbove}
+      below=false
+    fi
+  fi
+
+  maxHeight=$((maxAvailableLines >= maxHeight ? maxHeight : maxAvailableLines))
+  height=$((desiredHeight >= maxHeight ? maxHeight : desiredHeight))
+  if [[ ${below} == "true" ]]; then
+    top=$((currentLine + 1 - extraLine))
+  else
+    top=$((currentLine - height + extraLine))
+  fi
+
+  width=$((desiredWidth >= terminalWidth ? terminalWidth : desiredWidth))
+  left=$((terminalWidth - currentColumn + 1 > width ? currentColumn : terminalWidth - width + 1))
+
+  if ((width < 1)); then
+    width=1
+  fi
+  if ((height < 0)); then
+    height=0
+  fi
+
+  RETURNED_VALUE="${top}"
+  RETURNED_VALUE2="${left}"
+  # shellcheck disable=SC2034
+  RETURNED_VALUE3="${width}"
+  # shellcheck disable=SC2034
+  RETURNED_VALUE4="${height}"
+}
+
+
+#===============================================================
+# >>> Key press detection
+#===============================================================
+
+# ## tui::testWaitForChar
+#
+# Wait for the user to send a character to stdin (i.e. wait for a key press)
+# and prints the character that bash reads.
+#
+# Useful to test the `tui::waitForChar` function and see the char sequence we
+# get when pressing a key in a given terminal.
+#
+# See @tui::waitForChar for more information.
+#
+# ```bash
+# tui::testWaitForChar
+# ```
+function tui::testWaitForChar() {
+  printf '%s\n' "Press any key to see the returned character (Press Q to quit).${AC__CURSOR_HIDE}"
+  while true; do
+    if tui::waitForChar -t 1; then
+      if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
+        break
+      fi
+      printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+    fi
+    if [[ ! -t 0 ]]; then break; fi
+  done
+}
+
+# ## tui::waitForChar
+#
+# Wait for a user input (single char).
+# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
+#
+# It uses the read builtin command. This will not detect all key combinations.
+# The output will depend on the terminal used and the character sequences it sends on each key press.
+#
+# For more advanced use cases, you can use tui::waitForKeyPress.
+# This simple implementation does not rely on GNU readline and does not require stty to be initialized.
+#
+# Some special keys are translated into more readable strings:
+# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
+#
+# - $@: **read parameters** _as any_:
+#       additional parameters to pass to the read command
+#
+# Returns:
+#
+# - $?:
+#   - 0 if a char was retrieved
+#   - 1 otherwise
+# - `LAST_KEY_PRESSED`: the last char (key) retrieved.
+#
+# ```bash
+# tui::waitForChar
+# tui::waitForChar -t 0.1
+# ```
+#
+# > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>
+function tui::waitForChar() {
+  LAST_KEY_PRESSED=""
+  local IFS
+  IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || :
+
+  LAST_KEY_PRESSED="${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:-}${LAST_KEY_PRESSED}"
+  PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
+
+  if [[ -z ${LAST_KEY_PRESSED} ]]; then
+    return 1
+  fi
+
+  # special key detection, need to read more characters (up to 4 for F1-F12 keys)
+  if [[ ${LAST_KEY_PRESSED} == *$'\e'* ]]; then
+    REPLY=""
+    IFS='' read -t 0.01 -d '' -rsn 4 &>/dev/null || :
+
+    # we might have several ESC which means we read too much
+    local wholeChain="${LAST_KEY_PRESSED#$'\e'}${REPLY}"
+    LAST_KEY_PRESSED=$'\e'"${wholeChain%%$'\e'*}"
+
+    if [[ ${wholeChain} == *$'\e'* ]]; then
+      PREVIOUS_KEY_PRESSED_EXTRA_CHARS=$'\e'"${wholeChain#*$'\e'}"
+    fi
+
+    # translate some common inputs into more readable strings
+    case ${LAST_KEY_PRESSED} in
+    $'\e[A' | $'\eOA') LAST_KEY_PRESSED="UP" ;;
+    $'\e[B' | $'\eOB') LAST_KEY_PRESSED="DOWN" ;;
+    $'\e[C' | $'\eOC') LAST_KEY_PRESSED="RIGHT" ;;
+    $'\e[D' | $'\eOD') LAST_KEY_PRESSED="LEFT" ;;
+    $'\e[1~' | $'\e[H' | $'\e[7~') LAST_KEY_PRESSED="HOME" ;;
+    $'\e[2~') LAST_KEY_PRESSED="INSERT" ;;
+    $'\e[3~') LAST_KEY_PRESSED="DEL" ;;
+    $'\e[4~' | $'\e[F' | $'\e[8~') LAST_KEY_PRESSED="END" ;;
+    $'\e[5~') LAST_KEY_PRESSED="PAGE_UP" ;;
+    $'\e[6~') LAST_KEY_PRESSED="PAGE_DOWN" ;;
+    $'\e') LAST_KEY_PRESSED="ESC" ;;
+    $'\eOP' | $'\e[11~') LAST_KEY_PRESSED="F1" ;;
+    $'\e'?) LAST_KEY_PRESSED="ALT+${LAST_KEY_PRESSED#$'\e'}" ;;
+    esac
+  else
+    case ${LAST_KEY_PRESSED} in
+    $'\b' | $'\177') LAST_KEY_PRESSED="BACKSPACE" ;;
+    $'\r') LAST_KEY_PRESSED=$"\n" ;;
+    esac
+  fi
+  return 0
+}
+
+# ## tui::testWaitForKeyPress
+#
+# Wait for the user to press a key and prints it to the screen.
+# This function is used to test the `tui::waitForKeyPress` function.
+#
+# See @tui::waitForKeyPress for more information.
+#
+# ```bash
+# tui::testWaitForKeyPress
+# ```
+function tui::testWaitForKeyPress() {
+  # setup the terminal before anything else
+  tui::sttyInit
+  # define the callback function called when a special key is pressed
+  # shellcheck disable=SC2317
+  function interactiveOnKeyBindingPressTestFunction() {
+    local key="${1}"
+    printf "%sYou pressed (binding): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${key}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+  }
+  tui::rebindKeymap interactiveOnKeyBindingPressTestFunction
+
+  printf '%s\n' "Press any key to see the returned code (press Q to quit)."
+  while true; do
+    if tui::waitForKeyPress -t 0.3; then
+      if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
+        break
+      fi
+      printf "%sYou pressed (normal key): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+    fi
+    if [[ ! -t 0 ]]; then break; fi
+  done
+
+  tui::sttyRestore
+}
+
+# ## tui::waitForKeyPress
+#
+# Wait for a key press (single key).
+# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
+#
+# It uses the read builtin command with the option `-e` to use readline behind the scene.
+# This means we can detect more key combinations but all keys needs to be bound first...
+# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
+#
+# You must call `tui::rebindKeymap` and `tui::sttyInit` before using this function.
+#
+# - $@: **read parameters** _as any_:
+#       additional parameters to pass to the read command
+#
+# Returns:
+#
+# - $?:
+#   - 0 if a key was pressed
+#   - 1 otherwise
+# - `LAST_KEY_PRESSED`: the key pressed.
+#
+# ```bash
+# tui::waitForKeyPress
+# tui::waitForKeyPress -t 0.1
+# ```
+#
+# > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll
+# > even when nothing is read... Make sure to not position the cursor at the end of the screen.
+function tui::waitForKeyPress() {
+  LAST_KEY_PRESSED=""
+  # here we redirect the error output to null because of a bug in bash, it
+  # prints a newline each time read is called with -e, idk why...
+  local IFS
+  IFS='' read "$@" -e -d '' -s -r -n 1 LAST_KEY_PRESSED 2>/dev/null || :
+  if [[ -z ${LAST_KEY_PRESSED} ]]; then
+    return 1
+  fi
+  case ${LAST_KEY_PRESSED} in
+    $'\b' | $'\177') LAST_KEY_PRESSED="BACKSPACE" ;;
+    $'\023') LAST_KEY_PRESSED="CTRL+BACKSPACE" ;;
+    $'\r') LAST_KEY_PRESSED=$'\n' ;;
+  esac
+  return 0
+}
+
+# ## tui::rebindKeymap
+#
+# Rebinds all special keys to call a given callback function.
+# See @tui::testWaitForKeyPress for an implementation example.
+#
+# This allows to use the `-e` option with the read command and receive events for special key press.
+#
+# Key binding is a mess because binding is based on the sequence of characters that gets
+# generated by the terminal when a key is pressed and this is not standard across all terminals.
+# We do our best here to cover most cases but it is by no mean perfect.
+# A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.
+#
+# Users of this function can completely change the bindings afterward by implementing
+# the `tuiRebindOverride` function.
+#
+# This function should be called before using tui::waitForKeyPress.
+#
+# You can call `tui::resetBindings` to restore the default bindings. However, this is not
+# necessary as the bindings are local to the script.
+#
+# ```bash
+# tui::rebindKeymap
+# ```
+#
+# > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
+function tui::rebindKeymap() {
+  local callBackFunction="${1:-}"
+
+  if ! command -v "${callBackFunction}" &>/dev/null; then
+    core::fail "The function ⌜${callBackFunction}⌝ must be defined before calling tui::rebindKeymap."
+  fi
+
+  if [[ -n ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
+    # already done
+    return 0
+  fi
+
+  # remove all existing bindings except the self-insert ones
+  # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
+  io::createTempFile
+  _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
+  io::invokef2 true bind -p
+  \mv -f "${RETURNED_VALUE}" "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+  io::readFile "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+  local bindings="${RETURNED_VALUE}"
+  local IFS=$'\n'
+  local line
+  local key
+  for line in ${bindings}; do
+    if [[ ${line} == "#"* || ${line} == *"self-insert" ]]; then
+      continue
+    fi
+    key="${line%% *}"
+    key="${key//\"/}"
+    bind -r "${key%:}" &>/dev/null
+  done
+
+  # make sure that readline will not wait the default 1s after a special key (like \e ESC) is pressed
+  # to read a longer sequence of keys
+  bind 'set keyseq-timeout 1' &>/dev/null
+
+  # add the one we are interested in
+
+  # Escape key
+  bind -x '"\e": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"\e\e": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"\e\e\e": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"ESC": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"ESCAPE": '"${callBackFunction}"' ESC' &>/dev/null
+
+  # for each normal key, bind it with the different modifiers
+  local normalKeys="abcdefghijklmnopqrstuvwxyz"
+  local -a modifiers=(
+    "CTRL+" "\C-"
+    "ALT+" "\e"
+    "CTRL+ALT+" "\e\C-"
+  )
+  local -i index
+  local -i modeIndex
+  for((index=0;index<${#normalKeys};index++)); do
+    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+      key="${normalKeys:index:1}"
+      bind -x "\"${modifiers[modeIndex + 1]}${key}\": ${callBackFunction} ${modifiers[modeIndex]}${key^^}" &>/dev/null
+    done
+  done
+
+  # VT sequences + xterm sequences
+  local specialKeys=(
+    "[1?~" "HOME"
+    "[2?~" "INSERT"
+    "[3?~" "DEL"
+    "[4?~" "END"
+    "[5?~" "PAGE_UP"
+    "[6?~" "PAGE_DOWN"
+    "[7?~" "HOME"
+    "[8?~" "END"
+    "[11?~" "F1"
+    "[12?~" "F2"
+    "[13?~" "F3"
+    "[14?~" "F4"
+    "[15?~" "F5"
+    "[17?~" "F6"
+    "[18?~" "F7"
+    "[19?~" "F8"
+    "[20?~" "F9"
+    "[21?~" "F10"
+    "[23?~" "F11"
+    "[24?~" "F12"
+    "[25?~" "F13"
+    "[26?~" "F14"
+    "[28?~" "F15"
+    "[29?~" "F16"
+    "[31?~" "F17"
+    "[32?~" "F18"
+    "[33?~" "F19"
+    "[34?~" "F20"
+  )
+  modifiers=(
+    "" ""
+    "SHIFT+" ";2"
+    "ALT+" ";3"
+    "CTRL+" ";5"
+    "CTRL+SHIFT+" ";6"
+    "CTRL+ALT+" ";7"
+  )
+  for((index=0;index<${#specialKeys[@]};index+=2)); do
+    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+      key="${specialKeys[index]}"
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
+      # I have noticed that something the terminal sends the sequence without the \e...
+      # so we need to bind it without the \e as well
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
+    done
+  done
+
+  local specialKeys2=(
+    "[?A" "UP"
+    "[?B" "DOWN"
+    "[?C" "RIGHT"
+    "[?D" "LEFT"
+    "[?F" "END"
+    "[?H" "HOME"
+    "[?P" "F1"
+    "[?Q" "F2"
+    "[?R" "F3"
+    "[?S" "F4"
+    "[?I" "TAB"
+    "[?M" "NEWLINE"
+    "[?j" "*"
+    "[?k" "+"
+    "[?l" ","
+    "[?m" "-"
+    "[?n" "."
+    "[?o" "/"
+    "[?p" "0"
+    "[?q" "1"
+    "[?r" "2"
+    "[?s" "3"
+    "[?t" "4"
+    "[?u" "5"
+    "[?v" "6"
+    "[?w" "7"
+    "[?x" "8"
+    "[?y" "9"
+    "[?X" "="
+  )
+  modifiers=(
+    "" ""
+    "SHIFT+" "1;2"
+    "ALT+" "1;3"
+    "CTRL+" "1;5"
+    "CTRL+SHIFT+" "1;6"
+    "CTRL+ALT+" "1;7"
+  )
+  for((index=0;index<${#specialKeys2[@]};index+=2)); do
+    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+      key="${specialKeys2[index]}"
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      # I have noticed that something the terminal sends the sequence without the \e...
+      # so we need to bind it without the \e as well
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      # We also handle the case where SS3 (\eO) is sent instead of CSI (\e[)
+      key="${key//[/O}"
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+    done
+  done
+
+  # special key bindings
+  bind -x '"NEWLINE": '"${callBackFunction}"' NEWLINE' &>/dev/null
+  bind -x '"RET": '"${callBackFunction}"' NEWLINE' &>/dev/null
+  bind -x '"RETURN": '"${callBackFunction}"' NEWLINE' &>/dev/null
+
+  bind -x '"DEL": '"${callBackFunction}"' DEL' &>/dev/null
+  bind -x '"\d": '"${callBackFunction}"' DEL' &>/dev/null
+  bind -x '"\177": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+  bind -x '"RUBOUT": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+  bind -x '"\C-?": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+  bind -x '"\b": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
+  bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
+
+  bind -x '"TAB": '"${callBackFunction}"' TAB' &>/dev/null
+  bind -x '"\t": '"${callBackFunction}"' TAB' &>/dev/null
+
+  # allow the user to override bindings with a custom function
+  if command -v tuiRebindOverride &>/dev/null; then
+    tuiRebindOverride
+  fi
+}
+
+# ## tui::resetBindings
+#
+# Reset the key bindings to the default ones.
+#
+# ```bash
+# tui::resetBindings
+# ```
+function tui::resetBindings() {
+  if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
+    return 0
+  fi
+
+  # try to remove all bindings
+  io::invoke bind -p
+  local bindings="${RETURNED_VALUE}"
+  local IFS=$'\n'
+  local line
+  local key
+  for line in ${bindings}; do
+    if [[ ${line} == "#"* ]]; then
+      continue
+    fi
+    key="${line%% *}"
+    key="${key//\"/}"
+    bind -r "${key%:}" &>/dev/null
+  done
+
+  # restore the default bindings
+  bind -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}" &>/dev/null
+  rm -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+  unset -v _INTERACTIVE_SAVED_BINDINGS_FILE
+}
+
+# ## tui::clearKeyPressed
+#
+# This function reads all the inputs from the user, effectively discarding them.
+#
+# ```bash
+# tui::clearKeyPressed
+# ```
+function tui::clearKeyPressed() {
+  local IFS
+  IFS='' read -d '' -sr -t 0 LAST_KEY_PRESSED || :
+  PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
+}

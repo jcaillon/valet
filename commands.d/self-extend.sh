@@ -19,6 +19,8 @@ source string
 source system
 # shellcheck source=../libraries.d/lib-interactive
 source interactive
+# shellcheck source=../libraries.d/lib-progress
+source progress
 # shellcheck source=../libraries.d/lib-curl
 source curl
 
@@ -282,9 +284,9 @@ function selfExtend_downloadTarball() {
 
   # download the tarball
   log::info "Downloading the extension from the URL ⌜${tarballUrl}⌝ for sha1 ⌜${sha1}⌝."
-  interactive::startProgress "#spinner Download in progress, please wait..."
+  progress::start "#spinner Download in progress, please wait..."
   curl::toFile true 200,302 "${tempDirectory}/${sha1}.tar.gz" "${tarballUrl}"
-  interactive::stopProgress
+  progress::stop
 
   # untar
   tar -xzf "${tempDirectory}/${sha1}.tar.gz" -C "${tempDirectory}" || core::fail "Could not untar the extension tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ using tar."
@@ -326,7 +328,7 @@ function selfExtend_getSha1() {
 
     # get the sha1
     RETURNED_VALUE=""
-    interactive::startProgress "#spinner Fetching reference information from GitHub..."
+    progress::start "#spinner Fetching reference information from GitHub..."
     local url="https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${reference}"
     if ! curl::toVar false '200' -H "Accept: application/vnd.github.v3+json" "${url}"; then
       url="https://api.github.com/repos/${owner}/${repo}/git/refs/tags/${reference}"
@@ -335,7 +337,7 @@ function selfExtend_getSha1() {
     local response="${RETURNED_VALUE}"
     local error="${RETURNED_VALUE2}"
     local httpCode="${RETURNED_VALUE3}"
-    interactive::stopProgress
+    progress::stop
 
     if [[ ${httpCode} == 404 ]]; then
       core::fail "Could not find a branch or tag for the reference ⌜${reference}⌝ in repository ⌜${repositoryUrl}⌝: ${response}${error}."
@@ -374,9 +376,9 @@ function selfExtend_gitClone() {
   rm -Rf "${targetDirectory}"
 
   log::info "Cloning the git repository ⌜${url}⌝ with reference ⌜${version}⌝ in ⌜${targetDirectory}⌝."
-  interactive::startProgress "#spinner Cloning repo, please wait..."
+  progress::start "#spinner Cloning repo, please wait..."
   io::invoke git "${args[@]}"
-  interactive::stopProgress
+  progress::stop
 }
 
 # Execute the `extension.setup.sh` script of the extension, if any.
@@ -554,14 +556,14 @@ function selfExtend_updateGitRepository() {
     branch="${branch%%$'\n'*}"
     log::debug "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
     pushd "${repoPath}" &>/dev/null || core::fail "Could not change to the directory ⌜${repoPath}⌝."
-    interactive::startProgress "#spinner Fetching reference ${branch} for extension ${extensionName}..."
+    progress::start "#spinner Fetching reference ${branch} for extension ${extensionName}..."
     if ! git fetch -q; then
       popd &>/dev/null || :
-      interactive::stopProgress
+      progress::stop
       log::warning "Failed to fetch from ⌜origin⌝ remote for the repo ⌜${path}⌝."
       return 1
     fi
-    interactive::stopProgress
+    progress::stop
     if ! git merge -q --ff-only "origin/${branch}" &>/dev/null; then
       popd &>/dev/null || :
       log::warning "Failed to update the git repository ⌜${path}⌝, clean your workarea first (e.g. git stash, or git commit)."

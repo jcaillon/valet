@@ -405,9 +405,9 @@ function selfUpdate_install() {
   local releaseFile="${tempDirectory}/valet.tar.gz"
 
   log::debug "Downloading the release from ⌜${releaseUrl}⌝."
-  interactive::startProgress "#spinner Downloading valet..."
+  progress::start "#spinner Downloading valet..."
   selfUpdate_download "${releaseUrl}" "${releaseFile}"
-  interactive::stopProgress
+  progress::stop
 
   log::debug "Unpacking the release in ⌜${GLOBAL_VALET_HOME}⌝."
   tar -xzf "${releaseFile}" -C "${tempDirectory}" || core::fail "Could not unpack the release ⌜${releaseFile}⌝ using tar."
@@ -514,9 +514,9 @@ function selfUpdate_isDirectoryInPath() {
 # Get the version number of the latest release on GitHub.
 function selfUpdate_getLatestReleaseVersion() {
   local jsonFile="${TMPDIR:-/tmp}/valet.latest.json"
-  interactive::startProgress "#spinner Fetching the latest version from GitHub API..."
+  progress::start "#spinner Fetching the latest version from GitHub API..."
   selfUpdate_download "https://api.github.com/repos/jcaillon/valet/releases/latest" "${jsonFile}"
-  interactive::stopProgress
+  progress::stop
   io::readFile "${jsonFile}"
   rm -f "${jsonFile}" 1>/dev/null
   if [[ ${RETURNED_VALUE} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
@@ -589,6 +589,8 @@ function selfUpdate_sourceDependencies() {
   source system
   # shellcheck source=../libraries.d/lib-interactive
   source interactive
+  # shellcheck source=../libraries.d/lib-progress
+  source progress
   # shellcheck source=../libraries.d/lib-ansi-codes
   source ansi-codes
   # shellcheck source=../libraries.d/lib-io
@@ -752,8 +754,8 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
     return 1
   }
   function io::readFile() { RETURNED_VALUE="$(<"${1}")"; }
-  function interactive::startProgress() { :; }
-  function interactive::stopProgress() { :; }
+  function progress::start() { :; }
+  function progress::stop() { :; }
 
   VALET_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
 else

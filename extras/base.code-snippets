@@ -358,6 +358,14 @@
 			"\\${GLOBAL_CURSOR_COLUMN}$0"
 		]
 	},
+	"$GLOBAL_TEST_TEMP_FILE": {
+		"prefix": "$GLOBAL_TEST_TEMP_FILE",
+		"description": "The path to a temporary file that can be used during tests.",
+		"scope": "",
+		"body": [
+			"\\${GLOBAL_TEST_TEMP_FILE}$0"
+		]
+	},
 	"$LAST_KEY_PRESSED": {
 		"prefix": "$LAST_KEY_PRESSED",
 		"description": "",

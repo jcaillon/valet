@@ -151,7 +151,7 @@ function test_exec() {
 
 
   _TEST_OUTPUT="${compoundCommand}"
-  if declare -f test::transformTextBeforeFlushing &>/dev/null; then
+  if command -v test::transformTextBeforeFlushing &>/dev/null; then
     test::transformTextBeforeFlushing
   fi
 
@@ -190,8 +190,13 @@ function test_exec() {
   fi
 
   if ((exitCode != 0)); then
-    # shellcheck disable=SC2016
-    printf 'Exited with code: `%s`\n\n' "${exitCode}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    if [[ ${canExit} == "true" ]]; then
+      # shellcheck disable=SC2016
+      printf 'Exited with code: `%s`\n\n' "${exitCode}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    else
+      # shellcheck disable=SC2016
+      printf 'Returned code: `%s`\n\n' "${exitCode}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    fi
   fi
 
   test_flushFdToCodeBlock 1 "**Standard output**:"
@@ -212,10 +217,13 @@ function test_exec() {
 # test::printReturnedVars
 # ```
 function test::printReturnedVars() {
+  if command -v test::transformReturnedVarsBeforePrinting &>/dev/null; then
+    test::transformReturnedVarsBeforePrinting
+  fi
   local IFS=$'\n' key varName _TEST_OUTPUT=""
   for varName in RETURNED_VALUE RETURNED_VALUE2 RETURNED_VALUE3 RETURNED_VALUE4; do
     if [[ -v ${varName} ]]; then
-      _TEST_OUTPUT+="${varName}=${!varName@Q}"$'\n'
+      _TEST_OUTPUT+="${varName}='${!varName//\'/\'\"\'\"\'}'"$'\n'
     fi
   done
   for varName in RETURNED_ARRAY RETURNED_ARRAY2; do
@@ -223,7 +231,7 @@ function test::printReturnedVars() {
       _TEST_OUTPUT+="${varName}=("$'\n'
       local -n array="${varName}"
       for key in "${!array[@]}"; do
-        _TEST_OUTPUT+="[${key}]=${array[${key}]@Q}"$'\n'
+        _TEST_OUTPUT+="[${key}]='${array[${key}]//\'/\'\"\'\"\'}'"$'\n'
       done
       _TEST_OUTPUT+=")"$'\n'
     fi
@@ -231,12 +239,12 @@ function test::printReturnedVars() {
   if [[ -v RETURNED_ASSOCIATIVE_ARRAY && -v RETURNED_ASSOCIATIVE_ARRAY[@] ]]; then
       _TEST_OUTPUT+="RETURNED_ASSOCIATIVE_ARRAY=("$'\n'
     for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
-      _TEST_OUTPUT+="[${key}]=${RETURNED_ASSOCIATIVE_ARRAY[${key}]@Q}"$'\n'
+      _TEST_OUTPUT+="[${key}]='${RETURNED_ASSOCIATIVE_ARRAY[${key}]//\'/\'\"\'\"\'}'"$'\n'
     done
     _TEST_OUTPUT+=")"$'\n'
   fi
   if [[ -n ${_TEST_OUTPUT} ]]; then
-    if declare -f test::transformTextBeforeFlushing &>/dev/null; then
+    if command -v test::transformTextBeforeFlushing &>/dev/null; then
       test::transformTextBeforeFlushing
     fi
     # shellcheck disable=SC2016
@@ -291,7 +299,7 @@ function test::printVars() {
       local -n array="${varName}"
       _TEST_OUTPUT+="${varName}=("$'\n'
       for key in "${!array[@]}"; do
-        _TEST_OUTPUT+="[${key}]=${array[${key}]@Q}"$'\n'
+        _TEST_OUTPUT+="[${key}]='${array[${key}]//\'/\'\"\'\"\'}'"$'\n'
       done
       _TEST_OUTPUT+=")"$'\n'
     elif [[ ${chunk} =~ "declare -"[^[:space:]]+" "([^=]+)"=" ]]; then
@@ -302,7 +310,7 @@ function test::printVars() {
       test::fail "Could not parse variable declaration: ⌜${chunk}⌝."
     fi
   done
-  if declare -f test::transformTextBeforeFlushing &>/dev/null; then
+  if command -v test::transformTextBeforeFlushing &>/dev/null; then
     test::transformTextBeforeFlushing
   fi
   # shellcheck disable=SC2016
@@ -340,7 +348,7 @@ function test_flushFdToCodeBlock() {
   local IFS=''
   read -rd '' _TEST_OUTPUT <"${file}" || :
 
-  if declare -f test::transformTextBeforeFlushing &>/dev/null; then
+  if command -v test::transformTextBeforeFlushing &>/dev/null; then
     test::transformTextBeforeFlushing
   fi
 
@@ -366,6 +374,14 @@ function test_flushFdToCodeBlock() {
 # Returns:
 #
 # - `_TEST_OUTPUT`: The modified text.
+#
+# > You can define this function directly in the test script, or in a test hook if
+# > you need it to be available for multiple tests.
+# > Note however that this function can be called very often, so it should be optimized.
+
+# ## test::transformReturnedVarsBeforePrinting
+#
+# This function can be defined to modify the returned variables before printing them in the report.
 #
 # > You can define this function directly in the test script, or in a test hook if
 # > you need it to be available for multiple tests.

@@ -80,7 +80,7 @@ function http::request() {
     log::error "The URL is invalid: ⌜${url}⌝."
     return 1
   fi
-  log::debug "Getting URL for host ⌜${host}⌝ and path ⌜${path@Q}⌝."
+  log::debug "Getting URL for host ⌜${host}⌝ and path ⌜${path}⌝."
 
   # open connection
   exec 3<>"/dev/tcp/${host}/80"

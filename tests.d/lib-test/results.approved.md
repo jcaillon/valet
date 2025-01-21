@@ -122,7 +122,7 @@ In this second test, we expect the command to fail and return the exit code 2.
 
 ❯ `functionToTest KO Failure 2`
 
-Exited with code: `2`
+Returned code: `2`
 
 **Standard output**:
 
@@ -280,6 +280,6 @@ The variable TESTING_HOOKS shows that the hooks [before-tests](../before-tests),
 This test is written in the [after-each-test](after-each-test) script. The `after-each-test-suites` and `after-tests` are executed after the test script exits, thus we can't output their results in this report.
 
 ```text
-TESTING_HOOKS='before-tests,before-each-test-suite,after-each-test'
+TESTING_HOOKS='before-tests,before-each-test-suite,before-each-test,after-each-test'
 ```
 

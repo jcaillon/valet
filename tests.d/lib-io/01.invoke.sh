@@ -1,100 +1,72 @@
 #!/usr/bin/env bash
 
+function main() {
+  test::markdown "For these tests, we will use a special command \`fake\` defined as such:"
+  test::exec declare -f fake
+
+  test_io::invoke5
+  test_io::invoke2
+  test_io::invoke
+  test_io::invoke2piped
+}
+
 function test_io::invoke5() {
-  io::createTempFile && local tmpFile="${RETURNED_VALUE}"
-  local -i exitCode
+  test::title "✅ Testing io::invoke5"
 
-  echo "Input stream content from a file" >"${tmpFile}"
+  echo "Input stream content from a file" >"${GLOBAL_TEST_TEMP_FILE}"
 
-  echo "→ io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error"
-  io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error && exitCode=0 || exitCode=$?
-  echoio::invokeOutput ${exitCode} true
-  test::endTest "Testing io::invoke5, should return 1, input stream from string" ${exitCode}
+  test::markdown "Input stream from string, returns an error:"
+  test::func io::invoke5 false 0 false "'input_stream'" fake --std-in --error
 
-  echo "→ io::invokef5 true 0 false inputStreamValue fakeexec --std-in --error"
-  (io::invokef5 true 0 false inputStreamValue fakeexec --std-in --error) && exitCode=0 || exitCode=$?
-  echo "exitcode=${exitCode}"
-  test::endTest "Testing io::invoke5, should fail" ${exitCode}
+  test::markdown "Input stream from string, fails (exit):"
+  test::exit io::invoke5 true 0 false "'input_stream'" fake --std-in --error
 
-  echo "→ io::invokef5 true 0,1,2 true '' fakeexec --error"
-  io::invokef5 true 0,1,2 true '' fakeexec --error && exitCode=0 || exitCode=$?
-  echoio::invokeOutput ${exitCode} true
-  test::endTest "Testing io::invoke5, should translate error 1 to 0" ${exitCode}
+  test::markdown "Make error 1 acceptable:"
+  test::func io::invoke5 true 0,1,2 true "''" fake --error
 
-  echo "→ io::invoke5 false 0 true 'tmpFile' fakeexec --std-in"
-  io::invoke5 false 0 true "${tmpFile}" fakeexec --std-in && exitCode=0 || exitCode=$?
-  echoio::invokeOutput ${exitCode} false
-  test::endTest "Testing io::invoke5var, input stream for file, should get stdout/stderr from var" ${exitCode}
+  test::markdown "Normal, return everything as variables:"
+  test::func io::invoke5 true "''" "''" "''" fake
 
-  # test trace mode
-  echo "→ io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error"
-  log::setLevel trace
-  io::invokef5 false 0 false inputStreamValue fakeexec --std-in --error && exitCode=0 || exitCode=$?
-  echoio::invokeOutput ${exitCode} true
-  log::setLevel info
-  test::endTest "Testing io::invoke5, with trace mode on" ${exitCode}
+  test::markdown "Input stream for file, return everything as files:"
+  test::prompt io::invokef5 false 0 true "${GLOBAL_TEST_TEMP_FILE}" fake --std-in
+  test::resetReturnedVars
+  io::invokef5 false 0 true "${GLOBAL_TEST_TEMP_FILE}" fake --std-in
+  test::printReturnedVars
+
+  if [[ -s ${RETURNED_VALUE:-} ]]; then
+    test::exec io::cat "${RETURNED_VALUE}"
+  fi
+  if [[ -s ${RETURNED_VALUE2:-} ]]; then
+    test::exec io::cat "${RETURNED_VALUE2}"
+  fi
 }
 
 function test_io::invoke2() {
-  local -i exitCode
+  test::title "✅ Testing io::invoke2"
 
-  echo "→ io::invokef2 false fakeexec --option argument1 argument2"
-  io::invokef2 false fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
-  echoio::invokeOutput ${exitCode} true
-  test::endTest "Testing io::invoke2, output to files" ${exitCode}
+  test::func io::invoke2 false fake --option argument1 argument2
+  test::func io::invoke2 false fake --error
+  test::exit io::invoke2 true fake --error
 
-  echo "→ io::invoke2 false fakeexec --option argument1 argument2"
-  io::invoke2 false fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
-  echoio::invokeOutput ${exitCode} false
-  test::endTest "Testing io::invoke2var, output to var" ${exitCode}
+  test::func io::invokef2 false fake --option argument1 argument2
 }
 
 function test_io::invoke() {
-  local -i exitCode
+  test::title "✅ Testing io::invoke"
 
-  echo "→ io::invoke fakeexec --error"
-  ( io::invoke fakeexec --error ) && exitCode=0 || exitCode=${PIPESTATUS[0]}
-  test::endTest "Testing io::invoke, should fail" ${exitCode}
-
-  echo "→ io::invoke fakeexec --option argument1 argument2"
-  io::invoke fakeexec --option argument1 argument2 && exitCode=0 || exitCode=$?
-  echoio::invokeOutput ${exitCode} false
-  test::endTest "Testing io::invoke, output to var" ${exitCode}
+  test::exit io::invoke fake --error
+  test::func io::invoke fake --option argument1 argument2
 }
 
 function test_io::invoke2piped() {
-  local -i exitCode
+  test::title "✅ Testing io::invoke2piped"
 
-  echo "→ io::invokef2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2"
-  io::invokef2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
-  echoio::invokeOutput ${exitCode} true
-  test::endTest "Testing io::invoke2piped, stdin as string, output to files" ${exitCode}
+  test::func io::invoke2piped true "'input_stream'" fake --std-in --option argument1 argument2
 
-  echo "→ io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2"
-  io::invoke2piped true 'this is an stdin' fakeexec --std-in --option argument1 argument2 && exitCode=0 || exitCode=$?
-  echoio::invokeOutput ${exitCode} false
-  test::endTest "Testing io::invoke2pipedvar, stdin as string, output to vars" ${exitCode}
+  test::func io::invokef2piped true "'input_stream'" fake --std-in --option argument1 argument2
 }
 
-function echoio::invokeOutput() {
-  local exitCode areFiles
-  exitCode="${1}"
-  areFiles="${2}"
-
-  local debugMessage
-  debugMessage="io::invoke function ended with exit code ⌈${exitCode}⌉."$'\n'
-  if [[ ${areFiles} == "true" ]]; then
-    debugMessage+="stdout from file:"$'\n'"⌈$(<"${RETURNED_VALUE}")⌉"$'\n'
-    debugMessage+="stderr from file:"$'\n'"⌈$(<"${RETURNED_VALUE2}")⌉"$'\n'
-  else
-    debugMessage+="stdout from var:"$'\n'"⌈${RETURNED_VALUE}⌉"$'\n'
-    debugMessage+="stderr from var:"$'\n'"⌈${RETURNED_VALUE2}⌉"$'\n'
-  fi
-
-  echo "${debugMessage}"
-}
-
-function fakeexec() {
+function fake() {
   local inputStreamContent
 
   if [[ $* == *"--std-in"* ]]; then
@@ -103,23 +75,17 @@ function fakeexec() {
   fi
 
   local IFS=" "
-  echo "▶ called fakeexec $*"
-  echo "▶ fakeexec input stream was:"
-  echo "⌈${inputStreamContent:-}⌉"
+  echo "🙈 mocking fake $*"
+  if [[ -n ${inputStreamContent:-} ]]; then
+    echo "Input stream: <${inputStreamContent%$'\n'}>"
+  fi
 
-  echo "This is an error output from fakeexec" 1>&2
+  echo "INFO: log line from fake mock" 1>&2
 
   if [[ $* == *"--error"* ]]; then
-    echo "returning 1 from fakeexec" 1>&2
+    echo "ERROR: returning error from fake" 1>&2
     return 1
   fi
-}
-
-function main() {
-  test_io::invoke5
-  test_io::invoke2
-  test_io::invoke
-  test_io::invoke2piped
 }
 
 main

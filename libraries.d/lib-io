@@ -110,8 +110,8 @@ function io::invokef5() {
   if log::isDebugEnabled; then
     local IFS=' '
     if (( $# > 0 )); then
-      local args="${*@Q}"
-      log::debug "Executing the command ⌜${executable}⌝ with arguments (quoted): " "${args}"
+      printf -v args "%q " "${@}"
+      log::debug "Executing the command ⌜${executable}⌝ with arguments: " "${args% }"
     else
       log::debug "Executing the command ⌜${executable}⌝ (no arguments)."
     fi

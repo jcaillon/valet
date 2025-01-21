@@ -8,6 +8,9 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- add info of the extension from which a command comes from
+- we split the commands file into several one, per extension, so we don't have to load everything immediately
+- in the menu we can filter by extension (and we see the extension of a command)
 - propagate the set -x in self test subshells to have profiling enabled. We can create a new method in lib-profiler to profiler::reapply.
 - test the "sudo" feature: it runs the command by forking. We could add an option to instead rerun valet with sudo.
 - document the test; use the lib-test test as an example, and also link to the test:: lib.

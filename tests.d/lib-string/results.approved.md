@@ -751,7 +751,10 @@ Testing string::head with 3 lines
 Returned variables:
 
 ```text
-RETURNED_VALUE=$'The first line.\nThe second line.\nThe third line.\n'
+RETURNED_VALUE='The first line.
+The second line.
+The third line.
+'
 ```
 
 Testing string::head with 0 line
@@ -771,6 +774,11 @@ Testing string::head with 10 lines
 Returned variables:
 
 ```text
-RETURNED_VALUE=$'The first line.\nThe second line.\nThe third line.\nThe fourth line.\nThe fifth line.\n'
+RETURNED_VALUE='The first line.
+The second line.
+The third line.
+The fourth line.
+The fifth line.
+'
 ```
 

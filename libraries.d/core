@@ -50,15 +50,18 @@ function core::setShellOptions() {
   IFS=' '$'\t'$'\n'
 
   # set a fixed locale (otherwise we would risk to have comma as decimal separator
-  # for EPOCHREALTIME for instance)
-  LC_ALL=en_US.UTF-8
-  LANG=en_US.UTF-8
+  # for EPOCHREALTIME for instance).
+  # If the user does not have the locale, they will get a warning here.
+  # In which case they must either generate the locale C.utf8 or set an existing locale
+  # listed in `locale -a` via the VALET_CONFIG_LOCALE environment variable.
+  LC_ALL=C.UTF-8
+  LANG=C.UTF-8
 }
 
 # set different options for the shell, to have consistent behavior on all machines
 core::setShellOptions
 
-if [[ -n ${GLOBAL_CORE_INCLUDED:-} ]] && declare -f log::warning &>/dev/null; then
+if [[ -n ${GLOBAL_CORE_INCLUDED:-} ]] && command -v log::warning &>/dev/null; then
   log::warning "The core library has already been included but was called again, remove the unnecessary call."
   log::printCallStack
   return 0
@@ -204,10 +207,10 @@ function io::cleanupTempFiles() {
 }
 
 #===============================================================
-# >>> Logging
+# >>> Terminal UI
 #===============================================================
 
-# ## interactive::getTerminalSize
+# ## tui::getTerminalSize
 #
 # This function exports the terminal size.
 #
@@ -217,10 +220,10 @@ function io::cleanupTempFiles() {
 # - `GLOBAL_LINES`: The number of lines in the terminal.
 #
 # ```bash
-# interactive::getTerminalSize
+# tui::getTerminalSize
 # printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
 # ```
-function interactive::getTerminalSize() {
+function tui::getTerminalSize() {
   shopt -s checkwinsize
   # the following subshell is required to correctly compute the columns and lines
   # the bash manual says these are computed after the execution of an external command
@@ -233,6 +236,11 @@ function interactive::getTerminalSize() {
   GLOBAL_LINES="${LINES:-30}"
   shopt -u checkwinsize
 }
+
+#===============================================================
+# >>> Logging
+#===============================================================
+
 
 # ## log::setLevel
 #
@@ -1757,10 +1765,10 @@ esac
 
 # Export terminal size on window resize if we are in interactive mode.
 if [[ -t 2 ]]; then
-  interactive::getTerminalSize
+  tui::getTerminalSize
   GLOBAL_SCREEN_REDRAW_REQUIRED=false
   # shellcheck disable=SC2090
-  trap 'interactive::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::createPrintFunction; eval "${GLOBAL_LOG_PRINT_FUNCTION}"' SIGWINCH
+  trap 'tui::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::createPrintFunction; eval "${GLOBAL_LOG_PRINT_FUNCTION}"' SIGWINCH
 else
   GLOBAL_COLUMNS="${VALET_DEFAULT_COLUMNS:-120}"
   GLOBAL_LINES="${VALET_DEFAULT_LINES:-30}"

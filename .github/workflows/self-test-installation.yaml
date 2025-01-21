@@ -6,12 +6,12 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'tests.d/1106-self-install/**'
+      - 'tests.d/self-install/**'
       - 'commands.d/self-install.sh'
       - 'commands.d/self-extend.sh'
   pull_request:
     paths:
-      - 'tests.d/1106-self-install/**'
+      - 'tests.d/self-install/**'
       - 'commands.d/self-install.sh'
       - 'commands.d/self-extend.sh'
 
@@ -62,6 +62,6 @@ jobs:
           RUNNING_IN_DOCKER: true
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
-          chmod +x ./tests.d/1106-self-install/test
-          ./tests.d/1106-self-install/test
+          chmod +x ./tests.d/self-install/test
+          ./tests.d/self-install/test
 

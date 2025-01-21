@@ -5,7 +5,7 @@ set -Eeu -o pipefail
 # installation of Valet and its extensions, as well as the update.
 
 # Run locally from valet directory:
-# ./tests.d/1106-self-install/test
+# ./tests.d/self-install/test
 
 # We expect this script to run in a Docker container, with curl installed
 # and a 'me' user with sudo privileges.
@@ -18,11 +18,11 @@ function main() {
     if command -v docker &> /dev/null; then
       echo "Running the test in a container."
       # To build the image:
-      # - cd tests.d/1106-self-install/docker-valet-test
+      # - cd tests.d/self-install/docker-valet-test
       # - docker build -t valet-test .
       # Then to run it:
       # - docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash valet-test
-      docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash valet-test -c -o errexit -o nounset -o pipefail "chmod +x ./tests.d/1106-self-install/test; ./tests.d/1106-self-install/test"
+      docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash valet-test -c -o errexit -o nounset -o pipefail "chmod +x ./tests.d/self-install/test; ./tests.d/self-install/test"
       return 0
     fi
     echo "Need docker to run this test."

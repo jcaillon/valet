@@ -45,8 +45,8 @@ Here is an example of directory structure for your user directory:
     {{< /filetree/folder >}}
     {{< filetree/folder name="shared-commands" >}}
       {{< filetree/folder name="tests.d" >}}
+        {{< filetree/file name="before-each-test" >}}
         {{< filetree/folder name="test-suite3" >}}
-          {{< filetree/file name="before-each-test" >}}
           {{< filetree/file name="test.sh" >}}
         {{< /filetree/folder >}}
       {{< /filetree/folder >}}
@@ -166,8 +166,8 @@ In addition to the test scripts, you can create other specific scripts which wil
 | `tests.d/after-tests` | Source'd after all the test suites inside the tests.d folder are executed. |
 | `tests.d/before-each-test-suite` | Source'd before the execution of each test suite. |
 | `tests.d/after-each-test-suite` | Source'd after the execution of each test suite. |
-| `tests.d/{test-suite}/before-each-test` | Source'd before the execution of each test script. |
-| `tests.d/{test-suite}/after-each-test` | Source'd after the execution of each test script. |
+| `tests.d/before-each-test` | Source'd before the execution of each test script. |
+| `tests.d/after-each-test` | Source'd after the execution of each test script. |
 
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../command-properties" title="Command properties" >}}

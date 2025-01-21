@@ -226,7 +226,7 @@ VALET_CONFIG_FSFS_COUNT_RESET="${VALET_CONFIG_FSFS_COUNT_RESET:-}"
 ## -----------
 
 # Change the default progress bar template.
-# See interactive::startProgress.
+# See progress::start.
 VALET_CONFIG_PROGRESS_BAR_TEMPLATE="${VALET_CONFIG_PROGRESS_BAR_TEMPLATE:-}"
 
 # Change the default progress bar size
@@ -234,14 +234,14 @@ VALET_CONFIG_PROGRESS_BAR_SIZE="${VALET_CONFIG_PROGRESS_BAR_SIZE:-}"
 
 # Change the default time between two frames for the animation of the spinner in the progress
 # (in seconds, can be a float number).
-# See interactive::startProgress.
+# See progress::start.
 VALET_CONFIG_PROGRESS_ANIMATION_DELAY="${VALET_CONFIG_PROGRESS_ANIMATION_DELAY:-}"
 
 # The default number of animation frames to wait between two updates of the progress bar.
 VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL="${VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL:-}"
 
 # Change the default spinner characters (one character represents one frame of the animation).
-# See interactive::startProgress.
+# See progress::start.
 VALET_CONFIG_SPINNER_CHARACTERS="${VALET_CONFIG_SPINNER_CHARACTERS:-}"
 
 # The default character to use to represent the selected item in the interactive mode.

@@ -1,0 +1,268 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# shellcheck source=lib-ansi-codes
+source ansi-codes
+# shellcheck source=lib-io
+source io
+# shellcheck source=lib-tui
+source tui
+
+#===============================================================
+# >>> Wait spinner / progress bars
+#===============================================================
+
+# Returns a string representing a progress bar.
+#
+# - $1: **percent** _as int_:
+#       the percentage of the progress bar (0 to 100)
+# - $2: **size** _as int_:
+#       the size of the progress bar (max total nb characters)
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the progress bar string
+#
+# ```bash
+# progress_getProgressBarString 50 20
+# ```
+function progress_getProgressBarString() {
+  local percent="${1}"
+  local size="${2}"
+  local progressBarChars=" ▏▎▍▌▋▊▉"
+
+  local -i nbFullChars=$((size * percent / 100))
+  local -i extraCharIndex=$(((size * percent - nbFullChars * 100) * 8 / 100))
+
+  local IFS=""
+  if ((nbFullChars > 0)); then
+    eval "local -a array=( {0..$((nbFullChars - 1))} )"
+    # shellcheck disable=SC2154
+    RETURNED_VALUE="${array[*]//*/█}"
+  else
+    RETURNED_VALUE=""
+  fi
+  if ((extraCharIndex > 0)); then
+    RETURNED_VALUE+="${progressBarChars:extraCharIndex:1}"
+  fi
+  if ((size - ${#RETURNED_VALUE} - 1 >= 0)); then
+    eval "local -a array=( {0..$((size - ${#RETURNED_VALUE} - 1))} )"
+    RETURNED_VALUE+="${array[*]//*/ }"
+  fi
+}
+
+# Starts a wait spinner animation that will loop for a set number of frames.
+#
+# This function runs in a background process (subshell) and will not block the main thread.
+# It reads the progress from a file shared with the main thread.
+function progress_runAnimationInBackground() {
+  local progressFilePath="${1}"
+  local barTemplate="${2:-${VALET_CONFIG_PROGRESS_BAR_TEMPLATE:-"#spinner #percent ░#bar░ #message"}}"
+  local progressBarSize="${3:-${VALET_CONFIG_PROGRESS_BAR_SIZE:-20}}"
+  local frameDelay="${4:-${VALET_CONFIG_PROGRESS_ANIMATION_DELAY:-0.1}}"
+  local nbFrameForProgressRefresh="${5:-${VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL:-3}}"
+  local maxFrames="${6:-9223372036854775807}"
+  local spinner="${7:-${VALET_CONFIG_SPINNER_CHARACTERS:-"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"}}"
+
+  # shellcheck source=lib-io
+  source io
+  # shellcheck source=lib-ansi-codes
+  source ansi-codes
+
+  # Hide the cursor
+  printf "%s" "${AC__CURSOR_HIDE}"
+
+  local -i loopProgressRefresh=0
+  local -i spinnerIndex=0
+  local -i loop=0
+  local -i percent=0
+  local displayedString computeString percentString message
+  while [[ ${loop} -lt ${maxFrames} ]]; do
+    # each second, we read the progress file path to get the current %
+    if ((loopProgressRefresh >= nbFrameForProgressRefresh)); then
+      if [[ ! -f "${progressFilePath}" ]]; then
+        exit 0
+      fi
+      io::readFile "${progressFilePath}"
+      percentString="${RETURNED_VALUE%% *}"
+      message="${RETURNED_VALUE#* }"
+      message="${message%%$'\n'*}"
+      if [[ ${percentString} =~ ^([0-9]+)$ ]]; then
+        percent=${percentString}
+      else
+        percent=0
+      fi
+      loopProgressRefresh=0
+    else
+      loopProgressRefresh+=1
+    fi
+
+    displayedString="${barTemplate//"#spinner"/"${spinner:spinnerIndex:1}"}"
+
+    printf -v computeString "%4s" "${percent}%"
+    displayedString="${displayedString//"#percent"/"${computeString}"}"
+
+    progress_getProgressBarString "${percent}" "${progressBarSize}"
+    displayedString="${displayedString//"#bar"/"${RETURNED_VALUE}"}"
+
+    displayedString="${displayedString//"#message"/"${message:-}"}"
+
+    printf "%-${GLOBAL_COLUMNS}s%s" "${displayedString}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+
+    spinnerIndex=$((spinnerIndex >= ${#spinner} - 1 ? 0 : spinnerIndex + 1))
+    loop+=1
+    io::sleep "${frameDelay}"
+  done
+}
+
+# ## progress::start
+#
+# Shows a spinner / progress animation with configurable output including a progress bar.
+#
+# The animation will be displayed until progress::stop is called
+# or if the max number of frames is reached.
+#
+# Outputs to stderr.
+# This will run in the background and will not block the main thread.
+# The main thread can continue to output logs while this animation is running.
+#
+# - $1: output template _as string_:
+#       (optional) the template to display
+#       (defaults to VALET_CONFIG_PROGRESS_BAR_TEMPLATE="#spinner #percent ░#bar░ #message")
+# - $2: max width _as int_:
+#       (optional) the maximum width of the progress bar
+#       (defaults to VALET_CONFIG_PROGRESS_BAR_SIZE=20)
+# - $3: frame delay _as float_:
+#       (optional) the time in seconds between each frame of the spinner
+#       (defaults to VALET_CONFIG_PROGRESS_ANIMATION_DELAY=0.1)
+# - $4: refresh every x frames _as int_:
+#       (optional) the number of frames of the spinner to wait before refreshing the progress bar
+#       (defaults to VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL=3)
+# - $5: max frames _as int_:
+#       (optional) the maximum number of frames to display
+#       (defaults to 9223372036854775807)
+# - $6: spinner _as string_:
+#       (optional) the spinner to display (each character is a frame)
+#       (defaults to VALET_CONFIG_SPINNER_CHARACTERS="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+#       Examples:
+#       - ◐◓◑◒
+#       - ▖▘▝▗
+#       - ⣾⣽⣻⢿⡿⣟⣯⣷
+#       - ⢄⢂⢁⡁⡈⡐⡠
+#       - ◡⊙◠
+#       - ▌▀▐▄
+#       - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
+#
+# ```bash
+# progress::start "#spinner" "" 0.05 "" "" "⢄⢂⢁⡁⡈⡐⡠"
+# wait 4
+# progress::stop
+#
+# progress::start "#spinner #percent ░#bar░ #message" 30 0.05 1
+# IDX=0
+# while [[ ${IDX} -le 50 ]]; do
+#   progress::update $((IDX * 2)) "Doing something ${IDX}/50..."
+#   IDX=$((IDX + 1))
+#   sleep 0.1
+# done
+# ```
+function progress::start() {
+  if [[ ! -t 2 ]]; then
+    # we are not in an interactive session
+    return 0
+  fi
+  if [[ ${VALET_DISABLE_PROGRESS_BARS:-} == "true" ]]; then
+    return 0
+  fi
+
+  if [[ -n "${GLOBAL_BACKGROUND_JOB1_PID:-}" ]]; then
+    core::fail "A spinner or progress bar is already running."
+  fi
+
+  printf '%s' "${AC__CURSOR_HIDE}"
+
+  # disable echoing when we type something
+  tui::sttyInit
+
+  io::createTempFile
+  _PROGRESS_BAR_UPDATE_FILE="${RETURNED_VALUE}"
+  _PROGRESS_BAR_RUNNING=true
+
+  progress_runAnimationInBackground "${_PROGRESS_BAR_UPDATE_FILE}" "$@" 1>&2 &
+  GLOBAL_BACKGROUND_JOB1_PID="$!"
+}
+
+# ## progress::update
+#
+# Update the progress bar with a new percentage and message.
+#
+# The animation can be started with progress::start for more options.
+# The animation will stop if the updated percentage is 100.
+#
+# - $1: **percent** _as int_:
+#       the percentage of the progress bar (0 to 100)
+# - $2: message _as string_:
+#       (optional) the message to display
+#
+# ```bash
+# progress::update 50 "Doing something..."
+# ```
+function progress::update() {
+  local percent="${1}"
+  local message="${2:-}"
+
+  if [[ ! -t 2 ]]; then
+    # we are not in an interactive session
+    return 0
+  fi
+  if [[ ${VALET_DISABLE_PROGRESS_BARS:-} == "true" ]]; then
+    return 0
+  fi
+
+  if [[ ${percent} -lt 0 ]]; then
+    return
+  fi
+
+  # stop the progress bar at 100 percent
+  if [[ ${percent} -gt 100 ]]; then
+    progress::stop
+    return
+  fi
+
+  if [[ ${_PROGRESS_BAR_RUNNING:-} != "true" ]]; then
+    progress::start ""
+  fi
+
+  # update the progress file
+  printf "%s %s\n" "${percent}" "${message}" >"${_PROGRESS_BAR_UPDATE_FILE}"
+}
+
+# ## progress::stop
+#
+# Stop the progress bar.
+#
+# ```bash
+# progress::stop
+# ```
+function progress::stop() {
+  if [[ ! -t 2 ]]; then
+    # we are not in an interactive session
+    return 0
+  fi
+  if [[ ${VALET_DISABLE_PROGRESS_BARS:-} == "true" ]]; then
+    return 0
+  fi
+
+  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n "${GLOBAL_BACKGROUND_JOB1_PID:-}" ]]; then
+    _PROGRESS_BAR_RUNNING=false
+    kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
+    rm -f "${_PROGRESS_BAR_UPDATE_FILE}" &>/dev/null || :
+    unset -v GLOBAL_BACKGROUND_JOB1_PID _PROGRESS_BAR_UPDATE_FILE _PROGRESS_BAR_RUNNING
+  fi
+
+  printf "%s" "${AC__ERASE_LINE}${AC__CURSOR_SHOW}"
+
+  # restore the key echoing
+  tui::sttyRestore
+}

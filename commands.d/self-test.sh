@@ -15,8 +15,8 @@ fi
 source self-test-utils
 # shellcheck source=../libraries.d/lib-string
 source string
-# shellcheck source=../libraries.d/lib-interactive
-source interactive
+# shellcheck source=../libraries.d/lib-progress
+source progress
 # shellcheck source=../libraries.d/lib-bash
 source bash
 
@@ -244,8 +244,8 @@ function selfTest_runSingleTestSuites() {
   # run a custom user script before the tests if it exists
   selfTestUtils_runHookScript "${testsDotDirectory}/before-tests"
 
-  interactive::startProgress
-  interactive::updateProgress 0 "Running test suites."
+  progress::start
+  progress::update 0 "Running test suites."
 
   # sequential run
   if ((_TEST_NB_PARALLEL_TEST_SUITES == 0 || ${#testSuiteDirectories[@]} == 1)); then
@@ -254,7 +254,7 @@ function selfTest_runSingleTestSuites() {
       testDirectoryName="${testDirectory##*/}"
       log::debug "Starting test suite ⌜${testDirectoryName}⌝."
 
-      interactive::updateProgress $((testSuitesDoneCount * 100 / ${#testSuiteDirectories[@]})) "Running test suite ⌜${testDirectoryName}⌝."
+      progress::update $((testSuitesDoneCount * 100 / ${#testSuiteDirectories[@]})) "Running test suite ⌜${testDirectoryName}⌝."
       (selfTest_runSingleTestSuite "${testDirectory}") || _TEST_FAILED_TEST_SUITES+=("${testDirectoryName}")
       testSuitesDoneCount+=1
     done
@@ -272,7 +272,7 @@ function selfTest_runSingleTestSuites() {
     bash::runInParallel _TEST_SUITE_NAMES _TEST_SUITE_COMMANDS "${_TEST_NB_PARALLEL_TEST_SUITES}" selfTest_parallelCallback
   fi
 
-  interactive::stopProgress
+  progress::stop
 
   # run a custom user script after the tests if it exists
   selfTestUtils_runHookScript "${testsDotDirectory}/after-tests"
@@ -294,7 +294,7 @@ function selfTest_parallelCallback() {
   local -i exitCode="${3}"
   local -i percent="${4}"
 
-  interactive::updateProgress "${percent}" "Done running test suite ⌜${jobName}⌝."
+  progress::update "${percent}" "Done running test suite ⌜${jobName}⌝."
 
   # display the job output
   io::readFile "${_TEST_SUITE_OUTPUT_FILES[${index}]}"
@@ -352,9 +352,10 @@ function selfTest_runSingleTestSuite() {
   mkdir -p "${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}"
   # shellcheck disable=SC2034
   GLOBAL_TEST_CURRENT_DIRECTORY="${testSuiteDirectory}"
+  GLOBAL_TESTS_D_DIRECTORY="${testsDotDirectory}"
 
   # run a custom user script before the test suite if it exists
-  selfTestUtils_runHookScript "${testsDotDirectory}/before-each-test-suite"
+  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-each-test-suite"
 
   # write the test suite title
   printf "%s\n\n" "# Test suite ${GLOBAL_TEST_SUITE_NAME}" >"${GLOBAL_TEST_REPORT_FILE}"
@@ -459,7 +460,7 @@ function selfTest_runSingleTestSuite() {
   popd 1>/dev/null
 
   # run a custom user script after the test suite if it exists
-  selfTestUtils_runHookScript "${testsDotDirectory}/after-each-test-suite"
+  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/after-each-test-suite"
 
   # exit with an error if there were errors in the test scripts
   if ((nbOfScriptsWithErrors > 0)); then
@@ -547,14 +548,14 @@ function selfTest_runSingleTest() {
   exec 4>&2 2>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
 
   # run a custom user script before the test if it exists
-  selfTestUtils_runHookScript "${testDirectory}/before-each-test"
+  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-each-test"
 
   # run the test
   # shellcheck disable=SC1090
   builtin source "${testScript}"
 
   # run a custom user script after the test if it exists
-  selfTestUtils_runHookScript "${testDirectory}/after-each-test"
+  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/after-each-test"
 
   exec 3>&-
   exec 4>&-

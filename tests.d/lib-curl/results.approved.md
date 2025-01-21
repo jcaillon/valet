@@ -11,7 +11,8 @@ Writing to an output file:
 Returned variables:
 
 ```text
-RETURNED_VALUE=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 200 https://fuu\n'
+RETURNED_VALUE='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 200 https://fuu
+'
 RETURNED_VALUE2='200'
 ```
 
@@ -42,12 +43,13 @@ Getting a 500 error with fail mode off:
 
 ❯ `curl::toFile false 200 /tmp/valet-temp --code 500 https://fuu`
 
-Exited with code: `1`
+Returned code: `1`
 
 Returned variables:
 
 ```text
-RETURNED_VALUE=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 500 https://fuu\n'
+RETURNED_VALUE='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 500 https://fuu
+'
 RETURNED_VALUE2='500'
 ```
 
@@ -58,7 +60,8 @@ Getting an acceptable 400 error with fail mode:
 Returned variables:
 
 ```text
-RETURNED_VALUE=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 400 https://fuu\n'
+RETURNED_VALUE='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 400 https://fuu
+'
 RETURNED_VALUE2='400'
 ```
 
@@ -78,8 +81,8 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 **Error output**:
 
 ```text
-DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
-'--silent' '--show-error' '--location' '--write-out' '%{response_code}' '--output' '/tmp/valet-temp' '--code' '201' 'https://fuu'
+DEBUG    Executing the command ⌜curl⌝ with arguments: 
+--silent --show-error --location --write-out %\{response_code\} --output /tmp/valet-temp --code 201 https://fuu
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
 DEBUG    The curl command for url ⌜https://fuu⌝ ended with exit code ⌜0⌝, the http return code was ⌜201⌝.
 DEBUG    The http return code ⌜201⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
@@ -88,7 +91,8 @@ DEBUG    The http return code ⌜201⌝ is acceptable and exit code has been res
 Returned variables:
 
 ```text
-RETURNED_VALUE=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 201 https://fuu\n'
+RETURNED_VALUE='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 201 https://fuu
+'
 RETURNED_VALUE2='201'
 ```
 
@@ -104,7 +108,8 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='(request body response) Writing stuff to file because the --output option was given.'
-RETURNED_VALUE2=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu\n'
+RETURNED_VALUE2='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu
+'
 RETURNED_VALUE3='200'
 ```
 
@@ -145,8 +150,8 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 **Error output**:
 
 ```text
-DEBUG    Executing the command ⌜curl⌝ with arguments (quoted): 
-'--silent' '--show-error' '--location' '--write-out' '%{response_code}' '--output' '/tmp/valet-work.f' '/tmp/valet-temp' '--code' '200' 'https://fuu'
+DEBUG    Executing the command ⌜curl⌝ with arguments: 
+--silent --show-error --location --write-out %\{response_code\} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu
 DEBUG    The command ⌜curl⌝ originally ended with exit code ⌜0⌝.
 DEBUG    The curl command for url ⌜https://fuu⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
 DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
@@ -156,7 +161,8 @@ Returned variables:
 
 ```text
 RETURNED_VALUE=''
-RETURNED_VALUE2=$'(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu\n'
+RETURNED_VALUE2='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu
+'
 RETURNED_VALUE3='200'
 ```
 

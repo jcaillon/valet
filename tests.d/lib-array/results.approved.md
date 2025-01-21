@@ -131,7 +131,7 @@ MY_ARRAY=(
 
 ❯ `array::appendIfNotPresent MY_ARRAY breakdown`
 
-Exited with code: `1`
+Returned code: `1`
 
 ```text
 MY_ARRAY=(
@@ -163,7 +163,7 @@ MY_ARRAY=(
 
 ❯ `array::isInArray MY_ARRAY holiday`
 
-Exited with code: `1`
+Returned code: `1`
 
 ```text
 MY_ARRAY=(

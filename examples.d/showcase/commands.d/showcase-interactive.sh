@@ -3,7 +3,8 @@
 # Importing libraries from the core (note that we could do that in the function that needs it as well)
 # shellcheck disable=SC1091
 source interactive
-
+# shellcheck disable=SC1091
+source progress
 # shellcheck disable=SC1091
 source fsfs
 
@@ -23,12 +24,12 @@ function showcaseInteractive() {
   core::checkParseResults "${help:-}" "${parsingErrors:-}"
 
   log::info "Getting the cursor size:"
-  interactive::getCursorPosition
+  tui::getCursorPosition
   log::info "GLOBAL_CURSOR_LINE: ⌜${GLOBAL_CURSOR_LINE}⌝"
   log::info "GLOBAL_CURSOR_COLUMN: ⌜${GLOBAL_CURSOR_COLUMN}⌝"
 
   log::info "Getting the terminal size:"
-  interactive::getTerminalSize
+  tui::getTerminalSize
   log::info "GLOBAL_LINES: ⌜${GLOBAL_LINES}⌝"
   log::info "GLOBAL_COLUMNS: ⌜${GLOBAL_COLUMNS}⌝"
 
@@ -56,7 +57,7 @@ function showcaseInteractive() {
   fi
 
   log::info "Creating some space below this line."
-  interactive::createSpace 4
+  tui::createSpace 4
 
   ############################
   # Fsfs
@@ -79,7 +80,7 @@ function showcaseInteractive() {
 
   log::warning "Now displaying a spinner"
 
-  interactive::startProgress "#spinner" "" 0.05 "" "" "⢄⢂⢁⡁⡈⡐⡠"
+  progress::start "#spinner" "" 0.05 "" "" "⢄⢂⢁⡁⡈⡐⡠"
 
   IDX=0
   while [[ ${IDX} -lt 3 ]]; do
@@ -88,7 +89,7 @@ function showcaseInteractive() {
     sleep 1
   done
 
-  interactive::stopProgress
+  progress::stop
 
 
   ############################
@@ -99,13 +100,13 @@ function showcaseInteractive() {
 
   IDX=0
   while [[ ${IDX} -le 50 ]]; do
-    interactive::updateProgress $((IDX * 2)) "doing something ${IDX}..."
+    progress::update $((IDX * 2)) "doing something ${IDX}..."
     IDX=$((IDX + 1))
     # log::info "alright ${IDX}..."
     sleep 0.1
   done
 
-  interactive::stopProgress
+  progress::stop
 
 
   log::info "End of demo!"

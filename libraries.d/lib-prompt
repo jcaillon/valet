@@ -4,8 +4,8 @@
 
 # shellcheck source=lib-ansi-codes
 source ansi-codes
-# shellcheck source=lib-interactive
-source interactive
+# shellcheck source=lib-tui
+source tui
 
 # ## prompt::input (private)
 #
@@ -331,13 +331,13 @@ function prompt::input() {
   _PROMPT_CANCELLED=true
 
   # set trap so that interrupt signal sets GLOBAL_SESSION_INTERRUPTED to true
-  interactive::setInterruptTrap
+  tui::setInterruptTrap
   # before starting to wait for inputs, we clear up the key pressed
-  interactive::clearKeyPressed
+  tui::clearKeyPressed
   # setup the terminal to be ready for readline
-  interactive::sttyInit
+  tui::sttyInit
   # rebind some keys to call the callback function prompt_onKeyBindingPress
-  interactive::rebindKeymap prompt_onKeyBindingPress
+  tui::rebindKeymap prompt_onKeyBindingPress
 
   # make all match case insensitive
   shopt -s nocasematch
@@ -349,7 +349,7 @@ function prompt::input() {
 
   # main loop
   while true; do
-    if interactive::waitForKeyPress -t 0.2; then
+    if tui::waitForKeyPress -t 0.2; then
       prompt_onKeyPressed "${LAST_KEY_PRESSED}" "${LAST_KEY_PRESSED}"
     fi
 
@@ -392,8 +392,8 @@ function prompt::input() {
   prompt_clearErrorBox
   prompt_clearItemsBox
   prompt_clearPrompt
-  interactive::sttyRestore
-  interactive::restoreInterruptTrap
+  tui::sttyRestore
+  tui::restoreInterruptTrap
   shopt -u nocasematch
 
   if [[ ${_PROMPT_CANCELLED:-} == "true" ]]; then
@@ -884,7 +884,7 @@ function prompt_openItemsBox() {
   fi
 
   # compute the size of the autocomplete box
-  interactive::getBestAutocompleteBox "${_PROMPT_START_LINE}" "${preferredLeftPosition}" "${_PROMPT_ITEMS_BOX_PREFERRED_HEIGHT}" "${_PROMPT_ITEMS_BOX_PREFERRED_WIDTH}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
+  tui::getBestAutocompleteBox "${_PROMPT_START_LINE}" "${preferredLeftPosition}" "${_PROMPT_ITEMS_BOX_PREFERRED_HEIGHT}" "${_PROMPT_ITEMS_BOX_PREFERRED_WIDTH}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
   _PROMPT_ITEMS_BOX_TOP="${RETURNED_VALUE}"
   _PROMPT_ITEMS_BOX_LEFT="${RETURNED_VALUE2}"
   _PROMPT_ITEMS_BOX_WIDTH="${RETURNED_VALUE3}"
@@ -1135,7 +1135,7 @@ function prompt_clearItemsBox() {
     fi
   fi
 
-  interactive::clearBox "${_PROMPT_ITEMS_BOX_TOP}" "${_PROMPT_ITEMS_BOX_LEFT}" "${_PROMPT_ITEMS_BOX_WIDTH}" "${_PROMPT_ITEMS_BOX_HEIGHT}"
+  tui::clearBox "${_PROMPT_ITEMS_BOX_TOP}" "${_PROMPT_ITEMS_BOX_LEFT}" "${_PROMPT_ITEMS_BOX_WIDTH}" "${_PROMPT_ITEMS_BOX_HEIGHT}"
 
   _PROMPT_ITEMS_BOX_SHOWN=false
 }
@@ -1231,7 +1231,7 @@ function prompt_showError() {
 
   # compute the height of the box where we can display error messages
   # This box should fit within the autocomplete width
-  interactive::getBestAutocompleteBox "${_PROMPT_START_LINE}" "${_PROMPT_START_COLUMN}" "${errorLinesNeeded}" "${_PROMPT_WIDTH}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
+  tui::getBestAutocompleteBox "${_PROMPT_START_LINE}" "${_PROMPT_START_COLUMN}" "${errorLinesNeeded}" "${_PROMPT_WIDTH}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
   _PROMPT_ERROR_BOX_TOP="${RETURNED_VALUE}"
   _PROMPT_ERROR_BOX_LEFT="${RETURNED_VALUE2}"
   _PROMPT_ERROR_BOX_WIDTH="${RETURNED_VALUE3}"
@@ -1268,7 +1268,7 @@ function prompt_clearErrorBox() {
     fi
   fi
 
-  interactive::clearBox "${_PROMPT_ERROR_BOX_TOP}" "${_PROMPT_ERROR_BOX_LEFT}" "${_PROMPT_ERROR_BOX_WIDTH}" "${_PROMPT_ERROR_BOX_HEIGHT}"
+  tui::clearBox "${_PROMPT_ERROR_BOX_TOP}" "${_PROMPT_ERROR_BOX_LEFT}" "${_PROMPT_ERROR_BOX_WIDTH}" "${_PROMPT_ERROR_BOX_HEIGHT}"
 
   _PROMPT_ERROR_BOX_SHOWN=false
 }
