@@ -68,7 +68,7 @@ function selfAddCommand() {
   string::kebabCaseToCamelCase "${fileName}"
   local functionName="${RETURNED_VALUE}"
   local newCommandFilePath="${PWD}/commands.d/${fileName}.sh"
-  local commandTemplateFile="${GLOBAL_VALET_HOME}/extras/template-command-${templateFlavor}.sh"
+  local commandTemplateFile="${GLOBAL_INSTALLATION_DIRECTORY}/extras/template-command-${templateFlavor}.sh"
 
   if [[ -f ${newCommandFilePath} ]]; then
     log::warning "The command file ⌜${newCommandFilePath}⌝ already exists."

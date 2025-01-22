@@ -89,20 +89,20 @@ set -Eeu -o pipefail
 #===============================================================
 # >>> Include core/utils
 #===============================================================
-GLOBAL_VALET_HOME="${BASH_SOURCE[0]}"
-if [[ "${GLOBAL_VALET_HOME}" != /* ]]; then
+GLOBAL_INSTALLATION_DIRECTORY="${BASH_SOURCE[0]}"
+if [[ "${GLOBAL_INSTALLATION_DIRECTORY}" != /* ]]; then
   # resolve relative path
-  if pushd "${GLOBAL_VALET_HOME%/*}" &>/dev/null; then GLOBAL_VALET_HOME="${PWD}"; popd &>/dev/null;
-  else GLOBAL_VALET_HOME="${PWD}"; fi
+  if pushd "${GLOBAL_INSTALLATION_DIRECTORY%/*}" &>/dev/null; then GLOBAL_INSTALLATION_DIRECTORY="${PWD}"; popd &>/dev/null;
+  else GLOBAL_INSTALLATION_DIRECTORY="${PWD}"; fi
 else
-  GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip filename
+  GLOBAL_INSTALLATION_DIRECTORY="${GLOBAL_INSTALLATION_DIRECTORY%/*}" # strip filename
 fi
 
 #===============================================================
 # >>> Source main functions
 #===============================================================
 # shellcheck source=libraries.d/main
-source "${GLOBAL_VALET_HOME}/libraries.d/main"
+source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
 
 #===============================================================
 # >>> Run the main function

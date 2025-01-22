@@ -9,14 +9,14 @@
 **Standard output**:
 
 ```text
-🙈 mocking interactive::promptYesNo It does not look like the current directory ⌜$GLOBAL_VALET_HOME/tests.d/self-add-library/resources/gitignored⌝ is a valet extension, do you want to proceed anyway? true
+🙈 mocking interactive::promptYesNo It does not look like the current directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-library/resources/gitignored⌝ is a valet extension, do you want to proceed anyway? true
 ```
 
 **Error output**:
 
 ```text
 WARNING  The current directory is not under the valet user directory ⌜/tmp/valet.valet.d⌝.
-SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_VALET_HOME/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
+SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
 ```
 
 ❯ `selfAddLibrary new-cool-lib`
@@ -30,8 +30,8 @@ SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBA
 **Error output**:
 
 ```text
-WARNING  The library file ⌜$GLOBAL_VALET_HOME/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝ already exists.
-SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_VALET_HOME/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
+WARNING  The library file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝ already exists.
+SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
 ```
 
 ❯ `io::cat libraries.d/lib-new-cool-lib`

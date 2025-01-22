@@ -21,7 +21,7 @@ function test_helpCommand() {
 
 
   test::title "✅ Testing that we can display the help of a function using command::showHelp"
-  test::exit "${GLOBAL_VALET_HOME}/valet" self mock1 show-help
+  test::exit "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 show-help
 }
 
 # shellcheck disable=SC2317

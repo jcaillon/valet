@@ -139,23 +139,23 @@ function selfTest() {
 
   # core test suites
   if [[ -n ${withCore:-} || ${coreOnly:-false} == "true" ]]; then
-    if [[ ! -d ${GLOBAL_VALET_HOME}/tests.d ]]; then
-      core::fail "The valet core tests directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝ does not exist, cannot run core tests."
+    if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/tests.d ]]; then
+      core::fail "The valet core tests directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/tests.d⌝ does not exist, cannot run core tests."
     fi
 
     # we need to rebuild the commands for the core commands only
     rm -Rf "${GLOBAL_TEST_VALET_USER_DIRECTORY}"
     selfTestUtils_rebuildCommands --core-only  --output "${GLOBAL_TEST_VALET_USER_DIRECTORY}/commands"
-    selfTest_runSingleTestSuites "${GLOBAL_VALET_HOME}/tests.d"
+    selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d"
 
     # now we can also test the commands in examples.d if the directory is there
-    if [[ ! -d ${GLOBAL_VALET_HOME}/examples.d ]]; then
-      log::warning "The valet examples directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝ does not exist, cannot run the tests on the core examples."
+    if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/examples.d ]]; then
+      log::warning "The valet examples directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/examples.d⌝ does not exist, cannot run the tests on the core examples."
     else
       # we need to rebuild the commands for the examples only
       rm -Rf "${GLOBAL_TEST_VALET_USER_DIRECTORY}"
-      selfTestUtils_rebuildCommands --user-directory "${GLOBAL_VALET_HOME}/examples.d"  --output "${GLOBAL_TEST_VALET_USER_DIRECTORY}/commands"
-      selfTest_runSingleTestSuites "${GLOBAL_VALET_HOME}/examples.d/showcase/tests.d"
+      selfTestUtils_rebuildCommands --user-directory "${GLOBAL_INSTALLATION_DIRECTORY}/examples.d"  --output "${GLOBAL_TEST_VALET_USER_DIRECTORY}/commands"
+      selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/examples.d/showcase/tests.d"
     fi
   fi
 
@@ -206,7 +206,7 @@ function selfTest() {
 #   the number of failed test suites (add to the global variable _TEST_FAILED_TEST_SUITES)
 #
 # Usage:
-#   selfTest_runSingleTestSuites "${GLOBAL_VALET_HOME}/tests.d"
+#   selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d"
 function selfTest_runSingleTestSuites() {
   local testsDotDirectory="${1}"
   log::debug "Running all test suites in directory ⌜${testsDotDirectory}⌝."
@@ -571,8 +571,8 @@ function selfTest_runSingleTest() {
 # values that could be different on each run/machine.
 function self_makeReplacementsInReport() {
   io::readFile "${GLOBAL_TEST_REPORT_FILE}"
-  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_VALET_HOME}\/valet/valet}"
-  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_VALET_HOME}/\$GLOBAL_VALET_HOME}"
+  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_INSTALLATION_DIRECTORY}\/valet/valet}"
+  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_INSTALLATION_DIRECTORY}/\$GLOBAL_INSTALLATION_DIRECTORY}"
   RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
   RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
   RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"

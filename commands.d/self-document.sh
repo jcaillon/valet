@@ -119,7 +119,7 @@ function selfDocument::getAllFunctionsDocumentation() {
   fi
 
   # get all the files in the libraries.d directory
-  io::listFiles "${GLOBAL_VALET_HOME}/libraries.d"
+  io::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d"
   local -a filesToAnalyze=("${RETURNED_ARRAY[@]}")
 
   # add each file of each user library directory
@@ -307,7 +307,7 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   done
 
   # load the existing file content
-  io::readFile "${GLOBAL_VALET_HOME}/extras/base.code-snippets"
+  io::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/extras/base.code-snippets"
   local originalContent="${RETURNED_VALUE}"
 
   # remove the first line

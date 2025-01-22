@@ -4,7 +4,7 @@
 
 ### ✅ Testing self-build script
 
-❯ `$GLOBAL_VALET_HOME/commands.d/self-build.sh --output /tmp/valet-temp --core-only`
+❯ `$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-build.sh --output /tmp/valet-temp --core-only`
 
 **Error output**:
 
@@ -13,33 +13,33 @@ INFO     Added the test commands to the build.
 INFO     Skipping the build of scripts in user directory (building core commands only).
 INFO     Extracting commands from ⌜valet⌝.
 INFO                              ├── ⌜⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/help.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/help.sh⌝.
 INFO                              ├── ⌜help⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-add-command.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-add-command.sh⌝.
 INFO                              ├── ⌜self add-command⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-add-library.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-add-library.sh⌝.
 INFO                              ├── ⌜self add-library⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-build.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-build.sh⌝.
 INFO                              ├── ⌜self build⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-config.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-config.sh⌝.
 INFO                              ├── ⌜self config⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-document.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-document.sh⌝.
 INFO                              ├── ⌜self document⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-export.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-export.sh⌝.
 INFO                              ├── ⌜self export⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-extend.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-extend.sh⌝.
 INFO                              ├── ⌜self extend⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-install.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-install.sh⌝.
 INFO                              ├── ⌜self update⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-release.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-release.sh⌝.
 INFO                              ├── ⌜self release⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-setup.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-setup.sh⌝.
 INFO                              ├── ⌜self setup⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-test.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-test.sh⌝.
 INFO                              ├── ⌜self test⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/commands.d/self-uninstall.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-uninstall.sh⌝.
 INFO                              ├── ⌜self uninstall⌝.
-INFO     Extracting commands from ⌜$GLOBAL_VALET_HOME/tests.d/.commands.d/self-mock.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh⌝.
 INFO                              ├── ⌜self mock1⌝.
 INFO                              ├── ⌜self mock2⌝.
 INFO                              ├── ⌜self mock3⌝.

@@ -11,7 +11,7 @@
 **Standard output**:
 
 ```text
-source "$GLOBAL_VALET_HOME/libraries.d/core"
+source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
 trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;
 
 ```
@@ -23,7 +23,7 @@ trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;
 **Standard output**:
 
 ```text
-source "$GLOBAL_VALET_HOME/libraries.d/core"
+source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
 trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;
 source ansi-codes
 source array

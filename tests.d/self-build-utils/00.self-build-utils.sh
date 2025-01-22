@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck source=../../commands.d/self-build-utils
-source "${GLOBAL_VALET_HOME}/commands.d/self-build-utils"
+source "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-build-utils"
 
 function main() {
   unset -v ${!CMD_*}

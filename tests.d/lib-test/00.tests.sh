@@ -88,11 +88,11 @@ function main() {
 
   test::title "👁️ Display the value of any variable"
   test::markdown 'You can manually report the definition of any variable using the `test::printVars` function.'
-  GLOBAL_VAR1="This is the value of a global string"
-  GLOBAL_VAR2=("This" "is" "the" "value" "of" "a" "global" "array")
-  declare -iAu GLOBAL_VAR3=([key1]=1 [key2]=2 [key3]=3)
-  test::prompt "test::printVars GLOBAL_VAR1 GLOBAL_VAR2 GLOBAL_VAR3"
-  test::printVars GLOBAL_VAR1 GLOBAL_VAR2 GLOBAL_VAR3
+  MY_VAR1="This is the value of a global string"
+  MY_VAR2=("This" "is" "the" "value" "of" "a" "global" "array")
+  declare -iAu MY_VAR3=([key1]=1 [key2]=2 [key3]=3)
+  test::prompt "test::printVars MY_VAR1 MY_VAR2 MY_VAR3"
+  test::printVars MY_VAR1 MY_VAR2 MY_VAR3
 
   test::title "❤️ Recommendations for tests"
   test::markdown "It is also recommended to implement tests in bash functions and make use of local variables." \

@@ -332,8 +332,8 @@ GLOBAL_STACK_FUNCTION_NAMES=(
 GLOBAL_STACK_SOURCE_FILES=(
 [0]=''
 [1]='core'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-log/path/to/subFunction.sh'
-[3]='$GLOBAL_VALET_HOME/tests.d/lib-log/path/to/function.sh'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-log/path/to/subFunction.sh'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-log/path/to/function.sh'
 )
 GLOBAL_STACK_LINE_NUMBERS=(
 [0]='100'

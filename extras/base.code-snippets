@@ -366,6 +366,22 @@
 			"\\${GLOBAL_TEST_TEMP_FILE}$0"
 		]
 	},
+	"$GLOBAL_SCREEN_REDRAW_REQUIRED": {
+		"prefix": "$GLOBAL_SCREEN_REDRAW_REQUIRED",
+		"description": "Set to true when the terminal size changes, set it to false when you handle this event.",
+		"scope": "",
+		"body": [
+			"\\${GLOBAL_SCREEN_REDRAW_REQUIRED}$0"
+		]
+	},
+	"$GLOBAL_SESSION_INTERRUPTED": {
+		"prefix": "$GLOBAL_SESSION_INTERRUPTED",
+		"description": "Set to true when the user presses CTRL+C during an interactive experience.",
+		"scope": "",
+		"body": [
+			"\\${GLOBAL_SESSION_INTERRUPTED}$0"
+		]
+	},
 	"$LAST_KEY_PRESSED": {
 		"prefix": "$LAST_KEY_PRESSED",
 		"description": "",

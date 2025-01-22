@@ -38,7 +38,7 @@ DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Command found ⌜self mock1⌝.
 DEBUG    Function name found ⌜selfMock1⌝.
-DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/tests.d/.commands.d/self-mock.sh⌝.
+DEBUG    Loaded file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh⌝.
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
 local parsingErrors help action
@@ -67,7 +67,7 @@ DEBUG    Log level set to trace.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Command found ⌜self mock1⌝.
 DEBUG    Function name found ⌜selfMock1⌝.
-DEBUG    Loaded file ⌜$GLOBAL_VALET_HOME/tests.d/.commands.d/self-mock.sh⌝.
+DEBUG    Loaded file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh⌝.
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
 local parsingErrors help action

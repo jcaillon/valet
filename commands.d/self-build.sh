@@ -125,17 +125,17 @@ function selfBuild() {
   userDirectory="${userDirectory:-${RETURNED_VALUE}}"
   output="${output:-${userDirectory}/commands}"
 
-  io::toAbsolutePath "${GLOBAL_VALET_HOME}"
-  GLOBAL_VALET_HOME="${RETURNED_VALUE}"
+  io::toAbsolutePath "${GLOBAL_INSTALLATION_DIRECTORY}"
+  GLOBAL_INSTALLATION_DIRECTORY="${RETURNED_VALUE}"
 
   # list all the files in which we need to find command definitions
   local -a libraryDirectories=()
   local -a commandDefinitionFiles=(
-    "${GLOBAL_VALET_HOME}/valet"
-    "${GLOBAL_VALET_HOME}/commands.d"/*.sh
+    "${GLOBAL_INSTALLATION_DIRECTORY}/valet"
+    "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d"/*.sh
   )
-  if [[ -d "${GLOBAL_VALET_HOME}/tests.d/.commands.d" ]]; then
-    commandDefinitionFiles+=("${GLOBAL_VALET_HOME}/tests.d/.commands.d"/*.sh)
+  if [[ -d "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.commands.d" ]]; then
+    commandDefinitionFiles+=("${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.commands.d"/*.sh)
     log::info "Added the test commands to the build."
   fi
   if [[ ${coreOnly:-} != "true" ]]; then
@@ -264,7 +264,7 @@ function bumpValetBuildVersion() {
 
   version::bump "${currentVersion}" "patch" "false"
 
-  printf '%s' "${RETURNED_VALUE}" >"${GLOBAL_VALET_HOME}/version"
+  printf '%s' "${RETURNED_VALUE}" >"${GLOBAL_INSTALLATION_DIRECTORY}/version"
 
   log::info "The valet build version has been bumped to ⌜${RETURNED_VALUE}⌝."
 }
@@ -308,7 +308,7 @@ function extractCommandDefinitionsToVariables() {
 
 
       io::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${RETURNED_VALUE}"
-      TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${GLOBAL_VALET_HOME}"/}"
+      TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${GLOBAL_INSTALLATION_DIRECTORY}"/}"
 
       # make sure that all these arrays exists and have the same size
       array::makeArraysSameSize TEMP_CMD_BUILD_options_name TEMP_CMD_BUILD_options_description TEMP_CMD_BUILD_options_noEnvironmentVariable TEMP_CMD_BUILD_options_default

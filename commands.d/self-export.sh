@@ -51,13 +51,13 @@ function selfExport() {
   local output=""
 
   # source valet core library, disable some traps
-  output+="source \"${GLOBAL_VALET_HOME}/libraries.d/core\""$'\n'
+  output+="source \"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core\""$'\n'
   output+="trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;"$'\n'
 
   if [[ ${sourceAllFunctions:-} == "true" ]]; then
     # source all libraries
     local library
-    for library in "${GLOBAL_VALET_HOME}/libraries.d/lib-"*; do
+    for library in "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-"*; do
       local libraryName="${library##*lib-}"
       libraryName="${libraryName%lib-}"
       log::debug "Exporting library: ⌜${libraryName}⌝."

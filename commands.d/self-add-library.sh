@@ -65,7 +65,7 @@ function selfAddLibrary() {
   fi
 
   local newCommandFilePath="${PWD}/libraries.d/lib-${libraryName}"
-  local commandTemplateFile="${GLOBAL_VALET_HOME}/extras/template-library-${templateFlavor}.sh"
+  local commandTemplateFile="${GLOBAL_INSTALLATION_DIRECTORY}/extras/template-library-${templateFlavor}.sh"
 
   if [[ -f ${newCommandFilePath} ]]; then
     log::warning "The library file ⌜${newCommandFilePath}⌝ already exists."

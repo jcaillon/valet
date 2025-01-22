@@ -81,18 +81,18 @@ GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
 GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
 
 # Handle the case where this script was io::invoked outside of valet
-if [[ -z "${GLOBAL_VALET_HOME:-}" ]]; then
-  GLOBAL_VALET_HOME="${BASH_SOURCE[0]}"
-  if [[ "${GLOBAL_VALET_HOME}" != /* ]]; then
+if [[ -z "${GLOBAL_INSTALLATION_DIRECTORY:-}" ]]; then
+  GLOBAL_INSTALLATION_DIRECTORY="${BASH_SOURCE[0]}"
+  if [[ "${GLOBAL_INSTALLATION_DIRECTORY}" != /* ]]; then
     # resolve relative path
-    if pushd "${GLOBAL_VALET_HOME%/*}" &>/dev/null; then
-      GLOBAL_VALET_HOME="${PWD}"
+    if pushd "${GLOBAL_INSTALLATION_DIRECTORY%/*}" &>/dev/null; then
+      GLOBAL_INSTALLATION_DIRECTORY="${PWD}"
       popd 1>/dev/null
-    else GLOBAL_VALET_HOME="${PWD}"; fi
+    else GLOBAL_INSTALLATION_DIRECTORY="${PWD}"; fi
   else
-    GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip filename
+    GLOBAL_INSTALLATION_DIRECTORY="${GLOBAL_INSTALLATION_DIRECTORY%/*}" # strip filename
   fi
-  GLOBAL_VALET_HOME="${GLOBAL_VALET_HOME%/*}" # strip libraries.d directory
+  GLOBAL_INSTALLATION_DIRECTORY="${GLOBAL_INSTALLATION_DIRECTORY%/*}" # strip libraries.d directory
 fi
 
 # First thing we do is to source the valet configuration from the user config dir
@@ -1294,7 +1294,7 @@ function array::fuzzyFilterSortQuicksort() {
 # - `RETURNED_VALUE`: the modified function definition
 #
 # ```bash
-# bash::getFunctionDefinitionWithGlobalVars "myFunction" "myFunctionWithGlobalVars" "GLOBAL_VAR1" "GLOBAL_VAR2"
+# bash::getFunctionDefinitionWithGlobalVars "myFunction" "myFunctionWithGlobalVars" "MY_VAR1" "MY_VAR2"
 # ```
 function bash::getFunctionDefinitionWithGlobalVars() {
   local functionName="${1}"
@@ -1401,9 +1401,9 @@ function core::failWithCode() {
 # > - Use `builtin source` if you want to include the file even if it was already included.
 function source() {
   local filePathToInclude
-  if [[ -f "${GLOBAL_VALET_HOME}/libraries.d/lib-${1}" ]]; then
+  if [[ -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${1}" ]]; then
     # source the lib from the valet core libs
-    filePathToInclude="${GLOBAL_VALET_HOME}/libraries.d/lib-${1}"
+    filePathToInclude="${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${1}"
   else
     # source the lib from user libs
     if [[ -v CMD_LIBRARY_DIRECTORIES ]]; then
@@ -1481,7 +1481,7 @@ function core::sourceUserCommands() {
     # shellcheck disable=SC1091
     unset GLOBAL_CMD_INCLUDED
     # shellcheck source=../commands.d/self-build.sh
-    source "${GLOBAL_VALET_HOME}/commands.d/self-build.sh"
+    source "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-build.sh"
     selfBuild --silent
 
     if [[ ! -f "${commandsFile}" ]]; then
@@ -1538,7 +1538,7 @@ function core::deleteUserCommands() {
 function core::getVersion() {
   # shellcheck source=lib-io
   source io
-  io::readFile "${GLOBAL_VALET_HOME}/version"
+  io::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/version"
 }
 
 # ## core::getProgramElapsedMicroseconds
@@ -1654,12 +1654,12 @@ function command::sourceFunction() {
       # shellcheck disable=SC1090
       source "${fileToSource}"
       log::debug "Loaded file ⌜${fileToSource}⌝."
-    elif [[ -f "${GLOBAL_VALET_HOME:-}/${fileToSource}" ]]; then
+    elif [[ -f "${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}" ]]; then
       # shellcheck disable=SC1090
-      source "${GLOBAL_VALET_HOME:-}/${fileToSource}"
-      log::debug "Loaded file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝."
+      source "${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}"
+      log::debug "Loaded file ⌜${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}⌝."
     else
-      log::warning "The source file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
+      log::warning "The source file ⌜${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
     fi
   fi
 }
@@ -1814,6 +1814,6 @@ fi
 # Include main if not already included
 if [[ -z "${GLOBAL_MAIN_INCLUDED:-}" ]]; then
   # shellcheck source=main
-  source "${GLOBAL_VALET_HOME}/libraries.d/main"
+  source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
 fi
 

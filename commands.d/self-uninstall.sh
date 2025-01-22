@@ -41,7 +41,7 @@ function selfUninstall() {
   command::checkParsedResults
 
   if [[ ${script:-} == "true" ]]; then
-    if [[ ! -f "${GLOBAL_VALET_HOME}/valet" ]]; then
+    if [[ ! -f "${GLOBAL_INSTALLATION_DIRECTORY}/valet" ]]; then
       core::fail "Valet does not seem installed, please call this command from an installed Valet."
     fi
     core::getConfigurationDirectory
@@ -54,7 +54,7 @@ function selfUninstall() {
     # shellcheck disable=SC2016
     echo '#!/usr/bin/env bash
 # remove main installation of Valet
-rm -Rf "'"${GLOBAL_VALET_HOME}"'"
+rm -Rf "'"${GLOBAL_INSTALLATION_DIRECTORY}"'"
 # remove the user configuration
 rm -Rf "'"${configurationDirectory}"'"
 # remove the user state

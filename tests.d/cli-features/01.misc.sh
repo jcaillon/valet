@@ -10,7 +10,7 @@ function main() {
   # testing with a non existing user directory
   io::createTempDirectory
   export VALET_USER_DIRECTORY="${RETURNED_VALUE}/non-existing"
-  test::exec VALET_LOG_LEVEL=warning "${GLOBAL_VALET_HOME}/valet" self mock1 logging-level
+  test::exec VALET_LOG_LEVEL=warning "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
 
   log::setLevel info true
 }

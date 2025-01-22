@@ -255,10 +255,10 @@ function selfUpdate() {
   local -a binDirectories
   if [[ ${singleUserInstallation:-} == "true" || "${os}" == "windows" ]]; then
     log::debug "Installing Valet for the current user only."
-    GLOBAL_VALET_HOME="${installationDirectory:-${GLOBAL_VALET_HOME:-"${HOME}/.local/valet"}}"
+    GLOBAL_INSTALLATION_DIRECTORY="${installationDirectory:-${GLOBAL_INSTALLATION_DIRECTORY:-"${HOME}/.local/valet"}}"
   else
     log::debug "Installing Valet for all users."
-    GLOBAL_VALET_HOME="${installationDirectory:-${GLOBAL_VALET_HOME:-"/opt/valet"}}"
+    GLOBAL_INSTALLATION_DIRECTORY="${installationDirectory:-${GLOBAL_INSTALLATION_DIRECTORY:-"/opt/valet"}}"
     binDirectories+=("/usr/local/bin")
   fi
   binDirectories+=("${HOME}/.local/bin")
@@ -291,12 +291,12 @@ function selfUpdate() {
     selfUpdate_printRecapLine "Download from a branch:" "true"
   fi
   selfUpdate_printRecapLine "Download URL:" "${releaseUrl}"
-  selfUpdate_printRecapLine "Installation dir:" "${GLOBAL_VALET_HOME}"
+  selfUpdate_printRecapLine "Installation dir:" "${GLOBAL_INSTALLATION_DIRECTORY}"
   if [[ ${noShim} != "true" && -n ${binDirectory} ]]; then
     selfUpdate_printRecapLine "Create shim in dir:" "${binDirectory}"
     createShim=true
   fi
-  if [[ ${noPath} != "true" && -z ${binDirectory} ]] && ! selfUpdate_isDirectoryInPath "${GLOBAL_VALET_HOME}"; then
+  if [[ ${noPath} != "true" && -z ${binDirectory} ]] && ! selfUpdate_isDirectoryInPath "${GLOBAL_INSTALLATION_DIRECTORY}"; then
     selfUpdate_printRecapLine "Add install dir to PATH:" "true"
     addToPath=true
   fi
@@ -316,12 +316,12 @@ function selfUpdate() {
   selfUpdate_testCommand "chmod"
 
   # install valet
-  if [[ -d "${GLOBAL_VALET_HOME}/.git" ]]; then
+  if [[ -d "${GLOBAL_INSTALLATION_DIRECTORY}/.git" ]]; then
     # case where valet directory is a git repository
-    log::info "The Valet directory ⌜${GLOBAL_VALET_HOME}⌝ already exists and is a git repository, it will be updated using git."
-    selfUpdate_updateGitRepository "${GLOBAL_VALET_HOME}" || core::fail "Failed to update the git repository ⌜${GLOBAL_VALET_HOME}⌝, clean your workarea first (e.g. git stash, or git commit)."
+    log::info "The Valet directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝ already exists and is a git repository, it will be updated using git."
+    selfUpdate_updateGitRepository "${GLOBAL_INSTALLATION_DIRECTORY}" || core::fail "Failed to update the git repository ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝, clean your workarea first (e.g. git stash, or git commit)."
 
-    chmod +x "${GLOBAL_VALET_HOME}/valet"
+    chmod +x "${GLOBAL_INSTALLATION_DIRECTORY}/valet"
   else
     # download and install valet
     selfUpdate_install "${releaseUrl}" "${unattended}" "${useBranch}" "${version}"
@@ -338,7 +338,7 @@ function selfUpdate() {
 
   if [[ ${firstInstallation} == "true" ]]; then
     # shellcheck source=../libraries.d/core
-    source "${GLOBAL_VALET_HOME}/libraries.d/core"
+    source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core"
     log::debug "Sourcing the core functions from valet."
     selfUpdate_sourceDependencies
   else
@@ -350,7 +350,7 @@ function selfUpdate() {
   fi
 
   if [[ ${addToPath} == "true" ]]; then
-    system::addToPath "${GLOBAL_VALET_HOME}"
+    system::addToPath "${GLOBAL_INSTALLATION_DIRECTORY}"
   fi
 
   # run the post install command
@@ -409,9 +409,9 @@ function selfUpdate_install() {
   selfUpdate_download "${releaseUrl}" "${releaseFile}"
   progress::stop
 
-  log::debug "Unpacking the release in ⌜${GLOBAL_VALET_HOME}⌝."
+  log::debug "Unpacking the release in ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝."
   tar -xzf "${releaseFile}" -C "${tempDirectory}" || core::fail "Could not unpack the release ⌜${releaseFile}⌝ using tar."
-  log::debug "The release has been unpacked in ⌜${GLOBAL_VALET_HOME}⌝."
+  log::debug "The release has been unpacked in ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝."
 
   if [[ ${useBranch} == "true" ]]; then
     # when downloaded from a tarball, a sub director named valet-version is created
@@ -426,27 +426,27 @@ function selfUpdate_install() {
   fi
 
   # figure out if we need to use sudo
-  selfUpdate_setSudoIfNeeded "${GLOBAL_VALET_HOME}"
+  selfUpdate_setSudoIfNeeded "${GLOBAL_INSTALLATION_DIRECTORY}"
 
   # remove the old valet directory and move the new one
   ${_SUDO} rm -f "${releaseFile}"
-  ${_SUDO} rm -Rf "${GLOBAL_VALET_HOME}"
-  ${_SUDO} mv -f "${tempDirectory}" "${GLOBAL_VALET_HOME}"
-  log::info "Valet has been copied in ⌜${GLOBAL_VALET_HOME}⌝."
+  ${_SUDO} rm -Rf "${GLOBAL_INSTALLATION_DIRECTORY}"
+  ${_SUDO} mv -f "${tempDirectory}" "${GLOBAL_INSTALLATION_DIRECTORY}"
+  log::info "Valet has been copied in ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝."
 
   if [[ -n ${_SUDO} ]]; then
     # make the valet directory readable by anyone
-    ${_SUDO} chown -R 644 "${GLOBAL_VALET_HOME}"
+    ${_SUDO} chown -R 644 "${GLOBAL_INSTALLATION_DIRECTORY}"
   fi
 
   # make valet executable
-  ${_SUDO} chmod +x "${GLOBAL_VALET_HOME}/valet"
+  ${_SUDO} chmod +x "${GLOBAL_INSTALLATION_DIRECTORY}/valet"
 
   if [[ -d ${tempDirectory} ]]; then
     rm -Rf "${tempDirectory}" 1>/dev/null || :
   fi
 
-  log::success "Valet has been installed in ⌜${GLOBAL_VALET_HOME}⌝."
+  log::success "Valet has been installed in ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝."
 }
 
 # Copy the examples to the user directory.
@@ -459,7 +459,7 @@ function selfUpdate_copyExamples() {
     rm -Rf "${userDirectory}/examples.d" &>/dev/null || core::fail "Could not remove the existing examples in ⌜${userDirectory}⌝."
   fi
 
-  cp -R "${GLOBAL_VALET_HOME}/examples.d" "${userDirectory}" || core::fail "Could not copy the examples to ⌜${userDirectory}⌝."
+  cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/examples.d" "${userDirectory}" || core::fail "Could not copy the examples to ⌜${userDirectory}⌝."
 
   log::success "The examples have been copied to ⌜${userDirectory}/examples.d⌝."
 }
@@ -611,8 +611,8 @@ function selfUpdate_createShim() {
   # create the shim in the bin directory
   local valetBin="${binDirectory}/valet"
 
-  log::info "Creating a shim ⌜${valetBin}⌝ → ⌜${GLOBAL_VALET_HOME}/valet⌝."
-  ${_SUDO} bash -c "printf '#%s\nsource %s \"\$@\"' \"!/usr/bin/env bash\" \"'${GLOBAL_VALET_HOME}/valet'\" 1> \"${valetBin}\""
+  log::info "Creating a shim ⌜${valetBin}⌝ → ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝."
+  ${_SUDO} bash -c "printf '#%s\nsource %s \"\$@\"' \"!/usr/bin/env bash\" \"'${GLOBAL_INSTALLATION_DIRECTORY}/valet'\" 1> \"${valetBin}\""
   ${_SUDO} chmod +x "${valetBin}"
 }
 

@@ -188,9 +188,9 @@ function selfRelease::createRelease() {
     # write the current version in the self-install script
     # then commit the file
     if [[ "${dryRun:-}" != "true" ]]; then
-      io::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_VALET_HOME}/commands.d/self-install.sh"
+      io::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-install.sh"
 
-      io::invoke git add "${GLOBAL_VALET_HOME}/commands.d/self-install.sh"
+      io::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-install.sh"
       io::invoke git commit -m ":rocket: releasing version ${version}"
       log::success "The new version has been committed."
     fi
@@ -260,7 +260,7 @@ function selfRelease::uploadArtifact() {
   local uploadUrl="${1}"
 
   # prepare a temp folder to store the release
-  local tempDir="${GLOBAL_VALET_HOME}/.tmp"
+  local tempDir="${GLOBAL_INSTALLATION_DIRECTORY}/.tmp"
   rm -Rf "${tempDir}"
   mkdir -p "${tempDir}"
   pushd "${tempDir}" 1>/dev/null
@@ -271,7 +271,7 @@ function selfRelease::uploadArtifact() {
   # copy each file from valet dir to current dir
   local file
   for file in "${files[@]}"; do
-    io::invoke cp -R "${GLOBAL_VALET_HOME}/${file}" .
+    io::invoke cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/${file}" .
   done
 
   # prepare artifact
@@ -315,12 +315,12 @@ function selfRelease::bumpVersion() {
 
   # bump the version
   version::bump "${version}" "${bumpLevel}" && newVersion="${RETURNED_VALUE}"
-  if [[ "${dryRun:-}" != "true" ]]; then io::writeToFile "${GLOBAL_VALET_HOME}/version" "${newVersion}"; fi
+  if [[ "${dryRun:-}" != "true" ]]; then io::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/version" "${newVersion}"; fi
   log::info "The bumped version of valet is: ${newVersion}."
 
   # commit the new version and push it
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke git add "${GLOBAL_VALET_HOME}/version"
+    io::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/version"
     io::invoke git commit -m ":bookmark: bump version to ${newVersion}"
     io::invoke git push origin main
     log::success "The bumped version has been committed."
@@ -334,7 +334,7 @@ function selfRelease::updateDocumentation() {
   local pageFooter="${RETURNED_VALUE}"
 
   if [[ "${dryRun:-}" != "true" ]]; then
-    selfDocument --core-only --output "${GLOBAL_VALET_HOME}/extras"
+    selfDocument --core-only --output "${GLOBAL_INSTALLATION_DIRECTORY}/extras"
 
     selfRelease::writeAllFunctionsDocumentation "${pageFooter}"
   fi
@@ -344,18 +344,18 @@ function selfRelease::updateDocumentation() {
   selfConfig::getFileContent false
 
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::writeToFile "${GLOBAL_VALET_HOME}/docs/static/config.md" '```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'$'\n'$'\n'"> ${pageFooter}"$'\n'
+    io::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md" '```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'$'\n'$'\n'"> ${pageFooter}"$'\n'
   fi
 
   # copy the vscode recommended extensions
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke cp "${GLOBAL_VALET_HOME}/.vscode/extensions.json" "${GLOBAL_VALET_HOME}/extras/extensions.json"
+    io::invoke cp "${GLOBAL_INSTALLATION_DIRECTORY}/.vscode/extensions.json" "${GLOBAL_INSTALLATION_DIRECTORY}/extras/extensions.json"
   fi
 
   # commit the changes to the documentation
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke git add "${GLOBAL_VALET_HOME}/docs/static/config.md"
-    io::listFiles "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries"
+    io::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
+    io::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
     array::sort RETURNED_ARRAY
     # remove _index.md (otherwise not consistent tests on the CI...)
     local -a files
@@ -367,7 +367,7 @@ function selfRelease::updateDocumentation() {
       files+=("${file}")
     done
     io::invoke git add "${files[@]}"
-    io::listFiles "${GLOBAL_VALET_HOME}/extras" true
+    io::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/extras" true
     array::sort RETURNED_ARRAY
     io::invoke git add "${RETURNED_ARRAY[@]}"
     io::invoke git commit -m ":memo: updating the documentation"
@@ -383,7 +383,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
   log::info "Writing the ${#SORTED_FUNCTION_NAMES[@]} functions documentation to the core libraries docs."
 
   # delete the existing files
-  io::listFiles "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries"
+  io::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
   local file
   for file in "${RETURNED_ARRAY[@]}"; do
     if [[ ${file} == *"_index.md" ]]; then
@@ -403,7 +403,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
       packageName="core"
     fi
 
-    local path="${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries/${packageName}.md"
+    local path="${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries/${packageName}.md"
 
     # init the file if necessary
     if [[ ! -f "${path}" ]]; then
@@ -418,12 +418,12 @@ url: /docs/libraries/${packageName}
     fi
 
     # append the function documentation
-    io::writeToFileFromRef "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries/${packageName}.md" "RETURNED_ASSOCIATIVE_ARRAY[${key}]" true
-    io::writeToFile "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries/${packageName}.md" $'\n'$'\n' true
+    io::writeToFileFromRef "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries/${packageName}.md" "RETURNED_ASSOCIATIVE_ARRAY[${key}]" true
+    io::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries/${packageName}.md" $'\n'$'\n' true
   done
 
   # add footer
-  io::listFiles "${GLOBAL_VALET_HOME}/docs/content/docs/300.libraries"
+  io::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
   local file
   for file in "${RETURNED_ARRAY[@]}"; do
     if [[ ${file} == *"_index.md" ]]; then

@@ -4,12 +4,12 @@
 
 ### ✅ Testing io::toAbsolutePath
 
-❯ `io::toAbsolutePath $GLOBAL_VALET_HOME/tests.d/lib-io/01.invoke.sh`
+❯ `io::toAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh`
 
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/01.invoke.sh'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh'
 ```
 
 ❯ `io::toAbsolutePath .`
@@ -17,7 +17,7 @@ RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/01.invoke.sh'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io'
 ```
 
 ❯ `io::toAbsolutePath ..`
@@ -25,7 +25,7 @@ RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d'
 ```
 
 ❯ `io::toAbsolutePath 01.invoke.s`
@@ -33,7 +33,7 @@ RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/01.invoke.s'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.s'
 ```
 
 ❯ `io::toAbsolutePath ../1004-lib-system/00.tests.sh`
@@ -41,7 +41,7 @@ RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/01.invoke.s'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/../1004-lib-system/00.tests.sh'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/../1004-lib-system/00.tests.sh'
 ```
 
 ❯ `io::toAbsolutePath resources`
@@ -49,7 +49,7 @@ RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/../1004-lib-system/00.tests.sh
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/resources'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources'
 ```
 
 ❯ `io::toAbsolutePath ./01.invoke.sh`
@@ -57,7 +57,7 @@ RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/resources'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/01.invoke.sh'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh'
 ```
 
 ❯ `io::toAbsolutePath ./resources`
@@ -65,7 +65,7 @@ RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/01.invoke.sh'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/resources'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources'
 ```
 
 ❯ `io::toAbsolutePath missing-file`
@@ -73,7 +73,7 @@ RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/resources'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/missing-file'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/missing-file'
 ```
 
 ### ✅ Testing io::readFile
@@ -124,7 +124,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/dir/subdir'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subdir'
 ```
 
 This next command will fail because the directory already exists (it is a file).
@@ -136,8 +136,8 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-mkdir: cannot create directory ‘$GLOBAL_VALET_HOME/tests.d/lib-io/resources/dir/subdir/file1’: File exists
-ERROR    Failed to create the directory ⌜$GLOBAL_VALET_HOME/tests.d/lib-io/resources/dir/subdir/file1⌝.
+mkdir: cannot create directory ‘$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subdir/file1’: File exists
+ERROR    Failed to create the directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subdir/file1⌝.
 ```
 
 ❯ `io::createDirectoryIfNeeded resources/gitignored/derp`
@@ -145,7 +145,7 @@ ERROR    Failed to create the directory ⌜$GLOBAL_VALET_HOME/tests.d/lib-io/res
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored/derp'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/derp'
 ```
 
 Directory created successfully!
@@ -157,7 +157,7 @@ Directory created successfully!
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/dir/subdir/file1'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subdir/file1'
 ```
 
 ❯ `io::createFilePathIfNeeded resources/gitignored/allo/file1`
@@ -165,7 +165,7 @@ RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/dir/subdir/file1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored/allo/file1'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/allo/file1'
 ```
 
 File created successfully!
@@ -316,7 +316,7 @@ RETURNED_VALUE='C:\data\file'
 **Standard output**:
 
 ```text
-🙈 mocking ln: $GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored/file $GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored/try/file2
+🙈 mocking ln: $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/file $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/try/file2
 ```
 
 ❯ `io::createLink resources/gitignored/try resources/gitignored/new`
@@ -324,7 +324,7 @@ RETURNED_VALUE='C:\data\file'
 **Standard output**:
 
 ```text
-🙈 mocking ln: -s $GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored/try $GLOBAL_VALET_HOME/tests.d/lib-io/resources/gitignored/new
+🙈 mocking ln: -s $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/try $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/new
 ```
 
 ### ✅ Testing io::convertFromWindowsPath
@@ -734,66 +734,66 @@ RETURNED_VALUE2='/tmp/valet-stderr.f'
 
 ### ✅ Testing io::listPaths
 
-❯ `io::listPaths $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search`
+❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
 )
 ```
 
-❯ `io::listPaths $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true`
+❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/file2'
-[3]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2'
-[4]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/file2'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
 )
 ```
 
-❯ `io::listPaths $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search false true`
+❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search false true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-file'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1'
-[3]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-file'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
 )
 ```
 
-❯ `io::listPaths $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true true`
+❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-file'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1'
-[3]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1'
-[4]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
-[5]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
-[6]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4'
-[7]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/.hidden-file2'
-[8]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/file2'
-[9]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2'
-[10]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
-[11]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
-[12]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
-[13]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/file14'
-[14]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2/.hidden-file3'
-[15]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-file'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
+[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
+[6]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4'
+[7]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/.hidden-file2'
+[8]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/file2'
+[9]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2'
+[10]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
+[11]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
+[12]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
+[13]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/file14'
+[14]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/.hidden-file3'
+[15]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
 )
 ```
 
@@ -812,18 +812,18 @@ fileNamedFile ()
 }
 ```
 
-❯ `io::listPaths $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true true fileNamedFile`
+❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true fileNamedFile`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/file2'
-[3]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
-[4]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/file14'
-[5]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/file2'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/file14'
+[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
 )
 ```
 
@@ -842,63 +842,63 @@ folderNamedHidden ()
 }
 ```
 
-❯ `io::listPaths $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true true folderNamedHidden`
+❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-file'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
-[3]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/.hidden-file2'
-[4]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
-[5]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
-[6]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2/.hidden-file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-file'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/.hidden-file2'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
+[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
+[6]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/.hidden-file3'
 )
 ```
 
 ### ✅ Testing io::listFiles
 
-❯ `io::listFiles $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search`
+❯ `io::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
 )
 ```
 
-❯ `io::listFiles $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true`
+❯ `io::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/file2'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/file2'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
 )
 ```
 
-❯ `io::listFiles $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true true`
+❯ `io::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-file'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
-[3]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/.hidden-file2'
-[4]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/file2'
-[5]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
-[6]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
-[7]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
-[8]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/file14'
-[9]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2/.hidden-file3'
-[10]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-file'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/.hidden-file2'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/file2'
+[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
+[6]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
+[7]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
+[8]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/file14'
+[9]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/.hidden-file3'
+[10]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
 )
 ```
 
@@ -917,54 +917,54 @@ fileNamedHidden ()
 }
 ```
 
-❯ `io::listFiles $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true true folderNamedHidden`
+❯ `io::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-file'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/file1'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
-[3]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
-[4]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-file'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
 )
 ```
 
 ### ✅ Testing io::listDirectories
 
-❯ `io::listDirectories $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search`
+❯ `io::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
 )
 ```
 
-❯ `io::listDirectories $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true`
+❯ `io::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2'
 )
 ```
 
-❯ `io::listDirectories $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true true`
+❯ `io::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
-[3]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4'
-[4]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1/subfolder2'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2'
 )
 ```
 
@@ -983,16 +983,16 @@ folderNamedHidden ()
 }
 ```
 
-❯ `io::listDirectories $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true true folderNamedHidden`
+❯ `io::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder'
-[1]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/subfolder1'
-[2]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
-[3]='$GLOBAL_VALET_HOME/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4'
 )
 ```
 

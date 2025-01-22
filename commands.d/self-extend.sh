@@ -222,8 +222,8 @@ function selfExtend_createExtension() {
   # vscode stuff
   if command -v code &>/dev/null; then
     io::createDirectoryIfNeeded "${extensionDirectory}/.vscode"
-    cp -n "${GLOBAL_VALET_HOME}/extras/.vscode/settings.json" "${extensionDirectory}/.vscode/settings.json" || log::error "Could not copy the vscode settings file."
-    cp -n "${GLOBAL_VALET_HOME}/extras/.vscode/extensions.json" "${extensionDirectory}/.vscode/extensions.json" || log::error "Could not copy the vscode extensions file."
+    cp -n "${GLOBAL_INSTALLATION_DIRECTORY}/extras/.vscode/settings.json" "${extensionDirectory}/.vscode/settings.json" || log::error "Could not copy the vscode settings file."
+    cp -n "${GLOBAL_INSTALLATION_DIRECTORY}/extras/.vscode/extensions.json" "${extensionDirectory}/.vscode/extensions.json" || log::error "Could not copy the vscode extensions file."
 
     # link the snippets
     io::createLink "${userDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets" || log::error "Could not create a symbolic link to the vscode snippets."
