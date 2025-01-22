@@ -8,6 +8,8 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- refacto: move func from string/io lib to regex, path, fs libs. renamed fsfs to sfzf::show
+- make `source` able to source multiple libraries that are called the same. Improve the function to quickly return for sourced lib (anything not starting with / or .)
 - the config file should define everything, leave all def commented. When we self config we define only those already defined. We have an associative array of each var and description to handle this
 - all interactive functions must write to stderr not stdout!
 - add info of the extension from which a command comes from
@@ -31,7 +33,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Demo with ascii cinema: https://asciinema.org. Put the showcase in the index page instead.
 - For all the optional arguments of exported functions, allow to set them using a global variable `_OPTION_*` in addition to the positional argument. Add this in the documentation about functions.
 - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
-- make `source` able to source multiple libraries that are called the same.
 - add-test
 - for major version and breaking changes, we can add a lib `compat-x.x` which can be sourced by functions and declares functions as in version x.x.
 - Filter build command for `commands.d` ?

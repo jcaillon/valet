@@ -29,6 +29,7 @@ source ansi-codes
 source array
 source bash
 source benchmark
+source command
 source curl
 source fsfs
 source http

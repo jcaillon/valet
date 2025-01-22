@@ -1,0 +1,33 @@
+name: Self test
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Default to bash
+defaults:
+  run:
+    shell: bash -o errexit -o nounset -o pipefail -x {0}
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  self-test:
+    runs-on: ubuntu-latest
+    container: noyacode/minideb-bash5.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      # Runs our tests
+      - name: Run valet self test
+        env:
+          VALET_CONFIG_ENABLE_COLORS: true
+          VALET_CONFIG_DISABLE_PROGRESS: true
+        run: |
+          chmod +x valet
+          ./valet self test -C

@@ -239,11 +239,11 @@ RETURNED_ARRAY2=(
 
 You can manually report the definition of any variable using the `test::printVars` function.
 
-❯ `test::printVars GLOBAL_VAR1 GLOBAL_VAR2 GLOBAL_VAR3`
+❯ `test::printVars MY_VAR1 MY_VAR2 MY_VAR3`
 
 ```text
-GLOBAL_VAR1='This is the value of a global string'
-GLOBAL_VAR2=(
+MY_VAR1='This is the value of a global string'
+MY_VAR2=(
 [0]='This'
 [1]='is'
 [2]='the'
@@ -253,7 +253,7 @@ GLOBAL_VAR2=(
 [6]='global'
 [7]='array'
 )
-GLOBAL_VAR3=(
+MY_VAR3=(
 [key2]='2'
 [key3]='3'
 [key1]='1'
