@@ -26,7 +26,7 @@ function test_io::listPaths() {
   # shellcheck disable=SC2317
   folderNamedHidden() { if [[ ${1##*/} == *hidden* ]]; then return 0; else return 1; fi; }
   test::exec declare -f folderNamedHidden
-  test::func io::listPaths "${PWD}/resources/search" true true '' folderNamedHidden
+  test::func io::listPaths "${PWD}/resources/search" true true folderNamedHidden
 }
 
 function test_io::listFiles() {

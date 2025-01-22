@@ -111,7 +111,7 @@ simpleFunction ()
 }
 ```
 
-❯ `bash::injectCodeInFunction simpleFunction echo\ 'injected\ at\ the\ beginning!' true`
+❯ `bash::injectCodeInFunction simpleFunction echo\ \'injected\ at\ the\ beginning\!\' true`
 
 ❯ `echo ${RETURNED_VALUE}; echo ${RETURNED_VALUE2};`
 
@@ -120,7 +120,7 @@ simpleFunction ()
 ```text
 simpleFunction () 
 {
-echo injected\ at\ the\ beginning! 
+echo 'injected at the beginning!' 
     :
 }
 
@@ -131,7 +131,7 @@ simpleFunction ()
 
 ```
 
-❯ `bash::injectCodeInFunction simpleFunction echo\ 'injected\ at\ the\ end!'`
+❯ `bash::injectCodeInFunction simpleFunction echo\ \'injected\ at\ the\ end\!\'`
 
 ❯ `echo ${RETURNED_VALUE}; echo ${RETURNED_VALUE2};`
 
@@ -141,7 +141,7 @@ simpleFunction ()
 simpleFunction () 
 { 
     :
-echo injected\ at\ the\ end!
+echo 'injected at the end!'
 }
 simpleFunction () 
 { 
@@ -150,7 +150,7 @@ simpleFunction ()
 
 ```
 
-❯ `bash::injectCodeInFunction newName echo\ 'injected\ in\ a\ new\ function!'`
+❯ `bash::injectCodeInFunction newName echo\ \'injected\ in\ a\ new\ function\!\'`
 
 ❯ `echo ${RETURNED_VALUE}; echo ${RETURNED_VALUE2};`
 
@@ -158,7 +158,7 @@ simpleFunction ()
 
 ```text
 function newName() {
-echo injected\ in\ a\ new\ function!
+echo 'injected in a new function!'
 }
 
 ```

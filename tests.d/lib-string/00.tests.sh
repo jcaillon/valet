@@ -90,7 +90,7 @@ function test_string::extractBetween() {
   test::title "✅ Testing string::extractBetween function"
 
   test::func string::extractBetween 'hello' 'e' 'o'
-  test::func string::extractBetween 'hello' 'e' "''"
+  test::func string::extractBetween 'hello' 'e' ''
   test::func string::extractBetween 'hello' 'h' 'a'
 
   test::printVars MULTI_LINES_TEXT2
@@ -160,7 +160,7 @@ function test_string::wrapText() {
   test::func string::wrapText 'A message.' 80
 
   test::markdown "Wrapping words, no shortcut!"
-  test::func string::wrapText 'A message.' 80 "''" 5
+  test::func string::wrapText 'A message.' 80 '' 5
 
   test::markdown "Wrapping words"
   test::func string::wrapText 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
@@ -190,8 +190,8 @@ function test_string::highlight() {
 
   test::func string::highlight 'This is a Text to highlight.' 'ttttt'
   test::func string::highlight 'This is a texT to highlight.' 'TTTTT' "'>'" "'<'"
-  test::func string::highlight "''" 'ttttt'
-  test::func string::highlight 'This is a text to highlight.' "''"
+  test::func string::highlight '' 'ttttt'
+  test::func string::highlight 'This is a text to highlight.' ''
 }
 
 function test_string::head() {

@@ -25,7 +25,7 @@ array:
 
 ### ✅ Testing selfBuild_extractFirstLongNameFromOptionString
 
-❯ `selfBuild_extractFirstLongNameFromOptionString -x,\ --profiling`
+❯ `selfBuild_extractFirstLongNameFromOptionString -x\,\ --profiling`
 
 Returned variables:
 

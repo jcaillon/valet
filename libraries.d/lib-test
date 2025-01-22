@@ -138,16 +138,28 @@ function test_exec() {
     test::fail "No command provided to ⌜${FUNCNAME[1]:-}⌝ in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝."
   fi
 
-  local IFS=' ' compoundCommand
+  local IFS=' ' compoundCommand param
+
   # compute the command to run, escaping special characters
-  if (( BASH_VERSINFO[1] >= 2)); then
-    compoundCommand="${*//[\\ $'\t']/\\&}"
-  else
-    local params=("${@//\\/\\\\}")
-    params=("${params[@]// /\\ }")
-    compoundCommand="${params[*]//$'\t'/\\$'\t'}"
-  fi
-  compoundCommand="${compoundCommand//$'\n'/"$'\n'"}"
+  local -a params=("${@}")
+  local -i index=0
+  for ((index = 0; index < ${#params[@]}; index++)); do
+    param="${params[index]}"
+    if [[ -z ${param} ]]; then
+      # the argument is empty, make sure it is quoted
+      params[index]="''"
+    fi
+    if [[ ${param:0:1} == [\"\'] && ${param:${#param} - 1} == [\"\'] ]]; then
+      # the argument was quoted by the user, leave it as is
+      continue
+    fi
+    if [[ ${param} == *[\ \\$'\t'$'\n']* ]]; then
+      # the argument contains any problematic character, quote it
+      printf -v param '%q' "${param}"
+      params[index]="${param}"
+    fi
+  done
+  compoundCommand="${params[*]}"
 
 
   _TEST_OUTPUT="${compoundCommand}"

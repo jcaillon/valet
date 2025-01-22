@@ -22,10 +22,10 @@ function test_io::invoke5() {
   test::exit io::invoke5 true 0 false "'input_stream'" fake --std-in --error
 
   test::markdown "Make error 1 acceptable:"
-  test::func io::invoke5 true 0,1,2 true "''" fake --error
+  test::func io::invoke5 true 0,1,2 true '' fake --error
 
   test::markdown "Normal, return everything as variables:"
-  test::func io::invoke5 true "''" "''" "''" fake
+  test::func io::invoke5 true '' '' '' fake
 
   test::markdown "Input stream for file, return everything as files:"
   test::prompt io::invokef5 false 0 true "${GLOBAL_TEST_TEMP_FILE}" fake --std-in

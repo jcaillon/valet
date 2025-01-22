@@ -100,7 +100,7 @@ function test_system::windowsSetEnvVar() {
   test::title "✅ Testing system::windowsSetEnvVar"
 
   test::exec OSTYPE=msys system::windowsSetEnvVar VAR VALUE
-  test::exec OSTYPE=msys system::windowsSetEnvVar VAR "''"
+  test::exec OSTYPE=msys system::windowsSetEnvVar VAR ''
 }
 
 function test_system::windowsGetEnvVar() {

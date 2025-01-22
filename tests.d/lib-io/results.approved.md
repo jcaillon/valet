@@ -842,7 +842,7 @@ folderNamedHidden ()
 }
 ```
 
-❯ `io::listPaths $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true true  folderNamedHidden`
+❯ `io::listPaths $GLOBAL_VALET_HOME/tests.d/lib-io/resources/search true true folderNamedHidden`
 
 Returned variables:
 

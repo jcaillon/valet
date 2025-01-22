@@ -36,7 +36,7 @@ Returned variables:
 RETURNED_VALUE=''
 ```
 
-❯ `string::cutField line1\ hm\ I\ wonder$'\n'line2\ does\ it\ work\ on\ lines?$'\n'line3\ seems\ so 2 $'\n'`
+❯ `string::cutField $'line1 hm I wonder\nline2 does it work on lines?\nline3 seems so' 2 $'\n'`
 
 Returned variables:
 
@@ -124,7 +124,7 @@ Returned variables:
 RETURNED_VALUE='this is a command'
 ```
 
-❯ `string::trimAll \	$'\n'this\ is\ a\ \	command\ \ `
+❯ `string::trimAll $'\t\nthis is a \tcommand  '`
 
 Returned variables:
 
@@ -158,7 +158,7 @@ Returned variables:
 RETURNED_VALUE='hello'
 ```
 
-❯ `string::trim $'\n'\	\ \ hello$'\n'\	\ `
+❯ `string::trim $'\n\t  hello\n\t '`
 
 Returned variables:
 
@@ -241,7 +241,7 @@ MULTI_LINES_TEXT2='1 line one
 4 line four'
 ```
 
-❯ `string::extractBetween "${MULTI_LINES_TEXT2}" one$'\n' 4`
+❯ `string::extractBetween "${MULTI_LINES_TEXT2}" $'one\n' 4`
 
 Returned variables:
 
@@ -269,7 +269,7 @@ Returned variables:
 RETURNED_VALUE='2'
 ```
 
-❯ `string::count bonjour\ mon\ bon\ ami,\ bonne\ journée! bo`
+❯ `string::count bonjour\ mon\ bon\ ami\,\ bonne\ journée\! bo`
 
 Returned variables:
 
@@ -291,7 +291,7 @@ RETURNED_ARRAY=(
 )
 ```
 
-❯ `string::split one$'\n'two$'\n'three $'\n'`
+❯ `string::split $'one\ntwo\nthree' $'\n'`
 
 Returned variables:
 
@@ -559,7 +559,7 @@ message.'
 
 Wrapping words
 
-❯ `string::wrapText A\ message.$'\n'A\ new\ line 13 [36m░░░[0m 10`
+❯ `string::wrapText $'A message.\nA new line' 13 [36m░░░[0m 10`
 
 Returned variables:
 
@@ -716,7 +716,7 @@ RETURNED_VALUE2='8'
 
 Wrapping characters
 
-❯ `string::wrapCharacters A\ message.$'\n'A\ new\ line 13 [36m░░░[0m 10`
+❯ `string::wrapCharacters $'A message.\nA new line' 13 [36m░░░[0m 10`
 
 Returned variables:
 
@@ -728,7 +728,7 @@ RETURNED_VALUE2='0'
 
 Wrapping characters, spaces at the beginning of the line are kept
 
-❯ `string::wrapCharacters \ \ Start\ With\ spaces\ that\ must\ be\ kept!\ Other\ spaces\ can\ be\ ignored\ at\ wrapping.$'\n'\ \ Also\ start\ with\ spaces 17 \ \ \  14`
+❯ `string::wrapCharacters $'  Start With spaces that must be kept! Other spaces can be ignored at wrapping.\n  Also start with spaces' 17 \ \ \  14`
 
 Returned variables:
 

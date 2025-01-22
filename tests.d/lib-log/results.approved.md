@@ -433,7 +433,7 @@ TRACE    This is a trace
          message.
 ```
 
-❯ `log::errorTrace This\ is\ a\ errorTrace\ message,\ always\ shown.`
+❯ `log::errorTrace This\ is\ a\ errorTrace\ message\,\ always\ shown.`
 
 **Error output**:
 
@@ -525,7 +525,7 @@ DEBUG    This is a debug
 
 ❯ `log::trace This\ is\ a\ trace\ message.`
 
-❯ `log::errorTrace This\ is\ a\ errorTrace\ message,\ always\ shown.`
+❯ `log::errorTrace This\ is\ a\ errorTrace\ message\,\ always\ shown.`
 
 **Error output**:
 
@@ -593,7 +593,7 @@ INFO     This is an info
 
 ❯ `log::trace This\ is\ a\ trace\ message.`
 
-❯ `log::errorTrace This\ is\ a\ errorTrace\ message,\ always\ shown.`
+❯ `log::errorTrace This\ is\ a\ errorTrace\ message\,\ always\ shown.`
 
 **Error output**:
 
@@ -654,7 +654,7 @@ SUCCESS  This is an success
 
 ❯ `log::trace This\ is\ a\ trace\ message.`
 
-❯ `log::errorTrace This\ is\ a\ errorTrace\ message,\ always\ shown.`
+❯ `log::errorTrace This\ is\ a\ errorTrace\ message\,\ always\ shown.`
 
 **Error output**:
 
@@ -708,7 +708,7 @@ WARNING  This is a warning
 
 ❯ `log::trace This\ is\ a\ trace\ message.`
 
-❯ `log::errorTrace This\ is\ a\ errorTrace\ message,\ always\ shown.`
+❯ `log::errorTrace This\ is\ a\ errorTrace\ message\,\ always\ shown.`
 
 **Error output**:
 
@@ -755,7 +755,7 @@ ERROR    This is an error
 
 ❯ `log::trace This\ is\ a\ trace\ message.`
 
-❯ `log::errorTrace This\ is\ a\ errorTrace\ message,\ always\ shown.`
+❯ `log::errorTrace This\ is\ a\ errorTrace\ message\,\ always\ shown.`
 
 **Error output**:
 
