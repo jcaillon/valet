@@ -194,7 +194,7 @@ function test_array::fuzzyFilterSortFileWithGrepAndGawk() {
     exit 1
   fi
 
-  test::markdown "The result is the same as the pure bash implementation."
+  test::markdown "> The result is the same as the pure bash implementation."
 }
 
 main

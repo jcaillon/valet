@@ -119,7 +119,7 @@ function test_io::convertFromWindowsPath() {
   function test::transformTextBeforeFlushing() { _TEST_OUTPUT="${_TEST_OUTPUT//\/mnt}"; }
   test::func io::convertFromWindowsPath 'C:\Users\username'
   test::func io::convertFromWindowsPath 'D:\data\file'
-  unset test::transformTextBeforeFlushing
+  unset -f test::transformTextBeforeFlushing
 }
 
 function test_io::createLink() {

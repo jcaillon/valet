@@ -8,8 +8,8 @@
 # shellcheck disable=SC2292
 # shellcheck disable=SC2086
 # shellcheck disable=SC2128
-if [ ${BASH_VERSINFO:-0} -lt 5 ] || { [ ${BASH_VERSINFO} -eq 5 ] && [ ${BASH_VERSINFO[1]:-0} -lt 1 ]; }; then
-  printf '%s\n' "❌ Bash 5.1 or higher is required to run valet."
+if [ ${BASH_VERSINFO:-0} -lt 5 ]; then
+  printf '%s\n' "❌ Bash 5 or higher is required to run valet."
   exit 1
 fi
 

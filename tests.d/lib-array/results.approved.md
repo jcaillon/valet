@@ -305,5 +305,5 @@ elated
 Edwardsian
 ```
 
-The result is the same as the pure bash implementation.
+> The result is the same as the pure bash implementation.
 
