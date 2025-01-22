@@ -20,7 +20,7 @@ function test_helpCommand() {
   test::exec main::parseMainArguments help
 
 
-  test::title "✅ Testing that we can display the help of a function using core::showHelp"
+  test::title "✅ Testing that we can display the help of a function using command::showHelp"
   test::exit "${GLOBAL_VALET_HOME}/valet" self mock1 show-help
 }
 

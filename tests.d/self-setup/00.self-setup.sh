@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-core::sourceFunction "selfSetup"
+command::sourceFunction "selfSetup"
 
 function main() {
   test::title "✅ Testing self setup command"

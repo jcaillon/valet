@@ -59,7 +59,7 @@ function bash::countJobs() {
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0: if all the jobs completed successfully.
 #   - 1: if the job completed callback returned 1.
 # - `RETURNED_ARRAY`: an array containing the exit codes of the jobs.

@@ -75,7 +75,7 @@ An example is given below for a `mylib` library and a `myfunction` function:
 # 
 # Returns:
 # 
-# - $?: 0 if ok, 1 otherwise.
+# - `$?`:0 if ok, 1 otherwise.
 # - `RETURNED_VALUE`: The first returned value
 # - `RETURNED_ARRAY`: A second returned value, as array
 # 

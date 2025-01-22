@@ -166,7 +166,7 @@ source tui
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0: The user pressed ENTER to validate the text.
 #   - 1: The user pressed ESC to close the text box.
 # - `RETURNED_VALUE`: The entered value (or empty).

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-core::sourceFunction "selfAddCommand"
+command::sourceFunction "selfAddCommand"
 
 function main() {
   test::title "✅ Testing self add-command"

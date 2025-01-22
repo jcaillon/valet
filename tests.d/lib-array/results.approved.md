@@ -141,7 +141,7 @@ MY_ARRAY=(
 )
 ```
 
-### ✅ Testing array::isInArray
+### ✅ Testing array::checkIfPresent
 
 ```text
 MY_ARRAY=(
@@ -151,7 +151,7 @@ MY_ARRAY=(
 )
 ```
 
-❯ `array::isInArray MY_ARRAY deliver`
+❯ `array::checkIfPresent MY_ARRAY deliver`
 
 ```text
 MY_ARRAY=(
@@ -161,7 +161,7 @@ MY_ARRAY=(
 )
 ```
 
-❯ `array::isInArray MY_ARRAY holiday`
+❯ `array::checkIfPresent MY_ARRAY holiday`
 
 Returned code: `1`
 

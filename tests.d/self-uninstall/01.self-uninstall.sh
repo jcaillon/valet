@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-core::sourceFunction "selfUninstall"
+command::sourceFunction "selfUninstall"
 # shellcheck disable=SC1091
 source io
 

@@ -45,8 +45,8 @@ fi
 #     You can then can then use valet function as if you were in a command script.
 ##VALET_COMMAND
 function selfExport() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   local output=""
 

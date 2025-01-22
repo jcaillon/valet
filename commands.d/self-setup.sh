@@ -31,8 +31,8 @@ description: |-
   Let the user know what to do next.
 ---"
 function selfSetup() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   log::info "Now setting up Valet."
 
@@ -70,7 +70,7 @@ function selfSetup() {
   eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
   # generate the config
-  core::sourceFunction selfConfig
+  command::sourceFunction selfConfig
   selfConfig --export-current-values --no-edit --override
 
   log::success "You are all set!"

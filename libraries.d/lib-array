@@ -128,7 +128,7 @@ function array_sortSwapCallBack() {
 #
 # Returns:
 #
-# - $?: 0 if the first element is greater than the second, 1 otherwise.
+# - `$?`:0 if the first element is greater than the second, 1 otherwise.
 # shellcheck disable=SC2034
 function array_sortCompareCallBack() {
   local -i first="${1}"
@@ -216,12 +216,12 @@ function array::sortWithCriteria() {
 #
 # - $1: **array name** _as string_:
 #       The global variable name of the array.
-# - $2: **value** _as any:
+# - $2: **value** _as any_:
 #       The value to add.
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if the value was added
 #   - 1 if it was already present
 #
@@ -243,13 +243,13 @@ function array::appendIfNotPresent() {
       break
     fi
   done
-  if [[ present -eq 0 ]]; then
+  if (( present == 0 )); then
     array+=("${value}")
   fi
   return ${present}
 }
 
-# ## array::isInArray
+# ## array::checkIfPresent
 #
 # Check if a value is in an array.
 # It uses pure bash.
@@ -261,13 +261,13 @@ function array::appendIfNotPresent() {
 #
 # Returns:
 #
-# - $?: 0 if the value is in the array, 1 otherwise.
+# - `$?`: 0 if the value is in the array, 1 otherwise.
 #
 # ```bash
 # declare -g myArray=( "a" "b" )
-# array::isInArray myArray "b" && printf '%s\n' "b is in the array"
+# array::checkIfPresent myArray "b" && printf '%s\n' "b is in the array"
 # ```
-function array::isInArray() {
+function array::checkIfPresent() {
   # shellcheck disable=SC2178
   local -n array="${1}"
   local value="${2}"
@@ -327,6 +327,8 @@ function array::makeArraysSameSize() {
 #
 # - the index of the first matched character in the line
 # - the distance between the first and last matched characters in the line
+#
+# Will also output a file containing the indexes of the matched lines in the original file.
 #
 # - $1: **pattern** _as string_:
 #       The pattern to filter the file with.

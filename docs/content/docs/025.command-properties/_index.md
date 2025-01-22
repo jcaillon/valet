@@ -136,7 +136,7 @@ Arguments are parsed in the order given in the list of arguments for the command
 
 The argument name.
 
-When calling `core::parseArguments` the argument will be parsed to local variable which name correspond to the camelCase equivalent of its name.
+When calling `command::parseArguments` the argument will be parsed to local variable which name correspond to the camelCase equivalent of its name.
 
 Moreover, the name can be suffixed to enable extra features:
 
@@ -176,7 +176,7 @@ An option can be a simple true/false flag or it can hold a user value:
 - If the option ends with ` <something>`, then the option will hold a value passed by the user.
 - Otherwise, the option will be a simple flag and will be equal to `true` if the user passed the option, `false` otherwise.
 
-When calling `core::parseArguments` options will be parsed to local variable which name correspond to the camelCase equivalent of the first long option name.
+When calling `command::parseArguments` options will be parsed to local variable which name correspond to the camelCase equivalent of the first long option name.
 
 Example of a valid option names and their corresponding variable name:
 

@@ -9,7 +9,7 @@ function main() {
   test_array::sort
   test_array::sortWithCriteria
   test_array::appendIfNotPresent
-  test_array::isInArray
+  test_array::checkIfPresent
   test_array::makeArraysSameSize
   test_array::fuzzyFilterSort
   test_array::fuzzyFilterSortFileWithGrepAndGawk
@@ -72,8 +72,8 @@ function test_array::appendIfNotPresent() {
   test::printVars MY_ARRAY
 }
 
-function test_array::isInArray() {
-  test::title "✅ Testing array::isInArray"
+function test_array::checkIfPresent() {
+  test::title "✅ Testing array::checkIfPresent"
 
   declare -g MY_ARRAY=(
     breakdown
@@ -82,10 +82,10 @@ function test_array::isInArray() {
   )
 
   test::printVars MY_ARRAY
-  test::func array::isInArray MY_ARRAY 'deliver'
+  test::func array::checkIfPresent MY_ARRAY 'deliver'
   test::printVars MY_ARRAY
 
-  test::func array::isInArray MY_ARRAY 'holiday'
+  test::func array::checkIfPresent MY_ARRAY 'holiday'
   test::printVars MY_ARRAY
 }
 

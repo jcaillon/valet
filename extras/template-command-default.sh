@@ -36,8 +36,8 @@ examples:
 function _FUNCTION_NAME_() {
   local -a more
   local firstArg option1 thisIsOption2
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   log::info "First argument: ${firstArg:-}."
   log::info "Option 1: ${option1:-}."

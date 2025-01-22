@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-core::sourceFunction "selfDocument"
+command::sourceFunction "selfDocument"
 
 # shellcheck disable=SC1091
 source io

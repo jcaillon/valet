@@ -145,7 +145,7 @@ function io::setupTempFileGlobalVariable() {
 # local file="${RETURNED_VALUE}"
 # ```
 #
-# > Files created this way are automatically cleaned up by the io::cleanupTempFiles
+# > Files created this way are automatically cleaned up by the io::cleanTempFiles
 # > function when valet ends.
 function io::createTempFile() {
   if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
@@ -175,7 +175,7 @@ function io::createTempFile() {
 # local directory="${RETURNED_VALUE}"
 # ```
 #
-# > Directories created this way are automatically cleaned up by the io::cleanupTempFiles
+# > Directories created this way are automatically cleaned up by the io::cleanTempFiles
 # > function when valet ends.
 function io::createTempDirectory() {
   if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
@@ -192,16 +192,16 @@ function io::createTempDirectory() {
   done
 }
 
-# ## io::cleanupTempFiles
+# ## io::cleanTempFiles
 #
 # Removes all the temporary files and directories that were created by the
 # io::createTempFile and io::createTempDirectory functions.
 #
 # ```bash
-# io::cleanupTempFiles
+# io::cleanTempFiles
 # ```
 # shellcheck disable=SC2016
-function io::cleanupTempFiles() {
+function io::cleanTempFiles() {
   if [[ -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
     log::debug "Deleting temporary directory."
     rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null || :
@@ -751,7 +751,7 @@ function log::errorTrace() {
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if debug mode is enabled (log level is debug)
 #   - 1 if disabled
 #
@@ -771,7 +771,7 @@ function log::isDebugEnabled() {
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if trace mode is enabled (log level is trace)
 #   - 1 if disabled
 #
@@ -1148,6 +1148,8 @@ function string::highlight() {
 # - the distance between the first and last matched characters in the line
 # - the original order in the list
 #
+# Also returns an array containing the indexes of the matched items in the original array.
+#
 # - $1: **pattern** _as string_:
 #       the pattern to match
 # - $2: **array name** _as string_:
@@ -1159,9 +1161,8 @@ function string::highlight() {
 # - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array
 #
 # ```bash
-# array::fuzzyFilterSort "pattern" "myarray" && local filteredArray="${RETURNED_ARRAY}"
-# array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ && local filteredArray="${RETURNED_ARRAY}"
-# array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${RETURNED_ARRAY}"
+# array::fuzzyFilterSort "pattern" MY_ARRAY
+# echo "${RETURNED_ARRAY[*]}"
 # ```
 #
 # > - All characters in the pattern must be found in the same order in the matched line.
@@ -1287,7 +1288,7 @@ function array::fuzzyFilterSortQuicksort() {
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if the function was successfully re-exported
 #   - 1 if the function does not exist
 # - `RETURNED_VALUE`: the modified function definition
@@ -1452,38 +1453,7 @@ function core::resetIncludedFiles() {
   _LIST_OF_INCLUDED_FILES=()
 }
 
-# ## core::sourceFunction
-#
-# Source the file associated with a command function.
-# This allows you to call a command function without having to source the file manually.
-#
-# - $1: **function name** _as string_:
-#       the function name
-#
-# ```bash
-# core::sourceFunction "functionName"
-# ```
-function core::sourceFunction() {
-  local functionName="${1}"
-
-  local fileToSource
-  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
-    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
-    if [[ -f "${fileToSource}" ]]; then
-      # shellcheck disable=SC1090
-      source "${fileToSource}"
-      log::debug "Loaded file ⌜${fileToSource}⌝."
-    elif [[ -f "${GLOBAL_VALET_HOME:-}/${fileToSource}" ]]; then
-      # shellcheck disable=SC1090
-      source "${GLOBAL_VALET_HOME:-}/${fileToSource}"
-      log::debug "Loaded file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝."
-    else
-      log::warning "The source file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
-    fi
-  fi
-}
-
-# ## core::sourceUserCommands
+# ## core::sourceUserCommands (private)
 #
 # Source the user 'commands' file from the valet user directory.
 # If the file does not exist, we build it on the fly.
@@ -1525,7 +1495,7 @@ function core::sourceUserCommands() {
   builtin source "${commandsFile}"
 }
 
-# ## core::reloadUserCommands
+# ## core::reloadUserCommands (private)
 #
 # Forcibly source again the user 'commands' file from the valet user directory.
 #
@@ -1539,7 +1509,7 @@ function core::reloadUserCommands() {
   core::sourceUserCommands
 }
 
-# ## core::deleteUserCommands
+# ## core::deleteUserCommands (private)
 #
 # Delete the user 'commands' file from the valet user directory.
 #
@@ -1660,18 +1630,49 @@ function core::getUserDirectory() {
 }
 
 #===============================================================
-# >>> Parser and interactive mode
+# >>> Command functions
 #===============================================================
 
-# ## core::showHelp
+# ## command::sourceFunction
+#
+# Source the file associated with a command function.
+# This allows you to call a command function without having to source the file manually.
+#
+# - $1: **function name** _as string_:
+#       the function name
+#
+# ```bash
+# command::sourceFunction "functionName"
+# ```
+function command::sourceFunction() {
+  local functionName="${1}"
+
+  local fileToSource
+  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
+    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
+    if [[ -f "${fileToSource}" ]]; then
+      # shellcheck disable=SC1090
+      source "${fileToSource}"
+      log::debug "Loaded file ⌜${fileToSource}⌝."
+    elif [[ -f "${GLOBAL_VALET_HOME:-}/${fileToSource}" ]]; then
+      # shellcheck disable=SC1090
+      source "${GLOBAL_VALET_HOME:-}/${fileToSource}"
+      log::debug "Loaded file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝."
+    else
+      log::warning "The source file ⌜${GLOBAL_VALET_HOME:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
+    fi
+  fi
+}
+
+# ## command::showHelp
 #
 # Show the help for the current function.
 # This should be called directly from a command function for which you want to display the help text.
 #
 # ```bash
-# core::showHelp
+# command::showHelp
 # ```
-function core::showHelp() {
+function command::showHelp() {
   local functionName
   # get the function name of the calling function
   functionName="${FUNCNAME[1]?"This function must be called from a command function."}"
@@ -1679,7 +1680,7 @@ function core::showHelp() {
   main::printHelp function "${functionName}"
 }
 
-# ## core::parseArguments
+# ## command::parseArguments
 #
 # Parse the arguments and options of a function and return a string that can be evaluated to set the variables.
 # This should be called from a command function for which you want to parse the arguments.
@@ -1703,17 +1704,16 @@ function core::showHelp() {
 # ```
 #
 # ```bash
-# core::parseArguments "$@" && eval "${RETURNED_VALUE}"
+# command::parseArguments "$@" && eval "${RETURNED_VALUE}"
 # ```
-function core::parseArguments() {
-  local functionName
+function command::parseArguments() {
   # get the function name of the calling function
-  functionName="${FUNCNAME[1]?"This function must be called from a command function."}"
+  local functionName="${FUNCNAME[1]?"This function must be called from a command function."}"
 
   main::parseCmdFunctionArgumentsOrGoInteractive "${functionName}" "$@"
 }
 
-# ## core::checkParseResults
+# ## command::checkParsedResults
 #
 # A convenience function to check the parsing results and fails with an error message if there are
 # parsing errors.
@@ -1721,22 +1721,24 @@ function core::parseArguments() {
 #
 # This should be called from a command function for which you want to check the parsing results.
 #
-# - $1: **display help** _as bool_:
-#       the help option
-# - $2: **parsing errors** _as string_:
-#       the parsing errors
-# - $3: function name _as string_:
-#       (optional) the function name
-#       (defaults to the calling function)
+# - $1: help _as bool_:
+#       (optional) Can be set using the variable `_OPTION_HELP`.
+#       True to show the help for the function and then exit.
+#       (defaults to the value of the 'help' variable or false)
+# - $2: parsing errors _as string_:
+#       (optional) Can be set using the variable `_OPTION_PARSING_ERRORS`.
+#       A string containing the parsing errors.
+#       An empty string means no parsing errors.
+#       (defaults to the value of the 'parsingErrors' variable or empty)
 #
 # ```bash
-# core::checkParseResults "${help:-}" "${parsingErrors:-}"
-# core::checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
+# command::checkParsedResults
+# command::checkParsedResults "${help:-false}" "${parsingErrors:-}"
 # ```
-function core::checkParseResults() {
-  local help="${1:-}"
-  local parsingErrors="${2:-}"
-  local functionName="${3:-${FUNCNAME[1]?"This function must be called from a command function."}}"
+function command::checkParsedResults() {
+  local help="${1:-${_OPTION_HELP:-${help:-false}}}"
+  local parsingErrors="${2:-${_OPTION_PARSING_ERRORS:-${parsingErrors:-}}}"
+  local functionName="${FUNCNAME[1]?"This function must be called from a command function."}"
 
   if [[ ${help} == "true" ]]; then
     main::printHelp function "${functionName}"
@@ -1744,7 +1746,6 @@ function core::checkParseResults() {
   fi
 
   if [[ -n "${parsingErrors:-}" ]]; then
-    local -n commandName="CMD_COMMAND_${functionName}"
     core::fail "${parsingErrors}"
   fi
 }

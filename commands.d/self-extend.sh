@@ -97,8 +97,8 @@ source curl
 ##VALET_COMMAND
 function selfExtend() {
   local extensionUri version skipSetup name
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   local action="created"
   if [[ ${extensionUri} =~ ^(https|git) ]]; then
@@ -164,7 +164,7 @@ function selfExtend() {
 
   # rebuild the documentation
   log::info "Rebuilding the documentation."
-  core::sourceFunction selfDocument
+  command::sourceFunction selfDocument
   selfDocument
 
   log::success "The extension ⌜${extensionName}⌝ has been installed and is ready to be used."
@@ -211,7 +211,7 @@ function selfExtend_createExtension() {
   # verify that we have lib-valet generated in the user directory
   if [[ ! -f "${userDirectory}/lib-valet" ]]; then
     log::info "Rebuilding the documentation because ⌜${userDirectory}/lib-valet⌝ is missing."
-    core::sourceFunction selfDocument
+    command::sourceFunction selfDocument
     selfDocument
   fi
 
@@ -486,7 +486,7 @@ function selfExtend::updateExtensions() {
 # Update a tarball extension.
 #
 # Returns:
-# - $?: 0 if the repository was checked without errors, 1 otherwise.
+# - `$?`:0 if the repository was checked without errors, 1 otherwise.
 # - `RETURNED_VALUE`: true if the repository was updated, false otherwise.
 function selfExtend_updateTarBall() {
   local extensionDirectory="${1}"
@@ -535,7 +535,7 @@ function selfExtend_updateTarBall() {
 # Update a git repository.
 #
 # Returns:
-# - $?: 0 if the repository was checked without errors, 1 otherwise.
+# - `$?`:0 if the repository was checked without errors, 1 otherwise.
 # - `RETURNED_VALUE`: true if the repository was updated, false otherwise.
 function selfExtend_updateGitRepository() {
   local repoPath="${1}"

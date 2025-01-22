@@ -66,7 +66,7 @@ ABOUT
   
 ```
 
-### ✅ Testing that we can display the help of a function using core::showHelp
+### ✅ Testing that we can display the help of a function using command::showHelp
 
 ❯ `valet self mock1 show-help`
 

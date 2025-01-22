@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-core::sourceFunction "selfRelease"
+command::sourceFunction "selfRelease"
 
 function main() {
   test::title "✅ Testing self release command"

@@ -8,6 +8,8 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- the config file should define everything, leave all def commented. When we self config we define only those already defined. We have an associative array of each var and description to handle this
+- all interactive functions must write to stderr not stdout!
 - add info of the extension from which a command comes from
 - we split the commands file into several one, per extension, so we don't have to load everything immediately
 - in the menu we can filter by extension (and we see the extension of a command)
@@ -22,7 +24,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - for the log functions, we can optionally display the function name and the line number of the caller + pid + shlvl. +ISO8601 time `printf "%(%FT%H:%M:%S%z)T" "${EPOCHSECONDS}"`. Let user customize the log format with a var? `[%t] %-5level %36logger %msg`. Show them how to output as json!
 - Refactor the logging functions to be more readable, see if we really need to precalculate them or if we can just compute on the fly. Remove createPrintFunction on SIGWINCH.
 - Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.
-- core::checkParseResults typo...
+- command::checkParsedResults typo...
 - Add a full screen view with the keyboard shortcuts in edit mode (new interactive::showFullScreenHelp ?).
 - In benchmark, with debug mode on, we can compute the time spent on each line of a function (+ try to improve the fuzzy filter sort). See extdebug shopt.
 - add snippets for the Ansi codes. Add snippets on the global variables.
@@ -58,5 +60,7 @@ This page lists the features that I would like to implement in Valet. They come 
   - add a stack for kill/yank
   - add a stack for undo/redo
 - add a new command self diagnostic that will run a series of tests to check the environment and help figure out what's wrong.
+- option --install-dir (or cmd) to be able to eval "$(valet --install-dir)"
+- _OPTION_FROM_NAME to pass arguments from name: local ${_OPTION_FROM_NAME} derp="${1}"
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

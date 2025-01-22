@@ -49,14 +49,14 @@ options:
     Only test the valet core functions. Skips the tests for user commands.
 - name: -i, --include <pattern>
   description: |-
-    A regex pattern to include only the test suites that match the pattern.
+    A regex pattern to include only the test suites (path) that match the pattern.
 
     The name of the test suite is given by the name of the directory containing the .sh test files.
 
     Example: --include '(1|commands)'
 - name: -e, --exclude <pattern>
   description: |-
-    A regex pattern to exclude all the test suites that match the pattern.
+    A regex pattern to exclude all the test suites (path) that match the pattern.
 
     The name of the test suite is given by the name of the directory containing the .sh test files.
 
@@ -77,8 +77,8 @@ examples:
     Run only the test suites that match the regex pattern ⌜(my-thing|my-stuff)⌝.
 ---"
 function selfTest() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   core::getProgramElapsedMicroseconds
   local startTimeInMicroSeconds="${RETURNED_VALUE}"
@@ -116,6 +116,9 @@ function selfTest() {
   declare -g -i _TEST_TEST_SUITES_COUNT=0
   declare -g -a _TEST_FAILED_TEST_SUITES=()
 
+  io::createTempDirectory
+  GLOBAL_TEST_VALET_USER_DIRECTORY="${RETURNED_VALUE}"
+
   # test suites in the user directory
   if [[ ${coreOnly:-false} != "true" ]]; then
     # get the user directory
@@ -123,7 +126,7 @@ function selfTest() {
     userDirectory="${userDirectory:-${RETURNED_VALUE}}"
 
     # rebuild the commands for the user dir
-    selfTestUtils_rebuildCommands --user-directory "${userDirectory}"
+    selfTestUtils_rebuildCommands --user-directory "${userDirectory}" --output "${GLOBAL_TEST_VALET_USER_DIRECTORY}/commands"
 
     io::listDirectories "${userDirectory}"
     local extensionDirectory
@@ -140,11 +143,9 @@ function selfTest() {
       core::fail "The valet core tests directory ⌜${GLOBAL_VALET_HOME}/tests.d⌝ does not exist, cannot run core tests."
     fi
 
-    io::createTempDirectory
-    GLOBAL_TEST_VALET_USER_DIRECTORY="${RETURNED_VALUE}"
-
     # we need to rebuild the commands for the core commands only
-    selfTestUtils_rebuildCommands --core-only --user-directory "${GLOBAL_TEST_VALET_USER_DIRECTORY}"
+    rm -Rf "${GLOBAL_TEST_VALET_USER_DIRECTORY}"
+    selfTestUtils_rebuildCommands --core-only  --output "${GLOBAL_TEST_VALET_USER_DIRECTORY}/commands"
     selfTest_runSingleTestSuites "${GLOBAL_VALET_HOME}/tests.d"
 
     # now we can also test the commands in examples.d if the directory is there
@@ -152,7 +153,8 @@ function selfTest() {
       log::warning "The valet examples directory ⌜${GLOBAL_VALET_HOME}/examples.d⌝ does not exist, cannot run the tests on the core examples."
     else
       # we need to rebuild the commands for the examples only
-      selfTestUtils_rebuildCommands --user-directory "${GLOBAL_VALET_HOME}/examples.d" --no-output
+      rm -Rf "${GLOBAL_TEST_VALET_USER_DIRECTORY}"
+      selfTestUtils_rebuildCommands --user-directory "${GLOBAL_VALET_HOME}/examples.d"  --output "${GLOBAL_TEST_VALET_USER_DIRECTORY}/commands"
       selfTest_runSingleTestSuites "${GLOBAL_VALET_HOME}/examples.d/showcase/tests.d"
     fi
   fi
@@ -532,7 +534,7 @@ function selfTest_runSingleTest() {
     rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
   fi
   io::setupTempFileGlobalVariable
-  io::cleanupTempFiles
+  io::cleanTempFiles
   mkdir -p "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
 
   # set a new user directory so that commands are correctly recreated if calling

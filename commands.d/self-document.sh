@@ -51,8 +51,8 @@ source array
 ##VALET_COMMAND
 function selfDocument() {
   local output coreOnly
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   # default output to the user directory
   core::getUserDirectory

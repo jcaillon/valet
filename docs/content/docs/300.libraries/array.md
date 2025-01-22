@@ -95,7 +95,7 @@ array::fuzzyFilterSort "pattern" "myarray" ⌜ ⌝ 10 && local filteredArray="${
 > - This function does not sort the results, it only filters them.
 
 
-## array::isInArray
+## array::checkIfPresent
 
 Check if a value is in an array.
 It uses pure bash.
@@ -111,7 +111,7 @@ Returns:
 
 ```bash
 declare -g myArray=( "a" "b" )
-array::isInArray myArray "b" && printf '%s\n' "b is in the array"
+array::checkIfPresent myArray "b" && printf '%s\n' "b is in the array"
 ```
 
 

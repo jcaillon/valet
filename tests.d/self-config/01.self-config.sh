@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-core::sourceFunction "selfConfig"
+command::sourceFunction "selfConfig"
 
 # shellcheck disable=SC1091
 source io

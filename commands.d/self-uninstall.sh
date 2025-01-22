@@ -37,8 +37,8 @@ fi
 ##VALET_COMMAND
 function selfUninstall() {
   local script
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   if [[ ${script:-} == "true" ]]; then
     if [[ ! -f "${GLOBAL_VALET_HOME}/valet" ]]; then

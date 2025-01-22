@@ -42,8 +42,8 @@ source interactive
 ##VALET_COMMAND
 function selfAddLibrary() {
   local libraryName
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   local templateFlavor="default"
 

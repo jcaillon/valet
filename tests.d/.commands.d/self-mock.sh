@@ -43,8 +43,8 @@ arguments:
     - show-help
 ---"
 function selfMock1() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   case "${action:-}" in
   error)
@@ -105,7 +105,7 @@ function selfMock1() {
     io::sleep 999
     ;;
   show-help)
-    core::showHelp
+    command::showHelp
     ;;
   *)
     log::warning "This is for testing valet core functions, running the tests."
@@ -162,8 +162,8 @@ examples:
 ---"
 function selfMock2() {
   local -a more
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   log::info "Option 1 (option1): ${option1:-}."
   log::info "Option 2 (thisIsOption2): ${thisIsOption2:-}."
@@ -198,8 +198,8 @@ description: |-
   If so, it will require the user to enter the sudo password and use sudo inside the command
 ---"
 function selfMock3() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   ${SUDO} whoami
 }

@@ -91,16 +91,16 @@ A minimal command function has the following content (note that the function nam
 
 ```bash {linenos=table,hl_lines=[2,3],linenostart=1,filename="command.sh"}
 function helloWorld() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 }
 ```
 
 **Explanations:**
 
-- `core::parseArguments "$@"` is a core function of Valet which parses the input argument (i.e. `$@`) and returns a string in the global variable `RETURNED_VALUE` which can be evaluated to set local variables corresponding to arguments and options. See the function help in the [core library documentation page][core-library].
+- `command::parseArguments "$@"` is a core function of Valet which parses the input argument (i.e. `$@`) and returns a string in the global variable `RETURNED_VALUE` which can be evaluated to set local variables corresponding to arguments and options. See the function help in the [core library documentation page][core-library].
 - `eval "${RETURNED_VALUE}"` evaluates the output string of the parsing function which sets local variables.
-- `core::checkParseResults "${help:-}" "${parsingErrors:-}"` will check if the local variable `help` is true, which corresponds to the option `--help` passed to the function, in which case it will display the function help and stop its execution. It will also check if the local variable `parsingErrors` is not empty, which indicates that the parsing function encountered input errors: the function execution is also stopped with parsing errors shown to the user.
+- `command::checkParsedResults` will check if the local variable `help` is true, which corresponds to the option `--help` passed to the function, in which case it will display the function help and stop its execution. It will also check if the local variable `parsingErrors` is not empty, which indicates that the parsing function encountered input errors: the function execution is also stopped with parsing errors shown to the user.
 
 After these two mandatory lines, you can implement your function using local variables defined for you depending on the user inputs. You are guaranteed that the inputs are valid.
 
@@ -131,9 +131,9 @@ options:
 function example() {
   local myOption myArgument
   # parse the arguments of the command and evaluates to local variables
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
   # check if we need to exit because there was some inputs errors or if we need to just display the help
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::checkParsedResults
 
   # use options and arguments
   echo "${myOption} and ${myArgument}"
@@ -149,7 +149,7 @@ Check [the command properties section][command-properties] for more details on h
 
 #### Understand the parser
 
-The function `core::parseArguments "$@"` will return a string that can be evaluated to define the parsed options and arguments as local variables.
+The function `command::parseArguments "$@"` will return a string that can be evaluated to define the parsed options and arguments as local variables.
 
 With the command example above, assuming that the user input is `valet example --thing --my-option opt1 arg1` the content of the global variable `RETURNED_VALUE` would be:
 
@@ -159,7 +159,7 @@ localmyArgument="arg1"
 local parsingErrors="Unknown option '--thing'"
 ```
 
-The `parsingErrors` variable contains the parser error: here we passed an option that is unknown for this command. Calling `core::checkParseResults "${help:-}" "${parsingErrors:-}"` will print that parsing error message to the user and exit the program.
+The `parsingErrors` variable contains the parser error: here we passed an option that is unknown for this command. Calling `command::checkParsedResults` will print that parsing error message to the user and exit the program.
 
 #### Access Valet library functions
 

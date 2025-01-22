@@ -58,8 +58,8 @@ options:
     Do not perform the release, just show what would be done.
 ---"
 function selfRelease() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   if [[ ${dryRun:-} == "true" ]]; then
     log::info "Dry run mode is enabled, no changes will be made."
@@ -328,7 +328,7 @@ function selfRelease::bumpVersion() {
 }
 
 function selfRelease::updateDocumentation() {
-  core::sourceFunction selfDocument
+  command::sourceFunction selfDocument
 
   selfDocument::getFooter
   local pageFooter="${RETURNED_VALUE}"
@@ -340,7 +340,7 @@ function selfRelease::updateDocumentation() {
   fi
 
   # export the valet config valet to the documentation
-  core::sourceFunction selfConfig
+  command::sourceFunction selfConfig
   selfConfig::getFileContent false
 
   if [[ "${dryRun:-}" != "true" ]]; then

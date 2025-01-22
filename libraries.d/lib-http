@@ -39,7 +39,7 @@ source io
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if the http status code is acceptable
 #   - 1 otherwise
 # - `RETURNED_VALUE`: the headers of the response

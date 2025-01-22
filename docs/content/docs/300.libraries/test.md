@@ -17,24 +17,4 @@ test::commentTest "This is a comment."
 ```
 
 
-## test::endTest
-
-Call this function after each test to write the test results to the report file.
-This create a new H3 section in the report file with the test description and the exit code.
-
-- $1: **title** _as string_:
-      the title of the test
-- $2: **exit code** _as int_:
-      the exit code of the test
-- $3: comment _as string_:
-      (optional) a text to explain what is being tested
-      (defaults to "")
-
-```bash
-test::endTest "Testing something" $?
-```
-
-
-
-
 > Documentation generated for the version 0.27.285 (2024-12-05).

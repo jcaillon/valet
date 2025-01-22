@@ -48,13 +48,13 @@ command_that_could_fail || io::checkAndWarn "$?" "The command that could fail ha
 ```
 
 
-## io::cleanupTempFiles
+## io::cleanTempFiles
 
 Removes all the temporary files and directories that were created by the
 io::createTempFile and io::createTempDirectory functions.
 
 ```bash
-io::cleanupTempFiles
+io::cleanTempFiles
 ```
 shellcheck disable=SC2016
 
@@ -198,7 +198,7 @@ io::createTempDirectory
 local directory="${RETURNED_VALUE}"
 ```
 
-> Directories created this way are automatically cleaned up by the io::cleanupTempFiles
+> Directories created this way are automatically cleaned up by the io::cleanTempFiles
 > function when valet ends.
 
 
@@ -215,7 +215,7 @@ io::createTempFile
 local file="${RETURNED_VALUE}"
 ```
 
-> Files created this way are automatically cleaned up by the io::cleanupTempFiles
+> Files created this way are automatically cleaned up by the io::cleanTempFiles
 > function when valet ends.
 
 
@@ -619,7 +619,7 @@ Returns:
 io::windowsCreateTempDirectory
 ```
 
-> Directories created this way are automatically cleaned up by the io::cleanupTempFiles
+> Directories created this way are automatically cleaned up by the io::cleanTempFiles
 > function when valet ends.
 
 
@@ -638,7 +638,7 @@ Returns:
 io::windowsCreateTempFile
 ```
 
-> Files created this way are automatically cleaned up by the io::cleanupTempFiles
+> Files created this way are automatically cleaned up by the io::cleanTempFiles
 > function when valet ends.
 
 

@@ -63,7 +63,7 @@ set -Eeu -o pipefail
 #     Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
 ##VALET_COMMAND
 function selfBuild() {
-  local userDirectory outputFile coreOnly noOutput silent
+  local userDirectory output coreOnly noOutput silent
 
   # if this script is run directly
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || -z "${GLOBAL_CMD_INCLUDED:-}" ]]; then
@@ -76,7 +76,7 @@ function selfBuild() {
         ;;
       -o | --output)
         shift
-        outputFile="${1}"
+        output="${1}"
         ;;
       -C | --core-only)
         coreOnly=true
@@ -102,8 +102,8 @@ function selfBuild() {
       shift
     done
   else
-    core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-    core::checkParseResults "${help:-}" "${parsingErrors:-}"
+    command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+    command::checkParsedResults
   fi
 
   log::debug "Building the valet user commands."
@@ -123,7 +123,7 @@ function selfBuild() {
 
   core::getUserDirectory
   userDirectory="${userDirectory:-${RETURNED_VALUE}}"
-  outputFile="${outputFile:-${userDirectory}/commands}"
+  output="${output:-${userDirectory}/commands}"
 
   io::toAbsolutePath "${GLOBAL_VALET_HOME}"
   GLOBAL_VALET_HOME="${RETURNED_VALUE}"
@@ -206,8 +206,8 @@ function selfBuild() {
   fi
 
   if [[ ${noOutput:-} != "true" ]]; then
-    selfBuild_writeCommandDefinitionVariablesToFile "${outputFile}"
-    log::info "The command definition variables have been written to ⌜${outputFile}⌝."
+    selfBuild_writeCommandDefinitionVariablesToFile "${output}"
+    log::info "The command definition variables have been written to ⌜${output}⌝."
   fi
 
   if [[ ${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-false} == "true" ]]; then
@@ -298,7 +298,7 @@ function extractCommandDefinitionsToVariables() {
       command="${command#valet }"
       command="${command#valet}"
 
-      if array::isInArray CMD_ALL_COMMANDS_ARRAY "${command}"; then
+      if array::checkIfPresent CMD_ALL_COMMANDS_ARRAY "${command}"; then
         log::warning "                         ├── Skipping ⌜${command}⌝ (already defined)."
         duplicatedCommands+=1
         continue

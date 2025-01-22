@@ -50,7 +50,7 @@ function showCommandHelp() {
   command::parseFunctionArguments "${FUNCNAME[0]:-}" "$@"
   eval "${RETURNED_VALUE}"
 
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::checkParsedResults
 
   # show the program help if no commands are provided
   if [[ ${#commands[@]} -eq 0 ]]; then

@@ -45,7 +45,7 @@ INFO     Disabling profiler.
 
 D  I  S  timer  delta                          source:line function                                 → command
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:164  selfMock2()                              → local -a more
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:165  selfMock2()                              → core::parseArguments arg1 arg2
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:165  selfMock2()                              → command::parseArguments arg1 arg2
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:165  selfMock2()                              → eval 'local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
                                                                                                        local -a more
                                                                                                        option1=""
@@ -68,7 +68,7 @@ D  I  S  timer  delta                          source:line function             
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:172  selfMock2()                              → parsingErrors=
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → firstArg=arg1
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:176  selfMock2()                              → more=("arg2")
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:166  selfMock2()                              → core::checkParseResults '' ''
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:166  selfMock2()                              → command::checkParsedResults
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:168  selfMock2()                              → log::info 'Option 1 (option1): .'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:169  selfMock2()                              → log::info 'Option 2 (thisIsOption2): .'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  selfMock2()                              → log::info 'Option 3 (flag3): .'
@@ -113,7 +113,7 @@ INFO     Disabling profiler.
 
 D  I  S  timer  delta                          source:line function                                 → command
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:164  selfMock2()                              → local -a more
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:165  selfMock2()                              → core::parseArguments arg1 arg2
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:165  selfMock2()                              → command::parseArguments arg1 arg2
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:165  selfMock2()                              → eval 'local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
                                                                                                            local -a more								
                                                                                                            option1=""								
@@ -136,7 +136,7 @@ D  I  S  timer  delta                          source:line function             
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:172  selfMock2()                              → parsingErrors=
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → firstArg=arg1
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:176  selfMock2()                              → more=("arg2")
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:166  selfMock2()                              → core::checkParseResults '' ''
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:166  selfMock2()                              → command::checkParsedResults
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:168  selfMock2()                              → log::info 'Option 1 (option1): .'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:169  selfMock2()                              → log::info 'Option 2 (thisIsOption2): .'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  selfMock2()                              → log::info 'Option 3 (flag3): .'

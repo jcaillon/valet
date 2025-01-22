@@ -183,8 +183,8 @@ function selfUpdate() {
     skipExtensionsSetup="${skipExtensionsSetup:-"${VALET_SKIP_EXTENSIONS_SETUP:-"false"}"}"
   else
     log::debug "Parsing the arguments using the core functions."
-    core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-    core::checkParseResults "${help:-}" "${parsingErrors:-}"
+    command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+    command::checkParsedResults
   fi
 
   # get the os
@@ -203,7 +203,7 @@ function selfUpdate() {
 
     # only update extensions ?
     if [[ ${onlyExtensions} == "true" ]]; then
-      core::sourceFunction selfExtend
+      command::sourceFunction selfExtend
       selfExtend::updateExtensions "${userDirectory}" "${skipExtensionsSetup}"
       return 0
     fi
@@ -238,7 +238,7 @@ function selfUpdate() {
       log::info "The current local version ⌜${currentVersion}⌝ is higher or equal to the distant version ⌜${version}⌝."
       log::success "You already have the latest version."
       if [[ ${skipExtensions} != "true" ]]; then
-        core::sourceFunction selfExtend
+        command::sourceFunction selfExtend
         selfExtend::updateExtensions "${userDirectory}" "${skipExtensionsSetup}"
       fi
       return 0
@@ -356,17 +356,17 @@ function selfUpdate() {
   # run the post install command
   if [[ ${unattended} != "true" && ${firstInstallation} == "true" ]]; then
     log::info "Running the self setup command."
-    core::sourceFunction selfSetup
+    command::sourceFunction selfSetup
     selfSetup
   else
     # re-export the config file to be up to date (done in setup as well)
-    core::sourceFunction selfConfig
+    command::sourceFunction selfConfig
     selfConfig --no-edit --override --export-current-values
   fi
 
   # update the extensions
   if [[ ${firstInstallation} != "true" && ${skipExtensions} != "true" ]]; then
-    core::sourceFunction selfExtend
+    command::sourceFunction selfExtend
     selfExtend::updateExtensions "${userDirectory}" "${skipExtensionsSetup}"
   fi
 }

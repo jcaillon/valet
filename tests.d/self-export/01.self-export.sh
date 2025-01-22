@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-core::sourceFunction "selfExport"
+command::sourceFunction "selfExport"
 # shellcheck disable=SC1091
 source io
 

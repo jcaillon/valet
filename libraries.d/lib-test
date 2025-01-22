@@ -447,43 +447,6 @@ function test::flushStderr() {
   test_flushFdToCodeBlock 2 "${1:-${_OPTION_BLOCK_TITLE:-}}"
 }
 
-# ## test::endTest (deprecated)
-#
-# Call this function after a test to write a test result section to the report file.
-#
-# This create a new H3 section in the report file with the given test description,
-# the exit code, and the standard and error outputs captured from the last flush (if any).
-#
-# - $1: **title** _as string_:
-#       The title of the test.
-# - $2: **exit code** _as int_:
-#       The exit code of the test.
-# - $@: comments _as string_:
-#       (optional) Can be set using the variable `_OPTION_COMMENT`.
-#       A text to explain what is being tested.
-#       (defaults to "")
-#
-# ```bash
-# test::endTest "Testing something" $?
-# ```
-function test::endTest() {
-  local testTitle="${1:-"Test"}"
-  local exitCode="${2:-0}"
-  local testDescription IFS=$'\n'
-  if [[ -n ${3:-} ]]; then
-    printf -v testDescription '%s\n\n' "${@:3}"
-  else
-    testDescription+="${_OPTION_COMMENT:-}"$'\n'$'\n'
-  fi
-
-  # shellcheck disable=SC2183
-  # shellcheck disable=SC2016
-  printf '### %s\n\n%sExit code: `%s`\n\n' "${testTitle}" "${testDescription}" "${exitCode}" >>"${GLOBAL_TEST_REPORT_FILE}"
-
-  test_flushFdToCodeBlock 1 "Standard output"
-  test_flushFdToCodeBlock 2 "Error output"
-}
-
 # ## test::fail
 #
 # Call this function to log a message and exit with the status 142, which

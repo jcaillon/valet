@@ -104,7 +104,7 @@ function main::unregisterTraps() {
 main::registerTraps
 
 function main::onCleanUpInternal() {
-  io::cleanupTempFiles
+  io::cleanTempFiles
 
   # disable the profiler if still on
   if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
@@ -540,7 +540,7 @@ function main::runFunction() {
   fi
 
   # source the file in which the function is located if needed
-  core::sourceFunction "${functionName}"
+  command::sourceFunction "${functionName}"
 
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then
     core::fail "The function ⌜${functionName}⌝ associated with the command ⌜${command}⌝ does not exist."
@@ -1346,7 +1346,7 @@ function main::getSingleLetterOptions() {
 
 # Parse the arguments and options of a function.
 # If no arguments are provided but some are expected, it will enter interactive mode.
-# See the @core::parseArguments function for more details on parsing.
+# See the @command::parseArguments function for more details on parsing.
 #
 # Usage:
 #   main::parseCmdFunctionArgumentsOrGoInteractive "functionName" "$@" && eval "${RETURNED_VALUE}"

@@ -58,7 +58,7 @@ INFO     The tag message is:
    6 ░ - 🐞 fix
    7 ░ 
 INFO     Generating documentation for the core functions only.
-INFO     Found 159 functions with documentation.
+INFO     Found 154 functions with documentation.
 🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet.md⌝.
 🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/extras/lib-valet
@@ -66,7 +66,7 @@ INFO     The documentation has been generated in ⌜$GLOBAL_VALET_HOME/extras/li
 INFO     The prototype script has been generated in ⌜$GLOBAL_VALET_HOME/extras/lib-valet⌝.
 🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/extras/valet.code-snippets
 INFO     The vscode snippets have been generated in ⌜$GLOBAL_VALET_HOME/extras/valet.code-snippets⌝.
-INFO     Writing the 159 functions documentation to the core libraries docs.
+INFO     Writing the 154 functions documentation to the core libraries docs.
 🙈 mocked io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/array.md
 🙈 mocked io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/codes.md
 🙈 mocked io::invoke rm -f $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -110,20 +110,18 @@ INFO     Writing the 159 functions documentation to the core libraries docs.
 🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/benchmark.md
 🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/benchmark.md
 🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/benchmark.md
-🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
-🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
+🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
+🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/command.md
 🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
 🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
 🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/core.md
@@ -160,10 +158,6 @@ INFO     Writing the 159 functions documentation to the core libraries docs.
 🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
 🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/interactive.md
-🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
-🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 🙈 mocked io::writeToFile $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md
 🙈 mocked io::writeToFileFromRef $GLOBAL_VALET_HOME/docs/content/docs/300.libraries/io.md

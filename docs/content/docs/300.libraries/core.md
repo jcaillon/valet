@@ -5,7 +5,7 @@ cascade:
 url: /docs/libraries/core
 ---
 
-## core::checkParseResults
+## command::checkParsedResults
 
 A convenience function to check the parsing results and fails with an error message if there are
 parsing errors.
@@ -22,8 +22,8 @@ This should be called from a command function for which you want to check the pa
       (defaults to the calling function)
 
 ```bash
-core::checkParseResults "${help:-}" "${parsingErrors:-}"
-core::checkParseResults "${help:-}" "${parsingErrors:-}" "myFunctionName"
+command::checkParsedResults
+command::checkParsedResults "myFunctionName"
 ```
 
 
@@ -124,7 +124,7 @@ printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
 ```
 
 
-## core::parseArguments
+## command::parseArguments
 
 Parse the arguments and options of a function and return a string that can be evaluated to set the variables.
 This should be called from a command function for which you want to parse the arguments.
@@ -148,7 +148,7 @@ option1="xxx"
 ```
 
 ```bash
-core::parseArguments "$@" && eval "${RETURNED_VALUE}"
+command::parseArguments "$@" && eval "${RETURNED_VALUE}"
 ```
 
 
@@ -172,17 +172,17 @@ core::resetIncludedFiles
 ```
 
 
-## core::showHelp
+## command::showHelp
 
 Show the help for the current function.
 This should be called directly from a command function for which you want to display the help text.
 
 ```bash
-core::showHelp
+command::showHelp
 ```
 
 
-## core::sourceFunction
+## command::sourceFunction
 
 Source the file associated with a command function.
 This allows you to call a command function without having to source the file manually.
@@ -191,7 +191,7 @@ This allows you to call a command function without having to source the file man
       the function name
 
 ```bash
-core::sourceFunction "functionName"
+command::sourceFunction "functionName"
 ```
 
 

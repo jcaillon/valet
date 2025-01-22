@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-core::sourceFunction "selfAddLibrary"
+command::sourceFunction "selfAddLibrary"
 
 function main() {
   test::title "✅ Testing self add-library"

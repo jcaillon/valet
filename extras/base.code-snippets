@@ -141,8 +141,8 @@
 			"#     Call command with option1, option2 and some arguments.",
 			"##VALET_COMMAND",
 			"function $2() {",
-			"  core::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
-			"  core::checkParseResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  command::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  command::checkParsedResults \"${help:-}\" \"${parsingErrors:-}\"",
 			"  $0",
 			"}"
 		]
@@ -182,8 +182,8 @@
 			"    Call command with option1, option2 and some arguments.",
 			": \"---",
 			"function $2() {",
-			"  core::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
-			"  core::checkParseResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  command::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  command::checkParsedResults \"${help:-}\" \"${parsingErrors:-}\"",
 			"  $0",
 			"}"
 		]

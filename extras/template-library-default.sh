@@ -16,7 +16,7 @@
 #
 # Returns:
 #
-# - $?: The exit code of the executable.
+# - `$?`:The exit code of the executable.
 # - `RETURNED_VALUE`: The value to return
 #
 # ```bash

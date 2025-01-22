@@ -44,8 +44,8 @@ examples:
     Create (or recreate) the configuration file of Valet reusing the possible current values of the variables.
 ---"
 function selfConfig() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   core::getConfigurationDirectory
   local valetConfigFile="${VALET_CONFIG_FILE:-"${RETURNED_VALUE}/config"}"

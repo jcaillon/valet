@@ -20,8 +20,8 @@ description: |-
   This command demonstrates how to interact with the user using valet's interactive library.
 ---"
 function showcaseInteractive() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   log::info "Getting the cursor size:"
   tui::getCursorPosition

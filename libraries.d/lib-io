@@ -82,7 +82,7 @@ function io::toAbsolutePath() {
 #
 # Returns:
 #
-# - $?: The exit code of the executable.
+# - `$?`:The exit code of the executable.
 # - `RETURNED_VALUE`: The file path containing the stdout of the executable.
 # - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
 #
@@ -212,7 +212,7 @@ function io::invokef5() {
 #
 # Returns:
 #
-# - $?: The exit code of the executable.
+# - `$?`:The exit code of the executable.
 # - `RETURNED_VALUE`: The content of stdout.
 # - `RETURNED_VALUE2`: The content of stderr.
 #
@@ -252,7 +252,7 @@ function io::invoke5() {
 #
 # Returns:
 #
-# - $?: The exit code of the executable.
+# - `$?`:The exit code of the executable.
 # - `RETURNED_VALUE`: The file path containing the stdout of the executable.
 # - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
 #
@@ -285,7 +285,7 @@ function io::invokef2() {
 #
 # Returns:
 #
-# - $?: The exit code of the executable.
+# - `$?`:The exit code of the executable.
 # - `RETURNED_VALUE`: The content of stdout.
 # - `RETURNED_VALUE2`: The content of stderr.
 #
@@ -320,7 +320,7 @@ function io::invoke2() {
 #
 # Returns:
 #
-# - $?: The exit code of the executable.
+# - `$?`:The exit code of the executable.
 # - `RETURNED_VALUE`: The file path containing the stdout of the executable.
 # - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
 #
@@ -360,7 +360,7 @@ function io::invokef2piped() {
 #
 # Returns:
 #
-# - $?: The exit code of the executable.
+# - `$?`:The exit code of the executable.
 # - `RETURNED_VALUE`: The content of stdout.
 # - `RETURNED_VALUE2`: The content of stderr.
 #
@@ -398,7 +398,7 @@ function io::invoke2piped() {
 #
 # Returns:
 #
-# - $?: The exit code of the executable.
+# - `$?`:The exit code of the executable.
 # - `RETURNED_VALUE`: The content of stdout.
 # - `RETURNED_VALUE2`: The content of stderr.
 #
@@ -508,47 +508,6 @@ function io::writeToFileFromRef() {
   else
     printf '%s' "${!2}" >"${1}"
   fi
-}
-
-
-# ## io::checkAndFail
-#
-# Check last return code and fail (exit) if it is an error.
-#
-# - $1: **exit code** _as int_:
-#       the return code
-# - $@: **message** _as string_:
-#       the error message to display in case of error
-#
-# ```bash
-# command_that_could_fail || io::checkAndFail "$?" "The command that could fail has failed!"
-# ```
-function io::checkAndFail() {
-  if [[ ${1:-} != "0" ]]; then
-    shift
-    core::fail "$*"
-  fi
-  return 0
-}
-
-# ## io::checkAndWarn
-#
-# Check last return code and warn the user in case the return code is not 0.
-#
-# - $1: **exit code** _as int_:
-#       the last return code
-# - $@: **message** _as string_:
-#       the warning message to display in case of error
-#
-# ```bash
-# command_that_could_fail || io::checkAndWarn "$?" "The command that could fail has failed!"
-# ```
-function io::checkAndWarn() {
-  if [[ ${1:-} != "0" ]]; then
-    shift
-    log::warning "$*"
-  fi
-  return 0
 }
 
 # ## io::createDirectoryIfNeeded
@@ -951,7 +910,7 @@ function io::listDirectories() {
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if the directory is writable
 #   - 1 otherwise
 #
@@ -1313,7 +1272,7 @@ function io::convertFromWindowsPath() {
 # io::windowsCreateTempFile
 # ```
 #
-# > Files created this way are automatically cleaned up by the io::cleanupTempFiles
+# > Files created this way are automatically cleaned up by the io::cleanTempFiles
 # > function when valet ends.
 function io::windowsCreateTempFile() {
   local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
@@ -1355,7 +1314,7 @@ function io::windowsCreateTempFile() {
 # io::windowsCreateTempDirectory
 # ```
 #
-# > Directories created this way are automatically cleaned up by the io::cleanupTempFiles
+# > Directories created this way are automatically cleaned up by the io::cleanTempFiles
 # > function when valet ends.
 function io::windowsCreateTempDirectory() {
   local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"

@@ -389,7 +389,7 @@ function tui::testWaitForChar() {
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if a char was retrieved
 #   - 1 otherwise
 # - `LAST_KEY_PRESSED`: the last char (key) retrieved.
@@ -501,7 +501,7 @@ function tui::testWaitForKeyPress() {
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if a key was pressed
 #   - 1 otherwise
 # - `LAST_KEY_PRESSED`: the key pressed.

@@ -20,7 +20,7 @@ source tui
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if the user pressed enter
 #   - 1 otherwise
 #
@@ -41,7 +41,7 @@ function interactive::askForConfirmation() {
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if the user pressed enter
 #   - 1 otherwise
 #
@@ -103,7 +103,7 @@ function interactive::askForConfirmationRaw() {
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if the user answered yes
 #   - 1 otherwise
 # - `RETURNED_VALUE`: true or false.
@@ -142,7 +142,7 @@ function interactive::promptYesNo() {
 #
 # Returns:
 #
-# - $?:
+# - `$?`:
 #   - 0 if the user answered yes
 #   - 1 otherwise
 # - `RETURNED_VALUE`: true or false.

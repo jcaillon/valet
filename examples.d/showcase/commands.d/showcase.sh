@@ -37,8 +37,8 @@ examples:
 ---"
 function showcaseCommand1() {
   local -a more
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   log::info "First argument: ${firstArg:-}."
   log::info "Option 1: ${option1:-}."
@@ -72,8 +72,8 @@ description: |-
   If so, it will require the user to enter the sudo password and you can use the \${SUDO} variable inside the command
 ---"
 function showCaseSudo() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   ${SUDO} whoami
 }
