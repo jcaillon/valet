@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../libs.d/lib-extension2
+# shellcheck source=../libraries.d/lib-extension2
 source extension2
 
 #===============================================================
@@ -19,8 +19,8 @@ source extension2
 #     Just run the command and do nothing.
 ##VALET_COMMAND
 function extension2() {
-  core::parseArguments "$@" && eval "${RETURNED_VALUE}"
-  core::checkParseResults "${help:-}" "${parsingErrors:-}"
+  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::checkParsedResults
 
   extension2::doNothing
   :;
