@@ -2,7 +2,13 @@
 
 ## Test script 00.tests
 
-### Testing extension1::doNothing
+### ✅ Testing extension1::doNothing
 
-Exit code: `0`
+❯ `extension1::doNothing`
+
+**Error output**:
+
+```text
+INFO     Do nothing...
+```
 
