@@ -37,5 +37,6 @@ jobs:
           VALET_CONFIG_ENABLE_COLORS: true
           VALET_CONFIG_DISABLE_PROGRESS: true
         run: |
+          bash --version
           chmod +x valet
           ./valet self test -C
