@@ -167,7 +167,7 @@ local osName="${RETURNED_VALUE}"
 ```
 
 
-## system::windowsAddToPath
+## windows::addToPath
 
 Add the given path to the PATH environment variable on Windows (current user only).
 
@@ -178,13 +178,13 @@ Will also export the PATH variable in the current bash.
       The path can be in unix format, it will be converted to windows format.
 
 ```bash
-system::windowsAddToPath "/path/to/bin"
+windows::addToPath "/path/to/bin"
 ```
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
 
-## system::windowsGetEnvVar
+## windows::getEnvVar
 
 Get the value of an environment variable for the current user on Windows.
 
@@ -196,12 +196,12 @@ Returns:
 - `RETURNED_VALUE`: the value of the environment variable.
 
 ```bash
-system::windowsGetEnvVar "MY_VAR"
+windows::getEnvVar "MY_VAR"
 echo "${RETURNED_VALUE}"
 ```
 
 
-## system::windowsSetEnvVar
+## windows::setEnvVar
 
 Set an environment variable for the current user on Windows.
 
@@ -211,7 +211,7 @@ Set an environment variable for the current user on Windows.
       the value of the environment variable to set.
 
 ```bash
-system::windowsSetEnvVar "MY_VAR" "my_value"
+windows::setEnvVar "MY_VAR" "my_value"
 ```
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.

@@ -11,8 +11,10 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
 fi
 # --- END OF COMMAND COMMON PART
 
-# shellcheck source=../../libraries.d/lib-io
-source io
+# shellcheck source=../../libraries.d/lib-fs
+source fs
+# shellcheck source=../../libraries.d/lib-exe
+source exe
 
 #===============================================================
 # >>> command: self mock1
@@ -75,10 +77,10 @@ function selfMock1() {
       log::warning "This is a custom clean up function."
     }
     local tmp1 tmp2 tmp3 tmp4
-    io::createTempFile && tmp1="${RETURNED_VALUE}"
-    io::createTempFile && tmp2="${RETURNED_VALUE}"
-    io::createTempDirectory && tmp3="${RETURNED_VALUE}"
-    io::createTempDirectory && tmp4="${RETURNED_VALUE}"
+    fs::createTempFile && tmp1="${RETURNED_VALUE}"
+    fs::createTempFile && tmp2="${RETURNED_VALUE}"
+    fs::createTempDirectory && tmp3="${RETURNED_VALUE}"
+    fs::createTempDirectory && tmp4="${RETURNED_VALUE}"
     log::info "Created temp file: ${tmp1//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
     log::info "Created temp file: ${tmp2//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
     log::info "Created temp directory: ${tmp3//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
@@ -102,7 +104,7 @@ function selfMock1() {
     ;;
   wait-indefinitely)
     log::info "This is for testing valet core functions, waiting indefinitely."
-    io::sleep 999
+    exe::sleep 999
     ;;
   show-help)
     command::showHelp

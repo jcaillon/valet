@@ -2,8 +2,8 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=../libraries.d/lib-io
-source io
+# shellcheck source=../libraries.d/lib-exe
+source exe
 
 # ## bash::countJobs
 #
@@ -19,7 +19,7 @@ source io
 # ```
 function bash::countJobs() {
   local -i jobsCount=0
-  io::captureOutput jobs -r
+  exe::captureOutput jobs -r
   local IFS=$'\n' line
   for line in ${RETURNED_VALUE}; do
     if [[ ${line} == "["* ]]; then
@@ -103,7 +103,7 @@ function bash::runInParallel() {
     while ((${#_BASH_RUNNING_JOB_PIDS[@]} >= maxParallelJobs || (index + 1 == ${#jobNames[@]}))); do
       # wait for one of the test suites to finish (or all of them for the last batch)
       nbJobsCompleted=0
-      io::captureOutput jobs -r
+      exe::captureOutput jobs -r
       runningsJobs="${RETURNED_VALUE}"
       if log::isTraceEnabled; then
         log::trace "Running jobs: ${runningsJobs}"
@@ -137,7 +137,7 @@ function bash::runInParallel() {
       done
 
       if ((nbJobsCompleted == 0)); then
-        io::sleep "${timeoutBetweenChecks}"
+        exe::sleep "${timeoutBetweenChecks}"
       fi
 
       if ((${#exitCodes[@]} == ${#jobNames[@]})); then

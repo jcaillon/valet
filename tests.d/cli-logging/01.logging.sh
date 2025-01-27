@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# shellcheck source=../../libraries.d/lib-io
-source io
+# shellcheck source=../../libraries.d/lib-fs
+source fs
 
 function main() {
   test_logLevelOptions
@@ -41,25 +41,25 @@ function test_logDisplayOptions() {
 
 
 function test_logOutputOptions() {
-  io::createTempDirectory
+  fs::createTempDirectory
   local logDir="${RETURNED_VALUE}"
 
   test::title "✅ Testing that we can output the logs to a directory additionally to console"
   test::exec VALET_CONFIG_LOG_TO_DIRECTORY="${logDir}" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
   # shellcheck disable=SC2317
   function test::transformTextBeforeFlushing() { _TEST_OUTPUT="${_TEST_OUTPUT//????-??-??_??h??m??s.log/2025-01-17_21h29m41s.log}" ; }
-  test::func io::listFiles "${logDir}"
+  test::func fs::listFiles "${logDir}"
   unset -f test::transformTextBeforeFlushing
 
 
   test::title "✅ Testing that we can output the logs to a specific file name additionally to console"
   test::exec VALET_CONFIG_LOG_FILENAME_PATTERN='logFile=test.log' VALET_CONFIG_LOG_TO_DIRECTORY="${logDir}" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
-  test::exec io::cat "${logDir}/test.log"
+  test::exec fs::cat "${logDir}/test.log"
 
 
   test::title "✅ Testing that we can output the logs to a specific file descriptor"
   test::exec VALET_CONFIG_LOG_FD="${logDir}/test2.log" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level 3>&1
-  test::exec io::cat "${logDir}/test2.log"
+  test::exec fs::cat "${logDir}/test2.log"
 }
 
 main

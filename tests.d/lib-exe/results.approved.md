@@ -2,9 +2,9 @@
 
 ## Test script 00.tests
 
-### ✅ Testing io::toAbsolutePath
+### ✅ Testing fs::toAbsolutePath
 
-❯ `io::toAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh`
+❯ `fs::toAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh`
 
 Returned variables:
 
@@ -12,7 +12,7 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh'
 ```
 
-❯ `io::toAbsolutePath .`
+❯ `fs::toAbsolutePath .`
 
 Returned variables:
 
@@ -20,7 +20,7 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io'
 ```
 
-❯ `io::toAbsolutePath ..`
+❯ `fs::toAbsolutePath ..`
 
 Returned variables:
 
@@ -28,7 +28,7 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d'
 ```
 
-❯ `io::toAbsolutePath 01.invoke.s`
+❯ `fs::toAbsolutePath 01.invoke.s`
 
 Returned variables:
 
@@ -36,7 +36,7 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.s'
 ```
 
-❯ `io::toAbsolutePath ../1004-lib-system/00.tests.sh`
+❯ `fs::toAbsolutePath ../1004-lib-system/00.tests.sh`
 
 Returned variables:
 
@@ -44,7 +44,7 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/../1004-lib-system/00.tests.sh'
 ```
 
-❯ `io::toAbsolutePath resources`
+❯ `fs::toAbsolutePath resources`
 
 Returned variables:
 
@@ -52,7 +52,7 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources'
 ```
 
-❯ `io::toAbsolutePath ./01.invoke.sh`
+❯ `fs::toAbsolutePath ./01.invoke.sh`
 
 Returned variables:
 
@@ -60,7 +60,7 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh'
 ```
 
-❯ `io::toAbsolutePath ./resources`
+❯ `fs::toAbsolutePath ./resources`
 
 Returned variables:
 
@@ -68,7 +68,7 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources'
 ```
 
-❯ `io::toAbsolutePath missing-file`
+❯ `fs::toAbsolutePath missing-file`
 
 Returned variables:
 
@@ -76,9 +76,9 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/missing-file'
 ```
 
-### ✅ Testing io::readFile
+### ✅ Testing fs::readFile
 
-❯ `io::readFile resources/file-to-read 22`
+❯ `fs::readFile resources/file-to-read 22`
 
 Returned variables:
 
@@ -86,7 +86,7 @@ Returned variables:
 RETURNED_VALUE='# Explore why veganism'
 ```
 
-❯ `io::readFile resources/file-to-read`
+❯ `fs::readFile resources/file-to-read`
 
 Returned variables:
 
@@ -117,9 +117,9 @@ The production of meat and other animal derived products places a heavy burden o
 Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there'"'"'s never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it'"'"'s the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.'
 ```
 
-### ✅ Testing io::createDirectoryIfNeeded
+### ✅ Testing fs::createDirectoryIfNeeded
 
-❯ `io::createDirectoryIfNeeded resources/dir/subdir`
+❯ `fs::createDirectoryIfNeeded resources/dir/subdir`
 
 Returned variables:
 
@@ -129,7 +129,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subd
 
 This next command will fail because the directory already exists (it is a file).
 
-❯ `io::createDirectoryIfNeeded resources/dir/subdir/file1`
+❯ `fs::createDirectoryIfNeeded resources/dir/subdir/file1`
 
 Exited with code: `1`
 
@@ -140,7 +140,7 @@ mkdir: cannot create directory ‘$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/
 ERROR    Failed to create the directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subdir/file1⌝.
 ```
 
-❯ `io::createDirectoryIfNeeded resources/gitignored/derp`
+❯ `fs::createDirectoryIfNeeded resources/gitignored/derp`
 
 Returned variables:
 
@@ -150,9 +150,9 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignor
 
 Directory created successfully!
 
-### ✅ Testing io::createFilePathIfNeeded
+### ✅ Testing fs::createFilePathIfNeeded
 
-❯ `io::createFilePathIfNeeded resources/dir/subdir/file1`
+❯ `fs::createFilePathIfNeeded resources/dir/subdir/file1`
 
 Returned variables:
 
@@ -160,7 +160,7 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subdir/file1'
 ```
 
-❯ `io::createFilePathIfNeeded resources/gitignored/allo/file1`
+❯ `fs::createFilePathIfNeeded resources/gitignored/allo/file1`
 
 Returned variables:
 
@@ -170,13 +170,13 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignor
 
 File created successfully!
 
-### ✅ Testing io::sleep
+### ✅ Testing exe::sleep
 
-❯ `io::sleep 0.001`
+❯ `exe::sleep 0.001`
 
-### ✅ Testing io::cat
+### ✅ Testing fs::cat
 
-❯ `io::cat resources/file-to-read`
+❯ `fs::cat resources/file-to-read`
 
 **Standard output**:
 
@@ -236,9 +236,9 @@ The production of meat and other animal derived products places a heavy burden o
 Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there'"'"'s never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it'"'"'s the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.'
 ```
 
-### ✅ Testing io::readStdIn
+### ✅ Testing exe::readStdIn
 
-❯ `io::readStdIn <<<'coucou'`
+❯ `exe::readStdIn <<<'coucou'`
 
 Returned variables:
 
@@ -247,7 +247,7 @@ RETURNED_VALUE='coucou
 '
 ```
 
-❯ `io::readStdIn`
+❯ `exe::readStdIn`
 
 Returned variables:
 
@@ -255,17 +255,9 @@ Returned variables:
 RETURNED_VALUE=''
 ```
 
-### ✅ Testing io::countArgs
+### ✅ Testing exe::countArgs
 
-❯ `io::countArgs arg1 arg2 arg3`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='3'
-```
-
-❯ `io::countArgs ${PWD}/resources/*`
+❯ `exe::countArgs arg1 arg2 arg3`
 
 Returned variables:
 
@@ -273,9 +265,17 @@ Returned variables:
 RETURNED_VALUE='3'
 ```
 
-### ✅ Testing io::isDirectoryWritable
+❯ `exe::countArgs ${PWD}/resources/*`
 
-❯ `io::isDirectoryWritable /tmp && echo Writable || echo Not\ writable`
+Returned variables:
+
+```text
+RETURNED_VALUE='3'
+```
+
+### ✅ Testing fs::isDirectoryWritable
+
+❯ `fs::isDirectoryWritable /tmp && echo Writable || echo Not\ writable`
 
 **Standard output**:
 
@@ -283,9 +283,9 @@ RETURNED_VALUE='3'
 Writable
 ```
 
-### ✅ Testing io::convertToWindowsPath
+### ✅ Testing windows::convertPathFromUnix
 
-❯ `io::convertToWindowsPath /tmp/file`
+❯ `windows::convertPathFromUnix /tmp/file`
 
 Returned variables:
 
@@ -293,7 +293,7 @@ Returned variables:
 RETURNED_VALUE='\tmp\file'
 ```
 
-❯ `io::convertToWindowsPath /mnt/d/Users/username`
+❯ `windows::convertPathFromUnix /mnt/d/Users/username`
 
 Returned variables:
 
@@ -301,7 +301,7 @@ Returned variables:
 RETURNED_VALUE='D:\Users\username'
 ```
 
-❯ `io::convertToWindowsPath /c/data/file`
+❯ `windows::convertPathFromUnix /c/data/file`
 
 Returned variables:
 
@@ -309,9 +309,9 @@ Returned variables:
 RETURNED_VALUE='C:\data\file'
 ```
 
-### ✅ Testing io::createLink
+### ✅ Testing fs::createLink
 
-❯ `io::createLink resources/gitignored/file resources/gitignored/try/file2 true`
+❯ `fs::createLink resources/gitignored/file resources/gitignored/try/file2 true`
 
 **Standard output**:
 
@@ -319,7 +319,7 @@ RETURNED_VALUE='C:\data\file'
 🙈 mocking ln: $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/file $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/try/file2
 ```
 
-❯ `io::createLink resources/gitignored/try resources/gitignored/new`
+❯ `fs::createLink resources/gitignored/try resources/gitignored/new`
 
 **Standard output**:
 
@@ -327,9 +327,9 @@ RETURNED_VALUE='C:\data\file'
 🙈 mocking ln: -s $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/try $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/new
 ```
 
-### ✅ Testing io::convertFromWindowsPath
+### ✅ Testing windows::convertPathToUnix
 
-❯ `io::convertFromWindowsPath C:\\Users\\username`
+❯ `windows::convertPathToUnix C:\\Users\\username`
 
 Returned variables:
 
@@ -337,7 +337,7 @@ Returned variables:
 RETURNED_VALUE='/c/Users/username'
 ```
 
-❯ `io::convertFromWindowsPath D:\\data\\file`
+❯ `windows::convertPathToUnix D:\\data\\file`
 
 Returned variables:
 
@@ -345,9 +345,9 @@ Returned variables:
 RETURNED_VALUE='/d/data/file'
 ```
 
-### ✅ Testing io::head
+### ✅ Testing fs::head
 
-❯ `io::head resources/file-to-read 10`
+❯ `fs::head resources/file-to-read 10`
 
 **Standard output**:
 
@@ -364,9 +364,9 @@ Preventing the exploitation of animals is not the only reason for becoming vegan
 
 ```
 
-❯ `io::head resources/file-to-read 0`
+❯ `fs::head resources/file-to-read 0`
 
-❯ `io::head resources/file-to-read 99`
+❯ `fs::head resources/file-to-read 99`
 
 **Standard output**:
 
@@ -397,7 +397,7 @@ The production of meat and other animal derived products places a heavy burden o
 Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there's never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it's the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.
 ```
 
-❯ `io::head resources/file-to-read 3 true`
+❯ `fs::head resources/file-to-read 3 true`
 
 Returned variables:
 
@@ -409,9 +409,9 @@ RETURNED_ARRAY=(
 )
 ```
 
-### ✅ Testing io::captureOutput
+### ✅ Testing exe::captureOutput
 
-❯ `io::captureOutput echo coucou`
+❯ `exe::captureOutput echo coucou`
 
 Returned variables:
 
@@ -420,12 +420,12 @@ RETURNED_VALUE='coucou
 '
 ```
 
-❯ `io::captureOutput declare -f io::captureOutput`
+❯ `exe::captureOutput declare -f exe::captureOutput`
 
 Returned variables:
 
 ```text
-RETURNED_VALUE='io::captureOutput () 
+RETURNED_VALUE='exe::captureOutput () 
 { 
     local IFS='"'"' '"'"';
     ${@} &> "${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1;
@@ -435,13 +435,13 @@ RETURNED_VALUE='io::captureOutput ()
 '
 ```
 
-❯ `io::captureOutput [[ 1 -eq 0 ]]`
+❯ `exe::captureOutput [[ 1 -eq 0 ]]`
 
 Returned code: `1`
 
-### ✅ Testing io::tail
+### ✅ Testing fs::tail
 
-❯ `io::tail resources/file-to-read 3`
+❯ `fs::tail resources/file-to-read 3`
 
 **Standard output**:
 
@@ -451,7 +451,7 @@ Returned code: `1`
 Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there's never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it's the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.
 ```
 
-❯ `io::tail resources/file-to-read 0`
+❯ `fs::tail resources/file-to-read 0`
 
 **Standard output**:
 
@@ -459,7 +459,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ```
 
-❯ `io::tail resources/file-to-read 99`
+❯ `fs::tail resources/file-to-read 99`
 
 **Standard output**:
 
@@ -490,7 +490,7 @@ The production of meat and other animal derived products places a heavy burden o
 Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there's never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it's the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.
 ```
 
-❯ `io::tail resources/file-to-read 3 true`
+❯ `fs::tail resources/file-to-read 3 true`
 
 Returned variables:
 
@@ -515,7 +515,7 @@ fake ()
 { 
     local inputStreamContent;
     if [[ $* == *"--std-in"* ]]; then
-        io::readStdIn;
+        exe::readStdIn;
         inputStreamContent="${RETURNED_VALUE}";
     fi;
     local IFS=" ";
@@ -531,11 +531,11 @@ fake ()
 }
 ```
 
-### ✅ Testing io::invoke5
+### ✅ Testing exe::invoke5
 
 Input stream from string, returns an error:
 
-❯ `io::invoke5 false 0 false 'input_stream' fake --std-in --error`
+❯ `exe::invoke5 false 0 false 'input_stream' fake --std-in --error`
 
 Returned code: `1`
 
@@ -553,7 +553,7 @@ ERROR: returning error from fake
 
 Input stream from string, fails (exit):
 
-❯ `io::invoke5 true 0 false 'input_stream' fake --std-in --error`
+❯ `exe::invoke5 true 0 false 'input_stream' fake --std-in --error`
 
 Exited with code: `1`
 
@@ -572,7 +572,7 @@ ERROR    The command ⌜fake⌝ originally ended with exit code ⌜1⌝.
 
 Make error 1 acceptable:
 
-❯ `io::invoke5 true 0,1,2 true '' fake --error`
+❯ `exe::invoke5 true 0,1,2 true '' fake --error`
 
 Returned variables:
 
@@ -586,7 +586,7 @@ ERROR: returning error from fake
 
 Normal, return everything as variables:
 
-❯ `io::invoke5 true '' '' '' fake`
+❯ `exe::invoke5 true '' '' '' fake`
 
 Returned variables:
 
@@ -599,7 +599,7 @@ RETURNED_VALUE2='INFO: log line from fake mock
 
 Input stream for file, return everything as files:
 
-❯ `io::invokef5 false 0 true /tmp/valet-temp fake --std-in`
+❯ `exe::invokef5 false 0 true /tmp/valet-temp fake --std-in`
 
 Returned variables:
 
@@ -608,7 +608,7 @@ RETURNED_VALUE='/tmp/valet-stdout.f'
 RETURNED_VALUE2='/tmp/valet-stderr.f'
 ```
 
-❯ `io::cat /tmp/valet-stdout.f`
+❯ `fs::cat /tmp/valet-stdout.f`
 
 **Standard output**:
 
@@ -618,7 +618,7 @@ Input stream: <Input stream content from a file>
 
 ```
 
-❯ `io::cat /tmp/valet-stderr.f`
+❯ `fs::cat /tmp/valet-stderr.f`
 
 **Standard output**:
 
@@ -627,9 +627,9 @@ INFO: log line from fake mock
 
 ```
 
-### ✅ Testing io::invoke2
+### ✅ Testing exe::invoke2
 
-❯ `io::invoke2 false fake --option argument1 argument2`
+❯ `exe::invoke2 false fake --option argument1 argument2`
 
 Returned variables:
 
@@ -640,7 +640,7 @@ RETURNED_VALUE2='INFO: log line from fake mock
 '
 ```
 
-❯ `io::invoke2 false fake --error`
+❯ `exe::invoke2 false fake --error`
 
 Returned code: `1`
 
@@ -654,7 +654,7 @@ ERROR: returning error from fake
 '
 ```
 
-❯ `io::invoke2 true fake --error`
+❯ `exe::invoke2 true fake --error`
 
 Exited with code: `1`
 
@@ -669,7 +669,7 @@ TRACE    Fake standard error stream:
 ERROR    The command ⌜fake⌝ originally ended with exit code ⌜1⌝.
 ```
 
-❯ `io::invokef2 false fake --option argument1 argument2`
+❯ `exe::invokef2 false fake --option argument1 argument2`
 
 Returned variables:
 
@@ -678,9 +678,9 @@ RETURNED_VALUE='/tmp/valet-stdout.f'
 RETURNED_VALUE2='/tmp/valet-stderr.f'
 ```
 
-### ✅ Testing io::invoke
+### ✅ Testing exe::invoke
 
-❯ `io::invoke fake --error`
+❯ `exe::invoke fake --error`
 
 Exited with code: `1`
 
@@ -695,7 +695,7 @@ TRACE    Fake standard error stream:
 ERROR    The command ⌜fake⌝ originally ended with exit code ⌜1⌝.
 ```
 
-❯ `io::invoke fake --option argument1 argument2`
+❯ `exe::invoke fake --option argument1 argument2`
 
 Returned variables:
 
@@ -706,9 +706,9 @@ RETURNED_VALUE2='INFO: log line from fake mock
 '
 ```
 
-### ✅ Testing io::invoke2piped
+### ✅ Testing exe::invoke2piped
 
-❯ `io::invoke2piped true 'input_stream' fake --std-in --option argument1 argument2`
+❯ `exe::invoke2piped true 'input_stream' fake --std-in --option argument1 argument2`
 
 Returned variables:
 
@@ -721,7 +721,7 @@ RETURNED_VALUE2='INFO: log line from fake mock
 '
 ```
 
-❯ `io::invokef2piped true 'input_stream' fake --std-in --option argument1 argument2`
+❯ `exe::invokef2piped true 'input_stream' fake --std-in --option argument1 argument2`
 
 Returned variables:
 
@@ -732,9 +732,9 @@ RETURNED_VALUE2='/tmp/valet-stderr.f'
 
 ## Test script 02.listPaths
 
-### ✅ Testing io::listPaths
+### ✅ Testing fs::listPaths
 
-❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
 
 Returned variables:
 
@@ -745,7 +745,7 @@ RETURNED_ARRAY=(
 )
 ```
 
-❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
 
 Returned variables:
 
@@ -759,7 +759,7 @@ RETURNED_ARRAY=(
 )
 ```
 
-❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search false true`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search false true`
 
 Returned variables:
 
@@ -772,7 +772,7 @@ RETURNED_ARRAY=(
 )
 ```
 
-❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
 
 Returned variables:
 
@@ -812,7 +812,7 @@ fileNamedFile ()
 }
 ```
 
-❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true fileNamedFile`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true fileNamedFile`
 
 Returned variables:
 
@@ -842,7 +842,7 @@ folderNamedHidden ()
 }
 ```
 
-❯ `io::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
 
 Returned variables:
 
@@ -858,9 +858,9 @@ RETURNED_ARRAY=(
 )
 ```
 
-### ✅ Testing io::listFiles
+### ✅ Testing fs::listFiles
 
-❯ `io::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
 
 Returned variables:
 
@@ -870,7 +870,7 @@ RETURNED_ARRAY=(
 )
 ```
 
-❯ `io::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
 
 Returned variables:
 
@@ -882,7 +882,7 @@ RETURNED_ARRAY=(
 )
 ```
 
-❯ `io::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
 
 Returned variables:
 
@@ -917,7 +917,7 @@ fileNamedHidden ()
 }
 ```
 
-❯ `io::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
 
 Returned variables:
 
@@ -931,9 +931,9 @@ RETURNED_ARRAY=(
 )
 ```
 
-### ✅ Testing io::listDirectories
+### ✅ Testing fs::listDirectories
 
-❯ `io::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
 
 Returned variables:
 
@@ -943,7 +943,7 @@ RETURNED_ARRAY=(
 )
 ```
 
-❯ `io::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
 
 Returned variables:
 
@@ -954,7 +954,7 @@ RETURNED_ARRAY=(
 )
 ```
 
-❯ `io::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
 
 Returned variables:
 
@@ -983,7 +983,7 @@ folderNamedHidden ()
 }
 ```
 
-❯ `io::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
 
 Returned variables:
 

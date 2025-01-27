@@ -8,7 +8,12 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- refacto: move func from string/io lib to regex, path, fs libs. renamed fsfs to sfzf::show
+- prompt:
+  - since we add the possibility to load the prompt items from a file, migth as well rewrite another array fuzzy sort that loads from a file
+  - prompt: add the possibility to position the autocompletion box (top/left/width/height)
+  - prompt improvement ideas: do not filter from the original array if the new search string is starting with previous search string, we can search from the current array instead !
+- fzf: draw in a given rectangle, we handle full screen or not before calling sfzf
+- refacto: move func from string/io lib to regex, path, fs libs
 - make `source` able to source multiple libraries that are called the same. Improve the function to quickly return for sourced lib (anything not starting with / or .)
 - the config file should define everything, leave all def commented. When we self config we define only those already defined. We have an associative array of each var and description to handle this
 - all interactive functions must write to stderr not stdout!

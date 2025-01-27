@@ -36,7 +36,7 @@ INFO     More: arg2.
 INFO     Disabling profiler.
 ```
 
-❯ `io::cat /tmp/valet.d/f1-2`
+❯ `fs::cat /tmp/valet.d/f1-2`
 
 **Standard output**:
 
@@ -104,7 +104,7 @@ INFO     More: arg2.
 INFO     Disabling profiler.
 ```
 
-❯ `io::cat /tmp/valet.d/f1-2`
+❯ `fs::cat /tmp/valet.d/f1-2`
 
 **Standard output**:
 
@@ -160,7 +160,7 @@ INFO     Starting profiler, writing in ⌜/tmp/valet.d/f2-2⌝.
 TRACE    This is an error trace message which is always displayed.
 ```
 
-❯ `io::head /tmp/valet.d/f2-2 1`
+❯ `fs::head /tmp/valet.d/f2-2 1`
 
 **Standard output**:
 

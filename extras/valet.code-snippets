@@ -362,7 +362,7 @@
   "prefix": "curl::toFile#withdoc",
   "description": "This function is a wrapper around curl...",
   "scope": "",
-  "body": [ "# ## curl::toFile\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It io::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \\${2}.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$3: **path** _as string_:\n#       the file in which to save the output of curl\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of stderr\n# - `RETURNED_VALUE2`: the http status code\n# \n# ```bash\n# curl::toFile \"true\" \"200,201\" \"/filePath\" \"https://example.com\" || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::toFile \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
+  "body": [ "# ## curl::toFile\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It exe::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \\${2}.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$3: **path** _as string_:\n#       the file in which to save the output of curl\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of stderr\n# - `RETURNED_VALUE2`: the http status code\n# \n# ```bash\n# curl::toFile \"true\" \"200,201\" \"/filePath\" \"https://example.com\" || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::toFile \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
 },
 
 "curl::toVar": {
@@ -376,7 +376,7 @@
   "prefix": "curl::toVar#withdoc",
   "description": "This function is a wrapper around curl...",
   "scope": "",
-  "body": [ "# ## curl::toVar\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It io::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \"tempfile\".\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of the request\n# - `RETURNED_VALUE2`: the content of stderr\n# - `RETURNED_VALUE3`: the http status code\n# \n# ```bash\n# curl::toVar false 200,201 https://example.com || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::toVar \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${99:**curl arguments**}\"$0" ]
+  "body": [ "# ## curl::toVar\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It exe::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \"tempfile\".\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of the request\n# - `RETURNED_VALUE2`: the content of stderr\n# - `RETURNED_VALUE3`: the http status code\n# \n# ```bash\n# curl::toVar false 200,201 https://example.com || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::toVar \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${99:**curl arguments**}\"$0" ]
 },
 
 "fsfs::itemSelector": {
@@ -491,32 +491,32 @@
   "body": [ "# ## interactive::promptYesNoRaw\n# \n# Ask the user to yes or no.\n# \n# - The user can switch between the two options with the arrow keys or space.\n# - The user can validate the choice with the enter key.\n# - The user can also validate immediately with the y or n key.\n# \n# This raw version does not display the prompt or the answer.\n# \n# - \\$1: default _as bool_:\n#       (optional) the default value to select\n#       (defaults to true)\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the user answered yes\n#   - 1 otherwise\n# - `RETURNED_VALUE`: true or false.\n# \n# ```bash\n# interactive::promptYesNoRaw \"Do you want to continue?\" && local answer=\"\\${RETURNED_VALUE}\"\n# ```\n# \ninteractive::promptYesNoRaw \"${1:default}\"$0" ]
 },
 
-"io::captureOutput": {
-  "prefix": "io::captureOutput",
+"exe::captureOutput": {
+  "prefix": "exe::captureOutput",
   "description": "Capture the output of a command...",
   "scope": "",
-  "body": [ "io::captureOutput \"${99:**command**}\"$0" ]
+  "body": [ "exe::captureOutput \"${99:**command**}\"$0" ]
 },
 
-"io::captureOutput#withdoc": {
-  "prefix": "io::captureOutput#withdoc",
+"exe::captureOutput#withdoc": {
+  "prefix": "exe::captureOutput#withdoc",
   "description": "Capture the output of a command...",
   "scope": "",
-  "body": [ "# ## io::captureOutput\n# \n# Capture the output of a command.\n# Made to be used on bash builtins that produce output.\n# It captures the stdout and stderr of the command.\n# \n# This function is a lot more basic than `io::invoke` and does not support all its features.\n# \n# - \\$@: **command** _as string_:\n#       The command to run.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - `RETURNED_VALUE`: The captured output.\n# \n# ```bash\n# io::captureOutput declare -f io::captureOutput\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nio::captureOutput \"${99:**command**}\"$0" ]
+  "body": [ "# ## exe::captureOutput\n# \n# Capture the output of a command.\n# Made to be used on bash builtins that produce output.\n# It captures the stdout and stderr of the command.\n# \n# This function is a lot more basic than `exe::invoke` and does not support all its features.\n# \n# - \\$@: **command** _as string_:\n#       The command to run.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - `RETURNED_VALUE`: The captured output.\n# \n# ```bash\n# exe::captureOutput declare -f exe::captureOutput\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nexe::captureOutput \"${99:**command**}\"$0" ]
 },
 
-"io::cat": {
-  "prefix": "io::cat",
+"fs::cat": {
+  "prefix": "fs::cat",
   "description": "Print the content of a file to stdout...",
   "scope": "",
-  "body": [ "io::cat \"${1:**path**}\"$0" ]
+  "body": [ "fs::cat \"${1:**path**}\"$0" ]
 },
 
-"io::cat#withdoc": {
-  "prefix": "io::cat#withdoc",
+"fs::cat#withdoc": {
+  "prefix": "fs::cat#withdoc",
   "description": "Print the content of a file to stdout...",
   "scope": "",
-  "body": [ "# ## io::cat\n# \n# Print the content of a file to stdout.\n# This is a pure bash equivalent of cat.\n# \n# - \\$1: **path** _as string_:\n#       the file to print\n# \n# ```bash\n# io::cat \"myFile\"\n# ```\n# \n# > Also see log::printFile if you want to print a file for a user.\n# \nio::cat \"${1:**path**}\"$0" ]
+  "body": [ "# ## fs::cat\n# \n# Print the content of a file to stdout.\n# This is a pure bash equivalent of cat.\n# \n# - \\$1: **path** _as string_:\n#       the file to print\n# \n# ```bash\n# fs::cat \"myFile\"\n# ```\n# \n# > Also see log::printFile if you want to print a file for a user.\n# \nfs::cat \"${1:**path**}\"$0" ]
 },
 
 "io::checkAndFail": {
@@ -547,438 +547,438 @@
   "body": [ "# ## io::checkAndWarn\n# \n# Check last return code and warn the user in case the return code is not 0.\n# \n# - \\$1: **exit code** _as int_:\n#       the last return code\n# - \\$@: **message** _as string_:\n#       the warning message to display in case of error\n# \n# ```bash\n# command_that_could_fail || io::checkAndWarn \"\\$?\" \"The command that could fail has failed!\"\n# ```\n# \nio::checkAndWarn \"${1:**exit code**}\" \"${99:**message**}\"$0" ]
 },
 
-"io::cleanTempFiles": {
-  "prefix": "io::cleanTempFiles",
-  "description": "Removes all the temporary files and directories that were created by the io::createTempFile and io::createTempDirectory functions...",
+"fs::cleanTempFiles": {
+  "prefix": "fs::cleanTempFiles",
+  "description": "Removes all the temporary files and directories that were created by the fs::createTempFile and fs::createTempDirectory functions...",
   "scope": "",
-  "body": [ "io::cleanTempFiles$0" ]
+  "body": [ "fs::cleanTempFiles$0" ]
 },
 
-"io::cleanTempFiles#withdoc": {
-  "prefix": "io::cleanTempFiles#withdoc",
-  "description": "Removes all the temporary files and directories that were created by the io::createTempFile and io::createTempDirectory functions...",
+"fs::cleanTempFiles#withdoc": {
+  "prefix": "fs::cleanTempFiles#withdoc",
+  "description": "Removes all the temporary files and directories that were created by the fs::createTempFile and fs::createTempDirectory functions...",
   "scope": "",
-  "body": [ "# ## io::cleanTempFiles\n# \n# Removes all the temporary files and directories that were created by the\n# io::createTempFile and io::createTempDirectory functions.\n# \n# ```bash\n# io::cleanTempFiles\n# ```\n# shellcheck disable=SC2016\n# \nio::cleanTempFiles$0" ]
+  "body": [ "# ## fs::cleanTempFiles\n# \n# Removes all the temporary files and directories that were created by the\n# fs::createTempFile and fs::createTempDirectory functions.\n# \n# ```bash\n# fs::cleanTempFiles\n# ```\n# shellcheck disable=SC2016\n# \nfs::cleanTempFiles$0" ]
 },
 
-"io::convertFromWindowsPath": {
-  "prefix": "io::convertFromWindowsPath",
+"windows::convertPathToUnix": {
+  "prefix": "windows::convertPathToUnix",
   "description": "Convert a Windows path to a unix path...",
   "scope": "",
-  "body": [ "io::convertFromWindowsPath \"${1:**path**}\"$0" ]
+  "body": [ "windows::convertPathToUnix \"${1:**path**}\"$0" ]
 },
 
-"io::convertFromWindowsPath#withdoc": {
-  "prefix": "io::convertFromWindowsPath#withdoc",
+"windows::convertPathToUnix#withdoc": {
+  "prefix": "windows::convertPathToUnix#withdoc",
   "description": "Convert a Windows path to a unix path...",
   "scope": "",
-  "body": [ "# ## io::convertFromWindowsPath\n# \n# Convert a Windows path to a unix path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The unix path.\n# \n# ```bash\n# io::convertFromWindowsPath \"C:\\path\\to\\file\"\n# ```\n# \n# > Handles paths starting with `X:\\`.\n# \nio::convertFromWindowsPath \"${1:**path**}\"$0" ]
+  "body": [ "# ## windows::convertPathToUnix\n# \n# Convert a Windows path to a unix path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The unix path.\n# \n# ```bash\n# windows::convertPathToUnix \"C:\\path\\to\\file\"\n# ```\n# \n# > Handles paths starting with `X:\\`.\n# \nwindows::convertPathToUnix \"${1:**path**}\"$0" ]
 },
 
-"io::convertToWindowsPath": {
-  "prefix": "io::convertToWindowsPath",
+"windows::convertPathFromUnix": {
+  "prefix": "windows::convertPathFromUnix",
   "description": "Convert a unix path to a Windows path...",
   "scope": "",
-  "body": [ "io::convertToWindowsPath \"${1:**path**}\"$0" ]
+  "body": [ "windows::convertPathFromUnix \"${1:**path**}\"$0" ]
 },
 
-"io::convertToWindowsPath#withdoc": {
-  "prefix": "io::convertToWindowsPath#withdoc",
+"windows::convertPathFromUnix#withdoc": {
+  "prefix": "windows::convertPathFromUnix#withdoc",
   "description": "Convert a unix path to a Windows path...",
   "scope": "",
-  "body": [ "# ## io::convertToWindowsPath\n# \n# Convert a unix path to a Windows path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The Windows path.\n# \n# ```bash\n# io::convertToWindowsPath \"/path/to/file\"\n# ```\n# \n# > Handles paths starting with `/mnt/x/` or `/x/`.\n# \nio::convertToWindowsPath \"${1:**path**}\"$0" ]
+  "body": [ "# ## windows::convertPathFromUnix\n# \n# Convert a unix path to a Windows path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The Windows path.\n# \n# ```bash\n# windows::convertPathFromUnix \"/path/to/file\"\n# ```\n# \n# > Handles paths starting with `/mnt/x/` or `/x/`.\n# \nwindows::convertPathFromUnix \"${1:**path**}\"$0" ]
 },
 
-"io::countArgs": {
-  "prefix": "io::countArgs",
+"exe::countArgs": {
+  "prefix": "exe::countArgs",
   "description": "Returns the number of arguments passed...",
   "scope": "",
-  "body": [ "io::countArgs \"${99:**arguments**}\"$0" ]
+  "body": [ "exe::countArgs \"${99:**arguments**}\"$0" ]
 },
 
-"io::countArgs#withdoc": {
-  "prefix": "io::countArgs#withdoc",
+"exe::countArgs#withdoc": {
+  "prefix": "exe::countArgs#withdoc",
   "description": "Returns the number of arguments passed...",
   "scope": "",
-  "body": [ "# ## io::countArgs\n# \n# Returns the number of arguments passed.\n# \n# A convenient function that can be used to:\n# \n# - count the files/directories in a directory\n#   `io::countArgs \"\\${PWD}\"/* && local numberOfFiles=\"\\${RETURNED_VALUE}\"`\n# - count the number of variables starting with VALET_\n#   `io::countArgs \"\\${!VALET_@}\" && local numberOfVariables=\"\\${RETURNED_VALUE}\"`\n# \n# - \\$@: **arguments** _as any_:\n#       the arguments to count\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The number of arguments passed.\n# \n# ```bash\n# io::countArgs 1 2 3\n# ```\n# \nio::countArgs \"${99:**arguments**}\"$0" ]
+  "body": [ "# ## exe::countArgs\n# \n# Returns the number of arguments passed.\n# \n# A convenient function that can be used to:\n# \n# - count the files/directories in a directory\n#   `exe::countArgs \"\\${PWD}\"/* && local numberOfFiles=\"\\${RETURNED_VALUE}\"`\n# - count the number of variables starting with VALET_\n#   `exe::countArgs \"\\${!VALET_@}\" && local numberOfVariables=\"\\${RETURNED_VALUE}\"`\n# \n# - \\$@: **arguments** _as any_:\n#       the arguments to count\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The number of arguments passed.\n# \n# ```bash\n# exe::countArgs 1 2 3\n# ```\n# \nexe::countArgs \"${99:**arguments**}\"$0" ]
 },
 
-"io::createDirectoryIfNeeded": {
-  "prefix": "io::createDirectoryIfNeeded",
+"fs::createDirectoryIfNeeded": {
+  "prefix": "fs::createDirectoryIfNeeded",
   "description": "Create the directory tree if needed...",
   "scope": "",
-  "body": [ "io::createDirectoryIfNeeded \"${1:**path**}\"$0" ]
+  "body": [ "fs::createDirectoryIfNeeded \"${1:**path**}\"$0" ]
 },
 
-"io::createDirectoryIfNeeded#withdoc": {
-  "prefix": "io::createDirectoryIfNeeded#withdoc",
+"fs::createDirectoryIfNeeded#withdoc": {
+  "prefix": "fs::createDirectoryIfNeeded#withdoc",
   "description": "Create the directory tree if needed...",
   "scope": "",
-  "body": [ "# ## io::createDirectoryIfNeeded\n# \n# Create the directory tree if needed.\n# \n# - \\$1: **path** _as string_:\n#       The directory path to create.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The absolute path to the directory.\n# \n# ```bash\n# io::createDirectoryIfNeeded \"/my/directory\"\n# ```\n# \nio::createDirectoryIfNeeded \"${1:**path**}\"$0" ]
+  "body": [ "# ## fs::createDirectoryIfNeeded\n# \n# Create the directory tree if needed.\n# \n# - \\$1: **path** _as string_:\n#       The directory path to create.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The absolute path to the directory.\n# \n# ```bash\n# fs::createDirectoryIfNeeded \"/my/directory\"\n# ```\n# \nfs::createDirectoryIfNeeded \"${1:**path**}\"$0" ]
 },
 
-"io::createFilePathIfNeeded": {
-  "prefix": "io::createFilePathIfNeeded",
+"fs::createFilePathIfNeeded": {
+  "prefix": "fs::createFilePathIfNeeded",
   "description": "Make sure that the given file path exists...",
   "scope": "",
-  "body": [ "io::createFilePathIfNeeded \"${1:**path**}\"$0" ]
+  "body": [ "fs::createFilePathIfNeeded \"${1:**path**}\"$0" ]
 },
 
-"io::createFilePathIfNeeded#withdoc": {
-  "prefix": "io::createFilePathIfNeeded#withdoc",
+"fs::createFilePathIfNeeded#withdoc": {
+  "prefix": "fs::createFilePathIfNeeded#withdoc",
   "description": "Make sure that the given file path exists...",
   "scope": "",
-  "body": [ "# ## io::createFilePathIfNeeded\n# \n# Make sure that the given file path exists.\n# Create the directory tree and the file if needed.\n# \n# - \\$1: **path** _as string_:\n#       the file path to create\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The absolute path of the file.\n# \n# ```bash\n# io::createFilePathIfNeeded \"myFile\"\n# ```\n# \nio::createFilePathIfNeeded \"${1:**path**}\"$0" ]
+  "body": [ "# ## fs::createFilePathIfNeeded\n# \n# Make sure that the given file path exists.\n# Create the directory tree and the file if needed.\n# \n# - \\$1: **path** _as string_:\n#       the file path to create\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The absolute path of the file.\n# \n# ```bash\n# fs::createFilePathIfNeeded \"myFile\"\n# ```\n# \nfs::createFilePathIfNeeded \"${1:**path**}\"$0" ]
 },
 
-"io::createLink": {
-  "prefix": "io::createLink",
+"fs::createLink": {
+  "prefix": "fs::createLink",
   "description": "Create a soft or hard link (original ← link)...",
   "scope": "",
-  "body": [ "io::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
+  "body": [ "fs::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
 },
 
-"io::createLink#withdoc": {
-  "prefix": "io::createLink#withdoc",
+"fs::createLink#withdoc": {
+  "prefix": "fs::createLink#withdoc",
   "description": "Create a soft or hard link (original ← link)...",
   "scope": "",
-  "body": [ "# ## io::createLink\n# \n# Create a soft or hard link (original ← link).\n# \n# Reminder:\n# \n# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the\n#   form of an absolute or relative path.\n# - A hard link is a directory entry that associates a new pathname with an existing\n#   file (inode + data block) on a file system.\n# \n# This function allows to create a symbolic link on Windows as well as on Unix.\n# \n# - \\$1: **linked path** _as string_:\n#       the path to link to (the original file)\n# - \\$2: **link path** _as string_:\n#       the path where to create the link\n# - \\$3: hard link _as boolean_:\n#       (optional) true to create a hard link, false to create a symbolic link\n#       (defaults to false)\n# - \\$4: force _as boolean_:\n#       (optional) true to overwrite the link or file if it already exists.\n#       Otherwise, the function will fail on an existing link.\n#       (defaults to true)\n# \n# ```bash\n# io::createLink \"/path/to/link\" \"/path/to/linked\"\n# io::createLink \"/path/to/link\" \"/path/to/linked\" true\n# ```\n# \n# > On unix, the function uses the `ln` command.\n# > On Windows, the function uses `powershell` (and optionally ls to check the existing link).\n# \nio::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
+  "body": [ "# ## fs::createLink\n# \n# Create a soft or hard link (original ← link).\n# \n# Reminder:\n# \n# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the\n#   form of an absolute or relative path.\n# - A hard link is a directory entry that associates a new pathname with an existing\n#   file (inode + data block) on a file system.\n# \n# This function allows to create a symbolic link on Windows as well as on Unix.\n# \n# - \\$1: **linked path** _as string_:\n#       the path to link to (the original file)\n# - \\$2: **link path** _as string_:\n#       the path where to create the link\n# - \\$3: hard link _as boolean_:\n#       (optional) true to create a hard link, false to create a symbolic link\n#       (defaults to false)\n# - \\$4: force _as boolean_:\n#       (optional) true to overwrite the link or file if it already exists.\n#       Otherwise, the function will fail on an existing link.\n#       (defaults to true)\n# \n# ```bash\n# fs::createLink \"/path/to/link\" \"/path/to/linked\"\n# fs::createLink \"/path/to/link\" \"/path/to/linked\" true\n# ```\n# \n# > On unix, the function uses the `ln` command.\n# > On Windows, the function uses `powershell` (and optionally ls to check the existing link).\n# \nfs::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
 },
 
-"io::createTempDirectory": {
-  "prefix": "io::createTempDirectory",
+"fs::createTempDirectory": {
+  "prefix": "fs::createTempDirectory",
   "description": "Creates a temporary directory...",
   "scope": "",
-  "body": [ "io::createTempDirectory$0" ]
+  "body": [ "fs::createTempDirectory$0" ]
 },
 
-"io::createTempDirectory#withdoc": {
-  "prefix": "io::createTempDirectory#withdoc",
+"fs::createTempDirectory#withdoc": {
+  "prefix": "fs::createTempDirectory#withdoc",
   "description": "Creates a temporary directory...",
   "scope": "",
-  "body": [ "# ## io::createTempDirectory\n# \n# Creates a temporary directory.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The created path.\n# \n# ```bash\n# io::createTempDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Directories created this way are automatically cleaned up by the io::cleanTempFiles\n# > function when valet ends.\n# \nio::createTempDirectory$0" ]
+  "body": [ "# ## fs::createTempDirectory\n# \n# Creates a temporary directory.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The created path.\n# \n# ```bash\n# fs::createTempDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Directories created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \nfs::createTempDirectory$0" ]
 },
 
-"io::createTempFile": {
-  "prefix": "io::createTempFile",
+"fs::createTempFile": {
+  "prefix": "fs::createTempFile",
   "description": "Creates a temporary file and return its path...",
   "scope": "",
-  "body": [ "io::createTempFile$0" ]
+  "body": [ "fs::createTempFile$0" ]
 },
 
-"io::createTempFile#withdoc": {
-  "prefix": "io::createTempFile#withdoc",
+"fs::createTempFile#withdoc": {
+  "prefix": "fs::createTempFile#withdoc",
   "description": "Creates a temporary file and return its path...",
   "scope": "",
-  "body": [ "# ## io::createTempFile\n# \n# Creates a temporary file and return its path.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The created path.\n# \n# ```bash\n# io::createTempFile\n# local file=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Files created this way are automatically cleaned up by the io::cleanTempFiles\n# > function when valet ends.\n# \nio::createTempFile$0" ]
+  "body": [ "# ## fs::createTempFile\n# \n# Creates a temporary file and return its path.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The created path.\n# \n# ```bash\n# fs::createTempFile\n# local file=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Files created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \nfs::createTempFile$0" ]
 },
 
-"io::head": {
-  "prefix": "io::head",
+"fs::head": {
+  "prefix": "fs::head",
   "description": "Print the first lines of a file to stdout...",
   "scope": "",
-  "body": [ "io::head \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
+  "body": [ "fs::head \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
 },
 
-"io::head#withdoc": {
-  "prefix": "io::head#withdoc",
+"fs::head#withdoc": {
+  "prefix": "fs::head#withdoc",
   "description": "Print the first lines of a file to stdout...",
   "scope": "",
-  "body": [ "# ## io::head\n# \n# Print the first lines of a file to stdout.\n# This is a pure bash equivalent of head.\n# \n# - \\$1: **path** _as string_:\n#       The file to print.\n# - \\$2: **number of lines** _as int_:\n#       The number of lines to print.\n# - \\$3: to variable _as bool_:\n#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.\n#       If true, the output will be stored in the variable `RETURNED_ARRAY`\n#       instead of being printed to stdout.\n#       (defaults to false)\n# \n# ```bash\n# io::head \"myFile\" 10\n# ```\n# \n# > #TODO: faster with mapfile?\n# \nio::head \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
+  "body": [ "# ## fs::head\n# \n# Print the first lines of a file to stdout.\n# This is a pure bash equivalent of head.\n# \n# - \\$1: **path** _as string_:\n#       The file to print.\n# - \\$2: **number of lines** _as int_:\n#       The number of lines to print.\n# - \\$3: to variable _as bool_:\n#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.\n#       If true, the output will be stored in the variable `RETURNED_ARRAY`\n#       instead of being printed to stdout.\n#       (defaults to false)\n# \n# ```bash\n# fs::head \"myFile\" 10\n# ```\n# \n# > #TODO: faster with mapfile?\n# \nfs::head \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
 },
 
-"io::invoke": {
-  "prefix": "io::invoke",
+"exe::invoke": {
+  "prefix": "exe::invoke",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "io::invoke \"${1:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "exe::invoke \"${1:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invoke#withdoc": {
-  "prefix": "io::invoke#withdoc",
+"exe::invoke#withdoc": {
+  "prefix": "exe::invoke#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## io::invoke\n# \n# This function call an executable and its arguments.\n# If the execution fails, it will fail the script and show the std/err output.\n# Otherwise it hides both streams, effectively rendering the execution silent unless it fails.\n# \n# It redirects the stdout and stderr to environment variables.\n# Equivalent to io::invoke5 true 0 '' '' \"\\${@}\"\n# \n# - \\$1: **executable** _as string_:\n#       the executable or command\n# - \\$@: **arguments** _as any_:\n#       the command and its arguments\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# io::invoke git add --all\n# ```\n# \n# > See io::invokef5 for more information.\n# \nio::invoke \"${1:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invoke\n# \n# This function call an executable and its arguments.\n# If the execution fails, it will fail the script and show the std/err output.\n# Otherwise it hides both streams, effectively rendering the execution silent unless it fails.\n# \n# It redirects the stdout and stderr to environment variables.\n# Equivalent to exe::invoke5 true 0 '' '' \"\\${@}\"\n# \n# - \\$1: **executable** _as string_:\n#       the executable or command\n# - \\$@: **arguments** _as any_:\n#       the command and its arguments\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# exe::invoke git add --all\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invoke \"${1:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invoke2": {
-  "prefix": "io::invoke2",
+"exe::invoke2": {
+  "prefix": "exe::invoke2",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "io::invoke2 \"${1:**fail**}\" \"${2:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "exe::invoke2 \"${1:**fail**}\" \"${2:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invoke2#withdoc": {
-  "prefix": "io::invoke2#withdoc",
+"exe::invoke2#withdoc": {
+  "prefix": "exe::invoke2#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## io::invoke2\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to environment variables.\n# Equivalent to io::invoke5 \"\\${1}\" 0 \"\" \"\" \"\\${@:2}\"\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# io::invokef2 false git status || core::fail \"status failed.\"\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > See io::invokef5 for more information.\n# \nio::invoke2 \"${1:**fail**}\" \"${2:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invoke2\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to environment variables.\n# Equivalent to exe::invoke5 \"\\${1}\" 0 \"\" \"\" \"\\${@:2}\"\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# exe::invokef2 false git status || core::fail \"status failed.\"\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invoke2 \"${1:**fail**}\" \"${2:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invoke2piped": {
-  "prefix": "io::invoke2piped",
+"exe::invoke2piped": {
+  "prefix": "exe::invoke2piped",
   "description": "This function call an executable and its arguments and input a given string as stdin...",
   "scope": "",
-  "body": [ "io::invoke2piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "exe::invoke2piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invoke2piped#withdoc": {
-  "prefix": "io::invoke2piped#withdoc",
+"exe::invoke2piped#withdoc": {
+  "prefix": "exe::invoke2piped#withdoc",
   "description": "This function call an executable and its arguments and input a given string as stdin...",
   "scope": "",
-  "body": [ "# ## io::invoke2piped\n# \n# This function call an executable and its arguments and input a given string as stdin.\n# It redirects the stdout and stderr to environment variables.\n# Equivalent to io::invoke5 \"\\${1}\" 0 false \"\\${2}\" \"\\${@:3}\"\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **stdin** _as string_:\n#       the stdin to pass to the executable\n# - \\$3: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# io::invoke2piped true \"key: val\" yq -o json -p yaml -\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > This is the equivalent of:\n# > `myvar=\"\\$(printf '%s\\n' \"mystring\" | mycommand)\"`\n# > But without using a subshell.\n# >\n# > See io::invokef5 for more information.\n# \nio::invoke2piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invoke2piped\n# \n# This function call an executable and its arguments and input a given string as stdin.\n# It redirects the stdout and stderr to environment variables.\n# Equivalent to exe::invoke5 \"\\${1}\" 0 false \"\\${2}\" \"\\${@:3}\"\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **stdin** _as string_:\n#       the stdin to pass to the executable\n# - \\$3: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# exe::invoke2piped true \"key: val\" yq -o json -p yaml -\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > This is the equivalent of:\n# > `myvar=\"\\$(printf '%s\\n' \"mystring\" | mycommand)\"`\n# > But without using a subshell.\n# >\n# > See exe::invokef5 for more information.\n# \nexe::invoke2piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invoke5": {
-  "prefix": "io::invoke5",
+"exe::invoke5": {
+  "prefix": "exe::invoke5",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "io::invoke5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**stdin from file**}\" \"${4:**stdin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "exe::invoke5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**stdin from file**}\" \"${4:**stdin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invoke5#withdoc": {
-  "prefix": "io::invoke5#withdoc",
+"exe::invoke5#withdoc": {
+  "prefix": "exe::invoke5#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## io::invoke5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to environment variables.\n# It calls invoke5 and reads the files to set the environment variables.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#       (if the error code is matched, then set the output error code to 0)\n# - \\$3: **stdin from file** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **stdin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# io::invoke5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > See io::invokef5 for more information.\n# \nio::invoke5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**stdin from file**}\" \"${4:**stdin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invoke5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to environment variables.\n# It calls invoke5 and reads the files to set the environment variables.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#       (if the error code is matched, then set the output error code to 0)\n# - \\$3: **stdin from file** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **stdin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# exe::invoke5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invoke5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**stdin from file**}\" \"${4:**stdin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invokef2": {
-  "prefix": "io::invokef2",
+"exe::invokef2": {
+  "prefix": "exe::invokef2",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "io::invokef2 \"${1:**fail**}\" \"${2:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "exe::invokef2 \"${1:**fail**}\" \"${2:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invokef2#withdoc": {
-  "prefix": "io::invokef2#withdoc",
+"exe::invokef2#withdoc": {
+  "prefix": "exe::invokef2#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## io::invokef2\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# Equivalent to io::invokef5 \"\\${1}\" 0 \"\" \"\" \"\\${@:2}\"\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The file path containing the stdout of the executable.\n# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.\n# \n# ```bash\n# io::invokef2 false git status || core::fail \"status failed.\"\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > See io::invokef5 for more information.\n# \nio::invokef2 \"${1:**fail**}\" \"${2:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invokef2\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# Equivalent to exe::invokef5 \"\\${1}\" 0 \"\" \"\" \"\\${@:2}\"\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The file path containing the stdout of the executable.\n# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.\n# \n# ```bash\n# exe::invokef2 false git status || core::fail \"status failed.\"\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invokef2 \"${1:**fail**}\" \"${2:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invokef2piped": {
-  "prefix": "io::invokef2piped",
+"exe::invokef2piped": {
+  "prefix": "exe::invokef2piped",
   "description": "This function call an executable and its arguments and input a given string as stdin...",
   "scope": "",
-  "body": [ "io::invokef2piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "exe::invokef2piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invokef2piped#withdoc": {
-  "prefix": "io::invokef2piped#withdoc",
+"exe::invokef2piped#withdoc": {
+  "prefix": "exe::invokef2piped#withdoc",
   "description": "This function call an executable and its arguments and input a given string as stdin...",
   "scope": "",
-  "body": [ "# ## io::invokef2piped\n# \n# This function call an executable and its arguments and input a given string as stdin.\n# It redirects the stdout and stderr to temporary files.\n# Equivalent to io::invokef5 \"\\${1}\" 0 false \"\\${2}\" \"\\${@:3}\"\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **stdin** _as string_:\n#       the stdin to pass to the executable\n# - \\$3: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The file path containing the stdout of the executable.\n# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.\n# \n# ```bash\n# io::invokef2piped true \"key: val\" yq -o json -p yaml -\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > This is the equivalent of:\n# > `myvar=\"\\$(printf '%s\\n' \"mystring\" | mycommand)\"`\n# > But without using a subshell.\n# >\n# > See io::invokef5 for more information.\n# \nio::invokef2piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invokef2piped\n# \n# This function call an executable and its arguments and input a given string as stdin.\n# It redirects the stdout and stderr to temporary files.\n# Equivalent to exe::invokef5 \"\\${1}\" 0 false \"\\${2}\" \"\\${@:3}\"\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **stdin** _as string_:\n#       the stdin to pass to the executable\n# - \\$3: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The file path containing the stdout of the executable.\n# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.\n# \n# ```bash\n# exe::invokef2piped true \"key: val\" yq -o json -p yaml -\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > This is the equivalent of:\n# > `myvar=\"\\$(printf '%s\\n' \"mystring\" | mycommand)\"`\n# > But without using a subshell.\n# >\n# > See exe::invokef5 for more information.\n# \nexe::invokef2piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invokef5": {
-  "prefix": "io::invokef5",
+"exe::invokef5": {
+  "prefix": "exe::invokef5",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "io::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**sdtin from file**}\" \"${4:**sdtin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "exe::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**sdtin from file**}\" \"${4:**sdtin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::invokef5#withdoc": {
-  "prefix": "io::invokef5#withdoc",
+"exe::invokef5#withdoc": {
+  "prefix": "exe::invokef5#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## io::invokef5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#                      If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#         (if the error code is matched, then set the output error code to 0)\n# - \\$3: **sdtin from file** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **sdtin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The file path containing the stdout of the executable.\n# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.\n# \n# ```bash\n# io::invokef5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > - In windows, this is tremendously faster to do (or any other invoke flavor):\n# >   `io::invokef5 false 0 false '' mycommand && myvar=\"\\${RETURNED_VALUE}\"`\n# >   than doing:\n# >   `myvar=\"\\$(mycommand)\".`\n# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).\n# > - On linux, you can use a tmpfs directory for massive gains over subshells.\n# \nio::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**sdtin from file**}\" \"${4:**sdtin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invokef5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#                      If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#         (if the error code is matched, then set the output error code to 0)\n# - \\$3: **sdtin from file** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **sdtin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - `\\$?`:The exit code of the executable.\n# - `RETURNED_VALUE`: The file path containing the stdout of the executable.\n# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.\n# \n# ```bash\n# exe::invokef5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > - In windows, this is tremendously faster to do (or any other invoke flavor):\n# >   `exe::invokef5 false 0 false '' mycommand && myvar=\"\\${RETURNED_VALUE}\"`\n# >   than doing:\n# >   `myvar=\"\\$(mycommand)\".`\n# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).\n# > - On linux, you can use a tmpfs directory for massive gains over subshells.\n# \nexe::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**sdtin from file**}\" \"${4:**sdtin**}\" \"${5:**executable**}\" \"${99:**arguments**}\"$0" ]
 },
 
-"io::isDirectoryWritable": {
-  "prefix": "io::isDirectoryWritable",
+"fs::isDirectoryWritable": {
+  "prefix": "fs::isDirectoryWritable",
   "description": "Check if the directory is writable...",
   "scope": "",
-  "body": [ "io::isDirectoryWritable \"${1:**directory**}\" \"${2:test file name}\"$0" ]
+  "body": [ "fs::isDirectoryWritable \"${1:**directory**}\" \"${2:test file name}\"$0" ]
 },
 
-"io::isDirectoryWritable#withdoc": {
-  "prefix": "io::isDirectoryWritable#withdoc",
+"fs::isDirectoryWritable#withdoc": {
+  "prefix": "fs::isDirectoryWritable#withdoc",
   "description": "Check if the directory is writable...",
   "scope": "",
-  "body": [ "# ## io::isDirectoryWritable\n# \n# Check if the directory is writable. Creates the directory if it does not exist.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to check\n# - \\$2: test file name _as string_:\n#       (optional) the name of the file to create in the directory to test the write access\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the directory is writable\n#   - 1 otherwise\n# \n# ```bash\n# if io::isDirectoryWritable \"/path/to/directory\"; then\n#   echo \"The directory is writable.\"\n# fi\n# ```\n# \nio::isDirectoryWritable \"${1:**directory**}\" \"${2:test file name}\"$0" ]
+  "body": [ "# ## fs::isDirectoryWritable\n# \n# Check if the directory is writable. Creates the directory if it does not exist.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to check\n# - \\$2: test file name _as string_:\n#       (optional) the name of the file to create in the directory to test the write access\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the directory is writable\n#   - 1 otherwise\n# \n# ```bash\n# if fs::isDirectoryWritable \"/path/to/directory\"; then\n#   echo \"The directory is writable.\"\n# fi\n# ```\n# \nfs::isDirectoryWritable \"${1:**directory**}\" \"${2:test file name}\"$0" ]
 },
 
-"io::listDirectories": {
-  "prefix": "io::listDirectories",
+"fs::listDirectories": {
+  "prefix": "fs::listDirectories",
   "description": "List all the directories in the given directory...",
   "scope": "",
-  "body": [ "io::listDirectories \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
+  "body": [ "fs::listDirectories \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
 },
 
-"io::listDirectories#withdoc": {
-  "prefix": "io::listDirectories#withdoc",
+"fs::listDirectories#withdoc": {
+  "prefix": "fs::listDirectories#withdoc",
   "description": "List all the directories in the given directory...",
   "scope": "",
-  "body": [ "# ## io::listDirectories\n# \n# List all the directories in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the sub directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array with the list of all the files.\n# \n# ```bash\n# io::listDirectories \"/path/to/directory\" true true myFilterFunction\n# for path in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \nio::listDirectories \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
+  "body": [ "# ## fs::listDirectories\n# \n# List all the directories in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the sub directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array with the list of all the files.\n# \n# ```bash\n# fs::listDirectories \"/path/to/directory\" true true myFilterFunction\n# for path in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \nfs::listDirectories \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
 },
 
-"io::listFiles": {
-  "prefix": "io::listFiles",
+"fs::listFiles": {
+  "prefix": "fs::listFiles",
   "description": "List all the files in the given directory...",
   "scope": "",
-  "body": [ "io::listFiles \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
+  "body": [ "fs::listFiles \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
 },
 
-"io::listFiles#withdoc": {
-  "prefix": "io::listFiles#withdoc",
+"fs::listFiles#withdoc": {
+  "prefix": "fs::listFiles#withdoc",
   "description": "List all the files in the given directory...",
   "scope": "",
-  "body": [ "# ## io::listFiles\n# \n# List all the files in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array with the list of all the files.\n# \n# ```bash\n# io::listFiles \"/path/to/directory\" true true myFilterFunction\n# for path in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \nio::listFiles \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
+  "body": [ "# ## fs::listFiles\n# \n# List all the files in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array with the list of all the files.\n# \n# ```bash\n# fs::listFiles \"/path/to/directory\" true true myFilterFunction\n# for path in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \nfs::listFiles \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
 },
 
-"io::listPaths": {
-  "prefix": "io::listPaths",
+"fs::listPaths": {
+  "prefix": "fs::listPaths",
   "description": "List all the paths in the given directory...",
   "scope": "",
-  "body": [ "io::listPaths \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:path filter function name}\" \"${5:directory filter function name}\"$0" ]
+  "body": [ "fs::listPaths \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:path filter function name}\" \"${5:directory filter function name}\"$0" ]
 },
 
-"io::listPaths#withdoc": {
-  "prefix": "io::listPaths#withdoc",
+"fs::listPaths#withdoc": {
+  "prefix": "fs::listPaths#withdoc",
   "description": "List all the paths in the given directory...",
   "scope": "",
-  "body": [ "# ## io::listPaths\n# \n# List all the paths in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: path filter function name _as string_:\n#       (optional) a function name that is called to filter the paths that will be listed\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# - \\$5: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array with the list of all the paths.\n# \n# ```bash\n# io::listPaths \"/path/to/directory\" true true myFilterFunction myFilterDirectoryFunction\n# for path in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \n# > - It will correctly list files under symbolic link directories.\n# \nio::listPaths \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:path filter function name}\" \"${5:directory filter function name}\"$0" ]
+  "body": [ "# ## fs::listPaths\n# \n# List all the paths in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: path filter function name _as string_:\n#       (optional) a function name that is called to filter the paths that will be listed\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# - \\$5: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array with the list of all the paths.\n# \n# ```bash\n# fs::listPaths \"/path/to/directory\" true true myFilterFunction myFilterDirectoryFunction\n# for path in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \n# > - It will correctly list files under symbolic link directories.\n# \nfs::listPaths \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:path filter function name}\" \"${5:directory filter function name}\"$0" ]
 },
 
-"io::readFile": {
-  "prefix": "io::readFile",
+"fs::readFile": {
+  "prefix": "fs::readFile",
   "description": "Reads the content of a file and returns it in the global variable RETURNED_VALUE...",
   "scope": "",
-  "body": [ "io::readFile \"${1:**path**}\" \"${2:max char}\"$0" ]
+  "body": [ "fs::readFile \"${1:**path**}\" \"${2:max char}\"$0" ]
 },
 
-"io::readFile#withdoc": {
-  "prefix": "io::readFile#withdoc",
+"fs::readFile#withdoc": {
+  "prefix": "fs::readFile#withdoc",
   "description": "Reads the content of a file and returns it in the global variable RETURNED_VALUE...",
   "scope": "",
-  "body": [ "# ## io::readFile\n# \n# Reads the content of a file and returns it in the global variable RETURNED_VALUE.\n# Uses pure bash.\n# \n# - \\$1: **path** _as string_:\n#       the file path to read\n# - \\$2: max char _as int_:\n#       (optional) the maximum number of characters to read\n#       (defaults to 0, which means read the whole file)\n# \n# > If the file does not exist, the function will return an empty string instead of failing.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The content of the file.\n# \n# ```bash\n# io::readFile \"/path/to/file\" && local fileContent=\"\\${RETURNED_VALUE}\"\n# io::readFile \"/path/to/file\" 500 && local fileContent=\"\\${RETURNED_VALUE}\"\n# ```\n# \nio::readFile \"${1:**path**}\" \"${2:max char}\"$0" ]
+  "body": [ "# ## fs::readFile\n# \n# Reads the content of a file and returns it in the global variable RETURNED_VALUE.\n# Uses pure bash.\n# \n# - \\$1: **path** _as string_:\n#       the file path to read\n# - \\$2: max char _as int_:\n#       (optional) the maximum number of characters to read\n#       (defaults to 0, which means read the whole file)\n# \n# > If the file does not exist, the function will return an empty string instead of failing.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The content of the file.\n# \n# ```bash\n# fs::readFile \"/path/to/file\" && local fileContent=\"\\${RETURNED_VALUE}\"\n# fs::readFile \"/path/to/file\" 500 && local fileContent=\"\\${RETURNED_VALUE}\"\n# ```\n# \nfs::readFile \"${1:**path**}\" \"${2:max char}\"$0" ]
 },
 
-"io::readStdIn": {
-  "prefix": "io::readStdIn",
+"exe::readStdIn": {
+  "prefix": "exe::readStdIn",
   "description": "Read the content of the standard input...",
   "scope": "",
-  "body": [ "io::readStdIn$0" ]
+  "body": [ "exe::readStdIn$0" ]
 },
 
-"io::readStdIn#withdoc": {
-  "prefix": "io::readStdIn#withdoc",
+"exe::readStdIn#withdoc": {
+  "prefix": "exe::readStdIn#withdoc",
   "description": "Read the content of the standard input...",
   "scope": "",
-  "body": [ "# ## io::readStdIn\n# \n# Read the content of the standard input.\n# Will immediately return if the standard input is empty.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The content of the standard input.\n# \n# ```bash\n# io::readStdIn && local stdIn=\"\\${RETURNED_VALUE}\"\n# ```\n# \nio::readStdIn$0" ]
+  "body": [ "# ## exe::readStdIn\n# \n# Read the content of the standard input.\n# Will immediately return if the standard input is empty.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The content of the standard input.\n# \n# ```bash\n# exe::readStdIn && local stdIn=\"\\${RETURNED_VALUE}\"\n# ```\n# \nexe::readStdIn$0" ]
 },
 
-"io::sleep": {
-  "prefix": "io::sleep",
+"exe::sleep": {
+  "prefix": "exe::sleep",
   "description": "Sleep for the given amount of time...",
   "scope": "",
-  "body": [ "io::sleep \"${1:**time**}\"$0" ]
+  "body": [ "exe::sleep \"${1:**time**}\"$0" ]
 },
 
-"io::sleep#withdoc": {
-  "prefix": "io::sleep#withdoc",
+"exe::sleep#withdoc": {
+  "prefix": "exe::sleep#withdoc",
   "description": "Sleep for the given amount of time...",
   "scope": "",
-  "body": [ "# ## io::sleep\n# \n# Sleep for the given amount of time.\n# This is a pure bash replacement of sleep.\n# \n# - \\$1: **time** _as float_:\n#       the time to sleep in seconds (can be a float)\n# \n# ```bash\n# io:sleep 1.5\n# ```\n# \n# > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.\n# \nio::sleep \"${1:**time**}\"$0" ]
+  "body": [ "# ## exe::sleep\n# \n# Sleep for the given amount of time.\n# This is a pure bash replacement of sleep.\n# \n# - \\$1: **time** _as float_:\n#       the time to sleep in seconds (can be a float)\n# \n# ```bash\n# io:sleep 1.5\n# ```\n# \n# > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.\n# \nexe::sleep \"${1:**time**}\"$0" ]
 },
 
-"io::tail": {
-  "prefix": "io::tail",
+"fs::tail": {
+  "prefix": "fs::tail",
   "description": "Print the last lines of a file to stdout...",
   "scope": "",
-  "body": [ "io::tail \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
+  "body": [ "fs::tail \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
 },
 
-"io::tail#withdoc": {
-  "prefix": "io::tail#withdoc",
+"fs::tail#withdoc": {
+  "prefix": "fs::tail#withdoc",
   "description": "Print the last lines of a file to stdout...",
   "scope": "",
-  "body": [ "# ## io::tail\n# \n# Print the last lines of a file to stdout.\n# This is a pure bash equivalent of tail.\n# However, because we have to read the whole file, it is not efficient for large files.\n# \n# - \\$1: **path** _as string_:\n#       The file to print.\n# - \\$2: **number of lines** _as int_:\n#       The number of lines to print from the end of the file.\n# - \\$3: to variable _as bool_:\n#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.\n#       If true, the output will be stored in the variable `RETURNED_ARRAY`\n#       instead of being printed to stdout.\n#       (defaults to false)\n# \n# ```bash\n# io::tail \"myFile\" 10\n# ```\n# \n# > #TODO: use mapfile quantum to not have to read the whole file in a single go.\n# \nio::tail \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
+  "body": [ "# ## fs::tail\n# \n# Print the last lines of a file to stdout.\n# This is a pure bash equivalent of tail.\n# However, because we have to read the whole file, it is not efficient for large files.\n# \n# - \\$1: **path** _as string_:\n#       The file to print.\n# - \\$2: **number of lines** _as int_:\n#       The number of lines to print from the end of the file.\n# - \\$3: to variable _as bool_:\n#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.\n#       If true, the output will be stored in the variable `RETURNED_ARRAY`\n#       instead of being printed to stdout.\n#       (defaults to false)\n# \n# ```bash\n# fs::tail \"myFile\" 10\n# ```\n# \n# > #TODO: use mapfile quantum to not have to read the whole file in a single go.\n# \nfs::tail \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
 },
 
-"io::toAbsolutePath": {
-  "prefix": "io::toAbsolutePath",
+"fs::toAbsolutePath": {
+  "prefix": "fs::toAbsolutePath",
   "description": "This function returns the absolute path of a path...",
   "scope": "",
-  "body": [ "io::toAbsolutePath \"${1:**path**}\"$0" ]
+  "body": [ "fs::toAbsolutePath \"${1:**path**}\"$0" ]
 },
 
-"io::toAbsolutePath#withdoc": {
-  "prefix": "io::toAbsolutePath#withdoc",
+"fs::toAbsolutePath#withdoc": {
+  "prefix": "fs::toAbsolutePath#withdoc",
   "description": "This function returns the absolute path of a path...",
   "scope": "",
-  "body": [ "# ## io::toAbsolutePath\n# \n# This function returns the absolute path of a path.\n# \n# - \\$1: **path** _as string_:\n#       The path to translate to absolute path.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The absolute path of the path.\n# \n# ```bash\n# io::toAbsolutePath \"myFile\"\n# local myFileAbsolutePath=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# \nio::toAbsolutePath \"${1:**path**}\"$0" ]
+  "body": [ "# ## fs::toAbsolutePath\n# \n# This function returns the absolute path of a path.\n# \n# - \\$1: **path** _as string_:\n#       The path to translate to absolute path.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The absolute path of the path.\n# \n# ```bash\n# fs::toAbsolutePath \"myFile\"\n# local myFileAbsolutePath=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# \nfs::toAbsolutePath \"${1:**path**}\"$0" ]
 },
 
-"io::windowsCreateTempDirectory": {
-  "prefix": "io::windowsCreateTempDirectory",
+"windows::createTempDirectory": {
+  "prefix": "windows::createTempDirectory",
   "description": "Create a temporary directory on Windows and return the path both for Windows and Unix...",
   "scope": "",
-  "body": [ "io::windowsCreateTempDirectory$0" ]
+  "body": [ "windows::createTempDirectory$0" ]
 },
 
-"io::windowsCreateTempDirectory#withdoc": {
-  "prefix": "io::windowsCreateTempDirectory#withdoc",
+"windows::createTempDirectory#withdoc": {
+  "prefix": "windows::createTempDirectory#withdoc",
   "description": "Create a temporary directory on Windows and return the path both for Windows and Unix...",
   "scope": "",
-  "body": [ "# ## io::windowsCreateTempDirectory\n# \n# Create a temporary directory on Windows and return the path both for Windows and Unix.\n# \n# This is useful for creating temporary directories that can be used in both Windows and Unix.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The Windows path.\n# - `RETURNED_VALUE2`: The Unix path.\n# \n# ```bash\n# io::windowsCreateTempDirectory\n# ```\n# \n# > Directories created this way are automatically cleaned up by the io::cleanTempFiles\n# > function when valet ends.\n# \nio::windowsCreateTempDirectory$0" ]
+  "body": [ "# ## windows::createTempDirectory\n# \n# Create a temporary directory on Windows and return the path both for Windows and Unix.\n# \n# This is useful for creating temporary directories that can be used in both Windows and Unix.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The Windows path.\n# - `RETURNED_VALUE2`: The Unix path.\n# \n# ```bash\n# windows::createTempDirectory\n# ```\n# \n# > Directories created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \nwindows::createTempDirectory$0" ]
 },
 
-"io::windowsCreateTempFile": {
-  "prefix": "io::windowsCreateTempFile",
+"windows::createTempFile": {
+  "prefix": "windows::createTempFile",
   "description": "Create a temporary file on Windows and return the path both for Windows and Unix...",
   "scope": "",
-  "body": [ "io::windowsCreateTempFile$0" ]
+  "body": [ "windows::createTempFile$0" ]
 },
 
-"io::windowsCreateTempFile#withdoc": {
-  "prefix": "io::windowsCreateTempFile#withdoc",
+"windows::createTempFile#withdoc": {
+  "prefix": "windows::createTempFile#withdoc",
   "description": "Create a temporary file on Windows and return the path both for Windows and Unix...",
   "scope": "",
-  "body": [ "# ## io::windowsCreateTempFile\n# \n# Create a temporary file on Windows and return the path both for Windows and Unix.\n# \n# This is useful for creating temporary files that can be used in both Windows and Unix.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The Windows path.\n# - `RETURNED_VALUE2`: The Unix path.\n# \n# ```bash\n# io::windowsCreateTempFile\n# ```\n# \n# > Files created this way are automatically cleaned up by the io::cleanTempFiles\n# > function when valet ends.\n# \nio::windowsCreateTempFile$0" ]
+  "body": [ "# ## windows::createTempFile\n# \n# Create a temporary file on Windows and return the path both for Windows and Unix.\n# \n# This is useful for creating temporary files that can be used in both Windows and Unix.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The Windows path.\n# - `RETURNED_VALUE2`: The Unix path.\n# \n# ```bash\n# windows::createTempFile\n# ```\n# \n# > Files created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \nwindows::createTempFile$0" ]
 },
 
-"io::windowsPowershellBatchEnd": {
-  "prefix": "io::windowsPowershellBatchEnd",
-  "description": "This function will run all the commands that were batched with `io::windowsPowershellBatchStart`...",
+"windows::endPs1Batch": {
+  "prefix": "windows::endPs1Batch",
+  "description": "This function will run all the commands that were batched with `windows::startPs1Batch`...",
   "scope": "",
-  "body": [ "io::windowsPowershellBatchEnd$0" ]
+  "body": [ "windows::endPs1Batch$0" ]
 },
 
-"io::windowsPowershellBatchEnd#withdoc": {
-  "prefix": "io::windowsPowershellBatchEnd#withdoc",
-  "description": "This function will run all the commands that were batched with `io::windowsPowershellBatchStart`...",
+"windows::endPs1Batch#withdoc": {
+  "prefix": "windows::endPs1Batch#withdoc",
+  "description": "This function will run all the commands that were batched with `windows::startPs1Batch`...",
   "scope": "",
-  "body": [ "# ## io::windowsPowershellBatchEnd\n# \n# This function will run all the commands that were batched with `io::windowsPowershellBatchStart`.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# io::windowsPowershellBatchStart\n# io::windowsRunInPowershell \"Write-Host \\\"Hello\\\"\"\n# io::windowsRunInPowershell \"Write-Host \\\"World\\\"\"\n# io::windowsPowershellBatchEnd\n# ```\n# \nio::windowsPowershellBatchEnd$0" ]
+  "body": [ "# ## windows::endPs1Batch\n# \n# This function will run all the commands that were batched with `windows::startPs1Batch`.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# windows::startPs1Batch\n# windows::runPs1 \"Write-Host \\\"Hello\\\"\"\n# windows::runPs1 \"Write-Host \\\"World\\\"\"\n# windows::endPs1Batch\n# ```\n# \nwindows::endPs1Batch$0" ]
 },
 
-"io::windowsPowershellBatchStart": {
-  "prefix": "io::windowsPowershellBatchStart",
-  "description": "After running this function, all commands that should be executed by `io::windowsRunInPowershell` will be added to a batch that will only be played when `io::windowsPowershellBatchEnd` is called...",
+"windows::startPs1Batch": {
+  "prefix": "windows::startPs1Batch",
+  "description": "After running this function, all commands that should be executed by `windows::runPs1` will be added to a batch that will only be played when `windows::endPs1Batch` is called...",
   "scope": "",
-  "body": [ "io::windowsPowershellBatchStart$0" ]
+  "body": [ "windows::startPs1Batch$0" ]
 },
 
-"io::windowsPowershellBatchStart#withdoc": {
-  "prefix": "io::windowsPowershellBatchStart#withdoc",
-  "description": "After running this function, all commands that should be executed by `io::windowsRunInPowershell` will be added to a batch that will only be played when `io::windowsPowershellBatchEnd` is called...",
+"windows::startPs1Batch#withdoc": {
+  "prefix": "windows::startPs1Batch#withdoc",
+  "description": "After running this function, all commands that should be executed by `windows::runPs1` will be added to a batch that will only be played when `windows::endPs1Batch` is called...",
   "scope": "",
-  "body": [ "# ## io::windowsPowershellBatchStart\n# \n# After running this function, all commands that should be executed by\n# `io::windowsRunInPowershell` will be added to a batch that will only be played\n# when `io::windowsPowershellBatchEnd` is called.\n# \n# This is a convenient way to run multiple commands in a single PowerShell session.\n# It makes up for the fact that running a new PowerShell session for each command is slow.\n# \n# ```bash\n# io::windowsPowershellBatchStart\n# io::windowsRunInPowershell \"Write-Host \\\"Hello\\\"\"\n# io::windowsRunInPowershell \"Write-Host \\\"World\\\"\"\n# io::windowsPowershellBatchEnd\n# ```\n# \nio::windowsPowershellBatchStart$0" ]
+  "body": [ "# ## windows::startPs1Batch\n# \n# After running this function, all commands that should be executed by\n# `windows::runPs1` will be added to a batch that will only be played\n# when `windows::endPs1Batch` is called.\n# \n# This is a convenient way to run multiple commands in a single PowerShell session.\n# It makes up for the fact that running a new PowerShell session for each command is slow.\n# \n# ```bash\n# windows::startPs1Batch\n# windows::runPs1 \"Write-Host \\\"Hello\\\"\"\n# windows::runPs1 \"Write-Host \\\"World\\\"\"\n# windows::endPs1Batch\n# ```\n# \nwindows::startPs1Batch$0" ]
 },
 
-"io::windowsRunInPowershell": {
-  "prefix": "io::windowsRunInPowershell",
+"windows::runPs1": {
+  "prefix": "windows::runPs1",
   "description": "Runs a PowerShell command...",
   "scope": "",
-  "body": [ "io::windowsRunInPowershell \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
+  "body": [ "windows::runPs1 \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
 },
 
-"io::windowsRunInPowershell#withdoc": {
-  "prefix": "io::windowsRunInPowershell#withdoc",
+"windows::runPs1#withdoc": {
+  "prefix": "windows::runPs1#withdoc",
   "description": "Runs a PowerShell command...",
   "scope": "",
-  "body": [ "# ## io::windowsRunInPowershell\n# \n# Runs a PowerShell command.\n# This is mostly useful on Windows.\n# \n# - \\$1: **command** _as string_:\n#       the command to run.\n# - \\$2: run as administrator _as boolean_:\n#       (optional) whether to run the command as administrator.\n#       (defaults to false).\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# io::windowsRunInPowershell \"Write-Host \\\"Press any key:\\\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());\"\n# ```\n# \nio::windowsRunInPowershell \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
+  "body": [ "# ## windows::runPs1\n# \n# Runs a PowerShell command.\n# This is mostly useful on Windows.\n# \n# - \\$1: **command** _as string_:\n#       the command to run.\n# - \\$2: run as administrator _as boolean_:\n#       (optional) whether to run the command as administrator.\n#       (defaults to false).\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - `RETURNED_VALUE`: The content of stdout.\n# - `RETURNED_VALUE2`: The content of stderr.\n# \n# ```bash\n# windows::runPs1 \"Write-Host \\\"Press any key:\\\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());\"\n# ```\n# \nwindows::runPs1 \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
 },
 
 "log::debug": {
@@ -1639,46 +1639,46 @@
   "body": [ "# ## system::os\n# \n# Returns the name of the current OS.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the name of the current OS: \"darwin\", \"linux\" or \"windows\".\n# \n# ```bash\n# system::os\n# local osName=\"\\${RETURNED_VALUE}\"\n# ```\n# \nsystem::os$0" ]
 },
 
-"system::windowsAddToPath": {
-  "prefix": "system::windowsAddToPath",
+"windows::addToPath": {
+  "prefix": "windows::addToPath",
   "description": "Add the given path to the PATH environment variable on Windows (current user only)...",
   "scope": "",
-  "body": [ "system::windowsAddToPath \"${1:**path**}\"$0" ]
+  "body": [ "windows::addToPath \"${1:**path**}\"$0" ]
 },
 
-"system::windowsAddToPath#withdoc": {
-  "prefix": "system::windowsAddToPath#withdoc",
+"windows::addToPath#withdoc": {
+  "prefix": "windows::addToPath#withdoc",
   "description": "Add the given path to the PATH environment variable on Windows (current user only)...",
   "scope": "",
-  "body": [ "# ## system::windowsAddToPath\n# \n# Add the given path to the PATH environment variable on Windows (current user only).\n# \n# Will also export the PATH variable in the current bash.\n# \n# - \\$1: **path** _as string_:\n#       the path to add to the PATH environment variable.\n#       The path can be in unix format, it will be converted to windows format.\n# \n# ```bash\n# system::windowsAddToPath \"/path/to/bin\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell` to directly modify the registry.\n# \nsystem::windowsAddToPath \"${1:**path**}\"$0" ]
+  "body": [ "# ## windows::addToPath\n# \n# Add the given path to the PATH environment variable on Windows (current user only).\n# \n# Will also export the PATH variable in the current bash.\n# \n# - \\$1: **path** _as string_:\n#       the path to add to the PATH environment variable.\n#       The path can be in unix format, it will be converted to windows format.\n# \n# ```bash\n# windows::addToPath \"/path/to/bin\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell` to directly modify the registry.\n# \nwindows::addToPath \"${1:**path**}\"$0" ]
 },
 
-"system::windowsGetEnvVar": {
-  "prefix": "system::windowsGetEnvVar",
+"windows::getEnvVar": {
+  "prefix": "windows::getEnvVar",
   "description": "Get the value of an environment variable for the current user on Windows...",
   "scope": "",
-  "body": [ "system::windowsGetEnvVar \"${1:**variable name**}\"$0" ]
+  "body": [ "windows::getEnvVar \"${1:**variable name**}\"$0" ]
 },
 
-"system::windowsGetEnvVar#withdoc": {
-  "prefix": "system::windowsGetEnvVar#withdoc",
+"windows::getEnvVar#withdoc": {
+  "prefix": "windows::getEnvVar#withdoc",
   "description": "Get the value of an environment variable for the current user on Windows...",
   "scope": "",
-  "body": [ "# ## system::windowsGetEnvVar\n# \n# Get the value of an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to get.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the value of the environment variable.\n# \n# ```bash\n# system::windowsGetEnvVar \"MY_VAR\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nsystem::windowsGetEnvVar \"${1:**variable name**}\"$0" ]
+  "body": [ "# ## windows::getEnvVar\n# \n# Get the value of an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to get.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the value of the environment variable.\n# \n# ```bash\n# windows::getEnvVar \"MY_VAR\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nwindows::getEnvVar \"${1:**variable name**}\"$0" ]
 },
 
-"system::windowsSetEnvVar": {
-  "prefix": "system::windowsSetEnvVar",
+"windows::setEnvVar": {
+  "prefix": "windows::setEnvVar",
   "description": "Set an environment variable for the current user on Windows...",
   "scope": "",
-  "body": [ "system::windowsSetEnvVar \"${1:**variable name**}\" \"${2:**variable value**}\"$0" ]
+  "body": [ "windows::setEnvVar \"${1:**variable name**}\" \"${2:**variable value**}\"$0" ]
 },
 
-"system::windowsSetEnvVar#withdoc": {
-  "prefix": "system::windowsSetEnvVar#withdoc",
+"windows::setEnvVar#withdoc": {
+  "prefix": "windows::setEnvVar#withdoc",
   "description": "Set an environment variable for the current user on Windows...",
   "scope": "",
-  "body": [ "# ## system::windowsSetEnvVar\n# \n# Set an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to set.\n# - \\$2: **variable value** _as string_:\n#       the value of the environment variable to set.\n# \n# ```bash\n# system::windowsSetEnvVar \"MY_VAR\" \"my_value\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell` to directly modify the registry.\n# \nsystem::windowsSetEnvVar \"${1:**variable name**}\" \"${2:**variable value**}\"$0" ]
+  "body": [ "# ## windows::setEnvVar\n# \n# Set an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to set.\n# - \\$2: **variable value** _as string_:\n#       the value of the environment variable to set.\n# \n# ```bash\n# windows::setEnvVar \"MY_VAR\" \"my_value\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell` to directly modify the registry.\n# \nwindows::setEnvVar \"${1:**variable name**}\" \"${2:**variable value**}\"$0" ]
 },
 
 "test::exec": {

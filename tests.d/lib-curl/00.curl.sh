@@ -2,6 +2,8 @@
 
 # shellcheck source=../../libraries.d/lib-curl
 source curl
+# shellcheck source=../../libraries.d/lib-fs
+source fs
 
 function main() {
   test_curl::toFile
@@ -13,7 +15,7 @@ function test_curl::toFile() {
 
   test::markdown "Writing to an output file:"
   test::func curl::toFile true 200 "${GLOBAL_TEST_TEMP_FILE}" --code 200 https://fuu
-  test::exec io::cat "${GLOBAL_TEST_TEMP_FILE}"
+  test::exec fs::cat "${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Getting a 500 error with fail mode on:"
   test::exit curl::toFile true 200 "${GLOBAL_TEST_TEMP_FILE}" --code 500 https://fuu

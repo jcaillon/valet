@@ -23,6 +23,10 @@ source system
 source array
 # shellcheck source=../libraries.d/lib-version
 source version
+# shellcheck source=../libraries.d/lib-exe
+source exe
+# shellcheck source=../libraries.d/lib-fs
+source fs
 
 #===============================================================
 # >>> self release valet
@@ -67,7 +71,7 @@ function selfRelease() {
 
   # get the current latest tag
   local lastLocalTag
-  io::invoke git tag --sort=version:refname --no-color
+  exe::invoke git tag --sort=version:refname --no-color
   lastLocalTag="${RETURNED_VALUE}"
   lastLocalTag="${lastLocalTag%%$'\n'}"
   lastLocalTag="${lastLocalTag##*$'\n'}"
@@ -128,7 +132,7 @@ function selfRelease::createRelease() {
   lastLocalTag="${4}"
   latestReleaseVersion="${5}"
 
-  io::invoke git rev-parse HEAD
+  exe::invoke git rev-parse HEAD
   local currentHead="${RETURNED_VALUE%%$'\n'*}"
 
   # check if the latest release is the same as the last tag
@@ -150,9 +154,9 @@ function selfRelease::createRelease() {
 
     # check that the git workarea is clean
     log::debug "Checking if the workarea is clean"
-    io::invokef2 false git update-index --really-refresh 1>/dev/null || :
+    exe::invokef2 false git update-index --really-refresh 1>/dev/null || :
     local -i exitCode=0
-    io::invokef2 false git diff-index --quiet HEAD || exitCode=$?
+    exe::invokef2 false git diff-index --quiet HEAD || exitCode=$?
     if [[ exitCode -ne 0 ]]; then
       core::fail "The workarea is not clean, please commit your changes before releasing a new version."
     fi
@@ -168,7 +172,7 @@ function selfRelease::createRelease() {
   local tagMessage line
   tagMessage="# Release of version ${version}"$'\n'$'\n'
   tagMessage+="Changelog: "$'\n'$'\n'
-  io::invoke git log --pretty=format:"%s" "${lastLocalTag}..HEAD"
+  exe::invoke git log --pretty=format:"%s" "${lastLocalTag}..HEAD"
   local IFS=$'\n'
   for line in ${RETURNED_VALUE}; do
     if [[ ${line} == ":bookmark:"* ]]; then
@@ -188,24 +192,24 @@ function selfRelease::createRelease() {
     # write the current version in the self-install script
     # then commit the file
     if [[ "${dryRun:-}" != "true" ]]; then
-      io::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-install.sh"
+      exe::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-install.sh"
 
-      io::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-install.sh"
-      io::invoke git commit -m ":rocket: releasing version ${version}"
+      exe::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-install.sh"
+      exe::invoke git commit -m ":rocket: releasing version ${version}"
       log::success "The new version has been committed."
     fi
 
     if ! interactive::promptYesNo "Do you want to continue with the release of version ${version}?" false; then
       # reset to the original head
       if [[ "${dryRun:-}" != "true" ]]; then
-        io::invoke git reset --hard "${currentHead}"
+        exe::invoke git reset --hard "${currentHead}"
       fi
       core::fail "The release has been canceled."
     fi
 
     # create a new git tag with the version
     if [[ "${dryRun:-}" != "true" ]]; then
-      io::invoke git tag -a "v${version}" -m "${tagMessage}"
+      exe::invoke git tag -a "v${version}" -m "${tagMessage}"
       log::success "The new version has been tagged."
     fi
 
@@ -213,14 +217,14 @@ function selfRelease::createRelease() {
 
   # push main and the new tag
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke git push origin main
-    io::invoke git push origin "v${version}"
+    exe::invoke git push origin main
+    exe::invoke git push origin "v${version}"
     log::success "The ⌜main⌝ branch and the new version ⌜v${version}⌝ has been pushed."
   fi
 
   # force push the latest branch
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke git push origin -f main:latest
+    exe::invoke git push origin -f main:latest
     log::success "The ⌜latest⌝ branch has been updated."
   fi
 
@@ -271,12 +275,12 @@ function selfRelease::uploadArtifact() {
   # copy each file from valet dir to current dir
   local file
   for file in "${files[@]}"; do
-    io::invoke cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/${file}" .
+    exe::invoke cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/${file}" .
   done
 
   # prepare artifact
   local artifactPath="valet.tar.gz"
-  io::invoke tar -czvf "${artifactPath}" "${files[@]}"
+  exe::invoke tar -czvf "${artifactPath}" "${files[@]}"
   log::debug "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${RETURNED_VALUE}"
 
   # upload the artifact
@@ -315,14 +319,14 @@ function selfRelease::bumpVersion() {
 
   # bump the version
   version::bump "${version}" "${bumpLevel}" && newVersion="${RETURNED_VALUE}"
-  if [[ "${dryRun:-}" != "true" ]]; then io::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/version" "${newVersion}"; fi
+  if [[ "${dryRun:-}" != "true" ]]; then fs::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/version" "${newVersion}"; fi
   log::info "The bumped version of valet is: ${newVersion}."
 
   # commit the new version and push it
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/version"
-    io::invoke git commit -m ":bookmark: bump version to ${newVersion}"
-    io::invoke git push origin main
+    exe::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/version"
+    exe::invoke git commit -m ":bookmark: bump version to ${newVersion}"
+    exe::invoke git push origin main
     log::success "The bumped version has been committed."
   fi
 }
@@ -344,18 +348,18 @@ function selfRelease::updateDocumentation() {
   selfConfig::getFileContent false
 
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md" '```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'$'\n'$'\n'"> ${pageFooter}"$'\n'
+    fs::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md" '```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'$'\n'$'\n'"> ${pageFooter}"$'\n'
   fi
 
   # copy the vscode recommended extensions
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke cp "${GLOBAL_INSTALLATION_DIRECTORY}/.vscode/extensions.json" "${GLOBAL_INSTALLATION_DIRECTORY}/extras/extensions.json"
+    exe::invoke cp "${GLOBAL_INSTALLATION_DIRECTORY}/.vscode/extensions.json" "${GLOBAL_INSTALLATION_DIRECTORY}/extras/extensions.json"
   fi
 
   # commit the changes to the documentation
   if [[ "${dryRun:-}" != "true" ]]; then
-    io::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
-    io::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
+    exe::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
+    fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
     array::sort RETURNED_ARRAY
     # remove _index.md (otherwise not consistent tests on the CI...)
     local -a files
@@ -366,11 +370,11 @@ function selfRelease::updateDocumentation() {
       fi
       files+=("${file}")
     done
-    io::invoke git add "${files[@]}"
-    io::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/extras" true
+    exe::invoke git add "${files[@]}"
+    fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/extras" true
     array::sort RETURNED_ARRAY
-    io::invoke git add "${RETURNED_ARRAY[@]}"
-    io::invoke git commit -m ":memo: updating the documentation"
+    exe::invoke git add "${RETURNED_ARRAY[@]}"
+    exe::invoke git commit -m ":memo: updating the documentation"
     log::success "The documentation update has been committed."
   fi
 }
@@ -383,13 +387,13 @@ function selfRelease::writeAllFunctionsDocumentation() {
   log::info "Writing the ${#SORTED_FUNCTION_NAMES[@]} functions documentation to the core libraries docs."
 
   # delete the existing files
-  io::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
+  fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
   local file
   for file in "${RETURNED_ARRAY[@]}"; do
     if [[ ${file} == *"_index.md" ]]; then
       continue
     fi
-    io::invoke rm -f "${file}"
+    exe::invoke rm -f "${file}"
   done
 
   # write the new files
@@ -407,7 +411,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
 
     # init the file if necessary
     if [[ ! -f "${path}" ]]; then
-      io::writeToFile "${path}" "---
+      fs::writeToFile "${path}" "---
 title: 📂 ${packageName}
 cascade:
   type: docs
@@ -418,17 +422,16 @@ url: /docs/libraries/${packageName}
     fi
 
     # append the function documentation
-    io::writeToFileFromRef "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries/${packageName}.md" "RETURNED_ASSOCIATIVE_ARRAY[${key}]" true
-    io::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries/${packageName}.md" $'\n'$'\n' true
+    fs::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries/${packageName}.md" "RETURNED_ASSOCIATIVE_ARRAY[${key}]"$'\n'$'\n' true
   done
 
   # add footer
-  io::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
+  fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
   local file
   for file in "${RETURNED_ARRAY[@]}"; do
     if [[ ${file} == *"_index.md" ]]; then
       continue
     fi
-    io::writeToFile "${file}" $'\n'$'\n'"> ${pageFooter}"$'\n' true
+    fs::writeToFile "${file}" $'\n'$'\n'"> ${pageFooter}"$'\n' true
   done
 }

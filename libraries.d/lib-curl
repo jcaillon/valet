@@ -2,14 +2,16 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=lib-io
-source io
+# shellcheck source=lib-exe
+source exe
+# shellcheck source=lib-fs
+source fs
 
 # ## curl::toFile
 #
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
+# It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails
@@ -42,7 +44,7 @@ function curl::toFile() {
   # call curl
   local -i exitCode=0
   local httpStatusCode errors
-  io::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{response_code}" "--output" "${outputFile}" "$@" || exitCode=$?
+  exe::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{response_code}" "--output" "${outputFile}" "$@" || exitCode=$?
   httpStatusCode="${RETURNED_VALUE}"
   errors="${RETURNED_VALUE2}"
 
@@ -50,7 +52,7 @@ function curl::toFile() {
   # and for a bug in curl https://github.com/Homebrew/homebrew-core/issues/173294
   if [[ ${exitCode} != "0" && (${errors} == *"bad argument"* || ${errors} == *"is unknown"*) ]]; then
     log::debug "Trying to use curl without the many options."
-    io::invoke5 "false" "0" "false" "" "curl" "--location" "-v" "--output" "${outputFile}" "$@" || exitCode=$?
+    exe::invoke5 "false" "0" "false" "" "curl" "--location" "-v" "--output" "${outputFile}" "$@" || exitCode=$?
     if [[ ${RETURNED_VALUE}${RETURNED_VALUE2} =~ "< HTTP/"([0-9.]+)" "([0-9]+)" " ]]; then
       httpStatusCode="${BASH_REMATCH[2]}"
     else
@@ -92,7 +94,7 @@ function curl::toFile() {
 #
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
+# It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails
@@ -129,7 +131,7 @@ function curl::toVar() {
   errors="${RETURNED_VALUE}"
   httpStatusCode="${RETURNED_VALUE2}"
 
-  io::readFile "${GLOBAL_TEMPORARY_WORK_FILE}"
+  fs::readFile "${GLOBAL_TEMPORARY_WORK_FILE}"
   RETURNED_VALUE2="${errors}"
   # shellcheck disable=SC2034
   RETURNED_VALUE3="${httpStatusCode}"

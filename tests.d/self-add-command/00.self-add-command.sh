@@ -12,7 +12,7 @@ function main() {
 
   test::exec selfAddCommand 'new cool command'
   test::exec selfAddCommand 'new cool command'
-  test::exec io::cat "commands.d/new-cool-command.sh"
+  test::exec fs::cat "commands.d/new-cool-command.sh"
 
   popd &>/dev/null || test::fail "Unable to change directory"
 

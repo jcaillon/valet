@@ -390,8 +390,8 @@ function selfUpdate_install() {
 
   # temporary directory for the installation
   local tempDirectory
-  if command -v io::createTempDirectory 1>/dev/null; then
-    io::createTempDirectory
+  if command -v fs::createTempDirectory 1>/dev/null; then
+    fs::createTempDirectory
     tempDirectory="${RETURNED_VALUE}"
   else
     tempDirectory="${TMPDIR:-/tmp}/valet.install.d"
@@ -517,7 +517,7 @@ function selfUpdate_getLatestReleaseVersion() {
   progress::start "#spinner Fetching the latest version from GitHub API..."
   selfUpdate_download "https://api.github.com/repos/jcaillon/valet/releases/latest" "${jsonFile}"
   progress::stop
-  io::readFile "${jsonFile}"
+  fs::readFile "${jsonFile}"
   rm -f "${jsonFile}" 1>/dev/null
   if [[ ${RETURNED_VALUE} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
     RETURNED_VALUE="${BASH_REMATCH[2]}"
@@ -562,7 +562,7 @@ function selfUpdate_updateGitRepository() {
 
   log::debug "Updating the git repository ⌜${repoPath}⌝."
 
-  io::readFile "${repoPath}/.git/HEAD"
+  fs::readFile "${repoPath}/.git/HEAD"
   if [[ ${RETURNED_VALUE} =~ ^"ref: refs/heads/"(.+) ]]; then
     local branch="${BASH_REMATCH[1]:-}"
     branch="${branch%%$'\n'*}"
@@ -593,8 +593,8 @@ function selfUpdate_sourceDependencies() {
   source progress
   # shellcheck source=../libraries.d/lib-ansi-codes
   source ansi-codes
-  # shellcheck source=../libraries.d/lib-io
-  source io
+  # shellcheck source=../libraries.d/lib-fs
+  source fs
   # shellcheck source=../libraries.d/lib-string
   source string
   # shellcheck source=../libraries.d/lib-version
@@ -755,7 +755,7 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
     printf "\nNo\n"
     return 1
   }
-  function io::readFile() { RETURNED_VALUE="$(<"${1}")"; }
+  function fs::readFile() { RETURNED_VALUE="$(<"${1}")"; }
   function progress::start() { :; }
   function progress::stop() { :; }
 

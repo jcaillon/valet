@@ -3,7 +3,7 @@
 command::sourceFunction "selfConfig"
 
 # shellcheck disable=SC1091
-source io
+source fs
 
 function main() {
   test::title "✅ Testing self config command"
@@ -18,7 +18,7 @@ function main() {
   rm -f "${GLOBAL_TEST_TEMP_FILE}"
 
   test::exec selfConfig
-  test::exec io::head "${GLOBAL_TEST_TEMP_FILE}" 3
+  test::exec fs::head "${GLOBAL_TEST_TEMP_FILE}" 3
 
   test::markdown "Testing selfConfig (should only open, file does not exist)"
   test::exec selfConfig
@@ -30,7 +30,7 @@ function main() {
   export VALET_CONFIG_LOCALE="${GLOBAL_TEST_TEMP_FILE}"
   test::printVars VALET_CONFIG_LOCALE
   test::exec selfConfig --override --export-current-values
-  io::readFile "${GLOBAL_TEST_TEMP_FILE}"
+  fs::readFile "${GLOBAL_TEST_TEMP_FILE}"
   if [[ ${RETURNED_VALUE} == *"${GLOBAL_TEST_TEMP_FILE}"* ]]; then
     test::markdown "The path ${GLOBAL_TEST_TEMP_FILE} is in the config file as expected."
   fi

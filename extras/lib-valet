@@ -562,7 +562,7 @@ function core::resetIncludedFiles() { :; }
 #
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
+# It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails
@@ -592,7 +592,7 @@ function curl::toFile() { :; }
 #
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It io::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
+# It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails
@@ -813,13 +813,13 @@ function interactive::promptYesNo() { :; }
 #
 function interactive::promptYesNoRaw() { :; }
 
-# ## io::captureOutput
+# ## exe::captureOutput
 #
 # Capture the output of a command.
 # Made to be used on bash builtins that produce output.
 # It captures the stdout and stderr of the command.
 #
-# This function is a lot more basic than `io::invoke` and does not support all its features.
+# This function is a lot more basic than `exe::invoke` and does not support all its features.
 #
 # - $@: **command** _as string_:
 #       The command to run.
@@ -832,13 +832,13 @@ function interactive::promptYesNoRaw() { :; }
 # - `RETURNED_VALUE`: The captured output.
 #
 # ```bash
-# io::captureOutput declare -f io::captureOutput
+# exe::captureOutput declare -f exe::captureOutput
 # echo "${RETURNED_VALUE}"
 # ```
 #
-function io::captureOutput() { :; }
+function exe::captureOutput() { :; }
 
-# ## io::cat
+# ## fs::cat
 #
 # Print the content of a file to stdout.
 # This is a pure bash equivalent of cat.
@@ -847,12 +847,12 @@ function io::captureOutput() { :; }
 #       the file to print
 #
 # ```bash
-# io::cat "myFile"
+# fs::cat "myFile"
 # ```
 #
 # > Also see log::printFile if you want to print a file for a user.
 #
-function io::cat() { :; }
+function fs::cat() { :; }
 
 # ## io::checkAndFail
 #
@@ -884,19 +884,19 @@ function io::checkAndFail() { :; }
 #
 function io::checkAndWarn() { :; }
 
-# ## io::cleanTempFiles
+# ## fs::cleanTempFiles
 #
 # Removes all the temporary files and directories that were created by the
-# io::createTempFile and io::createTempDirectory functions.
+# fs::createTempFile and fs::createTempDirectory functions.
 #
 # ```bash
-# io::cleanTempFiles
+# fs::cleanTempFiles
 # ```
 # shellcheck disable=SC2016
 #
-function io::cleanTempFiles() { :; }
+function fs::cleanTempFiles() { :; }
 
-# ## io::convertFromWindowsPath
+# ## windows::convertPathToUnix
 #
 # Convert a Windows path to a unix path.
 #
@@ -908,14 +908,14 @@ function io::cleanTempFiles() { :; }
 # - `RETURNED_VALUE`: The unix path.
 #
 # ```bash
-# io::convertFromWindowsPath "C:\path\to\file"
+# windows::convertPathToUnix "C:\path\to\file"
 # ```
 #
 # > Handles paths starting with `X:\`.
 #
-function io::convertFromWindowsPath() { :; }
+function windows::convertPathToUnix() { :; }
 
-# ## io::convertToWindowsPath
+# ## windows::convertPathFromUnix
 #
 # Convert a unix path to a Windows path.
 #
@@ -927,23 +927,23 @@ function io::convertFromWindowsPath() { :; }
 # - `RETURNED_VALUE`: The Windows path.
 #
 # ```bash
-# io::convertToWindowsPath "/path/to/file"
+# windows::convertPathFromUnix "/path/to/file"
 # ```
 #
 # > Handles paths starting with `/mnt/x/` or `/x/`.
 #
-function io::convertToWindowsPath() { :; }
+function windows::convertPathFromUnix() { :; }
 
-# ## io::countArgs
+# ## exe::countArgs
 #
 # Returns the number of arguments passed.
 #
 # A convenient function that can be used to:
 #
 # - count the files/directories in a directory
-#   `io::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
+#   `exe::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
 # - count the number of variables starting with VALET_
-#   `io::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
+#   `exe::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
 #
 # - $@: **arguments** _as any_:
 #       the arguments to count
@@ -953,12 +953,12 @@ function io::convertToWindowsPath() { :; }
 # - `RETURNED_VALUE`: The number of arguments passed.
 #
 # ```bash
-# io::countArgs 1 2 3
+# exe::countArgs 1 2 3
 # ```
 #
-function io::countArgs() { :; }
+function exe::countArgs() { :; }
 
-# ## io::createDirectoryIfNeeded
+# ## fs::createDirectoryIfNeeded
 #
 # Create the directory tree if needed.
 #
@@ -970,12 +970,12 @@ function io::countArgs() { :; }
 # - `RETURNED_VALUE`: The absolute path to the directory.
 #
 # ```bash
-# io::createDirectoryIfNeeded "/my/directory"
+# fs::createDirectoryIfNeeded "/my/directory"
 # ```
 #
-function io::createDirectoryIfNeeded() { :; }
+function fs::createDirectoryIfNeeded() { :; }
 
-# ## io::createFilePathIfNeeded
+# ## fs::createFilePathIfNeeded
 #
 # Make sure that the given file path exists.
 # Create the directory tree and the file if needed.
@@ -988,12 +988,12 @@ function io::createDirectoryIfNeeded() { :; }
 # - `RETURNED_VALUE`: The absolute path of the file.
 #
 # ```bash
-# io::createFilePathIfNeeded "myFile"
+# fs::createFilePathIfNeeded "myFile"
 # ```
 #
-function io::createFilePathIfNeeded() { :; }
+function fs::createFilePathIfNeeded() { :; }
 
-# ## io::createLink
+# ## fs::createLink
 #
 # Create a soft or hard link (original ← link).
 #
@@ -1019,16 +1019,16 @@ function io::createFilePathIfNeeded() { :; }
 #       (defaults to true)
 #
 # ```bash
-# io::createLink "/path/to/link" "/path/to/linked"
-# io::createLink "/path/to/link" "/path/to/linked" true
+# fs::createLink "/path/to/link" "/path/to/linked"
+# fs::createLink "/path/to/link" "/path/to/linked" true
 # ```
 #
 # > On unix, the function uses the `ln` command.
 # > On Windows, the function uses `powershell` (and optionally ls to check the existing link).
 #
-function io::createLink() { :; }
+function fs::createLink() { :; }
 
-# ## io::createTempDirectory
+# ## fs::createTempDirectory
 #
 # Creates a temporary directory.
 #
@@ -1037,16 +1037,16 @@ function io::createLink() { :; }
 # - `RETURNED_VALUE`: The created path.
 #
 # ```bash
-# io::createTempDirectory
+# fs::createTempDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
 #
-# > Directories created this way are automatically cleaned up by the io::cleanTempFiles
+# > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
 #
-function io::createTempDirectory() { :; }
+function fs::createTempDirectory() { :; }
 
-# ## io::createTempFile
+# ## fs::createTempFile
 #
 # Creates a temporary file and return its path.
 #
@@ -1055,16 +1055,16 @@ function io::createTempDirectory() { :; }
 # - `RETURNED_VALUE`: The created path.
 #
 # ```bash
-# io::createTempFile
+# fs::createTempFile
 # local file="${RETURNED_VALUE}"
 # ```
 #
-# > Files created this way are automatically cleaned up by the io::cleanTempFiles
+# > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
 #
-function io::createTempFile() { :; }
+function fs::createTempFile() { :; }
 
-# ## io::head
+# ## fs::head
 #
 # Print the first lines of a file to stdout.
 # This is a pure bash equivalent of head.
@@ -1080,21 +1080,21 @@ function io::createTempFile() { :; }
 #       (defaults to false)
 #
 # ```bash
-# io::head "myFile" 10
+# fs::head "myFile" 10
 # ```
 #
 # > #TODO: faster with mapfile?
 #
-function io::head() { :; }
+function fs::head() { :; }
 
-# ## io::invoke
+# ## exe::invoke
 #
 # This function call an executable and its arguments.
 # If the execution fails, it will fail the script and show the std/err output.
 # Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
 #
 # It redirects the stdout and stderr to environment variables.
-# Equivalent to io::invoke5 true 0 '' '' "${@}"
+# Equivalent to exe::invoke5 true 0 '' '' "${@}"
 #
 # - $1: **executable** _as string_:
 #       the executable or command
@@ -1108,18 +1108,18 @@ function io::head() { :; }
 # - `RETURNED_VALUE2`: The content of stderr.
 #
 # ```bash
-# io::invoke git add --all
+# exe::invoke git add --all
 # ```
 #
-# > See io::invokef5 for more information.
+# > See exe::invokef5 for more information.
 #
-function io::invoke() { :; }
+function exe::invoke() { :; }
 
-# ## io::invoke2
+# ## exe::invoke2
 #
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to environment variables.
-# Equivalent to io::invoke5 "${1}" 0 "" "" "${@:2}"
+# Equivalent to exe::invoke5 "${1}" 0 "" "" "${@:2}"
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails.
@@ -1136,20 +1136,20 @@ function io::invoke() { :; }
 # - `RETURNED_VALUE2`: The content of stderr.
 #
 # ```bash
-# io::invokef2 false git status || core::fail "status failed."
+# exe::invokef2 false git status || core::fail "status failed."
 # stdout="${RETURNED_VALUE}"
 # stderr="${RETURNED_VALUE2}"
 # ```
 #
-# > See io::invokef5 for more information.
+# > See exe::invokef5 for more information.
 #
-function io::invoke2() { :; }
+function exe::invoke2() { :; }
 
-# ## io::invoke2piped
+# ## exe::invoke2piped
 #
 # This function call an executable and its arguments and input a given string as stdin.
 # It redirects the stdout and stderr to environment variables.
-# Equivalent to io::invoke5 "${1}" 0 false "${2}" "${@:3}"
+# Equivalent to exe::invoke5 "${1}" 0 false "${2}" "${@:3}"
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails.
@@ -1168,7 +1168,7 @@ function io::invoke2() { :; }
 # - `RETURNED_VALUE2`: The content of stderr.
 #
 # ```bash
-# io::invoke2piped true "key: val" yq -o json -p yaml -
+# exe::invoke2piped true "key: val" yq -o json -p yaml -
 # stdout="${RETURNED_VALUE}"
 # stderr="${RETURNED_VALUE2}"
 # ```
@@ -1177,11 +1177,11 @@ function io::invoke2() { :; }
 # > `myvar="$(printf '%s\n' "mystring" | mycommand)"`
 # > But without using a subshell.
 # >
-# > See io::invokef5 for more information.
+# > See exe::invokef5 for more information.
 #
-function io::invoke2piped() { :; }
+function exe::invoke2piped() { :; }
 
-# ## io::invoke5
+# ## exe::invoke5
 #
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to environment variables.
@@ -1209,20 +1209,20 @@ function io::invoke2piped() { :; }
 # - `RETURNED_VALUE2`: The content of stderr.
 #
 # ```bash
-# io::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
+# exe::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
 # stdout="${RETURNED_VALUE}"
 # stderr="${RETURNED_VALUE2}"
 # ```
 #
-# > See io::invokef5 for more information.
+# > See exe::invokef5 for more information.
 #
-function io::invoke5() { :; }
+function exe::invoke5() { :; }
 
-# ## io::invokef2
+# ## exe::invokef2
 #
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to temporary files.
-# Equivalent to io::invokef5 "${1}" 0 "" "" "${@:2}"
+# Equivalent to exe::invokef5 "${1}" 0 "" "" "${@:2}"
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails.
@@ -1239,20 +1239,20 @@ function io::invoke5() { :; }
 # - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
 #
 # ```bash
-# io::invokef2 false git status || core::fail "status failed."
+# exe::invokef2 false git status || core::fail "status failed."
 # stdoutFilePath="${RETURNED_VALUE}"
 # stderrFilePath="${RETURNED_VALUE2}"
 # ```
 #
-# > See io::invokef5 for more information.
+# > See exe::invokef5 for more information.
 #
-function io::invokef2() { :; }
+function exe::invokef2() { :; }
 
-# ## io::invokef2piped
+# ## exe::invokef2piped
 #
 # This function call an executable and its arguments and input a given string as stdin.
 # It redirects the stdout and stderr to temporary files.
-# Equivalent to io::invokef5 "${1}" 0 false "${2}" "${@:3}"
+# Equivalent to exe::invokef5 "${1}" 0 false "${2}" "${@:3}"
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails.
@@ -1271,7 +1271,7 @@ function io::invokef2() { :; }
 # - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
 #
 # ```bash
-# io::invokef2piped true "key: val" yq -o json -p yaml -
+# exe::invokef2piped true "key: val" yq -o json -p yaml -
 # stdoutFilePath="${RETURNED_VALUE}"
 # stderrFilePath="${RETURNED_VALUE2}"
 # ```
@@ -1280,11 +1280,11 @@ function io::invokef2() { :; }
 # > `myvar="$(printf '%s\n' "mystring" | mycommand)"`
 # > But without using a subshell.
 # >
-# > See io::invokef5 for more information.
+# > See exe::invokef5 for more information.
 #
-function io::invokef2piped() { :; }
+function exe::invokef2piped() { :; }
 
-# ## io::invokef5
+# ## exe::invokef5
 #
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to temporary files.
@@ -1311,21 +1311,21 @@ function io::invokef2piped() { :; }
 # - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
 #
 # ```bash
-# io::invokef5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
+# exe::invokef5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
 # stdoutFilePath="${RETURNED_VALUE}"
 # stderrFilePath="${RETURNED_VALUE2}"
 # ```
 #
 # > - In windows, this is tremendously faster to do (or any other invoke flavor):
-# >   `io::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
+# >   `exe::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
 # >   than doing:
 # >   `myvar="$(mycommand)".`
 # > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
 # > - On linux, you can use a tmpfs directory for massive gains over subshells.
 #
-function io::invokef5() { :; }
+function exe::invokef5() { :; }
 
-# ## io::isDirectoryWritable
+# ## fs::isDirectoryWritable
 #
 # Check if the directory is writable. Creates the directory if it does not exist.
 #
@@ -1341,14 +1341,14 @@ function io::invokef5() { :; }
 #   - 1 otherwise
 #
 # ```bash
-# if io::isDirectoryWritable "/path/to/directory"; then
+# if fs::isDirectoryWritable "/path/to/directory"; then
 #   echo "The directory is writable."
 # fi
 # ```
 #
-function io::isDirectoryWritable() { :; }
+function fs::isDirectoryWritable() { :; }
 
-# ## io::listDirectories
+# ## fs::listDirectories
 #
 # List all the directories in the given directory.
 #
@@ -1371,15 +1371,15 @@ function io::isDirectoryWritable() { :; }
 # - `RETURNED_ARRAY`: An array with the list of all the files.
 #
 # ```bash
-# io::listDirectories "/path/to/directory" true true myFilterFunction
+# fs::listDirectories "/path/to/directory" true true myFilterFunction
 # for path in "${RETURNED_ARRAY[@]}"; do
 #   printf '%s' "${path}"
 # done
 # ```
 #
-function io::listDirectories() { :; }
+function fs::listDirectories() { :; }
 
-# ## io::listFiles
+# ## fs::listFiles
 #
 # List all the files in the given directory.
 #
@@ -1402,15 +1402,15 @@ function io::listDirectories() { :; }
 # - `RETURNED_ARRAY`: An array with the list of all the files.
 #
 # ```bash
-# io::listFiles "/path/to/directory" true true myFilterFunction
+# fs::listFiles "/path/to/directory" true true myFilterFunction
 # for path in "${RETURNED_ARRAY[@]}"; do
 #   printf '%s' "${path}"
 # done
 # ```
 #
-function io::listFiles() { :; }
+function fs::listFiles() { :; }
 
-# ## io::listPaths
+# ## fs::listPaths
 #
 # List all the paths in the given directory.
 #
@@ -1438,7 +1438,7 @@ function io::listFiles() { :; }
 # - `RETURNED_ARRAY`: An array with the list of all the paths.
 #
 # ```bash
-# io::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
+# fs::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
 # for path in "${RETURNED_ARRAY[@]}"; do
 #   printf '%s' "${path}"
 # done
@@ -1446,9 +1446,9 @@ function io::listFiles() { :; }
 #
 # > - It will correctly list files under symbolic link directories.
 #
-function io::listPaths() { :; }
+function fs::listPaths() { :; }
 
-# ## io::readFile
+# ## fs::readFile
 #
 # Reads the content of a file and returns it in the global variable RETURNED_VALUE.
 # Uses pure bash.
@@ -1466,13 +1466,13 @@ function io::listPaths() { :; }
 # - `RETURNED_VALUE`: The content of the file.
 #
 # ```bash
-# io::readFile "/path/to/file" && local fileContent="${RETURNED_VALUE}"
-# io::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
+# fs::readFile "/path/to/file" && local fileContent="${RETURNED_VALUE}"
+# fs::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
 # ```
 #
-function io::readFile() { :; }
+function fs::readFile() { :; }
 
-# ## io::readStdIn
+# ## exe::readStdIn
 #
 # Read the content of the standard input.
 # Will immediately return if the standard input is empty.
@@ -1482,12 +1482,12 @@ function io::readFile() { :; }
 # - `RETURNED_VALUE`: The content of the standard input.
 #
 # ```bash
-# io::readStdIn && local stdIn="${RETURNED_VALUE}"
+# exe::readStdIn && local stdIn="${RETURNED_VALUE}"
 # ```
 #
-function io::readStdIn() { :; }
+function exe::readStdIn() { :; }
 
-# ## io::sleep
+# ## exe::sleep
 #
 # Sleep for the given amount of time.
 # This is a pure bash replacement of sleep.
@@ -1501,9 +1501,9 @@ function io::readStdIn() { :; }
 #
 # > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 #
-function io::sleep() { :; }
+function exe::sleep() { :; }
 
-# ## io::tail
+# ## fs::tail
 #
 # Print the last lines of a file to stdout.
 # This is a pure bash equivalent of tail.
@@ -1520,14 +1520,14 @@ function io::sleep() { :; }
 #       (defaults to false)
 #
 # ```bash
-# io::tail "myFile" 10
+# fs::tail "myFile" 10
 # ```
 #
 # > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 #
-function io::tail() { :; }
+function fs::tail() { :; }
 
-# ## io::toAbsolutePath
+# ## fs::toAbsolutePath
 #
 # This function returns the absolute path of a path.
 #
@@ -1539,15 +1539,15 @@ function io::tail() { :; }
 # - `RETURNED_VALUE`: The absolute path of the path.
 #
 # ```bash
-# io::toAbsolutePath "myFile"
+# fs::toAbsolutePath "myFile"
 # local myFileAbsolutePath="${RETURNED_VALUE}"
 # ```
 #
 # > This is a pure bash alternative to `realpath` or `readlink`.
 #
-function io::toAbsolutePath() { :; }
+function fs::toAbsolutePath() { :; }
 
-# ## io::windowsCreateTempDirectory
+# ## windows::createTempDirectory
 #
 # Create a temporary directory on Windows and return the path both for Windows and Unix.
 #
@@ -1559,15 +1559,15 @@ function io::toAbsolutePath() { :; }
 # - `RETURNED_VALUE2`: The Unix path.
 #
 # ```bash
-# io::windowsCreateTempDirectory
+# windows::createTempDirectory
 # ```
 #
-# > Directories created this way are automatically cleaned up by the io::cleanTempFiles
+# > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
 #
-function io::windowsCreateTempDirectory() { :; }
+function windows::createTempDirectory() { :; }
 
-# ## io::windowsCreateTempFile
+# ## windows::createTempFile
 #
 # Create a temporary file on Windows and return the path both for Windows and Unix.
 #
@@ -1579,17 +1579,17 @@ function io::windowsCreateTempDirectory() { :; }
 # - `RETURNED_VALUE2`: The Unix path.
 #
 # ```bash
-# io::windowsCreateTempFile
+# windows::createTempFile
 # ```
 #
-# > Files created this way are automatically cleaned up by the io::cleanTempFiles
+# > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
 #
-function io::windowsCreateTempFile() { :; }
+function windows::createTempFile() { :; }
 
-# ## io::windowsPowershellBatchEnd
+# ## windows::endPs1Batch
 #
-# This function will run all the commands that were batched with `io::windowsPowershellBatchStart`.
+# This function will run all the commands that were batched with `windows::startPs1Batch`.
 #
 # Returns:
 #
@@ -1600,33 +1600,33 @@ function io::windowsCreateTempFile() { :; }
 # - `RETURNED_VALUE2`: The content of stderr.
 #
 # ```bash
-# io::windowsPowershellBatchStart
-# io::windowsRunInPowershell "Write-Host \"Hello\""
-# io::windowsRunInPowershell "Write-Host \"World\""
-# io::windowsPowershellBatchEnd
+# windows::startPs1Batch
+# windows::runPs1 "Write-Host \"Hello\""
+# windows::runPs1 "Write-Host \"World\""
+# windows::endPs1Batch
 # ```
 #
-function io::windowsPowershellBatchEnd() { :; }
+function windows::endPs1Batch() { :; }
 
-# ## io::windowsPowershellBatchStart
+# ## windows::startPs1Batch
 #
 # After running this function, all commands that should be executed by
-# `io::windowsRunInPowershell` will be added to a batch that will only be played
-# when `io::windowsPowershellBatchEnd` is called.
+# `windows::runPs1` will be added to a batch that will only be played
+# when `windows::endPs1Batch` is called.
 #
 # This is a convenient way to run multiple commands in a single PowerShell session.
 # It makes up for the fact that running a new PowerShell session for each command is slow.
 #
 # ```bash
-# io::windowsPowershellBatchStart
-# io::windowsRunInPowershell "Write-Host \"Hello\""
-# io::windowsRunInPowershell "Write-Host \"World\""
-# io::windowsPowershellBatchEnd
+# windows::startPs1Batch
+# windows::runPs1 "Write-Host \"Hello\""
+# windows::runPs1 "Write-Host \"World\""
+# windows::endPs1Batch
 # ```
 #
-function io::windowsPowershellBatchStart() { :; }
+function windows::startPs1Batch() { :; }
 
-# ## io::windowsRunInPowershell
+# ## windows::runPs1
 #
 # Runs a PowerShell command.
 # This is mostly useful on Windows.
@@ -1646,10 +1646,10 @@ function io::windowsPowershellBatchStart() { :; }
 # - `RETURNED_VALUE2`: The content of stderr.
 #
 # ```bash
-# io::windowsRunInPowershell "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
+# windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
 # ```
 #
-function io::windowsRunInPowershell() { :; }
+function windows::runPs1() { :; }
 
 # ## log::debug
 #
@@ -2639,7 +2639,7 @@ function system::isRoot() { :; }
 #
 function system::os() { :; }
 
-# ## system::windowsAddToPath
+# ## windows::addToPath
 #
 # Add the given path to the PATH environment variable on Windows (current user only).
 #
@@ -2650,14 +2650,14 @@ function system::os() { :; }
 #       The path can be in unix format, it will be converted to windows format.
 #
 # ```bash
-# system::windowsAddToPath "/path/to/bin"
+# windows::addToPath "/path/to/bin"
 # ```
 #
 # > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 #
-function system::windowsAddToPath() { :; }
+function windows::addToPath() { :; }
 
-# ## system::windowsGetEnvVar
+# ## windows::getEnvVar
 #
 # Get the value of an environment variable for the current user on Windows.
 #
@@ -2669,13 +2669,13 @@ function system::windowsAddToPath() { :; }
 # - `RETURNED_VALUE`: the value of the environment variable.
 #
 # ```bash
-# system::windowsGetEnvVar "MY_VAR"
+# windows::getEnvVar "MY_VAR"
 # echo "${RETURNED_VALUE}"
 # ```
 #
-function system::windowsGetEnvVar() { :; }
+function windows::getEnvVar() { :; }
 
-# ## system::windowsSetEnvVar
+# ## windows::setEnvVar
 #
 # Set an environment variable for the current user on Windows.
 #
@@ -2685,12 +2685,12 @@ function system::windowsGetEnvVar() { :; }
 #       the value of the environment variable to set.
 #
 # ```bash
-# system::windowsSetEnvVar "MY_VAR" "my_value"
+# windows::setEnvVar "MY_VAR" "my_value"
 # ```
 #
 # > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 #
-function system::windowsSetEnvVar() { :; }
+function windows::setEnvVar() { :; }
 
 # ## test::exec
 #

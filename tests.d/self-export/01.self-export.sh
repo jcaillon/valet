@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 command::sourceFunction "selfExport"
-# shellcheck disable=SC1091
-source io
 
 function main() {
   test::title "✅ Testing self export command"

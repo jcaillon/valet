@@ -13,8 +13,8 @@ fi
 
 # shellcheck source=../libraries.d/lib-string
 source string
-# shellcheck source=../libraries.d/lib-io
-source io
+# shellcheck source=../libraries.d/lib-fs
+source fs
 # shellcheck source=../libraries.d/lib-interactive
 source interactive
 
@@ -77,9 +77,9 @@ function selfAddLibrary() {
   fi
 
   # create the commands directory if it does not exist
-  io::createDirectoryIfNeeded "${PWD}/libraries.d"
+  fs::createDirectoryIfNeeded "${PWD}/libraries.d"
 
-  io::readFile "${commandTemplateFile}"
+  fs::readFile "${commandTemplateFile}"
   local templateContent="${RETURNED_VALUE//_LIBRARY_NAME_/"${libraryName}"}"
 
   printf "%s" "${templateContent}" >"${newCommandFilePath}"

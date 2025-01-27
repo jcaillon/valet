@@ -1,0 +1,556 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# ## fs::toAbsolutePath
+#
+# This function returns the absolute path of a path.
+#
+# - $1: **path** _as string_:
+#       The path to translate to absolute path.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The absolute path of the path.
+#
+# ```bash
+# fs::toAbsolutePath "myFile"
+# local myFileAbsolutePath="${RETURNED_VALUE}"
+# ```
+#
+# > This is a pure bash alternative to `realpath` or `readlink`.
+function fs::toAbsolutePath() {
+  local file="${1%/}"
+
+  # if file starts with ~, we replace it with the home directory
+  if [[ ${file} == "~"* ]]; then
+    RETURNED_VALUE="${HOME}${file:1}"
+    return 0
+  fi
+
+  # if the file is already an absolute path, we return it
+  if [[ ${file} == "/"* ]]; then
+    RETURNED_VALUE="${file}"
+    return 0
+  fi
+
+  # if the file is relative path starting with .
+  if [[ ${file} == "." ]]; then
+    RETURNED_VALUE="${PWD}"
+    return 0
+  elif [[ ${file} == ".." ]]; then
+    RETURNED_VALUE="${PWD%/*}"
+    return 0
+  fi
+
+  # if the file is a relative path (not containing ..), we return the absolute path
+  RETURNED_VALUE="${PWD}/${file#./}"
+  if [[ ${file} != *".."* && -e "${RETURNED_VALUE}" ]]; then
+    return 0
+  fi
+
+  # the file contains .., we need to resolve the path by cd'ing into the directory
+  if pushd "${file%/*}" &>/dev/null; then
+    RETURNED_VALUE="${PWD}/${file##*/}"
+    popd 1>/dev/null || core::fail "Failed to popd."
+    return 0
+  fi
+
+  # other cases of relative paths not handled.
+  RETURNED_VALUE="${PWD}/${file#./}"
+}
+
+# ## fs::readFile
+#
+# Reads the content of a file and returns it in the global variable RETURNED_VALUE.
+# Uses pure bash.
+#
+# - $1: **path** _as string_:
+#       the file path to read
+# - $2: max char _as int_:
+#       (optional) the maximum number of characters to read
+#       (defaults to 0, which means read the whole file)
+#
+# > If the file does not exist, the function will return an empty string instead of failing.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The content of the file.
+#
+# ```bash
+# fs::readFile "/path/to/file" && local fileContent="${RETURNED_VALUE}"
+# fs::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
+# ```
+function fs::readFile() {
+  local filePath="${1}"
+  local -i maxCharacters="${2:-0}"
+
+  if [[ ! -s "${filePath}" ]]; then
+    RETURNED_VALUE=""
+    return 0
+  fi
+
+  RETURNED_VALUE=""
+  local IFS=''
+  if [[ "${maxCharacters}" -gt 0 ]]; then
+    read -rd '' -n "${maxCharacters}" RETURNED_VALUE <"${filePath}" || [[ -n ${RETURNED_VALUE} ]]
+  else
+    read -rd '' RETURNED_VALUE <"${filePath}" || [[ -n ${RETURNED_VALUE} ]] || RETURNED_VALUE=""
+    # fail safe for cases where the file is suppose to not be empty but we get null string
+    if [[ -z "${RETURNED_VALUE}" ]]; then
+      RETURNED_VALUE="$(<"${filePath}")"
+    fi
+  fi
+}
+
+## fs::writeToFile
+#
+# Write the content to a file.
+#
+# - $1: **path** _as string_:
+#       the file path to write
+# - $2: **content** _as string_:
+#       the content to write
+# - $3: append _as bool_:
+#       (optional) true to append the content to the file, false otherwise
+#       (defaults to false)
+#
+# ```bash
+# fs::writeToFile "/path/to/file" "content"
+# ```
+#
+# > - This function will overwrite the file if it already exists.
+# > - If the file path does not exist, the function will create the directory tree.
+# > - The main use case is to be able to mock this function during tests...
+function fs::writeToFile() {
+  fs::createFilePathIfNeeded "${1}"
+  if [[ ${3:-false} == "true" ]]; then
+    printf '%s' "${2}" >>"${1}"
+  else
+    printf '%s' "${2}" >"${1}"
+  fi
+}
+
+# ## fs::createDirectoryIfNeeded
+#
+# Create the directory tree if needed.
+#
+# - $1: **path** _as string_:
+#       The directory path to create.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The absolute path to the directory.
+#
+# ```bash
+# fs::createDirectoryIfNeeded "/my/directory"
+# ```
+function fs::createDirectoryIfNeeded() {
+  fs::toAbsolutePath "${1}"
+  local dirPath="${RETURNED_VALUE}"
+
+  if [[ ! -d "${dirPath}" ]]; then
+    if ! mkdir -p "${dirPath}" 1>/dev/null; then
+      core::fail "Failed to create the directory ⌜${dirPath}⌝."
+    fi
+  fi
+
+  RETURNED_VALUE="${dirPath}"
+}
+
+# ## fs::createFilePathIfNeeded
+#
+# Make sure that the given file path exists.
+# Create the directory tree and the file if needed.
+#
+# - $1: **path** _as string_:
+#       the file path to create
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The absolute path of the file.
+#
+# ```bash
+# fs::createFilePathIfNeeded "myFile"
+# ```
+function fs::createFilePathIfNeeded() {
+  fs::toAbsolutePath "${1}"
+  local filePath="${RETURNED_VALUE}"
+  local parentDir="${filePath%/*}"
+
+  fs::createDirectoryIfNeeded "${parentDir}"
+
+  if [[ ! -f "${filePath}" ]]; then
+    : >"${filePath}"
+  fi
+
+  RETURNED_VALUE="${filePath}"
+}
+
+# ## fs::cat
+#
+# Print the content of a file to stdout.
+# This is a pure bash equivalent of cat.
+#
+# - $1: **path** _as string_:
+#       the file to print
+#
+# ```bash
+# fs::cat "myFile"
+# ```
+#
+# > Also see log::printFile if you want to print a file for a user.
+function fs::cat() {
+  fs::readFile "${1}"
+  printf '%s\n' "${RETURNED_VALUE}"
+}
+
+# ## fs::head
+#
+# Print the first lines of a file to stdout.
+# This is a pure bash equivalent of head.
+#
+# - $1: **path** _as string_:
+#       The file to print.
+# - $2: **number of lines** _as int_:
+#       The number of lines to print.
+# - $3: to variable _as bool_:
+#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.
+#       If true, the output will be stored in the variable `RETURNED_ARRAY`
+#       instead of being printed to stdout.
+#       (defaults to false)
+#
+# ```bash
+# fs::head "myFile" 10
+# ```
+#
+# > #TODO: faster with mapfile + quantum?
+function fs::head() {
+  local filePath="${1}"
+  local -i numberOfLines="${2}"
+  local toVariable="${3:-${_OPTION_TO_VARIABLE:-false}}"
+  RETURNED_ARRAY=()
+  local IFS=$'\n' line
+  nb=0
+  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
+    if ((nb++ >= numberOfLines)); then
+      break
+    fi
+    if [[ ${toVariable} == "true" ]]; then
+      RETURNED_ARRAY+=("${line}")
+    else
+      printf '%s\n' "${line}"
+    fi
+  done <"${filePath}"
+}
+
+# ## fs::tail
+#
+# Print the last lines of a file to stdout.
+# This is a pure bash equivalent of tail.
+# However, because we have to read the whole file, it is not efficient for large files.
+#
+# - $1: **path** _as string_:
+#       The file to print.
+# - $2: **number of lines** _as int_:
+#       The number of lines to print from the end of the file.
+# - $3: to variable _as bool_:
+#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.
+#       If true, the output will be stored in the variable `RETURNED_ARRAY`
+#       instead of being printed to stdout.
+#       (defaults to false)
+#
+# ```bash
+# fs::tail "myFile" 10
+# ```
+#
+# > #TODO: use mapfile quantum to not have to read the whole file in a single go.
+function fs::tail() {
+  local filePath="${1}"
+  local -i numberOfLines="${2}"
+  local toVariable="${3:-${_OPTION_TO_VARIABLE:-false}}"
+  RETURNED_ARRAY=()
+  local IFS=$'\n'
+  local -a lines
+  mapfile -d $'\n' -t lines <"${filePath}"
+  local -i startLine=$(( ${#lines[@]} - numberOfLines ))
+  if [[ ${startLine} -lt 0 ]]; then
+    startLine=0
+  fi
+  if [[ ${toVariable} == "true" ]]; then
+    RETURNED_ARRAY=("${lines[@]:${startLine}}")
+  else
+    printf '%s\n' "${lines[@]:${startLine}}"
+  fi
+}
+
+# ## fs::listPaths
+#
+# List all the paths in the given directory.
+#
+# - $1: **directory** _as string_:
+#       the directory to list
+# - $2: recursive _as bool_:
+#       (optional) true to list recursively, false otherwise
+#       (defaults to false)
+# - $3: hidden _as bool_:
+#       (optional) true to list hidden paths, false otherwise
+#       (defaults to false)
+# - $4: path filter function name _as string_:
+#       (optional) a function name that is called to filter the paths that will be listed
+#       The function should return 0 if the path is to be kept, 1 otherwise.
+#       The function is called with the path as the first argument.
+#       (defaults to empty string, no filter)
+# - $5: directory filter function name _as string_:
+#       (optional) a function name that is called to filter the directories (for recursive listing)
+#       The function should return 0 if the path is to be kept, 1 otherwise.
+#       The function is called with the path as the first argument.
+#       (defaults to empty string, no filter)
+#
+# Returns:
+#
+# - `RETURNED_ARRAY`: An array with the list of all the paths.
+#
+# ```bash
+# fs::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
+# for path in "${RETURNED_ARRAY[@]}"; do
+#   printf '%s' "${path}"
+# done
+# ```
+#
+# > - It will correctly list files under symbolic link directories.
+function fs::listPaths() {
+  local directory="${1}"
+  local recursive="${2:-false}"
+  local includeHidden="${3:-false}"
+  local filterFunction="${4:-}"
+  local filterDirectoryFunction="${5:-}"
+
+  local IFS=' '
+
+  local activatedHidden=false
+  if [[ ${includeHidden} == "true" ]]; then
+    # change the shell options to include hidden files
+    log::debug "Activating the dotglob shell option."
+    shopt -s dotglob
+    activatedHidden=true
+  fi
+
+  RETURNED_ARRAY=()
+
+  local path listOfDirectories currentDirectory
+
+  listOfDirectories="${directory}"$'\n'
+  while [[ -n "${listOfDirectories}" ]]; do
+    currentDirectory="${listOfDirectories%%$'\n'*}"
+    listOfDirectories="${listOfDirectories#*$'\n'}"
+
+    log::trace "Listing paths in ⌜${currentDirectory}⌝."
+
+    for path in "${currentDirectory}"/*; do
+      if [[ ${recursive} == "true" && -d "${path}" ]]; then
+        if [[ -z ${filterDirectoryFunction} ]] || ${filterDirectoryFunction} "${path}"; then
+          listOfDirectories+="${path}"$'\n'
+          log::trace "Adding directory ⌜${path}⌝ to the search list."
+        fi
+      fi
+      if [[ -n ${filterFunction} ]] && ! ${filterFunction} "${path}"; then
+        continue
+      fi
+      RETURNED_ARRAY+=("${path}")
+    done
+  done
+
+  if [[ ${activatedHidden} == "true" ]]; then
+    shopt -u dotglob
+  fi
+}
+
+# ## fs::listFiles
+#
+# List all the files in the given directory.
+#
+# - $1: **directory** _as string_:
+#       the directory to list
+# - $2: recursive _as bool_:
+#       (optional) true to list recursively, false otherwise
+#       (defaults to false)
+# - $3: hidden _as bool_:
+#       (optional) true to list hidden paths, false otherwise
+#       (defaults to false)
+# - $4: directory filter function name _as string_:
+#       (optional) a function name that is called to filter the directories (for recursive listing)
+#       The function should return 0 if the path is to be kept, 1 otherwise.
+#       The function is called with the path as the first argument.
+#       (defaults to empty string, no filter)
+#
+# Returns:
+#
+# - `RETURNED_ARRAY`: An array with the list of all the files.
+#
+# ```bash
+# fs::listFiles "/path/to/directory" true true myFilterFunction
+# for path in "${RETURNED_ARRAY[@]}"; do
+#   printf '%s' "${path}"
+# done
+# ```
+function fs::listFiles() {
+  # shellcheck disable=SC2317
+  function ioListFilesReturnTrueIfFile() {
+    if [[ ! -f ${1} ]]; then return 1; fi
+  }
+  fs::listPaths "${1}" "${2:-false}" "${3:-false}" ioListFilesReturnTrueIfFile "${4:-}"
+}
+
+# ## fs::listDirectories
+#
+# List all the directories in the given directory.
+#
+# - $1: **directory** _as string_:
+#       the directory to list
+# - $2: recursive _as bool_:
+#       (optional) true to list recursively, false otherwise
+#       (defaults to false)
+# - $3: hidden _as bool_:
+#       (optional) true to list hidden paths, false otherwise
+#       (defaults to false)
+# - $4: directory filter function name _as string_:
+#       (optional) a function name that is called to filter the sub directories (for recursive listing)
+#       The function should return 0 if the path is to be kept, 1 otherwise.
+#       The function is called with the path as the first argument.
+#       (defaults to empty string, no filter)
+#
+# Returns:
+#
+# - `RETURNED_ARRAY`: An array with the list of all the files.
+#
+# ```bash
+# fs::listDirectories "/path/to/directory" true true myFilterFunction
+# for path in "${RETURNED_ARRAY[@]}"; do
+#   printf '%s' "${path}"
+# done
+# ```
+function fs::listDirectories() {
+  # shellcheck disable=SC2317
+  function ioListDirectoriesReturnTrueIfDirectory() {
+    if [[ ! -d ${1} ]]; then return 1; fi
+  }
+  fs::listPaths "${1}" "${2:-false}" "${3:-false}" ioListDirectoriesReturnTrueIfDirectory "${4:-}"
+}
+
+# ## fs::isDirectoryWritable
+#
+# Check if the directory is writable. Creates the directory if it does not exist.
+#
+# - $1: **directory** _as string_:
+#       the directory to check
+# - $2: test file name _as string_:
+#       (optional) the name of the file to create in the directory to test the write access
+#
+# Returns:
+#
+# - `$?`:
+#   - 0 if the directory is writable
+#   - 1 otherwise
+#
+# ```bash
+# if fs::isDirectoryWritable "/path/to/directory"; then
+#   echo "The directory is writable."
+# fi
+# ```
+function fs::isDirectoryWritable() {
+  local directory="${1%/}"
+  local testFile="${2:-writable-test-${BASHPID}}"
+  if ! mkdir -p "${directory}" &>/dev/null; then
+    return 1
+  fi
+  local path="${1}/${testFile}"
+  if (: >"${path}") &>/dev/null; then
+    if ! rm -f "${path}" 1>/dev/null; then
+      return 1
+    fi
+    return 0
+  fi
+  return 1
+}
+
+# ## fs::createLink
+#
+# Create a soft or hard link (original ← link).
+#
+# Reminder:
+#
+# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the
+#   form of an absolute or relative path.
+# - A hard link is a directory entry that associates a new pathname with an existing
+#   file (inode + data block) on a file system.
+#
+# This function allows to create a symbolic link on Windows as well as on Unix.
+#
+# - $1: **linked path** _as string_:
+#       the path to link to (the original file)
+# - $2: **link path** _as string_:
+#       the path where to create the link
+# - $3: hard link _as boolean_:
+#       (optional) true to create a hard link, false to create a symbolic link
+#       (defaults to false)
+# - $4: force _as boolean_:
+#       (optional) true to overwrite the link or file if it already exists.
+#       Otherwise, the function will fail on an existing link.
+#       (defaults to true)
+#
+# ```bash
+# fs::createLink "/path/to/link" "/path/to/linked"
+# fs::createLink "/path/to/link" "/path/to/linked" true
+# ```
+#
+# > The function uses the `ln` command.
+function fs::createLink() {
+  local linkedPath="${1}"
+  local linkPath="${2}"
+  local hardLink="${3:-false}"
+  local force="${3:-true}"
+
+  fs::toAbsolutePath "${linkedPath}"
+  linkedPath="${RETURNED_VALUE}"
+  fs::toAbsolutePath "${linkPath}"
+  linkPath="${RETURNED_VALUE}"
+
+  # check if the linked path exists
+  if [[ ! -e "${linkedPath}" ]]; then
+    core::fail "Failed to create a link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the linked path does not exist."
+  fi
+
+  # check the link path
+  if [[ -f ${linkPath} || -L ${linkPath} ]]; then
+    # if force, delete the link (or file) if it exists
+    if [[ ${force} == true ]]; then
+      if ! rm -f "${linkPath}"; then
+        core::fail "Failed to delete the existing link ⌜${linkPath}⌝ to replace it."
+      fi
+    else
+      core::fail "Failed to create a link to ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the link pathname already exists."
+    fi
+  fi
+
+  # create link parent directory if needed
+  local linkParentPath="${linkPath%/*}"
+  fs::createDirectoryIfNeeded "${linkParentPath}"
+
+  # create link
+  if [[ ${hardLink} == "true" ]]; then
+    if ! ln "${linkedPath}" "${linkPath}"; then
+      core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+    fi
+  else
+    if ! ln -s "${linkedPath}" "${linkPath}"; then
+      core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+    fi
+  fi
+
+  local linkType="symbolic"
+  if [[ ${hardLink} == "true" ]]; then
+    linkType="hard"
+  fi
+  log::debug "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+}

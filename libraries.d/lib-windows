@@ -1,0 +1,529 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# shellcheck source=lib-exe
+source exe
+# shellcheck source=lib-fs
+source fs
+
+# ## windows::runPs1
+#
+# Runs a PowerShell command.
+# This is mostly useful on Windows.
+#
+# - $1: **command** _as string_:
+#       the command to run.
+# - $2: run as administrator _as boolean_:
+#       (optional) whether to run the command as administrator.
+#       (defaults to false).
+#
+# Returns:
+#
+# - $?
+#   - 0 if the command was successful
+#   - 1 otherwise.
+# - `RETURNED_VALUE`: The content of stdout.
+# - `RETURNED_VALUE2`: The content of stderr.
+#
+# ```bash
+# windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
+# ```
+function windows::runPs1() {
+  local command="${1}"
+  local runAsAdmin="${2:-false}"
+
+  local exitCode=0
+
+  if ! command -v powershell &>/dev/null; then
+    core::fail "The PowerShell command is not available."
+  fi
+
+  command="${command//\$/\`\$}"
+
+  # there seem to be no simple way to capture the output of several commands...
+  # we run the commands in a subprocess for which we capture the outputs
+  windows::createTempFile
+  local stdoutFileWindows="${RETURNED_VALUE}"
+  local stdoutFile="${RETURNED_VALUE2}"
+  windows::createTempFile
+  local stderrFileWindows="${RETURNED_VALUE}"
+  local stderrFile="${RETURNED_VALUE2}"
+
+  # shellcheck disable=SC2016
+  local script='
+  $ErrorActionPreference = '"'Stop'"';
+  $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
+  $processInfo.FileName = "powershell.exe"
+  $processInfo.Verb = "runas";
+  $processInfo.RedirectStandardError = $true;
+  $processInfo.RedirectStandardOutput = $true;
+  $processInfo.UseShellExecute = $false;
+  $processInfo.CreateNoWindow = $true;
+  $processInfo.Arguments = @("-NoProfile","-NonInteractive","-Command","`$ErrorActionPreference = '"'Stop'"'; '"${command//\"/\`\"}"'; exit `$LASTEXITCODE;")
+  $p = New-Object System.Diagnostics.Process;
+  $p.StartInfo = $processInfo;
+  $p.Start() | Out-Null;
+  $stdout = $p.StandardOutput.ReadToEnd();
+  $stderr = $p.StandardError.ReadToEnd();
+  $p.WaitForExit();
+  $stdout | Out-File -FilePath '"'${stdoutFileWindows}'"' -Encoding utf8;
+  $stderr | Out-File -FilePath '"'${stderrFileWindows}'"' -Encoding utf8;
+  exit $p.ExitCode;
+  '
+
+  if [[ "${runAsAdmin}" == true ]]; then
+    # if we need to run as admin, we need to create a script that will run the commands
+    # and we run this script as an admin
+    windows::createTempDirectory
+    local scriptFileWindows="${RETURNED_VALUE}\\valet-run-ps1-as-admin.ps1"
+    local scriptFileLinux="${RETURNED_VALUE2}/valet-run-ps1-as-admin.ps1"
+    fs::writeToFile "${scriptFileLinux}" "${script}"
+    # shellcheck disable=SC2016
+    script='
+    $ErrorActionPreference = '"'Stop'"';
+    $process = Start-Process -FilePath powershell.exe -ArgumentList @("-NoProfile","-NonInteractive","-File","'"${scriptFileWindows}"'") -Wait -Verb RunAs -WindowStyle Hidden;
+    exit $process.ExitCode
+    '
+  fi
+  powershell -NoProfile -NonInteractive -Command "${script}" || exitCode=1
+
+  fs::readFile "${stdoutFile}"
+  stdout="${RETURNED_VALUE//$'\r'/}"
+  fs::readFile "${stderrFile}"
+  RETURNED_VALUE2="${RETURNED_VALUE//$'\r'/}"
+  RETURNED_VALUE="${stdout}"
+
+  return ${exitCode}
+}
+
+# ## windows::startPs1Batch
+#
+# After running this function, all commands that should be executed by
+# `windows::runPs1` will be added to a batch that will only be played
+# when `windows::endPs1Batch` is called.
+#
+# This is a convenient way to run multiple commands in a single PowerShell session.
+# It makes up for the fact that running a new PowerShell session for each command is slow.
+#
+# ```bash
+# windows::startPs1Batch
+# windows::runPs1 "Write-Host \"Hello\""
+# windows::runPs1 "Write-Host \"World\""
+# windows::endPs1Batch
+# ```
+function windows::startPs1Batch() {
+  _IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS=""
+  _IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN=false
+
+  # save the original function before overriding it
+  exe::invoke declare -f windows::runPs1
+  _IO_WINDOWS_POWERSHELL_FUNCTION="${RETURNED_VALUE//declare -? /}"
+
+  # shellcheck disable=SC2317
+  function windows::runPs1() {
+    _IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS+="${1};"
+    if [[ "${2:-false}" == true ]]; then
+      _IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN=true
+    fi
+  }
+}
+
+# ## windows::endPs1Batch
+#
+# This function will run all the commands that were batched with `windows::startPs1Batch`.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the command was successful
+#   - 1 otherwise.
+# - `RETURNED_VALUE`: The content of stdout.
+# - `RETURNED_VALUE2`: The content of stderr.
+#
+# ```bash
+# windows::startPs1Batch
+# windows::runPs1 "Write-Host \"Hello\""
+# windows::runPs1 "Write-Host \"World\""
+# windows::endPs1Batch
+# ```
+function windows::endPs1Batch() {
+  if [[ -z ${_IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS} ]]; then
+    RETURNED_VALUE=""
+    RETURNED_VALUE2=""
+    return 0
+  fi
+  # restore the original function
+  eval "${_IO_WINDOWS_POWERSHELL_FUNCTION}"
+
+  windows::runPs1 "${_IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS}" "${_IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN}"
+  unset -v _IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS _IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN _IO_WINDOWS_POWERSHELL_FUNCTION
+}
+
+# ## windows::createLink
+#
+# Create a soft or hard link (original ← link).
+#
+# Reminder:
+#
+# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the
+#   form of an absolute or relative path.
+# - A hard link is a directory entry that associates a new pathname with an existing
+#   file (inode + data block) on a file system.
+#
+# This function allows to create a symbolic link on Windows as well as on Unix.
+#
+# - $1: **linked path** _as string_:
+#       the path to link to (the original file)
+# - $2: **link path** _as string_:
+#       the path where to create the link
+# - $3: hard link _as boolean_:
+#       (optional) true to create a hard link, false to create a symbolic link
+#       (defaults to false)
+# - $4: force _as boolean_:
+#       (optional) true to overwrite the link or file if it already exists.
+#       Otherwise, the function will fail on an existing link.
+#       (defaults to true)
+#
+# ```bash
+# windows::createLink "/path/to/link" "/path/to/linked"
+# windows::createLink "/path/to/link" "/path/to/linked" true
+# ```
+#
+# > On Windows, the function uses `powershell` (and optionally ls to check the existing link).
+function windows::createLink() {
+  local linkedPath="${1}"
+  local linkPath="${2}"
+  local hardLink="${3:-false}"
+  local force="${3:-true}"
+
+  fs::toAbsolutePath "${linkedPath}"
+  linkedPath="${RETURNED_VALUE}"
+  fs::toAbsolutePath "${linkPath}"
+  linkPath="${RETURNED_VALUE}"
+
+  # check if the linked path exists
+  if [[ ! -e "${linkedPath}" ]]; then
+    core::fail "Failed to create a link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the linked path does not exist."
+  fi
+
+  # check the link path
+  if [[ -f ${linkPath} || -L ${linkPath} ]]; then
+    # on windows, creating a link is costly so don't do it if it's already good
+    if command -v ls &>/dev/null; then
+      exe::invoke ls -l "${linkPath}"
+      if [[ ${RETURNED_VALUE%%$'\n'*} == *"${linkedPath}" ]]; then
+        log::debug "The link ⌜${linkPath}⌝ already exists and points to ⌜${linkedPath}⌝."
+        return 0
+      fi
+    fi
+
+    # if force, delete the link (or file) if it exists
+    if [[ ${force} == true ]]; then
+      if ! rm -f "${linkPath}"; then
+        core::fail "Failed to delete the existing link ⌜${linkPath}⌝ to replace it."
+      fi
+    else
+      core::fail "Failed to create a link to ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the link pathname already exists."
+    fi
+  fi
+
+  # create link parent directory if needed
+  local linkParentPath="${linkPath%/*}"
+  local linkFileName="${linkPath##*/}"
+  fs::createDirectoryIfNeeded "${linkParentPath}"
+
+  # create link
+  windows::convertPathFromUnix "${linkPath}"
+  linkPath="${RETURNED_VALUE}"
+  windows::convertPathFromUnix "${linkParentPath}"
+  linkParentPath="${RETURNED_VALUE}"
+  windows::convertPathFromUnix "${linkedPath}"
+  linkedPath="${RETURNED_VALUE}"
+
+  log::debug "Creating a new link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝ using powershell."
+  if [[ ${hardLink} == "true" ]]; then
+    if ! windows::runPs1 "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
+      core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+    fi
+  else
+    if ! windows::runPs1 "New-Item -ItemType SymbolicLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
+      core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+    fi
+  fi
+
+  local linkType="symbolic"
+  if [[ ${hardLink} == "true" ]]; then
+    linkType="hard"
+  fi
+  log::debug "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+}
+
+# ## windows::convertPathFromUnix
+#
+# Convert a unix path to a Windows path.
+#
+# - $1: **path** _as string_:
+#       the path to convert
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The Windows path.
+#
+# ```bash
+# windows::convertPathFromUnix "/path/to/file"
+# ```
+#
+# > Handles paths starting with `/mnt/x/` or `/x/`.
+function windows::convertPathFromUnix() {
+  local path="${1}"
+  if [[ ${path} != "/"* ]]; then
+    fs::toAbsolutePath "${path}"
+    path="${RETURNED_VALUE}"
+  fi
+  if [[ ${path} =~ ^"/mnt/"([a-z])"/" || ${path} =~ ^"/"([a-z])"/" ]]; then
+    path="${BASH_REMATCH[1]}:/${path/"${BASH_REMATCH[0]}"/}"
+    path="${path^?}"
+  fi
+  RETURNED_VALUE="${path//\//\\}"
+}
+
+# ## windows::convertPathToUnix
+#
+# Convert a Windows path to a unix path.
+#
+# - $1: **path** _as string_:
+#       the path to convert
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The unix path.
+#
+# ```bash
+# windows::convertPathToUnix "C:\path\to\file"
+# ```
+#
+# > Handles paths starting with `X:\`.
+function windows::convertPathToUnix() {
+  local path="${1}"
+  if [[ ${path} =~ ^([a-zA-Z])":" ]]; then
+    if [[ -d "/mnt/${BASH_REMATCH[1],}" ]]; then
+      path="/mnt/${BASH_REMATCH[1],}${path:2}"
+    else
+      path="/${BASH_REMATCH[1],}${path:2}"
+    fi
+  fi
+  RETURNED_VALUE="${path//\\//}"
+}
+
+# ## windows::createTempFile
+#
+# Create a temporary file on Windows and return the path both for Windows and Unix.
+#
+# This is useful for creating temporary files that can be used in both Windows and Unix.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The Windows path.
+# - `RETURNED_VALUE2`: The Unix path.
+#
+# ```bash
+# windows::createTempFile
+# ```
+#
+# > Files created this way are automatically cleaned up by the fs::cleanTempFiles
+# > function when valet ends.
+function windows::createTempFile() {
+  local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
+
+  if [[ -z ${_IO_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
+    windows::convertPathToUnix "${windowsTemporaryDirectory}"
+    _IO_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
+  fi
+
+  local windowsPath linuxPath
+  TEMPORARY_FILE_NUMBER=${TEMPORARY_FILE_NUMBER:-0}
+  while true; do
+    TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
+    windowsPath="${windowsTemporaryDirectory}\\f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
+    windows::convertPathToUnix "${windowsPath}"
+    linuxPath="${RETURNED_VALUE}"
+    if [[ ! -f "${linuxPath}" ]]; then
+      fs::createFilePathIfNeeded "${linuxPath}"
+
+      RETURNED_VALUE="${windowsPath}"
+      RETURNED_VALUE2="${linuxPath}"
+      return 0
+    fi
+  done
+}
+
+# ## windows::createTempDirectory
+#
+# Create a temporary directory on Windows and return the path both for Windows and Unix.
+#
+# This is useful for creating temporary directories that can be used in both Windows and Unix.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The Windows path.
+# - `RETURNED_VALUE2`: The Unix path.
+#
+# ```bash
+# windows::createTempDirectory
+# ```
+#
+# > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
+# > function when valet ends.
+function windows::createTempDirectory() {
+  local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
+
+  if [[ -z ${_IO_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
+    windows::convertPathToUnix "${windowsTemporaryDirectory}"
+    _IO_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
+  fi
+
+  local windowsPath linuxPath
+  TEMPORARY_DIRECTORY_NUMBER=${TEMPORARY_DIRECTORY_NUMBER:-0}
+  while true; do
+    TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
+    windowsPath="${windowsTemporaryDirectory}\\d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
+    windows::convertPathToUnix "${windowsPath}"
+    linuxPath="${RETURNED_VALUE}"
+    if [[ ! -d "${linuxPath}" ]]; then
+      fs::createDirectoryIfNeeded "${linuxPath}"
+
+      RETURNED_VALUE="${windowsPath}"
+      RETURNED_VALUE2="${linuxPath}"
+      return 0
+    fi
+  done
+}
+
+
+
+# ## windows::setEnvVar
+#
+# Set an environment variable for the current user on Windows.
+#
+# - $1: **variable name** _as string_:
+#       the name of the environment variable to set.
+# - $2: **variable value** _as string_:
+#       the value of the environment variable to set.
+#
+# ```bash
+# windows::setEnvVar "MY_VAR" "my_value"
+# ```
+#
+# > This function is only available on Windows, it uses `powershell` to directly modify the registry.
+function windows::setEnvVar() {
+  local varName="${1:-}"
+  local varValue="${2:-}"
+
+  system::os
+  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
+    core::fail "This function is only available on Windows."
+  fi
+
+  if [[ -z ${varName} ]]; then
+    core::fail "The variable name is missing."
+  fi
+
+  if [[ -n ${varValue} ]]; then
+    if ! windows::runPs1 "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.SetValue('${varName//\'/\'\'}', '${varValue//\'/\'\'}', 'ExpandString');"; then
+      core::fail "Failed to set the environment variable ⌜${varName}⌝."
+    fi
+  else
+
+    if ! windows::runPs1 "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.DeleteValue('${varName//\'/\'\'}');"; then
+      core::fail "Failed to unset the environment variable ⌜${varName}⌝ using null string."
+    fi
+  fi
+}
+
+# ## windows::getEnvVar
+#
+# Get the value of an environment variable for the current user on Windows.
+#
+# - $1: **variable name** _as string_:
+#       the name of the environment variable to get.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the value of the environment variable.
+#
+# ```bash
+# windows::getEnvVar "MY_VAR"
+# echo "${RETURNED_VALUE}"
+# ```
+function windows::getEnvVar() {
+  local varName="${1:-}"
+
+  system::os
+  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
+    core::fail "This function is only available on Windows."
+  fi
+
+  if [[ -z ${varName} ]]; then
+    core::fail "The variable name is missing."
+  fi
+
+  local script="
+  \$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true);
+  \$value = \$key.GetValue('${varName//\'/\'\'}', '', 'DoNotExpandEnvironmentNames');
+  \$key.Dispose();
+  Write-Output \$value;
+  "
+
+  if ! windows::runPs1 "${script}"; then
+    core::fail "Failed to get the environment variable ⌜${varName}⌝."
+  fi
+}
+
+# ## windows::addToPath
+#
+# Add the given path to the PATH environment variable on Windows (current user only).
+#
+# Will also export the PATH variable in the current bash.
+#
+# - $1: **path** _as string_:
+#       the path to add to the PATH environment variable.
+#       The path can be in unix format, it will be converted to windows format.
+#
+# ```bash
+# windows::addToPath "/path/to/bin"
+# ```
+#
+# > This function is only available on Windows, it uses `powershell` to directly modify the registry.
+function windows::addToPath() {
+  local pathToAdd="${1:-}"
+
+  system::os
+  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
+    core::fail "This function is only available on Windows."
+  fi
+
+  log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
+
+  if [[ -z ${pathToAdd} ]]; then
+    core::fail "The path to add to the PATH is missing."
+  fi
+
+  windows::convertPathFromUnix "${pathToAdd}"
+  pathToAdd="${RETURNED_VALUE}"
+
+  local script="
+  \$pathToAdd = '${pathToAdd//\'/\'\'}';
+  \$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true);
+  \$oldPath = \$key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
+  if (\$currentPath -notlike \"*\$pathToAdd*\") {
+      \$newPath = '{0}{1}{2}' -f \$oldPath, [IO.Path]::PathSeparator, \$pathToAdd;
+      \$key.SetValue('Path', \$newPath, 'ExpandString');
+  };
+  \$key.Dispose();
+  "
+
+  if ! windows::runPs1 "${script}"; then
+    core::fail "Failed to add the directory ⌜${pathToAdd}⌝ to the PATH."
+  fi
+}

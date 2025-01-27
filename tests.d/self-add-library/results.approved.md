@@ -34,7 +34,7 @@ WARNING  The library file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-lib
 SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
 ```
 
-❯ `io::cat libraries.d/lib-new-cool-lib`
+❯ `fs::cat libraries.d/lib-new-cool-lib`
 
 **Standard output**:
 

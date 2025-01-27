@@ -125,7 +125,7 @@ function selfBuild() {
   userDirectory="${userDirectory:-${RETURNED_VALUE}}"
   output="${output:-${userDirectory}/commands}"
 
-  io::toAbsolutePath "${GLOBAL_INSTALLATION_DIRECTORY}"
+  fs::toAbsolutePath "${GLOBAL_INSTALLATION_DIRECTORY}"
   GLOBAL_INSTALLATION_DIRECTORY="${RETURNED_VALUE}"
 
   # list all the files in which we need to find command definitions
@@ -307,7 +307,7 @@ function extractCommandDefinitionsToVariables() {
       fi
 
 
-      io::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${RETURNED_VALUE}"
+      fs::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${RETURNED_VALUE}"
       TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${GLOBAL_INSTALLATION_DIRECTORY}"/}"
 
       # make sure that all these arrays exists and have the same size
@@ -317,7 +317,7 @@ function extractCommandDefinitionsToVariables() {
 
       if log::isTraceEnabled; then
         # shellcheck disable=SC2086
-        io::invoke declare -p ${!TEMP_CMD_BUILD_*}
+        exe::captureOutput declare -p ${!TEMP_CMD_BUILD_*}
         log::trace "Declared variables for this command:"
         log::printFileString "${RETURNED_VALUE}"
       fi
@@ -638,8 +638,10 @@ fi
 source self-build-utils
 # shellcheck source=../libraries.d/lib-array
 source array
-# shellcheck source=../libraries.d/lib-io
-source io
+# shellcheck source=../libraries.d/lib-fs
+source fs
+# shellcheck source=../libraries.d/lib-exe
+source exe
 # shellcheck source=../libraries.d/lib-string
 source string
 # shellcheck source=../libraries.d/lib-version

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# shellcheck source=../../libraries.d/lib-fs
+source fs
+
 function main() {
   test_main::sortCommands
 }
@@ -9,7 +12,7 @@ function test_main::sortCommands() {
   test::title "✅ Testing main::sortCommands"
 
   # overriding core::getLocalStateDirectory to return a temporary directory
-  io::createTempDirectory
+  fs::createTempDirectory
   VALET_CONFIG_LOCAL_STATE_DIRECTORY="${RETURNED_VALUE}"
   VALET_CONFIG_REMEMBER_LAST_CHOICES=5
 
@@ -55,13 +58,13 @@ function test_main::sortCommands() {
   for i in {1..4}; do
     test::exec main::addLastChoice "my-id1" "cm${i}"
   done
-  test::exec io::cat "${VALET_CONFIG_LOCAL_STATE_DIRECTORY}/last-choices-my-id1"
+  test::exec fs::cat "${VALET_CONFIG_LOCAL_STATE_DIRECTORY}/last-choices-my-id1"
 
   test::markdown "testing commands that adding the same command multiple times only keeps the last one"
   test::exec main::addLastChoice "my-id1" "another3"
   test::exec main::addLastChoice "my-id1" "another3"
   test::exec main::addLastChoice "my-id1" "another3"
-  test::exec io::cat "${VALET_CONFIG_LOCAL_STATE_DIRECTORY}/last-choices-my-id1"
+  test::exec fs::cat "${VALET_CONFIG_LOCAL_STATE_DIRECTORY}/last-choices-my-id1"
 }
 
 main

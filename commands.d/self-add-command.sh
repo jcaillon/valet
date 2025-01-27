@@ -13,8 +13,8 @@ fi
 
 # shellcheck source=../libraries.d/lib-string
 source string
-# shellcheck source=../libraries.d/lib-io
-source io
+# shellcheck source=../libraries.d/lib-fs
+source fs
 # shellcheck source=../libraries.d/lib-interactive
 source interactive
 
@@ -80,9 +80,9 @@ function selfAddCommand() {
   fi
 
   # create the commands directory if it does not exist
-  io::createDirectoryIfNeeded "${PWD}/commands.d"
+  fs::createDirectoryIfNeeded "${PWD}/commands.d"
 
-  io::readFile "${commandTemplateFile}"
+  fs::readFile "${commandTemplateFile}"
   local templateContent="${RETURNED_VALUE//_COMMAND_NAME_/"${commandName}"}"
   templateContent="${templateContent//_FUNCTION_NAME_/"${functionName}"}"
 

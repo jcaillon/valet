@@ -15,14 +15,14 @@ function main() {
 }
 
 # need to override git, curl
-function io::invokef5() {
-  echo "🙈 mocked io::invokef5 $*" 1>&2
+function exe::invokef5() {
+  echo "🙈 mocked exe::invokef5 $*" 1>&2
   RETURNED_VALUE=""
   RETURNED_VALUE2=""
 }
 
-function io::invoke() {
-  echo "🙈 mocked io::invoke $*" 1>&2
+function exe::invoke() {
+  echo "🙈 mocked exe::invoke $*" 1>&2
   if [[ ${1} == "git" ]]; then
     while [[ $# -gt 0 ]]; do
       case "${1}" in
@@ -60,12 +60,8 @@ function core::getVersion() {
   RETURNED_VALUE="1.2.3"
 }
 
-function io::writeToFile() {
-  echo "🙈 mocked io::writeToFile $1" 1>&2
-}
-
-function io::writeToFileFromRef() {
-  echo "🙈 mocked io::writeToFileFromRef $1" 1>&2
+function fs::writeToFile() {
+  echo "🙈 mocked fs::writeToFile $1" 1>&2
 }
 
 main

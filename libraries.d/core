@@ -80,7 +80,7 @@ GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
 # Remember the original working directory
 GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
 
-# Handle the case where this script was io::invoked outside of valet
+# Handle the case where this script was exe::invoked outside of valet
 if [[ -z "${GLOBAL_INSTALLATION_DIRECTORY:-}" ]]; then
   GLOBAL_INSTALLATION_DIRECTORY="${BASH_SOURCE[0]}"
   if [[ "${GLOBAL_INSTALLATION_DIRECTORY}" != /* ]]; then
@@ -113,7 +113,7 @@ fi
 #===============================================================
 
 # Setup global variables that will be used for temporary files and folders.
-function io::setupTempFileGlobalVariable() {
+function fs::setupTempFileGlobalVariable() {
   # get unique file names for the stdout, stderr and temporary directory
   # to be fast, we do not create anything until we really need it
   # this could lead to issues, although it is very unlikely
@@ -132,7 +132,7 @@ function io::setupTempFileGlobalVariable() {
   GLOBAL_TEMPORARY_STDERR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-stderr.f"
 }
 
-# ## io::createTempFile
+# ## fs::createTempFile
 #
 # Creates a temporary file and return its path.
 #
@@ -141,13 +141,13 @@ function io::setupTempFileGlobalVariable() {
 # - `RETURNED_VALUE`: The created path.
 #
 # ```bash
-# io::createTempFile
+# fs::createTempFile
 # local file="${RETURNED_VALUE}"
 # ```
 #
-# > Files created this way are automatically cleaned up by the io::cleanTempFiles
+# > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
-function io::createTempFile() {
+function fs::createTempFile() {
   if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
     mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
   fi
@@ -162,7 +162,7 @@ function io::createTempFile() {
   done
 }
 
-# ## io::createTempDirectory
+# ## fs::createTempDirectory
 #
 # Creates a temporary directory.
 #
@@ -171,13 +171,13 @@ function io::createTempFile() {
 # - `RETURNED_VALUE`: The created path.
 #
 # ```bash
-# io::createTempDirectory
+# fs::createTempDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
 #
-# > Directories created this way are automatically cleaned up by the io::cleanTempFiles
+# > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
-function io::createTempDirectory() {
+function fs::createTempDirectory() {
   if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
     mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
   fi
@@ -192,16 +192,16 @@ function io::createTempDirectory() {
   done
 }
 
-# ## io::cleanTempFiles
+# ## fs::cleanTempFiles
 #
 # Removes all the temporary files and directories that were created by the
-# io::createTempFile and io::createTempDirectory functions.
+# fs::createTempFile and fs::createTempDirectory functions.
 #
 # ```bash
-# io::cleanTempFiles
+# fs::cleanTempFiles
 # ```
 # shellcheck disable=SC2016
-function io::cleanTempFiles() {
+function fs::cleanTempFiles() {
   if [[ -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
     log::debug "Deleting temporary directory."
     rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null || :
@@ -1536,9 +1536,9 @@ function core::deleteUserCommands() {
 # printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
 # ```
 function core::getVersion() {
-  # shellcheck source=lib-io
-  source io
-  io::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/version"
+  # shellcheck source=lib-fs
+  source fs
+  fs::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/version"
 }
 
 # ## core::getProgramElapsedMicroseconds
@@ -1721,30 +1721,17 @@ function command::parseArguments() {
 #
 # This should be called from a command function for which you want to check the parsing results.
 #
-# - $1: help _as bool_:
-#       (optional) Can be set using the variable `_OPTION_HELP`.
-#       True to show the help for the function and then exit.
-#       (defaults to the value of the 'help' variable or false)
-# - $2: parsing errors _as string_:
-#       (optional) Can be set using the variable `_OPTION_PARSING_ERRORS`.
-#       A string containing the parsing errors.
-#       An empty string means no parsing errors.
-#       (defaults to the value of the 'parsingErrors' variable or empty)
+# It uses the variables `help` and `parsingErrors` to determine if the help should be displayed
+# and if there are parsing errors.
 #
 # ```bash
 # command::checkParsedResults
-# command::checkParsedResults "${help:-false}" "${parsingErrors:-}"
 # ```
 function command::checkParsedResults() {
-  local help="${1:-${_OPTION_HELP:-${help:-false}}}"
-  local parsingErrors="${2:-${_OPTION_PARSING_ERRORS:-${parsingErrors:-}}}"
-  local functionName="${FUNCNAME[1]?"This function must be called from a command function."}"
-
-  if [[ ${help} == "true" ]]; then
-    main::printHelp function "${functionName}"
+  if [[ ${help:-false} == "true" ]]; then
+    main::printHelp function "${FUNCNAME[1]?"This function must be called from a command function."}"
     exit 0
   fi
-
   if [[ -n "${parsingErrors:-}" ]]; then
     core::fail "${parsingErrors}"
   fi
@@ -1755,7 +1742,7 @@ function command::checkParsedResults() {
 #===============================================================
 
 # Setup global variables that will be used for temporary files and folders.
-io::setupTempFileGlobalVariable
+fs::setupTempFileGlobalVariable
 
 # Since we use _OPTION_* variables to pass optional options to functions, we want to make sure
 # to not create collisions so we unset them here.

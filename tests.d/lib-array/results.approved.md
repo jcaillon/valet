@@ -288,7 +288,7 @@ RETURNED_ARRAY2=(
 
 ❯ `array::fuzzyFilterSortFileWithGrepAndGawk /words /out1 /out2`
 
-❯ `io::head /out1 10`
+❯ `fs::head /out1 10`
 
 **Standard output**:
 

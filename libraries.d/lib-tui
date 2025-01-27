@@ -4,8 +4,10 @@
 
 # shellcheck source=lib-ansi-codes
 source ansi-codes
-# shellcheck source=lib-io
-source io
+# shellcheck source=lib-exe
+source exe
+# shellcheck source=lib-fs
+source fs
 
 #===============================================================
 # >>> Interactive utilities
@@ -86,9 +88,9 @@ function tui::switchToFullScreen() {
   printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
 
   # in full screen mode, we don't see the error messages so we capture them somewhere else
-  FSFS_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}${BASHPID}.valet-interactive.err"
-  while [[ -e "${FSFS_TEMPORARY_ERROR_FILE}" ]]; do FSFS_TEMPORARY_ERROR_FILE+="x"; done
-  exec 4>&2 2>"${FSFS_TEMPORARY_ERROR_FILE}"
+  SFZF_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}${BASHPID}.valet-interactive.err"
+  while [[ -e "${SFZF_TEMPORARY_ERROR_FILE}" ]]; do SFZF_TEMPORARY_ERROR_FILE+="x"; done
+  exec 4>&2 2>"${SFZF_TEMPORARY_ERROR_FILE}"
 }
 
 # ## tui::switchBackFromFullScreen
@@ -118,8 +120,8 @@ function tui::switchBackFromFullScreen() {
 
   # restore the error output and display them if any
   exec 2>&4 4>&-
-  if [[ -s "${FSFS_TEMPORARY_ERROR_FILE:-}" ]]; then
-    io::readFile "${FSFS_TEMPORARY_ERROR_FILE}"
+  if [[ -s "${SFZF_TEMPORARY_ERROR_FILE:-}" ]]; then
+    fs::readFile "${SFZF_TEMPORARY_ERROR_FILE}"
     log::error "Error messages during the interactive session:"$'\n'"${RETURNED_VALUE%$'\n'}"
   fi
 }
@@ -134,7 +136,7 @@ function tui::switchBackFromFullScreen() {
 function tui::sttyInit() {
   if command -v stty &>/dev/null; then
     if [[ -z ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
-      io::invoke "stty" "-g"
+      exe::invoke "stty" "-g"
       _INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
       # -echo is to suppress echoing characters typed by the user
       # All the other options are there to enable a satisfying behavior for the GNU readline library
@@ -183,7 +185,7 @@ function tui::setInterruptTrap() {
   GLOBAL_SESSION_INTERRUPTED=false
   if [[ -z ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
     # save the original traps so we can restore them later
-    io::captureOutput trap -p SIGINT SIGQUIT
+    exe::captureOutput trap -p SIGINT SIGQUIT
     _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP="${RETURNED_VALUE}"
 
     # interrupting sets GLOBAL_SESSION_INTERRUPTED to true
@@ -569,11 +571,11 @@ function tui::rebindKeymap() {
 
   # remove all existing bindings except the self-insert ones
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
-  io::createTempFile
+  fs::createTempFile
   _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
-  io::invokef2 true bind -p
+  exe::invokef2 true bind -p
   \mv -f "${RETURNED_VALUE}" "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
-  io::readFile "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+  fs::readFile "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
   local bindings="${RETURNED_VALUE}"
   local IFS=$'\n'
   local line
@@ -753,7 +755,7 @@ function tui::resetBindings() {
   fi
 
   # try to remove all bindings
-  io::invoke bind -p
+  exe::invoke bind -p
   local bindings="${RETURNED_VALUE}"
   local IFS=$'\n'
   local line

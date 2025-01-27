@@ -6,8 +6,8 @@
 # >>> Functions that can be used in the test scripts
 #===============================================================
 
-# shellcheck source=../libraries.d/lib-io
-source io
+# shellcheck source=../libraries.d/lib-fs
+source fs
 # shellcheck source=../libraries.d/lib-test
 source test
 
@@ -224,9 +224,9 @@ function selfTestUtils_internalCompare() {
   local file2="${2}"
 
   local content1 content2
-  io::readFile "${file1}"
+  fs::readFile "${file1}"
   content1="${RETURNED_VALUE}"
-  io::readFile "${file2}"
+  fs::readFile "${file2}"
   content2="${RETURNED_VALUE}"
 
   if [[ "${content1}" != "${content2}" ]]; then

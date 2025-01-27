@@ -19,7 +19,7 @@ INFO     Creating the valet config file ⌜/tmp/valet-temp⌝.
 INFO     Opening the valet config file ⌜/tmp/valet-temp⌝.
 ```
 
-❯ `io::head /tmp/valet-temp 3`
+❯ `fs::head /tmp/valet-temp 3`
 
 **Standard output**:
 

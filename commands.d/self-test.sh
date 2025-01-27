@@ -19,6 +19,8 @@ source string
 source progress
 # shellcheck source=../libraries.d/lib-bash
 source bash
+# shellcheck source=../libraries.d/lib-fs
+source fs
 
 #===============================================================
 # >>> command: self test
@@ -116,7 +118,7 @@ function selfTest() {
   declare -g -i _TEST_TEST_SUITES_COUNT=0
   declare -g -a _TEST_FAILED_TEST_SUITES=()
 
-  io::createTempDirectory
+  fs::createTempDirectory
   GLOBAL_TEST_VALET_USER_DIRECTORY="${RETURNED_VALUE}"
 
   # test suites in the user directory
@@ -128,7 +130,7 @@ function selfTest() {
     # rebuild the commands for the user dir
     selfTestUtils_rebuildCommands --user-directory "${userDirectory}" --output "${GLOBAL_TEST_VALET_USER_DIRECTORY}/commands"
 
-    io::listDirectories "${userDirectory}"
+    fs::listDirectories "${userDirectory}"
     local extensionDirectory
     for extensionDirectory in "${RETURNED_ARRAY[@]}"; do
       if [[ -d ${extensionDirectory}/tests.d ]]; then
@@ -212,7 +214,7 @@ function selfTest_runSingleTestSuites() {
   log::debug "Running all test suites in directory ⌜${testsDotDirectory}⌝."
 
   # make a list of all test suite directories
-  io::listDirectories "${testsDotDirectory}"
+  fs::listDirectories "${testsDotDirectory}"
   local testDirectory testDirectoryName
   local -a testSuiteDirectories=()
   for testDirectory in "${RETURNED_ARRAY[@]}"; do
@@ -266,7 +268,7 @@ function selfTest_runSingleTestSuites() {
     declare -g -a _TEST_SUITE_NAMES=() _TEST_SUITE_COMMANDS=() _TEST_SUITE_OUTPUT_FILES=()
     for testDirectory in "${testSuiteDirectories[@]}"; do
       _TEST_SUITE_NAMES+=("${testDirectory##*/}")
-      io::createTempFile
+      fs::createTempFile
       _TEST_SUITE_OUTPUT_FILES+=("${RETURNED_VALUE}")
       _TEST_SUITE_COMMANDS+=("selfTest_runSingleTestSuite '${testDirectory}' &>'${RETURNED_VALUE}'")
     done
@@ -299,7 +301,7 @@ function selfTest_parallelCallback() {
   progress::update "${percent}" "Done running test suite ⌜${jobName}⌝."
 
   # display the job output
-  io::readFile "${_TEST_SUITE_OUTPUT_FILES[${index}]}"
+  fs::readFile "${_TEST_SUITE_OUTPUT_FILES[${index}]}"
   printf '%s\n' "${RETURNED_VALUE%$'\n'}"
 
   if ((exitCode != 0)); then
@@ -395,7 +397,7 @@ function selfTest_runSingleTestSuite() {
       local exitCode="${PIPESTATUS[0]:-}"
 
       # get the stack trace at script exit
-      io::readFile "${GLOBAL_TEST_STACK_FILE}"
+      fs::readFile "${GLOBAL_TEST_STACK_FILE}"
       eval "${RETURNED_VALUE//declare -a/}"
 
       selfTestUtils_displayTestLogs
@@ -403,7 +405,7 @@ function selfTest_runSingleTestSuite() {
 
       if ((exitCode == GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS)); then
         # the function test::fail was called, there was a coding mistake in the test script that we caught
-        io::readFile "${GLOBAL_TEST_LOG_FILE}"
+        fs::readFile "${GLOBAL_TEST_LOG_FILE}"
         log::error "The test script ⌜${testScript##*/}⌝ failed because an error was explicitly thrown in the test script:" \
           "" \
           "${RETURNED_VALUE}" \
@@ -425,7 +427,7 @@ function selfTest_runSingleTestSuite() {
         GLOBAL_STACK_SOURCE_FILES=("${GLOBAL_STACK_SOURCE_FILES_ERR[@]}")
         GLOBAL_STACK_LINE_NUMBERS=("${GLOBAL_STACK_LINE_NUMBERS_ERR[@]}")
         # print the last line of the err output, which is supposed to be the bash error message
-        io::tail "${GLOBAL_TEST_STANDARD_ERROR_FILE}" 1 true
+        fs::tail "${GLOBAL_TEST_STANDARD_ERROR_FILE}" 1 true
         if [[ -n ${RETURNED_ARRAY[0]:-} ]]; then
           log::printString "░ ${RETURNED_ARRAY[0]:-}" "░ "
         fi
@@ -529,12 +531,12 @@ function selfTest_runSingleTest() {
   # set a simplified log print function to have consistent results in tests
   selfTestUtils_setupValetForConsistency
 
-  # reset the temporary location (to have consistency when using io::createTempDirectory for example)
+  # reset the temporary location (to have consistency when using fs::createTempDirectory for example)
   if [[ -d ${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY} ]]; then
     rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
   fi
-  io::setupTempFileGlobalVariable
-  io::cleanTempFiles
+  fs::setupTempFileGlobalVariable
+  fs::cleanTempFiles
   mkdir -p "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
 
   # set a new user directory so that commands are correctly recreated if calling
@@ -570,7 +572,7 @@ function selfTest_runSingleTest() {
 # In order to have consistent results in tests, we need to replace to replace
 # values that could be different on each run/machine.
 function self_makeReplacementsInReport() {
-  io::readFile "${GLOBAL_TEST_REPORT_FILE}"
+  fs::readFile "${GLOBAL_TEST_REPORT_FILE}"
   RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_INSTALLATION_DIRECTORY}\/valet/valet}"
   RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_INSTALLATION_DIRECTORY}/\$GLOBAL_INSTALLATION_DIRECTORY}"
   RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"

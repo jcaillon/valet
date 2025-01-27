@@ -2,8 +2,8 @@
 
 # shellcheck source=../../libraries.d/lib-array
 source array
-# shellcheck source=../../libraries.d/lib-io
-source io
+# shellcheck source=../../libraries.d/lib-fs
+source fs
 
 function main() {
   test_array::sort
@@ -139,7 +139,7 @@ function test_array::fuzzyFilterSortFileWithGrepAndGawk() {
   shopt -u nocasematch
 
   test::prompt "array::fuzzyFilterSortFileWithGrepAndGawk /words /out1 /out2"
-  test::prompt "io::head /out1 10"
+  test::prompt "fs::head /out1 10"
   local value
   local -i nb=0
   for value in "${RETURNED_ARRAY[@]}"; do
@@ -152,9 +152,9 @@ function test_array::fuzzyFilterSortFileWithGrepAndGawk() {
   test::flush
 
 
-  io::createTempFile
+  fs::createTempFile
   local outputFilteredFile="${RETURNED_VALUE}"
-  io::createTempFile
+  fs::createTempFile
   local outputCorrespondenceFile="${RETURNED_VALUE}"
 
   if ! command -v grep &>/dev/null || ! command -v gawk &>/dev/null; then
@@ -164,9 +164,9 @@ function test_array::fuzzyFilterSortFileWithGrepAndGawk() {
 
   array::fuzzyFilterSortFileWithGrepAndGawk ea words "${outputFilteredFile}" "${outputCorrespondenceFile}"
 
-  io::readFile "${outputFilteredFile}"
+  fs::readFile "${outputFilteredFile}"
   local awkLines="${RETURNED_VALUE%$'\n'}"
-  io::readFile "${outputCorrespondenceFile}"
+  fs::readFile "${outputCorrespondenceFile}"
   local awkCorrespondences="${RETURNED_VALUE%$'\n'}"
 
   local IFS=$'\n'

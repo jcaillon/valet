@@ -2,8 +2,8 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=lib-io
-source io
+# shellcheck source=lib-fs
+source fs
 
 # ## http::request (private)
 #
@@ -67,7 +67,7 @@ function http::request() {
   fi
 
   if [[ -n ${outputFile} ]]; then
-    io::createFilePathIfNeeded "${outputFile}"
+    fs::createFilePathIfNeeded "${outputFile}"
     : >"${outputFile}"
   fi
 

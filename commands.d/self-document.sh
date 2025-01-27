@@ -17,6 +17,8 @@ source string
 source system
 # shellcheck source=../libraries.d/lib-array
 source array
+# shellcheck source=../libraries.d/lib-fs
+source fs
 
 #===============================================================
 # >>> command: self document
@@ -119,14 +121,14 @@ function selfDocument::getAllFunctionsDocumentation() {
   fi
 
   # get all the files in the libraries.d directory
-  io::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d"
+  fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d"
   local -a filesToAnalyze=("${RETURNED_ARRAY[@]}")
 
   # add each file of each user library directory
   if [[ ${coreOnly} != "true" ]]; then
     local libraryDirectory
     for libraryDirectory in "${CMD_LIBRARY_DIRECTORIES[@]}"; do
-      io::listFiles "${libraryDirectory}"
+      fs::listFiles "${libraryDirectory}"
       filesToAnalyze+=("${RETURNED_ARRAY[@]}")
     done
   fi
@@ -197,7 +199,7 @@ function selfRelease_writeAllFunctionsToMarkdown() {
   local pageFooter="${1:-}"
   local outputFile="${2:-}"
 
-  io::createFilePathIfNeeded "${outputFile}"
+  fs::createFilePathIfNeeded "${outputFile}"
 
   local content="# Valet functions documentation"$'\n'$'\n'"> ${pageFooter}"$'\n'$'\n'
 
@@ -210,7 +212,7 @@ function selfRelease_writeAllFunctionsToMarkdown() {
 
   # add footer
   content+=$'\n'$'\n'"> ${pageFooter}"
-  io::writeToFile "${outputFile}" "${content}"
+  fs::writeToFile "${outputFile}" "${content}"
 }
 
 # This function writes all the function prototypes in a file.
@@ -218,8 +220,8 @@ function selfRelease_writeAllFunctionsToPrototypeScript() {
   local pageFooter="${1:-}"
   local outputFile="${2:-}"
 
-  io::createFilePathIfNeeded "${outputFile}"
-  io::writeToFile "${outputFile}" "# Valet functions documentation"$'\n'$'\n'
+  fs::createFilePathIfNeeded "${outputFile}"
+  fs::writeToFile "${outputFile}" "# Valet functions documentation"$'\n'$'\n'
 
   local content="#""!/usr/bin/env bash
 # This script contains the documentation of all the valet library functions.
@@ -243,7 +245,7 @@ function selfRelease_writeAllFunctionsToPrototypeScript() {
     content+="function ${functionName}() { :; }"$'\n'$'\n'
   done
 
-  io::writeToFile "${outputFile}" "${content}"
+  fs::writeToFile "${outputFile}" "${content}"
 }
 
 # This function writes all the functions to a vscode snippet file.
@@ -251,7 +253,7 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   local pageFooter="${1:-}"
   local outputFile="${2:-}"
 
-  io::createFilePathIfNeeded "${outputFile}"
+  fs::createFilePathIfNeeded "${outputFile}"
 
   local content="{"$'\n'"// ${pageFooter}"$'\n'
 
@@ -307,11 +309,11 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   done
 
   # load the existing file content
-  io::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/extras/base.code-snippets"
+  fs::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/extras/base.code-snippets"
   local originalContent="${RETURNED_VALUE}"
 
   # remove the first line
   originalContent="${originalContent#*$'\n'}"
 
-  io::writeToFile "${outputFile}" "${content}${originalContent}"
+  fs::writeToFile "${outputFile}" "${content}${originalContent}"
 }

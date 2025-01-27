@@ -16,7 +16,7 @@ RETURNED_VALUE='(curl logs) mocking curl --silent --show-error --location --writ
 RETURNED_VALUE2='200'
 ```
 
-❯ `io::cat /tmp/valet-temp`
+❯ `fs::cat /tmp/valet-temp`
 
 **Standard output**:
 

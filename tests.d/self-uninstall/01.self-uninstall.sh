@@ -2,7 +2,7 @@
 
 command::sourceFunction "selfUninstall"
 # shellcheck disable=SC1091
-source io
+source exe
 
 
 function main() {
@@ -10,7 +10,7 @@ function main() {
 
   test::exec selfUninstall
 
-  test::exec io::invoke selfUninstall --script
+  test::exec exe::invoke selfUninstall --script
   if [[ ${RETURNED_VALUE} == *"Valet has been uninstalled."* ]]; then
     test::markdown "The uninstallation script contains 'Valet has been uninstalled'."
   fi

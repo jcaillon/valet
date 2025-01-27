@@ -143,7 +143,7 @@ WARNING  The directory ⌜/coucou⌝ has been added to the PATH for 8 shells.
 Please login again to apply the changes on your current shell if you are not using bash.
 ```
 
-❯ `io::cat resources/gitignored/.zshrc`
+❯ `fs::cat resources/gitignored/.zshrc`
 
 **Standard output**:
 
@@ -154,7 +154,7 @@ export PATH="/coucou:${PATH}"
 
 ```
 
-❯ `io::cat resources/gitignored/.tcshrc`
+❯ `fs::cat resources/gitignored/.tcshrc`
 
 **Standard output**:
 
@@ -165,7 +165,7 @@ set path = ($path '/coucou')
 
 ```
 
-❯ `io::cat resources/gitignored/.cshrc`
+❯ `fs::cat resources/gitignored/.cshrc`
 
 **Standard output**:
 
@@ -176,7 +176,7 @@ set path = ($path '/coucou')
 
 ```
 
-❯ `io::cat resources/gitignored/.xonshrc`
+❯ `fs::cat resources/gitignored/.xonshrc`
 
 **Standard output**:
 
@@ -187,7 +187,7 @@ $PATH.append('/coucou')
 
 ```
 
-❯ `io::cat resources/gitignored/.config/fish/config.fish`
+❯ `fs::cat resources/gitignored/.config/fish/config.fish`
 
 **Standard output**:
 
@@ -198,7 +198,7 @@ fish_add_path '/coucou'
 
 ```
 
-❯ `io::cat resources/gitignored/.kshrc`
+❯ `fs::cat resources/gitignored/.kshrc`
 
 **Standard output**:
 
@@ -209,7 +209,7 @@ export PATH="/coucou:${PATH}"
 
 ```
 
-❯ `io::cat resources/gitignored/.config/nushell/env.nu`
+❯ `fs::cat resources/gitignored/.config/nushell/env.nu`
 
 **Standard output**:
 
@@ -235,32 +235,32 @@ INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜fish⌝ shell
 INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
 ```
 
-### ✅ Testing system::windowsSetEnvVar
+### ✅ Testing windows::setEnvVar
 
-❯ `OSTYPE=msys system::windowsSetEnvVar VAR VALUE`
+❯ `OSTYPE=msys windows::setEnvVar VAR VALUE`
 
 **Standard output**:
 
 ```text
-🙈 mocking io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.SetValue('VAR', 'VALUE', 'ExpandString');
+🙈 mocking windows::runPs1: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.SetValue('VAR', 'VALUE', 'ExpandString');
 ```
 
-❯ `OSTYPE=msys system::windowsSetEnvVar VAR ''`
+❯ `OSTYPE=msys windows::setEnvVar VAR ''`
 
 **Standard output**:
 
 ```text
-🙈 mocking io::windowsRunInPowershell: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.DeleteValue('VAR');
+🙈 mocking windows::runPs1: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.DeleteValue('VAR');
 ```
 
-### ✅ Testing system::windowsGetEnvVar
+### ✅ Testing windows::getEnvVar
 
-❯ `OSTYPE=msys system::windowsGetEnvVar VAR`
+❯ `OSTYPE=msys windows::getEnvVar VAR`
 
 **Standard output**:
 
 ```text
-🙈 mocking io::windowsRunInPowershell: 
+🙈 mocking windows::runPs1: 
   $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
   $value = $key.GetValue('VAR', '', 'DoNotExpandEnvironmentNames');
   $key.Dispose();
@@ -268,14 +268,14 @@ INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
   
 ```
 
-### ✅ Testing system::windowsAddToPath
+### ✅ Testing windows::addToPath
 
-❯ `OSTYPE=msys system::windowsAddToPath /coucou`
+❯ `OSTYPE=msys windows::addToPath /coucou`
 
 **Standard output**:
 
 ```text
-🙈 mocking io::windowsRunInPowershell: 
+🙈 mocking windows::runPs1: 
   $pathToAdd = '\coucou';
   $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
   $oldPath = $key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);

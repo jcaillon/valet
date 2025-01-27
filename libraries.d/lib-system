@@ -2,8 +2,8 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=lib-io
-source io
+# shellcheck source=lib-fs
+source fs
 
 # ## system::os
 #
@@ -207,7 +207,7 @@ function system::addToPath() {
 
   log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
 
-  io::createDirectoryIfNeeded "${HOME}"
+  fs::createDirectoryIfNeeded "${HOME}"
 
   local -i count=0
   local shellName
@@ -221,13 +221,13 @@ function system::addToPath() {
     case ${shellName} in
     nu)
       configFile="${HOME}/.config/nushell/env.nu"
-      io::createDirectoryIfNeeded "${HOME}/.config/nushell"
+      fs::createDirectoryIfNeeded "${HOME}/.config/nushell"
       configContent="\$env.PATH = (\$env.PATH | split row (char esep) | append \"${pathToAdd}\")"
       ;;
     fish)
       # shellcheck disable=SC2088
       configFile="${HOME}/.config/fish/config.fish"
-      io::createDirectoryIfNeeded "${HOME}/.config/fish"
+      fs::createDirectoryIfNeeded "${HOME}/.config/fish"
       configContent="fish_add_path '${pathToAdd}'"
       ;;
     tcsh | csh)
@@ -242,7 +242,7 @@ function system::addToPath() {
       ;;
     esac
 
-    if [[ -f "${configFile}" ]] && io::readFile "${configFile}" && [[ "${RETURNED_VALUE}" == *"${configContent}"* ]]; then
+    if [[ -f "${configFile}" ]] && fs::readFile "${configFile}" && [[ "${RETURNED_VALUE}" == *"${configContent}"* ]]; then
       log::info "The directory ⌜${pathToAdd}⌝ is already in the PATH for ⌜${shellName}⌝ shell."
       continue
     fi
@@ -260,131 +260,5 @@ function system::addToPath() {
   if (( count > 0 )); then
     log::warning "The directory ⌜${pathToAdd}⌝ has been added to the PATH for ${count} shells." \
       "Please login again to apply the changes on your current shell if you are not using bash."
-  fi
-}
-
-# ## system::windowsSetEnvVar
-#
-# Set an environment variable for the current user on Windows.
-#
-# - $1: **variable name** _as string_:
-#       the name of the environment variable to set.
-# - $2: **variable value** _as string_:
-#       the value of the environment variable to set.
-#
-# ```bash
-# system::windowsSetEnvVar "MY_VAR" "my_value"
-# ```
-#
-# > This function is only available on Windows, it uses `powershell` to directly modify the registry.
-function system::windowsSetEnvVar() {
-  local varName="${1:-}"
-  local varValue="${2:-}"
-
-  system::os
-  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
-    core::fail "This function is only available on Windows."
-  fi
-
-  if [[ -z ${varName} ]]; then
-    core::fail "The variable name is missing."
-  fi
-
-  if [[ -n ${varValue} ]]; then
-    if ! io::windowsRunInPowershell "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.SetValue('${varName//\'/\'\'}', '${varValue//\'/\'\'}', 'ExpandString');"; then
-      core::fail "Failed to set the environment variable ⌜${varName}⌝."
-    fi
-  else
-
-    if ! io::windowsRunInPowershell "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.DeleteValue('${varName//\'/\'\'}');"; then
-      core::fail "Failed to unset the environment variable ⌜${varName}⌝ using null string."
-    fi
-  fi
-}
-
-# ## system::windowsGetEnvVar
-#
-# Get the value of an environment variable for the current user on Windows.
-#
-# - $1: **variable name** _as string_:
-#       the name of the environment variable to get.
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: the value of the environment variable.
-#
-# ```bash
-# system::windowsGetEnvVar "MY_VAR"
-# echo "${RETURNED_VALUE}"
-# ```
-function system::windowsGetEnvVar() {
-  local varName="${1:-}"
-
-  system::os
-  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
-    core::fail "This function is only available on Windows."
-  fi
-
-  if [[ -z ${varName} ]]; then
-    core::fail "The variable name is missing."
-  fi
-
-  local script="
-  \$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true);
-  \$value = \$key.GetValue('${varName//\'/\'\'}', '', 'DoNotExpandEnvironmentNames');
-  \$key.Dispose();
-  Write-Output \$value;
-  "
-
-  if ! io::windowsRunInPowershell "${script}"; then
-    core::fail "Failed to get the environment variable ⌜${varName}⌝."
-  fi
-}
-
-# ## system::windowsAddToPath
-#
-# Add the given path to the PATH environment variable on Windows (current user only).
-#
-# Will also export the PATH variable in the current bash.
-#
-# - $1: **path** _as string_:
-#       the path to add to the PATH environment variable.
-#       The path can be in unix format, it will be converted to windows format.
-#
-# ```bash
-# system::windowsAddToPath "/path/to/bin"
-# ```
-#
-# > This function is only available on Windows, it uses `powershell` to directly modify the registry.
-function system::windowsAddToPath() {
-  local pathToAdd="${1:-}"
-
-  system::os
-  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
-    core::fail "This function is only available on Windows."
-  fi
-
-  log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
-
-  if [[ -z ${pathToAdd} ]]; then
-    core::fail "The path to add to the PATH is missing."
-  fi
-
-  io::convertToWindowsPath "${pathToAdd}"
-  pathToAdd="${RETURNED_VALUE}"
-
-  local script="
-  \$pathToAdd = '${pathToAdd//\'/\'\'}';
-  \$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true);
-  \$oldPath = \$key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
-  if (\$currentPath -notlike \"*\$pathToAdd*\") {
-      \$newPath = '{0}{1}{2}' -f \$oldPath, [IO.Path]::PathSeparator, \$pathToAdd;
-      \$key.SetValue('Path', \$newPath, 'ExpandString');
-  };
-  \$key.Dispose();
-  "
-
-  if ! io::windowsRunInPowershell "${script}"; then
-    core::fail "Failed to add the directory ⌜${pathToAdd}⌝ to the PATH."
   fi
 }

@@ -2,8 +2,8 @@
 
 # shellcheck source=../../libraries.d/lib-system
 source system
-# shellcheck source=../../libraries.d/lib-io
-source io
+# shellcheck source=../../libraries.d/lib-fs
+source fs
 
 function main() {
   test_system::os
@@ -13,9 +13,6 @@ function main() {
   test_system::getNotExistingCommands
   test_system::commandExists
   test_system::addToPath
-  test_system::windowsSetEnvVar
-  test_system::windowsGetEnvVar
-  test_system::windowsAddToPath
 }
 
 function test_system::os() {
@@ -83,42 +80,17 @@ function test_system::addToPath() {
 
   test::exec system::addToPath "/coucou"
 
-  test::exec io::cat resources/gitignored/.zshrc
-  test::exec io::cat resources/gitignored/.tcshrc
-  test::exec io::cat resources/gitignored/.cshrc
-  test::exec io::cat resources/gitignored/.xonshrc
-  test::exec io::cat resources/gitignored/.config/fish/config.fish
-  test::exec io::cat resources/gitignored/.kshrc
-  test::exec io::cat resources/gitignored/.config/nushell/env.nu
+  test::exec fs::cat resources/gitignored/.zshrc
+  test::exec fs::cat resources/gitignored/.tcshrc
+  test::exec fs::cat resources/gitignored/.cshrc
+  test::exec fs::cat resources/gitignored/.xonshrc
+  test::exec fs::cat resources/gitignored/.config/fish/config.fish
+  test::exec fs::cat resources/gitignored/.kshrc
+  test::exec fs::cat resources/gitignored/.config/nushell/env.nu
 
   test::exec system::addToPath "/coucou"
 
   rm -Rf resources/gitignored
-}
-
-function test_system::windowsSetEnvVar() {
-  test::title "✅ Testing system::windowsSetEnvVar"
-
-  test::exec OSTYPE=msys system::windowsSetEnvVar VAR VALUE
-  test::exec OSTYPE=msys system::windowsSetEnvVar VAR ''
-}
-
-function test_system::windowsGetEnvVar() {
-  test::title "✅ Testing system::windowsGetEnvVar"
-
-  test::exec OSTYPE=msys system::windowsGetEnvVar VAR
-}
-
-function test_system::windowsAddToPath() {
-  test::title "✅ Testing system::windowsAddToPath"
-
-  test::exec OSTYPE=msys system::windowsAddToPath /coucou
-}
-
-# mocking windowsRunInPowershell function
-# shellcheck disable=SC2317
-function io::windowsRunInPowershell() {
-  echo "🙈 mocking io::windowsRunInPowershell: $*";
 }
 
 main

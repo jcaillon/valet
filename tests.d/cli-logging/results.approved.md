@@ -115,7 +115,7 @@ WARNING  This is a warning message.
 With a second line.
 ```
 
-❯ `io::listFiles /tmp/valet.d/d1-2`
+❯ `fs::listFiles /tmp/valet.d/d1-2`
 
 Returned variables:
 
@@ -139,7 +139,7 @@ WARNING  This is a warning message.
 With a second line.
 ```
 
-❯ `io::cat /tmp/valet.d/d1-2/test.log`
+❯ `fs::cat /tmp/valet.d/d1-2/test.log`
 
 **Standard output**:
 
@@ -156,7 +156,7 @@ With a second line.
 
 ❯ `VALET_CONFIG_LOG_FD=/tmp/valet.d/d1-2/test2.log valet self mock1 logging-level`
 
-❯ `io::cat /tmp/valet.d/d1-2/test2.log`
+❯ `fs::cat /tmp/valet.d/d1-2/test2.log`
 
 **Standard output**:
 

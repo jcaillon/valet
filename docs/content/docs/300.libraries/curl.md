@@ -9,7 +9,7 @@ url: /docs/libraries/curl
 
 This function is a wrapper around curl.
 It allows you to check the http status code and return 1 if it is not acceptable.
-It io::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
+It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
 
 - $1: **fail** _as bool_:
       true/false to indicate if the function should fail in case the execution fails
@@ -38,7 +38,7 @@ curl::toFile "true" "200,201" "/filePath" "https://example.com" || core::fail "T
 
 This function is a wrapper around curl.
 It allows you to check the http status code and return 1 if it is not acceptable.
-It io::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
+It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
 
 - $1: **fail** _as bool_:
       true/false to indicate if the function should fail in case the execution fails

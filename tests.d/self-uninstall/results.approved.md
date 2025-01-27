@@ -14,7 +14,7 @@ WARNING  To uninstall Valet, you can run the following commands:
 bash -c 'eval "$(valet self uninstall --script 2>/dev/null)"'
 ```
 
-❯ `io::invoke selfUninstall --script`
+❯ `exe::invoke selfUninstall --script`
 
 The uninstallation script contains 'Valet has been uninstalled'.
 

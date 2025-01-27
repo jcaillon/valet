@@ -6,7 +6,7 @@ source interactive
 # shellcheck disable=SC1091
 source progress
 # shellcheck disable=SC1091
-source fsfs
+source sfzf
 
 #===============================================================
 # >>> command: showcase interactive
@@ -71,7 +71,7 @@ function showcaseInteractive() {
   # shellcheck disable=SC2317
 
   function getColorSample() { local -n color="AC__FG_${1^^}"; RETURNED_VALUE="${color}AC__FG_${1^^}${AC__TEXT_RESET}"; }
-  fsfs::itemSelector "What's your favorite color?" SELECTION_ARRAY "getColorSample" "Color sample"
+  sfzf::show "What's your favorite color?" SELECTION_ARRAY "getColorSample" "Color sample"
   log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
 
   ############################

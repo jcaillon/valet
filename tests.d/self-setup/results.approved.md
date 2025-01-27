@@ -58,7 +58,7 @@ VALET_CONFIG_ENABLE_COLORS='false'
 VALET_CONFIG_ENABLE_NERDFONT_ICONS='false'
 ```
 
-❯ `io::head /tmp/valet-temp 3`
+❯ `fs::head /tmp/valet-temp 3`
 
 **Standard output**:
 
@@ -117,7 +117,7 @@ VALET_CONFIG_ENABLE_COLORS='true'
 VALET_CONFIG_ENABLE_NERDFONT_ICONS='true'
 ```
 
-❯ `io::head /tmp/valet-temp 3`
+❯ `fs::head /tmp/valet-temp 3`
 
 **Standard output**:
 

@@ -5,7 +5,8 @@
   "terminal.integrated.wordSeparators": " ()[]{}',\"`─‘’“”|⌜⌝",
   "cSpell.words": [
     "nocasematch",
-    "Pids"
+    "Pids",
+    "sfzf"
   ],
   "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;'\",.<>/?"
 }

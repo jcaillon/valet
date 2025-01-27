@@ -16,7 +16,7 @@ INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-2/lib-val
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-2/valet.code-snippets⌝.
 ```
 
-❯ `io::head /tmp/valet.d/d1-2/lib-valet.md 10`
+❯ `fs::head /tmp/valet.d/d1-2/lib-valet.md 10`
 
 **Standard output**:
 
@@ -33,7 +33,7 @@ These codes can be used to format text in the terminal.
 These codes were selected because they are widely supported by terminals and they
 ```
 
-❯ `io::head /tmp/valet.d/d1-2/lib-valet 10`
+❯ `fs::head /tmp/valet.d/d1-2/lib-valet 10`
 
 **Standard output**:
 
@@ -50,7 +50,7 @@ These codes were selected because they are widely supported by terminals and the
 # These codes can be used to format text in the terminal.
 ```
 
-❯ `io::head /tmp/valet.d/d1-2/valet.code-snippets 10`
+❯ `fs::head /tmp/valet.d/d1-2/valet.code-snippets 10`
 
 **Standard output**:
 

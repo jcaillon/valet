@@ -11,8 +11,10 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
 fi
 # --- END OF COMMAND COMMON PART
 
-# shellcheck source=../libraries.d/lib-io
-source io
+# shellcheck source=../libraries.d/lib-exe
+source exe
+# shellcheck source=../libraries.d/lib-fs
+source fs
 # shellcheck source=../libraries.d/lib-string
 source string
 # shellcheck source=../libraries.d/lib-system
@@ -108,7 +110,7 @@ function selfExtend() {
   # compute where to install the extension
   core::getUserDirectory
   local userDirectory="${RETURNED_VALUE}"
-  io::createDirectoryIfNeeded "${userDirectory}"
+  fs::createDirectoryIfNeeded "${userDirectory}"
 
   # case of extension creation
   if [[ ${action} == "created" ]]; then
@@ -204,7 +206,7 @@ function selfExtend_createExtension() {
     local -a subDirectories=(commands.d libraries.d tests.d)
     local subdir
     for subdir in "${subDirectories[@]}"; do
-      io::createDirectoryIfNeeded "${extensionDirectory}/${subdir}"
+      fs::createDirectoryIfNeeded "${extensionDirectory}/${subdir}"
     done
   fi
 
@@ -215,35 +217,51 @@ function selfExtend_createExtension() {
     selfDocument
   fi
 
-  # on windows, creating links will prompt the user for admin permissions
-  # we can group all the ps1 commands and run it once at the end
-  io::windowsPowershellBatchStart
+  system::os
+  local os="${RETURNED_VALUE}"
+  if [[ ${os} == "windows" ]]; then
+    # shellcheck source=../libraries.d/lib-windows
+    source windows
+
+    # on windows, creating links will prompt the user for admin permissions
+    # we can group all the ps1 commands and run it once at the end
+    windows::startPs1Batch
+
+    # shellcheck disable=SC2317
+    function createLink() { windows::createLink "${@}"; }
+  else
+    # shellcheck disable=SC2317
+    function createLink() { fs::createLink "${@}"; }
+  fi
+
 
   # vscode stuff
   if command -v code &>/dev/null; then
-    io::createDirectoryIfNeeded "${extensionDirectory}/.vscode"
+    fs::createDirectoryIfNeeded "${extensionDirectory}/.vscode"
     cp -n "${GLOBAL_INSTALLATION_DIRECTORY}/extras/.vscode/settings.json" "${extensionDirectory}/.vscode/settings.json" || log::error "Could not copy the vscode settings file."
     cp -n "${GLOBAL_INSTALLATION_DIRECTORY}/extras/.vscode/extensions.json" "${extensionDirectory}/.vscode/extensions.json" || log::error "Could not copy the vscode extensions file."
 
     # link the snippets
-    io::createLink "${userDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets" || log::error "Could not create a symbolic link to the vscode snippets."
+    createLink "${userDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets" || log::error "Could not create a symbolic link to the vscode snippets."
   fi
 
   # git stuff
   if command -v git &>/dev/null; then
-    io::createFilePathIfNeeded "${extensionDirectory}/.gitignore"
-    io::readFile "${extensionDirectory}/.gitignore"
+    fs::createFilePathIfNeeded "${extensionDirectory}/.gitignore"
+    fs::readFile "${extensionDirectory}/.gitignore"
     if [[ ${RETURNED_VALUE} != *"### Valet ###"* ]]; then
       local content=$'\n'$'\n'"### Valet ###"$'\n'"lib-valet"$'\n'"lib-valet.md"$'\n'".vscode/valet.code-snippets"
-      io::writeToFile "${extensionDirectory}/.gitignore" "${content}" true
+      fs::writeToFile "${extensionDirectory}/.gitignore" "${content}" true
     fi
   fi
 
   # link lib-valet
-  io::createLink "${userDirectory}/lib-valet" "${extensionDirectory}/lib-valet" || log::error "Could not create a symbolic link to the lib-valet."
-  io::createLink "${userDirectory}/lib-valet.md" "${extensionDirectory}/lib-valet.md" || log::error "Could not create a symbolic link to the lib-valet.md."
+  createLink "${userDirectory}/lib-valet" "${extensionDirectory}/lib-valet" || log::error "Could not create a symbolic link to the lib-valet."
+  createLink "${userDirectory}/lib-valet.md" "${extensionDirectory}/lib-valet.md" || log::error "Could not create a symbolic link to the lib-valet.md."
 
-  io::windowsPowershellBatchEnd
+  if [[ ${os} == "windows" ]]; then
+    windows::endPs1Batch
+  fi
 
   log::success "The extension ⌜${extensionName}⌝ has been setup in ⌜${extensionDirectory}⌝."
 }
@@ -279,7 +297,7 @@ function selfExtend_downloadTarball() {
 
   local tarballUrl="${tarballUrlPattern/"%SHA1%"/"${sha1}"}"
 
-  io::createTempDirectory
+  fs::createTempDirectory
   local tempDirectory="${RETURNED_VALUE}"
 
   # download the tarball
@@ -293,17 +311,17 @@ function selfExtend_downloadTarball() {
 
   # move the files to the target directory
   rm -Rf "${targetDirectory}" 1>/dev/null || core::fail "Could not remove the existing files in ⌜${targetDirectory}⌝."
-  io::createDirectoryIfNeeded "${targetDirectory}"
-  io::listDirectories "${tempDirectory}" false
+  fs::createDirectoryIfNeeded "${targetDirectory}"
+  fs::listDirectories "${tempDirectory}" false
   if (( ${#RETURNED_ARRAY[@]} != 1 )); then
     core::fail "The tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ did not contain a single directory."
   fi
   mv "${RETURNED_ARRAY[0]}"/* "${targetDirectory}" || core::fail "Could not move the files from ⌜${RETURNED_ARRAY[0]}⌝ to ⌜${targetDirectory}⌝."
 
   # write the sha1 to the targetDirectory so we known which commit we fetched
-  io::writeToFile "${targetDirectory}/.sha1" "${sha1}"
-  io::writeToFile "${targetDirectory}/.reference" "${reference}"
-  io::writeToFile "${targetDirectory}/.repo" "${repositoryUrl}"
+  fs::writeToFile "${targetDirectory}/.sha1" "${sha1}"
+  fs::writeToFile "${targetDirectory}/.reference" "${reference}"
+  fs::writeToFile "${targetDirectory}/.repo" "${repositoryUrl}"
 }
 
 # Get the sha1 from a git server API.
@@ -377,7 +395,7 @@ function selfExtend_gitClone() {
 
   log::info "Cloning the git repository ⌜${url}⌝ with reference ⌜${version}⌝ in ⌜${targetDirectory}⌝."
   progress::start "#spinner Cloning repo, please wait..."
-  io::invoke git "${args[@]}"
+  exe::invoke git "${args[@]}"
   progress::stop
 }
 
@@ -410,8 +428,8 @@ function selfExtend_executeSetupScript() {
     log::error "The extension setup script for the extension ⌜${extensionName}⌝ failed. You can manually retry the setup by running the script ⌜${extensionDirectory}/extension.setup.sh⌝."
     interactive::promptYesNo "The setup script for the extension ⌜${extensionName}⌝ failed (see above), do you want to continue anyway?" true || core::fail "The setup script for the extension ⌜${extensionName}⌝ failed."
   fi
-  io::createDirectoryIfNeeded "${extensionDirectory}/.git"
-  io::writeToFile "${extensionDirectory}/.git/.valet-setup-executed" "ok"
+  fs::createDirectoryIfNeeded "${extensionDirectory}/.git"
+  fs::writeToFile "${extensionDirectory}/.git/.valet-setup-executed" "ok"
   log::success "The setup script for the extension ⌜${extensionName}⌝ has been executed."
 }
 
@@ -438,7 +456,7 @@ function selfExtend::updateExtensions() {
   fi
 
   log::info "Attempting to update all git repositories and installed extensions in ⌜${userDirectory}⌝."
-  io::listDirectories "${userDirectory}" true false filterExtensionFolder
+  fs::listDirectories "${userDirectory}" true false filterExtensionFolder
   local path
   local allUpdateSuccess=true
   local -i count=0
@@ -496,11 +514,11 @@ function selfExtend_updateTarBall() {
 
   log::info "Updating the tarball extension ⌜${extensionDirectory}⌝."
 
-  io::readFile "${extensionDirectory}/.repo"
+  fs::readFile "${extensionDirectory}/.repo"
   local repo="${RETURNED_VALUE%%$'\n'*}"
-  io::readFile "${extensionDirectory}/.reference"
+  fs::readFile "${extensionDirectory}/.reference"
   local reference="${RETURNED_VALUE%%$'\n'*}"
-  io::readFile "${extensionDirectory}/.sha1"
+  fs::readFile "${extensionDirectory}/.sha1"
   local currentSha1="${RETURNED_VALUE%%$'\n'*}"
 
   log::debug "Extension ⌜${extensionName}⌝ is from repository ⌜${repo}⌝ and reference ⌜${reference}⌝ with sha1 ⌜${currentSha1}⌝."
@@ -550,7 +568,7 @@ function selfExtend_updateGitRepository() {
 
   log::debug "Current HEAD is ${currentHead}."
 
-  io::readFile "${repoPath}/.git/HEAD"
+  fs::readFile "${repoPath}/.git/HEAD"
   if [[ ${RETURNED_VALUE} =~ ^"ref: refs/heads/"(.+) ]]; then
     local branch="${BASH_REMATCH[1]:-}"
     branch="${branch%%$'\n'*}"
@@ -592,7 +610,7 @@ function selfExtend_getCurrentCommit() {
   local repoPath="${1}"
 
   pushd "${repoPath}" &>/dev/null || core::fail "Could not change to the directory ⌜${repoPath}⌝."
-  io::invoke git rev-parse HEAD
+  exe::invoke git rev-parse HEAD
   popd &>/dev/null || :
   local currentHead="${RETURNED_VALUE%%$'\n'*}"
   RETURNED_VALUE="${currentHead}"

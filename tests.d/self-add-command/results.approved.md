@@ -34,7 +34,7 @@ WARNING  The command file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-com
 SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-command/resources/gitignored/commands.d/new-cool-command.sh⌝.
 ```
 
-❯ `io::cat commands.d/new-cool-command.sh`
+❯ `fs::cat commands.d/new-cool-command.sh`
 
 **Standard output**:
 

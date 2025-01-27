@@ -2,6 +2,9 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
+# shellcheck source=lib-exe
+source exe
+
 # ## test::log
 #
 # Call this function to log a message during a test.
@@ -291,10 +294,10 @@ function test::resetReturnedVars() {
 function test::printVars() {
   local IFS=$'\n'
   local chunk varName
-  if ! io::captureOutput declare -p "${@}"; then
+  if ! exe::captureOutput declare -p "${@}"; then
     local varName
     for varName in "${@}"; do
-      if ! io::captureOutput declare -p "${varName}"; then
+      if ! exe::captureOutput declare -p "${varName}"; then
         IFS=' '
         test::fail "Variable ⌜${varName}⌝ does not exist, could not execute ⌜test::printVars $*⌝."
       fi

@@ -72,7 +72,7 @@ echo "${myString}"
 In valet, you can do:
 
 ```bash
-io::readFile file
+fs::readFile file
 echo "${RETURNED_VALUE}"
 ```
 
@@ -127,7 +127,7 @@ read -r myvar < /tmp/file
 In valet, you can do:
 
 ```bash
-io::invoke tput cols
+exe::invoke tput cols
 myvar="${RETURNED_VALUE}"
 ```
 

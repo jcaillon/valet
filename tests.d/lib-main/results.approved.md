@@ -90,7 +90,7 @@ VALET_CONFIG_REMEMBER_LAST_CHOICES='2'
 
 ❯ `main::addLastChoice my-id1 cm4`
 
-❯ `io::cat /tmp/valet.d/d1-2/last-choices-my-id1`
+❯ `fs::cat /tmp/valet.d/d1-2/last-choices-my-id1`
 
 **Standard output**:
 
@@ -108,7 +108,7 @@ testing commands that adding the same command multiple times only keeps the last
 
 ❯ `main::addLastChoice my-id1 another3`
 
-❯ `io::cat /tmp/valet.d/d1-2/last-choices-my-id1`
+❯ `fs::cat /tmp/valet.d/d1-2/last-choices-my-id1`
 
 **Standard output**:
 

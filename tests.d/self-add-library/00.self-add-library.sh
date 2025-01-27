@@ -12,7 +12,7 @@ function main() {
 
   test::exec selfAddLibrary 'new-cool-lib'
   test::exec selfAddLibrary 'new-cool-lib'
-  test::exec io::cat "libraries.d/lib-new-cool-lib"
+  test::exec fs::cat "libraries.d/lib-new-cool-lib"
 
   popd &>/dev/null || test::fail "Unable to change directory"
 

@@ -2,19 +2,19 @@
 
 command::sourceFunction "selfDocument"
 
-# shellcheck disable=SC1091
-source io
+# shellcheck source=../../libraries.d/lib-fs
+source fs
 
 function main() {
   test::title "✅ Testing self document command"
 
-  io::createTempDirectory
+  fs::createTempDirectory
   TEST_DIRECTORY="${RETURNED_VALUE}"
 
   test::exec selfDocument --output "\"\${TEST_DIRECTORY}\"" --core-only
-  test::exec io::head "${TEST_DIRECTORY}/lib-valet.md" 10
-  test::exec io::head "${TEST_DIRECTORY}/lib-valet" 10
-  test::exec io::head "${TEST_DIRECTORY}/valet.code-snippets" 10
+  test::exec fs::head "${TEST_DIRECTORY}/lib-valet.md" 10
+  test::exec fs::head "${TEST_DIRECTORY}/lib-valet" 10
+  test::exec fs::head "${TEST_DIRECTORY}/valet.code-snippets" 10
 }
 
 function core::getVersion() {

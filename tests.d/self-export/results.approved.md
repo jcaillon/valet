@@ -31,13 +31,13 @@ source bash
 source benchmark
 source command
 source curl
-source fsfs
 source http
 source interactive
 source io
 source profiler
 source progress
 source prompt
+source sfzf
 source string
 source system
 source test

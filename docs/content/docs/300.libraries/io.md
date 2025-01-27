@@ -5,7 +5,7 @@ cascade:
 url: /docs/libraries/io
 ---
 
-## io::cat
+## fs::cat
 
 Print the content of a file to stdout.
 This is a pure bash equivalent of cat.
@@ -14,7 +14,7 @@ This is a pure bash equivalent of cat.
       the file to print
 
 ```bash
-io::cat "myFile"
+fs::cat "myFile"
 ```
 
 > Also see log::printFile if you want to print a file for a user.
@@ -48,18 +48,18 @@ command_that_could_fail || io::checkAndWarn "$?" "The command that could fail ha
 ```
 
 
-## io::cleanTempFiles
+## fs::cleanTempFiles
 
 Removes all the temporary files and directories that were created by the
-io::createTempFile and io::createTempDirectory functions.
+fs::createTempFile and fs::createTempDirectory functions.
 
 ```bash
-io::cleanTempFiles
+fs::cleanTempFiles
 ```
 shellcheck disable=SC2016
 
 
-## io::convertFromWindowsPath
+## windows::convertPathToUnix
 
 Convert a Windows path to a unix path.
 
@@ -71,13 +71,13 @@ Returns:
 - `RETURNED_VALUE`: The unix path.
 
 ```bash
-io::convertFromWindowsPath "C:\path\to\file"
+windows::convertPathToUnix "C:\path\to\file"
 ```
 
 > Handles paths starting with `X:\`.
 
 
-## io::convertToWindowsPath
+## windows::convertPathFromUnix
 
 Convert a unix path to a Windows path.
 
@@ -89,22 +89,22 @@ Returns:
 - `RETURNED_VALUE`: The Windows path.
 
 ```bash
-io::convertToWindowsPath "/path/to/file"
+windows::convertPathFromUnix "/path/to/file"
 ```
 
 > Handles paths starting with `/mnt/x/` or `/x/`.
 
 
-## io::countArgs
+## exe::countArgs
 
 Returns the number of arguments passed.
 
 A convenient function that can be used to:
 
 - count the files/directories in a directory
-  `io::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
+  `exe::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
 - count the number of variables starting with VALET_
-  `io::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
+  `exe::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
 
 - $@: **arguments** _as any_:
       the arguments to count
@@ -114,11 +114,11 @@ Returns:
 - `RETURNED_VALUE`: The number of arguments passed.
 
 ```bash
-io::countArgs 1 2 3
+exe::countArgs 1 2 3
 ```
 
 
-## io::createDirectoryIfNeeded
+## fs::createDirectoryIfNeeded
 
 Create the directory tree if needed.
 
@@ -130,11 +130,11 @@ Returns:
 - `RETURNED_VALUE`: The absolute path to the directory.
 
 ```bash
-io::createDirectoryIfNeeded "/my/directory"
+fs::createDirectoryIfNeeded "/my/directory"
 ```
 
 
-## io::createFilePathIfNeeded
+## fs::createFilePathIfNeeded
 
 Make sure that the given file path exists.
 Create the directory tree and the file if needed.
@@ -147,11 +147,11 @@ Returns:
 - `RETURNED_VALUE`: The absolute path of the file.
 
 ```bash
-io::createFilePathIfNeeded "myFile"
+fs::createFilePathIfNeeded "myFile"
 ```
 
 
-## io::createLink
+## fs::createLink
 
 Create a soft or hard link (original ← link).
 
@@ -177,15 +177,15 @@ This function allows to create a symbolic link on Windows as well as on Unix.
       (defaults to true)
 
 ```bash
-io::createLink "/path/to/link" "/path/to/linked"
-io::createLink "/path/to/link" "/path/to/linked" true
+fs::createLink "/path/to/link" "/path/to/linked"
+fs::createLink "/path/to/link" "/path/to/linked" true
 ```
 
 > On unix, the function uses the `ln` command.
 > On Windows, the function uses `powershell` (and optionally ls to check the existing link).
 
 
-## io::createTempDirectory
+## fs::createTempDirectory
 
 Creates a temporary directory.
 
@@ -194,15 +194,15 @@ Returns:
 - `RETURNED_VALUE`: The created path.
 
 ```bash
-io::createTempDirectory
+fs::createTempDirectory
 local directory="${RETURNED_VALUE}"
 ```
 
-> Directories created this way are automatically cleaned up by the io::cleanTempFiles
+> Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
 
-## io::createTempFile
+## fs::createTempFile
 
 Creates a temporary file and return its path.
 
@@ -211,22 +211,22 @@ Returns:
 - `RETURNED_VALUE`: The created path.
 
 ```bash
-io::createTempFile
+fs::createTempFile
 local file="${RETURNED_VALUE}"
 ```
 
-> Files created this way are automatically cleaned up by the io::cleanTempFiles
+> Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
 
-## io::invoke
+## exe::invoke
 
 This function call an executable and its arguments.
 If the execution fails, it will fail the script and show the std/err output.
 Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
 
 It redirects the stdout and stderr to environment variables.
-Equivalent to io::invoke5 true 0 '' '' "${@}"
+Equivalent to exe::invoke5 true 0 '' '' "${@}"
 
 - $1: **executable** _as string_:
       the executable or command
@@ -240,17 +240,17 @@ Returns:
 - `RETURNED_VALUE2`: The content of stderr.
 
 ```bash
-io::invoke git add --all
+exe::invoke git add --all
 ```
 
-> See io::invokef5 for more information.
+> See exe::invokef5 for more information.
 
 
-## io::invoke2
+## exe::invoke2
 
 This function call an executable and its arguments.
 It redirects the stdout and stderr to environment variables.
-Equivalent to io::invoke5 "${1}" 0 "" "" "${@:2}"
+Equivalent to exe::invoke5 "${1}" 0 "" "" "${@:2}"
 
 - $1: **fail** _as bool_:
       true/false to indicate if the function should fail in case the execution fails.
@@ -267,19 +267,19 @@ Returns:
 - `RETURNED_VALUE2`: The content of stderr.
 
 ```bash
-io::invokef2 false git status || core::fail "status failed."
+exe::invokef2 false git status || core::fail "status failed."
 stdout="${RETURNED_VALUE}"
 stderr="${RETURNED_VALUE2}"
 ```
 
-> See io::invokef5 for more information.
+> See exe::invokef5 for more information.
 
 
-## io::invoke2piped
+## exe::invoke2piped
 
 This function call an executable and its arguments and input a given string as stdin.
 It redirects the stdout and stderr to environment variables.
-Equivalent to io::invoke5 "${1}" 0 false "${2}" "${@:3}"
+Equivalent to exe::invoke5 "${1}" 0 false "${2}" "${@:3}"
 
 - $1: **fail** _as bool_:
       true/false to indicate if the function should fail in case the execution fails.
@@ -298,7 +298,7 @@ Returns:
 - `RETURNED_VALUE2`: The content of stderr.
 
 ```bash
-io::invoke2piped true "key: val" yq -o json -p yaml -
+exe::invoke2piped true "key: val" yq -o json -p yaml -
 stdout="${RETURNED_VALUE}"
 stderr="${RETURNED_VALUE2}"
 ```
@@ -307,14 +307,14 @@ stderr="${RETURNED_VALUE2}"
 > `myvar="$(printf '%s\n' "mystring" | mycommand)"`
 > But without using a subshell.
 >
-> See io::invokef5 for more information.
+> See exe::invokef5 for more information.
 
 
-## io::invokef2
+## exe::invokef2
 
 This function call an executable and its arguments.
 It redirects the stdout and stderr to temporary files.
-Equivalent to io::invokef5 "${1}" 0 "" "" "${@:2}"
+Equivalent to exe::invokef5 "${1}" 0 "" "" "${@:2}"
 
 - $1: **fail** _as bool_:
       true/false to indicate if the function should fail in case the execution fails.
@@ -331,19 +331,19 @@ Returns:
 - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
 
 ```bash
-io::invokef2 false git status || core::fail "status failed."
+exe::invokef2 false git status || core::fail "status failed."
 stdoutFilePath="${RETURNED_VALUE}"
 stderrFilePath="${RETURNED_VALUE2}"
 ```
 
-> See io::invokef5 for more information.
+> See exe::invokef5 for more information.
 
 
-## io::invokef2piped
+## exe::invokef2piped
 
 This function call an executable and its arguments and input a given string as stdin.
 It redirects the stdout and stderr to temporary files.
-Equivalent to io::invokef5 "${1}" 0 false "${2}" "${@:3}"
+Equivalent to exe::invokef5 "${1}" 0 false "${2}" "${@:3}"
 
 - $1: **fail** _as bool_:
       true/false to indicate if the function should fail in case the execution fails.
@@ -362,7 +362,7 @@ Returns:
 - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
 
 ```bash
-io::invokef2piped true "key: val" yq -o json -p yaml -
+exe::invokef2piped true "key: val" yq -o json -p yaml -
 stdoutFilePath="${RETURNED_VALUE}"
 stderrFilePath="${RETURNED_VALUE2}"
 ```
@@ -371,10 +371,10 @@ stderrFilePath="${RETURNED_VALUE2}"
 > `myvar="$(printf '%s\n' "mystring" | mycommand)"`
 > But without using a subshell.
 >
-> See io::invokef5 for more information.
+> See exe::invokef5 for more information.
 
 
-## io::invokef5
+## exe::invokef5
 
 This function call an executable and its arguments.
 It redirects the stdout and stderr to temporary files.
@@ -401,20 +401,20 @@ Returns:
 - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
 
 ```bash
-io::invokef5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
+exe::invokef5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
 stdoutFilePath="${RETURNED_VALUE}"
 stderrFilePath="${RETURNED_VALUE2}"
 ```
 
 > - In windows, this is tremendously faster to do (or any other invoke flavor):
->   `io::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
+>   `exe::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
 >   than doing:
 >   `myvar="$(mycommand)".`
 > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
 > - On linux, you can use a tmpfs directory for massive gains over subshells.
 
 
-## io::isDirectoryWritable
+## fs::isDirectoryWritable
 
 Check if the directory is writable. Creates the directory if it does not exist.
 
@@ -430,13 +430,13 @@ Returns:
   - 1 otherwise
 
 ```bash
-if io::isDirectoryWritable "/path/to/directory"; then
+if fs::isDirectoryWritable "/path/to/directory"; then
   echo "The directory is writable."
 fi
 ```
 
 
-## io::listDirectories
+## fs::listDirectories
 
 List all the directories in the given directory.
 
@@ -459,14 +459,14 @@ Returns:
 - `RETURNED_ARRAY`: An array with the list of all the files.
 
 ```bash
-io::listDirectories "/path/to/directory" true true myFilterFunction
+fs::listDirectories "/path/to/directory" true true myFilterFunction
 for path in "${RETURNED_ARRAY[@]}"; do
   printf '%s' "${path}"
 done
 ```
 
 
-## io::listFiles
+## fs::listFiles
 
 List all the files in the given directory.
 
@@ -489,14 +489,14 @@ Returns:
 - `RETURNED_ARRAY`: An array with the list of all the files.
 
 ```bash
-io::listFiles "/path/to/directory" true true myFilterFunction
+fs::listFiles "/path/to/directory" true true myFilterFunction
 for path in "${RETURNED_ARRAY[@]}"; do
   printf '%s' "${path}"
 done
 ```
 
 
-## io::listPaths
+## fs::listPaths
 
 List all the paths in the given directory.
 
@@ -524,7 +524,7 @@ Returns:
 - `RETURNED_ARRAY`: An array with the list of all the paths.
 
 ```bash
-io::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
+fs::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
 for path in "${RETURNED_ARRAY[@]}"; do
   printf '%s' "${path}"
 done
@@ -533,7 +533,7 @@ done
 > - It will correctly list files under symbolic link directories.
 
 
-## io::readFile
+## fs::readFile
 
 Reads the content of a file and returns it in the global variable RETURNED_VALUE.
 Uses pure bash.
@@ -551,12 +551,12 @@ Returns:
 - `RETURNED_VALUE`: The content of the file.
 
 ```bash
-io::readFile "/path/to/file" && local fileContent="${RETURNED_VALUE}"
-io::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
+fs::readFile "/path/to/file" && local fileContent="${RETURNED_VALUE}"
+fs::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
 ```
 
 
-## io::readStdIn
+## exe::readStdIn
 
 Read the content of the standard input.
 Will immediately return if the standard input is empty.
@@ -566,11 +566,11 @@ Returns:
 - `RETURNED_VALUE`: The content of the standard input.
 
 ```bash
-io::readStdIn && local stdIn="${RETURNED_VALUE}"
+exe::readStdIn && local stdIn="${RETURNED_VALUE}"
 ```
 
 
-## io::sleep
+## exe::sleep
 
 Sleep for the given amount of time.
 This is a pure bash replacement of sleep.
@@ -585,7 +585,7 @@ io:sleep 1.5
 > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 
 
-## io::toAbsolutePath
+## fs::toAbsolutePath
 
 This function returns the absolute path of a path.
 
@@ -597,14 +597,14 @@ Returns:
 - `RETURNED_VALUE`: The absolute path of the path.
 
 ```bash
-io::toAbsolutePath "myFile"
+fs::toAbsolutePath "myFile"
 local myFileAbsolutePath="${RETURNED_VALUE}"
 ```
 
 > This is a pure bash alternative to `realpath` or `readlink`.
 
 
-## io::windowsCreateTempDirectory
+## windows::createTempDirectory
 
 Create a temporary directory on Windows and return the path both for Windows and Unix.
 
@@ -616,14 +616,14 @@ Returns:
 - `RETURNED_VALUE2`: The Unix path.
 
 ```bash
-io::windowsCreateTempDirectory
+windows::createTempDirectory
 ```
 
-> Directories created this way are automatically cleaned up by the io::cleanTempFiles
+> Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
 
-## io::windowsCreateTempFile
+## windows::createTempFile
 
 Create a temporary file on Windows and return the path both for Windows and Unix.
 
@@ -635,16 +635,16 @@ Returns:
 - `RETURNED_VALUE2`: The Unix path.
 
 ```bash
-io::windowsCreateTempFile
+windows::createTempFile
 ```
 
-> Files created this way are automatically cleaned up by the io::cleanTempFiles
+> Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
 
-## io::windowsPowershellBatchEnd
+## windows::endPs1Batch
 
-This function will run all the commands that were batched with `io::windowsPowershellBatchStart`.
+This function will run all the commands that were batched with `windows::startPs1Batch`.
 
 Returns:
 
@@ -655,31 +655,31 @@ Returns:
 - `RETURNED_VALUE2`: The content of stderr.
 
 ```bash
-io::windowsPowershellBatchStart
-io::windowsRunInPowershell "Write-Host \"Hello\""
-io::windowsRunInPowershell "Write-Host \"World\""
-io::windowsPowershellBatchEnd
+windows::startPs1Batch
+windows::runPs1 "Write-Host \"Hello\""
+windows::runPs1 "Write-Host \"World\""
+windows::endPs1Batch
 ```
 
 
-## io::windowsPowershellBatchStart
+## windows::startPs1Batch
 
 After running this function, all commands that should be executed by
-`io::windowsRunInPowershell` will be added to a batch that will only be played
-when `io::windowsPowershellBatchEnd` is called.
+`windows::runPs1` will be added to a batch that will only be played
+when `windows::endPs1Batch` is called.
 
 This is a convenient way to run multiple commands in a single PowerShell session.
 It makes up for the fact that running a new PowerShell session for each command is slow.
 
 ```bash
-io::windowsPowershellBatchStart
-io::windowsRunInPowershell "Write-Host \"Hello\""
-io::windowsRunInPowershell "Write-Host \"World\""
-io::windowsPowershellBatchEnd
+windows::startPs1Batch
+windows::runPs1 "Write-Host \"Hello\""
+windows::runPs1 "Write-Host \"World\""
+windows::endPs1Batch
 ```
 
 
-## io::windowsRunInPowershell
+## windows::runPs1
 
 Runs a PowerShell command.
 This is mostly useful on Windows.
@@ -699,7 +699,7 @@ Returns:
 - `RETURNED_VALUE2`: The content of stderr.
 
 ```bash
-io::windowsRunInPowershell "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
+windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
 ```
 
 

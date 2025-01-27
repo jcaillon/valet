@@ -4,8 +4,10 @@
 
 # shellcheck source=lib-ansi-codes
 source ansi-codes
-# shellcheck source=lib-io
-source io
+# shellcheck source=lib-fs
+source fs
+# shellcheck source=lib-exe
+source exe
 # shellcheck source=lib-tui
 source tui
 
@@ -65,8 +67,8 @@ function progress_runAnimationInBackground() {
   local maxFrames="${6:-9223372036854775807}"
   local spinner="${7:-${VALET_CONFIG_SPINNER_CHARACTERS:-"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"}}"
 
-  # shellcheck source=lib-io
-  source io
+  # shellcheck source=lib-fs
+  source fs
   # shellcheck source=lib-ansi-codes
   source ansi-codes
 
@@ -84,7 +86,7 @@ function progress_runAnimationInBackground() {
       if [[ ! -f "${progressFilePath}" ]]; then
         exit 0
       fi
-      io::readFile "${progressFilePath}"
+      fs::readFile "${progressFilePath}"
       percentString="${RETURNED_VALUE%% *}"
       message="${RETURNED_VALUE#* }"
       message="${message%%$'\n'*}"
@@ -112,7 +114,7 @@ function progress_runAnimationInBackground() {
 
     spinnerIndex=$((spinnerIndex >= ${#spinner} - 1 ? 0 : spinnerIndex + 1))
     loop+=1
-    io::sleep "${frameDelay}"
+    exe::sleep "${frameDelay}"
   done
 }
 
@@ -185,7 +187,7 @@ function progress::start() {
   # disable echoing when we type something
   tui::sttyInit
 
-  io::createTempFile
+  fs::createTempFile
   _PROGRESS_BAR_UPDATE_FILE="${RETURNED_VALUE}"
   _PROGRESS_BAR_RUNNING=true
 

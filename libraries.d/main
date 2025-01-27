@@ -104,7 +104,7 @@ function main::unregisterTraps() {
 main::registerTraps
 
 function main::onCleanUpInternal() {
-  io::cleanTempFiles
+  fs::cleanTempFiles
 
   # disable the profiler if still on
   if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
@@ -801,10 +801,10 @@ function main::showInteractiveCommandsMenu() {
   menuHeader="${1}"
   commandSelectionItemsArrayName="${2}"
 
-  # shellcheck source=lib-fsfs
-  source fsfs
+  # shellcheck source=lib-sfzf
+  source sfzf
 
-  fsfs::itemSelector "${menuHeader}" "${commandSelectionItemsArrayName}" "main::onFsfsItemSelectionChange" "Command help"
+  sfzf::show "${menuHeader}" "${commandSelectionItemsArrayName}" "main::onFsfsItemSelectionChange" "Command help"
 
   choice="${RETURNED_VALUE}"
   if (( ${#choice} >= CMD_MAX_COMMAND_WIDTH)); then
