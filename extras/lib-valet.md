@@ -520,14 +520,14 @@ printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
 ```
 
 
-## core::resetIncludedFiles
+## core::resetIncludedLibraries
 
 Allows to reset the included files.
 When calling the source function, it will source all the files again.
 This is useful when we want to reload the libraries.
 
 ```bash
-core::resetIncludedFiles
+core::resetIncludedLibraries
 ```
 
 

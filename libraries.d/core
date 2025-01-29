@@ -127,8 +127,10 @@ function fs::setupTempFileGlobalVariable() {
   done
 
   GLOBAL_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.d"
+  # shellcheck disable=SC2034
   GLOBAL_TEMPORARY_WORK_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-work.f"
   GLOBAL_TEMPORARY_STDOUT_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-stdout.f"
+  # shellcheck disable=SC2034
   GLOBAL_TEMPORARY_STDERR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-stderr.f"
 }
 
@@ -1492,16 +1494,16 @@ function source() {
   core::fail "${failMessage}"
 }
 
-# ## core::resetIncludedFiles
+# ## core::resetIncludedLibraries (private)
 #
-# Allows to reset the included files.
-# When calling the source function, it will source all the files again.
+# Allows to reset the included libraries.
+# When calling the source function, it will source all the libraries again.
 # This is useful when we want to reload the libraries.
 #
 # ```bash
-# core::resetIncludedFiles
+# core::resetIncludedLibraries
 # ```
-function core::resetIncludedFiles() {
+function core::resetIncludedLibraries() {
   _CORE_INCLUDED_LIBRARIES=""
 }
 
@@ -1774,7 +1776,7 @@ function command::checkParsedResults() {
 # Setup global variables that will be used for temporary files and folders.
 fs::setupTempFileGlobalVariable
 
-core::resetIncludedFiles
+core::resetIncludedLibraries
 
 # Since we use _OPTION_* variables to pass optional options to functions, we want to make sure
 # to not create collisions so we unset them here.

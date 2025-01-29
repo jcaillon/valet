@@ -337,18 +337,18 @@
   "body": [ "# ## core::getVersion\n# \n# Returns the version of Valet.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The version of Valet.\n# \n# ```bash\n# core::getVersion\n# printf '%s\\n' \"The version of Valet is ⌜\\${RETURNED_VALUE}⌝.\"\n# ```\n# \ncore::getVersion$0" ]
 },
 
-"core::resetIncludedFiles": {
-  "prefix": "core::resetIncludedFiles",
+"core::resetIncludedLibraries": {
+  "prefix": "core::resetIncludedLibraries",
   "description": "Allows to reset the included files...",
   "scope": "",
-  "body": [ "core::resetIncludedFiles$0" ]
+  "body": [ "core::resetIncludedLibraries$0" ]
 },
 
-"core::resetIncludedFiles#withdoc": {
-  "prefix": "core::resetIncludedFiles#withdoc",
+"core::resetIncludedLibraries#withdoc": {
+  "prefix": "core::resetIncludedLibraries#withdoc",
   "description": "Allows to reset the included files...",
   "scope": "",
-  "body": [ "# ## core::resetIncludedFiles\n# \n# Allows to reset the included files.\n# When calling the source function, it will source all the files again.\n# This is useful when we want to reload the libraries.\n# \n# ```bash\n# core::resetIncludedFiles\n# ```\n# \ncore::resetIncludedFiles$0" ]
+  "body": [ "# ## core::resetIncludedLibraries\n# \n# Allows to reset the included files.\n# When calling the source function, it will source all the files again.\n# This is useful when we want to reload the libraries.\n# \n# ```bash\n# core::resetIncludedLibraries\n# ```\n# \ncore::resetIncludedLibraries$0" ]
 },
 
 "curl::download": {

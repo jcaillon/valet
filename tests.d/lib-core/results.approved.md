@@ -4,7 +4,7 @@
 
 ### ✅ Test source
 
-❯ `core::resetIncludedFiles`
+❯ `core::resetIncludedLibraries`
 
 ```text
 CMD_LIBRARY_DIRECTORIES=(

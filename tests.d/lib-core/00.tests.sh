@@ -7,7 +7,7 @@ function main() {
 function test_source() {
   test::title "✅ Test source"
 
-  test::exec core::resetIncludedFiles
+  test::exec core::resetIncludedLibraries
 
   # shellcheck disable=SC2034
   CMD_LIBRARY_DIRECTORIES=("${PWD}/resources/ext2" "${PWD}/resources/ext1")
