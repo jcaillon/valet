@@ -48,7 +48,7 @@ RETURNED_VALUE='/d/data/file'
 
 ### ✅ Testing windows::setEnvVar
 
-❯ `OSTYPE=msys windows::setEnvVar VAR VALUE`
+❯ `windows::setEnvVar VAR VALUE`
 
 **Standard output**:
 
@@ -74,7 +74,7 @@ RETURNED_VALUE='/d/data/file'
   
 ```
 
-❯ `OSTYPE=msys windows::setEnvVar VAR ''`
+❯ `windows::setEnvVar VAR ''`
 
 **Standard output**:
 
@@ -102,7 +102,7 @@ RETURNED_VALUE='/d/data/file'
 
 ### ✅ Testing windows::getEnvVar
 
-❯ `OSTYPE=msys windows::getEnvVar VAR`
+❯ `windows::getEnvVar VAR`
 
 **Standard output**:
 
@@ -135,7 +135,7 @@ RETURNED_VALUE='/d/data/file'
 
 ### ✅ Testing windows::addToPath
 
-❯ `OSTYPE=msys windows::addToPath /coucou`
+❯ `windows::addToPath /coucou`
 
 **Standard output**:
 

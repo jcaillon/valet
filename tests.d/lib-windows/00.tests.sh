@@ -5,6 +5,7 @@ source windows
 
 function main() {
   USERNAME="user"
+  LOCALAPPDATA="tmp"
   test_windows::convertPathFromUnix
   test_windows::convertPathToUnix
   test_windows::setEnvVar
@@ -34,20 +35,20 @@ function test_windows::convertPathToUnix() {
 function test_windows::setEnvVar() {
   test::title "✅ Testing windows::setEnvVar"
 
-  test::exec OSTYPE=msys windows::setEnvVar VAR VALUE
-  test::exec OSTYPE=msys windows::setEnvVar VAR ''
+  test::exec windows::setEnvVar VAR VALUE
+  test::exec windows::setEnvVar VAR ''
 }
 
 function test_windows::getEnvVar() {
   test::title "✅ Testing windows::getEnvVar"
 
-  test::exec OSTYPE=msys windows::getEnvVar VAR
+  test::exec windows::getEnvVar VAR
 }
 
 function test_windows::addToPath() {
   test::title "✅ Testing windows::addToPath"
 
-  test::exec OSTYPE=msys windows::addToPath /coucou
+  test::exec windows::addToPath /coucou
 }
 
 function test_windows::createLink() {

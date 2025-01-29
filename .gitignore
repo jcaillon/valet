@@ -30,6 +30,8 @@ sort.sh
 f?
 
 # tests
-tests.d/1005-lib-io/resources/gitignored/**
-tests.d/1004-lib-system/resources/gitignored/**
-tests.d/1109-self-add-command/resources/gitignored/**
+tests.d/lib-fs/resources/gitignored/**
+tests.d/lib-system/resources/gitignored/**
+tests.d/self-add-command/resources/gitignored/**
+tests.d/lib-windows/tmp/**
+
