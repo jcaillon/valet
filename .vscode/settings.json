@@ -8,5 +8,5 @@
     "Pids",
     "sfzf"
   ],
-  "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;'\",.<>/?"
+  "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
 }

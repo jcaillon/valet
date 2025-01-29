@@ -1,6 +1,10 @@
+# https://github.com/koalaman/shellcheck/wiki/Directive
+
 # Suggest ${VAR} in place of $VAR
 enable=require-variable-braces
 # Suggest explicitly using -n in `[ $var ]`
 enable=avoid-nullary-conditions
 # Suggest [[ ... ]] in place of [ ... ]
 enable=require-double-brackets
+# Allows or disallows shellcheck to include the files pointed-to by the source or . statements while checking.
+external-sources=true

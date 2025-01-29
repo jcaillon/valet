@@ -1413,65 +1413,84 @@ function core::failWithCode() {
 
 # ## source
 #
-# Allows to include a library file or sources a file.
+# Allows to source/include a library file or sources a file.
 #
-# It replaces the builtin source command to make sure that we do not include the same file twice.
+# It replaces the builtin source command to make sure that we do not source the same library twice.
 # We replace source instead of creating a new function to allow us to
 # specify the included file for spellcheck.
 #
-# - $1: **library name** _as string_:
+# - $1: **library name or path** _as string_:
 #       the name of the library (array, interactive, string...) or the file path to include.
 # - $@: arguments _as any_:
-#       (optional) the arguments to pass to the included file (mimics the builtin source command).
+#       (optional) the arguments to pass to the sourced file (mimics the builtin source command).
 #
 # ```bash
-#   source string array system
-#   source ./my/path my/other/path
+#   source string
+#   source ./my/path
 # ```
 #
 # > - The file can be relative to the current script (script that calls this function).
-# > - This function makes sure that we do not include the same file twice.
 # > - Use `builtin source` if you want to include the file even if it was already included.
 function source() {
-  local filePathToInclude
-  if [[ -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${1}" ]]; then
+  local pathOrName="${1}"
+  shift
+
+  # if the name does not start with . or /, we assume it is a library name
+  if [[ ${pathOrName:0:1} != [./] ]]; then
+    # quick check if it is already included
+    if [[ ${_CORE_INCLUDED_LIBRARIES:-} == *$'\n'"${pathOrName}"$'\n'* ]]; then
+      return 0
+    fi
+
+    local -i sourcedFiles=0
+
     # source the lib from the valet core libs
-    filePathToInclude="${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${1}"
-  else
+    if [[ -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${pathOrName}" ]]; then
+      builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${pathOrName}" "$@"
+      sourcedFiles+=1
+    fi
+
     # source the lib from user libs
     if [[ -v CMD_LIBRARY_DIRECTORIES ]]; then
       local libraryDirectory
       for libraryDirectory in "${CMD_LIBRARY_DIRECTORIES[@]}"; do
-        if [[ -f "${libraryDirectory}/lib-${1}" ]]; then
-          filePathToInclude="${libraryDirectory}/lib-${1}"
+        if [[ -f "${libraryDirectory}/lib-${pathOrName}" ]]; then
+          builtin source "${libraryDirectory}/lib-${pathOrName}" "$@"
+          sourcedFiles+=1
         fi
       done
     fi
-    if [[ -z "${filePathToInclude:-}" ]]; then
-      if [[ -n ${BASH_SOURCE[1]:-} && -f "${BASH_SOURCE[1]%/*}/${1}" ]]; then
-        # source a file next to the file that calls this function
-        filePathToInclude="${BASH_SOURCE[1]%/*}/${1}"
-      elif [[ -f "${1}" ]]; then
-        # source a file with an absolute path or in the current directory
-        filePathToInclude="${1}"
-      else
-        core::fail "Cannot source the file ⌜${1}⌝ because it does not exist."$'\n'"If you meant to source a library, make sure it is either in the valet core or user libraries and do not include the ⌜lib-⌝ prefix."
-      fi
+
+    # we included at least one file? then we are done
+    if ((sourcedFiles > 0)); then
+      _CORE_INCLUDED_LIBRARIES="${_CORE_INCLUDED_LIBRARIES:-}"$'\n'"${pathOrName}"$'\n'
+      return 0
     fi
   fi
 
-  local includeFile
-  for includedFile in "${_LIST_OF_INCLUDED_FILES[@]}"; do
-    if [[ ${includedFile} == "${filePathToInclude}" ]]; then
-      return 0
-    fi
-  done
-  shift
-  # shellcheck source=/dev/null
-  builtin source "${filePathToInclude}" "$@"
-  _LIST_OF_INCLUDED_FILES+=("${filePathToInclude}")
+  # quick check if the file is already included
+  if [[ ${_CORE_INCLUDED_FILES:-} == *$'\n'"${pathOrName}"$'\n'* ]]; then
+    return 0
+  fi
+
+  # source a file next to the file that calls this function
+  if [[ -n ${BASH_SOURCE[1]:-} && -f "${BASH_SOURCE[1]%/*}/${pathOrName}" ]]; then
+    builtin source "${BASH_SOURCE[1]%/*}/${pathOrName}" "$@"
+    return 0
+  fi
+
+  # source a file with an absolute path or in the current directory
+  if [[ -f "${pathOrName}" ]]; then
+    builtin source "${pathOrName}" "$@"
+    return 0
+  fi
+
+  local failMessage="Cannot source the file ⌜${pathOrName}⌝ because it does not exist."
+  if [[ ${pathOrName} == "lib-"* ]]; then
+    failMessage+=$'\n'"If you meant to source a library, make sure it is either in the valet core or user libraries and do not include the ⌜lib-⌝ prefix."
+  fi
+  core::fail "${failMessage}"
 }
-_LIST_OF_INCLUDED_FILES=()
 
 # ## core::resetIncludedFiles
 #
@@ -1483,7 +1502,7 @@ _LIST_OF_INCLUDED_FILES=()
 # core::resetIncludedFiles
 # ```
 function core::resetIncludedFiles() {
-  _LIST_OF_INCLUDED_FILES=()
+  _CORE_INCLUDED_LIBRARIES=""
 }
 
 # ## core::sourceUserCommands (private)
@@ -1754,6 +1773,8 @@ function command::checkParsedResults() {
 
 # Setup global variables that will be used for temporary files and folders.
 fs::setupTempFileGlobalVariable
+
+core::resetIncludedFiles
 
 # Since we use _OPTION_* variables to pass optional options to functions, we want to make sure
 # to not create collisions so we unset them here.
