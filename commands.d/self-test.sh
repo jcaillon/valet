@@ -21,6 +21,8 @@ source progress
 source bash
 # shellcheck source=../libraries.d/lib-fs
 source fs
+# shellcheck source=../libraries.d/lib-time
+source time
 
 #===============================================================
 # >>> command: self test
@@ -82,7 +84,7 @@ function selfTest() {
   command::parseArguments "$@" && eval "${RETURNED_VALUE}"
   command::checkParsedResults
 
-  core::getProgramElapsedMicroseconds
+  time::getProgramElapsedMicroseconds
   local startTimeInMicroSeconds="${RETURNED_VALUE}"
 
   # check what will be used to display the diff between received and approved files
@@ -161,8 +163,8 @@ function selfTest() {
     fi
   fi
 
-  core::getProgramElapsedMicroseconds
-  string::microsecondsToHuman $((RETURNED_VALUE - startTimeInMicroSeconds)) "%S seconds and %l ms"
+  time::getProgramElapsedMicroseconds
+  time::convertMicrosecondsToHuman $((RETURNED_VALUE - startTimeInMicroSeconds)) "%S seconds and %l ms"
   log::info "Total time running tests: ⌜${RETURNED_VALUE}⌝."
 
   if ((${#_TEST_FAILED_TEST_SUITES[@]} > 0)); then

@@ -188,7 +188,7 @@ function selfUpdate() {
   fi
 
   # get the os
-  system::os
+  system::getOs
   local os="${RETURNED_VALUE}"
   log::debug "The current OS is ⌜${os}⌝."
 
@@ -724,7 +724,7 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
 " "${EPOCHSECONDS}" "ERROR" "$*"
     exit 1
   }
-  function system::os() {
+  function system::getOs() {
     case "${OSTYPE:-}" in
     darwin*) RETURNED_VALUE="darwin" ;;
     linux*) RETURNED_VALUE="linux" ;;

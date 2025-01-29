@@ -7,11 +7,11 @@ source exe
 # shellcheck source=lib-fs
 source fs
 
-# ## curl::toFile
+# ## curl::download
 #
-# This function is a wrapper around curl.
+# This function is a wrapper around curl to save a request result in a file.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
+# It invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails
@@ -32,10 +32,10 @@ source fs
 # - `RETURNED_VALUE2`: the http status code
 #
 # ```bash
-# curl::toFile true 200,201 "/filePath" "https://example.com"
-# curl::toFile false 200 "/filePath2" "https://example2.com" || core::fail "The curl command failed."
+# curl::download true 200,201 "/filePath" "https://example.com"
+# curl::download false 200 "/filePath2" "https://example2.com" || core::fail "The curl command failed."
 # ```
-function curl::toFile() {
+function curl::download() {
   local failIfFails="${1:-false}"
   local acceptableStatusCodes="${2:-200,201,202,204,301,304,308}"
   local outputFile="${3}"
@@ -90,11 +90,11 @@ function curl::toFile() {
   return ${exitCode}
 }
 
-# ## curl::toVar
+# ## curl::request
 #
-# This function is a wrapper around curl.
+# This function is a wrapper around curl to save the content of a request in a variable.
 # It allows you to check the http status code and return 1 if it is not acceptable.
-# It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
+# It invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails
@@ -114,10 +114,10 @@ function curl::toFile() {
 # - `RETURNED_VALUE3`: the http status code
 #
 # ```bash
-# curl::toVar true 200 https://example.com -X POST -H 'Authorization: token'
-# curl::toVar false 200,201 https://example.com || core::fail "The curl command failed."
+# curl::request true 200 https://example.com -X POST -H 'Authorization: token'
+# curl::request false 200,201 https://example.com || core::fail "The curl command failed."
 # ```
-function curl::toVar() {
+function curl::request() {
   local failIfFails="${1:-false}"
   local acceptableStatusCodes="${2:-}"
   shift 2
@@ -127,7 +127,7 @@ function curl::toVar() {
 
   local -i exitCode=0
   local errors httpStatusCode
-  curl::toFile "${failIfFails}" "${acceptableStatusCodes}" "${GLOBAL_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
+  curl::download "${failIfFails}" "${acceptableStatusCodes}" "${GLOBAL_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
   errors="${RETURNED_VALUE}"
   httpStatusCode="${RETURNED_VALUE2}"
 

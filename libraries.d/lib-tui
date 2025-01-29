@@ -82,7 +82,7 @@ function tui::switchToFullScreen() {
   _INTERACTIVE_FULL_SCREEN_MODE=true
 
   # disable echoing when we type something
-  tui::sttyInit
+  tui::setTerminalOptions
 
   # switch to the alternate screen, hide the cursor and clear the screen
   printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
@@ -116,7 +116,7 @@ function tui::switchBackFromFullScreen() {
   printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
 
   # restore stty
-  tui::sttyRestore
+  tui::restoreTerminalOptions
 
   # restore the error output and display them if any
   exec 2>&4 4>&-
@@ -126,14 +126,16 @@ function tui::switchBackFromFullScreen() {
   fi
 }
 
-# ## tui::sttyInit
+# ## tui::setTerminalOptions
 #
-# Disable the echo of the tty. Will no longer display the characters typed by the user.
+# Set the terminal options to enable a satisfying and consistent behavior
+# for the GNU readline library.
+# Disable the echo of the terminal, no longer display the characters typed by the user.
 #
 # ```bash
-# tui::sttyInit
+# tui::setTerminalOptions
 # ```
-function tui::sttyInit() {
+function tui::setTerminalOptions() {
   if command -v stty &>/dev/null; then
     if [[ -z ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
       exe::invoke "stty" "-g"
@@ -146,9 +148,10 @@ function tui::sttyInit() {
   fi
 }
 
-# ## tui::sttyRestore
+# ## tui::restoreTerminalOptions
 #
-# Enable the echo of the tty. Will display the characters typed by the user.
+# Restore the terminal options to their original state.
+# Should be called after `tui::setTerminalOptions`.
 #
 # - $1: **force** _as bool_:
 #       (optional) force the restoration of the stty configuration
@@ -156,10 +159,10 @@ function tui::sttyInit() {
 #       (defaults to false)
 #
 # ```bash
-# tui::sttyRestore
+# tui::restoreTerminalOptions
 # ```
 # shellcheck disable=SC2120
-function tui::sttyRestore() {
+function tui::restoreTerminalOptions() {
   if [[ ${_INTERACTIVE_FULL_SCREEN_MODE:-} == "true" && ${1:-} != "true" ]]; then
     return 0
   fi
@@ -380,8 +383,9 @@ function tui::testWaitForChar() {
 # It uses the read builtin command. This will not detect all key combinations.
 # The output will depend on the terminal used and the character sequences it sends on each key press.
 #
-# For more advanced use cases, you can use tui::waitForKeyPress.
-# This simple implementation does not rely on GNU readline and does not require stty to be initialized.
+# For more advanced use cases, you can use `tui::waitForKeyPress`.
+# This simple implementation does not rely on GNU readline and does not require terminal options
+# to be set using `tui::setTerminalOptions`.
 #
 # Some special keys are translated into more readable strings:
 # UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
@@ -464,7 +468,7 @@ function tui::waitForChar() {
 # ```
 function tui::testWaitForKeyPress() {
   # setup the terminal before anything else
-  tui::sttyInit
+  tui::setTerminalOptions
   # define the callback function called when a special key is pressed
   # shellcheck disable=SC2317
   function interactiveOnKeyBindingPressTestFunction() {
@@ -484,7 +488,7 @@ function tui::testWaitForKeyPress() {
     if [[ ! -t 0 ]]; then break; fi
   done
 
-  tui::sttyRestore
+  tui::restoreTerminalOptions
 }
 
 # ## tui::waitForKeyPress
@@ -496,7 +500,7 @@ function tui::testWaitForKeyPress() {
 # This means we can detect more key combinations but all keys needs to be bound first...
 # Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 #
-# You must call `tui::rebindKeymap` and `tui::sttyInit` before using this function.
+# You must call `tui::rebindKeymap` and `tui::setTerminalOptions` before using this function.
 #
 # - $@: **read parameters** _as any_:
 #       additional parameters to pass to the read command
@@ -549,7 +553,7 @@ function tui::waitForKeyPress() {
 #
 # This function should be called before using tui::waitForKeyPress.
 #
-# You can call `tui::resetBindings` to restore the default bindings. However, this is not
+# You can call `tui::restoreBindings` to restore the default bindings. However, this is not
 # necessary as the bindings are local to the script.
 #
 # ```bash
@@ -742,14 +746,14 @@ function tui::rebindKeymap() {
   fi
 }
 
-# ## tui::resetBindings
+# ## tui::restoreBindings
 #
 # Reset the key bindings to the default ones.
 #
 # ```bash
-# tui::resetBindings
+# tui::restoreBindings
 # ```
-function tui::resetBindings() {
+function tui::restoreBindings() {
   if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
     return 0
   fi

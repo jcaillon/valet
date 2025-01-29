@@ -44,27 +44,9 @@ Returned variables:
 RETURNED_VALUE='line3 seems so'
 ```
 
-### ✅ Testing string::kebabCaseToSnakeCase
+### ✅ Testing string::convertKebabCaseToSnakeCase
 
-❯ `string::kebabCaseToSnakeCase this-is-a-test0`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='THIS_IS_A_TEST0'
-```
-
-❯ `string::kebabCaseToSnakeCase --another-test`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='ANOTHER_TEST'
-```
-
-### ✅ Testing string::kebabCaseToSnakeCase
-
-❯ `string::kebabCaseToSnakeCase this-is-a-test0`
+❯ `string::convertKebabCaseToSnakeCase this-is-a-test0`
 
 Returned variables:
 
@@ -72,7 +54,7 @@ Returned variables:
 RETURNED_VALUE='THIS_IS_A_TEST0'
 ```
 
-❯ `string::kebabCaseToSnakeCase --another-test`
+❯ `string::convertKebabCaseToSnakeCase --another-test`
 
 Returned variables:
 
@@ -80,9 +62,27 @@ Returned variables:
 RETURNED_VALUE='ANOTHER_TEST'
 ```
 
-### ✅ Testing string::kebabCaseToCamelCase
+### ✅ Testing string::convertKebabCaseToSnakeCase
 
-❯ `string::kebabCaseToCamelCase this-is-a-test0`
+❯ `string::convertKebabCaseToSnakeCase this-is-a-test0`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='THIS_IS_A_TEST0'
+```
+
+❯ `string::convertKebabCaseToSnakeCase --another-test`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='ANOTHER_TEST'
+```
+
+### ✅ Testing string::convertKebabCaseToCamelCase
+
+❯ `string::convertKebabCaseToCamelCase this-is-a-test0`
 
 Returned variables:
 
@@ -90,7 +90,7 @@ Returned variables:
 RETURNED_VALUE='thisIsATest0'
 ```
 
-❯ `string::kebabCaseToCamelCase --another-test`
+❯ `string::convertKebabCaseToCamelCase --another-test`
 
 Returned variables:
 
@@ -98,7 +98,7 @@ Returned variables:
 RETURNED_VALUE='anotherTest'
 ```
 
-❯ `string::kebabCaseToCamelCase --last--`
+❯ `string::convertKebabCaseToCamelCase --last--`
 
 Returned variables:
 
@@ -303,81 +303,11 @@ RETURNED_ARRAY=(
 )
 ```
 
-### ✅ Testing string::regexGetFirst function
-
-❯ `string::regexGetFirst name:\ julien 'name:[[:space:]]*([[:alnum:]]*)'`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='julien'
-```
-
-### ✅ Testing string::microsecondsToHuman function
-
-```text
-format='Hours: %HH
-Minutes: %MM
-Seconds: %SS
-Milliseconds: %LL
-Microseconds: %UU
-
-Hours: %h
-Minutes: %m
-Seconds: %s
-Milliseconds: %l
-Microseconds: %u
-
-Total minutes: %M
-Total seconds: %S
-Total milliseconds: %L
-Total microseconds: %U'
-```
-
-❯ `string::microsecondsToHuman 18243002234 "${format}"`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='Hours: 05
-Minutes: 04
-Seconds: 03
-Milliseconds: 002
-Microseconds: 234
-
-Hours: 5
-Minutes: 4
-Seconds: 3
-Milliseconds: 2
-Microseconds: 234
-
-Total minutes: 304
-Total seconds: 18243
-Total milliseconds: 4320003002
-Total microseconds: 18243002234'
-```
-
-❯ `string::microsecondsToHuman 18243002234`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='05:04:03'
-```
-
-❯ `_OPTION_FORMAT=%U string::microsecondsToHuman 18243002234`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='18243002234'
-```
-
-### ✅ Testing string::wrapText
+### ✅ Testing string::wrapWords
 
 Wrapping text at column 30 with no padding
 
-❯ `string::wrapText "${MULTI_LINES_TEXT}" 30`
+❯ `string::wrapWords "${MULTI_LINES_TEXT}" 30`
 
 Returned variables:
 
@@ -427,7 +357,7 @@ RETURNED_VALUE2='8'
 
 Wrapping text at column 50 with padding of 4 on new lines
 
-❯ `string::wrapText "${MULTI_LINES_TEXT}" 50 \ \ \ \ `
+❯ `string::wrapWords "${MULTI_LINES_TEXT}" 50 \ \ \ \ `
 
 Returned variables:
 
@@ -462,7 +392,7 @@ RETURNED_VALUE='You don`t [36m[36m[36mget better[39m[39m[39m on the days w
 
 Wrapping text at column 20 with padding of 3 on all lines
 
-❯ `string::wrapText "${MULTI_LINES_TEXT}" 20 \ \ \  17`
+❯ `string::wrapWords "${MULTI_LINES_TEXT}" 20 \ \ \  17`
 
 Returned variables:
 
@@ -538,7 +468,7 @@ RETURNED_VALUE2='4'
 
 Wrapping words, shortcut because the message is a short single line
 
-❯ `string::wrapText A\ message. 80`
+❯ `string::wrapWords A\ message. 80`
 
 Returned variables:
 
@@ -548,7 +478,7 @@ RETURNED_VALUE='A message.'
 
 Wrapping words, no shortcut!
 
-❯ `string::wrapText A\ message. 80 '' 5`
+❯ `string::wrapWords A\ message. 80 '' 5`
 
 Returned variables:
 
@@ -559,7 +489,7 @@ message.'
 
 Wrapping words
 
-❯ `string::wrapText $'A message.\nA new line' 13 [36m░░░[0m 10`
+❯ `string::wrapWords $'A message.\nA new line' 13 [36m░░░[0m 10`
 
 Returned variables:
 

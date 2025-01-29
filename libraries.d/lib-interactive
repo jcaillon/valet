@@ -95,6 +95,8 @@ function interactive::askForConfirmationRaw() {
 # - The user can validate the choice with the enter key.
 # - The user can also validate immediately with the y or n key.
 #
+# Dialog boxes are displayed for the question and answer.
+#
 # - $1: **prompt** _as string_:
 #       the prompt to display
 # - $2: default _as bool_:
@@ -304,7 +306,7 @@ interactive::displayDialogBox() {
     textWidth=${#text}
   fi
 
-  string::wrapText "${text}" "${textWidth}"
+  string::wrapWords "${text}" "${textWidth}"
   local wrappedText="${RETURNED_VALUE}"
 
   local finalString line sideString

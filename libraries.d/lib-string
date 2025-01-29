@@ -47,7 +47,7 @@ function string::cutField() {
   RETURNED_VALUE=""
 }
 
-# ## string::camelCaseToSnakeCase
+# ## string::convertCamelCaseToSnakeCase
 #
 # This function convert a camelCase string to a SNAKE_CASE string.
 # It uses pure bash.
@@ -61,9 +61,9 @@ function string::cutField() {
 # - `RETURNED_VALUE`: The SNAKE_CASE string.
 #
 # ```bash
-# string::camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
+# string::convertCamelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
 # ```
-function string::camelCaseToSnakeCase() {
+function string::convertCamelCaseToSnakeCase() {
   local camelCase="${1}"
   local snakeCase=""
   local -i charIndex strLength=${#camelCase}
@@ -82,7 +82,7 @@ function string::camelCaseToSnakeCase() {
   RETURNED_VALUE="${snakeCase}"
 }
 
-# ## string::kebabCaseToSnakeCase
+# ## string::convertKebabCaseToSnakeCase
 #
 # This function convert a kebab-case string to a SNAKE_CASE string.
 # It uses pure bash.
@@ -96,9 +96,9 @@ function string::camelCaseToSnakeCase() {
 # - `RETURNED_VALUE`: The SNAKE_CASE string.
 #
 # ```bash
-# string::kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
+# string::convertKebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
 # ```
-function string::kebabCaseToSnakeCase() {
+function string::convertKebabCaseToSnakeCase() {
   local kebabCase="${1}"
   local snakeCase=""
   local -i charIndex strLength=${#kebabCase}
@@ -117,7 +117,7 @@ function string::kebabCaseToSnakeCase() {
   RETURNED_VALUE="${snakeCase}"
 }
 
-# ## string::kebabCaseToCamelCase
+# ## string::convertKebabCaseToCamelCase
 #
 # This function convert a kebab-case string to a camelCase string.
 # It uses pure bash.
@@ -131,9 +131,9 @@ function string::kebabCaseToSnakeCase() {
 # - `RETURNED_VALUE`: The camelCase string.
 #
 # ```bash
-# string::kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
+# string::convertKebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
 # ```
-function string::kebabCaseToCamelCase() {
+function string::convertKebabCaseToCamelCase() {
   local kebabCase="${1}"
   local camelCase=""
   local -i charIndex strLength=${#kebabCase}
@@ -367,120 +367,6 @@ function string::split() {
   # shellcheck disable=SC2206
   # shellcheck disable=SC2034
   RETURNED_ARRAY=(${1})
-}
-
-# ## string::regexGetFirst
-#
-# Matches a string against a regex and returns the first capture group of the matched string.
-#
-# - $1: **string** _as string_:
-#       the string to match
-# - $2: **regex** _as string_:
-#       the regex
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: the first capture group in the matched string.
-#                     Empty if no match.
-#
-# ```bash
-# string::regexGetFirst "name: julien" "name:(.*)"
-# echo "${RETURNED_VALUE}"
-# ```
-#
-# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
-function string::regexGetFirst() {
-  # Usage: regex "string" "regex"
-  if [[ ${1} =~ ${2} ]]; then
-    RETURNED_VALUE="${BASH_REMATCH[1]:-}"
-  else
-    RETURNED_VALUE=""
-  fi
-}
-
-# ## string::microsecondsToHuman
-#
-# Convert microseconds to human readable format.
-#
-# - $1: **microseconds** _as int_:
-#       the microseconds to convert
-# - $2: format _as string_:
-#      (optional) Can be set using the variable `_OPTION_FORMAT`.
-#      the format to use (defaults to "%HH:%MM:%SS")
-#      Usable formats:
-#      - %HH: hours
-#      - %MM: minutes
-#      - %SS: seconds
-#      - %LL: milliseconds
-#      - %h: hours without leading zero
-#      - %m: minutes without leading zero
-#      - %s: seconds without leading zero
-#      - %l: milliseconds without leading zero
-#      - %u: microseconds without leading zero
-#      - %M: total minutes
-#      - %S: total seconds
-#      - %L: total milliseconds
-#      - %U: total microseconds
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: the human readable format
-#
-# ```bash
-# string::microsecondsToHuman 123456789
-# echo "${RETURNED_VALUE}"
-# ```
-function string::microsecondsToHuman() {
-  local -i ms="${1}"
-  local format="${2:-${_OPTION_FORMAT:-"%HH:%MM:%SS"}}"
-
-  local -i hours=$((ms / 3600 / 1000000))
-  local -i minutes=$(((ms / 60 / 1000000) % 60))
-  local -i seconds=$(((ms / 1000000) % 60))
-  local -i milliseconds=$((ms / 1000 % 1000))
-  local -i microseconds=$((ms % 1000))
-
-  local humanFormat="${format}"
-  if [[ ${hours} -lt 10 ]]; then
-    humanFormat="${humanFormat//%HH/0${hours}}"
-  else
-    humanFormat="${humanFormat//%HH/${hours}}"
-  fi
-  if [[ ${minutes} -lt 10 ]]; then
-    humanFormat="${humanFormat//%MM/0${minutes}}"
-  else
-    humanFormat="${humanFormat//%MM/${minutes}}"
-  fi
-  if [[ ${seconds} -lt 10 ]]; then
-    humanFormat="${humanFormat//%SS/0${seconds}}"
-  else
-    humanFormat="${humanFormat//%SS/${seconds}}"
-  fi
-  if [[ ${milliseconds} -lt 10 ]]; then
-    humanFormat="${humanFormat//%LL/00${milliseconds}}"
-  elif [[ ${milliseconds} -lt 100 ]]; then
-    humanFormat="${humanFormat//%LL/0${milliseconds}}"
-  else
-    humanFormat="${humanFormat//%LL/${milliseconds}}"
-  fi
-  if [[ ${microseconds} -lt 10 ]]; then
-    humanFormat="${humanFormat//%UU/00${microseconds}}"
-  elif [[ ${microseconds} -lt 100 ]]; then
-    humanFormat="${humanFormat//%UU/0${microseconds}}"
-  else
-    humanFormat="${humanFormat//%UU/${microseconds}}"
-  fi
-  humanFormat="${humanFormat//%h/${hours}}"
-  humanFormat="${humanFormat//%m/${minutes}}"
-  humanFormat="${humanFormat//%s/${seconds}}"
-  humanFormat="${humanFormat//%l/${milliseconds}}"
-  humanFormat="${humanFormat//%u/${microseconds}}"
-  humanFormat="${humanFormat//%M/$((hours * 60 + minutes))}"
-  humanFormat="${humanFormat//%S/$((hours * 3600 + minutes * 60 + seconds))}"
-  humanFormat="${humanFormat//%L/$(((hours * 3600 * + minutes * 60 + seconds) * 1000 + milliseconds))}"
-  humanFormat="${humanFormat//%U/$((ms))}"
-
-  RETURNED_VALUE="${humanFormat}"
 }
 
 # ## string::head

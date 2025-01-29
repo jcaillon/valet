@@ -453,7 +453,7 @@ function declareFinalCommandDefinitionHelpVariables() {
       optionValue="${TEMP_CMD_BUILD_options_name[index]}"
       if [[ ${optionValue} == *"<"* ]]; then optionValue="<${optionValue##*<}"; else optionValue="true"; fi
       selfBuild_extractFirstLongNameFromOptionString "${TEMP_CMD_BUILD_options_name[index]}"
-      string::kebabCaseToSnakeCase "${RETURNED_VALUE}"
+      string::convertKebabCaseToSnakeCase "${RETURNED_VALUE}"
       TEMP_CMD_BUILD_options_description[index]+=$'\n'"This option can be set by exporting the variable VALET_${RETURNED_VALUE}='${optionValue}'."
     fi
   done
@@ -509,9 +509,9 @@ function declareFinalCommandDefinitionParserVariables() {
     option="${option//,/ }"
     string::trimAll "${option}" && option="${RETURNED_VALUE}"
     selfBuild_extractFirstLongNameFromOptionString "${option}" && optionName="${RETURNED_VALUE}"
-    string::kebabCaseToCamelCase "${optionName}" && optionNameCc="${RETURNED_VALUE}"
+    string::convertKebabCaseToCamelCase "${optionName}" && optionNameCc="${RETURNED_VALUE}"
     if [[ "${optionNoEnvVar}" != "true" ]]; then
-      string::kebabCaseToSnakeCase "${optionName}" && optionNameSc="VALET_${RETURNED_VALUE}"
+      string::convertKebabCaseToSnakeCase "${optionName}" && optionNameSc="VALET_${RETURNED_VALUE}"
     else
       optionNameSc=""
     fi
@@ -537,7 +537,7 @@ function declareFinalCommandDefinitionParserVariables() {
         argument="${argument//\?/}"
         nbOptionalArguments+=1
       fi
-      string::kebabCaseToCamelCase "${argument}" && argumentNameCc="${RETURNED_VALUE}"
+      string::convertKebabCaseToCamelCase "${argument}" && argumentNameCc="${RETURNED_VALUE}"
 
       eval "CMD_ARGS_NAME_${function}+=(\"${argumentNameCc}\")"
     done

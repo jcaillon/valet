@@ -25,6 +25,8 @@ source interactive
 source progress
 # shellcheck source=../libraries.d/lib-curl
 source curl
+# shellcheck source=../libraries.d/lib-bash
+source bash
 
 #===============================================================
 # >>> command: self extend
@@ -144,7 +146,7 @@ function selfExtend() {
     # if Git is not installed, we download the source tarball and extract it
     # We will only be able to do that for a few git servers however
     log::info "Git is not installed, we will attempt to download the source tarball for the extension ⌜${extensionName}⌝."
-    if system::getNotExistingCommands curl tar; then
+    if bash::getMissingCommands curl tar; then
       local IFS=$'\n'
       core::fail "The following tools are required for this command but are not installed:"$'\n'"${RETURNED_ARRAY[*]}"
     fi
@@ -217,7 +219,7 @@ function selfExtend_createExtension() {
     selfDocument
   fi
 
-  system::os
+  system::getOs
   local os="${RETURNED_VALUE}"
   if [[ ${os} == "windows" ]]; then
     # shellcheck source=../libraries.d/lib-windows
@@ -303,7 +305,7 @@ function selfExtend_downloadTarball() {
   # download the tarball
   log::info "Downloading the extension from the URL ⌜${tarballUrl}⌝ for sha1 ⌜${sha1}⌝."
   progress::start "#spinner Download in progress, please wait..."
-  curl::toFile true 200,302 "${tempDirectory}/${sha1}.tar.gz" "${tarballUrl}"
+  curl::download true 200,302 "${tempDirectory}/${sha1}.tar.gz" "${tarballUrl}"
   progress::stop
 
   # untar
@@ -348,9 +350,9 @@ function selfExtend_getSha1() {
     RETURNED_VALUE=""
     progress::start "#spinner Fetching reference information from GitHub..."
     local url="https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${reference}"
-    if ! curl::toVar false '200' -H "Accept: application/vnd.github.v3+json" "${url}"; then
+    if ! curl::request false '200' -H "Accept: application/vnd.github.v3+json" "${url}"; then
       url="https://api.github.com/repos/${owner}/${repo}/git/refs/tags/${reference}"
-      curl::toVar false '200' -H "Accept: application/vnd.github.v3+json" "${url}" || :
+      curl::request false '200' -H "Accept: application/vnd.github.v3+json" "${url}" || :
     fi
     local response="${RETURNED_VALUE}"
     local error="${RETURNED_VALUE2}"

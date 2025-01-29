@@ -2,9 +2,9 @@
 
 ## Test script 00.tests
 
-### ✅ Testing system::os
+### ✅ Testing system::getOs
 
-❯ `OSTYPE=linux-bsd system::os`
+❯ `OSTYPE=linux-bsd system::getOs`
 
 Returned variables:
 
@@ -12,7 +12,7 @@ Returned variables:
 RETURNED_VALUE='linux'
 ```
 
-❯ `OSTYPE=msys system::os`
+❯ `OSTYPE=msys system::getOs`
 
 Returned variables:
 
@@ -20,7 +20,7 @@ Returned variables:
 RETURNED_VALUE='windows'
 ```
 
-❯ `OSTYPE=darwin-stuff system::os`
+❯ `OSTYPE=darwin-stuff system::getOs`
 
 Returned variables:
 
@@ -28,7 +28,7 @@ Returned variables:
 RETURNED_VALUE='darwin'
 ```
 
-❯ `OSTYPE=nop system::os`
+❯ `OSTYPE=nop system::getOs`
 
 Returned variables:
 
@@ -36,77 +36,11 @@ Returned variables:
 RETURNED_VALUE='unknown'
 ```
 
-### ✅ Testing system::env
+### ✅ Testing system::getEnvVars
 
-❯ `system::env`
+❯ `system::getEnvVars`
 
 Found environment variables in RETURNED_ARRAY.
-
-### ✅ Testing system::date
-
-❯ `system::date`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='1987-05-25_01h00m00s'
-```
-
-❯ `system::date '%(%H:%M:%S)T'`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='01:00:00'
-```
-
-### ✅ Testing system::getUndeclaredVariables
-
-❯ `system::getUndeclaredVariables`
-
-Returned code: `1`
-
-❯ `ABC=ok`
-
-❯ `system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE dfg ABC NOP`
-
-Returned variables:
-
-```text
-RETURNED_ARRAY=(
-[0]='dfg'
-[1]='NOP'
-)
-```
-
-### ✅ Testing system::getNotExistingCommands
-
-❯ `system::getNotExistingCommands`
-
-Returned code: `1`
-
-❯ `system::getNotExistingCommands NONEXISTINGSTUFF system::getNotExistingCommands rm YETANOTHERONEMISSING`
-
-Returned variables:
-
-```text
-RETURNED_ARRAY=(
-[0]='NONEXISTINGSTUFF'
-[1]='YETANOTHERONEMISSING'
-)
-```
-
-### ✅ Testing system::commandExists
-
-❯ `system::commandExists`
-
-Returned code: `1`
-
-❯ `system::commandExists NONEXISTINGSTUFF`
-
-Returned code: `1`
-
-❯ `system::commandExists rm`
 
 ### ✅ Testing system::addToPath
 
@@ -233,57 +167,5 @@ INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜csh⌝ shell.
 INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜xonsh⌝ shell.
 INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜fish⌝ shell.
 INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
-```
-
-### ✅ Testing windows::setEnvVar
-
-❯ `OSTYPE=msys windows::setEnvVar VAR VALUE`
-
-**Standard output**:
-
-```text
-🙈 mocking windows::runPs1: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.SetValue('VAR', 'VALUE', 'ExpandString');
-```
-
-❯ `OSTYPE=msys windows::setEnvVar VAR ''`
-
-**Standard output**:
-
-```text
-🙈 mocking windows::runPs1: $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true); $key.DeleteValue('VAR');
-```
-
-### ✅ Testing windows::getEnvVar
-
-❯ `OSTYPE=msys windows::getEnvVar VAR`
-
-**Standard output**:
-
-```text
-🙈 mocking windows::runPs1: 
-  $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
-  $value = $key.GetValue('VAR', '', 'DoNotExpandEnvironmentNames');
-  $key.Dispose();
-  Write-Output $value;
-  
-```
-
-### ✅ Testing windows::addToPath
-
-❯ `OSTYPE=msys windows::addToPath /coucou`
-
-**Standard output**:
-
-```text
-🙈 mocking windows::runPs1: 
-  $pathToAdd = '\coucou';
-  $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true);
-  $oldPath = $key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
-  if ($currentPath -notlike "*$pathToAdd*") {
-      $newPath = '{0}{1}{2}' -f $oldPath, [IO.Path]::PathSeparator, $pathToAdd;
-      $key.SetValue('Path', $newPath, 'ExpandString');
-  };
-  $key.Dispose();
-  
 ```
 

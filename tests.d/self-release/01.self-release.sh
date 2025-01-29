@@ -42,16 +42,16 @@ function interactive::promptYesNo() {
   return 0
 }
 
-function curl::toVar() {
-  echo "🙈 mocked curl::toVar $*" 1>&2
+function curl::request() {
+  echo "🙈 mocked curl::request $*" 1>&2
   RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}", "tag_name": "v1.2.3", "browser_download_url": "https:///fake" }'
   RETURNED_VALUE2=""
   RETURNED_VALUE3=200
 }
 
 
-function curl::toFile() {
-  echo "🙈 mocked curl::toFile $*" 1>&2
+function curl::download() {
+  echo "🙈 mocked curl::download $*" 1>&2
   RETURNED_VALUE=""
   RETURNED_VALUE2=200
 }

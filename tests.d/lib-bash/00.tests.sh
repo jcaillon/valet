@@ -4,6 +4,12 @@ function main() {
   test_bash::getFunctionDefinitionWithGlobalVars
   test_bash::countJobs
   test_bash::injectCodeInFunction
+  test_bash::sleep
+  test_bash::readStdIn
+  test_bash::countArgs
+  test_bash::getMissingVariables
+  test_bash::getMissingCommands
+  test_bash::isCommand
 }
 
 function test_bash::injectCodeInFunction() {
@@ -81,6 +87,54 @@ function test_bash::getFunctionDefinitionWithGlobalVars() {
   test::prompt "echo \${RETURNED_VALUE}"
   echo "${RETURNED_VALUE}"
   test::flush
+}
+
+function test_bash::sleep() {
+  test::title "✅ Testing bash::sleep"
+
+  test::exec bash::sleep 0.001
+}
+
+function test_bash::readStdIn() {
+  test::title "✅ Testing bash::readStdIn"
+
+  test::prompt "bash::readStdIn <<<'coucou'"
+  test::resetReturnedVars
+  bash::readStdIn <<<"coucou"
+  test::printReturnedVars
+
+  test::func bash::readStdIn
+}
+
+function test_bash::countArgs() {
+  test::title "✅ Testing bash::countArgs"
+
+  test::func bash::countArgs 'arg1' 'arg2' 'arg3'
+  test::func bash::countArgs "\${PWD}/resources/*"
+}
+
+function test_bash::getMissingVariables() {
+  test::title "✅ Testing bash::getMissingVariables"
+
+  test::func bash::getMissingVariables
+  test::exec ABC="ok"
+  test::func bash::getMissingVariables GLOBAL_TEST_TEMP_FILE dfg ABC NOP
+}
+
+function test_bash::getMissingCommands() {
+  test::title "✅ Testing bash::getMissingCommands"
+
+  test::func bash::getMissingCommands
+
+  test::func bash::getMissingCommands NONEXISTINGSTUFF bash::getMissingCommands rm YETANOTHERONEMISSING
+}
+
+function test_bash::isCommand() {
+  test::title "✅ Testing bash::isCommand"
+
+  test::exec bash::isCommand
+  test::exec bash::isCommand NONEXISTINGSTUFF
+  test::exec bash::isCommand rm
 }
 
 main

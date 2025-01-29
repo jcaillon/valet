@@ -295,18 +295,18 @@
   "body": [ "# ## core::getLocalStateDirectory\n# \n# Returns the path to the valet local state directory.\n# The base directory relative to which user-specific state files should be stored.\n# Creates it if missing.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the path to the valet local state directory\n# \n# ```bash\n# core::getLocalStateDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \ncore::getLocalStateDirectory$0" ]
 },
 
-"core::getProgramElapsedMicroseconds": {
-  "prefix": "core::getProgramElapsedMicroseconds",
+"time::getProgramElapsedMicroseconds": {
+  "prefix": "time::getProgramElapsedMicroseconds",
   "description": "Get the elapsed time in µs since the program started...",
   "scope": "",
-  "body": [ "core::getProgramElapsedMicroseconds$0" ]
+  "body": [ "time::getProgramElapsedMicroseconds$0" ]
 },
 
-"core::getProgramElapsedMicroseconds#withdoc": {
-  "prefix": "core::getProgramElapsedMicroseconds#withdoc",
+"time::getProgramElapsedMicroseconds#withdoc": {
+  "prefix": "time::getProgramElapsedMicroseconds#withdoc",
   "description": "Get the elapsed time in µs since the program started...",
   "scope": "",
-  "body": [ "# ## core::getProgramElapsedMicroseconds\n# \n# Get the elapsed time in µs since the program started.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the elapsed time in µs since the program started.\n# \n# ```bash\n# core::getElapsedProgramTime\n# echo \"\\${RETURNED_VALUE}\"\n# string::microsecondsToHuman \"\\${RETURNED_VALUE}\"\n# echo \"Human time: \\${RETURNED_VALUE}\"\n# ```\n# \n# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.\n# > The 10# forces the base 10 conversion to avoid issues with leading zeros.\n# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.\n# \ncore::getProgramElapsedMicroseconds$0" ]
+  "body": [ "# ## time::getProgramElapsedMicroseconds\n# \n# Get the elapsed time in µs since the program started.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the elapsed time in µs since the program started.\n# \n# ```bash\n# core::getElapsedProgramTime\n# echo \"\\${RETURNED_VALUE}\"\n# time::convertMicrosecondsToHuman \"\\${RETURNED_VALUE}\"\n# echo \"Human time: \\${RETURNED_VALUE}\"\n# ```\n# \n# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.\n# > The 10# forces the base 10 conversion to avoid issues with leading zeros.\n# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.\n# \ntime::getProgramElapsedMicroseconds$0" ]
 },
 
 "core::getUserDirectory": {
@@ -351,32 +351,32 @@
   "body": [ "# ## core::resetIncludedFiles\n# \n# Allows to reset the included files.\n# When calling the source function, it will source all the files again.\n# This is useful when we want to reload the libraries.\n# \n# ```bash\n# core::resetIncludedFiles\n# ```\n# \ncore::resetIncludedFiles$0" ]
 },
 
-"curl::toFile": {
-  "prefix": "curl::toFile",
+"curl::download": {
+  "prefix": "curl::download",
   "description": "This function is a wrapper around curl...",
   "scope": "",
-  "body": [ "curl::toFile \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
+  "body": [ "curl::download \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
 },
 
-"curl::toFile#withdoc": {
-  "prefix": "curl::toFile#withdoc",
+"curl::download#withdoc": {
+  "prefix": "curl::download#withdoc",
   "description": "This function is a wrapper around curl...",
   "scope": "",
-  "body": [ "# ## curl::toFile\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It exe::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \\${2}.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$3: **path** _as string_:\n#       the file in which to save the output of curl\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of stderr\n# - `RETURNED_VALUE2`: the http status code\n# \n# ```bash\n# curl::toFile \"true\" \"200,201\" \"/filePath\" \"https://example.com\" || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::toFile \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
+  "body": [ "# ## curl::download\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It exe::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \\${2}.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$3: **path** _as string_:\n#       the file in which to save the output of curl\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of stderr\n# - `RETURNED_VALUE2`: the http status code\n# \n# ```bash\n# curl::download \"true\" \"200,201\" \"/filePath\" \"https://example.com\" || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::download \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${99:**curl arguments**}\"$0" ]
 },
 
-"curl::toVar": {
-  "prefix": "curl::toVar",
+"curl::request": {
+  "prefix": "curl::request",
   "description": "This function is a wrapper around curl...",
   "scope": "",
-  "body": [ "curl::toVar \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${99:**curl arguments**}\"$0" ]
+  "body": [ "curl::request \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${99:**curl arguments**}\"$0" ]
 },
 
-"curl::toVar#withdoc": {
-  "prefix": "curl::toVar#withdoc",
+"curl::request#withdoc": {
+  "prefix": "curl::request#withdoc",
   "description": "This function is a wrapper around curl...",
   "scope": "",
-  "body": [ "# ## curl::toVar\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It exe::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \"tempfile\".\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of the request\n# - `RETURNED_VALUE2`: the content of stderr\n# - `RETURNED_VALUE3`: the http status code\n# \n# ```bash\n# curl::toVar false 200,201 https://example.com || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::toVar \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${99:**curl arguments**}\"$0" ]
+  "body": [ "# ## curl::request\n# \n# This function is a wrapper around curl.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It exe::invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \"tempfile\".\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - `RETURNED_VALUE`: the content of the request\n# - `RETURNED_VALUE2`: the content of stderr\n# - `RETURNED_VALUE3`: the http status code\n# \n# ```bash\n# curl::request false 200,201 https://example.com || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::request \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${99:**curl arguments**}\"$0" ]
 },
 
 "fsfs::itemSelector": {
@@ -589,18 +589,18 @@
   "body": [ "# ## windows::convertPathFromUnix\n# \n# Convert a unix path to a Windows path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The Windows path.\n# \n# ```bash\n# windows::convertPathFromUnix \"/path/to/file\"\n# ```\n# \n# > Handles paths starting with `/mnt/x/` or `/x/`.\n# \nwindows::convertPathFromUnix \"${1:**path**}\"$0" ]
 },
 
-"exe::countArgs": {
-  "prefix": "exe::countArgs",
+"bash::countArgs": {
+  "prefix": "bash::countArgs",
   "description": "Returns the number of arguments passed...",
   "scope": "",
-  "body": [ "exe::countArgs \"${99:**arguments**}\"$0" ]
+  "body": [ "bash::countArgs \"${99:**arguments**}\"$0" ]
 },
 
-"exe::countArgs#withdoc": {
-  "prefix": "exe::countArgs#withdoc",
+"bash::countArgs#withdoc": {
+  "prefix": "bash::countArgs#withdoc",
   "description": "Returns the number of arguments passed...",
   "scope": "",
-  "body": [ "# ## exe::countArgs\n# \n# Returns the number of arguments passed.\n# \n# A convenient function that can be used to:\n# \n# - count the files/directories in a directory\n#   `exe::countArgs \"\\${PWD}\"/* && local numberOfFiles=\"\\${RETURNED_VALUE}\"`\n# - count the number of variables starting with VALET_\n#   `exe::countArgs \"\\${!VALET_@}\" && local numberOfVariables=\"\\${RETURNED_VALUE}\"`\n# \n# - \\$@: **arguments** _as any_:\n#       the arguments to count\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The number of arguments passed.\n# \n# ```bash\n# exe::countArgs 1 2 3\n# ```\n# \nexe::countArgs \"${99:**arguments**}\"$0" ]
+  "body": [ "# ## bash::countArgs\n# \n# Returns the number of arguments passed.\n# \n# A convenient function that can be used to:\n# \n# - count the files/directories in a directory\n#   `bash::countArgs \"\\${PWD}\"/* && local numberOfFiles=\"\\${RETURNED_VALUE}\"`\n# - count the number of variables starting with VALET_\n#   `bash::countArgs \"\\${!VALET_@}\" && local numberOfVariables=\"\\${RETURNED_VALUE}\"`\n# \n# - \\$@: **arguments** _as any_:\n#       the arguments to count\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The number of arguments passed.\n# \n# ```bash\n# bash::countArgs 1 2 3\n# ```\n# \nbash::countArgs \"${99:**arguments**}\"$0" ]
 },
 
 "fs::createDirectoryIfNeeded": {
@@ -855,32 +855,32 @@
   "body": [ "# ## fs::readFile\n# \n# Reads the content of a file and returns it in the global variable RETURNED_VALUE.\n# Uses pure bash.\n# \n# - \\$1: **path** _as string_:\n#       the file path to read\n# - \\$2: max char _as int_:\n#       (optional) the maximum number of characters to read\n#       (defaults to 0, which means read the whole file)\n# \n# > If the file does not exist, the function will return an empty string instead of failing.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The content of the file.\n# \n# ```bash\n# fs::readFile \"/path/to/file\" && local fileContent=\"\\${RETURNED_VALUE}\"\n# fs::readFile \"/path/to/file\" 500 && local fileContent=\"\\${RETURNED_VALUE}\"\n# ```\n# \nfs::readFile \"${1:**path**}\" \"${2:max char}\"$0" ]
 },
 
-"exe::readStdIn": {
-  "prefix": "exe::readStdIn",
+"bash::readStdIn": {
+  "prefix": "bash::readStdIn",
   "description": "Read the content of the standard input...",
   "scope": "",
-  "body": [ "exe::readStdIn$0" ]
+  "body": [ "bash::readStdIn$0" ]
 },
 
-"exe::readStdIn#withdoc": {
-  "prefix": "exe::readStdIn#withdoc",
+"bash::readStdIn#withdoc": {
+  "prefix": "bash::readStdIn#withdoc",
   "description": "Read the content of the standard input...",
   "scope": "",
-  "body": [ "# ## exe::readStdIn\n# \n# Read the content of the standard input.\n# Will immediately return if the standard input is empty.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The content of the standard input.\n# \n# ```bash\n# exe::readStdIn && local stdIn=\"\\${RETURNED_VALUE}\"\n# ```\n# \nexe::readStdIn$0" ]
+  "body": [ "# ## bash::readStdIn\n# \n# Read the content of the standard input.\n# Will immediately return if the standard input is empty.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The content of the standard input.\n# \n# ```bash\n# bash::readStdIn && local stdIn=\"\\${RETURNED_VALUE}\"\n# ```\n# \nbash::readStdIn$0" ]
 },
 
-"exe::sleep": {
-  "prefix": "exe::sleep",
+"bash::sleep": {
+  "prefix": "bash::sleep",
   "description": "Sleep for the given amount of time...",
   "scope": "",
-  "body": [ "exe::sleep \"${1:**time**}\"$0" ]
+  "body": [ "bash::sleep \"${1:**time**}\"$0" ]
 },
 
-"exe::sleep#withdoc": {
-  "prefix": "exe::sleep#withdoc",
+"bash::sleep#withdoc": {
+  "prefix": "bash::sleep#withdoc",
   "description": "Sleep for the given amount of time...",
   "scope": "",
-  "body": [ "# ## exe::sleep\n# \n# Sleep for the given amount of time.\n# This is a pure bash replacement of sleep.\n# \n# - \\$1: **time** _as float_:\n#       the time to sleep in seconds (can be a float)\n# \n# ```bash\n# io:sleep 1.5\n# ```\n# \n# > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.\n# \nexe::sleep \"${1:**time**}\"$0" ]
+  "body": [ "# ## bash::sleep\n# \n# Sleep for the given amount of time.\n# This is a pure bash replacement of sleep.\n# \n# - \\$1: **time** _as float_:\n#       the time to sleep in seconds (can be a float)\n# \n# ```bash\n# bash::sleep 1.5\n# ```\n# \n# > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.\n# \nbash::sleep \"${1:**time**}\"$0" ]
 },
 
 "fs::tail": {
@@ -1303,18 +1303,18 @@
   "body": [ "# ## source\n# \n# Allows to include a library file or sources a file.\n# \n# It replaces the builtin source command to make sure that we do not include the same file twice.\n# We replace source instead of creating a new function to allow us to\n# specify the included file for spellcheck.\n# \n# - \\$1: **library name** _as string_:\n#       the name of the library (array, interactive, string...) or the file path to include.\n# - \\$@: arguments _as any_:\n#       (optional) the arguments to pass to the included file (mimics the builtin source command).\n# \n# ```bash\n#   source string array system\n#   source ./my/path my/other/path\n# ```\n# \n# > - The file can be relative to the current script (script that calls this function).\n# > - This function makes sure that we do not include the same file twice.\n# > - Use `builtin source` if you want to include the file even if it was already included.\n# \nsource \"${1:**library name**}\" \"${99:arguments}\"$0" ]
 },
 
-"string::camelCaseToSnakeCase": {
-  "prefix": "string::camelCaseToSnakeCase",
+"string::convertCamelCaseToSnakeCase": {
+  "prefix": "string::convertCamelCaseToSnakeCase",
   "description": "This function convert a camelCase string to a SNAKE_CASE string...",
   "scope": "",
-  "body": [ "string::camelCaseToSnakeCase \"${1:**camelCase string**}\"$0" ]
+  "body": [ "string::convertCamelCaseToSnakeCase \"${1:**camelCase string**}\"$0" ]
 },
 
-"string::camelCaseToSnakeCase#withdoc": {
-  "prefix": "string::camelCaseToSnakeCase#withdoc",
+"string::convertCamelCaseToSnakeCase#withdoc": {
+  "prefix": "string::convertCamelCaseToSnakeCase#withdoc",
   "description": "This function convert a camelCase string to a SNAKE_CASE string...",
   "scope": "",
-  "body": [ "# ## string::camelCaseToSnakeCase\n# \n# This function convert a camelCase string to a SNAKE_CASE string.\n# It uses pure bash.\n# Removes all leading underscores.\n# \n# - \\$1: **camelCase string** _as string_:\n#       The camelCase string to convert.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The SNAKE_CASE string.\n# \n# ```bash\n# string::camelCaseToSnakeCase \"myCamelCaseString\" && local mySnakeCaseString=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::camelCaseToSnakeCase \"${1:**camelCase string**}\"$0" ]
+  "body": [ "# ## string::convertCamelCaseToSnakeCase\n# \n# This function convert a camelCase string to a SNAKE_CASE string.\n# It uses pure bash.\n# Removes all leading underscores.\n# \n# - \\$1: **camelCase string** _as string_:\n#       The camelCase string to convert.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The SNAKE_CASE string.\n# \n# ```bash\n# string::convertCamelCaseToSnakeCase \"myCamelCaseString\" && local mySnakeCaseString=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::convertCamelCaseToSnakeCase \"${1:**camelCase string**}\"$0" ]
 },
 
 "string::count": {
@@ -1401,60 +1401,60 @@
   "body": [ "# ## string::indexOf\n# \n# Find the first index of a string within another string.\n# \n# - \\$1: **string** _as string_:\n#       the string in which to search\n# - \\$2: **search** _as string_:\n#       the string to search\n# - \\$3: start index _as int_:\n#       (optional) the starting index\n#       (defaults to 0)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the index of the substring in the string or -1 if not found.\n# \n# ```bash\n# string::indexOf \"This is a long text\" \"long\" && local index=\"\\${RETURNED_VALUE}\"\n# string::indexOf \"This is a long text\" \"long\" 10 && local index=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::indexOf \"${1:**string**}\" \"${2:**search**}\" \"${3:start index}\"$0" ]
 },
 
-"string::kebabCaseToCamelCase": {
-  "prefix": "string::kebabCaseToCamelCase",
+"string::convertKebabCaseToCamelCase": {
+  "prefix": "string::convertKebabCaseToCamelCase",
   "description": "This function convert a kebab-case string to a camelCase string...",
   "scope": "",
-  "body": [ "string::kebabCaseToCamelCase \"${1:**kebab-case string**}\"$0" ]
+  "body": [ "string::convertKebabCaseToCamelCase \"${1:**kebab-case string**}\"$0" ]
 },
 
-"string::kebabCaseToCamelCase#withdoc": {
-  "prefix": "string::kebabCaseToCamelCase#withdoc",
+"string::convertKebabCaseToCamelCase#withdoc": {
+  "prefix": "string::convertKebabCaseToCamelCase#withdoc",
   "description": "This function convert a kebab-case string to a camelCase string...",
   "scope": "",
-  "body": [ "# ## string::kebabCaseToCamelCase\n# \n# This function convert a kebab-case string to a camelCase string.\n# It uses pure bash.\n# Removes all leading dashes.\n# \n# - \\$1: **kebab-case string** _as string_:\n#       The kebab-case string to convert.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The camelCase string.\n# \n# ```bash\n# string::kebabCaseToCamelCase \"my-kebab-case-string\" && local myCamelCaseString=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::kebabCaseToCamelCase \"${1:**kebab-case string**}\"$0" ]
+  "body": [ "# ## string::convertKebabCaseToCamelCase\n# \n# This function convert a kebab-case string to a camelCase string.\n# It uses pure bash.\n# Removes all leading dashes.\n# \n# - \\$1: **kebab-case string** _as string_:\n#       The kebab-case string to convert.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The camelCase string.\n# \n# ```bash\n# string::convertKebabCaseToCamelCase \"my-kebab-case-string\" && local myCamelCaseString=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::convertKebabCaseToCamelCase \"${1:**kebab-case string**}\"$0" ]
 },
 
-"string::kebabCaseToSnakeCase": {
-  "prefix": "string::kebabCaseToSnakeCase",
+"string::convertKebabCaseToSnakeCase": {
+  "prefix": "string::convertKebabCaseToSnakeCase",
   "description": "This function convert a kebab-case string to a SNAKE_CASE string...",
   "scope": "",
-  "body": [ "string::kebabCaseToSnakeCase \"${1:**kebab-case string**}\"$0" ]
+  "body": [ "string::convertKebabCaseToSnakeCase \"${1:**kebab-case string**}\"$0" ]
 },
 
-"string::kebabCaseToSnakeCase#withdoc": {
-  "prefix": "string::kebabCaseToSnakeCase#withdoc",
+"string::convertKebabCaseToSnakeCase#withdoc": {
+  "prefix": "string::convertKebabCaseToSnakeCase#withdoc",
   "description": "This function convert a kebab-case string to a SNAKE_CASE string...",
   "scope": "",
-  "body": [ "# ## string::kebabCaseToSnakeCase\n# \n# This function convert a kebab-case string to a SNAKE_CASE string.\n# It uses pure bash.\n# Removes all leading dashes.\n# \n# - \\$1: **kebab-case string** _as string_:\n#       The kebab-case string to convert.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The SNAKE_CASE string.\n# \n# ```bash\n# string::kebabCaseToSnakeCase \"my-kebab-case-string\" && local mySnakeCaseString=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::kebabCaseToSnakeCase \"${1:**kebab-case string**}\"$0" ]
+  "body": [ "# ## string::convertKebabCaseToSnakeCase\n# \n# This function convert a kebab-case string to a SNAKE_CASE string.\n# It uses pure bash.\n# Removes all leading dashes.\n# \n# - \\$1: **kebab-case string** _as string_:\n#       The kebab-case string to convert.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: The SNAKE_CASE string.\n# \n# ```bash\n# string::convertKebabCaseToSnakeCase \"my-kebab-case-string\" && local mySnakeCaseString=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::convertKebabCaseToSnakeCase \"${1:**kebab-case string**}\"$0" ]
 },
 
-"string::microsecondsToHuman": {
-  "prefix": "string::microsecondsToHuman",
+"time::convertMicrosecondsToHuman": {
+  "prefix": "time::convertMicrosecondsToHuman",
   "description": "Convert microseconds to human readable format...",
   "scope": "",
-  "body": [ "string::microsecondsToHuman \"${1:**microseconds**}\" \"${2:format}\"$0" ]
+  "body": [ "time::convertMicrosecondsToHuman \"${1:**microseconds**}\" \"${2:format}\"$0" ]
 },
 
-"string::microsecondsToHuman#withdoc": {
-  "prefix": "string::microsecondsToHuman#withdoc",
+"time::convertMicrosecondsToHuman#withdoc": {
+  "prefix": "time::convertMicrosecondsToHuman#withdoc",
   "description": "Convert microseconds to human readable format...",
   "scope": "",
-  "body": [ "# ## string::microsecondsToHuman\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\$2: format _as string_:\n#      (optional) Can be set using the variable `_OPTION_FORMAT`.\n#      the format to use (defaults to \"%HH:%MM:%SS\")\n#      Usable formats:\n#      - %HH: hours\n#      - %MM: minutes\n#      - %SS: seconds\n#      - %LL: milliseconds\n#      - %h: hours without leading zero\n#      - %m: minutes without leading zero\n#      - %s: seconds without leading zero\n#      - %l: milliseconds without leading zero\n#      - %u: microseconds without leading zero\n#      - %M: total minutes\n#      - %S: total seconds\n#      - %L: total milliseconds\n#      - %U: total microseconds\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the human readable format\n# \n# ```bash\n# string::microsecondsToHuman 123456789\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::microsecondsToHuman \"${1:**microseconds**}\" \"${2:format}\"$0" ]
+  "body": [ "# ## time::convertMicrosecondsToHuman\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\$2: format _as string_:\n#      (optional) Can be set using the variable `_OPTION_FORMAT`.\n#      the format to use (defaults to \"%HH:%MM:%SS\")\n#      Usable formats:\n#      - %HH: hours\n#      - %MM: minutes\n#      - %SS: seconds\n#      - %LL: milliseconds\n#      - %h: hours without leading zero\n#      - %m: minutes without leading zero\n#      - %s: seconds without leading zero\n#      - %l: milliseconds without leading zero\n#      - %u: microseconds without leading zero\n#      - %M: total minutes\n#      - %S: total seconds\n#      - %L: total milliseconds\n#      - %U: total microseconds\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the human readable format\n# \n# ```bash\n# time::convertMicrosecondsToHuman 123456789\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \ntime::convertMicrosecondsToHuman \"${1:**microseconds**}\" \"${2:format}\"$0" ]
 },
 
-"string::regexGetFirst": {
-  "prefix": "string::regexGetFirst",
+"regex::getFirstGroup": {
+  "prefix": "regex::getFirstGroup",
   "description": "Matches a string against a regex and returns the first capture group of the matched string...",
   "scope": "",
-  "body": [ "string::regexGetFirst \"${1:**string**}\" \"${2:**regex**}\"$0" ]
+  "body": [ "regex::getFirstGroup \"${1:**string**}\" \"${2:**regex**}\"$0" ]
 },
 
-"string::regexGetFirst#withdoc": {
-  "prefix": "string::regexGetFirst#withdoc",
+"regex::getFirstGroup#withdoc": {
+  "prefix": "regex::getFirstGroup#withdoc",
   "description": "Matches a string against a regex and returns the first capture group of the matched string...",
   "scope": "",
-  "body": [ "# ## string::regexGetFirst\n# \n# Matches a string against a regex and returns the first capture group of the matched string.\n# \n# - \\$1: **string** _as string_:\n#       the string to match\n# - \\$2: **regex** _as string_:\n#       the regex\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the first capture group in the matched string.\n#                     Empty if no match.\n# \n# ```bash\n# string::regexGetFirst \"name: julien\" \"name:(.*)\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions\n# \nstring::regexGetFirst \"${1:**string**}\" \"${2:**regex**}\"$0" ]
+  "body": [ "# ## regex::getFirstGroup\n# \n# Matches a string against a regex and returns the first capture group of the matched string.\n# \n# - \\$1: **string** _as string_:\n#       the string to match\n# - \\$2: **regex** _as string_:\n#       the regex\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the first capture group in the matched string.\n#                     Empty if no match.\n# \n# ```bash\n# regex::getFirstGroup \"name: julien\" \"name:(.*)\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions\n# \nregex::getFirstGroup \"${1:**string**}\" \"${2:**regex**}\"$0" ]
 },
 
 "string::split": {
@@ -1513,18 +1513,18 @@
   "body": [ "# ## string::wrapCharacters\n# \n# Allows to hard wrap the given string at the given width.\n# Wrapping is done at character boundaries, see string::warpText for word wrapping.\n# Optionally appends padding characters on each new line.\n# \n# - \\$1: **text** _as string_:\n#       The text to wrap.\n# - \\$2: wrap width _as string_:\n#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.\n#       The width to wrap the text at.\n#       Note that length of the optional padding characters are subtracted from the\n#       width to make sure the text fits in the given width.\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3: padding characters _as string_:\n#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.\n#       The characters to apply as padding on the left of each new line.\n#       E.g. '  ' will add 2 spaces on the left of each new line.\n#       (defaults to 0)\n# - \\$4: first line width _as int_:\n#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.\n#       The width to use for the first line.\n#       (defaults to the width)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the wrapped string\n# - `RETURNED_VALUE2`: the length taken on the last line\n# \n# ```bash\n# string::wrapCharacters \"This is a long text that should be wrapped at 20 characters.\" 20 --- 5\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - It considers escape sequence for text formatting and does not count them as visible characters.\n# > - Leading spaces after a newly wrapped line are removed.\n# \nstring::wrapCharacters \"${1:**text**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
 },
 
-"string::wrapText": {
-  "prefix": "string::wrapText",
+"string::wrapWords": {
+  "prefix": "string::wrapWords",
   "description": "Allows to soft wrap the given text at the given width...",
   "scope": "",
-  "body": [ "string::wrapText \"${1:**text**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
+  "body": [ "string::wrapWords \"${1:**text**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
 },
 
-"string::wrapText#withdoc": {
-  "prefix": "string::wrapText#withdoc",
+"string::wrapWords#withdoc": {
+  "prefix": "string::wrapWords#withdoc",
   "description": "Allows to soft wrap the given text at the given width...",
   "scope": "",
-  "body": [ "# ## string::wrapText\n# \n# Allows to soft wrap the given text at the given width.\n# Wrapping is done at word boundaries.\n# Optionally appends padding characters on each new line.\n# \n# - \\$1: **text** _as string_:\n#       The text to wrap.\n# - \\$2: wrap width _as string_:\n#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.\n#       The width to wrap the text at.\n#       Note that length of the optional padding characters are subtracted from the\n#       width to make sure the text fits in the given width.\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3: padding characters _as string_:\n#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.\n#       The characters to apply as padding on the left of each new line.\n#       E.g. '  ' will add 2 spaces on the left of each new line.\n#       (defaults to 0)\n# - \\$4: first line width _as int_:\n#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.\n#       The width to use for the first line.\n#       (defaults to the width)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the wrapped text\n# \n# ```bash\n# string::wrapText \"This is a long text that should be wrapped at 20 characters.\" 20 '  ' 5\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).\n# > - It considers escape sequence for text formatting and does not count them as visible characters.\n# \nstring::wrapText \"${1:**text**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
+  "body": [ "# ## string::wrapWords\n# \n# Allows to soft wrap the given text at the given width.\n# Wrapping is done at word boundaries.\n# Optionally appends padding characters on each new line.\n# \n# - \\$1: **text** _as string_:\n#       The text to wrap.\n# - \\$2: wrap width _as string_:\n#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.\n#       The width to wrap the text at.\n#       Note that length of the optional padding characters are subtracted from the\n#       width to make sure the text fits in the given width.\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3: padding characters _as string_:\n#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.\n#       The characters to apply as padding on the left of each new line.\n#       E.g. '  ' will add 2 spaces on the left of each new line.\n#       (defaults to 0)\n# - \\$4: first line width _as int_:\n#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.\n#       The width to use for the first line.\n#       (defaults to the width)\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the wrapped text\n# \n# ```bash\n# string::wrapWords \"This is a long text that should be wrapped at 20 characters.\" 20 '  ' 5\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).\n# > - It considers escape sequence for text formatting and does not count them as visible characters.\n# \nstring::wrapWords \"${1:**text**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
 },
 
 "system::addToPath": {
@@ -1541,74 +1541,74 @@
   "body": [ "# ## system::addToPath\n# \n# Add the given path to the PATH environment variable for various shells,\n# by adding the appropriate export command to the appropriate file.\n# \n# Will also export the PATH variable in the current bash.\n# \n# - \\$1: **path** _as string_:\n#       the path to add to the PATH environment variable.\n# \n# ```bash\n# system::addToPath \"/path/to/bin\"\n# ```\n# \nsystem::addToPath \"${1:**path**}\"$0" ]
 },
 
-"system::commandExists": {
-  "prefix": "system::commandExists",
+"bash::isCommand": {
+  "prefix": "bash::isCommand",
   "description": "Check if the given command exists...",
   "scope": "",
-  "body": [ "system::commandExists \"${1:**command name**}\"$0" ]
+  "body": [ "bash::isCommand \"${1:**command name**}\"$0" ]
 },
 
-"system::commandExists#withdoc": {
-  "prefix": "system::commandExists#withdoc",
+"bash::isCommand#withdoc": {
+  "prefix": "bash::isCommand#withdoc",
   "description": "Check if the given command exists...",
   "scope": "",
-  "body": [ "# ## system::commandExists\n# \n# Check if the given command exists.\n# \n# - \\$1: **command name** _as string_:\n#       the command name to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command exists\n#   - 1 otherwise.\n# \n# ```bash\n# if system::commandExists \"command1\"; then\n#   printf 'The command exists.'\n# fi\n# ```\n# \nsystem::commandExists \"${1:**command name**}\"$0" ]
+  "body": [ "# ## bash::isCommand\n# \n# Check if the given command exists.\n# \n# - \\$1: **command name** _as string_:\n#       the command name to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command exists\n#   - 1 otherwise.\n# \n# ```bash\n# if bash::isCommand \"command1\"; then\n#   printf 'The command exists.'\n# fi\n# ```\n# \nbash::isCommand \"${1:**command name**}\"$0" ]
 },
 
-"system::date": {
-  "prefix": "system::date",
+"time::getDate": {
+  "prefix": "time::getDate",
   "description": "Get the current date in the given format...",
   "scope": "",
-  "body": [ "system::date \"${1:format}\"$0" ]
+  "body": [ "time::getDate \"${1:format}\"$0" ]
 },
 
-"system::date#withdoc": {
-  "prefix": "system::date#withdoc",
+"time::getDate#withdoc": {
+  "prefix": "time::getDate#withdoc",
   "description": "Get the current date in the given format...",
   "scope": "",
-  "body": [ "# ## system::date\n# \n# Get the current date in the given format.\n# \n# - \\$1: format _as string_:\n#       (optional) the format of the date to return\n#       (defaults to %(%F_%Hh%Mm%Ss)T).\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the current date in the given format.\n# \n# ```bash\n# system::date\n# local date=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This function avoid to call \\$(date) in a subshell (date is a an external executable).\n# \nsystem::date \"${1:format}\"$0" ]
+  "body": [ "# ## time::getDate\n# \n# Get the current date in the given format.\n# \n# - \\$1: format _as string_:\n#       (optional) the format of the date to return\n#       (defaults to %(%F_%Hh%Mm%Ss)T).\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the current date in the given format.\n# \n# ```bash\n# time::getDate\n# local date=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This function avoid to call \\$(date) in a subshell (date is a an external executable).\n# \ntime::getDate \"${1:format}\"$0" ]
 },
 
-"system::env": {
-  "prefix": "system::env",
+"system::getEnvVars": {
+  "prefix": "system::getEnvVars",
   "description": "Get the list of all the environment variables...",
   "scope": "",
-  "body": [ "system::env$0" ]
+  "body": [ "system::getEnvVars$0" ]
 },
 
-"system::env#withdoc": {
-  "prefix": "system::env#withdoc",
+"system::getEnvVars#withdoc": {
+  "prefix": "system::getEnvVars#withdoc",
   "description": "Get the list of all the environment variables...",
   "scope": "",
-  "body": [ "# ## system::env\n# \n# Get the list of all the environment variables.\n# In pure bash, no need for env or printenv.\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array with the list of all the environment variables.\n# \n# ```bash\n# system::env\n# for var in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s=%s\\n' \"\\${var}\" \"\\${!var}\"\n# done\n# ```\n# \n# > This is faster than using mapfile on <(compgen -v).\n# \nsystem::env$0" ]
+  "body": [ "# ## system::getEnvVars\n# \n# Get the list of all the environment variables.\n# In pure bash, no need for env or printenv.\n# \n# Returns:\n# \n# - `RETURNED_ARRAY`: An array with the list of all the environment variables.\n# \n# ```bash\n# system::getEnvVars\n# for var in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s=%s\\n' \"\\${var}\" \"\\${!var}\"\n# done\n# ```\n# \n# > This is faster than using mapfile on <(compgen -v).\n# \nsystem::getEnvVars$0" ]
 },
 
-"system::getNotExistingCommands": {
-  "prefix": "system::getNotExistingCommands",
+"bash::getMissingCommands": {
+  "prefix": "bash::getMissingCommands",
   "description": "This function returns the list of not existing commands for the given names...",
   "scope": "",
-  "body": [ "system::getNotExistingCommands \"${99:**command names**}\"$0" ]
+  "body": [ "bash::getMissingCommands \"${99:**command names**}\"$0" ]
 },
 
-"system::getNotExistingCommands#withdoc": {
-  "prefix": "system::getNotExistingCommands#withdoc",
+"bash::getMissingCommands#withdoc": {
+  "prefix": "bash::getMissingCommands#withdoc",
   "description": "This function returns the list of not existing commands for the given names...",
   "scope": "",
-  "body": [ "# ## system::getNotExistingCommands\n# \n# This function returns the list of not existing commands for the given names.\n# \n# - \\$@: **command names** _as string_:\n#       the list of command names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are not existing commands\n#   - 1 otherwise.\n# - `RETURNED_ARRAY`: the list of not existing commands.\n# \n# ```bash\n# if system::getNotExistingCommands \"command1\" \"command2\"; then\n#   printf 'The following commands do not exist: %s' \"\\${RETURNED_ARRAY[*]}\"\n# fi\n# ```\n# \nsystem::getNotExistingCommands \"${99:**command names**}\"$0" ]
+  "body": [ "# ## bash::getMissingCommands\n# \n# This function returns the list of not existing commands for the given names.\n# \n# - \\$@: **command names** _as string_:\n#       the list of command names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are not existing commands\n#   - 1 otherwise.\n# - `RETURNED_ARRAY`: the list of not existing commands.\n# \n# ```bash\n# if bash::getMissingCommands \"command1\" \"command2\"; then\n#   printf 'The following commands do not exist: %s' \"\\${RETURNED_ARRAY[*]}\"\n# fi\n# ```\n# \nbash::getMissingCommands \"${99:**command names**}\"$0" ]
 },
 
-"system::getUndeclaredVariables": {
-  "prefix": "system::getUndeclaredVariables",
+"bash::getMissingVariables": {
+  "prefix": "bash::getMissingVariables",
   "description": "This function returns the list of undeclared variables for the given names...",
   "scope": "",
-  "body": [ "system::getUndeclaredVariables \"${99:**variable names**}\"$0" ]
+  "body": [ "bash::getMissingVariables \"${99:**variable names**}\"$0" ]
 },
 
-"system::getUndeclaredVariables#withdoc": {
-  "prefix": "system::getUndeclaredVariables#withdoc",
+"bash::getMissingVariables#withdoc": {
+  "prefix": "bash::getMissingVariables#withdoc",
   "description": "This function returns the list of undeclared variables for the given names...",
   "scope": "",
-  "body": [ "# ## system::getUndeclaredVariables\n# \n# This function returns the list of undeclared variables for the given names.\n# \n# - \\$@: **variable names** _as string_:\n#       the list of variable names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are variable undeclared\n#   - 1 otherwise.\n# - `RETURNED_ARRAY`: the list of undeclared variables.\n# \n# ```bash\n# if system::getUndeclaredVariables \"var1\" \"var2\"; then\n#   printf 'The following variables are not declared: %s' \"\\${RETURNED_ARRAY[*]}\"\n# fi\n# ```\n# \nsystem::getUndeclaredVariables \"${99:**variable names**}\"$0" ]
+  "body": [ "# ## bash::getMissingVariables\n# \n# This function returns the list of undeclared variables for the given names.\n# \n# - \\$@: **variable names** _as string_:\n#       the list of variable names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are variable undeclared\n#   - 1 otherwise.\n# - `RETURNED_ARRAY`: the list of undeclared variables.\n# \n# ```bash\n# if bash::getMissingVariables \"var1\" \"var2\"; then\n#   printf 'The following variables are not declared: %s' \"\\${RETURNED_ARRAY[*]}\"\n# fi\n# ```\n# \nbash::getMissingVariables \"${99:**variable names**}\"$0" ]
 },
 
 "system::isRoot": {
@@ -1625,18 +1625,18 @@
   "body": [ "# ## system::isRoot\n# \n# Check if the script is running as root.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the script is running as root\n#   - 1 otherwise.\n# \n# ```bash\n# if system::isRoot; then\n#   printf 'The script is running as root.'\n# fi\n# ```\n# \nsystem::isRoot$0" ]
 },
 
-"system::os": {
-  "prefix": "system::os",
+"system::getOs": {
+  "prefix": "system::getOs",
   "description": "Returns the name of the current OS...",
   "scope": "",
-  "body": [ "system::os$0" ]
+  "body": [ "system::getOs$0" ]
 },
 
-"system::os#withdoc": {
-  "prefix": "system::os#withdoc",
+"system::getOs#withdoc": {
+  "prefix": "system::getOs#withdoc",
   "description": "Returns the name of the current OS...",
   "scope": "",
-  "body": [ "# ## system::os\n# \n# Returns the name of the current OS.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the name of the current OS: \"darwin\", \"linux\" or \"windows\".\n# \n# ```bash\n# system::os\n# local osName=\"\\${RETURNED_VALUE}\"\n# ```\n# \nsystem::os$0" ]
+  "body": [ "# ## system::getOs\n# \n# Returns the name of the current OS.\n# \n# Returns:\n# \n# - `RETURNED_VALUE`: the name of the current OS: \"darwin\", \"linux\" or \"windows\".\n# \n# ```bash\n# system::getOs\n# local osName=\"\\${RETURNED_VALUE}\"\n# ```\n# \nsystem::getOs$0" ]
 },
 
 "windows::addToPath": {
@@ -2000,21 +2000,21 @@
   "prefix": "tui::rebindKeymap#withdoc",
   "description": "Rebinds all special keys to call a given callback function...",
   "scope": "",
-  "body": [ "# ## tui::rebindKeymap\n# \n# Rebinds all special keys to call a given callback function.\n# See @tui::testWaitForKeyPress for an implementation example.\n# \n# This allows to use the `-e` option with the read command and receive events for special key press.\n# \n# Key binding is a mess because binding is based on the sequence of characters that gets\n# generated by the terminal when a key is pressed and this is not standard across all terminals.\n# We do our best here to cover most cases but it is by no mean perfect.\n# A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.\n# \n# Users of this function can completely change the bindings afterward by implementing\n# the `tuiRebindOverride` function.\n# \n# This function should be called before using tui::waitForKeyPress.\n# \n# You can call `tui::resetBindings` to restore the default bindings. However, this is not\n# necessary as the bindings are local to the script.\n# \n# ```bash\n# tui::rebindKeymap\n# ```\n# \n# > `showkey -a` is a good program to see the sequence of characters sent by the terminal.\n# \ntui::rebindKeymap$0" ]
+  "body": [ "# ## tui::rebindKeymap\n# \n# Rebinds all special keys to call a given callback function.\n# See @tui::testWaitForKeyPress for an implementation example.\n# \n# This allows to use the `-e` option with the read command and receive events for special key press.\n# \n# Key binding is a mess because binding is based on the sequence of characters that gets\n# generated by the terminal when a key is pressed and this is not standard across all terminals.\n# We do our best here to cover most cases but it is by no mean perfect.\n# A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.\n# \n# Users of this function can completely change the bindings afterward by implementing\n# the `tuiRebindOverride` function.\n# \n# This function should be called before using tui::waitForKeyPress.\n# \n# You can call `tui::restoreBindings` to restore the default bindings. However, this is not\n# necessary as the bindings are local to the script.\n# \n# ```bash\n# tui::rebindKeymap\n# ```\n# \n# > `showkey -a` is a good program to see the sequence of characters sent by the terminal.\n# \ntui::rebindKeymap$0" ]
 },
 
-"tui::resetBindings": {
-  "prefix": "tui::resetBindings",
+"tui::restoreBindings": {
+  "prefix": "tui::restoreBindings",
   "description": "Reset the key bindings to the default ones...",
   "scope": "",
-  "body": [ "tui::resetBindings$0" ]
+  "body": [ "tui::restoreBindings$0" ]
 },
 
-"tui::resetBindings#withdoc": {
-  "prefix": "tui::resetBindings#withdoc",
+"tui::restoreBindings#withdoc": {
+  "prefix": "tui::restoreBindings#withdoc",
   "description": "Reset the key bindings to the default ones...",
   "scope": "",
-  "body": [ "# ## tui::resetBindings\n# \n# Reset the key bindings to the default ones.\n# \n# ```bash\n# tui::resetBindings\n# ```\n# \ntui::resetBindings$0" ]
+  "body": [ "# ## tui::restoreBindings\n# \n# Reset the key bindings to the default ones.\n# \n# ```bash\n# tui::restoreBindings\n# ```\n# \ntui::restoreBindings$0" ]
 },
 
 "tui::restoreInterruptTrap": {
@@ -2045,32 +2045,32 @@
   "body": [ "# ## tui::setInterruptTrap\n# \n# Set a trap to catch the interrupt signal (SIGINT).\n# When the user presses Ctrl+C, the GLOBAL_SESSION_INTERRUPTED variable will be set to true.\n# \n# ```bash\n# tui::setInterruptTrap\n# ```\n# \ntui::setInterruptTrap$0" ]
 },
 
-"tui::sttyInit": {
-  "prefix": "tui::sttyInit",
+"tui::setTerminalOptions": {
+  "prefix": "tui::setTerminalOptions",
   "description": "Disable the echo of the tty...",
   "scope": "",
-  "body": [ "tui::sttyInit$0" ]
+  "body": [ "tui::setTerminalOptions$0" ]
 },
 
-"tui::sttyInit#withdoc": {
-  "prefix": "tui::sttyInit#withdoc",
+"tui::setTerminalOptions#withdoc": {
+  "prefix": "tui::setTerminalOptions#withdoc",
   "description": "Disable the echo of the tty...",
   "scope": "",
-  "body": [ "# ## tui::sttyInit\n# \n# Disable the echo of the tty. Will no longer display the characters typed by the user.\n# \n# ```bash\n# tui::sttyInit\n# ```\n# \ntui::sttyInit$0" ]
+  "body": [ "# ## tui::setTerminalOptions\n# \n# Disable the echo of the tty. Will no longer display the characters typed by the user.\n# \n# ```bash\n# tui::setTerminalOptions\n# ```\n# \ntui::setTerminalOptions$0" ]
 },
 
-"tui::sttyRestore": {
-  "prefix": "tui::sttyRestore",
+"tui::restoreTerminalOptions": {
+  "prefix": "tui::restoreTerminalOptions",
   "description": "Enable the echo of the tty...",
   "scope": "",
-  "body": [ "tui::sttyRestore \"${1:**force**}\"$0" ]
+  "body": [ "tui::restoreTerminalOptions \"${1:**force**}\"$0" ]
 },
 
-"tui::sttyRestore#withdoc": {
-  "prefix": "tui::sttyRestore#withdoc",
+"tui::restoreTerminalOptions#withdoc": {
+  "prefix": "tui::restoreTerminalOptions#withdoc",
   "description": "Enable the echo of the tty...",
   "scope": "",
-  "body": [ "# ## tui::sttyRestore\n# \n# Enable the echo of the tty. Will display the characters typed by the user.\n# \n# - \\$1: **force** _as bool_:\n#       (optional) force the restoration of the stty configuration\n#       stty state will not be restored if\n#       (defaults to false)\n# \n# ```bash\n# tui::sttyRestore\n# ```\n# shellcheck disable=SC2120\n# \ntui::sttyRestore \"${1:**force**}\"$0" ]
+  "body": [ "# ## tui::restoreTerminalOptions\n# \n# Enable the echo of the tty. Will display the characters typed by the user.\n# \n# - \\$1: **force** _as bool_:\n#       (optional) force the restoration of the stty configuration\n#       stty state will not be restored if\n#       (defaults to false)\n# \n# ```bash\n# tui::restoreTerminalOptions\n# ```\n# shellcheck disable=SC2120\n# \ntui::restoreTerminalOptions \"${1:**force**}\"$0" ]
 },
 
 "tui::switchBackFromFullScreen": {
@@ -2154,7 +2154,7 @@
   "prefix": "tui::waitForKeyPress#withdoc",
   "description": "Wait for a key press (single key)...",
   "scope": "",
-  "body": [ "# ## tui::waitForKeyPress\n# \n# Wait for a key press (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command with the option `-e` to use readline behind the scene.\n# This means we can detect more key combinations but all keys needs to be bound first...\n# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.\n# \n# You must call `tui::rebindKeymap` and `tui::sttyInit` before using this function.\n# \n# - \\$@: **read parameters** _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# tui::waitForKeyPress\n# tui::waitForKeyPress -t 0.1\n# ```\n# \n# > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll\n# > even when nothing is read... Make sure to not position the cursor at the end of the screen.\n# \ntui::waitForKeyPress \"${99:**read parameters**}\"$0" ]
+  "body": [ "# ## tui::waitForKeyPress\n# \n# Wait for a key press (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command with the option `-e` to use readline behind the scene.\n# This means we can detect more key combinations but all keys needs to be bound first...\n# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.\n# \n# You must call `tui::rebindKeymap` and `tui::setTerminalOptions` before using this function.\n# \n# - \\$@: **read parameters** _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - `\\$?`:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# tui::waitForKeyPress\n# tui::waitForKeyPress -t 0.1\n# ```\n# \n# > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll\n# > even when nothing is read... Make sure to not position the cursor at the end of the screen.\n# \ntui::waitForKeyPress \"${99:**read parameters**}\"$0" ]
 },
 
 "version::bump": {

@@ -137,7 +137,7 @@ function bash::runInParallel() {
       done
 
       if ((nbJobsCompleted == 0)); then
-        exe::sleep "${timeoutBetweenChecks}"
+        bash::sleep "${timeoutBetweenChecks}"
       fi
 
       if ((${#exitCodes[@]} == ${#jobNames[@]})); then
@@ -220,4 +220,199 @@ function bash::injectCodeInFunction() {
 
   RETURNED_VALUE="${modifiedFunctionDefinition}"
   RETURNED_VALUE2="${functionDefinition:-}"
+}
+
+# ## bash::sleep
+#
+# Sleep for the given amount of time.
+# This is a pure bash replacement of sleep.
+#
+# - $1: **time** _as float_:
+#       the time to sleep in seconds (can be a float)
+#
+# ```bash
+# bash::sleep 1.5
+# ```
+#
+# > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
+function bash::sleep() {
+  local timeout="${1}"
+  # when connected to a terminal, we can just read the stdout
+  # which will never be written to, and use a timeout on read
+  if [[ -t 2 ]]; then
+    read -rt "${timeout}" -u 2 || :
+    return 0
+  elif command -v mkfifo 1>/dev/null; then
+    if [[ -z ${IO_SLEEP_FIFO:-} ]]; then
+      fs::createTempFile && IO_SLEEP_FIFO="${RETURNED_VALUE}"
+      rm "${IO_SLEEP_FIFO}"
+      mkfifo -m 700 "${IO_SLEEP_FIFO}"
+      exec 6<>"${IO_SLEEP_FIFO}"
+      rm "${IO_SLEEP_FIFO}"
+    fi
+    read -rt "${timeout}" -u 6 || :
+  else
+    # when everything else failed...
+    sleep "${timeout}"
+  fi
+}
+
+# ## bash::readStdIn
+#
+# Read the content of the standard input.
+# Will immediately return if the standard input is empty.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The content of the standard input.
+#
+# ```bash
+# bash::readStdIn && local stdIn="${RETURNED_VALUE}"
+# ```
+function bash::readStdIn() {
+  RETURNED_VALUE=""
+  local IFS=''
+  if read -t 0 -u 0 -rd ''; then
+    read -u 0 -rd '' RETURNED_VALUE || [[ -n ${RETURNED_VALUE} ]] || RETURNED_VALUE=""
+  else
+    RETURNED_VALUE=""
+  fi
+}
+
+# ## bash::countArgs
+#
+# Returns the number of arguments passed.
+#
+# A convenient function that can be used to:
+#
+# - count the files/directories in a directory
+#   `bash::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
+# - count the number of variables starting with VALET_
+#   `bash::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
+#
+# - $@: **arguments** _as any_:
+#       the arguments to count
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: The number of arguments passed.
+#
+# ```bash
+# bash::countArgs 1 2 3
+# ```
+function bash::countArgs() {
+  RETURNED_VALUE="$#"
+}
+
+# ## bash::getMissingVariables
+#
+# This function returns the list of undeclared variables for the given names.
+#
+# - $@: **variable names** _as string_:
+#       the list of variable names to check.
+#
+# Returns:
+#
+# - $?
+#   - 0 if there are variable undeclared
+#   - 1 otherwise.
+# - `RETURNED_ARRAY`: the list of undeclared variables.
+#
+# ```bash
+# if bash::getMissingVariables "var1" "var2"; then
+#   printf 'The following variables are not declared: %s' "${RETURNED_ARRAY[*]}"
+# fi
+# ```
+function bash::getMissingVariables() {
+  RETURNED_ARRAY=()
+  local var
+  for var in "$@"; do
+    if [[ ! -v "${var}" ]]; then
+      RETURNED_ARRAY+=("${var}")
+    fi
+  done
+  if [[ ${#RETURNED_ARRAY[@]} -gt 0 ]]; then
+    return 0
+  fi
+  return 1
+}
+
+# ## bash::getMissingCommands
+#
+# This function returns the list of not existing commands for the given names.
+#
+# - $@: **command names** _as string_:
+#       the list of command names to check.
+#
+# Returns:
+#
+# - $?
+#   - 0 if there are not existing commands
+#   - 1 otherwise.
+# - `RETURNED_ARRAY`: the list of not existing commands.
+#
+# ```bash
+# if bash::getMissingCommands "command1" "command2"; then
+#   printf 'The following commands do not exist: %s' "${RETURNED_ARRAY[*]}"
+# fi
+# ```
+function bash::getMissingCommands() {
+  RETURNED_ARRAY=()
+  local cmd
+  for cmd in "$@"; do
+    if ! command -v "${cmd}" &>/dev/null; then
+      RETURNED_ARRAY+=("${cmd}")
+    fi
+  done
+  if [[ ${#RETURNED_ARRAY[@]} -gt 0 ]]; then
+    return 0
+  fi
+  return 1
+}
+
+# ## bash::isCommand
+#
+# Check if the given command exists.
+#
+# - $1: **command name** _as string_:
+#       the command name to check.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the command exists
+#   - 1 otherwise.
+#
+# ```bash
+# if bash::isCommand "command1"; then
+#   printf 'The command exists.'
+# fi
+# ```
+function bash::isCommand() {
+  if command -v "${1:-}" &>/dev/null; then
+    return 0
+  fi
+  return 1
+}
+
+# ## system::isRoot
+#
+# Check if the script is running as root.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the script is running as root
+#   - 1 otherwise.
+#
+# ```bash
+# if system::isRoot; then
+#   printf 'The script is running as root.'
+# fi
+# ```
+function system::isRoot() {
+  if [[ ${EUID:-${UID}} -eq 0 ]]; then
+    return 0
+  fi
+  return 1
 }

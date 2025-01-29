@@ -1,15 +1,15 @@
-# Test suite lib-io
+# Test suite lib-fs
 
 ## Test script 00.tests
 
 ### ✅ Testing fs::toAbsolutePath
 
-❯ `fs::toAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh`
+❯ `fs::toAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh`
 
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
 ```
 
 ❯ `fs::toAbsolutePath .`
@@ -17,7 +17,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs'
 ```
 
 ❯ `fs::toAbsolutePath ..`
@@ -33,7 +33,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.s'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.s'
 ```
 
 ❯ `fs::toAbsolutePath ../1004-lib-system/00.tests.sh`
@@ -41,7 +41,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.s'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/../1004-lib-system/00.tests.sh'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/../1004-lib-system/00.tests.sh'
 ```
 
 ❯ `fs::toAbsolutePath resources`
@@ -49,7 +49,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/../1004-lib-system
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
 ```
 
 ❯ `fs::toAbsolutePath ./01.invoke.sh`
@@ -57,7 +57,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
 ```
 
 ❯ `fs::toAbsolutePath ./resources`
@@ -65,7 +65,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/01.invoke.sh'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
 ```
 
 ❯ `fs::toAbsolutePath missing-file`
@@ -73,7 +73,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/missing-file'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/missing-file'
 ```
 
 ### ✅ Testing fs::readFile
@@ -124,7 +124,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subdir'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir'
 ```
 
 This next command will fail because the directory already exists (it is a file).
@@ -136,8 +136,8 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-mkdir: cannot create directory ‘$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subdir/file1’: File exists
-ERROR    Failed to create the directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subdir/file1⌝.
+mkdir: cannot create directory ‘$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1’: File exists
+ERROR    Failed to create the directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1⌝.
 ```
 
 ❯ `fs::createDirectoryIfNeeded resources/gitignored/derp`
@@ -145,7 +145,7 @@ ERROR    Failed to create the directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/derp'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/derp'
 ```
 
 Directory created successfully!
@@ -157,7 +157,7 @@ Directory created successfully!
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subdir/file1'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1'
 ```
 
 ❯ `fs::createFilePathIfNeeded resources/gitignored/allo/file1`
@@ -165,14 +165,10 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/dir/subd
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/allo/file1'
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/allo/file1'
 ```
 
 File created successfully!
-
-### ✅ Testing exe::sleep
-
-❯ `exe::sleep 0.001`
 
 ### ✅ Testing fs::cat
 
@@ -236,43 +232,6 @@ The production of meat and other animal derived products places a heavy burden o
 Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there'"'"'s never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it'"'"'s the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.'
 ```
 
-### ✅ Testing exe::readStdIn
-
-❯ `exe::readStdIn <<<'coucou'`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='coucou
-'
-```
-
-❯ `exe::readStdIn`
-
-Returned variables:
-
-```text
-RETURNED_VALUE=''
-```
-
-### ✅ Testing exe::countArgs
-
-❯ `exe::countArgs arg1 arg2 arg3`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='3'
-```
-
-❯ `exe::countArgs ${PWD}/resources/*`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='3'
-```
-
 ### ✅ Testing fs::isDirectoryWritable
 
 ❯ `fs::isDirectoryWritable /tmp && echo Writable || echo Not\ writable`
@@ -283,32 +242,6 @@ RETURNED_VALUE='3'
 Writable
 ```
 
-### ✅ Testing windows::convertPathFromUnix
-
-❯ `windows::convertPathFromUnix /tmp/file`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='\tmp\file'
-```
-
-❯ `windows::convertPathFromUnix /mnt/d/Users/username`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='D:\Users\username'
-```
-
-❯ `windows::convertPathFromUnix /c/data/file`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='C:\data\file'
-```
-
 ### ✅ Testing fs::createLink
 
 ❯ `fs::createLink resources/gitignored/file resources/gitignored/try/file2 true`
@@ -316,7 +249,7 @@ RETURNED_VALUE='C:\data\file'
 **Standard output**:
 
 ```text
-🙈 mocking ln: $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/file $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/try/file2
+🙈 mocking ln: $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/file $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/try/file2
 ```
 
 ❯ `fs::createLink resources/gitignored/try resources/gitignored/new`
@@ -324,25 +257,7 @@ RETURNED_VALUE='C:\data\file'
 **Standard output**:
 
 ```text
-🙈 mocking ln: -s $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/try $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/gitignored/new
-```
-
-### ✅ Testing windows::convertPathToUnix
-
-❯ `windows::convertPathToUnix C:\\Users\\username`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='/c/Users/username'
-```
-
-❯ `windows::convertPathToUnix D:\\data\\file`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='/d/data/file'
+🙈 mocking ln: -s $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/try $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/new
 ```
 
 ### ✅ Testing fs::head
@@ -409,36 +324,6 @@ RETURNED_ARRAY=(
 )
 ```
 
-### ✅ Testing exe::captureOutput
-
-❯ `exe::captureOutput echo coucou`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='coucou
-'
-```
-
-❯ `exe::captureOutput declare -f exe::captureOutput`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='exe::captureOutput () 
-{ 
-    local IFS='"'"' '"'"';
-    ${@} &> "${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1;
-    RETURNED_VALUE="";
-    IFS='"'"''"'"' read -rd '"'"''"'"' RETURNED_VALUE < "${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
-}
-'
-```
-
-❯ `exe::captureOutput [[ 1 -eq 0 ]]`
-
-Returned code: `1`
-
 ### ✅ Testing fs::tail
 
 ❯ `fs::tail resources/file-to-read 3`
@@ -502,298 +387,70 @@ RETURNED_ARRAY=(
 )
 ```
 
-## Test script 01.invoke
-
-For these tests, we will use a special command `fake` defined as such:
-
-❯ `declare -f fake`
-
-**Standard output**:
-
-```text
-fake () 
-{ 
-    local inputStreamContent;
-    if [[ $* == *"--std-in"* ]]; then
-        exe::readStdIn;
-        inputStreamContent="${RETURNED_VALUE}";
-    fi;
-    local IFS=" ";
-    echo "🙈 mocking fake $*";
-    if [[ -n ${inputStreamContent:-} ]]; then
-        echo "Input stream: <${inputStreamContent}>";
-    fi;
-    echo "INFO: log line from fake mock" 1>&2;
-    if [[ $* == *"--error"* ]]; then
-        echo "ERROR: returning error from fake" 1>&2;
-        return 1;
-    fi
-}
-```
-
-### ✅ Testing exe::invoke5
-
-Input stream from string, returns an error:
-
-❯ `exe::invoke5 false 0 false 'input_stream' fake --std-in --error`
-
-Returned code: `1`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='🙈 mocking fake --std-in --error
-Input stream: <input_stream
->
-'
-RETURNED_VALUE2='INFO: log line from fake mock
-ERROR: returning error from fake
-'
-```
-
-Input stream from string, fails (exit):
-
-❯ `exe::invoke5 true 0 false 'input_stream' fake --std-in --error`
-
-Exited with code: `1`
-
-**Error output**:
-
-```text
-TRACE    Fake standard output stream:
-   1 ░ 🙈 mocking fake --std-in --error
-   2 ░ Input stream: <input_stream
-   3 ░ >
-TRACE    Fake standard error stream:
-   1 ░ INFO: log line from fake mock
-   2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ originally ended with exit code ⌜1⌝.
-```
-
-Make error 1 acceptable:
-
-❯ `exe::invoke5 true 0,1,2 true '' fake --error`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='🙈 mocking fake --error
-'
-RETURNED_VALUE2='INFO: log line from fake mock
-ERROR: returning error from fake
-'
-```
-
-Normal, return everything as variables:
-
-❯ `exe::invoke5 true '' '' '' fake`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='🙈 mocking fake 
-'
-RETURNED_VALUE2='INFO: log line from fake mock
-'
-```
-
-Input stream for file, return everything as files:
-
-❯ `exe::invokef5 false 0 true /tmp/valet-temp fake --std-in`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='/tmp/valet-stdout.f'
-RETURNED_VALUE2='/tmp/valet-stderr.f'
-```
-
-❯ `fs::cat /tmp/valet-stdout.f`
-
-**Standard output**:
-
-```text
-🙈 mocking fake --std-in
-Input stream: <Input stream content from a file>
-
-```
-
-❯ `fs::cat /tmp/valet-stderr.f`
-
-**Standard output**:
-
-```text
-INFO: log line from fake mock
-
-```
-
-### ✅ Testing exe::invoke2
-
-❯ `exe::invoke2 false fake --option argument1 argument2`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='🙈 mocking fake --option argument1 argument2
-'
-RETURNED_VALUE2='INFO: log line from fake mock
-'
-```
-
-❯ `exe::invoke2 false fake --error`
-
-Returned code: `1`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='🙈 mocking fake --error
-'
-RETURNED_VALUE2='INFO: log line from fake mock
-ERROR: returning error from fake
-'
-```
-
-❯ `exe::invoke2 true fake --error`
-
-Exited with code: `1`
-
-**Error output**:
-
-```text
-TRACE    Fake standard output stream:
-   1 ░ 🙈 mocking fake --error
-TRACE    Fake standard error stream:
-   1 ░ INFO: log line from fake mock
-   2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ originally ended with exit code ⌜1⌝.
-```
-
-❯ `exe::invokef2 false fake --option argument1 argument2`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='/tmp/valet-stdout.f'
-RETURNED_VALUE2='/tmp/valet-stderr.f'
-```
-
-### ✅ Testing exe::invoke
-
-❯ `exe::invoke fake --error`
-
-Exited with code: `1`
-
-**Error output**:
-
-```text
-TRACE    Fake standard output stream:
-   1 ░ 🙈 mocking fake --error
-TRACE    Fake standard error stream:
-   1 ░ INFO: log line from fake mock
-   2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ originally ended with exit code ⌜1⌝.
-```
-
-❯ `exe::invoke fake --option argument1 argument2`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='🙈 mocking fake --option argument1 argument2
-'
-RETURNED_VALUE2='INFO: log line from fake mock
-'
-```
-
-### ✅ Testing exe::invoke2piped
-
-❯ `exe::invoke2piped true 'input_stream' fake --std-in --option argument1 argument2`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='🙈 mocking fake --std-in --option argument1 argument2
-Input stream: <input_stream
->
-'
-RETURNED_VALUE2='INFO: log line from fake mock
-'
-```
-
-❯ `exe::invokef2piped true 'input_stream' fake --std-in --option argument1 argument2`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='/tmp/valet-stdout.f'
-RETURNED_VALUE2='/tmp/valet-stderr.f'
-```
-
-## Test script 02.listPaths
+## Test script 01.listPaths
 
 ### ✅ Testing fs::listPaths
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
 )
 ```
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/file2'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2'
-[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/file2'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2/file3'
 )
 ```
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search false true`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search false true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-file'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
 )
 ```
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-file'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
-[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
-[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
-[6]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4'
-[7]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/.hidden-file2'
-[8]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/file2'
-[9]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2'
-[10]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
-[11]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
-[12]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
-[13]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/file14'
-[14]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/.hidden-file3'
-[15]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3'
+[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/file10'
+[6]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4'
+[7]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/.hidden-file2'
+[8]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/file2'
+[9]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2'
+[10]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
+[11]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/file13'
+[12]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
+[13]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4/file14'
+[14]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2/.hidden-file3'
+[15]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2/file3'
 )
 ```
 
@@ -812,18 +469,18 @@ fileNamedFile ()
 }
 ```
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true fileNamedFile`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true fileNamedFile`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/file2'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
-[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/file14'
-[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/file10'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/file2'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/file13'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4/file14'
+[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2/file3'
 )
 ```
 
@@ -842,63 +499,63 @@ folderNamedHidden ()
 }
 ```
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true folderNamedHidden`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-file'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/.hidden-file2'
-[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
-[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
-[6]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/.hidden-file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/.hidden-file2'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
+[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
+[6]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2/.hidden-file3'
 )
 ```
 
 ### ✅ Testing fs::listFiles
 
-❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
 )
 ```
 
-❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/file2'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/file2'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2/file3'
 )
 ```
 
-❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-file'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/.hidden-file2'
-[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/file2'
-[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
-[6]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
-[7]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
-[8]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4/file14'
-[9]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/.hidden-file3'
-[10]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2/file3'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/file10'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/.hidden-file2'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/file2'
+[5]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
+[6]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/file13'
+[7]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
+[8]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4/file14'
+[9]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2/.hidden-file3'
+[10]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2/file3'
 )
 ```
 
@@ -917,54 +574,54 @@ fileNamedHidden ()
 }
 ```
 
-❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true folderNamedHidden`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-file'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/file1'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/file10'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
-[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3/file13'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/file10'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/file13'
 )
 ```
 
 ### ✅ Testing fs::listDirectories
 
-❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
 )
 ```
 
-❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2'
 )
 ```
 
-❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4'
-[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1/subfolder2'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2'
 )
 ```
 
@@ -983,16 +640,16 @@ folderNamedHidden ()
 }
 ```
 
-❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search true true folderNamedHidden`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true folderNamedHidden`
 
 Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/subfolder1'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/.hidden3'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-io/resources/search/.hidden-subfolder/subfolder4'
+[0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4'
 )
 ```
 

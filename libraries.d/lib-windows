@@ -182,7 +182,8 @@ function windows::endPs1Batch() {
 #       (defaults to false)
 # - $4: force _as boolean_:
 #       (optional) true to overwrite the link or file if it already exists.
-#       Otherwise, the function will fail on an existing link.
+#       Otherwise, the function will not on an existing link not pointing to the
+#       target path.
 #       (defaults to true)
 #
 # ```bash
@@ -336,9 +337,9 @@ function windows::convertPathToUnix() {
 function windows::createTempFile() {
   local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
 
-  if [[ -z ${_IO_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
+  if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
     windows::convertPathToUnix "${windowsTemporaryDirectory}"
-    _IO_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
+    GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
   fi
 
   local windowsPath linuxPath
@@ -378,9 +379,9 @@ function windows::createTempFile() {
 function windows::createTempDirectory() {
   local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
 
-  if [[ -z ${_IO_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
+  if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
     windows::convertPathToUnix "${windowsTemporaryDirectory}"
-    _IO_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
+    GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
   fi
 
   local windowsPath linuxPath
@@ -420,11 +421,6 @@ function windows::setEnvVar() {
   local varName="${1:-}"
   local varValue="${2:-}"
 
-  system::os
-  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
-    core::fail "This function is only available on Windows."
-  fi
-
   if [[ -z ${varName} ]]; then
     core::fail "The variable name is missing."
   fi
@@ -459,11 +455,6 @@ function windows::setEnvVar() {
 function windows::getEnvVar() {
   local varName="${1:-}"
 
-  system::os
-  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
-    core::fail "This function is only available on Windows."
-  fi
-
   if [[ -z ${varName} ]]; then
     core::fail "The variable name is missing."
   fi
@@ -497,11 +488,6 @@ function windows::getEnvVar() {
 # > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 function windows::addToPath() {
   local pathToAdd="${1:-}"
-
-  system::os
-  if [[ "${RETURNED_VALUE}" != "windows" ]]; then
-    core::fail "This function is only available on Windows."
-  fi
 
   log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
 

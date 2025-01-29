@@ -19,6 +19,8 @@ source system
 source array
 # shellcheck source=../libraries.d/lib-fs
 source fs
+# shellcheck source=../libraries.d/lib-time
+source time
 
 #===============================================================
 # >>> command: self document
@@ -94,7 +96,7 @@ function selfDocument::getFooter() {
   core::getVersion
   local version="${RETURNED_VALUE}"
 
-  system::date "%(%F)T"
+  time::getDate "%(%F)T"
   local currentDate="${RETURNED_VALUE}"
   RETURNED_VALUE="Documentation generated for the version ${version} (${currentDate})."
 }

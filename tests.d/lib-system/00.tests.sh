@@ -6,63 +6,28 @@ source system
 source fs
 
 function main() {
-  test_system::os
-  test_system::env
-  test_system::date
-  test_system::getUndeclaredVariables
-  test_system::getNotExistingCommands
-  test_system::commandExists
+  test_system::getOs
+  test_system::getEnvVars
   test_system::addToPath
 }
 
-function test_system::os() {
-  test::title "✅ Testing system::os"
+function test_system::getOs() {
+  test::title "✅ Testing system::getOs"
 
-  test::func OSTYPE=linux-bsd system::os
-  test::func OSTYPE=msys system::os
-  test::func OSTYPE=darwin-stuff system::os
-  test::func OSTYPE=nop system::os
+  test::func OSTYPE=linux-bsd system::getOs
+  test::func OSTYPE=msys system::getOs
+  test::func OSTYPE=darwin-stuff system::getOs
+  test::func OSTYPE=nop system::getOs
 }
 
-function test_system::env() {
-  test::title "✅ Testing system::env"
+function test_system::getEnvVars() {
+  test::title "✅ Testing system::getEnvVars"
 
   RETURNED_ARRAY=()
-  test::exec system::env
+  test::exec system::getEnvVars
   if ((${#RETURNED_ARRAY[*]} > 0)); then
     test::markdown "Found environment variables in RETURNED_ARRAY."
   fi
-}
-
-function test_system::date() {
-  test::title "✅ Testing system::date"
-
-  test::func system::date
-  test::func system::date "'%(%H:%M:%S)T'"
-}
-
-function test_system::getUndeclaredVariables() {
-  test::title "✅ Testing system::getUndeclaredVariables"
-
-  test::func system::getUndeclaredVariables
-  test::exec ABC="ok"
-  test::func system::getUndeclaredVariables GLOBAL_TEST_TEMP_FILE dfg ABC NOP
-}
-
-function test_system::getNotExistingCommands() {
-  test::title "✅ Testing system::getNotExistingCommands"
-
-  test::func system::getNotExistingCommands
-
-  test::func system::getNotExistingCommands NONEXISTINGSTUFF system::getNotExistingCommands rm YETANOTHERONEMISSING
-}
-
-function test_system::commandExists() {
-  test::title "✅ Testing system::commandExists"
-
-  test::exec system::commandExists
-  test::exec system::commandExists NONEXISTINGSTUFF
-  test::exec system::commandExists rm
 }
 
 # shellcheck disable=SC2317

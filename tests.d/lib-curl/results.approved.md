@@ -2,11 +2,11 @@
 
 ## Test script 00.curl
 
-### ✅ Testing curl::toFile
+### ✅ Testing curl::download
 
 Writing to an output file:
 
-❯ `curl::toFile true 200 /tmp/valet-temp --code 200 https://fuu`
+❯ `curl::download true 200 /tmp/valet-temp --code 200 https://fuu`
 
 Returned variables:
 
@@ -26,7 +26,7 @@ RETURNED_VALUE2='200'
 
 Getting a 500 error with fail mode on:
 
-❯ `curl::toFile true 200 /tmp/valet-temp --code 500 https://fuu`
+❯ `curl::download true 200 /tmp/valet-temp --code 500 https://fuu`
 
 Exited with code: `1`
 
@@ -41,7 +41,7 @@ ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu
 
 Getting a 500 error with fail mode off:
 
-❯ `curl::toFile false 200 /tmp/valet-temp --code 500 https://fuu`
+❯ `curl::download false 200 /tmp/valet-temp --code 500 https://fuu`
 
 Returned code: `1`
 
@@ -55,7 +55,7 @@ RETURNED_VALUE2='500'
 
 Getting an acceptable 400 error with fail mode:
 
-❯ `curl::toFile true 200,400,401 /tmp/valet-temp --code 400 https://fuu`
+❯ `curl::download true 200,400,401 /tmp/valet-temp --code 400 https://fuu`
 
 Returned variables:
 
@@ -76,7 +76,7 @@ DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 ```
 
-❯ `curl::toFile false '' /tmp/valet-temp --code 201 https://fuu`
+❯ `curl::download false '' /tmp/valet-temp --code 201 https://fuu`
 
 **Error output**:
 
@@ -98,11 +98,11 @@ RETURNED_VALUE2='201'
 
 ❯ `log::setLevel info`
 
-### ✅ Testing curl::toVar
+### ✅ Testing curl::request
 
 Getting 200:
 
-❯ `curl::toVar true 200 /tmp/valet-temp --code 200 https://fuu`
+❯ `curl::request true 200 /tmp/valet-temp --code 200 https://fuu`
 
 Returned variables:
 
@@ -115,13 +115,13 @@ RETURNED_VALUE3='200'
 
 Getting 500 with fail mode off:
 
-❯ `curl::toVar false '' /tmp/valet-temp --code 500 https://fuu`
+❯ `curl::request false '' /tmp/valet-temp --code 500 https://fuu`
 
 Exited with code: `1`
 
 Getting 500 with fail mode on:
 
-❯ `curl::toVar true 200 /tmp/valet-temp --code 500 https://fuu`
+❯ `curl::request true 200 /tmp/valet-temp --code 500 https://fuu`
 
 Exited with code: `1`
 
@@ -145,7 +145,7 @@ DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 ```
 
-❯ `curl::toVar true 200 /tmp/valet-temp --code 200 https://fuu`
+❯ `curl::request true 200 /tmp/valet-temp --code 200 https://fuu`
 
 **Error output**:
 

@@ -28,7 +28,7 @@ local newVersion="${RETURNED_VALUE}"
 ```
 
 
-## string::camelCaseToSnakeCase
+## string::convertCamelCaseToSnakeCase
 
 This function convert a camelCase string to a SNAKE_CASE string.
 It uses pure bash.
@@ -42,7 +42,7 @@ Returns:
 - `RETURNED_VALUE`: The SNAKE_CASE string.
 
 ```bash
-string::camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
+string::convertCamelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
 ```
 
 
@@ -169,7 +169,7 @@ string::indexOf "This is a long text" "long" 10 && local index="${RETURNED_VALUE
 ```
 
 
-## string::kebabCaseToCamelCase
+## string::convertKebabCaseToCamelCase
 
 This function convert a kebab-case string to a camelCase string.
 It uses pure bash.
@@ -183,11 +183,11 @@ Returns:
 - `RETURNED_VALUE`: The camelCase string.
 
 ```bash
-string::kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
+string::convertKebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
 ```
 
 
-## string::kebabCaseToSnakeCase
+## string::convertKebabCaseToSnakeCase
 
 This function convert a kebab-case string to a SNAKE_CASE string.
 It uses pure bash.
@@ -201,11 +201,11 @@ Returns:
 - `RETURNED_VALUE`: The SNAKE_CASE string.
 
 ```bash
-string::kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
+string::convertKebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
 ```
 
 
-## string::microsecondsToHuman
+## time::convertMicrosecondsToHuman
 
 Convert microseconds to human readable format.
 
@@ -233,12 +233,12 @@ Returns:
 - `RETURNED_VALUE`: the human readable format
 
 ```bash
-string::microsecondsToHuman 123456789
+time::convertMicrosecondsToHuman 123456789
 echo "${RETURNED_VALUE}"
 ```
 
 
-## string::regexGetFirst
+## regex::getFirstGroup
 
 Matches a string against a regex and returns the first capture group of the matched string.
 
@@ -253,7 +253,7 @@ Returns:
                     Empty if no match.
 
 ```bash
-string::regexGetFirst "name: julien" "name:(.*)"
+regex::getFirstGroup "name: julien" "name:(.*)"
 echo "${RETURNED_VALUE}"
 ```
 

@@ -5,7 +5,7 @@ cascade:
 url: /docs/libraries/curl
 ---
 
-## curl::toFile
+## curl::download
 
 This function is a wrapper around curl.
 It allows you to check the http status code and return 1 if it is not acceptable.
@@ -30,11 +30,11 @@ Returns:
 - `RETURNED_VALUE2`: the http status code
 
 ```bash
-curl::toFile "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
+curl::download "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
 ```
 
 
-## curl::toVar
+## curl::request
 
 This function is a wrapper around curl.
 It allows you to check the http status code and return 1 if it is not acceptable.
@@ -58,7 +58,7 @@ Returns:
 - `RETURNED_VALUE3`: the http status code
 
 ```bash
-curl::toVar false 200,201 https://example.com || core::fail "The curl command failed."
+curl::request false 200,201 https://example.com || core::fail "The curl command failed."
 ```
 
 

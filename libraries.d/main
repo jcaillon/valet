@@ -49,7 +49,7 @@ function main::onExitInternal() {
 }
 
 function main::onInterruptInternal() {
-  if ! command -v tui::sttyRestore &>/dev/null; then
+  if ! command -v tui::restoreTerminalOptions &>/dev/null; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
   log::print "WARNING" "${VALET_CONFIG_ICON_STOPPED:-$'\uf256'}" "STOPPED" "Program interrupted by the user."
@@ -125,8 +125,8 @@ function main::onCleanUpInternal() {
   fi
 
   # restore tty settings if needed
-  if command -v tui::sttyRestore &>/dev/null; then
-    tui::sttyRestore true
+  if command -v tui::restoreTerminalOptions &>/dev/null; then
+    tui::restoreTerminalOptions true
   fi
 }
 
@@ -244,7 +244,7 @@ function main::getHelpText() {
   local -n functionExamples="CMD_EXAMPLES_NAME_${functionName}"
 
   # description
-  string::wrapText "${description}" "${helpWidth}" "  " "$((helpWidth - 2))"
+  string::wrapWords "${description}" "${helpWidth}" "  " "$((helpWidth - 2))"
   local wrappedDescription="  ${RETURNED_VALUE}"
 
   # usage
@@ -276,7 +276,7 @@ function main::getHelpText() {
     fi
   fi
   RETURNED_VALUE2="${usage}"
-  string::wrapText "${usage}" "${helpWidth}" "  " "$((helpWidth - 2))"
+  string::wrapWords "${usage}" "${helpWidth}" "  " "$((helpWidth - 2))"
   usage="  ${RETURNED_VALUE}"
 
   # global options
@@ -355,10 +355,10 @@ function mainWriteAsTable() {
 
   output=""
   for index in "${!names[@]}"; do
-    string::wrapText "${names[${index}]}" "${width}" "  " "$((width - 2))"
+    string::wrapWords "${names[${index}]}" "${width}" "  " "$((width - 2))"
     output+="  ${color}${RETURNED_VALUE}${cDefault:-}"$'\n'
 
-    string::wrapText "${descriptions[${index}]}" "${width}" "      " "$((width - 6))"
+    string::wrapWords "${descriptions[${index}]}" "${width}" "      " "$((width - 6))"
     output+="      ${RETURNED_VALUE}"$'\n'
   done
 

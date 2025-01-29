@@ -163,3 +163,92 @@ echo 'injected in a new function!'
 
 ```
 
+### ✅ Testing bash::sleep
+
+❯ `bash::sleep 0.001`
+
+### ✅ Testing bash::readStdIn
+
+❯ `bash::readStdIn <<<'coucou'`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='coucou
+'
+```
+
+❯ `bash::readStdIn`
+
+Returned variables:
+
+```text
+RETURNED_VALUE=''
+```
+
+### ✅ Testing bash::countArgs
+
+❯ `bash::countArgs arg1 arg2 arg3`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='3'
+```
+
+❯ `bash::countArgs ${PWD}/resources/*`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='1'
+```
+
+### ✅ Testing bash::getMissingVariables
+
+❯ `bash::getMissingVariables`
+
+Returned code: `1`
+
+❯ `ABC=ok`
+
+❯ `bash::getMissingVariables GLOBAL_TEST_TEMP_FILE dfg ABC NOP`
+
+Returned variables:
+
+```text
+RETURNED_ARRAY=(
+[0]='dfg'
+[1]='NOP'
+)
+```
+
+### ✅ Testing bash::getMissingCommands
+
+❯ `bash::getMissingCommands`
+
+Returned code: `1`
+
+❯ `bash::getMissingCommands NONEXISTINGSTUFF bash::getMissingCommands rm YETANOTHERONEMISSING`
+
+Returned variables:
+
+```text
+RETURNED_ARRAY=(
+[0]='NONEXISTINGSTUFF'
+[1]='YETANOTHERONEMISSING'
+)
+```
+
+### ✅ Testing bash::isCommand
+
+❯ `bash::isCommand`
+
+Returned code: `1`
+
+❯ `bash::isCommand NONEXISTINGSTUFF`
+
+Returned code: `1`
+
+❯ `bash::isCommand rm`
+

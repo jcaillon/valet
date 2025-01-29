@@ -13,9 +13,6 @@ function main() {
   test_exe::invoke2
   test_exe::invoke
   test_exe::invoke2piped
-  test_exe::sleep
-  test_exe::readStdIn
-  test_exe::countArgs
   test_exe::captureOutput
 }
 
@@ -75,30 +72,6 @@ function test_exe::invoke2piped() {
   test::func exe::invokef2piped true "'input_stream'" fake --std-in --option argument1 argument2
 }
 
-function test_exe::sleep() {
-  test::title "✅ Testing exe::sleep"
-
-  test::exec exe::sleep 0.001
-}
-
-function test_exe::readStdIn() {
-  test::title "✅ Testing exe::readStdIn"
-
-  test::prompt "exe::readStdIn <<<'coucou'"
-  test::resetReturnedVars
-  exe::readStdIn <<<"coucou"
-  test::printReturnedVars
-
-  test::func exe::readStdIn
-}
-
-function test_exe::countArgs() {
-  test::title "✅ Testing exe::countArgs"
-
-  test::func exe::countArgs 'arg1' 'arg2' 'arg3'
-  test::func exe::countArgs "\${PWD}/resources/*"
-}
-
 function test_exe::captureOutput() {
   test::title "✅ Testing exe::captureOutput"
 
@@ -111,7 +84,7 @@ function fake() {
   local inputStreamContent
 
   if [[ $* == *"--std-in"* ]]; then
-    exe::readStdIn
+    bash::readStdIn
     inputStreamContent="${RETURNED_VALUE}"
   fi
 

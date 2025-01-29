@@ -14,8 +14,8 @@ function test_benchmark::run() {
   test::exec benchmark::run test_function_1 test_function_2,test_function_3 3 5
 }
 
-# override core::getProgramElapsedMicroseconds to return a fake incremental time
-function core::getProgramElapsedMicroseconds() {
+# override time::getProgramElapsedMicroseconds to return a fake incremental time
+function time::getProgramElapsedMicroseconds() {
   if [[ -z ${_FAKE_TIME:-} ]]; then
     _FAKE_TIME=0
     _TIME_FACTOR=1

@@ -471,7 +471,7 @@ local directory="${RETURNED_VALUE}"
 ```
 
 
-## core::getProgramElapsedMicroseconds
+## time::getProgramElapsedMicroseconds
 
 Get the elapsed time in µs since the program started.
 
@@ -482,7 +482,7 @@ Returns:
 ```bash
 core::getElapsedProgramTime
 echo "${RETURNED_VALUE}"
-string::microsecondsToHuman "${RETURNED_VALUE}"
+time::convertMicrosecondsToHuman "${RETURNED_VALUE}"
 echo "Human time: ${RETURNED_VALUE}"
 ```
 
@@ -531,7 +531,7 @@ core::resetIncludedFiles
 ```
 
 
-## curl::toFile
+## curl::download
 
 This function is a wrapper around curl.
 It allows you to check the http status code and return 1 if it is not acceptable.
@@ -556,11 +556,11 @@ Returns:
 - `RETURNED_VALUE2`: the http status code
 
 ```bash
-curl::toFile "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
+curl::download "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
 ```
 
 
-## curl::toVar
+## curl::request
 
 This function is a wrapper around curl.
 It allows you to check the http status code and return 1 if it is not acceptable.
@@ -584,7 +584,7 @@ Returns:
 - `RETURNED_VALUE3`: the http status code
 
 ```bash
-curl::toVar false 200,201 https://example.com || core::fail "The curl command failed."
+curl::request false 200,201 https://example.com || core::fail "The curl command failed."
 ```
 
 
@@ -890,16 +890,16 @@ windows::convertPathFromUnix "/path/to/file"
 > Handles paths starting with `/mnt/x/` or `/x/`.
 
 
-## exe::countArgs
+## bash::countArgs
 
 Returns the number of arguments passed.
 
 A convenient function that can be used to:
 
 - count the files/directories in a directory
-  `exe::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
+  `bash::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
 - count the number of variables starting with VALET_
-  `exe::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
+  `bash::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
 
 - $@: **arguments** _as any_:
       the arguments to count
@@ -909,7 +909,7 @@ Returns:
 - `RETURNED_VALUE`: The number of arguments passed.
 
 ```bash
-exe::countArgs 1 2 3
+bash::countArgs 1 2 3
 ```
 
 
@@ -1409,7 +1409,7 @@ fs::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
 ```
 
 
-## exe::readStdIn
+## bash::readStdIn
 
 Read the content of the standard input.
 Will immediately return if the standard input is empty.
@@ -1419,11 +1419,11 @@ Returns:
 - `RETURNED_VALUE`: The content of the standard input.
 
 ```bash
-exe::readStdIn && local stdIn="${RETURNED_VALUE}"
+bash::readStdIn && local stdIn="${RETURNED_VALUE}"
 ```
 
 
-## exe::sleep
+## bash::sleep
 
 Sleep for the given amount of time.
 This is a pure bash replacement of sleep.
@@ -1432,7 +1432,7 @@ This is a pure bash replacement of sleep.
       the time to sleep in seconds (can be a float)
 
 ```bash
-io:sleep 1.5
+bash::sleep 1.5
 ```
 
 > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
@@ -1987,7 +1987,7 @@ specify the included file for spellcheck.
 > - Use `builtin source` if you want to include the file even if it was already included.
 
 
-## string::camelCaseToSnakeCase
+## string::convertCamelCaseToSnakeCase
 
 This function convert a camelCase string to a SNAKE_CASE string.
 It uses pure bash.
@@ -2001,7 +2001,7 @@ Returns:
 - `RETURNED_VALUE`: The SNAKE_CASE string.
 
 ```bash
-string::camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
+string::convertCamelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
 ```
 
 
@@ -2152,7 +2152,7 @@ string::indexOf "This is a long text" "long" 10 && local index="${RETURNED_VALUE
 ```
 
 
-## string::kebabCaseToCamelCase
+## string::convertKebabCaseToCamelCase
 
 This function convert a kebab-case string to a camelCase string.
 It uses pure bash.
@@ -2166,11 +2166,11 @@ Returns:
 - `RETURNED_VALUE`: The camelCase string.
 
 ```bash
-string::kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
+string::convertKebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
 ```
 
 
-## string::kebabCaseToSnakeCase
+## string::convertKebabCaseToSnakeCase
 
 This function convert a kebab-case string to a SNAKE_CASE string.
 It uses pure bash.
@@ -2184,11 +2184,11 @@ Returns:
 - `RETURNED_VALUE`: The SNAKE_CASE string.
 
 ```bash
-string::kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
+string::convertKebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
 ```
 
 
-## string::microsecondsToHuman
+## time::convertMicrosecondsToHuman
 
 Convert microseconds to human readable format.
 
@@ -2217,12 +2217,12 @@ Returns:
 - `RETURNED_VALUE`: the human readable format
 
 ```bash
-string::microsecondsToHuman 123456789
+time::convertMicrosecondsToHuman 123456789
 echo "${RETURNED_VALUE}"
 ```
 
 
-## string::regexGetFirst
+## regex::getFirstGroup
 
 Matches a string against a regex and returns the first capture group of the matched string.
 
@@ -2237,7 +2237,7 @@ Returns:
                     Empty if no match.
 
 ```bash
-string::regexGetFirst "name: julien" "name:(.*)"
+regex::getFirstGroup "name: julien" "name:(.*)"
 echo "${RETURNED_VALUE}"
 ```
 
@@ -2335,7 +2335,7 @@ echo "${RETURNED_VALUE}"
 > - Leading spaces after a newly wrapped line are removed.
 
 
-## string::wrapText
+## string::wrapWords
 
 Allows to soft wrap the given text at the given width.
 Wrapping is done at word boundaries.
@@ -2364,7 +2364,7 @@ Returns:
 - `RETURNED_VALUE`: the wrapped text
 
 ```bash
-string::wrapText "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
+string::wrapWords "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
 echo "${RETURNED_VALUE}"
 ```
 
@@ -2388,7 +2388,7 @@ system::addToPath "/path/to/bin"
 ```
 
 
-## system::commandExists
+## bash::isCommand
 
 Check if the given command exists.
 
@@ -2402,13 +2402,13 @@ Returns:
   - 1 otherwise.
 
 ```bash
-if system::commandExists "command1"; then
+if bash::isCommand "command1"; then
   printf 'The command exists.'
 fi
 ```
 
 
-## system::date
+## time::getDate
 
 Get the current date in the given format.
 
@@ -2421,14 +2421,14 @@ Returns:
 - `RETURNED_VALUE`: the current date in the given format.
 
 ```bash
-system::date
+time::getDate
 local date="${RETURNED_VALUE}"
 ```
 
 > This function avoid to call $(date) in a subshell (date is a an external executable).
 
 
-## system::env
+## system::getEnvVars
 
 Get the list of all the environment variables.
 In pure bash, no need for env or printenv.
@@ -2438,7 +2438,7 @@ Returns:
 - `RETURNED_ARRAY`: An array with the list of all the environment variables.
 
 ```bash
-system::env
+system::getEnvVars
 for var in "${RETURNED_ARRAY[@]}"; do
   printf '%s=%s\n' "${var}" "${!var}"
 done
@@ -2447,7 +2447,7 @@ done
 > This is faster than using mapfile on <(compgen -v).
 
 
-## system::getNotExistingCommands
+## bash::getMissingCommands
 
 This function returns the list of not existing commands for the given names.
 
@@ -2462,13 +2462,13 @@ Returns:
 - `RETURNED_ARRAY`: the list of not existing commands.
 
 ```bash
-if system::getNotExistingCommands "command1" "command2"; then
+if bash::getMissingCommands "command1" "command2"; then
   printf 'The following commands do not exist: %s' "${RETURNED_ARRAY[*]}"
 fi
 ```
 
 
-## system::getUndeclaredVariables
+## bash::getMissingVariables
 
 This function returns the list of undeclared variables for the given names.
 
@@ -2483,7 +2483,7 @@ Returns:
 - `RETURNED_ARRAY`: the list of undeclared variables.
 
 ```bash
-if system::getUndeclaredVariables "var1" "var2"; then
+if bash::getMissingVariables "var1" "var2"; then
   printf 'The following variables are not declared: %s' "${RETURNED_ARRAY[*]}"
 fi
 ```
@@ -2506,7 +2506,7 @@ fi
 ```
 
 
-## system::os
+## system::getOs
 
 Returns the name of the current OS.
 
@@ -2515,7 +2515,7 @@ Returns:
 - `RETURNED_VALUE`: the name of the current OS: "darwin", "linux" or "windows".
 
 ```bash
-system::os
+system::getOs
 local osName="${RETURNED_VALUE}"
 ```
 
@@ -2919,7 +2919,7 @@ the `tuiRebindOverride` function.
 
 This function should be called before using tui::waitForKeyPress.
 
-You can call `tui::resetBindings` to restore the default bindings. However, this is not
+You can call `tui::restoreBindings` to restore the default bindings. However, this is not
 necessary as the bindings are local to the script.
 
 ```bash
@@ -2929,12 +2929,12 @@ tui::rebindKeymap
 > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
 
 
-## tui::resetBindings
+## tui::restoreBindings
 
 Reset the key bindings to the default ones.
 
 ```bash
-tui::resetBindings
+tui::restoreBindings
 ```
 
 
@@ -2958,16 +2958,16 @@ tui::setInterruptTrap
 ```
 
 
-## tui::sttyInit
+## tui::setTerminalOptions
 
 Disable the echo of the tty. Will no longer display the characters typed by the user.
 
 ```bash
-tui::sttyInit
+tui::setTerminalOptions
 ```
 
 
-## tui::sttyRestore
+## tui::restoreTerminalOptions
 
 Enable the echo of the tty. Will display the characters typed by the user.
 
@@ -2977,7 +2977,7 @@ Enable the echo of the tty. Will display the characters typed by the user.
       (defaults to false)
 
 ```bash
-tui::sttyRestore
+tui::restoreTerminalOptions
 ```
 shellcheck disable=SC2120
 
@@ -3078,7 +3078,7 @@ It uses the read builtin command with the option `-e` to use readline behind the
 This means we can detect more key combinations but all keys needs to be bound first...
 Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 
-You must call `tui::rebindKeymap` and `tui::sttyInit` before using this function.
+You must call `tui::rebindKeymap` and `tui::setTerminalOptions` before using this function.
 
 - $@: **read parameters** _as any_:
       additional parameters to pass to the read command

@@ -43,7 +43,7 @@ Returned code: `1`
 ```text
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 ERROR    Error code 1 in selfMock1(), stack:
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:52
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:54
 ├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:565
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:423
 └─ in main() at valet:110
@@ -104,7 +104,7 @@ WARNING  This is for testing valet core functions, the next statement will call 
 ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
 ERROR    Error code 1 in selfMock1(), stack:
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:70
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:72
 ├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:565
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:423
 └─ in main() at valet:110

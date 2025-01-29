@@ -95,16 +95,16 @@ windows::convertPathFromUnix "/path/to/file"
 > Handles paths starting with `/mnt/x/` or `/x/`.
 
 
-## exe::countArgs
+## bash::countArgs
 
 Returns the number of arguments passed.
 
 A convenient function that can be used to:
 
 - count the files/directories in a directory
-  `exe::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
+  `bash::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
 - count the number of variables starting with VALET_
-  `exe::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
+  `bash::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
 
 - $@: **arguments** _as any_:
       the arguments to count
@@ -114,7 +114,7 @@ Returns:
 - `RETURNED_VALUE`: The number of arguments passed.
 
 ```bash
-exe::countArgs 1 2 3
+bash::countArgs 1 2 3
 ```
 
 
@@ -556,7 +556,7 @@ fs::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
 ```
 
 
-## exe::readStdIn
+## bash::readStdIn
 
 Read the content of the standard input.
 Will immediately return if the standard input is empty.
@@ -566,11 +566,11 @@ Returns:
 - `RETURNED_VALUE`: The content of the standard input.
 
 ```bash
-exe::readStdIn && local stdIn="${RETURNED_VALUE}"
+bash::readStdIn && local stdIn="${RETURNED_VALUE}"
 ```
 
 
-## exe::sleep
+## bash::sleep
 
 Sleep for the given amount of time.
 This is a pure bash replacement of sleep.
@@ -579,7 +579,7 @@ This is a pure bash replacement of sleep.
       the time to sleep in seconds (can be a float)
 
 ```bash
-io:sleep 1.5
+bash::sleep 1.5
 ```
 
 > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.

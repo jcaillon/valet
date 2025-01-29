@@ -185,7 +185,7 @@ function exe::invoke5() {
 #
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to temporary files.
-# Equivalent to exe::invokef5 "${1}" 0 "" "" "${@:2}"
+# Equivalent to `exe::invokef5 "${1}" 0 "" "" "${@:2}"`
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails.
@@ -218,7 +218,7 @@ function exe::invokef2() {
 #
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to environment variables.
-# Equivalent to exe::invoke5 "${1}" 0 "" "" "${@:2}"
+# Equivalent to `exe::invoke5 "${1}" 0 "" "" "${@:2}"`
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails.
@@ -251,7 +251,7 @@ function exe::invoke2() {
 #
 # This function call an executable and its arguments and input a given string as stdin.
 # It redirects the stdout and stderr to temporary files.
-# Equivalent to exe::invokef5 "${1}" 0 false "${2}" "${@:3}"
+# Equivalent to `exe::invokef5 "${1}" 0 false "${2}" "${@:3}"`
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails.
@@ -291,7 +291,7 @@ function exe::invokef2piped() {
 #
 # This function call an executable and its arguments and input a given string as stdin.
 # It redirects the stdout and stderr to environment variables.
-# Equivalent to exe::invoke5 "${1}" 0 false "${2}" "${@:3}"
+# Equivalent to `exe::invoke5 "${1}" 0 false "${2}" "${@:3}"`
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails.
@@ -334,7 +334,7 @@ function exe::invoke2piped() {
 # Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
 #
 # It redirects the stdout and stderr to environment variables.
-# Equivalent to exe::invoke5 true 0 '' '' "${@}"
+# Equivalent to `exe::invoke5 true 0 '' '' "${@}"`
 #
 # - $1: **executable** _as string_:
 #       the executable or command
@@ -384,86 +384,4 @@ function exe::captureOutput() {
   ${@} &>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
   RETURNED_VALUE=""
   IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
-}
-
-# ## exe::sleep
-#
-# Sleep for the given amount of time.
-# This is a pure bash replacement of sleep.
-#
-# - $1: **time** _as float_:
-#       the time to sleep in seconds (can be a float)
-#
-# ```bash
-# io:sleep 1.5
-# ```
-#
-# > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
-function exe::sleep() {
-  local timeout="${1}"
-  # when connected to a terminal, we can just read the stdout
-  # which will never be written to, and use a timeout on read
-  if [[ -t 2 ]]; then
-    read -rt "${timeout}" -u 2 || :
-    return 0
-  elif command -v mkfifo 1>/dev/null; then
-    if [[ -z ${IO_SLEEP_FIFO:-} ]]; then
-      fs::createTempFile && IO_SLEEP_FIFO="${RETURNED_VALUE}"
-      rm "${IO_SLEEP_FIFO}"
-      mkfifo -m 700 "${IO_SLEEP_FIFO}"
-      exec 6<>"${IO_SLEEP_FIFO}"
-      rm "${IO_SLEEP_FIFO}"
-    fi
-    read -rt "${timeout}" -u 6 || :
-  else
-    # when everything else failed...
-    sleep "${timeout}"
-  fi
-}
-
-# ## exe::readStdIn
-#
-# Read the content of the standard input.
-# Will immediately return if the standard input is empty.
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: The content of the standard input.
-#
-# ```bash
-# exe::readStdIn && local stdIn="${RETURNED_VALUE}"
-# ```
-function exe::readStdIn() {
-  RETURNED_VALUE=""
-  local IFS=''
-  if read -t 0 -u 0 -rd ''; then
-    read -u 0 -rd '' RETURNED_VALUE || [[ -n ${RETURNED_VALUE} ]] || RETURNED_VALUE=""
-  else
-    RETURNED_VALUE=""
-  fi
-}
-
-# ## exe::countArgs
-#
-# Returns the number of arguments passed.
-#
-# A convenient function that can be used to:
-#
-# - count the files/directories in a directory
-#   `exe::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
-# - count the number of variables starting with VALET_
-#   `exe::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
-#
-# - $@: **arguments** _as any_:
-#       the arguments to count
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: The number of arguments passed.
-#
-# ```bash
-# exe::countArgs 1 2 3
-# ```
-function exe::countArgs() {
-  RETURNED_VALUE="$#"
 }

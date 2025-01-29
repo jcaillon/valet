@@ -337,7 +337,7 @@ function prompt::input() {
   # before starting to wait for inputs, we clear up the key pressed
   tui::clearKeyPressed
   # setup the terminal to be ready for readline
-  tui::sttyInit
+  tui::setTerminalOptions
   # rebind some keys to call the callback function prompt_onKeyBindingPress
   tui::rebindKeymap prompt_onKeyBindingPress
 
@@ -394,7 +394,7 @@ function prompt::input() {
   prompt_clearErrorBox
   prompt_clearItemsBox
   prompt_clearPrompt
-  tui::sttyRestore
+  tui::restoreTerminalOptions
   tui::restoreInterruptTrap
   shopt -u nocasematch
 
@@ -760,7 +760,7 @@ function prompt_onKeyPressed() {
     prompt_onTextChanged
 
     # here we handle the case where the user pastes a string (or spam a key)
-    core::getProgramElapsedMicroseconds
+    time::getProgramElapsedMicroseconds
     if ((RETURNED_VALUE - _PROMPT_LAST_KEY_PRESSED_TIME < 300000)); then
       # key pressed under 100ms of the last
       _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
@@ -1223,7 +1223,7 @@ function prompt_showError() {
   prompt_clearItemsBox
   prompt_clearErrorBox
 
-  string::wrapText "${message}" $((_PROMPT_WIDTH - ${#_PROMPT_ERROR_BOX_SYMBOL}))
+  string::wrapWords "${message}" $((_PROMPT_WIDTH - ${#_PROMPT_ERROR_BOX_SYMBOL}))
   local IFS=$'\n'
   local text="${RETURNED_VALUE}"
   local -i errorLinesNeeded=0
@@ -1470,7 +1470,7 @@ function prompt_getCurrentInitialItemsIndex() {
   RETURNED_VALUE=-1
 }
 
-# ## prompt_getDisplayedPromptString
+# ## prompt_getDisplayedPromptString (private)
 #
 # This function return a string that can be printed in a terminal in order to display a text
 # and position the cursor at a given index in the input text.

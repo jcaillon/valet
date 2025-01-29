@@ -8,15 +8,15 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- make `source` able to source multiple libraries that are called the same. Improve the function to quickly return for sourced lib (anything not starting with / or .)
+- all interactive functions must write to stderr not stdout!
 - prompt:
   - since we add the possibility to load the prompt items from a file, migth as well rewrite another array fuzzy sort that loads from a file
   - prompt: add the possibility to position the autocompletion box (top/left/width/height)
   - prompt improvement ideas: do not filter from the original array if the new search string is starting with previous search string, we can search from the current array instead !
-- fzf: draw in a given rectangle, we handle full screen or not before calling sfzf
-- refacto: move func from string/io lib to regex, path, fs libs
-- make `source` able to source multiple libraries that are called the same. Improve the function to quickly return for sourced lib (anything not starting with / or .)
+- fzf: 
+  - draw in a given rectangle, we handle full screen or not before calling sfzf
 - the config file should define everything, leave all def commented. When we self config we define only those already defined. We have an associative array of each var and description to handle this
-- all interactive functions must write to stderr not stdout!
 - add info of the extension from which a command comes from
 - we split the commands file into several one, per extension, so we don't have to load everything immediately
 - in the menu we can filter by extension (and we see the extension of a command)
@@ -24,8 +24,9 @@ This page lists the features that I would like to implement in Valet. They come 
 - test the "sudo" feature: it runs the command by forking. We could add an option to instead rerun valet with sudo.
 - document the test; use the lib-test test as an example, and also link to the test:: lib.
 - test the new bash:: lib
-- refacto progress bar; use signal to tell the bg job to redraw the progress bar after displaying a log. +handle the terminal size to display the progress bar!
-- after logging, if progress bar is in progress, we need to redraw it immediately.
+- progress:
+  - refacto progress bar; use signal to tell the bg job to redraw the progress bar after displaying a log. +handle the terminal size to display the progress bar!
+  - after logging, if progress bar is in progress, we need to redraw it immediately.
 - for interactive mode, a first iteration is to prompt the user in the scrolling terminal. Then we add an option to instead open a full screen editor.
 - might be able to improve the quicksort if we use direct statements instead of functions.
 - for the log functions, we can optionally display the function name and the line number of the caller + pid + shlvl. +ISO8601 time `printf "%(%FT%H:%M:%S%z)T" "${EPOCHSECONDS}"`. Let user customize the log format with a var? `[%t] %-5level %36logger %msg`. Show them how to output as json!

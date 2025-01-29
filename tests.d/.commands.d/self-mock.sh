@@ -13,8 +13,8 @@ fi
 
 # shellcheck source=../../libraries.d/lib-fs
 source fs
-# shellcheck source=../../libraries.d/lib-exe
-source exe
+# shellcheck source=../../libraries.d/lib-bash
+source bash
 
 #===============================================================
 # >>> command: self mock1
@@ -104,7 +104,7 @@ function selfMock1() {
     ;;
   wait-indefinitely)
     log::info "This is for testing valet core functions, waiting indefinitely."
-    exe::sleep 999
+    bash::sleep 999
     ;;
   show-help)
     command::showHelp

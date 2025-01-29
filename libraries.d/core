@@ -206,6 +206,10 @@ function fs::cleanTempFiles() {
     log::debug "Deleting temporary directory."
     rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null || :
   fi
+  if [[ -n ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} && -d ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY} ]]; then
+    log::debug "Deleting temporary windows directory."
+    rm -Rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" 1>/dev/null || :
+  fi
   rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* 1>/dev/null || :
   unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
 }
@@ -447,7 +451,7 @@ function log::createPrintFunction() {
     done
 
     wrapStatement='
-    string::wrapText "${RETURNED_VALUE}" '"${wrapTextColumns}"' '"'${wrapPaddingCharacters}'"' '"$((wrapTextColumns - wrapPaddingLength))"''
+    string::wrapWords "${RETURNED_VALUE}" '"${wrapTextColumns}"' '"'${wrapPaddingCharacters}'"' '"$((wrapTextColumns - wrapPaddingLength))"''
   else
     wrapPaddingLength=0
   fi
@@ -853,7 +857,7 @@ function log::printCallStack() {
 # >>> String utilities
 #===============================================================
 
-# ## string::wrapText
+# ## string::wrapWords
 #
 # Allows to soft wrap the given text at the given width.
 # Wrapping is done at word boundaries.
@@ -882,14 +886,14 @@ function log::printCallStack() {
 # - `RETURNED_VALUE`: the wrapped text
 #
 # ```bash
-# string::wrapText "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
+# string::wrapWords "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
 # echo "${RETURNED_VALUE}"
 # ```
 #
 # > - This function is written in pure bash and is faster than calling the fold command.
 # > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 # > - It considers escape sequence for text formatting and does not count them as visible characters.
-function string::wrapText() {
+function string::wrapWords() {
   local text="${1}"
   local -i width="${2:-${_OPTION_WRAP_WIDTH:-${GLOBAL_COLUMNS}}}"
   local leftPaddingChars="${3:-${_OPTION_PADDING_CHARS:-}}"
@@ -1292,9 +1296,12 @@ function array::fuzzyFilterSortQuicksort() {
 #   - 0 if the function was successfully re-exported
 #   - 1 if the function does not exist
 # - `RETURNED_VALUE`: the modified function definition
+# - `RETURNED_VALUE2`: the original function
 #
 # ```bash
 # bash::getFunctionDefinitionWithGlobalVars "myFunction" "myFunctionWithGlobalVars" "MY_VAR1" "MY_VAR2"
+# eval "${RETURNED_VALUE}"
+# myFunctionWithGlobalVars
 # ```
 function bash::getFunctionDefinitionWithGlobalVars() {
   local functionName="${1}"
@@ -1302,10 +1309,10 @@ function bash::getFunctionDefinitionWithGlobalVars() {
   shift 2
 
   local IFS=''
-  local functionDefinition
   declare -f "${functionName}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
-  read -rd '' functionDefinition <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || [[ -n ${functionDefinition} ]]
-  functionDefinition="${functionDefinition/"${functionName}"/"${newFunctionName}"}"
+  read -rd '' RETURNED_VALUE2 <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || [[ -n ${RETURNED_VALUE2} ]]
+  local functionDefinition
+  functionDefinition="${RETURNED_VALUE2/"${functionName}"/"${newFunctionName}"}"
 
   # find the mapping between the positional parameters and the new global variable names
   local -A globalVars=()
@@ -1334,6 +1341,32 @@ function bash::getFunctionDefinitionWithGlobalVars() {
   done
 
   RETURNED_VALUE="${modifiedFunctionDefinition}"
+}
+
+#===============================================================
+# >>> Time utilities
+#===============================================================
+
+# ## time::getProgramElapsedMicroseconds
+#
+# Get the elapsed time in µs since the program started.
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the elapsed time in µs since the program started.
+#
+# ```bash
+# core::getElapsedProgramTime
+# echo "${RETURNED_VALUE}"
+# time::convertMicrosecondsToHuman "${RETURNED_VALUE}"
+# echo "Human time: ${RETURNED_VALUE}"
+# ```
+#
+# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.
+# > The 10# forces the base 10 conversion to avoid issues with leading zeros.
+# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
+function time::getProgramElapsedMicroseconds() {
+  RETURNED_VALUE=$(((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*\.} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))
 }
 
 #===============================================================
@@ -1539,28 +1572,6 @@ function core::getVersion() {
   # shellcheck source=lib-fs
   source fs
   fs::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/version"
-}
-
-# ## core::getProgramElapsedMicroseconds
-#
-# Get the elapsed time in µs since the program started.
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: the elapsed time in µs since the program started.
-#
-# ```bash
-# core::getElapsedProgramTime
-# echo "${RETURNED_VALUE}"
-# string::microsecondsToHuman "${RETURNED_VALUE}"
-# echo "Human time: ${RETURNED_VALUE}"
-# ```
-#
-# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.
-# > The 10# forces the base 10 conversion to avoid issues with leading zeros.
-# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
-function core::getProgramElapsedMicroseconds() {
-  RETURNED_VALUE=$(((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*\.} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))
 }
 
 #===============================================================

@@ -31,18 +31,22 @@ source bash
 source benchmark
 source command
 source curl
+source exe
+source fs
 source http
 source interactive
-source io
 source profiler
 source progress
 source prompt
+source regex
 source sfzf
 source string
 source system
 source test
+source time
 source tui
 source version
+source windows
 
 ```
 

@@ -494,7 +494,7 @@ function core::getConfigurationDirectory() { :; }
 #
 function core::getLocalStateDirectory() { :; }
 
-# ## core::getProgramElapsedMicroseconds
+# ## time::getProgramElapsedMicroseconds
 #
 # Get the elapsed time in µs since the program started.
 #
@@ -505,7 +505,7 @@ function core::getLocalStateDirectory() { :; }
 # ```bash
 # core::getElapsedProgramTime
 # echo "${RETURNED_VALUE}"
-# string::microsecondsToHuman "${RETURNED_VALUE}"
+# time::convertMicrosecondsToHuman "${RETURNED_VALUE}"
 # echo "Human time: ${RETURNED_VALUE}"
 # ```
 #
@@ -513,7 +513,7 @@ function core::getLocalStateDirectory() { :; }
 # > The 10# forces the base 10 conversion to avoid issues with leading zeros.
 # > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 #
-function core::getProgramElapsedMicroseconds() { :; }
+function time::getProgramElapsedMicroseconds() { :; }
 
 # ## core::getUserDirectory
 #
@@ -558,7 +558,7 @@ function core::getVersion() { :; }
 #
 function core::resetIncludedFiles() { :; }
 
-# ## curl::toFile
+# ## curl::download
 #
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
@@ -583,12 +583,12 @@ function core::resetIncludedFiles() { :; }
 # - `RETURNED_VALUE2`: the http status code
 #
 # ```bash
-# curl::toFile "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
+# curl::download "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
 # ```
 #
-function curl::toFile() { :; }
+function curl::download() { :; }
 
-# ## curl::toVar
+# ## curl::request
 #
 # This function is a wrapper around curl.
 # It allows you to check the http status code and return 1 if it is not acceptable.
@@ -612,10 +612,10 @@ function curl::toFile() { :; }
 # - `RETURNED_VALUE3`: the http status code
 #
 # ```bash
-# curl::toVar false 200,201 https://example.com || core::fail "The curl command failed."
+# curl::request false 200,201 https://example.com || core::fail "The curl command failed."
 # ```
 #
-function curl::toVar() { :; }
+function curl::request() { :; }
 
 # ## fsfs::itemSelector
 #
@@ -934,16 +934,16 @@ function windows::convertPathToUnix() { :; }
 #
 function windows::convertPathFromUnix() { :; }
 
-# ## exe::countArgs
+# ## bash::countArgs
 #
 # Returns the number of arguments passed.
 #
 # A convenient function that can be used to:
 #
 # - count the files/directories in a directory
-#   `exe::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
+#   `bash::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
 # - count the number of variables starting with VALET_
-#   `exe::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
+#   `bash::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
 #
 # - $@: **arguments** _as any_:
 #       the arguments to count
@@ -953,10 +953,10 @@ function windows::convertPathFromUnix() { :; }
 # - `RETURNED_VALUE`: The number of arguments passed.
 #
 # ```bash
-# exe::countArgs 1 2 3
+# bash::countArgs 1 2 3
 # ```
 #
-function exe::countArgs() { :; }
+function bash::countArgs() { :; }
 
 # ## fs::createDirectoryIfNeeded
 #
@@ -1472,7 +1472,7 @@ function fs::listPaths() { :; }
 #
 function fs::readFile() { :; }
 
-# ## exe::readStdIn
+# ## bash::readStdIn
 #
 # Read the content of the standard input.
 # Will immediately return if the standard input is empty.
@@ -1482,12 +1482,12 @@ function fs::readFile() { :; }
 # - `RETURNED_VALUE`: The content of the standard input.
 #
 # ```bash
-# exe::readStdIn && local stdIn="${RETURNED_VALUE}"
+# bash::readStdIn && local stdIn="${RETURNED_VALUE}"
 # ```
 #
-function exe::readStdIn() { :; }
+function bash::readStdIn() { :; }
 
-# ## exe::sleep
+# ## bash::sleep
 #
 # Sleep for the given amount of time.
 # This is a pure bash replacement of sleep.
@@ -1496,12 +1496,12 @@ function exe::readStdIn() { :; }
 #       the time to sleep in seconds (can be a float)
 #
 # ```bash
-# io:sleep 1.5
+# bash::sleep 1.5
 # ```
 #
 # > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 #
-function exe::sleep() { :; }
+function bash::sleep() { :; }
 
 # ## fs::tail
 #
@@ -2082,7 +2082,7 @@ function prompt_getDisplayedPromptString() { :; }
 #
 function source() { :; }
 
-# ## string::camelCaseToSnakeCase
+# ## string::convertCamelCaseToSnakeCase
 #
 # This function convert a camelCase string to a SNAKE_CASE string.
 # It uses pure bash.
@@ -2096,10 +2096,10 @@ function source() { :; }
 # - `RETURNED_VALUE`: The SNAKE_CASE string.
 #
 # ```bash
-# string::camelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
+# string::convertCamelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
 # ```
 #
-function string::camelCaseToSnakeCase() { :; }
+function string::convertCamelCaseToSnakeCase() { :; }
 
 # ## string::count
 #
@@ -2254,7 +2254,7 @@ function string::highlight() { :; }
 #
 function string::indexOf() { :; }
 
-# ## string::kebabCaseToCamelCase
+# ## string::convertKebabCaseToCamelCase
 #
 # This function convert a kebab-case string to a camelCase string.
 # It uses pure bash.
@@ -2268,12 +2268,12 @@ function string::indexOf() { :; }
 # - `RETURNED_VALUE`: The camelCase string.
 #
 # ```bash
-# string::kebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
+# string::convertKebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
 # ```
 #
-function string::kebabCaseToCamelCase() { :; }
+function string::convertKebabCaseToCamelCase() { :; }
 
-# ## string::kebabCaseToSnakeCase
+# ## string::convertKebabCaseToSnakeCase
 #
 # This function convert a kebab-case string to a SNAKE_CASE string.
 # It uses pure bash.
@@ -2287,12 +2287,12 @@ function string::kebabCaseToCamelCase() { :; }
 # - `RETURNED_VALUE`: The SNAKE_CASE string.
 #
 # ```bash
-# string::kebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
+# string::convertKebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
 # ```
 #
-function string::kebabCaseToSnakeCase() { :; }
+function string::convertKebabCaseToSnakeCase() { :; }
 
-# ## string::microsecondsToHuman
+# ## time::convertMicrosecondsToHuman
 #
 # Convert microseconds to human readable format.
 #
@@ -2321,13 +2321,13 @@ function string::kebabCaseToSnakeCase() { :; }
 # - `RETURNED_VALUE`: the human readable format
 #
 # ```bash
-# string::microsecondsToHuman 123456789
+# time::convertMicrosecondsToHuman 123456789
 # echo "${RETURNED_VALUE}"
 # ```
 #
-function string::microsecondsToHuman() { :; }
+function time::convertMicrosecondsToHuman() { :; }
 
-# ## string::regexGetFirst
+# ## regex::getFirstGroup
 #
 # Matches a string against a regex and returns the first capture group of the matched string.
 #
@@ -2342,13 +2342,13 @@ function string::microsecondsToHuman() { :; }
 #                     Empty if no match.
 #
 # ```bash
-# string::regexGetFirst "name: julien" "name:(.*)"
+# regex::getFirstGroup "name: julien" "name:(.*)"
 # echo "${RETURNED_VALUE}"
 # ```
 #
 # > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 #
-function string::regexGetFirst() { :; }
+function regex::getFirstGroup() { :; }
 
 # ## string::split
 #
@@ -2445,7 +2445,7 @@ function string::trimAll() { :; }
 #
 function string::wrapCharacters() { :; }
 
-# ## string::wrapText
+# ## string::wrapWords
 #
 # Allows to soft wrap the given text at the given width.
 # Wrapping is done at word boundaries.
@@ -2474,7 +2474,7 @@ function string::wrapCharacters() { :; }
 # - `RETURNED_VALUE`: the wrapped text
 #
 # ```bash
-# string::wrapText "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
+# string::wrapWords "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
 # echo "${RETURNED_VALUE}"
 # ```
 #
@@ -2482,7 +2482,7 @@ function string::wrapCharacters() { :; }
 # > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 # > - It considers escape sequence for text formatting and does not count them as visible characters.
 #
-function string::wrapText() { :; }
+function string::wrapWords() { :; }
 
 # ## system::addToPath
 #
@@ -2500,7 +2500,7 @@ function string::wrapText() { :; }
 #
 function system::addToPath() { :; }
 
-# ## system::commandExists
+# ## bash::isCommand
 #
 # Check if the given command exists.
 #
@@ -2514,14 +2514,14 @@ function system::addToPath() { :; }
 #   - 1 otherwise.
 #
 # ```bash
-# if system::commandExists "command1"; then
+# if bash::isCommand "command1"; then
 #   printf 'The command exists.'
 # fi
 # ```
 #
-function system::commandExists() { :; }
+function bash::isCommand() { :; }
 
-# ## system::date
+# ## time::getDate
 #
 # Get the current date in the given format.
 #
@@ -2534,15 +2534,15 @@ function system::commandExists() { :; }
 # - `RETURNED_VALUE`: the current date in the given format.
 #
 # ```bash
-# system::date
+# time::getDate
 # local date="${RETURNED_VALUE}"
 # ```
 #
 # > This function avoid to call $(date) in a subshell (date is a an external executable).
 #
-function system::date() { :; }
+function time::getDate() { :; }
 
-# ## system::env
+# ## system::getEnvVars
 #
 # Get the list of all the environment variables.
 # In pure bash, no need for env or printenv.
@@ -2552,7 +2552,7 @@ function system::date() { :; }
 # - `RETURNED_ARRAY`: An array with the list of all the environment variables.
 #
 # ```bash
-# system::env
+# system::getEnvVars
 # for var in "${RETURNED_ARRAY[@]}"; do
 #   printf '%s=%s\n' "${var}" "${!var}"
 # done
@@ -2560,9 +2560,9 @@ function system::date() { :; }
 #
 # > This is faster than using mapfile on <(compgen -v).
 #
-function system::env() { :; }
+function system::getEnvVars() { :; }
 
-# ## system::getNotExistingCommands
+# ## bash::getMissingCommands
 #
 # This function returns the list of not existing commands for the given names.
 #
@@ -2577,14 +2577,14 @@ function system::env() { :; }
 # - `RETURNED_ARRAY`: the list of not existing commands.
 #
 # ```bash
-# if system::getNotExistingCommands "command1" "command2"; then
+# if bash::getMissingCommands "command1" "command2"; then
 #   printf 'The following commands do not exist: %s' "${RETURNED_ARRAY[*]}"
 # fi
 # ```
 #
-function system::getNotExistingCommands() { :; }
+function bash::getMissingCommands() { :; }
 
-# ## system::getUndeclaredVariables
+# ## bash::getMissingVariables
 #
 # This function returns the list of undeclared variables for the given names.
 #
@@ -2599,12 +2599,12 @@ function system::getNotExistingCommands() { :; }
 # - `RETURNED_ARRAY`: the list of undeclared variables.
 #
 # ```bash
-# if system::getUndeclaredVariables "var1" "var2"; then
+# if bash::getMissingVariables "var1" "var2"; then
 #   printf 'The following variables are not declared: %s' "${RETURNED_ARRAY[*]}"
 # fi
 # ```
 #
-function system::getUndeclaredVariables() { :; }
+function bash::getMissingVariables() { :; }
 
 # ## system::isRoot
 #
@@ -2624,7 +2624,7 @@ function system::getUndeclaredVariables() { :; }
 #
 function system::isRoot() { :; }
 
-# ## system::os
+# ## system::getOs
 #
 # Returns the name of the current OS.
 #
@@ -2633,11 +2633,11 @@ function system::isRoot() { :; }
 # - `RETURNED_VALUE`: the name of the current OS: "darwin", "linux" or "windows".
 #
 # ```bash
-# system::os
+# system::getOs
 # local osName="${RETURNED_VALUE}"
 # ```
 #
-function system::os() { :; }
+function system::getOs() { :; }
 
 # ## windows::addToPath
 #
@@ -3063,7 +3063,7 @@ function tui::getTerminalSize() { :; }
 #
 # This function should be called before using tui::waitForKeyPress.
 #
-# You can call `tui::resetBindings` to restore the default bindings. However, this is not
+# You can call `tui::restoreBindings` to restore the default bindings. However, this is not
 # necessary as the bindings are local to the script.
 #
 # ```bash
@@ -3074,15 +3074,15 @@ function tui::getTerminalSize() { :; }
 #
 function tui::rebindKeymap() { :; }
 
-# ## tui::resetBindings
+# ## tui::restoreBindings
 #
 # Reset the key bindings to the default ones.
 #
 # ```bash
-# tui::resetBindings
+# tui::restoreBindings
 # ```
 #
-function tui::resetBindings() { :; }
+function tui::restoreBindings() { :; }
 
 # ## tui::restoreInterruptTrap
 #
@@ -3106,17 +3106,17 @@ function tui::restoreInterruptTrap() { :; }
 #
 function tui::setInterruptTrap() { :; }
 
-# ## tui::sttyInit
+# ## tui::setTerminalOptions
 #
 # Disable the echo of the tty. Will no longer display the characters typed by the user.
 #
 # ```bash
-# tui::sttyInit
+# tui::setTerminalOptions
 # ```
 #
-function tui::sttyInit() { :; }
+function tui::setTerminalOptions() { :; }
 
-# ## tui::sttyRestore
+# ## tui::restoreTerminalOptions
 #
 # Enable the echo of the tty. Will display the characters typed by the user.
 #
@@ -3126,11 +3126,11 @@ function tui::sttyInit() { :; }
 #       (defaults to false)
 #
 # ```bash
-# tui::sttyRestore
+# tui::restoreTerminalOptions
 # ```
 # shellcheck disable=SC2120
 #
-function tui::sttyRestore() { :; }
+function tui::restoreTerminalOptions() { :; }
 
 # ## tui::switchBackFromFullScreen
 #
@@ -3233,7 +3233,7 @@ function tui::waitForChar() { :; }
 # This means we can detect more key combinations but all keys needs to be bound first...
 # Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 #
-# You must call `tui::rebindKeymap` and `tui::sttyInit` before using this function.
+# You must call `tui::rebindKeymap` and `tui::setTerminalOptions` before using this function.
 #
 # - $@: **read parameters** _as any_:
 #       additional parameters to pass to the read command

@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# ## time::getDate
+#
+# Get the current date in the given format.
+#
+# - $1: format _as string_:
+#       (optional) the format of the date to return
+#       (defaults to %(%F_%Hh%Mm%Ss)T).
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the current date in the given format.
+#
+# ```bash
+# time::getDate
+# local date="${RETURNED_VALUE}"
+# ```
+#
+# > This function avoid to call $(date) in a subshell (date is a an external executable).
+function time::getDate() {
+  local format="${1:-"%(%F_%Hh%Mm%Ss)T"}"
+  # shellcheck disable=SC2059
+  printf -v RETURNED_VALUE "${format}" "${EPOCHSECONDS}"
+}
+
+# ## time::convertMicrosecondsToHuman
+#
+# Convert microseconds to human readable format.
+#
+# - $1: **microseconds** _as int_:
+#       the microseconds to convert
+# - $2: format _as string_:
+#      (optional) Can be set using the variable `_OPTION_FORMAT`.
+#      the format to use (defaults to "%HH:%MM:%SS")
+#      Usable formats:
+#      - %HH: hours
+#      - %MM: minutes
+#      - %SS: seconds
+#      - %LL: milliseconds
+#      - %h: hours without leading zero
+#      - %m: minutes without leading zero
+#      - %s: seconds without leading zero
+#      - %l: milliseconds without leading zero
+#      - %u: microseconds without leading zero
+#      - %M: total minutes
+#      - %S: total seconds
+#      - %L: total milliseconds
+#      - %U: total microseconds
+#
+# Returns:
+#
+# - `RETURNED_VALUE`: the human readable format
+#
+# ```bash
+# time::convertMicrosecondsToHuman 123456789
+# echo "${RETURNED_VALUE}"
+# ```
+function time::convertMicrosecondsToHuman() {
+  local -i ms="${1}"
+  local format="${2:-${_OPTION_FORMAT:-"%HH:%MM:%SS"}}"
+
+  local -i hours=$((ms / 3600 / 1000000))
+  local -i minutes=$(((ms / 60 / 1000000) % 60))
+  local -i seconds=$(((ms / 1000000) % 60))
+  local -i milliseconds=$((ms / 1000 % 1000))
+  local -i microseconds=$((ms % 1000))
+
+  local humanFormat="${format}"
+  if [[ ${hours} -lt 10 ]]; then
+    humanFormat="${humanFormat//%HH/0${hours}}"
+  else
+    humanFormat="${humanFormat//%HH/${hours}}"
+  fi
+  if [[ ${minutes} -lt 10 ]]; then
+    humanFormat="${humanFormat//%MM/0${minutes}}"
+  else
+    humanFormat="${humanFormat//%MM/${minutes}}"
+  fi
+  if [[ ${seconds} -lt 10 ]]; then
+    humanFormat="${humanFormat//%SS/0${seconds}}"
+  else
+    humanFormat="${humanFormat//%SS/${seconds}}"
+  fi
+  if [[ ${milliseconds} -lt 10 ]]; then
+    humanFormat="${humanFormat//%LL/00${milliseconds}}"
+  elif [[ ${milliseconds} -lt 100 ]]; then
+    humanFormat="${humanFormat//%LL/0${milliseconds}}"
+  else
+    humanFormat="${humanFormat//%LL/${milliseconds}}"
+  fi
+  if [[ ${microseconds} -lt 10 ]]; then
+    humanFormat="${humanFormat//%UU/00${microseconds}}"
+  elif [[ ${microseconds} -lt 100 ]]; then
+    humanFormat="${humanFormat//%UU/0${microseconds}}"
+  else
+    humanFormat="${humanFormat//%UU/${microseconds}}"
+  fi
+  humanFormat="${humanFormat//%h/${hours}}"
+  humanFormat="${humanFormat//%m/${minutes}}"
+  humanFormat="${humanFormat//%s/${seconds}}"
+  humanFormat="${humanFormat//%l/${milliseconds}}"
+  humanFormat="${humanFormat//%u/${microseconds}}"
+  humanFormat="${humanFormat//%M/$((hours * 60 + minutes))}"
+  humanFormat="${humanFormat//%S/$((hours * 3600 + minutes * 60 + seconds))}"
+  humanFormat="${humanFormat//%L/$(((hours * 3600 * + minutes * 60 + seconds) * 1000 + milliseconds))}"
+  humanFormat="${humanFormat//%U/$((ms))}"
+
+  RETURNED_VALUE="${humanFormat}"
+}

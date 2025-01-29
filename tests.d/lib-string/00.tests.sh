@@ -5,18 +5,16 @@ source string
 
 function main() {
   test_string::cutField
-  test_string::kebabCaseToSnakeCase
-  test_string::kebabCaseToSnakeCase
-  test_string::kebabCaseToCamelCase
+  test_string::convertKebabCaseToSnakeCase
+  test_string::convertKebabCaseToSnakeCase
+  test_string::convertKebabCaseToCamelCase
   test_string::trimAll
   test_string::trim
   test_string::indexOf
   test_string::extractBetween
   test_string::count
   test_string::split
-  test_string::regexGetFirst
-  test_string::microsecondsToHuman
-  test_string::wrapText
+  test_string::wrapWords
   test_string::wrapCharacters
   test_string::highlight
   test_string::head
@@ -34,28 +32,28 @@ line2 does it work on lines?
 line3 seems so" 2 $'\n'
 }
 
-function test_string::camelCaseToSnakeCase() {
-  test::title "✅ Testing string::camelCaseToSnakeCase"
+function test_string::convertCamelCaseToSnakeCase() {
+  test::title "✅ Testing string::convertCamelCaseToSnakeCase"
 
-  test::func string::camelCaseToSnakeCase thisIsATest0
-  test::func string::camelCaseToSnakeCase AnotherTest
-
-}
-
-function test_string::kebabCaseToSnakeCase() {
-  test::title "✅ Testing string::kebabCaseToSnakeCase"
-
-  test::func string::kebabCaseToSnakeCase this-is-a-test0
-  test::func string::kebabCaseToSnakeCase --another-test
+  test::func string::convertCamelCaseToSnakeCase thisIsATest0
+  test::func string::convertCamelCaseToSnakeCase AnotherTest
 
 }
 
-function test_string::kebabCaseToCamelCase() {
-  test::title "✅ Testing string::kebabCaseToCamelCase"
+function test_string::convertKebabCaseToSnakeCase() {
+  test::title "✅ Testing string::convertKebabCaseToSnakeCase"
 
-  test::func string::kebabCaseToCamelCase this-is-a-test0
-  test::func string::kebabCaseToCamelCase --another-test
-  test::func string::kebabCaseToCamelCase --last--
+  test::func string::convertKebabCaseToSnakeCase this-is-a-test0
+  test::func string::convertKebabCaseToSnakeCase --another-test
+
+}
+
+function test_string::convertKebabCaseToCamelCase() {
+  test::title "✅ Testing string::convertKebabCaseToCamelCase"
+
+  test::func string::convertKebabCaseToCamelCase this-is-a-test0
+  test::func string::convertKebabCaseToCamelCase --another-test
+  test::func string::convertKebabCaseToCamelCase --last--
 }
 
 function test_string::trimAll() {
@@ -112,58 +110,26 @@ function test_string::split() {
   test::func string::split "one"$'\n'"two"$'\n'"three" $'\n'
 }
 
-function test_string::regexGetFirst() {
-  test::title "✅ Testing string::regexGetFirst function"
-
-  test::func string::regexGetFirst 'name: julien' "'name:[[:space:]]*([[:alnum:]]*)'"
-}
-
-function test_string::microsecondsToHuman() {
-  test::title "✅ Testing string::microsecondsToHuman function"
-
-  local -i ms=$((234 + 1000 * 2 + 1000000 * 3 + 1000000 * 60 * 4 + 1000000 * 60 * 60 * 5))
-  local format="Hours: %HH
-Minutes: %MM
-Seconds: %SS
-Milliseconds: %LL
-Microseconds: %UU
-
-Hours: %h
-Minutes: %m
-Seconds: %s
-Milliseconds: %l
-Microseconds: %u
-
-Total minutes: %M
-Total seconds: %S
-Total milliseconds: %L
-Total microseconds: %U"
-  test::printVars format
-  test::func string::microsecondsToHuman ${ms} "\"\${format}\""
-  test::func string::microsecondsToHuman ${ms}
-  test::func _OPTION_FORMAT='%U' string::microsecondsToHuman ${ms}
-}
-
-function test_string::wrapText() {
-  test::title "✅ Testing string::wrapText"
+function test_string::wrapWords() {
+  test::title "✅ Testing string::wrapWords"
 
   test::markdown "Wrapping text at column 30 with no padding"
-  test::func string::wrapText "\"\${MULTI_LINES_TEXT}\"" 30
+  test::func string::wrapWords "\"\${MULTI_LINES_TEXT}\"" 30
 
   test::markdown "Wrapping text at column 50 with padding of 4 on new lines"
-  test::func string::wrapText "\"\${MULTI_LINES_TEXT}\"" 50 '    '
+  test::func string::wrapWords "\"\${MULTI_LINES_TEXT}\"" 50 '    '
 
   test::markdown "Wrapping text at column 20 with padding of 3 on all lines"
-  test::func string::wrapText "\"\${MULTI_LINES_TEXT}\"" 20 '   ' 17
+  test::func string::wrapWords "\"\${MULTI_LINES_TEXT}\"" 20 '   ' 17
 
   test::markdown "Wrapping words, shortcut because the message is a short single line"
-  test::func string::wrapText 'A message.' 80
+  test::func string::wrapWords 'A message.' 80
 
   test::markdown "Wrapping words, no shortcut!"
-  test::func string::wrapText 'A message.' 80 '' 5
+  test::func string::wrapWords 'A message.' 80 '' 5
 
   test::markdown "Wrapping words"
-  test::func string::wrapText 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
+  test::func string::wrapWords 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
 }
 
 function test_string::wrapCharacters() {

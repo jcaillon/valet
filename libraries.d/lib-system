@@ -5,7 +5,7 @@
 # shellcheck source=lib-fs
 source fs
 
-# ## system::os
+# ## system::getOs
 #
 # Returns the name of the current OS.
 #
@@ -14,10 +14,10 @@ source fs
 # - `RETURNED_VALUE`: the name of the current OS: "darwin", "linux" or "windows".
 #
 # ```bash
-# system::os
+# system::getOs
 # local osName="${RETURNED_VALUE}"
 # ```
-function system::os() {
+function system::getOs() {
   local osName
   case "${OSTYPE:-}" in
     darwin*) osName="darwin";;
@@ -28,7 +28,7 @@ function system::os() {
   RETURNED_VALUE="${osName}"
 }
 
-# ## system::env
+# ## system::getEnvVars
 #
 # Get the list of all the environment variables.
 # In pure bash, no need for env or printenv.
@@ -38,155 +38,18 @@ function system::os() {
 # - `RETURNED_ARRAY`: An array with the list of all the environment variables.
 #
 # ```bash
-# system::env
+# system::getEnvVars
 # for var in "${RETURNED_ARRAY[@]}"; do
 #   printf '%s=%s\n' "${var}" "${!var}"
 # done
 # ```
 #
 # > This is faster than using mapfile on <(compgen -v).
-function system::env() {
+function system::getEnvVars() {
   RETURNED_ARRAY=()
   for i in $(compgen -v); do
     RETURNED_ARRAY+=("${i}")
   done
-}
-
-# ## system::date
-#
-# Get the current date in the given format.
-#
-# - $1: format _as string_:
-#       (optional) the format of the date to return
-#       (defaults to %(%F_%Hh%Mm%Ss)T).
-#
-# Returns:
-#
-# - `RETURNED_VALUE`: the current date in the given format.
-#
-# ```bash
-# system::date
-# local date="${RETURNED_VALUE}"
-# ```
-#
-# > This function avoid to call $(date) in a subshell (date is a an external executable).
-function system::date() {
-  local format="${1:-"%(%F_%Hh%Mm%Ss)T"}"
-  # shellcheck disable=SC2059
-  printf -v RETURNED_VALUE "${format}" "${EPOCHSECONDS}"
-}
-
-# ## system::getUndeclaredVariables
-#
-# This function returns the list of undeclared variables for the given names.
-#
-# - $@: **variable names** _as string_:
-#       the list of variable names to check.
-#
-# Returns:
-#
-# - $?
-#   - 0 if there are variable undeclared
-#   - 1 otherwise.
-# - `RETURNED_ARRAY`: the list of undeclared variables.
-#
-# ```bash
-# if system::getUndeclaredVariables "var1" "var2"; then
-#   printf 'The following variables are not declared: %s' "${RETURNED_ARRAY[*]}"
-# fi
-# ```
-function system::getUndeclaredVariables() {
-  RETURNED_ARRAY=()
-  local var
-  for var in "$@"; do
-    if [[ ! -v "${var}" ]]; then
-      RETURNED_ARRAY+=("${var}")
-    fi
-  done
-  if [[ ${#RETURNED_ARRAY[@]} -gt 0 ]]; then
-    return 0
-  fi
-  return 1
-}
-
-# ## system::getNotExistingCommands
-#
-# This function returns the list of not existing commands for the given names.
-#
-# - $@: **command names** _as string_:
-#       the list of command names to check.
-#
-# Returns:
-#
-# - $?
-#   - 0 if there are not existing commands
-#   - 1 otherwise.
-# - `RETURNED_ARRAY`: the list of not existing commands.
-#
-# ```bash
-# if system::getNotExistingCommands "command1" "command2"; then
-#   printf 'The following commands do not exist: %s' "${RETURNED_ARRAY[*]}"
-# fi
-# ```
-function system::getNotExistingCommands() {
-  RETURNED_ARRAY=()
-  local cmd
-  for cmd in "$@"; do
-    if ! command -v "${cmd}" &>/dev/null; then
-      RETURNED_ARRAY+=("${cmd}")
-    fi
-  done
-  if [[ ${#RETURNED_ARRAY[@]} -gt 0 ]]; then
-    return 0
-  fi
-  return 1
-}
-
-# ## system::commandExists
-#
-# Check if the given command exists.
-#
-# - $1: **command name** _as string_:
-#       the command name to check.
-#
-# Returns:
-#
-# - $?
-#   - 0 if the command exists
-#   - 1 otherwise.
-#
-# ```bash
-# if system::commandExists "command1"; then
-#   printf 'The command exists.'
-# fi
-# ```
-function system::commandExists() {
-  if command -v "${1:-}" &>/dev/null; then
-    return 0
-  fi
-  return 1
-}
-
-# ## system::isRoot
-#
-# Check if the script is running as root.
-#
-# Returns:
-#
-# - $?
-#   - 0 if the script is running as root
-#   - 1 otherwise.
-#
-# ```bash
-# if system::isRoot; then
-#   printf 'The script is running as root.'
-# fi
-# ```
-function system::isRoot() {
-  if [[ ${EUID:-${UID}} -eq 0 ]]; then
-    return 0
-  fi
-  return 1
 }
 
 # ## system::addToPath

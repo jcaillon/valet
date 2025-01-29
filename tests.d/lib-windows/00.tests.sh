@@ -4,6 +4,7 @@
 source windows
 
 function main() {
+  USERNAME="user"
   test_windows::convertPathFromUnix
   test_windows::convertPathToUnix
   test_windows::setEnvVar
@@ -63,7 +64,10 @@ function test_windows::createLink() {
 }
 
 function powershell() {
-  echo "🙈 mocking powershell: $*";
+  local text="🙈 mocking powershell: $*"
+  text="${text//"-FilePath "*"-Encoding utf8;"/"-FilePath 'tmp' -Encoding utf8;"}"
+  text="${text//"\"-File\","*") -Wait"/"\"-File\",'tmp') -Wait"}"
+  echo "${text}";
 }
 
 main

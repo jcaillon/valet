@@ -27,6 +27,8 @@ source version
 source exe
 # shellcheck source=../libraries.d/lib-fs
 source fs
+# shellcheck source=../libraries.d/lib-regex
+source regex
 
 #===============================================================
 # >>> self release valet
@@ -79,7 +81,7 @@ function selfRelease() {
 
   # get the latest release
   local latestReleaseVersion
-  curl::toVar true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
+  curl::request true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
   lastReleaseJson="${RETURNED_VALUE}"
   if [[ ${lastReleaseJson} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
     latestReleaseVersion="v${BASH_REMATCH[2]}"
@@ -245,7 +247,7 @@ function selfRelease::createRelease() {
   local uploadUrl
   local createdReleaseJson
   if [[ "${dryRun:-}" != "true" ]]; then
-    curl::toVar true '201,422' -X POST \
+    curl::request true '201,422' -X POST \
       -H "Authorization: token ${githubReleaseToken:-}" \
       -H "Accept: application/vnd.github.v3+json" \
       -H "Content-type: application/json; charset=utf-8" \
@@ -286,7 +288,7 @@ function selfRelease::uploadArtifact() {
   # upload the artifact
   if [[ "${dryRun:-}" != "true" && -n "${uploadUrl}" ]]; then
     log::info "Uploading the artifact ⌜${artifactPath}⌝ to ⌜${uploadUrl}⌝."
-    curl::toVar true '' -X POST \
+    curl::request true '' -X POST \
       -H "Authorization: token ${githubReleaseToken:-}" \
       -H "Content-Type: application/tar+gzip" \
       --data-binary "@${artifactPath}" \
@@ -400,7 +402,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
   local key
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     local functionName="${key}"
-    string::regexGetFirst "${functionName}" '([[:alnum:]]+)::'
+    regex::getFirstGroup "${functionName}" '([[:alnum:]]+)::'
     local packageName="${RETURNED_VALUE}"
     if [[ -z "${packageName}" ]]; then
       # case for "source" function
