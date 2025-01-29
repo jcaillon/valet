@@ -355,11 +355,11 @@ This should be called from a command function for which you want to check the pa
       (optional) Can be set using the variable `_OPTION_PARSING_ERRORS`.
       A string containing the parsing errors.
       An empty string means no parsing errors.
-      (defaults to the value of the 'parsingErrors' variable or empty)
+      (defaults to the value of the 'commandArgumentsErrors' variable or empty)
 
 ```bash
 command::checkParsedResults
-command::checkParsedResults "${help:-false}" "${parsingErrors:-}"
+command::checkParsedResults "${help:-false}" "${commandArgumentsErrors:-}"
 ```
 
 

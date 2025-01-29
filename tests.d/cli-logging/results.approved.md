@@ -41,9 +41,9 @@ DEBUG    Function name found ⌜selfMock1⌝.
 DEBUG    Loaded file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh⌝.
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
-local parsingErrors help action
+local commandArgumentsErrors help action
 help=""
-parsingErrors=""
+commandArgumentsErrors=""
 action="logging-level"
 
 TRACE    This is an error trace message which is always displayed.
@@ -70,9 +70,9 @@ DEBUG    Function name found ⌜selfMock1⌝.
 DEBUG    Loaded file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh⌝.
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 DEBUG    Parsed arguments:
-local parsingErrors help action
+local commandArgumentsErrors help action
 help=""
-parsingErrors=""
+commandArgumentsErrors=""
 action="logging-level"
 
 TRACE    This is an error trace message which is always displayed.

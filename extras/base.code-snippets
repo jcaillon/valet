@@ -142,7 +142,7 @@
 			"##VALET_COMMAND",
 			"function $2() {",
 			"  command::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
-			"  command::checkParsedResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  command::checkParsedResults \"${help:-}\" \"${commandArgumentsErrors:-}\"",
 			"  $0",
 			"}"
 		]
@@ -183,7 +183,7 @@
 			": \"---",
 			"function $2() {",
 			"  command::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
-			"  command::checkParsedResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  command::checkParsedResults \"${help:-}\" \"${commandArgumentsErrors:-}\"",
 			"  $0",
 			"}"
 		]

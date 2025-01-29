@@ -617,6 +617,7 @@ function log::createPrintFunction() {
   }'
 
   # log::printRaw function
+  # shellcheck disable=SC2089
   GLOBAL_LOG_PRINT_FUNCTION+='
   function log::printRaw() {
     local toPrint="${1}"
@@ -1534,7 +1535,7 @@ function core::sourceUserCommands() {
 
     # shellcheck disable=SC1091
     unset GLOBAL_CMD_INCLUDED
-    # shellcheck source=../commands.d/self-build.sh
+    # shellcheck source=/dev/null
     source "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-build.sh"
     selfBuild --silent
 
@@ -1753,7 +1754,7 @@ function command::parseArguments() {
 #
 # This should be called from a command function for which you want to check the parsing results.
 #
-# It uses the variables `help` and `parsingErrors` to determine if the help should be displayed
+# It uses the variables `help` and `commandArgumentsErrors` to determine if the help should be displayed
 # and if there are parsing errors.
 #
 # ```bash
@@ -1764,8 +1765,8 @@ function command::checkParsedResults() {
     main::printHelp function "${FUNCNAME[1]?"This function must be called from a command function."}"
     exit 0
   fi
-  if [[ -n "${parsingErrors:-}" ]]; then
-    core::fail "${parsingErrors}"
+  if [[ -n "${commandArgumentsErrors:-}" ]]; then
+    core::fail "${commandArgumentsErrors}"
   fi
 }
 
@@ -1792,11 +1793,13 @@ esac
 # Export terminal size on window resize if we are in interactive mode.
 if [[ -t 2 ]]; then
   tui::getTerminalSize
+  # shellcheck disable=SC2034
   GLOBAL_SCREEN_REDRAW_REQUIRED=false
   # shellcheck disable=SC2090
   trap 'tui::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::createPrintFunction; eval "${GLOBAL_LOG_PRINT_FUNCTION}"' SIGWINCH
 else
   GLOBAL_COLUMNS="${VALET_DEFAULT_COLUMNS:-120}"
+  # shellcheck disable=SC2034
   GLOBAL_LINES="${VALET_DEFAULT_LINES:-30}"
 fi
 
@@ -1834,7 +1837,8 @@ fi
 
 # Include main if not already included
 if [[ -z "${GLOBAL_MAIN_INCLUDED:-}" ]]; then
-  # shellcheck source=main
+  # do not specify shellcheck source to avoid circular dependency!
+  # shellcheck source=/dev/null
   source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
 fi
 

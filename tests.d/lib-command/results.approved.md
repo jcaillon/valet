@@ -11,14 +11,14 @@ Missing argument:
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝.
+commandArgumentsErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝.
 Use ⌜valet self mock2 --help⌝ to get help.
 
 Usage:
@@ -34,12 +34,12 @@ ok
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors=""
+commandArgumentsErrors=""
 option1="true"
 thisIsOption2="optionValue2"
 firstArg="arg1"
@@ -56,12 +56,12 @@ missing argument
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
+commandArgumentsErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
 Use ⌜valet self mock2 --help⌝ to get help.
 
 Usage:
@@ -86,13 +86,13 @@ INFO     Fuzzy matching the option ⌜--what⌝ to ⌜--with-default⌝.
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 flag3="${VALET_FLAG3:-}"
 help=""
-parsingErrors="Unknown option ⌜--unknown⌝, valid options are:
+commandArgumentsErrors="Unknown option ⌜--unknown⌝, valid options are:
 -o --option1
 -2 --this-is-option2
 -3 --flag3
@@ -116,13 +116,13 @@ ok with the option at the end
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors=""
+commandArgumentsErrors=""
 firstArg="arg"
 option1="true"
 more=(
@@ -144,13 +144,13 @@ INFO     Fuzzy matching the option ⌜--this⌝ to ⌜--this-is-option2⌝.
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
+commandArgumentsErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
 Use ⌜valet self mock2 --help⌝ to get help.
 
 Usage:
@@ -168,13 +168,13 @@ ok, --option1 is interpreted as the value for --this-is-option2
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors=""
+commandArgumentsErrors=""
 thisIsOption2="--option1"
 firstArg="arg"
 more=(
@@ -199,14 +199,14 @@ ok with -- to separate options from args
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors=""
+commandArgumentsErrors=""
 firstArg="--arg1--"
 more=(
 "--arg2--"
@@ -220,13 +220,13 @@ missing a value for the option 2
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors="Missing value for option ⌜thisIsOption2⌝.
+commandArgumentsErrors="Missing value for option ⌜thisIsOption2⌝.
 Use ⌜valet self mock2 --help⌝ to get help."
 firstArg="arg1"
 more=(
@@ -241,14 +241,14 @@ ambiguous fuzzy match
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors="Found multiple matches for the option ⌜--th⌝, please be more specific:
+commandArgumentsErrors="Found multiple matches for the option ⌜--th⌝, please be more specific:
 CHI-CDECHI-CDECHItCDECHIhCDEis-is-option2
 CHI-CDECHI-CDEwiCHItCDECHIhCDE-default
 
@@ -266,12 +266,12 @@ ok single letter options grouped together
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors=""
+commandArgumentsErrors=""
 option1="true"
 flag3="true"
 firstArg="allo1"
@@ -289,10 +289,10 @@ ok single letter options, consume argument as option values
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 help=""
-parsingErrors=""
+commandArgumentsErrors=""
 option1="true"
 thisIsOption2="allo1"
 withDefault="allo2"
@@ -310,12 +310,12 @@ ko, single letter options, invalid one
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-parsingErrors="Unknown option letter ⌜a⌝ in group ⌜-3ao⌝. Valid single letter options are: ⌜o⌝, ⌜2⌝, ⌜3⌝, ⌜4⌝, ⌜h⌝.
+commandArgumentsErrors="Unknown option letter ⌜a⌝ in group ⌜-3ao⌝. Valid single letter options are: ⌜o⌝, ⌜2⌝, ⌜3⌝, ⌜4⌝, ⌜h⌝.
 Use ⌜valet self mock2 --help⌝ to get help."
 flag3="true"
 option1="true"
@@ -332,13 +332,13 @@ ko, missing a value for the option 4
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 flag3="${VALET_FLAG3:-}"
 help=""
-parsingErrors="Missing value for option ⌜withDefault⌝.
+commandArgumentsErrors="Missing value for option ⌜withDefault⌝.
 Use ⌜valet self mock2 --help⌝ to get help."
 firstArg="arg1"
 more=(
@@ -353,13 +353,13 @@ ko, missing multiple values in a group
 Returned variables:
 
 ```text
-RETURNED_VALUE='local parsingErrors option1 thisIsOption2 flag3 withDefault help firstArg
+RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 flag3="${VALET_FLAG3:-}"
 help=""
-parsingErrors="Missing value for option ⌜withDefault⌝.
+commandArgumentsErrors="Missing value for option ⌜withDefault⌝.
 Missing value for option ⌜withDefault⌝.
 Missing value for option ⌜withDefault⌝.
 Missing value for option ⌜withDefault⌝.

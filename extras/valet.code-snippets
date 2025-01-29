@@ -194,7 +194,7 @@
   "prefix": "command::checkParsedResults#withdoc",
   "description": "A convenience function to check the parsing results and fails with an error message if there are parsing errors...",
   "scope": "",
-  "body": [ "# ## command::checkParsedResults\n# \n# A convenience function to check the parsing results and fails with an error message if there are\n# parsing errors.\n# Will also display the help if the help option is true.\n# \n# This should be called from a command function for which you want to check the parsing results.\n# \n# - \\$1: help _as bool_:\n#       (optional) Can be set using the variable `_OPTION_HELP`.\n#       True to show the help for the function and then exit.\n#       (defaults to the value of the 'help' variable or false)\n# - \\$2: parsing errors _as string_:\n#       (optional) Can be set using the variable `_OPTION_PARSING_ERRORS`.\n#       A string containing the parsing errors.\n#       An empty string means no parsing errors.\n#       (defaults to the value of the 'parsingErrors' variable or empty)\n# \n# ```bash\n# command::checkParsedResults\n# command::checkParsedResults \"\\${help:-false}\" \"\\${parsingErrors:-}\"\n# ```\n# \ncommand::checkParsedResults \"${1:help}\" \"${2:parsing errors}\"$0" ]
+  "body": [ "# ## command::checkParsedResults\n# \n# A convenience function to check the parsing results and fails with an error message if there are\n# parsing errors.\n# Will also display the help if the help option is true.\n# \n# This should be called from a command function for which you want to check the parsing results.\n# \n# - \\$1: help _as bool_:\n#       (optional) Can be set using the variable `_OPTION_HELP`.\n#       True to show the help for the function and then exit.\n#       (defaults to the value of the 'help' variable or false)\n# - \\$2: parsing errors _as string_:\n#       (optional) Can be set using the variable `_OPTION_PARSING_ERRORS`.\n#       A string containing the parsing errors.\n#       An empty string means no parsing errors.\n#       (defaults to the value of the 'commandArgumentsErrors' variable or empty)\n# \n# ```bash\n# command::checkParsedResults\n# command::checkParsedResults \"\\${help:-false}\" \"\\${commandArgumentsErrors:-}\"\n# ```\n# \ncommand::checkParsedResults \"${1:help}\" \"${2:parsing errors}\"$0" ]
 },
 
 "command::parseArguments": {
@@ -2327,7 +2327,7 @@
 			"##VALET_COMMAND",
 			"function $2() {",
 			"  command::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
-			"  command::checkParsedResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  command::checkParsedResults \"${help:-}\" \"${commandArgumentsErrors:-}\"",
 			"  $0",
 			"}"
 		]
@@ -2368,7 +2368,7 @@
 			": \"---",
 			"function $2() {",
 			"  command::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
-			"  command::checkParsedResults \"${help:-}\" \"${parsingErrors:-}\"",
+			"  command::checkParsedResults \"${help:-}\" \"${commandArgumentsErrors:-}\"",
 			"  $0",
 			"}"
 		]

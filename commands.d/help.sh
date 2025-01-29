@@ -46,7 +46,7 @@ examples:
 # e.g. showCommandHelp "cmd1 subcmd2"
 function showCommandHelp() {
   local -a commands
-  local parsingErrors help columns noColors help
+  local commandArgumentsErrors help columns noColors help
   command::parseFunctionArguments "${FUNCNAME[0]:-}" "$@"
   eval "${RETURNED_VALUE}"
 

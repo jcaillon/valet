@@ -8,4 +8,3 @@ enable=avoid-nullary-conditions
 enable=require-double-brackets
 # Allows or disallows shellcheck to include the files pointed-to by the source or . statements while checking.
 external-sources=true
-# disable=SC1091

@@ -100,7 +100,7 @@ function helloWorld() {
 
 - `command::parseArguments "$@"` is a core function of Valet which parses the input argument (i.e. `$@`) and returns a string in the global variable `RETURNED_VALUE` which can be evaluated to set local variables corresponding to arguments and options. See the function help in the [core library documentation page][core-library].
 - `eval "${RETURNED_VALUE}"` evaluates the output string of the parsing function which sets local variables.
-- `command::checkParsedResults` will check if the local variable `help` is true, which corresponds to the option `--help` passed to the function, in which case it will display the function help and stop its execution. It will also check if the local variable `parsingErrors` is not empty, which indicates that the parsing function encountered input errors: the function execution is also stopped with parsing errors shown to the user.
+- `command::checkParsedResults` will check if the local variable `help` is true, which corresponds to the option `--help` passed to the function, in which case it will display the function help and stop its execution. It will also check if the local variable `commandArgumentsErrors` is not empty, which indicates that the parsing function encountered input errors: the function execution is also stopped with parsing errors shown to the user.
 
 After these two mandatory lines, you can implement your function using local variables defined for you depending on the user inputs. You are guaranteed that the inputs are valid.
 
@@ -156,10 +156,10 @@ With the command example above, assuming that the user input is `valet example -
 ```bash
 local myoptions="opt1"
 localmyArgument="arg1"
-local parsingErrors="Unknown option '--thing'"
+local commandArgumentsErrors="Unknown option '--thing'"
 ```
 
-The `parsingErrors` variable contains the parser error: here we passed an option that is unknown for this command. Calling `command::checkParsedResults` will print that parsing error message to the user and exit the program.
+The `commandArgumentsErrors` variable contains the parser error: here we passed an option that is unknown for this command. Calling `command::checkParsedResults` will print that parsing error message to the user and exit the program.
 
 #### Access Valet library functions
 

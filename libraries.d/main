@@ -17,6 +17,7 @@ fi
 # >>> Event handling
 #===============================================================
 
+# This function is called when a command or pipeline returns a non-zero exit status.
 function main::onErrorInternal() {
   if [[ ${GLOBAL_ERROR_DISPLAYED:-0} == "1" ]]; then
     return 0
@@ -48,6 +49,7 @@ function main::onExitInternal() {
   fi
 }
 
+# This function is called when the program is interrupted by the user (CTRL+C).
 function main::onInterruptInternal() {
   if ! command -v tui::restoreTerminalOptions &>/dev/null; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
@@ -71,6 +73,7 @@ function main::onInterruptInternal() {
   exit 1
 }
 
+# This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
 function main::onTerminateInternal() {
   log::print "ERROR" "${VALET_CONFIG_ICON_KILLED:-$'\uf05e'}" "KILLED" "Program killed."
   # check if the function exists
@@ -103,6 +106,7 @@ function main::unregisterTraps() {
 
 main::registerTraps
 
+# This functions is called before the program exits (in all cases, error or not).
 function main::onCleanUpInternal() {
   fs::cleanTempFiles
 
@@ -618,8 +622,8 @@ function main::runMenuWithSubCommands() {
     return 0
   fi
 
-  if [[ -n "${parsingErrors:-}" ]]; then
-    core::fail "${parsingErrors}"
+  if [[ -n "${commandArgumentsErrors:-}" ]]; then
+    core::fail "${commandArgumentsErrors}"
   fi
 
   # filter the commands to only keep the sub commands of the function
@@ -962,7 +966,7 @@ function main::getMaxPossibleCommandLevel() {
 #     arg1=\"\"
 #     option1=\"\"
 #     ..."
-# - It will also set the variable parsingErrors if there are any errors.
+# - It will also set the variable commandArgumentsErrors if there are any errors.
 # - Variable name for an option is taken from the first --long version of the option.
 # - It will set the variable as an array if the (last) argument name ends with '...'
 function command::parseFunctionArguments() {
@@ -1154,7 +1158,7 @@ function command::parseFunctionArguments() {
 
   # define all the possible local variables for options and arguments
   local option argumentIndex nbScalarArguments
-  outputString="local parsingErrors"
+  outputString="local commandArgumentsErrors"
   for option in "${optionsName[@]}"; do
     outputString+=" ${option}"
   done
@@ -1196,7 +1200,7 @@ function command::parseFunctionArguments() {
 
   # output the parsing errors
   local -i outputErrorIndex
-  outputString+="parsingErrors=\""
+  outputString+="commandArgumentsErrors=\""
   for outputErrorIndex in "${!outputErrors[@]}"; do
     if [[ outputErrorIndex -gt 0 ]]; then
       outputString+=$'\n'
