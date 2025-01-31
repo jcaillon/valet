@@ -506,8 +506,8 @@ function selfExtend::updateExtensions() {
 # Update a tarball extension.
 #
 # Returns:
-# - `$?`:0 if the repository was checked without errors, 1 otherwise.
-# - `RETURNED_VALUE`: true if the repository was updated, false otherwise.
+# - $?:0 if the repository was checked without errors, 1 otherwise.
+# - ${RETURNED_VALUE}: true if the repository was updated, false otherwise.
 function selfExtend_updateTarBall() {
   local extensionDirectory="${1}"
 
@@ -555,8 +555,8 @@ function selfExtend_updateTarBall() {
 # Update a git repository.
 #
 # Returns:
-# - `$?`:0 if the repository was checked without errors, 1 otherwise.
-# - `RETURNED_VALUE`: true if the repository was updated, false otherwise.
+# - $?:0 if the repository was checked without errors, 1 otherwise.
+# - ${RETURNED_VALUE}: true if the repository was updated, false otherwise.
 function selfExtend_updateGitRepository() {
   local repoPath="${1}"
 

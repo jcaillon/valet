@@ -18,7 +18,7 @@
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the extracted field
+# - ${RETURNED_VALUE}: the extracted field
 #
 # ```bash
 # string::cutField "field1 field2 field3" 1 " " && local field="${RETURNED_VALUE}"
@@ -58,7 +58,7 @@ function string::cutField() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The SNAKE_CASE string.
+# - ${RETURNED_VALUE}: The SNAKE_CASE string.
 #
 # ```bash
 # string::convertCamelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
@@ -93,7 +93,7 @@ function string::convertCamelCaseToSnakeCase() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The SNAKE_CASE string.
+# - ${RETURNED_VALUE}: The SNAKE_CASE string.
 #
 # ```bash
 # string::convertKebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
@@ -128,7 +128,7 @@ function string::convertKebabCaseToSnakeCase() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The camelCase string.
+# - ${RETURNED_VALUE}: The camelCase string.
 #
 # ```bash
 # string::convertKebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
@@ -161,7 +161,7 @@ function string::convertKebabCaseToCamelCase() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The trimmed string.
+# - ${RETURNED_VALUE}: The trimmed string.
 #
 # ```bash
 # string::trimAll "   example   string    " && local trimmedString="${RETURNED_VALUE}"
@@ -187,7 +187,7 @@ function string::trimAll() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The trimmed string.
+# - ${RETURNED_VALUE}: The trimmed string.
 #
 # ```bash
 # string::trim "   example string    " && local trimmedString="${RETURNED_VALUE}"
@@ -211,7 +211,7 @@ function string::trim() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the index of the substring in the string or -1 if not found.
+# - ${RETURNED_VALUE}: the index of the substring in the string or -1 if not found.
 #
 # ```bash
 # string::indexOf "This is a long text" "long" && local index="${RETURNED_VALUE}"
@@ -279,7 +279,7 @@ function string::indexOf() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the extracted text
+# - ${RETURNED_VALUE}: the extracted text
 #
 # ```bash
 # string::extractBetween "This is a long text" "is a " " text"
@@ -331,7 +331,7 @@ function string::extractBetween() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the number of occurrences
+# - ${RETURNED_VALUE}: the number of occurrences
 #
 # ```bash
 # string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
@@ -355,7 +355,7 @@ function string::count() {
 #
 # Returns:
 #
-# - `RETURNED_ARRAY`: the array of strings
+# - ${RETURNED_ARRAY}: the array of strings
 #
 # ```bash
 # string::split "name,first name,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
@@ -380,7 +380,7 @@ function string::split() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The extracted string.
+# - ${RETURNED_VALUE}: The extracted string.
 #
 # ```bash
 # string::head "line1\nline2\nline3" 2

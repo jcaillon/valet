@@ -86,7 +86,7 @@ function selfConfig_writeConfigFile() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the content of the valet config file.
+# - ${RETURNED_VALUE}: the content of the valet config file.
 function selfConfig::getFileContent() {
   local exportCurrentValues="${1}"
 

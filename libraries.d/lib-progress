@@ -24,7 +24,7 @@ source tui
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the progress bar string
+# - ${RETURNED_VALUE}: the progress bar string
 #
 # ```bash
 # progress_getProgressBarString 50 20

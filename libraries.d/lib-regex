@@ -13,7 +13,7 @@
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the first capture group in the matched string.
+# - ${RETURNED_VALUE}: the first capture group in the matched string.
 #                     Empty if no match.
 #
 # ```bash

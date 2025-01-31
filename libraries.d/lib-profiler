@@ -230,7 +230,7 @@ function profilerBashCleanFile() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The seconds (float number).
+# - ${RETURNED_VALUE}: The seconds (float number).
 #
 # ```bash
 # profilerMicrosecondsToSeconds 1234567

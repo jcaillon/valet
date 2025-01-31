@@ -282,10 +282,10 @@ function tui::clearBox() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the top position of the box (1 based)
-# - `RETURNED_VALUE2`: the left position of the box (1 based)
-# - `RETURNED_VALUE3`: the width of the box
-# - `RETURNED_VALUE4`: the height of the box
+# - ${RETURNED_VALUE}: the top position of the box (1 based)
+# - ${RETURNED_VALUE2}: the left position of the box (1 based)
+# - ${RETURNED_VALUE3}: the width of the box
+# - ${RETURNED_VALUE4}: the height of the box
 #
 # ```bash
 # tui::getBestAutocompleteBox 1 1 10 5
@@ -395,7 +395,7 @@ function tui::testWaitForChar() {
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if a char was retrieved
 #   - 1 otherwise
 # - `LAST_KEY_PRESSED`: the last char (key) retrieved.
@@ -507,7 +507,7 @@ function tui::testWaitForKeyPress() {
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if a key was pressed
 #   - 1 otherwise
 # - `LAST_KEY_PRESSED`: the key pressed.

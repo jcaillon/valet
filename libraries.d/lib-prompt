@@ -44,94 +44,77 @@ source fs
 # - $2: **start column** _as int_:
 #       The column at which the autocompleted text starts (this is used to
 #       compute how to display the box).
-# - $3: stop column _as int_:
-#       (optional) Can be set using the variable `_OPTION_STOP_COLUMN`.
-#       The column at which to stop showing the autocompleted text.
+# - ${_OPTION_STOP_COLUMN} _as int_:
+#       (optional) The column at which to stop showing the autocompleted text.
 #       Longer texts get shifted to display the end of the user input.
 #       (defaults to the end of the screen)
-# - $4: items array name _as string_:
-#       (optional) Can be set using the variable `_OPTION_ITEMS_ARRAY_NAME`.
-#       The items to display (name of a global array which contains the items).
+# - ${_OPTION_ITEMS_ARRAY_NAME} _as string_:
+#       (optional) The items to display (name of a global array which contains the items).
 #       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.
 #       (defaults to empty)
-# - $5: initial text _as string_:
-#       (optional) Can be set using the variable `_OPTION_STRING`.
-#       The initial string, which corresponds to the text already entered
+# - ${_OPTION_STRING} _as string_:
+#       (optional) The initial string, which corresponds to the text already entered
 #       by the user at the moment the autocompletion box shows up.
 #       Allows to pre-filter the autocompletion.
 #       (defaults to empty)
-# - $6: items box max lines _as int_:
-#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_MAX_HEIGHT`.
-#       The maximum number of lines/rows to use for the autocompletion box.
+# - ${_OPTION_ITEMS_BOX_MAX_HEIGHT} _as int_:
+#       (optional) The maximum number of lines/rows to use for the autocompletion box.
 #       If the number of items is greater than this value, the box will be scrollable.
 #       (defaults to a maximized auto-computed value depending on the items and screen size)
-# - $7: force items box below _as bool_:
-#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_BELOW`.
-#       If true, the box is forced to be displayed below the input text.
+# - ${_OPTION_ITEMS_BOX_FORCE_BELOW} _as bool_:
+#       (optional) If true, the box is forced to be displayed below the input text.
 #       Otherwise it will depend on the space required and space available below/above.
 #       (defaults to false)
-# - $8: show prompt _as bool_:
-#       (optional) Can be set using the variable `_OPTION_ENABLE_PROMPT`.
-#       If true, the prompt is displayed. If false, the prompt is hidden.
+# - ${_OPTION_ENABLE_PROMPT} _as bool_:
+#       (optional) If true, the prompt is displayed. If false, the prompt is hidden.
 #       Useful to turn this into a simple multiple choice list.
 #       (defaults to true)
-# - $9: force show count _as bool_:
+# - ${_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT} _as bool_:
 #       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT`.
 #       If true, the count of items is always displayed.
 #       If false, the count is only displayed when we can't display all the items at once.
 #       (defaults to false)
-# - $10: show count at top _as bool_:
-#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_SHOW_COUNT_AT_TOP`.
-#       If true, the count of items will be displayed at the top of the box instead of the bottom.
+# - ${_OPTION_ITEMS_BOX_SHOW_COUNT_AT_TOP} _as bool_:
+#       (optional) If true, the count of items will be displayed at the top of the box instead of the bottom.
 #       (defaults to false)
-# - $11: show left symbols _as bool_:
-#       (optional) Can be set using the variable `_OPTION_SHOW_SYMBOL`.
-#       If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
+# - ${_OPTION_SHOW_SYMBOL} _as bool_:
+#       (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
 #       Useful to display the most simple auto-completion when false.
 #       (defaults to true)
-# - $12: filters from n chars _as int_:
-#       (optional) Can be set using the variable `_OPTION_FILTERS_FROM_N_CHARS`.
-#       The minimum number of characters to type before starting to filter the items.
+# - ${_OPTION_FILTERS_FROM_N_CHARS} _as int_:
+#       (optional) The minimum number of characters to type before starting to filter the items.
 #       By default, the list is shown full and the user can start typing to filter.
 #       Put a value superior to 0 to make it behave like a standard autocompletion.
 #       When non-zero, the user can TAB to show the full list.
 #       (defaults to 0)
-# - $13: accept any value _as bool_:
-#       (optional) Can be set using the variable `_OPTION_ACCEPT_ANY_VALUE`.
-#       If true, the left cursors are displayed (> for prompt and the > for selected item).
+# - ${_OPTION_ACCEPT_ANY_VALUE} _as bool_:
+#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
 #       Useful to display the most simple auto-completion when false.
 #       (defaults to true)
-# - $14: placeholder _as string_:
-#       (optional) Can be set using the variable `_OPTION_PLACEHOLDER`.
-#       The placeholder to display when the input is empty.
+# - ${_OPTION_PLACEHOLDER} _as string_:
+#       (optional) The placeholder to display when the input is empty.
 #       (defaults to empty)
-# - $15: max length _as int_:
-#       (optional) Can be set using the variable `_OPTION_STRING_MAX_LENGTH`.
-#       The maximum length of the input string.
+# - ${_OPTION_STRING_MAX_LENGTH} _as int_:
+#       (optional) The maximum length of the input string.
 #       If the user types more characters, they are truncated and an error message is displayed.
 #       (defaults to 99999)
-# - $16: autocomplete whole line _as bool_:
-#       (optional) Can be set using the variable `_OPTION_AUTOCOMPLETE_WHOLE_LINE`.
-#       If true, the whole line is autocompleted (all characters are considered to filter)
+# - ${_OPTION_AUTOCOMPLETE_WHOLE_LINE} _as bool_:
+#       (optional) If true, the whole line is autocompleted (all characters are considered to filter)
 #       the items. If false, only the word characters before the cursor are considered.
 #       (defaults to true)
-# - $17: tab opens items box _as bool_:
-#       (optional) Can be set using the variable `_OPTION_TAB_OPENS_ITEMS_BOX`.
-#       If true, the tab key opens the items box if it is not already open.
+# - ${_OPTION_TAB_OPENS_ITEMS_BOX} _as bool_:
+#       (optional) If true, the tab key opens the items box if it is not already open.
 #       (defaults to true)
-# - $18: items box allow filtering _as bool_:
-#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_ALLOW_FILTERING`.
-#       If true, the items can be filtered by typing characters.
+# - ${_OPTION_ITEMS_BOX_ALLOW_FILTERING} _as bool_:
+#       (optional) If true, the items can be filtered by typing characters.
 #       If false, the items are displayed as is.
 #       (defaults to the value of `_OPTION_ENABLE_PROMPT` or true)
-# - $19: password mode _as bool_:
-#       (optional) Can be set using the variable `_OPTION_PASSWORD_MODE`.
-#       If true, the input is displayed as a series of stars *.
+# - ${_OPTION_PASSWORD_MODE} _as bool_:
+#       (optional) If true, the input is displayed as a series of stars *.
 #       This mode can be activated/deactivated by pressing CTRL+P.
 #       (defaults to false)
-# - $20: callback function on text update _as string_:
-#       (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE`.
-#       The name of a function to call each time the text is updated.
+# - ${_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE} _as string_:
+#       (optional) The name of a function to call each time the text is updated.
 #       Can be used to validate the input and display an error message.
 #       The function is called with no arguments but you can use the global variable `_OPTION_STRING` and
 #       `_OPTION_STRING_INDEX` to access the current text and cursor position.
@@ -141,9 +124,8 @@ source fs
 #       - `RETURNED_VALUE2`: A boolean to indicate if the autocompletion box should be redrawn.
 #
 #       (defaults to empty)
-# - $21: callback function on key pressed _as string_:
-#       (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED`.
-#       The name of a function to call each time a key is pressed.
+# - ${_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED} _as string_:
+#       (optional) The name of a function to call each time a key is pressed.
 #       Can be used to customize the behavior of the prompt.
 #       The function is called with the following arguments:
 #
@@ -152,9 +134,8 @@ source fs
 #
 #       The function must return 0 if the key press was handled, 1 otherwise.
 #       (defaults to empty)
-# - $22: callback function on box closed _as string_:
-#       (optional) Can be set using the variable `_OPTION_CALLBACK_FUNCTION_ON_BOX_CLOSED`.
-#       The name of a function to call when the autocompletion box is closed.
+# - ${_OPTION_CALLBACK_FUNCTION_ON_BOX_CLOSED} _as string_:
+#       (optional) The name of a function to call when the autocompletion box is closed.
 #       Can be used to clean up resources or to update the screen.
 #       The function is called with arguments:
 #
@@ -168,11 +149,11 @@ source fs
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0: The user pressed ENTER to validate the text.
 #   - 1: The user pressed ESC to close the text box.
-# - `RETURNED_VALUE`: The entered value (or empty).
-# - `RETURNED_VALUE2`: The string displayed on the screen between the 2 columns at the
+# - ${RETURNED_VALUE}: The entered value (or empty).
+# - ${RETURNED_VALUE2}: The string displayed on the screen between the 2 columns at the
 #                      moment when the autocompletion was closed.
 #
 # ```bash
@@ -1159,7 +1140,7 @@ function prompt_clearItemsBox() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the truncated string
+# - ${RETURNED_VALUE}: the truncated string
 #
 # ```bash
 # prompt::getItemDisplayedString "This is a long string that will be displayed in the screen." 20
@@ -1504,8 +1485,8 @@ function prompt_getCurrentInitialItemsIndex() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the string to display in the screen
-# - `RETURNED_VALUE2`: the index at which to position the cursor on screen
+# - ${RETURNED_VALUE}: the string to display in the screen
+# - ${RETURNED_VALUE2}: the index at which to position the cursor on screen
 #
 # ```bash
 # prompt_getDisplayedPromptString "This is a long string that will be displayed in the screen." 20 10
@@ -1588,4 +1569,10 @@ function prompt_fuzzyFilterSort() { :; }
 bash::getFunctionDefinitionWithGlobalVars array::fuzzyFilterSort prompt_fuzzyFilterSort _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ORIGINAL_ITEMS
 RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY2/_PROMPT_FILTERED_ITEMS_CORRESPONDENCES}"
 RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY/_PROMPT_FILTERED_ITEMS}"
+RETURNED_VALUE="${RETURNED_VALUE/array::fuzzyFilterSortQuicksort/prompt_fuzzyFilterSortQuicksort}"
+eval "${RETURNED_VALUE}"
+
+bash::getFunctionDefinitionWithGlobalVars array::fuzzyFilterSortQuicksort prompt_fuzzyFilterSortQuicksort
+RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY2/_PROMPT_FILTERED_ITEMS_CORRESPONDENCES}"
+RETURNED_VALUE="${RETURNED_VALUE//array::fuzzyFilterSortQuicksort/prompt_fuzzyFilterSortQuicksort}"
 eval "${RETURNED_VALUE}"

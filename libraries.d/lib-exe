@@ -27,9 +27,9 @@ source fs
 #
 # Returns:
 #
-# - `$?`:The exit code of the executable.
-# - `RETURNED_VALUE`: The file path containing the stdout of the executable.
-# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
+# - $?:The exit code of the executable.
+# - ${RETURNED_VALUE}: The file path containing the stdout of the executable.
+# - ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
 #
 # ```bash
 # exe::invokef5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
@@ -157,9 +157,9 @@ function exe::invokef5() {
 #
 # Returns:
 #
-# - `$?`:The exit code of the executable.
-# - `RETURNED_VALUE`: The content of stdout.
-# - `RETURNED_VALUE2`: The content of stderr.
+# - $?:The exit code of the executable.
+# - ${RETURNED_VALUE}: The content of stdout.
+# - ${RETURNED_VALUE2}: The content of stderr.
 #
 # ```bash
 # exe::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
@@ -197,9 +197,9 @@ function exe::invoke5() {
 #
 # Returns:
 #
-# - `$?`:The exit code of the executable.
-# - `RETURNED_VALUE`: The file path containing the stdout of the executable.
-# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
+# - $?:The exit code of the executable.
+# - ${RETURNED_VALUE}: The file path containing the stdout of the executable.
+# - ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
 #
 # ```bash
 # exe::invokef2 false git status || core::fail "status failed."
@@ -230,9 +230,9 @@ function exe::invokef2() {
 #
 # Returns:
 #
-# - `$?`:The exit code of the executable.
-# - `RETURNED_VALUE`: The content of stdout.
-# - `RETURNED_VALUE2`: The content of stderr.
+# - $?:The exit code of the executable.
+# - ${RETURNED_VALUE}: The content of stdout.
+# - ${RETURNED_VALUE2}: The content of stderr.
 #
 # ```bash
 # exe::invokef2 false git status || core::fail "status failed."
@@ -265,9 +265,9 @@ function exe::invoke2() {
 #
 # Returns:
 #
-# - `$?`:The exit code of the executable.
-# - `RETURNED_VALUE`: The file path containing the stdout of the executable.
-# - `RETURNED_VALUE2`: The file path containing the stderr of the executable.
+# - $?:The exit code of the executable.
+# - ${RETURNED_VALUE}: The file path containing the stdout of the executable.
+# - ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
 #
 # ```bash
 # exe::invokef2piped true "key: val" yq -o json -p yaml -
@@ -305,9 +305,9 @@ function exe::invokef2piped() {
 #
 # Returns:
 #
-# - `$?`:The exit code of the executable.
-# - `RETURNED_VALUE`: The content of stdout.
-# - `RETURNED_VALUE2`: The content of stderr.
+# - $?:The exit code of the executable.
+# - ${RETURNED_VALUE}: The content of stdout.
+# - ${RETURNED_VALUE2}: The content of stderr.
 #
 # ```bash
 # exe::invoke2piped true "key: val" yq -o json -p yaml -
@@ -343,9 +343,9 @@ function exe::invoke2piped() {
 #
 # Returns:
 #
-# - `$?`:The exit code of the executable.
-# - `RETURNED_VALUE`: The content of stdout.
-# - `RETURNED_VALUE2`: The content of stderr.
+# - $?:The exit code of the executable.
+# - ${RETURNED_VALUE}: The content of stdout.
+# - ${RETURNED_VALUE2}: The content of stderr.
 #
 # ```bash
 # exe::invoke git add --all
@@ -372,7 +372,7 @@ function exe::invoke() {
 # - $?
 #   - 0 if the command was successful
 #   - 1 otherwise.
-# - `RETURNED_VALUE`: The captured output.
+# - ${RETURNED_VALUE}: The captured output.
 #
 # ```bash
 # exe::captureOutput declare -f exe::captureOutput

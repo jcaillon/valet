@@ -39,12 +39,12 @@ source fs
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if the http status code is acceptable
 #   - 1 otherwise
-# - `RETURNED_VALUE`: the headers of the response
-# - `RETURNED_VALUE2`: the body of the response or the path to the file where it was saved
-# - `RETURNED_VALUE3`: the http status code
+# - ${RETURNED_VALUE}: the headers of the response
+# - ${RETURNED_VALUE2}: the body of the response or the path to the file where it was saved
+# - ${RETURNED_VALUE3}: the http status code
 #
 # ```bash
 # VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS=true

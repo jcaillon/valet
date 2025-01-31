@@ -25,11 +25,11 @@ source fs
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if the http status code is acceptable
 #   - 1 otherwise
-# - `RETURNED_VALUE`: the content of stderr
-# - `RETURNED_VALUE2`: the http status code
+# - ${RETURNED_VALUE}: the content of stderr
+# - ${RETURNED_VALUE2}: the http status code
 #
 # ```bash
 # curl::download true 200,201 "/filePath" "https://example.com"
@@ -106,12 +106,12 @@ function curl::download() {
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if the http status code is acceptable
 #   - 1 otherwise
-# - `RETURNED_VALUE`: the content of the request
-# - `RETURNED_VALUE2`: the content of stderr
-# - `RETURNED_VALUE3`: the http status code
+# - ${RETURNED_VALUE}: the content of the request
+# - ${RETURNED_VALUE2}: the content of stderr
+# - ${RETURNED_VALUE3}: the http status code
 #
 # ```bash
 # curl::request true 200 https://example.com -X POST -H 'Authorization: token'

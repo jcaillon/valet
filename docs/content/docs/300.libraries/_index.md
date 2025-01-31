@@ -40,7 +40,7 @@ For more details, please check the documentation on each library:
   {{< card link="log" icon="pencil-alt" title="log" subtitle="Logging functions." >}}
   {{< card link="profiler" icon="finger-print" title="profiler" subtitle="Enable and disable the bash profiler." >}}
   {{< card link="progress" icon="dots-horizontal" title="progress" subtitle="Display a progress bar or a spinner." >}}
-  {{< card link="prompt" icon="chevron-right" title="prompt" subtitle="Prompt the user for input." >}}
+  <!-- {{< card link="prompt" icon="chevron-right" title="prompt" subtitle="Prompt the user for input." >}} -->
   {{< card link="regex" icon="tag" title="regex" subtitle="Use regular expressions." >}}
   {{< card link="sfzf" icon="template" title="sfzf" subtitle="Simple fuzzy search interface, similar to fzf." >}}
   {{< card link="string" icon="scissors" title="string" subtitle="Functions for string manipulation." >}}

@@ -184,8 +184,8 @@ function main::printHelp() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the help text
-# - `RETURNED_VALUE2`: the command usage text
+# - ${RETURNED_VALUE}: the help text
+# - ${RETURNED_VALUE2}: the command usage text
 #
 # ```bash
 # main::getHelpText function "this" "false" "${GLOBAL_COLUMNS}"
@@ -854,9 +854,9 @@ function main::getFunctionNameFromCommand() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The function name.
-# - `RETURNED_VALUE2`: The level of the command.
-# - `RETURNED_VALUE3`: The exact command.
+# - ${RETURNED_VALUE}: The function name.
+# - ${RETURNED_VALUE2}: The level of the command.
+# - ${RETURNED_VALUE3}: The exact command.
 #
 # ```bash
 # main::fuzzyMatchCommandToFunctionNameOrFail "self" "build" && printf '%s\n' "${RETURNED_VALUE}"
@@ -1237,8 +1237,8 @@ function command::parseFunctionArguments() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: An error message with the suggested option(s).
-# - `RETURNED_VALUE2`: The single matched option that we can use.
+# - ${RETURNED_VALUE}: An error message with the suggested option(s).
+# - ${RETURNED_VALUE2}: The single matched option that we can use.
 #
 # ```bash
 # main::fuzzyFindOption opt1 option1 option2 option3 && fuzzyOption="${RETURNED_VALUE}"
@@ -1298,7 +1298,7 @@ function main::fuzzyFindOption() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The string to display.
+# - ${RETURNED_VALUE}: The string to display.
 #
 function main::getDisplayableFilteredArray() {
   local pattern="${1}"
@@ -1326,7 +1326,7 @@ function main::getDisplayableFilteredArray() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The message to display to the user.
+# - ${RETURNED_VALUE}: The message to display to the user.
 #
 # ```bash
 # options=("opt1" "option1" "option2" "option3")

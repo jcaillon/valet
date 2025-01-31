@@ -108,7 +108,7 @@ function selfDocument::getFooter() {
 #
 # Returns:
 #
-# - `RETURNED_ASSOCIATIVE_ARRAY` an associative array of all the function names and their documentation.
+# - ${RETURNED_ASSOCIATIVE_ARRAY}: an associative array of all the function names and their documentation.
 #
 # ```bash
 # selfDocument::getAllFunctionsDocumentation
@@ -259,7 +259,8 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
 
   local content="{"$'\n'"// ${pageFooter}"$'\n'
 
-  local key functionName documentation firstSentence body commentedDocumentation
+  local -i tabOrder
+  local key functionName documentation firstSentence body options commentedDocumentation
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     functionName="${key}"
     documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
@@ -271,15 +272,17 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
     firstSentence="${firstSentence//$'\n'/ }"
 
     body="${functionName}"
+    options=""
+    tabOrder=1
 
     local IFS=$'\n'
     for line in ${!documentation}; do
       if [[ "${line}" =~ "- \$"([0-9@])": "([^_]+)" _as "([^_]+)"_:" ]]; then
-        if [[ "${BASH_REMATCH[1]:-}" == "@" ]]; then
-          body+=" \"\${99:${BASH_REMATCH[2]}}\""
-        else
-          body+=" \"\${${BASH_REMATCH[1]}:${BASH_REMATCH[2]}}\""
-        fi
+        body+=" \"\${${tabOrder}:${BASH_REMATCH[2]}}\""
+        tabOrder+=1
+      elif [[ "${line}" =~ "- \${"([[:alpha:]_]+)"} _as "([^_]+)"_:" ]]; then
+        options+="${BASH_REMATCH[1]}=\${${tabOrder}} "
+        tabOrder+=1
       fi
     done
     body+="\$0"
@@ -289,7 +292,7 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   \"prefix\": \"${functionName}\",
   \"description\": \"${firstSentence}...\",
   \"scope\": \"\",
-  \"body\": [ \"${body//\"/\\\"}\" ]
+  \"body\": [ \"${options}${body//\"/\\\"}\" ]
 },"$'\n'
 
     commentedDocumentation=""
@@ -306,7 +309,7 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   \"prefix\": \"${functionName}#withdoc\",
   \"description\": \"${firstSentence}...\",
   \"scope\": \"\",
-  \"body\": [ \"${commentedDocumentation}${body//\"/\\\"}\" ]
+  \"body\": [ \"${commentedDocumentation}${options}${body//\"/\\\"}\" ]
 },"$'\n'
   done
 

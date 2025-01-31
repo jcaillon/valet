@@ -51,8 +51,8 @@ SFZF_RIGHT_PANE_HELP_TEXT="←/→: Scroll | Page up/down: Scroll+"
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The selected item value (or empty).
-# - `RETURNED_VALUE2`: The selected item index (from the original array).
+# - ${RETURNED_VALUE}: The selected item value (or empty).
+# - ${RETURNED_VALUE2}: The selected item index (from the original array).
 #                      Or -1 if the user cancelled the selection
 #
 # ```bash

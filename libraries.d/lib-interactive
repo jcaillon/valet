@@ -20,7 +20,7 @@ source tui
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if the user pressed enter
 #   - 1 otherwise
 #
@@ -41,7 +41,7 @@ function interactive::askForConfirmation() {
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if the user pressed enter
 #   - 1 otherwise
 #
@@ -105,10 +105,10 @@ function interactive::askForConfirmationRaw() {
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if the user answered yes
 #   - 1 otherwise
-# - `RETURNED_VALUE`: true or false.
+# - ${RETURNED_VALUE}: true or false.
 #
 # ```bash
 # if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
@@ -144,10 +144,10 @@ function interactive::promptYesNo() {
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if the user answered yes
 #   - 1 otherwise
-# - `RETURNED_VALUE`: true or false.
+# - ${RETURNED_VALUE}: true or false.
 #
 # ```bash
 # interactive::promptYesNoRaw "Do you want to continue?" && local answer="${RETURNED_VALUE}"

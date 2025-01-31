@@ -23,8 +23,8 @@ source fs
 # - $?
 #   - 0 if the command was successful
 #   - 1 otherwise.
-# - `RETURNED_VALUE`: The content of stdout.
-# - `RETURNED_VALUE2`: The content of stderr.
+# - ${RETURNED_VALUE}: The content of stdout.
+# - ${RETURNED_VALUE2}: The content of stderr.
 #
 # ```bash
 # windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
@@ -138,8 +138,8 @@ function windows::startPs1Batch() {
 # - $?
 #   - 0 if the command was successful
 #   - 1 otherwise.
-# - `RETURNED_VALUE`: The content of stdout.
-# - `RETURNED_VALUE2`: The content of stderr.
+# - ${RETURNED_VALUE}: The content of stdout.
+# - ${RETURNED_VALUE2}: The content of stderr.
 #
 # ```bash
 # windows::startPs1Batch
@@ -269,7 +269,7 @@ function windows::createLink() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The Windows path.
+# - ${RETURNED_VALUE}: The Windows path.
 #
 # ```bash
 # windows::convertPathFromUnix "/path/to/file"
@@ -298,7 +298,7 @@ function windows::convertPathFromUnix() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The unix path.
+# - ${RETURNED_VALUE}: The unix path.
 #
 # ```bash
 # windows::convertPathToUnix "C:\path\to\file"
@@ -325,8 +325,8 @@ function windows::convertPathToUnix() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The Windows path.
-# - `RETURNED_VALUE2`: The Unix path.
+# - ${RETURNED_VALUE}: The Windows path.
+# - ${RETURNED_VALUE2}: The Unix path.
 #
 # ```bash
 # windows::createTempFile
@@ -367,8 +367,8 @@ function windows::createTempFile() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The Windows path.
-# - `RETURNED_VALUE2`: The Unix path.
+# - ${RETURNED_VALUE}: The Windows path.
+# - ${RETURNED_VALUE2}: The Unix path.
 #
 # ```bash
 # windows::createTempDirectory
@@ -446,7 +446,7 @@ function windows::setEnvVar() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the value of the environment variable.
+# - ${RETURNED_VALUE}: the value of the environment variable.
 #
 # ```bash
 # windows::getEnvVar "MY_VAR"

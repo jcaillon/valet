@@ -17,7 +17,7 @@ source string
 #
 # Returns:
 #
-# - `RETURNED_VALUE`:
+# - ${RETURNED_VALUE}:
 #   - 0 if the versions are equal,
 #   - 1 if version1 is greater,
 #   - -1 if version2 is greater
@@ -69,7 +69,7 @@ function version::compare() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the new version string
+# - ${RETURNED_VALUE}: the new version string
 #
 # ```bash
 # version::bump "1.2.3-prerelease+build" "major"

@@ -128,7 +128,7 @@ function array_sortSwapCallBack() {
 #
 # Returns:
 #
-# - `$?`:0 if the first element is greater than the second, 1 otherwise.
+# - $?:0 if the first element is greater than the second, 1 otherwise.
 # shellcheck disable=SC2034
 function array_sortCompareCallBack() {
   local -i first="${1}"
@@ -154,7 +154,7 @@ function array_sortCompareCallBack() {
 #
 # Returns:
 #
-# - `RETURNED_ARRAY`: An array that contains the corresponding indexes of the sorted array in the original array
+# - ${RETURNED_ARRAY}: An array that contains the corresponding indexes of the sorted array in the original array
 #
 # ```bash
 # declare -g myArray=( "a" "b" "c" )
@@ -221,7 +221,7 @@ function array::sortWithCriteria() {
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if the value was added
 #   - 1 if it was already present
 #
@@ -261,7 +261,7 @@ function array::appendIfNotPresent() {
 #
 # Returns:
 #
-# - `$?`: 0 if the value is in the array, 1 otherwise.
+# - $?: 0 if the value is in the array, 1 otherwise.
 #
 # ```bash
 # declare -g myArray=( "a" "b" )

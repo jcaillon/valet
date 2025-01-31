@@ -12,7 +12,7 @@
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the current date in the given format.
+# - ${RETURNED_VALUE}: the current date in the given format.
 #
 # ```bash
 # time::getDate
@@ -52,7 +52,7 @@ function time::getDate() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the human readable format
+# - ${RETURNED_VALUE}: the human readable format
 #
 # ```bash
 # time::convertMicrosecondsToHuman 123456789

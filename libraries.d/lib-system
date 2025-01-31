@@ -11,7 +11,7 @@ source fs
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the name of the current OS: "darwin", "linux" or "windows".
+# - ${RETURNED_VALUE}: the name of the current OS: "darwin", "linux" or "windows".
 #
 # ```bash
 # system::getOs
@@ -35,7 +35,7 @@ function system::getOs() {
 #
 # Returns:
 #
-# - `RETURNED_ARRAY`: An array with the list of all the environment variables.
+# - ${RETURNED_ARRAY}: An array with the list of all the environment variables.
 #
 # ```bash
 # system::getEnvVars

@@ -11,7 +11,7 @@ source exe
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the number of jobs currently running in the background.
+# - ${RETURNED_VALUE}: the number of jobs currently running in the background.
 #
 # ```bash
 # bash::countJobs
@@ -40,7 +40,7 @@ function bash::countJobs() {
 # - $3: max parallel jobs _as integer_:
 #       (optional) Can be set using the variable `_OPTION_MAX_PARALLEL_JOBS`.
 #       The maximum number of parallel jobs to run.
-#       (defaults to 1)
+#       (defaults to 4)
 # - $4: job completed callback _as string_:
 #       (optional) Can be set using the variable `_OPTION_JOB_COMPLETED_CALLBACK`.
 #       The name of the function to call when a job is completed.
@@ -51,7 +51,7 @@ function bash::countJobs() {
 #       - the percentage of jobs completed
 #       If the function returns 1, the script will exit early.
 #       (defaults to "")
-# - $5: timeout between checks _as float_:
+# - ${_OPTION_TIMEOUT_BETWEEN_CHECKS} _as float_:
 #       (optional) Can be set using the variable `_OPTION_TIMEOUT_BETWEEN_CHECKS`.
 #       The time to wait between checks for completed jobs (when no jobs finished
 #       when we last checked).
@@ -59,22 +59,22 @@ function bash::countJobs() {
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0: if all the jobs completed successfully.
 #   - 1: if the job completed callback returned 1.
-# - `RETURNED_ARRAY`: an array containing the exit codes of the jobs.
+# - ${RETURNED_ARRAY}: an array containing the exit codes of the jobs.
 #
 # ```bash
 # declare -a jobNames=("job1" "job2" "job3")
 # declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
-# bash::runInParallel jobNames jobCommands 2
+# _OPTION_MAX_PARALLEL_JOBS=2 bash::runInParallel jobNames jobCommands
 # ```
 function bash::runInParallel() {
   local -n jobNames="${1}"
   local -n jobCommands="${2}"
-  local -i maxParallelJobs="${3:-${_OPTION_MAX_PARALLEL_JOBS:-1}}"
+  local -i maxParallelJobs="${3:-${_OPTION_MAX_PARALLEL_JOBS:-4}}"
   local jobCompletedCallback="${4:-${_OPTION_JOB_COMPLETED_CALLBACK:-}}"
-  local timeoutBetweenChecks="${5:-${_OPTION_TIMEOUT_BETWEEN_CHECKS:-0.2}}"
+  local timeoutBetweenChecks="${_OPTION_TIMEOUT_BETWEEN_CHECKS:-0.2}"
 
   # inject the code to kill the running jobs when the program exits
   bash::injectCodeInFunction cleanUp 'bash::killRunningJobs' true
@@ -190,8 +190,8 @@ function bash::killRunningJobs() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: the modified function.
-# - `RETURNED_VALUE2`: the original function.
+# - ${RETURNED_VALUE}: the modified function.
+# - ${RETURNED_VALUE2}: the original function.
 #
 # ```bash
 # bash::injectCodeInFunction myFunction "echo 'Hello world!'" true
@@ -264,7 +264,7 @@ function bash::sleep() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The content of the standard input.
+# - ${RETURNED_VALUE}: The content of the standard input.
 #
 # ```bash
 # bash::readStdIn && local stdIn="${RETURNED_VALUE}"
@@ -285,17 +285,19 @@ function bash::readStdIn() {
 #
 # A convenient function that can be used to:
 #
-# - count the files/directories in a directory
+# - count the files/directories in a directory:
 #   `bash::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
 # - count the number of variables starting with VALET_
 #   `bash::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
+#
+# Inputs:
 #
 # - $@: **arguments** _as any_:
 #       the arguments to count
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The number of arguments passed.
+# - ${RETURNED_VALUE}: The number of arguments passed.
 #
 # ```bash
 # bash::countArgs 1 2 3
@@ -316,7 +318,7 @@ function bash::countArgs() {
 # - $?
 #   - 0 if there are variable undeclared
 #   - 1 otherwise.
-# - `RETURNED_ARRAY`: the list of undeclared variables.
+# - ${RETURNED_ARRAY}: the list of undeclared variables.
 #
 # ```bash
 # if bash::getMissingVariables "var1" "var2"; then
@@ -349,7 +351,7 @@ function bash::getMissingVariables() {
 # - $?
 #   - 0 if there are not existing commands
 #   - 1 otherwise.
-# - `RETURNED_ARRAY`: the list of not existing commands.
+# - ${RETURNED_ARRAY}: the list of not existing commands.
 #
 # ```bash
 # if bash::getMissingCommands "command1" "command2"; then

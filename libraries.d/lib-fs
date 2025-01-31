@@ -11,7 +11,7 @@
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The absolute path of the path.
+# - ${RETURNED_VALUE}: The absolute path of the path.
 #
 # ```bash
 # fs::toAbsolutePath "myFile"
@@ -75,7 +75,7 @@ function fs::toAbsolutePath() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The content of the file.
+# - ${RETURNED_VALUE}: The content of the file.
 #
 # ```bash
 # fs::readFile "/path/to/file" && local fileContent="${RETURNED_VALUE}"
@@ -140,7 +140,7 @@ function fs::writeToFile() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The absolute path to the directory.
+# - ${RETURNED_VALUE}: The absolute path to the directory.
 #
 # ```bash
 # fs::createDirectoryIfNeeded "/my/directory"
@@ -168,7 +168,7 @@ function fs::createDirectoryIfNeeded() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE`: The absolute path of the file.
+# - ${RETURNED_VALUE}: The absolute path of the file.
 #
 # ```bash
 # fs::createFilePathIfNeeded "myFile"
@@ -309,7 +309,7 @@ function fs::tail() {
 #
 # Returns:
 #
-# - `RETURNED_ARRAY`: An array with the list of all the paths.
+# - ${RETURNED_ARRAY}: An array with the list of all the paths.
 #
 # ```bash
 # fs::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
@@ -386,7 +386,7 @@ function fs::listPaths() {
 #
 # Returns:
 #
-# - `RETURNED_ARRAY`: An array with the list of all the files.
+# - ${RETURNED_ARRAY}: An array with the list of all the files.
 #
 # ```bash
 # fs::listFiles "/path/to/directory" true true myFilterFunction
@@ -422,7 +422,7 @@ function fs::listFiles() {
 #
 # Returns:
 #
-# - `RETURNED_ARRAY`: An array with the list of all the files.
+# - ${RETURNED_ARRAY}: An array with the list of all the files.
 #
 # ```bash
 # fs::listDirectories "/path/to/directory" true true myFilterFunction
@@ -449,7 +449,7 @@ function fs::listDirectories() {
 #
 # Returns:
 #
-# - `$?`:
+# - $?:
 #   - 0 if the directory is writable
 #   - 1 otherwise
 #
