@@ -28,25 +28,7 @@ jobs:
   self-test-install:
     # We run this job in a container to avoid polluting the host
     runs-on: ubuntu-latest
-    container: ubuntu:latest
     steps:
-      # Install dependencies
-      - name: Run valet self install && self update && self extend
-        env:
-          VALET_CONFIG_ENABLE_COLORS: true
-          VALET_CONFIG_DISABLE_PROGRESS: true
-          RUNNING_IN_DOCKER: true
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-        run: |
-          # Install dependencies
-          apt-get update -qq
-          apt-get install -qq -y curl sudo makepasswd uidmap git 1>/dev/null
-          # Create the 'me' user with sudo privileges
-          echo 'me' > /tmp/pw
-          useradd -m -u 1987 -U -p "$(makepasswd --crypt-md5 --clearfrom=/tmp/pw)" me
-          echo "me ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers.d/me-sudo
-          chsh -s /bin/bash me;
-
       # checkout the repository
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,11 +39,15 @@ jobs:
       # Runs our tests
       - name: Run valet self install && self update && self extend
         env:
-          VALET_CONFIG_ENABLE_COLORS: true
-          VALET_CONFIG_DISABLE_PROGRESS: true
           RUNNING_IN_DOCKER: true
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           chmod +x ./tests.d/self-install/test
-          ./tests.d/self-install/test
-
+          docker run --rm \
+            -v $PWD:/app \
+            -w /app \
+            -e VALET_CONFIG_ENABLE_COLORS=true \
+            -e RUNNING_IN_DOCKER=true \
+            -e BRANCH_NAME=${BRANCH_NAME} \
+            noyacode/minideb-bash5.0 \
+            ./tests.d/self-install/test self test -C

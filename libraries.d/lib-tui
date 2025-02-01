@@ -775,7 +775,7 @@ function tui::restoreBindings() {
 
   # restore the default bindings
   bind -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}" &>/dev/null
-  rm -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+  rm -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}" &>/dev/null || :
   unset -v _INTERACTIVE_SAVED_BINDINGS_FILE
 }
 

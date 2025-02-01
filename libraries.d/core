@@ -212,7 +212,7 @@ function fs::cleanTempFiles() {
     log::debug "Deleting temporary windows directory."
     rm -Rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" 1>/dev/null || :
   fi
-  rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* 1>/dev/null || :
+  rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* &>/dev/null || :
   unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
 }
 

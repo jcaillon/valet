@@ -15,7 +15,7 @@ function main() {
   # shellcheck disable=SC2034
   VALET_CONFIG_FILE="${GLOBAL_TEST_TEMP_FILE}"
 
-  rm -f "${GLOBAL_TEST_TEMP_FILE}"
+  rm -f "${GLOBAL_TEST_TEMP_FILE}" &>/dev/null || :
 
   test::exec selfConfig
   test::exec fs::head "${GLOBAL_TEST_TEMP_FILE}" 3

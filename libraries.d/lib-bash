@@ -110,6 +110,9 @@ function bash::runInParallel() {
       fi
 
       for pid in "${_BASH_RUNNING_JOB_PIDS[@]}"; do
+        if [[ -z ${pid} ]]; then
+          continue
+        fi
         jobIndex="${jobIndexFromPid[${pid}]}"
         jobName="${jobNames[jobIndex]}"
 
