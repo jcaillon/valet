@@ -117,7 +117,7 @@ function selfTestUtils_compareWithApproved() {
   if ${command} 1>&2; then
     log::success "→ test suite has passed."
     if [[ -f "${receivedFile}" ]]; then
-      rm -f "${receivedFile}" 1>/dev/null || :
+      rm -f "${receivedFile}" 1>/dev/null
     fi
     return 0
   else
@@ -133,7 +133,7 @@ function selfTestUtils_compareWithApproved() {
       chmod "${GLOBAL_TEST_REPORT_FILE_MODE}" "${approvedFile}"
     fi
     if [[ -f "${receivedFile}" ]]; then
-      rm -f "${receivedFile}" 1>/dev/null || :
+      rm -f "${receivedFile}" 1>/dev/null
     fi
   else
     cp -f "${receivedFileToCopy}" "${receivedFile}"

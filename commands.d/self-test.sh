@@ -535,7 +535,7 @@ function selfTest_runSingleTest() {
 
   # reset the temporary location (to have consistency when using fs::createTempDirectory for example)
   if [[ -d ${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY} ]]; then
-    rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}" || :
+    rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
   fi
   fs::setupTempFileGlobalVariable
   fs::cleanTempFiles
