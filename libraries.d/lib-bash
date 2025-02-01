@@ -113,6 +113,7 @@ function bash::runInParallel() {
         if [[ -z ${pid} ]]; then
           continue
         fi
+        log::warning "pid=${pid}, xx=${jobIndexFromPid[${pid}]:-x}, jobIndexFromPid: ${!jobIndexFromPid[*]}, , jobIndexFromPid: ${jobIndexFromPid[*]}"
         jobIndex="${jobIndexFromPid[${pid}]}"
         jobName="${jobNames[jobIndex]}"
 

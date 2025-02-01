@@ -1580,7 +1580,7 @@ function core::reloadUserCommands() {
 # ```
 function core::deleteUserCommands() {
   core::getUserDirectory
-  rm -f "${RETURNED_VALUE}/commands"
+  rm -f "${RETURNED_VALUE}/commands" || :
 }
 
 # ## core::getVersion

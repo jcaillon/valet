@@ -41,13 +41,13 @@ jobs:
           chmod +x valet
           ./valet self test -C
 
-      # # Runs tests with bash 5
-      # - name: Run valet self test on bash5
-      #   run: |
-      #     chmod +x valet
-      #     docker run --rm \
-      #       -v $PWD:/app \
-      #       -w /app \
-      #       -e VALET_CONFIG_ENABLE_COLORS=true \
-      #       noyacode/minideb-bash5.0 \
-      #       ./valet self test -C
+      # Runs tests with bash 5
+      - name: Run valet self test on bash5
+        run: |
+          chmod +x valet
+          docker run --rm \
+            -v $PWD:/app \
+            -w /app \
+            -e VALET_CONFIG_ENABLE_COLORS=true \
+            noyacode/minideb-bash5.0 \
+            ./valet self test -C
