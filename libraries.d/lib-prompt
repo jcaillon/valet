@@ -57,6 +57,22 @@ source fs
 #       by the user at the moment the autocompletion box shows up.
 #       Allows to pre-filter the autocompletion.
 #       (defaults to empty)
+# - ${_OPTION_ITEMS_BOX_FORCE_LEFT} _as int_:
+#       (optional) The left column at which to display the autocompletion box.
+#       If left empty, the box will auto position itself according to the prompt.
+#       (defaults to empty)
+# - ${_OPTION_ITEMS_BOX_FORCE_TOP} _as int_:
+#       (optional) The top line at which to display the autocompletion box.
+#       If left empty, the box will auto position itself according to the prompt.
+#       (defaults to empty)
+# - ${_OPTION_ITEMS_BOX_FORCE_WIDTH} _as int_:
+#       (optional) The width of the autocompletion box.
+#       If left empty, the box will auto compute its width according to the items.
+#       (defaults to empty)
+# - ${_OPTION_ITEMS_BOX_FORCE_HEIGHT} _as int_:
+#       (optional) The height of the autocompletion box.
+#       If left empty, the box will auto compute its height according to the items.
+#       (defaults to empty)
 # - ${_OPTION_ITEMS_BOX_MAX_HEIGHT} _as int_:
 #       (optional) The maximum number of lines/rows to use for the autocompletion box.
 #       If the number of items is greater than this value, the box will be scrollable.
@@ -171,6 +187,11 @@ function prompt::input() {
   _PROMPT_ITEMS_ARRAY_NAME="${_OPTION_ITEMS_ARRAY_NAME:-}"
 
   _PROMPT_STRING="${_OPTION_STRING:-}"
+
+  _PROMPT_ITEMS_BOX_FORCED_LEFT="${_OPTION_ITEMS_BOX_FORCE_LEFT:-}"
+  _PROMPT_ITEMS_BOX_FORCED_TOP="${_OPTION_ITEMS_BOX_FORCE_TOP:-}"
+  _PROMPT_ITEMS_BOX_FORCED_WIDTH="${_OPTION_ITEMS_BOX_FORCE_WIDTH:-}"
+  _PROMPT_ITEMS_BOX_FORCED_HEIGHT="${_OPTION_ITEMS_BOX_FORCE_HEIGHT:-}"
 
   _PROMPT_ITEMS_BOX_MAX_HEIGHT="${_OPTION_ITEMS_BOX_MAX_HEIGHT:-}"
   _PROMPT_ITEMS_BOX_FORCE_BELOW="${_OPTION_ITEMS_BOX_FORCE_BELOW:-false}"
@@ -879,7 +900,7 @@ function prompt_openItemsBox() {
   fi
 
   # compute the size of the autocomplete box
-  tui::getBestAutocompleteBox "${_PROMPT_START_LINE}" "${preferredLeftPosition}" "${_PROMPT_ITEMS_BOX_PREFERRED_HEIGHT}" "${_PROMPT_ITEMS_BOX_PREFERRED_WIDTH}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
+  tui::getBestAutocompleteBox "${_PROMPT_ITEMS_BOX_FORCED_TOP:-${_PROMPT_START_LINE}}" "${_PROMPT_ITEMS_BOX_FORCED_LEFT:-${preferredLeftPosition}}" "${_PROMPT_ITEMS_BOX_FORCED_HEIGHT:-${_PROMPT_ITEMS_BOX_PREFERRED_HEIGHT}}" "${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_ITEMS_BOX_PREFERRED_WIDTH}}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
   _PROMPT_ITEMS_BOX_TOP="${RETURNED_VALUE}"
   _PROMPT_ITEMS_BOX_LEFT="${RETURNED_VALUE2}"
   _PROMPT_ITEMS_BOX_WIDTH="${RETURNED_VALUE3}"
@@ -1058,21 +1079,15 @@ function prompt_drawItemsBox() {
       continue
     fi
 
-    if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED} ]]; then
-      if "${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED}" "${_PROMPT_ITEMS_BOX_TOP}" "${_PROMPT_ITEMS_BOX_LEFT}" "${_PROMPT_ITEMS_BOX_WIDTH}" "${_PROMPT_ITEMS_BOX_HEIGHT}"; then
-        return 0
-      fi
-    fi
-
     # get the item display string in RETURNED_VALUE
     _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${_PROMPT_FILTERED_ITEMS[${index}]}"
-    "${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}"
-
-    if ((index == _PROMPT_FILTERED_ITEMS_SELECTED_INDEX)); then
-      # highlight the selected item
-      toPrint+="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
-    else
-      toPrint+="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
+    if "${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}"; then
+      if ((index == _PROMPT_FILTERED_ITEMS_SELECTED_INDEX)); then
+        # highlight the selected item
+        toPrint+="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
+      else
+        toPrint+="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
+      fi
     fi
   done
 
@@ -1226,7 +1241,7 @@ function prompt_showError() {
   prompt_clearItemsBox
   prompt_clearErrorBox
 
-  string::wrapWords "${message}" $((_PROMPT_WIDTH - ${#_PROMPT_ERROR_BOX_SYMBOL}))
+  string::wrapWords "${message}" $((${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}} - ${#_PROMPT_ERROR_BOX_SYMBOL}))
   local IFS=$'\n'
   local text="${RETURNED_VALUE}"
   local -i errorLinesNeeded=0
@@ -1236,7 +1251,7 @@ function prompt_showError() {
 
   # compute the height of the box where we can display error messages
   # This box should fit within the autocomplete width
-  tui::getBestAutocompleteBox "${_PROMPT_START_LINE}" "${_PROMPT_START_COLUMN}" "${errorLinesNeeded}" "${_PROMPT_WIDTH}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
+  tui::getBestAutocompleteBox "${_PROMPT_ITEMS_BOX_FORCED_TOP:-${_PROMPT_START_LINE}}" "${_PROMPT_ITEMS_BOX_FORCED_LEFT:-${_PROMPT_START_COLUMN}}" "${_PROMPT_ITEMS_BOX_FORCED_HEIGHT:-${errorLinesNeeded}}" "${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
   _PROMPT_ERROR_BOX_TOP="${RETURNED_VALUE}"
   _PROMPT_ERROR_BOX_LEFT="${RETURNED_VALUE2}"
   _PROMPT_ERROR_BOX_WIDTH="${RETURNED_VALUE3}"

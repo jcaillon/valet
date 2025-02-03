@@ -549,13 +549,16 @@ function tui::waitForKeyPress() {
 # A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.
 #
 # Users of this function can completely change the bindings afterward by implementing
-# the `tuiRebindOverride` function.
+# the `tui::RebindOverride` function.
 #
 # This function should be called before using tui::waitForKeyPress.
 #
 # You can call `tui::restoreBindings` to restore the default bindings. However, this is not
 # necessary as the bindings are local to the script.
 #
+# - $1: **callback function** _as string_:
+#       The function name to call when a special key is pressed.
+
 # ```bash
 # tui::rebindKeymap
 # ```
@@ -741,8 +744,8 @@ function tui::rebindKeymap() {
   bind -x '"\t": '"${callBackFunction}"' TAB' &>/dev/null
 
   # allow the user to override bindings with a custom function
-  if command -v tuiRebindOverride &>/dev/null; then
-    tuiRebindOverride
+  if command -v tui::RebindOverride &>/dev/null; then
+    tui::RebindOverride
   fi
 }
 

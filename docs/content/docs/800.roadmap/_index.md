@@ -9,7 +9,8 @@ url: /docs/roadmap
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
 - prompt:
-  - Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.
+  - Finish prompt and interactive functions: prompt user for multiline text (doable with by just implementing a good _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY)
+  - Prompt user for multi select.
   - prompt: add the possibility to position the autocompletion box (top/left/width/height)
   - Add a full screen view with the keyboard shortcuts in edit mode (new interactive::showFullScreenHelp ?).
 - fzf: 
