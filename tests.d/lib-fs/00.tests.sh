@@ -14,6 +14,15 @@ function main() {
   test_fs::head
   test_fs::tail
   test_fs::getFileMaxLineLength
+  test_fs::getFileLineCount
+}
+
+function test_fs::getFileLineCount() {
+  test::title "✅ Testing fs::getFileLineCount"
+
+  test::func fs::getFileLineCount 'resources/file-to-read'
+
+  test::func VALET_CONFIG_STRICT_PURE_BASH=true fs::getFileLineCount 'resources/file-to-read'
 }
 
 function test_fs::getFileMaxLineLength() {

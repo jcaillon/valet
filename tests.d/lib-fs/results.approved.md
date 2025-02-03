@@ -405,6 +405,24 @@ Returned variables:
 RETURNED_VALUE='842'
 ```
 
+### ✅ Testing fs::getFileLineCount
+
+❯ `fs::getFileLineCount resources/file-to-read`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='24'
+```
+
+❯ `VALET_CONFIG_STRICT_PURE_BASH=true fs::getFileLineCount resources/file-to-read`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='24'
+```
+
 ## Test script 01.listPaths
 
 ### ✅ Testing fs::listPaths
