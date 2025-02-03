@@ -10,9 +10,7 @@ This page lists the features that I would like to implement in Valet. They come 
 
 - prompt:
   - Finish prompt and interactive functions: prompt user for multiline text. Prompt user for multi select.
-  - since we add the possibility to load the prompt items from a file, migth as well rewrite another array fuzzy sort that loads from a file
   - prompt: add the possibility to position the autocompletion box (top/left/width/height)
-  - prompt improvement ideas: do not filter from the original array if the new search string is starting with previous search string, we can search from the current array instead !
   - Add a full screen view with the keyboard shortcuts in edit mode (new interactive::showFullScreenHelp ?).
 - fzf: 
   - draw in a given rectangle, we handle full screen or not before calling sfzf

@@ -51,10 +51,6 @@ source fs
 # - ${_OPTION_ITEMS_ARRAY_NAME} _as string_:
 #       (optional) The items to display (name of a global array which contains the items).
 #       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.
-#       Mutually exclusive with `_OPTION_ITEMS_FILE_PATH`.
-#       (defaults to empty)
-# - ${_OPTION_ITEMS_FILE_PATH} _as string_:
-#       (optional) A file path containing the items to display. Mutually exclusive with `_OPTION_ITEMS_ARRAY_NAME`.
 #       (defaults to empty)
 # - ${_OPTION_STRING} _as string_:
 #       (optional) The initial string, which corresponds to the text already entered
@@ -173,7 +169,6 @@ function prompt::input() {
   fi
 
   _PROMPT_ITEMS_ARRAY_NAME="${_OPTION_ITEMS_ARRAY_NAME:-}"
-  _PROMPT_ITEMS_FILE_PATH="${_OPTION_ITEMS_FILE_PATH:-}"
 
   _PROMPT_STRING="${_OPTION_STRING:-}"
 
@@ -366,6 +361,8 @@ function prompt::input() {
         _PROMPT_FILTERED_ITEMS=()
         _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
       fi
+      fs::readFile "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILTER_STRING}"
+      _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING="${RETURNED_VALUE%%[[:space:]]}"
       prompt_drawItemsBox
     fi
 
@@ -397,6 +394,9 @@ function prompt::input() {
     RETURNED_VALUE3=${_PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX}
   fi
 
+  # shellcheck disable=SC2086
+  unset -v ${!_PROMPT_*}
+
   return 0
 }
 
@@ -424,10 +424,11 @@ function prompt_setSizeVariables() {
   fi
 }
 
+# set up the variables that depend on the items list
 function prompt_setItemsListVariables() {
   if [[ -n "${_PROMPT_ITEMS_ARRAY_NAME}" ]]; then
-    local -n originalItems="${_PROMPT_ITEMS_ARRAY_NAME}"
-    _PROMPT_ORIGINAL_ITEMS=("${originalItems[@]}")
+    declare -g -n _PROMPT_ORIGINAL_ITEMS="${_PROMPT_ITEMS_ARRAY_NAME}"
+    _PROMPT_ITEMS_BOX_PREFERRED_WIDTH=0
     local item
     for item in "${_PROMPT_ORIGINAL_ITEMS[@]}"; do
       if ((${#item} > _PROMPT_ITEMS_BOX_PREFERRED_WIDTH)); then
@@ -438,19 +439,9 @@ function prompt_setItemsListVariables() {
       fi
     done
     _PROMPT_ORIGINAL_ITEMS_COUNT=${#_PROMPT_ORIGINAL_ITEMS[@]}
-    _PROMPT_ORIGINAL_ITEMS_FILE_PATH=""
     _PROMPT_ITEMS_BOX_PREFERRED_HEIGHT=${#_PROMPT_ORIGINAL_ITEMS[@]}
-  elif [[ -n "${_PROMPT_ITEMS_FILE_PATH}" ]]; then
-    _PROMPT_ORIGINAL_ITEMS_FILE_PATH="${_PROMPT_ITEMS_FILE_PATH}"
-    fs::getFileMaxLineLength "${_PROMPT_ITEMS_FILE_PATH}"
-    _PROMPT_ITEMS_BOX_PREFERRED_WIDTH="${RETURNED_VALUE}"
-    fs::getFileLineCount "${_PROMPT_ITEMS_FILE_PATH}"
-    _PROMPT_ORIGINAL_ITEMS_COUNT=${RETURNED_VALUE}
-    _PROMPT_ITEMS_BOX_PREFERRED_HEIGHT=${nbLines}
-    _PROMPT_ORIGINAL_ITEMS=()
   else
     _PROMPT_ORIGINAL_ITEMS=()
-    _PROMPT_ORIGINAL_ITEMS_FILE_PATH=""
     _PROMPT_ORIGINAL_ITEMS_COUNT=0
     _PROMPT_ITEMS_BOX_PREFERRED_WIDTH=0
     _PROMPT_ITEMS_BOX_PREFERRED_HEIGHT=0
@@ -483,11 +474,11 @@ function prompt_setItemsListVariables() {
   _PROMPT_ITEMS_BOX_FILTER_STRING=""
 
   # if the items are too many, we will filter them asynchronously/filter with grep
-  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 200 ]]; then
+  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 242 ]]; then
     _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY="false"
   fi
-  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1000 ]]; then
-    if command -v grep &>/dev/null && command -v gawk &>/dev/null; then
+  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1042 ]]; then
+    if [[ ${VALET_CONFIG_STRICT_PURE_BASH:-false} != "true" ]] && command -v grep &>/dev/null && command -v gawk &>/dev/null; then
       _PROMPT_ITEMS_BOX_FILTER_USING_GREP="true"
       # shellcheck source=lib-array
       source array
@@ -500,6 +491,8 @@ function prompt_setItemsListVariables() {
     _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE="${RETURNED_VALUE}"
     fs::createTempFile
     _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
+    fs::createTempFile
+    _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILTER_STRING="${RETURNED_VALUE}"
   fi
 
   # initial setup of files for grep filtering
@@ -874,6 +867,7 @@ function prompt_clearPrompt() {
   printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((_PROMPT_START_LINE));$((_PROMPT_START_COLUMN))${__AC__TO}${AC__ERASE__}$((_PROMPT_WIDTH))${__AC_CHARS}${AC__CURSOR_SHOW}"
 }
 
+# Open the item box (position it, filter items, and draw it)
 function prompt_openItemsBox() {
   _PROMPT_ITEMS_BOX_SHOWN=true
 
@@ -954,8 +948,16 @@ function prompt_filterItems() {
     return 0
   fi
 
+  if [[ -n ${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING:-} && ${_PROMPT_ITEMS_BOX_FILTER_STRING} == "${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING}"* && (${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} != "true" || ${#_PROMPT_FILTERED_ITEMS} -lt 242) ]]; then
+    # if the current filter string is a prefix of the previous one, we can filter the already filtered items
+    prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_FILTERED_ITEMS
+    _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING="${_PROMPT_ITEMS_BOX_FILTER_STRING}"
+    return 0
+  fi
+
   if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY:-true} == "true" ]]; then
     prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
+    _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING="${_PROMPT_ITEMS_BOX_FILTER_STRING}"
   else
     # asynchronous filtering
     rm -f "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}" &>/dev/null || :
@@ -966,6 +968,8 @@ function prompt_filterItems() {
 }
 
 function prompt_filterItemsAsync() {
+  echo "${_PROMPT_ITEMS_BOX_FILTER_STRING}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILTER_STRING}"
+
   if [[ ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} == "true" ]]; then
     # sort with grep and awk
     : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"

@@ -97,7 +97,7 @@ function fs::readFile() {
   else
     read -rd '' RETURNED_VALUE <"${filePath}" || [[ -n ${RETURNED_VALUE} ]] || RETURNED_VALUE=""
     # fail safe for cases where the file is suppose to not be empty but we get null string
-    if [[ -z "${RETURNED_VALUE}" ]]; then
+    if [[ -z ${RETURNED_VALUE} ]]; then
       RETURNED_VALUE="$(<"${filePath}")"
     fi
   fi
