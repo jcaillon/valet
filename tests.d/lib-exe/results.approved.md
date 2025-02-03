@@ -247,7 +247,7 @@ Returned variables:
 RETURNED_VALUE='exe::captureOutput () 
 { 
     local IFS='"'"' '"'"';
-    ${@} &> "${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1;
+    "${@}" &> "${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1;
     RETURNED_VALUE="";
     IFS='"'"''"'"' read -rd '"'"''"'"' RETURNED_VALUE < "${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
 }

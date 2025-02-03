@@ -310,14 +310,14 @@ interactive::displayDialogBox() {
   local wrappedText="${RETURNED_VALUE}"
 
   local finalString line sideString
-  local -i lineNumber=0
+  local -i lineNumber=0 maxLineLength=0
+  local IFS=$'\n'
 
-  local -i maxLineLength=0
-  while read -r line; do
+  for line in ${wrappedText}; do
     if (( ${#line} > maxLineLength )); then
       maxLineLength=${#line}
     fi
-  done <<<"${wrappedText}"
+  done
   textWidth=${maxLineLength}
 
   if [[ ${speaker} == "user" ]]; then
@@ -328,7 +328,7 @@ interactive::displayDialogBox() {
     startColumn+=1
 
     finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}┌─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┐${AC__TEXT_RESET}"$'\n'
-    while read -r line; do
+    for line in ${wrappedText}; do
       if (( lineNumber == 0 )); then
         sideString="├──░"
       else
@@ -336,13 +336,13 @@ interactive::displayDialogBox() {
       fi
       finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}│${AC__TEXT_RESET} ${line} ${AC__CURSOR_MOVE__}$((textWidth + 3 + startColumn))${__AC__COLUMN}${AC__TEXT_FAINT}${sideString}${AC__TEXT_RESET}"$'\n'
       lineNumber+=1
-    done <<<"${wrappedText}"
+    done
     finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}└─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┘${AC__TEXT_RESET}"$'\n'
 
   elif [[ ${speaker} == "system" ]]; then
 
     finalString+="${AC__TEXT_FAINT}   ┌─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┐${AC__TEXT_RESET}"$'\n'
-    while read -r line; do
+    for line in ${wrappedText}; do
       if (( lineNumber == 0 )); then
         sideString="░──┤"
       else
@@ -350,7 +350,7 @@ interactive::displayDialogBox() {
       fi
       finalString+="${AC__TEXT_FAINT}${sideString}${AC__TEXT_RESET} ${line} ${AC__CURSOR_MOVE__}$((textWidth + 7))${__AC__COLUMN}${AC__TEXT_FAINT}│${AC__TEXT_RESET}"$'\n'
       lineNumber+=1
-    done <<<"${wrappedText}"
+    done
     finalString+="${AC__TEXT_FAINT}   └─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┘${AC__TEXT_RESET}"$'\n'
 
   fi

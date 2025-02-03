@@ -22,7 +22,7 @@ function main() {
 
 
   test::title "✅ Testing the profiler with cleanup using bash"
-  test::exec VALET_CONFIG_LOG_CLEANUP_USING_BASH=true "${GLOBAL_INSTALLATION_DIRECTORY}/valet" -x self mock2 arg1 arg2
+  test::exec VALET_CONFIG_STRICT_PURE_BASH=true "${GLOBAL_INSTALLATION_DIRECTORY}/valet" -x self mock2 arg1 arg2
   test::exec fs::cat "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
   rm -f "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
 
@@ -36,9 +36,9 @@ function main() {
 function test::transformTextBeforeFlushing() {
   local line text=""
   local IFS=$'\n'
-  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
+  for line in ${_TEST_OUTPUT}; do
     text+="${line/*self-mock.sh:/00 00 00 0.0XXX 0.0XXX                    self-mock.sh:}"$'\n'
-  done <<<"${_TEST_OUTPUT}"
+  done
   _TEST_OUTPUT="${text%$'\n'}"
 }
 

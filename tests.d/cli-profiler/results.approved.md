@@ -42,7 +42,6 @@ INFO     Disabling profiler.
 
 ```text
 (D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)
-
 D  I  S  timer  delta                          source:line function                                 → command
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:166  selfMock2()                              → local -a more
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:167  selfMock2()                              → command::parseArguments arg1 arg2
@@ -78,12 +77,11 @@ D  I  S  timer  delta                          source:line function             
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:177  selfMock2()                              → aSubFunctionInselfMock2
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:184  aSubFunctionInselfMock2()                → log::debug 'This is a sub function.'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:179  selfMock2()                              → printf '%s\n' 'That'\''s it!'
-
 ```
 
 ### ✅ Testing the profiler with cleanup using bash
 
-❯ `VALET_CONFIG_LOG_CLEANUP_USING_BASH=true valet -x self mock2 arg1 arg2`
+❯ `VALET_CONFIG_STRICT_PURE_BASH=true valet -x self mock2 arg1 arg2`
 
 **Standard output**:
 
@@ -110,7 +108,6 @@ INFO     Disabling profiler.
 
 ```text
 (D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)
-
 D  I  S  timer  delta                          source:line function                                 → command
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:166  selfMock2()                              → local -a more
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:167  selfMock2()                              → command::parseArguments arg1 arg2
@@ -146,7 +143,6 @@ D  I  S  timer  delta                          source:line function             
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:177  selfMock2()                              → aSubFunctionInselfMock2
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:184  aSubFunctionInselfMock2()                → log::debug 'This is a sub function.'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:179  selfMock2()                              → printf '%s\n' 'That'\''s it!'
-
 ```
 
 ### ✅ Testing to enable the profiler on Valet startup

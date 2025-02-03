@@ -89,7 +89,7 @@ function profilerCleanFile() {
   fi
 
   # we do this one in awk if present, but in bash otherwise
-  if [[ ${VALET_CONFIG_LOG_CLEANUP_USING_BASH:-false} == "true" ]] || ! command -v awk 1>/dev/null 2>&1; then
+  if [[ ${VALET_CONFIG_STRICT_PURE_BASH:-false} == "true" ]] || ! command -v awk 1>/dev/null 2>&1; then
     log::debug "Cleaning the profiler file using bash."
     profilerBashCleanFile "${timePrecision}" "${clearLine}" >"${newProfilerFile}"
     mv -f "${newProfilerFile}" "${_PROFILER_OUTPUT_FILE}"

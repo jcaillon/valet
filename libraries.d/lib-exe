@@ -381,7 +381,7 @@ function exe::invoke() {
 function exe::captureOutput() {
   local IFS=' '
   # shellcheck disable=SC2068
-  ${@} &>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
+  "${@}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
   RETURNED_VALUE=""
   IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
 }

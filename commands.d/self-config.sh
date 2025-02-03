@@ -218,6 +218,10 @@ VALET_CONFIG_ENABLE_NERDFONT_ICONS=\"\${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-${EX
 # If true, will forcibly enable the color output (otherwise we try to detect color support on start).
 VALET_CONFIG_ENABLE_COLORS=\"\${VALET_CONFIG_ENABLE_COLORS:-${EXPORTED_VALET_CONFIG_ENABLE_COLORS:-}}\"
 
+# If true, will always use the pure bash implementation, even if we could use an existing binary in the path.
+VALET_CONFIG_STRICT_PURE_BASH=\"\${VALET_CONFIG_STRICT_PURE_BASH:-${EXPORTED_VALET_CONFIG_STRICT_PURE_BASH:-}}\"
+
+
 ## -----------
 ## Log/output configuration
 ## -----------
@@ -248,11 +252,6 @@ VALET_CONFIG_LOG_TO_DIRECTORY=\"\${VALET_CONFIG_LOG_TO_DIRECTORY:-${EXPORTED_VAL
 # printf -v logFile '%s%(%F_%Hh%Mm%Ss)T%s' 'valet-' \${EPOCHSECONDS} '.log'
 VALET_CONFIG_LOG_FILENAME_PATTERN=\"\${VALET_CONFIG_LOG_FILENAME_PATTERN:-${EXPORTED_VALET_CONFIG_LOG_FILENAME_PATTERN:-}}\"
 
-# The bash profiler logs will automatically be cleaned up and improved to make them
-# more readable.
-# This process can be done in awk (by default if found on your system) or
-# you can force to use bash by setting this property to true.
-VALET_CONFIG_LOG_CLEANUP_USING_BASH=\"\${VALET_CONFIG_LOG_CLEANUP_USING_BASH:-${EXPORTED_VALET_CONFIG_LOG_CLEANUP_USING_BASH:-}}\"
 
 ## -----------
 ## Log icons configuration

@@ -13,6 +13,15 @@ function main() {
   test_fs::createLink
   test_fs::head
   test_fs::tail
+  test_fs::getFileMaxLineLength
+}
+
+function test_fs::getFileMaxLineLength() {
+  test::title "✅ Testing fs::getFileMaxLineLength"
+
+  test::func fs::getFileMaxLineLength 'resources/file-to-read'
+
+  test::func VALET_CONFIG_STRICT_PURE_BASH=true fs::getFileMaxLineLength 'resources/file-to-read'
 }
 
 function test_fs::toAbsolutePath() {
