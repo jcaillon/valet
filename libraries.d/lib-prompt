@@ -558,7 +558,7 @@ function prompt_onKeyPressed() {
     ;;
 
   # validate or exit
-  $'\n' | CTRL+M | CTRL+J | NEWLINE)
+  $'\n' | CTRL+ALT+M | CTRL+M | CTRL+J | NEWLINE)
     # in autocompletion mode we can only validate if we autocompletion is closed, otherwise it autocompletes
     if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" && ${_PROMPT_ACCEPT_ANY_VALUE} == "true" ]]; then
       prompt_autocompleteWithSelectedItem

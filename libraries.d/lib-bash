@@ -110,9 +110,6 @@ function bash::runInParallel() {
       fi
 
       for pid in "${_BASH_RUNNING_JOB_PIDS[@]}"; do
-        if [[ -z ${pid} ]]; then
-          continue
-        fi
         jobIndex="${jobIndexFromPid[${pid}]}"
         jobName="${jobNames[jobIndex]}"
 
@@ -124,7 +121,14 @@ function bash::runInParallel() {
 
           # remove the pid from the running pids
           # shellcheck disable=SC2206
-          _BASH_RUNNING_JOB_PIDS=(${_BASH_RUNNING_JOB_PIDS[*]/${pid}})
+          IFS=','
+          local pidList=",${_BASH_RUNNING_JOB_PIDS[*]},"
+          pidList=${pidList//",${pid},"/,}
+          pidList=${pidList/#,/}
+          pidList=${pidList/%,/}
+          # shellcheck disable=SC2206
+          _BASH_RUNNING_JOB_PIDS=(${pidList})
+          IFS=' '$'\t'$'\n'
 
           if [[ -n ${jobCompletedCallback} ]]; then
             if ! ${jobCompletedCallback} "${jobIndex}" "${jobName}" "${exitCode}" "$((${#exitCodes[@]} * 100 / ${#jobNames[@]}))"; then
