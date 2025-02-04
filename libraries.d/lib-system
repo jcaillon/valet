@@ -5,6 +5,28 @@
 # shellcheck source=lib-fs
 source fs
 
+# ## system::isRoot
+#
+# Check if the script is running as root.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the script is running as root
+#   - 1 otherwise.
+#
+# ```bash
+# if system::isRoot; then
+#   printf 'The script is running as root.'
+# fi
+# ```
+function system::isRoot() {
+  if [[ ${EUID:-${UID}} -eq 0 ]]; then
+    return 0
+  fi
+  return 1
+}
+
 # ## system::getOs
 #
 # Returns the name of the current OS.

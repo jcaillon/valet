@@ -251,7 +251,10 @@ function bash::sleep() {
     return 0
   elif command -v mkfifo 1>/dev/null; then
     if [[ -z ${IO_SLEEP_FIFO:-} ]]; then
-      fs::createTempFile && IO_SLEEP_FIFO="${RETURNED_VALUE}"
+      # shellcheck source=lib-fs
+      source fs
+      fs::createTempFile
+      IO_SLEEP_FIFO="${RETURNED_VALUE}"
       rm "${IO_SLEEP_FIFO}"
       mkfifo -m 700 "${IO_SLEEP_FIFO}"
       exec 6<>"${IO_SLEEP_FIFO}"
@@ -404,24 +407,76 @@ function bash::isCommand() {
   return 1
 }
 
-# ## system::isRoot
+# ## bash::getFunctionDefinitionWithGlobalVars
 #
-# Check if the script is running as root.
+# This function can be used to get the definition of an existing function,
+# rename it, and replace the use of positional parameters by global variables.
+#
+# This can be useful for performance reasons when a function is called many times,
+# to avoid copying the positional parameters each time.
+#
+# - $1: **function name** _as string_:
+#       the name of the function to re-export
+# - $2: **new function name** _as string_:
+#       the name of the new function to create
+# - $@: global variable name _as string_:
+#       the name of the global variable to use instead of the positional parameters
+#       (can be repeated multiple times, for each parameter)
 #
 # Returns:
 #
-# - $?
-#   - 0 if the script is running as root
-#   - 1 otherwise.
+# - $?:
+#   - 0 if the function was successfully re-exported
+#   - 1 if the function does not exist
+# - ${RETURNED_VALUE}: the modified function definition
+# - ${RETURNED_VALUE2}: the original function
 #
 # ```bash
-# if system::isRoot; then
-#   printf 'The script is running as root.'
-# fi
+# bash::getFunctionDefinitionWithGlobalVars "myFunction" "myFunctionWithGlobalVars" "MY_VAR1" "MY_VAR2"
+# eval "${RETURNED_VALUE}"
+# myFunctionWithGlobalVars
 # ```
-function system::isRoot() {
-  if [[ ${EUID:-${UID}} -eq 0 ]]; then
+function bash::getFunctionDefinitionWithGlobalVars() {
+  local functionName="${1}"
+  local newFunctionName="${2}"
+  shift 2
+
+  local IFS=''
+  declare -f "${functionName}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
+  read -rd '' RETURNED_VALUE2 <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || [[ -n ${RETURNED_VALUE2} ]]
+  local functionDefinition
+  functionDefinition="${RETURNED_VALUE2/"${functionName}"/"${newFunctionName}"}"
+
+  if (($# == 0)); then
+    RETURNED_VALUE="${functionDefinition}"
     return 0
   fi
-  return 1
+
+  # find the mapping between the positional parameters and the new global variable names
+  local -A globalVars=()
+  local -a positionalParameters=("$@")
+  local IFS=$'\n'
+  local line varName varPosition
+  local modifiedFunctionDefinition=""
+  for line in ${functionDefinition}; do
+    if ((${#positionalParameters[@]} != ${#globalVars[@]})); then
+      if [[ "${line}" =~ ^\ *local\ +(-[[:alpha:]]+\ )?([[:alpha:]]+)=[^$]*\$\{?([[:digit:]]+) ]]; then
+        varName="${BASH_REMATCH[2]}"
+        varPosition="${BASH_REMATCH[3]}"
+        if [[ -n ${positionalParameters[$((varPosition - 1))]} ]]; then
+          globalVars["${varName}"]="${positionalParameters[$((varPosition - 1))]}"
+          log::debug "found local ${varName}=\${${varPosition}} -> remapped to ${globalVars[${varName}]}"
+          continue
+        fi
+      fi
+    fi
+    modifiedFunctionDefinition+="${line}"$'\n'
+  done
+
+  # modify the function to use the global variables instead of the positional parameters
+  for varName in "${!globalVars[@]}"; do
+    modifiedFunctionDefinition="${modifiedFunctionDefinition//${varName}/"${globalVars[${varName}]}"}"
+  done
+
+  RETURNED_VALUE="${modifiedFunctionDefinition}"
 }
