@@ -6,6 +6,42 @@ source prompt
 function main() {
   test_prompt_getDisplayedPromptString
   test_prompt::getItemDisplayedString
+  test_prompt_getIndexDeltaToBeginningOfWord
+  test_prompt_getIndexDeltaToEndOfWord
+}
+
+function test_prompt_getIndexDeltaToEndOfWord() {
+  test::title "✅ Testing prompt_getIndexDeltaToEndOfWord"
+
+  _PROMPT_STRING="Lorem   ipsum"
+  #              ^    ^^  ^ ^^^
+  #               0123456789
+  #                        10123
+  test::func _PROMPT_STRING_INDEX=0 prompt_getIndexDeltaToEndOfWord
+  test::func _PROMPT_STRING_INDEX=4 prompt_getIndexDeltaToEndOfWord
+  test::func _PROMPT_STRING_INDEX=5 prompt_getIndexDeltaToEndOfWord
+  test::func _PROMPT_STRING_INDEX=8 prompt_getIndexDeltaToEndOfWord
+  test::func _PROMPT_STRING_INDEX=10 prompt_getIndexDeltaToEndOfWord
+  test::func _PROMPT_STRING_INDEX=11 prompt_getIndexDeltaToEndOfWord
+  test::func _PROMPT_STRING_INDEX=12 prompt_getIndexDeltaToEndOfWord
+  test::func _PROMPT_STRING_INDEX=20 prompt_getIndexDeltaToEndOfWord
+}
+
+function test_prompt_getIndexDeltaToBeginningOfWord() {
+  test::title "✅ Testing prompt_getIndexDeltaToBeginningOfWord"
+
+  _PROMPT_STRING="Lorem ipsum  "
+  #              ^    ^^  ^ ^^^
+  #               0123456789
+  #                        10123
+  test::func _PROMPT_STRING_INDEX=0 prompt_getIndexDeltaToBeginningOfWord
+  test::func _PROMPT_STRING_INDEX=5 prompt_getIndexDeltaToBeginningOfWord
+  test::func _PROMPT_STRING_INDEX=6 prompt_getIndexDeltaToBeginningOfWord
+  test::func _PROMPT_STRING_INDEX=9 prompt_getIndexDeltaToBeginningOfWord
+  test::func _PROMPT_STRING_INDEX=11 prompt_getIndexDeltaToBeginningOfWord
+  test::func _PROMPT_STRING_INDEX=12 prompt_getIndexDeltaToBeginningOfWord
+  test::func _PROMPT_STRING_INDEX=13 prompt_getIndexDeltaToBeginningOfWord
+  test::func _PROMPT_STRING_INDEX=20 prompt_getIndexDeltaToBeginningOfWord
 }
 
 function test_prompt_getDisplayedPromptString() {
@@ -68,21 +104,28 @@ function test_prompt::getItemDisplayedString() {
   _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="HellO wOrld"
 
   test::printVars _PROMPT_COLOR_LETTER_HIGHLIGHT _PROMPT_COLOR_LETTER_HIGHLIGHT_RESET _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ITEMS_BOX_ITEM_DISPLAYED
-  test::exec prompt::getItemDisplayedString
+  test::func prompt::getItemDisplayedString
   test::markdown "\`${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}\`"
+
+  _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="HellO wOrld"
+  _PROMPT_ITEMS_BOX_ITEM_WIDTH=15
+  test::printVars _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_ITEM_DISPLAYED
+  test::func prompt::getItemDisplayedString
+  test::markdown "\`${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}\`"
+
 
   _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${FG_CYAN}HellO${FG_RESET} wOrld"
   _PROMPT_ITEMS_BOX_ITEM_WIDTH=10
 
   test::printVars _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_ITEM_DISPLAYED
-  test::exec prompt::getItemDisplayedString
+  test::func prompt::getItemDisplayedString
   test::markdown "\`${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}\`"
 
   _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${FG_CYAN}HellO${FG_RESET} wOrld"
   _PROMPT_ITEMS_BOX_ITEM_WIDTH=11
 
   test::printVars _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_ITEM_DISPLAYED
-  test::exec prompt::getItemDisplayedString
+  test::func prompt::getItemDisplayedString
   test::markdown "\`${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}\`"
 
   _PROMPT_COLOR_LETTER_HIGHLIGHT=$'\033[4m'
@@ -92,7 +135,7 @@ function test_prompt::getItemDisplayedString() {
   _PROMPT_ITEMS_BOX_ITEM_WIDTH=71
 
   test::printVars _PROMPT_COLOR_LETTER_HIGHLIGHT _PROMPT_COLOR_LETTER_HIGHLIGHT_RESET _PROMPT_ITEMS_BOX_ITEM_WIDTH _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ITEMS_BOX_ITEM_DISPLAYED
-  test::exec prompt::getItemDisplayedString
+  test::func prompt::getItemDisplayedString
   test::markdown "\`${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}\`"
 
   shopt -u nocasematch

@@ -282,8 +282,8 @@ function prompt::input() {
     _PROMPT_SYMBOL="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-"> "}"
     _PROMPT_SYMBOL_LENGTH=${#_PROMPT_SYMBOL}
     _PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-"█ "}"
-    _PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM="░ "
-    _PROMPT_ITEMS_BOX_SYMBOL_COUNTER="░░"
+    _PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM="│ "
+    _PROMPT_ITEMS_BOX_SYMBOL_COUNTER="┌─"
     _PROMPT_ITEMS_BOX_SYMBOL_LENGTH=${#_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}
   else
     _PROMPT_SYMBOL=""
@@ -354,7 +354,7 @@ function prompt::input() {
   # main loop
   while true; do
     if tui::waitForKeyPress -t 0.2; then
-      prompt_onKeyPressed "${LAST_KEY_PRESSED}" "${LAST_KEY_PRESSED}"
+      prompt_onKeyPressed "${LAST_KEY_PRESSED}"
     fi
 
     # in case of a terminal resize, we will have to redraw
@@ -529,55 +529,21 @@ function prompt_setItemsListVariables() {
   fi
 }
 
-# define the callback function called when a special key is pressed
-# shellcheck disable=SC2317
-function prompt_onKeyBindingPress() {
-  prompt_onKeyPressed "${1}" ""
-}
-
-# Called when a key is pressed.
+# Called when a special key is pressed.
 #
 # - $1: **key** _as string_:
 #       The key that was pressed, including special keys (CTRL+, ALT+, TAB, etc...).
-# - $2: **char sent** _as string_:
-#       The last character that was sent by the terminal, if any
-#       (can be empty when key is not empty).
 #
-function prompt_onKeyPressed() {
+# define the callback function called when a special key is pressed
+# shellcheck disable=SC2317
+function prompt_onKeyBindingPress() {
   if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED} ]]; then
-    if "${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED}" "${1}" "${2}"; then
+    if "${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED}" "" "${1}"; then
       return 0
     fi
   fi
 
   case "${1}" in
-
-  # autocompletion box
-  PAGE_UP)
-    prompt_changeSelectedItemIndex "-$((${_PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS:-10} - 1))"
-    prompt_drawItemsBox
-    ;;
-  PAGE_DOWN)
-    prompt_changeSelectedItemIndex "$((${_PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS:-10} - 1))"
-    prompt_drawItemsBox
-    ;;
-  HOME | CTRL+UP)
-    prompt_changeSelectedItemIndex "-$((_PROMPT_ORIGINAL_ITEMS_COUNT + 1))"
-    prompt_drawItemsBox
-    ;;
-  END | CTRL+DOWN)
-    prompt_changeSelectedItemIndex "$((_PROMPT_ORIGINAL_ITEMS_COUNT + 1))"
-    prompt_drawItemsBox
-    ;;
-  UP)
-    prompt_changeSelectedItemIndex -1
-    prompt_drawItemsBox
-    ;;
-  DOWN)
-    prompt_changeSelectedItemIndex 1
-    prompt_drawItemsBox
-    ;;
-
   # validate or exit
   $'\n' | CTRL+ALT+M | CTRL+M | CTRL+J | NEWLINE)
     # in autocompletion mode we can only validate if we autocompletion is closed, otherwise it autocompletes
@@ -754,65 +720,131 @@ function prompt_onKeyPressed() {
     prompt_drawPrompt
     ;;
   *)
-    # Case of keys that are supposed to only affect the search string
-    # insert the character at the cursor position
-    if [[ -z ${2} ]]; then
-      return 0
-    fi
-
-    # if it is too long warn the user
-    if ((${#_PROMPT_STRING} >= _PROMPT_STRING_MAX_LENGTH)); then
-      prompt_showError "The input can't exceed a maximum of ${_PROMPT_STRING_MAX_LENGTH} characters."
-      # read the stream until the end to clear the buffer
-      local IFS
-      IFS='' read -d '' -sr -t 0.2 _ || :
-      return 0
-    fi
-
-    prompt_insertTextAtCurrentIndex "${2}"
-    prompt_onTextChanged
-
-    # here we handle the case where the user pastes a string (or spam a key)
+    # handle spamming of keys (the actions before this do not need to be protected from spam,
+    # but the actions after this are slow to execute and should not be spammed)
     time::getProgramElapsedMicroseconds
-    if ((RETURNED_VALUE - _PROMPT_LAST_KEY_PRESSED_TIME < 300000)); then
+    if ((RETURNED_VALUE - _PROMPT_LAST_KEY_PRESSED_TIME < 100000)); then
       # key pressed under 100ms of the last
       _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
     else
       _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
     fi
+    if ((_PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED > 3)); then
+      # if we have 3 rapid successive key pressed
+      return 0
+    fi
     _PROMPT_LAST_KEY_PRESSED_TIME=${RETURNED_VALUE}
-    if ((_PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED > 10)); then
-      # if we have 6 rapid successive key pressed, we consider it as a paste
-      local IFS copiedText
-      IFS='' read -d '' -s -r -t 0.2 copiedText 2>/dev/null || :
-      if [[ -n ${copiedText:-} ]]; then
-        prompt_insertTextAtCurrentIndex "${copiedText}"
-        prompt_onTextChanged
+
+
+    case "${1}" in
+    # autocompletion box selected item
+    PAGE_UP)
+      prompt_changeSelectedItemIndex "-$((${_PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS:-10} - 1))"
+      prompt_drawItemsBox
+      ;;
+    PAGE_DOWN)
+      prompt_changeSelectedItemIndex "$((${_PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS:-10} - 1))"
+      prompt_drawItemsBox
+      ;;
+    HOME | CTRL+UP)
+      prompt_changeSelectedItemIndex "-$((_PROMPT_ORIGINAL_ITEMS_COUNT + 1))"
+      prompt_drawItemsBox
+      ;;
+    END | CTRL+DOWN)
+      prompt_changeSelectedItemIndex "$((_PROMPT_ORIGINAL_ITEMS_COUNT + 1))"
+      prompt_drawItemsBox
+      ;;
+    UP)
+      prompt_changeSelectedItemIndex -1
+      prompt_drawItemsBox
+      ;;
+    DOWN)
+      prompt_changeSelectedItemIndex 1
+      prompt_drawItemsBox
+      ;;
+    esac
+  esac
+}
+
+# Called when a key is pressed.
+#
+# - $1: **char sent** _as string_:
+#       The last character that was sent by the terminal
+#
+function prompt_onKeyPressed() {
+  if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED} ]]; then
+    if "${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED}" "${1}" ""; then
+      return 0
+    fi
+  fi
+
+  # if the key is actually a special keys
+  case ${1} in
+  $'\b' | $'\177')
+    prompt_onKeyBindingPress "BACKSPACE"
+    return 0
+    ;;
+  $'\023')
+    prompt_onKeyBindingPress "CTRL+BACKSPACE"
+    return 0
+    ;;
+  $'\r' | $'\n')
+    prompt_onKeyBindingPress $'\n'
+    return 0
+    ;;
+  esac
+
+  # if it is too long warn the user
+  if ((${#_PROMPT_STRING} >= _PROMPT_STRING_MAX_LENGTH)); then
+    prompt_showError "The input can't exceed a maximum of ${_PROMPT_STRING_MAX_LENGTH} characters."
+    # read the stream until the end to clear the buffer
+    local IFS=''
+    read -d '' -sr -t 0.2 _ || :
+    return 0
+  fi
+
+  prompt_insertTextAtCurrentIndex "${1}"
+  prompt_onTextChanged
+
+  # here we handle the case where the user pastes a string (or spam a key)
+  time::getProgramElapsedMicroseconds
+  if ((RETURNED_VALUE - _PROMPT_LAST_KEY_PRESSED_TIME < 200000)); then
+    # key pressed under 200ms of the last
+    _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
+  else
+    _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
+  fi
+  if ((_PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED > 10)); then
+    # if we have 10 rapid successive key pressed, we consider it as a paste
+    local IFS='' copiedText
+    read -d '' -s -r -t 0.2 copiedText 2>/dev/null || :
+    if [[ -n ${copiedText:-} ]]; then
+      prompt_insertTextAtCurrentIndex "${copiedText}"
+      prompt_onTextChanged
+      return 0
+    fi
+  fi
+  _PROMPT_LAST_KEY_PRESSED_TIME=${RETURNED_VALUE}
+
+  # check if we need to open the items box
+  if [[ ${_PROMPT_ITEMS_BOX_SHOWN} != "true" && ${1} != " " ]]; then
+    if [[ ${_PROMPT_AUTOCOMPLETE_WHOLE_LINE} == "true" ]]; then
+      if ((${#_PROMPT_STRING} >= _PROMPT_FILTERS_FROM_N_CHARS)); then
+        prompt_openItemsBox
+        return 0
+      fi
+    else
+      # count the number of characters that are not spaces before the cursor
+      local -i count=0
+      while [[ ${count} -lt ${_PROMPT_FILTERS_FROM_N_CHARS} && $((_PROMPT_STRING_INDEX - count - 1)) -gt 0 && ${_PROMPT_STRING:_PROMPT_STRING_INDEX-count-1:1} == [^[:space:]] ]]; do
+        count+=1
+      done
+      if ((count >= _PROMPT_FILTERS_FROM_N_CHARS)); then
+        prompt_openItemsBox
         return 0
       fi
     fi
-
-    # check if we need to open the items box
-    if [[ ${_PROMPT_ITEMS_BOX_SHOWN} != "true" && ${2:-} != " " ]]; then
-      if [[ ${_PROMPT_AUTOCOMPLETE_WHOLE_LINE} == "true" ]]; then
-        if ((${#_PROMPT_STRING} >= _PROMPT_FILTERS_FROM_N_CHARS)); then
-          prompt_openItemsBox
-          return 0
-        fi
-      else
-        # count the number of characters that are not spaces before the cursor
-        local -i count=0
-        while [[ ${count} -lt ${_PROMPT_FILTERS_FROM_N_CHARS} && $((_PROMPT_STRING_INDEX - count - 1)) -gt 0 && ${_PROMPT_STRING:_PROMPT_STRING_INDEX-count-1:1} == [^[:space:]] ]]; do
-          count+=1
-        done
-        if ((count >= _PROMPT_FILTERS_FROM_N_CHARS)); then
-          prompt_openItemsBox
-          return 0
-        fi
-      fi
-    fi
-    ;;
-  esac
+  fi
 }
 
 function prompt_onTextChanged() {
@@ -868,15 +900,25 @@ function prompt_drawPrompt() {
   prompt_getDisplayedPromptString
   GLOBAL_CURSOR_LINE="${_PROMPT_START_LINE}"
   GLOBAL_CURSOR_COLUMN=$((_PROMPT_START_COLUMN + _PROMPT_SYMBOL_LENGTH + RETURNED_VALUE2))
+  local -i spaceLeft=$((_PROMPT_STRING_SCREEN_WIDTH - ${#RETURNED_VALUE}))
 
   if [[ ${_PROMPT_PASSWORD_MODE} == "true" ]]; then
     RETURNED_VALUE="${RETURNED_VALUE//[^…]/*}"
   fi
   if [[ -z ${RETURNED_VALUE} && -n ${_PROMPT_PLACEHOLDER} ]]; then
     RETURNED_VALUE="${_PROMPT_COLOR_STATIC}${_PROMPT_PLACEHOLDER}${_PROMPT_COLOR_STATIC_RESET}"
+    spaceLeft=$((_PROMPT_STRING_SCREEN_WIDTH - ${#_PROMPT_PLACEHOLDER}))
+  fi
+  local spaces=""
+  if ((spaceLeft > 0)); then
+    if ((spaceLeft == 1)); then
+      spaces=" "
+    else
+      spaces=" ${AC__REPEAT__}$((spaceLeft - 1))${__AC__LAST_CHAR}"
+    fi
   fi
 
-  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__AC__TO}${AC__ERASE__}${_PROMPT_WIDTH}${__AC_CHARS}"$'\r'"${_PROMPT_COLOR_STATIC}${_PROMPT_SYMBOL}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_STRING}${RETURNED_VALUE}${_PROMPT_COLOR_STRING_RESET}${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__AC__TO}${_PROMPT_COLOR_STATIC}${_PROMPT_SYMBOL}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_STRING}${RETURNED_VALUE}${spaces}${_PROMPT_COLOR_STRING_RESET}${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
 }
 
 # Clear the prompt line
@@ -931,6 +973,7 @@ function prompt_updateItemsBox() {
   prompt_drawItemsBox
 }
 
+# Assign _PROMPT_CURRENT_WORD to the currently edited word (if any)
 function prompt_setCurrentWord() {
   if [[ ${_PROMPT_AUTOCOMPLETE_WHOLE_LINE} == "true" ]]; then
     _PROMPT_CURRENT_WORD="${_PROMPT_STRING}"
@@ -950,6 +993,7 @@ function prompt_setCurrentWord() {
   fi
 }
 
+# Filter the items of the autocompletion box, will either filter synchronously or asynchronously
 function prompt_filterItems() {
   if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} != "true" ]]; then
     return 0
@@ -969,25 +1013,41 @@ function prompt_filterItems() {
     return 0
   fi
 
-  if [[ -n ${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING:-} && ${_PROMPT_ITEMS_BOX_FILTER_STRING} == "${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING}"* && (${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} != "true" || ${#_PROMPT_FILTERED_ITEMS} -lt 242) ]]; then
+  # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
+  # shellcheck disable=SC2178
+  local -n RETURNED_ARRAY=_PROMPT_FILTERED_ITEMS
+  # shellcheck disable=SC2034
+  local -n RETURNED_ARRAY2=_PROMPT_FILTERED_ITEMS_CORRESPONDENCES
+
+  if [[ -n ${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING:-} && ${_PROMPT_ITEMS_BOX_FILTER_STRING} == "${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING}"* && (${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} == "true" || ${#_PROMPT_FILTERED_ITEMS[@]} -lt 242) ]]; then
+    if ((${#_PROMPT_FILTERED_ITEMS[@]} == 0)); then
+      return 0
+    fi
     # if the current filter string is a prefix of the previous one, we can filter the already filtered items
-    prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_FILTERED_ITEMS
+    local -a _PROMPT_PRE_FILTERED_ITEMS=("${_PROMPT_FILTERED_ITEMS[@]}")
+    local -a _PROMPT_PRE_FILTERED_ITEMS_CORRESPONDENCES=("${_PROMPT_FILTERED_ITEMS_CORRESPONDENCES[@]}")
+    array::fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_PRE_FILTERED_ITEMS
     _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING="${_PROMPT_ITEMS_BOX_FILTER_STRING}"
+    # we need to update the correspondences
+    local -i index
+    for index in "${!_PROMPT_FILTERED_ITEMS_CORRESPONDENCES[@]}"; do
+      _PROMPT_FILTERED_ITEMS_CORRESPONDENCES[index]="${_PROMPT_PRE_FILTERED_ITEMS_CORRESPONDENCES[${_PROMPT_FILTERED_ITEMS_CORRESPONDENCES[index]}]}"
+    done
     return 0
   fi
 
-  if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY:-true} == "true" ]]; then
-    prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
+  if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} == "true" ]]; then
+    array::fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
     _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING="${_PROMPT_ITEMS_BOX_FILTER_STRING}"
   else
     # asynchronous filtering
     rm -f "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}" &>/dev/null || :
     prompt_filterItemsAsync 1>&2 &
     GLOBAL_BACKGROUND_JOB1_PID="$!"
-
   fi
 }
 
+# Filter the items of the autocompletion box asynchronously
 function prompt_filterItemsAsync() {
   echo "${_PROMPT_ITEMS_BOX_FILTER_STRING}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILTER_STRING}"
 
@@ -1004,8 +1064,14 @@ function prompt_filterItemsAsync() {
       : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
     fi
   else
+    # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
+    # shellcheck disable=SC2178
+    local -n RETURNED_ARRAY=_PROMPT_FILTERED_ITEMS
+    # shellcheck disable=SC2034
+    local -n RETURNED_ARRAY2=_PROMPT_FILTERED_ITEMS_CORRESPONDENCES
+
     # sort with bash
-    prompt_fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
+    array::fuzzyFilterSort "${_PROMPT_ITEMS_BOX_FILTER_STRING}" _PROMPT_ORIGINAL_ITEMS
     local IFS=$'\n'
     if ((${#_PROMPT_FILTERED_ITEMS[@]} > 0)); then
       echo "${_PROMPT_FILTERED_ITEMS[*]}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
@@ -1016,6 +1082,7 @@ function prompt_filterItemsAsync() {
   fi
 }
 
+# Kill the background job that filters the items asynchronously
 function prompt_filterItemsAsyncKill() {
   if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
     kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
@@ -1061,8 +1128,8 @@ function prompt_drawItemsBox() {
   # draw the items
   _PROMPT_ITEMS_BOX_ITEM_WIDTH="$((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH))"
 
-  local -i line
-  local -i showAtLine
+  local -i line showAtLine index
+  local spaces
   for ((line = 0; line < _PROMPT_ITEMS_BOX_HEIGHT - showCountAtTop; line++)); do
     if [[ ${_PROMPT_ITEMS_BOX_REVERSE_MODE} == "true" ]]; then
       showAtLine=$((_PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_HEIGHT - 1 - line - showCountAtTop))
@@ -1071,22 +1138,32 @@ function prompt_drawItemsBox() {
     fi
     index=$((_PROMPT_FILTERED_ITEMS_START_INDEX + line))
 
-    # position and erase the line
-    toPrint+="${AC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__AC__TO}${AC__ERASE__}${_PROMPT_ITEMS_BOX_WIDTH}${__AC_CHARS}"
+    # position
+    toPrint+="${AC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__AC__TO}"
 
     if ((index >= ${#_PROMPT_FILTERED_ITEMS[@]})); then
       # nothing to show for this line
+      toPrint+="${AC__ERASE__}${_PROMPT_ITEMS_BOX_WIDTH}${__AC_CHARS}"
       continue
     fi
 
-    # get the item display string in RETURNED_VALUE
+    # get the item display string in _PROMPT_ITEMS_BOX_ITEM_DISPLAYED
     _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${_PROMPT_FILTERED_ITEMS[${index}]}"
     if "${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}"; then
+      if ((RETURNED_VALUE > 0)); then
+        if ((RETURNED_VALUE == 1)); then
+          spaces=" "
+        else
+          spaces=" ${AC__REPEAT__}$((RETURNED_VALUE - 1))${__AC__LAST_CHAR}"
+        fi
+      else
+        spaces=""
+      fi
       if ((index == _PROMPT_FILTERED_ITEMS_SELECTED_INDEX)); then
         # highlight the selected item
-        toPrint+="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
+        toPrint+="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${spaces}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
       else
-        toPrint+="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
+        toPrint+="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${spaces}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
       fi
     fi
   done
@@ -1168,25 +1245,34 @@ function prompt_clearItemsBox() {
 # This function will truncate a string without taking into account
 # the ANSI escape sequences for text formatting (i.e. the `\e[*m` format).
 #
-# - $_PROMPT_ITEMS_BOX_ITEM_DISPLAYED: **string** _as string_:
+# - ${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED} _as string_:
 #       the string to truncate
-# - $_PROMPT_ITEMS_BOX_ITEM_WIDTH: **visible characters** _as int_:
+# - ${_PROMPT_ITEMS_BOX_ITEM_WIDTH} _as int_:
 #       the number of visible characters
-# - $_PROMPT_ITEMS_BOX_FILTER_STRING: **search string** _as string_:
+# - ${_PROMPT_ITEMS_BOX_FILTER_STRING} _as string_:
 #       the string to search for in the string
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the truncated string
+# - ${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}: the truncated string
+# - ${RETURNED_VALUE}: the space left
+#       i.e. (_PROMPT_ITEMS_BOX_ITEM_WIDTH - the length of visible characters in _PROMPT_ITEMS_BOX_ITEM_DISPLAYED)
 #
 # ```bash
 # prompt::getItemDisplayedString "This is a long string that will be displayed in the screen." 20
-# echo "${RETURNED_VALUE}"
+# echo "${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}"
 # ```
 function prompt::getItemDisplayedString() {
   local -i stringLength=${#_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_STRING} && ${stringLength} -le ${_PROMPT_ITEMS_BOX_ITEM_WIDTH} ]]; then
     # no filter string, no need to truncate
+    if [[ ${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED} == *$'\e'* ]]; then
+      local realWord="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED//$'\e['[0-9][0-9]m/}"
+      realWord="${realWord//$'\e['[0-9]m/}"
+      RETURNED_VALUE=$((_PROMPT_ITEMS_BOX_ITEM_WIDTH - ${#realWord}))
+    else
+      RETURNED_VALUE=$((_PROMPT_ITEMS_BOX_ITEM_WIDTH - stringLength))
+    fi
     return 0
   fi
 
@@ -1202,6 +1288,7 @@ function prompt::getItemDisplayedString() {
       # we reached the desired size
       itemChunk="${itemChunk:0:$((_PROMPT_ITEMS_BOX_ITEM_WIDTH - 1 - itemDisplayedLength))}…"
       _PROMPT_ITEMS_BOX_ITEM_DISPLAYED=""
+      itemDisplayedLength=${_PROMPT_ITEMS_BOX_ITEM_WIDTH}
     else
       # otherwise we will continue in the next loop
       _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED:${#itemChunk}}"
@@ -1231,6 +1318,7 @@ function prompt::getItemDisplayedString() {
   done
 
   _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${itemDisplayed}"
+  RETURNED_VALUE=$((_PROMPT_ITEMS_BOX_ITEM_WIDTH - itemDisplayedLength))
 }
 
 # A function to show an error message
@@ -1300,8 +1388,8 @@ function prompt_clearErrorBox() {
 #
 # Returns:
 #
-# - `_OPTION_FILTERED_ITEMS_SELECTED_INDEX`: The new index.
-# - `_OPTION_FILTERED_ITEMS_START_INDEX`: The new start index if needed.
+# - ${_OPTION_FILTERED_ITEMS_SELECTED_INDEX}: The new index.
+# - ${_OPTION_FILTERED_ITEMS_START_INDEX}: The new start index if needed.
 #
 # ```bash
 # prompt_changeSelectedItemIndex 1
@@ -1445,33 +1533,24 @@ function prompt_autocompleteWithSelectedItem() {
 
 # Get the index delta to move to the beginning of the word (or previous).
 function prompt_getIndexDeltaToBeginningOfWord() {
-  # move to beginning of the previous word
-  local -i index=${_PROMPT_STRING_INDEX}
-  index+=-1
-  while [[ ${index} -gt 0 && ${_PROMPT_STRING:index:1} == [[:space:]] ]]; do
-    index+=-1
-  done
-  while [[ ${index} -gt 0 && ${_PROMPT_STRING:index:1} == [^[:space:]] ]]; do
-    if [[ ${index} -ge 1 && ${_PROMPT_STRING:index-1:1} == [[:space:]] ]]; then
-      break
-    fi
-    index=$((index - 1))
-  done
-  RETURNED_VALUE=$(((index >= 0 ? index : 0) - _PROMPT_STRING_INDEX))
+  local str="${_PROMPT_STRING:0:_PROMPT_STRING_INDEX}"
+  RETURNED_VALUE="${#str}"
+  # delete the trailing spaces
+  str="${str%"${str##*[^[:space:]]}"}"
+  # delete the last word
+  str="${str%"${str##*[[:space:]]}"}"
+  RETURNED_VALUE=$(((RETURNED_VALUE - ${#str}) * -1))
 }
 
 # Get the index delta to move to the end of the word (or next).
 function prompt_getIndexDeltaToEndOfWord() {
-  # move to the end of the word
-  local -i index=${_PROMPT_STRING_INDEX}
-  index+=1
-  while [[ ${index} -lt ${#_PROMPT_STRING} && ${_PROMPT_STRING:index:1} == [[:space:]] ]]; do
-    index+=1
-  done
-  while [[ ${index} -lt ${#_PROMPT_STRING} && ${_PROMPT_STRING:index:1} == [^[:space:]] ]]; do
-    index=$((index + 1))
-  done
-  RETURNED_VALUE=$(((index <= ${#_PROMPT_STRING} ? index : ${#_PROMPT_STRING}) - _PROMPT_STRING_INDEX))
+  local str="${_PROMPT_STRING:_PROMPT_STRING_INDEX}"
+  RETURNED_VALUE="${#str}"
+  # delete the leading spaces
+  str="${str#"${str%%[^[:space:]]*}"}"
+  # delete the first word
+  str="${str#"${str%%[[:space:]]*}"}"
+  RETURNED_VALUE=$((RETURNED_VALUE - ${#str}))
 }
 
 # Returns the index of the item in the original array (if any, or -1).
@@ -1599,17 +1678,3 @@ function prompt_getDisplayedPromptString() {
   RETURNED_VALUE="${screenString}"
   RETURNED_VALUE2=${screenIndex}
 }
-
-# we will redefine array::fuzzyFilterSort to a new function that uses global variables
-# this is to avoid copying parameters to the function and hopefully be faster
-function prompt_fuzzyFilterSort() { :; }
-bash::getFunctionDefinitionWithGlobalVars array::fuzzyFilterSort prompt_fuzzyFilterSort _PROMPT_ITEMS_BOX_FILTER_STRING _PROMPT_ORIGINAL_ITEMS
-RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY2/_PROMPT_FILTERED_ITEMS_CORRESPONDENCES}"
-RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY/_PROMPT_FILTERED_ITEMS}"
-RETURNED_VALUE="${RETURNED_VALUE/array::fuzzyFilterSortQuicksort/prompt_fuzzyFilterSortQuicksort}"
-eval "${RETURNED_VALUE}"
-
-bash::getFunctionDefinitionWithGlobalVars array::fuzzyFilterSortQuicksort prompt_fuzzyFilterSortQuicksort
-RETURNED_VALUE="${RETURNED_VALUE//RETURNED_ARRAY2/_PROMPT_FILTERED_ITEMS_CORRESPONDENCES}"
-RETURNED_VALUE="${RETURNED_VALUE//array::fuzzyFilterSortQuicksort/prompt_fuzzyFilterSortQuicksort}"
-eval "${RETURNED_VALUE}"

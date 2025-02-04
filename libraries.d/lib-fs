@@ -555,43 +555,6 @@ function fs::createLink() {
   log::debug "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
 }
 
-# ## fs::getFileMaxLineLength
-#
-# Get the maximum line length of a file.
-#
-# - $1: **path** _as string_:
-#       the file path to read
-#
-# Returns:
-#
-# - ${RETURNED_VALUE}: The maximum line length of the file.
-#
-# ```bash
-# fs::getFileMaxLineLength "/path/to/file"
-# local maxLineLength="${RETURNED_VALUE}"
-# ```
-function fs::getFileMaxLineLength() {
-  local filePath="${1}"
-
-  if [[ ${VALET_CONFIG_STRICT_PURE_BASH:-false} != "true" ]] && command -v awk &>/dev/null; then
-    # shellcheck source=lib-exe
-    source exe
-    exe::captureOutput awk 'BEGIN { maxLength = 0 } { if (length > maxLength) maxLength = length } END { print maxLength }' "${filePath}"
-    RETURNED_VALUE=${RETURNED_VALUE%%[[:space:]]}
-    return 0
-  fi
-
-  local -i maxLineLength=0 currentLineLength=0
-  local IFS=$'\n'
-  while read -rd $'\n' || [[ -n ${REPLY:-} ]]; do
-    currentLineLength=${#REPLY}
-    if (( currentLineLength > maxLineLength )); then
-      maxLineLength=${currentLineLength}
-    fi
-  done <"${filePath}"
-  RETURNED_VALUE="${maxLineLength}"
-}
-
 # ## fs::getFileLineCount
 #
 # Get the number of lines in a file.
@@ -609,15 +572,6 @@ function fs::getFileMaxLineLength() {
 # ```
 function fs::getFileLineCount() {
   local filePath="${1}"
-
-  if [[ ${VALET_CONFIG_STRICT_PURE_BASH:-false} != "true" ]] && command -v awk &>/dev/null; then
-    # shellcheck source=lib-exe
-    source exe
-    exe::captureOutput awk 'END { print NR }' "${filePath}"
-    RETURNED_VALUE=${RETURNED_VALUE%%[[:space:]]}
-    return 0
-  fi
-
   local -i lineCount=0
   while read -rd $'\n' || [[ -n ${REPLY:-} ]]; do
     ((lineCount++))

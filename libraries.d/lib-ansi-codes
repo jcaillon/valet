@@ -142,6 +142,8 @@ __AC__SCROLL_DOWN=$'T'
 # Reports the cursor position to the application as (as ESC[n;mR), where n is the line and m is the column.
 AC__REQUEST_CURSOR_POSITION=$'\e[6n'
 
+# About AC__ERASE*: try not to use them to clear characters that you will immediately rewrite
+#                   because it will cause flickering, use it to actually get empty space.
 # erase in display or line
 # clear from cursor to end of screen
 AC__ERASE_LINES_BELOW=$'\e[0J'
@@ -155,7 +157,6 @@ AC__ERASE_CHARS_RIGHT=$'\e[0K'
 AC__ERASE_CHARS_LEFT=$'\e[1K'
 # clear entire line
 AC__ERASE_LINE=$'\e[2K'
-
 # Erase a set number of characters "${AC__ERASE__}2${__AC_CHARS}"
 AC__ERASE__=$'\e['
 __AC_CHARS=$'X'

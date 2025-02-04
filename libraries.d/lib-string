@@ -193,8 +193,8 @@ function string::trimAll() {
 # string::trim "   example string    " && local trimmedString="${RETURNED_VALUE}"
 # ```
 function string::trim() {
-  RETURNED_VALUE="${1#"${1%%[![:space:]]*}"}"
-  RETURNED_VALUE="${RETURNED_VALUE%"${RETURNED_VALUE##*[![:space:]]}"}"
+  RETURNED_VALUE="${1#"${1%%[^[:space:]]*}"}"
+  RETURNED_VALUE="${RETURNED_VALUE%"${RETURNED_VALUE##*[^[:space:]]}"}"
 }
 
 # ## string::indexOf

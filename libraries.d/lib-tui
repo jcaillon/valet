@@ -383,12 +383,14 @@ function tui::testWaitForChar() {
 # It uses the read builtin command. This will not detect all key combinations.
 # The output will depend on the terminal used and the character sequences it sends on each key press.
 #
-# For more advanced use cases, you can use `tui::waitForKeyPress`.
+# Some special keys are translated into more readable strings:
+# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
+# However, this is not at all exhaustive and will depend on the terminal used. Use `tui::waitForKeyPress`
+# if you need to listen to special keys.
+#
 # This simple implementation does not rely on GNU readline and does not require terminal options
 # to be set using `tui::setTerminalOptions`.
 #
-# Some special keys are translated into more readable strings:
-# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
 #
 # - $@: **read parameters** _as any_:
 #       additional parameters to pass to the read command
@@ -408,8 +410,8 @@ function tui::testWaitForChar() {
 # > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>
 function tui::waitForChar() {
   LAST_KEY_PRESSED=""
-  local IFS
-  IFS='' read "$@" -d '' -srn 1 LAST_KEY_PRESSED || :
+  local IFS=''
+  read "$@" -d '' -srn 1 LAST_KEY_PRESSED || :
 
   LAST_KEY_PRESSED="${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:-}${LAST_KEY_PRESSED}"
   PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
@@ -523,16 +525,11 @@ function tui::waitForKeyPress() {
   LAST_KEY_PRESSED=""
   # here we redirect the error output to null because of a bug in bash, it
   # prints a newline each time read is called with -e, idk why...
-  local IFS
-  IFS='' read "$@" -e -d '' -s -r -n 1 LAST_KEY_PRESSED 2>/dev/null || :
+  local IFS=''
+  read "$@" -e -d '' -s -r -n 1 LAST_KEY_PRESSED 2>/dev/null || :
   if [[ -z ${LAST_KEY_PRESSED} ]]; then
     return 1
   fi
-  case ${LAST_KEY_PRESSED} in
-    $'\b' | $'\177') LAST_KEY_PRESSED="BACKSPACE" ;;
-    $'\023') LAST_KEY_PRESSED="CTRL+BACKSPACE" ;;
-    $'\r') LAST_KEY_PRESSED=$'\n' ;;
-  esac
   return 0
 }
 
@@ -571,17 +568,16 @@ function tui::rebindKeymap() {
     core::fail "The function ⌜${callBackFunction}⌝ must be defined before calling tui::rebindKeymap."
   fi
 
-  if [[ -n ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
-    # already done
-    return 0
+  if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
+    # save the original bindings
+    fs::createTempFile
+    _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
+    exe::invokef2 true bind -p
+    mv -f "${RETURNED_VALUE}" "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
   fi
 
   # remove all existing bindings except the self-insert ones
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
-  fs::createTempFile
-  _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
-  exe::invokef2 true bind -p
-  \mv -f "${RETURNED_VALUE}" "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
   fs::readFile "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
   local bindings="${RETURNED_VALUE}"
   local IFS=$'\n'
@@ -778,8 +774,8 @@ function tui::restoreBindings() {
 
   # restore the default bindings
   bind -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}" &>/dev/null
-  rm -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}" &>/dev/null || :
-  unset -v _INTERACTIVE_SAVED_BINDINGS_FILE
+
+  # we don't remove the original bindings file because we might want to rebind again
 }
 
 # ## tui::clearKeyPressed

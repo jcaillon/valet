@@ -216,7 +216,28 @@ _PROMPT_ITEMS_BOX_ITEM_DISPLAYED='HellO wOrld'
 
 ❯ `prompt::getItemDisplayedString`
 
+Returned variables:
+
+```text
+RETURNED_VALUE='0'
+```
+
 `H>e<>l<l…`
+
+```text
+_PROMPT_ITEMS_BOX_ITEM_WIDTH='15'
+_PROMPT_ITEMS_BOX_ITEM_DISPLAYED='HellO wOrld'
+```
+
+❯ `prompt::getItemDisplayedString`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='4'
+```
+
+`H>e<>l<l>O< wO>r<ld`
 
 ```text
 _PROMPT_ITEMS_BOX_ITEM_WIDTH='10'
@@ -224,6 +245,12 @@ _PROMPT_ITEMS_BOX_ITEM_DISPLAYED='[36mHellO[0m wOrld'
 ```
 
 ❯ `prompt::getItemDisplayedString`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='0'
+```
 
 `[36mH>e<>l<l>O<[0m wO>r<…`
 
@@ -233,6 +260,12 @@ _PROMPT_ITEMS_BOX_ITEM_DISPLAYED='[36mHellO[0m wOrld'
 ```
 
 ❯ `prompt::getItemDisplayedString`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='0'
+```
 
 `[36mH>e<>l<l>O<[0m wO>r<ld`
 
@@ -246,5 +279,143 @@ _PROMPT_ITEMS_BOX_ITEM_DISPLAYED='[7m[35md[27m[39m[7m[35mi[27m[39msable 
 
 ❯ `prompt::getItemDisplayedString`
 
+Returned variables:
+
+```text
+RETURNED_VALUE='0'
+```
+
 `[7m[35md[27m[39m[7m[35mi[27m[39ms[4ma[24m[4mb[24mle the [93mm[4mo[24mnitor [4mm[24mode to [4ma[24mvoid[39m the "Ter[4mm[24minated" message [4mw[24mith [4me[24mxit c…`
+
+### ✅ Testing prompt_getIndexDeltaToBeginningOfWord
+
+❯ `_PROMPT_STRING_INDEX=0 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='0'
+```
+
+❯ `_PROMPT_STRING_INDEX=5 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-5'
+```
+
+❯ `_PROMPT_STRING_INDEX=6 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-6'
+```
+
+❯ `_PROMPT_STRING_INDEX=9 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-3'
+```
+
+❯ `_PROMPT_STRING_INDEX=11 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-5'
+```
+
+❯ `_PROMPT_STRING_INDEX=12 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-6'
+```
+
+❯ `_PROMPT_STRING_INDEX=13 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-7'
+```
+
+❯ `_PROMPT_STRING_INDEX=20 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-7'
+```
+
+### ✅ Testing prompt_getIndexDeltaToEndOfWord
+
+❯ `_PROMPT_STRING_INDEX=0 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='5'
+```
+
+❯ `_PROMPT_STRING_INDEX=4 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='1'
+```
+
+❯ `_PROMPT_STRING_INDEX=5 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='8'
+```
+
+❯ `_PROMPT_STRING_INDEX=8 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='5'
+```
+
+❯ `_PROMPT_STRING_INDEX=10 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='3'
+```
+
+❯ `_PROMPT_STRING_INDEX=11 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='2'
+```
+
+❯ `_PROMPT_STRING_INDEX=12 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='1'
+```
+
+❯ `_PROMPT_STRING_INDEX=20 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='0'
+```
 
