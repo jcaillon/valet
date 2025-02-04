@@ -227,8 +227,9 @@ function prompt::input() {
   _PROMPT_PASSWORD_MODE="${_OPTION_PASSWORD_MODE:-false}"
 
   _PROMPT_NB_PROMPT_LINES="${_OPTION_NB_PROMPT_LINES:-1}"
+  _PROMPT_MULTI_LINE=false
   if ((_PROMPT_NB_PROMPT_LINES > 1)); then
-    _PROMPT_MULTI_LINE="${_OPTION_MULTI_LINE:-false}"
+    _PROMPT_MULTI_LINE=true
   fi
 
   _PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE="${_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE:-}"
@@ -964,7 +965,8 @@ function prompt_clearPrompt() {
 }
 
 function prompt_drawMultiLinePrompt() {
-  string::wrapWords "${_PROMPT_STRING}" "${_PROMPT_STRING_SCREEN_WIDTH}"
+  prompt_getMultiLinePrompt
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__AC__TO}${RETURNED_VALUE}${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
 }
 
 # Clear the multi-line prompt
@@ -1004,6 +1006,10 @@ function prompt_updateItemsBox() {
   # if the box is opened and the previous character is a space, we close the box
   if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" && ${_PROMPT_AUTOCOMPLETE_WHOLE_LINE} != "true" && ${_PROMPT_STRING_INDEX} -gt 0 && ${_PROMPT_STRING:_PROMPT_STRING_INDEX-1:1} == [[:space:]] ]]; then
     prompt_clearItemsBox
+    # in that case, we also reset the items
+    _PROMPT_FILTERED_ITEMS=("${_PROMPT_ORIGINAL_ITEMS[@]}")
+    _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
+    _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING=""
   fi
 
   if [[ ${_PROMPT_ITEMS_BOX_SHOWN} != "true" ]]; then
@@ -1053,6 +1059,7 @@ function prompt_filterItems() {
   if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_STRING} ]]; then
     _PROMPT_FILTERED_ITEMS=("${_PROMPT_ORIGINAL_ITEMS[@]}")
     _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
+    _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING=""
     return 0
   fi
 
@@ -1176,6 +1183,10 @@ function prompt_drawItemsBox() {
 
   # draw the items
   _PROMPT_ITEMS_BOX_ITEM_WIDTH="$((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH))"
+  _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS="${_PROMPT_ITEMS_BOX_NB_DISPLAYABLE_ITEMS}"
+  if ((${#_PROMPT_FILTERED_ITEMS[@]} < _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS)); then
+    _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS=${#_PROMPT_FILTERED_ITEMS[@]}
+  fi
 
   local -i line showAtLine index
   local spaces
@@ -1233,14 +1244,14 @@ function prompt_drawItemsBox() {
       fi
     else
       # case where we display the count
-      local lastItemNumber=$((_PROMPT_FILTERED_ITEMS_START_INDEX + _PROMPT_ITEMS_BOX_NB_DISPLAYABLE_ITEMS))
+      local lastItemNumber=$((_PROMPT_FILTERED_ITEMS_START_INDEX + _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS))
       if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} != "true" ]]; then
         # case of ' 00-00'
         local itemCounterLength=$((2 + ${#lastItemNumber} * 2))
         printf -v itemsCounter " %s%0${#lastItemNumber}i-%i%s" "${_PROMPT_COLOR_COUNT}" "${_PROMPT_FILTERED_ITEMS_START_INDEX}" "${lastItemNumber}" "${_PROMPT_COLOR_COUNT_RESET}"
       else
         itemCounterLength=$((7 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 2 + ${#lastItemNumber} * 2))
-        if ((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH >= itemCounterLength && _PROMPT_ITEMS_BOX_NB_DISPLAYABLE_ITEMS > 1)); then
+        if ((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH >= itemCounterLength && _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS > 1)); then
           # case of ' 00-00 of 00/00'
           printf -v itemsCounter " %s%0${#lastItemNumber}i-%i%s of %s%0${#_PROMPT_ORIGINAL_ITEMS_COUNT}i%s/%i%s" "${_PROMPT_COLOR_COUNT}" "${_PROMPT_FILTERED_ITEMS_START_INDEX}" "${lastItemNumber}" "${_PROMPT_COLOR_COUNT_RESET}${_PROMPT_COLOR_STATIC}" "${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_COUNT}" "${#_PROMPT_FILTERED_ITEMS[@]}" "${_PROMPT_COLOR_COUNT_RESET}${_PROMPT_COLOR_STATIC}" "${_PROMPT_ORIGINAL_ITEMS_COUNT}" "${_PROMPT_COLOR_STATIC_RESET}"
         else
@@ -1258,10 +1269,10 @@ function prompt_drawItemsBox() {
     fi
 
     if [[ ${_PROMPT_ITEMS_BOX_REVERSE_MODE} == "true" ]]; then
-      showAtLine=$((showCountAtTop == 1 ? _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_HEIGHT - 1 : _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_HEIGHT - 1 - _PROMPT_ITEMS_BOX_NB_DISPLAYABLE_ITEMS))
+      showAtLine=$((showCountAtTop == 1 ? _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_HEIGHT - 1 : _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_HEIGHT - 1 - _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS))
 
     else
-      showAtLine=$((showCountAtTop == 1 ? _PROMPT_ITEMS_BOX_TOP : _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_NB_DISPLAYABLE_ITEMS))
+      showAtLine=$((showCountAtTop == 1 ? _PROMPT_ITEMS_BOX_TOP : _PROMPT_ITEMS_BOX_TOP + _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS))
     fi
 
     local counterSymbol
@@ -1592,24 +1603,32 @@ function prompt_autocompleteWithSelectedItem() {
 
 # Get the index delta to move to the beginning of the word (or previous).
 function prompt_getIndexDeltaToBeginningOfWord() {
-  local str="${_PROMPT_STRING:0:_PROMPT_STRING_INDEX}"
-  RETURNED_VALUE="${#str}"
-  # delete the trailing spaces
-  str="${str%"${str##*[^[:space:]]}"}"
-  # delete the last word
-  str="${str%"${str##*[[:space:]]}"}"
-  RETURNED_VALUE=$(((RETURNED_VALUE - ${#str}) * -1))
+  # move to beginning of the previous word
+  local -i index=${_PROMPT_STRING_INDEX}
+  index+=-1
+  while [[ ${index} -gt 0 && ${_PROMPT_STRING:index:1} == [[:space:]] ]]; do
+    index+=-1
+  done
+  while [[ ${index} -gt 0 && ${_PROMPT_STRING:index:1} == [^[:space:]] ]]; do
+    if [[ ${index} -ge 1 && ${_PROMPT_STRING:index-1:1} == [[:space:]] ]]; then
+      break
+    fi
+    index=$((index - 1))
+  done
+  RETURNED_VALUE=$(((index >= 0 ? index : 0) - _PROMPT_STRING_INDEX))
 }
 
 # Get the index delta to move to the end of the word (or next).
 function prompt_getIndexDeltaToEndOfWord() {
-  local str="${_PROMPT_STRING:_PROMPT_STRING_INDEX}"
-  RETURNED_VALUE="${#str}"
-  # delete the leading spaces
-  str="${str#"${str%%[^[:space:]]*}"}"
-  # delete the first word
-  str="${str#"${str%%[[:space:]]*}"}"
-  RETURNED_VALUE=$((RETURNED_VALUE - ${#str}))
+  # move to the end of the word
+  local -i index=${_PROMPT_STRING_INDEX}
+  while [[ ${index} -lt ${#_PROMPT_STRING} && ${_PROMPT_STRING:index:1} == [[:space:]] ]]; do
+    index+=1
+  done
+  while [[ ${index} -lt ${#_PROMPT_STRING} && ${_PROMPT_STRING:index:1} == [^[:space:]] ]]; do
+    index=$((index + 1))
+  done
+  RETURNED_VALUE=$(((index <= ${#_PROMPT_STRING} ? index : ${#_PROMPT_STRING}) - _PROMPT_STRING_INDEX))
 }
 
 # Returns the index of the item in the original array (if any, or -1).
@@ -1737,3 +1756,4 @@ function prompt_getDisplayedPromptString() {
   RETURNED_VALUE="${screenString}"
   RETURNED_VALUE2=${screenIndex}
 }
+

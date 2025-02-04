@@ -753,3 +753,16 @@ RETURNED_VALUE='1 line one
 '
 ```
 
+### ✅ Testing string::doForEachLine
+
+❯ `string::doForEachLine MULTI_LINES_TEXT3 forEachLine`
+
+**Standard output**:
+
+```text
+Line: '1 line one'
+Line: ''
+Line: '3 line three'
+Line: '4 line four'
+```
+

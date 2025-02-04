@@ -286,10 +286,9 @@ function string::indexOf() {
 # local extractedText="${RETURNED_VALUE}"
 # ```
 function string::extractBetween() {
-  local string start end
-  string="${1}"
-  start="${2}"
-  end="${3}"
+  local string="${1}"
+  local start="${2}"
+  local end="${3}"
 
   local -i startIndex endIndex
 
@@ -393,12 +392,44 @@ function string::head() {
   local -i ii=0
   while ((ii < nbLines)); do
     chunk="${string%%$'\n'*}"
-    output+="${chunk}"$'\n'
     string="${string:${#chunk} + 1}"
+    output+="${chunk}"$'\n'
     if [[ -z ${string} ]]; then
       break
     fi
     ii+=1
   done
   RETURNED_VALUE="${output:-}"
+}
+
+# ## string::doForEachLine
+#
+# Execute a callback function for each line of a string.
+#
+# - $1: **string variable name** _as string_:
+#       The name of the variable containing the string.
+# - $2: **callback function** _as string_:
+#       The name of the function to execute for each line.
+#       The function is called with the following arguments:
+#
+#       - $1: the current line content
+#
+#       The function must return 0 if we should continue to the next line, 1 otherwise.
+#       (defaults to empty)
+#
+# ```bash
+# string::doForEachLine myString myCallback
+# ```
+#
+# > This function provides a convenient way to avoid using a "here string" and handles extra
+# > newlines (which is not the case with a "for loop" using parameter expansion and IFS=$'\n').
+# > Here string is significantly slower than using this.
+function string::doForEachLine() {
+  local -n text="${1}"
+  local chunk output
+  while [[ -n ${text} ]]; do
+    chunk="${text%%$'\n'*}"
+    text="${text:${#chunk} + 1}"
+    "${2}" "${chunk}"
+  done
 }

@@ -396,10 +396,10 @@ function fs::listPaths() {
 # ```
 function fs::listFiles() {
   # shellcheck disable=SC2317
-  function ioListFilesReturnTrueIfFile() {
+  function fs_listFilesReturnTrueIfFile() {
     if [[ ! -f ${1} ]]; then return 1; fi
   }
-  fs::listPaths "${1}" "${2:-false}" "${3:-false}" ioListFilesReturnTrueIfFile "${4:-}"
+  fs::listPaths "${1}" "${2:-false}" "${3:-false}" fs_listFilesReturnTrueIfFile "${4:-}"
 }
 
 # ## fs::listDirectories
@@ -432,10 +432,10 @@ function fs::listFiles() {
 # ```
 function fs::listDirectories() {
   # shellcheck disable=SC2317
-  function ioListDirectoriesReturnTrueIfDirectory() {
+  function fs_listDirectoriesReturnTrueIfDirectory() {
     if [[ ! -d ${1} ]]; then return 1; fi
   }
-  fs::listPaths "${1}" "${2:-false}" "${3:-false}" ioListDirectoriesReturnTrueIfDirectory "${4:-}"
+  fs::listPaths "${1}" "${2:-false}" "${3:-false}" fs_listDirectoriesReturnTrueIfDirectory "${4:-}"
 }
 
 # ## fs::isDirectoryWritable

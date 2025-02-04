@@ -14,7 +14,7 @@ function test_prompt_getIndexDeltaToEndOfWord() {
   test::title "✅ Testing prompt_getIndexDeltaToEndOfWord"
 
   _PROMPT_STRING="Lorem   ipsum"
-  #              ^    ^^  ^ ^^^
+  #               _   __  _ ___
   #               0123456789
   #                        10123
   test::func _PROMPT_STRING_INDEX=0 prompt_getIndexDeltaToEndOfWord
@@ -31,7 +31,7 @@ function test_prompt_getIndexDeltaToBeginningOfWord() {
   test::title "✅ Testing prompt_getIndexDeltaToBeginningOfWord"
 
   _PROMPT_STRING="Lorem ipsum  "
-  #              ^    ^^  ^ ^^^
+  #               _    __  _ ___
   #               0123456789
   #                        10123
   test::func _PROMPT_STRING_INDEX=0 prompt_getIndexDeltaToBeginningOfWord

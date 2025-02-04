@@ -18,6 +18,17 @@ function main() {
   test_string::wrapCharacters
   test_string::highlight
   test_string::head
+  test_string::doForEachLine
+}
+
+function test_string::doForEachLine() {
+  test::title "✅ Testing string::doForEachLine"
+
+  function forEachLine() {
+    echo "Line: '${1}'"
+  }
+
+  test::func string::doForEachLine MULTI_LINES_TEXT3 forEachLine
 }
 
 function test_string::cutField() {
@@ -190,4 +201,11 @@ MULTI_LINES_TEXT2="1 line one
 2 line two
 3 line three
 4 line four"
+
+# shellcheck disable=SC2034
+MULTI_LINES_TEXT3="1 line one
+
+3 line three
+4 line four"
+
 main

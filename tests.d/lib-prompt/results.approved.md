@@ -350,7 +350,7 @@ RETURNED_VALUE='-7'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-7'
+RETURNED_VALUE='-1'
 ```
 
 ### ✅ Testing prompt_getIndexDeltaToEndOfWord
@@ -416,6 +416,6 @@ RETURNED_VALUE='1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='0'
+RETURNED_VALUE='-7'
 ```
 
