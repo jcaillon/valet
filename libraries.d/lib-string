@@ -2,18 +2,174 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# ## string::cutField
+# ## string::trimAll
+#
+# Trim all whitespaces and truncate spaces.
+#
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string to trim.
+#       The variable is modified in place.
+#
+# ```bash
+# MY_STRING="   example "$'\t'"  string    "$'\n'
+# string::trimAll MY_STRING
+# echo "${MY_STRING}"
+# ```
+function string::trimAll() {
+  local -n stringToTrimAll="${1}"
+  set -o noglob +o braceexpand
+  # shellcheck disable=SC2086
+  # shellcheck disable=SC2048
+  local IFS=" "$'\t'$'\n'
+  # shellcheck disable=SC2086
+  # shellcheck disable=SC2048
+  set -- ${stringToTrimAll}
+  stringToTrimAll="$*"
+  set +o noglob -o braceexpand
+}
+
+# ## string::trimEdges
+#
+# Trim leading and trailing whitespaces (not in the middle).
+#
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string to trim.
+#       The variable is modified in place.
+#
+# ```bash
+# MY_STRING="   example  string    "
+# string::trimEdges MY_STRING
+# echo "${MY_STRING}"
+# ```
+function string::trimEdges() {
+  local -n stringToTrim="${1}"
+  stringToTrim="${stringToTrim#"${stringToTrim%%[^[:space:]]*}"}"
+  stringToTrim="${stringToTrim%"${stringToTrim##*[^[:space:]]}"}"
+}
+
+# ## string::convertCamelCaseToSnakeCase
+#
+# This function convert a camelCase string to a SNAKE_CASE string.
+# It uses pure bash.
+# Removes all leading underscores.
+#
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string to convert.
+#       The variable is modified in place.
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the extracted field
+#
+# ```bash
+# MY_STRING="myCamelCaseString"
+# string::convertCamelCaseToSnakeCase MY_STRING
+# echo "${RETURNED_VALUE}"
+# ```
+function string::convertCamelCaseToSnakeCase() {
+  local -n camelCaseStringToConvert="${1}"
+  local -i charIndex strLength=${#camelCaseStringToConvert}
+  local char output=""
+  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
+    char="${camelCaseStringToConvert:charIndex:1}"
+    if [[ ${char} =~ ^[[:upper:]]$ ]]; then
+      output+="_${char^}"
+    else
+      output+="${char^}"
+    fi
+  done
+  while [[ ${output} == _* ]]; do
+    output="${output:1}"
+  done
+  RETURNED_VALUE="${output}"
+}
+
+# ## string::convertKebabCaseToSnakeCase
+#
+# This function convert a kebab-case string to a SNAKE_CASE string.
+# It uses pure bash.
+# Removes all leading dashes.
+#
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string to convert.
+#       The variable is modified in place.
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the extracted field
+#
+# ```bash
+# MY_STRING="my-kebab-case-string"
+# string::convertKebabCaseToSnakeCase MY_STRING
+# echo "${RETURNED_VALUE}"
+# ```
+function string::convertKebabCaseToSnakeCase() {
+  local -n kebabCaseStringToConvert="${1}"
+  local -i charIndex strLength=${#kebabCaseStringToConvert}
+  local char output=""
+  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
+    char="${kebabCaseStringToConvert:charIndex:1}"
+    if [[ ${char} == "-" ]]; then
+      output+="_"
+    else
+      output+="${char^}"
+    fi
+  done
+  while [[ ${output} == _* ]]; do
+    output="${output:1}"
+  done
+  RETURNED_VALUE="${output}"
+}
+
+# ## string::convertKebabCaseToCamelCase
+#
+# This function convert a kebab-case string to a camelCase string.
+# It uses pure bash.
+# Removes all leading dashes.
+#
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string to convert.
+#       The variable is modified in place.
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the extracted field
+#
+# ```bash
+# MY_STRING="my-kebab-case-string"
+# string::convertKebabCaseToCamelCase MY_STRING
+# echo "${RETURNED_VALUE}"
+# ```
+function string::convertKebabCaseToCamelCase() {
+  local -n kebabCaseStringToConvert="${1}"
+  local -i charIndex strLength=${#kebabCaseStringToConvert}
+  local char output=""
+  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
+    char="${kebabCaseStringToConvert:charIndex:1}"
+    if [[ ${char} == "-" ]]; then
+      continue
+    fi
+    if [[ ${kebabCaseStringToConvert:charIndex-1:1} == "-" ]]; then
+      output+="${char^}"
+    else
+      output+="${char,}"
+    fi
+  done
+  RETURNED_VALUE="${output,}"
+}
+
+# ## string::getField
 #
 # Allows to get the nth element of a string separated by a given separator.
 # This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
 # but it uses pure bash to go faster.
 #
-# - $1: **string to cut** _as string_:
-#       the string to cut
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string to extract from.
 # - $2: **field number** _as int_:
-#       the field number to get (starting at 0)
+#       The field number to get (starting at 0).
 # - $3: separator _as string_:
-#       the separator
+#       The separator to use.
 #       (defaults to tab if not provided)
 #
 # Returns:
@@ -21,23 +177,23 @@
 # - ${RETURNED_VALUE}: the extracted field
 #
 # ```bash
-# string::cutField "field1 field2 field3" 1 " " && local field="${RETURNED_VALUE}"
-# printf '%s' "${field}" # will output "field2"
+# MY_STRING="field1 field2 field3"
+# string::getField MY_STRING 1 " "
+# echo "${RETURNED_VALUE}"
 # ```
 #
 # > This is faster than:
 # >
 # > - using read into an array from a here string
 # > - using bash parameter expansion to remove before/after the separator
-function string::cutField() {
-  local str fieldNumber separator
-  str="${1}"
-  fieldNumber="${2}"
-  separator="${3:-$'\t'}"
+function string::getField() {
+  local -n stringToCut="${1}"
+  local fieldNumber="${2}"
+  local separator="${3:-$'\t'}"
 
   local field IFS="${separator}"
   local -i index=0
-  for field in ${str}; do
+  for field in ${stringToCut}; do
     if [[ index -eq fieldNumber ]]; then
       RETURNED_VALUE="${field}"
       return 0
@@ -47,162 +203,12 @@ function string::cutField() {
   RETURNED_VALUE=""
 }
 
-# ## string::convertCamelCaseToSnakeCase
-#
-# This function convert a camelCase string to a SNAKE_CASE string.
-# It uses pure bash.
-# Removes all leading underscores.
-#
-# - $1: **camelCase string** _as string_:
-#       The camelCase string to convert.
-#
-# Returns:
-#
-# - ${RETURNED_VALUE}: The SNAKE_CASE string.
-#
-# ```bash
-# string::convertCamelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
-# ```
-function string::convertCamelCaseToSnakeCase() {
-  local camelCase="${1}"
-  local snakeCase=""
-  local -i charIndex strLength=${#camelCase}
-  local char
-  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
-    char="${camelCase:charIndex:1}"
-    if [[ ${char} =~ ^[[:upper:]]$ ]]; then
-      snakeCase+="_${char^}"
-    else
-      snakeCase+="${char^}"
-    fi
-  done
-  while [[ ${snakeCase} == _* ]]; do
-    snakeCase="${snakeCase:1}"
-  done
-  RETURNED_VALUE="${snakeCase}"
-}
-
-# ## string::convertKebabCaseToSnakeCase
-#
-# This function convert a kebab-case string to a SNAKE_CASE string.
-# It uses pure bash.
-# Removes all leading dashes.
-#
-# - $1: **kebab-case string** _as string_:
-#       The kebab-case string to convert.
-#
-# Returns:
-#
-# - ${RETURNED_VALUE}: The SNAKE_CASE string.
-#
-# ```bash
-# string::convertKebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
-# ```
-function string::convertKebabCaseToSnakeCase() {
-  local kebabCase="${1}"
-  local snakeCase=""
-  local -i charIndex strLength=${#kebabCase}
-  local char
-  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
-    char="${kebabCase:charIndex:1}"
-    if [[ ${char} == "-" ]]; then
-      snakeCase+="_"
-    else
-      snakeCase+="${char^}"
-    fi
-  done
-  while [[ ${snakeCase} == _* ]]; do
-    snakeCase="${snakeCase:1}"
-  done
-  RETURNED_VALUE="${snakeCase}"
-}
-
-# ## string::convertKebabCaseToCamelCase
-#
-# This function convert a kebab-case string to a camelCase string.
-# It uses pure bash.
-# Removes all leading dashes.
-#
-# - $1: **kebab-case string** _as string_:
-#       The kebab-case string to convert.
-#
-# Returns:
-#
-# - ${RETURNED_VALUE}: The camelCase string.
-#
-# ```bash
-# string::convertKebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
-# ```
-function string::convertKebabCaseToCamelCase() {
-  local kebabCase="${1}"
-  local camelCase=""
-  local -i charIndex strLength=${#kebabCase}
-  local char
-  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
-    char="${kebabCase:charIndex:1}"
-    if [[ ${char} == "-" ]]; then
-      continue
-    fi
-    if [[ ${kebabCase:charIndex-1:1} == "-" ]]; then
-      camelCase+="${char^}"
-    else
-      camelCase+="${char}"
-    fi
-  done
-  RETURNED_VALUE="${camelCase,}"
-}
-
-# ## string::trimAll
-#
-# Trim all whitespaces and truncate spaces.
-#
-# - $1: **string to trim** _as string_:
-#       The string to trim.
-#
-# Returns:
-#
-# - ${RETURNED_VALUE}: The trimmed string.
-#
-# ```bash
-# string::trimAll "   example   string    " && local trimmedString="${RETURNED_VALUE}"
-# ```
-function string::trimAll() {
-  set -o noglob +o braceexpand
-  # shellcheck disable=SC2086
-  # shellcheck disable=SC2048
-  local IFS=" "$'\t'$'\n'
-  # shellcheck disable=SC2086
-  # shellcheck disable=SC2048
-  set -- $*
-  RETURNED_VALUE="$*"
-  set +o noglob -o braceexpand
-}
-
-# ## string::trim
-#
-# Trim leading and trailing whitespaces.
-#
-# - $1: **string to trim** _as string_:
-#       The string to trim.
-#
-# Returns:
-#
-# - ${RETURNED_VALUE}: The trimmed string.
-#
-# ```bash
-# string::trim "   example string    " && local trimmedString="${RETURNED_VALUE}"
-# ```
-function string::trim() {
-  RETURNED_VALUE="${1#"${1%%[^[:space:]]*}"}"
-  RETURNED_VALUE="${RETURNED_VALUE%"${RETURNED_VALUE##*[^[:space:]]}"}"
-}
-
-# ## string::indexOf
+# ## string::getIndexOf
 #
 # Find the first index of a string within another string.
 #
-# - $1: **string** _as string_:
-#       the string in which to search
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string from which to find an index.
 # - $2: **search** _as string_:
 #       the string to search
 # - $3: start index _as int_:
@@ -214,49 +220,40 @@ function string::trim() {
 # - ${RETURNED_VALUE}: the index of the substring in the string or -1 if not found.
 #
 # ```bash
-# string::indexOf "This is a long text" "long" && local index="${RETURNED_VALUE}"
-# string::indexOf "This is a long text" "long" 10 && local index="${RETURNED_VALUE}"
+# MY_STRING="This is a long text"
+# string::getIndexOf MY_STRING "long"
+# echo "${RETURNED_VALUE}"
 # ```
-function string::indexOf() {
-  local search string
-  local -i startingIndex
-  string="${1}"
-  search="${2}"
-  startingIndex=${3:-0}
+function string::getIndexOf() {
+  local -n stringToSearch="${1}"
+  local search="${2}"
+  local -i startingIndex=${3:-0}
 
-  local -i stringLength
-  stringLength="${#string}"
-
-  if [[ startingIndex -gt 0 ]]; then
+  if (( startingIndex > 0 )); then
     # if the starting index is greater than the length of the string, we return -1
-    if [[ startingIndex -ge stringLength ]]; then
+    if (( startingIndex >= ${#stringToSearch} )); then
       RETURNED_VALUE=-1
       return 0
     fi
 
     # otherwise we keep only what is after this index
-    string="${string:startingIndex}"
+    local subStringToSearch="${stringToSearch:startingIndex}"
+  else
+    local -n subStringToSearch=stringToSearch
   fi
 
-  stringLength="${#string}"
-
-  # if the string starts with the search, we have our index
-  if [[ ${string} == "${search}"* ]]; then
-    RETURNED_VALUE=${startingIndex}
-    return 0
-  fi
+  local -i originalSubStringLength="${#subStringToSearch}"
 
   # cut everything after the search string
-  local tempString
-  tempString="${string%%"${search}"*}"
-  local -i tempStringLength="${#tempString}"
+  local afterSearchedString="${subStringToSearch%%"${search}"*}"
 
   # the index is the length of the temp string if it is different than the initial string length
-  if [[ tempStringLength -ne stringLength ]]; then
-    RETURNED_VALUE=$((tempStringLength + startingIndex))
+  if (( ${#afterSearchedString} != originalSubStringLength )); then
+    RETURNED_VALUE=$((${#afterSearchedString} + startingIndex))
   else
     RETURNED_VALUE=-1
   fi
+
   return 0
 }
 
@@ -268,8 +265,8 @@ function string::indexOf() {
 # Both start and end strings are excluded in the extracted text.
 # Both start and end strings must be found to extract something.
 #
-# - $1: **string** _as string_:
-#       the string in which to search
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string from which to extract a text.
 # - $2: **start string** _as string_:
 #       the start string
 #       (if empty, then it will extract from the beginning of the string)
@@ -282,19 +279,20 @@ function string::indexOf() {
 # - ${RETURNED_VALUE}: the extracted text
 #
 # ```bash
-# string::extractBetween "This is a long text" "is a " " text"
+# MY_STRING="This is a long text"
+# string::extractBetween MY_STRING "is a " " text"
 # local extractedText="${RETURNED_VALUE}"
 # ```
 function string::extractBetween() {
-  local string="${1}"
+  local -n stringFromWhichToExtract="${1}"
   local start="${2}"
   local end="${3}"
 
   local -i startIndex endIndex
-
   if [[ -n "${start}" ]]; then
-    string::indexOf "${string}" "${start}" && startIndex="${RETURNED_VALUE}"
-    if [[ startIndex -eq -1 ]]; then
+    string::getIndexOf stringFromWhichToExtract "${start}"
+    startIndex="${RETURNED_VALUE}"
+    if (( startIndex == -1 )); then
       RETURNED_VALUE=""
       return 0
     fi
@@ -304,27 +302,26 @@ function string::extractBetween() {
   fi
 
   if [[ -n "${end}" ]]; then
-    string::indexOf "${string}" "${end}" "${startIndex}" && endIndex="${RETURNED_VALUE}"
-    if [[ endIndex -eq -1 ]]; then
+    string::getIndexOf stringFromWhichToExtract "${end}" "${startIndex}"
+    endIndex="${RETURNED_VALUE}"
+    if (( endIndex == -1 )); then
       RETURNED_VALUE=""
       return 0
     fi
   else
-    RETURNED_VALUE="${string:startIndex}"
+    RETURNED_VALUE="${stringFromWhichToExtract:startIndex}"
     return 0
   fi
 
-  local -i extractedLength
-  extractedLength=$((endIndex - startIndex))
-  RETURNED_VALUE="${string:startIndex:extractedLength}"
+  RETURNED_VALUE="${stringFromWhichToExtract:startIndex:endIndex - startIndex}"
 }
 
 # ## string::count
 #
 # Counts the number of occurrences of a substring in a string.
 #
-# - $1: **string** _as string_:
-#       the string in which to search
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string in which to count occurrences.
 # - $2: **substring** _as string_:
 #       the substring to count
 #
@@ -333,49 +330,58 @@ function string::extractBetween() {
 # - ${RETURNED_VALUE}: the number of occurrences
 #
 # ```bash
-# string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
+# MY_STRING="name,first_name,address"
+# string::count MY_STRING ","
+# echo "${RETURNED_VALUE}"
 # ```
 #
 # > This is faster than looping over the string and check the substring.
 function string::count() {
-  local string="${1}"
-  local newString="${string//"${2}"/}"
-  RETURNED_VALUE=$(((${#string} - ${#newString}) / ${#2}))
+  local -n stringInWhichToCount="${1}"
+  local newString="${stringInWhichToCount//"${2}"/}"
+  RETURNED_VALUE=$(((${#stringInWhichToCount} - ${#newString}) / ${#2}))
 }
 
 # ## string::split
 #
 # Split a string into an array using a separator.
 #
-# - $1: **string** _as string_:
-#       the string to split
-# - $2: **separator** _as string_:
-#       the separator (must be a single character!)
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string to split.
+# - $2: **separators** _as string_:
+#       The separator characters to use.
 #
 # Returns:
 #
 # - ${RETURNED_ARRAY}: the array of strings
 #
 # ```bash
-# string::split "name,first name,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
+# MY_STRING="name,first_name,address"
+# string::split MY_STRING ","
+# ARRAY=("${RETURNED_ARRAY[@]}")
 # ```
 #
 # > This is faster than using read into an array from a here string.
 function string::split() {
+  local -n stringToSplit="${1}"
   local IFS="${2}"
   # shellcheck disable=SC2206
   # shellcheck disable=SC2034
-  RETURNED_ARRAY=(${1})
+  RETURNED_ARRAY=(${stringToSplit})
 }
 
 # ## string::head
 #
-# Get the first n lines of a string.
+# Get the first nth items (e.g. lines) of a string.
 #
-# - $1: **string** _as string_:
-#       The string to extract from.
-# - $2: **lines** _as int_:
-#       The number of lines to extract.
+# - $1: **variable name** _as string_:
+#       The variable name that contains the string from which to get the first occurrences.
+# - $2: **nb items** _as int_:
+#       The number of items (lines) to extract.
+# - $3: separator _as string_:
+#       (optional) Can be set using the variable `_OPTION_SEPARATOR`.
+#       The separator character to use.
+#       (defaults to newline if not provided)
 #
 # Returns:
 #
@@ -386,36 +392,44 @@ function string::split() {
 # echo "${RETURNED_VALUE}"
 # ```
 function string::head() {
-  local string="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
-  local -i nbLines="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
-  local chunk output
-  local -i ii=0
-  while ((ii < nbLines)); do
-    chunk="${string%%$'\n'*}"
-    string="${string:${#chunk} + 1}"
-    output+="${chunk}"$'\n'
-    if [[ -z ${string} ]]; then
-      break
-    fi
-    ii+=1
-  done
-  RETURNED_VALUE="${output:-}"
+  local _STRING_HEAD_NB_LINES="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
+  local -i _STRING_HEAD_COUNTER=0
+
+  RETURNED_VALUE=""
+  string::doForEachLine \
+    "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}" \
+    string_headCallback \
+    "${3:-${_OPTION_SEPARATOR:-$'\n'}}"
+}
+function string_headCallback() {
+  if ((_STRING_HEAD_COUNTER >= _STRING_HEAD_NB_LINES)); then
+    return 1
+  fi
+  RETURNED_VALUE+="${1}"$'\n'
+  ((_STRING_HEAD_COUNTER+=1))
+  return 0
 }
 
 # ## string::doForEachLine
 #
-# Execute a callback function for each line of a string.
+# Execute a callback function for each item (e.g. line) of a string.
+# The string is split using a separator (default to a new line) and
+# the callback function is called for each item.
 #
 # - $1: **string variable name** _as string_:
 #       The name of the variable containing the string.
 # - $2: **callback function** _as string_:
-#       The name of the function to execute for each line.
+#       The name of the function to execute for each item (line).
 #       The function is called with the following arguments:
 #
-#       - $1: the current line content
+#       - $1: the current item (line) content
 #
 #       The function must return 0 if we should continue to the next line, 1 otherwise.
 #       (defaults to empty)
+# - $3: separator _as string_:
+#       (optional) Can be set using the variable `_OPTION_SEPARATOR`.
+#       The separator character to use.
+#       (defaults to newline if not provided)
 #
 # ```bash
 # string::doForEachLine myString myCallback
@@ -425,11 +439,15 @@ function string::head() {
 # > newlines (which is not the case with a "for loop" using parameter expansion and IFS=$'\n').
 # > Here string is significantly slower than using this.
 function string::doForEachLine() {
-  local -n text="${1}"
-  local chunk output
-  while [[ -n ${text} ]]; do
-    chunk="${text%%$'\n'*}"
-    text="${text:${#chunk} + 1}"
-    "${2}" "${chunk}"
+  local -n stringForWhichToIterate="${1}"
+  local string="${stringForWhichToIterate}"
+  local separator="${3:-${_OPTION_SEPARATOR:-$'\n'}}"
+  local chunk
+  while [[ -n ${string} ]]; do
+    chunk="${string%%"${separator}"*}"
+    string="${string:${#chunk} + 1}"
+    if ! "${2}" "${chunk}"; then
+      break
+    fi
   done
 }

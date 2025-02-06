@@ -49,7 +49,8 @@ function showcaseCommand1() {
   # Importing the string library (note that we could do that at the begining of the script)
   # shellcheck disable=SC1091
   source string
-  string::extractBetween "<b>My bold text</b>" "<b>" "</b>"
+  local _myString="<b>My bold text</b>"
+  string::extractBetween _myString "<b>" "</b>"
   local extractedText="${RETURNED_VALUE}"
   log::info "Extracted text is: ⌜${extractedText:-}⌝"
 

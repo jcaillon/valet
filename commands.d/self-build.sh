@@ -291,8 +291,10 @@ function extractCommandDefinitionsToVariables() {
       selfBuild_extractCommandDefinitionToVariables "${content}"
 
       local function command
-      string::trimAll "${TEMP_CMD_BUILD_function:-}" && function="${RETURNED_VALUE}"
-      string::trimAll "${TEMP_CMD_BUILD_command:-}" && command="${RETURNED_VALUE}"
+      function="${TEMP_CMD_BUILD_function:-}"
+      string::trimAll function
+      command="${TEMP_CMD_BUILD_command:-}"
+      string::trimAll command
 
       # trim the leading "valet" from the command
       command="${command#valet }"
@@ -453,7 +455,7 @@ function declareFinalCommandDefinitionHelpVariables() {
       optionValue="${TEMP_CMD_BUILD_options_name[index]}"
       if [[ ${optionValue} == *"<"* ]]; then optionValue="<${optionValue##*<}"; else optionValue="true"; fi
       selfBuild_extractFirstLongNameFromOptionString "${TEMP_CMD_BUILD_options_name[index]}"
-      string::convertKebabCaseToSnakeCase "${RETURNED_VALUE}"
+      string::convertKebabCaseToSnakeCase RETURNED_VALUE
       TEMP_CMD_BUILD_options_description[index]+=$'\n'"This option can be set by exporting the variable VALET_${RETURNED_VALUE}='${optionValue}'."
     fi
   done
@@ -507,11 +509,14 @@ function declareFinalCommandDefinitionParserVariables() {
       optionHasValue="false"
     fi
     option="${option//,/ }"
-    string::trimAll "${option}" && option="${RETURNED_VALUE}"
-    selfBuild_extractFirstLongNameFromOptionString "${option}" && optionName="${RETURNED_VALUE}"
-    string::convertKebabCaseToCamelCase "${optionName}" && optionNameCc="${RETURNED_VALUE}"
+    string::trimAll option
+    selfBuild_extractFirstLongNameFromOptionString "${option}"
+    optionName="${RETURNED_VALUE}"
+    string::convertKebabCaseToCamelCase optionName
+    optionNameCc="${RETURNED_VALUE}"
     if [[ "${optionNoEnvVar}" != "true" ]]; then
-      string::convertKebabCaseToSnakeCase "${optionName}" && optionNameSc="VALET_${RETURNED_VALUE}"
+      string::convertKebabCaseToSnakeCase optionName
+      optionNameSc="VALET_${RETURNED_VALUE}"
     else
       optionNameSc=""
     fi
@@ -525,7 +530,7 @@ function declareFinalCommandDefinitionParserVariables() {
 
   # for each arguments
   if [[ "${#TEMP_CMD_BUILD_arguments_name[@]}" -gt 0 ]]; then
-    local argument argumentNameCc lastArgumentIsArray
+    local argument lastArgumentIsArray
     local -i nbOptionalArguments=0
     for ((index = 0; index < ${#TEMP_CMD_BUILD_arguments_name[@]}; index++)); do
       argument="${TEMP_CMD_BUILD_arguments_name[index]}"
@@ -537,9 +542,7 @@ function declareFinalCommandDefinitionParserVariables() {
         argument="${argument//\?/}"
         nbOptionalArguments+=1
       fi
-      string::convertKebabCaseToCamelCase "${argument}" && argumentNameCc="${RETURNED_VALUE}"
-
-      eval "CMD_ARGS_NAME_${function}+=(\"${argumentNameCc}\")"
+      eval "CMD_ARGS_NAME_${function}+=(\"${argument}\")"
     done
     declare -g "CMD_ARGS_LAST_IS_ARRAY_${function}"="${lastArgumentIsArray:-false}"
     declare -g "CMD_ARGS_NB_OPTIONAL_${function}"="${nbOptionalArguments}"

@@ -60,8 +60,9 @@ Make your scripts more performant and write code faster by using Valet [librarie
 ```python {linenos=table,linenostart=1,filename="script.sh"}
 myFunction() {
   source string
-  string::cutField "field1 field2 field3" 1 " " && echo "The field at index 1 is ${RETURNED_VALUE}"
-  string::extractBetween "<html><b>Bold value</b></html>" "<b>" "</b>" && echo "The extracted value is ${RETURNED_VALUE}" 
+  MY_STRING="field1 field2 field3"
+  string::getField MY_STRING 1 " "
+  echo "The field at index 1 is ${RETURNED_VALUE}"
 
   source interactive
   if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi

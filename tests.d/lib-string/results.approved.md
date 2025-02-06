@@ -2,9 +2,13 @@
 
 ## Test script 00.tests
 
-### ✅ Testing string::cutField
+### ✅ Testing string::getField
 
-❯ `string::cutField field1\ field2\ field3 0 \ `
+```text
+str='field1 field2 field3'
+```
+
+❯ `string::getField str 0 \ `
 
 Returned variables:
 
@@ -12,7 +16,7 @@ Returned variables:
 RETURNED_VALUE='field1'
 ```
 
-❯ `string::cutField field1\ field2\ field3 1 \ `
+❯ `string::getField str 1 \ `
 
 Returned variables:
 
@@ -20,15 +24,7 @@ Returned variables:
 RETURNED_VALUE='field2'
 ```
 
-❯ `string::cutField field1,field2,field3 2 ,`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='field3'
-```
-
-❯ `string::cutField field1,field2,field3 4 ,`
+❯ `string::getField str 2 ,`
 
 Returned variables:
 
@@ -36,7 +32,21 @@ Returned variables:
 RETURNED_VALUE=''
 ```
 
-❯ `string::cutField $'line1 hm I wonder\nline2 does it work on lines?\nline3 seems so' 2 $'\n'`
+❯ `string::getField str 4 ,`
+
+Returned variables:
+
+```text
+RETURNED_VALUE=''
+```
+
+```text
+str='line1 hm I wonder
+line2 does it work on lines?
+line3 seems so'
+```
+
+❯ `string::getField str 2 $'\n'`
 
 Returned variables:
 
@@ -44,9 +54,9 @@ Returned variables:
 RETURNED_VALUE='line3 seems so'
 ```
 
-### ✅ Testing string::convertKebabCaseToSnakeCase
+### ✅ Testing string::convertCamelCaseToSnakeCase
 
-❯ `string::convertKebabCaseToSnakeCase this-is-a-test0`
+❯ `str=thisIsATest0 string::convertCamelCaseToSnakeCase str`
 
 Returned variables:
 
@@ -54,7 +64,7 @@ Returned variables:
 RETURNED_VALUE='THIS_IS_A_TEST0'
 ```
 
-❯ `string::convertKebabCaseToSnakeCase --another-test`
+❯ `str=AnotherTest string::convertCamelCaseToSnakeCase str`
 
 Returned variables:
 
@@ -64,7 +74,7 @@ RETURNED_VALUE='ANOTHER_TEST'
 
 ### ✅ Testing string::convertKebabCaseToSnakeCase
 
-❯ `string::convertKebabCaseToSnakeCase this-is-a-test0`
+❯ `str=this-is-a-test0 string::convertKebabCaseToSnakeCase str`
 
 Returned variables:
 
@@ -72,7 +82,7 @@ Returned variables:
 RETURNED_VALUE='THIS_IS_A_TEST0'
 ```
 
-❯ `string::convertKebabCaseToSnakeCase --another-test`
+❯ `str=--another-test string::convertKebabCaseToSnakeCase str`
 
 Returned variables:
 
@@ -82,7 +92,7 @@ RETURNED_VALUE='ANOTHER_TEST'
 
 ### ✅ Testing string::convertKebabCaseToCamelCase
 
-❯ `string::convertKebabCaseToCamelCase this-is-a-test0`
+❯ `str=this-is-a-test0 string::convertKebabCaseToCamelCase str`
 
 Returned variables:
 
@@ -90,7 +100,7 @@ Returned variables:
 RETURNED_VALUE='thisIsATest0'
 ```
 
-❯ `string::convertKebabCaseToCamelCase --another-test`
+❯ `str=--another-test string::convertKebabCaseToCamelCase str`
 
 Returned variables:
 
@@ -98,7 +108,15 @@ Returned variables:
 RETURNED_VALUE='anotherTest'
 ```
 
-❯ `string::convertKebabCaseToCamelCase --last--`
+❯ `str=--anotherTest string::convertKebabCaseToCamelCase str`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='anothertest'
+```
+
+❯ `str=--last-- string::convertKebabCaseToCamelCase str`
 
 Returned variables:
 
@@ -108,67 +126,84 @@ RETURNED_VALUE='last'
 
 ### ✅ Testing string::trimAll
 
-❯ `string::trimAll \ \ a\ \ super\ test\ \ `
-
-Returned variables:
-
 ```text
-RETURNED_VALUE='a super test'
+MY_STRING='  a  super test  '
 ```
 
-❯ `string::trimAll this\ is\ a\ command\ \ `
-
-Returned variables:
+❯ `string::trimAll MY_STRING`
 
 ```text
-RETURNED_VALUE='this is a command'
+MY_STRING='a super test'
 ```
-
-❯ `string::trimAll $'\t\nthis is a \tcommand  '`
-
-Returned variables:
 
 ```text
-RETURNED_VALUE='this is a command'
+MY_STRING='this is a command  '
 ```
 
-### ✅ Testing string::trim
-
-❯ `string::trim \ \ hello\ \ world\ \ `
-
-Returned variables:
+❯ `string::trimAll MY_STRING`
 
 ```text
-RETURNED_VALUE='hello  world'
+MY_STRING='this is a command'
 ```
-
-❯ `string::trim hello\ \  \ `
-
-Returned variables:
 
 ```text
-RETURNED_VALUE='hello'
+MY_STRING='	
+this is a 	command  '
 ```
 
-❯ `string::trim \ \ hello`
-
-Returned variables:
+❯ `string::trimAll MY_STRING`
 
 ```text
-RETURNED_VALUE='hello'
+MY_STRING='this is a command'
 ```
 
-❯ `string::trim $'\n\t  hello\n\t '`
-
-Returned variables:
+### ✅ Testing string::trimEdges
 
 ```text
-RETURNED_VALUE='hello'
+MY_STRING='  hello  world  '
 ```
 
-### ✅ Testing string::indexOf function
+❯ `string::trimEdges MY_STRING`
 
-❯ `string::indexOf hello l`
+```text
+MY_STRING='hello  world'
+```
+
+```text
+MY_STRING='hello  '
+```
+
+❯ `string::trimEdges MY_STRING`
+
+```text
+MY_STRING='hello'
+```
+
+```text
+MY_STRING='  hello'
+```
+
+❯ `string::trimEdges MY_STRING`
+
+```text
+MY_STRING='hello'
+```
+
+```text
+MY_STRING='
+	  hello
+	 '
+```
+
+❯ `string::trimEdges MY_STRING`
+
+```text
+MY_STRING='hello'
+```
+
+### ✅ Testing string::getIndexOf function
+
+❯ `str=hello string::getIndexOf str l`
 
 Returned variables:
 
@@ -176,7 +211,7 @@ Returned variables:
 RETURNED_VALUE='2'
 ```
 
-❯ `string::indexOf hello he`
+❯ `str=hello string::getIndexOf str he`
 
 Returned variables:
 
@@ -184,7 +219,7 @@ Returned variables:
 RETURNED_VALUE='0'
 ```
 
-❯ `string::indexOf hello he 10`
+❯ `str=hello string::getIndexOf str he 10`
 
 Returned variables:
 
@@ -192,7 +227,7 @@ Returned variables:
 RETURNED_VALUE='-1'
 ```
 
-❯ `string::indexOf yes-yes ye 1`
+❯ `str=yes-yes string::getIndexOf str ye 1`
 
 Returned variables:
 
@@ -200,7 +235,7 @@ Returned variables:
 RETURNED_VALUE='4'
 ```
 
-❯ `string::indexOf yes-yes yes 5`
+❯ `str=yes-yes string::getIndexOf str yes 5`
 
 Returned variables:
 
@@ -210,7 +245,7 @@ RETURNED_VALUE='-1'
 
 ### ✅ Testing string::extractBetween function
 
-❯ `string::extractBetween hello e o`
+❯ `str=hello string::extractBetween str e o`
 
 Returned variables:
 
@@ -218,7 +253,7 @@ Returned variables:
 RETURNED_VALUE='ll'
 ```
 
-❯ `string::extractBetween hello e ''`
+❯ `str=hello string::extractBetween str e ''`
 
 Returned variables:
 
@@ -226,7 +261,7 @@ Returned variables:
 RETURNED_VALUE='llo'
 ```
 
-❯ `string::extractBetween hello h a`
+❯ `str=hello string::extractBetween str h a`
 
 Returned variables:
 
@@ -241,7 +276,7 @@ MULTI_LINES_TEXT2='1 line one
 4 line four'
 ```
 
-❯ `string::extractBetween "${MULTI_LINES_TEXT2}" $'one\n' 4`
+❯ `string::extractBetween MULTI_LINES_TEXT2 $'one\n' 4`
 
 Returned variables:
 
@@ -251,7 +286,7 @@ RETURNED_VALUE='2 line two
 '
 ```
 
-❯ `string::extractBetween "${MULTI_LINES_TEXT2}" 2\  $'\n'`
+❯ `string::extractBetween MULTI_LINES_TEXT2 2\  $'\n'`
 
 Returned variables:
 
@@ -261,7 +296,7 @@ RETURNED_VALUE='line two'
 
 ### ✅ Testing string::count function
 
-❯ `string::count name,firstname,address ,`
+❯ `str=name,firstname,address string::count str ,`
 
 Returned variables:
 
@@ -269,7 +304,7 @@ Returned variables:
 RETURNED_VALUE='2'
 ```
 
-❯ `string::count bonjour\ mon\ bon\ ami\,\ bonne\ journée\! bo`
+❯ `str=bonjour\ mon\ bon\ ami\,\ bonne\ journée\! string::count str bo`
 
 Returned variables:
 
@@ -279,7 +314,7 @@ RETURNED_VALUE='3'
 
 ### ✅ Testing string::split function
 
-❯ `string::split name:firstname:address :`
+❯ `str=name:firstname:address string::split str :`
 
 Returned variables:
 
@@ -291,7 +326,7 @@ RETURNED_ARRAY=(
 )
 ```
 
-❯ `string::split $'one\ntwo\nthree' $'\n'`
+❯ `str=one:two,three string::split str :,`
 
 Returned variables:
 
@@ -719,7 +754,7 @@ MULTI_LINES_TEXT2='1 line one
 
 Testing string::head with 2 lines
 
-❯ `string::head "${MULTI_LINES_TEXT2}" 2`
+❯ `string::head MULTI_LINES_TEXT2 2`
 
 Returned variables:
 
@@ -731,7 +766,7 @@ RETURNED_VALUE='1 line one
 
 Testing string::head with 0 line
 
-❯ `string::head "${MULTI_LINES_TEXT2}" 0`
+❯ `string::head MULTI_LINES_TEXT2 0`
 
 Returned variables:
 
@@ -741,7 +776,7 @@ RETURNED_VALUE=''
 
 Testing string::head with 10 lines
 
-❯ `string::head "${MULTI_LINES_TEXT2}" 10`
+❯ `string::head MULTI_LINES_TEXT2 10`
 
 Returned variables:
 

@@ -301,9 +301,11 @@ function selfRelease::uploadArtifact() {
 }
 
 function selfRelease::extractUploadUrl() {
+  # shellcheck disable=SC2034
   local releaseJson="${1}"
-  string::extractBetween "${releaseJson}" '"upload_url":' '{?name,label}"'
-  string::extractBetween "${RETURNED_VALUE}" '"' ''
+  string::extractBetween releaseJson '"upload_url":' '{?name,label}"'
+  uploadUrl="${RETURNED_VALUE}"
+  string::extractBetween uploadUrl '"' ''
   uploadUrl="${RETURNED_VALUE}"
   log::debug "The upload URL is: ${uploadUrl:-}"
   RETURNED_VALUE="${uploadUrl}"

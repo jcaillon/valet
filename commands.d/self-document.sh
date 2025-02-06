@@ -164,9 +164,9 @@ function selfDocument::getAllFunctionsDocumentation() {
 
       if [[ ${line} != "#"* ]]; then
         reading=false
-        string::extractBetween "${functionDocumentation}" "## " $'\n'
-        string::trim "${RETURNED_VALUE}"
+        string::extractBetween functionDocumentation "## " $'\n'
         functionName="${RETURNED_VALUE}"
+        string::trimEdges functionName
         log::debug "Found function: ⌜${functionName}⌝"
         RETURNED_ASSOCIATIVE_ARRAY["${functionName}"]="${functionDocumentation}"
         functionDocumentation=""
@@ -260,16 +260,17 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   local content="{"$'\n'"// ${pageFooter}"$'\n'
 
   local -i tabOrder
-  local key functionName documentation firstSentence body options commentedDocumentation
+  local key functionName documentation body options commentedDocumentation
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     functionName="${key}"
     documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
 
-    string::extractBetween "${!documentation}" $'\n' "."
-    firstSentence="${RETURNED_VALUE#$'\n'}"
-    firstSentence="${firstSentence//\/\\/}"
-    firstSentence="${firstSentence//'"'/'\"'}"
-    firstSentence="${firstSentence//$'\n'/ }"
+    local -n description="${documentation}"
+    string::extractBetween description $'\n' "."
+    description="${RETURNED_VALUE#$'\n'}"
+    description="${description//\/\\/}"
+    description="${description//'"'/'\"'}"
+    description="${description//$'\n'/ }"
 
     body="${functionName}"
     options=""
@@ -290,7 +291,7 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
     content+="
 \"${functionName}\": {
   \"prefix\": \"${functionName}\",
-  \"description\": \"${firstSentence}...\",
+  \"description\": \"${description}...\",
   \"scope\": \"\",
   \"body\": [ \"${options}${body//\"/\\\"}\" ]
 },"$'\n'
@@ -307,7 +308,7 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
     content+="
 \"${functionName}#withdoc\": {
   \"prefix\": \"${functionName}#withdoc\",
-  \"description\": \"${firstSentence}...\",
+  \"description\": \"${description}...\",
   \"scope\": \"\",
   \"body\": [ \"${commentedDocumentation}${options}${body//\"/\\\"}\" ]
 },"$'\n'

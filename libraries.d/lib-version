@@ -35,10 +35,10 @@ function version::compare() {
   local -i semVerIndex
   local semVerNumber1 semVerNumber2
   for semVerIndex in {0..2}; do
-    string::cutField "${version1}" "${semVerIndex}" "."
+    string::getField version1 "${semVerIndex}" "."
     semVerNumber1="${RETURNED_VALUE%%-*}"
     semVerNumber1="${semVerNumber1%%+*}"
-    string::cutField "${version2}" "${semVerIndex}" "."
+    string::getField version2 "${semVerIndex}" "."
     semVerNumber2="${RETURNED_VALUE%%-*}"
     semVerNumber2="${semVerNumber2%%+*}"
     if [[ ! ${semVerNumber1} =~ ^[0-9]+$ || ! ${semVerNumber2} =~ ^[0-9]+$ ]]; then
@@ -98,7 +98,7 @@ function version::bump() {
   if [[ ${bumpLevel:-} == "minor" ]]; then level=1; fi
   local newVersion semVerString
   for semVerIndex in {0..2}; do
-    string::cutField "${version}" "${semVerIndex}" "."
+    string::getField version "${semVerIndex}" "."
     semVerString="${RETURNED_VALUE%-*}"
     if [[ ! ${semVerString} =~ ^[0-9]+$ ]]; then
       core::fail "Failed to bump the version ⌜${version}⌝ because it is not valid semantic version."

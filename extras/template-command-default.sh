@@ -48,7 +48,8 @@ function _FUNCTION_NAME_() {
   # Importing the string library (note that we could also do that at the beginning of the script)
   # shellcheck disable=SC1091
   source string
-  string::extractBetween "<b>My bold text</b>" "<b>" "</b>"
+  local _myString="<b>My bold text</b>"
+  string::extractBetween _myString "<b>" "</b>"
   local extractedText="${RETURNED_VALUE}"
   log::info "Extracted text is: ⌜${extractedText:-}⌝"
 }

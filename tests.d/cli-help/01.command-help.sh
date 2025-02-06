@@ -29,7 +29,7 @@ function test::transformTextBeforeFlushing() {
   if [[ ${_TEST_OUTPUT} != *$'\n'* ]]; then
     return 0
   fi
-  string::head "${_TEST_OUTPUT}" 10
+  string::head _TEST_OUTPUT 10
   _TEST_OUTPUT="${RETURNED_VALUE}"
 }
 
