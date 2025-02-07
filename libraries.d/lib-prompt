@@ -187,8 +187,8 @@ function prompt::input() {
   # shellcheck disable=SC2086
   unset -v ${!_PROMPT_*}
 
-  _PROMPT_START_LINE="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
-  _PROMPT_START_COLUMN="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
+  _PROMPT_START_LINE="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  _PROMPT_START_COLUMN="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   _PROMPT_STOP_COLUMN="${_OPTION_STOP_COLUMN:-${GLOBAL_COLUMNS}}"
   _PROMPT_STOP_COLUMN_AT_END="false"
@@ -1399,7 +1399,7 @@ function prompt_showError() {
   prompt_clearItemsBox
   prompt_clearErrorBox
 
-  string::wrapWords "${message}" $((${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}} - ${#_PROMPT_ERROR_BOX_SYMBOL_LENGTH}))
+  string::wrapWords message $((${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}} - ${#_PROMPT_ERROR_BOX_SYMBOL_LENGTH}))
   local IFS=$'\n'
   local text="${RETURNED_VALUE}"
   local -i errorLinesNeeded=0

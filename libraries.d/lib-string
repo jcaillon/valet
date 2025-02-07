@@ -6,17 +6,20 @@
 #
 # Trim all whitespaces and truncate spaces.
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string to trim.
-#       The variable is modified in place.
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the extracted field
 #
 # ```bash
 # MY_STRING="   example "$'\t'"  string    "$'\n'
 # string::trimAll MY_STRING
-# echo "${MY_STRING}"
+# echo "${RETURNED_VALUE}"
 # ```
 function string::trimAll() {
-  local -n stringToTrimAll="${1}"
+  local -n stringToTrimAll="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   set -o noglob +o braceexpand
   # shellcheck disable=SC2086
   # shellcheck disable=SC2048
@@ -24,27 +27,33 @@ function string::trimAll() {
   # shellcheck disable=SC2086
   # shellcheck disable=SC2048
   set -- ${stringToTrimAll}
-  stringToTrimAll="$*"
+  RETURNED_VALUE="$*"
   set +o noglob -o braceexpand
 }
 
 # ## string::trimEdges
 #
-# Trim leading and trailing whitespaces (not in the middle).
+# Trim leading and trailing characters (defaults to whitespaces).
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string to trim.
-#       The variable is modified in place.
+# - $2: characters to trim _as string_:
+#       The characters to trim.
+#       (defaults to " "$'\t'$'\n')
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the extracted field
 #
 # ```bash
 # MY_STRING="   example  string    "
 # string::trimEdges MY_STRING
-# echo "${MY_STRING}"
+# echo "${RETURNED_VALUE}"
 # ```
 function string::trimEdges() {
-  local -n stringToTrim="${1}"
-  stringToTrim="${stringToTrim#"${stringToTrim%%[^[:space:]]*}"}"
-  stringToTrim="${stringToTrim%"${stringToTrim##*[^[:space:]]}"}"
+  local -n stringToTrim="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  RETURNED_VALUE="${stringToTrim#"${stringToTrim%%[^"${2:-" "$'\t'$'\n'}"]*}"}"
+  RETURNED_VALUE="${RETURNED_VALUE%"${RETURNED_VALUE##*[^"${2:-" "$'\t'$'\n'}"]}"}"
 }
 
 # ## string::convertCamelCaseToSnakeCase
@@ -53,9 +62,8 @@ function string::trimEdges() {
 # It uses pure bash.
 # Removes all leading underscores.
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string to convert.
-#       The variable is modified in place.
 #
 # Returns:
 #
@@ -67,7 +75,7 @@ function string::trimEdges() {
 # echo "${RETURNED_VALUE}"
 # ```
 function string::convertCamelCaseToSnakeCase() {
-  local -n camelCaseStringToConvert="${1}"
+  local -n camelCaseStringToConvert="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i charIndex strLength=${#camelCaseStringToConvert}
   local char output=""
   for ((charIndex = 0; charIndex < strLength; charIndex++)); do
@@ -90,9 +98,8 @@ function string::convertCamelCaseToSnakeCase() {
 # It uses pure bash.
 # Removes all leading dashes.
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string to convert.
-#       The variable is modified in place.
 #
 # Returns:
 #
@@ -104,7 +111,7 @@ function string::convertCamelCaseToSnakeCase() {
 # echo "${RETURNED_VALUE}"
 # ```
 function string::convertKebabCaseToSnakeCase() {
-  local -n kebabCaseStringToConvert="${1}"
+  local -n kebabCaseStringToConvert="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i charIndex strLength=${#kebabCaseStringToConvert}
   local char output=""
   for ((charIndex = 0; charIndex < strLength; charIndex++)); do
@@ -127,9 +134,8 @@ function string::convertKebabCaseToSnakeCase() {
 # It uses pure bash.
 # Removes all leading dashes.
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string to convert.
-#       The variable is modified in place.
 #
 # Returns:
 #
@@ -141,7 +147,7 @@ function string::convertKebabCaseToSnakeCase() {
 # echo "${RETURNED_VALUE}"
 # ```
 function string::convertKebabCaseToCamelCase() {
-  local -n kebabCaseStringToConvert="${1}"
+  local -n kebabCaseStringToConvert="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i charIndex strLength=${#kebabCaseStringToConvert}
   local char output=""
   for ((charIndex = 0; charIndex < strLength; charIndex++)); do
@@ -164,7 +170,7 @@ function string::convertKebabCaseToCamelCase() {
 # This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
 # but it uses pure bash to go faster.
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string to extract from.
 # - $2: **field number** _as int_:
 #       The field number to get (starting at 0).
@@ -187,8 +193,8 @@ function string::convertKebabCaseToCamelCase() {
 # > - using read into an array from a here string
 # > - using bash parameter expansion to remove before/after the separator
 function string::getField() {
-  local -n stringToCut="${1}"
-  local fieldNumber="${2}"
+  local -n stringToCut="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local fieldNumber="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local separator="${3:-$'\t'}"
 
   local field IFS="${separator}"
@@ -207,7 +213,7 @@ function string::getField() {
 #
 # Find the first index of a string within another string.
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string from which to find an index.
 # - $2: **search** _as string_:
 #       the string to search
@@ -225,14 +231,24 @@ function string::getField() {
 # echo "${RETURNED_VALUE}"
 # ```
 function string::getIndexOf() {
-  local -n stringToSearch="${1}"
-  local search="${2}"
+  local -i _STRING_INDEX_OF
+  string_getIndexOf "$@"
+  RETURNED_VALUE="${_STRING_INDEX_OF}"
+}
+
+# ## string_getIndexOf (private)
+#
+# Redefining this function because it is used by other functions and we want to avoid
+# collisions with the global RETURNED_VALUE. This is why we don't use string::getIndexOf directly.
+function string_getIndexOf() {
+  local -n stringToSearch="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local search="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i startingIndex=${3:-0}
 
   if (( startingIndex > 0 )); then
     # if the starting index is greater than the length of the string, we return -1
     if (( startingIndex >= ${#stringToSearch} )); then
-      RETURNED_VALUE=-1
+      _STRING_INDEX_OF=-1
       return 0
     fi
 
@@ -249,9 +265,9 @@ function string::getIndexOf() {
 
   # the index is the length of the temp string if it is different than the initial string length
   if (( ${#afterSearchedString} != originalSubStringLength )); then
-    RETURNED_VALUE=$((${#afterSearchedString} + startingIndex))
+    _STRING_INDEX_OF=$((${#afterSearchedString} + startingIndex))
   else
-    RETURNED_VALUE=-1
+    _STRING_INDEX_OF=-1
   fi
 
   return 0
@@ -265,7 +281,7 @@ function string::getIndexOf() {
 # Both start and end strings are excluded in the extracted text.
 # Both start and end strings must be found to extract something.
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string from which to extract a text.
 # - $2: **start string** _as string_:
 #       the start string
@@ -284,14 +300,14 @@ function string::getIndexOf() {
 # local extractedText="${RETURNED_VALUE}"
 # ```
 function string::extractBetween() {
-  local -n stringFromWhichToExtract="${1}"
-  local start="${2}"
-  local end="${3}"
+  local -n stringFromWhichToExtract="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local start="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local end="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  local -i startIndex endIndex
+  local -i startIndex endIndex _STRING_INDEX_OF
   if [[ -n "${start}" ]]; then
-    string::getIndexOf stringFromWhichToExtract "${start}"
-    startIndex="${RETURNED_VALUE}"
+    string_getIndexOf stringFromWhichToExtract "${start}"
+    startIndex=${_STRING_INDEX_OF}
     if (( startIndex == -1 )); then
       RETURNED_VALUE=""
       return 0
@@ -302,8 +318,8 @@ function string::extractBetween() {
   fi
 
   if [[ -n "${end}" ]]; then
-    string::getIndexOf stringFromWhichToExtract "${end}" "${startIndex}"
-    endIndex="${RETURNED_VALUE}"
+    string_getIndexOf stringFromWhichToExtract "${end}" "${startIndex}"
+    endIndex=${_STRING_INDEX_OF}
     if (( endIndex == -1 )); then
       RETURNED_VALUE=""
       return 0
@@ -320,7 +336,7 @@ function string::extractBetween() {
 #
 # Counts the number of occurrences of a substring in a string.
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string in which to count occurrences.
 # - $2: **substring** _as string_:
 #       the substring to count
@@ -337,8 +353,8 @@ function string::extractBetween() {
 #
 # > This is faster than looping over the string and check the substring.
 function string::count() {
-  local -n stringInWhichToCount="${1}"
-  local newString="${stringInWhichToCount//"${2}"/}"
+  local -n stringInWhichToCount="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local newString="${stringInWhichToCount//"${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"/}"
   RETURNED_VALUE=$(((${#stringInWhichToCount} - ${#newString}) / ${#2}))
 }
 
@@ -346,7 +362,7 @@ function string::count() {
 #
 # Split a string into an array using a separator.
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string to split.
 # - $2: **separators** _as string_:
 #       The separator characters to use.
@@ -363,8 +379,8 @@ function string::count() {
 #
 # > This is faster than using read into an array from a here string.
 function string::split() {
-  local -n stringToSplit="${1}"
-  local IFS="${2}"
+  local -n stringToSplit="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local IFS="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # shellcheck disable=SC2206
   # shellcheck disable=SC2034
   RETURNED_ARRAY=(${stringToSplit})
@@ -374,7 +390,7 @@ function string::split() {
 #
 # Get the first nth items (e.g. lines) of a string.
 #
-# - $1: **variable name** _as string_:
+# - $1: **string variable name** _as string_:
 #       The variable name that contains the string from which to get the first occurrences.
 # - $2: **nb items** _as int_:
 #       The number of items (lines) to extract.
@@ -388,19 +404,21 @@ function string::split() {
 # - ${RETURNED_VALUE}: The extracted string.
 #
 # ```bash
-# string::head "line1\nline2\nline3" 2
+# MY_STRING="line1"$'\n'"line2"$'\n'"line3"
+# string::head MY_STRING 2
 # echo "${RETURNED_VALUE}"
 # ```
 function string::head() {
-  local _STRING_HEAD_NB_LINES="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
+  local _STRING_HEAD_NB_LINES="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i _STRING_HEAD_COUNTER=0
 
   RETURNED_VALUE=""
   string::doForEachLine \
-    "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}" \
+    "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     string_headCallback \
     "${3:-${_OPTION_SEPARATOR:-$'\n'}}"
 }
+
 function string_headCallback() {
   if ((_STRING_HEAD_COUNTER >= _STRING_HEAD_NB_LINES)); then
     return 1
@@ -439,14 +457,14 @@ function string_headCallback() {
 # > newlines (which is not the case with a "for loop" using parameter expansion and IFS=$'\n').
 # > Here string is significantly slower than using this.
 function string::doForEachLine() {
-  local -n stringForWhichToIterate="${1}"
+  local -n stringForWhichToIterate="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local string="${stringForWhichToIterate}"
   local separator="${3:-${_OPTION_SEPARATOR:-$'\n'}}"
   local chunk
   while [[ -n ${string} ]]; do
     chunk="${string%%"${separator}"*}"
     string="${string:${#chunk} + 1}"
-    if ! "${2}" "${chunk}"; then
+    if ! "${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${chunk}"; then
       break
     fi
   done

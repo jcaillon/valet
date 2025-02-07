@@ -306,7 +306,7 @@ function interactive::displayDialogBox() {
     textWidth=${#text}
   fi
 
-  string::wrapWords "${text}" "${textWidth}"
+  string::wrapWords text "${textWidth}"
   local wrappedText="${RETURNED_VALUE}"
 
   local finalString line sideString

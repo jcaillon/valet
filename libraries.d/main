@@ -248,7 +248,7 @@ function main::getHelpText() {
   local -n functionExamples="CMD_EXAMPLES_NAME_${functionName}"
 
   # description
-  string::wrapWords "${description}" "${helpWidth}" "  " "$((helpWidth - 2))"
+  string::wrapWords description "${helpWidth}" "  " "$((helpWidth - 2))"
   local wrappedDescription="  ${RETURNED_VALUE}"
 
   # usage
@@ -280,7 +280,7 @@ function main::getHelpText() {
     fi
   fi
   RETURNED_VALUE2="${usage}"
-  string::wrapWords "${usage}" "${helpWidth}" "  " "$((helpWidth - 2))"
+  string::wrapWords usage "${helpWidth}" "  " "$((helpWidth - 2))"
   usage="  ${RETURNED_VALUE}"
 
   # global options
@@ -354,15 +354,15 @@ function mainWriteAsTable() {
   local -n names="${prefix}_NAME_${functionName}"
   local -n descriptions="${prefix}_DESCRIPTION_${functionName}"
 
-  local cDefault output description index
+  local cDefault output index
   if [[ -n "${color:-}" ]]; then cDefault=$'\e'"[0m"; fi
 
   output=""
   for index in "${!names[@]}"; do
-    string::wrapWords "${names[${index}]}" "${width}" "  " "$((width - 2))"
+    string::wrapWords "names[${index}]" "${width}" "  " "$((width - 2))"
     output+="  ${color}${RETURNED_VALUE}${cDefault:-}"$'\n'
 
-    string::wrapWords "${descriptions[${index}]}" "${width}" "      " "$((width - 6))"
+    string::wrapWords "descriptions[${index}]" "${width}" "      " "$((width - 6))"
     output+="      ${RETURNED_VALUE}"$'\n'
   done
 

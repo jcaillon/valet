@@ -22,7 +22,7 @@ commandArgumentsErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝.
 Use ⌜valet self mock2 --help⌝ to get help.
 
 Usage:
-valet [global options] self mock2 [options] [--] <firstArg> <more...>"
+valet [global options] self mock2 [options] [--] <first-arg> <more...>"
 more=(
 )'
 ```
@@ -65,7 +65,7 @@ commandArgumentsErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
 Use ⌜valet self mock2 --help⌝ to get help.
 
 Usage:
-valet [global options] self mock2 [options] [--] <firstArg> <more...>"
+valet [global options] self mock2 [options] [--] <first-arg> <more...>"
 option1="true"
 thisIsOption2="optionValue2"
 firstArg="arg1"
@@ -102,7 +102,7 @@ Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
 Use ⌜valet self mock2 --help⌝ to get help.
 
 Usage:
-valet [global options] self mock2 [options] [--] <firstArg> <more...>"
+valet [global options] self mock2 [options] [--] <first-arg> <more...>"
 withDefault="optionValue2"
 firstArg="arg"
 more=(
@@ -154,7 +154,7 @@ commandArgumentsErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
 Use ⌜valet self mock2 --help⌝ to get help.
 
 Usage:
-valet [global options] self mock2 [options] [--] <firstArg> <more...>"
+valet [global options] self mock2 [options] [--] <first-arg> <more...>"
 thisIsOption2="arg"
 firstArg="more1"
 more=(

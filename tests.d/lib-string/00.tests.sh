@@ -34,78 +34,78 @@ function test_string::doForEachLine() {
 function test_string::getField() {
   test::title "✅ Testing string::getField"
 
-  local str='field1 field2 field3'
-  test::printVars "str"
-  test::func string::getField str 0 ' '
-  test::func string::getField str 1 ' '
-  test::func string::getField str 2 ','
-  test::func string::getField str 4 ','
+  local _MY_STRING='field1 field2 field3'
+  test::printVars "_MY_STRING"
+  test::func string::getField _MY_STRING 0 ' '
+  test::func string::getField _MY_STRING 1 ' '
+  test::func string::getField _MY_STRING 2 ','
+  test::func string::getField _MY_STRING 4 ','
 
   # shellcheck disable=SC2034
-  str="line1 hm I wonder"$'\n'"line2 does it work on lines?"$'\n'"line3 seems so"
-  test::printVars "str"
-  test::func string::getField str 2 $'\n'
+  _MY_STRING="line1 hm I wonder"$'\n'"line2 does it work on lines?"$'\n'"line3 seems so"
+  test::printVars "_MY_STRING"
+  test::func string::getField _MY_STRING 2 $'\n'
 }
 
 function test_string::convertCamelCaseToSnakeCase() {
   test::title "✅ Testing string::convertCamelCaseToSnakeCase"
 
-  test::func str="thisIsATest0" string::convertCamelCaseToSnakeCase str
-  test::func str="AnotherTest" string::convertCamelCaseToSnakeCase str
+  test::func _MY_STRING="thisIsATest0" string::convertCamelCaseToSnakeCase _MY_STRING
+  test::func _MY_STRING="AnotherTest" string::convertCamelCaseToSnakeCase _MY_STRING
 
 }
 
 function test_string::convertKebabCaseToSnakeCase() {
   test::title "✅ Testing string::convertKebabCaseToSnakeCase"
 
-  test::func str="this-is-a-test0" string::convertKebabCaseToSnakeCase str
-  test::func str="--another-test" string::convertKebabCaseToSnakeCase str
+  test::func _MY_STRING="this-is-a-test0" string::convertKebabCaseToSnakeCase _MY_STRING
+  test::func _MY_STRING="--another-test" string::convertKebabCaseToSnakeCase _MY_STRING
 
 }
 
 function test_string::convertKebabCaseToCamelCase() {
   test::title "✅ Testing string::convertKebabCaseToCamelCase"
 
-  test::func str="this-is-a-test0" string::convertKebabCaseToCamelCase str
-  test::func str="--another-test" string::convertKebabCaseToCamelCase str
-  test::func str="--anotherTest" string::convertKebabCaseToCamelCase str
-  test::func str="--last--" string::convertKebabCaseToCamelCase str
+  test::func _MY_STRING="this-is-a-test0" string::convertKebabCaseToCamelCase _MY_STRING
+  test::func _MY_STRING="--another-test" string::convertKebabCaseToCamelCase _MY_STRING
+  test::func _MY_STRING="--anotherTest" string::convertKebabCaseToCamelCase _MY_STRING
+  test::func _MY_STRING="--last--" string::convertKebabCaseToCamelCase _MY_STRING
 }
 
 function test_string::trimAll() {
   test::title "✅ Testing string::trimAll"
 
-  test::doInPlaceChanges string::trimAll '  a  super test  '
-  test::doInPlaceChanges string::trimAll 'this is a command  '
-  test::doInPlaceChanges string::trimAll $'\t\n''this is a '$'\t''command  '
+  test::funcWithString string::trimAll '  a  super test  '
+  test::funcWithString string::trimAll 'this is a command  '
+  test::funcWithString string::trimAll $'\t\n''this is a '$'\t''command  '
 
 }
 
 function test_string::trimEdges() {
   test::title "✅ Testing string::trimEdges"
 
-  test::doInPlaceChanges string::trimEdges '  hello  world  '
-  test::doInPlaceChanges string::trimEdges 'hello  ' ' '
-  test::doInPlaceChanges string::trimEdges '  hello'
-  test::doInPlaceChanges string::trimEdges $'\n'$'\t''  hello'$'\n'$'\t'' '
+  test::funcWithString string::trimEdges '  hello  world  '
+  test::funcWithString string::trimEdges '_-_-_hello_-_' _-
+  test::funcWithString string::trimEdges '  hello'
+  test::funcWithString string::trimEdges $'\n'$'\t''  hello'$'\n'$'\t'' '
 }
 
 function test_string::getIndexOf() {
   test::title "✅ Testing string::getIndexOf function"
 
-  test::func str='hello' string::getIndexOf str 'l'
-  test::func str='hello' string::getIndexOf str 'he'
-  test::func str='hello' string::getIndexOf str 'he' 10
-  test::func str='yes-yes' string::getIndexOf str 'ye' 1
-  test::func str='yes-yes' string::getIndexOf str 'yes' 5
+  test::func _MY_STRING='hello' string::getIndexOf _MY_STRING 'l'
+  test::func _MY_STRING='hello' string::getIndexOf _MY_STRING 'he'
+  test::func _MY_STRING='hello' string::getIndexOf _MY_STRING 'he' 10
+  test::func _MY_STRING='yes-yes' string::getIndexOf _MY_STRING 'ye' 1
+  test::func _MY_STRING='yes-yes' string::getIndexOf _MY_STRING 'yes' 5
 }
 
 function test_string::extractBetween() {
   test::title "✅ Testing string::extractBetween function"
 
-  test::func str='hello' string::extractBetween str 'e' 'o'
-  test::func str='hello' string::extractBetween str 'e' ''
-  test::func str='hello' string::extractBetween str 'h' 'a'
+  test::func _MY_STRING='hello' string::extractBetween _MY_STRING 'e' 'o'
+  test::func _MY_STRING='hello' string::extractBetween _MY_STRING 'e' ''
+  test::func _MY_STRING='hello' string::extractBetween _MY_STRING 'h' 'a'
 
   test::printVars MULTI_LINES_TEXT2
   test::func string::extractBetween MULTI_LINES_TEXT2 "one"$'\n' '4'
@@ -115,56 +115,56 @@ function test_string::extractBetween() {
 function test_string::count() {
   test::title "✅ Testing string::count function"
 
-  test::func str='name,firstname,address' string::count str ','
-  test::func str='bonjour mon bon ami, bonne journée!' string::count str 'bo'
+  test::func _MY_STRING='name,firstname,address' string::count _MY_STRING ','
+  test::func _MY_STRING='bonjour mon bon ami, bonne journée!' string::count _MY_STRING 'bo'
 }
 
 function test_string::split() {
   test::title "✅ Testing string::split function"
 
-  test::func str="name:firstname:address" string::split str ":"
-  test::func str="one:two,three" string::split str ":,"
+  test::func _MY_STRING="name:firstname:address" string::split _MY_STRING ":"
+  test::func _MY_STRING="one:two,three" string::split _MY_STRING ":,"
 }
 
 function test_string::wrapWords() {
   test::title "✅ Testing string::wrapWords"
 
   test::markdown "Wrapping text at column 30 with no padding"
-  test::func string::wrapWords "\"\${MULTI_LINES_TEXT}\"" 30
+  test::func string::wrapWords MULTI_LINES_TEXT 30
 
   test::markdown "Wrapping text at column 50 with padding of 4 on new lines"
-  test::func string::wrapWords "\"\${MULTI_LINES_TEXT}\"" 50 '    '
+  test::func string::wrapWords MULTI_LINES_TEXT 50 '    '
 
   test::markdown "Wrapping text at column 20 with padding of 3 on all lines"
-  test::func string::wrapWords "\"\${MULTI_LINES_TEXT}\"" 20 '   ' 17
+  test::func string::wrapWords MULTI_LINES_TEXT 20 '   ' 17
 
   test::markdown "Wrapping words, shortcut because the message is a short single line"
-  test::func string::wrapWords 'A message.' 80
+  test::func _MY_STRING='A message.' string::wrapWords _MY_STRING 80
 
   test::markdown "Wrapping words, no shortcut!"
-  test::func string::wrapWords 'A message.' 80 '' 5
+  test::func _MY_STRING='A message.' string::wrapWords _MY_STRING 80 '' 5
 
   test::markdown "Wrapping words"
-  test::func string::wrapWords 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
+  test::funcWithString string::wrapWords 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
 }
 
 function test_string::wrapCharacters() {
   test::title "✅ Testing string::wrapCharacters"
 
   test::markdown  "Wrapping characters at column 20 with padding of 3 on all lines"
-  test::func string::wrapCharacters "\"\${MULTI_LINES_TEXT}\"" 20 "   " 17
+  test::func string::wrapCharacters MULTI_LINES_TEXT 20 "   " 17
 
   test::markdown "Wrapping characters at 20, no other options"
-  test::func string::wrapCharacters "\"\${MULTI_LINES_TEXT}\"" 20
+  test::func string::wrapCharacters MULTI_LINES_TEXT 20
 
   test::markdown "Wrapping characters"
-  test::func string::wrapCharacters 01234567890123456789234 17 '   ' 1
+  test::funcWithString string::wrapCharacters 01234567890123456789234 17 '   ' 1
 
   test::markdown "Wrapping characters"
-  test::func string::wrapCharacters 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
+  test::funcWithString string::wrapCharacters 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
 
   test::markdown "Wrapping characters, spaces at the beginning of the line are kept"
-  test::func string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 14
+  test::funcWithString string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 14
 }
 
 function test_string::highlight() {
@@ -191,12 +191,13 @@ function test_string::head() {
   test::func string::head MULTI_LINES_TEXT2 10
 }
 
-function test::doInPlaceChanges() {
+function test::funcWithString() {
   # shellcheck disable=SC2034
   MY_STRING="${2}"
+  local function="${1}"
+  shift 2
   test::printVars MY_STRING
-  test::exec "${1}" MY_STRING
-  test::printVars MY_STRING
+  test::func "${function}" MY_STRING "$@"
 }
 
 # shellcheck disable=SC2034

@@ -19,7 +19,7 @@ description: |-
 sudo: false
 hideInMenu: false
 arguments:
-- name: firstArg
+- name: first-arg
   description: |-
     First argument.
 - name: more...
@@ -134,7 +134,7 @@ Arguments are parsed in the order given in the list of arguments for the command
 
 ### ✔️ name
 
-The argument name.
+The argument name (in kebab-case).
 
 When calling `command::parseArguments` the argument will be parsed to local variable which name correspond to the camelCase equivalent of its name.
 

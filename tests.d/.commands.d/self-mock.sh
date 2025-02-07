@@ -136,7 +136,7 @@ description: |-
 
   You can ⌜highlight⌝ some text as well.
 arguments:
-- name: firstArg
+- name: first-arg
   description: |-
     First argument.
 - name: more...

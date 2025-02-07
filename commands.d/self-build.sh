@@ -293,8 +293,10 @@ function extractCommandDefinitionsToVariables() {
       local function command
       function="${TEMP_CMD_BUILD_function:-}"
       string::trimAll function
+      function="${RETURNED_VALUE}"
       command="${TEMP_CMD_BUILD_command:-}"
       string::trimAll command
+      command="${RETURNED_VALUE}"
 
       # trim the leading "valet" from the command
       command="${command#valet }"
@@ -510,6 +512,7 @@ function declareFinalCommandDefinitionParserVariables() {
     fi
     option="${option//,/ }"
     string::trimAll option
+    option="${RETURNED_VALUE}"
     selfBuild_extractFirstLongNameFromOptionString "${option}"
     optionName="${RETURNED_VALUE}"
     string::convertKebabCaseToCamelCase optionName
@@ -533,7 +536,8 @@ function declareFinalCommandDefinitionParserVariables() {
     local argument lastArgumentIsArray
     local -i nbOptionalArguments=0
     for ((index = 0; index < ${#TEMP_CMD_BUILD_arguments_name[@]}; index++)); do
-      argument="${TEMP_CMD_BUILD_arguments_name[index]}"
+      string::convertKebabCaseToCamelCase TEMP_CMD_BUILD_arguments_name[index]
+      argument="${RETURNED_VALUE}"
       if [[ ${argument} == *"..."* ]]; then
         argument="${argument//\.\.\./}"
         lastArgumentIsArray="true"

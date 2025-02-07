@@ -32,7 +32,7 @@ source interactive
 #
 #   This will create a file from a command template in the ⌜commands.d⌝ directory.
 # arguments:
-# - name: commandName
+# - name: command-name
 #   description: |-
 #     The name of the command to create.
 # examples:

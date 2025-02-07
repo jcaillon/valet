@@ -32,7 +32,7 @@ source interactive
 #
 #   This will create a file from a library template in the ⌜libraries.d⌝ directory.
 # arguments:
-# - name: libraryName
+# - name: library-name
 #   description: |-
 #     The name of the library to create.
 # examples:

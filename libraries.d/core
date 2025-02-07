@@ -274,7 +274,7 @@ function tui::getTerminalSize() {
 # ```
 function log::setLevel() {
   # log level, defaults to info
-  GLOBAL_LOG_LEVEL="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
+  GLOBAL_LOG_LEVEL="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   case "${GLOBAL_LOG_LEVEL}" in
   error) GLOBAL_LOG_LEVEL_INT=4 ;;
   warning) GLOBAL_LOG_LEVEL_INT=3 ;;
@@ -453,7 +453,7 @@ function log::createPrintFunction() {
     done
 
     wrapStatement='
-    string::wrapWords "${RETURNED_VALUE}" '"${wrapTextColumns}"' '"'${wrapPaddingCharacters}'"' '"$((wrapTextColumns - wrapPaddingLength))"''
+    string::wrapWords RETURNED_VALUE '"${wrapTextColumns}"' '"'${wrapPaddingCharacters}'"' '"$((wrapTextColumns - wrapPaddingLength))"''
   else
     wrapPaddingLength=0
   fi
@@ -532,7 +532,7 @@ function log::createPrintFunction() {
 
   # log::printFile function
   local insideTheLoop='
-        string::wrapCharacters "${line}" "${wrapTextColumns}" "${wrapPaddingCharacters}     '"${cDebug:-}"'░'"${cDefault:-}"' " "$((wrapTextColumns - 7 - ${#wrapPaddingCharacters}))"
+        string::wrapCharacters line "${wrapTextColumns}" "${wrapPaddingCharacters}     '"${cDebug:-}"'░'"${cDefault:-}"' " "$((wrapTextColumns - 7 - ${#wrapPaddingCharacters}))"
         toPrint+="${wrapPaddingCharacters}${lineNumberPadding}'"${cDebug:-}"'${lineNumber} ░'"${cDefault:-}"' ${RETURNED_VALUE}"'"$'\n'"'
         lineNumber+=1
         if (( ${#lineNumber} > currentLineNumberLength )); then
@@ -610,7 +610,7 @@ function log::createPrintFunction() {
     local line toPrint
     local IFS=
     while IFS= read -r line; do
-        string::wrapCharacters "${line}" "${wrapTextColumns}" "${wrapPaddingCharacters}${wrappedLineLeftPaddingString}" "$((wrapTextColumns - ${#wrapPaddingCharacters}))"
+        string::wrapCharacters line "${wrapTextColumns}" "${wrapPaddingCharacters}${wrappedLineLeftPaddingString}" "$((wrapTextColumns - ${#wrapPaddingCharacters}))"
         toPrint+="${wrapPaddingCharacters}${RETURNED_VALUE}"'"$'\n'"'
     done <<<"${content}"
     '"${standardPrintStatement}"'
@@ -866,8 +866,8 @@ function log::printCallStack() {
 # Wrapping is done at word boundaries.
 # Optionally appends padding characters on each new line.
 #
-# - $1: **text** _as string_:
-#       The text to wrap.
+# - $1: **text variable name** _as string_:
+#       The variable name that contains the text to wrap.
 # - $2: wrap width _as string_:
 #       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
 #       The width to wrap the text at.
@@ -897,18 +897,19 @@ function log::printCallStack() {
 # > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 # > - It considers escape sequence for text formatting and does not count them as visible characters.
 function string::wrapWords() {
-  local text="${1}"
+  local -n textToWrapAtWords="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i width="${2:-${_OPTION_WRAP_WIDTH:-${GLOBAL_COLUMNS}}}"
   local leftPaddingChars="${3:-${_OPTION_PADDING_CHARS:-}}"
   local -i firstLineWidth="${4:-${_OPTION_FIRST_LINE_WIDTH:-${width}}}"
 
   # short cut in case the text is already shorter than the width
-  if [[ ${#text} -le ${firstLineWidth} && ${text} != *$'\n'* ]]; then
-    RETURNED_VALUE="${text}"
+  if [[ ${#textToWrapAtWords} -le ${firstLineWidth} && ${textToWrapAtWords} != *$'\n'* ]]; then
+    RETURNED_VALUE="${textToWrapAtWords}"
     return 0
   fi
 
-  local IFS=$' \t' output="" line word realWord
+  local text="${textToWrapAtWords}"
+  local IFS=$' \t' output="" line word realWord RETURNED_VALUE2
   local leftPaddingVisibleChars="${leftPaddingChars//$'\e['[0-9][0-9]m/}"
   leftPaddingVisibleChars="${leftPaddingVisibleChars//$'\e['[0-9]m/}"
   local -i sentenceWidth=$((width - ${#leftPaddingVisibleChars})) realWordLength=0 firstWord=1
@@ -955,7 +956,7 @@ function string::wrapWords() {
           lineLength=realWordLength
         else
           # the word is too long to fit on a line, split it in multiple lines
-          string::wrapCharacters "${word}" "${width}" "${leftPaddingChars}" "$((sentenceWidth - lineLength))"
+          string::wrapCharacters word "${width}" "${leftPaddingChars}" "$((sentenceWidth - lineLength))"
           output+="${RETURNED_VALUE}"
           lineLength=${RETURNED_VALUE2}
         fi
@@ -975,8 +976,8 @@ function string::wrapWords() {
 # Wrapping is done at character boundaries, see string::warpText for word wrapping.
 # Optionally appends padding characters on each new line.
 #
-# - $1: **text** _as string_:
-#       The text to wrap.
+# - $1: **text variable name** _as string_:
+#       The variable name that contains the text to wrap.
 # - $2: wrap width _as string_:
 #       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
 #       The width to wrap the text at.
@@ -1007,12 +1008,12 @@ function string::wrapWords() {
 # > - It considers escape sequence for text formatting and does not count them as visible characters.
 # > - Leading spaces after a newly wrapped line are removed.
 function string::wrapCharacters() {
-  local text="${1}"
+  local -n textToWrapAtCharacters="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i width="${2:-${_OPTION_WRAP_WIDTH:-${GLOBAL_COLUMNS}}}"
   local leftPaddingChars="${3:-${_OPTION_PADDING_CHARS:-}}"
   local -i firstLineWidth="${4:-${_OPTION_FIRST_LINE_WIDTH:-${width}}}"
 
-  local itemChunk spaces
+  local itemChunk spaces text="${textToWrapAtCharacters}"
   local leftPaddingVisibleChars="${leftPaddingChars//$'\e['[0-9][0-9]m/}"
   leftPaddingVisibleChars="${leftPaddingVisibleChars//$'\e['[0-9]m/}"
   width=$((width - ${#leftPaddingVisibleChars}))

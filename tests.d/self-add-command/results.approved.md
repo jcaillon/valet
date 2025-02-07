@@ -54,7 +54,7 @@ description: |-
 sudo: false
 hideInMenu: false
 arguments:
-- name: firstArg
+- name: first-arg
   description: |-
     First argument.
 - name: more...

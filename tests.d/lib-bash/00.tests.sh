@@ -56,7 +56,7 @@ function test_function_to_reexport() {
   local -i firstArg=$1
   local secondArg="${2}"
   local -A thirdArg="${3:-egez}"
-  local -a fourth="${4?"The function ⌜${FUNCNAME:-?}⌝ requires more arguments."}"
+  local -a fourth="${4?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   if (( firstArg == 0 )); then
     echo "cool"

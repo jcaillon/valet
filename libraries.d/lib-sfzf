@@ -217,7 +217,7 @@ function sfzfDrawScreen() {
   # - compute the number of content lines for the pane
 
   # 1. draw the prompt string
-  string::wrapWords "${prompt}" "$((SFZF_LEFT_PANE_WIDTH - 1))"
+  string::wrapWords prompt "$((SFZF_LEFT_PANE_WIDTH - 1))"
   prompt="${RETURNED_VALUE}"
   SFZF_LEFT_PANE_FIRST_LINE=1
   local IFS line

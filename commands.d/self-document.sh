@@ -165,8 +165,8 @@ function selfDocument::getAllFunctionsDocumentation() {
       if [[ ${line} != "#"* ]]; then
         reading=false
         string::extractBetween functionDocumentation "## " $'\n'
+        string::trimEdges RETURNED_VALUE
         functionName="${RETURNED_VALUE}"
-        string::trimEdges functionName
         log::debug "Found function: ⌜${functionName}⌝"
         RETURNED_ASSOCIATIVE_ARRAY["${functionName}"]="${functionDocumentation}"
         functionDocumentation=""

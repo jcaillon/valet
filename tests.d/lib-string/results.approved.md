@@ -5,10 +5,10 @@
 ### ✅ Testing string::getField
 
 ```text
-str='field1 field2 field3'
+_MY_STRING='field1 field2 field3'
 ```
 
-❯ `string::getField str 0 \ `
+❯ `string::getField _MY_STRING 0 \ `
 
 Returned variables:
 
@@ -16,7 +16,7 @@ Returned variables:
 RETURNED_VALUE='field1'
 ```
 
-❯ `string::getField str 1 \ `
+❯ `string::getField _MY_STRING 1 \ `
 
 Returned variables:
 
@@ -24,7 +24,7 @@ Returned variables:
 RETURNED_VALUE='field2'
 ```
 
-❯ `string::getField str 2 ,`
+❯ `string::getField _MY_STRING 2 ,`
 
 Returned variables:
 
@@ -32,7 +32,7 @@ Returned variables:
 RETURNED_VALUE=''
 ```
 
-❯ `string::getField str 4 ,`
+❯ `string::getField _MY_STRING 4 ,`
 
 Returned variables:
 
@@ -41,12 +41,12 @@ RETURNED_VALUE=''
 ```
 
 ```text
-str='line1 hm I wonder
+_MY_STRING='line1 hm I wonder
 line2 does it work on lines?
 line3 seems so'
 ```
 
-❯ `string::getField str 2 $'\n'`
+❯ `string::getField _MY_STRING 2 $'\n'`
 
 Returned variables:
 
@@ -56,7 +56,7 @@ RETURNED_VALUE='line3 seems so'
 
 ### ✅ Testing string::convertCamelCaseToSnakeCase
 
-❯ `str=thisIsATest0 string::convertCamelCaseToSnakeCase str`
+❯ `_MY_STRING=thisIsATest0 string::convertCamelCaseToSnakeCase _MY_STRING`
 
 Returned variables:
 
@@ -64,7 +64,7 @@ Returned variables:
 RETURNED_VALUE='THIS_IS_A_TEST0'
 ```
 
-❯ `str=AnotherTest string::convertCamelCaseToSnakeCase str`
+❯ `_MY_STRING=AnotherTest string::convertCamelCaseToSnakeCase _MY_STRING`
 
 Returned variables:
 
@@ -74,7 +74,7 @@ RETURNED_VALUE='ANOTHER_TEST'
 
 ### ✅ Testing string::convertKebabCaseToSnakeCase
 
-❯ `str=this-is-a-test0 string::convertKebabCaseToSnakeCase str`
+❯ `_MY_STRING=this-is-a-test0 string::convertKebabCaseToSnakeCase _MY_STRING`
 
 Returned variables:
 
@@ -82,7 +82,7 @@ Returned variables:
 RETURNED_VALUE='THIS_IS_A_TEST0'
 ```
 
-❯ `str=--another-test string::convertKebabCaseToSnakeCase str`
+❯ `_MY_STRING=--another-test string::convertKebabCaseToSnakeCase _MY_STRING`
 
 Returned variables:
 
@@ -92,7 +92,7 @@ RETURNED_VALUE='ANOTHER_TEST'
 
 ### ✅ Testing string::convertKebabCaseToCamelCase
 
-❯ `str=this-is-a-test0 string::convertKebabCaseToCamelCase str`
+❯ `_MY_STRING=this-is-a-test0 string::convertKebabCaseToCamelCase _MY_STRING`
 
 Returned variables:
 
@@ -100,7 +100,7 @@ Returned variables:
 RETURNED_VALUE='thisIsATest0'
 ```
 
-❯ `str=--another-test string::convertKebabCaseToCamelCase str`
+❯ `_MY_STRING=--another-test string::convertKebabCaseToCamelCase _MY_STRING`
 
 Returned variables:
 
@@ -108,7 +108,7 @@ Returned variables:
 RETURNED_VALUE='anotherTest'
 ```
 
-❯ `str=--anotherTest string::convertKebabCaseToCamelCase str`
+❯ `_MY_STRING=--anotherTest string::convertKebabCaseToCamelCase _MY_STRING`
 
 Returned variables:
 
@@ -116,7 +116,7 @@ Returned variables:
 RETURNED_VALUE='anothertest'
 ```
 
-❯ `str=--last-- string::convertKebabCaseToCamelCase str`
+❯ `_MY_STRING=--last-- string::convertKebabCaseToCamelCase _MY_STRING`
 
 Returned variables:
 
@@ -132,8 +132,10 @@ MY_STRING='  a  super test  '
 
 ❯ `string::trimAll MY_STRING`
 
+Returned variables:
+
 ```text
-MY_STRING='a super test'
+RETURNED_VALUE='a super test'
 ```
 
 ```text
@@ -142,8 +144,10 @@ MY_STRING='this is a command  '
 
 ❯ `string::trimAll MY_STRING`
 
+Returned variables:
+
 ```text
-MY_STRING='this is a command'
+RETURNED_VALUE='this is a command'
 ```
 
 ```text
@@ -153,8 +157,10 @@ this is a 	command  '
 
 ❯ `string::trimAll MY_STRING`
 
+Returned variables:
+
 ```text
-MY_STRING='this is a command'
+RETURNED_VALUE='this is a command'
 ```
 
 ### ✅ Testing string::trimEdges
@@ -165,18 +171,22 @@ MY_STRING='  hello  world  '
 
 ❯ `string::trimEdges MY_STRING`
 
+Returned variables:
+
 ```text
-MY_STRING='hello  world'
+RETURNED_VALUE='hello  world'
 ```
 
 ```text
-MY_STRING='hello  '
+MY_STRING='_-_-_hello_-_'
 ```
 
-❯ `string::trimEdges MY_STRING`
+❯ `string::trimEdges MY_STRING _-`
+
+Returned variables:
 
 ```text
-MY_STRING='hello'
+RETURNED_VALUE='hello'
 ```
 
 ```text
@@ -185,8 +195,10 @@ MY_STRING='  hello'
 
 ❯ `string::trimEdges MY_STRING`
 
+Returned variables:
+
 ```text
-MY_STRING='hello'
+RETURNED_VALUE='hello'
 ```
 
 ```text
@@ -197,13 +209,15 @@ MY_STRING='
 
 ❯ `string::trimEdges MY_STRING`
 
+Returned variables:
+
 ```text
-MY_STRING='hello'
+RETURNED_VALUE='hello'
 ```
 
 ### ✅ Testing string::getIndexOf function
 
-❯ `str=hello string::getIndexOf str l`
+❯ `_MY_STRING=hello string::getIndexOf _MY_STRING l`
 
 Returned variables:
 
@@ -211,7 +225,7 @@ Returned variables:
 RETURNED_VALUE='2'
 ```
 
-❯ `str=hello string::getIndexOf str he`
+❯ `_MY_STRING=hello string::getIndexOf _MY_STRING he`
 
 Returned variables:
 
@@ -219,7 +233,7 @@ Returned variables:
 RETURNED_VALUE='0'
 ```
 
-❯ `str=hello string::getIndexOf str he 10`
+❯ `_MY_STRING=hello string::getIndexOf _MY_STRING he 10`
 
 Returned variables:
 
@@ -227,7 +241,7 @@ Returned variables:
 RETURNED_VALUE='-1'
 ```
 
-❯ `str=yes-yes string::getIndexOf str ye 1`
+❯ `_MY_STRING=yes-yes string::getIndexOf _MY_STRING ye 1`
 
 Returned variables:
 
@@ -235,7 +249,7 @@ Returned variables:
 RETURNED_VALUE='4'
 ```
 
-❯ `str=yes-yes string::getIndexOf str yes 5`
+❯ `_MY_STRING=yes-yes string::getIndexOf _MY_STRING yes 5`
 
 Returned variables:
 
@@ -245,7 +259,7 @@ RETURNED_VALUE='-1'
 
 ### ✅ Testing string::extractBetween function
 
-❯ `str=hello string::extractBetween str e o`
+❯ `_MY_STRING=hello string::extractBetween _MY_STRING e o`
 
 Returned variables:
 
@@ -253,7 +267,7 @@ Returned variables:
 RETURNED_VALUE='ll'
 ```
 
-❯ `str=hello string::extractBetween str e ''`
+❯ `_MY_STRING=hello string::extractBetween _MY_STRING e ''`
 
 Returned variables:
 
@@ -261,7 +275,7 @@ Returned variables:
 RETURNED_VALUE='llo'
 ```
 
-❯ `str=hello string::extractBetween str h a`
+❯ `_MY_STRING=hello string::extractBetween _MY_STRING h a`
 
 Returned variables:
 
@@ -296,7 +310,7 @@ RETURNED_VALUE='line two'
 
 ### ✅ Testing string::count function
 
-❯ `str=name,firstname,address string::count str ,`
+❯ `_MY_STRING=name,firstname,address string::count _MY_STRING ,`
 
 Returned variables:
 
@@ -304,7 +318,7 @@ Returned variables:
 RETURNED_VALUE='2'
 ```
 
-❯ `str=bonjour\ mon\ bon\ ami\,\ bonne\ journée\! string::count str bo`
+❯ `_MY_STRING=bonjour\ mon\ bon\ ami\,\ bonne\ journée\! string::count _MY_STRING bo`
 
 Returned variables:
 
@@ -314,7 +328,7 @@ RETURNED_VALUE='3'
 
 ### ✅ Testing string::split function
 
-❯ `str=name:firstname:address string::split str :`
+❯ `_MY_STRING=name:firstname:address string::split _MY_STRING :`
 
 Returned variables:
 
@@ -326,7 +340,7 @@ RETURNED_ARRAY=(
 )
 ```
 
-❯ `str=one:two,three string::split str :,`
+❯ `_MY_STRING=one:two,three string::split _MY_STRING :,`
 
 Returned variables:
 
@@ -342,7 +356,7 @@ RETURNED_ARRAY=(
 
 Wrapping text at column 30 with no padding
 
-❯ `string::wrapWords "${MULTI_LINES_TEXT}" 30`
+❯ `string::wrapWords MULTI_LINES_TEXT 30`
 
 Returned variables:
 
@@ -387,12 +401,11 @@ Veganism
 
 There were 2 new lines before 
 this.'
-RETURNED_VALUE2='8'
 ```
 
 Wrapping text at column 50 with padding of 4 on new lines
 
-❯ `string::wrapWords "${MULTI_LINES_TEXT}" 50 \ \ \ \ `
+❯ `string::wrapWords MULTI_LINES_TEXT 50 \ \ \ \ `
 
 Returned variables:
 
@@ -427,7 +440,7 @@ RETURNED_VALUE='You don`t [36m[36m[36mget better[39m[39m[39m on the days w
 
 Wrapping text at column 20 with padding of 3 on all lines
 
-❯ `string::wrapWords "${MULTI_LINES_TEXT}" 20 \ \ \  17`
+❯ `string::wrapWords MULTI_LINES_TEXT 20 \ \ \  17`
 
 Returned variables:
 
@@ -498,12 +511,11 @@ RETURNED_VALUE='You don`t [36m[36m[36mget
    There were 2 new 
    lines before 
    this.'
-RETURNED_VALUE2='4'
 ```
 
 Wrapping words, shortcut because the message is a short single line
 
-❯ `string::wrapWords A\ message. 80`
+❯ `_MY_STRING=A\ message. string::wrapWords _MY_STRING 80`
 
 Returned variables:
 
@@ -513,7 +525,7 @@ RETURNED_VALUE='A message.'
 
 Wrapping words, no shortcut!
 
-❯ `string::wrapWords A\ message. 80 '' 5`
+❯ `_MY_STRING=A\ message. string::wrapWords _MY_STRING 80 '' 5`
 
 Returned variables:
 
@@ -524,7 +536,12 @@ message.'
 
 Wrapping words
 
-❯ `string::wrapWords $'A message.\nA new line' 13 [36m░░░[0m 10`
+```text
+MY_STRING='A message.
+A new line'
+```
+
+❯ `string::wrapWords MY_STRING 13 [36m░░░[0m 10`
 
 Returned variables:
 
@@ -537,7 +554,7 @@ RETURNED_VALUE='A message.
 
 Wrapping characters at column 20 with padding of 3 on all lines
 
-❯ `string::wrapCharacters "${MULTI_LINES_TEXT}" 20 \ \ \  17`
+❯ `string::wrapCharacters MULTI_LINES_TEXT 20 \ \ \  17`
 
 Returned variables:
 
@@ -608,7 +625,7 @@ RETURNED_VALUE2='1'
 
 Wrapping characters at 20, no other options
 
-❯ `string::wrapCharacters "${MULTI_LINES_TEXT}" 20`
+❯ `string::wrapCharacters MULTI_LINES_TEXT 20`
 
 Returned variables:
 
@@ -668,7 +685,11 @@ RETURNED_VALUE2='15'
 
 Wrapping characters
 
-❯ `string::wrapCharacters 01234567890123456789234 17 \ \ \  1`
+```text
+MY_STRING='01234567890123456789234'
+```
+
+❯ `string::wrapCharacters MY_STRING 17 \ \ \  1`
 
 Returned variables:
 
@@ -681,7 +702,12 @@ RETURNED_VALUE2='8'
 
 Wrapping characters
 
-❯ `string::wrapCharacters $'A message.\nA new line' 13 [36m░░░[0m 10`
+```text
+MY_STRING='A message.
+A new line'
+```
+
+❯ `string::wrapCharacters MY_STRING 13 [36m░░░[0m 10`
 
 Returned variables:
 
@@ -693,7 +719,12 @@ RETURNED_VALUE2='0'
 
 Wrapping characters, spaces at the beginning of the line are kept
 
-❯ `string::wrapCharacters $'  Start With spaces that must be kept! Other spaces can be ignored at wrapping.\n  Also start with spaces' 17 \ \ \  14`
+```text
+MY_STRING='  Start With spaces that must be kept! Other spaces can be ignored at wrapping.
+  Also start with spaces'
+```
+
+❯ `string::wrapCharacters MY_STRING 17 \ \ \  14`
 
 Returned variables:
 
