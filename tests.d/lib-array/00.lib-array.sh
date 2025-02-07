@@ -122,11 +122,11 @@ function test_array::fuzzyFilterSort() {
   )
 
   test::printVars MY_ARRAY
-  test::func array::fuzzyFilterSort the MY_ARRAY
+  test::func SEARCH_STRING=the array::fuzzyFilterSort MY_ARRAY SEARCH_STRING
 
   test::prompt "shopt -s nocasematch"
   shopt -s nocasematch
-  test::func array::fuzzyFilterSort ELV MY_ARRAY
+  test::func SEARCH_STRING=ELV array::fuzzyFilterSort MY_ARRAY SEARCH_STRING
   shopt -u nocasematch
 }
 
@@ -135,10 +135,12 @@ function test_array::fuzzyFilterSortFileWithGrepAndGawk() {
 
   mapfile -t _MY_ARRAY <words
   shopt -s nocasematch
-  array::fuzzyFilterSort ea _MY_ARRAY
+  # shellcheck disable=SC2034
+  local SEARCH_STRING=ea
+  array::fuzzyFilterSort _MY_ARRAY SEARCH_STRING
   shopt -u nocasematch
 
-  test::prompt "array::fuzzyFilterSortFileWithGrepAndGawk /words /out1 /out2"
+  test::prompt "SEARCH_STRING=ea array::fuzzyFilterSortFileWithGrepAndGawk /words SEARCH_STRING /out1 /out2"
   test::prompt "fs::head /out1 10"
   local value
   local -i nb=0
@@ -162,7 +164,7 @@ function test_array::fuzzyFilterSortFileWithGrepAndGawk() {
     return 0
   fi
 
-  array::fuzzyFilterSortFileWithGrepAndGawk ea words "${outputFilteredFile}" "${outputCorrespondenceFile}"
+  array::fuzzyFilterSortFileWithGrepAndGawk words SEARCH_STRING "${outputFilteredFile}" "${outputCorrespondenceFile}"
 
   fs::readFile "${outputFilteredFile}"
   local awkLines="${RETURNED_VALUE%$'\n'}"

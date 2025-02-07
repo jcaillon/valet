@@ -51,6 +51,30 @@ Using a global variable seem to be a bad idea and can lead to confusion in the c
 
 Avoid code mistakes by deciding on 1 global variable for all your functions and always assign this variable in each return path of a function (otherwise you might use a value from a previous function call!). In valet, this variable is named `RETURNED_VALUE`.
 
+## Passing long strings to a function
+
+Instead of:
+
+```bash
+function myFunc() {
+  echo "${1}"
+}
+myFunc "a very long string"
+```
+
+do:
+
+```bash
+function myFunc() {
+  local -n myString="${1}"
+  echo "${myString}"
+}
+veryLongString="a very long string"
+myFunc veryLongString
+```
+
+This way, you avoid duplicating the string in memory.
+
 ## Read a whole file
 
 Instead of (subshell + forking):

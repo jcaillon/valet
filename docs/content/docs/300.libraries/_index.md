@@ -21,6 +21,32 @@ All Valet functions are prefixed with the library name. E.g. the function `strin
 The bash built-in `source` is overridden by a function in Valet. This allows to not source the same file twice, so you can safely call `source mylibrary` several times without impacting the runtime performance. If you need to use the default source keyword, use `builtin source`.
 {{< /callout >}}
 
+## 👔 About library functions
+
+The functions in Valet are implement for a good compromise between performance and readability. They generally define clear local variables for the inputs as they make the code more understandable. However, they do not implement input validation (beside checking if mandatory arguments are given), it is your responsibility to ensure that the inputs are correct.
+
+Functions return values using global variables (see [performance tips](/docs/performance-tips) for an explanation). Depending on the type and number of returned values, they will named as such:
+
+- `${RETURNED_VALUE}`
+- `${RETURNED_VALUE2}`
+- `${RETURNED_VALUE3}`
+- `${RETURNED_ARRAY[@]}`
+- `${RETURNED_ARRAY2[@]}`
+- `${RETURNED_ASSOCIATIVE_ARRAY[@]}`
+
+This ensures consistency across all functions. The trade off is that you must pay attention to how you use these variables. Calling two functions that are using the same `RETURNED_VALUE` will overwrite the value of the first function, so you will want to assign it to another variable because calling the second function.
+
+When you want to set a returned value to a particular variable and want to avoid copying the returned value as such `myVar="${RETURNED_VALUE}"`, you can use something like this:
+
+```bash
+declare MY_STRING='kebab-case' MY_OUTPUT
+declare -n RETURNED_VALUE=MY_OUTPUT # make RETURNED_VALUE reference MY_OUTPUT
+string::convertKebabCaseToCamelCase MY_STRING # the function writes to RETURNED_VALUE, which points to MY_OUTPUT
+declare +n RETURNED_VALUE=value # we remove the reference and set another value
+echo "MY_OUTPUT: ⌜${MY_OUTPUT}⌝" # will output 'kebabCase'
+echo "RETURNED_VALUE: ⌜${RETURNED_VALUE}⌝" # will output 'value'
+```
+
 ## 🎀 Available core libraries
 
 <!-- https://v1.heroicons.com/ -->

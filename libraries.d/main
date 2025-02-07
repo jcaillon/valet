@@ -894,7 +894,7 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
     fi
 
     # case where the command is not exact, we try to fuzzy match it
-    array::fuzzyFilterSort "${command}" CMD_ALL_COMMANDS_ARRAY
+    array::fuzzyFilterSort CMD_ALL_COMMANDS_ARRAY command
     if (( ${#RETURNED_ARRAY[@]} > 1)); then
         # case of ambiguous command, show the list of possible commands
         main::getDisplayableFilteredArray "${command}" RETURNED_ARRAY
@@ -1259,7 +1259,7 @@ function main::fuzzyFindOption() {
   shopt -s nocasematch
 
   # split to get one possible option per line
-  array::fuzzyFilterSort "${unknownOption}" _OPTIONS_TO_MATCH
+  array::fuzzyFilterSort _OPTIONS_TO_MATCH unknownOption
   if (( ${#RETURNED_ARRAY[@]} == 1 )); then
     if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
       suggestedOption="Unknown option ⌜${unknownOption}⌝, did you mean ⌜${RETURNED_ARRAY[0]}⌝?"

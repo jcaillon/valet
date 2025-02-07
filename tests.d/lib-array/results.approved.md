@@ -242,7 +242,7 @@ MY_ARRAY=(
 )
 ```
 
-❯ `array::fuzzyFilterSort the MY_ARRAY`
+❯ `SEARCH_STRING=the array::fuzzyFilterSort MY_ARRAY SEARCH_STRING`
 
 Returned variables:
 
@@ -263,7 +263,7 @@ RETURNED_ARRAY2=(
 
 ❯ `shopt -s nocasematch`
 
-❯ `array::fuzzyFilterSort ELV MY_ARRAY`
+❯ `SEARCH_STRING=ELV array::fuzzyFilterSort MY_ARRAY SEARCH_STRING`
 
 Returned variables:
 
@@ -286,7 +286,7 @@ RETURNED_ARRAY2=(
 
 ### ✅ Testing array::fuzzyFilterSortFileWithGrepAndGawk
 
-❯ `array::fuzzyFilterSortFileWithGrepAndGawk /words /out1 /out2`
+❯ `SEARCH_STRING=ea array::fuzzyFilterSortFileWithGrepAndGawk /words SEARCH_STRING /out1 /out2`
 
 ❯ `fs::head /out1 10`
 

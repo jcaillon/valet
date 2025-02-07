@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.28.2544 (2025-01-22).
+> Documentation generated for the version 0.28.2965 (2025-02-07).
 
 ## ansi-codes::*
 
@@ -40,18 +40,18 @@ Ascii graphics:
 Add a value to an array if it is not already present.
 
 - $1: **array name** _as string_:
-      The global variable name of the array.
+      The variable name of the array.
 - $2: **value** _as any_:
       The value to add.
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if the value was added
   - 1 if it was already present
 
 ```bash
-declare -g myArray=( "a" "b" )
+declare myArray=( "a" "b" )
 array::appendIfNotPresent myArray "c"
 printf '%s\n' "${myArray[@]}"
 ```
@@ -63,24 +63,24 @@ Check if a value is in an array.
 It uses pure bash.
 
 - $1: **array name** _as string_:
-      The global variable name of the array.
+      The variable name of the array.
 - $2: **value** _as any_:
       The value to check.
 
 Returns:
 
-- `$?`: 0 if the value is in the array, 1 otherwise.
+- $?: 0 if the value is in the array, 1 otherwise.
 
 ```bash
-declare -g myArray=( "a" "b" )
+declare myArray=( "a" "b" )
 array::checkIfPresent myArray "b" && printf '%s\n' "b is in the array"
 ```
 
 
 ## array::fuzzyFilterSort
 
-Allows to fuzzy sort an array against a given pattern.
-Returns an array containing only the lines matching the pattern.
+Allows to fuzzy sort an array against a given searched string.
+Returns an array containing only the lines matching the searched string.
 The array is sorted by (in order):
 
 - the index of the first matched character in the line
@@ -89,18 +89,18 @@ The array is sorted by (in order):
 
 Also returns an array containing the indexes of the matched items in the original array.
 
-- $1: **pattern** _as string_:
-      the pattern to match
-- $2: **array name** _as string_:
-      the initial array name
+- $1: **array name** _as string_:
+      The array name to fuzzy filter and sort.
+- $2: **search string** _as string_:
+      The variable name containing the search string to match.
 
 Returns:
 
-- `RETURNED_ARRAY`: An array containing the items sorted and filtered
-- `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array
+- ${RETURNED_ARRAY}: An array containing the items sorted and filtered
+- ${RETURNED_ARRAY2}: An array containing the indexes of the matched items in the original array
 
 ```bash
-array::fuzzyFilterSort "pattern" MY_ARRAY
+array::fuzzyFilterSort MY_ARRAY SEARCH_STRING
 echo "${RETURNED_ARRAY[*]}"
 ```
 
@@ -111,8 +111,8 @@ echo "${RETURNED_ARRAY[*]}"
 
 ## array::fuzzyFilterSortFileWithGrepAndGawk
 
-Allows to fuzzy sort a file against a given pattern.
-Outputs a file containing only the lines matching the pattern.
+Allows to fuzzy sort a file against a given searched string.
+Outputs a file containing only the lines matching the searched string.
 The array is sorted by (in order):
 
 - the index of the first matched character in the line
@@ -120,10 +120,10 @@ The array is sorted by (in order):
 
 Will also output a file containing the indexes of the matched lines in the original file.
 
-- $1: **pattern** _as string_:
-      The pattern to filter the file with.
-- $2: **file to filer** _as string_:
+- $1: **file to filer** _as string_:
       The input file to filter.
+- $2: **search string** _as string_:
+      The variable name containing the search string to match.
 - $3: **output filtered file** _as string_:
       The output file containing the filtered lines.
 - $4: **output correspondences file** _as string_:
@@ -143,7 +143,7 @@ This function makes sure that all the arrays have the same size.
 It will add empty strings to the arrays that are too short.
 
 - $@: **array names** _as string_:
-      The arrays (global variable names) to make the same size.
+      The variable names of each array to transform.
 
 ```bash
 array::makeArraysSameSize "array1" "array2" "array3"
@@ -155,10 +155,10 @@ array::makeArraysSameSize "array1" "array2" "array3"
 Sorts an array using the > bash operator (lexicographic order).
 
 - $1: **array name** _as string_:
-      The global variable name of array to sort.
+      The variable name of the array to sort  (it will be sorted in place).
 
 ```bash
-declare -g myArray=(z f b h a j)
+declare myArray=(z f b h a j)
 array::sort myArray
 echo "${myArray[*]}"
 ```
@@ -184,12 +184,12 @@ We first sort using the first criteria (from smallest to biggest), then the seco
 
 Returns:
 
-- `RETURNED_ARRAY`: An array that contains the corresponding indexes of the sorted array in the original array
+- ${RETURNED_ARRAY}: An array that contains the corresponding indexes of the sorted array in the original array
 
 ```bash
-declare -g myArray=( "a" "b" "c" )
-declare -g criteria1=( 3 2 2 )
-declare -g criteria2=( 1 3 2 )
+declare myArray=( "a" "b" "c" )
+declare criteria1=( 3 2 2 )
+declare criteria2=( 1 3 2 )
 array::sortWithCriteria myArray criteria1 criteria2
 echo "${myArray[@]}"
 # c b a
@@ -201,13 +201,38 @@ echo "${RETURNED_ARRAY[@]}"
 > - It is not appropriate for large array, use the `sort` binary for such cases.
 
 
+## bash::countArgs
+
+Returns the number of arguments passed.
+
+A convenient function that can be used to:
+
+- count the files/directories in a directory:
+  `bash::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
+- count the number of variables starting with VALET_
+  `bash::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
+
+Inputs:
+
+- $@: **arguments** _as any_:
+      the arguments to count
+
+Returns:
+
+- ${RETURNED_VALUE}: The number of arguments passed.
+
+```bash
+bash::countArgs 1 2 3
+```
+
+
 ## bash::countJobs
 
 This function counts the number of jobs currently running in the background.
 
 Returns:
 
-- `RETURNED_VALUE`: the number of jobs currently running in the background.
+- ${RETURNED_VALUE}: the number of jobs currently running in the background.
 
 ```bash
 bash::countJobs
@@ -233,13 +258,58 @@ to avoid copying the positional parameters each time.
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if the function was successfully re-exported
   - 1 if the function does not exist
-- `RETURNED_VALUE`: the modified function definition
+- ${RETURNED_VALUE}: the modified function definition
+- ${RETURNED_VALUE2}: the original function
 
 ```bash
-bash::getFunctionDefinitionWithGlobalVars "myFunction" "myFunctionWithGlobalVars" "GLOBAL_VAR1" "GLOBAL_VAR2"
+bash::getFunctionDefinitionWithGlobalVars "myFunction" "myFunctionWithGlobalVars" "MY_VAR1" "MY_VAR2"
+eval "${RETURNED_VALUE}"
+myFunctionWithGlobalVars
+```
+
+
+## bash::getMissingCommands
+
+This function returns the list of not existing commands for the given names.
+
+- $@: **command names** _as string_:
+      the list of command names to check.
+
+Returns:
+
+- $?
+  - 0 if there are not existing commands
+  - 1 otherwise.
+- ${RETURNED_ARRAY}: the list of not existing commands.
+
+```bash
+if bash::getMissingCommands "command1" "command2"; then
+  printf 'The following commands do not exist: %s' "${RETURNED_ARRAY[*]}"
+fi
+```
+
+
+## bash::getMissingVariables
+
+This function returns the list of undeclared variables for the given names.
+
+- $@: **variable names** _as string_:
+      the list of variable names to check.
+
+Returns:
+
+- $?
+  - 0 if there are variable undeclared
+  - 1 otherwise.
+- ${RETURNED_ARRAY}: the list of undeclared variables.
+
+```bash
+if bash::getMissingVariables "var1" "var2"; then
+  printf 'The following variables are not declared: %s' "${RETURNED_ARRAY[*]}"
+fi
 ```
 
 
@@ -259,13 +329,47 @@ returns the modified function to be evaluated.
 
 Returns:
 
-- `RETURNED_VALUE`: the modified function.
-- `RETURNED_VALUE2`: the original function.
+- ${RETURNED_VALUE}: the modified function.
+- ${RETURNED_VALUE2}: the original function.
 
 ```bash
 bash::injectCodeInFunction myFunction "echo 'Hello world!'" true
 eval "${RETURNED_VALUE}"
 myFunction
+```
+
+
+## bash::isCommand
+
+Check if the given command exists.
+
+- $1: **command name** _as string_:
+      the command name to check.
+
+Returns:
+
+- $?
+  - 0 if the command exists
+  - 1 otherwise.
+
+```bash
+if bash::isCommand "command1"; then
+  printf 'The command exists.'
+fi
+```
+
+
+## bash::readStdIn
+
+Read the content of the standard input.
+Will immediately return if the standard input is empty.
+
+Returns:
+
+- ${RETURNED_VALUE}: The content of the standard input.
+
+```bash
+bash::readStdIn && local stdIn="${RETURNED_VALUE}"
 ```
 
 
@@ -280,7 +384,7 @@ This function runs a list of commands in parallel with a maximum number of paral
 - $3: max parallel jobs _as integer_:
       (optional) Can be set using the variable `_OPTION_MAX_PARALLEL_JOBS`.
       The maximum number of parallel jobs to run.
-      (defaults to 1)
+      (defaults to 4)
 - $4: job completed callback _as string_:
       (optional) Can be set using the variable `_OPTION_JOB_COMPLETED_CALLBACK`.
       The name of the function to call when a job is completed.
@@ -291,7 +395,7 @@ This function runs a list of commands in parallel with a maximum number of paral
       - the percentage of jobs completed
       If the function returns 1, the script will exit early.
       (defaults to "")
-- $5: timeout between checks _as float_:
+- ${_OPTION_TIMEOUT_BETWEEN_CHECKS} _as float_:
       (optional) Can be set using the variable `_OPTION_TIMEOUT_BETWEEN_CHECKS`.
       The time to wait between checks for completed jobs (when no jobs finished
       when we last checked).
@@ -299,16 +403,31 @@ This function runs a list of commands in parallel with a maximum number of paral
 
 Returns:
 
-- `$?`:
+- $?:
   - 0: if all the jobs completed successfully.
   - 1: if the job completed callback returned 1.
-- `RETURNED_ARRAY`: an array containing the exit codes of the jobs.
+- ${RETURNED_ARRAY}: an array containing the exit codes of the jobs.
 
 ```bash
 declare -a jobNames=("job1" "job2" "job3")
 declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
-bash::runInParallel jobNames jobCommands 2
+_OPTION_MAX_PARALLEL_JOBS=2 bash::runInParallel jobNames jobCommands
 ```
+
+
+## bash::sleep
+
+Sleep for the given amount of time.
+This is a pure bash replacement of sleep.
+
+- $1: **time** _as float_:
+      the time to sleep in seconds (can be a float)
+
+```bash
+bash::sleep 1.5
+```
+
+> The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 
 
 ## benchmark::run
@@ -347,19 +466,11 @@ Will also display the help if the help option is true.
 
 This should be called from a command function for which you want to check the parsing results.
 
-- $1: help _as bool_:
-      (optional) Can be set using the variable `_OPTION_HELP`.
-      True to show the help for the function and then exit.
-      (defaults to the value of the 'help' variable or false)
-- $2: parsing errors _as string_:
-      (optional) Can be set using the variable `_OPTION_PARSING_ERRORS`.
-      A string containing the parsing errors.
-      An empty string means no parsing errors.
-      (defaults to the value of the 'commandArgumentsErrors' variable or empty)
+It uses the variables `help` and `commandArgumentsErrors` to determine if the help should be displayed
+and if there are parsing errors.
 
 ```bash
 command::checkParsedResults
-command::checkParsedResults "${help:-false}" "${commandArgumentsErrors:-}"
 ```
 
 
@@ -376,7 +487,7 @@ See the documentation for more details on the parser: <https://jcaillon.github.i
 
 Returns:
 
-- `RETURNED_VALUE`: a string that can be evaluated to set the parsed variables
+- ${RETURNED_VALUE}: a string that can be evaluated to set the parsed variables
 
 Output example:
 
@@ -447,7 +558,7 @@ Creates it if missing.
 
 Returns:
 
-- `RETURNED_VALUE`: the path to the valet configuration directory
+- ${RETURNED_VALUE}: the path to the valet configuration directory
 
 ```bash
 core::getConfigurationDirectory
@@ -463,32 +574,12 @@ Creates it if missing.
 
 Returns:
 
-- `RETURNED_VALUE`: the path to the valet local state directory
+- ${RETURNED_VALUE}: the path to the valet local state directory
 
 ```bash
 core::getLocalStateDirectory
 local directory="${RETURNED_VALUE}"
 ```
-
-
-## time::getProgramElapsedMicroseconds
-
-Get the elapsed time in µs since the program started.
-
-Returns:
-
-- `RETURNED_VALUE`: the elapsed time in µs since the program started.
-
-```bash
-core::getElapsedProgramTime
-echo "${RETURNED_VALUE}"
-time::convertMicrosecondsToHuman "${RETURNED_VALUE}"
-echo "Human time: ${RETURNED_VALUE}"
-```
-
-> We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.
-> The 10# forces the base 10 conversion to avoid issues with leading zeros.
-> Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 
 
 ## core::getUserDirectory
@@ -498,7 +589,7 @@ Does not create it if missing.
 
 Returns:
 
-- `RETURNED_VALUE`: the path to the valet user directory
+- ${RETURNED_VALUE}: the path to the valet user directory
 
 ```bash
 core::getUserDirectory
@@ -512,7 +603,7 @@ Returns the version of Valet.
 
 Returns:
 
-- `RETURNED_VALUE`: The version of Valet.
+- ${RETURNED_VALUE}: The version of Valet.
 
 ```bash
 core::getVersion
@@ -520,22 +611,11 @@ printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
 ```
 
 
-## core::resetIncludedLibraries
-
-Allows to reset the included files.
-When calling the source function, it will source all the files again.
-This is useful when we want to reload the libraries.
-
-```bash
-core::resetIncludedLibraries
-```
-
-
 ## curl::download
 
-This function is a wrapper around curl.
+This function is a wrapper around curl to save a request result in a file.
 It allows you to check the http status code and return 1 if it is not acceptable.
-It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
+It invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
 
 - $1: **fail** _as bool_:
       true/false to indicate if the function should fail in case the execution fails
@@ -549,22 +629,23 @@ It exe::invokes curl with the following options (do not repeat them): -sSL -w "%
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if the http status code is acceptable
   - 1 otherwise
-- `RETURNED_VALUE`: the content of stderr
-- `RETURNED_VALUE2`: the http status code
+- ${RETURNED_VALUE}: the content of stderr
+- ${RETURNED_VALUE2}: the http status code
 
 ```bash
-curl::download "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
+curl::download true 200,201 "/filePath" "https://example.com"
+curl::download false 200 "/filePath2" "https://example2.com" || core::fail "The curl command failed."
 ```
 
 
 ## curl::request
 
-This function is a wrapper around curl.
+This function is a wrapper around curl to save the content of a request in a variable.
 It allows you to check the http status code and return 1 if it is not acceptable.
-It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
+It invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
 
 - $1: **fail** _as bool_:
       true/false to indicate if the function should fail in case the execution fails
@@ -576,54 +657,648 @@ It exe::invokes curl with the following options (do not repeat them): -sSL -w "%
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if the http status code is acceptable
   - 1 otherwise
-- `RETURNED_VALUE`: the content of the request
-- `RETURNED_VALUE2`: the content of stderr
-- `RETURNED_VALUE3`: the http status code
+- ${RETURNED_VALUE}: the content of the request
+- ${RETURNED_VALUE2}: the content of stderr
+- ${RETURNED_VALUE3}: the http status code
 
 ```bash
+curl::request true 200 https://example.com -X POST -H 'Authorization: token'
 curl::request false 200,201 https://example.com || core::fail "The curl command failed."
 ```
 
 
-## fsfs::itemSelector
+## exe::captureOutput
 
-Displays a menu where the user can search and select an item.
-The menu is displayed in full screen.
-Each item can optionally have a description/details shown in a right panel.
-The user can search for an item by typing.
+Capture the output of a command.
+Made to be used on bash builtins that produce output.
+It captures the stdout and stderr of the command.
 
-- $1: **prompt** _as string_:
-      The prompt to display to the user (e.g. Please pick an item).
-- $2: **array name** _as string_:
-      The items to display (name of a global array).
-- $3: select callback function name _as string_:
-      (optional) The function to call when an item is selected
-      (defaults to empty, no callback)
-      this parameter can be left empty to hide the preview right pane;
-      otherwise the callback function should have the following signature:
-  - $1: the current item
-  - $2: the item number;
-  - $3: the current panel width;
-  - it should return the details of the item in the `RETURNED_VALUE` variable.
-- $4: preview title _as string_:
-      (optional) the title of the preview right pane (if any)
-      (defaults to empty)
+This function is a lot more basic than `exe::invoke` and does not support all its features.
+
+- $@: **command** _as string_:
+      The command to run.
 
 Returns:
 
-- `RETURNED_VALUE`: The selected item value (or empty).
-- `RETURNED_VALUE2`: The selected item index (from the original array).
-                     Or -1 if the user cancelled the selection
+- $?
+  - 0 if the command was successful
+  - 1 otherwise.
+- ${RETURNED_VALUE}: The captured output.
 
 ```bash
-declare -g -a SELECTION_ARRAY
-SELECTION_ARRAY=("blue" "red" "green" "yellow")
-fsfs::itemSelector "What's your favorite color?" SELECTION_ARRAY
-log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
+exe::captureOutput declare -f exe::captureOutput
+echo "${RETURNED_VALUE}"
 ```
+
+
+## exe::invoke
+
+This function call an executable and its arguments.
+If the execution fails, it will fail the script and show the std/err output.
+Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
+
+It redirects the stdout and stderr to environment variables.
+Equivalent to `exe::invoke5 true 0 '' '' "${@}"`
+
+- $1: **executable** _as string_:
+      the executable or command
+- $@: **arguments** _as any_:
+      the command and its arguments
+
+Returns:
+
+- $?:The exit code of the executable.
+- ${RETURNED_VALUE}: The content of stdout.
+- ${RETURNED_VALUE2}: The content of stderr.
+
+```bash
+exe::invoke git add --all
+```
+
+> See exe::invokef5 for more information.
+
+
+## exe::invoke2
+
+This function call an executable and its arguments.
+It redirects the stdout and stderr to environment variables.
+Equivalent to `exe::invoke5 "${1}" 0 "" "" "${@:2}"`
+
+- $1: **fail** _as bool_:
+      true/false to indicate if the function should fail in case the execution fails.
+      If true and the execution fails, the script will exit.
+- $2: **executable** _as string_:
+      the executable or function to execute
+- $@: **arguments** _as any_:
+      the arguments to pass to the executable
+
+Returns:
+
+- $?:The exit code of the executable.
+- ${RETURNED_VALUE}: The content of stdout.
+- ${RETURNED_VALUE2}: The content of stderr.
+
+```bash
+exe::invokef2 false git status || core::fail "status failed."
+stdout="${RETURNED_VALUE}"
+stderr="${RETURNED_VALUE2}"
+```
+
+> See exe::invokef5 for more information.
+
+
+## exe::invoke2piped
+
+This function call an executable and its arguments and input a given string as stdin.
+It redirects the stdout and stderr to environment variables.
+Equivalent to `exe::invoke5 "${1}" 0 false "${2}" "${@:3}"`
+
+- $1: **fail** _as bool_:
+      true/false to indicate if the function should fail in case the execution fails.
+      If true and the execution fails, the script will exit.
+- $2: **stdin** _as string_:
+      the stdin to pass to the executable
+- $3: **executable** _as string_:
+      the executable or function to execute
+- $@: **arguments** _as any_:
+      the arguments to pass to the executable
+
+Returns:
+
+- $?:The exit code of the executable.
+- ${RETURNED_VALUE}: The content of stdout.
+- ${RETURNED_VALUE2}: The content of stderr.
+
+```bash
+exe::invoke2piped true "key: val" yq -o json -p yaml -
+stdout="${RETURNED_VALUE}"
+stderr="${RETURNED_VALUE2}"
+```
+
+> This is the equivalent of:
+> `myvar="$(printf '%s\n' "mystring" | mycommand)"`
+> But without using a subshell.
+>
+> See exe::invokef5 for more information.
+
+
+## exe::invoke5
+
+This function call an executable and its arguments.
+It redirects the stdout and stderr to environment variables.
+It calls invoke5 and reads the files to set the environment variables.
+
+- $1: **fail** _as bool_:
+      true/false to indicate if the function should fail in case the execution fails.
+      If true and the execution fails, the script will exit.
+- $2: **acceptable codes** _as string_:
+      the acceptable error codes, comma separated
+      (if the error code is matched, then set the output error code to 0)
+- $3: **stdin from file** _as bool_:
+      true/false to indicate if the 4th argument represents a file path or directly the content for stdin
+- $4: **stdin** _as string_:
+      the stdin (can be empty)
+- $5: **executable** _as string_:
+      the executable or function to execute
+- $@: **arguments** _as any_:
+      the arguments to pass to the executable
+
+Returns:
+
+- $?:The exit code of the executable.
+- ${RETURNED_VALUE}: The content of stdout.
+- ${RETURNED_VALUE2}: The content of stderr.
+
+```bash
+exe::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
+stdout="${RETURNED_VALUE}"
+stderr="${RETURNED_VALUE2}"
+```
+
+> See exe::invokef5 for more information.
+
+
+## exe::invokef2
+
+This function call an executable and its arguments.
+It redirects the stdout and stderr to temporary files.
+Equivalent to `exe::invokef5 "${1}" 0 "" "" "${@:2}"`
+
+- $1: **fail** _as bool_:
+      true/false to indicate if the function should fail in case the execution fails.
+      If true and the execution fails, the script will exit.
+- $2: **executable** _as string_:
+      the executable or function to execute
+- $@: **arguments** _as any_:
+      the arguments to pass to the executable
+
+Returns:
+
+- $?:The exit code of the executable.
+- ${RETURNED_VALUE}: The file path containing the stdout of the executable.
+- ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
+
+```bash
+exe::invokef2 false git status || core::fail "status failed."
+stdoutFilePath="${RETURNED_VALUE}"
+stderrFilePath="${RETURNED_VALUE2}"
+```
+
+> See exe::invokef5 for more information.
+
+
+## exe::invokef2piped
+
+This function call an executable and its arguments and input a given string as stdin.
+It redirects the stdout and stderr to temporary files.
+Equivalent to `exe::invokef5 "${1}" 0 false "${2}" "${@:3}"`
+
+- $1: **fail** _as bool_:
+      true/false to indicate if the function should fail in case the execution fails.
+      If true and the execution fails, the script will exit.
+- $2: **stdin** _as string_:
+      the stdin to pass to the executable
+- $3: **executable** _as string_:
+      the executable or function to execute
+- $@: **arguments** _as any_:
+      the arguments to pass to the executable
+
+Returns:
+
+- $?:The exit code of the executable.
+- ${RETURNED_VALUE}: The file path containing the stdout of the executable.
+- ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
+
+```bash
+exe::invokef2piped true "key: val" yq -o json -p yaml -
+stdoutFilePath="${RETURNED_VALUE}"
+stderrFilePath="${RETURNED_VALUE2}"
+```
+
+> This is the equivalent of:
+> `myvar="$(printf '%s\n' "mystring" | mycommand)"`
+> But without using a subshell.
+>
+> See exe::invokef5 for more information.
+
+
+## exe::invokef5
+
+This function call an executable and its arguments.
+It redirects the stdout and stderr to temporary files.
+
+- $1: **fail** _as bool_:
+      true/false to indicate if the function should fail in case the execution fails.
+                     If true and the execution fails, the script will exit.
+- $2: **acceptable codes** _as string_:
+      the acceptable error codes, comma separated
+        (if the error code is matched, then set the output error code to 0)
+- $3: **sdtin from file** _as bool_:
+      true/false to indicate if the 4th argument represents a file path or directly the content for stdin
+- $4: **sdtin** _as string_:
+      the stdin (can be empty)
+- $5: **executable** _as string_:
+      the executable or function to execute
+- $@: **arguments** _as any_:
+      the arguments to pass to the executable
+
+Returns:
+
+- $?:The exit code of the executable.
+- ${RETURNED_VALUE}: The file path containing the stdout of the executable.
+- ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
+
+```bash
+exe::invokef5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
+stdoutFilePath="${RETURNED_VALUE}"
+stderrFilePath="${RETURNED_VALUE2}"
+```
+
+> - In windows, this is tremendously faster to do (or any other invoke flavor):
+>   `exe::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
+>   than doing:
+>   `myvar="$(mycommand)".`
+> - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
+> - On linux, you can use a tmpfs directory for massive gains over subshells.
+
+
+## extension1::doNothing
+
+Does nothing
+
+```bash
+extension1::doNothing
+```
+
+
+## extension2::doNothing
+
+Does nothing
+
+```bash
+extension2::doNothing
+```
+
+
+## extension3::doNothing
+
+Does nothing
+
+```bash
+extension3::doNothing
+```
+
+
+## fs::cat
+
+Print the content of a file to stdout.
+This is a pure bash equivalent of cat.
+
+- $1: **path** _as string_:
+      the file to print
+
+```bash
+fs::cat "myFile"
+```
+
+> Also see log::printFile if you want to print a file for a user.
+
+
+## fs::cleanTempFiles
+
+Removes all the temporary files and directories that were created by the
+fs::createTempFile and fs::createTempDirectory functions.
+
+```bash
+fs::cleanTempFiles
+```
+shellcheck disable=SC2016
+
+
+## fs::createDirectoryIfNeeded
+
+Create the directory tree if needed.
+
+- $1: **path** _as string_:
+      The directory path to create.
+
+Returns:
+
+- ${RETURNED_VALUE}: The absolute path to the directory.
+
+```bash
+fs::createDirectoryIfNeeded "/my/directory"
+```
+
+
+## fs::createFilePathIfNeeded
+
+Make sure that the given file path exists.
+Create the directory tree and the file if needed.
+
+- $1: **path** _as string_:
+      the file path to create
+
+Returns:
+
+- ${RETURNED_VALUE}: The absolute path of the file.
+
+```bash
+fs::createFilePathIfNeeded "myFile"
+```
+
+
+## fs::createLink
+
+Create a soft or hard link (original ← link).
+
+Reminder:
+
+- A soft (symbolic) link is a new file that contains a reference to another file or directory in the
+  form of an absolute or relative path.
+- A hard link is a directory entry that associates a new pathname with an existing
+  file (inode + data block) on a file system.
+
+This function allows to create a symbolic link on Windows as well as on Unix.
+
+- $1: **linked path** _as string_:
+      the path to link to (the original file)
+- $2: **link path** _as string_:
+      the path where to create the link
+- $3: hard link _as boolean_:
+      (optional) true to create a hard link, false to create a symbolic link
+      (defaults to false)
+- $4: force _as boolean_:
+      (optional) true to overwrite the link or file if it already exists.
+      Otherwise, the function will fail on an existing link.
+      (defaults to true)
+
+```bash
+fs::createLink "/path/to/link" "/path/to/linked"
+fs::createLink "/path/to/link" "/path/to/linked" true
+```
+
+> The function uses the `ln` command.
+
+
+## fs::createTempDirectory
+
+Creates a temporary directory.
+
+Returns:
+
+- ${RETURNED_VALUE}: The created path.
+
+```bash
+fs::createTempDirectory
+local directory="${RETURNED_VALUE}"
+```
+
+> Directories created this way are automatically cleaned up by the fs::cleanTempFiles
+> function when valet ends.
+
+
+## fs::createTempFile
+
+Creates a temporary file and return its path.
+
+Returns:
+
+- ${RETURNED_VALUE}: The created path.
+
+```bash
+fs::createTempFile
+local file="${RETURNED_VALUE}"
+```
+
+> Files created this way are automatically cleaned up by the fs::cleanTempFiles
+> function when valet ends.
+
+
+## fs::getFileLineCount
+
+Get the number of lines in a file.
+
+- $1: **path** _as string_:
+      the file path to read
+
+Returns:
+
+- ${RETURNED_VALUE}: The number of lines in the file.
+
+```bash
+fs::getFileLineCount "/path/to/file"
+local lineCount="${RETURNED_VALUE}"
+```
+
+
+## fs::head
+
+Print the first lines of a file to stdout.
+This is a pure bash equivalent of head.
+
+- $1: **path** _as string_:
+      The file to print.
+- $2: **number of lines** _as int_:
+      The number of lines to print.
+- $3: to variable _as bool_:
+      (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.
+      If true, the output will be stored in the variable `RETURNED_ARRAY`
+      instead of being printed to stdout.
+      (defaults to false)
+
+```bash
+fs::head "myFile" 10
+```
+
+> #TODO: faster with mapfile + quantum?
+
+
+## fs::isDirectoryWritable
+
+Check if the directory is writable. Creates the directory if it does not exist.
+
+- $1: **directory** _as string_:
+      the directory to check
+- $2: test file name _as string_:
+      (optional) the name of the file to create in the directory to test the write access
+
+Returns:
+
+- $?:
+  - 0 if the directory is writable
+  - 1 otherwise
+
+```bash
+if fs::isDirectoryWritable "/path/to/directory"; then
+  echo "The directory is writable."
+fi
+```
+
+
+## fs::listDirectories
+
+List all the directories in the given directory.
+
+- $1: **directory** _as string_:
+      the directory to list
+- $2: recursive _as bool_:
+      (optional) true to list recursively, false otherwise
+      (defaults to false)
+- $3: hidden _as bool_:
+      (optional) true to list hidden paths, false otherwise
+      (defaults to false)
+- $4: directory filter function name _as string_:
+      (optional) a function name that is called to filter the sub directories (for recursive listing)
+      The function should return 0 if the path is to be kept, 1 otherwise.
+      The function is called with the path as the first argument.
+      (defaults to empty string, no filter)
+
+Returns:
+
+- ${RETURNED_ARRAY}: An array with the list of all the files.
+
+```bash
+fs::listDirectories "/path/to/directory" true true myFilterFunction
+for path in "${RETURNED_ARRAY[@]}"; do
+  printf '%s' "${path}"
+done
+```
+
+
+## fs::listFiles
+
+List all the files in the given directory.
+
+- $1: **directory** _as string_:
+      the directory to list
+- $2: recursive _as bool_:
+      (optional) true to list recursively, false otherwise
+      (defaults to false)
+- $3: hidden _as bool_:
+      (optional) true to list hidden paths, false otherwise
+      (defaults to false)
+- $4: directory filter function name _as string_:
+      (optional) a function name that is called to filter the directories (for recursive listing)
+      The function should return 0 if the path is to be kept, 1 otherwise.
+      The function is called with the path as the first argument.
+      (defaults to empty string, no filter)
+
+Returns:
+
+- ${RETURNED_ARRAY}: An array with the list of all the files.
+
+```bash
+fs::listFiles "/path/to/directory" true true myFilterFunction
+for path in "${RETURNED_ARRAY[@]}"; do
+  printf '%s' "${path}"
+done
+```
+
+
+## fs::listPaths
+
+List all the paths in the given directory.
+
+- $1: **directory** _as string_:
+      the directory to list
+- $2: recursive _as bool_:
+      (optional) true to list recursively, false otherwise
+      (defaults to false)
+- $3: hidden _as bool_:
+      (optional) true to list hidden paths, false otherwise
+      (defaults to false)
+- $4: path filter function name _as string_:
+      (optional) a function name that is called to filter the paths that will be listed
+      The function should return 0 if the path is to be kept, 1 otherwise.
+      The function is called with the path as the first argument.
+      (defaults to empty string, no filter)
+- $5: directory filter function name _as string_:
+      (optional) a function name that is called to filter the directories (for recursive listing)
+      The function should return 0 if the path is to be kept, 1 otherwise.
+      The function is called with the path as the first argument.
+      (defaults to empty string, no filter)
+
+Returns:
+
+- ${RETURNED_ARRAY}: An array with the list of all the paths.
+
+```bash
+fs::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
+for path in "${RETURNED_ARRAY[@]}"; do
+  printf '%s' "${path}"
+done
+```
+
+> - It will correctly list files under symbolic link directories.
+
+
+## fs::readFile
+
+Reads the content of a file and returns it in the global variable RETURNED_VALUE.
+Uses pure bash.
+
+- $1: **path** _as string_:
+      the file path to read
+- $2: max char _as int_:
+      (optional) the maximum number of characters to read
+      (defaults to 0, which means read the whole file)
+
+> If the file does not exist, the function will return an empty string instead of failing.
+
+Returns:
+
+- ${RETURNED_VALUE}: The content of the file.
+
+```bash
+fs::readFile "/path/to/file" && local fileContent="${RETURNED_VALUE}"
+fs::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
+```
+
+
+## fs::tail
+
+Print the last lines of a file to stdout.
+This is a pure bash equivalent of tail.
+However, because we have to read the whole file, it is not efficient for large files.
+
+- $1: **path** _as string_:
+      The file to print.
+- $2: **number of lines** _as int_:
+      The number of lines to print from the end of the file.
+- $3: to variable _as bool_:
+      (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.
+      If true, the output will be stored in the variable `RETURNED_ARRAY`
+      instead of being printed to stdout.
+      (defaults to false)
+
+```bash
+fs::tail "myFile" 10
+```
+
+> #TODO: use mapfile quantum to not have to read the whole file in a single go.
+
+
+## fs::toAbsolutePath
+
+This function returns the absolute path of a path.
+
+- $1: **path** _as string_:
+      The path to translate to absolute path.
+
+Returns:
+
+- ${RETURNED_VALUE}: The absolute path of the path.
+
+```bash
+fs::toAbsolutePath "myFile"
+local myFileAbsolutePath="${RETURNED_VALUE}"
+```
+
+> This is a pure bash alternative to `realpath` or `readlink`.
 
 
 ##  interactive::askForConfirmation
@@ -635,7 +1310,7 @@ Ask the user to press the button to continue.
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if the user pressed enter
   - 1 otherwise
 
@@ -652,7 +1327,7 @@ This raw version does not display the prompt or the answer.
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if the user pressed enter
   - 1 otherwise
 
@@ -732,6 +1407,8 @@ Ask the user to yes or no.
 - The user can validate the choice with the enter key.
 - The user can also validate immediately with the y or n key.
 
+Dialog boxes are displayed for the question and answer.
+
 - $1: **prompt** _as string_:
       the prompt to display
 - $2: default _as bool_:
@@ -740,10 +1417,10 @@ Ask the user to yes or no.
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if the user answered yes
   - 1 otherwise
-- `RETURNED_VALUE`: true or false.
+- ${RETURNED_VALUE}: true or false.
 
 ```bash
 if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
@@ -766,816 +1443,13 @@ This raw version does not display the prompt or the answer.
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if the user answered yes
   - 1 otherwise
-- `RETURNED_VALUE`: true or false.
+- ${RETURNED_VALUE}: true or false.
 
 ```bash
 interactive::promptYesNoRaw "Do you want to continue?" && local answer="${RETURNED_VALUE}"
-```
-
-
-## exe::captureOutput
-
-Capture the output of a command.
-Made to be used on bash builtins that produce output.
-It captures the stdout and stderr of the command.
-
-This function is a lot more basic than `exe::invoke` and does not support all its features.
-
-- $@: **command** _as string_:
-      The command to run.
-
-Returns:
-
-- $?
-  - 0 if the command was successful
-  - 1 otherwise.
-- `RETURNED_VALUE`: The captured output.
-
-```bash
-exe::captureOutput declare -f exe::captureOutput
-echo "${RETURNED_VALUE}"
-```
-
-
-## fs::cat
-
-Print the content of a file to stdout.
-This is a pure bash equivalent of cat.
-
-- $1: **path** _as string_:
-      the file to print
-
-```bash
-fs::cat "myFile"
-```
-
-> Also see log::printFile if you want to print a file for a user.
-
-
-## io::checkAndFail
-
-Check last return code and fail (exit) if it is an error.
-
-- $1: **exit code** _as int_:
-      the return code
-- $@: **message** _as string_:
-      the error message to display in case of error
-
-```bash
-command_that_could_fail || io::checkAndFail "$?" "The command that could fail has failed!"
-```
-
-
-## io::checkAndWarn
-
-Check last return code and warn the user in case the return code is not 0.
-
-- $1: **exit code** _as int_:
-      the last return code
-- $@: **message** _as string_:
-      the warning message to display in case of error
-
-```bash
-command_that_could_fail || io::checkAndWarn "$?" "The command that could fail has failed!"
-```
-
-
-## fs::cleanTempFiles
-
-Removes all the temporary files and directories that were created by the
-fs::createTempFile and fs::createTempDirectory functions.
-
-```bash
-fs::cleanTempFiles
-```
-shellcheck disable=SC2016
-
-
-## windows::convertPathToUnix
-
-Convert a Windows path to a unix path.
-
-- $1: **path** _as string_:
-      the path to convert
-
-Returns:
-
-- `RETURNED_VALUE`: The unix path.
-
-```bash
-windows::convertPathToUnix "C:\path\to\file"
-```
-
-> Handles paths starting with `X:\`.
-
-
-## windows::convertPathFromUnix
-
-Convert a unix path to a Windows path.
-
-- $1: **path** _as string_:
-      the path to convert
-
-Returns:
-
-- `RETURNED_VALUE`: The Windows path.
-
-```bash
-windows::convertPathFromUnix "/path/to/file"
-```
-
-> Handles paths starting with `/mnt/x/` or `/x/`.
-
-
-## bash::countArgs
-
-Returns the number of arguments passed.
-
-A convenient function that can be used to:
-
-- count the files/directories in a directory
-  `bash::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
-- count the number of variables starting with VALET_
-  `bash::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
-
-- $@: **arguments** _as any_:
-      the arguments to count
-
-Returns:
-
-- `RETURNED_VALUE`: The number of arguments passed.
-
-```bash
-bash::countArgs 1 2 3
-```
-
-
-## fs::createDirectoryIfNeeded
-
-Create the directory tree if needed.
-
-- $1: **path** _as string_:
-      The directory path to create.
-
-Returns:
-
-- `RETURNED_VALUE`: The absolute path to the directory.
-
-```bash
-fs::createDirectoryIfNeeded "/my/directory"
-```
-
-
-## fs::createFilePathIfNeeded
-
-Make sure that the given file path exists.
-Create the directory tree and the file if needed.
-
-- $1: **path** _as string_:
-      the file path to create
-
-Returns:
-
-- `RETURNED_VALUE`: The absolute path of the file.
-
-```bash
-fs::createFilePathIfNeeded "myFile"
-```
-
-
-## fs::createLink
-
-Create a soft or hard link (original ← link).
-
-Reminder:
-
-- A soft (symbolic) link is a new file that contains a reference to another file or directory in the
-  form of an absolute or relative path.
-- A hard link is a directory entry that associates a new pathname with an existing
-  file (inode + data block) on a file system.
-
-This function allows to create a symbolic link on Windows as well as on Unix.
-
-- $1: **linked path** _as string_:
-      the path to link to (the original file)
-- $2: **link path** _as string_:
-      the path where to create the link
-- $3: hard link _as boolean_:
-      (optional) true to create a hard link, false to create a symbolic link
-      (defaults to false)
-- $4: force _as boolean_:
-      (optional) true to overwrite the link or file if it already exists.
-      Otherwise, the function will fail on an existing link.
-      (defaults to true)
-
-```bash
-fs::createLink "/path/to/link" "/path/to/linked"
-fs::createLink "/path/to/link" "/path/to/linked" true
-```
-
-> On unix, the function uses the `ln` command.
-> On Windows, the function uses `powershell` (and optionally ls to check the existing link).
-
-
-## fs::createTempDirectory
-
-Creates a temporary directory.
-
-Returns:
-
-- `RETURNED_VALUE`: The created path.
-
-```bash
-fs::createTempDirectory
-local directory="${RETURNED_VALUE}"
-```
-
-> Directories created this way are automatically cleaned up by the fs::cleanTempFiles
-> function when valet ends.
-
-
-## fs::createTempFile
-
-Creates a temporary file and return its path.
-
-Returns:
-
-- `RETURNED_VALUE`: The created path.
-
-```bash
-fs::createTempFile
-local file="${RETURNED_VALUE}"
-```
-
-> Files created this way are automatically cleaned up by the fs::cleanTempFiles
-> function when valet ends.
-
-
-## fs::head
-
-Print the first lines of a file to stdout.
-This is a pure bash equivalent of head.
-
-- $1: **path** _as string_:
-      The file to print.
-- $2: **number of lines** _as int_:
-      The number of lines to print.
-- $3: to variable _as bool_:
-      (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.
-      If true, the output will be stored in the variable `RETURNED_ARRAY`
-      instead of being printed to stdout.
-      (defaults to false)
-
-```bash
-fs::head "myFile" 10
-```
-
-> #TODO: faster with mapfile?
-
-
-## exe::invoke
-
-This function call an executable and its arguments.
-If the execution fails, it will fail the script and show the std/err output.
-Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
-
-It redirects the stdout and stderr to environment variables.
-Equivalent to exe::invoke5 true 0 '' '' "${@}"
-
-- $1: **executable** _as string_:
-      the executable or command
-- $@: **arguments** _as any_:
-      the command and its arguments
-
-Returns:
-
-- `$?`:The exit code of the executable.
-- `RETURNED_VALUE`: The content of stdout.
-- `RETURNED_VALUE2`: The content of stderr.
-
-```bash
-exe::invoke git add --all
-```
-
-> See exe::invokef5 for more information.
-
-
-## exe::invoke2
-
-This function call an executable and its arguments.
-It redirects the stdout and stderr to environment variables.
-Equivalent to exe::invoke5 "${1}" 0 "" "" "${@:2}"
-
-- $1: **fail** _as bool_:
-      true/false to indicate if the function should fail in case the execution fails.
-      If true and the execution fails, the script will exit.
-- $2: **executable** _as string_:
-      the executable or function to execute
-- $@: **arguments** _as any_:
-      the arguments to pass to the executable
-
-Returns:
-
-- `$?`:The exit code of the executable.
-- `RETURNED_VALUE`: The content of stdout.
-- `RETURNED_VALUE2`: The content of stderr.
-
-```bash
-exe::invokef2 false git status || core::fail "status failed."
-stdout="${RETURNED_VALUE}"
-stderr="${RETURNED_VALUE2}"
-```
-
-> See exe::invokef5 for more information.
-
-
-## exe::invoke2piped
-
-This function call an executable and its arguments and input a given string as stdin.
-It redirects the stdout and stderr to environment variables.
-Equivalent to exe::invoke5 "${1}" 0 false "${2}" "${@:3}"
-
-- $1: **fail** _as bool_:
-      true/false to indicate if the function should fail in case the execution fails.
-      If true and the execution fails, the script will exit.
-- $2: **stdin** _as string_:
-      the stdin to pass to the executable
-- $3: **executable** _as string_:
-      the executable or function to execute
-- $@: **arguments** _as any_:
-      the arguments to pass to the executable
-
-Returns:
-
-- `$?`:The exit code of the executable.
-- `RETURNED_VALUE`: The content of stdout.
-- `RETURNED_VALUE2`: The content of stderr.
-
-```bash
-exe::invoke2piped true "key: val" yq -o json -p yaml -
-stdout="${RETURNED_VALUE}"
-stderr="${RETURNED_VALUE2}"
-```
-
-> This is the equivalent of:
-> `myvar="$(printf '%s\n' "mystring" | mycommand)"`
-> But without using a subshell.
->
-> See exe::invokef5 for more information.
-
-
-## exe::invoke5
-
-This function call an executable and its arguments.
-It redirects the stdout and stderr to environment variables.
-It calls invoke5 and reads the files to set the environment variables.
-
-- $1: **fail** _as bool_:
-      true/false to indicate if the function should fail in case the execution fails.
-      If true and the execution fails, the script will exit.
-- $2: **acceptable codes** _as string_:
-      the acceptable error codes, comma separated
-      (if the error code is matched, then set the output error code to 0)
-- $3: **stdin from file** _as bool_:
-      true/false to indicate if the 4th argument represents a file path or directly the content for stdin
-- $4: **stdin** _as string_:
-      the stdin (can be empty)
-- $5: **executable** _as string_:
-      the executable or function to execute
-- $@: **arguments** _as any_:
-      the arguments to pass to the executable
-
-Returns:
-
-- `$?`:The exit code of the executable.
-- `RETURNED_VALUE`: The content of stdout.
-- `RETURNED_VALUE2`: The content of stderr.
-
-```bash
-exe::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
-stdout="${RETURNED_VALUE}"
-stderr="${RETURNED_VALUE2}"
-```
-
-> See exe::invokef5 for more information.
-
-
-## exe::invokef2
-
-This function call an executable and its arguments.
-It redirects the stdout and stderr to temporary files.
-Equivalent to exe::invokef5 "${1}" 0 "" "" "${@:2}"
-
-- $1: **fail** _as bool_:
-      true/false to indicate if the function should fail in case the execution fails.
-      If true and the execution fails, the script will exit.
-- $2: **executable** _as string_:
-      the executable or function to execute
-- $@: **arguments** _as any_:
-      the arguments to pass to the executable
-
-Returns:
-
-- `$?`:The exit code of the executable.
-- `RETURNED_VALUE`: The file path containing the stdout of the executable.
-- `RETURNED_VALUE2`: The file path containing the stderr of the executable.
-
-```bash
-exe::invokef2 false git status || core::fail "status failed."
-stdoutFilePath="${RETURNED_VALUE}"
-stderrFilePath="${RETURNED_VALUE2}"
-```
-
-> See exe::invokef5 for more information.
-
-
-## exe::invokef2piped
-
-This function call an executable and its arguments and input a given string as stdin.
-It redirects the stdout and stderr to temporary files.
-Equivalent to exe::invokef5 "${1}" 0 false "${2}" "${@:3}"
-
-- $1: **fail** _as bool_:
-      true/false to indicate if the function should fail in case the execution fails.
-      If true and the execution fails, the script will exit.
-- $2: **stdin** _as string_:
-      the stdin to pass to the executable
-- $3: **executable** _as string_:
-      the executable or function to execute
-- $@: **arguments** _as any_:
-      the arguments to pass to the executable
-
-Returns:
-
-- `$?`:The exit code of the executable.
-- `RETURNED_VALUE`: The file path containing the stdout of the executable.
-- `RETURNED_VALUE2`: The file path containing the stderr of the executable.
-
-```bash
-exe::invokef2piped true "key: val" yq -o json -p yaml -
-stdoutFilePath="${RETURNED_VALUE}"
-stderrFilePath="${RETURNED_VALUE2}"
-```
-
-> This is the equivalent of:
-> `myvar="$(printf '%s\n' "mystring" | mycommand)"`
-> But without using a subshell.
->
-> See exe::invokef5 for more information.
-
-
-## exe::invokef5
-
-This function call an executable and its arguments.
-It redirects the stdout and stderr to temporary files.
-
-- $1: **fail** _as bool_:
-      true/false to indicate if the function should fail in case the execution fails.
-                     If true and the execution fails, the script will exit.
-- $2: **acceptable codes** _as string_:
-      the acceptable error codes, comma separated
-        (if the error code is matched, then set the output error code to 0)
-- $3: **sdtin from file** _as bool_:
-      true/false to indicate if the 4th argument represents a file path or directly the content for stdin
-- $4: **sdtin** _as string_:
-      the stdin (can be empty)
-- $5: **executable** _as string_:
-      the executable or function to execute
-- $@: **arguments** _as any_:
-      the arguments to pass to the executable
-
-Returns:
-
-- `$?`:The exit code of the executable.
-- `RETURNED_VALUE`: The file path containing the stdout of the executable.
-- `RETURNED_VALUE2`: The file path containing the stderr of the executable.
-
-```bash
-exe::invokef5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
-stdoutFilePath="${RETURNED_VALUE}"
-stderrFilePath="${RETURNED_VALUE2}"
-```
-
-> - In windows, this is tremendously faster to do (or any other invoke flavor):
->   `exe::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
->   than doing:
->   `myvar="$(mycommand)".`
-> - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
-> - On linux, you can use a tmpfs directory for massive gains over subshells.
-
-
-## fs::isDirectoryWritable
-
-Check if the directory is writable. Creates the directory if it does not exist.
-
-- $1: **directory** _as string_:
-      the directory to check
-- $2: test file name _as string_:
-      (optional) the name of the file to create in the directory to test the write access
-
-Returns:
-
-- `$?`:
-  - 0 if the directory is writable
-  - 1 otherwise
-
-```bash
-if fs::isDirectoryWritable "/path/to/directory"; then
-  echo "The directory is writable."
-fi
-```
-
-
-## fs::listDirectories
-
-List all the directories in the given directory.
-
-- $1: **directory** _as string_:
-      the directory to list
-- $2: recursive _as bool_:
-      (optional) true to list recursively, false otherwise
-      (defaults to false)
-- $3: hidden _as bool_:
-      (optional) true to list hidden paths, false otherwise
-      (defaults to false)
-- $4: directory filter function name _as string_:
-      (optional) a function name that is called to filter the sub directories (for recursive listing)
-      The function should return 0 if the path is to be kept, 1 otherwise.
-      The function is called with the path as the first argument.
-      (defaults to empty string, no filter)
-
-Returns:
-
-- `RETURNED_ARRAY`: An array with the list of all the files.
-
-```bash
-fs::listDirectories "/path/to/directory" true true myFilterFunction
-for path in "${RETURNED_ARRAY[@]}"; do
-  printf '%s' "${path}"
-done
-```
-
-
-## fs::listFiles
-
-List all the files in the given directory.
-
-- $1: **directory** _as string_:
-      the directory to list
-- $2: recursive _as bool_:
-      (optional) true to list recursively, false otherwise
-      (defaults to false)
-- $3: hidden _as bool_:
-      (optional) true to list hidden paths, false otherwise
-      (defaults to false)
-- $4: directory filter function name _as string_:
-      (optional) a function name that is called to filter the directories (for recursive listing)
-      The function should return 0 if the path is to be kept, 1 otherwise.
-      The function is called with the path as the first argument.
-      (defaults to empty string, no filter)
-
-Returns:
-
-- `RETURNED_ARRAY`: An array with the list of all the files.
-
-```bash
-fs::listFiles "/path/to/directory" true true myFilterFunction
-for path in "${RETURNED_ARRAY[@]}"; do
-  printf '%s' "${path}"
-done
-```
-
-
-## fs::listPaths
-
-List all the paths in the given directory.
-
-- $1: **directory** _as string_:
-      the directory to list
-- $2: recursive _as bool_:
-      (optional) true to list recursively, false otherwise
-      (defaults to false)
-- $3: hidden _as bool_:
-      (optional) true to list hidden paths, false otherwise
-      (defaults to false)
-- $4: path filter function name _as string_:
-      (optional) a function name that is called to filter the paths that will be listed
-      The function should return 0 if the path is to be kept, 1 otherwise.
-      The function is called with the path as the first argument.
-      (defaults to empty string, no filter)
-- $5: directory filter function name _as string_:
-      (optional) a function name that is called to filter the directories (for recursive listing)
-      The function should return 0 if the path is to be kept, 1 otherwise.
-      The function is called with the path as the first argument.
-      (defaults to empty string, no filter)
-
-Returns:
-
-- `RETURNED_ARRAY`: An array with the list of all the paths.
-
-```bash
-fs::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
-for path in "${RETURNED_ARRAY[@]}"; do
-  printf '%s' "${path}"
-done
-```
-
-> - It will correctly list files under symbolic link directories.
-
-
-## fs::readFile
-
-Reads the content of a file and returns it in the global variable RETURNED_VALUE.
-Uses pure bash.
-
-- $1: **path** _as string_:
-      the file path to read
-- $2: max char _as int_:
-      (optional) the maximum number of characters to read
-      (defaults to 0, which means read the whole file)
-
-> If the file does not exist, the function will return an empty string instead of failing.
-
-Returns:
-
-- `RETURNED_VALUE`: The content of the file.
-
-```bash
-fs::readFile "/path/to/file" && local fileContent="${RETURNED_VALUE}"
-fs::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
-```
-
-
-## bash::readStdIn
-
-Read the content of the standard input.
-Will immediately return if the standard input is empty.
-
-Returns:
-
-- `RETURNED_VALUE`: The content of the standard input.
-
-```bash
-bash::readStdIn && local stdIn="${RETURNED_VALUE}"
-```
-
-
-## bash::sleep
-
-Sleep for the given amount of time.
-This is a pure bash replacement of sleep.
-
-- $1: **time** _as float_:
-      the time to sleep in seconds (can be a float)
-
-```bash
-bash::sleep 1.5
-```
-
-> The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
-
-
-## fs::tail
-
-Print the last lines of a file to stdout.
-This is a pure bash equivalent of tail.
-However, because we have to read the whole file, it is not efficient for large files.
-
-- $1: **path** _as string_:
-      The file to print.
-- $2: **number of lines** _as int_:
-      The number of lines to print from the end of the file.
-- $3: to variable _as bool_:
-      (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.
-      If true, the output will be stored in the variable `RETURNED_ARRAY`
-      instead of being printed to stdout.
-      (defaults to false)
-
-```bash
-fs::tail "myFile" 10
-```
-
-> #TODO: use mapfile quantum to not have to read the whole file in a single go.
-
-
-## fs::toAbsolutePath
-
-This function returns the absolute path of a path.
-
-- $1: **path** _as string_:
-      The path to translate to absolute path.
-
-Returns:
-
-- `RETURNED_VALUE`: The absolute path of the path.
-
-```bash
-fs::toAbsolutePath "myFile"
-local myFileAbsolutePath="${RETURNED_VALUE}"
-```
-
-> This is a pure bash alternative to `realpath` or `readlink`.
-
-
-## windows::createTempDirectory
-
-Create a temporary directory on Windows and return the path both for Windows and Unix.
-
-This is useful for creating temporary directories that can be used in both Windows and Unix.
-
-Returns:
-
-- `RETURNED_VALUE`: The Windows path.
-- `RETURNED_VALUE2`: The Unix path.
-
-```bash
-windows::createTempDirectory
-```
-
-> Directories created this way are automatically cleaned up by the fs::cleanTempFiles
-> function when valet ends.
-
-
-## windows::createTempFile
-
-Create a temporary file on Windows and return the path both for Windows and Unix.
-
-This is useful for creating temporary files that can be used in both Windows and Unix.
-
-Returns:
-
-- `RETURNED_VALUE`: The Windows path.
-- `RETURNED_VALUE2`: The Unix path.
-
-```bash
-windows::createTempFile
-```
-
-> Files created this way are automatically cleaned up by the fs::cleanTempFiles
-> function when valet ends.
-
-
-## windows::endPs1Batch
-
-This function will run all the commands that were batched with `windows::startPs1Batch`.
-
-Returns:
-
-- $?
-  - 0 if the command was successful
-  - 1 otherwise.
-- `RETURNED_VALUE`: The content of stdout.
-- `RETURNED_VALUE2`: The content of stderr.
-
-```bash
-windows::startPs1Batch
-windows::runPs1 "Write-Host \"Hello\""
-windows::runPs1 "Write-Host \"World\""
-windows::endPs1Batch
-```
-
-
-## windows::startPs1Batch
-
-After running this function, all commands that should be executed by
-`windows::runPs1` will be added to a batch that will only be played
-when `windows::endPs1Batch` is called.
-
-This is a convenient way to run multiple commands in a single PowerShell session.
-It makes up for the fact that running a new PowerShell session for each command is slow.
-
-```bash
-windows::startPs1Batch
-windows::runPs1 "Write-Host \"Hello\""
-windows::runPs1 "Write-Host \"World\""
-windows::endPs1Batch
-```
-
-
-## windows::runPs1
-
-Runs a PowerShell command.
-This is mostly useful on Windows.
-
-- $1: **command** _as string_:
-      the command to run.
-- $2: run as administrator _as boolean_:
-      (optional) whether to run the command as administrator.
-      (defaults to false).
-
-Returns:
-
-- $?
-  - 0 if the command was successful
-  - 1 otherwise.
-- `RETURNED_VALUE`: The content of stdout.
-- `RETURNED_VALUE2`: The content of stderr.
-
-```bash
-windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
 ```
 
 
@@ -1625,7 +1499,7 @@ Get the current log level.
 
 Returns:
 
-- `RETURNED_VALUE`: The current log level.
+- ${RETURNED_VALUE}: The current log level.
 
 ```bash
 log::getLevel
@@ -1651,7 +1525,7 @@ Check if the debug mode is enabled.
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if debug mode is enabled (log level is debug)
   - 1 if disabled
 
@@ -1666,7 +1540,7 @@ Check if the trace mode is enabled.
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if trace mode is enabled (log level is trace)
   - 1 if disabled
 
@@ -1922,68 +1796,85 @@ progress::update 50 "Doing something..."
 ```
 
 
-## prompt_getDisplayedPromptString
+## regex::getFirstGroup
 
-This function return a string that can be printed in a terminal in order to display a text
-and position the cursor at a given index in the input text.
+Matches a string against a regex and returns the first capture group of the matched string.
 
-If the string is too long to fit in the screen, it will be truncated and ellipsis will be displayed
-at the beginning and/or at the end of the string.
-
-The cursor will be displayed under the character at the given index of the input text and
-it makes sure that the cursor is always visible in the screen.
-
-This function is useful to display a long prompt on a single line.
-
-An example:
-
-```text
-_PROMPT_STRING_SCREEN_WIDTH=10
-_PROMPT_STRING_INDEX=20
-_PROMPT_STRING="This is a long string that will be displayed in the screen."
-#                                ^ input index 20
-prompt_getDisplayedPromptString 20 10
-# output: "…g string…"
-#                  ^ screen cursor (at index 8)
-```
-
-- $_PROMPT_STRING: **input string** _as string_:
-      the string to display
-- $_PROMPT_STRING_INDEX: **input index** _as int_:
-      the index of the character (in the input string) that should be under the cursor
-- $_PROMPT_STRING_SCREEN_WIDTH: **screen width** _as int_:
-      the width of the screen
+- $1: **string** _as string_:
+      the string to match
+- $2: **regex** _as string_:
+      the regex
 
 Returns:
 
-- `RETURNED_VALUE`: the string to display in the screen
-- `RETURNED_VALUE2`: the index at which to position the cursor on screen
+- ${RETURNED_VALUE}: the first capture group in the matched string.
+                    Empty if no match.
 
 ```bash
-prompt_getDisplayedPromptString "This is a long string that will be displayed in the screen." 20 10
+regex::getFirstGroup "name: julien" "name:(.*)"
+echo "${RETURNED_VALUE}"
+```
+
+> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+
+
+## sfzf::show
+
+Displays a menu where the user can search and select an item.
+The menu is displayed in full screen.
+Each item can optionally have a description/details shown in a right panel.
+The user can search for an item by typing.
+
+- $1: **prompt** _as string_:
+      The prompt to display to the user (e.g. Please pick an item).
+- $2: **array name** _as string_:
+      The items to display (name of a global array).
+- $3: select callback function name _as string_:
+      (optional) The function to call when an item is selected
+      (defaults to empty, no callback)
+      this parameter can be left empty to hide the preview right pane;
+      otherwise the callback function should have the following signature:
+  - $1: the current item
+  - $2: the item number;
+  - $3: the current panel width;
+  - it should return the details of the item in the `RETURNED_VALUE` variable.
+- $4: preview title _as string_:
+      (optional) the title of the preview right pane (if any)
+      (defaults to empty)
+
+Returns:
+
+- ${RETURNED_VALUE}: The selected item value (or empty).
+- ${RETURNED_VALUE2}: The selected item index (from the original array).
+                     Or -1 if the user cancelled the selection
+
+```bash
+declare -g -a SELECTION_ARRAY
+SELECTION_ARRAY=("blue" "red" "green" "yellow")
+sfzf::show "What's your favorite color?" SELECTION_ARRAY
+log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
 ```
 
 
 ## source
 
-Allows to include a library file or sources a file.
+Allows to source/include a library file or sources a file.
 
-It replaces the builtin source command to make sure that we do not include the same file twice.
+It replaces the builtin source command to make sure that we do not source the same library twice.
 We replace source instead of creating a new function to allow us to
 specify the included file for spellcheck.
 
-- $1: **library name** _as string_:
+- $1: **library name or path** _as string_:
       the name of the library (array, interactive, string...) or the file path to include.
 - $@: arguments _as any_:
-      (optional) the arguments to pass to the included file (mimics the builtin source command).
+      (optional) the arguments to pass to the sourced file (mimics the builtin source command).
 
 ```bash
-  source string array system
-  source ./my/path my/other/path
+  source string
+  source ./my/path
 ```
 
 > - The file can be relative to the current script (script that calls this function).
-> - This function makes sure that we do not include the same file twice.
 > - Use `builtin source` if you want to include the file even if it was already included.
 
 
@@ -1993,15 +1884,57 @@ This function convert a camelCase string to a SNAKE_CASE string.
 It uses pure bash.
 Removes all leading underscores.
 
-- $1: **camelCase string** _as string_:
-      The camelCase string to convert.
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to convert.
 
 Returns:
 
-- `RETURNED_VALUE`: The SNAKE_CASE string.
+- ${RETURNED_VALUE}: the extracted field
 
 ```bash
-string::convertCamelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
+MY_STRING="myCamelCaseString"
+string::convertCamelCaseToSnakeCase MY_STRING
+echo "${RETURNED_VALUE}"
+```
+
+
+## string::convertKebabCaseToCamelCase
+
+This function convert a kebab-case string to a camelCase string.
+It uses pure bash.
+Removes all leading dashes.
+
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to convert.
+
+Returns:
+
+- ${RETURNED_VALUE}: the extracted field
+
+```bash
+MY_STRING="my-kebab-case-string"
+string::convertKebabCaseToCamelCase MY_STRING
+echo "${RETURNED_VALUE}"
+```
+
+
+## string::convertKebabCaseToSnakeCase
+
+This function convert a kebab-case string to a SNAKE_CASE string.
+It uses pure bash.
+Removes all leading dashes.
+
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to convert.
+
+Returns:
+
+- ${RETURNED_VALUE}: the extracted field
+
+```bash
+MY_STRING="my-kebab-case-string"
+string::convertKebabCaseToSnakeCase MY_STRING
+echo "${RETURNED_VALUE}"
 ```
 
 
@@ -2009,49 +1942,52 @@ string::convertCamelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseStri
 
 Counts the number of occurrences of a substring in a string.
 
-- $1: **string** _as string_:
-      the string in which to search
+- $1: **string variable name** _as string_:
+      The variable name that contains the string in which to count occurrences.
 - $2: **substring** _as string_:
       the substring to count
 
 Returns:
 
-- `RETURNED_VALUE`: the number of occurrences
+- ${RETURNED_VALUE}: the number of occurrences
 
 ```bash
-string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
+MY_STRING="name,first_name,address"
+string::count MY_STRING ","
+echo "${RETURNED_VALUE}"
 ```
 
 > This is faster than looping over the string and check the substring.
 
 
-## string::cutField
+## string::doForEachLine
 
-Allows to get the nth element of a string separated by a given separator.
-This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
-but it uses pure bash to go faster.
+Execute a callback function for each item (e.g. line) of a string.
+The string is split using a separator (default to a new line) and
+the callback function is called for each item.
 
-- $1: **string to cut** _as string_:
-      the string to cut
-- $2: **field number** _as int_:
-      the field number to get (starting at 0)
+- $1: **string variable name** _as string_:
+      The name of the variable containing the string.
+- $2: **callback function** _as string_:
+      The name of the function to execute for each item (line).
+      The function is called with the following arguments:
+
+      - $1: the current item (line) content
+
+      The function must return 0 if we should continue to the next line, 1 otherwise.
+      (defaults to empty)
 - $3: separator _as string_:
-      the separator
-      (defaults to tab if not provided)
-
-Returns:
-
-- `RETURNED_VALUE`: the extracted field
+      (optional) Can be set using the variable `_OPTION_SEPARATOR`.
+      The separator character to use.
+      (defaults to newline if not provided)
 
 ```bash
-string::cutField "field1 field2 field3" 1 " " && local field="${RETURNED_VALUE}"
-printf '%s' "${field}" # will output "field2"
+string::doForEachLine myString myCallback
 ```
 
-> This is faster than:
->
-> - using read into an array from a here string
-> - using bash parameter expansion to remove before/after the separator
+> This function provides a convenient way to avoid using a "here string" and handles extra
+> newlines (which is not the case with a "for loop" using parameter expansion and IFS=$'\n').
+> Here string is significantly slower than using this.
 
 
 ## string::extractBetween
@@ -2062,8 +1998,8 @@ Search for the first occurrence of the start string and the first occurrence
 Both start and end strings are excluded in the extracted text.
 Both start and end strings must be found to extract something.
 
-- $1: **string** _as string_:
-      the string in which to search
+- $1: **string variable name** _as string_:
+      The variable name that contains the string from which to extract a text.
 - $2: **start string** _as string_:
       the start string
       (if empty, then it will extract from the beginning of the string)
@@ -2073,29 +2009,88 @@ Both start and end strings must be found to extract something.
 
 Returns:
 
-- `RETURNED_VALUE`: the extracted text
+- ${RETURNED_VALUE}: the extracted text
 
 ```bash
-string::extractBetween "This is a long text" "is a " " text"
+MY_STRING="This is a long text"
+string::extractBetween MY_STRING "is a " " text"
 local extractedText="${RETURNED_VALUE}"
+```
+
+
+## string::getField
+
+Allows to get the nth element of a string separated by a given separator.
+This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
+but it uses pure bash to go faster.
+
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to extract from.
+- $2: **field number** _as int_:
+      The field number to get (starting at 0).
+- $3: separator _as string_:
+      The separator to use.
+      (defaults to tab if not provided)
+
+Returns:
+
+- ${RETURNED_VALUE}: the extracted field
+
+```bash
+MY_STRING="field1 field2 field3"
+string::getField MY_STRING 1 " "
+echo "${RETURNED_VALUE}"
+```
+
+> This is faster than:
+>
+> - using read into an array from a here string
+> - using bash parameter expansion to remove before/after the separator
+
+
+## string::getIndexOf
+
+Find the first index of a string within another string.
+
+- $1: **string variable name** _as string_:
+      The variable name that contains the string from which to find an index.
+- $2: **search** _as string_:
+      the string to search
+- $3: start index _as int_:
+      (optional) the starting index
+      (defaults to 0)
+
+Returns:
+
+- ${RETURNED_VALUE}: the index of the substring in the string or -1 if not found.
+
+```bash
+MY_STRING="This is a long text"
+string::getIndexOf MY_STRING "long"
+echo "${RETURNED_VALUE}"
 ```
 
 
 ## string::head
 
-Get the first n lines of a string.
+Get the first nth items (e.g. lines) of a string.
 
-- $1: **string** _as string_:
-      The string to extract from.
-- $2: **lines** _as int_:
-      The number of lines to extract.
+- $1: **string variable name** _as string_:
+      The variable name that contains the string from which to get the first occurrences.
+- $2: **nb items** _as int_:
+      The number of items (lines) to extract.
+- $3: separator _as string_:
+      (optional) Can be set using the variable `_OPTION_SEPARATOR`.
+      The separator character to use.
+      (defaults to newline if not provided)
 
 Returns:
 
-- `RETURNED_VALUE`: The extracted string.
+- ${RETURNED_VALUE}: The extracted string.
 
 ```bash
-string::head "line1\nline2\nline3" 2
+MY_STRING="line1"$'\n'"line2"$'\n'"line3"
+string::head MY_STRING 2
 echo "${RETURNED_VALUE}"
 ```
 
@@ -2119,7 +2114,7 @@ Highlight a pattern (each character of this pattern) in a string.
 
 Returns:
 
-- `RETURNED_VALUE`: the highlighted text
+- ${RETURNED_VALUE}: the highlighted text
 
 ```bash
 string::highlight "This is a text to highlight." "ttttt"
@@ -2130,169 +2125,64 @@ echo "${RETURNED_VALUE}"
 > - This functions is case insensitive.
 
 
-## string::indexOf
-
-Find the first index of a string within another string.
-
-- $1: **string** _as string_:
-      the string in which to search
-- $2: **search** _as string_:
-      the string to search
-- $3: start index _as int_:
-      (optional) the starting index
-      (defaults to 0)
-
-Returns:
-
-- `RETURNED_VALUE`: the index of the substring in the string or -1 if not found.
-
-```bash
-string::indexOf "This is a long text" "long" && local index="${RETURNED_VALUE}"
-string::indexOf "This is a long text" "long" 10 && local index="${RETURNED_VALUE}"
-```
-
-
-## string::convertKebabCaseToCamelCase
-
-This function convert a kebab-case string to a camelCase string.
-It uses pure bash.
-Removes all leading dashes.
-
-- $1: **kebab-case string** _as string_:
-      The kebab-case string to convert.
-
-Returns:
-
-- `RETURNED_VALUE`: The camelCase string.
-
-```bash
-string::convertKebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
-```
-
-
-## string::convertKebabCaseToSnakeCase
-
-This function convert a kebab-case string to a SNAKE_CASE string.
-It uses pure bash.
-Removes all leading dashes.
-
-- $1: **kebab-case string** _as string_:
-      The kebab-case string to convert.
-
-Returns:
-
-- `RETURNED_VALUE`: The SNAKE_CASE string.
-
-```bash
-string::convertKebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
-```
-
-
-## time::convertMicrosecondsToHuman
-
-Convert microseconds to human readable format.
-
-- $1: **microseconds** _as int_:
-      the microseconds to convert
-- $2: format _as string_:
-     (optional) Can be set using the variable `_OPTION_FORMAT`.
-     the format to use (defaults to "%HH:%MM:%SS")
-     Usable formats:
-     - %HH: hours
-     - %MM: minutes
-     - %SS: seconds
-     - %LL: milliseconds
-     - %h: hours without leading zero
-     - %m: minutes without leading zero
-     - %s: seconds without leading zero
-     - %l: milliseconds without leading zero
-     - %u: microseconds without leading zero
-     - %M: total minutes
-     - %S: total seconds
-     - %L: total milliseconds
-     - %U: total microseconds
-
-Returns:
-
-- `RETURNED_VALUE`: the human readable format
-
-```bash
-time::convertMicrosecondsToHuman 123456789
-echo "${RETURNED_VALUE}"
-```
-
-
-## regex::getFirstGroup
-
-Matches a string against a regex and returns the first capture group of the matched string.
-
-- $1: **string** _as string_:
-      the string to match
-- $2: **regex** _as string_:
-      the regex
-
-Returns:
-
-- `RETURNED_VALUE`: the first capture group in the matched string.
-                    Empty if no match.
-
-```bash
-regex::getFirstGroup "name: julien" "name:(.*)"
-echo "${RETURNED_VALUE}"
-```
-
-> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
-
-
 ## string::split
 
 Split a string into an array using a separator.
 
-- $1: **string** _as string_:
-      the string to split
-- $2: **separator** _as string_:
-      the separator (must be a single character!)
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to split.
+- $2: **separators** _as string_:
+      The separator characters to use.
 
 Returns:
 
-- `RETURNED_ARRAY`: the array of strings
+- ${RETURNED_ARRAY}: the array of strings
 
 ```bash
-string::split "name,first name,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
+MY_STRING="name,first_name,address"
+string::split MY_STRING ","
+ARRAY=("${RETURNED_ARRAY[@]}")
 ```
 
 > This is faster than using read into an array from a here string.
-
-
-## string::trim
-
-Trim leading and trailing whitespaces.
-
-- $1: **string to trim** _as string_:
-      The string to trim.
-
-Returns:
-
-- `RETURNED_VALUE`: The trimmed string.
-
-```bash
-string::trim "   example string    " && local trimmedString="${RETURNED_VALUE}"
-```
 
 
 ## string::trimAll
 
 Trim all whitespaces and truncate spaces.
 
-- $1: **string to trim** _as string_:
-      The string to trim.
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to trim.
 
 Returns:
 
-- `RETURNED_VALUE`: The trimmed string.
+- ${RETURNED_VALUE}: the extracted field
 
 ```bash
-string::trimAll "   example   string    " && local trimmedString="${RETURNED_VALUE}"
+MY_STRING="   example "$'\t'"  string    "$'\n'
+string::trimAll MY_STRING
+echo "${RETURNED_VALUE}"
+```
+
+
+## string::trimEdges
+
+Trim leading and trailing characters (defaults to whitespaces).
+
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to trim.
+- $2: characters to trim _as string_:
+      The characters to trim.
+      (defaults to " "$'\t'$'\n')
+
+Returns:
+
+- ${RETURNED_VALUE}: the extracted field
+
+```bash
+MY_STRING="   example  string    "
+string::trimEdges MY_STRING
+echo "${RETURNED_VALUE}"
 ```
 
 
@@ -2302,8 +2192,8 @@ Allows to hard wrap the given string at the given width.
 Wrapping is done at character boundaries, see string::warpText for word wrapping.
 Optionally appends padding characters on each new line.
 
-- $1: **text** _as string_:
-      The text to wrap.
+- $1: **text variable name** _as string_:
+      The variable name that contains the text to wrap.
 - $2: wrap width _as string_:
       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
       The width to wrap the text at.
@@ -2322,8 +2212,8 @@ Optionally appends padding characters on each new line.
 
 Returns:
 
-- `RETURNED_VALUE`: the wrapped string
-- `RETURNED_VALUE2`: the length taken on the last line
+- ${RETURNED_VALUE}: the wrapped string
+- ${RETURNED_VALUE2}: the length taken on the last line
 
 ```bash
 string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 --- 5
@@ -2341,8 +2231,8 @@ Allows to soft wrap the given text at the given width.
 Wrapping is done at word boundaries.
 Optionally appends padding characters on each new line.
 
-- $1: **text** _as string_:
-      The text to wrap.
+- $1: **text variable name** _as string_:
+      The variable name that contains the text to wrap.
 - $2: wrap width _as string_:
       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
       The width to wrap the text at.
@@ -2361,7 +2251,7 @@ Optionally appends padding characters on each new line.
 
 Returns:
 
-- `RETURNED_VALUE`: the wrapped text
+- ${RETURNED_VALUE}: the wrapped text
 
 ```bash
 string::wrapWords "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
@@ -2388,46 +2278,6 @@ system::addToPath "/path/to/bin"
 ```
 
 
-## bash::isCommand
-
-Check if the given command exists.
-
-- $1: **command name** _as string_:
-      the command name to check.
-
-Returns:
-
-- $?
-  - 0 if the command exists
-  - 1 otherwise.
-
-```bash
-if bash::isCommand "command1"; then
-  printf 'The command exists.'
-fi
-```
-
-
-## time::getDate
-
-Get the current date in the given format.
-
-- $1: format _as string_:
-      (optional) the format of the date to return
-      (defaults to %(%F_%Hh%Mm%Ss)T).
-
-Returns:
-
-- `RETURNED_VALUE`: the current date in the given format.
-
-```bash
-time::getDate
-local date="${RETURNED_VALUE}"
-```
-
-> This function avoid to call $(date) in a subshell (date is a an external executable).
-
-
 ## system::getEnvVars
 
 Get the list of all the environment variables.
@@ -2435,7 +2285,7 @@ In pure bash, no need for env or printenv.
 
 Returns:
 
-- `RETURNED_ARRAY`: An array with the list of all the environment variables.
+- ${RETURNED_ARRAY}: An array with the list of all the environment variables.
 
 ```bash
 system::getEnvVars
@@ -2447,45 +2297,17 @@ done
 > This is faster than using mapfile on <(compgen -v).
 
 
-## bash::getMissingCommands
+## system::getOs
 
-This function returns the list of not existing commands for the given names.
-
-- $@: **command names** _as string_:
-      the list of command names to check.
+Returns the name of the current OS.
 
 Returns:
 
-- $?
-  - 0 if there are not existing commands
-  - 1 otherwise.
-- `RETURNED_ARRAY`: the list of not existing commands.
+- ${RETURNED_VALUE}: the name of the current OS: "darwin", "linux" or "windows".
 
 ```bash
-if bash::getMissingCommands "command1" "command2"; then
-  printf 'The following commands do not exist: %s' "${RETURNED_ARRAY[*]}"
-fi
-```
-
-
-## bash::getMissingVariables
-
-This function returns the list of undeclared variables for the given names.
-
-- $@: **variable names** _as string_:
-      the list of variable names to check.
-
-Returns:
-
-- $?
-  - 0 if there are variable undeclared
-  - 1 otherwise.
-- `RETURNED_ARRAY`: the list of undeclared variables.
-
-```bash
-if bash::getMissingVariables "var1" "var2"; then
-  printf 'The following variables are not declared: %s' "${RETURNED_ARRAY[*]}"
-fi
+system::getOs
+local osName="${RETURNED_VALUE}"
 ```
 
 
@@ -2504,70 +2326,6 @@ if system::isRoot; then
   printf 'The script is running as root.'
 fi
 ```
-
-
-## system::getOs
-
-Returns the name of the current OS.
-
-Returns:
-
-- `RETURNED_VALUE`: the name of the current OS: "darwin", "linux" or "windows".
-
-```bash
-system::getOs
-local osName="${RETURNED_VALUE}"
-```
-
-
-## windows::addToPath
-
-Add the given path to the PATH environment variable on Windows (current user only).
-
-Will also export the PATH variable in the current bash.
-
-- $1: **path** _as string_:
-      the path to add to the PATH environment variable.
-      The path can be in unix format, it will be converted to windows format.
-
-```bash
-windows::addToPath "/path/to/bin"
-```
-
-> This function is only available on Windows, it uses `powershell` to directly modify the registry.
-
-
-## windows::getEnvVar
-
-Get the value of an environment variable for the current user on Windows.
-
-- $1: **variable name** _as string_:
-      the name of the environment variable to get.
-
-Returns:
-
-- `RETURNED_VALUE`: the value of the environment variable.
-
-```bash
-windows::getEnvVar "MY_VAR"
-echo "${RETURNED_VALUE}"
-```
-
-
-## windows::setEnvVar
-
-Set an environment variable for the current user on Windows.
-
-- $1: **variable name** _as string_:
-      the name of the environment variable to set.
-- $2: **variable value** _as string_:
-      the value of the environment variable to set.
-
-```bash
-windows::setEnvVar "MY_VAR" "my_value"
-```
-
-> This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
 
 ## test::exec
@@ -2777,6 +2535,80 @@ Returns:
 > Note however that this function can be called very often, so it should be optimized.
 
 
+## time::convertMicrosecondsToHuman
+
+Convert microseconds to human readable format.
+
+- $1: **microseconds** _as int_:
+      the microseconds to convert
+- $2: format _as string_:
+     (optional) Can be set using the variable `_OPTION_FORMAT`.
+     the format to use (defaults to "%HH:%MM:%SS")
+     Usable formats:
+     - %HH: hours
+     - %MM: minutes
+     - %SS: seconds
+     - %LL: milliseconds
+     - %h: hours without leading zero
+     - %m: minutes without leading zero
+     - %s: seconds without leading zero
+     - %l: milliseconds without leading zero
+     - %u: microseconds without leading zero
+     - %M: total minutes
+     - %S: total seconds
+     - %L: total milliseconds
+     - %U: total microseconds
+
+Returns:
+
+- ${RETURNED_VALUE}: the human readable format
+
+```bash
+time::convertMicrosecondsToHuman 123456789
+echo "${RETURNED_VALUE}"
+```
+
+
+## time::getDate
+
+Get the current date in the given format.
+
+- $1: format _as string_:
+      (optional) the format of the date to return
+      (defaults to %(%F_%Hh%Mm%Ss)T).
+
+Returns:
+
+- ${RETURNED_VALUE}: the current date in the given format.
+
+```bash
+time::getDate
+local date="${RETURNED_VALUE}"
+```
+
+> This function avoid to call $(date) in a subshell (date is a an external executable).
+
+
+## time::getProgramElapsedMicroseconds
+
+Get the elapsed time in µs since the program started.
+
+Returns:
+
+- ${RETURNED_VALUE}: the elapsed time in µs since the program started.
+
+```bash
+core::getElapsedProgramTime
+echo "${RETURNED_VALUE}"
+time::convertMicrosecondsToHuman "${RETURNED_VALUE}"
+echo "Human time: ${RETURNED_VALUE}"
+```
+
+> We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.
+> The 10# forces the base 10 conversion to avoid issues with leading zeros.
+> Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
+
+
 ## tui::clearBox
 
 Clear a "box" in the terminal.
@@ -2863,10 +2695,10 @@ at the given position.
 
 Returns:
 
-- `RETURNED_VALUE`: the top position of the box (1 based)
-- `RETURNED_VALUE2`: the left position of the box (1 based)
-- `RETURNED_VALUE3`: the width of the box
-- `RETURNED_VALUE4`: the height of the box
+- ${RETURNED_VALUE}: the top position of the box (1 based)
+- ${RETURNED_VALUE2}: the left position of the box (1 based)
+- ${RETURNED_VALUE3}: the width of the box
+- ${RETURNED_VALUE4}: the height of the box
 
 ```bash
 tui::getBestAutocompleteBox 1 1 10 5
@@ -2915,18 +2747,15 @@ We do our best here to cover most cases but it is by no mean perfect.
 A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.
 
 Users of this function can completely change the bindings afterward by implementing
-the `tuiRebindOverride` function.
+the `tui::RebindOverride` function.
 
 This function should be called before using tui::waitForKeyPress.
 
 You can call `tui::restoreBindings` to restore the default bindings. However, this is not
 necessary as the bindings are local to the script.
 
-```bash
-tui::rebindKeymap
-```
-
-> `showkey -a` is a good program to see the sequence of characters sent by the terminal.
+- $1: **callback function** _as string_:
+      The function name to call when a special key is pressed.
 
 
 ## tui::restoreBindings
@@ -2948,6 +2777,22 @@ tui::restoreInterruptTrap
 ```
 
 
+## tui::restoreTerminalOptions
+
+Restore the terminal options to their original state.
+Should be called after `tui::setTerminalOptions`.
+
+- $1: **force** _as bool_:
+      (optional) force the restoration of the stty configuration
+      stty state will not be restored if
+      (defaults to false)
+
+```bash
+tui::restoreTerminalOptions
+```
+shellcheck disable=SC2120
+
+
 ## tui::setInterruptTrap
 
 Set a trap to catch the interrupt signal (SIGINT).
@@ -2960,26 +2805,13 @@ tui::setInterruptTrap
 
 ## tui::setTerminalOptions
 
-Disable the echo of the tty. Will no longer display the characters typed by the user.
+Set the terminal options to enable a satisfying and consistent behavior
+for the GNU readline library.
+Disable the echo of the terminal, no longer display the characters typed by the user.
 
 ```bash
 tui::setTerminalOptions
 ```
-
-
-## tui::restoreTerminalOptions
-
-Enable the echo of the tty. Will display the characters typed by the user.
-
-- $1: **force** _as bool_:
-      (optional) force the restoration of the stty configuration
-      stty state will not be restored if
-      (defaults to false)
-
-```bash
-tui::restoreTerminalOptions
-```
-shellcheck disable=SC2120
 
 
 ## tui::switchBackFromFullScreen
@@ -3045,18 +2877,21 @@ You can pass additional parameters to the read command (e.g. to wait for a set a
 It uses the read builtin command. This will not detect all key combinations.
 The output will depend on the terminal used and the character sequences it sends on each key press.
 
-For more advanced use cases, you can use tui::waitForKeyPress.
-This simple implementation does not rely on GNU readline and does not require stty to be initialized.
-
 Some special keys are translated into more readable strings:
 UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
+However, this is not at all exhaustive and will depend on the terminal used. Use `tui::waitForKeyPress`
+if you need to listen to special keys.
+
+This simple implementation does not rely on GNU readline and does not require terminal options
+to be set using `tui::setTerminalOptions`.
+
 
 - $@: **read parameters** _as any_:
       additional parameters to pass to the read command
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if a char was retrieved
   - 1 otherwise
 - `LAST_KEY_PRESSED`: the last char (key) retrieved.
@@ -3085,7 +2920,7 @@ You must call `tui::rebindKeymap` and `tui::setTerminalOptions` before using thi
 
 Returns:
 
-- `$?`:
+- $?:
   - 0 if a key was pressed
   - 1 otherwise
 - `LAST_KEY_PRESSED`: the key pressed.
@@ -3114,7 +2949,7 @@ major.minor.patch-prerelease+build
 
 Returns:
 
-- `RETURNED_VALUE`: the new version string
+- ${RETURNED_VALUE}: the new version string
 
 ```bash
 version::bump "1.2.3-prerelease+build" "major"
@@ -3134,7 +2969,7 @@ major.minor.patch-prerelease+build
 
 Returns:
 
-- `RETURNED_VALUE`:
+- ${RETURNED_VALUE}:
   - 0 if the versions are equal,
   - 1 if version1 is greater,
   - -1 if version2 is greater
@@ -3147,6 +2982,225 @@ local comparison="${RETURNED_VALUE}"
 > The prerelease and build are ignored in the comparison.
 
 
+## windows::addToPath
+
+Add the given path to the PATH environment variable on Windows (current user only).
+
+Will also export the PATH variable in the current bash.
+
+- $1: **path** _as string_:
+      the path to add to the PATH environment variable.
+      The path can be in unix format, it will be converted to windows format.
+
+```bash
+windows::addToPath "/path/to/bin"
+```
+
+> This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
 
-> Documentation generated for the version 0.28.2544 (2025-01-22).
+## windows::convertPathFromUnix
+
+Convert a unix path to a Windows path.
+
+- $1: **path** _as string_:
+      the path to convert
+
+Returns:
+
+- ${RETURNED_VALUE}: The Windows path.
+
+```bash
+windows::convertPathFromUnix "/path/to/file"
+```
+
+> Handles paths starting with `/mnt/x/` or `/x/`.
+
+
+## windows::convertPathToUnix
+
+Convert a Windows path to a unix path.
+
+- $1: **path** _as string_:
+      the path to convert
+
+Returns:
+
+- ${RETURNED_VALUE}: The unix path.
+
+```bash
+windows::convertPathToUnix "C:\path\to\file"
+```
+
+> Handles paths starting with `X:\`.
+
+
+## windows::createLink
+
+Create a soft or hard link (original ← link).
+
+Reminder:
+
+- A soft (symbolic) link is a new file that contains a reference to another file or directory in the
+  form of an absolute or relative path.
+- A hard link is a directory entry that associates a new pathname with an existing
+  file (inode + data block) on a file system.
+
+This function allows to create a symbolic link on Windows as well as on Unix.
+
+- $1: **linked path** _as string_:
+      the path to link to (the original file)
+- $2: **link path** _as string_:
+      the path where to create the link
+- $3: hard link _as boolean_:
+      (optional) true to create a hard link, false to create a symbolic link
+      (defaults to false)
+- $4: force _as boolean_:
+      (optional) true to overwrite the link or file if it already exists.
+      Otherwise, the function will not on an existing link not pointing to the
+      target path.
+      (defaults to true)
+
+```bash
+windows::createLink "/path/to/link" "/path/to/linked"
+windows::createLink "/path/to/link" "/path/to/linked" true
+```
+
+> On Windows, the function uses `powershell` (and optionally ls to check the existing link).
+
+
+## windows::createTempDirectory
+
+Create a temporary directory on Windows and return the path both for Windows and Unix.
+
+This is useful for creating temporary directories that can be used in both Windows and Unix.
+
+Returns:
+
+- ${RETURNED_VALUE}: The Windows path.
+- ${RETURNED_VALUE2}: The Unix path.
+
+```bash
+windows::createTempDirectory
+```
+
+> Directories created this way are automatically cleaned up by the fs::cleanTempFiles
+> function when valet ends.
+
+
+## windows::createTempFile
+
+Create a temporary file on Windows and return the path both for Windows and Unix.
+
+This is useful for creating temporary files that can be used in both Windows and Unix.
+
+Returns:
+
+- ${RETURNED_VALUE}: The Windows path.
+- ${RETURNED_VALUE2}: The Unix path.
+
+```bash
+windows::createTempFile
+```
+
+> Files created this way are automatically cleaned up by the fs::cleanTempFiles
+> function when valet ends.
+
+
+## windows::endPs1Batch
+
+This function will run all the commands that were batched with `windows::startPs1Batch`.
+
+Returns:
+
+- $?
+  - 0 if the command was successful
+  - 1 otherwise.
+- ${RETURNED_VALUE}: The content of stdout.
+- ${RETURNED_VALUE2}: The content of stderr.
+
+```bash
+windows::startPs1Batch
+windows::runPs1 "Write-Host \"Hello\""
+windows::runPs1 "Write-Host \"World\""
+windows::endPs1Batch
+```
+
+
+## windows::getEnvVar
+
+Get the value of an environment variable for the current user on Windows.
+
+- $1: **variable name** _as string_:
+      the name of the environment variable to get.
+
+Returns:
+
+- ${RETURNED_VALUE}: the value of the environment variable.
+
+```bash
+windows::getEnvVar "MY_VAR"
+echo "${RETURNED_VALUE}"
+```
+
+
+## windows::runPs1
+
+Runs a PowerShell command.
+This is mostly useful on Windows.
+
+- $1: **command** _as string_:
+      the command to run.
+- $2: run as administrator _as boolean_:
+      (optional) whether to run the command as administrator.
+      (defaults to false).
+
+Returns:
+
+- $?
+  - 0 if the command was successful
+  - 1 otherwise.
+- ${RETURNED_VALUE}: The content of stdout.
+- ${RETURNED_VALUE2}: The content of stderr.
+
+```bash
+windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
+```
+
+
+## windows::setEnvVar
+
+Set an environment variable for the current user on Windows.
+
+- $1: **variable name** _as string_:
+      the name of the environment variable to set.
+- $2: **variable value** _as string_:
+      the value of the environment variable to set.
+
+```bash
+windows::setEnvVar "MY_VAR" "my_value"
+```
+
+> This function is only available on Windows, it uses `powershell` to directly modify the registry.
+
+
+## windows::startPs1Batch
+
+After running this function, all commands that should be executed by
+`windows::runPs1` will be added to a batch that will only be played
+when `windows::endPs1Batch` is called.
+
+This is a convenient way to run multiple commands in a single PowerShell session.
+It makes up for the fact that running a new PowerShell session for each command is slow.
+
+```bash
+windows::startPs1Batch
+windows::runPs1 "Write-Host \"Hello\""
+windows::runPs1 "Write-Host \"World\""
+windows::endPs1Batch
+```
+
+
+
+
+> Documentation generated for the version 0.28.2965 (2025-02-07).

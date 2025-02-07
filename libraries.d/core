@@ -1148,8 +1148,8 @@ function string::highlight() {
 
 # ## array::fuzzyFilterSort
 #
-# Allows to fuzzy sort an array against a given pattern.
-# Returns an array containing only the lines matching the pattern.
+# Allows to fuzzy sort an array against a given searched string.
+# Returns an array containing only the lines matching the searched string.
 # The array is sorted by (in order):
 #
 # - the index of the first matched character in the line
@@ -1158,18 +1158,18 @@ function string::highlight() {
 #
 # Also returns an array containing the indexes of the matched items in the original array.
 #
-# - $1: **pattern** _as string_:
-#       the pattern to match
-# - $2: **array name** _as string_:
-#       the initial array name
+# - $1: **array name** _as string_:
+#       The array name to fuzzy filter and sort.
+# - $2: **search string** _as string_:
+#       The variable name containing the search string to match.
 #
 # Returns:
 #
 # - ${RETURNED_ARRAY}: An array containing the items sorted and filtered
-# - `RETURNED_ARRAY2`: An array containing the indexes of the matched items in the original array
+# - ${RETURNED_ARRAY2}: An array containing the indexes of the matched items in the original array
 #
 # ```bash
-# array::fuzzyFilterSort "pattern" MY_ARRAY
+# array::fuzzyFilterSort MY_ARRAY SEARCH_STRING
 # echo "${RETURNED_ARRAY[*]}"
 # ```
 #
@@ -1177,11 +1177,11 @@ function string::highlight() {
 # > - Use `shopt -s nocasematch` to make this function is case insensitive.
 # > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.
 function array::fuzzyFilterSort() {
-  local filterPattern="${1}"
-  local -n arrayToFilter="${2}"
+  local -n arrayToFilter="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n filterSearchString="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   # nothing to filter
-  if [[ -z ${filterPattern} || ${#arrayToFilter[@]} -eq 0 ]]; then
+  if [[ -z ${filterSearchString} || ${#arrayToFilter[@]} -eq 0 ]]; then
     RETURNED_ARRAY=("${arrayToFilter[@]}")
     eval "RETURNED_ARRAY2=( {0..$((${#arrayToFilter[@]} - 1))} )"
     return 0
@@ -1189,13 +1189,13 @@ function array::fuzzyFilterSort() {
 
   # prepare the regex for the pattern
   # the -> '([^t]*)(t[^h]*h[^e]*e)'
-  local patternRegex="^([^${filterPattern:0:1}]*)(${filterPattern:0:1}"
+  local patternRegex="^([^${filterSearchString:0:1}]*)(${filterSearchString:0:1}"
   local -i index
-  for ((index = 1; index < ${#filterPattern}; index++)); do
-    patternRegex+="[^${filterPattern:index:1}]*${filterPattern:index:1}"
+  for ((index = 1; index < ${#filterSearchString}; index++)); do
+    patternRegex+="[^${filterSearchString:index:1}]*${filterSearchString:index:1}"
   done
   patternRegex+=")(.?)"
-  local -i patternLength=${#filterPattern}
+  local -i patternLength=${#filterSearchString}
 
   # will contain a key that allows to sort the items, it is a combination of the length before the pattern,
   # the length of the matched pattern and the initial position of the item
