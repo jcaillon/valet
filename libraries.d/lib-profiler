@@ -60,11 +60,12 @@ function profiler::disable() {
 
   log::info "Disabling profiler."
   set +o xtrace
-  unset BASH_XTRACEFD PS4 _ACTIVE_PROFILER
+  unset -v BASH_XTRACEFD PS4 _ACTIVE_PROFILER
   exec 5>&-
   if [[ -v _PROFILER_OUTPUT_FILE ]]; then
     profilerCleanFile
   fi
+  unset -v _PROFILER_OUTPUT_FILE _PROFILER_STARTED_AT_SECOND _PROFILER_STARTED_AT_MICROSECOND _PROFILER_START_REALTIME
 }
 
 # Allows to pretty format the profiler file and remove stuff the user does not need.
