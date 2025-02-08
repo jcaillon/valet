@@ -58,7 +58,7 @@ source bash
 #
 #   Once an extension is installed, you can use the `valet self update` command to update it.
 # arguments:
-# - name: extensionUri
+# - name: extension-uri
 #   description: |-
 #     The URI of the extension to install or create.
 #
