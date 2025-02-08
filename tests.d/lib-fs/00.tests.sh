@@ -4,6 +4,8 @@
 source fs
 
 function main() {
+  test_fs::createTemp
+  test_fs::getFileLineCount
   test_fs::toAbsolutePath
   test_fs::readFile
   test_fs::createDirectoryIfNeeded
@@ -13,7 +15,20 @@ function main() {
   test_fs::createLink
   test_fs::head
   test_fs::tail
-  test_fs::getFileLineCount
+}
+
+function test_fs::createTemp() {
+  test::title "✅ Testing fs::createTempFile and fs::createTempDirectory"
+
+  test::func _OPTION_PATH_ONLY=true fs::createTempFile
+  if [[ ! -f "${RETURNED_VALUE}" ]]; then
+    test::markdown "The file path was returned but the file does not exist."
+  fi
+
+  test::func _OPTION_PATH_ONLY=true fs::createTempDirectory
+  if [[ ! -d "${RETURNED_VALUE}" ]]; then
+    test::markdown "The directory path was returned but the directory does not exist."
+  fi
 }
 
 function test_fs::getFileLineCount() {

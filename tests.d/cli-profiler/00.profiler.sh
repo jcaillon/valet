@@ -6,9 +6,9 @@ source fs
 test::markdown "The profiler is an excellent tool to debug your command. The following example shows what you would get when you enable it."$'\n\n'"Notice that the profiling file is cleaned up after the command execution to maximize readability."
 
 function main() {
-  fs::createTempFile
+  _OPTION_PATH_ONLY=true fs::createTempFile
   export VALET_CONFIG_COMMAND_PROFILING_FILE="${RETURNED_VALUE}"
-  fs::createTempFile
+  _OPTION_PATH_ONLY=true fs::createTempFile
   export VALET_CONFIG_STARTUP_PROFILING_FILE="${RETURNED_VALUE}"
 
   test::markdown "**Exported variables:**"

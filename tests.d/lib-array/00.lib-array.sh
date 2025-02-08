@@ -154,9 +154,9 @@ function test_array::fuzzyFilterSortFileWithGrepAndGawk() {
   test::flush
 
 
-  fs::createTempFile
+  _OPTION_PATH_ONLY=true fs::createTempFile
   local outputFilteredFile="${RETURNED_VALUE}"
-  fs::createTempFile
+  _OPTION_PATH_ONLY=true fs::createTempFile
   local outputCorrespondenceFile="${RETURNED_VALUE}"
 
   if ! command -v grep &>/dev/null || ! command -v gawk &>/dev/null; then

@@ -132,14 +132,20 @@ function fs::setupTempFileGlobalVariable() {
   GLOBAL_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.d"
   # shellcheck disable=SC2034
   GLOBAL_TEMPORARY_WORK_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-work.f"
+  # shellcheck disable=SC2034
   GLOBAL_TEMPORARY_STDOUT_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-stdout.f"
   # shellcheck disable=SC2034
   GLOBAL_TEMPORARY_STDERR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-stderr.f"
+  unset -v TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
 }
 
 # ## fs::createTempFile
 #
 # Creates a temporary file and return its path.
+#
+# - ${_OPTION_PATH_ONLY} _as boolean_:
+#       (optional) If true, does not create the file, only returns the path.
+#       (defaults to false)
 #
 # Returns:
 #
@@ -152,26 +158,27 @@ function fs::setupTempFileGlobalVariable() {
 #
 # > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
-#
-# TODO: add an _OPTION to not create the file immediately
 function fs::createTempFile() {
-  if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
-    mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
-  fi
-  TEMPORARY_FILE_NUMBER=${TEMPORARY_FILE_NUMBER:-0}
-  while true; do
-    TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
-    RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
-    if [[ ! -f "${RETURNED_VALUE}" ]]; then
-      : >"${RETURNED_VALUE}"
-      return 0
+  if [[ ! -v TEMPORARY_FILE_NUMBER ]]; then
+    TEMPORARY_FILE_NUMBER=0
+    if [[ ! -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
+      mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
     fi
-  done
+  fi
+  TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
+  RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
+  if [[ ${_OPTION_PATH_ONLY:-false} != "true" ]]; then
+    : >"${RETURNED_VALUE}"
+  fi
 }
 
 # ## fs::createTempDirectory
 #
 # Creates a temporary directory.
+#
+# - ${_OPTION_PATH_ONLY} _as boolean_:
+#       (optional) If true, does not create the file, only returns the path.
+#       (defaults to false)
 #
 # Returns:
 #
@@ -185,18 +192,17 @@ function fs::createTempFile() {
 # > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
 function fs::createTempDirectory() {
-  if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
-    mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
-  fi
-  TEMPORARY_DIRECTORY_NUMBER=${TEMPORARY_DIRECTORY_NUMBER:-0}
-  while true; do
-    TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
-    RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
-    if [[ ! -d "${RETURNED_VALUE}" ]]; then
-      mkdir -p "${RETURNED_VALUE}" 1>/dev/null
-      return 0
+  if [[ ! -v TEMPORARY_DIRECTORY_NUMBER ]]; then
+    TEMPORARY_DIRECTORY_NUMBER=0
+    if [[ ${_OPTION_PATH_ONLY:-false} == "true" && ! -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
+      mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
     fi
-  done
+  fi
+  TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
+  RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
+  if [[ ${_OPTION_PATH_ONLY:-false} != "true" ]]; then
+    mkdir -p "${RETURNED_VALUE}" 1>/dev/null
+  fi
 }
 
 # ## fs::cleanTempFiles
@@ -218,7 +224,7 @@ function fs::cleanTempFiles() {
     rm -Rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" 1>/dev/null || :
   fi
   rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* &>/dev/null || :
-  unset TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
+  unset -v TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
 }
 
 #===============================================================

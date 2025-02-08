@@ -77,10 +77,14 @@ function selfMock1() {
       log::warning "This is a custom clean up function."
     }
     local tmp1 tmp2 tmp3 tmp4
-    fs::createTempFile && tmp1="${RETURNED_VALUE}"
-    fs::createTempFile && tmp2="${RETURNED_VALUE}"
-    fs::createTempDirectory && tmp3="${RETURNED_VALUE}"
-    fs::createTempDirectory && tmp4="${RETURNED_VALUE}"
+    fs::createTempFile
+    tmp1="${RETURNED_VALUE}"
+    fs::createTempFile
+    tmp2="${RETURNED_VALUE}"
+    fs::createTempDirectory
+    tmp3="${RETURNED_VALUE}"
+    fs::createTempDirectory
+    tmp4="${RETURNED_VALUE}"
     log::info "Created temp file: ${tmp1//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
     log::info "Created temp file: ${tmp2//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
     log::info "Created temp directory: ${tmp3//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."

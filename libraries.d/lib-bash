@@ -253,9 +253,8 @@ function bash::sleep() {
     if [[ -z ${IO_SLEEP_FIFO:-} ]]; then
       # shellcheck source=lib-fs
       source fs
-      fs::createTempFile
+      _OPTION_PATH_ONLY=true fs::createTempFile
       IO_SLEEP_FIFO="${RETURNED_VALUE}"
-      rm "${IO_SLEEP_FIFO}"
       mkfifo -m 700 "${IO_SLEEP_FIFO}"
       exec 6<>"${IO_SLEEP_FIFO}"
       rm "${IO_SLEEP_FIFO}"

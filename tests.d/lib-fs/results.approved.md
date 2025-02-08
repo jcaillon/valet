@@ -2,6 +2,46 @@
 
 ## Test script 00.tests
 
+### ✅ Testing fs::createTempFile and fs::createTempDirectory
+
+❯ `_OPTION_PATH_ONLY=true fs::createTempFile`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='/tmp/valet.d/f1-2'
+```
+
+The file path was returned but the file does not exist.
+
+❯ `_OPTION_PATH_ONLY=true fs::createTempDirectory`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='/tmp/valet.d/d1-2'
+```
+
+The directory path was returned but the directory does not exist.
+
+### ✅ Testing fs::getFileLineCount
+
+❯ `fs::getFileLineCount resources/file-to-read`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='24'
+```
+
+❯ `VALET_CONFIG_STRICT_PURE_BASH=true fs::getFileLineCount resources/file-to-read`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='24'
+```
+
 ### ✅ Testing fs::toAbsolutePath
 
 ❯ `fs::toAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh`
@@ -385,24 +425,6 @@ RETURNED_ARRAY=(
 [1]=''
 [2]='Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there'"'"'s never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it'"'"'s the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.'
 )
-```
-
-### ✅ Testing fs::getFileLineCount
-
-❯ `fs::getFileLineCount resources/file-to-read`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='24'
-```
-
-❯ `VALET_CONFIG_STRICT_PURE_BASH=true fs::getFileLineCount resources/file-to-read`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='24'
 ```
 
 ## Test script 01.listPaths

@@ -72,7 +72,8 @@ function profiler::disable() {
 # Usage:
 #   profilerCleanFile
 function profilerCleanFile() {
-  fs::createTempFile && local newProfilerFile="${RETURNED_VALUE}"
+  _OPTION_PATH_ONLY=true fs::createTempFile
+  local newProfilerFile="${RETURNED_VALUE}"
 
   local timePrecision=${EPOCHREALTIME#*.}
   timePrecision=${#timePrecision}

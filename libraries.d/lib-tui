@@ -570,7 +570,7 @@ function tui::rebindKeymap() {
 
   if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
     # save the original bindings
-    fs::createTempFile
+    _OPTION_PATH_ONLY=true fs::createTempFile
     _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
     exe::invokef2 true bind -p
     mv -f "${RETURNED_VALUE}" "${_INTERACTIVE_SAVED_BINDINGS_FILE}"

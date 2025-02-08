@@ -270,7 +270,7 @@ function selfTest_runSingleTestSuites() {
     declare -g -a _TEST_SUITE_NAMES=() _TEST_SUITE_COMMANDS=() _TEST_SUITE_OUTPUT_FILES=()
     for testDirectory in "${testSuiteDirectories[@]}"; do
       _TEST_SUITE_NAMES+=("${testDirectory##*/}")
-      fs::createTempFile
+      _OPTION_PATH_ONLY=true fs::createTempFile
       _TEST_SUITE_OUTPUT_FILES+=("${RETURNED_VALUE}")
       _TEST_SUITE_COMMANDS+=("selfTest_runSingleTestSuite '${testDirectory}' &>'${RETURNED_VALUE}'")
     done

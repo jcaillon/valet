@@ -352,9 +352,9 @@ function array::fuzzyFilterSortFileWithGrepAndGawk() {
   if [[ -z ${_ARRAY_TEMP_FILTER_FILE:-} ]]; then
     # shellcheck source=lib-fs
     source fs
-    fs::createTempFile
+    _OPTION_PATH_ONLY=true fs::createTempFile
     _ARRAY_TEMP_FILTER_FILE="${RETURNED_VALUE}"
-    fs::createTempFile
+    _OPTION_PATH_ONLY=true fs::createTempFile
     _ARRAY_TEMP_FILTERED_FILE="${RETURNED_VALUE}"
   fi
 

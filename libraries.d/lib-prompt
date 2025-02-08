@@ -533,20 +533,20 @@ function prompt_setItemsListVariables() {
 
   # initial setup of files for async filtering if not done
   if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY:-true} != "true" && -z ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
-    fs::createTempFile
+    _OPTION_PATH_ONLY=true fs::createTempFile
     _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE="${RETURNED_VALUE}"
-    fs::createTempFile
+    _OPTION_PATH_ONLY=true fs::createTempFile
     _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
-    fs::createTempFile
+    _OPTION_PATH_ONLY=true fs::createTempFile
     _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILTER_STRING="${RETURNED_VALUE}"
   fi
 
   # initial setup of files for grep filtering
   if [[ ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP:-true} == "true" ]]; then
     if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS:-} ]]; then
-      fs::createTempFile
+      _OPTION_PATH_ONLY=true fs::createTempFile
       _PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS="${RETURNED_VALUE}"
-      fs::createTempFile
+      _OPTION_PATH_ONLY=true fs::createTempFile
       _PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1="${RETURNED_VALUE}"
     fi
     local IFS=$'\n'
