@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.28.2965 (2025-02-07).
+> Documentation generated for the version 0.28.2980 (2025-02-08).
 
 ## ansi-codes::*
 
@@ -104,7 +104,7 @@ array::fuzzyFilterSort MY_ARRAY SEARCH_STRING
 echo "${RETURNED_ARRAY[*]}"
 ```
 
-> - All characters in the pattern must be found in the same order in the matched line.
+> - All characters in the searched string must be found in the same order in the matched line.
 > - Use `shopt -s nocasematch` to make this function is case insensitive.
 > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.
 
@@ -1077,6 +1077,8 @@ local file="${RETURNED_VALUE}"
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
+TODO: add an _OPTION to not create the file immediately
+
 
 ## fs::getFileLineCount
 
@@ -1798,20 +1800,21 @@ progress::update 50 "Doing something..."
 
 ## regex::getFirstGroup
 
-Matches a string against a regex and returns the first capture group of the matched string.
+Matches a string against a regex and returns the first captured group of the matched string.
 
-- $1: **string** _as string_:
-      the string to match
+- $1: **string variable name** _as string_:
+      The variable name containing the string to match.
 - $2: **regex** _as string_:
-      the regex
+      The regex to use for the match.
 
 Returns:
 
-- ${RETURNED_VALUE}: the first capture group in the matched string.
-                    Empty if no match.
+- ${RETURNED_VALUE}: The first capture group in the matched string.
+                     Empty if no match.
 
 ```bash
-regex::getFirstGroup "name: julien" "name:(.*)"
+MY_STRING="name: julien"
+regex::getFirstGroup MY_STRING "name:(.*)"
 echo "${RETURNED_VALUE}"
 ```
 
@@ -2097,12 +2100,12 @@ echo "${RETURNED_VALUE}"
 
 ## string::highlight
 
-Highlight a pattern (each character of this pattern) in a string.
+Highlight characters in a string.
 
-- $1: **text** _as string_:
-      The text to highlight.
-- $2: **pattern** _as string_:
-      The pattern to highlight.
+- $1: **text variable name** _as string_:
+      The variable name that contains the text to highlight.
+- $2: **characters variable name** _as string_:
+      The variable name that contains characters to highlight.
 - $3: highlight ansi code _as string_:
       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.
       The ANSI code to use for highlighting.
@@ -2121,7 +2124,7 @@ string::highlight "This is a text to highlight." "ttttt"
 echo "${RETURNED_VALUE}"
 ```
 
-> - All characters in the pattern must be found in the same order in the matched line.
+> - All characters to highlight must be found in the same order in the matched line.
 > - This functions is case insensitive.
 
 
@@ -3203,4 +3206,4 @@ windows::endPs1Batch
 
 
 
-> Documentation generated for the version 0.28.2965 (2025-02-07).
+> Documentation generated for the version 0.28.2980 (2025-02-08).

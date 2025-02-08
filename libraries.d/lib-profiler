@@ -15,7 +15,7 @@
 #
 # > There can be only one profiler active at a time.
 function profiler::enable() {
-  local file="${1}"
+  local file="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # Nested profiling not supported
   if [[ -n ${_ACTIVE_PROFILER:-} ]]; then
     return 0

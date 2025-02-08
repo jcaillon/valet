@@ -47,6 +47,9 @@ function core::setShellOptions() {
     shopt -u varredir_close patsub_replacement
   fi
 
+  # remove all aliases
+  # unalias -a
+
   # default IFS
   IFS=' '$'\t'$'\n'
 
@@ -149,6 +152,8 @@ function fs::setupTempFileGlobalVariable() {
 #
 # > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
+#
+# TODO: add an _OPTION to not create the file immediately
 function fs::createTempFile() {
   if [[ ! -d "${GLOBAL_TEMPORARY_DIRECTORY}" ]]; then
     mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
@@ -1074,12 +1079,12 @@ function string::wrapCharacters() {
 
 # ## string::highlight
 #
-# Highlight a pattern (each character of this pattern) in a string.
+# Highlight characters in a string.
 #
-# - $1: **text** _as string_:
-#       The text to highlight.
-# - $2: **pattern** _as string_:
-#       The pattern to highlight.
+# - $1: **text variable name** _as string_:
+#       The variable name that contains the text to highlight.
+# - $2: **characters variable name** _as string_:
+#       The variable name that contains characters to highlight.
 # - $3: highlight ansi code _as string_:
 #       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.
 #       The ANSI code to use for highlighting.
@@ -1098,18 +1103,19 @@ function string::wrapCharacters() {
 # echo "${RETURNED_VALUE}"
 # ```
 #
-# > - All characters in the pattern must be found in the same order in the matched line.
+# > - All characters to highlight must be found in the same order in the matched line.
 # > - This functions is case insensitive.
 function string::highlight() {
-  local text="${1}"
-  local pattern="${2}"
+  local -n textToHighlight="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n charactersToHighlight="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local highlightCode="${3:-${_OPTION_HIGHLIGHT_ANSI:-${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"}}}"
   local resetCode="${4:-${_OPTION_RESET_ANSI:-${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}}}"
 
   local itemChunk itemChunkPiece
   local -i searchStringIndex=0
-  local searchStringCharacter="${pattern:0:1}"
+  local searchStringCharacter="${charactersToHighlight:0:1}"
   local searchStringCharacters="${searchStringCharacter,}${searchStringCharacter^}"
+  local text="${textToHighlight}"
 
   RETURNED_VALUE=""
 
@@ -1125,7 +1131,7 @@ function string::highlight() {
         RETURNED_VALUE+="${itemChunkPiece}${highlightCode}${itemChunk:${#itemChunkPiece}:1}${resetCode}"
         itemChunk="${itemChunk:${#itemChunkPiece}+1}"
         searchStringIndex+=1
-        searchStringCharacter="${pattern:searchStringIndex:1}"
+        searchStringCharacter="${charactersToHighlight:searchStringIndex:1}"
         searchStringCharacters="${searchStringCharacter,}${searchStringCharacter^}"
       done
 
@@ -1173,7 +1179,7 @@ function string::highlight() {
 # echo "${RETURNED_ARRAY[*]}"
 # ```
 #
-# > - All characters in the pattern must be found in the same order in the matched line.
+# > - All characters in the searched string must be found in the same order in the matched line.
 # > - Use `shopt -s nocasematch` to make this function is case insensitive.
 # > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.
 function array::fuzzyFilterSort() {
@@ -1187,7 +1193,7 @@ function array::fuzzyFilterSort() {
     return 0
   fi
 
-  # prepare the regex for the pattern
+  # prepare the regex for the searched string
   # the -> '([^t]*)(t[^h]*h[^e]*e)'
   local patternRegex="^([^${filterSearchString:0:1}]*)(${filterSearchString:0:1}"
   local -i index
@@ -1334,7 +1340,7 @@ function core::fail() {
 # core::failWithCode 255 "This is an error message."
 # ```
 function core::failWithCode() {
-  local exitCode="${1}"
+  local exitCode="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift
   log::error "$@"
   # shellcheck disable=SC2034
@@ -1363,7 +1369,7 @@ function core::failWithCode() {
 # > - The file can be relative to the current script (script that calls this function).
 # > - Use `builtin source` if you want to include the file even if it was already included.
 function source() {
-  local pathOrName="${1}"
+  local pathOrName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift
 
   # if the name does not start with . or /, we assume it is a library name
@@ -1606,7 +1612,7 @@ function core::getUserDirectory() {
 # command::sourceFunction "functionName"
 # ```
 function command::sourceFunction() {
-  local functionName="${1}"
+  local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   local fileToSource
   if ! command -v "${functionName}" 1>/dev/null 2>&1; then

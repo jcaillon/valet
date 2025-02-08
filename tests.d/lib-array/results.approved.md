@@ -119,7 +119,7 @@ MY_ARRAY=(
 )
 ```
 
-❯ `array::appendIfNotPresent MY_ARRAY deliver`
+❯ `MY_VALUE=deliver array::appendIfNotPresent MY_ARRAY MY_VALUE`
 
 ```text
 MY_ARRAY=(
@@ -129,7 +129,7 @@ MY_ARRAY=(
 )
 ```
 
-❯ `array::appendIfNotPresent MY_ARRAY breakdown`
+❯ `MY_VALUE=breakdown array::appendIfNotPresent MY_ARRAY MY_VALUE`
 
 Returned code: `1`
 
@@ -151,7 +151,7 @@ MY_ARRAY=(
 )
 ```
 
-❯ `array::checkIfPresent MY_ARRAY deliver`
+❯ `MY_VALUE=deliver array::checkIfPresent MY_ARRAY MY_VALUE`
 
 ```text
 MY_ARRAY=(
@@ -161,7 +161,7 @@ MY_ARRAY=(
 )
 ```
 
-❯ `array::checkIfPresent MY_ARRAY holiday`
+❯ `MY_VALUE=holiday array::checkIfPresent MY_ARRAY MY_VALUE`
 
 Returned code: `1`
 

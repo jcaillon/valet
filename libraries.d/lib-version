@@ -29,8 +29,11 @@ source string
 #
 # > The prerelease and build are ignored in the comparison.
 function version::compare() {
-  local version1="${1#v}"
-  local version2="${2#v}"
+  local version1="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local version2="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  version1="${version1#v}"
+  version2="${version2#v}"
 
   local -i semVerIndex
   local semVerNumber1 semVerNumber2
@@ -76,10 +79,9 @@ function version::compare() {
 # local newVersion="${RETURNED_VALUE}"
 # ```
 function version::bump() {
-  local version level clearPreRelease
-  version="${1}"
-  bumpLevel="${2}"
-  clearPreRelease="${3:-true}"
+  local version="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local bumpLevel="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local clearPreRelease="${3:-true}"
 
   local prerelease build modifiedVersion
   modifiedVersion="${version}-+"

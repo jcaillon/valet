@@ -4,27 +4,29 @@
 
 # ## regex::getFirstGroup
 #
-# Matches a string against a regex and returns the first capture group of the matched string.
+# Matches a string against a regex and returns the first captured group of the matched string.
 #
-# - $1: **string** _as string_:
-#       the string to match
+# - $1: **string variable name** _as string_:
+#       The variable name containing the string to match.
 # - $2: **regex** _as string_:
-#       the regex
+#       The regex to use for the match.
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the first capture group in the matched string.
-#                     Empty if no match.
+# - ${RETURNED_VALUE}: The first capture group in the matched string.
+#                      Empty if no match.
 #
 # ```bash
-# regex::getFirstGroup "name: julien" "name:(.*)"
+# MY_STRING="name: julien"
+# regex::getFirstGroup MY_STRING "name:(.*)"
 # echo "${RETURNED_VALUE}"
 # ```
 #
 # > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 function regex::getFirstGroup() {
+  local -n stringInWhichToMatch="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # Usage: regex "string" "regex"
-  if [[ ${1} =~ ${2} ]]; then
+  if [[ ${stringInWhichToMatch} =~ ${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."} ]]; then
     RETURNED_VALUE="${BASH_REMATCH[1]:-}"
   else
     # shellcheck disable=SC2034

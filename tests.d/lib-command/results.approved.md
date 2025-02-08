@@ -571,7 +571,7 @@ ARRAY=(
 )
 ```
 
-❯ `main::getDisplayableFilteredArray ae ARRAY`
+❯ `MY_CHARS=ae main::getDisplayableFilteredArray ARRAY MY_CHARS`
 
 Returned variables:
 

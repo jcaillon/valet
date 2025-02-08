@@ -81,7 +81,7 @@ function array::quicksort() {
 # > - This function uses a quicksort algorithm.
 # > - It is not appropriate for large array, use the `sort` binary for such cases.
 function array::sort() {
-  local arrayName=${1}
+  local arrayName=${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}
   local -n array=${arrayName}
 
   local _ARRAY_SWAP_COMMAND="
@@ -168,7 +168,7 @@ function array_sortCompareCallBack() {
 # > - This function uses a quicksort algorithm.
 # > - It is not appropriate for large array, use the `sort` binary for such cases.
 function array::sortWithCriteria() {
-  local arrayName="${1}"
+  local arrayName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -n array="${arrayName}"
   shift
   local -a criteriaArrayNames=("${@}")
@@ -212,8 +212,8 @@ function array::sortWithCriteria() {
 #
 # - $1: **array name** _as string_:
 #       The variable name of the array.
-# - $2: **value** _as any_:
-#       The value to add.
+# - $2: **value variable name** _as any_:
+#       The variable name containing the value to add.
 #
 # Returns:
 #
@@ -223,24 +223,25 @@ function array::sortWithCriteria() {
 #
 # ```bash
 # declare myArray=( "a" "b" )
-# array::appendIfNotPresent myArray "c"
+# declare myValue="b"
+# array::appendIfNotPresent myArray myValue
 # printf '%s\n' "${myArray[@]}"
 # ```
 function array::appendIfNotPresent() {
-  local -n array=${1}
-  local value="${2}"
+  local -n array=${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}
+  local -n valueToAdd="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   # add value to array if not present, check in a loop
   local -i present=0
   local item
   for item in "${array[@]}"; do
-    if [[ ${item} == "${value}" ]]; then
+    if [[ ${item} == "${valueToAdd}" ]]; then
       present=1
       break
     fi
   done
   if (( present == 0 )); then
-    array+=("${value}")
+    array+=("${valueToAdd}")
   fi
   return ${present}
 }
@@ -252,8 +253,8 @@ function array::appendIfNotPresent() {
 #
 # - $1: **array name** _as string_:
 #       The variable name of the array.
-# - $2: **value** _as any_:
-#       The value to check.
+# - $2: **value variable name** _as any_:
+#       The variable name containing the value to check.
 #
 # Returns:
 #
@@ -261,12 +262,13 @@ function array::appendIfNotPresent() {
 #
 # ```bash
 # declare myArray=( "a" "b" )
-# array::checkIfPresent myArray "b" && printf '%s\n' "b is in the array"
+# declare myValue="b"
+# if array::checkIfPresent myArray myValue; then "b is in the array"; fi
 # ```
 function array::checkIfPresent() {
   # shellcheck disable=SC2178
-  local -n array="${1}"
-  local value="${2}"
+  local -n array="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n value="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   local item
   for item in "${array[@]}"; do

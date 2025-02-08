@@ -65,10 +65,10 @@ function test_array::appendIfNotPresent() {
   )
 
   test::printVars MY_ARRAY
-  test::func array::appendIfNotPresent MY_ARRAY 'deliver'
+  test::func MY_VALUE='deliver' array::appendIfNotPresent MY_ARRAY MY_VALUE
   test::printVars MY_ARRAY
 
-  test::func array::appendIfNotPresent MY_ARRAY 'breakdown'
+  test::func MY_VALUE='breakdown' array::appendIfNotPresent MY_ARRAY MY_VALUE
   test::printVars MY_ARRAY
 }
 
@@ -82,10 +82,10 @@ function test_array::checkIfPresent() {
   )
 
   test::printVars MY_ARRAY
-  test::func array::checkIfPresent MY_ARRAY 'deliver'
+  test::func MY_VALUE='deliver' array::checkIfPresent MY_ARRAY MY_VALUE
   test::printVars MY_ARRAY
 
-  test::func array::checkIfPresent MY_ARRAY 'holiday'
+  test::func MY_VALUE='holiday' array::checkIfPresent MY_ARRAY MY_VALUE
   test::printVars MY_ARRAY
 }
 

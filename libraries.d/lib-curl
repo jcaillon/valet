@@ -38,7 +38,7 @@ source fs
 function curl::download() {
   local failIfFails="${1:-false}"
   local acceptableStatusCodes="${2:-200,201,202,204,301,304,308}"
-  local outputFile="${3}"
+  local outputFile="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift 3
 
   # call curl

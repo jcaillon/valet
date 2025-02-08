@@ -242,10 +242,6 @@ RETURNED_ARRAY=(
 
 ### ✅ Testing bash::isCommand
 
-❯ `bash::isCommand`
-
-Returned code: `1`
-
 ❯ `bash::isCommand NONEXISTINGSTUFF`
 
 Returned code: `1`

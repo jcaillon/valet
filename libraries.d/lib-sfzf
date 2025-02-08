@@ -62,8 +62,8 @@ SFZF_RIGHT_PANE_HELP_TEXT="←/→: Scroll | Page up/down: Scroll+"
 # log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
 # ```
 function sfzf::show() {
-  local prompt="${1}"
-  local itemsArrayName="${2}"
+  local prompt="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local itemsArrayName="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   SFZF_ITEM_SELECTED_CALLBACK="${3:-}"
   SFZF_RIGHT_PANE_TITLE="${4:-"Details"}"
 

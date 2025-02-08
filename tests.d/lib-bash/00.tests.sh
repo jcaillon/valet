@@ -132,7 +132,6 @@ function test_bash::getMissingCommands() {
 function test_bash::isCommand() {
   test::title "✅ Testing bash::isCommand"
 
-  test::exec bash::isCommand
   test::exec bash::isCommand NONEXISTINGSTUFF
   test::exec bash::isCommand rm
 }

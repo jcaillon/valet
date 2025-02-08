@@ -897,7 +897,7 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
     array::fuzzyFilterSort CMD_ALL_COMMANDS_ARRAY command
     if (( ${#RETURNED_ARRAY[@]} > 1)); then
         # case of ambiguous command, show the list of possible commands
-        main::getDisplayableFilteredArray "${command}" RETURNED_ARRAY
+        main::getDisplayableFilteredArray RETURNED_ARRAY command
         local IFS=$'\n'
         core::fail "Found multiple matches for the command ⌜${command}⌝, please be more specific:"$'\n'"${RETURNED_VALUE}"
     elif (( ${#RETURNED_ARRAY[@]} == 1 )); then
@@ -1268,7 +1268,7 @@ function main::fuzzyFindOption() {
       singleMatchedOption="${RETURNED_ARRAY[0]}"
     fi
   elif (( ${#RETURNED_ARRAY[@]} > 1 )); then
-    main::getDisplayableFilteredArray "${unknownOption}" RETURNED_ARRAY
+    main::getDisplayableFilteredArray RETURNED_ARRAY unknownOption
     if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
       suggestedOption="Unknown option ⌜${unknownOption}⌝, valid matches are:"$'\n'"${RETURNED_VALUE}"
     else
@@ -1289,20 +1289,20 @@ function main::fuzzyFindOption() {
 # ## main::getDisplayableFilteredArray (private)
 #
 # Outputs a string that displays an array where each item gets highlighted
-# letters based on a pattern.
+# characters.
 #
-# - $1: **pattern** _as string_:
-#       The pattern to highlight in the array items.
-# - $2: **array** _as string:
+# - $1: **array** _as string:
 #       The name of the global array to display.
+# - $2: **characters variable name** _as string_:
+#       The characters to highlight in the array items.
 #
 # Returns:
 #
 # - ${RETURNED_VALUE}: The string to display.
 #
 function main::getDisplayableFilteredArray() {
-  local pattern="${1}"
-  local -n array="${2}"
+  # shellcheck disable=SC2178
+  local -n array="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   # ignore case
   shopt -s nocasematch
@@ -1310,7 +1310,7 @@ function main::getDisplayableFilteredArray() {
   local line output=""
   local IFS=$'\n'
   for line in "${array[@]}"; do
-    string::highlight "${line}" "${pattern}"
+    string::highlight line "${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
     output+="${RETURNED_VALUE}"$'\n'
   done
 

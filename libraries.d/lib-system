@@ -88,7 +88,7 @@ function system::getEnvVars() {
 # system::addToPath "/path/to/bin"
 # ```
 function system::addToPath() {
-  local pathToAdd="${1:-}"
+  local pathToAdd="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
 

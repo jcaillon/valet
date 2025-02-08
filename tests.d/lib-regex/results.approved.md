@@ -4,7 +4,7 @@
 
 ### ✅ Testing regex::getFirstGroup function
 
-❯ `regex::getFirstGroup name:\ julien 'name:[[:space:]]*([[:alnum:]]*)'`
+❯ `MY_STRING=name:\ julien regex::getFirstGroup MY_STRING 'name:[[:space:]]*([[:alnum:]]*)'`
 
 Returned variables:
 

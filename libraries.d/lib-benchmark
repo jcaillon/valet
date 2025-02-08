@@ -26,7 +26,7 @@ source time
 #
 # - $1: **baseline** _as string_:
 #       the name of the function to use as baseline
-# - $2: **functions** _as string_:
+# - $2: functions _as string_:
 #       The names of the functions to benchmark, comma separated.
 # - $3: time _as int_:
 #       (optional) Can be set using the variable `_OPTION_TIME`.
@@ -41,7 +41,7 @@ source time
 # benchmark::run "baseline" "function1,function2" 1 100
 # ```
 function benchmark::run() {
-  local baseline="${1}"
+  local baseline="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local functions="${2:-}"
   local time="${3:-${_OPTION_TIME:-3}}"
   local maxRuns="${4:-${_OPTION_MAX_RUNS:--1}}"

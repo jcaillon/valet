@@ -59,7 +59,7 @@ function time::getDate() {
 # echo "${RETURNED_VALUE}"
 # ```
 function time::convertMicrosecondsToHuman() {
-  local -i ms="${1}"
+  local -i ms="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local format="${2:-${_OPTION_FORMAT:-"%HH:%MM:%SS"}}"
 
   local -i hours=$((ms / 3600 / 1000000))

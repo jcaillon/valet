@@ -54,8 +54,8 @@ source fs
 # echo "Returns HTTP code was ${RETURNED_VALUE3}, response:"$'\n'"${RETURNED_VALUE}"$'\n'"${RETURNED_VALUE2}"
 # ```
 function http::request() {
-  local verb="${1}"
-  local url="${2}"
+  local verb="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local url="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local failOnError="${3:-${_OPTION_FAIL_ON_ERROR:-false}}"
   local acceptableStatusCodes="${4:-${_OPTION_ACCEPTABLE_STATUS_CODES:-200,201,202,204,301,304,308}}"
   local outputFile="${5:-${_OPTION_OUTPUT_FILE:-}}"

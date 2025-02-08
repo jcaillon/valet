@@ -742,7 +742,7 @@ RETURNED_VALUE2='10'
 
 ### ✅ Testing string::highlight
 
-❯ `string::highlight This\ is\ a\ Text\ to\ highlight. ttttt`
+❯ `MY_STRING=This\ is\ a\ Text\ to\ highlight. MY_CHARS=ttttt string::highlight MY_STRING MY_CHARS`
 
 Returned variables:
 
@@ -750,7 +750,7 @@ Returned variables:
 RETURNED_VALUE='CHITCDEhis is a CHITCDEexCHItCDE CHItCDEo highlighCHItCDE.'
 ```
 
-❯ `string::highlight This\ is\ a\ texT\ to\ highlight. TTTTT '>' '<'`
+❯ `MY_STRING=This\ is\ a\ texT\ to\ highlight. MY_CHARS=TTTTT string::highlight MY_STRING MY_CHARS '>' '<'`
 
 Returned variables:
 
@@ -758,7 +758,7 @@ Returned variables:
 RETURNED_VALUE='>T<his is a >t<ex>T< >t<o highligh>t<.'
 ```
 
-❯ `string::highlight '' ttttt`
+❯ `MY_STRING= MY_CHARS=ttttt string::highlight MY_STRING MY_CHARS`
 
 Returned variables:
 
@@ -766,7 +766,7 @@ Returned variables:
 RETURNED_VALUE=''
 ```
 
-❯ `string::highlight This\ is\ a\ text\ to\ highlight. ''`
+❯ `MY_STRING=This\ is\ a\ text\ to\ highlight. MY_CHARS= string::highlight MY_STRING MY_CHARS`
 
 Returned variables:
 

@@ -20,7 +20,8 @@
 #
 # > This is a pure bash alternative to `realpath` or `readlink`.
 function fs::toAbsolutePath() {
-  local file="${1%/}"
+  local file="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  file="${file%/}"
 
   # if file starts with ~, we replace it with the home directory
   if [[ ${file} == "~"* ]]; then
@@ -82,7 +83,7 @@ function fs::toAbsolutePath() {
 # fs::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
 # ```
 function fs::readFile() {
-  local filePath="${1}"
+  local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i maxCharacters="${2:-0}"
 
   if [[ ! -s "${filePath}" ]]; then
@@ -123,7 +124,7 @@ function fs::readFile() {
 # > - If the file path does not exist, the function will create the directory tree.
 # > - The main use case is to be able to mock this function during tests...
 function fs::writeToFile() {
-  fs::createFilePathIfNeeded "${1}"
+  fs::createFilePathIfNeeded "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ ${3:-false} == "true" ]]; then
     printf '%s' "${2}" >>"${1}"
   else
@@ -146,7 +147,7 @@ function fs::writeToFile() {
 # fs::createDirectoryIfNeeded "/my/directory"
 # ```
 function fs::createDirectoryIfNeeded() {
-  fs::toAbsolutePath "${1}"
+  fs::toAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local dirPath="${RETURNED_VALUE}"
 
   if [[ ! -d "${dirPath}" ]]; then
@@ -174,7 +175,7 @@ function fs::createDirectoryIfNeeded() {
 # fs::createFilePathIfNeeded "myFile"
 # ```
 function fs::createFilePathIfNeeded() {
-  fs::toAbsolutePath "${1}"
+  fs::toAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local filePath="${RETURNED_VALUE}"
   local parentDir="${filePath%/*}"
 
@@ -201,7 +202,7 @@ function fs::createFilePathIfNeeded() {
 #
 # > Also see log::printFile if you want to print a file for a user.
 function fs::cat() {
-  fs::readFile "${1}"
+  fs::readFile "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   printf '%s\n' "${RETURNED_VALUE}"
 }
 
@@ -226,8 +227,8 @@ function fs::cat() {
 #
 # > #TODO: faster with mapfile + quantum?
 function fs::head() {
-  local filePath="${1}"
-  local -i numberOfLines="${2}"
+  local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -i numberOfLines="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local toVariable="${3:-${_OPTION_TO_VARIABLE:-false}}"
   RETURNED_ARRAY=()
   local IFS=$'\n' line
@@ -266,8 +267,8 @@ function fs::head() {
 #
 # > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 function fs::tail() {
-  local filePath="${1}"
-  local -i numberOfLines="${2}"
+  local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -i numberOfLines="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local toVariable="${3:-${_OPTION_TO_VARIABLE:-false}}"
   RETURNED_ARRAY=()
   local IFS=$'\n'
@@ -320,7 +321,7 @@ function fs::tail() {
 #
 # > - It will correctly list files under symbolic link directories.
 function fs::listPaths() {
-  local directory="${1}"
+  local directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local recursive="${2:-false}"
   local includeHidden="${3:-false}"
   local filterFunction="${4:-}"
@@ -399,7 +400,7 @@ function fs::listFiles() {
   function fs_listFilesReturnTrueIfFile() {
     if [[ ! -f ${1} ]]; then return 1; fi
   }
-  fs::listPaths "${1}" "${2:-false}" "${3:-false}" fs_listFilesReturnTrueIfFile "${4:-}"
+  fs::listPaths "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${2:-false}" "${3:-false}" fs_listFilesReturnTrueIfFile "${4:-}"
 }
 
 # ## fs::listDirectories
@@ -435,7 +436,7 @@ function fs::listDirectories() {
   function fs_listDirectoriesReturnTrueIfDirectory() {
     if [[ ! -d ${1} ]]; then return 1; fi
   }
-  fs::listPaths "${1}" "${2:-false}" "${3:-false}" fs_listDirectoriesReturnTrueIfDirectory "${4:-}"
+  fs::listPaths "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${2:-false}" "${3:-false}" fs_listDirectoriesReturnTrueIfDirectory "${4:-}"
 }
 
 # ## fs::isDirectoryWritable
@@ -459,8 +460,9 @@ function fs::listDirectories() {
 # fi
 # ```
 function fs::isDirectoryWritable() {
-  local directory="${1%/}"
+  local directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local testFile="${2:-writable-test-${BASHPID}}"
+  directory="${directory%/}"
   if ! mkdir -p "${directory}" &>/dev/null; then
     return 1
   fi
@@ -506,8 +508,8 @@ function fs::isDirectoryWritable() {
 #
 # > The function uses the `ln` command.
 function fs::createLink() {
-  local linkedPath="${1}"
-  local linkPath="${2}"
+  local linkedPath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local linkPath="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local hardLink="${3:-false}"
   local force="${3:-true}"
 
@@ -571,7 +573,7 @@ function fs::createLink() {
 # local lineCount="${RETURNED_VALUE}"
 # ```
 function fs::getFileLineCount() {
-  local filePath="${1}"
+  local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i lineCount=0
   while read -rd $'\n' || [[ -n ${REPLY:-} ]]; do
     ((lineCount++))

@@ -28,7 +28,7 @@ source tui
 # interactive::askForConfirmation "Press enter to continue."
 # ```
 function interactive::askForConfirmation() {
-  interactive::displayQuestion "${1}"
+  interactive::displayQuestion "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   interactive::askForConfirmationRaw
   return 0
 }
@@ -114,7 +114,7 @@ function interactive::askForConfirmationRaw() {
 # if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
 # ```
 function interactive::promptYesNo() {
-  interactive::displayQuestion "${1}"
+  interactive::displayQuestion "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   interactive::promptYesNoRaw "${2:-true}"
 
   if [[ ${RETURNED_VALUE} == "true" ]]; then
@@ -249,7 +249,7 @@ function interactive::promptYesNoRaw() {
 # interactive::displayPrompt "Do you want to continue?"
 # ```
 function interactive::displayQuestion() {
-  interactive::displayDialogBox "system" "${1}" "${2:-}"
+  interactive::displayDialogBox "system" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${2:-}"
 }
 
 # ## interactive::displayAnswer
@@ -274,7 +274,7 @@ function interactive::displayQuestion() {
 # interactive::displayAnswer "My answer."
 # ```
 function interactive::displayAnswer() {
-  interactive::displayDialogBox "user" "${1}" "${2:-}"
+  interactive::displayDialogBox "user" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${2:-}"
 }
 
 # ## interactive::displayDialogBox
@@ -293,8 +293,8 @@ function interactive::displayAnswer() {
 # interactive::displayDialogBox "system" "This is a system message."
 # ```
 function interactive::displayDialogBox() {
-  local speaker="${1}"
-  local text="${2}"
+  local speaker="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local text="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local requiredMaxTextWidth="${3:-${GLOBAL_COLUMNS}}"
 
   local -i maxTextWidth=$((GLOBAL_COLUMNS - 7))

@@ -10,7 +10,7 @@ function main() {
 function test_regex::getFirstGroup() {
   test::title "✅ Testing regex::getFirstGroup function"
 
-  test::func regex::getFirstGroup 'name: julien' "'name:[[:space:]]*([[:alnum:]]*)'"
+  test::func MY_STRING='name: julien' regex::getFirstGroup MY_STRING "'name:[[:space:]]*([[:alnum:]]*)'"
 }
 
 main

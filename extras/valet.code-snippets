@@ -1,5 +1,5 @@
 {
-// Documentation generated for the version 0.28.2965 (2025-02-07).
+// Documentation generated for the version 0.28.2980 (2025-02-08).
 
 "ansi-codes::*": {
   "prefix": "ansi-codes::*",
@@ -1207,16 +1207,16 @@
 
 "regex::getFirstGroup": {
   "prefix": "regex::getFirstGroup",
-  "description": "Matches a string against a regex and returns the first capture group of the matched string...",
+  "description": "Matches a string against a regex and returns the first captured group of the matched string...",
   "scope": "",
   "body": [ "regex::getFirstGroup$0" ]
 },
 
 "regex::getFirstGroup#withdoc": {
   "prefix": "regex::getFirstGroup#withdoc",
-  "description": "Matches a string against a regex and returns the first capture group of the matched string...",
+  "description": "Matches a string against a regex and returns the first captured group of the matched string...",
   "scope": "",
-  "body": [ "# Matches a string against a regex and returns the first capture group of the matched string\nregex::getFirstGroup$0" ]
+  "body": [ "# Matches a string against a regex and returns the first captured group of the matched string\nregex::getFirstGroup$0" ]
 },
 
 "sfzf::show": {
@@ -1375,16 +1375,16 @@
 
 "string::highlight": {
   "prefix": "string::highlight",
-  "description": "Highlight a pattern (each character of this pattern) in a string...",
+  "description": "Highlight characters in a string...",
   "scope": "",
   "body": [ "string::highlight$0" ]
 },
 
 "string::highlight#withdoc": {
   "prefix": "string::highlight#withdoc",
-  "description": "Highlight a pattern (each character of this pattern) in a string...",
+  "description": "Highlight characters in a string...",
   "scope": "",
-  "body": [ "# Highlight a pattern (each character of this pattern) in a string\nstring::highlight$0" ]
+  "body": [ "# Highlight characters in a string\nstring::highlight$0" ]
 },
 
 "string::split": {

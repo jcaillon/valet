@@ -70,8 +70,8 @@ function bash::countJobs() {
 # _OPTION_MAX_PARALLEL_JOBS=2 bash::runInParallel jobNames jobCommands
 # ```
 function bash::runInParallel() {
-  local -n jobNames="${1}"
-  local -n jobCommands="${2}"
+  local -n jobNames="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n jobCommands="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i maxParallelJobs="${3:-${_OPTION_MAX_PARALLEL_JOBS:-4}}"
   local jobCompletedCallback="${4:-${_OPTION_JOB_COMPLETED_CALLBACK:-}}"
   local timeoutBetweenChecks="${_OPTION_TIMEOUT_BETWEEN_CHECKS:-0.2}"
@@ -206,8 +206,8 @@ function bash::killRunningJobs() {
 # myFunction
 # ```
 function bash::injectCodeInFunction() {
-  local functionName="${1}"
-  local code="${2}"
+  local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local code="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local injectAtBeginning="${3:-${_OPTION_INJECT_AT_BEGINNING:-false}}"
 
   local IFS=''
@@ -243,7 +243,7 @@ function bash::injectCodeInFunction() {
 #
 # > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 function bash::sleep() {
-  local timeout="${1}"
+  local timeout="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # when connected to a terminal, we can just read the stdout
   # which will never be written to, and use a timeout on read
   if [[ -t 2 ]]; then
@@ -401,7 +401,7 @@ function bash::getMissingCommands() {
 # fi
 # ```
 function bash::isCommand() {
-  if command -v "${1:-}" &>/dev/null; then
+  if command -v "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" &>/dev/null; then
     return 0
   fi
   return 1
@@ -437,8 +437,8 @@ function bash::isCommand() {
 # myFunctionWithGlobalVars
 # ```
 function bash::getFunctionDefinitionWithGlobalVars() {
-  local functionName="${1}"
-  local newFunctionName="${2}"
+  local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local newFunctionName="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift 2
 
   local IFS=''

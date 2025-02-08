@@ -30,7 +30,7 @@ source fs
 # tui::createSpace 5
 # ```
 function tui::createSpace() {
-  local -i nbLines="${1}"
+  local -i nbLines="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   nbLines=$((nbLines > GLOBAL_LINES ? GLOBAL_LINES : nbLines))
   if (( nbLines <= 1 )); then
     printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINE}${AC__CURSOR_SHOW}"
@@ -153,7 +153,7 @@ function tui::setTerminalOptions() {
 # Restore the terminal options to their original state.
 # Should be called after `tui::setTerminalOptions`.
 #
-# - $1: **force** _as bool_:
+# - $1: force _as bool_:
 #       (optional) force the restoration of the stty configuration
 #       stty state will not be restored if
 #       (defaults to false)
@@ -562,7 +562,7 @@ function tui::waitForKeyPress() {
 #
 # > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
 function tui::rebindKeymap() {
-  local callBackFunction="${1:-}"
+  local callBackFunction="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   if ! command -v "${callBackFunction}" &>/dev/null; then
     core::fail "The function ⌜${callBackFunction}⌝ must be defined before calling tui::rebindKeymap."

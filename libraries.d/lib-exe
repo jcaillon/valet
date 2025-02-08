@@ -11,15 +11,17 @@ source fs
 # It redirects the stdout and stderr to temporary files.
 #
 # - $1: **fail** _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails.
-#                      If true and the execution fails, the script will exit.
+#       A boolean to indicate if the function should fail in case the execution fails.
+#       If true and the execution fails, the script will exit.
 # - $2: **acceptable codes** _as string_:
-#       the acceptable error codes, comma separated
-#         (if the error code is matched, then set the output error code to 0)
+#       The acceptable error codes, comma separated.
+#       (if the error code is matched, then set the output error code to 0)
 # - $3: **sdtin from file** _as bool_:
-#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin
-# - $4: **sdtin** _as string_:
-#       the stdin (can be empty)
+#       A boolean to indicate if the 4th argument represents a file path or
+#       directly the content for stdin.
+# - $2: **stdin** _as string_:
+#       The stdin content to pass to the executable.
+#       Can be empty if not used.
 # - $5: **executable** _as string_:
 #       the executable or function to execute
 # - $@: **arguments** _as any_:
@@ -44,11 +46,11 @@ source fs
 # > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
 # > - On linux, you can use a tmpfs directory for massive gains over subshells.
 function exe::invokef5() {
-  local failIfFails="${1}"
-  local acceptableErrorCodes="${2}"
-  local stdInFromFile="${3}"
-  local stdIn="${4}"
-  local executable="${5}"
+  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local acceptableErrorCodes="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local stdInFromFile="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local stdIn="${4?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local executable="${5?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift 5
 
   # if debug mode is on, print some info
@@ -209,7 +211,7 @@ function exe::invoke5() {
 #
 # > See exe::invokef5 for more information.
 function exe::invokef2() {
-  local failIfFails="${1}"
+  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift
   exe::invokef5 "${failIfFails}" 0 '' '' "$@" || return $?
 }
@@ -242,7 +244,7 @@ function exe::invokef2() {
 #
 # > See exe::invokef5 for more information.
 function exe::invoke2() {
-  local failIfFails="${1}"
+  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift
   exe::invoke5 "${failIfFails}" 0 '' '' "$@" || return $?
 }
@@ -257,7 +259,7 @@ function exe::invoke2() {
 #       true/false to indicate if the function should fail in case the execution fails.
 #       If true and the execution fails, the script will exit.
 # - $2: **stdin** _as string_:
-#       the stdin to pass to the executable
+#       The stdin content to pass to the executable
 # - $3: **executable** _as string_:
 #       the executable or function to execute
 # - $@: **arguments** _as any_:
@@ -281,8 +283,8 @@ function exe::invoke2() {
 # >
 # > See exe::invokef5 for more information.
 function exe::invokef2piped() {
-  local failIfFails="${1}"
-  local stdIn="${2}"
+  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local stdIn="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift 2
   exe::invokef5 "${failIfFails}" 0 false "${stdIn}" "$@" || return $?
 }
@@ -297,7 +299,7 @@ function exe::invokef2piped() {
 #       true/false to indicate if the function should fail in case the execution fails.
 #       If true and the execution fails, the script will exit.
 # - $2: **stdin** _as string_:
-#       the stdin to pass to the executable
+#       The stdin content to pass to the executable
 # - $3: **executable** _as string_:
 #       the executable or function to execute
 # - $@: **arguments** _as any_:
@@ -321,8 +323,8 @@ function exe::invokef2piped() {
 # >
 # > See exe::invokef5 for more information.
 function exe::invoke2piped() {
-  local failIfFails="${1}"
-  local stdIn="${2}"
+  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local stdIn="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift 2
   exe::invoke5 "${failIfFails}" 0 false "${stdIn}" "$@" || return $?
 }

@@ -68,7 +68,7 @@ function test_main::getDisplayableFilteredArray() {
   # shellcheck disable=SC2034
   ARRAY=(banana apple orange grape ananas lemon)
   test::printVars ARRAY
-  test::func main::getDisplayableFilteredArray ae ARRAY
+  test::func MY_CHARS=ae main::getDisplayableFilteredArray ARRAY MY_CHARS
 }
 
 # shellcheck disable=SC2317

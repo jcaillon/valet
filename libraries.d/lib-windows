@@ -30,7 +30,7 @@ source fs
 # windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
 # ```
 function windows::runPs1() {
-  local command="${1}"
+  local command="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local runAsAdmin="${2:-false}"
 
   local exitCode=0
@@ -193,8 +193,8 @@ function windows::endPs1Batch() {
 #
 # > On Windows, the function uses `powershell` (and optionally ls to check the existing link).
 function windows::createLink() {
-  local linkedPath="${1}"
-  local linkPath="${2}"
+  local linkedPath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local linkPath="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local hardLink="${3:-false}"
   local force="${3:-true}"
 
@@ -277,7 +277,7 @@ function windows::createLink() {
 #
 # > Handles paths starting with `/mnt/x/` or `/x/`.
 function windows::convertPathFromUnix() {
-  local path="${1}"
+  local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ ${path} != "/"* ]]; then
     fs::toAbsolutePath "${path}"
     path="${RETURNED_VALUE}"
@@ -306,7 +306,7 @@ function windows::convertPathFromUnix() {
 #
 # > Handles paths starting with `X:\`.
 function windows::convertPathToUnix() {
-  local path="${1}"
+  local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ ${path} =~ ^([a-zA-Z])":" ]]; then
     if [[ -d "/mnt/${BASH_REMATCH[1],}" ]]; then
       path="/mnt/${BASH_REMATCH[1],}${path:2}"
@@ -408,9 +408,10 @@ function windows::createTempDirectory() {
 # Set an environment variable for the current user on Windows.
 #
 # - $1: **variable name** _as string_:
-#       the name of the environment variable to set.
+#       The name of the environment variable to set.
 # - $2: **variable value** _as string_:
-#       the value of the environment variable to set.
+#       The value of the environment variable to set.
+#       An empty string will unset the variable.
 #
 # ```bash
 # windows::setEnvVar "MY_VAR" "my_value"
@@ -418,8 +419,8 @@ function windows::createTempDirectory() {
 #
 # > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 function windows::setEnvVar() {
-  local varName="${1:-}"
-  local varValue="${2:-}"
+  local varName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local varValue="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   if [[ -z ${varName} ]]; then
     core::fail "The variable name is missing."
@@ -430,7 +431,6 @@ function windows::setEnvVar() {
       core::fail "Failed to set the environment variable ⌜${varName}⌝."
     fi
   else
-
     if ! windows::runPs1 "\$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true); \$key.DeleteValue('${varName//\'/\'\'}');"; then
       core::fail "Failed to unset the environment variable ⌜${varName}⌝ using null string."
     fi
@@ -453,7 +453,7 @@ function windows::setEnvVar() {
 # echo "${RETURNED_VALUE}"
 # ```
 function windows::getEnvVar() {
-  local varName="${1:-}"
+  local varName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   if [[ -z ${varName} ]]; then
     core::fail "The variable name is missing."
@@ -487,7 +487,7 @@ function windows::getEnvVar() {
 #
 # > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 function windows::addToPath() {
-  local pathToAdd="${1:-}"
+  local pathToAdd="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
 

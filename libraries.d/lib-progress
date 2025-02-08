@@ -211,7 +211,7 @@ function progress::start() {
 # progress::update 50 "Doing something..."
 # ```
 function progress::update() {
-  local percent="${1}"
+  local percent="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local message="${2:-}"
 
   if [[ ! -t 2 ]]; then

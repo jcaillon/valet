@@ -302,7 +302,7 @@ function extractCommandDefinitionsToVariables() {
       command="${command#valet }"
       command="${command#valet}"
 
-      if array::checkIfPresent CMD_ALL_COMMANDS_ARRAY "${command}"; then
+      if array::checkIfPresent CMD_ALL_COMMANDS_ARRAY command; then
         log::warning "                         ├── Skipping ⌜${command}⌝ (already defined)."
         duplicatedCommands+=1
         continue
@@ -400,7 +400,7 @@ function declareFinalCommandDefinitionCommonVariables() {
   done
   parentCommand="${parentCommand# }"
   if [[ -n "${parentCommand}" ]]; then
-    if ! array::appendIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY "${parentCommand# }"; then
+    if ! array::appendIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY parentCommand; then
       declare -g "CMD_FUNCTION_NAME_${parentCommand//[^[:alnum:]]/_}"="_menu"
     fi
   fi

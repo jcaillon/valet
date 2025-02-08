@@ -339,7 +339,7 @@ function test::printVars() {
 #
 # - $1: **fdNumber** _as int_:
 #       The file descriptor number to flush (1 or 2).
-# - $2: **blockTitle** _as string_:
+# - $2: blockTitle _as string_:
 #       (optional) Can be set using the variable `_OPTION_BLOCK_TITLE`.
 #       Add a 'title' to the code block (`**title**:` before the code block).
 #       (defaults to '' which will not add a title)
