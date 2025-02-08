@@ -66,7 +66,7 @@ function selfBuild() {
   local userDirectory output coreOnly noOutput silent
 
   # if this script is run directly
-  if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || -z "${GLOBAL_CMD_INCLUDED:-}" ]]; then
+  if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || ! -v GLOBAL_CMD_INCLUDED ]]; then
     # parse arguments manually (basic parsing only)
     while [[ $# -gt 0 ]]; do
       case "${1}" in
@@ -146,7 +146,7 @@ function selfBuild() {
       # the file expansion does not include files under symbolic link directories
       # so we need to manually force the search in these directories
       listOfDirectories="${userDirectory}"$'\n'
-      while [[ -n "${listOfDirectories}" ]]; do
+      while [[ -n ${listOfDirectories} ]]; do
         currentDirectory="${listOfDirectories%%$'\n'*}"
         listOfDirectories="${listOfDirectories#*$'\n'}"
 
@@ -201,7 +201,7 @@ function selfBuild() {
 
   unset CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY
 
-  if [[ -n "${SELF_BUILD_ERRORS:-}" ]]; then
+  if [[ -n ${SELF_BUILD_ERRORS:-} ]]; then
     core::fail "The valet user commands have not been successfully built. Please check the following errors:"$'\n'"${SELF_BUILD_ERRORS}"
   fi
 
@@ -370,7 +370,7 @@ function declareFinalCommandDefinitionCommonVariables() {
   CMD_ALL_FUNCTIONS_ARRAY+=("${function}")
 
   # add to the list of all the commands
-  if [[ -n "${command}" ]]; then
+  if [[ -n ${command} ]]; then
     CMD_ALL_COMMANDS_ARRAY+=("${command}")
   fi
 
@@ -399,7 +399,7 @@ function declareFinalCommandDefinitionCommonVariables() {
     index+=1
   done
   parentCommand="${parentCommand# }"
-  if [[ -n "${parentCommand}" ]]; then
+  if [[ -n ${parentCommand} ]]; then
     if ! array::appendIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY parentCommand; then
       declare -g "CMD_FUNCTION_NAME_${parentCommand//[^[:alnum:]]/_}"="_menu"
     fi
@@ -442,7 +442,7 @@ function declareFinalCommandDefinitionHelpVariables() {
 
   declare -g "CMD_SHORT_DESCRIPTION_${function}"="${TEMP_CMD_BUILD_shortDescription}"
   declare -g "CMD_DESCRIPTION_${function}"="${TEMP_CMD_BUILD_description}"
-  if [[ -n "${TEMP_CMD_BUILD_sudo:-}" ]]; then declare -g "CMD_SUDO_${function}"="${TEMP_CMD_BUILD_sudo}"; fi
+  if [[ -n ${TEMP_CMD_BUILD_sudo:-} ]]; then declare -g "CMD_SUDO_${function}"="${TEMP_CMD_BUILD_sudo}"; fi
 
   # add the default --help option
   TEMP_CMD_BUILD_options_name+=("-h, --help")
@@ -578,7 +578,7 @@ function declareOtherCommandVariables() {
   # for each command
   local command line
   for command in "${CMD_ALL_COMMANDS_ARRAY[@]}"; do
-    if [[ -z "${command}" ]]; then continue; fi
+    if [[ -z ${command} ]]; then continue; fi
 
     # get the function name from a command
     local -n function="CMD_FUNCTION_NAME_${command//[^[:alnum:]]/_}"
@@ -620,7 +620,7 @@ function declareOtherCommandVariables() {
 # >>> Main
 #===============================================================
 
-if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
+if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   _NOT_EXECUTED_FROM_VALET=true
 
   # do not read the commands in that case

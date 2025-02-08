@@ -87,9 +87,9 @@ function version::bump() {
   modifiedVersion="${version}-+"
   prerelease="${modifiedVersion#*-}"
   prerelease="${prerelease%%+*}"
-  if [[ -n "${prerelease}" ]]; then prerelease="-${prerelease%-}"; fi
+  if [[ -n ${prerelease} ]]; then prerelease="-${prerelease%-}"; fi
   build="${modifiedVersion#*+}"
-  if [[ -n "${build}" ]]; then
+  if [[ -n ${build} ]]; then
     build="+${build%-+}"
   fi
 

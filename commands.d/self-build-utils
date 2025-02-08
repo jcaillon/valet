@@ -91,7 +91,7 @@ function selfBuild_extractCommandDefinitionToVariables() {
   local IFS
   while IFS=$'\n' read -rd $'\n' line; do
     lineNumber+=1
-    if [[ readingMultiLine -eq 0 || (-n "${line}" && "${line}" != "${multiLineIndentation}"*) ]]; then
+    if [[ readingMultiLine -eq 0 || (-n ${line} && "${line}" != "${multiLineIndentation}"*) ]]; then
       # we are matching a new property
       newPropertyName="${line%%:*}"
       newPropertyName="${newPropertyName// /}"
@@ -100,7 +100,7 @@ function selfBuild_extractCommandDefinitionToVariables() {
       newIndentation="${line%%[![:space:]]*}"
 
       # skip if property name is empty
-      if [[ -z "${newPropertyName}" ]]; then continue; fi
+      if [[ -z ${newPropertyName} ]]; then continue; fi
 
       # if we were on a multi line property, we store it
       if [[ readingMultiLine -eq 1 ]]; then
@@ -128,7 +128,7 @@ function selfBuild_extractCommandDefinitionToVariables() {
 
       propertyNames+=("${newPropertyName}")
 
-      if [[ -z "${newPropertyValue// /}" ]]; then
+      if [[ -z ${newPropertyValue// /} ]]; then
         # we are on a new array property
         log::trace "Starting new array property: ⌜${newPropertyName}⌝."
         arrayLength=0
@@ -326,7 +326,7 @@ function selfBuild_verifyCommandDefinition() {
   local message=""
 
   if [[ "${function}" != "this" ]]; then
-    if [[ -z "${command}" ]]; then
+    if [[ -z ${command} ]]; then
       SELF_BUILD_ERRORS+="- is missing the command name."$'\n'
     else
       # the command can only contain letters, numbers, hyphens and spaces
@@ -335,7 +335,7 @@ function selfBuild_verifyCommandDefinition() {
       fi
     fi
   fi
-  if [[ -z "${function:-}" ]]; then
+  if [[ -z ${function:-} ]]; then
     SELF_BUILD_ERRORS+="- has an empty function name."$'\n'
   else
     # the function can only contain letters, numbers, hyphens and spaces
@@ -343,13 +343,13 @@ function selfBuild_verifyCommandDefinition() {
       SELF_BUILD_ERRORS+="- has an invalid function name, it can only contain letters, numbers, hyphens and spaces."$'\n'
     fi
   fi
-  if [[ -z "${TEMP_CMD_BUILD_shortDescription:-}" ]]; then
+  if [[ -z ${TEMP_CMD_BUILD_shortDescription:-} ]]; then
     SELF_BUILD_ERRORS+="- does not have a short description."$'\n'
   fi
-  if [[ -z "${TEMP_CMD_BUILD_description:-}" ]]; then
+  if [[ -z ${TEMP_CMD_BUILD_description:-} ]]; then
     SELF_BUILD_ERRORS+="- does not have a description."$'\n'
   fi
-  if [[ -z "${TEMP_CMD_BUILD_fileToSource:-}" ]]; then
+  if [[ -z ${TEMP_CMD_BUILD_fileToSource:-} ]]; then
     SELF_BUILD_ERRORS+="- does not have a file to source to find the function."$'\n'
   fi
 
@@ -383,7 +383,7 @@ function selfBuild_verifyCommandDefinition() {
   #
   #
 
-  if [[ -n "${message}" ]]; then
+  if [[ -n ${message} ]]; then
     SELF_BUILD_ERRORS+="The command definition ⌜${command}⌝ for function ⌜${function}⌝:"$'\n'"${message}"
   fi
 }

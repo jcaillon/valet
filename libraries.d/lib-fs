@@ -342,7 +342,7 @@ function fs::listPaths() {
   local path listOfDirectories currentDirectory
 
   listOfDirectories="${directory}"$'\n'
-  while [[ -n "${listOfDirectories}" ]]; do
+  while [[ -n ${listOfDirectories} ]]; do
     currentDirectory="${listOfDirectories%%$'\n'*}"
     listOfDirectories="${listOfDirectories#*$'\n'}"
 

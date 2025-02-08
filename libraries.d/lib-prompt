@@ -472,7 +472,7 @@ function prompt_setSizeVariables() {
 
 # set up the variables that depend on the items list
 function prompt_setItemsListVariables() {
-  if [[ -n "${_PROMPT_ITEMS_ARRAY_NAME}" ]]; then
+  if [[ -n ${_PROMPT_ITEMS_ARRAY_NAME} ]]; then
     declare -g -n _PROMPT_ORIGINAL_ITEMS="${_PROMPT_ITEMS_ARRAY_NAME}"
     _PROMPT_ITEMS_BOX_PREFERRED_WIDTH=0
     local item

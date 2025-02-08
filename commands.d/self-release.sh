@@ -5,7 +5,7 @@ set -Eeu -o pipefail
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
-if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
+if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   # shellcheck source=../libraries.d/core
   source "$(dirname -- "$(command -v valet)")/libraries.d/core"
 fi
@@ -95,7 +95,7 @@ function selfRelease() {
   # check if the release has already been created and we just need to upload the artifact
   local uploadUrl
   local uploadArtifactsOnly=false
-  if [[ -n "${lastReleaseJson}" && ${latestReleaseVersion} == "${lastLocalTag}" ]]; then
+  if [[ -n ${lastReleaseJson} && ${latestReleaseVersion} == "${lastLocalTag}" ]]; then
     selfRelease::extractUploadUrl "${lastReleaseJson}"
     uploadUrl="${RETURNED_VALUE}"
     if [[ ${lastReleaseJson} != *"browser_download_url"* ]]; then
@@ -109,7 +109,7 @@ function selfRelease() {
     selfRelease::createRelease "${githubReleaseToken:-}" "${bumpLevel:-}" "${dryRun:-}" "${lastLocalTag}" "${latestReleaseVersion}"
     lastReleaseJson="${RETURNED_VALUE}"
 
-    if [[ -n "${lastReleaseJson}" ]]; then
+    if [[ -n ${lastReleaseJson} ]]; then
       selfRelease::extractUploadUrl "${lastReleaseJson}"
       uploadUrl="${RETURNED_VALUE}"
     fi
@@ -150,7 +150,7 @@ function selfRelease::createRelease() {
 
   if [[ "${dryRun:-}" != "true" ]]; then
     # check that we got the necessary token
-    if [[ -z "${githubReleaseToken:-}" ]]; then
+    if [[ -z ${githubReleaseToken:-} ]]; then
       core::fail "The GitHub release token is required to create a new release."
     fi
 
@@ -286,7 +286,7 @@ function selfRelease::uploadArtifact() {
   log::debug "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${RETURNED_VALUE}"
 
   # upload the artifact
-  if [[ "${dryRun:-}" != "true" && -n "${uploadUrl}" ]]; then
+  if [[ ${dryRun:-} != "true" && -n ${uploadUrl} ]]; then
     log::info "Uploading the artifact ⌜${artifactPath}⌝ to ⌜${uploadUrl}⌝."
     curl::request true '' -X POST \
       -H "Authorization: token ${githubReleaseToken:-}" \
@@ -406,7 +406,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
     local functionName="${key}"
     regex::getFirstGroup functionName '([[:alnum:]]+)::'
     local packageName="${RETURNED_VALUE}"
-    if [[ -z "${packageName}" ]]; then
+    if [[ -z ${packageName} ]]; then
       # case for "source" function
       packageName="core"
     fi

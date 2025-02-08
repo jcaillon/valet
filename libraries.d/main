@@ -8,7 +8,7 @@ set -Eeu -o pipefail
 # we check for this variable to know if this script has already been included
 GLOBAL_MAIN_INCLUDED=1
 
-if [[ -z ${GLOBAL_CORE_INCLUDED:-} ]]; then
+if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   # shellcheck source=core
   source "${BASH_SOURCE[0]%/*}/core"
 fi
@@ -258,17 +258,17 @@ function main::getHelpText() {
   else
     usage="valet ${cOption}[global options]${cDefault} ${command}"
   fi
-  if [[ -n "${functionOptions:-}" ]]; then
+  if [[ -n ${functionOptions:-} ]]; then
     if [[ ${functionName} == "this" ]]; then
       usage+=" ${cOption}[global options]${cDefault}"
     else
       usage+=" ${cOption}[options]${cDefault}"
     fi
   fi
-  if [[ -n "${functionCommands:-}" ]]; then
+  if [[ -n ${functionCommands:-} ]]; then
     usage+=" ${cCommand}[command]${cDefault}"
   else
-    if [[ -n "${functionArguments:-}" ]]; then
+    if [[ -n ${functionArguments:-} ]]; then
       usage+=" [--]"
       for argument in "${functionArguments[@]}"; do
         if [[ ${argument} == *\?* ]]; then
@@ -290,7 +290,7 @@ function main::getHelpText() {
 
   # options
   if [[ ${functionName} != "this" ]]; then
-    if [[ -n "${functionOptions:-}" ]]; then
+    if [[ -n ${functionOptions:-} ]]; then
       options+="${cTitle}OPTIONS${cDefault}"$'\n'$'\n'
       mainWriteAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
       options+="${RETURNED_VALUE}"$'\n'
@@ -299,7 +299,7 @@ function main::getHelpText() {
 
   # arguments
   local arguments
-  if [[ -z "${functionCommands:-}" && -n "${functionArguments:-}" ]]; then
+  if [[ -z ${functionCommands:-} && -n ${functionArguments:-} ]]; then
     arguments="${cTitle}ARGUMENTS${cDefault}"$'\n'$'\n'
     mainWriteAsTable "${helpWidth}" "${cArgument}" "CMD_ARGUMENTS" "${functionName}"
     arguments+="${RETURNED_VALUE}"$'\n'
@@ -307,7 +307,7 @@ function main::getHelpText() {
 
   # commands
   local commands
-  if [[ -n "${functionCommands:-}" ]]; then
+  if [[ -n ${functionCommands:-} ]]; then
     commands="${cTitle}COMMANDS${cDefault}"$'\n'$'\n'
     mainWriteAsTable "${helpWidth}" "${cCommand}" "CMD_COMMANDS" "${functionName}"
     commands+="${RETURNED_VALUE}"$'\n'
@@ -315,7 +315,7 @@ function main::getHelpText() {
 
   # examples
   local examples
-  if [[ -n "${functionExamples:-}" ]]; then
+  if [[ -n ${functionExamples:-} ]]; then
     examples="${cTitle}EXAMPLES${cDefault}"$'\n'$'\n'
     mainWriteAsTable "${helpWidth}" "${cCommand}" "CMD_EXAMPLES" "${functionName}"
     examples+="${RETURNED_VALUE}"$'\n'
@@ -355,7 +355,7 @@ function mainWriteAsTable() {
   local -n descriptions="${prefix}_DESCRIPTION_${functionName}"
 
   local cDefault output index
-  if [[ -n "${color:-}" ]]; then cDefault=$'\e'"[0m"; fi
+  if [[ -n ${color:-} ]]; then cDefault=$'\e'"[0m"; fi
 
   output=""
   for index in "${!names[@]}"; do
@@ -471,7 +471,7 @@ function main::parseMainArgumentsSwitch() {
     # if we didn't match any known long option, try to fuzzy find it
     main::fuzzyFindOption "${1}" "${CMD_OPTS_this[@]}"
 
-    if [[ -n "${RETURNED_VALUE2}" ]]; then
+    if [[ -n ${RETURNED_VALUE2} ]]; then
       # we found a single match! need to parse it
       main::parseMainArgumentsSwitch "${RETURNED_VALUE2}" "${@:2}"
       return 0
@@ -530,7 +530,7 @@ function main::runFunction() {
   functionName="${1}"
   shift
 
-  if [[ -z "${functionName}" ]]; then
+  if [[ -z ${functionName} ]]; then
     core::fail "No function name provided."
   fi
 
@@ -617,12 +617,12 @@ function main::runMenuWithSubCommands() {
   fi
   eval "${parsedArguments}"
 
-  if [[ -n "${help:-}" ]]; then
+  if [[ -n ${help:-} ]]; then
     main::printHelp menu "${command}"
     return 0
   fi
 
-  if [[ -n "${commandArgumentsErrors:-}" ]]; then
+  if [[ -n ${commandArgumentsErrors:-} ]]; then
     core::fail "${commandArgumentsErrors}"
   fi
 
@@ -660,7 +660,7 @@ function main::showCommandsMenuAndRun() {
 
   log::debug "Command choice ⌜${commandChoice}⌝."
 
-  if [[ -z "${commandChoice}" ]]; then
+  if [[ -z ${commandChoice} ]]; then
     # the user pressed escape or ctrl-c
     return 0
   fi
@@ -884,7 +884,7 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
 
     # case where the command is exact, we can match the function immediately
     main::getFunctionNameFromCommand "${command}" && functionName="${RETURNED_VALUE}"
-    if [[ -n "${functionName:-}" ]]; then
+    if [[ -n ${functionName:-} ]]; then
       exactCommand="${command}"
       break
     fi
@@ -909,7 +909,7 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
     fi
   done
 
-  if [[ -z "${functionName:-}" ]]; then
+  if [[ -z ${functionName:-} ]]; then
     local messageDetails
     if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
       messageDetails="an exact command"
@@ -986,7 +986,7 @@ function command::parseFunctionArguments() {
   local -n isLastArgumentAnArray="CMD_ARGS_LAST_IS_ARRAY_${functionName}"
   local -n nbOptionalArgsStr="CMD_ARGS_NB_OPTIONAL_${functionName}"
   local -i nbOptionalArgs="${nbOptionalArgsStr:-0}"
-  if [[ -z "${isLastArgumentAnArray:-}" ]]; then isLastArgumentAnArray=false; fi
+  if [[ -z ${isLastArgumentAnArray:-} ]]; then isLastArgumentAnArray=false; fi
   local -i argumentPosition=0
 
   # shellcheck disable=SC2178
@@ -1079,7 +1079,7 @@ function command::parseFunctionArguments() {
         # if we didn't match any known long option, try to fuzzy find it
         main::fuzzyFindOption "${1}" "${options[@]}"
 
-        if [[ -n "${RETURNED_VALUE2}" ]]; then
+        if [[ -n ${RETURNED_VALUE2} ]]; then
           # we found a single match!
           matchedIndex=-1
           eval "${optionFinder//"\${1}"/"${RETURNED_VALUE2}"}"
@@ -1187,8 +1187,8 @@ function command::parseFunctionArguments() {
       optionName="${optionsName[${optionIndex}]}"
       optionNameSc="${optionsNameSc[${optionIndex}]:-}"
       optionDefault="${optionsDefault[${optionIndex}]:-}"
-      if [[ -n "${optionNameSc}" ]]; then
-        if [[ -n "${optionDefault}" ]]; then
+      if [[ -n ${optionNameSc} ]]; then
+        if [[ -n ${optionDefault} ]]; then
           optionDefault="\"${optionDefault}\""
         fi
         outputString+="${optionsName[${optionIndex}]}=\"\${${optionNameSc}:-${optionDefault}}\""$'\n'

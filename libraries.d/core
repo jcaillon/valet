@@ -68,7 +68,7 @@ function core::setShellOptions() {
 # set different options for the shell, to have consistent behavior on all machines
 core::setShellOptions
 
-if [[ -n ${GLOBAL_CORE_INCLUDED:-} ]] && command -v log::warning &>/dev/null; then
+if [[ -v GLOBAL_CORE_INCLUDED ]] && command -v log::warning &>/dev/null; then
   log::warning "The core library has already been included but was called again, remove the unnecessary call."
   log::printCallStack
   return 0
@@ -84,7 +84,7 @@ GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
 GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
 
 # Handle the case where this script was exe::invoked outside of valet
-if [[ -z "${GLOBAL_INSTALLATION_DIRECTORY:-}" ]]; then
+if [[ ! -v GLOBAL_INSTALLATION_DIRECTORY ]]; then
   GLOBAL_INSTALLATION_DIRECTORY="${BASH_SOURCE[0]}"
   if [[ "${GLOBAL_INSTALLATION_DIRECTORY}" != /* ]]; then
     # resolve relative path
@@ -854,7 +854,7 @@ function log::printCallStack() {
       lineNumber="${stackLineNumbers[$((idx - 1))]}"
     fi
     sourceFile="${stackSourceFiles[${idx}]}"
-    if [[ -z "${sourceFile}" ]]; then
+    if [[ -z ${sourceFile} ]]; then
       sourceFile=non_file_source
     fi
     sourceFile="${sourceFile#"./"}"
@@ -1457,7 +1457,7 @@ function core::resetIncludedLibraries() {
 # core::sourceUserCommands
 # ```
 function core::sourceUserCommands() {
-  if [[ -n "${GLOBAL_CMD_INCLUDED:-}" ]]; then
+  if [[ -n ${GLOBAL_CMD_INCLUDED:-} ]]; then
     return 0
   fi
 
@@ -1705,7 +1705,7 @@ function command::checkParsedResults() {
     main::printHelp function "${FUNCNAME[1]?"This function must be called from a command function."}"
     exit 0
   fi
-  if [[ -n "${commandArgumentsErrors:-}" ]]; then
+  if [[ -n ${commandArgumentsErrors:-} ]]; then
     core::fail "${commandArgumentsErrors}"
   fi
 }
@@ -1738,9 +1738,26 @@ if [[ -t 2 ]]; then
   # shellcheck disable=SC2090
   trap 'tui::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::createPrintFunction; eval "${GLOBAL_LOG_PRINT_FUNCTION}"' SIGWINCH
 else
-  GLOBAL_COLUMNS="${VALET_DEFAULT_COLUMNS:-120}"
+  GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}"
   # shellcheck disable=SC2034
-  GLOBAL_LINES="${VALET_DEFAULT_LINES:-30}"
+  GLOBAL_LINES="${VALET_CONFIG_DEFAULT_LINES:-30}"
+fi
+
+# make sure the file descriptor (if any) is valid
+if [[ -v VALET_CONFIG_LOG_FD ]]; then
+  _CORE_VALID_FD=false
+  if [[ "${VALET_CONFIG_LOG_FD}" != [0-9] ]]; then
+    # it is a file
+    if { : >>"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+      _CORE_VALID_FD=true
+    fi
+  elif { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+    _CORE_VALID_FD=true
+  fi
+  if [[ ${_CORE_VALID_FD} != "true" ]]; then
+    printf '%s\n' "The file descriptor VALET_CONFIG_LOG_FD ⌜${_ORIGINAL_FD}⌝ is not valid."
+    exit 1
+  fi
 fi
 
 # Declare the print functions
@@ -1748,7 +1765,7 @@ log::createPrintFunction
 eval "${GLOBAL_LOG_PRINT_FUNCTION}"
 
 # Parsing the options from environment variables
-if [[ -n "${VALET_LOG_LEVEL:-}" ]]; then
+if [[ -v VALET_LOG_LEVEL ]]; then
   log::setLevel "${VALET_LOG_LEVEL}"
 fi
 if [[ ${VALET_VERBOSE:-} == "true" ]]; then
@@ -1757,26 +1774,9 @@ fi
 if [[ ${VALET_VERY_VERBOSE:-} == "true" ]]; then
   log::setLevel trace
 fi
-if [[ -n "${VALET_CONFIG_LOG_FD:-}" ]]; then
-  _INVALID_FD=false
-  # make sure the file descriptor is valid
-  if [[ ! "${VALET_CONFIG_LOG_FD}" =~ ^[0-9]+$ ]]; then
-    # it is a file
-    if ! { : >>"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
-      _INVALID_FD=true
-    fi
-  elif ! { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
-    _INVALID_FD=true
-  fi
-  if [[ ${_INVALID_FD} == "true" ]]; then
-    _ORIGINAL_FD="${VALET_CONFIG_LOG_FD}"
-    VALET_CONFIG_LOG_FD=2
-    core::fail "The file descriptor VALET_CONFIG_LOG_FD=⌜${_ORIGINAL_FD}⌝ is not valid."
-  fi
-fi
 
 # Include main if not already included
-if [[ -z "${GLOBAL_MAIN_INCLUDED:-}" ]]; then
+if [[ ! -v GLOBAL_MAIN_INCLUDED ]]; then
   # do not specify shellcheck source to avoid circular dependency!
   # shellcheck source=/dev/null
   source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"

@@ -178,7 +178,7 @@ function progress::start() {
     return 0
   fi
 
-  if [[ -n "${GLOBAL_BACKGROUND_JOB1_PID:-}" ]]; then
+  if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
     core::fail "A spinner or progress bar is already running."
   fi
 
@@ -256,7 +256,7 @@ function progress::stop() {
     return 0
   fi
 
-  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n "${GLOBAL_BACKGROUND_JOB1_PID:-}" ]]; then
+  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
     _PROGRESS_BAR_RUNNING=false
     kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
     rm -f "${_PROGRESS_BAR_UPDATE_FILE}" &>/dev/null || :

@@ -675,7 +675,7 @@ function selfUpdate_addToPath() {
 VALET_RELEASED_VERSION="0.27.285"
 
 # import the core script (should always be skipped if the command is run from valet)
-if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
+if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   _NOT_EXECUTED_FROM_VALET=true
 
   set -Eeu -o pipefail
@@ -685,7 +685,7 @@ if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
   # determine if we support colors (can be overridden by the user with VALET_CONFIG_ENABLE_COLORS)
   case "${TERM:-}" in
   xterm-color | xterm-256color | linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}" ;;
-  xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
+  xterm) if [[ -n ${COLORTERM:-} ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
   *) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
   esac
 

@@ -5,7 +5,7 @@ set -Eeu -o pipefail
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
-if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
+if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   # shellcheck source=../libraries.d/core
   source "$(dirname -- "$(command -v valet)")/libraries.d/core"
 fi

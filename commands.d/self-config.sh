@@ -5,7 +5,7 @@ set -Eeu -o pipefail
 # Author:        github.com/jcaillon
 
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
-if [[ -z "${GLOBAL_CORE_INCLUDED:-}" ]]; then
+if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   # shellcheck source=../libraries.d/core
   source "$(dirname -- "$(command -v valet)")/libraries.d/core"
 fi
@@ -100,7 +100,7 @@ function selfConfig::getFileContent() {
     local exportedVariable
     for exportedVariable in ${!VALET_CONFIG_*} VALET_USER_DIRECTORY; do
       local -n variable="${exportedVariable}"
-      if [[ -z "${variable:-}" ]]; then
+      if [[ -z ${variable:-} ]]; then
         continue
       fi
       printf -v "EXPORTED_${exportedVariable}" "%q" "${variable}"

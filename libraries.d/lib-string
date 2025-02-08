@@ -305,7 +305,7 @@ function string::extractBetween() {
   local end="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   local -i startIndex endIndex _STRING_INDEX_OF
-  if [[ -n "${start}" ]]; then
+  if [[ -n ${start} ]]; then
     string_getIndexOf stringFromWhichToExtract "${start}"
     startIndex=${_STRING_INDEX_OF}
     if (( startIndex == -1 )); then
@@ -317,7 +317,7 @@ function string::extractBetween() {
     startIndex=0
   fi
 
-  if [[ -n "${end}" ]]; then
+  if [[ -n ${end} ]]; then
     string_getIndexOf stringFromWhichToExtract "${end}" "${startIndex}"
     endIndex=${_STRING_INDEX_OF}
     if (( endIndex == -1 )); then

@@ -139,7 +139,7 @@ function http::request() {
     fi
 
     # get http code and interpret headers
-    if [[ -z "${httpCode:-}" && ${line} =~ ^HTTP/1\.[01]\ ([0-9]{3})\ .*$ ]]; then
+    if [[ -z ${httpCode:-} && ${line} =~ ^HTTP/1\.[01]\ ([0-9]{3})\ .*$ ]]; then
       httpCode="${BASH_REMATCH[1]}"
       log::debug "Got HTTP code ⌜${httpCode}⌝."
 

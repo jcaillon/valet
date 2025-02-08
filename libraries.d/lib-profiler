@@ -29,7 +29,7 @@ function profiler::enable() {
   log::info "Starting profiler, writing in ⌜${file}⌝."
 
   # we can only get the function depth if we call the profiler::enable from a function
-  if [[ -n "${FUNCNAME[3]:-}" ]]; then
+  if [[ -n ${FUNCNAME[3]:-} ]]; then
     # shellcheck disable=SC2016
     functionDepthExpression='${#FUNCNAME[@]}'
   else
@@ -82,10 +82,10 @@ function profilerCleanFile() {
   if [[ ${VALET_CONFIG_KEEP_ALL_PROFILER_LINES:-false} == "true" ]]; then
     clearLine=false
   fi
-  if [[ -z "${clearLine:-}" && "${VALET_CONFIG_STARTUP__ACTIVE_PROFILER:-false}" == "true" ]]; then
+  if [[ -z ${clearLine:-} && "${VALET_CONFIG_STARTUP__ACTIVE_PROFILER:-false}" == "true" ]]; then
     clearLine=false
   fi
-  if [[ -z "${clearLine:-}" ]]; then
+  if [[ -z ${clearLine:-} ]]; then
     clearLine=true
   fi
 

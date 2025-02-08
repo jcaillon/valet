@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- replace all [[ -n $var ]] with [[ -v var ]]
 - log:
   - when a log level is not enabled, we can alias it to :
   - for the log functions, we can optionally display the function name and the line number of the caller + pid + shlvl. +ISO8601 time `printf "%(%FT%H:%M:%S%z)T" "${EPOCHSECONDS}"`. Let user customize the log format with a var? `[%t] %-5level %36logger %msg`. Show them how to output as json!
