@@ -34,4 +34,5 @@ tests.d/lib-fs/resources/gitignored/**
 tests.d/lib-system/resources/gitignored/**
 tests.d/self-add-command/resources/gitignored/**
 tests.d/lib-windows/tmp/**
+tests.d/lib-log/tmp/**
 

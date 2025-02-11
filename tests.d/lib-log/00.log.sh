@@ -1,6 +1,51 @@
 #!/usr/bin/env bash
 
 function main() {
+  test_log::init
+  test_log::parseLogPattern
+  test_log
+}
+
+function test_log::init() {
+  test::title "✅ Testing log::init"
+
+  test::exec log::init
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+
+  test::exec VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true VALET_CONFIG_LOG_DISABLE_WRAP=false log::init
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+
+  test::exec VALET_CONFIG_LOG_PATTERN=abc VALET_CONFIG_LOG_FD=5 log::init
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+
+  test::exec VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL="local extra=1" log::init
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+
+  test::exec VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+
+  test::exec VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN="logFile=a" log::init
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+}
+
+function test_log::parseLogPattern() {
+  test::title "✅ Testing log::parseLogPattern"
+
+  test::func log::parseLogPattern "static string"
+
+  test::func log::parseLogPattern "static"$'\n'"string"
+
+  test::func log::parseLogPattern "static"$'\n'"<message>"
+
+  test::func log::parseLogPattern "<colorFaded><time><colorDefault> <levelColor><level> <icon><colorDefault> PID=<pid> SHLVL=<subshell> <function>{8s}@<source>:<line> <message>"
+
+  test::func VALET_CONFIG_ENABLE_NERDFONT_ICONS=true log::parseLogPattern "<icon> <message>"
+  test::func VALET_CONFIG_ENABLE_NERDFONT_ICONS=false log::parseLogPattern "<icon> <message>"
+
+  test::func log::parseLogPattern "<colorFaded>{9s} <time>{(%FT%H:%M:%S%z)T} <levelColor>{9s} <level>{9s} <icon>{9s} <varCOLOR_DEBUG>{9s} <pid>{9s} <subshell>{9s} <function>{9s} <source>{9s} <line>{9s}"
+}
+
+function test_log() {
   test::title "✅ Testing log::createPrintFunction"
 
   export VALET_CONFIG_ENABLE_COLORS=true

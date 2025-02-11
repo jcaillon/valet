@@ -2,6 +2,148 @@
 
 ## Test script 00.log
 
+### ✅ Testing log::init
+
+❯ `log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n message="${messageVariableName}"
+message="${message//⌜/CHI⌜}"
+message="${message//⌝/⌝CDE}"
+printf "%s%(%H:%M:%S)T%s%s%s%-8s%s%s%s%s" "CTI" "${EPOCHSECONDS}" "CDE" " " "${levelColor:-}" "${level:-}" " " "CDE" " " "${message:-}"  1>&2'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>&2'
+```
+
+❯ `VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true VALET_CONFIG_LOG_DISABLE_WRAP=false log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE
+local -n message=RETURNED_VALUE
+string::wrapWords "${messageVariableName}" 9999 "                   " 9980
+printf "%s%(%H:%M:%S)T%s%s%s%-8s%s%s%s%s" "CTI" "${EPOCHSECONDS}" "CDE" " " "${levelColor:-}" "${level:-}" " " "CDE" " " "${message:-}"  1>&2'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>&2'
+```
+
+❯ `VALET_CONFIG_LOG_PATTERN=abc VALET_CONFIG_LOG_FD=5 log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n message="${messageVariableName}"
+message="${message//⌜/CHI⌜}"
+message="${message//⌝/⌝CDE}"
+printf "%s" "abc"  1>&5'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>&5'
+```
+
+❯ `VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=local\ extra=1 log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n message="${messageVariableName}"
+message="${message//⌜/CHI⌜}"
+message="${message//⌝/⌝CDE}"
+
+local extra=1
+printf "%s%(%H:%M:%S)T%s%s%s%-8s%s%s%s%s" "CTI" "${EPOCHSECONDS}" "CDE" " " "${levelColor:-}" "${level:-}" " " "CDE" " " "${message:-}"  1>&2'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>&2'
+```
+
+❯ `VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n message="${messageVariableName}"
+message="${message//⌜/CHI⌜}"
+message="${message//⌝/⌝CDE}"
+printf "%s%(%H:%M:%S)T%s%s%s%-8s%s%s%s%s" "CTI" "${EPOCHSECONDS}" "CDE" " " "${levelColor:-}" "${level:-}" " " "CDE" " " "${message:-}"  1>>"/file"
+printf "%s%(%H:%M:%S)T%s%s%s%-8s%s%s%s%s" "CTI" "${EPOCHSECONDS}" "CDE" " " "${levelColor:-}" "${level:-}" " " "CDE" " " "${message:-}"  1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>>"/file"
+printf "%s" "${toPrint}" 1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
+```
+
+❯ `VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n message="${messageVariableName}"
+message="${message//⌜/CHI⌜}"
+message="${message//⌝/⌝CDE}"
+printf "%s%(%H:%M:%S)T%s%s%s%-8s%s%s%s%s" "CTI" "${EPOCHSECONDS}" "CDE" " " "${levelColor:-}" "${level:-}" " " "CDE" " " "${message:-}"  1>>"/file"
+printf "%s%(%H:%M:%S)T%s%s%s%-8s%s%s%s%s" "CTI" "${EPOCHSECONDS}" "CDE" " " "${levelColor:-}" "${level:-}" " " "CDE" " " "${message:-}"  1>>"tmp/a"'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>>"/file"
+printf "%s" "${toPrint}" 1>>"tmp/a"'
+```
+
+### ✅ Testing log::parseLogPattern
+
+❯ `log::parseLogPattern static\ string`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s'
+RETURNED_VALUE2='"static string" '
+RETURNED_VALUE3='13'
+```
+
+❯ `log::parseLogPattern $'static\nstring'`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s'
+RETURNED_VALUE2='"static
+string" '
+RETURNED_VALUE3='6'
+```
+
+❯ `log::parseLogPattern $'static\n<message>'`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%s'
+RETURNED_VALUE2='"static
+" "${message:-}" '
+RETURNED_VALUE3='0'
+```
+
+❯ `log::parseLogPattern \<colorFaded\>\<time\>\<colorDefault\>\ \<levelColor\>\<level\>\ \<icon\>\<colorDefault\>\ PID=\<pid\>\ SHLVL=\<subshell\>\ \<function\>\{8s\}@\<source\>:\<line\>\ \<message\>`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%(%H:%M:%S)T%s%s%s%-8s%s%s%s%-5d%s%-2d%s%8s%s%-10s%s%-4s%s%s'
+RETURNED_VALUE2='"CTI" "${EPOCHSECONDS}" "CDE" " " "${levelColor:-}" "${level:-}" " " "CDE" " PID=" "${BASHPID}" " SHLVL=" "${BASH_SUBSHELL}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 8 > 0 ? ${#FUNCNAME[2]} - 8 : 0}" "@" "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 10 > 0 ? ${#BASH_SOURCE[2]} - 10 : 0}" ":" "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 4 > 0 ? ${#BASH_LINENO[1]} - 4 : 0}" " " "${message:-}" '
+RETURNED_VALUE3='63'
+```
+
+❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=true log::parseLogPattern \<icon\>\ \<message\>`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%-4s%s%s'
+RETURNED_VALUE2='"${icon:-}" " " "${message:-}" '
+RETURNED_VALUE3='3'
+```
+
+❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=false log::parseLogPattern \<icon\>\ \<message\>`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%s'
+RETURNED_VALUE2='" " "${message:-}" '
+RETURNED_VALUE3='1'
+```
+
+❯ `log::parseLogPattern \<colorFaded\>\{9s\}\ \<time\>\{\(%FT%H:%M:%S%z\)T\}\ \<levelColor\>\{9s\}\ \<level\>\{9s\}\ \<icon\>\{9s\}\ \<varCOLOR_DEBUG\>\{9s\}\ \<pid\>\{9s\}\ \<subshell\>\{9s\}\ \<function\>\{9s\}\ \<source\>\{9s\}\ \<line\>\{9s\}`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%s%9s%s%9s%s%9s%s%9s%s%9s%s%9s'
+RETURNED_VALUE2='"CTI" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:-}" " " " " "$COLOR_DEBUG" " " "${BASHPID}" " " "${BASH_SUBSHELL}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 9 > 0 ? ${#FUNCNAME[2]} - 9 : 0}" " " "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 9 > 0 ? ${#BASH_SOURCE[2]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
+RETURNED_VALUE3='97'
+```
+
 ### ✅ Testing log::createPrintFunction
 
 ```text

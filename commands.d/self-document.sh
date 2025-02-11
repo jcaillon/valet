@@ -168,6 +168,7 @@ function selfDocument::getAllFunctionsDocumentation() {
         string::trimEdges RETURNED_VALUE
         functionName="${RETURNED_VALUE}"
         log::debug "Found function: ⌜${functionName}⌝"
+        functionDocumentation="${functionDocumentation%%"shellcheck disable="*}"
         RETURNED_ASSOCIATIVE_ARRAY["${functionName}"]="${functionDocumentation}"
         functionDocumentation=""
       else

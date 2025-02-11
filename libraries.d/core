@@ -76,6 +76,7 @@ fi
 
 # we check for this variable to know if this script has already been included
 GLOBAL_CORE_INCLUDED=1
+
 # Remember the time the program started (nb of seconds since epoch)
 GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
 GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
@@ -83,7 +84,7 @@ GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
 # Remember the original working directory
 GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
 
-# Handle the case where this script was exe::invoked outside of valet
+# Handle the case where this script was invoked outside of valet
 if [[ ! -v GLOBAL_INSTALLATION_DIRECTORY ]]; then
   GLOBAL_INSTALLATION_DIRECTORY="${BASH_SOURCE[0]}"
   if [[ "${GLOBAL_INSTALLATION_DIRECTORY}" != /* ]]; then
@@ -102,13 +103,11 @@ fi
 # This file can be used to override the default configuration by setting VALET_* env variables.
 VALET_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
 if [[ -f ${VALET_CONFIG_FILE} ]]; then
-  # shellcheck source=/dev/null
-  source "${VALET_CONFIG_FILE}"
+  builtin source "${VALET_CONFIG_FILE}"
 fi
 # Same with the env script
 if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_SCRIPT:-.env} ]]; then
-  # shellcheck source=/dev/null
-  source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
+  builtin source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
 fi
 
 #===============================================================
@@ -867,6 +866,270 @@ function log::printCallStack() {
   done
 }
 
+# ## log::parseLogPattern (private)
+#
+# Parse the log pattern and set variables that will be used to print the logs.
+# If the pattern changes during runtime, the function `log::init` should be called again.
+#
+# - $1: **log pattern** _as string_:
+#       The log pattern to parse.
+#       (defaults to `VALET_CONFIG_LOG_PATTERN` if not provided)
+#
+# Available placeholders:
+#
+# - `<colorXXX>`: The value of the color variable `VALET_CONFIG_COLOR_XXX`.
+# - `<time>`: The current time formatted with the `format` string.
+# - `<level>`: The log level.
+# - `<levelColor>`: The color for the log level.
+# - `<icon>`: The log level icon.
+# - `<pid>`: The process ID of the bash instance that logged the message.
+# - `<subshell>`: The subshell level of the bash instance that logged the message.
+# - `<function>`: The name of the function that logged the message.
+# - `<line>`: The line number where the message was logged.
+# - `<source>`: The source of the function that logged the message.
+# - `<varXXX>`: The value of an arbitrary variable `XXX`.
+# - `<message>`: The log message (should be the last placeholder).
+#
+# Each placeholder can be fallowed by `{...}` to add the format specifier (see printf help).
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: The format string to use in a printf statement.
+# - ${RETURNED_VALUE2}: The arguments (as a string space separated) to use in the printf statement.
+# - ${RETURNED_VALUE3}: The length of the displayed log before the message.
+#
+# ```bash
+# log::parseLogPattern "<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>"
+# ```
+# shellcheck disable=SC2120
+function log::parseLogPattern() {
+  local pattern="${1:-${VALET_CONFIG_LOG_PATTERN}}"
+
+  RETURNED_VALUE="" # format
+  RETURNED_VALUE2="" # arguments
+  local -i wrapPaddingLength=0
+
+  local normalString placeHolder formatSpecifier normalStringVisibleCharacters formatLengthTest printfFormat printfArgument
+  while [[ -n ${pattern} ]]; do
+    # extract the next placeholder
+    if [[ ${pattern} =~ \<([^\>]+)\>(\{([^}]+)\})? ]]; then
+      placeHolder="${BASH_REMATCH[1]}"
+      formatSpecifier="${BASH_REMATCH[3]:-}"
+      normalString="${pattern%%"${BASH_REMATCH[0]}"*}"
+      pattern="${pattern#*"${BASH_REMATCH[0]}"}"
+    else
+      placeHolder=""
+      normalString="${pattern}"
+      pattern=""
+    fi
+
+    # handle the normal string
+    if [[ -n ${normalString} ]]; then
+      normalStringVisibleCharacters="${normalString//$'\e['[0-9][0-9]m/}"
+      normalStringVisibleCharacters="${normalStringVisibleCharacters//$'\e['[0-9]m/}"
+      RETURNED_VALUE+="%s"
+      RETURNED_VALUE2+="\"${normalString}\" "
+      wrapPaddingLength+=${#normalStringVisibleCharacters}
+
+      if [[ ${normalString} == *$'\n'* ]]; then
+        local stringAfterNewline="${normalString##*$'\n'}"
+        wrapPaddingLength=${#stringAfterNewline}
+      fi
+    fi
+
+    printfFormat=""
+
+    # handle a placeholder
+    case "${placeHolder}" in
+      color*)
+        placeHolder="${placeHolder#color}"
+        local -n color="VALET_CONFIG_COLOR_${placeHolder^^}"
+        if [[ -n ${color:-} ]]; then
+          printfFormat="%s"
+          printfArgument="${color}"
+        fi
+        ;;
+      time)
+        printfFormat="%${formatSpecifier:-"(%H:%M:%S)T"}"
+        printfArgument="\${EPOCHSECONDS}"
+        ;;
+      levelColor)
+        printfFormat="%s"
+        printfArgument="\${levelColor:-}"
+        ;;
+      level)
+        printfFormat="%${formatSpecifier:-"-8s"}"
+        printfArgument="\${level:-}"
+        ;;
+      icon)
+        if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} == "true" ]]; then
+          printfFormat="%${formatSpecifier:-"-4s"}"
+          printfArgument="\${icon:-}"
+          # nerd font icons are 2 characters long
+          wrapPaddingLength=$((wrapPaddingLength - 2))
+        fi
+        ;;
+      var*)
+        printfFormat="%${formatSpecifier:-"s"}"
+        printfArgument="\$${placeHolder#var}"
+        ;;
+      pid)
+        printfFormat="%${formatSpecifier:-"-5d"}"
+        printfArgument="\${BASHPID}"
+        ;;
+      subshell)
+        printfFormat="%${formatSpecifier:-"-2d"}"
+        printfArgument="\${BASH_SUBSHELL}"
+        ;;
+      function)
+        formatSpecifier="${formatSpecifier:-"-10s"}"
+        printfFormat="%${formatSpecifier}"
+        formatSpecifier="${formatSpecifier#-}"
+        printfArgument="\${FUNCNAME[2]:\${#FUNCNAME[2]} - ${formatSpecifier%s} > 0 ? \${#FUNCNAME[2]} - ${formatSpecifier%s} : 0}"
+        ;;
+      line)
+        formatSpecifier="${formatSpecifier:-"-4s"}"
+        printfFormat="%${formatSpecifier}"
+        formatSpecifier="${formatSpecifier#-}"
+        printfArgument="\${BASH_LINENO[1]:\${#BASH_LINENO[1]} - ${formatSpecifier%s} > 0 ? \${#BASH_LINENO[1]} - ${formatSpecifier%s} : 0}"
+        ;;
+      source)
+        formatSpecifier="${formatSpecifier:-"-10s"}"
+        printfFormat="%${formatSpecifier}"
+        formatSpecifier="${formatSpecifier#-}"
+        printfArgument="\${BASH_SOURCE[2]:\${#BASH_SOURCE[2]} - ${formatSpecifier%s} > 0 ? \${#BASH_SOURCE[2]} - ${formatSpecifier%s} : 0}"
+        ;;
+      message)
+        printfFormat="%s"
+        printfArgument="\${message:-}"
+        ;;
+    esac
+    if [[ -z ${printfFormat} ]]; then
+      continue
+    fi
+    RETURNED_VALUE+="${printfFormat}"
+    RETURNED_VALUE2+="\"${printfArgument}\" "
+
+    if [[ ${printfFormat} != "%s" ]]; then
+      # shellcheck disable=SC2059
+      printf -v formatLengthTest "${printfFormat}" "1"
+      wrapPaddingLength+=${#formatLengthTest}
+    fi
+  done
+
+  # shellcheck disable=SC2034
+  RETURNED_VALUE3="${wrapPaddingLength}"
+}
+
+# ## log::getTruncate
+
+# ## log::init (private)
+#
+# In charge of setting up global variables that will be used to print the logs.
+# We compute them once to avoid recomputing them at each log call.
+#
+# It uses the following config
+#
+# - ${VALET_CONFIG_LOG_PATTERN}: The pattern used to display a formatted log line.
+# - ${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}: Contains a bash code executed before the print statement, which can be used
+#   to compute extra variables that can be used in the log pattern.
+# - ${VALET_CONFIG_LOG_COLUMNS}: The number of columns to use for the log.
+# - ${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT}: true to disable highlight for ⌜⌝.
+# - ${VALET_CONFIG_LOG_DISABLE_WRAP}: true if the log should not be wrapped.
+# - ${VALET_CONFIG_LOG_FD}: The file descriptor to use for the log.
+# - ${VALET_CONFIG_LOG_TO_DIRECTORY}: The directory in which to create an additional log file.
+# - ${VALET_CONFIG_LOG_FILENAME_PATTERN}: pattern for the new log file name
+# - ${VALET_CONFIG_ENABLE_NERDFONT_ICONS}: To know if we display a nerd icon for the log level.
+#
+# Returns:
+#
+# - ${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}: The statement to print the formatted log.
+# - ${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}: The statement to print the standard log.
+function log::init() {
+    VALET_CONFIG_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
+    VALET_CONFIG_LOG_FD="${VALET_CONFIG_LOG_FD:-2}"
+    VALET_CONFIG_LOG_PATTERN="${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>"}"
+
+    # we prepare the variables that will be used to print the formatted logs
+    local -n printfFormat=RETURNED_VALUE
+    local -n printfArguments=RETURNED_VALUE2
+    local -n wrapPaddingLength=RETURNED_VALUE3
+    log::parseLogPattern
+
+    # string with the number of spaces necessary to align with other log messages
+    if (( wrapPaddingLength > 0 )); then
+      local IFS=""
+      eval "local -a array=( {0..$((wrapPaddingLength - 1))} )"
+      # shellcheck disable=SC2154
+      # shellcheck disable=SC2034
+      local wrapPadding="${array[*]//*/ }"
+    else
+      local wrapPadding=""
+    fi
+
+    # now we build the two statements that can be evaluated to print the logs
+    # in the correct file descriptor or file (and to additional log file if needed)
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG=""
+    GLOBAL_LOG_PRINT_STATEMENT_STANDARD=""
+
+    if [[ ${VALET_CONFIG_LOG_DISABLE_WRAP:-false} != "true" ]]; then
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local RETURNED_VALUE"$'\n'"local -n message=RETURNED_VALUE"$'\n'"string::wrapWords \"\${messageVariableName}\" ${VALET_CONFIG_LOG_COLUMNS} \"${wrapPadding}\" $((VALET_CONFIG_LOG_COLUMNS - wrapPaddingLength))"$'\n'
+    else
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n message=\"\${messageVariableName}\""$'\n'
+    fi
+    if [[ ${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT:-false} != "true" ]]; then
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="message=\"\${message//⌜/${VALET_CONFIG_COLOR_ACCENT}⌜}\""$'\n'"message=\"\${message//⌝/⌝${VALET_CONFIG_COLOR_DEFAULT}}\""$'\n'
+    fi
+    if [[ -v VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL ]]; then
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}"$'\n'
+    fi
+
+    local eraseLineCode eraseLineCode2 outputCode
+    if [[ ${VALET_CONFIG_LOG_FD} == [0-9] ]]; then
+      # it is a numbered file descriptor
+      outputCode="1>&${VALET_CONFIG_LOG_FD}"
+
+      # clear the line before printing if we are display a progress bar/spinner
+      if [[ -t ${VALET_CONFIG_LOG_FD} ]]; then
+        eraseLineCode="local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'\e[2K'; fi"$'\n'
+        eraseLineCode2="\${eraseLine:-}"
+      fi
+    else
+      # it is a file
+      outputCode="1>>\"${VALET_CONFIG_LOG_FD}\""
+    fi
+
+    # define the formatted log statement
+    local formattedLogStatement="printf \"${eraseLineCode2:-}${printfFormat}\" ${printfArguments}"
+    local standardStatement="printf \"${eraseLineCode2:-}%s\" \"\${toPrint}\""
+
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${eraseLineCode:-}${formattedLogStatement} ${outputCode}"
+    GLOBAL_LOG_PRINT_STATEMENT_STANDARD+="${eraseLineCode:-}${standardStatement} ${outputCode}"
+
+    # check if we need to additionally output the logs to a file
+    if [[ -n ${VALET_CONFIG_LOG_TO_DIRECTORY:-} ]]; then
+      # compute the name of the output file
+      local logFile
+      if [[ -n ${VALET_CONFIG_LOG_FILENAME_PATTERN:-} ]]; then
+        eval "${VALET_CONFIG_LOG_FILENAME_PATTERN}"
+        if [[ ! -v logFile ]]; then
+          printf '%s\n' "The filename pattern for the log files VALET_CONFIG_LOG_FILENAME_PATTERN is not valid (does not create the variable logFile): ⌜${VALET_CONFIG_LOG_FILENAME_PATTERN}⌝."
+          exit 1
+        fi
+      else
+        printf -v logFile "%s%(%FT%H-%M-%S%z)T%s" "valet-" "${EPOCHSECONDS}" ".log"
+      fi
+      if [[ ! -d "${VALET_CONFIG_LOG_TO_DIRECTORY}" ]]; then
+        mkdir -p "${VALET_CONFIG_LOG_TO_DIRECTORY}" 1>/dev/null
+      fi
+      # append the log to the file
+      outputCode="1>>\"${VALET_CONFIG_LOG_TO_DIRECTORY%/}/${logFile}\""
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${formattedLogStatement} ${outputCode}"
+      GLOBAL_LOG_PRINT_STATEMENT_STANDARD+=$'\n'"${standardStatement} ${outputCode}"
+    fi
+}
+
+
 #===============================================================
 # >>> String utilities
 #===============================================================
@@ -1386,7 +1649,6 @@ function source() {
     fi
 
     local -i sourcedFiles=0
-
     # source the lib from the valet core libs
     if [[ -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${pathOrName}" ]]; then
       builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${pathOrName}" "$@"
@@ -1534,6 +1796,32 @@ function core::getVersion() {
   # shellcheck source=lib-fs
   source fs
   fs::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/version"
+}
+
+# ## core::colorInit (private)
+#
+# Initialize the valet color variables depending on the `VALET_CONFIG_ENABLE_COLORS` variable.
+# Reuse their value if defined or set them to the default value.
+function core::colorInit() {
+  if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
+    VALET_CONFIG_COLOR_DEFAULT="${VALET_CONFIG_COLOR_DEFAULT:-$'\e[0m'}"      # Text reset
+    VALET_CONFIG_COLOR_FADED="${VALET_CONFIG_COLOR_FADED:-$'\e[90m'}"         # Bright Black (Gray)
+    VALET_CONFIG_COLOR_ACCENT="${VALET_CONFIG_COLOR_ACCENT:-$'\e[95m'}"       # Bright Magenta (Pink)
+    VALET_CONFIG_COLOR_DEBUG="${VALET_CONFIG_COLOR_DEBUG:-$'\e[90m'}"         # Bright Black (Gray)
+    VALET_CONFIG_COLOR_INFO="${VALET_CONFIG_COLOR_INFO:-$'\e[36m'}"           # Cyan
+    VALET_CONFIG_COLOR_WARNING="${VALET_CONFIG_COLOR_WARNING:-$'\e[33m'}"     # Yellow
+    VALET_CONFIG_COLOR_SUCCESS="${VALET_CONFIG_COLOR_SUCCESS:-$'\e[32m'}"     # Green
+    VALET_CONFIG_COLOR_ERROR="${VALET_CONFIG_COLOR_ERROR:-$'\e[31m'}"         # Red
+  else
+    VALET_CONFIG_COLOR_DEFAULT=""
+    VALET_CONFIG_COLOR_FADED=""
+    VALET_CONFIG_COLOR_ACCENT=""
+    VALET_CONFIG_COLOR_DEBUG=""
+    VALET_CONFIG_COLOR_INFO=""
+    VALET_CONFIG_COLOR_WARNING=""
+    VALET_CONFIG_COLOR_SUCCESS=""
+    VALET_CONFIG_COLOR_ERROR=""
+  fi
 }
 
 #===============================================================
@@ -1729,6 +2017,8 @@ xterm-color | xterm-256color | linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG
 xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
 *) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
 esac
+# set the colors (either to default, user defined or empty values)
+core::colorInit
 
 # Export terminal size on window resize if we are in interactive mode.
 if [[ -t 2 ]]; then
@@ -1736,7 +2026,7 @@ if [[ -t 2 ]]; then
   # shellcheck disable=SC2034
   GLOBAL_SCREEN_REDRAW_REQUIRED=false
   # shellcheck disable=SC2090
-  trap 'tui::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::createPrintFunction; eval "${GLOBAL_LOG_PRINT_FUNCTION}"' SIGWINCH
+  trap 'tui::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::init; log::createPrintFunction; eval "${GLOBAL_LOG_PRINT_FUNCTION}"' SIGWINCH
 else
   GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}"
   # shellcheck disable=SC2034

@@ -12,6 +12,8 @@ function main() {
   test_windows::getEnvVar
   test_windows::addToPath
   test_windows::createLink
+
+  rm -Rf tmp
 }
 
 function test_windows::convertPathFromUnix() {

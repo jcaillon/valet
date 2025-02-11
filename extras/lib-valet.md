@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.28.2980 (2025-02-08).
+> Documentation generated for the version 0.28.3028 (2025-02-11).
 
 ## ansi-codes::*
 
@@ -41,8 +41,8 @@ Add a value to an array if it is not already present.
 
 - $1: **array name** _as string_:
       The variable name of the array.
-- $2: **value** _as any_:
-      The value to add.
+- $2: **value variable name** _as any_:
+      The variable name containing the value to add.
 
 Returns:
 
@@ -52,7 +52,8 @@ Returns:
 
 ```bash
 declare myArray=( "a" "b" )
-array::appendIfNotPresent myArray "c"
+declare myValue="b"
+array::appendIfNotPresent myArray myValue
 printf '%s\n' "${myArray[@]}"
 ```
 
@@ -64,8 +65,8 @@ It uses pure bash.
 
 - $1: **array name** _as string_:
       The variable name of the array.
-- $2: **value** _as any_:
-      The value to check.
+- $2: **value variable name** _as any_:
+      The variable name containing the value to check.
 
 Returns:
 
@@ -73,7 +74,8 @@ Returns:
 
 ```bash
 declare myArray=( "a" "b" )
-array::checkIfPresent myArray "b" && printf '%s\n' "b is in the array"
+declare myValue="b"
+if array::checkIfPresent myArray myValue; then "b is in the array"; fi
 ```
 
 
@@ -442,7 +444,7 @@ print the difference between the baseline and the other functions.
 
 - $1: **baseline** _as string_:
       the name of the function to use as baseline
-- $2: **functions** _as string_:
+- $2: functions _as string_:
       The names of the functions to benchmark, comma separated.
 - $3: time _as int_:
       (optional) Can be set using the variable `_OPTION_TIME`.
@@ -760,7 +762,7 @@ Equivalent to `exe::invoke5 "${1}" 0 false "${2}" "${@:3}"`
       true/false to indicate if the function should fail in case the execution fails.
       If true and the execution fails, the script will exit.
 - $2: **stdin** _as string_:
-      the stdin to pass to the executable
+      The stdin content to pass to the executable
 - $3: **executable** _as string_:
       the executable or function to execute
 - $@: **arguments** _as any_:
@@ -860,7 +862,7 @@ Equivalent to `exe::invokef5 "${1}" 0 false "${2}" "${@:3}"`
       true/false to indicate if the function should fail in case the execution fails.
       If true and the execution fails, the script will exit.
 - $2: **stdin** _as string_:
-      the stdin to pass to the executable
+      The stdin content to pass to the executable
 - $3: **executable** _as string_:
       the executable or function to execute
 - $@: **arguments** _as any_:
@@ -891,15 +893,17 @@ This function call an executable and its arguments.
 It redirects the stdout and stderr to temporary files.
 
 - $1: **fail** _as bool_:
-      true/false to indicate if the function should fail in case the execution fails.
-                     If true and the execution fails, the script will exit.
+      A boolean to indicate if the function should fail in case the execution fails.
+      If true and the execution fails, the script will exit.
 - $2: **acceptable codes** _as string_:
-      the acceptable error codes, comma separated
-        (if the error code is matched, then set the output error code to 0)
+      The acceptable error codes, comma separated.
+      (if the error code is matched, then set the output error code to 0)
 - $3: **sdtin from file** _as bool_:
-      true/false to indicate if the 4th argument represents a file path or directly the content for stdin
-- $4: **sdtin** _as string_:
-      the stdin (can be empty)
+      A boolean to indicate if the 4th argument represents a file path or
+      directly the content for stdin.
+- $2: **stdin** _as string_:
+      The stdin content to pass to the executable.
+      Can be empty if not used.
 - $5: **executable** _as string_:
       the executable or function to execute
 - $@: **arguments** _as any_:
@@ -975,7 +979,6 @@ fs::createTempFile and fs::createTempDirectory functions.
 ```bash
 fs::cleanTempFiles
 ```
-shellcheck disable=SC2016
 
 
 ## fs::createDirectoryIfNeeded
@@ -1048,6 +1051,10 @@ fs::createLink "/path/to/link" "/path/to/linked" true
 
 Creates a temporary directory.
 
+- ${_OPTION_PATH_ONLY} _as boolean_:
+      (optional) If true, does not create the file, only returns the path.
+      (defaults to false)
+
 Returns:
 
 - ${RETURNED_VALUE}: The created path.
@@ -1065,6 +1072,10 @@ local directory="${RETURNED_VALUE}"
 
 Creates a temporary file and return its path.
 
+- ${_OPTION_PATH_ONLY} _as boolean_:
+      (optional) If true, does not create the file, only returns the path.
+      (defaults to false)
+
 Returns:
 
 - ${RETURNED_VALUE}: The created path.
@@ -1076,8 +1087,6 @@ local file="${RETURNED_VALUE}"
 
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
-
-TODO: add an _OPTION to not create the file immediately
 
 
 ## fs::getFileLineCount
@@ -1587,7 +1596,6 @@ The file content will be aligned with the current log output and hard wrapped if
 ```bash
 log::printFile "/my/file/path"
 ```
-shellcheck disable=SC2317
 
 
 ## log::printFileString
@@ -1603,7 +1611,6 @@ The file content will be aligned with the current log output and hard wrapped if
 ```bash
 log::printFileString "myfilecontent"
 ```
-shellcheck disable=SC2317
 
 
 ## log::printRaw
@@ -1617,7 +1624,6 @@ Does not check the log level.
 ```bash
 log::printRaw "my line"
 ```
-shellcheck disable=SC2317
 
 
 ## log::printString
@@ -1635,7 +1641,6 @@ Does not check the log level.
 ```bash
 log::printString "my line"
 ```
-shellcheck disable=SC2317
 
 
 ## log::setLevel
@@ -2785,7 +2790,7 @@ tui::restoreInterruptTrap
 Restore the terminal options to their original state.
 Should be called after `tui::setTerminalOptions`.
 
-- $1: **force** _as bool_:
+- $1: force _as bool_:
       (optional) force the restoration of the stty configuration
       stty state will not be restored if
       (defaults to false)
@@ -2793,7 +2798,6 @@ Should be called after `tui::setTerminalOptions`.
 ```bash
 tui::restoreTerminalOptions
 ```
-shellcheck disable=SC2120
 
 
 ## tui::setInterruptTrap
@@ -3176,9 +3180,10 @@ windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key tha
 Set an environment variable for the current user on Windows.
 
 - $1: **variable name** _as string_:
-      the name of the environment variable to set.
+      The name of the environment variable to set.
 - $2: **variable value** _as string_:
-      the value of the environment variable to set.
+      The value of the environment variable to set.
+      An empty string will unset the variable.
 
 ```bash
 windows::setEnvVar "MY_VAR" "my_value"
@@ -3206,4 +3211,4 @@ windows::endPs1Batch
 
 
 
-> Documentation generated for the version 0.28.2980 (2025-02-08).
+> Documentation generated for the version 0.28.3028 (2025-02-11).
