@@ -249,8 +249,8 @@ flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 commandArgumentsErrors="Found multiple matches for the option ⌜--th⌝, please be more specific:
-CHI-CDECHI-CDECHItCDECHIhCDEis-is-option2
-CHI-CDECHI-CDEwiCHItCDECHIhCDE-default
+[95m-[0m[95m-[0m[95mt[0m[95mh[0mis-is-option2
+[95m-[0m[95m-[0mwi[95mt[0m[95mh[0m-default
 
 Use ⌜valet self mock2 --help⌝ to get help."
 firstArg="arg1"
@@ -424,21 +424,21 @@ Exited with code: `1`
 
 ```text
 ERROR    Found multiple matches for the command ⌜sf⌝, please be more specific:
-CHIsCDEelCHIfCDE add-command
-CHIsCDEelCHIfCDE add-library
-CHIsCDEelCHIfCDE build
-CHIsCDEelCHIfCDE config
-CHIsCDEelCHIfCDE document
-CHIsCDEelCHIfCDE export
-CHIsCDEelCHIfCDE extend
-CHIsCDEelCHIfCDE mock1
-CHIsCDEelCHIfCDE mock2
-CHIsCDEelCHIfCDE mock3
-CHIsCDEelCHIfCDE release
-CHIsCDEelCHIfCDE setup
-CHIsCDEelCHIfCDE test
-CHIsCDEelCHIfCDE uninstall
-CHIsCDEelCHIfCDE update
+[95ms[0mel[95mf[0m add-command
+[95ms[0mel[95mf[0m add-library
+[95ms[0mel[95mf[0m build
+[95ms[0mel[95mf[0m config
+[95ms[0mel[95mf[0m document
+[95ms[0mel[95mf[0m export
+[95ms[0mel[95mf[0m extend
+[95ms[0mel[95mf[0m mock1
+[95ms[0mel[95mf[0m mock2
+[95ms[0mel[95mf[0m mock3
+[95ms[0mel[95mf[0m release
+[95ms[0mel[95mf[0m setup
+[95ms[0mel[95mf[0m test
+[95ms[0mel[95mf[0m uninstall
+[95ms[0mel[95mf[0m update
 
 ```
 
@@ -514,8 +514,8 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='Unknown option ⌜-p⌝, valid matches are:
-CHI-CDE-oCHIpCDEt1
-CHI-CDE-derCHIpCDE2
+[95m-[0m-o[95mp[0mt1
+[95m-[0m-der[95mp[0m2
 '
 RETURNED_VALUE2=''
 ```
@@ -528,8 +528,8 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='Found multiple matches for the option ⌜-p⌝, please be more specific:
-CHI-CDE-oCHIpCDEt1
-CHI-CDE-derCHIpCDE2
+[95m-[0m-o[95mp[0mt1
+[95m-[0m-der[95mp[0m2
 '
 RETURNED_VALUE2=''
 ```
@@ -576,11 +576,11 @@ ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_VALUE='bCHIaCDEnana
-CHIaCDEpplCHIeCDE
-orCHIaCDEngCHIeCDE
-grCHIaCDEpCHIeCDE
-CHIaCDEnanas
+RETURNED_VALUE='b[95ma[0mnana
+[95ma[0mppl[95me[0m
+or[95ma[0mng[95me[0m
+gr[95ma[0mp[95me[0m
+[95ma[0mnanas
 lemon
 '
 ```

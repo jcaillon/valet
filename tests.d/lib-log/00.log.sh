@@ -1,8 +1,39 @@
 #!/usr/bin/env bash
 
+# shellcheck disable=SC2034
 function main() {
   test_log::init
   test_log::parseLogPattern
+
+  test::title "✅ Testing with no formatting"
+  VALET_CONFIG_LOG_PATTERN="<level> <message>"
+  VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=""
+  VALET_CONFIG_LOG_COLUMNS=9999
+  VALET_CONFIG_LOG_DISABLE_WRAP=true
+  VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true
+  VALET_CONFIG_LOG_FD=2
+  VALET_CONFIG_LOG_TO_DIRECTORY=""
+  VALET_CONFIG_LOG_FILENAME_PATTERN=""
+  test::exec log::init
+  test::exec core::colorInit
+  test_log
+
+
+  test::title "✅ Testing with full formatting"
+  VALET_CONFIG_ENABLE_COLORS=true
+  VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
+  VALET_CONFIG_LOG_PATTERN="<colorFaded>{9s} <time>{(%FT%H:%M:%S%z)T} <levelColor>{9s} <level>{9s} <icon>{9s} <message>"
+  VALET_CONFIG_LOG_COLUMNS=90
+  VALET_CONFIG_LOG_DISABLE_WRAP=false
+  VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=false
+  # fix the time to a known value
+  unset EPOCHSECONDS EPOCHREALTIME
+  TZ=Etc/GMT+0
+  EPOCHSECONDS=548902800
+  EPOCHREALTIME=548902800.000000
+  test::printVars VALET_CONFIG_ENABLE_COLORS VALET_CONFIG_ENABLE_NERDFONT_ICONS VALET_CONFIG_LOG_PATTERN VALET_CONFIG_LOG_COLUMNS VALET_CONFIG_LOG_DISABLE_WRAP VALET_CONFIG_LOG_DISABLE_HIGHLIGHT TZ EPOCHSECONDS EPOCHREALTIME
+  test::exec log::init
+  test::exec core::colorInit
   test_log
 }
 
@@ -10,22 +41,22 @@ function test_log::init() {
   test::title "✅ Testing log::init"
 
   test::exec log::init
-  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
 
   test::exec VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true VALET_CONFIG_LOG_DISABLE_WRAP=false log::init
-  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
 
   test::exec VALET_CONFIG_LOG_PATTERN=abc VALET_CONFIG_LOG_FD=5 log::init
-  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
 
   test::exec VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL="local extra=1" log::init
-  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
 
   test::exec VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init
-  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
 
   test::exec VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN="logFile=a" log::init
-  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD
+  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
 }
 
 function test_log::parseLogPattern() {
@@ -45,42 +76,16 @@ function test_log::parseLogPattern() {
   test::func log::parseLogPattern "<colorFaded>{9s} <time>{(%FT%H:%M:%S%z)T} <levelColor>{9s} <level>{9s} <icon>{9s} <varCOLOR_DEBUG>{9s} <pid>{9s} <subshell>{9s} <function>{9s} <source>{9s} <line>{9s}"
 }
 
+# shellcheck disable=SC2034
 function test_log() {
-  test::title "✅ Testing log::createPrintFunction"
+  test::title "✅ Testing log::printRaw"
+  test::exec log::printRaw hello
+  test::exec log::printRaw _world
 
-  export VALET_CONFIG_ENABLE_COLORS=true
-  export VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
-  export VALET_CONFIG_LOG_DISABLE_TIME=false
-  export VALET_CONFIG_LOG_DISABLE_WRAP=false
-  export VALET_CONFIG_LOG_ENABLE_TIMESTAMP=true
-  export VALET_CONFIG_LOG_COLUMNS=50
+  test::title "✅ Testing log::printString"
+  test::exec log::printString 'Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.'
 
-  # fix the time to a known value
-  export TZ=Etc/GMT+0
-  unset EPOCHSECONDS EPOCHREALTIME
-  export EPOCHSECONDS=548902800
-  export EPOCHREALTIME=548902800.000000
-
-  test::printVars VALET_CONFIG_ENABLE_COLORS VALET_CONFIG_ENABLE_NERDFONT_ICONS VALET_CONFIG_LOG_DISABLE_TIME VALET_CONFIG_LOG_COLUMNS VALET_CONFIG_LOG_DISABLE_WRAP VALET_CONFIG_LOG_ENABLE_TIMESTAMP TZ EPOCHSECONDS EPOCHREALTIME
-
-  test::exec log::createPrintFunction
-  test::prompt eval "\${GLOBAL_LOG_PRINT_FUNCTION}"
-  eval "${GLOBAL_LOG_PRINT_FUNCTION}"
-
-  test::title "✅ Testing log::print"
-  test::exec log::print SUCCESS   OK '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567' '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'
-
-  export VALET_CONFIG_ENABLE_COLORS=false
-  export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
-  export VALET_CONFIG_LOG_DISABLE_TIME=true
-  export VALET_CONFIG_LOG_COLUMNS=40
-
-  test::printVars VALET_CONFIG_ENABLE_COLORS VALET_CONFIG_ENABLE_NERDFONT_ICONS VALET_CONFIG_LOG_DISABLE_TIME VALET_CONFIG_LOG_COLUMNS
-
-  test::exec log::createPrintFunction
-  test::prompt eval "\${GLOBAL_LOG_PRINT_FUNCTION}"
-  eval "${GLOBAL_LOG_PRINT_FUNCTION}"
-
+  test::title "✅ Testing log::info"
   test::exec log::info 'Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.' '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567' '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'
 
   test::title "✅ Testing log::printFile"
@@ -103,7 +108,6 @@ It is a long established fact that a reader will be distracted by the readable c
 The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.
 Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.
 Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like)."
-  test::printVars text
 
   test::title "✅ Testing log::printFileString"
   test::exec log::printFileString "\"\${text}\"" 2

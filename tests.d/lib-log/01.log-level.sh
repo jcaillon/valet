@@ -4,22 +4,12 @@
 function main() {
   test::title "✅ Testing log levels"
 
-  VALET_CONFIG_ENABLE_COLORS=false
-  VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
-  VALET_CONFIG_LOG_DISABLE_TIME=true
-  VALET_CONFIG_LOG_COLUMNS=30
-  VALET_CONFIG_LOG_DISABLE_WRAP=false
-
   # fix stuff for printCallStack
   GLOBAL_STACK_FUNCTION_NAMES=(log::printCallStack log::error myCmd::subFunction myCmd::function)
   GLOBAL_STACK_SOURCE_FILES=("" "core" "${PWD}/path/to/subFunction.sh" "${PWD}/path/to/function.sh")
   GLOBAL_STACK_LINE_NUMBERS=(100 200 300)
 
-  test::printVars VALET_CONFIG_ENABLE_COLORS VALET_CONFIG_ENABLE_NERDFONT_ICONS VALET_CONFIG_LOG_DISABLE_TIME VALET_CONFIG_LOG_COLUMNS VALET_CONFIG_LOG_DISABLE_WRAP GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS
-
-  test::exec log::createPrintFunction
-  test::prompt eval "\${GLOBAL_LOG_PRINT_FUNCTION}"
-  eval "${GLOBAL_LOG_PRINT_FUNCTION}"
+  test::exec log::init
 
   test::exec log::setLevel trace
 
@@ -47,6 +37,9 @@ function main() {
 }
 
 function test_log_log_one_of_each_level() {
+  log::getLevel
+  test::title "✅ Testing level ${RETURNED_VALUE}"
+
   test::func log::getLevel
   test::exec log::isTraceEnabled
   test::exec log::isDebugEnabled

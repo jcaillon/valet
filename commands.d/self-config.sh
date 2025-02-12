@@ -172,9 +172,8 @@ VALET_CONFIG_LOCAL_STATE_DIRECTORY=\"\${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-${EX
 # Defaults to the temporary directory (TMPDIR or /tmp).
 VALET_CONFIG_WORK_FILES_DIRECTORY=\"\${VALET_CONFIG_WORK_FILES_DIRECTORY:-${EXPORTED_VALET_CONFIG_WORK_FILES_DIRECTORY:-}}\"
 
-# The directory in which to write work files (small files to capture output of programs).
-# You can set it to a tmpfs directory (such as /dev/shm) to speed up the execution of valet.
-# Defaults to the temporary directory (TMPDIR or /tmp).
+# The locale to use in Valet.
+# Defaults to C.UTF-8 to ensure that the output is consistent across different systems.
 VALET_CONFIG_LOCALE=\"\${VALET_CONFIG_LOCALE:-${EXPORTED_VALET_CONFIG_LOCALE:-}}\"
 
 # Number of last choices to remember when selecting an item from a command menu.
@@ -226,17 +225,40 @@ VALET_CONFIG_STRICT_PURE_BASH=\"\${VALET_CONFIG_STRICT_PURE_BASH:-${EXPORTED_VAL
 ## Log/output configuration
 ## -----------
 
-# If true, will disable the text wrapping for logs.
-VALET_CONFIG_LOG_DISABLE_WRAP=\"\${VALET_CONFIG_LOG_DISABLE_WRAP:-${EXPORTED_VALET_CONFIG_LOG_DISABLE_WRAP:-}}\"
+# The pattern to use to format a log line.
+# Defaults to:
+# <colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>
+# You can use the following placeholders:
+#
+# - <colorXXX>: The value of the color variable VALET_CONFIG_COLOR_XXX.
+# - <time>: The current time formatted with the format string.
+# - <level>: The log level.
+# - <levelColor>: The color for the log level.
+# - <icon>: The log level icon.
+# - <pid>: The process ID of the bash instance that logged the message.
+# - <subshell>: The subshell level of the bash instance that logged the message.
+# - <function>: The name of the function that logged the message.
+# - <line>: The line number where the message was logged.
+# - <source>: The source of the function that logged the message.
+# - <varXXX>: The value of an arbitrary variable XXX.
+# - <message>: The log message (should be the last placeholder).
+#
+# Each placeholder can be fallowed by {...} to add the format specifier (see printf help).
+VALET_CONFIG_LOG_PATTERN=\"\${VALET_CONFIG_LOG_PATTERN:-${EXPORTED_VALET_CONFIG_LOG_PATTERN:-}}\"
+
+# Contains a bash code executed before the print statement, to further process the variable
+# messageToPrint (containing the log message) or define new variables to use in the log pattern
+# with <varXXX> placeholders.
+VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=\"\${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL:-${EXPORTED_VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL:-}}\"
 
 # Sets the maximum width for the log output (used only when log wrapping is enabled).
 VALET_CONFIG_LOG_COLUMNS=\"\${VALET_CONFIG_LOG_COLUMNS:-${EXPORTED_VALET_CONFIG_LOG_COLUMNS:-}}\"
 
-# If true, will disable the time for logs.
-VALET_CONFIG_LOG_DISABLE_TIME=\"\${VALET_CONFIG_LOG_DISABLE_TIME:-${EXPORTED_VALET_CONFIG_LOG_DISABLE_TIME:-}}\"
+# If true, will disable the text wrapping for logs.
+VALET_CONFIG_LOG_DISABLE_WRAP=\"\${VALET_CONFIG_LOG_DISABLE_WRAP:-${EXPORTED_VALET_CONFIG_LOG_DISABLE_WRAP:-}}\"
 
-# If true, will print a timestamp instead of simple time in the logs.
-VALET_CONFIG_LOG_ENABLE_TIMESTAMP=\"\${VALET_CONFIG_LOG_ENABLE_TIMESTAMP:-${EXPORTED_VALET_CONFIG_LOG_ENABLE_TIMESTAMP:-}}\"
+# If true, will disable the highlight for ⌜quoted⌝ text in logs.
+VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=\"\${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT:-${EXPORTED_VALET_CONFIG_LOG_DISABLE_HIGHLIGHT:-}}\"
 
 # The file descriptor to use for the logs (defaults to 2 to output to stderr).
 VALET_CONFIG_LOG_FD=\"\${VALET_CONFIG_LOG_FD:-${EXPORTED_VALET_CONFIG_LOG_FD:-}}\"
@@ -307,8 +329,8 @@ VALET_CONFIG_COLOR_INFO=\"\${VALET_CONFIG_COLOR_INFO:-${EXPORTED_VALET_CONFIG_CO
 VALET_CONFIG_COLOR_WARNING=\"\${VALET_CONFIG_COLOR_WARNING:-${EXPORTED_VALET_CONFIG_COLOR_WARNING:-}}\"
 VALET_CONFIG_COLOR_SUCCESS=\"\${VALET_CONFIG_COLOR_SUCCESS:-${EXPORTED_VALET_CONFIG_COLOR_SUCCESS:-}}\"
 VALET_CONFIG_COLOR_ERROR=\"\${VALET_CONFIG_COLOR_ERROR:-${EXPORTED_VALET_CONFIG_COLOR_ERROR:-}}\"
-VALET_CONFIG_COLOR_TIMESTAMP=\"\${VALET_CONFIG_COLOR_TIMESTAMP:-${EXPORTED_VALET_CONFIG_COLOR_TIMESTAMP:-}}\"
-VALET_CONFIG_COLOR_HIGHLIGHT=\"\${VALET_CONFIG_COLOR_HIGHLIGHT:-${EXPORTED_VALET_CONFIG_COLOR_HIGHLIGHT:-}}\"
+VALET_CONFIG_COLOR_FADED=\"\${VALET_CONFIG_COLOR_FADED:-${EXPORTED_VALET_CONFIG_COLOR_FADED:-}}\"
+VALET_CONFIG_COLOR_ACCENT=\"\${VALET_CONFIG_COLOR_ACCENT:-${EXPORTED_VALET_CONFIG_COLOR_ACCENT:-}}\"
 
 # Colors for help
 VALET_CONFIG_COLOR_TITLE=\"\${VALET_CONFIG_COLOR_TITLE:-${EXPORTED_VALET_CONFIG_COLOR_TITLE:-}}\"

@@ -36,7 +36,9 @@ function test_logLevelOptions() {
 
 function test_logDisplayOptions() {
   test::title "✅ Testing that we can change the log display options"
-  test::exec VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true VALET_CONFIG_LOG_DISABLE_WRAP=true "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
+  export VALET_CONFIG_LOG_PATTERN='<level>_<message>'
+  test::exec VALET_CONFIG_LOG_COLUMNS=40 VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true VALET_CONFIG_LOG_DISABLE_WRAP=false VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=false "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
+  export VALET_CONFIG_LOG_PATTERN="<level> <message>"
 }
 
 
@@ -47,7 +49,7 @@ function test_logOutputOptions() {
   test::title "✅ Testing that we can output the logs to a directory additionally to console"
   test::exec VALET_CONFIG_LOG_TO_DIRECTORY="${logDir}" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
   # shellcheck disable=SC2317
-  function test::transformTextBeforeFlushing() { _TEST_OUTPUT="${_TEST_OUTPUT//????-??-??_??h??m??s.log/2025-01-17_21h29m41s.log}" ; }
+  function test::transformTextBeforeFlushing() { _TEST_OUTPUT="${_TEST_OUTPUT//????-??-??T??-??-??+????.log/2025-02-12T21-57-29+0000.log}" ; }
   test::func fs::listFiles "${logDir}"
   unset -f test::transformTextBeforeFlushing
 

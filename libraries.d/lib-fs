@@ -572,6 +572,8 @@ function fs::createLink() {
 # fs::getFileLineCount "/path/to/file"
 # local lineCount="${RETURNED_VALUE}"
 # ```
+#
+# TODO: fails to count the last line if empty
 function fs::getFileLineCount() {
   local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i lineCount=0

@@ -747,7 +747,7 @@ RETURNED_VALUE2='10'
 Returned variables:
 
 ```text
-RETURNED_VALUE='CHITCDEhis is a CHITCDEexCHItCDE CHItCDEo highlighCHItCDE.'
+RETURNED_VALUE='>T<his is a >T<ex>t< >t<o highligh>t<.'
 ```
 
 ❯ `MY_STRING=This\ is\ a\ texT\ to\ highlight. MY_CHARS=TTTTT string::highlight MY_STRING MY_CHARS '>' '<'`

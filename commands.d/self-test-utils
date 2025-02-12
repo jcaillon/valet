@@ -32,10 +32,16 @@ function selfTestUtils_setupValetForConsistency() {
 
   export VALET_CONFIG_ENABLE_COLORS=false
   export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
-  export VALET_CONFIG_LOG_DISABLE_TIME=true
-  export VALET_CONFIG_LOG_DISABLE_WRAP=true
-  export VALET_CONFIG_LOG_ENABLE_TIMESTAMP=false
+
+  export VALET_CONFIG_LOG_PATTERN="<level> <message>"
+  export VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=""
   export VALET_CONFIG_LOG_COLUMNS=9999
+  export VALET_CONFIG_LOG_DISABLE_WRAP=true
+  export VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true
+  export VALET_CONFIG_LOG_FD=2
+  export VALET_CONFIG_LOG_TO_DIRECTORY=""
+  export VALET_CONFIG_LOG_FILENAME_PATTERN=""
+
 
   export VALET_CONFIG_ICON_ERROR=IE
   export VALET_CONFIG_ICON_WARNING=IW
@@ -47,8 +53,8 @@ function selfTestUtils_setupValetForConsistency() {
   export VALET_CONFIG_ICON_KILLED=IK
 
   export VALET_CONFIG_COLOR_DEFAULT=CDE
-  export VALET_CONFIG_COLOR_ACCENT=CHI
-  export VALET_CONFIG_COLOR_FADED=CTI
+  export VALET_CONFIG_COLOR_ACCENT=CAC
+  export VALET_CONFIG_COLOR_FADED=CFA
   export VALET_CONFIG_COLOR_DEBUG=CDB
   export VALET_CONFIG_COLOR_INFO=CIN
   export VALET_CONFIG_COLOR_WARNING=CWA
@@ -60,8 +66,6 @@ function selfTestUtils_setupValetForConsistency() {
   export VALET_CONFIG_COLOR_ARGUMENT=CAR
   export VALET_CONFIG_COLOR_COMMAND=CCO
 
-  export VALET_CONFIG_COLOR_TIMESTAMP=CTI
-  export VALET_CONFIG_COLOR_HIGHLIGHT=CHI
   export VALET_CONFIG_COLOR_ACTIVE_BUTTON=CAB
   export VALET_CONFIG_COLOR_INACTIVE_BUTTON=CUB
 
@@ -82,8 +86,8 @@ function selfTestUtils_setupValetForConsistency() {
   # can't unset EPOCHREALTIME because we use it in PS4 during debug, #TODO: need to fix that
   export EPOCHREALTIME=548902800.000000
 
-  log::createPrintFunction
-  eval "${GLOBAL_LOG_PRINT_FUNCTION}"
+  core::colorInit
+  log::init
 }
 
 function selfTestUtils_runHookScript() {

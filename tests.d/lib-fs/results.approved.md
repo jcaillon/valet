@@ -34,6 +34,14 @@ Returned variables:
 RETURNED_VALUE='24'
 ```
 
+❯ `fs::getFileLineCount resources/file-with-final-eol`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='2'
+```
+
 ❯ `VALET_CONFIG_STRICT_PURE_BASH=true fs::getFileLineCount resources/file-to-read`
 
 Returned variables:

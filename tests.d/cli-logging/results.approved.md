@@ -45,7 +45,6 @@ local commandArgumentsErrors help action
 help=""
 commandArgumentsErrors=""
 action="logging-level"
-
 TRACE    This is an error trace message which is always displayed.
 DEBUG    This is a debug message.
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
@@ -74,7 +73,6 @@ local commandArgumentsErrors help action
 help=""
 commandArgumentsErrors=""
 action="logging-level"
-
 TRACE    This is an error trace message which is always displayed.
 TRACE    This is a trace message.
 DEBUG    This is a debug message.
@@ -89,16 +87,33 @@ DEBUG    Exiting with code 0 after 0s.
 
 ### ✅ Testing that we can change the log display options
 
-❯ `VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true VALET_CONFIG_LOG_DISABLE_WRAP=true valet self mock1 logging-level`
+❯ `VALET_CONFIG_LOG_COLUMNS=40 VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true VALET_CONFIG_LOG_DISABLE_WRAP=false VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=false valet self mock1 logging-level`
 
 **Error output**:
 
 ```text
-CDBTRACE    CDE This is an error trace message which is always displayed.
-CININFO    II  CDE This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-CSUSUCCESS IS  CDE This is a success message.
-CWAWARNING IW  CDE This is a warning message.
-With a second line.
+TRACE   _This is an error trace message 
+         which is always displayed.
+INFO    _This is an info message with a 
+         super long sentence. The value 
+         of life is not in its duration,
+         but in its donation. You are 
+         not important because of how 
+         long you live, you are 
+         important because of how 
+         effective you live. Give a man 
+         a fish and you feed him for a 
+         day; teach a man to fish and 
+         you feed him for a lifetime. 
+         Surround yourself with the best
+         people you can find, delegate 
+         authority, and don't interfere 
+         as long as the policy you've 
+         decided upon is being carried 
+         out.
+SUCCESS _This is a success message.
+WARNING _This is a warning message.
+         With a second line.
 ```
 
 ### ✅ Testing that we can output the logs to a directory additionally to console
@@ -121,7 +136,7 @@ Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='/tmp/valet.d/d1-2/valet-2025-01-17_21h29m41s.log'
+[0]='/tmp/valet.d/d1-2/valet-2025-02-12T21-57-29+0000.log'
 )
 ```
 

@@ -61,8 +61,8 @@ function core::setShellOptions() {
   # If the user does not have the locale, they will get a warning here.
   # In which case they must either generate the locale C.utf8 or set an existing locale
   # listed in `locale -a` via the VALET_CONFIG_LOCALE environment variable.
-  LC_ALL=C.UTF-8
-  LANG=C.UTF-8
+  LC_ALL="${VALET_CONFIG_LOCALE:-C.UTF-8}"
+  LANG="${LC_ALL}"
 }
 
 # set different options for the shell, to have consistent behavior on all machines
@@ -320,24 +320,56 @@ function log::getLevel() {
   RETURNED_VALUE="${GLOBAL_LOG_LEVEL:-info}"
 }
 
+# ## log::printInternal(private)
+#
+# Display log message.
+#
+# - $1: **color name** _as string_:
+#       The color name to use for the severity (TRACE, DEBUG...).
+# - $2: **icon** _as string_:
+#       The icon to display in the log message (utf8 character from nerd icons).
+# - $3: **severity** _as string_:
+#       The severity to display (max 7 chars for the default log pattern).
+# - $@: **message variable name** _as string_:
+#       The name of the variable that contains the message to log.
+#
+# ```bash
+# message="This is a success message."
+# log::Internal "SUCCESS" $'\uf14a' "OK" message
+# ```
+# shellcheck disable=SC2034
+function log::printInternal() {
+  local colorName="${1:-${3}}"
+  local icon="${2}"
+  local level="${3}"
+  local messageVariableName="${4}"
+  local -n levelColor="GLOBAL_THEME_COLOR_${colorName^^}"
+  # evaluated the print statement built in log::init; it uses the local vars defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
+}
+
 # ## log::print (private)
 #
-# Display log messages in the terminal.
+# Display a log message.
 #
-# - $1: **log level** _as string_:
-#       The level of the log message, which gives the color to use (TRACE, DEBUG...).
+# - $1: **color name** _as string_:
+#       The color name to use for the severity (TRACE, DEBUG...).
 # - $2: **icon** _as string_:
-#       The icon to display in the log message (utf8 character from nerdicons).
+#       The icon to display in the log message (utf8 character from nerd icons).
 # - $3: **severity** _as string_:
-#       The severity to display (max 7 chars).
+#       The severity to display (max 7 chars for the default log pattern).
 # - $@: **message** _as string_:
-#       The content of the log message (each arg will be separated by a new line).
+#       The message to log.
 #
 # ```bash
 # log::print "SUCCESS" $'\uf14a' "OK" "This is a success message."
 # ```
-# shellcheck disable=SC2317
-function log::print() { return 0; }
+# shellcheck disable=SC2034
+function log::print() {
+  local IFS=$'\n'
+  local message="${*:4}"
+  log::printInternal "${1}" "${2}" "${3}" message
+}
 
 # ## log::printFile
 #
@@ -353,7 +385,23 @@ function log::print() { return 0; }
 # log::printFile "/my/file/path"
 # ```
 # shellcheck disable=SC2317
-function log::printFile() { return 0; }
+function log::printFile() {
+  local filePath="${1}"
+  local maxLines="${2:-0}"
+
+  local line toPrint lineNumberPadding="   "
+  local -i lineNumber=1 currentLineNumberLength=1
+  if [[ ! -f "${filePath}" ]]; then
+    log::error "Can not print the file ⌜${filePath}⌝ because does not exist."
+    return 1
+  fi
+  local IFS=""
+  while IFS="" read -r line || [[ -n ${line:-} ]]; do
+    log::printFileInternalLoop || break;
+  done <"${filePath}"
+  # evaluated the print statement built in log::init; it uses the local var toPrint defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
+}
 
 # ## log::printFileString
 #
@@ -369,7 +417,47 @@ function log::printFile() { return 0; }
 # log::printFileString "myfilecontent"
 # ```
 # shellcheck disable=SC2317
-function log::printFileString() { return 0; }
+function log::printFileString() {
+  local content="${1}"
+  local -i maxLines="${2:-0}"
+
+  local line toPrint lineNumberPadding="   "
+  local -i lineNumber=1 currentLineNumberLength=1
+  while [[ -n ${content} ]]; do
+    line="${content%%$'\n'*}"
+    content="${content:${#line} + 1}"
+    log::printFileInternalLoop || break;
+  done
+  # evaluated the print statement built in log::init; it uses the local var toPrint defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
+}
+
+# ## log::printFileInternalLoop (private)
+#
+# An internal function used in log::printFile and log::printFileString to display each line
+# of a file or string. It uses the local variables set by the calling function.
+function log::printFileInternalLoop() {
+  if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
+    string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}     ${GLOBAL_THEME_COLOR_FADED}░${GLOBAL_THEME_COLOR_DEFAULT} " "$((GLOBAL_LOG_COLUMNS - 7 - ${#GLOBAL_LOG_WRAP_PADDING}))"
+
+    toPrint+="${GLOBAL_LOG_WRAP_PADDING}${GLOBAL_THEME_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${GLOBAL_THEME_COLOR_DEFAULT} ${RETURNED_VALUE}"$'\n'
+  else
+    toPrint+="${GLOBAL_THEME_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${GLOBAL_THEME_COLOR_DEFAULT} ${line}"$'\n'
+  fi
+
+  lineNumber+=1
+  if (( ${#lineNumber} > currentLineNumberLength )); then
+    lineNumberPadding="${lineNumberPadding%?}"
+    currentLineNumberLength+=1
+  fi
+  if (( maxLines != 0 && lineNumber > maxLines )); then
+    if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
+      toPrint+="${GLOBAL_LOG_WRAP_PADDING}"
+    fi
+    toPrint+="${GLOBAL_THEME_COLOR_FADED}     ░ (truncated)${GLOBAL_THEME_COLOR_DEFAULT}"$'\n'
+    return 1
+  fi
+}
 
 # ## log::printString
 #
@@ -387,7 +475,25 @@ function log::printFileString() { return 0; }
 # log::printString "my line"
 # ```
 # shellcheck disable=SC2317
-function log::printString() { return 0; }
+function log::printString() {
+  local content="${1}"
+  local wrappedLineLeftPaddingString="${2:-}"
+
+  local line toPrint
+  while [[ -n ${content} ]]; do
+    line="${content%%$'\n'*}"
+    content="${content:${#line} + 1}"
+
+    if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
+      string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}${wrappedLineLeftPaddingString}" "$((GLOBAL_LOG_COLUMNS - ${#GLOBAL_LOG_WRAP_PADDING}))"
+      toPrint+="${GLOBAL_LOG_WRAP_PADDING}${RETURNED_VALUE}"$'\n'
+    else
+      toPrint+="${line}"$'\n'
+    fi
+  done
+  # evaluated the print statement built in log::init; it uses the local var toPrint defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
+}
 
 # ## log::printRaw
 #
@@ -401,239 +507,12 @@ function log::printString() { return 0; }
 # log::printRaw "my line"
 # ```
 # shellcheck disable=SC2317
-function log::printRaw() { return 0; }
-
-# ## log::createPrintFunction (private)
-#
-# We build the log line function dynamically to adapt to the user options.
-# This avoid to have to check the options at each log message.
-#
-# Returns:
-#
-# - `GLOBAL_LOG_PRINT_FUNCTION`: Contains the functions definitions to print logs.
-# shellcheck disable=SC2016
-function log::createPrintFunction() {
-  local cDefault=""
-  local cTimestamp=""
-  local colorStatement
-  if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
-    cTimestamp=${VALET_CONFIG_COLOR_TIMESTAMP:-$'\e'"[90m"}       # Bright Black (Gray)
-    cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}            # Text reset
-    local cDebug=${VALET_CONFIG_COLOR_DEBUG:-$'\e'"[90m"}         # Bright Black (Gray)
-    local cInfo=${VALET_CONFIG_COLOR_INFO:-$'\e'"[36m"}           # Cyan
-    local cWarning=${VALET_CONFIG_COLOR_WARNING:-$'\e'"[33m"}     # Yellow
-    local cSuccess=${VALET_CONFIG_COLOR_SUCCESS:-$'\e'"[32m"}     # Green
-    local cError=${VALET_CONFIG_COLOR_ERROR:-$'\e'"[31m"}         # Red
-    local cHighlight=${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"} # Bright Magenta (Pink)
-
-    colorStatement="
-    local color
-    case \"\${colorCode}\" in
-    DEBUG) color=${cDebug@Q} ;;
-    TRACE) color=${cDebug@Q} ;;
-    INFO) color=${cInfo@Q} ;;
-    WARNING) color=${cWarning@Q} ;;
-    SUCCESS) color=${cSuccess@Q} ;;
-    ERROR) color=${cError@Q} ;;
-    *) color=${cDefault@Q} ;;
-    esac"
-    # shellcheck disable=SC2016
-    colorStatement+='
-    RETURNED_VALUE="${RETURNED_VALUE//⌜/'"${cHighlight@Q}"'⌜}"
-    RETURNED_VALUE="${RETURNED_VALUE//⌝/⌝'"${cDefault@Q}"'}"'
-  else
-    colorStatement='
-    local color=""'
-  fi
-
-  local wrapStatement
-  local wrapTextColumns="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
-  local wrapPaddingCharacters=""
-  local wrapPaddingLength=20
-  if [[ "${VALET_CONFIG_LOG_DISABLE_WRAP:-}" != "true" ]]; then
-    if [[ ${VALET_CONFIG_LOG_DISABLE_TIME:-} == "true" ]]; then
-      wrapPaddingLength=$((wrapPaddingLength - 9))
-    fi
-    if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} != "true" ]]; then
-      wrapPaddingLength=$((wrapPaddingLength - 2))
-    fi
-    # string with the number of spaces necessary to align with other log messages
-    for ((i = 0; i < wrapPaddingLength; i++)); do
-      wrapPaddingCharacters+=" "
-    done
-
-    wrapStatement='
-    string::wrapWords RETURNED_VALUE '"${wrapTextColumns}"' '"'${wrapPaddingCharacters}'"' '"$((wrapTextColumns - wrapPaddingLength))"''
-  else
-    wrapPaddingLength=0
-  fi
-
-  local printStatement
-  local standardPrintStatement
-  local printfFormat
-  local printfArguments
-
-  # timestamp
-  if [[ ${VALET_CONFIG_LOG_DISABLE_TIME:-} == "true" ]]; then
-    printfFormat+=""
-  elif [[ ${VALET_CONFIG_LOG_ENABLE_TIMESTAMP:-} == "true" ]]; then
-    printfFormat+="%(%F_%H:%M:%S)T "
-    printfArguments+='"${EPOCHSECONDS}" '
-  else
-    printfFormat+="%s%(%H:%M:%S)T "
-    printfArguments+="${cTimestamp@Q}"' "${EPOCHSECONDS}" '
-  fi
-
-  # severity
-  if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} == "true" ]]; then
-    printfFormat+="%s%-8s%-4s%s "
-    printfArguments+='"${color:-}" "${severity}" "${icon:-}" '"${cDefault@Q}"' '
-  else
-    printfFormat+="%s%-8s%s "
-    printfArguments+='"${color:-}" "${severity}" '"${cDefault@Q}"' '
-  fi
-
-  # message
-  printfFormat+="%s\n"
-  printfArguments+='"${RETURNED_VALUE}"'
-
-  if [[ -z ${VALET_CONFIG_LOG_FD:-} || ${#VALET_CONFIG_LOG_FD} == 1 ]]; then
-    # it is a numbered file descriptor
-
-    # clear the line before printing if we are display a progress bar/spinner
-    local cleanStatements='
-    local eraseLine
-    if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" ]]; then
-      eraseLine=$'"'"'\e[2K'"'"'
-    fi
-    '
-    printStatement="${cleanStatements}"'
-    printf "${eraseLine:-}'"${printfFormat}"'" '"${printfArguments}"' 1>&'"${VALET_CONFIG_LOG_FD:-2}"
-    standardPrintStatement="${cleanStatements}"'
-    printf "${eraseLine:-}%s" "${toPrint:-}" 1>&'"${VALET_CONFIG_LOG_FD:-2}"
-  else
-    # it is a file
-    printStatement='
-    printf "'"${printfFormat}"'" '"${printfArguments}"' 1>>'"${VALET_CONFIG_LOG_FD}"
-    standardPrintStatement='
-    printf "%s" "${toPrint:-}" 1>>'"${VALET_CONFIG_LOG_FD}"
-  fi
-
-  # check if we need to additionally output the logs to a file
-  if [[ -n ${VALET_CONFIG_LOG_TO_DIRECTORY:-} ]]; then
-    # compute the name of the output file
-    local logFile
-    if [[ -z ${VALET_CONFIG_LOG_FILENAME_PATTERN:-} ]]; then
-      printf -v logFile "%s%(%F_%Hh%Mm%Ss)T%s" "valet-" "${EPOCHSECONDS}" ".log"
-    else
-      eval "${VALET_CONFIG_LOG_FILENAME_PATTERN}"
-    fi
-    if [[ -n ${logFile:-} ]]; then
-      if [[ ! -d "${VALET_CONFIG_LOG_TO_DIRECTORY}" ]]; then
-        mkdir -p "${VALET_CONFIG_LOG_TO_DIRECTORY}" 1>/dev/null
-      fi
-      # append the log to the file
-      printStatement+='
-      printf "'"${printfFormat}"'" '"${printfArguments}"' 1>>'"${VALET_CONFIG_LOG_TO_DIRECTORY%/}/${logFile}"
-      standardPrintStatement+='
-      printf "%s" "${toPrint:-}" 1>>'"${VALET_CONFIG_LOG_TO_DIRECTORY%/}/${logFile}"
-    fi
-  fi
-
-  # log::printFile function
-  local insideTheLoop='
-        string::wrapCharacters line "${wrapTextColumns}" "${wrapPaddingCharacters}     '"${cDebug:-}"'░'"${cDefault:-}"' " "$((wrapTextColumns - 7 - ${#wrapPaddingCharacters}))"
-        toPrint+="${wrapPaddingCharacters}${lineNumberPadding}'"${cDebug:-}"'${lineNumber} ░'"${cDefault:-}"' ${RETURNED_VALUE}"'"$'\n'"'
-        lineNumber+=1
-        if (( ${#lineNumber} > currentLineNumberLength )); then
-          lineNumberPadding="${lineNumberPadding%?}"
-          currentLineNumberLength+=1
-        fi
-        if (( maxLines != 0 && lineNumber > maxLines )); then
-          toPrint+="${wrapPaddingCharacters}   '"${cDebug:-}"'… ░ (truncated)'"${cDefault:-}"'"'"$'\n'"'
-          break;
-        fi
-  '
-
-  # log::print function
-  GLOBAL_LOG_PRINT_FUNCTION='
-  function log::print() {
-    local colorCode="${1}"
-    local icon="${2}"
-    local severity="${3}"
-    shift 3
-    local IFS='"$'\n'"'
-    RETURNED_VALUE="$*"
-    IFS=" "
-
-    '"${colorStatement}"'
-
-    '"${wrapStatement:-}"'
-
-    '"${printStatement}"'
-  }'
-
-  GLOBAL_LOG_PRINT_FUNCTION+='
-  function log::printFile() {
-    local filePath="${1}"
-    local maxLines="${2:-0}"
-    local wrapTextColumns='"${wrapTextColumns}"'
-    local wrapPaddingCharacters="'"${wrapPaddingCharacters}"'"
-    local line toPrint
-    local lineNumberPadding="   "
-    local -i lineNumber=1 currentLineNumberLength=1
-    if [[ ! -f "${filePath}" ]]; then
-      log::error "Can not print the file ⌜${filePath}⌝ because does not exist."
-      return 1
-    fi
-    local IFS=
-    while IFS= read -r line || [[ -n ${line:-} ]]; do
-      '"${insideTheLoop}"'
-    done <"${filePath}"
-    '"${standardPrintStatement}"'
-  }'
-
-  # log::printFileString function
-  GLOBAL_LOG_PRINT_FUNCTION+='
-  function log::printFileString() {
-    local content="${1}"
-    local maxLines="${2:-0}"
-    local wrapTextColumns='"${wrapTextColumns}"'
-    local wrapPaddingCharacters="'"${wrapPaddingCharacters}"'"
-    local line toPrint
-    local lineNumberPadding="   "
-    local -i lineNumber=1 currentLineNumberLength=1
-    local IFS=
-    while IFS= read -r line; do
-      '"${insideTheLoop}"'
-    done <<<"${content}"
-    '"${standardPrintStatement}"'
-  }'
-
-  # log::printString function
-  GLOBAL_LOG_PRINT_FUNCTION+='
-  function log::printString() {
-    local content="${1}"
-    local wrappedLineLeftPaddingString="${2:-}"
-    local wrapTextColumns='"${wrapTextColumns}"'
-    local wrapPaddingCharacters="'"${wrapPaddingCharacters}"'"
-    local line toPrint
-    local IFS=
-    while IFS= read -r line; do
-        string::wrapCharacters line "${wrapTextColumns}" "${wrapPaddingCharacters}${wrappedLineLeftPaddingString}" "$((wrapTextColumns - ${#wrapPaddingCharacters}))"
-        toPrint+="${wrapPaddingCharacters}${RETURNED_VALUE}"'"$'\n'"'
-    done <<<"${content}"
-    '"${standardPrintStatement}"'
-  }'
-
-  # log::printRaw function
-  # shellcheck disable=SC2089
-  GLOBAL_LOG_PRINT_FUNCTION+='
-  function log::printRaw() {
-    local toPrint="${1}"
-    '"${standardPrintStatement}"'
-  }'
-
+function log::printRaw() {
+  local IFS=$'\n'
+  # shellcheck disable=SC2034
+  local toPrint="$*"
+  # evaluated the print statement built in log::init; it uses the local var toPrint defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
 }
 
 # ## log::error
@@ -649,7 +528,10 @@ function log::createPrintFunction() {
 #
 # > You probably want to exit immediately after an error and should consider using core::fail function instead.
 function log::error() {
-  log::print "ERROR" "${VALET_CONFIG_ICON_ERROR:-$'\uf2d3'}" "ERROR" "$@"
+  local IFS=$'\n'
+  # shellcheck disable=SC2034
+  local loggedLine="$*"
+  log::printInternal "ERROR" "${VALET_CONFIG_ICON_ERROR:-$'\uf2d3'}" "ERROR" loggedLine
   if log::isDebugEnabled; then
     log::printCallStack 2
   fi
@@ -669,7 +551,10 @@ function log::warning() {
   if ((${GLOBAL_LOG_LEVEL_INT:-1} > 3)); then
     return 0
   fi
-  log::print "WARNING" "${VALET_CONFIG_ICON_WARNING:-$'\uf071'}" "WARNING" "$@"
+  local IFS=$'\n'
+  # shellcheck disable=SC2034
+  local loggedLine="$*"
+  log::printInternal "WARNING" "${VALET_CONFIG_ICON_WARNING:-$'\uf071'}" "WARNING" loggedLine
   return 0
 }
 
@@ -687,7 +572,10 @@ function log::success() {
   if ((${GLOBAL_LOG_LEVEL_INT:-1} > 2)); then
     return 0
   fi
-  log::print "SUCCESS" "${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}" "SUCCESS" "$@"
+  local IFS=$'\n'
+  # shellcheck disable=SC2034
+  local loggedLine="$*"
+  log::printInternal "SUCCESS" "${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}" "SUCCESS" loggedLine
   return 0
 }
 
@@ -705,7 +593,10 @@ function log::info() {
   if ((${GLOBAL_LOG_LEVEL_INT:-1} > 1)); then
     return 0
   fi
-  log::print "INFO" "${VALET_CONFIG_ICON_INFO:-$'\uf05a'}" "INFO" "$@"
+  local IFS=$'\n'
+  # shellcheck disable=SC2034
+  local loggedLine="$*"
+  log::printInternal "INFO" "${VALET_CONFIG_ICON_INFO:-$'\uf05a'}" "INFO" loggedLine
   return 0
 }
 
@@ -723,7 +614,10 @@ function log::debug() {
   if ((${GLOBAL_LOG_LEVEL_INT:-1} > 0)); then
     return 0
   fi
-  log::print "DEBUG" "${VALET_CONFIG_ICON_DEBUG:-$'\uf188'}" "DEBUG" "$@"
+  local IFS=$'\n'
+  # shellcheck disable=SC2034
+  local loggedLine="$*"
+  log::printInternal "DEBUG" "${VALET_CONFIG_ICON_DEBUG:-$'\uf188'}" "DEBUG" loggedLine
   return 0
 }
 
@@ -741,7 +635,10 @@ function log::trace() {
   if ((${GLOBAL_LOG_LEVEL_INT:-1} > -1)); then
     return 0
   fi
-  log::print "TRACE" "${VALET_CONFIG_ICON_TRACE:-$'\ue241'}" "TRACE" "$@"
+  local IFS=$'\n'
+  # shellcheck disable=SC2034
+  local loggedLine="$*"
+  log::printInternal "TRACE" "${VALET_CONFIG_ICON_TRACE:-$'\ue241'}" "TRACE" loggedLine
   return 0
 }
 
@@ -758,7 +655,10 @@ function log::trace() {
 # log::errorTrace "This is a debug message."
 # ```
 function log::errorTrace() {
-  log::print "TRACE" "${VALET_CONFIG_ICON_ERROR_TRACE:-$'\uf06e'}" "TRACE" "$@"
+  local IFS=$'\n'
+  # shellcheck disable=SC2034
+  local loggedLine="$*"
+  log::printInternal "TRACE" "${VALET_CONFIG_ICON_ERROR_TRACE:-$'\uf06e'}" "TRACE" loggedLine
   return 0
 }
 
@@ -873,11 +773,10 @@ function log::printCallStack() {
 #
 # - $1: **log pattern** _as string_:
 #       The log pattern to parse.
-#       (defaults to `VALET_CONFIG_LOG_PATTERN` if not provided)
 #
 # Available placeholders:
 #
-# - `<colorXXX>`: The value of the color variable `VALET_CONFIG_COLOR_XXX`.
+# - `<colorXXX>`: The value of the color variable `GLOBAL_THEME_COLOR_XXX`.
 # - `<time>`: The current time formatted with the `format` string.
 # - `<level>`: The log level.
 # - `<levelColor>`: The color for the log level.
@@ -903,7 +802,7 @@ function log::printCallStack() {
 # ```
 # shellcheck disable=SC2120
 function log::parseLogPattern() {
-  local pattern="${1:-${VALET_CONFIG_LOG_PATTERN}}"
+  local pattern="${1}"
 
   RETURNED_VALUE="" # format
   RETURNED_VALUE2="" # arguments
@@ -943,7 +842,7 @@ function log::parseLogPattern() {
     case "${placeHolder}" in
       color*)
         placeHolder="${placeHolder#color}"
-        local -n color="VALET_CONFIG_COLOR_${placeHolder^^}"
+        local -n color="GLOBAL_THEME_COLOR_${placeHolder^^}"
         if [[ -n ${color:-} ]]; then
           printfFormat="%s"
           printfArgument="${color}"
@@ -971,7 +870,7 @@ function log::parseLogPattern() {
         ;;
       var*)
         printfFormat="%${formatSpecifier:-"s"}"
-        printfArgument="\$${placeHolder#var}"
+        printfArgument="\${${placeHolder#var}:-}"
         ;;
       pid)
         printfFormat="%${formatSpecifier:-"-5d"}"
@@ -1001,7 +900,7 @@ function log::parseLogPattern() {
         ;;
       message)
         printfFormat="%s"
-        printfArgument="\${message:-}"
+        printfArgument="\${messageToPrint:-}"
         ;;
     esac
     if [[ -z ${printfFormat} ]]; then
@@ -1017,6 +916,8 @@ function log::parseLogPattern() {
     fi
   done
 
+  RETURNED_VALUE+="\n"
+
   # shellcheck disable=SC2034
   RETURNED_VALUE3="${wrapPaddingLength}"
 }
@@ -1027,11 +928,13 @@ function log::parseLogPattern() {
 #
 # In charge of setting up global variables that will be used to print the logs.
 # We compute them once to avoid recomputing them at each log call.
+# Indeed, each log function might have to output the same log to different file descriptors or files,
+# we don't want to repeat code and we don't want to recompute the same output logic on each function.
 #
 # It uses the following config
 #
 # - ${VALET_CONFIG_LOG_PATTERN}: The pattern used to display a formatted log line.
-# - ${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}: Contains a bash code executed before the print statement, which can be used
+# - ${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}: Contains a bash code executed before the print statement, to further process the variable messageToPrint or define new variables to use in the log pattern.
 #   to compute extra variables that can be used in the log pattern.
 # - ${VALET_CONFIG_LOG_COLUMNS}: The number of columns to use for the log.
 # - ${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT}: true to disable highlight for ⌜⌝.
@@ -1045,16 +948,20 @@ function log::parseLogPattern() {
 #
 # - ${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}: The statement to print the formatted log.
 # - ${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}: The statement to print the standard log.
+# - ${GLOBAL_LOG_WRAP_PADDING}: The string with the number of spaces necessary to align with other log messages.
+# - $[GLOBAL_LOG_COLUMNS}: The number of columns to use for the log.
+# - $[GLOBAL_LOG_DISABLE_WRAP}: true if the log should not be wrapped.
 function log::init() {
-    VALET_CONFIG_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
-    VALET_CONFIG_LOG_FD="${VALET_CONFIG_LOG_FD:-2}"
-    VALET_CONFIG_LOG_PATTERN="${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>"}"
+    GLOBAL_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
+    GLOBAL_LOG_DISABLE_WRAP="${VALET_CONFIG_LOG_DISABLE_WRAP:-false}"
+
+    local logFileDescriptor="${VALET_CONFIG_LOG_FD:-2}"
 
     # we prepare the variables that will be used to print the formatted logs
     local -n printfFormat=RETURNED_VALUE
     local -n printfArguments=RETURNED_VALUE2
     local -n wrapPaddingLength=RETURNED_VALUE3
-    log::parseLogPattern
+    log::parseLogPattern "${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>"}"
 
     # string with the number of spaces necessary to align with other log messages
     if (( wrapPaddingLength > 0 )); then
@@ -1062,9 +969,9 @@ function log::init() {
       eval "local -a array=( {0..$((wrapPaddingLength - 1))} )"
       # shellcheck disable=SC2154
       # shellcheck disable=SC2034
-      local wrapPadding="${array[*]//*/ }"
+      GLOBAL_LOG_WRAP_PADDING="${array[*]//*/ }"
     else
-      local wrapPadding=""
+      GLOBAL_LOG_WRAP_PADDING=""
     fi
 
     # now we build the two statements that can be evaluated to print the logs
@@ -1072,31 +979,32 @@ function log::init() {
     GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG=""
     GLOBAL_LOG_PRINT_STATEMENT_STANDARD=""
 
-    if [[ ${VALET_CONFIG_LOG_DISABLE_WRAP:-false} != "true" ]]; then
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local RETURNED_VALUE"$'\n'"local -n message=RETURNED_VALUE"$'\n'"string::wrapWords \"\${messageVariableName}\" ${VALET_CONFIG_LOG_COLUMNS} \"${wrapPadding}\" $((VALET_CONFIG_LOG_COLUMNS - wrapPaddingLength))"$'\n'
+    if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
+      # define RETURNED_VALUE/RETURNED_VALUE2 as local so we don't impact the parent scope (they are used during parsing)
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local RETURNED_VALUE RETURNED_VALUE2"$'\n'"local -n messageToPrint=RETURNED_VALUE"$'\n'"string::wrapWords \"\${messageVariableName}\" ${GLOBAL_LOG_COLUMNS} \"${GLOBAL_LOG_WRAP_PADDING}\" $((GLOBAL_LOG_COLUMNS - wrapPaddingLength))"$'\n'
     else
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n message=\"\${messageVariableName}\""$'\n'
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n messageToPrint=\"\${messageVariableName}\""$'\n'
     fi
     if [[ ${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT:-false} != "true" ]]; then
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="message=\"\${message//⌜/${VALET_CONFIG_COLOR_ACCENT}⌜}\""$'\n'"message=\"\${message//⌝/⌝${VALET_CONFIG_COLOR_DEFAULT}}\""$'\n'
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="messageToPrint=\"\${messageToPrint//⌜/${GLOBAL_THEME_COLOR_ACCENT}⌜}\""$'\n'"messageToPrint=\"\${messageToPrint//⌝/⌝${GLOBAL_THEME_COLOR_DEFAULT}}\""$'\n'
     fi
     if [[ -v VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL ]]; then
       GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}"$'\n'
     fi
 
     local eraseLineCode eraseLineCode2 outputCode
-    if [[ ${VALET_CONFIG_LOG_FD} == [0-9] ]]; then
+    if [[ ${logFileDescriptor} == [0-9] ]]; then
       # it is a numbered file descriptor
-      outputCode="1>&${VALET_CONFIG_LOG_FD}"
+      outputCode="1>&${logFileDescriptor}"
 
       # clear the line before printing if we are display a progress bar/spinner
-      if [[ -t ${VALET_CONFIG_LOG_FD} ]]; then
+      if [[ -t ${logFileDescriptor} ]]; then
         eraseLineCode="local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'\e[2K'; fi"$'\n'
         eraseLineCode2="\${eraseLine:-}"
       fi
     else
       # it is a file
-      outputCode="1>>\"${VALET_CONFIG_LOG_FD}\""
+      outputCode="1>>\"${logFileDescriptor}\""
     fi
 
     # define the formatted log statement
@@ -1357,11 +1265,11 @@ function string::wrapCharacters() {
 # - $3: highlight ansi code _as string_:
 #       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.
 #       The ANSI code to use for highlighting.
-#       (defaults to VALET_CONFIG_COLOR_HIGHLIGHT)
+#       (defaults to GLOBAL_THEME_COLOR_ACCENT)
 # - $4: reset ansi code _as string_:
 #       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.
 #       The ANSI code to use for resetting the highlighting.
-#       (defaults to VALET_CONFIG_COLOR_DEFAULT)
+#       (defaults to GLOBAL_THEME_COLOR_DEFAULT)
 #
 # Returns:
 #
@@ -1377,8 +1285,8 @@ function string::wrapCharacters() {
 function string::highlight() {
   local -n textToHighlight="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -n charactersToHighlight="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local highlightCode="${3:-${_OPTION_HIGHLIGHT_ANSI:-${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[95m"}}}"
-  local resetCode="${4:-${_OPTION_RESET_ANSI:-${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}}}"
+  local highlightCode="${3:-${_OPTION_HIGHLIGHT_ANSI:-${GLOBAL_THEME_COLOR_ACCENT:-$'\e'"[95m"}}}"
+  local resetCode="${4:-${_OPTION_RESET_ANSI:-${GLOBAL_THEME_COLOR_DEFAULT:-$'\e'"[0m"}}}"
 
   local itemChunk itemChunkPiece
   local -i searchStringIndex=0
@@ -1802,25 +1710,26 @@ function core::getVersion() {
 #
 # Initialize the valet color variables depending on the `VALET_CONFIG_ENABLE_COLORS` variable.
 # Reuse their value if defined or set them to the default value.
+# shellcheck disable=SC2034
 function core::colorInit() {
   if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
-    VALET_CONFIG_COLOR_DEFAULT="${VALET_CONFIG_COLOR_DEFAULT:-$'\e[0m'}"      # Text reset
-    VALET_CONFIG_COLOR_FADED="${VALET_CONFIG_COLOR_FADED:-$'\e[90m'}"         # Bright Black (Gray)
-    VALET_CONFIG_COLOR_ACCENT="${VALET_CONFIG_COLOR_ACCENT:-$'\e[95m'}"       # Bright Magenta (Pink)
-    VALET_CONFIG_COLOR_DEBUG="${VALET_CONFIG_COLOR_DEBUG:-$'\e[90m'}"         # Bright Black (Gray)
-    VALET_CONFIG_COLOR_INFO="${VALET_CONFIG_COLOR_INFO:-$'\e[36m'}"           # Cyan
-    VALET_CONFIG_COLOR_WARNING="${VALET_CONFIG_COLOR_WARNING:-$'\e[33m'}"     # Yellow
-    VALET_CONFIG_COLOR_SUCCESS="${VALET_CONFIG_COLOR_SUCCESS:-$'\e[32m'}"     # Green
-    VALET_CONFIG_COLOR_ERROR="${VALET_CONFIG_COLOR_ERROR:-$'\e[31m'}"         # Red
+    GLOBAL_THEME_COLOR_DEFAULT="${VALET_CONFIG_COLOR_DEFAULT:-$'\e[0m'}"      # Text reset
+    GLOBAL_THEME_COLOR_FADED="${VALET_CONFIG_COLOR_FADED:-$'\e[90m'}"         # Bright Black (Gray)
+    GLOBAL_THEME_COLOR_ACCENT="${VALET_CONFIG_COLOR_ACCENT:-$'\e[95m'}"       # Bright Magenta (Pink)
+    GLOBAL_THEME_COLOR_DEBUG="${VALET_CONFIG_COLOR_DEBUG:-$'\e[90m'}"         # Bright Black (Gray)
+    GLOBAL_THEME_COLOR_INFO="${VALET_CONFIG_COLOR_INFO:-$'\e[36m'}"           # Cyan
+    GLOBAL_THEME_COLOR_WARNING="${VALET_CONFIG_COLOR_WARNING:-$'\e[33m'}"     # Yellow
+    GLOBAL_THEME_COLOR_SUCCESS="${VALET_CONFIG_COLOR_SUCCESS:-$'\e[32m'}"     # Green
+    GLOBAL_THEME_COLOR_ERROR="${VALET_CONFIG_COLOR_ERROR:-$'\e[31m'}"         # Red
   else
-    VALET_CONFIG_COLOR_DEFAULT=""
-    VALET_CONFIG_COLOR_FADED=""
-    VALET_CONFIG_COLOR_ACCENT=""
-    VALET_CONFIG_COLOR_DEBUG=""
-    VALET_CONFIG_COLOR_INFO=""
-    VALET_CONFIG_COLOR_WARNING=""
-    VALET_CONFIG_COLOR_SUCCESS=""
-    VALET_CONFIG_COLOR_ERROR=""
+    GLOBAL_THEME_COLOR_DEFAULT=""
+    GLOBAL_THEME_COLOR_FADED=""
+    GLOBAL_THEME_COLOR_ACCENT=""
+    GLOBAL_THEME_COLOR_DEBUG=""
+    GLOBAL_THEME_COLOR_INFO=""
+    GLOBAL_THEME_COLOR_WARNING=""
+    GLOBAL_THEME_COLOR_SUCCESS=""
+    GLOBAL_THEME_COLOR_ERROR=""
   fi
 }
 
@@ -2026,7 +1935,7 @@ if [[ -t 2 ]]; then
   # shellcheck disable=SC2034
   GLOBAL_SCREEN_REDRAW_REQUIRED=false
   # shellcheck disable=SC2090
-  trap 'tui::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::init; log::createPrintFunction; eval "${GLOBAL_LOG_PRINT_FUNCTION}"' SIGWINCH
+  trap 'tui::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::init' SIGWINCH
 else
   GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}"
   # shellcheck disable=SC2034
@@ -2050,9 +1959,8 @@ if [[ -n ${VALET_CONFIG_LOG_FD:-} ]]; then
   fi
 fi
 
-# Declare the print functions
-log::createPrintFunction
-eval "${GLOBAL_LOG_PRINT_FUNCTION}"
+# Initialize the log system
+log::init
 
 # Parsing the options from environment variables
 if [[ -v VALET_LOG_LEVEL ]]; then

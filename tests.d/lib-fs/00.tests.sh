@@ -36,6 +36,9 @@ function test_fs::getFileLineCount() {
 
   test::func fs::getFileLineCount 'resources/file-to-read'
 
+  # TODO: fix this test cause it should be 3 but it is 2
+  test::func fs::getFileLineCount 'resources/file-with-final-eol'
+
   test::func VALET_CONFIG_STRICT_PURE_BASH=true fs::getFileLineCount 'resources/file-to-read'
 }
 

@@ -211,7 +211,7 @@ function main::getHelpText() {
   else
     cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
     cTitle=${VALET_CONFIG_COLOR_TITLE:-$'\e'"[0;36m"}
-    cHighlight=${VALET_CONFIG_COLOR_HIGHLIGHT:-$'\e'"[0;35m"}
+    cHighlight=${VALET_CONFIG_COLOR_ACCENT:-$'\e'"[0;35m"}
     cOption=${VALET_CONFIG_COLOR_OPTION:-$'\e'"[0;33m"}
     cArgument=${VALET_CONFIG_COLOR_ARGUMENT:-$'\e'"[0;31m"}
     cCommand=${VALET_CONFIG_COLOR_COMMAND:-$'\e'"[0;32m"}

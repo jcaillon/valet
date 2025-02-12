@@ -12,8 +12,8 @@
 
 ```text
 ─────────────────────────────────────
-CINThis is a COLOR CHECK, this line should be COLORED (in cyan by default).CDE
-CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
+[0;36mThis is a COLOR CHECK, this line should be COLORED (in cyan by default).[0m
+[0;32mThis is a COLOR CHECK, this line should be COLORED (in green by default).[0m
 ─────────────────────────────────────
 [2m   ┌─[56b─┐[0m
 [2m░──┤[0m Do you see the colors in the color check above the line? [63G[2m│[0m
@@ -23,10 +23,10 @@ CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
 [2m[9G└─[3b─┘[0m
 ─────────────────────────────────────
 This is a nerd icon check, check out the next lines:
-A cross within a square: IE
-A warning sign: IW
-A checked box: IS
-An information icon: II
+A cross within a square: 
+A warning sign: 
+A checked box: 
+An information icon: 
 ─────────────────────────────────────
 [2m   ┌─[69b─┐[0m
 [2m░──┤[0m Do you correctly see the nerd icons in the icon check above the line? [76G[2m│[0m
@@ -75,8 +75,8 @@ VALET_CONFIG_ENABLE_NERDFONT_ICONS='false'
 ```text
 → echo yy | selfSetup
 ─────────────────────────────────────
-CINThis is a COLOR CHECK, this line should be COLORED (in cyan by default).CDE
-CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
+[0;36mThis is a COLOR CHECK, this line should be COLORED (in cyan by default).[0m
+[0;32mThis is a COLOR CHECK, this line should be COLORED (in green by default).[0m
 ─────────────────────────────────────
 [2m   ┌─[56b─┐[0m
 [2m░──┤[0m Do you see the colors in the color check above the line? [63G[2m│[0m
@@ -86,10 +86,10 @@ CSUThis is a COLOR CHECK, this line should be COLORED (in green by default).CDE
 [2m[9G└─[4b─┘[0m
 ─────────────────────────────────────
 This is a nerd icon check, check out the next lines:
-A cross within a square: IE
-A warning sign: IW
-A checked box: IS
-An information icon: II
+A cross within a square: 
+A warning sign: 
+A checked box: 
+An information icon: 
 ─────────────────────────────────────
 [2m   ┌─[69b─┐[0m
 [2m░──┤[0m Do you correctly see the nerd icons in the icon check above the line? [76G[2m│[0m
@@ -103,13 +103,13 @@ An information icon: II
 
 ```text
 INFO     Now setting up Valet.
-CININFO    II  CDE Creating the valet config file CHI⌜/tmp/valet-temp⌝CDE.
-CSUSUCCESS IS  CDE You are all set!
-CININFO    II  CDE As a reminder, you can modify the configuration done during this set up by either:
-- replaying the command CHI⌜valet self setup⌝CDE,
-- running the command CHI⌜valet self config⌝CDE.
-CININFO    II  CDE Run CHI⌜valet --help⌝CDE to get started.
-CININFO    II  CDE You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ to do so.
+INFO     Creating the valet config file ⌜/tmp/valet-temp⌝.
+SUCCESS  You are all set!
+INFO     As a reminder, you can modify the configuration done during this set up by either:
+- replaying the command ⌜valet self setup⌝,
+- running the command ⌜valet self config⌝.
+INFO     Run ⌜valet --help⌝ to get started.
+INFO     You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ to do so.
 ```
 
 ```text

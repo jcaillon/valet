@@ -26,7 +26,6 @@ INFO     The tag message is:
    4 ░ 
    5 ░ - ✨ feature
    6 ░ - 🐞 fix
-   7 ░ 
 🙈 mocked interactive::promptYesNo Do you want to continue with the release of version 1.2.3? false
 INFO     The current version of valet is: 1.2.3.
 INFO     The bumped version of valet is: 2.0.0.
@@ -56,7 +55,6 @@ INFO     The tag message is:
    4 ░ 
    5 ░ - ✨ feature
    6 ░ - 🐞 fix
-   7 ░ 
 INFO     Generating documentation for the core functions only.
 INFO     Found 156 functions with documentation.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md
