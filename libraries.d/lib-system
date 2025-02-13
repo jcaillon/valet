@@ -4,6 +4,8 @@
 
 # shellcheck source=lib-fs
 source fs
+# shellcheck source=lib-exe
+source exe
 
 # ## system::isRoot
 #
@@ -65,13 +67,12 @@ function system::getOs() {
 #   printf '%s=%s\n' "${var}" "${!var}"
 # done
 # ```
-#
-# > This is faster than using mapfile on <(compgen -v).
 function system::getEnvVars() {
   RETURNED_ARRAY=()
-  for i in $(compgen -v); do
-    RETURNED_ARRAY+=("${i}")
-  done
+  exe::captureOutput compgen -v
+  local IFS=$'\n'
+  # shellcheck disable=SC2206
+  RETURNED_ARRAY+=(${RETURNED_VALUE})
 }
 
 # ## system::addToPath

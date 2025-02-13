@@ -90,6 +90,26 @@ function selfConfig_writeConfigFile() {
 function selfConfig::getFileContent() {
   local exportCurrentValues="${1}"
 
+  # shellcheck disable=SC2016
+  local scriptHeader='#''!/usr/bin/env bash
+# The config script for Valet.
+# shellcheck disable=SC2034
+'
+
+  # shellcheck disable=SC2016
+  local scriptFooter='# source the startup script
+_CONFIG_DIR="${BASH_SOURCE[0]}"
+if [[ "${_CONFIG_DIR}" != /* ]]; then
+  # resolve relative path
+  if pushd "${_CONFIG_DIR%/*}" &>/dev/null; then _CONFIG_DIR="${PWD}"; popd &>/dev/null;
+  else _CONFIG_DIR="${PWD}"; fi
+else
+  _CONFIG_DIR="${_CONFIG_DIR%/*}" strip filename
+fi
+if [[ -f "${_CONFIG_DIR}/startup" ]]; then
+  source "${_CONFIG_DIR}/startup"
+fi
+'
   # shellcheck disable=SC2086
   unset -v ${!EXPORTED_VALET_*}
 

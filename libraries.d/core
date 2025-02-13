@@ -119,7 +119,7 @@ function fs::setupTempFileGlobalVariable() {
   # get unique file names for the stdout, stderr and temporary directory
   # to be fast, we do not create anything until we really need it
   # this could lead to issues, although it is very unlikely
-  GLOBAL_TEMPORARY_DIRECTORY_PREFIX="${TMPDIR:-/tmp}/vt-${BASHPID}"
+  GLOBAL_TEMPORARY_DIRECTORY_PREFIX="${VALET_CONFIG_TEMP_DIRECTORY:-${TMPDIR:-/tmp}}/vt-${BASHPID}"
   GLOBAL_TEMPORARY_FILE_PREFIX="${VALET_CONFIG_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/vt-${BASHPID}"
 
   while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.d" ]]; do
@@ -320,7 +320,7 @@ function log::getLevel() {
   RETURNED_VALUE="${GLOBAL_LOG_LEVEL:-info}"
 }
 
-# ## log::printInternal(private)
+# ## log::printInternal (private)
 #
 # Display log message.
 #
@@ -348,7 +348,7 @@ function log::printInternal() {
   eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
 }
 
-# ## log::print (private)
+# ## log::print
 #
 # Display a log message.
 #
