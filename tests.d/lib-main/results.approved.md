@@ -5,7 +5,7 @@
 ### ✅ Testing main::sortCommands
 
 ```text
-VALET_CONFIG_LOCAL_STATE_DIRECTORY='/tmp/valet.d/d1-2'
+VALET_CONFIG_USER_DATA_DIRECTORY='/tmp/valet.d/d1-2'
 VALET_CONFIG_REMEMBER_LAST_CHOICES='5'
 COMMANDS=(
 [0]='cm1  This is command 1'

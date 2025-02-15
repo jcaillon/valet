@@ -13,7 +13,7 @@ function main() {
   test::title "✅ Testing that valet can be called without any arguments and show the menu"
     # override the local state and config directories to return temp directories
   fs::createTempDirectory
-  export VALET_CONFIG_LOCAL_STATE_DIRECTORY="${RETURNED_VALUE}"
+  export VALET_CONFIG_USER_DATA_DIRECTORY="${RETURNED_VALUE}"
   test::exec main::parseMainArguments
 
 

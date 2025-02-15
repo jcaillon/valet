@@ -240,10 +240,10 @@ You will not find your command in the Valet menu nor will you be able to execute
 
 You first need to let Valet "re-index" all your commands by executing the `self build`.
 
-The build process consists of updating the `~/.valet.d/commands` file by extracting all the commands definitions from your scripts. This file defines variables which are used internally by Valet.
+The build process consists of updating the `~/.local/share/valet/commands` file by extracting all the commands definitions from your scripts. This file defines variables which are used internally by Valet.
 
 {{< callout type="info" >}}
-In case of an issue with your `~/.valet.d/commands` file you might be unable to run the `self build` command. In which case you can execute the build directly by calling `${VALET_HOME}/commands.d/self-build.sh` (`VALET_HOME` being your Valet installation directory).
+In case of an issue with your `~/.local/share/valet/commands` file you might be unable to run the `self build` command. In which case you can execute the build directly by calling `${VALET_HOME}/commands.d/self-build.sh` (`VALET_HOME` being your Valet installation directory).
 {{< /callout >}}
 
 During the build, all files matching `*.sh` will be read by Valet to look for command definitions, and the search is recursive. Hidden directories (starting with a `.`) will be ignored, consider this rule to lower the build time if it becomes too important.

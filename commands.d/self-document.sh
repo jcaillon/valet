@@ -59,7 +59,7 @@ function selfDocument() {
   command::checkParsedResults
 
   # default output to the user directory
-  core::getUserDirectory
+  core::getUserValetDirectory
   output="${output:-${RETURNED_VALUE}}"
 
   selfDocument::getFooter

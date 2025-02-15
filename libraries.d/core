@@ -1685,16 +1685,16 @@ function core::sourceUserCommands() {
   fi
 
   # source the user commands
-  local userDirectory
-  core::getUserDirectory
-  userDirectory="${RETURNED_VALUE}"
+  local stateDirectory
+  core::getUserDataDirectory
+  stateDirectory="${RETURNED_VALUE}"
 
   local commandsFile
-  commandsFile="${userDirectory}/commands"
+  commandsFile="${stateDirectory}/commands"
 
   # if the commands file does not exist, we build it.
   if [[ ! -f "${commandsFile}" ]]; then
-    log::info "The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'"Now silently building it using ⌜valet self build⌝ command."
+    log::info "The commands index does not exist ⌜${stateDirectory}/commands⌝."$'\n'"Now silently building it using ⌜valet self build⌝ command."
 
     # shellcheck disable=SC1091
     unset GLOBAL_CMD_INCLUDED
@@ -1739,8 +1739,8 @@ function core::reloadUserCommands() {
 # core::deleteUserCommands
 # ```
 function core::deleteUserCommands() {
-  core::getUserDirectory
-  rm -f "${RETURNED_VALUE}/commands"
+  core::getUserDataDirectory
+  rm -f "${RETURNED_VALUE}/commands" 1>/dev/null || :
 }
 
 # ## core::getVersion
@@ -1814,10 +1814,32 @@ function core::getConfigurationDirectory() {
   RETURNED_VALUE="${directory}"
 }
 
-# ## core::getLocalStateDirectory
+# ## core::getUserDataDirectory
 #
-# Returns the path to the valet local state directory.
-# The base directory relative to which user-specific state files should be stored.
+# Returns the path to the valet local data directory.
+# Where user-specific data files should be written (analogous to /usr/share).
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the path to the valet local state directory
+#
+# ```bash
+# core::getUserDataDirectory
+# local directory="${RETURNED_VALUE}"
+# ```
+function core::getUserDataDirectory() {
+  local directory
+  directory="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"
+  if [[ ! -d "${directory}" ]]; then
+    mkdir -p "${directory}"
+  fi
+  RETURNED_VALUE="${directory}"
+}
+
+# ## core::getUserCacheDirectory
+#
+# Returns the path to the valet local cache directory.
+# Where user-specific non-essential (cached) data should be written (analogous to /var/cache).
 # Creates it if missing.
 #
 # Returns:
@@ -1825,19 +1847,19 @@ function core::getConfigurationDirectory() {
 # - ${RETURNED_VALUE}: the path to the valet local state directory
 #
 # ```bash
-# core::getLocalStateDirectory
+# core::getUserCacheDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
-function core::getLocalStateDirectory() {
+function core::getUserCacheDirectory() {
   local directory
-  directory="${VALET_CONFIG_LOCAL_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/share}/valet}"
+  directory="${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}"
   if [[ ! -d "${directory}" ]]; then
     mkdir -p "${directory}"
   fi
   RETURNED_VALUE="${directory}"
 }
 
-# ## core::getUserDirectory
+# ## core::getUserValetDirectory
 #
 # Returns the path to the valet user directory.
 # Does not create it if missing.
@@ -1847,11 +1869,11 @@ function core::getLocalStateDirectory() {
 # - ${RETURNED_VALUE}: the path to the valet user directory
 #
 # ```bash
-# core::getUserDirectory
+# core::getUserValetDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
-function core::getUserDirectory() {
-  RETURNED_VALUE="${VALET_CONFIG_USER_DIRECTORY:-${HOME}/.valet.d}"
+function core::getUserValetDirectory() {
+  RETURNED_VALUE="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"
 }
 
 # ## core::setShellOptions (private)

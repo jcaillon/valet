@@ -47,7 +47,7 @@ function main() {
   echo "Built commands:"
   echo "================================================"
   # shellcheck disable=SC1090
-  source ~/.valet.d/commands
+  source ~/.local/share/valet/commands
   local IFS=$'\n'
   echo "${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]}"
   # check if CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY contains "showcase"
@@ -87,7 +87,7 @@ function main() {
   echo "Built commands:"
   echo "================================================"
   # shellcheck disable=SC1090
-  source ~/.valet.d/commands
+  source ~/.local/share/valet/commands
   echo "${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]}"
   # check if CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY contains "showcase"
   if [[ ! ${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]} =~ "extension" ]]; then
@@ -232,7 +232,7 @@ function main() {
   echo "Built commands:"
   echo "================================================"
   # shellcheck disable=SC1090
-  source ~/.valet.d/commands
+  source ~/.local/share/valet/commands
   echo "${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]}"
   # shellcheck disable=SC2086
   unset -v ${!CMD_*}

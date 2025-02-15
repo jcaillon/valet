@@ -78,7 +78,7 @@ Returned code: `1`
 **Error output**:
 
 ```text
-INFO     The valet user directory ⌜/tmp/valet.d/d3-2⌝ does not contain a built ⌜commands⌝ file.
+INFO     The commands index does not exist ⌜/tmp/valet.d/d3-2/commands⌝.
 Now silently building it using ⌜valet self build⌝ command.
 WARNING  Entering interactive mode for the function ⌜selfMock1⌝. This is not yet implemented.
 ERROR    Expecting ⌜1⌝ argument(s) but got ⌜0⌝.

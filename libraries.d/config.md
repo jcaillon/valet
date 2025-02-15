@@ -72,16 +72,20 @@ Default to the `config` file in your config directory.
 
 ### ⚙️ General configuration
 
-#### VALET_CONFIG_USER_DIRECTORY
+#### VALET_CONFIG_USER_VALET_DIRECTORY
 
 The directory in which to find the user commands.
 Defaults to the `.valet.d` directory in the user home directory `${XDG_CONFIG_HOME:-${HOME}}`.
 
-#### VALET_CONFIG_LOCAL_STATE_DIRECTORY
+#### VALET_CONFIG_USER_DATA_DIRECTORY
 
-The path to the directory in which to store the data that should be kept between sessions
-but are not essential for the user configuration (e.g. last choices in menus).
-Defaults to the `${XDG_STATE_HOME}` or the `.local/state` directory in the user home directory.
+The path to the directory in which to store the user-specific data files.
+Defaults to the `${XDG_DATA_HOME}` or the `.local/share` directory in the user home directory.
+
+#### VALET_CONFIG_USER_CACHE_DIRECTORY
+
+The path to the directory in which to store the cache data.
+Defaults to the `${XDG_CACHE_HOME}` or the `.cache` directory in the user home directory.
 
 #### VALET_CONFIG_TEMP_DIRECTORY
 

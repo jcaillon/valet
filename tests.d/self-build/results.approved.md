@@ -4,7 +4,7 @@
 
 ### ✅ Testing self-build script
 
-❯ `$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-build.sh --output /tmp/valet-temp --core-only`
+❯ `$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-build.sh --output /tmp/valet.d/d1-2 --core-only`
 
 **Error output**:
 
@@ -73,7 +73,7 @@ self extend         Extends Valet by creating or downloading a new extension in 
 self test           Test your valet custom commands.
 self update         Update valet and its extensions to the latest releases.
 
-INFO     The command definition variables have been written to ⌜/tmp/valet-temp⌝.
+INFO     The command definition variables have been written to ⌜/tmp/valet.d/d1-2/commands⌝.
 SUCCESS  The valet user commands have been successfully built.
 ```
 

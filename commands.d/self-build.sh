@@ -43,9 +43,9 @@ set -Eeu -o pipefail
 #     Build only the core commands (under commands.d).
 # - name: -o, --output <path>
 #   description: |-
-#     Specify the file path in which to write the command definition variables.
+#     Specify the directory path in which to write the command definition variable files.
 #
-#     This defaults to the ⌜commands⌝ file in your Valet user directory.
+#     This defaults to your user data folder `~/.local/share/valet`.
 # - name: -O, --no-output
 #   description: |-
 #     Do not write the command definition variables to a file.
@@ -63,7 +63,7 @@ set -Eeu -o pipefail
 #     Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
 ##VALET_COMMAND
 function selfBuild() {
-  local userDirectory output coreOnly noOutput silent
+  local userValetDirectory output coreOnly noOutput silent
 
   # if this script is run directly
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || ! -v GLOBAL_CMD_INCLUDED ]]; then
@@ -72,7 +72,7 @@ function selfBuild() {
       case "${1}" in
       -d | --user-directory)
         shift
-        userDirectory="${1}"
+        userValetDirectory="${1}"
         ;;
       -o | --output)
         shift
@@ -121,9 +121,13 @@ function selfBuild() {
     fi
   fi
 
-  core::getUserDirectory
-  userDirectory="${userDirectory:-${RETURNED_VALUE}}"
-  output="${output:-${userDirectory}/commands}"
+  core::getUserValetDirectory
+  userValetDirectory="${userValetDirectory:-${RETURNED_VALUE}}"
+
+  if [[ -z ${output:-} ]]; then
+    core::getUserDataDirectory
+    output="${RETURNED_VALUE}"
+  fi
 
   fs::toAbsolutePath "${GLOBAL_INSTALLATION_DIRECTORY}"
   GLOBAL_INSTALLATION_DIRECTORY="${RETURNED_VALUE}"
@@ -139,17 +143,20 @@ function selfBuild() {
     log::info "Added the test commands to the build."
   fi
   if [[ ${coreOnly:-} != "true" ]]; then
-    if [[ -d "${userDirectory}" ]]; then
-      log::info "Building the valet user commands from extensions in the user directory ⌜${userDirectory}⌝."
+    if [[ -d "${userValetDirectory}" ]]; then
+      log::info "Building the valet user commands from extensions in the user directory ⌜${userValetDirectory}⌝."
       local extensionsDirectory
-      for extensionsDirectory in "${userDirectory}"/*; do
+      for extensionsDirectory in "${userValetDirectory}"/*; do
         if [[ ! -d ${extensionsDirectory} && ${extensionsDirectory} != "."* ]]; then
           continue
+        fi
+        if [[ -d ${extensionsDirectory}/libraries.d ]]; then
+          libraryDirectories+=("${extensionsDirectory}/libraries.d")
         fi
         commandDefinitionFiles+=("${extensionsDirectory}/commands.d"/*.sh)
       done
     else
-      log::warning "Skipping the build of scripts in user directory ⌜${userDirectory}⌝ because it does not exist."
+      log::warning "Skipping the build of scripts in user directory ⌜${userValetDirectory}⌝ because it does not exist."
     fi
   else
     log::info "Skipping the build of scripts in user directory (building core commands only)."
@@ -181,8 +188,8 @@ function selfBuild() {
   fi
 
   if [[ ${noOutput:-} != "true" ]]; then
-    selfBuild_writeCommandDefinitionVariablesToFile "${output}"
-    log::info "The command definition variables have been written to ⌜${output}⌝."
+    selfBuild_writeCommandDefinitionVariablesToFile "${output}/commands"
+    log::info "The command definition variables have been written to ⌜${output}/commands⌝."
   fi
 
   if [[ ${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-false} == "true" ]]; then

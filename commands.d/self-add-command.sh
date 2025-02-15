@@ -54,7 +54,7 @@ function selfAddCommand() {
   fi
 
   # check if we are working for an extension
-  core::getUserDirectory
+  core::getUserValetDirectory
   if [[ ${PWD} != "${RETURNED_VALUE}"* && ! -d "commands.d" ]]; then
     log::warning "The current directory is not under the valet user directory ⌜${RETURNED_VALUE}⌝."
     if ! interactive::promptYesNo "It does not look like the current directory ⌜${PWD}⌝ is a valet extension, do you want to proceed anyway?" true; then

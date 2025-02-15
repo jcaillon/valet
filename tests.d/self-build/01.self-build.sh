@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# shellcheck source=../../libraries.d/lib-fs
+source fs
+
 function main() {
   test::title "✅ Testing self-build script"
 
@@ -9,7 +12,8 @@ function main() {
     chmod +x "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-build.sh"
   fi
 
-  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-build.sh" --output "${GLOBAL_TEST_TEMP_FILE}" --core-only
+  fs::createTempDirectory
+  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-build.sh" --output "${RETURNED_VALUE}" --core-only
 }
 
 main

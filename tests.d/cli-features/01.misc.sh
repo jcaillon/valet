@@ -20,10 +20,10 @@ function main() {
 
   test::title "✅ Testing the bad commands"
   fs::createTempDirectory
-  export VALET_CONFIG_USER_DIRECTORY="${RETURNED_VALUE}"
-  echo "fu=\$((1/0))" >"${VALET_CONFIG_USER_DIRECTORY}/commands"
+  export VALET_CONFIG_USER_DATA_DIRECTORY="${RETURNED_VALUE}"
+  echo "fu=\$((1/0))" >"${VALET_CONFIG_USER_DATA_DIRECTORY}/commands"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
-  rm -f "${VALET_CONFIG_USER_DIRECTORY}/commands"
+  rm -f "${VALET_CONFIG_USER_DATA_DIRECTORY}/commands"
 
   test::title "✅ Testing empty user directory rebuilding the commands"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1

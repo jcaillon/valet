@@ -46,10 +46,12 @@ function selfUninstall() {
     fi
     core::getConfigurationDirectory
     local configurationDirectory="${RETURNED_VALUE}"
-    core::getLocalStateDirectory
-    local localStateDirectory="${RETURNED_VALUE}"
-    core::getUserDirectory
-    local userDirectory="${RETURNED_VALUE}"
+    core::getUserDataDirectory
+    local userDataDirectory="${RETURNED_VALUE}"
+    core::getUserValetDirectory
+    local userValetDirectory="${RETURNED_VALUE}"
+    core::getUserCacheDirectory
+    local userCacheDirectory="${RETURNED_VALUE}"
 
     # shellcheck disable=SC2016
     echo '#!/usr/bin/env bash
@@ -57,10 +59,12 @@ function selfUninstall() {
 rm -Rf "'"${GLOBAL_INSTALLATION_DIRECTORY}"'"
 # remove the user configuration
 rm -Rf "'"${configurationDirectory}"'"
-# remove the user state
-rm -Rf "'"${localStateDirectory}"'"
+# remove the user data
+rm -Rf "'"${userDataDirectory}"'"
+# remove the user cache
+rm -Rf "'"${userCacheDirectory}"'"
 # remove the user directory
-rm -Rf "'"${userDirectory}"'"
+rm -Rf "'"${userValetDirectory}"'"
 # remove a possible symlink
 rm -f "'"$(which valet)"'" 2>/dev/null || :
 echo "Valet has been uninstalled."

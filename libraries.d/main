@@ -657,7 +657,7 @@ function main::sortCommands() {
   fi
 
   local lastChoicesFile
-  core::getLocalStateDirectory
+  core::getUserDataDirectory
   lastChoicesFile="${RETURNED_VALUE}/last-choices-${menuId}"
   if [[ ! -f "${lastChoicesFile}" ]]; then
     return 0
@@ -728,7 +728,7 @@ function main::addLastChoice() {
   # load last choices from the file into an array
   local lastChoicesFile
   local -a lastChoices
-  core::getLocalStateDirectory
+  core::getUserDataDirectory
   lastChoicesFile="${RETURNED_VALUE}/last-choices-${menuId}"
   if [[ -f "${lastChoicesFile}" ]]; then
     readarray -d $'\n' -t lastChoices <"${lastChoicesFile}"
