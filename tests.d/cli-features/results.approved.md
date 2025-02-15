@@ -17,17 +17,75 @@ DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 ```
 
-### ✅ Testing empty user directory rebuilding the commands
+### ✅ Testing the bad config
 
-❯ `VALET_LOG_LEVEL=warning valet self mock1 logging-level`
+❯ `valet self mock1`
+
+Returned code: `1`
 
 **Error output**:
 
 ```text
-WARNING  Skipping the build of scripts in user directory ⌜/tmp/valet.d/d3-2/non-existing⌝ because it does not exist.
-TRACE    This is an error trace message which is always displayed.
-WARNING  This is a warning message.
-With a second line.
+/tmp/valet.valet.d/config: line 1: 1/0: division by 0 (error token is "0")
+ERROR    Error code 1 in source(), stack:
+├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:47
+└─ in main() at valet:95
+TRACE    Error sourcing the configuration file ⌜/tmp/valet.valet.d/config⌝.
+Check the file for error and try again, or delete the file to discard your config.
+```
+
+### ✅ Testing the bad .env
+
+❯ `valet self mock1`
+
+Returned code: `1`
+
+**Error output**:
+
+```text
+.env: line 1: 1/0: division by 0 (error token is "0")
+ERROR    Error code 1 in source(), stack:
+├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:54
+└─ in main() at valet:95
+TRACE    Error sourcing the env file ⌜.env⌝.
+Check the file for error and try again, or delete the file to discard your config.
+```
+
+### ✅ Testing the bad commands
+
+❯ `valet self mock1`
+
+Returned code: `1`
+
+**Error output**:
+
+```text
+/tmp/valet.d/d3-2/commands: line 1: 1/0: division by 0 (error token is "0")
+ERROR    Error code 1 in core::sourceUserCommands(), stack:
+├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:1714
+├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:121
+└─ in main() at valet:95
+TRACE    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.
+Please rebuild it using the ⌜valet self build⌝ command.
+```
+
+### ✅ Testing empty user directory rebuilding the commands
+
+❯ `valet self mock1`
+
+Returned code: `1`
+
+**Error output**:
+
+```text
+INFO     The valet user directory ⌜/tmp/valet.d/d3-2⌝ does not contain a built ⌜commands⌝ file.
+Now silently building it using ⌜valet self build⌝ command.
+WARNING  Entering interactive mode for the function ⌜selfMock1⌝. This is not yet implemented.
+ERROR    Expecting ⌜1⌝ argument(s) but got ⌜0⌝.
+Use ⌜valet self mock1 --help⌝ to get help.
+
+Usage:
+valet [global options] self mock1 [options] [--] <action>
 ```
 
 ## Test script 02.traps
@@ -44,8 +102,8 @@ Returned code: `1`
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 ERROR    Error code 1 in selfMock1(), stack:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:54
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:571
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:427
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:533
+├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:391
 └─ in main() at valet:100
 ```
 
@@ -62,8 +120,8 @@ WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:1
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:571
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:427
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:533
+├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:391
 └─ in main() at valet:100
 ```
 
@@ -105,8 +163,8 @@ ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
 ERROR    Error code 1 in selfMock1(), stack:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:72
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:571
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:427
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:533
+├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:391
 └─ in main() at valet:100
 ```
 

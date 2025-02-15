@@ -80,7 +80,7 @@ function sfzf::show() {
   trap 'onResize;' SIGWINCH
 
   # still need to handle the exit, but we also need to reset the terminal when exiting.
-  trap 'tui::switchBackFromFullScreen; main::onExitInternal;' EXIT
+  trap 'tui::switchBackFromFullScreen; trap::onExitInternal;' EXIT
 
   # interrupting closes the interactive session
   trap 'SFZF_CLOSE_INTERACTIVE_SESSION=true;' SIGINT SIGQUIT

@@ -90,7 +90,7 @@ function bash::runInParallel() {
   for ((index = 0; index < ${#jobNames[@]}; index++)); do
     eval "{
       : ID=${index};
-      main::unregisterTraps;
+      trap::unregister;
       ${jobCommands[index]};
     } &"
     _BASH_RUNNING_JOB_PIDS+=("${!}")

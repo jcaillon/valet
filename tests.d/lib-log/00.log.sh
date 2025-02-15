@@ -35,6 +35,8 @@ function main() {
   test::exec log::init
   test::exec core::colorInit
   test_log
+
+  rm -Rf "tmp"
 }
 
 function test_log::init() {

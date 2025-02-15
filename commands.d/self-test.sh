@@ -321,7 +321,7 @@ function selfTest_runSingleTestSuite() {
   local testSuiteDirectory="${1}"
 
   core::setShellOptions
-  main::unregisterTraps
+  trap::unregister
 
   GLOBAL_TEST_SUITE_NAME="${testSuiteDirectory##*/}"
   local testsDotDirectory="${testSuiteDirectory%/*}"

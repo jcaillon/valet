@@ -13,61 +13,6 @@ if [ ${BASH_VERSINFO:-0} -lt 5 ]; then
   exit 1
 fi
 
-# ## core::setShellOptions (private)
-#
-# Set the important shell attributes to ensure consistency in execution (-enable, +disable).
-#
-# ```bash
-# core::setShellOptions
-# ```
-function core::setShellOptions() {
-  # -pipefail: the $? of a pipeline is the status of the last command to exit with a non-zero status
-  # -braceexpand: {1..3} will be expanded to 1 2 3
-  # -errexit: exit immediately if a command exits with a non-zero status
-  # -errtrace: ERR trap is inherited in subshell
-  # -functrace: DEBUG and RETURN traps are inherited in subshell
-  # -nounset: exit when script tries to use undeclared variables
-  # -hashall: enable hashing of all commands (for performance)
-  # +histexpand: disable history expansion
-  # +monitor: disable job control monitor (will not report status of background jobs)
-  # +noclobber: enable overwriting files during redirection
-  # +noglob: enable filename expansion (globbing)
-  # +notify: disable immediate report status of background jobs
-  set -o pipefail -o braceexpand -o errexit -o errtrace -o functrace -o nounset -o hashall +o histexpand +o monitor +o noclobber +o noglob +o notify
-  # -globasciiranges: use C locale for [] character ranges in match patterns
-  # +checkwinsize: do not check the window size after each external command
-  # +dotglob: disable inclusion of hidden files in filename expansion
-  # +expand_aliases: disable alias expansion
-  # +nocasematch: disable case-insensitive matching
-  shopt -s extquote globasciiranges huponexit interactive_comments progcomp
-  shopt -u assoc_expand_once cdable_vars checkhash checkjobs checkwinsize compat31 compat32 compat40 compat41 compat42 compat43 compat44 globstar localvar_inherit localvar_unset nocaseglob nocasematch progcomp_alias shift_verbose xpg_echo nullglob direxpand dirspell dotglob extglob failglob execfail expand_aliases inherit_errexit
-  if (( BASH_VERSINFO[1] >= 2)); then
-    shopt -s globskipdots
-    # we disable newer options for compatibility with older versions
-    shopt -u varredir_close patsub_replacement
-  fi
-
-  # remove all aliases
-  # unalias -a
-
-  # default IFS
-  IFS=' '$'\t'$'\n'
-
-  # Set a locale otherwise we will face inconsistencies in the output of commands:
-  # - file listing will not sort the same way
-  # - string comparison < and > will not have the same behavior
-  # - `EPOCHREALTIME` can output with a comma as decimal separator instead of a dot
-  # - ...
-  # If the user does not have the locale, they will get a warning here.
-  # In which case they must either generate the locale C.utf8 or set an existing locale
-  # listed in `locale -a` via the VALET_CONFIG_LOCALE environment variable.
-  LC_ALL="${VALET_CONFIG_LOCALE:-C.UTF-8}"
-  LANG="${LC_ALL}"
-}
-
-# set different options for the shell, to have consistent behavior on all machines
-core::setShellOptions
-
 if [[ -v GLOBAL_CORE_INCLUDED ]] && command -v log::warning &>/dev/null; then
   log::warning "The core library has already been included but was called again, remove the unnecessary call."
   log::printCallStack
@@ -77,38 +22,142 @@ fi
 # we check for this variable to know if this script has already been included
 GLOBAL_CORE_INCLUDED=1
 
-# Remember the time the program started (nb of seconds since epoch)
-GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
-GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
+#===============================================================
+# >>> Traps
+#===============================================================
 
-# Remember the original working directory
-GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
-
-# Handle the case where this script was invoked outside of valet
-if [[ ! -v GLOBAL_INSTALLATION_DIRECTORY ]]; then
-  GLOBAL_INSTALLATION_DIRECTORY="${BASH_SOURCE[0]}"
-  if [[ "${GLOBAL_INSTALLATION_DIRECTORY}" != /* ]]; then
-    # resolve relative path
-    if pushd "${GLOBAL_INSTALLATION_DIRECTORY%/*}" &>/dev/null; then
-      GLOBAL_INSTALLATION_DIRECTORY="${PWD}"
-      popd 1>/dev/null
-    else GLOBAL_INSTALLATION_DIRECTORY="${PWD}"; fi
-  else
-    GLOBAL_INSTALLATION_DIRECTORY="${GLOBAL_INSTALLATION_DIRECTORY%/*}" # strip filename
+# This function is called when a command or pipeline returns a non-zero exit status.
+function trap::onErrorInternal() {
+  if [[ ${GLOBAL_ERROR_DISPLAYED:-0} == "1" ]]; then
+    return 0
   fi
-  GLOBAL_INSTALLATION_DIRECTORY="${GLOBAL_INSTALLATION_DIRECTORY%/*}" # strip libraries.d directory
-fi
+  if [[ -n ${FUNCNAME[1]:-} ]]; then
+    log::error "Error code ${1} in ${FUNCNAME[1]:-}(), stack:"
+    log::printCallStack 2
+  else
+    log::error "Error code ${1} in the main program."
+  fi
+  GLOBAL_ERROR_DISPLAYED=1
+}
 
-# First thing we do is to source the valet configuration from the user config dir
-# This file can be used to override the default configuration by setting VALET_* env variables.
-GLOBAL_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
-if [[ -f ${GLOBAL_CONFIG_FILE} ]]; then
-  builtin source "${GLOBAL_CONFIG_FILE}"
-fi
-# Same with the env script
-if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_SCRIPT:-.env} ]]; then
-  builtin source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
-fi
+# This function is called when the program exits (on error, on success, on exit, on interrupt).
+function trap::onExitInternal() {
+  local rc=$?
+
+  log::debug "Exiting with code ${rc} after ${SECONDS}s."
+  if command -v onExit &>/dev/null; then
+    onExit "${rc}"
+  fi
+
+  # always call cleanUp before exiting
+  trap::onCleanUpInternal
+
+  if [[ ${GLOBAL_ERROR_DISPLAYED:-0} != "1" && ${rc} != "0" ]]; then
+    log::print "ERROR" "${VALET_CONFIG_ICON_EXIT:-$'\uf14c'}" "EXIT" "Exiting with code ${rc}, stack:"
+    log::printCallStack 2
+    GLOBAL_ERROR_DISPLAYED=1
+  fi
+
+  if [[ -n ${GLOBAL_ON_EXIT_MESSAGE:-} ]]; then
+    log::errorTrace "${GLOBAL_ON_EXIT_MESSAGE}"
+  fi
+}
+
+# This function is called when the program is interrupted by the user (CTRL+C).
+function trap::onInterruptInternal() {
+  if ! command -v tui::restoreTerminalOptions &>/dev/null; then
+    printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
+  fi
+  log::print "WARNING" "${VALET_CONFIG_ICON_STOPPED:-$'\uf256'}" "STOPPED" "Program interrupted by the user."
+
+  if log::isDebugEnabled; then
+    log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:"
+    log::printCallStack 2
+  fi
+
+  # check if the function exists
+  if command -v onInterrupt &>/dev/null; then
+    if onInterrupt; then
+      # if onInterrupt returns 0, then we cancel the interrupt
+      return 0
+    fi
+  fi
+  # reset the trap to not call this function again
+  trap ':' SIGINT SIGQUIT
+  exit 1
+}
+
+# This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
+function trap::onTerminateInternal() {
+  log::print "ERROR" "${VALET_CONFIG_ICON_KILLED:-$'\uf05e'}" "KILLED" "Program killed."
+  # check if the function exists
+  if command -v onTerminate 1>/dev/null 2>&1; then
+    if onTerminate; then
+      # if onTerminate returns 0, then we cancel the termination
+      return 0
+    fi
+  fi
+  # reset the trap to not call this function again
+  trap ':' SIGHUP SIGTERM
+  exit 1
+}
+
+function trap::register() {
+  trap 'trap::onErrorInternal $?' ERR
+  trap trap::onExitInternal EXIT
+  # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
+  trap trap::onInterruptInternal SIGINT SIGQUIT
+  # Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
+  trap trap::onTerminateInternal SIGHUP SIGTERM
+}
+
+function trap::unregister() {
+  trap ERR
+  trap EXIT
+  trap SIGINT; trap SIGQUIT
+  trap SIGHUP; trap SIGTERM
+}
+
+# This functions is called before the program exits (in all cases, error or not).
+function trap::onCleanUpInternal() {
+  fs::cleanTempFiles
+
+  # disable the profiler if still on
+  if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
+
+  # kill background job if still running
+  if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
+    kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
+  fi
+
+  # if we ran an interactive function, make sure to restore the cursor
+  if [[ -t 2 && -n ${AC__CURSOR_SHOW:-} ]]; then
+    printf '%s' "${AC__CURSOR_SHOW}" 1>&2
+  fi
+
+  # call the clean up functions if they exist
+  if command -v cleanUp 1>/dev/null 2>&1; then
+    cleanUp
+  fi
+
+  # restore tty settings if needed
+  if command -v tui::restoreTerminalOptions &>/dev/null; then
+    tui::restoreTerminalOptions true
+  fi
+}
+
+# Function to handle commands not found, so we can display a better message.
+# The name of this function is a bash convention.
+function command_not_found_handle() {
+  if [[ ${1:-} == "curl" ]]; then
+    core::fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
+  fi
+  # if the command contains :: it is one of our function, we can suggest to source the 'package'
+  if [[ ${1} == *::* ]]; then
+    core::fail "Command not found: ⌜${1}⌝."$'\n'"Did you forget to source the package? ⌜source ${1%%::*}⌝"
+  fi
+  core::fail "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
+}
 
 #===============================================================
 # >>> Temporary files and folders
@@ -214,7 +263,7 @@ function fs::createTempDirectory() {
 # ```
 # shellcheck disable=SC2016
 function fs::cleanTempFiles() {
-  if [[ -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
+  if [[ -d ${GLOBAL_TEMPORARY_DIRECTORY:-} ]]; then
     log::debug "Deleting temporary directory."
     rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null || :
   fi
@@ -222,7 +271,10 @@ function fs::cleanTempFiles() {
     log::debug "Deleting temporary windows directory."
     rm -Rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" 1>/dev/null || :
   fi
-  rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* &>/dev/null || :
+  if [[ -n ${GLOBAL_TEMPORARY_FILE_PREFIX:-} ]]; then
+    log::debug "Deleting temporary files."
+    rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* 1>/dev/null || :
+  fi
   unset -v TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
 }
 
@@ -243,6 +295,7 @@ function fs::cleanTempFiles() {
 # tui::getTerminalSize
 # printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
 # ```
+# shellcheck disable=SC2034
 function tui::getTerminalSize() {
   shopt -s checkwinsize
   # the following subshell is required to correctly compute the columns and lines
@@ -1641,7 +1694,7 @@ function core::sourceUserCommands() {
 
   # if the commands file does not exist, we build it.
   if [[ ! -f "${commandsFile}" ]]; then
-    log::info "The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'"Now building it using ⌜valet self build⌝ command."
+    log::info "The valet user directory ⌜${userDirectory}⌝ does not contain a built ⌜commands⌝ file."$'\n'"Now silently building it using ⌜valet self build⌝ command."
 
     # shellcheck disable=SC1091
     unset GLOBAL_CMD_INCLUDED
@@ -1657,7 +1710,9 @@ function core::sourceUserCommands() {
   log::debug "Sourcing the user commands from ⌜${commandsFile}⌝."
 
   # source commands (use builtin to not use our custom source function)
+  GLOBAL_ON_EXIT_MESSAGE="Error sourcing the commands file ⌜${commandsFile}⌝."$'\n'"Please rebuild it using the ⌜valet self build⌝ command."
   builtin source "${commandsFile}"
+  unset -v GLOBAL_ON_EXIT_MESSAGE
 }
 
 # ## core::reloadUserCommands (private)
@@ -1799,6 +1854,58 @@ function core::getUserDirectory() {
   RETURNED_VALUE="${VALET_CONFIG_USER_DIRECTORY:-${HOME}/.valet.d}"
 }
 
+# ## core::setShellOptions (private)
+#
+# Set the important shell attributes to ensure consistency in execution (-enable, +disable).
+#
+# ```bash
+# core::setShellOptions
+# ```
+function core::setShellOptions() {
+  # -pipefail: the $? of a pipeline is the status of the last command to exit with a non-zero status
+  # -braceexpand: {1..3} will be expanded to 1 2 3
+  # -errexit: exit immediately if a command exits with a non-zero status
+  # -errtrace: ERR trap is inherited in subshell
+  # -functrace: DEBUG and RETURN traps are inherited in subshell
+  # -nounset: exit when script tries to use undeclared variables
+  # -hashall: enable hashing of all commands (for performance)
+  # +histexpand: disable history expansion
+  # +monitor: disable job control monitor (will not report status of background jobs)
+  # +noclobber: enable overwriting files during redirection
+  # +noglob: enable filename expansion (globbing)
+  # +notify: disable immediate report status of background jobs
+  set -o pipefail -o braceexpand -o errexit -o errtrace -o functrace -o nounset -o hashall +o histexpand +o monitor +o noclobber +o noglob +o notify
+  # -globasciiranges: use C locale for [] character ranges in match patterns
+  # +checkwinsize: do not check the window size after each external command
+  # +dotglob: disable inclusion of hidden files in filename expansion
+  # +expand_aliases: disable alias expansion
+  # +nocasematch: disable case-insensitive matching
+  shopt -s extquote globasciiranges huponexit interactive_comments progcomp
+  shopt -u assoc_expand_once cdable_vars checkhash checkjobs checkwinsize compat31 compat32 compat40 compat41 compat42 compat43 compat44 globstar localvar_inherit localvar_unset nocaseglob nocasematch progcomp_alias shift_verbose xpg_echo nullglob direxpand dirspell dotglob extglob failglob execfail expand_aliases inherit_errexit
+  if (( BASH_VERSINFO[1] >= 2)); then
+    shopt -s globskipdots
+    # we disable newer options for compatibility with older versions
+    shopt -u varredir_close patsub_replacement
+  fi
+
+  # remove all aliases
+  # unalias -a
+
+  # default IFS
+  IFS=' '$'\t'$'\n'
+
+  # Set a locale otherwise we will face inconsistencies in the output of commands:
+  # - file listing will not sort the same way
+  # - string comparison < and > will not have the same behavior
+  # - `EPOCHREALTIME` can output with a comma as decimal separator instead of a dot
+  # - ...
+  # If the user does not have the locale, they will get a warning here.
+  # In which case they must either generate the locale C.utf8 or set an existing locale
+  # listed in `locale -a` via the VALET_CONFIG_LOCALE environment variable.
+  LC_ALL="${VALET_CONFIG_LOCALE:-C.UTF-8}"
+  LANG="${LC_ALL}"
+}
+
 #===============================================================
 # >>> Command functions
 #===============================================================
@@ -1911,66 +2018,19 @@ function command::checkParsedResults() {
 # >>> Main
 #===============================================================
 
-# Setup global variables that will be used for temporary files and folders.
-fs::setupTempFileGlobalVariable
-
-core::resetIncludedLibraries
-
-# Since we use _OPTION_* variables to pass optional options to functions, we want to make sure
-# to not create collisions so we unset them here.
-unset -v ${!_OPTION_*}
-
-# determine if we support colors (can be overridden by the user with VALET_CONFIG_ENABLE_COLORS)
-case "${TERM:-}" in
-xterm-color | xterm-256color | linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}" ;;
-xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
-*) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
-esac
-# set the colors (either to default, user defined or empty values)
-core::colorInit
-
-# Export terminal size on window resize if we are in interactive mode.
-if [[ -t 2 ]]; then
-  tui::getTerminalSize
-  # shellcheck disable=SC2034
-  GLOBAL_SCREEN_REDRAW_REQUIRED=false
-  # shellcheck disable=SC2090
-  trap 'tui::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::init' SIGWINCH
-else
-  GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}"
-  # shellcheck disable=SC2034
-  GLOBAL_LINES="${VALET_CONFIG_DEFAULT_LINES:-30}"
-fi
-
-# make sure the file descriptor (if any) is valid
-if [[ -n ${VALET_CONFIG_LOG_FD:-} ]]; then
-  _CORE_VALID_FD=false
-  if [[ "${VALET_CONFIG_LOG_FD}" != [0-9] ]]; then
-    # it is a file
-    if { : >>"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
-      _CORE_VALID_FD=true
-    fi
-  elif { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
-    _CORE_VALID_FD=true
+# Set GLOBAL_INSTALLATION_DIRECTORY if not already set (case where core was included outside valet)
+if [[ ! -v GLOBAL_INSTALLATION_DIRECTORY ]]; then
+  GLOBAL_INSTALLATION_DIRECTORY="${BASH_SOURCE[0]}"
+  if [[ "${GLOBAL_INSTALLATION_DIRECTORY}" != /* ]]; then
+    # resolve relative path
+    if pushd "${GLOBAL_INSTALLATION_DIRECTORY%/*}" &>/dev/null; then
+      GLOBAL_INSTALLATION_DIRECTORY="${PWD}"
+      popd 1>/dev/null
+    else GLOBAL_INSTALLATION_DIRECTORY="${PWD}"; fi
+  else
+    GLOBAL_INSTALLATION_DIRECTORY="${GLOBAL_INSTALLATION_DIRECTORY%/*}" # strip filename
   fi
-  if [[ ${_CORE_VALID_FD} != "true" ]]; then
-    printf '%s\n' "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${_ORIGINAL_FD}⌝."
-    exit 1
-  fi
-fi
-
-# Initialize the log system
-log::init
-
-# Parsing the options from environment variables
-if [[ -v VALET_LOG_LEVEL ]]; then
-  log::setLevel "${VALET_LOG_LEVEL}"
-fi
-if [[ ${VALET_VERBOSE:-} == "true" ]]; then
-  log::setLevel debug
-fi
-if [[ ${VALET_VERY_VERBOSE:-} == "true" ]]; then
-  log::setLevel trace
+  GLOBAL_INSTALLATION_DIRECTORY="${GLOBAL_INSTALLATION_DIRECTORY%/*}" # strip libraries.d directory
 fi
 
 # Include main if not already included

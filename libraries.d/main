@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -Eeu -o pipefail
 # Title:          libraries.d/main
 # Description:    this script contains the main code for our bash programs and
 #                 it should be sourced, not called directly
@@ -8,153 +7,118 @@ set -Eeu -o pipefail
 # we check for this variable to know if this script has already been included
 GLOBAL_MAIN_INCLUDED=1
 
+# Include core if not already included
 if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   # shellcheck source=core
   source "${BASH_SOURCE[0]%/*}/core"
 fi
 
-#===============================================================
-# >>> Event handling
-#===============================================================
+# Remember the time the program started (nb of seconds since epoch)
+GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
+GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
 
-# This function is called when a command or pipeline returns a non-zero exit status.
-function main::onErrorInternal() {
-  if [[ ${GLOBAL_ERROR_DISPLAYED:-0} == "1" ]]; then
-    return 0
-  fi
-  if [[ -n ${FUNCNAME[1]:-} ]]; then
-    log::error "Error code ${1} in ${FUNCNAME[1]:-}(), stack:"
-    log::printCallStack 2
-  else
-    log::error "Error code ${1} in the main program."
-  fi
-  GLOBAL_ERROR_DISPLAYED=1
-}
+# Remember the original working directory
+GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
 
-# This function is called when the program exits (on error, on success, on exit, on interrupt).
-function main::onExitInternal() {
-  local rc=$?
+# To ensure we print errors even before log::init is called
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG="printf \"%-8s %s\n\" \"\${level:-}\" \"\${!messageVariableName}\" 1>&2"
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD="printf \"%s\" \"\${toPrint}\" 1>&2"
+GLOBAL_LOG_WRAP_PADDING=''
+GLOBAL_LOG_DISABLE_WRAP=true
 
-  log::debug "Exiting with code ${rc} after ${SECONDS}s."
-  if command -v onExit &>/dev/null; then
-    onExit "${rc}"
-  fi
-
-  # always call cleanUp before exiting
-  main::onCleanUpInternal
-  if [[ "${GLOBAL_ERROR_DISPLAYED:-0}" != "1" && "${rc}" != "0" ]]; then
-    log::print "ERROR" "${VALET_CONFIG_ICON_EXIT:-$'\uf14c'}" "EXIT" "Exiting with code ${rc}, stack:"
-    log::printCallStack 2
-    GLOBAL_ERROR_DISPLAYED=1
-  fi
-}
-
-# This function is called when the program is interrupted by the user (CTRL+C).
-function main::onInterruptInternal() {
-  if ! command -v tui::restoreTerminalOptions &>/dev/null; then
-    printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
-  fi
-  log::print "WARNING" "${VALET_CONFIG_ICON_STOPPED:-$'\uf256'}" "STOPPED" "Program interrupted by the user."
-
-  if log::isDebugEnabled; then
-    log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:"
-    log::printCallStack 2
-  fi
-
-  # check if the function exists
-  if command -v onInterrupt &>/dev/null; then
-    if onInterrupt; then
-      # if onInterrupt returns 0, then we cancel the interrupt
-      return 0
-    fi
-  fi
-  # reset the trap to not call this function again
-  trap ':' SIGINT SIGQUIT
-  exit 1
-}
-
-# This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
-function main::onTerminateInternal() {
-  log::print "ERROR" "${VALET_CONFIG_ICON_KILLED:-$'\uf05e'}" "KILLED" "Program killed."
-  # check if the function exists
-  if command -v onTerminate 1>/dev/null 2>&1; then
-    if onTerminate; then
-      # if onTerminate returns 0, then we cancel the termination
-      return 0
-    fi
-  fi
-  # reset the trap to not call this function again
-  trap ':' SIGHUP SIGTERM
-  exit 1
-}
-
-function main::registerTraps() {
-  trap 'main::onErrorInternal $?' ERR
-  trap main::onExitInternal EXIT
-  # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
-  trap main::onInterruptInternal SIGINT SIGQUIT
-  # Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
-  trap main::onTerminateInternal SIGHUP SIGTERM
-}
-
-function main::unregisterTraps() {
-  trap ERR
-  trap EXIT
-  trap SIGINT; trap SIGQUIT
-  trap SIGHUP; trap SIGTERM
-}
-
-main::registerTraps
-
-# This functions is called before the program exits (in all cases, error or not).
-function main::onCleanUpInternal() {
-  fs::cleanTempFiles
-
-  # disable the profiler if still on
-  if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
-
-  # kill background job if still running
-  if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
-    kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
-  fi
-
-  # if we ran an interactive function, make sure to restore the cursor
-  if [[ -t 2 && -n ${AC__CURSOR_SHOW:-} ]]; then
-    printf '%s' "${AC__CURSOR_SHOW}" 1>&2
-  fi
-
-  # call the clean up functions if they exist
-  if command -v cleanUp 1>/dev/null 2>&1; then
-    cleanUp
-  fi
-
-  # restore tty settings if needed
-  if command -v tui::restoreTerminalOptions &>/dev/null; then
-    tui::restoreTerminalOptions true
-  fi
-}
-
-# Introducing our own function to handle commands not found, so we can display a better message.
-# The name of this function is a bash convention.
-function command_not_found_handle() {
-  if [[ ${1:-} == "curl" ]]; then
-    core::fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
-  fi
-  # if the command contains :: it is one of our function, we can suggest to source the 'package'
-  if [[ ${1} == *::* ]]; then
-    core::fail "Command not found: ⌜${1}⌝."$'\n'"Did you forget to source the package? ⌜source ${1%%::*}⌝"
-  fi
-  core::fail "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
-}
-
-#===============================================================
-# >>> Profiler
-#===============================================================
+# start the profiler
 if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
+  # profiler will need temp files
+  fs::setupTempFileGlobalVariable
   # shellcheck source=lib-profiler
   source profiler
   profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}.txt"}"
 fi
+
+# set different options for the shell, to have consistent behavior on all machines
+core::setShellOptions
+
+trap::register
+
+# Source the valet configuration from the user config dir
+GLOBAL_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
+if [[ -f ${GLOBAL_CONFIG_FILE} ]]; then
+  GLOBAL_ON_EXIT_MESSAGE="Error sourcing the configuration file ⌜${GLOBAL_CONFIG_FILE}⌝."$'\n'"Check the file for error and try again, or delete the file to discard your config."
+  builtin source "${GLOBAL_CONFIG_FILE}"
+  unset -v GLOBAL_ON_EXIT_MESSAGE
+fi
+# Source the env script
+if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_SCRIPT:-.env} ]]; then
+  # shellcheck disable=SC2034
+  GLOBAL_ON_EXIT_MESSAGE="Error sourcing the env file ⌜${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}⌝."$'\n'"Check the file for error and try again, or delete the file to discard your config."
+  builtin source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
+  unset -v GLOBAL_ON_EXIT_MESSAGE
+fi
+
+# Setup global variables that will be used for temporary files and folders.
+fs::setupTempFileGlobalVariable
+
+core::resetIncludedLibraries
+
+# Since we use _OPTION_* variables to pass optional options to functions, we want to make sure
+# to not create collisions so we unset them here.
+unset -v ${!_OPTION_*}
+
+# determine if we support colors (can be overridden by the user with VALET_CONFIG_ENABLE_COLORS)
+case "${TERM:-}" in
+xterm-color | xterm-256color | linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}" ;;
+xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
+*) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
+esac
+# set the colors (either to default, user defined or empty values)
+core::colorInit
+
+# Export terminal size on window resize if we are in interactive mode.
+if [[ -t 2 ]]; then
+  tui::getTerminalSize
+  # shellcheck disable=SC2034
+  GLOBAL_SCREEN_REDRAW_REQUIRED=false
+  # shellcheck disable=SC2090
+  trap 'tui::getTerminalSize; GLOBAL_SCREEN_REDRAW_REQUIRED=true; log::init' SIGWINCH
+else
+  GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}"
+  # shellcheck disable=SC2034
+  GLOBAL_LINES="${VALET_CONFIG_DEFAULT_LINES:-30}"
+fi
+
+# make sure the file descriptor (if any) is valid
+if [[ -n ${VALET_CONFIG_LOG_FD:-} ]]; then
+  _CORE_VALID_FD=false
+  if [[ "${VALET_CONFIG_LOG_FD}" != [0-9] ]]; then
+    # it is a file
+    if { : >>"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+      _CORE_VALID_FD=true
+    fi
+  elif { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+    _CORE_VALID_FD=true
+  fi
+  if [[ ${_CORE_VALID_FD} != "true" ]]; then
+    printf '%s\n' "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${_ORIGINAL_FD}⌝."
+    exit 1
+  fi
+fi
+
+# Initialize the log system
+log::init
+
+# Parsing the options from environment variables
+if [[ -v VALET_LOG_LEVEL ]]; then
+  log::setLevel "${VALET_LOG_LEVEL}"
+fi
+if [[ ${VALET_VERBOSE:-} == "true" ]]; then
+  log::setLevel debug
+fi
+if [[ ${VALET_VERY_VERBOSE:-} == "true" ]]; then
+  log::setLevel trace
+fi
+
+# Load the commands
+core::sourceUserCommands
 
 #===============================================================
 # >>> Help
@@ -564,8 +528,6 @@ function main::runFunction() {
 
   # reset IFS to ensure consistent behavior
   local IFS=' '$'\t'$'\n'
-
-  GLOBAL_RUNNING_COMMAND_FUNCTION=true
 
   # execute the function
   "${functionName}" "$@"
@@ -1392,8 +1354,3 @@ function main::goInteractive() {
 
   # at the end, printf '%s\n' to the user the complete command that will be run
 }
-
-#===============================================================
-# >>> Load the commands
-#===============================================================
-core::sourceUserCommands

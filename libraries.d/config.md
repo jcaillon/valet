@@ -338,12 +338,14 @@ Intended for Valet developers only.
 #### VALET_CONFIG_STARTUP_PROFILING
 
 If true, will enable debug mode with profiling for valet ON STARTUP.
+It must defined outside the config file (in your `~/.bashrc` or exporting before running valet).
 This is intended for Valet developers to debug the startup of Valet.
 To debug your commands, use the -x option.
 
 #### VALET_CONFIG_STARTUP_PROFILING_FILE
 
 The path to the file in which to write the profiling information for the startup of Valet.
+It must defined outside the config file (in your `~/.bashrc` or exporting before running valet).
 Defaults to the `~/valet-profiler-{PID}.txt` file.
 
 <!-- END -->

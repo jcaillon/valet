@@ -53,6 +53,7 @@ WARNING  This is a warning message.
 With a second line.
 The debug mode is activated!
 DEBUG    Exiting with code 0 after 0s.
+DEBUG    Deleting temporary files.
 ```
 
 ### ✅ Logging level with --very-verbose option
@@ -83,6 +84,7 @@ With a second line.
 The debug mode is activated!
 The trace mode is activated!
 DEBUG    Exiting with code 0 after 0s.
+DEBUG    Deleting temporary files.
 ```
 
 ### ✅ Testing that we can change the log display options

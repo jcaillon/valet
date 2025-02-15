@@ -42,7 +42,6 @@ function selfTestUtils_setupValetForConsistency() {
   export VALET_CONFIG_LOG_TO_DIRECTORY=""
   export VALET_CONFIG_LOG_FILENAME_PATTERN=""
 
-
   export VALET_CONFIG_ICON_ERROR=IE
   export VALET_CONFIG_ICON_WARNING=IW
   export VALET_CONFIG_ICON_SUCCESS=IS

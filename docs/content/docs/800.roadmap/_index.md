@@ -8,9 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- if we encounter an error before actually running the user command, we can display a special message to tell the user to check the config file and the exported variables. Use GLOBAL_RUNNING_COMMAND_FUNCTION
 - put in place custom keybindings for the interactive mode. In "case" switch we can replace with an ID that represents the action. And we can have an associative array with the key and the action.
-- don't run startup after the installation, play it on the first run.
 - we split the commands file into several one, per extension, so we don't have to load everything immediately
 - conditionally show global options because they take too much space
 - add a global --edit option to edit the command function file
