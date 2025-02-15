@@ -64,7 +64,7 @@ Testing is a key component in the development workflow. In this project, we use 
 
 Any new feature that you implement should be accompanied with a test suite.
 
-- If you are modifying an example, then you can implement or modify a test under `examples.d/.tests.d/`.
+- If you are modifying the showcase, then you can implement or modify a test under `showcase.d/.tests.d/`.
 - If you are modifying valet itself, then you can implement or modify a test under `tests.d/`.
 
 In any cases, you must then run all the tests to make sure nothing broke:

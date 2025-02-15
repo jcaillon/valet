@@ -272,7 +272,7 @@ function selfRelease::uploadArtifact() {
   pushd "${tempDir}" 1>/dev/null
 
   local -a files
-  files=(examples.d commands.d libraries.d extras valet version)
+  files=(showcase.d commands.d libraries.d extras valet version)
 
   # copy each file from valet dir to current dir
   local file

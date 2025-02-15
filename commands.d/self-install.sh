@@ -44,7 +44,7 @@ fi
 #        in a bin directory already present in your PATH, or by adding the Valet
 #        directory to your PATH on shell startup.
 #
-#   - 4. Copy the examples in the valet user directory ~/.valet.d.
+#   - 4. Copy the showcase (command examples) in the valet user directory ~/.valet.d.
 #
 #   - 6. Run self setup command (in case of a new installation) or re-export the config.
 #
@@ -82,13 +82,13 @@ fi
 #   description: |-
 #     Set to true to not add the Valet directory to the PATH (append to your .bashrc file).
 #   default: false
-# - name: -E, --no-examples
+# - name: --no-showcase
 #   description: |-
-#     Set to true to to not copy the examples (showcase) to the valet user directory (~/.valet.d).
+#     Set to true to to not copy the showcase (command examples) to the valet user directory (~/.valet.d).
 #
-#     If you do not set this option, newer examples will override the existing ones.
+#     If you do not set this option, newer versions of the showcase will override the existing ones.
 #
-#     In case of an update, if the examples.d directory does not exist, the examples will not be copied.
+#     In case of an update, if the showcase.d directory does not exist, the showcase will not be copied.
 #   default: false
 # - name: -U, --skip-extensions
 #   description: |-
@@ -120,7 +120,7 @@ fi
 #     Install the latest version of Valet in the user home directory and disable all interaction during the install process.
 ##VALET_COMMAND
 function selfUpdate() {
-  local unattended singleUserInstallation version installationDirectory noShim noPath noExamples skipExtensions onlyExtensions useBranch skipExtensionsSetup
+  local unattended singleUserInstallation version installationDirectory noShim noPath noShowcase skipExtensions onlyExtensions useBranch skipExtensionsSetup
 
   # if this script is run directly
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
@@ -150,8 +150,8 @@ function selfUpdate() {
       -P | --no-path)
         noPath="true"
         ;;
-      -E | --no-examples)
-        noExamples="true"
+      --no-showcase)
+        noShowcase="true"
         ;;
       -U | --skip-extensions)
         skipExtensions="true"
@@ -176,7 +176,7 @@ function selfUpdate() {
     installationDirectory="${installationDirectory:-"${VALET_INSTALLATION_DIRECTORY:-}"}"
     noShim="${noShim:-"${VALET_NO_SHIM:-"false"}"}"
     noPath="${noPath:-"${VALET_NO_PATH:-"false"}"}"
-    noExamples="${noExamples:-"${VALET_NO_EXAMPLES:-"false"}"}"
+    noShowcase="${noShowcase:-"${VALET_NO_EXAMPLES:-"false"}"}"
     skipExtensions="${skipExtensions:-"${VALET_SKIP_EXTENSION:-"false"}"}"
     onlyExtensions="${onlyExtensions:-"${VALET_ONLY_EXTENSION:-"false"}"}"
     useBranch="${useBranch:-"${VALET_USE_BRANCH:-"false"}"}"
@@ -300,11 +300,11 @@ function selfUpdate() {
     selfUpdate_printRecapLine "Add install dir to PATH:" "true"
     addToPath=true
   fi
-  if [[ ${noExamples} != "true" && (${firstInstallation} == "true" || -d "${userDirectory}/examples.d" ) ]]; then
-    selfUpdate_printRecapLine "Copy examples to:" "${userDirectory}"
+  if [[ ${noShowcase} != "true" && (${firstInstallation} == "true" || -d "${userDirectory}/showcase.d" ) ]]; then
+    selfUpdate_printRecapLine "Copy showcase to:" "${userDirectory}"
     copyExamples=true
   else
-    selfUpdate_printRecapLine "Skip examples copy:" "true"
+    selfUpdate_printRecapLine "Skip showcase copy:" "true"
   fi
   printf '\n'
 
@@ -453,19 +453,19 @@ function selfUpdate_install() {
   log::success "Valet has been installed in ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝."
 }
 
-# Copy the examples to the user directory.
+# Copy the showcase to the user directory.
 function selfUpdate_copyExamples() {
   local userDirectory="${1}"
 
   mkdir -p "${userDirectory}" || core::fail "Could not create the user directory ⌜${userDirectory}⌝."
 
-  if [[ -d "${userDirectory}/examples.d" ]]; then
-    rm -Rf "${userDirectory}/examples.d" &>/dev/null || core::fail "Could not remove the existing examples in ⌜${userDirectory}⌝."
+  if [[ -d "${userDirectory}/showcase.d" ]]; then
+    rm -Rf "${userDirectory}/showcase.d" &>/dev/null || core::fail "Could not remove the existing showcase (command examples) in ⌜${userDirectory}⌝."
   fi
 
-  cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/examples.d" "${userDirectory}" || core::fail "Could not copy the examples to ⌜${userDirectory}⌝."
+  cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" "${userDirectory}" || core::fail "Could not copy the showcase (command examples) to ⌜${userDirectory}⌝."
 
-  log::success "The examples have been copied to ⌜${userDirectory}/examples.d⌝."
+  log::success "The showcase has been copied to ⌜${userDirectory}/showcase.d⌝."
 }
 
 # Set the _SUDO variable if needed.

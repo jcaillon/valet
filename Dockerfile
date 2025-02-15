@@ -21,7 +21,7 @@ echo "LANG=${LOCALE}.UTF-8" >> /etc/locale.conf; \
 locale-gen ${LOCALE}.UTF-8
 
 # ✅ copy files
-COPY examples.d/ /root/.valet.d/examples.d/
+COPY showcase.d/ /root/.valet.d/showcase.d/
 COPY libraries.d/ /opt/valet/libraries.d/
 COPY commands.d/ /opt/valet/commands.d/
 COPY extras/ /opt/valet/extras/

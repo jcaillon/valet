@@ -836,6 +836,8 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
   main::getMaxPossibleCommandLevel "$@"
   local level="${RETURNED_VALUE}"
 
+  local IFS=" "
+
   # we put the arguments into an array so we can interpret 'my' 'sub'
   # and 'my sub' as the same command (we split everything by space)
   local -a commandArray
@@ -862,7 +864,6 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
     if (( ${#RETURNED_ARRAY[@]} > 1)); then
         # case of ambiguous command, show the list of possible commands
         main::getDisplayableFilteredArray RETURNED_ARRAY command
-        local IFS=$'\n'
         core::fail "Found multiple matches for the command ⌜${command}⌝, please be more specific:"$'\n'"${RETURNED_VALUE}"
     elif (( ${#RETURNED_ARRAY[@]} == 1 )); then
       # case of a single match, we can match the function immediately

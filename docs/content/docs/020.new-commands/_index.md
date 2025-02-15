@@ -270,7 +270,7 @@ You can activate the debug log level with Valet `-v` option, e.g. `valet -v my c
 
 [work-on-bash-scripts]: ../work-on-bash-scripts
 [performance-tips]: performance-tips
-[showcase-commands]: https://github.com/jcaillon/valet/tree/latest/examples.d/showcase
+[showcase-commands]: https://github.com/jcaillon/valet/tree/latest/showcase.d/commands.d
 [command-properties]: ../command-properties
 [core-library]: ../libraries/core/
 [bash-manual-set]: https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html#index-set

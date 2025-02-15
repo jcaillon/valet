@@ -21,7 +21,7 @@ set -Eeu -o pipefail
 #
 #   This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
 #
-#   Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜examples.d⌝ directory to learn how to create and modified your commands.
+#   Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜showcase.d⌝ directory to learn how to create and modified your commands.
 #
 #   This scripts:
 #
@@ -140,38 +140,13 @@ function selfBuild() {
   fi
   if [[ ${coreOnly:-} != "true" ]]; then
     if [[ -d "${userDirectory}" ]]; then
-      log::info "Building the valet user commands from the user directory ⌜${userDirectory}⌝."
-      local file listOfDirectories currentDirectory
-
-      # the file expansion does not include files under symbolic link directories
-      # so we need to manually force the search in these directories
-      listOfDirectories="${userDirectory}"$'\n'
-      while [[ -n ${listOfDirectories} ]]; do
-        currentDirectory="${listOfDirectories%%$'\n'*}"
-        listOfDirectories="${listOfDirectories#*$'\n'}"
-
-        log::trace "Searching for command definitions in ⌜${currentDirectory}⌝."
-        log::trace "listOfDirectories: ⌜${listOfDirectories}⌝."
-        for file in "${currentDirectory}"/*; do
-          local fileBasename="${file##*/}"
-          if [[ -d ${file} && ${fileBasename} != "."* && ${fileBasename} != "tests.d" ]]; then
-            # if directory we need to add it to the search list
-            # except if it starts with a . or if it is a tests.d or libraries.d directory
-            if [[ ${fileBasename} == "libraries.d" ]]; then
-              # if directory is named libraries.d, we need to add it to libraryDirectories
-              libraryDirectories+=("${file}")
-            else
-              listOfDirectories+="${file}"$'\n'
-              log::trace "adding directory ⌜${file}⌝ to the search list."
-            fi
-            continue
-          elif [[ "${file}" != *".sh" ]]; then
-            # skip all files not ending with .sh
-            continue
-          fi
-          log::debug "Considering file ⌜${file}⌝."
-          commandDefinitionFiles+=("${file}")
-        done
+      log::info "Building the valet user commands from extensions in the user directory ⌜${userDirectory}⌝."
+      local extensionsDirectory
+      for extensionsDirectory in "${userDirectory}"/*; do
+        if [[ ! -d ${extensionsDirectory} && ${extensionsDirectory} != "."* ]]; then
+          continue
+        fi
+        commandDefinitionFiles+=("${extensionsDirectory}/commands.d"/*.sh)
       done
     else
       log::warning "Skipping the build of scripts in user directory ⌜${userDirectory}⌝ because it does not exist."
@@ -278,6 +253,9 @@ function extractCommandDefinitionsToVariables() {
   while [[ $# -gt 0 ]]; do
     local file="${1}"
     shift
+    if [[ ${file} == *"*.sh" ]]; then
+      continue
+    fi
     log::info "Extracting commands from ⌜${file}⌝."
     selfBuild_extractCommandYamls "${file}"
     local content

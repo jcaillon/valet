@@ -152,14 +152,14 @@ function selfTest() {
     selfTestUtils_rebuildCommands --core-only  --output "${GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY}/commands"
     selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d"
 
-    # now we can also test the commands in examples.d if the directory is there
-    if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/examples.d ]]; then
-      log::warning "The valet examples directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/examples.d⌝ does not exist, cannot run the tests on the core examples."
+    # now we can also test the commands in showcase.d if the directory is there
+    if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d ]]; then
+      log::warning "The valet showcase directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d⌝ does not exist, cannot run the tests on the core showcase."
     else
-      # we need to rebuild the commands for the examples only
+      # we need to rebuild the commands for the showcase only
       rm -Rf "${GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY}"
-      selfTestUtils_rebuildCommands --user-directory "${GLOBAL_INSTALLATION_DIRECTORY}/examples.d"  --output "${GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY}/commands"
-      selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/examples.d/showcase/tests.d"
+      selfTestUtils_rebuildCommands --user-directory "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d"  --output "${GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY}/commands"
+      selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/showcase/tests.d"
     fi
   fi
 

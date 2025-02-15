@@ -357,13 +357,13 @@ SUCCESS  The ⌜latest⌝ branch has been updated.
     "prerelease": false
   } https://api.github.com/repos/jcaillon/valet/releases
 SUCCESS  The new version has been released on GitHub.
-🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/examples.d .
+🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/showcase.d .
 🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/commands.d .
 🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/libraries.d .
 🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/extras .
 🙈 mocked exe::invoke cp -R valet .
 🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/version .
-🙈 mocked exe::invoke tar -czvf valet.tar.gz examples.d commands.d libraries.d extras valet version
+🙈 mocked exe::invoke tar -czvf valet.tar.gz showcase.d commands.d libraries.d extras valet version
 INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 🙈 mocked curl::request true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz
 INFO     The current version of valet is: 1.2.3.

@@ -179,10 +179,10 @@ function main() {
 
 
   echo "================================================"
-  echo "Installing Valet: --unattended --use-branch --version ${BRANCH_NAME} --installation-directory /valet --no-shim --no-examples."
+  echo "Installing Valet: --unattended --use-branch --version ${BRANCH_NAME} --installation-directory /valet --no-shim --no-showcase."
   echo "================================================"
 
-  ./commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}" --installation-directory /valet --no-shim --no-examples
+  ./commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}" --installation-directory /valet --no-shim --no-showcase
 
   echo "================================================"
   echo "Uninstalling Valet."
@@ -222,10 +222,10 @@ function main() {
 
 
   echo "================================================"
-  echo "Installing Valet: --use-branch --version ${BRANCH_NAME} --unattended --single-user-installation --no-examples."
+  echo "Installing Valet: --use-branch --version ${BRANCH_NAME} --unattended --single-user-installation --no-showcase."
   echo "================================================"
 
-  bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/commands.d/self-install.sh")" -s --use-branch --version "${BRANCH_NAME}" --unattended --single-user-installation --no-examples
+  bash -c "$(curl -fsSL "https://raw.githubusercontent.com/jcaillon/valet/${BRANCH_NAME}/commands.d/self-install.sh")" -s --use-branch --version "${BRANCH_NAME}" --unattended --single-user-installation --no-showcase
   export PATH="/root/.local/valet:${PATH}"
 
   echo "================================================"

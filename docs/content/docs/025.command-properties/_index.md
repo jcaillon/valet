@@ -247,4 +247,4 @@ The description for this example.
   {{< card icon="arrow-circle-right" link="../test-commands" title="Test commands" >}}
 {{< /cards >}}
 
-[showcase-examples]: https://github.com/jcaillon/valet/tree/main/examples.d/showcase
+[showcase-examples]: https://github.com/jcaillon/valet/tree/main/showcase.d/commands.d
