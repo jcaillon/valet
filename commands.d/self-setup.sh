@@ -72,9 +72,4 @@ function selfSetup() {
   selfConfig --export-current-values --no-edit --override
 
   log::success "You are all set!"
-
-  # tell the user about what's next todo
-  log::info "As a reminder, you can modify the configuration done during this set up by either:"$'\n'"- replaying the command ⌜valet self setup⌝,"$'\n'"- running the command ⌜valet self config⌝."
-  log::info "Run ⌜valet --help⌝ to get started."
-  log::info "You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ to do so."
 }

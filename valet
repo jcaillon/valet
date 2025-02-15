@@ -21,28 +21,18 @@ set -Eeu -o pipefail
 #
 #   You can call valet without any commands to start an interactive session.
 #
-#   ⌜Exit codes:⌝
+#   ⌜Configuration through environment variables:⌝
 #
-#   - 0: everything went well
-#   - 1+: an error occurred
+#   Core features variables can be defined in the valet user config file. Run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).
+#
+#   Command options can also be set through environment variables. Check the command help for more information.
 #
 #   ⌜Create your own commands:⌝
 #
-#   You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ or the examples under examples.d to do so.
-#   Valet looks for commands in the valet user directory, which default to ~/.valet.d and can be overwritten using an environment variable (see below).
-#   Once you have created your new command script, run the ⌜valet self build⌝ command to update the valet menu.
+#   You can create your own commands and have them available in valet.
+#   A command is part of an extension, which is a collection of commands.
 #
-#   ⌜Configuration through environment variables:⌝
-#
-#   In addition to the environment variables defined for each options, you can define environment variables to configure valet.
-#
-#   These variables are contently defined in the valet user config file, located by default at ~/.config/valet/config (the path to this file can be configured using the VALET_CONFIG_FILE environment variable).
-#
-#   You can run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).
-#
-#   ⌜Developer notes:⌝
-#
-#   You can enable debug mode with profiling for valet by setting the environment variable VALET_CONFIG_STARTUP_PROFILING to true (it will output to ~/valet-profiler-{PID}.txt).
+#   To get started, run the command ⌜valet self create-extension⌝.
 # arguments:
 # - name: commands?...
 #   description: |-

@@ -8,8 +8,9 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- new global option to change the log output to a more complex and complete format.
-- the config file should define everything, leave all def commented. When we self config we define only those already defined. We have an associative array of each var and description to handle this
+- if we encounter an error before actually running the user command, we can display a special message to tell the user to check the config file and the exported variables. Use GLOBAL_RUNNING_COMMAND_FUNCTION
+- put in place custom keybindings for the interactive mode. In "case" switch we can replace with an ID that represents the action. And we can have an associative array with the key and the action.
+- don't run startup after the installation, play it on the first run.
 - we split the commands file into several one, per extension, so we don't have to load everything immediately
 - conditionally show global options because they take too much space
 - add a global --edit option to edit the command function file
@@ -61,6 +62,5 @@ This page lists the features that I would like to implement in Valet. They come 
   - add a stack for undo/redo
 - add a new command self diagnostic that will run a series of tests to check the environment and help figure out what's wrong.
 - option --install-dir (or cmd) to be able to eval "$(valet --install-dir)"
-- if we encounter an error before actually running the user command, we can display a special message to tell the user to check the config file and the exported variables.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

@@ -62,7 +62,7 @@ ABOUT
   
   You can call valet without any commands to start an interactive session.
   
-  ⌜Exit codes:⌝
+  ⌜Configuration through environment variables:⌝
   
 ```
 

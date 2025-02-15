@@ -343,16 +343,12 @@ function selfRelease::updateDocumentation() {
 
   if [[ "${dryRun:-}" != "true" ]]; then
     selfDocument --core-only --output "${GLOBAL_INSTALLATION_DIRECTORY}/extras"
-
     selfRelease::writeAllFunctionsDocumentation "${pageFooter}"
   fi
 
   # export the valet config valet to the documentation
-  command::sourceFunction selfConfig
-  selfConfig::getFileContent false
-
   if [[ "${dryRun:-}" != "true" ]]; then
-    fs::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md" '```bash {linenos=table,linenostart=1,filename="~/.config/valet/config"}'$'\n'"${RETURNED_VALUE}"$'\n''```'$'\n'$'\n'"> ${pageFooter}"$'\n'
+    exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/config.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
   fi
 
   # copy the vscode recommended extensions

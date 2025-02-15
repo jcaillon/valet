@@ -565,6 +565,8 @@ function main::runFunction() {
   # reset IFS to ensure consistent behavior
   local IFS=' '$'\t'$'\n'
 
+  GLOBAL_RUNNING_COMMAND_FUNCTION=true
+
   # execute the function
   "${functionName}" "$@"
 

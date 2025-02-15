@@ -358,6 +358,10 @@ function selfUpdate() {
     log::info "Running the self setup command."
     command::sourceFunction selfSetup
     selfSetup
+
+    # tell the user about what's next todo
+    log::info "As a reminder, you can modify the configuration done during this set up by either:"$'\n'"- replaying the command ⌜valet self setup⌝,"$'\n'"- running the command ⌜valet self config⌝."
+    log::info "Run ⌜valet --help⌝ to get started."
   else
     # re-export the config file to be up to date (done in setup as well)
     command::sourceFunction selfConfig
@@ -732,7 +736,7 @@ if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
     *) RETURNED_VALUE="unknown" ;;
     esac
   }
-  function core::getUserDirectory() { RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"; }
+  function core::getUserDirectory() { RETURNED_VALUE="${VALET_CONFIG_USER_DIRECTORY:-${HOME}/.valet.d}"; }
   function interactive::promptYesNo() {
     local question="${1}"
     local default="${2:-false}"
@@ -758,8 +762,6 @@ if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   function fs::readFile() { RETURNED_VALUE="$(<"${1}")"; }
   function progress::start() { :; }
   function progress::stop() { :; }
-
-  VALET_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
 else
   selfUpdate_sourceDependencies
 fi

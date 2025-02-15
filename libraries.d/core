@@ -101,9 +101,9 @@ fi
 
 # First thing we do is to source the valet configuration from the user config dir
 # This file can be used to override the default configuration by setting VALET_* env variables.
-VALET_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
-if [[ -f ${VALET_CONFIG_FILE} ]]; then
-  builtin source "${VALET_CONFIG_FILE}"
+GLOBAL_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
+if [[ -f ${GLOBAL_CONFIG_FILE} ]]; then
+  builtin source "${GLOBAL_CONFIG_FILE}"
 fi
 # Same with the env script
 if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_SCRIPT:-.env} ]]; then
@@ -1796,7 +1796,7 @@ function core::getLocalStateDirectory() {
 # local directory="${RETURNED_VALUE}"
 # ```
 function core::getUserDirectory() {
-  RETURNED_VALUE="${VALET_USER_DIRECTORY:-${HOME}/.valet.d}"
+  RETURNED_VALUE="${VALET_CONFIG_USER_DIRECTORY:-${HOME}/.valet.d}"
 }
 
 #===============================================================

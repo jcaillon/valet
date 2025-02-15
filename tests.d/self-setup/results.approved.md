@@ -44,13 +44,8 @@ INFO     If you see the replacement character ? in my terminal, it means you don
 You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
 After that, you need to setup your terminal to use this newly installed font.
 You can run the command ⌜valet self setup⌝ again after that.
-INFO     Creating the valet config file ⌜/tmp/valet-temp⌝.
+INFO     Writing the valet config file ⌜/tmp/valet-temp⌝.
 SUCCESS  You are all set!
-INFO     As a reminder, you can modify the configuration done during this set up by either:
-- replaying the command ⌜valet self setup⌝,
-- running the command ⌜valet self config⌝.
-INFO     Run ⌜valet --help⌝ to get started.
-INFO     You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ to do so.
 ```
 
 ```text
@@ -64,7 +59,7 @@ VALET_CONFIG_ENABLE_NERDFONT_ICONS='false'
 
 ```text
 #!/usr/bin/env bash
-# description: This script declares global variables used to configure Valet
+# The config script for Valet.
 # shellcheck disable=SC2034
 ```
 
@@ -103,13 +98,8 @@ An information icon: 
 
 ```text
 INFO     Now setting up Valet.
-INFO     Creating the valet config file ⌜/tmp/valet-temp⌝.
+INFO     Writing the valet config file ⌜/tmp/valet-temp⌝.
 SUCCESS  You are all set!
-INFO     As a reminder, you can modify the configuration done during this set up by either:
-- replaying the command ⌜valet self setup⌝,
-- running the command ⌜valet self config⌝.
-INFO     Run ⌜valet --help⌝ to get started.
-INFO     You can create your own commands and have them available in valet, please check https://jcaillon.github.io/valet/docs/new-commands/ to do so.
 ```
 
 ```text
@@ -123,7 +113,7 @@ VALET_CONFIG_ENABLE_NERDFONT_ICONS='true'
 
 ```text
 #!/usr/bin/env bash
-# description: This script declares global variables used to configure Valet
+# The config script for Valet.
 # shellcheck disable=SC2034
 ```
 

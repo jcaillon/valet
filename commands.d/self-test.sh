@@ -121,7 +121,7 @@ function selfTest() {
   declare -g -a _TEST_FAILED_TEST_SUITES=()
 
   fs::createTempDirectory
-  GLOBAL_TEST_VALET_USER_DIRECTORY="${RETURNED_VALUE}"
+  GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY="${RETURNED_VALUE}"
 
   # test suites in the user directory
   if [[ ${coreOnly:-false} != "true" ]]; then
@@ -130,7 +130,7 @@ function selfTest() {
     userDirectory="${userDirectory:-${RETURNED_VALUE}}"
 
     # rebuild the commands for the user dir
-    selfTestUtils_rebuildCommands --user-directory "${userDirectory}" --output "${GLOBAL_TEST_VALET_USER_DIRECTORY}/commands"
+    selfTestUtils_rebuildCommands --user-directory "${userDirectory}" --output "${GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY}/commands"
 
     fs::listDirectories "${userDirectory}"
     local extensionDirectory
@@ -148,8 +148,8 @@ function selfTest() {
     fi
 
     # we need to rebuild the commands for the core commands only
-    rm -Rf "${GLOBAL_TEST_VALET_USER_DIRECTORY}"
-    selfTestUtils_rebuildCommands --core-only  --output "${GLOBAL_TEST_VALET_USER_DIRECTORY}/commands"
+    rm -Rf "${GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY}"
+    selfTestUtils_rebuildCommands --core-only  --output "${GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY}/commands"
     selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d"
 
     # now we can also test the commands in examples.d if the directory is there
@@ -157,8 +157,8 @@ function selfTest() {
       log::warning "The valet examples directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/examples.d⌝ does not exist, cannot run the tests on the core examples."
     else
       # we need to rebuild the commands for the examples only
-      rm -Rf "${GLOBAL_TEST_VALET_USER_DIRECTORY}"
-      selfTestUtils_rebuildCommands --user-directory "${GLOBAL_INSTALLATION_DIRECTORY}/examples.d"  --output "${GLOBAL_TEST_VALET_USER_DIRECTORY}/commands"
+      rm -Rf "${GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY}"
+      selfTestUtils_rebuildCommands --user-directory "${GLOBAL_INSTALLATION_DIRECTORY}/examples.d"  --output "${GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY}/commands"
       selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/examples.d/showcase/tests.d"
     fi
   fi
@@ -541,10 +541,12 @@ function selfTest_runSingleTest() {
   fs::cleanTempFiles
   mkdir -p "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
 
-  # set a new user directory so that commands are correctly recreated if calling
+  # set a new user directories so that commands are correctly recreated if calling
   # valet from a test
-  cp -R "${GLOBAL_TEST_VALET_USER_DIRECTORY}" "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
-  export VALET_USER_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
+  cp -R "${GLOBAL_TEST_VALET_LOCAL_STATE_DIRECTORY}" "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
+  export VALET_CONFIG_USER_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
+  export VALET_CONFIG_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
+  export VALET_CONFIG_LOCAL_STATE_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
 
   # shellcheck disable=SC2034
   GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-temp"

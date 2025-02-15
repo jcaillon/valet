@@ -412,7 +412,6 @@ function string::head() {
   local _STRING_HEAD_NB_LINES="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i _STRING_HEAD_COUNTER=0
 
-  RETURNED_VALUE=""
   string::doForEachLine \
     "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     string_headCallback \
@@ -420,6 +419,9 @@ function string::head() {
 }
 
 function string_headCallback() {
+  if ((_STRING_HEAD_COUNTER == 0)); then
+    RETURNED_VALUE=""
+  fi
   if ((_STRING_HEAD_COUNTER >= _STRING_HEAD_NB_LINES)); then
     return 1
   fi

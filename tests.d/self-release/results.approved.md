@@ -324,7 +324,7 @@ INFO     Writing the 157 functions documentation to the core libraries docs.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/string.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/system.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/test.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md
+🙈 mocked exe::invoke cp -f $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/config.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md
 🙈 mocked exe::invoke cp $GLOBAL_INSTALLATION_DIRECTORY/.vscode/extensions.json $GLOBAL_INSTALLATION_DIRECTORY/extras/extensions.json
 🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md
 🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/codes.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/core.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/curl.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/fsfs.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/interactive.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/io.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/log.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/profiler.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/string.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/system.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/test.md
