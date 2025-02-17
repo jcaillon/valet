@@ -32,7 +32,9 @@ if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
   fs::setupTempFileGlobalVariable
   # shellcheck source=lib-profiler
   source profiler
-  profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}.txt"}"
+  printf -v _PROFILER_FILE_NAME "profiler-%(%FT%H-%M-%S%z)T--PID_%s.log" "${EPOCHSECONDS}" "${BASHPID}"
+  core::getUserStateDirectory
+  profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${_PROFILER_FILE_NAME}"}"
 fi
 
 # set different options for the shell, to have consistent behavior on all machines
@@ -523,7 +525,10 @@ function main::runFunction() {
   if [[ ${VALET_PROFILING:-} == "true" ]]; then
     # shellcheck source=lib-profiler
     source profiler
-    profiler::enable "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${HOME}/valet-profiler-${BASHPID}-command.txt"}"
+    local profilerFileName
+    printf -v profilerFileName "profiler-%(%FT%H-%M-%S%z)T--PID_%s--fun_%s.log" "${EPOCHSECONDS}" "${BASHPID}" "${functionName}"
+    core::getUserStateDirectory
+    profiler::enable "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${profilerFileName}"}"
   fi
 
   # reset IFS to ensure consistent behavior

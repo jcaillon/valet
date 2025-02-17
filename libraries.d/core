@@ -169,7 +169,7 @@ function fs::setupTempFileGlobalVariable() {
   # to be fast, we do not create anything until we really need it
   # this could lead to issues, although it is very unlikely
   GLOBAL_TEMPORARY_DIRECTORY_PREFIX="${VALET_CONFIG_TEMP_DIRECTORY:-${TMPDIR:-/tmp}}/vt-${BASHPID}"
-  GLOBAL_TEMPORARY_FILE_PREFIX="${VALET_CONFIG_WORK_FILES_DIRECTORY:-${TMPDIR:-/tmp}}/vt-${BASHPID}"
+  GLOBAL_TEMPORARY_FILE_PREFIX="${VALET_CONFIG_RUNTIME_DIRECTORY:-${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}}/vt-${BASHPID}"
 
   while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.d" ]]; do
     # just in case we have a collision
@@ -1788,10 +1788,6 @@ function core::colorInit() {
   fi
 }
 
-#===============================================================
-# >>> Valet files and directories
-#===============================================================
-
 # ## core::getConfigurationDirectory
 #
 # Returns the path to the valet configuration directory.
@@ -1818,6 +1814,7 @@ function core::getConfigurationDirectory() {
 #
 # Returns the path to the valet local data directory.
 # Where user-specific data files should be written (analogous to /usr/share).
+# Creates it if missing.
 #
 # Returns:
 #
@@ -1853,6 +1850,30 @@ function core::getUserDataDirectory() {
 function core::getUserCacheDirectory() {
   local directory
   directory="${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}"
+  if [[ ! -d "${directory}" ]]; then
+    mkdir -p "${directory}"
+  fi
+  RETURNED_VALUE="${directory}"
+}
+
+# ## core::getUserStateDirectory
+#
+# Returns the path to the valet local cache directory.
+# Where user-specific state files should be written (analogous to /var/lib).
+# Ideal location for storing runtime information, logs, etc...
+# Creates it if missing.
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the path to the valet local state directory
+#
+# ```bash
+# core::getUserStateDirectory
+# local directory="${RETURNED_VALUE}"
+# ```
+function core::getUserStateDirectory() {
+  local directory
+  directory="${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}"
   if [[ ! -d "${directory}" ]]; then
     mkdir -p "${directory}"
   fi

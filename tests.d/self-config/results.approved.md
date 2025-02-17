@@ -81,7 +81,7 @@ RETURNED_VALUE='#!/usr/bin/env bash
 # VALET_CONFIG_DIRECTORY=""
 # The path to the configuration directory of Valet.
 # You can backup this directory to keep your configuration.
-# Defaults to the `.config` directory in the user home directory `${XDG_CONFIG_HOME:-${HOME}}`.
+# Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
 # 
 # VALET_CONFIG_FILE=""
 # The path to this Valet config file.
@@ -173,7 +173,7 @@ RETURNED_VALUE='#!/usr/bin/env bash
 VALET_CONFIG_DIRECTORY=A\ value
 # The path to the configuration directory of Valet.
 # You can backup this directory to keep your configuration.
-# Defaults to the `.config` directory in the user home directory `${XDG_CONFIG_HOME:-${HOME}}`.
+# Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
 # 
 # VALET_CONFIG_FILE=""
 # The path to this Valet config file.

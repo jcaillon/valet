@@ -60,7 +60,7 @@ They **MUST BE** declared outside the config file (in your `~/.bashrc`)!
 
 The path to the configuration directory of Valet.
 You can backup this directory to keep your configuration.
-Defaults to the `.config` directory in the user home directory `${XDG_CONFIG_HOME:-${HOME}}`.
+Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
 
 #### VALET_CONFIG_FILE
 
@@ -75,28 +75,33 @@ Default to the `config` file in your config directory.
 #### VALET_CONFIG_USER_VALET_DIRECTORY
 
 The directory in which to find the user commands.
-Defaults to the `.valet.d` directory in the user home directory `${XDG_CONFIG_HOME:-${HOME}}`.
+Defaults to the `${HOME}/.valet.d`.
 
 #### VALET_CONFIG_USER_DATA_DIRECTORY
 
 The path to the directory in which to store the user-specific data files.
-Defaults to the `${XDG_DATA_HOME}` or the `.local/share` directory in the user home directory.
+Defaults to the `${XDG_DATA_HOME}/valet` or the `${HOME}/.local/share/valet` directory.
 
 #### VALET_CONFIG_USER_CACHE_DIRECTORY
 
-The path to the directory in which to store the cache data.
-Defaults to the `${XDG_CACHE_HOME}` or the `.cache` directory in the user home directory.
+The path to the directory in which to store the user cache data.
+Defaults to the `${XDG_CACHE_HOME}/valet` or the `${HOME}/.cache/valet` directory.
+
+#### VALET_CONFIG_USER_STATE_DIRECTORY
+
+The path to the directory in which to store the user state data.
+Defaults to the `${XDG_STATE_HOME}/valet` or the `.local/state/valet` directory in the user home directory.
 
 #### VALET_CONFIG_TEMP_DIRECTORY
 
-The directory used in valet to store all temporary files created by the program.
-Defaults to the temporary directory (`TMPDIR` or `/tmp`).
+The directory used in valet to store all temporary files and directories created by the program.
+Defaults to the temporary directory `${TMPDIR}` or `/tmp`.
 
-#### VALET_CONFIG_WORK_FILES_DIRECTORY
+#### VALET_CONFIG_RUNTIME_DIRECTORY
 
 The directory in which to write work files (small files to capture output of programs).
 You can set it to a `tmpfs` directory (such as /dev/shm) to speed up the execution of valet.
-Defaults to the temporary directory.
+Defaults to the `${XDG_RUNTIME_DIR}` or the temporary directory.
 
 #### VALET_CONFIG_LOCALE
 
@@ -350,6 +355,6 @@ To debug your commands, use the -x option.
 
 The path to the file in which to write the profiling information for the startup of Valet.
 It must defined outside the config file (in your `~/.bashrc` or exporting before running valet).
-Defaults to the `~/valet-profiler-{PID}.txt` file.
+Defaults to a new file in your user state directory `~/.local/state/valet/logs`.
 
 <!-- END -->
