@@ -259,6 +259,44 @@ function prompt::input() {
   _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=""
   _PROMPT_ITEMS_BOX_FILTER_USING_GREP=""
 
+  local -A _PROMPT_KEY_BINDING=(
+    ["CTRL+ALT+M"]="accept-line"
+    ["CTRL+M"]="accept-line"
+    ["CTRL+J"]="accept-line"
+    ["NEWLINE"]="accept-line"
+    ["TAB"]="complete"
+    ["CTRL+I"]="complete"
+    ["ESC"]="close"
+    ["CTRL+Q"]="abort"
+    ["CTRL+A"]="beginning-of-line"
+    ["CTRL+E"]="end-of-line"
+    ["LEFT"]="backward-char"
+    ["CTRL+B"]="backward-char"
+    ["RIGHT"]="forward-char"
+    ["CTRL+F"]="forward-char"
+    ["CTRL+LEFT"]="backward-word"
+    ["CTRL+RIGHT"]="forward-word"
+    ["CTRL+K"]="kill-end-of-line"
+    ["CTRL+X"]="kill-line"
+    ["CTRL+Y"]="yank"
+    ["DEL"]="delete-char"
+    ["CTRL+D"]="delete-char"
+    ["CTRL+H"]="backward-delete-char"
+    ["BACKSPACE"]="backward-delete-char"
+    ["CTRL+DEL"]="kill-word"
+    ["CTRL+BACKSPACE"]="backward-kill-word"
+    ["CTRL+W"]="backward-kill-word"
+    ["CTRL+P"]="toggle-password-mode"
+    ["PAGE_UP"]="scroll-up"
+    ["PAGE_DOWN"]="scroll-down"
+    ["HOME"]="move-beginning"
+    ["CTRL+UP"]="move-beginning"
+    ["END"]="move-end"
+    ["CTRL+DOWN"]="move-end"
+    ["UP"]="move-up"
+    ["DOWN"]="move-down"
+  )
+
   # set up colors
   if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
     _PROMPT_COLOR_STRING="${VALET_CONFIG_PROMPT_COLOR_STRING:-"${AC__FG_MAGENTA}"}"
@@ -356,7 +394,6 @@ function prompt::input() {
 
   _PROMPT_LAST_KEY_PRESSED_TIME=0
   _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
-
   _PROMPT_CANCELLED=true
 
   # set trap so that interrupt signal sets GLOBAL_SESSION_INTERRUPTED to true
@@ -568,9 +605,13 @@ function prompt_onKeyBindingPress() {
     fi
   fi
 
-  case "${1}" in
-  # validate or exit
-  $'\n' | CTRL+ALT+M | CTRL+M | CTRL+J | NEWLINE)
+  local action="${_PROMPT_KEY_BINDING[${1}]:-}"
+  if [[ -z ${action} ]]; then
+    return 0
+  fi
+
+  case "${action}" in
+  accept-line)
     # in autocompletion mode we can only validate if we autocompletion is closed, otherwise it autocompletes
     if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" && ${_PROMPT_ACCEPT_ANY_VALUE} == "true" ]]; then
       prompt_autocompleteWithSelectedItem
@@ -597,7 +638,7 @@ function prompt_onKeyBindingPress() {
     _PROMPT_CANCELLED=false
     return 0
     ;;
-  TAB | CTRL+I)
+  complete)
     # autocompletes if the box is shown, otherwise it opens the box (if allowed)
     if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" ]]; then
       prompt_autocompleteWithSelectedItem
@@ -608,7 +649,7 @@ function prompt_onKeyBindingPress() {
       prompt_onTextChanged
     fi
     ;;
-  ESC)
+  close)
     if [[ ${_PROMPT_ERROR_BOX_SHOWN} == "true" ]]; then
       prompt_clearErrorBox
       return 0
@@ -620,39 +661,39 @@ function prompt_onKeyBindingPress() {
     fi
     GLOBAL_SESSION_INTERRUPTED=true
     ;;
-  CTRL+Q)
+  abort)
     GLOBAL_SESSION_INTERRUPTED=true
     ;;
 
   # move the cursor
-  CTRL+A)
+  beginning-of-line)
     prompt_changePromptCursorIndex -9999999
     prompt_updateItemsBox
     prompt_drawPrompt
     ;;
-  CTRL+E)
+  end-of-line)
     prompt_changePromptCursorIndex 9999999
     prompt_updateItemsBox
     prompt_drawPrompt
     ;;
-  LEFT | CTRL+B)
+  backward-char)
     prompt_changePromptCursorIndex -1
     prompt_updateItemsBox
     prompt_drawPrompt
     ;;
-  RIGHT | CTRL+F)
+  forward-char)
     prompt_changePromptCursorIndex 1
     prompt_updateItemsBox
     prompt_drawPrompt
     ;;
-  CTRL+LEFT)
+  backward-word)
     # move to beginning of the previous word
     prompt_getIndexDeltaToBeginningOfWord
     prompt_changePromptCursorIndex "${RETURNED_VALUE}"
     prompt_updateItemsBox
     prompt_drawPrompt
     ;;
-  CTRL+RIGHT)
+  forward-word)
     prompt_getIndexDeltaToEndOfWord
     prompt_changePromptCursorIndex "${RETURNED_VALUE}"
     prompt_updateItemsBox
@@ -660,7 +701,7 @@ function prompt_onKeyBindingPress() {
     ;;
 
   # modify the text
-  CTRL+K)
+  kill-end-of-line)
     # kill the line from cursor to the end
     _PROMPT_KILLED_STRING="${_PROMPT_STRING:_PROMPT_STRING_INDEX}"
     if ((_PROMPT_STRING_INDEX > 0)); then
@@ -671,14 +712,22 @@ function prompt_onKeyBindingPress() {
     prompt_clearItemsBox
     prompt_onTextChanged
     ;;
-  CTRL+Y)
+  kill-line)
+    # kill the line
+    _PROMPT_KILLED_STRING="${_PROMPT_STRING}"
+    _PROMPT_STRING=""
+    _PROMPT_STRING_INDEX=0
+    prompt_clearItemsBox
+    prompt_onTextChanged
+    ;;
+  yank)
     # yank the killed string at cursor position
     if [[ -n ${_PROMPT_KILLED_STRING:-} ]]; then
       prompt_insertTextAtCurrentIndex "${_PROMPT_KILLED_STRING}"
       prompt_onTextChanged
     fi
     ;;
-  DEL | CTRL+D)
+  delete-char)
     # delete the character under the cursor
     local tempUserString
     if ((_PROMPT_STRING_INDEX > 0)); then
@@ -692,7 +741,7 @@ function prompt_onKeyBindingPress() {
     _PROMPT_STRING="${tempUserString}"
     prompt_onTextChanged
     ;;
-  BACKSPACE | CTRL+H)
+  backward-delete-char)
     # delete the character before the cursor
     if ((_PROMPT_STRING_INDEX > 0)); then
       if ((_PROMPT_STRING_INDEX > 1)); then
@@ -704,7 +753,7 @@ function prompt_onKeyBindingPress() {
     prompt_changePromptCursorIndex -1
     prompt_onTextChanged
     ;;
-  CTRL+DEL)
+  kill-word)
     # delete all chars from the cursor to the end of (this or next) word
     local -i oldIndex=${_PROMPT_STRING_INDEX}
     prompt_getIndexDeltaToEndOfWord
@@ -720,7 +769,7 @@ function prompt_onKeyBindingPress() {
     fi
     prompt_onTextChanged
     ;;
-  CTRL+BACKSPACE | CTRL+W)
+  backward-kill-word)
     # delete all chars before the cursor until reaching a space
     local -i oldIndex=${_PROMPT_STRING_INDEX}
     prompt_getIndexDeltaToBeginningOfWord
@@ -735,7 +784,7 @@ function prompt_onKeyBindingPress() {
     fi
     prompt_onTextChanged
     ;;
-  CTRL+P)
+  toggle-password-mode)
     # reveal/hide the prompt
     if [[ ${_PROMPT_PASSWORD_MODE} == "true" ]]; then
       _PROMPT_PASSWORD_MODE=false
@@ -761,29 +810,29 @@ function prompt_onKeyBindingPress() {
     _PROMPT_LAST_KEY_PRESSED_TIME=${RETURNED_VALUE}
 
 
-    case "${1}" in
+    case "${action}" in
     # autocompletion box selected item
-    PAGE_UP)
+    scroll-up)
       prompt_changeSelectedItemIndex "-$((${_PROMPT_ITEMS_BOX_NB_DISPLAYABLE_ITEMS:-10} - 1))"
       prompt_drawItemsBox
       ;;
-    PAGE_DOWN)
+    scroll-down)
       prompt_changeSelectedItemIndex "$((${_PROMPT_ITEMS_BOX_NB_DISPLAYABLE_ITEMS:-10} - 1))"
       prompt_drawItemsBox
       ;;
-    HOME | CTRL+UP)
+    move-beginning)
       prompt_changeSelectedItemIndex "-$((_PROMPT_ORIGINAL_ITEMS_COUNT + 1))"
       prompt_drawItemsBox
       ;;
-    END | CTRL+DOWN)
+    move-end)
       prompt_changeSelectedItemIndex "$((_PROMPT_ORIGINAL_ITEMS_COUNT + 1))"
       prompt_drawItemsBox
       ;;
-    UP)
+    move-up)
       prompt_changeSelectedItemIndex -1
       prompt_drawItemsBox
       ;;
-    DOWN)
+    move-down)
       prompt_changeSelectedItemIndex 1
       prompt_drawItemsBox
       ;;
@@ -814,7 +863,7 @@ function prompt_onKeyPressed() {
     return 0
     ;;
   $'\r' | $'\n')
-    prompt_onKeyBindingPress $'\n'
+    prompt_onKeyBindingPress "NEWLINE"
     return 0
     ;;
   esac

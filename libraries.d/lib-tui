@@ -384,7 +384,7 @@ function tui::testWaitForChar() {
 # The output will depend on the terminal used and the character sequences it sends on each key press.
 #
 # Some special keys are translated into more readable strings:
-# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
+# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1, ALT+?.
 # However, this is not at all exhaustive and will depend on the terminal used. Use `tui::waitForKeyPress`
 # if you need to listen to special keys.
 #
@@ -545,9 +545,6 @@ function tui::waitForKeyPress() {
 # We do our best here to cover most cases but it is by no mean perfect.
 # A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.
 #
-# Users of this function can completely change the bindings afterward by implementing
-# the `tui::RebindOverride` function.
-#
 # This function should be called before using tui::waitForKeyPress.
 #
 # You can call `tui::restoreBindings` to restore the default bindings. However, this is not
@@ -572,8 +569,7 @@ function tui::rebindKeymap() {
     # save the original bindings
     _OPTION_PATH_ONLY=true fs::createTempFile
     _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
-    exe::invokef2 true bind -p
-    mv -f "${RETURNED_VALUE}" "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+    bind -p >"${_INTERACTIVE_SAVED_BINDINGS_FILE}"
   fi
 
   # remove all existing bindings except the self-insert ones
@@ -612,8 +608,7 @@ function tui::rebindKeymap() {
     "ALT+" "\e"
     "CTRL+ALT+" "\e\C-"
   )
-  local -i index
-  local -i modeIndex
+  local -i index modeIndex
   for((index=0;index<${#normalKeys};index++)); do
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
       key="${normalKeys:index:1}"
@@ -664,7 +659,7 @@ function tui::rebindKeymap() {
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
       key="${specialKeys[index]}"
       bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
-      # I have noticed that something the terminal sends the sequence without the \e...
+      # I have noticed that sometimes the terminal sends the sequence without the \e...
       # so we need to bind it without the \e as well
       bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
     done
@@ -713,7 +708,7 @@ function tui::rebindKeymap() {
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
       key="${specialKeys2[index]}"
       bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
-      # I have noticed that something the terminal sends the sequence without the \e...
+      # I have noticed that sometimes the terminal sends the sequence without the \e...
       # so we need to bind it without the \e as well
       bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
       # We also handle the case where SS3 (\eO) is sent instead of CSI (\e[)
@@ -735,14 +730,10 @@ function tui::rebindKeymap() {
   bind -x '"\C-?": '"${callBackFunction}"' BACKSPACE' &>/dev/null
   bind -x '"\b": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
   bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
+  bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
 
   bind -x '"TAB": '"${callBackFunction}"' TAB' &>/dev/null
   bind -x '"\t": '"${callBackFunction}"' TAB' &>/dev/null
-
-  # allow the user to override bindings with a custom function
-  if command -v tui::RebindOverride &>/dev/null; then
-    tui::RebindOverride
-  fi
 }
 
 # ## tui::restoreBindings

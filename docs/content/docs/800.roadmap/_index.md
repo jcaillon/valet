@@ -8,7 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- put in place custom keybindings for the interactive mode. In "case" switch we can replace with an ID that represents the action. And we can have an associative array with the key and the action.
+- add a yaml library for basic parsing.
 - conditionally show global options because they take too much space
 - add a global --edit option to edit the command function file
 - for the showcase, actually build a small app like a git conventional commit tool.
@@ -25,6 +25,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - main menu:
   - add info of the extension from which a command comes from
   - in the menu we can filter by extension (and we see the extension of a command)
+- When calling `valet extension-name`, it should show the commands of the extension.
 - test the "sudo" feature: it runs the command by forking. We could add an option to instead rerun valet with sudo.
 - Add full support for interactive mode:
   - prompt the user in the scrolling terminal. Then we add an option to instead open a full screen editor.
