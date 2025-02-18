@@ -25,9 +25,9 @@ function main() {
 function test_string::removeSgrCodes() {
   test::title "✅ Testing string::removeSgrCodes"
 
-  local myStringWithSgrCodes="w[36mo[107mr[38;2;255;255;255md[38;5;255m!"
-  test::exec string::removeSgrCodes myStringWithSgrCodes
-  test::printVars myStringWithSgrCodes
+  local _myStringWithSgrCodes="w[36mo[107mr[38;2;255;255;255md[38;5;255m!"
+  test::exec string::removeSgrCodes _myStringWithSgrCodes
+  test::printVars _myStringWithSgrCodes
 }
 
 function test_string::doForEachLine() {

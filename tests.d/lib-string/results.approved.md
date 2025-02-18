@@ -4,10 +4,10 @@
 
 ### ✅ Testing string::removeSgrCodes
 
-❯ `string::removeSgrCodes myStringWithSgrCodes`
+❯ `string::removeSgrCodes _myStringWithSgrCodes`
 
 ```text
-myStringWithSgrCodes='word!'
+_myStringWithSgrCodes='word!'
 ```
 
 ### ✅ Testing string::getField
