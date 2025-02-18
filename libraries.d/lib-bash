@@ -62,7 +62,7 @@ function bash::countJobs() {
 # - $?:
 #   - 0: if all the jobs completed successfully.
 #   - 1: if the job completed callback returned 1.
-# - ${RETURNED_ARRAY}: an array containing the exit codes of the jobs.
+# - ${RETURNED_ARRAY[@]}: an array containing the exit codes of the jobs.
 #
 # ```bash
 # declare -a jobNames=("job1" "job2" "job3")
@@ -327,7 +327,7 @@ function bash::countArgs() {
 # - $?
 #   - 0 if there are variable undeclared
 #   - 1 otherwise.
-# - ${RETURNED_ARRAY}: the list of undeclared variables.
+# - ${RETURNED_ARRAY[@]}: the list of undeclared variables.
 #
 # ```bash
 # if bash::getMissingVariables "var1" "var2"; then
@@ -360,7 +360,7 @@ function bash::getMissingVariables() {
 # - $?
 #   - 0 if there are not existing commands
 #   - 1 otherwise.
-# - ${RETURNED_ARRAY}: the list of not existing commands.
+# - ${RETURNED_ARRAY[@]}: the list of not existing commands.
 #
 # ```bash
 # if bash::getMissingCommands "command1" "command2"; then

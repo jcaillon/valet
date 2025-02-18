@@ -59,7 +59,7 @@ function system::getOs() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY}: An array with the list of all the environment variables.
+# - ${RETURNED_ARRAY[@]}: An array with the list of all the environment variables.
 #
 # ```bash
 # system::getEnvVars

@@ -83,7 +83,7 @@ An example is given below for a `mylib` library and a `myfunction` function:
 # 
 # - $?: 0 if ok, 1 otherwise.
 # - ${RETURNED_VALUE}: The first returned value
-# - ${RETURNED_ARRAY}: A second returned value, as array
+# - ${RETURNED_ARRAY[@]}: A second returned value, as array
 # 
 # ```bash
 # mylib::myfunction arg1 && echo "${RETURNED_VALUE}"

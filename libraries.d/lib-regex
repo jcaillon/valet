@@ -4,7 +4,7 @@
 
 # ## regex::getFirstGroup
 #
-# Matches a string against a regex and returns the first captured group of the matched string.
+# Matches a string against a regex and returns the first captured group of the first match.
 #
 # - $1: **string variable name** _as string_:
 #       The variable name containing the string to match.
@@ -71,9 +71,14 @@ function regex::getFirstGroup() {
 function regex::replace() {
   local -n stringInWhichToReplace="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local regex="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i count="${4:-${_OPTION_MAX_COUNT:-"-1"}}"
+  local -i maxCount="${4:-${_OPTION_MAX_COUNT:-"-1"}}"
   local onlyMatches="${5:-${_OPTION_ONLY_MATCHES:-"false"}}"
-  if (( count == 0 )); then
+  if (( maxCount == 0 )); then
+    if [[ ${onlyMatches} == "true" ]]; then
+      RETURNED_VALUE=""
+    else
+      RETURNED_VALUE="${stringInWhichToReplace}"
+    fi
     return 0
   fi
 
@@ -87,7 +92,7 @@ function regex::replace() {
 
   RETURNED_VALUE=""
   local IFS="" stringBeforeMatch
-  local -i replacementsDone=0 currentCharIndex=0
+  local -i count=0 currentCharIndex=0
 
   while [[ ${stringInWhichToReplace:currentCharIndex} =~ ${regex} ]]; do
     stringBeforeMatch="${stringInWhichToReplace:currentCharIndex}"
@@ -95,7 +100,7 @@ function regex::replace() {
     currentCharIndex=$(( currentCharIndex + ${#stringBeforeMatch} + ${#BASH_REMATCH[0]} ))
 
     if [[ ${usePlaceHolders} == "true" ]]; then
-      actualReplacement="${replacement//"\c"/"${replacementsDone}"}"
+      actualReplacement="${replacement//"\c"/"${count}"}"
       for (( i = 0; i < ${#BASH_REMATCH[@]}; i++ )); do
         actualReplacement=${actualReplacement//"\\${i}"/"${BASH_REMATCH[i]}"}
       done
@@ -107,12 +112,93 @@ function regex::replace() {
       RETURNED_VALUE+="${stringBeforeMatch}${actualReplacement}"
     fi
 
-    replacementsDone+=1
-    if (( count != -1 && replacementsDone >= count )); then
+    count+=1
+    if (( maxCount != -1 && count >= maxCount )); then
       break
     fi
   done
   if [[ ${onlyMatches} != "true" ]]; then
     RETURNED_VALUE+="${stringInWhichToReplace:currentCharIndex}"
   fi
+}
+
+# ## regex::getMatches
+#
+# Returns an array containing all the matched for a regex in a string.
+#
+# - $1: **string variable name** _as string_:
+#       The variable name containing the string to match.
+# - $2: **regex** _as string_:
+#       The regex to use for the match.
+# - $3: replacement _as string_:
+#       (optional) Can be set using the variable `_OPTION_REPLACEMENT`.
+#       The replacement string to use on each match.
+#       Use \x to refer to the x-th capture group.
+#       Use \c to refer to replacement counter.
+#       (default to "", which means no changes will be done on the matches)
+# - $4: max count _as int_:
+#       (optional) Can be set using the variable `_OPTION_MAX_COUNT`.
+#       The number of matches to return.
+#       (default to -1, which is unlimited)
+#
+# Returns:
+#
+# - ${RETURNED_ARRAY[@]}: An array containing all the matches.
+#
+# ```bash
+# MY_STRING="name: julien, name: john"
+# regex::getMatches MY_STRING "name: (.*)"
+# for match in "${RETURNED_ARRAY[@]}"; do
+#   echo "${match}"
+# done
+# ```
+#
+# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+function regex::getMatches() {
+  local -n stringInWhichToMatch="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local regex="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local replacement="${3:-${_OPTION_REPLACEMENT:-""}}"
+  local -i maxCount="${4:-${_OPTION_MAX_COUNT:-"-1"}}"
+
+  RETURNED_ARRAY=()
+
+  if (( maxCount == 0 )); then
+    return 0
+  fi
+
+  local useReplacement=false usePlaceHolders=false actualReplacement
+  if (( ${#replacement} > 0 )); then
+    useReplacement=true
+    if [[ ${replacement} == *"\\"* ]]; then
+      usePlaceHolders=true
+    else
+      actualReplacement="${replacement}"
+    fi
+  fi
+
+  local IFS="" stringBeforeMatch
+  local -i count=0 currentCharIndex=0
+
+  while [[ ${stringInWhichToMatch:currentCharIndex} =~ ${regex} ]]; do
+    stringBeforeMatch="${stringInWhichToMatch:currentCharIndex}"
+    stringBeforeMatch="${stringBeforeMatch%%"${BASH_REMATCH[0]}"*}"
+    currentCharIndex=$(( currentCharIndex + ${#stringBeforeMatch} + ${#BASH_REMATCH[0]} ))
+
+    if [[ ${useReplacement} == "true" ]]; then
+      if [[ ${usePlaceHolders} == "true" ]]; then
+        actualReplacement="${replacement//"\c"/"${count}"}"
+        for (( i = 0; i < ${#BASH_REMATCH[@]}; i++ )); do
+          actualReplacement=${actualReplacement//"\\${i}"/"${BASH_REMATCH[i]}"}
+        done
+      fi
+      RETURNED_ARRAY+=("${actualReplacement}")
+    else
+      RETURNED_ARRAY+=("${BASH_REMATCH[0]}")
+    fi
+
+    count+=1
+    if (( maxCount != -1 && count >= maxCount )); then
+      break
+    fi
+  done
 }

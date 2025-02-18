@@ -310,7 +310,7 @@ function fs::tail() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY}: An array with the list of all the paths.
+# - ${RETURNED_ARRAY[@]}: An array with the list of all the paths.
 #
 # ```bash
 # fs::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
@@ -387,7 +387,7 @@ function fs::listPaths() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY}: An array with the list of all the files.
+# - ${RETURNED_ARRAY[@]}: An array with the list of all the files.
 #
 # ```bash
 # fs::listFiles "/path/to/directory" true true myFilterFunction
@@ -423,7 +423,7 @@ function fs::listFiles() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY}: An array with the list of all the files.
+# - ${RETURNED_ARRAY[@]}: An array with the list of all the files.
 #
 # ```bash
 # fs::listDirectories "/path/to/directory" true true myFilterFunction

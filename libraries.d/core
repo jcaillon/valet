@@ -1401,8 +1401,8 @@ function string::highlight() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY}: An array containing the items sorted and filtered
-# - ${RETURNED_ARRAY2}: An array containing the indexes of the matched items in the original array
+# - ${RETURNED_ARRAY[@]}: An array containing the items sorted and filtered
+# - ${RETURNED_ARRAY2[@]}: An array containing the indexes of the matched items in the original array
 #
 # ```bash
 # array::fuzzyFilterSort MY_ARRAY SEARCH_STRING

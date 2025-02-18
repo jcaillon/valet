@@ -152,7 +152,7 @@ function array_sortCompareCallBack() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY}: An array that contains the corresponding indexes of the sorted array in the original array
+# - ${RETURNED_ARRAY[@]}: An array that contains the corresponding indexes of the sorted array in the original array
 #
 # ```bash
 # declare myArray=( "a" "b" "c" )
