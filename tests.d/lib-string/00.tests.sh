@@ -4,6 +4,7 @@
 source string
 
 function main() {
+  test_string::removeSgrCodes
   test_string::getField
   test_string::convertCamelCaseToSnakeCase
   test_string::convertKebabCaseToSnakeCase
@@ -19,6 +20,14 @@ function main() {
   test_string::highlight
   test_string::head
   test_string::doForEachLine
+}
+
+function test_string::removeSgrCodes() {
+  test::title "✅ Testing string::removeSgrCodes"
+
+  local myStringWithSgrCodes="w[36mo[107mr[38;2;255;255;255md[38;5;255m!"
+  test::exec string::removeSgrCodes myStringWithSgrCodes
+  test::printVars myStringWithSgrCodes
 }
 
 function test_string::doForEachLine() {

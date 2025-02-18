@@ -364,6 +364,11 @@ function prompt::input() {
     _PROMPT_ERROR_BOX_SYMBOL_LENGTH=0
   fi
 
+  if [[ ${_PROMPT_MULTI_LINE} == "true" ]]; then
+    _PROMPT_MULTI_LINE_START_INDEX=0
+    _PROMPT_MULTI_LINE_CURSOR_INDEX=-1
+  fi
+
   _PROMPT_KILLED_STRING=""
   _PROMPT_STRING_INDEX=${#_PROMPT_STRING}
   GLOBAL_CURSOR_LINE="${_PROMPT_START_LINE}"
@@ -1017,11 +1022,6 @@ function prompt_clearPrompt() {
   fi
 
   printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__AC__TO}${AC__ERASE__}${_PROMPT_WIDTH}${__AC_CHARS}${AC__CURSOR_SHOW}"
-}
-
-function prompt_drawMultiLinePrompt() {
-  prompt_getMultiLinePrompt
-  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__AC__TO}${RETURNED_VALUE}${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
 }
 
 # Clear the multi-line prompt
@@ -1812,3 +1812,91 @@ function prompt_getDisplayedPromptString() {
   RETURNED_VALUE2=${screenIndex}
 }
 
+function prompt_drawMultiLinePrompt() {
+  # we need to draw the prompt on multiple lines
+  local promptLines=()
+  local promptLinesStartIndex=()
+  prompt_drawMultiLinePromptRefreshLines _PROMPT_STRING
+
+  prompt_getMultiLinePrompt
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__AC__TO}${RETURNED_VALUE}${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
+}
+
+
+function prompt_drawMultiLinePromptRefreshLines() {
+  local -n textToWrapAtWords="${1}"
+
+  local -i linesIndex=0
+
+  # short cut in case the text is already shorter than the width
+  if [[ ${#textToWrapAtWords} -le ${_PROMPT_STRING_SCREEN_WIDTH} && ${textToWrapAtWords} != *$'\n'* ]]; then
+    RETURNED_VALUE="${textToWrapAtWords}"
+    return 0
+  fi
+
+  local text="${textToWrapAtWords}"
+  local IFS=$' \t' output="" line word realWord RETURNED_VALUE2
+  local -i realWordLength=0 firstWord=1
+  local -i lineLength=0
+
+  while ((${#text} > 0)); do
+    line="${text%%$'\n'*}"
+    text="${text:${#line}+1}"
+
+    output+=$'\n'""
+
+    # short cut in case the text is already shorter than the width
+    if ((lineLength + ${#line} <= _PROMPT_STRING_SCREEN_WIDTH)); then
+      output+="${line}"
+      continue
+    fi
+
+    firstWord=1
+
+    for word in ${line}; do
+      if [[ ${word} == *$'\e'* ]]; then
+        realWord="${word//$'\e['[0-9][0-9]m/}"
+        realWord="${realWord//$'\e['[0-9]m/}"
+        realWordLength="${#realWord}"
+      else
+        realWordLength="${#word}"
+      fi
+
+      if ((lineLength < _PROMPT_STRING_SCREEN_WIDTH && firstWord == 0)); then
+        output+=" "
+        lineLength+=1
+      else
+        firstWord=0
+      fi
+
+      if ((lineLength + realWordLength <= _PROMPT_STRING_SCREEN_WIDTH)); then
+        # add the word to the current line
+        output+="${word}"
+        lineLength+=realWordLength
+      else
+        # not enough space left, check if the word fits on the next line
+        if ((realWordLength <= _PROMPT_STRING_SCREEN_WIDTH)); then
+          output+=$'\n'"${word}"
+          lineLength=realWordLength
+        else
+          # the word is too long to fit on a line, split it in multiple lines
+          string::wrapCharacters word "${_PROMPT_STRING_SCREEN_WIDTH}" "" "$((_PROMPT_STRING_SCREEN_WIDTH - lineLength))"
+          output+="${RETURNED_VALUE}"
+          lineLength=${RETURNED_VALUE2}
+        fi
+      fi
+
+    done
+
+    lineLength=0
+  done
+
+  RETURNED_VALUE="${output#$'\n'""}"
+
+
+
+  string::wrapWords _PROMPT_STRING "${_PROMPT_STRING_SCREEN_WIDTH}" "  " "$((_PROMPT_STRING_SCREEN_WIDTH - _PROMPT_SYMBOL_LENGTH))"
+
+  prompt_getMultiLinePrompt
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__AC__TO}${RETURNED_VALUE}${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
+}

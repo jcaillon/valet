@@ -2,6 +2,14 @@
 
 ## Test script 00.tests
 
+### ✅ Testing string::removeSgrCodes
+
+❯ `string::removeSgrCodes myStringWithSgrCodes`
+
+```text
+myStringWithSgrCodes='word!'
+```
+
 ### ✅ Testing string::getField
 
 ```text

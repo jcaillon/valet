@@ -105,8 +105,14 @@ AC__BG_BRIGHT_WHITE=$'\e[107m'
 # "${AC__FG_COLOR__}2${__AC__CODE}"
 AC__FG_COLOR__=$'\e[38;5;'
 # "${AC__BG_COLOR}2${__AC__CODE}"
-AC__BG_COLOR=$'\e[48;5;'
+AC__BG_COLOR__=$'\e[48;5;'
 __AC__CODE=$'m'
+
+# https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit
+# "${AC__FG_COLOR_24b__}255;255;255${__AC__CODE}"
+AC__FG_COLOR_24b__=$'\e[38;2;'
+# "${AC__BG_COLOR_24b}255;255;255${__AC__CODE}"
+AC__BG_COLOR_24b__=$'\e[48;2;'
 
 #===============================================================
 # >>> CSI: Cursor control

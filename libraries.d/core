@@ -1223,7 +1223,7 @@ function string::wrapWords() {
 #       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
 #       The characters to apply as padding on the left of each new line.
 #       E.g. '  ' will add 2 spaces on the left of each new line.
-#       (defaults to 0)
+#       (defaults to "")
 # - $4: first line width _as int_:
 #       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
 #       The width to use for the first line.
