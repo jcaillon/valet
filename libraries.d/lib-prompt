@@ -259,7 +259,7 @@ function prompt::input() {
   _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=""
   _PROMPT_ITEMS_BOX_FILTER_USING_GREP=""
 
-  local -A _PROMPT_KEY_BINDING=(
+  local -A _PROMPT_KEY_MAPPING=(
     ["CTRL+ALT+M"]="accept-line"
     ["CTRL+M"]="accept-line"
     ["CTRL+J"]="accept-line"
@@ -296,6 +296,12 @@ function prompt::input() {
     ["UP"]="move-up"
     ["DOWN"]="move-down"
   )
+  if [[ -v VALET_CONFIG_PROMPT_KEY_MAPPING ]]; then
+    local key
+    for key in "${!VALET_CONFIG_PROMPT_KEY_MAPPING[@]}"; do
+      _PROMPT_KEY_MAPPING["${key}"]="${VALET_CONFIG_PROMPT_KEY_MAPPING[${key}]}"
+    done
+  fi
 
   # set up colors
   if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
@@ -605,7 +611,7 @@ function prompt_onKeyBindingPress() {
     fi
   fi
 
-  local action="${_PROMPT_KEY_BINDING[${1}]:-}"
+  local action="${_PROMPT_KEY_MAPPING[${1}]:-}"
   if [[ -z ${action} ]]; then
     return 0
   fi

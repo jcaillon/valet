@@ -190,7 +190,7 @@ function bash::killRunningJobs() {
 #       The name of the function to inject the code into.
 # - $2: **code** _as string_:
 #       The code to inject.
-# - $3: inject at beginning _as boolean_:
+# - $3: inject at beginning _as bool_:
 #       (optional) Can be set using the variable `_OPTION_INJECT_AT_BEGINNING`.
 #       Whether to inject the code at the beginning of the function (or at the end).
 #       (defaults to false)

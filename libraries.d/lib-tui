@@ -569,7 +569,7 @@ function tui::rebindKeymap() {
     # save the original bindings
     _OPTION_PATH_ONLY=true fs::createTempFile
     _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
-    bind -p >"${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+    bind -p >"${_INTERACTIVE_SAVED_BINDINGS_FILE}" 2>/dev/null
   fi
 
   # remove all existing bindings except the self-insert ones
@@ -749,7 +749,7 @@ function tui::restoreBindings() {
   fi
 
   # try to remove all bindings
-  exe::invoke bind -p
+  exe::captureOutput bind -p
   local bindings="${RETURNED_VALUE}"
   local IFS=$'\n'
   local line

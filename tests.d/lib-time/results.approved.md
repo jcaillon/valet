@@ -2,6 +2,46 @@
 
 ## Test script 00.tests
 
+### ✅ Testing time::startTimer function
+
+❯ `time::startTimer`
+
+❯ `time::stopTimer`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='1000000'
+```
+
+❯ `time::stopTimer true`
+
+**Error output**:
+
+```text
+INFO     Elapsed time: 2.000s
+```
+
+Returned variables:
+
+```text
+RETURNED_VALUE='2000000'
+```
+
+❯ `time::stopTimer true %L`
+
+**Error output**:
+
+```text
+INFO     Elapsed time: 3000
+```
+
+Returned variables:
+
+```text
+RETURNED_VALUE='3000000'
+```
+
 ### ✅ Testing time::getDate
 
 ❯ `time::getDate`

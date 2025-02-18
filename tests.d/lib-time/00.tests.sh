@@ -4,8 +4,18 @@
 source time
 
 function main() {
+  test_time::startTimer
   test_time::getDate
   test_time::convertMicrosecondsToHuman
+}
+
+function test_time::startTimer() {
+  test::title "✅ Testing time::startTimer function"
+
+  test::exec time::startTimer
+  test::func time::stopTimer
+  test::func time::stopTimer true
+  test::func time::stopTimer true "%L"
 }
 
 function test_time::getDate() {
@@ -40,5 +50,15 @@ Total microseconds: %U"
   test::func time::convertMicrosecondsToHuman ${ms}
   test::func _OPTION_FORMAT='%U' time::convertMicrosecondsToHuman ${ms}
 }
+
+# override time::getProgramElapsedMicroseconds to return a fake incremental time
+function time::getProgramElapsedMicroseconds() {
+  if [[ -z ${_FAKE_TIME:-} ]]; then
+    _FAKE_TIME=0
+  fi
+  ((_FAKE_TIME=_FAKE_TIME + 1000000))
+  RETURNED_VALUE="${_FAKE_TIME}"
+}
+
 
 main

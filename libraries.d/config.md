@@ -270,13 +270,31 @@ See progress::start.
 
 The default number of animation frames to wait between two updates of the progress bar.
 
+#### VALET_CONFIG_PROMPT_KEY_MAPPING
+
+The key mapping for the prompts. This variable must be a valid bash associative array.
+Each key is a key code and the value is the action to perform.
+
+You don't have to define all the keys, only the ones you want to change.
+
+E.g.
+
+```bash
+local -A _PROMPT_KEY_MAPPING=(
+  ["CTRL+Y"]="yank"
+  ["DEL"]="delete-char"
+  ["UP"]="move-up"
+  ["DOWN"]="move-down"
+)
+```
+
 <!-- _________________ THEME _______________________ -->
 
 ### 🎨 Theme configuration
 
 Since there are many variables, we only list them here without description.
 
-Complete theme and theme selection will come later.
+Complete theming as well as theme selection will come later.
 
 #### Characters configuration
 

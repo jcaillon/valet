@@ -191,7 +191,7 @@ function fs::setupTempFileGlobalVariable() {
 #
 # Creates a temporary file and return its path.
 #
-# - ${_OPTION_PATH_ONLY} _as boolean_:
+# - ${_OPTION_PATH_ONLY} _as bool_:
 #       (optional) If true, does not create the file, only returns the path.
 #       (defaults to false)
 #
@@ -224,7 +224,7 @@ function fs::createTempFile() {
 #
 # Creates a temporary directory.
 #
-# - ${_OPTION_PATH_ONLY} _as boolean_:
+# - ${_OPTION_PATH_ONLY} _as bool_:
 #       (optional) If true, does not create the file, only returns the path.
 #       (defaults to false)
 #

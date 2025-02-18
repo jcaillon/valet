@@ -110,3 +110,52 @@ function time::convertMicrosecondsToHuman() {
 
   RETURNED_VALUE="${humanFormat}"
 }
+
+# ## time::startTimer
+#
+# Start a timer. You can then call `time::stopTimer` to get the elapsed time.
+#
+# ```bash
+# time::startTimer
+# time::stopTimer
+# ```
+function time::startTimer() {
+  time::getProgramElapsedMicroseconds
+  _TIME_TIMER_START="${RETURNED_VALUE}"
+}
+
+# ## time::stopTimer
+#
+# Stop the timer started by `time::startTimer`.
+#
+# - $1: log elapsed time _as bool_:
+#      (optional) Can be set using the variable `_OPTION_LOG_ELAPSED_TIME`.
+#      the format to use (defaults to "%HH:%MM:%SS")
+# - $2: format _as string_:
+#      (optional) Can be set using the variable `_OPTION_FORMAT`.
+#      The format to use if we log the elapsed time
+#      (defaults to "%S.%LLs").
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the elapsed time in microseconds.
+#
+# ```bash
+# time::startTimer
+# time::stopTimer true "%S.%LLs"
+# echo "Total microseconds: ${RETURNED_VALUE}"
+# ```
+function time::stopTimer() {
+  local log="${1:-${_OPTION_LOG_ELAPSED_TIME:-false}}"
+  local format="${2:-${_OPTION_FORMAT:-"%S.%LLs"}}"
+
+  time::getProgramElapsedMicroseconds
+  local -i elapsed=$((RETURNED_VALUE - _TIME_TIMER_START))
+
+  if [[ ${log} == "true" ]]; then
+    time::convertMicrosecondsToHuman ${elapsed} "${format}"
+    log::info "Elapsed time: ${RETURNED_VALUE}"
+  fi
+
+  RETURNED_VALUE="${elapsed}"
+}

@@ -14,7 +14,7 @@ source fs
 #
 # - $1: **command** _as string_:
 #       the command to run.
-# - $2: run as administrator _as boolean_:
+# - $2: run as administrator _as bool_:
 #       (optional) whether to run the command as administrator.
 #       (defaults to false).
 #
@@ -177,10 +177,10 @@ function windows::endPs1Batch() {
 #       the path to link to (the original file)
 # - $2: **link path** _as string_:
 #       the path where to create the link
-# - $3: hard link _as boolean_:
+# - $3: hard link _as bool_:
 #       (optional) true to create a hard link, false to create a symbolic link
 #       (defaults to false)
-# - $4: force _as boolean_:
+# - $4: force _as bool_:
 #       (optional) true to overwrite the link or file if it already exists.
 #       Otherwise, the function will not on an existing link not pointing to the
 #       target path.
