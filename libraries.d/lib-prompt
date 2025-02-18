@@ -1835,7 +1835,7 @@ function prompt_drawMultiLinePromptRefreshLines() {
   fi
 
   local text="${textToWrapAtWords}"
-  local IFS=$' \t' output="" line word realWord RETURNED_VALUE2
+  local IFS=$' \t' line word realWord RETURNED_VALUE2
   local -i realWordLength=0 firstWord=1
   local -i lineLength=0
 
