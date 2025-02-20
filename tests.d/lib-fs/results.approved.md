@@ -184,7 +184,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-mkdir: cannot create directory ‘$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1’: File exists
+mkdir: cannot create directory '$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1': File exists
 ERROR    Failed to create the directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1⌝.
 ```
 

@@ -177,6 +177,14 @@ RETURNED_VALUE='/d/data/file'
 **Standard output**:
 
 ```text
+🙈 mocking fs::createLink: resources/gitignored/file resources/gitignored/try/file2 true
+```
+
+❯ `windows::createLink resources/gitignored/file resources/gitignored/try/file2 true`
+
+**Standard output**:
+
+```text
 🙈 mocking powershell: -NoProfile -NonInteractive -Command 
     $ErrorActionPreference = 'Stop';
     $process = Start-Process -FilePath powershell.exe -ArgumentList @("-NoProfile","-NonInteractive","-File",'tmp') -Wait -Verb RunAs -WindowStyle Hidden;

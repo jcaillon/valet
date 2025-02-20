@@ -192,7 +192,13 @@ function windows::endPs1Batch() {
 # ```
 #
 # > On Windows, the function uses `powershell` (and optionally ls to check the existing link).
+# > If you have the windows "developer mode" enabled + MSYS=winsymlinks:nativestrict,
+# > then it uses the ln command.
 function windows::createLink() {
+  if [[ ${MSYS:-} == "winsymlinks:nativestrict" ]]; then
+    fs::createLink "$@"
+    return 0
+  fi
   local linkedPath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local linkPath="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local hardLink="${3:-false}"

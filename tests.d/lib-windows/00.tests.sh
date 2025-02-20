@@ -59,6 +59,11 @@ function test_windows::createLink() {
   mkdir -p resources/gitignored
   :> resources/gitignored/file
 
+  MSYS="winsymlinks:nativestrict"
+  test::exec windows::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' true
+  test::flush
+
+  MSYS=""
   test::exec windows::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' true
   test::flush
 
@@ -71,6 +76,10 @@ function powershell() {
   text="${text//"-FilePath "*"-Encoding utf8;"/"-FilePath 'tmp' -Encoding utf8;"}"
   text="${text//"\"-File\","*") -Wait"/"\"-File\",'tmp') -Wait"}"
   echo "${text}";
+}
+
+function fs::createLink() {
+  echo "🙈 mocking fs::createLink: $*"
 }
 
 main

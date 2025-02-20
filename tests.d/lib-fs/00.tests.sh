@@ -68,8 +68,13 @@ function test_fs::createDirectoryIfNeeded() {
 
   test::func fs::createDirectoryIfNeeded resources/dir/subdir
 
+  # on certain versions of bash, you get a different quote character
+  function test::transformTextBeforeFlushing() { _TEST_OUTPUT="${_TEST_OUTPUT//'‘'/"'"}"; _TEST_OUTPUT="${_TEST_OUTPUT//'’'/"'"}"; }
+
   test::markdown "This next command will fail because the directory already exists (it is a file)."
   test::exit fs::createDirectoryIfNeeded resources/dir/subdir/file1
+
+  unset -f test::transformTextBeforeFlushing
 
   test::func fs::createDirectoryIfNeeded resources/gitignored/derp
   if [[ -d resources/gitignored/derp ]]; then
