@@ -43,6 +43,9 @@ function main() {
   chmod +x ./commands.d/self-install.sh
   ./commands.d/self-install.sh --unattended --use-branch --version "${BRANCH_NAME}"
 
+  echo "Shim content:"
+  cat /usr/local/bin/valet
+
   echo "================================================"
   echo "Built commands:"
   echo "================================================"
