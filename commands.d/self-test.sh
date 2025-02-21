@@ -143,6 +143,10 @@ function selfTest() {
 
   # core test suites
   if [[ -n ${withCore:-} || ${coreOnly:-false} == "true" ]]; then
+    # for consistency, we need to run the core tests from the installation directory
+    local defaultCurrentDirectory="${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}"
+    GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${GLOBAL_INSTALLATION_DIRECTORY}"
+
     if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/tests.d ]]; then
       core::fail "The valet core tests directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/tests.d⌝ does not exist, cannot run core tests."
     fi
@@ -161,6 +165,8 @@ function selfTest() {
       selfTestUtils_rebuildCommands --user-directory "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d"  --output "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
       selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/showcase/tests.d"
     fi
+
+    GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${defaultCurrentDirectory}"
   fi
 
   time::getProgramElapsedMicroseconds

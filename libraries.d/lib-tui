@@ -718,6 +718,7 @@ function tui::rebindKeymap() {
     done
   done
 
+  # check http://www.afterstep.org/keyboard.html
   # special key bindings
   bind -x '"NEWLINE": '"${callBackFunction}"' NEWLINE' &>/dev/null
   bind -x '"RET": '"${callBackFunction}"' NEWLINE' &>/dev/null
@@ -729,7 +730,6 @@ function tui::rebindKeymap() {
   bind -x '"RUBOUT": '"${callBackFunction}"' BACKSPACE' &>/dev/null
   bind -x '"\C-?": '"${callBackFunction}"' BACKSPACE' &>/dev/null
   bind -x '"\b": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
-  bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
   bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
 
   bind -x '"TAB": '"${callBackFunction}"' TAB' &>/dev/null
