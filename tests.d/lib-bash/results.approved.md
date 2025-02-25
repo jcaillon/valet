@@ -248,3 +248,11 @@ Returned code: `1`
 
 ❯ `bash::isCommand rm`
 
+### ✅ Testing bash::isFunction
+
+❯ `bash::isFunction func1`
+
+Returned code: `1`
+
+❯ `bash::isFunction func1`
+

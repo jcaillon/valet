@@ -6,9 +6,16 @@ source system
 source fs
 
 function main() {
+  test_system::getArchitecture
   test_system::getOs
   test_system::getEnvVars
   test_system::addToPath
+}
+
+function test_system::getArchitecture() {
+  test::title "✅ Testing system::getArchitecture"
+
+  test::func MACHTYPE=x86_64-pc-msys system::getArchitecture
 }
 
 function test_system::getOs() {

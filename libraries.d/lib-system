@@ -52,6 +52,22 @@ function system::getOs() {
   RETURNED_VALUE="${osName}"
 }
 
+# ## system::getArchitecture
+#
+# Returns the CPU architecture of the current machine.
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the CPU architecture of the current machine.
+#
+# ```bash
+# system::getArchitecture
+# local architecture="${RETURNED_VALUE}"
+# ```
+function system::getArchitecture() {
+  RETURNED_VALUE="${MACHTYPE%%-*}"
+}
+
 # ## system::getEnvVars
 #
 # Get the list of all the environment variables.

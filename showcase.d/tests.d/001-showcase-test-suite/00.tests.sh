@@ -3,8 +3,8 @@
 # This function demonstrates how to test a function within your script
 function main() {
   # make sure to source the file in which these known functions are defined
-  command::sourceFunction "showcaseCommand1" 2> /dev/null
-  command::sourceFunction "showCaseSudo" 2> /dev/null
+  command::sourceFunction "showcaseCommand1" 2>/dev/null
+  command::sourceFunction "showCaseSudo" 2>/dev/null
 
   test::title "✅ Testing showcaseCommand1"
   test::exec showcaseCommand1 -o -2 optionValue2 arg1 more1 more2

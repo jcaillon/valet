@@ -53,6 +53,7 @@ function selfExport() {
   # source valet core library, disable some traps
   output+="source \"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core\""$'\n'
   output+="trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;"$'\n'
+  output+="GLOBAL_EXPORTED=true;"$'\n'
 
   if [[ ${sourceAllFunctions:-} == "true" ]]; then
     # source all libraries

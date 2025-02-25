@@ -45,7 +45,7 @@ function trap::onExitInternal() {
   local rc=$?
 
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
-  if command -v onExit &>/dev/null; then
+  if declare -F onExit &>/dev/null; then
     onExit "${rc}"
   fi
 
@@ -65,7 +65,7 @@ function trap::onExitInternal() {
 
 # This function is called when the program is interrupted by the user (CTRL+C).
 function trap::onInterruptInternal() {
-  if ! command -v tui::restoreTerminalOptions &>/dev/null; then
+  if ! declare -F tui::restoreTerminalOptions &>/dev/null; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
   log::print "WARNING" "${VALET_CONFIG_ICON_STOPPED:-$'\uf256'}" "STOPPED" "Program interrupted by the user."
@@ -76,7 +76,7 @@ function trap::onInterruptInternal() {
   fi
 
   # check if the function exists
-  if command -v onInterrupt &>/dev/null; then
+  if declare -F onInterrupt &>/dev/null; then
     if onInterrupt; then
       # if onInterrupt returns 0, then we cancel the interrupt
       return 0
@@ -91,7 +91,7 @@ function trap::onInterruptInternal() {
 function trap::onTerminateInternal() {
   log::print "ERROR" "${VALET_CONFIG_ICON_KILLED:-$'\uf05e'}" "KILLED" "Program killed."
   # check if the function exists
-  if command -v onTerminate 1>/dev/null 2>&1; then
+  if declare -F onTerminate &>/dev/null; then
     if onTerminate; then
       # if onTerminate returns 0, then we cancel the termination
       return 0
@@ -102,20 +102,19 @@ function trap::onTerminateInternal() {
   exit 1
 }
 
-function trap::register() {
-  trap 'trap::onErrorInternal $?' ERR
-  trap trap::onExitInternal EXIT
-  # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
-  trap trap::onInterruptInternal SIGINT SIGQUIT
-  # Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
-  trap trap::onTerminateInternal SIGHUP SIGTERM
-}
-
-function trap::unregister() {
-  trap ERR
-  trap EXIT
-  trap SIGINT; trap SIGQUIT
-  trap SIGHUP; trap SIGTERM
+# This function is called when terminal changes its size.
+function trap::onResizeInternal() {
+  tui::getTerminalSize
+  # shellcheck disable=SC2034
+  GLOBAL_SCREEN_REDRAW_REQUIRED=true
+  # need to re init the logs because might depend on the number of columns for wrapping
+  log::init
+  if declare -F progress::onResize &>/dev/null; then
+    progress::onResize
+  fi
+  if declare -F onResize &>/dev/null; then
+    onResize
+  fi
 }
 
 # This functions is called before the program exits (in all cases, error or not).
@@ -131,17 +130,17 @@ function trap::onCleanUpInternal() {
   fi
 
   # if we ran an interactive function, make sure to restore the cursor
-  if [[ -t 2 && -n ${AC__CURSOR_SHOW:-} ]]; then
-    printf '%s' "${AC__CURSOR_SHOW}" 1>&2
+  if [[ -t 2 ]]; then
+    printf '%s' $'\e[?25h' 1>&2
   fi
 
   # call the clean up functions if they exist
-  if command -v cleanUp 1>/dev/null 2>&1; then
+  if declare -F cleanUp &>/dev/null; then
     cleanUp
   fi
 
   # restore tty settings if needed
-  if command -v tui::restoreTerminalOptions &>/dev/null; then
+  if declare -F tui::restoreTerminalOptions &>/dev/null; then
     tui::restoreTerminalOptions true
   fi
 }
@@ -157,6 +156,30 @@ function command_not_found_handle() {
     core::fail "Command not found: ⌜${1}⌝."$'\n'"Did you forget to source the package? ⌜source ${1%%::*}⌝"
   fi
   core::fail "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
+}
+
+function trap::register() {
+  trap 'trap::onErrorInternal $?' ERR
+  trap trap::onExitInternal EXIT
+  # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
+  trap trap::onInterruptInternal SIGINT SIGQUIT
+  # Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
+  trap trap::onTerminateInternal SIGHUP SIGTERM
+  if [[ -t 2 ]]; then
+    # shellcheck disable=SC2034
+    GLOBAL_SCREEN_REDRAW_REQUIRED=false
+    trap trap::onResizeInternal SIGWINCH
+  fi
+}
+
+function trap::unregister() {
+  trap ERR
+  trap EXIT
+  trap SIGINT; trap SIGQUIT
+  trap SIGHUP; trap SIGTERM
+  if [[ -t 2 ]]; then
+    trap SIGWINCH
+  fi
 }
 
 #===============================================================
@@ -975,8 +998,6 @@ function log::parseLogPattern() {
   RETURNED_VALUE3="${wrapPaddingLength}"
 }
 
-# ## log::getTruncate
-
 # ## log::init (private)
 #
 # In charge of setting up global variables that will be used to print the logs.
@@ -1018,11 +1039,7 @@ function log::init() {
 
     # string with the number of spaces necessary to align with other log messages
     if (( wrapPaddingLength > 0 )); then
-      local IFS=""
-      eval "local -a array=( {0..$((wrapPaddingLength - 1))} )"
-      # shellcheck disable=SC2154
-      # shellcheck disable=SC2034
-      GLOBAL_LOG_WRAP_PADDING="${array[*]//*/ }"
+      printf -v GLOBAL_LOG_WRAP_PADDING "%${wrapPaddingLength}s" ""
     else
       GLOBAL_LOG_WRAP_PADDING=""
     fi
@@ -1045,15 +1062,16 @@ function log::init() {
       GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}"$'\n'
     fi
 
-    local eraseLineCode eraseLineCode2 outputCode
+    local progressBarCode progressBarCode2 progressBarCode3 outputCode
     if [[ ${logFileDescriptor} == [0-9] ]]; then
       # it is a numbered file descriptor
       outputCode="1>&${logFileDescriptor}"
 
       # clear the line before printing if we are display a progress bar/spinner
-      if [[ -t ${logFileDescriptor} ]]; then
-        eraseLineCode="local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'\e[2K'; fi"$'\n'
-        eraseLineCode2="\${eraseLine:-}"
+      if [[ -t ${logFileDescriptor} || ${GLOBAL_TEST_FORCE_FD_OPEN:-} == "true" ]]; then
+        progressBarCode="local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'\e[2K'; fi"$'\n'
+        progressBarCode2="\${eraseLine:-}"
+        progressBarCode3=$'\n'"if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi"$'\n'
       fi
     else
       # it is a file
@@ -1061,11 +1079,11 @@ function log::init() {
     fi
 
     # define the formatted log statement
-    local formattedLogStatement="printf \"${eraseLineCode2:-}${printfFormat}\" ${printfArguments}"
-    local standardStatement="printf \"${eraseLineCode2:-}%s\" \"\${toPrint}\""
+    local formattedLogStatement="printf \"${progressBarCode2:-}${printfFormat}\" ${printfArguments}"
+    local standardStatement="printf \"${progressBarCode2:-}%s\" \"\${toPrint}\""
 
-    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${eraseLineCode:-}${formattedLogStatement} ${outputCode}"
-    GLOBAL_LOG_PRINT_STATEMENT_STANDARD+="${eraseLineCode:-}${standardStatement} ${outputCode}"
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${progressBarCode:-}${formattedLogStatement} ${outputCode}${progressBarCode3:-}"
+    GLOBAL_LOG_PRINT_STATEMENT_STANDARD+="${progressBarCode:-}${standardStatement} ${outputCode}${progressBarCode3:-}"
 
     # check if we need to additionally output the logs to a file
     if [[ -n ${VALET_CONFIG_LOG_TO_DIRECTORY:-} ]]; then
@@ -1658,6 +1676,27 @@ function source() {
   core::fail "${failMessage}"
 }
 
+# ## include
+#
+# Allows to include multiple library files.
+#
+# It calls `source` for each argument.
+# Useful if you don't have arguments to pass to the sourced files.
+#
+# - $@: **libraries** _as string_:
+#       The names of the libraries (array, interactive, string...) or the file paths to include.
+#
+# ```bash
+# include string array ./my/path
+# ```
+function include() {
+  local name
+  for name in "$@"; do
+    # shellcheck disable=SC1090
+    source "${name}"
+  done
+}
+
 # ## core::resetIncludedLibraries (private)
 #
 # Allows to reset the included libraries.
@@ -1934,6 +1973,9 @@ function core::setShellOptions() {
   # remove all aliases
   # unalias -a
 
+  # unset important variables
+  unset -v CDPATH TMOUT
+
   # default IFS
   IFS=' '$'\t'$'\n'
 
@@ -1968,7 +2010,7 @@ function command::sourceFunction() {
   local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   local fileToSource
-  if ! command -v "${functionName}" 1>/dev/null 2>&1; then
+  if ! declare -F "${functionName}" &>/dev/null; then
     local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
     if [[ -f "${fileToSource}" ]]; then
       # shellcheck disable=SC1090
@@ -1979,7 +2021,7 @@ function command::sourceFunction() {
       source "${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}"
       log::debug "Loaded file ⌜${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}⌝."
     else
-      log::warning "The source file ⌜${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
+      core::fail "The source file ⌜${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
     fi
   fi
 }

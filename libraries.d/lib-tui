@@ -136,15 +136,13 @@ function tui::switchBackFromFullScreen() {
 # tui::setTerminalOptions
 # ```
 function tui::setTerminalOptions() {
-  if command -v stty &>/dev/null; then
-    if [[ -z ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
-      exe::invoke "stty" "-g"
-      _INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
-      # -echo is to suppress echoing characters typed by the user
-      # All the other options are there to enable a satisfying behavior for the GNU readline library
-      # used when we call read -e
-      stty -ixon nl0 cr0 tab0 ff0 icrnl -inlcr -onlret -icanon erase ^B werase ^W -echo -echok -echonl -echoe -echoke -ctlecho &>/dev/null || :
-    fi
+  if [[ -z ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]] && command -v stty &>/dev/null; then
+    exe::invoke "stty" "-g"
+    _INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
+    # -echo is to suppress echoing characters typed by the user
+    # All the other options are there to enable a satisfying behavior for the GNU readline library
+    # used when we call read -e
+    stty -ixon nl0 cr0 tab0 ff0 icrnl -inlcr -onlret -icanon erase ^B werase ^W -echo -echok -echonl -echoe -echoke -ctlecho &>/dev/null || :
   fi
 }
 
@@ -163,14 +161,12 @@ function tui::setTerminalOptions() {
 # ```
 # shellcheck disable=SC2120
 function tui::restoreTerminalOptions() {
-  if [[ ${_INTERACTIVE_FULL_SCREEN_MODE:-} == "true" && ${1:-} != "true" ]]; then
+  if [[ ${_INTERACTIVE_FULL_SCREEN_MODE:-${GLOBAL_EXPORTED:-}} == "true" && ${1:-} != "true" ]]; then
+    # don't restore if we do not force it and we are either in full screen or exported mode
     return 0
   fi
-
   if [[ -n ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
-    if command -v stty &>/dev/null; then
-      stty "${_INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
-    fi
+    stty "${_INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
     unset -v _INTERACTIVE_STTY_SAVED_CONFIG
   fi
 }
@@ -561,7 +557,7 @@ function tui::waitForKeyPress() {
 function tui::rebindKeymap() {
   local callBackFunction="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if ! command -v "${callBackFunction}" &>/dev/null; then
+  if ! declare -F "${callBackFunction}" &>/dev/null; then
     core::fail "The function ⌜${callBackFunction}⌝ must be defined before calling tui::rebindKeymap."
   fi
 
@@ -747,6 +743,10 @@ function tui::restoreBindings() {
   if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
     return 0
   fi
+  if [[ ${GLOBAL_EXPORTED:-} != "true" ]]; then
+    # there is no need to restore if we are not in exported mode, the bindings are local to this execution
+    return 0
+  fi
 
   # try to remove all bindings
   exe::captureOutput bind -p
@@ -765,8 +765,6 @@ function tui::restoreBindings() {
 
   # restore the default bindings
   bind -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}" &>/dev/null
-
-  # we don't remove the original bindings file because we might want to rebind again
 }
 
 # ## tui::clearKeyPressed

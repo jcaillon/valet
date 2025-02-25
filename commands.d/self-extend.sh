@@ -304,7 +304,7 @@ function selfExtend_downloadTarball() {
 
   # download the tarball
   log::info "Downloading the extension from the URL ⌜${tarballUrl}⌝ for sha1 ⌜${sha1}⌝."
-  progress::start "#spinner Download in progress, please wait..."
+  progress::start "<spinner> Download in progress, please wait..."
   curl::download true 200,302 "${tempDirectory}/${sha1}.tar.gz" "${tarballUrl}"
   progress::stop
 
@@ -348,7 +348,7 @@ function selfExtend_getSha1() {
 
     # get the sha1
     RETURNED_VALUE=""
-    progress::start "#spinner Fetching reference information from GitHub..."
+    progress::start "<spinner> Fetching reference information from GitHub..."
     local url="https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${reference}"
     if ! curl::request false '200' -H "Accept: application/vnd.github.v3+json" "${url}"; then
       url="https://api.github.com/repos/${owner}/${repo}/git/refs/tags/${reference}"
@@ -396,7 +396,7 @@ function selfExtend_gitClone() {
   rm -Rf "${targetDirectory}"
 
   log::info "Cloning the git repository ⌜${url}⌝ with reference ⌜${version}⌝ in ⌜${targetDirectory}⌝."
-  progress::start "#spinner Cloning repo, please wait..."
+  progress::start "<spinner> Cloning repo, please wait..."
   exe::invoke git "${args[@]}"
   progress::stop
 }
@@ -576,7 +576,7 @@ function selfExtend_updateGitRepository() {
     branch="${branch%%$'\n'*}"
     log::debug "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
     pushd "${repoPath}" &>/dev/null || core::fail "Could not change to the directory ⌜${repoPath}⌝."
-    progress::start "#spinner Fetching reference ${branch} for extension ${extensionName}..."
+    progress::start "<spinner> Fetching reference ${branch} for extension ${extensionName}..."
     if ! git fetch -q; then
       popd &>/dev/null || :
       progress::stop

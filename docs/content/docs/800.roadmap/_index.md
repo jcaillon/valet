@@ -8,8 +8,11 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- improve prompt: use coproc instead of kill/spawing a bach everytime; start it only if the coproc fd is not already open.
+- progress:
+  - refacto progress bar; use signal to tell the bg job to redraw the progress bar after displaying a log. +handle the terminal size to display the progress bar!
+  - after logging, if progress bar is in progress, we need to redraw it immediately.
 - self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.
-- add a yaml library for basic parsing.
 - conditionally show global options because they take too much space
 - add a global --edit option to edit the command function file
 - for the showcase, actually build a small app like a git conventional commit tool.
@@ -19,9 +22,6 @@ This page lists the features that I would like to implement in Valet. They come 
   - Add a full screen view with the keyboard shortcuts in edit mode (new interactive::showFullScreenHelp ?).
 - fzf: 
   - draw in a given rectangle, we handle full screen or not before calling sfzf
-- progress:
-  - refacto progress bar; use signal to tell the bg job to redraw the progress bar after displaying a log. +handle the terminal size to display the progress bar!
-  - after logging, if progress bar is in progress, we need to redraw it immediately.
 - all interactive functions must write to stderr not stdout!
 - main menu:
   - add info of the extension from which a command comes from
@@ -63,5 +63,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - add a new command self diagnostic that will run a series of tests to check the environment and help figure out what's wrong.
 - option --install-dir (or cmd) to be able to eval "$(valet --install-dir)"
 - might be able to improve the quicksort if we use direct statements instead of functions.
+- add a yaml library for basic parsing. Same for json
+- Implement tests that are only run with -e flag and where we test system specific stuff, like the windows library and fs::createLink, absolute path with real path etc...
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

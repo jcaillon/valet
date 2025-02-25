@@ -6,7 +6,7 @@
 
 ❯ `time::startTimer`
 
-❯ `time::stopTimer`
+❯ `time::getTimerValue`
 
 Returned variables:
 
@@ -14,7 +14,7 @@ Returned variables:
 RETURNED_VALUE='1000000'
 ```
 
-❯ `time::stopTimer true`
+❯ `time::getTimerValue true`
 
 **Error output**:
 
@@ -28,7 +28,7 @@ Returned variables:
 RETURNED_VALUE='2000000'
 ```
 
-❯ `time::stopTimer true %L`
+❯ `time::getTimerValue true %L`
 
 **Error output**:
 

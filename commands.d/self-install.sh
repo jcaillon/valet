@@ -408,7 +408,7 @@ function selfUpdate_install() {
   local releaseFile="${tempDirectory}/valet.tar.gz"
 
   log::debug "Downloading the release from ⌜${releaseUrl}⌝."
-  progress::start "#spinner Downloading valet..."
+  progress::start "<spinner> Downloading valet..."
   selfUpdate_download "${releaseUrl}" "${releaseFile}"
   progress::stop
 
@@ -517,7 +517,7 @@ function selfUpdate_isDirectoryInPath() {
 # Get the version number of the latest release on GitHub.
 function selfUpdate_getLatestReleaseVersion() {
   local jsonFile="${TMPDIR:-/tmp}/valet.latest.json"
-  progress::start "#spinner Fetching the latest version from GitHub API..."
+  progress::start "<spinner> Fetching the latest version from GitHub API..."
   selfUpdate_download "https://api.github.com/repos/jcaillon/valet/releases/latest" "${jsonFile}"
   progress::stop
   fs::readFile "${jsonFile}"

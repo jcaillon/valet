@@ -47,7 +47,7 @@ function benchmark::run() {
   local maxRuns="${4:-${_OPTION_MAX_RUNS:--1}}"
 
   # check functions
-  if ! command -v "${baseline}" >/dev/null; then
+  if ! declare -F "${baseline}" >/dev/null; then
     core::fail "The baseline function ⌜${baseline}⌝ does not exist."
   fi
   local IFS=','
@@ -56,7 +56,7 @@ function benchmark::run() {
 
   if [[ -n ${functions} ]]; then
     for function in ${functions}; do
-      if ! command -v "${function}" >/dev/null; then
+      if ! declare -F "${function}" >/dev/null; then
         core::fail "The function ⌜${function}⌝ does not exist."
       fi
       if (( ${#function} > longestFunctionNameLength )); then
@@ -69,7 +69,7 @@ function benchmark::run() {
   local -A functionsElapsed
 
   # Run the baseline
-  progress::start "#spinner Running the baseline ⌜${baseline}⌝ for ⌜${time}s⌝."
+  progress::start "<spinner> Running the baseline ⌜${baseline}⌝ for ⌜${time}s⌝."
 
   time::getProgramElapsedMicroseconds
   local startTimeInUs="${RETURNED_VALUE}"
@@ -95,7 +95,7 @@ function benchmark::run() {
   # Run the other functions
   if [[ -n ${functions} ]]; then
     for function in ${functions}; do
-      progress::start "#spinner Running the function ⌜${function}⌝ ⌜${baselineRuns}⌝ times."
+      progress::start "<spinner> Running the function ⌜${function}⌝ ⌜${baselineRuns}⌝ times."
 
       time::getProgramElapsedMicroseconds
       startTimeInUs="${RETURNED_VALUE}"
@@ -115,7 +115,7 @@ function benchmark::run() {
   fi
 
   # Re run the baseline to get the average time
-  progress::start "#spinner Running the baseline ⌜${baseline}⌝ ⌜${baselineRuns}⌝ times."
+  progress::start "<spinner> Running the baseline ⌜${baseline}⌝ ⌜${baselineRuns}⌝ times."
 
   time::getProgramElapsedMicroseconds
   startTimeInUs="${RETURNED_VALUE}"

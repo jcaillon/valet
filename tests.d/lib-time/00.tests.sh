@@ -13,9 +13,9 @@ function test_time::startTimer() {
   test::title "✅ Testing time::startTimer function"
 
   test::exec time::startTimer
-  test::func time::stopTimer
-  test::func time::stopTimer true
-  test::func time::stopTimer true "%L"
+  test::func time::getTimerValue
+  test::func time::getTimerValue true
+  test::func time::getTimerValue true "%L"
 }
 
 function test_time::getDate() {

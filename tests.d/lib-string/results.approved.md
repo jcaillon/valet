@@ -748,6 +748,21 @@ RETURNED_VALUE='  Start With s
 RETURNED_VALUE2='10'
 ```
 
+```text
+MY_STRING='Message'
+```
+
+❯ `string::wrapCharacters MY_STRING 3`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='Mes
+sag
+e'
+RETURNED_VALUE2='1'
+```
+
 ### ✅ Testing string::highlight
 
 ❯ `MY_STRING=This\ is\ a\ Text\ to\ highlight. MY_CHARS=ttttt string::highlight MY_STRING MY_CHARS`

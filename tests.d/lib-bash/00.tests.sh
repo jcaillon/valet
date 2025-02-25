@@ -10,6 +10,7 @@ function main() {
   test_bash::getMissingVariables
   test_bash::getMissingCommands
   test_bash::isCommand
+  test_bash::isFunction
 }
 
 function test_bash::injectCodeInFunction() {
@@ -134,6 +135,15 @@ function test_bash::isCommand() {
 
   test::exec bash::isCommand NONEXISTINGSTUFF
   test::exec bash::isCommand rm
+}
+
+function test_bash::isFunction() {
+  test::title "✅ Testing bash::isFunction"
+
+  unset -v func1
+  test::exec bash::isFunction func1
+  function func1() { :;}
+  test::exec bash::isFunction func1
 }
 
 main

@@ -163,7 +163,7 @@ function selfTest() {
       # we need to rebuild the commands for the showcase only
       rm -Rf "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
       selfTestUtils_rebuildCommands --user-directory "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d"  --output "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
-      selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/showcase/tests.d"
+      selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/tests.d"
     fi
 
     GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${defaultCurrentDirectory}"

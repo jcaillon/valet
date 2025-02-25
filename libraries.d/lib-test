@@ -166,7 +166,7 @@ function test_exec() {
 
 
   _TEST_OUTPUT="${compoundCommand}"
-  if command -v test::transformTextBeforeFlushing &>/dev/null; then
+  if declare -F test::transformTextBeforeFlushing &>/dev/null; then
     test::transformTextBeforeFlushing
   fi
 
@@ -232,7 +232,7 @@ function test_exec() {
 # test::printReturnedVars
 # ```
 function test::printReturnedVars() {
-  if command -v test::transformReturnedVarsBeforePrinting &>/dev/null; then
+  if declare -F test::transformReturnedVarsBeforePrinting &>/dev/null; then
     test::transformReturnedVarsBeforePrinting
   fi
   local IFS=$'\n' key varName _TEST_OUTPUT=""
@@ -259,7 +259,7 @@ function test::printReturnedVars() {
     _TEST_OUTPUT+=")"$'\n'
   fi
   if [[ -n ${_TEST_OUTPUT} ]]; then
-    if command -v test::transformTextBeforeFlushing &>/dev/null; then
+    if declare -F test::transformTextBeforeFlushing &>/dev/null; then
       test::transformTextBeforeFlushing
     fi
     # shellcheck disable=SC2016
@@ -325,7 +325,7 @@ function test::printVars() {
       test::fail "Could not parse variable declaration: ⌜${chunk}⌝."
     fi
   done
-  if command -v test::transformTextBeforeFlushing &>/dev/null; then
+  if declare -F test::transformTextBeforeFlushing &>/dev/null; then
     test::transformTextBeforeFlushing
   fi
   # shellcheck disable=SC2016
@@ -363,7 +363,7 @@ function test_flushFdToCodeBlock() {
   local IFS=''
   read -rd '' _TEST_OUTPUT <"${file}" || :
 
-  if command -v test::transformTextBeforeFlushing &>/dev/null; then
+  if declare -F test::transformTextBeforeFlushing &>/dev/null; then
     test::transformTextBeforeFlushing
   fi
 

@@ -2,6 +2,16 @@
 
 ## Test script 00.tests
 
+### ✅ Testing system::getArchitecture
+
+❯ `MACHTYPE=x86_64-pc-msys system::getArchitecture`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='x86_64'
+```
+
 ### ✅ Testing system::getOs
 
 ❯ `OSTYPE=linux-bsd system::getOs`

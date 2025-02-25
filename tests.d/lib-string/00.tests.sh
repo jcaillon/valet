@@ -174,6 +174,8 @@ function test_string::wrapCharacters() {
 
   test::markdown "Wrapping characters, spaces at the beginning of the line are kept"
   test::funcWithString string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 14
+
+  test::funcWithString string::wrapCharacters 'Message' 3
 }
 
 function test_string::highlight() {

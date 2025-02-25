@@ -117,7 +117,7 @@ function bash::runInParallel() {
           exitCode=0
           wait -f "${pid}" || exitCode=$?
           exitCodes+=("${exitCode}")
-          log::debug "Job (${jobIndex}) ⌜${jobName}⌝ with pid ⌜${pid}⌝ completed with exit code ⌜${exitCode}⌝."":${jobCommands[${jobIndex}]}"
+          log::trace "Job (${jobIndex}) ⌜${jobName}⌝ with pid ⌜${pid}⌝ completed with exit code ⌜${exitCode}⌝."":${jobCommands[${jobIndex}]}"
 
           # remove the pid from the running pids
           # shellcheck disable=SC2206
@@ -132,14 +132,14 @@ function bash::runInParallel() {
 
           if [[ -n ${jobCompletedCallback} ]]; then
             if ! ${jobCompletedCallback} "${jobIndex}" "${jobName}" "${exitCode}" "$((${#exitCodes[@]} * 100 / ${#jobNames[@]}))"; then
-              log::debug "Exiting early."
+              log::trace "Exiting early."
               bash::killRunningJobs
               break 3
             fi
           fi
           nbJobsCompleted+=1
         else
-          log::debug "Job ⌜${jobName}⌝ with pid ⌜${pid}⌝ is still running."
+          log::trace "Job ⌜${jobName}⌝ with pid ⌜${pid}⌝ is still running."
         fi
       done
 
@@ -401,6 +401,31 @@ function bash::getMissingCommands() {
 # ```
 function bash::isCommand() {
   if command -v "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" &>/dev/null; then
+    return 0
+  fi
+  return 1
+}
+
+# ## bash::isFunction
+#
+# Check if the given function exists.
+#
+# - $1: **function name** _as string_:
+#       the function name to check.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the function exists
+#   - 1 otherwise.
+#
+# ```bash
+# if bash::isFunction "function1"; then
+#   printf 'The function exists.'
+# fi
+# ```
+function bash::isFunction() {
+  if declare -F "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" &>/dev/null; then
     return 0
   fi
   return 1

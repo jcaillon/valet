@@ -4,7 +4,20 @@
 source progress
 
 function main() {
+  test_progress_getStringToDisplay
   test_progress_getProgressBarString
+}
+
+function test_progress_getStringToDisplay() {
+  test::title "✅ Testing progress_getStringToDisplay"
+
+  test::func GLOBAL_COLUMNS=10 progress_getStringToDisplay "'░<bar>░'" 10 50 "Message"
+  test::func GLOBAL_COLUMNS=10 progress_getStringToDisplay "'<spinner> <percent> ░<bar>░'" 10 0 "Message"
+  test::func GLOBAL_COLUMNS=0 progress_getStringToDisplay "'<spinner> <percent> ░<bar>░'" 0 0 ""
+  test::func GLOBAL_COLUMNS=20 progress_getStringToDisplay "'<spinner> <percent> ░<bar>░ <message>'" 9 0 "Message"
+  test::func GLOBAL_COLUMNS=24 progress_getStringToDisplay "'<spinner> <percent> ░<bar>░ <message>'" 10 0 "Message"
+  test::func GLOBAL_COLUMNS=29 progress_getStringToDisplay "'<spinner> <percent> ░<bar>░ <message>'" 10 0 "Message"
+  test::func GLOBAL_COLUMNS=35 progress_getStringToDisplay "'<spinner> <percent> ░<bar>░ <message>'" 10 0 "Message"
 }
 
 function test_progress_getProgressBarString() {

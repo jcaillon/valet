@@ -22,12 +22,9 @@ valet.tar.gz
 **.tag.gz
 **.zip
 
-# playground files
-sandbox.sh
-benchmark.sh
-try.sh
-sort.sh
-f?
+# scratchpad files
+scratchpad/f?
+tmp/**
 
 # tests
 tests.d/lib-fs/resources/gitignored/**

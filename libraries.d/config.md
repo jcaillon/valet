@@ -251,22 +251,21 @@ If true, it disables this behavior and you can see all the profiler lines.
 
 ### 🖱️ Interactive mode configuration
 
-#### VALET_CONFIG_PROGRESS_BAR_TEMPLATE
+#### VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE
 
-Change the default progress bar template.
+Change the default progress template.
 See progress::start.
 
-#### VALET_CONFIG_PROGRESS_BAR_SIZE
+#### VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE
 
 Change the default progress bar size.
 
-#### VALET_CONFIG_PROGRESS_ANIMATION_DELAY
+#### VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY
 
-Change the default time between two frames for the animation of the spinner in the progress
-(in seconds, can be a float number).
+Change the default time between two frames for the animation of the spinner in the progress (in milliseconds).
 See progress::start.
 
-#### VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL
+#### VALET_CONFIG_PROGRESS_DEFAULT_UPDATE_INTERVAL
 
 The default number of animation frames to wait between two updates of the progress bar.
 

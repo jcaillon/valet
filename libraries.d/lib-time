@@ -59,14 +59,14 @@ function time::getDate() {
 # echo "${RETURNED_VALUE}"
 # ```
 function time::convertMicrosecondsToHuman() {
-  local -i ms="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -i us="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local format="${2:-${_OPTION_FORMAT:-"%HH:%MM:%SS"}}"
 
-  local -i hours=$((ms / 3600 / 1000000))
-  local -i minutes=$(((ms / 60 / 1000000) % 60))
-  local -i seconds=$(((ms / 1000000) % 60))
-  local -i milliseconds=$((ms / 1000 % 1000))
-  local -i microseconds=$((ms % 1000))
+  local -i hours=$((us / 3600 / 1000000))
+  local -i minutes=$(((us / 60 / 1000000) % 60))
+  local -i seconds=$(((us / 1000000) % 60))
+  local -i milliseconds=$((us / 1000 % 1000))
+  local -i microseconds=$((us % 1000))
 
   local humanFormat="${format}"
   if [[ ${hours} -lt 10 ]]; then
@@ -106,34 +106,36 @@ function time::convertMicrosecondsToHuman() {
   humanFormat="${humanFormat//%M/$((hours * 60 + minutes))}"
   humanFormat="${humanFormat//%S/$((hours * 3600 + minutes * 60 + seconds))}"
   humanFormat="${humanFormat//%L/$(((hours * 3600 * + minutes * 60 + seconds) * 1000 + milliseconds))}"
-  humanFormat="${humanFormat//%U/$((ms))}"
+  humanFormat="${humanFormat//%U/$((us))}"
 
   RETURNED_VALUE="${humanFormat}"
 }
 
 # ## time::startTimer
 #
-# Start a timer. You can then call `time::stopTimer` to get the elapsed time.
+# Start a timer. You can then call `time::getTimerValue` to get the elapsed time.
 #
 # ```bash
 # time::startTimer
-# time::stopTimer
+# time::getTimerValue
 # ```
 function time::startTimer() {
   time::getProgramElapsedMicroseconds
   _TIME_TIMER_START="${RETURNED_VALUE}"
 }
 
-# ## time::stopTimer
+# ## time::getTimerValue
 #
-# Stop the timer started by `time::startTimer`.
+# Get the time elapsed since the call of `time::startTimer`.
 #
 # - $1: log elapsed time _as bool_:
 #      (optional) Can be set using the variable `_OPTION_LOG_ELAPSED_TIME`.
-#      the format to use (defaults to "%HH:%MM:%SS")
+#      Wether or not to log the elapsed time.
+#      (defaults to false)
 # - $2: format _as string_:
 #      (optional) Can be set using the variable `_OPTION_FORMAT`.
-#      The format to use if we log the elapsed time
+#      The format to use if we log the elapsed time.
+#      See `time::convertMicrosecondsToHuman` for the format.
 #      (defaults to "%S.%LLs").
 #
 # Returns:
@@ -142,10 +144,10 @@ function time::startTimer() {
 #
 # ```bash
 # time::startTimer
-# time::stopTimer true "%S.%LLs"
+# time::getTimerValue true "%S.%LLs"
 # echo "Total microseconds: ${RETURNED_VALUE}"
 # ```
-function time::stopTimer() {
+function time::getTimerValue() {
   local log="${1:-${_OPTION_LOG_ELAPSED_TIME:-false}}"
   local format="${2:-${_OPTION_FORMAT:-"%S.%LLs"}}"
 

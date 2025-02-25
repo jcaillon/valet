@@ -6,59 +6,100 @@
 #
 # This function returns the absolute path of a path.
 #
+# If the path exists, it can be resolved to the real path, following symlinks,
+# using the option `_OPTION_REALPATH=true`.
+#
 # - $1: **path** _as string_:
 #       The path to translate to absolute path.
+# - ${_OPTION_REALPATH} _as bool_:
+#       (optional) true to resolve the path to the real path, following symlinks.
+#       (defaults to false)
 #
 # Returns:
 #
 # - ${RETURNED_VALUE}: The absolute path of the path.
 #
 # ```bash
-# fs::toAbsolutePath "myFile"
-# local myFileAbsolutePath="${RETURNED_VALUE}"
+# fs::toAbsolutePath "myPath"
+# local myPathAbsolutePath="${RETURNED_VALUE}"
 # ```
 #
 # > This is a pure bash alternative to `realpath` or `readlink`.
+# > The `..` will be processed before following any symlinks, by removing
+# > the immediate pathname component.
 function fs::toAbsolutePath() {
-  local file="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  file="${file%/}"
+  local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  path="${path%/}"
 
-  # if file starts with ~, we replace it with the home directory
-  if [[ ${file} == "~"* ]]; then
-    RETURNED_VALUE="${HOME}${file:1}"
+  # if path starts with ~, we replace it with the home directory
+  if [[ ${path} == "~"* ]]; then
+    path="${HOME}${path:1}"
+  fi
+
+  # check if the path is an existing directory
+  if cd "${path}" &>/dev/null; then
+    if [[ ${_OPTION_REALPATH:-} == "true" ]]; then
+      fs::getPwdRealPath
+    else
+      RETURNED_VALUE="${PWD}"
+    fi
+    cd "${OLDPWD}" &>/dev/null || core::fail "Failed to cd back to the previous directory."
     return 0
   fi
+
+  # check if the path is an existing file
+  if cd "${path%/*}" &>/dev/null; then
+    if [[ ${_OPTION_REALPATH:-} == "true" ]]; then
+      fs::getPwdRealPath
+      RETURNED_VALUE="${RETURNED_VALUE}/${path##*/}"
+    else
+      RETURNED_VALUE="${PWD}/${path##*/}"
+    fi
+    cd "${OLDPWD}" &>/dev/null || core::fail "Failed to cd back to the previous directory."
+    return 0
+  fi
+
+  local currentDirectoryPath
+  if [[ ${_OPTION_REALPATH:-} == "true" ]]; then
+    fs::getPwdRealPath
+    currentDirectoryPath="${RETURNED_VALUE}"
+  else
+    currentDirectoryPath="${PWD}"
+  fi
+
+  # TODO: from this point and for non existing path, we could loop on the path components
+  # to resolve the real path starting from the left until we have a missing path component
 
   # if the file is already an absolute path, we return it
-  if [[ ${file} == "/"* ]]; then
-    RETURNED_VALUE="${file}"
+  if [[ ${path} == "/"* ]]; then
+    RETURNED_VALUE="${path}"
     return 0
   fi
 
-  # if the file is relative path starting with .
-  if [[ ${file} == "." ]]; then
-    RETURNED_VALUE="${PWD}"
-    return 0
-  elif [[ ${file} == ".." ]]; then
-    RETURNED_VALUE="${PWD%/*}"
-    return 0
-  fi
+  # other cases of relative paths not handled
+  RETURNED_VALUE="${currentDirectoryPath}/${path#./}"
+}
 
-  # if the file is a relative path (not containing ..), we return the absolute path
-  RETURNED_VALUE="${PWD}/${file#./}"
-  if [[ ${file} != *".."* && -e "${RETURNED_VALUE}" ]]; then
-    return 0
-  fi
-
-  # the file contains .., we need to resolve the path by cd'ing into the directory
-  if pushd "${file%/*}" &>/dev/null; then
-    RETURNED_VALUE="${PWD}/${file##*/}"
-    popd 1>/dev/null || core::fail "Failed to popd."
-    return 0
-  fi
-
-  # other cases of relative paths not handled.
-  RETURNED_VALUE="${PWD}/${file#./}"
+# ## fs::getPwdRealPath
+#
+# Get the real path of the current directory.
+# By default, the `${PWD}` variable is the logical path, which may contain symlinks.
+#
+# ```bash
+# fs::getPwdRealPath
+# ```
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: The realpath for the current directory.
+#
+# > This is a pure bash alternative to `realpath` or `readlink`.
+function fs::getPwdRealPath() {
+  local IFS=''
+  pwd -P &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"
+  RETURNED_VALUE=""
+  IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+  RETURNED_VALUE="${RETURNED_VALUE%[[:space:]]}"
 }
 
 # ## fs::readFile

@@ -233,23 +233,23 @@ function prompt::input() {
   fi
 
   _PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE="${_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE:-}"
-  if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE} ]] && ! command -v "${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}" &>/dev/null; then
+  if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE} ]] && ! declare -F "${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}" &>/dev/null; then
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}⌝ does not exist."
   fi
 
   _PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED="${_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED:-}"
-  if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED} ]] && ! command -v "${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED}" &>/dev/null; then
+  if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED} ]] && ! declare -F "${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED}" &>/dev/null; then
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED}⌝ does not exist."
   fi
 
   _PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED="${_OPTION_CALLBACK_FUNCTION_ON_BOX_CLOSED:-}"
-  if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED} ]] && ! command -v "${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED}" &>/dev/null; then
+  if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED} ]] && ! declare -F "${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED}" &>/dev/null; then
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED}⌝ does not exist."
   fi
 
   _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY=""
   if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY} ]]; then
-    if ! command -v "${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}" &>/dev/null; then
+    if ! declare -F "${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}" &>/dev/null; then
       core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}⌝ does not exist."
     fi
   else

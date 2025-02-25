@@ -13,6 +13,7 @@
 ```text
 source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
 trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;
+GLOBAL_EXPORTED=true;
 
 ```
 
@@ -25,6 +26,7 @@ trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;
 ```text
 source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
 trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;
+GLOBAL_EXPORTED=true;
 source ansi-codes
 source array
 source bash

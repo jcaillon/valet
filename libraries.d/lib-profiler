@@ -23,7 +23,9 @@ function profiler::enable() {
   _ACTIVE_PROFILER=1
 
   # create the directory for file and reset it
-  mkdir -p "${file%/*}"
+  if [[ ${file} != "${file%/*}" ]]; then
+    mkdir -p "${file%/*}"
+  fi
   : >"${file}"
 
   log::info "Starting profiler, writing in ⌜${file}⌝."
@@ -83,7 +85,7 @@ function profilerCleanFile() {
   if [[ ${VALET_CONFIG_KEEP_ALL_PROFILER_LINES:-false} == "true" ]]; then
     clearLine=false
   fi
-  if [[ -z ${clearLine:-} && "${VALET_CONFIG_STARTUP__ACTIVE_PROFILER:-false}" == "true" ]]; then
+  if [[ -z ${clearLine:-} && "${VALET_CONFIG_STARTUP_PROFILING:-false}" == "true" ]]; then
     clearLine=false
   fi
   if [[ -z ${clearLine:-} ]]; then

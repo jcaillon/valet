@@ -10,8 +10,14 @@
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVariableName}"
 
 
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>&2'
+local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%s" "${toPrint}" 1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
 GLOBAL_LOG_WRAP_PADDING='         '
 ```
 
@@ -23,20 +29,15 @@ local -n messageToPrint=RETURNED_VALUE
 string::wrapWords "${messageVariableName}" 9999 "         " 9990
 
 
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>&2'
+local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%s" "${toPrint}" 1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
 GLOBAL_LOG_WRAP_PADDING='         '
-```
-
-❯ `VALET_CONFIG_LOG_PATTERN=abc VALET_CONFIG_LOG_FD=5 log::init`
-
-```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVariableName}"
-
-
-printf "%s\n" "abc"  1>&5'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>&5'
-GLOBAL_LOG_WRAP_PADDING='   '
 ```
 
 ❯ `VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=local\ extra=1 log::init`
@@ -45,8 +46,14 @@ GLOBAL_LOG_WRAP_PADDING='   '
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVariableName}"
 
 local extra=1
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>&2'
+local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%s" "${toPrint}" 1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
 GLOBAL_LOG_WRAP_PADDING='         '
 ```
 
@@ -74,6 +81,17 @@ printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>>"tmp/a"'
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>>"/file"
 printf "%s" "${toPrint}" 1>>"tmp/a"'
 GLOBAL_LOG_WRAP_PADDING='         '
+```
+
+❯ `VALET_CONFIG_LOG_PATTERN=abc VALET_CONFIG_LOG_FD=5 log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVariableName}"
+
+
+printf "%s\n" "abc"  1>&5'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>&5'
+GLOBAL_LOG_WRAP_PADDING='   '
 ```
 
 ### ✅ Testing log::parseLogPattern
