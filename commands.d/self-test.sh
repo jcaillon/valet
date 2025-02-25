@@ -35,11 +35,11 @@ shortDescription: Test your valet custom commands.
 description: |-
   Test your valet custom commands using approval tests approach.
 options:
-- name: -d, --user-directory <path>
+- name: -d, --extensions-directory <path>
   description: |-
-    The path to your valet directory.
+    The path to your valet extensions directory.
 
-    Each sub directory named ⌜.tests.d⌝ will be considered as a test directory containing a test.sh file.
+    Each sub directory named ⌜.tests.d⌝ in an extension will be considered as a test directory containing a test.sh file.
 - name: -a, --auto-approve
   description: |-
     The received test result files will automatically be approved.
@@ -126,13 +126,13 @@ function selfTest() {
   # test suites in the user directory
   if [[ ${coreOnly:-false} != "true" ]]; then
     # get the user directory
-    core::getUserValetDirectory
-    userValetDirectory="${userValetDirectory:-${RETURNED_VALUE}}"
+    core::getExtensionsDirectory
+    extensionsDirectory="${extensionsDirectory:-${RETURNED_VALUE}}"
 
     # rebuild the commands for the user dir
-    selfTestUtils_rebuildCommands --user-directory "${userValetDirectory}" --output "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
+    selfTestUtils_rebuildCommands --extensions-directory "${extensionsDirectory}" --output "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
 
-    fs::listDirectories "${userValetDirectory}"
+    fs::listDirectories "${extensionsDirectory}"
     local extensionDirectory
     for extensionDirectory in "${RETURNED_ARRAY[@]}"; do
       if [[ -d ${extensionDirectory}/tests.d ]]; then
@@ -153,16 +153,13 @@ function selfTest() {
 
     # we need to rebuild the commands for the core commands only
     rm -Rf "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
-    selfTestUtils_rebuildCommands --core-only --output "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
+    selfTestUtils_rebuildCommands --core-only --include-showcase --output "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
     selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d"
 
     # now we can also test the commands in showcase.d if the directory is there
     if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d ]]; then
       log::warning "The valet showcase directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d⌝ does not exist, cannot run the tests on the core showcase."
     else
-      # we need to rebuild the commands for the showcase only
-      rm -Rf "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
-      selfTestUtils_rebuildCommands --user-directory "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d"  --output "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
       selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/tests.d"
     fi
 

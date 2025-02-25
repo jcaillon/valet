@@ -1919,9 +1919,9 @@ function core::getUserStateDirectory() {
   RETURNED_VALUE="${directory}"
 }
 
-# ## core::getUserValetDirectory
+# ## core::getExtensionsDirectory
 #
-# Returns the path to the valet user directory.
+# Returns the path to the user extensions directory.
 # Does not create it if missing.
 #
 # Returns:
@@ -1929,10 +1929,10 @@ function core::getUserStateDirectory() {
 # - ${RETURNED_VALUE}: the path to the valet user directory
 #
 # ```bash
-# core::getUserValetDirectory
+# core::getExtensionsDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
-function core::getUserValetDirectory() {
+function core::getExtensionsDirectory() {
   RETURNED_VALUE="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"
 }
 

@@ -110,13 +110,13 @@ function selfExtend() {
   fi
 
   # compute where to install the extension
-  core::getUserValetDirectory
-  local userValetDirectory="${RETURNED_VALUE}"
-  fs::createDirectoryIfNeeded "${userValetDirectory}"
+  core::getExtensionsDirectory
+  local extensionsDirectory="${RETURNED_VALUE}"
+  fs::createDirectoryIfNeeded "${extensionsDirectory}"
 
   # case of extension creation
   if [[ ${action} == "created" ]]; then
-    selfExtend_createExtension "${extensionUri}" "${userValetDirectory}"
+    selfExtend_createExtension "${extensionUri}" "${extensionsDirectory}"
     return 0
   fi
 
@@ -126,7 +126,7 @@ function selfExtend() {
     repositoryName="${repositoryName%.git}"
   fi
   local extensionName="${name:-${repositoryName:-${extensionUri}}}"
-  local extensionDirectory="${userValetDirectory}/${extensionName}"
+  local extensionDirectory="${extensionsDirectory}/${extensionName}"
   log::info "The extension will be ${action} under ⌜${extensionDirectory}⌝."
 
   # if the extension already exists, ask the user for a confirmation
@@ -177,7 +177,7 @@ function selfExtend() {
 # Create a new extension for Valet.
 function selfExtend_createExtension() {
   local extensionName="${1}"
-  local userValetDirectory="${2}"
+  local extensionsDirectory="${2}"
 
   local extensionDirectory
 
@@ -186,13 +186,13 @@ function selfExtend_createExtension() {
     extensionName="${PWD##*/}"
     log::info "Setting up the current directory ⌜${extensionName}⌝ as an extension."
 
-    if [[ ${PWD} != "${userValetDirectory}"* ]]; then
-      core::fail "Extension directories must be created in the user directory ⌜${userValetDirectory}⌝, the current directory is ⌜${PWD}⌝."
+    if [[ ${PWD} != "${extensionsDirectory}"* ]]; then
+      core::fail "Extension directories must be created in the user directory ⌜${extensionsDirectory}⌝, the current directory is ⌜${PWD}⌝."
     fi
     extensionDirectory="${PWD}"
   else
     # create a new extension directory
-    extensionDirectory="${userValetDirectory}/${extensionName}"
+    extensionDirectory="${extensionsDirectory}/${extensionName}"
     log::info "Creating the extension ⌜${extensionName}⌝ in ⌜${extensionDirectory}⌝."
 
     # if the extension already exists, ask the user for a confirmation
@@ -213,8 +213,8 @@ function selfExtend_createExtension() {
   fi
 
   # verify that we have lib-valet generated in the user directory
-  if [[ ! -f "${userValetDirectory}/lib-valet" ]]; then
-    log::info "Rebuilding the documentation because ⌜${userValetDirectory}/lib-valet⌝ is missing."
+  if [[ ! -f "${extensionsDirectory}/lib-valet" ]]; then
+    log::info "Rebuilding the documentation because ⌜${extensionsDirectory}/lib-valet⌝ is missing."
     command::sourceFunction selfDocument
     selfDocument
   fi
@@ -244,7 +244,7 @@ function selfExtend_createExtension() {
     cp -n "${GLOBAL_INSTALLATION_DIRECTORY}/extras/.vscode/extensions.json" "${extensionDirectory}/.vscode/extensions.json" || log::error "Could not copy the vscode extensions file."
 
     # link the snippets
-    createLink "${userValetDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets" || log::error "Could not create a symbolic link to the vscode snippets."
+    createLink "${extensionsDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets" || log::error "Could not create a symbolic link to the vscode snippets."
   fi
 
   # git stuff
@@ -258,8 +258,8 @@ function selfExtend_createExtension() {
   fi
 
   # link lib-valet
-  createLink "${userValetDirectory}/lib-valet" "${extensionDirectory}/lib-valet" || log::error "Could not create a symbolic link to the lib-valet."
-  createLink "${userValetDirectory}/lib-valet.md" "${extensionDirectory}/lib-valet.md" || log::error "Could not create a symbolic link to the lib-valet.md."
+  createLink "${extensionsDirectory}/lib-valet" "${extensionDirectory}/lib-valet" || log::error "Could not create a symbolic link to the lib-valet."
+  createLink "${extensionsDirectory}/lib-valet.md" "${extensionDirectory}/lib-valet.md" || log::error "Could not create a symbolic link to the lib-valet.md."
 
   if [[ ${os} == "windows" ]]; then
     windows::endPs1Batch
@@ -449,16 +449,16 @@ function filterExtensionFolder() {
 
 # Attempts to update each git repository found in the user directory.
 function selfExtend::updateExtensions() {
-  local userValetDirectory="${1}"
+  local extensionsDirectory="${1}"
   local skipSetup="${2:-false}"
 
-  if [[ ! -d "${userValetDirectory}" ]]; then
-    log::warning "The user directory ⌜${userValetDirectory}⌝ does not exist."
+  if [[ ! -d "${extensionsDirectory}" ]]; then
+    log::warning "The user directory ⌜${extensionsDirectory}⌝ does not exist."
     return 0
   fi
 
-  log::info "Attempting to update all git repositories and installed extensions in ⌜${userValetDirectory}⌝."
-  fs::listDirectories "${userValetDirectory}" true false filterExtensionFolder
+  log::info "Attempting to update all git repositories and installed extensions in ⌜${extensionsDirectory}⌝."
+  fs::listDirectories "${extensionsDirectory}" true false filterExtensionFolder
   local path
   local allUpdateSuccess=true
   local -i count=0
@@ -494,12 +494,12 @@ function selfExtend::updateExtensions() {
 
   if [[ ${allUpdateSuccess} == "true" ]]; then
     if ((count == 0)); then
-      log::info "No extensions to update in ⌜${userValetDirectory}⌝."
+      log::info "No extensions to update in ⌜${extensionsDirectory}⌝."
     else
-      log::success "A total of ⌜${count}⌝ extensions in ⌜${userValetDirectory}⌝ have been updated."
+      log::success "A total of ⌜${count}⌝ extensions in ⌜${extensionsDirectory}⌝ have been updated."
     fi
   else
-    log::warning "Some extensions in ⌜${userValetDirectory}⌝ could not be updated, ⌜${count}⌝ were updated successfully."
+    log::warning "Some extensions in ⌜${extensionsDirectory}⌝ could not be updated, ⌜${count}⌝ were updated successfully."
   fi
 }
 

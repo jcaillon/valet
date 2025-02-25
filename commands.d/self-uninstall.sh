@@ -48,8 +48,8 @@ function selfUninstall() {
     local configurationDirectory="${RETURNED_VALUE}"
     core::getUserDataDirectory
     local userDataDirectory="${RETURNED_VALUE}"
-    core::getUserValetDirectory
-    local userValetDirectory="${RETURNED_VALUE}"
+    core::getExtensionsDirectory
+    local extensionsDirectory="${RETURNED_VALUE}"
     core::getUserCacheDirectory
     local userCacheDirectory="${RETURNED_VALUE}"
 
@@ -64,7 +64,7 @@ rm -Rf "'"${userDataDirectory}"'"
 # remove the user cache
 rm -Rf "'"${userCacheDirectory}"'"
 # remove the user directory
-rm -Rf "'"${userValetDirectory}"'"
+rm -Rf "'"${extensionsDirectory}"'"
 # remove a possible symlink
 rm -f "'"$(which valet)"'" 2>/dev/null || :
 echo "Valet has been uninstalled."

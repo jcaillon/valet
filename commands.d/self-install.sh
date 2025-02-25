@@ -193,8 +193,8 @@ function selfUpdate() {
   log::debug "The current OS is ⌜${os}⌝."
 
   # get the user directory
-  core::getUserValetDirectory
-  local userValetDirectory="${RETURNED_VALUE}"
+  core::getExtensionsDirectory
+  local extensionsDirectory="${RETURNED_VALUE}"
 
   # check if valet already exists
   local firstInstallation="${_NOT_EXECUTED_FROM_VALET:-false}"
@@ -204,7 +204,7 @@ function selfUpdate() {
     # only update extensions ?
     if [[ ${onlyExtensions} == "true" ]]; then
       command::sourceFunction selfExtend
-      selfExtend::updateExtensions "${userValetDirectory}" "${skipExtensionsSetup}"
+      selfExtend::updateExtensions "${extensionsDirectory}" "${skipExtensionsSetup}"
       return 0
     fi
 
@@ -239,7 +239,7 @@ function selfUpdate() {
       log::success "You already have the latest version."
       if [[ ${skipExtensions} != "true" ]]; then
         command::sourceFunction selfExtend
-        selfExtend::updateExtensions "${userValetDirectory}" "${skipExtensionsSetup}"
+        selfExtend::updateExtensions "${extensionsDirectory}" "${skipExtensionsSetup}"
       fi
       return 0
     fi
@@ -300,8 +300,8 @@ function selfUpdate() {
     selfUpdate_printRecapLine "Add install dir to PATH:" "true"
     addToPath=true
   fi
-  if [[ ${noShowcase} != "true" && (${firstInstallation} == "true" || -d "${userValetDirectory}/showcase.d" ) ]]; then
-    selfUpdate_printRecapLine "Copy showcase to:" "${userValetDirectory}"
+  if [[ ${noShowcase} != "true" && (${firstInstallation} == "true" || -d "${extensionsDirectory}/showcase.d" ) ]]; then
+    selfUpdate_printRecapLine "Copy showcase to:" "${extensionsDirectory}"
     copyExamples=true
   else
     selfUpdate_printRecapLine "Skip showcase copy:" "true"
@@ -328,7 +328,7 @@ function selfUpdate() {
   fi
 
   if [[ ${copyExamples} == "true" ]]; then
-    selfUpdate_copyExamples "${userValetDirectory}"
+    selfUpdate_copyExamples "${extensionsDirectory}"
   fi
 
   # remove the user commands to rebuild them
@@ -370,7 +370,7 @@ function selfUpdate() {
   # update the extensions
   if [[ ${firstInstallation} != "true" && ${skipExtensions} != "true" ]]; then
     command::sourceFunction selfExtend
-    selfExtend::updateExtensions "${userValetDirectory}" "${skipExtensionsSetup}"
+    selfExtend::updateExtensions "${extensionsDirectory}" "${skipExtensionsSetup}"
   fi
 }
 
@@ -454,17 +454,17 @@ function selfUpdate_install() {
 
 # Copy the showcase to the user directory.
 function selfUpdate_copyExamples() {
-  local userValetDirectory="${1}"
+  local extensionsDirectory="${1}"
 
-  mkdir -p "${userValetDirectory}" || core::fail "Could not create the user directory ⌜${userValetDirectory}⌝."
+  mkdir -p "${extensionsDirectory}" || core::fail "Could not create the user directory ⌜${extensionsDirectory}⌝."
 
-  if [[ -d "${userValetDirectory}/showcase.d" ]]; then
-    rm -Rf "${userValetDirectory}/showcase.d" &>/dev/null || core::fail "Could not remove the existing showcase (command examples) in ⌜${userValetDirectory}⌝."
+  if [[ -d "${extensionsDirectory}/showcase.d" ]]; then
+    rm -Rf "${extensionsDirectory}/showcase.d" &>/dev/null || core::fail "Could not remove the existing showcase (command examples) in ⌜${extensionsDirectory}⌝."
   fi
 
-  cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" "${userValetDirectory}" || core::fail "Could not copy the showcase (command examples) to ⌜${userValetDirectory}⌝."
+  cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" "${extensionsDirectory}" || core::fail "Could not copy the showcase (command examples) to ⌜${extensionsDirectory}⌝."
 
-  log::success "The showcase has been copied to ⌜${userValetDirectory}/showcase.d⌝."
+  log::success "The showcase has been copied to ⌜${extensionsDirectory}/showcase.d⌝."
 }
 
 # Set the _SUDO variable if needed.
@@ -735,7 +735,7 @@ if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
     *) RETURNED_VALUE="unknown" ;;
     esac
   }
-  function core::getUserValetDirectory() { RETURNED_VALUE="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"; }
+  function core::getExtensionsDirectory() { RETURNED_VALUE="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"; }
   function core::getUserDataDirectory() { RETURNED_VALUE="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"; }
   function interactive::promptYesNo() {
     local question="${1}"

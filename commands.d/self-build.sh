@@ -34,13 +34,16 @@ set -Eeu -o pipefail
 #
 #   → commands.d/self-build.sh
 # options:
-# - name: -d, --user-directory <path>
+# - name: -d, --extensions-directory <path>
 #   description: |-
-#     Specify the directory in which to look for your command scripts.
-#     Defaults to the valet user directory.
+#     Specify your valet extensions directory, in which to look for your extension commands.
+#     Defaults to the valet extensions directory.
 # - name: -C, --core-only
 #   description: |-
 #     Build only the core commands (under commands.d).
+# - name: --include-showcase
+#   description: |-
+#     Build the showcase extension if it exists in the valet installation directory.
 # - name: -o, --output <path>
 #   description: |-
 #     Specify the directory path in which to write the command definition variable files.
@@ -63,16 +66,16 @@ set -Eeu -o pipefail
 #     Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
 ##VALET_COMMAND
 function selfBuild() {
-  local userValetDirectory output coreOnly noOutput silent
+  local extensionsDirectory output coreOnly noOutput silent
 
   # if this script is run directly
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || ! -v GLOBAL_CMD_INCLUDED ]]; then
     # parse arguments manually (basic parsing only)
     while [[ $# -gt 0 ]]; do
       case "${1}" in
-      -d | --user-directory)
+      -d | --extensions-directory)
         shift
-        userValetDirectory="${1}"
+        extensionsDirectory="${1}"
         ;;
       -o | --output)
         shift
@@ -80,6 +83,9 @@ function selfBuild() {
         ;;
       -C | --core-only)
         coreOnly=true
+        ;;
+      --include-showcase)
+        includeShowcase=true
         ;;
       -O | --no-output)
         noOutput=true
@@ -121,8 +127,8 @@ function selfBuild() {
     fi
   fi
 
-  core::getUserValetDirectory
-  userValetDirectory="${userValetDirectory:-${RETURNED_VALUE}}"
+  core::getExtensionsDirectory
+  extensionsDirectory="${extensionsDirectory:-${RETURNED_VALUE}}"
 
   if [[ -z ${output:-} ]]; then
     core::getUserDataDirectory
@@ -138,15 +144,22 @@ function selfBuild() {
     "${GLOBAL_INSTALLATION_DIRECTORY}/valet"
     "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d"/*.sh
   )
+
   if [[ -d "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.commands.d" ]]; then
     commandDefinitionFiles+=("${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.commands.d"/*.sh)
     log::info "Added the test commands to the build."
   fi
+
+  if [[ ${includeShowcase:-} == "true" && -d "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" ]]; then
+    commandDefinitionFiles+=("${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/commands.d"/*.sh)
+    log::info "Added the showcase commands to the build."
+  fi
+
   if [[ ${coreOnly:-} != "true" ]]; then
-    if [[ -d "${userValetDirectory}" ]]; then
-      log::info "Building the valet user commands from extensions in the user directory ⌜${userValetDirectory}⌝."
+    if [[ -d "${extensionsDirectory}" ]]; then
+      log::info "Building the valet user commands from extensions in the user directory ⌜${extensionsDirectory}⌝."
       local extensionsDirectory
-      for extensionsDirectory in "${userValetDirectory}"/*; do
+      for extensionsDirectory in "${extensionsDirectory}"/*; do
         if [[ ! -d ${extensionsDirectory} && ${extensionsDirectory} != "."* ]]; then
           continue
         fi
@@ -156,7 +169,7 @@ function selfBuild() {
         commandDefinitionFiles+=("${extensionsDirectory}/commands.d"/*.sh)
       done
     else
-      log::warning "Skipping the build of scripts in user directory ⌜${userValetDirectory}⌝ because it does not exist."
+      log::warning "Skipping the build of scripts in user directory ⌜${extensionsDirectory}⌝ because it does not exist."
     fi
   else
     log::info "Skipping the build of scripts in user directory (building core commands only)."
