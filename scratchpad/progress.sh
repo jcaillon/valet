@@ -7,16 +7,14 @@ include progress bash profiler
 # # Spinner
 # ############################
 
-log::warning "Now displaying a spinner"
+log::info "Now displaying a slow spinner that goes for 7 frames."
 
 _OPTION_MAX_FRAMES=7 _OPTION_SPINNER="⢄⢂⢁⡁⡈⡐⡠" progress::start "<spinner>" "20" 200
-
-VALET_CONFIG_KEEP_ALL_PROFILER_LINES=true
-profiler::enable "tmp/fu2"
+# the spinners stops on itself
 
 bash::sleep 3
-log::warning "Again"
 
+log::info "Another spinner."
 
 _OPTION_SPINNER="⢄⢂⢁⡁⡈⡐⡠" progress::start "<spinner>" "20" 50
 

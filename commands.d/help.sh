@@ -25,9 +25,6 @@ arguments:
     The name of the command to show the help for.
     If not provided, show the help for the program.
 options:
-- name: -n, --no-colors
-  description: |-
-    Do not use any colors in the output
 - name: -c, --columns <number>
   description: |-
     Set the maximum columns for the help text
@@ -46,7 +43,7 @@ examples:
 # e.g. showCommandHelp "cmd1 subcmd2"
 function showCommandHelp() {
   local -a commands
-  local commandArgumentsErrors help columns noColors help
+  local commandArgumentsErrors help columns help
   command::parseFunctionArguments "${FUNCNAME[0]:-}" "$@"
   eval "${RETURNED_VALUE}"
 
@@ -54,7 +51,7 @@ function showCommandHelp() {
 
   # show the program help if no commands are provided
   if [[ ${#commands[@]} -eq 0 ]]; then
-    main::printHelp function "this" "${noColors:-}" "${columns:-}"
+    main::printHelp function "this" "${columns:-}"
     return 0
   fi
 
@@ -64,8 +61,8 @@ function showCommandHelp() {
   exactCommand="${RETURNED_VALUE3:-}"
 
   if [[ ${functionName} == "_menu" ]]; then
-    main::printHelp menu "${exactCommand}" "${noColors:-}" "${columns:-}"
+    main::printHelp menu "${exactCommand}" "${columns:-}"
   else
-    main::printHelp function "${functionName}" "${noColors:-}" "${columns:-}"
+    main::printHelp function "${functionName}" "${columns:-}"
   fi
 }

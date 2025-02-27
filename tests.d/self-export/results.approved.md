@@ -43,6 +43,7 @@ source prompt
 source regex
 source sfzf
 source string
+source styles
 source system
 source test
 source time

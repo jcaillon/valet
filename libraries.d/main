@@ -49,6 +49,7 @@ if [[ -f ${GLOBAL_CONFIG_FILE} ]]; then
   builtin source "${GLOBAL_CONFIG_FILE}"
   unset -v GLOBAL_ON_EXIT_MESSAGE
 fi
+
 # Source the env script
 if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_SCRIPT:-.env} ]]; then
   # shellcheck disable=SC2034
@@ -60,7 +61,7 @@ fi
 # Setup global variables that will be used for temporary files and folders.
 fs::setupTempFileGlobalVariable
 
-core::resetIncludedLibraries
+core::resetIncludedFiles
 
 # Since we use _OPTION_* variables to pass optional options to functions, we want to make sure
 # to not create collisions so we unset them here.
@@ -73,13 +74,15 @@ xterm-color | xterm-256color | linux) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG
 xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-true}"; fi ;;
 *) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
 esac
-# set the colors (either to default, user defined or empty values)
-core::colorInit
+
+# set the styles
+styles::init
 
 # Export terminal size on window resize if we are in interactive mode.
 if [[ -t 2 ]]; then
   tui::getTerminalSize
-  # hide the cursor ? # printf "%s" $'\e[?25l' 1>&2
+  # hide the cursor (we restore on exit)
+  printf "%s" "${AC__CURSOR_HIDE}" 1>&2
 else
   GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}"
   # shellcheck disable=SC2034
@@ -127,13 +130,14 @@ core::sourceUserCommands
 #
 # - $1: the type help to print (function or menu).
 # - $2: the name of the function or the command in the case of a menu.
-# - $3: (optional) whether to use colors or not (true to not use color).
-# - $4: (optional) the maximum columns for the help text.
+# - $3: (optional) the maximum columns for the help text.
 #
 # ```bash
-# main::printHelp function "this" "false" "${GLOBAL_COLUMNS}"
+# main::printHelp function "this" "${GLOBAL_COLUMNS}"
 # ```
 function main::printHelp() {
+  #shellcheck source=lib-styles
+  source styles
   main::getHelpText "$@"
   printf '%s' "${RETURNED_VALUE}"
 }
@@ -142,8 +146,7 @@ function main::printHelp() {
 #
 # - $1: the type help to print (function or menu).
 # - $2: the name of the function or the command in the case of a menu.
-# - $3: (optional) whether to use colors or not (true to not use colors).
-# - $4: (optional) the maximum columns for the help text.
+# - $3: (optional) the maximum columns for the help text.
 #
 # Returns:
 #
@@ -156,29 +159,7 @@ function main::printHelp() {
 function main::getHelpText() {
   local type=${1:-function}
   local name="${2:-this}"
-  local noColor="${3:-}"
-  local maxColumns="${4:-${GLOBAL_COLUMNS}}"
-
-  if [[ -z ${noColor:-} && ${VALET_CONFIG_ENABLE_COLORS:-false} != true ]]; then
-    noColor=true
-  fi
-
-  local cDefault cTitle cHighlight cOption cArgument cCommand
-  if [[ ${noColor} == "true" ]]; then
-    cDefault=""
-    cTitle=""
-    cHighlight=""
-    cOption=""
-    cArgument=""
-    cCommand=""
-  else
-    cDefault=${VALET_CONFIG_COLOR_DEFAULT:-$'\e'"[0m"}
-    cTitle=${VALET_CONFIG_COLOR_TITLE:-$'\e'"[0;36m"}
-    cHighlight=${VALET_CONFIG_COLOR_ACCENT:-$'\e'"[0;35m"}
-    cOption=${VALET_CONFIG_COLOR_OPTION:-$'\e'"[0;33m"}
-    cArgument=${VALET_CONFIG_COLOR_ARGUMENT:-$'\e'"[0;31m"}
-    cCommand=${VALET_CONFIG_COLOR_COMMAND:-$'\e'"[0;32m"}
-  fi
+  local maxColumns="${3:-${GLOBAL_COLUMNS}}"
 
   local -i helpWidth
   helpWidth="${maxColumns}"
@@ -219,25 +200,25 @@ function main::getHelpText() {
   if [[ ${functionName} == "this" ]]; then
     usage="valet"
   else
-    usage="valet ${cOption}[global options]${cDefault} ${command}"
+    usage="valet ${STYLE_HELP_OPTION}[global options]${STYLE_RESET} ${command}"
   fi
   if [[ -n ${functionOptions:-} ]]; then
     if [[ ${functionName} == "this" ]]; then
-      usage+=" ${cOption}[global options]${cDefault}"
+      usage+=" ${STYLE_HELP_OPTION}[global options]${STYLE_RESET}"
     else
-      usage+=" ${cOption}[options]${cDefault}"
+      usage+=" ${STYLE_HELP_OPTION}[options]${STYLE_RESET}"
     fi
   fi
   if [[ -n ${functionCommands:-} ]]; then
-    usage+=" ${cCommand}[command]${cDefault}"
+    usage+=" ${STYLE_HELP_COMMAND}[command]${STYLE_RESET}"
   else
     if [[ -n ${functionArguments:-} ]]; then
       usage+=" [--]"
       for argument in "${functionArguments[@]}"; do
         if [[ ${argument} == *\?* ]]; then
-          usage+=" ${cArgument}[${argument//\?/}]${cDefault}"
+          usage+=" ${STYLE_HELP_ARGUMENT}[${argument//\?/}]${STYLE_RESET}"
         else
-          usage+=" ${cArgument}<${argument}>${cDefault}"
+          usage+=" ${STYLE_HELP_ARGUMENT}<${argument}>${STYLE_RESET}"
         fi
       done
     fi
@@ -247,15 +228,15 @@ function main::getHelpText() {
   usage="  ${RETURNED_VALUE}"
 
   # global options
-  local options="${cTitle}GLOBAL OPTIONS${cDefault}"$'\n'$'\n'
-  mainWriteAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "this"
+  local options="${STYLE_HELP_TITLE}GLOBAL OPTIONS${STYLE_RESET}"$'\n'$'\n'
+  mainWriteAsTable "${helpWidth}" "${STYLE_HELP_OPTION}" "CMD_OPTIONS" "this"
   options+="${RETURNED_VALUE}"$'\n'
 
   # options
   if [[ ${functionName} != "this" ]]; then
     if [[ -n ${functionOptions:-} ]]; then
-      options+="${cTitle}OPTIONS${cDefault}"$'\n'$'\n'
-      mainWriteAsTable "${helpWidth}" "${cOption}" "CMD_OPTIONS" "${functionName}"
+      options+="${STYLE_HELP_TITLE}OPTIONS${STYLE_RESET}"$'\n'$'\n'
+      mainWriteAsTable "${helpWidth}" "${STYLE_HELP_OPTION}" "CMD_OPTIONS" "${functionName}"
       options+="${RETURNED_VALUE}"$'\n'
     fi
   fi
@@ -263,41 +244,41 @@ function main::getHelpText() {
   # arguments
   local arguments
   if [[ -z ${functionCommands:-} && -n ${functionArguments:-} ]]; then
-    arguments="${cTitle}ARGUMENTS${cDefault}"$'\n'$'\n'
-    mainWriteAsTable "${helpWidth}" "${cArgument}" "CMD_ARGUMENTS" "${functionName}"
+    arguments="${STYLE_HELP_TITLE}ARGUMENTS${STYLE_RESET}"$'\n'$'\n'
+    mainWriteAsTable "${helpWidth}" "${STYLE_HELP_ARGUMENT}" "CMD_ARGUMENTS" "${functionName}"
     arguments+="${RETURNED_VALUE}"$'\n'
   fi
 
   # commands
   local commands
   if [[ -n ${functionCommands:-} ]]; then
-    commands="${cTitle}COMMANDS${cDefault}"$'\n'$'\n'
-    mainWriteAsTable "${helpWidth}" "${cCommand}" "CMD_COMMANDS" "${functionName}"
+    commands="${STYLE_HELP_TITLE}COMMANDS${STYLE_RESET}"$'\n'$'\n'
+    mainWriteAsTable "${helpWidth}" "${STYLE_HELP_COMMAND}" "CMD_COMMANDS" "${functionName}"
     commands+="${RETURNED_VALUE}"$'\n'
   fi
 
   # examples
   local examples
   if [[ -n ${functionExamples:-} ]]; then
-    examples="${cTitle}EXAMPLES${cDefault}"$'\n'$'\n'
-    mainWriteAsTable "${helpWidth}" "${cCommand}" "CMD_EXAMPLES" "${functionName}"
+    examples="${STYLE_HELP_TITLE}EXAMPLES${STYLE_RESET}"$'\n'$'\n'
+    mainWriteAsTable "${helpWidth}" "${STYLE_HELP_COMMAND}" "CMD_EXAMPLES" "${functionName}"
     examples+="${RETURNED_VALUE}"$'\n'
   fi
 
-  local output="${cTitle}ABOUT${cDefault}
+  local output="${STYLE_HELP_TITLE}ABOUT${STYLE_RESET}
 
 ${wrappedDescription}
 
-${cTitle}USAGE${cDefault}
+${STYLE_HELP_TITLE}USAGE${STYLE_RESET}
 
 ${usage}
 
 ${options:-}${arguments:-}${commands:-}${examples:-}"
 
   # surround "markdown like" _italic_ with italic color
-  if [[ ${noColor:-false} == "false" ]]; then
-    output="${output//⌜/${cHighlight}⌜}"
-    output="${output//⌝/⌝${cDefault}}"
+  if [[ -n ${STYLE_HELP_HIGHLIGHT} ]]; then
+    output="${output//⌜/${STYLE_HELP_HIGHLIGHT}⌜}"
+    output="${output//⌝/⌝${STYLE_RESET}}"
   fi
 
   RETURNED_VALUE="${output}"
@@ -316,14 +297,12 @@ function mainWriteAsTable() {
 
   local -n names="${prefix}_NAME_${functionName}"
   local -n descriptions="${prefix}_DESCRIPTION_${functionName}"
-
-  local cDefault output index
-  if [[ -n ${color:-} ]]; then cDefault=$'\e'"[0m"; fi
+  local output index
 
   output=""
   for index in "${!names[@]}"; do
     string::wrapWords "names[${index}]" "${width}" "  " "$((width - 2))"
-    output+="  ${color}${RETURNED_VALUE}${cDefault:-}"$'\n'
+    output+="  ${color}${RETURNED_VALUE}${STYLE_RESET:-}"$'\n'
 
     string::wrapWords "descriptions[${index}]" "${width}" "      " "$((width - 6))"
     output+="      ${RETURNED_VALUE}"$'\n'
@@ -792,7 +771,7 @@ function main::onFsfsItemSelectionChange() {
   local command="${item:0:CMD_MAX_COMMAND_WIDTH}  "
   command="${command%%  *}"
   main::getFunctionNameFromCommand "${command}"
-  main::getHelpText function "${RETURNED_VALUE}" "" "${3}"
+  main::getHelpText function "${RETURNED_VALUE}" "${3}"
   return 0
 }
 
@@ -1115,7 +1094,7 @@ function command::parseFunctionArguments() {
     local -n command="CMD_COMMAND_${functionName}"
     outputErrors+=("Use ⌜valet ${command} --help⌝ to get help.")
     if [[ ${badArguments} == "true" ]]; then
-      main::getHelpText function "${functionName}" "true"
+      main::getHelpText function "${functionName}"
       outputErrors+=($'\n'"Usage:"$'\n'"${RETURNED_VALUE2}")
     fi
   fi

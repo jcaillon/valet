@@ -172,7 +172,7 @@ RETURNED_VALUE3='97'
 
 ❯ `log::init`
 
-❯ `core::colorInit`
+❯ `styles::init`
 
 ### ✅ Testing log::printRaw
 
@@ -298,7 +298,7 @@ EPOCHREALTIME='548902800.000000'
 
 ❯ `log::init`
 
-❯ `core::colorInit`
+❯ `styles::init`
 
 ### ✅ Testing log::printRaw
 
@@ -338,7 +338,7 @@ _world
 **Error output**:
 
 ```text
- 1987-05-25T01:00:00+0000 CIN      INFO        II Next up is a big line with a lot of numbers 
+ 1987-05-25T01:00:00+0000 [36m      INFO        Next up is a big line with a lot of numbers 
                                              not separated by spaces. Which means they 
                                              will be truncated by characters and not by 
                                              word boundaries like this sentence.
@@ -365,9 +365,9 @@ _world
 **Error output**:
 
 ```text
-                                             CFA   1 ░CDE What is Lorem Ipsum?
-                                             CFA   2 ░CDE 
-                                             CFA     ░ (truncated)CDE
+                                             [90m   1 ░[0m What is Lorem Ipsum?
+                                             [90m   2 ░[0m 
+                                             [90m     ░ (truncated)[0m
 ```
 
 ❯ `log::printFile file-to-read`
@@ -375,69 +375,61 @@ _world
 **Error output**:
 
 ```text
-                                             CFA   1 ░CDE What is Lorem Ipsum?
-                                             CFA   2 ░CDE 
-                                             CFA   3 ░CDE Lorem Ipsum is simply dummy text of th
-                                                  CFA░CDE e printing and typesetting indus
-                                                  CFA░CDE try.
-                                             CFA   4 ░CDE Lorem Ipsum has been the industry's st
-                                                  CFA░CDE andard dummy text ever since the
-                                                  CFA░CDE 1500s, when an unknown printer t
-                                                  CFA░CDE ook a galley of type and scrambl
-                                                  CFA░CDE ed it to make a type specimen bo
-                                                  CFA░CDE ok.
-                                             CFA   5 ░CDE It has survived not only five centurie
-                                                  CFA░CDE s, but also the leap into electr
-                                                  CFA░CDE onic typesetting, remaining esse
-                                                  CFA░CDE ntially unchanged.
-                                             CFA   6 ░CDE It was popularised in the 1960s with t
-                                                  CFA░CDE he release of Letraset sheets co
-                                                  CFA░CDE ntaining Lorem Ipsum passages, a
-                                                  CFA░CDE nd more recently with desktop pu
-                                                  CFA░CDE blishing software like Aldus Pag
-                                                  CFA░CDE eMaker including versions of Lor
-                                                  CFA░CDE em Ipsum.
-                                             CFA   7 ░CDE 
-                                             CFA   8 ░CDE 01234567890123456789012345678901234567
-                                                  CFA░CDE 89012345678901234567890123456789
-                                                  CFA░CDE 01234567890123456789012345678901
-                                                  CFA░CDE 23456789012345678901234567890123
-                                                  CFA░CDE 45678901234567890123456789012345
-                                                  CFA░CDE 67890123456789012345678901234567
-                                                  CFA░CDE 89012345678901234567890123456789
-                                                  CFA░CDE 01234567890123456789012345678901
-                                                  CFA░CDE 23456789012345678901234567890123
-                                                  CFA░CDE 45678901234567890123456789012345
-                                                  CFA░CDE 67890123456789012345678901234567
-                                                  CFA░CDE 89012345678901234567890123456789
-                                                  CFA░CDE 01234567890123456789012345678901
-                                                  CFA░CDE 23456789012345678901234567890123
-                                                  CFA░CDE 45678901234567890123456789012345
-                                                  CFA░CDE 67890123456789012345678901234567
-                                                  CFA░CDE 890123456789
-                                             CFA   9 ░CDE 
-                                             CFA  10 ░CDE Why do we use it?
-                                             CFA  11 ░CDE 
-                                             CFA  12 ░CDE It is a long established fact that a r
-                                                  CFA░CDE eader will be distracted by the 
-                                                  CFA░CDE readable content of a page when 
-                                                  CFA░CDE looking at its layout.
-                                             CFA  13 ░CDE The point of using Lorem Ipsum is that
-                                                  CFA░CDE it has a more-or-less normal dis
-                                                  CFA░CDE tribution of letters, as opposed
-                                                  CFA░CDE to using 'Content here, content 
-                                                  CFA░CDE here', making it look like reada
-                                                  CFA░CDE ble English.
-                                             CFA  14 ░CDE Many desktop publishing packages and w
-                                                  CFA░CDE eb page editors now use Lorem Ip
-                                                  CFA░CDE sum as their default model text,
-                                                  CFA░CDE and a search for 'lorem ipsum' w
-                                                  CFA░CDE ill uncover many web sites still
-                                                  CFA░CDE in their infancy.
-                                             CFA  15 ░CDE Various versions have evolved over the
-                                                  CFA░CDE years, sometimes by accident, so
-                                                  CFA░CDE metimes on purpose (injected hum
-                                                  CFA░CDE our and the like).
+                                             [90m   1 ░[0m What is Lorem Ipsum?
+                                             [90m   2 ░[0m 
+                                             [90m   3 ░[0m Lorem Ipsum is simply dummy text of th
+                                                  [90m░[0m e printing and typesetting industry.
+                                             [90m   4 ░[0m Lorem Ipsum has been the industry's st
+                                                  [90m░[0m andard dummy text ever since the 1500s
+                                                  [90m░[0m , when an unknown printer took a galle
+                                                  [90m░[0m y of type and scrambled it to make a t
+                                                  [90m░[0m ype specimen book.
+                                             [90m   5 ░[0m It has survived not only five centurie
+                                                  [90m░[0m s, but also the leap into electronic t
+                                                  [90m░[0m ypesetting, remaining essentially unch
+                                                  [90m░[0m anged.
+                                             [90m   6 ░[0m It was popularised in the 1960s with t
+                                                  [90m░[0m he release of Letraset sheets containi
+                                                  [90m░[0m ng Lorem Ipsum passages, and more rece
+                                                  [90m░[0m ntly with desktop publishing software 
+                                                  [90m░[0m like Aldus PageMaker including version
+                                                  [90m░[0m s of Lorem Ipsum.
+                                             [90m   7 ░[0m 
+                                             [90m   8 ░[0m 01234567890123456789012345678901234567
+                                                  [90m░[0m 89012345678901234567890123456789012345
+                                                  [90m░[0m 67890123456789012345678901234567890123
+                                                  [90m░[0m 45678901234567890123456789012345678901
+                                                  [90m░[0m 23456789012345678901234567890123456789
+                                                  [90m░[0m 01234567890123456789012345678901234567
+                                                  [90m░[0m 89012345678901234567890123456789012345
+                                                  [90m░[0m 67890123456789012345678901234567890123
+                                                  [90m░[0m 45678901234567890123456789012345678901
+                                                  [90m░[0m 23456789012345678901234567890123456789
+                                                  [90m░[0m 01234567890123456789012345678901234567
+                                                  [90m░[0m 89012345678901234567890123456789012345
+                                                  [90m░[0m 67890123456789012345678901234567890123
+                                                  [90m░[0m 456789012345678901234567890123456789
+                                             [90m   9 ░[0m 
+                                             [90m  10 ░[0m Why do we use it?
+                                             [90m  11 ░[0m 
+                                             [90m  12 ░[0m It is a long established fact that a r
+                                                  [90m░[0m eader will be distracted by the readab
+                                                  [90m░[0m le content of a page when looking at i
+                                                  [90m░[0m ts layout.
+                                             [90m  13 ░[0m The point of using Lorem Ipsum is that
+                                                  [90m░[0m it has a more-or-less normal distribut
+                                                  [90m░[0m ion of letters, as opposed to using 'C
+                                                  [90m░[0m ontent here, content here', making it 
+                                                  [90m░[0m look like readable English.
+                                             [90m  14 ░[0m Many desktop publishing packages and w
+                                                  [90m░[0m eb page editors now use Lorem Ipsum as
+                                                  [90m░[0m their default model text, and a search
+                                                  [90m░[0m for 'lorem ipsum' will uncover many we
+                                                  [90m░[0m b sites still in their infancy.
+                                             [90m  15 ░[0m Various versions have evolved over the
+                                                  [90m░[0m years, sometimes by accident, sometime
+                                                  [90m░[0m s on purpose (injected humour and the 
+                                                  [90m░[0m like).
 ```
 
 ### ✅ Testing log::printFileString
@@ -447,9 +439,9 @@ _world
 **Error output**:
 
 ```text
-                                             CFA   1 ░CDE What is Lorem Ipsum?
-                                             CFA   2 ░CDE 
-                                             CFA     ░ (truncated)CDE
+                                             [90m   1 ░[0m What is Lorem Ipsum?
+                                             [90m   2 ░[0m 
+                                             [90m     ░ (truncated)[0m
 ```
 
 ❯ `log::printFileString "${text}"`
@@ -457,69 +449,61 @@ _world
 **Error output**:
 
 ```text
-                                             CFA   1 ░CDE What is Lorem Ipsum?
-                                             CFA   2 ░CDE 
-                                             CFA   3 ░CDE Lorem Ipsum is simply dummy text of th
-                                                  CFA░CDE e printing and typesetting indus
-                                                  CFA░CDE try.
-                                             CFA   4 ░CDE Lorem Ipsum has been the industry's st
-                                                  CFA░CDE andard dummy text ever since the
-                                                  CFA░CDE 1500s, when an unknown printer t
-                                                  CFA░CDE ook a galley of type and scrambl
-                                                  CFA░CDE ed it to make a type specimen bo
-                                                  CFA░CDE ok.
-                                             CFA   5 ░CDE It has survived not only five centurie
-                                                  CFA░CDE s, but also the leap into electr
-                                                  CFA░CDE onic typesetting, remaining esse
-                                                  CFA░CDE ntially unchanged.
-                                             CFA   6 ░CDE It was popularised in the 1960s with t
-                                                  CFA░CDE he release of Letraset sheets co
-                                                  CFA░CDE ntaining Lorem Ipsum passages, a
-                                                  CFA░CDE nd more recently with desktop pu
-                                                  CFA░CDE blishing software like Aldus Pag
-                                                  CFA░CDE eMaker including versions of Lor
-                                                  CFA░CDE em Ipsum.
-                                             CFA   7 ░CDE 
-                                             CFA   8 ░CDE 01234567890123456789012345678901234567
-                                                  CFA░CDE 89012345678901234567890123456789
-                                                  CFA░CDE 01234567890123456789012345678901
-                                                  CFA░CDE 23456789012345678901234567890123
-                                                  CFA░CDE 45678901234567890123456789012345
-                                                  CFA░CDE 67890123456789012345678901234567
-                                                  CFA░CDE 89012345678901234567890123456789
-                                                  CFA░CDE 01234567890123456789012345678901
-                                                  CFA░CDE 23456789012345678901234567890123
-                                                  CFA░CDE 45678901234567890123456789012345
-                                                  CFA░CDE 67890123456789012345678901234567
-                                                  CFA░CDE 89012345678901234567890123456789
-                                                  CFA░CDE 01234567890123456789012345678901
-                                                  CFA░CDE 23456789012345678901234567890123
-                                                  CFA░CDE 45678901234567890123456789012345
-                                                  CFA░CDE 67890123456789012345678901234567
-                                                  CFA░CDE 890123456789
-                                             CFA   9 ░CDE 
-                                             CFA  10 ░CDE Why do we use it?
-                                             CFA  11 ░CDE 
-                                             CFA  12 ░CDE It is a long established fact that a r
-                                                  CFA░CDE eader will be distracted by the 
-                                                  CFA░CDE readable content of a page when 
-                                                  CFA░CDE looking at its layout.
-                                             CFA  13 ░CDE The point of using Lorem Ipsum is that
-                                                  CFA░CDE it has a more-or-less normal dis
-                                                  CFA░CDE tribution of letters, as opposed
-                                                  CFA░CDE to using 'Content here, content 
-                                                  CFA░CDE here', making it look like reada
-                                                  CFA░CDE ble English.
-                                             CFA  14 ░CDE Many desktop publishing packages and w
-                                                  CFA░CDE eb page editors now use Lorem Ip
-                                                  CFA░CDE sum as their default model text,
-                                                  CFA░CDE and a search for 'lorem ipsum' w
-                                                  CFA░CDE ill uncover many web sites still
-                                                  CFA░CDE in their infancy.
-                                             CFA  15 ░CDE Various versions have evolved over the
-                                                  CFA░CDE years, sometimes by accident, so
-                                                  CFA░CDE metimes on purpose (injected hum
-                                                  CFA░CDE our and the like).
+                                             [90m   1 ░[0m What is Lorem Ipsum?
+                                             [90m   2 ░[0m 
+                                             [90m   3 ░[0m Lorem Ipsum is simply dummy text of th
+                                                  [90m░[0m e printing and typesetting industry.
+                                             [90m   4 ░[0m Lorem Ipsum has been the industry's st
+                                                  [90m░[0m andard dummy text ever since the 1500s
+                                                  [90m░[0m , when an unknown printer took a galle
+                                                  [90m░[0m y of type and scrambled it to make a t
+                                                  [90m░[0m ype specimen book.
+                                             [90m   5 ░[0m It has survived not only five centurie
+                                                  [90m░[0m s, but also the leap into electronic t
+                                                  [90m░[0m ypesetting, remaining essentially unch
+                                                  [90m░[0m anged.
+                                             [90m   6 ░[0m It was popularised in the 1960s with t
+                                                  [90m░[0m he release of Letraset sheets containi
+                                                  [90m░[0m ng Lorem Ipsum passages, and more rece
+                                                  [90m░[0m ntly with desktop publishing software 
+                                                  [90m░[0m like Aldus PageMaker including version
+                                                  [90m░[0m s of Lorem Ipsum.
+                                             [90m   7 ░[0m 
+                                             [90m   8 ░[0m 01234567890123456789012345678901234567
+                                                  [90m░[0m 89012345678901234567890123456789012345
+                                                  [90m░[0m 67890123456789012345678901234567890123
+                                                  [90m░[0m 45678901234567890123456789012345678901
+                                                  [90m░[0m 23456789012345678901234567890123456789
+                                                  [90m░[0m 01234567890123456789012345678901234567
+                                                  [90m░[0m 89012345678901234567890123456789012345
+                                                  [90m░[0m 67890123456789012345678901234567890123
+                                                  [90m░[0m 45678901234567890123456789012345678901
+                                                  [90m░[0m 23456789012345678901234567890123456789
+                                                  [90m░[0m 01234567890123456789012345678901234567
+                                                  [90m░[0m 89012345678901234567890123456789012345
+                                                  [90m░[0m 67890123456789012345678901234567890123
+                                                  [90m░[0m 456789012345678901234567890123456789
+                                             [90m   9 ░[0m 
+                                             [90m  10 ░[0m Why do we use it?
+                                             [90m  11 ░[0m 
+                                             [90m  12 ░[0m It is a long established fact that a r
+                                                  [90m░[0m eader will be distracted by the readab
+                                                  [90m░[0m le content of a page when looking at i
+                                                  [90m░[0m ts layout.
+                                             [90m  13 ░[0m The point of using Lorem Ipsum is that
+                                                  [90m░[0m it has a more-or-less normal distribut
+                                                  [90m░[0m ion of letters, as opposed to using 'C
+                                                  [90m░[0m ontent here, content here', making it 
+                                                  [90m░[0m look like readable English.
+                                             [90m  14 ░[0m Many desktop publishing packages and w
+                                                  [90m░[0m eb page editors now use Lorem Ipsum as
+                                                  [90m░[0m their default model text, and a search
+                                                  [90m░[0m for 'lorem ipsum' will uncover many we
+                                                  [90m░[0m b sites still in their infancy.
+                                             [90m  15 ░[0m Various versions have evolved over the
+                                                  [90m░[0m years, sometimes by accident, sometime
+                                                  [90m░[0m s on purpose (injected humour and the 
+                                                  [90m░[0m like).
 ```
 
 ## Test script 01.log-level
@@ -558,7 +542,7 @@ RETURNED_VALUE='trace'
 ```text
 ERROR    This is an error message.
 ├─ in myCmd::subFunction() at tests.d/lib-log/path/to/subFunction.sh:200
-└─ in myCmd::function() at tests.d/lib-log/path/to/function.sh:300
+╰─ in myCmd::function() at tests.d/lib-log/path/to/function.sh:300
 ```
 
 ❯ `log::warning This\ is\ a\ warning\ message.`
@@ -641,7 +625,7 @@ Returned code: `1`
 ```text
 ERROR    This is an error message.
 ├─ in myCmd::subFunction() at tests.d/lib-log/path/to/subFunction.sh:200
-└─ in myCmd::function() at tests.d/lib-log/path/to/function.sh:300
+╰─ in myCmd::function() at tests.d/lib-log/path/to/function.sh:300
 ```
 
 ❯ `log::warning This\ is\ a\ warning\ message.`

@@ -15,12 +15,6 @@
 [0;36mThis is a COLOR CHECK, this line should be COLORED (in cyan by default).[0m
 [0;32mThis is a COLOR CHECK, this line should be COLORED (in green by default).[0m
 ─────────────────────────────────────
-[2m   ┌─[56b─┐[0m
-[2m░──┤[0m Do you see the colors in the color check above the line? [63G[2m│[0m
-[2m   └─[56b─┘[0m
-[?25l[1G[0J[1S[1F[?25h[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
-[2m[9G│[0m No. [15G[2m├──░[0m
-[2m[9G└─[3b─┘[0m
 ─────────────────────────────────────
 This is a nerd icon check, check out the next lines:
 A cross within a square: 
@@ -28,18 +22,24 @@ A warning sign: 
 A checked box: 
 An information icon: 
 ─────────────────────────────────────
-[2m   ┌─[69b─┐[0m
-[2m░──┤[0m Do you correctly see the nerd icons in the icon check above the line? [76G[2m│[0m
-[2m   └─[69b─┘[0m
-[?25l[1G[0J[1S[1F[?25h[?25l   (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[?25h[2m[9G┌─[3b─┐[0m
-[2m[9G│[0m No. [15G[2m├──░[0m
-[2m[9G└─[3b─┘[0m
 ```
 
 **Error output**:
 
 ```text
 INFO     Now setting up Valet.
+   ╭─56─╮
+░──┤ Do you see the colors in the color check above the line? 63│
+   ╰─56─╯
+111    (Y)ES         (N)O   19╭─3─╮
+9│ No. 15├──░
+9╰─3─╯
+   ┌─69─┐
+░──┤ Do you correctly see the nerd icons in the icon check above the line? 76│
+   └─69─┘
+111    (Y)ES         (N)O   19┌─3─┐
+9│ No. 15├──░
+9└─3─┘
 INFO     If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal.
 You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
 After that, you need to setup your terminal to use this newly installed font.
@@ -73,12 +73,6 @@ VALET_CONFIG_ENABLE_NERDFONT_ICONS='false'
 [0;36mThis is a COLOR CHECK, this line should be COLORED (in cyan by default).[0m
 [0;32mThis is a COLOR CHECK, this line should be COLORED (in green by default).[0m
 ─────────────────────────────────────
-[2m   ┌─[56b─┐[0m
-[2m░──┤[0m Do you see the colors in the color check above the line? [63G[2m│[0m
-[2m   └─[56b─┘[0m
-[?25l[1G[0J[1S[1F[?25h[?25l[7m   (Y)ES   [0m      (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
-[2m[9G│[0m Yes. [16G[2m├──░[0m
-[2m[9G└─[4b─┘[0m
 ─────────────────────────────────────
 This is a nerd icon check, check out the next lines:
 A cross within a square: 
@@ -86,18 +80,24 @@ A warning sign: 
 A checked box: 
 An information icon: 
 ─────────────────────────────────────
-[2m   ┌─[69b─┐[0m
-[2m░──┤[0m Do you correctly see the nerd icons in the icon check above the line? [76G[2m│[0m
-[2m   └─[69b─┘[0m
-[?25l[1G[0J[1S[1F[?25h[?25l[7mCUB   (Y)ES   [0m   [7mCAB   (N)O   [0m[1G[0K[?25h[2m[9G┌─[4b─┐[0m
-[2m[9G│[0m Yes. [16G[2m├──░[0m
-[2m[9G└─[4b─┘[0m
 ```
 
 **Error output**:
 
 ```text
 INFO     Now setting up Valet.
+   ┌─56─┐
+░──┤ Do you see the colors in the color check above the line? 63│
+   └─56─┘
+111    (Y)ES         (N)O   19┌─4─┐
+9│ Yes. 16├──░
+9└─4─┘
+   ┌─69─┐
+░──┤ Do you correctly see the nerd icons in the icon check above the line? 76│
+   └─69─┘
+111    (Y)ES         (N)O   19┌─4─┐
+9│ Yes. 16├──░
+9└─4─┘
 INFO     Writing the valet config file ⌜/tmp/valet-temp⌝.
 SUCCESS  You are all set!
 ```

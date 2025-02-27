@@ -4,7 +4,7 @@
 
 ### ✅ Test source
 
-❯ `core::resetIncludedLibraries`
+❯ `core::resetIncludedFiles`
 
 ```text
 CMD_LIBRARY_DIRECTORIES=(
@@ -38,7 +38,7 @@ Including a user defined library.
 We sourced lib-stuff2 from extension1
 ```
 
-Including a script using relative path.
+Including a script using relative path twice, expecting to be sourced once.
 
 ❯ `source resources/script1.sh`
 
@@ -48,7 +48,9 @@ Including a script using relative path.
 We sourced script1.sh
 ```
 
-Including a script using an absolute path.
+❯ `source resources/script1.sh`
+
+Including a script using an absolute path twice, expecting to be sourced once.
 
 ❯ `source $GLOBAL_INSTALLATION_DIRECTORY/script1.sh`
 
@@ -57,6 +59,8 @@ Including a script using an absolute path.
 ```text
 We sourced script1.sh
 ```
+
+❯ `source $GLOBAL_INSTALLATION_DIRECTORY/script1.sh`
 
 ```text
 _CORE_INCLUDED_LIBRARIES='

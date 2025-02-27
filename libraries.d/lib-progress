@@ -91,15 +91,14 @@ function progress::start() {
   if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
     core::fail "A spinner or progress bar is already running."
   fi
-  printf '%s' "${AC__CURSOR_HIDE}"
+
+  # Hide the cursor
+  printf "%s" "${AC__CURSOR_HIDE}" 1>&2
 
   # disable echoing when we type something
   tui::setTerminalOptions
 
   _PROGRESS_BAR_RUNNING=true
-
-  # Hide the cursor
-  printf "%s" "${AC__CURSOR_HIDE}"
 
   # coproc can emit a warning if another coproc is already running, so we redirect stderr to avoid it
   # but we still want to have stderr of progress_runAnimationInBackground so we redirect it to fd4
@@ -131,7 +130,7 @@ function progress::stop() {
     unset -v GLOBAL_BACKGROUND_JOB1_PID _PROGRESS_BAR_RUNNING _PROGRESS_BACKGROUND_JOB _PROGRESS_BACKGROUND_JOB_PID
   fi
 
-  printf "%s" "${AC__ERASE_LINE}${AC__CURSOR_SHOW}"
+  printf "%s" "${AC__ERASE_LINE}${AC__CURSOR_SHOW}" 1>&2
 
   # restore the key echoing
   tui::restoreTerminalOptions
@@ -222,6 +221,11 @@ function progress_runAnimationInBackground() {
   local spinner="${5}"
   local -i percentage="${6}"
   local message="${7}"
+
+  trap::unregister
+
+  # Hide the cursor
+  printf "%s" "${AC__CURSOR_HIDE}" 1>&2
 
   # shellcheck source=lib-string
   source string

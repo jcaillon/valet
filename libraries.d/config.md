@@ -21,6 +21,13 @@ Use the `valet self config` command to initialize and open the YAML configuratio
 
 You should not define all the variables, only the ones you want to change.
 
+If you want environment variables exported in the shell to be prioritized over the ones in the config file,
+you can define variables with a default value like this:
+
+```bash
+VALET_CONFIG_MY_VAR="${VALET_CONFIG_MY_VAR:-"default value if not set"}"
+```
+
 Do not add custom code to this script, use the custom startup script instead (see next section).
 
 If you break this file, valet will fail to start!
@@ -126,6 +133,17 @@ If true, will forcibly enable the color output (otherwise we try to detect color
 #### VALET_CONFIG_ENABLE_NERDFONT_ICONS
 
 If true, will enable the icons (using nerd font).
+
+#### VALET_CONFIG_DISABLE_ESC_CODES
+
+If true, will disable all ANSI escape codes.
+This will break Valet usage in the terminal, this option is intended to be used in a CI environment
+where you want to disable all colors and escape codes.
+
+#### VALET_CONFIG_DISABLE_TEXT_ATTRIBUTES
+
+If true, will disable all Select Graphic Rendition escape codes that modify the text attributes.
+It can be used if your terminal does not support text attributes.
 
 #### VALET_CONFIG_TEST_DIFF_COMMAND
 
@@ -279,7 +297,7 @@ You don't have to define all the keys, only the ones you want to change.
 E.g.
 
 ```bash
-local -A _PROMPT_KEY_MAPPING=(
+VALET_CONFIG_PROMPT_KEY_MAPPING=(
   ["CTRL+Y"]="yank"
   ["DEL"]="delete-char"
   ["UP"]="move-up"
@@ -291,66 +309,7 @@ local -A _PROMPT_KEY_MAPPING=(
 
 ### 🎨 Theme configuration
 
-Since there are many variables, we only list them here without description.
-
-Complete theming as well as theme selection will come later.
-
-#### Characters configuration
-
-- `VALET_CONFIG_SPINNER_CHARACTERS`
-- `VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER`
-- `VALET_CONFIG_INTERACTIVE_PROMPT_CHARACTER`
-
-#### Log icons configuration
-
-The icon to use for the logs.
-
-- `VALET_CONFIG_ICON_ERROR`
-- `VALET_CONFIG_ICON_WARNING`
-- `VALET_CONFIG_ICON_SUCCESS`
-- `VALET_CONFIG_ICON_INFO`
-- `VALET_CONFIG_ICON_DEBUG`
-- `VALET_CONFIG_ICON_TRACE`
-- `VALET_CONFIG_ICON_ERROR_TRACE`
-- `VALET_CONFIG_ICON_EXIT`
-- `VALET_CONFIG_ICON_STOPPED`
-- `VALET_CONFIG_ICON_KILLED`
-
-#### Colors configuration
-
-You should define a color using an ANSI escape sequence. See <https://en.wikipedia.org/wiki/ANSI_escape_code#Colors>.
-
-E.g., this will set the INFO levels logs to blue: `VALET_CONFIG_COLOR_INFO=$'\e[44m'`
-
-- `VALET_CONFIG_COLOR_DEFAULT`
-- `VALET_CONFIG_COLOR_DEBUG`
-- `VALET_CONFIG_COLOR_INFO`
-- `VALET_CONFIG_COLOR_WARNING`
-- `VALET_CONFIG_COLOR_SUCCESS`
-- `VALET_CONFIG_COLOR_ERROR`
-- `VALET_CONFIG_COLOR_FADED`
-- `VALET_CONFIG_COLOR_ACCENT`
-
-- `VALET_CONFIG_COLOR_TITLE`
-- `VALET_CONFIG_COLOR_OPTION`
-- `VALET_CONFIG_COLOR_ARGUMENT`
-- `VALET_CONFIG_COLOR_COMMAND`
-
-- `VALET_CONFIG_COLOR_ACTIVE_BUTTON`
-- `VALET_CONFIG_COLOR_INACTIVE_BUTTON`
-
-- `VALET_CONFIG_SFZF_RESET_TEXT`
-- `VALET_CONFIG_SFZF_STATIC`
-- `VALET_CONFIG_SFZF_FOCUS`
-- `VALET_CONFIG_SFZF_FOCUS_RESET`
-- `VALET_CONFIG_SFZF_LETTER_HIGHLIGHT`
-- `VALET_CONFIG_SFZF_LETTER_HIGHLIGHT_RESET`
-- `VALET_CONFIG_SFZF_SELECTED_ITEM`
-- `VALET_CONFIG_SFZF_SELECTED_ITEM_RESET`
-- `VALET_CONFIG_SFZF_PROMPT_STRING`
-- `VALET_CONFIG_SFZF_PROMPT_STRING_RESET`
-- `VALET_CONFIG_SFZF_COUNT`
-- `VALET_CONFIG_SFZF_COUNT_RESET`
+TODO: To be done.
 
 <!-- _________________ Developer _______________________ -->
 

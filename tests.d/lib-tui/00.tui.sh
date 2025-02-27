@@ -3,7 +3,16 @@
 # shellcheck source=../../libraries.d/lib-tui
 source tui
 
+# shellcheck disable=SC2034
 function main() {
+  # to test the interactive functions we reactive all escape characters and styles
+  VALET_CONFIG_ENABLE_COLORS=true
+  VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
+  VALET_CONFIG_STYLE_SQUARED_BOXES=false
+  VALET_CONFIG_DISABLE_TEXT_ATTRIBUTES=false
+  VALET_CONFIG_DISABLE_ESC_CODES=false
+  styles::init
+
   test_tui::createSpace
   test_tui::getCursorPosition
   test_tui::clearBox

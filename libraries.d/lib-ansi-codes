@@ -40,8 +40,6 @@
 #===============================================================
 # https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
 
-AC__TEXT_RESET=$'\e[0m'
-
 AC__TEXT_BOLD=$'\e[1m'
 AC__TEXT_NO_BOLD=$'\e[21m'
 AC__TEXT_FAINT=$'\e[2m'
@@ -56,6 +54,15 @@ AC__TEXT_INVERSE=$'\e[7m'
 AC__TEXT_NO_INVERSE=$'\e[27m'
 AC__TEXT_STRIKE=$'\e[9m'
 AC__TEXT_NO_STRIKE=$'\e[29m'
+
+if [[ ${VALET_CONFIG_DISABLE_TEXT_ATTRIBUTES:-} == "true" ]]; then
+  # we reset all the text variables to a blank string
+  _ESC_VARS="${!AC__TEXT_*}"
+  eval "${_ESC_VARS// /"=''; "}=''"
+  unset -v _ESC_VARS
+fi
+
+AC__TEXT_RESET=$'\e[0m'
 
 #===============================================================
 # >>> SGR: Colors
@@ -102,17 +109,27 @@ AC__BG_WHITE=$'\e[47m'
 AC__BG_BRIGHT_WHITE=$'\e[107m'
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
-# "${AC__FG_COLOR__}2${__AC__CODE}"
+# "${AC__FG_COLOR__}2${__AC__END_COLOR}"
 AC__FG_COLOR__=$'\e[38;5;'
-# "${AC__BG_COLOR}2${__AC__CODE}"
+# "${AC__BG_COLOR}2${__AC__END_COLOR}"
 AC__BG_COLOR__=$'\e[48;5;'
-__AC__CODE=$'m'
+__AC__END_COLOR=$'m'
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit
-# "${AC__FG_COLOR_24b__}255;255;255${__AC__CODE}"
+# "${AC__FG_COLOR_24b__}255;255;255${__AC__END_COLOR}"
 AC__FG_COLOR_24b__=$'\e[38;2;'
-# "${AC__BG_COLOR_24b}255;255;255${__AC__CODE}"
+# "${AC__BG_COLOR_24b}255;255;255${__AC__END_COLOR}"
 AC__BG_COLOR_24b__=$'\e[48;2;'
+
+if [[ ${VALET_CONFIG_ENABLE_COLORS:-} != "true" ]]; then
+  # we reset all the color variables to a blank string
+  _ESC_VARS="${!AC__FG_*} ${!AC__BG_*} __AC__END_COLOR AC__COLOR_RESET"
+  eval "${_ESC_VARS// /"=''; "}=''"
+  unset -v _ESC_VARS
+  if [[ ${VALET_CONFIG_DISABLE_TEXT_ATTRIBUTES:-} == "true" ]]; then
+    AC__TEXT_RESET=""
+  fi
+fi
 
 #===============================================================
 # >>> CSI: Cursor control
@@ -175,16 +192,12 @@ __AC__LAST_CHAR=$'b'
 # >>> General ASCII Codes
 #===============================================================
 
-AC__RING_BELL=$'\a'
-# Moves the cursor to the first column.
-AC__RETURN_CARRIAGE=$'\r'
-# Moves to next line, scrolls the display up if at bottom of the screen.
-# Usually does not move horizontally, though programs should not rely on this.
-AC__NEW_LINE=$'\n'
-#  	Moves the cursor right to next multiple of 8.
-AC__TAB=$'\t'
-# Moves the cursor left (but may "backwards wrap" if cursor is at start of line).
-AC__BACKSPACE=$'\b'
+# $'\a': bell
+# $'\r': return carriage, moves the cursor to the first column.
+# $'\n': new line, moves to next line, scrolls the display up if at bottom of the screen.
+#        Usually does not move horizontally, though programs should not rely on this.
+# $'\t': tab, moves the cursor right to next multiple of 8.
+# $'\b': backspace, moves the cursor left (but may "backwards wrap" if cursor is at start of line).
 
 #===============================================================
 # >>> Other Common Private Modes
@@ -192,10 +205,22 @@ AC__BACKSPACE=$'\b'
 
 # Hides the cursor.
 AC__CURSOR_HIDE=$'\e[?25l'
-# Shows the cursor.
-AC__CURSOR_SHOW=$'\e[?25h'
+# Shows the cursor (forcibly show it).
+AC__CURSOR_SHOW_FORCE=$'\e[?25h'
+# Shows the cursor (or not, if we are not in exported mode).
+AC__CURSOR_SHOW=""
+if [[ ${GLOBAL_EXPORTED:-} == "true" ]]; then
+  AC__CURSOR_SHOW=$'\e[?25h'
+fi
 
 # Switch to the alternate screen buffer.
 AC__ENABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049h'
 # Switch back from the alternate screen buffer.
 AC__DISABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049l'
+
+if [[ ${VALET_CONFIG_DISABLE_ESC_CODES:-} == "true" ]]; then
+  # we reset all the color variables to a blank string
+  _ESC_VARS="${!AC__*} ${!__AC__*}"
+  eval "${_ESC_VARS// /"=''; "}=''"
+  unset -v _ESC_VARS
+fi

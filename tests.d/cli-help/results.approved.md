@@ -73,15 +73,15 @@ ABOUT
 **Standard output**:
 
 ```text
-ABOUT
+[31mABOUT[0m
 
   A command that only for testing valet core functions.
 
-USAGE
+[31mUSAGE[0m
 
-  valet [global options] self mock1 [options] [--] <action>
+  valet [94m[global options][0m self mock1 [94m[options][0m [--] [96m<action>[0m
 
-GLOBAL OPTIONS
+[31mGLOBAL OPTIONS[0m
 
 ```
 

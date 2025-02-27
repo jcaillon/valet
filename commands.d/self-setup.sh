@@ -46,6 +46,7 @@ function selfSetup() {
   else
     VALET_CONFIG_ENABLE_COLORS=false
   fi
+  styles::init
   log::init
 
   printf '%s\n' "─────────────────────────────────────"
@@ -65,6 +66,7 @@ function selfSetup() {
   else
     VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
   fi
+  styles::init
   log::init
 
   # generate the config

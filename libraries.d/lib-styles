@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2034
+# author: github.com/jcaillon
+# description: This script provides the styles used in Valet.
+#   A style is a set of colors and attributes that can be used to format text in the terminal.
+
+# shellcheck source=lib-ansi-codes
+source ansi-codes
+
+STYLE_COLOR_ACCENT="${AC__FG_BRIGHT_MAGENTA}"
+STYLE_COLOR_PRIMARY="${AC__FG_BRIGHT_CYAN}"
+STYLE_COLOR_SECONDARY="${AC__FG_BRIGHT_BLUE}"
+STYLE_COLOR_FADED="${AC__FG_BRIGHT_BLACK}"
+STYLE_COLOR_DEBUG="${AC__FG_BRIGHT_BLACK}"
+STYLE_COLOR_INFO="${AC__FG_CYAN}"
+STYLE_COLOR_WARNING="${AC__FG_YELLOW}"
+STYLE_COLOR_SUCCESS="${AC__FG_GREEN}"
+STYLE_COLOR_ERROR="${AC__FG_RED}"
+STYLE_COLOR_DEFAULT="${AC__TEXT_RESET}"
+
+STYLE_RESET="${AC__TEXT_RESET}"
+
+if [[ ${VALET_CONFIG_STYLE_SQUARED_BOXES:-} == "true" ]]; then
+  DRAW_TL_CORNER='┌'
+  DRAW_TR_CORNER='┐'
+  DRAW_BL_CORNER='└'
+  DRAW_BR_CORNER='┘'
+else
+  DRAW_TL_CORNER='╭'
+  DRAW_TR_CORNER='╮'
+  DRAW_BL_CORNER='╰'
+  DRAW_BR_CORNER='╯'
+fi
+
+DRAW_DIAGONAL='╲'
+
+# help
+STYLE_HELP_TITLE="${STYLE_COLOR_ERROR}"
+STYLE_HELP_HIGHLIGHT="${STYLE_COLOR_ACCENT}"
+STYLE_HELP_COMMAND="${STYLE_COLOR_WARNING}"
+STYLE_HELP_ARGUMENT="${STYLE_COLOR_PRIMARY}"
+STYLE_HELP_OPTION="${STYLE_COLOR_SECONDARY}"
+
+# interactive
+STYLE_ACTIVE_BUTTON="${AC__TEXT_INVERSE}${STYLE_COLOR_ACCENT}"
+STYLE_INACTIVE_BUTTON="${AC__TEXT_INVERSE}${STYLE_COLOR_FADED}"
+STYLE_FRAMES="${STYLE_COLOR_FADED}"
+
+if [[ ${VALET_CONFIG_ENABLE_COLORS:-} != "true" ]]; then
+  # help
+  STYLE_HELP_TITLE="${AC__TEXT_INVERSE}"
+
+  # interactive
+  STYLE_ACTIVE_BUTTON="${AC__TEXT_INVERSE}"
+  STYLE_INACTIVE_BUTTON=""
+fi
+
+STYLE_ICON_ERROR=$'\uf2d3'
+STYLE_ICON_WARNING=$'\uf071'
+STYLE_ICON_SUCCESS=$'\uf14a'
+STYLE_ICON_INFO=$'\uf05a'
+STYLE_ICON_DEBUG=$'\uf188'
+STYLE_ICON_TRACE=$'\ue241'
+STYLE_ICON_ERROR_TRACE=$'\uf06e'
+STYLE_ICON_EXIT=$'\uf14c'
+STYLE_ICON_STOPPED=$'\uf256'
+STYLE_ICON_KILLED=$'\uf05e'
+
+if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} != "true" ]]; then
+  # we reset all the icon variables to a blank string
+  _STYLE_VARS="${!STYLE_ICON_*}"
+  eval "${_STYLE_VARS// /"=''; "}=''"
+  unset -v _STYLE_VARS
+fi

@@ -21,6 +21,9 @@ function test_helpCommand() {
 
 
   test::title "✅ Testing that we can display the help of a function using command::showHelp"
+  export VALET_CONFIG_ENABLE_COLORS=true
+  export VALET_CONFIG_DISABLE_ESC_CODES=false
+  export VALET_CONFIG_DISABLE_TEXT_ATTRIBUTES=false
   test::exit "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 show-help
 }
 

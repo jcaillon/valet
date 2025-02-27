@@ -7,6 +7,8 @@
 
 # shellcheck source=lib-ansi-codes
 source ansi-codes
+# shellcheck source=lib-styles
+source styles
 # shellcheck source=lib-tui
 source tui
 # shellcheck source=lib-exe
@@ -271,7 +273,7 @@ function sfzfDrawScreen() {
       titleWidth=0
       title=""
     fi
-    toPrint+="${AC__CURSOR_MOVE__}${SFZF_RIGHT_PANE_FIRST_LINE};$((SFZF_LEFT_PANE_WIDTH + 1))${__AC__TO}┌─${title}─${AC__REPEAT__}$((SFZF_RIGHT_PANE_WIDTH - titleWidth - 4))${__AC__LAST_CHAR}░"
+    toPrint+="${AC__CURSOR_MOVE__}${SFZF_RIGHT_PANE_FIRST_LINE};$((SFZF_LEFT_PANE_WIDTH + 1))${__AC__TO}${DRAW_TL_CORNER}─${title}─${AC__REPEAT__}$((SFZF_RIGHT_PANE_WIDTH - titleWidth - 4))${__AC__LAST_CHAR}░"
 
     # last line with help
     local helpWidth=$((${#SFZF_RIGHT_PANE_HELP_TEXT} + 2))

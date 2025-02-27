@@ -140,7 +140,9 @@ function benchmark::run() {
   # print the results
   local line
   printf -v line "%-${longestFunctionNameLength}s ░ %-13s ░ %s\n" "Function name" "Average time" "Compared to fastest"
-  local result="Benchmark results from fastest to slowest for ${baselineRuns} runs:"$'\n'$'\n'"${line}░${AC__REPEAT__}$((longestFunctionNameLength + 39))${__AC__LAST_CHAR}"$'\n'
+  local result="Benchmark results from fastest to slowest for ${baselineRuns} runs:"$'\n'$'\n'"${line}"
+  printf -v line "%-$((longestFunctionNameLength + 39))s" " "
+  result+="${line// /░}"$'\n'
   local fastestElapsed="${functionsElapsed["${_BENCHMARK_FUNCTIONS[0]}"]}"
   local -i index=0
   for function in "${_BENCHMARK_FUNCTIONS[@]}"; do

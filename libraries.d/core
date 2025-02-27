@@ -53,7 +53,7 @@ function trap::onExitInternal() {
   trap::onCleanUpInternal
 
   if [[ ${GLOBAL_ERROR_DISPLAYED:-0} != "1" && ${rc} != "0" ]]; then
-    log::print "ERROR" "${VALET_CONFIG_ICON_EXIT:-$'\uf14c'}" "EXIT" "Exiting with code ${rc}, stack:"
+    log::print "ERROR" "${STYLE_ICON_EXIT:-}" "EXIT" "Exiting with code ${rc}, stack:"
     log::printCallStack 2
     GLOBAL_ERROR_DISPLAYED=1
   fi
@@ -68,7 +68,7 @@ function trap::onInterruptInternal() {
   if ! declare -F tui::restoreTerminalOptions &>/dev/null; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
-  log::print "WARNING" "${VALET_CONFIG_ICON_STOPPED:-$'\uf256'}" "STOPPED" "Program interrupted by the user."
+  log::print "WARNING" "${STYLE_ICON_STOPPED:-}" "STOPPED" "Program interrupted by the user."
 
   if log::isDebugEnabled; then
     log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:"
@@ -89,7 +89,7 @@ function trap::onInterruptInternal() {
 
 # This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
 function trap::onTerminateInternal() {
-  log::print "ERROR" "${VALET_CONFIG_ICON_KILLED:-$'\uf05e'}" "KILLED" "Program killed."
+  log::print "ERROR" "${STYLE_ICON_KILLED:-}" "KILLED" "Program killed."
   # check if the function exists
   if declare -F onTerminate &>/dev/null; then
     if onTerminate; then
@@ -129,8 +129,8 @@ function trap::onCleanUpInternal() {
     kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
   fi
 
-  # if we ran an interactive function, make sure to restore the cursor
-  if [[ -t 2 ]]; then
+  # if we are in interactive mode, we need to restore the cursor
+  if [[ -t 2 && ${VALET_CONFIG_DISABLE_ESC_CODES:-} != "true" ]]; then
     printf '%s' $'\e[?25h' 1>&2
   fi
 
@@ -158,6 +158,9 @@ function command_not_found_handle() {
   core::fail "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
 }
 
+# ## trap::register (private)
+#
+# Register the traps for the program.
 function trap::register() {
   trap 'trap::onErrorInternal $?' ERR
   trap trap::onExitInternal EXIT
@@ -172,6 +175,10 @@ function trap::register() {
   fi
 }
 
+# ## trap::unregister (private)
+#
+# Unregister the traps for the program.
+# Can be called in a subshell where we want to reset the traps.
 function trap::unregister() {
   trap ERR
   trap EXIT
@@ -419,7 +426,7 @@ function log::printInternal() {
   local icon="${2}"
   local level="${3}"
   local messageVariableName="${4}"
-  local -n levelColor="GLOBAL_THEME_COLOR_${colorName^^}"
+  local -n levelColor="STYLE_COLOR_${colorName^^}"
   # evaluated the print statement built in log::init; it uses the local vars defined above
   eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
 }
@@ -514,11 +521,11 @@ function log::printFileString() {
 # of a file or string. It uses the local variables set by the calling function.
 function log::printFileInternalLoop() {
   if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
-    string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}     ${GLOBAL_THEME_COLOR_FADED}░${GLOBAL_THEME_COLOR_DEFAULT} " "$((GLOBAL_LOG_COLUMNS - 7 - ${#GLOBAL_LOG_WRAP_PADDING}))"
+    string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}     ${STYLE_COLOR_FADED}░${STYLE_COLOR_DEFAULT} " "$((GLOBAL_LOG_COLUMNS - 7 - ${#GLOBAL_LOG_WRAP_PADDING}))"
 
-    toPrint+="${GLOBAL_LOG_WRAP_PADDING}${GLOBAL_THEME_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${GLOBAL_THEME_COLOR_DEFAULT} ${RETURNED_VALUE}"$'\n'
+    toPrint+="${GLOBAL_LOG_WRAP_PADDING}${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${RETURNED_VALUE}"$'\n'
   else
-    toPrint+="${GLOBAL_THEME_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${GLOBAL_THEME_COLOR_DEFAULT} ${line}"$'\n'
+    toPrint+="${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${line}"$'\n'
   fi
 
   lineNumber+=1
@@ -530,7 +537,7 @@ function log::printFileInternalLoop() {
     if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
       toPrint+="${GLOBAL_LOG_WRAP_PADDING}"
     fi
-    toPrint+="${GLOBAL_THEME_COLOR_FADED}     ░ (truncated)${GLOBAL_THEME_COLOR_DEFAULT}"$'\n'
+    toPrint+="${STYLE_COLOR_FADED}     ░ (truncated)${STYLE_COLOR_DEFAULT}"$'\n'
     return 1
   fi
 }
@@ -607,7 +614,7 @@ function log::error() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "ERROR" "${VALET_CONFIG_ICON_ERROR:-$'\uf2d3'}" "ERROR" loggedLine
+  log::printInternal "ERROR" "${STYLE_ICON_ERROR:-}" "ERROR" loggedLine
   if log::isDebugEnabled; then
     log::printCallStack 2
   fi
@@ -630,7 +637,7 @@ function log::warning() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "WARNING" "${VALET_CONFIG_ICON_WARNING:-$'\uf071'}" "WARNING" loggedLine
+  log::printInternal "WARNING" "${STYLE_ICON_WARNING:-}" "WARNING" loggedLine
   return 0
 }
 
@@ -651,7 +658,7 @@ function log::success() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "SUCCESS" "${VALET_CONFIG_ICON_SUCCESS:-$'\uf14a'}" "SUCCESS" loggedLine
+  log::printInternal "SUCCESS" "${STYLE_ICON_SUCCESS:-}" "SUCCESS" loggedLine
   return 0
 }
 
@@ -672,7 +679,7 @@ function log::info() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "INFO" "${VALET_CONFIG_ICON_INFO:-$'\uf05a'}" "INFO" loggedLine
+  log::printInternal "INFO" "${STYLE_ICON_INFO:-}" "INFO" loggedLine
   return 0
 }
 
@@ -693,7 +700,7 @@ function log::debug() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "DEBUG" "${VALET_CONFIG_ICON_DEBUG:-$'\uf188'}" "DEBUG" loggedLine
+  log::printInternal "DEBUG" "${STYLE_ICON_DEBUG:-}" "DEBUG" loggedLine
   return 0
 }
 
@@ -714,7 +721,7 @@ function log::trace() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "TRACE" "${VALET_CONFIG_ICON_TRACE:-$'\ue241'}" "TRACE" loggedLine
+  log::printInternal "TRACE" "${STYLE_ICON_TRACE:-}" "TRACE" loggedLine
   return 0
 }
 
@@ -734,7 +741,7 @@ function log::errorTrace() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "TRACE" "${VALET_CONFIG_ICON_ERROR_TRACE:-$'\uf06e'}" "TRACE" loggedLine
+  log::printInternal "TRACE" "${STYLE_ICON_ERROR_TRACE:-}" "TRACE" loggedLine
   return 0
 }
 
@@ -835,7 +842,7 @@ function log::printCallStack() {
     sourceFile="${sourceFile#"./"}"
     sourceFile="${sourceFile#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"}"
     if ((idx == stackSize - 1)); then
-      treeString="└─"
+      treeString="╰─"
       treePadding="   "
     fi
     log::printString "${treeString} in ${functionName} at ${sourceFile}:${lineNumber}" "${treePadding}"
@@ -852,7 +859,7 @@ function log::printCallStack() {
 #
 # Available placeholders:
 #
-# - `<colorXXX>`: The value of the color variable `GLOBAL_THEME_COLOR_XXX`.
+# - `<colorXXX>`: The value of the color variable `STYLE_COLOR_XXX`.
 # - `<time>`: The current time formatted with the `format` string.
 # - `<level>`: The log level.
 # - `<levelColor>`: The color for the log level.
@@ -918,7 +925,7 @@ function log::parseLogPattern() {
     case "${placeHolder}" in
       color*)
         placeHolder="${placeHolder#color}"
-        local -n color="GLOBAL_THEME_COLOR_${placeHolder^^}"
+        local -n color="STYLE_COLOR_${placeHolder^^}"
         if [[ -n ${color:-} ]]; then
           printfFormat="%s"
           printfArgument="${color}"
@@ -1056,7 +1063,7 @@ function log::init() {
       GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n messageToPrint=\"\${messageVariableName}\""$'\n'
     fi
     if [[ ${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT:-false} != "true" ]]; then
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="messageToPrint=\"\${messageToPrint//⌜/${GLOBAL_THEME_COLOR_ACCENT}⌜}\""$'\n'"messageToPrint=\"\${messageToPrint//⌝/⌝${GLOBAL_THEME_COLOR_DEFAULT}}\""$'\n'
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="messageToPrint=\"\${messageToPrint//⌜/${STYLE_COLOR_ACCENT}⌜}\""$'\n'"messageToPrint=\"\${messageToPrint//⌝/⌝${STYLE_COLOR_DEFAULT}}\""$'\n'
     fi
     if [[ -v VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL ]]; then
       GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}"$'\n'
@@ -1336,11 +1343,11 @@ function string::wrapCharacters() {
 # - $3: highlight ansi code _as string_:
 #       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.
 #       The ANSI code to use for highlighting.
-#       (defaults to GLOBAL_THEME_COLOR_ACCENT)
+#       (defaults to STYLE_COLOR_ACCENT)
 # - $4: reset ansi code _as string_:
 #       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.
 #       The ANSI code to use for resetting the highlighting.
-#       (defaults to GLOBAL_THEME_COLOR_DEFAULT)
+#       (defaults to STYLE_COLOR_DEFAULT)
 #
 # Returns:
 #
@@ -1356,8 +1363,8 @@ function string::wrapCharacters() {
 function string::highlight() {
   local -n textToHighlight="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -n charactersToHighlight="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local highlightCode="${3:-${_OPTION_HIGHLIGHT_ANSI:-${GLOBAL_THEME_COLOR_ACCENT:-$'\e'"[95m"}}}"
-  local resetCode="${4:-${_OPTION_RESET_ANSI:-${GLOBAL_THEME_COLOR_DEFAULT:-$'\e'"[0m"}}}"
+  local highlightCode="${3:-${_OPTION_HIGHLIGHT_ANSI:-${STYLE_COLOR_ACCENT:-$'\e'"[95m"}}}"
+  local resetCode="${4:-${_OPTION_RESET_ANSI:-${STYLE_COLOR_DEFAULT:-$'\e'"[0m"}}}"
 
   local itemChunk itemChunkPiece
   local -i searchStringIndex=0
@@ -1659,13 +1666,16 @@ function source() {
 
   # source a file next to the file that calls this function
   if [[ -n ${BASH_SOURCE[1]:-} && -f "${BASH_SOURCE[1]%/*}/${pathOrName}" ]]; then
-    builtin source "${BASH_SOURCE[1]%/*}/${pathOrName}" "$@"
+    pathOrName="${BASH_SOURCE[1]%/*}/${pathOrName}"
+    builtin source "${pathOrName}" "$@"
+    _CORE_INCLUDED_FILES="${_CORE_INCLUDED_FILES:-}"$'\n'"${pathOrName}"$'\n'
     return 0
   fi
 
   # source a file with an absolute path or in the current directory
   if [[ -f "${pathOrName}" ]]; then
     builtin source "${pathOrName}" "$@"
+    _CORE_INCLUDED_FILES="${_CORE_INCLUDED_FILES:-}"$'\n'"${pathOrName}"$'\n'
     return 0
   fi
 
@@ -1697,17 +1707,34 @@ function include() {
   done
 }
 
-# ## core::resetIncludedLibraries (private)
+# ## core::resetIncludedFiles (private)
 #
 # Allows to reset the included libraries.
 # When calling the source function, it will source all the libraries again.
 # This is useful when we want to reload the libraries.
 #
 # ```bash
-# core::resetIncludedLibraries
+# core::resetIncludedFiles
 # ```
-function core::resetIncludedLibraries() {
+function core::resetIncludedFiles() {
   _CORE_INCLUDED_LIBRARIES=""
+  _CORE_INCLUDED_FILES=""
+}
+
+# ## core::resetIncludedFile (private)
+#
+# Allows to source again a given file at the next source call.
+#
+# ```bash
+# core::resetIncludedFile
+# ```
+function core::resetIncludedFile() {
+  if [[ -v _CORE_INCLUDED_LIBRARIES ]]; then
+    _CORE_INCLUDED_LIBRARIES="${_CORE_INCLUDED_LIBRARIES//$'\n'${1}$'\n'/$'\n'}"
+  fi
+  if [[ -v _CORE_INCLUDED_FILES ]]; then
+    _CORE_INCLUDED_FILES="${_CORE_INCLUDED_FILES//$'\n'${1}$'\n'/$'\n'}"
+  fi
 }
 
 # ## core::sourceUserCommands (private)
@@ -1800,31 +1827,16 @@ function core::getVersion() {
   fs::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/version"
 }
 
-# ## core::colorInit (private)
+# ## styles::init (private)
 #
-# Initialize the valet color variables depending on the `VALET_CONFIG_ENABLE_COLORS` variable.
-# Reuse their value if defined or set them to the default value.
-# shellcheck disable=SC2034
-function core::colorInit() {
-  if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
-    GLOBAL_THEME_COLOR_DEFAULT="${VALET_CONFIG_COLOR_DEFAULT:-$'\e[0m'}"      # Text reset
-    GLOBAL_THEME_COLOR_FADED="${VALET_CONFIG_COLOR_FADED:-$'\e[90m'}"         # Bright Black (Gray)
-    GLOBAL_THEME_COLOR_ACCENT="${VALET_CONFIG_COLOR_ACCENT:-$'\e[95m'}"       # Bright Magenta (Pink)
-    GLOBAL_THEME_COLOR_DEBUG="${VALET_CONFIG_COLOR_DEBUG:-$'\e[90m'}"         # Bright Black (Gray)
-    GLOBAL_THEME_COLOR_INFO="${VALET_CONFIG_COLOR_INFO:-$'\e[36m'}"           # Cyan
-    GLOBAL_THEME_COLOR_WARNING="${VALET_CONFIG_COLOR_WARNING:-$'\e[33m'}"     # Yellow
-    GLOBAL_THEME_COLOR_SUCCESS="${VALET_CONFIG_COLOR_SUCCESS:-$'\e[32m'}"     # Green
-    GLOBAL_THEME_COLOR_ERROR="${VALET_CONFIG_COLOR_ERROR:-$'\e[31m'}"         # Red
-  else
-    GLOBAL_THEME_COLOR_DEFAULT=""
-    GLOBAL_THEME_COLOR_FADED=""
-    GLOBAL_THEME_COLOR_ACCENT=""
-    GLOBAL_THEME_COLOR_DEBUG=""
-    GLOBAL_THEME_COLOR_INFO=""
-    GLOBAL_THEME_COLOR_WARNING=""
-    GLOBAL_THEME_COLOR_SUCCESS=""
-    GLOBAL_THEME_COLOR_ERROR=""
+# Initialize the valet styles variables.
+function styles::init() {
+  if [[ -v STYLE_RESET ]]; then
+    core::resetIncludedFile styles
+    core::resetIncludedFile ansi-codes
   fi
+  #shellcheck source=lib-styles
+  source styles
 }
 
 # ## core::getConfigurationDirectory

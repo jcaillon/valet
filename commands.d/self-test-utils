@@ -30,9 +30,13 @@ function selfTestUtils_setupValetForConsistency() {
   # shellcheck disable=SC2086
   unset -v ${!VALET_*}
 
-  export VALET_CONFIG_ENABLE_COLORS=false
-  export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
+  # same with all styles and escape codes
+  # shellcheck disable=SC2086
+  # we reset all the icon variables to a blank string
+  local vars="${!STYLE_*} ${!AC__*} ${!__AC__*}"
+  eval "${vars// /"=''; "}=''"
 
+  # setup consistent logs
   export VALET_CONFIG_LOG_PATTERN="<level> <message>"
   export VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=""
   export VALET_CONFIG_LOG_COLUMNS=9999
@@ -41,42 +45,23 @@ function selfTestUtils_setupValetForConsistency() {
   export VALET_CONFIG_LOG_FD=2
   export VALET_CONFIG_LOG_TO_DIRECTORY=""
   export VALET_CONFIG_LOG_FILENAME_PATTERN=""
+  export GLOBAL_LOG_LEVEL_INT=1
+  export GLOBAL_LOG_LEVEL=info
+  log::init
 
-  export VALET_CONFIG_ICON_ERROR=IE
-  export VALET_CONFIG_ICON_WARNING=IW
-  export VALET_CONFIG_ICON_SUCCESS=IS
-  export VALET_CONFIG_ICON_INFO=II
-  export VALET_CONFIG_ICON_DEBUG=ID
-  export VALET_CONFIG_ICON_EXIT=IX
-  export VALET_CONFIG_ICON_STOPPED=IP
-  export VALET_CONFIG_ICON_KILLED=IK
+  # consistent styles
+  export VALET_CONFIG_ENABLE_COLORS=false
+  export VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
+  export VALET_CONFIG_STYLE_SQUARED_BOXES=true
+  export VALET_CONFIG_DISABLE_TEXT_ATTRIBUTES=true
+  export VALET_CONFIG_DISABLE_ESC_CODES=true
 
-  export VALET_CONFIG_COLOR_DEFAULT=CDE
-  export VALET_CONFIG_COLOR_ACCENT=CAC
-  export VALET_CONFIG_COLOR_FADED=CFA
-  export VALET_CONFIG_COLOR_DEBUG=CDB
-  export VALET_CONFIG_COLOR_INFO=CIN
-  export VALET_CONFIG_COLOR_WARNING=CWA
-  export VALET_CONFIG_COLOR_SUCCESS=CSU
-  export VALET_CONFIG_COLOR_ERROR=CER
-
-  export VALET_CONFIG_COLOR_TITLE=CTT
-  export VALET_CONFIG_COLOR_OPTION=COP
-  export VALET_CONFIG_COLOR_ARGUMENT=CAR
-  export VALET_CONFIG_COLOR_COMMAND=CCO
-
-  export VALET_CONFIG_COLOR_ACTIVE_BUTTON=CAB
-  export VALET_CONFIG_COLOR_INACTIVE_BUTTON=CUB
-
+  # other important variables
+  export GLOBAL_COLUMNS=9999
   export VALET_CONFIG_DOT_ENV_SCRIPT=false
-
   export VALET_CONFIG_DISABLE_PROGRESS=true
   unset _PROGRESS_BAR_RUNNING
 
-  export GLOBAL_COLUMNS=9999
-
-  export GLOBAL_LOG_LEVEL_INT=1
-  export GLOBAL_LOG_LEVEL=info
 
   # fix the time to a known value
   export TZ=Etc/GMT+0
@@ -85,8 +70,6 @@ function selfTestUtils_setupValetForConsistency() {
   # can't unset EPOCHREALTIME because we use it in PS4 during debug, #TODO: need to fix that
   export EPOCHREALTIME=548902800.000000
 
-  core::colorInit
-  log::init
 }
 
 function selfTestUtils_runHookScript() {

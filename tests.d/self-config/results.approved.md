@@ -38,6 +38,13 @@ RETURNED_VALUE='#!/usr/bin/env bash
 # 
 # You should not define all the variables, only the ones you want to change.
 # 
+# If you want environment variables exported in the shell to be prioritized over the ones in the config file,
+# you can define variables with a default value like this:
+# 
+# ```bash
+# VALET_CONFIG_MY_VAR="${VALET_CONFIG_MY_VAR:-"default value if not set"}"
+# ```
+# 
 # Do not add custom code to this script, use the custom startup script instead (see next section).
 # 
 # If you break this file, valet will fail to start!
@@ -84,13 +91,6 @@ RETURNED_VALUE='#!/usr/bin/env bash
 # Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
 # 
 # VALET_CONFIG_FILE=""
-# The path to this Valet config file.
-# Export the variable before calling Valet.
-# Default to the `config` file in your config directory.
-# 
-# 
-####################
-# ⚙️ General configuration
 '
 ```
 
@@ -129,6 +129,13 @@ RETURNED_VALUE='#!/usr/bin/env bash
 # Use the `valet self config` command to initialize and open the YAML configuration file.
 # 
 # You should not define all the variables, only the ones you want to change.
+# 
+# If you want environment variables exported in the shell to be prioritized over the ones in the config file,
+# you can define variables with a default value like this:
+# 
+# ```bash
+# VALET_CONFIG_MY_VAR="${VALET_CONFIG_MY_VAR:-"default value if not set"}"
+# ```
 # 
 # Do not add custom code to this script, use the custom startup script instead (see next section).
 # 
@@ -176,13 +183,6 @@ VALET_CONFIG_DIRECTORY=A\ value
 # Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
 # 
 # VALET_CONFIG_FILE=""
-# The path to this Valet config file.
-# Export the variable before calling Valet.
-# Default to the `config` file in your config directory.
-# 
-# 
-####################
-# ⚙️ General configuration
 '
 ```
 

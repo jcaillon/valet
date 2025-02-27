@@ -15,13 +15,15 @@ function main() {
   VALET_CONFIG_LOG_TO_DIRECTORY=""
   VALET_CONFIG_LOG_FILENAME_PATTERN=""
   test::exec log::init
-  test::exec core::colorInit
+  test::exec styles::init
   test_log
 
 
   test::title "✅ Testing with full formatting"
   VALET_CONFIG_ENABLE_COLORS=true
   VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
+  VALET_CONFIG_DISABLE_ESC_CODES=false
+  VALET_CONFIG_DISABLE_TEXT_ATTRIBUTES=false
   VALET_CONFIG_LOG_PATTERN="<colorFaded>{9s} <time>{(%FT%H:%M:%S%z)T} <levelColor>{9s} <level>{9s} <icon>{9s} <message>"
   VALET_CONFIG_LOG_COLUMNS=90
   VALET_CONFIG_LOG_DISABLE_WRAP=false
@@ -33,7 +35,7 @@ function main() {
   EPOCHREALTIME=548902800.000000
   test::printVars VALET_CONFIG_ENABLE_COLORS VALET_CONFIG_ENABLE_NERDFONT_ICONS VALET_CONFIG_LOG_PATTERN VALET_CONFIG_LOG_COLUMNS VALET_CONFIG_LOG_DISABLE_WRAP VALET_CONFIG_LOG_DISABLE_HIGHLIGHT TZ EPOCHSECONDS EPOCHREALTIME
   test::exec log::init
-  test::exec core::colorInit
+  test::exec styles::init
   test_log
 
   rm -Rf "tmp"

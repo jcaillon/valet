@@ -33,11 +33,11 @@ function tui::createSpace() {
   local -i nbLines="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   nbLines=$((nbLines > GLOBAL_LINES ? GLOBAL_LINES : nbLines))
   if (( nbLines <= 1 )); then
-    printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINE}${AC__CURSOR_SHOW}"
+    printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINE}${AC__CURSOR_SHOW}" 1>&2
     return 0
   fi
   nbLines=$((nbLines - 1))
-  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${AC__CURSOR_MOVE__}${nbLines}${__AC__SCROLL_UP}${AC__CURSOR_MOVE__}${nbLines}${__AC__START_OF_LINE_UP}${AC__CURSOR_SHOW}"
+  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}1${__AC__COLUMN}${AC__ERASE_LINES_BELOW}${AC__CURSOR_MOVE__}${nbLines}${__AC__SCROLL_UP}${AC__CURSOR_MOVE__}${nbLines}${__AC__START_OF_LINE_UP}${AC__CURSOR_SHOW}" 1>&2
 }
 
 # ## tui::getCursorPosition
@@ -85,7 +85,7 @@ function tui::switchToFullScreen() {
   tui::setTerminalOptions
 
   # switch to the alternate screen, hide the cursor and clear the screen
-  printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}"
+  printf '%s' "${AC__ENABLE_ALTERNATE_BUFFER_SCREEN}${AC__CURSOR_HIDE}${AC__ERASE_SCREEN}" 1>&2
 
   # in full screen mode, we don't see the error messages so we capture them somewhere else
   SFZF_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}${BASHPID}.valet-interactive.err"
@@ -113,7 +113,7 @@ function tui::switchBackFromFullScreen() {
   _INTERACTIVE_FULL_SCREEN_MODE=false
 
   # restore the terminal state
-  printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}"
+  printf '%s' "${AC__CURSOR_SHOW}${AC__TEXT_RESET}${AC__DISABLE_ALTERNATE_BUFFER_SCREEN}" 1>&2
 
   # restore stty
   tui::restoreTerminalOptions
@@ -236,7 +236,7 @@ function tui::clearBox() {
   for ((lineNumber = top; lineNumber < top + height; lineNumber++)); do
     toPrint+="${AC__CURSOR_MOVE__}${lineNumber};${left}${__AC__TO}${AC__ERASE__}${width}${__AC_CHARS}"
   done
-  printf '%s%s' "${toPrint}" "${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}"
+  printf '%s%s' "${toPrint}" "${AC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__AC__TO}${AC__CURSOR_SHOW}" 1>&2
 }
 
 # ## tui::getBestAutocompleteBox
@@ -359,13 +359,13 @@ function tui::getBestAutocompleteBox() {
 # tui::testWaitForChar
 # ```
 function tui::testWaitForChar() {
-  printf '%s\n' "Press any key to see the returned character (Press Q to quit).${AC__CURSOR_HIDE}"
+  printf '%s\n' "Press any key to see the returned character (Press Q to quit).${AC__CURSOR_HIDE}" 1>&2
   while true; do
     if tui::waitForChar -t 1; then
       if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
         break
       fi
-      printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+      printf "%sYou pressed: ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}" 1>&2
     fi
     if [[ ! -t 0 ]]; then break; fi
   done
@@ -471,17 +471,17 @@ function tui::testWaitForKeyPress() {
   # shellcheck disable=SC2317
   function interactiveOnKeyBindingPressTestFunction() {
     local key="${1}"
-    printf "%sYou pressed (binding): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${key}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+    printf "%sYou pressed (binding): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${key}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}" 1>&2
   }
   tui::rebindKeymap interactiveOnKeyBindingPressTestFunction
 
-  printf '%s\n' "Press any key to see the returned code (press Q to quit)."
+  printf '%s\n' "Press any key to see the returned code (press Q to quit)." 1>&2
   while true; do
     if tui::waitForKeyPress -t 0.3; then
       if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
         break
       fi
-      printf "%sYou pressed (normal key): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+      printf "%sYou pressed (normal key): ⌜%q⌝%s" "${AC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${AC__CURSOR_MOVE__}1${__AC__COLUMN}" 1>&2
     fi
     if [[ ! -t 0 ]]; then break; fi
   done

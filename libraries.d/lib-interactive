@@ -4,6 +4,8 @@
 
 # shellcheck source=lib-ansi-codes
 source ansi-codes
+# shellcheck source=lib-styles
+source styles
 # shellcheck source=lib-tui
 source tui
 
@@ -29,7 +31,9 @@ source tui
 # ```
 function interactive::askForConfirmation() {
   interactive::displayQuestion "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  interactive::askForConfirmationRaw
+  if ! interactive::askForConfirmationRaw; then
+    return 1
+  fi
   return 0
 }
 
@@ -49,22 +53,15 @@ function interactive::askForConfirmation() {
 # interactive::askForConfirmationRaw
 # ```
 function interactive::askForConfirmationRaw() {
-  # colors
-  local styleActiveButton
-  if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
-    styleActiveButton="${AC__TEXT_INVERSE}${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${AC__FG_MAGENTA}}"
-  else
-    styleActiveButton="${AC__TEXT_INVERSE}"
-  fi
-
   tui::createSpace 2
 
   # print the current state (then move to column 1 to be ready to rewrite)
-  printf '%s%s%s' \
-    "${AC__CURSOR_HIDE}${styleActiveButton}" \
+  printf ' %s%s%s' \
+    "${AC__CURSOR_HIDE}${STYLE_ACTIVE_BUTTON}" \
     "   (O)K   " \
-    "${AC__TEXT_RESET}${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+    "${STYLE_RESET}${AC__CURSOR_MOVE__}1${__AC__COLUMN}" 1>&2
 
+  local -i returnedCode=0
   while true; do
     # wait and handle key press
     if tui::waitForChar -t 1; then
@@ -72,19 +69,22 @@ function interactive::askForConfirmationRaw() {
       $'\n' | ' ' | o)
         break
         ;;
-      ESC)
-        core::fail "Interactive session cancelled."
+      *)
+        returnedCode=1
+        break;
         ;;
       esac
     fi
 
     # break if fd 0 is closed or does not refer to a terminal.
-    if [[ ! -t 0 ]]; then break; fi
+    if [[ ! -t 0 ]]; then
+      break;
+    fi
   done
 
-  printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}"
+  printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}" 1>&2
 
-  return 0
+  return ${returnedCode}
 }
 
 # ## interactive::promptYesNo
@@ -115,17 +115,16 @@ function interactive::askForConfirmationRaw() {
 # ```
 function interactive::promptYesNo() {
   interactive::displayQuestion "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  interactive::promptYesNoRaw "${2:-true}"
 
-  if [[ ${RETURNED_VALUE} == "true" ]]; then
-    interactive::displayAnswer "Yes."
-    RETURNED_VALUE=true
-    return 0
+  if ! interactive::promptYesNoRaw "${2:-true}"; then
+    interactive::displayAnswer "No."
+    RETURNED_VALUE=false
+    return 1
   fi
 
-  interactive::displayAnswer "No."
-  RETURNED_VALUE=false
-  return 1
+  interactive::displayAnswer "Yes."
+  RETURNED_VALUE=true
+  return 0
 }
 
 # ## interactive::promptYesNoRaw
@@ -155,39 +154,28 @@ function interactive::promptYesNo() {
 function interactive::promptYesNoRaw() {
   local state=${1:-true}
 
-  # colors
-  local styleActiveButton
-  local styleInactiveButton
-  if [[ "${VALET_CONFIG_ENABLE_COLORS:-}" == "true" ]]; then
-    styleActiveButton="${AC__TEXT_INVERSE}${VALET_CONFIG_COLOR_ACTIVE_BUTTON:-${AC__FG_MAGENTA}}"
-    styleInactiveButton="${AC__TEXT_INVERSE}${VALET_CONFIG_COLOR_INACTIVE_BUTTON:-}"
-  else
-    styleActiveButton="${AC__TEXT_INVERSE}"
-    styleInactiveButton=""
-  fi
-
   tui::createSpace 2
 
-  printf '%s' "${AC__CURSOR_HIDE}"
+  printf '%s' "${AC__CURSOR_HIDE}" 1>&2
 
   local yesColor noColor
   while true; do
     if [[ ${state} == "true" ]]; then
-      yesColor="${styleActiveButton}"
-      noColor="${styleInactiveButton}"
+      yesColor="${STYLE_ACTIVE_BUTTON}"
+      noColor="${STYLE_INACTIVE_BUTTON}"
     else
-      yesColor="${styleInactiveButton}"
-      noColor="${styleActiveButton}"
+      yesColor="${STYLE_INACTIVE_BUTTON}"
+      noColor="${STYLE_ACTIVE_BUTTON}"
     fi
 
     # print the current state (then move to column 1 to be ready to rewrite)
-    printf '%s%s%s   %s%s%s' \
+    printf ' %s%s%s   %s%s%s' \
       "${yesColor}" \
       "   (Y)ES   " \
-      "${AC__TEXT_RESET}" \
+      "${STYLE_RESET}" \
       "${noColor}" \
       "   (N)O   " \
-      "${AC__TEXT_RESET}${AC__CURSOR_MOVE__}1${__AC__COLUMN}"
+      "${STYLE_RESET}${AC__CURSOR_MOVE__}1${__AC__COLUMN}" 1>&2
 
     # wait and handle key press
     if tui::waitForChar -t 1; then
@@ -216,7 +204,7 @@ function interactive::promptYesNoRaw() {
     if [[ ! -t 0 ]]; then break; fi
   done
 
-  printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}"
+  printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}" 1>&2
 
   if [[ ${state} == "true" ]]; then
     RETURNED_VALUE=${state}
@@ -234,9 +222,9 @@ function interactive::promptYesNoRaw() {
 # The text is wrapped and put inside a box like so:
 #
 # ```text
-#    ┌────────────────────────────────┐
+#    ╭────────────────────────────────╮
 # ░──┤ Is this an important question? │
-#    └────────────────────────────────┘
+#    ╰────────────────────────────────╯
 # ```
 #
 # - $1: **prompt** _as string_:
@@ -259,9 +247,9 @@ function interactive::displayQuestion() {
 # The text is wrapped and put inside a box like so:
 #
 # ```text
-#     ┌─────┐
+#     ╭─────╮
 #     │ No. ├──░
-#     └─────┘
+#     ╰─────╯
 # ```
 #
 # - $1: **answer** _as string_:
@@ -327,33 +315,34 @@ function interactive::displayDialogBox() {
     startColumn=$((startColumn <= 8 ? startColumn : 8))
     startColumn+=1
 
-    finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}┌─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┐${AC__TEXT_RESET}"$'\n'
+    finalString+="${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}${STYLE_FRAMES}${DRAW_TL_CORNER}─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─${DRAW_TR_CORNER}${STYLE_RESET}"$'\n'
     while read -r line; do
       if (( lineNumber == 0 )); then
         sideString="├──░"
       else
         sideString="│"
       fi
-      finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}│${AC__TEXT_RESET} ${line} ${AC__CURSOR_MOVE__}$((textWidth + 3 + startColumn))${__AC__COLUMN}${AC__TEXT_FAINT}${sideString}${AC__TEXT_RESET}"$'\n'
+      finalString+="${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}${STYLE_FRAMES}│${STYLE_RESET} ${line} ${AC__CURSOR_MOVE__}$((textWidth + 3 + startColumn))${__AC__COLUMN}${STYLE_FRAMES}${sideString}${STYLE_RESET}"$'\n'
       lineNumber+=1
     done <<<"${wrappedText}"
-    finalString+="${AC__TEXT_FAINT}${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}└─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┘${AC__TEXT_RESET}"$'\n'
+    finalString+="${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}${STYLE_FRAMES}${DRAW_BL_CORNER}─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─${DRAW_BR_CORNER}${STYLE_RESET}"$'\n'
 
   elif [[ ${speaker} == "system" ]]; then
 
-    finalString+="${AC__TEXT_FAINT}   ┌─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┐${AC__TEXT_RESET}"$'\n'
+    finalString+="   ${STYLE_FRAMES}${DRAW_TL_CORNER}─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─${DRAW_TR_CORNER}${STYLE_RESET}"$'\n'
     while read -r line; do
       if (( lineNumber == 0 )); then
-        sideString="░──┤"
+        sideString="${STYLE_FRAMES}░──┤"
       else
-        sideString="   │"
+        sideString="   ${STYLE_FRAMES}│"
       fi
-      finalString+="${AC__TEXT_FAINT}${sideString}${AC__TEXT_RESET} ${line} ${AC__CURSOR_MOVE__}$((textWidth + 7))${__AC__COLUMN}${AC__TEXT_FAINT}│${AC__TEXT_RESET}"$'\n'
+      finalString+="${sideString}${STYLE_RESET} ${line} ${AC__CURSOR_MOVE__}$((textWidth + 7))${__AC__COLUMN}${STYLE_FRAMES}│${STYLE_RESET}"$'\n'
       lineNumber+=1
     done <<<"${wrappedText}"
-    finalString+="${AC__TEXT_FAINT}   └─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─┘${AC__TEXT_RESET}"$'\n'
+    finalString+="   ${STYLE_FRAMES}${DRAW_BL_CORNER}─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─${DRAW_BR_CORNER}${STYLE_RESET}"$'\n'
 
   fi
 
-  printf '%s' "${finalString}"
+  printf '%s' "${finalString}" 1>&2
 }
+

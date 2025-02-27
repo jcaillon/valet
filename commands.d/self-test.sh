@@ -177,7 +177,7 @@ function selfTest() {
     local -i nb=0
     for failedTestSuite in "${_TEST_FAILED_TEST_SUITES[@]}"; do
       if ((nb == ${#_TEST_FAILED_TEST_SUITES[@]} - 1)); then
-        treeString="  └─"
+        treeString="  ╰─"
         treePadding="     "
       fi
       failMessage+=$'\n'"- ⌜${failedTestSuite}⌝."
@@ -378,7 +378,7 @@ function selfTest_runSingleTestSuite() {
   for testScript in "${testScripts[@]}"; do
     GLOBAL_TEST_SUITE_SCRIPT_NAME="${testScript##*/}"
     if ((nbScriptsDone == ${#testScripts[@]} - 1)); then
-      treeString="  └─"
+      treeString="  ╰─"
       treePadding="     "
     fi
     log::printString "${treeString} ${GLOBAL_TEST_SUITE_SCRIPT_NAME}" "${treePadding}"

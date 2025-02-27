@@ -280,7 +280,7 @@ function selfUpdate() {
 
   # display a recap to the user
   local createShim=false addToPath=false copyExamples=false
-  printf '\n  %s\n\n' "${AC__TEXT_UNDERLINE}Valet installation recap:${AC__TEXT_RESET}"
+  printf '\n  %s\n\n' "${STYLE_COLOR_PRIMARY}Valet installation recap:${STYLE_COLOR_DEFAULT}"
   selfUpdate_printRecapLine "Operating system:" "${os}"
   if [[ ${firstInstallation} != "true" ]]; then
     selfUpdate_printRecapLine "First installation:" "${firstInstallation}"
@@ -375,7 +375,7 @@ function selfUpdate() {
 }
 
 function selfUpdate_printRecapLine() {
-  printf '  - %s%-30s%s%s\n' "${AC__TEXT_BOLD}" "${1}" "${AC__FG_MAGENTA}${2}" "${AC__TEXT_RESET}"
+  printf '  - %-30s%s%s\n' "${1}" "${STYLE_COLOR_ACCENT}${2}" "${STYLE_COLOR_DEFAULT}"
 }
 
 # Install Valet using the given release URL.
@@ -594,8 +594,8 @@ function selfUpdate_sourceDependencies() {
   source interactive
   # shellcheck source=../libraries.d/lib-progress
   source progress
-  # shellcheck source=../libraries.d/lib-ansi-codes
-  source ansi-codes
+  # shellcheck source=../libraries.d/lib-styles
+  source styles
   # shellcheck source=../libraries.d/lib-fs
   source fs
   # shellcheck source=../libraries.d/lib-string
@@ -654,8 +654,8 @@ function selfUpdate_addToPath() {
       ;;
     esac
 
-    printf '\n  %s\n\n' "${AC__TEXT_UNDERLINE}Append to${AC__TEXT_RESET}: ${AC__FG_MAGENTA}${configFile}${AC__TEXT_RESET}"
-    printf '    %s%s%s\n\n' "${AC__TEXT_BOLD}" "${configContent}" "${AC__TEXT_RESET}"
+    printf '\n  %s\n\n' "${STYLE_COLOR_PRIMARY}Append to${STYLE_COLOR_DEFAULT}: ${STYLE_COLOR_ACCENT}${configFile}${STYLE_COLOR_DEFAULT}"
+    printf '    %s%s\n\n' "${configContent}" "${STYLE_COLOR_DEFAULT}"
 
     if [[ ${unattended} != "true" ]] && ! interactive::promptYesNo "Do you want to modify ⌜${configFile}⌝ as described above ?" "true"; then
       continue
@@ -692,38 +692,38 @@ if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   *) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
   esac
 
-  AC__TEXT_RESET=$'\e[0m'
-  AC__TEXT_BOLD=$'\e[1m'
-  AC__TEXT_UNDERLINE=$'\e[4m'
-  AC__FG_MAGENTA=$'\e[35m'
-  AC__FG_BRIGHT_BLACK=$'\e[90m'
-  AC__FG_CYAN=$'\e[36m'
-  AC__FG_YELLOW=$'\e[33m'
-  AC__FG_GREEN=$'\e[32m'
-  AC__FG_RED=$'\e[31m'
-
-  if [[ ${VALET_CONFIG_ENABLE_COLORS:-false} == "false" ]]; then
-    AC__TEXT_RESET=''
-    AC__TEXT_BOLD=''
-    AC__TEXT_UNDERLINE=''
-    AC__FG_MAGENTA=''
-    AC__FG_BRIGHT_BLACK=''
-    AC__FG_CYAN=''
-    AC__FG_YELLOW=''
-    AC__FG_GREEN=''
-    AC__FG_RED=''
+  if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
+    STYLE_COLOR_DEFAULT=$'\e[0m'
+    STYLE_COLOR_PRIMARY=$'\e[96m'
+    STYLE_COLOR_ACCENT=$'\e[95m'
+    STYLE_COLOR_FADED=$'\e[90m'
+    STYLE_COLOR_DEBUG=$'\e[90m'
+    STYLE_COLOR_INFO=$'\e[36m'
+    STYLE_COLOR_WARNING=$'\e[33m'
+    STYLE_COLOR_SUCCESS=$'\e[32m'
+    STYLE_COLOR_ERROR=$'\e[31m'
+  else
+    STYLE_COLOR_DEFAULT=''
+    STYLE_COLOR_PRIMARY=''
+    STYLE_COLOR_ACCENT=''
+    STYLE_COLOR_FADED=''
+    STYLE_COLOR_DEBUG=''
+    STYLE_COLOR_INFO=''
+    STYLE_COLOR_WARNING=''
+    STYLE_COLOR_SUCCESS=''
+    STYLE_COLOR_ERROR=''
   fi
 
   # we are executing this script without valet, create simplified functions to replace the libs
-  function log::info() { printf "${AC__FG_BRIGHT_BLACK}%(%H:%M:%S)T${AC__TEXT_RESET} ${AC__TEXT_BOLD}${AC__FG_CYAN}%-8s${AC__TEXT_RESET} %s\n" "${EPOCHSECONDS}" "INFO" "$*"; }
-  function log::success() { printf "${AC__FG_BRIGHT_BLACK}%(%H:%M:%S)T${AC__TEXT_RESET} ${AC__TEXT_BOLD}${AC__FG_GREEN}%-8s${AC__TEXT_RESET} %s
+  function log::info() { printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_INFO}%-8s${STYLE_COLOR_DEFAULT} %s\n" "${EPOCHSECONDS}" "INFO" "$*"; }
+  function log::success() { printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_SUCCESS}%-8s${STYLE_COLOR_DEFAULT} %s
 " "${EPOCHSECONDS}" "SUCCESS" "$*"; }
-  function log::debug() { if [[ ${VALET_VERBOSE:-false} == "true" ]]; then printf "${AC__FG_BRIGHT_BLACK}%(%H:%M:%S)T${AC__TEXT_RESET} ${AC__TEXT_BOLD}${AC__FG_BRIGHT_BLACK}%-8s${AC__TEXT_RESET} %s
+  function log::debug() { if [[ ${VALET_VERBOSE:-false} == "true" ]]; then printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_DEBUG}%-8s${STYLE_COLOR_DEFAULT} %s
 " "${EPOCHSECONDS}" "DEBUG" "$*"; fi; }
-  function log::warning() { printf "${AC__FG_BRIGHT_BLACK}%(%H:%M:%S)T${AC__TEXT_RESET} ${AC__TEXT_BOLD}${AC__FG_YELLOW}%-8s${AC__TEXT_RESET} %s
+  function log::warning() { printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_WARNING}%-8s${STYLE_COLOR_DEFAULT} %s
 " "${EPOCHSECONDS}" "WARNING" "$*"; }
   function core::fail() {
-    printf "${AC__FG_BRIGHT_BLACK}%(%H:%M:%S)T${AC__TEXT_RESET} ${AC__TEXT_BOLD}${AC__FG_RED}%-8s${AC__TEXT_RESET} %s
+    printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_ERROR}%-8s${STYLE_COLOR_DEFAULT} %s
 " "${EPOCHSECONDS}" "ERROR" "$*"
     exit 1
   }

@@ -35,7 +35,7 @@ INFO     The function ⌜test_function_1⌝ was run ⌜2⌝ times in ⌜10.000s�
 SUCCESS  Benchmark results from fastest to slowest for 2 runs:
 
 Function name   ░ Average time  ░ Compared to fastest
-░[54b
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 test_function_2 ░ 3.000s 000µs ░ N/A
 test_function_3 ░ 4.000s 000µs ░ +33%
 test_function_1 ░ 5.000s 000µs ░ +66%

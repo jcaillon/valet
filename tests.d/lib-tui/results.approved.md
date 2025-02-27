@@ -6,10 +6,10 @@
 
 ❯ `tui::createSpace 5`
 
-**Standard output**:
+**Error output**:
 
 ```text
-[?25l[1G[0J[4S[4F[?25h
+[?25l[1G[0J[4S[4F
 ```
 
 ### ✅ Testing tui::getCursorPosition
@@ -30,18 +30,18 @@ GLOBAL_CURSOR_COLUMN='42'
 
 ❯ `tui::clearBox 1 1 10 10`
 
-**Standard output**:
+**Error output**:
 
 ```text
-[?25l[1;1H[10X[2;1H[10X[3;1H[10X[4;1H[10X[5;1H[10X[6;1H[10X[7;1H[10X[8;1H[10X[9;1H[10X[10;1H[10X[42;42H[?25h
+[?25l[1;1H[10X[2;1H[10X[3;1H[10X[4;1H[10X[5;1H[10X[6;1H[10X[7;1H[10X[8;1H[10X[9;1H[10X[10;1H[10X[42;42H
 ```
 
 ❯ `tui::clearBox 10 10 5 5`
 
-**Standard output**:
+**Error output**:
 
 ```text
-[?25l[10;10H[5X[11;10H[5X[12;10H[5X[13;10H[5X[14;10H[5X[42;42H[?25h
+[?25l[10;10H[5X[11;10H[5X[12;10H[5X[13;10H[5X[14;10H[5X[42;42H
 ```
 
 ### ✅ Testing tui::getBestAutocompleteBox

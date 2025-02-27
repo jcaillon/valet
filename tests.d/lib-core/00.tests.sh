@@ -7,7 +7,7 @@ function main() {
 function test_source() {
   test::title "✅ Test source"
 
-  test::exec core::resetIncludedLibraries
+  test::exec core::resetIncludedFiles
 
   # shellcheck disable=SC2034
   CMD_LIBRARY_DIRECTORIES=("${PWD}/resources/ext2" "${PWD}/resources/ext1")
@@ -25,11 +25,13 @@ function test_source() {
   test::exec source stuff2
   test::flush
 
-  test::markdown "Including a script using relative path."
+  test::markdown "Including a script using relative path twice, expecting to be sourced once."
+  test::exec source resources/script1.sh
   test::exec source resources/script1.sh
   test::flush
 
-  test::markdown "Including a script using an absolute path."
+  test::markdown "Including a script using an absolute path twice, expecting to be sourced once."
+  test::exec source "${PWD}/resources/script1.sh"
   test::exec source "${PWD}/resources/script1.sh"
   test::flush
 
