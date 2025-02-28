@@ -3,7 +3,7 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# ## ansi-codes::*
+# ## esc-codes::*
 #
 # ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
 # These codes can be used to format text in the terminal.
@@ -12,8 +12,8 @@
 # probably will cover all use cases. It is also advised to stick to the 4-bit colors
 # which allows your application to adopt the color scheme of the terminal.
 #
-# They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:
-# <https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>
+# They are defined as variables and not as functions. Please check the content of the esc-codes to learn more:
+# <https://github.com/jcaillon/valet/blob/latest/libraries.d/esc-codes>
 #
 # References:
 #

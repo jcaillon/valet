@@ -210,10 +210,9 @@ function bash::injectCodeInFunction() {
   local code="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local injectAtBeginning="${3:-${_OPTION_INJECT_AT_BEGINNING:-false}}"
 
-  local IFS=''
   local functionDefinition modifiedFunctionDefinition
   if declare -f "${functionName}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
-    read -rd '' functionDefinition <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || [[ -n ${functionDefinition} ]]
+    IFS='' read -rd '' functionDefinition <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || [[ -n ${functionDefinition} ]]
     modifiedFunctionDefinition="${functionDefinition}"
   else
     modifiedFunctionDefinition="function ${functionName}() {"$'\n'"}"

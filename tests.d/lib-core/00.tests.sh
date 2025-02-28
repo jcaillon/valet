@@ -35,6 +35,10 @@ function test_source() {
   test::exec source "${PWD}/resources/script1.sh"
   test::flush
 
+  test::markdown "Including non existing library."
+  test::exit source NOPNOP
+  test::flush
+
   test::printVars _CORE_INCLUDED_LIBRARIES
 }
 

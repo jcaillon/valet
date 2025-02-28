@@ -5,10 +5,6 @@
 # sfzf stands for full screen fuzzy search.
 # This script uses a lot of "private" variables (starting with _).
 
-# shellcheck source=lib-ansi-codes
-source ansi-codes
-# shellcheck source=lib-styles
-source styles
 # shellcheck source=lib-tui
 source tui
 # shellcheck source=lib-exe

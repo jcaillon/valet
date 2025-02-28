@@ -62,6 +62,18 @@ We sourced script1.sh
 
 ❯ `source $GLOBAL_INSTALLATION_DIRECTORY/script1.sh`
 
+Including non existing library.
+
+❯ `source NOPNOP`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+ERROR    Cannot source the file ⌜NOPNOP⌝ because it does not exist.
+```
+
 ```text
 _CORE_INCLUDED_LIBRARIES='
 stuff

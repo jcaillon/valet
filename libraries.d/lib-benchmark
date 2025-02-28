@@ -6,8 +6,6 @@
 source array
 # shellcheck source=lib-string
 source string
-# shellcheck source=lib-ansi-codes
-source ansi-codes
 # shellcheck source=lib-progress
 source progress
 # shellcheck source=lib-time

@@ -8,7 +8,9 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- improve prompt: use coproc instead of kill/spawing a bach everytime; start it only if the coproc fd is not already open.
+- improve prompt:
+  - use coproc instead of kill/spawing a bach everytime; start it only if the coproc fd is not already open.
+  - use fzf if available
 - progress:
   - refacto progress bar; use signal to tell the bg job to redraw the progress bar after displaying a log. +handle the terminal size to display the progress bar!
   - after logging, if progress bar is in progress, we need to redraw it immediately.

@@ -25,12 +25,12 @@ INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-2/valet.c
 
 > Documentation generated for the version 1.2.3 (1987-05-25).
 
-## ansi-codes::*
+## array::appendIfNotPresent
 
-ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
-These codes can be used to format text in the terminal.
+Add a value to an array if it is not already present.
 
-These codes were selected because they are widely supported by terminals and they
+- $1: **array name** _as string_:
+      The variable name of the array.
 ```
 
 ❯ `fs::head /tmp/valet.d/d1-2/lib-valet 10`
@@ -44,10 +44,10 @@ These codes were selected because they are widely supported by terminals and the
 #
 # Documentation generated for the version 1.2.3 (1987-05-25).
 
-# ## ansi-codes::*
+# ## array::appendIfNotPresent
 # 
-# ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
-# These codes can be used to format text in the terminal.
+# Add a value to an array if it is not already present.
+# 
 ```
 
 ❯ `fs::head /tmp/valet.d/d1-2/valet.code-snippets 10`
@@ -58,11 +58,11 @@ These codes were selected because they are widely supported by terminals and the
 {
 // Documentation generated for the version 1.2.3 (1987-05-25).
 
-"ansi-codes::*": {
-  "prefix": "ansi-codes::*",
-  "description": "ANSI codes for text attributes, colors, cursor control, and other common escape sequences...",
+"array::appendIfNotPresent": {
+  "prefix": "array::appendIfNotPresent",
+  "description": "Add a value to an array if it is not already present...",
   "scope": "",
-  "body": [ "ansi-codes::*$0" ]
+  "body": [ "array::appendIfNotPresent$0" ]
 },
 
 ```

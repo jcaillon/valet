@@ -1680,7 +1680,9 @@ function source() {
   fi
 
   local failMessage="Cannot source the file ⌜${pathOrName}⌝ because it does not exist."
-  if [[ ${pathOrName} == "lib-"* ]]; then
+  if [[ ${pathOrName} =~ ^(esc-codes|core)$ ]]; then
+    failMessage+="The ⌜${pathOrName}⌝ library is included by default in Valet, please remove ⌜source ${pathOrName}⌝."
+  elif [[ ${pathOrName} == "lib-"* ]]; then
     failMessage+=$'\n'"If you meant to source a library, make sure it is either in the valet core or user libraries and do not include the ⌜lib-⌝ prefix."
   fi
   core::fail "${failMessage}"
@@ -1825,18 +1827,6 @@ function core::getVersion() {
   # shellcheck source=lib-fs
   source fs
   fs::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/version"
-}
-
-# ## styles::init (private)
-#
-# Initialize the valet styles variables.
-function styles::init() {
-  if [[ -v STYLE_RESET ]]; then
-    core::resetIncludedFile styles
-    core::resetIncludedFile ansi-codes
-  fi
-  #shellcheck source=lib-styles
-  source styles
 }
 
 # ## core::getConfigurationDirectory
@@ -2002,6 +1992,16 @@ function core::setShellOptions() {
   LC_ALL="${VALET_CONFIG_LOCALE:-C.UTF-8}"
   LANG="${LC_ALL}"
 }
+
+# ## styles::init (private)
+#
+# Initialize the valet styles variables.
+# Also includes the esc-codes library (required for styles).
+function styles::init() {
+  builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/esc-codes"
+  builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/styles"
+}
+
 
 #===============================================================
 # >>> Command functions

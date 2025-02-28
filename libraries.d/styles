@@ -4,9 +4,6 @@
 # description: This script provides the styles used in Valet.
 #   A style is a set of colors and attributes that can be used to format text in the terminal.
 
-# shellcheck source=lib-ansi-codes
-source ansi-codes
-
 STYLE_COLOR_ACCENT="${AC__FG_BRIGHT_MAGENTA}"
 STYLE_COLOR_PRIMARY="${AC__FG_BRIGHT_CYAN}"
 STYLE_COLOR_SECONDARY="${AC__FG_BRIGHT_BLUE}"

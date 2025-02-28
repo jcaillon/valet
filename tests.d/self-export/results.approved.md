@@ -27,7 +27,6 @@ GLOBAL_EXPORTED=true;
 source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
 trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;
 GLOBAL_EXPORTED=true;
-source ansi-codes
 source array
 source bash
 source benchmark
@@ -43,7 +42,6 @@ source prompt
 source regex
 source sfzf
 source string
-source styles
 source system
 source test
 source time

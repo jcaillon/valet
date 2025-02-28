@@ -1,0 +1,8 @@
+<div style="height: 2rem;"></div>
+
+<div class="collapse-container">
+    <button class="collapse-button">{{ .Get 0 }}</button>
+    <div class="collapse-content">
+        {{ .Inner | markdownify}}
+    </div>
+</div>

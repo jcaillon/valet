@@ -594,8 +594,6 @@ function selfUpdate_sourceDependencies() {
   source interactive
   # shellcheck source=../libraries.d/lib-progress
   source progress
-  # shellcheck source=../libraries.d/lib-styles
-  source styles
   # shellcheck source=../libraries.d/lib-fs
   source fs
   # shellcheck source=../libraries.d/lib-string
@@ -682,6 +680,9 @@ if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   _NOT_EXECUTED_FROM_VALET=true
 
   set -Eeu -o pipefail
+
+  unalias -a
+  IFS=' '$'\t'$'\n'
 
   VALET_VERSION="${VALET_VERSION:-${VALET_RELEASED_VERSION}}"
 

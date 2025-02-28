@@ -75,7 +75,7 @@ xterm) if [[ -n "${COLORTERM:-}" ]]; then VALET_CONFIG_ENABLE_COLORS="${VALET_CO
 *) VALET_CONFIG_ENABLE_COLORS="${VALET_CONFIG_ENABLE_COLORS:-false}" ;;
 esac
 
-# set the styles
+# set the styles and esc codes
 styles::init
 
 # Export terminal size on window resize if we are in interactive mode.
@@ -136,8 +136,6 @@ core::sourceUserCommands
 # main::printHelp function "this" "${GLOBAL_COLUMNS}"
 # ```
 function main::printHelp() {
-  #shellcheck source=lib-styles
-  source styles
   main::getHelpText "$@"
   printf '%s' "${RETURNED_VALUE}"
 }

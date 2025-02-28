@@ -52,7 +52,6 @@ echo "RETURNED_VALUE: ⌜${RETURNED_VALUE}⌝" # will output 'value'
 <!-- https://v1.heroicons.com/ -->
 For more details, please check the documentation on each library:
 {{< cards >}}
-  {{< card link="ansi-codes" icon="annotation" title="ansi-code" subtitle="Declares variables containing ASCII escape codes, enabling interactive programs." >}}
   {{< card link="array" icon="table" title="array" subtitle="Manipulate bash arrays." >}}
   {{< card link="bash" icon="code" title="bash" subtitle="Extend bash capabilities." >}}
   {{< card link="benchmark" icon="trending-up" title="benchmark" subtitle="Benchmark bash functions." >}}
@@ -60,6 +59,7 @@ For more details, please check the documentation on each library:
   {{< card link="core" icon="star" title="core" subtitle="The core functions of Valet." >}}
   {{< card link="curl" icon="cloud-download" title="curl" subtitle="Wrapper functions around curl." >}}
   {{< card link="exe" icon="star" title="exe" subtitle="Run commands and executables." >}}
+  {{< card link="esc-codes" icon="annotation" title="esc-code" subtitle="Declares variables containing ASCII escape codes, enabling interactive programs." >}}
   {{< card link="fs" icon="document" title="fs" subtitle="Manipulate the files and directories." >}}
   {{< card link="http" icon="cloud-download" title="http" subtitle="Naive http implementation." >}}
   {{< card link="interactive" icon="cursor-click" title="interactive" subtitle="Make your command interactive." >}}
