@@ -165,25 +165,25 @@ function sfzfInitialize() {
 
   # set up colors
   if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
-    SFZF_COLOR_RESET_TEXT="${VALET_CONFIG_SFZF_RESET_TEXT:-"${AC__TEXT_RESET}"}"
-    SFZF_COLOR_STATIC="${VALET_CONFIG_SFZF_STATIC:-"${AC__FG_BRIGHT_BLACK}"}"
-    SFZF_COLOR_FOCUS="${VALET_CONFIG_SFZF_FOCUS:-"${AC__FG_MAGENTA}"}"
-    SFZF_COLOR_FOCUS_RESET="${VALET_CONFIG_SFZF_FOCUS_RESET:-"${AC__FG_RESET}"}"
-    SFZF_COLOR_LETTER_HIGHLIGHT="${VALET_CONFIG_SFZF_LETTER_HIGHLIGHT:-"${AC__TEXT_INVERSE}${AC__FG_MAGENTA}"}"
-    SFZF_COLOR_LETTER_HIGHLIGHT_RESET="${VALET_CONFIG_SFZF_LETTER_HIGHLIGHT_RESET:-"${AC__TEXT_NO_INVERSE}${AC__FG_RESET}"}"
-    SFZF_COLOR_SELECTED_ITEM="${VALET_CONFIG_SFZF_SELECTED_ITEM:-"${AC__BG_BLACK}"}"
-    SFZF_COLOR_SELECTED_ITEM_RESET="${VALET_CONFIG_SFZF_SELECTED_ITEM_RESET:-"${AC__BG_RESET}"}"
-    SFZF_COLOR_PROMPT_STRING="${VALET_CONFIG_SFZF_PROMPT_STRING:-"${AC__FG_CYAN}${AC__TEXT_BOLD}"}"
-    SFZF_COLOR_PROMPT_STRING_RESET="${VALET_CONFIG_SFZF_PROMPT_STRING_RESET:-"${AC__TEXT_RESET}"}"
-    SFZF_COLOR_COUNT="${VALET_CONFIG_SFZF_COUNT:-"${AC__FG_YELLOW}"}"
-    SFZF_COLOR_COUNT_RESET="${VALET_CONFIG_SFZF_COUNT_RESET:-"${AC__TEXT_RESET}"}"
+    SFZF_COLOR_RESET_TEXT="${VALET_CONFIG_SFZF_RESET_TEXT:-"${ESC__TEXT_RESET}"}"
+    SFZF_COLOR_STATIC="${VALET_CONFIG_SFZF_STATIC:-"${ESC__FG_BRIGHT_BLACK}"}"
+    SFZF_COLOR_FOCUS="${VALET_CONFIG_SFZF_FOCUS:-"${ESC__FG_MAGENTA}"}"
+    SFZF_COLOR_FOCUS_RESET="${VALET_CONFIG_SFZF_FOCUS_RESET:-"${ESC__FG_RESET}"}"
+    SFZF_COLOR_LETTER_HIGHLIGHT="${VALET_CONFIG_SFZF_LETTER_HIGHLIGHT:-"${ESC__TEXT_INVERSE}${ESC__FG_MAGENTA}"}"
+    SFZF_COLOR_LETTER_HIGHLIGHT_RESET="${VALET_CONFIG_SFZF_LETTER_HIGHLIGHT_RESET:-"${ESC__TEXT_NO_INVERSE}${ESC__FG_RESET}"}"
+    SFZF_COLOR_SELECTED_ITEM="${VALET_CONFIG_SFZF_SELECTED_ITEM:-"${ESC__BG_BLACK}"}"
+    SFZF_COLOR_SELECTED_ITEM_RESET="${VALET_CONFIG_SFZF_SELECTED_ITEM_RESET:-"${ESC__BG_RESET}"}"
+    SFZF_COLOR_PROMPT_STRING="${VALET_CONFIG_SFZF_PROMPT_STRING:-"${ESC__FG_CYAN}${ESC__TEXT_BOLD}"}"
+    SFZF_COLOR_PROMPT_STRING_RESET="${VALET_CONFIG_SFZF_PROMPT_STRING_RESET:-"${ESC__TEXT_RESET}"}"
+    SFZF_COLOR_COUNT="${VALET_CONFIG_SFZF_COUNT:-"${ESC__FG_YELLOW}"}"
+    SFZF_COLOR_COUNT_RESET="${VALET_CONFIG_SFZF_COUNT_RESET:-"${ESC__TEXT_RESET}"}"
   else
     SFZF_COLOR_RESET_TEXT=""
     SFZF_COLOR_STATIC=""
     SFZF_COLOR_FOCUS=""
     SFZF_COLOR_FOCUS_RESET=""
-    SFZF_COLOR_LETTER_HIGHLIGHT="${AC__TEXT_INVERSE}"
-    SFZF_COLOR_LETTER_HIGHLIGHT_RESET="${AC__TEXT_NO_INVERSE}"
+    SFZF_COLOR_LETTER_HIGHLIGHT="${ESC__TEXT_INVERSE}"
+    SFZF_COLOR_LETTER_HIGHLIGHT_RESET="${ESC__TEXT_NO_INVERSE}"
     SFZF_COLOR_SELECTED_ITEM=""
     SFZF_COLOR_SELECTED_ITEM_RESET=""
     SFZF_COLOR_PROMPT_STRING=""
@@ -196,10 +196,10 @@ function sfzfInitialize() {
 # Draw or redraw the whole screen (initially or after a terminal resize).
 function sfzfDrawScreen() {
   local prompt="${1}"
-  local toPrint="${AC__CURSOR_HIDE}${SFZF_COLOR_STATIC}"
+  local toPrint="${ESC__CURSOR_HIDE}${SFZF_COLOR_STATIC}"
 
   # clear the screen, move to the top left corner
-  toPrint+="${AC__ERASE_SCREEN}${AC__CURSOR_MOVE__}1;1${__AC__TO}"
+  toPrint+="${ESC__ERASE_SCREEN}${ESC__CURSOR_MOVE__}1;1${__ESC__TO}"
 
   # compute the width of the left/right panel
   if [[ ${SFZF_HAS_PREVIEW} == "true" ]]; then
@@ -244,7 +244,7 @@ function sfzfDrawScreen() {
     leftHelpWidth=0
     leftHelp=""
   fi
-  toPrint+="${AC__CURSOR_MOVE__}${GLOBAL_LINES};1${__AC__TO}░─${leftHelp}─${AC__REPEAT__}$((SFZF_LEFT_PANE_WIDTH - leftHelpWidth - 4))${__AC__LAST_CHAR}"
+  toPrint+="${ESC__CURSOR_MOVE__}${GLOBAL_LINES};1${__ESC__TO}░─${leftHelp}─${ESC__REPEAT__}$((SFZF_LEFT_PANE_WIDTH - leftHelpWidth - 4))${__ESC__LAST_CHAR}"
   if [[ ${SFZF_HAS_PREVIEW} == "true" ]]; then
     toPrint+="─"
   else
@@ -252,7 +252,7 @@ function sfzfDrawScreen() {
   fi
 
   # 3. draw the separator of the left pane
-  toPrint+="${AC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE + 1));1${__AC__TO}░─${AC__REPEAT__}$((SFZF_LEFT_PANE_WIDTH - 3))${__AC__LAST_CHAR}"
+  toPrint+="${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE + 1));1${__ESC__TO}░─${ESC__REPEAT__}$((SFZF_LEFT_PANE_WIDTH - 3))${__ESC__LAST_CHAR}"
   if [[ ${SFZF_HAS_PREVIEW} == "true" ]]; then
     toPrint+="─"
   else
@@ -269,7 +269,7 @@ function sfzfDrawScreen() {
       titleWidth=0
       title=""
     fi
-    toPrint+="${AC__CURSOR_MOVE__}${SFZF_RIGHT_PANE_FIRST_LINE};$((SFZF_LEFT_PANE_WIDTH + 1))${__AC__TO}${DRAW_TL_CORNER}─${title}─${AC__REPEAT__}$((SFZF_RIGHT_PANE_WIDTH - titleWidth - 4))${__AC__LAST_CHAR}░"
+    toPrint+="${ESC__CURSOR_MOVE__}${SFZF_RIGHT_PANE_FIRST_LINE};$((SFZF_LEFT_PANE_WIDTH + 1))${__ESC__TO}${DRAW_TL_CORNER}─${title}─${ESC__REPEAT__}$((SFZF_RIGHT_PANE_WIDTH - titleWidth - 4))${__ESC__LAST_CHAR}░"
 
     # last line with help
     local helpWidth=$((${#SFZF_RIGHT_PANE_HELP_TEXT} + 2))
@@ -278,11 +278,11 @@ function sfzfDrawScreen() {
       helpWidth=0
       help=""
     fi
-    toPrint+="${AC__CURSOR_MOVE__}${GLOBAL_LINES};$((SFZF_LEFT_PANE_WIDTH + 1))${__AC__TO}┴─${AC__REPEAT__}$((SFZF_RIGHT_PANE_WIDTH - helpWidth - 4))${__AC__LAST_CHAR}${help}─░"
+    toPrint+="${ESC__CURSOR_MOVE__}${GLOBAL_LINES};$((SFZF_LEFT_PANE_WIDTH + 1))${__ESC__TO}┴─${ESC__REPEAT__}$((SFZF_RIGHT_PANE_WIDTH - helpWidth - 4))${__ESC__LAST_CHAR}${help}─░"
 
     # left border of the right pane
     for ((line = SFZF_RIGHT_PANE_FIRST_LINE + 1; line <= SFZF_RIGHT_PANE_FIRST_LINE + SFZF_RIGHT_PANE_LINES; line++)); do
-      toPrint+="${AC__CURSOR_MOVE__}${line};$((SFZF_LEFT_PANE_WIDTH + 1))${__AC__TO}"
+      toPrint+="${ESC__CURSOR_MOVE__}${line};$((SFZF_LEFT_PANE_WIDTH + 1))${__ESC__TO}"
       if ((line == SFZF_LEFT_PANE_FIRST_LINE + 1)); then
         toPrint+="┤"
       else
@@ -308,7 +308,7 @@ function sfzfDrawScreen() {
 # Draw the left pane content.
 function drawLeftPane() {
   local IFS
-  local toPrint="${AC__CURSOR_HIDE}${SFZF_COLOR_RESET_TEXT}"
+  local toPrint="${ESC__CURSOR_HIDE}${SFZF_COLOR_RESET_TEXT}"
 
   getCurrentInitialItemsIndex
   local initialOriginalIndex=${RETURNED_VALUE}
@@ -358,7 +358,7 @@ function drawLeftPane() {
     local itemsCounter
     printf -v itemsCounter " %s%0${#totalItemCount}i%s/%i%s " "${SFZF_COLOR_COUNT}" "${itemCount}" "${SFZF_COLOR_COUNT_RESET}${SFZF_COLOR_STATIC}" "${totalItemCount}" "${SFZF_COLOR_RESET_TEXT}"
     local itemCounterLength=$((3 + ${#totalItemCount} * 2))
-    toPrint+="${AC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE + 1));$((SFZF_LEFT_PANE_WIDTH - itemCounterLength))${__AC__TO}${itemsCounter}"
+    toPrint+="${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE + 1));$((SFZF_LEFT_PANE_WIDTH - itemCounterLength))${__ESC__TO}${itemsCounter}"
   fi
 
   # draw the items
@@ -372,17 +372,17 @@ function drawLeftPane() {
     else
       itemPrefix="  "
     fi
-    toPrint+="${AC__CURSOR_MOVE__}${line};${SFZF_LEFT_PANE_WIDTH}${__AC__TO}${AC__ERASE_CHARS_LEFT}"$'\r'"${itemPrefix}${SFZF_FILTERED_ITEMS[index]}${SFZF_COLOR_SELECTED_ITEM_RESET}"
+    toPrint+="${ESC__CURSOR_MOVE__}${line};${SFZF_LEFT_PANE_WIDTH}${__ESC__TO}${ESC__ERASE_CHARS_LEFT}"$'\r'"${itemPrefix}${SFZF_FILTERED_ITEMS[index]}${SFZF_COLOR_SELECTED_ITEM_RESET}"
     line+=1
   done
 
   # clear the remaining lines
   for ((line = SFZF_LEFT_PANE_FIRST_CONTENT_LINE + line - SFZF_LEFT_PANE_FIRST_CONTENT_LINE; line < SFZF_LEFT_PANE_FIRST_CONTENT_LINE + SFZF_LEFT_PANE_LINES; line++)); do
-    toPrint+="${AC__CURSOR_MOVE__}${line};${SFZF_LEFT_PANE_WIDTH}${__AC__TO}${AC__ERASE_CHARS_LEFT}"
+    toPrint+="${ESC__CURSOR_MOVE__}${line};${SFZF_LEFT_PANE_WIDTH}${__ESC__TO}${ESC__ERASE_CHARS_LEFT}"
   done
 
   # reposition the cursor
-  toPrint+="${AC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE));$((3 + ${#SFZF_PROMPT}))${__AC__TO}${AC__CURSOR_SHOW}"
+  toPrint+="${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE));$((3 + ${#SFZF_PROMPT}))${__ESC__TO}${ESC__CURSOR_SHOW}"
 
   printf '%s' "${toPrint}"
 }
@@ -431,7 +431,7 @@ function drawRightPane() {
     # nothing to do
     return 0
   fi
-  local toPrint="${AC__CURSOR_HIDE}${SFZF_COLOR_RESET_TEXT}"
+  local toPrint="${ESC__CURSOR_HIDE}${SFZF_COLOR_RESET_TEXT}"
 
   # compute the number of lines for the right pane content
   local contentLength
@@ -459,30 +459,30 @@ function drawRightPane() {
   fi
   local -i repeat=$((9 - itemsCounterLength))
   repeat=$((repeat > 0 ? repeat : 0))
-  toPrint+="${AC__CURSOR_MOVE__}${SFZF_RIGHT_PANE_FIRST_LINE};$((GLOBAL_COLUMNS - 9 - 2))${__AC__TO}${SFZF_COLOR_STATIC}─${AC__REPEAT__}${repeat}${__AC__LAST_CHAR}${itemsCounter}"
+  toPrint+="${ESC__CURSOR_MOVE__}${SFZF_RIGHT_PANE_FIRST_LINE};$((GLOBAL_COLUMNS - 9 - 2))${__ESC__TO}${SFZF_COLOR_STATIC}─${ESC__REPEAT__}${repeat}${__ESC__LAST_CHAR}${itemsCounter}"
 
   # draw the lines
   local -i index line=${SFZF_RIGHT_PANE_FIRST_CONTENT_LINE}
   local -i max=$((SFZF_RIGHT_PANE_START_INDEX + SFZF_RIGHT_PANE_LINES - 1))
   max=$((max > contentLength - 1 ? contentLength - 1 : max))
   for ((index = SFZF_RIGHT_PANE_START_INDEX; index <= max; index++)); do
-    toPrint+="${AC__CURSOR_MOVE__}${line};$((SFZF_LEFT_PANE_WIDTH + 2))${__AC__TO}${AC__ERASE_CHARS_RIGHT} ${SFZF_RIGHT_PANE_CONTENT_CURRENT_ARRAY[index]}"
+    toPrint+="${ESC__CURSOR_MOVE__}${line};$((SFZF_LEFT_PANE_WIDTH + 2))${__ESC__TO}${ESC__ERASE_CHARS_RIGHT} ${SFZF_RIGHT_PANE_CONTENT_CURRENT_ARRAY[index]}"
     line+=1
   done
 
   # clear the remaining lines
   for ((line = SFZF_RIGHT_PANE_FIRST_CONTENT_LINE + line - SFZF_RIGHT_PANE_FIRST_CONTENT_LINE; line < SFZF_RIGHT_PANE_FIRST_CONTENT_LINE + SFZF_RIGHT_PANE_LINES; line++)); do
-    toPrint+="${AC__CURSOR_MOVE__}${line};$((SFZF_LEFT_PANE_WIDTH + 2))${__AC__TO}${AC__ERASE_CHARS_RIGHT}"
+    toPrint+="${ESC__CURSOR_MOVE__}${line};$((SFZF_LEFT_PANE_WIDTH + 2))${__ESC__TO}${ESC__ERASE_CHARS_RIGHT}"
   done
 
   # if there is no content, display a "Nothing to show" message on the center of the right pane
   if ((contentLength == 0)); then
     local loadingMessage="Nothing to show…"
-    toPrint+="${AC__CURSOR_MOVE__}$((SFZF_RIGHT_PANE_FIRST_CONTENT_LINE + SFZF_RIGHT_PANE_LINES / 2));$((SFZF_LEFT_PANE_WIDTH + 2 + SFZF_RIGHT_PANE_WIDTH / 2 - ${#loadingMessage} / 2))${__AC__TO}${loadingMessage}"
+    toPrint+="${ESC__CURSOR_MOVE__}$((SFZF_RIGHT_PANE_FIRST_CONTENT_LINE + SFZF_RIGHT_PANE_LINES / 2));$((SFZF_LEFT_PANE_WIDTH + 2 + SFZF_RIGHT_PANE_WIDTH / 2 - ${#loadingMessage} / 2))${__ESC__TO}${loadingMessage}"
   fi
 
   # reposition the cursor
-  toPrint+="${AC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE));$((3 + ${#SFZF_PROMPT}))${__AC__TO}${AC__CURSOR_SHOW}"
+  toPrint+="${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE));$((3 + ${#SFZF_PROMPT}))${__ESC__TO}${ESC__CURSOR_SHOW}"
 
   printf '%s' "${toPrint}"
 }
@@ -496,7 +496,7 @@ function drawPrompt() {
   else
     SFZF_PROMPT="${SFZF_SEARCH_STRING}"
   fi
-  printf '%s' "${AC__CURSOR_HIDE}${AC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE));$((SFZF_LEFT_PANE_WIDTH))${__AC__TO}${AC__ERASE_CHARS_LEFT}"$'\r'"${SFZF_COLOR_STATIC}${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-">"} ${SFZF_COLOR_RESET_TEXT}${SFZF_COLOR_FOCUS}${SFZF_PROMPT}${AC__CURSOR_SHOW}"
+  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE));$((SFZF_LEFT_PANE_WIDTH))${__ESC__TO}${ESC__ERASE_CHARS_LEFT}"$'\r'"${SFZF_COLOR_STATIC}${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-">"} ${SFZF_COLOR_RESET_TEXT}${SFZF_COLOR_FOCUS}${SFZF_PROMPT}${ESC__CURSOR_SHOW}"
 }
 
 # Returns the index of the item in the original array (if any, or -1).

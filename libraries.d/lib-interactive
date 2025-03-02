@@ -53,9 +53,9 @@ function interactive::askForConfirmationRaw() {
 
   # print the current state (then move to column 1 to be ready to rewrite)
   printf ' %s%s%s' \
-    "${AC__CURSOR_HIDE}${STYLE_ACTIVE_BUTTON}" \
+    "${ESC__CURSOR_HIDE}${STYLE_ACTIVE_BUTTON}" \
     "   (O)K   " \
-    "${STYLE_RESET}${AC__CURSOR_MOVE__}1${__AC__COLUMN}" 1>&2
+    "${STYLE_RESET}${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&2
 
   local -i returnedCode=0
   while true; do
@@ -78,7 +78,7 @@ function interactive::askForConfirmationRaw() {
     fi
   done
 
-  printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}" 1>&2
+  printf '%s' "${ESC__ERASE_CHARS_RIGHT}${ESC__CURSOR_SHOW}" 1>&2
 
   return ${returnedCode}
 }
@@ -152,7 +152,7 @@ function interactive::promptYesNoRaw() {
 
   tui::createSpace 2
 
-  printf '%s' "${AC__CURSOR_HIDE}" 1>&2
+  printf '%s' "${ESC__CURSOR_HIDE}" 1>&2
 
   local yesColor noColor
   while true; do
@@ -171,7 +171,7 @@ function interactive::promptYesNoRaw() {
       "${STYLE_RESET}" \
       "${noColor}" \
       "   (N)O   " \
-      "${STYLE_RESET}${AC__CURSOR_MOVE__}1${__AC__COLUMN}" 1>&2
+      "${STYLE_RESET}${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&2
 
     # wait and handle key press
     if tui::waitForChar -t 1; then
@@ -200,7 +200,7 @@ function interactive::promptYesNoRaw() {
     if [[ ! -t 0 ]]; then break; fi
   done
 
-  printf '%s' "${AC__ERASE_CHARS_RIGHT}${AC__CURSOR_SHOW}" 1>&2
+  printf '%s' "${ESC__ERASE_CHARS_RIGHT}${ESC__CURSOR_SHOW}" 1>&2
 
   if [[ ${state} == "true" ]]; then
     RETURNED_VALUE=${state}
@@ -311,31 +311,31 @@ function interactive::displayDialogBox() {
     startColumn=$((startColumn <= 8 ? startColumn : 8))
     startColumn+=1
 
-    finalString+="${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}${STYLE_FRAMES}${DRAW_TL_CORNER}─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─${DRAW_TR_CORNER}${STYLE_RESET}"$'\n'
+    finalString+="${ESC__CURSOR_MOVE__}${startColumn}${__ESC__COLUMN}${STYLE_FRAMES}${DRAW_TL_CORNER}─${ESC__REPEAT__}${textWidth}${__ESC__LAST_CHAR}─${DRAW_TR_CORNER}${STYLE_RESET}"$'\n'
     while read -r line; do
       if (( lineNumber == 0 )); then
         sideString="├──░"
       else
         sideString="│"
       fi
-      finalString+="${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}${STYLE_FRAMES}│${STYLE_RESET} ${line} ${AC__CURSOR_MOVE__}$((textWidth + 3 + startColumn))${__AC__COLUMN}${STYLE_FRAMES}${sideString}${STYLE_RESET}"$'\n'
+      finalString+="${ESC__CURSOR_MOVE__}${startColumn}${__ESC__COLUMN}${STYLE_FRAMES}│${STYLE_RESET} ${line} ${ESC__CURSOR_MOVE__}$((textWidth + 3 + startColumn))${__ESC__COLUMN}${STYLE_FRAMES}${sideString}${STYLE_RESET}"$'\n'
       lineNumber+=1
     done <<<"${wrappedText}"
-    finalString+="${AC__CURSOR_MOVE__}${startColumn}${__AC__COLUMN}${STYLE_FRAMES}${DRAW_BL_CORNER}─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─${DRAW_BR_CORNER}${STYLE_RESET}"$'\n'
+    finalString+="${ESC__CURSOR_MOVE__}${startColumn}${__ESC__COLUMN}${STYLE_FRAMES}${DRAW_BL_CORNER}─${ESC__REPEAT__}${textWidth}${__ESC__LAST_CHAR}─${DRAW_BR_CORNER}${STYLE_RESET}"$'\n'
 
   elif [[ ${speaker} == "system" ]]; then
 
-    finalString+="   ${STYLE_FRAMES}${DRAW_TL_CORNER}─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─${DRAW_TR_CORNER}${STYLE_RESET}"$'\n'
+    finalString+="   ${STYLE_FRAMES}${DRAW_TL_CORNER}─${ESC__REPEAT__}${textWidth}${__ESC__LAST_CHAR}─${DRAW_TR_CORNER}${STYLE_RESET}"$'\n'
     while read -r line; do
       if (( lineNumber == 0 )); then
         sideString="${STYLE_FRAMES}░──┤"
       else
         sideString="   ${STYLE_FRAMES}│"
       fi
-      finalString+="${sideString}${STYLE_RESET} ${line} ${AC__CURSOR_MOVE__}$((textWidth + 7))${__AC__COLUMN}${STYLE_FRAMES}│${STYLE_RESET}"$'\n'
+      finalString+="${sideString}${STYLE_RESET} ${line} ${ESC__CURSOR_MOVE__}$((textWidth + 7))${__ESC__COLUMN}${STYLE_FRAMES}│${STYLE_RESET}"$'\n'
       lineNumber+=1
     done <<<"${wrappedText}"
-    finalString+="   ${STYLE_FRAMES}${DRAW_BL_CORNER}─${AC__REPEAT__}${textWidth}${__AC__LAST_CHAR}─${DRAW_BR_CORNER}${STYLE_RESET}"$'\n'
+    finalString+="   ${STYLE_FRAMES}${DRAW_BL_CORNER}─${ESC__REPEAT__}${textWidth}${__ESC__LAST_CHAR}─${DRAW_BR_CORNER}${STYLE_RESET}"$'\n'
 
   fi
 

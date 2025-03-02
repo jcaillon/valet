@@ -33,7 +33,7 @@ function selfTestUtils_setupValetForConsistency() {
   # same with all styles and escape codes
   # shellcheck disable=SC2086
   # we reset all the icon variables to a blank string
-  local vars="${!STYLE_*} ${!AC__*} ${!__AC__*}"
+  local vars="${!STYLE_*} ${!ESC__*} ${!__ESC__*}"
   eval "${vars// /"=''; "}=''"
 
   # setup consistent logs

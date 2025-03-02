@@ -40,94 +40,94 @@
 #===============================================================
 # https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
 
-AC__TEXT_BOLD=$'\e[1m'
-AC__TEXT_NO_BOLD=$'\e[21m'
-AC__TEXT_FAINT=$'\e[2m'
-AC__TEXT_NO_FAINT=$'\e[22m'
-AC__TEXT_ITALIC=$'\e[3m'
-AC__TEXT_NO_ITALIC=$'\e[23m'
-AC__TEXT_UNDERLINE=$'\e[4m'
-AC__TEXT_NO_UNDERLINE=$'\e[24m'
-AC__TEXT_BLINK=$'\e[5m'
-AC__TEXT_NO_BLINK=$'\e[25m'
-AC__TEXT_INVERSE=$'\e[7m'
-AC__TEXT_NO_INVERSE=$'\e[27m'
-AC__TEXT_STRIKE=$'\e[9m'
-AC__TEXT_NO_STRIKE=$'\e[29m'
+ESC__TEXT_BOLD=$'\e[1m'
+ESC__TEXT_NO_BOLD=$'\e[21m'
+ESC__TEXT_FAINT=$'\e[2m'
+ESC__TEXT_NO_FAINT=$'\e[22m'
+ESC__TEXT_ITALIC=$'\e[3m'
+ESC__TEXT_NO_ITALIC=$'\e[23m'
+ESC__TEXT_UNDERLINE=$'\e[4m'
+ESC__TEXT_NO_UNDERLINE=$'\e[24m'
+ESC__TEXT_BLINK=$'\e[5m'
+ESC__TEXT_NO_BLINK=$'\e[25m'
+ESC__TEXT_INVERSE=$'\e[7m'
+ESC__TEXT_NO_INVERSE=$'\e[27m'
+ESC__TEXT_STRIKE=$'\e[9m'
+ESC__TEXT_NO_STRIKE=$'\e[29m'
 
 if [[ ${VALET_CONFIG_DISABLE_TEXT_ATTRIBUTES:-} == "true" ]]; then
   # we reset all the text variables to a blank string
-  _ESC_VARS="${!AC__TEXT_*}"
+  _ESC_VARS="${!ESC__TEXT_*}"
   eval "${_ESC_VARS// /"=''; "}=''"
   unset -v _ESC_VARS
 fi
 
-AC__TEXT_RESET=$'\e[0m'
+ESC__TEXT_RESET=$'\e[0m'
 
 #===============================================================
 # >>> SGR: Colors
 #===============================================================
 # https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit
-AC__COLOR_RESET=$'\e[49m'$'\e[39m'
-AC__FG_RESET=$'\e[39m'
-AC__BG_RESET=$'\e[49m'
+ESC__COLOR_RESET=$'\e[49m'$'\e[39m'
+ESC__FG_RESET=$'\e[39m'
+ESC__BG_RESET=$'\e[49m'
 
 # Text colors
-AC__FG_BLACK=$'\e[30m'
-AC__FG_BRIGHT_BLACK=$'\e[90m'
-AC__FG_RED=$'\e[31m'
-AC__FG_BRIGHT_RED=$'\e[91m'
-AC__FG_GREEN=$'\e[32m'
-AC__FG_BRIGHT_GREEN=$'\e[92m'
-AC__FG_YELLOW=$'\e[33m'
-AC__FG_BRIGHT_YELLOW=$'\e[93m'
-AC__FG_BLUE=$'\e[34m'
-AC__FG_BRIGHT_BLUE=$'\e[94m'
-AC__FG_MAGENTA=$'\e[35m'
-AC__FG_BRIGHT_MAGENTA=$'\e[95m'
-AC__FG_CYAN=$'\e[36m'
-AC__FG_BRIGHT_CYAN=$'\e[96m'
-AC__FG_WHITE=$'\e[37m'
-AC__FG_BRIGHT_WHITE=$'\e[97m'
+ESC__FG_BLACK=$'\e[30m'
+ESC__FG_BRIGHT_BLACK=$'\e[90m'
+ESC__FG_RED=$'\e[31m'
+ESC__FG_BRIGHT_RED=$'\e[91m'
+ESC__FG_GREEN=$'\e[32m'
+ESC__FG_BRIGHT_GREEN=$'\e[92m'
+ESC__FG_YELLOW=$'\e[33m'
+ESC__FG_BRIGHT_YELLOW=$'\e[93m'
+ESC__FG_BLUE=$'\e[34m'
+ESC__FG_BRIGHT_BLUE=$'\e[94m'
+ESC__FG_MAGENTA=$'\e[35m'
+ESC__FG_BRIGHT_MAGENTA=$'\e[95m'
+ESC__FG_CYAN=$'\e[36m'
+ESC__FG_BRIGHT_CYAN=$'\e[96m'
+ESC__FG_WHITE=$'\e[37m'
+ESC__FG_BRIGHT_WHITE=$'\e[97m'
 
 # background colors
-AC__BG_BLACK=$'\e[40m'
-AC__BG_BRIGHT_BLACK=$'\e[100m'
-AC__BG_RED=$'\e[41m'
-AC__BG_BRIGHT_RED=$'\e[101m'
-AC__BG_GREEN=$'\e[42m'
-AC__BG_BRIGHT_GREEN=$'\e[102m'
-AC__BG_YELLOW=$'\e[43m'
-AC__BG_BRIGHT_YELLOW=$'\e[103m'
-AC__BG_BLUE=$'\e[44m'
-AC__BG_BRIGHT_BLUE=$'\e[104m'
-AC__BG_MAGENTA=$'\e[45m'
-AC__BG_BRIGHT_MAGENTA=$'\e[105m'
-AC__BG_CYAN=$'\e[46m'
-AC__BG_BRIGHT_CYAN=$'\e[106m'
-AC__BG_WHITE=$'\e[47m'
-AC__BG_BRIGHT_WHITE=$'\e[107m'
+ESC__BG_BLACK=$'\e[40m'
+ESC__BG_BRIGHT_BLACK=$'\e[100m'
+ESC__BG_RED=$'\e[41m'
+ESC__BG_BRIGHT_RED=$'\e[101m'
+ESC__BG_GREEN=$'\e[42m'
+ESC__BG_BRIGHT_GREEN=$'\e[102m'
+ESC__BG_YELLOW=$'\e[43m'
+ESC__BG_BRIGHT_YELLOW=$'\e[103m'
+ESC__BG_BLUE=$'\e[44m'
+ESC__BG_BRIGHT_BLUE=$'\e[104m'
+ESC__BG_MAGENTA=$'\e[45m'
+ESC__BG_BRIGHT_MAGENTA=$'\e[105m'
+ESC__BG_CYAN=$'\e[46m'
+ESC__BG_BRIGHT_CYAN=$'\e[106m'
+ESC__BG_WHITE=$'\e[47m'
+ESC__BG_BRIGHT_WHITE=$'\e[107m'
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
-# "${AC__FG_COLOR__}2${__AC__END_COLOR}"
-AC__FG_COLOR__=$'\e[38;5;'
-# "${AC__BG_COLOR}2${__AC__END_COLOR}"
-AC__BG_COLOR__=$'\e[48;5;'
-__AC__END_COLOR=$'m'
+# "${ESC__FG_COLOR__}2${__ESC__END_COLOR}"
+ESC__FG_COLOR__=$'\e[38;5;'
+# "${ESC__BG_COLOR}2${__ESC__END_COLOR}"
+ESC__BG_COLOR__=$'\e[48;5;'
+__ESC__END_COLOR=$'m'
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit
-# "${AC__FG_COLOR_24b__}255;255;255${__AC__END_COLOR}"
-AC__FG_COLOR_24b__=$'\e[38;2;'
-# "${AC__BG_COLOR_24b}255;255;255${__AC__END_COLOR}"
-AC__BG_COLOR_24b__=$'\e[48;2;'
+# "${ESC__FG_COLOR_24b__}255;255;255${__ESC__END_COLOR}"
+ESC__FG_COLOR_24b__=$'\e[38;2;'
+# "${ESC__BG_COLOR_24b}255;255;255${__ESC__END_COLOR}"
+ESC__BG_COLOR_24b__=$'\e[48;2;'
 
 if [[ ${VALET_CONFIG_ENABLE_COLORS:-} != "true" ]]; then
   # we reset all the color variables to a blank string
-  _ESC_VARS="${!AC__FG_*} ${!AC__BG_*} __AC__END_COLOR AC__COLOR_RESET"
+  _ESC_VARS="${!ESC__FG_*} ${!ESC__BG_*} __ESC__END_COLOR ESC__COLOR_RESET"
   eval "${_ESC_VARS// /"=''; "}=''"
   unset -v _ESC_VARS
   if [[ ${VALET_CONFIG_DISABLE_TEXT_ATTRIBUTES:-} == "true" ]]; then
-    AC__TEXT_RESET=""
+    ESC__TEXT_RESET=""
   fi
 fi
 
@@ -139,54 +139,54 @@ fi
 # Cursor at 1;1 is the top left corner of the screen.
 
 # cursor movement
-AC__CURSOR_MOVE__=$'\e['
-# "${AC__CURSOR_MOVE__}2${__AC__UP}"
-__AC__UP=$'A'
-# "${AC__CURSOR_MOVE__}2${__AC__DOWN}"
-__AC__DOWN=$'B'
-# "${AC__CURSOR_MOVE__}2${__AC__RIGHT}"
-__AC__RIGHT=$'C'
-# "${AC__CURSOR_MOVE__}2${__AC__LEFT}"
-__AC__LEFT=$'D'
-# Moves cursor to beginning of the line n lines down. If the active position is at the bottom margin, a scroll up is performed. "${AC__CURSOR_MOVE__}1${__AC__START_OF_LINE_DOWN}"
-__AC__START_OF_LINE_DOWN=$'E'
-# Moves cursor to beginning of the line n lines up. If the active position is at the bottom margin, a scroll up is performed. "${AC__CURSOR_MOVE__}1${__AC__START_OF_LINE_UP}"
-__AC__START_OF_LINE_UP=$'F'
-# Move the cursor to the given column (1 based). "${AC__CURSOR_MOVE__}2${__AC__COLUMN}"
-__AC__COLUMN=$'G'
-# Move the cursor to given position. "${AC__CURSOR_MOVE__}1;1${__AC__TO}" (row;col)
-__AC__TO=$'H'
+ESC__CURSOR_MOVE__=$'\e['
+# "${ESC__CURSOR_MOVE__}2${__ESC__UP}"
+__ESC__UP=$'A'
+# "${ESC__CURSOR_MOVE__}2${__ESC__DOWN}"
+__ESC__DOWN=$'B'
+# "${ESC__CURSOR_MOVE__}2${__ESC__RIGHT}"
+__ESC__RIGHT=$'C'
+# "${ESC__CURSOR_MOVE__}2${__ESC__LEFT}"
+__ESC__LEFT=$'D'
+# Moves cursor to beginning of the line n lines down. If the active position is at the bottom margin, a scroll up is performed. "${ESC__CURSOR_MOVE__}1${__ESC__START_OF_LINE_DOWN}"
+__ESC__START_OF_LINE_DOWN=$'E'
+# Moves cursor to beginning of the line n lines up. If the active position is at the bottom margin, a scroll up is performed. "${ESC__CURSOR_MOVE__}1${__ESC__START_OF_LINE_UP}"
+__ESC__START_OF_LINE_UP=$'F'
+# Move the cursor to the given column (1 based). "${ESC__CURSOR_MOVE__}2${__ESC__COLUMN}"
+__ESC__COLUMN=$'G'
+# Move the cursor to given position. "${ESC__CURSOR_MOVE__}1;1${__ESC__TO}" (row;col)
+__ESC__TO=$'H'
 
-# Scroll whole page up by n (default 1) lines. New lines are added at the bottom. "${AC__CURSOR_MOVE__}2${__AC__SCROLL_UP}"
-__AC__SCROLL_UP=$'S'
-# Scroll whole page down by n (default 1) lines. New lines are added at the top. "${AC__CURSOR_MOVE__}2${__AC__SCROLL_DOWN}"
-__AC__SCROLL_DOWN=$'T'
+# Scroll whole page up by n (default 1) lines. New lines are added at the bottom. "${ESC__CURSOR_MOVE__}2${__ESC__SCROLL_UP}"
+__ESC__SCROLL_UP=$'S'
+# Scroll whole page down by n (default 1) lines. New lines are added at the top. "${ESC__CURSOR_MOVE__}2${__ESC__SCROLL_DOWN}"
+__ESC__SCROLL_DOWN=$'T'
 
 # Reports the cursor position to the application as (as ESC[n;mR), where n is the line and m is the column.
-AC__REQUEST_CURSOR_POSITION=$'\e[6n'
+ESC__REQUEST_CURSOR_POSITION=$'\e[6n'
 
-# About AC__ERASE*: try not to use them to clear characters that you will immediately rewrite
+# About ESC__ERASE*: try not to use them to clear characters that you will immediately rewrite
 #                   because it will cause flickering, use it to actually get empty space.
 # erase in display or line
 # clear from cursor to end of screen
-AC__ERASE_LINES_BELOW=$'\e[0J'
+ESC__ERASE_LINES_BELOW=$'\e[0J'
 # clear from cursor to beginning of the screen
-AC__ERASE_LINES_ABOVE=$'\e[1J'
+ESC__ERASE_LINES_ABOVE=$'\e[1J'
 # clear entire screen
-AC__ERASE_SCREEN=$'\e[2J'
+ESC__ERASE_SCREEN=$'\e[2J'
 # clear from cursor to the end of the line
-AC__ERASE_CHARS_RIGHT=$'\e[0K'
+ESC__ERASE_CHARS_RIGHT=$'\e[0K'
 # clear from cursor to the beginning of the line
-AC__ERASE_CHARS_LEFT=$'\e[1K'
+ESC__ERASE_CHARS_LEFT=$'\e[1K'
 # clear entire line
-AC__ERASE_LINE=$'\e[2K'
-# Erase a set number of characters "${AC__ERASE__}2${__AC_CHARS}"
-AC__ERASE__=$'\e['
+ESC__ERASE_LINE=$'\e[2K'
+# Erase a set number of characters "${ESC__ERASE__}2${__AC_CHARS}"
+ESC__ERASE__=$'\e['
 __AC_CHARS=$'X'
 
-# Repeat last displayed (visible only) character n times "${AC__REPEAT__}2${__AC__LAST_CHAR}"
-AC__REPEAT__=$'\e['
-__AC__LAST_CHAR=$'b'
+# Repeat last displayed (visible only) character n times "${ESC__REPEAT__}2${__ESC__LAST_CHAR}"
+ESC__REPEAT__=$'\e['
+__ESC__LAST_CHAR=$'b'
 
 #===============================================================
 # >>> General ASCII Codes
@@ -204,23 +204,23 @@ __AC__LAST_CHAR=$'b'
 #===============================================================
 
 # Hides the cursor.
-AC__CURSOR_HIDE=$'\e[?25l'
+ESC__CURSOR_HIDE=$'\e[?25l'
 # Shows the cursor (forcibly show it).
-AC__CURSOR_SHOW_FORCE=$'\e[?25h'
+ESC__CURSOR_SHOW_FORCE=$'\e[?25h'
 # Shows the cursor (or not, if we are not in exported mode).
-AC__CURSOR_SHOW=""
+ESC__CURSOR_SHOW=""
 if [[ ${GLOBAL_EXPORTED:-} == "true" ]]; then
-  AC__CURSOR_SHOW=$'\e[?25h'
+  ESC__CURSOR_SHOW=$'\e[?25h'
 fi
 
 # Switch to the alternate screen buffer.
-AC__ENABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049h'
+ESC__ENABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049h'
 # Switch back from the alternate screen buffer.
-AC__DISABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049l'
+ESC__DISABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049l'
 
 if [[ ${VALET_CONFIG_DISABLE_ESC_CODES:-} == "true" ]]; then
   # we reset all the color variables to a blank string
-  _ESC_VARS="${!AC__*} ${!__AC__*}"
+  _ESC_VARS="${!ESC__*} ${!__ESC__*}"
   eval "${_ESC_VARS// /"=''; "}=''"
   unset -v _ESC_VARS
 fi

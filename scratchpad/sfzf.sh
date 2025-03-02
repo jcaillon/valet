@@ -40,7 +40,7 @@ declare -g -a SELECTION_ARRAY
 SELECTION_ARRAY=("blue" "red" "green" "yellow")
 # shellcheck disable=SC2317
 
-function getColorSample() { local -n color="AC__FG_${1^^}"; RETURNED_VALUE="${color}AC__FG_${1^^}${AC__TEXT_RESET}"; }
+function getColorSample() { local -n color="ESC__FG_${1^^}"; RETURNED_VALUE="${color}ESC__FG_${1^^}${ESC__TEXT_RESET}"; }
 sfzf::show "What's your favorite color?" SELECTION_ARRAY "getColorSample" "Color sample"
 log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
 

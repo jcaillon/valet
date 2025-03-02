@@ -82,7 +82,7 @@ styles::init
 if [[ -t 2 ]]; then
   tui::getTerminalSize
   # hide the cursor (we restore on exit)
-  printf "%s" "${AC__CURSOR_HIDE}" 1>&2
+  printf "%s" "${ESC__CURSOR_HIDE}" 1>&2
 else
   GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}"
   # shellcheck disable=SC2034
