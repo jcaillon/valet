@@ -128,7 +128,7 @@ function selfDocument::getAllFunctionsDocumentation() {
 
   # add each file of each user library directory
   if [[ ${coreOnly} != "true" ]]; then
-    local libraryDirectory
+    local -n libraryDirectory
     for libraryDirectory in "${CMD_LIBRARY_DIRECTORIES[@]}"; do
       fs::listFiles "${libraryDirectory}"
       filesToAnalyze+=("${RETURNED_ARRAY[@]}")

@@ -49,9 +49,6 @@ function trap::onExitInternal() {
     onExit "${rc}"
   fi
 
-  # always call cleanUp before exiting
-  trap::onCleanUpInternal
-
   if [[ ${GLOBAL_ERROR_DISPLAYED:-0} != "1" && ${rc} != "0" ]]; then
     log::print "ERROR" "${STYLE_ICON_EXIT:-}" "EXIT" "Exiting with code ${rc}, stack:"
     log::printCallStack 2
@@ -61,6 +58,9 @@ function trap::onExitInternal() {
   if [[ -n ${GLOBAL_ON_EXIT_MESSAGE:-} ]]; then
     log::errorTrace "${GLOBAL_ON_EXIT_MESSAGE}"
   fi
+
+  # always call cleanUp before exiting
+  trap::onCleanUpInternal
 }
 
 # This function is called when the program is interrupted by the user (CTRL+C).
@@ -119,8 +119,6 @@ function trap::onResizeInternal() {
 
 # This functions is called before the program exits (in all cases, error or not).
 function trap::onCleanUpInternal() {
-  fs::cleanTempFiles
-
   # disable the profiler if still on
   if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
 
@@ -140,9 +138,16 @@ function trap::onCleanUpInternal() {
   fi
 
   # restore tty settings if needed
+  if declare -F tui::restoreLogs &>/dev/null; then
+    tui::restoreLogs
+  fi
+
+  # restore tty settings if needed
   if declare -F tui::restoreTerminalOptions &>/dev/null; then
     tui::restoreTerminalOptions true
   fi
+
+  fs::cleanTempFiles
 }
 
 # Function to handle commands not found, so we can display a better message.
@@ -1440,6 +1445,10 @@ function string::highlight() {
 function array::fuzzyFilterSort() {
   local -n arrayToFilter="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -n filterSearchString="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  # exclude regex meta characters
+  #TODO: handle these by escaping them
+  filterSearchString="${filterSearchString//[\$\^\.\[\]\{\}\(\)\*\+\?\|]/}"
 
   # nothing to filter
   if [[ -z ${filterSearchString} || ${#arrayToFilter[@]} -eq 0 ]]; then

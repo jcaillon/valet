@@ -28,18 +28,18 @@ An information icon: 
 
 ```text
 INFO     Now setting up Valet.
-   ╭─56─╮
+   ╭──────────────────────────────────────────────────────────╮
 ░──┤ Do you see the colors in the color check above the line? 63│
-   ╰─56─╯
-111    (Y)ES         (N)O   19╭─3─╮
+   ╰──────────────────────────────────────────────────────────╯
+111    (Y)ES         (N)O   19╭─────╮
 9│ No. 15├──░
-9╰─3─╯
-   ┌─69─┐
+9╰─────╯
+   ┌───────────────────────────────────────────────────────────────────────┐
 ░──┤ Do you correctly see the nerd icons in the icon check above the line? 76│
-   └─69─┘
-111    (Y)ES         (N)O   19┌─3─┐
+   └───────────────────────────────────────────────────────────────────────┘
+111    (Y)ES         (N)O   19┌─────┐
 9│ No. 15├──░
-9└─3─┘
+9└─────┘
 INFO     If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal.
 You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
 After that, you need to setup your terminal to use this newly installed font.
@@ -86,18 +86,18 @@ An information icon: 
 
 ```text
 INFO     Now setting up Valet.
-   ┌─56─┐
+   ┌──────────────────────────────────────────────────────────┐
 ░──┤ Do you see the colors in the color check above the line? 63│
-   └─56─┘
-111    (Y)ES         (N)O   19┌─4─┐
+   └──────────────────────────────────────────────────────────┘
+111    (Y)ES         (N)O   19┌──────┐
 9│ Yes. 16├──░
-9└─4─┘
-   ┌─69─┐
+9└──────┘
+   ┌───────────────────────────────────────────────────────────────────────┐
 ░──┤ Do you correctly see the nerd icons in the icon check above the line? 76│
-   └─69─┘
-111    (Y)ES         (N)O   19┌─4─┐
+   └───────────────────────────────────────────────────────────────────────┘
+111    (Y)ES         (N)O   19┌──────┐
 9│ Yes. 16├──░
-9└─4─┘
+9└──────┘
 INFO     Writing the valet config file ⌜/tmp/valet-temp⌝.
 SUCCESS  You are all set!
 ```

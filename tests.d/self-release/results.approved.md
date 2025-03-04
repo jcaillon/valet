@@ -56,7 +56,7 @@ INFO     The tag message is:
    5 ░ - ✨ feature
    6 ░ - 🐞 fix
 INFO     Generating documentation for the core functions only.
-INFO     Found 167 functions with documentation.
+INFO     Found 170 functions with documentation.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md⌝.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet
@@ -64,7 +64,7 @@ INFO     The documentation has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTO
 INFO     The prototype script has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet⌝.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets
 INFO     The vscode snippets have been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets⌝.
-INFO     Writing the 167 functions documentation to the core libraries docs.
+INFO     Writing the 170 functions documentation to the core libraries docs.
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/codes.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/core.md
@@ -77,6 +77,7 @@ INFO     Writing the 167 functions documentation to the core libraries docs.
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/string.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/system.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/test.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md
@@ -266,6 +267,10 @@ INFO     Writing the 167 functions documentation to the core libraries docs.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/time.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/time.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/time.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md

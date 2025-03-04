@@ -9,7 +9,7 @@ include prompt time profiler
 # load the file
 time::getProgramElapsedMicroseconds
 TIME1="${RETURNED_VALUE}"
-mapfile -t MY_ARRAY < "scratchpad/f2"
+mapfile -t MY_ARRAY < "tests.d/lib-array/words"
 # mapfile -t MY_ARRAY < "f3"
 # mapfile -t MY_ARRAY < "f4"
 # echo
@@ -97,8 +97,11 @@ _OPTION_PASSWORD_MODE=false
 
 # There were 2 new lines before this.'
 
-profiler::enable ./tmp/prof
-VALET_CONFIG_KEEP_ALL_PROFILER_LINES=true
+# profiler::enable ./tmp/prof
+# VALET_CONFIG_KEEP_ALL_PROFILER_LINES=true
+
+_OPTION_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD=0
+_OPTION_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD=0
 
 if prompt::input "${GLOBAL_CURSOR_LINE}" "${GLOBAL_CURSOR_COLUMN}"; then
   log::info "You entered: ⌜${RETURNED_VALUE}⌝ (displayed: ⌜${RETURNED_VALUE2}⌝ index ⌜${RETURNED_VALUE3}⌝)"

@@ -170,7 +170,7 @@ function progress::update() {
     _OPTION_DEFAULT_PERCENTAGE="${percent}" _OPTION_DEFAULT_MESSAGE="${message}" progress::start ""
     return 0
   fi
-  if ! { printf "1\0%s %s %s\0" "update" "${percent}" "${message}" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; } 2>/dev/null; then
+  if [[ ! -v _PROGRESS_BACKGROUND_JOB ]] || ! { printf "1\0%s %s %s\0" "update" "${percent}" "${message}" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; } 2>/dev/null; then
     # case where the progress bar was stopped because it reached max frames
     progress::stop
   fi
@@ -184,7 +184,7 @@ function progress:redraw() {
   if [[ ${_PROGRESS_BAR_RUNNING:-} != "true" ]]; then
     return 0
   fi
-  if ! { printf "1\0%s\0" "redraw" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; } 2>/dev/null; then
+  if [[ ! -v _PROGRESS_BACKGROUND_JOB ]] || ! { printf "1\0%s\0" "redraw" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; } 2>/dev/null; then
     # case where the progress bar was stopped because it reached max frames
     progress::stop
   fi
@@ -198,7 +198,7 @@ function progress::onResize() {
   if [[ ${_PROGRESS_BAR_RUNNING:-} != "true" ]]; then
     return 0
   fi
-  if ! { printf "1\0%s %s\0" "resize" "${GLOBAL_COLUMNS}" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; } 2>/dev/null; then
+  if [[ ! -v _PROGRESS_BACKGROUND_JOB ]] || ! { printf "1\0%s %s\0" "resize" "${GLOBAL_COLUMNS}" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; } 2>/dev/null; then
     # case where the progress bar was stopped because it reached max frames
     progress::stop
   fi

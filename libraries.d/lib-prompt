@@ -90,6 +90,16 @@ source fs
 # - ${_OPTION_ITEMS_BOX_SHOW_COUNT_AT_TOP} _as bool_:
 #       (optional) If true, the count of items will be displayed at the top of the box instead of the bottom.
 #       (defaults to false)
+# - ${_OPTION_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD} _as int_:
+#       (optional) The number of items at which the filtering is done asynchronously.
+#       If the number of items is greater than this value, the filtering is done asynchronously.
+#       Can be set to 0 to force asynchronous filtering.
+#       (defaults to 242)
+# - ${_OPTION_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD} _as int_:
+#       (optional) The number of items at which the filtering is done using an external program.
+#       If the number of items is greater than this value, the filtering is done using an external program.
+#       This is to avoid performance issues when filtering a large number of items using pure bash.
+#       (defaults to 1042)
 # - ${_OPTION_ENABLE_PROMPT} _as bool_:
 #       (optional) If true, the prompt is displayed. If false, the prompt is hidden.
 #       Useful to turn this into a simple multiple choice list.
@@ -261,8 +271,8 @@ function prompt::input() {
     _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY="prompt::getItemDisplayedString"
   fi
 
-  _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=""
-  _PROMPT_ITEMS_BOX_FILTER_USING_GREP=""
+  _PROMPT_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD="${_OPTION_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD:-242}"
+  _PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${_OPTION_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD:-1042}"
 
   local -A _PROMPT_KEY_MAPPING=(
     ["CTRL+ALT+M"]="accept-line"
@@ -385,6 +395,7 @@ function prompt_main_loop() {
   tui::setTerminalOptions
   # rebind some keys to call the callback function prompt_onKeyBindingPress
   tui::rebindKeymap prompt_onKeyBindingPress
+  tui::rerouteLogs
   # we redirect everything done in this function to fd 3 which prints to stderr
   # we need this because tui::waitForKeyPress redirects stderr to /dev/null
   exec 3>&2
@@ -418,18 +429,9 @@ function prompt_main_loop() {
     fi
 
     # check if the background job for async filtering is done
-    if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} && -f ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
-      unset -v GLOBAL_BACKGROUND_JOB1_PID
-      # read the items from the file
-      if [[ -s ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE} ]]; then
-        readarray -t _PROMPT_FILTERED_ITEMS <"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
-        readarray -t _PROMPT_FILTERED_ITEMS_CORRESPONDENCES <"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
-      else
-        _PROMPT_FILTERED_ITEMS=()
-        _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
-      fi
-      fs::readFile "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILTER_STRING}"
-      _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING="${RETURNED_VALUE%%[[:space:]]}"
+    if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} != "true" ]] && prompt_asyncFilterLoadFilteredItems; then
+      _PROMPT_ASYNC_FILTERING_RUNNING=false
+      echo "redraw item box after async filtering" >>./tmp/f
       prompt_drawItemsBox
     fi
 
@@ -440,12 +442,13 @@ function prompt_main_loop() {
   done
 
   # clean up
-  prompt_filterItemsAsyncKill
+  prompt_stopAsyncFiltering
   prompt_clearErrorBox
   prompt_clearItemsBox
   prompt_clearPrompt
   exec 3>&-
 
+  tui::restoreLogs
   tui::restoreTerminalOptions
   tui::restoreInterruptTrap
   shopt -u nocasematch
@@ -489,6 +492,8 @@ function prompt_setSizeVariables() {
   else
     _PROMPT_STRING_SCREEN_WIDTH=${_PROMPT_WIDTH}
   fi
+
+  printf -v _PROMPT_STRING_BLANKS "%${_PROMPT_STRING_SCREEN_WIDTH}s" " "
 }
 
 # set up the variables that depend on the items list
@@ -540,39 +545,35 @@ function prompt_setItemsListVariables() {
   _PROMPT_FILTERED_ITEMS_SELECTED_INDEX=-1
   _PROMPT_ITEMS_BOX_FILTER_STRING=""
 
-  # if the items are too many, we will filter them asynchronously/filter with grep
-  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 242 ]]; then
-    _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY="false"
+  # Async filtering variables below
+
+  # make sure to use async when we use an external program
+  if (( _PROMPT_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD > _PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD )); then
+    _PROMPT_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD="${_PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD}"
   fi
-  if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} && _PROMPT_ORIGINAL_ITEMS_COUNT -gt 1042 ]]; then
-    if [[ ${VALET_CONFIG_STRICT_PURE_BASH:-false} != "true" ]] && command -v grep &>/dev/null && command -v gawk &>/dev/null; then
-      _PROMPT_ITEMS_BOX_FILTER_USING_GREP="true"
+
+  # filter with an external program
+  if [[ ${VALET_CONFIG_STRICT_PURE_BASH:-false} != "true" && _PROMPT_ORIGINAL_ITEMS_COUNT -ge _PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD ]]; then
+
+    _OPTION_PATH_ONLY=true fs::createTempFile
+    _ASYNC_FILTER_ORIGINAL_ITEMS_FILE="${RETURNED_VALUE}"
+
+    if command -v grep &>/dev/null && command -v gawk &>/dev/null; then
+      _PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM="grep+gawk"
       # shellcheck source=lib-array
       source array
     fi
   fi
 
-  # initial setup of files for async filtering if not done
-  if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY:-true} != "true" && -z ${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
-    _OPTION_PATH_ONLY=true fs::createTempFile
-    _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE="${RETURNED_VALUE}"
-    _OPTION_PATH_ONLY=true fs::createTempFile
-    _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
-    _OPTION_PATH_ONLY=true fs::createTempFile
-    _PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILTER_STRING="${RETURNED_VALUE}"
+  # if the items are too many, we will filter them asynchronously/filter with grep
+  if (( _PROMPT_ORIGINAL_ITEMS_COUNT >= _PROMPT_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD )); then
+    prompt_setUpAsyncFiltering
+    _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=false
+  else
+    _PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY=true
   fi
+  echo "_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY: ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY}" >>./tmp/f
 
-  # initial setup of files for grep filtering
-  if [[ ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP:-true} == "true" ]]; then
-    if [[ -z ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS:-} ]]; then
-      _OPTION_PATH_ONLY=true fs::createTempFile
-      _PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS="${RETURNED_VALUE}"
-      _OPTION_PATH_ONLY=true fs::createTempFile
-      _PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1="${RETURNED_VALUE}"
-    fi
-    local IFS=$'\n'
-    echo "${_PROMPT_ORIGINAL_ITEMS[*]}" >"${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}"
-  fi
 }
 
 # Called when a special key is pressed.
@@ -970,11 +971,7 @@ function prompt_drawPrompt() {
   fi
   local spaces=""
   if ((spaceLeft > 0)); then
-    if ((spaceLeft == 1)); then
-      spaces=" "
-    else
-      spaces=" ${ESC__REPEAT__}$((spaceLeft - 1))${__ESC__LAST_CHAR}"
-    fi
+    spaces="${_PROMPT_STRING_BLANKS:0:spaceLeft}"
   fi
 
   printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${STYLE_FRAMES}${_PROMPT_SYMBOL}${STYLE_RESET}${STYLE_PROMPT_STRING}${RETURNED_VALUE}${spaces}${STYLE_RESET}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&3
@@ -1006,6 +1003,8 @@ function prompt_openItemsBox() {
   _PROMPT_ITEMS_BOX_LEFT="${RETURNED_VALUE2}"
   _PROMPT_ITEMS_BOX_WIDTH="${RETURNED_VALUE3}"
   _PROMPT_ITEMS_BOX_HEIGHT="${RETURNED_VALUE4}"
+
+  printf -v _PROMPT_ITEMS_BOX_BLANKS "%${_PROMPT_ITEMS_BOX_WIDTH}s" " "
 
   _PROMPT_ITEMS_BOX_REVERSE_MODE="false"
   if ((_PROMPT_ITEMS_BOX_TOP < _PROMPT_START_LINE)); then
@@ -1063,11 +1062,6 @@ function prompt_filterItems() {
     return 0
   fi
 
-  if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY:-true} != "true" ]]; then
-    # asynchronous filtering, kill an already running background job
-    prompt_filterItemsAsyncKill
-  fi
-
   _PROMPT_ITEMS_BOX_FILTER_STRING="${_PROMPT_CURRENT_WORD}"
 
   # case where we can return the original items
@@ -1078,19 +1072,19 @@ function prompt_filterItems() {
     return 0
   fi
 
-  # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
-  # shellcheck disable=SC2178
-  local -n RETURNED_ARRAY=_PROMPT_FILTERED_ITEMS
-  # shellcheck disable=SC2034
-  local -n RETURNED_ARRAY2=_PROMPT_FILTERED_ITEMS_CORRESPONDENCES
 
-  if [[ -n ${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING:-} && ${_PROMPT_ITEMS_BOX_FILTER_STRING} == "${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING}"* && (${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} == "true" || ${#_PROMPT_FILTERED_ITEMS[@]} -lt 242) ]]; then
+  if [[ -n ${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING:-} && ${_PROMPT_ITEMS_BOX_FILTER_STRING} == "${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING}"* && (${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} == "true" || ${#_PROMPT_FILTERED_ITEMS[@]} -lt _PROMPT_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD) ]]; then
     if ((${#_PROMPT_FILTERED_ITEMS[@]} == 0)); then
       return 0
     fi
     # if the current filter string is a prefix of the previous one, we can filter the already filtered items
     local -a _PROMPT_PRE_FILTERED_ITEMS=("${_PROMPT_FILTERED_ITEMS[@]}")
     local -a _PROMPT_PRE_FILTERED_ITEMS_CORRESPONDENCES=("${_PROMPT_FILTERED_ITEMS_CORRESPONDENCES[@]}")
+    # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
+    # shellcheck disable=SC2178
+    local -n RETURNED_ARRAY=_PROMPT_FILTERED_ITEMS
+    # shellcheck disable=SC2034
+    local -n RETURNED_ARRAY2=_PROMPT_FILTERED_ITEMS_CORRESPONDENCES
     array::fuzzyFilterSort _PROMPT_PRE_FILTERED_ITEMS _PROMPT_ITEMS_BOX_FILTER_STRING
     _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING="${_PROMPT_ITEMS_BOX_FILTER_STRING}"
     # we need to update the correspondences
@@ -1102,57 +1096,203 @@ function prompt_filterItems() {
   fi
 
   if [[ ${_PROMPT_ITEMS_BOX_FILTER_SYNCHRONOUSLY} == "true" ]]; then
-    array::fuzzyFilterSort _PROMPT_ORIGINAL_ITEMS _PROMPT_ITEMS_BOX_FILTER_STRING
-    _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING="${_PROMPT_ITEMS_BOX_FILTER_STRING}"
-  else
-    # asynchronous filtering
-    rm -f "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}" &>/dev/null || :
-    prompt_filterItemsAsync &
-    GLOBAL_BACKGROUND_JOB1_PID="$!"
-  fi
-}
-
-# Filter the items of the autocompletion box asynchronously
-function prompt_filterItemsAsync() {
-  echo "${_PROMPT_ITEMS_BOX_FILTER_STRING}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILTER_STRING}"
-
-  if [[ ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP} == "true" ]]; then
-    # sort with grep and awk
-    : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
-    rm "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" &>/dev/null || :
-
-    array::fuzzyFilterSortFileWithGrepAndGawk "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_ORIGINAL_ITEMS}" _PROMPT_ITEMS_BOX_FILTER_STRING "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
-
-    if [[ -f ${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1} ]]; then
-      mv "${_PROMPT_ITEMS_BOX_FILTER_USING_GREP_TEMP1}" "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
-    else
-      : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
-    fi
-  else
     # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
     # shellcheck disable=SC2178
     local -n RETURNED_ARRAY=_PROMPT_FILTERED_ITEMS
     # shellcheck disable=SC2034
     local -n RETURNED_ARRAY2=_PROMPT_FILTERED_ITEMS_CORRESPONDENCES
-
-    # sort with bash
     array::fuzzyFilterSort _PROMPT_ORIGINAL_ITEMS _PROMPT_ITEMS_BOX_FILTER_STRING
-    local IFS=$'\n'
-    if ((${#_PROMPT_FILTERED_ITEMS[@]} > 0)); then
-      echo "${_PROMPT_FILTERED_ITEMS[*]}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
-      echo "${_PROMPT_FILTERED_ITEMS_CORRESPONDENCES[*]}" >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
-    else
-      : >"${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}"
+    _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING="${_PROMPT_ITEMS_BOX_FILTER_STRING}"
+  else
+    # asynchronous filtering
+    if [[ ! -v _PROMPT_ASYNC_FILTER_JOB ]]; then
+      prompt_setUpAsyncFiltering
     fi
+
+    # send a message to the async filter job
+    if ! { printf "filter=%s\0" "${_PROMPT_ITEMS_BOX_FILTER_STRING}" >&"${_PROMPT_ASYNC_FILTER_JOB[1]:-}"; } 2>/dev/null; then
+      prompt_setUpAsyncFiltering
+    fi
+
+    _PROMPT_ASYNC_FILTERING_RUNNING=true
   fi
 }
 
-# Kill the background job that filters the items asynchronously
-function prompt_filterItemsAsyncKill() {
-  if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
-    kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
-    unset -v GLOBAL_BACKGROUND_JOB1_PID
+function prompt_setUpAsyncFiltering() {
+  if [[ -v _PROMPT_ASYNC_FILTER_JOB ]]; then
+    return
   fi
+
+  # initial setup of files for async filtering if not done
+  if [[ -z ${_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
+    _OPTION_PATH_ONLY=true fs::createTempFile
+    _ASYNC_FILTERED_ITEMS_FILE="${RETURNED_VALUE}"
+
+    _OPTION_PATH_ONLY=true fs::createTempFile
+    _ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
+  fi
+
+  { coproc _PROMPT_ASYNC_FILTER_JOB { prompt_asyncFilterJob ; } } 2>/dev/null
+  # shellcheck disable=SC2034
+  GLOBAL_BACKGROUND_JOB1_PID="${_PROMPT_ASYNC_FILTER_JOB_PID}"
+
+  echo "Async filtering job started" >>./tmp/f
+}
+
+function prompt_stopAsyncFiltering() {
+  echo "Async filtering job stopped" >>./tmp/f
+  if [[ ! -v _PROMPT_ASYNC_FILTER_JOB || ! -v _PROMPT_ASYNC_FILTER_JOB_PID ]]; then
+    return
+  fi
+
+  kill "${_PROMPT_ASYNC_FILTER_JOB_PID}" &>/dev/null || :
+
+  unset -v _PROMPT_ASYNC_FILTER_JOB
+
+  rm -f "${_ASYNC_FILTERED_ITEMS_FILE}" \
+    "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+}
+
+function prompt_asyncFilterJob() {
+  local IFS
+
+  if [[ -n ${_PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM:-} ]]; then
+
+    _OPTION_PATH_ONLY=true fs::createTempFile
+    local intermediateItemsFile="${RETURNED_VALUE}"
+    _OPTION_PATH_ONLY=true fs::createTempFile
+    local intermediateItemsCorrespondencesFile="${RETURNED_VALUE}"
+
+    # initial setup of files for filtering with external programs
+    case "${_PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM:-}" in
+      grep+gawk)
+        IFS=$'\n'
+        echo "${_PROMPT_ORIGINAL_ITEMS[*]}" >"${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
+        ;;
+      fzf)
+        IFS=$'\n'
+        echo "${_PROMPT_ORIGINAL_ITEMS[*]}" >"${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
+        ;;
+    esac
+  fi
+
+  local instruction filterString
+  local lastFilterString=""
+  # allows to know if we need to filter from the original items list,
+  # or if we can continue to filter down from our last filtering operation
+  local filterOriginalItems=true
+  while true; do
+    # loop and wait to read instructions until we read a filter instruction
+    while true; do
+      IFS='' read -rd '' instruction || [[ -v instruction ]]
+
+      case "${instruction}" in
+        filter=*)
+          filterString="${instruction#"filter="}"
+          ;;
+        reloadItems)
+          readarray -t _PROMPT_ORIGINAL_ITEMS <"${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
+          continue
+          ;;
+        *)
+          core::fail "Unknown instruction: ${instruction}"
+          ;;
+      esac
+
+      if IFS='' read -t 0 -rd ''; then
+        continue
+      fi
+      break
+    done
+
+    if [[ ${filterString} != "${lastFilterString}"* ]]; then
+      filterOriginalItems=true
+    fi
+
+    # filter
+    echo "Async filtering <${filterString}>, filterOriginalItems=${filterOriginalItems}, lastFilterString=<${lastFilterString}>" >>./tmp/f
+
+    case "${_PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM:-}" in
+      grep+gawk)
+        echo "using grep" >>./tmp/f
+        # sort with grep and awk
+        : >"${intermediateItemsFile}"
+        : >"${intermediateItemsCorrespondencesFile}"
+
+        array::fuzzyFilterSortFileWithGrepAndGawk \
+          "${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}" \
+          filterString \
+          "${intermediateItemsFile}" \
+          "${intermediateItemsCorrespondencesFile}"
+
+        mv -f "${intermediateItemsFile}" "${_ASYNC_FILTERED_ITEMS_FILE}"
+        mv -f "${intermediateItemsCorrespondencesFile}" "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+        ;;
+      *)
+        echo "using bash" >>./tmp/f
+        # sort with bash
+        echo "exec bash" >>./tmp/f
+        array::fuzzyFilterSort _PROMPT_ORIGINAL_ITEMS filterString
+        echo "exec2 bash: RETURNED_ARRAY ${RETURNED_ARRAY:-}, RETURNED_ARRAY2 ${RETURNED_ARRAY2:-}" >>./tmp/f
+        IFS=$'\n'
+        if ((${#RETURNED_ARRAY[@]} > 0)); then
+          echo "exec2 bash: _ASYNC_FILTERED_ITEMS_FILE ${_ASYNC_FILTERED_ITEMS_FILE:-}" >>./tmp/f
+          echo "exec2 bash: _ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE ${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE:-}" >>./tmp/f
+          echo "${RETURNED_ARRAY[*]}" >"${_ASYNC_FILTERED_ITEMS_FILE}"
+          echo "${RETURNED_ARRAY2[*]}" >"${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+        else
+          : >"${_ASYNC_FILTERED_ITEMS_FILE}"
+        fi
+        echo "done bash" >>./tmp/f
+        ;;
+    esac
+
+    lastFilterString="${filterString}"
+    filterOriginalItems=false
+
+    # notify main process that it can read the filtered items
+    printf "%s\0" "${lastFilterString}"
+    echo "Async filtering done and main notified <${filterString}>" >>./tmp/f
+  done
+
+  echo "Async filtering job terminated" >>./tmp/f
+}
+
+function prompt_asyncFilterLoadFilteredItems() {
+  if [[ ! -v _PROMPT_ASYNC_FILTER_JOB ]]; then
+    prompt_setUpAsyncFiltering
+    return 1
+  fi
+  if ! IFS='' read -rd '' -t 0 <&"${_PROMPT_ASYNC_FILTER_JOB[0]}"; then
+    return 1
+  fi
+
+  # read the filter string from the stdout of the background job
+  while true; do
+    IFS='' read -rd '' _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING <&"${_PROMPT_ASYNC_FILTER_JOB[0]}" || [[ -v _PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING ]]
+    if IFS='' read -rd '' -t 0 <&"${_PROMPT_ASYNC_FILTER_JOB[0]}"; then
+      continue
+    fi
+    break
+  done
+
+  echo "Loading filtered items for <${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING}>" >>./tmp/f
+
+  if [[ -z ${_PROMPT_ITEMS_BOX_CURRENT_FILTER_STRING} ]]; then
+    return 1
+  fi
+
+
+  # read the items from the file
+  if [[ -s ${_ASYNC_FILTERED_ITEMS_FILE} ]]; then
+    readarray -t _PROMPT_FILTERED_ITEMS <"${_ASYNC_FILTERED_ITEMS_FILE}"
+    readarray -t _PROMPT_FILTERED_ITEMS_CORRESPONDENCES <"${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+  else
+    _PROMPT_FILTERED_ITEMS=()
+    _PROMPT_FILTERED_ITEMS_CORRESPONDENCES=()
+  fi
+
+  echo "Loaded ${#_PROMPT_FILTERED_ITEMS[@]} items" >>./tmp/f
 }
 
 # Draw the autocompletion box
@@ -1218,7 +1358,7 @@ function prompt_drawItemsBox() {
 
     if ((index >= ${#_PROMPT_FILTERED_ITEMS[@]})); then
       # nothing to show for this line
-      toPrint+="${ESC__ERASE__}${_PROMPT_ITEMS_BOX_WIDTH}${__ECS__CHARS}"
+      toPrint+="${_PROMPT_ITEMS_BOX_BLANKS}"
       continue
     fi
 
@@ -1226,11 +1366,7 @@ function prompt_drawItemsBox() {
     _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${_PROMPT_FILTERED_ITEMS[${index}]}"
     if "${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}"; then
       if ((RETURNED_VALUE > 0)); then
-        if ((RETURNED_VALUE == 1)); then
-          spaces=" "
-        else
-          spaces=" ${ESC__REPEAT__}$((RETURNED_VALUE - 1))${__ESC__LAST_CHAR}"
-        fi
+        spaces="${_PROMPT_ITEMS_BOX_BLANKS:0:RETURNED_VALUE}"
       else
         spaces=""
       fi
@@ -1248,7 +1384,7 @@ function prompt_drawItemsBox() {
     local itemsCounter
     local -i itemCounterLength
 
-    if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
+    if [[ ${_PROMPT_ASYNC_FILTERING_RUNNING:-} == "true" ]]; then
       # case where we are filtering asynchronously, we display a loading message
       if ((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH >= 11)); then
         itemsCounter=" ${STYLE_PROMPT_COUNT}Filtering…${STYLE_RESET}"
@@ -1299,7 +1435,9 @@ function prompt_drawItemsBox() {
       counterSymbol="${_PROMPT_ITEMS_BOX_SYMBOL_COUNTER_BOX_BELOW}"
     fi
 
-    toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__ESC__TO}${STYLE_FRAMES}${counterSymbol}${ESC__REPEAT__}$((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH - itemCounterLength))${__ESC__LAST_CHAR}${STYLE_RESET}${itemsCounter}"
+    local counterFrame="${_PROMPT_ITEMS_BOX_BLANKS:0:_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH - itemCounterLength}"
+
+    toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__ESC__TO}${STYLE_FRAMES}${counterSymbol}${counterFrame// /─}${STYLE_RESET}${itemsCounter}"
   fi
 
   printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&3

@@ -368,7 +368,7 @@ function array::fuzzyFilterSortFileWithGrepAndGawk() {
   searchStringRegex+=")"
 
   # we use grep to pre-filter the lines.
-  # We could do everything in gawk but it would be slower for hugh files.
+  # We could do everything in gawk but it would be slower for huge files.
   grep --ignore-case --line-number "${searchStringRegex//[()]/}" "${fileToFilter}" >"${_ARRAY_TEMP_FILTER_FILE}"
   searchStringRegex="${searchStringRegex}(.?)"
   gawk "
@@ -433,4 +433,39 @@ function array::fuzzyFilterSortFileWithGrepAndGawk() {
     }
   " "${_ARRAY_TEMP_FILTER_FILE}"
   mv "${_ARRAY_TEMP_FILTERED_FILE}" "${outputFilteredFile}"
+}
+
+# ## array::fuzzyFilterSortFileWithFzf
+#
+# Allows to fuzzy sort a file against a given searched string.
+# Outputs a file containing only the lines matching the searched string.
+# The array is sorted by (in order):
+#
+# - the index of the first matched character in the line
+# - the distance between the first and last matched characters in the line
+#
+# Will also output a file containing the indexes of the matched lines in the original file.
+#
+# - $1: **file to filer** _as string_:
+#       The input file to filter.
+# - $2: **search string** _as string_:
+#       The variable name containing the search string to match.
+# - $3: **output filtered file** _as string_:
+#       The output file containing the filtered lines.
+# - $4: **output correspondences file** _as string_:
+#       The output file containing the indexes of the matched lines in the original file.
+#
+# ```bash
+# array::fuzzyFilterSortFileWithGrepAndGawk file.txt filtered.txt correspondences.txt
+# ```
+#
+# > This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.
+# > This function is useful for very large arrays.
+function array::fuzzyFilterSortFileWithFzf() {
+  # TODO: do the same with fzf, the input file should contains the line number as 1st field
+
+  fzf --ignore-case \
+    --tiebreak begin,end,index \
+    --filter ""
+
 }

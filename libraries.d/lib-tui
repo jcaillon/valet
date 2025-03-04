@@ -63,11 +63,8 @@ function tui::getCursorPosition() {
 #
 # Call this function to start an interactive session in full screen mode.
 # This function will switch to the alternate screen, hide the cursor and clear the screen.
-# It will also disable echoing when we type something.
 #
 # You should call tui::switchBackFromFullScreen at the end of the interactive session.
-#
-# In the alternate screen, we don't see the error messages so we capture them somewhere else.
 #
 # ```bash
 # tui::switchToFullScreen
@@ -84,11 +81,6 @@ function tui::switchToFullScreen() {
 
   # switch to the alternate screen, hide the cursor and clear the screen
   printf '%s' "${ESC__ENABLE_ALTERNATE_BUFFER_SCREEN}${ESC__CURSOR_HIDE}${ESC__ERASE_SCREEN}" 1>&2
-
-  # in full screen mode, we don't see the error messages so we capture them somewhere else
-  SFZF_TEMPORARY_ERROR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}${BASHPID}.valet-interactive.err"
-  while [[ -e "${SFZF_TEMPORARY_ERROR_FILE}" ]]; do SFZF_TEMPORARY_ERROR_FILE+="x"; done
-  exec 4>&2 2>"${SFZF_TEMPORARY_ERROR_FILE}"
 }
 
 # ## tui::switchBackFromFullScreen
@@ -97,7 +89,6 @@ function tui::switchToFullScreen() {
 #
 # - This function will restore the terminal state and show the cursor.
 # - It will also restore the key echoing.
-# - If there were error messages during the interactive session, they will be displayed at the end.
 #
 # ```bash
 # tui::switchBackFromFullScreen
@@ -115,13 +106,6 @@ function tui::switchBackFromFullScreen() {
 
   # restore stty
   tui::restoreTerminalOptions
-
-  # restore the error output and display them if any
-  exec 2>&4 4>&-
-  if [[ -s "${SFZF_TEMPORARY_ERROR_FILE:-}" ]]; then
-    fs::readFile "${SFZF_TEMPORARY_ERROR_FILE}"
-    log::error "Error messages during the interactive session:"$'\n'"${RETURNED_VALUE%$'\n'}"
-  fi
 }
 
 # ## tui::setTerminalOptions
@@ -166,6 +150,51 @@ function tui::restoreTerminalOptions() {
   if [[ -n ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
     stty "${_INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
     unset -v _INTERACTIVE_STTY_SAVED_CONFIG
+  fi
+}
+
+# ## tui::rerouteLogs
+#
+# Reroute the logs to a temporary file.
+# The logs will be displayed at the end of the interactive session.
+#
+# ```bash
+# tui::rerouteLogs
+# ```
+function tui::rerouteLogs() {
+  if [[ ! -v _TUI_LOG_FILE ]]; then
+    _OPTION_PATH_ONLY=true fs::createTempFile
+    _TUI_LOG_FILE="${RETURNED_VALUE}"
+  fi
+  _TUI_ORIGINAL_LOG_FD="${VALET_CONFIG_LOG_FD:-}"
+  VALET_CONFIG_LOG_FD="${_TUI_LOG_FILE}"
+  log::init
+}
+
+# ## tui::restoreLogs
+#
+# Restore the logs to their original state.
+# Should be called after `tui::rerouteLogs` and at the end of an interactive session.
+#
+# ```bash
+# tui::restoreLogs
+# ```
+function tui::restoreLogs() {
+  if [[ ! -v _TUI_LOG_FILE || ! -v _TUI_ORIGINAL_LOG_FD ]]; then
+    return 0
+  fi
+  if [[ -n ${_TUI_ORIGINAL_LOG_FD} ]]; then
+    VALET_CONFIG_LOG_FD="${_TUI_ORIGINAL_LOG_FD}"
+  else
+    unset -v VALET_CONFIG_LOG_FD
+  fi
+  log::init
+  unset -v _TUI_ORIGINAL_LOG_FD
+
+  # display the accumulated logs
+  if [[ -s "${_TUI_LOG_FILE}" ]]; then
+    fs::readFile "${_TUI_LOG_FILE}"
+    printf '%s' "${RETURNED_VALUE}" 1>&2
   fi
 }
 

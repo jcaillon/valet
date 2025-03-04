@@ -5,48 +5,78 @@ include bash
 
 # shellcheck disable=SC2317
 function inCoproc() {
-  echo "ok2" 1>&2
+  echo "COPROC: coproc started" 1>&2
+  # print an initial message
   printf "%s" a
   printf "%s" b
   printf "%s" c
   printf "%s\0" d
+
   local IFS='' instruction
   # read instructions from stdin
   while true; do
-    read -rd '' instruction || [[ -n ${instruction} ]] || instruction=""
+    while true; do
+      read -rd '' instruction || [[ -v instruction ]]
+      if read -t 0 -rd ''; then
+        echo "COPROC: got instruction <${instruction}> but more instructions await" 1>&2
+        continue
+      fi
+      break
+    done
     if [[ -n ${instruction} ]]; then
-      echo "instruction: ${instruction}" 1>&2
+      echo "COPROC: instruction: ${instruction}" 1>&2
     fi
     case "${instruction}" in
       "start")
-        echo "Starting the progress bar." 1>&2
+        echo "COPROC: Starting" 1>&2
+        bash::sleep 1
+        printf "%s\0" "started"
         ;;
-      "update")
-        echo "Updating the progress bar." 1>&2
+      "stop")
+        echo "COPROC: Stopping" 1>&2
+        break
         ;;
       *)
+        echo "COPROC: Unknown instruction: ${instruction}" 1>&2
         ;;
     esac
   done
-  echo "done" 1>&2
+  echo "COPROC: done" 1>&2
 }
 
 exec 4>&2
 { coproc _PROGRESS_COPROC_PIPES { inCoproc 2>&4; }  } 2>/dev/null
 exec 4>&-
-echo "The _PROGRESS_COPROC_PIPES coprocess array: ${_PROGRESS_COPROC_PIPES[*]}"
+echo "MAIN: _PROGRESS_COPROC_PIPES=${_PROGRESS_COPROC_PIPES[*]}"
+echo "MAIN: _PROGRESS_COPROC_PIPES_PID=${_PROGRESS_COPROC_PIPES_PID}"
 
-bash::sleep 1
-echo "Sending command..."
+IFS='' read -rd '' RETURNED_VALUE <&"${_PROGRESS_COPROC_PIPES[0]}" || [[ -v RETURNED_VALUE ]]
+echo "MAIN: Received: ${RETURNED_VALUE}"
+
+echo "MAIN: Sending start command"
 printf "%s\0" "start" >&"${_PROGRESS_COPROC_PIPES[1]}"
 
+echo "MAIN: Waiting for response..."
+IFS='' read -rd '' RETURNED_VALUE <&"${_PROGRESS_COPROC_PIPES[0]}" || [[ -v RETURNED_VALUE ]]
+echo "MAIN: Received: ${RETURNED_VALUE}"
+
+echo "Sending stop command"
+printf "%s\0%s\0" "unknown" "stop" >&"${_PROGRESS_COPROC_PIPES[1]}"
+
 bash::sleep 1
 
-IFS='' read -rd '' RETURNED_VALUE <&"${_PROGRESS_COPROC_PIPES[0]}" || [[ -n ${RETURNED_VALUE} ]] || RETURNED_VALUE=""
-echo "Received: ${RETURNED_VALUE}"
-
-bash::sleep 1
-
-kill "${_PROGRESS_COPROC_PIPES_PID}"
+# can check the variable _PROGRESS_COPROC_PIPES with -v to know if the coproc is still running
+if [[ -v _PROGRESS_COPROC_PIPES ]]; then
+  echo "Killing the coproc."
+  kill "${_PROGRESS_COPROC_PIPES_PID}"
+  bash::sleep 1
+  if [[ -v _PROGRESS_COPROC_PIPES ]]; then
+    echo "The coproc is still running."
+  else
+    echo "The coproc stopped with success."
+  fi
+else
+  echo "The coproc already stopped with success."
+fi
 
 exit 0
