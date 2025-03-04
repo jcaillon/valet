@@ -79,15 +79,6 @@ source fs
 #       (optional) If true, the box is forced to be displayed below the input text.
 #       Otherwise it will depend on the space required and space available below/above.
 #       (defaults to false)
-# - ${_OPTION_ENABLE_PROMPT} _as bool_:
-#       (optional) If true, the prompt is displayed. If false, the prompt is hidden.
-#       Useful to turn this into a simple multiple choice list.
-#       (defaults to true)
-# - ${_OPTION_NB_PROMPT_LINES} _as integer_:
-#       (optional) The number of lines to display for the prompt.
-#       A number above 1 allows a multi-line prompt.
-#       In which case, a new line is not used for validation but adds a new line in the prompt.
-#       (defaults to 1)
 # - ${_OPTION_ITEMS_BOX_ITEM_COUNT_ENABLED} _as bool_:
 #       (optional) If true, the count of items can be displayed at the bottom of the box.
 #       (defaults to true)
@@ -99,6 +90,10 @@ source fs
 # - ${_OPTION_ITEMS_BOX_SHOW_COUNT_AT_TOP} _as bool_:
 #       (optional) If true, the count of items will be displayed at the top of the box instead of the bottom.
 #       (defaults to false)
+# - ${_OPTION_ENABLE_PROMPT} _as bool_:
+#       (optional) If true, the prompt is displayed. If false, the prompt is hidden.
+#       Useful to turn this into a simple multiple choice list.
+#       (defaults to true)
 # - ${_OPTION_SHOW_SYMBOL} _as bool_:
 #       (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
 #       Useful to display the most simple auto-completion when false.
@@ -110,8 +105,8 @@ source fs
 #       When non-zero, the user can TAB to show the full list.
 #       (defaults to 0)
 # - ${_OPTION_ACCEPT_ANY_VALUE} _as bool_:
-#       (optional) If true, the left cursors are displayed (> for prompt and the > for selected item).
-#       Useful to display the most simple auto-completion when false.
+#       (optional) If true, the user can type any value, even if it is not in the list.
+#       If false, the user can only select a value from the list.
 #       (defaults to true)
 # - ${_OPTION_PLACEHOLDER} _as string_:
 #       (optional) The placeholder to display when the input is empty.
@@ -123,7 +118,7 @@ source fs
 # - ${_OPTION_AUTOCOMPLETE_WHOLE_LINE} _as bool_:
 #       (optional) If true, the whole line is autocompleted (all characters are considered to filter)
 #       the items. If false, only the word characters before the cursor are considered.
-#       (defaults to true)
+#       (defaults to false)
 # - ${_OPTION_TAB_OPENS_ITEMS_BOX} _as bool_:
 #       (optional) If true, the tab key opens the items box if it is not already open.
 #       (defaults to true)
@@ -167,6 +162,24 @@ source fs
 #       - $4: The height of the box.
 #
 #       The function must return 0 to state that prompt does not have to be redrawn, 1 otherwise.
+#       (defaults to empty)
+# - ${_OPTION_CALLBACK_FUNCTION_ON_ITEM_DISPLAY} _as string_:
+#       (optional) The name of a function to call when an item needs to be displayed in the list.
+#       This will replace the default function that displays the item with highlighted characters.
+#       The following variables are available:
+#
+#       - ${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED} _as string_:
+#             the string of the item as it is defined in the array
+#       - ${_PROMPT_ITEMS_BOX_ITEM_WIDTH} _as int_:
+#             the width of the item box (to truncate the string)
+#       - ${_PROMPT_ITEMS_BOX_FILTER_STRING} _as string_:
+#             the user current input string (to highlight the characters)
+#
+#       The function should return:
+#
+#       - ${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}: the string to display
+#       - ${RETURNED_VALUE}: the space left
+#
 #       (defaults to empty)
 #
 # Returns:
@@ -219,16 +232,10 @@ function prompt::input() {
   _PROMPT_PLACEHOLDER="${_OPTION_PLACEHOLDER:-}"
   _PROMPT_STRING_MAX_LENGTH="${_OPTION_STRING_MAX_LENGTH:-99999}"
 
-  _PROMPT_AUTOCOMPLETE_WHOLE_LINE="${_OPTION_AUTOCOMPLETE_WHOLE_LINE:-true}"
+  _PROMPT_AUTOCOMPLETE_WHOLE_LINE="${_OPTION_AUTOCOMPLETE_WHOLE_LINE:-false}"
   _PROMPT_TAB_OPENS_ITEMS_BOX="${_OPTION_TAB_OPENS_ITEMS_BOX:-true}"
   _PROMPT_ITEMS_BOX_ALLOW_FILTERING="${_OPTION_ITEMS_BOX_ALLOW_FILTERING:-${_PROMPT_ENABLE_PROMPT}}"
   _PROMPT_PASSWORD_MODE="${_OPTION_PASSWORD_MODE:-false}"
-
-  _PROMPT_NB_PROMPT_LINES="${_OPTION_NB_PROMPT_LINES:-1}"
-  _PROMPT_MULTI_LINE=false
-  if ((_PROMPT_NB_PROMPT_LINES > 1)); then
-    _PROMPT_MULTI_LINE=true
-  fi
 
   _PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE="${_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE:-}"
   if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE} ]] && ! declare -F "${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}" &>/dev/null; then
@@ -245,7 +252,7 @@ function prompt::input() {
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED}⌝ does not exist."
   fi
 
-  _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY=""
+  _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY="${_OPTION_CALLBACK_FUNCTION_ON_ITEM_DISPLAY:-}"
   if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY} ]]; then
     if ! declare -F "${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}" &>/dev/null; then
       core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}⌝ does not exist."
@@ -301,55 +308,18 @@ function prompt::input() {
     done
   fi
 
-  # set up colors
-  if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
-    _PROMPT_COLOR_STRING="${VALET_CONFIG_PROMPT_COLOR_STRING:-"${ESC__FG_MAGENTA}"}"
-    _PROMPT_COLOR_STRING_RESET="${VALET_CONFIG_PROMPT_COLOR_STRING_RESET:-"${ESC__FG_RESET}"}"
-    _PROMPT_COLOR_STATIC="${VALET_CONFIG_PROMPT_COLOR_STATIC:-"${ESC__FG_BRIGHT_BLACK}"}"
-    _PROMPT_COLOR_STATIC_RESET="${VALET_CONFIG_PROMPT_COLOR_STATIC_RESET:-"${ESC__FG_RESET}"}"
-    _PROMPT_COLOR_LETTER_HIGHLIGHT="${VALET_CONFIG_PROMPT_COLOR_LETTER_HIGHLIGHT:-"${ESC__TEXT_INVERSE}${ESC__FG_MAGENTA}"}"
-    _PROMPT_COLOR_LETTER_HIGHLIGHT_RESET="${VALET_CONFIG_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET:-"${ESC__TEXT_NO_INVERSE}${ESC__FG_RESET}"}"
-    _PROMPT_COLOR_SELECTED_ITEM="${VALET_CONFIG_PROMPT_COLOR_SELECTED_ITEM:-"${ESC__BG_BLACK}${ESC__FG_WHITE}"}"
-    _PROMPT_COLOR_SELECTED_ITEM_RESET="${VALET_CONFIG_PROMPT_COLOR_SELECTED_ITEM_RESET:-"${ESC__BG_RESET}${ESC__FG_RESET}"}"
-    _PROMPT_COLOR_SELECTED_ITEM_SYMBOL="${VALET_CONFIG_PROMPT_COLOR_SELECTED_ITEM_SYMBOL:-"${ESC__BG_BLACK}${ESC__FG_MAGENTA}"}"
-    _PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET="${VALET_CONFIG_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET:-"${ESC__BG_RESET}${ESC__FG_RESET}"}"
-    _PROMPT_COLOR_UNSELECTED_ITEM="${VALET_CONFIG_PROMPT_COLOR_UNSELECTED_ITEM:-""}"
-    _PROMPT_COLOR_UNSELECTED_ITEM_RESET="${VALET_CONFIG_PROMPT_COLOR_UNSELECTED_ITEM_RESET:-""}"
-    _PROMPT_COLOR_COUNT="${VALET_CONFIG_PROMPT_COLOR_COUNT:-"${ESC__FG_YELLOW}"}"
-    _PROMPT_COLOR_COUNT_RESET="${VALET_CONFIG_PROMPT_COLOR_COUNT_RESET:-"${ESC__FG_RESET}"}"
-    _PROMPT_COLOR_VALIDATION_ERROR="${VALET_CONFIG_PROMPT_COLOR_VALIDATION_ERROR:-"${ESC__FG_RED}"}"
-    _PROMPT_COLOR_VALIDATION_ERROR_RESET="${VALET_CONFIG_PROMPT_COLOR_VALIDATION_ERROR_RESET:-"${ESC__FG_RESET}"}"
-  else
-    _PROMPT_COLOR_STRING=""
-    _PROMPT_COLOR_STRING_RESET=""
-    _PROMPT_COLOR_STATIC=""
-    _PROMPT_COLOR_STATIC_RESET=""
-    _PROMPT_COLOR_LETTER_HIGHLIGHT="${ESC__TEXT_UNDERLINE}"
-    _PROMPT_COLOR_LETTER_HIGHLIGHT_RESET="${ESC__TEXT_NO_UNDERLINE}"
-    _PROMPT_COLOR_SELECTED_ITEM="${ESC__TEXT_INVERSE}"
-    _PROMPT_COLOR_SELECTED_ITEM_RESET="${ESC__TEXT_NO_INVERSE}"
-    _PROMPT_COLOR_SELECTED_ITEM_SYMBOL="${ESC__TEXT_INVERSE}"
-    _PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET="${ESC__TEXT_NO_INVERSE}"
-    _PROMPT_COLOR_UNSELECTED_ITEM=""
-    _PROMPT_COLOR_UNSELECTED_ITEM_RESET=""
-    _PROMPT_COLOR_COUNT=""
-    _PROMPT_COLOR_COUNT_RESET=""
-    _PROMPT_COLOR_VALIDATION_ERROR="${ESC__TEXT_INVERSE}"
-    _PROMPT_COLOR_VALIDATION_ERROR_RESET="${ESC__TEXT_NO_INVERSE}"
-  fi
-
   # set up the left symbols (> for prompt and the > for selected item)
   if [[ ${_PROMPT_SHOW_SYMBOL} == "true" ]]; then
-    _PROMPT_SYMBOL="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-"> "}"
-    _PROMPT_SYMBOL_LENGTH=${#_PROMPT_SYMBOL}
-    _PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM="${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-"█ "}"
-    _PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM="│ "
-    _PROMPT_ITEMS_BOX_SYMBOL_COUNTER="──"
-    _PROMPT_ITEMS_BOX_SYMBOL_COUNTER_BOX_BELOW="${DRAW_TL_CORNER}─"
-    _PROMPT_ITEMS_BOX_SYMBOL_COUNTER_BOX_ABOVE="${DRAW_BL_CORNER}─"
-    _PROMPT_ITEMS_BOX_SYMBOL_LENGTH=${#_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}
-    _PROMPT_ERROR_BOX_SYMBOL="█ "
-    _PROMPT_ERROR_BOX_SYMBOL_LENGTH=2
+    _PROMPT_SYMBOL="${STYLE_PROMPT_SYMBOL}"
+    _PROMPT_SYMBOL_LENGTH="${STYLE_PROMPT_SYMBOL_LENGTH}"
+    _PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM="${STYLE_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}"
+    _PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM="${STYLE_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}"
+    _PROMPT_ITEMS_BOX_SYMBOL_COUNTER="${STYLE_PROMPT_ITEMS_BOX_SYMBOL_COUNTER}"
+    _PROMPT_ITEMS_BOX_SYMBOL_COUNTER_BOX_BELOW="${STYLE_PROMPT_ITEMS_BOX_SYMBOL_COUNTER_BOX_BELOW}"
+    _PROMPT_ITEMS_BOX_SYMBOL_COUNTER_BOX_ABOVE="${STYLE_PROMPT_ITEMS_BOX_SYMBOL_COUNTER_BOX_ABOVE}"
+    _PROMPT_ITEMS_BOX_SYMBOL_LENGTH="${STYLE_PROMPT_ITEMS_BOX_SYMBOL_LENGTH}"
+    _PROMPT_ERROR_BOX_SYMBOL="${STYLE_PROMPT_ERROR_BOX_SYMBOL}"
+    _PROMPT_ERROR_BOX_SYMBOL_LENGTH="${STYLE_PROMPT_ERROR_BOX_SYMBOL_LENGTH}"
   else
     _PROMPT_SYMBOL=""
     _PROMPT_SYMBOL_LENGTH=0
@@ -360,11 +330,6 @@ function prompt::input() {
     _PROMPT_ITEMS_BOX_SYMBOL_LENGTH=0
     _PROMPT_ERROR_BOX_SYMBOL=""
     _PROMPT_ERROR_BOX_SYMBOL_LENGTH=0
-  fi
-
-  if [[ ${_PROMPT_MULTI_LINE} == "true" ]]; then
-    _PROMPT_MULTI_LINE_START_INDEX=0
-    _PROMPT_MULTI_LINE_CURSOR_INDEX=-1
   fi
 
   _PROMPT_KILLED_STRING=""
@@ -405,6 +370,13 @@ function prompt::input() {
   _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
   _PROMPT_CANCELLED=true
 
+  if prompt_main_loop; then
+    return 0
+  fi
+  return 1
+}
+
+function prompt_main_loop() {
   # set trap so that interrupt signal sets GLOBAL_SESSION_INTERRUPTED to true
   tui::setInterruptTrap
   # before starting to wait for inputs, we clear up the key pressed
@@ -413,6 +385,9 @@ function prompt::input() {
   tui::setTerminalOptions
   # rebind some keys to call the callback function prompt_onKeyBindingPress
   tui::rebindKeymap prompt_onKeyBindingPress
+  # we redirect everything done in this function to fd 3 which prints to stderr
+  # we need this because tui::waitForKeyPress redirects stderr to /dev/null
+  exec 3>&2
 
   # make all match case insensitive
   shopt -s nocasematch
@@ -469,6 +444,8 @@ function prompt::input() {
   prompt_clearErrorBox
   prompt_clearItemsBox
   prompt_clearPrompt
+  exec 3>&-
+
   tui::restoreTerminalOptions
   tui::restoreInterruptTrap
   shopt -u nocasematch
@@ -488,8 +465,6 @@ function prompt::input() {
 
   # shellcheck disable=SC2086
   unset -v ${!_PROMPT_*}
-
-  return 0
 }
 
 # compute properties that depend on the screen size
@@ -979,10 +954,6 @@ function prompt_drawPrompt() {
   if [[ ${_PROMPT_ENABLE_PROMPT} != "true" ]]; then
     return 0
   fi
-  if [[ ${_PROMPT_MULTI_LINE} == "true" ]]; then
-    prompt_drawMultiLinePrompt
-    return 0
-  fi
 
   # use interactive::showStringInScreen with global the variables: _PROMPT_STRING, _PROMPT_STRING_INDEX, _PROMPT_STRING_SCREEN_WIDTH
   prompt_getDisplayedPromptString
@@ -994,7 +965,7 @@ function prompt_drawPrompt() {
     RETURNED_VALUE="${RETURNED_VALUE//[^…]/*}"
   fi
   if [[ -z ${RETURNED_VALUE} && -n ${_PROMPT_PLACEHOLDER} ]]; then
-    RETURNED_VALUE="${_PROMPT_COLOR_STATIC}${_PROMPT_PLACEHOLDER}${_PROMPT_COLOR_STATIC_RESET}"
+    RETURNED_VALUE="${STYLE_FRAMES}${_PROMPT_PLACEHOLDER}${STYLE_RESET}"
     spaceLeft=$((_PROMPT_STRING_SCREEN_WIDTH - ${#_PROMPT_PLACEHOLDER}))
   fi
   local spaces=""
@@ -1006,7 +977,7 @@ function prompt_drawPrompt() {
     fi
   fi
 
-  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${_PROMPT_COLOR_STATIC}${_PROMPT_SYMBOL}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_STRING}${RETURNED_VALUE}${spaces}${_PROMPT_COLOR_STRING_RESET}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}"
+  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${STYLE_FRAMES}${_PROMPT_SYMBOL}${STYLE_RESET}${STYLE_PROMPT_STRING}${RETURNED_VALUE}${spaces}${STYLE_RESET}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&3
 }
 
 # Clear the prompt line
@@ -1014,17 +985,8 @@ function prompt_clearPrompt() {
   if [[ ${_PROMPT_ENABLE_PROMPT} != "true" ]]; then
     return 0
   fi
-  if [[ ${_PROMPT_MULTI_LINE} == "true" ]]; then
-    prompt_clearMultiLinePrompt
-    return 0
-  fi
 
-  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${ESC__ERASE__}${_PROMPT_WIDTH}${__AC_CHARS}${ESC__CURSOR_SHOW}"
-}
-
-# Clear the multi-line prompt
-function prompt_clearMultiLinePrompt() {
-  tui::clearBox "${_PROMPT_START_LINE}" "${_PROMPT_START_COLUMN}" "${_PROMPT_WIDTH}" "${_PROMPT_NB_PROMPT_LINES}"
+  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${ESC__ERASE__}${_PROMPT_WIDTH}${__ECS__CHARS}${ESC__CURSOR_SHOW_FORCE}" 1>&3
 }
 
 # Open the item box (position it, filter items, and draw it)
@@ -1145,7 +1107,7 @@ function prompt_filterItems() {
   else
     # asynchronous filtering
     rm -f "${_PROMPT_ITEMS_BOX_ASYNC_FILTERED_ITEMS_FILE}" &>/dev/null || :
-    prompt_filterItemsAsync 1>&2 &
+    prompt_filterItemsAsync &
     GLOBAL_BACKGROUND_JOB1_PID="$!"
   fi
 }
@@ -1256,7 +1218,7 @@ function prompt_drawItemsBox() {
 
     if ((index >= ${#_PROMPT_FILTERED_ITEMS[@]})); then
       # nothing to show for this line
-      toPrint+="${ESC__ERASE__}${_PROMPT_ITEMS_BOX_WIDTH}${__AC_CHARS}"
+      toPrint+="${ESC__ERASE__}${_PROMPT_ITEMS_BOX_WIDTH}${__ECS__CHARS}"
       continue
     fi
 
@@ -1274,9 +1236,9 @@ function prompt_drawItemsBox() {
       fi
       if ((index == _PROMPT_FILTERED_ITEMS_SELECTED_INDEX)); then
         # highlight the selected item
-        toPrint+="${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${_PROMPT_COLOR_SELECTED_ITEM_SYMBOL_RESET}${_PROMPT_COLOR_SELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${spaces}${_PROMPT_COLOR_SELECTED_ITEM_RESET}"
+        toPrint+="${STYLE_PROMPT_SELECTED_ITEM_SYMBOL}${_PROMPT_ITEMS_BOX_SYMBOL_SELECTED_ITEM}${STYLE_RESET}${STYLE_PROMPT_SELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${spaces}${STYLE_RESET}"
       else
-        toPrint+="${_PROMPT_COLOR_STATIC}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_UNSELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${spaces}${_PROMPT_COLOR_UNSELECTED_ITEM_RESET}"
+        toPrint+="${STYLE_FRAMES}${_PROMPT_ITEMS_BOX_SYMBOL_UNSELECTED_ITEM}${STYLE_RESET}${STYLE_PROMPT_UNSELECTED_ITEM}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${spaces}${STYLE_RESET}"
       fi
     fi
   done
@@ -1289,10 +1251,10 @@ function prompt_drawItemsBox() {
     if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
       # case where we are filtering asynchronously, we display a loading message
       if ((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH >= 11)); then
-        itemsCounter=" ${_PROMPT_COLOR_COUNT}Filtering…${_PROMPT_COLOR_COUNT_RESET}"
+        itemsCounter=" ${STYLE_PROMPT_COUNT}Filtering…${STYLE_RESET}"
         itemCounterLength=11
       else
-        itemsCounter=" ${_PROMPT_COLOR_COUNT}…${_PROMPT_COLOR_COUNT_RESET}"
+        itemsCounter=" ${STYLE_PROMPT_COUNT}…${STYLE_RESET}"
         itemCounterLength=2
       fi
     else
@@ -1301,16 +1263,16 @@ function prompt_drawItemsBox() {
       if [[ ${_PROMPT_ITEMS_BOX_ALLOW_FILTERING} != "true" ]]; then
         # case of ' 00-00'
         local itemCounterLength=$((2 + ${#lastItemNumber} * 2))
-        printf -v itemsCounter " %s%0${#lastItemNumber}i-%i%s" "${_PROMPT_COLOR_COUNT}" "${_PROMPT_FILTERED_ITEMS_START_INDEX}" "${lastItemNumber}" "${_PROMPT_COLOR_COUNT_RESET}"
+        printf -v itemsCounter " %s%0${#lastItemNumber}i-%i%s" "${STYLE_PROMPT_COUNT}" "${_PROMPT_FILTERED_ITEMS_START_INDEX}" "${lastItemNumber}" "${STYLE_RESET}"
       else
         itemCounterLength=$((7 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 2 + ${#lastItemNumber} * 2))
         if ((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH >= itemCounterLength && _PROMPT_ITEMS_BOX_NB_DISPLAYED_ITEMS > 1)); then
           # case of ' 00-00 of 00/00'
-          printf -v itemsCounter " %s%0${#lastItemNumber}i-%i%s of %s%0${#_PROMPT_ORIGINAL_ITEMS_COUNT}i%s/%i%s" "${_PROMPT_COLOR_COUNT}" "${_PROMPT_FILTERED_ITEMS_START_INDEX}" "${lastItemNumber}" "${_PROMPT_COLOR_COUNT_RESET}${_PROMPT_COLOR_STATIC}" "${_PROMPT_COLOR_STATIC_RESET}${_PROMPT_COLOR_COUNT}" "${#_PROMPT_FILTERED_ITEMS[@]}" "${_PROMPT_COLOR_COUNT_RESET}${_PROMPT_COLOR_STATIC}" "${_PROMPT_ORIGINAL_ITEMS_COUNT}" "${_PROMPT_COLOR_STATIC_RESET}"
+          printf -v itemsCounter " %s%0${#lastItemNumber}i-%i%s of %s%0${#_PROMPT_ORIGINAL_ITEMS_COUNT}i%s/%i%s" "${STYLE_PROMPT_COUNT}" "${_PROMPT_FILTERED_ITEMS_START_INDEX}" "${lastItemNumber}" "${STYLE_RESET}${STYLE_FRAMES}" "${STYLE_RESET}${STYLE_PROMPT_COUNT}" "${#_PROMPT_FILTERED_ITEMS[@]}" "${STYLE_RESET}${STYLE_FRAMES}" "${_PROMPT_ORIGINAL_ITEMS_COUNT}" "${STYLE_RESET}"
         else
           # case of ' 00/00'
           local itemCounterLength=$((2 + ${#_PROMPT_ORIGINAL_ITEMS_COUNT} * 2))
-          printf -v itemsCounter " %s%0${#_PROMPT_ORIGINAL_ITEMS_COUNT}i%s/%i%s" "${_PROMPT_COLOR_COUNT}" "${#_PROMPT_FILTERED_ITEMS[@]}" "${_PROMPT_COLOR_COUNT_RESET}${_PROMPT_COLOR_STATIC}" "${_PROMPT_ORIGINAL_ITEMS_COUNT}" "${_PROMPT_COLOR_STATIC_RESET}"
+          printf -v itemsCounter " %s%0${#_PROMPT_ORIGINAL_ITEMS_COUNT}i%s/%i%s" "${STYLE_PROMPT_COUNT}" "${#_PROMPT_FILTERED_ITEMS[@]}" "${STYLE_RESET}${STYLE_FRAMES}" "${_PROMPT_ORIGINAL_ITEMS_COUNT}" "${STYLE_RESET}"
         fi
       fi
 
@@ -1337,10 +1299,10 @@ function prompt_drawItemsBox() {
       counterSymbol="${_PROMPT_ITEMS_BOX_SYMBOL_COUNTER_BOX_BELOW}"
     fi
 
-    toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__ESC__TO}${_PROMPT_COLOR_STATIC}${counterSymbol}${ESC__REPEAT__}$((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH - itemCounterLength))${__ESC__LAST_CHAR}${_PROMPT_COLOR_STATIC_RESET}${itemsCounter}"
+    toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_PROMPT_ITEMS_BOX_LEFT}${__ESC__TO}${STYLE_FRAMES}${counterSymbol}${ESC__REPEAT__}$((_PROMPT_ITEMS_BOX_WIDTH - _PROMPT_ITEMS_BOX_SYMBOL_LENGTH - itemCounterLength))${__ESC__LAST_CHAR}${STYLE_RESET}${itemsCounter}"
   fi
 
-  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}"
+  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&3
 }
 
 # Clear the items box
@@ -1355,7 +1317,7 @@ function prompt_clearItemsBox() {
     fi
   fi
 
-  tui::clearBox "${_PROMPT_ITEMS_BOX_TOP}" "${_PROMPT_ITEMS_BOX_LEFT}" "${_PROMPT_ITEMS_BOX_WIDTH}" "${_PROMPT_ITEMS_BOX_HEIGHT}"
+  tui::clearBox "${_PROMPT_ITEMS_BOX_TOP}" "${_PROMPT_ITEMS_BOX_LEFT}" "${_PROMPT_ITEMS_BOX_WIDTH}" "${_PROMPT_ITEMS_BOX_HEIGHT}" 2>&3
 
   _PROMPT_ITEMS_BOX_SHOWN=false
 }
@@ -1422,7 +1384,7 @@ function prompt::getItemDisplayedString() {
       # colorize the search string in this chunk
       while [[ -n ${searchStringCharacter} && ${itemChunk} == *"${searchStringCharacter}"* ]]; do
         itemChunkPiece="${itemChunk%%["${searchStringCharacter^}${searchStringCharacter,}"]*}"
-        itemDisplayed+="${itemChunkPiece}${_PROMPT_COLOR_LETTER_HIGHLIGHT}${itemChunk:${#itemChunkPiece}:1}${_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET}"
+        itemDisplayed+="${itemChunkPiece}${STYLE_PROMPT_LETTER_HIGHLIGHT}${itemChunk:${#itemChunkPiece}:1}${STYLE_PROMPT_LETTER_HIGHLIGHT_RESET}"
         itemChunk="${itemChunk:${#itemChunkPiece}+1}"
         searchStringIndex+=1
         searchStringCharacter="${_PROMPT_ITEMS_BOX_FILTER_STRING:searchStringIndex:1}"
@@ -1446,13 +1408,13 @@ function prompt::getItemDisplayedString() {
 
 # A function to show an error message
 function prompt_showError() {
-  local message="${1:-}"
+  local _message="${1:-}"
 
   # clear the autocompletion box / existing error box if any
   prompt_clearItemsBox
   prompt_clearErrorBox
 
-  string::wrapWords message $((${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}} - ${#_PROMPT_ERROR_BOX_SYMBOL_LENGTH}))
+  string::wrapWords _message $((${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}} - ${#_PROMPT_ERROR_BOX_SYMBOL_LENGTH}))
   local IFS=$'\n'
   local text="${RETURNED_VALUE}"
   local -i errorLinesNeeded=0
@@ -1476,13 +1438,13 @@ function prompt_showError() {
   local line
   local -i lineNumber=0
   for line in ${text}; do
-    toPrint+="${ESC__CURSOR_MOVE__}$((_PROMPT_ERROR_BOX_TOP + lineNumber));${_PROMPT_ERROR_BOX_LEFT}${__ESC__TO}${_PROMPT_COLOR_VALIDATION_ERROR}${_PROMPT_ERROR_BOX_SYMBOL}${line}${_PROMPT_COLOR_VALIDATION_ERROR_RESET}"
+    toPrint+="${ESC__CURSOR_MOVE__}$((_PROMPT_ERROR_BOX_TOP + lineNumber));${_PROMPT_ERROR_BOX_LEFT}${__ESC__TO}${STYLE_PROMPT_VALIDATION_ERROR}${_PROMPT_ERROR_BOX_SYMBOL}${line}${STYLE_RESET}"
     lineNumber+=1
     if ((lineNumber >= _PROMPT_ERROR_BOX_HEIGHT)); then
       break
     fi
   done
-  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}"
+  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&3
 
   _PROMPT_ERROR_BOX_SHOWN=true
 }
@@ -1499,7 +1461,7 @@ function prompt_clearErrorBox() {
     fi
   fi
 
-  tui::clearBox "${_PROMPT_ERROR_BOX_TOP}" "${_PROMPT_ERROR_BOX_LEFT}" "${_PROMPT_ERROR_BOX_WIDTH}" "${_PROMPT_ERROR_BOX_HEIGHT}"
+  tui::clearBox "${_PROMPT_ERROR_BOX_TOP}" "${_PROMPT_ERROR_BOX_LEFT}" "${_PROMPT_ERROR_BOX_WIDTH}" "${_PROMPT_ERROR_BOX_HEIGHT}" 2>&3
 
   _PROMPT_ERROR_BOX_SHOWN=false
 }
@@ -1808,93 +1770,4 @@ function prompt_getDisplayedPromptString() {
 
   RETURNED_VALUE="${screenString}"
   RETURNED_VALUE2=${screenIndex}
-}
-
-function prompt_drawMultiLinePrompt() {
-  # we need to draw the prompt on multiple lines
-  local promptLines=()
-  local promptLinesStartIndex=()
-  prompt_drawMultiLinePromptRefreshLines _PROMPT_STRING
-
-  prompt_getMultiLinePrompt
-  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${RETURNED_VALUE}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}"
-}
-
-
-function prompt_drawMultiLinePromptRefreshLines() {
-  local -n textToWrapAtWords="${1}"
-
-  local -i linesIndex=0
-
-  # short cut in case the text is already shorter than the width
-  if [[ ${#textToWrapAtWords} -le ${_PROMPT_STRING_SCREEN_WIDTH} && ${textToWrapAtWords} != *$'\n'* ]]; then
-    RETURNED_VALUE="${textToWrapAtWords}"
-    return 0
-  fi
-
-  local text="${textToWrapAtWords}"
-  local IFS=$' \t' line word realWord RETURNED_VALUE2
-  local -i realWordLength=0 firstWord=1
-  local -i lineLength=0
-
-  while ((${#text} > 0)); do
-    line="${text%%$'\n'*}"
-    text="${text:${#line}+1}"
-
-    output+=$'\n'""
-
-    # short cut in case the text is already shorter than the width
-    if ((lineLength + ${#line} <= _PROMPT_STRING_SCREEN_WIDTH)); then
-      output+="${line}"
-      continue
-    fi
-
-    firstWord=1
-
-    for word in ${line}; do
-      if [[ ${word} == *$'\e'* ]]; then
-        realWord="${word//$'\e['[0-9][0-9]m/}"
-        realWord="${realWord//$'\e['[0-9]m/}"
-        realWordLength="${#realWord}"
-      else
-        realWordLength="${#word}"
-      fi
-
-      if ((lineLength < _PROMPT_STRING_SCREEN_WIDTH && firstWord == 0)); then
-        output+=" "
-        lineLength+=1
-      else
-        firstWord=0
-      fi
-
-      if ((lineLength + realWordLength <= _PROMPT_STRING_SCREEN_WIDTH)); then
-        # add the word to the current line
-        output+="${word}"
-        lineLength+=realWordLength
-      else
-        # not enough space left, check if the word fits on the next line
-        if ((realWordLength <= _PROMPT_STRING_SCREEN_WIDTH)); then
-          output+=$'\n'"${word}"
-          lineLength=realWordLength
-        else
-          # the word is too long to fit on a line, split it in multiple lines
-          string::wrapCharacters word "${_PROMPT_STRING_SCREEN_WIDTH}" "" "$((_PROMPT_STRING_SCREEN_WIDTH - lineLength))"
-          output+="${RETURNED_VALUE}"
-          lineLength=${RETURNED_VALUE2}
-        fi
-      fi
-
-    done
-
-    lineLength=0
-  done
-
-  RETURNED_VALUE="${output#$'\n'""}"
-
-
-
-  string::wrapWords _PROMPT_STRING "${_PROMPT_STRING_SCREEN_WIDTH}" "  " "$((_PROMPT_STRING_SCREEN_WIDTH - _PROMPT_SYMBOL_LENGTH))"
-
-  prompt_getMultiLinePrompt
-  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${RETURNED_VALUE}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}"
 }

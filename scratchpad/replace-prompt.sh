@@ -6,18 +6,6 @@ include tui
 # source this file
 
 # tui::testWaitForKeyPress
-
-function for_each_key() {
-  # echo "READLINE_LINE: ${READLINE_LINE}, READLINE_POINT: ${READLINE_POINT}, READLINE_MARK: ${READLINE_MARK}"
-  # echo "You pressed the key: ${1@Q}"
-  READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${1}"
-  if (( READLINE_POINT > 0 )); then
-    READLINE_LINE+="${READLINE_LINE:READLINE_POINT}"
-  fi
-  READLINE_POINT=$((READLINE_POINT + 1))
-  # printf "%s" $'\r'"${ESC__FG_RED}${READLINE_LINE:0:READLINE_POINT}${ESC__FG_RESET}"
-}
-
 # tui::rebindKeymap for_each_key
 
 function main() {
@@ -59,3 +47,28 @@ function main() {
 main
 
 # bind -X
+
+
+function for_each_key() {
+  # echo "READLINE_LINE: ${READLINE_LINE}, READLINE_POINT: ${READLINE_POINT}, READLINE_MARK: ${READLINE_MARK}"
+  # echo "You pressed the key: ${1@Q}"
+  # READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${1}"
+  # if (( READLINE_POINT > 0 )); then
+  #   READLINE_LINE+="${READLINE_LINE:READLINE_POINT}"
+  # fi
+  # READLINE_POINT=$((READLINE_POINT + 1))
+  # READLINE_LINE="\x1b[34m${READLINE_LINE:0:READLINE_POINT}\x1b[0m"
+  printf "%s" $'\r'"${ESC__FG_RED}${READLINE_LINE:0:READLINE_POINT}${ESC__FG_RESET}" 1>&2
+  READLINE_LINE=""
+  READLINE_POINT=0
+}
+
+function accceptLine() {
+  READLINE_LINE="echo coucou"
+}
+
+bind -m emacs-standard '"a": "\065\C-r"'
+bind -m emacs-standard '"\C-q": "\C-k"'
+bind -x '"\C-r": for_each_key'
+bind -x '"\C-k": accceptLine'
+bind -x '"\C-j": accept-line'

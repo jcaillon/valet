@@ -232,8 +232,9 @@ function tui::clearBox() {
   local toPrint="${ESC__CURSOR_HIDE}"
   local lineNumber=0
   for ((lineNumber = top; lineNumber < top + height; lineNumber++)); do
-    toPrint+="${ESC__CURSOR_MOVE__}${lineNumber};${left}${__ESC__TO}${ESC__ERASE__}${width}${__AC_CHARS}"
+    toPrint+="${ESC__CURSOR_MOVE__}${lineNumber};${left}${__ESC__TO}${ESC__ERASE__}${width}${__ECS__CHARS}"
   done
+
   printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}" 1>&2
 }
 
@@ -465,25 +466,28 @@ function tui::waitForChar() {
 function tui::testWaitForKeyPress() {
   # setup the terminal before anything else
   tui::setTerminalOptions
+  exec 3>&2
+
   # define the callback function called when a special key is pressed
   # shellcheck disable=SC2317
   function interactiveOnKeyBindingPressTestFunction() {
     local key="${1}"
-    printf "%sYou pressed (binding): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${key}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&2
+    printf "%sYou pressed (binding): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${key}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&3
   }
   tui::rebindKeymap interactiveOnKeyBindingPressTestFunction
 
-  printf '%s\n' "Press any key to see the returned code (press Q to quit)." 1>&2
+  printf '%s\n' "Press any key to see the returned code (press Q to quit)." 1>&3
   while true; do
     if tui::waitForKeyPress -t 0.3; then
       if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
         break
       fi
-      printf "%sYou pressed (normal key): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&2
+      printf "%sYou pressed (normal key): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&3
     fi
     if [[ ! -t 0 ]]; then break; fi
   done
 
+  exec 3>&-
   tui::restoreTerminalOptions
 }
 
@@ -513,12 +517,17 @@ function tui::testWaitForKeyPress() {
 # tui::waitForKeyPress -t 0.1
 # ```
 #
-# > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll
-# > even when nothing is read... Make sure to not position the cursor at the end of the screen.
+# > There are 2 issues when using readline in bash:
+# > 1. if the cursor is at the end of the screen, it will make the screen scroll
+# >    even when nothing is read... Make sure to not position the cursor at the end of the screen.
+# > 2. When read is done, it will print a new line in stderr. So we redirect stderr to null.
+# >    This means that if you print something in a readline bound function, do not print to stderr or you will get nothing !
 function tui::waitForKeyPress() {
   LAST_KEY_PRESSED=""
-  # here we redirect the error output to null because of a bug in bash, it
-  # prints a newline each time read is called with -e, idk why...
+  # here we redirect the error output to null because of a weird bash behavior, it
+  # prints a newline each time read is finished (when called with -e), idk why...
+  # This means that if you print something in a readline bound function, do not print to
+  # stderr or you will get nothing !
   local IFS=''
   read "$@" -e -d '' -s -r -n 1 LAST_KEY_PRESSED 2>/dev/null || :
   if [[ -z ${LAST_KEY_PRESSED} ]]; then
@@ -582,9 +591,17 @@ function tui::rebindKeymap() {
     bind -r "${key%:}" &>/dev/null
   done
 
-  # make sure that readline will not wait the default 1s after a special key (like \e ESC) is pressed
+  # make sure that readline will not wait the default 500ms after a special key (like \e ESC) is pressed
   # to read a longer sequence of keys
   bind 'set keyseq-timeout 1' &>/dev/null
+
+  # some other default values to ensure we get the right behavior
+  bind 'set bind-tty-special-chars on' &>/dev/null
+  bind 'set echo-control-characters on' &>/dev/null
+  bind 'set editing-mode emacs' &>/dev/null
+  bind 'set enable-keypad on' &>/dev/null
+  bind 'set output-meta off' &>/dev/null
+  bind 'set show-mode-in-prompt off' &>/dev/null
 
   # add the one we are interested in
 
@@ -596,11 +613,10 @@ function tui::rebindKeymap() {
   bind -x '"ESCAPE": '"${callBackFunction}"' ESC' &>/dev/null
 
   # for each normal key, bind it with the different modifiers
-  local normalKeys="abcdefghijklmnopqrstuvwxyz"
+  local normalKeys="abcdefghijklmnopqrstuvwxyz1234567890"
   local -a modifiers=(
     "CTRL+" "\C-"
     "ALT+" "\e"
-    "CTRL+ALT+" "\e\C-"
   )
   local -i index modeIndex
   for((index=0;index<${#normalKeys};index++)); do

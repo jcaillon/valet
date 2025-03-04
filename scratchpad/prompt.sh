@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
 source "libraries.d/core"
-include prompt
+include prompt time profiler
 
 # interactive::testWaitForKeyPress
 # exit 0
@@ -9,7 +9,7 @@ include prompt
 # load the file
 time::getProgramElapsedMicroseconds
 TIME1="${RETURNED_VALUE}"
-mapfile -t MY_ARRAY < "f2"
+mapfile -t MY_ARRAY < "scratchpad/f2"
 # mapfile -t MY_ARRAY < "f3"
 # mapfile -t MY_ARRAY < "f4"
 # echo
@@ -89,7 +89,6 @@ _OPTION_PASSWORD_MODE=false
 # else
 #   log::info "bye"
 # fi
-
 # _OPTION_STRING='You don`t [36m[36m[36mget better[39m[39m[39m on the days when you feel like going. You get better on the days when you don`t want to go, but you go anyway. If you can [34movercome the negative energy[39m coming from your tired body or unmotivated mind, you will grow and become better. It won`t be the best workout you have, you won`t accomplish as much as what you usually do when you actually feel good, but that doesn`t matter. Growth is a long term game, and the crappy days are more important.
 
 # As long as I focus on what I feel and don`t worry about where I`m going, it works out. Having no expectations but being open to everything is what makes wonderful things happen. If I don`t worry, there`s no obstruction and life flows easily. It sounds impractical, but `Expect nothing; be open to everything` is really all it is. 01234567890123456789 on new line 01234567890123456789234 line new line.
@@ -98,8 +97,8 @@ _OPTION_PASSWORD_MODE=false
 
 # There were 2 new lines before this.'
 
-_PROMPT_NB_PROMPT_LINES=1
-
+profiler::enable ./tmp/prof
+VALET_CONFIG_KEEP_ALL_PROFILER_LINES=true
 
 if prompt::input "${GLOBAL_CURSOR_LINE}" "${GLOBAL_CURSOR_COLUMN}"; then
   log::info "You entered: ⌜${RETURNED_VALUE}⌝ (displayed: ⌜${RETURNED_VALUE2}⌝ index ⌜${RETURNED_VALUE3}⌝)"

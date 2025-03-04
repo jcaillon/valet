@@ -222,7 +222,7 @@ Returned variables:
 RETURNED_VALUE='0'
 ```
 
-`H>e<>l<l…`
+`Hell…`
 
 ```text
 _PROMPT_ITEMS_BOX_ITEM_WIDTH='15'
@@ -237,7 +237,7 @@ Returned variables:
 RETURNED_VALUE='4'
 ```
 
-`H>e<>l<l>O< wO>r<ld`
+`HellO wOrld`
 
 ```text
 _PROMPT_ITEMS_BOX_ITEM_WIDTH='10'
@@ -252,7 +252,7 @@ Returned variables:
 RETURNED_VALUE='0'
 ```
 
-`[36mH>e<>l<l>O<[0m wO>r<…`
+`[36mHellO[0m wOr…`
 
 ```text
 _PROMPT_ITEMS_BOX_ITEM_WIDTH='11'
@@ -267,7 +267,7 @@ Returned variables:
 RETURNED_VALUE='0'
 ```
 
-`[36mH>e<>l<l>O<[0m wO>r<ld`
+`[36mHellO[0m wOrld`
 
 ```text
 _PROMPT_COLOR_LETTER_HIGHLIGHT='[4m'
@@ -285,7 +285,7 @@ Returned variables:
 RETURNED_VALUE='0'
 ```
 
-`[7m[35md[27m[39m[7m[35mi[27m[39ms[4ma[24m[4mb[24mle the [93mm[4mo[24mnitor [4mm[24mode to [4ma[24mvoid[39m the "Ter[4mm[24minated" message [4mw[24mith [4me[24mxit c…`
+`[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit c…`
 
 ### ✅ Testing prompt_getIndexDeltaToBeginningOfWord
 

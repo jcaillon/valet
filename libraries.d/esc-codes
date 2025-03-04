@@ -180,9 +180,9 @@ ESC__ERASE_CHARS_RIGHT=$'\e[0K'
 ESC__ERASE_CHARS_LEFT=$'\e[1K'
 # clear entire line
 ESC__ERASE_LINE=$'\e[2K'
-# Erase a set number of characters "${ESC__ERASE__}2${__AC_CHARS}"
+# Erase a set number of characters "${ESC__ERASE__}2${__ECS__CHARS}"
 ESC__ERASE__=$'\e['
-__AC_CHARS=$'X'
+__ECS__CHARS=$'X'
 
 # Repeat last displayed (visible only) character n times "${ESC__REPEAT__}2${__ESC__LAST_CHAR}"
 ESC__REPEAT__=$'\e['
