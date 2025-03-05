@@ -2,6 +2,138 @@
 
 ## Test script 00.tests
 
+### ✅ Testing prompt_getIndexDeltaToEndOfWord
+
+❯ `_PROMPT_STRING_INDEX=0 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='5'
+```
+
+❯ `_PROMPT_STRING_INDEX=4 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='1'
+```
+
+❯ `_PROMPT_STRING_INDEX=5 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='8'
+```
+
+❯ `_PROMPT_STRING_INDEX=8 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='5'
+```
+
+❯ `_PROMPT_STRING_INDEX=10 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='3'
+```
+
+❯ `_PROMPT_STRING_INDEX=11 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='2'
+```
+
+❯ `_PROMPT_STRING_INDEX=12 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='1'
+```
+
+❯ `_PROMPT_STRING_INDEX=20 prompt_getIndexDeltaToEndOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-7'
+```
+
+### ✅ Testing prompt_getIndexDeltaToBeginningOfWord
+
+❯ `_PROMPT_STRING_INDEX=0 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='0'
+```
+
+❯ `_PROMPT_STRING_INDEX=5 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-5'
+```
+
+❯ `_PROMPT_STRING_INDEX=6 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-6'
+```
+
+❯ `_PROMPT_STRING_INDEX=9 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-3'
+```
+
+❯ `_PROMPT_STRING_INDEX=11 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-5'
+```
+
+❯ `_PROMPT_STRING_INDEX=12 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-6'
+```
+
+❯ `_PROMPT_STRING_INDEX=13 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-7'
+```
+
+❯ `_PROMPT_STRING_INDEX=20 prompt_getIndexDeltaToBeginningOfWord`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='-1'
+```
+
 ### ✅ Testing prompt_getDisplayedPromptString
 
 ```text
@@ -287,135 +419,32 @@ RETURNED_VALUE='0'
 
 `[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit c…`
 
-### ✅ Testing prompt_getIndexDeltaToBeginningOfWord
+### ✅ Testing fuzzy filtering with external programs
 
-❯ `_PROMPT_STRING_INDEX=0 prompt_getIndexDeltaToBeginningOfWord`
+❯ `SEARCH_STRING=ea array::fuzzyFilterSort _MY_ARRAY SEARCH_STRING`
 
-Returned variables:
+❯ `fs::head /out1 10`
 
-```text
-RETURNED_VALUE='0'
-```
-
-❯ `_PROMPT_STRING_INDEX=5 prompt_getIndexDeltaToBeginningOfWord`
-
-Returned variables:
+**Standard output**:
 
 ```text
-RETURNED_VALUE='-5'
+ea1
+eat
+evades
+beader
+decancellated
+medakas
+well-ankled
+rerummage
+sense-data
+rectiserial
 ```
 
-❯ `_PROMPT_STRING_INDEX=6 prompt_getIndexDeltaToBeginningOfWord`
+### ✅ Testing prompt_fuzzyFilterSortFileWithGrepAndGawk
 
-Returned variables:
+❯ `SEARCH_STRING=ea prompt_fuzzyFilterSortFileWithGrepAndGawk /words SEARCH_STRING /out1 /out2`
 
-```text
-RETURNED_VALUE='-6'
-```
+❯ `fs::head /out1 10`
 
-❯ `_PROMPT_STRING_INDEX=9 prompt_getIndexDeltaToBeginningOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='-3'
-```
-
-❯ `_PROMPT_STRING_INDEX=11 prompt_getIndexDeltaToBeginningOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='-5'
-```
-
-❯ `_PROMPT_STRING_INDEX=12 prompt_getIndexDeltaToBeginningOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='-6'
-```
-
-❯ `_PROMPT_STRING_INDEX=13 prompt_getIndexDeltaToBeginningOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='-7'
-```
-
-❯ `_PROMPT_STRING_INDEX=20 prompt_getIndexDeltaToBeginningOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='-1'
-```
-
-### ✅ Testing prompt_getIndexDeltaToEndOfWord
-
-❯ `_PROMPT_STRING_INDEX=0 prompt_getIndexDeltaToEndOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='5'
-```
-
-❯ `_PROMPT_STRING_INDEX=4 prompt_getIndexDeltaToEndOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='1'
-```
-
-❯ `_PROMPT_STRING_INDEX=5 prompt_getIndexDeltaToEndOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='8'
-```
-
-❯ `_PROMPT_STRING_INDEX=8 prompt_getIndexDeltaToEndOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='5'
-```
-
-❯ `_PROMPT_STRING_INDEX=10 prompt_getIndexDeltaToEndOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='3'
-```
-
-❯ `_PROMPT_STRING_INDEX=11 prompt_getIndexDeltaToEndOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='2'
-```
-
-❯ `_PROMPT_STRING_INDEX=12 prompt_getIndexDeltaToEndOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='1'
-```
-
-❯ `_PROMPT_STRING_INDEX=20 prompt_getIndexDeltaToEndOfWord`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='-7'
-```
+> The result is the same as the pure bash implementation.
 

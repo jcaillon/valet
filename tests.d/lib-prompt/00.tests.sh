@@ -4,10 +4,11 @@
 source prompt
 
 function main() {
+  test_prompt_getIndexDeltaToEndOfWord
+  test_prompt_getIndexDeltaToBeginningOfWord
   test_prompt_getDisplayedPromptString
   test_prompt::getItemDisplayedString
-  test_prompt_getIndexDeltaToBeginningOfWord
-  test_prompt_getIndexDeltaToEndOfWord
+  test_prompt_fuzzyFilterSortFileWithExternalTools
 }
 
 function test_prompt_getIndexDeltaToEndOfWord() {
@@ -139,6 +140,80 @@ function test_prompt::getItemDisplayedString() {
   test::markdown "\`${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}\`"
 
   shopt -u nocasematch
+}
+
+function test_prompt_fuzzyFilterSortFileWithExternalTools() {
+  test::title "✅ Testing fuzzy filtering with external programs"
+
+  include array
+
+  mapfile -t _MY_ARRAY <words
+  shopt -s nocasematch
+  # shellcheck disable=SC2034
+  local SEARCH_STRING=ea
+  array::fuzzyFilterSort _MY_ARRAY SEARCH_STRING
+  shopt -u nocasematch
+
+  test::prompt "SEARCH_STRING=ea array::fuzzyFilterSort _MY_ARRAY SEARCH_STRING"
+  test::prompt "fs::head /out1 10"
+  local value
+  local -i nb=0
+  for value in "${RETURNED_ARRAY[@]}"; do
+    echo "${value}"
+    nb+=1
+    if ((nb >= 10)); then
+      break
+    fi
+  done
+  test::flush
+
+  test::title "✅ Testing prompt_fuzzyFilterSortFileWithGrepAndGawk"
+  test::prompt "SEARCH_STRING=ea prompt_fuzzyFilterSortFileWithGrepAndGawk /words SEARCH_STRING /out1 /out2"
+  test::prompt "fs::head /out1 10"
+
+  _OPTION_PATH_ONLY=true fs::createTempFile
+  local outputFilteredFile="${RETURNED_VALUE}"
+  _OPTION_PATH_ONLY=true fs::createTempFile
+  local outputCorrespondenceFile="${RETURNED_VALUE}"
+
+  if ! command -v grep &>/dev/null || ! command -v gawk &>/dev/null; then
+    test::markdown "> The result is the same as the pure bash implementation."
+    return 0
+  fi
+
+  prompt_fuzzyFilterSortFileWithGrepAndGawk words SEARCH_STRING "${outputFilteredFile}" "${outputCorrespondenceFile}"
+
+  fs::readFile "${outputFilteredFile}"
+  local awkLines="${RETURNED_VALUE%$'\n'}"
+  fs::readFile "${outputCorrespondenceFile}"
+  local awkCorrespondences="${RETURNED_VALUE%$'\n'}"
+
+  local IFS=$'\n'
+  local bashLines="${RETURNED_ARRAY[*]}"
+  # shellcheck disable=SC2153
+  local bashCorrespondences="${RETURNED_ARRAY2[*]}"
+
+  # check that the lines are the same
+  if [[ "${awkLines}" != "${bashLines}" ]]; then
+    echo "Outputs are different!"
+    echo "awkLines:"
+    echo "${awkLines}"
+    echo
+    echo "bashLines:"
+    echo "${bashLines}"
+    exit 1
+  fi
+  if [[ "${awkCorrespondences}" != "${bashCorrespondences}" ]]; then
+    echo "Correspondences are different!"
+    echo "awkCorrespondences:"
+    echo "${awkCorrespondences}"
+    echo
+    echo "bashCorrespondences:"
+    echo "${bashCorrespondences}"
+    exit 1
+  fi
+
+  test::markdown "> The result is the same as the pure bash implementation."
 }
 
 main

@@ -8,6 +8,8 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- fix quick sort for sorted array (f3 with "s" string loops indefinitely)
+- in performance tip, document the use of -n
 - improve prompt:
   - use coproc instead of kill/spawing a bach everytime; start it only if the coproc fd is not already open.
   - use fzf if available

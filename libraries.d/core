@@ -1514,7 +1514,7 @@ function array::fuzzyFilterSortQuicksort() {
   if ((low >= high)); then
     return 0
   fi
-  local pivot=${_ARRAY_FUZZY_FILTER_KEYS[low]}
+  local -i pivot=${_ARRAY_FUZZY_FILTER_KEYS[low]}
   local -i ii=${low}
   local -i jj=${high}
   local tmpKey tempValue

@@ -284,26 +284,3 @@ RETURNED_ARRAY2=(
 )
 ```
 
-### ✅ Testing array::fuzzyFilterSortFileWithGrepAndGawk
-
-❯ `SEARCH_STRING=ea array::fuzzyFilterSortFileWithGrepAndGawk /words SEARCH_STRING /out1 /out2`
-
-❯ `fs::head /out1 10`
-
-**Standard output**:
-
-```text
-ea
-ea1
-eat
-eavesdropper
-Earvin
-evades
-Ekaterina
-Evarts
-elated
-Edwardsian
-```
-
-> The result is the same as the pure bash implementation.
-
