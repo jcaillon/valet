@@ -62,7 +62,7 @@ Returned code: `1`
 ```text
 /tmp/valet.d/d3-2/commands: line 1: 1/0: division by 0 (error token is "0")
 ERROR    Error code 1 in core::sourceUserCommands(), stack:
-├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:1791
+├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:1836
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:123
 ╰─ in main() at valet:95
 TRACE    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.

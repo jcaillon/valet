@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 function main() {
-
   test::title "✅ Testing exit cleanup"
   test::exec main::parseMainArguments self mock1 create-temp-files
   log::setLevel info true

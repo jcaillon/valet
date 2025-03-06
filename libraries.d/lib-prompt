@@ -1138,7 +1138,7 @@ function prompt_setUpAsyncFiltering() {
     _ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
   fi
 
-  { coproc _PROMPT_ASYNC_FILTER_JOB { prompt_asyncFilterJob ; } } 2>/dev/null
+  { coproc _PROMPT_ASYNC_FILTER_JOB { prompt_asyncFilterJob; } } 2>./tmp/f-err
   # shellcheck disable=SC2034
   GLOBAL_BACKGROUND_JOB1_PID="${_PROMPT_ASYNC_FILTER_JOB_PID}"
 
@@ -1179,7 +1179,7 @@ function prompt_asyncFilterWriteItemsToFile() {
 
 function prompt_asyncFilterJob() {
   local IFS
-
+echo coucou 1>&2
   # make all match case insensitive
   shopt -s nocasematch
 
@@ -1294,7 +1294,9 @@ function prompt_asyncFilterJob() {
         local -n RETURNED_ARRAY2=filteredItemsCorrespondences
 
         if [[ ${filterOriginalItems} == "true" ]]; then
+            echo "start fuzzy filter" >>./tmp/f
           array::fuzzyFilterSort _PROMPT_ORIGINAL_ITEMS filterString
+            echo "end fuzzy filter" >>./tmp/f
         else
           # if the current filter string is a prefix of the previous one, we can filter the already filtered items
           echo "reuse previous filter" >>./tmp/f

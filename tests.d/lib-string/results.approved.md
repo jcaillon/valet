@@ -2,6 +2,26 @@
 
 ## Test script 00.tests
 
+### ✅ Testing string::getFuzzySearchRegexFromSearchString
+
+❯ `string::getFuzzySearchRegexFromSearchString _searchString`
+
+```text
+_STRING_FUZZY_FILTER_REGEX='^([^a]*)(a[^c]*c[^f]*f)(.?)'
+```
+
+❯ `string::getFuzzySearchRegexFromSearchString _searchString`
+
+```text
+_STRING_FUZZY_FILTER_REGEX='^([^a]*)(a[^$]*\$[^b]*b[^^]*\^[^f]*f)(.?)'
+```
+
+❯ `string::getFuzzySearchRegexFromSearchString _searchString`
+
+```text
+_STRING_FUZZY_FILTER_REGEX='^([^\]*)(\\[^^]*\^[^$]*\$[^.]*\.[^|]*\|[^?]*\?[^*]*\*[^+]*\+[^[]*\[[^]]*\][^{]*\{[^}]*\}[^(]*\([^)]*\))(.?)'
+```
+
 ### ✅ Testing string::removeSgrCodes
 
 ❯ `string::removeSgrCodes _myStringWithSgrCodes`

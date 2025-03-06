@@ -128,7 +128,7 @@ function selfDocument::getAllFunctionsDocumentation() {
 
   # add each file of each user library directory
   if [[ ${coreOnly} != "true" ]]; then
-    local -n libraryDirectory
+    local libraryDirectory
     for libraryDirectory in "${CMD_LIBRARY_DIRECTORIES[@]}"; do
       fs::listFiles "${libraryDirectory}"
       filesToAnalyze+=("${RETURNED_ARRAY[@]}")
@@ -194,6 +194,7 @@ function selfDocument::getAllFunctionsDocumentation() {
 
   # sort the functions by name
   declare -g -a SORTED_FUNCTION_NAMES=("${!RETURNED_ASSOCIATIVE_ARRAY[@]}")
+  IFS=$'\n' echo "${SORTED_FUNCTION_NAMES[*]}" >./tmp/w
   array::sort SORTED_FUNCTION_NAMES
 }
 
