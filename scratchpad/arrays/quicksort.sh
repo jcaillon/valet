@@ -44,32 +44,59 @@ function quicksort() {
   quicksort $((partitionPoint + 1)) ${high}
 }
 
+function quicksort2() {
+  local tempValue pivot="${_myArray[${1} + (${2} - ${1}) / 2]}"
+  local -i left=${1} right=${2}
+  while :; do
+    while [[ ${_myArray[left]} < "${pivot}" ]]; do
+      left+=1
+    done
+    while [[ ${pivot} < "${_myArray[right]}" ]]; do
+      right=$((right - 1))
+    done
+    if ((left >= right)); then
+      break;
+    fi
+    tempValue="${_myArray[left]}"
+    _myArray[left]="${_myArray[right]}"
+    _myArray[right]="${tempValue}"
+    left+=1
+    right=$((right - 1))
+  done
+  if ((${1} < ${right})); then
+    quicksort2 ${1} ${right}
+  fi
+  if (($((right + 1)) < ${2})); then
+    quicksort2 $((right + 1)) ${2}
+  fi
+}
+
 
 function main() {
   local _myArray
   local _searchString
 
   mapfile -t _myArray <"scratchpad/f3"
-  mapfile -t _myArray <"scratchpad/arrays/w"
-  mapfile -t _myArray <"./tmp/commands"
+  # mapfile -t _myArray <"scratchpad/arrays/w"
+  # mapfile -t _myArray <"./tmp/commands"
 
   _searchString="s"
 
-  # time array::fuzzyFilterSort _myArray _searchString
+  time array::fuzzyFilterSort _myArray _searchString
 
   local IFS=$'\n'
   # local IFS=' '
-  # echo "${RETURNED_ARRAY[*]}"
-  # echo "-> ${#RETURNED_ARRAY[@]} elements"
+  echo "${RETURNED_ARRAY[*]}"
+  echo "-> ${#RETURNED_ARRAY[@]} elements"
 
   # profiler::enable ./tmp/prof
   # VALET_CONFIG_KEEP_ALL_PROFILER_LINES=true
   # _myArray=(9 5 3 7 1 0 6 5 4)
-  echo "${_myArray[*]}"
+  # echo "${_myArray[*]}"
   echo "----"
-  # quicksort 0 $((${#_myArray[@]} - 1))
-  array::sort _myArray
-  echo "${_myArray[*]}"
+  # quicksort2 0 $((${#_myArray[@]} - 1))
+  # array::sort _myArray
+  # echo "${_myArray[*]}"
 
   # local RETURNED_ARRAY2
   # local _ARRAY_FUZZY_FILTER_KEYS
@@ -101,7 +128,7 @@ function withCriteria() {
   echo "expected: g e d c b a f"
 }
 
-# main
-withCriteria
+main
+# withCriteria
 
 

@@ -1530,7 +1530,9 @@ function array::fuzzyFilterSort() {
     fi
   done
 
-  array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
+  if (( ${#_ARRAY_FUZZY_FILTER_KEYS[@]} > 1 )); then
+    array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
+  fi
 
   # will contain the matched lines, sorted
   RETURNED_ARRAY=()
@@ -1544,7 +1546,8 @@ function array::fuzzyFilterSort() {
 #
 # A special quicksort implementation dedicated to `array::fuzzyFilterSort`
 # that only compare numbers and that uses _ARRAY_FUZZY_FILTER_KEYS as
-# a global arrays to go faster.
+# a global arrays to go faster. Check `array::quicksort` for an equivalent
+# but clearer implementation.
 #
 # - $1: **low** _as int_:
 #       The low index of the _ARRAY_FUZZY_FILTER_KEYS array.
@@ -1555,47 +1558,31 @@ function array::fuzzyFilterSort() {
 # array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
 # ```
 function array::fuzzyFilterSortQuicksort() {
-  local -i low=${1}
-  local -i high=${2}
-
-  if ((low >= high)); then
-    return 0
-  fi
-
-  local -i pivotValue=${_ARRAY_FUZZY_FILTER_KEYS[low + (high - low) / 2]}
-
-  local -i left=low
-  local -i right=high
-  local tempKey tempValue
-
-  while ((left <= right)); do
+  local -i left=${1} right=${2} tempValue pivotValue=${_ARRAY_FUZZY_FILTER_KEYS[${1} + (${2} - ${1}) / 2]}
+  while :; do
     while ((_ARRAY_FUZZY_FILTER_KEYS[left] < pivotValue)); do
       left+=1
     done
     while ((pivotValue < _ARRAY_FUZZY_FILTER_KEYS[right])); do
       right=$((right - 1))
     done
-
-    if ((left <= right)); then
-      tempKey=${_ARRAY_FUZZY_FILTER_KEYS[left]}
-      _ARRAY_FUZZY_FILTER_KEYS[left]=${_ARRAY_FUZZY_FILTER_KEYS[right]}
-      _ARRAY_FUZZY_FILTER_KEYS[right]=${tempKey}
-
-      tempValue=${RETURNED_ARRAY2[left]}
-      RETURNED_ARRAY2[left]=${RETURNED_ARRAY2[right]}
-      RETURNED_ARRAY2[right]=${tempValue}
-
-      left+=1
-      right=$((right - 1))
+    if ((left >= right)); then
+      break;
     fi
+    tempKey=${_ARRAY_FUZZY_FILTER_KEYS[left]}
+    _ARRAY_FUZZY_FILTER_KEYS[left]=${_ARRAY_FUZZY_FILTER_KEYS[right]}
+    _ARRAY_FUZZY_FILTER_KEYS[right]=${tempKey}
+    tempValue=${RETURNED_ARRAY2[left]}
+    RETURNED_ARRAY2[left]=${RETURNED_ARRAY2[right]}
+    RETURNED_ARRAY2[right]=${tempValue}
+    left+=1
+    right=$((right - 1))
   done
-
-  if ((low < right)); then
-    array::fuzzyFilterSortQuicksort ${low} ${right}
+  if ((${1} < right)); then
+    array::fuzzyFilterSortQuicksort ${1} ${right}
   fi
-
-  if ((left < high)); then
-    array::fuzzyFilterSortQuicksort ${left} ${high}
+  if ((right + 1 < ${2})); then
+    array::fuzzyFilterSortQuicksort $((right + 1)) ${2}
   fi
 }
 
