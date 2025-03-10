@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Utility function to swap two elements
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Function to select pivot - median of three strategy
+int choosePivot(int arr[], int low, int high) {
+    int mid = low + (high - low) / 2;
+
+    // Sort low, mid, high
+    if (arr[mid] < arr[low])
+        swap(&arr[low], &arr[mid]);
+    if (arr[high] < arr[low])
+        swap(&arr[low], &arr[high]);
+    if (arr[high] < arr[mid])
+        swap(&arr[mid], &arr[high]);
+
+    // Place pivot at position high-1
+    swap(&arr[mid], &arr[high-1]);
+    return arr[high-1];
+}
+
+// Hoare partition scheme
+int partition(int arr[], int low, int high) {
+    if (high - low > 3) {
+        // Use median-of-three for larger arrays
+        int pivot = choosePivot(arr, low, high);
+        int i = low - 1;
+        int j = high;
+
+        while (1) {
+            // Find element greater than or equal to pivot from left
+            do {
+                i++;
+            } while (arr[i] < pivot);
+
+            // Find element less than or equal to pivot from right
+            do {
+                j--;
+            } while (arr[j] > pivot);
+
+            // If pointers have crossed, we're done
+            if (i >= j)
+                return j;
+
+            // Otherwise, swap elements
+            swap(&arr[i], &arr[j]);
+        }
+    } else {
+        // Simple pivot for small arrays
+        int pivot = arr[high];
+        int i = low - 1;
+        int j = high + 1;
+
+        while (1) {
+            do {
+                i++;
+            } while (arr[i] < pivot);
+
+            do {
+                j--;
+            } while (arr[j] > pivot);
+
+            if (i >= j)
+                return j;
+
+            swap(&arr[i], &arr[j]);
+        }
+    }
+}
+
+// Function implementing insertion sort for small subarrays
+void insertionSort(int arr[], int low, int high) {
+    for (int i = low + 1; i <= high; i++) {
+        int key = arr[i];
+        int j = i - 1;
+
+        while (j >= low && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+// Implementation of QuickSort
+void quickSort(int arr[], int low, int high) {
+    // Create a stack for storing subarray boundaries
+    #define MAX_STACK_SIZE 2 * (32) // 2*log2(MAX_ARRAY_SIZE)
+    int stack[MAX_STACK_SIZE];
+    int top = -1;
+
+    // Push initial boundaries to stack
+    stack[++top] = low;
+    stack[++top] = high;
+
+    // Keep popping from stack while it's not empty
+    while (top >= 0) {
+        // Pop high and low
+        high = stack[top--];
+        low = stack[top--];
+
+        // Use insertion sort for small arrays (optimization)
+        if (high - low < 10) {
+            insertionSort(arr, low, high);
+            continue;
+        }
+
+        // Partition and get pivot position
+        int p = partition(arr, low, high);
+
+        // Push left subarray to stack if there are elements
+        if (p > low) {
+            stack[++top] = low;
+            stack[++top] = p;
+        }
+
+        // Push right subarray to stack if there are elements
+        if (high > p + 1) {
+            stack[++top] = p + 1;
+            stack[++top] = high;
+        }
+    }
+}
+
+// Driver function to test the algorithm
+int main() {
+    int arr[] = {10, 7, 8, 9, 1, 5, 64, 32, 12, 22, 45, 11, 89, 2, 3};
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    printf("Original array: ");
+    for (int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+
+    quickSort(arr, 0, n - 1);
+
+    printf("\nSorted array: ");
+    for (int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+
+    return 0;
+}

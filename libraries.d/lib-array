@@ -4,23 +4,16 @@
 
 # ## array::quicksort (private)
 #
-# Sorts an array using the quicksort algorithm.
+# Sorts an array using the quicksort algorithm (hoarse partition).
 #
 # This function is hard to use, check `array::sort` or `array::sortWithCriteria` instead
 # (they also use this quicksort function behind the scene).
 #
-# This function uses callback functions to compare and swap elements.
+# This function uses callback functions to set the pivot, compare and swap elements.
 #
-# - $1: **compare callback** _as string_:
-#       The name of the function to use to compare elements at given indexes.
-#       The function must return 0 if the first element is greater than the second.
-#       It will receive two arguments: the index of the first element and the index of the second element.
-# - $2: **swap callback** _as string_:
-#       The name of the function to use to swap elements at given indexes.
-#       It will receive two arguments: the index of the first element and the index of the second element.
-# - $3: **low** _as integer_:
+# - $1: **low** _as integer_:
 #       The index of the first element to sort.
-# - $4: **high** _as integer_:
+# - $2: **high** _as integer_:
 #       The index of the last element to sort.
 #
 # ```bash
@@ -31,38 +24,40 @@
 #
 # > This function is not meant to be used directly, use `array::sort` or `array::sortWithCriteria` instead.
 function array::quicksort() {
-  local compareCallBack="${1}"
-  local swapCallBack="${2}"
-  local -i low=${3}
-  local -i high=${4}
+  local -i low=${1}
+  local -i high=${2}
 
   if ((low >= high)); then
     return 0
   fi
 
-  local -i pivotIndex=$((low))
-  local -i ii=${low}
-  local -i jj=${high}
-  while ((ii <= jj)); do
-    while ${compareCallBack} ${pivotIndex} ${ii}; do # pivot > ii
-      ii+=1
+  local -i left=$((low - 1))
+  local -i right=$((high + 1))
+
+  # set the pivot value
+  array_setPivotCallBack $((low + (high - low) / 2))
+
+  while true; do
+    left+=1
+    right=$((right - 1))
+
+    while array_isInferiorToPivotCallBack ${left}; do # left < pivot
+      left+=1
     done
-    while ${compareCallBack} ${jj} ${pivotIndex}; do  # jj > pivot
-      jj=$((jj - 1))
+    while array_isSuperiorToPivotCallBack ${right}; do # right > pivot
+      right=$((right - 1))
     done
-    if ((ii <= jj)); then
-      ${swapCallBack} ${ii} ${jj}
-      ii+=1
-      jj=$((jj - 1))
+
+    if ((left >= right)); then
+      break
     fi
+
+    # swap left and right
+    array_swapCallBack ${left} ${right}
   done
 
-  if ((low < jj)); then
-    array::quicksort "${compareCallBack}" "${swapCallBack}" ${low} ${jj}
-  fi
-  if ((ii < high)); then
-    array::quicksort "${compareCallBack}" "${swapCallBack}" ${ii} ${high}
-  fi
+  array::quicksort ${low} ${right}
+  array::quicksort $((right + 1)) ${high}
 }
 
 # ## array::sort
@@ -78,28 +73,58 @@ function array::quicksort() {
 # echo "${myArray[*]}"
 # ```
 #
-# > - This function uses a quicksort algorithm.
+# > - This function uses a quicksort algorithm (hoarse partition).
+# > - The sorting is not stable (the order of equal elements is not preserved).
 # > - It is not appropriate for large array, use the `sort` binary for such cases.
 function array::sort() {
   local arrayName=${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}
   local -n array=${arrayName}
 
-  local _ARRAY_SWAP_COMMAND="
-  tmp=\"\${${arrayName}[first]}\"
-  ${arrayName}[first]=\"\${${arrayName}[second]}\"
-  ${arrayName}[second]=\"\${tmp}\"
-  "
-  local _ARRAY_COMPARE_COMMAND="
-  if [[ \${${arrayName}[first]} > \"\${${arrayName}[second]}\" ]]; then
-    return 0
-  fi
+  local _tmp _pivot
+  local setPivot="_pivot=\"\${${arrayName}[\${1}]}\""
+  local isInferiorToPivot="[[ \${${arrayName}[\${1}]} < \"\${_pivot}\" ]]"
+  local isSuperiorToPivot="[[ \${${arrayName}[\${1}]} > \"\${_pivot}\" ]]"
+  local swap="
+  _tmp=\"\${${arrayName}[\${1}]}\"
+  ${arrayName}[\${1}]=\"\${${arrayName}[\${2}]}\"
+  ${arrayName}[\${2}]=\"\${_tmp}\"
   "
 
   local IFS=" "
-  array::quicksort "array_sortCompareCallBack" "array_sortSwapCallBack" 0 $(( ${#array[@]} - 1 ))
+  array::quicksort 0 $((${#array[@]} - 1))
 }
 
-# ## array_sortSwapCallBack (private)
+# ## array_setPivotCallBack (private)
+#
+# Set the pivot value.
+#
+# - $1: **index** _as integer_:
+#       The index of the pivot element.
+function array_setPivotCallBack() {
+  eval "${setPivot}"
+}
+
+# ## array_isInferiorToPivotCallBack (private)
+#
+# Check if the element at the given index is inferior (strictly) to the pivot.
+#
+# - $1: **index** _as integer_:
+#       The index of the element to check against the pivot.
+function array_isInferiorToPivotCallBack() {
+  eval "${isInferiorToPivot}"
+}
+
+# ## array_isSuperiorToPivotCallBack (private)
+#
+# Check if the element at the given index is superior (strictly) to the pivot.
+#
+# - $1: **index** _as integer_:
+#       The index of the element to check against the pivot.
+function array_isSuperiorToPivotCallBack() {
+  eval "${isSuperiorToPivot}"
+}
+
+# ## array_swapCallBack (private)
 #
 # Swap two elements.
 #
@@ -108,31 +133,8 @@ function array::sort() {
 # - $2: **second index** _as integer_:
 #       The index of the second element to swap.
 # shellcheck disable=SC2034
-function array_sortSwapCallBack() {
-  local -i first="${1}"
-  local -i second="${2}"
-  local tmp
-  eval "${_ARRAY_SWAP_COMMAND}"
-}
-
-# ## array_sortMultiIntegerCriteriaCompareCallBack (private)
-#
-# Compare two elements.
-#
-# - $1: **first index** _as integer_:
-#       The index of the first element to compare.
-# - $2: **second index** _as integer_:
-#       The index of the second element to compare.
-#
-# Returns:
-#
-# - $?:0 if the first element is greater than the second, 1 otherwise.
-# shellcheck disable=SC2034
-function array_sortCompareCallBack() {
-  local -i first="${1}"
-  local -i second="${2}"
-  eval "${_ARRAY_COMPARE_COMMAND}"
-  return 1
+function array_swapCallBack() {
+  eval "${swap}"
 }
 
 # ## array::sortWithCriteria
@@ -165,7 +167,8 @@ function array_sortCompareCallBack() {
 # # 3 2 1
 # ```
 #
-# > - This function uses a quicksort algorithm.
+# > - This function uses a quicksort algorithm (hoarse partition).
+# > - The sorting is not stable (the order of equal elements is not preserved).
 # > - It is not appropriate for large array, use the `sort` binary for such cases.
 function array::sortWithCriteria() {
   local arrayName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -176,34 +179,45 @@ function array::sortWithCriteria() {
   # an array of indices
   eval "RETURNED_ARRAY=( {0..$((${#array[@]} - 1))} )"
 
-  # prepare the commands to compare and swap the elements
-  local _ARRAY_COMPARE_COMMAND=""
-  local _ARRAY_SWAP_COMMAND="
-    tmp=\"\${${arrayName}[first]}\"
-    ${arrayName}[first]=\"\${${arrayName}[second]}\"
-    ${arrayName}[second]=\"\${tmp}\"
-    tmp=\"\${RETURNED_ARRAY[first]}\"
-    RETURNED_ARRAY[first]=\"\${RETURNED_ARRAY[second]}\"
-    RETURNED_ARRAY[second]=\"\${tmp}\"
-  "
-  local name
+  local name _tmpValue
+  local -i arrayNumber=0 _tmp
+  local -a -i _pivot
+  local setPivot="_pivot=();"
+  local isInferiorToPivot="" isSuperiorToPivot=""
   for name in "${criteriaArrayNames[@]}"; do
-    _ARRAY_SWAP_COMMAND="${_ARRAY_SWAP_COMMAND}
-    tmp=\"\${${name}[first]}\"
-    ${name}[first]=\"\${${name}[second]}\"
-    ${name}[second]=\"\${tmp}\"
+    setPivot+="
+      _pivot+=(\${${name}[RETURNED_ARRAY[\${1}]]})
     "
-    _ARRAY_COMPARE_COMMAND="${_ARRAY_COMPARE_COMMAND}
-      if (( ${name}[first] < ${name}[second] )); then
-        return 1
-      elif (( ${name}[first] > ${name}[second] )); then
+    isInferiorToPivot+="
+      if (( ${name}[\${RETURNED_ARRAY[\${1}]}] < _pivot[${arrayNumber}] )); then
         return 0
+      elif (( ${name}[\${RETURNED_ARRAY[\${1}]}] > _pivot[${arrayNumber}] )); then
+        return 1
       fi
     "
+    isSuperiorToPivot+="
+      if (( ${name}[\${RETURNED_ARRAY[\${1}]}] > _pivot[${arrayNumber}] )); then
+        return 0
+      elif (( ${name}[\${RETURNED_ARRAY[\${1}]}] < _pivot[${arrayNumber}] )); then
+        return 1
+      fi
+    "
+    arrayNumber+=1
   done
+  isInferiorToPivot+="return 1"
+  isSuperiorToPivot+="return 1"
+  local swap="
+  _tmp=\"\${RETURNED_ARRAY[\${1}]}\"
+  RETURNED_ARRAY[\${1}]=\"\${RETURNED_ARRAY[\${2}]}\"
+  RETURNED_ARRAY[\${2}]=\"\${_tmp}\"
+
+  _tmpValue=\"\${array[\${1}]}\"
+  array[\${1}]=\"\${array[\${2}]}\"
+  array[\${2}]=\"\${_tmpValue}\"
+  "
 
   local IFS=" "
-  array::quicksort "array_sortCompareCallBack" "array_sortSwapCallBack" 0 $(( ${#array[@]} - 1 ))
+  array::quicksort 0 $((${#array[@]} - 1))
 }
 
 # ## array::appendIfNotPresent
@@ -240,7 +254,7 @@ function array::appendIfNotPresent() {
       break
     fi
   done
-  if (( present == 0 )); then
+  if ((present == 0)); then
     array+=("${valueToAdd}")
   fi
   return ${present}

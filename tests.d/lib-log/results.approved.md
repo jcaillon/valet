@@ -15,7 +15,7 @@ printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${toPrint}" 1>&2
+printf "${eraseLine:-}%s" "${toPrint:-}" 1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_WRAP_PADDING='         '
@@ -34,7 +34,7 @@ printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${toPrint}" 1>&2
+printf "${eraseLine:-}%s" "${toPrint:-}" 1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_WRAP_PADDING='         '
@@ -51,7 +51,7 @@ printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${toPrint}" 1>&2
+printf "${eraseLine:-}%s" "${toPrint:-}" 1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_WRAP_PADDING='         '
@@ -65,8 +65,8 @@ GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVari
 
 printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>>"/file"
 printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>>"/file"
-printf "%s" "${toPrint}" 1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint:-}" 1>>"/file"
+printf "%s" "${toPrint:-}" 1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
 GLOBAL_LOG_WRAP_PADDING='         '
 ```
 
@@ -78,8 +78,8 @@ GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVari
 
 printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>>"/file"
 printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>>"tmp/a"'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>>"/file"
-printf "%s" "${toPrint}" 1>>"tmp/a"'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint:-}" 1>>"/file"
+printf "%s" "${toPrint:-}" 1>>"tmp/a"'
 GLOBAL_LOG_WRAP_PADDING='         '
 ```
 
@@ -90,7 +90,7 @@ GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVari
 
 
 printf "%s\n" "abc"  1>&5'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint}" 1>&5'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint:-}" 1>&5'
 GLOBAL_LOG_WRAP_PADDING='   '
 ```
 

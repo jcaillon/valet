@@ -1,0 +1,33 @@
+function quickSort(array, low, high)
+    if low < high then
+        // Partition the array and get the pivot index
+        pivotIndex = partition(array, low, high)
+
+        // Recursively sort the sub-arrays
+        quickSort(array, low, pivotIndex - 1)
+        quickSort(array, pivotIndex + 1, high)
+    end if
+end function
+
+function partition(array, low, high)
+    // Choose the rightmost element as pivot
+    pivot = array[high]
+
+    // Index of smaller element
+    i = low - 1
+
+    for j = low to high - 1 do
+        // If current element is smaller than the pivot
+        if array[j] < pivot then
+            // Increment index of smaller element
+            i = i + 1
+            swap array[i] and array[j]
+        end if
+    end for
+
+    swap array[i + 1] and array[high]
+    return i + 1
+end function
+
+// Initial call
+quickSort(array, 0, length(array) - 1)

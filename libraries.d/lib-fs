@@ -623,3 +623,4 @@ function fs::getFileLineCount() {
   done <"${filePath}"
   RETURNED_VALUE="${lineCount}"
 }
+

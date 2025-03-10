@@ -504,6 +504,8 @@ function log::printFile() {
 # ```bash
 # log::printFileString "myfilecontent"
 # ```
+#
+# > This function is not at all suited for large strings, print the content to a file instead.
 # shellcheck disable=SC2317
 function log::printFileString() {
   local content="${1}"
@@ -511,7 +513,7 @@ function log::printFileString() {
 
   local line toPrint lineNumberPadding="   "
   local -i lineNumber=1 currentLineNumberLength=1
-  while [[ -n ${content} ]]; do
+  while (( ${#content} > 0 )); do
     line="${content%%$'\n'*}"
     content="${content:${#line} + 1}"
     log::printFileInternalLoop || break;
@@ -545,6 +547,14 @@ function log::printFileInternalLoop() {
     toPrint+="${STYLE_COLOR_FADED}     ░ (truncated)${STYLE_COLOR_DEFAULT}"$'\n'
     return 1
   fi
+}
+
+function log::writeFile() {
+  local filePath
+  printf -v _PROFILER_FILE_NAME "profiler-%(%FT%H-%M-%S%z)T--PID_%s.log" "${EPOCHSECONDS}" "${BASHPID}"
+  core::getUserStateDirectory
+  profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${_PROFILER_FILE_NAME}"}"
+
 }
 
 # ## log::printString
@@ -1092,7 +1102,7 @@ function log::init() {
 
     # define the formatted log statement
     local formattedLogStatement="printf \"${progressBarCode2:-}${printfFormat}\" ${printfArguments}"
-    local standardStatement="printf \"${progressBarCode2:-}%s\" \"\${toPrint}\""
+    local standardStatement="printf \"${progressBarCode2:-}%s\" \"\${toPrint:-}\""
 
     GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${progressBarCode:-}${formattedLogStatement} ${outputCode}${progressBarCode3:-}"
     GLOBAL_LOG_PRINT_STATEMENT_STANDARD+="${progressBarCode:-}${standardStatement} ${outputCode}${progressBarCode3:-}"

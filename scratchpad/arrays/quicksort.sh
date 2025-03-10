@@ -1,7 +1,49 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
 source "libraries.d/core"
-include array
+include array profiler
+
+function quicksort() {
+  local -i low=${1}
+  local -i high=${2}
+
+  if ((low >= high)); then
+    return 0
+  fi
+
+  local pivot="${_myArray[low + (high - low) / 2]}"
+
+  local -i left=$((low - 1))
+  local -i right=$((high + 1))
+
+  local -i partitionPoint
+  local tempValue
+
+  while true; do
+    left+=1
+    right=$((right - 1))
+
+    while [[ ${_myArray[left]} < "${pivot}" ]]; do
+      left+=1
+    done
+    while [[ ${pivot} < "${_myArray[right]}" ]]; do
+      right=$((right - 1))
+    done
+
+    if ((left >= right)); then
+      partitionPoint=${right}
+      break;
+    fi
+
+    tempValue="${_myArray[left]}"
+    _myArray[left]="${_myArray[right]}"
+    _myArray[right]="${tempValue}"
+  done
+
+  quicksort ${low} ${partitionPoint}
+  quicksort $((partitionPoint + 1)) ${high}
+}
+
 
 function main() {
   local _myArray
@@ -9,24 +51,32 @@ function main() {
 
   mapfile -t _myArray <"scratchpad/f3"
   mapfile -t _myArray <"scratchpad/arrays/w"
+  mapfile -t _myArray <"./tmp/commands"
 
   _searchString="s"
 
-  time array::fuzzyFilterSort _myArray _searchString
+  # time array::fuzzyFilterSort _myArray _searchString
 
   local IFS=$'\n'
+  # local IFS=' '
   # echo "${RETURNED_ARRAY[*]}"
-  echo "-> ${#RETURNED_ARRAY[@]} elements"
+  # echo "-> ${#RETURNED_ARRAY[@]} elements"
 
+  # profiler::enable ./tmp/prof
+  # VALET_CONFIG_KEEP_ALL_PROFILER_LINES=true
+  # _myArray=(9 5 3 7 1 0 6 5 4)
+  echo "${_myArray[*]}"
+  echo "----"
+  # quicksort 0 $((${#_myArray[@]} - 1))
   array::sort _myArray
   echo "${_myArray[*]}"
 
-  local RETURNED_ARRAY2
-  local _ARRAY_FUZZY_FILTER_KEYS
-  mapfile -t _ARRAY_FUZZY_FILTER_KEYS <"scratchpad/arrays/w3"
-  eval "RETURNED_ARRAY2=( {0..$((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))} )"
-  array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
-  echo "${_ARRAY_FUZZY_FILTER_KEYS[*]}"
+  # local RETURNED_ARRAY2
+  # local _ARRAY_FUZZY_FILTER_KEYS
+  # mapfile -t _ARRAY_FUZZY_FILTER_KEYS <"scratchpad/arrays/w3"
+  # eval "RETURNED_ARRAY2=( {0..$((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))} )"
+  # array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
+  # echo "${_ARRAY_FUZZY_FILTER_KEYS[*]}"
 
   # echo ----
 
@@ -36,4 +86,22 @@ function main() {
 
 }
 
-main
+function withCriteria() {
+  declare -g MY_ARRAY=(a b c d e f g)
+  #                       (0 1 2 3 4 5 6)
+  #                       (a b c d e f g)
+  declare -g MY_CRITERIA1=(3 2 2 1 1 4 0)
+  declare -g MY_CRITERIA2=(1 3 2 5 0 2 9)
+
+  profiler::enable ./tmp/prof
+  VALET_CONFIG_KEEP_ALL_PROFILER_LINES=true
+
+  array::sortWithCriteria MY_ARRAY MY_CRITERIA1 MY_CRITERIA2
+  echo "got:      ${MY_ARRAY[*]}"
+  echo "expected: g e d c b a f"
+}
+
+# main
+withCriteria
+
+
