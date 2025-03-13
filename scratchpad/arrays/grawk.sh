@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1091
+source "libraries.d/core"
+include list
+
+_myArray=(7 10 4 13 5 2 6 11 1 8 12 3 9)
+function quicksort2() {
+  local tempValue pivot="${_myArray[${1} + (${2} - ${1}) / 2]}"
+  printf "pivot: %d\n" "${pivot}"
+  local -i left=${1} right=${2}
+  while :; do
+    while (( ${_myArray[left]} < ${pivot} )); do
+      left+=1
+    done
+    while (( ${pivot} < ${_myArray[right]} )); do
+      right=$((right - 1))
+    done
+    if ((left >= right)); then
+      break;
+    fi
+    printf "swap left: %d, right: %d\n" "${left}" "${right}"
+    tempValue="${_myArray[left]}"
+    _myArray[left]="${_myArray[right]}"
+    _myArray[right]="${tempValue}"
+    left+=1
+    right=$((right - 1))
+  done
+  printf "keys: %s\n" "${_myArray[*]}"
+  if ((${1} < ${right})); then
+    quicksort2 ${1} ${right}
+  fi
+  if (($((right + 1)) < ${2})); then
+    quicksort2 $((right + 1)) ${2}
+  fi
+}
+quicksort2 0 $(( ${#_myArray[@]} - 1 ))
+echo "${_myArray[*]}"
+echo -----
+TOSORT="7	seven
+10	ten
+4	four
+13	thirteen
+5	five
+2	two
+6	six
+11	eleven
+1	one
+8	eight
+12	twelve
+3	three
+9	nine"
+echo "${TOSORT}" | gawk "
+    BEGIN {
+      # Ignore case when matching the searchString
+      IGNORECASE = 1;
+      idx = 0;
+    }
+    {
+      keys[idx] = \$1
+      lines[idx] = \$2
+      idx++
+    }
+    END {
+      # Sort the lines
+      nbLines = length(lines)
+      print length(keys)
+      if (nbLines > 1)
+        quickSort(keys, lines, 0, nbLines - 1)
+
+      # Output the sorted lines in one file, and the correspondences in another
+      for (i = 0; i < nbLines; i++) {
+        print keys[i]
+        print lines[i]
+      }
+    }
+    function quickSort(keys, lines, low, high) {
+      # Choose the pivot value
+      middle = low + (high - low) / 2
+      # round to the nearest integer
+      middle = middle - middle % 1
+      pivot = keys[middle]
+      printf(\"middle: %d, pivot: %d\n\", middle, pivot)
+      left = low
+      right = high
+      do {
+        while (keys[left] < pivot)
+          left++
+        while (pivot < keys[right])
+          right--
+        if (left >= right)
+          break
+        printf(\"swap left: %d, right: %d\n\", left, right)
+        tempKey = keys[left]
+        keys[left] = keys[right]
+        keys[right] = tempKey
+        tempLine = lines[left]
+        lines[left] = lines[right]
+        lines[right] = tempLine
+        left++
+        right--
+      } while (0 == 0)
+      printf(\"keys: \")
+      for (i = 0; i < length(keys); i++) {
+        printf(\"%d \", keys[i])
+      }
+      printf(\"\n\")
+      if (low < right)
+        quickSort(keys, lines, low, right)
+      if (right + 1 < high)
+        quickSort(keys, lines, right + 1, high)
+    }
+  "

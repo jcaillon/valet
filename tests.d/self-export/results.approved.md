@@ -36,6 +36,7 @@ source exe
 source fs
 source http
 source interactive
+source list
 source multi-line-prompt
 source profiler
 source progress

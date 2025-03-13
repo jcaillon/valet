@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 
 function main() {
+  test_core::createNewStateFilePath
   test_source
+}
+
+function test_core::createNewStateFilePath() {
+  test::title "✅ Test core::createNewStateFilePath"
+
+  unset BASHPID
+  export BASHPID=1234
+  EPOCHSECONDS=548902800
+  test::func core::createNewStateFilePath "suffix"
 }
 
 function test_source() {

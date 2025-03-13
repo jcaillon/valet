@@ -102,7 +102,7 @@ function tui::switchBackFromFullScreen() {
   _INTERACTIVE_FULL_SCREEN_MODE=false
 
   # restore the terminal state
-  printf '%s' "${ESC__CURSOR_SHOW}${ESC__TEXT_RESET}${ESC__DISABLE_ALTERNATE_BUFFER_SCREEN}" 1>&2
+  printf '%s' "${ESC__ERASE_SCREEN}${ESC__TEXT_RESET}${ESC__DISABLE_ALTERNATE_BUFFER_SCREEN}" 1>&2
 
   # restore stty
   tui::restoreTerminalOptions

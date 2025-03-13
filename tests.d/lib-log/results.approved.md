@@ -890,3 +890,42 @@ ERROR    This is an error message.
 TRACE    This is a errorTrace message, always shown.
 ```
 
+## Test script 02.log-save
+
+### ✅ Testing log::saveFile
+
+❯ `log::saveFile /tmp/valet.d/f1-2 important`
+
+**Error output**:
+
+```text
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important⌝
+```
+
+❯ `fs::cat /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important`
+
+**Standard output**:
+
+```text
+test
+
+```
+
+### ✅ Testing log::saveFileString
+
+❯ `log::saveFileString test important2`
+
+**Error output**:
+
+```text
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important2⌝
+```
+
+❯ `fs::cat /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important2`
+
+**Standard output**:
+
+```text
+test
+```
+

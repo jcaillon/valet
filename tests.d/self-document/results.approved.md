@@ -10,7 +10,7 @@
 
 ```text
 INFO     Generating documentation for the core functions only.
-INFO     Found 169 functions with documentation.
+INFO     Found 172 functions with documentation.
 $GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-document.sh: line 197: ./tmp/w: No such file or directory
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-2/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-2/lib-valet⌝.
