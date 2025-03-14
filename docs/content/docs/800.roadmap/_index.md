@@ -62,7 +62,6 @@ This page lists the features that I would like to implement in Valet. They come 
   - add a stack for kill/yank
   - add a stack for undo/redo
 - add a new command self diagnostic that will run a series of tests to check the environment and help figure out what's wrong.
-- option --install-dir (or cmd) to be able to eval "$(valet --install-dir)"
 - might be able to improve the quicksort if we use direct statements instead of functions.
 - add a yaml library for basic parsing. Same for json
 - Implement tests that are only run with -e flag and where we test system specific stuff, like the windows library and fs::createLink, absolute path with real path etc...

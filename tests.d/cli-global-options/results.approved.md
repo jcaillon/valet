@@ -18,6 +18,7 @@ ERROR    Unknown option ⌜--logging-leeeevel⌝, valid options are:
 -w --very-verbose
 --disable-progress-bars
 -i --force-interactive-mode
+--source
 --version
 -h --help
 ```

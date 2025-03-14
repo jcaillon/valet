@@ -10,6 +10,8 @@
 source fs
 # shellcheck source=../libraries.d/lib-test
 source test
+# shellcheck source=../libraries.d/lib-profiler
+source profiler
 
 # Rebuild all the commands silently.
 function selfTestUtils_rebuildCommands() {
@@ -19,6 +21,7 @@ function selfTestUtils_rebuildCommands() {
   selfBuild "$@" --silent
 }
 
+# Set the value of Valet variables to ensure consistency in the tests
 # - to reset all valet config and global variables to their original values,
 #   as well as the log line function.
 # - valet config and global variables to simpler values
@@ -62,14 +65,6 @@ function selfTestUtils_setupValetForConsistency() {
   export VALET_CONFIG_DISABLE_PROGRESS=true
   unset _PROGRESS_BAR_RUNNING
 
-
-  # fix the time to a known value
-  export TZ=Etc/GMT+0
-  unset EPOCHSECONDS
-  export EPOCHSECONDS=548902800
-  # can't unset EPOCHREALTIME because we use it in PS4 during debug, #TODO: need to fix that
-  export EPOCHREALTIME=548902800.000000
-
   # override time::getProgramElapsedMicroseconds to return a fake incremental time
   # shellcheck disable=SC2317
   function time::getProgramElapsedMicroseconds() {
@@ -80,6 +75,21 @@ function selfTestUtils_setupValetForConsistency() {
     ((_FAKE_TIME=_FAKE_TIME+ 1000000 * _TIME_FACTOR, _TIME_FACTOR++))
     RETURNED_VALUE="${_FAKE_TIME}"
   }
+}
+
+# Set the value of important bash variables to ensure consistency in the tests.
+function selfTestUtils_setupBashForConsistency() {
+  # fix the time to a known value
+  export TZ=Etc/GMT+0
+  unset EPOCHSECONDS
+  export EPOCHSECONDS=548902800
+  profiler::pause
+  # because the profiler uses EPOCHREALTIME in PS4, we need to pause it first
+  unset EPOCHREALTIME
+  export EPOCHREALTIME=548902800.000000
+  profiler::resume
+  unset BASHPID
+  export BASHPID=1234
 }
 
 function selfTestUtils_runHookScript() {

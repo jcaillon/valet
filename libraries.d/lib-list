@@ -873,11 +873,9 @@ function list_fuzzyFilterSortFileWithGrepAndGawk() {
   local outputFilteredFile="${3}"
   local outputCorrespondencesFile="${4}"
 
-  if [[ -z ${_ARRAY_TEMP_FILTER_FILE:-} ]]; then
+  if [[ -z ${_ARRAY_TEMP_FILTERED_FILE:-} ]]; then
     # shellcheck source=lib-fs
     source fs
-    _OPTION_PATH_ONLY=true fs::createTempFile
-    _ARRAY_TEMP_FILTER_FILE="${RETURNED_VALUE}"
     _OPTION_PATH_ONLY=true fs::createTempFile
     _ARRAY_TEMP_FILTERED_FILE="${RETURNED_VALUE}"
   fi
@@ -888,8 +886,8 @@ function list_fuzzyFilterSortFileWithGrepAndGawk() {
 
   # we use grep to pre-filter the lines.
   # We could do everything in gawk but it would be slower for huge files.
-  grep --ignore-case --line-number "${grepRegex}" "${fileToFilter}" >"${_ARRAY_TEMP_FILTER_FILE}"
-  gawk "
+  grep --ignore-case --line-number "${grepRegex}" "${fileToFilter}" | \
+    gawk "
     BEGIN {
       # Ignore case when matching the searchString
       IGNORECASE = 1;
@@ -952,6 +950,6 @@ function list_fuzzyFilterSortFileWithGrepAndGawk() {
       if (right + 1 < high)
         quickSort(keys, lines, right + 1, high)
     }
-  " "${_ARRAY_TEMP_FILTER_FILE}"
+  "
   mv "${_ARRAY_TEMP_FILTERED_FILE}" "${outputFilteredFile}"
 }

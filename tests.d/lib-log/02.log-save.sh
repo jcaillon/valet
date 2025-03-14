@@ -10,10 +10,6 @@ function main() {
 function test_log::saveFile() {
   test::title "✅ Testing log::saveFile"
 
-  unset BASHPID
-  export BASHPID=1234
-  EPOCHSECONDS=548902800
-
   _OPTION_PATH_ONLY=true fs::createTempFile
   local originalFile="${RETURNED_VALUE}"
   echo "test" >"${originalFile}"

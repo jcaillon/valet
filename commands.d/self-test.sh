@@ -7,7 +7,7 @@ set -Eeu -o pipefail
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
 if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   # shellcheck source=../libraries.d/core
-  source "$(dirname -- "$(command -v valet)")/libraries.d/core"
+  source "$(valet --source)"
 fi
 # --- END OF COMMAND COMMON PART
 
@@ -533,7 +533,7 @@ function selfTest_runSingleTest() {
   local testDirectory="${1}"
   local testScript="${2}"
 
-  # set a simplified log print function to have consistent results in tests
+  # Set the value of Valet variables to ensure consistency in the tests
   selfTestUtils_setupValetForConsistency
 
   # reset the temporary location (to have consistency when using fs::createTempDirectory for example)
@@ -562,6 +562,9 @@ function selfTest_runSingleTest() {
 
   # run a custom user script before the test if it exists
   selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-each-test"
+
+  # Set the value of important bash variables to ensure consistency in the tests
+  selfTestUtils_setupBashForConsistency
 
   # run the test
   # shellcheck disable=SC1090

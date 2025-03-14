@@ -7,7 +7,7 @@ set -Eeu -o pipefail
 # import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
 if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   # shellcheck source=../libraries.d/core
-  source "$(dirname -- "$(command -v valet)")/libraries.d/core"
+  source "$(valet --source)"
 fi
 # --- END OF COMMAND COMMON PART
 
@@ -191,8 +191,8 @@ function selfDocument::getAllFunctionsDocumentation() {
     local key
     for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
       log::trace "Function: ⌜${key}⌝"
-      local documentationString="${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"
-      log::printFileString documentationString
+      local _documentationString="${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"
+      log::printFileString _documentationString
     done
   fi
 

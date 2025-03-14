@@ -63,6 +63,11 @@ set -Eeu -o pipefail
 # - name: -i, --force-interactive-mode
 #   description: |-
 #     Enter interactive mode for commands even if arguments are not required or provided.
+# - name: --source
+#   description: |-
+#     Returns in the path to the valet file to source in order to use valet in your scripts.
+#     Usage: `source "$(valet --source)"`.
+#   noEnvironmentVariable: true
 # - name: --version
 #   description: |-
 #     Display the current version of valet.

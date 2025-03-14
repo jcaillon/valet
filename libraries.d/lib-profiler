@@ -69,6 +69,34 @@ function profiler::disable() {
   fi
 }
 
+# ## profiler::pause
+#
+# Pause the profiler if previously activated with profiler::enable.
+#
+# ```bash
+# profiler::pause
+# ```
+function profiler::pause() {
+  if [[ ${_ACTIVE_PROFILER:-} != "1" ]]; then return 0; fi
+
+  log::info "Pausing profiler."
+  set +o xtrace
+}
+
+# ## profiler::resume
+#
+# Resume the profiler if previously paused with profiler::pause.
+#
+# ```bash
+# profiler::resume
+# ```
+function profiler::resume() {
+  if [[ ${_ACTIVE_PROFILER:-} != "1" ]]; then return 0; fi
+
+  log::info "Resuming profiler."
+  set -o xtrace
+}
+
 # Allows to pretty format the profiler file and remove stuff the user does not need.
 #
 # Usage:
@@ -156,7 +184,7 @@ function profilerCleanFile() {
 
     printf "%02d %02d %02d %.4f %.4f %30s:%-4d %-40s → %s\n", stackLength, indirectionLevel, subShellLevel, timer, deltaTimer, programShorten, lineNumber, fun, theRest;
   }
-  ' <"${_PROFILER_OUTPUT_FILE}" >"${newProfilerFile}"
+  ' "${_PROFILER_OUTPUT_FILE}" >"${newProfilerFile}"
 
   mv -f "${newProfilerFile}" "${_PROFILER_OUTPUT_FILE}"
 }

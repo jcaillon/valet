@@ -371,6 +371,10 @@ function main::parseMainArguments() {
 
 function main::parseMainArgumentsSwitch() {
   case "${1}" in
+  --source)
+    echo "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core"
+    exit 0
+    ;;
   -x | --profiling)
     VALET_PROFILING=true
     ;;
