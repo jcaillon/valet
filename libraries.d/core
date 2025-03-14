@@ -469,7 +469,7 @@ function log::print() {
 # - $2: max lines _as int_:
 #       (optional) Can be set using the variable `_OPTION_MAX_LINES`.
 #       Max lines to display, can be set to 0 to display all lines.
-#       (defaults to 99)
+#       (defaults to 0)
 #
 # ```bash
 # log::printFile "/my/file/path"
@@ -477,7 +477,7 @@ function log::print() {
 # shellcheck disable=SC2317
 function log::printFile() {
   local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i maxLines="${2:-${_OPTION_MAX_LINES:-99}}"
+  local -i maxLines="${2:-${_OPTION_MAX_LINES:-0}}"
 
   local line toPrint lineNumberPadding="   "
   local -i lineNumber=1 currentLineNumberLength=1
@@ -503,7 +503,7 @@ function log::printFile() {
 # - $2: max lines _as int_:
 #       (optional) Can be set using the variable `_OPTION_MAX_LINES`.
 #       Max lines to display, can be set to 0 to display all lines.
-#       (defaults to 99)
+#       (defaults to 0)
 #
 # ```bash
 # log::printFileString "myfilecontent"
@@ -513,7 +513,7 @@ function log::printFile() {
 # shellcheck disable=SC2317
 function log::printFileString() {
   local content="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i maxLines="${2:-${_OPTION_MAX_LINES:-99}}"
+  local -i maxLines="${2:-${_OPTION_MAX_LINES:-0}}"
 
   local line toPrint lineNumberPadding="   "
   local -i lineNumber=1 currentLineNumberLength=1

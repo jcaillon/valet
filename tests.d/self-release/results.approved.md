@@ -57,7 +57,6 @@ INFO     The tag message is:
    6 ░ - 🐞 fix
 INFO     Generating documentation for the core functions only.
 INFO     Found 172 functions with documentation.
-$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-document.sh: line 197: ./tmp/w: No such file or directory
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md⌝.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet

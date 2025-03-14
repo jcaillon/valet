@@ -94,11 +94,6 @@ function tui::switchToFullScreen() {
 # tui::switchBackFromFullScreen
 # ```
 function tui::switchBackFromFullScreen() {
-  if [[ -t 2 ]]; then
-    # already in the normal terminal mode
-    return
-  fi
-
   _INTERACTIVE_FULL_SCREEN_MODE=false
 
   # restore the terminal state
