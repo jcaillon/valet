@@ -167,7 +167,7 @@ function selfDocument::getAllFunctionsDocumentation() {
         string::extractBetween functionDocumentation "## " $'\n'
         string::trimEdges RETURNED_VALUE
         functionName="${RETURNED_VALUE}"
-        log::debug "Found function: ⌜${functionName}⌝"
+        log::trace "Found function: ⌜${functionName}⌝"
         functionDocumentation="${functionDocumentation%%"shellcheck disable="*}"
         RETURNED_ASSOCIATIVE_ARRAY["${functionName}"]="${functionDocumentation}"
         functionDocumentation=""

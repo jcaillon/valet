@@ -65,7 +65,7 @@ TRACE    Fake standard output stream:
 TRACE    Fake standard error stream:
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ originally ended with exit code ⌜1⌝.
+ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜4.000s⌝.
 ```
 
 Make error 1 acceptable:
@@ -164,7 +164,7 @@ TRACE    Fake standard output stream:
 TRACE    Fake standard error stream:
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ originally ended with exit code ⌜1⌝.
+ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜14.000s⌝.
 ```
 
 ❯ `exe::invokef2 false fake --option argument1 argument2`
@@ -190,7 +190,7 @@ TRACE    Fake standard output stream:
 TRACE    Fake standard error stream:
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ originally ended with exit code ⌜1⌝.
+ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜16.000s⌝.
 ```
 
 ❯ `exe::invoke fake --option argument1 argument2`

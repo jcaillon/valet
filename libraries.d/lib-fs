@@ -373,7 +373,7 @@ function fs::listPaths() {
   local activatedHidden=false
   if [[ ${includeHidden} == "true" ]]; then
     # change the shell options to include hidden files
-    log::debug "Activating the dotglob shell option."
+    log::trace "Activating the dotglob shell option."
     shopt -s dotglob
     activatedHidden=true
   fi

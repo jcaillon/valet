@@ -128,13 +128,11 @@ function time::startTimer() {
 #
 # Get the time elapsed since the call of `time::startTimer`.
 #
-# - $1: log elapsed time _as bool_:
-#      (optional) Can be set using the variable `_OPTION_LOG_ELAPSED_TIME`.
-#      Wether or not to log the elapsed time.
+# - ${_OPTION_LOG_ELAPSED_TIME} _as bool_:
+#      (optional) Wether or not to log the elapsed time.
 #      (defaults to false)
-# - $2: format _as string_:
-#      (optional) Can be set using the variable `_OPTION_FORMAT`.
-#      The format to use if we log the elapsed time.
+# - ${_OPTION_FORMAT} _as string_:
+#      (optional) The format to use if we log the elapsed time.
 #      See `time::convertMicrosecondsToHuman` for the format.
 #      (defaults to "%S.%LLs").
 #
@@ -144,12 +142,12 @@ function time::startTimer() {
 #
 # ```bash
 # time::startTimer
-# time::getTimerValue true "%S.%LLs"
+# _OPTION_LOG_ELAPSED_TIME=true time::getTimerValue
 # echo "Total microseconds: ${RETURNED_VALUE}"
 # ```
 function time::getTimerValue() {
-  local log="${1:-${_OPTION_LOG_ELAPSED_TIME:-false}}"
-  local format="${2:-${_OPTION_FORMAT:-"%S.%LLs"}}"
+  local log="${_OPTION_LOG_ELAPSED_TIME:-false}"
+  local format="${_OPTION_FORMAT:-"%S.%LLs"}"
 
   time::getProgramElapsedMicroseconds
   local -i elapsed=$((RETURNED_VALUE - _TIME_TIMER_START))

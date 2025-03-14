@@ -5,6 +5,7 @@
 # ## profiler::enable
 #
 # Enables the profiler and start writing to the given file.
+# The profiler will also be active in subshells of this current shell.
 #
 # - $1: **path** _as string_:
 #       the file to write to.
@@ -38,15 +39,14 @@ function profiler::enable() {
     functionDepthExpression='0'
   fi
 
-  export PS4='+'$'\011''$(((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*\.} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL:-}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
+  PS4='+'$'\011''$(((${EPOCHREALTIME%%\.*} - _PROFILER_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*\.} - 10#${_PROFILER_STARTED_AT_MICROSECOND})))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL:-}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
 
   exec 5>"${file}"
 
-  export _PROFILER_OUTPUT_FILE="${file}"
-  export _PROFILER_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
-  export _PROFILER_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
-  export _PROFILER_START_REALTIME="${EPOCHREALTIME//./}"
-  export BASH_XTRACEFD=5
+  _PROFILER_OUTPUT_FILE="${file}"
+  _PROFILER_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
+  _PROFILER_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
+  BASH_XTRACEFD=5
   set -o xtrace
 }
 
@@ -67,7 +67,6 @@ function profiler::disable() {
   if [[ -v _PROFILER_OUTPUT_FILE ]]; then
     profilerCleanFile
   fi
-  unset -v _PROFILER_OUTPUT_FILE _PROFILER_STARTED_AT_SECOND _PROFILER_STARTED_AT_MICROSECOND _PROFILER_START_REALTIME
 }
 
 # Allows to pretty format the profiler file and remove stuff the user does not need.
@@ -94,13 +93,13 @@ function profilerCleanFile() {
 
   # we do this one in awk if present, but in bash otherwise
   if [[ ${VALET_CONFIG_STRICT_PURE_BASH:-false} == "true" ]] || ! command -v awk 1>/dev/null 2>&1; then
-    log::debug "Cleaning the profiler file using bash."
+    log::trace "Cleaning the profiler file using bash."
     profilerBashCleanFile "${timePrecision}" "${clearLine}" >"${newProfilerFile}"
     mv -f "${newProfilerFile}" "${_PROFILER_OUTPUT_FILE}"
     return 0
   fi
 
-  log::debug "Cleaning the profiler file using awk."
+  log::trace "Cleaning the profiler file using awk."
 
   awk -F $'\t' -v timePrecision="${timePrecision}" -v clearCoreLine="${clearLine}" '
   BEGIN {

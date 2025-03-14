@@ -80,7 +80,7 @@ function http::request() {
     log::error "The URL is invalid: ⌜${url}⌝."
     return 1
   fi
-  log::debug "Getting URL for host ⌜${host}⌝ and path ⌜${path}⌝."
+  log::trace "Getting URL for host ⌜${host}⌝ and path ⌜${path}⌝."
 
   # open connection
   exec 3<>"/dev/tcp/${host}/80"
@@ -96,13 +96,13 @@ function http::request() {
     ""
   )
   printf '%s\r\n' "${headers[@]}" >&3
-  log::debug "Headers sent:"
+  log::trace "Headers sent:"
   if log::isDebugEnabled; then
     log::printString "${headers[*]}"
   fi
 
   # read response
-  log::debug "Headers received:"
+  log::trace "Headers received:"
   local headers body httpCode line contentLength
   local -i readBody=0 exitCode=0
   while IFS=$'\n' read -r -d $'\n' -u 3 -t "${responseTimeout}" line || [[ -n ${line:-} ]]; do
@@ -120,7 +120,7 @@ function http::request() {
       if [[ -n ${outputFile} ]]; then
         # read the whole body to a file
         local buffer
-        log::debug "Reading body with content length: ${contentLength:-0}"
+        log::trace "Reading body with content length: ${contentLength:-0}"
         if [[ -n ${contentLength:-} ]]; then
           while IFS= read -sr -d '' -u 3 buffer || [[ -n ${buffer:-} ]]; do
             printf '%s' "${buffer}" >>"${outputFile}"
@@ -141,11 +141,11 @@ function http::request() {
     # get http code and interpret headers
     if [[ -z ${httpCode:-} && ${line} =~ ^HTTP/1\.[01]\ ([0-9]{3})\ .*$ ]]; then
       httpCode="${BASH_REMATCH[1]}"
-      log::debug "Got HTTP code ⌜${httpCode}⌝."
+      log::trace "Got HTTP code ⌜${httpCode}⌝."
 
     elif [[ ${line} =~ ^Content-Length:\ ([0-9]+)$ ]]; then
       contentLength="${BASH_REMATCH[1]}"
-      log::debug "Got Content-Length: ${contentLength}"
+      log::trace "Got Content-Length: ${contentLength}"
 
     elif [[ ${followRedirection} == "true" && ${httpCode:-} == 301 && ${line} =~ ^Location:\ (.*)$ ]]; then
       local location="${BASH_REMATCH[1]}"
@@ -154,7 +154,7 @@ function http::request() {
         log::error "HTTPS redirection detected for ⌜${url}⌝, we cannot follow (HTTP request was sent but we got 301 and the location is the HTTPS url)."
         exitCode=1
       fi
-      log::debug "Following redirection to: ${location}"
+      log::trace "Following redirection to: ${location}"
       http::get "${location}"
       return 0
     fi
@@ -166,7 +166,7 @@ function http::request() {
 
   if [[ ,${acceptableStatusCodes}, == *",${httpCode},"* ]]; then
     exitCode=0
-    log::debug "The HTTP return code ⌜${httpCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
+    log::trace "The HTTP return code ⌜${httpCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
   else
     exitCode=1
   fi
@@ -179,7 +179,7 @@ function http::request() {
     if [[ ${failOnError} == "true" ]]; then
       core::fail "${message}"
     fi
-    log::debug "${message}"
+    log::trace "${message}"
   fi
 
   RETURNED_VALUE="${headers}"

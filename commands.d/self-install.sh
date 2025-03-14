@@ -525,7 +525,7 @@ function selfUpdate_getLatestReleaseVersion() {
   if [[ ${RETURNED_VALUE} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
     RETURNED_VALUE="${BASH_REMATCH[2]}"
   else
-    log::debug "${RETURNED_VALUE}"
+    log::debug "GitHub API response:"$'\n'"${RETURNED_VALUE}"
     core::fail "Could not get the latest version from GitHub (did not find tag_name)."
   fi
 }

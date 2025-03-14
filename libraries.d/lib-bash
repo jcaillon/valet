@@ -488,7 +488,7 @@ function bash::getFunctionDefinitionWithGlobalVars() {
         varPosition="${BASH_REMATCH[3]}"
         if [[ -n ${positionalParameters[$((varPosition - 1))]} ]]; then
           globalVars["${varName}"]="${positionalParameters[$((varPosition - 1))]}"
-          log::debug "found local ${varName}=\${${varPosition}} -> remapped to ${globalVars[${varName}]}"
+          log::trace "found local ${varName}=\${${varPosition}} -> remapped to ${globalVars[${varName}]}"
           continue
         fi
       fi

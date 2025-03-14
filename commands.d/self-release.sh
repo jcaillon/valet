@@ -87,7 +87,7 @@ function selfRelease() {
     latestReleaseVersion="v${BASH_REMATCH[2]}"
     log::info "The latest release on GitHub is: ${latestReleaseVersion}."
   else
-    log::debug "${RETURNED_VALUE}"
+    log::trace "GitHub API response:"$'\n'"${RETURNED_VALUE}"
     log::warning "Could not get the latest version from GitHub (did not find tag_name)."
     latestReleaseVersion="${lastLocalTag}"
   fi

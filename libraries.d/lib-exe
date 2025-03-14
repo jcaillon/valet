@@ -4,6 +4,8 @@
 
 # shellcheck source=lib-fs
 source fs
+# shellcheck source=lib-time
+source time
 
 # ## exe::invokef5
 #
@@ -53,32 +55,31 @@ function exe::invokef5() {
   local executable="${5?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift 5
 
-  # if debug mode is on, print some info
-  if log::isDebugEnabled; then
+  # if trace mode is on, print some info
+  if log::isTraceEnabled; then
     local IFS=' '
     if (( $# > 0 )); then
       printf -v args "%q " "${@}"
-      log::debug "Executing the command ⌜${executable}⌝ with arguments: " "${args% }"
+      log::trace "Executing the command ⌜${executable}⌝ with arguments: " "${args% }"
     else
-      log::debug "Executing the command ⌜${executable}⌝ (no arguments)."
+      log::trace "Executing the command ⌜${executable}⌝ (no arguments)."
     fi
-
-  fi
-
-  # if trace mode is on, print some info
-  if log::isTraceEnabled; then
     if [[ -n ${stdIn} ]]; then
       if [[ ${stdInFromFile} == "true" ]]; then
         log::trace "${executable^} standard input from file ${stdIn}:"
-        log::printFile "${stdIn}" 9999
+        log::saveFile "${stdIn}" "${executable^}-stdin"
       else
         log::trace "${executable^} standard input from string:"
-        log::printFileString "${stdIn}" 9999
+        log::saveFileString "${stdIn}" "${executable^}-stdin"
       fi
     else
       log::trace "No standard input."
     fi
+  else
+    log::debug "Executing the command ⌜${executable}⌝ (no arguments)."
   fi
+
+  time::startTimer
 
   # execute the executable
   local -i exitCode=0
@@ -92,12 +93,14 @@ function exe::invokef5() {
     "${executable}" "$@" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
   fi
 
-  local debugMessage="The command ⌜${executable}⌝ originally ended with exit code ⌜${exitCode}⌝."
+  time::getTimerValue
+  time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"
+  local debugMessage="The command ⌜${executable}⌝ ended with exit code ⌜${exitCode}⌝ in ⌜${RETURNED_VALUE}⌝."
 
   # if the error code is acceptable, then we set it to 0
   if [[ ${exitCode} -ne "0" && ,${acceptableErrorCodes}, == *",${exitCode},"* ]]; then
     exitCode=0
-    debugMessage+=$'\n'"The error code ⌜${exitCode}⌝ is acceptable and has been reset to 0."
+    log::trace "The error code ⌜${exitCode}⌝ is acceptable and has been reset to 0."
   fi
 
   local shouldFail=false

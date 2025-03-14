@@ -70,6 +70,16 @@ function selfTestUtils_setupValetForConsistency() {
   # can't unset EPOCHREALTIME because we use it in PS4 during debug, #TODO: need to fix that
   export EPOCHREALTIME=548902800.000000
 
+  # override time::getProgramElapsedMicroseconds to return a fake incremental time
+  # shellcheck disable=SC2317
+  function time::getProgramElapsedMicroseconds() {
+    if [[ -z ${_FAKE_TIME:-} ]]; then
+      _FAKE_TIME=0
+      _TIME_FACTOR=1
+    fi
+    ((_FAKE_TIME=_FAKE_TIME+ 1000000 * _TIME_FACTOR, _TIME_FACTOR++))
+    RETURNED_VALUE="${_FAKE_TIME}"
+  }
 }
 
 function selfTestUtils_runHookScript() {

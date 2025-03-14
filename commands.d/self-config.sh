@@ -117,7 +117,7 @@ function selfConfig::getFileContent() {
     fi
     if [[ -n ${variableName} ]]; then
       if [[ ${exportCurrentValues} == "true" && -v ${variableName} ]]; then
-        log::debug "Exported the value for ⌜${variableName}⌝."
+        log::trace "Exported the value for ⌜${variableName}⌝."
         printf -v "variableValue" "%q" "${!variableName}"
         if [[ ${variableValue} != "'''" ]]; then
           RETURNED_VALUE+="${variableName}=${variableValue}"$'\n'

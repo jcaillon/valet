@@ -61,7 +61,7 @@ function selfExport() {
     for library in "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-"*; do
       local libraryName="${library##*lib-}"
       libraryName="${libraryName%lib-}"
-      log::debug "Exporting library: ⌜${libraryName}⌝."
+      log::trace "Exporting library: ⌜${libraryName}⌝."
       output+="source ${libraryName}"$'\n'
     done
   fi

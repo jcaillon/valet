@@ -14,8 +14,8 @@ function test_time::startTimer() {
 
   test::exec time::startTimer
   test::func time::getTimerValue
-  test::func time::getTimerValue true
-  test::func time::getTimerValue true "%L"
+  test::func _OPTION_LOG_ELAPSED_TIME=true time::getTimerValue
+  test::func _OPTION_LOG_ELAPSED_TIME=true _OPTION_FORMAT=%L time::getTimerValue
 }
 
 function test_time::getDate() {
@@ -50,15 +50,5 @@ Total microseconds: %U"
   test::func time::convertMicrosecondsToHuman ${ms}
   test::func _OPTION_FORMAT='%U' time::convertMicrosecondsToHuman ${ms}
 }
-
-# override time::getProgramElapsedMicroseconds to return a fake incremental time
-function time::getProgramElapsedMicroseconds() {
-  if [[ -z ${_FAKE_TIME:-} ]]; then
-    _FAKE_TIME=0
-  fi
-  ((_FAKE_TIME=_FAKE_TIME + 1000000))
-  RETURNED_VALUE="${_FAKE_TIME}"
-}
-
 
 main

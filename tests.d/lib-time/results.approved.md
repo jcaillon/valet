@@ -11,35 +11,35 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='1000000'
-```
-
-❯ `time::getTimerValue true`
-
-**Error output**:
-
-```text
-INFO     Elapsed time: 2.000s
-```
-
-Returned variables:
-
-```text
 RETURNED_VALUE='2000000'
 ```
 
-❯ `time::getTimerValue true %L`
+❯ `_OPTION_LOG_ELAPSED_TIME=true time::getTimerValue`
 
 **Error output**:
 
 ```text
-INFO     Elapsed time: 3000
+INFO     Elapsed time: 5.000s
 ```
 
 Returned variables:
 
 ```text
-RETURNED_VALUE='3000000'
+RETURNED_VALUE='5000000'
+```
+
+❯ `_OPTION_LOG_ELAPSED_TIME=true _OPTION_FORMAT=%L time::getTimerValue`
+
+**Error output**:
+
+```text
+INFO     Elapsed time: 9000
+```
+
+Returned variables:
+
+```text
+RETURNED_VALUE='9000000'
 ```
 
 ### ✅ Testing time::getDate

@@ -335,7 +335,7 @@ function main::parseMainArguments() {
     shift
   done
 
-  log::debug "Command found ⌜${_PARSED_COMMANDS[*]}⌝."
+  log::trace "Command found ⌜${_PARSED_COMMANDS[*]}⌝."
 
   if (( ${#_PARSED_COMMANDS[@]} == 0 )); then
     # no command provided, we show the commands menu
@@ -357,7 +357,7 @@ function main::parseMainArguments() {
   nbArgs="${RETURNED_VALUE2:-}"
   exactCommand="${RETURNED_VALUE3:-}"
 
-  log::debug "Function name found ⌜${functionName}⌝."
+  log::trace "Function name found ⌜${functionName}⌝."
 
   if [[ ${functionName} == "_menu" ]]; then
     # run a menu with the list of sub commands
@@ -490,6 +490,7 @@ function main::runFunction() {
     core::fail "The function ⌜${functionName}⌝ associated with the command ⌜${command}⌝ does not exist."
   fi
 
+  local IFS=' '
   log::debug "Running the command ⌜${command}⌝ with the function ⌜${functionName}⌝ and the arguments ⌜$*⌝."
 
   # disable startup profile and enable command profile, if needed
@@ -506,7 +507,7 @@ function main::runFunction() {
   fi
 
   # reset IFS to ensure consistent behavior
-  local IFS=' '$'\t'$'\n'
+  IFS=' '$'\t'$'\n'
 
   # execute the function
   "${functionName}" "$@"
@@ -601,7 +602,7 @@ function main::showCommandsMenuAndRun() {
   main::showInteractiveCommandsMenu "Please select the command to run." "${commandSelectionItemsArrayName}"
   commandChoice="${RETURNED_VALUE}"
 
-  log::debug "Command choice ⌜${commandChoice}⌝."
+  log::trace "Command choice ⌜${commandChoice}⌝."
 
   if [[ -z ${commandChoice} ]]; then
     # the user pressed escape or ctrl-c

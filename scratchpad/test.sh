@@ -23,4 +23,4 @@ for((i=0;i<100;i++)); do
   builtin source "libraries.d/styles"
 done
 
-time::getTimerValue true
+_OPTION_LOG_ELAPSED_TIME=true time::getTimerValue

@@ -102,7 +102,7 @@ Returned code: `1`
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 ERROR    Error code 1 in selfMock1(), stack:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:54
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:512
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:513
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:367
 ╰─ in main() at valet:100
 ```
@@ -120,7 +120,7 @@ WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:1
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:512
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:513
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:367
 ╰─ in main() at valet:100
 ```
@@ -163,7 +163,7 @@ ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
 ERROR    Error code 1 in selfMock1(), stack:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:72
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:512
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:513
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:367
 ╰─ in main() at valet:100
 ```
