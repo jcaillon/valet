@@ -11,6 +11,8 @@ source tui
 source exe
 # shellcheck source=lib-array
 source array
+# shellcheck source=lib-list
+source list
 
 #===============================================================
 # >>> Customization
@@ -361,6 +363,9 @@ function drawLeftPane() {
     toPrint+="${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE + 1));$((SFZF_LEFT_PANE_WIDTH - itemCounterLength))${__ESC__TO}${itemsCounter}"
   fi
 
+  _PROMPT_ITEMS_BOX_ITEM_WIDTH=$((SFZF_LEFT_PANE_WIDTH - 3))
+  _PROMPT_ITEMS_BOX_FILTER_STRING="${SFZF_SEARCH_STRING}"
+
   # draw the items
   local itemPrefix
   local -i index line=${SFZF_LEFT_PANE_FIRST_CONTENT_LINE}
@@ -372,7 +377,10 @@ function drawLeftPane() {
     else
       itemPrefix="  "
     fi
-    toPrint+="${ESC__CURSOR_MOVE__}${line};${SFZF_LEFT_PANE_WIDTH}${__ESC__TO}${ESC__ERASE_CHARS_LEFT}"$'\r'"${itemPrefix}${SFZF_FILTERED_ITEMS[index]}${SFZF_COLOR_SELECTED_ITEM_RESET}"
+
+    _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${SFZF_FILTERED_ITEMS[index]}"
+    list::getItemDisplayedString
+    toPrint+="${ESC__CURSOR_MOVE__}${line};${SFZF_LEFT_PANE_WIDTH}${__ESC__TO}${ESC__ERASE_CHARS_LEFT}"$'\r'"${itemPrefix}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${SFZF_COLOR_SELECTED_ITEM_RESET}"
     line+=1
   done
 

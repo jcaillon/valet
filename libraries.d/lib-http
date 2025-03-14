@@ -173,7 +173,7 @@ function http::request() {
   if (( exitCode != 0 )); then
     if log::isDebugEnabled || [[ ${failOnError} == "true" ]]; then
       log::errorTrace "HTTP response:"
-      log::printFileString "${headers}"$'\n'"${body:-}"
+      log::printString "${headers}"$'\n'"${body:-}"
     fi
     local message="The HTTP return code ⌜${httpCode}⌝ is not acceptable for url ⌜${url}⌝."
     if [[ ${failOnError} == "true" ]]; then

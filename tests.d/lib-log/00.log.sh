@@ -86,8 +86,10 @@ function test_log::parseLogPattern() {
 # shellcheck disable=SC2034
 function test_log() {
   test::title "✅ Testing log::printRaw"
-  test::exec log::printRaw hello
-  test::exec log::printRaw _world
+  local _var1=hello
+  local _var2=_world
+  test::exec log::printRaw _var1
+  test::exec log::printRaw _var2
 
   test::title "✅ Testing log::printString"
   test::exec log::printString 'Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.'
@@ -117,8 +119,8 @@ Many desktop publishing packages and web page editors now use Lorem Ipsum as the
 Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like)."
 
   test::title "✅ Testing log::printFileString"
-  test::exec log::printFileString "\"\${text}\"" 2
-  test::exec log::printFileString "\"\${text}\""
+  test::exec log::printFileString text 2
+  test::exec log::printFileString text
 }
 
 main

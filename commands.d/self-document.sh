@@ -138,7 +138,10 @@ function selfDocument::getAllFunctionsDocumentation() {
   local IFS=$'\n'
   if log::isDebugEnabled; then
     log::debug "Analyzing the following files:"
-    log::printFileString "${filesToAnalyze[*]}"
+    local file
+    for file in "${filesToAnalyze[@]}"; do
+      log::printString "- ${file}"
+    done
   fi
 
   unset -v RETURNED_ASSOCIATIVE_ARRAY SORTED_FUNCTION_NAMES
@@ -188,7 +191,8 @@ function selfDocument::getAllFunctionsDocumentation() {
     local key
     for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
       log::trace "Function: ⌜${key}⌝"
-      log::printFileString "${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"
+      local documentationString="${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"
+      log::printFileString documentationString
     done
   fi
 

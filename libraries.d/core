@@ -479,7 +479,7 @@ function log::printFile() {
   local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i maxLines="${2:-${_OPTION_MAX_LINES:-0}}"
 
-  local line toPrint lineNumberPadding="   "
+  local line rawStringToPrintInLog lineNumberPadding="   "
   local -i lineNumber=1 currentLineNumberLength=1
   if [[ ! -f "${filePath}" ]]; then
     log::error "Can not print the file ⌜${filePath}⌝ because does not exist."
@@ -489,7 +489,7 @@ function log::printFile() {
   while IFS="" read -r line || [[ -n ${line:-} ]]; do
     log::printFileInternalLoop || break;
   done <"${filePath}"
-  # evaluated the print statement built in log::init; it uses the local var toPrint defined above
+  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
   eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
 }
 
@@ -498,31 +498,32 @@ function log::printFile() {
 # Display a file content with line numbers in the logs.
 # The file content will be aligned with the current log output and hard wrapped if necessary.
 #
-# - $1: **content** _as string_:
-#       the file content.
+# - $1: **content variable name** _as string_:
+#       The name of the variable containing the file content to print.
 # - $2: max lines _as int_:
 #       (optional) Can be set using the variable `_OPTION_MAX_LINES`.
 #       Max lines to display, can be set to 0 to display all lines.
 #       (defaults to 0)
 #
 # ```bash
-# log::printFileString "myfilecontent"
+# log::printFileString "myvar"
 # ```
 #
 # > This function is not at all suited for large strings, print the content to a file instead.
 # shellcheck disable=SC2317
 function log::printFileString() {
-  local content="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n contentToPrint="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i maxLines="${2:-${_OPTION_MAX_LINES:-0}}"
 
-  local line toPrint lineNumberPadding="   "
+  local line rawStringToPrintInLog lineNumberPadding="   "
   local -i lineNumber=1 currentLineNumberLength=1
-  while (( ${#content} > 0 )); do
-    line="${content%%$'\n'*}"
-    content="${content:${#line} + 1}"
+
+  local IFS
+  while IFS=$'\n' read -rd $'\n' line; do
     log::printFileInternalLoop || break;
-  done
-  # evaluated the print statement built in log::init; it uses the local var toPrint defined above
+  done <<<"${contentToPrint}"
+
+  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
   eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
 }
 
@@ -534,9 +535,9 @@ function log::printFileInternalLoop() {
   if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
     string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}     ${STYLE_COLOR_FADED}░${STYLE_COLOR_DEFAULT} " "$((GLOBAL_LOG_COLUMNS - 7 - ${#GLOBAL_LOG_WRAP_PADDING}))"
 
-    toPrint+="${GLOBAL_LOG_WRAP_PADDING}${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${RETURNED_VALUE}"$'\n'
+    rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${RETURNED_VALUE}"$'\n'
   else
-    toPrint+="${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${line}"$'\n'
+    rawStringToPrintInLog+="${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${line}"$'\n'
   fi
 
   lineNumber+=1
@@ -546,9 +547,9 @@ function log::printFileInternalLoop() {
   fi
   if (( maxLines != 0 && lineNumber > maxLines )); then
     if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
-      toPrint+="${GLOBAL_LOG_WRAP_PADDING}"
+      rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}"
     fi
-    toPrint+="${STYLE_COLOR_FADED}     ░ (truncated)${STYLE_COLOR_DEFAULT}"$'\n'
+    rawStringToPrintInLog+="${STYLE_COLOR_FADED}     ░ (truncated)${STYLE_COLOR_DEFAULT}"$'\n'
     return 1
   fi
 }
@@ -573,19 +574,19 @@ function log::printString() {
   local content="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local wrappedLineLeftPaddingString="${2:-}"
 
-  local line toPrint
+  local line rawStringToPrintInLog
   while [[ -n ${content} ]]; do
     line="${content%%$'\n'*}"
     content="${content:${#line} + 1}"
 
     if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
       string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}${wrappedLineLeftPaddingString}" "$((GLOBAL_LOG_COLUMNS - ${#GLOBAL_LOG_WRAP_PADDING}))"
-      toPrint+="${GLOBAL_LOG_WRAP_PADDING}${RETURNED_VALUE}"$'\n'
+      rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}${RETURNED_VALUE}"$'\n'
     else
-      toPrint+="${line}"$'\n'
+      rawStringToPrintInLog+="${line}"$'\n'
     fi
   done
-  # evaluated the print statement built in log::init; it uses the local var toPrint defined above
+  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
   eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
 }
 
@@ -629,8 +630,8 @@ function log::saveFile() {
 # (using `core::createNewStateFilePath`).
 # Useful for debugging purposes, to save the state of a string during execution.
 #
-# - $1: **content** _as string_:
-#       The content to save.
+# - $1: **content variable name** _as string_:
+#       The variable name of the content to save.
 # - $2: **suffix** _as string_:
 #       The suffix to add to the file name.
 # - $3: log path _as bool_:
@@ -645,12 +646,12 @@ function log::saveFile() {
 # log::saveFileString "my content" "suffix" "important result file"
 # ```
 function log::saveFileString() {
-  local content="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n contentToSave="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local suffix="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local logPath="${3:-"true"}"
   core::createNewStateFilePath "${suffix}"
   local newFilePath="${RETURNED_VALUE}"
-  printf '%s' "${content}" >"${newFilePath}"
+  printf '%s' "${contentToSave}" >"${newFilePath}"
   if [[ ${logPath} == "true" ]]; then
     log::printString "⌜${newFilePath}⌝"
   fi
@@ -662,18 +663,18 @@ function log::saveFileString() {
 # Display something in the log stream.
 # Does not check the log level.
 #
-# - $1: **content** _as string_:
-#       the content to print (can contain new lines)
+# - $1: **content variable name** _as string_:
+#       The variable name containing the content to print (can contain new lines).
 #
 # ```bash
 # log::printRaw "my line"
 # ```
 # shellcheck disable=SC2317
 function log::printRaw() {
-  local IFS=$'\n'
+  local -n rawStringToPrintInLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # shellcheck disable=SC2034
-  local toPrint="$*"
-  # evaluated the print statement built in log::init; it uses the local var toPrint defined above
+
+  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
   eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
 }
 
@@ -1062,7 +1063,7 @@ function log::parseLogPattern() {
         ;;
       message)
         printfFormat="%s"
-        printfArgument="\${messageToPrint:-}"
+        printfArgument="\${messageToPrintInLog:-}"
         ;;
     esac
     if [[ -z ${printfFormat} ]]; then
@@ -1094,7 +1095,7 @@ function log::parseLogPattern() {
 # It uses the following config
 #
 # - ${VALET_CONFIG_LOG_PATTERN}: The pattern used to display a formatted log line.
-# - ${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}: Contains a bash code executed before the print statement, to further process the variable messageToPrint or define new variables to use in the log pattern.
+# - ${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}: Contains a bash code executed before the print statement, to further process the variable messageToPrintInLog or define new variables to use in the log pattern.
 #   to compute extra variables that can be used in the log pattern.
 # - ${VALET_CONFIG_LOG_COLUMNS}: The number of columns to use for the log.
 # - ${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT}: true to disable highlight for ⌜⌝.
@@ -1137,12 +1138,12 @@ function log::init() {
 
     if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
       # define RETURNED_VALUE/RETURNED_VALUE2 as local so we don't impact the parent scope (they are used during parsing)
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local RETURNED_VALUE RETURNED_VALUE2"$'\n'"local -n messageToPrint=RETURNED_VALUE"$'\n'"string::wrapWords \"\${messageVariableName}\" ${GLOBAL_LOG_COLUMNS} \"${GLOBAL_LOG_WRAP_PADDING}\" $((GLOBAL_LOG_COLUMNS - wrapPaddingLength))"$'\n'
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local RETURNED_VALUE RETURNED_VALUE2"$'\n'"local -n messageToPrintInLog=RETURNED_VALUE"$'\n'"string::wrapWords \"\${messageVariableName}\" ${GLOBAL_LOG_COLUMNS} \"${GLOBAL_LOG_WRAP_PADDING}\" $((GLOBAL_LOG_COLUMNS - wrapPaddingLength))"$'\n'
     else
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n messageToPrint=\"\${messageVariableName}\""$'\n'
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n messageToPrintInLog=\"\${messageVariableName}\""$'\n'
     fi
     if [[ ${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT:-false} != "true" ]]; then
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="messageToPrint=\"\${messageToPrint//⌜/${STYLE_COLOR_ACCENT}⌜}\""$'\n'"messageToPrint=\"\${messageToPrint//⌝/⌝${STYLE_COLOR_DEFAULT}}\""$'\n'
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="messageToPrintInLog=\"\${messageToPrintInLog//⌜/${STYLE_COLOR_ACCENT}⌜}\""$'\n'"messageToPrintInLog=\"\${messageToPrintInLog//⌝/⌝${STYLE_COLOR_DEFAULT}}\""$'\n'
     fi
     if [[ -v VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL ]]; then
       GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}"$'\n'
@@ -1166,7 +1167,7 @@ function log::init() {
 
     # define the formatted log statement
     local formattedLogStatement="printf \"${progressBarCode2:-}${printfFormat}\" ${printfArguments}"
-    local standardStatement="printf \"${progressBarCode2:-}%s\" \"\${toPrint:-}\""
+    local standardStatement="printf \"${progressBarCode2:-}%s\" \"\${rawStringToPrintInLog:-}\""
 
     GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${progressBarCode:-}${formattedLogStatement} ${outputCode}${progressBarCode3:-}"
     GLOBAL_LOG_PRINT_STATEMENT_STANDARD+="${progressBarCode:-}${standardStatement} ${outputCode}${progressBarCode3:-}"

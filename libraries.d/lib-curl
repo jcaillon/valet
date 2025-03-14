@@ -76,7 +76,8 @@ function curl::download() {
     exitCode=1
     if log::isDebugEnabled || [[ ${failIfFails} == "true" ]]; then
       log::errorTrace "Curl error output stream:"
-      log::printFileString "${errors}"
+      log::saveFileString errors "curl-stderr"
+      log::printFileString errors 99
     fi
     local message="The http return code ⌜${httpStatusCode}⌝ is not acceptable for url ⌜${url}⌝."
     if [[ ${failIfFails} == "true" ]]; then

@@ -22,7 +22,7 @@ GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
 
 # To ensure we print errors even before log::init is called
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG="printf \"%-8s %s\n\" \"\${level:-}\" \"\${!messageVariableName}\" 1>&2"
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD="printf \"%s\" \"\${toPrint}\" 1>&2"
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD="printf \"%s\" \"\${rawStringToPrintInLog}\" 1>&2"
 GLOBAL_LOG_WRAP_PADDING=''
 GLOBAL_LOG_DISABLE_WRAP=true
 

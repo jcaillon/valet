@@ -23,7 +23,8 @@ function test_log::saveFile() {
 
   test::title "✅ Testing log::saveFileString"
 
-  test::exec log::saveFileString "test" "important2"
+  local _myVar="test"
+  test::exec log::saveFileString _myVar "important2"
   test::exec fs::cat "${RETURNED_VALUE}"
 }
 

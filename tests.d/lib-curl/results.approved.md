@@ -34,7 +34,9 @@ Exited with code: `1`
 
 ```text
 TRACE    Curl error output stream:
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_008343--curl-stderr⌝
    1 ░ (curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 500 https://fuu
+   2 ░ 
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝.
 ```
 
@@ -127,7 +129,9 @@ Exited with code: `1`
 
 ```text
 TRACE    Curl error output stream:
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_008362--curl-stderr⌝
    1 ░ (curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 500 https://fuu
+   2 ░ 
 ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝.
 ```
 

@@ -283,7 +283,7 @@ function extractCommandDefinitionsToVariables() {
 
       if log::isTraceEnabled; then
         log::trace "Extracting command definition for:"
-        log::printFileString "${content%%$'\n'*}"
+        log::printFileString content
       fi
 
       selfBuild_extractCommandDefinitionToVariables "${content}"
@@ -320,8 +320,9 @@ function extractCommandDefinitionsToVariables() {
       if log::isTraceEnabled; then
         # shellcheck disable=SC2086
         exe::captureOutput declare -p ${!TEMP_CMD_BUILD_*}
+        local declaredVariables="${RETURNED_VALUE}"
         log::trace "Declared variables for this command:"
-        log::printFileString "${RETURNED_VALUE}"
+        log::printFileString declaredVariables
       fi
 
       # verify that the command definition is valid

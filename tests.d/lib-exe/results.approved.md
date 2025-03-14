@@ -59,10 +59,12 @@ Exited with code: `1`
 
 ```text
 TRACE    Fake standard output stream:
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_008345--fake-stdout⌝
    1 ░ 🙈 mocking fake --std-in --error
    2 ░ Input stream: <input_stream
    3 ░ >
 TRACE    Fake standard error stream:
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_008345--fake-stderr⌝
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
 ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜4.000s⌝.
@@ -160,8 +162,10 @@ Exited with code: `1`
 
 ```text
 TRACE    Fake standard output stream:
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_008368--fake-stdout⌝
    1 ░ 🙈 mocking fake --error
 TRACE    Fake standard error stream:
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_008368--fake-stderr⌝
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
 ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜14.000s⌝.
@@ -186,8 +190,10 @@ Exited with code: `1`
 
 ```text
 TRACE    Fake standard output stream:
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_008382--fake-stdout⌝
    1 ░ 🙈 mocking fake --error
 TRACE    Fake standard error stream:
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_008382--fake-stderr⌝
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
 ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜16.000s⌝.

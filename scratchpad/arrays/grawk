@@ -4,6 +4,7 @@ source "libraries.d/core"
 include list
 
 _myArray=(7 10 4 13 5 2 6 11 1 8 12 3 9)
+
 function quicksort2() {
   local tempValue pivot="${_myArray[${1} + (${2} - ${1}) / 2]}"
   printf "pivot: %d\n" "${pivot}"

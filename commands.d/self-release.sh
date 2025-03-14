@@ -184,7 +184,7 @@ function selfRelease::createRelease() {
   done
   IFS=$' '
   log::info "The tag message is:"
-  log::printFileString "${tagMessage}"
+  log::printFileString tagMessage
 
   if [[ "${uploadExistingTag:-}" != "true" ]]; then
 

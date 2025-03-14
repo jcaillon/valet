@@ -7,15 +7,15 @@
 ❯ `log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVariableName}"
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
 
 
 local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2
+printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${toPrint:-}" 1>&2
+printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_WRAP_PADDING='         '
@@ -25,16 +25,16 @@ GLOBAL_LOG_WRAP_PADDING='         '
 
 ```text
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
-local -n messageToPrint=RETURNED_VALUE
+local -n messageToPrintInLog=RETURNED_VALUE
 string::wrapWords "${messageVariableName}" 9999 "         " 9990
 
 
 local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2
+printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${toPrint:-}" 1>&2
+printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_WRAP_PADDING='         '
@@ -43,15 +43,15 @@ GLOBAL_LOG_WRAP_PADDING='         '
 ❯ `VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=local\ extra=1 log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVariableName}"
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
 
 local extra=1
 local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>&2
+printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${toPrint:-}" 1>&2
+printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_WRAP_PADDING='         '
@@ -60,37 +60,37 @@ GLOBAL_LOG_WRAP_PADDING='         '
 ❯ `VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVariableName}"
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
 
 
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>>"/file"
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint:-}" 1>>"/file"
-printf "%s" "${toPrint:-}" 1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
+printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>>"/file"
+printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/file"
+printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
 GLOBAL_LOG_WRAP_PADDING='         '
 ```
 
 ❯ `VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVariableName}"
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
 
 
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>>"/file"
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrint:-}"  1>>"tmp/a"'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint:-}" 1>>"/file"
-printf "%s" "${toPrint:-}" 1>>"tmp/a"'
+printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>>"/file"
+printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>>"tmp/a"'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/file"
+printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/a"'
 GLOBAL_LOG_WRAP_PADDING='         '
 ```
 
 ❯ `VALET_CONFIG_LOG_PATTERN=abc VALET_CONFIG_LOG_FD=5 log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrint="${messageVariableName}"
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
 
 
 printf "%s\n" "abc"  1>&5'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${toPrint:-}" 1>&5'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>&5'
 GLOBAL_LOG_WRAP_PADDING='   '
 ```
 
@@ -124,7 +124,7 @@ Returned variables:
 ```text
 RETURNED_VALUE='%s%s\n'
 RETURNED_VALUE2='"static
-" "${messageToPrint:-}" '
+" "${messageToPrintInLog:-}" '
 RETURNED_VALUE3='0'
 ```
 
@@ -134,7 +134,7 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='%(%H:%M:%S)T%s%s%-8s%s%s%-5d%s%-2d%s%8s%s%-10s%s%-4s%s%s\n'
-RETURNED_VALUE2='"${EPOCHSECONDS}" " " "${levelColor:-}" "${level:-}" " " " PID=" "${BASHPID}" " SHLVL=" "${BASH_SUBSHELL}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 8 > 0 ? ${#FUNCNAME[2]} - 8 : 0}" "@" "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 10 > 0 ? ${#BASH_SOURCE[2]} - 10 : 0}" ":" "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 4 > 0 ? ${#BASH_LINENO[1]} - 4 : 0}" " " "${messageToPrint:-}" '
+RETURNED_VALUE2='"${EPOCHSECONDS}" " " "${levelColor:-}" "${level:-}" " " " PID=" "${BASHPID}" " SHLVL=" "${BASH_SUBSHELL}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 8 > 0 ? ${#FUNCNAME[2]} - 8 : 0}" "@" "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 10 > 0 ? ${#BASH_SOURCE[2]} - 10 : 0}" ":" "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 4 > 0 ? ${#BASH_LINENO[1]} - 4 : 0}" " " "${messageToPrintInLog:-}" '
 RETURNED_VALUE3='63'
 ```
 
@@ -144,7 +144,7 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='%-4s%s%s\n'
-RETURNED_VALUE2='"${icon:-}" " " "${messageToPrint:-}" '
+RETURNED_VALUE2='"${icon:-}" " " "${messageToPrintInLog:-}" '
 RETURNED_VALUE3='3'
 ```
 
@@ -154,7 +154,7 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='%s%s\n'
-RETURNED_VALUE2='" " "${messageToPrint:-}" '
+RETURNED_VALUE2='" " "${messageToPrintInLog:-}" '
 RETURNED_VALUE3='1'
 ```
 
@@ -176,7 +176,7 @@ RETURNED_VALUE3='97'
 
 ### ✅ Testing log::printRaw
 
-❯ `log::printRaw hello`
+❯ `log::printRaw _var1`
 
 **Error output**:
 
@@ -184,7 +184,7 @@ RETURNED_VALUE3='97'
 hello
 ```
 
-❯ `log::printRaw _world`
+❯ `log::printRaw _var2`
 
 **Error output**:
 
@@ -250,7 +250,7 @@ INFO     Next up is a big line with a lot of numbers not separated by spaces. Wh
 
 ### ✅ Testing log::printFileString
 
-❯ `log::printFileString "${text}" 2`
+❯ `log::printFileString text 2`
 
 **Error output**:
 
@@ -260,7 +260,7 @@ INFO     Next up is a big line with a lot of numbers not separated by spaces. Wh
      ░ (truncated)
 ```
 
-❯ `log::printFileString "${text}"`
+❯ `log::printFileString text`
 
 **Error output**:
 
@@ -302,7 +302,7 @@ EPOCHREALTIME='548902800.000000'
 
 ### ✅ Testing log::printRaw
 
-❯ `log::printRaw hello`
+❯ `log::printRaw _var1`
 
 **Error output**:
 
@@ -310,7 +310,7 @@ EPOCHREALTIME='548902800.000000'
 hello
 ```
 
-❯ `log::printRaw _world`
+❯ `log::printRaw _var2`
 
 **Error output**:
 
@@ -434,7 +434,7 @@ _world
 
 ### ✅ Testing log::printFileString
 
-❯ `log::printFileString "${text}" 2`
+❯ `log::printFileString text 2`
 
 **Error output**:
 
@@ -444,7 +444,7 @@ _world
                                              [90m     ░ (truncated)[39m
 ```
 
-❯ `log::printFileString "${text}"`
+❯ `log::printFileString text`
 
 **Error output**:
 
@@ -913,7 +913,7 @@ test
 
 ### ✅ Testing log::saveFileString
 
-❯ `log::saveFileString test important2`
+❯ `log::saveFileString _myVar important2`
 
 **Error output**:
 
