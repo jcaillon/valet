@@ -307,7 +307,7 @@ function selfTest_parallelCallback() {
 
   # display the job output
   fs::readFile "${_TEST_SUITE_OUTPUT_FILES[${index}]}"
-  printf '%s\n' "${RETURNED_VALUE%$'\n'}"
+  log::printRaw RETURNED_VALUE
 
   if ((exitCode != 0)); then
     _TEST_FAILED_TEST_SUITES+=("${jobName}")
@@ -349,7 +349,7 @@ function selfTest_runSingleTestSuite() {
   # setup the temp locations for this test suite (cleanup is done at self test command level since
   # we create everything in the original temp directory)
   GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY}/tmp-${BASHPID}.${GLOBAL_TEST_SUITE_NAME}"
-  unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY
+  unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
   TMPDIR="${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
 
   GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY}/output-${BASHPID}.${GLOBAL_TEST_SUITE_NAME}"

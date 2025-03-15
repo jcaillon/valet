@@ -12,7 +12,7 @@ function main() {
   test_exe::invoke5
   test_exe::invoke2
   test_exe::invoke
-  test_exe::invoke2piped
+  test_exe::invoke3piped
   test_exe::captureOutput
 }
 
@@ -32,6 +32,9 @@ function test_exe::invoke5() {
 
   test::markdown "Normal, return everything as variables:"
   test::func exe::invoke5 true '' '' '' fake
+
+  test::markdown "Normal, does not redirect outputs:"
+  _OPTION_NO_REDIRECTION=true test::exec exe::invoke5 true '' '' '' fake
 
   test::markdown "Input stream for file, return everything as files:"
   test::prompt exe::invokef5 false 0 true "${GLOBAL_TEST_TEMP_FILE}" fake --std-in
@@ -55,6 +58,8 @@ function test_exe::invoke2() {
   test::exit exe::invoke2 true fake --error
 
   test::func exe::invokef2 false fake --option argument1 argument2
+
+  test::exec exe::invoket2 false fake --option argument1 argument2
 }
 
 function test_exe::invoke() {
@@ -64,12 +69,12 @@ function test_exe::invoke() {
   test::func exe::invoke fake --option argument1 argument2
 }
 
-function test_exe::invoke2piped() {
-  test::title "✅ Testing exe::invoke2piped"
+function test_exe::invoke3piped() {
+  test::title "✅ Testing exe::invoke3piped"
 
-  test::func exe::invoke2piped true "'input_stream'" fake --std-in --option argument1 argument2
+  test::func exe::invoke3piped true "'input_stream'" fake --std-in --option argument1 argument2
 
-  test::func exe::invokef2piped true "'input_stream'" fake --std-in --option argument1 argument2
+  test::func exe::invokef3piped true "'input_stream'" fake --std-in --option argument1 argument2
 }
 
 function test_exe::captureOutput() {

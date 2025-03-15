@@ -28,6 +28,9 @@ source time
 #       the executable or function to execute
 # - $@: **arguments** _as any_:
 #       the arguments to pass to the executable
+# - ${_OPTION_NO_REDIRECTION}: _as bool_:
+#       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.
+#       (default to false)
 #
 # Returns:
 #
@@ -53,6 +56,7 @@ function exe::invokef5() {
   local stdInFromFile="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local stdIn="${4?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local executable="${5?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local noRedirection="${_OPTION_NO_REDIRECTION:-false}"
   shift 5
 
   # if trace mode is on, print some info
@@ -83,14 +87,26 @@ function exe::invokef5() {
 
   # execute the executable
   local -i exitCode=0
-  if [[ -n ${stdIn} ]]; then
-    if [[ ${stdInFromFile} == "true" ]]; then
-      "${executable}" "$@" <"${stdIn}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
+  if [[ ${noRedirection} == "true" ]]; then
+    if [[ -n ${stdIn} ]]; then
+      if [[ ${stdInFromFile} == "true" ]]; then
+        "${executable}" "$@" <"${stdIn}" || exitCode=$?
+      else
+        "${executable}" "$@" <<<"${stdIn}" || exitCode=$?
+      fi
     else
-      "${executable}" "$@" <<<"${stdIn}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
+      "${executable}" "$@" || exitCode=$?
     fi
   else
-    "${executable}" "$@" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
+    if [[ -n ${stdIn} ]]; then
+      if [[ ${stdInFromFile} == "true" ]]; then
+        "${executable}" "$@" <"${stdIn}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
+      else
+        "${executable}" "$@" <<<"${stdIn}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
+      fi
+    else
+      "${executable}" "$@" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
+    fi
   fi
 
   time::getTimerValue
@@ -104,28 +120,32 @@ function exe::invokef5() {
   fi
 
   local shouldFail=false
-  if [[ ${failIfFails} == "true" && exitCode -ne 0 ]]; then shouldFail=true; fi
+  if [[ ${failIfFails} == "true" && exitCode -ne 0 ]]; then
+    shouldFail=true;
+  fi
 
   # fail if needed or we are debug mode; display all the debug information that could be useful
   if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
 
-    if log::isTraceEnabled || [[ ${shouldFail} == "true" ]]; then
-      # print std out
-      if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
-        log::errorTrace "${executable^} standard output stream:"
-        log::saveFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" "${executable}-stdout"
-        log::printFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 99
-      else
-        log::errorTrace "${executable^} had no standard output stream."
-      fi
+    if [[ ${noRedirection} != "true" ]]; then
+      if log::isTraceEnabled || [[ ${shouldFail} == "true" ]]; then
+        # print std out
+        if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
+          log::errorTrace "${executable^} standard output stream:"
+          log::saveFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" "${executable}-stdout"
+          log::printFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 99
+        else
+          log::errorTrace "${executable^} had no standard output stream."
+        fi
 
-      # print stderr
-      if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
-        log::errorTrace "${executable^} standard error stream:"
-        log::saveFile "${GLOBAL_TEMPORARY_STDERR_FILE}" "${executable}-stderr"
-        log::printFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 99
-      else
-        log::errorTrace "${executable^} had no standard error stream."
+        # print stderr
+        if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
+          log::errorTrace "${executable^} standard error stream:"
+          log::saveFile "${GLOBAL_TEMPORARY_STDERR_FILE}" "${executable}-stderr"
+          log::printFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 99
+        else
+          log::errorTrace "${executable^} had no standard error stream."
+        fi
       fi
     fi
 
@@ -242,7 +262,7 @@ function exe::invokef2() {
 # - ${RETURNED_VALUE2}: The content of stderr.
 #
 # ```bash
-# exe::invokef2 false git status || core::fail "status failed."
+# exe::invoke2 false git status || core::fail "status failed."
 # stdout="${RETURNED_VALUE}"
 # stderr="${RETURNED_VALUE2}"
 # ```
@@ -254,7 +274,37 @@ function exe::invoke2() {
   exe::invoke5 "${failIfFails}" 0 '' '' "$@" || return $?
 }
 
-# ## exe::invokef2piped
+# ## exe::invoket2
+#
+# This function call an executable and its arguments.
+# It does not redirect the stdout and stderr so it outputs to the
+# default 1/2 file descriptors.
+# Equivalent to `_OPTION_NO_REDIRECTION=true exe::invokef5 "${1}" 0 "" "" "${@:2}"`
+#
+# - $1: **fail** _as bool_:
+#       true/false to indicate if the function should fail in case the execution fails.
+#       If true and the execution fails, the script will exit.
+# - $2: **executable** _as string_:
+#       the executable or function to execute
+# - $@: **arguments** _as any_:
+#       the arguments to pass to the executable
+#
+# Returns:
+#
+# - $?:The exit code of the executable.
+#
+# ```bash
+# exe::invoket2 false git status || core::fail "status failed."
+# ```
+#
+# > See exe::invokef5 for more information.
+function exe::invoket2() {
+  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  shift
+  _OPTION_NO_REDIRECTION=true exe::invokef5 "${failIfFails}" 0 '' '' "$@" || return $?
+}
+
+# ## exe::invokef3piped
 #
 # This function call an executable and its arguments and input a given string as stdin.
 # It redirects the stdout and stderr to temporary files.
@@ -277,7 +327,7 @@ function exe::invoke2() {
 # - ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
 #
 # ```bash
-# exe::invokef2piped true "key: val" yq -o json -p yaml -
+# exe::invokef3piped true "key: val" yq -o json -p yaml -
 # stdoutFilePath="${RETURNED_VALUE}"
 # stderrFilePath="${RETURNED_VALUE2}"
 # ```
@@ -287,14 +337,14 @@ function exe::invoke2() {
 # > But without using a subshell.
 # >
 # > See exe::invokef5 for more information.
-function exe::invokef2piped() {
+function exe::invokef3piped() {
   local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local stdIn="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift 2
   exe::invokef5 "${failIfFails}" 0 false "${stdIn}" "$@" || return $?
 }
 
-# ## exe::invoke2piped
+# ## exe::invoke3piped
 #
 # This function call an executable and its arguments and input a given string as stdin.
 # It redirects the stdout and stderr to environment variables.
@@ -317,7 +367,7 @@ function exe::invokef2piped() {
 # - ${RETURNED_VALUE2}: The content of stderr.
 #
 # ```bash
-# exe::invoke2piped true "key: val" yq -o json -p yaml -
+# exe::invoke3piped true "key: val" yq -o json -p yaml -
 # stdout="${RETURNED_VALUE}"
 # stderr="${RETURNED_VALUE2}"
 # ```
@@ -327,7 +377,7 @@ function exe::invokef2piped() {
 # > But without using a subshell.
 # >
 # > See exe::invokef5 for more information.
-function exe::invoke2piped() {
+function exe::invoke3piped() {
   local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local stdIn="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift 2

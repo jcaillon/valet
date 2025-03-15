@@ -90,7 +90,14 @@ function bash::runInParallel() {
   for ((index = 0; index < ${#jobNames[@]}; index++)); do
     eval "{
       : ID=${index};
+
+      # set the sell for this job
+      core::setShellOptions
       trap::unregister;
+      TMPDIR=\"${GLOBAL_TEMPORARY_DIRECTORY}/job-\${BASHPID}\"
+      unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
+      fs::setupTempFileGlobalVariable
+
       ${jobCommands[index]};
     } &"
     _BASH_RUNNING_JOB_PIDS+=("${!}")

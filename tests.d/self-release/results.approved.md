@@ -58,7 +58,7 @@ INFO     The tag message is:
    6 ░ - 🐞 fix
    7 ░ 
 INFO     Generating documentation for the core functions only.
-INFO     Found 174 functions with documentation.
+INFO     Found 175 functions with documentation.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md⌝.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet
@@ -66,7 +66,7 @@ INFO     The documentation has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTO
 INFO     The prototype script has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet⌝.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets
 INFO     The vscode snippets have been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets⌝.
-INFO     Writing the 174 functions documentation to the core libraries docs.
+INFO     Writing the 175 functions documentation to the core libraries docs.
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/codes.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/core.md
@@ -129,6 +129,8 @@ INFO     Writing the 174 functions documentation to the core libraries docs.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/curl.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/curl.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/codes.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/exe.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/exe.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/exe.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/exe.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/exe.md

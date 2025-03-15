@@ -218,7 +218,9 @@ function progress_runAnimationInBackground() {
   local -i percentage="${6}"
   local message="${7}"
 
-  trap::unregister
+  # TODO: understand why unregistering here affects the main thread
+  # core::setShellOptions
+  # trap::unregister
 
   # Hide the cursor
   printf "%s" "${ESC__CURSOR_HIDE}" 1>&2

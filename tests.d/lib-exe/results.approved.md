@@ -97,6 +97,22 @@ RETURNED_VALUE2='INFO: log line from fake mock
 '
 ```
 
+Normal, does not redirect outputs:
+
+❯ `exe::invoke5 true '' '' '' fake`
+
+**Standard output**:
+
+```text
+🙈 mocking fake 
+```
+
+**Error output**:
+
+```text
+INFO: log line from fake mock
+```
+
 Input stream for file, return everything as files:
 
 ❯ `exe::invokef5 false 0 true /tmp/valet-temp fake --std-in`
@@ -168,7 +184,7 @@ TRACE    Fake standard error stream:
 ⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr⌝
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜14.000s⌝.
+ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜16.000s⌝.
 ```
 
 ❯ `exe::invokef2 false fake --option argument1 argument2`
@@ -178,6 +194,20 @@ Returned variables:
 ```text
 RETURNED_VALUE='/tmp/valet-stdout.f'
 RETURNED_VALUE2='/tmp/valet-stderr.f'
+```
+
+❯ `exe::invoket2 false fake --option argument1 argument2`
+
+**Standard output**:
+
+```text
+🙈 mocking fake --option argument1 argument2
+```
+
+**Error output**:
+
+```text
+INFO: log line from fake mock
 ```
 
 ### ✅ Testing exe::invoke
@@ -196,7 +226,7 @@ TRACE    Fake standard error stream:
 ⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr⌝
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜16.000s⌝.
+ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜20.000s⌝.
 ```
 
 ❯ `exe::invoke fake --option argument1 argument2`
@@ -210,9 +240,9 @@ RETURNED_VALUE2='INFO: log line from fake mock
 '
 ```
 
-### ✅ Testing exe::invoke2piped
+### ✅ Testing exe::invoke3piped
 
-❯ `exe::invoke2piped true 'input_stream' fake --std-in --option argument1 argument2`
+❯ `exe::invoke3piped true 'input_stream' fake --std-in --option argument1 argument2`
 
 Returned variables:
 
@@ -225,7 +255,7 @@ RETURNED_VALUE2='INFO: log line from fake mock
 '
 ```
 
-❯ `exe::invokef2piped true 'input_stream' fake --std-in --option argument1 argument2`
+❯ `exe::invokef3piped true 'input_stream' fake --std-in --option argument1 argument2`
 
 Returned variables:
 

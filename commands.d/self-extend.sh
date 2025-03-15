@@ -437,7 +437,7 @@ function selfExtend_executeSetupScript() {
 
 # A filter so select extension folders.
 # shellcheck disable=SC2317
-function filterExtensionFolder() {
+function selfExtend_filterExtensionFolder() {
   if [[ -d "${1}/.git" ]]; then
     return 1
   fi
@@ -458,7 +458,7 @@ function selfExtend::updateExtensions() {
   fi
 
   log::info "Attempting to update all git repositories and installed extensions in ⌜${extensionsDirectory}⌝."
-  fs::listDirectories "${extensionsDirectory}" true false filterExtensionFolder
+  fs::listDirectories "${extensionsDirectory}" true false selfExtend_filterExtensionFolder
   local path
   local allUpdateSuccess=true
   local -i count=0

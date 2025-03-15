@@ -9,6 +9,7 @@ url: /docs/roadmap
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
 - coproc: make sure we see any issue happening in the background
+- issue with progress bar: try self test -p 0 and the progress is not displayed
 - in performance tip, document the use of -n
 - progress:
   - refacto progress bar; use signal to tell the bg job to redraw the progress bar after displaying a log. +handle the terminal size to display the progress bar!
