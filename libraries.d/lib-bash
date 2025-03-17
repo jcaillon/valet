@@ -96,6 +96,7 @@ function bash::runInParallel() {
       trap::unregister;
       TMPDIR=\"${GLOBAL_TEMPORARY_DIRECTORY}/job-\${BASHPID}\"
       unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
+
       fs::setupTempFileGlobalVariable
 
       ${jobCommands[index]};
@@ -105,7 +106,7 @@ function bash::runInParallel() {
     # we could get the job number using 'jobs %%' but since it displays the command, we will
     # check for ID=x in the jobs output
 
-    log::debug "Running job (${index}) ⌜${jobNames[index]}⌝ with PID ${!}."
+    log::debug "Running job (${index}) ⌜${jobNames[index]}⌝ with PID ${!}."$'\n'"Command: ${jobCommands[index]}"
 
     while ((${#_BASH_RUNNING_JOB_PIDS[@]} >= maxParallelJobs || (index + 1 == ${#jobNames[@]}))); do
       # wait for one of the test suites to finish (or all of them for the last batch)

@@ -108,10 +108,8 @@ function selfTest() {
   _TEST_NB_PARALLEL_TEST_SUITES="${parallelTestSuites:-}"
   if ((_TEST_NB_PARALLEL_TEST_SUITES == 0)); then
     log::debug "Running all test suites sequentially."
-    _TEST_PARALLEL_RUN_QUALIFIER="sequentially"
   else
     log::debug "Running up to ⌜${_TEST_NB_PARALLEL_TEST_SUITES}⌝ test suites in parallel."
-    _TEST_PARALLEL_RUN_QUALIFIER="in parallel (max ${_TEST_NB_PARALLEL_TEST_SUITES})"
   fi
 
   GLOBAL_TEST_APPROVAL_FAILURE_STATUS=141
@@ -246,7 +244,7 @@ function selfTest_runSingleTestSuites() {
     return 0
   fi
 
-  log::info "Running ⌜${#testSuiteDirectories[@]}⌝ test suites from directory ⌜${testsDotDirectory}⌝ ${_TEST_PARALLEL_RUN_QUALIFIER}."
+  log::info "Running ⌜${#testSuiteDirectories[@]}⌝ test suites from directory ⌜${testsDotDirectory}⌝."
 
   pushd "${testsDotDirectory}" 1>/dev/null
 

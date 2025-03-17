@@ -3,20 +3,6 @@
 source "libraries.d/core"
 include progress bash profiler
 
-log::warning "Now displaying a progress bar."
-
-IDX=0
-while [[ ${IDX} -le 50 ]]; do
-  log::info "doing something ${IDX}..."
-  progress::update $((IDX * 2)) "doing something ${IDX}..."
-  IDX=$((IDX + 1))
-  # log::info "alright ${IDX}..."
-  bash::sleep  0.1
-done
-
-exit 0
-
-
 # ############################
 # # Spinner
 # ############################

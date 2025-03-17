@@ -9,11 +9,7 @@ url: /docs/roadmap
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
 - coproc: make sure we see any issue happening in the background
-- issue with progress bar: try self test -p 0 and the progress is not displayed
 - in performance tip, document the use of -n
-- progress:
-  - refacto progress bar; use signal to tell the bg job to redraw the progress bar after displaying a log. +handle the terminal size to display the progress bar!
-  - after logging, if progress bar is in progress, we need to redraw it immediately.
 - self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.
 - conditionally show global options because they take too much space
 - add a global --edit option to edit the command function file

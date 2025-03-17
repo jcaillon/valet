@@ -186,7 +186,7 @@ function progress:redraw() {
   if [[ ${_PROGRESS_BAR_RUNNING:-} != "true" ]]; then
     return 0
   fi
-  if [[ ! -v _PROGRESS_BACKGROUND_JOB ]] || ! { printf "1\0%s\0" "redraw" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; }; then
+  if [[ ! -v _PROGRESS_BACKGROUND_JOB ]] || ! { printf "1\0%s\0" "redraw" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; } 2>/dev/null; then
     # case where the progress bar was stopped because it reached max frames
     progress::stop
   fi
