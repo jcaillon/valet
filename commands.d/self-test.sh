@@ -258,13 +258,27 @@ function selfTest_runSingleTestSuites() {
 
   # sequential run
   if ((_TEST_NB_PARALLEL_TEST_SUITES == 0 || ${#testSuiteDirectories[@]} == 1)); then
+    _OPTION_PATH_ONLY=true fs::createTempFile
+    local testLogFile="${RETURNED_VALUE}"
+
     local -i testSuitesDoneCount=0
     for testDirectory in "${testSuiteDirectories[@]}"; do
       testDirectoryName="${testDirectory##*/}"
       log::debug "Starting test suite ⌜${testDirectoryName}⌝."
 
+      : >"${testLogFile}"
+
       progress::update $((testSuitesDoneCount * 100 / ${#testSuiteDirectories[@]})) "Running test suite ⌜${testDirectoryName}⌝."
-      (selfTest_runSingleTestSuite "${testDirectory}") || _TEST_FAILED_TEST_SUITES+=("${testDirectoryName}")
+      (
+        VALET_CONFIG_LOG_FD="${testLogFile}"
+        log::init
+        selfTest_runSingleTestSuite "${testDirectory}") || _TEST_FAILED_TEST_SUITES+=("${testDirectoryName}"
+      )
+
+      # display the job output
+      fs::readFile "${testLogFile}"
+      log::printRaw RETURNED_VALUE
+
       testSuitesDoneCount+=1
     done
 
@@ -275,7 +289,7 @@ function selfTest_runSingleTestSuites() {
       _TEST_SUITE_NAMES+=("${testDirectory##*/}")
       _OPTION_PATH_ONLY=true fs::createTempFile
       _TEST_SUITE_OUTPUT_FILES+=("${RETURNED_VALUE}")
-      _TEST_SUITE_COMMANDS+=("selfTest_runSingleTestSuite '${testDirectory}' &>'${RETURNED_VALUE}'")
+      _TEST_SUITE_COMMANDS+=("VALET_CONFIG_LOG_FD='${RETURNED_VALUE}'; log::init; selfTest_runSingleTestSuite '${testDirectory}'")
     done
 
     bash::runInParallel _TEST_SUITE_NAMES _TEST_SUITE_COMMANDS "${_TEST_NB_PARALLEL_TEST_SUITES}" selfTest_parallelCallback
