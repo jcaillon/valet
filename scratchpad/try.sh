@@ -3,6 +3,17 @@
 source "libraries.d/core"
 include benchmark progress bash
 
+bash::getScriptDirectory
+echo "Script directory: ${RETURNED_VALUE}"
+
+pushd /c/Users/jcaillon/data/repo/innersource/sres/sres-cloud/enablers/yg
+
+(source extension.setup.sh)
+
+popd
+
+exit 0
+
 function func1() {
   cd libraries.d &>/dev/null
   cd - &>/dev/null

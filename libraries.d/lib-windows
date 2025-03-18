@@ -35,8 +35,15 @@ function windows::runPs1() {
 
   local exitCode=0
 
-  if ! command -v powershell &>/dev/null; then
-    core::fail "The PowerShell command is not available."
+  local powershellPath="powershell.exe"
+  local powershellCommand="powershell"
+  if ! command -v "${powershellCommand}" &>/dev/null; then
+    powershellPath="${SYSTEMROOT:-C:\\Windows}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+    windows::convertPathToUnix "${powershellPath}"
+    powershellCommand="${RETURNED_VALUE}"
+    if [[ ! -f "${powershellCommand}" ]]; then
+      core::fail "The PowerShell command is not available."
+    fi
   fi
 
   command="${command//\$/\`\$}"
@@ -54,7 +61,7 @@ function windows::runPs1() {
   local script='
   $ErrorActionPreference = '"'Stop'"';
   $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
-  $processInfo.FileName = "powershell.exe"
+  $processInfo.FileName = "'"${powershellPath}"'";
   $processInfo.Verb = "runas";
   $processInfo.RedirectStandardError = $true;
   $processInfo.RedirectStandardOutput = $true;
@@ -82,11 +89,11 @@ function windows::runPs1() {
     # shellcheck disable=SC2016
     script='
     $ErrorActionPreference = '"'Stop'"';
-    $process = Start-Process -FilePath powershell.exe -ArgumentList @("-NoProfile","-NonInteractive","-File","'"${scriptFileWindows}"'") -Wait -Verb RunAs -WindowStyle Hidden;
+    $process = Start-Process -FilePath "'"${powershellPath}"'" -ArgumentList @("-NoProfile","-NonInteractive","-File","'"${scriptFileWindows}"'") -Wait -Verb RunAs -WindowStyle Hidden;
     exit $process.ExitCode
     '
   fi
-  powershell -NoProfile -NonInteractive -Command "${script}" || exitCode=1
+  "${powershellCommand}" -NoProfile -NonInteractive -Command "${script}" || exitCode=1
 
   fs::readFile "${stdoutFile}"
   stdout="${RETURNED_VALUE//$'\r'/}"

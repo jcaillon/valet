@@ -56,7 +56,7 @@ RETURNED_VALUE='/d/data/file'
 🙈 mocking powershell: -NoProfile -NonInteractive -Command 
   $ErrorActionPreference = 'Stop';
   $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
-  $processInfo.FileName = "powershell.exe"
+  $processInfo.FileName = "powershell.exe";
   $processInfo.Verb = "runas";
   $processInfo.RedirectStandardError = $true;
   $processInfo.RedirectStandardOutput = $true;
@@ -82,7 +82,7 @@ RETURNED_VALUE='/d/data/file'
 🙈 mocking powershell: -NoProfile -NonInteractive -Command 
   $ErrorActionPreference = 'Stop';
   $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
-  $processInfo.FileName = "powershell.exe"
+  $processInfo.FileName = "powershell.exe";
   $processInfo.Verb = "runas";
   $processInfo.RedirectStandardError = $true;
   $processInfo.RedirectStandardOutput = $true;
@@ -110,7 +110,7 @@ RETURNED_VALUE='/d/data/file'
 🙈 mocking powershell: -NoProfile -NonInteractive -Command 
   $ErrorActionPreference = 'Stop';
   $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
-  $processInfo.FileName = "powershell.exe"
+  $processInfo.FileName = "powershell.exe";
   $processInfo.Verb = "runas";
   $processInfo.RedirectStandardError = $true;
   $processInfo.RedirectStandardOutput = $true;
@@ -143,7 +143,7 @@ RETURNED_VALUE='/d/data/file'
 🙈 mocking powershell: -NoProfile -NonInteractive -Command 
   $ErrorActionPreference = 'Stop';
   $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
-  $processInfo.FileName = "powershell.exe"
+  $processInfo.FileName = "powershell.exe";
   $processInfo.Verb = "runas";
   $processInfo.RedirectStandardError = $true;
   $processInfo.RedirectStandardOutput = $true;
@@ -187,7 +187,7 @@ RETURNED_VALUE='/d/data/file'
 ```text
 🙈 mocking powershell: -NoProfile -NonInteractive -Command 
     $ErrorActionPreference = 'Stop';
-    $process = Start-Process -FilePath powershell.exe -ArgumentList @("-NoProfile","-NonInteractive","-File",'tmp') -Wait -Verb RunAs -WindowStyle Hidden;
+    $process = Start-Process -FilePath "powershell.exe" -ArgumentList @("-NoProfile","-NonInteractive","-File",'tmp') -Wait -Verb RunAs -WindowStyle Hidden;
     exit $process.ExitCode
     
 ```
@@ -199,7 +199,7 @@ RETURNED_VALUE='/d/data/file'
 ```text
 🙈 mocking powershell: -NoProfile -NonInteractive -Command 
     $ErrorActionPreference = 'Stop';
-    $process = Start-Process -FilePath powershell.exe -ArgumentList @("-NoProfile","-NonInteractive","-File",'tmp') -Wait -Verb RunAs -WindowStyle Hidden;
+    $process = Start-Process -FilePath "powershell.exe" -ArgumentList @("-NoProfile","-NonInteractive","-File",'tmp') -Wait -Verb RunAs -WindowStyle Hidden;
     exit $process.ExitCode
     
 ```
