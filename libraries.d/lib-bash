@@ -511,3 +511,33 @@ function bash::getFunctionDefinitionWithGlobalVars() {
 
   RETURNED_VALUE="${modifiedFunctionDefinition}"
 }
+
+# ## bash::getScriptDirectory
+#
+# This function returns the directory of the script that called it.
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the directory of the script that called it.
+#
+# ```bash
+# bash::getScriptDirectory
+# echo "${RETURNED_VALUE}"
+# ```
+function bash::getScriptDirectory() {
+  local scriptDirectory
+  local scriptDirectory="${BASH_SOURCE[1]}"
+  if [[ "${scriptDirectory}" != /* ]]; then
+    # resolve relative path
+    if pushd "${scriptDirectory%/*}" &>/dev/null; then
+      scriptDirectory="${PWD}"
+      popd &>/dev/null || :
+    else
+      scriptDirectory="${PWD}"
+    fi
+  else
+    # strip filename
+    scriptDirectory="${scriptDirectory%/*}"
+  fi
+  RETURNED_VALUE="${scriptDirectory}"
+}
