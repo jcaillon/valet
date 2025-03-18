@@ -253,7 +253,7 @@ function selfExtend_createExtension() {
     fs::readFile "${extensionDirectory}/.gitignore"
     if [[ ${RETURNED_VALUE} != *"### Valet ###"* ]]; then
       local content=$'\n'$'\n'"### Valet ###"$'\n'"lib-valet"$'\n'"lib-valet.md"$'\n'".vscode/valet.code-snippets"
-      fs::writeToFile "${extensionDirectory}/.gitignore" "${content}" true
+      fs::writeToFile "${extensionDirectory}/.gitignore" content true
     fi
   fi
 
@@ -321,9 +321,9 @@ function selfExtend_downloadTarball() {
   mv "${RETURNED_ARRAY[0]}"/* "${targetDirectory}" || core::fail "Could not move the files from ⌜${RETURNED_ARRAY[0]}⌝ to ⌜${targetDirectory}⌝."
 
   # write the sha1 to the targetDirectory so we known which commit we fetched
-  fs::writeToFile "${targetDirectory}/.sha1" "${sha1}"
-  fs::writeToFile "${targetDirectory}/.reference" "${reference}"
-  fs::writeToFile "${targetDirectory}/.repo" "${repositoryUrl}"
+  fs::writeToFile "${targetDirectory}/.sha1" sha1
+  fs::writeToFile "${targetDirectory}/.reference" reference
+  fs::writeToFile "${targetDirectory}/.repo" repositoryUrl
 }
 
 # Get the sha1 from a git server API.
@@ -431,7 +431,8 @@ function selfExtend_executeSetupScript() {
     interactive::promptYesNo "The setup script for the extension ⌜${extensionName}⌝ failed (see above), do you want to continue anyway?" true || core::fail "The setup script for the extension ⌜${extensionName}⌝ failed."
   fi
   fs::createDirectoryIfNeeded "${extensionDirectory}/.git"
-  fs::writeToFile "${extensionDirectory}/.git/.valet-setup-executed" "ok"
+  local content="ok"
+  fs::writeToFile "${extensionDirectory}/.git/.valet-setup-executed" content
   log::success "The setup script for the extension ⌜${extensionName}⌝ has been executed."
 }
 

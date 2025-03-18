@@ -323,7 +323,9 @@ function selfRelease::bumpVersion() {
 
   # bump the version
   version::bump "${version}" "${bumpLevel}" && newVersion="${RETURNED_VALUE}"
-  if [[ "${dryRun:-}" != "true" ]]; then fs::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/version" "${newVersion}"; fi
+  if [[ "${dryRun:-}" != "true" ]]; then
+    fs::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/version" newVersion
+  fi
   log::info "The bumped version of valet is: ${newVersion}."
 
   # commit the new version and push it
@@ -382,7 +384,7 @@ function selfRelease::updateDocumentation() {
 # This function writes all the functions documentation to the documentation files
 # under the `docs/content/docs/300.libraries` directory.
 function selfRelease::writeAllFunctionsDocumentation() {
-  local pageFooter="${1:-}"
+  local pageFooter=$'\n'$'\n'"> ${1}"$'\n'
 
   log::info "Writing the ${#SORTED_FUNCTION_NAMES[@]} functions documentation to the core libraries docs."
 
@@ -397,7 +399,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
   done
 
   # write the new files
-  local key
+  local key content
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     local functionName="${key}"
     regex::getFirstGroup functionName '([[:alnum:]]+)::'
@@ -411,7 +413,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
 
     # init the file if necessary
     if [[ ! -f "${path}" ]]; then
-      fs::writeToFile "${path}" "---
+      content="---
 title: 📂 ${packageName}
 cascade:
   type: docs
@@ -419,10 +421,13 @@ url: /docs/libraries/${packageName}
 ---
 
 "
+      fs::writeToFile "${path}" content
     fi
 
     # append the function documentation
-    fs::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries/${packageName}.md" "RETURNED_ASSOCIATIVE_ARRAY[${key}]"$'\n'$'\n' true
+    fs::writeToFile "${path}" "RETURNED_ASSOCIATIVE_ARRAY[${key}]" true
+    content=$'\n'$'\n'
+    fs::writeToFile "${path}" content true
   done
 
   # add footer
@@ -432,6 +437,6 @@ url: /docs/libraries/${packageName}
     if [[ ${file} == *"_index.md" ]]; then
       continue
     fi
-    fs::writeToFile "${file}" $'\n'$'\n'"> ${pageFooter}"$'\n' true
+    fs::writeToFile "${file}" pageFooter true
   done
 }

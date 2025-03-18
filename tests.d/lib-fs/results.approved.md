@@ -2,6 +2,20 @@
 
 ## Test script 00.tests
 
+### ✅ Testing fs::writeToFile
+
+❯ `fs::writeToFile resources/gitignored/file1 _content`
+
+❯ `fs::writeToFile resources/gitignored/file1 _content true`
+
+❯ `fs::cat resources/gitignored/file1`
+
+**Standard output**:
+
+```text
+Hello, World!
+```
+
 ### ✅ Testing fs::createTempFile and fs::createTempDirectory
 
 ❯ `_OPTION_PATH_ONLY=true fs::createTempFile`

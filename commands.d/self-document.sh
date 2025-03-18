@@ -219,7 +219,7 @@ function selfRelease_writeAllFunctionsToMarkdown() {
 
   # add footer
   content+=$'\n'$'\n'"> ${pageFooter}"
-  fs::writeToFile "${outputFile}" "${content}"
+  fs::writeToFile "${outputFile}" content
 }
 
 # This function writes all the function prototypes in a file.
@@ -228,7 +228,8 @@ function selfRelease_writeAllFunctionsToPrototypeScript() {
   local outputFile="${2:-}"
 
   fs::createFilePathIfNeeded "${outputFile}"
-  fs::writeToFile "${outputFile}" "# Valet functions documentation"$'\n'$'\n'
+  local _title="# Valet functions documentation"$'\n'$'\n'
+  fs::writeToFile "${outputFile}" _title
 
   local content="#""!/usr/bin/env bash
 # This script contains the documentation of all the valet library functions.
@@ -252,7 +253,7 @@ function selfRelease_writeAllFunctionsToPrototypeScript() {
     content+="function ${functionName}() { :; }"$'\n'$'\n'
   done
 
-  fs::writeToFile "${outputFile}" "${content}"
+  fs::writeToFile "${outputFile}" content
 }
 
 # This function writes all the functions to a vscode snippet file.
@@ -326,5 +327,6 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   # remove the first line
   originalContent="${originalContent#*$'\n'}"
 
-  fs::writeToFile "${outputFile}" "${content}${originalContent}"
+  fs::writeToFile "${outputFile}" content
+  fs::writeToFile "${outputFile}" originalContent true
 }

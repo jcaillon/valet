@@ -78,7 +78,7 @@ function windows::runPs1() {
     windows::createTempDirectory
     local scriptFileWindows="${RETURNED_VALUE}\\valet-run-ps1-as-admin.ps1"
     local scriptFileLinux="${RETURNED_VALUE2}/valet-run-ps1-as-admin.ps1"
-    fs::writeToFile "${scriptFileLinux}" "${script}"
+    fs::writeToFile "${scriptFileLinux}" script
     # shellcheck disable=SC2016
     script='
     $ErrorActionPreference = '"'Stop'"';

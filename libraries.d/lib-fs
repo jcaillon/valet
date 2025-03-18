@@ -152,7 +152,7 @@ function fs::readFile() {
 # - $1: **path** _as string_:
 #       the file path to write
 # - $2: **content** _as string_:
-#       the content to write
+#       The variable containing the content to write.
 # - $3: append _as bool_:
 #       (optional) true to append the content to the file, false otherwise
 #       (defaults to false)
@@ -165,11 +165,12 @@ function fs::readFile() {
 # > - If the file path does not exist, the function will create the directory tree.
 # > - The main use case is to be able to mock this function during tests...
 function fs::writeToFile() {
+  local -n contentToWriteInFile="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   fs::createFilePathIfNeeded "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ ${3:-false} == "true" ]]; then
-    printf '%s' "${2}" >>"${1}"
+    printf '%s' "${contentToWriteInFile}" >>"${1}"
   else
-    printf '%s' "${2}" >"${1}"
+    printf '%s' "${contentToWriteInFile}" >"${1}"
   fi
 }
 

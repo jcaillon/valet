@@ -4,6 +4,7 @@
 source fs
 
 function main() {
+  test_fs::writeToFile
   test_fs::createTemp
   test_fs::getFileLineCount
   test_fs::toAbsolutePath
@@ -15,6 +16,18 @@ function main() {
   test_fs::createLink
   test_fs::head
   test_fs::tail
+}
+
+function test_fs::writeToFile() {
+  test::title "✅ Testing fs::writeToFile"
+
+  local _content="Hello,"
+  test::exec fs::writeToFile resources/gitignored/file1 _content
+
+  _content=" World!"
+  test::exec fs::writeToFile resources/gitignored/file1 _content true
+
+  test::exec fs::cat resources/gitignored/file1
 }
 
 function test_fs::createTemp() {
