@@ -2168,7 +2168,9 @@ function command::sourceFunction() {
   local fileToSource
   if ! declare -F "${functionName}" &>/dev/null; then
     local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
-    if [[ -f "${fileToSource}" ]]; then
+    if [[ -z "${fileToSource:-}" ]]; then
+      core::fail "Could not find a command function named ⌜${functionName}⌝."
+    elif [[ -f "${fileToSource}" ]]; then
       # shellcheck disable=SC1090
       source "${fileToSource}"
       log::debug "Loaded file ⌜${fileToSource}⌝."

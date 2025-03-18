@@ -11,6 +11,12 @@ function main() {
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
   rm -f "${RETURNED_VALUE}/config"
 
+  test::title "✅ Testing the bad startup"
+  core::getConfigurationDirectory
+  echo "fu=\$((1/0))" >"${RETURNED_VALUE}/startup"
+  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
+  rm -f "${RETURNED_VALUE}/startup"
+
   test::title "✅ Testing the bad .env"
   echo "fu=\$((1/0))" >".env"
   export VALET_CONFIG_DOT_ENV_SCRIPT=".env"

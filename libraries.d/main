@@ -50,6 +50,14 @@ if [[ -f ${GLOBAL_CONFIG_FILE} ]]; then
   unset -v GLOBAL_ON_EXIT_MESSAGE
 fi
 
+# Source the startup file
+GLOBAL_STARTUP_FILE="${VALET_STARTUP_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/startup"}"
+if [[ -f ${GLOBAL_STARTUP_FILE} ]]; then
+  GLOBAL_ON_EXIT_MESSAGE="Error sourcing the startup file ⌜${GLOBAL_STARTUP_FILE}⌝."$'\n'"Check the file for error and try again, or delete the file to discard your config."
+  builtin source "${GLOBAL_STARTUP_FILE}"
+  unset -v GLOBAL_ON_EXIT_MESSAGE
+fi
+
 # Source the env script
 if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_SCRIPT:-.env} ]]; then
   # shellcheck disable=SC2034
