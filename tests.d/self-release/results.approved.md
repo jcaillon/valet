@@ -69,43 +69,53 @@ INFO     The prototype script has been generated in ⌜$GLOBAL_INSTALLATION_DIRE
 INFO     The vscode snippets have been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets⌝.
 INFO     Writing the 175 functions documentation to the core libraries docs.
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/bash.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/benchmark.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/codes.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/command.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/core.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/curl.md
-🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/fsfs.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/exe.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/fs.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/interactive.md
-🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/io.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/log.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/profiler.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/progress.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/regex.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/sfzf.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/string.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/system.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/test.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/interactive.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/log.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/system.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/windows.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/fs.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/core.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/string.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/test.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/time.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/version.md
+🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/windows.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/bash.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/profiler.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/benchmark.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/codes.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/command.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/benchmark.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/core.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/curl.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/exe.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/fs.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/interactive.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/log.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/profiler.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/progress.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/regex.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/sfzf.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/string.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/system.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/test.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/time.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/version.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/curl.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/sfzf.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/regex.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/progress.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/time.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/exe.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/windows.md
 🙈 mocked exe::invoke cp -f $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/config.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md
 🙈 mocked exe::invoke cp $GLOBAL_INSTALLATION_DIRECTORY/.vscode/extensions.json $GLOBAL_INSTALLATION_DIRECTORY/extras/extensions.json
 🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md
-🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/codes.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/core.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/curl.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/fsfs.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/interactive.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/io.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/log.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/profiler.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/string.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/system.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/test.md
+🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/bash.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/benchmark.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/codes.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/command.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/core.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/curl.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/exe.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/fs.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/interactive.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/log.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/profiler.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/progress.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/regex.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/sfzf.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/string.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/system.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/test.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/time.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/version.md $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/windows.md
 🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/extras/base.code-snippets $GLOBAL_INSTALLATION_DIRECTORY/extras/extensions.json $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md $GLOBAL_INSTALLATION_DIRECTORY/extras/template-command-default.sh $GLOBAL_INSTALLATION_DIRECTORY/extras/template-library-default.sh $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets
 🙈 mocked exe::invoke git commit -m :memo: updating the documentation
 SUCCESS  The documentation update has been committed.

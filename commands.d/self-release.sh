@@ -384,7 +384,7 @@ function selfRelease::updateDocumentation() {
 # This function writes all the functions documentation to the documentation files
 # under the `docs/content/docs/300.libraries` directory.
 function selfRelease::writeAllFunctionsDocumentation() {
-  local pageFooter="> ${1}"$'\n'
+  local pageFooter="{{< callout type=\"info\" >}}"$'\n'"${1}"$'\n'"{{< /callout >}}"$'\n'
 
   log::info "Writing the ${#SORTED_FUNCTION_NAMES[@]} functions documentation to the core libraries docs."
 
@@ -398,7 +398,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
     exe::invoke rm -f "${file}"
   done
 
-  local -A documentationPages
+  local -A documentationPageContent
 
   # write the new files
   local key
@@ -410,12 +410,11 @@ function selfRelease::writeAllFunctionsDocumentation() {
       # case for "source" function
       packageName="core"
     fi
-
     local path="${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries/${packageName}.md"
 
     # init the file if necessary
-    if [[ ! -v documentationPages["${path}"] ]]; then
-      documentationPages["${path}"]="---
+    if [[ ! -v documentationPageContent["${path}"] ]]; then
+      documentationPageContent["${path}"]="---
 title: 📂 ${packageName}
 cascade:
   type: docs
@@ -425,13 +424,16 @@ url: /docs/libraries/${packageName}
 "
     fi
 
-    documentationPages["${path}"]+="${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"$'\n'
+    documentationPageContent["${path}"]+="${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"$'\n'
   done
 
+  local -a filePaths=("${!documentationPageContent[@]}")
+  array::sort filePaths
+
   # write each file
-  local file content
-  for file in "${!documentationPages[@]}"; do
-    content="${documentationPages[${file}]}${pageFooter}"
-    fs::writeToFile "${file}" content
+  local content path
+  for path in "${filePaths[@]}"; do
+    content="${documentationPageContent[${path}]}${pageFooter}"
+    fs::writeToFile "${path}" content
   done
 }
