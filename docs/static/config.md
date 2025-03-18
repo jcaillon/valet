@@ -8,9 +8,10 @@ In Valet, you can also set variables in special bash scripts which are sourced w
 These scripts are:
 
 - `~/.config/valet/config`: the Valet configuration file (this is the recommended way to configure Valet itself).
-- `~/.config/valet/startup`: a custom script that is itself sourced by `~/.config/valet/config` which can be used
-  to define or manipulate variables on startup.
-- `./.env`: a `.env` in the current directory.
+- `./.env`: a `.env` in the current directory (the filename can be set with `VALET_CONFIG_DOT_ENV_SCRIPT`).
+
+> **Tip:** Use the `.env` files to configure your project-specific variables.
+> Remember that command options are also configurable through environment variables!
 
 ## 📄 About the config file
 
@@ -19,6 +20,13 @@ The config file is sourced by Valet on startup which allows you to setup variabl
 Use the `valet self config` command to initialize and open the YAML configuration file.
 
 You should not define all the variables, only the ones you want to change.
+
+If you want environment variables exported in the shell to be prioritized over the ones in the config file,
+you can define variables with a default value like this:
+
+```bash
+VALET_CONFIG_MY_VAR="${VALET_CONFIG_MY_VAR:-"default value if not set"}"
+```
 
 Do not add custom code to this script, use the custom startup script instead (see next section).
 
@@ -45,47 +53,67 @@ eval "${_TO_EVAL}"
 
 ## 🅰️ Configuration variables
 
+All configuration variables in valet start with `VALET_CONFIG_`.
+
+<!-- __________________ CONFIG LOCATION ______________________ -->
+
+### 🗺️ Configuration location
+
+These variables define the location of the configuration files.
+
+They **MUST BE** declared outside the config file (in your `~/.bashrc`)!
+
+#### VALET_CONFIG_DIRECTORY
+
+The path to the configuration directory of Valet.
+You can backup this directory to keep your configuration.
+Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
+
+#### VALET_CONFIG_FILE
+
+The path to this Valet config file.
+Export the variable before calling Valet.
+Default to the `config` file in your config directory.
+
 <!-- __________________ GENERAL ______________________ -->
 
 ### ⚙️ General configuration
 
-#### VALET_CONFIG_USER_DIRECTORY
+#### VALET_CONFIG_USER_VALET_DIRECTORY
 
 The directory in which to find the user commands.
-Defaults to the `.valet.d` directory in the user home directory `XDG_CONFIG_HOME` / `HOME`.
+Defaults to the `${HOME}/.valet.d`.
 
-#### VALET_CONFIG_DIRECTORY
+#### VALET_CONFIG_USER_DATA_DIRECTORY
 
-The path to the configuration directory of Valet. You can backup this directory to keep your configuration.
-Defaults to the `.config` directory in the user home directory `XDG_CONFIG_HOME` / `HOME`.
+The path to the directory in which to store the user-specific data files.
+Defaults to the `${XDG_DATA_HOME}/valet` or the `${HOME}/.local/share/valet` directory.
 
-#### VALET_CONFIG_FILE
+#### VALET_CONFIG_USER_CACHE_DIRECTORY
 
-The path to this Valet config file: **MUST BE** declared outside the config file!
-Export the variable before calling Valet.
-Default to the `config` file in your config directory.
+The path to the directory in which to store the user cache data.
+Defaults to the `${XDG_CACHE_HOME}/valet` or the `${HOME}/.cache/valet` directory.
 
-#### VALET_CONFIG_LOCAL_STATE_DIRECTORY
+#### VALET_CONFIG_USER_STATE_DIRECTORY
 
-The path to the directory in which to store the data that should be kept between sessions
-but are not essential for the user configuration (e.g. last choices in menus).
-Defaults to the `XDG_STATE_HOME` or the `.local/state` directory in the user home directory.
+The path to the directory in which to store the user state data.
+Defaults to the `${XDG_STATE_HOME}/valet` or the `.local/state/valet` directory in the user home directory.
 
 #### VALET_CONFIG_TEMP_DIRECTORY
 
-The directory used in valet to store all temporary files created by the program.
-Defaults to the temporary directory (`TMPDIR` or `/tmp`).
+The directory used in valet to store all temporary files and directories created by the program.
+Defaults to the temporary directory `${TMPDIR}` or `/tmp`.
 
-#### VALET_CONFIG_WORK_FILES_DIRECTORY
+#### VALET_CONFIG_RUNTIME_DIRECTORY
 
 The directory in which to write work files (small files to capture output of programs).
 You can set it to a `tmpfs` directory (such as /dev/shm) to speed up the execution of valet.
-Defaults to the temporary directory.
+Defaults to the `${XDG_RUNTIME_DIR}` or the temporary directory.
 
 #### VALET_CONFIG_LOCALE
 
 The value is used to set `LC_ALL` and `LANG` in Valet (see the bash manual for more details on these variables).
-Defaults to C.UTF-8 to ensure that the output is consistent across different systems.
+Defaults to `C.UTF-8` to ensure that the output is consistent across different systems.
 
 #### VALET_CONFIG_DOT_ENV_SCRIPT
 
@@ -106,6 +134,17 @@ If true, will forcibly enable the color output (otherwise we try to detect color
 
 If true, will enable the icons (using nerd font).
 
+#### VALET_CONFIG_DISABLE_ESC_CODES
+
+If true, will disable all ANSI escape codes.
+This will break Valet usage in the terminal, this option is intended to be used in a CI environment
+where you want to disable all colors and escape codes.
+
+#### VALET_CONFIG_DISABLE_TEXT_ATTRIBUTES
+
+If true, will disable all Select Graphic Rendition escape codes that modify the text attributes.
+It can be used if your terminal does not support text attributes.
+
 #### VALET_CONFIG_TEST_DIFF_COMMAND
 
 The command (with arguments) that will be used to diff files in the `valet test` command.
@@ -123,7 +162,7 @@ This defaults to:
 - `internalCompare %APPROVED_FILE% %RECEIVED_FILE%`
   otherwise (internalCompare is a bash function that compares 2 files).
 
-It is strongly advised to install delta, this tool is really awesome: <https://github.com/dandavison/delta>.
+It is strongly advised to install delta to get the best test outputs: <https://github.com/dandavison/delta>.
 
 #### VALET_CONFIG_STRICT_MATCHING
 
@@ -230,89 +269,47 @@ If true, it disables this behavior and you can see all the profiler lines.
 
 ### 🖱️ Interactive mode configuration
 
-#### VALET_CONFIG_PROGRESS_BAR_TEMPLATE
+#### VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE
 
-Change the default progress bar template.
+Change the default progress template.
 See progress::start.
 
-#### VALET_CONFIG_PROGRESS_BAR_SIZE
+#### VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE
 
 Change the default progress bar size.
 
-#### VALET_CONFIG_PROGRESS_ANIMATION_DELAY
+#### VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY
 
-Change the default time between two frames for the animation of the spinner in the progress
-(in seconds, can be a float number).
+Change the default time between two frames for the animation of the spinner in the progress (in milliseconds).
 See progress::start.
 
-#### VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL
+#### VALET_CONFIG_PROGRESS_DEFAULT_UPDATE_INTERVAL
 
 The default number of animation frames to wait between two updates of the progress bar.
+
+#### VALET_CONFIG_PROMPT_KEY_MAPPING
+
+The key mapping for the prompts. This variable must be a valid bash associative array.
+Each key is a key code and the value is the action to perform.
+
+You don't have to define all the keys, only the ones you want to change.
+
+E.g.
+
+```bash
+VALET_CONFIG_PROMPT_KEY_MAPPING=(
+  ["CTRL+Y"]="yank"
+  ["DEL"]="delete-char"
+  ["UP"]="move-up"
+  ["DOWN"]="move-down"
+)
+```
 
 <!-- _________________ THEME _______________________ -->
 
 ### 🎨 Theme configuration
 
-Since there are many variables, we only list them here without description.
-
-Complete theme and theme selection will come later.
-
-#### Characters configuration
-
-- `VALET_CONFIG_SPINNER_CHARACTERS`
-- `VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER`
-- `VALET_CONFIG_INTERACTIVE_PROMPT_CHARACTER`
-
-#### Log icons configuration
-
-The icon to use for the logs.
-
-- `VALET_CONFIG_ICON_ERROR`
-- `VALET_CONFIG_ICON_WARNING`
-- `VALET_CONFIG_ICON_SUCCESS`
-- `VALET_CONFIG_ICON_INFO`
-- `VALET_CONFIG_ICON_DEBUG`
-- `VALET_CONFIG_ICON_TRACE`
-- `VALET_CONFIG_ICON_ERROR_TRACE`
-- `VALET_CONFIG_ICON_EXIT`
-- `VALET_CONFIG_ICON_STOPPED`
-- `VALET_CONFIG_ICON_KILLED`
-
-#### Colors configuration
-
-You should define a color using an ANSI escape sequence. See <https://en.wikipedia.org/wiki/ANSI_escape_code#Colors>.
-
-E.g., this will set the INFO levels logs to blue: `VALET_CONFIG_COLOR_INFO=$'\e[44m'`
-
-- `VALET_CONFIG_COLOR_DEFAULT`
-- `VALET_CONFIG_COLOR_DEBUG`
-- `VALET_CONFIG_COLOR_INFO`
-- `VALET_CONFIG_COLOR_WARNING`
-- `VALET_CONFIG_COLOR_SUCCESS`
-- `VALET_CONFIG_COLOR_ERROR`
-- `VALET_CONFIG_COLOR_FADED`
-- `VALET_CONFIG_COLOR_ACCENT`
-
-- `VALET_CONFIG_COLOR_TITLE`
-- `VALET_CONFIG_COLOR_OPTION`
-- `VALET_CONFIG_COLOR_ARGUMENT`
-- `VALET_CONFIG_COLOR_COMMAND`
-
-- `VALET_CONFIG_COLOR_ACTIVE_BUTTON`
-- `VALET_CONFIG_COLOR_INACTIVE_BUTTON`
-
-- `VALET_CONFIG_SFZF_RESET_TEXT`
-- `VALET_CONFIG_SFZF_STATIC`
-- `VALET_CONFIG_SFZF_FOCUS`
-- `VALET_CONFIG_SFZF_FOCUS_RESET`
-- `VALET_CONFIG_SFZF_LETTER_HIGHLIGHT`
-- `VALET_CONFIG_SFZF_LETTER_HIGHLIGHT_RESET`
-- `VALET_CONFIG_SFZF_SELECTED_ITEM`
-- `VALET_CONFIG_SFZF_SELECTED_ITEM_RESET`
-- `VALET_CONFIG_SFZF_PROMPT_STRING`
-- `VALET_CONFIG_SFZF_PROMPT_STRING_RESET`
-- `VALET_CONFIG_SFZF_COUNT`
-- `VALET_CONFIG_SFZF_COUNT_RESET`
+TODO: To be done.
 
 <!-- _________________ Developer _______________________ -->
 
@@ -326,12 +323,14 @@ Intended for Valet developers only.
 #### VALET_CONFIG_STARTUP_PROFILING
 
 If true, will enable debug mode with profiling for valet ON STARTUP.
+It must defined outside the config file (in your `~/.bashrc` or exporting before running valet).
 This is intended for Valet developers to debug the startup of Valet.
 To debug your commands, use the -x option.
 
 #### VALET_CONFIG_STARTUP_PROFILING_FILE
 
 The path to the file in which to write the profiling information for the startup of Valet.
-Defaults to the `~/valet-profiler-{PID}.txt` file.
+It must defined outside the config file (in your `~/.bashrc` or exporting before running valet).
+Defaults to a new file in your user state directory `~/.local/state/valet/logs`.
 
 <!-- END -->

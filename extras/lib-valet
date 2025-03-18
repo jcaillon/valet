@@ -2,41 +2,7 @@
 # This script contains the documentation of all the valet library functions.
 # It can be used in your editor to provide auto-completion and documentation.
 #
-# Documentation generated for the version 0.28.3028 (2025-02-11).
-
-# ## ansi-codes::*
-# 
-# ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
-# These codes can be used to format text in the terminal.
-# 
-# These codes were selected because they are widely supported by terminals and they
-# probably will cover all use cases. It is also advised to stick to the 4-bit colors
-# which allows your application to adopt the color scheme of the terminal.
-# 
-# They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:
-# <https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>
-# 
-# References:
-# 
-# - https://en.wikipedia.org/wiki/ANSI_escape_code
-# - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
-# - https://paulbourke.net/dataformats/ascii/
-# - https://www.aivosto.com/articles/control-characters.html
-# - https://github.com/tmux/tmux/blob/master/tools/ansicode.txt
-# - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
-# - https://vt100.net/docs/vt102-ug/chapter5.html
-# - https://vt100.net/docs/vt100-ug/chapter3.html#S3.3.1
-# 
-# Ascii graphics:
-# 
-# - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9
-# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing
-# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements
-# 
-# > While it could be very handy to define a function for each of these instructions,
-# > it would also be slower to execute (function overhead + multiple printf calls).
-# 
-function ansi-codes::*() { :; }
+# Documentation generated for the version 0.28.3846 (2025-03-18).
 
 # ## array::appendIfNotPresent
 # 
@@ -103,8 +69,8 @@ function array::checkIfPresent() { :; }
 # 
 # Returns:
 # 
-# - ${RETURNED_ARRAY}: An array containing the items sorted and filtered
-# - ${RETURNED_ARRAY2}: An array containing the indexes of the matched items in the original array
+# - ${RETURNED_ARRAY[@]}: An array containing the items sorted and filtered
+# - ${RETURNED_ARRAY2[@]}: An array containing the indexes of the matched items in the original array
 # 
 # ```bash
 # array::fuzzyFilterSort MY_ARRAY SEARCH_STRING
@@ -116,35 +82,6 @@ function array::checkIfPresent() { :; }
 # > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.
 # 
 function array::fuzzyFilterSort() { :; }
-
-# ## array::fuzzyFilterSortFileWithGrepAndGawk
-# 
-# Allows to fuzzy sort a file against a given searched string.
-# Outputs a file containing only the lines matching the searched string.
-# The array is sorted by (in order):
-# 
-# - the index of the first matched character in the line
-# - the distance between the first and last matched characters in the line
-# 
-# Will also output a file containing the indexes of the matched lines in the original file.
-# 
-# - $1: **file to filer** _as string_:
-#       The input file to filter.
-# - $2: **search string** _as string_:
-#       The variable name containing the search string to match.
-# - $3: **output filtered file** _as string_:
-#       The output file containing the filtered lines.
-# - $4: **output correspondences file** _as string_:
-#       The output file containing the indexes of the matched lines in the original file.
-# 
-# ```bash
-# array::fuzzyFilterSortFileWithGrepAndGawk file.txt filtered.txt correspondences.txt
-# ```
-# 
-# > This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.
-# > This function is useful for very large arrays.
-# 
-function array::fuzzyFilterSortFileWithGrepAndGawk() { :; }
 
 # ## array::makeArraysSameSize
 # 
@@ -173,7 +110,8 @@ function array::makeArraysSameSize() { :; }
 # echo "${myArray[*]}"
 # ```
 # 
-# > - This function uses a quicksort algorithm.
+# > - This function uses a quicksort algorithm (hoarse partition).
+# > - The sorting is not stable (the order of equal elements is not preserved).
 # > - It is not appropriate for large array, use the `sort` binary for such cases.
 # 
 function array::sort() { :; }
@@ -195,7 +133,7 @@ function array::sort() { :; }
 # 
 # Returns:
 # 
-# - ${RETURNED_ARRAY}: An array that contains the corresponding indexes of the sorted array in the original array
+# - ${RETURNED_ARRAY[@]}: An array that contains the corresponding indexes of the sorted array in the original array
 # 
 # ```bash
 # declare myArray=( "a" "b" "c" )
@@ -208,7 +146,8 @@ function array::sort() { :; }
 # # 3 2 1
 # ```
 # 
-# > - This function uses a quicksort algorithm.
+# > - This function uses a quicksort algorithm (hoarse partition).
+# > - The sorting is not stable (the order of equal elements is not preserved).
 # > - It is not appropriate for large array, use the `sort` binary for such cases.
 # 
 function array::sortWithCriteria() { :; }
@@ -298,7 +237,7 @@ function bash::getFunctionDefinitionWithGlobalVars() { :; }
 # - $?
 #   - 0 if there are not existing commands
 #   - 1 otherwise.
-# - ${RETURNED_ARRAY}: the list of not existing commands.
+# - ${RETURNED_ARRAY[@]}: the list of not existing commands.
 # 
 # ```bash
 # if bash::getMissingCommands "command1" "command2"; then
@@ -320,7 +259,7 @@ function bash::getMissingCommands() { :; }
 # - $?
 #   - 0 if there are variable undeclared
 #   - 1 otherwise.
-# - ${RETURNED_ARRAY}: the list of undeclared variables.
+# - ${RETURNED_ARRAY[@]}: the list of undeclared variables.
 # 
 # ```bash
 # if bash::getMissingVariables "var1" "var2"; then
@@ -339,7 +278,7 @@ function bash::getMissingVariables() { :; }
 #       The name of the function to inject the code into.
 # - $2: **code** _as string_:
 #       The code to inject.
-# - $3: inject at beginning _as boolean_:
+# - $3: inject at beginning _as bool_:
 #       (optional) Can be set using the variable `_OPTION_INJECT_AT_BEGINNING`.
 #       Whether to inject the code at the beginning of the function (or at the end).
 #       (defaults to false)
@@ -377,6 +316,27 @@ function bash::injectCodeInFunction() { :; }
 # ```
 # 
 function bash::isCommand() { :; }
+
+# ## bash::isFunction
+# 
+# Check if the given function exists.
+# 
+# - $1: **function name** _as string_:
+#       the function name to check.
+# 
+# Returns:
+# 
+# - $?
+#   - 0 if the function exists
+#   - 1 otherwise.
+# 
+# ```bash
+# if bash::isFunction "function1"; then
+#   printf 'The function exists.'
+# fi
+# ```
+# 
+function bash::isFunction() { :; }
 
 # ## bash::readStdIn
 # 
@@ -426,7 +386,7 @@ function bash::readStdIn() { :; }
 # - $?:
 #   - 0: if all the jobs completed successfully.
 #   - 1: if the job completed callback returned 1.
-# - ${RETURNED_ARRAY}: an array containing the exit codes of the jobs.
+# - ${RETURNED_ARRAY[@]}: an array containing the exit codes of the jobs.
 # 
 # ```bash
 # declare -a jobNames=("job1" "job2" "job3")
@@ -552,6 +512,26 @@ function command::showHelp() { :; }
 # 
 function command::sourceFunction() { :; }
 
+# ## core::createNewStateFilePath
+# 
+# Returns the path to a new file stored in the user state directory.
+# Can be used to save the state of important temporary files generated during a program
+# execution.
+# 
+# - $1: **file suffix** _as string_:
+#       The suffix for the file to create.
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: The path to the created file.
+# 
+# ```bash
+# core::createNewStateFilePath "my-file"
+# printf '%s\n' "The file is ⌜${RETURNED_VALUE}⌝."
+# ```
+# 
+function core::createNewStateFilePath() { :; }
+
 # ## core::fail
 # 
 # Displays an error message and then exit the program with error.
@@ -596,26 +576,9 @@ function core::failWithCode() { :; }
 # 
 function core::getConfigurationDirectory() { :; }
 
-# ## core::getLocalStateDirectory
+# ## core::getExtensionsDirectory
 # 
-# Returns the path to the valet local state directory.
-# The base directory relative to which user-specific state files should be stored.
-# Creates it if missing.
-# 
-# Returns:
-# 
-# - ${RETURNED_VALUE}: the path to the valet local state directory
-# 
-# ```bash
-# core::getLocalStateDirectory
-# local directory="${RETURNED_VALUE}"
-# ```
-# 
-function core::getLocalStateDirectory() { :; }
-
-# ## core::getUserDirectory
-# 
-# Returns the path to the valet user directory.
+# Returns the path to the user extensions directory.
 # Does not create it if missing.
 # 
 # Returns:
@@ -623,11 +586,63 @@ function core::getLocalStateDirectory() { :; }
 # - ${RETURNED_VALUE}: the path to the valet user directory
 # 
 # ```bash
-# core::getUserDirectory
+# core::getExtensionsDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
 # 
-function core::getUserDirectory() { :; }
+function core::getExtensionsDirectory() { :; }
+
+# ## core::getUserCacheDirectory
+# 
+# Returns the path to the valet local cache directory.
+# Where user-specific non-essential (cached) data should be written (analogous to /var/cache).
+# Creates it if missing.
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: the path to the valet local state directory
+# 
+# ```bash
+# core::getUserCacheDirectory
+# local directory="${RETURNED_VALUE}"
+# ```
+# 
+function core::getUserCacheDirectory() { :; }
+
+# ## core::getUserDataDirectory
+# 
+# Returns the path to the valet local data directory.
+# Where user-specific data files should be written (analogous to /usr/share).
+# Creates it if missing.
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: the path to the valet local state directory
+# 
+# ```bash
+# core::getUserDataDirectory
+# local directory="${RETURNED_VALUE}"
+# ```
+# 
+function core::getUserDataDirectory() { :; }
+
+# ## core::getUserStateDirectory
+# 
+# Returns the path to the valet local cache directory.
+# Where user-specific state files should be written (analogous to /var/lib).
+# Ideal location for storing runtime information, logs, etc...
+# Creates it if missing.
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: the path to the valet local state directory
+# 
+# ```bash
+# core::getUserStateDirectory
+# local directory="${RETURNED_VALUE}"
+# ```
+# 
+function core::getUserStateDirectory() { :; }
 
 # ## core::getVersion
 # 
@@ -705,6 +720,40 @@ function curl::download() { :; }
 # 
 function curl::request() { :; }
 
+# ## esc-codes::*
+# 
+# ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
+# These codes can be used to format text in the terminal.
+# 
+# These codes were selected because they are widely supported by terminals and they
+# probably will cover all use cases. It is also advised to stick to the 4-bit colors
+# which allows your application to adopt the color scheme of the terminal.
+# 
+# They are defined as variables and not as functions. Please check the content of the esc-codes to learn more:
+# <https://github.com/jcaillon/valet/blob/latest/libraries.d/esc-codes>
+# 
+# References:
+# 
+# - https://en.wikipedia.org/wiki/ANSI_escape_code
+# - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+# - https://paulbourke.net/dataformats/ascii/
+# - https://www.aivosto.com/articles/control-characters.html
+# - https://github.com/tmux/tmux/blob/master/tools/ansicode.txt
+# - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
+# - https://vt100.net/docs/vt102-ug/chapter5.html
+# - https://vt100.net/docs/vt100-ug/chapter3.html#S3.3.1
+# 
+# Ascii graphics:
+# 
+# - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9
+# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing
+# - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements
+# 
+# > While it could be very handy to define a function for each of these instructions,
+# > it would also be slower to execute (function overhead + multiple printf calls).
+# 
+function esc-codes::*() { :; }
+
 # ## exe::captureOutput
 # 
 # Capture the output of a command.
@@ -779,7 +828,7 @@ function exe::invoke() { :; }
 # - ${RETURNED_VALUE2}: The content of stderr.
 # 
 # ```bash
-# exe::invokef2 false git status || core::fail "status failed."
+# exe::invoke2 false git status || core::fail "status failed."
 # stdout="${RETURNED_VALUE}"
 # stderr="${RETURNED_VALUE2}"
 # ```
@@ -788,7 +837,7 @@ function exe::invoke() { :; }
 # 
 function exe::invoke2() { :; }
 
-# ## exe::invoke2piped
+# ## exe::invoke3piped
 # 
 # This function call an executable and its arguments and input a given string as stdin.
 # It redirects the stdout and stderr to environment variables.
@@ -811,7 +860,7 @@ function exe::invoke2() { :; }
 # - ${RETURNED_VALUE2}: The content of stderr.
 # 
 # ```bash
-# exe::invoke2piped true "key: val" yq -o json -p yaml -
+# exe::invoke3piped true "key: val" yq -o json -p yaml -
 # stdout="${RETURNED_VALUE}"
 # stderr="${RETURNED_VALUE2}"
 # ```
@@ -822,7 +871,7 @@ function exe::invoke2() { :; }
 # >
 # > See exe::invokef5 for more information.
 # 
-function exe::invoke2piped() { :; }
+function exe::invoke3piped() { :; }
 
 # ## exe::invoke5
 # 
@@ -891,7 +940,7 @@ function exe::invoke5() { :; }
 # 
 function exe::invokef2() { :; }
 
-# ## exe::invokef2piped
+# ## exe::invokef3piped
 # 
 # This function call an executable and its arguments and input a given string as stdin.
 # It redirects the stdout and stderr to temporary files.
@@ -914,7 +963,7 @@ function exe::invokef2() { :; }
 # - ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
 # 
 # ```bash
-# exe::invokef2piped true "key: val" yq -o json -p yaml -
+# exe::invokef3piped true "key: val" yq -o json -p yaml -
 # stdoutFilePath="${RETURNED_VALUE}"
 # stderrFilePath="${RETURNED_VALUE2}"
 # ```
@@ -925,7 +974,7 @@ function exe::invokef2() { :; }
 # >
 # > See exe::invokef5 for more information.
 # 
-function exe::invokef2piped() { :; }
+function exe::invokef3piped() { :; }
 
 # ## exe::invokef5
 # 
@@ -948,6 +997,9 @@ function exe::invokef2piped() { :; }
 #       the executable or function to execute
 # - $@: **arguments** _as any_:
 #       the arguments to pass to the executable
+# - ${_OPTION_NO_REDIRECTION}: _as bool_:
+#       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.
+#       (default to false)
 # 
 # Returns:
 # 
@@ -970,35 +1022,32 @@ function exe::invokef2piped() { :; }
 # 
 function exe::invokef5() { :; }
 
-# ## extension1::doNothing
+# ## exe::invoket2
 # 
-# Does nothing
+# This function call an executable and its arguments.
+# It does not redirect the stdout and stderr so it outputs to the
+# default 1/2 file descriptors.
+# Equivalent to `_OPTION_NO_REDIRECTION=true exe::invokef5 "${1}" 0 "" "" "${@:2}"`
 # 
-# ```bash
-# extension1::doNothing
-# ```
+# - $1: **fail** _as bool_:
+#       true/false to indicate if the function should fail in case the execution fails.
+#       If true and the execution fails, the script will exit.
+# - $2: **executable** _as string_:
+#       the executable or function to execute
+# - $@: **arguments** _as any_:
+#       the arguments to pass to the executable
 # 
-function extension1::doNothing() { :; }
-
-# ## extension2::doNothing
+# Returns:
 # 
-# Does nothing
-# 
-# ```bash
-# extension2::doNothing
-# ```
-# 
-function extension2::doNothing() { :; }
-
-# ## extension3::doNothing
-# 
-# Does nothing
+# - $?:The exit code of the executable.
 # 
 # ```bash
-# extension3::doNothing
+# exe::invoket2 false git status || core::fail "status failed."
 # ```
 # 
-function extension3::doNothing() { :; }
+# > See exe::invokef5 for more information.
+# 
+function exe::invoket2() { :; }
 
 # ## fs::cat
 # 
@@ -1100,7 +1149,7 @@ function fs::createLink() { :; }
 # 
 # Creates a temporary directory.
 # 
-# - ${_OPTION_PATH_ONLY} _as boolean_:
+# - ${_OPTION_PATH_ONLY} _as bool_:
 #       (optional) If true, does not create the file, only returns the path.
 #       (defaults to false)
 # 
@@ -1122,7 +1171,7 @@ function fs::createTempDirectory() { :; }
 # 
 # Creates a temporary file and return its path.
 # 
-# - ${_OPTION_PATH_ONLY} _as boolean_:
+# - ${_OPTION_PATH_ONLY} _as bool_:
 #       (optional) If true, does not create the file, only returns the path.
 #       (defaults to false)
 # 
@@ -1156,7 +1205,26 @@ function fs::createTempFile() { :; }
 # local lineCount="${RETURNED_VALUE}"
 # ```
 # 
+# TODO: fails to count the last line if empty
+# 
 function fs::getFileLineCount() { :; }
+
+# ## fs::getPwdRealPath
+# 
+# Get the real path of the current directory.
+# By default, the `${PWD}` variable is the logical path, which may contain symlinks.
+# 
+# ```bash
+# fs::getPwdRealPath
+# ```
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: The realpath for the current directory.
+# 
+# > This is a pure bash alternative to `realpath` or `readlink`.
+# 
+function fs::getPwdRealPath() { :; }
 
 # ## fs::head
 # 
@@ -1224,7 +1292,7 @@ function fs::isDirectoryWritable() { :; }
 # 
 # Returns:
 # 
-# - ${RETURNED_ARRAY}: An array with the list of all the files.
+# - ${RETURNED_ARRAY[@]}: An array with the list of all the files.
 # 
 # ```bash
 # fs::listDirectories "/path/to/directory" true true myFilterFunction
@@ -1255,7 +1323,7 @@ function fs::listDirectories() { :; }
 # 
 # Returns:
 # 
-# - ${RETURNED_ARRAY}: An array with the list of all the files.
+# - ${RETURNED_ARRAY[@]}: An array with the list of all the files.
 # 
 # ```bash
 # fs::listFiles "/path/to/directory" true true myFilterFunction
@@ -1291,7 +1359,7 @@ function fs::listFiles() { :; }
 # 
 # Returns:
 # 
-# - ${RETURNED_ARRAY}: An array with the list of all the paths.
+# - ${RETURNED_ARRAY[@]}: An array with the list of all the paths.
 # 
 # ```bash
 # fs::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
@@ -1356,21 +1424,45 @@ function fs::tail() { :; }
 # 
 # This function returns the absolute path of a path.
 # 
+# If the path exists, it can be resolved to the real path, following symlinks,
+# using the option `_OPTION_REALPATH=true`.
+# 
 # - $1: **path** _as string_:
 #       The path to translate to absolute path.
+# - ${_OPTION_REALPATH} _as bool_:
+#       (optional) true to resolve the path to the real path, following symlinks.
+#       (defaults to false)
 # 
 # Returns:
 # 
 # - ${RETURNED_VALUE}: The absolute path of the path.
 # 
 # ```bash
-# fs::toAbsolutePath "myFile"
-# local myFileAbsolutePath="${RETURNED_VALUE}"
+# fs::toAbsolutePath "myPath"
+# local myPathAbsolutePath="${RETURNED_VALUE}"
 # ```
 # 
 # > This is a pure bash alternative to `realpath` or `readlink`.
+# > The `..` will be processed before following any symlinks, by removing
+# > the immediate pathname component.
 # 
 function fs::toAbsolutePath() { :; }
+
+# ## include
+# 
+# Allows to include multiple library files.
+# 
+# It calls `source` for each argument.
+# Useful if you don't have arguments to pass to the sourced files.
+# 
+# - $@: **libraries** _as string_:
+#       The names of the libraries (array, interactive, string...) or the file paths to include.
+# 
+# ```bash
+# include string array ./my/path
+# ```
+# 
+function include() { :; }
 
 # ##  interactive::askForConfirmation
 # 
@@ -1416,9 +1508,9 @@ function interactive::askForConfirmationRaw() { :; }
 # The text is wrapped and put inside a box like so:
 # 
 # ```text
-#     ┌─────┐
+#     ╭─────╮
 #     │ No. ├──░
-#     └─────┘
+#     ╰─────╯
 # ```
 # 
 # - $1: **answer** _as string_:
@@ -1458,9 +1550,9 @@ function interactive::displayDialogBox() { :; }
 # The text is wrapped and put inside a box like so:
 # 
 # ```text
-#    ┌────────────────────────────────┐
+#    ╭────────────────────────────────╮
 # ░──┤ Is this an important question? │
-#    └────────────────────────────────┘
+#    ╰────────────────────────────────╯
 # ```
 # 
 # - $1: **prompt** _as string_:
@@ -1530,6 +1622,35 @@ function interactive::promptYesNo() { :; }
 # ```
 # 
 function interactive::promptYesNoRaw() { :; }
+
+# ## list_fuzzyFilterSortFileWithGrepAndGawk
+# 
+# Allows to fuzzy sort a file against a given searched string.
+# Outputs a file containing only the lines matching the searched string.
+# The array is sorted by (in order):
+# 
+# - the index of the first matched character in the line
+# - the distance between the first and last matched characters in the line
+# 
+# Will also output a file containing the indexes of the matched lines in the original file.
+# 
+# - $1: **file to filer** _as string_:
+#       The input file to filter.
+# - $2: **search string** _as string_:
+#       The variable name containing the search string to match.
+# - $3: **output filtered file** _as string_:
+#       The output file containing the filtered lines.
+# - $4: **output correspondences file** _as string_:
+#       The output file containing the indexes of the matched lines in the original file.
+# 
+# ```bash
+# list_fuzzyFilterSortFileWithGrepAndGawk file.txt filtered.txt correspondences.txt
+# ```
+# 
+# > This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.
+# > This function is useful for very large arrays.
+# 
+function list_fuzzyFilterSortFileWithGrepAndGawk() { :; }
 
 # ## log::debug
 # 
@@ -1634,6 +1755,25 @@ function log::isDebugEnabled() { :; }
 # 
 function log::isTraceEnabled() { :; }
 
+# ## log::print
+# 
+# Display a log message.
+# 
+# - $1: **color name** _as string_:
+#       The color name to use for the severity (TRACE, DEBUG...).
+# - $2: **icon** _as string_:
+#       The icon to display in the log message (utf8 character from nerd icons).
+# - $3: **severity** _as string_:
+#       The severity to display (max 7 chars for the default log pattern).
+# - $@: **message** _as string_:
+#       The message to log.
+# 
+# ```bash
+# log::print "SUCCESS" $'\uf14a' "OK" "This is a success message."
+# ```
+# 
+function log::print() { :; }
+
 # ## log::printCallStack
 # 
 # This function prints the current function stack in the logs.
@@ -1666,7 +1806,9 @@ function log::printCallStack() { :; }
 # - $1: **path** _as string_:
 #       the file path to display.
 # - $2: max lines _as int_:
-#       (optional) max lines to display (defaults to 0 which prints all lines).
+#       (optional) Can be set using the variable `_OPTION_MAX_LINES`.
+#       Max lines to display, can be set to 0 to display all lines.
+#       (defaults to 0)
 # 
 # ```bash
 # log::printFile "/my/file/path"
@@ -1679,14 +1821,18 @@ function log::printFile() { :; }
 # Display a file content with line numbers in the logs.
 # The file content will be aligned with the current log output and hard wrapped if necessary.
 # 
-# - $1: **content** _as string_:
-#       the file content.
-# - $2: **max lines** _as int_:
-#       (optional) max lines to display (defaults to 0 which prints all lines).
+# - $1: **content variable name** _as string_:
+#       The name of the variable containing the file content to print.
+# - $2: max lines _as int_:
+#       (optional) Can be set using the variable `_OPTION_MAX_LINES`.
+#       Max lines to display, can be set to 0 to display all lines.
+#       (defaults to 0)
 # 
 # ```bash
-# log::printFileString "myfilecontent"
+# log::printFileString "myvar"
 # ```
+# 
+# > This function is not at all suited for large strings, print the content to a file instead.
 # 
 function log::printFileString() { :; }
 
@@ -1695,8 +1841,8 @@ function log::printFileString() { :; }
 # Display something in the log stream.
 # Does not check the log level.
 # 
-# - $1: **content** _as string_:
-#       the content to print (can contain new lines)
+# - $1: **content variable name** _as string_:
+#       The variable name containing the content to print (can contain new lines).
 # 
 # ```bash
 # log::printRaw "my line"
@@ -1721,6 +1867,54 @@ function log::printRaw() { :; }
 # ```
 # 
 function log::printString() { :; }
+
+# ## log::saveFile
+# 
+# Save the given file by copying it to a new file in the user local state directory
+# (using `core::createNewStateFilePath`).
+# Useful for debugging purposes, to save the state of a file during execution.
+# 
+# - $1: **path** _as string_:
+#       The file path to save.
+# - $2: **suffix** _as string_:
+#       The suffix to add to the file name.
+# - $3: log path _as bool_:
+#       (optional) if true, log the path of the saved file using `log::printString`
+#       (defaults to true)
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: The path to the saved file.
+# 
+# ```bash
+# log::saveFile "/my/file/path" "suffix" "important result file"
+# ```
+# 
+function log::saveFile() { :; }
+
+# ## log::saveFileString
+# 
+# Save the given string to a new file in the user local state directory
+# (using `core::createNewStateFilePath`).
+# Useful for debugging purposes, to save the state of a string during execution.
+# 
+# - $1: **content variable name** _as string_:
+#       The variable name of the content to save.
+# - $2: **suffix** _as string_:
+#       The suffix to add to the file name.
+# - $3: log path _as bool_:
+#       (optional) if true, log the path of the saved file using `log::printString`
+#       (defaults to true)
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: The path to the saved file.
+# 
+# ```bash
+# log::saveFileString "my content" "suffix" "important result file"
+# ```
+# 
+function log::saveFileString() { :; }
 
 # ## log::setLevel
 # 
@@ -1797,6 +1991,7 @@ function profiler::disable() { :; }
 # ## profiler::enable
 # 
 # Enables the profiler and start writing to the given file.
+# The profiler will also be active in subshells of this current shell.
 # 
 # - $1: **path** _as string_:
 #       the file to write to.
@@ -1809,6 +2004,26 @@ function profiler::disable() { :; }
 # 
 function profiler::enable() { :; }
 
+# ## profiler::pause
+# 
+# Pause the profiler if previously activated with profiler::enable.
+# 
+# ```bash
+# profiler::pause
+# ```
+# 
+function profiler::pause() { :; }
+
+# ## profiler::resume
+# 
+# Resume the profiler if previously paused with profiler::pause.
+# 
+# ```bash
+# profiler::resume
+# ```
+# 
+function profiler::resume() { :; }
+
 # ## progress::start
 # 
 # Shows a spinner / progress animation with configurable output including a progress bar.
@@ -1820,24 +2035,28 @@ function profiler::enable() { :; }
 # This will run in the background and will not block the main thread.
 # The main thread can continue to output logs while this animation is running.
 # 
-# - $1: output template _as string_:
-#       (optional) the template to display
-#       (defaults to VALET_CONFIG_PROGRESS_BAR_TEMPLATE="#spinner #percent ░#bar░ #message")
-# - $2: max width _as int_:
-#       (optional) the maximum width of the progress bar
-#       (defaults to VALET_CONFIG_PROGRESS_BAR_SIZE=20)
-# - $3: frame delay _as float_:
-#       (optional) the time in seconds between each frame of the spinner
-#       (defaults to VALET_CONFIG_PROGRESS_ANIMATION_DELAY=0.1)
-# - $4: refresh every x frames _as int_:
-#       (optional) the number of frames of the spinner to wait before refreshing the progress bar
-#       (defaults to VALET_CONFIG_PROGRESS_BAR_UPDATE_INTERVAL=3)
-# - $5: max frames _as int_:
-#       (optional) the maximum number of frames to display
+# - $1: template _as string_:
+#       (optional) Can be set using the variable `_OPTION_TEMPLATE`.
+#       The template to display. The template can contain the following placeholders:
+#       - `<spinner>`: the spinner animation
+#       - `<percent>`: the percentage of the progress bar
+#       - `<bar>`: the progress bar
+#       - `<message>`: the message to display
+#       - #TODO: add `<cGradient>` and `<cDefault>`: colors the bar with a gradient (if colors enabled)
+#       (defaults to VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE or "<spinner> <percent> ░<bar>░ <message>")
+# - $2: bar size _as int_:
+#       (optional) Can be set using the variable `_OPTION_BAR_SIZE`.
+#       The maximum width of the progress bar.
+#       (defaults to VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE or 20)
+# - $3: frame delay _as int_:
+#       (optional) Can be set using the variable `_OPTION_FRAME_DELAY`.
+#       The time in milliseconds between each frame of the spinner.
+#       (defaults to VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY or 200)
+# - ${_OPTION_MAX_FRAMES} _as int_:
+#       (optional) The maximum number of frames to display.
 #       (defaults to 9223372036854775807)
-# - $6: spinner _as string_:
-#       (optional) the spinner to display (each character is a frame)
-#       (defaults to VALET_CONFIG_SPINNER_CHARACTERS="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+# - ${_OPTION_SPINNER} _as string_:
+#       (optional) The spinner to display (each character is a frame).
 #       Examples:
 #       - ◐◓◑◒
 #       - ▖▘▝▗
@@ -1846,13 +2065,20 @@ function profiler::enable() { :; }
 #       - ◡⊙◠
 #       - ▌▀▐▄
 #       - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
+#       (defaults to VALET_CONFIG_SPINNER_CHARACTERS or "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+# - ${_OPTION_DEFAULT_PERCENTAGE} _as int_:
+#       (optional) The default percentage to start with.
+#       (defaults to 0)
+# - ${_OPTION_DEFAULT_MESSAGE} _as int_:
+#       (optional) The default message to start with.
+#       (defaults to "")
 # 
 # ```bash
-# progress::start "#spinner" "" 0.05 "" "" "⢄⢂⢁⡁⡈⡐⡠"
+# progress::start "<spinner>" "" 100
 # wait 4
 # progress::stop
 # 
-# progress::start "#spinner #percent ░#bar░ #message" 30 0.05 1
+# _OPTION_SPINNER="⢄⢂⢁⡁⡈⡐⡠" progress::start "<spinner> <percent> ░<bar>░ <message>" 30
 # IDX=0
 # while [[ ${IDX} -le 50 ]]; do
 #   progress::update $((IDX * 2)) "Doing something ${IDX}/50..."
@@ -1860,6 +2086,9 @@ function profiler::enable() { :; }
 #   sleep 0.1
 # done
 # ```
+# 
+# > Important: all progress functions will only work if called from the same shell
+# > that started the progress bar.
 # 
 function progress::start() { :; }
 
@@ -1893,7 +2122,7 @@ function progress::update() { :; }
 
 # ## regex::getFirstGroup
 # 
-# Matches a string against a regex and returns the first captured group of the matched string.
+# Matches a string against a regex and returns the first captured group of the first match.
 # 
 # - $1: **string variable name** _as string_:
 #       The variable name containing the string to match.
@@ -1914,6 +2143,78 @@ function progress::update() { :; }
 # > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 # 
 function regex::getFirstGroup() { :; }
+
+# ## regex::getMatches
+# 
+# Returns an array containing all the matched for a regex in a string.
+# 
+# - $1: **string variable name** _as string_:
+#       The variable name containing the string to match.
+# - $2: **regex** _as string_:
+#       The regex to use for the match.
+# - $3: replacement _as string_:
+#       (optional) Can be set using the variable `_OPTION_REPLACEMENT`.
+#       The replacement string to use on each match.
+#       Use \x to refer to the x-th capture group.
+#       Use \c to refer to replacement counter.
+#       (default to "", which means no changes will be done on the matches)
+# - $4: max count _as int_:
+#       (optional) Can be set using the variable `_OPTION_MAX_COUNT`.
+#       The number of matches to return.
+#       (default to -1, which is unlimited)
+# 
+# Returns:
+# 
+# - ${RETURNED_ARRAY[@]}: An array containing all the matches.
+# 
+# ```bash
+# MY_STRING="name: julien, name: john"
+# regex::getMatches MY_STRING "name: (.*)"
+# for match in "${RETURNED_ARRAY[@]}"; do
+#   echo "${match}"
+# done
+# ```
+# 
+# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+# 
+function regex::getMatches() { :; }
+
+# ## regex::replace
+# 
+# Replaces strings within a string using a regex.
+# 
+# - $1: **string variable name** _as string_:
+#       The variable name containing the string in which to do replacements.
+#       Replacement is done in place.
+# - $2: **regex** _as string_:
+#       The regex to use for the match.
+# - $3: **replacement** _as string_:
+#       The replacement string.
+#       Use \x to refer to the x-th capture group.
+#       Use \c to refer to replacement counter.
+# - $4: max count _as int_:
+#       (optional) Can be set using the variable `_OPTION_MAX_COUNT`.
+#       The number of replacements to do.
+#       (default to -1, which is unlimited)
+# - $5: only matches _as bool_:
+#       (optional) Can be set using the variable `_OPTION_ONLY_MATCHES`.
+#       Instead of replacing with the regex, we keep only the matches.
+#       This can be used to extract information from a string.
+#       (default to false)
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: The string with replacements.
+# 
+# ```bash
+# MY_STRING="name: julien"
+# regex::replace MY_STRING "name: (.*)" "\1"
+# echo "${RETURNED_VALUE}"
+# ```
+# 
+# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+# 
+function regex::replace() { :; }
 
 # ## sfzf::show
 # 
@@ -2214,11 +2515,11 @@ function string::head() { :; }
 # - $3: highlight ansi code _as string_:
 #       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.
 #       The ANSI code to use for highlighting.
-#       (defaults to VALET_CONFIG_COLOR_HIGHLIGHT)
+#       (defaults to STYLE_COLOR_ACCENT)
 # - $4: reset ansi code _as string_:
 #       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.
 #       The ANSI code to use for resetting the highlighting.
-#       (defaults to VALET_CONFIG_COLOR_DEFAULT)
+#       (defaults to STYLE_COLOR_DEFAULT)
 # 
 # Returns:
 # 
@@ -2234,6 +2535,25 @@ function string::head() { :; }
 # 
 function string::highlight() { :; }
 
+# ## string::removeSgrCodes
+# 
+# Remove all SGR (Select Graphic Rendition) codes from a string.
+# 
+# - $1: **string variable name** _as string_:
+#       The variable name that contains the string to clean.
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: the cleaned string
+# 
+# ```bash
+# MY_STRING="This is a string with SGR codes"$'\e[0m'
+# string::removeSgrCodes MY_STRING
+# echo "${RETURNED_VALUE}"
+# ```
+# 
+function string::removeSgrCodes() { :; }
+
 # ## string::split
 # 
 # Split a string into an array using a separator.
@@ -2245,7 +2565,7 @@ function string::highlight() { :; }
 # 
 # Returns:
 # 
-# - ${RETURNED_ARRAY}: the array of strings
+# - ${RETURNED_ARRAY[@]}: the array of strings
 # 
 # ```bash
 # MY_STRING="name,first_name,address"
@@ -2316,7 +2636,7 @@ function string::trimEdges() { :; }
 #       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
 #       The characters to apply as padding on the left of each new line.
 #       E.g. '  ' will add 2 spaces on the left of each new line.
-#       (defaults to 0)
+#       (defaults to "")
 # - $4: first line width _as int_:
 #       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
 #       The width to use for the first line.
@@ -2393,6 +2713,21 @@ function string::wrapWords() { :; }
 # 
 function system::addToPath() { :; }
 
+# ## system::getArchitecture
+# 
+# Returns the CPU architecture of the current machine.
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: the CPU architecture of the current machine.
+# 
+# ```bash
+# system::getArchitecture
+# local architecture="${RETURNED_VALUE}"
+# ```
+# 
+function system::getArchitecture() { :; }
+
 # ## system::getEnvVars
 # 
 # Get the list of all the environment variables.
@@ -2400,7 +2735,7 @@ function system::addToPath() { :; }
 # 
 # Returns:
 # 
-# - ${RETURNED_ARRAY}: An array with the list of all the environment variables.
+# - ${RETURNED_ARRAY[@]}: An array with the list of all the environment variables.
 # 
 # ```bash
 # system::getEnvVars
@@ -2408,8 +2743,6 @@ function system::addToPath() { :; }
 #   printf '%s=%s\n' "${var}" "${!var}"
 # done
 # ```
-# 
-# > This is faster than using mapfile on <(compgen -v).
 # 
 function system::getEnvVars() { :; }
 
@@ -2746,6 +3079,41 @@ function time::getDate() { :; }
 # 
 function time::getProgramElapsedMicroseconds() { :; }
 
+# ## time::getTimerValue
+# 
+# Get the time elapsed since the call of `time::startTimer`.
+# 
+# - ${_OPTION_LOG_ELAPSED_TIME} _as bool_:
+#      (optional) Wether or not to log the elapsed time.
+#      (defaults to false)
+# - ${_OPTION_FORMAT} _as string_:
+#      (optional) The format to use if we log the elapsed time.
+#      See `time::convertMicrosecondsToHuman` for the format.
+#      (defaults to "%S.%LLs").
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: the elapsed time in microseconds.
+# 
+# ```bash
+# time::startTimer
+# _OPTION_LOG_ELAPSED_TIME=true time::getTimerValue
+# echo "Total microseconds: ${RETURNED_VALUE}"
+# ```
+# 
+function time::getTimerValue() { :; }
+
+# ## time::startTimer
+# 
+# Start a timer. You can then call `time::getTimerValue` to get the elapsed time.
+# 
+# ```bash
+# time::startTimer
+# time::getTimerValue
+# ```
+# 
+function time::startTimer() { :; }
+
 # ## tui::clearBox
 # 
 # Clear a "box" in the terminal.
@@ -2889,9 +3257,6 @@ function tui::getTerminalSize() { :; }
 # We do our best here to cover most cases but it is by no mean perfect.
 # A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.
 # 
-# Users of this function can completely change the bindings afterward by implementing
-# the `tui::RebindOverride` function.
-# 
 # This function should be called before using tui::waitForKeyPress.
 # 
 # You can call `tui::restoreBindings` to restore the default bindings. However, this is not
@@ -2901,6 +3266,17 @@ function tui::getTerminalSize() { :; }
 #       The function name to call when a special key is pressed.
 # 
 function tui::rebindKeymap() { :; }
+
+# ## tui::rerouteLogs
+# 
+# Reroute the logs to a temporary file.
+# The logs will be displayed at the end of the interactive session.
+# 
+# ```bash
+# tui::rerouteLogs
+# ```
+# 
+function tui::rerouteLogs() { :; }
 
 # ## tui::restoreBindings
 # 
@@ -2922,6 +3298,17 @@ function tui::restoreBindings() { :; }
 # ```
 # 
 function tui::restoreInterruptTrap() { :; }
+
+# ## tui::restoreLogs
+# 
+# Restore the logs to their original state.
+# Should be called after `tui::rerouteLogs` and at the end of an interactive session.
+# 
+# ```bash
+# tui::restoreLogs
+# ```
+# 
+function tui::restoreLogs() { :; }
 
 # ## tui::restoreTerminalOptions
 # 
@@ -2968,7 +3355,6 @@ function tui::setTerminalOptions() { :; }
 # 
 # - This function will restore the terminal state and show the cursor.
 # - It will also restore the key echoing.
-# - If there were error messages during the interactive session, they will be displayed at the end.
 # 
 # ```bash
 # tui::switchBackFromFullScreen
@@ -2980,11 +3366,8 @@ function tui::switchBackFromFullScreen() { :; }
 # 
 # Call this function to start an interactive session in full screen mode.
 # This function will switch to the alternate screen, hide the cursor and clear the screen.
-# It will also disable echoing when we type something.
 # 
 # You should call tui::switchBackFromFullScreen at the end of the interactive session.
-# 
-# In the alternate screen, we don't see the error messages so we capture them somewhere else.
 # 
 # ```bash
 # tui::switchToFullScreen
@@ -3030,7 +3413,7 @@ function tui::testWaitForKeyPress() { :; }
 # The output will depend on the terminal used and the character sequences it sends on each key press.
 # 
 # Some special keys are translated into more readable strings:
-# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1-F12, ALT+...
+# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1, ALT+?.
 # However, this is not at all exhaustive and will depend on the terminal used. Use `tui::waitForKeyPress`
 # if you need to listen to special keys.
 # 
@@ -3083,8 +3466,11 @@ function tui::waitForChar() { :; }
 # tui::waitForKeyPress -t 0.1
 # ```
 # 
-# > Due to a bug in bash, if the cursor is at the end of the screen, it will make the screen scroll
-# > even when nothing is read... Make sure to not position the cursor at the end of the screen.
+# > There are 2 issues when using readline in bash:
+# > 1. if the cursor is at the end of the screen, it will make the screen scroll
+# >    even when nothing is read... Make sure to not position the cursor at the end of the screen.
+# > 2. When read is done, it will print a new line in stderr. So we redirect stderr to null.
+# >    This means that if you print something in a readline bound function, do not print to stderr or you will get nothing !
 # 
 function tui::waitForKeyPress() { :; }
 
@@ -3211,10 +3597,10 @@ function windows::convertPathToUnix() { :; }
 #       the path to link to (the original file)
 # - $2: **link path** _as string_:
 #       the path where to create the link
-# - $3: hard link _as boolean_:
+# - $3: hard link _as bool_:
 #       (optional) true to create a hard link, false to create a symbolic link
 #       (defaults to false)
-# - $4: force _as boolean_:
+# - $4: force _as bool_:
 #       (optional) true to overwrite the link or file if it already exists.
 #       Otherwise, the function will not on an existing link not pointing to the
 #       target path.
@@ -3226,6 +3612,8 @@ function windows::convertPathToUnix() { :; }
 # ```
 # 
 # > On Windows, the function uses `powershell` (and optionally ls to check the existing link).
+# > If you have the windows "developer mode" enabled + MSYS=winsymlinks:nativestrict,
+# > then it uses the ln command.
 # 
 function windows::createLink() { :; }
 
@@ -3315,7 +3703,7 @@ function windows::getEnvVar() { :; }
 # 
 # - $1: **command** _as string_:
 #       the command to run.
-# - $2: run as administrator _as boolean_:
+# - $2: run as administrator _as bool_:
 #       (optional) whether to run the command as administrator.
 #       (defaults to false).
 # 

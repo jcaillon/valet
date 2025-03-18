@@ -5,13 +5,17 @@ cascade:
 url: /docs/libraries/codes
 ---
 
-## ansi-codes::*
+## esc-codes::*
 
 ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
 These codes can be used to format text in the terminal.
 
-They are defined as variables and not as functions. Please check the content of the lib-ansi-codes to learn more:
-<https://github.com/jcaillon/valet/blob/latest/libraries.d/lib-ansi-codes>
+These codes were selected because they are widely supported by terminals and they
+probably will cover all use cases. It is also advised to stick to the 4-bit colors
+which allows your application to adopt the color scheme of the terminal.
+
+They are defined as variables and not as functions. Please check the content of the esc-codes to learn more:
+<https://github.com/jcaillon/valet/blob/latest/libraries.d/esc-codes>
 
 References:
 
@@ -27,11 +31,10 @@ References:
 Ascii graphics:
 
 - https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9
+- https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing
+- https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements
 
 > While it could be very handy to define a function for each of these instructions,
 > it would also be slower to execute (function overhead + multiple printf calls).
 
-
-
-
-> Documentation generated for the version 0.27.285 (2024-12-05).
+> Documentation generated for the version 0.28.3846 (2025-03-18).

@@ -13,10 +13,10 @@ Disable the profiler if previously activated with profiler::enable.
 profiler::disable
 ```
 
-
 ## profiler::enable
 
 Enables the profiler and start writing to the given file.
+The profiler will also be active in subshells of this current shell.
 
 - $1: **path** _as string_:
       the file to write to.
@@ -27,7 +27,20 @@ profiler::enable "${HOME}/valet-profiler-${BASHPID}.txt"
 
 > There can be only one profiler active at a time.
 
+## profiler::pause
 
+Pause the profiler if previously activated with profiler::enable.
 
+```bash
+profiler::pause
+```
 
-> Documentation generated for the version 0.27.285 (2024-12-05).
+## profiler::resume
+
+Resume the profiler if previously paused with profiler::pause.
+
+```bash
+profiler::resume
+```
+
+> Documentation generated for the version 0.28.3846 (2025-03-18).

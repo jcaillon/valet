@@ -5,120 +5,112 @@ cascade:
 url: /docs/libraries/string
 ---
 
-## string::bumpSemanticVersion
-
-This function allows to bump a semantic version formatted like:
-major.minor.patch-prerelease+build
-
-- $1: **version** _as string_:
-      the version to bump
-- $2: **level** _as string_:
-      the level to bump (major, minor, patch)
-- $3: clear build and prerelease _as bool_:
-      (optional) clear the prerelease and build
-      (defaults to true)
-
-Returns:
-
-- `RETURNED_VALUE`: the new version string
-
-```bash
-string::bumpSemanticVersion "1.2.3-prerelease+build" "major"
-local newVersion="${RETURNED_VALUE}"
-```
-
-
 ## string::convertCamelCaseToSnakeCase
 
 This function convert a camelCase string to a SNAKE_CASE string.
 It uses pure bash.
 Removes all leading underscores.
 
-- $1: **camelCase string** _as string_:
-      The camelCase string to convert.
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to convert.
 
 Returns:
 
-- `RETURNED_VALUE`: The SNAKE_CASE string.
+- ${RETURNED_VALUE}: the extracted field
 
 ```bash
-string::convertCamelCaseToSnakeCase "myCamelCaseString" && local mySnakeCaseString="${RETURNED_VALUE}"
+MY_STRING="myCamelCaseString"
+string::convertCamelCaseToSnakeCase MY_STRING
+echo "${RETURNED_VALUE}"
 ```
 
+## string::convertKebabCaseToCamelCase
 
-## string::compareSemanticVersion
+This function convert a kebab-case string to a camelCase string.
+It uses pure bash.
+Removes all leading dashes.
 
-This function allows to compare two semantic versions formatted like:
-major.minor.patch-prerelease+build
-
-- $1: **version1** _as string_:
-      the first version to compare
-- $2: **version2** _as string_:
-      the second version to compare
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to convert.
 
 Returns:
 
-- `RETURNED_VALUE`:
-  - 0 if the versions are equal,
-  - 1 if version1 is greater,
-  - -1 if version2 is greater
+- ${RETURNED_VALUE}: the extracted field
 
 ```bash
-string::compareSemanticVersion "2.3.4-prerelease+build" "1.2.3-prerelease+build"
-local comparison="${RETURNED_VALUE}"
+MY_STRING="my-kebab-case-string"
+string::convertKebabCaseToCamelCase MY_STRING
+echo "${RETURNED_VALUE}"
 ```
 
-> The prerelease and build are ignored in the comparison.
+## string::convertKebabCaseToSnakeCase
 
+This function convert a kebab-case string to a SNAKE_CASE string.
+It uses pure bash.
+Removes all leading dashes.
+
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to convert.
+
+Returns:
+
+- ${RETURNED_VALUE}: the extracted field
+
+```bash
+MY_STRING="my-kebab-case-string"
+string::convertKebabCaseToSnakeCase MY_STRING
+echo "${RETURNED_VALUE}"
+```
 
 ## string::count
 
 Counts the number of occurrences of a substring in a string.
 
-- $1: **string** _as string_:
-      the string in which to search
+- $1: **string variable name** _as string_:
+      The variable name that contains the string in which to count occurrences.
 - $2: **substring** _as string_:
       the substring to count
 
 Returns:
 
-- `RETURNED_VALUE`: the number of occurrences
+- ${RETURNED_VALUE}: the number of occurrences
 
 ```bash
-string::count "name,firstname,address" "," && local count="${RETURNED_VALUE}"
+MY_STRING="name,first_name,address"
+string::count MY_STRING ","
+echo "${RETURNED_VALUE}"
 ```
 
 > This is faster than looping over the string and check the substring.
 
+## string::doForEachLine
 
-## string::cutField
+Execute a callback function for each item (e.g. line) of a string.
+The string is split using a separator (default to a new line) and
+the callback function is called for each item.
 
-Allows to get the nth element of a string separated by a given separator.
-This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
-but it uses pure bash to go faster.
+- $1: **string variable name** _as string_:
+      The name of the variable containing the string.
+- $2: **callback function** _as string_:
+      The name of the function to execute for each item (line).
+      The function is called with the following arguments:
 
-- $1: **string to cut** _as string_:
-      the string to cut
-- $2: **field number** _as int_:
-      the field number to get (starting at 0)
+      - $1: the current item (line) content
+
+      The function must return 0 if we should continue to the next line, 1 otherwise.
+      (defaults to empty)
 - $3: separator _as string_:
-      the separator
-      (defaults to tab if not provided)
-
-Returns:
-
-- `RETURNED_VALUE`: the extracted field
+      (optional) Can be set using the variable `_OPTION_SEPARATOR`.
+      The separator character to use.
+      (defaults to newline if not provided)
 
 ```bash
-string::cutField "field1 field2 field3" 1 " " && local field="${RETURNED_VALUE}"
-printf '%s' "${field}" # will output "field2"
+string::doForEachLine myString myCallback
 ```
 
-> This is faster than:
->
-> - using read into an array from a here string
-> - using bash parameter expansion to remove before/after the separator
-
+> This function provides a convenient way to avoid using a "here string" and handles extra
+> newlines (which is not the case with a "for loop" using parameter expansion and IFS=$'\n').
+> Here string is significantly slower than using this.
 
 ## string::extractBetween
 
@@ -128,8 +120,8 @@ Search for the first occurrence of the start string and the first occurrence
 Both start and end strings are excluded in the extracted text.
 Both start and end strings must be found to extract something.
 
-- $1: **string** _as string_:
-      the string in which to search
+- $1: **string variable name** _as string_:
+      The variable name that contains the string from which to extract a text.
 - $2: **start string** _as string_:
       the start string
       (if empty, then it will extract from the beginning of the string)
@@ -139,20 +131,49 @@ Both start and end strings must be found to extract something.
 
 Returns:
 
-- `RETURNED_VALUE`: the extracted text
+- ${RETURNED_VALUE}: the extracted text
 
 ```bash
-string::extractBetween "This is a long text" "is a " " text"
+MY_STRING="This is a long text"
+string::extractBetween MY_STRING "is a " " text"
 local extractedText="${RETURNED_VALUE}"
 ```
 
+## string::getField
 
-## string::indexOf
+Allows to get the nth element of a string separated by a given separator.
+This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
+but it uses pure bash to go faster.
+
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to extract from.
+- $2: **field number** _as int_:
+      The field number to get (starting at 0).
+- $3: separator _as string_:
+      The separator to use.
+      (defaults to tab if not provided)
+
+Returns:
+
+- ${RETURNED_VALUE}: the extracted field
+
+```bash
+MY_STRING="field1 field2 field3"
+string::getField MY_STRING 1 " "
+echo "${RETURNED_VALUE}"
+```
+
+> This is faster than:
+>
+> - using read into an array from a here string
+> - using bash parameter expansion to remove before/after the separator
+
+## string::getIndexOf
 
 Find the first index of a string within another string.
 
-- $1: **string** _as string_:
-      the string in which to search
+- $1: **string variable name** _as string_:
+      The variable name that contains the string from which to find an index.
 - $2: **search** _as string_:
       the string to search
 - $3: start index _as int_:
@@ -161,214 +182,214 @@ Find the first index of a string within another string.
 
 Returns:
 
-- `RETURNED_VALUE`: the index of the substring in the string or -1 if not found.
+- ${RETURNED_VALUE}: the index of the substring in the string or -1 if not found.
 
 ```bash
-string::indexOf "This is a long text" "long" && local index="${RETURNED_VALUE}"
-string::indexOf "This is a long text" "long" 10 && local index="${RETURNED_VALUE}"
-```
-
-
-## string::convertKebabCaseToCamelCase
-
-This function convert a kebab-case string to a camelCase string.
-It uses pure bash.
-Removes all leading dashes.
-
-- $1: **kebab-case string** _as string_:
-      The kebab-case string to convert.
-
-Returns:
-
-- `RETURNED_VALUE`: The camelCase string.
-
-```bash
-string::convertKebabCaseToCamelCase "my-kebab-case-string" && local myCamelCaseString="${RETURNED_VALUE}"
-```
-
-
-## string::convertKebabCaseToSnakeCase
-
-This function convert a kebab-case string to a SNAKE_CASE string.
-It uses pure bash.
-Removes all leading dashes.
-
-- $1: **kebab-case string** _as string_:
-      The kebab-case string to convert.
-
-Returns:
-
-- `RETURNED_VALUE`: The SNAKE_CASE string.
-
-```bash
-string::convertKebabCaseToSnakeCase "my-kebab-case-string" && local mySnakeCaseString="${RETURNED_VALUE}"
-```
-
-
-## time::convertMicrosecondsToHuman
-
-Convert microseconds to human readable format.
-
-- $1: **microseconds** _as int_:
-      the microseconds to convert
-- $2: **format** _as string_:
-     the format to use (defaults to "HH:MM:SS")
-     Usable formats:
-     - %HH: hours
-     - %MM: minutes
-     - %SS: seconds
-     - %LL: milliseconds
-     - %h: hours without leading zero
-     - %m: minutes without leading zero
-     - %s: seconds without leading zero
-     - %l: milliseconds without leading zero
-     - %u: microseconds without leading zero
-     - %M: total minutes
-     - %S: total seconds
-     - %L: total milliseconds
-     - %U: total microseconds
-
-Returns:
-
-- `RETURNED_VALUE`: the human readable format
-
-```bash
-time::convertMicrosecondsToHuman 123456789
+MY_STRING="This is a long text"
+string::getIndexOf MY_STRING "long"
 echo "${RETURNED_VALUE}"
 ```
 
+## string::head
 
-## regex::getFirstGroup
+Get the first nth items (e.g. lines) of a string.
 
-Matches a string against a regex and returns the first capture group of the matched string.
-
-- $1: **string** _as string_:
-      the string to match
-- $2: **regex** _as string_:
-      the regex
+- $1: **string variable name** _as string_:
+      The variable name that contains the string from which to get the first occurrences.
+- $2: **nb items** _as int_:
+      The number of items (lines) to extract.
+- $3: separator _as string_:
+      (optional) Can be set using the variable `_OPTION_SEPARATOR`.
+      The separator character to use.
+      (defaults to newline if not provided)
 
 Returns:
 
-- `RETURNED_VALUE`: the first capture group in the matched string.
-                    Empty if no match.
+- ${RETURNED_VALUE}: The extracted string.
 
 ```bash
-regex::getFirstGroup "name: julien" "name:(.*)"
+MY_STRING="line1"$'\n'"line2"$'\n'"line3"
+string::head MY_STRING 2
 echo "${RETURNED_VALUE}"
 ```
 
-> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+## string::highlight
 
+Highlight characters in a string.
+
+- $1: **text variable name** _as string_:
+      The variable name that contains the text to highlight.
+- $2: **characters variable name** _as string_:
+      The variable name that contains characters to highlight.
+- $3: highlight ansi code _as string_:
+      (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.
+      The ANSI code to use for highlighting.
+      (defaults to STYLE_COLOR_ACCENT)
+- $4: reset ansi code _as string_:
+      (optional) Can be set using the variable `_OPTION_RESET_ANSI`.
+      The ANSI code to use for resetting the highlighting.
+      (defaults to STYLE_COLOR_DEFAULT)
+
+Returns:
+
+- ${RETURNED_VALUE}: the highlighted text
+
+```bash
+string::highlight "This is a text to highlight." "ttttt"
+echo "${RETURNED_VALUE}"
+```
+
+> - All characters to highlight must be found in the same order in the matched line.
+> - This functions is case insensitive.
+
+## string::removeSgrCodes
+
+Remove all SGR (Select Graphic Rendition) codes from a string.
+
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to clean.
+
+Returns:
+
+- ${RETURNED_VALUE}: the cleaned string
+
+```bash
+MY_STRING="This is a string with SGR codes"$'\e[0m'
+string::removeSgrCodes MY_STRING
+echo "${RETURNED_VALUE}"
+```
 
 ## string::split
 
 Split a string into an array using a separator.
 
-- $1: **string** _as string_:
-      the string to split
-- $2: **separator** _as string_:
-      the separator (must be a single character!)
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to split.
+- $2: **separators** _as string_:
+      The separator characters to use.
 
 Returns:
 
-- `RETURNED_ARRAY`: the array of strings
+- ${RETURNED_ARRAY[@]}: the array of strings
 
 ```bash
-string::split "name,first name,address" "," && local -a array=("${RETURNED_ARRAY[@]}")
+MY_STRING="name,first_name,address"
+string::split MY_STRING ","
+ARRAY=("${RETURNED_ARRAY[@]}")
 ```
 
 > This is faster than using read into an array from a here string.
-
-
-## string::trim
-
-Trim leading and trailing whitespaces.
-
-- $1: **string to trim** _as string_:
-      The string to trim.
-
-Returns:
-
-- `RETURNED_VALUE`: The trimmed string.
-
-```bash
-string::trim "   example string    " && local trimmedString="${RETURNED_VALUE}"
-```
-
 
 ## string::trimAll
 
 Trim all whitespaces and truncate spaces.
 
-- $1: **string to trim** _as string_:
-      The string to trim.
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to trim.
 
 Returns:
 
-- `RETURNED_VALUE`: The trimmed string.
+- ${RETURNED_VALUE}: the extracted field
 
 ```bash
-string::trimAll "   example   string    " && local trimmedString="${RETURNED_VALUE}"
+MY_STRING="   example "$'\t'"  string    "$'\n'
+string::trimAll MY_STRING
+echo "${RETURNED_VALUE}"
 ```
 
+## string::trimEdges
+
+Trim leading and trailing characters (defaults to whitespaces).
+
+- $1: **string variable name** _as string_:
+      The variable name that contains the string to trim.
+- $2: characters to trim _as string_:
+      The characters to trim.
+      (defaults to " "$'\t'$'\n')
+
+Returns:
+
+- ${RETURNED_VALUE}: the extracted field
+
+```bash
+MY_STRING="   example  string    "
+string::trimEdges MY_STRING
+echo "${RETURNED_VALUE}"
+```
 
 ## string::wrapCharacters
 
-Allows to hard wrap the given string (without new lines) at the given width.
-Wrapping is done at character boundaries without taking spaces into consideration.
-Optionally applies a prefix on each new line.
+Allows to hard wrap the given string at the given width.
+Wrapping is done at character boundaries, see string::warpText for word wrapping.
+Optionally appends padding characters on each new line.
 
-- $1: **text** _as string_:
-      the text to wrap
+- $1: **text variable name** _as string_:
+      The variable name that contains the text to wrap.
 - $2: wrap width _as string_:
-      (optional) the width to wrap the text at
+      (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
+      The width to wrap the text at.
+      Note that length of the optional padding characters are subtracted from the
+      width to make sure the text fits in the given width.
       (defaults to GLOBAL_COLUMNS)
-- $3: new line pad string _as string_:
-      (optional) the prefix to apply to each new line
+- $3: padding characters _as string_:
+      (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
+      The characters to apply as padding on the left of each new line.
+      E.g. '  ' will add 2 spaces on the left of each new line.
       (defaults to "")
-- $4: new line wrap width _as string_:
-      (optional) the width to wrap the text for each new line
+- $4: first line width _as int_:
+      (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
+      The width to use for the first line.
       (defaults to the width)
 
 Returns:
 
-- `RETURNED_VALUE`: the wrapped string
+- ${RETURNED_VALUE}: the wrapped string
+- ${RETURNED_VALUE2}: the length taken on the last line
 
 ```bash
-string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 ---
-local wrappedString="${RETURNED_VALUE}"
+string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 --- 5
+echo "${RETURNED_VALUE}"
 ```
 
-> This function is written in pure bash and is faster than calling the fold command.
+> - This function is written in pure bash and is faster than calling the fold command.
+> - It considers escape sequence for text formatting and does not count them as visible characters.
+> - Leading spaces after a newly wrapped line are removed.
 
+## string::wrapWords
 
-## string::wrapSentence
+Allows to soft wrap the given text at the given width.
+Wrapping is done at word boundaries.
+Optionally appends padding characters on each new line.
 
-Allows to soft wrap the given sentence (without new lines) at the given width.
-Optionally applies a prefix on each new line.
-
-- $1: **text** _as string_:
-      the text to wrap
-- $2: wrap width _as int_:
-      (optional) the width to wrap the text at
+- $1: **text variable name** _as string_:
+      The variable name that contains the text to wrap.
+- $2: wrap width _as string_:
+      (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
+      The width to wrap the text at.
+      Note that length of the optional padding characters are subtracted from the
+      width to make sure the text fits in the given width.
       (defaults to GLOBAL_COLUMNS)
-- $3:*new line pad string _as string_:
-      (optional) the prefix to apply to each new line
-      (defaults to "")
+- $3: padding characters _as string_:
+      (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
+      The characters to apply as padding on the left of each new line.
+      E.g. '  ' will add 2 spaces on the left of each new line.
+      (defaults to 0)
+- $4: first line width _as int_:
+      (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
+      The width to use for the first line.
+      (defaults to the width)
 
 Returns:
 
-- `RETURNED_VALUE`: the wrapped text
+- ${RETURNED_VALUE}: the wrapped text
 
 ```bash
-string::wrapSentence "This is a long text that should be wrapped at 20 characters." 20
-local wrappedText="${RETURNED_VALUE}"
+string::wrapWords "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
+echo "${RETURNED_VALUE}"
 ```
 
 > - This function is written in pure bash and is faster than calling the fold command.
 > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
+> - It considers escape sequence for text formatting and does not count them as visible characters.
 
-
-
-
-> Documentation generated for the version 0.27.285 (2024-12-05).
+> Documentation generated for the version 0.28.3846 (2025-03-18).

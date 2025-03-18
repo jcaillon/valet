@@ -7,9 +7,9 @@ url: /docs/libraries/curl
 
 ## curl::download
 
-This function is a wrapper around curl.
+This function is a wrapper around curl to save a request result in a file.
 It allows you to check the http status code and return 1 if it is not acceptable.
-It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
+It invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
 
 - $1: **fail** _as bool_:
       true/false to indicate if the function should fail in case the execution fails
@@ -26,19 +26,19 @@ Returns:
 - $?:
   - 0 if the http status code is acceptable
   - 1 otherwise
-- `RETURNED_VALUE`: the content of stderr
-- `RETURNED_VALUE2`: the http status code
+- ${RETURNED_VALUE}: the content of stderr
+- ${RETURNED_VALUE2}: the http status code
 
 ```bash
-curl::download "true" "200,201" "/filePath" "https://example.com" || core::fail "The curl command failed."
+curl::download true 200,201 "/filePath" "https://example.com"
+curl::download false 200 "/filePath2" "https://example2.com" || core::fail "The curl command failed."
 ```
-
 
 ## curl::request
 
-This function is a wrapper around curl.
+This function is a wrapper around curl to save the content of a request in a variable.
 It allows you to check the http status code and return 1 if it is not acceptable.
-It exe::invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
+It invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
 
 - $1: **fail** _as bool_:
       true/false to indicate if the function should fail in case the execution fails
@@ -53,15 +53,13 @@ Returns:
 - $?:
   - 0 if the http status code is acceptable
   - 1 otherwise
-- `RETURNED_VALUE`: the content of the request
-- `RETURNED_VALUE2`: the content of stderr
-- `RETURNED_VALUE3`: the http status code
+- ${RETURNED_VALUE}: the content of the request
+- ${RETURNED_VALUE2}: the content of stderr
+- ${RETURNED_VALUE3}: the http status code
 
 ```bash
+curl::request true 200 https://example.com -X POST -H 'Authorization: token'
 curl::request false 200,201 https://example.com || core::fail "The curl command failed."
 ```
 
-
-
-
-> Documentation generated for the version 0.27.285 (2024-12-05).
+> Documentation generated for the version 0.28.3846 (2025-03-18).

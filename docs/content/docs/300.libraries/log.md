@@ -16,7 +16,6 @@ Displays a debug message.
 log::debug "This is a debug message."
 ```
 
-
 ## log::error
 
 Displays an error message.
@@ -29,7 +28,6 @@ log::error "This is an error message."
 ```
 
 > You probably want to exit immediately after an error and should consider using core::fail function instead.
-
 
 ## log::errorTrace
 
@@ -44,20 +42,18 @@ It can be used before a fatal error to display useful information.
 log::errorTrace "This is a debug message."
 ```
 
-
 ## log::getLevel
 
 Get the current log level.
 
 Returns:
 
-- `RETURNED_VALUE`: The current log level.
+- ${RETURNED_VALUE}: The current log level.
 
 ```bash
 log::getLevel
 printf '%s\n' "The log level is ⌜${RETURNED_VALUE}⌝."
 ```
-
 
 ## log::info
 
@@ -69,7 +65,6 @@ Displays an info message.
 ```bash
 log::info "This is an info message."
 ```
-
 
 ## log::isDebugEnabled
 
@@ -85,7 +80,6 @@ Returns:
 if log::isDebugEnabled; then printf '%s\n' "Debug mode is active."; fi
 ```
 
-
 ## log::isTraceEnabled
 
 Check if the trace mode is enabled.
@@ -100,19 +94,44 @@ Returns:
 if log::isTraceEnabled; then printf '%s\n' "Debug mode is active."; fi
 ```
 
+## log::print
+
+Display a log message.
+
+- $1: **color name** _as string_:
+      The color name to use for the severity (TRACE, DEBUG...).
+- $2: **icon** _as string_:
+      The icon to display in the log message (utf8 character from nerd icons).
+- $3: **severity** _as string_:
+      The severity to display (max 7 chars for the default log pattern).
+- $@: **message** _as string_:
+      The message to log.
+
+```bash
+log::print "SUCCESS" $'\uf14a' "OK" "This is a success message."
+```
 
 ## log::printCallStack
 
 This function prints the current function stack in the logs.
 
-- $1: **stack to skip** _as int_:
-      the number of stack to skip (defaults to 2 which skips this function
-      and the first calling function which is usually the onError function)
+- $1: Stack to skip _as int_:
+      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
+      The number of stack to skip.
+      (defaults to 2 which skips this function and the first calling function
+      which is usually the onError function)
+- $2: Stack to skip at end _as int_:
+      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.
+      The number of stack to skip at the end.
+      (defaults to 0)
 
 ```bash
-log::printCallStack 2
+log::printCallStack
+log::printCallStack 0
 ```
 
+> For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+> variables to simulate a call stack.
 
 ## log::printFile
 
@@ -122,43 +141,43 @@ The file content will be aligned with the current log output and hard wrapped if
 - $1: **path** _as string_:
       the file path to display.
 - $2: max lines _as int_:
-      (optional) max lines to display (defaults to 0 which prints all lines).
+      (optional) Can be set using the variable `_OPTION_MAX_LINES`.
+      Max lines to display, can be set to 0 to display all lines.
+      (defaults to 0)
 
 ```bash
 log::printFile "/my/file/path"
 ```
-shellcheck disable=SC2317
-
 
 ## log::printFileString
 
 Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
 
-- $1: **content** _as string_:
-      the file content.
-- $2: **max lines** _as int_:
-      (optional) max lines to display (defaults to 0 which prints all lines).
+- $1: **content variable name** _as string_:
+      The name of the variable containing the file content to print.
+- $2: max lines _as int_:
+      (optional) Can be set using the variable `_OPTION_MAX_LINES`.
+      Max lines to display, can be set to 0 to display all lines.
+      (defaults to 0)
 
 ```bash
-log::printFileString "myfilecontent"
+log::printFileString "myvar"
 ```
-shellcheck disable=SC2317
 
+> This function is not at all suited for large strings, print the content to a file instead.
 
 ## log::printRaw
 
 Display something in the log stream.
 Does not check the log level.
 
-- $1: **content** _as string_:
-      the content to print (can contain new lines)
+- $1: **content variable name** _as string_:
+      The variable name containing the content to print (can contain new lines).
 
 ```bash
 log::printRaw "my line"
 ```
-shellcheck disable=SC2317
-
 
 ## log::printString
 
@@ -175,15 +194,57 @@ Does not check the log level.
 ```bash
 log::printString "my line"
 ```
-shellcheck disable=SC2317
 
+## log::saveFile
+
+Save the given file by copying it to a new file in the user local state directory
+(using `core::createNewStateFilePath`).
+Useful for debugging purposes, to save the state of a file during execution.
+
+- $1: **path** _as string_:
+      The file path to save.
+- $2: **suffix** _as string_:
+      The suffix to add to the file name.
+- $3: log path _as bool_:
+      (optional) if true, log the path of the saved file using `log::printString`
+      (defaults to true)
+
+Returns:
+
+- ${RETURNED_VALUE}: The path to the saved file.
+
+```bash
+log::saveFile "/my/file/path" "suffix" "important result file"
+```
+
+## log::saveFileString
+
+Save the given string to a new file in the user local state directory
+(using `core::createNewStateFilePath`).
+Useful for debugging purposes, to save the state of a string during execution.
+
+- $1: **content variable name** _as string_:
+      The variable name of the content to save.
+- $2: **suffix** _as string_:
+      The suffix to add to the file name.
+- $3: log path _as bool_:
+      (optional) if true, log the path of the saved file using `log::printString`
+      (defaults to true)
+
+Returns:
+
+- ${RETURNED_VALUE}: The path to the saved file.
+
+```bash
+log::saveFileString "my content" "suffix" "important result file"
+```
 
 ## log::setLevel
 
 Set the log level.
 
 - $1: **log level** _as string_:
-      the log level to set (or defaults to info), acceptable values are:
+      The log level to set (or defaults to info), acceptable values are:
   - trace
   - debug
   - info
@@ -199,7 +260,6 @@ log::setLevel debug
 log::setLevel debug true
 ```
 
-
 ## log::success
 
 Displays a success message.
@@ -210,7 +270,6 @@ Displays a success message.
 ```bash
 log::success "This is a success message."
 ```
-
 
 ## log::trace
 
@@ -223,7 +282,6 @@ Displays a trace message.
 log::trace "This is a trace message."
 ```
 
-
 ## log::warning
 
 Displays a warning.
@@ -235,7 +293,4 @@ Displays a warning.
 log::warning "This is a warning message."
 ```
 
-
-
-
-> Documentation generated for the version 0.27.285 (2024-12-05).
+> Documentation generated for the version 0.28.3846 (2025-03-18).
