@@ -62,7 +62,7 @@ Add a value to an array if it is not already present.
   "prefix": "array::appendIfNotPresent",
   "description": "Add a value to an array if it is not already present...",
   "scope": "",
-  "body": [ "array::appendIfNotPresent$0" ]
+  "body": [ "array::appendIfNotPresent \"${1:**array name**}\" \"${2:**value variable name**}\"$0" ]
 },
 
 ```

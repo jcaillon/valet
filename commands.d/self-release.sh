@@ -384,7 +384,7 @@ function selfRelease::updateDocumentation() {
 # This function writes all the functions documentation to the documentation files
 # under the `docs/content/docs/300.libraries` directory.
 function selfRelease::writeAllFunctionsDocumentation() {
-  local pageFooter=$'\n'$'\n'"> ${1}"$'\n'
+  local pageFooter="> ${1}"$'\n'
 
   log::info "Writing the ${#SORTED_FUNCTION_NAMES[@]} functions documentation to the core libraries docs."
 
@@ -398,8 +398,10 @@ function selfRelease::writeAllFunctionsDocumentation() {
     exe::invoke rm -f "${file}"
   done
 
+  local -A documentationPages
+
   # write the new files
-  local key content
+  local key
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     local functionName="${key}"
     regex::getFirstGroup functionName '([[:alnum:]]+)::'
@@ -412,8 +414,8 @@ function selfRelease::writeAllFunctionsDocumentation() {
     local path="${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries/${packageName}.md"
 
     # init the file if necessary
-    if [[ ! -f "${path}" ]]; then
-      content="---
+    if [[ ! -v documentationPages["${path}"] ]]; then
+      documentationPages["${path}"]="---
 title: 📂 ${packageName}
 cascade:
   type: docs
@@ -421,22 +423,15 @@ url: /docs/libraries/${packageName}
 ---
 
 "
-      fs::writeToFile "${path}" content
     fi
 
-    # append the function documentation
-    fs::writeToFile "${path}" "RETURNED_ASSOCIATIVE_ARRAY[${key}]" true
-    content=$'\n'$'\n'
-    fs::writeToFile "${path}" content true
+    documentationPages["${path}"]+="${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"$'\n'
   done
 
-  # add footer
-  fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
-  local file
-  for file in "${RETURNED_ARRAY[@]}"; do
-    if [[ ${file} == *"_index.md" ]]; then
-      continue
-    fi
-    fs::writeToFile "${file}" pageFooter true
+  # write each file
+  local file content
+  for file in "${!documentationPages[@]}"; do
+    content="${documentationPages[${file}]}${pageFooter}"
+    fs::writeToFile "${file}" content
   done
 }

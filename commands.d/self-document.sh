@@ -214,7 +214,7 @@ function selfRelease_writeAllFunctionsToMarkdown() {
   local key documentation
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
-    content+="${!documentation}"$'\n'$'\n'
+    content+="${!documentation}"$'\n'
   done
 
   # add footer
@@ -271,7 +271,7 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
     functionName="${key}"
     documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
 
-    local -n description="${documentation}"
+    local description="${!documentation}"
     string::extractBetween description $'\n' "."
     description="${RETURNED_VALUE#$'\n'}"
     description="${description//\/\\/}"
