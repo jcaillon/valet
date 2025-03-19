@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 function main() {
-  test_bash::getScriptDirectory
   test_bash::getFunctionDefinitionWithGlobalVars
   test_bash::countJobs
   test_bash::injectCodeInFunction
@@ -12,20 +11,6 @@ function main() {
   test_bash::getMissingCommands
   test_bash::isCommand
   test_bash::isFunction
-}
-
-function test_bash::getScriptDirectory() {
-  test::title "✅ Testing bash::getScriptDirectory"
-
-  test::prompt bash::getScriptDirectory
-  bash::getScriptDirectory
-  echo "${RETURNED_VALUE}"
-  test::flush
-
-  test::prompt source sub/script.sh
-  source sub/script.sh
-  echo "${RETURNED_VALUE}"
-  test::flush
 }
 
 function test_bash::injectCodeInFunction() {

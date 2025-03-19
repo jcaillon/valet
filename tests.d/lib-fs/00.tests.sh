@@ -4,6 +4,7 @@
 source fs
 
 function main() {
+  test_fs::getScriptDirectory
   test_fs::writeToFile
   test_fs::createTemp
   test_fs::getFileLineCount
@@ -16,6 +17,20 @@ function main() {
   test_fs::createLink
   test_fs::head
   test_fs::tail
+}
+
+function test_fs::getScriptDirectory() {
+  test::title "✅ Testing fs::getScriptDirectory"
+
+  test::prompt fs::getScriptDirectory
+  fs::getScriptDirectory
+  echo "${RETURNED_VALUE}"
+  test::flush
+
+  test::prompt source resources/script.sh
+  source resources/script.sh
+  echo "${RETURNED_VALUE}"
+  test::flush
 }
 
 function test_fs::writeToFile() {

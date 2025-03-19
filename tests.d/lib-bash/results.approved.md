@@ -2,24 +2,6 @@
 
 ## Test script 00.tests
 
-### ✅ Testing bash::getScriptDirectory
-
-❯ `bash::getScriptDirectory`
-
-**Standard output**:
-
-```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash
-```
-
-❯ `source sub/script.sh`
-
-**Standard output**:
-
-```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/sub
-```
-
 ### ✅ Testing bash::getFunctionDefinitionWithGlobalVars
 
 ❯ `declare -f test_function_to_reexport`

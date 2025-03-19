@@ -308,7 +308,7 @@ function fs::cleanTempFiles() {
   fi
   if [[ -n ${GLOBAL_TEMPORARY_FILE_PREFIX:-} ]]; then
     log::debug "Deleting temporary files."
-    rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* 1>/dev/null || :
+    rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* &>/dev/null || :
   fi
   unset -v TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
 }

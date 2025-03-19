@@ -2,6 +2,24 @@
 
 ## Test script 00.tests
 
+### ✅ Testing fs::getScriptDirectory
+
+❯ `fs::getScriptDirectory`
+
+**Standard output**:
+
+```text
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs
+```
+
+❯ `source resources/script.sh`
+
+**Standard output**:
+
+```text
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources
+```
+
 ### ✅ Testing fs::writeToFile
 
 ❯ `fs::writeToFile resources/gitignored/file1 _content`
