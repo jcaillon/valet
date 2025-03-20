@@ -1483,7 +1483,7 @@ function string::highlight() {
   done
 }
 
-# ## string::transformSearchStringToFuzzySearchRegex (private)
+# ## string::getFuzzySearchRegexFromSearchString
 #
 # Allows to get a regex that can be used to fuzzy search a string.
 # the -> '([^t]*)(t[^h]*h[^e]*e)'
@@ -1496,10 +1496,10 @@ function string::highlight() {
 # - ${_STRING_FUZZY_FILTER_REGEX}: the regex
 #
 # ```bash
-# string::transformSearchStringToFuzzySearchRegex SEARCH_STRING
+# string::getFuzzySearchRegexFromSearchString SEARCH_STRING
 # echo "${_STRING_FUZZY_FILTER_REGEX}"
 # ```
-function string::getFuzzySearchRegexFromSearchString() {
+function regex::getFuzzySearchRegexFromSearchString() {
   local -n filterSearchString="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   # nothing to filter
@@ -1574,7 +1574,7 @@ function array::fuzzyFilterSort() {
     return 0
   fi
 
-  string::getFuzzySearchRegexFromSearchString "${2}"
+  regex::getFuzzySearchRegexFromSearchString "${2}"
 
   local -i patternLength=${#filterSearchString}
 
@@ -1675,7 +1675,7 @@ function array::fuzzyFilterSortQuicksort() {
 # > The 10# forces the base 10 conversion to avoid issues with leading zeros.
 # > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 function time::getProgramElapsedMicroseconds() {
-  RETURNED_VALUE=$(((${EPOCHREALTIME%%\.*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*\.} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))
+  RETURNED_VALUE=$(((${EPOCHREALTIME%%[.,]*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*[.,]} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))
 }
 
 #===============================================================

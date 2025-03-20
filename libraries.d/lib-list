@@ -841,7 +841,7 @@ function list::getCurrentInitialItemsIndex() {
   RETURNED_VALUE=-1
 }
 
-# ## list_fuzzyFilterSortFileWithGrepAndGawk
+# ## list_fuzzyFilterSortFileWithGrepAndGawk (private)
 #
 # Allows to fuzzy sort a file against a given searched string.
 # Outputs a file containing only the lines matching the searched string.
@@ -869,7 +869,7 @@ function list::getCurrentInitialItemsIndex() {
 # > This function is useful for very large arrays.
 function list_fuzzyFilterSortFileWithGrepAndGawk() {
   local fileToFilter="${1}"
-  string::getFuzzySearchRegexFromSearchString "${2}"
+  regex::getFuzzySearchRegexFromSearchString "${2}"
   local outputFilteredFile="${3}"
   local outputCorrespondencesFile="${4}"
 

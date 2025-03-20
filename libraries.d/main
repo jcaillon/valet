@@ -13,9 +13,12 @@ if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   source "${BASH_SOURCE[0]%/*}/core"
 fi
 
+# set different options for the shell, to have consistent behavior on all machines
+core::setShellOptions
+
 # Remember the time the program started (nb of seconds since epoch)
-GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%\.*}"
-GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*\.}"
+GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%[.,]*}"
+GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*[.,]}"
 
 # Remember the original working directory
 GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
@@ -36,9 +39,6 @@ if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
   core::getUserStateDirectory
   profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${_PROFILER_FILE_NAME}"}"
 fi
-
-# set different options for the shell, to have consistent behavior on all machines
-core::setShellOptions
 
 trap::register
 

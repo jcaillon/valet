@@ -107,8 +107,8 @@ function sfzf::show() {
 
     # recompute the right pane content if needed
     # only do it each 0.4s at maximum
-    if [[ ${SFZF_RECOMPUTE_RIGHT_PANE_CONTENT} == "true" && $((${EPOCHREALTIME//./} - ${LAST_RECOMPUTE_RIGHT_PANE_CONTENT_TIME:-"-99999"})) -gt 400000 ]]; then
-      LAST_RECOMPUTE_RIGHT_PANE_CONTENT_TIME="${EPOCHREALTIME//./}"
+    if [[ ${SFZF_RECOMPUTE_RIGHT_PANE_CONTENT} == "true" && $((${EPOCHREALTIME//[.,]/} - ${LAST_RECOMPUTE_RIGHT_PANE_CONTENT_TIME:-"-99999"})) -gt 400000 ]]; then
+      LAST_RECOMPUTE_RIGHT_PANE_CONTENT_TIME="${EPOCHREALTIME//[.,]/}"
       computeRightPaneContent
       drawRightPane
       drawPrompt

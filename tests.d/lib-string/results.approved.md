@@ -2,21 +2,21 @@
 
 ## Test script 00.tests
 
-### ✅ Testing string::getFuzzySearchRegexFromSearchString
+### ✅ Testing regex::getFuzzySearchRegexFromSearchString
 
-❯ `string::getFuzzySearchRegexFromSearchString _searchString`
+❯ `regex::getFuzzySearchRegexFromSearchString _searchString`
 
 ```text
 _STRING_FUZZY_FILTER_REGEX='^([^a]*)(a[^c]*c[^f]*f)(.?)'
 ```
 
-❯ `string::getFuzzySearchRegexFromSearchString _searchString`
+❯ `regex::getFuzzySearchRegexFromSearchString _searchString`
 
 ```text
 _STRING_FUZZY_FILTER_REGEX='^([^a]*)(a[^$]*\$[^b]*b[^^]*\^[^f]*f)(.?)'
 ```
 
-❯ `string::getFuzzySearchRegexFromSearchString _searchString`
+❯ `regex::getFuzzySearchRegexFromSearchString _searchString`
 
 ```text
 _STRING_FUZZY_FILTER_REGEX='^([^\]*)(\\[^^]*\^[^$]*\$[^.]*\.[^|]*\|[^?]*\?[^*]*\*[^+]*\+[^[]*\[[^]]*\][^{]*\{[^}]*\}[^(]*\([^)]*\))(.?)'

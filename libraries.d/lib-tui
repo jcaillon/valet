@@ -129,8 +129,8 @@ function tui::setTerminalOptions() {
 # Should be called after `tui::setTerminalOptions`.
 #
 # - $1: force _as bool_:
-#       (optional) force the restoration of the stty configuration
-#       stty state will not be restored if
+#       (optional) force the restoration of the stty configuration.
+#       By default, the restoration is only done if we are not in full screen mode when called.
 #       (defaults to false)
 #
 # ```bash
@@ -151,7 +151,7 @@ function tui::restoreTerminalOptions() {
 # ## tui::rerouteLogs
 #
 # Reroute the logs to a temporary file.
-# The logs will be displayed at the end of the interactive session.
+# The logs will be displayed when calling `tui::restoreLogs`
 #
 # ```bash
 # tui::rerouteLogs
@@ -773,6 +773,7 @@ function tui::rebindKeymap() {
 # ## tui::restoreBindings
 #
 # Reset the key bindings to the default ones.
+# To be called after `tui::rebindKeymap`.
 #
 # ```bash
 # tui::restoreBindings

@@ -8,6 +8,9 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- create log::getCallStack
+- rename time::getTimerValue to time::getTimerMicroseconds
+- rename command::parseArgument to command::parseParameters
 - coproc: make sure we see any issue happening in the background
 - in performance tip, document the use of -n
 - self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.
