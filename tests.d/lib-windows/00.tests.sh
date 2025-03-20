@@ -6,6 +6,7 @@ source windows
 function main() {
   USERNAME="user"
   LOCALAPPDATA="tmp"
+
   test_windows::convertPathFromUnix
   test_windows::convertPathToUnix
   test_windows::setEnvVar
@@ -80,6 +81,11 @@ function powershell() {
 
 function fs::createLink() {
   echo "🙈 mocking fs::createLink: $*"
+}
+
+# override cygpath for the test to work on linux as well
+function cygpath() {
+  echo 'C:\Users\TEMP\'"${2##*/}";
 }
 
 main

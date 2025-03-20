@@ -9,7 +9,8 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='\tmp\file'
+RETURNED_VALUE='C:\Users\TEMP\file'
+RETURNED_VALUE2=''
 ```
 
 ❯ `windows::convertPathFromUnix /mnt/d/Users/username`
@@ -150,7 +151,7 @@ RETURNED_VALUE='/d/data/file'
   $processInfo.UseShellExecute = $false;
   $processInfo.CreateNoWindow = $true;
   $processInfo.Arguments = @("-NoProfile","-NonInteractive","-Command","`$ErrorActionPreference = 'Stop'; 
-  `$pathToAdd = '\coucou';
+  `$pathToAdd = 'C:\Users\TEMP\coucou';
   `$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', `$true);
   `$oldPath = `$key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
   if (`$currentPath -notlike `"*`$pathToAdd*`") {

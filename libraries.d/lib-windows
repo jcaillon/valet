@@ -178,8 +178,6 @@ function windows::endPs1Batch() {
 # - A hard link is a directory entry that associates a new pathname with an existing
 #   file (inode + data block) on a file system.
 #
-# This function allows to create a symbolic link on Windows as well as on Unix.
-#
 # - $1: **linked path** _as string_:
 #       the path to link to (the original file)
 # - $2: **link path** _as string_:
@@ -288,7 +286,8 @@ function windows::createLink() {
 # windows::convertPathFromUnix "/path/to/file"
 # ```
 #
-# > Handles paths starting with `/mnt/x/` or `/x/`.
+# > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
+# > handles other msys2 paths using `cygpath`.
 function windows::convertPathFromUnix() {
   local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ ${path} != "/"* ]]; then
@@ -298,6 +297,10 @@ function windows::convertPathFromUnix() {
   if [[ ${path} =~ ^"/mnt/"([a-z])"/" || ${path} =~ ^"/"([a-z])"/" ]]; then
     path="${BASH_REMATCH[1]}:/${path/"${BASH_REMATCH[0]}"/}"
     path="${path^?}"
+  elif command -v cygpath &>/dev/null; then
+    exe::invoke cygpath -w "${path}"
+    RETURNED_VALUE="${RETURNED_VALUE%%$'\n'*}"
+    return 0
   fi
   RETURNED_VALUE="${path//\//\\}"
 }
