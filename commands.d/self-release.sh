@@ -404,7 +404,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
   local key
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     local functionName="${key}"
-    regex::getFirstGroup functionName '([[:alnum:]]+)::'
+    regex::getFirstGroup functionName '([-[:alnum:]]+)::'
     local packageName="${RETURNED_VALUE}"
     if [[ -z ${packageName} ]]; then
       # case for "source" function

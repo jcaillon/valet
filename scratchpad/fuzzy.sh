@@ -8,7 +8,7 @@ function main() {
   local _STRING_FUZZY_FILTER_REGEX
   fuzzy=a+bc\\
 
-  string::getFuzzySearchRegexFromSearchString fuzzy
+  regex::getFuzzySearchRegexFromSearchString fuzzy
   echo "${fuzzy} -> ${_STRING_FUZZY_FILTER_REGEX}"
 
   echo "----"

@@ -372,6 +372,12 @@ function selfUpdate() {
     command::sourceFunction selfExtend
     selfExtend::updateExtensions "${extensionsDirectory}" "${skipExtensionsSetup}"
   fi
+
+  if [[ ${firstInstallation} != "true" ]]; then
+    log::success "Valet has been updated from version ⌜${currentVersion}⌝ to version ⌜${version}⌝."$'\n'"The changelogs can be found here: https://github.com/jcaillon/valet/releases."
+  else
+    log::success "Valet version ⌜${version}⌝ has been installed in ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝."
+  fi
 }
 
 function selfUpdate_printRecapLine() {
