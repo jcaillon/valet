@@ -202,3 +202,38 @@ function regex::getMatches() {
     fi
   done
 }
+
+# ## regex::escapeRegexSpecialChars
+#
+# Escapes special characters in a string to be used as a regex.
+#
+# - $1: **string to escape** _as string_:
+#       The string to escape.
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: The escaped string.
+#
+# ```bash
+# regex::escapeRegexSpecialChars "a.(b)"
+# echo "${RETURNED_VALUE}"
+# ```
+function regex::escapeRegexSpecialChars() {
+  RETURNED_VALUE="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  RETURNED_VALUE=${RETURNED_VALUE//\\/\\\\}
+  RETURNED_VALUE=${RETURNED_VALUE//\//\\\/}
+  RETURNED_VALUE=${RETURNED_VALUE//\./\\\.}
+  RETURNED_VALUE=${RETURNED_VALUE//\*/\\\*}
+  RETURNED_VALUE=${RETURNED_VALUE//\+/\\\+}
+  RETURNED_VALUE=${RETURNED_VALUE//\?/\\?}
+  RETURNED_VALUE=${RETURNED_VALUE//\(/\\\(}
+  RETURNED_VALUE=${RETURNED_VALUE//\)/\\\)}
+  RETURNED_VALUE=${RETURNED_VALUE//\[/\\\[}
+  RETURNED_VALUE=${RETURNED_VALUE//\]/\\\]}
+  RETURNED_VALUE=${RETURNED_VALUE//\{/\\\{}
+  RETURNED_VALUE=${RETURNED_VALUE//\}/\\\}}
+  RETURNED_VALUE=${RETURNED_VALUE//\^/\\^}
+  RETURNED_VALUE=${RETURNED_VALUE//\$/\\\$}
+  RETURNED_VALUE=${RETURNED_VALUE//\|/\\|}
+}
+

@@ -4,9 +4,30 @@
 source regex
 
 function main() {
+  test_regex::escapeRegexSpecialChars
+  test_regex::getFuzzySearchRegexFromSearchString
   test_regex::getMatches
   test_regex::replace
   test_regex::getFirstGroup
+}
+
+function test_regex::escapeRegexSpecialChars() {
+  test::title "✅ Testing regex::escapeRegexSpecialChars function"
+
+  local _string='\^$.|?*+[]{}()'
+  test::func regex::escapeRegexSpecialChars "${_string}"
+}
+
+function test_regex::getFuzzySearchRegexFromSearchString() {
+  test::title "✅ Testing regex::getFuzzySearchRegexFromSearchString function"
+
+  local _string="the"
+  test::exec regex::getFuzzySearchRegexFromSearchString _string
+  test::printVars _string _STRING_FUZZY_FILTER_REGEX
+
+  _string='\^$.|?*+[]{}()'
+  test::exec regex::getFuzzySearchRegexFromSearchString _string
+  test::printVars _string _STRING_FUZZY_FILTER_REGEX
 }
 
 function test_regex::getMatches() {
