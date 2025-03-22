@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1091
+source "libraries.d/core"
+include benchmark progress bash
+
+progress::start
+progress::update 0 "Running test suites."
+
+JOB_NAMES=(name{1..30})
+JOB_COMMANDS=()
+for i in {1..30}; do
+  JOB_COMMANDS+=("sleep $((RANDOM % 3 + 1)); log::warning 'Job $i done'")
+done
+
+function callback() {
+  progress::update ${4} "Done running ⌜${2}⌝ at index ${1}: ${3}."
+  if [[ ${3} -eq 1 ]]; then
+    return 1
+  fi
+}
+
+bash::runInParallel JOB_NAMES JOB_COMMANDS 5 callback
+
+progress::stop
+

@@ -34,6 +34,20 @@ function main() {
   test_log
 
   rm -Rf "tmp"
+
+  test_log::printCallStack
+}
+
+function test_log::printCallStack() {
+  test::title "✅ Testing log::printCallStack"
+
+  # fix stuff for printCallStack
+  GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
+  GLOBAL_STACK_SOURCE_FILES=("core" "core" "core" "/path/to/subFunction.sh" "/path/to/function.sh")
+  GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
+
+  test::func log::getCallStack
+  test::exec log::printCallStack
 }
 
 function test_log::init() {

@@ -4,33 +4,19 @@ source "libraries.d/core"
 include benchmark progress bash
 
 function func1() {
-  cd libraries.d &>/dev/null
-  cd - &>/dev/null
+  func2
 }
+
 function func2() {
-  pushd libraries.d &>/dev/null
-  popd &>/dev/null
+  func3
 }
 
-benchmark::run func1 func2
-
-progress::start
-progress::update 0 "Running test suites."
-
-JOB_NAMES=(name{1..30})
-JOB_COMMANDS=()
-for i in {1..30}; do
-  JOB_COMMANDS+=("sleep $((RANDOM % 3 + 1)); log::warning 'Job $i done'")
-done
-
-function callback() {
-  progress::update ${4} "Done running ⌜${2}⌝ at index ${1}: ${3}."
-  if [[ ${3} -eq 1 ]]; then
-    return 1
-  fi
+function func3() {
+  echo "ok"
+  log::getCallStack
+  echo "${RETURNED_VALUE}"
+  log::info stack:
+  log::printCallStack
 }
 
-bash::runInParallel JOB_NAMES JOB_COMMANDS 5 callback
-
-progress::stop
-
+func1

@@ -506,6 +506,32 @@ _world
                                                   [90m░[39m like).
 ```
 
+### ✅ Testing log::printCallStack
+
+❯ `log::getCallStack`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='├─ in log::printCallStack() at core:10
+├─ in log::error() at core:100
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
+'
+RETURNED_VALUE2='48'
+```
+
+❯ `log::printCallStack`
+
+**Error output**:
+
+```text
+                                             ├─ in myCmd::subFunction() at /path/to/subFun
+                                             │  ction.sh:200
+                                             ╰─ in myCmd::function() at /path/to/function.
+                                                sh:300
+```
+
 ## Test script 01.log-level
 
 ### ✅ Testing log levels

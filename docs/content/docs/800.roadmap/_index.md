@@ -8,7 +8,6 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- create log::getCallStack
 - rename time::getTimerValue to time::getTimerMicroseconds
 - rename command::parseArgument to command::parseParameters
 - coproc: make sure we see any issue happening in the background

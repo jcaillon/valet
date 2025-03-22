@@ -28,10 +28,9 @@ Returned code: `1`
 ```text
 /tmp/valet.valet.d/config: line 1: 1/0: division by 0 (error token is "0")
 ERROR    Error code 1 in source(), stack:
-├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:49
-╰─ in main() at valet:100
-TRACE    Error sourcing the configuration file ⌜/tmp/valet.valet.d/config⌝.
-Check the file for error and try again, or delete the file to discard your config.
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
+EXIT     Exiting with code 1, stack:
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad startup
@@ -45,10 +44,9 @@ Returned code: `1`
 ```text
 /tmp/valet.valet.d/startup: line 1: 1/0: division by 0 (error token is "0")
 ERROR    Error code 1 in source(), stack:
-├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:57
-╰─ in main() at valet:100
-TRACE    Error sourcing the startup file ⌜/tmp/valet.valet.d/startup⌝.
-Check the file for error and try again, or delete the file to discard your config.
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
+EXIT     Exiting with code 1, stack:
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad .env
@@ -62,10 +60,9 @@ Returned code: `1`
 ```text
 .env: line 1: 1/0: division by 0 (error token is "0")
 ERROR    Error code 1 in source(), stack:
-├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:65
-╰─ in main() at valet:100
-TRACE    Error sourcing the env file ⌜.env⌝.
-Check the file for error and try again, or delete the file to discard your config.
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
+EXIT     Exiting with code 1, stack:
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad commands
@@ -79,7 +76,7 @@ Returned code: `1`
 ```text
 /tmp/valet.d/d3-2/commands: line 1: 1/0: division by 0 (error token is "0")
 ERROR    Error code 1 in core::sourceUserCommands(), stack:
-├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:1899
+├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:1942
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:131
 ╰─ in main() at valet:100
 TRACE    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.

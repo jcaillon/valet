@@ -889,7 +889,42 @@ function log::isTraceEnabled() {
 function log::printCallStack() {
   local -i levelToSkip="${1:-${_OPTION_STACK_TO_SKIP:-2}}"
   local -i levelToSkipAtEnd="${2:-${_OPTION_STACK_TO_SKIP_AT_END:-0}}"
-  local -i idx stackSize
+
+  _OPTION_WRAP_WIDTH="$((GLOBAL_LOG_COLUMNS - ${#GLOBAL_LOG_WRAP_PADDING}))" log::getCallStack "$((levelToSkip + 1))" "${levelToSkipAtEnd}"
+  log::printString "${RETURNED_VALUE}"
+}
+
+# ## log::getCallStack
+#
+# This function returns the current function stack.
+#
+# - $1: Stack to skip _as int_:
+#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
+#       The number of stack to skip.
+#       (defaults to 1 which skips this function)
+# - $2: Stack to skip at end _as int_:
+#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.
+#       The number of stack to skip at the end.
+#       (defaults to 0)
+# - ${_OPTION_WRAP_WIDTH} _as int_:
+#       (optional) The width to wrap the call stack.
+#       (defaults to the terminal width)
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: The call stack as a string.
+#
+# ```bash
+# log::getCallStack
+# echo "${RETURNED_VALUE}"
+# ```
+#
+# > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+# > variables to simulate a call stack.
+function log::getCallStack() {
+  local -i levelToSkip="${1:-${_OPTION_STACK_TO_SKIP:-1}}"
+  local -i levelToSkipAtEnd="${2:-${_OPTION_STACK_TO_SKIP_AT_END:-0}}"
+  local -i wrapWidth=${_OPTION_WRAP_WIDTH:-"${GLOBAL_COLUMNS}"}
 
   local -a stackFunctionNames stackSourceFiles stackLineNumbers
   if [[ -n ${GLOBAL_STACK_FUNCTION_NAMES:-} ]]; then
@@ -902,8 +937,8 @@ function log::printCallStack() {
     stackLineNumbers=("${BASH_LINENO[@]}")
   fi
 
-  stackSize=$((${#stackFunctionNames[@]} - levelToSkipAtEnd))
-  local functionName lineNumber="${LINENO}" sourceFile
+  local -i idx stackSize=$((${#stackFunctionNames[@]} - levelToSkipAtEnd))
+  local functionName lineNumber="${LINENO}" sourceFile line returnedString=""
   local treeString="├─" treePadding="│  "
   for ((idx = levelToSkip; idx < stackSize; idx++)); do
     functionName="${stackFunctionNames[${idx}]}"
@@ -925,8 +960,16 @@ function log::printCallStack() {
       treeString="╰─"
       treePadding="   "
     fi
-    log::printString "${treeString} in ${functionName} at ${sourceFile}:${lineNumber}" "${treePadding}"
+    line="${treeString} in ${functionName} at ${sourceFile}:${lineNumber}"
+    if (( wrapWidth > 0 )); then
+      string::wrapCharacters line "${wrapWidth}" "${treePadding}"
+      returnedString+="${RETURNED_VALUE}"$'\n'
+    else
+      returnedString+="${line}"$'\n'
+    fi
   done
+
+  RETURNED_VALUE="${returnedString}"
 }
 
 # ## log::parseLogPattern (private)
