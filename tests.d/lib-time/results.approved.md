@@ -6,7 +6,7 @@
 
 ❯ `time::startTimer`
 
-❯ `time::getTimerValue`
+❯ `time::getTimerMicroseconds`
 
 Returned variables:
 
@@ -14,7 +14,7 @@ Returned variables:
 RETURNED_VALUE='2000000'
 ```
 
-❯ `_OPTION_LOG_ELAPSED_TIME=true time::getTimerValue`
+❯ `_OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds`
 
 **Error output**:
 
@@ -28,7 +28,7 @@ Returned variables:
 RETURNED_VALUE='5000000'
 ```
 
-❯ `_OPTION_LOG_ELAPSED_TIME=true _OPTION_FORMAT=%L time::getTimerValue`
+❯ `_OPTION_LOG_ELAPSED_TIME=true _OPTION_FORMAT=%L time::getTimerMicroseconds`
 
 **Error output**:
 

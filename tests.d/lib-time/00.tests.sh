@@ -13,9 +13,9 @@ function test_time::startTimer() {
   test::title "✅ Testing time::startTimer function"
 
   test::exec time::startTimer
-  test::func time::getTimerValue
-  test::func _OPTION_LOG_ELAPSED_TIME=true time::getTimerValue
-  test::func _OPTION_LOG_ELAPSED_TIME=true _OPTION_FORMAT=%L time::getTimerValue
+  test::func time::getTimerMicroseconds
+  test::func _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
+  test::func _OPTION_LOG_ELAPSED_TIME=true _OPTION_FORMAT=%L time::getTimerMicroseconds
 }
 
 function test_time::getDate() {

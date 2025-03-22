@@ -109,7 +109,7 @@ function exe::invokef5() {
     fi
   fi
 
-  time::getTimerValue
+  time::getTimerMicroseconds
   time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"
   local debugMessage="The command ⌜${executable}⌝ ended with exit code ⌜${exitCode}⌝ in ⌜${RETURNED_VALUE}⌝."
 

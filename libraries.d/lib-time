@@ -113,18 +113,18 @@ function time::convertMicrosecondsToHuman() {
 
 # ## time::startTimer
 #
-# Start a timer. You can then call `time::getTimerValue` to get the elapsed time.
+# Start a timer. You can then call `time::getTimerMicroseconds` to get the elapsed time.
 #
 # ```bash
 # time::startTimer
-# time::getTimerValue
+# time::getTimerMicroseconds
 # ```
 function time::startTimer() {
   time::getProgramElapsedMicroseconds
   _TIME_TIMER_START="${RETURNED_VALUE}"
 }
 
-# ## time::getTimerValue
+# ## time::getTimerMicroseconds
 #
 # Get the time elapsed since the call of `time::startTimer`.
 #
@@ -142,10 +142,10 @@ function time::startTimer() {
 #
 # ```bash
 # time::startTimer
-# _OPTION_LOG_ELAPSED_TIME=true time::getTimerValue
+# _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
 # echo "Total microseconds: ${RETURNED_VALUE}"
 # ```
-function time::getTimerValue() {
+function time::getTimerMicroseconds() {
   local log="${_OPTION_LOG_ELAPSED_TIME:-false}"
   local format="${_OPTION_FORMAT:-"%S.%LLs"}"
 
