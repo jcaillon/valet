@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- Add `valet.cmd` to the package, in self setup we can optionally add the valet install dir to the windows PATH + add VALET_WIN_BASH + VALET_WIN_INSTALLATION_DIRECTORY.
 - Use a VALET_CONFIG_VERBOSE_LOG_PATTERN as default when -v/-w is used. Add the patterns: <sourceFile>, <elapsedTime>, <elapsedTimeSinceLastLog>
 - coproc: make sure we see any issue happening in the background
 - in performance tip, document the use of -n
@@ -52,7 +53,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Add a command `self package` that build the user commands into a single script file. We want to add options to the build command so we can exclude some commands. It will include all source required and try to minify the bash script. In addition, we can rebrand *valet* into another name.
 - add valet in brew
 - add man page for valet
-- Add `valet.cmd` to the package, in self setup we can optionally add the valet install dir to the windows PATH + add VALET_WIN_BASH + VALET_WIN_INSTALLATION_DIRECTORY.
 - Allow self release to release extensions.
 - Prompt improvements:
   - handle shift + arrows to highlight text

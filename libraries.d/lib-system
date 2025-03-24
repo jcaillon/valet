@@ -52,6 +52,63 @@ function system::getOs() {
   RETURNED_VALUE="${osName}"
 }
 
+# ## system::isWindows
+#
+# Check if the current OS is Windows.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the current OS is Windows
+#   - 1 otherwise.
+#
+# ```bash
+# if system::isWindows; then
+#   printf 'The current OS is Windows.'
+# fi
+# ```
+function system::isWindows() {
+  [[ ${OSTYPE:-} == "msys"* ]] || return 1
+}
+
+# ## system::isLinux
+#
+# Check if the current OS is Linux.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the current OS is Linux
+#   - 1 otherwise.
+#
+# ```bash
+# if system::isLinux; then
+#   printf 'The current OS is Linux.'
+# fi
+# ```
+function system::isLinux() {
+  [[ ${OSTYPE:-} == "linux"* ]] || return 1
+}
+
+# ## system::isDarwin
+#
+# Check if the current OS is macOS.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the current OS is macOS
+#   - 1 otherwise.
+#
+# ```bash
+# if system::isDarwin; then
+#   printf 'The current OS is macOS.'
+# fi
+# ```
+function system::isDarwin() {
+  [[ ${OSTYPE:-} == "darwin"* ]] || return 1
+}
+
 # ## system::getArchitecture
 #
 # Returns the CPU architecture of the current machine.

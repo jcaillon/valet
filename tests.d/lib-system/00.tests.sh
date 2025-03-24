@@ -6,10 +6,40 @@ source system
 source fs
 
 function main() {
+  test_system::isDarwin
+  test_system::isLinux
+  test_system::isWindows
   test_system::getArchitecture
   test_system::getOs
   test_system::getEnvVars
   test_system::addToPath
+}
+
+function test_system::isDarwin() {
+  test::title "✅ Testing system::isDarwin"
+
+  test::func OSTYPE=darwin system::isDarwin
+  test::func OSTYPE=darwin-bsd system::isDarwin
+  test::func OSTYPE=msys system::isDarwin
+  test::func OSTYPE=cygwin system::isDarwin
+}
+
+function test_system::isLinux() {
+  test::title "✅ Testing system::isLinux"
+
+  test::func OSTYPE=linux system::isLinux
+  test::func OSTYPE=linux-bsd system::isLinux
+  test::func OSTYPE=msys system::isLinux
+  test::func OSTYPE=cygwin system::isLinux
+}
+
+function test_system::isWindows() {
+  test::title "✅ Testing system::isWindows"
+
+  test::func OSTYPE=msys system::isWindows
+  test::func OSTYPE=cygwin system::isWindows
+  test::func OSTYPE=windows system::isWindows
+  test::func OSTYPE=linux system::isWindows
 }
 
 function test_system::getArchitecture() {

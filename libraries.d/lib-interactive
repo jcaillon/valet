@@ -62,7 +62,7 @@ function interactive::askForConfirmationRaw() {
     # wait and handle key press
     if tui::waitForChar -t 1; then
       case ${LAST_KEY_PRESSED} in
-      $'\n' | ' ' | o)
+      $'\n' | ' ' | $'\r' | o | y)
         break
         ;;
       *)

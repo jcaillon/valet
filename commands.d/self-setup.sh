@@ -13,6 +13,10 @@ fi
 
 # shellcheck source=../libraries.d/lib-interactive
 source interactive
+# shellcheck source=../libraries.d/lib-windows
+source windows
+# shellcheck source=../libraries.d/lib-system
+source system
 
 #===============================================================
 # >>> command: self setup
@@ -57,11 +61,13 @@ function selfSetup() {
   printf '%s\n' "An information icon: "$'\uf05a'
   printf '%s\n' "─────────────────────────────────────"
 
-  if ! interactive::promptYesNo "Do you correctly see the nerd icons in the icon check above the line?" false; then
-    log::info "If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal." \
-    "You can download any font here: https://www.nerdfonts.com/font-downloads and install it." \
+  log::info "If you see an unusual or ? character in the lines above, it means you don't have a nerd-font setup in your terminal." \
+    "You can download a nerd-font here: https://www.nerdfonts.com/font-downloads."
+
+  if ! interactive::promptYesNo "Do you correctly see the nerd icons in lines above?" false; then
+    log::info "You can download any font here: https://www.nerdfonts.com/font-downloads and install it." \
     "After that, you need to setup your terminal to use this newly installed font." \
-    "You can run the command ⌜valet self setup⌝ again after that."
+    "You can then run the command ⌜valet self setup⌝ again to set up the use of this font."
     VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
   else
     VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
@@ -72,6 +78,8 @@ function selfSetup() {
   # generate the config
   command::sourceFunction selfConfig
   selfConfig --export-current-values --no-edit --override
+
+  # on windows, we can add the installation path to the windows PATH
 
   log::success "You are all set!"
 }

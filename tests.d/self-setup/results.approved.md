@@ -34,16 +34,17 @@ INFO     Now setting up Valet.
 111    (Y)ES         (N)O   19╭─────╮
 9│ No. 15├──░
 9╰─────╯
-   ┌───────────────────────────────────────────────────────────────────────┐
-░──┤ Do you correctly see the nerd icons in the icon check above the line? 76│
-   └───────────────────────────────────────────────────────────────────────┘
+INFO     If you see an unusual or ? character in the lines above, it means you don't have a nerd-font setup in your terminal.
+You can download a nerd-font here: https://www.nerdfonts.com/font-downloads.
+   ┌─────────────────────────────────────────────────────┐
+░──┤ Do you correctly see the nerd icons in lines above? 58│
+   └─────────────────────────────────────────────────────┘
 111    (Y)ES         (N)O   19┌─────┐
 9│ No. 15├──░
 9└─────┘
-INFO     If you see the replacement character ? in my terminal, it means you don't have a nerd-font setup in your terminal.
-You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
+INFO     You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
 After that, you need to setup your terminal to use this newly installed font.
-You can run the command ⌜valet self setup⌝ again after that.
+You can then run the command ⌜valet self setup⌝ again to set up the use of this font.
 INFO     Writing the valet config file ⌜/tmp/valet-temp⌝.
 SUCCESS  You are all set!
 ```
@@ -92,9 +93,11 @@ INFO     Now setting up Valet.
 111    (Y)ES         (N)O   19┌──────┐
 9│ Yes. 16├──░
 9└──────┘
-   ┌───────────────────────────────────────────────────────────────────────┐
-░──┤ Do you correctly see the nerd icons in the icon check above the line? 76│
-   └───────────────────────────────────────────────────────────────────────┘
+INFO     If you see an unusual or ? character in the lines above, it means you don't have a nerd-font setup in your terminal.
+You can download a nerd-font here: https://www.nerdfonts.com/font-downloads.
+   ┌─────────────────────────────────────────────────────┐
+░──┤ Do you correctly see the nerd icons in lines above? 58│
+   └─────────────────────────────────────────────────────┘
 111    (Y)ES         (N)O   19┌──────┐
 9│ Yes. 16├──░
 9└──────┘

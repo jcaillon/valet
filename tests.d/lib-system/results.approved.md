@@ -2,6 +2,50 @@
 
 ## Test script 00.tests
 
+### ✅ Testing system::isDarwin
+
+❯ `OSTYPE=darwin system::isDarwin`
+
+❯ `OSTYPE=darwin-bsd system::isDarwin`
+
+❯ `OSTYPE=msys system::isDarwin`
+
+Returned code: `1`
+
+❯ `OSTYPE=cygwin system::isDarwin`
+
+Returned code: `1`
+
+### ✅ Testing system::isLinux
+
+❯ `OSTYPE=linux system::isLinux`
+
+❯ `OSTYPE=linux-bsd system::isLinux`
+
+❯ `OSTYPE=msys system::isLinux`
+
+Returned code: `1`
+
+❯ `OSTYPE=cygwin system::isLinux`
+
+Returned code: `1`
+
+### ✅ Testing system::isWindows
+
+❯ `OSTYPE=msys system::isWindows`
+
+❯ `OSTYPE=cygwin system::isWindows`
+
+Returned code: `1`
+
+❯ `OSTYPE=windows system::isWindows`
+
+Returned code: `1`
+
+❯ `OSTYPE=linux system::isWindows`
+
+Returned code: `1`
+
 ### ✅ Testing system::getArchitecture
 
 ❯ `MACHTYPE=x86_64-pc-msys system::getArchitecture`

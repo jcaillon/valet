@@ -58,7 +58,7 @@ INFO     The tag message is:
    6 ░ - 🐞 fix
    7 ░ 
 INFO     Generating documentation for the core functions only.
-INFO     Found 178 functions with documentation.
+INFO     Found 181 functions with documentation.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md
 INFO     The documentation has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md⌝.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet
@@ -67,7 +67,7 @@ INFO     The prototype script has been generated in ⌜$GLOBAL_INSTALLATION_DIRE
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets
 INFO     The vscode snippets have been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets⌝.
-INFO     Writing the 178 functions documentation to the core libraries docs.
+INFO     Writing the 181 functions documentation to the core libraries docs.
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/array.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/bash.md
 🙈 mocked exe::invoke rm -f $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/benchmark.md
@@ -150,8 +150,10 @@ SUCCESS  The new version has been released on GitHub.
 🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/libraries.d .
 🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/extras .
 🙈 mocked exe::invoke cp -R valet .
+🙈 mocked exe::invoke cp -R valet.cmd .
+🙈 mocked exe::invoke cp -R valet.ps1 .
 🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/version .
-🙈 mocked exe::invoke tar -czvf valet.tar.gz showcase.d commands.d libraries.d extras valet version
+🙈 mocked exe::invoke tar -czvf valet.tar.gz showcase.d commands.d libraries.d extras valet valet.cmd valet.ps1 version
 INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 🙈 mocked curl::request true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz
 INFO     The current version of valet is: 1.2.3.
