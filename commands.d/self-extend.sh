@@ -219,9 +219,7 @@ function selfExtend_createExtension() {
     selfDocument
   fi
 
-  system::getOs
-  local os="${RETURNED_VALUE}"
-  if [[ ${os} == "windows" ]]; then
+  if system::isWindows; then
     # shellcheck source=../libraries.d/lib-windows
     source windows
 
@@ -261,7 +259,7 @@ function selfExtend_createExtension() {
   createLink "${extensionsDirectory}/lib-valet" "${extensionDirectory}/lib-valet" || log::error "Could not create a symbolic link to the lib-valet."
   createLink "${extensionsDirectory}/lib-valet.md" "${extensionDirectory}/lib-valet.md" || log::error "Could not create a symbolic link to the lib-valet.md."
 
-  if [[ ${os} == "windows" ]]; then
+  if system::isWindows; then
     windows::endPs1Batch
   fi
 

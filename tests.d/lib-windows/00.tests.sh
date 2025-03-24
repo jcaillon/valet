@@ -23,6 +23,7 @@ function test_windows::convertPathFromUnix() {
   test::func windows::convertPathFromUnix '/tmp/file'
   test::func windows::convertPathFromUnix '/mnt/d/Users/username'
   test::func windows::convertPathFromUnix '/c/data/file'
+  test::func windows::convertPathFromUnix 'C:\Users\username'
 }
 
 function test_windows::convertPathToUnix() {
@@ -32,6 +33,7 @@ function test_windows::convertPathToUnix() {
   function test::transformTextBeforeFlushing() { _TEST_OUTPUT="${_TEST_OUTPUT//\/mnt}"; }
   test::func windows::convertPathToUnix 'C:\Users\username'
   test::func windows::convertPathToUnix 'D:\data\file'
+  test::func windows::convertPathToUnix '/c/Users/username'
   unset -f test::transformTextBeforeFlushing
 }
 

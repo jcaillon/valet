@@ -258,8 +258,6 @@ function bash::sleep() {
     return 0
   elif command -v mkfifo 1>/dev/null; then
     if [[ -z ${IO_SLEEP_FIFO:-} ]]; then
-      # shellcheck source=lib-fs
-      source fs
       _OPTION_PATH_ONLY=true fs::createTempFile
       IO_SLEEP_FIFO="${RETURNED_VALUE}"
       mkfifo -m 700 "${IO_SLEEP_FIFO}"

@@ -15,7 +15,11 @@ source fs
 # - $1: **command** _as string_:
 #       the command to run.
 # - $2: run as administrator _as bool_:
-#       (optional) whether to run the command as administrator.
+#       (optional) Can be set using the variable `_OPTION_RUN_AS_ADMIN`.
+#       Wether to run the command as administrator.
+#       (defaults to false).
+# - ${_OPTION_SILENT} _as bool_:
+#       (optional) Do not log the command stderr.
 #       (defaults to false).
 #
 # Returns:
@@ -31,10 +35,12 @@ source fs
 # ```
 function windows::runPs1() {
   local command="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local runAsAdmin="${2:-false}"
+  local runAsAdmin="${2:-${_OPTION_RUN_AS_ADMIN:-false}}"
+  local silent="${_OPTION_SILENT:-false}"
 
   local exitCode=0
 
+  # try to find powershell in the path; otherwise take it in the system32 directory; or try to use pwsh
   local powershellPath="powershell.exe"
   local powershellCommand="powershell"
   if ! command -v "${powershellCommand}" &>/dev/null; then
@@ -42,7 +48,17 @@ function windows::runPs1() {
     windows::convertPathToUnix "${powershellPath}"
     powershellCommand="${RETURNED_VALUE}"
     if [[ ! -f "${powershellCommand}" ]]; then
-      core::fail "The PowerShell command is not available."
+      if command -v "pwsh" &>/dev/null; then
+        fs::getCommandPath "pwsh"
+        powershellCommand="${RETURNED_VALUE}"
+        if [[ ! -f "${powershellCommand}.exe" ]]; then
+          core::fail "The PowerShell command is not available."
+        fi
+        windows::convertPathFromUnix "${powershellCommand}.exe"
+        powershellPath="${RETURNED_VALUE}"
+      else
+        core::fail "The PowerShell command is not available."
+      fi
     fi
   fi
 
@@ -93,12 +109,43 @@ function windows::runPs1() {
     exit $process.ExitCode
     '
   fi
+  if log::isDebugEnabled; then
+    log::debug "PowerShell command ⌜${powershellCommand}⌝, path ⌜${powershellPath}⌝."
+    log::debug "PowerShell script run:"
+    core::createNewStateFilePath "-script.ps1"
+    printf "%s" "${script}" >"${RETURNED_VALUE}"
+    log::printString "⌜${RETURNED_VALUE}⌝"
+  fi
   "${powershellCommand}" -NoProfile -NonInteractive -Command "${script}" || exitCode=1
 
+  if log::isDebugEnabled; then
+    if [[ -s "${stdoutFile}" ]]; then
+      log::debug "PowerShell stdout:"
+      log::saveFile "${stdoutFile}" "ps1.stdout"
+    else
+      log::debug "PowerShell stdout: (empty)"
+    fi
+    if [[ -s "${stderrFile}" ]]; then
+      log::debug "PowerShell stderr:"
+      log::saveFile "${stderrFile}" "ps1.stderr"
+    else
+      log::debug "PowerShell stderr: (empty)"
+    fi
+  fi
+
   fs::readFile "${stdoutFile}"
-  stdout="${RETURNED_VALUE//$'\r'/}"
+  local stdout="${RETURNED_VALUE//$'\r'/}"
+  stdout="${stdout%[[:space:]]}"
   fs::readFile "${stderrFile}"
-  RETURNED_VALUE2="${RETURNED_VALUE//$'\r'/}"
+  local stderr="${RETURNED_VALUE//$'\r'/}"
+  stderr="${stderr//$'\r'/}"
+
+  if [[ ${exitCode} -ne 0 && ${silent} == false && ${#stderr} -gt 0 ]]; then
+    log::error "PowerShell command failed with the following error:"
+    log::errorTrace "${stderr}"
+  fi
+
+  RETURNED_VALUE2="${stderr}"
   RETURNED_VALUE="${stdout}"
 
   return ${exitCode}
@@ -163,8 +210,16 @@ function windows::endPs1Batch() {
   # restore the original function
   eval "${_IO_WINDOWS_POWERSHELL_FUNCTION}"
 
-  windows::runPs1 "${_IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS}" "${_IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN}"
+  local exitCode
+  if windows::runPs1 "${_IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS}" "${_IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN}"; then
+    exitCode=0
+  else
+    exitCode=1
+  fi
+
   unset -v _IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS _IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN _IO_WINDOWS_POWERSHELL_FUNCTION
+
+  return ${exitCode}
 }
 
 # ## windows::createLink
@@ -290,6 +345,10 @@ function windows::createLink() {
 # > handles other msys2 paths using `cygpath`.
 function windows::convertPathFromUnix() {
   local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if [[ ${path} =~ ^([a-zA-Z])":" ]]; then
+    RETURNED_VALUE="${path}"
+    return 0
+  fi
   if [[ ${path} != "/"* ]]; then
     fs::toAbsolutePath "${path}"
     path="${RETURNED_VALUE}"
@@ -323,6 +382,10 @@ function windows::convertPathFromUnix() {
 # > Handles paths starting with `X:\`.
 function windows::convertPathToUnix() {
   local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if [[ ${path} == "/"* ]]; then
+    RETURNED_VALUE="${path}"
+    return 0
+  fi
   if [[ ${path} =~ ^([a-zA-Z])":" ]]; then
     if [[ -d "/mnt/${BASH_REMATCH[1],}" ]]; then
       path="/mnt/${BASH_REMATCH[1],}${path:2}"
@@ -518,7 +581,7 @@ function windows::addToPath() {
   \$pathToAdd = '${pathToAdd//\'/\'\'}';
   \$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true);
   \$oldPath = \$key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
-  if (\$currentPath -notlike \"*\$pathToAdd*\") {
+  if (! \$oldPath.Contains(\$pathToAdd)) {
       \$newPath = '{0}{1}{2}' -f \$oldPath, [IO.Path]::PathSeparator, \$pathToAdd;
       \$key.SetValue('Path', \$newPath, 'ExpandString');
   };

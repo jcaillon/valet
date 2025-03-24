@@ -29,6 +29,14 @@ Returned variables:
 RETURNED_VALUE='C:\data\file'
 ```
 
+❯ `windows::convertPathFromUnix C:\\Users\\username`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='C:\Users\username'
+```
+
 ### ✅ Testing windows::convertPathToUnix
 
 ❯ `windows::convertPathToUnix C:\\Users\\username`
@@ -45,6 +53,14 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='/d/data/file'
+```
+
+❯ `windows::convertPathToUnix /c/Users/username`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='/c/Users/username'
 ```
 
 ### ✅ Testing windows::setEnvVar
@@ -154,7 +170,7 @@ RETURNED_VALUE='/d/data/file'
   `$pathToAdd = 'C:\Users\TEMP\coucou';
   `$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', `$true);
   `$oldPath = `$key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
-  if (`$currentPath -notlike `"*`$pathToAdd*`") {
+  if (! `$oldPath.Contains(`$pathToAdd)) {
       `$newPath = '{0}{1}{2}' -f `$oldPath, [IO.Path]::PathSeparator, `$pathToAdd;
       `$key.SetValue('Path', `$newPath, 'ExpandString');
   };

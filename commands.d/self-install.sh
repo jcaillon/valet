@@ -122,7 +122,7 @@ fi
 function selfUpdate() {
   local unattended singleUserInstallation version installationDirectory noShim noPath noShowcase skipExtensions onlyExtensions useBranch skipExtensionsSetup
 
-  # if this script is run directly
+  # if this script is run directly, we parse the arguments manually
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
     log::debug "Parsing arguments manually (basic parsing only): ⌜${*}⌝."
     # parse arguments manually (basic parsing only)

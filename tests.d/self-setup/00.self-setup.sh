@@ -5,6 +5,8 @@ command::sourceFunction "selfSetup"
 function main() {
   test::title "✅ Testing self setup command"
 
+  export OSTYPE="linux"
+
   VALET_CONFIG_FILE="${GLOBAL_TEST_TEMP_FILE}"
 
   test::exec rm -f "\"\${VALET_CONFIG_FILE}\""
@@ -23,6 +25,17 @@ function main() {
   test::flush
   test::printVars VALET_CONFIG_ENABLE_COLORS VALET_CONFIG_ENABLE_NERDFONT_ICONS
   test::exec fs::head "${VALET_CONFIG_FILE}" 3
+
+  export OSTYPE="msys"
+
+  echo "→ echo yyy | selfSetup"
+  echo yyy 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
+  selfSetup <"${GLOBAL_TEMPORARY_WORK_FILE}"
+  test::flush
+}
+
+function powershell() {
+  echo "🙈 mocking powershell";
 }
 
 main
