@@ -658,3 +658,34 @@ function fs::getScriptDirectory() {
   fs::toAbsolutePath "${scriptDirectory}"
   RETURNED_VALUE="${scriptDirectory}"
 }
+
+# ## fs::getCommandPath
+#
+# Get the absolute path of a command.
+#
+# - $1: **command** _as string_:
+#       the command to find
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: The absolute path of the command (or empty if command not found).
+#
+# ```bash
+# fs::getCommandPath "command"
+# echo "${RETURNED_VALUE}"
+# ```
+function fs::getCommandPath() {
+  local command="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if [[ -v BASH_CMDS && -n ${BASH_CMDS[${command}]:-} ]]; then
+    fs::toAbsolutePath "${BASH_CMDS[${command}]}"
+    return 0
+  fi
+
+  local IFS=' '
+  RETURNED_VALUE=""
+  if command -v "${command}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
+    IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+    RETURNED_VALUE="${RETURNED_VALUE%[[:space:]]}"
+    fs::toAbsolutePath "${RETURNED_VALUE}"
+  fi
+}

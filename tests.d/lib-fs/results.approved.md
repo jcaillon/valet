@@ -2,6 +2,24 @@
 
 ## Test script 00.tests
 
+### ✅ Testing fs::getCommandPath
+
+❯ `fs::getCommandPath script.sh`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/script.sh'
+```
+
+❯ `fs::getCommandPath script2`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/script2.sh'
+```
+
 ### ✅ Testing fs::getScriptDirectory
 
 ❯ `fs::getScriptDirectory`

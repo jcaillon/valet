@@ -4,6 +4,7 @@
 source fs
 
 function main() {
+  test_fs::getCommandPath
   test_fs::getScriptDirectory
   test_fs::writeToFile
   test_fs::createTemp
@@ -17,6 +18,18 @@ function main() {
   test_fs::createLink
   test_fs::head
   test_fs::tail
+}
+
+function test_fs::getCommandPath() {
+  test::title "✅ Testing fs::getCommandPath"
+
+  local oldPath="${PATH}"
+  PATH="${PWD}/resources:${PATH}"
+  test::func fs::getCommandPath script.sh
+  PATH="${oldPath}"
+
+  hash -p resources/script2.sh script2
+  test::func fs::getCommandPath script2
 }
 
 function test_fs::getScriptDirectory() {
