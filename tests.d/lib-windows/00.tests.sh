@@ -54,6 +54,8 @@ function test_windows::addToPath() {
   test::title "✅ Testing windows::addToPath"
 
   test::exec windows::addToPath /coucou
+
+  test::exec windows::addToPath /coucou true
 }
 
 function test_windows::createLink() {

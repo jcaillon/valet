@@ -2,6 +2,11 @@
 
 command::sourceFunction "selfSetup"
 
+# shellcheck source=../../libraries.d/lib-windows
+source windows
+# shellcheck source=../../libraries.d/lib-fs
+source fs
+
 function main() {
   test::title "✅ Testing self setup command"
 
@@ -27,6 +32,7 @@ function main() {
   test::exec fs::head "${VALET_CONFIG_FILE}" 3
 
   export OSTYPE="msys"
+  log::setLevel warning
 
   echo "→ echo yyy | selfSetup"
   echo yyy 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
@@ -34,8 +40,8 @@ function main() {
   test::flush
 }
 
-function powershell() {
-  echo "🙈 mocking powershell";
+function windows::runPs1() {
+  echo "🙈 mocking windows::runPs1";
 }
 
 main

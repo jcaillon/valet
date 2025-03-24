@@ -140,7 +140,7 @@ function windows::runPs1() {
   local stderr="${RETURNED_VALUE//$'\r'/}"
   stderr="${stderr//$'\r'/}"
 
-  if [[ ${exitCode} -ne 0 && ${silent} == false && ${#stderr} -gt 0 ]]; then
+  if [[ ${exitCode} -ne 0 && ${silent} != "true" && ${#stderr} -gt 0 ]]; then
     log::error "PowerShell command failed with the following error:"
     log::errorTrace "${stderr}"
   fi
@@ -559,6 +559,10 @@ function windows::getEnvVar() {
 # - $1: **path** _as string_:
 #       the path to add to the PATH environment variable.
 #       The path can be in unix format, it will be converted to windows format.
+# - $2: preprend _as bool_:
+#       (optional) Can be set using the variable `_OPTION_PREPEND`.
+#       True to prepend the path to the PATH, false to append it.
+#       (defaults to false)
 #
 # ```bash
 # windows::addToPath "/path/to/bin"
@@ -567,6 +571,7 @@ function windows::getEnvVar() {
 # > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 function windows::addToPath() {
   local pathToAdd="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local prepend="${2:-${_OPTION_PREPEND:-false}}"
 
   log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
 
@@ -577,12 +582,18 @@ function windows::addToPath() {
   windows::convertPathFromUnix "${pathToAdd}"
   pathToAdd="${RETURNED_VALUE}"
 
+  if [[ ${prepend} == "true" ]]; then
+    local setNewPathStatement="\$newPath = '{0}{1}{2}' -f \$pathToAdd, [IO.Path]::PathSeparator, \$oldPath;"
+  else
+    local setNewPathStatement="\$newPath = '{0}{1}{2}' -f \$oldPath, [IO.Path]::PathSeparator, \$pathToAdd;"
+  fi
+
   local script="
   \$pathToAdd = '${pathToAdd//\'/\'\'}';
   \$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', \$true);
   \$oldPath = \$key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
   if (! \$oldPath.Contains(\$pathToAdd)) {
-      \$newPath = '{0}{1}{2}' -f \$oldPath, [IO.Path]::PathSeparator, \$pathToAdd;
+      ${setNewPathStatement}
       \$key.SetValue('Path', \$newPath, 'ExpandString');
   };
   \$key.Dispose();

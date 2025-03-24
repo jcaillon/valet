@@ -187,6 +187,41 @@ RETURNED_VALUE='/c/Users/username'
   
 ```
 
+❯ `windows::addToPath /coucou true`
+
+**Standard output**:
+
+```text
+🙈 mocking powershell: -NoProfile -NonInteractive -Command 
+  $ErrorActionPreference = 'Stop';
+  $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
+  $processInfo.FileName = "powershell.exe";
+  $processInfo.Verb = "runas";
+  $processInfo.RedirectStandardError = $true;
+  $processInfo.RedirectStandardOutput = $true;
+  $processInfo.UseShellExecute = $false;
+  $processInfo.CreateNoWindow = $true;
+  $processInfo.Arguments = @("-NoProfile","-NonInteractive","-Command","`$ErrorActionPreference = 'Stop'; 
+  `$pathToAdd = 'C:\Users\TEMP\coucou';
+  `$key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', `$true);
+  `$oldPath = `$key.GetValue('Path', '', 'DoNotExpandEnvironmentNames').TrimEnd([IO.Path]::PathSeparator);
+  if (! `$oldPath.Contains(`$pathToAdd)) {
+      `$newPath = '{0}{1}{2}' -f `$pathToAdd, [IO.Path]::PathSeparator, `$oldPath;
+      `$key.SetValue('Path', `$newPath, 'ExpandString');
+  };
+  `$key.Dispose();
+  ; exit `$LASTEXITCODE;")
+  $p = New-Object System.Diagnostics.Process;
+  $p.StartInfo = $processInfo;
+  $p.Start() | Out-Null;
+  $stdout = $p.StandardOutput.ReadToEnd();
+  $stderr = $p.StandardError.ReadToEnd();
+  $p.WaitForExit();
+  $stdout | Out-File -FilePath 'tmp' -Encoding utf8;
+  exit $p.ExitCode;
+  
+```
+
 ### ✅ Testing windows::createLink
 
 ❯ `windows::createLink resources/gitignored/file resources/gitignored/try/file2 true`
