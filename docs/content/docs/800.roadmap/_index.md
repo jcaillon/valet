@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- Ajouter un dump des variables denv et stack trace au moment d'un exit non prévu, utiliser log save file
 - Use a VALET_CONFIG_VERBOSE_LOG_PATTERN as default when -v/-w is used. Add the patterns: <sourceFile>, <elapsedTime>, <elapsedTimeSinceLastLog>
 - coproc: make sure we see any issue happening in the background
 - in performance tip, document the use of -n

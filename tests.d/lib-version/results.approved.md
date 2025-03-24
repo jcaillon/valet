@@ -59,7 +59,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-ERROR    Failed to compare versions ⌜1.2a.3⌝ and ⌜1.2.3derp⌝ because they are not valid semantic versions.
+FAIL     Failed to compare versions ⌜1.2a.3⌝ and ⌜1.2.3derp⌝ because they are not valid semantic versions.
 ```
 
 ### ✅ Testing version::bump
@@ -119,6 +119,6 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-ERROR    Failed to bump the version ⌜aze⌝ because it is not valid semantic version.
+FAIL     Failed to bump the version ⌜aze⌝ because it is not valid semantic version.
 ```
 

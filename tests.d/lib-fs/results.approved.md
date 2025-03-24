@@ -235,7 +235,7 @@ Exited with code: `1`
 
 ```text
 mkdir: cannot create directory '$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1': File exists
-ERROR    Failed to create the directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1⌝.
+FAIL     Failed to create the directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1⌝.
 ```
 
 ❯ `fs::createDirectoryIfNeeded resources/gitignored/derp`

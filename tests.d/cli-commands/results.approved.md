@@ -11,7 +11,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-ERROR    Expecting 1 argument(s), got extra argument ⌜nonNeededArg1⌝.
+FAIL     Expecting 1 argument(s), got extra argument ⌜nonNeededArg1⌝.
 Unknown option letter ⌜d⌝ in group ⌜-derp⌝. Valid single letter options are: ⌜h⌝.
 Unknown option letter ⌜e⌝ in group ⌜-derp⌝. Valid single letter options are: ⌜h⌝.
 Unknown option letter ⌜r⌝ in group ⌜-derp⌝. Valid single letter options are: ⌜h⌝.
@@ -88,7 +88,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-ERROR    Unknown option ⌜--unknown⌝, valid options are:
+FAIL     Unknown option ⌜--unknown⌝, valid options are:
 -h --help
 Use ⌜valet self --help⌝ to get help.
 ```

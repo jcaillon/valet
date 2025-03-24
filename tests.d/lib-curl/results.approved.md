@@ -37,7 +37,7 @@ TRACE    Curl error output stream:
 ⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--curl-stderr⌝
    1 ░ (curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 500 https://fuu
    2 ░ 
-ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝.
+FAIL     The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝.
 ```
 
 Getting a 500 error with fail mode off:
@@ -132,7 +132,7 @@ TRACE    Curl error output stream:
 ⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--curl-stderr⌝
    1 ░ (curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 500 https://fuu
    2 ░ 
-ERROR    The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝.
+FAIL     The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝.
 ```
 
 Getting 200 with no content and debug mode on:

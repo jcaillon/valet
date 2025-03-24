@@ -287,7 +287,7 @@ function selfTest_runSingleTestSuites() {
       _TEST_SUITE_NAMES+=("${testDirectory##*/}")
       _OPTION_PATH_ONLY=true fs::createTempFile
       _TEST_SUITE_OUTPUT_FILES+=("${RETURNED_VALUE}")
-      _TEST_SUITE_COMMANDS+=("VALET_CONFIG_LOG_FD='${RETURNED_VALUE}'; log::init; selfTest_runSingleTestSuite '${testDirectory}'")
+      _TEST_SUITE_COMMANDS+=("VALET_CONFIG_LOG_FD=2; log::init; selfTest_runSingleTestSuite '${testDirectory}' 2>'${RETURNED_VALUE}'")
     done
 
     bash::runInParallel _TEST_SUITE_NAMES _TEST_SUITE_COMMANDS "${_TEST_NB_PARALLEL_TEST_SUITES}" selfTest_parallelCallback

@@ -81,7 +81,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-ERROR    Cannot source the file ⌜NOPNOP⌝ because it does not exist.
+FAIL     Cannot source the file ⌜NOPNOP⌝ because it does not exist.
 ```
 
 ```text

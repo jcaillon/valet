@@ -411,7 +411,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-ERROR    Could not find an exact command for ⌜se⌝, use ⌜--help⌝ to get a list of valid commands.
+FAIL     Could not find an exact command for ⌜se⌝, use ⌜--help⌝ to get a list of valid commands.
 ```
 
 Fuzzy match with ambiguous result:
@@ -423,7 +423,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-ERROR    Found multiple matches for the command ⌜sf⌝, please be more specific:
+FAIL     Found multiple matches for the command ⌜sf⌝, please be more specific:
 [95ms[0mel[95mf[0m add-command
 [95ms[0mel[95mf[0m add-library
 [95ms[0mel[95mf[0m build

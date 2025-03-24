@@ -27,10 +27,10 @@ Returned code: `1`
 
 ```text
 /tmp/valet.valet.d/config: line 1: 1/0: division by 0 (error token is "0")
-ERROR    Error code 1 in source(), stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
+CMDERR   A command had a return code of ⌜1⌝.
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
 EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad startup
@@ -43,10 +43,10 @@ Returned code: `1`
 
 ```text
 /tmp/valet.valet.d/startup: line 1: 1/0: division by 0 (error token is "0")
-ERROR    Error code 1 in source(), stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
+CMDERR   A command had a return code of ⌜1⌝.
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
 EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad .env
@@ -59,10 +59,10 @@ Returned code: `1`
 
 ```text
 .env: line 1: 1/0: division by 0 (error token is "0")
-ERROR    Error code 1 in source(), stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
+CMDERR   A command had a return code of ⌜1⌝.
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
 EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 893: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad commands
@@ -75,8 +75,8 @@ Returned code: `1`
 
 ```text
 /tmp/valet.d/d3-2/commands: line 1: 1/0: division by 0 (error token is "0")
-ERROR    Error code 1 in core::sourceUserCommands(), stack:
-├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:1942
+CMDERR   A command had a return code of ⌜1⌝.
+├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:1952
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:131
 ╰─ in main() at valet:100
 TRACE    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.
@@ -95,7 +95,7 @@ Returned code: `1`
 INFO     The commands index does not exist ⌜/tmp/valet.d/d3-2/commands⌝.
 Now silently building it using ⌜valet self build⌝ command.
 WARNING  Entering interactive mode for the function ⌜selfMock1⌝. This is not yet implemented.
-ERROR    Expecting ⌜1⌝ argument(s) but got ⌜0⌝.
+FAIL     Expecting ⌜1⌝ argument(s) but got ⌜0⌝.
 Use ⌜valet self mock1 --help⌝ to get help.
 
 Usage:
@@ -114,7 +114,7 @@ Returned code: `1`
 
 ```text
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
-ERROR    Error code 1 in selfMock1(), stack:
+CMDERR   A command had a return code of ⌜1⌝.
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:54
 ├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:525
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:375
@@ -148,7 +148,7 @@ Returned code: `1`
 **Error output**:
 
 ```text
-ERROR    This is for testing valet core functions, failing now.
+FAIL     This is for testing valet core functions, failing now.
 ```
 
 ### ✅ Testing the core::failWithCode function
@@ -160,7 +160,7 @@ Returned code: `255`
 **Error output**:
 
 ```text
-ERROR    This is for testing valet core functions, failing now with exit code 255.
+FAIL     This is for testing valet core functions, failing now with exit code 255.
 ```
 
 ### ✅ Testing the unknown command handler
@@ -173,9 +173,13 @@ Returned code: `1`
 
 ```text
 WARNING  This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle.
-ERROR    Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
+CMDMISS  Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
-ERROR    Error code 1 in selfMock1(), stack:
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:72
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:525
+├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:375
+╰─ in main() at valet:105
+CMDERR   A command had a return code of ⌜1⌝.
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:72
 ├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:525
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:375

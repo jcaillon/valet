@@ -32,7 +32,7 @@ function trap::onErrorInternal() {
     return 0
   fi
   if [[ -n ${FUNCNAME[1]:-} ]]; then
-    log::error "Error code ${1} in ${FUNCNAME[1]:-}(), stack:"
+    log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDERR" "A command had a return code of ⌜${1}⌝."
     log::printCallStack 2
   else
     log::error "Error code ${1} in the main program."
@@ -153,14 +153,18 @@ function trap::onCleanUpInternal() {
 # Function to handle commands not found, so we can display a better message.
 # The name of this function is a bash convention.
 function command_not_found_handle() {
+  local errorMessage
   if [[ ${1:-} == "curl" ]]; then
-    core::fail "This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
+    errorMessage="This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
   fi
   # if the command contains :: it is one of our function, we can suggest to source the 'package'
   if [[ ${1} == *::* ]]; then
-    core::fail "Command not found: ⌜${1}⌝."$'\n'"Did you forget to source the package? ⌜source ${1%%::*}⌝"
+    errorMessage="Command not found: ⌜${1}⌝."$'\n'"Did you forget to source the package? ⌜source ${1%%::*}⌝"
   fi
-  core::fail "Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
+  errorMessage="Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
+  log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
+  log::printCallStack 2
+  exit 1
 }
 
 # ## trap::register (private)
@@ -1736,7 +1740,10 @@ function time::getProgramElapsedMicroseconds() {
 # core::fail "This is an error message."
 # ```
 function core::fail() {
-  log::error "$@"
+  log::print "ERROR" "${STYLE_ICON_ERROR:-}" "FAIL" "$@"
+  if log::isDebugEnabled; then
+    log::printCallStack 2
+  fi
   # shellcheck disable=SC2034
   GLOBAL_ERROR_DISPLAYED=1
   exit 1
@@ -1757,7 +1764,10 @@ function core::fail() {
 function core::failWithCode() {
   local exitCode="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift
-  log::error "$@"
+  log::print "ERROR" "${STYLE_ICON_ERROR:-}" "FAIL" "$@"
+  if log::isDebugEnabled; then
+    log::printCallStack 2
+  fi
   # shellcheck disable=SC2034
   GLOBAL_ERROR_DISPLAYED=1
   exit "${exitCode}"

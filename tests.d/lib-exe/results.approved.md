@@ -67,7 +67,7 @@ TRACE    Fake standard error stream:
 ⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr⌝
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜4.000s⌝.
+FAIL     The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜4.000s⌝.
 ```
 
 Make error 1 acceptable:
@@ -184,7 +184,7 @@ TRACE    Fake standard error stream:
 ⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr⌝
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜16.000s⌝.
+FAIL     The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜16.000s⌝.
 ```
 
 ❯ `exe::invokef2 false fake --option argument1 argument2`
@@ -226,7 +226,7 @@ TRACE    Fake standard error stream:
 ⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr⌝
    1 ░ INFO: log line from fake mock
    2 ░ ERROR: returning error from fake
-ERROR    The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜20.000s⌝.
+FAIL     The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜20.000s⌝.
 ```
 
 ❯ `exe::invoke fake --option argument1 argument2`

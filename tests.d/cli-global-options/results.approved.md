@@ -11,7 +11,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-ERROR    Unknown option ⌜--logging-leeeevel⌝, valid options are:
+FAIL     Unknown option ⌜--logging-leeeevel⌝, valid options are:
 -x --profiling
 -l --log-level --log
 -v --verbose
@@ -32,7 +32,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-ERROR    Unknown option letter ⌜p⌝ in group ⌜-p⌝. Valid single letter options are: ⌜x⌝, ⌜l⌝, ⌜v⌝, ⌜w⌝, ⌜i⌝, ⌜h⌝.
+FAIL     Unknown option letter ⌜p⌝ in group ⌜-p⌝. Valid single letter options are: ⌜x⌝, ⌜l⌝, ⌜v⌝, ⌜w⌝, ⌜i⌝, ⌜h⌝.
 ```
 
 ### ✅ Testing option --version corrected with fuzzy match
