@@ -85,6 +85,20 @@ DEBUG    Exiting with code 0 after 0s.
 DEBUG    Deleting temporary files.
 ```
 
+### ✅ Logging with -a option
+
+❯ `valet -a self mock1 logging-level`
+
+**Error output**:
+
+```text
+| TRACE    This is an error trace message which is always displayed.
+| INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+| SUCCESS  This is a success message.
+| WARNING  This is a warning message.
+With a second line.
+```
+
 ### ✅ Testing that we can change the log display options
 
 ❯ `VALET_CONFIG_LOG_COLUMNS=40 VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_ENABLE_NERDFONT_ICONS=true VALET_CONFIG_LOG_DISABLE_WRAP=false VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=false valet self mock1 logging-level`

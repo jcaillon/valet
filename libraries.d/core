@@ -976,6 +976,18 @@ function log::getCallStack() {
   RETURNED_VALUE="${returnedString}"
 }
 
+# ## log_setPrintfArgumentFromFormat (private)
+#
+# Set the variable printfArgument from the format specifier.
+function log_setPrintfArgumentFromFormat() {
+  formatSpecifier="${formatSpecifier#-}"
+  if [[ ${formatSpecifier} == "s" ]]; then
+    printfArgument="\${${1}}"
+  else
+    printfArgument="\${${1}:\${#${1}} - ${formatSpecifier%s} > 0 ? \${#${1}} - ${formatSpecifier%s} : 0}"
+  fi
+}
+
 # ## log::parseLogPattern (private)
 #
 # Parse the log pattern and set variables that will be used to print the logs.
@@ -998,6 +1010,10 @@ function log::getCallStack() {
 # - `<source>`: The source of the function that logged the message.
 # - `<varXXX>`: The value of an arbitrary variable `XXX`.
 # - `<message>`: The log message (should be the last placeholder).
+# - `<sourceFile>`: The file name of the source of the function that logged the message.
+# - `<wrapPadding>`: The padding (spaces) used for wrapping the log message.
+# - `<elapsedTime>`: The time elapsed since the start of the script.
+# - `<elapsedTimeSinceLastLog>`: The time elapsed since the last log.
 #
 # Each placeholder can be fallowed by `{...}` to add the format specifier (see printf help).
 #
@@ -1006,6 +1022,7 @@ function log::getCallStack() {
 # - ${RETURNED_VALUE}: The format string to use in a printf statement.
 # - ${RETURNED_VALUE2}: The arguments (as a string space separated) to use in the printf statement.
 # - ${RETURNED_VALUE3}: The length of the displayed log before the message.
+# - ${RETURNED_VALUE4}: Extra code to compute variables that will be used to print the logs.
 #
 # ```bash
 # log::parseLogPattern "<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>"
@@ -1016,6 +1033,8 @@ function log::parseLogPattern() {
 
   RETURNED_VALUE="" # format
   RETURNED_VALUE2="" # arguments
+  RETURNED_VALUE3=0 # wrap padding length
+  RETURNED_VALUE4="" # code
   local -i wrapPaddingLength=0
 
   local normalString placeHolder formatSpecifier normalStringVisibleCharacters formatLengthTest printfFormat printfArgument
@@ -1037,7 +1056,7 @@ function log::parseLogPattern() {
       normalStringVisibleCharacters="${normalString//$'\e['[0-9][0-9]m/}"
       normalStringVisibleCharacters="${normalStringVisibleCharacters//$'\e['[0-9]m/}"
       RETURNED_VALUE+="%s"
-      RETURNED_VALUE2+="\"${normalString}\" "
+      RETURNED_VALUE2+="\"${normalString//\"/\\\"}\" "
       wrapPaddingLength+=${#normalStringVisibleCharacters}
 
       if [[ ${normalString} == *$'\n'* ]]; then
@@ -1093,24 +1112,48 @@ function log::parseLogPattern() {
       function)
         formatSpecifier="${formatSpecifier:-"-10s"}"
         printfFormat="%${formatSpecifier}"
-        formatSpecifier="${formatSpecifier#-}"
-        printfArgument="\${FUNCNAME[2]:\${#FUNCNAME[2]} - ${formatSpecifier%s} > 0 ? \${#FUNCNAME[2]} - ${formatSpecifier%s} : 0}"
+        log_setPrintfArgumentFromFormat "FUNCNAME[2]"
         ;;
       line)
         formatSpecifier="${formatSpecifier:-"-4s"}"
         printfFormat="%${formatSpecifier}"
-        formatSpecifier="${formatSpecifier#-}"
-        printfArgument="\${BASH_LINENO[1]:\${#BASH_LINENO[1]} - ${formatSpecifier%s} > 0 ? \${#BASH_LINENO[1]} - ${formatSpecifier%s} : 0}"
+        log_setPrintfArgumentFromFormat "BASH_LINENO[1]"
         ;;
       source)
         formatSpecifier="${formatSpecifier:-"-10s"}"
         printfFormat="%${formatSpecifier}"
-        formatSpecifier="${formatSpecifier#-}"
-        printfArgument="\${BASH_SOURCE[2]:\${#BASH_SOURCE[2]} - ${formatSpecifier%s} > 0 ? \${#BASH_SOURCE[2]} - ${formatSpecifier%s} : 0}"
+        log_setPrintfArgumentFromFormat "BASH_SOURCE[2]"
+        ;;
+      sourceFile)
+        formatSpecifier="${formatSpecifier:-"-10s"}"
+        printfFormat="%${formatSpecifier}"
+        RETURNED_VALUE4+=$'\n'"local sourceFile=\"\${BASH_SOURCE[2]##*/}\""
+        log_setPrintfArgumentFromFormat "sourceFile"
+        ;;
+      elapsedTime)
+        printfFormat="%${formatSpecifier:-"-7s"}"
+        printfArgument="\${loggedElapsedTime}"
+        # shellcheck source=lib-time
+        source time
+        RETURNED_VALUE4+=$'\n'"time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman \"\${RETURNED_VALUE}\" \"%S.%LLs\"; local loggedElapsedTime=\"\${RETURNED_VALUE}\""
+        ;;
+      elapsedTimeSinceLastLog)
+        printfFormat="%${formatSpecifier:-"-7s"}"
+        printfArgument="\${loggedElapsedTimeSinceLastLog}"
+        # shellcheck source=lib-time
+        source time
+        RETURNED_VALUE4+=$'\n'"time::getProgramElapsedMicroseconds; local -i currentTime=\${RETURNED_VALUE}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman \"\${_LOG_ELAPSED_TIME}\" \"%S.%LLs\"; local loggedElapsedTimeSinceLastLog=\"\${RETURNED_VALUE}\"; _LOG_ELAPSED_TIME=\${currentTime}"
+        ;;
+      wrapPadding)
+        printfFormat="%s"
+        printfArgument="\${GLOBAL_LOG_WRAP_PADDING}"
         ;;
       message)
         printfFormat="%s"
         printfArgument="\${messageToPrintInLog:-}"
+
+        # shellcheck disable=SC2034
+        RETURNED_VALUE3="${wrapPaddingLength}"
         ;;
     esac
     if [[ -z ${printfFormat} ]]; then
@@ -1127,9 +1170,6 @@ function log::parseLogPattern() {
   done
 
   RETURNED_VALUE+="\n"
-
-  # shellcheck disable=SC2034
-  RETURNED_VALUE3="${wrapPaddingLength}"
 }
 
 # ## log::init (private)
@@ -1138,6 +1178,10 @@ function log::parseLogPattern() {
 # We compute them once to avoid recomputing them at each log call.
 # Indeed, each log function might have to output the same log to different file descriptors or files,
 # we don't want to repeat code and we don't want to recompute the same output logic on each function.
+#
+# - ${_OPTION_LOG_PATTERN} _as string_:
+#       (optional) If defined, the log pattern to use.
+#       (defaults to "")
 #
 # It uses the following config
 #
@@ -1169,7 +1213,8 @@ function log::init() {
     local -n printfFormat=RETURNED_VALUE
     local -n printfArguments=RETURNED_VALUE2
     local -n wrapPaddingLength=RETURNED_VALUE3
-    log::parseLogPattern "${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>"}"
+    local -n beforePrintStatementCode=RETURNED_VALUE4
+    log::parseLogPattern "${_OPTION_LOG_PATTERN:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level>  <icon><colorDefault> <message>"}}"
 
     # string with the number of spaces necessary to align with other log messages
     if (( wrapPaddingLength > 0 )); then
@@ -1183,6 +1228,9 @@ function log::init() {
     GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG=""
     GLOBAL_LOG_PRINT_STATEMENT_STANDARD=""
 
+    if (( ${#beforePrintStatementCode} > 0 )); then
+      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${beforePrintStatementCode}"$'\n'
+    fi
     if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
       # define RETURNED_VALUE/RETURNED_VALUE2 as local so we don't impact the parent scope (they are used during parsing)
       GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local RETURNED_VALUE RETURNED_VALUE2"$'\n'"local -n messageToPrintInLog=RETURNED_VALUE"$'\n'"string::wrapWords \"\${messageVariableName}\" ${GLOBAL_LOG_COLUMNS} \"${GLOBAL_LOG_WRAP_PADDING}\" $((GLOBAL_LOG_COLUMNS - wrapPaddingLength))"$'\n'

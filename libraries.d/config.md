@@ -210,10 +210,25 @@ You can use the following placeholders:
 - `<source>`: The source of the function that logged the message.
 - `<varXXX>`: The value of an arbitrary variable `XXX`.
 - `<message>`: The log message (should be the last placeholder).
+- `<sourceFile>`: The file name of the source of the function that logged the message.
+- `<wrapPadding>`: The padding (spaces) used for wrapping the log message.
+- `<elapsedTime>`: The time elapsed since the start of the script.
+- `<elapsedTimeSinceLastLog>`: The time elapsed since the last log.
 
 Each placeholder can be followed by `{...}` to add the format specifier (see printf help).
 
-<!-- TODO: provide more example: output as JSON, output for more detailed -->
+Examples:
+
+- Java like logs: `"<colorFaded><time>{(%H:%M:%S)T} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <levelColor><level><colorDefault> <colorFaded><sourceFile>{10s}:<line>{-4s}<colorDefault> -- <message>"`
+- JSON output: `'{"level": "<level>{s}", "message": "<message>{s}", "source": "<source>{s}", "line": "<line>{s}"}'`
+- Boxed messages: `"<colorFaded>╭─<time>{(%H:%M:%S)T}──<levelColor><level>{7s}<colorFaded>────────<sourceFile>{10s}:<line>{-4s}───░<colorDefault>"$'\n'"<colorFaded>│<colorDefault>  <message>"$'\n'"<colorFaded>╰─ +<elapsedTimeSinceLastLog>{7s}──────────────────────────────────░<colorDefault>"$'\n'`
+- Subtitles message: `"<levelColor><level><colorDefault> <message>"$'\n'"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) | pid <pid>{5s} | shlvl <subshell>{-1s} | from <sourceFile>{10s}:<line>{-4s}<colorDefault>"`
+
+#### VALET_CONFIG_LOG_PATTERN_ALTERNATIVE
+
+The pattern to display a log line when the alternative log mode is used (global option `-a`).
+
+Defaults to: `"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <levelColor><level>{7s}<colorDefault> <colorFaded><sourceFile>{15s}:<line>{-4s}<colorDefault> <message>"`
 
 #### VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL
 
@@ -258,7 +273,7 @@ The default is equivalent to setting this string to: `printf -v logFile '%s%(%FT
 #### VALET_CONFIG_COMMAND_PROFILING_FILE
 
 The path to the file in which to write the profiling information for the command.
-Defaults to the ~/valet-profiler-{PID}-command.txt file.
+Defaults to a new file under ~/.local/state/valet/logs.
 
 #### VALET_CONFIG_KEEP_ALL_PROFILER_LINES
 

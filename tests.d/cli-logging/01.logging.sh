@@ -30,6 +30,11 @@ function test_logLevelOptions() {
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" -w self mock1 logging-level
 
 
+  test::title "✅ Logging with -a option"
+  export VALET_CONFIG_LOG_PATTERN_ALTERNATIVE='| <level> <message>'
+  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" -a self mock1 logging-level
+  unset -v VALET_CONFIG_LOG_PATTERN_ALTERNATIVE
+
   unset -f test::transformTextBeforeFlushing
 }
 

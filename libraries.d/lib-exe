@@ -83,7 +83,8 @@ function exe::invokef5() {
     log::debug "Executing the command ⌜${executable}⌝ (no arguments)."
   fi
 
-  time::startTimer
+  time::getProgramElapsedMicroseconds
+  local timerStart="${RETURNED_VALUE}"
 
   # execute the executable
   local -i exitCode=0
@@ -109,8 +110,9 @@ function exe::invokef5() {
     fi
   fi
 
-  time::getTimerMicroseconds
-  time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"
+  time::getProgramElapsedMicroseconds
+  local -i elapsed=$((RETURNED_VALUE - timerStart))
+  time::convertMicrosecondsToHuman "${elapsed}" "%S.%LLs"
   local debugMessage="The command ⌜${executable}⌝ ended with exit code ⌜${exitCode}⌝ in ⌜${RETURNED_VALUE}⌝."
 
   # if the error code is acceptable, then we set it to 0

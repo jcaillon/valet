@@ -91,7 +91,7 @@ GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messag
 
 printf "%s\n" "abc"  1>&5'
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>&5'
-GLOBAL_LOG_WRAP_PADDING='   '
+GLOBAL_LOG_WRAP_PADDING=''
 ```
 
 ### ✅ Testing log::parseLogPattern
@@ -103,7 +103,8 @@ Returned variables:
 ```text
 RETURNED_VALUE='%s\n'
 RETURNED_VALUE2='"static string" '
-RETURNED_VALUE3='13'
+RETURNED_VALUE3='0'
+RETURNED_VALUE4=''
 ```
 
 ❯ `log::parseLogPattern $'static\nstring'`
@@ -114,7 +115,8 @@ Returned variables:
 RETURNED_VALUE='%s\n'
 RETURNED_VALUE2='"static
 string" '
-RETURNED_VALUE3='6'
+RETURNED_VALUE3='0'
+RETURNED_VALUE4=''
 ```
 
 ❯ `log::parseLogPattern $'static\n<message>'`
@@ -126,6 +128,7 @@ RETURNED_VALUE='%s%s\n'
 RETURNED_VALUE2='"static
 " "${messageToPrintInLog:-}" '
 RETURNED_VALUE3='0'
+RETURNED_VALUE4=''
 ```
 
 ❯ `log::parseLogPattern \<colorFaded\>\<time\>\<colorDefault\>\ \<levelColor\>\<level\>\ \<icon\>\<colorDefault\>\ PID=\<pid\>\ SHLVL=\<subshell\>\ \<function\>\{8s\}@\<source\>:\<line\>\ \<message\>`
@@ -136,6 +139,7 @@ Returned variables:
 RETURNED_VALUE='%(%H:%M:%S)T%s%s%-8s%s%s%-5d%s%-2d%s%8s%s%-10s%s%-4s%s%s\n'
 RETURNED_VALUE2='"${EPOCHSECONDS}" " " "${levelColor:-}" "${level:-}" " " " PID=" "${BASHPID}" " SHLVL=" "${BASH_SUBSHELL}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 8 > 0 ? ${#FUNCNAME[2]} - 8 : 0}" "@" "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 10 > 0 ? ${#BASH_SOURCE[2]} - 10 : 0}" ":" "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 4 > 0 ? ${#BASH_LINENO[1]} - 4 : 0}" " " "${messageToPrintInLog:-}" '
 RETURNED_VALUE3='63'
+RETURNED_VALUE4=''
 ```
 
 ❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=true log::parseLogPattern \<icon\>\ \<message\>`
@@ -146,6 +150,7 @@ Returned variables:
 RETURNED_VALUE='%-4s%s%s\n'
 RETURNED_VALUE2='"${icon:-}" " " "${messageToPrintInLog:-}" '
 RETURNED_VALUE3='3'
+RETURNED_VALUE4=''
 ```
 
 ❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=false log::parseLogPattern \<icon\>\ \<message\>`
@@ -156,6 +161,7 @@ Returned variables:
 RETURNED_VALUE='%s%s\n'
 RETURNED_VALUE2='" " "${messageToPrintInLog:-}" '
 RETURNED_VALUE3='1'
+RETURNED_VALUE4=''
 ```
 
 ❯ `log::parseLogPattern \<colorFaded\>\{9s\}\ \<time\>\{\(%FT%H:%M:%S%z\)T\}\ \<levelColor\>\{9s\}\ \<level\>\{9s\}\ \<icon\>\{9s\}\ \<varCOLOR_DEBUG\>\{9s\}\ \<pid\>\{9s\}\ \<subshell\>\{9s\}\ \<function\>\{9s\}\ \<source\>\{9s\}\ \<line\>\{9s\}`
@@ -165,7 +171,34 @@ Returned variables:
 ```text
 RETURNED_VALUE='%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%s%9s%s%9s%s%9s%s%9s%s%9s%s%9s\n'
 RETURNED_VALUE2='" " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:-}" " " " " "${COLOR_DEBUG:-}" " " "${BASHPID}" " " "${BASH_SUBSHELL}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 9 > 0 ? ${#FUNCNAME[2]} - 9 : 0}" " " "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 9 > 0 ? ${#BASH_SOURCE[2]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
-RETURNED_VALUE3='97'
+RETURNED_VALUE3='0'
+RETURNED_VALUE4=''
+```
+
+❯ `log::parseLogPattern $'<levelColor><level><colorDefault> <message>\n<wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>'`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%-8s%s%s%s%s%s%-7s%s%-7s%s%-10s%s\n'
+RETURNED_VALUE2='"${levelColor:-}" "${level:-}" " " "${messageToPrintInLog:-}" "
+" "${GLOBAL_LOG_WRAP_PADDING}" "[" "${loggedElapsedTime}" "] [" "${loggedElapsedTimeSinceLastLog}" "] in [" "${sourceFile:${#sourceFile} - 10 > 0 ? ${#sourceFile} - 10 : 0}" "]" '
+RETURNED_VALUE3='9'
+RETURNED_VALUE4='
+time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"; local loggedElapsedTime="${RETURNED_VALUE}"
+time::getProgramElapsedMicroseconds; local -i currentTime=${RETURNED_VALUE}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${RETURNED_VALUE}"; _LOG_ELAPSED_TIME=${currentTime}
+local sourceFile="${BASH_SOURCE[2]##*/}"'
+```
+
+❯ `log::parseLogPattern "${pat}"`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%s%s%s%s%s%s%s%s\n'
+RETURNED_VALUE2='"{\"level\": \"" "${level:-}" "\", \"message\": \"" "${messageToPrintInLog:-}" "\", \"source\": \"" "${BASH_SOURCE[2]}" "\", \"line\": \"" "${BASH_LINENO[1]}" "\"}" '
+RETURNED_VALUE3='26'
+RETURNED_VALUE4=''
 ```
 
 ### ✅ Testing with no formatting

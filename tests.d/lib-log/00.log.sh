@@ -90,6 +90,12 @@ function test_log::parseLogPattern() {
   test::func VALET_CONFIG_ENABLE_NERDFONT_ICONS=false log::parseLogPattern "<icon> <message>"
 
   test::func log::parseLogPattern "<colorFaded>{9s} <time>{(%FT%H:%M:%S%z)T} <levelColor>{9s} <level>{9s} <icon>{9s} <varCOLOR_DEBUG>{9s} <pid>{9s} <subshell>{9s} <function>{9s} <source>{9s} <line>{9s}"
+
+  test::func log::parseLogPattern "<levelColor><level><colorDefault> <message>
+<wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>"
+
+  local pat='{"level": "<level>{s}", "message": "<message>{s}", "source": "<source>{s}", "line": "<line>{s}"}'
+  test::func log::parseLogPattern '"${pat}"'
 }
 
 # shellcheck disable=SC2034

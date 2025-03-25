@@ -232,7 +232,8 @@ function progress_runAnimationInBackground() {
   # shellcheck source=lib-time
   source time
 
-  time::startTimer
+  time::getProgramElapsedMicroseconds
+  local timerStart="${RETURNED_VALUE}"
 
   local -i readDelay=$((frameDelay / 2))
   if ((readDelay < 10)); then
@@ -279,8 +280,9 @@ function progress_runAnimationInBackground() {
       displayedString="${RETURNED_VALUE}"
     fi
 
-    time::getTimerMicroseconds
-    loop=$((RETURNED_VALUE / 1000 / frameDelay))
+    time::getProgramElapsedMicroseconds
+    local -i elapsed=$((RETURNED_VALUE - timerStart))
+    loop=$((elapsed / 1000 / frameDelay))
     spinnerIndex=$(( loop % ${#spinner} ))
     printf "%-${GLOBAL_COLUMNS}s%s" "${displayedString//"<spinner>"/"${spinner:spinnerIndex:1}"}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&2
 
