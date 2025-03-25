@@ -27,10 +27,11 @@ Returned code: `1`
 
 ```text
 /tmp/valet.valet.d/config: line 1: 1/0: division by 0 (error token is "0")
-CMDERR   A command had a return code of ⌜1⌝.
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
+CMDERR   The command had a return code of ⌜1⌝:
+╭ builtin source "${GLOBAL_CONFIG_FILE}"
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
 EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad startup
@@ -43,10 +44,11 @@ Returned code: `1`
 
 ```text
 /tmp/valet.valet.d/startup: line 1: 1/0: division by 0 (error token is "0")
-CMDERR   A command had a return code of ⌜1⌝.
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
+CMDERR   The command had a return code of ⌜1⌝:
+╭ builtin source "${GLOBAL_STARTUP_FILE}"
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
 EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad .env
@@ -59,10 +61,11 @@ Returned code: `1`
 
 ```text
 .env: line 1: 1/0: division by 0 (error token is "0")
-CMDERR   A command had a return code of ⌜1⌝.
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
+CMDERR   The command had a return code of ⌜1⌝:
+╭ builtin source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
 EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad commands
@@ -75,8 +78,9 @@ Returned code: `1`
 
 ```text
 /tmp/valet.d/d3-2/commands: line 1: 1/0: division by 0 (error token is "0")
-CMDERR   A command had a return code of ⌜1⌝.
-├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:2036
+CMDERR   The command had a return code of ⌜1⌝:
+╭ builtin source "${commandsFile}"
+├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:2044
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:132
 ╰─ in main() at valet:100
 TRACE    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.
@@ -114,7 +118,8 @@ Returned code: `1`
 
 ```text
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
-CMDERR   A command had a return code of ⌜1⌝.
+CMDERR   The command had a return code of ⌜1⌝:
+╭ return 1
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:54
 ├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:529
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:376
@@ -179,7 +184,8 @@ Please check your ⌜PATH⌝ variable.
 ├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:529
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:376
 ╰─ in main() at valet:105
-CMDERR   A command had a return code of ⌜1⌝.
+CMDERR   The command had a return code of ⌜1⌝:
+╭ thisIsAnUnknownCommandForTesting
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:72
 ├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:529
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:376

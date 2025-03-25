@@ -35,20 +35,28 @@ function trap::onErrorInternal() {
     return 0
   fi
 
+  local IFS=' '
+  local errorCodes="⌜${1}⌝"
+  shift
+  if (( $# > 1 )); then
+    errorCodes+=" (pipeline statuses ⌜${*}⌝)"
+  fi
+
   if [[ ${FUNCNAME[1]:-} == "log::"* ]]; then
     # we are here if the error happened in a log function and thus we couldn't print the error
-    printf '%s\n%s\n' "A command had a return code of ⌜${1}⌝." "Error in a log function." >&2
+    printf '%s\n%s\n%s\n' "The command had a return code of ${errorCodes}." "Error in a log function:" "${BASH_COMMAND:-}" >&2
     log::getCallStack 2
     printf '%s\n' "${RETURNED_VALUE}" >&2
     GLOBAL_ERROR_DISPLAYED=1
     return 0
   fi
 
-  if [[ -n ${FUNCNAME[1]:-} ]]; then
-    log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDERR" "A command had a return code of ⌜${1}⌝."
+  if [[ -n ${FUNCNAME[1]:-} && -v BASH_COMMAND ]]; then
+    log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDERR" "The command had a return code of ${errorCodes}:"
+    log::printString "╭ ${BASH_COMMAND:-}" "│ "
     log::printCallStack 2
   else
-    log::error "Error code ${1} in the main program."
+    log::error "Error code ${errorCodes} in the main program."
   fi
 
   GLOBAL_ERROR_DISPLAYED=1
@@ -159,7 +167,7 @@ function trap::onCleanUpInternal() {
     cleanUp
   fi
 
-  # restore tty settings if needed
+  # if we were in interactive mode, we need to restore the logs
   if declare -F tui::restoreLogs &>/dev/null; then
     tui::restoreLogs
   fi
@@ -207,7 +215,7 @@ function command_not_found_handle() {
 #
 # Register the traps for the program.
 function trap::register() {
-  trap 'trap::onErrorInternal $?' ERR
+  trap 'trap::onErrorInternal $? "${PIPESTATUS[@]}"' ERR
   trap trap::onExitInternal EXIT
   # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
   trap trap::onInterruptInternal SIGINT SIGQUIT

@@ -222,7 +222,7 @@ You can also revert these bash options in your function. However, they are very 
 
 #### Notable information
 
-Valet uses the the 3rd, 4th, 5th and 6 file descriptors for various internal purposes. If you need to use file descriptors in your command, you should use the 7th, 8th or 9th file descriptors.
+Valet uses the the file descriptors 3 to 7 (in addition to stdout and stderr) for various internal purposes. If you need to use file descriptors in your command, you should use the 8+ file descriptors.
 
 #### Implementation tips
 

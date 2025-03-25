@@ -20,6 +20,16 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/script2.sh'
 ```
 
+❯ `fs::getCommandPath unknown-command1`
+
+Returned code: `1`
+
+Returned variables:
+
+```text
+RETURNED_VALUE=''
+```
+
 ### ✅ Testing fs::getScriptDirectory
 
 ❯ `fs::getScriptDirectory`

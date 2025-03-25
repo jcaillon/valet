@@ -30,6 +30,8 @@ function test_fs::getCommandPath() {
 
   hash -p resources/script2.sh script2
   test::func fs::getCommandPath script2
+
+  test::func fs::getCommandPath unknown-command1
 }
 
 function test_fs::getScriptDirectory() {
