@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
-source "libraries.d/core"
+# shellcheck disable=SC1090
+source "$(valet --source)"
 include tui
 
 tui::testWaitForKeyPress

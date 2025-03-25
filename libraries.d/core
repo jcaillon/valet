@@ -27,29 +27,50 @@ GLOBAL_CORE_INCLUDED=1
 #===============================================================
 
 # This function is called when a command or pipeline returns a non-zero exit status.
+# It is executed in the same shell as the command that failed, as if we called this function
+# at the line where the command failed.
 function trap::onErrorInternal() {
-  if [[ ${GLOBAL_ERROR_DISPLAYED:-0} == "1" ]]; then
+  trap ERR
+  if [[ -v GLOBAL_ERROR_DISPLAYED ]]; then
     return 0
   fi
+
+  if [[ ${FUNCNAME[1]:-} == "log::"* ]]; then
+    # we are here if the error happened in a log function and thus we couldn't print the error
+    printf '%s\n%s\n' "A command had a return code of ⌜${1}⌝." "Error in a log function." >&2
+    log::getCallStack 2
+    printf '%s\n' "${RETURNED_VALUE}" >&2
+    GLOBAL_ERROR_DISPLAYED=1
+    return 0
+  fi
+
   if [[ -n ${FUNCNAME[1]:-} ]]; then
     log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDERR" "A command had a return code of ⌜${1}⌝."
     log::printCallStack 2
   else
     log::error "Error code ${1} in the main program."
   fi
+
   GLOBAL_ERROR_DISPLAYED=1
 }
 
 # This function is called when the program exits (on error, on success, on exit, on interrupt).
+# It is executed in the same shell that exited, as if we called this function
+# at the line where the exit command is called.
 function trap::onExitInternal() {
   local rc=$?
+  trap EXIT
+
+  if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || ( ! -v GLOBAL_ERROR_DISPLAYED && ${rc} != "0" ) ]]; then
+    _OPTION_DUMP_SUFFIX="-${rc}" core::dump
+  fi
 
   log::debug "Exiting with code ${rc} after ${SECONDS}s."
   if declare -F onExit &>/dev/null; then
     onExit "${rc}"
   fi
 
-  if [[ ${GLOBAL_ERROR_DISPLAYED:-0} != "1" && ${rc} != "0" ]]; then
+  if [[ ! -v GLOBAL_ERROR_DISPLAYED && ${rc} != "0" ]]; then
     log::print "ERROR" "${STYLE_ICON_EXIT:-}" "EXIT" "Exiting with code ${rc}, stack:"
     log::printCallStack 2
     GLOBAL_ERROR_DISPLAYED=1
@@ -83,7 +104,8 @@ function trap::onInterruptInternal() {
     fi
   fi
   # reset the trap to not call this function again
-  trap ':' SIGINT SIGQUIT
+  trap SIGINT SIGQUIT
+  GLOBAL_ERROR_DISPLAYED=1
   exit 1
 }
 
@@ -98,7 +120,7 @@ function trap::onTerminateInternal() {
     fi
   fi
   # reset the trap to not call this function again
-  trap ':' SIGHUP SIGTERM
+  trap SIGHUP SIGTERM
   exit 1
 }
 
@@ -152,7 +174,19 @@ function trap::onCleanUpInternal() {
 
 # Function to handle commands not found, so we can display a better message.
 # The name of this function is a bash convention.
+# This is called by bash and executed in a subshell (different PID than the main program).
 function command_not_found_handle() {
+  # check for recursive call
+  if [[ -v GLOBAL_COMMAND_NOT_FOUND ]]; then
+    # we are here if the error happened in a log function and thus we couldn't print the error
+    printf '%s\n%s\n' "Command not found: ⌜${1}⌝." "Error in a log function." >&2
+    log::getCallStack 2
+    printf '%s\n' "${RETURNED_VALUE}" >&2
+    GLOBAL_ERROR_DISPLAYED=1
+    exit 1
+  fi
+  GLOBAL_COMMAND_NOT_FOUND=1
+
   local errorMessage
   if [[ ${1:-} == "curl" ]]; then
     errorMessage="This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
@@ -162,8 +196,10 @@ function command_not_found_handle() {
     errorMessage="Command not found: ⌜${1}⌝."$'\n'"Did you forget to source the package? ⌜source ${1%%::*}⌝"
   fi
   errorMessage="Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
+
   log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
   log::printCallStack 2
+  GLOBAL_ERROR_DISPLAYED=1
   exit 1
 }
 
@@ -2181,6 +2217,57 @@ function core::createNewStateFilePath() {
     mkdir -p "${RETURNED_VALUE}/saved-files"
   fi
   RETURNED_VALUE="${RETURNED_VALUE}/saved-files/${filePath}"
+}
+
+# ## core::dump
+#
+# Dumps information about the current environment into a new state file.
+#
+# - ${_OPTION_DUMP_SUFFIX} _as string_:
+#       (optional) The suffix for the file to create.
+#       (defaults to an empty string)
+#
+# ```bash
+# core::dump
+# ```
+function core::dump() {
+  local filePath
+  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d" "${EPOCHSECONDS}" "${BASHPID}"
+  core::getUserStateDirectory
+  if [[ ! -d "${RETURNED_VALUE}/core-dumps" ]]; then
+    mkdir -p "${RETURNED_VALUE}/core-dumps"
+  fi
+  filePath="${RETURNED_VALUE}/core-dumps/${filePath}${_OPTION_DUMP_SUFFIX:-}"
+
+  {
+    echo "================="$'\n'"BASHPID: ${BASHPID:-}"
+    echo "================="$'\n'"Stack:"
+    log::getCallStack
+    echo "${RETURNED_VALUE}"
+    echo "================="$'\n'"Processes:"
+    ps -l || :
+    echo "================="$'\n'"File descriptors:"
+    ls -l /proc/"${BASHPID}"/fd || :
+    if command -v lsof &>/dev/null; then
+      echo "================="$'\n'"Open files:"
+      lsof -p "${BASHPID}" || :
+    fi
+    echo "================="$'\n'"Options:"
+    shopt
+    shopt -p
+    echo "================="$'\n'"Signals:"
+    trap -p
+    echo "================="$'\n'"Jobs:"
+    jobs || :
+    echo "================="$'\n'"Variables:"
+    declare -p
+    echo "================="$'\n'"Functions:"
+    declare -f
+    echo "================="$'\n'"Aliases:"
+    alias
+  } >"${filePath}"
+
+  log::debug "Core dump saved to ⌜${filePath}⌝"
 }
 
 # ## core::setShellOptions (private)

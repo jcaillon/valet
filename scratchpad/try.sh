@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
-source "libraries.d/core"
+# shellcheck disable=SC1090
+source "$(valet --source)"
 include benchmark progress bash
+
 
 function func1() {
   func2
@@ -36,3 +37,5 @@ log::warning "This is a warning message."$'\n'"With a second line."
 
 sleep 1
 log::info coucou
+
+core::dump

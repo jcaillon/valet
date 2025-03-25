@@ -28,9 +28,9 @@ Returned code: `1`
 ```text
 /tmp/valet.valet.d/config: line 1: 1/0: division by 0 (error token is "0")
 CMDERR   A command had a return code of ⌜1⌝.
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
 EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad startup
@@ -44,9 +44,9 @@ Returned code: `1`
 ```text
 /tmp/valet.valet.d/startup: line 1: 1/0: division by 0 (error token is "0")
 CMDERR   A command had a return code of ⌜1⌝.
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
 EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad .env
@@ -60,9 +60,9 @@ Returned code: `1`
 ```text
 .env: line 1: 1/0: division by 0 (error token is "0")
 CMDERR   A command had a return code of ⌜1⌝.
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
 EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 897: GLOBAL_LOG_COLUMNS: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 933: GLOBAL_LOG_COLUMNS: unbound variable
 ```
 
 ### ✅ Testing the bad commands
@@ -76,7 +76,7 @@ Returned code: `1`
 ```text
 /tmp/valet.d/d3-2/commands: line 1: 1/0: division by 0 (error token is "0")
 CMDERR   A command had a return code of ⌜1⌝.
-├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:2000
+├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:2036
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:132
 ╰─ in main() at valet:100
 TRACE    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.

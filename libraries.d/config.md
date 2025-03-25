@@ -348,4 +348,9 @@ The path to the file in which to write the profiling information for the startup
 It must defined outside the config file (in your `~/.bashrc` or exporting before running valet).
 Defaults to a new file in your user state directory `~/.local/state/valet/logs`.
 
+#### VALET_CONFIG_CORE_DUMP_ON_EXIT
+
+Force the creation of a core dump file when valet exits.
+Dump files are created in the user state directory in `~/.local/state/valet/core-dumps` by default.
+
 <!-- END -->
