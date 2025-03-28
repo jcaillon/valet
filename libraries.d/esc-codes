@@ -209,7 +209,7 @@ ESC__CURSOR_HIDE=$'\e[?25l'
 ESC__CURSOR_SHOW_FORCE=$'\e[?25h'
 # Shows the cursor (or not, if we are not in exported mode).
 ESC__CURSOR_SHOW=""
-if [[ ${GLOBAL_EXPORTED:-} == "true" ]]; then
+if [[ ${GLOBAL_EXPORTED_FOR_PROMPT:-} == "true" ]]; then
   ESC__CURSOR_SHOW=$'\e[?25h'
 fi
 

@@ -38,6 +38,9 @@ fi
 # - name: -E, --no-exit
 #   description: |-
 #     Override the ⌜core::fail⌝ and ⌜core::failWithCode⌝ functions to not exit the script.
+# - name: -p, --prompt-mode
+#   description: |-
+#     Source valet functions with modifications to be used in a shell prompt.
 # examples:
 # - name: !eval "$(valet self export)"
 #   description: |-
@@ -50,10 +53,15 @@ function selfExport() {
 
   local output=""
 
-  # source valet core library, disable some traps
+  if [[ ${promptMode:-} == "true" ]]; then
+    noExit=true
+    # can be used to check if the script is running in a prompt or not
+    # must be set before calling the core lib
+    output+="GLOBAL_EXPORTED_FOR_PROMPT=true;"$'\n'
+  fi
+
+  # source valet core library
   output+="source \"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core\""$'\n'
-  output+="trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;"$'\n'
-  output+="GLOBAL_EXPORTED=true;"$'\n'
 
   if [[ ${sourceAllFunctions:-} == "true" ]]; then
     # source all libraries
@@ -69,7 +77,15 @@ function selfExport() {
   if [[ ${noExit:-} == "true" ]]; then
     output+="function core::fail() { log::error \"\$@\"; }"$'\n'
     output+="function core::failWithCode() { local exitCode=\"\${1}\"; shift; log::error \"\$@\"; log::error \"Exit code: \$exitCode\"; }"$'\n'
-    output+="set +o errexit"
+    output+="set +o errexit"$'\n'
+  fi
+
+  if [[ ${promptMode} == "true" ]]; then
+    # disable all traps
+    output+="trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT"$'\n'
+    # TODO: as we disable the exit trap, we do not clean up the files.
+    # We can clean them here during the export. We list all vt-* and we list the running PIDs
+    # we can clean everything that is not in the list of running PIDs
   fi
 
   echo "${output}"

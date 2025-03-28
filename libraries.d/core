@@ -30,62 +30,66 @@ GLOBAL_CORE_INCLUDED=1
 # It is executed in the same shell as the command that failed, as if we called this function
 # at the line where the command failed.
 function trap::onErrorInternal() {
-  trap ERR
-  if [[ -v GLOBAL_ERROR_DISPLAYED ]]; then
-    return 0
-  fi
-
+  local -a errorCodes=("$?" "${PIPESTATUS[@]}")
   local IFS=' '
-  local errorCodes="⌜${1}⌝"
-  shift
-  if (( $# > 1 )); then
-    errorCodes+=" (pipeline statuses ⌜${*}⌝)"
+  local errorCodesString="⌜${errorCodes[0]}⌝"
+  if (( ${#errorCodes[@]} > 2 )); then
+    errorCodesString+=" (pipeline statuses ⌜${errorCodes[*]}⌝)"
   fi
 
   if [[ ${FUNCNAME[1]:-} == "log::"* ]]; then
     # we are here if the error happened in a log function and thus we couldn't print the error
-    printf '%s\n%s\n%s\n' "The command had a return code of ${errorCodes}." "Error in a log function:" "${BASH_COMMAND:-}" >&2
+    printf '%s\n%s\n%s\n' "The command had a return code of ${errorCodesString}." "Error in a log function:" "${BASH_COMMAND:-}" >&2
     log::getCallStack 2
     printf '%s\n' "${RETURNED_VALUE}" >&2
-    GLOBAL_ERROR_DISPLAYED=1
     return 0
   fi
 
-  if [[ -n ${FUNCNAME[1]:-} && -v BASH_COMMAND ]]; then
-    log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDERR" "The command had a return code of ${errorCodes}:"
-    log::printString "╭ ${BASH_COMMAND:-}" "│ "
-    log::printCallStack 2
-  else
-    log::error "Error code ${errorCodes} in the main program."
+  local symbol="╰"
+  if [[ -n ${FUNCNAME[1]:-} ]]; then
+    symbol="╭"
   fi
+  log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDERR" "Error code ${errorCodesString} for the command:"
+  log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
+  log::printCallStack 2
 
-  GLOBAL_ERROR_DISPLAYED=1
+  # the program will exit
+  GLOBAL_EXPECTED_EXIT=1
 }
 
 # This function is called when the program exits (on error, on success, on exit, on interrupt).
 # It is executed in the same shell that exited, as if we called this function
 # at the line where the exit command is called.
 function trap::onExitInternal() {
-  local rc=$?
-  trap EXIT
+  local exitCode="$?"
 
-  if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || ( ! -v GLOBAL_ERROR_DISPLAYED && ${rc} != "0" ) ]]; then
-    _OPTION_DUMP_SUFFIX="-${rc}" core::dump
+  if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || ( ! -v GLOBAL_EXPECTED_EXIT && ${exitCode} != "0" ) ]]; then
+    _OPTION_DUMP_SUFFIX="-${exitCode}" core::dump
   fi
 
-  log::debug "Exiting with code ${rc} after ${SECONDS}s."
+  log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
   if declare -F onExit &>/dev/null; then
-    onExit "${rc}"
+    onExit "${exitCode}"
   fi
 
-  if [[ ! -v GLOBAL_ERROR_DISPLAYED && ${rc} != "0" ]]; then
-    log::print "ERROR" "${STYLE_ICON_EXIT:-}" "EXIT" "Exiting with code ${rc}, stack:"
-    log::printCallStack 2
-    GLOBAL_ERROR_DISPLAYED=1
+  if [[ ! -v GLOBAL_EXPECTED_EXIT ]]; then
+    local symbol="╰"
+    if [[ -n ${FUNCNAME[1]:-} ]]; then
+      symbol="╭"
+    fi
+    if [[ ${BASH_COMMAND:-} != "exit"* ]]; then
+      log::print "WARNING" "${STYLE_ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
+      log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
+      log::printCallStack 2
+    elif [[ ${exitCode} != "0" ]]; then
+      log::print "ERROR" "${STYLE_ICON_EXIT:-}" "EXIT" "Exiting with code ${exitCode}, stack:"
+      log::debug "${symbol} ${BASH_COMMAND:-}" "│ "
+      log::printCallStack 2
+    fi
   fi
 
   if [[ -n ${GLOBAL_ON_EXIT_MESSAGE:-} ]]; then
-    log::errorTrace "${GLOBAL_ON_EXIT_MESSAGE}"
+    log::error "${GLOBAL_ON_EXIT_MESSAGE}"
   fi
 
   # always call cleanUp before exiting
@@ -93,6 +97,8 @@ function trap::onExitInternal() {
 }
 
 # This function is called when the program is interrupted by the user (CTRL+C).
+# It is executed in the same shell that has been interrupted, as if we called this function
+# at the line executed at the moment when the interruption took place.
 function trap::onInterruptInternal() {
   if ! declare -F tui::restoreTerminalOptions &>/dev/null; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
@@ -113,7 +119,7 @@ function trap::onInterruptInternal() {
   fi
   # reset the trap to not call this function again
   trap SIGINT SIGQUIT
-  GLOBAL_ERROR_DISPLAYED=1
+  GLOBAL_EXPECTED_EXIT=1
   exit 1
 }
 
@@ -129,6 +135,7 @@ function trap::onTerminateInternal() {
   fi
   # reset the trap to not call this function again
   trap SIGHUP SIGTERM
+  GLOBAL_EXPECTED_EXIT=1
   exit 1
 }
 
@@ -158,8 +165,8 @@ function trap::onCleanUpInternal() {
   fi
 
   # if we are in interactive mode, we need to restore the cursor
-  if [[ -t 2 && ${VALET_CONFIG_DISABLE_ESC_CODES:-} != "true" ]]; then
-    printf '%s' $'\e[?25h' 1>&2
+  if [[ -t 7 && ${VALET_CONFIG_DISABLE_ESC_CODES:-} != "true" ]]; then
+    printf '%s' $'\e[?25h' 1>&7 # ESC__CURSOR_SHOW_FORCE
   fi
 
   # call the clean up functions if they exist
@@ -190,8 +197,8 @@ function command_not_found_handle() {
     printf '%s\n%s\n' "Command not found: ⌜${1}⌝." "Error in a log function." >&2
     log::getCallStack 2
     printf '%s\n' "${RETURNED_VALUE}" >&2
-    GLOBAL_ERROR_DISPLAYED=1
-    exit 1
+    GLOBAL_EXPECTED_EXIT=1
+    return 1
   fi
   GLOBAL_COMMAND_NOT_FOUND=1
 
@@ -207,15 +214,18 @@ function command_not_found_handle() {
 
   log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
   log::printCallStack 2
-  GLOBAL_ERROR_DISPLAYED=1
-  exit 1
+
+  GLOBAL_EXPECTED_EXIT=1
+  return 1
+  # since this runs in a subshell, we don't actually exit the main program
+  # but we set $? to 1 so ERR trap is called
 }
 
 # ## trap::register (private)
 #
 # Register the traps for the program.
 function trap::register() {
-  trap 'trap::onErrorInternal $? "${PIPESTATUS[@]}"' ERR
+  trap trap::onErrorInternal ERR
   trap trap::onExitInternal EXIT
   # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
   trap trap::onInterruptInternal SIGINT SIGQUIT
@@ -938,8 +948,10 @@ function log::printCallStack() {
   local -i levelToSkip="${1:-${_OPTION_STACK_TO_SKIP:-2}}"
   local -i levelToSkipAtEnd="${2:-${_OPTION_STACK_TO_SKIP_AT_END:-0}}"
 
-  _OPTION_WRAP_WIDTH="$((GLOBAL_LOG_COLUMNS - ${#GLOBAL_LOG_WRAP_PADDING}))" log::getCallStack "$((levelToSkip + 1))" "${levelToSkipAtEnd}"
-  log::printString "${RETURNED_VALUE}"
+  _OPTION_WRAP_WIDTH="$((${GLOBAL_LOG_COLUMNS:-${GLOBAL_COLUMNS}} - ${#GLOBAL_LOG_WRAP_PADDING}))" log::getCallStack "$((levelToSkip + 1))" "${levelToSkipAtEnd}"
+  if (( ${#RETURNED_VALUE} > 0 )); then
+    log::printString "${RETURNED_VALUE}"
+  fi
 }
 
 # ## log::getCallStack
@@ -1024,11 +1036,17 @@ function log::getCallStack() {
 #
 # Set the variable printfArgument from the format specifier.
 function log_setPrintfArgumentFromFormat() {
-  formatSpecifier="${formatSpecifier#-}"
-  if [[ ${formatSpecifier} == "s" ]]; then
+  local format="${printfFormat#'%'}"
+  if [[ ${format} != *[0-9]* ]]; then
     printfArgument="\${${1}}"
   else
-    printfArgument="\${${1}:\${#${1}} - ${formatSpecifier%s} > 0 ? \${#${1}} - ${formatSpecifier%s} : 0}"
+    format="${format%[sd]}"
+    if [[ ${format} == "-"* ]]; then
+      format="${format#-}"
+      printfArgument="\${${1}:0:${format#-}}"
+    else
+      printfArgument="\${${1}:\${#${1}} - ${format} > 0 ? \${#${1}} - ${format} : 0}"
+    fi
   fi
 }
 
@@ -1131,7 +1149,7 @@ function log::parseLogPattern() {
         ;;
       level)
         printfFormat="%${formatSpecifier:-"-8s"}"
-        printfArgument="\${level:-}"
+        log_setPrintfArgumentFromFormat "level"
         ;;
       icon)
         if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} == "true" ]]; then
@@ -1144,46 +1162,44 @@ function log::parseLogPattern() {
       var*)
         printfFormat="%${formatSpecifier:-"s"}"
         printfArgument="\${${placeHolder#var}:-}"
+        RETURNED_VALUE4+=$'\n'"local variableToPrintInLog=\"\${${placeHolder#var}:-}\""
+        log_setPrintfArgumentFromFormat "variableToPrintInLog"
         ;;
       pid)
         printfFormat="%${formatSpecifier:-"-5d"}"
-        printfArgument="\${BASHPID}"
+        log_setPrintfArgumentFromFormat "BASHPID"
         ;;
       subshell)
         printfFormat="%${formatSpecifier:-"-2d"}"
-        printfArgument="\${BASH_SUBSHELL}"
+        log_setPrintfArgumentFromFormat "BASH_SUBSHELL"
         ;;
       function)
-        formatSpecifier="${formatSpecifier:-"-10s"}"
-        printfFormat="%${formatSpecifier}"
+        printfFormat="%${formatSpecifier:-"-10s"}"
         log_setPrintfArgumentFromFormat "FUNCNAME[2]"
         ;;
       line)
-        formatSpecifier="${formatSpecifier:-"-4s"}"
-        printfFormat="%${formatSpecifier}"
+        printfFormat="%${formatSpecifier:-"-4s"}"
         log_setPrintfArgumentFromFormat "BASH_LINENO[1]"
         ;;
       source)
-        formatSpecifier="${formatSpecifier:-"-10s"}"
-        printfFormat="%${formatSpecifier}"
+        printfFormat="%${formatSpecifier:-"-10s"}"
         log_setPrintfArgumentFromFormat "BASH_SOURCE[2]"
         ;;
       sourceFile)
-        formatSpecifier="${formatSpecifier:-"-10s"}"
-        printfFormat="%${formatSpecifier}"
+        printfFormat="%${formatSpecifier:-"-10s"}"
         RETURNED_VALUE4+=$'\n'"local sourceFile=\"\${BASH_SOURCE[2]##*/}\""
         log_setPrintfArgumentFromFormat "sourceFile"
         ;;
       elapsedTime)
         printfFormat="%${formatSpecifier:-"-7s"}"
-        printfArgument="\${loggedElapsedTime}"
+        log_setPrintfArgumentFromFormat "loggedElapsedTime"
         # shellcheck source=lib-time
         source time
         RETURNED_VALUE4+=$'\n'"time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman \"\${RETURNED_VALUE}\" \"%S.%LLs\"; local loggedElapsedTime=\"\${RETURNED_VALUE}\""
         ;;
       elapsedTimeSinceLastLog)
         printfFormat="%${formatSpecifier:-"-7s"}"
-        printfArgument="\${loggedElapsedTimeSinceLastLog}"
+        log_setPrintfArgumentFromFormat "loggedElapsedTimeSinceLastLog"
         # shellcheck source=lib-time
         source time
         RETURNED_VALUE4+=$'\n'"time::getProgramElapsedMicroseconds; local -i currentTime=\${RETURNED_VALUE}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman \"\${_LOG_ELAPSED_TIME}\" \"%S.%LLs\"; local loggedElapsedTimeSinceLastLog=\"\${RETURNED_VALUE}\"; _LOG_ELAPSED_TIME=\${currentTime}"
@@ -1250,6 +1266,7 @@ function log::parseLogPattern() {
 function log::init() {
     GLOBAL_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
     GLOBAL_LOG_DISABLE_WRAP="${VALET_CONFIG_LOG_DISABLE_WRAP:-false}"
+    GLOBAL_LOG_PATTERN="${_OPTION_LOG_PATTERN:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level>  <icon><colorDefault> <message>"}}"
 
     local logFileDescriptor="${VALET_CONFIG_LOG_FD:-2}"
 
@@ -1258,7 +1275,7 @@ function log::init() {
     local -n printfArguments=RETURNED_VALUE2
     local -n wrapPaddingLength=RETURNED_VALUE3
     local -n beforePrintStatementCode=RETURNED_VALUE4
-    log::parseLogPattern "${_OPTION_LOG_PATTERN:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level>  <icon><colorDefault> <message>"}}"
+    log::parseLogPattern "${GLOBAL_LOG_PATTERN}"
 
     # string with the number of spaces necessary to align with other log messages
     if (( wrapPaddingLength > 0 )); then
@@ -1289,7 +1306,7 @@ function log::init() {
     fi
 
     local progressBarCode progressBarCode2 progressBarCode3 outputCode
-    if [[ ${logFileDescriptor} == [0-9] ]]; then
+    if [[ ${logFileDescriptor} =~ ^[0-9]+$ ]]; then
       # it is a numbered file descriptor
       outputCode="1>&${logFileDescriptor}"
 
@@ -1318,8 +1335,7 @@ function log::init() {
       if [[ -n ${VALET_CONFIG_LOG_FILENAME_PATTERN:-} ]]; then
         eval "${VALET_CONFIG_LOG_FILENAME_PATTERN}"
         if [[ ! -v logFile ]]; then
-          printf '%s\n' "The filename pattern for the log files VALET_CONFIG_LOG_FILENAME_PATTERN is not valid (does not create the variable logFile): ⌜${VALET_CONFIG_LOG_FILENAME_PATTERN}⌝."
-          exit 1
+          core::fail "The filename pattern for the log files VALET_CONFIG_LOG_FILENAME_PATTERN is not valid (does not create the variable logFile): ⌜${VALET_CONFIG_LOG_FILENAME_PATTERN}⌝."
         fi
       else
         printf -v logFile "%s%(%FT%H-%M-%S%z)T%s" "valet-" "${EPOCHSECONDS}" ".log"
@@ -1837,7 +1853,7 @@ function core::fail() {
     log::printCallStack 2
   fi
   # shellcheck disable=SC2034
-  GLOBAL_ERROR_DISPLAYED=1
+  GLOBAL_EXPECTED_EXIT=1
   exit 1
 }
 
@@ -1861,7 +1877,7 @@ function core::failWithCode() {
     log::printCallStack 2
   fi
   # shellcheck disable=SC2034
-  GLOBAL_ERROR_DISPLAYED=1
+  GLOBAL_EXPECTED_EXIT=1
   exit "${exitCode}"
 }
 
@@ -2235,6 +2251,10 @@ function core::createNewStateFilePath() {
 #       (optional) The suffix for the file to create.
 #       (defaults to an empty string)
 #
+# Returns:
+#
+# - ${RETURNED_VALUE}: the path to the created file.
+#
 # ```bash
 # core::dump
 # ```
@@ -2249,13 +2269,16 @@ function core::dump() {
 
   {
     echo "================="$'\n'"BASHPID: ${BASHPID:-}"
+    echo "================="$'\n'"PPID: ${PPID:-}"
     echo "================="$'\n'"Stack:"
     log::getCallStack
     echo "${RETURNED_VALUE}"
     echo "================="$'\n'"Processes:"
     ps -l || :
     echo "================="$'\n'"File descriptors:"
-    ls -l /proc/"${BASHPID}"/fd || :
+  } >"${filePath}"
+    ls -l /proc/"${BASHPID}"/fd >>"${filePath}" || :
+  {
     if command -v lsof &>/dev/null; then
       echo "================="$'\n'"Open files:"
       lsof -p "${BASHPID}" || :
@@ -2273,9 +2296,10 @@ function core::dump() {
     declare -f
     echo "================="$'\n'"Aliases:"
     alias
-  } >"${filePath}"
+  } >>"${filePath}"
 
   log::debug "Core dump saved to ⌜${filePath}⌝"
+  RETURNED_VALUE="${filePath}"
 }
 
 # ## core::setShellOptions (private)

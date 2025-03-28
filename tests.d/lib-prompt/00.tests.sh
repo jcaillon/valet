@@ -84,7 +84,7 @@ function test_prompt_internal() {
   test::markdown "\`░${RETURNED_VALUE}░ ${RETURNED_VALUE2}\`"
   if [[ "░${RETURNED_VALUE}░ ${RETURNED_VALUE2}" != "░${4}░ ${5}" ]]; then
     echo "Expected: ░${4}░ ${5}"
-    exit 1
+    test::fail "Unexpected value."
   fi
 }
 

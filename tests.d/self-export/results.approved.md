@@ -4,20 +4,14 @@
 
 ### ✅ Testing self export command
 
-❯ `eval "$(valet self export)"`
-
 ❯ `selfExport`
 
 **Standard output**:
 
 ```text
 source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
-trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;
-GLOBAL_EXPORTED=true;
 
 ```
-
-❯ `eval "$(valet self export -a)"`
 
 ❯ `selfExport -a`
 
@@ -25,8 +19,6 @@ GLOBAL_EXPORTED=true;
 
 ```text
 source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
-trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM;
-GLOBAL_EXPORTED=true;
 source array
 source bash
 source benchmark
@@ -51,4 +43,36 @@ source version
 source windows
 
 ```
+
+❯ `selfExport -p`
+
+**Standard output**:
+
+```text
+GLOBAL_EXPORTED_FOR_PROMPT=true;
+source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
+function core::fail() { log::error "$@"; }
+function core::failWithCode() { local exitCode="${1}"; shift; log::error "$@"; log::error "Exit code: $exitCode"; }
+set +o errexit
+trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT
+
+```
+
+❯ `selfExport -E`
+
+**Standard output**:
+
+```text
+source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
+function core::fail() { log::error "$@"; }
+function core::failWithCode() { local exitCode="${1}"; shift; log::error "$@"; log::error "Exit code: $exitCode"; }
+set +o errexit
+
+```
+
+❯ `eval "$(valet self export)"`
+
+❯ `eval "$(valet self export -a)"`
+
+❯ `eval "$(valet self export -p)"`
 

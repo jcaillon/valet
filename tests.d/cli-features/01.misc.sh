@@ -18,7 +18,7 @@ function main() {
   rm -f "${RETURNED_VALUE}/startup"
 
   test::title "✅ Testing the bad .env"
-  echo "fu=\$((1/0))" >".env"
+  echo "zeoifuhizefuhzeh" >".env"
   export VALET_CONFIG_DOT_ENV_SCRIPT=".env"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
   rm -f ".env"
@@ -32,6 +32,17 @@ function main() {
 
   test::title "✅ Testing empty user directory rebuilding the commands"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
+}
+
+# shellcheck disable=SC2317
+function test::transformTextBeforeFlushing() {
+  local line text=""
+  local IFS=$'\n'
+  for line in ${_TEST_OUTPUT}; do
+    line="${line//core:[0-9]*/core:xxx}"
+    text+="${line//main:[0-9]*/main:xxx}"$'\n'
+  done
+  _TEST_OUTPUT="${text%$'\n'}"
 }
 
 main

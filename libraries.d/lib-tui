@@ -7,6 +7,9 @@ source exe
 # shellcheck source=lib-fs
 source fs
 
+# fd 7 will be where we write the TUI
+exec 7>&2
+
 #===============================================================
 # >>> Interactive utilities
 #===============================================================
@@ -138,7 +141,7 @@ function tui::setTerminalOptions() {
 # ```
 # shellcheck disable=SC2120
 function tui::restoreTerminalOptions() {
-  if [[ ${_INTERACTIVE_FULL_SCREEN_MODE:-${GLOBAL_EXPORTED:-}} == "true" && ${1:-} != "true" ]]; then
+  if [[ ${_INTERACTIVE_FULL_SCREEN_MODE:-${GLOBAL_EXPORTED_FOR_PROMPT:-}} == "true" && ${1:-} != "true" ]]; then
     # don't restore if we do not force it and we are either in full screen or exported mode
     return 0
   fi
@@ -782,7 +785,7 @@ function tui::restoreBindings() {
   if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
     return 0
   fi
-  if [[ ${GLOBAL_EXPORTED:-} != "true" ]]; then
+  if [[ ${GLOBAL_EXPORTED_FOR_PROMPT:-} != "true" ]]; then
     # there is no need to restore if we are not in exported mode, the bindings are local to this execution
     return 0
   fi

@@ -86,11 +86,16 @@ esac
 # set the styles and esc codes
 styles::init
 
+# fd 7 will be where we write the TUI
+exec 7>&2
+
 # Export terminal size on window resize if we are in interactive mode.
-if [[ -t 2 ]]; then
+if [[ -t 7 ]]; then
   tui::getTerminalSize
-  # hide the cursor (we restore on exit)
-  printf "%s" "${ESC__CURSOR_HIDE}" 1>&2
+  if [[ ${GLOBAL_EXPORTED_FOR_PROMPT:-} != "true" ]]; then
+    # hide the cursor (we restore on exit)
+    printf "%s" "${ESC__CURSOR_HIDE}" 1>&7
+  fi
 else
   GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}"
   # shellcheck disable=SC2034
@@ -100,17 +105,16 @@ fi
 # make sure the file descriptor (if any) is valid
 if [[ -n ${VALET_CONFIG_LOG_FD:-} ]]; then
   _CORE_VALID_FD=false
-  if [[ "${VALET_CONFIG_LOG_FD}" != [0-9] ]]; then
-    # it is a file
-    if { : >>"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+  if [[ ${VALET_CONFIG_LOG_FD} =~ ^[0-9]+$ ]]; then
+    if { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
       _CORE_VALID_FD=true
     fi
-  elif { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+  elif { : >>"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
+    # it is a file
     _CORE_VALID_FD=true
   fi
   if [[ ${_CORE_VALID_FD} != "true" ]]; then
-    printf '%s\n' "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${_ORIGINAL_FD}⌝."
-    exit 1
+    core::fail "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${VALET_CONFIG_LOG_FD}⌝."
   fi
 fi
 
@@ -375,6 +379,7 @@ function main::parseMainArguments() {
     # run the function without the matched commands in the arguments
     main::runFunction "${functionName}" "${_PARSED_COMMAND_ARGS[@]:nbArgs}"
   fi
+
   return 0
 }
 

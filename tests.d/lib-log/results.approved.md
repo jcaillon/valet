@@ -11,7 +11,7 @@ GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messag
 
 
 local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>&2
+printf "${eraseLine:-}%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
@@ -30,7 +30,7 @@ string::wrapWords "${messageVariableName}" 9999 "         " 9990
 
 
 local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>&2
+printf "${eraseLine:-}%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
@@ -47,7 +47,7 @@ GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messag
 
 local extra=1
 local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>&2
+printf "${eraseLine:-}%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>&2
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
@@ -63,8 +63,8 @@ GLOBAL_LOG_WRAP_PADDING='         '
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
 
 
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>>"/file"
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
+printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/file"
+printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/file"
 printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/valet-1987-05-25T01-00-00+0000.log"'
 GLOBAL_LOG_WRAP_PADDING='         '
@@ -76,8 +76,8 @@ GLOBAL_LOG_WRAP_PADDING='         '
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
 
 
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>>"/file"
-printf "%-8s%s%s\n" "${level:-}" " " "${messageToPrintInLog:-}"  1>>"tmp/a"'
+printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/file"
+printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"tmp/a"'
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/file"
 printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/a"'
 GLOBAL_LOG_WRAP_PADDING='         '
@@ -137,7 +137,7 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='%(%H:%M:%S)T%s%s%-8s%s%s%-5d%s%-2d%s%8s%s%-10s%s%-4s%s%s\n'
-RETURNED_VALUE2='"${EPOCHSECONDS}" " " "${levelColor:-}" "${level:-}" " " " PID=" "${BASHPID}" " SHLVL=" "${BASH_SUBSHELL}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 8 > 0 ? ${#FUNCNAME[2]} - 8 : 0}" "@" "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 10 > 0 ? ${#BASH_SOURCE[2]} - 10 : 0}" ":" "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 4 > 0 ? ${#BASH_LINENO[1]} - 4 : 0}" " " "${messageToPrintInLog:-}" '
+RETURNED_VALUE2='"${EPOCHSECONDS}" " " "${levelColor:-}" "${level:0:8}" " " " PID=" "${BASHPID:0:5}" " SHLVL=" "${BASH_SUBSHELL:0:2}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 8 > 0 ? ${#FUNCNAME[2]} - 8 : 0}" "@" "${BASH_SOURCE[2]:0:10}" ":" "${BASH_LINENO[1]:0:4}" " " "${messageToPrintInLog:-}" '
 RETURNED_VALUE3='63'
 RETURNED_VALUE4=''
 ```
@@ -170,9 +170,10 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%s%9s%s%9s%s%9s%s%9s%s%9s%s%9s\n'
-RETURNED_VALUE2='" " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:-}" " " " " "${COLOR_DEBUG:-}" " " "${BASHPID}" " " "${BASH_SUBSHELL}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 9 > 0 ? ${#FUNCNAME[2]} - 9 : 0}" " " "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 9 > 0 ? ${#BASH_SOURCE[2]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
+RETURNED_VALUE2='" " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " " " "${variableToPrintInLog:${#variableToPrintInLog} - 9 > 0 ? ${#variableToPrintInLog} - 9 : 0}" " " "${BASHPID:${#BASHPID} - 9 > 0 ? ${#BASHPID} - 9 : 0}" " " "${BASH_SUBSHELL:${#BASH_SUBSHELL} - 9 > 0 ? ${#BASH_SUBSHELL} - 9 : 0}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 9 > 0 ? ${#FUNCNAME[2]} - 9 : 0}" " " "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 9 > 0 ? ${#BASH_SOURCE[2]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
 RETURNED_VALUE3='0'
-RETURNED_VALUE4=''
+RETURNED_VALUE4='
+local variableToPrintInLog="${COLOR_DEBUG:-}"'
 ```
 
 ❯ `log::parseLogPattern $'<levelColor><level><colorDefault> <message>\n<wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>'`
@@ -181,8 +182,8 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='%s%-8s%s%s%s%s%s%-7s%s%-7s%s%-10s%s\n'
-RETURNED_VALUE2='"${levelColor:-}" "${level:-}" " " "${messageToPrintInLog:-}" "
-" "${GLOBAL_LOG_WRAP_PADDING}" "[" "${loggedElapsedTime}" "] [" "${loggedElapsedTimeSinceLastLog}" "] in [" "${sourceFile:${#sourceFile} - 10 > 0 ? ${#sourceFile} - 10 : 0}" "]" '
+RETURNED_VALUE2='"${levelColor:-}" "${level:0:8}" " " "${messageToPrintInLog:-}" "
+" "${GLOBAL_LOG_WRAP_PADDING}" "[" "${loggedElapsedTime:0:7}" "] [" "${loggedElapsedTimeSinceLastLog:0:7}" "] in [" "${sourceFile:0:10}" "]" '
 RETURNED_VALUE3='9'
 RETURNED_VALUE4='
 time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"; local loggedElapsedTime="${RETURNED_VALUE}"
@@ -196,9 +197,34 @@ Returned variables:
 
 ```text
 RETURNED_VALUE='%s%s%s%s%s%s%s%s%s\n'
-RETURNED_VALUE2='"{\"level\": \"" "${level:-}" "\", \"message\": \"" "${messageToPrintInLog:-}" "\", \"source\": \"" "${BASH_SOURCE[2]}" "\", \"line\": \"" "${BASH_LINENO[1]}" "\"}" '
+RETURNED_VALUE2='"{\"level\": \"" "${level}" "\", \"message\": \"" "${messageToPrintInLog:-}" "\", \"source\": \"" "${BASH_SOURCE[2]}" "\", \"line\": \"" "${BASH_LINENO[1]}" "\"}" '
 RETURNED_VALUE3='26'
 RETURNED_VALUE4=''
+```
+
+❯ `log::parseLogPattern $'<level>{-2s}\n  <varSTUFF>{-5s}\n  <pid>{-04d}\n  <subshell>{-1s}\n  <function>{-5s}\n  <line>{-03d}\n  <source>{-5s}\n  <sourceFile>{-5s}\n  <elapsedTime>{-5s}\n  <elapsedTimeSinceLastLog>{-5s}\n  '`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%-2s%s%-5s%s%-04d%s%-1s%s%-5s%s%-03d%s%-5s%s%-5s%s%-5s%s%-5s%s\n'
+RETURNED_VALUE2='"${level:0:2}" "
+  " "${variableToPrintInLog:0:5}" "
+  " "${BASHPID:0:04}" "
+  " "${BASH_SUBSHELL:0:1}" "
+  " "${FUNCNAME[2]:0:5}" "
+  " "${BASH_LINENO[1]:0:03}" "
+  " "${BASH_SOURCE[2]:0:5}" "
+  " "${sourceFile:0:5}" "
+  " "${loggedElapsedTime:0:5}" "
+  " "${loggedElapsedTimeSinceLastLog:0:5}" "
+  " '
+RETURNED_VALUE3='0'
+RETURNED_VALUE4='
+local variableToPrintInLog="${STUFF:-}"
+local sourceFile="${BASH_SOURCE[2]##*/}"
+time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"; local loggedElapsedTime="${RETURNED_VALUE}"
+time::getProgramElapsedMicroseconds; local -i currentTime=${RETURNED_VALUE}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${RETURNED_VALUE}"; _LOG_ELAPSED_TIME=${currentTime}'
 ```
 
 ### ✅ Testing with no formatting

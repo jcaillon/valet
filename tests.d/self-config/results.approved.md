@@ -17,7 +17,7 @@ RETURNED_VALUE='#!/usr/bin/env bash
 # 
 # Valet is configurable through environment variables.
 # 
-# To configure variables in bash, you should defined them in your `~/.bashrc` file which gets included (source) on each startup.
+# To configure variables in bash, you should export them in your `~/.bashrc` file which gets included (source) on each startup.
 # 
 # In Valet, you can also set variables in special bash scripts which are sourced when the program starts.
 # These scripts are:
@@ -109,7 +109,7 @@ RETURNED_VALUE='#!/usr/bin/env bash
 # 
 # Valet is configurable through environment variables.
 # 
-# To configure variables in bash, you should defined them in your `~/.bashrc` file which gets included (source) on each startup.
+# To configure variables in bash, you should export them in your `~/.bashrc` file which gets included (source) on each startup.
 # 
 # In Valet, you can also set variables in special bash scripts which are sourced when the program starts.
 # These scripts are:

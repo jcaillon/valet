@@ -119,7 +119,7 @@ function test_list_fuzzyFilterSortFileWithGrepAndGawk() {
     echo
     echo "bashLines:"
     echo "${bashLines}"
-    exit 1
+    test::fail "The result is different from the pure bash implementation."
   fi
   if [[ "${awkCorrespondences}" != "${bashCorrespondences}" ]]; then
     echo "Correspondences are different!"
@@ -128,7 +128,7 @@ function test_list_fuzzyFilterSortFileWithGrepAndGawk() {
     echo
     echo "bashCorrespondences:"
     echo "${bashCorrespondences}"
-    exit 1
+    test::fail "The result is different from the pure bash implementation."
   fi
 
   test::markdown "> The result is the same as the pure bash implementation."

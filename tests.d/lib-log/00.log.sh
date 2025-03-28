@@ -96,6 +96,18 @@ function test_log::parseLogPattern() {
 
   local pat='{"level": "<level>{s}", "message": "<message>{s}", "source": "<source>{s}", "line": "<line>{s}"}'
   test::func log::parseLogPattern '"${pat}"'
+
+  test::func log::parseLogPattern "<level>{-2s}
+  <varSTUFF>{-5s}
+  <pid>{-04d}
+  <subshell>{-1s}
+  <function>{-5s}
+  <line>{-03d}
+  <source>{-5s}
+  <sourceFile>{-5s}
+  <elapsedTime>{-5s}
+  <elapsedTimeSinceLastLog>{-5s}
+  "
 }
 
 # shellcheck disable=SC2034

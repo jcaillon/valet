@@ -5,14 +5,15 @@ include bash
 
 exec 60>&2
 echo "zefgzefze" >&60
-exec 2>/dev/null
+# exec 2>/dev/null
 [[ -t 2 ]] && echo "a terminal"
 [[ -t 60 ]] && echo "60 a terminal"
 
 # shellcheck disable=SC2317
 function inCoproc() {
   echo "coucou" >&60
-  trap -zeafezf
+
+  hash -x
   echo "COPROC: coproc started" 1>&2
   # print an initial message
   printf "%s" a

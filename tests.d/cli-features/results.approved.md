@@ -27,11 +27,12 @@ Returned code: `1`
 
 ```text
 /tmp/valet.valet.d/config: line 1: 1/0: division by 0 (error token is "0")
-CMDERR   The command had a return code of ⌜1⌝:
+CMDERR   Error code ⌜1⌝ for the command:
 ╭ builtin source "${GLOBAL_CONFIG_FILE}"
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
-EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
+├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
+╰─ in main() at valet:100
+ERROR    Error sourcing the configuration file ⌜/tmp/valet.valet.d/config⌝.
+Check the file for error and try again, or delete the file to discard your config.
 ```
 
 ### ✅ Testing the bad startup
@@ -44,11 +45,12 @@ Returned code: `1`
 
 ```text
 /tmp/valet.valet.d/startup: line 1: 1/0: division by 0 (error token is "0")
-CMDERR   The command had a return code of ⌜1⌝:
+CMDERR   Error code ⌜1⌝ for the command:
 ╭ builtin source "${GLOBAL_STARTUP_FILE}"
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
-EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
+├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
+╰─ in main() at valet:100
+ERROR    Error sourcing the startup file ⌜/tmp/valet.valet.d/startup⌝.
+Check the file for error and try again, or delete the file to discard your config.
 ```
 
 ### ✅ Testing the bad .env
@@ -60,12 +62,18 @@ Returned code: `1`
 **Error output**:
 
 ```text
-.env: line 1: 1/0: division by 0 (error token is "0")
-CMDERR   The command had a return code of ⌜1⌝:
-╭ builtin source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
-EXIT     Exiting with code 1, stack:
-$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core: line 941: GLOBAL_LOG_COLUMNS: unbound variable
+CMDMISS  Command not found: ⌜zeoifuhizefuhzeh⌝.
+Please check your ⌜PATH⌝ variable.
+├─ in source() at .env:1
+├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
+╰─ in main() at valet:100
+CMDERR   Error code ⌜1⌝ for the command:
+╭ zeoifuhizefuhzeh
+├─ in source() at .env:1
+├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
+╰─ in main() at valet:100
+ERROR    Error sourcing the env file ⌜.env⌝.
+Check the file for error and try again, or delete the file to discard your config.
 ```
 
 ### ✅ Testing the bad commands
@@ -78,12 +86,12 @@ Returned code: `1`
 
 ```text
 /tmp/valet.d/d3-2/commands: line 1: 1/0: division by 0 (error token is "0")
-CMDERR   The command had a return code of ⌜1⌝:
+CMDERR   Error code ⌜1⌝ for the command:
 ╭ builtin source "${commandsFile}"
-├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:2044
-├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:132
+├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:100
-TRACE    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.
+ERROR    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.
 Please rebuild it using the ⌜valet self build⌝ command.
 ```
 
@@ -101,7 +109,6 @@ Now silently building it using ⌜valet self build⌝ command.
 WARNING  Entering interactive mode for the function ⌜selfMock1⌝. This is not yet implemented.
 FAIL     Expecting ⌜1⌝ argument(s) but got ⌜0⌝.
 Use ⌜valet self mock1 --help⌝ to get help.
-
 Usage:
 valet [global options] self mock1 [options] [--] <action>
 ```
@@ -118,11 +125,11 @@ Returned code: `1`
 
 ```text
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
-CMDERR   The command had a return code of ⌜1⌝:
+CMDERR   Error code ⌜1⌝ for the command:
 ╭ return 1
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:54
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:529
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:376
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
+├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:105
 ```
 
@@ -139,8 +146,8 @@ WARNING  This is for testing valet core functions, exiting with code 5.
 WARNING  This is a custom on exit function.
 EXIT     Exiting with code 5, stack:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:1
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:529
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:376
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
+├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:105
 ```
 
@@ -181,14 +188,14 @@ WARNING  This is for testing valet core functions, the next statement will call 
 CMDMISS  Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:72
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:529
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:376
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
+├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:105
-CMDERR   The command had a return code of ⌜1⌝:
+CMDERR   Error code ⌜1⌝ for the command:
 ╭ thisIsAnUnknownCommandForTesting
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:72
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:529
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:376
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
+├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:105
 ```
 

@@ -31,4 +31,15 @@ function test_traps() {
   # test::flush
 }
 
+# shellcheck disable=SC2317
+function test::transformTextBeforeFlushing() {
+  local line text=""
+  local IFS=$'\n'
+  for line in ${_TEST_OUTPUT}; do
+    line="${line//core:[0-9]*/core:xxx}"
+    text+="${line//main:[0-9]*/main:xxx}"$'\n'
+  done
+  _TEST_OUTPUT="${text%$'\n'}"
+}
+
 main

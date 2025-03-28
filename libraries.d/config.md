@@ -2,7 +2,7 @@
 
 Valet is configurable through environment variables.
 
-To configure variables in bash, you should defined them in your `~/.bashrc` file which gets included (source) on each startup.
+To configure variables in bash, you should export them in your `~/.bashrc` file which gets included (source) on each startup.
 
 In Valet, you can also set variables in special bash scripts which are sourced when the program starts.
 These scripts are:
@@ -217,12 +217,15 @@ You can use the following placeholders:
 
 Each placeholder can be followed by `{...}` to add the format specifier (see printf help).
 
+All the placeholders have a default format which truncates the string to a maximum length. Use the format `{s}` to disable the truncation.
+
 Examples:
 
-- Java like logs: `"<colorFaded><time>{(%H:%M:%S)T} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <levelColor><level><colorDefault> <colorFaded><sourceFile>{10s}:<line>{-4s}<colorDefault> -- <message>"`
+- Java like logs: `"<colorFaded><time>{(%H:%M:%S)T} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <levelColor><level><colorDefault> <colorFaded><function>{15s}<colorDefault> -- <message>"`
 - JSON output: `'{"level": "<level>{s}", "message": "<message>{s}", "source": "<source>{s}", "line": "<line>{s}"}'`
 - Boxed messages: `"<colorFaded>╭─<time>{(%H:%M:%S)T}──<levelColor><level>{7s}<colorFaded>────────<sourceFile>{10s}:<line>{-4s}───░<colorDefault>"$'\n'"<colorFaded>│<colorDefault>  <message>"$'\n'"<colorFaded>╰─ +<elapsedTimeSinceLastLog>{7s}──────────────────────────────────░<colorDefault>"$'\n'`
 - Subtitles message: `"<levelColor><level><colorDefault> <message>"$'\n'"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) | pid <pid>{5s} | shlvl <subshell>{-1s} | from <sourceFile>{10s}:<line>{-4s}<colorDefault>"`
+- Compact debug logs: `"<colorFaded><elapsedTime>{8s} [<pid>{04d}:<subshell>{1s}] <colorFaded><sourceFile>{-5s}:<line>{-4s}<colorDefault> <levelColor><level>{-4s} <icon><colorDefault> <message>"`
 
 #### VALET_CONFIG_LOG_PATTERN_ALTERNATIVE
 
