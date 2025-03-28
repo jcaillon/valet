@@ -54,14 +54,15 @@ function test_logOutputOptions() {
   test::title "✅ Testing that we can output the logs to a directory additionally to console"
   test::exec VALET_CONFIG_LOG_TO_DIRECTORY="${logDir}" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
   # shellcheck disable=SC2317
-  function test::transformTextBeforeFlushing() { _TEST_OUTPUT="${_TEST_OUTPUT//????-??-??T??-??-??+????.log/2025-02-12T21-57-29+0000.log}" ; }
+  function test::transformTextBeforeFlushing() { _TEST_OUTPUT="${_TEST_OUTPUT//????-??-??T??-??-??+????--PID_??????.log/2025-02-12T21-57-29+0000.log}" ; }
   test::func fs::listFiles "${logDir}"
   unset -f test::transformTextBeforeFlushing
 
 
   test::title "✅ Testing that we can output the logs to a specific file name additionally to console"
-  test::exec VALET_CONFIG_LOG_FILENAME_PATTERN='logFile=test.log' VALET_CONFIG_LOG_TO_DIRECTORY="${logDir}" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
-  test::exec fs::cat "${logDir}/test.log"
+  test::exec VALET_CONFIG_LOG_FILENAME_PATTERN='logFile=test.log' VALET_CONFIG_LOG_TO_DIRECTORY="true" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
+  core::getUserStateDirectory
+  test::exec fs::cat "${RETURNED_VALUE}/logs/test.log"
 
 
   test::title "✅ Testing that we can output the logs to a specific file descriptor"

@@ -1338,13 +1338,18 @@ function log::init() {
           core::fail "The filename pattern for the log files VALET_CONFIG_LOG_FILENAME_PATTERN is not valid (does not create the variable logFile): ⌜${VALET_CONFIG_LOG_FILENAME_PATTERN}⌝."
         fi
       else
-        printf -v logFile "%s%(%FT%H-%M-%S%z)T%s" "valet-" "${EPOCHSECONDS}" ".log"
+        printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
+      fi
+      if [[ ${VALET_CONFIG_LOG_TO_DIRECTORY} == "true" ]]; then
+        core::getUserStateDirectory
+        VALET_CONFIG_LOG_TO_DIRECTORY="${RETURNED_VALUE}/logs"
       fi
       if [[ ! -d "${VALET_CONFIG_LOG_TO_DIRECTORY}" ]]; then
         mkdir -p "${VALET_CONFIG_LOG_TO_DIRECTORY}" 1>/dev/null
       fi
       # append the log to the file
-      outputCode="1>>\"${VALET_CONFIG_LOG_TO_DIRECTORY%/}/${logFile}\""
+      GLOBAL_LOG_ADDITIONAL_LOG_FILE="${VALET_CONFIG_LOG_TO_DIRECTORY%/}/${logFile}"
+      outputCode="1>>\"${GLOBAL_LOG_ADDITIONAL_LOG_FILE}\""
       GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${formattedLogStatement} ${outputCode}"
       GLOBAL_LOG_PRINT_STATEMENT_STANDARD+=$'\n'"${standardStatement} ${outputCode}"
     fi

@@ -257,17 +257,22 @@ The file descriptor in which to print the logs (defaults to `2` to output to std
 
 #### VALET_CONFIG_LOG_TO_DIRECTORY
 
-A path to directory in which we will create one log file per valet execution, which
-will contain the valet logs.
+If equals to `true`, will enable the logging to a new file in addition to the file descriptor. Each execution of valet will produce a new log file.
+
+The logs are written in new files generated in the directory `~/.local/state/valet/logs` by default.
+
+Can also be set to the path of a directory in which to create the log files.
+
+See [VALET_CONFIG_LOG_FILENAME_PATTERN](#valet_config_log_filename_pattern) for the name of the log file.
 
 #### VALET_CONFIG_LOG_FILENAME_PATTERN
 
 A string that will be evaluated to set a variable `logFile` which represents
 the name of the file in which to write the logs.
 
-Only used if VALET_CONFIG_LOG_TO_DIRECTORY is set.
+Only used if [VALET_CONFIG_LOG_TO_DIRECTORY](#valet_config_log_to_directory) is set.
 
-The default is equivalent to setting this string to: `printf -v logFile '%s%(%FT%H-%M-%S%z)T%s' 'valet-' \${EPOCHSECONDS} '.log'`.
+The default is equivalent to setting this string to: `printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"`.
 
 <!-- _________________ PROFILER _______________________ -->
 

@@ -150,13 +150,13 @@ Returned variables:
 
 ```text
 RETURNED_ARRAY=(
-[0]='/tmp/valet.d/d1-2/valet-2025-02-12T21-57-29+0000.log'
+[0]='/tmp/valet.d/d1-2/log-2025-02-12T21-57-29+0000.log'
 )
 ```
 
 ### ✅ Testing that we can output the logs to a specific file name additionally to console
 
-❯ `VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=test.log VALET_CONFIG_LOG_TO_DIRECTORY=/tmp/valet.d/d1-2 valet self mock1 logging-level`
+❯ `VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=test.log VALET_CONFIG_LOG_TO_DIRECTORY=true valet self mock1 logging-level`
 
 **Error output**:
 
@@ -168,7 +168,7 @@ WARNING  This is a warning message.
 With a second line.
 ```
 
-❯ `fs::cat /tmp/valet.d/d1-2/test.log`
+❯ `fs::cat /tmp/valet.valet.d/logs/test.log`
 
 **Standard output**:
 
