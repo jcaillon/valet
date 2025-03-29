@@ -82,7 +82,7 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 **Error output**:
 
 ```text
-DEBUG    Executing the command ⌜curl⌝ (no arguments).
+DEBUG    Executing the command ⌜curl⌝.
 DEBUG    The command ⌜curl⌝ ended with exit code ⌜0⌝ in ⌜8.000s⌝.
 DEBUG    The curl command for url ⌜https://fuu⌝ ended with exit code ⌜0⌝, the http return code was ⌜201⌝.
 DEBUG    The http return code ⌜201⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
@@ -151,7 +151,7 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 **Error output**:
 
 ```text
-DEBUG    Executing the command ⌜curl⌝ (no arguments).
+DEBUG    Executing the command ⌜curl⌝.
 DEBUG    The command ⌜curl⌝ ended with exit code ⌜0⌝ in ⌜12.000s⌝.
 DEBUG    The curl command for url ⌜https://fuu⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
 DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.

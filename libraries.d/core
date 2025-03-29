@@ -191,10 +191,12 @@ function trap::onCleanUpInternal() {
 # The name of this function is a bash convention.
 # This is called by bash and executed in a subshell (different PID than the main program).
 function command_not_found_handle() {
+  local commandNotFound="${1:-}"
+
   # check for recursive call
   if [[ -v GLOBAL_COMMAND_NOT_FOUND ]]; then
     # we are here if the error happened in a log function and thus we couldn't print the error
-    printf '%s\n%s\n' "Command not found: ⌜${1}⌝." "Error in a log function." >&2
+    printf '%s\n%s\n' "Command not found: ⌜${commandNotFound}⌝." "Error in a log function." >&2
     log::getCallStack 2
     printf '%s\n' "${RETURNED_VALUE}" >&2
     GLOBAL_EXPECTED_EXIT=1
@@ -202,15 +204,14 @@ function command_not_found_handle() {
   fi
   GLOBAL_COMMAND_NOT_FOUND=1
 
-  local errorMessage
-  if [[ ${1:-} == "curl" ]]; then
+  local errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
+  if [[ ${commandNotFound} == "curl" ]]; then
     errorMessage="This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
   fi
   # if the command contains :: it is one of our function, we can suggest to source the 'package'
-  if [[ ${1} == *::* ]]; then
-    errorMessage="Command not found: ⌜${1}⌝."$'\n'"Did you forget to source the package? ⌜source ${1%%::*}⌝"
+  if [[ ${commandNotFound} == *::* ]]; then
+    errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Did you forget to source/include the package? ⌜include ${commandNotFound%%::*}⌝"
   fi
-  errorMessage="Command not found: ⌜${1}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
 
   log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
   log::printCallStack 2

@@ -80,7 +80,7 @@ function exe::invokef5() {
       log::trace "No standard input."
     fi
   else
-    log::debug "Executing the command ⌜${executable}⌝ (no arguments)."
+    log::debug "Executing the command ⌜${executable}⌝."
   fi
 
   time::getProgramElapsedMicroseconds
