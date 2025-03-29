@@ -68,4 +68,6 @@ This allows you to call a command function without having to source the file man
 command::sourceFunction "functionName"
 ```
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

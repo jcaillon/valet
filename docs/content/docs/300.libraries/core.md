@@ -23,6 +23,22 @@ core::createNewStateFilePath "my-file"
 printf '%s\n' "The file is ⌜${RETURNED_VALUE}⌝."
 ```
 
+## core::dump
+
+Dumps information about the current environment into a new state file.
+
+- ${_OPTION_DUMP_SUFFIX} _as string_:
+      (optional) The suffix for the file to create.
+      (defaults to an empty string)
+
+Returns:
+
+- ${RETURNED_VALUE}: the path to the created file.
+
+```bash
+core::dump
+```
+
 ## core::fail
 
 Displays an error message and then exit the program with error.
@@ -148,33 +164,6 @@ Useful if you don't have arguments to pass to the sourced files.
 include string array ./my/path
 ```
 
-## list_fuzzyFilterSortFileWithGrepAndGawk
-
-Allows to fuzzy sort a file against a given searched string.
-Outputs a file containing only the lines matching the searched string.
-The array is sorted by (in order):
-
-- the index of the first matched character in the line
-- the distance between the first and last matched characters in the line
-
-Will also output a file containing the indexes of the matched lines in the original file.
-
-- $1: **file to filer** _as string_:
-      The input file to filter.
-- $2: **search string** _as string_:
-      The variable name containing the search string to match.
-- $3: **output filtered file** _as string_:
-      The output file containing the filtered lines.
-- $4: **output correspondences file** _as string_:
-      The output file containing the indexes of the matched lines in the original file.
-
-```bash
-list_fuzzyFilterSortFileWithGrepAndGawk file.txt filtered.txt correspondences.txt
-```
-
-> This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.
-> This function is useful for very large arrays.
-
 ## source
 
 Allows to source/include a library file or sources a file.
@@ -196,4 +185,6 @@ specify the included file for spellcheck.
 > - The file can be relative to the current script (script that calls this function).
 > - Use `builtin source` if you want to include the file even if it was already included.
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

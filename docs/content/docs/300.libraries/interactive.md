@@ -150,4 +150,6 @@ Returns:
 interactive::promptYesNoRaw "Do you want to continue?" && local answer="${RETURNED_VALUE}"
 ```
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

@@ -62,4 +62,6 @@ curl::request true 200 https://example.com -X POST -H 'Authorization: token'
 curl::request false 200,201 https://example.com || core::fail "The curl command failed."
 ```
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

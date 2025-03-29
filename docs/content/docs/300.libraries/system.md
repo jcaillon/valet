@@ -61,6 +61,38 @@ system::getOs
 local osName="${RETURNED_VALUE}"
 ```
 
+## system::isDarwin
+
+Check if the current OS is macOS.
+
+Returns:
+
+- $?
+  - 0 if the current OS is macOS
+  - 1 otherwise.
+
+```bash
+if system::isDarwin; then
+  printf 'The current OS is macOS.'
+fi
+```
+
+## system::isLinux
+
+Check if the current OS is Linux.
+
+Returns:
+
+- $?
+  - 0 if the current OS is Linux
+  - 1 otherwise.
+
+```bash
+if system::isLinux; then
+  printf 'The current OS is Linux.'
+fi
+```
+
 ## system::isRoot
 
 Check if the script is running as root.
@@ -77,4 +109,22 @@ if system::isRoot; then
 fi
 ```
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+## system::isWindows
+
+Check if the current OS is Windows.
+
+Returns:
+
+- $?
+  - 0 if the current OS is Windows
+  - 1 otherwise.
+
+```bash
+if system::isWindows; then
+  printf 'The current OS is Windows.'
+fi
+```
+
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

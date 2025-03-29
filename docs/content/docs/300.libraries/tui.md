@@ -147,7 +147,7 @@ necessary as the bindings are local to the script.
 ## tui::rerouteLogs
 
 Reroute the logs to a temporary file.
-The logs will be displayed at the end of the interactive session.
+The logs will be displayed when calling `tui::restoreLogs`
 
 ```bash
 tui::rerouteLogs
@@ -156,6 +156,7 @@ tui::rerouteLogs
 ## tui::restoreBindings
 
 Reset the key bindings to the default ones.
+To be called after `tui::rebindKeymap`.
 
 ```bash
 tui::restoreBindings
@@ -185,8 +186,8 @@ Restore the terminal options to their original state.
 Should be called after `tui::setTerminalOptions`.
 
 - $1: force _as bool_:
-      (optional) force the restoration of the stty configuration
-      stty state will not be restored if
+      (optional) force the restoration of the stty configuration.
+      By default, the restoration is only done if we are not in full screen mode when called.
       (defaults to false)
 
 ```bash
@@ -325,4 +326,6 @@ tui::waitForKeyPress -t 0.1
 > 2. When read is done, it will print a new line in stderr. So we redirect stderr to null.
 >    This means that if you print something in a readline bound function, do not print to stderr or you will get nothing !
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

@@ -76,7 +76,7 @@ echo "Human time: ${RETURNED_VALUE}"
 > The 10# forces the base 10 conversion to avoid issues with leading zeros.
 > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 
-## time::getTimerValue
+## time::getTimerMicroseconds
 
 Get the time elapsed since the call of `time::startTimer`.
 
@@ -94,17 +94,19 @@ Returns:
 
 ```bash
 time::startTimer
-_OPTION_LOG_ELAPSED_TIME=true time::getTimerValue
+_OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
 echo "Total microseconds: ${RETURNED_VALUE}"
 ```
 
 ## time::startTimer
 
-Start a timer. You can then call `time::getTimerValue` to get the elapsed time.
+Start a timer. You can then call `time::getTimerMicroseconds` to get the elapsed time.
 
 ```bash
 time::startTimer
-time::getTimerValue
+time::getTimerMicroseconds
 ```
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

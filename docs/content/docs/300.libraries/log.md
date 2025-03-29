@@ -42,6 +42,34 @@ It can be used before a fatal error to display useful information.
 log::errorTrace "This is a debug message."
 ```
 
+## log::getCallStack
+
+This function returns the current function stack.
+
+- $1: Stack to skip _as int_:
+      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
+      The number of stack to skip.
+      (defaults to 1 which skips this function)
+- $2: Stack to skip at end _as int_:
+      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.
+      The number of stack to skip at the end.
+      (defaults to 0)
+- ${_OPTION_WRAP_WIDTH} _as int_:
+      (optional) The width to wrap the call stack.
+      (defaults to the terminal width)
+
+Returns:
+
+- ${RETURNED_VALUE}: The call stack as a string.
+
+```bash
+log::getCallStack
+echo "${RETURNED_VALUE}"
+```
+
+> For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+> variables to simulate a call stack.
+
 ## log::getLevel
 
 Get the current log level.
@@ -293,4 +321,6 @@ Displays a warning.
 log::warning "This is a warning message."
 ```
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

@@ -141,4 +141,6 @@ echo "${RETURNED_ARRAY[@]}"
 > - The sorting is not stable (the order of equal elements is not preserved).
 > - It is not appropriate for large array, use the `sort` binary for such cases.
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

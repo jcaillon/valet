@@ -70,17 +70,19 @@ Reminder:
 - A hard link is a directory entry that associates a new pathname with an existing
   file (inode + data block) on a file system.
 
-This function allows to create a symbolic link on Windows as well as on Unix.
+See `windows::createLink` for Windows.
 
 - $1: **linked path** _as string_:
       the path to link to (the original file)
 - $2: **link path** _as string_:
       the path where to create the link
 - $3: hard link _as boolean_:
-      (optional) true to create a hard link, false to create a symbolic link
+      (optional) Can be set using the variable `_OPTION_HARD_LINK`.
+      True to create a hard link, false to create a symbolic link
       (defaults to false)
 - $4: force _as boolean_:
-      (optional) true to overwrite the link or file if it already exists.
+      (optional) Can be set using the variable `_OPTION_FORCE`.
+      True to overwrite the link or file if it already exists.
       Otherwise, the function will fail on an existing link.
       (defaults to true)
 
@@ -131,6 +133,25 @@ local file="${RETURNED_VALUE}"
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
+## fs::getCommandPath
+
+Get the absolute path of a command.
+
+- $1: **command** _as string_:
+      the command to find
+
+Returns:
+
+- ${RETURNED_VALUE}: The absolute path of the command (or empty if command not found).
+- $?:
+  - 0 if the command was found
+  - 1 otherwise
+
+```bash
+fs::getCommandPath "command"
+echo "${RETURNED_VALUE}"
+```
+
 ## fs::getFileLineCount
 
 Get the number of lines in a file.
@@ -164,6 +185,19 @@ Returns:
 
 > This is a pure bash alternative to `realpath` or `readlink`.
 
+## fs::getScriptDirectory
+
+This function returns the absolute path of the directory of the script that called it.
+
+Returns:
+
+- ${RETURNED_VALUE}: the directory of the script that called it.
+
+```bash
+fs::getScriptDirectory
+echo "${RETURNED_VALUE}"
+```
+
 ## fs::head
 
 Print the first lines of a file to stdout.
@@ -192,7 +226,8 @@ Check if the directory is writable. Creates the directory if it does not exist.
 - $1: **directory** _as string_:
       the directory to check
 - $2: test file name _as string_:
-      (optional) the name of the file to create in the directory to test the write access
+      (optional) Can be set using the variable `_OPTION_TEST_FILE_NAME`.
+      the name of the file to create in the directory to test the write access
 
 Returns:
 
@@ -370,4 +405,6 @@ local myPathAbsolutePath="${RETURNED_VALUE}"
 > The `..` will be processed before following any symlinks, by removing
 > the immediate pathname component.
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

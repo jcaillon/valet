@@ -14,6 +14,10 @@ Will also export the PATH variable in the current bash.
 - $1: **path** _as string_:
       the path to add to the PATH environment variable.
       The path can be in unix format, it will be converted to windows format.
+- $2: preprend _as bool_:
+      (optional) Can be set using the variable `_OPTION_PREPEND`.
+      True to prepend the path to the PATH, false to append it.
+      (defaults to false)
 
 ```bash
 windows::addToPath "/path/to/bin"
@@ -36,7 +40,8 @@ Returns:
 windows::convertPathFromUnix "/path/to/file"
 ```
 
-> Handles paths starting with `/mnt/x/` or `/x/`.
+> Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
+> handles other msys2 paths using `cygpath`.
 
 ## windows::convertPathToUnix
 
@@ -65,8 +70,6 @@ Reminder:
   form of an absolute or relative path.
 - A hard link is a directory entry that associates a new pathname with an existing
   file (inode + data block) on a file system.
-
-This function allows to create a symbolic link on Windows as well as on Unix.
 
 - $1: **linked path** _as string_:
       the path to link to (the original file)
@@ -169,7 +172,11 @@ This is mostly useful on Windows.
 - $1: **command** _as string_:
       the command to run.
 - $2: run as administrator _as bool_:
-      (optional) whether to run the command as administrator.
+      (optional) Can be set using the variable `_OPTION_RUN_AS_ADMIN`.
+      Wether to run the command as administrator.
+      (defaults to false).
+- ${_OPTION_SILENT} _as bool_:
+      (optional) Do not log the command stderr.
       (defaults to false).
 
 Returns:
@@ -216,4 +223,6 @@ windows::runPs1 "Write-Host \"World\""
 windows::endPs1Batch
 ```
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

@@ -2,7 +2,7 @@
 
 Valet is configurable through environment variables.
 
-To configure variables in bash, you should defined them in your `~/.bashrc` file which gets included (source) on each startup.
+To configure variables in bash, you should export them in your `~/.bashrc` file which gets included (source) on each startup.
 
 In Valet, you can also set variables in special bash scripts which are sourced when the program starts.
 These scripts are:
@@ -210,10 +210,28 @@ You can use the following placeholders:
 - `<source>`: The source of the function that logged the message.
 - `<varXXX>`: The value of an arbitrary variable `XXX`.
 - `<message>`: The log message (should be the last placeholder).
+- `<sourceFile>`: The file name of the source of the function that logged the message.
+- `<wrapPadding>`: The padding (spaces) used for wrapping the log message.
+- `<elapsedTime>`: The time elapsed since the start of the script.
+- `<elapsedTimeSinceLastLog>`: The time elapsed since the last log.
 
 Each placeholder can be followed by `{...}` to add the format specifier (see printf help).
 
-<!-- TODO: provide more example: output as JSON, output for more detailed -->
+All the placeholders have a default format which truncates the string to a maximum length. Use the format `{s}` to disable the truncation.
+
+Examples:
+
+- Java like logs: `"<colorFaded><time>{(%H:%M:%S)T} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <levelColor><level><colorDefault> <colorFaded><function>{15s}<colorDefault> -- <message>"`
+- JSON output: `'{"level": "<level>{s}", "message": "<message>{s}", "source": "<source>{s}", "line": "<line>{s}"}'`
+- Boxed messages: `"<colorFaded>╭─<time>{(%H:%M:%S)T}──<levelColor><level>{7s}<colorFaded>────────<sourceFile>{10s}:<line>{-4s}───░<colorDefault>"$'\n'"<colorFaded>│<colorDefault>  <message>"$'\n'"<colorFaded>╰─ +<elapsedTimeSinceLastLog>{7s}──────────────────────────────────░<colorDefault>"$'\n'`
+- Subtitles message: `"<levelColor><level><colorDefault> <message>"$'\n'"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) | pid <pid>{5s} | shlvl <subshell>{-1s} | from <sourceFile>{10s}:<line>{-4s}<colorDefault>"`
+- Compact debug logs: `"<colorFaded><elapsedTime>{8s} [<pid>{04d}:<subshell>{1s}] <colorFaded><sourceFile>{-5s}:<line>{-4s}<colorDefault> <levelColor><level>{-4s} <icon><colorDefault> <message>"`
+
+#### VALET_CONFIG_LOG_PATTERN_ALTERNATIVE
+
+The pattern to display a log line when the alternative log mode is used (global option `-a`).
+
+Defaults to: `"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <levelColor><level>{7s}<colorDefault> <colorFaded><sourceFile>{15s}:<line>{-4s}<colorDefault> <message>"`
 
 #### VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL
 
@@ -239,17 +257,22 @@ The file descriptor in which to print the logs (defaults to `2` to output to std
 
 #### VALET_CONFIG_LOG_TO_DIRECTORY
 
-A path to directory in which we will create one log file per valet execution, which
-will contain the valet logs.
+If equals to `true`, will enable the logging to a new file in addition to the file descriptor. Each execution of valet will produce a new log file.
+
+The logs are written in new files generated in the directory `~/.local/state/valet/logs` by default.
+
+Can also be set to the path of a directory in which to create the log files.
+
+See [VALET_CONFIG_LOG_FILENAME_PATTERN](#valet_config_log_filename_pattern) for the name of the log file.
 
 #### VALET_CONFIG_LOG_FILENAME_PATTERN
 
 A string that will be evaluated to set a variable `logFile` which represents
 the name of the file in which to write the logs.
 
-Only used if VALET_CONFIG_LOG_TO_DIRECTORY is set.
+Only used if [VALET_CONFIG_LOG_TO_DIRECTORY](#valet_config_log_to_directory) is set.
 
-The default is equivalent to setting this string to: `printf -v logFile '%s%(%FT%H-%M-%S%z)T%s' 'valet-' \${EPOCHSECONDS} '.log'`.
+The default is equivalent to setting this string to: `printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"`.
 
 <!-- _________________ PROFILER _______________________ -->
 
@@ -258,7 +281,7 @@ The default is equivalent to setting this string to: `printf -v logFile '%s%(%FT
 #### VALET_CONFIG_COMMAND_PROFILING_FILE
 
 The path to the file in which to write the profiling information for the command.
-Defaults to the ~/valet-profiler-{PID}-command.txt file.
+Defaults to a new file under ~/.local/state/valet/logs.
 
 #### VALET_CONFIG_KEEP_ALL_PROFILER_LINES
 
@@ -332,5 +355,10 @@ To debug your commands, use the -x option.
 The path to the file in which to write the profiling information for the startup of Valet.
 It must defined outside the config file (in your `~/.bashrc` or exporting before running valet).
 Defaults to a new file in your user state directory `~/.local/state/valet/logs`.
+
+#### VALET_CONFIG_CORE_DUMP_ON_EXIT
+
+Force the creation of a core dump file when valet exits.
+Dump files are created in the user state directory in `~/.local/state/valet/core-dumps` by default.
 
 <!-- END -->

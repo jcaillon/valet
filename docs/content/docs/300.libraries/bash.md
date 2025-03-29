@@ -243,4 +243,6 @@ bash::sleep 1.5
 
 > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

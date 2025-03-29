@@ -282,4 +282,6 @@ exe::invoket2 false git status || core::fail "status failed."
 
 > See exe::invokef5 for more information.
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

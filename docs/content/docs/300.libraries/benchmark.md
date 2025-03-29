@@ -32,4 +32,6 @@ print the difference between the baseline and the other functions.
 benchmark::run "baseline" "function1,function2" 1 100
 ```
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

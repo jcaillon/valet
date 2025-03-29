@@ -2,7 +2,7 @@
 # This script contains the documentation of all the valet library functions.
 # It can be used in your editor to provide auto-completion and documentation.
 #
-# Documentation generated for the version 0.28.3846 (2025-03-18).
+# Documentation generated for the version 0.29.197 (2025-03-29).
 
 # ## array::appendIfNotPresent
 # 
@@ -531,6 +531,24 @@ function command::sourceFunction() { :; }
 # ```
 # 
 function core::createNewStateFilePath() { :; }
+
+# ## core::dump
+# 
+# Dumps information about the current environment into a new state file.
+# 
+# - ${_OPTION_DUMP_SUFFIX} _as string_:
+#       (optional) The suffix for the file to create.
+#       (defaults to an empty string)
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: the path to the created file.
+# 
+# ```bash
+# core::dump
+# ```
+# 
+function core::dump() { :; }
 
 # ## core::fail
 # 
@@ -1122,17 +1140,19 @@ function fs::createFilePathIfNeeded() { :; }
 # - A hard link is a directory entry that associates a new pathname with an existing
 #   file (inode + data block) on a file system.
 # 
-# This function allows to create a symbolic link on Windows as well as on Unix.
+# See `windows::createLink` for Windows.
 # 
 # - $1: **linked path** _as string_:
 #       the path to link to (the original file)
 # - $2: **link path** _as string_:
 #       the path where to create the link
 # - $3: hard link _as boolean_:
-#       (optional) true to create a hard link, false to create a symbolic link
+#       (optional) Can be set using the variable `_OPTION_HARD_LINK`.
+#       True to create a hard link, false to create a symbolic link
 #       (defaults to false)
 # - $4: force _as boolean_:
-#       (optional) true to overwrite the link or file if it already exists.
+#       (optional) Can be set using the variable `_OPTION_FORCE`.
+#       True to overwrite the link or file if it already exists.
 #       Otherwise, the function will fail on an existing link.
 #       (defaults to true)
 # 
@@ -1189,6 +1209,27 @@ function fs::createTempDirectory() { :; }
 # 
 function fs::createTempFile() { :; }
 
+# ## fs::getCommandPath
+# 
+# Get the absolute path of a command.
+# 
+# - $1: **command** _as string_:
+#       the command to find
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: The absolute path of the command (or empty if command not found).
+# - $?:
+#   - 0 if the command was found
+#   - 1 otherwise
+# 
+# ```bash
+# fs::getCommandPath "command"
+# echo "${RETURNED_VALUE}"
+# ```
+# 
+function fs::getCommandPath() { :; }
+
 # ## fs::getFileLineCount
 # 
 # Get the number of lines in a file.
@@ -1226,6 +1267,21 @@ function fs::getFileLineCount() { :; }
 # 
 function fs::getPwdRealPath() { :; }
 
+# ## fs::getScriptDirectory
+# 
+# This function returns the absolute path of the directory of the script that called it.
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: the directory of the script that called it.
+# 
+# ```bash
+# fs::getScriptDirectory
+# echo "${RETURNED_VALUE}"
+# ```
+# 
+function fs::getScriptDirectory() { :; }
+
 # ## fs::head
 # 
 # Print the first lines of a file to stdout.
@@ -1256,7 +1312,8 @@ function fs::head() { :; }
 # - $1: **directory** _as string_:
 #       the directory to check
 # - $2: test file name _as string_:
-#       (optional) the name of the file to create in the directory to test the write access
+#       (optional) Can be set using the variable `_OPTION_TEST_FILE_NAME`.
+#       the name of the file to create in the directory to test the write access
 # 
 # Returns:
 # 
@@ -1623,35 +1680,6 @@ function interactive::promptYesNo() { :; }
 # 
 function interactive::promptYesNoRaw() { :; }
 
-# ## list_fuzzyFilterSortFileWithGrepAndGawk
-# 
-# Allows to fuzzy sort a file against a given searched string.
-# Outputs a file containing only the lines matching the searched string.
-# The array is sorted by (in order):
-# 
-# - the index of the first matched character in the line
-# - the distance between the first and last matched characters in the line
-# 
-# Will also output a file containing the indexes of the matched lines in the original file.
-# 
-# - $1: **file to filer** _as string_:
-#       The input file to filter.
-# - $2: **search string** _as string_:
-#       The variable name containing the search string to match.
-# - $3: **output filtered file** _as string_:
-#       The output file containing the filtered lines.
-# - $4: **output correspondences file** _as string_:
-#       The output file containing the indexes of the matched lines in the original file.
-# 
-# ```bash
-# list_fuzzyFilterSortFileWithGrepAndGawk file.txt filtered.txt correspondences.txt
-# ```
-# 
-# > This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.
-# > This function is useful for very large arrays.
-# 
-function list_fuzzyFilterSortFileWithGrepAndGawk() { :; }
-
 # ## log::debug
 # 
 # Displays a debug message.
@@ -1694,6 +1722,36 @@ function log::error() { :; }
 # ```
 # 
 function log::errorTrace() { :; }
+
+# ## log::getCallStack
+# 
+# This function returns the current function stack.
+# 
+# - $1: Stack to skip _as int_:
+#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
+#       The number of stack to skip.
+#       (defaults to 1 which skips this function)
+# - $2: Stack to skip at end _as int_:
+#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.
+#       The number of stack to skip at the end.
+#       (defaults to 0)
+# - ${_OPTION_WRAP_WIDTH} _as int_:
+#       (optional) The width to wrap the call stack.
+#       (defaults to the terminal width)
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: The call stack as a string.
+# 
+# ```bash
+# log::getCallStack
+# echo "${RETURNED_VALUE}"
+# ```
+# 
+# > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+# > variables to simulate a call stack.
+# 
+function log::getCallStack() { :; }
 
 # ## log::getLevel
 # 
@@ -2120,6 +2178,24 @@ function progress::stop() { :; }
 # 
 function progress::update() { :; }
 
+# ## regex::escapeRegexSpecialChars
+# 
+# Escapes special characters in a string to be used as a regex.
+# 
+# - $1: **string to escape** _as string_:
+#       The string to escape.
+# 
+# Returns:
+# 
+# - ${RETURNED_VALUE}: The escaped string.
+# 
+# ```bash
+# regex::escapeRegexSpecialChars "a.(b)"
+# echo "${RETURNED_VALUE}"
+# ```
+# 
+function regex::escapeRegexSpecialChars() { :; }
+
 # ## regex::getFirstGroup
 # 
 # Matches a string against a regex and returns the first captured group of the first match.
@@ -2455,6 +2531,25 @@ function string::extractBetween() { :; }
 # 
 function string::getField() { :; }
 
+# ## string::getFuzzySearchRegexFromSearchString
+# 
+# Allows to get a regex that can be used to fuzzy search a string.
+# the -> '([^t]*)(t[^h]*h[^e]*e)'
+# 
+# - $1: **search string** _as string_:
+#       The variable name containing the search string to match.
+# 
+# Returns:
+# 
+# - ${_STRING_FUZZY_FILTER_REGEX}: the regex
+# 
+# ```bash
+# string::getFuzzySearchRegexFromSearchString SEARCH_STRING
+# echo "${_STRING_FUZZY_FILTER_REGEX}"
+# ```
+# 
+function string::getFuzzySearchRegexFromSearchString() { :; }
+
 # ## string::getIndexOf
 # 
 # Find the first index of a string within another string.
@@ -2761,6 +2856,42 @@ function system::getEnvVars() { :; }
 # 
 function system::getOs() { :; }
 
+# ## system::isDarwin
+# 
+# Check if the current OS is macOS.
+# 
+# Returns:
+# 
+# - $?
+#   - 0 if the current OS is macOS
+#   - 1 otherwise.
+# 
+# ```bash
+# if system::isDarwin; then
+#   printf 'The current OS is macOS.'
+# fi
+# ```
+# 
+function system::isDarwin() { :; }
+
+# ## system::isLinux
+# 
+# Check if the current OS is Linux.
+# 
+# Returns:
+# 
+# - $?
+#   - 0 if the current OS is Linux
+#   - 1 otherwise.
+# 
+# ```bash
+# if system::isLinux; then
+#   printf 'The current OS is Linux.'
+# fi
+# ```
+# 
+function system::isLinux() { :; }
+
 # ## system::isRoot
 # 
 # Check if the script is running as root.
@@ -2778,6 +2909,24 @@ function system::getOs() { :; }
 # ```
 # 
 function system::isRoot() { :; }
+
+# ## system::isWindows
+# 
+# Check if the current OS is Windows.
+# 
+# Returns:
+# 
+# - $?
+#   - 0 if the current OS is Windows
+#   - 1 otherwise.
+# 
+# ```bash
+# if system::isWindows; then
+#   printf 'The current OS is Windows.'
+# fi
+# ```
+# 
+function system::isWindows() { :; }
 
 # ## test::exec
 # 
@@ -3079,7 +3228,7 @@ function time::getDate() { :; }
 # 
 function time::getProgramElapsedMicroseconds() { :; }
 
-# ## time::getTimerValue
+# ## time::getTimerMicroseconds
 # 
 # Get the time elapsed since the call of `time::startTimer`.
 # 
@@ -3097,19 +3246,19 @@ function time::getProgramElapsedMicroseconds() { :; }
 # 
 # ```bash
 # time::startTimer
-# _OPTION_LOG_ELAPSED_TIME=true time::getTimerValue
+# _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
 # echo "Total microseconds: ${RETURNED_VALUE}"
 # ```
 # 
-function time::getTimerValue() { :; }
+function time::getTimerMicroseconds() { :; }
 
 # ## time::startTimer
 # 
-# Start a timer. You can then call `time::getTimerValue` to get the elapsed time.
+# Start a timer. You can then call `time::getTimerMicroseconds` to get the elapsed time.
 # 
 # ```bash
 # time::startTimer
-# time::getTimerValue
+# time::getTimerMicroseconds
 # ```
 # 
 function time::startTimer() { :; }
@@ -3270,7 +3419,7 @@ function tui::rebindKeymap() { :; }
 # ## tui::rerouteLogs
 # 
 # Reroute the logs to a temporary file.
-# The logs will be displayed at the end of the interactive session.
+# The logs will be displayed when calling `tui::restoreLogs`
 # 
 # ```bash
 # tui::rerouteLogs
@@ -3281,6 +3430,7 @@ function tui::rerouteLogs() { :; }
 # ## tui::restoreBindings
 # 
 # Reset the key bindings to the default ones.
+# To be called after `tui::rebindKeymap`.
 # 
 # ```bash
 # tui::restoreBindings
@@ -3316,8 +3466,8 @@ function tui::restoreLogs() { :; }
 # Should be called after `tui::setTerminalOptions`.
 # 
 # - $1: force _as bool_:
-#       (optional) force the restoration of the stty configuration
-#       stty state will not be restored if
+#       (optional) force the restoration of the stty configuration.
+#       By default, the restoration is only done if we are not in full screen mode when called.
 #       (defaults to false)
 # 
 # ```bash
@@ -3533,6 +3683,10 @@ function version::compare() { :; }
 # - $1: **path** _as string_:
 #       the path to add to the PATH environment variable.
 #       The path can be in unix format, it will be converted to windows format.
+# - $2: preprend _as bool_:
+#       (optional) Can be set using the variable `_OPTION_PREPEND`.
+#       True to prepend the path to the PATH, false to append it.
+#       (defaults to false)
 # 
 # ```bash
 # windows::addToPath "/path/to/bin"
@@ -3557,7 +3711,8 @@ function windows::addToPath() { :; }
 # windows::convertPathFromUnix "/path/to/file"
 # ```
 # 
-# > Handles paths starting with `/mnt/x/` or `/x/`.
+# > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
+# > handles other msys2 paths using `cygpath`.
 # 
 function windows::convertPathFromUnix() { :; }
 
@@ -3590,8 +3745,6 @@ function windows::convertPathToUnix() { :; }
 #   form of an absolute or relative path.
 # - A hard link is a directory entry that associates a new pathname with an existing
 #   file (inode + data block) on a file system.
-# 
-# This function allows to create a symbolic link on Windows as well as on Unix.
 # 
 # - $1: **linked path** _as string_:
 #       the path to link to (the original file)
@@ -3704,7 +3857,11 @@ function windows::getEnvVar() { :; }
 # - $1: **command** _as string_:
 #       the command to run.
 # - $2: run as administrator _as bool_:
-#       (optional) whether to run the command as administrator.
+#       (optional) Can be set using the variable `_OPTION_RUN_AS_ADMIN`.
+#       Wether to run the command as administrator.
+#       (defaults to false).
+# - ${_OPTION_SILENT} _as bool_:
+#       (optional) Do not log the command stderr.
 #       (defaults to false).
 # 
 # Returns:

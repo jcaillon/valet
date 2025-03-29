@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+> Documentation generated for the version 0.29.197 (2025-03-29).
 
 ## array::appendIfNotPresent
 
@@ -482,6 +482,22 @@ Returns:
 ```bash
 core::createNewStateFilePath "my-file"
 printf '%s\n' "The file is ⌜${RETURNED_VALUE}⌝."
+```
+
+## core::dump
+
+Dumps information about the current environment into a new state file.
+
+- ${_OPTION_DUMP_SUFFIX} _as string_:
+      (optional) The suffix for the file to create.
+      (defaults to an empty string)
+
+Returns:
+
+- ${RETURNED_VALUE}: the path to the created file.
+
+```bash
+core::dump
 ```
 
 ## core::fail
@@ -1026,17 +1042,19 @@ Reminder:
 - A hard link is a directory entry that associates a new pathname with an existing
   file (inode + data block) on a file system.
 
-This function allows to create a symbolic link on Windows as well as on Unix.
+See `windows::createLink` for Windows.
 
 - $1: **linked path** _as string_:
       the path to link to (the original file)
 - $2: **link path** _as string_:
       the path where to create the link
 - $3: hard link _as boolean_:
-      (optional) true to create a hard link, false to create a symbolic link
+      (optional) Can be set using the variable `_OPTION_HARD_LINK`.
+      True to create a hard link, false to create a symbolic link
       (defaults to false)
 - $4: force _as boolean_:
-      (optional) true to overwrite the link or file if it already exists.
+      (optional) Can be set using the variable `_OPTION_FORCE`.
+      True to overwrite the link or file if it already exists.
       Otherwise, the function will fail on an existing link.
       (defaults to true)
 
@@ -1087,6 +1105,25 @@ local file="${RETURNED_VALUE}"
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
+## fs::getCommandPath
+
+Get the absolute path of a command.
+
+- $1: **command** _as string_:
+      the command to find
+
+Returns:
+
+- ${RETURNED_VALUE}: The absolute path of the command (or empty if command not found).
+- $?:
+  - 0 if the command was found
+  - 1 otherwise
+
+```bash
+fs::getCommandPath "command"
+echo "${RETURNED_VALUE}"
+```
+
 ## fs::getFileLineCount
 
 Get the number of lines in a file.
@@ -1120,6 +1157,19 @@ Returns:
 
 > This is a pure bash alternative to `realpath` or `readlink`.
 
+## fs::getScriptDirectory
+
+This function returns the absolute path of the directory of the script that called it.
+
+Returns:
+
+- ${RETURNED_VALUE}: the directory of the script that called it.
+
+```bash
+fs::getScriptDirectory
+echo "${RETURNED_VALUE}"
+```
+
 ## fs::head
 
 Print the first lines of a file to stdout.
@@ -1148,7 +1198,8 @@ Check if the directory is writable. Creates the directory if it does not exist.
 - $1: **directory** _as string_:
       the directory to check
 - $2: test file name _as string_:
-      (optional) the name of the file to create in the directory to test the write access
+      (optional) Can be set using the variable `_OPTION_TEST_FILE_NAME`.
+      the name of the file to create in the directory to test the write access
 
 Returns:
 
@@ -1485,33 +1536,6 @@ Returns:
 interactive::promptYesNoRaw "Do you want to continue?" && local answer="${RETURNED_VALUE}"
 ```
 
-## list_fuzzyFilterSortFileWithGrepAndGawk
-
-Allows to fuzzy sort a file against a given searched string.
-Outputs a file containing only the lines matching the searched string.
-The array is sorted by (in order):
-
-- the index of the first matched character in the line
-- the distance between the first and last matched characters in the line
-
-Will also output a file containing the indexes of the matched lines in the original file.
-
-- $1: **file to filer** _as string_:
-      The input file to filter.
-- $2: **search string** _as string_:
-      The variable name containing the search string to match.
-- $3: **output filtered file** _as string_:
-      The output file containing the filtered lines.
-- $4: **output correspondences file** _as string_:
-      The output file containing the indexes of the matched lines in the original file.
-
-```bash
-list_fuzzyFilterSortFileWithGrepAndGawk file.txt filtered.txt correspondences.txt
-```
-
-> This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.
-> This function is useful for very large arrays.
-
 ## log::debug
 
 Displays a debug message.
@@ -1548,6 +1572,34 @@ It can be used before a fatal error to display useful information.
 ```bash
 log::errorTrace "This is a debug message."
 ```
+
+## log::getCallStack
+
+This function returns the current function stack.
+
+- $1: Stack to skip _as int_:
+      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
+      The number of stack to skip.
+      (defaults to 1 which skips this function)
+- $2: Stack to skip at end _as int_:
+      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.
+      The number of stack to skip at the end.
+      (defaults to 0)
+- ${_OPTION_WRAP_WIDTH} _as int_:
+      (optional) The width to wrap the call stack.
+      (defaults to the terminal width)
+
+Returns:
+
+- ${RETURNED_VALUE}: The call stack as a string.
+
+```bash
+log::getCallStack
+echo "${RETURNED_VALUE}"
+```
+
+> For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+> variables to simulate a call stack.
 
 ## log::getLevel
 
@@ -1928,6 +1980,22 @@ The animation will stop if the updated percentage is 100.
 progress::update 50 "Doing something..."
 ```
 
+## regex::escapeRegexSpecialChars
+
+Escapes special characters in a string to be used as a regex.
+
+- $1: **string to escape** _as string_:
+      The string to escape.
+
+Returns:
+
+- ${RETURNED_VALUE}: The escaped string.
+
+```bash
+regex::escapeRegexSpecialChars "a.(b)"
+echo "${RETURNED_VALUE}"
+```
+
 ## regex::getFirstGroup
 
 Matches a string against a regex and returns the first captured group of the first match.
@@ -2239,6 +2307,23 @@ echo "${RETURNED_VALUE}"
 > - using read into an array from a here string
 > - using bash parameter expansion to remove before/after the separator
 
+## string::getFuzzySearchRegexFromSearchString
+
+Allows to get a regex that can be used to fuzzy search a string.
+the -> '([^t]*)(t[^h]*h[^e]*e)'
+
+- $1: **search string** _as string_:
+      The variable name containing the search string to match.
+
+Returns:
+
+- ${_STRING_FUZZY_FILTER_REGEX}: the regex
+
+```bash
+string::getFuzzySearchRegexFromSearchString SEARCH_STRING
+echo "${_STRING_FUZZY_FILTER_REGEX}"
+```
+
 ## string::getIndexOf
 
 Find the first index of a string within another string.
@@ -2519,6 +2604,38 @@ system::getOs
 local osName="${RETURNED_VALUE}"
 ```
 
+## system::isDarwin
+
+Check if the current OS is macOS.
+
+Returns:
+
+- $?
+  - 0 if the current OS is macOS
+  - 1 otherwise.
+
+```bash
+if system::isDarwin; then
+  printf 'The current OS is macOS.'
+fi
+```
+
+## system::isLinux
+
+Check if the current OS is Linux.
+
+Returns:
+
+- $?
+  - 0 if the current OS is Linux
+  - 1 otherwise.
+
+```bash
+if system::isLinux; then
+  printf 'The current OS is Linux.'
+fi
+```
+
 ## system::isRoot
 
 Check if the script is running as root.
@@ -2532,6 +2649,22 @@ Returns:
 ```bash
 if system::isRoot; then
   printf 'The script is running as root.'
+fi
+```
+
+## system::isWindows
+
+Check if the current OS is Windows.
+
+Returns:
+
+- $?
+  - 0 if the current OS is Windows
+  - 1 otherwise.
+
+```bash
+if system::isWindows; then
+  printf 'The current OS is Windows.'
 fi
 ```
 
@@ -2797,7 +2930,7 @@ echo "Human time: ${RETURNED_VALUE}"
 > The 10# forces the base 10 conversion to avoid issues with leading zeros.
 > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 
-## time::getTimerValue
+## time::getTimerMicroseconds
 
 Get the time elapsed since the call of `time::startTimer`.
 
@@ -2815,17 +2948,17 @@ Returns:
 
 ```bash
 time::startTimer
-_OPTION_LOG_ELAPSED_TIME=true time::getTimerValue
+_OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
 echo "Total microseconds: ${RETURNED_VALUE}"
 ```
 
 ## time::startTimer
 
-Start a timer. You can then call `time::getTimerValue` to get the elapsed time.
+Start a timer. You can then call `time::getTimerMicroseconds` to get the elapsed time.
 
 ```bash
 time::startTimer
-time::getTimerValue
+time::getTimerMicroseconds
 ```
 
 ## tui::clearBox
@@ -2970,7 +3103,7 @@ necessary as the bindings are local to the script.
 ## tui::rerouteLogs
 
 Reroute the logs to a temporary file.
-The logs will be displayed at the end of the interactive session.
+The logs will be displayed when calling `tui::restoreLogs`
 
 ```bash
 tui::rerouteLogs
@@ -2979,6 +3112,7 @@ tui::rerouteLogs
 ## tui::restoreBindings
 
 Reset the key bindings to the default ones.
+To be called after `tui::rebindKeymap`.
 
 ```bash
 tui::restoreBindings
@@ -3008,8 +3142,8 @@ Restore the terminal options to their original state.
 Should be called after `tui::setTerminalOptions`.
 
 - $1: force _as bool_:
-      (optional) force the restoration of the stty configuration
-      stty state will not be restored if
+      (optional) force the restoration of the stty configuration.
+      By default, the restoration is only done if we are not in full screen mode when called.
       (defaults to false)
 
 ```bash
@@ -3203,6 +3337,10 @@ Will also export the PATH variable in the current bash.
 - $1: **path** _as string_:
       the path to add to the PATH environment variable.
       The path can be in unix format, it will be converted to windows format.
+- $2: preprend _as bool_:
+      (optional) Can be set using the variable `_OPTION_PREPEND`.
+      True to prepend the path to the PATH, false to append it.
+      (defaults to false)
 
 ```bash
 windows::addToPath "/path/to/bin"
@@ -3225,7 +3363,8 @@ Returns:
 windows::convertPathFromUnix "/path/to/file"
 ```
 
-> Handles paths starting with `/mnt/x/` or `/x/`.
+> Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
+> handles other msys2 paths using `cygpath`.
 
 ## windows::convertPathToUnix
 
@@ -3254,8 +3393,6 @@ Reminder:
   form of an absolute or relative path.
 - A hard link is a directory entry that associates a new pathname with an existing
   file (inode + data block) on a file system.
-
-This function allows to create a symbolic link on Windows as well as on Unix.
 
 - $1: **linked path** _as string_:
       the path to link to (the original file)
@@ -3358,7 +3495,11 @@ This is mostly useful on Windows.
 - $1: **command** _as string_:
       the command to run.
 - $2: run as administrator _as bool_:
-      (optional) whether to run the command as administrator.
+      (optional) Can be set using the variable `_OPTION_RUN_AS_ADMIN`.
+      Wether to run the command as administrator.
+      (defaults to false).
+- ${_OPTION_SILENT} _as bool_:
+      (optional) Do not log the command stderr.
       (defaults to false).
 
 Returns:
@@ -3407,4 +3548,4 @@ windows::endPs1Batch
 
 
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+> Documentation generated for the version 0.29.197 (2025-03-29).

@@ -5,6 +5,22 @@ cascade:
 url: /docs/libraries/regex
 ---
 
+## regex::escapeRegexSpecialChars
+
+Escapes special characters in a string to be used as a regex.
+
+- $1: **string to escape** _as string_:
+      The string to escape.
+
+Returns:
+
+- ${RETURNED_VALUE}: The escaped string.
+
+```bash
+regex::escapeRegexSpecialChars "a.(b)"
+echo "${RETURNED_VALUE}"
+```
+
 ## regex::getFirstGroup
 
 Matches a string against a regex and returns the first captured group of the first match.
@@ -95,4 +111,6 @@ echo "${RETURNED_VALUE}"
 
 > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

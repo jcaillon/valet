@@ -51,4 +51,6 @@ local comparison="${RETURNED_VALUE}"
 
 > The prerelease and build are ignored in the comparison.
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

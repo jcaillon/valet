@@ -168,6 +168,23 @@ echo "${RETURNED_VALUE}"
 > - using read into an array from a here string
 > - using bash parameter expansion to remove before/after the separator
 
+## string::getFuzzySearchRegexFromSearchString
+
+Allows to get a regex that can be used to fuzzy search a string.
+the -> '([^t]*)(t[^h]*h[^e]*e)'
+
+- $1: **search string** _as string_:
+      The variable name containing the search string to match.
+
+Returns:
+
+- ${_STRING_FUZZY_FILTER_REGEX}: the regex
+
+```bash
+string::getFuzzySearchRegexFromSearchString SEARCH_STRING
+echo "${_STRING_FUZZY_FILTER_REGEX}"
+```
+
 ## string::getIndexOf
 
 Find the first index of a string within another string.
@@ -392,4 +409,6 @@ echo "${RETURNED_VALUE}"
 > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 
-> Documentation generated for the version 0.28.3846 (2025-03-18).
+{{< callout type="info" >}}
+Documentation generated for the version 0.29.197 (2025-03-29).
+{{< /callout >}}

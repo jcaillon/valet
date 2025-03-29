@@ -1,5 +1,5 @@
 {
-// Documentation generated for the version 0.28.3846 (2025-03-18).
+// Documentation generated for the version 0.29.197 (2025-03-29).
 
 "array::appendIfNotPresent": {
   "prefix": "array::appendIfNotPresent",
@@ -321,6 +321,20 @@
   "description": "Returns the path to a new file stored in the user state directory...",
   "scope": "",
   "body": [ "# ## core::createNewStateFilePath\n# \n# Returns the path to a new file stored in the user state directory.\n# Can be used to save the state of important temporary files generated during a program\n# execution.\n# \n# - \\$1: **file suffix** _as string_:\n#       The suffix for the file to create.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The path to the created file.\n# \n# ```bash\n# core::createNewStateFilePath \"my-file\"\n# printf '%s\\n' \"The file is ⌜\\${RETURNED_VALUE}⌝.\"\n# ```\n# \ncore::createNewStateFilePath \"${1:**file suffix**}\"$0" ]
+},
+
+"core::dump": {
+  "prefix": "core::dump",
+  "description": "Dumps information about the current environment into a new state file...",
+  "scope": "",
+  "body": [ "_OPTION_DUMP_SUFFIX=${1} core::dump$0" ]
+},
+
+"core::dump#withdoc": {
+  "prefix": "core::dump#withdoc",
+  "description": "Dumps information about the current environment into a new state file...",
+  "scope": "",
+  "body": [ "# ## core::dump\n# \n# Dumps information about the current environment into a new state file.\n# \n# - \\${_OPTION_DUMP_SUFFIX} _as string_:\n#       (optional) The suffix for the file to create.\n#       (defaults to an empty string)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the path to the created file.\n# \n# ```bash\n# core::dump\n# ```\n# \n_OPTION_DUMP_SUFFIX=${1} core::dump$0" ]
 },
 
 "core::fail": {
@@ -670,7 +684,7 @@
   "prefix": "fs::createLink#withdoc",
   "description": "Create a soft or hard link (original ← link)...",
   "scope": "",
-  "body": [ "# ## fs::createLink\n# \n# Create a soft or hard link (original ← link).\n# \n# Reminder:\n# \n# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the\n#   form of an absolute or relative path.\n# - A hard link is a directory entry that associates a new pathname with an existing\n#   file (inode + data block) on a file system.\n# \n# This function allows to create a symbolic link on Windows as well as on Unix.\n# \n# - \\$1: **linked path** _as string_:\n#       the path to link to (the original file)\n# - \\$2: **link path** _as string_:\n#       the path where to create the link\n# - \\$3: hard link _as boolean_:\n#       (optional) true to create a hard link, false to create a symbolic link\n#       (defaults to false)\n# - \\$4: force _as boolean_:\n#       (optional) true to overwrite the link or file if it already exists.\n#       Otherwise, the function will fail on an existing link.\n#       (defaults to true)\n# \n# ```bash\n# fs::createLink \"/path/to/link\" \"/path/to/linked\"\n# fs::createLink \"/path/to/link\" \"/path/to/linked\" true\n# ```\n# \n# > The function uses the `ln` command.\n# \nfs::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
+  "body": [ "# ## fs::createLink\n# \n# Create a soft or hard link (original ← link).\n# \n# Reminder:\n# \n# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the\n#   form of an absolute or relative path.\n# - A hard link is a directory entry that associates a new pathname with an existing\n#   file (inode + data block) on a file system.\n# \n# See `windows::createLink` for Windows.\n# \n# - \\$1: **linked path** _as string_:\n#       the path to link to (the original file)\n# - \\$2: **link path** _as string_:\n#       the path where to create the link\n# - \\$3: hard link _as boolean_:\n#       (optional) Can be set using the variable `_OPTION_HARD_LINK`.\n#       True to create a hard link, false to create a symbolic link\n#       (defaults to false)\n# - \\$4: force _as boolean_:\n#       (optional) Can be set using the variable `_OPTION_FORCE`.\n#       True to overwrite the link or file if it already exists.\n#       Otherwise, the function will fail on an existing link.\n#       (defaults to true)\n# \n# ```bash\n# fs::createLink \"/path/to/link\" \"/path/to/linked\"\n# fs::createLink \"/path/to/link\" \"/path/to/linked\" true\n# ```\n# \n# > The function uses the `ln` command.\n# \nfs::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
 },
 
 "fs::createTempDirectory": {
@@ -701,6 +715,20 @@
   "body": [ "# ## fs::createTempFile\n# \n# Creates a temporary file and return its path.\n# \n# - \\${_OPTION_PATH_ONLY} _as bool_:\n#       (optional) If true, does not create the file, only returns the path.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The created path.\n# \n# ```bash\n# fs::createTempFile\n# local file=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Files created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \n_OPTION_PATH_ONLY=${1} fs::createTempFile$0" ]
 },
 
+"fs::getCommandPath": {
+  "prefix": "fs::getCommandPath",
+  "description": "Get the absolute path of a command...",
+  "scope": "",
+  "body": [ "fs::getCommandPath \"${1:**command**}\"$0" ]
+},
+
+"fs::getCommandPath#withdoc": {
+  "prefix": "fs::getCommandPath#withdoc",
+  "description": "Get the absolute path of a command...",
+  "scope": "",
+  "body": [ "# ## fs::getCommandPath\n# \n# Get the absolute path of a command.\n# \n# - \\$1: **command** _as string_:\n#       the command to find\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The absolute path of the command (or empty if command not found).\n# - \\$?:\n#   - 0 if the command was found\n#   - 1 otherwise\n# \n# ```bash\n# fs::getCommandPath \"command\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nfs::getCommandPath \"${1:**command**}\"$0" ]
+},
+
 "fs::getFileLineCount": {
   "prefix": "fs::getFileLineCount",
   "description": "Get the number of lines in a file...",
@@ -729,6 +757,20 @@
   "body": [ "# ## fs::getPwdRealPath\n# \n# Get the real path of the current directory.\n# By default, the `\\${PWD}` variable is the logical path, which may contain symlinks.\n# \n# ```bash\n# fs::getPwdRealPath\n# ```\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The realpath for the current directory.\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# \nfs::getPwdRealPath$0" ]
 },
 
+"fs::getScriptDirectory": {
+  "prefix": "fs::getScriptDirectory",
+  "description": "This function returns the absolute path of the directory of the script that called it...",
+  "scope": "",
+  "body": [ "fs::getScriptDirectory$0" ]
+},
+
+"fs::getScriptDirectory#withdoc": {
+  "prefix": "fs::getScriptDirectory#withdoc",
+  "description": "This function returns the absolute path of the directory of the script that called it...",
+  "scope": "",
+  "body": [ "# ## fs::getScriptDirectory\n# \n# This function returns the absolute path of the directory of the script that called it.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the directory of the script that called it.\n# \n# ```bash\n# fs::getScriptDirectory\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nfs::getScriptDirectory$0" ]
+},
+
 "fs::head": {
   "prefix": "fs::head",
   "description": "Print the first lines of a file to stdout...",
@@ -754,7 +796,7 @@
   "prefix": "fs::isDirectoryWritable#withdoc",
   "description": "Check if the directory is writable...",
   "scope": "",
-  "body": [ "# ## fs::isDirectoryWritable\n# \n# Check if the directory is writable. Creates the directory if it does not exist.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to check\n# - \\$2: test file name _as string_:\n#       (optional) the name of the file to create in the directory to test the write access\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the directory is writable\n#   - 1 otherwise\n# \n# ```bash\n# if fs::isDirectoryWritable \"/path/to/directory\"; then\n#   echo \"The directory is writable.\"\n# fi\n# ```\n# \nfs::isDirectoryWritable \"${1:**directory**}\" \"${2:test file name}\"$0" ]
+  "body": [ "# ## fs::isDirectoryWritable\n# \n# Check if the directory is writable. Creates the directory if it does not exist.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to check\n# - \\$2: test file name _as string_:\n#       (optional) Can be set using the variable `_OPTION_TEST_FILE_NAME`.\n#       the name of the file to create in the directory to test the write access\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the directory is writable\n#   - 1 otherwise\n# \n# ```bash\n# if fs::isDirectoryWritable \"/path/to/directory\"; then\n#   echo \"The directory is writable.\"\n# fi\n# ```\n# \nfs::isDirectoryWritable \"${1:**directory**}\" \"${2:test file name}\"$0" ]
 },
 
 "fs::listDirectories": {
@@ -953,20 +995,6 @@
   "body": [ "# ## interactive::promptYesNoRaw\n# \n# Ask the user to yes or no.\n# \n# - The user can switch between the two options with the arrow keys or space.\n# - The user can validate the choice with the enter key.\n# - The user can also validate immediately with the y or n key.\n# \n# This raw version does not display the prompt or the answer.\n# \n# - \\$1: default _as bool_:\n#       (optional) the default value to select\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user answered yes\n#   - 1 otherwise\n# - \\${RETURNED_VALUE}: true or false.\n# \n# ```bash\n# interactive::promptYesNoRaw \"Do you want to continue?\" && local answer=\"\\${RETURNED_VALUE}\"\n# ```\n# \ninteractive::promptYesNoRaw \"${1:default}\"$0" ]
 },
 
-"list_fuzzyFilterSortFileWithGrepAndGawk": {
-  "prefix": "list_fuzzyFilterSortFileWithGrepAndGawk",
-  "description": "Allows to fuzzy sort a file against a given searched string...",
-  "scope": "",
-  "body": [ "list_fuzzyFilterSortFileWithGrepAndGawk \"${1:**file to filer**}\" \"${2:**search string**}\" \"${3:**output filtered file**}\" \"${4:**output correspondences file**}\"$0" ]
-},
-
-"list_fuzzyFilterSortFileWithGrepAndGawk#withdoc": {
-  "prefix": "list_fuzzyFilterSortFileWithGrepAndGawk#withdoc",
-  "description": "Allows to fuzzy sort a file against a given searched string...",
-  "scope": "",
-  "body": [ "# ## list_fuzzyFilterSortFileWithGrepAndGawk\n# \n# Allows to fuzzy sort a file against a given searched string.\n# Outputs a file containing only the lines matching the searched string.\n# The array is sorted by (in order):\n# \n# - the index of the first matched character in the line\n# - the distance between the first and last matched characters in the line\n# \n# Will also output a file containing the indexes of the matched lines in the original file.\n# \n# - \\$1: **file to filer** _as string_:\n#       The input file to filter.\n# - \\$2: **search string** _as string_:\n#       The variable name containing the search string to match.\n# - \\$3: **output filtered file** _as string_:\n#       The output file containing the filtered lines.\n# - \\$4: **output correspondences file** _as string_:\n#       The output file containing the indexes of the matched lines in the original file.\n# \n# ```bash\n# list_fuzzyFilterSortFileWithGrepAndGawk file.txt filtered.txt correspondences.txt\n# ```\n# \n# > This is not a pure bash function! Use `array::fuzzyFilterSort` for pure bash alternative.\n# > This function is useful for very large arrays.\n# \nlist_fuzzyFilterSortFileWithGrepAndGawk \"${1:**file to filer**}\" \"${2:**search string**}\" \"${3:**output filtered file**}\" \"${4:**output correspondences file**}\"$0" ]
-},
-
 "log::debug": {
   "prefix": "log::debug",
   "description": "Displays a debug message...",
@@ -1007,6 +1035,20 @@
   "description": "Displays an error trace message...",
   "scope": "",
   "body": [ "# ## log::errorTrace\n# \n# Displays an error trace message.\n# This is a trace message that is always displayed, independently of the log level.\n# It can be used before a fatal error to display useful information.\n# \n# - \\$@: **message** _as string_:\n#       the trace messages to display\n# \n# ```bash\n# log::errorTrace \"This is a debug message.\"\n# ```\n# \nlog::errorTrace \"${1:**message**}\"$0" ]
+},
+
+"log::getCallStack": {
+  "prefix": "log::getCallStack",
+  "description": "This function returns the current function stack...",
+  "scope": "",
+  "body": [ "_OPTION_WRAP_WIDTH=${3} log::getCallStack \"${1:Stack to skip}\" \"${2:Stack to skip at end}\"$0" ]
+},
+
+"log::getCallStack#withdoc": {
+  "prefix": "log::getCallStack#withdoc",
+  "description": "This function returns the current function stack...",
+  "scope": "",
+  "body": [ "# ## log::getCallStack\n# \n# This function returns the current function stack.\n# \n# - \\$1: Stack to skip _as int_:\n#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.\n#       The number of stack to skip.\n#       (defaults to 1 which skips this function)\n# - \\$2: Stack to skip at end _as int_:\n#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.\n#       The number of stack to skip at the end.\n#       (defaults to 0)\n# - \\${_OPTION_WRAP_WIDTH} _as int_:\n#       (optional) The width to wrap the call stack.\n#       (defaults to the terminal width)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The call stack as a string.\n# \n# ```bash\n# log::getCallStack\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`\n# > variables to simulate a call stack.\n# \n_OPTION_WRAP_WIDTH=${3} log::getCallStack \"${1:Stack to skip}\" \"${2:Stack to skip at end}\"$0" ]
 },
 
 "log::getLevel": {
@@ -1331,6 +1373,20 @@
   "body": [ "# ## progress::update\n# \n# Update the progress bar with a new percentage and message.\n# \n# The animation can be started with progress::start for more options.\n# The animation will stop if the updated percentage is 100.\n# \n# - \\$1: **percent** _as int_:\n#       the percentage of the progress bar (0 to 100)\n# - \\$2: message _as string_:\n#       (optional) the message to display\n# \n# ```bash\n# progress::update 50 \"Doing something...\"\n# ```\n# \nprogress::update \"${1:**percent**}\" \"${2:message}\"$0" ]
 },
 
+"regex::escapeRegexSpecialChars": {
+  "prefix": "regex::escapeRegexSpecialChars",
+  "description": "Escapes special characters in a string to be used as a regex...",
+  "scope": "",
+  "body": [ "regex::escapeRegexSpecialChars \"${1:**string to escape**}\"$0" ]
+},
+
+"regex::escapeRegexSpecialChars#withdoc": {
+  "prefix": "regex::escapeRegexSpecialChars#withdoc",
+  "description": "Escapes special characters in a string to be used as a regex...",
+  "scope": "",
+  "body": [ "# ## regex::escapeRegexSpecialChars\n# \n# Escapes special characters in a string to be used as a regex.\n# \n# - \\$1: **string to escape** _as string_:\n#       The string to escape.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The escaped string.\n# \n# ```bash\n# regex::escapeRegexSpecialChars \"a.(b)\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nregex::escapeRegexSpecialChars \"${1:**string to escape**}\"$0" ]
+},
+
 "regex::getFirstGroup": {
   "prefix": "regex::getFirstGroup",
   "description": "Matches a string against a regex and returns the first captured group of the first match...",
@@ -1497,6 +1553,20 @@
   "description": "Allows to get the nth element of a string separated by a given separator...",
   "scope": "",
   "body": [ "# ## string::getField\n# \n# Allows to get the nth element of a string separated by a given separator.\n# This is the equivalent of the cut command \"cut -d\"\\${separator}\" -f\"\\${fieldNumber}\"\"\n# but it uses pure bash to go faster.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to extract from.\n# - \\$2: **field number** _as int_:\n#       The field number to get (starting at 0).\n# - \\$3: separator _as string_:\n#       The separator to use.\n#       (defaults to tab if not provided)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the extracted field\n# \n# ```bash\n# MY_STRING=\"field1 field2 field3\"\n# string::getField MY_STRING 1 \" \"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This is faster than:\n# >\n# > - using read into an array from a here string\n# > - using bash parameter expansion to remove before/after the separator\n# \nstring::getField \"${1:**string variable name**}\" \"${2:**field number**}\" \"${3:separator}\"$0" ]
+},
+
+"string::getFuzzySearchRegexFromSearchString": {
+  "prefix": "string::getFuzzySearchRegexFromSearchString",
+  "description": "Allows to get a regex that can be used to fuzzy search a string...",
+  "scope": "",
+  "body": [ "string::getFuzzySearchRegexFromSearchString \"${1:**search string**}\"$0" ]
+},
+
+"string::getFuzzySearchRegexFromSearchString#withdoc": {
+  "prefix": "string::getFuzzySearchRegexFromSearchString#withdoc",
+  "description": "Allows to get a regex that can be used to fuzzy search a string...",
+  "scope": "",
+  "body": [ "# ## string::getFuzzySearchRegexFromSearchString\n# \n# Allows to get a regex that can be used to fuzzy search a string.\n# the -> '([^t]*)(t[^h]*h[^e]*e)'\n# \n# - \\$1: **search string** _as string_:\n#       The variable name containing the search string to match.\n# \n# Returns:\n# \n# - \\${_STRING_FUZZY_FILTER_REGEX}: the regex\n# \n# ```bash\n# string::getFuzzySearchRegexFromSearchString SEARCH_STRING\n# echo \"\\${_STRING_FUZZY_FILTER_REGEX}\"\n# ```\n# \nstring::getFuzzySearchRegexFromSearchString \"${1:**search string**}\"$0" ]
 },
 
 "string::getIndexOf": {
@@ -1681,6 +1751,34 @@
   "body": [ "# ## system::getOs\n# \n# Returns the name of the current OS.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the name of the current OS: \"darwin\", \"linux\" or \"windows\".\n# \n# ```bash\n# system::getOs\n# local osName=\"\\${RETURNED_VALUE}\"\n# ```\n# \nsystem::getOs$0" ]
 },
 
+"system::isDarwin": {
+  "prefix": "system::isDarwin",
+  "description": "Check if the current OS is macOS...",
+  "scope": "",
+  "body": [ "system::isDarwin$0" ]
+},
+
+"system::isDarwin#withdoc": {
+  "prefix": "system::isDarwin#withdoc",
+  "description": "Check if the current OS is macOS...",
+  "scope": "",
+  "body": [ "# ## system::isDarwin\n# \n# Check if the current OS is macOS.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the current OS is macOS\n#   - 1 otherwise.\n# \n# ```bash\n# if system::isDarwin; then\n#   printf 'The current OS is macOS.'\n# fi\n# ```\n# \nsystem::isDarwin$0" ]
+},
+
+"system::isLinux": {
+  "prefix": "system::isLinux",
+  "description": "Check if the current OS is Linux...",
+  "scope": "",
+  "body": [ "system::isLinux$0" ]
+},
+
+"system::isLinux#withdoc": {
+  "prefix": "system::isLinux#withdoc",
+  "description": "Check if the current OS is Linux...",
+  "scope": "",
+  "body": [ "# ## system::isLinux\n# \n# Check if the current OS is Linux.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the current OS is Linux\n#   - 1 otherwise.\n# \n# ```bash\n# if system::isLinux; then\n#   printf 'The current OS is Linux.'\n# fi\n# ```\n# \nsystem::isLinux$0" ]
+},
+
 "system::isRoot": {
   "prefix": "system::isRoot",
   "description": "Check if the script is running as root...",
@@ -1693,6 +1791,20 @@
   "description": "Check if the script is running as root...",
   "scope": "",
   "body": [ "# ## system::isRoot\n# \n# Check if the script is running as root.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the script is running as root\n#   - 1 otherwise.\n# \n# ```bash\n# if system::isRoot; then\n#   printf 'The script is running as root.'\n# fi\n# ```\n# \nsystem::isRoot$0" ]
+},
+
+"system::isWindows": {
+  "prefix": "system::isWindows",
+  "description": "Check if the current OS is Windows...",
+  "scope": "",
+  "body": [ "system::isWindows$0" ]
+},
+
+"system::isWindows#withdoc": {
+  "prefix": "system::isWindows#withdoc",
+  "description": "Check if the current OS is Windows...",
+  "scope": "",
+  "body": [ "# ## system::isWindows\n# \n# Check if the current OS is Windows.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the current OS is Windows\n#   - 1 otherwise.\n# \n# ```bash\n# if system::isWindows; then\n#   printf 'The current OS is Windows.'\n# fi\n# ```\n# \nsystem::isWindows$0" ]
 },
 
 "test::exec": {
@@ -1961,18 +2073,18 @@
   "body": [ "# ## time::getProgramElapsedMicroseconds\n# \n# Get the elapsed time in µs since the program started.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the elapsed time in µs since the program started.\n# \n# ```bash\n# core::getElapsedProgramTime\n# echo \"\\${RETURNED_VALUE}\"\n# time::convertMicrosecondsToHuman \"\\${RETURNED_VALUE}\"\n# echo \"Human time: \\${RETURNED_VALUE}\"\n# ```\n# \n# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.\n# > The 10# forces the base 10 conversion to avoid issues with leading zeros.\n# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.\n# \ntime::getProgramElapsedMicroseconds$0" ]
 },
 
-"time::getTimerValue": {
-  "prefix": "time::getTimerValue",
+"time::getTimerMicroseconds": {
+  "prefix": "time::getTimerMicroseconds",
   "description": "Get the time elapsed since the call of `time::startTimer`...",
   "scope": "",
-  "body": [ "_OPTION_LOG_ELAPSED_TIME=${1} _OPTION_FORMAT=${2} time::getTimerValue$0" ]
+  "body": [ "_OPTION_LOG_ELAPSED_TIME=${1} _OPTION_FORMAT=${2} time::getTimerMicroseconds$0" ]
 },
 
-"time::getTimerValue#withdoc": {
-  "prefix": "time::getTimerValue#withdoc",
+"time::getTimerMicroseconds#withdoc": {
+  "prefix": "time::getTimerMicroseconds#withdoc",
   "description": "Get the time elapsed since the call of `time::startTimer`...",
   "scope": "",
-  "body": [ "# ## time::getTimerValue\n# \n# Get the time elapsed since the call of `time::startTimer`.\n# \n# - \\${_OPTION_LOG_ELAPSED_TIME} _as bool_:\n#      (optional) Wether or not to log the elapsed time.\n#      (defaults to false)\n# - \\${_OPTION_FORMAT} _as string_:\n#      (optional) The format to use if we log the elapsed time.\n#      See `time::convertMicrosecondsToHuman` for the format.\n#      (defaults to \"%S.%LLs\").\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the elapsed time in microseconds.\n# \n# ```bash\n# time::startTimer\n# _OPTION_LOG_ELAPSED_TIME=true time::getTimerValue\n# echo \"Total microseconds: \\${RETURNED_VALUE}\"\n# ```\n# \n_OPTION_LOG_ELAPSED_TIME=${1} _OPTION_FORMAT=${2} time::getTimerValue$0" ]
+  "body": [ "# ## time::getTimerMicroseconds\n# \n# Get the time elapsed since the call of `time::startTimer`.\n# \n# - \\${_OPTION_LOG_ELAPSED_TIME} _as bool_:\n#      (optional) Wether or not to log the elapsed time.\n#      (defaults to false)\n# - \\${_OPTION_FORMAT} _as string_:\n#      (optional) The format to use if we log the elapsed time.\n#      See `time::convertMicrosecondsToHuman` for the format.\n#      (defaults to \"%S.%LLs\").\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the elapsed time in microseconds.\n# \n# ```bash\n# time::startTimer\n# _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds\n# echo \"Total microseconds: \\${RETURNED_VALUE}\"\n# ```\n# \n_OPTION_LOG_ELAPSED_TIME=${1} _OPTION_FORMAT=${2} time::getTimerMicroseconds$0" ]
 },
 
 "time::startTimer": {
@@ -1986,7 +2098,7 @@
   "prefix": "time::startTimer#withdoc",
   "description": "Start a timer...",
   "scope": "",
-  "body": [ "# ## time::startTimer\n# \n# Start a timer. You can then call `time::getTimerValue` to get the elapsed time.\n# \n# ```bash\n# time::startTimer\n# time::getTimerValue\n# ```\n# \ntime::startTimer$0" ]
+  "body": [ "# ## time::startTimer\n# \n# Start a timer. You can then call `time::getTimerMicroseconds` to get the elapsed time.\n# \n# ```bash\n# time::startTimer\n# time::getTimerMicroseconds\n# ```\n# \ntime::startTimer$0" ]
 },
 
 "tui::clearBox": {
@@ -2098,7 +2210,7 @@
   "prefix": "tui::rerouteLogs#withdoc",
   "description": "Reroute the logs to a temporary file...",
   "scope": "",
-  "body": [ "# ## tui::rerouteLogs\n# \n# Reroute the logs to a temporary file.\n# The logs will be displayed at the end of the interactive session.\n# \n# ```bash\n# tui::rerouteLogs\n# ```\n# \ntui::rerouteLogs$0" ]
+  "body": [ "# ## tui::rerouteLogs\n# \n# Reroute the logs to a temporary file.\n# The logs will be displayed when calling `tui::restoreLogs`\n# \n# ```bash\n# tui::rerouteLogs\n# ```\n# \ntui::rerouteLogs$0" ]
 },
 
 "tui::restoreBindings": {
@@ -2112,7 +2224,7 @@
   "prefix": "tui::restoreBindings#withdoc",
   "description": "Reset the key bindings to the default ones...",
   "scope": "",
-  "body": [ "# ## tui::restoreBindings\n# \n# Reset the key bindings to the default ones.\n# \n# ```bash\n# tui::restoreBindings\n# ```\n# \ntui::restoreBindings$0" ]
+  "body": [ "# ## tui::restoreBindings\n# \n# Reset the key bindings to the default ones.\n# To be called after `tui::rebindKeymap`.\n# \n# ```bash\n# tui::restoreBindings\n# ```\n# \ntui::restoreBindings$0" ]
 },
 
 "tui::restoreInterruptTrap": {
@@ -2154,7 +2266,7 @@
   "prefix": "tui::restoreTerminalOptions#withdoc",
   "description": "Restore the terminal options to their original state...",
   "scope": "",
-  "body": [ "# ## tui::restoreTerminalOptions\n# \n# Restore the terminal options to their original state.\n# Should be called after `tui::setTerminalOptions`.\n# \n# - \\$1: force _as bool_:\n#       (optional) force the restoration of the stty configuration\n#       stty state will not be restored if\n#       (defaults to false)\n# \n# ```bash\n# tui::restoreTerminalOptions\n# ```\n# \ntui::restoreTerminalOptions \"${1:force}\"$0" ]
+  "body": [ "# ## tui::restoreTerminalOptions\n# \n# Restore the terminal options to their original state.\n# Should be called after `tui::setTerminalOptions`.\n# \n# - \\$1: force _as bool_:\n#       (optional) force the restoration of the stty configuration.\n#       By default, the restoration is only done if we are not in full screen mode when called.\n#       (defaults to false)\n# \n# ```bash\n# tui::restoreTerminalOptions\n# ```\n# \ntui::restoreTerminalOptions \"${1:force}\"$0" ]
 },
 
 "tui::setInterruptTrap": {
@@ -2301,14 +2413,14 @@
   "prefix": "windows::addToPath",
   "description": "Add the given path to the PATH environment variable on Windows (current user only)...",
   "scope": "",
-  "body": [ "windows::addToPath \"${1:**path**}\"$0" ]
+  "body": [ "windows::addToPath \"${1:**path**}\" \"${2:preprend}\"$0" ]
 },
 
 "windows::addToPath#withdoc": {
   "prefix": "windows::addToPath#withdoc",
   "description": "Add the given path to the PATH environment variable on Windows (current user only)...",
   "scope": "",
-  "body": [ "# ## windows::addToPath\n# \n# Add the given path to the PATH environment variable on Windows (current user only).\n# \n# Will also export the PATH variable in the current bash.\n# \n# - \\$1: **path** _as string_:\n#       the path to add to the PATH environment variable.\n#       The path can be in unix format, it will be converted to windows format.\n# \n# ```bash\n# windows::addToPath \"/path/to/bin\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell` to directly modify the registry.\n# \nwindows::addToPath \"${1:**path**}\"$0" ]
+  "body": [ "# ## windows::addToPath\n# \n# Add the given path to the PATH environment variable on Windows (current user only).\n# \n# Will also export the PATH variable in the current bash.\n# \n# - \\$1: **path** _as string_:\n#       the path to add to the PATH environment variable.\n#       The path can be in unix format, it will be converted to windows format.\n# - \\$2: preprend _as bool_:\n#       (optional) Can be set using the variable `_OPTION_PREPEND`.\n#       True to prepend the path to the PATH, false to append it.\n#       (defaults to false)\n# \n# ```bash\n# windows::addToPath \"/path/to/bin\"\n# ```\n# \n# > This function is only available on Windows, it uses `powershell` to directly modify the registry.\n# \nwindows::addToPath \"${1:**path**}\" \"${2:preprend}\"$0" ]
 },
 
 "windows::convertPathFromUnix": {
@@ -2322,7 +2434,7 @@
   "prefix": "windows::convertPathFromUnix#withdoc",
   "description": "Convert a unix path to a Windows path...",
   "scope": "",
-  "body": [ "# ## windows::convertPathFromUnix\n# \n# Convert a unix path to a Windows path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The Windows path.\n# \n# ```bash\n# windows::convertPathFromUnix \"/path/to/file\"\n# ```\n# \n# > Handles paths starting with `/mnt/x/` or `/x/`.\n# \nwindows::convertPathFromUnix \"${1:**path**}\"$0" ]
+  "body": [ "# ## windows::convertPathFromUnix\n# \n# Convert a unix path to a Windows path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The Windows path.\n# \n# ```bash\n# windows::convertPathFromUnix \"/path/to/file\"\n# ```\n# \n# > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,\n# > handles other msys2 paths using `cygpath`.\n# \nwindows::convertPathFromUnix \"${1:**path**}\"$0" ]
 },
 
 "windows::convertPathToUnix": {
@@ -2350,7 +2462,7 @@
   "prefix": "windows::createLink#withdoc",
   "description": "Create a soft or hard link (original ← link)...",
   "scope": "",
-  "body": [ "# ## windows::createLink\n# \n# Create a soft or hard link (original ← link).\n# \n# Reminder:\n# \n# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the\n#   form of an absolute or relative path.\n# - A hard link is a directory entry that associates a new pathname with an existing\n#   file (inode + data block) on a file system.\n# \n# This function allows to create a symbolic link on Windows as well as on Unix.\n# \n# - \\$1: **linked path** _as string_:\n#       the path to link to (the original file)\n# - \\$2: **link path** _as string_:\n#       the path where to create the link\n# - \\$3: hard link _as bool_:\n#       (optional) true to create a hard link, false to create a symbolic link\n#       (defaults to false)\n# - \\$4: force _as bool_:\n#       (optional) true to overwrite the link or file if it already exists.\n#       Otherwise, the function will not on an existing link not pointing to the\n#       target path.\n#       (defaults to true)\n# \n# ```bash\n# windows::createLink \"/path/to/link\" \"/path/to/linked\"\n# windows::createLink \"/path/to/link\" \"/path/to/linked\" true\n# ```\n# \n# > On Windows, the function uses `powershell` (and optionally ls to check the existing link).\n# > If you have the windows \"developer mode\" enabled + MSYS=winsymlinks:nativestrict,\n# > then it uses the ln command.\n# \nwindows::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
+  "body": [ "# ## windows::createLink\n# \n# Create a soft or hard link (original ← link).\n# \n# Reminder:\n# \n# - A soft (symbolic) link is a new file that contains a reference to another file or directory in the\n#   form of an absolute or relative path.\n# - A hard link is a directory entry that associates a new pathname with an existing\n#   file (inode + data block) on a file system.\n# \n# - \\$1: **linked path** _as string_:\n#       the path to link to (the original file)\n# - \\$2: **link path** _as string_:\n#       the path where to create the link\n# - \\$3: hard link _as bool_:\n#       (optional) true to create a hard link, false to create a symbolic link\n#       (defaults to false)\n# - \\$4: force _as bool_:\n#       (optional) true to overwrite the link or file if it already exists.\n#       Otherwise, the function will not on an existing link not pointing to the\n#       target path.\n#       (defaults to true)\n# \n# ```bash\n# windows::createLink \"/path/to/link\" \"/path/to/linked\"\n# windows::createLink \"/path/to/link\" \"/path/to/linked\" true\n# ```\n# \n# > On Windows, the function uses `powershell` (and optionally ls to check the existing link).\n# > If you have the windows \"developer mode\" enabled + MSYS=winsymlinks:nativestrict,\n# > then it uses the ln command.\n# \nwindows::createLink \"${1:**linked path**}\" \"${2:**link path**}\" \"${3:hard link}\" \"${4:force}\"$0" ]
 },
 
 "windows::createTempDirectory": {
@@ -2413,14 +2525,14 @@
   "prefix": "windows::runPs1",
   "description": "Runs a PowerShell command...",
   "scope": "",
-  "body": [ "windows::runPs1 \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
+  "body": [ "_OPTION_SILENT=${3} windows::runPs1 \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
 },
 
 "windows::runPs1#withdoc": {
   "prefix": "windows::runPs1#withdoc",
   "description": "Runs a PowerShell command...",
   "scope": "",
-  "body": [ "# ## windows::runPs1\n# \n# Runs a PowerShell command.\n# This is mostly useful on Windows.\n# \n# - \\$1: **command** _as string_:\n#       the command to run.\n# - \\$2: run as administrator _as bool_:\n#       (optional) whether to run the command as administrator.\n#       (defaults to false).\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - \\${RETURNED_VALUE}: The content of stdout.\n# - \\${RETURNED_VALUE2}: The content of stderr.\n# \n# ```bash\n# windows::runPs1 \"Write-Host \\\"Press any key:\\\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());\"\n# ```\n# \nwindows::runPs1 \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
+  "body": [ "# ## windows::runPs1\n# \n# Runs a PowerShell command.\n# This is mostly useful on Windows.\n# \n# - \\$1: **command** _as string_:\n#       the command to run.\n# - \\$2: run as administrator _as bool_:\n#       (optional) Can be set using the variable `_OPTION_RUN_AS_ADMIN`.\n#       Wether to run the command as administrator.\n#       (defaults to false).\n# - \\${_OPTION_SILENT} _as bool_:\n#       (optional) Do not log the command stderr.\n#       (defaults to false).\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - \\${RETURNED_VALUE}: The content of stdout.\n# - \\${RETURNED_VALUE2}: The content of stderr.\n# \n# ```bash\n# windows::runPs1 \"Write-Host \\\"Press any key:\\\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());\"\n# ```\n# \n_OPTION_SILENT=${3} windows::runPs1 \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
 },
 
 "windows::setEnvVar": {
