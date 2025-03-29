@@ -65,6 +65,9 @@ function interactive::askForConfirmationRaw() {
       $'\n' | ' ' | $'\r' | o | y)
         break
         ;;
+      ESC)
+        core::fail "Interactive session cancelled."
+        ;;
       *)
         returnedCode=1
         break;

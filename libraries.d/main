@@ -406,7 +406,7 @@ function main::parseMainArgumentsSwitch() {
     log::setLevel trace
     ;;
   -a | --alternative-log)
-    _OPTION_LOG_PATTERN="${VALET_CONFIG_LOG_PATTERN_ALTERNATIVE:-"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <levelColor><level>{7s}<colorDefault> <colorFaded><sourceFile>{15s}:<line>{-4s}<colorDefault> <message>"}" log::init
+    _OPTION_LOG_PATTERN="${VALET_CONFIG_LOG_PATTERN_ALTERNATIVE:-"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <sourceFile>{15s}:<line>{-4s}<levelColor><level>{7s}<colorDefault> <message>"}" log::init
     ;;
   -i | --force-interactive-mode)
     VALET_FORCE_INTERACTIVE_MODE=true
