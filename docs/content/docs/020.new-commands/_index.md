@@ -183,7 +183,7 @@ Additionally, you can create your own library functions. See the [create a libra
 Although you can simply `exit` from a command function, it is recommended to:
 
 - ✅ `return 0` if all went well.
-- ❌ `core::fail "My error message"` if something went wrong. This will exit the program with code 1 and print your error to the user. You can use `core::failWithCode` if you need to return a particular exit code.
+- ❌ `core::fail "My error message"` if something went wrong. This will exit the program with code 1 and print your error to the user.
 
 {{< callout type="warning" >}}
 In Valet, the following bash options are set: `set -Eeu -o pipefail`: your function will stop with an error if any statement returns an error code different from zero; this also include any program in a pipe. It will end with an error if you try to use an unset variable.

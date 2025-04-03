@@ -37,7 +37,7 @@ fi
 #     Will immediately source all the libraries functions.
 # - name: -E, --no-exit
 #   description: |-
-#     Override the ⌜core::fail⌝ and ⌜core::failWithCode⌝ functions to not exit the script.
+#     Override the ⌜core::fail⌝  function to not exit the script.
 # - name: -p, --prompt-mode
 #   description: |-
 #     Source valet functions with modifications to be used in a shell prompt.
@@ -76,7 +76,6 @@ function selfExport() {
 
   if [[ ${noExit:-} == "true" ]]; then
     output+="function core::fail() { log::error \"\$@\"; }"$'\n'
-    output+="function core::failWithCode() { local exitCode=\"\${1}\"; shift; log::error \"\$@\"; log::error \"Exit code: \$exitCode\"; }"$'\n'
     output+="set +o errexit"$'\n'
   fi
 

@@ -163,7 +163,7 @@ Returned code: `1`
 FAIL     This is for testing valet core functions, failing now.
 ```
 
-### ✅ Testing the core::failWithCode function
+### ✅ Testing the core::fail function with an error code
 
 ❯ `valet self mock1 fail2`
 

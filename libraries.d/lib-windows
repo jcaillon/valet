@@ -112,7 +112,7 @@ function windows::runPs1() {
   if log::isDebugEnabled; then
     log::debug "PowerShell command ⌜${powershellCommand}⌝, path ⌜${powershellPath}⌝."
     log::debug "PowerShell script run:"
-    core::createNewStateFilePath "-script.ps1"
+    core::createSavedFilePath "script.ps1"
     printf "%s" "${script}" >"${RETURNED_VALUE}"
     log::printString "⌜${RETURNED_VALUE}⌝"
   fi

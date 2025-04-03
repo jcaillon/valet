@@ -14,7 +14,7 @@ function test_traps() {
   test::title "✅ Testing the core::fail function"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 fail
 
-  test::title "✅ Testing the core::failWithCode function"
+  test::title "✅ Testing the core::fail function with an error code"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 fail2
 
   test::title "✅ Testing the unknown command handler"

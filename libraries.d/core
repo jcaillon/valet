@@ -652,7 +652,7 @@ function log::printString() {
 # ## log::saveFile
 #
 # Save the given file by copying it to a new file in the user local state directory
-# (using `core::createNewStateFilePath`).
+# (using `core::createSavedFilePath`).
 # Useful for debugging purposes, to save the state of a file during execution.
 #
 # - $1: **path** _as string_:
@@ -674,7 +674,7 @@ function log::saveFile() {
   local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local suffix="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local logPath="${3:-"true"}"
-  core::createNewStateFilePath "${suffix}"
+  core::createSavedFilePath "${suffix}"
   local newFilePath="${RETURNED_VALUE}"
   cp "${filePath}" "${newFilePath}"
   if [[ ${logPath} == "true" ]]; then
@@ -686,7 +686,7 @@ function log::saveFile() {
 # ## log::saveFileString
 #
 # Save the given string to a new file in the user local state directory
-# (using `core::createNewStateFilePath`).
+# (using `core::createSavedFilePath`).
 # Useful for debugging purposes, to save the state of a string during execution.
 #
 # - $1: **content variable name** _as string_:
@@ -708,7 +708,7 @@ function log::saveFileString() {
   local -n contentToSave="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local suffix="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local logPath="${3:-"true"}"
-  core::createNewStateFilePath "${suffix}"
+  core::createSavedFilePath "${suffix}"
   local newFilePath="${RETURNED_VALUE}"
   printf '%s' "${contentToSave}" >"${newFilePath}"
   if [[ ${logPath} == "true" ]]; then
@@ -1849,6 +1849,9 @@ function time::getProgramElapsedMicroseconds() {
 #
 # - $@: **message** _as string_:
 #       the error message to display
+# - ${_OPTION_EXIT_CODE} _as int_:
+#       (optional) the exit code to use, should be between 1 and 255
+#       (defaults to 1)
 #
 # ```bash
 # core::fail "This is an error message."
@@ -1860,31 +1863,7 @@ function core::fail() {
   fi
   # shellcheck disable=SC2034
   GLOBAL_EXPECTED_EXIT=1
-  exit 1
-}
-
-# ## core::failWithCode
-#
-# Displays an error message and then exit the program with error.
-#
-# - $1: **exit code** _as int_:
-#       the exit code to use, should be between 1 and 255
-# - $@: **message** _as string_:
-#       the error message to display
-#
-# ```bash
-# core::failWithCode 255 "This is an error message."
-# ```
-function core::failWithCode() {
-  local exitCode="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  shift
-  log::print "ERROR" "${STYLE_ICON_ERROR:-}" "FAIL" "$@"
-  if log::isDebugEnabled; then
-    log::printCallStack 2
-  fi
-  # shellcheck disable=SC2034
-  GLOBAL_EXPECTED_EXIT=1
-  exit "${exitCode}"
+  exit "${_OPTION_EXIT_CODE:-1}"
 }
 
 # ## source
@@ -2222,9 +2201,9 @@ function core::getExtensionsDirectory() {
   RETURNED_VALUE="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"
 }
 
-# ## core::createNewStateFilePath
+# ## core::createSavedFilePath
 #
-# Returns the path to a new file stored in the user state directory.
+# Returns the path to a new file stored in the user state directory under `saved-files`.
 # Can be used to save the state of important temporary files generated during a program
 # execution.
 #
@@ -2236,10 +2215,10 @@ function core::getExtensionsDirectory() {
 # - ${RETURNED_VALUE}: The path to the created file.
 #
 # ```bash
-# core::createNewStateFilePath "my-file"
+# core::createSavedFilePath "my-file"
 # printf '%s\n' "The file is ⌜${RETURNED_VALUE}⌝."
 # ```
-function core::createNewStateFilePath() {
+function core::createSavedFilePath() {
   local filePath
   printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d--%s" "${EPOCHSECONDS}" "${BASHPID}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   core::getUserStateDirectory
@@ -2251,7 +2230,7 @@ function core::createNewStateFilePath() {
 
 # ## core::dump
 #
-# Dumps information about the current environment into a new state file.
+# Dumps information about the current bash session into a new file.
 #
 # - ${_OPTION_DUMP_SUFFIX} _as string_:
 #       (optional) The suffix for the file to create.
@@ -2266,7 +2245,7 @@ function core::createNewStateFilePath() {
 # ```
 function core::dump() {
   local filePath
-  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06s" "${EPOCHSECONDS}" "${BASHPID}"
+  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d" "${EPOCHSECONDS}" "${BASHPID}"
   core::getUserStateDirectory
   if [[ ! -d "${RETURNED_VALUE}/core-dumps" ]]; then
     mkdir -p "${RETURNED_VALUE}/core-dumps"

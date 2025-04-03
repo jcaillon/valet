@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 function main() {
-  test_core::createNewStateFilePath
+  test_core::createSavedFilePath
   test_source
 }
 
-function test_core::createNewStateFilePath() {
-  test::title "✅ Test core::createNewStateFilePath"
-  test::func core::createNewStateFilePath "suffix"
+function test_core::createSavedFilePath() {
+  test::title "✅ Test core::createSavedFilePath"
+  test::func core::createSavedFilePath "suffix"
 }
 
 function test_source() {
