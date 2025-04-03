@@ -264,33 +264,3 @@ RETURNED_VALUE='/tmp/valet-stdout.f'
 RETURNED_VALUE2='/tmp/valet-stderr.f'
 ```
 
-### ✅ Testing exe::captureOutput
-
-❯ `exe::captureOutput echo coucou`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='coucou
-'
-```
-
-❯ `exe::captureOutput declare -f exe::captureOutput`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='exe::captureOutput () 
-{ 
-    local IFS='"'"' '"'"';
-    "${@}" &> "${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1;
-    RETURNED_VALUE="";
-    IFS='"'"''"'"' read -rd '"'"''"'"' RETURNED_VALUE < "${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
-}
-'
-```
-
-❯ `exe::captureOutput [[ 1 -eq 0 ]]`
-
-Returned code: `1`
-

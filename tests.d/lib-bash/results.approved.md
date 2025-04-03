@@ -256,3 +256,33 @@ Returned code: `1`
 
 ❯ `bash::isFunction func1`
 
+### ✅ Testing bash::getBuiltinOutput
+
+❯ `bash::getBuiltinOutput echo coucou`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='coucou
+'
+```
+
+❯ `bash::getBuiltinOutput declare -f bash::getBuiltinOutput`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='bash::getBuiltinOutput () 
+{ 
+    local IFS='"'"' '"'"';
+    "${@}" &> "${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1;
+    RETURNED_VALUE="";
+    IFS='"'"''"'"' read -rd '"'"''"'"' RETURNED_VALUE < "${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+}
+'
+```
+
+❯ `bash::getBuiltinOutput [[ 1 -eq 0 ]]`
+
+Returned code: `1`
+

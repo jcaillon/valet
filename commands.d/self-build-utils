@@ -2,8 +2,8 @@
 # author: github.com/jcaillon
 # description: Utility functions for the self-build script.
 
-# shellcheck source=../libraries.d/lib-exe
-source exe
+# shellcheck source=../libraries.d/lib-bash
+source bash
 
 # This function extracts each content between the valet front matter tags.
 #
@@ -304,7 +304,7 @@ GLOBAL_CMD_INCLUDED=1
 
 "
     # shellcheck disable=SC2086
-    exe::captureOutput declare -p ${!CMD_*}
+    bash::getBuiltinOutput declare -p ${!CMD_*}
     local line
     local IFS
     while IFS=$'\n' read -r -d $'\n' line; do

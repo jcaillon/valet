@@ -4,8 +4,8 @@
 
 # shellcheck source=lib-fs
 source fs
-# shellcheck source=lib-exe
-source exe
+# shellcheck source=lib-bash
+source bash
 
 # ## system::isRoot
 #
@@ -142,7 +142,7 @@ function system::getArchitecture() {
 # ```
 function system::getEnvVars() {
   RETURNED_ARRAY=()
-  exe::captureOutput compgen -v
+  bash::getBuiltinOutput compgen -v
   local IFS=$'\n'
   # shellcheck disable=SC2206
   RETURNED_ARRAY+=(${RETURNED_VALUE})

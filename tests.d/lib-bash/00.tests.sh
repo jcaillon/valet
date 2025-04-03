@@ -11,6 +11,7 @@ function main() {
   test_bash::getMissingCommands
   test_bash::isCommand
   test_bash::isFunction
+  test_bash::getBuiltinOutput
 }
 
 function test_bash::injectCodeInFunction() {
@@ -144,6 +145,14 @@ function test_bash::isFunction() {
   test::exec bash::isFunction func1
   function func1() { :;}
   test::exec bash::isFunction func1
+}
+
+function test_bash::getBuiltinOutput() {
+  test::title "✅ Testing bash::getBuiltinOutput"
+
+  test::func bash::getBuiltinOutput echo coucou
+  test::func bash::getBuiltinOutput declare -f bash::getBuiltinOutput
+  test::func bash::getBuiltinOutput "[[" 1 -eq 0 "]]" || echo "Failed as expected"
 }
 
 main

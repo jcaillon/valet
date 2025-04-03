@@ -2,8 +2,8 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=lib-exe
-source exe
+# shellcheck source=lib-bash
+source bash
 
 # ## test::log
 #
@@ -294,10 +294,10 @@ function test::resetReturnedVars() {
 function test::printVars() {
   local IFS=$'\n'
   local chunk varName
-  if ! exe::captureOutput declare -p "${@}"; then
+  if ! bash::getBuiltinOutput declare -p "${@}"; then
     local varName
     for varName in "${@}"; do
-      if ! exe::captureOutput declare -p "${varName}"; then
+      if ! bash::getBuiltinOutput declare -p "${varName}"; then
         IFS=' '
         test::fail "Variable ⌜${varName}⌝ does not exist, could not execute ⌜test::printVars $*⌝."
       fi

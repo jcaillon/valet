@@ -319,7 +319,7 @@ function extractCommandDefinitionsToVariables() {
 
       if log::isTraceEnabled; then
         # shellcheck disable=SC2086
-        exe::captureOutput declare -p ${!TEMP_CMD_BUILD_*}
+        bash::getBuiltinOutput declare -p ${!TEMP_CMD_BUILD_*}
         local declaredVariables="${RETURNED_VALUE}"
         log::trace "Declared variables for this command:"
         log::printFileString declaredVariables
@@ -646,8 +646,8 @@ source self-build-utils
 source array
 # shellcheck source=../libraries.d/lib-fs
 source fs
-# shellcheck source=../libraries.d/lib-exe
-source exe
+# shellcheck source=../libraries.d/lib-bash
+source bash
 # shellcheck source=../libraries.d/lib-string
 source string
 # shellcheck source=../libraries.d/lib-version

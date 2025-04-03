@@ -7,8 +7,8 @@
 
 # shellcheck source=lib-tui
 source tui
-# shellcheck source=lib-exe
-source exe
+# shellcheck source=lib-bash
+source bash
 # shellcheck source=lib-array
 source array
 # shellcheck source=lib-list
@@ -71,7 +71,7 @@ function sfzf::show() {
 
   # save the original traps so we can restore them later
   local originalTraps
-  exe::captureOutput trap -p SIGWINCH EXIT SIGINT SIGQUIT
+  bash::getBuiltinOutput trap -p SIGWINCH EXIT SIGINT SIGQUIT
   originalTraps="${RETURNED_VALUE}"
 
   # we still need to export the terminal size but in addition, we need to sfzfDrawScreen.

@@ -415,7 +415,7 @@ function exe::invoke() {
   exe::invoke5 true 0 '' '' "$@"
 }
 
-# ## exe::captureOutput
+# ## bash::getBuiltinOutput
 #
 # Capture the output of a command.
 # Made to be used on bash builtins that produce output.
@@ -434,10 +434,10 @@ function exe::invoke() {
 # - ${RETURNED_VALUE}: The captured output.
 #
 # ```bash
-# exe::captureOutput declare -f exe::captureOutput
+# bash::getBuiltinOutput declare -f bash::getBuiltinOutput
 # echo "${RETURNED_VALUE}"
 # ```
-function exe::captureOutput() {
+function bash::getBuiltinOutput() {
   local IFS=' '
   # shellcheck disable=SC2068
   "${@}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1

@@ -13,7 +13,6 @@ function main() {
   test_exe::invoke2
   test_exe::invoke
   test_exe::invoke3piped
-  test_exe::captureOutput
 }
 
 function test_exe::invoke5() {
@@ -77,12 +76,12 @@ function test_exe::invoke3piped() {
   test::func exe::invokef3piped true "'input_stream'" fake --std-in --option argument1 argument2
 }
 
-function test_exe::captureOutput() {
-  test::title "✅ Testing exe::captureOutput"
+function test_bash::getBuiltinOutput() {
+  test::title "✅ Testing bash::getBuiltinOutput"
 
-  test::func exe::captureOutput echo coucou
-  test::func exe::captureOutput declare -f exe::captureOutput
-  test::func exe::captureOutput "[[" 1 -eq 0 "]]" || echo "Failed as expected"
+  test::func bash::getBuiltinOutput echo coucou
+  test::func bash::getBuiltinOutput declare -f bash::getBuiltinOutput
+  test::func bash::getBuiltinOutput "[[" 1 -eq 0 "]]" || echo "Failed as expected"
 }
 
 function fake() {

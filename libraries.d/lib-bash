@@ -2,9 +2,6 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=../libraries.d/lib-exe
-source exe
-
 # ## bash::countJobs
 #
 # This function counts the number of jobs currently running in the background.
@@ -19,7 +16,7 @@ source exe
 # ```
 function bash::countJobs() {
   local -i jobsCount=0
-  exe::captureOutput jobs -r
+  bash::getBuiltinOutput jobs -r
   local IFS=$'\n' line
   for line in ${RETURNED_VALUE}; do
     if [[ ${line} == "["* ]]; then
@@ -111,7 +108,7 @@ function bash::runInParallel() {
     while ((${#_BASH_RUNNING_JOB_PIDS[@]} >= maxParallelJobs || (index + 1 == ${#jobNames[@]}))); do
       # wait for one of the test suites to finish (or all of them for the last batch)
       nbJobsCompleted=0
-      exe::captureOutput jobs -r
+      bash::getBuiltinOutput jobs -r
       runningsJobs="${RETURNED_VALUE}"
       if log::isTraceEnabled; then
         log::trace "Running jobs: ${runningsJobs}"
@@ -436,7 +433,7 @@ function bash::isFunction() {
   return 1
 }
 
-# ## bash::getFunctionDefinitionWithGlobalVars
+# ## bash::getFunctionDefinitionWithGlobalVars (private)
 #
 # This function can be used to get the definition of an existing function,
 # rename it, and replace the use of positional parameters by global variables.
@@ -508,4 +505,33 @@ function bash::getFunctionDefinitionWithGlobalVars() {
   done
 
   RETURNED_VALUE="${modifiedFunctionDefinition}"
+}
+
+# ## bash::getBuiltinOutput
+#
+# Capture the output of a builtin command. Can be used on bash builtins that produce output.
+# It captures the stdout and stderr of said command.
+#
+# This function is a lot more basic than `exe::invoke` and does not support all its features.
+#
+# - $@: **command** _as string_:
+#       The command to run.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the command was successful
+#   - 1 otherwise.
+# - ${RETURNED_VALUE}: The captured output.
+#
+# ```bash
+# bash::getBuiltinOutput declare -f bash::getBuiltinOutput
+# echo "${RETURNED_VALUE}"
+# ```
+function bash::getBuiltinOutput() {
+  local IFS=' '
+  # shellcheck disable=SC2068
+  "${@}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
+  RETURNED_VALUE=""
+  IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
 }

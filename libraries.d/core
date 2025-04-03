@@ -1334,7 +1334,6 @@ function log::init() {
       # compute the name of the output file
       local logFile
       if [[ -n ${VALET_CONFIG_LOG_FILENAME_PATTERN:-} ]]; then
-        log::warning "${VALET_CONFIG_LOG_FILENAME_PATTERN}"
         eval "${VALET_CONFIG_LOG_FILENAME_PATTERN}"
         if [[ ! -v logFile ]]; then
           core::fail "The filename pattern for the log files VALET_CONFIG_LOG_FILENAME_PATTERN is not valid (does not create the variable logFile): ⌜${VALET_CONFIG_LOG_FILENAME_PATTERN}⌝."

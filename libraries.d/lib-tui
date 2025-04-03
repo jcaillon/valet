@@ -2,8 +2,8 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=lib-exe
-source exe
+# shellcheck source=lib-bash
+source bash
 # shellcheck source=lib-fs
 source fs
 
@@ -117,7 +117,7 @@ function tui::switchBackFromFullScreen() {
 # ```
 function tui::setTerminalOptions() {
   if [[ -z ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]] && command -v stty &>/dev/null; then
-    exe::invoke "stty" "-g"
+    bash::getBuiltinOutput "stty" "-g" || { log::warning "Unable to get the stty configuration: ${RETURNED_VALUE}"; RETURNED_VALUE=""; }
     _INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
     # -echo is to suppress echoing characters typed by the user
     # All the other options are there to enable a satisfying behavior for the GNU readline library
@@ -209,7 +209,7 @@ function tui::setInterruptTrap() {
   GLOBAL_SESSION_INTERRUPTED=false
   if [[ -z ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
     # save the original traps so we can restore them later
-    exe::captureOutput trap -p SIGINT SIGQUIT
+    bash::getBuiltinOutput trap -p SIGINT SIGQUIT
     _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP="${RETURNED_VALUE}"
 
     # interrupting sets GLOBAL_SESSION_INTERRUPTED to true
@@ -791,7 +791,7 @@ function tui::restoreBindings() {
   fi
 
   # try to remove all bindings
-  exe::captureOutput bind -p
+  bash::getBuiltinOutput bind -p
   local bindings="${RETURNED_VALUE}"
   local IFS=$'\n'
   local line
