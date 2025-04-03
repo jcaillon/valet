@@ -8,11 +8,17 @@ url: /docs/libraries
 
 ## 🧩 Source core libraries
 
-A set of core libraries are immediately available on Valet. To use the library functions, you need to _source_ the library that you need, e.g.:
+A set of core libraries are available on Valet. To use the library functions, you need to _source_ the library that you need, e.g.:
 
 ```bash
 source string
 source interactive
+```
+
+Alternatively, if you have several libraries to source, you can use the `include` command with a list of libraries:
+
+```bash
+include string interactive
 ```
 
 All Valet functions are prefixed with the library name. E.g. the function `string::cutField` is from the `string` library. A clear error message will be displayed if you are trying to use a library function without sourcing the library.
@@ -23,7 +29,7 @@ The bash built-in `source` is overridden by a function in Valet. This allows to 
 
 ## 👔 About library functions
 
-The functions in Valet are implement for a good compromise between performance and readability. They generally define clear local variables for the inputs as they make the code more understandable. However, they do not implement input validation (beside checking if mandatory arguments are given), it is your responsibility to ensure that the inputs are correct.
+The functions in Valet are implemented for a good compromise between performance and readability. They generally define clear local variables for the inputs as they make the code more understandable. However, they do not implement input validation (beside checking if mandatory arguments are given), it is your responsibility to ensure that the inputs are correct.
 
 Functions return values using global variables (see [performance tips](/docs/performance-tips) for an explanation). Depending on the type and number of returned values, they will named as such:
 
@@ -49,8 +55,11 @@ echo "RETURNED_VALUE: ⌜${RETURNED_VALUE}⌝" # will output 'value'
 
 ## 🎀 Available core libraries
 
+A complete list of library functions can be generated locally in a single file using the `valet self document` command.
+
 <!-- https://v1.heroicons.com/ -->
-For more details, please check the documentation on each library:
+You can also browse the list of available libraries and their functions here;
+
 {{< cards >}}
   {{< card link="array" icon="table" title="array" subtitle="Manipulate bash arrays." >}}
   {{< card link="bash" icon="code" title="bash" subtitle="Extend bash capabilities." >}}

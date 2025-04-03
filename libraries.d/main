@@ -35,7 +35,7 @@ if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
   fs::setupTempFileGlobalVariable
   # shellcheck source=lib-profiler
   source profiler
-  printf -v _PROFILER_FILE_NAME "profiler-%(%FT%H-%M-%S%z)T--PID_%06s.log" "${EPOCHSECONDS}" "${BASHPID}"
+  printf -v _PROFILER_FILE_NAME "profiler-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
   core::getUserStateDirectory
   profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${_PROFILER_FILE_NAME}"}"
 fi
@@ -522,7 +522,7 @@ function main::runFunction() {
     # shellcheck source=lib-profiler
     source profiler
     local profilerFileName
-    printf -v profilerFileName "profiler-%(%FT%H-%M-%S%z)T--PID_%06s--fun_%s.log" "${EPOCHSECONDS}" "${BASHPID}" "${functionName}"
+    printf -v profilerFileName "profiler-%(%FT%H-%M-%S%z)T--PID_%06d--fun_%s.log" "${EPOCHSECONDS}" "${BASHPID}" "${functionName}"
     core::getUserStateDirectory
     profiler::enable "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${profilerFileName}"}"
   fi

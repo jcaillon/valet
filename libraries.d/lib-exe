@@ -414,33 +414,3 @@ function exe::invoke3piped() {
 function exe::invoke() {
   exe::invoke5 true 0 '' '' "$@"
 }
-
-# ## bash::getBuiltinOutput
-#
-# Capture the output of a command.
-# Made to be used on bash builtins that produce output.
-# It captures the stdout and stderr of the command.
-#
-# This function is a lot more basic than `exe::invoke` and does not support all its features.
-#
-# - $@: **command** _as string_:
-#       The command to run.
-#
-# Returns:
-#
-# - $?
-#   - 0 if the command was successful
-#   - 1 otherwise.
-# - ${RETURNED_VALUE}: The captured output.
-#
-# ```bash
-# bash::getBuiltinOutput declare -f bash::getBuiltinOutput
-# echo "${RETURNED_VALUE}"
-# ```
-function bash::getBuiltinOutput() {
-  local IFS=' '
-  # shellcheck disable=SC2068
-  "${@}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
-  RETURNED_VALUE=""
-  IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
-}

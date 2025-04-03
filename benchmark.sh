@@ -33,4 +33,4 @@ function func2() {
   ffunc2 _PROMPT_STRING
 }
 
-benchmark::run func1 func2 3
+benchmark::run func1 func2

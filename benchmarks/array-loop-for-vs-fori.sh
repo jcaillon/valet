@@ -19,4 +19,4 @@ function func2() {
   done
 }
 
-benchmark::run func1 func2 3
+benchmark::run func1 func2

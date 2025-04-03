@@ -76,14 +76,6 @@ function test_exe::invoke3piped() {
   test::func exe::invokef3piped true "'input_stream'" fake --std-in --option argument1 argument2
 }
 
-function test_bash::getBuiltinOutput() {
-  test::title "✅ Testing bash::getBuiltinOutput"
-
-  test::func bash::getBuiltinOutput echo coucou
-  test::func bash::getBuiltinOutput declare -f bash::getBuiltinOutput
-  test::func bash::getBuiltinOutput "[[" 1 -eq 0 "]]" || echo "Failed as expected"
-}
-
 function fake() {
   local inputStreamContent
 

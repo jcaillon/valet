@@ -18,4 +18,4 @@ function func2() {
 func1
 echo
 func2
-benchmark::run func1 func2 3
+benchmark::run func1 func2

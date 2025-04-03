@@ -1339,7 +1339,7 @@ function log::init() {
           core::fail "The filename pattern for the log files VALET_CONFIG_LOG_FILENAME_PATTERN is not valid (does not create the variable logFile): ⌜${VALET_CONFIG_LOG_FILENAME_PATTERN}⌝."
         fi
       else
-        printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06s.log" "${EPOCHSECONDS}" "${BASHPID}"
+        printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
       fi
       if [[ ${VALET_CONFIG_LOG_TO_DIRECTORY} == "true" ]]; then
         core::getUserStateDirectory
@@ -2241,7 +2241,7 @@ function core::getExtensionsDirectory() {
 # ```
 function core::createNewStateFilePath() {
   local filePath
-  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06s--%s" "${EPOCHSECONDS}" "${BASHPID}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d--%s" "${EPOCHSECONDS}" "${BASHPID}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   core::getUserStateDirectory
   if [[ ! -d "${RETURNED_VALUE}/saved-files" ]]; then
     mkdir -p "${RETURNED_VALUE}/saved-files"
