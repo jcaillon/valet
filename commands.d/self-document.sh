@@ -206,7 +206,7 @@ function selfRelease_writeAllFunctionsToMarkdown() {
   local pageFooter="${1:-}"
   local outputFile="${2:-}"
 
-  fs::createFilePathIfNeeded "${outputFile}"
+  fs::createFileIfNeeded "${outputFile}"
 
   local content="# Valet functions documentation"$'\n'$'\n'"> ${pageFooter}"$'\n'$'\n'
 
@@ -227,7 +227,7 @@ function selfRelease_writeAllFunctionsToPrototypeScript() {
   local pageFooter="${1:-}"
   local outputFile="${2:-}"
 
-  fs::createFilePathIfNeeded "${outputFile}"
+  fs::createFileIfNeeded "${outputFile}"
   local _title="# Valet functions documentation"$'\n'$'\n'
   fs::writeToFile "${outputFile}" _title
 
@@ -261,7 +261,7 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   local pageFooter="${1:-}"
   local outputFile="${2:-}"
 
-  fs::createFilePathIfNeeded "${outputFile}"
+  fs::createFileIfNeeded "${outputFile}"
 
   local content="{"$'\n'"// ${pageFooter}"$'\n'
 

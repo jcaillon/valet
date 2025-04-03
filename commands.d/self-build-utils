@@ -239,7 +239,7 @@ function selfBuild_writeCommandDefinitionVariablesToFile() {
   local outputFile="${1}"
   local content
 
-  fs::createFilePathIfNeeded "${outputFile}"
+  fs::createFileIfNeeded "${outputFile}"
 
   {
     # write the header

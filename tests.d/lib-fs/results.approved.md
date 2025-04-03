@@ -258,9 +258,9 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignor
 
 Directory created successfully!
 
-### ✅ Testing fs::createFilePathIfNeeded
+### ✅ Testing fs::createFileIfNeeded
 
-❯ `fs::createFilePathIfNeeded resources/dir/subdir/file1`
+❯ `fs::createFileIfNeeded resources/dir/subdir/file1`
 
 Returned variables:
 
@@ -268,7 +268,7 @@ Returned variables:
 RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1'
 ```
 
-❯ `fs::createFilePathIfNeeded resources/gitignored/allo/file1`
+❯ `fs::createFileIfNeeded resources/gitignored/allo/file1`
 
 Returned variables:
 

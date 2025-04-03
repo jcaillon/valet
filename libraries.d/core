@@ -350,7 +350,7 @@ function fs::createTempDirectory() {
 # ## fs::cleanTempFiles
 #
 # Removes all the temporary files and directories that were created by the
-# fs::createTempFile and fs::createTempDirectory functions.
+# `fs::createTempFile` and `fs::createTempDirectory` functions.
 #
 # ```bash
 # fs::cleanTempFiles
@@ -2105,13 +2105,13 @@ function core::getVersion() {
 # core::getConfigurationDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
+#
+# > The default configuration directory is `~/.config/valet`.
 function core::getConfigurationDirectory() {
-  local directory
-  directory="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}"
-  if [[ ! -d "${directory}" ]]; then
-    mkdir -p "${directory}"
+  RETURNED_VALUE="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}"
+  if [[ ! -d "${RETURNED_VALUE}" ]]; then
+    mkdir -p "${RETURNED_VALUE}"
   fi
-  RETURNED_VALUE="${directory}"
 }
 
 # ## core::getUserDataDirectory
@@ -2128,13 +2128,13 @@ function core::getConfigurationDirectory() {
 # core::getUserDataDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
+#
+# > The default data directory is `~/.local/share/valet`.
 function core::getUserDataDirectory() {
-  local directory
-  directory="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"
-  if [[ ! -d "${directory}" ]]; then
-    mkdir -p "${directory}"
+  RETURNED_VALUE="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"
+  if [[ ! -d "${RETURNED_VALUE}" ]]; then
+    mkdir -p "${RETURNED_VALUE}"
   fi
-  RETURNED_VALUE="${directory}"
 }
 
 # ## core::getUserCacheDirectory
@@ -2151,13 +2151,13 @@ function core::getUserDataDirectory() {
 # core::getUserCacheDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
+#
+# > The default cache directory is `~/.cache/valet`.
 function core::getUserCacheDirectory() {
-  local directory
-  directory="${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}"
-  if [[ ! -d "${directory}" ]]; then
-    mkdir -p "${directory}"
+  RETURNED_VALUE="${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}"
+  if [[ ! -d "${RETURNED_VALUE}" ]]; then
+    mkdir -p "${RETURNED_VALUE}"
   fi
-  RETURNED_VALUE="${directory}"
 }
 
 # ## core::getUserStateDirectory
@@ -2175,19 +2175,19 @@ function core::getUserCacheDirectory() {
 # core::getUserStateDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
+#
+# > The default state directory is `~/.local/state/valet`.
 function core::getUserStateDirectory() {
-  local directory
-  directory="${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}"
-  if [[ ! -d "${directory}" ]]; then
-    mkdir -p "${directory}"
+  RETURNED_VALUE="${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}"
+  if [[ ! -d "${RETURNED_VALUE}" ]]; then
+    mkdir -p "${RETURNED_VALUE}"
   fi
-  RETURNED_VALUE="${directory}"
 }
 
 # ## core::getExtensionsDirectory
 #
 # Returns the path to the user extensions directory.
-# Does not create it if missing.
+# Creates it if missing.
 #
 # Returns:
 #
@@ -2197,8 +2197,13 @@ function core::getUserStateDirectory() {
 # core::getExtensionsDirectory
 # local directory="${RETURNED_VALUE}"
 # ```
+#
+# > The default extensions directory is `~/.valet.d`.
 function core::getExtensionsDirectory() {
   RETURNED_VALUE="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"
+  if [[ ! -d "${RETURNED_VALUE}" ]]; then
+    mkdir -p "${RETURNED_VALUE}"
+  fi
 }
 
 # ## core::createSavedFilePath

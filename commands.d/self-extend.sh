@@ -112,7 +112,6 @@ function selfExtend() {
   # compute where to install the extension
   core::getExtensionsDirectory
   local extensionsDirectory="${RETURNED_VALUE}"
-  fs::createDirectoryIfNeeded "${extensionsDirectory}"
 
   # case of extension creation
   if [[ ${action} == "created" ]]; then
@@ -247,7 +246,7 @@ function selfExtend_createExtension() {
 
   # git stuff
   if command -v git &>/dev/null; then
-    fs::createFilePathIfNeeded "${extensionDirectory}/.gitignore"
+    fs::createFileIfNeeded "${extensionDirectory}/.gitignore"
     fs::readFile "${extensionDirectory}/.gitignore"
     if [[ ${RETURNED_VALUE} != *"### Valet ###"* ]]; then
       local content=$'\n'$'\n'"### Valet ###"$'\n'"lib-valet"$'\n'"lib-valet.md"$'\n'".vscode/valet.code-snippets"

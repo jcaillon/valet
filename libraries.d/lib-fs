@@ -110,7 +110,8 @@ function fs::getPwdRealPath() {
 # - $1: **path** _as string_:
 #       the file path to read
 # - $2: max char _as int_:
-#       (optional) the maximum number of characters to read
+#       (optional) Can be set using the variable `_OPTION_MAX_CHAR`.
+#       the maximum number of characters to read
 #       (defaults to 0, which means read the whole file)
 #
 # > If the file does not exist, the function will return an empty string instead of failing.
@@ -125,7 +126,7 @@ function fs::getPwdRealPath() {
 # ```
 function fs::readFile() {
   local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i maxCharacters="${2:-0}"
+  local -i maxCharacters="${2:-${_OPTION_MAX_CHAR:-0}}"
 
   if [[ ! -s "${filePath}" ]]; then
     RETURNED_VALUE=""
@@ -154,7 +155,8 @@ function fs::readFile() {
 # - $2: **content** _as string_:
 #       The variable containing the content to write.
 # - $3: append _as bool_:
-#       (optional) true to append the content to the file, false otherwise
+#       (optional) Can be set using the variable `_OPTION_APPEND`.
+#       true to append the content to the file, false otherwise
 #       (defaults to false)
 #
 # ```bash
@@ -166,8 +168,8 @@ function fs::readFile() {
 # > - The main use case is to be able to mock this function during tests...
 function fs::writeToFile() {
   local -n contentToWriteInFile="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  fs::createFilePathIfNeeded "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  if [[ ${3:-false} == "true" ]]; then
+  fs::createFileIfNeeded "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if [[ ${3:-${_OPTION_APPEND:-false}} == "true" ]]; then
     printf '%s' "${contentToWriteInFile}" >>"${1}"
   else
     printf '%s' "${contentToWriteInFile}" >"${1}"
@@ -190,6 +192,10 @@ function fs::writeToFile() {
 # ```
 function fs::createDirectoryIfNeeded() {
   fs::toAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if [[ -d "${RETURNED_VALUE}" ]]; then
+    return 0
+  fi
+
   local dirPath="${RETURNED_VALUE}"
 
   if [[ ! -d "${dirPath}" ]]; then
@@ -201,9 +207,9 @@ function fs::createDirectoryIfNeeded() {
   RETURNED_VALUE="${dirPath}"
 }
 
-# ## fs::createFilePathIfNeeded
+# ## fs::createFileIfNeeded
 #
-# Make sure that the given file path exists.
+# Make sure that the given file exists.
 # Create the directory tree and the file if needed.
 #
 # - $1: **path** _as string_:
@@ -214,10 +220,14 @@ function fs::createDirectoryIfNeeded() {
 # - ${RETURNED_VALUE}: The absolute path of the file.
 #
 # ```bash
-# fs::createFilePathIfNeeded "myFile"
+# fs::createFileIfNeeded "myFile"
 # ```
-function fs::createFilePathIfNeeded() {
+function fs::createFileIfNeeded() {
   fs::toAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if [[ -f "${RETURNED_VALUE}" ]]; then
+    return 0
+  fi
+
   local filePath="${RETURNED_VALUE}"
   local parentDir="${filePath%/*}"
 
@@ -334,18 +344,22 @@ function fs::tail() {
 # - $1: **directory** _as string_:
 #       the directory to list
 # - $2: recursive _as bool_:
-#       (optional) true to list recursively, false otherwise
+#       (optional) Can be set using the variable `_OPTION_RECURSIVE`.
+#       true to list recursively, false otherwise
 #       (defaults to false)
 # - $3: hidden _as bool_:
-#       (optional) true to list hidden paths, false otherwise
+#       (optional) Can be set using the variable `_OPTION_INCLUDE_HIDDEN`.
+#       true to list hidden paths, false otherwise
 #       (defaults to false)
 # - $4: path filter function name _as string_:
-#       (optional) a function name that is called to filter the paths that will be listed
+#       (optional) Can be set using the variable `_OPTION_FILTER`.
+#       a function name that is called to filter the paths that will be listed
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 #       (defaults to empty string, no filter)
 # - $5: directory filter function name _as string_:
-#       (optional) a function name that is called to filter the directories (for recursive listing)
+#       (optional) Can be set using the variable `_OPTION_FILTER_DIRECTORY`.
+#       a function name that is called to filter the directories (for recursive listing)
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 #       (defaults to empty string, no filter)
@@ -364,10 +378,10 @@ function fs::tail() {
 # > - It will correctly list files under symbolic link directories.
 function fs::listPaths() {
   local directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local recursive="${2:-false}"
-  local includeHidden="${3:-false}"
-  local filterFunction="${4:-}"
-  local filterDirectoryFunction="${5:-}"
+  local recursive="${2:-${_OPTION_RECURSIVE:-false}}"
+  local includeHidden="${3:-${_OPTION_INCLUDE_HIDDEN:-false}}"
+  local filterFunction="${4:-${_OPTION_FILTER:-}}"
+  local filterDirectoryFunction="${5:-${_OPTION_FILTER_DIRECTORY:-}}"
 
   local IFS=' '
 
@@ -416,13 +430,16 @@ function fs::listPaths() {
 # - $1: **directory** _as string_:
 #       the directory to list
 # - $2: recursive _as bool_:
-#       (optional) true to list recursively, false otherwise
+#       (optional) Can be set using the variable `_OPTION_RECURSIVE`.
+#       true to list recursively, false otherwise
 #       (defaults to false)
 # - $3: hidden _as bool_:
-#       (optional) true to list hidden paths, false otherwise
+#       (optional) Can be set using the variable `_OPTION_INCLUDE_HIDDEN`.
+#       true to list hidden paths, false otherwise
 #       (defaults to false)
 # - $4: directory filter function name _as string_:
-#       (optional) a function name that is called to filter the directories (for recursive listing)
+#       (optional) Can be set using the variable `_OPTION_FILTER_DIRECTORY`.
+#       a function name that is called to filter the directories (for recursive listing)
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 #       (defaults to empty string, no filter)
@@ -438,11 +455,12 @@ function fs::listPaths() {
 # done
 # ```
 function fs::listFiles() {
-  # shellcheck disable=SC2317
-  function fs_listFilesReturnTrueIfFile() {
-    if [[ ! -f ${1} ]]; then return 1; fi
-  }
-  fs::listPaths "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${2:-false}" "${3:-false}" fs_listFilesReturnTrueIfFile "${4:-}"
+  fs::listPaths "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${2:-${_OPTION_RECURSIVE:-}}" "${3:-${_OPTION_INCLUDE_HIDDEN:-false}}" fs_listFilesReturnTrueIfFile "${4:-${_OPTION_FILTER_DIRECTORY:-}}"
+}
+
+# Helper function to check if the path is a file.
+function fs_listFilesReturnTrueIfFile() {
+  if [[ ! -f ${1} ]]; then return 1; fi
 }
 
 # ## fs::listDirectories
@@ -452,13 +470,16 @@ function fs::listFiles() {
 # - $1: **directory** _as string_:
 #       the directory to list
 # - $2: recursive _as bool_:
-#       (optional) true to list recursively, false otherwise
+#       (optional) Can be set using the variable `_OPTION_RECURSIVE`.
+#       true to list recursively, false otherwise
 #       (defaults to false)
 # - $3: hidden _as bool_:
-#       (optional) true to list hidden paths, false otherwise
+#       (optional) Can be set using the variable `_OPTION_INCLUDE_HIDDEN`.
+#       true to list hidden paths, false otherwise
 #       (defaults to false)
 # - $4: directory filter function name _as string_:
-#       (optional) a function name that is called to filter the sub directories (for recursive listing)
+#       (optional) Can be set using the variable `_OPTION_FILTER_DIRECTORY`.
+#       a function name that is called to filter the sub directories (for recursive listing)
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 #       (defaults to empty string, no filter)
@@ -474,11 +495,12 @@ function fs::listFiles() {
 # done
 # ```
 function fs::listDirectories() {
-  # shellcheck disable=SC2317
-  function fs_listDirectoriesReturnTrueIfDirectory() {
-    if [[ ! -d ${1} ]]; then return 1; fi
-  }
-  fs::listPaths "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${2:-false}" "${3:-false}" fs_listDirectoriesReturnTrueIfDirectory "${4:-}"
+  fs::listPaths "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${2:-${_OPTION_RECURSIVE:-false}}" "${3:-${_OPTION_INCLUDE_HIDDEN:-false}}" fs_listDirectoriesReturnTrueIfDirectory "${4:-${_OPTION_FILTER_DIRECTORY:-}}"
+}
+
+# Helper function to check if the path is a directory.
+function fs_listDirectoriesReturnTrueIfDirectory() {
+  if [[ ! -d ${1} ]]; then return 1; fi
 }
 
 # ## fs::isDirectoryWritable
@@ -548,7 +570,7 @@ function fs::isDirectoryWritable() {
 #
 # ```bash
 # fs::createLink "/path/to/link" "/path/to/linked"
-# fs::createLink "/path/to/link" "/path/to/linked" true
+# _OPTION_HARD_LINK=true fs::createLink "/path/to/link" "/path/to/linked"
 # ```
 #
 # > The function uses the `ln` command.

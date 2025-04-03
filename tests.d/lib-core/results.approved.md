@@ -2,9 +2,9 @@
 
 ## Test script 00.tests
 
-### ✅ Test core::createNewStateFilePath
+### ✅ Test core::createSavedFilePath
 
-❯ `core::createNewStateFilePath suffix`
+❯ `core::createSavedFilePath suffix`
 
 Returned variables:
 

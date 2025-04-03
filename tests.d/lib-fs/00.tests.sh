@@ -12,7 +12,7 @@ function main() {
   test_fs::toAbsolutePath
   test_fs::readFile
   test_fs::createDirectoryIfNeeded
-  test_fs::createFilePathIfNeeded
+  test_fs::createFileIfNeeded
   test_fs::cat
   test_fs::isDirectoryWritable
   test_fs::createLink
@@ -126,11 +126,11 @@ function test_fs::createDirectoryIfNeeded() {
   rm -Rf resources/gitignored 1>/dev/null
 }
 
-function test_fs::createFilePathIfNeeded() {
-  test::title "✅ Testing fs::createFilePathIfNeeded"
-  test::func fs::createFilePathIfNeeded resources/dir/subdir/file1
+function test_fs::createFileIfNeeded() {
+  test::title "✅ Testing fs::createFileIfNeeded"
+  test::func fs::createFileIfNeeded resources/dir/subdir/file1
 
-  test::func fs::createFilePathIfNeeded resources/gitignored/allo/file1
+  test::func fs::createFileIfNeeded resources/gitignored/allo/file1
   if [[ -f resources/gitignored/allo/file1 ]]; then
     test::markdown "File created successfully!"
   fi

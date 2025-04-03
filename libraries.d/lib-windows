@@ -429,7 +429,7 @@ function windows::createTempFile() {
     windows::convertPathToUnix "${windowsPath}"
     linuxPath="${RETURNED_VALUE}"
     if [[ ! -f "${linuxPath}" ]]; then
-      fs::createFilePathIfNeeded "${linuxPath}"
+      fs::createFileIfNeeded "${linuxPath}"
 
       RETURNED_VALUE="${windowsPath}"
       RETURNED_VALUE2="${linuxPath}"

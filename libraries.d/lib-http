@@ -67,7 +67,7 @@ function http::request() {
   fi
 
   if [[ -n ${outputFile} ]]; then
-    fs::createFilePathIfNeeded "${outputFile}"
+    fs::createFileIfNeeded "${outputFile}"
     : >"${outputFile}"
   fi
 

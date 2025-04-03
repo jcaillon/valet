@@ -52,7 +52,6 @@ source windows
 GLOBAL_EXPORTED_FOR_PROMPT=true;
 source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
 function core::fail() { log::error "$@"; }
-function core::failWithCode() { local exitCode="${1}"; shift; log::error "$@"; log::error "Exit code: $exitCode"; }
 set +o errexit
 trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT
 
@@ -65,7 +64,6 @@ trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT
 ```text
 source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
 function core::fail() { log::error "$@"; }
-function core::failWithCode() { local exitCode="${1}"; shift; log::error "$@"; log::error "Exit code: $exitCode"; }
 set +o errexit
 
 ```
