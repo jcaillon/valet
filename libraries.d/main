@@ -35,7 +35,7 @@ if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
   fs::setupTempFileGlobalVariable
   # shellcheck source=lib-profiler
   source profiler
-  printf -v _PROFILER_FILE_NAME "profiler-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
+  printf -v _PROFILER_FILE_NAME "profiler-%(%FT%H-%M-%S%z)T--PID_%06s.log" "${EPOCHSECONDS}" "${BASHPID}"
   core::getUserStateDirectory
   profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${_PROFILER_FILE_NAME}"}"
 fi
@@ -406,7 +406,7 @@ function main::parseMainArgumentsSwitch() {
     log::setLevel trace
     ;;
   -a | --alternative-log)
-    _OPTION_LOG_PATTERN="${VALET_CONFIG_LOG_PATTERN_ALTERNATIVE:-"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <sourceFile>{15s}:<line>{-4s}<levelColor><level>{7s}<colorDefault> <message>"}" log::init
+    _OPTION_LOG_PATTERN="${VALET_CONFIG_LOG_PATTERN_ALTERNATIVE:-"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05s}:<subshell>{1s}] <sourceFile>{15s}:<line>{-4s}<levelColor><level>{7s}<colorDefault> <message>"}" log::init
     ;;
   -i | --force-interactive-mode)
     VALET_FORCE_INTERACTIVE_MODE=true
@@ -522,7 +522,7 @@ function main::runFunction() {
     # shellcheck source=lib-profiler
     source profiler
     local profilerFileName
-    printf -v profilerFileName "profiler-%(%FT%H-%M-%S%z)T--PID_%06d--fun_%s.log" "${EPOCHSECONDS}" "${BASHPID}" "${functionName}"
+    printf -v profilerFileName "profiler-%(%FT%H-%M-%S%z)T--PID_%06s--fun_%s.log" "${EPOCHSECONDS}" "${BASHPID}" "${functionName}"
     core::getUserStateDirectory
     profiler::enable "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${profilerFileName}"}"
   fi

@@ -221,17 +221,17 @@ All the placeholders have a default format which truncates the string to a maxim
 
 Examples:
 
-- Java like logs: `"<colorFaded><time>{(%H:%M:%S)T} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <levelColor><level><colorDefault> <colorFaded><function>{15s}<colorDefault> -- <message>"`
+- Java like logs: `"<colorFaded><time>{(%H:%M:%S)T} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05s}:<subshell>{1s}] <levelColor><level><colorDefault> <colorFaded><function>{15s}<colorDefault> -- <message>"`
 - JSON output: `'{"level": "<level>{s}", "message": "<message>{s}", "source": "<source>{s}", "line": "<line>{s}"}'`
 - Boxed messages: `"<colorFaded>╭─<time>{(%H:%M:%S)T}──<levelColor><level>{7s}<colorFaded>────────<sourceFile>{10s}:<line>{-4s}───░<colorDefault>"$'\n'"<colorFaded>│<colorDefault>  <message>"$'\n'"<colorFaded>╰─ +<elapsedTimeSinceLastLog>{7s}──────────────────────────────────░<colorDefault>"$'\n'`
 - Subtitles message: `"<levelColor><level><colorDefault> <message>"$'\n'"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) | pid <pid>{5s} | shlvl <subshell>{-1s} | from <sourceFile>{10s}:<line>{-4s}<colorDefault>"`
-- Compact debug logs: `"<colorFaded><elapsedTime>{8s} [<pid>{04d}:<subshell>{1s}] <colorFaded><sourceFile>{-5s}:<line>{-4s}<colorDefault> <levelColor><level>{-4s} <icon><colorDefault> <message>"`
+- Compact debug logs: `"<colorFaded><elapsedTime>{8s} [<pid>{04s}:<subshell>{1s}] <colorFaded><sourceFile>{-5s}:<line>{-4s}<colorDefault> <levelColor><level>{-4s} <icon><colorDefault> <message>"`
 
 #### VALET_CONFIG_LOG_PATTERN_ALTERNATIVE
 
 The pattern to display a log line when the alternative log mode is used (global option `-a`).
 
-Defaults to: `"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <levelColor><level>{7s}<colorDefault> <colorFaded><sourceFile>{15s}:<line>{-4s}<colorDefault> <message>"`
+Defaults to: `"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05s}:<subshell>{1s}] <levelColor><level>{7s}<colorDefault> <colorFaded><sourceFile>{15s}:<line>{-4s}<colorDefault> <message>"`
 
 #### VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL
 
@@ -272,7 +272,7 @@ the name of the file in which to write the logs.
 
 Only used if [VALET_CONFIG_LOG_TO_DIRECTORY](#valet_config_log_to_directory) is set.
 
-The default is equivalent to setting this string to: `printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"`.
+The default is equivalent to setting this string to: `printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06s.log" "${EPOCHSECONDS}" "${BASHPID}"`.
 
 <!-- _________________ PROFILER _______________________ -->
 
@@ -360,5 +360,9 @@ Defaults to a new file in your user state directory `~/.local/state/valet/logs`.
 
 Force the creation of a core dump file when valet exits.
 Dump files are created in the user state directory in `~/.local/state/valet/core-dumps` by default.
+
+#### VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT
+
+If true, will display a warning when valet exits unexpectedly (not calling core::fail or doing a exit 0).
 
 <!-- END -->

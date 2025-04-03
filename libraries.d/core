@@ -77,7 +77,7 @@ function trap::onExitInternal() {
     if [[ -n ${FUNCNAME[1]:-} ]]; then
       symbol="╭"
     fi
-    if [[ ${BASH_COMMAND:-} != "exit"* ]]; then
+    if [[ ${VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT:-} == "true" && ${BASH_COMMAND:-} != "exit"* ]]; then
       log::print "WARNING" "${STYLE_ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
       log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
       log::printCallStack 2
@@ -1330,16 +1330,17 @@ function log::init() {
     GLOBAL_LOG_PRINT_STATEMENT_STANDARD+="${progressBarCode:-}${standardStatement} ${outputCode}${progressBarCode3:-}"
 
     # check if we need to additionally output the logs to a file
-    if [[ -n ${VALET_CONFIG_LOG_TO_DIRECTORY:-} ]]; then
+    if [[ -n ${VALET_CONFIG_LOG_TO_DIRECTORY:-} && ${VALET_CONFIG_LOG_TO_DIRECTORY:-} != "false" ]]; then
       # compute the name of the output file
       local logFile
       if [[ -n ${VALET_CONFIG_LOG_FILENAME_PATTERN:-} ]]; then
+        log::warning "${VALET_CONFIG_LOG_FILENAME_PATTERN}"
         eval "${VALET_CONFIG_LOG_FILENAME_PATTERN}"
         if [[ ! -v logFile ]]; then
           core::fail "The filename pattern for the log files VALET_CONFIG_LOG_FILENAME_PATTERN is not valid (does not create the variable logFile): ⌜${VALET_CONFIG_LOG_FILENAME_PATTERN}⌝."
         fi
       else
-        printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
+        printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06s.log" "${EPOCHSECONDS}" "${BASHPID}"
       fi
       if [[ ${VALET_CONFIG_LOG_TO_DIRECTORY} == "true" ]]; then
         core::getUserStateDirectory
@@ -2241,7 +2242,7 @@ function core::getExtensionsDirectory() {
 # ```
 function core::createNewStateFilePath() {
   local filePath
-  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d--%s" "${EPOCHSECONDS}" "${BASHPID}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06s--%s" "${EPOCHSECONDS}" "${BASHPID}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   core::getUserStateDirectory
   if [[ ! -d "${RETURNED_VALUE}/saved-files" ]]; then
     mkdir -p "${RETURNED_VALUE}/saved-files"
@@ -2266,12 +2267,21 @@ function core::createNewStateFilePath() {
 # ```
 function core::dump() {
   local filePath
-  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d" "${EPOCHSECONDS}" "${BASHPID}"
+  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06s" "${EPOCHSECONDS}" "${BASHPID}"
   core::getUserStateDirectory
   if [[ ! -d "${RETURNED_VALUE}/core-dumps" ]]; then
     mkdir -p "${RETURNED_VALUE}/core-dumps"
   fi
   filePath="${RETURNED_VALUE}/core-dumps/${filePath}${_OPTION_DUMP_SUFFIX:-}"
+
+  local fd listOfFds=""
+  if command -v readlink &>/dev/null; then
+    include exe
+    for fd in /proc/"${BASHPID}"/fd/*; do
+      exe::invoke readlink -f "${fd}"
+      listOfFds+="${fd} -> ${RETURNED_VALUE%$'\n'*}"$'\n'
+    done
+  fi
 
   {
     echo "================="$'\n'"BASHPID: ${BASHPID:-}"
@@ -2279,11 +2289,17 @@ function core::dump() {
     echo "================="$'\n'"Stack:"
     log::getCallStack
     echo "${RETURNED_VALUE}"
-    echo "================="$'\n'"Processes:"
-    ps -l || :
+    if command -v ps &>/dev/null; then
+      echo "================="$'\n'"Processes:"
+      ps -l || :
+    fi
     echo "================="$'\n'"File descriptors:"
+    echo "${listOfFds}"
   } >"${filePath}"
-    ls -l /proc/"${BASHPID}"/fd >>"${filePath}" || :
+    if command -v ls &>/dev/null; then
+      echo "From ls:" >>"${filePath}"
+      ls -l /proc/"${BASHPID}"/fd >>"${filePath}" || :
+    fi
   {
     if command -v lsof &>/dev/null; then
       echo "================="$'\n'"Open files:"
