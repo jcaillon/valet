@@ -494,3 +494,30 @@ function string::removeSgrCodes() {
     stringFromWhichToRemoveSgrCodes="${stringFromWhichToRemoveSgrCodes//"${BASH_REMATCH[0]}"/}"
   done
 }
+
+# ## string::convertToHex
+#
+# Convert a string to its hexadecimal representation.
+#
+# - $1: **string variable name** _as string_:
+#       The variable name that contains the string to convert.
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the hexadecimal representation of the string
+#
+# ```bash
+# MY_STRING="This is a string"
+# string::convertToHex MY_STRING
+# echo "${RETURNED_VALUE}"
+# ```
+function string::convertToHex() {
+  local -n stringToConvertToHex="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -i charIndex
+  local hexChar
+  RETURNED_VALUE=""
+  for ((charIndex = 0; charIndex < ${#stringToConvertToHex}; charIndex++)); do
+    printf -v hexChar "%x" "'${stringToConvertToHex:charIndex:1}"
+    RETURNED_VALUE+="${hexChar}"
+  done
+}

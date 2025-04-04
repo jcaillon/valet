@@ -62,5 +62,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Implement tests that are only run with -e flag and where we test system specific stuff, like the windows library and fs::createLink, absolute path with real path etc...
 - Add documentation pages for each built in commands. Add an option --markdown to the help command to output the help in markdown.
 - Add an option to enter interactive debug mode when an error occurs and on each log::print call.
+- Add a function to display a table, use it for benchmark.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

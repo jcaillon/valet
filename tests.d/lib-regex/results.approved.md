@@ -2,6 +2,22 @@
 
 ## Test script 00.tests
 
+### ✅ Testing regex::getFuzzySearchRegexFromSearchString function
+
+❯ `regex::getFuzzySearchRegexFromSearchString _string`
+
+```text
+_string='the'
+_STRING_FUZZY_FILTER_REGEX='^([^t]*)(t[^h]*h[^e]*e)(.?)'
+```
+
+❯ `regex::getFuzzySearchRegexFromSearchString _string`
+
+```text
+_string='\^$.|?*+[]{}()'
+_STRING_FUZZY_FILTER_REGEX='^([^\]*)(\\[^^]*\^[^$]*\$[^.]*\.[^|]*\|[^?]*\?[^*]*\*[^+]*\+[^[]*\[[^]]*\][^{]*\{[^}]*\}[^(]*\([^)]*\))(.?)'
+```
+
 ### ✅ Testing regex::escapeRegexSpecialChars function
 
 ❯ `regex::escapeRegexSpecialChars \\\^\$.\|\?\*+\[\]\{\}\(\)`

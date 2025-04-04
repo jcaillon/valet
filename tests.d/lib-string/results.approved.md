@@ -2,24 +2,14 @@
 
 ## Test script 00.tests
 
-### ✅ Testing regex::getFuzzySearchRegexFromSearchString
+### ✅ Testing string::convertToHex
 
-❯ `regex::getFuzzySearchRegexFromSearchString _searchString`
+❯ `_myString=d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301 string::convertToHex _myString`
 
-```text
-_STRING_FUZZY_FILTER_REGEX='^([^a]*)(a[^c]*c[^f]*f)(.?)'
-```
-
-❯ `regex::getFuzzySearchRegexFromSearchString _searchString`
+Returned variables:
 
 ```text
-_STRING_FUZZY_FILTER_REGEX='^([^a]*)(a[^$]*\$[^b]*b[^^]*\^[^f]*f)(.?)'
-```
-
-❯ `regex::getFuzzySearchRegexFromSearchString _searchString`
-
-```text
-_STRING_FUZZY_FILTER_REGEX='^([^\]*)(\\[^^]*\^[^$]*\$[^.]*\.[^|]*\|[^?]*\?[^*]*\*[^+]*\+[^[]*\[[^]]*\][^{]*\{[^}]*\}[^(]*\([^)]*\))(.?)'
+RETURNED_VALUE='64303731656331393166366539386139633738623664353032633832336438653561646366646638336430656135356562633766323432623239636538333031'
 ```
 
 ### ✅ Testing string::removeSgrCodes

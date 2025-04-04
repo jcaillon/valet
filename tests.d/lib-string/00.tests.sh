@@ -4,7 +4,7 @@
 source string
 
 function main() {
-  test_regex::getFuzzySearchRegexFromSearchString
+  test_string::convertToHex
   test_string::removeSgrCodes
   test_string::getField
   test_string::convertCamelCaseToSnakeCase
@@ -23,25 +23,11 @@ function main() {
   test_string::doForEachLine
 }
 
-function test_regex::getFuzzySearchRegexFromSearchString() {
-  test::title "✅ Testing regex::getFuzzySearchRegexFromSearchString"
+function test_string::convertToHex() {
+  test::title "✅ Testing string::convertToHex"
 
-  local stringsToTry=(
-    'abcdef' 'acf'
-    'a$bcd^ef' 'a$b^f'
-    '\^$.|?*+[]{}()' '\^$.|?*+[]{}()'
-  )
-
-  local index
-  for ((index = 0; index < ${#stringsToTry[@]}; index += 2)); do
-    local _searchString="${stringsToTry[index + 1]}"
-    test::exec regex::getFuzzySearchRegexFromSearchString _searchString
-    if [[ ${stringsToTry[index]} =~ ${_STRING_FUZZY_FILTER_REGEX} ]]; then
-      test::printVars _STRING_FUZZY_FILTER_REGEX
-    else
-      test::fail "Fuzzy search regex '${_STRING_FUZZY_FILTER_REGEX}' is incorrect for '${stringsToTry[index]}'"
-    fi
-  done
+  local _myString="d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301"
+  test::func _myString=d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301 string::convertToHex _myString
 }
 
 function test_string::removeSgrCodes() {

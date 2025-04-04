@@ -4,11 +4,33 @@
 source regex
 
 function main() {
+  test_regex::getFuzzySearchRegexFromSearchString
   test_regex::escapeRegexSpecialChars
   test_regex::getFuzzySearchRegexFromSearchString
   test_regex::getMatches
   test_regex::replace
   test_regex::getFirstGroup
+}
+
+function test_regex::getFuzzySearchRegexFromSearchString() {
+  test::title "✅ Testing regex::getFuzzySearchRegexFromSearchString"
+
+  local stringsToTry=(
+    'abcdef' 'acf'
+    'a$bcd^ef' 'a$b^f'
+    '\^$.|?*+[]{}()' '\^$.|?*+[]{}()'
+  )
+
+  local index
+  for ((index = 0; index < ${#stringsToTry[@]}; index += 2)); do
+    local _searchString="${stringsToTry[index + 1]}"
+    test::exec regex::getFuzzySearchRegexFromSearchString _searchString
+    if [[ ${stringsToTry[index]} =~ ${_STRING_FUZZY_FILTER_REGEX} ]]; then
+      test::printVars _STRING_FUZZY_FILTER_REGEX
+    else
+      test::fail "Fuzzy search regex '${_STRING_FUZZY_FILTER_REGEX}' is incorrect for '${stringsToTry[index]}'"
+    fi
+  done
 }
 
 function test_regex::escapeRegexSpecialChars() {

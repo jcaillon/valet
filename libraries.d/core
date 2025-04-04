@@ -77,7 +77,7 @@ function trap::onExitInternal() {
     if [[ -n ${FUNCNAME[1]:-} ]]; then
       symbol="╭"
     fi
-    if [[ ${VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT:-} == "true" && ${BASH_COMMAND:-} != "exit"* ]]; then
+    if [[ ${VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT:-} == "true" && ! ${BASH_COMMAND:-} =~ ^(exit|return) ]]; then
       log::print "WARNING" "${STYLE_ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
       log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
       log::printCallStack 2
