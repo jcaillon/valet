@@ -248,24 +248,11 @@ function bash::injectCodeInFunction() {
 # > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 function bash::sleep() {
   local timeout="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  # when connected to a terminal, we can just read the stdout
-  # which will never be written to, and use a timeout on read
-  if [[ -t 2 ]]; then
-    read -rt "${timeout}" -u 2 || :
-    return 0
-  elif command -v mkfifo 1>/dev/null; then
-    if [[ -z ${IO_SLEEP_FIFO:-} ]]; then
-      _OPTION_PATH_ONLY=true fs::createTempFile
-      IO_SLEEP_FIFO="${RETURNED_VALUE}"
-      mkfifo -m 700 "${IO_SLEEP_FIFO}"
-      exec 6<>"${IO_SLEEP_FIFO}"
-      rm "${IO_SLEEP_FIFO}"
-    fi
-    read -rt "${timeout}" -u 6 || :
-  else
-    # when everything else failed...
-    sleep "${timeout}"
+  if [[ ! -v IO_SLEEP_FD6 ]]; then
+    IO_SLEEP_FD6=1
+    exec 6<>/dev/udp/127.0.0.1/0
   fi
+  read -rt "${timeout}" -u 6 || :
 }
 
 # ## bash::readStdIn
