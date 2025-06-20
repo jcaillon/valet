@@ -22,6 +22,11 @@ function main() {
 function test_tui::createSpace() {
   test::title "✅ Testing tui::createSpace"
 
+  GLOBAL_LINES=10
+  test::exec tui::createSpace 1
+
+  test::exec tui::createSpace 20
+
   test::exec tui::createSpace 5
 }
 
@@ -30,7 +35,7 @@ function test_tui::getCursorPosition() {
 
   test::prompt "printf '\e[%sR' '123;456' | tui::getCursorPosition"
   printf '\e[%sR' '123;456' 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
-  tui::getCursorPosition < "${GLOBAL_TEMPORARY_WORK_FILE}"
+  tui::getCursorPosition <"${GLOBAL_TEMPORARY_WORK_FILE}"
   test::printVars GLOBAL_CURSOR_LINE GLOBAL_CURSOR_COLUMN
 }
 

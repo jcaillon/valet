@@ -5,11 +5,11 @@
 ### ✅ Testing list::getItemDisplayedString
 
 ```text
-_PROMPT_COLOR_LETTER_HIGHLIGHT='>'
-_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET='<'
-_PROMPT_ITEMS_BOX_ITEM_WIDTH='5'
-_PROMPT_ITEMS_BOX_FILTER_STRING='eLor'
-_PROMPT_ITEMS_BOX_ITEM_DISPLAYED='HellO wOrld'
+_LIST_COLOR_LETTER_HIGHLIGHT='>'
+_LIST_COLOR_LETTER_HIGHLIGHT_RESET='<'
+_LIST_ITEM_WIDTH='5'
+_LIST_FILTER_STRING='eLor'
+_LIST_ITEM_DISPLAYED='HellO wOrld'
 ```
 
 ❯ `list::getItemDisplayedString`
@@ -23,8 +23,8 @@ RETURNED_VALUE='0'
 `Hell…`
 
 ```text
-_PROMPT_ITEMS_BOX_ITEM_WIDTH='15'
-_PROMPT_ITEMS_BOX_ITEM_DISPLAYED='HellO wOrld'
+_LIST_ITEM_WIDTH='15'
+_LIST_ITEM_DISPLAYED='HellO wOrld'
 ```
 
 ❯ `list::getItemDisplayedString`
@@ -38,8 +38,8 @@ RETURNED_VALUE='4'
 `HellO wOrld`
 
 ```text
-_PROMPT_ITEMS_BOX_ITEM_WIDTH='10'
-_PROMPT_ITEMS_BOX_ITEM_DISPLAYED='[36mHellO[0m wOrld'
+_LIST_ITEM_WIDTH='10'
+_LIST_ITEM_DISPLAYED='[36mHellO[0m wOrld'
 ```
 
 ❯ `list::getItemDisplayedString`
@@ -53,8 +53,8 @@ RETURNED_VALUE='0'
 `[36mHellO[0m wOr…`
 
 ```text
-_PROMPT_ITEMS_BOX_ITEM_WIDTH='11'
-_PROMPT_ITEMS_BOX_ITEM_DISPLAYED='[36mHellO[0m wOrld'
+_LIST_ITEM_WIDTH='11'
+_LIST_ITEM_DISPLAYED='[36mHellO[0m wOrld'
 ```
 
 ❯ `list::getItemDisplayedString`
@@ -68,11 +68,11 @@ RETURNED_VALUE='0'
 `[36mHellO[0m wOrld`
 
 ```text
-_PROMPT_COLOR_LETTER_HIGHLIGHT='[4m'
-_PROMPT_COLOR_LETTER_HIGHLIGHT_RESET='[24m'
-_PROMPT_ITEMS_BOX_ITEM_WIDTH='71'
-_PROMPT_ITEMS_BOX_FILTER_STRING='abomamwesspp'
-_PROMPT_ITEMS_BOX_ITEM_DISPLAYED='[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit code once the spinner is stopped'
+_LIST_COLOR_LETTER_HIGHLIGHT='[4m'
+_LIST_COLOR_LETTER_HIGHLIGHT_RESET='[24m'
+_LIST_ITEM_WIDTH='71'
+_LIST_FILTER_STRING='abomamwesspp'
+_LIST_ITEM_DISPLAYED='[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit code once the spinner is stopped'
 ```
 
 ❯ `list::getItemDisplayedString`

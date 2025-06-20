@@ -404,7 +404,7 @@ function prompt_main_loop() {
   shopt -s nocasematch
 
   if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" ]]; then
-    list::show
+    prompt_showItemsBox
   fi
   prompt_drawPrompt
 
@@ -422,7 +422,7 @@ function prompt_main_loop() {
       prompt_clearErrorBox
       prompt_setSizeVariables
       if [[ ${isItemBoxShown} == "true" ]]; then
-        list::show
+        prompt_showItemsBox
       fi
       prompt_drawPrompt
       GLOBAL_SCREEN_REDRAW_REQUIRED=false
@@ -550,7 +550,7 @@ function prompt_onKeyBindingPress() {
     if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" ]]; then
       prompt_autocompleteWithSelectedItem
     elif [[ ${_PROMPT_TAB_OPENS_ITEMS_BOX} == "true" ]]; then
-      list::show
+      prompt_showItemsBox
     else
       prompt_insertTextAtCurrentIndex $'\t'
       prompt_onTextChanged
@@ -811,7 +811,7 @@ function prompt_onKeyPressed() {
   if [[ ${_PROMPT_ITEMS_BOX_SHOWN} != "true" && ${1} != " " ]]; then
     if [[ ${_PROMPT_AUTOCOMPLETE_WHOLE_LINE} == "true" ]]; then
       if ((${#_PROMPT_STRING} >= _PROMPT_FILTERS_FROM_N_CHARS)); then
-        list::show
+        prompt_showItemsBox
         return 0
       fi
     else
@@ -821,7 +821,7 @@ function prompt_onKeyPressed() {
         count+=1
       done
       if ((count >= _PROMPT_FILTERS_FROM_N_CHARS)); then
-        list::show
+        prompt_showItemsBox
         return 0
       fi
     fi
@@ -947,6 +947,37 @@ function prompt_setCurrentWord() {
       fi
     fi
   fi
+}
+
+function prompt_showItemsBox() {
+  _LIST_SHOWN=true
+
+  # position the box aligned with the current word
+  prompt_setCurrentWord
+  local preferredLeftPosition="$((GLOBAL_CURSOR_COLUMN - ${#_LIST_CURRENT_WORD} - _LIST_SYMBOL_LENGTH))"
+  if ((preferredLeftPosition < _LIST_START_COLUMN)); then
+    preferredLeftPosition="${_LIST_START_COLUMN}"
+  fi
+
+  # compute the size of the autocomplete box
+  tui::getBestAutocompleteBox "${_LIST_FORCED_TOP:-${_LIST_START_LINE}}" "${_LIST_FORCED_LEFT:-${preferredLeftPosition}}" "${_LIST_FORCED_HEIGHT:-${_LIST_PREFERRED_HEIGHT}}" "${_LIST_FORCED_WIDTH:-${_LIST_PREFERRED_WIDTH}}" "${_LIST_MAX_HEIGHT}" "${_LIST_FORCE_BELOW}" "${_LIST_ENABLE_PROMPT}"
+  _LIST_TOP="${RETURNED_VALUE}"
+  _LIST_LEFT="${RETURNED_VALUE2}"
+  _LIST_WIDTH="${RETURNED_VALUE3}"
+  _LIST_HEIGHT="${RETURNED_VALUE4}"
+
+  printf -v _LIST_BLANKS "%${_LIST_WIDTH}s" " "
+
+  if [[ ${_LIST_ENABLED} != "true" || ${_LIST_SHOWN} != "true" || _LIST_HEIGHT -le 0 ]]; then
+    return 0
+  fi
+  # clear the error box
+  if [[ ${_LIST_ERROR_BOX_SHOWN} == "true" ]]; then
+    prompt_clearErrorBox
+  fi
+
+  list::filter
+  list::draw
 }
 
 # A function to show an error message

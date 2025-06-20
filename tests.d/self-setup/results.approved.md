@@ -31,7 +31,8 @@ INFO     Now setting up Valet.
    ╭──────────────────────────────────────────────────────────╮
 ░──┤ Do you see the colors in the color check above the line? 63│
    ╰──────────────────────────────────────────────────────────╯
-111    (Y)ES         (N)O   19╭─────╮
+
+1    (Y)ES         (N)O   19╭─────╮
 9│ No. 15├──░
 9╰─────╯
 INFO     If you see an unusual or ? character in the lines below, it means you don't have a nerd-font setup in your terminal.
@@ -39,7 +40,8 @@ You can download a nerd-font here: https://www.nerdfonts.com/font-downloads.
    ┌─────────────────────────────────────────────────────┐
 ░──┤ Do you correctly see the nerd icons in lines above? 58│
    └─────────────────────────────────────────────────────┘
-111    (Y)ES         (N)O   19┌─────┐
+
+1    (Y)ES         (N)O   19┌─────┐
 9│ No. 15├──░
 9└─────┘
 INFO     You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
@@ -90,7 +92,8 @@ INFO     Now setting up Valet.
    ┌──────────────────────────────────────────────────────────┐
 ░──┤ Do you see the colors in the color check above the line? 63│
    └──────────────────────────────────────────────────────────┘
-111    (Y)ES         (N)O   19┌──────┐
+
+1    (Y)ES         (N)O   19┌──────┐
 9│ Yes. 16├──░
 9└──────┘
 INFO     If you see an unusual or ? character in the lines below, it means you don't have a nerd-font setup in your terminal.
@@ -98,7 +101,8 @@ You can download a nerd-font here: https://www.nerdfonts.com/font-downloads.
    ┌─────────────────────────────────────────────────────┐
 ░──┤ Do you correctly see the nerd icons in lines above? 58│
    └─────────────────────────────────────────────────────┘
-111    (Y)ES         (N)O   19┌──────┐
+
+1    (Y)ES         (N)O   19┌──────┐
 9│ Yes. 16├──░
 9└──────┘
 INFO     Writing the valet config file ⌜/tmp/valet-temp⌝.
@@ -146,20 +150,23 @@ An information icon: 
    ┌──────────────────────────────────────────────────────────┐
 ░──┤ Do you see the colors in the color check above the line? 63│
    └──────────────────────────────────────────────────────────┘
-111    (Y)ES         (N)O   19┌──────┐
+
+1    (Y)ES         (N)O   19┌──────┐
 9│ Yes. 16├──░
 9└──────┘
    ┌─────────────────────────────────────────────────────┐
 ░──┤ Do you correctly see the nerd icons in lines above? 58│
    └─────────────────────────────────────────────────────┘
-111    (Y)ES         (N)O   19┌──────┐
+
+1    (Y)ES         (N)O   19┌──────┐
 9│ Yes. 16├──░
 9└──────┘
    ┌─────────────────────────────────────────────────────────────────────────────┐
 ░──┤ Valet can be setup to be called from the windows CMD or windows powershell. 82│
    │ Do you want to add Valet to your windows PATH? 82│
    └─────────────────────────────────────────────────────────────────────────────┘
-111    (Y)ES         (N)O   19┌──────┐
+
+1    (Y)ES         (N)O   19┌──────┐
 9│ Yes. 16├──░
 9└──────┘
 ```

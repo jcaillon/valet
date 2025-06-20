@@ -37,8 +37,12 @@ function tui::createSpace() {
     printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&2
     return 0
   fi
+
   nbLines=$((nbLines - 1))
-  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}${ESC__ERASE_LINES_BELOW}${ESC__CURSOR_MOVE__}${nbLines}${__ESC__SCROLL_UP}${ESC__CURSOR_MOVE__}${nbLines}${__ESC__START_OF_LINE_UP}${ESC__CURSOR_SHOW}" 1>&2
+  printf -v scrollInstruction "%${nbLines}s" " "
+  scrollInstruction="${scrollInstruction// /$'\n'}"
+
+  printf '%s' "${ESC__CURSOR_HIDE}${scrollInstruction}${ESC__CURSOR_MOVE__}${nbLines}${__ESC__START_OF_LINE_UP}${ESC__ERASE_LINES_BELOW}${ESC__CURSOR_SHOW}" 1>&2
 }
 
 # ## tui::getCursorPosition

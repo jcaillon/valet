@@ -4,12 +4,41 @@
 
 ### ✅ Testing tui::createSpace
 
+❯ `tui::createSpace 1`
+
+**Error output**:
+
+```text
+[?25l[1G[2K
+```
+
+❯ `tui::createSpace 20`
+
+**Error output**:
+
+```text
+[?25l
+
+
+
+
+
+
+
+
+[9F[0J
+```
+
 ❯ `tui::createSpace 5`
 
 **Error output**:
 
 ```text
-[?25l[1G[0J[4S[4F
+[?25l
+
+
+
+[4F[0J
 ```
 
 ### ✅ Testing tui::getCursorPosition
