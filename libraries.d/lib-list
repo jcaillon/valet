@@ -23,6 +23,9 @@ source fs
 # - ${_OPTION_HEIGHT} _as int_:
 #       (optional) The height of the viewport of the list.
 #       (defaults to GLOBAL_LINES)
+# - ${_OPTION_ITEM_HEIGHT} _as int_:
+#       (optional) The height of each item in the list (number of lines needed to display the item).
+#       (defaults to 1)
 # - ${_OPTION_HIDE_ITEMS_COUNT} _as bool_:
 #       (optional) If true, the count of items at the bottom of the list is hidden.
 #       (defaults to false)
@@ -101,6 +104,7 @@ function list::setViewport() {
   _LIST_HEIGHT="${_OPTION_HEIGHT:-${GLOBAL_LINES}}"
 
   # display modes
+  _LIST_ITEM_HEIGHT="${_OPTION_ITEM_HEIGHT:-1}"
   _LIST_HIDE_ITEMS_COUNT="${_OPTION_HIDE_ITEMS_COUNT:-false}"
   _LIST_FORCE_SHOW_ITEMS_COUNT="${_OPTION_FORCE_SHOW_ITEMS_COUNT:-false}"
   if [[ ${_OPTION_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
@@ -131,6 +135,16 @@ function list::setViewport() {
     _LIST_SYMBOL_COUNTER_BOX_ABOVE=""
     _LIST_SYMBOL_COUNTER_BOX_BELOW=""
     _LIST_SYMBOL_LENGTH=0
+  fi
+
+  # callbacks
+  _LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED="${_OPTION_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED:-}"
+  if [[ -n ${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED} ]]; then
+    if ! declare -F "${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}" &>/dev/null; then
+      core::fail "The callback function ⌜${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}⌝ does not exist."
+    fi
+  else
+    _LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED="list::getItemDisplayedString"
   fi
 
   # handle shortcuts, allow to override the default key mapping
@@ -164,58 +178,20 @@ function list::setViewport() {
 #       The name of the array that contains the items to display.
 function list::setItems() {
   local itemsArrayName="${1:-}"
+  local initialFilterString="${2:-}"
 
   if [[ -n ${itemsArrayName} ]]; then
     declare -g -n _LIST_ORIGINAL_ITEMS="${itemsArrayName}"
-    _LIST_PREFERRED_WIDTH=0
-    local item
-    for item in "${_LIST_ORIGINAL_ITEMS[@]}"; do
-      if ((${#item} > _LIST_PREFERRED_WIDTH)); then
-        _LIST_PREFERRED_WIDTH=${#item}
-        if ((_LIST_PREFERRED_WIDTH > GLOBAL_COLUMNS)); then
-          break
-        fi
-      fi
-    done
     _LIST_ORIGINAL_ITEMS_COUNT=${#_LIST_ORIGINAL_ITEMS[@]}
-    _LIST_PREFERRED_HEIGHT=${#_LIST_ORIGINAL_ITEMS[@]}
   else
     _LIST_ORIGINAL_ITEMS=()
     _LIST_ORIGINAL_ITEMS_COUNT=0
-    _LIST_PREFERRED_WIDTH=0
-    _LIST_PREFERRED_HEIGHT=0
   fi
 
-  if [[ ${_LIST_FORCE_SHOW_ITEMS_COUNT} == "true" ]]; then
-    _LIST_PREFERRED_HEIGHT=$((_LIST_PREFERRED_HEIGHT + 1))
-  fi
-
-  _LIST_ORIGINAL_ITEMS_SELECTED_INDEX=-1
-
-  local itemCountWidth=$((8 + ${#_LIST_ORIGINAL_ITEMS_COUNT} * 4))
-  if ((_LIST_PREFERRED_WIDTH < itemCountWidth)); then
-    # the width necessary to display the count of items
-    _LIST_PREFERRED_WIDTH=${itemCountWidth}
-  fi
-
-  if [[ ${_LIST_SHOW_SYMBOL} == "true" ]]; then
-    _LIST_PREFERRED_WIDTH=$((_LIST_PREFERRED_WIDTH + _LIST_SYMBOL_LENGTH))
-  fi
-
-  if [[ ${_LIST_DISABLE_FILTERING} == "true" ]]; then
-    _LIST_FILTERED_ITEMS=("${_LIST_ORIGINAL_ITEMS[@]}")
-  else
-    _LIST_FILTERED_ITEMS=()
-  fi
-  _LIST_FILTERED_ITEMS_CORRESPONDENCES=()
   _LIST_FILTERED_ITEMS_START_INDEX=0
   _LIST_FILTERED_ITEMS_SELECTED_INDEX=-1
-  _LIST_FILTER_STRING=""
-
-  _LIST_ASYNC_FILTERING_RUNNING=false
 
   # Async filtering variables below
-
   # make sure to use async when we use an external program
   if (( _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD > _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD )); then
     _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD="${_LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD}"
@@ -242,32 +218,14 @@ function list::setItems() {
     _LIST_FILTER_SYNCHRONOUSLY=true
   fi
 
-  list_post_filter
-}
-
-function list_post_filter() {
-  # check if we display the item count
-  _LIST_ITEM_COUNT_SHOWN=false
-  _LIST_NB_DISPLAYABLE_ITEMS="${_LIST_HEIGHT}"
-  if [[ ${_LIST_HIDE_ITEMS_COUNT} != "true" ]]; then
-    if [[ ${_LIST_FORCE_SHOW_ITEMS_COUNT} == "true" || ${#_LIST_FILTERED_ITEMS[@]} -gt ${_LIST_NB_DISPLAYABLE_ITEMS} || ${#_LIST_FILTERED_ITEMS[@]} -ne ${_LIST_ORIGINAL_ITEMS_COUNT} ]]; then
-      # we show the count if:
-      # - we force its display
-      # - we have more items than the box can display
-      # - we display less items than the original items
-      if ((_LIST_HEIGHT > 1 || (_LIST_HEIGHT == 1 && ${#_LIST_FILTERED_ITEMS[@]} == 0))); then
-        # display if we have more than one line or if we have no items
-        _LIST_ITEM_COUNT_SHOWN=true
-        _LIST_NB_DISPLAYABLE_ITEMS=$((_LIST_NB_DISPLAYABLE_ITEMS - 1))
-      fi
-    fi
+  if [[ ${_LIST_DISABLE_FILTERING} == "true" || -n ${initialFilterString} ]]; then
+    _LIST_FILTERED_ITEMS=("${_LIST_ORIGINAL_ITEMS[@]}")
+    _LIST_FILTERED_ITEMS_CORRESPONDENCES=()
+    _LIST_FILTER_STRING=""
+    _LIST_ASYNC_FILTERING_RUNNING=false
+  else
+    list::filter "${initialFilterString:-}"
   fi
-
-  #TODO: callback to compute the _LIST_NB_DISPLAYABLE_ITEMS, _LIST_ITEM_COUNT_SHOWN
-
-  # make sure to select an existing index regarding the filtered items +
-  # make sure it is in the view
-  list::changeSelectedItemIndex 0
 }
 
 # Draw the autocompletion box
@@ -275,7 +233,7 @@ function list::draw() {
   local toPrint="${ESC__CURSOR_HIDE}"
 
   # draw the items
-  _LIST_NB_DISPLAYED_ITEMS="${_LIST_NB_DISPLAYABLE_ITEMS}"
+  _LIST_NB_DISPLAYED_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
   if ((${#_LIST_FILTERED_ITEMS[@]} < _LIST_NB_DISPLAYED_ITEMS)); then
     _LIST_NB_DISPLAYED_ITEMS=${#_LIST_FILTERED_ITEMS[@]}
   fi
@@ -301,7 +259,7 @@ function list::draw() {
 
     # get the item display string in _LIST_ITEM_DISPLAYED
     _LIST_ITEM_DISPLAYED="${_LIST_FILTERED_ITEMS[${index}]}"
-    if "${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}"; then
+    if "${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}"; then
       if ((RETURNED_VALUE > 0)); then
         spaces="${_LIST_BLANKS:0:RETURNED_VALUE}"
       else
@@ -309,8 +267,10 @@ function list::draw() {
       fi
       if ((index == _LIST_FILTERED_ITEMS_SELECTED_INDEX)); then
         # highlight the selected item
+        echo "ok" >>tmp/f
         toPrint+="${STYLE_LIST_SELECTED_ITEM_SYMBOL}${_LIST_SYMBOL_SELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_SELECTED_ITEM}${_LIST_ITEM_DISPLAYED}${spaces}${STYLE_RESET}"
       else
+        echo "${_LIST_FILTERED_ITEMS_SELECTED_INDEX} vs ${index}" >>tmp/f
         toPrint+="${STYLE_FRAMES}${_LIST_SYMBOL_UNSELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_ITEM_DISPLAYED}${spaces}${STYLE_RESET}"
       fi
     fi
@@ -424,11 +384,11 @@ function list::onKeyBindingPress() {
   case "${action}" in
   # autocompletion box selected item
   scroll-up)
-    list::changeSelectedItemIndex "-$((${_LIST_NB_DISPLAYABLE_ITEMS:-10} - 1))"
+    list::changeSelectedItemIndex "-$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
     list::draw
     ;;
   scroll-down)
-    list::changeSelectedItemIndex "$((${_LIST_NB_DISPLAYABLE_ITEMS:-10} - 1))"
+    list::changeSelectedItemIndex "$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
     list::draw
     ;;
   move-beginning)
@@ -453,27 +413,37 @@ function list::onKeyBindingPress() {
 
 # Filter the items of the autocompletion box, will either filter synchronously or asynchronously
 function list::filter() {
+  _LIST_FILTER_STRING="${1}"
+
+  list_filter
+
+  if [[ ${_LIST_ASYNC_FILTERING_RUNNING} != "true" ]]; then
+    list_post_filter
+  fi
+}
+
+# Filter the items of the autocompletion box, will either filter synchronously or asynchronously
+function list_filter() {
   if [[ ${_LIST_DISABLE_FILTERING} == "true" ]]; then
     return 0
   fi
 
-  _LIST_FILTER_STRING="${_LIST_CURRENT_WORD}"
+  _LIST_ASYNC_FILTERING_RUNNING=false
 
   # case where we can return the original items
   if [[ -z ${_LIST_FILTER_STRING} ]]; then
     _LIST_FILTERED_ITEMS=("${_LIST_ORIGINAL_ITEMS[@]}")
     _LIST_FILTERED_ITEMS_CORRESPONDENCES=()
     _LIST_CURRENT_FILTER_STRING=""
-    _LIST_ASYNC_FILTERING_RUNNING=false
     return 0
   fi
 
 
+  # if the current filter string is a prefix of the previous one, we can filter the already filtered items synchronously
   if [[ -n ${_LIST_CURRENT_FILTER_STRING:-} && ${_LIST_FILTER_STRING} == "${_LIST_CURRENT_FILTER_STRING}"* && (${_LIST_FILTER_SYNCHRONOUSLY} == "true" || ${#_LIST_FILTERED_ITEMS[@]} -lt _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD) ]]; then
     if ((${#_LIST_FILTERED_ITEMS[@]} == 0)); then
       return 0
     fi
-    # if the current filter string is a prefix of the previous one, we can filter the already filtered items
     local -a _LIST_PRE_FILTERED_ITEMS=("${_LIST_FILTERED_ITEMS[@]}")
     local -a _LIST_PRE_FILTERED_ITEMS_CORRESPONDENCES=("${_LIST_FILTERED_ITEMS_CORRESPONDENCES[@]}")
     # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
@@ -513,6 +483,29 @@ function list::filter() {
     _LIST_ASYNC_FILTERING_LAST_REQUESTED_STRING="${_LIST_FILTER_STRING}"
     _LIST_ASYNC_FILTERING_RUNNING=true
   fi
+}
+
+function list_post_filter() {
+  # check if we display the item count
+  _LIST_ITEM_COUNT_SHOWN=false
+  _LIST_NB_USABLE_LINES_FOR_ITEMS="${_LIST_HEIGHT}"
+  if [[ ${_LIST_HIDE_ITEMS_COUNT} != "true" ]]; then
+    if [[ ${_LIST_FORCE_SHOW_ITEMS_COUNT} == "true" || $((_LIST_ITEM_HEIGHT * ${#_LIST_FILTERED_ITEMS[@]})) -gt ${_LIST_NB_USABLE_LINES_FOR_ITEMS} || ${#_LIST_FILTERED_ITEMS[@]} -ne ${_LIST_ORIGINAL_ITEMS_COUNT} ]]; then
+      # we show the count if:
+      # - we force its display
+      # - we have more items than the box can display
+      # - we display less items than the original items
+      if ((_LIST_HEIGHT > 1 || (_LIST_HEIGHT == 1 && ${#_LIST_FILTERED_ITEMS[@]} == 0))); then
+        # display if we have more than one line or if we have no items
+        _LIST_ITEM_COUNT_SHOWN=true
+        _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
+      fi
+    fi
+  fi
+
+  # make sure to select an existing index regarding the filtered items +
+  # make sure it is in the view
+  list::changeSelectedItemIndex 0
 }
 
 # Clear the items box
@@ -669,12 +662,12 @@ function list::changeSelectedItemIndex() {
   # to make sure that the new index is visible on the screen
   if ((newIndex < _LIST_FILTERED_ITEMS_START_INDEX)); then
     _LIST_FILTERED_ITEMS_START_INDEX=${newIndex}
-  elif ((newIndex > _LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYABLE_ITEMS - 1)); then
-    _LIST_FILTERED_ITEMS_START_INDEX=$((newIndex - _LIST_NB_DISPLAYABLE_ITEMS + 1))
+  elif ((newIndex > _LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_USABLE_LINES_FOR_ITEMS - 1)); then
+    _LIST_FILTERED_ITEMS_START_INDEX=$((newIndex - _LIST_NB_USABLE_LINES_FOR_ITEMS + 1))
   fi
   # also to make sure that we use all the space available on screen
-  if ((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYABLE_ITEMS > ${#_LIST_FILTERED_ITEMS[@]})); then
-    _LIST_FILTERED_ITEMS_START_INDEX=$((${#_LIST_FILTERED_ITEMS[@]} - _LIST_NB_DISPLAYABLE_ITEMS))
+  if ((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_USABLE_LINES_FOR_ITEMS > ${#_LIST_FILTERED_ITEMS[@]})); then
+    _LIST_FILTERED_ITEMS_START_INDEX=$((${#_LIST_FILTERED_ITEMS[@]} - _LIST_NB_USABLE_LINES_FOR_ITEMS))
     if ((_LIST_FILTERED_ITEMS_START_INDEX < 0)); then
       _LIST_FILTERED_ITEMS_START_INDEX=0
     fi

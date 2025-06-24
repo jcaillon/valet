@@ -386,6 +386,47 @@ function prompt::input() {
   return 1
 }
 
+function prompt::setItems() {
+  local itemsArrayName="${1:-}"
+
+  if [[ -n ${itemsArrayName} ]]; then
+    declare -g -n _LIST_ORIGINAL_ITEMS="${itemsArrayName}"
+    _LIST_PREFERRED_WIDTH=0
+    local item
+    for item in "${_LIST_ORIGINAL_ITEMS[@]}"; do
+      if ((${#item} > _LIST_PREFERRED_WIDTH)); then
+        _LIST_PREFERRED_WIDTH=${#item}
+        if ((_LIST_PREFERRED_WIDTH > GLOBAL_COLUMNS)); then
+          break
+        fi
+      fi
+    done
+    _LIST_ORIGINAL_ITEMS_COUNT=${#_LIST_ORIGINAL_ITEMS[@]}
+    _LIST_PREFERRED_HEIGHT=${#_LIST_ORIGINAL_ITEMS[@]}
+  else
+    _LIST_ORIGINAL_ITEMS=()
+    _LIST_ORIGINAL_ITEMS_COUNT=0
+    _LIST_PREFERRED_WIDTH=0
+    _LIST_PREFERRED_HEIGHT=0
+  fi
+
+  if [[ ${_LIST_FORCE_SHOW_ITEMS_COUNT} == "true" ]]; then
+    _LIST_PREFERRED_HEIGHT=$((_LIST_PREFERRED_HEIGHT + 1))
+  fi
+
+  _LIST_ORIGINAL_ITEMS_SELECTED_INDEX=-1
+
+  local itemCountWidth=$((8 + ${#_LIST_ORIGINAL_ITEMS_COUNT} * 4))
+  if ((_LIST_PREFERRED_WIDTH < itemCountWidth)); then
+    # the width necessary to display the count of items
+    _LIST_PREFERRED_WIDTH=${itemCountWidth}
+  fi
+
+  if [[ ${_LIST_SHOW_SYMBOL} == "true" ]]; then
+    _LIST_PREFERRED_WIDTH=$((_LIST_PREFERRED_WIDTH + _LIST_SYMBOL_LENGTH))
+  fi
+}
+
 function prompt_main_loop() {
   # set trap so that interrupt signal sets GLOBAL_SESSION_INTERRUPTED to true
   tui::setInterruptTrap
