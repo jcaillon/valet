@@ -49,7 +49,7 @@ function trap::onErrorInternal() {
   if [[ -n ${FUNCNAME[1]:-} ]]; then
     symbol="╭"
   fi
-  log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDERR" "Error code ${errorCodesString} for the command:"
+  log::print "ERROR" "${ICON_ERROR:-}" "CMDERR" "Error code ${errorCodesString} for the command:"
   log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
   log::printCallStack 2
 
@@ -78,11 +78,11 @@ function trap::onExitInternal() {
       symbol="╭"
     fi
     if [[ ${VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT:-} == "true" && ! ${BASH_COMMAND:-} =~ ^(exit|return) ]]; then
-      log::print "WARNING" "${STYLE_ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
+      log::print "WARNING" "${ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
       log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
       log::printCallStack 2
     elif [[ ${exitCode} != "0" ]]; then
-      log::print "ERROR" "${STYLE_ICON_EXIT:-}" "EXIT" "Exiting with code ${exitCode}, stack:"
+      log::print "ERROR" "${ICON_EXIT:-}" "EXIT" "Exiting with code ${exitCode}, stack:"
       log::debug "${symbol} ${BASH_COMMAND:-}" "│ "
       log::printCallStack 2
     fi
@@ -103,7 +103,7 @@ function trap::onInterruptInternal() {
   if ! declare -F tui::restoreTerminalOptions &>/dev/null; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
-  log::print "WARNING" "${STYLE_ICON_STOPPED:-}" "STOPPED" "Program interrupted by the user."
+  log::print "WARNING" "${ICON_STOPPED:-}" "STOPPED" "Program interrupted by the user."
 
   if log::isDebugEnabled; then
     log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:"
@@ -125,7 +125,7 @@ function trap::onInterruptInternal() {
 
 # This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
 function trap::onTerminateInternal() {
-  log::print "ERROR" "${STYLE_ICON_KILLED:-}" "KILLED" "Program killed."
+  log::print "ERROR" "${ICON_KILLED:-}" "KILLED" "Program killed."
   # check if the function exists
   if declare -F onTerminate &>/dev/null; then
     if onTerminate; then
@@ -213,7 +213,7 @@ function command_not_found_handle() {
     errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Did you forget to source/include the package? ⌜include ${commandNotFound%%::*}⌝"
   fi
 
-  log::print "ERROR" "${STYLE_ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
+  log::print "ERROR" "${ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
   log::printCallStack 2
 
   GLOBAL_EXPECTED_EXIT=1
@@ -753,7 +753,7 @@ function log::error() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "ERROR" "${STYLE_ICON_ERROR:-}" "ERROR" loggedLine
+  log::printInternal "ERROR" "${ICON_ERROR:-}" "ERROR" loggedLine
   if log::isDebugEnabled; then
     log::printCallStack 2
   fi
@@ -776,7 +776,7 @@ function log::warning() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "WARNING" "${STYLE_ICON_WARNING:-}" "WARNING" loggedLine
+  log::printInternal "WARNING" "${ICON_WARNING:-}" "WARNING" loggedLine
   return 0
 }
 
@@ -797,7 +797,7 @@ function log::success() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "SUCCESS" "${STYLE_ICON_SUCCESS:-}" "SUCCESS" loggedLine
+  log::printInternal "SUCCESS" "${ICON_SUCCESS:-}" "SUCCESS" loggedLine
   return 0
 }
 
@@ -818,7 +818,7 @@ function log::info() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "INFO" "${STYLE_ICON_INFO:-}" "INFO" loggedLine
+  log::printInternal "INFO" "${ICON_INFO:-}" "INFO" loggedLine
   return 0
 }
 
@@ -839,7 +839,7 @@ function log::debug() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "DEBUG" "${STYLE_ICON_DEBUG:-}" "DEBUG" loggedLine
+  log::printInternal "DEBUG" "${ICON_DEBUG:-}" "DEBUG" loggedLine
   return 0
 }
 
@@ -860,7 +860,7 @@ function log::trace() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "TRACE" "${STYLE_ICON_TRACE:-}" "TRACE" loggedLine
+  log::printInternal "TRACE" "${ICON_TRACE:-}" "TRACE" loggedLine
   return 0
 }
 
@@ -880,7 +880,7 @@ function log::errorTrace() {
   local IFS=$'\n'
   # shellcheck disable=SC2034
   local loggedLine="$*"
-  log::printInternal "TRACE" "${STYLE_ICON_ERROR_TRACE:-}" "TRACE" loggedLine
+  log::printInternal "TRACE" "${ICON_ERROR_TRACE:-}" "TRACE" loggedLine
   return 0
 }
 
@@ -1857,7 +1857,7 @@ function time::getProgramElapsedMicroseconds() {
 # core::fail "This is an error message."
 # ```
 function core::fail() {
-  log::print "ERROR" "${STYLE_ICON_ERROR:-}" "FAIL" "$@"
+  log::print "ERROR" "${ICON_ERROR:-}" "FAIL" "$@"
   if log::isDebugEnabled; then
     log::printCallStack 2
   fi

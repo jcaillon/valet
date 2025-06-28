@@ -6,6 +6,8 @@
 source tui
 # shellcheck source=lib-fs
 source fs
+# shellcheck source=lib-string
+source string
 
 # ## list::setViewport
 #
@@ -80,20 +82,15 @@ source fs
 #       (defaults to empty)
 # - ${_OPTION_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED} _as string_:
 #       (optional) The name of a function to call when an item needs to be displayed in the list.
-#       This will replace the default function that displays the item with highlighted characters.
+#       This can be used to change the text displayed for the item (which default to the item string).
 #       The following variables are available:
 #
-#       - ${_PROMPT_ITEM_DISPLAYED} _as string_:
-#             the string of the item as it is defined in the array
-#       - ${_PROMPT_ITEM_WIDTH} _as int_:
-#             the width of the item box (to truncate the string)
-#       - ${_PROMPT_FILTER_STRING} _as string_:
-#             the user current input string (to highlight the characters)
+#       - $1 _as int_:
+#             the index of the item being displayed
 #
 #       The function should return:
 #
 #       - ${_PROMPT_ITEM_DISPLAYED}: the string to display
-#       - ${RETURNED_VALUE}: the space left
 #
 #       (defaults to empty)
 function list::setViewport() {
@@ -122,12 +119,12 @@ function list::setViewport() {
   # visual options
   _LIST_SHOW_SYMBOL="${_OPTION_SHOW_SYMBOL:-true}"
   if [[ ${_LIST_SHOW_SYMBOL} == "true" ]]; then
-    _LIST_SYMBOL_SELECTED_ITEM="${STYLE_LIST_SYMBOL_SELECTED_ITEM}"
-    _LIST_SYMBOL_UNSELECTED_ITEM="${STYLE_LIST_SYMBOL_UNSELECTED_ITEM}"
-    _LIST_SYMBOL_COUNTER="${STYLE_LIST_SYMBOL_COUNTER}"
-    _LIST_SYMBOL_COUNTER_BOX_ABOVE="${STYLE_LIST_SYMBOL_COUNTER_BOX_ABOVE}"
-    _LIST_SYMBOL_COUNTER_BOX_BELOW="${STYLE_LIST_SYMBOL_COUNTER_BOX_BELOW}"
-    _LIST_SYMBOL_LENGTH="${STYLE_LIST_SYMBOL_LENGTH}"
+    _LIST_SYMBOL_SELECTED_ITEM="${SYMBOL_LIST_SELECTED_ITEM}"
+    _LIST_SYMBOL_UNSELECTED_ITEM="${SYMBOL_LIST_UNSELECTED_ITEM}"
+    _LIST_SYMBOL_LENGTH="${SYMBOL_LIST_LENGTH}"
+    _LIST_SYMBOL_COUNTER="${SYMBOL_LIST_COUNTER}"
+    _LIST_SYMBOL_COUNTER_BOX_ABOVE="${SYMBOL_LIST_COUNTER_BOX_ABOVE}"
+    _LIST_SYMBOL_COUNTER_BOX_BELOW="${SYMBOL_LIST_COUNTER_BOX_BELOW}"
   else
     _LIST_SYMBOL_SELECTED_ITEM=""
     _LIST_SYMBOL_UNSELECTED_ITEM=""
@@ -137,14 +134,20 @@ function list::setViewport() {
     _LIST_SYMBOL_LENGTH=0
   fi
 
+  _LIST_STYLE_LETTER_HIGHLIGHT="${STYLE_LIST_LETTER_HIGHLIGHT}"
+  _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}"
+
   # callbacks
   _LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED="${_OPTION_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED:-}"
   if [[ -n ${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED} ]]; then
     if ! declare -F "${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}" &>/dev/null; then
       core::fail "The callback function ⌜${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}⌝ does not exist."
     fi
+  fi
+  if ((_LIST_ITEM_HEIGHT == 1)); then
+    _LIST_APPEND_ITEM_STRING_FUNCTION="list_appendSingleLineItemDisplayString"
   else
-    _LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED="list::getItemDisplayedString"
+    _LIST_APPEND_ITEM_STRING_FUNCTION="list_appendMultiLineItemDisplayString"
   fi
 
   # handle shortcuts, allow to override the default key mapping
@@ -232,54 +235,105 @@ function list::setItems() {
 function list::draw() {
   local toPrint="${ESC__CURSOR_HIDE}"
 
-  # draw the items
-  _LIST_NB_DISPLAYED_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
-  if ((${#_LIST_FILTERED_ITEMS[@]} < _LIST_NB_DISPLAYED_ITEMS)); then
-    _LIST_NB_DISPLAYED_ITEMS=${#_LIST_FILTERED_ITEMS[@]}
-  fi
+  local -i line displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT)) index=${_LIST_FILTERED_ITEMS_START_INDEX}
+  _LIST_NB_DISPLAYED_ITEMS=0
+_LIST_FILTER_STRING="ae"
+_LIST_FILTERED_ITEMS_SELECTED_INDEX=1
 
-  local -i line showAtLine index
-  local spaces
-  for ((line = 0; line < _LIST_HEIGHT - _LIST_SHOW_ITEMS_COUNT_AT_TOP; line++)); do
+  for ((line = 0; line < _LIST_NB_USABLE_LINES_FOR_ITEMS - _LIST_SHOW_ITEMS_COUNT_AT_TOP; line = line + _LIST_ITEM_HEIGHT)); do
+    # line at which to display the item
     if [[ ${_LIST_ENABLE_REVERSE_MODE} == "true" ]]; then
-      showAtLine=$((_LIST_TOP + _LIST_HEIGHT - 1 - line - _LIST_SHOW_ITEMS_COUNT_AT_TOP))
+      _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_TOP + _LIST_HEIGHT - 1 - line - _LIST_SHOW_ITEMS_COUNT_AT_TOP))
     else
-      showAtLine=$((_LIST_TOP + line + _LIST_SHOW_ITEMS_COUNT_AT_TOP))
+      _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_TOP + line + _LIST_SHOW_ITEMS_COUNT_AT_TOP))
     fi
-    index=$((_LIST_FILTERED_ITEMS_START_INDEX + line))
 
     # position
-    toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}"
+    toPrint+="${ESC__CURSOR_MOVE__}${_LIST_CURRENT_ITEM_SHOWN_AT_LINE};${_LIST_LEFT}${__ESC__TO}"
 
-    if ((index >= ${#_LIST_FILTERED_ITEMS[@]})); then
+    if ((index >= ${#_LIST_FILTERED_ITEMS[@]} || _LIST_NB_DISPLAYED_ITEMS >= displayableItems)); then
       # nothing to show for this line
       toPrint+="${_LIST_BLANKS}"
       continue
     fi
 
-    # get the item display string in _LIST_ITEM_DISPLAYED
-    _LIST_ITEM_DISPLAYED="${_LIST_FILTERED_ITEMS[${index}]}"
-    if "${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}"; then
-      if ((RETURNED_VALUE > 0)); then
-        spaces="${_LIST_BLANKS:0:RETURNED_VALUE}"
-      else
-        spaces=""
-      fi
-      if ((index == _LIST_FILTERED_ITEMS_SELECTED_INDEX)); then
-        # highlight the selected item
-        echo "ok" >>tmp/f
-        toPrint+="${STYLE_LIST_SELECTED_ITEM_SYMBOL}${_LIST_SYMBOL_SELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_SELECTED_ITEM}${_LIST_ITEM_DISPLAYED}${spaces}${STYLE_RESET}"
-      else
-        echo "${_LIST_FILTERED_ITEMS_SELECTED_INDEX} vs ${index}" >>tmp/f
-        toPrint+="${STYLE_FRAMES}${_LIST_SYMBOL_UNSELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_ITEM_DISPLAYED}${spaces}${STYLE_RESET}"
-      fi
+    # get the item string to display
+    if [[ -n ${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED} ]]; then
+      # case of a callback in which we want to change the displayed text
+      list::convertToInitialItemsIndex "${index}"
+      "${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}" "${RETURNED_VALUE}"
+    else
+      _LIST_CURRENT_ITEM="${_LIST_FILTERED_ITEMS[${index}]}"
     fi
+
+    # append the item display string (uses index and toPrint directly)
+    "${_LIST_APPEND_ITEM_STRING_FUNCTION}"
+
+    index=$((index + 1))
+    _LIST_NB_DISPLAYED_ITEMS=$((_LIST_NB_DISPLAYED_ITEMS + 1))
   done
 
-  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&7
+  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&7
 }
 
+# ## list_appendSingleLineItemDisplayString (private)
+function list_appendSingleLineItemDisplayString() {
+  if ((index == _LIST_FILTERED_ITEMS_SELECTED_INDEX)); then
+    # highlight the selected item
+    _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_SELECTED_ITEM}"
+    list::getCurrentItemDisplayableString
+    toPrint+="${STYLE_LIST_SELECTED_ITEM_SYMBOL}${_LIST_SYMBOL_SELECTED_ITEM}${STYLE_LIST_SELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+  else
+    _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_UNSELECTED_ITEM}"
+    list::getCurrentItemDisplayableString
+    toPrint+="${STYLE_LIST_UNSELECTED_ITEM_SYMBOL}${_LIST_SYMBOL_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+  fi
+  if ((RETURNED_VALUE > 0)); then
+    toPrint+="${_LIST_BLANKS:0:RETURNED_VALUE}"
+  else
+    toPrint+=""
+  fi
+}
 
+# ## list_appendMultiLineItemDisplayString (private)
+function list_appendMultiLineItemDisplayString() {
+  if ((index == _LIST_FILTERED_ITEMS_SELECTED_INDEX)); then
+    # highlight the selected item
+    _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_SELECTED_ITEM}"
+  else
+    _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_UNSELECTED_ITEM}"
+  fi
+
+  string::highlight _LIST_CURRENT_ITEM _LIST_FILTER_STRING "${_LIST_STYLE_LETTER_HIGHLIGHT}" "${_LIST_STYLE_LETTER_HIGHLIGHT_RESET}"
+  _LIST_CURRENT_ITEM="${RETURNED_VALUE}"
+
+  local IFS=$'\n' savedFilterString="${_LIST_FILTER_STRING}"
+  _LIST_FILTER_STRING=""
+
+  local -i nbLines=0
+  for _LIST_CURRENT_ITEM in ${_LIST_CURRENT_ITEM}; do
+    if ((nbLines > 0)); then
+      toPrint+="${ESC__CURSOR_MOVE__}$((_LIST_CURRENT_ITEM_SHOWN_AT_LINE + nbLines));${_LIST_LEFT}${__ESC__TO}"
+    fi
+
+    list::getCurrentItemDisplayableString
+
+    if ((index == _LIST_FILTERED_ITEMS_SELECTED_INDEX)); then
+      toPrint+="${STYLE_LIST_SELECTED_ITEM_SYMBOL}${_LIST_SYMBOL_SELECTED_ITEM}${STYLE_LIST_SELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+    else
+      toPrint+="${STYLE_LIST_UNSELECTED_ITEM_SYMBOL}${_LIST_SYMBOL_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+    fi
+
+    if ((RETURNED_VALUE > 0)); then
+      toPrint+="${_LIST_BLANKS:0:RETURNED_VALUE}"
+    else
+      toPrint+=""
+    fi
+    nbLines=$((nbLines + 1))
+  done
+
+  _LIST_FILTER_STRING="${savedFilterString}"
+}
 
 # Draw the autocompletion box
 function list::drawCounter() {
@@ -510,7 +564,7 @@ function list_post_filter() {
 
 # Clear the items box
 function list::clearVieWport() {
-  if [[ ${_LIST_ENABLED} != "true" || ${_LIST_SHOWN} != "true" || _LIST_HEIGHT -le 0 ]]; then
+  if [[ _LIST_HEIGHT -le 0 ]]; then
     return 0
   fi
 
@@ -521,8 +575,6 @@ function list::clearVieWport() {
   fi
 
   tui::clearBox "${_LIST_TOP}" "${_LIST_LEFT}" "${_LIST_WIDTH}" "${_LIST_HEIGHT}" 2>&3
-
-  _LIST_SHOWN=false
 }
 
 function list::destroy() {
@@ -530,37 +582,43 @@ function list::destroy() {
   unset -v ${!_LIST_*}
 }
 
-# ## list::getItemDisplayedString (private)
+
+# ## list::getCurrentItemDisplayableString (private)
 #
-# Truncate a string to a given number of visible characters.
-# Adds an ellipsis at the end if the string is truncated.
+# Truncate a string to a given number of visible characters,
+# adds an ellipsis at the end if the string is truncated,
+# and highlights the characters that match the filter string.
 #
 # This function will truncate a string without taking into account
 # the ANSI escape sequences for text formatting (i.e. the `\e[*m` format).
 #
-# - ${_LIST_ITEM_DISPLAYED} _as string_:
+# - ${_LIST_CURRENT_ITEM} _as string_:
 #       the string to truncate
 # - ${_LIST_ITEM_WIDTH} _as int_:
 #       the number of visible characters
 # - ${_LIST_FILTER_STRING} _as string_:
 #       the string to search for in the string
+# - ${_LIST_STYLE_LETTER_HIGHLIGHT} _as string_:
+#       the color to use for highlighting the letters
+# - ${_LIST_STYLE_LETTER_HIGHLIGHT_RESET} _as string_:
+#       the color reset code to use after highlighting the letters
 #
 # Returns:
 #
-# - ${_LIST_ITEM_DISPLAYED}: the truncated string
+# - ${_LIST_CURRENT_ITEM}: the truncated string
 # - ${RETURNED_VALUE}: the space left
-#       i.e. (_LIST_ITEM_WIDTH - the length of visible characters in _LIST_ITEM_DISPLAYED)
+#       i.e. (_LIST_ITEM_WIDTH - the length of visible characters in _LIST_CURRENT_ITEM)
 #
 # ```bash
-# list::getItemDisplayedString "This is a long string that will be displayed in the screen." 20
-# echo "${_LIST_ITEM_DISPLAYED}"
+# list::getCurrentItemDisplayableString "This is a long string that will be displayed in the screen." 20
+# echo "${_LIST_CURRENT_ITEM}"
 # ```
-function list::getItemDisplayedString() {
-  local -i stringLength=${#_LIST_ITEM_DISPLAYED}
+function list::getCurrentItemDisplayableString() {
+  local -i stringLength=${#_LIST_CURRENT_ITEM}
   if [[ -z ${_LIST_FILTER_STRING} && ${stringLength} -le ${_LIST_ITEM_WIDTH} ]]; then
     # no filter string, no need to truncate
-    if [[ ${_LIST_ITEM_DISPLAYED} == *$'\e'* ]]; then
-      local realWord="${_LIST_ITEM_DISPLAYED//$'\e['[0-9][0-9]m/}"
+    if [[ ${_LIST_CURRENT_ITEM} == *$'\e'* ]]; then
+      local realWord="${_LIST_CURRENT_ITEM//$'\e['[0-9][0-9]m/}"
       realWord="${realWord//$'\e['[0-9]m/}"
       RETURNED_VALUE=$((_LIST_ITEM_WIDTH - ${#realWord}))
     else
@@ -573,18 +631,18 @@ function list::getItemDisplayedString() {
   local -i searchStringIndex=0 itemDisplayedLength=0
   local searchStringCharacter="${_LIST_FILTER_STRING:0:1}"
 
-  while ((${#_LIST_ITEM_DISPLAYED} > 0)); do
+  while ((${#_LIST_CURRENT_ITEM} > 0)); do
     # take the first chunk that does not contain an escape character
-    itemChunk="${_LIST_ITEM_DISPLAYED%%$'\e'*}"
+    itemChunk="${_LIST_CURRENT_ITEM%%$'\e'*}"
 
     if ((itemDisplayedLength + ${#itemChunk} > _LIST_ITEM_WIDTH)); then
       # we reached the desired size
       itemChunk="${itemChunk:0:$((_LIST_ITEM_WIDTH - 1 - itemDisplayedLength))}…"
-      _LIST_ITEM_DISPLAYED=""
+      _LIST_CURRENT_ITEM=""
       itemDisplayedLength=${_LIST_ITEM_WIDTH}
     else
       # otherwise we will continue in the next loop
-      _LIST_ITEM_DISPLAYED="${_LIST_ITEM_DISPLAYED:${#itemChunk}}"
+      _LIST_CURRENT_ITEM="${_LIST_CURRENT_ITEM:${#itemChunk}}"
       itemDisplayedLength+=${#itemChunk}
     fi
 
@@ -592,7 +650,7 @@ function list::getItemDisplayedString() {
       # colorize the search string in this chunk
       while [[ -n ${searchStringCharacter} && ${itemChunk} == *"${searchStringCharacter}"* ]]; do
         itemChunkPiece="${itemChunk%%["${searchStringCharacter^}${searchStringCharacter,}"]*}"
-        itemDisplayed+="${itemChunkPiece}${STYLE_LIST_LETTER_HIGHLIGHT}${itemChunk:${#itemChunkPiece}:1}${STYLE_LIST_LETTER_HIGHLIGHT_RESET}"
+        itemDisplayed+="${itemChunkPiece}${_LIST_STYLE_LETTER_HIGHLIGHT}${itemChunk:${#itemChunkPiece}:1}${_LIST_STYLE_LETTER_HIGHLIGHT_RESET}"
         itemChunk="${itemChunk:${#itemChunkPiece}+1}"
         searchStringIndex+=1
         searchStringCharacter="${_LIST_FILTER_STRING:searchStringIndex:1}"
@@ -601,22 +659,22 @@ function list::getItemDisplayedString() {
       itemDisplayed+="${itemChunk}"
     fi
 
-    while [[ ${_LIST_ITEM_DISPLAYED} == $'\e'* ]]; do
+    while [[ ${_LIST_CURRENT_ITEM} == $'\e'* ]]; do
       # case where we have an escape sequence at the beginning of the string
       # we only consider escape sequences for text formatting, they end with m
-      itemChunk="${_LIST_ITEM_DISPLAYED%%"m"*}m"
+      itemChunk="${_LIST_CURRENT_ITEM%%"m"*}m"
       itemDisplayed+="${itemChunk}"
-      _LIST_ITEM_DISPLAYED="${_LIST_ITEM_DISPLAYED:${#itemChunk}}"
+      _LIST_CURRENT_ITEM="${_LIST_CURRENT_ITEM:${#itemChunk}}"
     done
   done
 
-  _LIST_ITEM_DISPLAYED="${itemDisplayed}"
+  _LIST_CURRENT_ITEM="${itemDisplayed}"
   RETURNED_VALUE=$((_LIST_ITEM_WIDTH - itemDisplayedLength))
 }
 
 # Modifies the selected item index and adjust the start index if necessary.
 #
-# - $1: **delta** _as integer_:
+# - $1: **delta** _as int_:
 #       The delta to apply to the current index.
 #
 # Returns:
@@ -678,12 +736,13 @@ function list::changeSelectedItemIndex() {
 
 # Returns the index of the item in the original array (if any, or -1).
 # It returns in the RETURNED_VALUE variable.
-function list::getCurrentInitialItemsIndex() {
-  if [[ ${_LIST_SHOWN} == "true" ]] && ((_LIST_FILTERED_ITEMS_SELECTED_INDEX >= 0 && _LIST_FILTERED_ITEMS_SELECTED_INDEX < ${#_LIST_FILTERED_ITEMS[@]})); then
+function list::convertToInitialItemsIndex() {
+  local -i filteredIndex=${1}
+  if ((filteredIndex >= 0 && filteredIndex < ${#_LIST_FILTERED_ITEMS[@]})); then
     if ((${#_LIST_FILTERED_ITEMS_CORRESPONDENCES[@]} > 0)); then
-      RETURNED_VALUE=${_LIST_FILTERED_ITEMS_CORRESPONDENCES[${_LIST_FILTERED_ITEMS_SELECTED_INDEX}]}
+      RETURNED_VALUE=${_LIST_FILTERED_ITEMS_CORRESPONDENCES[${filteredIndex}]}
     else
-      RETURNED_VALUE=${_LIST_FILTERED_ITEMS_SELECTED_INDEX}
+      RETURNED_VALUE=${filteredIndex}
     fi
     return 0
   fi

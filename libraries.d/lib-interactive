@@ -318,7 +318,7 @@ function interactive::displayDialogBox() {
     startColumn=$((startColumn <= 8 ? startColumn : 8))
     startColumn+=1
 
-    finalString+="${ESC__CURSOR_MOVE__}${startColumn}${__ESC__COLUMN}${STYLE_FRAMES}${DRAW_TL_CORNER}─${frameBorder}─${DRAW_TR_CORNER}${STYLE_RESET}"$'\n'
+    finalString+="${ESC__CURSOR_MOVE__}${startColumn}${__ESC__COLUMN}${STYLE_FRAMES}${SYMBOL_TL_CORNER}─${frameBorder}─${SYMBOL_TR_CORNER}${STYLE_RESET}"$'\n'
     while read -r line; do
       if (( lineNumber == 0 )); then
         sideString="├──░"
@@ -328,11 +328,11 @@ function interactive::displayDialogBox() {
       finalString+="${ESC__CURSOR_MOVE__}${startColumn}${__ESC__COLUMN}${STYLE_FRAMES}│${STYLE_RESET} ${line} ${ESC__CURSOR_MOVE__}$((textWidth + 3 + startColumn))${__ESC__COLUMN}${STYLE_FRAMES}${sideString}${STYLE_RESET}"$'\n'
       lineNumber+=1
     done <<<"${wrappedText}"
-    finalString+="${ESC__CURSOR_MOVE__}${startColumn}${__ESC__COLUMN}${STYLE_FRAMES}${DRAW_BL_CORNER}─${frameBorder}─${DRAW_BR_CORNER}${STYLE_RESET}"$'\n'
+    finalString+="${ESC__CURSOR_MOVE__}${startColumn}${__ESC__COLUMN}${STYLE_FRAMES}${SYMBOL_BL_CORNER}─${frameBorder}─${SYMBOL_BR_CORNER}${STYLE_RESET}"$'\n'
 
   elif [[ ${speaker} == "system" ]]; then
 
-    finalString+="   ${STYLE_FRAMES}${DRAW_TL_CORNER}─${frameBorder}─${DRAW_TR_CORNER}${STYLE_RESET}"$'\n'
+    finalString+="   ${STYLE_FRAMES}${SYMBOL_TL_CORNER}─${frameBorder}─${SYMBOL_TR_CORNER}${STYLE_RESET}"$'\n'
     while read -r line; do
       if (( lineNumber == 0 )); then
         sideString="${STYLE_FRAMES}░──┤"
@@ -342,7 +342,7 @@ function interactive::displayDialogBox() {
       finalString+="${sideString}${STYLE_RESET} ${line} ${ESC__CURSOR_MOVE__}$((textWidth + 7))${__ESC__COLUMN}${STYLE_FRAMES}│${STYLE_RESET}"$'\n'
       lineNumber+=1
     done <<<"${wrappedText}"
-    finalString+="   ${STYLE_FRAMES}${DRAW_BL_CORNER}─${frameBorder}─${DRAW_BR_CORNER}${STYLE_RESET}"$'\n'
+    finalString+="   ${STYLE_FRAMES}${SYMBOL_BL_CORNER}─${frameBorder}─${SYMBOL_BR_CORNER}${STYLE_RESET}"$'\n'
 
   fi
 

@@ -2,17 +2,17 @@
 
 ## Test script 00.tests
 
-### ✅ Testing list::getItemDisplayedString
+### ✅ Testing list::getCurrentItemDisplayableString
 
 ```text
-_LIST_COLOR_LETTER_HIGHLIGHT='>'
-_LIST_COLOR_LETTER_HIGHLIGHT_RESET='<'
+_LIST_STYLE_LETTER_HIGHLIGHT='>'
+_LIST_STYLE_LETTER_HIGHLIGHT_RESET='<'
 _LIST_ITEM_WIDTH='5'
 _LIST_FILTER_STRING='eLor'
-_LIST_ITEM_DISPLAYED='HellO wOrld'
+_LIST_CURRENT_ITEM='HellO wOrld'
 ```
 
-❯ `list::getItemDisplayedString`
+❯ `list::getCurrentItemDisplayableString`
 
 Returned variables:
 
@@ -20,14 +20,14 @@ Returned variables:
 RETURNED_VALUE='0'
 ```
 
-`Hell…`
+`H>e<>l<l…`
 
 ```text
 _LIST_ITEM_WIDTH='15'
-_LIST_ITEM_DISPLAYED='HellO wOrld'
+_LIST_CURRENT_ITEM='HellO wOrld'
 ```
 
-❯ `list::getItemDisplayedString`
+❯ `list::getCurrentItemDisplayableString`
 
 Returned variables:
 
@@ -35,14 +35,14 @@ Returned variables:
 RETURNED_VALUE='4'
 ```
 
-`HellO wOrld`
+`H>e<>l<l>O< wO>r<ld`
 
 ```text
 _LIST_ITEM_WIDTH='10'
-_LIST_ITEM_DISPLAYED='[36mHellO[0m wOrld'
+_LIST_CURRENT_ITEM='[36mHellO[0m wOrld'
 ```
 
-❯ `list::getItemDisplayedString`
+❯ `list::getCurrentItemDisplayableString`
 
 Returned variables:
 
@@ -50,14 +50,14 @@ Returned variables:
 RETURNED_VALUE='0'
 ```
 
-`[36mHellO[0m wOr…`
+`[36mH>e<>l<l>O<[0m wO>r<…`
 
 ```text
 _LIST_ITEM_WIDTH='11'
-_LIST_ITEM_DISPLAYED='[36mHellO[0m wOrld'
+_LIST_CURRENT_ITEM='[36mHellO[0m wOrld'
 ```
 
-❯ `list::getItemDisplayedString`
+❯ `list::getCurrentItemDisplayableString`
 
 Returned variables:
 
@@ -65,17 +65,17 @@ Returned variables:
 RETURNED_VALUE='0'
 ```
 
-`[36mHellO[0m wOrld`
+`[36mH>e<>l<l>O<[0m wO>r<ld`
 
 ```text
-_LIST_COLOR_LETTER_HIGHLIGHT='[4m'
-_LIST_COLOR_LETTER_HIGHLIGHT_RESET='[24m'
+_LIST_STYLE_LETTER_HIGHLIGHT='[4m'
+_LIST_STYLE_LETTER_HIGHLIGHT_RESET='[24m'
 _LIST_ITEM_WIDTH='71'
 _LIST_FILTER_STRING='abomamwesspp'
-_LIST_ITEM_DISPLAYED='[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit code once the spinner is stopped'
+_LIST_CURRENT_ITEM='[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit code once the spinner is stopped'
 ```
 
-❯ `list::getItemDisplayedString`
+❯ `list::getCurrentItemDisplayableString`
 
 Returned variables:
 
@@ -83,7 +83,7 @@ Returned variables:
 RETURNED_VALUE='0'
 ```
 
-`[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit c…`
+`[7m[35md[27m[39m[7m[35mi[27m[39ms[4ma[24m[4mb[24mle the [93mm[4mo[24mnitor [4mm[24mode to [4ma[24mvoid[39m the "Ter[4mm[24minated" message [4mw[24mith [4me[24mxit c…`
 
 ### ✅ Testing fuzzy filtering with external programs
 

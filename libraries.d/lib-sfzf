@@ -271,7 +271,7 @@ function sfzfDrawScreen() {
       titleWidth=0
       title=""
     fi
-    toPrint+="${ESC__CURSOR_MOVE__}${SFZF_RIGHT_PANE_FIRST_LINE};$((SFZF_LEFT_PANE_WIDTH + 1))${__ESC__TO}${DRAW_TL_CORNER}─${title}─${ESC__REPEAT__}$((SFZF_RIGHT_PANE_WIDTH - titleWidth - 4))${__ESC__LAST_CHAR}░"
+    toPrint+="${ESC__CURSOR_MOVE__}${SFZF_RIGHT_PANE_FIRST_LINE};$((SFZF_LEFT_PANE_WIDTH + 1))${__ESC__TO}${SYMBOL_TL_CORNER}─${title}─${ESC__REPEAT__}$((SFZF_RIGHT_PANE_WIDTH - titleWidth - 4))${__ESC__LAST_CHAR}░"
 
     # last line with help
     local helpWidth=$((${#SFZF_RIGHT_PANE_HELP_TEXT} + 2))
@@ -363,8 +363,10 @@ function drawLeftPane() {
     toPrint+="${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE + 1));$((SFZF_LEFT_PANE_WIDTH - itemCounterLength))${__ESC__TO}${itemsCounter}"
   fi
 
-  _PROMPT_ITEMS_BOX_ITEM_WIDTH=$((SFZF_LEFT_PANE_WIDTH - 3))
-  _PROMPT_ITEMS_BOX_FILTER_STRING="${SFZF_SEARCH_STRING}"
+  _LIST_ITEM_WIDTH=$((SFZF_LEFT_PANE_WIDTH - 3))
+  _LIST_FILTER_STRING="${SFZF_SEARCH_STRING}"
+  _LIST_STYLE_LETTER_HIGHLIGHT="${STYLE_LIST_LETTER_HIGHLIGHT}"
+  _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}"
 
   # draw the items
   local itemPrefix
@@ -378,9 +380,9 @@ function drawLeftPane() {
       itemPrefix="  "
     fi
 
-    _PROMPT_ITEMS_BOX_ITEM_DISPLAYED="${SFZF_FILTERED_ITEMS[index]}"
-    list::getItemDisplayedString
-    toPrint+="${ESC__CURSOR_MOVE__}${line};${SFZF_LEFT_PANE_WIDTH}${__ESC__TO}${ESC__ERASE_CHARS_LEFT}"$'\r'"${itemPrefix}${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}${SFZF_COLOR_SELECTED_ITEM_RESET}"
+    _LIST_CURRENT_ITEM="${SFZF_FILTERED_ITEMS[index]}"
+    list::getCurrentItemDisplayableString
+    toPrint+="${ESC__CURSOR_MOVE__}${line};${SFZF_LEFT_PANE_WIDTH}${__ESC__TO}${ESC__ERASE_CHARS_LEFT}"$'\r'"${itemPrefix}${_LIST_CURRENT_ITEM}${SFZF_COLOR_SELECTED_ITEM_RESET}"
     line+=1
   done
 

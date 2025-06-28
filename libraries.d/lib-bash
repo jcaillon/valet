@@ -34,7 +34,7 @@ function bash::countJobs() {
 #       The name of the array containing the names of the jobs to run.
 # - $2: **job commands array name** _as string_:
 #       The name of the array containing the commands to run.
-# - $3: max parallel jobs _as integer_:
+# - $3: max parallel jobs _as int_:
 #       (optional) Can be set using the variable `_OPTION_MAX_PARALLEL_JOBS`.
 #       The maximum number of parallel jobs to run.
 #       (defaults to 4)

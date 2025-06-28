@@ -11,9 +11,9 @@
 #
 # This function uses callback functions to set the pivot, compare and swap elements.
 #
-# - $1: **low** _as integer_:
+# - $1: **low** _as int_:
 #       The index of the first element to sort.
-# - $2: **high** _as integer_:
+# - $2: **high** _as int_:
 #       The index of the last element to sort.
 #
 # ```bash
@@ -98,7 +98,7 @@ function array::sort() {
 #
 # Set the pivot value.
 #
-# - $1: **index** _as integer_:
+# - $1: **index** _as int_:
 #       The index of the pivot element.
 function array_setPivotCallBack() {
   eval "${setPivot}"
@@ -108,7 +108,7 @@ function array_setPivotCallBack() {
 #
 # Check if the element at the given index is inferior (strictly) to the pivot.
 #
-# - $1: **index** _as integer_:
+# - $1: **index** _as int_:
 #       The index of the element to check against the pivot.
 function array_isInferiorToPivotCallBack() {
   eval "${isInferiorToPivot}"
@@ -118,7 +118,7 @@ function array_isInferiorToPivotCallBack() {
 #
 # Check if the element at the given index is superior (strictly) to the pivot.
 #
-# - $1: **index** _as integer_:
+# - $1: **index** _as int_:
 #       The index of the element to check against the pivot.
 function array_isSuperiorToPivotCallBack() {
   eval "${isSuperiorToPivot}"
@@ -128,9 +128,9 @@ function array_isSuperiorToPivotCallBack() {
 #
 # Swap two elements.
 #
-# - $1: **first index** _as integer_:
+# - $1: **first index** _as int_:
 #       The index of the first element to swap.
-# - $2: **second index** _as integer_:
+# - $2: **second index** _as int_:
 #       The index of the second element to swap.
 # shellcheck disable=SC2034
 function array_swapCallBack() {

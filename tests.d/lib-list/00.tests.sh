@@ -4,58 +4,58 @@
 source list
 
 function main() {
-  test_list::getItemDisplayedString
+  test_list::getCurrentItemDisplayableString
   test_list_fuzzyFilterSortFileWithGrepAndGawk
 }
 
-function test_list::getItemDisplayedString() {
-  test::title "✅ Testing list::getItemDisplayedString"
+function test_list::getCurrentItemDisplayableString() {
+  test::title "✅ Testing list::getCurrentItemDisplayableString"
 
   local FG_CYAN=$'\033[36m'
   local FG_RESET=$'\033[0m'
 
   shopt -s nocasematch
 
-  _LIST_COLOR_LETTER_HIGHLIGHT=">"
-  _LIST_COLOR_LETTER_HIGHLIGHT_RESET="<"
+  _LIST_STYLE_LETTER_HIGHLIGHT=">"
+  _LIST_STYLE_LETTER_HIGHLIGHT_RESET="<"
   _LIST_ITEM_WIDTH=5
   _LIST_FILTER_STRING="eLor"
-  _LIST_ITEM_DISPLAYED="HellO wOrld"
+  _LIST_CURRENT_ITEM="HellO wOrld"
 
-  test::printVars _LIST_COLOR_LETTER_HIGHLIGHT _LIST_COLOR_LETTER_HIGHLIGHT_RESET _LIST_ITEM_WIDTH _LIST_FILTER_STRING _LIST_ITEM_DISPLAYED
-  test::func list::getItemDisplayedString
-  test::markdown "\`${_LIST_ITEM_DISPLAYED}\`"
+  test::printVars _LIST_STYLE_LETTER_HIGHLIGHT _LIST_STYLE_LETTER_HIGHLIGHT_RESET _LIST_ITEM_WIDTH _LIST_FILTER_STRING _LIST_CURRENT_ITEM
+  test::func list::getCurrentItemDisplayableString
+  test::markdown "\`${_LIST_CURRENT_ITEM}\`"
 
-  _LIST_ITEM_DISPLAYED="HellO wOrld"
+  _LIST_CURRENT_ITEM="HellO wOrld"
   _LIST_ITEM_WIDTH=15
-  test::printVars _LIST_ITEM_WIDTH _LIST_ITEM_DISPLAYED
-  test::func list::getItemDisplayedString
-  test::markdown "\`${_LIST_ITEM_DISPLAYED}\`"
+  test::printVars _LIST_ITEM_WIDTH _LIST_CURRENT_ITEM
+  test::func list::getCurrentItemDisplayableString
+  test::markdown "\`${_LIST_CURRENT_ITEM}\`"
 
 
-  _LIST_ITEM_DISPLAYED="${FG_CYAN}HellO${FG_RESET} wOrld"
+  _LIST_CURRENT_ITEM="${FG_CYAN}HellO${FG_RESET} wOrld"
   _LIST_ITEM_WIDTH=10
 
-  test::printVars _LIST_ITEM_WIDTH _LIST_ITEM_DISPLAYED
-  test::func list::getItemDisplayedString
-  test::markdown "\`${_LIST_ITEM_DISPLAYED}\`"
+  test::printVars _LIST_ITEM_WIDTH _LIST_CURRENT_ITEM
+  test::func list::getCurrentItemDisplayableString
+  test::markdown "\`${_LIST_CURRENT_ITEM}\`"
 
-  _LIST_ITEM_DISPLAYED="${FG_CYAN}HellO${FG_RESET} wOrld"
+  _LIST_CURRENT_ITEM="${FG_CYAN}HellO${FG_RESET} wOrld"
   _LIST_ITEM_WIDTH=11
 
-  test::printVars _LIST_ITEM_WIDTH _LIST_ITEM_DISPLAYED
-  test::func list::getItemDisplayedString
-  test::markdown "\`${_LIST_ITEM_DISPLAYED}\`"
+  test::printVars _LIST_ITEM_WIDTH _LIST_CURRENT_ITEM
+  test::func list::getCurrentItemDisplayableString
+  test::markdown "\`${_LIST_CURRENT_ITEM}\`"
 
-  _LIST_COLOR_LETTER_HIGHLIGHT=$'\033[4m'
-  _LIST_COLOR_LETTER_HIGHLIGHT_RESET=$'\033[24m'
-  _LIST_ITEM_DISPLAYED='[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit code once the spinner is stopped'
+  _LIST_STYLE_LETTER_HIGHLIGHT=$'\033[4m'
+  _LIST_STYLE_LETTER_HIGHLIGHT_RESET=$'\033[24m'
+  _LIST_CURRENT_ITEM='[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonitor mode to avoid[39m the "Terminated" message with exit code once the spinner is stopped'
   _LIST_FILTER_STRING="abomamwesspp"
   _LIST_ITEM_WIDTH=71
 
-  test::printVars _LIST_COLOR_LETTER_HIGHLIGHT _LIST_COLOR_LETTER_HIGHLIGHT_RESET _LIST_ITEM_WIDTH _LIST_FILTER_STRING _LIST_ITEM_DISPLAYED
-  test::func list::getItemDisplayedString
-  test::markdown "\`${_LIST_ITEM_DISPLAYED}\`"
+  test::printVars _LIST_STYLE_LETTER_HIGHLIGHT _LIST_STYLE_LETTER_HIGHLIGHT_RESET _LIST_ITEM_WIDTH _LIST_FILTER_STRING _LIST_CURRENT_ITEM
+  test::func list::getCurrentItemDisplayableString
+  test::markdown "\`${_LIST_CURRENT_ITEM}\`"
 
   shopt -u nocasematch
 }
