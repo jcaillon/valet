@@ -26,8 +26,11 @@ source fs
 # - ${_OPTION_ITEM_HEIGHT} _as int_:
 #       (optional) The height of each item in the list (num²ber of lines needed to display the item).
 #       (defaults to 1)
-# - ${_OPTION_HIDE_ITEMS_COUNT} _as bool_:
-#       (optional) If true, the count of items at the bottom of the list is hidden.
+# - ${_OPTION_ENABLE_REVERSE_MODE} _as bool_:
+#       (optional) If true, the items are displayed from bottom to top.
+#       (defaults to false)
+# - ${_OPTION_DISABLE_ITEMS_COUNT} _as bool_:
+#       (optional) If true, the count of items is not displayed.
 #       (defaults to false)
 # - ${_OPTION_FORCE_SHOW_ITEMS_COUNT} _as bool_:
 #       (optional) If true, the count of items is always displayed.
@@ -36,9 +39,23 @@ source fs
 # - ${_OPTION_SHOW_ITEMS_COUNT_AT_TOP} _as bool_:
 #       (optional) If true, the count of items will be displayed at the top of the box instead of the bottom.
 #       (defaults to false)
-# - ${_OPTION_ENABLE_REVERSE_MODE} _as bool_:
-#       (optional) If true, the items are displayed from bottom to top.
-#       (defaults to false)
+# - ${_OPTION_ITEMS_COUNT_PATTERN} _as string_:
+#       (optional) The pattern to use for displaying the count of items.
+#
+#       - <colorCount>: The color to use for the count of items.
+#       - <colorFrame>: The color to use for items count frame.
+#       - <colorReset>: The color reset code.
+#       - <lastItemNumber>: The last item number displayed in the list.
+#       - <firstItemNumber>: The first item number displayed in the list.
+#       - <totalItems>: The total number of items in the list.
+#       - <filteredItems>: The number of items that match the filter.
+#       - <percentViewed>: The percentage of items viewed in the list.
+#
+#       (defaults to " <colorCount><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorCount><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> ")
+# - ${_OPTION_ITEMS_COUNT_FILTERING_STRING} _as string_:
+#       (optional) The string to display when the list is being filtered.
+#       (defaults to " <colorCount>Filtering…<colorReset> ")
+# - ${_OPTION_DISABLE_SCROLLBAR} _as bool_:
 # - ${_OPTION_DISABLE_FILTERING} _as bool_:
 #       (optional) If true, the items can't be filtered using list::filter.
 #       (defaults to false)
@@ -52,6 +69,9 @@ source fs
 #       If the number of items is greater than this value, the filtering is done using an external program.
 #       This is to avoid performance issues when filtering a large number of items using pure bash.
 #       (defaults to 1042)
+# - ${_OPTION_EMPTY_LIST_TEXT} _as string_:
+#       (optional) The text to display when the list is empty.
+#       (defaults to "EMPTY")
 # - ${_OPTION_SHOW_SYMBOL} _as bool_:
 #       (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
 #       Useful to display the most simple auto-completion when false.
@@ -100,7 +120,7 @@ function list::setViewport() {
 
   # display modes
   _LIST_ITEM_HEIGHT="${_OPTION_ITEM_HEIGHT:-1}"
-  _LIST_HIDE_ITEMS_COUNT="${_OPTION_HIDE_ITEMS_COUNT:-false}"
+  _LIST_DISABLE_ITEMS_COUNT="${_OPTION_DISABLE_ITEMS_COUNT:-false}"
   _LIST_FORCE_SHOW_ITEMS_COUNT="${_OPTION_FORCE_SHOW_ITEMS_COUNT:-false}"
   if [[ ${_OPTION_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
     _LIST_SHOW_ITEMS_COUNT_AT_TOP=1
@@ -115,25 +135,51 @@ function list::setViewport() {
   _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${_OPTION_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD:-1042}"
 
   # visual options
-  _LIST_SHOW_SYMBOL="${_OPTION_SHOW_SYMBOL:-true}"
-  if [[ ${_LIST_SHOW_SYMBOL} == "true" ]]; then
-    _LIST_SYMBOL_SELECTED_ITEM="${SYMBOL_LIST_SELECTED_ITEM}"
-    _LIST_SYMBOL_UNSELECTED_ITEM="${SYMBOL_LIST_UNSELECTED_ITEM}"
-    _LIST_SYMBOL_LENGTH="${SYMBOL_LIST_LENGTH}"
-    _LIST_SYMBOL_COUNTER="${SYMBOL_LIST_COUNTER}"
-    _LIST_SYMBOL_COUNTER_BOX_ABOVE="${SYMBOL_LIST_COUNTER_BOX_ABOVE}"
-    _LIST_SYMBOL_COUNTER_BOX_BELOW="${SYMBOL_LIST_COUNTER_BOX_BELOW}"
+  if [[ ${_OPTION_SHOW_SYMBOL:-true} == "true" ]]; then
+    _LIST_SYMBOL_LEFT_LENGTH="${SYMBOL_LIST_LEFT_LENGTH}"
+    _LIST_SYMBOL_LEFT_SELECTED_ITEM="${SYMBOL_LIST_LEFT_SELECTED_ITEM}"
+    _LIST_SYMBOL_LEFT_UNSELECTED_ITEM="${SYMBOL_LIST_LEFT_UNSELECTED_ITEM}"
+    _LIST_SYMBOL_LEFT_SEPARATOR_TOP="${SYMBOL_LIST_LEFT_SEPARATOR_TOP}"
+    _LIST_SYMBOL_LEFT_SEPARATOR_BOTTOM="${SYMBOL_LIST_LEFT_SEPARATOR_BOTTOM}"
   else
-    _LIST_SYMBOL_SELECTED_ITEM=""
-    _LIST_SYMBOL_UNSELECTED_ITEM=""
-    _LIST_SYMBOL_COUNTER=""
-    _LIST_SYMBOL_COUNTER_BOX_ABOVE=""
-    _LIST_SYMBOL_COUNTER_BOX_BELOW=""
-    _LIST_SYMBOL_LENGTH=0
+    _LIST_SYMBOL_LEFT_LENGTH=0
+    _LIST_SYMBOL_LEFT_SELECTED_ITEM=""
+    _LIST_SYMBOL_LEFT_UNSELECTED_ITEM=""
+    _LIST_SYMBOL_LEFT_SEPARATOR_TOP=""
+    _LIST_SYMBOL_LEFT_SEPARATOR_BOTTOM=""
   fi
 
   _LIST_STYLE_LETTER_HIGHLIGHT="${STYLE_LIST_LETTER_HIGHLIGHT}"
   _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}"
+
+  _LIST_EMPTY_LIST_TEXT="${_OPTION_EMPTY_LIST_TEXT:-"EMPTY"}"
+  local visibleCharacters="${_LIST_EMPTY_LIST_TEXT}"
+  string::removeTextFormatting visibleCharacters
+  _LIST_EMPTY_LIST_TEXT_LENGTH=${#visibleCharacters}
+
+  _LIST_ITEMS_COUNT_PATTERN="${_OPTION_ITEMS_COUNT_PATTERN:-" <colorCount><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorCount><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> "}"
+  _LIST_ITEMS_COUNT_PATTERN="${_LIST_ITEMS_COUNT_PATTERN//"<colorCount>"/"${STYLE_LIST_COUNT_NUMBER}"}"
+  _LIST_ITEMS_COUNT_PATTERN="${_LIST_ITEMS_COUNT_PATTERN//"<colorFrame>"/"${STYLE_LIST_COUNT_FRAME}"}"
+  _LIST_ITEMS_COUNT_PATTERN="${_LIST_ITEMS_COUNT_PATTERN//"<colorReset>"/"${STYLE_RESET}"}"
+
+  _LIST_ITEMS_COUNT_FILTERING_STRING="${_OPTION_ITEMS_COUNT_FILTERING_STRING:-" <colorCount>Filtering…<colorReset> "}"
+  _LIST_ITEMS_COUNT_FILTERING_STRING="${_LIST_ITEMS_COUNT_FILTERING_STRING//"<colorCount>"/"${STYLE_LIST_COUNT_NUMBER}"}"
+  _LIST_ITEMS_COUNT_FILTERING_STRING="${_LIST_ITEMS_COUNT_FILTERING_STRING//"<colorReset>"/"${STYLE_RESET}"}"
+
+  # scrollbar
+  if [[ ${_OPTION_DISABLE_SCROLLBAR:-false} != "true" ]]; then
+    _LIST_SYMBOL_RIGHT_LENGTH="${SYMBOL_LIST_RIGHT_LENGTH}"
+    _LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR="${SYMBOL_LIST_RIGHT_WITH_SCROLL_BAR}"
+    _LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR="${SYMBOL_LIST_RIGHT_WITHOUT_SCROLL_BAR}"
+    _LIST_SYMBOL_RIGHT_SEPARATOR_TOP="${SYMBOL_LIST_RIGHT_SEPARATOR_TOP}"
+    _LIST_SYMBOL_RIGHT_SEPARATOR_BOTTOM="${SYMBOL_LIST_RIGHT_SEPARATOR_BOTTOM}"
+  else
+    _LIST_SYMBOL_RIGHT_LENGTH=0
+    _LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR=""
+    _LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR=""
+    _LIST_SYMBOL_RIGHT_SEPARATOR_TOP=""
+    _LIST_SYMBOL_RIGHT_SEPARATOR_BOTTOM=""
+  fi
 
   # callbacks
   _LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED="${_OPTION_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED:-}"
@@ -167,8 +213,9 @@ function list::setViewport() {
   fi
 
   # variables derived from options
-  _LIST_ITEM_WIDTH="$((_LIST_WIDTH - _LIST_SYMBOL_LENGTH))"
+  _LIST_ITEM_WIDTH="$((_LIST_WIDTH - _LIST_SYMBOL_LEFT_LENGTH - _LIST_SYMBOL_RIGHT_LENGTH))"
   printf -v _LIST_BLANKS "%${_LIST_WIDTH}s" " "
+  printf -v _LIST_BLANKS_EMPTY "%${_LIST_ITEM_WIDTH}s" " "
 }
 
 # ## list::setItems
@@ -194,7 +241,7 @@ function list::setItems() {
 
   # Async filtering variables below
   # make sure to use async when we use an external program
-  if (( _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD > _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD )); then
+  if ((_LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD > _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD)); then
     _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD="${_LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD}"
   fi
 
@@ -212,7 +259,7 @@ function list::setItems() {
   fi
 
   # if the items are too many, we will filter them asynchronously/filter with grep
-  if (( _LIST_ORIGINAL_ITEMS_COUNT >= _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD )); then
+  if ((_LIST_ORIGINAL_ITEMS_COUNT >= _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD)); then
     list_startAsyncFiltering
     _LIST_FILTER_SYNCHRONOUSLY=false
   else
@@ -233,12 +280,14 @@ function list::setItems() {
 function list::draw() {
   local toPrint="${ESC__CURSOR_HIDE}"
 
-  local -i line displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT)) index=${_LIST_FILTERED_ITEMS_START_INDEX}
-  _LIST_NB_DISPLAYED_ITEMS=0
 _LIST_FILTER_STRING="ae"
 _LIST_FILTERED_ITEMS_SELECTED_INDEX=1
+_LIST_FILTERED_ITEMS_START_INDEX=11
 
-  for ((line = 0; line < _LIST_NB_USABLE_LINES_FOR_ITEMS - _LIST_SHOW_ITEMS_COUNT_AT_TOP; line = line + _LIST_ITEM_HEIGHT)); do
+  local -i line displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT)) index=${_LIST_FILTERED_ITEMS_START_INDEX}
+  _LIST_NB_DISPLAYED_ITEMS=0
+
+  for ((line = 0; line < _LIST_NB_USABLE_LINES_FOR_ITEMS - _LIST_SHOW_ITEMS_COUNT_AT_TOP; line++)); do
     # line at which to display the item
     if [[ ${_LIST_ENABLE_REVERSE_MODE} == "true" ]]; then
       _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_TOP + _LIST_HEIGHT - 1 - line - _LIST_SHOW_ITEMS_COUNT_AT_TOP))
@@ -251,7 +300,7 @@ _LIST_FILTERED_ITEMS_SELECTED_INDEX=1
 
     if ((index >= ${#_LIST_FILTERED_ITEMS[@]} || _LIST_NB_DISPLAYED_ITEMS >= displayableItems)); then
       # nothing to show for this line
-      toPrint+="${_LIST_BLANKS}"
+      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_EMPTY// /${SYMBOL_LIST_EMPTY}}${STYLE_RESET}"
       continue
     fi
 
@@ -267,9 +316,15 @@ _LIST_FILTERED_ITEMS_SELECTED_INDEX=1
     # append the item display string (uses index and toPrint directly)
     "${_LIST_APPEND_ITEM_STRING_FUNCTION}"
 
+    line=$((line + _LIST_ITEM_HEIGHT - 1))
     index=$((index + 1))
     _LIST_NB_DISPLAYED_ITEMS=$((_LIST_NB_DISPLAYED_ITEMS + 1))
   done
+
+  # case of an empty list
+  if ((_LIST_NB_DISPLAYED_ITEMS == 0)); then
+    toPrint+="${ESC__CURSOR_MOVE__}$((_LIST_TOP + _LIST_NB_USABLE_LINES_FOR_ITEMS / 2));$((_LIST_LEFT + _LIST_WIDTH / 2 - _LIST_EMPTY_LIST_TEXT_LENGTH / 2))${__ESC__TO}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_EMPTY_LIST_TEXT}${STYLE_RESET}"
+  fi
 
   printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&7
 }
@@ -280,11 +335,11 @@ function list_appendSingleLineItemDisplayString() {
     # highlight the selected item
     _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_SELECTED_ITEM}"
     list::getCurrentItemDisplayableString
-    toPrint+="${STYLE_LIST_SELECTED_ITEM_SYMBOL}${_LIST_SYMBOL_SELECTED_ITEM}${STYLE_LIST_SELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+    toPrint+="${_LIST_SYMBOL_LEFT_SELECTED_ITEM}${STYLE_LIST_SELECTED_ITEM}${_LIST_CURRENT_ITEM}"
   else
     _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_UNSELECTED_ITEM}"
     list::getCurrentItemDisplayableString
-    toPrint+="${STYLE_LIST_UNSELECTED_ITEM_SYMBOL}${_LIST_SYMBOL_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+    toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
   fi
   if ((RETURNED_VALUE > 0)); then
     toPrint+="${_LIST_BLANKS:0:RETURNED_VALUE}"
@@ -317,9 +372,9 @@ function list_appendMultiLineItemDisplayString() {
     list::getCurrentItemDisplayableString
 
     if ((index == _LIST_FILTERED_ITEMS_SELECTED_INDEX)); then
-      toPrint+="${STYLE_LIST_SELECTED_ITEM_SYMBOL}${_LIST_SYMBOL_SELECTED_ITEM}${STYLE_LIST_SELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+      toPrint+="${_LIST_SYMBOL_LEFT_SELECTED_ITEM}${STYLE_LIST_SELECTED_ITEM}${_LIST_CURRENT_ITEM}"
     else
-      toPrint+="${STYLE_LIST_UNSELECTED_ITEM_SYMBOL}${_LIST_SYMBOL_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
     fi
 
     if ((RETURNED_VALUE > 0)); then
@@ -333,135 +388,103 @@ function list_appendMultiLineItemDisplayString() {
   _LIST_FILTER_STRING="${savedFilterString}"
 }
 
-# Draw the autocompletion box
+# Draw the items count at the bottom/top of the list.
 function list::drawCounter() {
   if [[ ${_LIST_ITEM_COUNT_SHOWN} != "true" ]]; then
-    # if we do not show the items count, we do nothing
     return 0
   fi
 
   local toPrint="${ESC__CURSOR_HIDE}"
 
-  local itemsCounter
-  local -i itemCounterLength
+  local -i counterAvailableLength=$((_LIST_WIDTH - _LIST_SYMBOL_LEFT_LENGTH - _LIST_SYMBOL_RIGHT_LENGTH))
 
-  if [[ ${_LIST_ASYNC_FILTERING_RUNNING:-} == "true" ]]; then
+  local itemsCounterString
+  if ((_LIST_ORIGINAL_ITEMS_COUNT == 0)); then
+    itemsCounterString=""
+  elif [[ ${_LIST_ASYNC_FILTERING_RUNNING:-} == "true" ]]; then
     # case where we are filtering asynchronously, we display a loading message
-    if ((_LIST_WIDTH - _LIST_SYMBOL_LENGTH >= 11)); then
-      itemsCounter=" ${STYLE_LIST_COUNT}Filtering…${STYLE_RESET}"
-      itemCounterLength=11
-    else
-      itemsCounter=" ${STYLE_LIST_COUNT}…${STYLE_RESET}"
-      itemCounterLength=2
-    fi
+    itemsCounterString=" ${_LIST_ITEMS_COUNT_FILTERING_STRING}"
   else
-    # case where we display the count
     local lastItemNumber=$((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYED_ITEMS))
-    if [[ ${_LIST_DISABLE_FILTERING} == "true" ]]; then
-      # case of ' 00-00'
-      local itemCounterLength=$((2 + ${#lastItemNumber} * 2))
-      printf -v itemsCounter " %s%0${#lastItemNumber}i-%i%s" "${STYLE_LIST_COUNT}" "${_LIST_FILTERED_ITEMS_START_INDEX}" "${lastItemNumber}" "${STYLE_RESET}"
+    printf -v firstItemNumber "%0${#lastItemNumber}i" "${_LIST_FILTERED_ITEMS_START_INDEX}"
+    local totalItems="${_LIST_ORIGINAL_ITEMS_COUNT}"
+    printf -v filteredItems "%0${#totalItems}i" "${#_LIST_FILTERED_ITEMS[@]}"
+    local percentViewed=$((_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS > 0 ? (_LIST_FILTERED_ITEMS_START_INDEX * 100) / (_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS) : 100))
+
+    local itemsCounterString="${_LIST_ITEMS_COUNT_PATTERN//"<lastItemNumber>"/"${lastItemNumber}"}"
+    itemsCounterString="${itemsCounterString//"<firstItemNumber>"/"${firstItemNumber}"}"
+    itemsCounterString="${itemsCounterString//"<totalItems>"/"${totalItems}"}"
+    itemsCounterString="${itemsCounterString//"<filteredItems>"/"${filteredItems}"}"
+    itemsCounterString="${itemsCounterString//"<percentViewed>"/"${percentViewed}%"}"
+  fi
+
+  local itemsCounterStringVisibleCharacters="${itemsCounterString}"
+  string::removeTextFormatting itemsCounterStringVisibleCharacters
+  local -i itemCounterLength=${#itemsCounterStringVisibleCharacters}
+
+  if ((itemCounterLength > counterAvailableLength)); then
+    # case where we do not have the space to display the count
+    itemCounterLength=0
+    itemsCounterString=""
+  fi
+
+  local showAtLine counterSymbol
+  if [[ ${_OPTION_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
+    showAtLine=${_LIST_TOP}
+    counterSymbol="${_LIST_SYMBOL_LEFT_SEPARATOR_TOP}"
+  else
+    showAtLine=$((_LIST_TOP + _LIST_HEIGHT - 1))
+    counterSymbol="${_LIST_SYMBOL_LEFT_SEPARATOR_BOTTOM}"
+  fi
+
+  local counterFrame="${_LIST_BLANKS:0:counterAvailableLength-itemCounterLength}"
+
+  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${STYLE_LIST_COUNT_FRAME}${counterSymbol}${counterFrame// /"${SYMBOL_LIST_SEPARATOR}"}${STYLE_RESET}${itemsCounterString}"
+
+  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&7
+}
+
+# Draw the scroll bar on the right side of the list.
+function list::drawScrollBar() {
+  if [[ ${_OPTION_DISABLE_SCROLLBAR:-false} == "true" ]]; then
+    return 0
+  fi
+
+  local toPrint="${ESC__CURSOR_HIDE}"
+
+  local -i displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
+  local -i percentViewed=$((_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS > 0 ? (_LIST_FILTERED_ITEMS_START_INDEX * 100) / (_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS) : 100))
+  local -i linesWithScrollBar=$((_LIST_NB_USABLE_LINES_FOR_ITEMS * displayableItems / _LIST_ORIGINAL_ITEMS_COUNT))
+  local -i firstLineWithScrollBar=$(( ((_LIST_NB_USABLE_LINES_FOR_ITEMS - linesWithScrollBar) * percentViewed) / 100))
+
+  log::info "firstLineWithScrollBar=${firstLineWithScrollBar} linesWithScrollBar=${linesWithScrollBar} percentViewed=${percentViewed} displayableItems=${displayableItems} _LIST_NB_USABLE_LINES_FOR_ITEMS=${_LIST_NB_USABLE_LINES_FOR_ITEMS} _LIST_ORIGINAL_ITEMS_COUNT=${_LIST_ORIGINAL_ITEMS_COUNT}"
+
+  for ((line = 0; line < _LIST_NB_USABLE_LINES_FOR_ITEMS - _LIST_SHOW_ITEMS_COUNT_AT_TOP; line++)); do
+    # position
+    toPrint+="${ESC__CURSOR_MOVE__}$((_LIST_TOP + line + _LIST_SHOW_ITEMS_COUNT_AT_TOP));$((_LIST_LEFT + _LIST_WIDTH - _LIST_SYMBOL_RIGHT_LENGTH))${__ESC__TO}"
+
+    if ((line >= firstLineWithScrollBar && line < firstLineWithScrollBar + linesWithScrollBar)); then
+      toPrint+="${_LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR}"
     else
-      itemCounterLength=$((7 + ${#_LIST_ORIGINAL_ITEMS_COUNT} * 2 + ${#lastItemNumber} * 2))
-      if ((_LIST_WIDTH - _LIST_SYMBOL_LENGTH >= itemCounterLength && _LIST_NB_DISPLAYED_ITEMS > 1)); then
-        # case of ' 00-00 of 00/00'
-        printf -v itemsCounter " %s%0${#lastItemNumber}i-%i%s of %s%0${#_LIST_ORIGINAL_ITEMS_COUNT}i%s/%i%s" "${STYLE_LIST_COUNT}" "${_LIST_FILTERED_ITEMS_START_INDEX}" "${lastItemNumber}" "${STYLE_RESET}${STYLE_FRAMES}" "${STYLE_RESET}${STYLE_LIST_COUNT}" "${#_LIST_FILTERED_ITEMS[@]}" "${STYLE_RESET}${STYLE_FRAMES}" "${_LIST_ORIGINAL_ITEMS_COUNT}" "${STYLE_RESET}"
-      else
-        # case of ' 00/00'
-        local itemCounterLength=$((2 + ${#_LIST_ORIGINAL_ITEMS_COUNT} * 2))
-        printf -v itemsCounter " %s%0${#_LIST_ORIGINAL_ITEMS_COUNT}i%s/%i%s" "${STYLE_LIST_COUNT}" "${#_LIST_FILTERED_ITEMS[@]}" "${STYLE_RESET}${STYLE_FRAMES}" "${_LIST_ORIGINAL_ITEMS_COUNT}" "${STYLE_RESET}"
-      fi
+      toPrint+="${_LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR}"
     fi
+  done
 
-    if ((itemCounterLength > _LIST_WIDTH - _LIST_SYMBOL_LENGTH)); then
-      # case where we do not have the space to display the count
-      itemCounterLength=0
-      itemsCounter=""
+  # right side of the counter separator
+  if [[ ${_LIST_ITEM_COUNT_SHOWN} == "true" ]]; then
+    local showAtLine symbol
+    if [[ ${_OPTION_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
+      showAtLine=${_LIST_TOP}
+      symbol="${SYMBOL_LIST_RIGHT_SEPARATOR_TOP}"
+    else
+      showAtLine=$((_LIST_TOP + _LIST_HEIGHT - 1))
+      symbol="${SYMBOL_LIST_RIGHT_SEPARATOR_BOTTOM}"
     fi
+    toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};$((_LIST_LEFT + _LIST_WIDTH - _LIST_SYMBOL_RIGHT_LENGTH))${__ESC__TO}${STYLE_LIST_COUNT_FRAME}${symbol}${STYLE_RESET}"
   fi
 
-  local showAtLine
-  if [[ ${_LIST_ENABLE_REVERSE_MODE} == "true" ]]; then
-    showAtLine=$((_LIST_SHOW_ITEMS_COUNT_AT_TOP == 1 ? _LIST_TOP + _LIST_HEIGHT - 1 : _LIST_TOP + _LIST_HEIGHT - 1 - _LIST_NB_DISPLAYED_ITEMS * _LIST_ITEM_HEIGHT))
-
-  else
-    showAtLine=$((_LIST_SHOW_ITEMS_COUNT_AT_TOP == 1 ? _LIST_TOP : _LIST_TOP + _LIST_NB_DISPLAYED_ITEMS * _LIST_ITEM_HEIGHT))
-  fi
-
-  local counterSymbol
-  if ((${#_LIST_FILTERED_ITEMS[@]} == 0)); then
-    counterSymbol="${_LIST_SYMBOL_COUNTER}"
-  elif [[ (${_LIST_ENABLE_REVERSE_MODE} == "true" && ${_LIST_SHOW_ITEMS_COUNT_AT_TOP} -eq 1) || (${_LIST_ENABLE_REVERSE_MODE} != "true" && ${_LIST_SHOW_ITEMS_COUNT_AT_TOP} -eq 0) ]]; then
-    counterSymbol="${_LIST_SYMBOL_COUNTER_BOX_ABOVE}"
-  else
-    counterSymbol="${_LIST_SYMBOL_COUNTER_BOX_BELOW}"
-  fi
-
-  local counterFrame="${_LIST_BLANKS:0:_LIST_WIDTH - _LIST_SYMBOL_LENGTH - itemCounterLength}"
-
-  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${STYLE_FRAMES}${counterSymbol}${counterFrame// /─}${STYLE_RESET}${itemsCounter}"
-
-  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&7
+  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&7
 }
-
-# Called when a special key is pressed.
-#
-# - $1: **key** _as string_:
-#       The special key that was pressed (UP, DOWN, etc...).
-#
-# define the callback function called when a special key is pressed
-# shellcheck disable=SC2317
-function list::onKeyBindingPress() {
-  local action="${_LIST_KEY_MAPPING[${1}]:-}"
-  if [[ -z ${action} ]]; then
-    return 0
-  fi
-
-  # handle spamming of keys (the actions before this do not need to be protected from spam,
-  # but the actions after this are slow to execute and should not be spammed)
-  time::getProgramElapsedMicroseconds
-  if ((RETURNED_VALUE - _LIST_LAST_KEY_PRESSED_TIME < 100000)); then
-    # key pressed under 100ms of the last
-    _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
-  else
-    _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
-  fi
-  if ((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED > 3)); then
-    # if we have 3 rapid successive key pressed
-    return 0
-  fi
-  _LIST_LAST_KEY_PRESSED_TIME=${RETURNED_VALUE}
-
-
-  case "${action}" in
-  # autocompletion box selected item
-  scroll-up)
-    list::changeSelectedItemIndex "-$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
-    list::draw
-    ;;
-  scroll-down)
-    list::changeSelectedItemIndex "$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
-    list::draw
-    ;;
-  move-beginning)
-    list::changeSelectedItemIndex "-$((_LIST_ORIGINAL_ITEMS_COUNT + 1))"
-    list::draw
-    ;;
-  move-end)
-    list::changeSelectedItemIndex "$((_LIST_ORIGINAL_ITEMS_COUNT + 1))"
-    list::draw
-    ;;
-  move-up)
-    list::changeSelectedItemIndex -1
-    list::draw
-    ;;
-  move-down)
-    list::changeSelectedItemIndex 1
-    list::draw
-    ;;
-  esac
-}
-
 
 # Filter the items of the autocompletion box, will either filter synchronously or asynchronously
 function list::filter() {
@@ -489,7 +512,6 @@ function list_filter() {
     _LIST_CURRENT_FILTER_STRING=""
     return 0
   fi
-
 
   # if the current filter string is a prefix of the previous one, we can filter the already filtered items synchronously
   if [[ -n ${_LIST_CURRENT_FILTER_STRING:-} && ${_LIST_FILTER_STRING} == "${_LIST_CURRENT_FILTER_STRING}"* && (${_LIST_FILTER_SYNCHRONOUSLY} == "true" || ${#_LIST_FILTERED_ITEMS[@]} -lt _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD) ]]; then
@@ -541,7 +563,7 @@ function list_post_filter() {
   # check if we display the item count
   _LIST_ITEM_COUNT_SHOWN=false
   _LIST_NB_USABLE_LINES_FOR_ITEMS="${_LIST_HEIGHT}"
-  if [[ ${_LIST_HIDE_ITEMS_COUNT} != "true" ]]; then
+  if [[ ${_LIST_DISABLE_ITEMS_COUNT} != "true" ]]; then
     if [[ ${_LIST_FORCE_SHOW_ITEMS_COUNT} == "true" || $((_LIST_ITEM_HEIGHT * ${#_LIST_FILTERED_ITEMS[@]})) -gt ${_LIST_NB_USABLE_LINES_FOR_ITEMS} || ${#_LIST_FILTERED_ITEMS[@]} -ne ${_LIST_ORIGINAL_ITEMS_COUNT} ]]; then
       # we show the count if:
       # - we force its display
@@ -580,6 +602,62 @@ function list::destroy() {
   unset -v ${!_LIST_*}
 }
 
+# Called when a special key is pressed.
+#
+# - $1: **key** _as string_:
+#       The special key that was pressed (UP, DOWN, etc...).
+#
+# define the callback function called when a special key is pressed
+# shellcheck disable=SC2317
+function list::onKeyBindingPress() {
+  local action="${_LIST_KEY_MAPPING[${1}]:-}"
+  if [[ -z ${action} ]]; then
+    return 0
+  fi
+
+  # handle spamming of keys (the actions before this do not need to be protected from spam,
+  # but the actions after this are slow to execute and should not be spammed)
+  time::getProgramElapsedMicroseconds
+  if ((RETURNED_VALUE - _LIST_LAST_KEY_PRESSED_TIME < 100000)); then
+    # key pressed under 100ms of the last
+    _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
+  else
+    _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
+  fi
+  if ((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED > 3)); then
+    # if we have 3 rapid successive key pressed
+    return 0
+  fi
+  _LIST_LAST_KEY_PRESSED_TIME=${RETURNED_VALUE}
+
+  case "${action}" in
+  # autocompletion box selected item
+  scroll-up)
+    list::changeSelectedItemIndex "-$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
+    list::draw
+    ;;
+  scroll-down)
+    list::changeSelectedItemIndex "$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
+    list::draw
+    ;;
+  move-beginning)
+    list::changeSelectedItemIndex "-$((_LIST_ORIGINAL_ITEMS_COUNT + 1))"
+    list::draw
+    ;;
+  move-end)
+    list::changeSelectedItemIndex "$((_LIST_ORIGINAL_ITEMS_COUNT + 1))"
+    list::draw
+    ;;
+  move-up)
+    list::changeSelectedItemIndex -1
+    list::draw
+    ;;
+  move-down)
+    list::changeSelectedItemIndex 1
+    list::draw
+    ;;
+  esac
+}
 
 # ## list::getCurrentItemDisplayableString (private)
 #
@@ -761,7 +839,7 @@ function list_startAsyncFiltering() {
     _ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
   fi
 
-  { coproc _LIST_ASYNC_FILTER_JOB { list_asyncFilterJob; } } 2>./tmp/f-err
+  { coproc _LIST_ASYNC_FILTER_JOB { list_asyncFilterJob; }; } 2>./tmp/f-err
   # shellcheck disable=SC2034
   GLOBAL_BACKGROUND_JOB1_PID="${_LIST_ASYNC_FILTER_JOB_PID}"
 
@@ -785,18 +863,18 @@ function list_stopAsyncFiltering() {
 function list_asyncFilterWriteItemsToFile() {
   # initial setup of files for filtering with external programs
   case "${_LIST_FILTER_USING_EXTERNAL_PROGRAM:-}" in
-    fzf+awk)
-      IFS=$'\n'
-      # for fzf, we need to display each item with number$'\t'item
-      local index
-      for((index=0; index < ${#_LIST_ORIGINAL_ITEMS[@]}; index++)); do
-        printf "%s\t%s\n" "${index}" "${_LIST_ORIGINAL_ITEMS[index]}"
-      done >"${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
-      ;;
-    grep+gawk)
-      IFS=$'\n'
-      echo "${_LIST_ORIGINAL_ITEMS[*]}" >"${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
-      ;;
+  fzf+awk)
+    IFS=$'\n'
+    # for fzf, we need to display each item with number$'\t'item
+    local index
+    for ((index = 0; index < ${#_LIST_ORIGINAL_ITEMS[@]}; index++)); do
+      printf "%s\t%s\n" "${index}" "${_LIST_ORIGINAL_ITEMS[index]}"
+    done >"${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
+    ;;
+  grep+gawk)
+    IFS=$'\n'
+    echo "${_LIST_ORIGINAL_ITEMS[*]}" >"${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
+    ;;
   esac
 }
 
@@ -815,12 +893,12 @@ function list_asyncFilterJob() {
 
     # initial setup of files for filtering with external programs
     case "${_LIST_FILTER_USING_EXTERNAL_PROGRAM:-}" in
-      fzf+awk)
-        _OPTION_PATH_ONLY=true fs::createTempFile
-        local fzfOutputFile="${RETURNED_VALUE}"
-        _OPTION_PATH_ONLY=true fs::createTempFile
-        local fzfPreviousOutputFile="${RETURNED_VALUE}"
-        ;;
+    fzf+awk)
+      _OPTION_PATH_ONLY=true fs::createTempFile
+      local fzfOutputFile="${RETURNED_VALUE}"
+      _OPTION_PATH_ONLY=true fs::createTempFile
+      local fzfPreviousOutputFile="${RETURNED_VALUE}"
+      ;;
     esac
 
     list_asyncFilterWriteItemsToFile
@@ -840,16 +918,16 @@ function list_asyncFilterJob() {
       IFS='' read -rd '' instruction || [[ -v instruction ]]
 
       case "${instruction}" in
-        filter=*)
-          filterString="${instruction#"filter="}"
-          ;;
-        reloadItems)
-          readarray -t _LIST_ORIGINAL_ITEMS <"${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
-          continue
-          ;;
-        *)
-          core::fail "Unknown instruction: ${instruction}"
-          ;;
+      filter=*)
+        filterString="${instruction#"filter="}"
+        ;;
+      reloadItems)
+        readarray -t _LIST_ORIGINAL_ITEMS <"${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
+        continue
+        ;;
+      *)
+        core::fail "Unknown instruction: ${instruction}"
+        ;;
       esac
 
       if IFS='' read -t 0 -rd ''; then
@@ -866,87 +944,87 @@ function list_asyncFilterJob() {
     echo "Async filtering <${filterString}>, filterOriginalItems=${filterOriginalItems}, lastFilterString=<${lastFilterString}>" >>./tmp/f
 
     case "${_LIST_FILTER_USING_EXTERNAL_PROGRAM:-}" in
-      fzf+awk)
-        # sort with fzf and awk
-        echo "using fzf" >>./tmp/f
-        : >"${intermediateItemsFile}"
-        : >"${intermediateItemsCorrespondencesFile}"
+    fzf+awk)
+      # sort with fzf and awk
+      echo "using fzf" >>./tmp/f
+      : >"${intermediateItemsFile}"
+      : >"${intermediateItemsCorrespondencesFile}"
 
-        local fzfInputFile
-        if [[ ${filterOriginalItems} == "true" ]]; then
-          fzfInputFile="${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
-        else
-          # reuse the previous output as input
-          fzfInputFile="${fzfPreviousOutputFile}"
-          mv -f "${fzfOutputFile}" "${fzfPreviousOutputFile}"
-        fi
+      local fzfInputFile
+      if [[ ${filterOriginalItems} == "true" ]]; then
+        fzfInputFile="${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}"
+      else
+        # reuse the previous output as input
+        fzfInputFile="${fzfPreviousOutputFile}"
+        mv -f "${fzfOutputFile}" "${fzfPreviousOutputFile}"
+      fi
 
-        fzf --ignore-case \
-          --tiebreak=begin,end,index \
-          --filter="${filterString}" \
-          --nth=2 \
-          --delimiter='\t' <"${fzfInputFile}" >"${fzfOutputFile}"
+      fzf --ignore-case \
+        --tiebreak=begin,end,index \
+        --filter="${filterString}" \
+        --nth=2 \
+        --delimiter='\t' <"${fzfInputFile}" >"${fzfOutputFile}"
 
-        awk "{print \$1 >\"${intermediateItemsCorrespondencesFile}\"; print \$2 >\"${intermediateItemsFile}\"}" "${fzfOutputFile}"
+      awk "{print \$1 >\"${intermediateItemsCorrespondencesFile}\"; print \$2 >\"${intermediateItemsFile}\"}" "${fzfOutputFile}"
 
-        mv -f "${intermediateItemsFile}" "${_ASYNC_FILTERED_ITEMS_FILE}"
-        mv -f "${intermediateItemsCorrespondencesFile}" "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
-        ;;
-      grep+gawk)
-        # sort with grep and gawk
-        echo "using grep" >>./tmp/f
-        : >"${intermediateItemsFile}"
-        : >"${intermediateItemsCorrespondencesFile}"
+      mv -f "${intermediateItemsFile}" "${_ASYNC_FILTERED_ITEMS_FILE}"
+      mv -f "${intermediateItemsCorrespondencesFile}" "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+      ;;
+    grep+gawk)
+      # sort with grep and gawk
+      echo "using grep" >>./tmp/f
+      : >"${intermediateItemsFile}"
+      : >"${intermediateItemsCorrespondencesFile}"
 
-        list_fuzzyFilterSortFileWithGrepAndGawk \
-          "${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}" \
-          filterString \
-          "${intermediateItemsFile}" \
-          "${intermediateItemsCorrespondencesFile}"
+      list_fuzzyFilterSortFileWithGrepAndGawk \
+        "${_ASYNC_FILTER_ORIGINAL_ITEMS_FILE}" \
+        filterString \
+        "${intermediateItemsFile}" \
+        "${intermediateItemsCorrespondencesFile}"
 
-        mv -f "${intermediateItemsFile}" "${_ASYNC_FILTERED_ITEMS_FILE}"
-        mv -f "${intermediateItemsCorrespondencesFile}" "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
-        ;;
-      *)
-        # sort with bash
-        echo "using bash" >>./tmp/f
-        # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
-        # shellcheck disable=SC2178
-        local -n RETURNED_ARRAY=filteredItems
-        # shellcheck disable=SC2034
-        local -n RETURNED_ARRAY2=filteredItemsCorrespondences
+      mv -f "${intermediateItemsFile}" "${_ASYNC_FILTERED_ITEMS_FILE}"
+      mv -f "${intermediateItemsCorrespondencesFile}" "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+      ;;
+    *)
+      # sort with bash
+      echo "using bash" >>./tmp/f
+      # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
+      # shellcheck disable=SC2178
+      local -n RETURNED_ARRAY=filteredItems
+      # shellcheck disable=SC2034
+      local -n RETURNED_ARRAY2=filteredItemsCorrespondences
 
-        if [[ ${filterOriginalItems} == "true" ]]; then
-            echo "start fuzzy filter" >>./tmp/f
-          array::fuzzyFilterSort _LIST_ORIGINAL_ITEMS filterString
-            echo "end fuzzy filter" >>./tmp/f
-        else
-          # if the current filter string is a prefix of the previous one, we can filter the already filtered items
-          echo "reuse previous filter" >>./tmp/f
-          if ((${#filteredItems[@]} > 0)); then
-            local -a preFilteredItems=("${filteredItems[@]}")
-            local -a preFilteredItemsCorrespondences=("${filteredItemsCorrespondences[@]}")
-            array::fuzzyFilterSort preFilteredItems filterString
-            # we need to update the correspondences
-            local -i index
-            for ((index = 0; index < ${#filteredItemsCorrespondences[@]}; index++)); do
-              filteredItemsCorrespondences[index]="${preFilteredItemsCorrespondences[${filteredItemsCorrespondences[index]}]}"
-            done
-          fi
-          echo "exec----" >>./tmp/f
-        fi
-
-        echo "exec2 bash: filteredItems ${filteredItems:-}, filteredItemsCorrespondences ${filteredItemsCorrespondences:-}" >>./tmp/f
-
+      if [[ ${filterOriginalItems} == "true" ]]; then
+        echo "start fuzzy filter" >>./tmp/f
+        array::fuzzyFilterSort _LIST_ORIGINAL_ITEMS filterString
+        echo "end fuzzy filter" >>./tmp/f
+      else
+        # if the current filter string is a prefix of the previous one, we can filter the already filtered items
+        echo "reuse previous filter" >>./tmp/f
         if ((${#filteredItems[@]} > 0)); then
-          IFS=$'\n'
-          echo "${filteredItems[*]}" >"${_ASYNC_FILTERED_ITEMS_FILE}"
-          echo "${filteredItemsCorrespondences[*]}" >"${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
-        else
-          : >"${_ASYNC_FILTERED_ITEMS_FILE}"
+          local -a preFilteredItems=("${filteredItems[@]}")
+          local -a preFilteredItemsCorrespondences=("${filteredItemsCorrespondences[@]}")
+          array::fuzzyFilterSort preFilteredItems filterString
+          # we need to update the correspondences
+          local -i index
+          for ((index = 0; index < ${#filteredItemsCorrespondences[@]}; index++)); do
+            filteredItemsCorrespondences[index]="${preFilteredItemsCorrespondences[${filteredItemsCorrespondences[index]}]}"
+          done
         fi
-        echo "done bash" >>./tmp/f
-        ;;
+        echo "exec----" >>./tmp/f
+      fi
+
+      echo "exec2 bash: filteredItems ${filteredItems:-}, filteredItemsCorrespondences ${filteredItemsCorrespondences:-}" >>./tmp/f
+
+      if ((${#filteredItems[@]} > 0)); then
+        IFS=$'\n'
+        echo "${filteredItems[*]}" >"${_ASYNC_FILTERED_ITEMS_FILE}"
+        echo "${filteredItemsCorrespondences[*]}" >"${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+      else
+        : >"${_ASYNC_FILTERED_ITEMS_FILE}"
+      fi
+      echo "done bash" >>./tmp/f
+      ;;
     esac
 
     lastFilterString="${filterString}"
@@ -1035,13 +1113,13 @@ function list_fuzzyFilterSortFileWithGrepAndGawk() {
     _ARRAY_TEMP_FILTERED_FILE="${RETURNED_VALUE}"
   fi
 
-  local grepRegex="${_STRING_FUZZY_FILTER_REGEX:0:${#_STRING_FUZZY_FILTER_REGEX} - 4}"
+  local grepRegex="${_STRING_FUZZY_FILTER_REGEX:0:${#_STRING_FUZZY_FILTER_REGEX}-4}"
   grepRegex="${grepRegex//[()]/}"
   _STRING_FUZZY_FILTER_REGEX="${_STRING_FUZZY_FILTER_REGEX:1}"
 
   # we use grep to pre-filter the lines.
   # We could do everything in gawk but it would be slower for huge files.
-  grep --ignore-case --line-number "${grepRegex}" "${fileToFilter}" | \
+  grep --ignore-case --line-number "${grepRegex}" "${fileToFilter}" |
     gawk "
     BEGIN {
       # Ignore case when matching the searchString
