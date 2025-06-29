@@ -13,10 +13,26 @@ function main() {
   VALET_CONFIG_DISABLE_ESC_CODES=false
   styles::init
 
+  test_tui::allVariablesCachedWithValue
   test_tui::createSpace
   test_tui::getCursorPosition
   test_tui::clearBox
   test_tui::getBestAutocompleteBox
+}
+
+function test_tui::allVariablesCachedWithValue() {
+  test::title "✅ Testing tui::allVariablesCachedWithValue"
+
+  test::func tui::allVariablesCachedWithValue VAR1 val1 VAR2 val2
+  test::func tui::allVariablesCachedWithValue VAR1 val1
+  test::func tui::allVariablesCachedWithValue VAR1 val2
+
+  # shellcheck disable=SC2119
+  test::func tui::clearCachedVariables
+  test::func tui::allVariablesCachedWithValue VAR2 val2
+  test::func tui::clearCachedVariables VAR2
+  test::func tui::allVariablesCachedWithValue VAR2 val2
+  test::func tui::allVariablesCachedWithValue VAR2 val2
 }
 
 function test_tui::createSpace() {

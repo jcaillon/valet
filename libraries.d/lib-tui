@@ -370,6 +370,73 @@ function tui::getBestAutocompleteBox() {
   RETURNED_VALUE4="${height}"
 }
 
+# ## tui::allVariablesCachedWithValue
+#
+# Check if one or more variables are cached with the given value.
+# If all the variables given already have the same value cached,
+# the function will return true.
+# Otherwise, it will return false and cache the given value in the variables.
+#
+# - $1: **variable name** _as string_:
+#       the name of the variable to check
+# - $2: **value** _as any_:
+#       the value to check against the variable
+# - $@: **variable/value pair** _as any_:
+#       additional variable/value pairs to check
+# 
+# Returns:
+#
+# - $?:
+#   - 0 if all the variables have the same value as the given value
+#   - 1 otherwise
+#
+# ```bash
+# if tui::allVariablesCachedWithValue "MY_VAR" "my_value"; then
+#   echo "MY_VAR is cached with the value 'my_value'"
+# else
+#   echo "MY_VAR is not cached with the value 'my_value'"
+# fi
+# ```
+function tui::allVariablesCachedWithValue() {
+  local -i nbNotCached=0
+  local varName varValue
+  while (( $# > 0 )); do
+    varName="_TUI_CACHED_${1}"
+    varValue="${2}"
+    shift 2
+    if [[ ! -v "${varName}" || ${!varName} != "${varValue}" ]]; then
+      nbNotCached=$((nbNotCached + 1))
+      eval "${varName}=\"${varValue}\""
+    fi
+  done
+  return $((nbNotCached == 0 ? 0 : 1))
+}
+
+# ## tui::clearCachedVariables
+#
+# Clear the cached variables used by tui::allVariablesCachedWithValue.
+# This will unset all variables starting with _TUI_CACHED_.
+#
+# - $@ : **variable names** _as any_:
+#       (optional) the names of the variables to clear
+#       (defaults to all cached variables)
+#
+# ```bash
+# tui::clearCachedVariables
+# tui::clearCachedVariables "MY_VAR" "ANOTHER_VAR"
+# ```
+function tui::clearCachedVariables() {
+  if (( $# == 0 )); then
+    # shellcheck disable=SC2086
+    unset -v ${!_TUI_CACHED_*}
+  else
+    while (( $# > 0 )); do
+      unset -v "_TUI_CACHED_${1}"
+      shift
+    done
+  fi
+}
+
 
 #===============================================================
 # >>> Key press detection

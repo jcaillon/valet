@@ -2,6 +2,32 @@
 
 ## Test script 00.tui
 
+### ✅ Testing tui::allVariablesCachedWithValue
+
+❯ `tui::allVariablesCachedWithValue VAR1 val1 VAR2 val2`
+
+Returned code: `1`
+
+❯ `tui::allVariablesCachedWithValue VAR1 val1`
+
+❯ `tui::allVariablesCachedWithValue VAR1 val2`
+
+Returned code: `1`
+
+❯ `tui::clearCachedVariables`
+
+❯ `tui::allVariablesCachedWithValue VAR2 val2`
+
+Returned code: `1`
+
+❯ `tui::clearCachedVariables VAR2`
+
+❯ `tui::allVariablesCachedWithValue VAR2 val2`
+
+Returned code: `1`
+
+❯ `tui::allVariablesCachedWithValue VAR2 val2`
+
 ### ✅ Testing tui::createSpace
 
 ❯ `tui::createSpace 1`
