@@ -6,8 +6,6 @@
 source tui
 # shellcheck source=lib-fs
 source fs
-# shellcheck source=lib-string
-source string
 
 # ## list::setViewport
 #
@@ -26,7 +24,7 @@ source string
 #       (optional) The height of the viewport of the list.
 #       (defaults to GLOBAL_LINES)
 # - ${_OPTION_ITEM_HEIGHT} _as int_:
-#       (optional) The height of each item in the list (number of lines needed to display the item).
+#       (optional) The height of each item in the list (num²ber of lines needed to display the item).
 #       (defaults to 1)
 # - ${_OPTION_HIDE_ITEMS_COUNT} _as bool_:
 #       (optional) If true, the count of items at the bottom of the list is hidden.
@@ -384,10 +382,10 @@ function list::drawCounter() {
 
   local showAtLine
   if [[ ${_LIST_ENABLE_REVERSE_MODE} == "true" ]]; then
-    showAtLine=$((_LIST_SHOW_ITEMS_COUNT_AT_TOP == 1 ? _LIST_TOP + _LIST_HEIGHT - 1 : _LIST_TOP + _LIST_HEIGHT - 1 - _LIST_NB_DISPLAYED_ITEMS))
+    showAtLine=$((_LIST_SHOW_ITEMS_COUNT_AT_TOP == 1 ? _LIST_TOP + _LIST_HEIGHT - 1 : _LIST_TOP + _LIST_HEIGHT - 1 - _LIST_NB_DISPLAYED_ITEMS * _LIST_ITEM_HEIGHT))
 
   else
-    showAtLine=$((_LIST_SHOW_ITEMS_COUNT_AT_TOP == 1 ? _LIST_TOP : _LIST_TOP + _LIST_NB_DISPLAYED_ITEMS))
+    showAtLine=$((_LIST_SHOW_ITEMS_COUNT_AT_TOP == 1 ? _LIST_TOP : _LIST_TOP + _LIST_NB_DISPLAYED_ITEMS * _LIST_ITEM_HEIGHT))
   fi
 
   local counterSymbol
@@ -618,9 +616,9 @@ function list::getCurrentItemDisplayableString() {
   if [[ -z ${_LIST_FILTER_STRING} && ${stringLength} -le ${_LIST_ITEM_WIDTH} ]]; then
     # no filter string, no need to truncate
     if [[ ${_LIST_CURRENT_ITEM} == *$'\e'* ]]; then
-      local realWord="${_LIST_CURRENT_ITEM//$'\e['[0-9][0-9]m/}"
-      realWord="${realWord//$'\e['[0-9]m/}"
-      RETURNED_VALUE=$((_LIST_ITEM_WIDTH - ${#realWord}))
+      local visibleCharacters="${_LIST_CURRENT_ITEM}"
+      string::removeTextFormatting visibleCharacters
+      RETURNED_VALUE=$((_LIST_ITEM_WIDTH - ${#visibleCharacters}))
     else
       RETURNED_VALUE=$((_LIST_ITEM_WIDTH - stringLength))
     fi

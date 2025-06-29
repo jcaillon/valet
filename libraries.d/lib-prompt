@@ -1359,8 +1359,8 @@ function prompt_drawMultiLinePromptRefreshLines() {
 
     for word in ${line}; do
       if [[ ${word} == *$'\e'* ]]; then
-        realWord="${word//$'\e['[0-9][0-9]m/}"
-        realWord="${realWord//$'\e['[0-9]m/}"
+        realWord="${word}"
+        string::removeTextFormatting realWord
         realWordLength="${#realWord}"
       else
         realWordLength="${#word}"

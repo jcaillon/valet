@@ -10,7 +10,7 @@
 
 ```text
 INFO     Generating documentation for the core functions only.
-INFO     Found 184 functions with documentation.
+INFO     Found 185 functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-2/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-2/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-2/valet.code-snippets⌝.

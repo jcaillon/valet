@@ -4,6 +4,7 @@
 source string
 
 function main() {
+  test_string::removeTextFormatting
   test_string::convertToHex
   test_string::removeSgrCodes
   test_string::getField
@@ -21,6 +22,14 @@ function main() {
   test_string::highlight
   test_string::head
   test_string::doForEachLine
+}
+
+function test_string::removeTextFormatting() {
+  test::title "✅ Testing string::removeTextFormatting"
+
+  local _myString="My text${ESC__BG_RED}${ESC__FG_WHITE} with some ${ESC__TEXT_BOLD}text formatting${ESC__TEXT_RESET} and some more text${ESC__BG_BLUE}${ESC__FG_BRIGHT_CYAN}unreadable stuff${ESC__TEXT_RESET}. Inluding some ${ESC__FG_COLOR_24b__}123;55;255${__ESC__END_COLOR}24 bit colors${ESC__BG_RESET} and some ${ESC__FG_COLOR__}2${__ESC__END_COLOR}8 bit colors${ESC__TEXT_RESET}."
+  test::func string::removeTextFormatting _myString
+  test::printVars _myString
 }
 
 function test_string::convertToHex() {

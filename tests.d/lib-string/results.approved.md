@@ -2,6 +2,14 @@
 
 ## Test script 00.tests
 
+### ✅ Testing string::removeTextFormatting
+
+❯ `string::removeTextFormatting _myString`
+
+```text
+_myString='My text with some text formatting and some more textunreadable stuff. Inluding some 123;55;25524 bit colors and some 28 bit colors.'
+```
+
 ### ✅ Testing string::convertToHex
 
 ❯ `_myString=d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301 string::convertToHex _myString`

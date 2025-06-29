@@ -1116,8 +1116,8 @@ function log::parseLogPattern() {
 
     # handle the normal string
     if [[ -n ${normalString} ]]; then
-      normalStringVisibleCharacters="${normalString//$'\e['[0-9][0-9]m/}"
-      normalStringVisibleCharacters="${normalStringVisibleCharacters//$'\e['[0-9]m/}"
+      normalStringVisibleCharacters="${normalString}"
+      string::removeTextFormatting normalStringVisibleCharacters
       RETURNED_VALUE+="%s"
       RETURNED_VALUE2+="\"${normalString//\"/\\\"}\" "
       wrapPaddingLength+=${#normalStringVisibleCharacters}
@@ -1361,6 +1361,38 @@ function log::init() {
 # >>> String utilities
 #===============================================================
 
+# ## string::removeTextFormatting
+#
+# Removes all text formatting from the given string.
+# This includes colors, bold, underline, etc.
+#
+# - $1: **text variable name** _as string_:
+#       The variable name that contains the text to remove formatting from.
+#
+# ```bash
+# string::removeTextFormatting "myText"
+# echo "${myText}"
+# ```
+function string::removeTextFormatting() {
+  local -n textForWhichToRemoveFormatting="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if [[ ${textForWhichToRemoveFormatting} == *$'\e'* ]]; then
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9][0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;5;[0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;5;[0-9][0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;5;[0-9][0-9][0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9];[0-9];[0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9][0-9];[0-9];[0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9][0-9][0-9];[0-9];[0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9];[0-9][0-9];[0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9];[0-9][0-9][0-9];[0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9];[0-9];[0-9][0-9][0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9];[0-9];[0-9][0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9][0-9];[0-9][0-9];[0-9][0-9]m/}"
+    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9][0-9][0-9];[0-9][0-9][0-9];[0-9][0-9][0-9]m/}"
+  fi
+}
+
 # ## string::wrapWords
 #
 # Allows to soft wrap the given text at the given width.
@@ -1411,8 +1443,8 @@ function string::wrapWords() {
 
   local text="${textToWrapAtWords}"
   local IFS=$' \t' output="" line word realWord RETURNED_VALUE2
-  local leftPaddingVisibleChars="${leftPaddingChars//$'\e['[0-9][0-9]m/}"
-  leftPaddingVisibleChars="${leftPaddingVisibleChars//$'\e['[0-9]m/}"
+  local leftPaddingVisibleChars="${leftPaddingChars}"
+  string::removeTextFormatting leftPaddingVisibleChars
   local -i sentenceWidth=$((width - ${#leftPaddingVisibleChars})) realWordLength=0 firstWord=1
   local -i lineLength=$((sentenceWidth - firstLineWidth))
 
@@ -1432,8 +1464,8 @@ function string::wrapWords() {
 
     for word in ${line}; do
       if [[ ${word} == *$'\e'* ]]; then
-        realWord="${word//$'\e['[0-9][0-9]m/}"
-        realWord="${realWord//$'\e['[0-9]m/}"
+        realWord="${word}"
+        string::removeTextFormatting realWord
         realWordLength="${#realWord}"
       else
         realWordLength="${#word}"
@@ -1515,8 +1547,8 @@ function string::wrapCharacters() {
   local -i firstLineWidth="${4:-${_OPTION_FIRST_LINE_WIDTH:-${width}}}"
 
   local itemChunk spaces text="${textToWrapAtCharacters}"
-  local leftPaddingVisibleChars="${leftPaddingChars//$'\e['[0-9][0-9]m/}"
-  leftPaddingVisibleChars="${leftPaddingVisibleChars//$'\e['[0-9]m/}"
+  local leftPaddingVisibleChars="${leftPaddingChars}"
+  string::removeTextFormatting leftPaddingVisibleChars
   width=$((width - ${#leftPaddingVisibleChars}))
   local -i lineLength=$((width - firstLineWidth)) isWrapping=0
 
