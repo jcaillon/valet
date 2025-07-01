@@ -77,41 +77,41 @@ if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 GLOBAL_LOG_WRAP_PADDING='         '
 ```
 
-❯ `VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init`
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init`
 
 ```text
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
 
 
-printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/file"
+printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet-temp"
 printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"tmp/log-1987-05-25T01-00-00+0000--PID_001234.log"'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/file"
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet-temp"
 printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/log-1987-05-25T01-00-00+0000--PID_001234.log"'
 GLOBAL_LOG_WRAP_PADDING='         '
 ```
 
-❯ `VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
 
 ```text
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
 
 
-printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/file"
+printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet-temp"
 printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"tmp/a"'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/file"
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet-temp"
 printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/a"'
 GLOBAL_LOG_WRAP_PADDING='         '
 ```
 
-❯ `VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
 
 ```text
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
 
 
-printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/file"
+printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet-temp"
 printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet.valet.d/logs/a"'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/file"
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet-temp"
 printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet.valet.d/logs/a"'
 GLOBAL_LOG_WRAP_PADDING='         '
 ```
