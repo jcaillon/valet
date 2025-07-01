@@ -41,12 +41,12 @@ function profiler::enable() {
 
   PS4='+'$'\011''$(((${EPOCHREALTIME%%[.,]*} - _PROFILER_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*[.,]} - 10#${_PROFILER_STARTED_AT_MICROSECOND})))'$'\011''${BASH_SOURCE[0]:-}'$'\011''${LINENO:-?}'$'\011''${FUNCNAME[0]:-}'$'\011''${BASH_SUBSHELL:-}'$'\011'"${functionDepthExpression}"$'\011''→'$'\011'
 
-  exec 5>"${file}"
+  exec {_PROFILER_FD}>"${file}"
 
   _PROFILER_OUTPUT_FILE="${file}"
   _PROFILER_STARTED_AT_SECOND="${EPOCHREALTIME%%[.,]*}"
   _PROFILER_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*[.,]}"
-  BASH_XTRACEFD=5
+  BASH_XTRACEFD=${_PROFILER_FD}
   set -o xtrace
 }
 
@@ -63,7 +63,7 @@ function profiler::disable() {
   log::info "Disabling profiler."
   set +o xtrace
   unset -v BASH_XTRACEFD PS4 _ACTIVE_PROFILER
-  exec 5>&-
+  exec {_PROFILER_FD}>&-
   if [[ -v _PROFILER_OUTPUT_FILE ]]; then
     profilerCleanFile
   fi

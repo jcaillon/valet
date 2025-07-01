@@ -100,13 +100,11 @@ function progress::start() {
   _PROGRESS_BAR_RUNNING=true
 
   # coproc can emit a warning if another coproc is already running, so we redirect stderr to avoid it
-  # but we still want to have stderr of progress_runAnimationInBackground so we redirect it to fd4
-  exec 4>&2
+  # but we still want to have stderr of progress_runAnimationInBackground so we redirect it to GLOBAL_FD_LOG
   {
     # we use coproc because it gives us a file descriptor to write to the input stream of the background job
-    coproc _PROGRESS_BACKGROUND_JOB { progress_runAnimationInBackground "${template}" "${barSize}" "${frameDelay}" "${maxFrames}" "${spinner}" "${defaultPercentage}" "${defaultMessage}" 2>&4; }
+    coproc _PROGRESS_BACKGROUND_JOB { progress_runAnimationInBackground "${template}" "${barSize}" "${frameDelay}" "${maxFrames}" "${spinner}" "${defaultPercentage}" "${defaultMessage}" 2>&"${GLOBAL_FD_LOG}"; }
   } 2>/dev/null
-  exec 4>&-
   GLOBAL_BACKGROUND_JOB1_PID="${_PROGRESS_BACKGROUND_JOB_PID}"
 }
 

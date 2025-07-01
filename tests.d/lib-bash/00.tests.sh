@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 function main() {
+  test_bash::isFdValid
   test_bash::getFunctionDefinitionWithGlobalVars
   test_bash::countJobs
   test_bash::injectCodeInFunction
@@ -12,6 +13,20 @@ function main() {
   test_bash::isCommand
   test_bash::isFunction
   test_bash::getBuiltinOutput
+}
+
+function test_bash::isFdValid() {
+  test::title "✅ Testing bash::isFdValid"
+
+  test::exec bash::isFdValid 2
+  test::exec bash::isFdValid "${GLOBAL_TEST_TEMP_FILE}"
+  local fd
+  exec {fd}>&2
+  test::exec bash::isFdValid "${fd}"
+  exec {fd}>&-
+
+  test::exec bash::isFdValid 999
+  test::exec bash::isFdValid /unknown/file/path
 }
 
 function test_bash::injectCodeInFunction() {
@@ -152,7 +167,7 @@ function test_bash::getBuiltinOutput() {
 
   test::func bash::getBuiltinOutput echo coucou
   test::func bash::getBuiltinOutput declare -f bash::getBuiltinOutput
-  test::func bash::getBuiltinOutput "[[" 1 -eq 0 "]]" || echo "Failed as expected"
+  test::func bash::getBuiltinOutput false || echo "Failed as expected"
 }
 
 main

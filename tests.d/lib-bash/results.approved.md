@@ -2,6 +2,22 @@
 
 ## Test script 00.tests
 
+### ✅ Testing bash::isFdValid
+
+❯ `bash::isFdValid 2`
+
+❯ `bash::isFdValid /tmp/valet-temp`
+
+❯ `bash::isFdValid 13`
+
+❯ `bash::isFdValid 999`
+
+Returned code: `1`
+
+❯ `bash::isFdValid /unknown/file/path`
+
+Returned code: `1`
+
 ### ✅ Testing bash::getFunctionDefinitionWithGlobalVars
 
 ❯ `declare -f test_function_to_reexport`
@@ -282,7 +298,7 @@ RETURNED_VALUE='bash::getBuiltinOutput ()
 '
 ```
 
-❯ `bash::getBuiltinOutput [[ 1 -eq 0 ]]`
+❯ `bash::getBuiltinOutput false`
 
 Returned code: `1`
 

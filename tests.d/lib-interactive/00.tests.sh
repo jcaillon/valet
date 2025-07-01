@@ -30,24 +30,24 @@ function test_interactive::promptYesNo() {
   test::title "✅ Testing interactive::promptYesNo"
 
   test::prompt "echo y | interactive::promptYesNo 'Do you see this message?'"
-  echo y 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
-  test::func interactive::promptYesNo 'Do you see this message?' <"${GLOBAL_TEMPORARY_WORK_FILE}"
+  test::setTerminalInputs y
+  test::func interactive::promptYesNo 'Do you see this message?'
 
   test::prompt "echo n | interactive::promptYesNo 'Do you see this message?'"
-  echo n 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
-  test::func interactive::promptYesNo 'Do you see this message?' <"${GLOBAL_TEMPORARY_WORK_FILE}"
+  test::setTerminalInputs n
+  test::func interactive::promptYesNo 'Do you see this message?'
 }
 
 function test_interactive::askForConfirmation() {
   test::title "✅ Testing interactive::askForConfirmation"
 
   test::prompt "echo o | interactive::askForConfirmation 'Please press OK.'"
-  echo o 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
-  test::exec interactive::askForConfirmation 'Please press OK.' <"${GLOBAL_TEMPORARY_WORK_FILE}"
+  test::setTerminalInputs o
+  test::exec interactive::askForConfirmation 'Please press OK.'
 
   test::prompt "echo n | interactive::askForConfirmation 'Please press OK.'"
-  echo n 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
-  test::exec interactive::askForConfirmation 'Please press OK.' <"${GLOBAL_TEMPORARY_WORK_FILE}"
+  test::setTerminalInputs n
+  test::exec interactive::askForConfirmation 'Please press OK.'
 }
 
 main

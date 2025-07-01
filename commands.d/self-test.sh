@@ -287,7 +287,7 @@ function selfTest_runSingleTestSuites() {
       _TEST_SUITE_NAMES+=("${testDirectory##*/}")
       _OPTION_PATH_ONLY=true fs::createTempFile
       _TEST_SUITE_OUTPUT_FILES+=("${RETURNED_VALUE}")
-      _TEST_SUITE_COMMANDS+=("VALET_CONFIG_LOG_FD=2; log::init; selfTest_runSingleTestSuite '${testDirectory}' 2>'${RETURNED_VALUE}'")
+      _TEST_SUITE_COMMANDS+=("VALET_CONFIG_LOG_FD='${RETURNED_VALUE}'; log::init; selfTest_runSingleTestSuite '${testDirectory}'")
     done
 
     bash::runInParallel _TEST_SUITE_NAMES _TEST_SUITE_COMMANDS "${_TEST_NB_PARALLEL_TEST_SUITES}" selfTest_parallelCallback
@@ -371,6 +371,8 @@ function selfTest_runSingleTestSuite() {
   GLOBAL_TEST_STACK_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/stack"
   GLOBAL_TEST_LOG_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/log"
   mkdir -p "${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}"
+  exec {GLOBAL_FD_TEST_LOG}>"${GLOBAL_TEST_LOG_FILE}"
+
   # shellcheck disable=SC2034
   GLOBAL_TEST_CURRENT_DIRECTORY="${testSuiteDirectory}"
   GLOBAL_TESTS_D_DIRECTORY="${testsDotDirectory}"
@@ -406,7 +408,7 @@ function selfTest_runSingleTestSuite() {
       trap 'selfTest_onExitTestInternal $?' EXIT
       trap 'selfTest_onErrTestInternal' ERR
       selfTest_runSingleTest "${testSuiteDirectory}" "${testScript}" || exit $?
-    ) >"${GLOBAL_TEST_STACK_FILE}" 2>"${GLOBAL_TEST_LOG_FILE}"; then
+    ) 2>&"${GLOBAL_FD_TEST_LOG}" 1>&2; then
 
       # Handle an error that occurred in the test script.
       # We trapped the EXIT signal in the subshell that runs the test and we make it output the
@@ -520,7 +522,7 @@ function selfTest_onExitTestInternal() {
     GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
     GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
     GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
-    declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS 1>&3
+    declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
   fi
 }
 
@@ -533,7 +535,7 @@ function selfTest_onErrTestInternal() {
   GLOBAL_STACK_FUNCTION_NAMES_ERR=("${FUNCNAME[@]}")
   GLOBAL_STACK_SOURCE_FILES_ERR=("${BASH_SOURCE[@]}")
   GLOBAL_STACK_LINE_NUMBERS_ERR=("${BASH_LINENO[@]}")
-  declare -p GLOBAL_STACK_FUNCTION_NAMES_ERR GLOBAL_STACK_SOURCE_FILES_ERR GLOBAL_STACK_LINE_NUMBERS_ERR 1>&3
+  declare -p GLOBAL_STACK_FUNCTION_NAMES_ERR GLOBAL_STACK_SOURCE_FILES_ERR GLOBAL_STACK_LINE_NUMBERS_ERR >>"${GLOBAL_TEST_STACK_FILE}"
 }
 
 # ## selfTest_runSingleTest
@@ -569,8 +571,8 @@ function selfTest_runSingleTest() {
   GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-temp"
 
   # redirect the standard output and error output to files
-  exec 3>&1 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
-  exec 4>&2 2>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
+  exec 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
+  exec 2>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
 
   # run a custom user script before the test if it exists
   selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-each-test"
@@ -585,8 +587,7 @@ function selfTest_runSingleTest() {
   # run a custom user script after the test if it exists
   selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/after-each-test"
 
-  exec 3>&-
-  exec 4>&-
+  exec 2>&"${GLOBAL_FD_TEST_LOG}"
 
   self_makeReplacementsInReport
 }

@@ -336,7 +336,7 @@ _LIST_FILTERED_ITEMS_START_INDEX=11
     toPrint+="${ESC__CURSOR_MOVE__}$((_LIST_TOP + _LIST_NB_USABLE_LINES_FOR_ITEMS / 2));$((_LIST_LEFT + _LIST_WIDTH / 2 - _LIST_EMPTY_LIST_TEXT_LENGTH / 2))${__ESC__TO}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_EMPTY_LIST_TEXT}${STYLE_RESET}"
   fi
 
-  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&7
+  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # ## list_appendSingleLineItemDisplayString (private)
@@ -411,7 +411,7 @@ function list::drawCounter() {
     itemsCounterString=" ${_LIST_ITEMS_COUNT_FILTERING_STRING}"
     itemCounterLength=${_LIST_ITEMS_COUNT_FILTERING_STRING_LENGTH}
   else
-    local lastItemNumber=$((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYED_ITEMS))
+    local lastItemNumber=$((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYED_ITEMS - 1))
     printf -v firstItemNumber "%0${#lastItemNumber}i" "${_LIST_FILTERED_ITEMS_START_INDEX}"
     local totalItems="${_LIST_ORIGINAL_ITEMS_COUNT}"
     printf -v filteredItems "%0${#totalItems}i" "${#_LIST_FILTERED_ITEMS[@]}"
@@ -450,7 +450,7 @@ function list::drawCounter() {
   local counterFrame="${_LIST_BLANKS_WIDTH:0:counterAvailableLength-itemCounterLength}"
   printf '%s%s' \
     "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${STYLE_LIST_COUNT_FRAME}${leftSymbol}${counterFrame// /"${SYMBOL_LIST_SEPARATOR}"}${STYLE_RESET}${itemsCounterString}${STYLE_LIST_COUNT_FRAME}${rightSymbol}${STYLE_RESET}" \
-    "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&7
+    "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # Draw the scroll bar on the right side of the list.
@@ -493,7 +493,7 @@ function list::drawScrollBar() {
     fi
   done
 
-  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&7
+  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # Draw the scroll bar on the right side of the list.
@@ -515,7 +515,7 @@ function list::drawTopSeparator() {
 
   printf '%s%s' \
     "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${STYLE_LIST_COUNT_FRAME}${leftSymbol}${_LIST_BLANKS_ITEM_WIDTH// /"${SYMBOL_LIST_SEPARATOR}"}${rightSymbol}${STYLE_RESET}" \
-    "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&7
+    "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # Filter the items of the autocompletion box, will either filter synchronously or asynchronously

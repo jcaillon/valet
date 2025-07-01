@@ -248,11 +248,10 @@ function bash::injectCodeInFunction() {
 # > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 function bash::sleep() {
   local timeout="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  if [[ ! -v IO_SLEEP_FD6 ]]; then
-    IO_SLEEP_FD6=1
-    exec 6<>/dev/udp/127.0.0.1/0
+  if [[ ! -v _BASH_SLEEP_FD ]]; then
+    exec {_BASH_SLEEP_FD}<>/dev/udp/127.0.0.1/0
   fi
-  read -rt "${timeout}" -u 6 || :
+  read -rt "${timeout}" -u "${_BASH_SLEEP_FD}" || :
 }
 
 # ## bash::readStdIn
@@ -521,4 +520,41 @@ function bash::getBuiltinOutput() {
   "${@}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
   RETURNED_VALUE=""
   IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+}
+
+# ## bash::isFdValid
+#
+# Check if the given file descriptor is valid.
+#
+# - $1: **file descriptor** _as string_:
+#       The file descriptor to check.
+#
+# Returns:
+#
+# - $?
+#   - 0 if the file descriptor is valid
+#   - 1 otherwise.
+#
+# ```bash
+# if bash::isFdValid 1; then
+#   echo "File descriptor 1 is valid."
+# fi
+# ```
+function bash::isFdValid() {
+  local fd="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local test keepStderr
+  exec {keepStderr}>&2
+  if [[ ${fd} =~ ^[0-9]+$ ]]; then
+    if { exec {test}>&"${fd}"; } 2>/dev/null; then
+      exec 2>&${keepStderr} {test}>&- {keepStderr}>&-
+      return 0
+    fi
+  else
+    if { exec {test}>>"${fd}"; } 2>/dev/null; then
+      exec 2>&${keepStderr} {test}>&- {keepStderr}>&-
+      return 0
+    fi
+  fi
+  exec 2>&${keepStderr} {keepStderr}>&-
+  return 1
 }

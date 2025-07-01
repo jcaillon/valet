@@ -5,11 +5,14 @@ export VALET_CONFIG_LOG_FD=tmp/log
 export VALET_CONFIG_LOG_PATTERN="<elapsedTime>{8s} [<pid>{04s}:<subshell>{1s}] <sourceFile>{-5s}:<line>{-4s} <level>{-4s}  <message>"
 
 source "$(valet --source)"
-include list
+include list bash profiler
 
 
 # load the file
 mapfile -t MY_ARRAY < "scratchpad/words"
+
+
+
 
 MY_ARRAY=(
   "apple"$'\n'"(green)"
@@ -51,6 +54,15 @@ _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
 
 echo "${ESC__CURSOR_MOVE__}$((GLOBAL_CURSOR_LINE + 8));1${__ESC__TO}"
 
-sleep 1
+# bash::sleep 1
+
+VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS=true
+VALET_CONFIG_KEEP_ALL_PROFILER_LINES=true
+include http
+
+profiler::enable "tmp/profiler.log"
+http::request GET http://httpbin.org/get
+profiler::disable
 
 # option for title, option for text on the bottom left
+# fix the counter

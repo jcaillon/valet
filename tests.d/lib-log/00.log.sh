@@ -53,6 +53,10 @@ function test_log::printCallStack() {
 function test_log::init() {
   test::title "✅ Testing log::init"
 
+  # test bad descriptors
+  test::exit VALET_CONFIG_LOG_FD=5 log::init
+  test::exit VALET_CONFIG_LOG_FD=/unknown/file/path log::init
+
   GLOBAL_TEST_FORCE_FD_OPEN=true
   test::exec log::init
   test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
@@ -72,9 +76,6 @@ function test_log::init() {
   test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
 
   test::exec VALET_CONFIG_LOG_FD=/file VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN="logFile=a" log::init
-  test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
-
-  test::exec VALET_CONFIG_LOG_PATTERN=abc VALET_CONFIG_LOG_FD=5 log::init
   test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
 }
 

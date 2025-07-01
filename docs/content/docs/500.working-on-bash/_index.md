@@ -39,7 +39,7 @@ Here is a list of recommended extensions to work on bash scripts:
 - [Snippets for bash scripts](https://marketplace.visualstudio.com/items?itemName=Remisa.shellman)
 - [Snippets for shebang](https://marketplace.visualstudio.com/items?itemName=rpinski.shebang-snippets)
 
-A more up-to-date list can be found [here](https://raw.githubusercontent.com/jcaillon/valet/refs/heads/latest/extras/.vscode/extensions.json).
+A more up-to-date list can be found in [extensions.json](https://raw.githubusercontent.com/jcaillon/valet/refs/heads/latest/extras/.vscode/extensions.json).
 
 ### 🆎 Autocompletion on Valet library functions
 
@@ -77,6 +77,7 @@ source string
 - [Google shell style guidelines](https://google.github.io/styleguide/shellguide.html)
 - [Baeldung Linux scripting series](https://www.baeldung.com/linux/linux-scripting-series)
 - [Pure bash bible](https://github.com/dylanaraps/pure-bash-bible)
+- [Dave's videos](https://ysap.sh/)
 
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../libraries" title="Libraries" >}}

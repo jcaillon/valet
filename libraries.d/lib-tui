@@ -7,8 +7,6 @@ source bash
 # shellcheck source=lib-fs
 source fs
 
-# fd 7 will be where we write the TUI
-exec 7>&2
 
 #===============================================================
 # >>> Interactive utilities
@@ -34,7 +32,7 @@ function tui::createSpace() {
   local -i nbLines="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   nbLines=$((nbLines > GLOBAL_LINES ? GLOBAL_LINES : nbLines))
   if (( nbLines <= 1 )); then
-    printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&2
+    printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
     return 0
   fi
 
@@ -42,7 +40,7 @@ function tui::createSpace() {
   printf -v scrollInstruction "%${nbLines}s" " "
   scrollInstruction="${scrollInstruction// /$'\n'}"
 
-  printf '%s' "${ESC__CURSOR_HIDE}${scrollInstruction}${ESC__CURSOR_MOVE__}${nbLines}${__ESC__START_OF_LINE_UP}${ESC__ERASE_LINES_BELOW}${ESC__CURSOR_SHOW}" 1>&2
+  printf '%s' "${ESC__CURSOR_HIDE}${scrollInstruction}${ESC__CURSOR_MOVE__}${nbLines}${__ESC__START_OF_LINE_UP}${ESC__ERASE_LINES_BELOW}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # ## tui::getCursorPosition
@@ -77,7 +75,7 @@ function tui::getCursorPosition() {
 # tui::switchToFullScreen
 # ```
 function tui::switchToFullScreen() {
-  if [[ ! -t 2 ]]; then
+  if [[ ! -t ${GLOBAL_FD_TUI} ]]; then
     core::fail "This function can only be used in an interactive session. Did you already called tui::switchBackFromFullScreen?"
   fi
 
@@ -87,7 +85,7 @@ function tui::switchToFullScreen() {
   tui::setTerminalOptions
 
   # switch to the alternate screen, hide the cursor and clear the screen
-  printf '%s' "${ESC__ENABLE_ALTERNATE_BUFFER_SCREEN}${ESC__CURSOR_HIDE}${ESC__ERASE_SCREEN}" 1>&2
+  printf '%s' "${ESC__ENABLE_ALTERNATE_BUFFER_SCREEN}${ESC__CURSOR_HIDE}${ESC__ERASE_SCREEN}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # ## tui::switchBackFromFullScreen
@@ -104,7 +102,7 @@ function tui::switchBackFromFullScreen() {
   _INTERACTIVE_FULL_SCREEN_MODE=false
 
   # restore the terminal state
-  printf '%s' "${ESC__ERASE_SCREEN}${ESC__TEXT_RESET}${ESC__DISABLE_ALTERNATE_BUFFER_SCREEN}" 1>&2
+  printf '%s' "${ESC__ERASE_SCREEN}${ESC__TEXT_RESET}${ESC__DISABLE_ALTERNATE_BUFFER_SCREEN}" 1>&"${GLOBAL_FD_TUI}"
 
   # restore stty
   tui::restoreTerminalOptions
@@ -196,7 +194,7 @@ function tui::restoreLogs() {
   # display the accumulated logs
   if [[ -s "${_TUI_LOG_FILE}" ]]; then
     fs::readFile "${_TUI_LOG_FILE}"
-    printf '%s' "${RETURNED_VALUE}" 1>&2
+    printf '%s' "${RETURNED_VALUE}" 1>&"${GLOBAL_FD_LOG}"
   fi
 }
 
@@ -266,7 +264,7 @@ function tui::clearBox() {
     toPrint+="${ESC__CURSOR_MOVE__}${lineNumber};${left}${__ESC__TO}${ESC__ERASE__}${width}${__ECS__CHARS}"
   done
 
-  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}" 1>&2
+  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # ## tui::getBestAutocompleteBox
@@ -383,7 +381,7 @@ function tui::getBestAutocompleteBox() {
 #       the value to check against the variable
 # - $@: **variable/value pair** _as any_:
 #       additional variable/value pairs to check
-# 
+#
 # Returns:
 #
 # - $?:
@@ -456,15 +454,15 @@ function tui::clearCachedVariables() {
 # tui::testWaitForChar
 # ```
 function tui::testWaitForChar() {
-  printf '%s\n' "Press any key to see the returned character (Press Q to quit).${ESC__CURSOR_HIDE}" 1>&2
+  printf '%s\n' "Press any key to see the returned character (Press Q to quit).${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
   while true; do
     if tui::waitForChar -t 1; then
       if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
         break
       fi
-      printf "%sYou pressed: ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&2
+      printf "%sYou pressed: ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
     fi
-    if [[ ! -t 0 ]]; then break; fi
+    if [[ ! -t ${GLOBAL_FD_TUI} ]]; then break; fi
   done
 }
 
@@ -564,28 +562,26 @@ function tui::waitForChar() {
 function tui::testWaitForKeyPress() {
   # setup the terminal before anything else
   tui::setTerminalOptions
-  exec 3>&2
 
   # define the callback function called when a special key is pressed
   # shellcheck disable=SC2317
   function interactiveOnKeyBindingPressTestFunction() {
     local key="${1}"
-    printf "%sYou pressed (binding): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${key}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&3
+    printf "%sYou pressed (binding): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${key}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
   }
   tui::rebindKeymap interactiveOnKeyBindingPressTestFunction
 
-  printf '%s\n' "Press any key to see the returned code (press Q to quit)." 1>&3
+  printf '%s\n' "Press any key to see the returned code (press Q to quit)." 1>&"${GLOBAL_FD_TUI}"
   while true; do
     if tui::waitForKeyPress -t 0.3; then
       if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
         break
       fi
-      printf "%sYou pressed (normal key): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&3
+      printf "%sYou pressed (normal key): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
     fi
-    if [[ ! -t 0 ]]; then break; fi
+    if [[ ! -t ${GLOBAL_FD_TUI} ]]; then break; fi
   done
 
-  exec 3>&-
   tui::restoreTerminalOptions
 }
 

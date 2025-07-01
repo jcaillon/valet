@@ -18,7 +18,7 @@ source bash
 # test::log "This is a log message."
 # ```
 function test::log() {
-  printf '%s\n' "${@}" >&4
+  printf '%s\n' "${@}" >&"${GLOBAL_FD_TEST_LOG}"
 }
 
 # ## test::title
@@ -376,8 +376,9 @@ function test_flushFdToCodeBlock() {
   fi
 
   # reset the file content (must close/open the file descriptor in between)
-  # shellcheck disable=SC2093
-  eval "exec ${fdNumber}>&-; : >'${file}'; exec ${fdNumber}>'${file}';"
+  exec {fdNumber}>&-
+  : >"${file}"
+  eval "exec ${fdNumber}>\"${file}\""
 }
 
 # ## test::transformTextBeforeFlushing
@@ -466,8 +467,44 @@ function test::fail() {
   GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
   GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
   GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
-  declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS 1>&3
+  declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
 
   test::log "$@"
   exit "${GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS}"
+}
+
+# ## test::setTerminalInputs
+#
+# Replaces the functions `tui::waitForChar` and `tui::waitForKeyPress` by custom functions
+# that return keys defined as an input of this function.
+#
+# - $@: **keys** _as string_:
+#       The keys to return when `tui::waitForChar` or `tui::waitForKeyPress` are called.
+#       Keys are consumed in the order they are provided.
+#
+# ```bash
+# test::setTerminalInputs "a" "b" "c"
+# ```
+# shellcheck disable=SC2317
+function test::setTerminalInputs() {
+  if [[ ! -v TEST_TERMINAL_INPUTS ]]; then
+    # override the default functions
+    function tui::waitForChar() {
+      if ((TEST_TERMINAL_INPUTS_INDEX >= ${#TEST_TERMINAL_INPUTS[@]})); then
+        test::fail "No more terminal inputs available, but tui::waitForChar was called."
+      fi
+      LAST_KEY_PRESSED="${TEST_TERMINAL_INPUTS[${TEST_TERMINAL_INPUTS_INDEX}]}"
+      TEST_TERMINAL_INPUTS_INDEX=$((TEST_TERMINAL_INPUTS_INDEX + 1))
+    }
+    function tui::waitForKeyPress() {
+      if ((TEST_TERMINAL_INPUTS_INDEX >= ${#TEST_TERMINAL_INPUTS[@]})); then
+        test::fail "No more terminal inputs available, but tui::waitForKeyPress was called."
+      fi
+      # shellcheck disable=SC2034
+      LAST_KEY_PRESSED="${TEST_TERMINAL_INPUTS[${TEST_TERMINAL_INPUTS_INDEX}]}"
+      TEST_TERMINAL_INPUTS_INDEX=$((TEST_TERMINAL_INPUTS_INDEX + 1))
+    }
+  fi
+  TEST_TERMINAL_INPUTS_INDEX=0
+  TEST_TERMINAL_INPUTS=("${@}")
 }

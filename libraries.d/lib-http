@@ -83,7 +83,8 @@ function http::request() {
   log::trace "Getting URL for host ⌜${host}⌝ and path ⌜${path}⌝."
 
   # open connection
-  exec 3<>"/dev/tcp/${host}/80"
+  local -i requestFd
+  exec {requestFd}<>"/dev/tcp/${host}/80"
 
   local IFS=$'\n'
 
@@ -95,7 +96,7 @@ function http::request() {
     "Connection: close"
     ""
   )
-  printf '%s\r\n' "${headers[@]}" >&3
+  printf '%s\r\n' "${headers[@]}" >&${requestFd}
   log::trace "Headers sent:"
   if log::isDebugEnabled; then
     log::printString "${headers[*]}"
@@ -105,7 +106,7 @@ function http::request() {
   log::trace "Headers received:"
   local headers body httpCode line contentLength
   local -i readBody=0 exitCode=0
-  while IFS=$'\n' read -r -d $'\n' -u 3 -t "${responseTimeout}" line || [[ -n ${line:-} ]]; do
+  while IFS=$'\n' read -r -d $'\n' -u "${requestFd}" -t "${responseTimeout}" line || [[ -n ${line:-} ]]; do
 
     if [[ ${readBody} -eq 0 && -n ${line%$'\r'} ]]; then
       # we are still in the headers
@@ -122,7 +123,7 @@ function http::request() {
         local buffer
         log::trace "Reading body with content length: ${contentLength:-0}"
         if [[ -n ${contentLength:-} ]]; then
-          while IFS= read -sr -d '' -u 3 buffer || [[ -n ${buffer:-} ]]; do
+          while IFS= read -sr -d '' -u ${requestFd} buffer || [[ -n ${buffer:-} ]]; do
             printf '%s' "${buffer}" >>"${outputFile}"
           done
         else
@@ -130,7 +131,7 @@ function http::request() {
         fi
       else
         if [[ -n ${contentLength:-} ]]; then
-          while IFS= read -sr -d '' -u 3 buffer || [[ -n ${buffer:-} ]]; do
+          while IFS= read -sr -d '' -u ${requestFd} buffer || [[ -n ${buffer:-} ]]; do
             body+="${buffer}"
           done
         fi
@@ -161,8 +162,8 @@ function http::request() {
   done
 
   # close connection
-  exec 3<&-
-  exec 3>&-
+  exec {requestFd}<&-
+  exec {requestFd}>&-
 
   if [[ ,${acceptableStatusCodes}, == *",${httpCode},"* ]]; then
     exitCode=0

@@ -40,6 +40,9 @@ if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
   profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${_PROFILER_FILE_NAME}"}"
 fi
 
+# fd where we write the TUI
+exec {GLOBAL_FD_TUI}>&2
+
 trap::register
 
 # Source the valet configuration from the user config dir
@@ -86,36 +89,17 @@ esac
 # set the styles and esc codes
 styles::init
 
-# fd 7 will be where we write the TUI
-exec 7>&2
-
 # Export terminal size on window resize if we are in interactive mode.
-if [[ -t 7 ]]; then
+if [[ -t ${GLOBAL_FD_TUI} ]]; then
   tui::getTerminalSize
   if [[ ${GLOBAL_EXPORTED_FOR_PROMPT:-} != "true" ]]; then
     # hide the cursor (we restore on exit)
-    printf "%s" "${ESC__CURSOR_HIDE}" 1>&7
+    printf "%s" "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
   fi
 else
   GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}"
   # shellcheck disable=SC2034
   GLOBAL_LINES="${VALET_CONFIG_DEFAULT_LINES:-30}"
-fi
-
-# make sure the file descriptor (if any) is valid
-if [[ -n ${VALET_CONFIG_LOG_FD:-} ]]; then
-  _CORE_VALID_FD=false
-  if [[ ${VALET_CONFIG_LOG_FD} =~ ^[0-9]+$ ]]; then
-    if { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
-      _CORE_VALID_FD=true
-    fi
-  elif { : >>"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null; then
-    # it is a file
-    _CORE_VALID_FD=true
-  fi
-  if [[ ${_CORE_VALID_FD} != "true" ]]; then
-    core::fail "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${VALET_CONFIG_LOG_FD}⌝."
-  fi
 fi
 
 # Initialize the log system

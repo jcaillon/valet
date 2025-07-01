@@ -22,6 +22,7 @@ function main() {
       # - docker build -t noyacode/minideb-bash5.0 .
       # Then to run it:
       # - docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash noyacode/minideb-bash5.0
+      # - ./tests.d/self-install/test
       docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash noyacode/minideb-bash5.0 -c -o errexit -o nounset -o pipefail "chmod +x ./tests.d/self-install/test; ./tests.d/self-install/test"
       return 0
     fi

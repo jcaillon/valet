@@ -27,6 +27,7 @@ function selfTestUtils_rebuildCommands() {
 # - valet config and global variables to simpler values
 #   in order to have consistent results in the tests.
 #   As well as a simplified log line function.
+# shellcheck disable=SC2034
 function selfTestUtils_setupValetForConsistency() {
   local IFS=' '
   # unset all VALET_ variables to not have the user variables interfere with the tests
@@ -50,6 +51,7 @@ function selfTestUtils_setupValetForConsistency() {
   export VALET_CONFIG_LOG_FILENAME_PATTERN=""
   export GLOBAL_LOG_LEVEL_INT=1
   export GLOBAL_LOG_LEVEL=info
+  GLOBAL_FD_TUI=2
   log::init
 
   # consistent styles

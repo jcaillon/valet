@@ -285,7 +285,7 @@ Defaults to a new file under ~/.local/state/valet/logs.
 
 #### VALET_CONFIG_KEEP_ALL_PROFILER_LINES
 
-The profiler log will be cleanup to only keep lines relevant for your command script
+The profiler log will be cleanup to only keep lines relevant for your command script.
 If true, it disables this behavior and you can see all the profiler lines.
 
 <!-- _________________ LIBRARIES _______________________ -->

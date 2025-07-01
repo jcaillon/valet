@@ -4,6 +4,26 @@
 
 ### ✅ Testing log::init
 
+❯ `VALET_CONFIG_LOG_FD=5 log::init`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+FAIL     The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜5⌝.
+```
+
+❯ `VALET_CONFIG_LOG_FD=/unknown/file/path log::init`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+FAIL     The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜/unknown/file/path⌝.
+```
+
 ❯ `log::init`
 
 ```text
@@ -94,17 +114,6 @@ printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/tmp/vale
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/file"
 printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet.valet.d/logs/a"'
 GLOBAL_LOG_WRAP_PADDING='         '
-```
-
-❯ `VALET_CONFIG_LOG_PATTERN=abc VALET_CONFIG_LOG_FD=5 log::init`
-
-```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
-
-
-printf "%s\n" "abc"  1>&5'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>&5'
-GLOBAL_LOG_WRAP_PADDING=''
 ```
 
 ### ✅ Testing log::parseLogPattern

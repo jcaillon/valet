@@ -33,7 +33,7 @@ function trap::onErrorInternal() {
   local -a errorCodes=("$?" "${PIPESTATUS[@]}")
   local IFS=' '
   local errorCodesString="⌜${errorCodes[0]}⌝"
-  if (( ${#errorCodes[@]} > 2 )); then
+  if ((${#errorCodes[@]} > 2)); then
     errorCodesString+=" (pipeline statuses ⌜${errorCodes[*]}⌝)"
   fi
 
@@ -63,7 +63,7 @@ function trap::onErrorInternal() {
 function trap::onExitInternal() {
   local exitCode="$?"
 
-  if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || ( ! -v GLOBAL_EXPECTED_EXIT && ${exitCode} != "0" ) ]]; then
+  if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || (! -v GLOBAL_EXPECTED_EXIT && ${exitCode} != "0") ]]; then
     _OPTION_DUMP_SUFFIX="-${exitCode}" core::dump
   fi
 
@@ -165,8 +165,8 @@ function trap::onCleanUpInternal() {
   fi
 
   # if we are in interactive mode, we need to restore the cursor
-  if [[ -t 7 && ${VALET_CONFIG_DISABLE_ESC_CODES:-} != "true" ]]; then
-    printf '%s' $'\e[?25h' 1>&7 # ESC__CURSOR_SHOW_FORCE
+  if [[ -t ${GLOBAL_FD_TUI} && ${VALET_CONFIG_DISABLE_ESC_CODES:-} != "true" ]]; then
+    printf '%s' $'\e[?25h' 1>&"${GLOBAL_FD_TUI}" # ESC__CURSOR_SHOW_FORCE
   fi
 
   # call the clean up functions if they exist
@@ -246,8 +246,10 @@ function trap::register() {
 function trap::unregister() {
   trap ERR
   trap EXIT
-  trap SIGINT; trap SIGQUIT
-  trap SIGHUP; trap SIGTERM
+  trap SIGINT
+  trap SIGQUIT
+  trap SIGHUP
+  trap SIGTERM
   if [[ -t 2 ]]; then
     trap SIGWINCH
   fi
@@ -408,7 +410,6 @@ function tui::getTerminalSize() {
 # >>> Logging
 #===============================================================
 
-
 # ## log::setLevel
 #
 # Set the log level.
@@ -546,7 +547,7 @@ function log::printFile() {
   fi
   local IFS=""
   while IFS="" read -r line || [[ -n ${line:-} ]]; do
-    log::printFileInternalLoop || break;
+    log::printFileInternalLoop || break
   done <"${filePath}"
   # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
   eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
@@ -579,7 +580,7 @@ function log::printFileString() {
 
   local IFS
   while IFS=$'\n' read -rd $'\n' line; do
-    log::printFileInternalLoop || break;
+    log::printFileInternalLoop || break
   done <<<"${contentToPrint}"
 
   # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
@@ -600,11 +601,11 @@ function log::printFileInternalLoop() {
   fi
 
   lineNumber+=1
-  if (( ${#lineNumber} > currentLineNumberLength )); then
+  if ((${#lineNumber} > currentLineNumberLength)); then
     lineNumberPadding="${lineNumberPadding%?}"
     currentLineNumberLength+=1
   fi
-  if (( maxLines != 0 && lineNumber > maxLines )); then
+  if ((maxLines != 0 && lineNumber > maxLines)); then
     if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
       rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}"
     fi
@@ -636,7 +637,7 @@ function log::printString() {
   local line rawStringToPrintInLog
   while [[ -n ${content} ]]; do
     line="${content%%$'\n'*}"
-    content="${content:${#line} + 1}"
+    content="${content:${#line}+1}"
 
     if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
       string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}${wrappedLineLeftPaddingString}" "$((GLOBAL_LOG_COLUMNS - ${#GLOBAL_LOG_WRAP_PADDING}))"
@@ -950,7 +951,7 @@ function log::printCallStack() {
   local -i levelToSkipAtEnd="${2:-${_OPTION_STACK_TO_SKIP_AT_END:-0}}"
 
   _OPTION_WRAP_WIDTH="$((${GLOBAL_LOG_COLUMNS:-${GLOBAL_COLUMNS}} - ${#GLOBAL_LOG_WRAP_PADDING}))" log::getCallStack "$((levelToSkip + 1))" "${levelToSkipAtEnd}"
-  if (( ${#RETURNED_VALUE} > 0 )); then
+  if ((${#RETURNED_VALUE} > 0)); then
     log::printString "${RETURNED_VALUE}"
   fi
 }
@@ -1022,7 +1023,7 @@ function log::getCallStack() {
       treePadding="   "
     fi
     line="${treeString} in ${functionName} at ${sourceFile}:${lineNumber}"
-    if (( wrapWidth > 0 )); then
+    if ((wrapWidth > 0)); then
       string::wrapCharacters line "${wrapWidth}" "${treePadding}"
       returnedString+="${RETURNED_VALUE}"$'\n'
     else
@@ -1094,9 +1095,9 @@ function log_setPrintfArgumentFromFormat() {
 function log::parseLogPattern() {
   local pattern="${1}"
 
-  RETURNED_VALUE="" # format
+  RETURNED_VALUE=""  # format
   RETURNED_VALUE2="" # arguments
-  RETURNED_VALUE3=0 # wrap padding length
+  RETURNED_VALUE3=0  # wrap padding length
   RETURNED_VALUE4="" # code
   local -i wrapPaddingLength=0
 
@@ -1132,90 +1133,90 @@ function log::parseLogPattern() {
 
     # handle a placeholder
     case "${placeHolder}" in
-      color*)
-        placeHolder="${placeHolder#color}"
-        local -n color="STYLE_COLOR_${placeHolder^^}"
-        if [[ -n ${color:-} ]]; then
-          printfFormat="%s"
-          printfArgument="${color}"
-        fi
-        ;;
-      time)
-        printfFormat="%${formatSpecifier:-"(%H:%M:%S)T"}"
-        printfArgument="\${EPOCHSECONDS}"
-        ;;
-      levelColor)
+    color*)
+      placeHolder="${placeHolder#color}"
+      local -n color="STYLE_COLOR_${placeHolder^^}"
+      if [[ -n ${color:-} ]]; then
         printfFormat="%s"
-        printfArgument="\${levelColor:-}"
-        ;;
-      level)
-        printfFormat="%${formatSpecifier:-"-8s"}"
-        log_setPrintfArgumentFromFormat "level"
-        ;;
-      icon)
-        if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} == "true" ]]; then
-          printfFormat="%${formatSpecifier:-"-4s"}"
-          printfArgument="\${icon:-}"
-          # nerd font icons are 2 characters long
-          wrapPaddingLength=$((wrapPaddingLength - 2))
-        fi
-        ;;
-      var*)
-        printfFormat="%${formatSpecifier:-"s"}"
-        printfArgument="\${${placeHolder#var}:-}"
-        RETURNED_VALUE4+=$'\n'"local variableToPrintInLog=\"\${${placeHolder#var}:-}\""
-        log_setPrintfArgumentFromFormat "variableToPrintInLog"
-        ;;
-      pid)
-        printfFormat="%${formatSpecifier:-"-5d"}"
-        log_setPrintfArgumentFromFormat "BASHPID"
-        ;;
-      subshell)
-        printfFormat="%${formatSpecifier:-"-2d"}"
-        log_setPrintfArgumentFromFormat "BASH_SUBSHELL"
-        ;;
-      function)
-        printfFormat="%${formatSpecifier:-"-10s"}"
-        log_setPrintfArgumentFromFormat "FUNCNAME[2]"
-        ;;
-      line)
+        printfArgument="${color}"
+      fi
+      ;;
+    time)
+      printfFormat="%${formatSpecifier:-"(%H:%M:%S)T"}"
+      printfArgument="\${EPOCHSECONDS}"
+      ;;
+    levelColor)
+      printfFormat="%s"
+      printfArgument="\${levelColor:-}"
+      ;;
+    level)
+      printfFormat="%${formatSpecifier:-"-8s"}"
+      log_setPrintfArgumentFromFormat "level"
+      ;;
+    icon)
+      if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} == "true" ]]; then
         printfFormat="%${formatSpecifier:-"-4s"}"
-        log_setPrintfArgumentFromFormat "BASH_LINENO[1]"
-        ;;
-      source)
-        printfFormat="%${formatSpecifier:-"-10s"}"
-        log_setPrintfArgumentFromFormat "BASH_SOURCE[2]"
-        ;;
-      sourceFile)
-        printfFormat="%${formatSpecifier:-"-10s"}"
-        RETURNED_VALUE4+=$'\n'"local sourceFile=\"\${BASH_SOURCE[2]##*/}\""
-        log_setPrintfArgumentFromFormat "sourceFile"
-        ;;
-      elapsedTime)
-        printfFormat="%${formatSpecifier:-"-7s"}"
-        log_setPrintfArgumentFromFormat "loggedElapsedTime"
-        # shellcheck source=lib-time
-        source time
-        RETURNED_VALUE4+=$'\n'"time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman \"\${RETURNED_VALUE}\" \"%S.%LLs\"; local loggedElapsedTime=\"\${RETURNED_VALUE}\""
-        ;;
-      elapsedTimeSinceLastLog)
-        printfFormat="%${formatSpecifier:-"-7s"}"
-        log_setPrintfArgumentFromFormat "loggedElapsedTimeSinceLastLog"
-        # shellcheck source=lib-time
-        source time
-        RETURNED_VALUE4+=$'\n'"time::getProgramElapsedMicroseconds; local -i currentTime=\${RETURNED_VALUE}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman \"\${_LOG_ELAPSED_TIME}\" \"%S.%LLs\"; local loggedElapsedTimeSinceLastLog=\"\${RETURNED_VALUE}\"; _LOG_ELAPSED_TIME=\${currentTime}"
-        ;;
-      wrapPadding)
-        printfFormat="%s"
-        printfArgument="\${GLOBAL_LOG_WRAP_PADDING}"
-        ;;
-      message)
-        printfFormat="%s"
-        printfArgument="\${messageToPrintInLog:-}"
+        printfArgument="\${icon:-}"
+        # nerd font icons are 2 characters long
+        wrapPaddingLength=$((wrapPaddingLength - 2))
+      fi
+      ;;
+    var*)
+      printfFormat="%${formatSpecifier:-"s"}"
+      printfArgument="\${${placeHolder#var}:-}"
+      RETURNED_VALUE4+=$'\n'"local variableToPrintInLog=\"\${${placeHolder#var}:-}\""
+      log_setPrintfArgumentFromFormat "variableToPrintInLog"
+      ;;
+    pid)
+      printfFormat="%${formatSpecifier:-"-5d"}"
+      log_setPrintfArgumentFromFormat "BASHPID"
+      ;;
+    subshell)
+      printfFormat="%${formatSpecifier:-"-2d"}"
+      log_setPrintfArgumentFromFormat "BASH_SUBSHELL"
+      ;;
+    function)
+      printfFormat="%${formatSpecifier:-"-10s"}"
+      log_setPrintfArgumentFromFormat "FUNCNAME[2]"
+      ;;
+    line)
+      printfFormat="%${formatSpecifier:-"-4s"}"
+      log_setPrintfArgumentFromFormat "BASH_LINENO[1]"
+      ;;
+    source)
+      printfFormat="%${formatSpecifier:-"-10s"}"
+      log_setPrintfArgumentFromFormat "BASH_SOURCE[2]"
+      ;;
+    sourceFile)
+      printfFormat="%${formatSpecifier:-"-10s"}"
+      RETURNED_VALUE4+=$'\n'"local sourceFile=\"\${BASH_SOURCE[2]##*/}\""
+      log_setPrintfArgumentFromFormat "sourceFile"
+      ;;
+    elapsedTime)
+      printfFormat="%${formatSpecifier:-"-7s"}"
+      log_setPrintfArgumentFromFormat "loggedElapsedTime"
+      # shellcheck source=lib-time
+      source time
+      RETURNED_VALUE4+=$'\n'"time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman \"\${RETURNED_VALUE}\" \"%S.%LLs\"; local loggedElapsedTime=\"\${RETURNED_VALUE}\""
+      ;;
+    elapsedTimeSinceLastLog)
+      printfFormat="%${formatSpecifier:-"-7s"}"
+      log_setPrintfArgumentFromFormat "loggedElapsedTimeSinceLastLog"
+      # shellcheck source=lib-time
+      source time
+      RETURNED_VALUE4+=$'\n'"time::getProgramElapsedMicroseconds; local -i currentTime=\${RETURNED_VALUE}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman \"\${_LOG_ELAPSED_TIME}\" \"%S.%LLs\"; local loggedElapsedTimeSinceLastLog=\"\${RETURNED_VALUE}\"; _LOG_ELAPSED_TIME=\${currentTime}"
+      ;;
+    wrapPadding)
+      printfFormat="%s"
+      printfArgument="\${GLOBAL_LOG_WRAP_PADDING}"
+      ;;
+    message)
+      printfFormat="%s"
+      printfArgument="\${messageToPrintInLog:-}"
 
-        # shellcheck disable=SC2034
-        RETURNED_VALUE3="${wrapPaddingLength}"
-        ;;
+      # shellcheck disable=SC2034
+      RETURNED_VALUE3="${wrapPaddingLength}"
+      ;;
     esac
     if [[ -z ${printfFormat} ]]; then
       continue
@@ -1265,95 +1266,115 @@ function log::parseLogPattern() {
 # - $[GLOBAL_LOG_COLUMNS}: The number of columns to use for the log.
 # - $[GLOBAL_LOG_DISABLE_WRAP}: true if the log should not be wrapped.
 function log::init() {
-    GLOBAL_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
-    GLOBAL_LOG_DISABLE_WRAP="${VALET_CONFIG_LOG_DISABLE_WRAP:-false}"
-    GLOBAL_LOG_PATTERN="${_OPTION_LOG_PATTERN:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level>  <icon><colorDefault> <message>"}}"
+  GLOBAL_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
+  GLOBAL_LOG_DISABLE_WRAP="${VALET_CONFIG_LOG_DISABLE_WRAP:-false}"
+  GLOBAL_LOG_PATTERN="${_OPTION_LOG_PATTERN:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level>  <icon><colorDefault> <message>"}}"
 
-    local logFileDescriptor="${VALET_CONFIG_LOG_FD:-2}"
-
-    # we prepare the variables that will be used to print the formatted logs
-    local -n printfFormat=RETURNED_VALUE
-    local -n printfArguments=RETURNED_VALUE2
-    local -n wrapPaddingLength=RETURNED_VALUE3
-    local -n beforePrintStatementCode=RETURNED_VALUE4
-    log::parseLogPattern "${GLOBAL_LOG_PATTERN}"
-
-    # string with the number of spaces necessary to align with other log messages
-    if (( wrapPaddingLength > 0 )); then
-      printf -v GLOBAL_LOG_WRAP_PADDING "%${wrapPaddingLength}s" ""
-    else
-      GLOBAL_LOG_WRAP_PADDING=""
-    fi
-
-    # now we build the two statements that can be evaluated to print the logs
-    # in the correct file descriptor or file (and to additional log file if needed)
-    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG=""
-    GLOBAL_LOG_PRINT_STATEMENT_STANDARD=""
-
-    if (( ${#beforePrintStatementCode} > 0 )); then
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${beforePrintStatementCode}"$'\n'
-    fi
-    if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
-      # define RETURNED_VALUE/RETURNED_VALUE2 as local so we don't impact the parent scope (they are used during parsing)
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local RETURNED_VALUE RETURNED_VALUE2"$'\n'"local -n messageToPrintInLog=RETURNED_VALUE"$'\n'"string::wrapWords \"\${messageVariableName}\" ${GLOBAL_LOG_COLUMNS} \"${GLOBAL_LOG_WRAP_PADDING}\" $((GLOBAL_LOG_COLUMNS - wrapPaddingLength))"$'\n'
-    else
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n messageToPrintInLog=\"\${messageVariableName}\""$'\n'
-    fi
-    if [[ ${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT:-false} != "true" ]]; then
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="messageToPrintInLog=\"\${messageToPrintInLog//⌜/${STYLE_COLOR_ACCENT}⌜}\""$'\n'"messageToPrintInLog=\"\${messageToPrintInLog//⌝/⌝${STYLE_COLOR_DEFAULT}}\""$'\n'
-    fi
-    if [[ -v VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL ]]; then
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}"$'\n'
-    fi
-
-    local progressBarCode progressBarCode2 progressBarCode3 outputCode
-    if [[ ${logFileDescriptor} =~ ^[0-9]+$ ]]; then
-      # it is a numbered file descriptor
-      outputCode="1>&${logFileDescriptor}"
-
-      # clear the line before printing if we are display a progress bar/spinner
-      if [[ -t ${logFileDescriptor} || ${GLOBAL_TEST_FORCE_FD_OPEN:-} == "true" ]]; then
-        progressBarCode="local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'\e[2K'; fi"$'\n'
-        progressBarCode2="\${eraseLine:-}"
-        progressBarCode3=$'\n'"if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi"$'\n'
+  # make sure the file descriptor (if any) is valid
+  if [[ -v GLOBAL_FD_LOG ]]; then
+    # close if already opened
+    exec {GLOBAL_FD_LOG}>&-
+  fi
+  if [[ -n ${VALET_CONFIG_LOG_FD:-} ]]; then
+    local isFdValid=false
+    if [[ ${VALET_CONFIG_LOG_FD} =~ ^[0-9]+$ ]]; then
+      if { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>&${VALET_CONFIG_LOG_FD}; then
+        isFdValid=true
       fi
-    else
+    elif { : >>"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>>"${VALET_CONFIG_LOG_FD}"; then
       # it is a file
-      outputCode="1>>\"${logFileDescriptor}\""
+      isFdValid=true
     fi
-
-    # define the formatted log statement
-    local formattedLogStatement="printf \"${progressBarCode2:-}${printfFormat}\" ${printfArguments}"
-    local standardStatement="printf \"${progressBarCode2:-}%s\" \"\${rawStringToPrintInLog:-}\""
-
-    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${progressBarCode:-}${formattedLogStatement} ${outputCode}${progressBarCode3:-}"
-    GLOBAL_LOG_PRINT_STATEMENT_STANDARD+="${progressBarCode:-}${standardStatement} ${outputCode}${progressBarCode3:-}"
-
-    # check if we need to additionally output the logs to a file
-    if [[ -n ${VALET_CONFIG_LOG_TO_DIRECTORY:-} && ${VALET_CONFIG_LOG_TO_DIRECTORY:-} != "false" ]]; then
-      # compute the name of the output file
-      local logFile
-      if [[ -n ${VALET_CONFIG_LOG_FILENAME_PATTERN:-} ]]; then
-        eval "${VALET_CONFIG_LOG_FILENAME_PATTERN}"
-        if [[ ! -v logFile ]]; then
-          core::fail "The filename pattern for the log files VALET_CONFIG_LOG_FILENAME_PATTERN is not valid (does not create the variable logFile): ⌜${VALET_CONFIG_LOG_FILENAME_PATTERN}⌝."
-        fi
-      else
-        printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
-      fi
-      if [[ ${VALET_CONFIG_LOG_TO_DIRECTORY} == "true" ]]; then
-        core::getUserStateDirectory
-        VALET_CONFIG_LOG_TO_DIRECTORY="${RETURNED_VALUE}/logs"
-      fi
-      if [[ ! -d "${VALET_CONFIG_LOG_TO_DIRECTORY}" ]]; then
-        mkdir -p "${VALET_CONFIG_LOG_TO_DIRECTORY}" 1>/dev/null
-      fi
-      # append the log to the file
-      GLOBAL_LOG_ADDITIONAL_LOG_FILE="${VALET_CONFIG_LOG_TO_DIRECTORY%/}/${logFile}"
-      outputCode="1>>\"${GLOBAL_LOG_ADDITIONAL_LOG_FILE}\""
-      GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${formattedLogStatement} ${outputCode}"
-      GLOBAL_LOG_PRINT_STATEMENT_STANDARD+=$'\n'"${standardStatement} ${outputCode}"
+    if [[ ${isFdValid} != "true" ]]; then
+      core::fail "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${VALET_CONFIG_LOG_FD}⌝."
     fi
+  else
+    exec {GLOBAL_FD_LOG}>&2
+  fi
+
+  local progressBarCode progressBarCode2 progressBarCode3 outputCode logFileDescriptor="${VALET_CONFIG_LOG_FD:-2}"
+  if [[ ${logFileDescriptor} =~ ^[0-9]+$ ]]; then
+    # it is a numbered file descriptor
+    outputCode="1>&${logFileDescriptor}"
+
+    # clear the line before printing if we are display a progress bar/spinner
+    if [[ -t ${GLOBAL_FD_TUI} || ${GLOBAL_TEST_FORCE_FD_OPEN:-} == "true" ]]; then
+      progressBarCode="local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'\e[2K'; fi"$'\n'
+      progressBarCode2="\${eraseLine:-}"
+      progressBarCode3=$'\n'"if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi"$'\n'
+    fi
+  else
+    # it is a file
+    outputCode="1>>\"${logFileDescriptor}\""
+  fi
+
+  # we prepare the variables that will be used to print the formatted logs
+  local -n printfFormat=RETURNED_VALUE
+  local -n printfArguments=RETURNED_VALUE2
+  local -n wrapPaddingLength=RETURNED_VALUE3
+  local -n beforePrintStatementCode=RETURNED_VALUE4
+  log::parseLogPattern "${GLOBAL_LOG_PATTERN}"
+
+  # string with the number of spaces necessary to align with other log messages
+  if ((wrapPaddingLength > 0)); then
+    printf -v GLOBAL_LOG_WRAP_PADDING "%${wrapPaddingLength}s" ""
+  else
+    GLOBAL_LOG_WRAP_PADDING=""
+  fi
+
+  # now we build the two statements that can be evaluated to print the logs
+  # in the correct file descriptor or file (and to additional log file if needed)
+  GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG=""
+  GLOBAL_LOG_PRINT_STATEMENT_STANDARD=""
+
+  if ((${#beforePrintStatementCode} > 0)); then
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${beforePrintStatementCode}"$'\n'
+  fi
+  if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
+    # define RETURNED_VALUE/RETURNED_VALUE2 as local so we don't impact the parent scope (they are used during parsing)
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local RETURNED_VALUE RETURNED_VALUE2"$'\n'"local -n messageToPrintInLog=RETURNED_VALUE"$'\n'"string::wrapWords \"\${messageVariableName}\" ${GLOBAL_LOG_COLUMNS} \"${GLOBAL_LOG_WRAP_PADDING}\" $((GLOBAL_LOG_COLUMNS - wrapPaddingLength))"$'\n'
+  else
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n messageToPrintInLog=\"\${messageVariableName}\""$'\n'
+  fi
+  if [[ ${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT:-false} != "true" ]]; then
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="messageToPrintInLog=\"\${messageToPrintInLog//⌜/${STYLE_COLOR_ACCENT}⌜}\""$'\n'"messageToPrintInLog=\"\${messageToPrintInLog//⌝/⌝${STYLE_COLOR_DEFAULT}}\""$'\n'
+  fi
+  if [[ -v VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL ]]; then
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL}"$'\n'
+  fi
+
+  # define the formatted log statement
+  local formattedLogStatement="printf \"${progressBarCode2:-}${printfFormat}\" ${printfArguments}"
+  local standardStatement="printf \"${progressBarCode2:-}%s\" \"\${rawStringToPrintInLog:-}\""
+
+  GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${progressBarCode:-}${formattedLogStatement} ${outputCode}${progressBarCode3:-}"
+  GLOBAL_LOG_PRINT_STATEMENT_STANDARD+="${progressBarCode:-}${standardStatement} ${outputCode}${progressBarCode3:-}"
+
+  # check if we need to additionally output the logs to a file
+  if [[ -n ${VALET_CONFIG_LOG_TO_DIRECTORY:-} && ${VALET_CONFIG_LOG_TO_DIRECTORY:-} != "false" ]]; then
+    # compute the name of the output file
+    local logFile
+    if [[ -n ${VALET_CONFIG_LOG_FILENAME_PATTERN:-} ]]; then
+      eval "${VALET_CONFIG_LOG_FILENAME_PATTERN}"
+      if [[ ! -v logFile ]]; then
+        core::fail "The filename pattern for the log files VALET_CONFIG_LOG_FILENAME_PATTERN is not valid (does not create the variable logFile): ⌜${VALET_CONFIG_LOG_FILENAME_PATTERN}⌝."
+      fi
+    else
+      printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
+    fi
+    if [[ ${VALET_CONFIG_LOG_TO_DIRECTORY} == "true" ]]; then
+      core::getUserStateDirectory
+      VALET_CONFIG_LOG_TO_DIRECTORY="${RETURNED_VALUE}/logs"
+    fi
+    if [[ ! -d "${VALET_CONFIG_LOG_TO_DIRECTORY}" ]]; then
+      mkdir -p "${VALET_CONFIG_LOG_TO_DIRECTORY}" 1>/dev/null
+    fi
+    # append the log to the file
+    GLOBAL_LOG_ADDITIONAL_LOG_FILE="${VALET_CONFIG_LOG_TO_DIRECTORY%/}/${logFile}"
+    outputCode="1>>\"${GLOBAL_LOG_ADDITIONAL_LOG_FILE}\""
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${formattedLogStatement} ${outputCode}"
+    GLOBAL_LOG_PRINT_STATEMENT_STANDARD+=$'\n'"${standardStatement} ${outputCode}"
+  fi
 }
 
 
@@ -1761,7 +1782,7 @@ function array::fuzzyFilterSort() {
   local -n filterSearchString="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   # nothing to filter
-  if (( ${#filterSearchString} == 0 || ${#arrayToFilter[@]} == 0 )); then
+  if ((${#filterSearchString} == 0 || ${#arrayToFilter[@]} == 0)); then
     RETURNED_ARRAY=("${arrayToFilter[@]}")
     eval "RETURNED_ARRAY2=( {0..$((${#arrayToFilter[@]} - 1))} )"
     return 0
@@ -1788,7 +1809,7 @@ function array::fuzzyFilterSort() {
     fi
   done
 
-  if (( ${#_ARRAY_FUZZY_FILTER_KEYS[@]} > 1 )); then
+  if ((${#_ARRAY_FUZZY_FILTER_KEYS[@]} > 1)); then
     array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
   fi
 
@@ -1826,7 +1847,7 @@ function array::fuzzyFilterSortQuicksort() {
       right=$((right - 1))
     done
     if ((left >= right)); then
-      break;
+      break
     fi
     tempKey=${_ARRAY_FUZZY_FILTER_KEYS[left]}
     _ARRAY_FUZZY_FILTER_KEYS[left]=${_ARRAY_FUZZY_FILTER_KEYS[right]}
@@ -2293,8 +2314,11 @@ function core::dump() {
   if command -v readlink &>/dev/null; then
     include exe
     for fd in /proc/"${BASHPID}"/fd/*; do
-      exe::invoke readlink -f "${fd}"
-      listOfFds+="${fd} -> ${RETURNED_VALUE%$'\n'*}"$'\n'
+      if exe::invoke2 false readlink -f "${fd}"; then
+        listOfFds+="${fd} -> ${RETURNED_VALUE%$'\n'*}"$'\n'
+      else
+        listOfFds+="${fd} -> ?? (readlink failed)"$'\n'
+      fi
     done
   fi
 
@@ -2311,10 +2335,10 @@ function core::dump() {
     echo "================="$'\n'"File descriptors:"
     echo "${listOfFds}"
   } >"${filePath}"
-    if command -v ls &>/dev/null; then
-      echo "From ls:" >>"${filePath}"
-      ls -l /proc/"${BASHPID}"/fd >>"${filePath}" || :
-    fi
+  if command -v ls &>/dev/null; then
+    echo "From ls:" >>"${filePath}"
+    ls -l /proc/"${BASHPID}"/fd >>"${filePath}" || :
+  fi
   {
     if command -v lsof &>/dev/null; then
       echo "================="$'\n'"Open files:"
@@ -2367,7 +2391,7 @@ function core::setShellOptions() {
   # +nocasematch: disable case-insensitive matching
   shopt -s extquote globasciiranges huponexit interactive_comments progcomp
   shopt -u assoc_expand_once cdable_vars checkhash checkjobs checkwinsize compat31 compat32 compat40 compat41 compat42 compat43 compat44 globstar localvar_inherit localvar_unset nocaseglob nocasematch progcomp_alias shift_verbose xpg_echo nullglob direxpand dirspell dotglob extglob failglob execfail expand_aliases inherit_errexit
-  if (( BASH_VERSINFO[1] >= 2)); then
+  if ((BASH_VERSINFO[1] >= 2)); then
     shopt -s globskipdots
     # we disable newer options for compatibility with older versions
     shopt -u varredir_close patsub_replacement
@@ -2402,7 +2426,6 @@ function styles::init() {
   builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/esc-codes"
   builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/styles"
 }
-
 
 #===============================================================
 # >>> Command functions
@@ -2539,4 +2562,3 @@ if [[ ! -v GLOBAL_MAIN_INCLUDED ]]; then
   # shellcheck source=/dev/null
   source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
 fi
-
