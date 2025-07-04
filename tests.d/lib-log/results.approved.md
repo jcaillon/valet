@@ -186,16 +186,18 @@ RETURNED_VALUE3='1'
 RETURNED_VALUE4=''
 ```
 
-❯ `log::parseLogPattern \<colorFaded\>\{9s\}\ \<time\>\{\(%FT%H:%M:%S%z\)T\}\ \<levelColor\>\{9s\}\ \<level\>\{9s\}\ \<icon\>\{9s\}\ \<varCOLOR_DEBUG\>\{9s\}\ \<pid\>\{9s\}\ \<subshell\>\{9s\}\ \<function\>\{9s\}\ \<source\>\{9s\}\ \<line\>\{9s\}`
+❯ `log::parseLogPattern \<colorFaded\>\{9s\}\ \<time\>\{\(%FT%H:%M:%S%z\)T\}\ \<levelColor\>\{9s\}\ \<level\>\{9s\}\ \<icon\>\{9s\}\ \<varCOLOR_DEBUG\>\{9s\}\ \<pName\>\{-5s\}\ \<pid\>\{9s\}\ \<subshell\>\{9s\}\ \<function\>\{9s\}\ \<source\>\{9s\}\ \<line\>\{9s\}`
 
 Returned variables:
 
 ```text
-RETURNED_VALUE='%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%s%9s%s%9s%s%9s%s%9s%s%9s%s%9s\n'
-RETURNED_VALUE2='" " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " " " "${variableToPrintInLog:${#variableToPrintInLog} - 9 > 0 ? ${#variableToPrintInLog} - 9 : 0}" " " "${BASHPID:${#BASHPID} - 9 > 0 ? ${#BASHPID} - 9 : 0}" " " "${BASH_SUBSHELL:${#BASH_SUBSHELL} - 9 > 0 ? ${#BASH_SUBSHELL} - 9 : 0}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 9 > 0 ? ${#FUNCNAME[2]} - 9 : 0}" " " "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 9 > 0 ? ${#BASH_SOURCE[2]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
+RETURNED_VALUE='%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%s%9s%s%-5s%s%9s%s%9s%s%9s%s%9s%s%9s\n'
+RETURNED_VALUE2='" " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " " " "${variableToPrintInLog:${#variableToPrintInLog} - 9 > 0 ? ${#variableToPrintInLog} - 9 : 0}" " " "${processName:0:5}" " " "${BASHPID:${#BASHPID} - 9 > 0 ? ${#BASHPID} - 9 : 0}" " " "${BASH_SUBSHELL:${#BASH_SUBSHELL} - 9 > 0 ? ${#BASH_SUBSHELL} - 9 : 0}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 9 > 0 ? ${#FUNCNAME[2]} - 9 : 0}" " " "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 9 > 0 ? ${#BASH_SOURCE[2]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
 RETURNED_VALUE3='0'
 RETURNED_VALUE4='
-local variableToPrintInLog="${COLOR_DEBUG:-}"'
+local variableToPrintInLog="${COLOR_DEBUG:-}"
+local processName
+if [[ ${BASHPID} == "1234" ]]; then processName="main"; else processName="${BASHPID}"; fi'
 ```
 
 ❯ `log::parseLogPattern $'<levelColor><level><colorDefault> <message>\n<wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>'`

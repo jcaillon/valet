@@ -532,7 +532,7 @@ function fs::isDirectoryWritable() {
     return 1
   fi
   local path="${1}/${testFile}"
-  if (: >"${path}") &>/dev/null; then
+  if { : >"${path}"; } &>/dev/null; then
     if ! rm -f "${path}" 1>/dev/null; then
       return 1
     fi

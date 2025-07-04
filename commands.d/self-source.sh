@@ -12,20 +12,20 @@ fi
 # --- END OF COMMAND COMMON PART
 
 #===============================================================
-# >>> command: self export
+# >>> command: self source
 #===============================================================
 
 ##<<VALET_COMMAND
-# command: self export
-# function: selfExport
+# command: self source
+# function: selfSource
 # hideInMenu: true
 # author: github.com/jcaillon
-# shortDescription: Returns a string that can be evaluated to have Valet functions in bash.
+# shortDescription: Returns a string that can be evaluated to source Valet functions in bash.
 # description: |-
 #   If you want to use Valet functions directly in bash, you can use this command like this:
 #
 #   ```bash
-#   eval "$(valet self export)"
+#   eval "$(valet self source)"
 #   ```
 #
 #   This will source valet to be able to use its functions as if you were in a command script.
@@ -42,12 +42,12 @@ fi
 #   description: |-
 #     Source valet functions with modifications to be used in a shell prompt.
 # examples:
-# - name: !eval "$(valet self export)"
+# - name: !eval "$(valet self source)"
 #   description: |-
 #     Source valet functions in your bash script or bash prompt.
 #     You can then can then use valet function as if you were in a command script.
 ##VALET_COMMAND
-function selfExport() {
+function selfSource() {
   command::parseArguments "$@" && eval "${RETURNED_VALUE}"
   command::checkParsedResults
 
@@ -69,7 +69,7 @@ function selfExport() {
     for library in "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-"*; do
       local libraryName="${library##*lib-}"
       libraryName="${libraryName%lib-}"
-      log::trace "Exporting library: ⌜${libraryName}⌝."
+      log::trace "Sourcing library: ⌜${libraryName}⌝."
       output+="source ${libraryName}"$'\n'
     done
   fi

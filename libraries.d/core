@@ -66,7 +66,7 @@ function trap::onExitInternal() {
   if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || (! -v GLOBAL_EXPECTED_EXIT && ${exitCode} != "0") ]]; then
     _OPTION_DUMP_SUFFIX="-${exitCode}" core::dump
   fi
-
+  
   log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
   if declare -F onExit &>/dev/null; then
     onExit "${exitCode}"
@@ -157,7 +157,9 @@ function trap::onResizeInternal() {
 # This functions is called before the program exits (in all cases, error or not).
 function trap::onCleanUpInternal() {
   # disable the profiler if still on
-  if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then profiler::disable; fi
+  if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then 
+    profiler::disable
+  fi
 
   # kill background job if still running
   if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
@@ -1170,6 +1172,11 @@ function log::parseLogPattern() {
     pid)
       printfFormat="%${formatSpecifier:-"-5d"}"
       log_setPrintfArgumentFromFormat "BASHPID"
+      ;;
+    pName)
+      printfFormat="%${formatSpecifier:-"-5d"}"
+      RETURNED_VALUE4+=$'\n'"local processName"$'\n'"if [[ \${BASHPID} == \"${BASHPID}\" ]]; then processName=\"main\"; else processName=\"\${BASHPID}\"; fi"
+      log_setPrintfArgumentFromFormat "processName"
       ;;
     subshell)
       printfFormat="%${formatSpecifier:-"-2d"}"
@@ -2383,7 +2390,7 @@ function core::setShellOptions() {
   # +noclobber: enable overwriting files during redirection
   # +noglob: enable filename expansion (globbing)
   # +notify: disable immediate report status of background jobs
-  set -o pipefail -o braceexpand -o errexit -o errtrace -o functrace -o nounset -o hashall +o histexpand +o monitor +o noclobber +o noglob +o notify
+  set -o pipefail -o braceexpand -o errexit -o errtrace -o functrace -o nounset -o hashall +o histexpand +o monitor +o noclobber +o noglob +o notify +o allexport +o keyword +o physical +o posix +o privileged
   # -globasciiranges: use C locale for [] character ranges in match patterns
   # +checkwinsize: do not check the window size after each external command
   # +dotglob: disable inclusion of hidden files in filename expansion

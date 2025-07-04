@@ -84,10 +84,10 @@ To create a new library, follow this [documentation][new-libraries].
 
 ## 🪄 Use Valet library functions directly in bash
 
-Thanks to the `self export` command, you can export Valet functions so they are usable directly in your bash session:
+Thanks to the `self source` command, you can source Valet functions so they are usable directly in your bash session:
 
 ```bash
-eval "$(valet self export -a)"
+eval "$(valet self source -a)"
 
 log::info "Cool logs!"
 if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi

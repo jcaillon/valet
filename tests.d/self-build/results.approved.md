@@ -25,8 +25,6 @@ INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/s
 INFO                              ├── ⌜self config⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-document.sh⌝.
 INFO                              ├── ⌜self document⌝.
-INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-export.sh⌝.
-INFO                              ├── ⌜self export⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-extend.sh⌝.
 INFO                              ├── ⌜self extend⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-install.sh⌝.
@@ -35,6 +33,8 @@ INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/s
 INFO                              ├── ⌜self release⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-setup.sh⌝.
 INFO                              ├── ⌜self setup⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-source.sh⌝.
+INFO                              ├── ⌜self source⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-test.sh⌝.
 INFO                              ├── ⌜self test⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-uninstall.sh⌝.
@@ -53,12 +53,12 @@ INFO     == Summary of the commands ==
 
 == List of all the hidden commands ==
 
-self export         Returns a string that can be evaluated to have Valet functions in bash.
 self mock1          A command that only for testing valet core functions.
 self mock2          A command that only for testing valet core functions.
 self mock3          A command that only for testing valet core functions.
 self release        Release a new version of valet.
 self setup          The command run after the installation of Valet to setup the tool.
+self source         Returns a string that can be evaluated to source Valet functions in bash.
 self uninstall      A command to uninstall Valet.
 
 == List of all the commands ==

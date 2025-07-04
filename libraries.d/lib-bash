@@ -191,6 +191,8 @@ function bash::killRunningJobs() {
 # This function injects code at the beginning or the end of a function and
 # returns the modified function to be evaluated.
 #
+# Creates an empty function if the function does not exist initially.
+#
 # - $1: **function name** _as string_:
 #       The name of the function to inject the code into.
 # - $2: **code** _as string_:

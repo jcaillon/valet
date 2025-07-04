@@ -429,13 +429,13 @@ FAIL     Found multiple matches for the command ⌜sf⌝, please be more specifi
 [95ms[0mel[95mf[0m build
 [95ms[0mel[95mf[0m config
 [95ms[0mel[95mf[0m document
-[95ms[0mel[95mf[0m export
 [95ms[0mel[95mf[0m extend
 [95ms[0mel[95mf[0m mock1
 [95ms[0mel[95mf[0m mock2
 [95ms[0mel[95mf[0m mock3
 [95ms[0mel[95mf[0m release
 [95ms[0mel[95mf[0m setup
+[95ms[0mel[95mf[0m source
 [95ms[0mel[95mf[0m test
 [95ms[0mel[95mf[0m uninstall
 [95ms[0mel[95mf[0m update

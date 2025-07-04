@@ -1,10 +1,10 @@
-# Test suite self-export
+# Test suite self-source
 
-## Test script 01.self-export
+## Test script 01.self-source
 
-### ✅ Testing self export command
+### ✅ Testing self source command
 
-❯ `selfExport`
+❯ `selfSource`
 
 **Standard output**:
 
@@ -13,7 +13,7 @@ source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
 
 ```
 
-❯ `selfExport -a`
+❯ `selfSource -a`
 
 **Standard output**:
 
@@ -44,7 +44,7 @@ source windows
 
 ```
 
-❯ `selfExport -p`
+❯ `selfSource -p`
 
 **Standard output**:
 
@@ -57,7 +57,7 @@ trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT
 
 ```
 
-❯ `selfExport -E`
+❯ `selfSource -E`
 
 **Standard output**:
 
@@ -68,9 +68,9 @@ set +o errexit
 
 ```
 
-❯ `eval "$(valet self export)"`
+❯ `eval "$(valet self source)"`
 
-❯ `eval "$(valet self export -a)"`
+❯ `eval "$(valet self source -a)"`
 
-❯ `eval "$(valet self export -p)"`
+❯ `eval "$(valet self source -p)"`
 
