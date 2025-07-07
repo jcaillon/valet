@@ -3,7 +3,7 @@
 export VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT=false
 exec {LOG_FD}>&2
 export VALET_CONFIG_LOG_FD=${LOG_FD}
-export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<pid>{04s}:<subshell>{1s}] <colorFaded>line <line>{-4s}<colorDefault> <levelColor><level>{-4s} <colorDefault> <message>"
+export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<subshell>{1s}] <colorFaded>line <line>{-4s}<colorDefault> <levelColor><level>{-4s} <colorDefault> <message>"
 
 source "libraries.d/core"
 include bash
@@ -21,13 +21,41 @@ log::info "LESSONS LEARNED:
     This technical is called 'double fork' and can also be replaced by using the builtin 'disown' command.
   - We must check if the main process is still running inside the coproc or we must kill
     all the coproc/jobs when the main script exits.
+- traps, shopt settings, set options, etc... are inherited from the parent shell but the exit trap is not executed
+  on error! If we re register the EXIT trap in the coproc/job, it will be executed on error.
+  So it is better to re-register the EXIT trap in the coproc/job for consistent behavior.
+- coproc behaves like a background job; expect that is does not inherit the SIGINT trap.
+  CTRL+C will interrupt both the main process and a background job, but not a coproc.
 "
 
 # shellcheck disable=SC2317
+function cleanUp() {
+  log::warning "Cleaning up..."
+}
+
+# shellcheck disable=SC2317
 function inCoproc() {
-  local mainProcessPID="${BASHPID}"
-  log::info "Main PID: ${mainProcessPID}"
+  log::info "Main PID: ${GLOBAL_PROGRAM_MAIN_PID}"
   log::info "COPROC PID: ${BASHPID}"
+
+  bash::getBuiltinOutput trap -p
+  if [[ ${ORIGINAL_TRAPS} == "${RETURNED_VALUE}" ]]; then
+    log::info "Inherited the traps."
+  else
+    log::error "Trap settings have changed:"$'\n'"${RETURNED_VALUE}"
+  fi
+  bash::getBuiltinOutput shopt -p
+  if [[ ${ORIGINAL_SHOPT} == "${RETURNED_VALUE}" ]]; then
+    log::info "Inherited the shopt settings."
+  else
+    log::error "Shopt settings have changed."
+  fi
+  bash::getBuiltinOutput shopt -p -o
+  if [[ ${ORIGINAL_SET} == "${RETURNED_VALUE}" ]]; then
+    log::info "Inherited the set options."
+  else
+    log::error "Set options have changed."
+  fi
 
   [[ -p /dev/fd/0 ]] && log::info "stdin is a pipe"
   [[ -t 0 ]] && log::info "stdout is a terminal"
@@ -38,8 +66,8 @@ function inCoproc() {
 
   local IFS='' instruction
   # read instructions from stdin
-  while kill -0 "${mainProcessPID}"; do
-    while kill -0 "${mainProcessPID}"; do
+  while kill -0 "${GLOBAL_PROGRAM_MAIN_PID}"; do
+    while kill -0 "${GLOBAL_PROGRAM_MAIN_PID}"; do
       read -rd $'\0' instruction || [[ -v instruction ]]
       if read -t 0 -rd $'\0'; then
         log::info "got instruction <${instruction}> but more instructions await"
@@ -53,7 +81,7 @@ function inCoproc() {
     case "${instruction}" in
       "start")
         log::info "Starting"
-        bash::sleep 2
+        bash::sleep 1
         printf "%s\0" "started"
         ;;
       "stop")
@@ -68,18 +96,25 @@ function inCoproc() {
   log::info "done"
 }
 
-MAIN_PID="${BASHPID}"
+log::info "PID: ${BASHPID}"
+bash::getBuiltinOutput trap -p
+ORIGINAL_TRAPS="${RETURNED_VALUE}"
+bash::getBuiltinOutput shopt -p
+ORIGINAL_SHOPT="${RETURNED_VALUE}"
+bash::getBuiltinOutput shopt -p -o
+ORIGINAL_SET="${RETURNED_VALUE}"
+
+
 coproc _PROGRESS_COPROC_PIPES { inCoproc 2>&${LOG_FD}; }
 
-log::info "PID: ${BASHPID}"
+
 log::info "_PROGRESS_COPROC_PIPES=${_PROGRESS_COPROC_PIPES[*]}"
 log::info "_PROGRESS_COPROC_PIPES_PID=${_PROGRESS_COPROC_PIPES_PID}"
-sleep 10
-if [[ -p /dev/fd/${_PROGRESS_COPROC_PIPES[0]} ]]; then
-  log::info "The coproc pipes are valid."
-else
-  log::error "The coproc pipes are not valid."
-fi
+
+while ! kill -0 "${_PROGRESS_COPROC_PIPES_PID}" 2>/dev/null; do
+  log::info "Waiting for the coproc to start..."
+  bash::sleep 0.01
+done
 
 log::info "Waiting for the initial message..."
 IFS=$'\0' read -u "${_PROGRESS_COPROC_PIPES[0]}" -rd $'\0' RETURNED_VALUE
@@ -95,13 +130,12 @@ log::info "Received: ${RETURNED_VALUE}"
 log::info "Sending stop command"
 printf "%s\0%s\0" "unknown" "stop" >&"${_PROGRESS_COPROC_PIPES[1]}"
 
-bash::sleep 1
+sleep 1
 
 # can check the variable _PROGRESS_COPROC_PIPES with -v to know if the coproc is still running
 if [[ -v _PROGRESS_COPROC_PIPES ]]; then
   echo "Killing the coproc."
   kill "${_PROGRESS_COPROC_PIPES_PID}"
-  bash::sleep 1
   if [[ -v _PROGRESS_COPROC_PIPES ]]; then
     echo "The coproc is still running."
   else
@@ -111,4 +145,49 @@ else
   echo "The coproc already stopped with success."
 fi
 
-exit 0
+
+
+function inCoproc2() {
+  log::info "COPROC PID: ${BASHPID}"
+  ((10/0))
+  log::warning "This line should not be reached."
+}
+
+coproc _PROGRESS_COPROC_PIPES2 { inCoproc2 2>&${LOG_FD}; }
+{ coproc _PROGRESS_COPROC_PIPES3 { inCoproc2 2>&${LOG_FD}; } } 2>/dev/null
+
+while true; do
+  EXIT_STATUS=0
+  wait -n -p COPROC_PID || EXIT_STATUS=$?
+  if [[ -z ${COPROC_PID:-} ]]; then
+    log::warning "No more coproc to wait for."
+    break
+  fi
+  log::info "The coproc ${COPROC_PID} exited with status: ${EXIT_STATUS}"
+done
+
+
+function inCoproc3() {
+  trap::register
+  log::info "COPROC PID: ${BASHPID}"
+  fzefzefze
+  log::warning "This line should not be reached."
+}
+
+coproc _PROGRESS_COPROC_PIPES4 { inCoproc3 2>&${LOG_FD}; }
+wait -n "${_PROGRESS_COPROC_PIPES4_PID}" || true
+
+
+# CTRL+C will interrupt both the main process and a background job, but not a coproc.
+#
+function inCoproc4() {
+  while true; do
+    log::info "JOB Still going..."
+    sleep 1 || true
+  done
+}
+coproc _PROGRESS_COPROC_PIPES4 { inCoproc4 2>&${LOG_FD}; }
+while true; do
+  log::info "MAIN Still going..."
+  sleep 1
+done

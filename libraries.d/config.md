@@ -204,6 +204,7 @@ You can use the following placeholders:
 - `<levelColor>`: The color for the log level.
 - `<icon>`: The log level icon.
 - `<pid>`: The process ID of the bash instance that logged the message.
+- `<processName>`: A human readable name for the process that logged the message ("main" for the main process).
 - `<subshell>`: The subshell level of the bash instance that logged the message.
 - `<function>`: The name of the function that logged the message.
 - `<line>`: The line number where the message was logged.

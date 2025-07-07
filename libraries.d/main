@@ -23,6 +23,10 @@ GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*[.,]}"
 # Remember the original working directory
 GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
 
+# Remember the main PID
+# shellcheck disable=SC2034
+GLOBAL_PROGRAM_MAIN_PID="${BASHPID}"
+
 # To ensure we print errors even before log::init is called
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG="printf \"%-8s %s\n\" \"\${level:-}\" \"\${!messageVariableName}\" 1>&2"
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD="printf \"%s\" \"\${rawStringToPrintInLog}\" 1>&2"

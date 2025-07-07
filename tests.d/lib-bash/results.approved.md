@@ -2,6 +2,55 @@
 
 ## Test script 00.tests
 
+### ✅ Testing bash::runInSubshell
+
+❯ `bash::runInSubshell log::info hello`
+
+**Error output**:
+
+```text
+INFO     hello
+WARNING  Subshell exited with code 0
+```
+
+❯ `bash::runInSubshell subshellThatFails`
+
+Returned code: `1`
+
+**Error output**:
+
+```text
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.tests.sh: line 36: ((: 0/0: division by 0 (error token is "0")
+CMDERR   Error code ⌜1⌝ for the command:
+╭ ((0/0))
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
+ERROR    Exiting with code 1, stack:
+╭ ((0/0))
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
+WARNING  Subshell exited with code 1
+```
+
+❯ `_OPTION_EXIT_ON_FAIL=true bash::runInSubshell subshellThatFails`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.tests.sh: line 36: ((: 0/0: division by 0 (error token is "0")
+CMDERR   Error code ⌜1⌝ for the command:
+╭ ((0/0))
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
+ERROR    Exiting with code 1, stack:
+╭ ((0/0))
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
+WARNING  Subshell exited with code 1
+```
+
 ### ✅ Testing bash::isFdValid
 
 ❯ `bash::isFdValid 2`

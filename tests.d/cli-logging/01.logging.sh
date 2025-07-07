@@ -65,7 +65,7 @@ function test_logOutputOptions() {
   test::exec fs::cat "${RETURNED_VALUE}/logs/test.log"
 
   test::title "✅ Testing that we can output the logs to a specific file descriptor"
-  test::exec VALET_CONFIG_LOG_FD="${logDir}/test2.log" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
+  test::exec VALET_CONFIG_LOG_FD="${logDir}/test2.log" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 divide-by-zero
   test::exec fs::cat "${logDir}/test2.log"
 }
 

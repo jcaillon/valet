@@ -53,8 +53,10 @@ function trap::onErrorInternal() {
   log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
   log::printCallStack 2
 
-  # the program will exit
+  # reset the trap to not call this function again
+  trap ERR
   GLOBAL_EXPECTED_EXIT=1
+  exit 1
 }
 
 # This function is called when the program exits (on error, on success, on exit, on interrupt).
@@ -66,7 +68,7 @@ function trap::onExitInternal() {
   if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || (! -v GLOBAL_EXPECTED_EXIT && ${exitCode} != "0") ]]; then
     _OPTION_DUMP_SUFFIX="-${exitCode}" core::dump
   fi
-  
+
   log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
   if declare -F onExit &>/dev/null; then
     onExit "${exitCode}"
@@ -81,7 +83,7 @@ function trap::onExitInternal() {
       log::print "WARNING" "${ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
       log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
       log::printCallStack 2
-    elif [[ ${exitCode} != "0" ]]; then
+    elif (( exitCode != 0 )); then
       log::print "ERROR" "${ICON_EXIT:-}" "EXIT" "Exiting with code ${exitCode}, stack:"
       log::debug "${symbol} ${BASH_COMMAND:-}" "│ "
       log::printCallStack 2
@@ -157,7 +159,7 @@ function trap::onResizeInternal() {
 # This functions is called before the program exits (in all cases, error or not).
 function trap::onCleanUpInternal() {
   # disable the profiler if still on
-  if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then 
+  if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then
     profiler::disable
   fi
 
@@ -257,10 +259,64 @@ function trap::unregister() {
   fi
 }
 
+# This function is called when a subshell exits (on error, on success, on exit, on interrupt).
+# It is executed in the process that exited, as if we called this function
+# at the line where the exit command is called.
+function trap::onSubshellExitInternal() {
+  local exitCode="$?"
+
+  if (( exitCode != 0 )); then
+    log::error "Exiting with code ${exitCode}, stack:"
+  elif log::isDebugEnabled; then
+    log::debug "Exiting with code ${exitCode}, stack:"
+  else
+    log::debug "Exiting with code ${exitCode}"
+  fi
+
+  if log::isDebugEnabled || (( exitCode != 0 )); then
+    local symbol="╰"
+    if [[ -n ${FUNCNAME[1]:-} ]]; then
+      symbol="╭"
+    fi
+    log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
+    log::printCallStack 2
+  fi
+
+  if declare -F onSubshellExit &>/dev/null; then
+    onSubshellExit "${exitCode}"
+  fi
+}
+
+# ## trap::registerForSubshell (private)
+#
+# Register the traps for a subshell.
+#
+# - For a subshell, we do not want to execute the "cleanup" because it would also delete
+#   files of the main process.
+# - Additionally, we want to re-register the EXIT trap because it is not properly honored.
+# - External interruptions of the subshell (e.g. kill) are considered to be voluntary so we exit with 0;
+#   note that coproc do not respond to interrupt signals (CTRL+C does not work).
+# - coproc and jobs will not get SIGHUP when the main process ends and they will continue to execute
+#   until killed or until they check that the main process is dead.
+function trap::registerSubshell() {
+  if (( BASH_SUBSHELL == 0 )); then
+    core::fail "This function should only be called in a subshell."
+  fi
+  trap trap::onErrorInternal ERR
+  trap trap::onSubshellExitInternal EXIT
+  # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
+  trap 'exit 0' SIGINT SIGQUIT
+  # Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
+  trap 'exit 0' SIGHUP SIGTERM
+  trap SIGWINCH
+}
+
 #===============================================================
 # >>> Temporary files and folders
 #===============================================================
 
+# ## fs::setupTempFileGlobalVariable (private)
+#
 # Setup global variables that will be used for temporary files and folders.
 function fs::setupTempFileGlobalVariable() {
   # get unique file names for the stdout, stderr and temporary directory
@@ -283,6 +339,20 @@ function fs::setupTempFileGlobalVariable() {
   # shellcheck disable=SC2034
   GLOBAL_TEMPORARY_STDERR_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-stderr.f"
   unset -v TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
+}
+
+# ## fs::setupSubshellTempFileGlobalVariable (private)
+#
+# Setup global variables that will be used for temporary files and folders in the context
+# of a subshell. We keep everything under a new directory named with the process ID;
+# the dir gets cleanup when the main process ends.
+function fs::setupSubshellTempFileGlobalVariable() {
+  if (( BASH_SUBSHELL == 0 )); then
+    core::fail "This function should only be called in a subshell."
+  fi
+  TMPDIR="${GLOBAL_TEMPORARY_DIRECTORY}/job-${BASHPID}"
+  unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
+  fs::setupTempFileGlobalVariable
 }
 
 # ## fs::createTempFile
@@ -1173,7 +1243,7 @@ function log::parseLogPattern() {
       printfFormat="%${formatSpecifier:-"-5d"}"
       log_setPrintfArgumentFromFormat "BASHPID"
       ;;
-    pName)
+    processName)
       printfFormat="%${formatSpecifier:-"-5d"}"
       RETURNED_VALUE4+=$'\n'"local processName"$'\n'"if [[ \${BASHPID} == \"${BASHPID}\" ]]; then processName=\"main\"; else processName=\"\${BASHPID}\"; fi"
       log_setPrintfArgumentFromFormat "processName"
@@ -1295,6 +1365,8 @@ function log::init() {
     if [[ ${isFdValid} != "true" ]]; then
       core::fail "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${VALET_CONFIG_LOG_FD}⌝."
     fi
+    # we also redirect the builtin bash errors to the same FD so we can have them along the logs
+    exec 2>&${GLOBAL_FD_LOG}
   else
     exec {GLOBAL_FD_LOG}>&2
   fi

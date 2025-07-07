@@ -183,18 +183,21 @@ With a second line.
 
 ### ✅ Testing that we can output the logs to a specific file descriptor
 
-❯ `VALET_CONFIG_LOG_FD=/tmp/valet.d/d1-2/test2.log valet self mock1 logging-level`
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet.d/d1-2/test2.log valet self mock1 divide-by-zero`
+
+Returned code: `1`
 
 ❯ `fs::cat /tmp/valet.d/d1-2/test2.log`
 
 **Standard output**:
 
 ```text
-TRACE    This is an error trace message which is always displayed.
-INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-SUCCESS  This is a success message.
-WARNING  This is a warning message.
-With a second line.
+WARNING  This is for testing valet core functions, the next statement will call a bash error.
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh: line 80: ((: 10/0: division by 0 (error token is "0")
+CMDERR   Error code ⌜1⌝ for the command:
+╭ ((10/0))
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
 
 ```
 

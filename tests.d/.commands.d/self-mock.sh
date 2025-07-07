@@ -71,6 +71,15 @@ function selfMock1() {
     log::warning "This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle."
     thisIsAnUnknownCommandForTesting
     ;;
+  divide-by-zero)
+    log::warning "This is for testing valet core functions, the next statement will call a bash error."
+    # fix stuff for printCallStack
+    GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
+    GLOBAL_STACK_SOURCE_FILES=("core" "core" "core" "/path/to/subFunction.sh" "/path/to/function.sh")
+    GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
+    ((10/0))
+    log::warning "This line should not be reached, the previous command should have failed."
+    ;;
   create-temp-files)
     # shellcheck disable=SC2317
     function cleanUp() {

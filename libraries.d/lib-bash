@@ -2,6 +2,61 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
+# ## bash::runInSubshell
+#
+# This functions a list of commands in a subshell.
+  #
+# - $@: **commands** _as string_:
+#       The list of commands to run in the subshell.
+# - ${_OPTION_EXIT_ON_FAIL} _as bool_:
+#       (optional) If set to true, the main program will exit with code 1 if the subshell fails.
+#
+# Returns:
+# - $?:
+#   - 0 if the subshell completed successfully.
+#   - 1 if the subshell failed.
+#
+# ```bash
+# if bash::runInSubshell myFunction; then
+#   log::info "The subshell completed successfully."
+# else
+#   core::fail "The subshell failed."
+# fi
+# ```
+#
+# > This function exists because the behavior of bash subshells are not what you would expect.
+# > This function ensures that errors are properly handled and make the command list fail,
+# > it ensures that we run the exit trap and the custom function "onSubshellExit",
+# > and it gives you the correct exit code of the subshell.
+function bash::runInSubshell() {
+  local exitOnFail="${_OPTION_EXIT_ON_FAIL:-false}"
+  # save the ERR trap to restore it later
+  bash::getBuiltinOutput trap -p ERR
+  local originalErrTrap="${RETURNED_VALUE}"
+  # disable the ERR trap or we would catch the subshell failure with it and not restore
+  # the errexit and the original trap (and we would display an error message that we do 
+  # not want to display because we already displayed an error from the subshell).
+  trap ERR
+  # disable errexit in the main shell
+  set +o errexit
+  (
+    # re-enable errexit in the subshell
+    set -o errexit
+    trap::registerSubshell
+    "${@}"
+  )
+  local subshellExitCode=$?
+  set +o errexit
+  # restore the original ERR trap
+  eval "${originalErrTrap}"
+  if [[ ${exitOnFail} == "true" && ${subshellExitCode} -gt 0 ]]; then
+    # shellcheck disable=SC2034
+    GLOBAL_EXPECTED_EXIT=1
+    exit ${subshellExitCode}
+  fi
+  return "${subshellExitCode}"
+}
+
 # ## bash::countJobs
 #
 # This function counts the number of jobs currently running in the background.
@@ -34,6 +89,7 @@ function bash::countJobs() {
 #       The name of the array containing the names of the jobs to run.
 # - $2: **job commands array name** _as string_:
 #       The name of the array containing the commands to run.
+#       Each command string will be evaluated in a subshell.
 # - $3: max parallel jobs _as int_:
 #       (optional) Can be set using the variable `_OPTION_MAX_PARALLEL_JOBS`.
 #       The maximum number of parallel jobs to run.
@@ -88,13 +144,8 @@ function bash::runInParallel() {
     eval "{
       : ID=${index};
 
-      # set the sell for this job
-      core::setShellOptions
-      trap::unregister;
-      TMPDIR=\"${GLOBAL_TEMPORARY_DIRECTORY}/job-\${BASHPID}\"
-      unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
-
-      fs::setupTempFileGlobalVariable
+      trap::registerSubshell
+      fs::setupSubshellTempFileGlobalVariable
 
       ${jobCommands[index]};
     } &"

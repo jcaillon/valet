@@ -92,7 +92,7 @@ function progress::start() {
   fi
 
   # Hide the cursor
-  printf "%s" "${ESC__CURSOR_HIDE}" 1>&2
+  printf "%s" "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
 
   # disable echoing when we type something
   tui::setTerminalOptions
@@ -126,7 +126,7 @@ function progress::stop() {
     unset -v GLOBAL_BACKGROUND_JOB1_PID _PROGRESS_BAR_RUNNING _PROGRESS_BACKGROUND_JOB _PROGRESS_BACKGROUND_JOB_PID
   fi
 
-  printf "%s" "${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&2
+  printf "%s" "${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
 
   # restore the key echoing
   tui::restoreTerminalOptions
@@ -223,7 +223,7 @@ function progress_runAnimationInBackground() {
   # trap::unregister
 
   # Hide the cursor
-  printf "%s" "${ESC__CURSOR_HIDE}" 1>&2
+  printf "%s" "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
 
   # shellcheck source=lib-string
   source string
@@ -282,7 +282,7 @@ function progress_runAnimationInBackground() {
     local -i elapsed=$((RETURNED_VALUE - timerStart))
     loop=$((elapsed / 1000 / frameDelay))
     spinnerIndex=$(( loop % ${#spinner} ))
-    printf "%-${GLOBAL_COLUMNS}s%s" "${displayedString//"<spinner>"/"${spinner:spinnerIndex:1}"}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&2
+    printf "%-${GLOBAL_COLUMNS}s%s" "${displayedString//"<spinner>"/"${spinner:spinnerIndex:1}"}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
 
     # since we put a timeout on the read, we don't want to risk not reading the entire instruction,
     # so we read only a potential "1" indicating that an instruction was received
@@ -291,7 +291,7 @@ function progress_runAnimationInBackground() {
     read -t "${readDelayInSeconds}" -rd '' instructionReceived || :
   done
 
-  printf "%s" "${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&2
+  printf "%s" "${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # Computes the string to display for the progress bar.

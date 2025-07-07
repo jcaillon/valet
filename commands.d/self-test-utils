@@ -92,6 +92,8 @@ function selfTestUtils_setupBashForConsistency() {
   profiler::resume
   unset BASHPID
   export BASHPID=1234
+  unset SECONDS
+  export SECONDS=0
 }
 
 function selfTestUtils_runHookScript() {
@@ -126,7 +128,7 @@ function selfTestUtils_compareWithApproved() {
     chmod "${GLOBAL_TEST_REPORT_FILE_MODE}" "${receivedFileToCopy}"
   fi
 
-  if ${command} 1>&2; then
+  if ${command} 1>&"${GLOBAL_FD_LOG}"; then
     log::success "→ test suite has passed."
     if [[ -f "${receivedFile}" ]]; then
       rm -f "${receivedFile}" 1>/dev/null

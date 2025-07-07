@@ -4,7 +4,7 @@ export TMPDIR=tmp
 export VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT=false
 exec {LOG_FD}>&2
 export VALET_CONFIG_LOG_FD=${LOG_FD}
-export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<pName>{04s}:<subshell>{1s}] <colorFaded>line <line>{-4s}<colorDefault> <levelColor><level>{-4s} <colorDefault> <message>"
+export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<subshell>{1s}] <colorFaded>line <line>{-4s}<colorDefault> <levelColor><level>{-4s} <colorDefault> <message>"
 
 source "libraries.d/core"
 include bash time
@@ -17,7 +17,7 @@ log::info "LESSONS LEARNED:
 SUPER IMPORTANT:
 
 - In command substitutions Bash clears the -e option in subshells (at least when not in POSIX mode which is our case).
-- Never use the '() ||' or 'if ()' construct because the behavior is not comprehensible... 
+- Never use the '() ||' or 'if ()' construct because the behavior is not comprehensible...
     - Even with the set -e option it does not stop on errors
     - the ERR trap and the EXIT trap are not respected
     - if we reregister the EXIT trap is does apply (but not the ERR trap)

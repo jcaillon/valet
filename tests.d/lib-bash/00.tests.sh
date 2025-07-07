@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 function main() {
+  test_bash::runInSubshell
   test_bash::isFdValid
   test_bash::getFunctionDefinitionWithGlobalVars
   test_bash::countJobs
@@ -13,6 +14,33 @@ function main() {
   test_bash::isCommand
   test_bash::isFunction
   test_bash::getBuiltinOutput
+}
+
+function test_bash::runInSubshell() {
+  test::title "✅ Testing bash::runInSubshell"
+
+  function onSubshellExit() {
+    log::warning "Subshell exited with code $1"
+  }
+
+  test::exec bash::runInSubshell log::info "hello"
+
+  # shellcheck disable=SC2034
+  # shellcheck disable=SC2317
+  function subshellThatFails() {
+    # fix stuff for printCallStack
+    GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
+    GLOBAL_STACK_SOURCE_FILES=("core" "core" "core" "/path/to/subFunction.sh" "/path/to/function.sh")
+    GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
+    
+    ((0/0)) # This will fail and exit the subshell
+    log::info "This line will not be executed because the previous command failed."
+  }
+
+  test::exec bash::runInSubshell subshellThatFails
+  test::exit _OPTION_EXIT_ON_FAIL=true bash::runInSubshell subshellThatFails
+
+  unset -f onSubshellExit subshellThatFails
 }
 
 function test_bash::isFdValid() {

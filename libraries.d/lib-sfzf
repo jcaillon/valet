@@ -293,7 +293,7 @@ function sfzfDrawScreen() {
     done
   fi
 
-  printf '%s' "${toPrint}" 1>&2
+  printf '%s' "${toPrint}" 1>&"${GLOBAL_FD_TUI}"
 
   # reset the fetched details because they are for a given width that might have changed
   # shellcheck disable=SC2086
@@ -358,7 +358,7 @@ function drawLeftPane() {
       itemCount="${SFZF_LEFT_PANE_LINES}"
     fi
     local itemsCounter
-    printf -v itemsCounter " %s%0${#totalItemCount}i%s/%i%s " "${SFZF_COLOR_COUNT}" "${itemCount}" "${SFZF_COLOR_COUNT_RESET}${SFZF_COLOR_STATIC}" "${totalItemCount}" "${SFZF_COLOR_RESET_TEXT}" 1>&2
+    printf -v itemsCounter " %s%0${#totalItemCount}i%s/%i%s " "${SFZF_COLOR_COUNT}" "${itemCount}" "${SFZF_COLOR_COUNT_RESET}${SFZF_COLOR_STATIC}" "${totalItemCount}" "${SFZF_COLOR_RESET_TEXT}"
     local itemCounterLength=$((3 + ${#totalItemCount} * 2))
     toPrint+="${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE + 1));$((SFZF_LEFT_PANE_WIDTH - itemCounterLength))${__ESC__TO}${itemsCounter}"
   fi
@@ -394,7 +394,7 @@ function drawLeftPane() {
   # reposition the cursor
   toPrint+="${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE));$((3 + ${#SFZF_PROMPT}))${__ESC__TO}${ESC__CURSOR_SHOW}"
 
-  printf '%s' "${toPrint}" 1>&2
+  printf '%s' "${toPrint}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # Compute the array that should be displayed in the right pane.
@@ -461,7 +461,7 @@ function drawRightPane() {
     itemCount=0
   fi
   if ((itemCount > 0)); then
-    printf -v itemsCounter " %s%0${#itemCount}i%s/%i%s " "${SFZF_COLOR_COUNT}" "${SFZF_RIGHT_PANE_START_INDEX}" "${SFZF_COLOR_COUNT_RESET}${SFZF_COLOR_STATIC}" "${itemCount}" "${SFZF_COLOR_RESET_TEXT}" 1>&2
+    printf -v itemsCounter " %s%0${#itemCount}i%s/%i%s " "${SFZF_COLOR_COUNT}" "${SFZF_RIGHT_PANE_START_INDEX}" "${SFZF_COLOR_COUNT_RESET}${SFZF_COLOR_STATIC}" "${itemCount}" "${SFZF_COLOR_RESET_TEXT}"
     itemsCounterLength=$((3 + ${#itemCount} * 2))
   else
     itemsCounter="─────────"
@@ -494,7 +494,7 @@ function drawRightPane() {
   # reposition the cursor
   toPrint+="${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE));$((3 + ${#SFZF_PROMPT}))${__ESC__TO}${ESC__CURSOR_SHOW}"
 
-  printf '%s' "${toPrint}" 1>&2
+  printf '%s' "${toPrint}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # Draw the prompt line
@@ -506,7 +506,7 @@ function drawPrompt() {
   else
     SFZF_PROMPT="${SFZF_SEARCH_STRING}"
   fi
-  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE));$((SFZF_LEFT_PANE_WIDTH))${__ESC__TO}${ESC__ERASE_CHARS_LEFT}"$'\r'"${SFZF_COLOR_STATIC}${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-">"} ${SFZF_COLOR_RESET_TEXT}${SFZF_COLOR_FOCUS}${SFZF_PROMPT}${ESC__CURSOR_SHOW}" 1>&2
+  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}$((SFZF_LEFT_PANE_FIRST_LINE));$((SFZF_LEFT_PANE_WIDTH))${__ESC__TO}${ESC__ERASE_CHARS_LEFT}"$'\r'"${SFZF_COLOR_STATIC}${VALET_CONFIG_INTERACTIVE_SELECTED_ITEM_CHARACTER:-">"} ${SFZF_COLOR_RESET_TEXT}${SFZF_COLOR_FOCUS}${SFZF_PROMPT}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # Returns the index of the item in the original array (if any, or -1).
