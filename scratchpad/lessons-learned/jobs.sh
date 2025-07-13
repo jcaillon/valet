@@ -8,26 +8,6 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<subshell>{1s}]
 source "libraries.d/core"
 include bash
 
-log::info "LESSONS LEARNED:
-
-- if the main process exits, the coproc (same for background jobs) does not exit:
-  - When we exit an interactive shell, a SIGHUP will be sent to the shell process which forwards it to
-    all its children processes, including the coproc/jobs.
-  - But in the case of a script, we start a new bash process for the script which in turns starts
-    processes for coproc/jobs, the SIGHUP is not sent automatically to the coproc/jobs when the script ends
-    (it only happens at the end of an interactive shell session).
-    Coproc/jobs will no longer have the PPID of the bash script but will be assigned the PPID 1
-    which is the init process. This is actually a way to 'daemonize' a process (detaching it from the terminal).
-    This technical is called 'double fork' and can also be replaced by using the builtin 'disown' command.
-  - We must check if the main process is still running inside the coproc or we must kill
-    all the coproc/jobs when the main script exits.
-- traps, shopt settings, set options, etc... are inherited from the parent shell but the exit trap is not executed
-  on error! If we re register the EXIT trap in the coproc/job, it will be executed on error.
-  So it is better to re-register the EXIT trap in the coproc/job for consistent behavior.
-- coproc behaves like a background job; expect that is does not inherit the SIGINT trap.
-  CTRL+C will interrupt both the main process and a background job, but not a coproc.
-"
-
 # shellcheck disable=SC2317
 function cleanUp() {
   log::warning "Cleaning up..."
@@ -124,3 +104,24 @@ wait "${MY_JOB_PID}" || true
 #   log::info "MAIN Still going..."
 #   sleep 1
 # done
+
+
+log::info "LESSONS LEARNED:
+
+- if the main process exits, the coproc (same for background jobs) does not exit:
+  - When we exit an interactive shell, a SIGHUP will be sent to the shell process which forwards it to
+    all its children processes, including the coproc/jobs.
+  - But in the case of a script, we start a new bash process for the script which in turns starts
+    processes for coproc/jobs, the SIGHUP is not sent automatically to the coproc/jobs when the script ends
+    (it only happens at the end of an interactive shell session).
+    Coproc/jobs will no longer have the PPID of the bash script but will be assigned the PPID 1
+    which is the init process. This is actually a way to 'daemonize' a process (detaching it from the terminal).
+    This technical is called 'double fork' and can also be replaced by using the builtin 'disown' command.
+  - We must check if the main process is still running inside the coproc or we must kill
+    all the coproc/jobs when the main script exits.
+- traps, shopt settings, set options, etc... are inherited from the parent shell but the exit trap is not executed
+  on error! If we re register the EXIT trap in the coproc/job, it will be executed on error.
+  So it is better to re-register the EXIT trap in the coproc/job for consistent behavior.
+- coproc behaves like a background job; expect that is does not inherit the SIGINT trap.
+  CTRL+C will interrupt both the main process and a background job, but not a coproc.
+"

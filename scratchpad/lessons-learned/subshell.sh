@@ -9,34 +9,6 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<subshell>{1s}]
 source "libraries.d/core"
 include bash time
 
-log::info "LESSONS LEARNED:
-
-- https://www.gnu.org/software/bash/manual/bash.html#Command-Execution-Environment
-- Subshells inherit the traps, shopt settings, set options, etc... From the parent shell.
-
-SUPER IMPORTANT:
-
-- In command substitutions Bash clears the -e option in subshells (at least when not in POSIX mode which is our case).
-- Never use the '() ||' or 'if ()' construct because the behavior is not comprehensible...
-    - Even with the set -e option it does not stop on errors
-    - the ERR trap and the EXIT trap are not respected
-    - if we reregister the EXIT trap is does apply (but not the ERR trap)
-    - it will runs all the commands in the subshell even when command fails and the subshell exit code
-      will be the exit code of the last command executed in the subshell.
-    - The only way to stop it is an exit command on each line, e.g. ((0/0)) || exit 1
-- The only way to have the expected behavior is to:
-  set +o errexit on main
-  (
-    enter the subshell and set -o errexit
-    failing commands will make the subshell exit on error
-  )
-  capture the exit code of the subshell with \$?
-  reactivate the set +o errexit on main
-  and then check the exit code of the subshell
-
-  However, even with this, the EXIT trap is not triggered in the subshell.
-  To have the EXIT trap triggered in the subshell, we need to re-register it in the subshell.
-"
 
 trap -- 'log::error EXIT WITH CODE $?' EXIT
 trap -- 'log::error ERR CODE $?' ERR
@@ -203,3 +175,35 @@ fi
 set +o errexit
 
 log::info "End"
+
+
+log::info "LESSONS LEARNED:
+
+see bash::runInSubshell for a clean implementation.
+
+- https://www.gnu.org/software/bash/manual/bash.html#Command-Execution-Environment
+- Subshells inherit the traps, shopt settings, set options, etc... From the parent shell.
+
+SUPER IMPORTANT:
+
+- In command substitutions Bash clears the -e option in subshells (at least when not in POSIX mode which is our case).
+- Never use the '() ||' or 'if ()' construct because the behavior is not comprehensible...
+    - Even with the set -e option it does not stop on errors
+    - the ERR trap and the EXIT trap are not respected
+    - if we reregister the EXIT trap is does apply (but not the ERR trap)
+    - it will runs all the commands in the subshell even when command fails and the subshell exit code
+      will be the exit code of the last command executed in the subshell.
+    - The only way to stop it is an exit command on each line, e.g. ((0/0)) || exit 1
+- The only way to have the expected behavior is to:
+  set +o errexit on main
+  (
+    enter the subshell and set -o errexit
+    failing commands will make the subshell exit on error
+  )
+  capture the exit code of the subshell with \$?
+  reactivate the set +o errexit on main
+  and then check the exit code of the subshell
+
+  However, even with this, the EXIT trap is not triggered in the subshell.
+  To have the EXIT trap triggered in the subshell, we need to re-register it in the subshell.
+"

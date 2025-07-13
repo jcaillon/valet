@@ -197,28 +197,27 @@ function trap::onCleanUpInternal() {
 function command_not_found_handle() {
   local commandNotFound="${1:-}"
 
+  local errorMessage
+  if [[ ${commandNotFound} == "curl" ]]; then
+    errorMessage="This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
+  elif [[ ${commandNotFound} == *::* ]]; then
+    # if the command contains :: it is one of our function, we can suggest to source the 'package'
+    errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Did you forget to source/include the package? ⌜include ${commandNotFound%%::*}⌝"
+  else
+    errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
+  fi
+
   # check for recursive call
   if [[ -v GLOBAL_COMMAND_NOT_FOUND ]]; then
     # we are here if the error happened in a log function and thus we couldn't print the error
     printf '%s\n%s\n' "Command not found: ⌜${commandNotFound}⌝." "Error in a log function." >&2
     log::getCallStack 2
     printf '%s\n' "${RETURNED_VALUE}" >&2
-    GLOBAL_EXPECTED_EXIT=1
-    return 1
+  else
+    GLOBAL_COMMAND_NOT_FOUND=1
+    log::print "ERROR" "${ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
+    log::printCallStack 2
   fi
-  GLOBAL_COMMAND_NOT_FOUND=1
-
-  local errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
-  if [[ ${commandNotFound} == "curl" ]]; then
-    errorMessage="This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
-  fi
-  # if the command contains :: it is one of our function, we can suggest to source the 'package'
-  if [[ ${commandNotFound} == *::* ]]; then
-    errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Did you forget to source/include the package? ⌜include ${commandNotFound%%::*}⌝"
-  fi
-
-  log::print "ERROR" "${ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
-  log::printCallStack 2
 
   GLOBAL_EXPECTED_EXIT=1
   return 1
@@ -2010,6 +2009,14 @@ function core::fail() {
 #       the name of the library (array, interactive, string...) or the file path to include.
 # - $@: arguments _as any_:
 #       (optional) the arguments to pass to the sourced file (mimics the builtin source command).
+# - ${_OPTION_EXIT_IF_NOT_FOUND} _as bool_:
+#       (optional) Fail the program if we do not find a file to source.
+#       Otherwise we simply return 1.
+#       (defaults to false)
+# - ${_OPTION_RETURN_CODE_ALREADY_INCLUDED} _as int_:
+#       (optional) The function return code if the given file or library was already
+#       included.
+#       (defaults to 0)
 #
 # ```bash
 #   source string
@@ -2021,12 +2028,14 @@ function core::fail() {
 function source() {
   local pathOrName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift
+  local exitIfNotFound="${_OPTION_EXIT_IF_NOT_FOUND:-true}"
+  local -i returnCodeIfAlreadyIncluded="${_OPTION_RETURNED_CODE_ALREADY_INCLUDED:-0}"
 
   # if the name does not start with . or /, we assume it is a library name
   if [[ ${pathOrName:0:1} != [./] ]]; then
     # quick check if it is already included
     if [[ ${_CORE_INCLUDED_LIBRARIES:-} == *$'\n'"${pathOrName}"$'\n'* ]]; then
-      return 0
+      return ${returnCodeIfAlreadyIncluded}
     fi
 
     local -i sourcedFiles=0
@@ -2056,7 +2065,7 @@ function source() {
 
   # quick check if the file is already included
   if [[ ${_CORE_INCLUDED_FILES:-} == *$'\n'"${pathOrName}"$'\n'* ]]; then
-    return 0
+    return ${returnCodeIfAlreadyIncluded}
   fi
 
   # source a file next to the file that calls this function
@@ -2074,13 +2083,17 @@ function source() {
     return 0
   fi
 
-  local failMessage="Cannot source the file ⌜${pathOrName}⌝ because it does not exist."
-  if [[ ${pathOrName} =~ ^(esc-codes|core)$ ]]; then
-    failMessage+="The ⌜${pathOrName}⌝ library is included by default in Valet, please remove ⌜source ${pathOrName}⌝."
-  elif [[ ${pathOrName} == "lib-"* ]]; then
-    failMessage+=$'\n'"If you meant to source a library, make sure it is either in the valet core or user libraries and do not include the ⌜lib-⌝ prefix."
+  if [[ ${exitIfNotFound} == "true" ]]; then
+    local failMessage="Cannot source the file ⌜${pathOrName}⌝ because it does not exist."
+    if [[ ${pathOrName} =~ ^(esc-codes|core|styles|main)$ ]]; then
+      failMessage+="The ⌜${pathOrName}⌝ library is included by default in Valet, please remove ⌜source ${pathOrName}⌝."
+    elif [[ ${pathOrName} == "lib-"* ]]; then
+      failMessage+=$'\n'"If you meant to source a library, make sure it is either in the valet or user libraries and do not include the ⌜lib-⌝ prefix."
+    fi
+    core::fail "${failMessage}"
+  else
+    return 1
   fi
-  core::fail "${failMessage}"
 }
 
 # ## include
