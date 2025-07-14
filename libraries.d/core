@@ -71,6 +71,7 @@ function trap::onExitInternal() {
 
   log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
   if declare -F onExit &>/dev/null; then
+    log::debug "Executing custom ⌜onExit⌝ function ."
     onExit "${exitCode}"
   fi
 
@@ -264,25 +265,26 @@ function trap::unregister() {
 function trap::onSubshellExitInternal() {
   local exitCode="$?"
 
-  if (( exitCode != 0 )); then
-    log::error "Exiting with code ${exitCode}, stack:"
-  elif log::isDebugEnabled; then
-    log::debug "Exiting with code ${exitCode}, stack:"
-  else
-    log::debug "Exiting with code ${exitCode}"
-  fi
-
-  if log::isDebugEnabled || (( exitCode != 0 )); then
-    local symbol="╰"
-    if [[ -n ${FUNCNAME[1]:-} ]]; then
-      symbol="╭"
-    fi
-    log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
-    log::printCallStack 2
-  fi
-
+  log::debug "Exiting subshell ${BASH_SUBSHELL} with code ${exitCode}"
   if declare -F onSubshellExit &>/dev/null; then
+    log::debug "Executing custom ⌜onSubshellExit⌝ function ."
     onSubshellExit "${exitCode}"
+  fi
+
+  if [[ ! -v GLOBAL_SUBSHELL_EXPECTED_EXIT ]]; then
+    if (( exitCode != 0 )); then
+      log::error "Exiting subshell ${BASH_SUBSHELL} with code ${exitCode}, stack:"
+    elif log::isDebugEnabled; then
+      log::debug "Exiting subshell ${BASH_SUBSHELL} with code ${exitCode}, stack:"
+    fi
+    if log::isDebugEnabled || (( exitCode != 0 )); then
+      local symbol="╰"
+      if [[ -n ${FUNCNAME[1]:-} ]]; then
+        symbol="╭"
+      fi
+      log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
+      log::printCallStack 2
+    fi
   fi
 }
 
@@ -290,17 +292,27 @@ function trap::onSubshellExitInternal() {
 #
 # Register the traps for a subshell.
 #
-# - For a subshell, we do not want to execute the "cleanup" because it would also delete
-#   files of the main process.
-# - Additionally, we want to re-register the EXIT trap because it is not properly honored.
-# - External interruptions of the subshell (e.g. kill) are considered to be voluntary so we exit with 0;
-#   note that coproc do not respond to interrupt signals (CTRL+C does not work).
-# - coproc and jobs will not get SIGHUP when the main process ends and they will continue to execute
-#   until killed or until they check that the main process is dead.
+# - ${_OPTION_EXPECTED_EXIT} _as bool_:
+#       (optional) If true, will not display an error if the subshell exits with a non zero code
+#       (defaults to false)
+
+# > - For a subshell, we do not want to execute the "cleanup" because it would also delete
+# >   files of the main process.
+# > - Additionally, we want to re-register the EXIT trap because it is not properly honored.
+# > - External interruptions of the subshell (e.g. kill) are considered to be voluntary so we exit with 0;
+# >   note that coproc do not respond to interrupt signals (CTRL+C does not work).
+# > - coproc and jobs will not get SIGHUP when the main process ends and they will continue to execute
+# >   until killed or until they check that the main process is dead.
 function trap::registerSubshell() {
   if (( BASH_SUBSHELL == 0 )); then
     core::fail "This function should only be called in a subshell."
   fi
+  if [[ ${_OPTION_EXPECTED_EXIT:-false} == "true" ]]; then
+    GLOBAL_SUBSHELL_EXPECTED_EXIT=1
+  else
+    unset -v GLOBAL_SUBSHELL_EXPECTED_EXIT
+  fi
+
   trap trap::onErrorInternal ERR
   trap trap::onSubshellExitInternal EXIT
   # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler

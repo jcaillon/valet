@@ -2,255 +2,6 @@
 
 ## Test script 00.log
 
-### ✅ Testing log::init
-
-❯ `VALET_CONFIG_LOG_FD=5 log::init`
-
-Exited with code: `1`
-
-**Error output**:
-
-```text
-FAIL     The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜5⌝.
-```
-
-❯ `VALET_CONFIG_LOG_FD=/unknown/file/path log::init`
-
-Exited with code: `1`
-
-**Error output**:
-
-```text
-FAIL     The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜/unknown/file/path⌝.
-```
-
-❯ `log::init`
-
-```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
-
-
-local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>&2
-if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
-'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
-if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
-'
-GLOBAL_LOG_WRAP_PADDING='         '
-```
-
-❯ `VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true VALET_CONFIG_LOG_DISABLE_WRAP=false log::init`
-
-```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
-local -n messageToPrintInLog=RETURNED_VALUE
-string::wrapWords "${messageVariableName}" 9999 "         " 9990
-
-
-local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>&2
-if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
-'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
-if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
-'
-GLOBAL_LOG_WRAP_PADDING='         '
-```
-
-❯ `VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=local\ extra=1 log::init`
-
-```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
-
-local extra=1
-local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>&2
-if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
-'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
-if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
-'
-GLOBAL_LOG_WRAP_PADDING='         '
-```
-
-❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init`
-
-```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
-
-
-printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet-temp"
-printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"tmp/log-1987-05-25T01-00-00+0000--PID_001234.log"'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet-temp"
-printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/log-1987-05-25T01-00-00+0000--PID_001234.log"'
-GLOBAL_LOG_WRAP_PADDING='         '
-```
-
-❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
-
-```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
-
-
-printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet-temp"
-printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"tmp/a"'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet-temp"
-printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/a"'
-GLOBAL_LOG_WRAP_PADDING='         '
-```
-
-❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
-
-```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n messageToPrintInLog="${messageVariableName}"
-
-
-printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet-temp"
-printf "%-8s%s%s\n" "${level:0:8}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet.valet.d/logs/a"'
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet-temp"
-printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet.valet.d/logs/a"'
-GLOBAL_LOG_WRAP_PADDING='         '
-```
-
-### ✅ Testing log::parseLogPattern
-
-❯ `log::parseLogPattern static\ string`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='%s\n'
-RETURNED_VALUE2='"static string" '
-RETURNED_VALUE3='0'
-RETURNED_VALUE4=''
-```
-
-❯ `log::parseLogPattern $'static\nstring'`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='%s\n'
-RETURNED_VALUE2='"static
-string" '
-RETURNED_VALUE3='0'
-RETURNED_VALUE4=''
-```
-
-❯ `log::parseLogPattern $'static\n<message>'`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='%s%s\n'
-RETURNED_VALUE2='"static
-" "${messageToPrintInLog:-}" '
-RETURNED_VALUE3='0'
-RETURNED_VALUE4=''
-```
-
-❯ `log::parseLogPattern \<colorFaded\>\<time\>\<colorDefault\>\ \<levelColor\>\<level\>\ \<icon\>\<colorDefault\>\ PID=\<pid\>\ SHLVL=\<subshell\>\ \<function\>\{8s\}@\<source\>:\<line\>\ \<message\>`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='%(%H:%M:%S)T%s%s%-8s%s%s%-5d%s%-2d%s%8s%s%-10s%s%-4s%s%s\n'
-RETURNED_VALUE2='"${EPOCHSECONDS}" " " "${levelColor:-}" "${level:0:8}" " " " PID=" "${BASHPID:0:5}" " SHLVL=" "${BASH_SUBSHELL:0:2}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 8 > 0 ? ${#FUNCNAME[2]} - 8 : 0}" "@" "${BASH_SOURCE[2]:0:10}" ":" "${BASH_LINENO[1]:0:4}" " " "${messageToPrintInLog:-}" '
-RETURNED_VALUE3='63'
-RETURNED_VALUE4=''
-```
-
-❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=true log::parseLogPattern \<icon\>\ \<message\>`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='%-4s%s%s\n'
-RETURNED_VALUE2='"${icon:-}" " " "${messageToPrintInLog:-}" '
-RETURNED_VALUE3='3'
-RETURNED_VALUE4=''
-```
-
-❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=false log::parseLogPattern \<icon\>\ \<message\>`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='%s%s\n'
-RETURNED_VALUE2='" " "${messageToPrintInLog:-}" '
-RETURNED_VALUE3='1'
-RETURNED_VALUE4=''
-```
-
-❯ `log::parseLogPattern \<colorFaded\>\{9s\}\ \<time\>\{\(%FT%H:%M:%S%z\)T\}\ \<levelColor\>\{9s\}\ \<level\>\{9s\}\ \<icon\>\{9s\}\ \<varCOLOR_DEBUG\>\{9s\}\ \<processName\>\{-5s\}\ \<pid\>\{9s\}\ \<subshell\>\{9s\}\ \<function\>\{9s\}\ \<source\>\{9s\}\ \<line\>\{9s\}`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%s%9s%s%-5s%s%9s%s%9s%s%9s%s%9s%s%9s\n'
-RETURNED_VALUE2='" " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " " " "${variableToPrintInLog:${#variableToPrintInLog} - 9 > 0 ? ${#variableToPrintInLog} - 9 : 0}" " " "${processName:0:5}" " " "${BASHPID:${#BASHPID} - 9 > 0 ? ${#BASHPID} - 9 : 0}" " " "${BASH_SUBSHELL:${#BASH_SUBSHELL} - 9 > 0 ? ${#BASH_SUBSHELL} - 9 : 0}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 9 > 0 ? ${#FUNCNAME[2]} - 9 : 0}" " " "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 9 > 0 ? ${#BASH_SOURCE[2]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
-RETURNED_VALUE3='0'
-RETURNED_VALUE4='
-local variableToPrintInLog="${COLOR_DEBUG:-}"
-local processName
-if [[ ${BASHPID} == "1234" ]]; then processName="main"; else processName="${BASHPID}"; fi'
-```
-
-❯ `log::parseLogPattern $'<levelColor><level><colorDefault> <message>\n<wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>'`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='%s%-8s%s%s%s%s%s%-7s%s%-7s%s%-10s%s\n'
-RETURNED_VALUE2='"${levelColor:-}" "${level:0:8}" " " "${messageToPrintInLog:-}" "
-" "${GLOBAL_LOG_WRAP_PADDING}" "[" "${loggedElapsedTime:0:7}" "] [" "${loggedElapsedTimeSinceLastLog:0:7}" "] in [" "${sourceFile:0:10}" "]" '
-RETURNED_VALUE3='9'
-RETURNED_VALUE4='
-time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"; local loggedElapsedTime="${RETURNED_VALUE}"
-time::getProgramElapsedMicroseconds; local -i currentTime=${RETURNED_VALUE}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${RETURNED_VALUE}"; _LOG_ELAPSED_TIME=${currentTime}
-local sourceFile="${BASH_SOURCE[2]##*/}"'
-```
-
-❯ `log::parseLogPattern "${pat}"`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='%s%s%s%s%s%s%s%s%s\n'
-RETURNED_VALUE2='"{\"level\": \"" "${level}" "\", \"message\": \"" "${messageToPrintInLog:-}" "\", \"source\": \"" "${BASH_SOURCE[2]}" "\", \"line\": \"" "${BASH_LINENO[1]}" "\"}" '
-RETURNED_VALUE3='26'
-RETURNED_VALUE4=''
-```
-
-❯ `log::parseLogPattern $'<level>{-2s}\n  <varSTUFF>{-5s}\n  <pid>{-04d}\n  <subshell>{-1s}\n  <function>{-5s}\n  <line>{-03d}\n  <source>{-5s}\n  <sourceFile>{-5s}\n  <elapsedTime>{-5s}\n  <elapsedTimeSinceLastLog>{-5s}\n  '`
-
-Returned variables:
-
-```text
-RETURNED_VALUE='%-2s%s%-5s%s%-04d%s%-1s%s%-5s%s%-03d%s%-5s%s%-5s%s%-5s%s%-5s%s\n'
-RETURNED_VALUE2='"${level:0:2}" "
-  " "${variableToPrintInLog:0:5}" "
-  " "${BASHPID:0:04}" "
-  " "${BASH_SUBSHELL:0:1}" "
-  " "${FUNCNAME[2]:0:5}" "
-  " "${BASH_LINENO[1]:0:03}" "
-  " "${BASH_SOURCE[2]:0:5}" "
-  " "${sourceFile:0:5}" "
-  " "${loggedElapsedTime:0:5}" "
-  " "${loggedElapsedTimeSinceLastLog:0:5}" "
-  " '
-RETURNED_VALUE3='0'
-RETURNED_VALUE4='
-local variableToPrintInLog="${STUFF:-}"
-local sourceFile="${BASH_SOURCE[2]##*/}"
-time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"; local loggedElapsedTime="${RETURNED_VALUE}"
-time::getProgramElapsedMicroseconds; local -i currentTime=${RETURNED_VALUE}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${RETURNED_VALUE}"; _LOG_ELAPSED_TIME=${currentTime}'
-```
-
 ### ✅ Testing with no formatting
 
 ❯ `log::init`
@@ -615,6 +366,278 @@ RETURNED_VALUE2='48'
                                                 sh:300
 ```
 
+### ✅ Testing log::init
+
+❯ `VALET_CONFIG_LOG_FD=5 log::init`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+ 1987-05-25T01:00:00+0000 [31m      FAIL        The file descriptor for the logs 
+                                             VALET_CONFIG_LOG_FD is not valid: ⌜5⌝.
+```
+
+❯ `VALET_CONFIG_LOG_FD=/unknown/file/path log::init`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+ 1987-05-25T01:00:00+0000 [31m      FAIL        The file descriptor for the logs 
+                                             VALET_CONFIG_LOG_FD is not valid: 
+                                             ⌜/unknown/file/path⌝.
+```
+
+❯ `log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
+local -n messageToPrintInLog=RETURNED_VALUE
+string::wrapWords "${messageVariableName}" 90 "                                             " 45
+messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
+messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
+
+
+local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
+GLOBAL_LOG_WRAP_PADDING='                                             '
+```
+
+❯ `VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true VALET_CONFIG_LOG_DISABLE_WRAP=false log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
+local -n messageToPrintInLog=RETURNED_VALUE
+string::wrapWords "${messageVariableName}" 90 "                                             " 45
+
+
+local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
+GLOBAL_LOG_WRAP_PADDING='                                             '
+```
+
+❯ `VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=local\ extra=1 log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
+local -n messageToPrintInLog=RETURNED_VALUE
+string::wrapWords "${messageVariableName}" 90 "                                             " 45
+messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
+messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
+
+local extra=1
+local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
+printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
+if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
+'
+GLOBAL_LOG_WRAP_PADDING='                                             '
+```
+
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
+local -n messageToPrintInLog=RETURNED_VALUE
+string::wrapWords "${messageVariableName}" 90 "                                             " 45
+messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
+messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
+
+
+printf "%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet-temp"
+printf "%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>>"tmp/log-1987-05-25T01-00-00+0000--PID_001234.log"'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet-temp"
+printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/log-1987-05-25T01-00-00+0000--PID_001234.log"'
+GLOBAL_LOG_WRAP_PADDING='                                             '
+```
+
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
+local -n messageToPrintInLog=RETURNED_VALUE
+string::wrapWords "${messageVariableName}" 90 "                                             " 45
+messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
+messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
+
+
+printf "%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet-temp"
+printf "%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>>"tmp/a"'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet-temp"
+printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/a"'
+GLOBAL_LOG_WRAP_PADDING='                                             '
+```
+
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
+
+```text
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
+local -n messageToPrintInLog=RETURNED_VALUE
+string::wrapWords "${messageVariableName}" 90 "                                             " 45
+messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
+messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
+
+
+printf "%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet-temp"
+printf "%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>>"/tmp/valet.valet.d/logs/a"'
+GLOBAL_LOG_PRINT_STATEMENT_STANDARD='printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet-temp"
+printf "%s" "${rawStringToPrintInLog:-}" 1>>"/tmp/valet.valet.d/logs/a"'
+GLOBAL_LOG_WRAP_PADDING='                                             '
+```
+
+### ✅ Testing log::parseLogPattern
+
+❯ `log::parseLogPattern static\ string`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s\n'
+RETURNED_VALUE2='"static string" '
+RETURNED_VALUE3='0'
+RETURNED_VALUE4=''
+```
+
+❯ `log::parseLogPattern $'static\nstring'`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s\n'
+RETURNED_VALUE2='"static
+string" '
+RETURNED_VALUE3='0'
+RETURNED_VALUE4=''
+```
+
+❯ `log::parseLogPattern $'static\n<message>'`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%s\n'
+RETURNED_VALUE2='"static
+" "${messageToPrintInLog:-}" '
+RETURNED_VALUE3='0'
+RETURNED_VALUE4=''
+```
+
+❯ `log::parseLogPattern \<colorFaded\>\<time\>\<colorDefault\>\ \<levelColor\>\<level\>\ \<icon\>\<colorDefault\>\ PID=\<pid\>\ SUBSHELL=\<subshell\>\ \<function\>\{8s\}@\<source\>:\<line\>\ \<message\>`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%(%H:%M:%S)T%s%s%s%-8s%s%-4s%s%s%-5d%s%-2d%s%8s%s%-10s%s%-4s%s%s\n'
+RETURNED_VALUE2='"[90m" "${EPOCHSECONDS}" "[39m" " " "${levelColor:-}" "${level:0:8}" " " "${icon:-}" "[39m" " PID=" "${BASHPID:0:5}" " SUBSHELL=" "${BASH_SUBSHELL:0:2}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 8 > 0 ? ${#FUNCNAME[2]} - 8 : 0}" "@" "${BASH_SOURCE[2]:0:10}" ":" "${BASH_LINENO[1]:0:4}" " " "${messageToPrintInLog:-}" '
+RETURNED_VALUE3='68'
+RETURNED_VALUE4=''
+```
+
+❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=true log::parseLogPattern \<icon\>\ \<message\>`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%-4s%s%s\n'
+RETURNED_VALUE2='"${icon:-}" " " "${messageToPrintInLog:-}" '
+RETURNED_VALUE3='3'
+RETURNED_VALUE4=''
+```
+
+❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=false log::parseLogPattern \<icon\>\ \<message\>`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%s\n'
+RETURNED_VALUE2='" " "${messageToPrintInLog:-}" '
+RETURNED_VALUE3='1'
+RETURNED_VALUE4=''
+```
+
+❯ `log::parseLogPattern \<colorFaded\>\{9s\}\ \<time\>\{\(%FT%H:%M:%S%z\)T\}\ \<levelColor\>\{9s\}\ \<level\>\{9s\}\ \<icon\>\{9s\}\ \<varCOLOR_DEBUG\>\{9s\}\ \<processName\>\{-5s\}\ \<pid\>\{9s\}\ \<subshell\>\{9s\}\ \<function\>\{9s\}\ \<source\>\{9s\}\ \<line\>\{9s\}`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%9s%s%-5s%s%9s%s%9s%s%9s%s%9s%s%9s\n'
+RETURNED_VALUE2='"[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${variableToPrintInLog:${#variableToPrintInLog} - 9 > 0 ? ${#variableToPrintInLog} - 9 : 0}" " " "${processName:0:5}" " " "${BASHPID:${#BASHPID} - 9 > 0 ? ${#BASHPID} - 9 : 0}" " " "${BASH_SUBSHELL:${#BASH_SUBSHELL} - 9 > 0 ? ${#BASH_SUBSHELL} - 9 : 0}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 9 > 0 ? ${#FUNCNAME[2]} - 9 : 0}" " " "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 9 > 0 ? ${#BASH_SOURCE[2]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
+RETURNED_VALUE3='0'
+RETURNED_VALUE4='
+local variableToPrintInLog="${COLOR_DEBUG:-}"
+local processName
+if [[ ${BASHPID} == "1234" ]]; then processName="main"; else processName="${BASHPID}"; fi'
+```
+
+❯ `log::parseLogPattern $'<levelColor><level><colorDefault> <message>\n<wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>'`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%-8s%s%s%s%s%s%s%s%-7s%s%-7s%s%-10s%s%s\n'
+RETURNED_VALUE2='"${levelColor:-}" "${level:0:8}" "[39m" " " "${messageToPrintInLog:-}" "
+" "${GLOBAL_LOG_WRAP_PADDING}" "[90m" "[" "${loggedElapsedTime:0:7}" "] [" "${loggedElapsedTimeSinceLastLog:0:7}" "] in [" "${sourceFile:0:10}" "]" "[39m" '
+RETURNED_VALUE3='9'
+RETURNED_VALUE4='
+time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"; local loggedElapsedTime="${RETURNED_VALUE}"
+time::getProgramElapsedMicroseconds; local -i currentTime=${RETURNED_VALUE}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${RETURNED_VALUE}"; _LOG_ELAPSED_TIME=${currentTime}
+local sourceFile="${BASH_SOURCE[2]##*/}"'
+```
+
+❯ `log::parseLogPattern "${pat}"`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%s%s%s%s%s%s%s%s%s\n'
+RETURNED_VALUE2='"{\"level\": \"" "${level}" "\", \"message\": \"" "${messageToPrintInLog:-}" "\", \"source\": \"" "${BASH_SOURCE[2]}" "\", \"line\": \"" "${BASH_LINENO[1]}" "\"}" '
+RETURNED_VALUE3='26'
+RETURNED_VALUE4=''
+```
+
+❯ `log::parseLogPattern $'<level>{-2s}\n  <varSTUFF>{-5s}\n  <pid>{-04d}\n  <subshell>{-1s}\n  <function>{-5s}\n  <line>{-03d}\n  <source>{-5s}\n  <sourceFile>{-5s}\n  <elapsedTime>{-5s}\n  <elapsedTimeSinceLastLog>{-5s}\n  '`
+
+Returned variables:
+
+```text
+RETURNED_VALUE='%-2s%s%-5s%s%-04d%s%-1s%s%-5s%s%-03d%s%-5s%s%-5s%s%-5s%s%-5s%s\n'
+RETURNED_VALUE2='"${level:0:2}" "
+  " "${variableToPrintInLog:0:5}" "
+  " "${BASHPID:0:04}" "
+  " "${BASH_SUBSHELL:0:1}" "
+  " "${FUNCNAME[2]:0:5}" "
+  " "${BASH_LINENO[1]:0:03}" "
+  " "${BASH_SOURCE[2]:0:5}" "
+  " "${sourceFile:0:5}" "
+  " "${loggedElapsedTime:0:5}" "
+  " "${loggedElapsedTimeSinceLastLog:0:5}" "
+  " '
+RETURNED_VALUE3='0'
+RETURNED_VALUE4='
+local variableToPrintInLog="${STUFF:-}"
+local sourceFile="${BASH_SOURCE[2]##*/}"
+time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"; local loggedElapsedTime="${RETURNED_VALUE}"
+time::getProgramElapsedMicroseconds; local -i currentTime=${RETURNED_VALUE}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${RETURNED_VALUE}"; _LOG_ELAPSED_TIME=${currentTime}'
+```
+
 ## Test script 01.log-level
 
 ### ✅ Testing log levels
@@ -650,8 +673,8 @@ RETURNED_VALUE='trace'
 
 ```text
 ERROR    This is an error message.
-├─ in myCmd::subFunction() at tests.d/lib-log/path/to/subFunction.sh:200
-╰─ in myCmd::function() at tests.d/lib-log/path/to/function.sh:300
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
 ```
 
 ❯ `log::warning This\ is\ a\ warning\ message.`
@@ -733,8 +756,8 @@ Returned code: `1`
 
 ```text
 ERROR    This is an error message.
-├─ in myCmd::subFunction() at tests.d/lib-log/path/to/subFunction.sh:200
-╰─ in myCmd::function() at tests.d/lib-log/path/to/function.sh:300
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
 ```
 
 ❯ `log::warning This\ is\ a\ warning\ message.`

@@ -73,5 +73,6 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 DEBUG    Log level set to trace.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
+DEBUG    Exiting subshell 3 with code 0
 ```
 

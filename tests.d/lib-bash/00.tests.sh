@@ -16,6 +16,8 @@ function main() {
   test_bash::getBuiltinOutput
 }
 
+# shellcheck disable=SC2317
+# shellcheck disable=SC2034
 function test_bash::runInSubshell() {
   test::title "✅ Testing bash::runInSubshell"
 
@@ -25,20 +27,19 @@ function test_bash::runInSubshell() {
 
   test::exec bash::runInSubshell log::info "hello"
 
-  # shellcheck disable=SC2034
-  # shellcheck disable=SC2317
   function subshellThatFails() {
-    # fix stuff for printCallStack
-    GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
-    GLOBAL_STACK_SOURCE_FILES=("core" "core" "core" "/path/to/subFunction.sh" "/path/to/function.sh")
-    GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
-    
     ((0/0)) # This will fail and exit the subshell
     log::info "This line will not be executed because the previous command failed."
   }
 
   test::exec bash::runInSubshell subshellThatFails
   test::exit _OPTION_EXIT_ON_FAIL=true bash::runInSubshell subshellThatFails
+
+  function subshellThatExits() {
+    exit 2
+  }
+
+  test::exec bash::runInSubshell subshellThatExits
 
   unset -f onSubshellExit subshellThatFails
 }

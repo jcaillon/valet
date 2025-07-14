@@ -4,11 +4,6 @@
 function main() {
   test::title "✅ Testing log levels"
 
-  # fix stuff for printCallStack
-  GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
-  GLOBAL_STACK_SOURCE_FILES=("core" "core" "core" "${PWD}/path/to/subFunction.sh" "${PWD}/path/to/function.sh")
-  GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
-
   test::exec log::init
 
   test::exec log::setLevel trace

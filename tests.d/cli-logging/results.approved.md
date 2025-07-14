@@ -193,11 +193,13 @@ Returned code: `1`
 
 ```text
 WARNING  This is for testing valet core functions, the next statement will call a bash error.
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh: line 80: ((: 10/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh: line 76: ((: 10/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((10/0))
-├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
-╰─ in myCmd::function() at /path/to/function.sh:300
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:76
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:522
+├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:368
+╰─ in main() at valet:105
 
 ```
 

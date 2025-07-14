@@ -267,6 +267,8 @@ function selfTest_runSingleTestSuites() {
       : >"${testLogFile}"
 
       progress::update $((testSuitesDoneCount * 100 / ${#testSuiteDirectories[@]})) "Running test suite ⌜${testDirectoryName}⌝."
+      # TODO: to be be replace by bash::runInParallel when we implement
+      # sequential run when n=1
       (
         VALET_CONFIG_LOG_FD="${testLogFile}"
         log::init
@@ -404,7 +406,6 @@ function selfTest_runSingleTestSuite() {
     # This way each test can define any vars or functions without polluting
     # the global execution of the tests.
     if ! (
-      core::setShellOptions
       trap 'selfTest_onExitTestInternal $?' EXIT
       trap 'selfTest_onErrTestInternal' ERR
       selfTest_runSingleTest "${testSuiteDirectory}" "${testScript}" || exit $?

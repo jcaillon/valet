@@ -2,9 +2,6 @@
 
 # shellcheck disable=SC2034
 function main() {
-  test_log::init
-  test_log::parseLogPattern
-
   test::title "✅ Testing with no formatting"
   VALET_CONFIG_LOG_PATTERN="<level> <message>"
   VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=""
@@ -36,15 +33,13 @@ function main() {
   rm -Rf "tmp"
 
   test_log::printCallStack
+
+  test_log::init
+  test_log::parseLogPattern
 }
 
 function test_log::printCallStack() {
   test::title "✅ Testing log::printCallStack"
-
-  # fix stuff for printCallStack
-  GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
-  GLOBAL_STACK_SOURCE_FILES=("core" "core" "core" "/path/to/subFunction.sh" "/path/to/function.sh")
-  GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
 
   test::func log::getCallStack
   test::exec log::printCallStack
@@ -88,7 +83,7 @@ function test_log::parseLogPattern() {
 
   test::func log::parseLogPattern "static"$'\n'"<message>"
 
-  test::func log::parseLogPattern "<colorFaded><time><colorDefault> <levelColor><level> <icon><colorDefault> PID=<pid> SHLVL=<subshell> <function>{8s}@<source>:<line> <message>"
+  test::func log::parseLogPattern "<colorFaded><time><colorDefault> <levelColor><level> <icon><colorDefault> PID=<pid> SUBSHELL=<subshell> <function>{8s}@<source>:<line> <message>"
 
   test::func VALET_CONFIG_ENABLE_NERDFONT_ICONS=true log::parseLogPattern "<icon> <message>"
   test::func VALET_CONFIG_ENABLE_NERDFONT_ICONS=false log::parseLogPattern "<icon> <message>"

@@ -8,7 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- instead of source/include, let it fail and call source on missing function
+- rewrite the bash::runInParallel to use coproc instead of jobs. Allow to run the tasks sequentially if number in parallel is set to 1. Use this in the self-test to replace the subshell.
 - coproc: make sure we see any issue happening in the background
 - in performance tip, document the use of -n
 - self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.

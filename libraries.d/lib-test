@@ -193,14 +193,12 @@ function test_exec() {
   # execute the command
   local -i exitCode=0
   if [[ ${canExit} == "true" ]]; then
-    if ! (eval "${compoundCommand}") 1>>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" 2>>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"; then
+    if ! bash::runInSubshell eval "${compoundCommand}"; then
       exitCode=${PIPESTATUS[0]:-}
     fi
   else
-    if eval "${compoundCommand}" 1>>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" 2>>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"; then
-      :
-    else
-      exitCode=$?
+    if ! eval "${compoundCommand}"; then
+      exitCode=${PIPESTATUS[0]:-}
     fi
   fi
 

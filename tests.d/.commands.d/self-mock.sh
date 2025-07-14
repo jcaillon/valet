@@ -73,10 +73,6 @@ function selfMock1() {
     ;;
   divide-by-zero)
     log::warning "This is for testing valet core functions, the next statement will call a bash error."
-    # fix stuff for printCallStack
-    GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
-    GLOBAL_STACK_SOURCE_FILES=("core" "core" "core" "/path/to/subFunction.sh" "/path/to/function.sh")
-    GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
     ((10/0))
     log::warning "This line should not be reached, the previous command should have failed."
     ;;
