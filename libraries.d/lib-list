@@ -2,8 +2,8 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=lib-tui
-source tui
+# shellcheck source=lib-terminal
+source terminal
 # shellcheck source=lib-fs
 source fs
 
@@ -220,7 +220,7 @@ function list::setViewport() {
   printf -v _LIST_BLANKS_WIDTH "%${_LIST_WIDTH}s" " "
   printf -v _LIST_BLANKS_ITEM_WIDTH "%${_LIST_ITEM_WIDTH}s" " "
 
-  tui::clearCachedVariables _LIST_itemCounterLength _LIST_itemsCounterString _LIST_linesWithScrollBar _LIST_firstLineWithScrollBar
+  bash::clearCachedVariables _LIST_itemCounterLength _LIST_itemsCounterString _LIST_linesWithScrollBar _LIST_firstLineWithScrollBar
 }
 
 # ## list::setItems
@@ -277,17 +277,13 @@ function list::setItems() {
     _LIST_FILTER_STRING=""
     _LIST_ASYNC_FILTERING_RUNNING=false
   else
-    list::filter "${initialFilterString:-}"
+    list::filter "${initialFilterString}"
   fi
 }
 
 # Draw the autocompletion box
 function list::drawItems() {
   local toPrint="${ESC__CURSOR_HIDE}"
-
-_LIST_FILTER_STRING="ae"
-_LIST_FILTERED_ITEMS_SELECTED_INDEX=1
-_LIST_FILTERED_ITEMS_START_INDEX=11
 
   local -i line displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT)) index=${_LIST_FILTERED_ITEMS_START_INDEX}
   _LIST_NB_DISPLAYED_ITEMS=0
@@ -432,7 +428,7 @@ function list::drawCounter() {
     itemsCounterString=""
   fi
 
-  if tui::allVariablesCachedWithValue _LIST_itemCounterLength "${itemCounterLength}" _LIST_itemsCounterString "${itemsCounterString}"; then
+  if bash::allVariablesCachedWithValue _LIST_itemCounterLength "${itemCounterLength}" _LIST_itemsCounterString "${itemsCounterString}"; then
     return 0
   fi
 
@@ -470,7 +466,7 @@ function list::drawScrollBar() {
     firstLineWithScrollBar=$(( ((_LIST_NB_USABLE_LINES_FOR_ITEMS - linesWithScrollBar) * percentViewed) / 100))
   fi
 
-  if tui::allVariablesCachedWithValue _LIST_linesWithScrollBar "${linesWithScrollBar}" _LIST_firstLineWithScrollBar "${firstLineWithScrollBar}"; then
+  if bash::allVariablesCachedWithValue _LIST_linesWithScrollBar "${linesWithScrollBar}" _LIST_firstLineWithScrollBar "${firstLineWithScrollBar}"; then
     return 0
   fi
 
@@ -496,7 +492,7 @@ function list::drawScrollBar() {
   printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
 }
 
-# Draw the scroll bar on the right side of the list.
+# Draw the scroll bar top separator.
 function list::drawTopSeparator() {
   if [[ ${_LIST_DISABLE_TOP_SEPARATOR} == "true" ]]; then
     return 0
@@ -634,7 +630,7 @@ function list::clearVieWport() {
     fi
   fi
 
-  tui::clearBox "${_LIST_TOP}" "${_LIST_LEFT}" "${_LIST_WIDTH}" "${_LIST_HEIGHT}" 2>&3
+  terminal::clearBox "${_LIST_TOP}" "${_LIST_LEFT}" "${_LIST_WIDTH}" "${_LIST_HEIGHT}" 2>&3
 }
 
 function list::destroy() {
@@ -652,7 +648,7 @@ function list::destroy() {
 function list::onKeyBindingPress() {
   local action="${_LIST_KEY_MAPPING[${1}]:-}"
   if [[ -z ${action} ]]; then
-    return 0
+    return 1
   fi
 
   # handle spamming of keys (the actions before this do not need to be protected from spam,

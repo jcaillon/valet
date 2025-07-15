@@ -2,8 +2,8 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=lib-tui
-source tui
+# shellcheck source=lib-terminal
+source terminal
 # shellcheck source=lib-fs
 source fs
 
@@ -429,16 +429,16 @@ function prompt::setItems() {
 
 function prompt_main_loop() {
   # set trap so that interrupt signal sets GLOBAL_SESSION_INTERRUPTED to true
-  tui::setInterruptTrap
+  terminal::setInterruptTrap
   # before starting to wait for inputs, we clear up the key pressed
-  tui::clearKeyPressed
+  terminal::clearKeyPressed
   # setup the terminal to be ready for readline
-  tui::setTerminalOptions
+  terminal::setTerminalOptions
   # rebind some keys to call the callback function prompt_onKeyBindingPress
-  tui::rebindKeymap prompt_onKeyBindingPress
-  tui::rerouteLogs
+  terminal::rebindKeymap prompt_onKeyBindingPress
+  terminal::rerouteLogs
   # we redirect everything done in this function to fd 3 which prints to stderr
-  # we need this because tui::waitForKeyPress redirects stderr to /dev/null
+  # we need this because terminal::waitForKeyPress redirects stderr to /dev/null
   exec 3>&2
 
   # make all match case insensitive
@@ -451,7 +451,7 @@ function prompt_main_loop() {
 
   # main loop
   while true; do
-    if tui::waitForKeyPress -t 0.2; then
+    if terminal::waitForKeyPress -t 0.2; then
       prompt_onKeyPressed "${LAST_KEY_PRESSED}"
     fi
 
@@ -491,9 +491,9 @@ function prompt_main_loop() {
   prompt_clearPrompt
   exec 3>&-
 
-  tui::restoreLogs
-  tui::restoreTerminalOptions
-  tui::restoreInterruptTrap
+  terminal::restoreLogs
+  terminal::restoreTerminalOptions
+  terminal::restoreInterruptTrap
   shopt -u nocasematch
 
   if [[ ${_PROMPT_CANCELLED:-} == "true" ]]; then
@@ -1001,7 +1001,7 @@ function prompt_showItemsBox() {
   fi
 
   # compute the size of the autocomplete box
-  tui::getBestAutocompleteBox "${_LIST_FORCED_TOP:-${_LIST_START_LINE}}" "${_LIST_FORCED_LEFT:-${preferredLeftPosition}}" "${_LIST_FORCED_HEIGHT:-${_LIST_PREFERRED_HEIGHT}}" "${_LIST_FORCED_WIDTH:-${_LIST_PREFERRED_WIDTH}}" "${_LIST_MAX_HEIGHT}" "${_LIST_FORCE_BELOW}" "${_LIST_ENABLE_PROMPT}"
+  terminal::getBestAutocompleteBox "${_LIST_FORCED_TOP:-${_LIST_START_LINE}}" "${_LIST_FORCED_LEFT:-${preferredLeftPosition}}" "${_LIST_FORCED_HEIGHT:-${_LIST_PREFERRED_HEIGHT}}" "${_LIST_FORCED_WIDTH:-${_LIST_PREFERRED_WIDTH}}" "${_LIST_MAX_HEIGHT}" "${_LIST_FORCE_BELOW}" "${_LIST_ENABLE_PROMPT}"
   _LIST_TOP="${RETURNED_VALUE}"
   _LIST_LEFT="${RETURNED_VALUE2}"
   _LIST_WIDTH="${RETURNED_VALUE3}"
@@ -1039,7 +1039,7 @@ function prompt_showError() {
 
   # compute the height of the box where we can display error messages
   # This box should fit within the autocomplete width
-  tui::getBestAutocompleteBox "${_PROMPT_ITEMS_BOX_FORCED_TOP:-${_PROMPT_START_LINE}}" "${_PROMPT_ITEMS_BOX_FORCED_LEFT:-${_PROMPT_START_COLUMN}}" "${_PROMPT_ITEMS_BOX_FORCED_HEIGHT:-${errorLinesNeeded}}" "${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
+  terminal::getBestAutocompleteBox "${_PROMPT_ITEMS_BOX_FORCED_TOP:-${_PROMPT_START_LINE}}" "${_PROMPT_ITEMS_BOX_FORCED_LEFT:-${_PROMPT_START_COLUMN}}" "${_PROMPT_ITEMS_BOX_FORCED_HEIGHT:-${errorLinesNeeded}}" "${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
   _PROMPT_ERROR_BOX_TOP="${RETURNED_VALUE}"
   _PROMPT_ERROR_BOX_LEFT="${RETURNED_VALUE2}"
   _PROMPT_ERROR_BOX_WIDTH="${RETURNED_VALUE3}"
@@ -1076,7 +1076,7 @@ function prompt_clearErrorBox() {
     fi
   fi
 
-  tui::clearBox "${_PROMPT_ERROR_BOX_TOP}" "${_PROMPT_ERROR_BOX_LEFT}" "${_PROMPT_ERROR_BOX_WIDTH}" "${_PROMPT_ERROR_BOX_HEIGHT}" 2>&3
+  terminal::clearBox "${_PROMPT_ERROR_BOX_TOP}" "${_PROMPT_ERROR_BOX_LEFT}" "${_PROMPT_ERROR_BOX_WIDTH}" "${_PROMPT_ERROR_BOX_HEIGHT}" 2>&3
 
   _PROMPT_ERROR_BOX_SHOWN=false
 }
@@ -1314,7 +1314,7 @@ function prompt_getDisplayedPromptString() {
 
 # Clear the multi-line prompt
 function prompt_clearMultiLinePrompt() {
-  tui::clearBox "${_PROMPT_START_LINE}" "${_PROMPT_START_COLUMN}" "${_PROMPT_WIDTH}" "${_PROMPT_NB_PROMPT_LINES}"
+  terminal::clearBox "${_PROMPT_START_LINE}" "${_PROMPT_START_COLUMN}" "${_PROMPT_WIDTH}" "${_PROMPT_NB_PROMPT_LINES}"
 }
 
 function prompt_drawMultiLinePrompt() {

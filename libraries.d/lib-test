@@ -473,11 +473,11 @@ function test::fail() {
 
 # ## test::setTerminalInputs
 #
-# Replaces the functions `tui::waitForChar` and `tui::waitForKeyPress` by custom functions
+# Replaces the functions `terminal::waitForChar` and `terminal::waitForKeyPress` by custom functions
 # that return keys defined as an input of this function.
 #
 # - $@: **keys** _as string_:
-#       The keys to return when `tui::waitForChar` or `tui::waitForKeyPress` are called.
+#       The keys to return when `terminal::waitForChar` or `terminal::waitForKeyPress` are called.
 #       Keys are consumed in the order they are provided.
 #
 # ```bash
@@ -487,16 +487,16 @@ function test::fail() {
 function test::setTerminalInputs() {
   if [[ ! -v TEST_TERMINAL_INPUTS ]]; then
     # override the default functions
-    function tui::waitForChar() {
+    function terminal::waitForChar() {
       if ((TEST_TERMINAL_INPUTS_INDEX >= ${#TEST_TERMINAL_INPUTS[@]})); then
-        test::fail "No more terminal inputs available, but tui::waitForChar was called."
+        test::fail "No more terminal inputs available, but terminal::waitForChar was called."
       fi
       LAST_KEY_PRESSED="${TEST_TERMINAL_INPUTS[${TEST_TERMINAL_INPUTS_INDEX}]}"
       TEST_TERMINAL_INPUTS_INDEX=$((TEST_TERMINAL_INPUTS_INDEX + 1))
     }
-    function tui::waitForKeyPress() {
+    function terminal::waitForKeyPress() {
       if ((TEST_TERMINAL_INPUTS_INDEX >= ${#TEST_TERMINAL_INPUTS[@]})); then
-        test::fail "No more terminal inputs available, but tui::waitForKeyPress was called."
+        test::fail "No more terminal inputs available, but terminal::waitForKeyPress was called."
       fi
       # shellcheck disable=SC2034
       LAST_KEY_PRESSED="${TEST_TERMINAL_INPUTS[${TEST_TERMINAL_INPUTS_INDEX}]}"

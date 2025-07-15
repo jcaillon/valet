@@ -1,36 +1,10 @@
-# Test suite lib-tui
+# Test suite lib-terminal
 
-## Test script 00.tui
+## Test script 00.terminal
 
-### ✅ Testing tui::allVariablesCachedWithValue
+### ✅ Testing terminal::createSpace
 
-❯ `tui::allVariablesCachedWithValue VAR1 val1 VAR2 val2`
-
-Returned code: `1`
-
-❯ `tui::allVariablesCachedWithValue VAR1 val1`
-
-❯ `tui::allVariablesCachedWithValue VAR1 val2`
-
-Returned code: `1`
-
-❯ `tui::clearCachedVariables`
-
-❯ `tui::allVariablesCachedWithValue VAR2 val2`
-
-Returned code: `1`
-
-❯ `tui::clearCachedVariables VAR2`
-
-❯ `tui::allVariablesCachedWithValue VAR2 val2`
-
-Returned code: `1`
-
-❯ `tui::allVariablesCachedWithValue VAR2 val2`
-
-### ✅ Testing tui::createSpace
-
-❯ `tui::createSpace 1`
+❯ `terminal::createSpace 1`
 
 **Error output**:
 
@@ -38,7 +12,7 @@ Returned code: `1`
 [?25l[1G[2K
 ```
 
-❯ `tui::createSpace 20`
+❯ `terminal::createSpace 20`
 
 **Error output**:
 
@@ -55,7 +29,7 @@ Returned code: `1`
 [9F[0J
 ```
 
-❯ `tui::createSpace 5`
+❯ `terminal::createSpace 5`
 
 **Error output**:
 
@@ -67,23 +41,31 @@ Returned code: `1`
 [4F[0J
 ```
 
-### ✅ Testing tui::getCursorPosition
+### ✅ Testing terminal::getCursorPosition
 
-❯ `printf '\e[%sR' '123;456' | tui::getCursorPosition`
+❯ `printf '\e[%sR' '123;456' | terminal::getCursorPosition`
+
+❯ `terminal::getCursorPosition`
+
+**Error output**:
+
+```text
+[6n
+```
 
 ```text
 GLOBAL_CURSOR_LINE='123'
 GLOBAL_CURSOR_COLUMN='456'
 ```
 
-### ✅ Testing tui::clearBox
+### ✅ Testing terminal::clearBox
 
 ```text
 GLOBAL_CURSOR_LINE='42'
 GLOBAL_CURSOR_COLUMN='42'
 ```
 
-❯ `tui::clearBox 1 1 10 10`
+❯ `terminal::clearBox 1 1 10 10`
 
 **Error output**:
 
@@ -91,7 +73,7 @@ GLOBAL_CURSOR_COLUMN='42'
 [?25l[1;1H[10X[2;1H[10X[3;1H[10X[4;1H[10X[5;1H[10X[6;1H[10X[7;1H[10X[8;1H[10X[9;1H[10X[10;1H[10X[42;42H
 ```
 
-❯ `tui::clearBox 10 10 5 5`
+❯ `terminal::clearBox 10 10 5 5`
 
 **Error output**:
 
@@ -99,14 +81,14 @@ GLOBAL_CURSOR_COLUMN='42'
 [?25l[10;10H[5X[11;10H[5X[12;10H[5X[13;10H[5X[14;10H[5X[42;42H
 ```
 
-### ✅ Testing tui::getBestAutocompleteBox
+### ✅ Testing terminal::getBestAutocompleteBox
 
 ```text
 GLOBAL_LINES='10'
 GLOBAL_COLUMNS='10'
 ```
 
-❯ `tui::getBestAutocompleteBox 1 1 20 20`
+❯ `terminal::getBestAutocompleteBox 1 1 20 20`
 
 Returned variables:
 
@@ -117,7 +99,7 @@ RETURNED_VALUE3='10'
 RETURNED_VALUE4='9'
 ```
 
-❯ `tui::getBestAutocompleteBox 1 1 20 20 2`
+❯ `terminal::getBestAutocompleteBox 1 1 20 20 2`
 
 Returned variables:
 
@@ -128,7 +110,7 @@ RETURNED_VALUE3='10'
 RETURNED_VALUE4='2'
 ```
 
-❯ `tui::getBestAutocompleteBox 1 1 5 5`
+❯ `terminal::getBestAutocompleteBox 1 1 5 5`
 
 Returned variables:
 
@@ -139,7 +121,7 @@ RETURNED_VALUE3='5'
 RETURNED_VALUE4='5'
 ```
 
-❯ `tui::getBestAutocompleteBox 5 5 6 9`
+❯ `terminal::getBestAutocompleteBox 5 5 6 9`
 
 Returned variables:
 
@@ -150,7 +132,7 @@ RETURNED_VALUE3='9'
 RETURNED_VALUE4='5'
 ```
 
-❯ `tui::getBestAutocompleteBox 7 7 10 4`
+❯ `terminal::getBestAutocompleteBox 7 7 10 4`
 
 Returned variables:
 
@@ -161,7 +143,7 @@ RETURNED_VALUE3='4'
 RETURNED_VALUE4='6'
 ```
 
-❯ `tui::getBestAutocompleteBox 7 7 10 10 '' true`
+❯ `terminal::getBestAutocompleteBox 7 7 10 10 '' true`
 
 Returned variables:
 
@@ -172,7 +154,7 @@ RETURNED_VALUE3='10'
 RETURNED_VALUE4='3'
 ```
 
-❯ `tui::getBestAutocompleteBox 1 1 10 10 999 true true 999 5`
+❯ `terminal::getBestAutocompleteBox 1 1 10 10 999 true true 999 5`
 
 Returned variables:
 
@@ -183,7 +165,7 @@ RETURNED_VALUE3='10'
 RETURNED_VALUE4='4'
 ```
 
-❯ `tui::getBestAutocompleteBox 1 1 20 20 '' '' false`
+❯ `terminal::getBestAutocompleteBox 1 1 20 20 '' '' false`
 
 Returned variables:
 
@@ -194,7 +176,7 @@ RETURNED_VALUE3='10'
 RETURNED_VALUE4='10'
 ```
 
-❯ `tui::getBestAutocompleteBox 1 1 20 20 2 '' false`
+❯ `terminal::getBestAutocompleteBox 1 1 20 20 2 '' false`
 
 Returned variables:
 
@@ -205,7 +187,7 @@ RETURNED_VALUE3='10'
 RETURNED_VALUE4='2'
 ```
 
-❯ `tui::getBestAutocompleteBox 1 1 5 5 '' '' false`
+❯ `terminal::getBestAutocompleteBox 1 1 5 5 '' '' false`
 
 Returned variables:
 
@@ -216,7 +198,7 @@ RETURNED_VALUE3='5'
 RETURNED_VALUE4='5'
 ```
 
-❯ `tui::getBestAutocompleteBox 5 5 6 9 '' '' false`
+❯ `terminal::getBestAutocompleteBox 5 5 6 9 '' '' false`
 
 Returned variables:
 
@@ -227,7 +209,7 @@ RETURNED_VALUE3='9'
 RETURNED_VALUE4='6'
 ```
 
-❯ `tui::getBestAutocompleteBox 7 7 10 4 '' '' false`
+❯ `terminal::getBestAutocompleteBox 7 7 10 4 '' '' false`
 
 Returned variables:
 
@@ -238,7 +220,7 @@ RETURNED_VALUE3='4'
 RETURNED_VALUE4='7'
 ```
 
-❯ `tui::getBestAutocompleteBox 7 7 4 4 '' '' false`
+❯ `terminal::getBestAutocompleteBox 7 7 4 4 '' '' false`
 
 Returned variables:
 
@@ -249,7 +231,7 @@ RETURNED_VALUE3='4'
 RETURNED_VALUE4='4'
 ```
 
-❯ `tui::getBestAutocompleteBox 7 7 10 10 '' true false`
+❯ `terminal::getBestAutocompleteBox 7 7 10 10 '' true false`
 
 Returned variables:
 

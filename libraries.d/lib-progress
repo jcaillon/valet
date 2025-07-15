@@ -2,8 +2,8 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=lib-tui
-source tui
+# shellcheck source=lib-terminal
+source terminal
 
 #===============================================================
 # >>> Wait spinner / progress bars
@@ -95,7 +95,7 @@ function progress::start() {
   printf "%s" "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
 
   # disable echoing when we type something
-  tui::setTerminalOptions
+  terminal::setTerminalOptions
 
   _PROGRESS_BAR_RUNNING=true
 
@@ -129,7 +129,7 @@ function progress::stop() {
   printf "%s" "${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
 
   # restore the key echoing
-  tui::restoreTerminalOptions
+  terminal::restoreTerminalOptions
 }
 
 # ## progress::update

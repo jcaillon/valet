@@ -2,6 +2,30 @@
 
 ## Test script 00.tests
 
+### ✅ Testing bash::allVariablesCachedWithValue
+
+❯ `bash::allVariablesCachedWithValue VAR1 val1 VAR2 val2`
+
+Returned code: `1`
+
+❯ `bash::allVariablesCachedWithValue VAR1 val1`
+
+❯ `bash::allVariablesCachedWithValue VAR1 val2`
+
+Returned code: `1`
+
+❯ `bash::clearCachedVariables`
+
+❯ `bash::allVariablesCachedWithValue VAR2 val2`
+
+❯ `bash::clearCachedVariables VAR2`
+
+❯ `bash::allVariablesCachedWithValue VAR2 val2`
+
+Returned code: `1`
+
+❯ `bash::allVariablesCachedWithValue VAR2 val2`
+
 ### ✅ Testing bash::runInSubshell
 
 ❯ `bash::runInSubshell log::info hello`
@@ -20,7 +44,7 @@ Returned code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.tests.sh: line 31: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.tests.sh: line 47: ((: 0/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0/0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -35,7 +59,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.tests.sh: line 31: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.tests.sh: line 47: ((: 0/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0/0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200

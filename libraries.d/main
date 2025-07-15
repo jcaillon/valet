@@ -95,7 +95,7 @@ styles::init
 
 # Export terminal size on window resize if we are in interactive mode.
 if [[ -t ${GLOBAL_FD_TUI} ]]; then
-  tui::getTerminalSize
+  terminal::getTerminalSize
   if [[ ${GLOBAL_EXPORTED_FOR_PROMPT:-} != "true" ]]; then
     # hide the cursor (we restore on exit)
     printf "%s" "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"

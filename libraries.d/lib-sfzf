@@ -5,8 +5,8 @@
 # sfzf stands for full screen fuzzy search.
 # This script uses a lot of "private" variables (starting with _).
 
-# shellcheck source=lib-tui
-source tui
+# shellcheck source=lib-terminal
+source terminal
 # shellcheck source=lib-bash
 source bash
 # shellcheck source=lib-array
@@ -80,20 +80,20 @@ function sfzf::show() {
   trap 'onResize;' SIGWINCH
 
   # still need to handle the exit, but we also need to reset the terminal when exiting.
-  trap 'tui::switchBackFromFullScreen; trap::onExitInternal;' EXIT
+  trap 'terminal::switchBackFromFullScreen; trap::onExitInternal;' EXIT
 
   # interrupting closes the interactive session
   trap 'SFZF_CLOSE_INTERACTIVE_SESSION=true;' SIGINT SIGQUIT
 
-  tui::switchToFullScreen
+  terminal::switchToFullScreen
   sfzfDrawScreen "${prompt}"
 
   # before starting to wait for inputs, we clear up the key pressed
-  tui::clearKeyPressed
+  terminal::clearKeyPressed
 
   # main loop
   while true; do
-    if tui::waitForChar -t 0.05; then
+    if terminal::waitForChar -t 0.05; then
       onKeyPressed "${LAST_KEY_PRESSED}"
     fi
 
@@ -117,7 +117,7 @@ function sfzf::show() {
 
   # restore the initial traps
   eval "${originalTraps}"
-  tui::switchBackFromFullScreen
+  terminal::switchBackFromFullScreen
 
   if ((SFZF_FINAL_SELECTION_INDEX >= 0)); then
     RETURNED_VALUE="${SFZF_ORIGINAL_ITEMS[${SFZF_FINAL_SELECTION_INDEX}]}"
@@ -667,7 +667,7 @@ function onResize() {
   # export terminal size does not work if both 1 and 2 fd
   # are not the terminal. We need to temporarily redirect
   exec 2>&4 4>&-
-  tui::getTerminalSize
+  terminal::getTerminalSize
   exec 4>&2 2>"${SFZF_TEMPORARY_ERROR_FILE}"
   GLOBAL_SCREEN_REDRAW_REQUIRED=true;
 }

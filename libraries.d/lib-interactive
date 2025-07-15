@@ -2,8 +2,8 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=lib-tui
-source tui
+# shellcheck source=lib-terminal
+source terminal
 
 #===============================================================
 # >>> Interactive prompts
@@ -49,7 +49,7 @@ function interactive::askForConfirmation() {
 # interactive::askForConfirmationRaw
 # ```
 function interactive::askForConfirmationRaw() {
-  tui::createSpace 2
+  terminal::createSpace 2
 
   # print the current state (then move to column 1 to be ready to rewrite)
   printf ' %s%s%s' \
@@ -60,7 +60,7 @@ function interactive::askForConfirmationRaw() {
   local -i returnedCode=0
   while true; do
     # wait and handle key press
-    if tui::waitForChar -t 1; then
+    if terminal::waitForChar -t 1; then
       case ${LAST_KEY_PRESSED} in
       $'\n' | ' ' | $'\r' | o | y)
         break
@@ -153,7 +153,7 @@ function interactive::promptYesNo() {
 function interactive::promptYesNoRaw() {
   local state=${1:-true}
 
-  tui::createSpace 2
+  terminal::createSpace 2
 
   printf '%s' "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
 
@@ -177,7 +177,7 @@ function interactive::promptYesNoRaw() {
       "${STYLE_RESET}${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
 
     # wait and handle key press
-    if tui::waitForChar -t 1; then
+    if terminal::waitForChar -t 1; then
       case ${LAST_KEY_PRESSED} in
       $'\n' | ' ')
         break

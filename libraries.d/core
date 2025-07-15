@@ -103,7 +103,7 @@ function trap::onExitInternal() {
 # It is executed in the same shell that has been interrupted, as if we called this function
 # at the line executed at the moment when the interruption took place.
 function trap::onInterruptInternal() {
-  if ! declare -F tui::restoreTerminalOptions &>/dev/null; then
+  if ! declare -F terminal::restoreTerminalOptions &>/dev/null; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
   log::print "WARNING" "${ICON_STOPPED:-}" "STOPPED" "Program interrupted by the user."
@@ -144,7 +144,7 @@ function trap::onTerminateInternal() {
 
 # This function is called when terminal changes its size.
 function trap::onResizeInternal() {
-  tui::getTerminalSize
+  terminal::getTerminalSize
   # shellcheck disable=SC2034
   GLOBAL_SCREEN_REDRAW_REQUIRED=true
   # need to re init the logs because might depend on the number of columns for wrapping
@@ -180,13 +180,13 @@ function trap::onCleanUpInternal() {
   fi
 
   # if we were in interactive mode, we need to restore the logs
-  if declare -F tui::restoreLogs &>/dev/null; then
-    tui::restoreLogs
+  if declare -F terminal::restoreLogs &>/dev/null; then
+    terminal::restoreLogs
   fi
 
   # restore tty settings if needed
-  if declare -F tui::restoreTerminalOptions &>/dev/null; then
-    tui::restoreTerminalOptions true
+  if declare -F terminal::restoreTerminalOptions &>/dev/null; then
+    terminal::restoreTerminalOptions true
   fi
 
   fs::cleanTempFiles
@@ -461,7 +461,7 @@ function fs::cleanTempFiles() {
 # >>> Terminal UI
 #===============================================================
 
-# ## tui::getTerminalSize
+# ## terminal::getTerminalSize
 #
 # This function exports the terminal size.
 #
@@ -471,11 +471,11 @@ function fs::cleanTempFiles() {
 # - `GLOBAL_LINES`: The number of lines in the terminal.
 #
 # ```bash
-# tui::getTerminalSize
+# terminal::getTerminalSize
 # printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
 # ```
 # shellcheck disable=SC2034
-function tui::getTerminalSize() {
+function terminal::getTerminalSize() {
   shopt -s checkwinsize
   # the following subshell is required to correctly compute the columns and lines
   # the bash manual says these are computed after the execution of an external command

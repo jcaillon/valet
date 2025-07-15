@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 function main() {
+  test_bash::allVariablesCachedWithValue
   test_bash::runInSubshell
   test_bash::isFdValid
   test_bash::getFunctionDefinitionWithGlobalVars
@@ -14,6 +15,21 @@ function main() {
   test_bash::isCommand
   test_bash::isFunction
   test_bash::getBuiltinOutput
+}
+
+function test_bash::allVariablesCachedWithValue() {
+  test::title "✅ Testing bash::allVariablesCachedWithValue"
+
+  test::func bash::allVariablesCachedWithValue VAR1 val1 VAR2 val2
+  test::func bash::allVariablesCachedWithValue VAR1 val1
+  test::func bash::allVariablesCachedWithValue VAR1 val2
+
+  # shellcheck disable=SC2119
+  test::func bash::clearCachedVariables
+  test::func bash::allVariablesCachedWithValue VAR2 val2
+  test::func bash::clearCachedVariables VAR2
+  test::func bash::allVariablesCachedWithValue VAR2 val2
+  test::func bash::allVariablesCachedWithValue VAR2 val2
 }
 
 # shellcheck disable=SC2317

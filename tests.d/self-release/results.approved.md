@@ -108,9 +108,9 @@ INFO     Writing the 190 functions documentation to the core libraries docs.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/sfzf.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/string.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/system.md
+🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/terminal.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/test.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/time.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/tui.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/version.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/windows.md
 🙈 mocked exe::invoke cp -f $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/config.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md

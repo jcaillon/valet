@@ -5,14 +5,11 @@ export VALET_CONFIG_LOG_FD=tmp/log
 export VALET_CONFIG_LOG_PATTERN="<elapsedTime>{8s} [<pid>{04s}:<subshell>{1s}] <sourceFile>{-5s}:<line>{-4s} <level>{-4s}  <message>"
 
 source "$(valet --source)"
-include list bash profiler
+include list bash
 
 
 # load the file
 mapfile -t MY_ARRAY < "scratchpad/words"
-
-
-
 
 MY_ARRAY=(
   "apple"$'\n'"(green)"
@@ -35,9 +32,9 @@ MY_ARRAY=(
 # )
 _OPTION_ITEM_HEIGHT=2
 _OPTION_FORCE_SHOW_ITEMS_COUNT=true
-
 tui::createSpace 10
 tui::getCursorPosition
+log::info "Drawing the list with ${#MY_ARRAY[@]} items."
 
 time::startTimer
 _OPTION_TOP=${GLOBAL_CURSOR_LINE} _OPTION_HEIGHT=10 list::setViewport
@@ -55,14 +52,6 @@ _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
 echo "${ESC__CURSOR_MOVE__}$((GLOBAL_CURSOR_LINE + 8));1${__ESC__TO}"
 
 # bash::sleep 1
-
-VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS=true
-VALET_CONFIG_KEEP_ALL_PROFILER_LINES=true
-include http
-
-profiler::enable "tmp/profiler.log"
-http::request GET http://httpbin.org/get
-profiler::disable
 
 # option for title, option for text on the bottom left
 # fix the counter

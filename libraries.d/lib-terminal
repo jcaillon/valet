@@ -1,0 +1,824 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# shellcheck source=lib-bash
+source bash
+# shellcheck source=lib-fs
+source fs
+
+
+#===============================================================
+# >>> Interactive utilities
+#===============================================================
+
+# ## terminal::createSpace
+#
+# This function creates empty lines from the current cursor position.
+# Then it moves back to its original line (at the column 1).
+# The current cursor line counts, meaning that `terminal::createSpace 1` will
+# not do anything but clear the current line.
+#
+# This effectively creates a space in the terminal (scroll up if we are at the bottom).
+# It does not create more space than the number of lines in the terminal.
+#
+# - $1: **number of lines** _as int_:
+#       the number of lines to create
+#
+# ```bash
+# terminal::createSpace 5
+# ```
+function terminal::createSpace() {
+  local -i nbLines="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  nbLines=$((nbLines > GLOBAL_LINES ? GLOBAL_LINES : nbLines))
+  if (( nbLines <= 1 )); then
+    printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
+    return 0
+  fi
+
+  nbLines=$((nbLines - 1))
+  printf -v scrollInstruction "%${nbLines}s" " "
+  scrollInstruction="${scrollInstruction// /$'\n'}"
+
+  printf '%s' "${ESC__CURSOR_HIDE}${scrollInstruction}${ESC__CURSOR_MOVE__}${nbLines}${__ESC__START_OF_LINE_UP}${ESC__ERASE_LINES_BELOW}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
+}
+
+# ## terminal::getCursorPosition
+#
+# Get the current cursor position.
+#
+# Returns:
+#
+# - `GLOBAL_CURSOR_LINE`: the line number
+# - `GLOBAL_CURSOR_COLUMN`: the column number
+#
+# ```bash
+# terminal::getCursorPosition
+# ```
+function terminal::getCursorPosition() {
+  local IFS
+  # we request the position
+  printf "%s" "${ESC__REQUEST_CURSOR_POSITION}" 1>&"${GLOBAL_FD_TUI}"
+  # then read \e[line;colR
+  # shellcheck disable=SC2034
+  IFS=';' read -d 'R' -sr GLOBAL_CURSOR_LINE GLOBAL_CURSOR_COLUMN || :
+  GLOBAL_CURSOR_LINE="${GLOBAL_CURSOR_LINE#$'\e['}"
+}
+
+# ## terminal::switchToFullScreen
+#
+# Call this function to start an interactive session in full screen mode.
+# This function will switch to the alternate screen, hide the cursor and clear the screen.
+#
+# You should call terminal::switchBackFromFullScreen at the end of the interactive session.
+#
+# ```bash
+# terminal::switchToFullScreen
+# ```
+function terminal::switchToFullScreen() {
+  if [[ ! -t ${GLOBAL_FD_TUI} ]]; then
+    core::fail "This function can only be used in an interactive session. Did you already called terminal::switchBackFromFullScreen?"
+  fi
+
+  _INTERACTIVE_FULL_SCREEN_MODE=true
+
+  # disable echoing when we type something
+  terminal::setTerminalOptions
+
+  # switch to the alternate screen, hide the cursor and clear the screen
+  printf '%s' "${ESC__ENABLE_ALTERNATE_BUFFER_SCREEN}${ESC__CURSOR_HIDE}${ESC__ERASE_SCREEN}" 1>&"${GLOBAL_FD_TUI}"
+}
+
+# ## terminal::switchBackFromFullScreen
+#
+# Call this function to switch back from the full screen mode.
+#
+# - This function will restore the terminal state and show the cursor.
+# - It will also restore the key echoing.
+#
+# ```bash
+# terminal::switchBackFromFullScreen
+# ```
+function terminal::switchBackFromFullScreen() {
+  _INTERACTIVE_FULL_SCREEN_MODE=false
+
+  # restore the terminal state
+  printf '%s' "${ESC__ERASE_SCREEN}${ESC__TEXT_RESET}${ESC__DISABLE_ALTERNATE_BUFFER_SCREEN}" 1>&"${GLOBAL_FD_TUI}"
+
+  # restore stty
+  terminal::restoreTerminalOptions
+}
+
+# ## terminal::setTerminalOptions
+#
+# Set the terminal options to enable a satisfying and consistent behavior
+# for the GNU readline library.
+# Disable the echo of the terminal, no longer display the characters typed by the user.
+#
+# ```bash
+# terminal::setTerminalOptions
+# ```
+function terminal::setTerminalOptions() {
+  if [[ -z ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]] && command -v stty &>/dev/null; then
+    bash::getBuiltinOutput "stty" "-g" || { log::warning "Unable to get the stty configuration: ${RETURNED_VALUE}"; RETURNED_VALUE=""; }
+    _INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
+    # -echo is to suppress echoing characters typed by the user
+    # All the other options are there to enable a satisfying behavior for the GNU readline library
+    # used when we call read -e
+    stty -ixon nl0 cr0 tab0 ff0 icrnl -inlcr -onlret -icanon erase ^B werase ^W -echo -echok -echonl -echoe -echoke -ctlecho &>/dev/null || :
+  fi
+}
+
+# ## terminal::restoreTerminalOptions
+#
+# Restore the terminal options to their original state.
+# Should be called after `terminal::setTerminalOptions`.
+#
+# - $1: force _as bool_:
+#       (optional) force the restoration of the stty configuration.
+#       By default, the restoration is only done if we are not in full screen mode when called.
+#       (defaults to false)
+#
+# ```bash
+# terminal::restoreTerminalOptions
+# ```
+# shellcheck disable=SC2120
+function terminal::restoreTerminalOptions() {
+  if [[ ${_INTERACTIVE_FULL_SCREEN_MODE:-${GLOBAL_EXPORTED_FOR_PROMPT:-}} == "true" && ${1:-} != "true" ]]; then
+    # don't restore if we do not force it and we are either in full screen or exported mode
+    return 0
+  fi
+  if [[ -n ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
+    stty "${_INTERACTIVE_STTY_SAVED_CONFIG}" &>/dev/null || :
+    unset -v _INTERACTIVE_STTY_SAVED_CONFIG
+  fi
+}
+
+# ## terminal::rerouteLogs
+#
+# Reroute the logs to a temporary file.
+# The logs will be displayed when calling `terminal::restoreLogs`
+#
+# ```bash
+# terminal::rerouteLogs
+# ```
+function terminal::rerouteLogs() {
+  if [[ ! -v _TUI_LOG_FILE ]]; then
+    _OPTION_PATH_ONLY=true fs::createTempFile
+    _TUI_LOG_FILE="${RETURNED_VALUE}"
+  fi
+  _TUI_ORIGINAL_LOG_FD="${VALET_CONFIG_LOG_FD:-}"
+  VALET_CONFIG_LOG_FD="${_TUI_LOG_FILE}"
+  log::init
+}
+
+# ## terminal::restoreLogs
+#
+# Restore the logs to their original state.
+# Should be called after `terminal::rerouteLogs` and at the end of an interactive session.
+#
+# ```bash
+# terminal::restoreLogs
+# ```
+function terminal::restoreLogs() {
+  if [[ ! -v _TUI_LOG_FILE || ! -v _TUI_ORIGINAL_LOG_FD ]]; then
+    return 0
+  fi
+  if [[ -n ${_TUI_ORIGINAL_LOG_FD} ]]; then
+    VALET_CONFIG_LOG_FD="${_TUI_ORIGINAL_LOG_FD}"
+  else
+    unset -v VALET_CONFIG_LOG_FD
+  fi
+  log::init
+  unset -v _TUI_ORIGINAL_LOG_FD
+
+  # display the accumulated logs
+  if [[ -s "${_TUI_LOG_FILE}" ]]; then
+    fs::readFile "${_TUI_LOG_FILE}"
+    printf '%s' "${RETURNED_VALUE}" 1>&"${GLOBAL_FD_LOG}"
+  fi
+}
+
+# ## terminal::setInterruptTrap
+#
+# Set a trap to catch the interrupt signal (SIGINT).
+# When the user presses Ctrl+C, the GLOBAL_SESSION_INTERRUPTED variable will be set to true.
+#
+# ```bash
+# terminal::setInterruptTrap
+# ```
+function terminal::setInterruptTrap() {
+  # shellcheck disable=SC2034
+  GLOBAL_SESSION_INTERRUPTED=false
+  if [[ -z ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
+    # save the original traps so we can restore them later
+    bash::getBuiltinOutput trap -p SIGINT SIGQUIT
+    _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP="${RETURNED_VALUE}"
+
+    # interrupting sets GLOBAL_SESSION_INTERRUPTED to true
+    trap 'GLOBAL_SESSION_INTERRUPTED=true;' SIGINT SIGQUIT
+  fi
+}
+
+# ## terminal::restoreInterruptTrap
+#
+# Restore the original trap for the interrupt signal (SIGINT).
+# To be called after terminal::setInterruptTrap.
+#
+# ```bash
+# terminal::restoreInterruptTrap
+# ```
+function terminal::restoreInterruptTrap() {
+  if [[ -n ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
+    eval "${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP}"
+    unset -v _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP
+  fi
+}
+
+# ## terminal::clearBox
+#
+# Clear a "box" in the terminal.
+# Will return the cursor at the current position at the end (using GLOBAL_CURSOR_LINE and GLOBAL_CURSOR_COLUMN).
+#
+# - $1: **top** _as int_:
+#       the left position of the box
+# - $2: **left** _as int_:
+#       the top position of the box
+# - $3: **width** _as int_:
+#       the width of the box
+# - $4: **height** _as int_:
+#       the height of the box
+#
+# ```bash
+# terminal::getCursorPosition
+# terminal::clearBox 1 1 10 5
+# ```
+function terminal::clearBox() {
+  local top="${1}"
+  local left="${2}"
+  local width="${3}"
+  local height="${4}"
+
+  local toPrint="${ESC__CURSOR_HIDE}"
+  local lineNumber=0
+  for ((lineNumber = top; lineNumber < top + height; lineNumber++)); do
+    toPrint+="${ESC__CURSOR_MOVE__}${lineNumber};${left}${__ESC__TO}${ESC__ERASE__}${width}${__ECS__CHARS}"
+  done
+
+  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
+}
+
+# ## terminal::getBestAutocompleteBox
+#
+# This function returns the best position and size for an autocomplete box that would open
+# at the given position.
+#
+# - The box will be placed below the current position if possible, but can be placed
+#   above if there is not enough space below.
+# - The box will be placed on the same column as the current position if possible, but can be placed
+#   on the left side if there is not enough space on the right to display the full width of the box.
+# - The box will have the desired height and width if possible, but will be reduced if there is
+#   not enough space in the terminal.
+# - The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.
+#   Otherwise it can use the current position line.
+#
+# - $1: **current line** _as int_:
+#       the current line of the cursor (1 based)
+# - $2: **current column** _as int_:
+#       the current column of the cursor (1 based)
+# - $3: **desired height** _as int_:
+#       the desired height of the box
+# - $4: **desired width** _as int_:
+#       the desired width of the box
+# - $5: **max height** _as int_:
+#       the maximum height of the box
+# - $6: force below _as bool_:
+#       (optional) force the box to be below the current position
+#       (defaults to false)
+# - $7: not on current line _as bool_:
+#       (optional) the box will not be placed on the same line as the current position
+#       (defaults to true)
+# - $8: terminal width _as int_:
+#       (optional) the width of the terminal
+#       (defaults to GLOBAL_COLUMNS)
+# - $9: terminal height _as int_:
+#       (optional) the height of the terminal
+#       (defaults to GLOBAL_LINES)
+#
+# Returns:
+#
+# - ${RETURNED_VALUE}: the top position of the box (1 based)
+# - ${RETURNED_VALUE2}: the left position of the box (1 based)
+# - ${RETURNED_VALUE3}: the width of the box
+# - ${RETURNED_VALUE4}: the height of the box
+#
+# ```bash
+# terminal::getBestAutocompleteBox 1 1 10 5
+# ```
+function terminal::getBestAutocompleteBox() {
+  local currentLine="${1}"
+  local currentColumn="${2}"
+  local desiredHeight="${3}"
+  local desiredWidth="${4}"
+  local maxHeight="${5:-${GLOBAL_LINES:-9999}}"
+  local forceBelow="${6:-false}"
+  local notOnCurrentLine="${7:-true}"
+  local terminalWidth="${8:-${GLOBAL_COLUMNS:-9999}}"
+  local terminalHeight="${9:-${GLOBAL_LINES:-9999}}"
+
+  local left top width height
+
+  local extraLine=1
+  if [[ ${notOnCurrentLine} == "true" ]]; then
+    extraLine=0
+  fi
+
+  local below=true
+  local -i maxAvailableLines=$((terminalHeight - currentLine + extraLine))
+  if [[ ${forceBelow} != "true" ]]; then
+    local maxAvailableLinesAbove=$((currentLine - 1 + extraLine))
+    if ((desiredHeight > maxAvailableLines && maxAvailableLinesAbove > maxAvailableLines)); then
+      maxAvailableLines=${maxAvailableLinesAbove}
+      below=false
+    fi
+  fi
+
+  maxHeight=$((maxAvailableLines >= maxHeight ? maxHeight : maxAvailableLines))
+  height=$((desiredHeight >= maxHeight ? maxHeight : desiredHeight))
+  if [[ ${below} == "true" ]]; then
+    top=$((currentLine + 1 - extraLine))
+  else
+    top=$((currentLine - height + extraLine))
+  fi
+
+  width=$((desiredWidth >= terminalWidth ? terminalWidth : desiredWidth))
+  left=$((terminalWidth - currentColumn + 1 > width ? currentColumn : terminalWidth - width + 1))
+
+  if ((width < 1)); then
+    width=1
+  fi
+  if ((height < 0)); then
+    height=0
+  fi
+
+  RETURNED_VALUE="${top}"
+  RETURNED_VALUE2="${left}"
+  # shellcheck disable=SC2034
+  RETURNED_VALUE3="${width}"
+  # shellcheck disable=SC2034
+  RETURNED_VALUE4="${height}"
+}
+
+
+#===============================================================
+# >>> Key press detection
+#===============================================================
+
+# ## terminal::testWaitForChar
+#
+# Wait for the user to send a character to stdin (i.e. wait for a key press)
+# and prints the character that bash reads.
+#
+# Useful to test the `terminal::waitForChar` function and see the char sequence we
+# get when pressing a key in a given terminal.
+#
+# See @terminal::waitForChar for more information.
+#
+# ```bash
+# terminal::testWaitForChar
+# ```
+function terminal::testWaitForChar() {
+  printf '%s\n' "Press any key to see the returned character (Press Q to quit).${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
+  while true; do
+    if terminal::waitForChar -t 1; then
+      if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
+        break
+      fi
+      printf "%sYou pressed: ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
+    fi
+    if [[ ! -t ${GLOBAL_FD_TUI} ]]; then break; fi
+  done
+}
+
+# ## terminal::waitForChar
+#
+# Wait for a user input (single char).
+# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
+#
+# It uses the read builtin command. This will not detect all key combinations.
+# The output will depend on the terminal used and the character sequences it sends on each key press.
+#
+# Some special keys are translated into more readable strings:
+# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1, ALT+?.
+# However, this is not at all exhaustive and will depend on the terminal used. Use `terminal::waitForKeyPress`
+# if you need to listen to special keys.
+#
+# This simple implementation does not rely on GNU readline and does not require terminal options
+# to be set using `terminal::setTerminalOptions`.
+#
+#
+# - $@: **read parameters** _as any_:
+#       additional parameters to pass to the read command
+#
+# Returns:
+#
+# - $?:
+#   - 0 if a char was retrieved
+#   - 1 otherwise
+# - `LAST_KEY_PRESSED`: the last char (key) retrieved.
+#
+# ```bash
+# terminal::waitForChar
+# terminal::waitForChar -t 0.1
+# ```
+#
+# > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>
+function terminal::waitForChar() {
+  LAST_KEY_PRESSED=""
+  local IFS=''
+  read "$@" -d '' -srn 1 LAST_KEY_PRESSED || :
+
+  LAST_KEY_PRESSED="${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:-}${LAST_KEY_PRESSED}"
+  PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
+
+  if [[ -z ${LAST_KEY_PRESSED} ]]; then
+    return 1
+  fi
+
+  # special key detection, need to read more characters (up to 4 for F1-F12 keys)
+  if [[ ${LAST_KEY_PRESSED} == *$'\e'* ]]; then
+    REPLY=""
+    IFS='' read -t 0.01 -d '' -rsn 4 &>/dev/null || :
+
+    # we might have several ESC which means we read too much
+    local wholeChain="${LAST_KEY_PRESSED#$'\e'}${REPLY}"
+    LAST_KEY_PRESSED=$'\e'"${wholeChain%%$'\e'*}"
+
+    if [[ ${wholeChain} == *$'\e'* ]]; then
+      PREVIOUS_KEY_PRESSED_EXTRA_CHARS=$'\e'"${wholeChain#*$'\e'}"
+    fi
+
+    # translate some common inputs into more readable strings
+    case ${LAST_KEY_PRESSED} in
+    $'\e[A' | $'\eOA') LAST_KEY_PRESSED="UP" ;;
+    $'\e[B' | $'\eOB') LAST_KEY_PRESSED="DOWN" ;;
+    $'\e[C' | $'\eOC') LAST_KEY_PRESSED="RIGHT" ;;
+    $'\e[D' | $'\eOD') LAST_KEY_PRESSED="LEFT" ;;
+    $'\e[1~' | $'\e[H' | $'\e[7~') LAST_KEY_PRESSED="HOME" ;;
+    $'\e[2~') LAST_KEY_PRESSED="INSERT" ;;
+    $'\e[3~') LAST_KEY_PRESSED="DEL" ;;
+    $'\e[4~' | $'\e[F' | $'\e[8~') LAST_KEY_PRESSED="END" ;;
+    $'\e[5~') LAST_KEY_PRESSED="PAGE_UP" ;;
+    $'\e[6~') LAST_KEY_PRESSED="PAGE_DOWN" ;;
+    $'\e') LAST_KEY_PRESSED="ESC" ;;
+    $'\eOP' | $'\e[11~') LAST_KEY_PRESSED="F1" ;;
+    $'\e'?) LAST_KEY_PRESSED="ALT+${LAST_KEY_PRESSED#$'\e'}" ;;
+    esac
+  else
+    case ${LAST_KEY_PRESSED} in
+    $'\b' | $'\177') LAST_KEY_PRESSED="BACKSPACE" ;;
+    $'\r') LAST_KEY_PRESSED=$"\n" ;;
+    esac
+  fi
+  return 0
+}
+
+# ## terminal::testWaitForKeyPress
+#
+# Wait for the user to press a key and prints it to the screen.
+# This function is used to test the `terminal::waitForKeyPress` function.
+#
+# See @terminal::waitForKeyPress for more information.
+#
+# ```bash
+# terminal::testWaitForKeyPress
+# ```
+function terminal::testWaitForKeyPress() {
+  # setup the terminal before anything else
+  terminal::setTerminalOptions
+
+  # define the callback function called when a special key is pressed
+  # shellcheck disable=SC2317
+  function interactiveOnKeyBindingPressTestFunction() {
+    local key="${1}"
+    printf "%sYou pressed (binding): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${key}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
+  }
+  terminal::rebindKeymap interactiveOnKeyBindingPressTestFunction
+
+  printf '%s\n' "Press any key to see the returned code (press Q to quit)." 1>&"${GLOBAL_FD_TUI}"
+  while true; do
+    if terminal::waitForKeyPress -t 0.3; then
+      if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
+        break
+      fi
+      printf "%sYou pressed (normal key): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
+    fi
+    if [[ ! -t ${GLOBAL_FD_TUI} ]]; then break; fi
+  done
+
+  terminal::restoreTerminalOptions
+}
+
+# ## terminal::waitForKeyPress
+#
+# Wait for a key press (single key).
+# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
+#
+# It uses the read builtin command with the option `-e` to use readline behind the scene.
+# This means we can detect more key combinations but all keys needs to be bound first...
+# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
+#
+# You must call `terminal::rebindKeymap` and `terminal::setTerminalOptions` before using this function.
+#
+# - $@: **read parameters** _as any_:
+#       additional parameters to pass to the read command
+#
+# Returns:
+#
+# - $?:
+#   - 0 if a key was pressed
+#   - 1 otherwise
+# - `LAST_KEY_PRESSED`: the key pressed.
+#
+# ```bash
+# terminal::waitForKeyPress
+# terminal::waitForKeyPress -t 0.1
+# ```
+#
+# > There are 2 issues when using readline in bash:
+# > 1. if the cursor is at the end of the screen, it will make the screen scroll
+# >    even when nothing is read... Make sure to not position the cursor at the end of the screen.
+# > 2. When read is done, it will print a new line in stderr. So we redirect stderr to null.
+# >    This means that if you print something in a readline bound function, do not print to stderr or you will get nothing !
+function terminal::waitForKeyPress() {
+  LAST_KEY_PRESSED=""
+  # here we redirect the error output to null because of a weird bash behavior, it
+  # prints a newline each time read is finished (when called with -e), idk why...
+  # This means that if you print something in a readline bound function, do not print to
+  # stderr or you will get nothing !
+  local IFS=''
+  read "$@" -e -d '' -s -r -n 1 LAST_KEY_PRESSED 2>/dev/null || :
+  if [[ -z ${LAST_KEY_PRESSED} ]]; then
+    return 1
+  fi
+  return 0
+}
+
+# ## terminal::rebindKeymap
+#
+# Rebinds all special keys to call a given callback function.
+# See @terminal::testWaitForKeyPress for an implementation example.
+#
+# This allows to use the `-e` option with the read command and receive events for special key press.
+#
+# Key binding is a mess because binding is based on the sequence of characters that gets
+# generated by the terminal when a key is pressed and this is not standard across all terminals.
+# We do our best here to cover most cases but it is by no mean perfect.
+# A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.
+#
+# This function should be called before using terminal::waitForKeyPress.
+#
+# You can call `terminal::restoreBindings` to restore the default bindings. However, this is not
+# necessary as the bindings are local to the script.
+#
+# - $1: **callback function** _as string_:
+#       The function name to call when a special key is pressed.
+
+# ```bash
+# terminal::rebindKeymap
+# ```
+#
+# > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
+function terminal::rebindKeymap() {
+  local callBackFunction="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  if ! declare -F "${callBackFunction}" &>/dev/null; then
+    core::fail "The function ⌜${callBackFunction}⌝ must be defined before calling terminal::rebindKeymap."
+  fi
+
+  if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
+    # save the original bindings
+    _OPTION_PATH_ONLY=true fs::createTempFile
+    _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
+    bind -p >"${_INTERACTIVE_SAVED_BINDINGS_FILE}" 2>/dev/null
+  fi
+
+  # remove all existing bindings except the self-insert ones
+  # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
+  fs::readFile "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+  local bindings="${RETURNED_VALUE}"
+  local IFS=$'\n'
+  local line
+  local key
+  for line in ${bindings}; do
+    if [[ ${line} == "#"* || ${line} == *"self-insert" ]]; then
+      continue
+    fi
+    key="${line%% *}"
+    key="${key//\"/}"
+    bind -r "${key%:}" &>/dev/null
+  done
+
+  # make sure that readline will not wait the default 500ms after a special key (like \e ESC) is pressed
+  # to read a longer sequence of keys
+  bind 'set keyseq-timeout 1' &>/dev/null
+
+  # some other default values to ensure we get the right behavior
+  bind 'set bind-tty-special-chars on' &>/dev/null
+  bind 'set echo-control-characters on' &>/dev/null
+  bind 'set editing-mode emacs' &>/dev/null
+  bind 'set enable-keypad on' &>/dev/null
+  bind 'set output-meta off' &>/dev/null
+  bind 'set show-mode-in-prompt off' &>/dev/null
+
+  # add the one we are interested in
+
+  # Escape key
+  bind -x '"\e": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"\e\e": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"\e\e\e": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"ESC": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"ESCAPE": '"${callBackFunction}"' ESC' &>/dev/null
+
+  # for each normal key, bind it with the different modifiers
+  local normalKeys="abcdefghijklmnopqrstuvwxyz1234567890"
+  local -a modifiers=(
+    "CTRL+" "\C-"
+    "ALT+" "\e"
+  )
+  local -i index modeIndex
+  for((index=0;index<${#normalKeys};index++)); do
+    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+      key="${normalKeys:index:1}"
+      bind -x "\"${modifiers[modeIndex + 1]}${key}\": ${callBackFunction} ${modifiers[modeIndex]}${key^^}" &>/dev/null
+    done
+  done
+
+  # VT sequences + xterm sequences
+  local specialKeys=(
+    "[1?~" "HOME"
+    "[2?~" "INSERT"
+    "[3?~" "DEL"
+    "[4?~" "END"
+    "[5?~" "PAGE_UP"
+    "[6?~" "PAGE_DOWN"
+    "[7?~" "HOME"
+    "[8?~" "END"
+    "[11?~" "F1"
+    "[12?~" "F2"
+    "[13?~" "F3"
+    "[14?~" "F4"
+    "[15?~" "F5"
+    "[17?~" "F6"
+    "[18?~" "F7"
+    "[19?~" "F8"
+    "[20?~" "F9"
+    "[21?~" "F10"
+    "[23?~" "F11"
+    "[24?~" "F12"
+    "[25?~" "F13"
+    "[26?~" "F14"
+    "[28?~" "F15"
+    "[29?~" "F16"
+    "[31?~" "F17"
+    "[32?~" "F18"
+    "[33?~" "F19"
+    "[34?~" "F20"
+  )
+  modifiers=(
+    "" ""
+    "SHIFT+" ";2"
+    "ALT+" ";3"
+    "CTRL+" ";5"
+    "CTRL+SHIFT+" ";6"
+    "CTRL+ALT+" ";7"
+  )
+  for((index=0;index<${#specialKeys[@]};index+=2)); do
+    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+      key="${specialKeys[index]}"
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
+      # I have noticed that sometimes the terminal sends the sequence without the \e...
+      # so we need to bind it without the \e as well
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
+    done
+  done
+
+  local specialKeys2=(
+    "[?A" "UP"
+    "[?B" "DOWN"
+    "[?C" "RIGHT"
+    "[?D" "LEFT"
+    "[?F" "END"
+    "[?H" "HOME"
+    "[?P" "F1"
+    "[?Q" "F2"
+    "[?R" "F3"
+    "[?S" "F4"
+    "[?I" "TAB"
+    "[?M" "NEWLINE"
+    "[?j" "*"
+    "[?k" "+"
+    "[?l" ","
+    "[?m" "-"
+    "[?n" "."
+    "[?o" "/"
+    "[?p" "0"
+    "[?q" "1"
+    "[?r" "2"
+    "[?s" "3"
+    "[?t" "4"
+    "[?u" "5"
+    "[?v" "6"
+    "[?w" "7"
+    "[?x" "8"
+    "[?y" "9"
+    "[?X" "="
+  )
+  modifiers=(
+    "" ""
+    "SHIFT+" "1;2"
+    "ALT+" "1;3"
+    "CTRL+" "1;5"
+    "CTRL+SHIFT+" "1;6"
+    "CTRL+ALT+" "1;7"
+  )
+  for((index=0;index<${#specialKeys2[@]};index+=2)); do
+    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+      key="${specialKeys2[index]}"
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      # I have noticed that sometimes the terminal sends the sequence without the \e...
+      # so we need to bind it without the \e as well
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      # We also handle the case where SS3 (\eO) is sent instead of CSI (\e[)
+      key="${key//[/O}"
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+    done
+  done
+
+  # check http://www.afterstep.org/keyboard.html
+  # special key bindings
+  bind -x '"NEWLINE": '"${callBackFunction}"' NEWLINE' &>/dev/null
+  bind -x '"RET": '"${callBackFunction}"' NEWLINE' &>/dev/null
+  bind -x '"RETURN": '"${callBackFunction}"' NEWLINE' &>/dev/null
+
+  bind -x '"DEL": '"${callBackFunction}"' DEL' &>/dev/null
+  bind -x '"\d": '"${callBackFunction}"' DEL' &>/dev/null
+  bind -x '"\177": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+  bind -x '"RUBOUT": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+  bind -x '"\C-?": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+  bind -x '"\b": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
+  bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
+
+  bind -x '"TAB": '"${callBackFunction}"' TAB' &>/dev/null
+  bind -x '"\t": '"${callBackFunction}"' TAB' &>/dev/null
+}
+
+# ## terminal::restoreBindings
+#
+# Reset the key bindings to the default ones.
+# To be called after `terminal::rebindKeymap`.
+#
+# ```bash
+# terminal::restoreBindings
+# ```
+function terminal::restoreBindings() {
+  if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
+    return 0
+  fi
+  if [[ ${GLOBAL_EXPORTED_FOR_PROMPT:-} != "true" ]]; then
+    # there is no need to restore if we are not in exported mode, the bindings are local to this execution
+    return 0
+  fi
+
+  # try to remove all bindings
+  bash::getBuiltinOutput bind -p
+  local bindings="${RETURNED_VALUE}"
+  local IFS=$'\n'
+  local line
+  local key
+  for line in ${bindings}; do
+    if [[ ${line} == "#"* ]]; then
+      continue
+    fi
+    key="${line%% *}"
+    key="${key//\"/}"
+    bind -r "${key%:}" &>/dev/null
+  done
+
+  # restore the default bindings
+  bind -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}" &>/dev/null
+}
+
+# ## terminal::clearKeyPressed
+#
+# This function reads all the inputs from the user, effectively discarding them.
+#
+# ```bash
+# terminal::clearKeyPressed
+# ```
+function terminal::clearKeyPressed() {
+  local IFS
+  IFS='' read -d '' -sr -t 0 LAST_KEY_PRESSED || :
+  PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
+}

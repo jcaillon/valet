@@ -24,12 +24,12 @@ function showcaseInteractive() {
   command::checkParsedResults
 
   log::info "Getting the cursor size:"
-  tui::getCursorPosition
+  terminal::getCursorPosition
   log::info "GLOBAL_CURSOR_LINE: ⌜${GLOBAL_CURSOR_LINE}⌝"
   log::info "GLOBAL_CURSOR_COLUMN: ⌜${GLOBAL_CURSOR_COLUMN}⌝"
 
   log::info "Getting the terminal size:"
-  tui::getTerminalSize
+  terminal::getTerminalSize
   log::info "GLOBAL_LINES: ⌜${GLOBAL_LINES}⌝"
   log::info "GLOBAL_COLUMNS: ⌜${GLOBAL_COLUMNS}⌝"
 
@@ -57,7 +57,7 @@ function showcaseInteractive() {
   fi
 
   log::info "Creating some space below this line."
-  tui::createSpace 4
+  terminal::createSpace 4
 
   ############################
   # Fsfs

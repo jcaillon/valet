@@ -36,6 +36,7 @@ source regex
 source sfzf
 source string
 source system
+source terminal
 source test
 source time
 source tui
