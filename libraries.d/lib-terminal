@@ -83,7 +83,7 @@ function terminal::switchToFullScreen() {
   _INTERACTIVE_FULL_SCREEN_MODE=true
 
   # disable echoing when we type something
-  terminal::setTerminalOptions
+  terminal::setRawMode
 
   # switch to the alternate screen, hide the cursor and clear the screen
   printf '%s' "${ESC__ENABLE_ALTERNATE_BUFFER_SCREEN}${ESC__CURSOR_HIDE}${ESC__ERASE_SCREEN}" 1>&"${GLOBAL_FD_TUI}"
@@ -106,33 +106,36 @@ function terminal::switchBackFromFullScreen() {
   printf '%s' "${ESC__ERASE_SCREEN}${ESC__TEXT_RESET}${ESC__DISABLE_ALTERNATE_BUFFER_SCREEN}" 1>&"${GLOBAL_FD_TUI}"
 
   # restore stty
-  terminal::restoreTerminalOptions
+  terminal::restoreSettings
 }
 
-# ## terminal::setTerminalOptions
+# ## terminal::setRawMode
 #
-# Set the terminal options to enable a satisfying and consistent behavior
-# for the GNU readline library.
-# Disable the echo of the terminal, no longer display the characters typed by the user.
+# Put the terminal in "raw" mode.
+# Set options to enable a satisfying and consistent behavior for the GNU readline library.
+# Call `terminal::restoreSettings` to restore the original settings.
 #
 # ```bash
-# terminal::setTerminalOptions
+# terminal::setRawMode
 # ```
-function terminal::setTerminalOptions() {
-  if [[ -z ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]] && command -v stty &>/dev/null; then
-    bash::getBuiltinOutput "stty" "-g" || { log::warning "Unable to get the stty configuration: ${RETURNED_VALUE}"; RETURNED_VALUE=""; }
+function terminal::setRawMode() {
+  if [[ -z ${_INTERACTIVE_STTY_SAVED_CONFIG:-} ]]; then
+    bash::getBuiltinOutput stty -g || core::fail "Unable to get the current terminal configuration. Please make sure that ⌜stty⌝ is available in your PATH."
     _INTERACTIVE_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
-    # -echo is to suppress echoing characters typed by the user
-    # All the other options are there to enable a satisfying behavior for the GNU readline library
-    # used when we call read -e
-    stty -ixon nl0 cr0 tab0 ff0 icrnl -inlcr -onlret -icanon erase ^B werase ^W -echo -echok -echonl -echoe -echoke -ctlecho &>/dev/null || :
+    # we try to set specific settings and if it fails, we just set raw mode
+    stty icrnl -inlcr -ixon -ixoff \
+      nl0 cr0 tab0 ff0 -onlret \
+      -icanon -echo -echok -echonl -echoe -echoke -ctlecho -tostop \
+      erase ^B werase ^W \
+      min 1 time 0 &>/dev/null || \
+      stty raw -echo || :
   fi
 }
 
-# ## terminal::restoreTerminalOptions
+# ## terminal::restoreSettings
 #
 # Restore the terminal options to their original state.
-# Should be called after `terminal::setTerminalOptions`.
+# Should be called after `terminal::setRawMode`.
 #
 # - $1: force _as bool_:
 #       (optional) force the restoration of the stty configuration.
@@ -140,10 +143,10 @@ function terminal::setTerminalOptions() {
 #       (defaults to false)
 #
 # ```bash
-# terminal::restoreTerminalOptions
+# terminal::restoreSettings
 # ```
 # shellcheck disable=SC2120
-function terminal::restoreTerminalOptions() {
+function terminal::restoreSettings() {
   if [[ ${_INTERACTIVE_FULL_SCREEN_MODE:-${GLOBAL_EXPORTED_FOR_PROMPT:-}} == "true" && ${1:-} != "true" ]]; then
     # don't restore if we do not force it and we are either in full screen or exported mode
     return 0
@@ -410,11 +413,11 @@ function terminal::testWaitForChar() {
 #
 # Some special keys are translated into more readable strings:
 # UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1, ALT+?.
-# However, this is not at all exhaustive and will depend on the terminal used. Use `terminal::waitForKeyPress`
-# if you need to listen to special keys.
+# However, this is not at all exhaustive and will depend on the terminal used. 
+# Use `terminal::waitForKeyPress` if you need to listen to special keys.
 #
 # This simple implementation does not rely on GNU readline and does not require terminal options
-# to be set using `terminal::setTerminalOptions`.
+# to be set using `terminal::setRawMode`.
 #
 #
 # - $@: **read parameters** _as any_:
@@ -446,7 +449,7 @@ function terminal::waitForChar() {
   fi
 
   # special key detection, need to read more characters (up to 4 for F1-F12 keys)
-  if [[ ${LAST_KEY_PRESSED} == *$'\e'* ]]; then
+  if [[ ${LAST_KEY_PRESSED} == $'\e'* ]]; then
     REPLY=""
     IFS='' read -t 0.01 -d '' -rsn 4 &>/dev/null || :
 
@@ -475,6 +478,11 @@ function terminal::waitForChar() {
     $'\e'?) LAST_KEY_PRESSED="ALT+${LAST_KEY_PRESSED#$'\e'}" ;;
     esac
   else
+    if (( ${#LAST_KEY_PRESSED} > 1 )); then
+      # if we have more than one char, we store the extra chars for the next read
+      PREVIOUS_KEY_PRESSED_EXTRA_CHARS="${LAST_KEY_PRESSED:1}"
+      LAST_KEY_PRESSED="${LAST_KEY_PRESSED:0:1}"
+    fi
     case ${LAST_KEY_PRESSED} in
     $'\b' | $'\177') LAST_KEY_PRESSED="BACKSPACE" ;;
     $'\r') LAST_KEY_PRESSED=$"\n" ;;
@@ -495,7 +503,7 @@ function terminal::waitForChar() {
 # ```
 function terminal::testWaitForKeyPress() {
   # setup the terminal before anything else
-  terminal::setTerminalOptions
+  terminal::setRawMode
 
   # define the callback function called when a special key is pressed
   # shellcheck disable=SC2317
@@ -507,7 +515,7 @@ function terminal::testWaitForKeyPress() {
 
   printf '%s\n' "Press any key to see the returned code (press Q to quit)." 1>&"${GLOBAL_FD_TUI}"
   while true; do
-    if terminal::waitForKeyPress -t 0.3; then
+    if terminal::waitForKeyPress; then
       if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
         break
       fi
@@ -516,7 +524,7 @@ function terminal::testWaitForKeyPress() {
     if [[ ! -t ${GLOBAL_FD_TUI} ]]; then break; fi
   done
 
-  terminal::restoreTerminalOptions
+  terminal::restoreSettings
 }
 
 # ## terminal::waitForKeyPress
@@ -528,7 +536,7 @@ function terminal::testWaitForKeyPress() {
 # This means we can detect more key combinations but all keys needs to be bound first...
 # Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 #
-# You must call `terminal::rebindKeymap` and `terminal::setTerminalOptions` before using this function.
+# You must call `terminal::rebindKeymap` and `terminal::setRawMode` before using this function.
 #
 # - $@: **read parameters** _as any_:
 #       additional parameters to pass to the read command

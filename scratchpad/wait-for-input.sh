@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1090
 source "$(valet --source)"
-include tui
+include terminal
 
-tui::testWaitForKeyPress
+# terminal::testWaitForChar
+
+terminal::testWaitForKeyPress

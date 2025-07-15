@@ -1,3 +1,22 @@
 #!/usr/bin/env bash
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
+
+
+function tui::startMainLoop() {
+  # set trap so that interrupt signal sets GLOBAL_SESSION_INTERRUPTED to true
+  terminal::setInterruptTrap
+  # setup the terminal to be ready for readline
+  terminal::setRawMode
+  # before starting to wait for inputs, we clear up the key pressed
+  terminal::clearKeyPressed
+  # rebind some keys to call the callback function prompt_onKeyBindingPress
+  terminal::rebindKeymap prompt_onKeyBindingPress
+  terminal::rerouteLogs
+
+
+
+  terminal::restoreLogs
+  terminal::restoreSettings
+  terminal::restoreInterruptTrap
+}

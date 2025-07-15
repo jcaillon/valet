@@ -95,7 +95,7 @@ function progress::start() {
   printf "%s" "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
 
   # disable echoing when we type something
-  terminal::setTerminalOptions
+  terminal::setRawMode
 
   _PROGRESS_BAR_RUNNING=true
 
@@ -129,7 +129,7 @@ function progress::stop() {
   printf "%s" "${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
 
   # restore the key echoing
-  terminal::restoreTerminalOptions
+  terminal::restoreSettings
 }
 
 # ## progress::update

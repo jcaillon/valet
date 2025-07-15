@@ -433,7 +433,7 @@ function prompt_main_loop() {
   # before starting to wait for inputs, we clear up the key pressed
   terminal::clearKeyPressed
   # setup the terminal to be ready for readline
-  terminal::setTerminalOptions
+  terminal::setRawMode
   # rebind some keys to call the callback function prompt_onKeyBindingPress
   terminal::rebindKeymap prompt_onKeyBindingPress
   terminal::rerouteLogs
@@ -492,7 +492,7 @@ function prompt_main_loop() {
   exec 3>&-
 
   terminal::restoreLogs
-  terminal::restoreTerminalOptions
+  terminal::restoreSettings
   terminal::restoreInterruptTrap
   shopt -u nocasematch
 

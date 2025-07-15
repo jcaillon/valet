@@ -103,7 +103,7 @@ function trap::onExitInternal() {
 # It is executed in the same shell that has been interrupted, as if we called this function
 # at the line executed at the moment when the interruption took place.
 function trap::onInterruptInternal() {
-  if ! declare -F terminal::restoreTerminalOptions &>/dev/null; then
+  if ! declare -F terminal::restoreSettings &>/dev/null; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
   log::print "WARNING" "${ICON_STOPPED:-}" "STOPPED" "Program interrupted by the user."
@@ -185,8 +185,8 @@ function trap::onCleanUpInternal() {
   fi
 
   # restore tty settings if needed
-  if declare -F terminal::restoreTerminalOptions &>/dev/null; then
-    terminal::restoreTerminalOptions true
+  if declare -F terminal::restoreSettings &>/dev/null; then
+    terminal::restoreSettings true
   fi
 
   fs::cleanTempFiles
