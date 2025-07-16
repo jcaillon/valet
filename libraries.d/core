@@ -1365,19 +1365,14 @@ function log::init() {
     # close if already opened
     exec {GLOBAL_FD_LOG}>&-
     if [[ -v GLOBAL_FD_ORIGINAL_STDERR ]]; then
+      # restore the original stderr if it was modified
       exec 2>&${GLOBAL_FD_ORIGINAL_STDERR}
-    fi
-  else
-    # save the original stderr fd so we can restore it if we call log::init again
-    if [[ ${GLOBAL_IS_TEST_MODE:-} != "true" ]]; then
-      #TODO: this is a workaround for the tests lib-log & self-setup, 
-      # figure out why it does not work without this condition!
-      exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
+      exec {GLOBAL_FD_ORIGINAL_STDERR}>&-
     fi
   fi
 
   # make sure the file descriptor (if any) is valid
-  if [[ -n ${VALET_CONFIG_LOG_FD:-} ]]; then
+  if [[ -n ${VALET_CONFIG_LOG_FD:-} && ${VALET_CONFIG_LOG_FD} != "2" ]]; then
     local isFdValid=false
     if [[ ${VALET_CONFIG_LOG_FD} =~ ^[0-9]+$ ]]; then
       if { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>&${VALET_CONFIG_LOG_FD}; then
@@ -1390,6 +1385,8 @@ function log::init() {
     if [[ ${isFdValid} != "true" ]]; then
       core::fail "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${VALET_CONFIG_LOG_FD}⌝."
     fi
+    # save the original stderr fd so we can restore it if we call log::init again
+    exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
     # we also redirect the builtin bash errors to the same FD so we can have them along the logs
     exec 2>&${GLOBAL_FD_LOG}
   else

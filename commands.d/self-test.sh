@@ -574,15 +574,13 @@ function selfTest_runSingleTest() {
   # redirect the standard output and error output to files
   exec 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
   exec 2>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
+  unset -v GLOBAL_FD_ORIGINAL_STDERR
 
   # run a custom user script before the test if it exists
   selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-each-test"
 
   # Set the value of important bash variables to ensure consistency in the tests
   selfTestUtils_setupBashForConsistency
-
-  unset -v GLOBAL_FD_ORIGINAL_STDERR
-  GLOBAL_IS_TEST_MODE=true
 
   # run the test
   # shellcheck disable=SC1090
