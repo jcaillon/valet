@@ -877,7 +877,7 @@ function list_startAsyncFiltering() {
 
   { coproc _LIST_ASYNC_FILTER_JOB { list_asyncFilterJob; }; } 2>./tmp/f-err
   # shellcheck disable=SC2034
-  GLOBAL_BACKGROUND_JOB1_PID="${_LIST_ASYNC_FILTER_JOB_PID}"
+  GLOBAL_BACKGROUND_PIDS+=("${_LIST_ASYNC_FILTER_JOB_PID}")
 
   echo "Async filtering job started" >>./tmp/f
 }

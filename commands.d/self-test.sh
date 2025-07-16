@@ -581,6 +581,9 @@ function selfTest_runSingleTest() {
   # Set the value of important bash variables to ensure consistency in the tests
   selfTestUtils_setupBashForConsistency
 
+  unset -v GLOBAL_FD_ORIGINAL_STDERR
+  GLOBAL_IS_TEST_MODE=true
+
   # run the test
   # shellcheck disable=SC1090
   builtin source "${testScript}"

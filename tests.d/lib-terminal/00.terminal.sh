@@ -17,6 +17,8 @@ function main() {
   test_terminal::getCursorPosition
   test_terminal::clearBox
   test_terminal::getBestAutocompleteBox
+  test_terminal::switchToFullScreen
+  test_terminal::setRawMode
 }
 
 function test_terminal::createSpace() {
@@ -83,6 +85,37 @@ function test_terminal::getBestAutocompleteBox() {
   test::func terminal::getBestAutocompleteBox  7 7 4 4 \'\' \'\' false
 
   test::func terminal::getBestAutocompleteBox  7 7 10 10 \'\' true false
+}
+
+function test_terminal::switchToFullScreen() {
+  test::title "✅ Testing terminal::switchToFullScreen"
+
+  test::exec terminal::switchBackFromFullScreen
+  test::exec terminal::switchToFullScreen
+  test::exec terminal::switchBackFromFullScreen
+}
+
+function test_terminal::setRawMode() {
+  test::title "✅ Testing terminal::setRawMode"
+
+  unset -v GLOBAL_STTY_SAVED_CONFIG _TERMINAL_RAW_MODE_ENABLED
+
+  # shellcheck disable=SC2317
+  function stty() {
+    _stty_args=("$@")
+    if [[ ${1:-} == "-g" ]]; then
+      echo "original config"
+      return 0
+    fi
+  }
+
+  test::exec terminal::restoreSettings
+  test::exec terminal::setRawMode
+  test::markdown 'stty called with `'"${_stty_args[*]}"'`'
+  test::exec terminal::restoreSettings
+  test::markdown 'stty called with `'"${_stty_args[*]}"'`'
+
+  unset -f stty
 }
 
 main

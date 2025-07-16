@@ -2,21 +2,84 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
+# shellcheck source=lib-terminal
+source terminal
 
 function tui::startMainLoop() {
   # set trap so that interrupt signal sets GLOBAL_SESSION_INTERRUPTED to true
-  terminal::setInterruptTrap
+  # terminal::setInterruptTrap
   # setup the terminal to be ready for readline
   terminal::setRawMode
   # before starting to wait for inputs, we clear up the key pressed
   terminal::clearKeyPressed
-  # rebind some keys to call the callback function prompt_onKeyBindingPress
-  terminal::rebindKeymap prompt_onKeyBindingPress
   terminal::rerouteLogs
 
+  tui_startKeyPressListener
 
+  local IFS=" "
+
+  # main loop
+  while [[ -t ${GLOBAL_FD_TUI} || ${GLOBAL_SESSION_INTERRUPTED} != "true" ]]; do
+    if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER_PID ]]; then
+      log::warning "Key press listener coproc is not already running, re-starting it."
+      tui_startKeyPressListener
+    fi
+    # read the key pressed from the key press listener coproc
+    if IFS=$'\0' read -rd $'\0' RETURNED_VALUE <&"${_TUI_COPROC_KEY_PRESS_LISTENER[0]}"; then
+      log::info "Received key press: ${RETURNED_VALUE}"
+    fi
+  done
+
+  tui_stopKeyPressListener
 
   terminal::restoreLogs
   terminal::restoreSettings
   terminal::restoreInterruptTrap
+}
+
+function tui_startKeyPressListener() {
+  # if the key press listener is not already running, we start it
+  if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER ]]; then
+    if [[ ! -v _TUI_USER_INPUT_FD ]]; then
+      exec {_TUI_USER_INPUT_FD}<&0
+    fi
+    log::debug "Starting key press listener coproc."
+    { coproc _TUI_COPROC_KEY_PRESS_LISTENER { tui_keyPressListener 2>&"${LOG_FD}"; } } 2>/dev/null
+  fi
+}
+
+function tui_stopKeyPressListener() {
+  # if the key press listener is running, we stop it
+  if [[ -v _TUI_COPROC_KEY_PRESS_LISTENER_PID ]]; then
+    log::debug "Stopping key press listener coproc."
+    kill "${_TUI_COPROC_KEY_PRESS_LISTENER_PID}" &>/dev/null || :
+    unset _TUI_COPROC_KEY_PRESS_LISTENER _TUI_COPROC_KEY_PRESS_LISTENER_PID
+  else
+    log::debug "Key press listener coproc is not running."
+  fi
+}
+
+function tui_keyPressListener() {
+  # rebind some keys to call the callback function
+  terminal::rebindKeymap tui_keyPressListener_handleKeyBinding
+
+  exec 0<&"${_TUI_USER_INPUT_FD}" || log::fail "Failed to redirect stdin to the user input fd."
+  if [[ ! -t 0 ]]; then
+    log::fail "stdin is not a terminal"
+  fi
+
+  while kill -0 "${GLOBAL_PROGRAM_MAIN_PID}"; do
+    if terminal::waitForKeyPress; then
+      printf "%s\0" "${LAST_KEY_PRESSED}"
+    fi
+  done
+}
+
+function tui_keyPressListener_handleKeyBinding() {
+  # make sure we see any error happening in this function, since it is 
+  # executed as a callback of the readline process and we redirected the stderr
+  # to /dev/null to avoid a bug with readline (see terminal::waitForKeyPress)
+  # exec 2>&"${LOG_FD}"
+
+  printf "!%s\0" "${1}"
 }

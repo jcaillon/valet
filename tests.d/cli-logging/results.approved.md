@@ -197,8 +197,8 @@ $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh: line 76: ((: 10
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((10/0))
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:76
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:522
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:368
+├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:526
+├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:372
 ╰─ in main() at valet:105
 
 ```

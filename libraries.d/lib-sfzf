@@ -86,6 +86,7 @@ function sfzf::show() {
   trap 'SFZF_CLOSE_INTERACTIVE_SESSION=true;' SIGINT SIGQUIT
 
   terminal::switchToFullScreen
+  terminal::setRawMode
   sfzfDrawScreen "${prompt}"
 
   # before starting to wait for inputs, we clear up the key pressed
@@ -118,6 +119,7 @@ function sfzf::show() {
   # restore the initial traps
   eval "${originalTraps}"
   terminal::switchBackFromFullScreen
+  terminal::restoreSettings
 
   if ((SFZF_FINAL_SELECTION_INDEX >= 0)); then
     RETURNED_VALUE="${SFZF_ORIGINAL_ITEMS[${SFZF_FINAL_SELECTION_INDEX}]}"

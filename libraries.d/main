@@ -47,7 +47,11 @@ fi
 # fd where we write the TUI
 exec {GLOBAL_FD_TUI}>&2
 
+# set the signal traps
 trap::register
+
+# init the array containing background processes IDs
+GLOBAL_BACKGROUND_PIDS=()
 
 # Source the valet configuration from the user config dir
 GLOBAL_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
@@ -96,7 +100,7 @@ styles::init
 # Export terminal size on window resize if we are in interactive mode.
 if [[ -t ${GLOBAL_FD_TUI} ]]; then
   terminal::getTerminalSize
-  if [[ ${GLOBAL_EXPORTED_FOR_PROMPT:-} != "true" ]]; then
+  if [[ ${GLOBAL_SOURCED_FOR_PROMPT:-} != "true" ]]; then
     # hide the cursor (we restore on exit)
     printf "%s" "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
   fi

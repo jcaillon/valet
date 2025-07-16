@@ -242,3 +242,41 @@ RETURNED_VALUE3='10'
 RETURNED_VALUE4='4'
 ```
 
+### ✅ Testing terminal::switchToFullScreen
+
+❯ `terminal::switchBackFromFullScreen`
+
+**Error output**:
+
+```text
+[2J[0m[?1049l
+```
+
+❯ `terminal::switchToFullScreen`
+
+**Error output**:
+
+```text
+[?1049h[?25l[2J
+```
+
+❯ `terminal::switchBackFromFullScreen`
+
+**Error output**:
+
+```text
+[2J[0m[?1049l
+```
+
+### ✅ Testing terminal::setRawMode
+
+❯ `terminal::restoreSettings`
+
+❯ `terminal::setRawMode`
+
+stty called with `icrnl -inlcr -ixon -ixoff nl0 cr0 tab0 ff0 -onlret -icanon -echo -echok -echonl -echoe -echoke -ctlecho -tostop erase ^B werase ^W min 1 time 0`
+
+❯ `terminal::restoreSettings`
+
+stty called with `original config`
+

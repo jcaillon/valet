@@ -103,7 +103,7 @@ function trap::onExitInternal() {
 # It is executed in the same shell that has been interrupted, as if we called this function
 # at the line executed at the moment when the interruption took place.
 function trap::onInterruptInternal() {
-  if ! declare -F terminal::restoreSettings &>/dev/null; then
+  if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
   log::print "WARNING" "${ICON_STOPPED:-}" "STOPPED" "Program interrupted by the user."
@@ -164,9 +164,12 @@ function trap::onCleanUpInternal() {
     profiler::disable
   fi
 
-  # kill background job if still running
-  if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
-    kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
+  # kill background processes if still running
+  if (( ${#GLOBAL_BACKGROUND_PIDS[@]} > 0 )); then
+    local pid
+    for pid in "${GLOBAL_BACKGROUND_PIDS[@]}"; do
+      kill "${pid}" &>/dev/null || :
+    done
   fi
 
   # if we are in interactive mode, we need to restore the cursor
@@ -186,7 +189,7 @@ function trap::onCleanUpInternal() {
 
   # restore tty settings if needed
   if declare -F terminal::restoreSettings &>/dev/null; then
-    terminal::restoreSettings true
+    terminal::restoreSettings
   fi
 
   fs::cleanTempFiles
@@ -1358,11 +1361,22 @@ function log::init() {
   GLOBAL_LOG_DISABLE_WRAP="${VALET_CONFIG_LOG_DISABLE_WRAP:-false}"
   GLOBAL_LOG_PATTERN="${_OPTION_LOG_PATTERN:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level>  <icon><colorDefault> <message>"}}"
 
-  # make sure the file descriptor (if any) is valid
   if [[ -v GLOBAL_FD_LOG ]]; then
     # close if already opened
     exec {GLOBAL_FD_LOG}>&-
+    if [[ -v GLOBAL_FD_ORIGINAL_STDERR ]]; then
+      exec 2>&${GLOBAL_FD_ORIGINAL_STDERR}
+    fi
+  else
+    # save the original stderr fd so we can restore it if we call log::init again
+    if [[ ${GLOBAL_IS_TEST_MODE:-} != "true" ]]; then
+      #TODO: this is a workaround for the tests lib-log & self-setup, 
+      # figure out why it does not work without this condition!
+      exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
+    fi
   fi
+
+  # make sure the file descriptor (if any) is valid
   if [[ -n ${VALET_CONFIG_LOG_FD:-} ]]; then
     local isFdValid=false
     if [[ ${VALET_CONFIG_LOG_FD} =~ ^[0-9]+$ ]]; then

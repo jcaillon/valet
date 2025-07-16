@@ -87,7 +87,7 @@ function progress::start() {
     # we are not in an interactive session or progress bars are disabled
     return 0
   fi
-  if [[ -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
+  if [[ -n ${_PROGRESS_BACKGROUND_PID:-} ]]; then
     core::fail "A spinner or progress bar is already running."
   fi
 
@@ -105,7 +105,8 @@ function progress::start() {
     # we use coproc because it gives us a file descriptor to write to the input stream of the background job
     coproc _PROGRESS_BACKGROUND_JOB { progress_runAnimationInBackground "${template}" "${barSize}" "${frameDelay}" "${maxFrames}" "${spinner}" "${defaultPercentage}" "${defaultMessage}" 2>&"${GLOBAL_FD_LOG}"; }
   } 2>/dev/null
-  GLOBAL_BACKGROUND_JOB1_PID="${_PROGRESS_BACKGROUND_JOB_PID}"
+  _PROGRESS_BACKGROUND_PID="${_PROGRESS_BACKGROUND_JOB_PID}"
+  GLOBAL_BACKGROUND_PIDS+=("${_PROGRESS_BACKGROUND_JOB_PID}")
 }
 
 # ## progress::stop
@@ -120,10 +121,10 @@ function progress::stop() {
     # we are not in an interactive session or progress bars are disabled
     return 0
   fi
-  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n ${GLOBAL_BACKGROUND_JOB1_PID:-} ]]; then
+  if [[ ${_PROGRESS_BAR_RUNNING:-} == "true" && -n ${_PROGRESS_BACKGROUND_PID:-} ]]; then
     _PROGRESS_BAR_RUNNING=false
-    kill "${GLOBAL_BACKGROUND_JOB1_PID}" &>/dev/null || :
-    unset -v GLOBAL_BACKGROUND_JOB1_PID _PROGRESS_BAR_RUNNING _PROGRESS_BACKGROUND_JOB _PROGRESS_BACKGROUND_JOB_PID
+    kill "${_PROGRESS_BACKGROUND_PID}" &>/dev/null || :
+    unset -v _PROGRESS_BACKGROUND_PID _PROGRESS_BAR_RUNNING _PROGRESS_BACKGROUND_JOB _PROGRESS_BACKGROUND_JOB_PID
   fi
 
   printf "%s" "${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
