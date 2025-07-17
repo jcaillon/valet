@@ -14,4 +14,4 @@ log::warning "This is a warning"
 terminal::restoreLogs
 log::info "end"
 
-# tui::startMainLoop
+tui::startMainLoop

@@ -1368,6 +1368,7 @@ function log::init() {
       # restore the original stderr if it was modified
       exec 2>&${GLOBAL_FD_ORIGINAL_STDERR}
       exec {GLOBAL_FD_ORIGINAL_STDERR}>&-
+      unset -v GLOBAL_FD_ORIGINAL_STDERR
     fi
   fi
 

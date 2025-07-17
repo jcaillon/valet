@@ -280,3 +280,23 @@ stty called with `icrnl -inlcr -ixon -ixoff nl0 cr0 tab0 ff0 -onlret -icanon -ec
 
 stty called with `original config`
 
+### ✅ Testing terminal::rerouteLogs
+
+❯ `terminal::restoreLogs`
+
+**Error output**:
+
+```text
+INFO     Before rerouting Logs
+```
+
+❯ `terminal::rerouteLogs`
+
+❯ `terminal::restoreLogs`
+
+**Error output**:
+
+```text
+INFO     After rerouting Logs
+```
+

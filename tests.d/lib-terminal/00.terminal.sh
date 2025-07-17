@@ -19,6 +19,7 @@ function main() {
   test_terminal::getBestAutocompleteBox
   test_terminal::switchToFullScreen
   test_terminal::setRawMode
+  test_terminal::rerouteLogs
 }
 
 function test_terminal::createSpace() {
@@ -116,6 +117,19 @@ function test_terminal::setRawMode() {
   test::markdown 'stty called with `'"${_stty_args[*]}"'`'
 
   unset -f stty
+}
+
+function test_terminal::rerouteLogs() {
+  test::title "✅ Testing terminal::rerouteLogs"
+
+  test::exec terminal::restoreLogs
+
+  log::info "Before rerouting Logs"
+  test::flush
+  test::exec terminal::rerouteLogs
+  log::info "After rerouting Logs"
+  test::exec terminal::restoreLogs
+  test::flush
 }
 
 main

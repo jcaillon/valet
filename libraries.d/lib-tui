@@ -26,7 +26,7 @@ function tui::startMainLoop() {
     fi
     # read the key pressed from the key press listener coproc
     if IFS=$'\0' read -rd $'\0' RETURNED_VALUE <&"${_TUI_COPROC_KEY_PRESS_LISTENER[0]}"; then
-      log::info "Received key press: ${RETURNED_VALUE}"
+      printf "%s\n" "Received key press: ${RETURNED_VALUE}" >&"${GLOBAL_FD_TUI}"
     fi
   done
 
@@ -44,7 +44,7 @@ function tui_startKeyPressListener() {
       exec {_TUI_USER_INPUT_FD}<&0
     fi
     log::debug "Starting key press listener coproc."
-    { coproc _TUI_COPROC_KEY_PRESS_LISTENER { tui_keyPressListener 2>&"${LOG_FD}"; } } 2>/dev/null
+    { coproc _TUI_COPROC_KEY_PRESS_LISTENER { tui_keyPressListener 2>&"${GLOBAL_FD_LOG}"; } } 2>/dev/null
   fi
 }
 
@@ -63,23 +63,24 @@ function tui_keyPressListener() {
   # rebind some keys to call the callback function
   terminal::rebindKeymap tui_keyPressListener_handleKeyBinding
 
-  exec 0<&"${_TUI_USER_INPUT_FD}" || log::fail "Failed to redirect stdin to the user input fd."
-  if [[ ! -t 0 ]]; then
-    log::fail "stdin is not a terminal"
-  fi
+  # exec 0<&"${_TUI_USER_INPUT_FD}" || log::fail "Failed to redirect stdin to the user input fd."
+  # if [[ ! -t 0 ]]; then
+  #   log::fail "stdin is not a terminal"
+  # fi
 
   while kill -0 "${GLOBAL_PROGRAM_MAIN_PID}"; do
-    if terminal::waitForKeyPress; then
-      printf "%s\0" "${LAST_KEY_PRESSED}"
+    if terminal::waitForKeyPress -u "${_TUI_USER_INPUT_FD}"; then
+      printf "%q\0" "${LAST_KEY_PRESSED}"
+      log::info "Key pressed: ${LAST_KEY_PRESSED} (length ${#LAST_KEY_PRESSED})"
     fi
   done
 }
 
 function tui_keyPressListener_handleKeyBinding() {
-  # make sure we see any error happening in this function, since it is 
+  # make sure we see any error happening in this function, since it is
   # executed as a callback of the readline process and we redirected the stderr
   # to /dev/null to avoid a bug with readline (see terminal::waitForKeyPress)
-  # exec 2>&"${LOG_FD}"
+  # exec 2>&"${GLOBAL_FD_LOGx}"
 
-  printf "!%s\0" "${1}"
+  printf "!%q\0" "${1}"
 }

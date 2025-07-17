@@ -136,7 +136,7 @@ function terminal::setRawMode() {
 # shellcheck disable=SC2120
 function terminal::restoreSettings() {
   if [[ ${_TERMINAL_RAW_MODE_ENABLED:-} == "true" ]]; then
-    stty "${GLOBAL_STTY_SAVED_CONFIG}" &>/dev/null || :
+    stty "${GLOBAL_STTY_SAVED_CONFIG}" || log::warning "Failed to restore the terminal settings, check stty version."
     unset -v _TERMINAL_RAW_MODE_ENABLED
   fi
 }
@@ -197,10 +197,10 @@ function terminal::restoreLogs() {
 function terminal::setInterruptTrap() {
   # shellcheck disable=SC2034
   GLOBAL_SESSION_INTERRUPTED=false
-  if [[ -z ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
+  if [[ -z ${_TERMINAL_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
     # save the original traps so we can restore them later
     bash::getBuiltinOutput trap -p SIGINT SIGQUIT
-    _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP="${RETURNED_VALUE}"
+    _TERMINAL_ORIGINAL_INTERRUPT_TRAP="${RETURNED_VALUE}"
 
     # interrupting sets GLOBAL_SESSION_INTERRUPTED to true
     trap 'GLOBAL_SESSION_INTERRUPTED=true;' SIGINT SIGQUIT
@@ -216,9 +216,9 @@ function terminal::setInterruptTrap() {
 # terminal::restoreInterruptTrap
 # ```
 function terminal::restoreInterruptTrap() {
-  if [[ -n ${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
-    eval "${_INTERACTIVE_ORIGINAL_INTERRUPT_TRAP}"
-    unset -v _INTERACTIVE_ORIGINAL_INTERRUPT_TRAP
+  if [[ -n ${_TERMINAL_ORIGINAL_INTERRUPT_TRAP:-} ]]; then
+    eval "${_TERMINAL_ORIGINAL_INTERRUPT_TRAP}"
+    unset -v _TERMINAL_ORIGINAL_INTERRUPT_TRAP
   fi
 }
 
@@ -397,7 +397,7 @@ function terminal::testWaitForChar() {
 #
 # Some special keys are translated into more readable strings:
 # UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1, ALT+?.
-# However, this is not at all exhaustive and will depend on the terminal used. 
+# However, this is not at all exhaustive and will depend on the terminal used.
 # Use `terminal::waitForKeyPress` if you need to listen to special keys.
 #
 # This simple implementation does not rely on GNU readline and does not require terminal options
@@ -423,7 +423,7 @@ function terminal::testWaitForChar() {
 function terminal::waitForChar() {
   LAST_KEY_PRESSED=""
   local IFS=''
-  read "$@" -d '' -srn 1 LAST_KEY_PRESSED || :
+  read "$@" -d '' -srN 1 LAST_KEY_PRESSED || :
 
   LAST_KEY_PRESSED="${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:-}${LAST_KEY_PRESSED}"
   PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
@@ -435,7 +435,7 @@ function terminal::waitForChar() {
   # special key detection, need to read more characters (up to 4 for F1-F12 keys)
   if [[ ${LAST_KEY_PRESSED} == $'\e'* ]]; then
     REPLY=""
-    IFS='' read -t 0.01 -d '' -rsn 4 &>/dev/null || :
+    IFS='' read -t 0.01 -d '' -rsN 4 &>/dev/null || :
 
     # we might have several ESC which means we read too much
     local wholeChain="${LAST_KEY_PRESSED#$'\e'}${REPLY}"
@@ -462,6 +462,8 @@ function terminal::waitForChar() {
     $'\e'?) LAST_KEY_PRESSED="ALT+${LAST_KEY_PRESSED#$'\e'}" ;;
     esac
   else
+
+
     if (( ${#LAST_KEY_PRESSED} > 1 )); then
       # if we have more than one char, we store the extra chars for the next read
       PREVIOUS_KEY_PRESSED_EXTRA_CHARS="${LAST_KEY_PRESSED:1}"
@@ -543,15 +545,30 @@ function terminal::testWaitForKeyPress() {
 # > 2. When read is done, it will print a new line in stderr. So we redirect stderr to null.
 # >    This means that if you print something in a readline bound function, do not print to stderr or you will get nothing !
 function terminal::waitForKeyPress() {
-  LAST_KEY_PRESSED=""
+  if [[ -n ${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:-} ]]; then
+    LAST_KEY_PRESSED="${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:0:1}"
+    PREVIOUS_KEY_PRESSED_EXTRA_CHARS="${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:1}"
+    return 0
+  fi
   # here we redirect the error output to null because of a weird bash behavior, it
   # prints a newline each time read is finished (when called with -e), idk why...
   # This means that if you print something in a readline bound function, do not print to
   # stderr or you will get nothing !
   local IFS=''
-  read "$@" -e -d '' -s -r -n 1 LAST_KEY_PRESSED 2>/dev/null || :
+  read "$@" -e -d '' -s -r -N 1 LAST_KEY_PRESSED 2>/dev/null || :
   if [[ -z ${LAST_KEY_PRESSED} ]]; then
     return 1
+  fi
+  # readline will actually read byte per byte and not a complete UTF8 character (or I missed something!)
+  # check if we have more chars waiting in the buffer and append it directly
+  while read "$@" -t 0 -d '' -s -r -N 1 2>/dev/null; do
+    read "$@" -d '' -s -r -N 1 2>/dev/null
+    LAST_KEY_PRESSED+="${REPLY}"
+  done
+  if (( ${#LAST_KEY_PRESSED} > 1 )); then
+    # if we have more than one char, we store the extra chars for the next read
+    PREVIOUS_KEY_PRESSED_EXTRA_CHARS="${LAST_KEY_PRESSED:1}"
+    LAST_KEY_PRESSED="${LAST_KEY_PRESSED:0:1}"
   fi
   return 0
 }
@@ -591,16 +608,16 @@ function terminal::rebindKeymap() {
     core::fail "The function ⌜${callBackFunction}⌝ must be defined before calling terminal::rebindKeymap."
   fi
 
-  if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
+  if [[ -z ${_TERMINAL_SAVED_BINDINGS_FILE:-} ]]; then
     # save the original bindings
     _OPTION_PATH_ONLY=true fs::createTempFile
-    _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
-    bind -p >"${_INTERACTIVE_SAVED_BINDINGS_FILE}" 2>/dev/null
+    _TERMINAL_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
+    bind -p >"${_TERMINAL_SAVED_BINDINGS_FILE}" 2>/dev/null
   fi
 
   # remove all existing bindings except the self-insert ones
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
-  fs::readFile "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
+  fs::readFile "${_TERMINAL_SAVED_BINDINGS_FILE}"
   local bindings="${RETURNED_VALUE}"
   local IFS=$'\n'
   local line
@@ -636,7 +653,7 @@ function terminal::rebindKeymap() {
   bind -x '"ESCAPE": '"${callBackFunction}"' ESC' &>/dev/null
 
   # for each normal key, bind it with the different modifiers
-  local normalKeys="abcdefghijklmnopqrstuvwxyz1234567890"
+  local normalKeys="abcdefghijklmnopqrstuvwxyz1234567890,;:!?./%*$^"
   local -a modifiers=(
     "CTRL+" "\C-"
     "ALT+" "\e"
@@ -778,7 +795,7 @@ function terminal::rebindKeymap() {
 # terminal::restoreBindings
 # ```
 function terminal::restoreBindings() {
-  if [[ -z ${_INTERACTIVE_SAVED_BINDINGS_FILE:-} ]]; then
+  if [[ -z ${_TERMINAL_SAVED_BINDINGS_FILE:-} ]]; then
     return 0
   fi
   if [[ ${GLOBAL_SOURCED_FOR_PROMPT:-} != "true" ]]; then
@@ -802,7 +819,7 @@ function terminal::restoreBindings() {
   done
 
   # restore the default bindings
-  bind -f "${_INTERACTIVE_SAVED_BINDINGS_FILE}" &>/dev/null
+  bind -f "${_TERMINAL_SAVED_BINDINGS_FILE}" &>/dev/null
 }
 
 # ## terminal::clearKeyPressed
