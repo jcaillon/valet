@@ -99,6 +99,8 @@ function test_terminal::switchToFullScreen() {
 function test_terminal::setRawMode() {
   test::title "✅ Testing terminal::setRawMode"
 
+  GLOBAL_TEST_FORCE_FD_OPEN=true
+
   unset -v GLOBAL_STTY_SAVED_CONFIG _TERMINAL_RAW_MODE_ENABLED
 
   # shellcheck disable=SC2317

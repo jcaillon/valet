@@ -6,8 +6,6 @@
 source terminal
 
 function tui::startMainLoop() {
-  # set trap so that interrupt signal sets GLOBAL_SESSION_INTERRUPTED to true
-  # terminal::setInterruptTrap
   # setup the terminal to be ready for readline
   terminal::setRawMode
   # before starting to wait for inputs, we clear up the key pressed
@@ -19,22 +17,31 @@ function tui::startMainLoop() {
   local IFS=" "
 
   # main loop
-  while [[ -t ${GLOBAL_FD_TUI} || ${GLOBAL_SESSION_INTERRUPTED} != "true" ]]; do
+  while [[ -t ${GLOBAL_FD_TUI} ]]; do
     if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER_PID ]]; then
       log::warning "Key press listener coproc is not already running, re-starting it."
       tui_startKeyPressListener
     fi
     # read the key pressed from the key press listener coproc
-    if IFS=$'\0' read -rd $'\0' RETURNED_VALUE <&"${_TUI_COPROC_KEY_PRESS_LISTENER[0]}"; then
-      printf "%s\n" "Received key press: ${RETURNED_VALUE}" >&"${GLOBAL_FD_TUI}"
+    if IFS=$'\0' read -rd $'\0' -u "${_TUI_COPROC_KEY_PRESS_LISTENER[0]}" LAST_KEY_PRESSED; then
+      if [[ ${LAST_KEY_PRESSED} == "!CTRL+C" ]]; then
+        log::info "CTRL+C pressed, exiting the TUI main loop."
+        break
+      fi
+
+      printf "%s\n" "Received key press: ${LAST_KEY_PRESSED}" >&"${GLOBAL_FD_TUI}"
     fi
   done
 
   tui_stopKeyPressListener
 
   terminal::restoreLogs
+
+  core::dump
+  if [[ -t 0 ]]; then
+    log::warning "Restoring terminal settings."
+  fi
   terminal::restoreSettings
-  terminal::restoreInterruptTrap
 }
 
 function tui_startKeyPressListener() {
@@ -60,18 +67,15 @@ function tui_stopKeyPressListener() {
 }
 
 function tui_keyPressListener() {
+  # we are inside a coproc, register the correct traps
+  trap::registerSubshell
+
   # rebind some keys to call the callback function
   terminal::rebindKeymap tui_keyPressListener_handleKeyBinding
 
-  # exec 0<&"${_TUI_USER_INPUT_FD}" || log::fail "Failed to redirect stdin to the user input fd."
-  # if [[ ! -t 0 ]]; then
-  #   log::fail "stdin is not a terminal"
-  # fi
-
-  while kill -0 "${GLOBAL_PROGRAM_MAIN_PID}"; do
+  while [[ -t ${_TUI_USER_INPUT_FD} ]] && kill -0 "${GLOBAL_PROGRAM_MAIN_PID}"; do
     if terminal::waitForKeyPress -u "${_TUI_USER_INPUT_FD}"; then
-      printf "%q\0" "${LAST_KEY_PRESSED}"
-      log::info "Key pressed: ${LAST_KEY_PRESSED} (length ${#LAST_KEY_PRESSED})"
+      printf "%s\0" "${LAST_KEY_PRESSED}"
     fi
   done
 }

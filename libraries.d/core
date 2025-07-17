@@ -103,6 +103,8 @@ function trap::onExitInternal() {
 # It is executed in the same shell that has been interrupted, as if we called this function
 # at the line executed at the moment when the interruption took place.
 function trap::onInterruptInternal() {
+  # reset the trap to not call this function again
+  trap ":;" SIGINT SIGQUIT
   if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
@@ -120,8 +122,6 @@ function trap::onInterruptInternal() {
       return 0
     fi
   fi
-  # reset the trap to not call this function again
-  trap SIGINT SIGQUIT
   GLOBAL_EXPECTED_EXIT=1
   exit 1
 }

@@ -7,11 +7,11 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<sub
 source "libraries.d/core"
 include tui
 
-log::info "Before rerouting Logs"
-terminal::rerouteLogs
-log::info "After rerouting Logs"
-log::warning "This is a warning"
-terminal::restoreLogs
-log::info "end"
+# log::info "Before rerouting Logs"
+# terminal::rerouteLogs
+# log::info "After rerouting Logs"
+# log::warning "This is a warning"
+# terminal::restoreLogs
+# log::info "end"
 
 tui::startMainLoop

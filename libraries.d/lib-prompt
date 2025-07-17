@@ -274,6 +274,9 @@ function prompt::input() {
   _PROMPT_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD="${_OPTION_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD:-242}"
   _PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${_OPTION_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD:-1042}"
 
+  # default key mapping using the
+  # - control characters: https://jvns.ca/ascii
+  # - default emacs mapping for bash readline
   local -A _PROMPT_KEY_MAPPING=(
     ["CTRL+ALT+M"]="accept-line"
     ["CTRL+M"]="accept-line"
@@ -293,10 +296,15 @@ function prompt::input() {
     ["CTRL+RIGHT"]="forward-word"
     ["CTRL+K"]="kill-end-of-line"
     ["CTRL+X"]="kill-line"
+    ["CTRL+U"]="kill-line"
     ["CTRL+Y"]="yank"
     ["DEL"]="delete-char"
     ["CTRL+D"]="delete-char"
+    #["CTRL+P"]="prev-line"
+    #["CTRL+N"]="next-line"
+    #["CTRL+L"]="clear-all"
     ["CTRL+H"]="backward-delete-char"
+    ["CTRL+?"]="backward-delete-char"
     ["BACKSPACE"]="backward-delete-char"
     ["CTRL+DEL"]="kill-word"
     ["CTRL+BACKSPACE"]="backward-kill-word"

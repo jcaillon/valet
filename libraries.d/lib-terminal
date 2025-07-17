@@ -114,6 +114,9 @@ function terminal::setRawMode() {
     GLOBAL_STTY_SAVED_CONFIG="${RETURNED_VALUE%%$'\n'}"
   fi
   if [[ ${_TERMINAL_RAW_MODE_ENABLED:-} != "true" ]]; then
+    if [[ ! -t 0 && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
+      core::fail "stdin is not a terminal, cannot set raw mode."
+    fi
     # we try to set specific settings and if it fails, we just set raw mode
     stty icrnl -inlcr -ixon -ixoff \
       nl0 cr0 tab0 ff0 -onlret \
@@ -136,6 +139,9 @@ function terminal::setRawMode() {
 # shellcheck disable=SC2120
 function terminal::restoreSettings() {
   if [[ ${_TERMINAL_RAW_MODE_ENABLED:-} == "true" ]]; then
+    if [[ ! -t 0 && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
+      core::fail "stdin is not a terminal, cannot reset mode."
+    fi
     stty "${GLOBAL_STTY_SAVED_CONFIG}" || log::warning "Failed to restore the terminal settings, check stty version."
     unset -v _TERMINAL_RAW_MODE_ENABLED
   fi
@@ -186,8 +192,9 @@ function terminal::restoreLogs() {
   fi
 }
 
-# ## terminal::setInterruptTrap
+# ## terminal::setInterruptTrap (private)
 #
+#TODO: delete, useless now
 # Set a trap to catch the interrupt signal (SIGINT).
 # When the user presses Ctrl+C, the GLOBAL_SESSION_INTERRUPTED variable will be set to true.
 #
@@ -653,7 +660,8 @@ function terminal::rebindKeymap() {
   bind -x '"ESCAPE": '"${callBackFunction}"' ESC' &>/dev/null
 
   # for each normal key, bind it with the different modifiers
-  local normalKeys="abcdefghijklmnopqrstuvwxyz1234567890,;:!?./%*$^"
+  # local normalKeys="abcdefghijklmnopqrstuvwxyz1234567890\`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?"
+  local normalKeys="abcdefghijklmnopqrstuvwxyz1234567890"
   local -a modifiers=(
     "CTRL+" "\C-"
     "ALT+" "\e"
@@ -662,7 +670,7 @@ function terminal::rebindKeymap() {
   for((index=0;index<${#normalKeys};index++)); do
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
       key="${normalKeys:index:1}"
-      bind -x "\"${modifiers[modeIndex + 1]}${key}\": ${callBackFunction} ${modifiers[modeIndex]}${key^^}" &>/dev/null
+      bind -x "\"${modifiers[modeIndex + 1]}${key}\": ${callBackFunction} ${modifiers[modeIndex]}\\${key^^}" &>/dev/null
     done
   done
 
@@ -770,20 +778,29 @@ function terminal::rebindKeymap() {
 
   # check http://www.afterstep.org/keyboard.html
   # special key bindings
-  bind -x '"NEWLINE": '"${callBackFunction}"' NEWLINE' &>/dev/null
-  bind -x '"RET": '"${callBackFunction}"' NEWLINE' &>/dev/null
-  bind -x '"RETURN": '"${callBackFunction}"' NEWLINE' &>/dev/null
+  bind -x '"\C-x\C-a": '"${callBackFunction}"' CTRL+ENTER' &>/dev/null
+  bind 'NEWLINE: "\C-x\C-a"' &>/dev/null
+
+  bind -x '"\C-x\C-b": '"${callBackFunction}"' ENTER' &>/dev/null
+  bind 'RET:"\C-x\C-b"' &>/dev/null
+  bind 'RETURN:"\C-x\C-b"' &>/dev/null
+  bind '"\r":"\C-x\C-b"' &>/dev/null
+  
+  # bind -x '"\C-x\C-c": '"${callBackFunction}"' SHIFT+ENTER' &>/dev/null
+  # bind 'LFD: "\C-x\C-c"' &>/dev/null
 
   bind -x '"DEL": '"${callBackFunction}"' DEL' &>/dev/null
   bind -x '"\d": '"${callBackFunction}"' DEL' &>/dev/null
+
   bind -x '"\177": '"${callBackFunction}"' BACKSPACE' &>/dev/null
   bind -x '"RUBOUT": '"${callBackFunction}"' BACKSPACE' &>/dev/null
   bind -x '"\C-?": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+
   bind -x '"\b": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
   bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
 
-  bind -x '"TAB": '"${callBackFunction}"' TAB' &>/dev/null
   bind -x '"\t": '"${callBackFunction}"' TAB' &>/dev/null
+  bind -x '"TAB": '"${callBackFunction}"' TAB' &>/dev/null
 }
 
 # ## terminal::restoreBindings
