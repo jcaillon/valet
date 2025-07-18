@@ -48,7 +48,5 @@ jobs:
           docker run --rm \
             -v $PWD:/app \
             -w /app \
-            -e VALET_CONFIG_ENABLE_COLORS=true \
-            -e VALET_CONFIG_DISABLE_PROGRESS=true \
             noyacode/minideb-bash5.0 \
-            bash --version && ./valet self test -C
+            bash --version; VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_DISABLE_PROGRESS=true ./valet self test -C
