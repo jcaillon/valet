@@ -19,7 +19,7 @@ source extension1
 #     Just run the command and do nothing.
 ##VALET_COMMAND
 function extension1() {
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   extension1::doNothing
