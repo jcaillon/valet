@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- test with bash 5.1, 5.2 and 5.3 in the pipeline (with different distros each time).
 - handle the drawing of TUI panels in a coproc so each has its own set of variables for its state.
 - handle SIGTSTP/SIGCONT to pause and resume the TUI session. This is useful when we want to run a command in the background and then come back to the TUI.
 - Support bracketed paste mode: <https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Bracketed-Paste-Mode>
