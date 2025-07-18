@@ -376,7 +376,14 @@ function test_flushFdToCodeBlock() {
   # reset the file content (must close/open the file descriptor in between)
   exec {fdNumber}>&-
   : >"${file}"
-  eval "exec ${fdNumber}>\"${file}\""
+  eval "exec ${fdNumber}>>\"${file}\""
+  if (( fdNumber == 2 )); then
+    # since we changed fd2, we also need to redeclare fd that point to fd2
+    exec {GLOBAL_FD_LOG}>&-
+    exec {GLOBAL_FD_LOG}>&2
+    exec {GLOBAL_FD_TUI}>&-
+    exec {GLOBAL_FD_TUI}>&2
+  fi
 }
 
 # ## test::transformTextBeforeFlushing

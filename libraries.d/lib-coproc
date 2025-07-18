@@ -23,15 +23,17 @@ source bash
 # - $3: **loop command to eval** _as string_:
 #       The command (will be evaluated) to run in the coproc loop.
 #       Can be set to "false" to not run any command in the loop (and just use init).
-#       Can return 1 to stop the coproc.
+#       Can return 1 to break the loop.
 # - $4: **on message command to eval** _as string_:
 #       The command (will be evaluated) to run in the coproc loop when a message
 #       is received from the main thread.
-#       The command can expect to use the variable _COPROC_MESSAGE which contains
+#       The command can expect to use the variable RETURNED_VALUE which contains
 #       the message (string) received from the main thread.
 #       The command can send messages to the main thread using the syntax
 #       printf "%s\0" "message"
-#       Can return 1 to stop the coproc.
+#       Can return 1 to break the loop.
+# - $5: **end command to eval** _as string_:
+#       The command (will be evaluated) to run at the end of the coproc.
 # - ${_OPTION_WAIT_FOR_READINESS} _as bool_:
 #       (optional) If true, the main thread will wait for the coproc to be ready
 #       before returning from this function (readiness is achieved after executing
@@ -42,6 +44,10 @@ source bash
 #       from the main thread to evaluate the on message command.
 #       (defaults to false)
 #
+# Returns:
+# 
+# - ${RETURNED_VALUE}: The PID of the coproc.
+#
 # ```bash
 # _OPTION_WAIT_FOR_READINESS=true coproc::run "_MY_COPROC" initCommand loopCommand onMessageCommand
 # ```
@@ -50,6 +56,7 @@ function coproc::run() {
   local initCommand="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local loopCommand="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local onMessageCommand="${4?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local endCommand="${5?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local waitForReadiness="${_OPTION_WAIT_FOR_READINESS:-false}"
   local keepOnlyLastMessage="${_OPTION_KEEP_ONLY_LAST_MESSAGE:-false}"
 
@@ -60,24 +67,24 @@ function coproc::run() {
   log::debug "Starting coproc ⌜${coprocVarName}⌝ with command ⌜${initCommand}⌝ and loop ⌜${loopCommand}⌝."
 
   # Start the coproc
-  eval "{ coproc ${coprocVarName} { coproc_program \"${initCommand}\" \"${loopCommand}\" \"${onMessageCommand}\" ${waitForReadiness} ${keepOnlyLastMessage} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
+  eval "{ coproc ${coprocVarName} { coproc_program \"${initCommand}\" \"${loopCommand}\" \"${onMessageCommand}\" \"${endCommand}\" ${waitForReadiness} ${keepOnlyLastMessage} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
 
   # get the PID
-  while [[ ! -v "${coprocVarName}_PID" ]]; do
-    log::info "Waiting for the coproc ⌜${coprocVarName}⌝ to start..."
-    bash::sleep 0.01
-  done
   local -n pid="${coprocVarName}_PID"
-
   GLOBAL_BACKGROUND_PIDS+=("${pid}")
 
   # wait for readiness if requested
   if [[ ${waitForReadiness} == "true" ]]; then
-    while ! kill -0 "${pid}" 2>/dev/null; do
-      log::info "Waiting for the coproc ⌜${coprocVarName}⌝ to be ready..."
-      bash::sleep 0.01
-    done
+    if ! kill -0 "${pid}" 2>/dev/null || ! coproc::receiveMessage "${coprocVarName}"; then
+      log::fail "The coproc ⌜${coprocVarName}⌝ did not start correctly."
+    elif [[ ${RETURNED_VALUE} != "ready" ]]; then
+      log::fail "The coproc ⌜${coprocVarName}⌝ did not send the expected readiness message."
+    else
+      log::debug "The coproc ⌜${coprocVarName}⌝ is ready."
+    fi
   fi
+
+  RETURNED_VALUE="${pid}"
 }
 
 # The function that will run in the coproc.
@@ -85,37 +92,50 @@ function coproc_program() {
   local initCommand="${1}"
   local loopCommand="${2}"
   local onMessageCommand="${3}"
-  local waitForReadiness="${4}"
-  local keepOnlyLastMessage="${5}"
+  local endCommand="${4}"
+  local waitForReadiness="${5}"
+  local keepOnlyLastMessage="${6}"
 
   # we are inside a coproc, register the correct traps
   trap::registerSubshell
 
   # Run the initialization command
   if ! eval "${initCommand}"; then
+    log::debug "Initialization command returned non-zero status, exiting coproc."
     return 0
+  fi
+
+  if [[ ${waitForReadiness} == "true" ]]; then
+    # Send a readiness message to the main thread
+    printf "%s\0" "ready"
   fi
 
   while kill -0 "${GLOBAL_PROGRAM_MAIN_PID}" 2>/dev/null; do
     if ! eval "${loopCommand}"; then
-      return 0
+      log::debug "Loop command return non-zero status, exiting coproc."
+      break
     fi
     if [[ -n "${onMessageCommand}" ]]; then
       # Read messages from the main thread
-      if IFS=$'\0' read -rd $'\0' _COPROC_MESSAGE; then
+      if IFS=$'\0' read -rd $'\0' RETURNED_VALUE; then
 
         # if we keep only the last message, we read until no more messages are available
         while [[ ${keepOnlyLastMessage} == "true" ]] && IFS=$'\0' read -rd $'\0' -t 0; do
-          IFS=$'\0' read -rd $'\0' _COPROC_MESSAGE
+          IFS=$'\0' read -rd $'\0' RETURNED_VALUE
         done
 
         # Execute the on message command with the received message
         if ! eval "${onMessageCommand}"; then
-          return 0
+          log::debug "On message command returned non-zero status, exiting coproc."
+          break
         fi
       fi
     fi
   done
+
+  if ! eval "${endCommand}"; then
+    log::debug "End command returned non-zero status."
+  fi
 }
 
 # ## coproc::sendMessage
@@ -209,5 +229,36 @@ function coproc::wait() {
   
   if ! wait -f "${pid}"; then
     return "${PIPESTATUS[0]:-}"
+  fi
+}
+
+# ## coproc::isRunning
+#
+# This function checks if a coproc is running.
+#
+# - $1: **coproc variable name** _as string_:
+#       The variable name to use for the coproc.
+#
+# Returns:
+#
+# - $?: 
+#   - 0 if the coproc is running
+#   - 1 if it is not
+#
+# ```bash
+# if coproc::isRunning "myCoproc"; then
+#   echo "The coproc is running."
+# fi
+# ```
+function coproc::isRunning() {
+  local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if [[ ! -v "${coprocVarName}_PID" ]]; then
+    return 1
+  fi
+
+  local -n pid="${coprocVarName}_PID"
+
+  if ! kill -0 "${pid}" 2>/dev/null; then
+    return 1
   fi
 }

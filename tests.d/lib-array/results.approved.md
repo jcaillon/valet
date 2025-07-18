@@ -141,7 +141,7 @@ MY_ARRAY=(
 )
 ```
 
-### ✅ Testing array::checkIfPresent
+### ✅ Testing array::contains
 
 ```text
 MY_ARRAY=(
@@ -151,7 +151,7 @@ MY_ARRAY=(
 )
 ```
 
-❯ `MY_VALUE=deliver array::checkIfPresent MY_ARRAY MY_VALUE`
+❯ `MY_VALUE=deliver array::contains MY_ARRAY MY_VALUE`
 
 ```text
 MY_ARRAY=(
@@ -161,7 +161,7 @@ MY_ARRAY=(
 )
 ```
 
-❯ `MY_VALUE=holiday array::checkIfPresent MY_ARRAY MY_VALUE`
+❯ `MY_VALUE=holiday array::contains MY_ARRAY MY_VALUE`
 
 Returned code: `1`
 

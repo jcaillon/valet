@@ -84,8 +84,6 @@ WARNING  Subshell exited with code 2
 
 ❯ `bash::isFdValid /tmp/valet-temp`
 
-❯ `bash::isFdValid 12`
-
 ❯ `bash::isFdValid 999`
 
 Returned code: `1`

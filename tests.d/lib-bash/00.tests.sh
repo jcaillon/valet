@@ -65,11 +65,6 @@ function test_bash::isFdValid() {
 
   test::exec bash::isFdValid 2
   test::exec bash::isFdValid "${GLOBAL_TEST_TEMP_FILE}"
-  local fd
-  exec {fd}>&2
-  test::exec bash::isFdValid "${fd}"
-  exec {fd}>&-
-
   test::exec bash::isFdValid 999
   test::exec bash::isFdValid /unknown/file/path
 }

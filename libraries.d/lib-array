@@ -260,7 +260,7 @@ function array::appendIfNotPresent() {
   return ${present}
 }
 
-# ## array::checkIfPresent
+# ## array::contains
 #
 # Check if a value is in an array.
 # It uses pure bash.
@@ -277,9 +277,9 @@ function array::appendIfNotPresent() {
 # ```bash
 # declare myArray=( "a" "b" )
 # declare myValue="b"
-# if array::checkIfPresent myArray myValue; then "b is in the array"; fi
+# if array::contains myArray myValue; then "b is in the array"; fi
 # ```
-function array::checkIfPresent() {
+function array::contains() {
   # shellcheck disable=SC2178
   local -n array="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -n value="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"

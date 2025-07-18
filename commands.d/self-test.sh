@@ -434,7 +434,7 @@ function selfTest_runSingleTestSuite() {
         log::printCallStack 1 7
 
       elif [[ -n ${GLOBAL_STACK_FUNCTION_NAMES_ERR:-} ]]; then
-        log::error "The test script ⌜${testScript##*/}⌝ had an error  and exited with code ⌜${exitCode}⌝." \
+        log::error "The test script ⌜${testScript##*/}⌝ had an error and exited with code ⌜${exitCode}⌝." \
           "Test scripts will exit if a command ends with an error (shell option to exit on error)." \
           "" \
           "If you expect a tested function or command to fail, use one of these two methods to display the failure without exiting the script:" \
@@ -574,6 +574,9 @@ function selfTest_runSingleTest() {
   # redirect the standard output and error output to files
   exec 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
   exec 2>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
+  # since we changed fd2, we also need to redeclare fd that point to fd2
+  exec {GLOBAL_FD_LOG}>&2
+  exec {GLOBAL_FD_TUI}>&2
   unset -v GLOBAL_FD_ORIGINAL_STDERR
 
   # run a custom user script before the test if it exists
@@ -590,6 +593,8 @@ function selfTest_runSingleTest() {
   selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/after-each-test"
 
   exec 2>&"${GLOBAL_FD_TEST_LOG}"
+  exec {GLOBAL_FD_LOG}>&-
+  exec {GLOBAL_FD_TUI}>&-
 
   self_makeReplacementsInReport
 }

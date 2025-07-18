@@ -300,7 +300,7 @@ function extractCommandDefinitionsToVariables() {
       command="${command#valet }"
       command="${command#valet}"
 
-      if array::checkIfPresent CMD_ALL_COMMANDS_ARRAY command; then
+      if array::contains CMD_ALL_COMMANDS_ARRAY command; then
         log::warning "                         ├── Skipping ⌜${command}⌝ (already defined)."
         duplicatedCommands+=1
         continue

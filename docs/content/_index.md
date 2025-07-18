@@ -28,6 +28,18 @@ keywords:
 description: With Valet, you can setup and execute tests, code interactive experiences for your users, navigate and execute your scripts (called commands) from a searchable menu interface, and more! It provides libraries of functions that can be sourced to solve standard programming needs such as string, array or file manipulation, prompting the user, and so on...
 ---
 
+<style>
+/* https://patterncraft.fun/ */
+body {
+  background: radial-gradient(125% 125% at 50% 90%, rgb(255, 255, 255) 40%, rgb(181, 146, 247) 100%);
+}
+
+body:is(html[class~="dark"] *) {
+  background: rgb(0, 0, 0) radial-gradient(125% 125% at 50% 100%, rgb(0, 0, 0) 40%, rgb(53, 1, 54) 100%) 0% 0% / 100% 100%;
+}
+</style>
+
+
 <div class="hx-mt-6 hx-mb-6">
 {{< hextra/hero-headline >}}
   Valet
