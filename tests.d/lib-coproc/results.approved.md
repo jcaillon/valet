@@ -51,11 +51,9 @@ INFO     Running init command in coproc (_COPROC_3).
 
 ```text
 INFO     Running loop command in coproc (_COPROC_4), loop number: 1.
-INFO     Received message from coproc: continue 1
 INFO     Received message in coproc (_COPROC_4): decoy
 INFO     Running loop command in coproc (_COPROC_4), loop number: 2.
 INFO     Received message in coproc (_COPROC_4): message 0
-INFO     Received message from coproc: continue 2
 INFO     Received message in coproc (_COPROC_4): decoy
 INFO     Received message in coproc (_COPROC_4): message 1
 INFO     Received message in coproc (_COPROC_4): stop
@@ -70,10 +68,8 @@ INFO     Stopping the coproc (_COPROC_4).
 
 ```text
 INFO     Running loop command in coproc (_COPROC_4), loop number: 1.
-INFO     Received message from coproc: continue 1
 INFO     Received message in coproc (_COPROC_4): message 0
 INFO     Running loop command in coproc (_COPROC_4), loop number: 2.
-INFO     Received message from coproc: continue 2
 INFO     Received message in coproc (_COPROC_4): message 1
 INFO     Received message in coproc (_COPROC_4): stop
 INFO     Stopping the coproc (_COPROC_4).

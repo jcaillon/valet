@@ -513,3 +513,30 @@ function test::setTerminalInputs() {
   TEST_TERMINAL_INPUTS_INDEX=0
   TEST_TERMINAL_INPUTS=("${@}")
 }
+
+# ## test::setTestCallStack (private)
+#
+# This function is used to set the call stack for the tests.
+# It is used to ensure that the call stack is consistent with the tests.
+#
+# ```bash
+# test::setTestCallStack
+# ```
+function test::setTestCallStack() {
+  # fix output for printCallStack
+  GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
+  GLOBAL_STACK_SOURCE_FILES=("core" "core" "core" "/path/to/subFunction.sh" "/path/to/function.sh")
+  GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
+}
+
+# ## test::unsetTestCallStack (private)
+#
+# This function is used to unset the call stack for the tests.
+#
+# ```bash
+# test::unsetTestCallStack
+# ```
+function test::unsetTestCallStack() {
+  unset -v GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS
+}
+

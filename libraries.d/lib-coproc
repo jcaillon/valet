@@ -76,9 +76,9 @@ function coproc::run() {
   # wait for readiness if requested
   if [[ ${waitForReadiness} == "true" ]]; then
     if ! kill -0 "${pid}" 2>/dev/null || ! coproc::receiveMessage "${coprocVarName}"; then
-      log::fail "The coproc ⌜${coprocVarName}⌝ did not start correctly."
+      core::fail "The coproc ⌜${coprocVarName}⌝ did not start correctly."
     elif [[ ${RETURNED_VALUE} != "ready" ]]; then
-      log::fail "The coproc ⌜${coprocVarName}⌝ did not send the expected readiness message."
+      core::fail "The coproc ⌜${coprocVarName}⌝ did not send the expected readiness message."
     else
       log::debug "The coproc ⌜${coprocVarName}⌝ is ready."
     fi

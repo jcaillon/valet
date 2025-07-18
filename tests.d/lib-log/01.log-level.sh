@@ -39,7 +39,9 @@ function test_log_log_one_of_each_level() {
   test::exec log::isTraceEnabled
   test::exec log::isDebugEnabled
 
+  test::setTestCallStack
   test::exec log::error 'This is an error message.'
+  test::unsetTestCallStack
   test::exec log::warning 'This is a warning message.'
   test::exec log::success 'This is an success message.'
   test::exec log::info 'This is an info message.'

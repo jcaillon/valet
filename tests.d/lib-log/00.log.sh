@@ -32,7 +32,9 @@ function main() {
 
   rm -Rf "tmp"
 
+  test::setTestCallStack
   test_log::printCallStack
+  test::unsetTestCallStack
 
   test_log::init
   test_log::parseLogPattern
@@ -41,8 +43,10 @@ function main() {
 function test_log::printCallStack() {
   test::title "✅ Testing log::printCallStack"
 
+  test::setTestCallStack
   test::func log::getCallStack
   test::exec log::printCallStack
+  test::unsetTestCallStack
 }
 
 function test_log::init() {

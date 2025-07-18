@@ -78,11 +78,6 @@ function selfTestUtils_setupValetForConsistency() {
     ((_FAKE_TIME=_FAKE_TIME+ 1000000 * _TIME_FACTOR, _TIME_FACTOR++))
     RETURNED_VALUE="${_FAKE_TIME}"
   }
-
-  # fix output for printCallStack
-  GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
-  GLOBAL_STACK_SOURCE_FILES=("core" "core" "core" "/path/to/subFunction.sh" "/path/to/function.sh")
-  GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
 }
 
 # Set the value of important bash variables to ensure consistency in the tests.

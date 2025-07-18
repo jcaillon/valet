@@ -48,8 +48,10 @@ function test_bash::runInSubshell() {
     log::info "This line will not be executed because the previous command failed."
   }
 
+  test::setTestCallStack
   test::exec bash::runInSubshell subshellThatFails
   test::exit _OPTION_EXIT_ON_FAIL=true bash::runInSubshell subshellThatFails
+  test::unsetTestCallStack
 
   function subshellThatExits() {
     exit 2

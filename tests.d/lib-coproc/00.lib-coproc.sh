@@ -99,7 +99,6 @@ function completeTest() {
 
   local -i messageSent=0
   while coproc::receiveMessage _COPROC_4 && [[ ${RETURNED_VALUE} != "stop" ]]; do
-    log::info "Received message from coproc: ${RETURNED_VALUE}"
     printf "%s\0%s\0" "decoy" "message ${messageSent}" >&"${_COPROC_4[1]}"
     messageSent+=1
   done
