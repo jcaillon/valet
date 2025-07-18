@@ -347,12 +347,12 @@ _world
 Returned variables:
 
 ```text
-RETURNED_VALUE='├─ in log::printCallStack() at core:10
+REPLY='├─ in log::printCallStack() at core:10
 ├─ in log::error() at core:100
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
 '
-RETURNED_VALUE2='48'
+REPLY2='48'
 ```
 
 ❯ `log::printCallStack`
@@ -394,8 +394,8 @@ Exited with code: `1`
 ❯ `log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
-local -n messageToPrintInLog=RETURNED_VALUE
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+local -n messageToPrintInLog=REPLY
 string::wrapWords "${messageVariableName}" 90 "                                             " 45
 messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
 messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
@@ -415,8 +415,8 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 ❯ `VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true VALET_CONFIG_LOG_DISABLE_WRAP=false log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
-local -n messageToPrintInLog=RETURNED_VALUE
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+local -n messageToPrintInLog=REPLY
 string::wrapWords "${messageVariableName}" 90 "                                             " 45
 
 
@@ -434,8 +434,8 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 ❯ `VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=local\ extra=1 log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
-local -n messageToPrintInLog=RETURNED_VALUE
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+local -n messageToPrintInLog=REPLY
 string::wrapWords "${messageVariableName}" 90 "                                             " 45
 messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
 messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
@@ -455,8 +455,8 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 ❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
-local -n messageToPrintInLog=RETURNED_VALUE
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+local -n messageToPrintInLog=REPLY
 string::wrapWords "${messageVariableName}" 90 "                                             " 45
 messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
 messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
@@ -472,8 +472,8 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 ❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
-local -n messageToPrintInLog=RETURNED_VALUE
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+local -n messageToPrintInLog=REPLY
 string::wrapWords "${messageVariableName}" 90 "                                             " 45
 messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
 messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
@@ -489,8 +489,8 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 ❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local RETURNED_VALUE RETURNED_VALUE2
-local -n messageToPrintInLog=RETURNED_VALUE
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+local -n messageToPrintInLog=REPLY
 string::wrapWords "${messageVariableName}" 90 "                                             " 45
 messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
 messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
@@ -510,10 +510,10 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 Returned variables:
 
 ```text
-RETURNED_VALUE='%s\n'
-RETURNED_VALUE2='"static string" '
-RETURNED_VALUE3='0'
-RETURNED_VALUE4=''
+REPLY='%s\n'
+REPLY2='"static string" '
+REPLY3='0'
+REPLY4=''
 ```
 
 ❯ `log::parseLogPattern $'static\nstring'`
@@ -521,11 +521,11 @@ RETURNED_VALUE4=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='%s\n'
-RETURNED_VALUE2='"static
+REPLY='%s\n'
+REPLY2='"static
 string" '
-RETURNED_VALUE3='0'
-RETURNED_VALUE4=''
+REPLY3='0'
+REPLY4=''
 ```
 
 ❯ `log::parseLogPattern $'static\n<message>'`
@@ -533,11 +533,11 @@ RETURNED_VALUE4=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='%s%s\n'
-RETURNED_VALUE2='"static
+REPLY='%s%s\n'
+REPLY2='"static
 " "${messageToPrintInLog:-}" '
-RETURNED_VALUE3='0'
-RETURNED_VALUE4=''
+REPLY3='0'
+REPLY4=''
 ```
 
 ❯ `log::parseLogPattern \<colorFaded\>\<time\>\<colorDefault\>\ \<levelColor\>\<level\>\ \<icon\>\<colorDefault\>\ PID=\<pid\>\ SUBSHELL=\<subshell\>\ \<function\>\{8s\}@\<source\>:\<line\>\ \<message\>`
@@ -545,10 +545,10 @@ RETURNED_VALUE4=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='%s%(%H:%M:%S)T%s%s%s%-8s%s%-4s%s%s%-5d%s%-2d%s%8s%s%-10s%s%-4s%s%s\n'
-RETURNED_VALUE2='"[90m" "${EPOCHSECONDS}" "[39m" " " "${levelColor:-}" "${level:0:8}" " " "${icon:-}" "[39m" " PID=" "${BASHPID:0:5}" " SUBSHELL=" "${BASH_SUBSHELL:0:2}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 8 > 0 ? ${#FUNCNAME[2]} - 8 : 0}" "@" "${BASH_SOURCE[2]:0:10}" ":" "${BASH_LINENO[1]:0:4}" " " "${messageToPrintInLog:-}" '
-RETURNED_VALUE3='68'
-RETURNED_VALUE4=''
+REPLY='%s%(%H:%M:%S)T%s%s%s%-8s%s%-4s%s%s%-5d%s%-2d%s%8s%s%-10s%s%-4s%s%s\n'
+REPLY2='"[90m" "${EPOCHSECONDS}" "[39m" " " "${levelColor:-}" "${level:0:8}" " " "${icon:-}" "[39m" " PID=" "${BASHPID:0:5}" " SUBSHELL=" "${BASH_SUBSHELL:0:2}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 8 > 0 ? ${#FUNCNAME[2]} - 8 : 0}" "@" "${BASH_SOURCE[2]:0:10}" ":" "${BASH_LINENO[1]:0:4}" " " "${messageToPrintInLog:-}" '
+REPLY3='68'
+REPLY4=''
 ```
 
 ❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=true log::parseLogPattern \<icon\>\ \<message\>`
@@ -556,10 +556,10 @@ RETURNED_VALUE4=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='%-4s%s%s\n'
-RETURNED_VALUE2='"${icon:-}" " " "${messageToPrintInLog:-}" '
-RETURNED_VALUE3='3'
-RETURNED_VALUE4=''
+REPLY='%-4s%s%s\n'
+REPLY2='"${icon:-}" " " "${messageToPrintInLog:-}" '
+REPLY3='3'
+REPLY4=''
 ```
 
 ❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=false log::parseLogPattern \<icon\>\ \<message\>`
@@ -567,10 +567,10 @@ RETURNED_VALUE4=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='%s%s\n'
-RETURNED_VALUE2='" " "${messageToPrintInLog:-}" '
-RETURNED_VALUE3='1'
-RETURNED_VALUE4=''
+REPLY='%s%s\n'
+REPLY2='" " "${messageToPrintInLog:-}" '
+REPLY3='1'
+REPLY4=''
 ```
 
 ❯ `log::parseLogPattern \<colorFaded\>\{9s\}\ \<time\>\{\(%FT%H:%M:%S%z\)T\}\ \<levelColor\>\{9s\}\ \<level\>\{9s\}\ \<icon\>\{9s\}\ \<varCOLOR_DEBUG\>\{9s\}\ \<processName\>\{-5s\}\ \<pid\>\{9s\}\ \<subshell\>\{9s\}\ \<function\>\{9s\}\ \<source\>\{9s\}\ \<line\>\{9s\}`
@@ -578,10 +578,10 @@ RETURNED_VALUE4=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%9s%s%-5s%s%9s%s%9s%s%9s%s%9s%s%9s\n'
-RETURNED_VALUE2='"[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${variableToPrintInLog:${#variableToPrintInLog} - 9 > 0 ? ${#variableToPrintInLog} - 9 : 0}" " " "${processName:0:5}" " " "${BASHPID:${#BASHPID} - 9 > 0 ? ${#BASHPID} - 9 : 0}" " " "${BASH_SUBSHELL:${#BASH_SUBSHELL} - 9 > 0 ? ${#BASH_SUBSHELL} - 9 : 0}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 9 > 0 ? ${#FUNCNAME[2]} - 9 : 0}" " " "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 9 > 0 ? ${#BASH_SOURCE[2]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
-RETURNED_VALUE3='0'
-RETURNED_VALUE4='
+REPLY='%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%9s%s%-5s%s%9s%s%9s%s%9s%s%9s%s%9s\n'
+REPLY2='"[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${variableToPrintInLog:${#variableToPrintInLog} - 9 > 0 ? ${#variableToPrintInLog} - 9 : 0}" " " "${processName:0:5}" " " "${BASHPID:${#BASHPID} - 9 > 0 ? ${#BASHPID} - 9 : 0}" " " "${BASH_SUBSHELL:${#BASH_SUBSHELL} - 9 > 0 ? ${#BASH_SUBSHELL} - 9 : 0}" " " "${FUNCNAME[2]:${#FUNCNAME[2]} - 9 > 0 ? ${#FUNCNAME[2]} - 9 : 0}" " " "${BASH_SOURCE[2]:${#BASH_SOURCE[2]} - 9 > 0 ? ${#BASH_SOURCE[2]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
+REPLY3='0'
+REPLY4='
 local variableToPrintInLog="${COLOR_DEBUG:-}"
 local processName
 if [[ ${BASHPID} == "1234" ]]; then processName="main"; else processName="${BASHPID}"; fi'
@@ -592,13 +592,13 @@ if [[ ${BASHPID} == "1234" ]]; then processName="main"; else processName="${BASH
 Returned variables:
 
 ```text
-RETURNED_VALUE='%s%-8s%s%s%s%s%s%s%s%-7s%s%-7s%s%-10s%s%s\n'
-RETURNED_VALUE2='"${levelColor:-}" "${level:0:8}" "[39m" " " "${messageToPrintInLog:-}" "
+REPLY='%s%-8s%s%s%s%s%s%s%s%-7s%s%-7s%s%-10s%s%s\n'
+REPLY2='"${levelColor:-}" "${level:0:8}" "[39m" " " "${messageToPrintInLog:-}" "
 " "${GLOBAL_LOG_WRAP_PADDING}" "[90m" "[" "${loggedElapsedTime:0:7}" "] [" "${loggedElapsedTimeSinceLastLog:0:7}" "] in [" "${sourceFile:0:10}" "]" "[39m" '
-RETURNED_VALUE3='9'
-RETURNED_VALUE4='
-time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"; local loggedElapsedTime="${RETURNED_VALUE}"
-time::getProgramElapsedMicroseconds; local -i currentTime=${RETURNED_VALUE}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${RETURNED_VALUE}"; _LOG_ELAPSED_TIME=${currentTime}
+REPLY3='9'
+REPLY4='
+time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${REPLY}" "%S.%LLs"; local loggedElapsedTime="${REPLY}"
+time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${REPLY}"; _LOG_ELAPSED_TIME=${currentTime}
 local sourceFile="${BASH_SOURCE[2]##*/}"'
 ```
 
@@ -607,10 +607,10 @@ local sourceFile="${BASH_SOURCE[2]##*/}"'
 Returned variables:
 
 ```text
-RETURNED_VALUE='%s%s%s%s%s%s%s%s%s\n'
-RETURNED_VALUE2='"{\"level\": \"" "${level}" "\", \"message\": \"" "${messageToPrintInLog:-}" "\", \"source\": \"" "${BASH_SOURCE[2]}" "\", \"line\": \"" "${BASH_LINENO[1]}" "\"}" '
-RETURNED_VALUE3='26'
-RETURNED_VALUE4=''
+REPLY='%s%s%s%s%s%s%s%s%s\n'
+REPLY2='"{\"level\": \"" "${level}" "\", \"message\": \"" "${messageToPrintInLog:-}" "\", \"source\": \"" "${BASH_SOURCE[2]}" "\", \"line\": \"" "${BASH_LINENO[1]}" "\"}" '
+REPLY3='26'
+REPLY4=''
 ```
 
 ❯ `log::parseLogPattern $'<level>{-2s}\n  <varSTUFF>{-5s}\n  <pid>{-04d}\n  <subshell>{-1s}\n  <function>{-5s}\n  <line>{-03d}\n  <source>{-5s}\n  <sourceFile>{-5s}\n  <elapsedTime>{-5s}\n  <elapsedTimeSinceLastLog>{-5s}\n  '`
@@ -618,8 +618,8 @@ RETURNED_VALUE4=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='%-2s%s%-5s%s%-04d%s%-1s%s%-5s%s%-03d%s%-5s%s%-5s%s%-5s%s%-5s%s\n'
-RETURNED_VALUE2='"${level:0:2}" "
+REPLY='%-2s%s%-5s%s%-04d%s%-1s%s%-5s%s%-03d%s%-5s%s%-5s%s%-5s%s%-5s%s\n'
+REPLY2='"${level:0:2}" "
   " "${variableToPrintInLog:0:5}" "
   " "${BASHPID:0:04}" "
   " "${BASH_SUBSHELL:0:1}" "
@@ -630,12 +630,12 @@ RETURNED_VALUE2='"${level:0:2}" "
   " "${loggedElapsedTime:0:5}" "
   " "${loggedElapsedTimeSinceLastLog:0:5}" "
   " '
-RETURNED_VALUE3='0'
-RETURNED_VALUE4='
+REPLY3='0'
+REPLY4='
 local variableToPrintInLog="${STUFF:-}"
 local sourceFile="${BASH_SOURCE[2]##*/}"
-time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${RETURNED_VALUE}" "%S.%LLs"; local loggedElapsedTime="${RETURNED_VALUE}"
-time::getProgramElapsedMicroseconds; local -i currentTime=${RETURNED_VALUE}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${RETURNED_VALUE}"; _LOG_ELAPSED_TIME=${currentTime}'
+time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${REPLY}" "%S.%LLs"; local loggedElapsedTime="${REPLY}"
+time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${REPLY}"; _LOG_ELAPSED_TIME=${currentTime}'
 ```
 
 ## Test script 01.log-level
@@ -660,7 +660,7 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 Returned variables:
 
 ```text
-RETURNED_VALUE='trace'
+REPLY='trace'
 ```
 
 ❯ `log::isTraceEnabled`
@@ -741,7 +741,7 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 Returned variables:
 
 ```text
-RETURNED_VALUE='debug'
+REPLY='debug'
 ```
 
 ❯ `log::isTraceEnabled`
@@ -811,7 +811,7 @@ TRACE    This is a errorTrace message, always shown.
 Returned variables:
 
 ```text
-RETURNED_VALUE='info'
+REPLY='info'
 ```
 
 ❯ `log::isTraceEnabled`
@@ -875,7 +875,7 @@ TRACE    This is a errorTrace message, always shown.
 Returned variables:
 
 ```text
-RETURNED_VALUE='success'
+REPLY='success'
 ```
 
 ❯ `log::isTraceEnabled`
@@ -933,7 +933,7 @@ TRACE    This is a errorTrace message, always shown.
 Returned variables:
 
 ```text
-RETURNED_VALUE='warning'
+REPLY='warning'
 ```
 
 ❯ `log::isTraceEnabled`
@@ -985,7 +985,7 @@ TRACE    This is a errorTrace message, always shown.
 Returned variables:
 
 ```text
-RETURNED_VALUE='error'
+REPLY='error'
 ```
 
 ❯ `log::isTraceEnabled`

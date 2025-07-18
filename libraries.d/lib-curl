@@ -28,8 +28,8 @@ source fs
 # - $?:
 #   - 0 if the http status code is acceptable
 #   - 1 otherwise
-# - ${RETURNED_VALUE}: the content of stderr
-# - ${RETURNED_VALUE2}: the http status code
+# - ${REPLY}: the content of stderr
+# - ${REPLY2}: the http status code
 #
 # ```bash
 # curl::download true 200,201 "/filePath" "https://example.com"
@@ -45,20 +45,20 @@ function curl::download() {
   local -i exitCode=0
   local httpStatusCode errors
   exe::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{response_code}" "--output" "${outputFile}" "$@" || exitCode=$?
-  httpStatusCode="${RETURNED_VALUE}"
-  errors="${RETURNED_VALUE2}"
+  httpStatusCode="${REPLY}"
+  errors="${REPLY2}"
 
   # workaround in case of unknown args in curl
   # and for a bug in curl https://github.com/Homebrew/homebrew-core/issues/173294
   if [[ ${exitCode} != "0" && (${errors} == *"bad argument"* || ${errors} == *"is unknown"*) ]]; then
     log::debug "Trying to use curl without the many options."
     exe::invoke5 "false" "0" "false" "" "curl" "--location" "-v" "--output" "${outputFile}" "$@" || exitCode=$?
-    if [[ ${RETURNED_VALUE}${RETURNED_VALUE2} =~ "< HTTP/"([0-9.]+)" "([0-9]+)" " ]]; then
+    if [[ ${REPLY}${REPLY2} =~ "< HTTP/"([0-9.]+)" "([0-9]+)" " ]]; then
       httpStatusCode="${BASH_REMATCH[2]}"
     else
       httpStatusCode="??? Could not read from verbose curl output."
     fi
-    errors="${RETURNED_VALUE2}"
+    errors="${REPLY2}"
   fi
 
   local url="$*"
@@ -86,8 +86,8 @@ function curl::download() {
     log::debug "${message}"
   fi
 
-  RETURNED_VALUE="${errors}"
-  RETURNED_VALUE2="${httpStatusCode}"
+  REPLY="${errors}"
+  REPLY2="${httpStatusCode}"
   return ${exitCode}
 }
 
@@ -110,9 +110,9 @@ function curl::download() {
 # - $?:
 #   - 0 if the http status code is acceptable
 #   - 1 otherwise
-# - ${RETURNED_VALUE}: the content of the request
-# - ${RETURNED_VALUE2}: the content of stderr
-# - ${RETURNED_VALUE3}: the http status code
+# - ${REPLY}: the content of the request
+# - ${REPLY2}: the content of stderr
+# - ${REPLY3}: the http status code
 #
 # ```bash
 # curl::request true 200 https://example.com -X POST -H 'Authorization: token'
@@ -129,12 +129,12 @@ function curl::request() {
   local -i exitCode=0
   local errors httpStatusCode
   curl::download "${failIfFails}" "${acceptableStatusCodes}" "${GLOBAL_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
-  errors="${RETURNED_VALUE}"
-  httpStatusCode="${RETURNED_VALUE2}"
+  errors="${REPLY}"
+  httpStatusCode="${REPLY2}"
 
   fs::readFile "${GLOBAL_TEMPORARY_WORK_FILE}"
-  RETURNED_VALUE2="${errors}"
+  REPLY2="${errors}"
   # shellcheck disable=SC2034
-  RETURNED_VALUE3="${httpStatusCode}"
+  REPLY3="${httpStatusCode}"
   return ${exitCode}
 }

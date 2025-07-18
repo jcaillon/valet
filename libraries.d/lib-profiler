@@ -103,7 +103,7 @@ function profiler::resume() {
 #   profilerCleanFile
 function profilerCleanFile() {
   _OPTION_PATH_ONLY=true fs::createTempFile
-  local newProfilerFile="${RETURNED_VALUE}"
+  local newProfilerFile="${REPLY}"
 
   local timePrecision=${EPOCHREALTIME#*[.,]}
   timePrecision=${#timePrecision}
@@ -227,13 +227,13 @@ function profilerBashCleanFile() {
     fi
 
     profilerMicrosecondsToSeconds "${timer}" 4
-    totalElapsedTime="${RETURNED_VALUE}"
+    totalElapsedTime="${REPLY}"
 
     deltaTimer=$((timer - lastTimer))
     lastTimer=${timer}
 
     profilerMicrosecondsToSeconds "${deltaTimer}" 4
-    lastElapsedTime=${RETURNED_VALUE}
+    lastElapsedTime=${REPLY}
 
     # shorten the program name if it is too long
     if ((${#program} > 30)); then
@@ -261,19 +261,19 @@ function profilerBashCleanFile() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The seconds (float number).
+# - ${REPLY}: The seconds (float number).
 #
 # ```bash
 # profilerMicrosecondsToSeconds 1234567
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function profilerMicrosecondsToSeconds() {
   local microseconds="${1}"
   if [[ ${#microseconds} -gt 6 ]]; then
     local ms="${microseconds:${#microseconds}-6}"
-    RETURNED_VALUE="${microseconds:0:${#microseconds}-6}.${ms:0:${2}}"
+    REPLY="${microseconds:0:${#microseconds}-6}.${ms:0:${2}}"
   else
-    printf -v RETURNED_VALUE "%06d" "${microseconds}"
-    printf -v RETURNED_VALUE "0.%s" "${RETURNED_VALUE:0:${2}}"
+    printf -v REPLY "%06d" "${microseconds}"
+    printf -v REPLY "0.%s" "${REPLY:0:${2}}"
   fi
 }

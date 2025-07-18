@@ -33,7 +33,7 @@ function test::transformTextBeforeFlushing() {
     return 0
   fi
   string::head _TEST_OUTPUT 10
-  _TEST_OUTPUT="${RETURNED_VALUE}"
+  _TEST_OUTPUT="${REPLY}"
 }
 
 main

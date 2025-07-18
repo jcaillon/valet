@@ -21,7 +21,7 @@ function simpleTests() {
   }
 
   function onMessageCommand() {
-    log::info "Received message in coproc (${coprocVarName}): ${RETURNED_VALUE}"
+    log::info "Received message in coproc (${coprocVarName}): ${REPLY}"
     return 1
   }
 
@@ -32,7 +32,7 @@ function simpleTests() {
   test::prompt coproc::run _COPROC_1 initCommand false willNotBeUsed ":"
   test::prompt coproc::wait _COPROC_1
   coproc::run _COPROC_1 initCommand false willNotBeUsed ":"
-  local coproc1Pid="${RETURNED_VALUE}"
+  local coproc1Pid="${REPLY}"
   coproc::wait _COPROC_1
   test::flush
 
@@ -42,7 +42,7 @@ function simpleTests() {
   test::prompt coproc::wait _COPROC_2
   test::prompt coproc::isRunning _COPROC_2
   coproc::run _COPROC_2 initCommand loopCommand onMessageCommand endCommand
-  local coproc2Pid="${RETURNED_VALUE}"
+  local coproc2Pid="${REPLY}"
   if ! coproc::isRunning _COPROC_2; then
     test::fail "The coproc ⌜_COPROC_2⌝ is not running."
   fi
@@ -56,7 +56,7 @@ function simpleTests() {
   test::prompt _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_3 initCommand false false true
   test::prompt coproc::wait _COPROC_3
   _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_3 initCommand false false true
-  local coproc3Pid="${RETURNED_VALUE}"
+  local coproc3Pid="${REPLY}"
   coproc::wait _COPROC_3
   test::flush
 
@@ -86,8 +86,8 @@ function completeTest() {
   }
 
   function realisticOnMessage() {
-    log::info "Received message in coproc (${coprocVarName}): ${RETURNED_VALUE}"
-    if [[ ${RETURNED_VALUE} == "stop" ]]; then
+    log::info "Received message in coproc (${coprocVarName}): ${REPLY}"
+    if [[ ${REPLY} == "stop" ]]; then
       log::info "Stopping the coproc (${coprocVarName})."
       return 1
     fi
@@ -98,7 +98,7 @@ function completeTest() {
   coproc::run _COPROC_4 : realisticLoop realisticOnMessage :
 
   local -i messageSent=0
-  while coproc::receiveMessage _COPROC_4 && [[ ${RETURNED_VALUE} != "stop" ]]; do
+  while coproc::receiveMessage _COPROC_4 && [[ ${REPLY} != "stop" ]]; do
     printf "%s\0%s\0" "decoy" "message ${messageSent}" >&"${_COPROC_4[1]}"
     messageSent+=1
   done

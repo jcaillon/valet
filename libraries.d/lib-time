@@ -12,18 +12,18 @@
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the current date in the given format.
+# - ${REPLY}: the current date in the given format.
 #
 # ```bash
 # time::getDate
-# local date="${RETURNED_VALUE}"
+# local date="${REPLY}"
 # ```
 #
 # > This function avoid to call $(date) in a subshell (date is a an external executable).
 function time::getDate() {
   local format="${1:-"%(%F_%Hh%Mm%Ss)T"}"
   # shellcheck disable=SC2059
-  printf -v RETURNED_VALUE "${format}" "${EPOCHSECONDS}"
+  printf -v REPLY "${format}" "${EPOCHSECONDS}"
 }
 
 # ## time::convertMicrosecondsToHuman
@@ -52,11 +52,11 @@ function time::getDate() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the human readable format
+# - ${REPLY}: the human readable format
 #
 # ```bash
 # time::convertMicrosecondsToHuman 123456789
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function time::convertMicrosecondsToHuman() {
   local -i us="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -108,7 +108,7 @@ function time::convertMicrosecondsToHuman() {
   humanFormat="${humanFormat//%L/$(((hours * 3600 * + minutes * 60 + seconds) * 1000 + milliseconds))}"
   humanFormat="${humanFormat//%U/$((us))}"
 
-  RETURNED_VALUE="${humanFormat}"
+  REPLY="${humanFormat}"
 }
 
 # ## time::startTimer
@@ -121,7 +121,7 @@ function time::convertMicrosecondsToHuman() {
 # ```
 function time::startTimer() {
   time::getProgramElapsedMicroseconds
-  _TIME_TIMER_START="${RETURNED_VALUE}"
+  _TIME_TIMER_START="${REPLY}"
 }
 
 # ## time::getTimerMicroseconds
@@ -138,24 +138,24 @@ function time::startTimer() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the elapsed time in microseconds.
+# - ${REPLY}: the elapsed time in microseconds.
 #
 # ```bash
 # time::startTimer
 # _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
-# echo "Total microseconds: ${RETURNED_VALUE}"
+# echo "Total microseconds: ${REPLY}"
 # ```
 function time::getTimerMicroseconds() {
   local log="${_OPTION_LOG_ELAPSED_TIME:-false}"
   local format="${_OPTION_FORMAT:-"%S.%LLs"}"
 
   time::getProgramElapsedMicroseconds
-  local -i elapsed=$((RETURNED_VALUE - _TIME_TIMER_START))
+  local -i elapsed=$((REPLY - _TIME_TIMER_START))
 
   if [[ ${log} == "true" ]]; then
     time::convertMicrosecondsToHuman ${elapsed} "${format}"
-    log::info "Elapsed time: ${RETURNED_VALUE}"
+    log::info "Elapsed time: ${REPLY}"
   fi
 
-  RETURNED_VALUE="${elapsed}"
+  REPLY="${elapsed}"
 }

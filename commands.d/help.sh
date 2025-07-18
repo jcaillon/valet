@@ -45,7 +45,7 @@ function showCommandHelp() {
   local -a commands
   local commandArgumentsErrors help columns help
   command::parseFunctionArguments "${FUNCNAME[0]:-}" "$@"
-  eval "${RETURNED_VALUE}"
+  eval "${REPLY}"
 
   command::checkParsedResults
 
@@ -57,8 +57,8 @@ function showCommandHelp() {
 
   local functionName exactCommand
   main::fuzzyMatchCommandToFunctionNameOrFail "${commands[@]}"
-  functionName="${RETURNED_VALUE:-}"
-  exactCommand="${RETURNED_VALUE3:-}"
+  functionName="${REPLY:-}"
+  exactCommand="${REPLY3:-}"
 
   if [[ ${functionName} == "_menu" ]]; then
     main::printHelp menu "${exactCommand}" "${columns:-}"

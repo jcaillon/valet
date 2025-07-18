@@ -37,7 +37,7 @@ examples:
 ---"
 function showcaseCommand1() {
   local -a more
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   log::info "First argument: ${firstArg:-}."
@@ -51,7 +51,7 @@ function showcaseCommand1() {
   source string
   local _myString="<b>My bold text</b>"
   string::extractBetween _myString "<b>" "</b>"
-  local extractedText="${RETURNED_VALUE}"
+  local extractedText="${REPLY}"
   log::info "Extracted text is: ⌜${extractedText:-}⌝"
 
   echo "That's it!"
@@ -73,7 +73,7 @@ description: |-
   If so, it will require the user to enter the sudo password and you can use the \${SUDO} variable inside the command
 ---"
 function showCaseSudo() {
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   ${SUDO} whoami

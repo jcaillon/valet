@@ -11,7 +11,7 @@ Missing argument:
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -34,7 +34,7 @@ ok
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
@@ -56,7 +56,7 @@ missing argument
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 flag3="${VALET_FLAG3:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
@@ -86,7 +86,7 @@ INFO     Fuzzy matching the option ⌜--what⌝ to ⌜--with-default⌝.
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -116,7 +116,7 @@ ok with the option at the end
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 flag3="${VALET_FLAG3:-}"
@@ -144,7 +144,7 @@ INFO     Fuzzy matching the option ⌜--this⌝ to ⌜--this-is-option2⌝.
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 flag3="${VALET_FLAG3:-}"
@@ -168,7 +168,7 @@ ok, --option1 is interpreted as the value for --this-is-option2
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 flag3="${VALET_FLAG3:-}"
@@ -189,7 +189,7 @@ ok only args
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
+REPLY=''
 ```
 
 ok with -- to separate options from args
@@ -199,7 +199,7 @@ ok with -- to separate options from args
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -220,7 +220,7 @@ missing a value for the option 2
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 flag3="${VALET_FLAG3:-}"
@@ -241,7 +241,7 @@ ambiguous fuzzy match
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -266,7 +266,7 @@ ok single letter options grouped together
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
@@ -289,7 +289,7 @@ ok single letter options, consume argument as option values
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 help=""
 commandArgumentsErrors=""
@@ -310,7 +310,7 @@ ko, single letter options, invalid one
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
@@ -332,7 +332,7 @@ ko, missing a value for the option 4
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -353,7 +353,7 @@ ko, missing multiple values in a group
 Returned variables:
 
 ```text
-RETURNED_VALUE='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
+REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
 thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
@@ -379,7 +379,7 @@ more=(
 Returned variables:
 
 ```text
-RETURNED_VALUE='selfBuild'
+REPLY='selfBuild'
 ```
 
 ### ✅ Testing main::fuzzyMatchCommandToFunctionNameOrFail
@@ -397,9 +397,9 @@ INFO     Fuzzy matching the command ⌜se bu⌝ to ⌜self build⌝.
 Returned variables:
 
 ```text
-RETURNED_VALUE='selfBuild'
-RETURNED_VALUE2='2'
-RETURNED_VALUE3='self build'
+REPLY='selfBuild'
+REPLY2='2'
+REPLY3='self build'
 ```
 
 Fuzzy match by strict mode is enabled so it fails:
@@ -449,7 +449,7 @@ FAIL     Found multiple matches for the command ⌜sf⌝, please be more specifi
 Returned variables:
 
 ```text
-RETURNED_VALUE='2'
+REPLY='2'
 ```
 
 ❯ `main::getMaxPossibleCommandLevel 1\ 2\ 3`
@@ -457,7 +457,7 @@ RETURNED_VALUE='2'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2'
+REPLY='2'
 ```
 
 ❯ `main::getMaxPossibleCommandLevel 1`
@@ -465,7 +465,7 @@ RETURNED_VALUE='2'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
+REPLY='1'
 ```
 
 ❯ `main::getMaxPossibleCommandLevel`
@@ -473,7 +473,7 @@ RETURNED_VALUE='1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='0'
+REPLY='0'
 ```
 
 ### ✅ Testing main::fuzzyFindOption
@@ -485,8 +485,8 @@ single match, strict mode is enabled
 Returned variables:
 
 ```text
-RETURNED_VALUE='Unknown option ⌜de⌝, did you mean ⌜--derp2⌝?'
-RETURNED_VALUE2=''
+REPLY='Unknown option ⌜de⌝, did you mean ⌜--derp2⌝?'
+REPLY2=''
 ```
 
 single match, strict mode is disabled
@@ -502,8 +502,8 @@ INFO     Fuzzy matching the option ⌜de⌝ to ⌜--derp2⌝.
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
-RETURNED_VALUE2='--derp2'
+REPLY=''
+REPLY2='--derp2'
 ```
 
 multiple matches, strict mode is enabled
@@ -513,11 +513,11 @@ multiple matches, strict mode is enabled
 Returned variables:
 
 ```text
-RETURNED_VALUE='Unknown option ⌜-p⌝, valid matches are:
+REPLY='Unknown option ⌜-p⌝, valid matches are:
 [95m-[0m-o[95mp[0mt1
 [95m-[0m-der[95mp[0m2
 '
-RETURNED_VALUE2=''
+REPLY2=''
 ```
 
 multiple matches, strict mode is disabled
@@ -527,11 +527,11 @@ multiple matches, strict mode is disabled
 Returned variables:
 
 ```text
-RETURNED_VALUE='Found multiple matches for the option ⌜-p⌝, please be more specific:
+REPLY='Found multiple matches for the option ⌜-p⌝, please be more specific:
 [95m-[0m-o[95mp[0mt1
 [95m-[0m-der[95mp[0m2
 '
-RETURNED_VALUE2=''
+REPLY2=''
 ```
 
 no match
@@ -541,11 +541,11 @@ no match
 Returned variables:
 
 ```text
-RETURNED_VALUE='Unknown option ⌜thing⌝, valid options are:
+REPLY='Unknown option ⌜thing⌝, valid options are:
 --opt1
 --derp2
 --allo3'
-RETURNED_VALUE2=''
+REPLY2=''
 ```
 
 ### ✅ Testing main::getSingleLetterOptions
@@ -555,7 +555,7 @@ RETURNED_VALUE2=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='Valid single letter options are: ⌜a⌝, ⌜b⌝, ⌜c⌝.'
+REPLY='Valid single letter options are: ⌜a⌝, ⌜b⌝, ⌜c⌝.'
 ```
 
 ### ✅ Testing main::getDisplayableFilteredArray
@@ -576,7 +576,7 @@ ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_VALUE='b[95ma[0mnana
+REPLY='b[95ma[0mnana
 [95ma[0mppl[95me[0m
 or[95ma[0mng[95me[0m
 gr[95ma[0mp[95me[0m

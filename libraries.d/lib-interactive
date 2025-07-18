@@ -107,7 +107,7 @@ function interactive::askForConfirmationRaw() {
 # - $?:
 #   - 0 if the user answered yes
 #   - 1 otherwise
-# - ${RETURNED_VALUE}: true or false.
+# - ${REPLY}: true or false.
 #
 # ```bash
 # if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
@@ -117,12 +117,12 @@ function interactive::promptYesNo() {
 
   if ! interactive::promptYesNoRaw "${2:-true}"; then
     interactive::displayAnswer "No."
-    RETURNED_VALUE=false
+    REPLY=false
     return 1
   fi
 
   interactive::displayAnswer "Yes."
-  RETURNED_VALUE=true
+  REPLY=true
   return 0
 }
 
@@ -145,10 +145,10 @@ function interactive::promptYesNo() {
 # - $?:
 #   - 0 if the user answered yes
 #   - 1 otherwise
-# - ${RETURNED_VALUE}: true or false.
+# - ${REPLY}: true or false.
 #
 # ```bash
-# interactive::promptYesNoRaw "Do you want to continue?" && local answer="${RETURNED_VALUE}"
+# interactive::promptYesNoRaw "Do you want to continue?" && local answer="${REPLY}"
 # ```
 function interactive::promptYesNoRaw() {
   local state=${1:-true}
@@ -206,11 +206,11 @@ function interactive::promptYesNoRaw() {
   printf '%s' "${ESC__ERASE_CHARS_RIGHT}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
 
   if [[ ${state} == "true" ]]; then
-    RETURNED_VALUE=${state}
+    REPLY=${state}
     return 0
   fi
 
-  RETURNED_VALUE=${state}
+  REPLY=${state}
   return 1
 }
 
@@ -294,7 +294,7 @@ function interactive::displayDialogBox() {
   fi
 
   string::wrapWords text "${textWidth}"
-  local wrappedText="${RETURNED_VALUE}"
+  local wrappedText="${REPLY}"
 
   local finalString line sideString
   local -i lineNumber=0 maxLineLength=0

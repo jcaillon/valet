@@ -101,7 +101,7 @@ source bash
 ##VALET_COMMAND
 function selfExtend() {
   local extensionUri version skipSetup name
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   local action="created"
@@ -111,7 +111,7 @@ function selfExtend() {
 
   # compute where to install the extension
   core::getExtensionsDirectory
-  local extensionsDirectory="${RETURNED_VALUE}"
+  local extensionsDirectory="${REPLY}"
 
   # case of extension creation
   if [[ ${action} == "created" ]]; then
@@ -147,12 +147,12 @@ function selfExtend() {
     log::info "Git is not installed, we will attempt to download the source tarball for the extension ⌜${extensionName}⌝."
     if bash::getMissingCommands curl tar; then
       local IFS=$'\n'
-      core::fail "The following tools are required for this command but are not installed:"$'\n'"${RETURNED_ARRAY[*]}"
+      core::fail "The following tools are required for this command but are not installed:"$'\n'"${REPLY_ARRAY[*]}"
     fi
 
     # get the sha1 of the reference, fail if not found
     selfExtend_getSha1 "${extensionUri}" "${version}"
-    selfExtend_downloadTarball "${extensionUri}"  "${version}" "${extensionDirectory}" "${RETURNED_VALUE}"
+    selfExtend_downloadTarball "${extensionUri}"  "${version}" "${extensionDirectory}" "${REPLY}"
   fi
 
   # execute the setup script of the extension, if any
@@ -248,7 +248,7 @@ function selfExtend_createExtension() {
   if command -v git &>/dev/null; then
     fs::createFileIfNeeded "${extensionDirectory}/.gitignore"
     fs::readFile "${extensionDirectory}/.gitignore"
-    if [[ ${RETURNED_VALUE} != *"### Valet ###"* ]]; then
+    if [[ ${REPLY} != *"### Valet ###"* ]]; then
       local content=$'\n'$'\n'"### Valet ###"$'\n'"lib-valet"$'\n'"lib-valet.md"$'\n'".vscode/valet.code-snippets"
       fs::writeToFile "${extensionDirectory}/.gitignore" content true
     fi
@@ -297,7 +297,7 @@ function selfExtend_downloadTarball() {
   local tarballUrl="${tarballUrlPattern/"%SHA1%"/"${sha1}"}"
 
   fs::createTempDirectory
-  local tempDirectory="${RETURNED_VALUE}"
+  local tempDirectory="${REPLY}"
 
   # download the tarball
   log::info "Downloading the extension from the URL ⌜${tarballUrl}⌝ for sha1 ⌜${sha1}⌝."
@@ -312,10 +312,10 @@ function selfExtend_downloadTarball() {
   rm -Rf "${targetDirectory}" 1>/dev/null || core::fail "Could not remove the existing files in ⌜${targetDirectory}⌝."
   fs::createDirectoryIfNeeded "${targetDirectory}"
   fs::listDirectories "${tempDirectory}" false
-  if (( ${#RETURNED_ARRAY[@]} != 1 )); then
+  if (( ${#REPLY_ARRAY[@]} != 1 )); then
     core::fail "The tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ did not contain a single directory."
   fi
-  mv "${RETURNED_ARRAY[0]}"/* "${targetDirectory}" || core::fail "Could not move the files from ⌜${RETURNED_ARRAY[0]}⌝ to ⌜${targetDirectory}⌝."
+  mv "${REPLY_ARRAY[0]}"/* "${targetDirectory}" || core::fail "Could not move the files from ⌜${REPLY_ARRAY[0]}⌝ to ⌜${targetDirectory}⌝."
 
   # write the sha1 to the targetDirectory so we known which commit we fetched
   fs::writeToFile "${targetDirectory}/.sha1" sha1
@@ -344,16 +344,16 @@ function selfExtend_getSha1() {
     log::debug "Found owner ⌜${owner}⌝ and repo ⌜${repo}⌝ for the repository ⌜${repositoryUrl}⌝."
 
     # get the sha1
-    RETURNED_VALUE=""
+    REPLY=""
     progress::start "<spinner> Fetching reference information from GitHub..."
     local url="https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${reference}"
     if ! curl::request false '200' -H "Accept: application/vnd.github.v3+json" "${url}"; then
       url="https://api.github.com/repos/${owner}/${repo}/git/refs/tags/${reference}"
       curl::request false '200' -H "Accept: application/vnd.github.v3+json" "${url}" || :
     fi
-    local response="${RETURNED_VALUE}"
-    local error="${RETURNED_VALUE2}"
-    local httpCode="${RETURNED_VALUE3}"
+    local response="${REPLY}"
+    local error="${REPLY2}"
+    local httpCode="${REPLY3}"
     progress::stop
 
     if [[ ${httpCode} == 404 ]]; then
@@ -373,7 +373,7 @@ function selfExtend_getSha1() {
     log::debug "Found sha1 for ⌜${repositoryUrl}⌝ and reference ⌜${reference}⌝: ${sha1}."
   fi
 
-  RETURNED_VALUE="${sha1}"
+  REPLY="${sha1}"
 }
 
 # git clone a given repository in a target directory.
@@ -460,7 +460,7 @@ function selfExtend::updateExtensions() {
   local path
   local allUpdateSuccess=true
   local -i count=0
-  for path in "${RETURNED_ARRAY[@]}"; do
+  for path in "${REPLY_ARRAY[@]}"; do
     local updateSuccess=false
     local extensionName="${path##*/}"
 
@@ -473,14 +473,14 @@ function selfExtend::updateExtensions() {
       if ! selfExtend_updateGitRepository "${path}"; then
         allUpdateSuccess=false
       else
-        updateSuccess=${RETURNED_VALUE}
+        updateSuccess=${REPLY}
       fi
     elif [[ -f "${path}/.repo" ]]; then
       log::debug "Found an installed extension ⌜${extensionName}⌝."
       if ! selfExtend_updateTarBall "${path}"; then
         allUpdateSuccess=false
       else
-        updateSuccess=${RETURNED_VALUE}
+        updateSuccess=${REPLY}
       fi
     fi
 
@@ -505,7 +505,7 @@ function selfExtend::updateExtensions() {
 #
 # Returns:
 # - $?:0 if the repository was checked without errors, 1 otherwise.
-# - ${RETURNED_VALUE}: true if the repository was updated, false otherwise.
+# - ${REPLY}: true if the repository was updated, false otherwise.
 function selfExtend_updateTarBall() {
   local extensionDirectory="${1}"
 
@@ -515,11 +515,11 @@ function selfExtend_updateTarBall() {
   log::info "Updating the tarball extension ⌜${extensionDirectory}⌝."
 
   fs::readFile "${extensionDirectory}/.repo"
-  local repo="${RETURNED_VALUE%%$'\n'*}"
+  local repo="${REPLY%%$'\n'*}"
   fs::readFile "${extensionDirectory}/.reference"
-  local reference="${RETURNED_VALUE%%$'\n'*}"
+  local reference="${REPLY%%$'\n'*}"
   fs::readFile "${extensionDirectory}/.sha1"
-  local currentSha1="${RETURNED_VALUE%%$'\n'*}"
+  local currentSha1="${REPLY%%$'\n'*}"
 
   log::debug "Extension ⌜${extensionName}⌝ is from repository ⌜${repo}⌝ and reference ⌜${reference}⌝ with sha1 ⌜${currentSha1}⌝."
 
@@ -530,7 +530,7 @@ function selfExtend_updateTarBall() {
 
   # get the sha1 of the reference, fail if not found
   selfExtend_getSha1 "${repo}" "${reference}"
-  local newSha1="${RETURNED_VALUE}"
+  local newSha1="${REPLY}"
 
   if [[ -z ${newSha1} ]]; then
     log::warning "The extension ⌜${extensionName}⌝ (tarball) is not updatable for the reference ⌜${reference}⌝ and the repository url ⌜${repo}⌝."
@@ -546,7 +546,7 @@ function selfExtend_updateTarBall() {
     log::info "The extension ⌜${extensionName}⌝ (tarball) is already up-to-date."
   fi
 
-  RETURNED_VALUE="${hasBeenUpdated}"
+  REPLY="${hasBeenUpdated}"
   return 0
 }
 
@@ -554,7 +554,7 @@ function selfExtend_updateTarBall() {
 #
 # Returns:
 # - $?:0 if the repository was checked without errors, 1 otherwise.
-# - ${RETURNED_VALUE}: true if the repository was updated, false otherwise.
+# - ${REPLY}: true if the repository was updated, false otherwise.
 function selfExtend_updateGitRepository() {
   local repoPath="${1}"
 
@@ -564,12 +564,12 @@ function selfExtend_updateGitRepository() {
   log::debug "Updating the git repository ⌜${repoPath}⌝."
 
   selfExtend_getCurrentCommit "${repoPath}"
-  local currentHead="${RETURNED_VALUE}"
+  local currentHead="${REPLY}"
 
   log::debug "Current HEAD is ${currentHead}."
 
   fs::readFile "${repoPath}/.git/HEAD"
-  if [[ ${RETURNED_VALUE} =~ ^"ref: refs/heads/"(.+) ]]; then
+  if [[ ${REPLY} =~ ^"ref: refs/heads/"(.+) ]]; then
     local branch="${BASH_REMATCH[1]:-}"
     branch="${branch%%$'\n'*}"
     log::debug "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
@@ -590,7 +590,7 @@ function selfExtend_updateGitRepository() {
     popd &>/dev/null || :
 
     selfExtend_getCurrentCommit "${repoPath}"
-    local newHead="${RETURNED_VALUE}"
+    local newHead="${REPLY}"
 
     if [[ ${newHead} == "${currentHead}" ]]; then
       log::info "The extension ⌜${extensionName}⌝ (git) is already up-to-date."
@@ -602,7 +602,7 @@ function selfExtend_updateGitRepository() {
     log::warning "The extension ⌜${extensionName}⌝ (git) with repository ⌜${repoPath}⌝ has a detached HEAD, could not update it (please check out a branch first)."
   fi
 
-  RETURNED_VALUE="${hasBeenUpdated}"
+  REPLY="${hasBeenUpdated}"
   return 0
 }
 
@@ -612,6 +612,6 @@ function selfExtend_getCurrentCommit() {
   pushd "${repoPath}" &>/dev/null || core::fail "Could not change to the directory ⌜${repoPath}⌝."
   exe::invoke git rev-parse HEAD
   popd &>/dev/null || :
-  local currentHead="${RETURNED_VALUE%%$'\n'*}"
-  RETURNED_VALUE="${currentHead}"
+  local currentHead="${REPLY%%$'\n'*}"
+  REPLY="${currentHead}"
 }

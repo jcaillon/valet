@@ -7,25 +7,25 @@ IFS=' '
 
 function func1() {
   ls &>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
-  RETURNED_VALUE=""
-  IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+  REPLY=""
+  IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
 }
 
 function func2() {
-  RETURNED_VALUE=""
-  IFS='' read -rd '' RETURNED_VALUE < <(ls) || :
+  REPLY=""
+  IFS='' read -rd '' REPLY < <(ls) || :
 }
 
 function func3() {
-  RETURNED_VALUE="$(ls)"
+  REPLY="$(ls)"
 }
 
 func1
-echo "func1: ${RETURNED_VALUE}"
+echo "func1: ${REPLY}"
 func2
-echo "func2: ${RETURNED_VALUE}"
+echo "func2: ${REPLY}"
 func3
-echo "func3: ${RETURNED_VALUE}"
+echo "func3: ${REPLY}"
 
 benchmark::run func1 func2 func3
 

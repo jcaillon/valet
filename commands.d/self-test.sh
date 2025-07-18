@@ -81,11 +81,11 @@ examples:
     Run only the test suites that match the regex pattern ⌜(my-thing|my-stuff)⌝.
 ---"
 function selfTest() {
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   time::getProgramElapsedMicroseconds
-  local startTimeInMicroSeconds="${RETURNED_VALUE}"
+  local startTimeInMicroSeconds="${REPLY}"
 
   # check what will be used to display the diff between received and approved files
   selfTestUtils_setupDiffCommand
@@ -119,20 +119,20 @@ function selfTest() {
   declare -g -a _TEST_FAILED_TEST_SUITES=()
 
   fs::createTempDirectory
-  GLOBAL_TEST_VALET_USER_DATA_DIRECTORY="${RETURNED_VALUE}"
+  GLOBAL_TEST_VALET_USER_DATA_DIRECTORY="${REPLY}"
 
   # test suites in the user directory
   if [[ ${coreOnly:-false} != "true" ]]; then
     # get the user directory
     core::getExtensionsDirectory
-    extensionsDirectory="${extensionsDirectory:-${RETURNED_VALUE}}"
+    extensionsDirectory="${extensionsDirectory:-${REPLY}}"
 
     # rebuild the commands for the user dir
     selfTestUtils_rebuildCommands --extensions-directory "${extensionsDirectory}" --output "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
 
     fs::listDirectories "${extensionsDirectory}"
     local extensionDirectory
-    for extensionDirectory in "${RETURNED_ARRAY[@]}"; do
+    for extensionDirectory in "${REPLY_ARRAY[@]}"; do
       if [[ -d ${extensionDirectory}/tests.d ]]; then
         selfTest_runSingleTestSuites "${extensionDirectory}/tests.d"
       fi
@@ -165,8 +165,8 @@ function selfTest() {
   fi
 
   time::getProgramElapsedMicroseconds
-  time::convertMicrosecondsToHuman $((RETURNED_VALUE - startTimeInMicroSeconds)) "%S seconds and %l ms"
-  log::info "Total time running tests: ⌜${RETURNED_VALUE}⌝."
+  time::convertMicrosecondsToHuman $((REPLY - startTimeInMicroSeconds)) "%S seconds and %l ms"
+  log::info "Total time running tests: ⌜${REPLY}⌝."
 
   if ((${#_TEST_FAILED_TEST_SUITES[@]} > 0)); then
     local failMessage
@@ -220,7 +220,7 @@ function selfTest_runSingleTestSuites() {
   fs::listDirectories "${testsDotDirectory}"
   local testDirectory testDirectoryName
   local -a testSuiteDirectories=()
-  for testDirectory in "${RETURNED_ARRAY[@]}"; do
+  for testDirectory in "${REPLY_ARRAY[@]}"; do
     testDirectoryName="${testDirectory##*/}"
 
     # skip if not a directory or hidden dir
@@ -257,7 +257,7 @@ function selfTest_runSingleTestSuites() {
   # sequential run
   if ((_TEST_NB_PARALLEL_TEST_SUITES == 0 || ${#testSuiteDirectories[@]} == 1)); then
     _OPTION_PATH_ONLY=true fs::createTempFile
-    local testLogFile="${RETURNED_VALUE}"
+    local testLogFile="${REPLY}"
 
     local -i testSuitesDoneCount=0
     for testDirectory in "${testSuiteDirectories[@]}"; do
@@ -277,7 +277,7 @@ function selfTest_runSingleTestSuites() {
 
       # display the job output
       fs::readFile "${testLogFile}"
-      log::printRaw RETURNED_VALUE
+      log::printRaw REPLY
 
       testSuitesDoneCount+=1
     done
@@ -288,8 +288,8 @@ function selfTest_runSingleTestSuites() {
     for testDirectory in "${testSuiteDirectories[@]}"; do
       _TEST_SUITE_NAMES+=("${testDirectory##*/}")
       _OPTION_PATH_ONLY=true fs::createTempFile
-      _TEST_SUITE_OUTPUT_FILES+=("${RETURNED_VALUE}")
-      _TEST_SUITE_COMMANDS+=("VALET_CONFIG_LOG_FD='${RETURNED_VALUE}'; log::init; selfTest_runSingleTestSuite '${testDirectory}'")
+      _TEST_SUITE_OUTPUT_FILES+=("${REPLY}")
+      _TEST_SUITE_COMMANDS+=("VALET_CONFIG_LOG_FD='${REPLY}'; log::init; selfTest_runSingleTestSuite '${testDirectory}'")
     done
 
     bash::runInParallel _TEST_SUITE_NAMES _TEST_SUITE_COMMANDS "${_TEST_NB_PARALLEL_TEST_SUITES}" selfTest_parallelCallback
@@ -321,7 +321,7 @@ function selfTest_parallelCallback() {
 
   # display the job output
   fs::readFile "${_TEST_SUITE_OUTPUT_FILES[${index}]}"
-  log::printRaw RETURNED_VALUE
+  log::printRaw REPLY
 
   if ((exitCode != 0)); then
     _TEST_FAILED_TEST_SUITES+=("${jobName}")
@@ -418,7 +418,7 @@ function selfTest_runSingleTestSuite() {
 
       # get the stack trace at script exit
       fs::readFile "${GLOBAL_TEST_STACK_FILE}"
-      eval "${RETURNED_VALUE//declare -a/}"
+      eval "${REPLY//declare -a/}"
 
       selfTestUtils_displayTestLogs
       selfTestUtils_displayTestSuiteOutputs
@@ -428,7 +428,7 @@ function selfTest_runSingleTestSuite() {
         fs::readFile "${GLOBAL_TEST_LOG_FILE}"
         log::error "The test script ⌜${testScript##*/}⌝ failed because an error was explicitly thrown in the test script:" \
           "" \
-          "${RETURNED_VALUE}" \
+          "${REPLY}" \
           "" \
           "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
         log::printCallStack 1 7
@@ -448,8 +448,8 @@ function selfTest_runSingleTestSuite() {
         GLOBAL_STACK_LINE_NUMBERS=("${GLOBAL_STACK_LINE_NUMBERS_ERR[@]}")
         # print the last line of the err output, which is supposed to be the bash error message
         fs::tail "${GLOBAL_TEST_STANDARD_ERROR_FILE}" 1 true
-        if [[ -n ${RETURNED_ARRAY[0]:-} ]]; then
-          log::printString "░ ${RETURNED_ARRAY[0]:-}" "░ "
+        if [[ -n ${REPLY_ARRAY[0]:-} ]]; then
+          log::printString "░ ${REPLY_ARRAY[0]:-}" "░ "
         fi
         log::printCallStack 2 7
       else
@@ -605,10 +605,10 @@ function selfTest_runSingleTest() {
 # values that could be different on each run/machine.
 function self_makeReplacementsInReport() {
   fs::readFile "${GLOBAL_TEST_REPORT_FILE}"
-  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_INSTALLATION_DIRECTORY}\/valet/valet}"
-  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_INSTALLATION_DIRECTORY}/\$GLOBAL_INSTALLATION_DIRECTORY}"
-  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
-  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
-  RETURNED_VALUE="${RETURNED_VALUE//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
-  printf "%s" "${RETURNED_VALUE}" >"${GLOBAL_TEST_REPORT_FILE}"
+  REPLY="${REPLY//${GLOBAL_INSTALLATION_DIRECTORY}\/valet/valet}"
+  REPLY="${REPLY//${GLOBAL_INSTALLATION_DIRECTORY}/\$GLOBAL_INSTALLATION_DIRECTORY}"
+  REPLY="${REPLY//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
+  REPLY="${REPLY//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
+  REPLY="${REPLY//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
+  printf "%s" "${REPLY}" >"${GLOBAL_TEST_REPORT_FILE}"
 }

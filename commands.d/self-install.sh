@@ -183,18 +183,18 @@ function selfUpdate() {
     skipExtensionsSetup="${skipExtensionsSetup:-"${VALET_SKIP_EXTENSIONS_SETUP:-"false"}"}"
   else
     log::debug "Parsing the arguments using the core functions."
-    command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+    command::parseArguments "$@" && eval "${REPLY}"
     command::checkParsedResults
   fi
 
   # get the os
   system::getOs
-  local os="${RETURNED_VALUE}"
+  local os="${REPLY}"
   log::debug "The current OS is ⌜${os}⌝."
 
   # get the user directory
   core::getExtensionsDirectory
-  local extensionsDirectory="${RETURNED_VALUE}"
+  local extensionsDirectory="${REPLY}"
 
   # check if valet already exists
   local firstInstallation="${_NOT_EXECUTED_FROM_VALET:-false}"
@@ -220,7 +220,7 @@ function selfUpdate() {
   if [[ ${useBranch} != "true" && ${version:-"latest"} == "latest" ]]; then
     log::debug "Getting the latest version from GitHub."
     selfUpdate_getLatestReleaseVersion
-    version="${RETURNED_VALUE}"
+    version="${REPLY}"
     log::info "The latest version of Valet found on GitHub is ⌜${version}⌝."
   fi
 
@@ -229,12 +229,12 @@ function selfUpdate() {
 
     # get the current version
     core::getVersion
-    local currentVersion="${RETURNED_VALUE}"
+    local currentVersion="${REPLY}"
     currentVersion="${currentVersion%%$'\n'*}"
 
     # compare local and distant versions
     version::compare "${currentVersion}" "${version}"
-    if [[ ${RETURNED_VALUE} == "0" || ${RETURNED_VALUE} == "1" ]]; then
+    if [[ ${REPLY} == "0" || ${REPLY} == "1" ]]; then
       log::info "The current local version ⌜${currentVersion}⌝ is higher or equal to the distant version ⌜${version}⌝."
       log::success "You already have the latest version."
       if [[ ${skipExtensions} != "true" ]]; then
@@ -333,7 +333,7 @@ function selfUpdate() {
 
   # remove the user commands to rebuild them
   core::getUserDataDirectory
-  rm -f "${RETURNED_VALUE}/commands" 1>/dev/null || :
+  rm -f "${REPLY}/commands" 1>/dev/null || :
 
   if [[ ${firstInstallation} == "true" ]]; then
     # shellcheck source=../libraries.d/core
@@ -401,7 +401,7 @@ function selfUpdate_install() {
   local tempDirectory
   if command -v fs::createTempDirectory 1>/dev/null; then
     fs::createTempDirectory
-    tempDirectory="${RETURNED_VALUE}"
+    tempDirectory="${REPLY}"
   else
     tempDirectory="${TMPDIR:-/tmp}/valet.install.d"
     if [[ -d ${tempDirectory} ]]; then
@@ -528,10 +528,10 @@ function selfUpdate_getLatestReleaseVersion() {
   progress::stop
   fs::readFile "${jsonFile}"
   rm -f "${jsonFile}" 1>/dev/null
-  if [[ ${RETURNED_VALUE} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
-    RETURNED_VALUE="${BASH_REMATCH[2]}"
+  if [[ ${REPLY} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
+    REPLY="${BASH_REMATCH[2]}"
   else
-    log::debug "GitHub API response:"$'\n'"${RETURNED_VALUE}"
+    log::debug "GitHub API response:"$'\n'"${REPLY}"
     core::fail "Could not get the latest version from GitHub (did not find tag_name)."
   fi
 }
@@ -572,7 +572,7 @@ function selfUpdate_updateGitRepository() {
   log::debug "Updating the git repository ⌜${repoPath}⌝."
 
   fs::readFile "${repoPath}/.git/HEAD"
-  if [[ ${RETURNED_VALUE} =~ ^"ref: refs/heads/"(.+) ]]; then
+  if [[ ${REPLY} =~ ^"ref: refs/heads/"(.+) ]]; then
     local branch="${BASH_REMATCH[1]:-}"
     branch="${branch%%$'\n'*}"
     log::info "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
@@ -736,14 +736,14 @@ if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   }
   function system::getOs() {
     case "${OSTYPE:-}" in
-    darwin*) RETURNED_VALUE="darwin" ;;
-    linux*) RETURNED_VALUE="linux" ;;
-    msys*) RETURNED_VALUE="windows" ;;
-    *) RETURNED_VALUE="unknown" ;;
+    darwin*) REPLY="darwin" ;;
+    linux*) REPLY="linux" ;;
+    msys*) REPLY="windows" ;;
+    *) REPLY="unknown" ;;
     esac
   }
-  function core::getExtensionsDirectory() { RETURNED_VALUE="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"; }
-  function core::getUserDataDirectory() { RETURNED_VALUE="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"; }
+  function core::getExtensionsDirectory() { REPLY="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"; }
+  function core::getUserDataDirectory() { REPLY="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"; }
   function interactive::promptYesNo() {
     local question="${1}"
     local default="${2:-false}"
@@ -755,18 +755,18 @@ if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
     local IFS=''
     read -d '' -srn 1 LAST_KEY_PRESSED
     case "${LAST_KEY_PRESSED}" in
-    y | Y | $'\n') RETURNED_VALUE="true" ;;
-    n | N) RETURNED_VALUE="false" ;;
-    *) RETURNED_VALUE="${default}" ;;
+    y | Y | $'\n') REPLY="true" ;;
+    n | N) REPLY="false" ;;
+    *) REPLY="${default}" ;;
     esac
-    if [[ ${RETURNED_VALUE} == "true" ]]; then
+    if [[ ${REPLY} == "true" ]]; then
       printf "\nYes\n"
       return 0
     fi
     printf "\nNo\n"
     return 1
   }
-  function fs::readFile() { RETURNED_VALUE="$(<"${1}")"; }
+  function fs::readFile() { REPLY="$(<"${1}")"; }
   function progress::start() { :; }
   function progress::stop() { :; }
 else

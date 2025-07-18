@@ -31,7 +31,7 @@ function bash::runInSubshell() {
   local exitOnFail="${_OPTION_EXIT_ON_FAIL:-false}"
   # save the ERR trap to restore it later
   bash::getBuiltinOutput trap -p ERR
-  local originalErrTrap="${RETURNED_VALUE}"
+  local originalErrTrap="${REPLY}"
   # disable the ERR trap or we would catch the subshell failure with it and not restore
   # the errexit and the original trap (and we would display an error message that we do
   # not want to display because we already displayed an error from the subshell).
@@ -62,22 +62,22 @@ function bash::runInSubshell() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the number of jobs currently running in the background.
+# - ${REPLY}: the number of jobs currently running in the background.
 #
 # ```bash
 # bash::countJobs
-# echo "There are currently ${RETURNED_VALUE} jobs running in the background."
+# echo "There are currently ${REPLY} jobs running in the background."
 # ```
 function bash::countJobs() {
   local -i jobsCount=0
   bash::getBuiltinOutput jobs -r
   local IFS=$'\n' line
-  for line in ${RETURNED_VALUE}; do
+  for line in ${REPLY}; do
     if [[ ${line} == "["* ]]; then
       jobsCount+=1
     fi
   done
-  RETURNED_VALUE="${jobsCount}"
+  REPLY="${jobsCount}"
 }
 
 # ## bash::runInParallel
@@ -114,7 +114,7 @@ function bash::countJobs() {
 # - $?:
 #   - 0: if all the jobs completed successfully.
 #   - 1: if the job completed callback returned 1.
-# - ${RETURNED_ARRAY[@]}: an array containing the exit codes of the jobs.
+# - ${REPLY_ARRAY[@]}: an array containing the exit codes of the jobs.
 #
 # ```bash
 # declare -a jobNames=("job1" "job2" "job3")
@@ -130,8 +130,8 @@ function bash::runInParallel() {
 
   # inject the code to kill the running jobs when the program exits
   bash::injectCodeInFunction cleanUp 'bash::killRunningJobs' true
-  eval "${RETURNED_VALUE}"
-  local originalFunction="${RETURNED_VALUE2}"
+  eval "${REPLY}"
+  local originalFunction="${REPLY2}"
 
   local IFS=' '$'\t'$'\n' runningsJobs jobName
   local -A -i jobIndexFromPid=()
@@ -159,7 +159,7 @@ function bash::runInParallel() {
       # wait for one of the test suites to finish (or all of them for the last batch)
       nbJobsCompleted=0
       bash::getBuiltinOutput jobs -r
-      runningsJobs="${RETURNED_VALUE}"
+      runningsJobs="${REPLY}"
       if log::isTraceEnabled; then
         log::trace "Running jobs: ${runningsJobs}"
       fi
@@ -213,7 +213,7 @@ function bash::runInParallel() {
     eval "${originalFunction}"
   fi
 
-  RETURNED_ARRAY=("${exitCodes[@]}")
+  REPLY_ARRAY=("${exitCodes[@]}")
   ((${#exitCodes[@]} != ${#jobNames[@]})) && return 1
   return 0
 }
@@ -254,12 +254,12 @@ function bash::killRunningJobs() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the modified function.
-# - ${RETURNED_VALUE2}: the original function.
+# - ${REPLY}: the modified function.
+# - ${REPLY2}: the original function.
 #
 # ```bash
 # bash::injectCodeInFunction myFunction "echo 'Hello world!'" true
-# eval "${RETURNED_VALUE}"
+# eval "${REPLY}"
 # myFunction
 # ```
 function bash::injectCodeInFunction() {
@@ -281,8 +281,8 @@ function bash::injectCodeInFunction() {
     modifiedFunctionDefinition="${modifiedFunctionDefinition%"}"*}${code}"$'\n'"}"
   fi
 
-  RETURNED_VALUE="${modifiedFunctionDefinition}"
-  RETURNED_VALUE2="${functionDefinition:-}"
+  REPLY="${modifiedFunctionDefinition}"
+  REPLY2="${functionDefinition:-}"
 }
 
 # ## bash::sleep
@@ -313,18 +313,18 @@ function bash::sleep() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The content of the standard input.
+# - ${REPLY}: The content of the standard input.
 #
 # ```bash
-# bash::readStdIn && local stdIn="${RETURNED_VALUE}"
+# bash::readStdIn && local stdIn="${REPLY}"
 # ```
 function bash::readStdIn() {
-  RETURNED_VALUE=""
+  REPLY=""
   local IFS=''
   if read -t 0 -u 0 -rd ''; then
-    read -u 0 -rd '' RETURNED_VALUE || [[ -n ${RETURNED_VALUE} ]] || RETURNED_VALUE=""
+    read -u 0 -rd '' REPLY || [[ -n ${REPLY} ]] || REPLY=""
   else
-    RETURNED_VALUE=""
+    REPLY=""
   fi
 }
 
@@ -335,9 +335,9 @@ function bash::readStdIn() {
 # A convenient function that can be used to:
 #
 # - count the files/directories in a directory:
-#   `bash::countArgs "${PWD}"/* && local numberOfFiles="${RETURNED_VALUE}"`
+#   `bash::countArgs "${PWD}"/* && local numberOfFiles="${REPLY}"`
 # - count the number of variables starting with VALET_
-#   `bash::countArgs "${!VALET_@}" && local numberOfVariables="${RETURNED_VALUE}"`
+#   `bash::countArgs "${!VALET_@}" && local numberOfVariables="${REPLY}"`
 #
 # Inputs:
 #
@@ -346,13 +346,13 @@ function bash::readStdIn() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The number of arguments passed.
+# - ${REPLY}: The number of arguments passed.
 #
 # ```bash
 # bash::countArgs 1 2 3
 # ```
 function bash::countArgs() {
-  RETURNED_VALUE="$#"
+  REPLY="$#"
 }
 
 # ## bash::getMissingVariables
@@ -367,22 +367,22 @@ function bash::countArgs() {
 # - $?
 #   - 0 if there are variable undeclared
 #   - 1 otherwise.
-# - ${RETURNED_ARRAY[@]}: the list of undeclared variables.
+# - ${REPLY_ARRAY[@]}: the list of undeclared variables.
 #
 # ```bash
 # if bash::getMissingVariables "var1" "var2"; then
-#   printf 'The following variables are not declared: %s' "${RETURNED_ARRAY[*]}"
+#   printf 'The following variables are not declared: %s' "${REPLY_ARRAY[*]}"
 # fi
 # ```
 function bash::getMissingVariables() {
-  RETURNED_ARRAY=()
+  REPLY_ARRAY=()
   local var
   for var in "$@"; do
     if [[ ! -v "${var}" ]]; then
-      RETURNED_ARRAY+=("${var}")
+      REPLY_ARRAY+=("${var}")
     fi
   done
-  if [[ ${#RETURNED_ARRAY[@]} -gt 0 ]]; then
+  if [[ ${#REPLY_ARRAY[@]} -gt 0 ]]; then
     return 0
   fi
   return 1
@@ -400,22 +400,22 @@ function bash::getMissingVariables() {
 # - $?
 #   - 0 if there are not existing commands
 #   - 1 otherwise.
-# - ${RETURNED_ARRAY[@]}: the list of not existing commands.
+# - ${REPLY_ARRAY[@]}: the list of not existing commands.
 #
 # ```bash
 # if bash::getMissingCommands "command1" "command2"; then
-#   printf 'The following commands do not exist: %s' "${RETURNED_ARRAY[*]}"
+#   printf 'The following commands do not exist: %s' "${REPLY_ARRAY[*]}"
 # fi
 # ```
 function bash::getMissingCommands() {
-  RETURNED_ARRAY=()
+  REPLY_ARRAY=()
   local cmd
   for cmd in "$@"; do
     if ! command -v "${cmd}" &>/dev/null; then
-      RETURNED_ARRAY+=("${cmd}")
+      REPLY_ARRAY+=("${cmd}")
     fi
   done
-  if [[ ${#RETURNED_ARRAY[@]} -gt 0 ]]; then
+  if [[ ${#REPLY_ARRAY[@]} -gt 0 ]]; then
     return 0
   fi
   return 1
@@ -492,12 +492,12 @@ function bash::isFunction() {
 # - $?:
 #   - 0 if the function was successfully re-exported
 #   - 1 if the function does not exist
-# - ${RETURNED_VALUE}: the modified function definition
-# - ${RETURNED_VALUE2}: the original function
+# - ${REPLY}: the modified function definition
+# - ${REPLY2}: the original function
 #
 # ```bash
 # bash::getFunctionDefinitionWithGlobalVars "myFunction" "myFunctionWithGlobalVars" "MY_VAR1" "MY_VAR2"
-# eval "${RETURNED_VALUE}"
+# eval "${REPLY}"
 # myFunctionWithGlobalVars
 # ```
 function bash::getFunctionDefinitionWithGlobalVars() {
@@ -507,12 +507,12 @@ function bash::getFunctionDefinitionWithGlobalVars() {
 
   local IFS=''
   declare -f "${functionName}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
-  read -rd '' RETURNED_VALUE2 <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || [[ -n ${RETURNED_VALUE2} ]]
+  read -rd '' REPLY2 <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || [[ -n ${REPLY2} ]]
   local functionDefinition
-  functionDefinition="${RETURNED_VALUE2/"${functionName}"/"${newFunctionName}"}"
+  functionDefinition="${REPLY2/"${functionName}"/"${newFunctionName}"}"
 
   if (($# == 0)); then
-    RETURNED_VALUE="${functionDefinition}"
+    REPLY="${functionDefinition}"
     return 0
   fi
 
@@ -542,7 +542,7 @@ function bash::getFunctionDefinitionWithGlobalVars() {
     modifiedFunctionDefinition="${modifiedFunctionDefinition//${varName}/"${globalVars[${varName}]}"}"
   done
 
-  RETURNED_VALUE="${modifiedFunctionDefinition}"
+  REPLY="${modifiedFunctionDefinition}"
 }
 
 # ## bash::getBuiltinOutput
@@ -560,18 +560,18 @@ function bash::getFunctionDefinitionWithGlobalVars() {
 # - $?
 #   - 0 if the command was successful
 #   - 1 otherwise.
-# - ${RETURNED_VALUE}: The captured output.
+# - ${REPLY}: The captured output.
 #
 # ```bash
 # bash::getBuiltinOutput declare -f bash::getBuiltinOutput
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function bash::getBuiltinOutput() {
   local IFS=' '
   # shellcheck disable=SC2068
   "${@}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
-  RETURNED_VALUE=""
-  IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+  REPLY=""
+  IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
 }
 
 # ## bash::isFdValid

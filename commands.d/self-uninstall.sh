@@ -37,7 +37,7 @@ fi
 ##VALET_COMMAND
 function selfUninstall() {
   local script
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   if [[ ${script:-} == "true" ]]; then
@@ -45,13 +45,13 @@ function selfUninstall() {
       core::fail "Valet does not seem installed, please call this command from an installed Valet."
     fi
     core::getConfigurationDirectory
-    local configurationDirectory="${RETURNED_VALUE}"
+    local configurationDirectory="${REPLY}"
     core::getUserDataDirectory
-    local userDataDirectory="${RETURNED_VALUE}"
+    local userDataDirectory="${REPLY}"
     core::getExtensionsDirectory
-    local extensionsDirectory="${RETURNED_VALUE}"
+    local extensionsDirectory="${REPLY}"
     core::getUserCacheDirectory
-    local userCacheDirectory="${RETURNED_VALUE}"
+    local userCacheDirectory="${REPLY}"
 
     # shellcheck disable=SC2016
     echo '#!/usr/bin/env bash

@@ -8,7 +8,7 @@ include prompt time profiler
 
 # load the file
 time::getProgramElapsedMicroseconds
-TIME1="${RETURNED_VALUE}"
+TIME1="${REPLY}"
 mapfile -t MY_ARRAY < "scratchpad/words"
 mapfile -t MY_ARRAY < "scratchpad/f3"
 # mapfile -t MY_ARRAY < "scratchpad/f4"
@@ -16,11 +16,11 @@ mapfile -t MY_ARRAY < "scratchpad/f3"
 # echo "→ array::fuzzyFilterSort the MY_ARRAY"
 # array::fuzzyFilterSort a MY_ARRAY
 # IFS=$'\n'
-# echo "${RETURNED_ARRAY[*]}"
-# echo "${RETURNED_ARRAY2[*]}"
+# echo "${REPLY_ARRAY[*]}"
+# echo "${REPLY_ARRAY2[*]}"
 time::getProgramElapsedMicroseconds
-time::convertMicrosecondsToHuman "$((RETURNED_VALUE - TIME1))" %SS.%l
-log::warning "Elapsed time: ${RETURNED_VALUE}"
+time::convertMicrosecondsToHuman "$((REPLY - TIME1))" %SS.%l
+log::warning "Elapsed time: ${REPLY}"
 
 
 declare -g -a SELECTION_ARRAY
@@ -34,8 +34,8 @@ tui::createSpace 5
 # if PROMPT_STRING_MAX_LENGTH=9 PROMPT_PLACEHOLDER="Type something" prompt::input "${GLOBAL_CURSOR_LINE}" "${GLOBAL_CURSOR_COLUMN}" "$((GLOBAL_CURSOR_COLUMN + 15))" SELECTION_ARRAY ""; then
 
 function fuck() {
-  RETURNED_VALUE="coucou"
-  RETURNED_VALUE2=false
+  REPLY="coucou"
+  REPLY2=false
   return 0
 }
 # PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE=fuck
@@ -85,7 +85,7 @@ _OPTION_TAB_OPENS_ITEMS_BOX=true
 _OPTION_ITEMS_BOX_ALLOW_FILTERING=true
 _OPTION_PASSWORD_MODE=false
 # if prompt::input "${GLOBAL_CURSOR_LINE}" "${GLOBAL_CURSOR_COLUMN}"; then
-#   log::info "You entered: ⌜${RETURNED_VALUE}⌝ (displayed: ⌜${RETURNED_VALUE2}⌝ index ⌜${RETURNED_VALUE3}⌝)"
+#   log::info "You entered: ⌜${REPLY}⌝ (displayed: ⌜${REPLY2}⌝ index ⌜${REPLY3}⌝)"
 # else
 #   log::info "bye"
 # fi
@@ -104,7 +104,7 @@ _OPTION_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD=0
 _OPTION_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD=10000
 
 if prompt::input "${GLOBAL_CURSOR_LINE}" "${GLOBAL_CURSOR_COLUMN}"; then
-  log::info "You entered: ⌜${RETURNED_VALUE}⌝ (displayed: ⌜${RETURNED_VALUE2}⌝ index ⌜${RETURNED_VALUE3}⌝)"
+  log::info "You entered: ⌜${REPLY}⌝ (displayed: ⌜${REPLY2}⌝ index ⌜${REPLY3}⌝)"
 else
   log::info "bye"
 fi

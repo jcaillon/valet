@@ -26,12 +26,12 @@
 # Returns:
 #
 # - $?: The exit code of the executable.
-# - ${RETURNED_VALUE}: The value to return
+# - ${REPLY}: The value to return
 #
 # ```bash
 # _LIBRARY_NAME_::myFunction hi
 # _OPTION_THIRD_OPTION=10 _LIBRARY_NAME_::myFunction hi true
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 #
 # > A note about the function.

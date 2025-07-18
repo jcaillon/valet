@@ -9,7 +9,7 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--suffix'
+REPLY='/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--suffix'
 ```
 
 ### ✅ Test source

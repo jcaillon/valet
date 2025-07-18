@@ -42,7 +42,7 @@ source interactive
 ##VALET_COMMAND
 function selfAddCommand() {
   local commandName
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   local templateFlavor="default"
@@ -55,8 +55,8 @@ function selfAddCommand() {
 
   # check if we are working for an extension
   core::getExtensionsDirectory
-  if [[ ${PWD} != "${RETURNED_VALUE}"* && ! -d "commands.d" ]]; then
-    log::warning "The current directory is not under the valet user directory ⌜${RETURNED_VALUE}⌝."
+  if [[ ${PWD} != "${REPLY}"* && ! -d "commands.d" ]]; then
+    log::warning "The current directory is not under the valet user directory ⌜${REPLY}⌝."
     if ! interactive::promptYesNo "It does not look like the current directory ⌜${PWD}⌝ is a valet extension, do you want to proceed anyway?" true; then
       log::info "Aborting the creation of the command."
       log::info "You should first create an extension with ⌜valet self extend⌝ and then cd into the created directory."
@@ -66,7 +66,7 @@ function selfAddCommand() {
 
   local fileName="${commandName// /-}"
   string::convertKebabCaseToCamelCase fileName
-  local functionName="${RETURNED_VALUE}"
+  local functionName="${REPLY}"
   local newCommandFilePath="${PWD}/commands.d/${fileName}.sh"
   local commandTemplateFile="${GLOBAL_INSTALLATION_DIRECTORY}/extras/template-command-${templateFlavor}.sh"
 
@@ -83,7 +83,7 @@ function selfAddCommand() {
   fs::createDirectoryIfNeeded "${PWD}/commands.d"
 
   fs::readFile "${commandTemplateFile}"
-  local templateContent="${RETURNED_VALUE//_COMMAND_NAME_/"${commandName}"}"
+  local templateContent="${REPLY//_COMMAND_NAME_/"${commandName}"}"
   templateContent="${templateContent//_FUNCTION_NAME_/"${functionName}"}"
 
   printf "%s" "${templateContent}" >"${newCommandFilePath}"

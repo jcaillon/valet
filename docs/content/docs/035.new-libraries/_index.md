@@ -82,12 +82,12 @@ An example is given below for a `mylib` library and a `myfunction` function:
 # Returns:
 # 
 # - $?: 0 if ok, 1 otherwise.
-# - ${RETURNED_VALUE}: The first returned value
-# - ${RETURNED_ARRAY[@]}: A second returned value, as array
+# - ${REPLY}: The first returned value
+# - ${REPLY_ARRAY[@]}: A second returned value, as array
 # 
 # ```bash
-# mylib::myfunction arg1 && echo "${RETURNED_VALUE}"
-# _OPTION_NON_POSITIONAL=10 mylib::myfunction arg1 optional_arg2 && echo "${RETURNED_VALUE}"
+# mylib::myfunction arg1 && echo "${REPLY}"
+# _OPTION_NON_POSITIONAL=10 mylib::myfunction arg1 optional_arg2 && echo "${REPLY}"
 # ```
 # 
 # > A comment on this particular function.

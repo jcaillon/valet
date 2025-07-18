@@ -9,7 +9,7 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='0'
+REPLY='0'
 ```
 
 ❯ `version::compare 1.2.3-alpha 1.2.4+az123`
@@ -17,7 +17,7 @@ RETURNED_VALUE='0'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-1'
+REPLY='-1'
 ```
 
 ❯ `version::compare 1.2.3 1.2.2`
@@ -25,7 +25,7 @@ RETURNED_VALUE='-1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
+REPLY='1'
 ```
 
 ❯ `version::compare 2.2.3 1.2.3-alpha`
@@ -33,7 +33,7 @@ RETURNED_VALUE='1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
+REPLY='1'
 ```
 
 ❯ `version::compare 1.2.3+a1212 1.3.3`
@@ -41,7 +41,7 @@ RETURNED_VALUE='1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-1'
+REPLY='-1'
 ```
 
 ❯ `version::compare 1.2.3-alpha+a123123 1.2.3-alpha+123zer`
@@ -49,7 +49,7 @@ RETURNED_VALUE='-1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='0'
+REPLY='0'
 ```
 
 ❯ `version::compare 1.2a.3 1.2.3derp`
@@ -69,7 +69,7 @@ FAIL     Failed to compare versions ⌜1.2a.3⌝ and ⌜1.2.3derp⌝ because the
 Returned variables:
 
 ```text
-RETURNED_VALUE='0.1.0'
+REPLY='0.1.0'
 ```
 
 ❯ `version::bump 1.2.3-alpha+zae345 major`
@@ -77,7 +77,7 @@ RETURNED_VALUE='0.1.0'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2.0.0'
+REPLY='2.0.0'
 ```
 
 ❯ `version::bump 1.2.3-alpha+zae345 minor`
@@ -85,7 +85,7 @@ RETURNED_VALUE='2.0.0'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1.3.0'
+REPLY='1.3.0'
 ```
 
 ❯ `version::bump 1.2.3-alpha+zae345 patch`
@@ -93,7 +93,7 @@ RETURNED_VALUE='1.3.0'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1.2.4'
+REPLY='1.2.4'
 ```
 
 ❯ `version::bump 1.2.3-alpha+zae345 major false`
@@ -101,7 +101,7 @@ RETURNED_VALUE='1.2.4'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2.0.0-alpha+zae345'
+REPLY='2.0.0-alpha+zae345'
 ```
 
 ❯ `version::bump 1.2.156-alpha patch false`
@@ -109,7 +109,7 @@ RETURNED_VALUE='2.0.0-alpha+zae345'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1.2.157-alpha'
+REPLY='1.2.157-alpha'
 ```
 
 ❯ `version::bump aze patch false`

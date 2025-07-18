@@ -53,7 +53,7 @@ Returned code: `1`
 Returned variables:
 
 ```text
-RETURNED_VALUE='x86_64'
+REPLY='x86_64'
 ```
 
 ### ✅ Testing system::getOs
@@ -63,7 +63,7 @@ RETURNED_VALUE='x86_64'
 Returned variables:
 
 ```text
-RETURNED_VALUE='linux'
+REPLY='linux'
 ```
 
 ❯ `OSTYPE=msys system::getOs`
@@ -71,7 +71,7 @@ RETURNED_VALUE='linux'
 Returned variables:
 
 ```text
-RETURNED_VALUE='windows'
+REPLY='windows'
 ```
 
 ❯ `OSTYPE=darwin-stuff system::getOs`
@@ -79,7 +79,7 @@ RETURNED_VALUE='windows'
 Returned variables:
 
 ```text
-RETURNED_VALUE='darwin'
+REPLY='darwin'
 ```
 
 ❯ `OSTYPE=nop system::getOs`
@@ -87,14 +87,14 @@ RETURNED_VALUE='darwin'
 Returned variables:
 
 ```text
-RETURNED_VALUE='unknown'
+REPLY='unknown'
 ```
 
 ### ✅ Testing system::getEnvVars
 
 ❯ `system::getEnvVars`
 
-Found environment variables in RETURNED_ARRAY.
+Found environment variables in REPLY_ARRAY.
 
 ### ✅ Testing system::addToPath
 

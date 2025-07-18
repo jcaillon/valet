@@ -13,7 +13,7 @@ function test_main::sortCommands() {
 
   # overriding core::getUserDataDirectory to return a temporary directory
   fs::createTempDirectory
-  VALET_CONFIG_USER_DATA_DIRECTORY="${RETURNED_VALUE}"
+  VALET_CONFIG_USER_DATA_DIRECTORY="${REPLY}"
   VALET_CONFIG_REMEMBER_LAST_CHOICES=5
 
 

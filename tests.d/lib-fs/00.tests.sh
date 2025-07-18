@@ -39,12 +39,12 @@ function test_fs::getScriptDirectory() {
 
   test::prompt fs::getScriptDirectory
   fs::getScriptDirectory
-  echo "${RETURNED_VALUE}"
+  echo "${REPLY}"
   test::flush
 
   test::prompt source resources/script.sh
   source resources/script.sh
-  echo "${RETURNED_VALUE}"
+  echo "${REPLY}"
   test::flush
 }
 
@@ -64,12 +64,12 @@ function test_fs::createTemp() {
   test::title "✅ Testing fs::createTempFile and fs::createTempDirectory"
 
   test::func _OPTION_PATH_ONLY=true fs::createTempFile
-  if [[ ! -f "${RETURNED_VALUE}" ]]; then
+  if [[ ! -f "${REPLY}" ]]; then
     test::markdown "The file path was returned but the file does not exist."
   fi
 
   test::func _OPTION_PATH_ONLY=true fs::createTempDirectory
-  if [[ ! -d "${RETURNED_VALUE}" ]]; then
+  if [[ ! -d "${REPLY}" ]]; then
     test::markdown "The directory path was returned but the directory does not exist."
   fi
 }

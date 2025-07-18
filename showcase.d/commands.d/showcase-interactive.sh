@@ -20,7 +20,7 @@ description: |-
   This command demonstrates how to interact with the user using valet's interactive library.
 ---"
 function showcaseInteractive() {
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   log::info "Getting the cursor size:"
@@ -70,9 +70,9 @@ function showcaseInteractive() {
   SELECTION_ARRAY=("blue" "red" "green" "yellow")
   # shellcheck disable=SC2317
 
-  function getColorSample() { local -n color="ESC__FG_${1^^}"; RETURNED_VALUE="${color}ESC__FG_${1^^}${ESC__TEXT_RESET}"; }
+  function getColorSample() { local -n color="ESC__FG_${1^^}"; REPLY="${color}ESC__FG_${1^^}${ESC__TEXT_RESET}"; }
   sfzf::show "What's your favorite color?" SELECTION_ARRAY "getColorSample" "Color sample"
-  log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
+  log::info "You selected: ⌜${REPLY}⌝ (index: ⌜${REPLY2}⌝)"
 
   ############################
   # Spinner

@@ -48,7 +48,7 @@ fi
 #     You can then can then use valet function as if you were in a command script.
 ##VALET_COMMAND
 function selfSource() {
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   local output=""

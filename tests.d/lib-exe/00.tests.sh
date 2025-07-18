@@ -37,15 +37,15 @@ function test_exe::invoke5() {
 
   test::markdown "Input stream for file, return everything as files:"
   test::prompt exe::invokef5 false 0 true "${GLOBAL_TEST_TEMP_FILE}" fake --std-in
-  test::resetReturnedVars
+  test::resetReplyVars
   exe::invokef5 false 0 true "${GLOBAL_TEST_TEMP_FILE}" fake --std-in
-  test::printReturnedVars
+  test::printReplyVars
 
-  if [[ -s ${RETURNED_VALUE:-} ]]; then
-    test::exec fs::cat "${RETURNED_VALUE}"
+  if [[ -s ${REPLY:-} ]]; then
+    test::exec fs::cat "${REPLY}"
   fi
-  if [[ -s ${RETURNED_VALUE2:-} ]]; then
-    test::exec fs::cat "${RETURNED_VALUE2}"
+  if [[ -s ${REPLY2:-} ]]; then
+    test::exec fs::cat "${REPLY2}"
   fi
 }
 
@@ -81,7 +81,7 @@ function fake() {
 
   if [[ $* == *"--std-in"* ]]; then
     bash::readStdIn
-    inputStreamContent="${RETURNED_VALUE}"
+    inputStreamContent="${REPLY}"
   fi
 
   local IFS=" "

@@ -35,17 +35,17 @@ source time
 # Returns:
 #
 # - $?:The exit code of the executable.
-# - ${RETURNED_VALUE}: The file path containing the stdout of the executable.
-# - ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
+# - ${REPLY}: The file path containing the stdout of the executable.
+# - ${REPLY2}: The file path containing the stderr of the executable.
 #
 # ```bash
 # exe::invokef5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
-# stdoutFilePath="${RETURNED_VALUE}"
-# stderrFilePath="${RETURNED_VALUE2}"
+# stdoutFilePath="${REPLY}"
+# stderrFilePath="${REPLY2}"
 # ```
 #
 # > - In windows, this is tremendously faster to do (or any other invoke flavor):
-# >   `exe::invokef5 false 0 false '' mycommand && myvar="${RETURNED_VALUE}"`
+# >   `exe::invokef5 false 0 false '' mycommand && myvar="${REPLY}"`
 # >   than doing:
 # >   `myvar="$(mycommand)".`
 # > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
@@ -84,7 +84,7 @@ function exe::invokef5() {
   fi
 
   time::getProgramElapsedMicroseconds
-  local timerStart="${RETURNED_VALUE}"
+  local timerStart="${REPLY}"
 
   # execute the executable
   local -i exitCode=0
@@ -111,9 +111,9 @@ function exe::invokef5() {
   fi
 
   time::getProgramElapsedMicroseconds
-  local -i elapsed=$((RETURNED_VALUE - timerStart))
+  local -i elapsed=$((REPLY - timerStart))
   time::convertMicrosecondsToHuman "${elapsed}" "%S.%LLs"
-  local debugMessage="The command ⌜${executable}⌝ ended with exit code ⌜${exitCode}⌝ in ⌜${RETURNED_VALUE}⌝."
+  local debugMessage="The command ⌜${executable}⌝ ended with exit code ⌜${exitCode}⌝ in ⌜${REPLY}⌝."
 
   # if the error code is acceptable, then we set it to 0
   if [[ ${exitCode} -ne "0" && ,${acceptableErrorCodes}, == *",${exitCode},"* ]]; then
@@ -158,8 +158,8 @@ function exe::invokef5() {
     fi
   fi
 
-  RETURNED_VALUE="${GLOBAL_TEMPORARY_STDOUT_FILE}"
-  RETURNED_VALUE2="${GLOBAL_TEMPORARY_STDERR_FILE}"
+  REPLY="${GLOBAL_TEMPORARY_STDOUT_FILE}"
+  REPLY2="${GLOBAL_TEMPORARY_STDERR_FILE}"
   return ${exitCode}
 }
 
@@ -187,24 +187,24 @@ function exe::invokef5() {
 # Returns:
 #
 # - $?:The exit code of the executable.
-# - ${RETURNED_VALUE}: The content of stdout.
-# - ${RETURNED_VALUE2}: The content of stderr.
+# - ${REPLY}: The content of stdout.
+# - ${REPLY2}: The content of stderr.
 #
 # ```bash
 # exe::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
-# stdout="${RETURNED_VALUE}"
-# stderr="${RETURNED_VALUE2}"
+# stdout="${REPLY}"
+# stderr="${REPLY2}"
 # ```
 #
 # > See exe::invokef5 for more information.
 function exe::invoke5() {
   local -i exitCode=0
   exe::invokef5 "$@" || exitCode=$?
-  local stdOutFile="${RETURNED_VALUE}"
-  local stdErrFile="${RETURNED_VALUE2}"
+  local stdOutFile="${REPLY}"
+  local stdErrFile="${REPLY2}"
 
   fs::readFile "${stdErrFile}"
-  RETURNED_VALUE2="${RETURNED_VALUE}"
+  REPLY2="${REPLY}"
   fs::readFile "${stdOutFile}"
 
   return ${exitCode}
@@ -227,13 +227,13 @@ function exe::invoke5() {
 # Returns:
 #
 # - $?:The exit code of the executable.
-# - ${RETURNED_VALUE}: The file path containing the stdout of the executable.
-# - ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
+# - ${REPLY}: The file path containing the stdout of the executable.
+# - ${REPLY2}: The file path containing the stderr of the executable.
 #
 # ```bash
 # exe::invokef2 false git status || core::fail "status failed."
-# stdoutFilePath="${RETURNED_VALUE}"
-# stderrFilePath="${RETURNED_VALUE2}"
+# stdoutFilePath="${REPLY}"
+# stderrFilePath="${REPLY2}"
 # ```
 #
 # > See exe::invokef5 for more information.
@@ -260,13 +260,13 @@ function exe::invokef2() {
 # Returns:
 #
 # - $?:The exit code of the executable.
-# - ${RETURNED_VALUE}: The content of stdout.
-# - ${RETURNED_VALUE2}: The content of stderr.
+# - ${REPLY}: The content of stdout.
+# - ${REPLY2}: The content of stderr.
 #
 # ```bash
 # exe::invoke2 false git status || core::fail "status failed."
-# stdout="${RETURNED_VALUE}"
-# stderr="${RETURNED_VALUE2}"
+# stdout="${REPLY}"
+# stderr="${REPLY2}"
 # ```
 #
 # > See exe::invokef5 for more information.
@@ -325,13 +325,13 @@ function exe::invoket2() {
 # Returns:
 #
 # - $?:The exit code of the executable.
-# - ${RETURNED_VALUE}: The file path containing the stdout of the executable.
-# - ${RETURNED_VALUE2}: The file path containing the stderr of the executable.
+# - ${REPLY}: The file path containing the stdout of the executable.
+# - ${REPLY2}: The file path containing the stderr of the executable.
 #
 # ```bash
 # exe::invokef3piped true "key: val" yq -o json -p yaml -
-# stdoutFilePath="${RETURNED_VALUE}"
-# stderrFilePath="${RETURNED_VALUE2}"
+# stdoutFilePath="${REPLY}"
+# stderrFilePath="${REPLY2}"
 # ```
 #
 # > This is the equivalent of:
@@ -365,13 +365,13 @@ function exe::invokef3piped() {
 # Returns:
 #
 # - $?:The exit code of the executable.
-# - ${RETURNED_VALUE}: The content of stdout.
-# - ${RETURNED_VALUE2}: The content of stderr.
+# - ${REPLY}: The content of stdout.
+# - ${REPLY2}: The content of stderr.
 #
 # ```bash
 # exe::invoke3piped true "key: val" yq -o json -p yaml -
-# stdout="${RETURNED_VALUE}"
-# stderr="${RETURNED_VALUE2}"
+# stdout="${REPLY}"
+# stderr="${REPLY2}"
 # ```
 #
 # > This is the equivalent of:
@@ -403,8 +403,8 @@ function exe::invoke3piped() {
 # Returns:
 #
 # - $?:The exit code of the executable.
-# - ${RETURNED_VALUE}: The content of stdout.
-# - ${RETURNED_VALUE2}: The content of stderr.
+# - ${REPLY}: The content of stdout.
+# - ${REPLY2}: The content of stderr.
 #
 # ```bash
 # exe::invoke git add --all

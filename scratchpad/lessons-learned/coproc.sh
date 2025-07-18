@@ -19,19 +19,19 @@ function inCoproc() {
   log::info "COPROC PID: ${BASHPID}"
 
   bash::getBuiltinOutput trap -p
-  if [[ ${ORIGINAL_TRAPS} == "${RETURNED_VALUE}" ]]; then
+  if [[ ${ORIGINAL_TRAPS} == "${REPLY}" ]]; then
     log::info "Inherited the traps."
   else
-    log::error "Trap settings have changed:"$'\n'"${RETURNED_VALUE}"
+    log::error "Trap settings have changed:"$'\n'"${REPLY}"
   fi
   bash::getBuiltinOutput shopt -p
-  if [[ ${ORIGINAL_SHOPT} == "${RETURNED_VALUE}" ]]; then
+  if [[ ${ORIGINAL_SHOPT} == "${REPLY}" ]]; then
     log::info "Inherited the shopt settings."
   else
     log::error "Shopt settings have changed."
   fi
   bash::getBuiltinOutput shopt -p -o
-  if [[ ${ORIGINAL_SET} == "${RETURNED_VALUE}" ]]; then
+  if [[ ${ORIGINAL_SET} == "${REPLY}" ]]; then
     log::info "Inherited the set options."
   else
     log::error "Set options have changed."
@@ -78,11 +78,11 @@ function inCoproc() {
 
 log::info "PID: ${BASHPID}"
 bash::getBuiltinOutput trap -p
-ORIGINAL_TRAPS="${RETURNED_VALUE}"
+ORIGINAL_TRAPS="${REPLY}"
 bash::getBuiltinOutput shopt -p
-ORIGINAL_SHOPT="${RETURNED_VALUE}"
+ORIGINAL_SHOPT="${REPLY}"
 bash::getBuiltinOutput shopt -p -o
-ORIGINAL_SET="${RETURNED_VALUE}"
+ORIGINAL_SET="${REPLY}"
 
 
 coproc _PROGRESS_COPROC_PIPES { inCoproc 2>&${LOG_FD}; }
@@ -97,15 +97,15 @@ while ! kill -0 "${_PROGRESS_COPROC_PIPES_PID}" 2>/dev/null; do
 done
 
 log::info "Waiting for the initial message..."
-IFS=$'\0' read -u "${_PROGRESS_COPROC_PIPES[0]}" -rd $'\0' RETURNED_VALUE
-log::info "Received: ${RETURNED_VALUE}"
+IFS=$'\0' read -u "${_PROGRESS_COPROC_PIPES[0]}" -rd $'\0' REPLY
+log::info "Received: ${REPLY}"
 
 log::info "Sending start command"
 printf "%s\0" "start" >&"${_PROGRESS_COPROC_PIPES[1]}"
 
 log::info "Waiting for response..."
-IFS=$'\0' read -rd $'\0' RETURNED_VALUE <&"${_PROGRESS_COPROC_PIPES[0]}" || [[ -v RETURNED_VALUE ]]
-log::info "Received: ${RETURNED_VALUE}"
+IFS=$'\0' read -rd $'\0' REPLY <&"${_PROGRESS_COPROC_PIPES[0]}" || [[ -v REPLY ]]
+log::info "Received: ${REPLY}"
 
 log::info "Sending stop command"
 printf "%s\0%s\0" "unknown" "stop" >&"${_PROGRESS_COPROC_PIPES[1]}"

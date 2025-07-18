@@ -7,15 +7,15 @@ function main() {
 
   test::title "✅ Testing the bad config"
   core::getConfigurationDirectory
-  echo "fu=\$((1/0))" >"${RETURNED_VALUE}/config"
+  echo "fu=\$((1/0))" >"${REPLY}/config"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
-  rm -f "${RETURNED_VALUE}/config"
+  rm -f "${REPLY}/config"
 
   test::title "✅ Testing the bad startup"
   core::getConfigurationDirectory
-  echo "fu=\$((1/0))" >"${RETURNED_VALUE}/startup"
+  echo "fu=\$((1/0))" >"${REPLY}/startup"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
-  rm -f "${RETURNED_VALUE}/startup"
+  rm -f "${REPLY}/startup"
 
   test::title "✅ Testing the bad .env"
   echo "zeoifuhizefuhzeh" >".env"
@@ -25,7 +25,7 @@ function main() {
 
   test::title "✅ Testing the bad commands"
   fs::createTempDirectory
-  export VALET_CONFIG_USER_DATA_DIRECTORY="${RETURNED_VALUE}"
+  export VALET_CONFIG_USER_DATA_DIRECTORY="${REPLY}"
   echo "fu=\$((1/0))" >"${VALET_CONFIG_USER_DATA_DIRECTORY}/commands"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
   rm -f "${VALET_CONFIG_USER_DATA_DIRECTORY}/commands"

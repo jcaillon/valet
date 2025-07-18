@@ -13,7 +13,7 @@ function main() {
   test::title "✅ Testing that valet can be called without any arguments and show the menu"
     # override the local state and config directories to return temp directories
   fs::createTempDirectory
-  export VALET_CONFIG_USER_DATA_DIRECTORY="${RETURNED_VALUE}"
+  export VALET_CONFIG_USER_DATA_DIRECTORY="${REPLY}"
   test::exec main::parseMainArguments
 
 
@@ -23,7 +23,7 @@ function main() {
 
   test::title "✅ Testing that we can display the help of a sub menu"
   # shellcheck disable=SC2317
-  function test::transformTextBeforeFlushing() { string::head _TEST_OUTPUT 10; _TEST_OUTPUT="${RETURNED_VALUE}"; }
+  function test::transformTextBeforeFlushing() { string::head _TEST_OUTPUT 10; _TEST_OUTPUT="${REPLY}"; }
   test::exec main::parseMainArguments self -h
   unset -f test::transformTextBeforeFlushing
 
@@ -46,7 +46,7 @@ function main::showInteractiveCommandsMenu() {
   echo "🙈 mocking main::showInteractiveCommandsMenu:" 1>&2
   declare -p menuHeader array 1>&2
 
-  RETURNED_VALUE=""
+  REPLY=""
 }
 
 main

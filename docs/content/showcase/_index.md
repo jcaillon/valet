@@ -62,7 +62,7 @@ myFunction() {
   source string
   MY_STRING="field1 field2 field3"
   string::getField MY_STRING 1 " "
-  echo "The field at index 1 is ${RETURNED_VALUE}"
+  echo "The field at index 1 is ${REPLY}"
 
   source interactive
   if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi

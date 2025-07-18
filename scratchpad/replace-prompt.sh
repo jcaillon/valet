@@ -11,14 +11,14 @@ include tui
 function main() {
   # save the original bindings
   _OPTION_PATH_ONLY=true fs::createTempFile
-  _INTERACTIVE_SAVED_BINDINGS_FILE="${RETURNED_VALUE}"
+  _INTERACTIVE_SAVED_BINDINGS_FILE="${REPLY}"
   bind -p >"${_INTERACTIVE_SAVED_BINDINGS_FILE}" 2>/dev/null
 
 
   # remove all existing bindings except the self-insert ones
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
   fs::readFile "${_INTERACTIVE_SAVED_BINDINGS_FILE}"
-  local bindings="${RETURNED_VALUE}"
+  local bindings="${REPLY}"
   local IFS=$'\n'
   local line
   local key

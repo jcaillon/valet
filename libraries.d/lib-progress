@@ -232,7 +232,7 @@ function progress_runAnimationInBackground() {
   source time
 
   time::getProgramElapsedMicroseconds
-  local timerStart="${RETURNED_VALUE}"
+  local timerStart="${REPLY}"
 
   local -i readDelay=$((frameDelay / 2))
   if ((readDelay < 10)); then
@@ -276,11 +276,11 @@ function progress_runAnimationInBackground() {
     if [[ ${computeDisplayString} == "true" ]]; then
       computeDisplayString=false
       progress_getStringToDisplay "${template}" "${barSize}" "${percentage}" "${message}"
-      displayedString="${RETURNED_VALUE}"
+      displayedString="${REPLY}"
     fi
 
     time::getProgramElapsedMicroseconds
-    local -i elapsed=$((RETURNED_VALUE - timerStart))
+    local -i elapsed=$((REPLY - timerStart))
     loop=$((elapsed / 1000 / frameDelay))
     spinnerIndex=$(( loop % ${#spinner} ))
     printf "%-${GLOBAL_COLUMNS}s%s" "${displayedString//"<spinner>"/"${spinner:spinnerIndex:1}"}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
@@ -333,7 +333,7 @@ function progress_getStringToDisplay() {
     fi
 
     progress_getProgressBarString "${percentage}" "${progressBarSize}"
-    displayedString="${displayedString//"<bar>"/"${RETURNED_VALUE}"}"
+    displayedString="${displayedString//"<bar>"/"${REPLY}"}"
   fi
 
   if [[ ${template} == *"<message>"* ]]; then
@@ -345,7 +345,7 @@ function progress_getStringToDisplay() {
       message=""
     elif ((templateLengthWithoutMessage + ${#messageWithoutSfrCodes} > GLOBAL_COLUMNS)); then
       string::wrapCharacters message "$((GLOBAL_COLUMNS - templateLengthWithoutMessage - 1))"
-      message="${RETURNED_VALUE%%$'\n'*}…"
+      message="${REPLY%%$'\n'*}…"
     fi
     displayedString="${displayedString//"<message>"/"${message}"}"
   fi
@@ -355,7 +355,7 @@ function progress_getStringToDisplay() {
     displayedString="<spinner>"
   fi
 
-  RETURNED_VALUE="${displayedString}"
+  REPLY="${displayedString}"
 }
 
 # Returns a string representing a progress bar.
@@ -367,7 +367,7 @@ function progress_getStringToDisplay() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the progress bar string
+# - ${REPLY}: the progress bar string
 #
 # ```bash
 # progress_getProgressBarString 50 20
@@ -381,17 +381,17 @@ function progress_getProgressBarString() {
   local -i extraCharIndex=$(((size * percent - nbFullChars * 100) * 8 / 100))
 
   if ((nbFullChars > 0)); then
-    printf -v RETURNED_VALUE "%${nbFullChars}s" ""
-    RETURNED_VALUE="${RETURNED_VALUE// /█}"
+    printf -v REPLY "%${nbFullChars}s" ""
+    REPLY="${REPLY// /█}"
   else
-    RETURNED_VALUE=""
+    REPLY=""
   fi
   if ((extraCharIndex > 0)); then
-    RETURNED_VALUE+="${progressBarChars:extraCharIndex:1}"
+    REPLY+="${progressBarChars:extraCharIndex:1}"
   fi
-  if ((size - ${#RETURNED_VALUE} - 1 >= 0)); then
+  if ((size - ${#REPLY} - 1 >= 0)); then
     local printVar
-    printf -v printVar "%$((size - ${#RETURNED_VALUE}))s" ""
-    RETURNED_VALUE+="${printVar}"
+    printf -v printVar "%$((size - ${#REPLY}))s" ""
+    REPLY+="${printVar}"
   fi
 }

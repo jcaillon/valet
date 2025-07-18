@@ -77,7 +77,7 @@ examples:
 function newCoolCommand() {
   local -a more
   local firstArg option1 thisIsOption2
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   log::info "First argument: ${firstArg:-}."
@@ -91,7 +91,7 @@ function newCoolCommand() {
   source string
   local _myString="<b>My bold text</b>"
   string::extractBetween _myString "<b>" "</b>"
-  local extractedText="${RETURNED_VALUE}"
+  local extractedText="${REPLY}"
   log::info "Extracted text is: ⌜${extractedText:-}⌝"
 }
 ```

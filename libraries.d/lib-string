@@ -11,12 +11,12 @@
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the extracted field
+# - ${REPLY}: the extracted field
 #
 # ```bash
 # MY_STRING="   example "$'\t'"  string    "$'\n'
 # string::trimAll MY_STRING
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function string::trimAll() {
   local -n stringToTrimAll="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -27,7 +27,7 @@ function string::trimAll() {
   # shellcheck disable=SC2086
   # shellcheck disable=SC2048
   set -- ${stringToTrimAll}
-  RETURNED_VALUE="$*"
+  REPLY="$*"
   set +o noglob -o braceexpand
 }
 
@@ -43,17 +43,17 @@ function string::trimAll() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the extracted field
+# - ${REPLY}: the extracted field
 #
 # ```bash
 # MY_STRING="   example  string    "
 # string::trimEdges MY_STRING
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function string::trimEdges() {
   local -n stringToTrim="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  RETURNED_VALUE="${stringToTrim#"${stringToTrim%%[^"${2:-" "$'\t'$'\n'}"]*}"}"
-  RETURNED_VALUE="${RETURNED_VALUE%"${RETURNED_VALUE##*[^"${2:-" "$'\t'$'\n'}"]}"}"
+  REPLY="${stringToTrim#"${stringToTrim%%[^"${2:-" "$'\t'$'\n'}"]*}"}"
+  REPLY="${REPLY%"${REPLY##*[^"${2:-" "$'\t'$'\n'}"]}"}"
 }
 
 # ## string::convertCamelCaseToSnakeCase
@@ -67,12 +67,12 @@ function string::trimEdges() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the extracted field
+# - ${REPLY}: the extracted field
 #
 # ```bash
 # MY_STRING="myCamelCaseString"
 # string::convertCamelCaseToSnakeCase MY_STRING
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function string::convertCamelCaseToSnakeCase() {
   local -n camelCaseStringToConvert="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -89,7 +89,7 @@ function string::convertCamelCaseToSnakeCase() {
   while [[ ${output} == _* ]]; do
     output="${output:1}"
   done
-  RETURNED_VALUE="${output}"
+  REPLY="${output}"
 }
 
 # ## string::convertKebabCaseToSnakeCase
@@ -103,12 +103,12 @@ function string::convertCamelCaseToSnakeCase() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the extracted field
+# - ${REPLY}: the extracted field
 #
 # ```bash
 # MY_STRING="my-kebab-case-string"
 # string::convertKebabCaseToSnakeCase MY_STRING
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function string::convertKebabCaseToSnakeCase() {
   local -n kebabCaseStringToConvert="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -125,7 +125,7 @@ function string::convertKebabCaseToSnakeCase() {
   while [[ ${output} == _* ]]; do
     output="${output:1}"
   done
-  RETURNED_VALUE="${output}"
+  REPLY="${output}"
 }
 
 # ## string::convertKebabCaseToCamelCase
@@ -139,12 +139,12 @@ function string::convertKebabCaseToSnakeCase() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the extracted field
+# - ${REPLY}: the extracted field
 #
 # ```bash
 # MY_STRING="my-kebab-case-string"
 # string::convertKebabCaseToCamelCase MY_STRING
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function string::convertKebabCaseToCamelCase() {
   local -n kebabCaseStringToConvert="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -161,7 +161,7 @@ function string::convertKebabCaseToCamelCase() {
       output+="${char,}"
     fi
   done
-  RETURNED_VALUE="${output,}"
+  REPLY="${output,}"
 }
 
 # ## string::getField
@@ -180,12 +180,12 @@ function string::convertKebabCaseToCamelCase() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the extracted field
+# - ${REPLY}: the extracted field
 #
 # ```bash
 # MY_STRING="field1 field2 field3"
 # string::getField MY_STRING 1 " "
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 #
 # > This is faster than:
@@ -201,12 +201,12 @@ function string::getField() {
   local -i index=0
   for field in ${stringToCut}; do
     if [[ index -eq fieldNumber ]]; then
-      RETURNED_VALUE="${field}"
+      REPLY="${field}"
       return 0
     fi
     index=$((index + 1))
   done
-  RETURNED_VALUE=""
+  REPLY=""
 }
 
 # ## string::getIndexOf
@@ -223,23 +223,23 @@ function string::getField() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the index of the substring in the string or -1 if not found.
+# - ${REPLY}: the index of the substring in the string or -1 if not found.
 #
 # ```bash
 # MY_STRING="This is a long text"
 # string::getIndexOf MY_STRING "long"
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function string::getIndexOf() {
   local -i _STRING_INDEX_OF
   string_getIndexOf "$@"
-  RETURNED_VALUE="${_STRING_INDEX_OF}"
+  REPLY="${_STRING_INDEX_OF}"
 }
 
 # ## string_getIndexOf (private)
 #
 # Redefining this function because it is used by other functions and we want to avoid
-# collisions with the global RETURNED_VALUE. This is why we don't use string::getIndexOf directly.
+# collisions with the global REPLY. This is why we don't use string::getIndexOf directly.
 function string_getIndexOf() {
   local -n stringToSearch="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local search="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -292,12 +292,12 @@ function string_getIndexOf() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the extracted text
+# - ${REPLY}: the extracted text
 #
 # ```bash
 # MY_STRING="This is a long text"
 # string::extractBetween MY_STRING "is a " " text"
-# local extractedText="${RETURNED_VALUE}"
+# local extractedText="${REPLY}"
 # ```
 function string::extractBetween() {
   local -n stringFromWhichToExtract="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -309,7 +309,7 @@ function string::extractBetween() {
     string_getIndexOf stringFromWhichToExtract "${start}"
     startIndex=${_STRING_INDEX_OF}
     if (( startIndex == -1 )); then
-      RETURNED_VALUE=""
+      REPLY=""
       return 0
     fi
     startIndex=$((startIndex + ${#start}))
@@ -321,15 +321,15 @@ function string::extractBetween() {
     string_getIndexOf stringFromWhichToExtract "${end}" "${startIndex}"
     endIndex=${_STRING_INDEX_OF}
     if (( endIndex == -1 )); then
-      RETURNED_VALUE=""
+      REPLY=""
       return 0
     fi
   else
-    RETURNED_VALUE="${stringFromWhichToExtract:startIndex}"
+    REPLY="${stringFromWhichToExtract:startIndex}"
     return 0
   fi
 
-  RETURNED_VALUE="${stringFromWhichToExtract:startIndex:endIndex - startIndex}"
+  REPLY="${stringFromWhichToExtract:startIndex:endIndex - startIndex}"
 }
 
 # ## string::count
@@ -343,19 +343,19 @@ function string::extractBetween() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the number of occurrences
+# - ${REPLY}: the number of occurrences
 #
 # ```bash
 # MY_STRING="name,first_name,address"
 # string::count MY_STRING ","
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 #
 # > This is faster than looping over the string and check the substring.
 function string::count() {
   local -n stringInWhichToCount="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local newString="${stringInWhichToCount//"${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"/}"
-  RETURNED_VALUE=$(((${#stringInWhichToCount} - ${#newString}) / ${#2}))
+  REPLY=$(((${#stringInWhichToCount} - ${#newString}) / ${#2}))
 }
 
 # ## string::split
@@ -369,12 +369,12 @@ function string::count() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY[@]}: the array of strings
+# - ${REPLY_ARRAY[@]}: the array of strings
 #
 # ```bash
 # MY_STRING="name,first_name,address"
 # string::split MY_STRING ","
-# ARRAY=("${RETURNED_ARRAY[@]}")
+# ARRAY=("${REPLY_ARRAY[@]}")
 # ```
 #
 # > This is faster than using read into an array from a here string.
@@ -383,7 +383,7 @@ function string::split() {
   local IFS="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # shellcheck disable=SC2206
   # shellcheck disable=SC2034
-  RETURNED_ARRAY=(${stringToSplit})
+  REPLY_ARRAY=(${stringToSplit})
 }
 
 # ## string::head
@@ -401,12 +401,12 @@ function string::split() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The extracted string.
+# - ${REPLY}: The extracted string.
 #
 # ```bash
 # MY_STRING="line1"$'\n'"line2"$'\n'"line3"
 # string::head MY_STRING 2
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function string::head() {
   local _STRING_HEAD_NB_LINES="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -420,12 +420,12 @@ function string::head() {
 
 function string_headCallback() {
   if ((_STRING_HEAD_COUNTER == 0)); then
-    RETURNED_VALUE=""
+    REPLY=""
   fi
   if ((_STRING_HEAD_COUNTER >= _STRING_HEAD_NB_LINES)); then
     return 1
   fi
-  RETURNED_VALUE+="${1}"$'\n'
+  REPLY+="${1}"$'\n'
   ((_STRING_HEAD_COUNTER+=1))
   return 0
 }
@@ -481,12 +481,12 @@ function string::doForEachLine() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the cleaned string
+# - ${REPLY}: the cleaned string
 #
 # ```bash
 # MY_STRING="This is a string with SGR codes"$'\e[0m'
 # string::removeSgrCodes MY_STRING
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function string::removeSgrCodes() {
   local -n stringFromWhichToRemoveSgrCodes="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -504,20 +504,20 @@ function string::removeSgrCodes() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the hexadecimal representation of the string
+# - ${REPLY}: the hexadecimal representation of the string
 #
 # ```bash
 # MY_STRING="This is a string"
 # string::convertToHex MY_STRING
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function string::convertToHex() {
   local -n stringToConvertToHex="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i charIndex
   local hexChar
-  RETURNED_VALUE=""
+  REPLY=""
   for ((charIndex = 0; charIndex < ${#stringToConvertToHex}; charIndex++)); do
     printf -v hexChar "%x" "'${stringToConvertToHex:charIndex:1}"
-    RETURNED_VALUE+="${hexChar}"
+    REPLY+="${hexChar}"
   done
 }

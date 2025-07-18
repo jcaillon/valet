@@ -17,7 +17,7 @@ _myString='My text with some text formatting and some more textunreadable stuff.
 Returned variables:
 
 ```text
-RETURNED_VALUE='64303731656331393166366539386139633738623664353032633832336438653561646366646638336430656135356562633766323432623239636538333031'
+REPLY='64303731656331393166366539386139633738623664353032633832336438653561646366646638336430656135356562633766323432623239636538333031'
 ```
 
 ### ✅ Testing string::removeSgrCodes
@@ -39,7 +39,7 @@ _MY_STRING='field1 field2 field3'
 Returned variables:
 
 ```text
-RETURNED_VALUE='field1'
+REPLY='field1'
 ```
 
 ❯ `string::getField _MY_STRING 1 \ `
@@ -47,7 +47,7 @@ RETURNED_VALUE='field1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='field2'
+REPLY='field2'
 ```
 
 ❯ `string::getField _MY_STRING 2 ,`
@@ -55,7 +55,7 @@ RETURNED_VALUE='field2'
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
+REPLY=''
 ```
 
 ❯ `string::getField _MY_STRING 4 ,`
@@ -63,7 +63,7 @@ RETURNED_VALUE=''
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
+REPLY=''
 ```
 
 ```text
@@ -77,7 +77,7 @@ line3 seems so'
 Returned variables:
 
 ```text
-RETURNED_VALUE='line3 seems so'
+REPLY='line3 seems so'
 ```
 
 ### ✅ Testing string::convertCamelCaseToSnakeCase
@@ -87,7 +87,7 @@ RETURNED_VALUE='line3 seems so'
 Returned variables:
 
 ```text
-RETURNED_VALUE='THIS_IS_A_TEST0'
+REPLY='THIS_IS_A_TEST0'
 ```
 
 ❯ `_MY_STRING=AnotherTest string::convertCamelCaseToSnakeCase _MY_STRING`
@@ -95,7 +95,7 @@ RETURNED_VALUE='THIS_IS_A_TEST0'
 Returned variables:
 
 ```text
-RETURNED_VALUE='ANOTHER_TEST'
+REPLY='ANOTHER_TEST'
 ```
 
 ### ✅ Testing string::convertKebabCaseToSnakeCase
@@ -105,7 +105,7 @@ RETURNED_VALUE='ANOTHER_TEST'
 Returned variables:
 
 ```text
-RETURNED_VALUE='THIS_IS_A_TEST0'
+REPLY='THIS_IS_A_TEST0'
 ```
 
 ❯ `_MY_STRING=--another-test string::convertKebabCaseToSnakeCase _MY_STRING`
@@ -113,7 +113,7 @@ RETURNED_VALUE='THIS_IS_A_TEST0'
 Returned variables:
 
 ```text
-RETURNED_VALUE='ANOTHER_TEST'
+REPLY='ANOTHER_TEST'
 ```
 
 ### ✅ Testing string::convertKebabCaseToCamelCase
@@ -123,7 +123,7 @@ RETURNED_VALUE='ANOTHER_TEST'
 Returned variables:
 
 ```text
-RETURNED_VALUE='thisIsATest0'
+REPLY='thisIsATest0'
 ```
 
 ❯ `_MY_STRING=--another-test string::convertKebabCaseToCamelCase _MY_STRING`
@@ -131,7 +131,7 @@ RETURNED_VALUE='thisIsATest0'
 Returned variables:
 
 ```text
-RETURNED_VALUE='anotherTest'
+REPLY='anotherTest'
 ```
 
 ❯ `_MY_STRING=--anotherTest string::convertKebabCaseToCamelCase _MY_STRING`
@@ -139,7 +139,7 @@ RETURNED_VALUE='anotherTest'
 Returned variables:
 
 ```text
-RETURNED_VALUE='anothertest'
+REPLY='anothertest'
 ```
 
 ❯ `_MY_STRING=--last-- string::convertKebabCaseToCamelCase _MY_STRING`
@@ -147,7 +147,7 @@ RETURNED_VALUE='anothertest'
 Returned variables:
 
 ```text
-RETURNED_VALUE='last'
+REPLY='last'
 ```
 
 ### ✅ Testing string::trimAll
@@ -161,7 +161,7 @@ MY_STRING='  a  super test  '
 Returned variables:
 
 ```text
-RETURNED_VALUE='a super test'
+REPLY='a super test'
 ```
 
 ```text
@@ -173,7 +173,7 @@ MY_STRING='this is a command  '
 Returned variables:
 
 ```text
-RETURNED_VALUE='this is a command'
+REPLY='this is a command'
 ```
 
 ```text
@@ -186,7 +186,7 @@ this is a 	command  '
 Returned variables:
 
 ```text
-RETURNED_VALUE='this is a command'
+REPLY='this is a command'
 ```
 
 ### ✅ Testing string::trimEdges
@@ -200,7 +200,7 @@ MY_STRING='  hello  world  '
 Returned variables:
 
 ```text
-RETURNED_VALUE='hello  world'
+REPLY='hello  world'
 ```
 
 ```text
@@ -212,7 +212,7 @@ MY_STRING='_-_-_hello_-_'
 Returned variables:
 
 ```text
-RETURNED_VALUE='hello'
+REPLY='hello'
 ```
 
 ```text
@@ -224,7 +224,7 @@ MY_STRING='  hello'
 Returned variables:
 
 ```text
-RETURNED_VALUE='hello'
+REPLY='hello'
 ```
 
 ```text
@@ -238,7 +238,7 @@ MY_STRING='
 Returned variables:
 
 ```text
-RETURNED_VALUE='hello'
+REPLY='hello'
 ```
 
 ### ✅ Testing string::getIndexOf function
@@ -248,7 +248,7 @@ RETURNED_VALUE='hello'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2'
+REPLY='2'
 ```
 
 ❯ `_MY_STRING=hello string::getIndexOf _MY_STRING he`
@@ -256,7 +256,7 @@ RETURNED_VALUE='2'
 Returned variables:
 
 ```text
-RETURNED_VALUE='0'
+REPLY='0'
 ```
 
 ❯ `_MY_STRING=hello string::getIndexOf _MY_STRING he 10`
@@ -264,7 +264,7 @@ RETURNED_VALUE='0'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-1'
+REPLY='-1'
 ```
 
 ❯ `_MY_STRING=yes-yes string::getIndexOf _MY_STRING ye 1`
@@ -272,7 +272,7 @@ RETURNED_VALUE='-1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='4'
+REPLY='4'
 ```
 
 ❯ `_MY_STRING=yes-yes string::getIndexOf _MY_STRING yes 5`
@@ -280,7 +280,7 @@ RETURNED_VALUE='4'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-1'
+REPLY='-1'
 ```
 
 ### ✅ Testing string::extractBetween function
@@ -290,7 +290,7 @@ RETURNED_VALUE='-1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='ll'
+REPLY='ll'
 ```
 
 ❯ `_MY_STRING=hello string::extractBetween _MY_STRING e ''`
@@ -298,7 +298,7 @@ RETURNED_VALUE='ll'
 Returned variables:
 
 ```text
-RETURNED_VALUE='llo'
+REPLY='llo'
 ```
 
 ❯ `_MY_STRING=hello string::extractBetween _MY_STRING h a`
@@ -306,7 +306,7 @@ RETURNED_VALUE='llo'
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
+REPLY=''
 ```
 
 ```text
@@ -321,7 +321,7 @@ MULTI_LINES_TEXT2='1 line one
 Returned variables:
 
 ```text
-RETURNED_VALUE='2 line two
+REPLY='2 line two
 3 line three
 '
 ```
@@ -331,7 +331,7 @@ RETURNED_VALUE='2 line two
 Returned variables:
 
 ```text
-RETURNED_VALUE='line two'
+REPLY='line two'
 ```
 
 ### ✅ Testing string::count function
@@ -341,7 +341,7 @@ RETURNED_VALUE='line two'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2'
+REPLY='2'
 ```
 
 ❯ `_MY_STRING=bonjour\ mon\ bon\ ami\,\ bonne\ journée\! string::count _MY_STRING bo`
@@ -349,7 +349,7 @@ RETURNED_VALUE='2'
 Returned variables:
 
 ```text
-RETURNED_VALUE='3'
+REPLY='3'
 ```
 
 ### ✅ Testing string::split function
@@ -359,7 +359,7 @@ RETURNED_VALUE='3'
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='name'
 [1]='firstname'
 [2]='address'
@@ -371,7 +371,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='one'
 [1]='two'
 [2]='three'
@@ -387,7 +387,7 @@ Wrapping text at column 30 with no padding
 Returned variables:
 
 ```text
-RETURNED_VALUE='You don`t [36m[36m[36mget better[39m[39m[39m on the 
+REPLY='You don`t [36m[36m[36mget better[39m[39m[39m on the 
 days when you feel like going.
 You get better on the days 
 when you don`t want to go, but
@@ -436,7 +436,7 @@ Wrapping text at column 50 with padding of 4 on new lines
 Returned variables:
 
 ```text
-RETURNED_VALUE='You don`t [36m[36m[36mget better[39m[39m[39m on the days when you feel 
+REPLY='You don`t [36m[36m[36mget better[39m[39m[39m on the days when you feel 
     like going. You get better on the days when 
     you don`t want to go, but you go anyway. If 
     you can [34movercome the negative energy[39m coming 
@@ -471,7 +471,7 @@ Wrapping text at column 20 with padding of 3 on all lines
 Returned variables:
 
 ```text
-RETURNED_VALUE='You don`t [36m[36m[36mget 
+REPLY='You don`t [36m[36m[36mget 
    better[39m[39m[39m on the 
    days when you 
    feel like going. 
@@ -546,7 +546,7 @@ Wrapping words, shortcut because the message is a short single line
 Returned variables:
 
 ```text
-RETURNED_VALUE='A message.'
+REPLY='A message.'
 ```
 
 Wrapping words, no shortcut!
@@ -556,7 +556,7 @@ Wrapping words, no shortcut!
 Returned variables:
 
 ```text
-RETURNED_VALUE='A 
+REPLY='A 
 message.'
 ```
 
@@ -572,7 +572,7 @@ A new line'
 Returned variables:
 
 ```text
-RETURNED_VALUE='A message.
+REPLY='A message.
 [36m░░░[0mA new line'
 ```
 
@@ -585,7 +585,7 @@ Wrapping characters at column 20 with padding of 3 on all lines
 Returned variables:
 
 ```text
-RETURNED_VALUE='You don`t [36m[36m[36mget bet
+REPLY='You don`t [36m[36m[36mget bet
    ter[39m[39m[39m on the days w
    hen you feel like
    going. You get be
@@ -646,7 +646,7 @@ RETURNED_VALUE='You don`t [36m[36m[36mget bet
    There were 2 new 
    lines before this
    .'
-RETURNED_VALUE2='1'
+REPLY2='1'
 ```
 
 Wrapping characters at 20, no other options
@@ -656,7 +656,7 @@ Wrapping characters at 20, no other options
 Returned variables:
 
 ```text
-RETURNED_VALUE='You don`t [36m[36m[36mget better[39m[39m[39m
+REPLY='You don`t [36m[36m[36mget better[39m[39m[39m
 on the days when you
 feel like going. You
 get better on the da
@@ -706,7 +706,7 @@ https://en.wikipedia
 
 There were 2 new lin
 es before this.'
-RETURNED_VALUE2='15'
+REPLY2='15'
 ```
 
 Wrapping characters
@@ -720,10 +720,10 @@ MY_STRING='01234567890123456789234'
 Returned variables:
 
 ```text
-RETURNED_VALUE='0
+REPLY='0
    12345678901234
    56789234'
-RETURNED_VALUE2='8'
+REPLY2='8'
 ```
 
 Wrapping characters
@@ -738,9 +738,9 @@ A new line'
 Returned variables:
 
 ```text
-RETURNED_VALUE='A message.
+REPLY='A message.
 [36m░░░[0mA new line'
-RETURNED_VALUE2='0'
+REPLY2='0'
 ```
 
 Wrapping characters, spaces at the beginning of the line are kept
@@ -755,7 +755,7 @@ MY_STRING='  Start With spaces that must be kept! Other spaces can be ignored at
 Returned variables:
 
 ```text
-RETURNED_VALUE='  Start With s
+REPLY='  Start With s
    paces that mus
    t be kept! Oth
    er spaces can 
@@ -763,7 +763,7 @@ RETURNED_VALUE='  Start With s
    wrapping.
      Also start w
    ith spaces'
-RETURNED_VALUE2='10'
+REPLY2='10'
 ```
 
 ```text
@@ -775,10 +775,10 @@ MY_STRING='Message'
 Returned variables:
 
 ```text
-RETURNED_VALUE='Mes
+REPLY='Mes
 sag
 e'
-RETURNED_VALUE2='1'
+REPLY2='1'
 ```
 
 ### ✅ Testing string::highlight
@@ -788,7 +788,7 @@ RETURNED_VALUE2='1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='>T<his is a >T<ex>t< >t<o highligh>t<.'
+REPLY='>T<his is a >T<ex>t< >t<o highligh>t<.'
 ```
 
 ❯ `MY_STRING=This\ is\ a\ texT\ to\ highlight. MY_CHARS=TTTTT string::highlight MY_STRING MY_CHARS '>' '<'`
@@ -796,7 +796,7 @@ RETURNED_VALUE='>T<his is a >T<ex>t< >t<o highligh>t<.'
 Returned variables:
 
 ```text
-RETURNED_VALUE='>T<his is a >t<ex>T< >t<o highligh>t<.'
+REPLY='>T<his is a >t<ex>T< >t<o highligh>t<.'
 ```
 
 ❯ `MY_STRING= MY_CHARS=ttttt string::highlight MY_STRING MY_CHARS`
@@ -804,7 +804,7 @@ RETURNED_VALUE='>T<his is a >t<ex>T< >t<o highligh>t<.'
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
+REPLY=''
 ```
 
 ❯ `MY_STRING=This\ is\ a\ text\ to\ highlight. MY_CHARS= string::highlight MY_STRING MY_CHARS`
@@ -812,7 +812,7 @@ RETURNED_VALUE=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='This is a text to highlight.'
+REPLY='This is a text to highlight.'
 ```
 
 ### ✅ Testing string::head
@@ -831,7 +831,7 @@ Testing string::head with 2 lines
 Returned variables:
 
 ```text
-RETURNED_VALUE='1 line one
+REPLY='1 line one
 2 line two
 '
 ```
@@ -843,7 +843,7 @@ Testing string::head with 0 line
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
+REPLY=''
 ```
 
 Testing string::head with 10 lines
@@ -853,7 +853,7 @@ Testing string::head with 10 lines
 Returned variables:
 
 ```text
-RETURNED_VALUE='1 line one
+REPLY='1 line one
 2 line two
 3 line three
 4 line four

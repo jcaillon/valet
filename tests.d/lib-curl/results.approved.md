@@ -11,9 +11,9 @@ Writing to an output file:
 Returned variables:
 
 ```text
-RETURNED_VALUE='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 200 https://fuu
+REPLY='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 200 https://fuu
 '
-RETURNED_VALUE2='200'
+REPLY2='200'
 ```
 
 ❯ `fs::cat /tmp/valet-temp`
@@ -49,9 +49,9 @@ Returned code: `1`
 Returned variables:
 
 ```text
-RETURNED_VALUE='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 500 https://fuu
+REPLY='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 500 https://fuu
 '
-RETURNED_VALUE2='500'
+REPLY2='500'
 ```
 
 Getting an acceptable 400 error with fail mode:
@@ -61,9 +61,9 @@ Getting an acceptable 400 error with fail mode:
 Returned variables:
 
 ```text
-RETURNED_VALUE='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 400 https://fuu
+REPLY='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 400 https://fuu
 '
-RETURNED_VALUE2='400'
+REPLY2='400'
 ```
 
 Getting an acceptable 201 with debug mode on
@@ -91,9 +91,9 @@ DEBUG    The http return code ⌜201⌝ is acceptable and exit code has been res
 Returned variables:
 
 ```text
-RETURNED_VALUE='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 201 https://fuu
+REPLY='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 201 https://fuu
 '
-RETURNED_VALUE2='201'
+REPLY2='201'
 ```
 
 ❯ `log::setLevel info`
@@ -107,10 +107,10 @@ Getting 200:
 Returned variables:
 
 ```text
-RETURNED_VALUE='(request body response) Writing stuff to file because the --output option was given.'
-RETURNED_VALUE2='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu
+REPLY='(request body response) Writing stuff to file because the --output option was given.'
+REPLY2='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu
 '
-RETURNED_VALUE3='200'
+REPLY3='200'
 ```
 
 Getting 500 with fail mode off:
@@ -160,10 +160,10 @@ DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been res
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
-RETURNED_VALUE2='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu
+REPLY=''
+REPLY2='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 200 https://fuu
 '
-RETURNED_VALUE3='200'
+REPLY3='200'
 ```
 
 ❯ `log::setLevel info`

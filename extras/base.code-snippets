@@ -141,7 +141,7 @@
 			"#     Call command with option1, option2 and some arguments.",
 			"##VALET_COMMAND",
 			"function $2() {",
-			"  command::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  command::parseArguments \"$@\" && eval \"${REPLY}\"",
 			"  command::checkParsedResults \"${help:-}\" \"${commandArgumentsErrors:-}\"",
 			"  $0",
 			"}"
@@ -182,7 +182,7 @@
 			"    Call command with option1, option2 and some arguments.",
 			": \"---",
 			"function $2() {",
-			"  command::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  command::parseArguments \"$@\" && eval \"${REPLY}\"",
 			"  command::checkParsedResults \"${help:-}\" \"${commandArgumentsErrors:-}\"",
 			"  $0",
 			"}"
@@ -262,60 +262,60 @@
 			""
 		]
 	},
-	"RETURNED_VALUE": {
-		"prefix": "RETURNED_VALUE",
+	"REPLY": {
+		"prefix": "REPLY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_VALUE$0"
+			"REPLY$0"
 		]
 	},
-	"RETURNED_VALUE2": {
-		"prefix": "RETURNED_VALUE2",
+	"REPLY2": {
+		"prefix": "REPLY2",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_VALUE2$0"
+			"REPLY2$0"
 		]
 	},
-	"RETURNED_VALUE3": {
-		"prefix": "RETURNED_VALUE3",
+	"REPLY3": {
+		"prefix": "REPLY3",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_VALUE3$0"
+			"REPLY3$0"
 		]
 	},
-	"RETURNED_ARRAY": {
-		"prefix": "RETURNED_ARRAY",
+	"REPLY_ARRAY": {
+		"prefix": "REPLY_ARRAY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_ARRAY$0"
+			"REPLY_ARRAY$0"
 		]
 	},
-	"RETURNED_ARRAY2": {
-		"prefix": "RETURNED_ARRAY2",
+	"REPLY_ARRAY2": {
+		"prefix": "REPLY_ARRAY2",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_ARRAY2$0"
+			"REPLY_ARRAY2$0"
 		]
 	},
-	"RETURNED_ARRAY3": {
-		"prefix": "RETURNED_ARRAY3",
+	"REPLY_ARRAY3": {
+		"prefix": "REPLY_ARRAY3",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_ARRAY3$0"
+			"REPLY_ARRAY3$0"
 		]
 	},
-	"RETURNED_ASSOCIATIVE_ARRAY": {
-		"prefix": "RETURNED_ASSOCIATIVE_ARRAY",
+	"REPLY_ASSOCIATIVE_ARRAY": {
+		"prefix": "REPLY_ASSOCIATIVE_ARRAY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_ASSOCIATIVE_ARRAY$0"
+			"REPLY_ASSOCIATIVE_ARRAY$0"
 		]
 	},
 	"IFS": {
@@ -390,60 +390,60 @@
 			"\\${LAST_KEY_PRESSED}$0"
 		]
 	},
-	"$RETURNED_VALUE": {
-		"prefix": "$RETURNED_VALUE",
+	"$REPLY": {
+		"prefix": "$REPLY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_VALUE}$0"
+			"\\${REPLY}$0"
 		]
 	},
-	"$RETURNED_VALUE2": {
-		"prefix": "$RETURNED_VALUE2",
+	"$REPLY2": {
+		"prefix": "$REPLY2",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_VALUE2}$0"
+			"\\${REPLY2}$0"
 		]
 	},
-	"$RETURNED_VALUE3": {
-		"prefix": "$RETURNED_VALUE3",
+	"$REPLY3": {
+		"prefix": "$REPLY3",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_VALUE3}$0"
+			"\\${REPLY3}$0"
 		]
 	},
-	"$RETURNED_ARRAY": {
-		"prefix": "$RETURNED_ARRAY",
+	"$REPLY_ARRAY": {
+		"prefix": "$REPLY_ARRAY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_ARRAY}$0"
+			"\\${REPLY_ARRAY}$0"
 		]
 	},
-	"$RETURNED_ARRAY2": {
-		"prefix": "$RETURNED_ARRAY2",
+	"$REPLY_ARRAY2": {
+		"prefix": "$REPLY_ARRAY2",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_ARRAY2}$0"
+			"\\${REPLY_ARRAY2}$0"
 		]
 	},
-	"$RETURNED_ARRAY3": {
-		"prefix": "$RETURNED_ARRAY3",
+	"$REPLY_ARRAY3": {
+		"prefix": "$REPLY_ARRAY3",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_ARRAY3}$0"
+			"\\${REPLY_ARRAY3}$0"
 		]
 	},
-	"$RETURNED_ASSOCIATIVE_ARRAY": {
-		"prefix": "$RETURNED_ASSOCIATIVE_ARRAY",
+	"$REPLY_ASSOCIATIVE_ARRAY": {
+		"prefix": "$REPLY_ASSOCIATIVE_ARRAY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_ASSOCIATIVE_ARRAY}$0"
+			"\\${REPLY_ASSOCIATIVE_ARRAY}$0"
 		]
 	},
 	"$BASHOPTS": {

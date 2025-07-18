@@ -99,16 +99,16 @@ function selfBuild() {
           # shellcheck disable=SC2086
           main::fuzzyFindOption "${1}" "${CMD_OPTS_selfBuild[@]}"
         else
-          RETURNED_VALUE="Unknown option ⌜${1}⌝"
+          REPLY="Unknown option ⌜${1}⌝"
         fi
-        core::fail "${RETURNED_VALUE}"
+        core::fail "${REPLY}"
         ;;
       *) core::fail "This command takes no arguments." ;;
       esac
       shift
     done
   else
-    command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+    command::parseArguments "$@" && eval "${REPLY}"
     command::checkParsedResults
   fi
 
@@ -117,26 +117,26 @@ function selfBuild() {
   local originalLogLevel
   if [[ ${silent:-} == "true" ]]; then
     log::getLevel
-    if [[ ${RETURNED_VALUE} == "debug" || ${RETURNED_VALUE} == "trace" ]]; then
+    if [[ ${REPLY} == "debug" || ${REPLY} == "trace" ]]; then
       log::info "The silent option has been ignored because of the current log level."
       silent=false
     else
       log::debug "Building the valet user commands silently."
-      log::getLevel && originalLogLevel="${RETURNED_VALUE}"
+      log::getLevel && originalLogLevel="${REPLY}"
       log::setLevel warning true
     fi
   fi
 
   core::getExtensionsDirectory
-  extensionsDirectory="${extensionsDirectory:-${RETURNED_VALUE}}"
+  extensionsDirectory="${extensionsDirectory:-${REPLY}}"
 
   if [[ -z ${output:-} ]]; then
     core::getUserDataDirectory
-    output="${RETURNED_VALUE}"
+    output="${REPLY}"
   fi
 
   fs::toAbsolutePath "${GLOBAL_INSTALLATION_DIRECTORY}"
-  GLOBAL_INSTALLATION_DIRECTORY="${RETURNED_VALUE}"
+  GLOBAL_INSTALLATION_DIRECTORY="${REPLY}"
 
   # list all the files in which we need to find command definitions
   local -a libraryDirectories=()
@@ -254,14 +254,14 @@ function summarize() {
 # Bump the valet build version by one patch.
 function bumpValetBuildVersion() {
   core::getVersion
-  local currentVersion="${RETURNED_VALUE:-0.0.0}"
+  local currentVersion="${REPLY:-0.0.0}"
   currentVersion="${currentVersion%%$'\n'*}"
 
   version::bump "${currentVersion}" "patch" "false"
 
-  printf '%s' "${RETURNED_VALUE}" >"${GLOBAL_INSTALLATION_DIRECTORY}/version"
+  printf '%s' "${REPLY}" >"${GLOBAL_INSTALLATION_DIRECTORY}/version"
 
-  log::info "The valet build version has been bumped to ⌜${RETURNED_VALUE}⌝."
+  log::info "The valet build version has been bumped to ⌜${REPLY}⌝."
 }
 
 # This function extracts the command definitions from the files and stores them in
@@ -279,7 +279,7 @@ function extractCommandDefinitionsToVariables() {
     log::info "Extracting commands from ⌜${file}⌝."
     selfBuild_extractCommandYamls "${file}"
     local content
-    for content in "${RETURNED_ARRAY[@]}"; do
+    for content in "${REPLY_ARRAY[@]}"; do
 
       if log::isTraceEnabled; then
         log::trace "Extracting command definition for:"
@@ -291,10 +291,10 @@ function extractCommandDefinitionsToVariables() {
       local function command
       function="${TEMP_CMD_BUILD_function:-}"
       string::trimAll function
-      function="${RETURNED_VALUE}"
+      function="${REPLY}"
       command="${TEMP_CMD_BUILD_command:-}"
       string::trimAll command
-      command="${RETURNED_VALUE}"
+      command="${REPLY}"
 
       # trim the leading "valet" from the command
       command="${command#valet }"
@@ -309,7 +309,7 @@ function extractCommandDefinitionsToVariables() {
       fi
 
 
-      fs::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${RETURNED_VALUE}"
+      fs::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${REPLY}"
       TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${GLOBAL_INSTALLATION_DIRECTORY}"/}"
 
       # make sure that all these arrays exists and have the same size
@@ -320,7 +320,7 @@ function extractCommandDefinitionsToVariables() {
       if log::isTraceEnabled; then
         # shellcheck disable=SC2086
         bash::getBuiltinOutput declare -p ${!TEMP_CMD_BUILD_*}
-        local declaredVariables="${RETURNED_VALUE}"
+        local declaredVariables="${REPLY}"
         log::trace "Declared variables for this command:"
         log::printFileString declaredVariables
       fi
@@ -456,8 +456,8 @@ function declareFinalCommandDefinitionHelpVariables() {
       optionValue="${TEMP_CMD_BUILD_options_name[index]}"
       if [[ ${optionValue} == *"<"* ]]; then optionValue="<${optionValue##*<}"; else optionValue="true"; fi
       selfBuild_extractFirstLongNameFromOptionString "${TEMP_CMD_BUILD_options_name[index]}"
-      string::convertKebabCaseToSnakeCase RETURNED_VALUE
-      TEMP_CMD_BUILD_options_description[index]+=$'\n'"This option can be set by exporting the variable VALET_${RETURNED_VALUE}='${optionValue}'."
+      string::convertKebabCaseToSnakeCase REPLY
+      TEMP_CMD_BUILD_options_description[index]+=$'\n'"This option can be set by exporting the variable VALET_${REPLY}='${optionValue}'."
     fi
   done
 
@@ -511,14 +511,14 @@ function declareFinalCommandDefinitionParserVariables() {
     fi
     option="${option//,/ }"
     string::trimAll option
-    option="${RETURNED_VALUE}"
+    option="${REPLY}"
     selfBuild_extractFirstLongNameFromOptionString "${option}"
-    optionName="${RETURNED_VALUE}"
+    optionName="${REPLY}"
     string::convertKebabCaseToCamelCase optionName
-    optionNameCc="${RETURNED_VALUE}"
+    optionNameCc="${REPLY}"
     if [[ "${optionNoEnvVar}" != "true" ]]; then
       string::convertKebabCaseToSnakeCase optionName
-      optionNameSc="VALET_${RETURNED_VALUE}"
+      optionNameSc="VALET_${REPLY}"
     else
       optionNameSc=""
     fi
@@ -536,7 +536,7 @@ function declareFinalCommandDefinitionParserVariables() {
     local -i nbOptionalArguments=0
     for ((index = 0; index < ${#TEMP_CMD_BUILD_arguments_name[@]}; index++)); do
       string::convertKebabCaseToCamelCase TEMP_CMD_BUILD_arguments_name[index]
-      argument="${RETURNED_VALUE}"
+      argument="${REPLY}"
       if [[ ${argument} == *"..."* ]]; then
         argument="${argument//\.\.\./}"
         lastArgumentIsArray="true"

@@ -42,7 +42,7 @@ source interactive
 ##VALET_COMMAND
 function selfAddLibrary() {
   local libraryName
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   local templateFlavor="default"
@@ -55,8 +55,8 @@ function selfAddLibrary() {
 
   # check if we are working for an extension
   core::getExtensionsDirectory
-  if [[ ${PWD} != "${RETURNED_VALUE}"* && ! -d "libraries.d" ]]; then
-    log::warning "The current directory is not under the valet user directory ⌜${RETURNED_VALUE}⌝."
+  if [[ ${PWD} != "${REPLY}"* && ! -d "libraries.d" ]]; then
+    log::warning "The current directory is not under the valet user directory ⌜${REPLY}⌝."
     if ! interactive::promptYesNo "It does not look like the current directory ⌜${PWD}⌝ is a valet extension, do you want to proceed anyway?" true; then
       log::info "Aborting the creation of the library."
       log::info "You should first create an extension with ⌜valet self extend⌝ and then cd into the created directory."
@@ -80,7 +80,7 @@ function selfAddLibrary() {
   fs::createDirectoryIfNeeded "${PWD}/libraries.d"
 
   fs::readFile "${commandTemplateFile}"
-  local templateContent="${RETURNED_VALUE//_LIBRARY_NAME_/"${libraryName}"}"
+  local templateContent="${REPLY//_LIBRARY_NAME_/"${libraryName}"}"
 
   printf "%s" "${templateContent}" >"${newCommandFilePath}"
 

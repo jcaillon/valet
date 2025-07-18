@@ -40,9 +40,9 @@ declare -g -a SELECTION_ARRAY
 SELECTION_ARRAY=("blue" "red" "green" "yellow")
 # shellcheck disable=SC2317
 
-function getColorSample() { local -n color="ESC__FG_${1^^}"; RETURNED_VALUE="${color}ESC__FG_${1^^}${ESC__TEXT_RESET}"; }
+function getColorSample() { local -n color="ESC__FG_${1^^}"; REPLY="${color}ESC__FG_${1^^}${ESC__TEXT_RESET}"; }
 sfzf::show "What's your favorite color?" SELECTION_ARRAY "getColorSample" "Color sample"
-log::info "You selected: ⌜${RETURNED_VALUE}⌝ (index: ⌜${RETURNED_VALUE2}⌝)"
+log::info "You selected: ⌜${REPLY}⌝ (index: ⌜${REPLY2}⌝)"
 
 log::warning "Now displaying a spinner"
 

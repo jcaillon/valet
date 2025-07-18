@@ -17,14 +17,14 @@ source string
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}:
+# - ${REPLY}:
 #   - 0 if the versions are equal,
 #   - 1 if version1 is greater,
 #   - -1 if version2 is greater
 #
 # ```bash
 # version::compare "2.3.4-prerelease+build" "1.2.3-prerelease+build"
-# local comparison="${RETURNED_VALUE}"
+# local comparison="${REPLY}"
 # ```
 #
 # > The prerelease and build are ignored in the comparison.
@@ -39,22 +39,22 @@ function version::compare() {
   local semVerNumber1 semVerNumber2
   for semVerIndex in {0..2}; do
     string::getField version1 "${semVerIndex}" "."
-    semVerNumber1="${RETURNED_VALUE%%-*}"
+    semVerNumber1="${REPLY%%-*}"
     semVerNumber1="${semVerNumber1%%+*}"
     string::getField version2 "${semVerIndex}" "."
-    semVerNumber2="${RETURNED_VALUE%%-*}"
+    semVerNumber2="${REPLY%%-*}"
     semVerNumber2="${semVerNumber2%%+*}"
     if [[ ! ${semVerNumber1} =~ ^[0-9]+$ || ! ${semVerNumber2} =~ ^[0-9]+$ ]]; then
       core::fail "Failed to compare versions ⌜${version1}⌝ and ⌜${version2}⌝ because they are not valid semantic versions."
     elif (( semVerNumber1 > semVerNumber2 )); then
-      RETURNED_VALUE=1
+      REPLY=1
       return 0
     elif (( semVerNumber1 < semVerNumber2 )); then
-      RETURNED_VALUE=-1
+      REPLY=-1
       return 0
     fi
   done
-  RETURNED_VALUE=0
+  REPLY=0
 }
 
 # ## version::bump
@@ -72,11 +72,11 @@ function version::compare() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the new version string
+# - ${REPLY}: the new version string
 #
 # ```bash
 # version::bump "1.2.3-prerelease+build" "major"
-# local newVersion="${RETURNED_VALUE}"
+# local newVersion="${REPLY}"
 # ```
 function version::bump() {
   local version="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -101,7 +101,7 @@ function version::bump() {
   local newVersion semVerString
   for semVerIndex in {0..2}; do
     string::getField version "${semVerIndex}" "."
-    semVerString="${RETURNED_VALUE%-*}"
+    semVerString="${REPLY%-*}"
     if [[ ! ${semVerString} =~ ^[0-9]+$ ]]; then
       core::fail "Failed to bump the version ⌜${version}⌝ because it is not valid semantic version."
     fi
@@ -116,6 +116,6 @@ function version::bump() {
     newVersion="${newVersion%.}${prerelease}${build}"
   fi
 
-  RETURNED_VALUE="${newVersion}"
+  REPLY="${newVersion}"
 }
 

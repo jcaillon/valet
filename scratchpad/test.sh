@@ -7,8 +7,8 @@ _BASH_TEMPORARY_STDOUT_FILE=/tmp/temporary-stdout
 function runAndCaptureOutput() {
     # shellcheck disable=SC2068
     ${@} &>"${_BASH_TEMPORARY_STDOUT_FILE}" || return 1
-    RETURNED_VALUE=""
-    IFS='' read -rd '' RETURNED_VALUE <"${_BASH_TEMPORARY_STDOUT_FILE}" || echo "ok"
+    REPLY=""
+    IFS='' read -rd '' REPLY <"${_BASH_TEMPORARY_STDOUT_FILE}" || echo "ok"
     printf "%q" "${IFS}"
 }
 

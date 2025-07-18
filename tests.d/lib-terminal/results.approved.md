@@ -93,10 +93,10 @@ GLOBAL_COLUMNS='10'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2'
-RETURNED_VALUE2='1'
-RETURNED_VALUE3='10'
-RETURNED_VALUE4='9'
+REPLY='2'
+REPLY2='1'
+REPLY3='10'
+REPLY4='9'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 1 1 20 20 2`
@@ -104,10 +104,10 @@ RETURNED_VALUE4='9'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2'
-RETURNED_VALUE2='1'
-RETURNED_VALUE3='10'
-RETURNED_VALUE4='2'
+REPLY='2'
+REPLY2='1'
+REPLY3='10'
+REPLY4='2'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 1 1 5 5`
@@ -115,10 +115,10 @@ RETURNED_VALUE4='2'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2'
-RETURNED_VALUE2='1'
-RETURNED_VALUE3='5'
-RETURNED_VALUE4='5'
+REPLY='2'
+REPLY2='1'
+REPLY3='5'
+REPLY4='5'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 5 5 6 9`
@@ -126,10 +126,10 @@ RETURNED_VALUE4='5'
 Returned variables:
 
 ```text
-RETURNED_VALUE='6'
-RETURNED_VALUE2='2'
-RETURNED_VALUE3='9'
-RETURNED_VALUE4='5'
+REPLY='6'
+REPLY2='2'
+REPLY3='9'
+REPLY4='5'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 7 7 10 4`
@@ -137,10 +137,10 @@ RETURNED_VALUE4='5'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
-RETURNED_VALUE2='7'
-RETURNED_VALUE3='4'
-RETURNED_VALUE4='6'
+REPLY='1'
+REPLY2='7'
+REPLY3='4'
+REPLY4='6'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 7 7 10 10 '' true`
@@ -148,10 +148,10 @@ RETURNED_VALUE4='6'
 Returned variables:
 
 ```text
-RETURNED_VALUE='8'
-RETURNED_VALUE2='1'
-RETURNED_VALUE3='10'
-RETURNED_VALUE4='3'
+REPLY='8'
+REPLY2='1'
+REPLY3='10'
+REPLY4='3'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 1 1 10 10 999 true true 999 5`
@@ -159,10 +159,10 @@ RETURNED_VALUE4='3'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2'
-RETURNED_VALUE2='1'
-RETURNED_VALUE3='10'
-RETURNED_VALUE4='4'
+REPLY='2'
+REPLY2='1'
+REPLY3='10'
+REPLY4='4'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 1 1 20 20 '' '' false`
@@ -170,10 +170,10 @@ RETURNED_VALUE4='4'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
-RETURNED_VALUE2='1'
-RETURNED_VALUE3='10'
-RETURNED_VALUE4='10'
+REPLY='1'
+REPLY2='1'
+REPLY3='10'
+REPLY4='10'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 1 1 20 20 2 '' false`
@@ -181,10 +181,10 @@ RETURNED_VALUE4='10'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
-RETURNED_VALUE2='1'
-RETURNED_VALUE3='10'
-RETURNED_VALUE4='2'
+REPLY='1'
+REPLY2='1'
+REPLY3='10'
+REPLY4='2'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 1 1 5 5 '' '' false`
@@ -192,10 +192,10 @@ RETURNED_VALUE4='2'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
-RETURNED_VALUE2='1'
-RETURNED_VALUE3='5'
-RETURNED_VALUE4='5'
+REPLY='1'
+REPLY2='1'
+REPLY3='5'
+REPLY4='5'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 5 5 6 9 '' '' false`
@@ -203,10 +203,10 @@ RETURNED_VALUE4='5'
 Returned variables:
 
 ```text
-RETURNED_VALUE='5'
-RETURNED_VALUE2='2'
-RETURNED_VALUE3='9'
-RETURNED_VALUE4='6'
+REPLY='5'
+REPLY2='2'
+REPLY3='9'
+REPLY4='6'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 7 7 10 4 '' '' false`
@@ -214,10 +214,10 @@ RETURNED_VALUE4='6'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
-RETURNED_VALUE2='7'
-RETURNED_VALUE3='4'
-RETURNED_VALUE4='7'
+REPLY='1'
+REPLY2='7'
+REPLY3='4'
+REPLY4='7'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 7 7 4 4 '' '' false`
@@ -225,10 +225,10 @@ RETURNED_VALUE4='7'
 Returned variables:
 
 ```text
-RETURNED_VALUE='7'
-RETURNED_VALUE2='7'
-RETURNED_VALUE3='4'
-RETURNED_VALUE4='4'
+REPLY='7'
+REPLY2='7'
+REPLY3='4'
+REPLY4='4'
 ```
 
 ❯ `terminal::getBestAutocompleteBox 7 7 10 10 '' true false`
@@ -236,10 +236,10 @@ RETURNED_VALUE4='4'
 Returned variables:
 
 ```text
-RETURNED_VALUE='7'
-RETURNED_VALUE2='1'
-RETURNED_VALUE3='10'
-RETURNED_VALUE4='4'
+REPLY='7'
+REPLY2='1'
+REPLY3='10'
+REPLY4='4'
 ```
 
 ### ✅ Testing terminal::switchToFullScreen

@@ -76,7 +76,7 @@ function selfTestUtils_setupValetForConsistency() {
       _TIME_FACTOR=1
     fi
     ((_FAKE_TIME=_FAKE_TIME+ 1000000 * _TIME_FACTOR, _TIME_FACTOR++))
-    RETURNED_VALUE="${_FAKE_TIME}"
+    REPLY="${_FAKE_TIME}"
   }
 }
 
@@ -212,7 +212,7 @@ function selfTestUtils_setupDiffCommand() {
     fi
   else
     string::getField GLOBAL_TEST_DIFF_COMMAND 0 " "
-    local diffExecutable="${RETURNED_VALUE}"
+    local diffExecutable="${REPLY}"
     if ! command -v "${diffExecutable}" &>/dev/null; then
       log::warning "The user diff command ⌜${diffExecutable}⌝ set with VALET_CONFIG_TEST_DIFF_COMMAND is not available, using the internal comparison function."
     fi
@@ -240,9 +240,9 @@ function selfTestUtils_internalCompare() {
 
   local content1 content2
   fs::readFile "${file1}"
-  content1="${RETURNED_VALUE}"
+  content1="${REPLY}"
   fs::readFile "${file2}"
-  content2="${RETURNED_VALUE}"
+  content2="${REPLY}"
 
   if [[ "${content1}" != "${content2}" ]]; then
     return 1

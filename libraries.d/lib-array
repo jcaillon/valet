@@ -154,7 +154,7 @@ function array_swapCallBack() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY[@]}: An array that contains the corresponding indexes of the sorted array in the original array
+# - ${REPLY_ARRAY[@]}: An array that contains the corresponding indexes of the sorted array in the original array
 #
 # ```bash
 # declare myArray=( "a" "b" "c" )
@@ -163,7 +163,7 @@ function array_swapCallBack() {
 # array::sortWithCriteria myArray criteria1 criteria2
 # echo "${myArray[@]}"
 # # c b a
-# echo "${RETURNED_ARRAY[@]}"
+# echo "${REPLY_ARRAY[@]}"
 # # 3 2 1
 # ```
 #
@@ -177,7 +177,7 @@ function array::sortWithCriteria() {
   local -a criteriaArrayNames=("${@}")
 
   # an array of indices
-  eval "RETURNED_ARRAY=( {0..$((${#array[@]} - 1))} )"
+  eval "REPLY_ARRAY=( {0..$((${#array[@]} - 1))} )"
 
   local name _tmpValue
   local -i arrayNumber=0 _tmp
@@ -186,19 +186,19 @@ function array::sortWithCriteria() {
   local isInferiorToPivot="" isSuperiorToPivot=""
   for name in "${criteriaArrayNames[@]}"; do
     setPivot+="
-      _pivot+=(\${${name}[RETURNED_ARRAY[\${1}]]})
+      _pivot+=(\${${name}[REPLY_ARRAY[\${1}]]})
     "
     isInferiorToPivot+="
-      if (( ${name}[\${RETURNED_ARRAY[\${1}]}] < _pivot[${arrayNumber}] )); then
+      if (( ${name}[\${REPLY_ARRAY[\${1}]}] < _pivot[${arrayNumber}] )); then
         return 0
-      elif (( ${name}[\${RETURNED_ARRAY[\${1}]}] > _pivot[${arrayNumber}] )); then
+      elif (( ${name}[\${REPLY_ARRAY[\${1}]}] > _pivot[${arrayNumber}] )); then
         return 1
       fi
     "
     isSuperiorToPivot+="
-      if (( ${name}[\${RETURNED_ARRAY[\${1}]}] > _pivot[${arrayNumber}] )); then
+      if (( ${name}[\${REPLY_ARRAY[\${1}]}] > _pivot[${arrayNumber}] )); then
         return 0
-      elif (( ${name}[\${RETURNED_ARRAY[\${1}]}] < _pivot[${arrayNumber}] )); then
+      elif (( ${name}[\${REPLY_ARRAY[\${1}]}] < _pivot[${arrayNumber}] )); then
         return 1
       fi
     "
@@ -207,9 +207,9 @@ function array::sortWithCriteria() {
   isInferiorToPivot+="return 1"
   isSuperiorToPivot+="return 1"
   local swap="
-  _tmp=\"\${RETURNED_ARRAY[\${1}]}\"
-  RETURNED_ARRAY[\${1}]=\"\${RETURNED_ARRAY[\${2}]}\"
-  RETURNED_ARRAY[\${2}]=\"\${_tmp}\"
+  _tmp=\"\${REPLY_ARRAY[\${1}]}\"
+  REPLY_ARRAY[\${1}]=\"\${REPLY_ARRAY[\${2}]}\"
+  REPLY_ARRAY[\${2}]=\"\${_tmp}\"
 
   _tmpValue=\"\${array[\${1}]}\"
   array[\${1}]=\"\${array[\${2}]}\"

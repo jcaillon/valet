@@ -39,11 +39,11 @@ function echoOutputCurlToFile() {
 
   local debugMessage
   debugMessage="curl::download false function ended with exit code ⌈${exitCode}⌉."$'\n'
-  debugMessage+="http return code was ⌈${RETURNED_VALUE2}⌉"$'\n'
+  debugMessage+="http return code was ⌈${REPLY2}⌉"$'\n'
   if [[ -s "${filePath}" ]]; then
     debugMessage+="Content of downloaded file:"$'\n'"⌈$(<"${filePath}")⌉"$'\n'
   fi
-  debugMessage+="stderr:"$'\n'"⌈${RETURNED_VALUE}⌉"
+  debugMessage+="stderr:"$'\n'"⌈${REPLY}⌉"
   echo "${debugMessage}"
 }
 
@@ -76,9 +76,9 @@ function echoOutputCurlToVar() {
 
   local debugMessage
   debugMessage="curl::request function ended with exit code ⌈${exitCode}⌉."$'\n'
-  debugMessage+="http return code was ⌈${RETURNED_VALUE3}⌉"$'\n'
-  debugMessage+="stdout:"$'\n'"⌈${RETURNED_VALUE}⌉"$'\n'
-  debugMessage+="stderr:"$'\n'"⌈${RETURNED_VALUE2}⌉"
+  debugMessage+="http return code was ⌈${REPLY3}⌉"$'\n'
+  debugMessage+="stdout:"$'\n'"⌈${REPLY}⌉"$'\n'
+  debugMessage+="stderr:"$'\n'"⌈${REPLY2}⌉"
   echo "${debugMessage}"
 }
 

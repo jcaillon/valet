@@ -180,9 +180,9 @@ Exiting
 
 The `test::func` function is a variant of `test::exec` that is adapted to handle functions developed using the coding style of Valet.
 
-Meaning functions that usually return values in a variables named `RETURNED_VALUE...` (or `RETURNED_ARRAY...`) and that can optionally print results to the standard output and push logs to the error output.
+Meaning functions that usually return values in a variables named `REPLY...` (or `REPLY_ARRAY...`) and that can optionally print results to the standard output and push logs to the error output.
 
-It function will be executed and its output will be added the report, including any declare `RETURNED_*` variable.
+It function will be executed and its output will be added the report, including any declare `REPLY*` variable.
 
 ❯ `functionWithReturnedVariables VALUE Running\ functionWithReturnedVariables`
 
@@ -201,8 +201,8 @@ LOG: Running functionWithReturnedVariables
 Returned variables:
 
 ```text
-RETURNED_VALUE='This is the returned value'
-RETURNED_ARRAY=(
+REPLY='This is the returned value'
+REPLY_ARRAY=(
 [0]='This'
 [1]='is'
 [2]='the'
@@ -211,17 +211,17 @@ RETURNED_ARRAY=(
 )
 ```
 
-### 🙈 Display reporting RETURNED variables
+### 🙈 Display reporting REPLY variables
 
-You can manually report the content of the `RETURNED_*` variables using the `test::printReturnedVars` function.
+You can manually report the content of the `REPLY*` variables using the `test::printReplyVars` function.
 
-The function `test::resetReturnedVars` can also be used to reset the content of the `RETURNED_*` variables.
+The function `test::resetReplyVars` can also be used to reset the content of the `REPLY*` variables.
 
 Returned variables:
 
 ```text
-RETURNED_VALUE2='This is the value of a returned string for RETURNED_VALUE2'
-RETURNED_ARRAY2=(
+REPLY2='This is the value of a returned string for REPLY2'
+REPLY_ARRAY2=(
 [0]='This'
 [1]='is'
 [2]='the'
@@ -231,7 +231,7 @@ RETURNED_ARRAY2=(
 [6]='returned'
 [7]='array'
 [8]='for'
-[9]='RETURNED_ARRAY2'
+[9]='REPLY_ARRAY2'
 )
 ```
 

@@ -40,7 +40,7 @@
   "prefix": "array::fuzzyFilterSort#withdoc",
   "description": "Allows to fuzzy sort an array against a given searched string...",
   "scope": "",
-  "body": [ "# ## array::fuzzyFilterSort\n# \n# Allows to fuzzy sort an array against a given searched string.\n# Returns an array containing only the lines matching the searched string.\n# The array is sorted by (in order):\n# \n# - the index of the first matched character in the line\n# - the distance between the first and last matched characters in the line\n# - the original order in the list\n# \n# Also returns an array containing the indexes of the matched items in the original array.\n# \n# - \\$1: **array name** _as string_:\n#       The array name to fuzzy filter and sort.\n# - \\$2: **search string** _as string_:\n#       The variable name containing the search string to match.\n# \n# Returns:\n# \n# - \\${RETURNED_ARRAY[@]}: An array containing the items sorted and filtered\n# - \\${RETURNED_ARRAY2[@]}: An array containing the indexes of the matched items in the original array\n# \n# ```bash\n# array::fuzzyFilterSort MY_ARRAY SEARCH_STRING\n# echo \"\\${RETURNED_ARRAY[*]}\"\n# ```\n# \n# > - All characters in the searched string must be found in the same order in the matched line.\n# > - Use `shopt -s nocasematch` to make this function is case insensitive.\n# > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.\n# \narray::fuzzyFilterSort \"${1:**array name**}\" \"${2:**search string**}\"$0" ]
+  "body": [ "# ## array::fuzzyFilterSort\n# \n# Allows to fuzzy sort an array against a given searched string.\n# Returns an array containing only the lines matching the searched string.\n# The array is sorted by (in order):\n# \n# - the index of the first matched character in the line\n# - the distance between the first and last matched characters in the line\n# - the original order in the list\n# \n# Also returns an array containing the indexes of the matched items in the original array.\n# \n# - \\$1: **array name** _as string_:\n#       The array name to fuzzy filter and sort.\n# - \\$2: **search string** _as string_:\n#       The variable name containing the search string to match.\n# \n# Returns:\n# \n# - \\${REPLY_ARRAY[@]}: An array containing the items sorted and filtered\n# - \\${REPLY_ARRAY2[@]}: An array containing the indexes of the matched items in the original array\n# \n# ```bash\n# array::fuzzyFilterSort MY_ARRAY SEARCH_STRING\n# echo \"\\${REPLY_ARRAY[*]}\"\n# ```\n# \n# > - All characters in the searched string must be found in the same order in the matched line.\n# > - Use `shopt -s nocasematch` to make this function is case insensitive.\n# > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.\n# \narray::fuzzyFilterSort \"${1:**array name**}\" \"${2:**search string**}\"$0" ]
 },
 
 "array::makeArraysSameSize": {
@@ -82,7 +82,7 @@
   "prefix": "array::sortWithCriteria#withdoc",
   "description": "Sorts an array using multiple criteria...",
   "scope": "",
-  "body": [ "# ## array::sortWithCriteria\n# \n# Sorts an array using multiple criteria.\n# Excepts multiple arrays. The first array is the one to sort.\n# The other arrays are used as criteria. Criteria are used in the order they are given.\n# Each criteria array must have the same size as the array to sort.\n# Each criteria array must containing integers representing the order of the elements.\n# We first sort using the first criteria (from smallest to biggest), then the second, etc.\n# \n# - \\$1: **array name** _as string_:\n#       The name of the array to sort (it will be sorted in place).\n# - \\$@: **criteria array names** _as string_:\n#       The names of the arrays to use as criteria.\n#       Each array must have the same size as the array to sort and contain only numbers.\n# \n# Returns:\n# \n# - \\${RETURNED_ARRAY[@]}: An array that contains the corresponding indexes of the sorted array in the original array\n# \n# ```bash\n# declare myArray=( \"a\" \"b\" \"c\" )\n# declare criteria1=( 3 2 2 )\n# declare criteria2=( 1 3 2 )\n# array::sortWithCriteria myArray criteria1 criteria2\n# echo \"\\${myArray[@]}\"\n# # c b a\n# echo \"\\${RETURNED_ARRAY[@]}\"\n# # 3 2 1\n# ```\n# \n# > - This function uses a quicksort algorithm (hoarse partition).\n# > - The sorting is not stable (the order of equal elements is not preserved).\n# > - It is not appropriate for large array, use the `sort` binary for such cases.\n# \narray::sortWithCriteria \"${1:**array name**}\" \"${2:**criteria array names**}\"$0" ]
+  "body": [ "# ## array::sortWithCriteria\n# \n# Sorts an array using multiple criteria.\n# Excepts multiple arrays. The first array is the one to sort.\n# The other arrays are used as criteria. Criteria are used in the order they are given.\n# Each criteria array must have the same size as the array to sort.\n# Each criteria array must containing integers representing the order of the elements.\n# We first sort using the first criteria (from smallest to biggest), then the second, etc.\n# \n# - \\$1: **array name** _as string_:\n#       The name of the array to sort (it will be sorted in place).\n# - \\$@: **criteria array names** _as string_:\n#       The names of the arrays to use as criteria.\n#       Each array must have the same size as the array to sort and contain only numbers.\n# \n# Returns:\n# \n# - \\${REPLY_ARRAY[@]}: An array that contains the corresponding indexes of the sorted array in the original array\n# \n# ```bash\n# declare myArray=( \"a\" \"b\" \"c\" )\n# declare criteria1=( 3 2 2 )\n# declare criteria2=( 1 3 2 )\n# array::sortWithCriteria myArray criteria1 criteria2\n# echo \"\\${myArray[@]}\"\n# # c b a\n# echo \"\\${REPLY_ARRAY[@]}\"\n# # 3 2 1\n# ```\n# \n# > - This function uses a quicksort algorithm (hoarse partition).\n# > - The sorting is not stable (the order of equal elements is not preserved).\n# > - It is not appropriate for large array, use the `sort` binary for such cases.\n# \narray::sortWithCriteria \"${1:**array name**}\" \"${2:**criteria array names**}\"$0" ]
 },
 
 "bash::countArgs": {
@@ -96,7 +96,7 @@
   "prefix": "bash::countArgs#withdoc",
   "description": "Returns the number of arguments passed...",
   "scope": "",
-  "body": [ "# ## bash::countArgs\n# \n# Returns the number of arguments passed.\n# \n# A convenient function that can be used to:\n# \n# - count the files/directories in a directory:\n#   `bash::countArgs \"\\${PWD}\"/* && local numberOfFiles=\"\\${RETURNED_VALUE}\"`\n# - count the number of variables starting with VALET_\n#   `bash::countArgs \"\\${!VALET_@}\" && local numberOfVariables=\"\\${RETURNED_VALUE}\"`\n# \n# Inputs:\n# \n# - \\$@: **arguments** _as any_:\n#       the arguments to count\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The number of arguments passed.\n# \n# ```bash\n# bash::countArgs 1 2 3\n# ```\n# \nbash::countArgs \"${1:**arguments**}\"$0" ]
+  "body": [ "# ## bash::countArgs\n# \n# Returns the number of arguments passed.\n# \n# A convenient function that can be used to:\n# \n# - count the files/directories in a directory:\n#   `bash::countArgs \"\\${PWD}\"/* && local numberOfFiles=\"\\${REPLY}\"`\n# - count the number of variables starting with VALET_\n#   `bash::countArgs \"\\${!VALET_@}\" && local numberOfVariables=\"\\${REPLY}\"`\n# \n# Inputs:\n# \n# - \\$@: **arguments** _as any_:\n#       the arguments to count\n# \n# Returns:\n# \n# - \\${REPLY}: The number of arguments passed.\n# \n# ```bash\n# bash::countArgs 1 2 3\n# ```\n# \nbash::countArgs \"${1:**arguments**}\"$0" ]
 },
 
 "bash::countJobs": {
@@ -110,7 +110,7 @@
   "prefix": "bash::countJobs#withdoc",
   "description": "This function counts the number of jobs currently running in the background...",
   "scope": "",
-  "body": [ "# ## bash::countJobs\n# \n# This function counts the number of jobs currently running in the background.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the number of jobs currently running in the background.\n# \n# ```bash\n# bash::countJobs\n# echo \"There are currently \\${RETURNED_VALUE} jobs running in the background.\"\n# ```\n# \nbash::countJobs$0" ]
+  "body": [ "# ## bash::countJobs\n# \n# This function counts the number of jobs currently running in the background.\n# \n# Returns:\n# \n# - \\${REPLY}: the number of jobs currently running in the background.\n# \n# ```bash\n# bash::countJobs\n# echo \"There are currently \\${REPLY} jobs running in the background.\"\n# ```\n# \nbash::countJobs$0" ]
 },
 
 "bash::getFunctionDefinitionWithGlobalVars": {
@@ -124,7 +124,7 @@
   "prefix": "bash::getFunctionDefinitionWithGlobalVars#withdoc",
   "description": "This function can be used to get the definition of an existing function, rename it, and replace the use of positional parameters by global variables...",
   "scope": "",
-  "body": [ "# ## bash::getFunctionDefinitionWithGlobalVars\n# \n# This function can be used to get the definition of an existing function,\n# rename it, and replace the use of positional parameters by global variables.\n# \n# This can be useful for performance reasons when a function is called many times,\n# to avoid copying the positional parameters each time.\n# \n# - \\$1: **function name** _as string_:\n#       the name of the function to re-export\n# - \\$2: **new function name** _as string_:\n#       the name of the new function to create\n# - \\$@: global variable name _as string_:\n#       the name of the global variable to use instead of the positional parameters\n#       (can be repeated multiple times, for each parameter)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the function was successfully re-exported\n#   - 1 if the function does not exist\n# - \\${RETURNED_VALUE}: the modified function definition\n# - \\${RETURNED_VALUE2}: the original function\n# \n# ```bash\n# bash::getFunctionDefinitionWithGlobalVars \"myFunction\" \"myFunctionWithGlobalVars\" \"MY_VAR1\" \"MY_VAR2\"\n# eval \"\\${RETURNED_VALUE}\"\n# myFunctionWithGlobalVars\n# ```\n# \nbash::getFunctionDefinitionWithGlobalVars \"${1:**function name**}\" \"${2:**new function name**}\" \"${3:global variable name}\"$0" ]
+  "body": [ "# ## bash::getFunctionDefinitionWithGlobalVars\n# \n# This function can be used to get the definition of an existing function,\n# rename it, and replace the use of positional parameters by global variables.\n# \n# This can be useful for performance reasons when a function is called many times,\n# to avoid copying the positional parameters each time.\n# \n# - \\$1: **function name** _as string_:\n#       the name of the function to re-export\n# - \\$2: **new function name** _as string_:\n#       the name of the new function to create\n# - \\$@: global variable name _as string_:\n#       the name of the global variable to use instead of the positional parameters\n#       (can be repeated multiple times, for each parameter)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the function was successfully re-exported\n#   - 1 if the function does not exist\n# - \\${REPLY}: the modified function definition\n# - \\${REPLY2}: the original function\n# \n# ```bash\n# bash::getFunctionDefinitionWithGlobalVars \"myFunction\" \"myFunctionWithGlobalVars\" \"MY_VAR1\" \"MY_VAR2\"\n# eval \"\\${REPLY}\"\n# myFunctionWithGlobalVars\n# ```\n# \nbash::getFunctionDefinitionWithGlobalVars \"${1:**function name**}\" \"${2:**new function name**}\" \"${3:global variable name}\"$0" ]
 },
 
 "bash::getMissingCommands": {
@@ -138,7 +138,7 @@
   "prefix": "bash::getMissingCommands#withdoc",
   "description": "This function returns the list of not existing commands for the given names...",
   "scope": "",
-  "body": [ "# ## bash::getMissingCommands\n# \n# This function returns the list of not existing commands for the given names.\n# \n# - \\$@: **command names** _as string_:\n#       the list of command names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are not existing commands\n#   - 1 otherwise.\n# - \\${RETURNED_ARRAY[@]}: the list of not existing commands.\n# \n# ```bash\n# if bash::getMissingCommands \"command1\" \"command2\"; then\n#   printf 'The following commands do not exist: %s' \"\\${RETURNED_ARRAY[*]}\"\n# fi\n# ```\n# \nbash::getMissingCommands \"${1:**command names**}\"$0" ]
+  "body": [ "# ## bash::getMissingCommands\n# \n# This function returns the list of not existing commands for the given names.\n# \n# - \\$@: **command names** _as string_:\n#       the list of command names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are not existing commands\n#   - 1 otherwise.\n# - \\${REPLY_ARRAY[@]}: the list of not existing commands.\n# \n# ```bash\n# if bash::getMissingCommands \"command1\" \"command2\"; then\n#   printf 'The following commands do not exist: %s' \"\\${REPLY_ARRAY[*]}\"\n# fi\n# ```\n# \nbash::getMissingCommands \"${1:**command names**}\"$0" ]
 },
 
 "bash::getMissingVariables": {
@@ -152,7 +152,7 @@
   "prefix": "bash::getMissingVariables#withdoc",
   "description": "This function returns the list of undeclared variables for the given names...",
   "scope": "",
-  "body": [ "# ## bash::getMissingVariables\n# \n# This function returns the list of undeclared variables for the given names.\n# \n# - \\$@: **variable names** _as string_:\n#       the list of variable names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are variable undeclared\n#   - 1 otherwise.\n# - \\${RETURNED_ARRAY[@]}: the list of undeclared variables.\n# \n# ```bash\n# if bash::getMissingVariables \"var1\" \"var2\"; then\n#   printf 'The following variables are not declared: %s' \"\\${RETURNED_ARRAY[*]}\"\n# fi\n# ```\n# \nbash::getMissingVariables \"${1:**variable names**}\"$0" ]
+  "body": [ "# ## bash::getMissingVariables\n# \n# This function returns the list of undeclared variables for the given names.\n# \n# - \\$@: **variable names** _as string_:\n#       the list of variable names to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if there are variable undeclared\n#   - 1 otherwise.\n# - \\${REPLY_ARRAY[@]}: the list of undeclared variables.\n# \n# ```bash\n# if bash::getMissingVariables \"var1\" \"var2\"; then\n#   printf 'The following variables are not declared: %s' \"\\${REPLY_ARRAY[*]}\"\n# fi\n# ```\n# \nbash::getMissingVariables \"${1:**variable names**}\"$0" ]
 },
 
 "bash::injectCodeInFunction": {
@@ -166,7 +166,7 @@
   "prefix": "bash::injectCodeInFunction#withdoc",
   "description": "This function injects code at the beginning or the end of a function and returns the modified function to be evaluated...",
   "scope": "",
-  "body": [ "# ## bash::injectCodeInFunction\n# \n# This function injects code at the beginning or the end of a function and\n# returns the modified function to be evaluated.\n# \n# - \\$1: **function name** _as string_:\n#       The name of the function to inject the code into.\n# - \\$2: **code** _as string_:\n#       The code to inject.\n# - \\$3: inject at beginning _as bool_:\n#       (optional) Can be set using the variable `_OPTION_INJECT_AT_BEGINNING`.\n#       Whether to inject the code at the beginning of the function (or at the end).\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the modified function.\n# - \\${RETURNED_VALUE2}: the original function.\n# \n# ```bash\n# bash::injectCodeInFunction myFunction \"echo 'Hello world!'\" true\n# eval \"\\${RETURNED_VALUE}\"\n# myFunction\n# ```\n# \nbash::injectCodeInFunction \"${1:**function name**}\" \"${2:**code**}\" \"${3:inject at beginning}\"$0" ]
+  "body": [ "# ## bash::injectCodeInFunction\n# \n# This function injects code at the beginning or the end of a function and\n# returns the modified function to be evaluated.\n# \n# - \\$1: **function name** _as string_:\n#       The name of the function to inject the code into.\n# - \\$2: **code** _as string_:\n#       The code to inject.\n# - \\$3: inject at beginning _as bool_:\n#       (optional) Can be set using the variable `_OPTION_INJECT_AT_BEGINNING`.\n#       Whether to inject the code at the beginning of the function (or at the end).\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY}: the modified function.\n# - \\${REPLY2}: the original function.\n# \n# ```bash\n# bash::injectCodeInFunction myFunction \"echo 'Hello world!'\" true\n# eval \"\\${REPLY}\"\n# myFunction\n# ```\n# \nbash::injectCodeInFunction \"${1:**function name**}\" \"${2:**code**}\" \"${3:inject at beginning}\"$0" ]
 },
 
 "bash::isCommand": {
@@ -208,7 +208,7 @@
   "prefix": "bash::readStdIn#withdoc",
   "description": "Read the content of the standard input...",
   "scope": "",
-  "body": [ "# ## bash::readStdIn\n# \n# Read the content of the standard input.\n# Will immediately return if the standard input is empty.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The content of the standard input.\n# \n# ```bash\n# bash::readStdIn && local stdIn=\"\\${RETURNED_VALUE}\"\n# ```\n# \nbash::readStdIn$0" ]
+  "body": [ "# ## bash::readStdIn\n# \n# Read the content of the standard input.\n# Will immediately return if the standard input is empty.\n# \n# Returns:\n# \n# - \\${REPLY}: The content of the standard input.\n# \n# ```bash\n# bash::readStdIn && local stdIn=\"\\${REPLY}\"\n# ```\n# \nbash::readStdIn$0" ]
 },
 
 "bash::runInParallel": {
@@ -222,7 +222,7 @@
   "prefix": "bash::runInParallel#withdoc",
   "description": "This function runs a list of commands in parallel with a maximum number of parallel jobs...",
   "scope": "",
-  "body": [ "# ## bash::runInParallel\n# \n# This function runs a list of commands in parallel with a maximum number of parallel jobs.\n# \n# - \\$1: **job names array name** _as string_:\n#       The name of the array containing the names of the jobs to run.\n# - \\$2: **job commands array name** _as string_:\n#       The name of the array containing the commands to run.\n# - \\$3: max parallel jobs _as integer_:\n#       (optional) Can be set using the variable `_OPTION_MAX_PARALLEL_JOBS`.\n#       The maximum number of parallel jobs to run.\n#       (defaults to 4)\n# - \\$4: job completed callback _as string_:\n#       (optional) Can be set using the variable `_OPTION_JOB_COMPLETED_CALLBACK`.\n#       The name of the function to call when a job is completed.\n#       The function will receive the following arguments:\n#       - the job index\n#       - the job name\n#       - the job exit code\n#       - the percentage of jobs completed\n#       If the function returns 1, the script will exit early.\n#       (defaults to \"\")\n# - \\${_OPTION_TIMEOUT_BETWEEN_CHECKS} _as float_:\n#       (optional) Can be set using the variable `_OPTION_TIMEOUT_BETWEEN_CHECKS`.\n#       The time to wait between checks for completed jobs (when no jobs finished\n#       when we last checked).\n#       (defaults to 0.2)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0: if all the jobs completed successfully.\n#   - 1: if the job completed callback returned 1.\n# - \\${RETURNED_ARRAY[@]}: an array containing the exit codes of the jobs.\n# \n# ```bash\n# declare -a jobNames=(\"job1\" \"job2\" \"job3\")\n# declare -a jobCommands=(\"sleep 1\" \"sleep 2\" \"sleep 3\")\n# _OPTION_MAX_PARALLEL_JOBS=2 bash::runInParallel jobNames jobCommands\n# ```\n# \n_OPTION_TIMEOUT_BETWEEN_CHECKS=${5} bash::runInParallel \"${1:**job names array name**}\" \"${2:**job commands array name**}\" \"${3:max parallel jobs}\" \"${4:job completed callback}\"$0" ]
+  "body": [ "# ## bash::runInParallel\n# \n# This function runs a list of commands in parallel with a maximum number of parallel jobs.\n# \n# - \\$1: **job names array name** _as string_:\n#       The name of the array containing the names of the jobs to run.\n# - \\$2: **job commands array name** _as string_:\n#       The name of the array containing the commands to run.\n# - \\$3: max parallel jobs _as integer_:\n#       (optional) Can be set using the variable `_OPTION_MAX_PARALLEL_JOBS`.\n#       The maximum number of parallel jobs to run.\n#       (defaults to 4)\n# - \\$4: job completed callback _as string_:\n#       (optional) Can be set using the variable `_OPTION_JOB_COMPLETED_CALLBACK`.\n#       The name of the function to call when a job is completed.\n#       The function will receive the following arguments:\n#       - the job index\n#       - the job name\n#       - the job exit code\n#       - the percentage of jobs completed\n#       If the function returns 1, the script will exit early.\n#       (defaults to \"\")\n# - \\${_OPTION_TIMEOUT_BETWEEN_CHECKS} _as float_:\n#       (optional) Can be set using the variable `_OPTION_TIMEOUT_BETWEEN_CHECKS`.\n#       The time to wait between checks for completed jobs (when no jobs finished\n#       when we last checked).\n#       (defaults to 0.2)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0: if all the jobs completed successfully.\n#   - 1: if the job completed callback returned 1.\n# - \\${REPLY_ARRAY[@]}: an array containing the exit codes of the jobs.\n# \n# ```bash\n# declare -a jobNames=(\"job1\" \"job2\" \"job3\")\n# declare -a jobCommands=(\"sleep 1\" \"sleep 2\" \"sleep 3\")\n# _OPTION_MAX_PARALLEL_JOBS=2 bash::runInParallel jobNames jobCommands\n# ```\n# \n_OPTION_TIMEOUT_BETWEEN_CHECKS=${5} bash::runInParallel \"${1:**job names array name**}\" \"${2:**job commands array name**}\" \"${3:max parallel jobs}\" \"${4:job completed callback}\"$0" ]
 },
 
 "bash::sleep": {
@@ -278,7 +278,7 @@
   "prefix": "command::parseArguments#withdoc",
   "description": "Parse the arguments and options of a function and return a string that can be evaluated to set the variables...",
   "scope": "",
-  "body": [ "# ## command::parseArguments\n# \n# Parse the arguments and options of a function and return a string that can be evaluated to set the variables.\n# This should be called from a command function for which you want to parse the arguments.\n# \n# See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#-implement-your-command>.\n# \n# \n# - \\$@: **arguments** _as any_:\n#       the arguments to parse\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: a string that can be evaluated to set the parsed variables\n# \n# Output example:\n# \n# ```\n# local arg1 option1\n# arg1=\"xxx\"\n# option1=\"xxx\"\n# ```\n# \n# ```bash\n# command::parseArguments \"\\$@\" && eval \"\\${RETURNED_VALUE}\"\n# ```\n# \ncommand::parseArguments \"${1:**arguments**}\"$0" ]
+  "body": [ "# ## command::parseArguments\n# \n# Parse the arguments and options of a function and return a string that can be evaluated to set the variables.\n# This should be called from a command function for which you want to parse the arguments.\n# \n# See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#-implement-your-command>.\n# \n# \n# - \\$@: **arguments** _as any_:\n#       the arguments to parse\n# \n# Returns:\n# \n# - \\${REPLY}: a string that can be evaluated to set the parsed variables\n# \n# Output example:\n# \n# ```\n# local arg1 option1\n# arg1=\"xxx\"\n# option1=\"xxx\"\n# ```\n# \n# ```bash\n# command::parseArguments \"\\$@\" && eval \"\\${REPLY}\"\n# ```\n# \ncommand::parseArguments \"${1:**arguments**}\"$0" ]
 },
 
 "command::showHelp": {
@@ -320,7 +320,7 @@
   "prefix": "core::createNewStateFilePath#withdoc",
   "description": "Returns the path to a new file stored in the user state directory...",
   "scope": "",
-  "body": [ "# ## core::createNewStateFilePath\n# \n# Returns the path to a new file stored in the user state directory.\n# Can be used to save the state of important temporary files generated during a program\n# execution.\n# \n# - \\$1: **file suffix** _as string_:\n#       The suffix for the file to create.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The path to the created file.\n# \n# ```bash\n# core::createNewStateFilePath \"my-file\"\n# printf '%s\\n' \"The file is ⌜\\${RETURNED_VALUE}⌝.\"\n# ```\n# \ncore::createNewStateFilePath \"${1:**file suffix**}\"$0" ]
+  "body": [ "# ## core::createNewStateFilePath\n# \n# Returns the path to a new file stored in the user state directory.\n# Can be used to save the state of important temporary files generated during a program\n# execution.\n# \n# - \\$1: **file suffix** _as string_:\n#       The suffix for the file to create.\n# \n# Returns:\n# \n# - \\${REPLY}: The path to the created file.\n# \n# ```bash\n# core::createNewStateFilePath \"my-file\"\n# printf '%s\\n' \"The file is ⌜\\${REPLY}⌝.\"\n# ```\n# \ncore::createNewStateFilePath \"${1:**file suffix**}\"$0" ]
 },
 
 "core::dump": {
@@ -334,7 +334,7 @@
   "prefix": "core::dump#withdoc",
   "description": "Dumps information about the current environment into a new state file...",
   "scope": "",
-  "body": [ "# ## core::dump\n# \n# Dumps information about the current environment into a new state file.\n# \n# - \\${_OPTION_DUMP_SUFFIX} _as string_:\n#       (optional) The suffix for the file to create.\n#       (defaults to an empty string)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the path to the created file.\n# \n# ```bash\n# core::dump\n# ```\n# \n_OPTION_DUMP_SUFFIX=${1} core::dump$0" ]
+  "body": [ "# ## core::dump\n# \n# Dumps information about the current environment into a new state file.\n# \n# - \\${_OPTION_DUMP_SUFFIX} _as string_:\n#       (optional) The suffix for the file to create.\n#       (defaults to an empty string)\n# \n# Returns:\n# \n# - \\${REPLY}: the path to the created file.\n# \n# ```bash\n# core::dump\n# ```\n# \n_OPTION_DUMP_SUFFIX=${1} core::dump$0" ]
 },
 
 "core::fail": {
@@ -376,7 +376,7 @@
   "prefix": "core::getConfigurationDirectory#withdoc",
   "description": "Returns the path to the valet configuration directory...",
   "scope": "",
-  "body": [ "# ## core::getConfigurationDirectory\n# \n# Returns the path to the valet configuration directory.\n# Creates it if missing.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the path to the valet configuration directory\n# \n# ```bash\n# core::getConfigurationDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \ncore::getConfigurationDirectory$0" ]
+  "body": [ "# ## core::getConfigurationDirectory\n# \n# Returns the path to the valet configuration directory.\n# Creates it if missing.\n# \n# Returns:\n# \n# - \\${REPLY}: the path to the valet configuration directory\n# \n# ```bash\n# core::getConfigurationDirectory\n# local directory=\"\\${REPLY}\"\n# ```\n# \ncore::getConfigurationDirectory$0" ]
 },
 
 "core::getExtensionsDirectory": {
@@ -390,7 +390,7 @@
   "prefix": "core::getExtensionsDirectory#withdoc",
   "description": "Returns the path to the user extensions directory...",
   "scope": "",
-  "body": [ "# ## core::getExtensionsDirectory\n# \n# Returns the path to the user extensions directory.\n# Does not create it if missing.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the path to the valet user directory\n# \n# ```bash\n# core::getExtensionsDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \ncore::getExtensionsDirectory$0" ]
+  "body": [ "# ## core::getExtensionsDirectory\n# \n# Returns the path to the user extensions directory.\n# Does not create it if missing.\n# \n# Returns:\n# \n# - \\${REPLY}: the path to the valet user directory\n# \n# ```bash\n# core::getExtensionsDirectory\n# local directory=\"\\${REPLY}\"\n# ```\n# \ncore::getExtensionsDirectory$0" ]
 },
 
 "core::getUserCacheDirectory": {
@@ -404,7 +404,7 @@
   "prefix": "core::getUserCacheDirectory#withdoc",
   "description": "Returns the path to the valet local cache directory...",
   "scope": "",
-  "body": [ "# ## core::getUserCacheDirectory\n# \n# Returns the path to the valet local cache directory.\n# Where user-specific non-essential (cached) data should be written (analogous to /var/cache).\n# Creates it if missing.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the path to the valet local state directory\n# \n# ```bash\n# core::getUserCacheDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \ncore::getUserCacheDirectory$0" ]
+  "body": [ "# ## core::getUserCacheDirectory\n# \n# Returns the path to the valet local cache directory.\n# Where user-specific non-essential (cached) data should be written (analogous to /var/cache).\n# Creates it if missing.\n# \n# Returns:\n# \n# - \\${REPLY}: the path to the valet local state directory\n# \n# ```bash\n# core::getUserCacheDirectory\n# local directory=\"\\${REPLY}\"\n# ```\n# \ncore::getUserCacheDirectory$0" ]
 },
 
 "core::getUserDataDirectory": {
@@ -418,7 +418,7 @@
   "prefix": "core::getUserDataDirectory#withdoc",
   "description": "Returns the path to the valet local data directory...",
   "scope": "",
-  "body": [ "# ## core::getUserDataDirectory\n# \n# Returns the path to the valet local data directory.\n# Where user-specific data files should be written (analogous to /usr/share).\n# Creates it if missing.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the path to the valet local state directory\n# \n# ```bash\n# core::getUserDataDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \ncore::getUserDataDirectory$0" ]
+  "body": [ "# ## core::getUserDataDirectory\n# \n# Returns the path to the valet local data directory.\n# Where user-specific data files should be written (analogous to /usr/share).\n# Creates it if missing.\n# \n# Returns:\n# \n# - \\${REPLY}: the path to the valet local state directory\n# \n# ```bash\n# core::getUserDataDirectory\n# local directory=\"\\${REPLY}\"\n# ```\n# \ncore::getUserDataDirectory$0" ]
 },
 
 "core::getUserStateDirectory": {
@@ -432,7 +432,7 @@
   "prefix": "core::getUserStateDirectory#withdoc",
   "description": "Returns the path to the valet local cache directory...",
   "scope": "",
-  "body": [ "# ## core::getUserStateDirectory\n# \n# Returns the path to the valet local cache directory.\n# Where user-specific state files should be written (analogous to /var/lib).\n# Ideal location for storing runtime information, logs, etc...\n# Creates it if missing.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the path to the valet local state directory\n# \n# ```bash\n# core::getUserStateDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \ncore::getUserStateDirectory$0" ]
+  "body": [ "# ## core::getUserStateDirectory\n# \n# Returns the path to the valet local cache directory.\n# Where user-specific state files should be written (analogous to /var/lib).\n# Ideal location for storing runtime information, logs, etc...\n# Creates it if missing.\n# \n# Returns:\n# \n# - \\${REPLY}: the path to the valet local state directory\n# \n# ```bash\n# core::getUserStateDirectory\n# local directory=\"\\${REPLY}\"\n# ```\n# \ncore::getUserStateDirectory$0" ]
 },
 
 "core::getVersion": {
@@ -446,7 +446,7 @@
   "prefix": "core::getVersion#withdoc",
   "description": "Returns the version of Valet...",
   "scope": "",
-  "body": [ "# ## core::getVersion\n# \n# Returns the version of Valet.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The version of Valet.\n# \n# ```bash\n# core::getVersion\n# printf '%s\\n' \"The version of Valet is ⌜\\${RETURNED_VALUE}⌝.\"\n# ```\n# \ncore::getVersion$0" ]
+  "body": [ "# ## core::getVersion\n# \n# Returns the version of Valet.\n# \n# Returns:\n# \n# - \\${REPLY}: The version of Valet.\n# \n# ```bash\n# core::getVersion\n# printf '%s\\n' \"The version of Valet is ⌜\\${REPLY}⌝.\"\n# ```\n# \ncore::getVersion$0" ]
 },
 
 "curl::download": {
@@ -460,7 +460,7 @@
   "prefix": "curl::download#withdoc",
   "description": "This function is a wrapper around curl to save a request result in a file...",
   "scope": "",
-  "body": [ "# ## curl::download\n# \n# This function is a wrapper around curl to save a request result in a file.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \\${2}.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$3: **path** _as string_:\n#       the file in which to save the output of curl\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - \\${RETURNED_VALUE}: the content of stderr\n# - \\${RETURNED_VALUE2}: the http status code\n# \n# ```bash\n# curl::download true 200,201 \"/filePath\" \"https://example.com\"\n# curl::download false 200 \"/filePath2\" \"https://example2.com\" || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::download \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${4:**curl arguments**}\"$0" ]
+  "body": [ "# ## curl::download\n# \n# This function is a wrapper around curl to save a request result in a file.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \\${2}.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$3: **path** _as string_:\n#       the file in which to save the output of curl\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - \\${REPLY}: the content of stderr\n# - \\${REPLY2}: the http status code\n# \n# ```bash\n# curl::download true 200,201 \"/filePath\" \"https://example.com\"\n# curl::download false 200 \"/filePath2\" \"https://example2.com\" || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::download \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**path**}\" \"${4:**curl arguments**}\"$0" ]
 },
 
 "curl::request": {
@@ -474,7 +474,7 @@
   "prefix": "curl::request#withdoc",
   "description": "This function is a wrapper around curl to save the content of a request in a variable...",
   "scope": "",
-  "body": [ "# ## curl::request\n# \n# This function is a wrapper around curl to save the content of a request in a variable.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \"tempfile\".\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - \\${RETURNED_VALUE}: the content of the request\n# - \\${RETURNED_VALUE2}: the content of stderr\n# - \\${RETURNED_VALUE3}: the http status code\n# \n# ```bash\n# curl::request true 200 https://example.com -X POST -H 'Authorization: token'\n# curl::request false 200,201 https://example.com || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::request \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**curl arguments**}\"$0" ]
+  "body": [ "# ## curl::request\n# \n# This function is a wrapper around curl to save the content of a request in a variable.\n# It allows you to check the http status code and return 1 if it is not acceptable.\n# It invokes curl with the following options (do not repeat them): -sSL -w \"%{response_code}\" -o \"tempfile\".\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails\n# - \\$2: **acceptable codes** _as string_:\n#       list of http status codes that are acceptable, comma separated\n#       (defaults to 200,201,202,204,301,304,308 if left empty)\n# - \\$@: **curl arguments** _as any_:\n#       options for curl\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the http status code is acceptable\n#   - 1 otherwise\n# - \\${REPLY}: the content of the request\n# - \\${REPLY2}: the content of stderr\n# - \\${REPLY3}: the http status code\n# \n# ```bash\n# curl::request true 200 https://example.com -X POST -H 'Authorization: token'\n# curl::request false 200,201 https://example.com || core::fail \"The curl command failed.\"\n# ```\n# \ncurl::request \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**curl arguments**}\"$0" ]
 },
 
 "esc-codes::*": {
@@ -502,7 +502,7 @@
   "prefix": "exe::captureOutput#withdoc",
   "description": "Capture the output of a command...",
   "scope": "",
-  "body": [ "# ## exe::captureOutput\n# \n# Capture the output of a command.\n# Made to be used on bash builtins that produce output.\n# It captures the stdout and stderr of the command.\n# \n# This function is a lot more basic than `exe::invoke` and does not support all its features.\n# \n# - \\$@: **command** _as string_:\n#       The command to run.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - \\${RETURNED_VALUE}: The captured output.\n# \n# ```bash\n# exe::captureOutput declare -f exe::captureOutput\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nexe::captureOutput \"${1:**command**}\"$0" ]
+  "body": [ "# ## exe::captureOutput\n# \n# Capture the output of a command.\n# Made to be used on bash builtins that produce output.\n# It captures the stdout and stderr of the command.\n# \n# This function is a lot more basic than `exe::invoke` and does not support all its features.\n# \n# - \\$@: **command** _as string_:\n#       The command to run.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - \\${REPLY}: The captured output.\n# \n# ```bash\n# exe::captureOutput declare -f exe::captureOutput\n# echo \"\\${REPLY}\"\n# ```\n# \nexe::captureOutput \"${1:**command**}\"$0" ]
 },
 
 "exe::invoke": {
@@ -516,7 +516,7 @@
   "prefix": "exe::invoke#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## exe::invoke\n# \n# This function call an executable and its arguments.\n# If the execution fails, it will fail the script and show the std/err output.\n# Otherwise it hides both streams, effectively rendering the execution silent unless it fails.\n# \n# It redirects the stdout and stderr to environment variables.\n# Equivalent to `exe::invoke5 true 0 '' '' \"\\${@}\"`\n# \n# - \\$1: **executable** _as string_:\n#       the executable or command\n# - \\$@: **arguments** _as any_:\n#       the command and its arguments\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${RETURNED_VALUE}: The content of stdout.\n# - \\${RETURNED_VALUE2}: The content of stderr.\n# \n# ```bash\n# exe::invoke git add --all\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invoke \"${1:**executable**}\" \"${2:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invoke\n# \n# This function call an executable and its arguments.\n# If the execution fails, it will fail the script and show the std/err output.\n# Otherwise it hides both streams, effectively rendering the execution silent unless it fails.\n# \n# It redirects the stdout and stderr to environment variables.\n# Equivalent to `exe::invoke5 true 0 '' '' \"\\${@}\"`\n# \n# - \\$1: **executable** _as string_:\n#       the executable or command\n# - \\$@: **arguments** _as any_:\n#       the command and its arguments\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${REPLY}: The content of stdout.\n# - \\${REPLY2}: The content of stderr.\n# \n# ```bash\n# exe::invoke git add --all\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invoke \"${1:**executable**}\" \"${2:**arguments**}\"$0" ]
 },
 
 "exe::invoke2": {
@@ -530,7 +530,7 @@
   "prefix": "exe::invoke2#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## exe::invoke2\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to environment variables.\n# Equivalent to `exe::invoke5 \"\\${1}\" 0 \"\" \"\" \"\\${@:2}\"`\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${RETURNED_VALUE}: The content of stdout.\n# - \\${RETURNED_VALUE2}: The content of stderr.\n# \n# ```bash\n# exe::invoke2 false git status || core::fail \"status failed.\"\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invoke2 \"${1:**fail**}\" \"${2:**executable**}\" \"${3:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invoke2\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to environment variables.\n# Equivalent to `exe::invoke5 \"\\${1}\" 0 \"\" \"\" \"\\${@:2}\"`\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${REPLY}: The content of stdout.\n# - \\${REPLY2}: The content of stderr.\n# \n# ```bash\n# exe::invoke2 false git status || core::fail \"status failed.\"\n# stdout=\"\\${REPLY}\"\n# stderr=\"\\${REPLY2}\"\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invoke2 \"${1:**fail**}\" \"${2:**executable**}\" \"${3:**arguments**}\"$0" ]
 },
 
 "exe::invoke3piped": {
@@ -544,7 +544,7 @@
   "prefix": "exe::invoke3piped#withdoc",
   "description": "This function call an executable and its arguments and input a given string as stdin...",
   "scope": "",
-  "body": [ "# ## exe::invoke3piped\n# \n# This function call an executable and its arguments and input a given string as stdin.\n# It redirects the stdout and stderr to environment variables.\n# Equivalent to `exe::invoke5 \"\\${1}\" 0 false \"\\${2}\" \"\\${@:3}\"`\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **stdin** _as string_:\n#       The stdin content to pass to the executable\n# - \\$3: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${RETURNED_VALUE}: The content of stdout.\n# - \\${RETURNED_VALUE2}: The content of stderr.\n# \n# ```bash\n# exe::invoke3piped true \"key: val\" yq -o json -p yaml -\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > This is the equivalent of:\n# > `myvar=\"\\$(printf '%s\\n' \"mystring\" | mycommand)\"`\n# > But without using a subshell.\n# >\n# > See exe::invokef5 for more information.\n# \nexe::invoke3piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${4:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invoke3piped\n# \n# This function call an executable and its arguments and input a given string as stdin.\n# It redirects the stdout and stderr to environment variables.\n# Equivalent to `exe::invoke5 \"\\${1}\" 0 false \"\\${2}\" \"\\${@:3}\"`\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **stdin** _as string_:\n#       The stdin content to pass to the executable\n# - \\$3: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${REPLY}: The content of stdout.\n# - \\${REPLY2}: The content of stderr.\n# \n# ```bash\n# exe::invoke3piped true \"key: val\" yq -o json -p yaml -\n# stdout=\"\\${REPLY}\"\n# stderr=\"\\${REPLY2}\"\n# ```\n# \n# > This is the equivalent of:\n# > `myvar=\"\\$(printf '%s\\n' \"mystring\" | mycommand)\"`\n# > But without using a subshell.\n# >\n# > See exe::invokef5 for more information.\n# \nexe::invoke3piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${4:**arguments**}\"$0" ]
 },
 
 "exe::invoke5": {
@@ -558,7 +558,7 @@
   "prefix": "exe::invoke5#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## exe::invoke5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to environment variables.\n# It calls invoke5 and reads the files to set the environment variables.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#       (if the error code is matched, then set the output error code to 0)\n# - \\$3: **stdin from file** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **stdin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${RETURNED_VALUE}: The content of stdout.\n# - \\${RETURNED_VALUE2}: The content of stderr.\n# \n# ```bash\n# exe::invoke5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdout=\"\\${RETURNED_VALUE}\"\n# stderr=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invoke5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**stdin from file**}\" \"${4:**stdin**}\" \"${5:**executable**}\" \"${6:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invoke5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to environment variables.\n# It calls invoke5 and reads the files to set the environment variables.\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       the acceptable error codes, comma separated\n#       (if the error code is matched, then set the output error code to 0)\n# - \\$3: **stdin from file** _as bool_:\n#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin\n# - \\$4: **stdin** _as string_:\n#       the stdin (can be empty)\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${REPLY}: The content of stdout.\n# - \\${REPLY2}: The content of stderr.\n# \n# ```bash\n# exe::invoke5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdout=\"\\${REPLY}\"\n# stderr=\"\\${REPLY2}\"\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invoke5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**stdin from file**}\" \"${4:**stdin**}\" \"${5:**executable**}\" \"${6:**arguments**}\"$0" ]
 },
 
 "exe::invokef2": {
@@ -572,7 +572,7 @@
   "prefix": "exe::invokef2#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## exe::invokef2\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# Equivalent to `exe::invokef5 \"\\${1}\" 0 \"\" \"\" \"\\${@:2}\"`\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${RETURNED_VALUE}: The file path containing the stdout of the executable.\n# - \\${RETURNED_VALUE2}: The file path containing the stderr of the executable.\n# \n# ```bash\n# exe::invokef2 false git status || core::fail \"status failed.\"\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invokef2 \"${1:**fail**}\" \"${2:**executable**}\" \"${3:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invokef2\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# Equivalent to `exe::invokef5 \"\\${1}\" 0 \"\" \"\" \"\\${@:2}\"`\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${REPLY}: The file path containing the stdout of the executable.\n# - \\${REPLY2}: The file path containing the stderr of the executable.\n# \n# ```bash\n# exe::invokef2 false git status || core::fail \"status failed.\"\n# stdoutFilePath=\"\\${REPLY}\"\n# stderrFilePath=\"\\${REPLY2}\"\n# ```\n# \n# > See exe::invokef5 for more information.\n# \nexe::invokef2 \"${1:**fail**}\" \"${2:**executable**}\" \"${3:**arguments**}\"$0" ]
 },
 
 "exe::invokef3piped": {
@@ -586,7 +586,7 @@
   "prefix": "exe::invokef3piped#withdoc",
   "description": "This function call an executable and its arguments and input a given string as stdin...",
   "scope": "",
-  "body": [ "# ## exe::invokef3piped\n# \n# This function call an executable and its arguments and input a given string as stdin.\n# It redirects the stdout and stderr to temporary files.\n# Equivalent to `exe::invokef5 \"\\${1}\" 0 false \"\\${2}\" \"\\${@:3}\"`\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **stdin** _as string_:\n#       The stdin content to pass to the executable\n# - \\$3: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${RETURNED_VALUE}: The file path containing the stdout of the executable.\n# - \\${RETURNED_VALUE2}: The file path containing the stderr of the executable.\n# \n# ```bash\n# exe::invokef3piped true \"key: val\" yq -o json -p yaml -\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > This is the equivalent of:\n# > `myvar=\"\\$(printf '%s\\n' \"mystring\" | mycommand)\"`\n# > But without using a subshell.\n# >\n# > See exe::invokef5 for more information.\n# \nexe::invokef3piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${4:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invokef3piped\n# \n# This function call an executable and its arguments and input a given string as stdin.\n# It redirects the stdout and stderr to temporary files.\n# Equivalent to `exe::invokef5 \"\\${1}\" 0 false \"\\${2}\" \"\\${@:3}\"`\n# \n# - \\$1: **fail** _as bool_:\n#       true/false to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **stdin** _as string_:\n#       The stdin content to pass to the executable\n# - \\$3: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${REPLY}: The file path containing the stdout of the executable.\n# - \\${REPLY2}: The file path containing the stderr of the executable.\n# \n# ```bash\n# exe::invokef3piped true \"key: val\" yq -o json -p yaml -\n# stdoutFilePath=\"\\${REPLY}\"\n# stderrFilePath=\"\\${REPLY2}\"\n# ```\n# \n# > This is the equivalent of:\n# > `myvar=\"\\$(printf '%s\\n' \"mystring\" | mycommand)\"`\n# > But without using a subshell.\n# >\n# > See exe::invokef5 for more information.\n# \nexe::invokef3piped \"${1:**fail**}\" \"${2:**stdin**}\" \"${3:**executable**}\" \"${4:**arguments**}\"$0" ]
 },
 
 "exe::invokef5": {
@@ -600,7 +600,7 @@
   "prefix": "exe::invokef5#withdoc",
   "description": "This function call an executable and its arguments...",
   "scope": "",
-  "body": [ "# ## exe::invokef5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# \n# - \\$1: **fail** _as bool_:\n#       A boolean to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       The acceptable error codes, comma separated.\n#       (if the error code is matched, then set the output error code to 0)\n# - \\$3: **sdtin from file** _as bool_:\n#       A boolean to indicate if the 4th argument represents a file path or\n#       directly the content for stdin.\n# - \\$2: **stdin** _as string_:\n#       The stdin content to pass to the executable.\n#       Can be empty if not used.\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# - \\${_OPTION_NO_REDIRECTION}: _as bool_:\n#       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.\n#       (default to false)\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${RETURNED_VALUE}: The file path containing the stdout of the executable.\n# - \\${RETURNED_VALUE2}: The file path containing the stderr of the executable.\n# \n# ```bash\n# exe::invokef5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdoutFilePath=\"\\${RETURNED_VALUE}\"\n# stderrFilePath=\"\\${RETURNED_VALUE2}\"\n# ```\n# \n# > - In windows, this is tremendously faster to do (or any other invoke flavor):\n# >   `exe::invokef5 false 0 false '' mycommand && myvar=\"\\${RETURNED_VALUE}\"`\n# >   than doing:\n# >   `myvar=\"\\$(mycommand)\".`\n# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).\n# > - On linux, you can use a tmpfs directory for massive gains over subshells.\n# \nexe::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**sdtin from file**}\" \"${4:**stdin**}\" \"${5:**executable**}\" \"${6:**arguments**}\"$0" ]
+  "body": [ "# ## exe::invokef5\n# \n# This function call an executable and its arguments.\n# It redirects the stdout and stderr to temporary files.\n# \n# - \\$1: **fail** _as bool_:\n#       A boolean to indicate if the function should fail in case the execution fails.\n#       If true and the execution fails, the script will exit.\n# - \\$2: **acceptable codes** _as string_:\n#       The acceptable error codes, comma separated.\n#       (if the error code is matched, then set the output error code to 0)\n# - \\$3: **sdtin from file** _as bool_:\n#       A boolean to indicate if the 4th argument represents a file path or\n#       directly the content for stdin.\n# - \\$2: **stdin** _as string_:\n#       The stdin content to pass to the executable.\n#       Can be empty if not used.\n# - \\$5: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# - \\${_OPTION_NO_REDIRECTION}: _as bool_:\n#       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.\n#       (default to false)\n# \n# Returns:\n# \n# - \\$?:The exit code of the executable.\n# - \\${REPLY}: The file path containing the stdout of the executable.\n# - \\${REPLY2}: The file path containing the stderr of the executable.\n# \n# ```bash\n# exe::invokef5 \"false\" \"130,2\" \"false\" \"This is the stdin\" \"stuff\" \"--height=10\" || core::fail \"stuff failed.\"\n# stdoutFilePath=\"\\${REPLY}\"\n# stderrFilePath=\"\\${REPLY2}\"\n# ```\n# \n# > - In windows, this is tremendously faster to do (or any other invoke flavor):\n# >   `exe::invokef5 false 0 false '' mycommand && myvar=\"\\${REPLY}\"`\n# >   than doing:\n# >   `myvar=\"\\$(mycommand)\".`\n# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).\n# > - On linux, you can use a tmpfs directory for massive gains over subshells.\n# \nexe::invokef5 \"${1:**fail**}\" \"${2:**acceptable codes**}\" \"${3:**sdtin from file**}\" \"${4:**stdin**}\" \"${5:**executable**}\" \"${6:**arguments**}\"$0" ]
 },
 
 "exe::invoket2": {
@@ -656,7 +656,7 @@
   "prefix": "fs::createDirectoryIfNeeded#withdoc",
   "description": "Create the directory tree if needed...",
   "scope": "",
-  "body": [ "# ## fs::createDirectoryIfNeeded\n# \n# Create the directory tree if needed.\n# \n# - \\$1: **path** _as string_:\n#       The directory path to create.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The absolute path to the directory.\n# \n# ```bash\n# fs::createDirectoryIfNeeded \"/my/directory\"\n# ```\n# \nfs::createDirectoryIfNeeded \"${1:**path**}\"$0" ]
+  "body": [ "# ## fs::createDirectoryIfNeeded\n# \n# Create the directory tree if needed.\n# \n# - \\$1: **path** _as string_:\n#       The directory path to create.\n# \n# Returns:\n# \n# - \\${REPLY}: The absolute path to the directory.\n# \n# ```bash\n# fs::createDirectoryIfNeeded \"/my/directory\"\n# ```\n# \nfs::createDirectoryIfNeeded \"${1:**path**}\"$0" ]
 },
 
 "fs::createFilePathIfNeeded": {
@@ -670,7 +670,7 @@
   "prefix": "fs::createFilePathIfNeeded#withdoc",
   "description": "Make sure that the given file path exists...",
   "scope": "",
-  "body": [ "# ## fs::createFilePathIfNeeded\n# \n# Make sure that the given file path exists.\n# Create the directory tree and the file if needed.\n# \n# - \\$1: **path** _as string_:\n#       the file path to create\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The absolute path of the file.\n# \n# ```bash\n# fs::createFilePathIfNeeded \"myFile\"\n# ```\n# \nfs::createFilePathIfNeeded \"${1:**path**}\"$0" ]
+  "body": [ "# ## fs::createFilePathIfNeeded\n# \n# Make sure that the given file path exists.\n# Create the directory tree and the file if needed.\n# \n# - \\$1: **path** _as string_:\n#       the file path to create\n# \n# Returns:\n# \n# - \\${REPLY}: The absolute path of the file.\n# \n# ```bash\n# fs::createFilePathIfNeeded \"myFile\"\n# ```\n# \nfs::createFilePathIfNeeded \"${1:**path**}\"$0" ]
 },
 
 "fs::createLink": {
@@ -698,7 +698,7 @@
   "prefix": "fs::createTempDirectory#withdoc",
   "description": "Creates a temporary directory...",
   "scope": "",
-  "body": [ "# ## fs::createTempDirectory\n# \n# Creates a temporary directory.\n# \n# - \\${_OPTION_PATH_ONLY} _as bool_:\n#       (optional) If true, does not create the file, only returns the path.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The created path.\n# \n# ```bash\n# fs::createTempDirectory\n# local directory=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Directories created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \n_OPTION_PATH_ONLY=${1} fs::createTempDirectory$0" ]
+  "body": [ "# ## fs::createTempDirectory\n# \n# Creates a temporary directory.\n# \n# - \\${_OPTION_PATH_ONLY} _as bool_:\n#       (optional) If true, does not create the file, only returns the path.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY}: The created path.\n# \n# ```bash\n# fs::createTempDirectory\n# local directory=\"\\${REPLY}\"\n# ```\n# \n# > Directories created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \n_OPTION_PATH_ONLY=${1} fs::createTempDirectory$0" ]
 },
 
 "fs::createTempFile": {
@@ -712,7 +712,7 @@
   "prefix": "fs::createTempFile#withdoc",
   "description": "Creates a temporary file and return its path...",
   "scope": "",
-  "body": [ "# ## fs::createTempFile\n# \n# Creates a temporary file and return its path.\n# \n# - \\${_OPTION_PATH_ONLY} _as bool_:\n#       (optional) If true, does not create the file, only returns the path.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The created path.\n# \n# ```bash\n# fs::createTempFile\n# local file=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Files created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \n_OPTION_PATH_ONLY=${1} fs::createTempFile$0" ]
+  "body": [ "# ## fs::createTempFile\n# \n# Creates a temporary file and return its path.\n# \n# - \\${_OPTION_PATH_ONLY} _as bool_:\n#       (optional) If true, does not create the file, only returns the path.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY}: The created path.\n# \n# ```bash\n# fs::createTempFile\n# local file=\"\\${REPLY}\"\n# ```\n# \n# > Files created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \n_OPTION_PATH_ONLY=${1} fs::createTempFile$0" ]
 },
 
 "fs::getCommandPath": {
@@ -726,7 +726,7 @@
   "prefix": "fs::getCommandPath#withdoc",
   "description": "Get the absolute path of a command...",
   "scope": "",
-  "body": [ "# ## fs::getCommandPath\n# \n# Get the absolute path of a command.\n# \n# - \\$1: **command** _as string_:\n#       the command to find\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The absolute path of the command (or empty if command not found).\n# - \\$?:\n#   - 0 if the command was found\n#   - 1 otherwise\n# \n# ```bash\n# fs::getCommandPath \"command\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nfs::getCommandPath \"${1:**command**}\"$0" ]
+  "body": [ "# ## fs::getCommandPath\n# \n# Get the absolute path of a command.\n# \n# - \\$1: **command** _as string_:\n#       the command to find\n# \n# Returns:\n# \n# - \\${REPLY}: The absolute path of the command (or empty if command not found).\n# - \\$?:\n#   - 0 if the command was found\n#   - 1 otherwise\n# \n# ```bash\n# fs::getCommandPath \"command\"\n# echo \"\\${REPLY}\"\n# ```\n# \nfs::getCommandPath \"${1:**command**}\"$0" ]
 },
 
 "fs::getFileLineCount": {
@@ -740,7 +740,7 @@
   "prefix": "fs::getFileLineCount#withdoc",
   "description": "Get the number of lines in a file...",
   "scope": "",
-  "body": [ "# ## fs::getFileLineCount\n# \n# Get the number of lines in a file.\n# \n# - \\$1: **path** _as string_:\n#       the file path to read\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The number of lines in the file.\n# \n# ```bash\n# fs::getFileLineCount \"/path/to/file\"\n# local lineCount=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# TODO: fails to count the last line if empty\n# \nfs::getFileLineCount \"${1:**path**}\"$0" ]
+  "body": [ "# ## fs::getFileLineCount\n# \n# Get the number of lines in a file.\n# \n# - \\$1: **path** _as string_:\n#       the file path to read\n# \n# Returns:\n# \n# - \\${REPLY}: The number of lines in the file.\n# \n# ```bash\n# fs::getFileLineCount \"/path/to/file\"\n# local lineCount=\"\\${REPLY}\"\n# ```\n# \n# TODO: fails to count the last line if empty\n# \nfs::getFileLineCount \"${1:**path**}\"$0" ]
 },
 
 "fs::getPwdRealPath": {
@@ -754,7 +754,7 @@
   "prefix": "fs::getPwdRealPath#withdoc",
   "description": "Get the real path of the current directory...",
   "scope": "",
-  "body": [ "# ## fs::getPwdRealPath\n# \n# Get the real path of the current directory.\n# By default, the `\\${PWD}` variable is the logical path, which may contain symlinks.\n# \n# ```bash\n# fs::getPwdRealPath\n# ```\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The realpath for the current directory.\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# \nfs::getPwdRealPath$0" ]
+  "body": [ "# ## fs::getPwdRealPath\n# \n# Get the real path of the current directory.\n# By default, the `\\${PWD}` variable is the logical path, which may contain symlinks.\n# \n# ```bash\n# fs::getPwdRealPath\n# ```\n# \n# Returns:\n# \n# - \\${REPLY}: The realpath for the current directory.\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# \nfs::getPwdRealPath$0" ]
 },
 
 "fs::getScriptDirectory": {
@@ -768,7 +768,7 @@
   "prefix": "fs::getScriptDirectory#withdoc",
   "description": "This function returns the absolute path of the directory of the script that called it...",
   "scope": "",
-  "body": [ "# ## fs::getScriptDirectory\n# \n# This function returns the absolute path of the directory of the script that called it.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the directory of the script that called it.\n# \n# ```bash\n# fs::getScriptDirectory\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nfs::getScriptDirectory$0" ]
+  "body": [ "# ## fs::getScriptDirectory\n# \n# This function returns the absolute path of the directory of the script that called it.\n# \n# Returns:\n# \n# - \\${REPLY}: the directory of the script that called it.\n# \n# ```bash\n# fs::getScriptDirectory\n# echo \"\\${REPLY}\"\n# ```\n# \nfs::getScriptDirectory$0" ]
 },
 
 "fs::head": {
@@ -782,7 +782,7 @@
   "prefix": "fs::head#withdoc",
   "description": "Print the first lines of a file to stdout...",
   "scope": "",
-  "body": [ "# ## fs::head\n# \n# Print the first lines of a file to stdout.\n# This is a pure bash equivalent of head.\n# \n# - \\$1: **path** _as string_:\n#       The file to print.\n# - \\$2: **number of lines** _as int_:\n#       The number of lines to print.\n# - \\$3: to variable _as bool_:\n#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.\n#       If true, the output will be stored in the variable `RETURNED_ARRAY`\n#       instead of being printed to stdout.\n#       (defaults to false)\n# \n# ```bash\n# fs::head \"myFile\" 10\n# ```\n# \n# > #TODO: faster with mapfile + quantum?\n# \nfs::head \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
+  "body": [ "# ## fs::head\n# \n# Print the first lines of a file to stdout.\n# This is a pure bash equivalent of head.\n# \n# - \\$1: **path** _as string_:\n#       The file to print.\n# - \\$2: **number of lines** _as int_:\n#       The number of lines to print.\n# - \\$3: to variable _as bool_:\n#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.\n#       If true, the output will be stored in the variable `REPLY_ARRAY`\n#       instead of being printed to stdout.\n#       (defaults to false)\n# \n# ```bash\n# fs::head \"myFile\" 10\n# ```\n# \n# > #TODO: faster with mapfile + quantum?\n# \nfs::head \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
 },
 
 "fs::isDirectoryWritable": {
@@ -810,7 +810,7 @@
   "prefix": "fs::listDirectories#withdoc",
   "description": "List all the directories in the given directory...",
   "scope": "",
-  "body": [ "# ## fs::listDirectories\n# \n# List all the directories in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the sub directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - \\${RETURNED_ARRAY[@]}: An array with the list of all the files.\n# \n# ```bash\n# fs::listDirectories \"/path/to/directory\" true true myFilterFunction\n# for path in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \nfs::listDirectories \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
+  "body": [ "# ## fs::listDirectories\n# \n# List all the directories in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the sub directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - \\${REPLY_ARRAY[@]}: An array with the list of all the files.\n# \n# ```bash\n# fs::listDirectories \"/path/to/directory\" true true myFilterFunction\n# for path in \"\\${REPLY_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \nfs::listDirectories \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
 },
 
 "fs::listFiles": {
@@ -824,7 +824,7 @@
   "prefix": "fs::listFiles#withdoc",
   "description": "List all the files in the given directory...",
   "scope": "",
-  "body": [ "# ## fs::listFiles\n# \n# List all the files in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - \\${RETURNED_ARRAY[@]}: An array with the list of all the files.\n# \n# ```bash\n# fs::listFiles \"/path/to/directory\" true true myFilterFunction\n# for path in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \nfs::listFiles \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
+  "body": [ "# ## fs::listFiles\n# \n# List all the files in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - \\${REPLY_ARRAY[@]}: An array with the list of all the files.\n# \n# ```bash\n# fs::listFiles \"/path/to/directory\" true true myFilterFunction\n# for path in \"\\${REPLY_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \nfs::listFiles \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:directory filter function name}\"$0" ]
 },
 
 "fs::listPaths": {
@@ -838,21 +838,21 @@
   "prefix": "fs::listPaths#withdoc",
   "description": "List all the paths in the given directory...",
   "scope": "",
-  "body": [ "# ## fs::listPaths\n# \n# List all the paths in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: path filter function name _as string_:\n#       (optional) a function name that is called to filter the paths that will be listed\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# - \\$5: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - \\${RETURNED_ARRAY[@]}: An array with the list of all the paths.\n# \n# ```bash\n# fs::listPaths \"/path/to/directory\" true true myFilterFunction myFilterDirectoryFunction\n# for path in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \n# > - It will correctly list files under symbolic link directories.\n# \nfs::listPaths \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:path filter function name}\" \"${5:directory filter function name}\"$0" ]
+  "body": [ "# ## fs::listPaths\n# \n# List all the paths in the given directory.\n# \n# - \\$1: **directory** _as string_:\n#       the directory to list\n# - \\$2: recursive _as bool_:\n#       (optional) true to list recursively, false otherwise\n#       (defaults to false)\n# - \\$3: hidden _as bool_:\n#       (optional) true to list hidden paths, false otherwise\n#       (defaults to false)\n# - \\$4: path filter function name _as string_:\n#       (optional) a function name that is called to filter the paths that will be listed\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# - \\$5: directory filter function name _as string_:\n#       (optional) a function name that is called to filter the directories (for recursive listing)\n#       The function should return 0 if the path is to be kept, 1 otherwise.\n#       The function is called with the path as the first argument.\n#       (defaults to empty string, no filter)\n# \n# Returns:\n# \n# - \\${REPLY_ARRAY[@]}: An array with the list of all the paths.\n# \n# ```bash\n# fs::listPaths \"/path/to/directory\" true true myFilterFunction myFilterDirectoryFunction\n# for path in \"\\${REPLY_ARRAY[@]}\"; do\n#   printf '%s' \"\\${path}\"\n# done\n# ```\n# \n# > - It will correctly list files under symbolic link directories.\n# \nfs::listPaths \"${1:**directory**}\" \"${2:recursive}\" \"${3:hidden}\" \"${4:path filter function name}\" \"${5:directory filter function name}\"$0" ]
 },
 
 "fs::readFile": {
   "prefix": "fs::readFile",
-  "description": "Reads the content of a file and returns it in the global variable RETURNED_VALUE...",
+  "description": "Reads the content of a file and returns it in the global variable REPLY...",
   "scope": "",
   "body": [ "fs::readFile \"${1:**path**}\" \"${2:max char}\"$0" ]
 },
 
 "fs::readFile#withdoc": {
   "prefix": "fs::readFile#withdoc",
-  "description": "Reads the content of a file and returns it in the global variable RETURNED_VALUE...",
+  "description": "Reads the content of a file and returns it in the global variable REPLY...",
   "scope": "",
-  "body": [ "# ## fs::readFile\n# \n# Reads the content of a file and returns it in the global variable RETURNED_VALUE.\n# Uses pure bash.\n# \n# - \\$1: **path** _as string_:\n#       the file path to read\n# - \\$2: max char _as int_:\n#       (optional) the maximum number of characters to read\n#       (defaults to 0, which means read the whole file)\n# \n# > If the file does not exist, the function will return an empty string instead of failing.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The content of the file.\n# \n# ```bash\n# fs::readFile \"/path/to/file\" && local fileContent=\"\\${RETURNED_VALUE}\"\n# fs::readFile \"/path/to/file\" 500 && local fileContent=\"\\${RETURNED_VALUE}\"\n# ```\n# \nfs::readFile \"${1:**path**}\" \"${2:max char}\"$0" ]
+  "body": [ "# ## fs::readFile\n# \n# Reads the content of a file and returns it in the global variable REPLY.\n# Uses pure bash.\n# \n# - \\$1: **path** _as string_:\n#       the file path to read\n# - \\$2: max char _as int_:\n#       (optional) the maximum number of characters to read\n#       (defaults to 0, which means read the whole file)\n# \n# > If the file does not exist, the function will return an empty string instead of failing.\n# \n# Returns:\n# \n# - \\${REPLY}: The content of the file.\n# \n# ```bash\n# fs::readFile \"/path/to/file\" && local fileContent=\"\\${REPLY}\"\n# fs::readFile \"/path/to/file\" 500 && local fileContent=\"\\${REPLY}\"\n# ```\n# \nfs::readFile \"${1:**path**}\" \"${2:max char}\"$0" ]
 },
 
 "fs::tail": {
@@ -866,7 +866,7 @@
   "prefix": "fs::tail#withdoc",
   "description": "Print the last lines of a file to stdout...",
   "scope": "",
-  "body": [ "# ## fs::tail\n# \n# Print the last lines of a file to stdout.\n# This is a pure bash equivalent of tail.\n# However, because we have to read the whole file, it is not efficient for large files.\n# \n# - \\$1: **path** _as string_:\n#       The file to print.\n# - \\$2: **number of lines** _as int_:\n#       The number of lines to print from the end of the file.\n# - \\$3: to variable _as bool_:\n#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.\n#       If true, the output will be stored in the variable `RETURNED_ARRAY`\n#       instead of being printed to stdout.\n#       (defaults to false)\n# \n# ```bash\n# fs::tail \"myFile\" 10\n# ```\n# \n# > #TODO: use mapfile quantum to not have to read the whole file in a single go.\n# \nfs::tail \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
+  "body": [ "# ## fs::tail\n# \n# Print the last lines of a file to stdout.\n# This is a pure bash equivalent of tail.\n# However, because we have to read the whole file, it is not efficient for large files.\n# \n# - \\$1: **path** _as string_:\n#       The file to print.\n# - \\$2: **number of lines** _as int_:\n#       The number of lines to print from the end of the file.\n# - \\$3: to variable _as bool_:\n#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.\n#       If true, the output will be stored in the variable `REPLY_ARRAY`\n#       instead of being printed to stdout.\n#       (defaults to false)\n# \n# ```bash\n# fs::tail \"myFile\" 10\n# ```\n# \n# > #TODO: use mapfile quantum to not have to read the whole file in a single go.\n# \nfs::tail \"${1:**path**}\" \"${2:**number of lines**}\" \"${3:to variable}\"$0" ]
 },
 
 "fs::toAbsolutePath": {
@@ -880,7 +880,7 @@
   "prefix": "fs::toAbsolutePath#withdoc",
   "description": "This function returns the absolute path of a path...",
   "scope": "",
-  "body": [ "# ## fs::toAbsolutePath\n# \n# This function returns the absolute path of a path.\n# \n# If the path exists, it can be resolved to the real path, following symlinks,\n# using the option `_OPTION_REALPATH=true`.\n# \n# - \\$1: **path** _as string_:\n#       The path to translate to absolute path.\n# - \\${_OPTION_REALPATH} _as bool_:\n#       (optional) true to resolve the path to the real path, following symlinks.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The absolute path of the path.\n# \n# ```bash\n# fs::toAbsolutePath \"myPath\"\n# local myPathAbsolutePath=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# > The `..` will be processed before following any symlinks, by removing\n# > the immediate pathname component.\n# \n_OPTION_REALPATH=${2} fs::toAbsolutePath \"${1:**path**}\"$0" ]
+  "body": [ "# ## fs::toAbsolutePath\n# \n# This function returns the absolute path of a path.\n# \n# If the path exists, it can be resolved to the real path, following symlinks,\n# using the option `_OPTION_REALPATH=true`.\n# \n# - \\$1: **path** _as string_:\n#       The path to translate to absolute path.\n# - \\${_OPTION_REALPATH} _as bool_:\n#       (optional) true to resolve the path to the real path, following symlinks.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY}: The absolute path of the path.\n# \n# ```bash\n# fs::toAbsolutePath \"myPath\"\n# local myPathAbsolutePath=\"\\${REPLY}\"\n# ```\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# > The `..` will be processed before following any symlinks, by removing\n# > the immediate pathname component.\n# \n_OPTION_REALPATH=${2} fs::toAbsolutePath \"${1:**path**}\"$0" ]
 },
 
 "include": {
@@ -978,7 +978,7 @@
   "prefix": "interactive::promptYesNo#withdoc",
   "description": "Ask the user to yes or no...",
   "scope": "",
-  "body": [ "# ## interactive::promptYesNo\n# \n# Ask the user to yes or no.\n# \n# - The user can switch between the two options with the arrow keys or space.\n# - The user can validate the choice with the enter key.\n# - The user can also validate immediately with the y or n key.\n# \n# Dialog boxes are displayed for the question and answer.\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# - \\$2: default _as bool_:\n#       (optional) the default value to select\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user answered yes\n#   - 1 otherwise\n# - \\${RETURNED_VALUE}: true or false.\n# \n# ```bash\n# if interactive::promptYesNo \"Do you want to continue?\"; then echo \"Yes.\"; else echo \"No.\"; fi\n# ```\n# \ninteractive::promptYesNo \"${1:**prompt**}\" \"${2:default}\"$0" ]
+  "body": [ "# ## interactive::promptYesNo\n# \n# Ask the user to yes or no.\n# \n# - The user can switch between the two options with the arrow keys or space.\n# - The user can validate the choice with the enter key.\n# - The user can also validate immediately with the y or n key.\n# \n# Dialog boxes are displayed for the question and answer.\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# - \\$2: default _as bool_:\n#       (optional) the default value to select\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user answered yes\n#   - 1 otherwise\n# - \\${REPLY}: true or false.\n# \n# ```bash\n# if interactive::promptYesNo \"Do you want to continue?\"; then echo \"Yes.\"; else echo \"No.\"; fi\n# ```\n# \ninteractive::promptYesNo \"${1:**prompt**}\" \"${2:default}\"$0" ]
 },
 
 "interactive::promptYesNoRaw": {
@@ -992,7 +992,7 @@
   "prefix": "interactive::promptYesNoRaw#withdoc",
   "description": "Ask the user to yes or no...",
   "scope": "",
-  "body": [ "# ## interactive::promptYesNoRaw\n# \n# Ask the user to yes or no.\n# \n# - The user can switch between the two options with the arrow keys or space.\n# - The user can validate the choice with the enter key.\n# - The user can also validate immediately with the y or n key.\n# \n# This raw version does not display the prompt or the answer.\n# \n# - \\$1: default _as bool_:\n#       (optional) the default value to select\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user answered yes\n#   - 1 otherwise\n# - \\${RETURNED_VALUE}: true or false.\n# \n# ```bash\n# interactive::promptYesNoRaw \"Do you want to continue?\" && local answer=\"\\${RETURNED_VALUE}\"\n# ```\n# \ninteractive::promptYesNoRaw \"${1:default}\"$0" ]
+  "body": [ "# ## interactive::promptYesNoRaw\n# \n# Ask the user to yes or no.\n# \n# - The user can switch between the two options with the arrow keys or space.\n# - The user can validate the choice with the enter key.\n# - The user can also validate immediately with the y or n key.\n# \n# This raw version does not display the prompt or the answer.\n# \n# - \\$1: default _as bool_:\n#       (optional) the default value to select\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user answered yes\n#   - 1 otherwise\n# - \\${REPLY}: true or false.\n# \n# ```bash\n# interactive::promptYesNoRaw \"Do you want to continue?\" && local answer=\"\\${REPLY}\"\n# ```\n# \ninteractive::promptYesNoRaw \"${1:default}\"$0" ]
 },
 
 "log::debug": {
@@ -1048,7 +1048,7 @@
   "prefix": "log::getCallStack#withdoc",
   "description": "This function returns the current function stack...",
   "scope": "",
-  "body": [ "# ## log::getCallStack\n# \n# This function returns the current function stack.\n# \n# - \\$1: Stack to skip _as int_:\n#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.\n#       The number of stack to skip.\n#       (defaults to 1 which skips this function)\n# - \\$2: Stack to skip at end _as int_:\n#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.\n#       The number of stack to skip at the end.\n#       (defaults to 0)\n# - \\${_OPTION_WRAP_WIDTH} _as int_:\n#       (optional) The width to wrap the call stack.\n#       (defaults to the terminal width)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The call stack as a string.\n# \n# ```bash\n# log::getCallStack\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`\n# > variables to simulate a call stack.\n# \n_OPTION_WRAP_WIDTH=${3} log::getCallStack \"${1:Stack to skip}\" \"${2:Stack to skip at end}\"$0" ]
+  "body": [ "# ## log::getCallStack\n# \n# This function returns the current function stack.\n# \n# - \\$1: Stack to skip _as int_:\n#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.\n#       The number of stack to skip.\n#       (defaults to 1 which skips this function)\n# - \\$2: Stack to skip at end _as int_:\n#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.\n#       The number of stack to skip at the end.\n#       (defaults to 0)\n# - \\${_OPTION_WRAP_WIDTH} _as int_:\n#       (optional) The width to wrap the call stack.\n#       (defaults to the terminal width)\n# \n# Returns:\n# \n# - \\${REPLY}: The call stack as a string.\n# \n# ```bash\n# log::getCallStack\n# echo \"\\${REPLY}\"\n# ```\n# \n# > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`\n# > variables to simulate a call stack.\n# \n_OPTION_WRAP_WIDTH=${3} log::getCallStack \"${1:Stack to skip}\" \"${2:Stack to skip at end}\"$0" ]
 },
 
 "log::getLevel": {
@@ -1062,7 +1062,7 @@
   "prefix": "log::getLevel#withdoc",
   "description": "Get the current log level...",
   "scope": "",
-  "body": [ "# ## log::getLevel\n# \n# Get the current log level.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The current log level.\n# \n# ```bash\n# log::getLevel\n# printf '%s\\n' \"The log level is ⌜\\${RETURNED_VALUE}⌝.\"\n# ```\n# \nlog::getLevel$0" ]
+  "body": [ "# ## log::getLevel\n# \n# Get the current log level.\n# \n# Returns:\n# \n# - \\${REPLY}: The current log level.\n# \n# ```bash\n# log::getLevel\n# printf '%s\\n' \"The log level is ⌜\\${REPLY}⌝.\"\n# ```\n# \nlog::getLevel$0" ]
 },
 
 "log::info": {
@@ -1202,7 +1202,7 @@
   "prefix": "log::saveFile#withdoc",
   "description": "Save the given file by copying it to a new file in the user local state directory (using `core::createNewStateFilePath`)...",
   "scope": "",
-  "body": [ "# ## log::saveFile\n# \n# Save the given file by copying it to a new file in the user local state directory\n# (using `core::createNewStateFilePath`).\n# Useful for debugging purposes, to save the state of a file during execution.\n# \n# - \\$1: **path** _as string_:\n#       The file path to save.\n# - \\$2: **suffix** _as string_:\n#       The suffix to add to the file name.\n# - \\$3: log path _as bool_:\n#       (optional) if true, log the path of the saved file using `log::printString`\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The path to the saved file.\n# \n# ```bash\n# log::saveFile \"/my/file/path\" \"suffix\" \"important result file\"\n# ```\n# \nlog::saveFile \"${1:**path**}\" \"${2:**suffix**}\" \"${3:log path}\"$0" ]
+  "body": [ "# ## log::saveFile\n# \n# Save the given file by copying it to a new file in the user local state directory\n# (using `core::createNewStateFilePath`).\n# Useful for debugging purposes, to save the state of a file during execution.\n# \n# - \\$1: **path** _as string_:\n#       The file path to save.\n# - \\$2: **suffix** _as string_:\n#       The suffix to add to the file name.\n# - \\$3: log path _as bool_:\n#       (optional) if true, log the path of the saved file using `log::printString`\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\${REPLY}: The path to the saved file.\n# \n# ```bash\n# log::saveFile \"/my/file/path\" \"suffix\" \"important result file\"\n# ```\n# \nlog::saveFile \"${1:**path**}\" \"${2:**suffix**}\" \"${3:log path}\"$0" ]
 },
 
 "log::saveFileString": {
@@ -1216,7 +1216,7 @@
   "prefix": "log::saveFileString#withdoc",
   "description": "Save the given string to a new file in the user local state directory (using `core::createNewStateFilePath`)...",
   "scope": "",
-  "body": [ "# ## log::saveFileString\n# \n# Save the given string to a new file in the user local state directory\n# (using `core::createNewStateFilePath`).\n# Useful for debugging purposes, to save the state of a string during execution.\n# \n# - \\$1: **content variable name** _as string_:\n#       The variable name of the content to save.\n# - \\$2: **suffix** _as string_:\n#       The suffix to add to the file name.\n# - \\$3: log path _as bool_:\n#       (optional) if true, log the path of the saved file using `log::printString`\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The path to the saved file.\n# \n# ```bash\n# log::saveFileString \"my content\" \"suffix\" \"important result file\"\n# ```\n# \nlog::saveFileString \"${1:**content variable name**}\" \"${2:**suffix**}\" \"${3:log path}\"$0" ]
+  "body": [ "# ## log::saveFileString\n# \n# Save the given string to a new file in the user local state directory\n# (using `core::createNewStateFilePath`).\n# Useful for debugging purposes, to save the state of a string during execution.\n# \n# - \\$1: **content variable name** _as string_:\n#       The variable name of the content to save.\n# - \\$2: **suffix** _as string_:\n#       The suffix to add to the file name.\n# - \\$3: log path _as bool_:\n#       (optional) if true, log the path of the saved file using `log::printString`\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\${REPLY}: The path to the saved file.\n# \n# ```bash\n# log::saveFileString \"my content\" \"suffix\" \"important result file\"\n# ```\n# \nlog::saveFileString \"${1:**content variable name**}\" \"${2:**suffix**}\" \"${3:log path}\"$0" ]
 },
 
 "log::setLevel": {
@@ -1384,7 +1384,7 @@
   "prefix": "regex::escapeRegexSpecialChars#withdoc",
   "description": "Escapes special characters in a string to be used as a regex...",
   "scope": "",
-  "body": [ "# ## regex::escapeRegexSpecialChars\n# \n# Escapes special characters in a string to be used as a regex.\n# \n# - \\$1: **string to escape** _as string_:\n#       The string to escape.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The escaped string.\n# \n# ```bash\n# regex::escapeRegexSpecialChars \"a.(b)\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nregex::escapeRegexSpecialChars \"${1:**string to escape**}\"$0" ]
+  "body": [ "# ## regex::escapeRegexSpecialChars\n# \n# Escapes special characters in a string to be used as a regex.\n# \n# - \\$1: **string to escape** _as string_:\n#       The string to escape.\n# \n# Returns:\n# \n# - \\${REPLY}: The escaped string.\n# \n# ```bash\n# regex::escapeRegexSpecialChars \"a.(b)\"\n# echo \"\\${REPLY}\"\n# ```\n# \nregex::escapeRegexSpecialChars \"${1:**string to escape**}\"$0" ]
 },
 
 "regex::getFirstGroup": {
@@ -1398,7 +1398,7 @@
   "prefix": "regex::getFirstGroup#withdoc",
   "description": "Matches a string against a regex and returns the first captured group of the first match...",
   "scope": "",
-  "body": [ "# ## regex::getFirstGroup\n# \n# Matches a string against a regex and returns the first captured group of the first match.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name containing the string to match.\n# - \\$2: **regex** _as string_:\n#       The regex to use for the match.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The first capture group in the matched string.\n#                      Empty if no match.\n# \n# ```bash\n# MY_STRING=\"name: julien\"\n# regex::getFirstGroup MY_STRING \"name:(.*)\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions\n# \nregex::getFirstGroup \"${1:**string variable name**}\" \"${2:**regex**}\"$0" ]
+  "body": [ "# ## regex::getFirstGroup\n# \n# Matches a string against a regex and returns the first captured group of the first match.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name containing the string to match.\n# - \\$2: **regex** _as string_:\n#       The regex to use for the match.\n# \n# Returns:\n# \n# - \\${REPLY}: The first capture group in the matched string.\n#                      Empty if no match.\n# \n# ```bash\n# MY_STRING=\"name: julien\"\n# regex::getFirstGroup MY_STRING \"name:(.*)\"\n# echo \"\\${REPLY}\"\n# ```\n# \n# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions\n# \nregex::getFirstGroup \"${1:**string variable name**}\" \"${2:**regex**}\"$0" ]
 },
 
 "regex::getMatches": {
@@ -1412,7 +1412,7 @@
   "prefix": "regex::getMatches#withdoc",
   "description": "Returns an array containing all the matched for a regex in a string...",
   "scope": "",
-  "body": [ "# ## regex::getMatches\n# \n# Returns an array containing all the matched for a regex in a string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name containing the string to match.\n# - \\$2: **regex** _as string_:\n#       The regex to use for the match.\n# - \\$3: replacement _as string_:\n#       (optional) Can be set using the variable `_OPTION_REPLACEMENT`.\n#       The replacement string to use on each match.\n#       Use \\x to refer to the x-th capture group.\n#       Use \\c to refer to replacement counter.\n#       (default to \"\", which means no changes will be done on the matches)\n# - \\$4: max count _as int_:\n#       (optional) Can be set using the variable `_OPTION_MAX_COUNT`.\n#       The number of matches to return.\n#       (default to -1, which is unlimited)\n# \n# Returns:\n# \n# - \\${RETURNED_ARRAY[@]}: An array containing all the matches.\n# \n# ```bash\n# MY_STRING=\"name: julien, name: john\"\n# regex::getMatches MY_STRING \"name: (.*)\"\n# for match in \"\\${RETURNED_ARRAY[@]}\"; do\n#   echo \"\\${match}\"\n# done\n# ```\n# \n# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions\n# \nregex::getMatches \"${1:**string variable name**}\" \"${2:**regex**}\" \"${3:replacement}\" \"${4:max count}\"$0" ]
+  "body": [ "# ## regex::getMatches\n# \n# Returns an array containing all the matched for a regex in a string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name containing the string to match.\n# - \\$2: **regex** _as string_:\n#       The regex to use for the match.\n# - \\$3: replacement _as string_:\n#       (optional) Can be set using the variable `_OPTION_REPLACEMENT`.\n#       The replacement string to use on each match.\n#       Use \\x to refer to the x-th capture group.\n#       Use \\c to refer to replacement counter.\n#       (default to \"\", which means no changes will be done on the matches)\n# - \\$4: max count _as int_:\n#       (optional) Can be set using the variable `_OPTION_MAX_COUNT`.\n#       The number of matches to return.\n#       (default to -1, which is unlimited)\n# \n# Returns:\n# \n# - \\${REPLY_ARRAY[@]}: An array containing all the matches.\n# \n# ```bash\n# MY_STRING=\"name: julien, name: john\"\n# regex::getMatches MY_STRING \"name: (.*)\"\n# for match in \"\\${REPLY_ARRAY[@]}\"; do\n#   echo \"\\${match}\"\n# done\n# ```\n# \n# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions\n# \nregex::getMatches \"${1:**string variable name**}\" \"${2:**regex**}\" \"${3:replacement}\" \"${4:max count}\"$0" ]
 },
 
 "regex::replace": {
@@ -1426,7 +1426,7 @@
   "prefix": "regex::replace#withdoc",
   "description": "Replaces strings within a string using a regex...",
   "scope": "",
-  "body": [ "# ## regex::replace\n# \n# Replaces strings within a string using a regex.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name containing the string in which to do replacements.\n#       Replacement is done in place.\n# - \\$2: **regex** _as string_:\n#       The regex to use for the match.\n# - \\$3: **replacement** _as string_:\n#       The replacement string.\n#       Use \\x to refer to the x-th capture group.\n#       Use \\c to refer to replacement counter.\n# - \\$4: max count _as int_:\n#       (optional) Can be set using the variable `_OPTION_MAX_COUNT`.\n#       The number of replacements to do.\n#       (default to -1, which is unlimited)\n# - \\$5: only matches _as bool_:\n#       (optional) Can be set using the variable `_OPTION_ONLY_MATCHES`.\n#       Instead of replacing with the regex, we keep only the matches.\n#       This can be used to extract information from a string.\n#       (default to false)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The string with replacements.\n# \n# ```bash\n# MY_STRING=\"name: julien\"\n# regex::replace MY_STRING \"name: (.*)\" \"\\1\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions\n# \nregex::replace \"${1:**string variable name**}\" \"${2:**regex**}\" \"${3:**replacement**}\" \"${4:max count}\" \"${5:only matches}\"$0" ]
+  "body": [ "# ## regex::replace\n# \n# Replaces strings within a string using a regex.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name containing the string in which to do replacements.\n#       Replacement is done in place.\n# - \\$2: **regex** _as string_:\n#       The regex to use for the match.\n# - \\$3: **replacement** _as string_:\n#       The replacement string.\n#       Use \\x to refer to the x-th capture group.\n#       Use \\c to refer to replacement counter.\n# - \\$4: max count _as int_:\n#       (optional) Can be set using the variable `_OPTION_MAX_COUNT`.\n#       The number of replacements to do.\n#       (default to -1, which is unlimited)\n# - \\$5: only matches _as bool_:\n#       (optional) Can be set using the variable `_OPTION_ONLY_MATCHES`.\n#       Instead of replacing with the regex, we keep only the matches.\n#       This can be used to extract information from a string.\n#       (default to false)\n# \n# Returns:\n# \n# - \\${REPLY}: The string with replacements.\n# \n# ```bash\n# MY_STRING=\"name: julien\"\n# regex::replace MY_STRING \"name: (.*)\" \"\\1\"\n# echo \"\\${REPLY}\"\n# ```\n# \n# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions\n# \nregex::replace \"${1:**string variable name**}\" \"${2:**regex**}\" \"${3:**replacement**}\" \"${4:max count}\" \"${5:only matches}\"$0" ]
 },
 
 "sfzf::show": {
@@ -1440,7 +1440,7 @@
   "prefix": "sfzf::show#withdoc",
   "description": "Displays a menu where the user can search and select an item...",
   "scope": "",
-  "body": [ "# ## sfzf::show\n# \n# Displays a menu where the user can search and select an item.\n# The menu is displayed in full screen.\n# Each item can optionally have a description/details shown in a right panel.\n# The user can search for an item by typing.\n# \n# - \\$1: **prompt** _as string_:\n#       The prompt to display to the user (e.g. Please pick an item).\n# - \\$2: **array name** _as string_:\n#       The items to display (name of a global array).\n# - \\$3: select callback function name _as string_:\n#       (optional) The function to call when an item is selected\n#       (defaults to empty, no callback)\n#       this parameter can be left empty to hide the preview right pane;\n#       otherwise the callback function should have the following signature:\n#   - \\$1: the current item\n#   - \\$2: the item number;\n#   - \\$3: the current panel width;\n#   - it should return the details of the item in the `RETURNED_VALUE` variable.\n# - \\$4: preview title _as string_:\n#       (optional) the title of the preview right pane (if any)\n#       (defaults to empty)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The selected item value (or empty).\n# - \\${RETURNED_VALUE2}: The selected item index (from the original array).\n#                      Or -1 if the user cancelled the selection\n# \n# ```bash\n# declare -g -a SELECTION_ARRAY\n# SELECTION_ARRAY=(\"blue\" \"red\" \"green\" \"yellow\")\n# sfzf::show \"What's your favorite color?\" SELECTION_ARRAY\n# log::info \"You selected: ⌜\\${RETURNED_VALUE}⌝ (index: ⌜\\${RETURNED_VALUE2}⌝)\"\n# ```\n# \nsfzf::show \"${1:**prompt**}\" \"${2:**array name**}\" \"${3:select callback function name}\" \"${4:preview title}\"$0" ]
+  "body": [ "# ## sfzf::show\n# \n# Displays a menu where the user can search and select an item.\n# The menu is displayed in full screen.\n# Each item can optionally have a description/details shown in a right panel.\n# The user can search for an item by typing.\n# \n# - \\$1: **prompt** _as string_:\n#       The prompt to display to the user (e.g. Please pick an item).\n# - \\$2: **array name** _as string_:\n#       The items to display (name of a global array).\n# - \\$3: select callback function name _as string_:\n#       (optional) The function to call when an item is selected\n#       (defaults to empty, no callback)\n#       this parameter can be left empty to hide the preview right pane;\n#       otherwise the callback function should have the following signature:\n#   - \\$1: the current item\n#   - \\$2: the item number;\n#   - \\$3: the current panel width;\n#   - it should return the details of the item in the `REPLY` variable.\n# - \\$4: preview title _as string_:\n#       (optional) the title of the preview right pane (if any)\n#       (defaults to empty)\n# \n# Returns:\n# \n# - \\${REPLY}: The selected item value (or empty).\n# - \\${REPLY2}: The selected item index (from the original array).\n#                      Or -1 if the user cancelled the selection\n# \n# ```bash\n# declare -g -a SELECTION_ARRAY\n# SELECTION_ARRAY=(\"blue\" \"red\" \"green\" \"yellow\")\n# sfzf::show \"What's your favorite color?\" SELECTION_ARRAY\n# log::info \"You selected: ⌜\\${REPLY}⌝ (index: ⌜\\${REPLY2}⌝)\"\n# ```\n# \nsfzf::show \"${1:**prompt**}\" \"${2:**array name**}\" \"${3:select callback function name}\" \"${4:preview title}\"$0" ]
 },
 
 "source": {
@@ -1468,7 +1468,7 @@
   "prefix": "string::convertCamelCaseToSnakeCase#withdoc",
   "description": "This function convert a camelCase string to a SNAKE_CASE string...",
   "scope": "",
-  "body": [ "# ## string::convertCamelCaseToSnakeCase\n# \n# This function convert a camelCase string to a SNAKE_CASE string.\n# It uses pure bash.\n# Removes all leading underscores.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the extracted field\n# \n# ```bash\n# MY_STRING=\"myCamelCaseString\"\n# string::convertCamelCaseToSnakeCase MY_STRING\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::convertCamelCaseToSnakeCase \"${1:**string variable name**}\"$0" ]
+  "body": [ "# ## string::convertCamelCaseToSnakeCase\n# \n# This function convert a camelCase string to a SNAKE_CASE string.\n# It uses pure bash.\n# Removes all leading underscores.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"myCamelCaseString\"\n# string::convertCamelCaseToSnakeCase MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::convertCamelCaseToSnakeCase \"${1:**string variable name**}\"$0" ]
 },
 
 "string::convertKebabCaseToCamelCase": {
@@ -1482,7 +1482,7 @@
   "prefix": "string::convertKebabCaseToCamelCase#withdoc",
   "description": "This function convert a kebab-case string to a camelCase string...",
   "scope": "",
-  "body": [ "# ## string::convertKebabCaseToCamelCase\n# \n# This function convert a kebab-case string to a camelCase string.\n# It uses pure bash.\n# Removes all leading dashes.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the extracted field\n# \n# ```bash\n# MY_STRING=\"my-kebab-case-string\"\n# string::convertKebabCaseToCamelCase MY_STRING\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::convertKebabCaseToCamelCase \"${1:**string variable name**}\"$0" ]
+  "body": [ "# ## string::convertKebabCaseToCamelCase\n# \n# This function convert a kebab-case string to a camelCase string.\n# It uses pure bash.\n# Removes all leading dashes.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"my-kebab-case-string\"\n# string::convertKebabCaseToCamelCase MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::convertKebabCaseToCamelCase \"${1:**string variable name**}\"$0" ]
 },
 
 "string::convertKebabCaseToSnakeCase": {
@@ -1496,7 +1496,7 @@
   "prefix": "string::convertKebabCaseToSnakeCase#withdoc",
   "description": "This function convert a kebab-case string to a SNAKE_CASE string...",
   "scope": "",
-  "body": [ "# ## string::convertKebabCaseToSnakeCase\n# \n# This function convert a kebab-case string to a SNAKE_CASE string.\n# It uses pure bash.\n# Removes all leading dashes.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the extracted field\n# \n# ```bash\n# MY_STRING=\"my-kebab-case-string\"\n# string::convertKebabCaseToSnakeCase MY_STRING\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::convertKebabCaseToSnakeCase \"${1:**string variable name**}\"$0" ]
+  "body": [ "# ## string::convertKebabCaseToSnakeCase\n# \n# This function convert a kebab-case string to a SNAKE_CASE string.\n# It uses pure bash.\n# Removes all leading dashes.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"my-kebab-case-string\"\n# string::convertKebabCaseToSnakeCase MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::convertKebabCaseToSnakeCase \"${1:**string variable name**}\"$0" ]
 },
 
 "string::count": {
@@ -1510,7 +1510,7 @@
   "prefix": "string::count#withdoc",
   "description": "Counts the number of occurrences of a substring in a string...",
   "scope": "",
-  "body": [ "# ## string::count\n# \n# Counts the number of occurrences of a substring in a string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string in which to count occurrences.\n# - \\$2: **substring** _as string_:\n#       the substring to count\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the number of occurrences\n# \n# ```bash\n# MY_STRING=\"name,first_name,address\"\n# string::count MY_STRING \",\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This is faster than looping over the string and check the substring.\n# \nstring::count \"${1:**string variable name**}\" \"${2:**substring**}\"$0" ]
+  "body": [ "# ## string::count\n# \n# Counts the number of occurrences of a substring in a string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string in which to count occurrences.\n# - \\$2: **substring** _as string_:\n#       the substring to count\n# \n# Returns:\n# \n# - \\${REPLY}: the number of occurrences\n# \n# ```bash\n# MY_STRING=\"name,first_name,address\"\n# string::count MY_STRING \",\"\n# echo \"\\${REPLY}\"\n# ```\n# \n# > This is faster than looping over the string and check the substring.\n# \nstring::count \"${1:**string variable name**}\" \"${2:**substring**}\"$0" ]
 },
 
 "string::doForEachLine": {
@@ -1538,7 +1538,7 @@
   "prefix": "string::extractBetween#withdoc",
   "description": "Extract the text between two strings within a string...",
   "scope": "",
-  "body": [ "# ## string::extractBetween\n# \n# Extract the text between two strings within a string.\n# Search for the first occurrence of the start string and the first occurrence\n# (after the start index) of the end string.\n# Both start and end strings are excluded in the extracted text.\n# Both start and end strings must be found to extract something.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string from which to extract a text.\n# - \\$2: **start string** _as string_:\n#       the start string\n#       (if empty, then it will extract from the beginning of the string)\n# - \\$3: **end string** _as string_:\n#       the end string\n#       (if empty, then it will extract until the end of the string)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the extracted text\n# \n# ```bash\n# MY_STRING=\"This is a long text\"\n# string::extractBetween MY_STRING \"is a \" \" text\"\n# local extractedText=\"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::extractBetween \"${1:**string variable name**}\" \"${2:**start string**}\" \"${3:**end string**}\"$0" ]
+  "body": [ "# ## string::extractBetween\n# \n# Extract the text between two strings within a string.\n# Search for the first occurrence of the start string and the first occurrence\n# (after the start index) of the end string.\n# Both start and end strings are excluded in the extracted text.\n# Both start and end strings must be found to extract something.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string from which to extract a text.\n# - \\$2: **start string** _as string_:\n#       the start string\n#       (if empty, then it will extract from the beginning of the string)\n# - \\$3: **end string** _as string_:\n#       the end string\n#       (if empty, then it will extract until the end of the string)\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted text\n# \n# ```bash\n# MY_STRING=\"This is a long text\"\n# string::extractBetween MY_STRING \"is a \" \" text\"\n# local extractedText=\"\\${REPLY}\"\n# ```\n# \nstring::extractBetween \"${1:**string variable name**}\" \"${2:**start string**}\" \"${3:**end string**}\"$0" ]
 },
 
 "string::getField": {
@@ -1552,7 +1552,7 @@
   "prefix": "string::getField#withdoc",
   "description": "Allows to get the nth element of a string separated by a given separator...",
   "scope": "",
-  "body": [ "# ## string::getField\n# \n# Allows to get the nth element of a string separated by a given separator.\n# This is the equivalent of the cut command \"cut -d\"\\${separator}\" -f\"\\${fieldNumber}\"\"\n# but it uses pure bash to go faster.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to extract from.\n# - \\$2: **field number** _as int_:\n#       The field number to get (starting at 0).\n# - \\$3: separator _as string_:\n#       The separator to use.\n#       (defaults to tab if not provided)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the extracted field\n# \n# ```bash\n# MY_STRING=\"field1 field2 field3\"\n# string::getField MY_STRING 1 \" \"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This is faster than:\n# >\n# > - using read into an array from a here string\n# > - using bash parameter expansion to remove before/after the separator\n# \nstring::getField \"${1:**string variable name**}\" \"${2:**field number**}\" \"${3:separator}\"$0" ]
+  "body": [ "# ## string::getField\n# \n# Allows to get the nth element of a string separated by a given separator.\n# This is the equivalent of the cut command \"cut -d\"\\${separator}\" -f\"\\${fieldNumber}\"\"\n# but it uses pure bash to go faster.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to extract from.\n# - \\$2: **field number** _as int_:\n#       The field number to get (starting at 0).\n# - \\$3: separator _as string_:\n#       The separator to use.\n#       (defaults to tab if not provided)\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"field1 field2 field3\"\n# string::getField MY_STRING 1 \" \"\n# echo \"\\${REPLY}\"\n# ```\n# \n# > This is faster than:\n# >\n# > - using read into an array from a here string\n# > - using bash parameter expansion to remove before/after the separator\n# \nstring::getField \"${1:**string variable name**}\" \"${2:**field number**}\" \"${3:separator}\"$0" ]
 },
 
 "string::getFuzzySearchRegexFromSearchString": {
@@ -1580,7 +1580,7 @@
   "prefix": "string::getIndexOf#withdoc",
   "description": "Find the first index of a string within another string...",
   "scope": "",
-  "body": [ "# ## string::getIndexOf\n# \n# Find the first index of a string within another string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string from which to find an index.\n# - \\$2: **search** _as string_:\n#       the string to search\n# - \\$3: start index _as int_:\n#       (optional) the starting index\n#       (defaults to 0)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the index of the substring in the string or -1 if not found.\n# \n# ```bash\n# MY_STRING=\"This is a long text\"\n# string::getIndexOf MY_STRING \"long\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::getIndexOf \"${1:**string variable name**}\" \"${2:**search**}\" \"${3:start index}\"$0" ]
+  "body": [ "# ## string::getIndexOf\n# \n# Find the first index of a string within another string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string from which to find an index.\n# - \\$2: **search** _as string_:\n#       the string to search\n# - \\$3: start index _as int_:\n#       (optional) the starting index\n#       (defaults to 0)\n# \n# Returns:\n# \n# - \\${REPLY}: the index of the substring in the string or -1 if not found.\n# \n# ```bash\n# MY_STRING=\"This is a long text\"\n# string::getIndexOf MY_STRING \"long\"\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::getIndexOf \"${1:**string variable name**}\" \"${2:**search**}\" \"${3:start index}\"$0" ]
 },
 
 "string::head": {
@@ -1594,7 +1594,7 @@
   "prefix": "string::head#withdoc",
   "description": "Get the first nth items (e...",
   "scope": "",
-  "body": [ "# ## string::head\n# \n# Get the first nth items (e.g. lines) of a string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string from which to get the first occurrences.\n# - \\$2: **nb items** _as int_:\n#       The number of items (lines) to extract.\n# - \\$3: separator _as string_:\n#       (optional) Can be set using the variable `_OPTION_SEPARATOR`.\n#       The separator character to use.\n#       (defaults to newline if not provided)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The extracted string.\n# \n# ```bash\n# MY_STRING=\"line1\"\\$'\\n'\"line2\"\\$'\\n'\"line3\"\n# string::head MY_STRING 2\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::head \"${1:**string variable name**}\" \"${2:**nb items**}\" \"${3:separator}\"$0" ]
+  "body": [ "# ## string::head\n# \n# Get the first nth items (e.g. lines) of a string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string from which to get the first occurrences.\n# - \\$2: **nb items** _as int_:\n#       The number of items (lines) to extract.\n# - \\$3: separator _as string_:\n#       (optional) Can be set using the variable `_OPTION_SEPARATOR`.\n#       The separator character to use.\n#       (defaults to newline if not provided)\n# \n# Returns:\n# \n# - \\${REPLY}: The extracted string.\n# \n# ```bash\n# MY_STRING=\"line1\"\\$'\\n'\"line2\"\\$'\\n'\"line3\"\n# string::head MY_STRING 2\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::head \"${1:**string variable name**}\" \"${2:**nb items**}\" \"${3:separator}\"$0" ]
 },
 
 "string::highlight": {
@@ -1608,7 +1608,7 @@
   "prefix": "string::highlight#withdoc",
   "description": "Highlight characters in a string...",
   "scope": "",
-  "body": [ "# ## string::highlight\n# \n# Highlight characters in a string.\n# \n# - \\$1: **text variable name** _as string_:\n#       The variable name that contains the text to highlight.\n# - \\$2: **characters variable name** _as string_:\n#       The variable name that contains characters to highlight.\n# - \\$3: highlight ansi code _as string_:\n#       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.\n#       The ANSI code to use for highlighting.\n#       (defaults to STYLE_COLOR_ACCENT)\n# - \\$4: reset ansi code _as string_:\n#       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.\n#       The ANSI code to use for resetting the highlighting.\n#       (defaults to STYLE_COLOR_DEFAULT)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the highlighted text\n# \n# ```bash\n# string::highlight \"This is a text to highlight.\" \"ttttt\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - All characters to highlight must be found in the same order in the matched line.\n# > - This functions is case insensitive.\n# \nstring::highlight \"${1:**text variable name**}\" \"${2:**characters variable name**}\" \"${3:highlight ansi code}\" \"${4:reset ansi code}\"$0" ]
+  "body": [ "# ## string::highlight\n# \n# Highlight characters in a string.\n# \n# - \\$1: **text variable name** _as string_:\n#       The variable name that contains the text to highlight.\n# - \\$2: **characters variable name** _as string_:\n#       The variable name that contains characters to highlight.\n# - \\$3: highlight ansi code _as string_:\n#       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.\n#       The ANSI code to use for highlighting.\n#       (defaults to STYLE_COLOR_ACCENT)\n# - \\$4: reset ansi code _as string_:\n#       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.\n#       The ANSI code to use for resetting the highlighting.\n#       (defaults to STYLE_COLOR_DEFAULT)\n# \n# Returns:\n# \n# - \\${REPLY}: the highlighted text\n# \n# ```bash\n# string::highlight \"This is a text to highlight.\" \"ttttt\"\n# echo \"\\${REPLY}\"\n# ```\n# \n# > - All characters to highlight must be found in the same order in the matched line.\n# > - This functions is case insensitive.\n# \nstring::highlight \"${1:**text variable name**}\" \"${2:**characters variable name**}\" \"${3:highlight ansi code}\" \"${4:reset ansi code}\"$0" ]
 },
 
 "string::removeSgrCodes": {
@@ -1622,7 +1622,7 @@
   "prefix": "string::removeSgrCodes#withdoc",
   "description": "Remove all SGR (Select Graphic Rendition) codes from a string...",
   "scope": "",
-  "body": [ "# ## string::removeSgrCodes\n# \n# Remove all SGR (Select Graphic Rendition) codes from a string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to clean.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the cleaned string\n# \n# ```bash\n# MY_STRING=\"This is a string with SGR codes\"\\$'\\e[0m'\n# string::removeSgrCodes MY_STRING\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::removeSgrCodes \"${1:**string variable name**}\"$0" ]
+  "body": [ "# ## string::removeSgrCodes\n# \n# Remove all SGR (Select Graphic Rendition) codes from a string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to clean.\n# \n# Returns:\n# \n# - \\${REPLY}: the cleaned string\n# \n# ```bash\n# MY_STRING=\"This is a string with SGR codes\"\\$'\\e[0m'\n# string::removeSgrCodes MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::removeSgrCodes \"${1:**string variable name**}\"$0" ]
 },
 
 "string::split": {
@@ -1636,7 +1636,7 @@
   "prefix": "string::split#withdoc",
   "description": "Split a string into an array using a separator...",
   "scope": "",
-  "body": [ "# ## string::split\n# \n# Split a string into an array using a separator.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to split.\n# - \\$2: **separators** _as string_:\n#       The separator characters to use.\n# \n# Returns:\n# \n# - \\${RETURNED_ARRAY[@]}: the array of strings\n# \n# ```bash\n# MY_STRING=\"name,first_name,address\"\n# string::split MY_STRING \",\"\n# ARRAY=(\"\\${RETURNED_ARRAY[@]}\")\n# ```\n# \n# > This is faster than using read into an array from a here string.\n# \nstring::split \"${1:**string variable name**}\" \"${2:**separators**}\"$0" ]
+  "body": [ "# ## string::split\n# \n# Split a string into an array using a separator.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to split.\n# - \\$2: **separators** _as string_:\n#       The separator characters to use.\n# \n# Returns:\n# \n# - \\${REPLY_ARRAY[@]}: the array of strings\n# \n# ```bash\n# MY_STRING=\"name,first_name,address\"\n# string::split MY_STRING \",\"\n# ARRAY=(\"\\${REPLY_ARRAY[@]}\")\n# ```\n# \n# > This is faster than using read into an array from a here string.\n# \nstring::split \"${1:**string variable name**}\" \"${2:**separators**}\"$0" ]
 },
 
 "string::trimAll": {
@@ -1650,7 +1650,7 @@
   "prefix": "string::trimAll#withdoc",
   "description": "Trim all whitespaces and truncate spaces...",
   "scope": "",
-  "body": [ "# ## string::trimAll\n# \n# Trim all whitespaces and truncate spaces.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to trim.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the extracted field\n# \n# ```bash\n# MY_STRING=\"   example \"\\$'\\t'\"  string    \"\\$'\\n'\n# string::trimAll MY_STRING\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::trimAll \"${1:**string variable name**}\"$0" ]
+  "body": [ "# ## string::trimAll\n# \n# Trim all whitespaces and truncate spaces.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to trim.\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"   example \"\\$'\\t'\"  string    \"\\$'\\n'\n# string::trimAll MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::trimAll \"${1:**string variable name**}\"$0" ]
 },
 
 "string::trimEdges": {
@@ -1664,7 +1664,7 @@
   "prefix": "string::trimEdges#withdoc",
   "description": "Trim leading and trailing characters (defaults to whitespaces)...",
   "scope": "",
-  "body": [ "# ## string::trimEdges\n# \n# Trim leading and trailing characters (defaults to whitespaces).\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to trim.\n# - \\$2: characters to trim _as string_:\n#       The characters to trim.\n#       (defaults to \" \"\\$'\\t'\\$'\\n')\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the extracted field\n# \n# ```bash\n# MY_STRING=\"   example  string    \"\n# string::trimEdges MY_STRING\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nstring::trimEdges \"${1:**string variable name**}\" \"${2:characters to trim}\"$0" ]
+  "body": [ "# ## string::trimEdges\n# \n# Trim leading and trailing characters (defaults to whitespaces).\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to trim.\n# - \\$2: characters to trim _as string_:\n#       The characters to trim.\n#       (defaults to \" \"\\$'\\t'\\$'\\n')\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"   example  string    \"\n# string::trimEdges MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::trimEdges \"${1:**string variable name**}\" \"${2:characters to trim}\"$0" ]
 },
 
 "string::wrapCharacters": {
@@ -1678,7 +1678,7 @@
   "prefix": "string::wrapCharacters#withdoc",
   "description": "Allows to hard wrap the given string at the given width...",
   "scope": "",
-  "body": [ "# ## string::wrapCharacters\n# \n# Allows to hard wrap the given string at the given width.\n# Wrapping is done at character boundaries, see string::warpText for word wrapping.\n# Optionally appends padding characters on each new line.\n# \n# - \\$1: **text variable name** _as string_:\n#       The variable name that contains the text to wrap.\n# - \\$2: wrap width _as string_:\n#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.\n#       The width to wrap the text at.\n#       Note that length of the optional padding characters are subtracted from the\n#       width to make sure the text fits in the given width.\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3: padding characters _as string_:\n#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.\n#       The characters to apply as padding on the left of each new line.\n#       E.g. '  ' will add 2 spaces on the left of each new line.\n#       (defaults to \"\")\n# - \\$4: first line width _as int_:\n#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.\n#       The width to use for the first line.\n#       (defaults to the width)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the wrapped string\n# - \\${RETURNED_VALUE2}: the length taken on the last line\n# \n# ```bash\n# string::wrapCharacters \"This is a long text that should be wrapped at 20 characters.\" 20 --- 5\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - It considers escape sequence for text formatting and does not count them as visible characters.\n# > - Leading spaces after a newly wrapped line are removed.\n# \nstring::wrapCharacters \"${1:**text variable name**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
+  "body": [ "# ## string::wrapCharacters\n# \n# Allows to hard wrap the given string at the given width.\n# Wrapping is done at character boundaries, see string::warpText for word wrapping.\n# Optionally appends padding characters on each new line.\n# \n# - \\$1: **text variable name** _as string_:\n#       The variable name that contains the text to wrap.\n# - \\$2: wrap width _as string_:\n#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.\n#       The width to wrap the text at.\n#       Note that length of the optional padding characters are subtracted from the\n#       width to make sure the text fits in the given width.\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3: padding characters _as string_:\n#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.\n#       The characters to apply as padding on the left of each new line.\n#       E.g. '  ' will add 2 spaces on the left of each new line.\n#       (defaults to \"\")\n# - \\$4: first line width _as int_:\n#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.\n#       The width to use for the first line.\n#       (defaults to the width)\n# \n# Returns:\n# \n# - \\${REPLY}: the wrapped string\n# - \\${REPLY2}: the length taken on the last line\n# \n# ```bash\n# string::wrapCharacters \"This is a long text that should be wrapped at 20 characters.\" 20 --- 5\n# echo \"\\${REPLY}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - It considers escape sequence for text formatting and does not count them as visible characters.\n# > - Leading spaces after a newly wrapped line are removed.\n# \nstring::wrapCharacters \"${1:**text variable name**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
 },
 
 "string::wrapWords": {
@@ -1692,7 +1692,7 @@
   "prefix": "string::wrapWords#withdoc",
   "description": "Allows to soft wrap the given text at the given width...",
   "scope": "",
-  "body": [ "# ## string::wrapWords\n# \n# Allows to soft wrap the given text at the given width.\n# Wrapping is done at word boundaries.\n# Optionally appends padding characters on each new line.\n# \n# - \\$1: **text variable name** _as string_:\n#       The variable name that contains the text to wrap.\n# - \\$2: wrap width _as string_:\n#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.\n#       The width to wrap the text at.\n#       Note that length of the optional padding characters are subtracted from the\n#       width to make sure the text fits in the given width.\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3: padding characters _as string_:\n#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.\n#       The characters to apply as padding on the left of each new line.\n#       E.g. '  ' will add 2 spaces on the left of each new line.\n#       (defaults to 0)\n# - \\$4: first line width _as int_:\n#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.\n#       The width to use for the first line.\n#       (defaults to the width)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the wrapped text\n# \n# ```bash\n# string::wrapWords \"This is a long text that should be wrapped at 20 characters.\" 20 '  ' 5\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).\n# > - It considers escape sequence for text formatting and does not count them as visible characters.\n# \nstring::wrapWords \"${1:**text variable name**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
+  "body": [ "# ## string::wrapWords\n# \n# Allows to soft wrap the given text at the given width.\n# Wrapping is done at word boundaries.\n# Optionally appends padding characters on each new line.\n# \n# - \\$1: **text variable name** _as string_:\n#       The variable name that contains the text to wrap.\n# - \\$2: wrap width _as string_:\n#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.\n#       The width to wrap the text at.\n#       Note that length of the optional padding characters are subtracted from the\n#       width to make sure the text fits in the given width.\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$3: padding characters _as string_:\n#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.\n#       The characters to apply as padding on the left of each new line.\n#       E.g. '  ' will add 2 spaces on the left of each new line.\n#       (defaults to 0)\n# - \\$4: first line width _as int_:\n#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.\n#       The width to use for the first line.\n#       (defaults to the width)\n# \n# Returns:\n# \n# - \\${REPLY}: the wrapped text\n# \n# ```bash\n# string::wrapWords \"This is a long text that should be wrapped at 20 characters.\" 20 '  ' 5\n# echo \"\\${REPLY}\"\n# ```\n# \n# > - This function is written in pure bash and is faster than calling the fold command.\n# > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).\n# > - It considers escape sequence for text formatting and does not count them as visible characters.\n# \nstring::wrapWords \"${1:**text variable name**}\" \"${2:wrap width}\" \"${3:padding characters}\" \"${4:first line width}\"$0" ]
 },
 
 "system::addToPath": {
@@ -1720,7 +1720,7 @@
   "prefix": "system::getArchitecture#withdoc",
   "description": "Returns the CPU architecture of the current machine...",
   "scope": "",
-  "body": [ "# ## system::getArchitecture\n# \n# Returns the CPU architecture of the current machine.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the CPU architecture of the current machine.\n# \n# ```bash\n# system::getArchitecture\n# local architecture=\"\\${RETURNED_VALUE}\"\n# ```\n# \nsystem::getArchitecture$0" ]
+  "body": [ "# ## system::getArchitecture\n# \n# Returns the CPU architecture of the current machine.\n# \n# Returns:\n# \n# - \\${REPLY}: the CPU architecture of the current machine.\n# \n# ```bash\n# system::getArchitecture\n# local architecture=\"\\${REPLY}\"\n# ```\n# \nsystem::getArchitecture$0" ]
 },
 
 "system::getEnvVars": {
@@ -1734,7 +1734,7 @@
   "prefix": "system::getEnvVars#withdoc",
   "description": "Get the list of all the environment variables...",
   "scope": "",
-  "body": [ "# ## system::getEnvVars\n# \n# Get the list of all the environment variables.\n# In pure bash, no need for env or printenv.\n# \n# Returns:\n# \n# - \\${RETURNED_ARRAY[@]}: An array with the list of all the environment variables.\n# \n# ```bash\n# system::getEnvVars\n# for var in \"\\${RETURNED_ARRAY[@]}\"; do\n#   printf '%s=%s\\n' \"\\${var}\" \"\\${!var}\"\n# done\n# ```\n# \nsystem::getEnvVars$0" ]
+  "body": [ "# ## system::getEnvVars\n# \n# Get the list of all the environment variables.\n# In pure bash, no need for env or printenv.\n# \n# Returns:\n# \n# - \\${REPLY_ARRAY[@]}: An array with the list of all the environment variables.\n# \n# ```bash\n# system::getEnvVars\n# for var in \"\\${REPLY_ARRAY[@]}\"; do\n#   printf '%s=%s\\n' \"\\${var}\" \"\\${!var}\"\n# done\n# ```\n# \nsystem::getEnvVars$0" ]
 },
 
 "system::getOs": {
@@ -1748,7 +1748,7 @@
   "prefix": "system::getOs#withdoc",
   "description": "Returns the name of the current OS...",
   "scope": "",
-  "body": [ "# ## system::getOs\n# \n# Returns the name of the current OS.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the name of the current OS: \"darwin\", \"linux\" or \"windows\".\n# \n# ```bash\n# system::getOs\n# local osName=\"\\${RETURNED_VALUE}\"\n# ```\n# \nsystem::getOs$0" ]
+  "body": [ "# ## system::getOs\n# \n# Returns the name of the current OS.\n# \n# Returns:\n# \n# - \\${REPLY}: the name of the current OS: \"darwin\", \"linux\" or \"windows\".\n# \n# ```bash\n# system::getOs\n# local osName=\"\\${REPLY}\"\n# ```\n# \nsystem::getOs$0" ]
 },
 
 "system::isDarwin": {
@@ -1893,16 +1893,16 @@
 
 "test::func": {
   "prefix": "test::func",
-  "description": "Call this function to test a function that returns a value using the valet conventions (RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY, etc...",
+  "description": "Call this function to test a function that returns a value using the valet conventions (REPLY, REPLY2, REPLY_ARRAY, etc...",
   "scope": "",
   "body": [ "test::func \"${1:**command**}\"$0" ]
 },
 
 "test::func#withdoc": {
   "prefix": "test::func#withdoc",
-  "description": "Call this function to test a function that returns a value using the valet conventions (RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY, etc...",
+  "description": "Call this function to test a function that returns a value using the valet conventions (REPLY, REPLY2, REPLY_ARRAY, etc...",
   "scope": "",
-  "body": [ "# ## test::func\n# \n# Call this function to test a function that returns a value using the valet\n# conventions (RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY, etc...).\n# \n# It will write the command and its output to the report file.\n# It will also print the returned values.\n# \n# - \\$@: **command** _as string_:\n#       The command to execute (function and its arguments).\n# \n# ```bash\n# test::func myFunction\n# ```\n# \ntest::func \"${1:**command**}\"$0" ]
+  "body": [ "# ## test::func\n# \n# Call this function to test a function that returns a value using the valet\n# conventions (REPLY, REPLY2, REPLY_ARRAY, etc...).\n# \n# It will write the command and its output to the report file.\n# It will also print the returned values.\n# \n# - \\$@: **command** _as string_:\n#       The command to execute (function and its arguments).\n# \n# ```bash\n# test::func myFunction\n# ```\n# \ntest::func \"${1:**command**}\"$0" ]
 },
 
 "test::log": {
@@ -1933,18 +1933,18 @@
   "body": [ "# ## test::markdown\n# \n# Call this function to add some markdown in the report file.\n# \n# - \\$@: **markdown** _as string_:\n#       The markdown to add in the report file.\n# \n# ```bash\n# test::markdown \"> This is a **quote**.\"\n# ```\n# \ntest::markdown \"${1:**markdown**}\"$0" ]
 },
 
-"test::printReturnedVars": {
-  "prefix": "test::printReturnedVars",
+"test::printReplyVars": {
+  "prefix": "test::printReplyVars",
   "description": "This function can be called to print the returned values, e...",
   "scope": "",
-  "body": [ "test::printReturnedVars$0" ]
+  "body": [ "test::printReplyVars$0" ]
 },
 
-"test::printReturnedVars#withdoc": {
-  "prefix": "test::printReturnedVars#withdoc",
+"test::printReplyVars#withdoc": {
+  "prefix": "test::printReplyVars#withdoc",
   "description": "This function can be called to print the returned values, e...",
   "scope": "",
-  "body": [ "# ## test::printReturnedVars\n# \n# This function can be called to print the returned values,\n# e.g. RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY...\n# They will each be printed in a code block in the report file.\n# \n# ```bash\n# test::printReturnedVars\n# ```\n# \ntest::printReturnedVars$0" ]
+  "body": [ "# ## test::printReplyVars\n# \n# This function can be called to print the returned values,\n# e.g. REPLY, REPLY2, REPLY_ARRAY...\n# They will each be printed in a code block in the report file.\n# \n# ```bash\n# test::printReplyVars\n# ```\n# \ntest::printReplyVars$0" ]
 },
 
 "test::printVars": {
@@ -1975,18 +1975,18 @@
   "body": [ "# ## test::prompt\n# \n# Call this function to print a 'prompt' (markdown that looks like a prompt) in the report file.\n# \n# - \\$@: **command** _as string_:\n#       The command to print as a prompt.\n# \n# ```bash\n# test::prompt \"echo 'Hello, world!'\"\n# ```\n# \ntest::prompt \"${1:**command**}\"$0" ]
 },
 
-"test::resetReturnedVars": {
-  "prefix": "test::resetReturnedVars",
+"test::resetReplyVars": {
+  "prefix": "test::resetReplyVars",
   "description": "Resets the value of each RETURNED_ variable...",
   "scope": "",
-  "body": [ "test::resetReturnedVars$0" ]
+  "body": [ "test::resetReplyVars$0" ]
 },
 
-"test::resetReturnedVars#withdoc": {
-  "prefix": "test::resetReturnedVars#withdoc",
+"test::resetReplyVars#withdoc": {
+  "prefix": "test::resetReplyVars#withdoc",
   "description": "Resets the value of each RETURNED_ variable...",
   "scope": "",
-  "body": [ "# ## test::resetReturnedVars\n# \n# Resets the value of each RETURNED_ variable.\n# \n# ```bash\n# test::resetReturnedVars\n# ```\n# \ntest::resetReturnedVars$0" ]
+  "body": [ "# ## test::resetReplyVars\n# \n# Resets the value of each RETURNED_ variable.\n# \n# ```bash\n# test::resetReplyVars\n# ```\n# \ntest::resetReplyVars$0" ]
 },
 
 "test::title": {
@@ -2003,18 +2003,18 @@
   "body": [ "# ## test::title\n# \n# Call this function to add an H3 title in the report file.\n# \n# - \\$1: title _as string_:\n#       (optional) Can be set using the variable `_OPTION_TITLE`.\n#       The title of the test.\n#      (defaults to \"Test\")\n# \n# ```bash\n# test::title \"Testing something\"\n# ```\n# \ntest::title \"${1:title}\"$0" ]
 },
 
-"test::transformReturnedVarsBeforePrinting": {
-  "prefix": "test::transformReturnedVarsBeforePrinting",
+"test::transformReplyVarsBeforePrinting": {
+  "prefix": "test::transformReplyVarsBeforePrinting",
   "description": "This function can be defined to modify the returned variables before printing them in the report...",
   "scope": "",
-  "body": [ "test::transformReturnedVarsBeforePrinting$0" ]
+  "body": [ "test::transformReplyVarsBeforePrinting$0" ]
 },
 
-"test::transformReturnedVarsBeforePrinting#withdoc": {
-  "prefix": "test::transformReturnedVarsBeforePrinting#withdoc",
+"test::transformReplyVarsBeforePrinting#withdoc": {
+  "prefix": "test::transformReplyVarsBeforePrinting#withdoc",
   "description": "This function can be defined to modify the returned variables before printing them in the report...",
   "scope": "",
-  "body": [ "# ## test::transformReturnedVarsBeforePrinting\n# \n# This function can be defined to modify the returned variables before printing them in the report.\n# \n# > You can define this function directly in the test script, or in a test hook if\n# > you need it to be available for multiple tests.\n# > Note however that this function can be called very often, so it should be optimized.\n# \ntest::transformReturnedVarsBeforePrinting$0" ]
+  "body": [ "# ## test::transformReplyVarsBeforePrinting\n# \n# This function can be defined to modify the returned variables before printing them in the report.\n# \n# > You can define this function directly in the test script, or in a test hook if\n# > you need it to be available for multiple tests.\n# > Note however that this function can be called very often, so it should be optimized.\n# \ntest::transformReplyVarsBeforePrinting$0" ]
 },
 
 "test::transformTextBeforeFlushing": {
@@ -2042,7 +2042,7 @@
   "prefix": "time::convertMicrosecondsToHuman#withdoc",
   "description": "Convert microseconds to human readable format...",
   "scope": "",
-  "body": [ "# ## time::convertMicrosecondsToHuman\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\$2: format _as string_:\n#      (optional) Can be set using the variable `_OPTION_FORMAT`.\n#      the format to use (defaults to \"%HH:%MM:%SS\")\n#      Usable formats:\n#      - %HH: hours\n#      - %MM: minutes\n#      - %SS: seconds\n#      - %LL: milliseconds\n#      - %h: hours without leading zero\n#      - %m: minutes without leading zero\n#      - %s: seconds without leading zero\n#      - %l: milliseconds without leading zero\n#      - %u: microseconds without leading zero\n#      - %M: total minutes\n#      - %S: total seconds\n#      - %L: total milliseconds\n#      - %U: total microseconds\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the human readable format\n# \n# ```bash\n# time::convertMicrosecondsToHuman 123456789\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \ntime::convertMicrosecondsToHuman \"${1:**microseconds**}\" \"${2:format}\"$0" ]
+  "body": [ "# ## time::convertMicrosecondsToHuman\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\$2: format _as string_:\n#      (optional) Can be set using the variable `_OPTION_FORMAT`.\n#      the format to use (defaults to \"%HH:%MM:%SS\")\n#      Usable formats:\n#      - %HH: hours\n#      - %MM: minutes\n#      - %SS: seconds\n#      - %LL: milliseconds\n#      - %h: hours without leading zero\n#      - %m: minutes without leading zero\n#      - %s: seconds without leading zero\n#      - %l: milliseconds without leading zero\n#      - %u: microseconds without leading zero\n#      - %M: total minutes\n#      - %S: total seconds\n#      - %L: total milliseconds\n#      - %U: total microseconds\n# \n# Returns:\n# \n# - \\${REPLY}: the human readable format\n# \n# ```bash\n# time::convertMicrosecondsToHuman 123456789\n# echo \"\\${REPLY}\"\n# ```\n# \ntime::convertMicrosecondsToHuman \"${1:**microseconds**}\" \"${2:format}\"$0" ]
 },
 
 "time::getDate": {
@@ -2056,7 +2056,7 @@
   "prefix": "time::getDate#withdoc",
   "description": "Get the current date in the given format...",
   "scope": "",
-  "body": [ "# ## time::getDate\n# \n# Get the current date in the given format.\n# \n# - \\$1: format _as string_:\n#       (optional) the format of the date to return\n#       (defaults to %(%F_%Hh%Mm%Ss)T).\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the current date in the given format.\n# \n# ```bash\n# time::getDate\n# local date=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > This function avoid to call \\$(date) in a subshell (date is a an external executable).\n# \ntime::getDate \"${1:format}\"$0" ]
+  "body": [ "# ## time::getDate\n# \n# Get the current date in the given format.\n# \n# - \\$1: format _as string_:\n#       (optional) the format of the date to return\n#       (defaults to %(%F_%Hh%Mm%Ss)T).\n# \n# Returns:\n# \n# - \\${REPLY}: the current date in the given format.\n# \n# ```bash\n# time::getDate\n# local date=\"\\${REPLY}\"\n# ```\n# \n# > This function avoid to call \\$(date) in a subshell (date is a an external executable).\n# \ntime::getDate \"${1:format}\"$0" ]
 },
 
 "time::getProgramElapsedMicroseconds": {
@@ -2070,7 +2070,7 @@
   "prefix": "time::getProgramElapsedMicroseconds#withdoc",
   "description": "Get the elapsed time in µs since the program started...",
   "scope": "",
-  "body": [ "# ## time::getProgramElapsedMicroseconds\n# \n# Get the elapsed time in µs since the program started.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the elapsed time in µs since the program started.\n# \n# ```bash\n# core::getElapsedProgramTime\n# echo \"\\${RETURNED_VALUE}\"\n# time::convertMicrosecondsToHuman \"\\${RETURNED_VALUE}\"\n# echo \"Human time: \\${RETURNED_VALUE}\"\n# ```\n# \n# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.\n# > The 10# forces the base 10 conversion to avoid issues with leading zeros.\n# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.\n# \ntime::getProgramElapsedMicroseconds$0" ]
+  "body": [ "# ## time::getProgramElapsedMicroseconds\n# \n# Get the elapsed time in µs since the program started.\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in µs since the program started.\n# \n# ```bash\n# core::getElapsedProgramTime\n# echo \"\\${REPLY}\"\n# time::convertMicrosecondsToHuman \"\\${REPLY}\"\n# echo \"Human time: \\${REPLY}\"\n# ```\n# \n# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.\n# > The 10# forces the base 10 conversion to avoid issues with leading zeros.\n# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.\n# \ntime::getProgramElapsedMicroseconds$0" ]
 },
 
 "time::getTimerMicroseconds": {
@@ -2084,7 +2084,7 @@
   "prefix": "time::getTimerMicroseconds#withdoc",
   "description": "Get the time elapsed since the call of `time::startTimer`...",
   "scope": "",
-  "body": [ "# ## time::getTimerMicroseconds\n# \n# Get the time elapsed since the call of `time::startTimer`.\n# \n# - \\${_OPTION_LOG_ELAPSED_TIME} _as bool_:\n#      (optional) Wether or not to log the elapsed time.\n#      (defaults to false)\n# - \\${_OPTION_FORMAT} _as string_:\n#      (optional) The format to use if we log the elapsed time.\n#      See `time::convertMicrosecondsToHuman` for the format.\n#      (defaults to \"%S.%LLs\").\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the elapsed time in microseconds.\n# \n# ```bash\n# time::startTimer\n# _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds\n# echo \"Total microseconds: \\${RETURNED_VALUE}\"\n# ```\n# \n_OPTION_LOG_ELAPSED_TIME=${1} _OPTION_FORMAT=${2} time::getTimerMicroseconds$0" ]
+  "body": [ "# ## time::getTimerMicroseconds\n# \n# Get the time elapsed since the call of `time::startTimer`.\n# \n# - \\${_OPTION_LOG_ELAPSED_TIME} _as bool_:\n#      (optional) Wether or not to log the elapsed time.\n#      (defaults to false)\n# - \\${_OPTION_FORMAT} _as string_:\n#      (optional) The format to use if we log the elapsed time.\n#      See `time::convertMicrosecondsToHuman` for the format.\n#      (defaults to \"%S.%LLs\").\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in microseconds.\n# \n# ```bash\n# time::startTimer\n# _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds\n# echo \"Total microseconds: \\${REPLY}\"\n# ```\n# \n_OPTION_LOG_ELAPSED_TIME=${1} _OPTION_FORMAT=${2} time::getTimerMicroseconds$0" ]
 },
 
 "time::startTimer": {
@@ -2154,7 +2154,7 @@
   "prefix": "tui::getBestAutocompleteBox#withdoc",
   "description": "This function returns the best position and size for an autocomplete box that would open at the given position...",
   "scope": "",
-  "body": [ "# ## tui::getBestAutocompleteBox\n# \n# This function returns the best position and size for an autocomplete box that would open\n# at the given position.\n# \n# - The box will be placed below the current position if possible, but can be placed\n#   above if there is not enough space below.\n# - The box will be placed on the same column as the current position if possible, but can be placed\n#   on the left side if there is not enough space on the right to display the full width of the box.\n# - The box will have the desired height and width if possible, but will be reduced if there is\n#   not enough space in the terminal.\n# - The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.\n#   Otherwise it can use the current position line.\n# \n# - \\$1: **current line** _as int_:\n#       the current line of the cursor (1 based)\n# - \\$2: **current column** _as int_:\n#       the current column of the cursor (1 based)\n# - \\$3: **desired height** _as int_:\n#       the desired height of the box\n# - \\$4: **desired width** _as int_:\n#       the desired width of the box\n# - \\$5: **max height** _as int_:\n#       the maximum height of the box\n# - \\$6: force below _as bool_:\n#       (optional) force the box to be below the current position\n#       (defaults to false)\n# - \\$7: not on current line _as bool_:\n#       (optional) the box will not be placed on the same line as the current position\n#       (defaults to true)\n# - \\$8: terminal width _as int_:\n#       (optional) the width of the terminal\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$9: terminal height _as int_:\n#       (optional) the height of the terminal\n#       (defaults to GLOBAL_LINES)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the top position of the box (1 based)\n# - \\${RETURNED_VALUE2}: the left position of the box (1 based)\n# - \\${RETURNED_VALUE3}: the width of the box\n# - \\${RETURNED_VALUE4}: the height of the box\n# \n# ```bash\n# tui::getBestAutocompleteBox 1 1 10 5\n# ```\n# \ntui::getBestAutocompleteBox \"${1:**current line**}\" \"${2:**current column**}\" \"${3:**desired height**}\" \"${4:**desired width**}\" \"${5:**max height**}\" \"${6:force below}\" \"${7:not on current line}\" \"${8:terminal width}\" \"${9:terminal height}\"$0" ]
+  "body": [ "# ## tui::getBestAutocompleteBox\n# \n# This function returns the best position and size for an autocomplete box that would open\n# at the given position.\n# \n# - The box will be placed below the current position if possible, but can be placed\n#   above if there is not enough space below.\n# - The box will be placed on the same column as the current position if possible, but can be placed\n#   on the left side if there is not enough space on the right to display the full width of the box.\n# - The box will have the desired height and width if possible, but will be reduced if there is\n#   not enough space in the terminal.\n# - The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.\n#   Otherwise it can use the current position line.\n# \n# - \\$1: **current line** _as int_:\n#       the current line of the cursor (1 based)\n# - \\$2: **current column** _as int_:\n#       the current column of the cursor (1 based)\n# - \\$3: **desired height** _as int_:\n#       the desired height of the box\n# - \\$4: **desired width** _as int_:\n#       the desired width of the box\n# - \\$5: **max height** _as int_:\n#       the maximum height of the box\n# - \\$6: force below _as bool_:\n#       (optional) force the box to be below the current position\n#       (defaults to false)\n# - \\$7: not on current line _as bool_:\n#       (optional) the box will not be placed on the same line as the current position\n#       (defaults to true)\n# - \\$8: terminal width _as int_:\n#       (optional) the width of the terminal\n#       (defaults to GLOBAL_COLUMNS)\n# - \\$9: terminal height _as int_:\n#       (optional) the height of the terminal\n#       (defaults to GLOBAL_LINES)\n# \n# Returns:\n# \n# - \\${REPLY}: the top position of the box (1 based)\n# - \\${REPLY2}: the left position of the box (1 based)\n# - \\${REPLY3}: the width of the box\n# - \\${REPLY4}: the height of the box\n# \n# ```bash\n# tui::getBestAutocompleteBox 1 1 10 5\n# ```\n# \ntui::getBestAutocompleteBox \"${1:**current line**}\" \"${2:**current column**}\" \"${3:**desired height**}\" \"${4:**desired width**}\" \"${5:**max height**}\" \"${6:force below}\" \"${7:not on current line}\" \"${8:terminal width}\" \"${9:terminal height}\"$0" ]
 },
 
 "tui::getCursorPosition": {
@@ -2392,7 +2392,7 @@
   "prefix": "version::bump#withdoc",
   "description": "This function allows to bump a semantic version formatted like: major...",
   "scope": "",
-  "body": [ "# ## version::bump\n# \n# This function allows to bump a semantic version formatted like:\n# major.minor.patch-prerelease+build\n# \n# - \\$1: **version** _as string_:\n#       the version to bump\n# - \\$2: **level** _as string_:\n#       the level to bump (major, minor, patch)\n# - \\$3: clear build and prerelease _as bool_:\n#       (optional) clear the prerelease and build\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the new version string\n# \n# ```bash\n# version::bump \"1.2.3-prerelease+build\" \"major\"\n# local newVersion=\"\\${RETURNED_VALUE}\"\n# ```\n# \nversion::bump \"${1:**version**}\" \"${2:**level**}\" \"${3:clear build and prerelease}\"$0" ]
+  "body": [ "# ## version::bump\n# \n# This function allows to bump a semantic version formatted like:\n# major.minor.patch-prerelease+build\n# \n# - \\$1: **version** _as string_:\n#       the version to bump\n# - \\$2: **level** _as string_:\n#       the level to bump (major, minor, patch)\n# - \\$3: clear build and prerelease _as bool_:\n#       (optional) clear the prerelease and build\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\${REPLY}: the new version string\n# \n# ```bash\n# version::bump \"1.2.3-prerelease+build\" \"major\"\n# local newVersion=\"\\${REPLY}\"\n# ```\n# \nversion::bump \"${1:**version**}\" \"${2:**level**}\" \"${3:clear build and prerelease}\"$0" ]
 },
 
 "version::compare": {
@@ -2406,7 +2406,7 @@
   "prefix": "version::compare#withdoc",
   "description": "This function allows to compare two semantic versions formatted like: major...",
   "scope": "",
-  "body": [ "# ## version::compare\n# \n# This function allows to compare two semantic versions formatted like:\n# major.minor.patch-prerelease+build\n# \n# - \\$1: **version1** _as string_:\n#       the first version to compare\n# - \\$2: **version2** _as string_:\n#       the second version to compare\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}:\n#   - 0 if the versions are equal,\n#   - 1 if version1 is greater,\n#   - -1 if version2 is greater\n# \n# ```bash\n# version::compare \"2.3.4-prerelease+build\" \"1.2.3-prerelease+build\"\n# local comparison=\"\\${RETURNED_VALUE}\"\n# ```\n# \n# > The prerelease and build are ignored in the comparison.\n# \nversion::compare \"${1:**version1**}\" \"${2:**version2**}\"$0" ]
+  "body": [ "# ## version::compare\n# \n# This function allows to compare two semantic versions formatted like:\n# major.minor.patch-prerelease+build\n# \n# - \\$1: **version1** _as string_:\n#       the first version to compare\n# - \\$2: **version2** _as string_:\n#       the second version to compare\n# \n# Returns:\n# \n# - \\${REPLY}:\n#   - 0 if the versions are equal,\n#   - 1 if version1 is greater,\n#   - -1 if version2 is greater\n# \n# ```bash\n# version::compare \"2.3.4-prerelease+build\" \"1.2.3-prerelease+build\"\n# local comparison=\"\\${REPLY}\"\n# ```\n# \n# > The prerelease and build are ignored in the comparison.\n# \nversion::compare \"${1:**version1**}\" \"${2:**version2**}\"$0" ]
 },
 
 "windows::addToPath": {
@@ -2434,7 +2434,7 @@
   "prefix": "windows::convertPathFromUnix#withdoc",
   "description": "Convert a unix path to a Windows path...",
   "scope": "",
-  "body": [ "# ## windows::convertPathFromUnix\n# \n# Convert a unix path to a Windows path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The Windows path.\n# \n# ```bash\n# windows::convertPathFromUnix \"/path/to/file\"\n# ```\n# \n# > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,\n# > handles other msys2 paths using `cygpath`.\n# \nwindows::convertPathFromUnix \"${1:**path**}\"$0" ]
+  "body": [ "# ## windows::convertPathFromUnix\n# \n# Convert a unix path to a Windows path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - \\${REPLY}: The Windows path.\n# \n# ```bash\n# windows::convertPathFromUnix \"/path/to/file\"\n# ```\n# \n# > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,\n# > handles other msys2 paths using `cygpath`.\n# \nwindows::convertPathFromUnix \"${1:**path**}\"$0" ]
 },
 
 "windows::convertPathToUnix": {
@@ -2448,7 +2448,7 @@
   "prefix": "windows::convertPathToUnix#withdoc",
   "description": "Convert a Windows path to a unix path...",
   "scope": "",
-  "body": [ "# ## windows::convertPathToUnix\n# \n# Convert a Windows path to a unix path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The unix path.\n# \n# ```bash\n# windows::convertPathToUnix \"C:\\path\\to\\file\"\n# ```\n# \n# > Handles paths starting with `X:\\`.\n# \nwindows::convertPathToUnix \"${1:**path**}\"$0" ]
+  "body": [ "# ## windows::convertPathToUnix\n# \n# Convert a Windows path to a unix path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - \\${REPLY}: The unix path.\n# \n# ```bash\n# windows::convertPathToUnix \"C:\\path\\to\\file\"\n# ```\n# \n# > Handles paths starting with `X:\\`.\n# \nwindows::convertPathToUnix \"${1:**path**}\"$0" ]
 },
 
 "windows::createLink": {
@@ -2476,7 +2476,7 @@
   "prefix": "windows::createTempDirectory#withdoc",
   "description": "Create a temporary directory on Windows and return the path both for Windows and Unix...",
   "scope": "",
-  "body": [ "# ## windows::createTempDirectory\n# \n# Create a temporary directory on Windows and return the path both for Windows and Unix.\n# \n# This is useful for creating temporary directories that can be used in both Windows and Unix.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The Windows path.\n# - \\${RETURNED_VALUE2}: The Unix path.\n# \n# ```bash\n# windows::createTempDirectory\n# ```\n# \n# > Directories created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \nwindows::createTempDirectory$0" ]
+  "body": [ "# ## windows::createTempDirectory\n# \n# Create a temporary directory on Windows and return the path both for Windows and Unix.\n# \n# This is useful for creating temporary directories that can be used in both Windows and Unix.\n# \n# Returns:\n# \n# - \\${REPLY}: The Windows path.\n# - \\${REPLY2}: The Unix path.\n# \n# ```bash\n# windows::createTempDirectory\n# ```\n# \n# > Directories created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \nwindows::createTempDirectory$0" ]
 },
 
 "windows::createTempFile": {
@@ -2490,7 +2490,7 @@
   "prefix": "windows::createTempFile#withdoc",
   "description": "Create a temporary file on Windows and return the path both for Windows and Unix...",
   "scope": "",
-  "body": [ "# ## windows::createTempFile\n# \n# Create a temporary file on Windows and return the path both for Windows and Unix.\n# \n# This is useful for creating temporary files that can be used in both Windows and Unix.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: The Windows path.\n# - \\${RETURNED_VALUE2}: The Unix path.\n# \n# ```bash\n# windows::createTempFile\n# ```\n# \n# > Files created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \nwindows::createTempFile$0" ]
+  "body": [ "# ## windows::createTempFile\n# \n# Create a temporary file on Windows and return the path both for Windows and Unix.\n# \n# This is useful for creating temporary files that can be used in both Windows and Unix.\n# \n# Returns:\n# \n# - \\${REPLY}: The Windows path.\n# - \\${REPLY2}: The Unix path.\n# \n# ```bash\n# windows::createTempFile\n# ```\n# \n# > Files created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \nwindows::createTempFile$0" ]
 },
 
 "windows::endPs1Batch": {
@@ -2504,7 +2504,7 @@
   "prefix": "windows::endPs1Batch#withdoc",
   "description": "This function will run all the commands that were batched with `windows::startPs1Batch`...",
   "scope": "",
-  "body": [ "# ## windows::endPs1Batch\n# \n# This function will run all the commands that were batched with `windows::startPs1Batch`.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - \\${RETURNED_VALUE}: The content of stdout.\n# - \\${RETURNED_VALUE2}: The content of stderr.\n# \n# ```bash\n# windows::startPs1Batch\n# windows::runPs1 \"Write-Host \\\"Hello\\\"\"\n# windows::runPs1 \"Write-Host \\\"World\\\"\"\n# windows::endPs1Batch\n# ```\n# \nwindows::endPs1Batch$0" ]
+  "body": [ "# ## windows::endPs1Batch\n# \n# This function will run all the commands that were batched with `windows::startPs1Batch`.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - \\${REPLY}: The content of stdout.\n# - \\${REPLY2}: The content of stderr.\n# \n# ```bash\n# windows::startPs1Batch\n# windows::runPs1 \"Write-Host \\\"Hello\\\"\"\n# windows::runPs1 \"Write-Host \\\"World\\\"\"\n# windows::endPs1Batch\n# ```\n# \nwindows::endPs1Batch$0" ]
 },
 
 "windows::getEnvVar": {
@@ -2518,7 +2518,7 @@
   "prefix": "windows::getEnvVar#withdoc",
   "description": "Get the value of an environment variable for the current user on Windows...",
   "scope": "",
-  "body": [ "# ## windows::getEnvVar\n# \n# Get the value of an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to get.\n# \n# Returns:\n# \n# - \\${RETURNED_VALUE}: the value of the environment variable.\n# \n# ```bash\n# windows::getEnvVar \"MY_VAR\"\n# echo \"\\${RETURNED_VALUE}\"\n# ```\n# \nwindows::getEnvVar \"${1:**variable name**}\"$0" ]
+  "body": [ "# ## windows::getEnvVar\n# \n# Get the value of an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to get.\n# \n# Returns:\n# \n# - \\${REPLY}: the value of the environment variable.\n# \n# ```bash\n# windows::getEnvVar \"MY_VAR\"\n# echo \"\\${REPLY}\"\n# ```\n# \nwindows::getEnvVar \"${1:**variable name**}\"$0" ]
 },
 
 "windows::runPs1": {
@@ -2532,7 +2532,7 @@
   "prefix": "windows::runPs1#withdoc",
   "description": "Runs a PowerShell command...",
   "scope": "",
-  "body": [ "# ## windows::runPs1\n# \n# Runs a PowerShell command.\n# This is mostly useful on Windows.\n# \n# - \\$1: **command** _as string_:\n#       the command to run.\n# - \\$2: run as administrator _as bool_:\n#       (optional) Can be set using the variable `_OPTION_RUN_AS_ADMIN`.\n#       Wether to run the command as administrator.\n#       (defaults to false).\n# - \\${_OPTION_SILENT} _as bool_:\n#       (optional) Do not log the command stderr.\n#       (defaults to false).\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - \\${RETURNED_VALUE}: The content of stdout.\n# - \\${RETURNED_VALUE2}: The content of stderr.\n# \n# ```bash\n# windows::runPs1 \"Write-Host \\\"Press any key:\\\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());\"\n# ```\n# \n_OPTION_SILENT=${3} windows::runPs1 \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
+  "body": [ "# ## windows::runPs1\n# \n# Runs a PowerShell command.\n# This is mostly useful on Windows.\n# \n# - \\$1: **command** _as string_:\n#       the command to run.\n# - \\$2: run as administrator _as bool_:\n#       (optional) Can be set using the variable `_OPTION_RUN_AS_ADMIN`.\n#       Wether to run the command as administrator.\n#       (defaults to false).\n# - \\${_OPTION_SILENT} _as bool_:\n#       (optional) Do not log the command stderr.\n#       (defaults to false).\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the command was successful\n#   - 1 otherwise.\n# - \\${REPLY}: The content of stdout.\n# - \\${REPLY2}: The content of stderr.\n# \n# ```bash\n# windows::runPs1 \"Write-Host \\\"Press any key:\\\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());\"\n# ```\n# \n_OPTION_SILENT=${3} windows::runPs1 \"${1:**command**}\" \"${2:run as administrator}\"$0" ]
 },
 
 "windows::setEnvVar": {
@@ -2704,7 +2704,7 @@
 			"#     Call command with option1, option2 and some arguments.",
 			"##VALET_COMMAND",
 			"function $2() {",
-			"  command::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  command::parseArguments \"$@\" && eval \"${REPLY}\"",
 			"  command::checkParsedResults \"${help:-}\" \"${commandArgumentsErrors:-}\"",
 			"  $0",
 			"}"
@@ -2745,7 +2745,7 @@
 			"    Call command with option1, option2 and some arguments.",
 			": \"---",
 			"function $2() {",
-			"  command::parseArguments \"$@\" && eval \"${RETURNED_VALUE}\"",
+			"  command::parseArguments \"$@\" && eval \"${REPLY}\"",
 			"  command::checkParsedResults \"${help:-}\" \"${commandArgumentsErrors:-}\"",
 			"  $0",
 			"}"
@@ -2825,60 +2825,60 @@
 			""
 		]
 	},
-	"RETURNED_VALUE": {
-		"prefix": "RETURNED_VALUE",
+	"REPLY": {
+		"prefix": "REPLY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_VALUE$0"
+			"REPLY$0"
 		]
 	},
-	"RETURNED_VALUE2": {
-		"prefix": "RETURNED_VALUE2",
+	"REPLY2": {
+		"prefix": "REPLY2",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_VALUE2$0"
+			"REPLY2$0"
 		]
 	},
-	"RETURNED_VALUE3": {
-		"prefix": "RETURNED_VALUE3",
+	"REPLY3": {
+		"prefix": "REPLY3",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_VALUE3$0"
+			"REPLY3$0"
 		]
 	},
-	"RETURNED_ARRAY": {
-		"prefix": "RETURNED_ARRAY",
+	"REPLY_ARRAY": {
+		"prefix": "REPLY_ARRAY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_ARRAY$0"
+			"REPLY_ARRAY$0"
 		]
 	},
-	"RETURNED_ARRAY2": {
-		"prefix": "RETURNED_ARRAY2",
+	"REPLY_ARRAY2": {
+		"prefix": "REPLY_ARRAY2",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_ARRAY2$0"
+			"REPLY_ARRAY2$0"
 		]
 	},
-	"RETURNED_ARRAY3": {
-		"prefix": "RETURNED_ARRAY3",
+	"REPLY_ARRAY3": {
+		"prefix": "REPLY_ARRAY3",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_ARRAY3$0"
+			"REPLY_ARRAY3$0"
 		]
 	},
-	"RETURNED_ASSOCIATIVE_ARRAY": {
-		"prefix": "RETURNED_ASSOCIATIVE_ARRAY",
+	"REPLY_ASSOCIATIVE_ARRAY": {
+		"prefix": "REPLY_ASSOCIATIVE_ARRAY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"RETURNED_ASSOCIATIVE_ARRAY$0"
+			"REPLY_ASSOCIATIVE_ARRAY$0"
 		]
 	},
 	"IFS": {
@@ -2953,60 +2953,60 @@
 			"\\${LAST_KEY_PRESSED}$0"
 		]
 	},
-	"$RETURNED_VALUE": {
-		"prefix": "$RETURNED_VALUE",
+	"$REPLY": {
+		"prefix": "$REPLY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_VALUE}$0"
+			"\\${REPLY}$0"
 		]
 	},
-	"$RETURNED_VALUE2": {
-		"prefix": "$RETURNED_VALUE2",
+	"$REPLY2": {
+		"prefix": "$REPLY2",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_VALUE2}$0"
+			"\\${REPLY2}$0"
 		]
 	},
-	"$RETURNED_VALUE3": {
-		"prefix": "$RETURNED_VALUE3",
+	"$REPLY3": {
+		"prefix": "$REPLY3",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_VALUE3}$0"
+			"\\${REPLY3}$0"
 		]
 	},
-	"$RETURNED_ARRAY": {
-		"prefix": "$RETURNED_ARRAY",
+	"$REPLY_ARRAY": {
+		"prefix": "$REPLY_ARRAY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_ARRAY}$0"
+			"\\${REPLY_ARRAY}$0"
 		]
 	},
-	"$RETURNED_ARRAY2": {
-		"prefix": "$RETURNED_ARRAY2",
+	"$REPLY_ARRAY2": {
+		"prefix": "$REPLY_ARRAY2",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_ARRAY2}$0"
+			"\\${REPLY_ARRAY2}$0"
 		]
 	},
-	"$RETURNED_ARRAY3": {
-		"prefix": "$RETURNED_ARRAY3",
+	"$REPLY_ARRAY3": {
+		"prefix": "$REPLY_ARRAY3",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_ARRAY3}$0"
+			"\\${REPLY_ARRAY3}$0"
 		]
 	},
-	"$RETURNED_ASSOCIATIVE_ARRAY": {
-		"prefix": "$RETURNED_ASSOCIATIVE_ARRAY",
+	"$REPLY_ASSOCIATIVE_ARRAY": {
+		"prefix": "$REPLY_ASSOCIATIVE_ARRAY",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${RETURNED_ASSOCIATIVE_ARRAY}$0"
+			"\\${REPLY_ASSOCIATIVE_ARRAY}$0"
 		]
 	},
 	"$BASHOPTS": {

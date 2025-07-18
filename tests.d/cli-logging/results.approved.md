@@ -149,7 +149,7 @@ With a second line.
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='/tmp/valet.d/d1-2/log-2025-02-12T21-57-29+0000.log'
 )
 ```

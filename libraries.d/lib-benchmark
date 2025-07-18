@@ -68,7 +68,7 @@ function benchmark::run() {
   progress::start "<spinner> Running the baseline ⌜${baseline}⌝ for ⌜${time}s⌝."
 
   time::getProgramElapsedMicroseconds
-  local startTimeInUs="${RETURNED_VALUE}"
+  local startTimeInUs="${REPLY}"
 
   local -i baselineRuns
   # shellcheck disable=SC2323
@@ -76,7 +76,7 @@ function benchmark::run() {
   for ((baselineRuns = 1; (baselineRuns <= maxRuns || maxRuns == -1); baselineRuns++)); do
     "${baseline}"
     time::getProgramElapsedMicroseconds
-    if (( RETURNED_VALUE - startTimeInUs > time * 1000000 )); then
+    if (( REPLY - startTimeInUs > time * 1000000 )); then
       break
     fi
   done
@@ -84,9 +84,9 @@ function benchmark::run() {
   progress::stop
 
   time::getProgramElapsedMicroseconds
-  local elapsedTimeInUs=$((RETURNED_VALUE - startTimeInUs))
+  local elapsedTimeInUs=$((REPLY - startTimeInUs))
   time::convertMicrosecondsToHuman "${elapsedTimeInUs}" '%S.%LL'
-  log::info "The baseline ⌜${baseline}⌝ was initially run ⌜${baselineRuns}⌝ times in ⌜${RETURNED_VALUE}s⌝."
+  log::info "The baseline ⌜${baseline}⌝ was initially run ⌜${baselineRuns}⌝ times in ⌜${REPLY}s⌝."
 
   # Run the other functions
   if (( $# > 0 )); then
@@ -94,17 +94,17 @@ function benchmark::run() {
       progress::start "<spinner> Running the function ⌜${function}⌝ ⌜${baselineRuns}⌝ times."
 
       time::getProgramElapsedMicroseconds
-      startTimeInUs="${RETURNED_VALUE}"
+      startTimeInUs="${REPLY}"
       local -i runs
       for ((runs = 0; runs < baselineRuns; runs++)); do
         "${function}"
       done
 
       time::getProgramElapsedMicroseconds
-      local elapsedTimeInUs=$((RETURNED_VALUE - startTimeInUs))
+      local elapsedTimeInUs=$((REPLY - startTimeInUs))
       functionsElapsed["${function}"]="${elapsedTimeInUs}"
       time::convertMicrosecondsToHuman "${elapsedTimeInUs}" %S.%LL
-      log::info "The function ⌜${function}⌝ was run ⌜${runs}⌝ times in ⌜${RETURNED_VALUE}s⌝."
+      log::info "The function ⌜${function}⌝ was run ⌜${runs}⌝ times in ⌜${REPLY}s⌝."
 
       progress::stop
     done
@@ -114,16 +114,16 @@ function benchmark::run() {
   progress::start "<spinner> Running the baseline ⌜${baseline}⌝ ⌜${baselineRuns}⌝ times."
 
   time::getProgramElapsedMicroseconds
-  startTimeInUs="${RETURNED_VALUE}"
+  startTimeInUs="${REPLY}"
   local -i runs
   for ((runs = 0; runs < baselineRuns; runs++)); do
     "${baseline}"
   done
   time::getProgramElapsedMicroseconds
-  local elapsedTimeInUs=$((RETURNED_VALUE - startTimeInUs))
+  local elapsedTimeInUs=$((REPLY - startTimeInUs))
   functionsElapsed["${baseline}"]="${elapsedTimeInUs}"
   time::convertMicrosecondsToHuman "${elapsedTimeInUs}" %S.%LL
-  log::info "The function ⌜${baseline}⌝ was run ⌜${runs}⌝ times in ⌜${RETURNED_VALUE}s⌝."
+  log::info "The function ⌜${baseline}⌝ was run ⌜${runs}⌝ times in ⌜${REPLY}s⌝."
 
   progress::stop
 
@@ -148,7 +148,7 @@ function benchmark::run() {
     if (( index == 0 )); then
       percentSlowerThanFastest="N/A"
     fi
-    printf -v line "%-${longestFunctionNameLength}s ░ %s ░ %s\n" "${function}" "${RETURNED_VALUE}" "${percentSlowerThanFastest}"
+    printf -v line "%-${longestFunctionNameLength}s ░ %s ░ %s\n" "${function}" "${REPLY}" "${percentSlowerThanFastest}"
     result+="${line}"
     index+=1
   done

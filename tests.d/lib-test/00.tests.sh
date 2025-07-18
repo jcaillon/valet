@@ -70,20 +70,20 @@ function main() {
 
   test::title "🔬 Testing a function with test::func"
   test::markdown 'The `test::func` function is a variant of `test::exec` that is adapted to handle functions developed using the coding style of Valet.' \
-  'Meaning functions that usually return values in a variables named `RETURNED_VALUE...` (or `RETURNED_ARRAY...`) and that can optionally print results to the standard output and push logs to the error output.' \
-  'It function will be executed and its output will be added the report, including any declare `RETURNED_*` variable.'
-  RETURNED_VALUE="This will be overridden"
-  RETURNED_ARRAY=("This" "will" "be" "overridden")
+  'Meaning functions that usually return values in a variables named `REPLY...` (or `REPLY_ARRAY...`) and that can optionally print results to the standard output and push logs to the error output.' \
+  'It function will be executed and its output will be added the report, including any declare `REPLY*` variable.'
+  REPLY="This will be overridden"
+  REPLY_ARRAY=("This" "will" "be" "overridden")
   test::func functionWithReturnedVariables "VALUE" "Running functionWithReturnedVariables"
 
 
-  test::title "🙈 Display reporting RETURNED variables"
-  test::markdown 'You can manually report the content of the `RETURNED_*` variables using the `test::printReturnedVars` function.' \
-  'The function `test::resetReturnedVars` can also be used to reset the content of the `RETURNED_*` variables.'
-  test::resetReturnedVars
-  RETURNED_VALUE2="This is the value of a returned string for RETURNED_VALUE2"
-  RETURNED_ARRAY2=("This" "is" "the" "value" "of" "a" "returned" "array" "for" "RETURNED_ARRAY2")
-  test::printReturnedVars
+  test::title "🙈 Display reporting REPLY variables"
+  test::markdown 'You can manually report the content of the `REPLY*` variables using the `test::printReplyVars` function.' \
+  'The function `test::resetReplyVars` can also be used to reset the content of the `REPLY*` variables.'
+  test::resetReplyVars
+  REPLY2="This is the value of a returned string for REPLY2"
+  REPLY_ARRAY2=("This" "is" "the" "value" "of" "a" "returned" "array" "for" "REPLY_ARRAY2")
+  test::printReplyVars
 
 
   test::title "👁️ Display the value of any variable"
@@ -117,9 +117,9 @@ function functionThatExit() {
 function functionWithReturnedVariables() {
   echo "OUTPUT: ${1}"
   echo "LOG: ${2}" 1>&2
-  RETURNED_VALUE="This is the returned value"
-  RETURNED_ARRAY=("This" "is" "the" "returned" "array")
-  RETURNED_ASSOCIATIVE_ARRAY=([key1]="This" [key2]="is" [key3]="the" [key4]="returned" [key5]="associative" [key6]="array")
+  REPLY="This is the returned value"
+  REPLY_ARRAY=("This" "is" "the" "returned" "array")
+  REPLY_ASSOCIATIVE_ARRAY=([key1]="This" [key2]="is" [key3]="the" [key4]="returned" [key5]="associative" [key6]="array")
 }
 
 main

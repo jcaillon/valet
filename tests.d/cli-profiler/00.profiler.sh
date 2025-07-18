@@ -7,9 +7,9 @@ test::markdown "The profiler is an excellent tool to debug your command. The fol
 
 function main() {
   _OPTION_PATH_ONLY=true fs::createTempFile
-  export VALET_CONFIG_COMMAND_PROFILING_FILE="${RETURNED_VALUE}"
+  export VALET_CONFIG_COMMAND_PROFILING_FILE="${REPLY}"
   _OPTION_PATH_ONLY=true fs::createTempFile
-  export VALET_CONFIG_STARTUP_PROFILING_FILE="${RETURNED_VALUE}"
+  export VALET_CONFIG_STARTUP_PROFILING_FILE="${REPLY}"
 
   test::markdown "**Exported variables:**"
   test::printVars VALET_CONFIG_COMMAND_PROFILING_FILE VALET_CONFIG_STARTUP_PROFILING_FILE

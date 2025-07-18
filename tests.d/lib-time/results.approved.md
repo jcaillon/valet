@@ -11,7 +11,7 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='2000000'
+REPLY='2000000'
 ```
 
 ❯ `_OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds`
@@ -25,7 +25,7 @@ INFO     Elapsed time: 5.000s
 Returned variables:
 
 ```text
-RETURNED_VALUE='5000000'
+REPLY='5000000'
 ```
 
 ❯ `_OPTION_LOG_ELAPSED_TIME=true _OPTION_FORMAT=%L time::getTimerMicroseconds`
@@ -39,7 +39,7 @@ INFO     Elapsed time: 9000
 Returned variables:
 
 ```text
-RETURNED_VALUE='9000000'
+REPLY='9000000'
 ```
 
 ### ✅ Testing time::getDate
@@ -49,7 +49,7 @@ RETURNED_VALUE='9000000'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1987-05-25_01h00m00s'
+REPLY='1987-05-25_01h00m00s'
 ```
 
 ❯ `time::getDate '%(%H:%M:%S)T'`
@@ -57,7 +57,7 @@ RETURNED_VALUE='1987-05-25_01h00m00s'
 Returned variables:
 
 ```text
-RETURNED_VALUE='01:00:00'
+REPLY='01:00:00'
 ```
 
 ### ✅ Testing time::convertMicrosecondsToHuman function
@@ -86,7 +86,7 @@ Total microseconds: %U'
 Returned variables:
 
 ```text
-RETURNED_VALUE='Hours: 05
+REPLY='Hours: 05
 Minutes: 04
 Seconds: 03
 Milliseconds: 002
@@ -109,7 +109,7 @@ Total microseconds: 18243002234'
 Returned variables:
 
 ```text
-RETURNED_VALUE='05:04:03'
+REPLY='05:04:03'
 ```
 
 ❯ `_OPTION_FORMAT=%U time::convertMicrosecondsToHuman 18243002234`
@@ -117,6 +117,6 @@ RETURNED_VALUE='05:04:03'
 Returned variables:
 
 ```text
-RETURNED_VALUE='18243002234'
+REPLY='18243002234'
 ```
 

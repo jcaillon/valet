@@ -33,7 +33,7 @@ description: |-
   Let the user know what to do next.
 ---"
 function selfSetup() {
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   log::info "Now setting up Valet."
@@ -96,13 +96,13 @@ function selfSetup_setupForWindows() {
 
   local linuxInstallationPath="${GLOBAL_INSTALLATION_DIRECTORY}"
   _OPTION_REALPATH=true fs::toAbsolutePath "${linuxInstallationPath}"
-  windows::convertPathFromUnix "${RETURNED_VALUE}"
-  local windowsInstallationPath="${RETURNED_VALUE}"
+  windows::convertPathFromUnix "${REPLY}"
+  local windowsInstallationPath="${REPLY}"
 
   local linuxBashPath="${BASH}"
   _OPTION_REALPATH=true fs::toAbsolutePath "${linuxBashPath}"
-  windows::convertPathFromUnix "${RETURNED_VALUE}"
-  local windowsBashPath="${RETURNED_VALUE}"
+  windows::convertPathFromUnix "${REPLY}"
+  local windowsBashPath="${REPLY}"
 
   log::info "Setting the windows variable VALET_WIN_BASH to ⌜${windowsBashPath}⌝."
   windows::setEnvVar VALET_WIN_BASH "${windowsBashPath}"

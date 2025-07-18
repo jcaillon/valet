@@ -76,7 +76,7 @@ function test_list_fuzzyFilterSortFileWithGrepAndGawk() {
   test::prompt "fs::head /out1 10"
   local value
   local -i nb=0
-  for value in "${RETURNED_ARRAY[@]}"; do
+  for value in "${REPLY_ARRAY[@]}"; do
     echo "${value}"
     nb+=1
     if ((nb >= 10)); then
@@ -90,9 +90,9 @@ function test_list_fuzzyFilterSortFileWithGrepAndGawk() {
   test::prompt "fs::head /out1 10"
 
   _OPTION_PATH_ONLY=true fs::createTempFile
-  local outputFilteredFile="${RETURNED_VALUE}"
+  local outputFilteredFile="${REPLY}"
   _OPTION_PATH_ONLY=true fs::createTempFile
-  local outputCorrespondenceFile="${RETURNED_VALUE}"
+  local outputCorrespondenceFile="${REPLY}"
 
   if ! command -v grep &>/dev/null || ! command -v gawk &>/dev/null; then
     test::markdown "> The result is the same as the pure bash implementation."
@@ -102,14 +102,14 @@ function test_list_fuzzyFilterSortFileWithGrepAndGawk() {
   list_fuzzyFilterSortFileWithGrepAndGawk words SEARCH_STRING "${outputFilteredFile}" "${outputCorrespondenceFile}"
 
   fs::readFile "${outputFilteredFile}"
-  local awkLines="${RETURNED_VALUE%$'\n'}"
+  local awkLines="${REPLY%$'\n'}"
   fs::readFile "${outputCorrespondenceFile}"
-  local awkCorrespondences="${RETURNED_VALUE%$'\n'}"
+  local awkCorrespondences="${REPLY%$'\n'}"
 
   local IFS=$'\n'
-  local bashLines="${RETURNED_ARRAY[*]}"
+  local bashLines="${REPLY_ARRAY[*]}"
   # shellcheck disable=SC2153
-  local bashCorrespondences="${RETURNED_ARRAY2[*]}"
+  local bashCorrespondences="${REPLY_ARRAY2[*]}"
 
   # check that the lines are the same
   if [[ "${awkLines}" != "${bashLines}" ]]; then

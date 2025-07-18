@@ -52,7 +52,7 @@ This page lists the features that I would like to implement in Valet. They come 
   - how to use valet from your bash prompt
   - how to use valet in your existing scripts
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
-- For argument and option autocompletion, accept any multiline string that will be eval and that should set RETURNED_ARRAY with the list of possible completion.
+- For argument and option autocompletion, accept any multiline string that will be eval and that should set REPLY_ARRAY with the list of possible completion.
 - Generate an autocompletion script for bash and zsh.
 - Add a command `self package` that build the user commands into a single script file. We want to add options to the build command so we can exclude some commands. It will include all source required and try to minify the bash script. In addition, we can rebrand *valet* into another name.
 - add valet in brew

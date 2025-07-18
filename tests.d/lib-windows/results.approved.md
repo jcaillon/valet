@@ -9,8 +9,8 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='C:\Users\TEMP\file'
-RETURNED_VALUE2=''
+REPLY='C:\Users\TEMP\file'
+REPLY2=''
 ```
 
 ❯ `windows::convertPathFromUnix /mnt/d/Users/username`
@@ -18,7 +18,7 @@ RETURNED_VALUE2=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='D:\Users\username'
+REPLY='D:\Users\username'
 ```
 
 ❯ `windows::convertPathFromUnix /c/data/file`
@@ -26,7 +26,7 @@ RETURNED_VALUE='D:\Users\username'
 Returned variables:
 
 ```text
-RETURNED_VALUE='C:\data\file'
+REPLY='C:\data\file'
 ```
 
 ❯ `windows::convertPathFromUnix C:\\Users\\username`
@@ -34,7 +34,7 @@ RETURNED_VALUE='C:\data\file'
 Returned variables:
 
 ```text
-RETURNED_VALUE='C:\Users\username'
+REPLY='C:\Users\username'
 ```
 
 ### ✅ Testing windows::convertPathToUnix
@@ -44,7 +44,7 @@ RETURNED_VALUE='C:\Users\username'
 Returned variables:
 
 ```text
-RETURNED_VALUE='/c/Users/username'
+REPLY='/c/Users/username'
 ```
 
 ❯ `windows::convertPathToUnix D:\\data\\file`
@@ -52,7 +52,7 @@ RETURNED_VALUE='/c/Users/username'
 Returned variables:
 
 ```text
-RETURNED_VALUE='/d/data/file'
+REPLY='/d/data/file'
 ```
 
 ❯ `windows::convertPathToUnix /c/Users/username`
@@ -60,7 +60,7 @@ RETURNED_VALUE='/d/data/file'
 Returned variables:
 
 ```text
-RETURNED_VALUE='/c/Users/username'
+REPLY='/c/Users/username'
 ```
 
 ### ✅ Testing windows::setEnvVar

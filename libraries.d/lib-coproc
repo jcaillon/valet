@@ -27,7 +27,7 @@ source bash
 # - $4: **on message command to eval** _as string_:
 #       The command (will be evaluated) to run in the coproc loop when a message
 #       is received from the main thread.
-#       The command can expect to use the variable RETURNED_VALUE which contains
+#       The command can expect to use the variable REPLY which contains
 #       the message (string) received from the main thread.
 #       The command can send messages to the main thread using the syntax
 #       printf "%s\0" "message"
@@ -46,7 +46,7 @@ source bash
 #
 # Returns:
 # 
-# - ${RETURNED_VALUE}: The PID of the coproc.
+# - ${REPLY}: The PID of the coproc.
 #
 # ```bash
 # _OPTION_WAIT_FOR_READINESS=true coproc::run "_MY_COPROC" initCommand loopCommand onMessageCommand
@@ -77,14 +77,14 @@ function coproc::run() {
   if [[ ${waitForReadiness} == "true" ]]; then
     if ! kill -0 "${pid}" 2>/dev/null || ! coproc::receiveMessage "${coprocVarName}"; then
       core::fail "The coproc ⌜${coprocVarName}⌝ did not start correctly."
-    elif [[ ${RETURNED_VALUE} != "ready" ]]; then
+    elif [[ ${REPLY} != "ready" ]]; then
       core::fail "The coproc ⌜${coprocVarName}⌝ did not send the expected readiness message."
     else
       log::debug "The coproc ⌜${coprocVarName}⌝ is ready."
     fi
   fi
 
-  RETURNED_VALUE="${pid}"
+  REPLY="${pid}"
 }
 
 # The function that will run in the coproc.
@@ -117,11 +117,11 @@ function coproc_program() {
     fi
     if [[ -n "${onMessageCommand}" ]]; then
       # Read messages from the main thread
-      if IFS=$'\0' read -rd $'\0' RETURNED_VALUE; then
+      if IFS=$'\0' read -rd $'\0' REPLY; then
 
         # if we keep only the last message, we read until no more messages are available
         while [[ ${keepOnlyLastMessage} == "true" ]] && IFS=$'\0' read -rd $'\0' -t 0; do
-          IFS=$'\0' read -rd $'\0' RETURNED_VALUE
+          IFS=$'\0' read -rd $'\0' REPLY
         done
 
         # Execute the on message command with the received message
@@ -183,11 +183,11 @@ function coproc::sendMessage() {
 # - $?:
 #   - 0 if a message was received successfully.
 #   - 1 if the coproc is not running or no message could be received.
-# - ${RETURNED_VALUE}: The received message.
+# - ${REPLY}: The received message.
 #
 # ```bash
 # if coproc::receiveMessage "myCoproc"; then
-#   echo "Received message: ${RETURNED_VALUE}"
+#   echo "Received message: ${REPLY}"
 # fi
 # ```
 function coproc::receiveMessage() {
@@ -198,7 +198,7 @@ function coproc::receiveMessage() {
   fi
   local -n coprocFd="${coprocVarName}[0]"
 
-  if { IFS=$'\0' read -rd $'\0' -u "${coprocFd}" RETURNED_VALUE; } 2>/dev/null; then
+  if { IFS=$'\0' read -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
     return 0
   fi
 

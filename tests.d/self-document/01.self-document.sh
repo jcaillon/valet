@@ -9,7 +9,7 @@ function main() {
   test::title "✅ Testing self document command"
 
   fs::createTempDirectory
-  TEST_DIRECTORY="${RETURNED_VALUE}"
+  TEST_DIRECTORY="${REPLY}"
 
   test::exec selfDocument --output "\"\${TEST_DIRECTORY}\"" --core-only
   test::exec fs::head "${TEST_DIRECTORY}/lib-valet.md" 10
@@ -18,7 +18,7 @@ function main() {
 }
 
 function core::getVersion() {
-  RETURNED_VALUE="1.2.3"
+  REPLY="1.2.3"
 }
 
 main

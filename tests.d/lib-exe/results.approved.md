@@ -14,7 +14,7 @@ fake ()
     local inputStreamContent;
     if [[ $* == *"--std-in"* ]]; then
         bash::readStdIn;
-        inputStreamContent="${RETURNED_VALUE}";
+        inputStreamContent="${REPLY}";
     fi;
     local IFS=" ";
     echo "🙈 mocking fake $*";
@@ -40,11 +40,11 @@ Returned code: `1`
 Returned variables:
 
 ```text
-RETURNED_VALUE='🙈 mocking fake --std-in --error
+REPLY='🙈 mocking fake --std-in --error
 Input stream: <input_stream
 >
 '
-RETURNED_VALUE2='INFO: log line from fake mock
+REPLY2='INFO: log line from fake mock
 ERROR: returning error from fake
 '
 ```
@@ -77,9 +77,9 @@ Make error 1 acceptable:
 Returned variables:
 
 ```text
-RETURNED_VALUE='🙈 mocking fake --error
+REPLY='🙈 mocking fake --error
 '
-RETURNED_VALUE2='INFO: log line from fake mock
+REPLY2='INFO: log line from fake mock
 ERROR: returning error from fake
 '
 ```
@@ -91,9 +91,9 @@ Normal, return everything as variables:
 Returned variables:
 
 ```text
-RETURNED_VALUE='🙈 mocking fake 
+REPLY='🙈 mocking fake 
 '
-RETURNED_VALUE2='INFO: log line from fake mock
+REPLY2='INFO: log line from fake mock
 '
 ```
 
@@ -120,8 +120,8 @@ Input stream for file, return everything as files:
 Returned variables:
 
 ```text
-RETURNED_VALUE='/tmp/valet-stdout.f'
-RETURNED_VALUE2='/tmp/valet-stderr.f'
+REPLY='/tmp/valet-stdout.f'
+REPLY2='/tmp/valet-stderr.f'
 ```
 
 ❯ `fs::cat /tmp/valet-stdout.f`
@@ -150,9 +150,9 @@ INFO: log line from fake mock
 Returned variables:
 
 ```text
-RETURNED_VALUE='🙈 mocking fake --option argument1 argument2
+REPLY='🙈 mocking fake --option argument1 argument2
 '
-RETURNED_VALUE2='INFO: log line from fake mock
+REPLY2='INFO: log line from fake mock
 '
 ```
 
@@ -163,9 +163,9 @@ Returned code: `1`
 Returned variables:
 
 ```text
-RETURNED_VALUE='🙈 mocking fake --error
+REPLY='🙈 mocking fake --error
 '
-RETURNED_VALUE2='INFO: log line from fake mock
+REPLY2='INFO: log line from fake mock
 ERROR: returning error from fake
 '
 ```
@@ -192,8 +192,8 @@ FAIL     The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜16.000s⌝.
 Returned variables:
 
 ```text
-RETURNED_VALUE='/tmp/valet-stdout.f'
-RETURNED_VALUE2='/tmp/valet-stderr.f'
+REPLY='/tmp/valet-stdout.f'
+REPLY2='/tmp/valet-stderr.f'
 ```
 
 ❯ `exe::invoket2 false fake --option argument1 argument2`
@@ -234,9 +234,9 @@ FAIL     The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜20.000s⌝.
 Returned variables:
 
 ```text
-RETURNED_VALUE='🙈 mocking fake --option argument1 argument2
+REPLY='🙈 mocking fake --option argument1 argument2
 '
-RETURNED_VALUE2='INFO: log line from fake mock
+REPLY2='INFO: log line from fake mock
 '
 ```
 
@@ -247,11 +247,11 @@ RETURNED_VALUE2='INFO: log line from fake mock
 Returned variables:
 
 ```text
-RETURNED_VALUE='🙈 mocking fake --std-in --option argument1 argument2
+REPLY='🙈 mocking fake --std-in --option argument1 argument2
 Input stream: <input_stream
 >
 '
-RETURNED_VALUE2='INFO: log line from fake mock
+REPLY2='INFO: log line from fake mock
 '
 ```
 
@@ -260,7 +260,7 @@ RETURNED_VALUE2='INFO: log line from fake mock
 Returned variables:
 
 ```text
-RETURNED_VALUE='/tmp/valet-stdout.f'
-RETURNED_VALUE2='/tmp/valet-stderr.f'
+REPLY='/tmp/valet-stdout.f'
+REPLY2='/tmp/valet-stderr.f'
 ```
 

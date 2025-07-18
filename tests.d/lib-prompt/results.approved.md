@@ -9,7 +9,7 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='5'
+REPLY='5'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=4 prompt_getIndexDeltaToEndOfWord`
@@ -17,7 +17,7 @@ RETURNED_VALUE='5'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
+REPLY='1'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=5 prompt_getIndexDeltaToEndOfWord`
@@ -25,7 +25,7 @@ RETURNED_VALUE='1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='8'
+REPLY='8'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=8 prompt_getIndexDeltaToEndOfWord`
@@ -33,7 +33,7 @@ RETURNED_VALUE='8'
 Returned variables:
 
 ```text
-RETURNED_VALUE='5'
+REPLY='5'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=10 prompt_getIndexDeltaToEndOfWord`
@@ -41,7 +41,7 @@ RETURNED_VALUE='5'
 Returned variables:
 
 ```text
-RETURNED_VALUE='3'
+REPLY='3'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=11 prompt_getIndexDeltaToEndOfWord`
@@ -49,7 +49,7 @@ RETURNED_VALUE='3'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2'
+REPLY='2'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=12 prompt_getIndexDeltaToEndOfWord`
@@ -57,7 +57,7 @@ RETURNED_VALUE='2'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
+REPLY='1'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=20 prompt_getIndexDeltaToEndOfWord`
@@ -65,7 +65,7 @@ RETURNED_VALUE='1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-7'
+REPLY='-7'
 ```
 
 ### ✅ Testing prompt_getIndexDeltaToBeginningOfWord
@@ -75,7 +75,7 @@ RETURNED_VALUE='-7'
 Returned variables:
 
 ```text
-RETURNED_VALUE='0'
+REPLY='0'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=5 prompt_getIndexDeltaToBeginningOfWord`
@@ -83,7 +83,7 @@ RETURNED_VALUE='0'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-5'
+REPLY='-5'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=6 prompt_getIndexDeltaToBeginningOfWord`
@@ -91,7 +91,7 @@ RETURNED_VALUE='-5'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-6'
+REPLY='-6'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=9 prompt_getIndexDeltaToBeginningOfWord`
@@ -99,7 +99,7 @@ RETURNED_VALUE='-6'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-3'
+REPLY='-3'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=11 prompt_getIndexDeltaToBeginningOfWord`
@@ -107,7 +107,7 @@ RETURNED_VALUE='-3'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-5'
+REPLY='-5'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=12 prompt_getIndexDeltaToBeginningOfWord`
@@ -115,7 +115,7 @@ RETURNED_VALUE='-5'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-6'
+REPLY='-6'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=13 prompt_getIndexDeltaToBeginningOfWord`
@@ -123,7 +123,7 @@ RETURNED_VALUE='-6'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-7'
+REPLY='-7'
 ```
 
 ❯ `_PROMPT_STRING_INDEX=20 prompt_getIndexDeltaToBeginningOfWord`
@@ -131,7 +131,7 @@ RETURNED_VALUE='-7'
 Returned variables:
 
 ```text
-RETURNED_VALUE='-1'
+REPLY='-1'
 ```
 
 ### ✅ Testing prompt_getDisplayedPromptString

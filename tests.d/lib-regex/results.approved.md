@@ -25,7 +25,7 @@ _STRING_FUZZY_FILTER_REGEX='^([^\]*)(\\[^^]*\^[^$]*\$[^.]*\.[^|]*\|[^?]*\?[^*]*\
 Returned variables:
 
 ```text
-RETURNED_VALUE='\\\^\$\.\|\?\*\+\[\]\{\}\(\)'
+REPLY='\\\^\$\.\|\?\*\+\[\]\{\}\(\)'
 ```
 
 ### ✅ Testing regex::getFuzzySearchRegexFromSearchString function
@@ -62,7 +62,7 @@ _MY_STRING='---
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='name: marc'
 [1]='name:   john'
 [2]='name:julien'
@@ -74,7 +74,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='marc'
 [1]='john'
 )
@@ -100,7 +100,7 @@ _MY_STRING='---
 Returned variables:
 
 ```text
-RETURNED_VALUE='0=marc 1=john '
+REPLY='0=marc 1=john '
 ```
 
 ❯ `regex::replace _MY_STRING '- name:[[:space:]]*([[:alnum:]]*)[^-]+' \\c=\\1\ `
@@ -108,7 +108,7 @@ RETURNED_VALUE='0=marc 1=john '
 Returned variables:
 
 ```text
-RETURNED_VALUE='---
+REPLY='---
 0=marc 1=john 2=julien '
 ```
 
@@ -121,7 +121,7 @@ _MY_STRING='This is the year 2000, madness rules the world.'
 Returned variables:
 
 ```text
-RETURNED_VALUE='This is the year 2025, madness rules the world.'
+REPLY='This is the year 2025, madness rules the world.'
 ```
 
 ❯ `regex::replace _MY_STRING '^(This) is.*$' \\1\ is\ working.`
@@ -129,7 +129,7 @@ RETURNED_VALUE='This is the year 2025, madness rules the world.'
 Returned variables:
 
 ```text
-RETURNED_VALUE='This is working.'
+REPLY='This is working.'
 ```
 
 ❯ `regex::replace _MY_STRING '^(This) is.*$' \\1\ is\ working. 0`
@@ -137,7 +137,7 @@ RETURNED_VALUE='This is working.'
 Returned variables:
 
 ```text
-RETURNED_VALUE='This is the year 2000, madness rules the world.'
+REPLY='This is the year 2000, madness rules the world.'
 ```
 
 ❯ `regex::replace _MY_STRING '^(This) is.*$' \\1\ is\ working. 0 true`
@@ -145,7 +145,7 @@ RETURNED_VALUE='This is the year 2000, madness rules the world.'
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
+REPLY=''
 ```
 
 ### ✅ Testing regex::getFirstGroup function
@@ -155,6 +155,6 @@ RETURNED_VALUE=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='julien'
+REPLY='julien'
 ```
 

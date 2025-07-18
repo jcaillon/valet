@@ -55,15 +55,15 @@ source time
 ##VALET_COMMAND
 function selfDocument() {
   local output coreOnly
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   # default output to the user directory
   core::getExtensionsDirectory
-  output="${output:-${RETURNED_VALUE}}"
+  output="${output:-${REPLY}}"
 
   selfDocument::getFooter
-  local pageFooter="${RETURNED_VALUE}"
+  local pageFooter="${REPLY}"
 
   # export the documentation for each library
   selfDocument::getAllFunctionsDocumentation "${coreOnly}"
@@ -86,19 +86,19 @@ function selfDocument() {
 #
 # Returns:
 #
-# - `RETURNED_VALUE` the footer for the documentation.
+# - `REPLY` the footer for the documentation.
 #
 # ```bash
 # selfDocument::getFooter
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function selfDocument::getFooter() {
   core::getVersion
-  local version="${RETURNED_VALUE}"
+  local version="${REPLY}"
 
   time::getDate "%(%F)T"
-  local currentDate="${RETURNED_VALUE}"
-  RETURNED_VALUE="Documentation generated for the version ${version} (${currentDate})."
+  local currentDate="${REPLY}"
+  REPLY="Documentation generated for the version ${version} (${currentDate})."
 }
 
 # Returns an associative array of all the function names and their documentation.
@@ -108,7 +108,7 @@ function selfDocument::getFooter() {
 #
 # Returns:
 #
-# - ${RETURNED_ASSOCIATIVE_ARRAY}: an associative array of all the function names and their documentation.
+# - ${REPLY_ASSOCIATIVE_ARRAY}: an associative array of all the function names and their documentation.
 #
 # ```bash
 # selfDocument::getAllFunctionsDocumentation
@@ -124,14 +124,14 @@ function selfDocument::getAllFunctionsDocumentation() {
 
   # get all the files in the libraries.d directory
   fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d"
-  local -a filesToAnalyze=("${RETURNED_ARRAY[@]}")
+  local -a filesToAnalyze=("${REPLY_ARRAY[@]}")
 
   # add each file of each user library directory
   if [[ ${coreOnly} != "true" ]]; then
     local libraryDirectory
     for libraryDirectory in "${CMD_LIBRARY_DIRECTORIES[@]}"; do
       fs::listFiles "${libraryDirectory}"
-      filesToAnalyze+=("${RETURNED_ARRAY[@]}")
+      filesToAnalyze+=("${REPLY_ARRAY[@]}")
     done
   fi
 
@@ -144,8 +144,8 @@ function selfDocument::getAllFunctionsDocumentation() {
     done
   fi
 
-  unset -v RETURNED_ASSOCIATIVE_ARRAY SORTED_FUNCTION_NAMES
-  declare -g -A RETURNED_ASSOCIATIVE_ARRAY=()
+  unset -v REPLY_ASSOCIATIVE_ARRAY SORTED_FUNCTION_NAMES
+  declare -g -A REPLY_ASSOCIATIVE_ARRAY=()
 
   # for each file to analyze
   local file
@@ -168,11 +168,11 @@ function selfDocument::getAllFunctionsDocumentation() {
       if [[ ${line} != "#"* ]]; then
         reading=false
         string::extractBetween functionDocumentation "## " $'\n'
-        string::trimEdges RETURNED_VALUE
-        functionName="${RETURNED_VALUE}"
+        string::trimEdges REPLY
+        functionName="${REPLY}"
         log::trace "Found function: ⌜${functionName}⌝"
         functionDocumentation="${functionDocumentation%%"shellcheck disable="*}"
-        RETURNED_ASSOCIATIVE_ARRAY["${functionName}"]="${functionDocumentation}"
+        REPLY_ASSOCIATIVE_ARRAY["${functionName}"]="${functionDocumentation}"
         functionDocumentation=""
       else
         if [[ ${line} == "#" ]]; then
@@ -184,20 +184,20 @@ function selfDocument::getAllFunctionsDocumentation() {
     done <"${file}"
   done
 
-  log::info "Found ${#RETURNED_ASSOCIATIVE_ARRAY[@]} functions with documentation."
+  log::info "Found ${#REPLY_ASSOCIATIVE_ARRAY[@]} functions with documentation."
 
   if log::isTraceEnabled; then
     log::trace "The functions with their documentation are:"
     local key
-    for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
+    for key in "${!REPLY_ASSOCIATIVE_ARRAY[@]}"; do
       log::trace "Function: ⌜${key}⌝"
-      local _documentationString="${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"
+      local _documentationString="${REPLY_ASSOCIATIVE_ARRAY[${key}]}"
       log::printFileString _documentationString
     done
   fi
 
   # sort the functions by name
-  declare -g -a SORTED_FUNCTION_NAMES=("${!RETURNED_ASSOCIATIVE_ARRAY[@]}")
+  declare -g -a SORTED_FUNCTION_NAMES=("${!REPLY_ASSOCIATIVE_ARRAY[@]}")
   array::sort SORTED_FUNCTION_NAMES
 }
 
@@ -213,7 +213,7 @@ function selfRelease_writeAllFunctionsToMarkdown() {
   # append each function documentation to the file
   local key documentation
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
-    documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
+    documentation="REPLY_ASSOCIATIVE_ARRAY[${key}]"
     content+="${!documentation}"$'\n'
   done
 
@@ -242,7 +242,7 @@ function selfRelease_writeAllFunctionsToPrototypeScript() {
   local key functionName documentation line
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     functionName="${key}"
-    documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
+    documentation="REPLY_ASSOCIATIVE_ARRAY[${key}]"
     # add # to each line of the documentation
 
     local IFS
@@ -269,11 +269,11 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   local key functionName documentation body options commentedDocumentation
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     functionName="${key}"
-    documentation="RETURNED_ASSOCIATIVE_ARRAY[${key}]"
+    documentation="REPLY_ASSOCIATIVE_ARRAY[${key}]"
 
     local description="${!documentation}"
     string::extractBetween description $'\n' "."
-    description="${RETURNED_VALUE#$'\n'}"
+    description="${REPLY#$'\n'}"
     description="${description//\/\\/}"
     description="${description//'"'/'\"'}"
     description="${description//$'\n'/ }"
@@ -322,7 +322,7 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
 
   # load the existing file content
   fs::readFile "${GLOBAL_INSTALLATION_DIRECTORY}/extras/base.code-snippets"
-  local originalContent="${RETURNED_VALUE}"
+  local originalContent="${REPLY}"
 
   # remove the first line
   originalContent="${originalContent#*$'\n'}"

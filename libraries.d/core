@@ -41,7 +41,7 @@ function trap::onErrorInternal() {
     # we are here if the error happened in a log function and thus we couldn't print the error
     printf '%s\n%s\n%s\n' "The command had a return code of ${errorCodesString}." "Error in a log function:" "${BASH_COMMAND:-}" >&2
     log::getCallStack 2
-    printf '%s\n' "${RETURNED_VALUE}" >&2
+    printf '%s\n' "${REPLY}" >&2
     return 0
   fi
 
@@ -218,7 +218,7 @@ function command_not_found_handle() {
     # we are here if the error happened in a log function and thus we couldn't print the error
     printf '%s\n%s\n' "Command not found: ⌜${commandNotFound}⌝." "Error in a log function." >&2
     log::getCallStack 2
-    printf '%s\n' "${RETURNED_VALUE}" >&2
+    printf '%s\n' "${REPLY}" >&2
   else
     GLOBAL_COMMAND_NOT_FOUND=1
     log::print "ERROR" "${ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
@@ -381,11 +381,11 @@ function fs::setupSubshellTempFileGlobalVariable() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The created path.
+# - ${REPLY}: The created path.
 #
 # ```bash
 # fs::createTempFile
-# local file="${RETURNED_VALUE}"
+# local file="${REPLY}"
 # ```
 #
 # > Files created this way are automatically cleaned up by the fs::cleanTempFiles
@@ -398,9 +398,9 @@ function fs::createTempFile() {
     fi
   fi
   TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
-  RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
+  REPLY="${GLOBAL_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
   if [[ ${_OPTION_PATH_ONLY:-false} != "true" ]]; then
-    : >"${RETURNED_VALUE}"
+    : >"${REPLY}"
   fi
 }
 
@@ -414,11 +414,11 @@ function fs::createTempFile() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The created path.
+# - ${REPLY}: The created path.
 #
 # ```bash
 # fs::createTempDirectory
-# local directory="${RETURNED_VALUE}"
+# local directory="${REPLY}"
 # ```
 #
 # > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
@@ -431,9 +431,9 @@ function fs::createTempDirectory() {
     fi
   fi
   TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
-  RETURNED_VALUE="${GLOBAL_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
+  REPLY="${GLOBAL_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
   if [[ ${_OPTION_PATH_ONLY:-false} != "true" ]]; then
-    mkdir -p "${RETURNED_VALUE}" 1>/dev/null
+    mkdir -p "${REPLY}" 1>/dev/null
   fi
 }
 
@@ -546,14 +546,14 @@ function log::setLevel() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The current log level.
+# - ${REPLY}: The current log level.
 #
 # ```bash
 # log::getLevel
-# printf '%s\n' "The log level is ⌜${RETURNED_VALUE}⌝."
+# printf '%s\n' "The log level is ⌜${REPLY}⌝."
 # ```
 function log::getLevel() {
-  RETURNED_VALUE="${GLOBAL_LOG_LEVEL:-info}"
+  REPLY="${GLOBAL_LOG_LEVEL:-info}"
 }
 
 # ## log::printInternal (private)
@@ -683,7 +683,7 @@ function log::printFileInternalLoop() {
   if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
     string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}     ${STYLE_COLOR_FADED}░${STYLE_COLOR_DEFAULT} " "$((GLOBAL_LOG_COLUMNS - 7 - ${#GLOBAL_LOG_WRAP_PADDING}))"
 
-    rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${RETURNED_VALUE}"$'\n'
+    rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${REPLY}"$'\n'
   else
     rawStringToPrintInLog+="${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${line}"$'\n'
   fi
@@ -729,7 +729,7 @@ function log::printString() {
 
     if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
       string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}${wrappedLineLeftPaddingString}" "$((GLOBAL_LOG_COLUMNS - ${#GLOBAL_LOG_WRAP_PADDING}))"
-      rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}${RETURNED_VALUE}"$'\n'
+      rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}${REPLY}"$'\n'
     else
       rawStringToPrintInLog+="${line}"$'\n'
     fi
@@ -754,7 +754,7 @@ function log::printString() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The path to the saved file.
+# - ${REPLY}: The path to the saved file.
 #
 # ```bash
 # log::saveFile "/my/file/path" "suffix" "important result file"
@@ -764,12 +764,12 @@ function log::saveFile() {
   local suffix="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local logPath="${3:-"true"}"
   core::createSavedFilePath "${suffix}"
-  local newFilePath="${RETURNED_VALUE}"
+  local newFilePath="${REPLY}"
   cp "${filePath}" "${newFilePath}"
   if [[ ${logPath} == "true" ]]; then
     log::printString "⌜${newFilePath}⌝"
   fi
-  RETURNED_VALUE="${newFilePath}"
+  REPLY="${newFilePath}"
 }
 
 # ## log::saveFileString
@@ -788,7 +788,7 @@ function log::saveFile() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The path to the saved file.
+# - ${REPLY}: The path to the saved file.
 #
 # ```bash
 # log::saveFileString "my content" "suffix" "important result file"
@@ -798,12 +798,12 @@ function log::saveFileString() {
   local suffix="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local logPath="${3:-"true"}"
   core::createSavedFilePath "${suffix}"
-  local newFilePath="${RETURNED_VALUE}"
+  local newFilePath="${REPLY}"
   printf '%s' "${contentToSave}" >"${newFilePath}"
   if [[ ${logPath} == "true" ]]; then
     log::printString "⌜${newFilePath}⌝"
   fi
-  RETURNED_VALUE="${newFilePath}"
+  REPLY="${newFilePath}"
 }
 
 # ## log::printRaw
@@ -1039,8 +1039,8 @@ function log::printCallStack() {
   local -i levelToSkipAtEnd="${2:-${_OPTION_STACK_TO_SKIP_AT_END:-0}}"
 
   _OPTION_WRAP_WIDTH="$((${GLOBAL_LOG_COLUMNS:-${GLOBAL_COLUMNS}} - ${#GLOBAL_LOG_WRAP_PADDING}))" log::getCallStack "$((levelToSkip + 1))" "${levelToSkipAtEnd}"
-  if ((${#RETURNED_VALUE} > 0)); then
-    log::printString "${RETURNED_VALUE}"
+  if ((${#REPLY} > 0)); then
+    log::printString "${REPLY}"
   fi
 }
 
@@ -1062,11 +1062,11 @@ function log::printCallStack() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The call stack as a string.
+# - ${REPLY}: The call stack as a string.
 #
 # ```bash
 # log::getCallStack
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 #
 # > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
@@ -1113,13 +1113,13 @@ function log::getCallStack() {
     line="${treeString} in ${functionName} at ${sourceFile}:${lineNumber}"
     if ((wrapWidth > 0)); then
       string::wrapCharacters line "${wrapWidth}" "${treePadding}"
-      returnedString+="${RETURNED_VALUE}"$'\n'
+      returnedString+="${REPLY}"$'\n'
     else
       returnedString+="${line}"$'\n'
     fi
   done
 
-  RETURNED_VALUE="${returnedString}"
+  REPLY="${returnedString}"
 }
 
 # ## log_setPrintfArgumentFromFormat (private)
@@ -1171,10 +1171,10 @@ function log_setPrintfArgumentFromFormat() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The format string to use in a printf statement.
-# - ${RETURNED_VALUE2}: The arguments (as a string space separated) to use in the printf statement.
-# - ${RETURNED_VALUE3}: The length of the displayed log before the message.
-# - ${RETURNED_VALUE4}: Extra code to compute variables that will be used to print the logs.
+# - ${REPLY}: The format string to use in a printf statement.
+# - ${REPLY2}: The arguments (as a string space separated) to use in the printf statement.
+# - ${REPLY3}: The length of the displayed log before the message.
+# - ${REPLY4}: Extra code to compute variables that will be used to print the logs.
 #
 # ```bash
 # log::parseLogPattern "<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>"
@@ -1183,10 +1183,10 @@ function log_setPrintfArgumentFromFormat() {
 function log::parseLogPattern() {
   local pattern="${1}"
 
-  RETURNED_VALUE=""  # format
-  RETURNED_VALUE2="" # arguments
-  RETURNED_VALUE3=0  # wrap padding length
-  RETURNED_VALUE4="" # code
+  REPLY=""  # format
+  REPLY2="" # arguments
+  REPLY3=0  # wrap padding length
+  REPLY4="" # code
   local -i wrapPaddingLength=0
 
   local normalString placeHolder formatSpecifier normalStringVisibleCharacters formatLengthTest printfFormat printfArgument
@@ -1207,8 +1207,8 @@ function log::parseLogPattern() {
     if [[ -n ${normalString} ]]; then
       normalStringVisibleCharacters="${normalString}"
       string::removeTextFormatting normalStringVisibleCharacters
-      RETURNED_VALUE+="%s"
-      RETURNED_VALUE2+="\"${normalString//\"/\\\"}\" "
+      REPLY+="%s"
+      REPLY2+="\"${normalString//\"/\\\"}\" "
       wrapPaddingLength+=${#normalStringVisibleCharacters}
 
       if [[ ${normalString} == *$'\n'* ]]; then
@@ -1252,7 +1252,7 @@ function log::parseLogPattern() {
     var*)
       printfFormat="%${formatSpecifier:-"s"}"
       printfArgument="\${${placeHolder#var}:-}"
-      RETURNED_VALUE4+=$'\n'"local variableToPrintInLog=\"\${${placeHolder#var}:-}\""
+      REPLY4+=$'\n'"local variableToPrintInLog=\"\${${placeHolder#var}:-}\""
       log_setPrintfArgumentFromFormat "variableToPrintInLog"
       ;;
     pid)
@@ -1261,7 +1261,7 @@ function log::parseLogPattern() {
       ;;
     processName)
       printfFormat="%${formatSpecifier:-"-5d"}"
-      RETURNED_VALUE4+=$'\n'"local processName"$'\n'"if [[ \${BASHPID} == \"${BASHPID}\" ]]; then processName=\"main\"; else processName=\"\${BASHPID}\"; fi"
+      REPLY4+=$'\n'"local processName"$'\n'"if [[ \${BASHPID} == \"${BASHPID}\" ]]; then processName=\"main\"; else processName=\"\${BASHPID}\"; fi"
       log_setPrintfArgumentFromFormat "processName"
       ;;
     subshell)
@@ -1282,7 +1282,7 @@ function log::parseLogPattern() {
       ;;
     sourceFile)
       printfFormat="%${formatSpecifier:-"-10s"}"
-      RETURNED_VALUE4+=$'\n'"local sourceFile=\"\${BASH_SOURCE[2]##*/}\""
+      REPLY4+=$'\n'"local sourceFile=\"\${BASH_SOURCE[2]##*/}\""
       log_setPrintfArgumentFromFormat "sourceFile"
       ;;
     elapsedTime)
@@ -1290,14 +1290,14 @@ function log::parseLogPattern() {
       log_setPrintfArgumentFromFormat "loggedElapsedTime"
       # shellcheck source=lib-time
       source time
-      RETURNED_VALUE4+=$'\n'"time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman \"\${RETURNED_VALUE}\" \"%S.%LLs\"; local loggedElapsedTime=\"\${RETURNED_VALUE}\""
+      REPLY4+=$'\n'"time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman \"\${REPLY}\" \"%S.%LLs\"; local loggedElapsedTime=\"\${REPLY}\""
       ;;
     elapsedTimeSinceLastLog)
       printfFormat="%${formatSpecifier:-"-7s"}"
       log_setPrintfArgumentFromFormat "loggedElapsedTimeSinceLastLog"
       # shellcheck source=lib-time
       source time
-      RETURNED_VALUE4+=$'\n'"time::getProgramElapsedMicroseconds; local -i currentTime=\${RETURNED_VALUE}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman \"\${_LOG_ELAPSED_TIME}\" \"%S.%LLs\"; local loggedElapsedTimeSinceLastLog=\"\${RETURNED_VALUE}\"; _LOG_ELAPSED_TIME=\${currentTime}"
+      REPLY4+=$'\n'"time::getProgramElapsedMicroseconds; local -i currentTime=\${REPLY}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman \"\${_LOG_ELAPSED_TIME}\" \"%S.%LLs\"; local loggedElapsedTimeSinceLastLog=\"\${REPLY}\"; _LOG_ELAPSED_TIME=\${currentTime}"
       ;;
     wrapPadding)
       printfFormat="%s"
@@ -1308,14 +1308,14 @@ function log::parseLogPattern() {
       printfArgument="\${messageToPrintInLog:-}"
 
       # shellcheck disable=SC2034
-      RETURNED_VALUE3="${wrapPaddingLength}"
+      REPLY3="${wrapPaddingLength}"
       ;;
     esac
     if [[ -z ${printfFormat} ]]; then
       continue
     fi
-    RETURNED_VALUE+="${printfFormat}"
-    RETURNED_VALUE2+="\"${printfArgument}\" "
+    REPLY+="${printfFormat}"
+    REPLY2+="\"${printfArgument}\" "
 
     if [[ ${printfFormat} != "%s" ]]; then
       # shellcheck disable=SC2059
@@ -1324,7 +1324,7 @@ function log::parseLogPattern() {
     fi
   done
 
-  RETURNED_VALUE+="\n"
+  REPLY+="\n"
 }
 
 # ## log::init (private)
@@ -1413,10 +1413,10 @@ function log::init() {
   fi
 
   # we prepare the variables that will be used to print the formatted logs
-  local -n printfFormat=RETURNED_VALUE
-  local -n printfArguments=RETURNED_VALUE2
-  local -n wrapPaddingLength=RETURNED_VALUE3
-  local -n beforePrintStatementCode=RETURNED_VALUE4
+  local -n printfFormat=REPLY
+  local -n printfArguments=REPLY2
+  local -n wrapPaddingLength=REPLY3
+  local -n beforePrintStatementCode=REPLY4
   log::parseLogPattern "${GLOBAL_LOG_PATTERN}"
 
   # string with the number of spaces necessary to align with other log messages
@@ -1435,8 +1435,8 @@ function log::init() {
     GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${beforePrintStatementCode}"$'\n'
   fi
   if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
-    # define RETURNED_VALUE/RETURNED_VALUE2 as local so we don't impact the parent scope (they are used during parsing)
-    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local RETURNED_VALUE RETURNED_VALUE2"$'\n'"local -n messageToPrintInLog=RETURNED_VALUE"$'\n'"string::wrapWords \"\${messageVariableName}\" ${GLOBAL_LOG_COLUMNS} \"${GLOBAL_LOG_WRAP_PADDING}\" $((GLOBAL_LOG_COLUMNS - wrapPaddingLength))"$'\n'
+    # define REPLY/REPLY2 as local so we don't impact the parent scope (they are used during parsing)
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local REPLY REPLY2"$'\n'"local -n messageToPrintInLog=REPLY"$'\n'"string::wrapWords \"\${messageVariableName}\" ${GLOBAL_LOG_COLUMNS} \"${GLOBAL_LOG_WRAP_PADDING}\" $((GLOBAL_LOG_COLUMNS - wrapPaddingLength))"$'\n'
   else
     GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n messageToPrintInLog=\"\${messageVariableName}\""$'\n'
   fi
@@ -1468,7 +1468,7 @@ function log::init() {
     fi
     if [[ ${VALET_CONFIG_LOG_TO_DIRECTORY} == "true" ]]; then
       core::getUserStateDirectory
-      VALET_CONFIG_LOG_TO_DIRECTORY="${RETURNED_VALUE}/logs"
+      VALET_CONFIG_LOG_TO_DIRECTORY="${REPLY}/logs"
     fi
     if [[ ! -d "${VALET_CONFIG_LOG_TO_DIRECTORY}" ]]; then
       mkdir -p "${VALET_CONFIG_LOG_TO_DIRECTORY}" 1>/dev/null
@@ -1544,11 +1544,11 @@ function string::removeTextFormatting() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the wrapped text
+# - ${REPLY}: the wrapped text
 #
 # ```bash
 # string::wrapWords "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 #
 # > - This function is written in pure bash and is faster than calling the fold command.
@@ -1562,12 +1562,12 @@ function string::wrapWords() {
 
   # short cut in case the text is already shorter than the width
   if [[ ${#textToWrapAtWords} -le ${firstLineWidth} && ${textToWrapAtWords} != *$'\n'* ]]; then
-    RETURNED_VALUE="${textToWrapAtWords}"
+    REPLY="${textToWrapAtWords}"
     return 0
   fi
 
   local text="${textToWrapAtWords}"
-  local IFS=$' \t' output="" line word realWord RETURNED_VALUE2
+  local IFS=$' \t' output="" line word realWord REPLY2
   local leftPaddingVisibleChars="${leftPaddingChars}"
   string::removeTextFormatting leftPaddingVisibleChars
   local -i sentenceWidth=$((width - ${#leftPaddingVisibleChars})) realWordLength=0 firstWord=1
@@ -1615,8 +1615,8 @@ function string::wrapWords() {
         else
           # the word is too long to fit on a line, split it in multiple lines
           string::wrapCharacters word "${width}" "${leftPaddingChars}" "$((sentenceWidth - lineLength))"
-          output+="${RETURNED_VALUE}"
-          lineLength=${RETURNED_VALUE2}
+          output+="${REPLY}"
+          lineLength=${REPLY2}
         fi
       fi
 
@@ -1625,7 +1625,7 @@ function string::wrapWords() {
     lineLength=0
   done
 
-  RETURNED_VALUE="${output#$'\n'"${leftPaddingChars}"}"
+  REPLY="${output#$'\n'"${leftPaddingChars}"}"
 }
 
 # ## string::wrapCharacters
@@ -1654,12 +1654,12 @@ function string::wrapWords() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the wrapped string
-# - ${RETURNED_VALUE2}: the length taken on the last line
+# - ${REPLY}: the wrapped string
+# - ${REPLY2}: the length taken on the last line
 #
 # ```bash
 # string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 --- 5
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 #
 # > - This function is written in pure bash and is faster than calling the fold command.
@@ -1678,12 +1678,12 @@ function string::wrapCharacters() {
   local -i lineLength=$((width - firstLineWidth)) isWrapping=0
 
   if ((width <= 0)); then
-    RETURNED_VALUE=""
-    RETURNED_VALUE2=0
+    REPLY=""
+    REPLY2=0
     return
   fi
 
-  RETURNED_VALUE=""
+  REPLY=""
   while ((${#text} > 0)); do
     # take the first chunk that does not contain an escape character
     itemChunk="${text%%$'\e'*}"
@@ -1700,19 +1700,19 @@ function string::wrapCharacters() {
       itemChunk="${itemChunk:0:$((width - lineLength))}"
       text="${text:${#itemChunk}}"
       lineLength+=${#itemChunk}
-      RETURNED_VALUE+="${itemChunk}"
+      REPLY+="${itemChunk}"
       isWrapping=1
 
       while [[ ${text} == $'\e'* ]]; do
         # case where we have an escape sequence at the beginning of the string
         # we only consider escape sequences for text formatting, they end with 'm'
         itemChunk="${text%%"m"*}m"
-        RETURNED_VALUE+="${itemChunk}"
+        REPLY+="${itemChunk}"
         text="${text:${#itemChunk}}"
       done
 
       while [[ ${text} == $'\n'* ]]; do
-        RETURNED_VALUE+=$'\n'"${leftPaddingChars}"
+        REPLY+=$'\n'"${leftPaddingChars}"
         text="${text:1}"
         lineLength=0
         isWrapping=0
@@ -1722,12 +1722,12 @@ function string::wrapCharacters() {
     if ((lineLength >= width)); then
       # we reached the desired size
       lineLength=0
-      RETURNED_VALUE+=$'\n'"${leftPaddingChars}"
+      REPLY+=$'\n'"${leftPaddingChars}"
     fi
   done
 
-  RETURNED_VALUE="${RETURNED_VALUE%$'\n'"${leftPaddingChars}"}"
-  RETURNED_VALUE2=${lineLength}
+  REPLY="${REPLY%$'\n'"${leftPaddingChars}"}"
+  REPLY2=${lineLength}
 }
 
 # ## string::highlight
@@ -1749,11 +1749,11 @@ function string::wrapCharacters() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the highlighted text
+# - ${REPLY}: the highlighted text
 #
 # ```bash
 # string::highlight "This is a text to highlight." "ttttt"
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 #
 # > - All characters to highlight must be found in the same order in the matched line.
@@ -1770,7 +1770,7 @@ function string::highlight() {
   local searchStringCharacters="${searchStringCharacter,}${searchStringCharacter^}"
   local text="${textToHighlight}"
 
-  RETURNED_VALUE=""
+  REPLY=""
 
   while ((${#text} > 0)); do
     # take the first chunk that does not contain an escape character
@@ -1781,21 +1781,21 @@ function string::highlight() {
       # colorize the search string in this chunk
       while [[ -n ${searchStringCharacter} && ${itemChunk} == *["${searchStringCharacters}"]* ]]; do
         itemChunkPiece="${itemChunk%%["${searchStringCharacters}"]*}"
-        RETURNED_VALUE+="${itemChunkPiece}${highlightCode}${itemChunk:${#itemChunkPiece}:1}${resetCode}"
+        REPLY+="${itemChunkPiece}${highlightCode}${itemChunk:${#itemChunkPiece}:1}${resetCode}"
         itemChunk="${itemChunk:${#itemChunkPiece}+1}"
         searchStringIndex+=1
         searchStringCharacter="${charactersToHighlight:searchStringIndex:1}"
         searchStringCharacters="${searchStringCharacter,}${searchStringCharacter^}"
       done
 
-      RETURNED_VALUE+="${itemChunk}"
+      REPLY+="${itemChunk}"
     fi
 
     while [[ ${text} == $'\e'* ]]; do
       # case where we have an escape sequence at the beginning of the string
       # we only consider escape sequences for text formatting, they end with m
       itemChunk="${text%%"m"*}m"
-      RETURNED_VALUE+="${itemChunk}"
+      REPLY+="${itemChunk}"
       text="${text:${#itemChunk}}"
     done
   done
@@ -1870,12 +1870,12 @@ function regex::getFuzzySearchRegexFromSearchString() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY[@]}: An array containing the items sorted and filtered
-# - ${RETURNED_ARRAY2[@]}: An array containing the indexes of the matched items in the original array
+# - ${REPLY_ARRAY[@]}: An array containing the items sorted and filtered
+# - ${REPLY_ARRAY2[@]}: An array containing the indexes of the matched items in the original array
 #
 # ```bash
 # array::fuzzyFilterSort MY_ARRAY SEARCH_STRING
-# echo "${RETURNED_ARRAY[*]}"
+# echo "${REPLY_ARRAY[*]}"
 # ```
 #
 # > - All characters in the searched string must be found in the same order in the matched line.
@@ -1887,8 +1887,8 @@ function array::fuzzyFilterSort() {
 
   # nothing to filter
   if ((${#filterSearchString} == 0 || ${#arrayToFilter[@]} == 0)); then
-    RETURNED_ARRAY=("${arrayToFilter[@]}")
-    eval "RETURNED_ARRAY2=( {0..$((${#arrayToFilter[@]} - 1))} )"
+    REPLY_ARRAY=("${arrayToFilter[@]}")
+    eval "REPLY_ARRAY2=( {0..$((${#arrayToFilter[@]} - 1))} )"
     return 0
   fi
 
@@ -1900,7 +1900,7 @@ function array::fuzzyFilterSort() {
   # the length of the matched pattern and the initial position of the item
   _ARRAY_FUZZY_FILTER_KEYS=()
   # will contain the original indexes corresponding to the sorted array
-  RETURNED_ARRAY2=()
+  REPLY_ARRAY2=()
 
   for ((index = 0; index < ${#arrayToFilter[@]}; index++)); do
     if [[ ${arrayToFilter[index]} =~ ${_STRING_FUZZY_FILTER_REGEX} ]]; then
@@ -1909,7 +1909,7 @@ function array::fuzzyFilterSort() {
       else
         _ARRAY_FUZZY_FILTER_KEYS+=($((${#BASH_REMATCH[1]} * 10000000 + ${#BASH_REMATCH[2]} * 10000 + index)))
       fi
-      RETURNED_ARRAY2+=($((index)))
+      REPLY_ARRAY2+=($((index)))
     fi
   done
 
@@ -1918,9 +1918,9 @@ function array::fuzzyFilterSort() {
   fi
 
   # will contain the matched lines, sorted
-  RETURNED_ARRAY=()
-  for ((index = 0; index < ${#RETURNED_ARRAY2[@]}; index++)); do
-    RETURNED_ARRAY+=("${arrayToFilter[RETURNED_ARRAY2[index]]}")
+  REPLY_ARRAY=()
+  for ((index = 0; index < ${#REPLY_ARRAY2[@]}; index++)); do
+    REPLY_ARRAY+=("${arrayToFilter[REPLY_ARRAY2[index]]}")
   done
   unset -v _ARRAY_FUZZY_FILTER_KEYS
 }
@@ -1956,9 +1956,9 @@ function array::fuzzyFilterSortQuicksort() {
     tempKey=${_ARRAY_FUZZY_FILTER_KEYS[left]}
     _ARRAY_FUZZY_FILTER_KEYS[left]=${_ARRAY_FUZZY_FILTER_KEYS[right]}
     _ARRAY_FUZZY_FILTER_KEYS[right]=${tempKey}
-    tempValue=${RETURNED_ARRAY2[left]}
-    RETURNED_ARRAY2[left]=${RETURNED_ARRAY2[right]}
-    RETURNED_ARRAY2[right]=${tempValue}
+    tempValue=${REPLY_ARRAY2[left]}
+    REPLY_ARRAY2[left]=${REPLY_ARRAY2[right]}
+    REPLY_ARRAY2[right]=${tempValue}
     left+=1
     right=$((right - 1))
   done
@@ -1980,20 +1980,20 @@ function array::fuzzyFilterSortQuicksort() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the elapsed time in µs since the program started.
+# - ${REPLY}: the elapsed time in µs since the program started.
 #
 # ```bash
 # core::getElapsedProgramTime
-# echo "${RETURNED_VALUE}"
-# time::convertMicrosecondsToHuman "${RETURNED_VALUE}"
-# echo "Human time: ${RETURNED_VALUE}"
+# echo "${REPLY}"
+# time::convertMicrosecondsToHuman "${REPLY}"
+# echo "Human time: ${REPLY}"
 # ```
 #
 # > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.
 # > The 10# forces the base 10 conversion to avoid issues with leading zeros.
 # > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 function time::getProgramElapsedMicroseconds() {
-  RETURNED_VALUE=$(((${EPOCHREALTIME%%[.,]*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*[.,]} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))
+  REPLY=$(((${EPOCHREALTIME%%[.,]*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*[.,]} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))
 }
 
 #===============================================================
@@ -2189,7 +2189,7 @@ function core::sourceUserCommands() {
   # source the user commands
   local stateDirectory
   core::getUserDataDirectory
-  stateDirectory="${RETURNED_VALUE}"
+  stateDirectory="${REPLY}"
 
   local commandsFile
   commandsFile="${stateDirectory}/commands"
@@ -2242,7 +2242,7 @@ function core::reloadUserCommands() {
 # ```
 function core::deleteUserCommands() {
   core::getUserDataDirectory
-  rm -f "${RETURNED_VALUE}/commands" 1>/dev/null || :
+  rm -f "${REPLY}/commands" 1>/dev/null || :
 }
 
 # ## core::getVersion
@@ -2251,11 +2251,11 @@ function core::deleteUserCommands() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The version of Valet.
+# - ${REPLY}: The version of Valet.
 #
 # ```bash
 # core::getVersion
-# printf '%s\n' "The version of Valet is ⌜${RETURNED_VALUE}⌝."
+# printf '%s\n' "The version of Valet is ⌜${REPLY}⌝."
 # ```
 function core::getVersion() {
   # shellcheck source=lib-fs
@@ -2270,18 +2270,18 @@ function core::getVersion() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the path to the valet configuration directory
+# - ${REPLY}: the path to the valet configuration directory
 #
 # ```bash
 # core::getConfigurationDirectory
-# local directory="${RETURNED_VALUE}"
+# local directory="${REPLY}"
 # ```
 #
 # > The default configuration directory is `~/.config/valet`.
 function core::getConfigurationDirectory() {
-  RETURNED_VALUE="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}"
-  if [[ ! -d "${RETURNED_VALUE}" ]]; then
-    mkdir -p "${RETURNED_VALUE}"
+  REPLY="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}"
+  if [[ ! -d "${REPLY}" ]]; then
+    mkdir -p "${REPLY}"
   fi
 }
 
@@ -2293,18 +2293,18 @@ function core::getConfigurationDirectory() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the path to the valet local state directory
+# - ${REPLY}: the path to the valet local state directory
 #
 # ```bash
 # core::getUserDataDirectory
-# local directory="${RETURNED_VALUE}"
+# local directory="${REPLY}"
 # ```
 #
 # > The default data directory is `~/.local/share/valet`.
 function core::getUserDataDirectory() {
-  RETURNED_VALUE="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"
-  if [[ ! -d "${RETURNED_VALUE}" ]]; then
-    mkdir -p "${RETURNED_VALUE}"
+  REPLY="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"
+  if [[ ! -d "${REPLY}" ]]; then
+    mkdir -p "${REPLY}"
   fi
 }
 
@@ -2316,18 +2316,18 @@ function core::getUserDataDirectory() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the path to the valet local state directory
+# - ${REPLY}: the path to the valet local state directory
 #
 # ```bash
 # core::getUserCacheDirectory
-# local directory="${RETURNED_VALUE}"
+# local directory="${REPLY}"
 # ```
 #
 # > The default cache directory is `~/.cache/valet`.
 function core::getUserCacheDirectory() {
-  RETURNED_VALUE="${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}"
-  if [[ ! -d "${RETURNED_VALUE}" ]]; then
-    mkdir -p "${RETURNED_VALUE}"
+  REPLY="${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}"
+  if [[ ! -d "${REPLY}" ]]; then
+    mkdir -p "${REPLY}"
   fi
 }
 
@@ -2340,18 +2340,18 @@ function core::getUserCacheDirectory() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the path to the valet local state directory
+# - ${REPLY}: the path to the valet local state directory
 #
 # ```bash
 # core::getUserStateDirectory
-# local directory="${RETURNED_VALUE}"
+# local directory="${REPLY}"
 # ```
 #
 # > The default state directory is `~/.local/state/valet`.
 function core::getUserStateDirectory() {
-  RETURNED_VALUE="${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}"
-  if [[ ! -d "${RETURNED_VALUE}" ]]; then
-    mkdir -p "${RETURNED_VALUE}"
+  REPLY="${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}"
+  if [[ ! -d "${REPLY}" ]]; then
+    mkdir -p "${REPLY}"
   fi
 }
 
@@ -2362,18 +2362,18 @@ function core::getUserStateDirectory() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the path to the valet user directory
+# - ${REPLY}: the path to the valet user directory
 #
 # ```bash
 # core::getExtensionsDirectory
-# local directory="${RETURNED_VALUE}"
+# local directory="${REPLY}"
 # ```
 #
 # > The default extensions directory is `~/.valet.d`.
 function core::getExtensionsDirectory() {
-  RETURNED_VALUE="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"
-  if [[ ! -d "${RETURNED_VALUE}" ]]; then
-    mkdir -p "${RETURNED_VALUE}"
+  REPLY="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"
+  if [[ ! -d "${REPLY}" ]]; then
+    mkdir -p "${REPLY}"
   fi
 }
 
@@ -2388,20 +2388,20 @@ function core::getExtensionsDirectory() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The path to the created file.
+# - ${REPLY}: The path to the created file.
 #
 # ```bash
 # core::createSavedFilePath "my-file"
-# printf '%s\n' "The file is ⌜${RETURNED_VALUE}⌝."
+# printf '%s\n' "The file is ⌜${REPLY}⌝."
 # ```
 function core::createSavedFilePath() {
   local filePath
   printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d--%s" "${EPOCHSECONDS}" "${BASHPID}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   core::getUserStateDirectory
-  if [[ ! -d "${RETURNED_VALUE}/saved-files" ]]; then
-    mkdir -p "${RETURNED_VALUE}/saved-files"
+  if [[ ! -d "${REPLY}/saved-files" ]]; then
+    mkdir -p "${REPLY}/saved-files"
   fi
-  RETURNED_VALUE="${RETURNED_VALUE}/saved-files/${filePath}"
+  REPLY="${REPLY}/saved-files/${filePath}"
 }
 
 # ## core::dump
@@ -2414,7 +2414,7 @@ function core::createSavedFilePath() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the path to the created file.
+# - ${REPLY}: the path to the created file.
 #
 # ```bash
 # core::dump
@@ -2423,17 +2423,17 @@ function core::dump() {
   local filePath
   printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d" "${EPOCHSECONDS}" "${BASHPID}"
   core::getUserStateDirectory
-  if [[ ! -d "${RETURNED_VALUE}/core-dumps" ]]; then
-    mkdir -p "${RETURNED_VALUE}/core-dumps"
+  if [[ ! -d "${REPLY}/core-dumps" ]]; then
+    mkdir -p "${REPLY}/core-dumps"
   fi
-  filePath="${RETURNED_VALUE}/core-dumps/${filePath}${_OPTION_DUMP_SUFFIX:-}"
+  filePath="${REPLY}/core-dumps/${filePath}${_OPTION_DUMP_SUFFIX:-}"
 
   local fd listOfFds=""
   if command -v readlink &>/dev/null; then
     include exe
     for fd in /proc/"${BASHPID}"/fd/*; do
       if exe::invoke2 false readlink -f "${fd}"; then
-        listOfFds+="${fd} -> ${RETURNED_VALUE%$'\n'*}"$'\n'
+        listOfFds+="${fd} -> ${REPLY%$'\n'*}"$'\n'
       else
         listOfFds+="${fd} -> ?? (readlink failed)"$'\n'
       fi
@@ -2445,7 +2445,7 @@ function core::dump() {
     echo "================="$'\n'"PPID: ${PPID:-}"
     echo "================="$'\n'"Stack:"
     log::getCallStack
-    echo "${RETURNED_VALUE}"
+    echo "${REPLY}"
     if command -v ps &>/dev/null; then
       echo "================="$'\n'"Processes:"
       ps -l || :
@@ -2478,7 +2478,7 @@ function core::dump() {
   } >>"${filePath}"
 
   log::debug "Core dump saved to ⌜${filePath}⌝"
-  RETURNED_VALUE="${filePath}"
+  REPLY="${filePath}"
 }
 
 # ## core::setShellOptions (private)
@@ -2611,7 +2611,7 @@ function command::showHelp() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: a string that can be evaluated to set the parsed variables
+# - ${REPLY}: a string that can be evaluated to set the parsed variables
 #
 # Output example:
 #
@@ -2622,7 +2622,7 @@ function command::showHelp() {
 # ```
 #
 # ```bash
-# command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+# command::parseArguments "$@" && eval "${REPLY}"
 # ```
 function command::parseArguments() {
   # get the function name of the calling function

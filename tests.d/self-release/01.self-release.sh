@@ -17,8 +17,8 @@ function main() {
 # need to override git, curl
 function exe::invokef5() {
   echo "🙈 mocked exe::invokef5 $*" 1>&2
-  RETURNED_VALUE=""
-  RETURNED_VALUE2=""
+  REPLY=""
+  REPLY2=""
 }
 
 function exe::invoke() {
@@ -26,15 +26,15 @@ function exe::invoke() {
   if [[ ${1} == "git" ]]; then
     while [[ $# -gt 0 ]]; do
       case "${1}" in
-      tag) RETURNED_VALUE="${LAST_GIT_TAG}"; return 0;;
-      log) RETURNED_VALUE="✨ feature"$'\n'"🐞 fix"; return 0;;
+      tag) REPLY="${LAST_GIT_TAG}"; return 0;;
+      log) REPLY="✨ feature"$'\n'"🐞 fix"; return 0;;
       *) ;;
       esac
       shift
     done
   fi
-  RETURNED_VALUE=""
-  RETURNED_VALUE2=""
+  REPLY=""
+  REPLY2=""
 }
 
 function interactive::promptYesNo() {
@@ -44,20 +44,20 @@ function interactive::promptYesNo() {
 
 function curl::request() {
   echo "🙈 mocked curl::request $*" 1>&2
-  RETURNED_VALUE='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}", "tag_name": "v1.2.3", "browser_download_url": "https:///fake" }'
-  RETURNED_VALUE2=""
-  RETURNED_VALUE3=200
+  REPLY='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}", "tag_name": "v1.2.3", "browser_download_url": "https:///fake" }'
+  REPLY2=""
+  REPLY3=200
 }
 
 
 function curl::download() {
   echo "🙈 mocked curl::download $*" 1>&2
-  RETURNED_VALUE=""
-  RETURNED_VALUE2=200
+  REPLY=""
+  REPLY2=200
 }
 
 function core::getVersion() {
-  RETURNED_VALUE="1.2.3"
+  REPLY="1.2.3"
 }
 
 function fs::writeToFile() {

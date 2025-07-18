@@ -11,7 +11,7 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='#!/usr/bin/env bash
+REPLY='#!/usr/bin/env bash
 # The config script for Valet.
 # shellcheck disable=SC2034
 # 
@@ -103,7 +103,7 @@ Testing selfConfig::getFileContent with exportCurrentValues:
 Returned variables:
 
 ```text
-RETURNED_VALUE='#!/usr/bin/env bash
+REPLY='#!/usr/bin/env bash
 # The config script for Valet.
 # shellcheck disable=SC2034
 # 

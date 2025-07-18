@@ -41,7 +41,7 @@ if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
   source profiler
   printf -v _PROFILER_FILE_NAME "profiler-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
   core::getUserStateDirectory
-  profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${_PROFILER_FILE_NAME}"}"
+  profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${REPLY}/logs/${_PROFILER_FILE_NAME}"}"
 fi
 
 # fd where we write the TUI
@@ -142,7 +142,7 @@ core::sourceUserCommands
 # ```
 function main::printHelp() {
   main::getHelpText "$@"
-  printf '%s' "${RETURNED_VALUE}"
+  printf '%s' "${REPLY}"
 }
 
 # Get the help text of a function or a command.
@@ -153,8 +153,8 @@ function main::printHelp() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the help text
-# - ${RETURNED_VALUE2}: the command usage text
+# - ${REPLY}: the help text
+# - ${REPLY2}: the command usage text
 #
 # ```bash
 # main::getHelpText function "this" "false" "${GLOBAL_COLUMNS}"
@@ -196,7 +196,7 @@ function main::getHelpText() {
 
   # description
   string::wrapWords description "${helpWidth}" "  " "$((helpWidth - 2))"
-  local wrappedDescription="  ${RETURNED_VALUE}"
+  local wrappedDescription="  ${REPLY}"
 
   # usage
   local usage
@@ -226,21 +226,21 @@ function main::getHelpText() {
       done
     fi
   fi
-  RETURNED_VALUE2="${usage}"
+  REPLY2="${usage}"
   string::wrapWords usage "${helpWidth}" "  " "$((helpWidth - 2))"
-  usage="  ${RETURNED_VALUE}"
+  usage="  ${REPLY}"
 
   # global options
   local options="${STYLE_HELP_TITLE}GLOBAL OPTIONS${STYLE_RESET}"$'\n'$'\n'
   mainWriteAsTable "${helpWidth}" "${STYLE_HELP_OPTION}" "CMD_OPTIONS" "this"
-  options+="${RETURNED_VALUE}"$'\n'
+  options+="${REPLY}"$'\n'
 
   # options
   if [[ ${functionName} != "this" ]]; then
     if [[ -n ${functionOptions:-} ]]; then
       options+="${STYLE_HELP_TITLE}OPTIONS${STYLE_RESET}"$'\n'$'\n'
       mainWriteAsTable "${helpWidth}" "${STYLE_HELP_OPTION}" "CMD_OPTIONS" "${functionName}"
-      options+="${RETURNED_VALUE}"$'\n'
+      options+="${REPLY}"$'\n'
     fi
   fi
 
@@ -249,7 +249,7 @@ function main::getHelpText() {
   if [[ -z ${functionCommands:-} && -n ${functionArguments:-} ]]; then
     arguments="${STYLE_HELP_TITLE}ARGUMENTS${STYLE_RESET}"$'\n'$'\n'
     mainWriteAsTable "${helpWidth}" "${STYLE_HELP_ARGUMENT}" "CMD_ARGUMENTS" "${functionName}"
-    arguments+="${RETURNED_VALUE}"$'\n'
+    arguments+="${REPLY}"$'\n'
   fi
 
   # commands
@@ -257,7 +257,7 @@ function main::getHelpText() {
   if [[ -n ${functionCommands:-} ]]; then
     commands="${STYLE_HELP_TITLE}COMMANDS${STYLE_RESET}"$'\n'$'\n'
     mainWriteAsTable "${helpWidth}" "${STYLE_HELP_COMMAND}" "CMD_COMMANDS" "${functionName}"
-    commands+="${RETURNED_VALUE}"$'\n'
+    commands+="${REPLY}"$'\n'
   fi
 
   # examples
@@ -265,7 +265,7 @@ function main::getHelpText() {
   if [[ -n ${functionExamples:-} ]]; then
     examples="${STYLE_HELP_TITLE}EXAMPLES${STYLE_RESET}"$'\n'$'\n'
     mainWriteAsTable "${helpWidth}" "${STYLE_HELP_COMMAND}" "CMD_EXAMPLES" "${functionName}"
-    examples+="${RETURNED_VALUE}"$'\n'
+    examples+="${REPLY}"$'\n'
   fi
 
   local output="${STYLE_HELP_TITLE}ABOUT${STYLE_RESET}
@@ -284,7 +284,7 @@ ${options:-}${arguments:-}${commands:-}${examples:-}"
     output="${output//⌝/⌝${STYLE_RESET}}"
   fi
 
-  RETURNED_VALUE="${output}"
+  REPLY="${output}"
 }
 
 # used in show help to write a table of options, commands, arguments...
@@ -305,13 +305,13 @@ function mainWriteAsTable() {
   output=""
   for index in "${!names[@]}"; do
     string::wrapWords "names[${index}]" "${width}" "  " "$((width - 2))"
-    output+="  ${color}${RETURNED_VALUE}${STYLE_RESET:-}"$'\n'
+    output+="  ${color}${REPLY}${STYLE_RESET:-}"$'\n'
 
     string::wrapWords "descriptions[${index}]" "${width}" "      " "$((width - 6))"
-    output+="      ${RETURNED_VALUE}"$'\n'
+    output+="      ${REPLY}"$'\n'
   done
 
-  RETURNED_VALUE="${output}"
+  REPLY="${output}"
 }
 
 
@@ -332,10 +332,10 @@ function main::parseMainArguments() {
       break
     fi
     main::parseMainArgumentsSwitch "$@"
-    if (( RETURNED_VALUE < 0 )); then
+    if (( REPLY < 0 )); then
       break;
-    elif (( RETURNED_VALUE > 0 )); then
-      shift "${RETURNED_VALUE}"
+    elif (( REPLY > 0 )); then
+      shift "${REPLY}"
     fi
     shift
   done
@@ -358,9 +358,9 @@ function main::parseMainArguments() {
 
   local functionName nbArgs exactCommand
   main::fuzzyMatchCommandToFunctionNameOrFail "${_PARSED_COMMANDS[@]}"
-  functionName="${RETURNED_VALUE:-}"
-  nbArgs="${RETURNED_VALUE2:-}"
-  exactCommand="${RETURNED_VALUE3:-}"
+  functionName="${REPLY:-}"
+  nbArgs="${REPLY2:-}"
+  exactCommand="${REPLY3:-}"
 
   log::trace "Function name found ⌜${functionName}⌝."
 
@@ -388,7 +388,7 @@ function main::parseMainArgumentsSwitch() {
     if (( $# <= 1 )); then core::fail "Missing value for option ⌜${1}⌝."; fi
     shift
     log::setLevel "${1}"
-    RETURNED_VALUE=1
+    REPLY=1
     return 0
     ;;
   -v | --verbose)
@@ -409,7 +409,7 @@ function main::parseMainArgumentsSwitch() {
     ;;
   --version)
     core::getVersion
-    printf '%s\n' "${RETURNED_VALUE}"
+    printf '%s\n' "${REPLY}"
     exit 0
     ;;
   -h | --help)
@@ -417,27 +417,27 @@ function main::parseMainArgumentsSwitch() {
     exit 0
     ;;
   --)
-    RETURNED_VALUE=-1
+    REPLY=-1
     return 0
     ;;
   --*)
     # if we didn't match any known long option, try to fuzzy find it
     main::fuzzyFindOption "${1}" "${CMD_OPTS_this[@]}"
 
-    if [[ -n ${RETURNED_VALUE2} ]]; then
+    if [[ -n ${REPLY2} ]]; then
       # we found a single match! need to parse it
-      main::parseMainArgumentsSwitch "${RETURNED_VALUE2}" "${@:2}"
+      main::parseMainArgumentsSwitch "${REPLY2}" "${@:2}"
       return 0
     else
       # we found multiple matches or no match
-      core::fail "${RETURNED_VALUE}"
+      core::fail "${REPLY}"
     fi
     ;;
   -*)
     # a single dash and single letter, we don't have a match
     if (( ${#1} <= 2 )); then
       main::getSingleLetterOptions "${CMD_OPTS_this[@]}"
-      core::fail "Unknown option letter ⌜${optionLetter}⌝ in group ⌜${1}⌝. ${RETURNED_VALUE}"
+      core::fail "Unknown option letter ⌜${optionLetter}⌝ in group ⌜${1}⌝. ${REPLY}"
     fi
 
     # many letters, we can resolve each letter as an option
@@ -447,18 +447,18 @@ function main::parseMainArgumentsSwitch() {
     for ((letterIndex = 1; letterIndex < optionLength; letterIndex++)); do
       optionLetter="${1:letterIndex:1}"
       main::parseMainArgumentsSwitch "-${optionLetter}" "${@:2 + argsToShift}"
-      if (( RETURNED_VALUE > 0 )); then
-        argsToShift+=RETURNED_VALUE
+      if (( REPLY > 0 )); then
+        argsToShift+=REPLY
       fi
     done
-    RETURNED_VALUE=${argsToShift}
+    REPLY=${argsToShift}
     return 0
     ;;
   *)
     _PARSED_COMMANDS+=("${1}")
     # we don't expect more than CMD_MAX_SUB_COMMAND_LEVEL + 1 commands so if we matched enough, break
     if (( ${#_PARSED_COMMANDS[@]} >= CMD_MAX_SUB_COMMAND_LEVEL + 1 )); then
-      RETURNED_VALUE=-1
+      REPLY=-1
       return 0
     fi
     # if we matched the first command, we can extract the arguments for the sub command
@@ -467,7 +467,7 @@ function main::parseMainArgumentsSwitch() {
     fi
     ;;
   esac
-  RETURNED_VALUE=0
+  REPLY=0
 }
 
 # Run a given function
@@ -516,7 +516,7 @@ function main::runFunction() {
     local profilerFileName
     printf -v profilerFileName "profiler-%(%FT%H-%M-%S%z)T--PID_%06d--fun_%s.log" "${EPOCHSECONDS}" "${BASHPID}" "${functionName}"
     core::getUserStateDirectory
-    profiler::enable "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${RETURNED_VALUE}/logs/${profilerFileName}"}"
+    profiler::enable "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${REPLY}/logs/${profilerFileName}"}"
   fi
 
   # reset IFS to ensure consistent behavior
@@ -567,7 +567,7 @@ function main::runMenuWithSubCommands() {
 
   local parsedArguments
   command::parseFunctionArguments "_menu" "$@"
-  parsedArguments="${RETURNED_VALUE}"
+  parsedArguments="${REPLY}"
   if log::isDebugEnabled; then
     log::debug "Parsed arguments:"
     log::printString "${parsedArguments}"
@@ -613,7 +613,7 @@ function main::showCommandsMenuAndRun() {
 
   local commandChoice
   main::showInteractiveCommandsMenu "Please select the command to run." "${commandSelectionItemsArrayName}"
-  commandChoice="${RETURNED_VALUE}"
+  commandChoice="${REPLY}"
 
   log::trace "Command choice ⌜${commandChoice}⌝."
 
@@ -627,7 +627,7 @@ function main::showCommandsMenuAndRun() {
   # get the function name from the command by replacing spaces and hyphens with _
   local functionName
   main::getFunctionNameFromCommand "${commandChoice}"
-  functionName="${RETURNED_VALUE}"
+  functionName="${REPLY}"
 
   main::runFunction "${functionName}"
 }
@@ -639,7 +639,7 @@ function main::showCommandsMenuAndRun() {
 # $2: the menu body
 #
 # Usage:
-#  main::sortCommands "id" "${commands}" && sortedCommands="${RETURNED_VALUE}"
+#  main::sortCommands "id" "${commands}" && sortedCommands="${REPLY}"
 function main::sortCommands() {
   local menuId="${1}"
   local -n commands="${2}"
@@ -651,7 +651,7 @@ function main::sortCommands() {
 
   local lastChoicesFile
   core::getUserDataDirectory
-  lastChoicesFile="${RETURNED_VALUE}/last-choices-${menuId}"
+  lastChoicesFile="${REPLY}/last-choices-${menuId}"
   if [[ ! -f "${lastChoicesFile}" ]]; then
     return 0
   fi
@@ -722,7 +722,7 @@ function main::addLastChoice() {
   local lastChoicesFile
   local -a lastChoices
   core::getUserDataDirectory
-  lastChoicesFile="${RETURNED_VALUE}/last-choices-${menuId}"
+  lastChoicesFile="${REPLY}/last-choices-${menuId}"
   if [[ -f "${lastChoicesFile}" ]]; then
     readarray -d $'\n' -t lastChoices <"${lastChoicesFile}"
   else
@@ -756,7 +756,7 @@ function main::addLastChoice() {
 # $3: the menu items array name (reference)
 #
 # Usage:
-#  main::showInteractiveCommandsMenu "menuId" "header" ARRAY_NAME && choice="${RETURNED_VALUE}"
+#  main::showInteractiveCommandsMenu "menuId" "header" ARRAY_NAME && choice="${REPLY}"
 function main::showInteractiveCommandsMenu() {
   local menuHeader commandSelectionItemsArrayName
   menuHeader="${1}"
@@ -767,7 +767,7 @@ function main::showInteractiveCommandsMenu() {
 
   sfzf::show "${menuHeader}" "${commandSelectionItemsArrayName}" "main::onFsfsItemSelectionChange" "Command help"
 
-  choice="${RETURNED_VALUE}"
+  choice="${REPLY}"
   if (( ${#choice} >= CMD_MAX_COMMAND_WIDTH)); then
     choice="${choice:0:CMD_MAX_COMMAND_WIDTH}  "
     choice="${choice%%  *}"
@@ -775,7 +775,7 @@ function main::showInteractiveCommandsMenu() {
     choice=""
   fi
 
-  RETURNED_VALUE="${choice}"
+  REPLY="${choice}"
 }
 
 function main::onFsfsItemSelectionChange() {
@@ -783,7 +783,7 @@ function main::onFsfsItemSelectionChange() {
   local command="${item:0:CMD_MAX_COMMAND_WIDTH}  "
   command="${command%%  *}"
   main::getFunctionNameFromCommand "${command}"
-  main::getHelpText function "${RETURNED_VALUE}" "${3}"
+  main::getHelpText function "${REPLY}" "${3}"
   return 0
 }
 
@@ -794,10 +794,10 @@ function main::onFsfsItemSelectionChange() {
 # Get the function name of a command.
 #
 # Usage:
-#  main::getFunctionNameFromCommand "self build" && printf '%s\n' "${RETURNED_VALUE}"
+#  main::getFunctionNameFromCommand "self build" && printf '%s\n' "${REPLY}"
 function main::getFunctionNameFromCommand() {
   local -n functionName="CMD_FUNCTION_NAME_${1//[^[:alnum:]]/_}"
-  RETURNED_VALUE="${functionName:-}"
+  REPLY="${functionName:-}"
 }
 
 # Find the function name from arguments that represents the commands.
@@ -811,12 +811,12 @@ function main::getFunctionNameFromCommand() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The function name.
-# - ${RETURNED_VALUE2}: The level of the command.
-# - ${RETURNED_VALUE3}: The exact command.
+# - ${REPLY}: The function name.
+# - ${REPLY2}: The level of the command.
+# - ${REPLY3}: The exact command.
 #
 # ```bash
-# main::fuzzyMatchCommandToFunctionNameOrFail "self" "build" && printf '%s\n' "${RETURNED_VALUE}"
+# main::fuzzyMatchCommandToFunctionNameOrFail "self" "build" && printf '%s\n' "${REPLY}"
 # ```
 function main::fuzzyMatchCommandToFunctionNameOrFail() {
   if [[ $# -eq 0 ]]; then
@@ -827,7 +827,7 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
   shopt -s nocasematch
 
   main::getMaxPossibleCommandLevel "$@"
-  local level="${RETURNED_VALUE}"
+  local level="${REPLY}"
 
   local IFS=" "
 
@@ -842,7 +842,7 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
     command="${commandArray[*]:0:loopI}"
 
     # case where the command is exact, we can match the function immediately
-    main::getFunctionNameFromCommand "${command}" && functionName="${RETURNED_VALUE}"
+    main::getFunctionNameFromCommand "${command}" && functionName="${REPLY}"
     if [[ -n ${functionName:-} ]]; then
       exactCommand="${command}"
       break
@@ -854,14 +854,14 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
 
     # case where the command is not exact, we try to fuzzy match it
     array::fuzzyFilterSort CMD_ALL_COMMANDS_ARRAY command
-    if (( ${#RETURNED_ARRAY[@]} > 1)); then
+    if (( ${#REPLY_ARRAY[@]} > 1)); then
         # case of ambiguous command, show the list of possible commands
-        main::getDisplayableFilteredArray RETURNED_ARRAY command
-        core::fail "Found multiple matches for the command ⌜${command}⌝, please be more specific:"$'\n'"${RETURNED_VALUE}"
-    elif (( ${#RETURNED_ARRAY[@]} == 1 )); then
+        main::getDisplayableFilteredArray REPLY_ARRAY command
+        core::fail "Found multiple matches for the command ⌜${command}⌝, please be more specific:"$'\n'"${REPLY}"
+    elif (( ${#REPLY_ARRAY[@]} == 1 )); then
       # case of a single match, we can match the function immediately
-      exactCommand="${RETURNED_ARRAY[0]}"
-      main::getFunctionNameFromCommand "${exactCommand}" && functionName="${RETURNED_VALUE}"
+      exactCommand="${REPLY_ARRAY[0]}"
+      main::getFunctionNameFromCommand "${exactCommand}" && functionName="${REPLY}"
       log::info "Fuzzy matching the command ⌜${command}⌝ to ⌜${exactCommand}⌝."
       break
     fi
@@ -879,9 +879,9 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
 
   shopt -u nocasematch
 
-  RETURNED_VALUE="${functionName:-}"
-  RETURNED_VALUE2="${loopI}"
-  RETURNED_VALUE3="${exactCommand:-}"
+  REPLY="${functionName:-}"
+  REPLY2="${loopI}"
+  REPLY3="${exactCommand:-}"
 }
 
 # Return the maximum level of subcommands
@@ -893,7 +893,7 @@ function main::fuzzyMatchCommandToFunctionNameOrFail() {
 # $@: the arguments
 #
 # Usage:
-#  main::getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3" && level="${RETURNED_VALUE}"
+#  main::getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3" && level="${REPLY}"
 function main::getMaxPossibleCommandLevel() {
   local level maxLevel
   local IFS=' '
@@ -906,7 +906,7 @@ function main::getMaxPossibleCommandLevel() {
   if (( level > CMD_MAX_SUB_COMMAND_LEVEL + 1 )); then
     level="${maxLevel}"
   fi
-  RETURNED_VALUE="${level}"
+  REPLY="${level}"
 }
 
 #===============================================================
@@ -915,7 +915,7 @@ function main::getMaxPossibleCommandLevel() {
 
 # Parses the arguments and options of a function.
 # Usage:
-#  command::parseFunctionArguments "functionName" "$@" && eval "${RETURNED_VALUE}"
+#  command::parseFunctionArguments "functionName" "$@" && eval "${REPLY}"
 #
 # Notes:
 # - It will return a string that can be evaluated to set the variables
@@ -963,7 +963,7 @@ function command::parseFunctionArguments() {
 
   # shortcut if the function expect no arguments and no options
   if [[ totalNbArguments -eq 0 && totalNbOptions -eq 0 ]]; then
-    RETURNED_VALUE=""
+    REPLY=""
     return 0
   fi
 
@@ -1037,14 +1037,14 @@ function command::parseFunctionArguments() {
         # if we didn't match any known long option, try to fuzzy find it
         main::fuzzyFindOption "${1}" "${options[@]}"
 
-        if [[ -n ${RETURNED_VALUE2} ]]; then
+        if [[ -n ${REPLY2} ]]; then
           # we found a single match!
           matchedIndex=-1
-          eval "${optionFinder//"\${1}"/"${RETURNED_VALUE2}"}"
+          eval "${optionFinder//"\${1}"/"${REPLY2}"}"
           eval "${registerOption}"
         else
           # we found multiple matches or no match
-          outputErrors+=("${RETURNED_VALUE}")
+          outputErrors+=("${REPLY}")
         fi
 
       else
@@ -1059,7 +1059,7 @@ function command::parseFunctionArguments() {
             eval "${registerOption}"
           else
             main::getSingleLetterOptions "${options[@]}"
-            outputErrors+=("Unknown option letter ⌜${optionLetter}⌝ in group ⌜${optionLetters}⌝. ${RETURNED_VALUE}")
+            outputErrors+=("Unknown option letter ⌜${optionLetter}⌝ in group ⌜${optionLetters}⌝. ${REPLY}")
           fi
         done
 
@@ -1107,7 +1107,7 @@ function command::parseFunctionArguments() {
     outputErrors+=("Use ⌜valet ${command} --help⌝ to get help.")
     if [[ ${badArguments} == "true" ]]; then
       main::getHelpText function "${functionName}"
-      outputErrors+=($'\n'"Usage:"$'\n'"${RETURNED_VALUE2}")
+      outputErrors+=($'\n'"Usage:"$'\n'"${REPLY2}")
     fi
   fi
 
@@ -1183,7 +1183,7 @@ function command::parseFunctionArguments() {
     outputString+=")"
   fi
 
-  RETURNED_VALUE="${outputString}"
+  REPLY="${outputString}"
 }
 
 # Tries to find a match for an inexact option.
@@ -1195,11 +1195,11 @@ function command::parseFunctionArguments() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: An error message with the suggested option(s).
-# - ${RETURNED_VALUE2}: The single matched option that we can use.
+# - ${REPLY}: An error message with the suggested option(s).
+# - ${REPLY2}: The single matched option that we can use.
 #
 # ```bash
-# main::fuzzyFindOption opt1 option1 option2 option3 && fuzzyOption="${RETURNED_VALUE}"
+# main::fuzzyFindOption opt1 option1 option2 option3 && fuzzyOption="${REPLY}"
 # ```
 function main::fuzzyFindOption() {
   local unknownOption suggestedOption
@@ -1218,19 +1218,19 @@ function main::fuzzyFindOption() {
 
   # split to get one possible option per line
   array::fuzzyFilterSort _OPTIONS_TO_MATCH unknownOption
-  if (( ${#RETURNED_ARRAY[@]} == 1 )); then
+  if (( ${#REPLY_ARRAY[@]} == 1 )); then
     if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
-      suggestedOption="Unknown option ⌜${unknownOption}⌝, did you mean ⌜${RETURNED_ARRAY[0]}⌝?"
+      suggestedOption="Unknown option ⌜${unknownOption}⌝, did you mean ⌜${REPLY_ARRAY[0]}⌝?"
     else
-      log::info "Fuzzy matching the option ⌜${unknownOption}⌝ to ⌜${RETURNED_ARRAY[0]}⌝."
-      singleMatchedOption="${RETURNED_ARRAY[0]}"
+      log::info "Fuzzy matching the option ⌜${unknownOption}⌝ to ⌜${REPLY_ARRAY[0]}⌝."
+      singleMatchedOption="${REPLY_ARRAY[0]}"
     fi
-  elif (( ${#RETURNED_ARRAY[@]} > 1 )); then
-    main::getDisplayableFilteredArray RETURNED_ARRAY unknownOption
+  elif (( ${#REPLY_ARRAY[@]} > 1 )); then
+    main::getDisplayableFilteredArray REPLY_ARRAY unknownOption
     if [[ ${VALET_CONFIG_STRICT_MATCHING:-} == "true" ]]; then
-      suggestedOption="Unknown option ⌜${unknownOption}⌝, valid matches are:"$'\n'"${RETURNED_VALUE}"
+      suggestedOption="Unknown option ⌜${unknownOption}⌝, valid matches are:"$'\n'"${REPLY}"
     else
-      suggestedOption="Found multiple matches for the option ⌜${unknownOption}⌝, please be more specific:"$'\n'"${RETURNED_VALUE}"
+      suggestedOption="Found multiple matches for the option ⌜${unknownOption}⌝, please be more specific:"$'\n'"${REPLY}"
     fi
   else
     suggestedOption="Unknown option ⌜${unknownOption}⌝, valid options are:"$'\n'"$*"
@@ -1240,8 +1240,8 @@ function main::fuzzyFindOption() {
 
   unset _OPTIONS_TO_MATCH
 
-  RETURNED_VALUE="${suggestedOption:-}"
-  RETURNED_VALUE2="${singleMatchedOption:-}"
+  REPLY="${suggestedOption:-}"
+  REPLY2="${singleMatchedOption:-}"
 }
 
 # ## main::getDisplayableFilteredArray (private)
@@ -1256,7 +1256,7 @@ function main::fuzzyFindOption() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The string to display.
+# - ${REPLY}: The string to display.
 #
 function main::getDisplayableFilteredArray() {
   # shellcheck disable=SC2178
@@ -1269,12 +1269,12 @@ function main::getDisplayableFilteredArray() {
   local IFS=$'\n'
   for line in "${array[@]}"; do
     string::highlight line "${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-    output+="${RETURNED_VALUE}"$'\n'
+    output+="${REPLY}"$'\n'
   done
 
   shopt -u nocasematch
 
-  RETURNED_VALUE="${output}"
+  REPLY="${output}"
 }
 
 # Helps to build a message for the user to inform them
@@ -1284,26 +1284,26 @@ function main::getDisplayableFilteredArray() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The message to display to the user.
+# - ${REPLY}: The message to display to the user.
 #
 # ```bash
 # options=("opt1" "option1" "option2" "option3")
-# main::getSingleLetterOptions "${options[@]}" && message="${RETURNED_VALUE}"
+# main::getSingleLetterOptions "${options[@]}" && message="${REPLY}"
 # ```
 function main::getSingleLetterOptions() {
   local -a options
   # shellcheck disable=SC2206
   options=($*)
 
-  RETURNED_VALUE="Valid single letter options are: "
+  REPLY="Valid single letter options are: "
 
   for option in "${options[@]}"; do
     if [[ ${#option} -eq 2 ]]; then
-      RETURNED_VALUE+="⌜${option:1:1}⌝, "
+      REPLY+="⌜${option:1:1}⌝, "
     fi
   done
 
-  RETURNED_VALUE="${RETURNED_VALUE%, }."
+  REPLY="${REPLY%, }."
 }
 
 # Parse the arguments and options of a function.
@@ -1311,14 +1311,14 @@ function main::getSingleLetterOptions() {
 # See the @command::parseArguments function for more details on parsing.
 #
 # Usage:
-#   main::parseCmdFunctionArgumentsOrGoInteractive "functionName" "$@" && eval "${RETURNED_VALUE}"
+#   main::parseCmdFunctionArgumentsOrGoInteractive "functionName" "$@" && eval "${REPLY}"
 function main::parseCmdFunctionArgumentsOrGoInteractive() {
   local functionName
   functionName="${1}"
   shift
 
   command::parseFunctionArguments "${functionName}" "$@"
-  local parsedArguments="${RETURNED_VALUE}"
+  local parsedArguments="${REPLY}"
   if log::isDebugEnabled; then
     log::debug "Parsed arguments:"
     log::printString "${parsedArguments}"
@@ -1335,7 +1335,7 @@ function main::parseCmdFunctionArgumentsOrGoInteractive() {
     main::goInteractive "${functionName}" "${parsedArguments}"
   fi
 
-  RETURNED_VALUE="${parsedArguments}"
+  REPLY="${parsedArguments}"
 }
 
 function main::goInteractive() {

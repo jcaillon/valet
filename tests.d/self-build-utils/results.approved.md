@@ -9,7 +9,7 @@
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='A content between tags
 array:
   - item1
@@ -30,7 +30,7 @@ array:
 Returned variables:
 
 ```text
-RETURNED_VALUE='--profiling'
+REPLY='--profiling'
 ```
 
 ### ✅ Testing to extract command definition to variables

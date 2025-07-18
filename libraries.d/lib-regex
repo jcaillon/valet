@@ -13,13 +13,13 @@
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The first capture group in the matched string.
+# - ${REPLY}: The first capture group in the matched string.
 #                      Empty if no match.
 #
 # ```bash
 # MY_STRING="name: julien"
 # regex::getFirstGroup MY_STRING "name:(.*)"
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 #
 # > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
@@ -27,10 +27,10 @@ function regex::getFirstGroup() {
   local -n stringInWhichToMatch="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # Usage: regex "string" "regex"
   if [[ ${stringInWhichToMatch} =~ ${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."} ]]; then
-    RETURNED_VALUE="${BASH_REMATCH[1]:-}"
+    REPLY="${BASH_REMATCH[1]:-}"
   else
     # shellcheck disable=SC2034
-    RETURNED_VALUE=""
+    REPLY=""
   fi
 }
 
@@ -59,12 +59,12 @@ function regex::getFirstGroup() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The string with replacements.
+# - ${REPLY}: The string with replacements.
 #
 # ```bash
 # MY_STRING="name: julien"
 # regex::replace MY_STRING "name: (.*)" "\1"
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 #
 # > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
@@ -75,9 +75,9 @@ function regex::replace() {
   local onlyMatches="${5:-${_OPTION_ONLY_MATCHES:-"false"}}"
   if (( maxCount == 0 )); then
     if [[ ${onlyMatches} == "true" ]]; then
-      RETURNED_VALUE=""
+      REPLY=""
     else
-      RETURNED_VALUE="${stringInWhichToReplace}"
+      REPLY="${stringInWhichToReplace}"
     fi
     return 0
   fi
@@ -90,7 +90,7 @@ function regex::replace() {
     actualReplacement="${3}"
   fi
 
-  RETURNED_VALUE=""
+  REPLY=""
   local IFS="" stringBeforeMatch
   local -i count=0 currentCharIndex=0
 
@@ -107,9 +107,9 @@ function regex::replace() {
     fi
 
     if [[ ${onlyMatches} == "true" ]]; then
-      RETURNED_VALUE+="${actualReplacement}"
+      REPLY+="${actualReplacement}"
     else
-      RETURNED_VALUE+="${stringBeforeMatch}${actualReplacement}"
+      REPLY+="${stringBeforeMatch}${actualReplacement}"
     fi
 
     count+=1
@@ -118,7 +118,7 @@ function regex::replace() {
     fi
   done
   if [[ ${onlyMatches} != "true" ]]; then
-    RETURNED_VALUE+="${stringInWhichToReplace:currentCharIndex}"
+    REPLY+="${stringInWhichToReplace:currentCharIndex}"
   fi
 }
 
@@ -143,12 +143,12 @@ function regex::replace() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY[@]}: An array containing all the matches.
+# - ${REPLY_ARRAY[@]}: An array containing all the matches.
 #
 # ```bash
 # MY_STRING="name: julien, name: john"
 # regex::getMatches MY_STRING "name: (.*)"
-# for match in "${RETURNED_ARRAY[@]}"; do
+# for match in "${REPLY_ARRAY[@]}"; do
 #   echo "${match}"
 # done
 # ```
@@ -160,7 +160,7 @@ function regex::getMatches() {
   local replacement="${3:-${_OPTION_REPLACEMENT:-""}}"
   local -i maxCount="${4:-${_OPTION_MAX_COUNT:-"-1"}}"
 
-  RETURNED_ARRAY=()
+  REPLY_ARRAY=()
 
   if (( maxCount == 0 )); then
     return 0
@@ -191,9 +191,9 @@ function regex::getMatches() {
           actualReplacement=${actualReplacement//"\\${i}"/"${BASH_REMATCH[i]}"}
         done
       fi
-      RETURNED_ARRAY+=("${actualReplacement}")
+      REPLY_ARRAY+=("${actualReplacement}")
     else
-      RETURNED_ARRAY+=("${BASH_REMATCH[0]}")
+      REPLY_ARRAY+=("${BASH_REMATCH[0]}")
     fi
 
     count+=1
@@ -212,28 +212,28 @@ function regex::getMatches() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The escaped string.
+# - ${REPLY}: The escaped string.
 #
 # ```bash
 # regex::escapeRegexSpecialChars "a.(b)"
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function regex::escapeRegexSpecialChars() {
-  RETURNED_VALUE="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  RETURNED_VALUE=${RETURNED_VALUE//\\/\\\\}
-  RETURNED_VALUE=${RETURNED_VALUE//\//\\\/}
-  RETURNED_VALUE=${RETURNED_VALUE//\./\\\.}
-  RETURNED_VALUE=${RETURNED_VALUE//\*/\\\*}
-  RETURNED_VALUE=${RETURNED_VALUE//\+/\\\+}
-  RETURNED_VALUE=${RETURNED_VALUE//\?/\\?}
-  RETURNED_VALUE=${RETURNED_VALUE//\(/\\\(}
-  RETURNED_VALUE=${RETURNED_VALUE//\)/\\\)}
-  RETURNED_VALUE=${RETURNED_VALUE//\[/\\\[}
-  RETURNED_VALUE=${RETURNED_VALUE//\]/\\\]}
-  RETURNED_VALUE=${RETURNED_VALUE//\{/\\\{}
-  RETURNED_VALUE=${RETURNED_VALUE//\}/\\\}}
-  RETURNED_VALUE=${RETURNED_VALUE//\^/\\^}
-  RETURNED_VALUE=${RETURNED_VALUE//\$/\\\$}
-  RETURNED_VALUE=${RETURNED_VALUE//\|/\\|}
+  REPLY="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  REPLY=${REPLY//\\/\\\\}
+  REPLY=${REPLY//\//\\\/}
+  REPLY=${REPLY//\./\\\.}
+  REPLY=${REPLY//\*/\\\*}
+  REPLY=${REPLY//\+/\\\+}
+  REPLY=${REPLY//\?/\\?}
+  REPLY=${REPLY//\(/\\\(}
+  REPLY=${REPLY//\)/\\\)}
+  REPLY=${REPLY//\[/\\\[}
+  REPLY=${REPLY//\]/\\\]}
+  REPLY=${REPLY//\{/\\\{}
+  REPLY=${REPLY//\}/\\\}}
+  REPLY=${REPLY//\^/\\^}
+  REPLY=${REPLY//\$/\\\$}
+  REPLY=${REPLY//\|/\\|}
 }
 

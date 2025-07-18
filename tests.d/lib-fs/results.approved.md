@@ -9,7 +9,7 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/script.sh'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/script.sh'
 ```
 
 ❯ `fs::getCommandPath script2`
@@ -17,7 +17,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/script.s
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/script2.sh'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/script2.sh'
 ```
 
 ❯ `fs::getCommandPath unknown-command1`
@@ -27,7 +27,7 @@ Returned code: `1`
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
+REPLY=''
 ```
 
 ### ✅ Testing fs::getScriptDirectory
@@ -69,7 +69,7 @@ Hello, World!
 Returned variables:
 
 ```text
-RETURNED_VALUE='/tmp/valet.d/f1-2'
+REPLY='/tmp/valet.d/f1-2'
 ```
 
 The file path was returned but the file does not exist.
@@ -79,7 +79,7 @@ The file path was returned but the file does not exist.
 Returned variables:
 
 ```text
-RETURNED_VALUE='/tmp/valet.d/d1-2'
+REPLY='/tmp/valet.d/d1-2'
 ```
 
 The directory path was returned but the directory does not exist.
@@ -91,7 +91,7 @@ The directory path was returned but the directory does not exist.
 Returned variables:
 
 ```text
-RETURNED_VALUE='24'
+REPLY='24'
 ```
 
 ❯ `fs::getFileLineCount resources/file-with-final-eol`
@@ -99,7 +99,7 @@ RETURNED_VALUE='24'
 Returned variables:
 
 ```text
-RETURNED_VALUE='2'
+REPLY='2'
 ```
 
 ❯ `VALET_CONFIG_STRICT_PURE_BASH=true fs::getFileLineCount resources/file-to-read`
@@ -107,7 +107,7 @@ RETURNED_VALUE='2'
 Returned variables:
 
 ```text
-RETURNED_VALUE='24'
+REPLY='24'
 ```
 
 ### ✅ Testing fs::toAbsolutePath
@@ -117,7 +117,7 @@ RETURNED_VALUE='24'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
 ```
 
 ❯ `fs::toAbsolutePath .`
@@ -125,7 +125,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs'
 ```
 
 ❯ `fs::toAbsolutePath ..`
@@ -133,7 +133,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d'
 ```
 
 ❯ `fs::toAbsolutePath 01.invoke.s`
@@ -141,7 +141,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.s'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.s'
 ```
 
 ❯ `fs::toAbsolutePath ../1004-lib-system/00.tests.sh`
@@ -149,7 +149,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.s'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/../1004-lib-system/00.tests.sh'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/../1004-lib-system/00.tests.sh'
 ```
 
 ❯ `fs::toAbsolutePath resources`
@@ -157,7 +157,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/../1004-lib-system
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
 ```
 
 ❯ `fs::toAbsolutePath ./01.invoke.sh`
@@ -165,7 +165,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
 ```
 
 ❯ `fs::toAbsolutePath ./resources`
@@ -173,7 +173,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
 ```
 
 ❯ `fs::toAbsolutePath missing-file`
@@ -181,7 +181,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/missing-file'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/missing-file'
 ```
 
 ### ✅ Testing fs::readFile
@@ -191,7 +191,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/missing-file'
 Returned variables:
 
 ```text
-RETURNED_VALUE='# Explore why veganism'
+REPLY='# Explore why veganism'
 ```
 
 ❯ `fs::readFile resources/file-to-read`
@@ -199,7 +199,7 @@ RETURNED_VALUE='# Explore why veganism'
 Returned variables:
 
 ```text
-RETURNED_VALUE='# Explore why veganism is kinder to animals, to people and to our planet'"'"'s future.
+REPLY='# Explore why veganism is kinder to animals, to people and to our planet'"'"'s future.
 
 Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
 
@@ -232,7 +232,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir'
 ```
 
 This next command will fail because the directory already exists (it is a file).
@@ -253,7 +253,7 @@ FAIL     Failed to create the directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/derp'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/derp'
 ```
 
 Directory created successfully!
@@ -265,7 +265,7 @@ Directory created successfully!
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1'
 ```
 
 ❯ `fs::createFileIfNeeded resources/gitignored/allo/file1`
@@ -273,7 +273,7 @@ RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subd
 Returned variables:
 
 ```text
-RETURNED_VALUE='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/allo/file1'
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/allo/file1'
 ```
 
 File created successfully!
@@ -314,7 +314,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 Returned variables:
 
 ```text
-RETURNED_VALUE='# Explore why veganism is kinder to animals, to people and to our planet'"'"'s future.
+REPLY='# Explore why veganism is kinder to animals, to people and to our planet'"'"'s future.
 
 Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
 
@@ -425,7 +425,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='# Explore why veganism is kinder to animals, to people and to our planet'"'"'s future.'
 [1]=''
 [2]='Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>'
@@ -488,7 +488,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='## For people'
 [1]=''
 [2]='Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there'"'"'s never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it'"'"'s the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.'
@@ -504,7 +504,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
 )
@@ -515,7 +515,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
 [2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/file2'
@@ -529,7 +529,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
 [2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
@@ -542,7 +542,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
 [2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
@@ -582,7 +582,7 @@ fileNamedFile ()
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/file10'
 [2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/file2'
@@ -612,7 +612,7 @@ folderNamedHidden ()
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
 [2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3'
@@ -630,7 +630,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
 )
 ```
@@ -640,7 +640,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/file2'
 [2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2/file3'
@@ -652,7 +652,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
 [2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/file10'
@@ -687,7 +687,7 @@ fileNamedHidden ()
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
 [2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/file10'
@@ -703,7 +703,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
 )
 ```
@@ -713,7 +713,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2'
 )
@@ -724,7 +724,7 @@ RETURNED_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
 [2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3'
@@ -753,7 +753,7 @@ folderNamedHidden ()
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
 [1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
 [2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3'

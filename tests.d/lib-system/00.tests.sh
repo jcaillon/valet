@@ -60,10 +60,10 @@ function test_system::getOs() {
 function test_system::getEnvVars() {
   test::title "✅ Testing system::getEnvVars"
 
-  RETURNED_ARRAY=()
+  REPLY_ARRAY=()
   test::exec system::getEnvVars
-  if ((${#RETURNED_ARRAY[*]} > 0)); then
-    test::markdown "Found environment variables in RETURNED_ARRAY."
+  if ((${#REPLY_ARRAY[*]} > 0)); then
+    test::markdown "Found environment variables in REPLY_ARRAY."
   fi
 }
 

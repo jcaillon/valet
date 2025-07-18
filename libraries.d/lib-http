@@ -27,7 +27,7 @@ source fs
 # - $5: output file _as string_:
 #       (optional) Can be set using the variable `_OPTION_OUTPUT_FILE`.
 #       The file in which to save the output of the request.
-#       (defaults to "" which means the body will be returned in the variable `RETURNED_VALUE2`)
+#       (defaults to "" which means the body will be returned in the variable `REPLY2`)
 # - $6: follow redirection _as bool_:
 #       (optional) Can be set using the variable `_OPTION_FOLLOW_REDIRECTION`.
 #       If true, the function will follow redirections.
@@ -42,16 +42,16 @@ source fs
 # - $?:
 #   - 0 if the http status code is acceptable
 #   - 1 otherwise
-# - ${RETURNED_VALUE}: the headers of the response
-# - ${RETURNED_VALUE2}: the body of the response or the path to the file where it was saved
-# - ${RETURNED_VALUE3}: the http status code
+# - ${REPLY}: the headers of the response
+# - ${REPLY2}: the body of the response or the path to the file where it was saved
+# - ${REPLY3}: the http status code
 #
 # ```bash
 # VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS=true
 # http::request "GET" "http://example.com" "false" "200,201" "" "true" "1" || core::fail "The HTTP request failed."
 # http::request GET https://api.ip2location.io/ true "" test.json
 # http::request GET http://httpbin.org/get
-# echo "Returns HTTP code was ${RETURNED_VALUE3}, response:"$'\n'"${RETURNED_VALUE}"$'\n'"${RETURNED_VALUE2}"
+# echo "Returns HTTP code was ${REPLY3}, response:"$'\n'"${REPLY}"$'\n'"${REPLY2}"
 # ```
 function http::request() {
   local verb="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -183,9 +183,9 @@ function http::request() {
     log::trace "${message}"
   fi
 
-  RETURNED_VALUE="${headers}"
-  RETURNED_VALUE2="${body:-${outputFile}}"
-  RETURNED_VALUE3="${httpCode}"
+  REPLY="${headers}"
+  REPLY2="${body:-${outputFile}}"
+  REPLY3="${httpCode}"
 
   return ${exitCode}
 }

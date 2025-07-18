@@ -254,7 +254,7 @@ function list::setItems() {
   if [[ ${VALET_CONFIG_STRICT_PURE_BASH:-false} != "true" && _LIST_ORIGINAL_ITEMS_COUNT -ge _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD ]]; then
 
     _OPTION_PATH_ONLY=true fs::createTempFile
-    _ASYNC_FILTER_ORIGINAL_ITEMS_FILE="${RETURNED_VALUE}"
+    _ASYNC_FILTER_ORIGINAL_ITEMS_FILE="${REPLY}"
 
     if command -v fzf &>/dev/null && command -v awk &>/dev/null; then
       _LIST_FILTER_USING_EXTERNAL_PROGRAM="fzf+awk"
@@ -313,7 +313,7 @@ function list::drawItems() {
       if [[ -n ${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED} ]]; then
         # case of a callback in which we want to change the displayed text
         list::convertToInitialItemsIndex "${index}"
-        "${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}" "${RETURNED_VALUE}"
+        "${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}" "${REPLY}"
       else
         _LIST_CURRENT_ITEM="${_LIST_FILTERED_ITEMS[${index}]}"
       fi
@@ -347,8 +347,8 @@ function list_appendSingleLineItemDisplayString() {
     list::getCurrentItemDisplayableString
     toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
   fi
-  if ((RETURNED_VALUE > 0)); then
-    toPrint+="${_LIST_BLANKS_WIDTH:0:RETURNED_VALUE}"
+  if ((REPLY > 0)); then
+    toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}"
   fi
 }
 
@@ -362,7 +362,7 @@ function list_appendMultiLineItemDisplayString() {
   fi
 
   string::highlight _LIST_CURRENT_ITEM _LIST_FILTER_STRING "${_LIST_STYLE_LETTER_HIGHLIGHT}" "${_LIST_STYLE_LETTER_HIGHLIGHT_RESET}"
-  _LIST_CURRENT_ITEM="${RETURNED_VALUE}"
+  _LIST_CURRENT_ITEM="${REPLY}"
 
   local IFS=$'\n' savedFilterString="${_LIST_FILTER_STRING}"
   _LIST_FILTER_STRING=""
@@ -381,8 +381,8 @@ function list_appendMultiLineItemDisplayString() {
       toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
     fi
 
-    if ((RETURNED_VALUE > 0)); then
-      toPrint+="${_LIST_BLANKS_WIDTH:0:RETURNED_VALUE}"
+    if ((REPLY > 0)); then
+      toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}"
     fi
 
     nbLines=$((nbLines + 1))
@@ -550,9 +550,9 @@ function list_filter() {
     local -a _LIST_PRE_FILTERED_ITEMS_CORRESPONDENCES=("${_LIST_FILTERED_ITEMS_CORRESPONDENCES[@]}")
     # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
     # shellcheck disable=SC2178
-    local -n RETURNED_ARRAY=_LIST_FILTERED_ITEMS
+    local -n REPLY_ARRAY=_LIST_FILTERED_ITEMS
     # shellcheck disable=SC2034
-    local -n RETURNED_ARRAY2=_LIST_FILTERED_ITEMS_CORRESPONDENCES
+    local -n REPLY_ARRAY2=_LIST_FILTERED_ITEMS_CORRESPONDENCES
     array::fuzzyFilterSort _LIST_PRE_FILTERED_ITEMS _LIST_FILTER_STRING
     _LIST_CURRENT_FILTER_STRING="${_LIST_FILTER_STRING}"
     # we need to update the correspondences
@@ -566,9 +566,9 @@ function list_filter() {
   if [[ ${_LIST_FILTER_SYNCHRONOUSLY} == "true" ]]; then
     # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
     # shellcheck disable=SC2178
-    local -n RETURNED_ARRAY=_LIST_FILTERED_ITEMS
+    local -n REPLY_ARRAY=_LIST_FILTERED_ITEMS
     # shellcheck disable=SC2034
-    local -n RETURNED_ARRAY2=_LIST_FILTERED_ITEMS_CORRESPONDENCES
+    local -n REPLY_ARRAY2=_LIST_FILTERED_ITEMS_CORRESPONDENCES
     array::fuzzyFilterSort _LIST_ORIGINAL_ITEMS _LIST_FILTER_STRING
     _LIST_CURRENT_FILTER_STRING="${_LIST_FILTER_STRING}"
   else
@@ -654,7 +654,7 @@ function list::onKeyBindingPress() {
   # handle spamming of keys (the actions before this do not need to be protected from spam,
   # but the actions after this are slow to execute and should not be spammed)
   time::getProgramElapsedMicroseconds
-  if ((RETURNED_VALUE - _LIST_LAST_KEY_PRESSED_TIME < 100000)); then
+  if ((REPLY - _LIST_LAST_KEY_PRESSED_TIME < 100000)); then
     # key pressed under 100ms of the last
     _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
   else
@@ -664,7 +664,7 @@ function list::onKeyBindingPress() {
     # if we have 3 rapid successive key pressed
     return 0
   fi
-  _LIST_LAST_KEY_PRESSED_TIME=${RETURNED_VALUE}
+  _LIST_LAST_KEY_PRESSED_TIME=${REPLY}
 
   case "${action}" in
   # autocompletion box selected item
@@ -718,7 +718,7 @@ function list::onKeyBindingPress() {
 # Returns:
 #
 # - ${_LIST_CURRENT_ITEM}: the truncated string
-# - ${RETURNED_VALUE}: the space left
+# - ${REPLY}: the space left
 #       i.e. (_LIST_ITEM_WIDTH - the length of visible characters in _LIST_CURRENT_ITEM)
 #
 # ```bash
@@ -732,9 +732,9 @@ function list::getCurrentItemDisplayableString() {
     if [[ ${_LIST_CURRENT_ITEM} == *$'\e'* ]]; then
       local visibleCharacters="${_LIST_CURRENT_ITEM}"
       string::removeTextFormatting visibleCharacters
-      RETURNED_VALUE=$((_LIST_ITEM_WIDTH - ${#visibleCharacters}))
+      REPLY=$((_LIST_ITEM_WIDTH - ${#visibleCharacters}))
     else
-      RETURNED_VALUE=$((_LIST_ITEM_WIDTH - stringLength))
+      REPLY=$((_LIST_ITEM_WIDTH - stringLength))
     fi
     return 0
   fi
@@ -781,7 +781,7 @@ function list::getCurrentItemDisplayableString() {
   done
 
   _LIST_CURRENT_ITEM="${itemDisplayed}"
-  RETURNED_VALUE=$((_LIST_ITEM_WIDTH - itemDisplayedLength))
+  REPLY=$((_LIST_ITEM_WIDTH - itemDisplayedLength))
 }
 
 # Modifies the selected item index and adjust the start index if necessary.
@@ -847,18 +847,18 @@ function list::changeSelectedItemIndex() {
 }
 
 # Returns the index of the item in the original array (if any, or -1).
-# It returns in the RETURNED_VALUE variable.
+# It returns in the REPLY variable.
 function list::convertToInitialItemsIndex() {
   local -i filteredIndex=${1}
   if ((filteredIndex >= 0 && filteredIndex < ${#_LIST_FILTERED_ITEMS[@]})); then
     if ((${#_LIST_FILTERED_ITEMS_CORRESPONDENCES[@]} > 0)); then
-      RETURNED_VALUE=${_LIST_FILTERED_ITEMS_CORRESPONDENCES[${filteredIndex}]}
+      REPLY=${_LIST_FILTERED_ITEMS_CORRESPONDENCES[${filteredIndex}]}
     else
-      RETURNED_VALUE=${filteredIndex}
+      REPLY=${filteredIndex}
     fi
     return 0
   fi
-  RETURNED_VALUE=-1
+  REPLY=-1
 }
 
 function list_startAsyncFiltering() {
@@ -869,10 +869,10 @@ function list_startAsyncFiltering() {
   # initial setup of files for async filtering if not done
   if [[ -z ${_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
     _OPTION_PATH_ONLY=true fs::createTempFile
-    _ASYNC_FILTERED_ITEMS_FILE="${RETURNED_VALUE}"
+    _ASYNC_FILTERED_ITEMS_FILE="${REPLY}"
 
     _OPTION_PATH_ONLY=true fs::createTempFile
-    _ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${RETURNED_VALUE}"
+    _ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${REPLY}"
   fi
 
   { coproc _LIST_ASYNC_FILTER_JOB { list_asyncFilterJob; }; } 2>./tmp/f-err
@@ -923,17 +923,17 @@ function list_asyncFilterJob() {
   if [[ -n ${_LIST_FILTER_USING_EXTERNAL_PROGRAM:-} ]]; then
 
     _OPTION_PATH_ONLY=true fs::createTempFile
-    local intermediateItemsFile="${RETURNED_VALUE}"
+    local intermediateItemsFile="${REPLY}"
     _OPTION_PATH_ONLY=true fs::createTempFile
-    local intermediateItemsCorrespondencesFile="${RETURNED_VALUE}"
+    local intermediateItemsCorrespondencesFile="${REPLY}"
 
     # initial setup of files for filtering with external programs
     case "${_LIST_FILTER_USING_EXTERNAL_PROGRAM:-}" in
     fzf+awk)
       _OPTION_PATH_ONLY=true fs::createTempFile
-      local fzfOutputFile="${RETURNED_VALUE}"
+      local fzfOutputFile="${REPLY}"
       _OPTION_PATH_ONLY=true fs::createTempFile
-      local fzfPreviousOutputFile="${RETURNED_VALUE}"
+      local fzfPreviousOutputFile="${REPLY}"
       ;;
     esac
 
@@ -1026,9 +1026,9 @@ function list_asyncFilterJob() {
       echo "using bash" >>./tmp/f
       # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
       # shellcheck disable=SC2178
-      local -n RETURNED_ARRAY=filteredItems
+      local -n REPLY_ARRAY=filteredItems
       # shellcheck disable=SC2034
-      local -n RETURNED_ARRAY2=filteredItemsCorrespondences
+      local -n REPLY_ARRAY2=filteredItemsCorrespondences
 
       if [[ ${filterOriginalItems} == "true" ]]; then
         echo "start fuzzy filter" >>./tmp/f
@@ -1146,7 +1146,7 @@ function list_fuzzyFilterSortFileWithGrepAndGawk() {
     # shellcheck source=lib-fs
     source fs
     _OPTION_PATH_ONLY=true fs::createTempFile
-    _ARRAY_TEMP_FILTERED_FILE="${RETURNED_VALUE}"
+    _ARRAY_TEMP_FILTERED_FILE="${REPLY}"
   fi
 
   local grepRegex="${_STRING_FUZZY_FILTER_REGEX:0:${#_STRING_FUZZY_FILTER_REGEX}-4}"

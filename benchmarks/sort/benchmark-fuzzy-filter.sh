@@ -9,8 +9,8 @@ function array::fuzzyFilterSort2() {
 
   # nothing to filter
   if [[ -z ${filterSearchString} || ${#arrayToFilter[@]} -eq 0 ]]; then
-    RETURNED_ARRAY=("${arrayToFilter[@]}")
-    eval "RETURNED_ARRAY2=( {0..$((${#arrayToFilter[@]} - 1))} )"
+    REPLY_ARRAY=("${arrayToFilter[@]}")
+    eval "REPLY_ARRAY2=( {0..$((${#arrayToFilter[@]} - 1))} )"
     return 0
   fi
 
@@ -28,7 +28,7 @@ function array::fuzzyFilterSort2() {
   # the length of the matched pattern and the initial position of the item
   _ARRAY_FUZZY_FILTER_KEYS=()
   # will contain the original indexes corresponding to the sorted array
-  RETURNED_ARRAY2=()
+  REPLY_ARRAY2=()
 
   local value
   index=0
@@ -39,7 +39,7 @@ function array::fuzzyFilterSort2() {
       else
         _ARRAY_FUZZY_FILTER_KEYS+=($((${#BASH_REMATCH[1]} * 10000000 + ${#BASH_REMATCH[2]} * 10000 + index)))
       fi
-      RETURNED_ARRAY2+=($((index)))
+      REPLY_ARRAY2+=($((index)))
     fi
     index+=1
   done
@@ -47,9 +47,9 @@ function array::fuzzyFilterSort2() {
   array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
 
   # will contain the matched lines, sorted
-  RETURNED_ARRAY=()
-  for ((index = 0; index < ${#RETURNED_ARRAY2[@]}; index++)); do
-    RETURNED_ARRAY+=("${arrayToFilter[RETURNED_ARRAY2[index]]}")
+  REPLY_ARRAY=()
+  for ((index = 0; index < ${#REPLY_ARRAY2[@]}; index++)); do
+    REPLY_ARRAY+=("${arrayToFilter[REPLY_ARRAY2[index]]}")
   done
   unset -v _ARRAY_FUZZY_FILTER_KEYS
 }
@@ -72,12 +72,12 @@ shopt -s nocasematch
 # assert both implementations are the same
 echo "Running the baseline..."
 baseline
-BASELINE_ARRAY=("${RETURNED_ARRAY[@]}")
-BASELINE_ARRAY2=("${RETURNED_ARRAY2[@]}")
+BASELINE_ARRAY=("${REPLY_ARRAY[@]}")
+BASELINE_ARRAY2=("${REPLY_ARRAY2[@]}")
 echo "Running the new implementation..."
 newImplementation1
-NEW_ARRAY=("${RETURNED_ARRAY[@]}")
-NEW_ARRAY2=("${RETURNED_ARRAY2[@]}")
+NEW_ARRAY=("${REPLY_ARRAY[@]}")
+NEW_ARRAY2=("${REPLY_ARRAY2[@]}")
 
 if [[ ${BASELINE_ARRAY[*]} != "${NEW_ARRAY[*]}" || ${BASELINE_ARRAY2[*]} != "${NEW_ARRAY2[*]}" ]]; then
   echo "The results are different!"

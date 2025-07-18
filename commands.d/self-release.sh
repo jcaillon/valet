@@ -64,7 +64,7 @@ options:
     Do not perform the release, just show what would be done.
 ---"
 function selfRelease() {
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   if [[ ${dryRun:-} == "true" ]]; then
@@ -74,7 +74,7 @@ function selfRelease() {
   # get the current latest tag
   local lastLocalTag
   exe::invoke git tag --sort=version:refname --no-color
-  lastLocalTag="${RETURNED_VALUE}"
+  lastLocalTag="${REPLY}"
   lastLocalTag="${lastLocalTag%%$'\n'}"
   lastLocalTag="${lastLocalTag##*$'\n'}"
   log::info "The last tag is: ${lastLocalTag}."
@@ -82,12 +82,12 @@ function selfRelease() {
   # get the latest release
   local latestReleaseVersion
   curl::request true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
-  lastReleaseJson="${RETURNED_VALUE}"
+  lastReleaseJson="${REPLY}"
   if [[ ${lastReleaseJson} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
     latestReleaseVersion="v${BASH_REMATCH[2]}"
     log::info "The latest release on GitHub is: ${latestReleaseVersion}."
   else
-    log::trace "GitHub API response:"$'\n'"${RETURNED_VALUE}"
+    log::trace "GitHub API response:"$'\n'"${REPLY}"
     log::warning "Could not get the latest version from GitHub (did not find tag_name)."
     latestReleaseVersion="${lastLocalTag}"
   fi
@@ -97,7 +97,7 @@ function selfRelease() {
   local uploadArtifactsOnly=false
   if [[ -n ${lastReleaseJson} && ${latestReleaseVersion} == "${lastLocalTag}" ]]; then
     selfRelease::extractUploadUrl "${lastReleaseJson}"
-    uploadUrl="${RETURNED_VALUE}"
+    uploadUrl="${REPLY}"
     if [[ ${lastReleaseJson} != *"browser_download_url"* ]]; then
       uploadArtifactsOnly=true
       log::info "The release has already been created, we will only upload the artifacts."
@@ -107,11 +107,11 @@ function selfRelease() {
   if [[ "${uploadArtifactsOnly:-}" != "true" ]]; then
     # create a new release
     selfRelease::createRelease "${githubReleaseToken:-}" "${bumpLevel:-}" "${dryRun:-}" "${lastLocalTag}" "${latestReleaseVersion}"
-    lastReleaseJson="${RETURNED_VALUE}"
+    lastReleaseJson="${REPLY}"
 
     if [[ -n ${lastReleaseJson} ]]; then
       selfRelease::extractUploadUrl "${lastReleaseJson}"
-      uploadUrl="${RETURNED_VALUE}"
+      uploadUrl="${REPLY}"
     fi
   fi
 
@@ -135,7 +135,7 @@ function selfRelease::createRelease() {
   latestReleaseVersion="${5}"
 
   exe::invoke git rev-parse HEAD
-  local currentHead="${RETURNED_VALUE%%$'\n'*}"
+  local currentHead="${REPLY%%$'\n'*}"
 
   # check if the latest release is the same as the last tag
   local uploadExistingTag=false
@@ -166,7 +166,7 @@ function selfRelease::createRelease() {
 
   # read the version from the valet file
   core::getVersion
-  local version="${RETURNED_VALUE}"
+  local version="${REPLY}"
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."
 
@@ -176,7 +176,7 @@ function selfRelease::createRelease() {
   tagMessage+="Changelog: "$'\n'$'\n'
   exe::invoke git log --pretty=format:"%s" "${lastLocalTag}..HEAD"
   local IFS=$'\n'
-  for line in ${RETURNED_VALUE}; do
+  for line in ${REPLY}; do
     if [[ ${line} == ":bookmark:"* ]]; then
       continue
     fi
@@ -254,12 +254,12 @@ function selfRelease::createRelease() {
       -d "${releasePayload}" \
       "https://api.github.com/repos/jcaillon/valet/releases"
 
-    createdReleaseJson="${RETURNED_VALUE}"
+    createdReleaseJson="${REPLY}"
 
     log::success "The new version has been released on GitHub."
   fi
 
-  RETURNED_VALUE="${createdReleaseJson:-}"
+  REPLY="${createdReleaseJson:-}"
 }
 
 function selfRelease::uploadArtifact() {
@@ -283,7 +283,7 @@ function selfRelease::uploadArtifact() {
   # prepare artifact
   local artifactPath="valet.tar.gz"
   exe::invoke tar -czvf "${artifactPath}" "${files[@]}"
-  log::debug "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${RETURNED_VALUE}"
+  log::debug "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${REPLY}"
 
   # upload the artifact
   if [[ ${dryRun:-} != "true" && -n ${uploadUrl} ]]; then
@@ -304,11 +304,11 @@ function selfRelease::extractUploadUrl() {
   # shellcheck disable=SC2034
   local releaseJson="${1}"
   string::extractBetween releaseJson '"upload_url":' '{?name,label}"'
-  uploadUrl="${RETURNED_VALUE}"
+  uploadUrl="${REPLY}"
   string::extractBetween uploadUrl '"' ''
-  uploadUrl="${RETURNED_VALUE}"
+  uploadUrl="${REPLY}"
   log::debug "The upload URL is: ${uploadUrl:-}"
-  RETURNED_VALUE="${uploadUrl}"
+  REPLY="${uploadUrl}"
 }
 
 function selfRelease::bumpVersion() {
@@ -317,12 +317,12 @@ function selfRelease::bumpVersion() {
 
   # read the version from the valet file
   core::getVersion
-  local version="${RETURNED_VALUE}"
+  local version="${REPLY}"
   version="${version%%$'\n'*}"
   log::info "The current version of valet is: ${version}."
 
   # bump the version
-  version::bump "${version}" "${bumpLevel}" && newVersion="${RETURNED_VALUE}"
+  version::bump "${version}" "${bumpLevel}" && newVersion="${REPLY}"
   if [[ "${dryRun:-}" != "true" ]]; then
     fs::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/version" newVersion
   fi
@@ -341,7 +341,7 @@ function selfRelease::updateDocumentation() {
   command::sourceFunction selfDocument
 
   selfDocument::getFooter
-  local pageFooter="${RETURNED_VALUE}"
+  local pageFooter="${REPLY}"
 
   if [[ "${dryRun:-}" != "true" ]]; then
     selfDocument --core-only --output "${GLOBAL_INSTALLATION_DIRECTORY}/extras"
@@ -362,11 +362,11 @@ function selfRelease::updateDocumentation() {
   if [[ "${dryRun:-}" != "true" ]]; then
     exe::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
     fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
-    array::sort RETURNED_ARRAY
+    array::sort REPLY_ARRAY
     # remove _index.md (otherwise not consistent tests on the CI...)
     local -a files
     local file
-    for file in "${RETURNED_ARRAY[@]}"; do
+    for file in "${REPLY_ARRAY[@]}"; do
       if [[ ${file} == *"_index.md" ]]; then
         continue
       fi
@@ -374,8 +374,8 @@ function selfRelease::updateDocumentation() {
     done
     exe::invoke git add "${files[@]}"
     fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/extras" true
-    array::sort RETURNED_ARRAY
-    exe::invoke git add "${RETURNED_ARRAY[@]}"
+    array::sort REPLY_ARRAY
+    exe::invoke git add "${REPLY_ARRAY[@]}"
     exe::invoke git commit -m ":memo: updating the documentation"
     log::success "The documentation update has been committed."
   fi
@@ -391,7 +391,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
   # delete the existing files
   fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
   local file
-  for file in "${RETURNED_ARRAY[@]}"; do
+  for file in "${REPLY_ARRAY[@]}"; do
     if [[ ${file} == *"_index.md" ]]; then
       continue
     fi
@@ -405,7 +405,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     local functionName="${key}"
     regex::getFirstGroup functionName '([-[:alnum:]]+)::'
-    local packageName="${RETURNED_VALUE}"
+    local packageName="${REPLY}"
     if [[ -z ${packageName} ]]; then
       # case for "source" function
       packageName="core"
@@ -424,7 +424,7 @@ url: /docs/libraries/${packageName}
 "
     fi
 
-    documentationPageContent["${path}"]+="${RETURNED_ASSOCIATIVE_ARRAY[${key}]}"$'\n'
+    documentationPageContent["${path}"]+="${REPLY_ASSOCIATIVE_ARRAY[${key}]}"$'\n'
   done
 
   local -a filePaths=("${!documentationPageContent[@]}")

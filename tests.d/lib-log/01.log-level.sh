@@ -33,7 +33,7 @@ function main() {
 
 function test_log_log_one_of_each_level() {
   log::getLevel
-  test::title "✅ Testing level ${RETURNED_VALUE}"
+  test::title "✅ Testing level ${REPLY}"
 
   test::func log::getLevel
   test::exec log::isTraceEnabled

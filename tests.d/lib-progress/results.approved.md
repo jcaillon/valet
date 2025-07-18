@@ -9,7 +9,7 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='░████    ░'
+REPLY='░████    ░'
 ```
 
 ❯ `GLOBAL_COLUMNS=10 progress_getStringToDisplay '<spinner> <percent> ░<bar>░' 10 0 Message`
@@ -17,7 +17,7 @@ RETURNED_VALUE='░████    ░'
 Returned variables:
 
 ```text
-RETURNED_VALUE='<spinner>   0% ░░'
+REPLY='<spinner>   0% ░░'
 ```
 
 ❯ `GLOBAL_COLUMNS=0 progress_getStringToDisplay '<spinner> <percent> ░<bar>░' 0 0 ''`
@@ -25,7 +25,7 @@ RETURNED_VALUE='<spinner>   0% ░░'
 Returned variables:
 
 ```text
-RETURNED_VALUE='<spinner>'
+REPLY='<spinner>'
 ```
 
 ❯ `GLOBAL_COLUMNS=20 progress_getStringToDisplay '<spinner> <percent> ░<bar>░ <message>' 9 0 Message`
@@ -33,7 +33,7 @@ RETURNED_VALUE='<spinner>'
 Returned variables:
 
 ```text
-RETURNED_VALUE='<spinner>   0% ░         ░ '
+REPLY='<spinner>   0% ░         ░ '
 ```
 
 ❯ `GLOBAL_COLUMNS=24 progress_getStringToDisplay '<spinner> <percent> ░<bar>░ <message>' 10 0 Message`
@@ -41,8 +41,8 @@ RETURNED_VALUE='<spinner>   0% ░         ░ '
 Returned variables:
 
 ```text
-RETURNED_VALUE='<spinner>   0% ░          ░ Me…'
-RETURNED_VALUE2='1'
+REPLY='<spinner>   0% ░          ░ Me…'
+REPLY2='1'
 ```
 
 ❯ `GLOBAL_COLUMNS=29 progress_getStringToDisplay '<spinner> <percent> ░<bar>░ <message>' 10 0 Message`
@@ -50,7 +50,7 @@ RETURNED_VALUE2='1'
 Returned variables:
 
 ```text
-RETURNED_VALUE='<spinner>   0% ░          ░ Message'
+REPLY='<spinner>   0% ░          ░ Message'
 ```
 
 ❯ `GLOBAL_COLUMNS=35 progress_getStringToDisplay '<spinner> <percent> ░<bar>░ <message>' 10 0 Message`
@@ -58,7 +58,7 @@ RETURNED_VALUE='<spinner>   0% ░          ░ Message'
 Returned variables:
 
 ```text
-RETURNED_VALUE='<spinner>   0% ░          ░ Message'
+REPLY='<spinner>   0% ░          ░ Message'
 ```
 
 ### ✅ Testing progress_getProgressBarString
@@ -68,7 +68,7 @@ RETURNED_VALUE='<spinner>   0% ░          ░ Message'
 Returned variables:
 
 ```text
-RETURNED_VALUE=' '
+REPLY=' '
 ```
 
 ❯ `progress_getProgressBarString 10 1`
@@ -76,7 +76,7 @@ RETURNED_VALUE=' '
 Returned variables:
 
 ```text
-RETURNED_VALUE=' '
+REPLY=' '
 ```
 
 ❯ `progress_getProgressBarString 50 1`
@@ -84,7 +84,7 @@ RETURNED_VALUE=' '
 Returned variables:
 
 ```text
-RETURNED_VALUE='▌'
+REPLY='▌'
 ```
 
 ❯ `progress_getProgressBarString 90 1`
@@ -92,7 +92,7 @@ RETURNED_VALUE='▌'
 Returned variables:
 
 ```text
-RETURNED_VALUE='▉'
+REPLY='▉'
 ```
 
 ❯ `progress_getProgressBarString 100 1`
@@ -100,7 +100,7 @@ RETURNED_VALUE='▉'
 Returned variables:
 
 ```text
-RETURNED_VALUE='█'
+REPLY='█'
 ```
 
 ❯ `progress_getProgressBarString 22 10`
@@ -108,7 +108,7 @@ RETURNED_VALUE='█'
 Returned variables:
 
 ```text
-RETURNED_VALUE='██▏       '
+REPLY='██▏       '
 ```
 
 ❯ `progress_getProgressBarString 50 15`
@@ -116,7 +116,7 @@ RETURNED_VALUE='██▏       '
 Returned variables:
 
 ```text
-RETURNED_VALUE='███████▌       '
+REPLY='███████▌       '
 ```
 
 ❯ `progress_getProgressBarString 83 30`
@@ -124,6 +124,6 @@ RETURNED_VALUE='███████▌       '
 Returned variables:
 
 ```text
-RETURNED_VALUE='████████████████████████▉     '
+REPLY='████████████████████████▉     '
 ```
 

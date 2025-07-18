@@ -122,7 +122,7 @@ test_function_to_reexport ()
 
 ❯ `bash::getFunctionDefinitionWithGlobalVars test_function_to_reexport new_name FIRST_ARG SECOND_ARG THIRD_ARG FOURTH_ARG`
 
-❯ `echo ${RETURNED_VALUE}`
+❯ `echo ${REPLY}`
 
 **Standard output**:
 
@@ -149,7 +149,7 @@ Testing without arguments
 
 ❯ `bash::getFunctionDefinitionWithGlobalVars test_function_to_reexport new_name`
 
-❯ `echo ${RETURNED_VALUE}`
+❯ `echo ${REPLY}`
 
 **Standard output**:
 
@@ -185,7 +185,7 @@ new_name ()
 Returned variables:
 
 ```text
-RETURNED_VALUE='3'
+REPLY='3'
 ```
 
 ### ✅ Testing bash::injectCodeInFunction
@@ -203,7 +203,7 @@ simpleFunction ()
 
 ❯ `bash::injectCodeInFunction simpleFunction echo\ \'injected\ at\ the\ beginning\!\' true`
 
-❯ `echo ${RETURNED_VALUE}; echo ${RETURNED_VALUE2};`
+❯ `echo ${REPLY}; echo ${REPLY2};`
 
 **Standard output**:
 
@@ -223,7 +223,7 @@ simpleFunction ()
 
 ❯ `bash::injectCodeInFunction simpleFunction echo\ \'injected\ at\ the\ end\!\'`
 
-❯ `echo ${RETURNED_VALUE}; echo ${RETURNED_VALUE2};`
+❯ `echo ${REPLY}; echo ${REPLY2};`
 
 **Standard output**:
 
@@ -242,7 +242,7 @@ simpleFunction ()
 
 ❯ `bash::injectCodeInFunction newName echo\ \'injected\ in\ a\ new\ function\!\'`
 
-❯ `echo ${RETURNED_VALUE}; echo ${RETURNED_VALUE2};`
+❯ `echo ${REPLY}; echo ${REPLY2};`
 
 **Standard output**:
 
@@ -264,7 +264,7 @@ echo 'injected in a new function!'
 Returned variables:
 
 ```text
-RETURNED_VALUE='coucou
+REPLY='coucou
 '
 ```
 
@@ -273,7 +273,7 @@ RETURNED_VALUE='coucou
 Returned variables:
 
 ```text
-RETURNED_VALUE=''
+REPLY=''
 ```
 
 ### ✅ Testing bash::countArgs
@@ -283,7 +283,7 @@ RETURNED_VALUE=''
 Returned variables:
 
 ```text
-RETURNED_VALUE='3'
+REPLY='3'
 ```
 
 ❯ `bash::countArgs ${PWD}/resources/*`
@@ -291,7 +291,7 @@ RETURNED_VALUE='3'
 Returned variables:
 
 ```text
-RETURNED_VALUE='1'
+REPLY='1'
 ```
 
 ### ✅ Testing bash::getMissingVariables
@@ -307,7 +307,7 @@ Returned code: `1`
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='dfg'
 [1]='NOP'
 )
@@ -324,7 +324,7 @@ Returned code: `1`
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='NONEXISTINGSTUFF'
 [1]='YETANOTHERONEMISSING'
 )
@@ -353,7 +353,7 @@ Returned code: `1`
 Returned variables:
 
 ```text
-RETURNED_VALUE='coucou
+REPLY='coucou
 '
 ```
 
@@ -362,12 +362,12 @@ RETURNED_VALUE='coucou
 Returned variables:
 
 ```text
-RETURNED_VALUE='bash::getBuiltinOutput () 
+REPLY='bash::getBuiltinOutput () 
 { 
     local IFS='"'"' '"'"';
     "${@}" &> "${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1;
-    RETURNED_VALUE="";
-    IFS='"'"''"'"' read -rd '"'"''"'"' RETURNED_VALUE < "${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+    REPLY="";
+    IFS='"'"''"'"' read -rd '"'"''"'"' REPLY < "${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
 }
 '
 ```

@@ -81,8 +81,8 @@ function test_prompt_internal() {
   _PROMPT_STRING_INDEX="${3}"
   test::printVars _PROMPT_STRING _PROMPT_STRING_INDEX _PROMPT_STRING_SCREEN_WIDTH
   test::exec prompt_getDisplayedPromptString
-  test::markdown "\`░${RETURNED_VALUE}░ ${RETURNED_VALUE2}\`"
-  if [[ "░${RETURNED_VALUE}░ ${RETURNED_VALUE2}" != "░${4}░ ${5}" ]]; then
+  test::markdown "\`░${REPLY}░ ${REPLY2}\`"
+  if [[ "░${REPLY}░ ${REPLY2}" != "░${4}░ ${5}" ]]; then
     echo "Expected: ░${4}░ ${5}"
     test::fail "Unexpected value."
   fi

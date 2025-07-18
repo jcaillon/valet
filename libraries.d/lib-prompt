@@ -147,8 +147,8 @@ source fs
 #       `_OPTION_STRING_INDEX` to access the current text and cursor position.
 #       You must set:
 #
-#       - `RETURNED_VALUE`: The error message to display (or empty).
-#       - `RETURNED_VALUE2`: A boolean to indicate if the autocompletion box should be redrawn.
+#       - `REPLY`: The error message to display (or empty).
+#       - `REPLY2`: A boolean to indicate if the autocompletion box should be redrawn.
 #
 #       (defaults to empty)
 # - ${_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED} _as string_:
@@ -188,7 +188,7 @@ source fs
 #       The function should return:
 #
 #       - ${_PROMPT_ITEMS_BOX_ITEM_DISPLAYED}: the string to display
-#       - ${RETURNED_VALUE}: the space left
+#       - ${REPLY}: the space left
 #
 #       (defaults to empty)
 #
@@ -197,8 +197,8 @@ source fs
 # - $?:
 #   - 0: The user pressed ENTER to validate the text.
 #   - 1: The user pressed ESC to close the text box.
-# - ${RETURNED_VALUE}: The entered value (or empty).
-# - ${RETURNED_VALUE2}: The string displayed on the screen between the 2 columns at the
+# - ${REPLY}: The entered value (or empty).
+# - ${REPLY2}: The string displayed on the screen between the 2 columns at the
 #                      moment when the autocompletion was closed.
 #
 # ```bash
@@ -507,14 +507,14 @@ function prompt_main_loop() {
   if [[ ${_PROMPT_CANCELLED:-} == "true" ]]; then
     return 1
   else
-    RETURNED_VALUE="${_PROMPT_STRING}"
+    REPLY="${_PROMPT_STRING}"
     if ((_PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX >= 0)); then
-      RETURNED_VALUE2="${_PROMPT_ORIGINAL_ITEMS[${_PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX}]}"
+      REPLY2="${_PROMPT_ORIGINAL_ITEMS[${_PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX}]}"
     else
-      RETURNED_VALUE2=""
+      REPLY2=""
     fi
     # shellcheck disable=SC2034
-    RETURNED_VALUE3=${_PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX}
+    REPLY3=${_PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX}
   fi
 
   # shellcheck disable=SC2086
@@ -577,13 +577,13 @@ function prompt_onKeyBindingPress() {
     # if we selected index is within the range of the filtered items
     # we can return the corresponding index in the original items
     list::getCurrentInitialItemsIndex
-    if [[ ${RETURNED_VALUE} == "-1" ]]; then
+    if [[ ${REPLY} == "-1" ]]; then
       if [[ ${_PROMPT_ACCEPT_ANY_VALUE} != "true" ]]; then
         # make enter have no effect if we are not on a valid item and we don't accept any value
         prompt_showError "No item matching your query!"
         return 0
       fi
-      _PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX=${RETURNED_VALUE}
+      _PROMPT_ORIGINAL_ITEMS_SELECTED_INDEX=${REPLY}
     fi
     if [[ ${_PROMPT_ACCEPT_ANY_VALUE} == "true" && ${_PROMPT_STRING} == "" ]]; then
       # make enter have no effect if we accept any value but we have an empty string
@@ -645,13 +645,13 @@ function prompt_onKeyBindingPress() {
   backward-word)
     # move to beginning of the previous word
     prompt_getIndexDeltaToBeginningOfWord
-    prompt_changePromptCursorIndex "${RETURNED_VALUE}"
+    prompt_changePromptCursorIndex "${REPLY}"
     prompt_updateItemsBox
     prompt_drawPrompt
     ;;
   forward-word)
     prompt_getIndexDeltaToEndOfWord
-    prompt_changePromptCursorIndex "${RETURNED_VALUE}"
+    prompt_changePromptCursorIndex "${REPLY}"
     prompt_updateItemsBox
     prompt_drawPrompt
     ;;
@@ -713,7 +713,7 @@ function prompt_onKeyBindingPress() {
     # delete all chars from the cursor to the end of (this or next) word
     local -i oldIndex=${_PROMPT_STRING_INDEX}
     prompt_getIndexDeltaToEndOfWord
-    prompt_changePromptCursorIndex "${RETURNED_VALUE}"
+    prompt_changePromptCursorIndex "${REPLY}"
     if ((_PROMPT_STRING_INDEX > oldIndex)); then
       _PROMPT_KILLED_STRING="${_PROMPT_STRING:${oldIndex}:_PROMPT_STRING_INDEX-oldIndex}"
       if ((oldIndex > 0)); then
@@ -729,7 +729,7 @@ function prompt_onKeyBindingPress() {
     # delete all chars before the cursor until reaching a space
     local -i oldIndex=${_PROMPT_STRING_INDEX}
     prompt_getIndexDeltaToBeginningOfWord
-    prompt_changePromptCursorIndex "${RETURNED_VALUE}"
+    prompt_changePromptCursorIndex "${REPLY}"
     if ((oldIndex > _PROMPT_STRING_INDEX)); then
       _PROMPT_KILLED_STRING="${_PROMPT_STRING:_PROMPT_STRING_INDEX:oldIndex-_PROMPT_STRING_INDEX}"
       if ((_PROMPT_STRING_INDEX > 0)); then
@@ -753,7 +753,7 @@ function prompt_onKeyBindingPress() {
     # handle spamming of keys (the actions before this do not need to be protected from spam,
     # but the actions after this are slow to execute and should not be spammed)
     time::getProgramElapsedMicroseconds
-    if ((RETURNED_VALUE - _PROMPT_LAST_KEY_PRESSED_TIME < 100000)); then
+    if ((REPLY - _PROMPT_LAST_KEY_PRESSED_TIME < 100000)); then
       # key pressed under 100ms of the last
       _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
     else
@@ -763,7 +763,7 @@ function prompt_onKeyBindingPress() {
       # if we have 3 rapid successive key pressed
       return 0
     fi
-    _PROMPT_LAST_KEY_PRESSED_TIME=${RETURNED_VALUE}
+    _PROMPT_LAST_KEY_PRESSED_TIME=${REPLY}
 
 
     case "${action}" in
@@ -838,7 +838,7 @@ function prompt_onKeyPressed() {
 
   # here we handle the case where the user pastes a string (or spam a key)
   time::getProgramElapsedMicroseconds
-  if ((RETURNED_VALUE - _PROMPT_LAST_KEY_PRESSED_TIME < 200000)); then
+  if ((REPLY - _PROMPT_LAST_KEY_PRESSED_TIME < 200000)); then
     # key pressed under 200ms of the last
     _PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_PROMPT_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
   else
@@ -854,7 +854,7 @@ function prompt_onKeyPressed() {
       return 0
     fi
   fi
-  _PROMPT_LAST_KEY_PRESSED_TIME=${RETURNED_VALUE}
+  _PROMPT_LAST_KEY_PRESSED_TIME=${REPLY}
 
   # check if we need to open the items box
   if [[ ${_PROMPT_ITEMS_BOX_SHOWN} != "true" && ${1} != " " ]]; then
@@ -903,11 +903,11 @@ function prompt_onTextChanged() {
   # call the callback function on text update if it is enabled (and we did not just update the cursor)
   if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE} ]]; then
     ${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}
-    if [[ -n ${RETURNED_VALUE} ]]; then
-      prompt_showError "${RETURNED_VALUE}"
+    if [[ -n ${REPLY} ]]; then
+      prompt_showError "${REPLY}"
       shownError=true
     fi
-    if [[ ${RETURNED_VALUE2:-false} == "true" ]]; then
+    if [[ ${REPLY2:-false} == "true" ]]; then
       list::draw
     fi
   fi
@@ -930,14 +930,14 @@ function prompt_drawPrompt() {
   # use interactive::showStringInScreen with global the variables: _PROMPT_STRING, _PROMPT_STRING_INDEX, _PROMPT_STRING_SCREEN_WIDTH
   prompt_getDisplayedPromptString
   GLOBAL_CURSOR_LINE="${_PROMPT_START_LINE}"
-  GLOBAL_CURSOR_COLUMN=$((_PROMPT_START_COLUMN + _PROMPT_SYMBOL_LENGTH + RETURNED_VALUE2))
-  local -i spaceLeft=$((_PROMPT_STRING_SCREEN_WIDTH - ${#RETURNED_VALUE}))
+  GLOBAL_CURSOR_COLUMN=$((_PROMPT_START_COLUMN + _PROMPT_SYMBOL_LENGTH + REPLY2))
+  local -i spaceLeft=$((_PROMPT_STRING_SCREEN_WIDTH - ${#REPLY}))
 
   if [[ ${_PROMPT_PASSWORD_MODE} == "true" ]]; then
-    RETURNED_VALUE="${RETURNED_VALUE//[^…]/*}"
+    REPLY="${REPLY//[^…]/*}"
   fi
-  if [[ -z ${RETURNED_VALUE} && -n ${_PROMPT_PLACEHOLDER} ]]; then
-    RETURNED_VALUE="${STYLE_FRAMES}${_PROMPT_PLACEHOLDER}${STYLE_RESET}"
+  if [[ -z ${REPLY} && -n ${_PROMPT_PLACEHOLDER} ]]; then
+    REPLY="${STYLE_FRAMES}${_PROMPT_PLACEHOLDER}${STYLE_RESET}"
     spaceLeft=$((_PROMPT_STRING_SCREEN_WIDTH - ${#_PROMPT_PLACEHOLDER}))
   fi
   local spaces=""
@@ -945,7 +945,7 @@ function prompt_drawPrompt() {
     spaces="${_PROMPT_STRING_BLANKS:0:spaceLeft}"
   fi
 
-  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${STYLE_FRAMES}${_PROMPT_SYMBOL}${STYLE_RESET}${STYLE_PROMPT_STRING}${RETURNED_VALUE}${spaces}${STYLE_RESET}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&3
+  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${STYLE_FRAMES}${_PROMPT_SYMBOL}${STYLE_RESET}${STYLE_PROMPT_STRING}${REPLY}${spaces}${STYLE_RESET}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&3
 }
 
 # Clear the prompt line
@@ -989,8 +989,8 @@ function prompt_setCurrentWord() {
       _PROMPT_CURRENT_WORD=""
     else
       prompt_getIndexDeltaToBeginningOfWord
-      if ((RETURNED_VALUE < 0)); then
-        _PROMPT_CURRENT_WORD="${_PROMPT_STRING:_PROMPT_STRING_INDEX+RETURNED_VALUE:-1*RETURNED_VALUE}"
+      if ((REPLY < 0)); then
+        _PROMPT_CURRENT_WORD="${_PROMPT_STRING:_PROMPT_STRING_INDEX+REPLY:-1*REPLY}"
       else
         _PROMPT_CURRENT_WORD=""
       fi
@@ -1010,10 +1010,10 @@ function prompt_showItemsBox() {
 
   # compute the size of the autocomplete box
   terminal::getBestAutocompleteBox "${_LIST_FORCED_TOP:-${_LIST_START_LINE}}" "${_LIST_FORCED_LEFT:-${preferredLeftPosition}}" "${_LIST_FORCED_HEIGHT:-${_LIST_PREFERRED_HEIGHT}}" "${_LIST_FORCED_WIDTH:-${_LIST_PREFERRED_WIDTH}}" "${_LIST_MAX_HEIGHT}" "${_LIST_FORCE_BELOW}" "${_LIST_ENABLE_PROMPT}"
-  _LIST_TOP="${RETURNED_VALUE}"
-  _LIST_LEFT="${RETURNED_VALUE2}"
-  _LIST_WIDTH="${RETURNED_VALUE3}"
-  _LIST_HEIGHT="${RETURNED_VALUE4}"
+  _LIST_TOP="${REPLY}"
+  _LIST_LEFT="${REPLY2}"
+  _LIST_WIDTH="${REPLY3}"
+  _LIST_HEIGHT="${REPLY4}"
 
   printf -v _LIST_BLANKS "%${_LIST_WIDTH}s" " "
 
@@ -1039,7 +1039,7 @@ function prompt_showError() {
 
   string::wrapWords _message $((${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}} - ${#_PROMPT_ERROR_BOX_SYMBOL_LENGTH}))
   local IFS=$'\n'
-  local text="${RETURNED_VALUE}"
+  local text="${REPLY}"
   local -i errorLinesNeeded=0
   for _ in ${text}; do
     errorLinesNeeded+=1
@@ -1048,10 +1048,10 @@ function prompt_showError() {
   # compute the height of the box where we can display error messages
   # This box should fit within the autocomplete width
   terminal::getBestAutocompleteBox "${_PROMPT_ITEMS_BOX_FORCED_TOP:-${_PROMPT_START_LINE}}" "${_PROMPT_ITEMS_BOX_FORCED_LEFT:-${_PROMPT_START_COLUMN}}" "${_PROMPT_ITEMS_BOX_FORCED_HEIGHT:-${errorLinesNeeded}}" "${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
-  _PROMPT_ERROR_BOX_TOP="${RETURNED_VALUE}"
-  _PROMPT_ERROR_BOX_LEFT="${RETURNED_VALUE2}"
-  _PROMPT_ERROR_BOX_WIDTH="${RETURNED_VALUE3}"
-  _PROMPT_ERROR_BOX_HEIGHT="${RETURNED_VALUE4}"
+  _PROMPT_ERROR_BOX_TOP="${REPLY}"
+  _PROMPT_ERROR_BOX_LEFT="${REPLY2}"
+  _PROMPT_ERROR_BOX_WIDTH="${REPLY3}"
+  _PROMPT_ERROR_BOX_HEIGHT="${REPLY4}"
 
   if ((_PROMPT_ERROR_BOX_HEIGHT <= 0)); then
     return 0
@@ -1150,11 +1150,11 @@ function prompt_autocompleteWithSelectedItem() {
 
   # get the current selected item
   list::getCurrentInitialItemsIndex
-  if [[ ${RETURNED_VALUE} == "-1" ]]; then
+  if [[ ${REPLY} == "-1" ]]; then
     return 0
   fi
 
-  local selectedItem="${_PROMPT_ORIGINAL_ITEMS[${RETURNED_VALUE}]}"
+  local selectedItem="${_PROMPT_ORIGINAL_ITEMS[${REPLY}]}"
 
   # get the current word
   prompt_setCurrentWord
@@ -1191,7 +1191,7 @@ function prompt_getIndexDeltaToBeginningOfWord() {
     fi
     index=$((index - 1))
   done
-  RETURNED_VALUE=$(((index >= 0 ? index : 0) - _PROMPT_STRING_INDEX))
+  REPLY=$(((index >= 0 ? index : 0) - _PROMPT_STRING_INDEX))
 }
 
 # Get the index delta to move to the end of the word (or next).
@@ -1204,7 +1204,7 @@ function prompt_getIndexDeltaToEndOfWord() {
   while [[ ${index} -lt ${#_PROMPT_STRING} && ${_PROMPT_STRING:index:1} == [^[:space:]] ]]; do
     index=$((index + 1))
   done
-  RETURNED_VALUE=$(((index <= ${#_PROMPT_STRING} ? index : ${#_PROMPT_STRING}) - _PROMPT_STRING_INDEX))
+  REPLY=$(((index <= ${#_PROMPT_STRING} ? index : ${#_PROMPT_STRING}) - _PROMPT_STRING_INDEX))
 }
 
 # ## prompt_getDisplayedPromptString (private)
@@ -1241,8 +1241,8 @@ function prompt_getIndexDeltaToEndOfWord() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the string to display in the screen
-# - ${RETURNED_VALUE2}: the index at which to position the cursor on screen
+# - ${REPLY}: the string to display in the screen
+# - ${REPLY2}: the index at which to position the cursor on screen
 #
 # ```bash
 # prompt_getDisplayedPromptString "This is a long string that will be displayed in the screen." 20 10
@@ -1315,8 +1315,8 @@ function prompt_getDisplayedPromptString() {
     fi
   fi
 
-  RETURNED_VALUE="${screenString}"
-  RETURNED_VALUE2=${screenIndex}
+  REPLY="${screenString}"
+  REPLY2=${screenIndex}
 }
 
 
@@ -1332,7 +1332,7 @@ function prompt_drawMultiLinePrompt() {
   prompt_drawMultiLinePromptRefreshLines _PROMPT_STRING
 
   prompt_getMultiLinePrompt
-  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${RETURNED_VALUE}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}"
+  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${REPLY}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}"
 }
 
 function prompt_drawMultiLinePromptRefreshLines() {
@@ -1342,12 +1342,12 @@ function prompt_drawMultiLinePromptRefreshLines() {
 
   # short cut in case the text is already shorter than the width
   if [[ ${#textToWrapAtWords} -le ${_PROMPT_STRING_SCREEN_WIDTH} && ${textToWrapAtWords} != *$'\n'* ]]; then
-    RETURNED_VALUE="${textToWrapAtWords}"
+    REPLY="${textToWrapAtWords}"
     return 0
   fi
 
   local text="${textToWrapAtWords}"
-  local IFS=$' \t' line word realWord RETURNED_VALUE2
+  local IFS=$' \t' line word realWord REPLY2
   local -i realWordLength=0 firstWord=1
   local -i lineLength=0
 
@@ -1393,8 +1393,8 @@ function prompt_drawMultiLinePromptRefreshLines() {
         else
           # the word is too long to fit on a line, split it in multiple lines
           string::wrapCharacters word "${_PROMPT_STRING_SCREEN_WIDTH}" "" "$((_PROMPT_STRING_SCREEN_WIDTH - lineLength))"
-          output+="${RETURNED_VALUE}"
-          lineLength=${RETURNED_VALUE2}
+          output+="${REPLY}"
+          lineLength=${REPLY2}
         fi
       fi
 
@@ -1403,12 +1403,12 @@ function prompt_drawMultiLinePromptRefreshLines() {
     lineLength=0
   done
 
-  RETURNED_VALUE="${output#$'\n'""}"
+  REPLY="${output#$'\n'""}"
 
 
 
   string::wrapWords _PROMPT_STRING "${_PROMPT_STRING_SCREEN_WIDTH}" "  " "$((_PROMPT_STRING_SCREEN_WIDTH - _PROMPT_SYMBOL_LENGTH))"
 
   prompt_getMultiLinePrompt
-  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${RETURNED_VALUE}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}"
+  printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${REPLY}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}"
 }

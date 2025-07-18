@@ -64,7 +64,7 @@
 Returned variables:
 
 ```text
-RETURNED_VALUE='true'
+REPLY='true'
 ```
 
 ❯ `echo n | interactive::promptYesNo 'Do you see this message?'`
@@ -88,7 +88,7 @@ Returned code: `1`
 Returned variables:
 
 ```text
-RETURNED_VALUE='false'
+REPLY='false'
 ```
 
 ### ✅ Testing interactive::askForConfirmation

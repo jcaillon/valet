@@ -49,7 +49,7 @@ echo "${MY_GLOBAL_VAR}"
 
 Using a global variable seem to be a bad idea and can lead to confusion in the code if you are not rigorous. But the cost in performance of the first solution is huge (try to time these 2 codes in 1000 iterations).
 
-Avoid code mistakes by deciding on 1 global variable for all your functions and always assign this variable in each return path of a function (otherwise you might use a value from a previous function call!). In valet, this variable is named `RETURNED_VALUE`.
+Avoid code mistakes by deciding on 1 global variable for all your functions and always assign this variable in each return path of a function (otherwise you might use a value from a previous function call!). In valet, this variable is named `REPLY`.
 
 ## Passing long strings to a function
 
@@ -97,7 +97,7 @@ In valet, you can do:
 
 ```bash
 fs::readFile file
-echo "${RETURNED_VALUE}"
+echo "${REPLY}"
 ```
 
 ## Read a file, line by line
@@ -152,7 +152,7 @@ In valet, you can do:
 
 ```bash
 exe::invoke tput cols
-myvar="${RETURNED_VALUE}"
+myvar="${REPLY}"
 ```
 
 ## Loop through line or fields of the content of a variable

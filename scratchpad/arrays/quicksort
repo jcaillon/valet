@@ -86,8 +86,8 @@ function main() {
 
   local IFS=$'\n'
   # local IFS=' '
-  echo "${RETURNED_ARRAY[*]}"
-  echo "-> ${#RETURNED_ARRAY[@]} elements"
+  echo "${REPLY_ARRAY[*]}"
+  echo "-> ${#REPLY_ARRAY[@]} elements"
 
   # profiler::enable ./tmp/prof
   # VALET_CONFIG_KEEP_ALL_PROFILER_LINES=true
@@ -98,10 +98,10 @@ function main() {
   # array::sort _myArray
   # echo "${_myArray[*]}"
 
-  # local RETURNED_ARRAY2
+  # local REPLY_ARRAY2
   # local _ARRAY_FUZZY_FILTER_KEYS
   # mapfile -t _ARRAY_FUZZY_FILTER_KEYS <"scratchpad/arrays/w3"
-  # eval "RETURNED_ARRAY2=( {0..$((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))} )"
+  # eval "REPLY_ARRAY2=( {0..$((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))} )"
   # array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
   # echo "${_ARRAY_FUZZY_FILTER_KEYS[*]}"
 

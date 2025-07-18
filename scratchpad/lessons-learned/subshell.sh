@@ -15,18 +15,18 @@ trap -- 'log::error ERR CODE $?' ERR
 
 log::info "PID: ${BASHPID}"
 bash::getBuiltinOutput trap -p
-ORIGINAL_TRAPS="${RETURNED_VALUE}"
+ORIGINAL_TRAPS="${REPLY}"
 bash::getBuiltinOutput shopt -p
-ORIGINAL_SHOPT="${RETURNED_VALUE}"
+ORIGINAL_SHOPT="${REPLY}"
 bash::getBuiltinOutput shopt -p -o
-ORIGINAL_SET="${RETURNED_VALUE}"
+ORIGINAL_SET="${REPLY}"
 
 log::info "======= Testing a subshell in expansion ======="
 TEST="$(
   log::info "SUBSHELL PID: ${BASHPID}"
   ((0/0))
   bash::getBuiltinOutput shopt -p -o
-  if [[ ${ORIGINAL_SET} == "${RETURNED_VALUE}" ]]; then
+  if [[ ${ORIGINAL_SET} == "${REPLY}" ]]; then
     log::info "Inherited the set options."
   else
     log::warning "Set options have changed (set +e because we are in a substitution shell)."
@@ -44,19 +44,19 @@ log::info "======= Testing another subshell in a list of commands ======="
   ((0/0))
 
   bash::getBuiltinOutput trap -p
-  if [[ ${ORIGINAL_TRAPS} == "${RETURNED_VALUE}" ]]; then
+  if [[ ${ORIGINAL_TRAPS} == "${REPLY}" ]]; then
     log::info "Inherited the traps."
   else
     log::error "Trap settings have changed."
   fi
   bash::getBuiltinOutput shopt -p
-  if [[ ${ORIGINAL_SHOPT} == "${RETURNED_VALUE}" ]]; then
+  if [[ ${ORIGINAL_SHOPT} == "${REPLY}" ]]; then
     log::info "Inherited the shopt settings."
   else
     log::error "Shopt settings have changed."
   fi
   bash::getBuiltinOutput shopt -p -o
-  if [[ ${ORIGINAL_SET} == "${RETURNED_VALUE}" ]]; then
+  if [[ ${ORIGINAL_SET} == "${REPLY}" ]]; then
     log::info "Inherited the set options."
   else
     log::error "Set options have changed."

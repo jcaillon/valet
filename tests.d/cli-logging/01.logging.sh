@@ -49,7 +49,7 @@ function test_logDisplayOptions() {
 
 function test_logOutputOptions() {
   fs::createTempDirectory
-  local logDir="${RETURNED_VALUE}"
+  local logDir="${REPLY}"
 
   test::title "✅ Testing that we can output the logs to a directory additionally to console"
   test::exec VALET_CONFIG_LOG_TO_DIRECTORY="${logDir}" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
@@ -62,7 +62,7 @@ function test_logOutputOptions() {
   test::title "✅ Testing that we can output the logs to a specific file name additionally to console"
   test::exec VALET_CONFIG_LOG_FILENAME_PATTERN='logFile=test.log' VALET_CONFIG_LOG_TO_DIRECTORY="true" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
   core::getUserStateDirectory
-  test::exec fs::cat "${RETURNED_VALUE}/logs/test.log"
+  test::exec fs::cat "${REPLY}/logs/test.log"
 
   test::title "✅ Testing that we can output the logs to a specific file descriptor"
   test::exec VALET_CONFIG_LOG_FD="${logDir}/test2.log" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 divide-by-zero

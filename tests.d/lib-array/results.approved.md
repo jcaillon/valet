@@ -80,7 +80,7 @@ MY_CRITERIA2=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='6'
 [1]='4'
 [2]='3'
@@ -247,13 +247,13 @@ MY_ARRAY=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='the breakdown'
 [1]='the d day'
 [2]='one the'
 [3]='hold the baby'
 )
-RETURNED_ARRAY2=(
+REPLY_ARRAY2=(
 [0]='1'
 [1]='11'
 [2]='0'
@@ -268,14 +268,14 @@ RETURNED_ARRAY2=(
 Returned variables:
 
 ```text
-RETURNED_ARRAY=(
+REPLY_ARRAY=(
 [0]='eLv'
 [1]='eLv1'
 [2]='elevator'
 [3]='deliver'
 [4]='make a living'
 )
-RETURNED_ARRAY2=(
+REPLY_ARRAY2=(
 [0]='8'
 [1]='7'
 [2]='12'

@@ -47,11 +47,11 @@ examples:
     Create (or recreate) the configuration file of Valet reusing the possible current values of the variables.
 ---"
 function selfConfig() {
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   core::getConfigurationDirectory
-  local valetConfigFile="${VALET_CONFIG_FILE:-"${RETURNED_VALUE}/config"}"
+  local valetConfigFile="${VALET_CONFIG_FILE:-"${REPLY}/config"}"
 
   if [[ ! -f "${valetConfigFile}" || ${override:-} == "true" ]]; then
     log::info "Writing the valet config file ⌜${valetConfigFile}⌝."
@@ -79,7 +79,7 @@ function selfConfig_writeConfigFile() {
 
   selfConfig::getFileContent "${@}"
 
-  printf '%s\n' "${RETURNED_VALUE}" >"${valetConfigFile}"
+  printf '%s\n' "${REPLY}" >"${valetConfigFile}"
 }
 
 # Return the content of the valet config file.
@@ -89,12 +89,12 @@ function selfConfig_writeConfigFile() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the content of the valet config file.
+# - ${REPLY}: the content of the valet config file.
 function selfConfig::getFileContent() {
   local exportCurrentValues="${1}"
 
   # shellcheck disable=SC2016
-  RETURNED_VALUE='#''!/usr/bin/env bash
+  REPLY='#''!/usr/bin/env bash
 # The config script for Valet.
 # shellcheck disable=SC2034
 '
@@ -120,22 +120,22 @@ function selfConfig::getFileContent() {
         log::trace "Exported the value for ⌜${variableName}⌝."
         printf -v "variableValue" "%q" "${!variableName}"
         if [[ ${variableValue} != "'''" ]]; then
-          RETURNED_VALUE+="${variableName}=${variableValue}"$'\n'
+          REPLY+="${variableName}=${variableValue}"$'\n'
         else
-          RETURNED_VALUE+="# ${variableName}=\"\""$'\n'
+          REPLY+="# ${variableName}=\"\""$'\n'
         fi
       else
-        RETURNED_VALUE+="# ${variableName}=\"\""$'\n'
+        REPLY+="# ${variableName}=\"\""$'\n'
       fi
     else
       if [[ ${line} == "## "* ]]; then
-        RETURNED_VALUE+="##############################"$'\n'"# ${line##*"# "}"$'\n'"##############################"$'\n'
+        REPLY+="##############################"$'\n'"# ${line##*"# "}"$'\n'"##############################"$'\n'
       elif [[ ${line} == "### "* ]]; then
-        RETURNED_VALUE+="####################"$'\n'"# ${line##*"# "}"$'\n'"####################"$'\n'
+        REPLY+="####################"$'\n'"# ${line##*"# "}"$'\n'"####################"$'\n'
       elif [[ ${line} == "#### "* || ${line} == "### "* ]]; then
-        RETURNED_VALUE+="# ${line##*"# "}"$'\n'"#-------------------"$'\n'
+        REPLY+="# ${line##*"# "}"$'\n'"#-------------------"$'\n'
       else
-        RETURNED_VALUE+="# ${line}"$'\n'
+        REPLY+="# ${line}"$'\n'
       fi
     fi
   done <"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/config.md"

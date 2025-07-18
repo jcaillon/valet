@@ -17,11 +17,11 @@
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The absolute path of the path.
+# - ${REPLY}: The absolute path of the path.
 #
 # ```bash
 # fs::toAbsolutePath "myPath"
-# local myPathAbsolutePath="${RETURNED_VALUE}"
+# local myPathAbsolutePath="${REPLY}"
 # ```
 #
 # > This is a pure bash alternative to `realpath` or `readlink`.
@@ -41,7 +41,7 @@ function fs::toAbsolutePath() {
     if [[ ${_OPTION_REALPATH:-} == "true" ]]; then
       fs::getPwdRealPath
     else
-      RETURNED_VALUE="${PWD}"
+      REPLY="${PWD}"
     fi
     cd "${OLDPWD}" &>/dev/null || core::fail "Failed to cd back to the previous directory."
     return 0
@@ -51,9 +51,9 @@ function fs::toAbsolutePath() {
   if cd "${path%/*}" &>/dev/null; then
     if [[ ${_OPTION_REALPATH:-} == "true" ]]; then
       fs::getPwdRealPath
-      RETURNED_VALUE="${RETURNED_VALUE}/${path##*/}"
+      REPLY="${REPLY}/${path##*/}"
     else
-      RETURNED_VALUE="${PWD}/${path##*/}"
+      REPLY="${PWD}/${path##*/}"
     fi
     cd "${OLDPWD}" &>/dev/null || core::fail "Failed to cd back to the previous directory."
     return 0
@@ -62,7 +62,7 @@ function fs::toAbsolutePath() {
   local currentDirectoryPath
   if [[ ${_OPTION_REALPATH:-} == "true" ]]; then
     fs::getPwdRealPath
-    currentDirectoryPath="${RETURNED_VALUE}"
+    currentDirectoryPath="${REPLY}"
   else
     currentDirectoryPath="${PWD}"
   fi
@@ -72,12 +72,12 @@ function fs::toAbsolutePath() {
 
   # if the file is already an absolute path, we return it
   if [[ ${path} == "/"* ]]; then
-    RETURNED_VALUE="${path}"
+    REPLY="${path}"
     return 0
   fi
 
   # other cases of relative paths not handled
-  RETURNED_VALUE="${currentDirectoryPath}/${path#./}"
+  REPLY="${currentDirectoryPath}/${path#./}"
 }
 
 # ## fs::getPwdRealPath
@@ -91,20 +91,20 @@ function fs::toAbsolutePath() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The realpath for the current directory.
+# - ${REPLY}: The realpath for the current directory.
 #
 # > This is a pure bash alternative to `realpath` or `readlink`.
 function fs::getPwdRealPath() {
   local IFS=''
   pwd -P &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"
-  RETURNED_VALUE=""
-  IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
-  RETURNED_VALUE="${RETURNED_VALUE%[[:space:]]}"
+  REPLY=""
+  IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+  REPLY="${REPLY%[[:space:]]}"
 }
 
 # ## fs::readFile
 #
-# Reads the content of a file and returns it in the global variable RETURNED_VALUE.
+# Reads the content of a file and returns it in the global variable REPLY.
 # Uses pure bash.
 #
 # - $1: **path** _as string_:
@@ -118,30 +118,30 @@ function fs::getPwdRealPath() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The content of the file.
+# - ${REPLY}: The content of the file.
 #
 # ```bash
-# fs::readFile "/path/to/file" && local fileContent="${RETURNED_VALUE}"
-# fs::readFile "/path/to/file" 500 && local fileContent="${RETURNED_VALUE}"
+# fs::readFile "/path/to/file" && local fileContent="${REPLY}"
+# fs::readFile "/path/to/file" 500 && local fileContent="${REPLY}"
 # ```
 function fs::readFile() {
   local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i maxCharacters="${2:-${_OPTION_MAX_CHAR:-0}}"
 
   if [[ ! -s "${filePath}" ]]; then
-    RETURNED_VALUE=""
+    REPLY=""
     return 0
   fi
 
-  RETURNED_VALUE=""
+  REPLY=""
   local IFS=''
   if [[ "${maxCharacters}" -gt 0 ]]; then
-    read -rd '' -n "${maxCharacters}" RETURNED_VALUE <"${filePath}" || [[ -n ${RETURNED_VALUE} ]]
+    read -rd '' -n "${maxCharacters}" REPLY <"${filePath}" || [[ -n ${REPLY} ]]
   else
-    read -rd '' RETURNED_VALUE <"${filePath}" || [[ -n ${RETURNED_VALUE} ]] || RETURNED_VALUE=""
+    read -rd '' REPLY <"${filePath}" || [[ -n ${REPLY} ]] || REPLY=""
     # fail safe for cases where the file is suppose to not be empty but we get null string
-    if [[ -z ${RETURNED_VALUE} ]]; then
-      RETURNED_VALUE="$(<"${filePath}")"
+    if [[ -z ${REPLY} ]]; then
+      REPLY="$(<"${filePath}")"
     fi
   fi
 }
@@ -185,18 +185,18 @@ function fs::writeToFile() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The absolute path to the directory.
+# - ${REPLY}: The absolute path to the directory.
 #
 # ```bash
 # fs::createDirectoryIfNeeded "/my/directory"
 # ```
 function fs::createDirectoryIfNeeded() {
   fs::toAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  if [[ -d "${RETURNED_VALUE}" ]]; then
+  if [[ -d "${REPLY}" ]]; then
     return 0
   fi
 
-  local dirPath="${RETURNED_VALUE}"
+  local dirPath="${REPLY}"
 
   if [[ ! -d "${dirPath}" ]]; then
     if ! mkdir -p "${dirPath}" 1>/dev/null; then
@@ -204,7 +204,7 @@ function fs::createDirectoryIfNeeded() {
     fi
   fi
 
-  RETURNED_VALUE="${dirPath}"
+  REPLY="${dirPath}"
 }
 
 # ## fs::createFileIfNeeded
@@ -217,18 +217,18 @@ function fs::createDirectoryIfNeeded() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The absolute path of the file.
+# - ${REPLY}: The absolute path of the file.
 #
 # ```bash
 # fs::createFileIfNeeded "myFile"
 # ```
 function fs::createFileIfNeeded() {
   fs::toAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  if [[ -f "${RETURNED_VALUE}" ]]; then
+  if [[ -f "${REPLY}" ]]; then
     return 0
   fi
 
-  local filePath="${RETURNED_VALUE}"
+  local filePath="${REPLY}"
   local parentDir="${filePath%/*}"
 
   fs::createDirectoryIfNeeded "${parentDir}"
@@ -237,7 +237,7 @@ function fs::createFileIfNeeded() {
     : >"${filePath}"
   fi
 
-  RETURNED_VALUE="${filePath}"
+  REPLY="${filePath}"
 }
 
 # ## fs::cat
@@ -255,7 +255,7 @@ function fs::createFileIfNeeded() {
 # > Also see log::printFile if you want to print a file for a user.
 function fs::cat() {
   fs::readFile "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  printf '%s\n' "${RETURNED_VALUE}"
+  printf '%s\n' "${REPLY}"
 }
 
 # ## fs::head
@@ -269,7 +269,7 @@ function fs::cat() {
 #       The number of lines to print.
 # - $3: to variable _as bool_:
 #       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.
-#       If true, the output will be stored in the variable `RETURNED_ARRAY`
+#       If true, the output will be stored in the variable `REPLY_ARRAY`
 #       instead of being printed to stdout.
 #       (defaults to false)
 #
@@ -282,7 +282,7 @@ function fs::head() {
   local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i numberOfLines="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local toVariable="${3:-${_OPTION_TO_VARIABLE:-false}}"
-  RETURNED_ARRAY=()
+  REPLY_ARRAY=()
   local IFS=$'\n' line
   nb=0
   while read -rd $'\n' line || [[ -n ${line:-} ]]; do
@@ -290,7 +290,7 @@ function fs::head() {
       break
     fi
     if [[ ${toVariable} == "true" ]]; then
-      RETURNED_ARRAY+=("${line}")
+      REPLY_ARRAY+=("${line}")
     else
       printf '%s\n' "${line}"
     fi
@@ -309,7 +309,7 @@ function fs::head() {
 #       The number of lines to print from the end of the file.
 # - $3: to variable _as bool_:
 #       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.
-#       If true, the output will be stored in the variable `RETURNED_ARRAY`
+#       If true, the output will be stored in the variable `REPLY_ARRAY`
 #       instead of being printed to stdout.
 #       (defaults to false)
 #
@@ -322,7 +322,7 @@ function fs::tail() {
   local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i numberOfLines="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local toVariable="${3:-${_OPTION_TO_VARIABLE:-false}}"
-  RETURNED_ARRAY=()
+  REPLY_ARRAY=()
   local IFS=$'\n'
   local -a lines
   mapfile -d $'\n' -t lines <"${filePath}"
@@ -331,7 +331,7 @@ function fs::tail() {
     startLine=0
   fi
   if [[ ${toVariable} == "true" ]]; then
-    RETURNED_ARRAY=("${lines[@]:${startLine}}")
+    REPLY_ARRAY=("${lines[@]:${startLine}}")
   else
     printf '%s\n' "${lines[@]:${startLine}}"
   fi
@@ -366,11 +366,11 @@ function fs::tail() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY[@]}: An array with the list of all the paths.
+# - ${REPLY_ARRAY[@]}: An array with the list of all the paths.
 #
 # ```bash
 # fs::listPaths "/path/to/directory" true true myFilterFunction myFilterDirectoryFunction
-# for path in "${RETURNED_ARRAY[@]}"; do
+# for path in "${REPLY_ARRAY[@]}"; do
 #   printf '%s' "${path}"
 # done
 # ```
@@ -393,7 +393,7 @@ function fs::listPaths() {
     activatedHidden=true
   fi
 
-  RETURNED_ARRAY=()
+  REPLY_ARRAY=()
 
   local path listOfDirectories currentDirectory
 
@@ -414,7 +414,7 @@ function fs::listPaths() {
       if [[ -n ${filterFunction} ]] && ! ${filterFunction} "${path}"; then
         continue
       fi
-      RETURNED_ARRAY+=("${path}")
+      REPLY_ARRAY+=("${path}")
     done
   done
 
@@ -446,11 +446,11 @@ function fs::listPaths() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY[@]}: An array with the list of all the files.
+# - ${REPLY_ARRAY[@]}: An array with the list of all the files.
 #
 # ```bash
 # fs::listFiles "/path/to/directory" true true myFilterFunction
-# for path in "${RETURNED_ARRAY[@]}"; do
+# for path in "${REPLY_ARRAY[@]}"; do
 #   printf '%s' "${path}"
 # done
 # ```
@@ -486,11 +486,11 @@ function fs_listFilesReturnTrueIfFile() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY[@]}: An array with the list of all the files.
+# - ${REPLY_ARRAY[@]}: An array with the list of all the files.
 #
 # ```bash
 # fs::listDirectories "/path/to/directory" true true myFilterFunction
-# for path in "${RETURNED_ARRAY[@]}"; do
+# for path in "${REPLY_ARRAY[@]}"; do
 #   printf '%s' "${path}"
 # done
 # ```
@@ -581,9 +581,9 @@ function fs::createLink() {
   local force="${3:-${_OPTION_FORCE:-true}}"
 
   fs::toAbsolutePath "${linkedPath}"
-  linkedPath="${RETURNED_VALUE}"
+  linkedPath="${REPLY}"
   fs::toAbsolutePath "${linkPath}"
-  linkPath="${RETURNED_VALUE}"
+  linkPath="${REPLY}"
 
   # check if the linked path exists
   if [[ ! -e "${linkedPath}" ]]; then
@@ -633,11 +633,11 @@ function fs::createLink() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The number of lines in the file.
+# - ${REPLY}: The number of lines in the file.
 #
 # ```bash
 # fs::getFileLineCount "/path/to/file"
-# local lineCount="${RETURNED_VALUE}"
+# local lineCount="${REPLY}"
 # ```
 #
 # TODO: fails to count the last line if empty
@@ -647,7 +647,7 @@ function fs::getFileLineCount() {
   while read -rd $'\n' || [[ -n ${REPLY:-} ]]; do
     ((lineCount++))
   done <"${filePath}"
-  RETURNED_VALUE="${lineCount}"
+  REPLY="${lineCount}"
 }
 
 # ## fs::getScriptDirectory
@@ -656,11 +656,11 @@ function fs::getFileLineCount() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the directory of the script that called it.
+# - ${REPLY}: the directory of the script that called it.
 #
 # ```bash
 # fs::getScriptDirectory
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function fs::getScriptDirectory() {
   local scriptDirectory
@@ -678,7 +678,7 @@ function fs::getScriptDirectory() {
     scriptDirectory="${scriptDirectory%/*}"
   fi
   fs::toAbsolutePath "${scriptDirectory}"
-  RETURNED_VALUE="${scriptDirectory}"
+  REPLY="${scriptDirectory}"
 }
 
 # ## fs::getCommandPath
@@ -690,14 +690,14 @@ function fs::getScriptDirectory() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The absolute path of the command (or empty if command not found).
+# - ${REPLY}: The absolute path of the command (or empty if command not found).
 # - $?:
 #   - 0 if the command was found
 #   - 1 otherwise
 #
 # ```bash
 # fs::getCommandPath "command"
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function fs::getCommandPath() {
   local command="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -707,11 +707,11 @@ function fs::getCommandPath() {
   fi
 
   local IFS=' '
-  RETURNED_VALUE=""
+  REPLY=""
   if command -v "${command}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
-    IFS='' read -rd '' RETURNED_VALUE <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
-    RETURNED_VALUE="${RETURNED_VALUE%[[:space:]]}"
-    fs::toAbsolutePath "${RETURNED_VALUE}"
+    IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+    REPLY="${REPLY%[[:space:]]}"
+    fs::toAbsolutePath "${REPLY}"
     return 0
   fi
 

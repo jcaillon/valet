@@ -46,7 +46,7 @@ function command_not_found_handle() {
     # we are here if the error happened in a log function and thus we couldn't print the error
     printf '%s\n%s\n' "Command not found: ⌜${commandNotFound}⌝." "Error in a log function." >&2
     log::getCallStack 2
-    printf '%s\n' "${RETURNED_VALUE}" >&2
+    printf '%s\n' "${REPLY}" >&2
   else
     GLOBAL_COMMAND_NOT_FOUND="${commandNotFound}"
     log::print "ERROR" "${ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
@@ -101,7 +101,7 @@ log::info "LESSONS LEARNED:
 - command_not_found_handle is executed in a separate process
 - we do have the missing command and its arguments available in the command_not_found_handle but even if we can re-execute it,
   it is not really usable because it is executed in a different process so we would lose
-  any RETURNED_VALUE set with it (for instance).
+  any REPLY set with it (for instance).
 
 So unfortunately, this is not a good solution to auto source libraries on missing commands.
 "

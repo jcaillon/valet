@@ -69,10 +69,10 @@ function test::prompt() {
 # ## test::func
 #
 # Call this function to test a function that returns a value using the valet
-# conventions (RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY, etc...).
+# conventions (REPLY, REPLY2, REPLY_ARRAY, etc...).
 #
 # It will write the command and its output to the report file.
-# It will also print the returned values.
+# It will also print the REPLY values.
 #
 # - $@: **command** _as string_:
 #       The command to execute (function and its arguments).
@@ -122,9 +122,9 @@ function test::exit() {
 #
 # - $1: **can exit** _as boolean_:
 #       Whether the command can call `exit`.
-# - $2: **print returned values** _as boolean_:
-#       Whether the returned values should be printed in the report.
-#       (e.g. RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY...)
+# - $2: **print REPLY values** _as boolean_:
+#       Whether the REPLY variable values should be printed in the report.
+#       (e.g. REPLY, REPLY2, REPLY_ARRAY...)
 # - $@: **command** _as string_:
 #       The command to execute.
 #
@@ -178,13 +178,13 @@ function test_exec() {
   fi
 
   if [[ ${printReturnedValues} == "true" ]]; then
-    local RETURNED_VALUE
-    local RETURNED_VALUE2
-    local RETURNED_VALUE3
-    local RETURNED_VALUE4
-    local -a RETURNED_ARRAY
-    local -a RETURNED_ARRAY2
-    local -A RETURNED_ASSOCIATIVE_ARRAY
+    local REPLY
+    local REPLY2
+    local REPLY3
+    local REPLY4
+    local -a REPLY_ARRAY
+    local -a REPLY_ARRAY2
+    local -A REPLY_ASSOCIATIVE_ARRAY
   fi
 
   # reset IFS to ensure consistent behavior
@@ -216,30 +216,30 @@ function test_exec() {
   test_flushFdToCodeBlock 2 "**Error output**:"
 
   if [[ ${printReturnedValues} == "true" ]]; then
-    test::printReturnedVars
+    test::printReplyVars
   fi
 }
 
-# ## test::printReturnedVars
+# ## test::printReplyVars
 #
-# This function can be called to print the returned values,
-# e.g. RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY...
+# This function can be called to print the REPLY values,
+# e.g. REPLY, REPLY2, REPLY_ARRAY...
 # They will each be printed in a code block in the report file.
 #
 # ```bash
-# test::printReturnedVars
+# test::printReplyVars
 # ```
-function test::printReturnedVars() {
-  if declare -F test::transformReturnedVarsBeforePrinting &>/dev/null; then
-    test::transformReturnedVarsBeforePrinting
+function test::printReplyVars() {
+  if declare -F test::transformReplyVarsBeforePrinting &>/dev/null; then
+    test::transformReplyVarsBeforePrinting
   fi
   local IFS=$'\n' key varName _TEST_OUTPUT=""
-  for varName in RETURNED_VALUE RETURNED_VALUE2 RETURNED_VALUE3 RETURNED_VALUE4; do
+  for varName in REPLY REPLY2 REPLY3 REPLY4; do
     if [[ -v ${varName} ]]; then
       _TEST_OUTPUT+="${varName}='${!varName//\'/\'\"\'\"\'}'"$'\n'
     fi
   done
-  for varName in RETURNED_ARRAY RETURNED_ARRAY2; do
+  for varName in REPLY_ARRAY REPLY_ARRAY2; do
     if [[ -v ${varName} ]]; then
       _TEST_OUTPUT+="${varName}=("$'\n'
       local -n array="${varName}"
@@ -249,10 +249,10 @@ function test::printReturnedVars() {
       _TEST_OUTPUT+=")"$'\n'
     fi
   done
-  if [[ -v RETURNED_ASSOCIATIVE_ARRAY && -v RETURNED_ASSOCIATIVE_ARRAY[@] ]]; then
-      _TEST_OUTPUT+="RETURNED_ASSOCIATIVE_ARRAY=("$'\n'
-    for key in "${!RETURNED_ASSOCIATIVE_ARRAY[@]}"; do
-      _TEST_OUTPUT+="[${key}]='${RETURNED_ASSOCIATIVE_ARRAY[${key}]//\'/\'\"\'\"\'}'"$'\n'
+  if [[ -v REPLY_ASSOCIATIVE_ARRAY && -v REPLY_ASSOCIATIVE_ARRAY[@] ]]; then
+      _TEST_OUTPUT+="REPLY_ASSOCIATIVE_ARRAY=("$'\n'
+    for key in "${!REPLY_ASSOCIATIVE_ARRAY[@]}"; do
+      _TEST_OUTPUT+="[${key}]='${REPLY_ASSOCIATIVE_ARRAY[${key}]//\'/\'\"\'\"\'}'"$'\n'
     done
     _TEST_OUTPUT+=")"$'\n'
   fi
@@ -265,17 +265,17 @@ function test::printReturnedVars() {
   fi
 }
 
-# ## test::resetReturnedVars
+# ## test::resetReplyVars
 #
-# Resets the value of each RETURNED_ variable.
+# Resets the value of each REPLY variable.
 #
 # ```bash
-# test::resetReturnedVars
+# test::resetReplyVars
 # ```
-function test::resetReturnedVars() {
+function test::resetReplyVars() {
   local IFS=' '
   # shellcheck disable=SC2086
-  unset ${!RETURNED_*}
+  unset ${!REPLY*}
 }
 
 # ## test::printVars
@@ -302,9 +302,9 @@ function test::printVars() {
     done
   fi
   _TEST_OUTPUT=""
-  while [[ -n ${RETURNED_VALUE} ]]; do
-    chunk="${RETURNED_VALUE%%$'\n'*}"
-    RETURNED_VALUE="${RETURNED_VALUE:${#chunk} + 1}"
+  while [[ -n ${REPLY} ]]; do
+    chunk="${REPLY%%$'\n'*}"
+    REPLY="${REPLY:${#chunk} + 1}"
 
     if [[ ${chunk} =~ "declare -"[aA][ilnrtux]*" "([^=]+)"=" ]]; then
       # we print an array
@@ -400,9 +400,9 @@ function test_flushFdToCodeBlock() {
 # > you need it to be available for multiple tests.
 # > Note however that this function can be called very often, so it should be optimized.
 
-# ## test::transformReturnedVarsBeforePrinting
+# ## test::transformReplyVarsBeforePrinting
 #
-# This function can be defined to modify the returned variables before printing them in the report.
+# This function can be defined to modify the REPLY variables before printing them in the report.
 #
 # > You can define this function directly in the test script, or in a test hook if
 # > you need it to be available for multiple tests.

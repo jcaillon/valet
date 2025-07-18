@@ -77,21 +77,21 @@ function test_bash::injectCodeInFunction() {
   function simpleFunction() { :;}
   test::exec declare -f simpleFunction
   test::exec bash::injectCodeInFunction simpleFunction "echo 'injected at the beginning!'" true
-  test::prompt "echo \${RETURNED_VALUE}; echo \${RETURNED_VALUE2};"
-  echo "${RETURNED_VALUE}"
-  echo "${RETURNED_VALUE2}"
+  test::prompt "echo \${REPLY}; echo \${REPLY2};"
+  echo "${REPLY}"
+  echo "${REPLY2}"
   test::flush
 
   test::exec bash::injectCodeInFunction simpleFunction "echo 'injected at the end!'"
-  test::prompt "echo \${RETURNED_VALUE}; echo \${RETURNED_VALUE2};"
-  echo "${RETURNED_VALUE}"
-  echo "${RETURNED_VALUE2}"
+  test::prompt "echo \${REPLY}; echo \${REPLY2};"
+  echo "${REPLY}"
+  echo "${REPLY2}"
   test::flush
 
   test::exec bash::injectCodeInFunction newName "echo 'injected in a new function!'"
-  test::prompt "echo \${RETURNED_VALUE}; echo \${RETURNED_VALUE2};"
-  echo "${RETURNED_VALUE}"
-  echo "${RETURNED_VALUE2}"
+  test::prompt "echo \${REPLY}; echo \${REPLY2};"
+  echo "${REPLY}"
+  echo "${REPLY2}"
   test::flush
 }
 
@@ -136,15 +136,15 @@ function test_bash::getFunctionDefinitionWithGlobalVars() {
 
   test::exec declare -f test_function_to_reexport
   test::exec bash::getFunctionDefinitionWithGlobalVars test_function_to_reexport new_name FIRST_ARG SECOND_ARG THIRD_ARG FOURTH_ARG
-  test::prompt "echo \${RETURNED_VALUE}"
-  echo "${RETURNED_VALUE}"
+  test::prompt "echo \${REPLY}"
+  echo "${REPLY}"
   test::flush
 
 
   test::markdown "Testing without arguments"
   test::exec bash::getFunctionDefinitionWithGlobalVars test_function_to_reexport new_name
-  test::prompt "echo \${RETURNED_VALUE}"
-  echo "${RETURNED_VALUE}"
+  test::prompt "echo \${REPLY}"
+  echo "${REPLY}"
   test::flush
 }
 
@@ -158,9 +158,9 @@ function test_bash::readStdIn() {
   test::title "✅ Testing bash::readStdIn"
 
   test::prompt "bash::readStdIn <<<'coucou'"
-  test::resetReturnedVars
+  test::resetReplyVars
   bash::readStdIn <<<"coucou"
-  test::printReturnedVars
+  test::printReplyVars
 
   test::func bash::readStdIn
 }

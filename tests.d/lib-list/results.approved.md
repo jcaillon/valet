@@ -17,7 +17,7 @@ _LIST_CURRENT_ITEM='HellO wOrld'
 Returned variables:
 
 ```text
-RETURNED_VALUE='0'
+REPLY='0'
 ```
 
 `H>e<>l<l…`
@@ -32,7 +32,7 @@ _LIST_CURRENT_ITEM='HellO wOrld'
 Returned variables:
 
 ```text
-RETURNED_VALUE='4'
+REPLY='4'
 ```
 
 `H>e<>l<l>O< wO>r<ld`
@@ -47,7 +47,7 @@ _LIST_CURRENT_ITEM='[36mHellO[0m wOrld'
 Returned variables:
 
 ```text
-RETURNED_VALUE='0'
+REPLY='0'
 ```
 
 `[36mH>e<>l<l>O<[0m wO>r<…`
@@ -62,7 +62,7 @@ _LIST_CURRENT_ITEM='[36mHellO[0m wOrld'
 Returned variables:
 
 ```text
-RETURNED_VALUE='0'
+REPLY='0'
 ```
 
 `[36mH>e<>l<l>O<[0m wO>r<ld`
@@ -80,7 +80,7 @@ _LIST_CURRENT_ITEM='[7m[35md[27m[39m[7m[35mi[27m[39msable the [93mmonit
 Returned variables:
 
 ```text
-RETURNED_VALUE='0'
+REPLY='0'
 ```
 
 `[7m[35md[27m[39m[7m[35mi[27m[39ms[4ma[24m[4mb[24mle the [93mm[4mo[24mnitor [4mm[24mode to [4ma[24mvoid[39m the "Ter[4mm[24minated" message [4mw[24mith [4me[24mxit c…`

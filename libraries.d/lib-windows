@@ -27,8 +27,8 @@ source fs
 # - $?
 #   - 0 if the command was successful
 #   - 1 otherwise.
-# - ${RETURNED_VALUE}: The content of stdout.
-# - ${RETURNED_VALUE2}: The content of stderr.
+# - ${REPLY}: The content of stdout.
+# - ${REPLY2}: The content of stderr.
 #
 # ```bash
 # windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
@@ -46,16 +46,16 @@ function windows::runPs1() {
   if ! command -v "${powershellCommand}" &>/dev/null; then
     powershellPath="${SYSTEMROOT:-C:\\Windows}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
     windows::convertPathToUnix "${powershellPath}"
-    powershellCommand="${RETURNED_VALUE}"
+    powershellCommand="${REPLY}"
     if [[ ! -f "${powershellCommand}" ]]; then
       if command -v "pwsh" &>/dev/null; then
         fs::getCommandPath "pwsh"
-        powershellCommand="${RETURNED_VALUE}"
+        powershellCommand="${REPLY}"
         if [[ ! -f "${powershellCommand}.exe" ]]; then
           core::fail "The PowerShell command is not available."
         fi
         windows::convertPathFromUnix "${powershellCommand}.exe"
-        powershellPath="${RETURNED_VALUE}"
+        powershellPath="${REPLY}"
       else
         core::fail "The PowerShell command is not available."
       fi
@@ -67,11 +67,11 @@ function windows::runPs1() {
   # there seem to be no simple way to capture the output of several commands...
   # we run the commands in a subprocess for which we capture the outputs
   windows::createTempFile
-  local stdoutFileWindows="${RETURNED_VALUE}"
-  local stdoutFile="${RETURNED_VALUE2}"
+  local stdoutFileWindows="${REPLY}"
+  local stdoutFile="${REPLY2}"
   windows::createTempFile
-  local stderrFileWindows="${RETURNED_VALUE}"
-  local stderrFile="${RETURNED_VALUE2}"
+  local stderrFileWindows="${REPLY}"
+  local stderrFile="${REPLY2}"
 
   # shellcheck disable=SC2016
   local script='
@@ -99,8 +99,8 @@ function windows::runPs1() {
     # if we need to run as admin, we need to create a script that will run the commands
     # and we run this script as an admin
     windows::createTempDirectory
-    local scriptFileWindows="${RETURNED_VALUE}\\valet-run-ps1-as-admin.ps1"
-    local scriptFileLinux="${RETURNED_VALUE2}/valet-run-ps1-as-admin.ps1"
+    local scriptFileWindows="${REPLY}\\valet-run-ps1-as-admin.ps1"
+    local scriptFileLinux="${REPLY2}/valet-run-ps1-as-admin.ps1"
     fs::writeToFile "${scriptFileLinux}" script
     # shellcheck disable=SC2016
     script='
@@ -113,8 +113,8 @@ function windows::runPs1() {
     log::debug "PowerShell command ⌜${powershellCommand}⌝, path ⌜${powershellPath}⌝."
     log::debug "PowerShell script run:"
     core::createSavedFilePath "script.ps1"
-    printf "%s" "${script}" >"${RETURNED_VALUE}"
-    log::printString "⌜${RETURNED_VALUE}⌝"
+    printf "%s" "${script}" >"${REPLY}"
+    log::printString "⌜${REPLY}⌝"
   fi
   "${powershellCommand}" -NoProfile -NonInteractive -Command "${script}" || exitCode=1
 
@@ -134,10 +134,10 @@ function windows::runPs1() {
   fi
 
   fs::readFile "${stdoutFile}"
-  local stdout="${RETURNED_VALUE//$'\r'/}"
+  local stdout="${REPLY//$'\r'/}"
   stdout="${stdout%[[:space:]]}"
   fs::readFile "${stderrFile}"
-  local stderr="${RETURNED_VALUE//$'\r'/}"
+  local stderr="${REPLY//$'\r'/}"
   stderr="${stderr//$'\r'/}"
 
   if [[ ${exitCode} -ne 0 && ${silent} != "true" && ${#stderr} -gt 0 ]]; then
@@ -145,8 +145,8 @@ function windows::runPs1() {
     log::errorTrace "${stderr}"
   fi
 
-  RETURNED_VALUE2="${stderr}"
-  RETURNED_VALUE="${stdout}"
+  REPLY2="${stderr}"
+  REPLY="${stdout}"
 
   return ${exitCode}
 }
@@ -172,7 +172,7 @@ function windows::startPs1Batch() {
 
   # save the original function before overriding it
   exe::invoke declare -f windows::runPs1
-  _IO_WINDOWS_POWERSHELL_FUNCTION="${RETURNED_VALUE//declare -? /}"
+  _IO_WINDOWS_POWERSHELL_FUNCTION="${REPLY//declare -? /}"
 
   # shellcheck disable=SC2317
   function windows::runPs1() {
@@ -192,8 +192,8 @@ function windows::startPs1Batch() {
 # - $?
 #   - 0 if the command was successful
 #   - 1 otherwise.
-# - ${RETURNED_VALUE}: The content of stdout.
-# - ${RETURNED_VALUE2}: The content of stderr.
+# - ${REPLY}: The content of stdout.
+# - ${REPLY2}: The content of stderr.
 #
 # ```bash
 # windows::startPs1Batch
@@ -203,8 +203,8 @@ function windows::startPs1Batch() {
 # ```
 function windows::endPs1Batch() {
   if [[ -z ${_IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS} ]]; then
-    RETURNED_VALUE=""
-    RETURNED_VALUE2=""
+    REPLY=""
+    REPLY2=""
     return 0
   fi
   # restore the original function
@@ -265,9 +265,9 @@ function windows::createLink() {
   local force="${3:-true}"
 
   fs::toAbsolutePath "${linkedPath}"
-  linkedPath="${RETURNED_VALUE}"
+  linkedPath="${REPLY}"
   fs::toAbsolutePath "${linkPath}"
-  linkPath="${RETURNED_VALUE}"
+  linkPath="${REPLY}"
 
   # check if the linked path exists
   if [[ ! -e "${linkedPath}" ]]; then
@@ -279,7 +279,7 @@ function windows::createLink() {
     # on windows, creating a link is costly so don't do it if it's already good
     if command -v ls &>/dev/null; then
       exe::invoke ls -l "${linkPath}"
-      if [[ ${RETURNED_VALUE%%$'\n'*} == *"${linkedPath}" ]]; then
+      if [[ ${REPLY%%$'\n'*} == *"${linkedPath}" ]]; then
         log::debug "The link ⌜${linkPath}⌝ already exists and points to ⌜${linkedPath}⌝."
         return 0
       fi
@@ -302,11 +302,11 @@ function windows::createLink() {
 
   # create link
   windows::convertPathFromUnix "${linkPath}"
-  linkPath="${RETURNED_VALUE}"
+  linkPath="${REPLY}"
   windows::convertPathFromUnix "${linkParentPath}"
-  linkParentPath="${RETURNED_VALUE}"
+  linkParentPath="${REPLY}"
   windows::convertPathFromUnix "${linkedPath}"
-  linkedPath="${RETURNED_VALUE}"
+  linkedPath="${REPLY}"
 
   log::debug "Creating a new link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝ using powershell."
   if [[ ${hardLink} == "true" ]]; then
@@ -335,7 +335,7 @@ function windows::createLink() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The Windows path.
+# - ${REPLY}: The Windows path.
 #
 # ```bash
 # windows::convertPathFromUnix "/path/to/file"
@@ -346,22 +346,22 @@ function windows::createLink() {
 function windows::convertPathFromUnix() {
   local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ ${path} =~ ^([a-zA-Z])":" ]]; then
-    RETURNED_VALUE="${path}"
+    REPLY="${path}"
     return 0
   fi
   if [[ ${path} != "/"* ]]; then
     fs::toAbsolutePath "${path}"
-    path="${RETURNED_VALUE}"
+    path="${REPLY}"
   fi
   if [[ ${path} =~ ^"/mnt/"([a-z])"/" || ${path} =~ ^"/"([a-z])"/" ]]; then
     path="${BASH_REMATCH[1]}:/${path/"${BASH_REMATCH[0]}"/}"
     path="${path^?}"
   elif command -v cygpath &>/dev/null; then
     exe::invoke cygpath -w "${path}"
-    RETURNED_VALUE="${RETURNED_VALUE%%$'\n'*}"
+    REPLY="${REPLY%%$'\n'*}"
     return 0
   fi
-  RETURNED_VALUE="${path//\//\\}"
+  REPLY="${path//\//\\}"
 }
 
 # ## windows::convertPathToUnix
@@ -373,7 +373,7 @@ function windows::convertPathFromUnix() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The unix path.
+# - ${REPLY}: The unix path.
 #
 # ```bash
 # windows::convertPathToUnix "C:\path\to\file"
@@ -383,7 +383,7 @@ function windows::convertPathFromUnix() {
 function windows::convertPathToUnix() {
   local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ ${path} == "/"* ]]; then
-    RETURNED_VALUE="${path}"
+    REPLY="${path}"
     return 0
   fi
   if [[ ${path} =~ ^([a-zA-Z])":" ]]; then
@@ -393,7 +393,7 @@ function windows::convertPathToUnix() {
       path="/${BASH_REMATCH[1],}${path:2}"
     fi
   fi
-  RETURNED_VALUE="${path//\\//}"
+  REPLY="${path//\\//}"
 }
 
 # ## windows::createTempFile
@@ -404,8 +404,8 @@ function windows::convertPathToUnix() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The Windows path.
-# - ${RETURNED_VALUE2}: The Unix path.
+# - ${REPLY}: The Windows path.
+# - ${REPLY2}: The Unix path.
 #
 # ```bash
 # windows::createTempFile
@@ -418,7 +418,7 @@ function windows::createTempFile() {
 
   if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
     windows::convertPathToUnix "${windowsTemporaryDirectory}"
-    GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
+    GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${REPLY}"
   fi
 
   local windowsPath linuxPath
@@ -427,12 +427,12 @@ function windows::createTempFile() {
     TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
     windowsPath="${windowsTemporaryDirectory}\\f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
     windows::convertPathToUnix "${windowsPath}"
-    linuxPath="${RETURNED_VALUE}"
+    linuxPath="${REPLY}"
     if [[ ! -f "${linuxPath}" ]]; then
       fs::createFileIfNeeded "${linuxPath}"
 
-      RETURNED_VALUE="${windowsPath}"
-      RETURNED_VALUE2="${linuxPath}"
+      REPLY="${windowsPath}"
+      REPLY2="${linuxPath}"
       return 0
     fi
   done
@@ -446,8 +446,8 @@ function windows::createTempFile() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: The Windows path.
-# - ${RETURNED_VALUE2}: The Unix path.
+# - ${REPLY}: The Windows path.
+# - ${REPLY2}: The Unix path.
 #
 # ```bash
 # windows::createTempDirectory
@@ -460,7 +460,7 @@ function windows::createTempDirectory() {
 
   if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
     windows::convertPathToUnix "${windowsTemporaryDirectory}"
-    GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${RETURNED_VALUE}"
+    GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${REPLY}"
   fi
 
   local windowsPath linuxPath
@@ -469,12 +469,12 @@ function windows::createTempDirectory() {
     TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
     windowsPath="${windowsTemporaryDirectory}\\d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
     windows::convertPathToUnix "${windowsPath}"
-    linuxPath="${RETURNED_VALUE}"
+    linuxPath="${REPLY}"
     if [[ ! -d "${linuxPath}" ]]; then
       fs::createDirectoryIfNeeded "${linuxPath}"
 
-      RETURNED_VALUE="${windowsPath}"
-      RETURNED_VALUE2="${linuxPath}"
+      REPLY="${windowsPath}"
+      REPLY2="${linuxPath}"
       return 0
     fi
   done
@@ -525,11 +525,11 @@ function windows::setEnvVar() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the value of the environment variable.
+# - ${REPLY}: the value of the environment variable.
 #
 # ```bash
 # windows::getEnvVar "MY_VAR"
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 function windows::getEnvVar() {
   local varName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -580,7 +580,7 @@ function windows::addToPath() {
   fi
 
   windows::convertPathFromUnix "${pathToAdd}"
-  pathToAdd="${RETURNED_VALUE}"
+  pathToAdd="${REPLY}"
 
   if [[ ${prepend} == "true" ]]; then
     local setNewPathStatement="\$newPath = '{0}{1}{2}' -f \$pathToAdd, [IO.Path]::PathSeparator, \$oldPath;"

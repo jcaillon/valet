@@ -67,12 +67,12 @@ SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBA
 # Returns:
 #
 # - $?: The exit code of the executable.
-# - ${RETURNED_VALUE}: The value to return
+# - ${REPLY}: The value to return
 #
 # ```bash
 # new-cool-lib::myFunction hi
 # _OPTION_THIRD_OPTION=10 new-cool-lib::myFunction hi true
-# echo "${RETURNED_VALUE}"
+# echo "${REPLY}"
 # ```
 #
 # > A note about the function.

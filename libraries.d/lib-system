@@ -35,11 +35,11 @@ function system::isRoot() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the name of the current OS: "darwin", "linux" or "windows".
+# - ${REPLY}: the name of the current OS: "darwin", "linux" or "windows".
 #
 # ```bash
 # system::getOs
-# local osName="${RETURNED_VALUE}"
+# local osName="${REPLY}"
 # ```
 function system::getOs() {
   local osName
@@ -49,7 +49,7 @@ function system::getOs() {
     msys*) osName="windows";;
     *) osName="unknown";;
   esac
-  RETURNED_VALUE="${osName}"
+  REPLY="${osName}"
 }
 
 # ## system::isWindows
@@ -115,14 +115,14 @@ function system::isDarwin() {
 #
 # Returns:
 #
-# - ${RETURNED_VALUE}: the CPU architecture of the current machine.
+# - ${REPLY}: the CPU architecture of the current machine.
 #
 # ```bash
 # system::getArchitecture
-# local architecture="${RETURNED_VALUE}"
+# local architecture="${REPLY}"
 # ```
 function system::getArchitecture() {
-  RETURNED_VALUE="${MACHTYPE%%-*}"
+  REPLY="${MACHTYPE%%-*}"
 }
 
 # ## system::getEnvVars
@@ -132,20 +132,20 @@ function system::getArchitecture() {
 #
 # Returns:
 #
-# - ${RETURNED_ARRAY[@]}: An array with the list of all the environment variables.
+# - ${REPLY_ARRAY[@]}: An array with the list of all the environment variables.
 #
 # ```bash
 # system::getEnvVars
-# for var in "${RETURNED_ARRAY[@]}"; do
+# for var in "${REPLY_ARRAY[@]}"; do
 #   printf '%s=%s\n' "${var}" "${!var}"
 # done
 # ```
 function system::getEnvVars() {
-  RETURNED_ARRAY=()
+  REPLY_ARRAY=()
   bash::getBuiltinOutput compgen -v
   local IFS=$'\n'
   # shellcheck disable=SC2206
-  RETURNED_ARRAY+=(${RETURNED_VALUE})
+  REPLY_ARRAY+=(${REPLY})
 }
 
 # ## system::addToPath
@@ -201,7 +201,7 @@ function system::addToPath() {
       ;;
     esac
 
-    if [[ -f "${configFile}" ]] && fs::readFile "${configFile}" && [[ "${RETURNED_VALUE}" == *"${configContent}"* ]]; then
+    if [[ -f "${configFile}" ]] && fs::readFile "${configFile}" && [[ "${REPLY}" == *"${configContent}"* ]]; then
       log::info "The directory ⌜${pathToAdd}⌝ is already in the PATH for ⌜${shellName}⌝ shell."
       continue
     fi

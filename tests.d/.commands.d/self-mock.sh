@@ -45,7 +45,7 @@ arguments:
     - show-help
 ---"
 function selfMock1() {
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   case "${action:-}" in
@@ -83,13 +83,13 @@ function selfMock1() {
     }
     local tmp1 tmp2 tmp3 tmp4
     fs::createTempFile
-    tmp1="${RETURNED_VALUE}"
+    tmp1="${REPLY}"
     fs::createTempFile
-    tmp2="${RETURNED_VALUE}"
+    tmp2="${REPLY}"
     fs::createTempDirectory
-    tmp3="${RETURNED_VALUE}"
+    tmp3="${REPLY}"
     fs::createTempDirectory
-    tmp4="${RETURNED_VALUE}"
+    tmp4="${REPLY}"
     log::info "Created temp file: ${tmp1//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
     log::info "Created temp file: ${tmp2//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
     log::info "Created temp directory: ${tmp3//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}."
@@ -173,7 +173,7 @@ examples:
 ---"
 function selfMock2() {
   local -a more
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   log::info "Option 1 (option1): ${option1:-}."
@@ -209,7 +209,7 @@ description: |-
   If so, it will require the user to enter the sudo password and use sudo inside the command
 ---"
 function selfMock3() {
-  command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   ${SUDO} whoami

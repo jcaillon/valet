@@ -13,7 +13,7 @@ function main() {
   fi
 
   fs::createTempDirectory
-  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-build.sh" --output "${RETURNED_VALUE}" --core-only
+  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-build.sh" --output "${REPLY}" --core-only
 }
 
 main
