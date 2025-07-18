@@ -69,9 +69,18 @@ function coproc::run() {
   # Start the coproc
   eval "{ coproc ${coprocVarName} { coproc_program \"${initCommand}\" \"${loopCommand}\" \"${onMessageCommand}\" \"${endCommand}\" ${waitForReadiness} ${keepOnlyLastMessage} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
 
+  local -i loopNumber=0
+  while [[  ${loopNumber} -lt 500 && ! -v "${coprocVarName}_PID" ]]; do
+    sleep 0.01
+    loopNumber+=1
+  done
+
   # get the PID (store it in another var because _PID gets deleted once the coproc ends)
   eval "local pid=\${${coprocVarName}_PID}"
   GLOBAL_BACKGROUND_PIDS+=("${pid}")
+
+  # tell the coproc to resume (it is waiting for the main thread to retrieve its PID)
+  coproc::sendMessage "${coprocVarName}" ":"
 
   # wait for readiness if requested
   if [[ ${waitForReadiness} == "true" ]]; then
@@ -98,6 +107,12 @@ function coproc_program() {
 
   # we are inside a coproc, register the correct traps
   trap::registerSubshell
+
+  # wait for the main process to retrieve our PID
+  if ! kill -0 "${GLOBAL_PROGRAM_MAIN_PID}" 2>/dev/null || ! IFS=$'\0' read -rd $'\0' REPLY; then
+    log::debug "Main process is not running, exiting coproc."
+    return 0
+  fi 
 
   # Run the initialization command
   if ! eval "${initCommand}"; then
