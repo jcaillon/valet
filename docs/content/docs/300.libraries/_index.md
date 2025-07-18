@@ -65,6 +65,7 @@ You can also browse the list of available libraries and their functions here;
   {{< card link="bash" icon="code" title="bash" subtitle="Extend bash capabilities." >}}
   {{< card link="benchmark" icon="trending-up" title="benchmark" subtitle="Benchmark bash functions." >}}
   {{< card link="command" icon="ticket" title="command" subtitle="Functions to be used in your commands." >}}
+  {{< card link="coproc" icon="arrow-path-rounded-square" title="coproc" subtitle="Functions that simplify and robustify the use of coprocesses in bashs." >}}
   {{< card link="core" icon="star" title="core" subtitle="The core functions of Valet." >}}
   {{< card link="curl" icon="cloud-download" title="curl" subtitle="Wrapper functions around curl." >}}
   {{< card link="exe" icon="star" title="exe" subtitle="Run commands and executables." >}}

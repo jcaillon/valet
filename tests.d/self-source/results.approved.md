@@ -23,6 +23,7 @@ source array
 source bash
 source benchmark
 source command
+source coproc
 source curl
 source exe
 source fs

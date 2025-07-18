@@ -2,12 +2,13 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
+
 # ## bash::runInSubshell
 #
-# This functions a list of commands in a subshell.
+# This functions runs a command in a subshell.
   #
-# - $@: **commands** _as string_:
-#       The list of commands to run in the subshell.
+# - $@: **command with args** _as string_:
+#       The command to run in the subshell.
 # - ${_OPTION_EXIT_ON_FAIL} _as bool_:
 #       (optional) If set to true, the main program will exit with code 1 if the subshell fails.
 #

@@ -274,7 +274,7 @@ RETURNED_VALUE4='4'
 
 ❯ `terminal::setRawMode`
 
-stty called with `icrnl -inlcr -ixon -ixoff nl0 cr0 tab0 ff0 -onlret -icanon -echo -echok -echonl -echoe -echoke -ctlecho -tostop erase ^B werase ^W min 1 time 0`
+stty called with `-icrnl -inlcr -ixon -ixoff nl0 cr0 tab0 ff0 -onlret -icanon -echo -echok -echonl -echoe -echoke -ctlecho -tostop erase ^B werase ^W min 1 time 0`
 
 ❯ `terminal::restoreSettings`
 

@@ -675,17 +675,6 @@ function terminal::rebindKeymap() {
     done
   done
 
-  # normalKeys="\`~!@#$%^&*()-_=+[{]}\\|'\",;:<.>/?"
-  # modifiers=(
-  #   "ALT+" "\e"
-  # )
-  # for((index=0;index<${#normalKeys};index++)); do
-  #   for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
-  #     key="${normalKeys:index:1}"
-  #     bind -x "\"${modifiers[modeIndex + 1]}\\${key}\": ${callBackFunction} ${modifiers[modeIndex]}${key^^}"
-  #   done
-  # done
-
   # VT sequences + xterm sequences
   local specialKeys=(
     "[1?~" "HOME"
@@ -816,8 +805,6 @@ function terminal::rebindKeymap() {
 
   bind -x '"\b": '"${callBackFunction}"' CTRL+BACKSPACE'
   bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE'
-
-  # bind -x '"TAB": '"${callBackFunction}"' TAB'
 }
 
 # ## terminal::restoreBindings

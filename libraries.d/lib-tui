@@ -11,14 +11,18 @@ function tui::startMainLoop() {
   # before starting to wait for inputs, we clear up the key pressed
   terminal::clearKeyPressed
   terminal::rerouteLogs
-
   tui_startKeyPressListener
+
+  # shellcheck disable=SC2034
+  GLOBAL_WARN_ON_INTERRUPT_DISABLED=true
 
   local -i nbCoprocRestart=0
   local IFS=" "
 
   # main loop
   while [[ -t ${GLOBAL_FD_TUI} ]]; do
+
+    # restart coproc if it is not running
     if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER_PID ]]; then
       if (( nbCoprocRestart > 3 )); then
         log::error "Key press listener coproc is failing to start, check the logs for errors."
@@ -28,31 +32,21 @@ function tui::startMainLoop() {
       tui_startKeyPressListener
       nbCoprocRestart+=1
     fi
-    # read the key pressed from the key press listener coproc
-    if IFS=$'\0' read -rd $'\0' -u "${_TUI_COPROC_KEY_PRESS_LISTENER[0]}" LAST_KEY_PRESSED; then
-      if [[ ${LAST_KEY_PRESSED} == "!CTRL+C" ]]; then
-        log::info "CTRL+C pressed, exiting the TUI main loop."
-        break
-      fi
 
+    # read the key pressed from the key press listener coproc
+    if { IFS=$'\0' read -rd $'\0' -u "${_TUI_COPROC_KEY_PRESS_LISTENER[0]}" LAST_KEY_PRESSED; } 2>/dev/null; then
       printf "%s\n" "Received key press: ${LAST_KEY_PRESSED}" >&"${GLOBAL_FD_TUI}"
     fi
   done
 
   tui_stopKeyPressListener
-
   terminal::restoreLogs
-
-  core::dump
-  if [[ -t 0 ]]; then
-    log::warning "Restoring terminal settings."
-  fi
   terminal::restoreSettings
 }
 
 function tui_startKeyPressListener() {
   # if the key press listener is not already running, we start it
-  if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER ]]; then
+  if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER ]]; then  
     if [[ ! -v _TUI_USER_INPUT_FD ]]; then
       exec {_TUI_USER_INPUT_FD}<&0
     fi
@@ -79,7 +73,7 @@ function tui_keyPressListener() {
   # rebind some keys to call the callback function
   terminal::rebindKeymap tui_keyPressListener_handleKeyBinding
 
-  while [[ -t ${_TUI_USER_INPUT_FD} ]] && kill -0 "${GLOBAL_PROGRAM_MAIN_PID}"; do
+  while [[ -t ${_TUI_USER_INPUT_FD} ]] && kill -0 "${GLOBAL_PROGRAM_MAIN_PID}" 2>/dev/null; do
     if terminal::waitForKeyPress -u "${_TUI_USER_INPUT_FD}"; then
       printf "%s\0" "${LAST_KEY_PRESSED}"
     fi
@@ -89,8 +83,8 @@ function tui_keyPressListener() {
 function tui_keyPressListener_handleKeyBinding() {
   # make sure we see any error happening in this function, since it is
   # executed as a callback of the readline process and we redirected the stderr
-  # to /dev/null to avoid a bug with readline (see terminal::waitForKeyPress)
+  # to /dev/null to avoid a bug with readline (see tui_waitForKeyPress)
   # exec 2>&"${GLOBAL_FD_LOGx}"
 
-  printf "!%q\0" "${1}"
+  printf "!%s\0" "${1}"
 }
