@@ -69,8 +69,8 @@ function coproc::run() {
   # Start the coproc
   eval "{ coproc ${coprocVarName} { coproc_program \"${initCommand}\" \"${loopCommand}\" \"${onMessageCommand}\" \"${endCommand}\" ${waitForReadiness} ${keepOnlyLastMessage} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
 
-  # get the PID
-  local -n pid="${coprocVarName}_PID"
+  # get the PID (store it in another var because _PID gets deleted once the coproc ends)
+  eval "local pid=\${${coprocVarName}_PID}"
   GLOBAL_BACKGROUND_PIDS+=("${pid}")
 
   # wait for readiness if requested
