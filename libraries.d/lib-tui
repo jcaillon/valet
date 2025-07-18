@@ -14,13 +14,19 @@ function tui::startMainLoop() {
 
   tui_startKeyPressListener
 
+  local -i nbCoprocRestart=0
   local IFS=" "
 
   # main loop
   while [[ -t ${GLOBAL_FD_TUI} ]]; do
     if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER_PID ]]; then
+      if (( nbCoprocRestart > 3 )); then
+        log::error "Key press listener coproc is failing to start, check the logs for errors."
+        break
+      fi
       log::warning "Key press listener coproc is not already running, re-starting it."
       tui_startKeyPressListener
+      nbCoprocRestart+=1
     fi
     # read the key pressed from the key press listener coproc
     if IFS=$'\0' read -rd $'\0' -u "${_TUI_COPROC_KEY_PRESS_LISTENER[0]}" LAST_KEY_PRESSED; then

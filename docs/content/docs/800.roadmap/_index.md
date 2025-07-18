@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- handle SIGTSTP/SIGCONT to pause and resume the TUI session. This is useful when we want to run a command in the background and then come back to the TUI.
 - Support bracketed paste mode: <https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Bracketed-Paste-Mode>
 - Support mouse events: <https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking>
 - rewrite the bash::runInParallel to use coproc instead of jobs. Allow to run the tasks sequentially if number in parallel is set to 1. Use this in the self-test to replace the subshell.

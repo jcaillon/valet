@@ -118,11 +118,11 @@ function terminal::setRawMode() {
       core::fail "stdin is not a terminal, cannot set raw mode."
     fi
     # we try to set specific settings and if it fails, we just set raw mode
-    stty icrnl -inlcr -ixon -ixoff \
+    stty -icrnl -inlcr -ixon -ixoff \
       nl0 cr0 tab0 ff0 -onlret \
       -icanon -echo -echok -echonl -echoe -echoke -ctlecho -tostop \
       erase ^B werase ^W \
-      min 1 time 0 &>/dev/null || \
+      min 1 time 0 || \
       stty raw -echo || core::fail "Failed to set the terminal in raw mode, check stty version."
     _TERMINAL_RAW_MODE_ENABLED=true
   fi
@@ -622,6 +622,9 @@ function terminal::rebindKeymap() {
     bind -p >"${_TERMINAL_SAVED_BINDINGS_FILE}" 2>/dev/null
   fi
 
+  # use emacs style line editing
+  set -o emacs
+
   # remove all existing bindings except the self-insert ones
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
   fs::readFile "${_TERMINAL_SAVED_BINDINGS_FILE}"
@@ -635,32 +638,30 @@ function terminal::rebindKeymap() {
     fi
     key="${line%% *}"
     key="${key//\"/}"
-    bind -r "${key%:}" &>/dev/null
+    bind -r "${key%:}"
   done
+
+
+  # some other default values to ensure we get the right behavior
+  bind 'set bind-tty-special-chars on'
+  bind 'set echo-control-characters on'
+  bind 'set editing-mode emacs'
+  bind 'set enable-keypad on'
+  bind 'set output-meta off'
+  bind 'set show-mode-in-prompt off'
 
   # make sure that readline will not wait the default 500ms after a special key (like \e ESC) is pressed
   # to read a longer sequence of keys
-  bind 'set keyseq-timeout 1' &>/dev/null
-
-  # some other default values to ensure we get the right behavior
-  bind 'set bind-tty-special-chars on' &>/dev/null
-  bind 'set echo-control-characters on' &>/dev/null
-  bind 'set editing-mode emacs' &>/dev/null
-  bind 'set enable-keypad on' &>/dev/null
-  bind 'set output-meta off' &>/dev/null
-  bind 'set show-mode-in-prompt off' &>/dev/null
+  bind 'set keyseq-timeout 1'
 
   # add the one we are interested in
 
   # Escape key
-  bind -x '"\e": '"${callBackFunction}"' ESC' &>/dev/null
-  bind -x '"\e\e": '"${callBackFunction}"' ESC' &>/dev/null
-  bind -x '"\e\e\e": '"${callBackFunction}"' ESC' &>/dev/null
-  bind -x '"ESC": '"${callBackFunction}"' ESC' &>/dev/null
-  bind -x '"ESCAPE": '"${callBackFunction}"' ESC' &>/dev/null
+  bind -x '"\e": '"${callBackFunction}"' ESC'
+  bind -x '"\e\e": '"${callBackFunction}"' ESC'
+  bind -x '"\e\e\e": '"${callBackFunction}"' ESC'
 
   # for each normal key, bind it with the different modifiers
-  # local normalKeys="abcdefghijklmnopqrstuvwxyz1234567890\`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?"
   local normalKeys="abcdefghijklmnopqrstuvwxyz1234567890"
   local -a modifiers=(
     "CTRL+" "\C-"
@@ -670,9 +671,20 @@ function terminal::rebindKeymap() {
   for((index=0;index<${#normalKeys};index++)); do
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
       key="${normalKeys:index:1}"
-      bind -x "\"${modifiers[modeIndex + 1]}${key}\": ${callBackFunction} ${modifiers[modeIndex]}\\${key^^}" &>/dev/null
+      bind -x "\"${modifiers[modeIndex + 1]}${key}\": ${callBackFunction} ${modifiers[modeIndex]}${key^^}"
     done
   done
+
+  # normalKeys="\`~!@#$%^&*()-_=+[{]}\\|'\",;:<.>/?"
+  # modifiers=(
+  #   "ALT+" "\e"
+  # )
+  # for((index=0;index<${#normalKeys};index++)); do
+  #   for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+  #     key="${normalKeys:index:1}"
+  #     bind -x "\"${modifiers[modeIndex + 1]}\\${key}\": ${callBackFunction} ${modifiers[modeIndex]}${key^^}"
+  #   done
+  # done
 
   # VT sequences + xterm sequences
   local specialKeys=(
@@ -716,10 +728,10 @@ function terminal::rebindKeymap() {
   for((index=0;index<${#specialKeys[@]};index+=2)); do
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
       key="${specialKeys[index]}"
-      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}"
       # I have noticed that sometimes the terminal sends the sequence without the \e...
       # so we need to bind it without the \e as well
-      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}" &>/dev/null
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}"
     done
   done
 
@@ -735,7 +747,7 @@ function terminal::rebindKeymap() {
     "[?R" "F3"
     "[?S" "F4"
     "[?I" "TAB"
-    "[?M" "NEWLINE"
+    "[?M" "ENTER"
     "[?j" "*"
     "[?k" "+"
     "[?l" ","
@@ -765,42 +777,47 @@ function terminal::rebindKeymap() {
   for((index=0;index<${#specialKeys2[@]};index+=2)); do
     for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
       key="${specialKeys2[index]}"
-      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}"
       # I have noticed that sometimes the terminal sends the sequence without the \e...
       # so we need to bind it without the \e as well
-      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}"
       # We also handle the case where SS3 (\eO) is sent instead of CSI (\e[)
       key="${key//[/O}"
-      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
-      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}" &>/dev/null
+      bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}"
+      bind -x "\"${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}"
     done
   done
 
   # check http://www.afterstep.org/keyboard.html
   # special key bindings
-  bind -x '"\C-x\C-a": '"${callBackFunction}"' CTRL+ENTER' &>/dev/null
-  bind 'NEWLINE: "\C-x\C-a"' &>/dev/null
+  bind -x '"\C-x\C-a": '"${callBackFunction}"' CTRL+ENTER'
+  bind 'NEWLINE: "\C-x\C-a"'
+  bind 'LFD: "\C-x\C-a"'
 
-  bind -x '"\C-x\C-b": '"${callBackFunction}"' ENTER' &>/dev/null
-  bind 'RET:"\C-x\C-b"' &>/dev/null
-  bind 'RETURN:"\C-x\C-b"' &>/dev/null
-  bind '"\r":"\C-x\C-b"' &>/dev/null
-  
-  # bind -x '"\C-x\C-c": '"${callBackFunction}"' SHIFT+ENTER' &>/dev/null
-  # bind 'LFD: "\C-x\C-c"' &>/dev/null
+  bind -x '"\C-x\C-b": '"${callBackFunction}"' ENTER'
+  bind 'RET:"\C-x\C-b"'
+  bind 'RETURN:"\C-x\C-b"'
 
-  bind -x '"DEL": '"${callBackFunction}"' DEL' &>/dev/null
-  bind -x '"\d": '"${callBackFunction}"' DEL' &>/dev/null
+  bind -x '"\C-x\C-c": '"${callBackFunction}"' TAB'
+  bind 'TAB:"\C-x\C-c"'
+  bind -x '"\t": '"${callBackFunction}"' TAB'
 
-  bind -x '"\177": '"${callBackFunction}"' BACKSPACE' &>/dev/null
-  bind -x '"RUBOUT": '"${callBackFunction}"' BACKSPACE' &>/dev/null
-  bind -x '"\C-?": '"${callBackFunction}"' BACKSPACE' &>/dev/null
+  bind -x '"\C-x\C-d": '"${callBackFunction}"' ESC'
+  bind 'ESC:"\C-x\C-d"'
+  bind 'ESCAPE:"\C-x\C-d"'
 
-  bind -x '"\b": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
-  bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE' &>/dev/null
+  bind -x '"\C-x\C-e": '"${callBackFunction}"' DEL'
+  bind 'DEL:"\C-x\C-e"'
+  bind -x '"\d": '"${callBackFunction}"' DEL'
 
-  bind -x '"\t": '"${callBackFunction}"' TAB' &>/dev/null
-  bind -x '"TAB": '"${callBackFunction}"' TAB' &>/dev/null
+  bind -x '"\C-x\C-f": '"${callBackFunction}"' BACKSPACE'
+  bind 'RUBOUT:"\C-x\C-f"'
+  bind -x '"\177": '"${callBackFunction}"' BACKSPACE'
+
+  bind -x '"\b": '"${callBackFunction}"' CTRL+BACKSPACE'
+  bind -x '"\023": '"${callBackFunction}"' CTRL+BACKSPACE'
+
+  # bind -x '"TAB": '"${callBackFunction}"' TAB'
 }
 
 # ## terminal::restoreBindings
@@ -832,11 +849,11 @@ function terminal::restoreBindings() {
     fi
     key="${line%% *}"
     key="${key//\"/}"
-    bind -r "${key%:}" &>/dev/null
+    bind -r "${key%:}"
   done
 
   # restore the default bindings
-  bind -f "${_TERMINAL_SAVED_BINDINGS_FILE}" &>/dev/null
+  bind -f "${_TERMINAL_SAVED_BINDINGS_FILE}"
 }
 
 # ## terminal::clearKeyPressed
