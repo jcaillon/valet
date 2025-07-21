@@ -8,13 +8,15 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<sub
 source "libraries.d/core"
 include tui coproc
 
+GLOBAL_BACKGROUND_PIDS=(1 4 567 9876 9876 456 1234 5678 12345 67890)
 
-log::info "Starting TUI main loop script."
-(
-  log::info "Sourcing core libraries."
-  (
-    log::warning "Warning: This is a nested subshell."
-  )
-)
+pid=456
 
-declare -p GLOBAL_PID_TO_PNAME
+for i in "${!GLOBAL_BACKGROUND_PIDS[@]}"; do
+  if [[ "${GLOBAL_BACKGROUND_PIDS[i]}" == "${pid}" ]]; then
+    unset 'GLOBAL_BACKGROUND_PIDS[i]'
+    break
+  fi
+done
+
+declare -p GLOBAL_BACKGROUND_PIDS

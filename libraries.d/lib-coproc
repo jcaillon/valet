@@ -280,3 +280,41 @@ function coproc::isRunning() {
     return 1
   fi
 }
+
+# ## coproc::kill
+#
+# This function kills a coproc.
+#
+# - $1: **coproc variable name** _as string_:
+#       The variable name to use for the coproc.
+#
+# ```bash
+# coproc::kill "myCoproc"
+# ```
+function coproc::kill() {
+  local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  if [[ ! -v "${coprocVarName}_PID" ]]; then
+    return 0
+  fi
+
+  eval "local pid=\${${coprocVarName}_PID}"
+
+  if kill "${pid}" &>/dev/null; then
+    coproc_removePidFromBackgroundPids "${pid}"
+    unset -v "${coprocVarName}" "${coprocVarName}_PID"
+  fi
+}
+
+# Remove the coproc pid from GLOBAL_BACKGROUND_PIDS
+function coproc_removePidFromBackgroundPids() {
+  local -i pid="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  local index
+  for index in "${!GLOBAL_BACKGROUND_PIDS[@]}"; do
+    if [[ "${GLOBAL_BACKGROUND_PIDS[index]}" == "${pid}" ]]; then
+      unset 'GLOBAL_BACKGROUND_PIDS[index]'
+      break
+    fi
+  done
+}

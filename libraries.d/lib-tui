@@ -39,6 +39,8 @@ function tui::startMainLoop() {
     fi
   done
 
+  unset -v GLOBAL_WARN_ON_INTERRUPT_DISABLED
+
   tui_stopKeyPressListener
   terminal::restoreLogs
   terminal::restoreSettings

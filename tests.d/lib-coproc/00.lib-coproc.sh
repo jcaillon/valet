@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-include coproc array
+include coproc array bash
 
 function main() {
   simpleTests
@@ -10,7 +10,6 @@ function main() {
 
 # shellcheck disable=SC2034
 function simpleTests() {
-  test::title "✅ Testing coproc::run"
 
   function initCommand() {
     log::info "Running init command in coproc (${coprocVarName})."
@@ -29,12 +28,21 @@ function simpleTests() {
     log::info "Running end command in coproc (${coprocVarName})."
   }
 
+
+  test::title "✅ Testing coproc::run with a simple init command"
+
   test::prompt coproc::run _COPROC_1 initCommand false willNotBeUsed ":"
   test::prompt coproc::wait _COPROC_1
   coproc::run _COPROC_1 initCommand false willNotBeUsed ":"
   local coproc1Pid="${REPLY}"
+  if (( coproc1Pid <= 0 )); then
+    test::fail "The coproc ⌜_COPROC_1⌝ is not running."
+  fi
   coproc::wait _COPROC_1
   test::flush
+
+
+  test::title "✅ Testing coproc::sendMessage, coproc::isRunning and coproc::wait"
 
   test::prompt coproc::run _COPROC_2 initCommand loopCommand onMessageCommand endCommand
   test::prompt coproc::isRunning _COPROC_2
@@ -53,6 +61,9 @@ function simpleTests() {
   fi
   test::flush
 
+
+  test::title "✅ Testing coproc::run with wait for readiness"
+
   test::prompt _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_3 initCommand false false true
   test::prompt coproc::wait _COPROC_3
   _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_3 initCommand false false true
@@ -65,6 +76,27 @@ function simpleTests() {
     || ! array::contains GLOBAL_BACKGROUND_PIDS coproc3Pid; then
     test::fail "The coproc PIDs are not in the GLOBAL_BACKGROUND_PIDS array."
   fi
+
+
+  test::title "✅ Testing coproc::kill"
+
+  function loopCommand() {
+    bash::sleep 0
+  }
+
+  test::prompt _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_4 initCommand loopCommand : :
+  test::prompt coproc::kill _COPROC_4
+  _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_4 initCommand loopCommand : :
+  local coproc4Pid="${REPLY}"
+  local IFS=" "
+  if [[ ${GLOBAL_BACKGROUND_PIDS[*]} != *"${coproc4Pid}"* ]]; then
+    test::fail "The coproc ⌜_COPROC_4⌝ is not in the GLOBAL_BACKGROUND_PIDS array."
+  fi
+  coproc::kill _COPROC_4
+  if [[ ${GLOBAL_BACKGROUND_PIDS[*]} == *"${coproc4Pid}"* ]]; then
+    test::fail "The coproc ⌜_COPROC_4⌝ is still in the GLOBAL_BACKGROUND_PIDS array."
+  fi
+  test::flush
 }
 
 
@@ -94,17 +126,17 @@ function completeTest() {
     return 0
   }
 
-  test::prompt coproc::run _COPROC_4 : realisticLoop realisticOnMessage :
-  coproc::run _COPROC_4 : realisticLoop realisticOnMessage :
+  test::prompt coproc::run _COPROC_9 : realisticLoop realisticOnMessage :
+  coproc::run _COPROC_9 : realisticLoop realisticOnMessage :
 
   local -i messageSent=0
-  while coproc::receiveMessage _COPROC_4 && [[ ${REPLY} != "stop" ]]; do
-    printf "%s\0%s\0" "decoy" "message ${messageSent}" >&"${_COPROC_4[1]}"
+  while coproc::receiveMessage _COPROC_9 && [[ ${REPLY} != "stop" ]]; do
+    printf "%s\0%s\0" "decoy" "message ${messageSent}" >&"${_COPROC_9[1]}"
     messageSent+=1
   done
-  coproc::sendMessage _COPROC_4 "stop"
+  coproc::sendMessage _COPROC_9 "stop"
 
-  coproc::wait _COPROC_4
+  coproc::wait _COPROC_9
   test::flush
 }
 

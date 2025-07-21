@@ -292,6 +292,7 @@ function bash::injectCodeInFunction() {
 #
 # - $1: **time** _as float_:
 #       the time to sleep in seconds (can be a float)
+#       If 0, waits indefinitely.
 #
 # ```bash
 # bash::sleep 1.5
@@ -300,10 +301,15 @@ function bash::injectCodeInFunction() {
 # > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 function bash::sleep() {
   local timeout="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  if [[ ! -v _BASH_SLEEP_FD ]]; then
-    exec {_BASH_SLEEP_FD}<>/dev/udp/127.0.0.1/0
+  if [[ ! -v GLOBAL_FD_BASH_SLEEP ]]; then
+    exec {GLOBAL_FD_BASH_SLEEP}<>/dev/udp/127.0.0.1/0
   fi
-  read -rt "${timeout}" -u "${_BASH_SLEEP_FD}" || :
+  if [[ ${timeout} == "0" ]]; then
+    # wait indefinitely
+    read -r -u "${GLOBAL_FD_BASH_SLEEP}" || :
+    return 0
+  fi
+  read -rt "${timeout}" -u "${GLOBAL_FD_BASH_SLEEP}" || :
 }
 
 # ## bash::readStdIn
@@ -319,7 +325,6 @@ function bash::sleep() {
 # bash::readStdIn && local stdIn="${REPLY}"
 # ```
 function bash::readStdIn() {
-  REPLY=""
   local IFS=''
   if read -t 0 -u 0 -rd ''; then
     read -u 0 -rd '' REPLY || [[ -n ${REPLY} ]] || REPLY=""
