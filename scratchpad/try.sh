@@ -1,24 +1,20 @@
 #!/usr/bin/env bash
-fd1=2
+# shellcheck disable=SC1091
+export VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT=false
+export VALET_LOG_LEVEL="debug"
+export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<subshell>{1s}]   <colorFaded><sourceFile>{-5s}:<line>{-4s}<colorDefault>  <levelColor><level>{-4s} <colorDefault> <message>"
 
-exec {FD}>&${fd1}
 
-echo "This is a test" >&${FD}
+source "libraries.d/core"
+include tui coproc
 
-exec {FD2}>&${FD}
-exec {FD3}>&${FD}
 
-echo "This is a test" >&${FD2}
-echo "This is a test" >&${FD3}
+log::info "Starting TUI main loop script."
+(
+  log::info "Sourcing core libraries."
+  (
+    log::warning "Warning: This is a nested subshell."
+  )
+)
 
-for fd in /proc/"${BASHPID}"/fd/*; do
-  listOfFds+="${fd} -> $(readlink -f "${fd}")"$'\n'
-done
-
-echo "${listOfFds}"
-
-exec {FD4}>"tmp/file"
-echo "This is a test1" >&${FD4}
-echo "This is a test2" >>"tmp/file"
-echo "This is a test3" >&${FD4}
-echo "This is a test4" >>"tmp/file"
+declare -p GLOBAL_PID_TO_PNAME

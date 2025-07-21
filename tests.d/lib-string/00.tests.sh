@@ -4,6 +4,7 @@
 source string
 
 function main() {
+  test_string::numberToUniqueId
   test_string::removeTextFormatting
   test_string::convertToHex
   test_string::removeSgrCodes
@@ -22,6 +23,14 @@ function main() {
   test_string::highlight
   test_string::head
   test_string::doForEachLine
+}
+
+function test_string::numberToUniqueId() {
+  test::title "✅ Testing string::numberToUniqueId"
+
+  for i in 345 2000 8976 12003 34567; do
+    test::func string::numberToUniqueId "${i}"
+  done
 }
 
 function test_string::removeTextFormatting() {

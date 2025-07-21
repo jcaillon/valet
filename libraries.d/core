@@ -1261,7 +1261,9 @@ function log::parseLogPattern() {
       ;;
     processName)
       printfFormat="%${formatSpecifier:-"-5d"}"
-      REPLY4+=$'\n'"local processName"$'\n'"if [[ \${BASHPID} == \"${BASHPID}\" ]]; then processName=\"main\"; else processName=\"\${BASHPID}\"; fi"
+      # shellcheck disable=SC2034
+      declare -g -A GLOBAL_PID_TO_PNAME
+      REPLY4+=$'\n'"local processName=\${GLOBAL_PID_TO_PNAME[\${BASHPID}]:-}; if [[ -z \${processName} ]]; then if [[ \${BASHPID} == \"${BASHPID}\" ]]; then GLOBAL_PID_TO_PNAME[\${BASHPID}]=\"main\"; else string::numberToUniqueId \"\${BASHPID}\"; GLOBAL_PID_TO_PNAME[\${BASHPID}]=\"\${REPLY}\"; fi; processName=\${GLOBAL_PID_TO_PNAME[\${BASHPID}]}; fi"
       log_setPrintfArgumentFromFormat "processName"
       ;;
     subshell)
@@ -1801,7 +1803,47 @@ function string::highlight() {
   done
 }
 
-# ## string::getFuzzySearchRegexFromSearchString
+# ## string::numberToUniqueId
+#
+# Converts a number into a unique and human readable string of the same length.
+#
+# - $1: **number** _as int_:
+#       The number to convert.
+#
+# Returns:
+#
+# - ${REPLY}: the unique string.
+#
+# ```bash
+# string::numberToUniqueId 12345
+# echo "${REPLY}"
+# ```
+function string::numberToUniqueId() {
+  local number="${1}"
+
+  # we convert numbers
+  local vowels="aeiou"
+  local consonants="bcdfmnprstgjklvwxz"
+  REPLY=""
+  local toConvert
+  local -i index=0
+  while (( index < ${#number} )); do
+    toConvert="${number:index:2}"
+    if (( ${#toConvert} == 2 )); then
+      REPLY+="${consonants:$(( toConvert / 5 - 2 )):1}${vowels:$(( toConvert % 5 )):1}"
+    elif (( ${#toConvert} == 1 )); then
+      REPLY+="${consonants:toConvert:1}"
+    fi
+    index+=2
+  done
+}
+
+
+#===============================================================
+# >>> Array utilities
+#===============================================================
+
+# ## regex::getFuzzySearchRegexFromSearchString
 #
 # Allows to get a regex that can be used to fuzzy search a string.
 # the -> '([^t]*)(t[^h]*h[^e]*e)'
@@ -1814,7 +1856,7 @@ function string::highlight() {
 # - ${_STRING_FUZZY_FILTER_REGEX}: the regex
 #
 # ```bash
-# string::getFuzzySearchRegexFromSearchString SEARCH_STRING
+# regex::getFuzzySearchRegexFromSearchString SEARCH_STRING
 # echo "${_STRING_FUZZY_FILTER_REGEX}"
 # ```
 function regex::getFuzzySearchRegexFromSearchString() {

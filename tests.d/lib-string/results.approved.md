@@ -2,6 +2,48 @@
 
 ## Test script 00.tests
 
+### ✅ Testing string::numberToUniqueId
+
+❯ `string::numberToUniqueId 345`
+
+Returned variables:
+
+```text
+REPLY='mun'
+```
+
+❯ `string::numberToUniqueId 2000`
+
+Returned variables:
+
+```text
+REPLY='daxa'
+```
+
+❯ `string::numberToUniqueId 8976`
+
+Returned variables:
+
+```text
+REPLY='wule'
+```
+
+❯ `string::numberToUniqueId 12003`
+
+Returned variables:
+
+```text
+REPLY='bixaf'
+```
+
+❯ `string::numberToUniqueId 34567`
+
+Returned variables:
+
+```text
+REPLY='muter'
+```
+
 ### ✅ Testing string::removeTextFormatting
 
 ❯ `string::removeTextFormatting _myString`

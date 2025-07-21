@@ -69,6 +69,7 @@ function coproc::run() {
   # Start the coproc
   eval "{ coproc ${coprocVarName} { coproc_program \"${initCommand}\" \"${loopCommand}\" \"${onMessageCommand}\" \"${endCommand}\" ${waitForReadiness} ${keepOnlyLastMessage} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
 
+  # wait for pid variable to be set by bash (we should never enter the loop)
   local -i loopNumber=0
   while [[  ${loopNumber} -lt 500 && ! -v "${coprocVarName}_PID" ]]; do
     sleep 0.01
@@ -76,7 +77,9 @@ function coproc::run() {
   done
 
   # get the PID (store it in another var because _PID gets deleted once the coproc ends)
-  eval "local pid=\${${coprocVarName}_PID}"
+  if ! eval "local pid=\${${coprocVarName}_PID}"; then
+    core::fail "Failed to get the PID for coproc ⌜${coprocVarName}⌝."
+  fi
   GLOBAL_BACKGROUND_PIDS+=("${pid}")
 
   # tell the coproc to resume (it is waiting for the main thread to retrieve its PID)

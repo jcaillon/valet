@@ -583,8 +583,7 @@ REPLY2='"[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#leve
 REPLY3='0'
 REPLY4='
 local variableToPrintInLog="${COLOR_DEBUG:-}"
-local processName
-if [[ ${BASHPID} == "1234" ]]; then processName="main"; else processName="${BASHPID}"; fi'
+local processName=${GLOBAL_PID_TO_PNAME[${BASHPID}]:-}; if [[ -z ${processName} ]]; then if [[ ${BASHPID} == "1234" ]]; then GLOBAL_PID_TO_PNAME[${BASHPID}]="main"; else string::numberToUniqueId "${BASHPID}"; GLOBAL_PID_TO_PNAME[${BASHPID}]="${REPLY}"; fi; processName=${GLOBAL_PID_TO_PNAME[${BASHPID}]}; fi'
 ```
 
 ❯ `log::parseLogPattern $'<levelColor><level><colorDefault> <message>\n<wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>'`
