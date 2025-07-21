@@ -61,7 +61,7 @@ function selfMock1() {
     ;;
   exit)
     # shellcheck disable=SC2317
-    function onExit() {
+    function trap::onExit() {
       log::warning "This is a custom on exit function."
     }
     log::warning "This is for testing valet core functions, exiting with code 5."
@@ -78,7 +78,7 @@ function selfMock1() {
     ;;
   create-temp-files)
     # shellcheck disable=SC2317
-    function cleanUp() {
+    function trap::onCleanUp() {
       log::warning "This is a custom clean up function."
     }
     local tmp1 tmp2 tmp3 tmp4

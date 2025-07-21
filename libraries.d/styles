@@ -101,6 +101,7 @@ ICON_ERROR_TRACE=$'\uf06e'
 ICON_EXIT=$'\uf14c'
 ICON_STOPPED=$'\uf256'
 ICON_KILLED=$'\uf05e'
+ICON_HALT=$'\uf28b'
 
 if [[ ${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-} != "true" ]]; then
   # we reset all the icon variables to a blank string

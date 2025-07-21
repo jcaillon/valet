@@ -101,7 +101,7 @@ function test_terminal::setRawMode() {
 
   GLOBAL_TEST_FORCE_FD_OPEN=true
 
-  unset -v GLOBAL_STTY_SAVED_CONFIG _TERMINAL_RAW_MODE_ENABLED
+  unset -v GLOBAL_STTY_SAVED_CONFIG GLOBAL_TERMINAL_RAW_MODE_ENABLED
 
   # shellcheck disable=SC2317
   function stty() {

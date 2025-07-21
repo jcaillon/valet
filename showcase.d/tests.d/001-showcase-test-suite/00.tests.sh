@@ -23,11 +23,11 @@ function testShowCaseSudo() {
 
 # This demonstrates a custom test where we output what we want in the test results file
 function testOnInterrupt() {
-  test::prompt "onInterrupt"
-  if onInterrupt; then
-    echo "onInterrupt is working"
+  test::prompt "trap::onInterrupt"
+  if trap::onInterrupt; then
+    echo "trap::onInterrupt is working"
   else
-    echo "onInterrupt is not working"
+    echo "trap::onInterrupt is not working"
   fi
   test::flush
 }

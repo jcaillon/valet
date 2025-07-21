@@ -32,11 +32,11 @@ INFO     Extracted text is: ⌜My bold text⌝
 whoami
 ```
 
-❯ `onInterrupt`
+❯ `trap::onInterrupt`
 
 **Standard output**:
 
 ```text
-onInterrupt is working
+trap::onInterrupt is working
 ```
 

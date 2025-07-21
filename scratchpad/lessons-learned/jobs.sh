@@ -9,7 +9,7 @@ source "libraries.d/core"
 include bash
 
 # shellcheck disable=SC2317
-function cleanUp() {
+function trap::onCleanUp() {
   log::warning "Cleaning up..."
 }
 

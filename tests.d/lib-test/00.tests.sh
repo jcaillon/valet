@@ -94,6 +94,11 @@ function main() {
   test::prompt "test::printVars MY_VAR1 MY_VAR2 MY_VAR3"
   test::printVars MY_VAR1 MY_VAR2 MY_VAR3
 
+  test::title "🫧 Scrubbers"
+  test::markdown "You can use scrubbers to remove dynamic content from the test report." \
+    "Scrubbers are required when we need to convert non-deterministic text to something stable so that tests are reproducible." \
+    "- define a function called \`test::scrubOutput\` in your test script to modify the content of stdout and stderr before it gets flushed into the report. The text to transform is in the global variable \`_TEST_OUTPUT\` and you can use \`_TEST_FD_NUMBER\` to know which file descriptor is being flushed (1 for stdout, 2 for stderr)."$'\n'"- define a function called \`test::scrubReplyVars\` in your test script to modify the REPLY variables before they get printed in the report."
+
   test::title "❤️ Recommendations for tests"
   test::markdown "It is also recommended to implement tests in bash functions and make use of local variables." \
     "While you can test a command by invoking valet (e.g. \`test::exec valet my-command argument1\`), it is recommended to test the command function itself (e.g. \`test::exec myCommandFunction argument1\`):" \

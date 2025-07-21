@@ -86,14 +86,14 @@ function showCaseSudo() {
 
 # This function is called before the program exits.
 # It does not have to be defined.
-function onExit() {
+function trap::onExit() {
   log::debug "Exiting a showcase command."
 }
 
 # This function is always called before the program ends and allows
 # you to do some custom clean up.
 # It does not have to be defined.
-function cleanUp() {
+function trap::onCleanUp() {
   log::debug "Cleaning up stuff in the showcase commands."
 }
 
@@ -102,7 +102,7 @@ function cleanUp() {
 # It is called on signal SIGINT and SIGQUIT.
 # It does not have to be defined.
 # shellcheck disable=SC2317
-onInterrupt() {
+function trap::onInterrupt() {
   return 0
 }
 
@@ -111,6 +111,6 @@ onInterrupt() {
 # It is called on signal SIGHUP and SIGTERM.
 # It does not have to be defined.
 # shellcheck disable=SC2317
-onTerminate() {
+function trap::onTerminate() {
   return 0
 }

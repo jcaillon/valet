@@ -14,12 +14,19 @@ function tui::test() {
     printf "You pressed (binding): ⌜%q⌝\n" "${1}" 1>&"${GLOBAL_FD_TUI}"
   }
 
-  # define the callback function called when the terminal size changes
-  function onTerminalResize() {
-    printf "Terminal changed to: ⌜%s x %s⌝\n" "${GLOBAL_COLUMNS}" "${GLOBAL_LINES}" 1>&"${GLOBAL_FD_TUI}"
+  # define the callback function called when the screen needs to be redrawn
+  function onRedrawRequired() {
+    printf "The screen needs to be redrawn, terminal changed to: ⌜%s x %s⌝\n" "${GLOBAL_COLUMNS}" "${GLOBAL_LINES}" 1>&"${GLOBAL_FD_TUI}"
   }
 
-  _OPTION_ON_REDRAW_REQUIRED_CALLBACK=onTerminalResize \
+  # define the callback function called on each loop iteration
+  function onTick() {
+    printf "%s\n" "1s has elapsed" 1>&"${GLOBAL_FD_TUI}"
+  }
+
+  _OPTION_ON_REDRAW_REQUIRED_CALLBACK=onRedrawRequired \
+  _OPTION_ON_EACH_LOOP_ITERATION_CALLBACK=onTick \
+  _OPTION_LOOP_DELAY=1.0 \
     tui::startMainLoop onKeyPress
 }
 

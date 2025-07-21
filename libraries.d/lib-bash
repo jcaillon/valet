@@ -129,7 +129,7 @@ function bash::runInParallel() {
   local timeoutBetweenChecks="${_OPTION_TIMEOUT_BETWEEN_CHECKS:-0.2}"
 
   # inject the code to kill the running jobs when the program exits
-  bash::injectCodeInFunction cleanUp 'bash::killRunningJobs' true
+  bash::injectCodeInFunction trap::onCleanUp 'bash::killRunningJobs' true
   eval "${REPLY}"
   local originalFunction="${REPLY2}"
 
