@@ -8,15 +8,4 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<sub
 source "libraries.d/core"
 include tui coproc
 
-GLOBAL_BACKGROUND_PIDS=(1 4 567 9876 9876 456 1234 5678 12345 67890)
-
-pid=456
-
-for i in "${!GLOBAL_BACKGROUND_PIDS[@]}"; do
-  if [[ "${GLOBAL_BACKGROUND_PIDS[i]}" == "${pid}" ]]; then
-    unset 'GLOBAL_BACKGROUND_PIDS[i]'
-    break
-  fi
-done
-
-declare -p GLOBAL_BACKGROUND_PIDS
+fu=${fu1:-} || :

@@ -28,7 +28,7 @@ function main() {
 function test_string::numberToUniqueId() {
   test::title "✅ Testing string::numberToUniqueId"
 
-  for i in 345 2000 8976 12003 34567; do
+  for i in 0109 345 2000 8976 12003 34567; do
     test::func string::numberToUniqueId "${i}"
   done
 }

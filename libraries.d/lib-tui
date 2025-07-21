@@ -5,7 +5,11 @@
 # shellcheck source=lib-terminal
 source terminal
 
-function tui::startMainLoop() {
+function tui::test() {
+  :
+}
+
+function tui::start() {
   # setup the terminal to be ready for readline
   terminal::setRawMode
   # before starting to wait for inputs, we clear up the key pressed
@@ -92,7 +96,6 @@ function tui_keyPressListener_handleKeyBinding() {
   # make sure we see any error happening in this function, since it is
   # executed as a callback of the readline process and we redirected the stderr
   # to /dev/null to avoid a bug with readline (see tui_waitForKeyPress)
-  # exec 2>&"${GLOBAL_FD_LOGx}"
-
+  # exec 2>&"${GLOBAL_FD_LOG}"
   printf "!%s\0" "${1}"
 }

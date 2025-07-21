@@ -71,13 +71,13 @@ function coproc::run() {
 
   # wait for pid variable to be set by bash (we should never enter the loop)
   local -i loopNumber=0
-  while [[  ${loopNumber} -lt 500 && ! -v "${coprocVarName}_PID" ]]; do
+  while [[  ! -v "${coprocVarName}_PID" && ${loopNumber} -lt 500 ]]; do
     sleep 0.01
     loopNumber+=1
   done
 
   # get the PID (store it in another var because _PID gets deleted once the coproc ends)
-  if ! eval "local pid=\${${coprocVarName}_PID}"; then
+  if ! eval "local pid=\${${coprocVarName}_PID:-}" || [[ -z ${pid} ]]; then
     core::fail "Failed to get the PID for coproc ⌜${coprocVarName}⌝."
   fi
   GLOBAL_BACKGROUND_PIDS+=("${pid}")
@@ -177,10 +177,9 @@ function coproc_program() {
 function coproc::sendMessage() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if [[ ! -v "${coprocVarName}" ]]; then
+  if ! eval "local coprocFd=\${${coprocVarName}[1]:-}" || [[ -z ${coprocFd} ]]; then
     return 1
   fi
-  local -n coprocFd="${coprocVarName}[1]"
   
   if { printf '%s\0' "${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" >&"${coprocFd}"; } 2>/dev/null; then
     return 0
@@ -211,10 +210,9 @@ function coproc::sendMessage() {
 function coproc::receiveMessage() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if [[ ! -v "${coprocVarName}" ]]; then
+  if ! eval "local coprocFd=\${${coprocVarName}[0]:-}" || [[ -z ${coprocFd} ]]; then
     return 1
   fi
-  local -n coprocFd="${coprocVarName}[0]"
 
   if { IFS=$'\0' read -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
     return 0
@@ -239,12 +237,12 @@ function coproc::receiveMessage() {
 function coproc::wait() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if [[ ! -v "${coprocVarName}_PID" ]]; then
+  if ! eval "local pid=\${${coprocVarName}_PID:-}" || [[ -z ${pid} ]]; then
     return 0
-  fi
+  fi  
 
-  eval "local pid=\${${coprocVarName}_PID}"
-  
+  log::debug "Waiting for coproc ⌜${coprocVarName}⌝ (PID: ${pid}) to finish."
+
   local -i exitStatus=0
   if ! wait -f "${pid}"; then
     exitStatus="${PIPESTATUS[0]:-}"
@@ -274,11 +272,10 @@ function coproc::wait() {
 # ```
 function coproc::isRunning() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  if [[ ! -v "${coprocVarName}_PID" ]]; then
+
+  if ! eval "local pid=\${${coprocVarName}_PID:-}" || [[ -z ${pid} ]]; then
     return 1
   fi
-
-  local -n pid="${coprocVarName}_PID"
 
   if ! kill -0 "${pid}" 2>/dev/null; then
     return 1
@@ -298,11 +295,11 @@ function coproc::isRunning() {
 function coproc::kill() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if [[ ! -v "${coprocVarName}_PID" ]]; then
+  if ! eval "local pid=\${${coprocVarName}_PID:-}" || [[ -z ${pid} ]]; then
     return 0
-  fi
+  fi  
 
-  eval "local pid=\${${coprocVarName}_PID}"
+  log::debug "Killing coproc ⌜${coprocVarName}⌝ (PID: ${pid})."
 
   if kill "${pid}" &>/dev/null; then
     coproc_removePidFromBackgroundPids "${pid}"

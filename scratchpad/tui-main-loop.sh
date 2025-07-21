@@ -7,30 +7,4 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<sub
 source "libraries.d/core"
 include tui coproc
 
-
-function initCommand() {
-  log::info "Running init command in coproc (${coprocVarName})."
-}
-
-function loopCommand() {
-  log::info "Running loop command in coproc (${coprocVarName})."
-}
-
-function onMessageCommand() {
-  log::info "Received message in coproc (${coprocVarName}): ${_COPROC_MESSAGE}"
-  return 1
-}
-
-coproc::run _COPROC_2 initCommand loopCommand onMessageCommand
-coproc::sendMessage _COPROC_2 "Hello, coproc 2!"
-coproc::wait _COPROC_2
-
-
-# log::info "Before rerouting Logs"
-# terminal::rerouteLogs
-# log::info "After rerouting Logs"
-# log::warning "This is a warning"
-# terminal::restoreLogs
-# log::info "end"
-
-# tui::startMainLoop
+tui::test

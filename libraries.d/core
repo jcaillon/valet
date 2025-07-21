@@ -1830,7 +1830,7 @@ function string::numberToUniqueId() {
   while (( index < ${#number} )); do
     toConvert="${number:index:2}"
     if (( ${#toConvert} == 2 )); then
-      REPLY+="${consonants:$(( toConvert / 5 - 2 )):1}${vowels:$(( toConvert % 5 )):1}"
+      REPLY+="${consonants:$(( 10#${toConvert} / 5 - 2 )):1}${vowels:$(( 10#${toConvert} % 5 )):1}"
     elif (( ${#toConvert} == 1 )); then
       REPLY+="${consonants:toConvert:1}"
     fi

@@ -530,6 +530,7 @@ function terminal::testWaitForKeyPress() {
 # Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 #
 # You must call `terminal::rebindKeymap` and `terminal::setRawMode` before using this function.
+# You should use `tui::start` instead of using this function directly. 
 #
 # - $@: **read parameters** _as any_:
 #       additional parameters to pass to the read command
@@ -546,11 +547,17 @@ function terminal::testWaitForKeyPress() {
 # terminal::waitForKeyPress -t 0.1
 # ```
 #
-# > There are 2 issues when using readline in bash:
+# > There are issues when using readline in bash:
+# >
 # > 1. if the cursor is at the end of the screen, it will make the screen scroll
 # >    even when nothing is read... Make sure to not position the cursor at the end of the screen.
 # > 2. When read is done, it will print a new line in stderr. So we redirect stderr to null.
-# >    This means that if you print something in a readline bound function, do not print to stderr or you will get nothing !
+# >    This means that if you print something to stderr in a readline bound function, you will see nothing
+# >    As a workaround, do this in your callback function: `exec 2>&"${GLOBAL_FD_LOG}"`
+# > 3. Not all key combinations can be bound, like SHIFT+ENTER. This is inherent to the way terminals work,
+# >    they send a sequence of characters when a key is pressed and this sequence is read by readline/bash.
+# >    For advanced key combinations, you will need to use a terminal that allows to remap such keys
+# >    and send a specific sequence of characters that you can bind in bash.
 function terminal::waitForKeyPress() {
   if [[ -n ${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:-} ]]; then
     LAST_KEY_PRESSED="${PREVIOUS_KEY_PRESSED_EXTRA_CHARS:0:1}"

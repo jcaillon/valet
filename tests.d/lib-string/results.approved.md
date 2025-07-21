@@ -4,6 +4,14 @@
 
 ### ✅ Testing string::numberToUniqueId
 
+❯ `string::numberToUniqueId 0109`
+
+Returned variables:
+
+```text
+REPLY='xezu'
+```
+
 ❯ `string::numberToUniqueId 345`
 
 Returned variables:

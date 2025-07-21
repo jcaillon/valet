@@ -223,6 +223,7 @@ function array::sortWithCriteria() {
 # ## array::appendIfNotPresent
 #
 # Add a value to an array if it is not already present.
+# Works for normal and associative arrays.
 #
 # - $1: **array name** _as string_:
 #       The variable name of the array.
@@ -263,6 +264,7 @@ function array::appendIfNotPresent() {
 # ## array::remove
 #
 # Remove a value from an array.
+# Works for normal and associative arrays.
 #
 # - $1: **array name** _as string_:
 #       The variable name of the array.
