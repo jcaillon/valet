@@ -243,11 +243,15 @@ function coproc::wait() {
     return 0
   fi
 
-  local -n pid="${coprocVarName}_PID"
+  eval "local pid=\${${coprocVarName}_PID}"
   
+  local -i exitStatus=0
   if ! wait -f "${pid}"; then
-    return "${PIPESTATUS[0]:-}"
+    exitStatus="${PIPESTATUS[0]:-}"
   fi
+
+  coproc_removePidFromBackgroundPids "${pid}"
+  return "${exitStatus}"
 }
 
 # ## coproc::isRunning
@@ -313,7 +317,7 @@ function coproc_removePidFromBackgroundPids() {
   local index
   for index in "${!GLOBAL_BACKGROUND_PIDS[@]}"; do
     if [[ "${GLOBAL_BACKGROUND_PIDS[index]}" == "${pid}" ]]; then
-      unset 'GLOBAL_BACKGROUND_PIDS[index]'
+      unset -v 'GLOBAL_BACKGROUND_PIDS[index]'
       break
     fi
   done

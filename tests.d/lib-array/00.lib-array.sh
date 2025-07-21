@@ -10,6 +10,7 @@ function main() {
   test_array::sortWithCriteria
   test_array::appendIfNotPresent
   test_array::contains
+  test_array::remove
   test_array::makeArraysSameSize
   test_array::fuzzyFilterSort
 }
@@ -17,7 +18,7 @@ function main() {
 function test_array::sort() {
   test::title "✅ Testing array::sort"
 
-  declare -g MY_ARRAY=(
+  MY_ARRAY=(
     breakdown
     constitutional
     conventional
@@ -43,9 +44,9 @@ function test_array::sort() {
 function test_array::sortWithCriteria() {
   test::title "✅ Testing array::sortWithCriteria"
 
-  declare -g MY_ARRAY=(a b c d e f g)
-  declare -g MY_CRITERIA1=(3 2 2 1 1 4 0)
-  declare -g MY_CRITERIA2=(1 3 2 5 0 2 9)
+  MY_ARRAY=(a b c d e f g)
+  MY_CRITERIA1=(3 2 2 1 1 4 0)
+  MY_CRITERIA2=(1 3 2 5 0 2 9)
 
   test::printVars MY_ARRAY MY_CRITERIA1 MY_CRITERIA2
   test::func array::sortWithCriteria MY_ARRAY MY_CRITERIA1 MY_CRITERIA2
@@ -58,7 +59,7 @@ function test_array::sortWithCriteria() {
 function test_array::appendIfNotPresent() {
   test::title "✅ Testing array::appendIfNotPresent"
 
-  declare -g MY_ARRAY=(
+  MY_ARRAY=(
     breakdown
     constitutional
   )
@@ -74,7 +75,7 @@ function test_array::appendIfNotPresent() {
 function test_array::contains() {
   test::title "✅ Testing array::contains"
 
-  declare -g MY_ARRAY=(
+  MY_ARRAY=(
     breakdown
     deliver
     economics
@@ -88,13 +89,41 @@ function test_array::contains() {
   test::printVars MY_ARRAY
 }
 
+function test_array::remove() {
+  test::title "✅ Testing array::remove"
+
+  MY_ARRAY=(
+    breakdown
+    deliver
+    economics
+  )
+
+  test::printVars MY_ARRAY
+  test::func MY_VALUE='deliver' array::remove MY_ARRAY MY_VALUE
+  test::printVars MY_ARRAY
+
+  test::func MY_VALUE='holiday' array::remove MY_ARRAY MY_VALUE
+  test::printVars MY_ARRAY
+
+  
+  # shellcheck disable=SC2034
+  declare -A MY_ASSOCIATIVE_ARRAY
+  MY_ASSOCIATIVE_ARRAY[breakdown]=1
+  MY_ASSOCIATIVE_ARRAY[deliver]=2
+  MY_ASSOCIATIVE_ARRAY[economics]=3
+
+  test::printVars MY_ASSOCIATIVE_ARRAY
+  test::func MY_VALUE='1' array::remove MY_ASSOCIATIVE_ARRAY MY_VALUE
+  test::printVars MY_ASSOCIATIVE_ARRAY
+}
+
 # shellcheck disable=SC2034
 function test_array::makeArraysSameSize {
   test::title "✅ Testing array::makeArraysSameSize"
 
-  declare -g MY_ARRAY1=("a" "b" "c")
-  declare -g MY_ARRAY2=("" "2")
-  declare -g MY_ARRAY3=("x" "y" "z" "w")
+  MY_ARRAY1=("a" "b" "c")
+  MY_ARRAY2=("" "2")
+  MY_ARRAY3=("x" "y" "z" "w")
 
   test::printVars MY_ARRAY1 MY_ARRAY2 MY_ARRAY3
   test::func array::makeArraysSameSize MY_ARRAY1 MY_ARRAY2 MY_ARRAY3 MY_ARRAY4

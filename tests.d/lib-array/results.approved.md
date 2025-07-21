@@ -173,6 +173,53 @@ MY_ARRAY=(
 )
 ```
 
+### ✅ Testing array::remove
+
+```text
+MY_ARRAY=(
+[0]='breakdown'
+[1]='deliver'
+[2]='economics'
+)
+```
+
+❯ `MY_VALUE=deliver array::remove MY_ARRAY MY_VALUE`
+
+```text
+MY_ARRAY=(
+[0]='breakdown'
+[2]='economics'
+)
+```
+
+❯ `MY_VALUE=holiday array::remove MY_ARRAY MY_VALUE`
+
+Returned code: `1`
+
+```text
+MY_ARRAY=(
+[0]='breakdown'
+[2]='economics'
+)
+```
+
+```text
+MY_ASSOCIATIVE_ARRAY=(
+[deliver]='2'
+[breakdown]='1'
+[economics]='3'
+)
+```
+
+❯ `MY_VALUE=1 array::remove MY_ASSOCIATIVE_ARRAY MY_VALUE`
+
+```text
+MY_ASSOCIATIVE_ARRAY=(
+[deliver]='2'
+[economics]='3'
+)
+```
+
 ### ✅ Testing array::makeArraysSameSize
 
 ```text

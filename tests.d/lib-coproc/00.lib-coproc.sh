@@ -70,13 +70,7 @@ function simpleTests() {
   local coproc3Pid="${REPLY}"
   coproc::wait _COPROC_3
   test::flush
-
-  if ! array::contains GLOBAL_BACKGROUND_PIDS coproc1Pid \
-    || ! array::contains GLOBAL_BACKGROUND_PIDS coproc2Pid \
-    || ! array::contains GLOBAL_BACKGROUND_PIDS coproc3Pid; then
-    test::fail "The coproc PIDs are not in the GLOBAL_BACKGROUND_PIDS array."
-  fi
-
+  
 
   test::title "✅ Testing coproc::kill"
 
