@@ -56,7 +56,7 @@ function test_command::parseFunctionArguments() {
   test::func command::parseFunctionArguments selfMock2 arg1 arg2 -4444
 }
 
-function test::transformReplyVarsBeforePrinting() {
+function test::scrubReplyVars() {
   unset -v REPLY2 REPLY_ARRAY REPLY_ARRAY2
   unset -v REPLY2 REPLY_ARRAY REPLY_ARRAY2
 }

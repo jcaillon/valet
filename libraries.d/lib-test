@@ -166,8 +166,8 @@ function test_exec() {
 
 
   _TEST_OUTPUT="${compoundCommand}"
-  if declare -F test::transformTextBeforeFlushing &>/dev/null; then
-    test::transformTextBeforeFlushing
+  if declare -F test::scrubOutput &>/dev/null; then
+    test::scrubOutput
   fi
 
   # shellcheck disable=SC2016
@@ -230,8 +230,8 @@ function test_exec() {
 # test::printReplyVars
 # ```
 function test::printReplyVars() {
-  if declare -F test::transformReplyVarsBeforePrinting &>/dev/null; then
-    test::transformReplyVarsBeforePrinting
+  if declare -F test::scrubReplyVars &>/dev/null; then
+    test::scrubReplyVars
   fi
   local IFS=$'\n' key varName _TEST_OUTPUT=""
   for varName in REPLY REPLY2 REPLY3 REPLY4; do
@@ -257,8 +257,8 @@ function test::printReplyVars() {
     _TEST_OUTPUT+=")"$'\n'
   fi
   if [[ -n ${_TEST_OUTPUT} ]]; then
-    if declare -F test::transformTextBeforeFlushing &>/dev/null; then
-      test::transformTextBeforeFlushing
+    if declare -F test::scrubOutput &>/dev/null; then
+      test::scrubOutput
     fi
     # shellcheck disable=SC2016
     printf 'Returned variables:\n\n```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
@@ -323,8 +323,8 @@ function test::printVars() {
       test::fail "Could not parse variable declaration: ⌜${chunk}⌝."
     fi
   done
-  if declare -F test::transformTextBeforeFlushing &>/dev/null; then
-    test::transformTextBeforeFlushing
+  if declare -F test::scrubOutput &>/dev/null; then
+    test::scrubOutput
   fi
   # shellcheck disable=SC2016
   printf '```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
@@ -335,7 +335,7 @@ function test::printVars() {
 # This function write the captured standard and error outputs to the report file
 # and reset these file descriptors.
 #
-# - $1: **fdNumber** _as int_:
+# - $1: **file descriptor number** _as int_:
 #       The file descriptor number to flush (1 or 2).
 # - $2: blockTitle _as string_:
 #       (optional) Can be set using the variable `_OPTION_BLOCK_TITLE`.
@@ -346,10 +346,10 @@ function test::printVars() {
 # test_flushFdToCodeBlock 1 true
 # ```
 function test_flushFdToCodeBlock() {
-  local -i fdNumber="${1}"
+  local -i _TEST_FD_NUMBER="${1}"
   local blockTitle="${2:-${_OPTION_BLOCK_TITLE:-}}"
   local file
-  if ((fdNumber == 1)); then
+  if ((_TEST_FD_NUMBER == 1)); then
     file="${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
   else
     file="${GLOBAL_TEST_STANDARD_ERROR_FILE}"
@@ -361,8 +361,8 @@ function test_flushFdToCodeBlock() {
   local IFS=''
   read -rd '' _TEST_OUTPUT <"${file}" || :
 
-  if declare -F test::transformTextBeforeFlushing &>/dev/null; then
-    test::transformTextBeforeFlushing
+  if declare -F test::scrubOutput &>/dev/null; then
+    test::scrubOutput
   fi
 
   if [[ -n ${blockTitle} ]]; then
@@ -374,10 +374,10 @@ function test_flushFdToCodeBlock() {
   fi
 
   # reset the file content (must close/open the file descriptor in between)
-  exec {fdNumber}>&-
+  exec {_TEST_FD_NUMBER}>&-
   : >"${file}"
-  eval "exec ${fdNumber}>>\"${file}\""
-  if (( fdNumber == 2 )); then
+  eval "exec ${_TEST_FD_NUMBER}>>\"${file}\""
+  if (( _TEST_FD_NUMBER == 2 )); then
     # since we changed fd2, we also need to redeclare fd that point to fd2
     exec {GLOBAL_FD_LOG}>&-
     exec {GLOBAL_FD_LOG}>&2
@@ -386,11 +386,15 @@ function test_flushFdToCodeBlock() {
   fi
 }
 
-# ## test::transformTextBeforeFlushing
+# ## test::scrubOutput
 #
-# This function can be defined to modify the flushed text before adding it to the report.
+# This function can be defined to modify the flushed text (both stdout and stderr) before adding it to the report.
+#
+# Scrubbers are required when we need to convert non-deterministic text to something stable so that
+# tests are reproducible.
 #
 # The text to transform is in the global variable `_TEST_OUTPUT`.
+# You can also use `_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
 #
 # Returns:
 #
@@ -400,9 +404,12 @@ function test_flushFdToCodeBlock() {
 # > you need it to be available for multiple tests.
 # > Note however that this function can be called very often, so it should be optimized.
 
-# ## test::transformReplyVarsBeforePrinting
+# ## test::scrubReplyVars
 #
 # This function can be defined to modify the REPLY variables before printing them in the report.
+#
+# Scrubbers are required when we need to convert non-deterministic text to something stable so that
+# tests are reproducible.
 #
 # > You can define this function directly in the test script, or in a test hook if
 # > you need it to be available for multiple tests.

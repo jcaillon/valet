@@ -18,10 +18,10 @@
 function profiler::enable() {
   local file="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # Nested profiling not supported
-  if [[ -n ${_ACTIVE_PROFILER:-} ]]; then
+  if [[ ${GLOBAL_PROFILER_ENABLED:-} == "true" ]]; then
     return 0
   fi
-  _ACTIVE_PROFILER=1
+  GLOBAL_PROFILER_ENABLED=true
 
   # create the directory for file and reset it
   if [[ ${file} != "${file%/*}" ]]; then
@@ -58,11 +58,13 @@ function profiler::enable() {
 # profiler::disable
 # ```
 function profiler::disable() {
-  if [[ ${_ACTIVE_PROFILER:-} != "1" ]]; then return 0; fi
+  if [[ ${GLOBAL_PROFILER_ENABLED:-} != "true" ]]; then
+    return 0
+  fi
 
   log::info "Disabling profiler."
   set +o xtrace
-  unset -v BASH_XTRACEFD PS4 _ACTIVE_PROFILER
+  unset -v BASH_XTRACEFD PS4 GLOBAL_PROFILER_ENABLED
   exec {_PROFILER_FD}>&-
   if [[ -v _PROFILER_OUTPUT_FILE ]]; then
     profilerCleanFile
@@ -77,7 +79,7 @@ function profiler::disable() {
 # profiler::pause
 # ```
 function profiler::pause() {
-  if [[ ${_ACTIVE_PROFILER:-} != "1" ]]; then return 0; fi
+  if [[ ${GLOBAL_PROFILER_ENABLED:-} != "true" ]]; then return 0; fi
 
   log::info "Pausing profiler."
   set +o xtrace
@@ -91,7 +93,9 @@ function profiler::pause() {
 # profiler::resume
 # ```
 function profiler::resume() {
-  if [[ ${_ACTIVE_PROFILER:-} != "1" ]]; then return 0; fi
+  if [[ ${GLOBAL_PROFILER_ENABLED:-} != "true" ]]; then 
+    return 0
+  fi
 
   log::info "Resuming profiler."
   set -o xtrace

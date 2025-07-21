@@ -310,6 +310,13 @@ See progress::start.
 
 The default number of animation frames to wait between two updates of the progress bar.
 
+#### VALET_CONFIG_TUI_KEEP_ESCAPE_KEY_SEQUENCES
+
+By default, in TUI mode, the escape code is immediately translated to the `ESC` key code instead of waiting for a longer sequence of keys
+(which is the default behavior of bash readline).
+
+If true, will keep the escape key sequences as they are, allowing you to remediate issues with key sequences in your terminal.
+
 #### VALET_CONFIG_PROMPT_KEY_MAPPING
 
 The key mapping for the prompts. This variable must be a valid bash associative array.

@@ -5,26 +5,65 @@
 # shellcheck source=lib-terminal
 source terminal
 
+# shellcheck disable=SC2317
 function tui::test() {
-  :
+  printf '%s\n' "Press any key to see the returned code (press CTRL+C to quit)." 1>&"${GLOBAL_FD_TUI}"
+
+  # define the callback function called when a special key is pressed
+  function onKeyPress() {
+    printf "You pressed (binding): ⌜%q⌝\n" "${1}" 1>&"${GLOBAL_FD_TUI}"
+  }
+
+  # define the callback function called when the terminal size changes
+  function onTerminalResize() {
+    printf "Terminal changed to: ⌜%s x %s⌝\n" "${GLOBAL_COLUMNS}" "${GLOBAL_LINES}" 1>&"${GLOBAL_FD_TUI}"
+  }
+
+  _OPTION_ON_REDRAW_REQUIRED_CALLBACK=onTerminalResize \
+    tui::startMainLoop onKeyPress
 }
 
-function tui::start() {
+function tui::startMainLoop() {
+  local onKeyPressFunction="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local onEachLoopIterationFunction="${_OPTION_ON_EACH_LOOP_ITERATION_CALLBACK:-}"
+  local onRedrawRequiredFunction="${_OPTION_ON_REDRAW_REQUIRED_CALLBACK:-}"
+  local loopDelay="${_OPTION_LOOP_DELAY:-0.5}"
+  local _TUI_KEY_BINDINGS_PREFIX=":"
+
+  if ! declare -F "${onKeyPressFunction}" &>/dev/null; then
+    core::fail "The on key press callback function ⌜${onKeyPressFunction}⌝ does not exist."
+  fi
+  if [[ -n ${onEachLoopIterationFunction} ]] && ! declare -F "${onEachLoopIterationFunction}" &>/dev/null; then
+    core::fail "The on each loop iteration callback function ⌜${onEachLoopIterationFunction}⌝ does not exist."
+  fi
+
   # setup the terminal to be ready for readline
   terminal::setRawMode
   # before starting to wait for inputs, we clear up the key pressed
-  terminal::clearKeyPressed
+  # terminal::clearKeyPressed
   terminal::rerouteLogs
   tui_startKeyPressListener
 
   # shellcheck disable=SC2034
   GLOBAL_WARN_ON_INTERRUPT_DISABLED=true
+  GLOBAL_SCREEN_REDRAW_REQUIRED=false
 
   local -i nbCoprocRestart=0
   local IFS=" "
 
   # main loop
   while [[ -t ${GLOBAL_FD_TUI} ]]; do
+    # call the on each loop iteration callback function if defined
+    if [[ -n ${onEachLoopIterationFunction} ]] && ! "${onEachLoopIterationFunction}"; then
+      log::debug "The on each loop iteration callback function ⌜${onEachLoopIterationFunction}⌝ returned non-zero exit code, stopping the main loop."
+      break
+    fi
+
+    # call the on redraw required callback function if defined
+    if [[ ${GLOBAL_SCREEN_REDRAW_REQUIRED} == "true" && -n ${onRedrawRequiredFunction} ]]; then
+      "${onRedrawRequiredFunction}"
+      GLOBAL_SCREEN_REDRAW_REQUIRED=false
+    fi
 
     # restart coproc if it is not running
     if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER_PID ]]; then
@@ -38,8 +77,11 @@ function tui::start() {
     fi
 
     # read the key pressed from the key press listener coproc
-    if { IFS=$'\0' read -rd $'\0' -u "${_TUI_COPROC_KEY_PRESS_LISTENER[0]}" LAST_KEY_PRESSED; } 2>/dev/null; then
-      printf "%s\n" "Received key press: ${LAST_KEY_PRESSED}" >&"${GLOBAL_FD_TUI}"
+    if { IFS=$'\0' read -t "${loopDelay}" -rd $'\0' -u "${_TUI_COPROC_KEY_PRESS_LISTENER[0]}" LAST_KEY_PRESSED; } 2>/dev/null; then
+      if ! "${onKeyPressFunction}" "${LAST_KEY_PRESSED}"; then
+        log::debug "The on key press callback function ⌜${onKeyPressFunction}⌝ returned non-zero exit code, stopping the main loop."
+        break
+      fi
     fi
   done
 
@@ -87,7 +129,12 @@ function tui_keyPressListener() {
 
   while [[ -t ${_TUI_USER_INPUT_FD} ]] && kill -0 "${GLOBAL_PROGRAM_MAIN_PID}" 2>/dev/null; do
     if terminal::waitForKeyPress -u "${_TUI_USER_INPUT_FD}"; then
-      printf "%s\0" "${LAST_KEY_PRESSED}"
+      case ${LAST_KEY_PRESSED} in
+      $'\r') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "ENTER" ;;
+      $'\n') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "CTRL+ENTER" ;;
+      $'\t') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "TAB" ;;
+      *) printf "%s\0" "${LAST_KEY_PRESSED}" ;;
+      esac
     fi
   done
 }
@@ -97,5 +144,5 @@ function tui_keyPressListener_handleKeyBinding() {
   # executed as a callback of the readline process and we redirected the stderr
   # to /dev/null to avoid a bug with readline (see tui_waitForKeyPress)
   # exec 2>&"${GLOBAL_FD_LOG}"
-  printf "!%s\0" "${1}"
+  printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "${1}" 
 }

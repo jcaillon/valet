@@ -3,13 +3,13 @@
 include coproc array bash
 
 function main() {
-  simpleTests
-  completeTest
-  _OPTION_KEEP_ONLY_LAST_MESSAGE=true completeTest
+  test_coproc::run_simpleTests
+  test_coproc::run_completeTest
+  _OPTION_KEEP_ONLY_LAST_MESSAGE=true test_coproc::run_completeTest
 }
 
 # shellcheck disable=SC2034
-function simpleTests() {
+function test_coproc::run_simpleTests() {
 
   function initCommand() {
     log::info "Running init command in coproc (${coprocVarName})."
@@ -70,7 +70,7 @@ function simpleTests() {
   local coproc3Pid="${REPLY}"
   coproc::wait _COPROC_3
   test::flush
-  
+
 
   test::title "✅ Testing coproc::kill"
 
@@ -94,7 +94,7 @@ function simpleTests() {
 }
 
 
-function completeTest() {
+function test_coproc::run_completeTest() {
   if [[ ${_OPTION_KEEP_ONLY_LAST_MESSAGE:-} == "true" ]]; then
     test::title "✅ Testing coproc::run with a realistic usage and keeping only the last message"
   else

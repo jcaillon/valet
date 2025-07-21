@@ -72,7 +72,7 @@ function test_main::getDisplayableFilteredArray() {
 }
 
 # shellcheck disable=SC2317
-function test::transformReplyVarsBeforePrinting() {
+function test::scrubReplyVars() {
   unset -v REPLY_ARRAY REPLY_ARRAY2
   unset -v REPLY_ARRAY REPLY_ARRAY2
 }

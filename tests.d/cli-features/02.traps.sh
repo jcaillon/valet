@@ -32,7 +32,7 @@ function test_traps() {
 }
 
 # shellcheck disable=SC2317
-function test::transformTextBeforeFlushing() {
+function test::scrubOutput() {
   local line text=""
   local IFS=$'\n'
   for line in ${_TEST_OUTPUT}; do

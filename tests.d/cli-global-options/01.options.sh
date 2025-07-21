@@ -2,7 +2,7 @@
 
 function main() {
   test_globalOptions
-  unset -f test::transformTextBeforeFlushing
+  unset -f test::scrubOutput
 }
 
 function test_globalOptions() {
@@ -23,7 +23,7 @@ function test_globalOptions() {
 }
 
 # shellcheck disable=SC2317
-function test::transformTextBeforeFlushing() {
+function test::scrubOutput() {
   _TEST_OUTPUT="${_TEST_OUTPUT/#[0-9]*/1.42.69}"
 }
 

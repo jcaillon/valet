@@ -484,42 +484,6 @@ function terminal::waitForChar() {
   return 0
 }
 
-# ## terminal::testWaitForKeyPress
-#
-# Wait for the user to press a key and prints it to the screen.
-# This function is used to test the `terminal::waitForKeyPress` function.
-#
-# See @terminal::waitForKeyPress for more information.
-#
-# ```bash
-# terminal::testWaitForKeyPress
-# ```
-function terminal::testWaitForKeyPress() {
-  # setup the terminal before anything else
-  terminal::setRawMode
-
-  # define the callback function called when a special key is pressed
-  # shellcheck disable=SC2317
-  function interactiveOnKeyBindingPressTestFunction() {
-    local key="${1}"
-    printf "%sYou pressed (binding): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${key}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
-  }
-  terminal::rebindKeymap interactiveOnKeyBindingPressTestFunction
-
-  printf '%s\n' "Press any key to see the returned code (press Q to quit)." 1>&"${GLOBAL_FD_TUI}"
-  while true; do
-    if terminal::waitForKeyPress; then
-      if [[ ${LAST_KEY_PRESSED} == "Q" || ${LAST_KEY_PRESSED} == "q" ]]; then
-        break
-      fi
-      printf "%sYou pressed (normal key): ⌜%q⌝%s" "${ESC__ERASE_LINE}" "${LAST_KEY_PRESSED}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
-    fi
-    if [[ ! -t ${GLOBAL_FD_TUI} ]]; then break; fi
-  done
-
-  terminal::restoreSettings
-}
-
 # ## terminal::waitForKeyPress
 #
 # Wait for a key press (single key).
@@ -657,14 +621,16 @@ function terminal::rebindKeymap() {
   bind 'set output-meta off'
   bind 'set show-mode-in-prompt off'
 
-  # make sure that readline will not wait the default 500ms after a special key (like \e ESC) is pressed
-  # to read a longer sequence of keys
-  bind 'set keyseq-timeout 1'
+  if [[ ${VALET_CONFIG_TUI_KEEP_ESCAPE_KEY_SEQUENCES:-} != "true" ]]; then
+    # make sure that readline will not wait the default 500ms after a special key (like \e ESC) is pressed
+    # to read a longer sequence of keys
+    bind 'set keyseq-timeout 1'
 
-  # add the one we are interested in
+    # Escape key
+    bind -x '"\e": '"${callBackFunction}"' ESC'
+  fi
 
   # Escape key
-  bind -x '"\e": '"${callBackFunction}"' ESC'
   bind -x '"\e\e": '"${callBackFunction}"' ESC'
   bind -x '"\e\e\e": '"${callBackFunction}"' ESC'
 

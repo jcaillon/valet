@@ -70,6 +70,7 @@ function trap::onExitInternal() {
   fi
 
   log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
+
   if declare -F onExit &>/dev/null; then
     log::debug "Executing custom ⌜onExit⌝ function ."
     onExit "${exitCode}"
@@ -162,7 +163,7 @@ function trap::onResizeInternal() {
 # This functions is called before the program exits (in all cases, error or not).
 function trap::onCleanUpInternal() {
   # disable the profiler if still on
-  if [[ ${_ACTIVE_PROFILER:-} == "1" ]]; then
+  if [[ ${GLOBAL_PROFILER_ENABLED:-} == "true" ]]; then
     profiler::disable
   fi
 
@@ -179,6 +180,11 @@ function trap::onCleanUpInternal() {
     printf '%s' $'\e[?25h' 1>&"${GLOBAL_FD_TUI}" # ESC__CURSOR_SHOW_FORCE
   fi
 
+  # restore tty settings if needed
+  if declare -F terminal::restoreSettings &>/dev/null; then
+    terminal::restoreSettings
+  fi
+
   # call the clean up functions if they exist
   if declare -F cleanUp &>/dev/null; then
     cleanUp
@@ -187,11 +193,6 @@ function trap::onCleanUpInternal() {
   # if we were in interactive mode, we need to restore the logs
   if declare -F terminal::restoreLogs &>/dev/null; then
     terminal::restoreLogs
-  fi
-
-  # restore tty settings if needed
-  if declare -F terminal::restoreSettings &>/dev/null; then
-    terminal::restoreSettings
   fi
 
   fs::cleanTempFiles
@@ -481,17 +482,23 @@ function fs::cleanTempFiles() {
 # ```
 # shellcheck disable=SC2034
 function terminal::getTerminalSize() {
-  shopt -s checkwinsize
-  # the following subshell is required to correctly compute the columns and lines
-  # the bash manual says these are computed after the execution of an external command
-  # but it works with a subshell
-  (
-    :
-    :
-  )
-  GLOBAL_COLUMNS="${COLUMNS:-120}"
-  GLOBAL_LINES="${LINES:-30}"
-  shopt -u checkwinsize
+  if [[ ! -t ${GLOBAL_FD_TUI} ]]; then
+    return 0
+  fi
+  {
+    shopt -s checkwinsize
+    # the following subshell is required to correctly compute the columns and lines
+    # the bash manual says these are computed after the execution of an external command
+    # but it works with a subshell
+    (
+      :
+      :
+    )
+    GLOBAL_COLUMNS="${COLUMNS:-120}"
+    GLOBAL_LINES="${LINES:-30}"
+    shopt -u checkwinsize
+  } 1>&"${GLOBAL_FD_TUI}" 2>&1
+  # redirection to the terminal FD is necessary for bash to compute the terminal size
 }
 
 #===============================================================

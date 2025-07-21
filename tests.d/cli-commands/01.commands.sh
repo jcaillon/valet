@@ -23,9 +23,9 @@ function main() {
 
   test::title "✅ Testing that we can display the help of a sub menu"
   # shellcheck disable=SC2317
-  function test::transformTextBeforeFlushing() { string::head _TEST_OUTPUT 10; _TEST_OUTPUT="${REPLY}"; }
+  function test::scrubOutput() { string::head _TEST_OUTPUT 10; _TEST_OUTPUT="${REPLY}"; }
   test::exec main::parseMainArguments self -h
-  unset -f test::transformTextBeforeFlushing
+  unset -f test::scrubOutput
 
 
   test::title "✅ Testing that we catch option errors of a sub menu"

@@ -2003,32 +2003,32 @@
   "body": [ "# ## test::title\n# \n# Call this function to add an H3 title in the report file.\n# \n# - \\$1: title _as string_:\n#       (optional) Can be set using the variable `_OPTION_TITLE`.\n#       The title of the test.\n#      (defaults to \"Test\")\n# \n# ```bash\n# test::title \"Testing something\"\n# ```\n# \ntest::title \"${1:title}\"$0" ]
 },
 
-"test::transformReplyVarsBeforePrinting": {
-  "prefix": "test::transformReplyVarsBeforePrinting",
+"test::scrubReplyVars": {
+  "prefix": "test::scrubReplyVars",
   "description": "This function can be defined to modify the returned variables before printing them in the report...",
   "scope": "",
-  "body": [ "test::transformReplyVarsBeforePrinting$0" ]
+  "body": [ "test::scrubReplyVars$0" ]
 },
 
-"test::transformReplyVarsBeforePrinting#withdoc": {
-  "prefix": "test::transformReplyVarsBeforePrinting#withdoc",
+"test::scrubReplyVars#withdoc": {
+  "prefix": "test::scrubReplyVars#withdoc",
   "description": "This function can be defined to modify the returned variables before printing them in the report...",
   "scope": "",
-  "body": [ "# ## test::transformReplyVarsBeforePrinting\n# \n# This function can be defined to modify the returned variables before printing them in the report.\n# \n# > You can define this function directly in the test script, or in a test hook if\n# > you need it to be available for multiple tests.\n# > Note however that this function can be called very often, so it should be optimized.\n# \ntest::transformReplyVarsBeforePrinting$0" ]
+  "body": [ "# ## test::scrubReplyVars\n# \n# This function can be defined to modify the returned variables before printing them in the report.\n# \n# > You can define this function directly in the test script, or in a test hook if\n# > you need it to be available for multiple tests.\n# > Note however that this function can be called very often, so it should be optimized.\n# \ntest::scrubReplyVars$0" ]
 },
 
-"test::transformTextBeforeFlushing": {
-  "prefix": "test::transformTextBeforeFlushing",
+"test::scrubOutput": {
+  "prefix": "test::scrubOutput",
   "description": "This function can be defined to modify the flushed text before adding it to the report...",
   "scope": "",
-  "body": [ "test::transformTextBeforeFlushing$0" ]
+  "body": [ "test::scrubOutput$0" ]
 },
 
-"test::transformTextBeforeFlushing#withdoc": {
-  "prefix": "test::transformTextBeforeFlushing#withdoc",
+"test::scrubOutput#withdoc": {
+  "prefix": "test::scrubOutput#withdoc",
   "description": "This function can be defined to modify the flushed text before adding it to the report...",
   "scope": "",
-  "body": [ "# ## test::transformTextBeforeFlushing\n# \n# This function can be defined to modify the flushed text before adding it to the report.\n# \n# The text to transform is in the global variable `_TEST_OUTPUT`.\n# \n# Returns:\n# \n# - `_TEST_OUTPUT`: The modified text.\n# \n# > You can define this function directly in the test script, or in a test hook if\n# > you need it to be available for multiple tests.\n# > Note however that this function can be called very often, so it should be optimized.\n# \ntest::transformTextBeforeFlushing$0" ]
+  "body": [ "# ## test::scrubOutput\n# \n# This function can be defined to modify the flushed text before adding it to the report.\n# \n# The text to transform is in the global variable `_TEST_OUTPUT`.\n# \n# Returns:\n# \n# - `_TEST_OUTPUT`: The modified text.\n# \n# > You can define this function directly in the test script, or in a test hook if\n# > you need it to be available for multiple tests.\n# > Note however that this function can be called very often, so it should be optimized.\n# \ntest::scrubOutput$0" ]
 },
 
 "time::convertMicrosecondsToHuman": {

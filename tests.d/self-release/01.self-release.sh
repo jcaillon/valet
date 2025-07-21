@@ -64,4 +64,9 @@ function fs::writeToFile() {
   echo "🙈 mocked fs::writeToFile $1" 1>&2
 }
 
+# shellcheck disable=SC2317
+function test::scrubOutput() {
+  _TEST_OUTPUT="${_TEST_OUTPUT// [0-9][0-9][0-9] functions/ xxx functions}"
+}
+
 main

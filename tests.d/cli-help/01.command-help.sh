@@ -28,7 +28,7 @@ function test_helpCommand() {
 }
 
 # shellcheck disable=SC2317
-function test::transformTextBeforeFlushing() {
+function test::scrubOutput() {
   if [[ ${_TEST_OUTPUT} != *$'\n'* ]]; then
     return 0
   fi
