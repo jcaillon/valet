@@ -2028,7 +2028,7 @@
   "prefix": "test::scrubOutput#withdoc",
   "description": "This function can be defined to modify the flushed text before adding it to the report...",
   "scope": "",
-  "body": [ "# ## test::scrubOutput\n# \n# This function can be defined to modify the flushed text before adding it to the report.\n# \n# The text to transform is in the global variable `_TEST_OUTPUT`.\n# \n# Returns:\n# \n# - `_TEST_OUTPUT`: The modified text.\n# \n# > You can define this function directly in the test script, or in a test hook if\n# > you need it to be available for multiple tests.\n# > Note however that this function can be called very often, so it should be optimized.\n# \ntest::scrubOutput$0" ]
+  "body": [ "# ## test::scrubOutput\n# \n# This function can be defined to modify the flushed text before adding it to the report.\n# \n# The text to transform is in the global variable `GLOBAL_TEST_OUTPUT_CONTENT`.\n# \n# Returns:\n# \n# - `GLOBAL_TEST_OUTPUT_CONTENT`: The modified text.\n# \n# > You can define this function directly in the test script, or in a test hook if\n# > you need it to be available for multiple tests.\n# > Note however that this function can be called very often, so it should be optimized.\n# \ntest::scrubOutput$0" ]
 },
 
 "time::convertMicrosecondsToHuman": {

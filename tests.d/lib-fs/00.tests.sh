@@ -112,7 +112,7 @@ function test_fs::createDirectoryIfNeeded() {
   test::func fs::createDirectoryIfNeeded resources/dir/subdir
 
   # on certain versions of bash, you get a different quote character
-  function test::scrubOutput() { _TEST_OUTPUT="${_TEST_OUTPUT//'‘'/"'"}"; _TEST_OUTPUT="${_TEST_OUTPUT//'’'/"'"}"; }
+  function test::scrubOutput() { GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//'‘'/"'"}"; GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//'’'/"'"}"; }
 
   test::markdown "This next command will fail because the directory already exists (it is a file)."
   test::exit fs::createDirectoryIfNeeded resources/dir/subdir/file1

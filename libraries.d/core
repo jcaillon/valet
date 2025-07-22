@@ -173,16 +173,18 @@ function trap::onResizeInternal() {
 
 # This functions is called before the program exits (in all cases, error or not).
 function trap::onCleanUpInternal() {
-  # restore the terminal as it was before running this program
-  trap::restoreTerminal
-
   # kill background processes if still running
+  # we need to do this first because if one of the background is killed during "read"
+  # it will restore the tty as it was when it entered read, effectively discarding our trap::restoreTerminal
   if (( ${#GLOBAL_BACKGROUND_PIDS[@]} > 0 )); then
     local pid
     for pid in "${GLOBAL_BACKGROUND_PIDS[@]}"; do
       kill "${pid}" &>/dev/null || :
     done
   fi
+
+  # restore the terminal as it was before running this program
+  trap::restoreTerminal
 
   # call the clean up functions if they exist
   if declare -F trap::onCleanUp &>/dev/null; then
@@ -220,6 +222,9 @@ function trap::restoreTerminal() {
 # This function is called when the program is required to pause (stop/suspend).
 # Usually this is called when the user presses CTRL+Z in bash.
 function trap::onSuspendInternal() {
+  # avoid multiple calls
+  trap SIGTSTP
+
   # check if the function exists
   if declare -F onHalt &>/dev/null; then
     if onHalt; then
@@ -230,12 +235,11 @@ function trap::onSuspendInternal() {
 
   # restore the terminal in its original state, before running valet
   trap::restoreTerminal
-  
+
   log::print "WARNING" "${ICON_HALT:-}" "PAUSED" "Program halted."
 
   # now that we have set up everything for a suspend, we temporarily remove this trap
   # and send the same signal again to let bash handle the suspend of the process
-  trap SIGTSTP
   kill -TSTP "${BASHPID}" &>/dev/null || :
 }
 

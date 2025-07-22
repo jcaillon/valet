@@ -38,11 +38,11 @@ function main() {
 function test::scrubOutput() {
   local line text=""
   local IFS=$'\n'
-  for line in ${_TEST_OUTPUT}; do
+  for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do
     line="${line//core:[0-9]*/core:xxx}"
     text+="${line//main:[0-9]*/main:xxx}"$'\n'
   done
-  _TEST_OUTPUT="${text%$'\n'}"
+  GLOBAL_TEST_OUTPUT_CONTENT="${text%$'\n'}"
 }
 
 main

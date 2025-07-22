@@ -165,13 +165,13 @@ function test_exec() {
   compoundCommand="${params[*]}"
 
 
-  _TEST_OUTPUT="${compoundCommand}"
+  local GLOBAL_TEST_OUTPUT_CONTENT="${compoundCommand}"
   if declare -F test::scrubOutput &>/dev/null; then
     test::scrubOutput
   fi
 
   # shellcheck disable=SC2016
-  printf '❯ `%s`\n\n' "${_TEST_OUTPUT}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf '❯ `%s`\n\n' "${GLOBAL_TEST_OUTPUT_CONTENT}" >>"${GLOBAL_TEST_REPORT_FILE}"
 
   if [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" || -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
     test::fail "⌜${FUNCNAME[1]:-}⌝ was called in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝ but the standard/error output were not empty, call ⌜test::flush⌝ first or do not write to these streams."
@@ -233,35 +233,35 @@ function test::printReplyVars() {
   if declare -F test::scrubReplyVars &>/dev/null; then
     test::scrubReplyVars
   fi
-  local IFS=$'\n' key varName _TEST_OUTPUT=""
+  local IFS=$'\n' key varName GLOBAL_TEST_OUTPUT_CONTENT=""
   for varName in REPLY REPLY2 REPLY3 REPLY4; do
     if [[ -v ${varName} ]]; then
-      _TEST_OUTPUT+="${varName}='${!varName//\'/\'\"\'\"\'}'"$'\n'
+      GLOBAL_TEST_OUTPUT_CONTENT+="${varName}='${!varName//\'/\'\"\'\"\'}'"$'\n'
     fi
   done
   for varName in REPLY_ARRAY REPLY_ARRAY2; do
     if [[ -v ${varName} ]]; then
-      _TEST_OUTPUT+="${varName}=("$'\n'
+      GLOBAL_TEST_OUTPUT_CONTENT+="${varName}=("$'\n'
       local -n array="${varName}"
       for key in "${!array[@]}"; do
-        _TEST_OUTPUT+="[${key}]='${array[${key}]//\'/\'\"\'\"\'}'"$'\n'
+        GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${array[${key}]//\'/\'\"\'\"\'}'"$'\n'
       done
-      _TEST_OUTPUT+=")"$'\n'
+      GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
     fi
   done
   if [[ -v REPLY_ASSOCIATIVE_ARRAY && -v REPLY_ASSOCIATIVE_ARRAY[@] ]]; then
-      _TEST_OUTPUT+="REPLY_ASSOCIATIVE_ARRAY=("$'\n'
+      GLOBAL_TEST_OUTPUT_CONTENT+="REPLY_ASSOCIATIVE_ARRAY=("$'\n'
     for key in "${!REPLY_ASSOCIATIVE_ARRAY[@]}"; do
-      _TEST_OUTPUT+="[${key}]='${REPLY_ASSOCIATIVE_ARRAY[${key}]//\'/\'\"\'\"\'}'"$'\n'
+      GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${REPLY_ASSOCIATIVE_ARRAY[${key}]//\'/\'\"\'\"\'}'"$'\n'
     done
-    _TEST_OUTPUT+=")"$'\n'
+    GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
   fi
-  if [[ -n ${_TEST_OUTPUT} ]]; then
+  if [[ -n ${GLOBAL_TEST_OUTPUT_CONTENT} ]]; then
     if declare -F test::scrubOutput &>/dev/null; then
       test::scrubOutput
     fi
     # shellcheck disable=SC2016
-    printf 'Returned variables:\n\n```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    printf 'Returned variables:\n\n```text\n%s\n```\n\n' "${GLOBAL_TEST_OUTPUT_CONTENT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   fi
 }
 
@@ -301,7 +301,7 @@ function test::printVars() {
       fi
     done
   fi
-  _TEST_OUTPUT=""
+  GLOBAL_TEST_OUTPUT_CONTENT=""
   while [[ -n ${REPLY} ]]; do
     chunk="${REPLY%%$'\n'*}"
     REPLY="${REPLY:${#chunk} + 1}"
@@ -310,15 +310,15 @@ function test::printVars() {
       # we print an array
       varName="${BASH_REMATCH[1]}"
       local -n array="${varName}"
-      _TEST_OUTPUT+="${varName}=("$'\n'
+      GLOBAL_TEST_OUTPUT_CONTENT+="${varName}=("$'\n'
       for key in "${!array[@]}"; do
-        _TEST_OUTPUT+="[${key}]='${array[${key}]//\'/\'\"\'\"\'}'"$'\n'
+        GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${array[${key}]//\'/\'\"\'\"\'}'"$'\n'
       done
-      _TEST_OUTPUT+=")"$'\n'
+      GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
     elif [[ ${chunk} =~ "declare -"[^[:space:]]+" "([^=]+)"=" ]]; then
       # we print a simple variable
       varName="${BASH_REMATCH[1]}"
-      _TEST_OUTPUT+="${varName}='${!varName//\'/\'\"\'\"\'}'"$'\n'
+      GLOBAL_TEST_OUTPUT_CONTENT+="${varName}='${!varName//\'/\'\"\'\"\'}'"$'\n'
     elif [[ ${chunk} == "declare -"* ]]; then
       test::fail "Could not parse variable declaration: ⌜${chunk}⌝."
     fi
@@ -327,7 +327,7 @@ function test::printVars() {
     test::scrubOutput
   fi
   # shellcheck disable=SC2016
-  printf '```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf '```text\n%s\n```\n\n' "${GLOBAL_TEST_OUTPUT_CONTENT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
 # ## test_flushFdToCodeBlock (private)
@@ -346,10 +346,10 @@ function test::printVars() {
 # test_flushFdToCodeBlock 1 true
 # ```
 function test_flushFdToCodeBlock() {
-  local -i _TEST_FD_NUMBER="${1}"
+  local -i GLOBAL_TEST_FD_NUMBER="${1}"
   local blockTitle="${2:-${_OPTION_BLOCK_TITLE:-}}"
   local file
-  if ((_TEST_FD_NUMBER == 1)); then
+  if ((GLOBAL_TEST_FD_NUMBER == 1)); then
     file="${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
   else
     file="${GLOBAL_TEST_STANDARD_ERROR_FILE}"
@@ -357,9 +357,9 @@ function test_flushFdToCodeBlock() {
   if [[ ! -s "${file}" ]]; then
     return 0
   fi
-  _TEST_OUTPUT=''
+  local GLOBAL_TEST_OUTPUT_CONTENT=''
   local IFS=''
-  read -rd '' _TEST_OUTPUT <"${file}" || :
+  read -rd '' GLOBAL_TEST_OUTPUT_CONTENT <"${file}" || :
 
   if declare -F test::scrubOutput &>/dev/null; then
     test::scrubOutput
@@ -367,17 +367,17 @@ function test_flushFdToCodeBlock() {
 
   if [[ -n ${blockTitle} ]]; then
     # shellcheck disable=SC2016
-    printf '%s\n\n```text\n%s\n```\n\n' "${blockTitle}" "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    printf '%s\n\n```text\n%s\n```\n\n' "${blockTitle}" "${GLOBAL_TEST_OUTPUT_CONTENT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   else
     # shellcheck disable=SC2016
-    printf '```text\n%s\n```\n\n' "${_TEST_OUTPUT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
+    printf '```text\n%s\n```\n\n' "${GLOBAL_TEST_OUTPUT_CONTENT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   fi
 
   # reset the file content (must close/open the file descriptor in between)
-  exec {_TEST_FD_NUMBER}>&-
+  exec {GLOBAL_TEST_FD_NUMBER}>&-
   : >"${file}"
-  eval "exec ${_TEST_FD_NUMBER}>>\"${file}\""
-  if (( _TEST_FD_NUMBER == 2 )); then
+  eval "exec ${GLOBAL_TEST_FD_NUMBER}>>\"${file}\""
+  if (( GLOBAL_TEST_FD_NUMBER == 2 )); then
     # since we changed fd2, we also need to redeclare fd that point to fd2
     exec {GLOBAL_FD_LOG}>&-
     exec {GLOBAL_FD_LOG}>&2
@@ -393,12 +393,12 @@ function test_flushFdToCodeBlock() {
 # Scrubbers are required when we need to convert non-deterministic text to something stable so that
 # tests are reproducible.
 #
-# The text to transform is in the global variable `_TEST_OUTPUT`.
-# You can also use `_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
+# The text to transform is in the global variable `GLOBAL_TEST_OUTPUT_CONTENT`.
+# You can also use `GLOBAL_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
 #
 # Returns:
 #
-# - `_TEST_OUTPUT`: The modified text.
+# - `GLOBAL_TEST_OUTPUT_CONTENT`: The modified text.
 #
 # > You can define this function directly in the test script, or in a test hook if
 # > you need it to be available for multiple tests.

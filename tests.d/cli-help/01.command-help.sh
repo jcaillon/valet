@@ -29,11 +29,11 @@ function test_helpCommand() {
 
 # shellcheck disable=SC2317
 function test::scrubOutput() {
-  if [[ ${_TEST_OUTPUT} != *$'\n'* ]]; then
+  if [[ ${GLOBAL_TEST_OUTPUT_CONTENT} != *$'\n'* ]]; then
     return 0
   fi
-  string::head _TEST_OUTPUT 10
-  _TEST_OUTPUT="${REPLY}"
+  string::head GLOBAL_TEST_OUTPUT_CONTENT 10
+  GLOBAL_TEST_OUTPUT_CONTENT="${REPLY}"
 }
 
 main

@@ -11,7 +11,7 @@ function tui::test() {
 
   # define the callback function called when a special key is pressed
   function onKeyPress() {
-    printf "You pressed (binding): ⌜%q⌝\n" "${1}" 1>&"${GLOBAL_FD_TUI}"
+    printf "You pressed: ⌜%q⌝\n" "${1}" 1>&"${GLOBAL_FD_TUI}"
   }
 
   # define the callback function called when the screen needs to be redrawn
@@ -101,7 +101,7 @@ function tui::startMainLoop() {
 
 function tui_startKeyPressListener() {
   # if the key press listener is not already running, we start it
-  if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER ]]; then  
+  if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER ]]; then
     if [[ ! -v _TUI_USER_INPUT_FD ]]; then
       exec {_TUI_USER_INPUT_FD}<&0
     fi
@@ -133,9 +133,23 @@ function tui_keyPressListener() {
 
   # rebind some keys to call the callback function
   terminal::rebindKeymap tui_keyPressListener_handleKeyBinding
+  
+  # activate bracketed paste mode and bind the paste event
+  bind -x '"\e[200~": tui_keyPressListener_handlePaste'
+  printf "%s" "${ESC__ENABLE_BRACKETED_PASTE}" 1>&"${GLOBAL_FD_TUI}"
+  _TUI_RECEIVED_PASTE_EVENT=false
 
   while [[ -t ${_TUI_USER_INPUT_FD} ]] && kill -0 "${GLOBAL_PROGRAM_MAIN_PID}" 2>/dev/null; do
     if terminal::waitForKeyPress -u "${_TUI_USER_INPUT_FD}"; then
+
+      if [[ ${_TUI_RECEIVED_PASTE_EVENT} == "true" ]]; then
+        # the user is pasting text, we handle it; pasted text will end with \e[201~
+        printf "%s%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "PASTE" "=${LAST_KEY_PRESSED}${PREVIOUS_KEY_PRESSED_EXTRA_CHARS%%$'\e[201~'}"
+        PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
+        _TUI_RECEIVED_PASTE_EVENT=false
+        continue
+      fi
+
       case ${LAST_KEY_PRESSED} in
       $'\r') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "ENTER" ;;
       $'\n') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "CTRL+ENTER" ;;
@@ -151,5 +165,9 @@ function tui_keyPressListener_handleKeyBinding() {
   # executed as a callback of the readline process and we redirected the stderr
   # to /dev/null to avoid a bug with readline (see tui_waitForKeyPress)
   # exec 2>&"${GLOBAL_FD_LOG}"
-  printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "${1}" 
+  printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "${1}"
+}
+
+function tui_keyPressListener_handlePaste() {
+  _TUI_RECEIVED_PASTE_EVENT=true
 }

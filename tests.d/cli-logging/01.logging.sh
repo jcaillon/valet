@@ -19,7 +19,7 @@ function test_logLevelOptions() {
 
 
   # shellcheck disable=SC2317
-  function test::scrubOutput() { _TEST_OUTPUT="${_TEST_OUTPUT//after ?s/after 0s}"; }
+  function test::scrubOutput() { GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//after ?s/after 0s}"; }
 
 
   test::title "✅ Logging level with --verbose option"
@@ -54,7 +54,7 @@ function test_logOutputOptions() {
   test::title "✅ Testing that we can output the logs to a directory additionally to console"
   test::exec VALET_CONFIG_LOG_TO_DIRECTORY="${logDir}" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
   # shellcheck disable=SC2317
-  function test::scrubOutput() { _TEST_OUTPUT="${_TEST_OUTPUT//????-??-??T??-??-??+????--PID_??????.log/2025-02-12T21-57-29+0000.log}" ; }
+  function test::scrubOutput() { GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//????-??-??T??-??-??+????--PID_??????.log/2025-02-12T21-57-29+0000.log}" ; }
   test::func fs::listFiles "${logDir}"
   unset -f test::scrubOutput
 

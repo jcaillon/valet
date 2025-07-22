@@ -115,6 +115,7 @@ function terminal::setRawMode() {
   if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
     bash::getBuiltinOutput stty -g || core::fail "Unable to get the current terminal configuration. Please make sure that ⌜stty⌝ is available in your PATH."
     GLOBAL_STTY_SAVED_CONFIG="${REPLY%%$'\n'}"
+    log::debug "Saved terminal stty initial settings: ${GLOBAL_STTY_SAVED_CONFIG}."
   fi
   if [[ ! -t 0 && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
     core::fail "stdin is not a terminal, cannot set raw mode."
@@ -137,15 +138,20 @@ function terminal::setRawMode() {
 # ```bash
 # terminal::restoreSettings
 # ```
+#
+# > Note that the bash read builtin will restore stty state as it was before entering.
+# > So you want to call this after all read has been finished (particularly, you want to kill
+# > any background process that is reading inputs before trying to restore these settings).
 # shellcheck disable=SC2120
 function terminal::restoreSettings() {
-  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} != "true" || -z ${GLOBAL_STTY_SAVED_CONFIG} ]]; then
+  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} != "true" || ! -v GLOBAL_STTY_SAVED_CONFIG ]]; then
     return 0
   fi
   if [[ ! -t 0 && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
     core::fail "stdin is not a terminal, cannot reset mode."
   fi
   stty "${GLOBAL_STTY_SAVED_CONFIG}" || log::warning "Failed to restore the terminal settings, check stty version."
+  log::debug "Restored terminal settings using: stty ${GLOBAL_STTY_SAVED_CONFIG}."
   unset -v GLOBAL_TERMINAL_RAW_MODE_ENABLED
 }
 
@@ -180,7 +186,7 @@ function terminal::rerouteLogs() {
 # terminal::restoreLogs
 # ```
 function terminal::restoreLogs() {
-  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} != "true" ]]; then
+  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} != "true" || ! -v _TUI_ORIGINAL_LOG_FD ]]; then
     return 0
   fi
   if [[ -n ${_TUI_ORIGINAL_LOG_FD} ]]; then
@@ -500,7 +506,7 @@ function terminal::waitForChar() {
 # Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.
 #
 # You must call `terminal::rebindKeymap` and `terminal::setRawMode` before using this function.
-# You should use `tui::start` instead of using this function directly. 
+# You should use `tui::start` instead of using this function directly.
 #
 # - $@: **read parameters** _as any_:
 #       additional parameters to pass to the read command
@@ -624,6 +630,7 @@ function terminal::rebindKeymap() {
   bind 'set echo-control-characters on'
   bind 'set editing-mode emacs'
   bind 'set enable-keypad on'
+  bind 'set enable-bracketed-paste on'
   bind 'set output-meta off'
   bind 'set show-mode-in-prompt off'
 

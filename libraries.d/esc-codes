@@ -217,6 +217,11 @@ ESC__ENABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049h'
 # Switch back from the alternate screen buffer.
 ESC__DISABLE_ALTERNATE_BUFFER_SCREEN=$'\e[?1049l'
 
+# enable bracketed paste mode
+ESC__ENABLE_BRACKETED_PASTE=$'\e[?2004h'
+# disable bracketed paste mode
+ESC__DISABLE_BRACKETED_PASTE=$'\e[?2004l'
+
 if [[ ${VALET_CONFIG_DISABLE_ESC_CODES:-} == "true" ]]; then
   # we reset all the color variables to a blank string
   _ESC_VARS="${!ESC__*} ${!__ESC__*}"

@@ -36,10 +36,10 @@ function main() {
 function test::scrubOutput() {
   local line text=""
   local IFS=$'\n'
-  for line in ${_TEST_OUTPUT}; do
+  for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do
     text+="${line/*self-mock.sh:/00 00 00 0.0XXX 0.0XXX                    self-mock.sh:}"$'\n'
   done
-  _TEST_OUTPUT="${text%$'\n'}"
+  GLOBAL_TEST_OUTPUT_CONTENT="${text%$'\n'}"
 }
 
 main

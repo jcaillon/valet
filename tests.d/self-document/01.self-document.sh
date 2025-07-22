@@ -13,7 +13,7 @@ function main() {
 
   # shellcheck disable=SC2317
   function test::scrubOutput() {
-    _TEST_OUTPUT="${_TEST_OUTPUT// [0-9][0-9][0-9] functions/ xxx functions}"
+    GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT// [0-9][0-9][0-9] functions/ xxx functions}"
   }
 
   test::exec selfDocument --output "\"\${TEST_DIRECTORY}\"" --core-only

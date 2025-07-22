@@ -23,7 +23,7 @@ function main() {
 
   test::title "✅ Testing that we can display the help of a sub menu"
   # shellcheck disable=SC2317
-  function test::scrubOutput() { string::head _TEST_OUTPUT 10; _TEST_OUTPUT="${REPLY}"; }
+  function test::scrubOutput() { string::head GLOBAL_TEST_OUTPUT_CONTENT 10; GLOBAL_TEST_OUTPUT_CONTENT="${REPLY}"; }
   test::exec main::parseMainArguments self -h
   unset -f test::scrubOutput
 

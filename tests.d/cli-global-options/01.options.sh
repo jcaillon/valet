@@ -24,7 +24,7 @@ function test_globalOptions() {
 
 # shellcheck disable=SC2317
 function test::scrubOutput() {
-  _TEST_OUTPUT="${_TEST_OUTPUT/#[0-9]*/1.42.69}"
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT/#[0-9]*/1.42.69}"
 }
 
 main

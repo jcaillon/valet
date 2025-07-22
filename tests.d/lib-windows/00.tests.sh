@@ -30,7 +30,7 @@ function test_windows::convertPathToUnix() {
   test::title "✅ Testing windows::convertPathToUnix"
 
   # shellcheck disable=SC2317
-  function test::scrubOutput() { _TEST_OUTPUT="${_TEST_OUTPUT//\/mnt}"; }
+  function test::scrubOutput() { GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//\/mnt}"; }
   test::func windows::convertPathToUnix 'C:\Users\username'
   test::func windows::convertPathToUnix 'D:\data\file'
   test::func windows::convertPathToUnix '/c/Users/username'
