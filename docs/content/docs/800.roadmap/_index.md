@@ -11,7 +11,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - split the core file which is getting too big.
 - test with bash 5.1, 5.2 and 5.3 in the pipeline (with different distros each time).
 - handle the drawing of TUI panels in a coproc so each has its own set of variables for its state.
-- Support mouse events: <https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking>
 - rewrite the bash::runInParallel to use coproc instead of jobs. Allow to run the tasks sequentially if number in parallel is set to 1. Use this in the self-test to replace the subshell.
 - in performance tip, document the use of -n
 - self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.
@@ -22,7 +21,7 @@ This page lists the features that I would like to implement in Valet. They come 
   - Finish prompt and interactive functions: prompt user for multiline text (doable with by just implementing a good _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY)
   - Prompt user for multi select.
   - Add a full screen view with the keyboard shortcuts in edit mode (new interactive::showFullScreenHelp ?).
-- fzf: 
+- fzf:
   - draw in a given rectangle, we handle full screen or not before calling sfzf
 - main menu:
   - add info of the extension from which a command comes from

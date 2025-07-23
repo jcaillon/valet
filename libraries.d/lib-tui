@@ -133,14 +133,29 @@ function tui_keyPressListener() {
 
   # rebind some keys to call the callback function
   terminal::rebindKeymap tui_keyPressListener_handleKeyBinding
-  
+
   # activate bracketed paste mode and bind the paste event
-  bind -x '"\e[200~": tui_keyPressListener_handlePaste'
+  # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Bracketed-Paste-Mode
   printf "%s" "${ESC__ENABLE_BRACKETED_PASTE}" 1>&"${GLOBAL_FD_TUI}"
+  bind -x '"\e[200~": tui_keyPressListener_handlePaste'
   _TUI_RECEIVED_PASTE_EVENT=false
+
+  # enable mouse tracking
+  # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Normal-tracking-mode
+  printf "%s" "${ESC__ENABLE_MOUSE_ANY_EVENT_TRACKING}" 1>&"${GLOBAL_FD_TUI}"
+  bind -x '"\e[<": tui_keyPressListener_handleMouseEvent'
+  _TUI_RECEIVED_MOUSE_EVENT=false
 
   while [[ -t ${_TUI_USER_INPUT_FD} ]] && kill -0 "${GLOBAL_PROGRAM_MAIN_PID}" 2>/dev/null; do
     if terminal::waitForKeyPress -u "${_TUI_USER_INPUT_FD}"; then
+
+      if [[ ${_TUI_RECEIVED_MOUSE_EVENT} == "true" ]]; then
+        # we received a mouse event, we need to parse it
+        tui_keyPressListener_parseMouseEvent "${LAST_KEY_PRESSED}${PREVIOUS_KEY_PRESSED_EXTRA_CHARS%%$'\e'*}"
+        PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
+        _TUI_RECEIVED_MOUSE_EVENT=false
+        continue
+      fi
 
       if [[ ${_TUI_RECEIVED_PASTE_EVENT} == "true" ]]; then
         # the user is pasting text, we handle it; pasted text will end with \e[201~
@@ -170,4 +185,59 @@ function tui_keyPressListener_handleKeyBinding() {
 
 function tui_keyPressListener_handlePaste() {
   _TUI_RECEIVED_PASTE_EVENT=true
+}
+
+function tui_keyPressListener_handleMouseEvent() {
+  _TUI_RECEIVED_MOUSE_EVENT=true
+}
+
+function tui_keyPressListener_parseMouseEvent() {
+  local mouseEventEncoded="${1}"
+  # mouse event is encoded as: <ESC>[<button type>;<x position>;<y position>[M|m]
+
+  local -i mouseEventType="${mouseEventEncoded%%;*}"
+  local mouseEventDecoded=""
+
+  # bitwise operations to decode the mouse event type
+  if (( mouseEventType & 2#100000 )); then
+    mouseEventDecoded+="MOVE+"
+  fi
+  if (( mouseEventType & 2#10000 )); then
+    mouseEventDecoded+="CTRL+"
+  fi
+  if (( mouseEventType & 2#1000 )); then
+    mouseEventDecoded+="ALT+"
+  fi
+  if (( mouseEventType & 2#100 )); then
+    mouseEventDecoded+="SHIFT+"
+  fi
+  mouseEventType=$(( mouseEventType & 2#11000011 ))
+
+  local mouseButtonStatus
+  if [[ ${mouseEventEncoded} == *"M" ]]; then
+    mouseButtonStatus="CLICK_"
+  else
+    mouseButtonStatus="RELEASE_"
+  fi
+  mouseEventEncoded="${mouseEventEncoded%[Mm]}"
+
+  if (( mouseEventType == 0 )); then
+    mouseEventDecoded+="${mouseButtonStatus}MB1 "
+  elif (( mouseEventType == 1 )); then
+    mouseEventDecoded+="${mouseButtonStatus}MB2 "
+  elif (( mouseEventType == 2 )); then
+    mouseEventDecoded+="${mouseButtonStatus}MB3 "
+  elif (( mouseEventType == 3 )); then
+    mouseEventDecoded+="RELEASE "
+  elif (( mouseEventType == 64 )); then
+    mouseEventDecoded+="SCROLL_UP "
+  elif (( mouseEventType == 65 )); then
+    mouseEventDecoded+="SCROLL_DOWN "
+  else
+    mouseEventDecoded+="${mouseButtonStatus}MB${mouseEventType} "
+  fi
+
+  mouseEventDecoded+="${mouseEventEncoded#*;}"
+
+  printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "${mouseEventDecoded}"
 }

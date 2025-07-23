@@ -222,6 +222,17 @@ ESC__ENABLE_BRACKETED_PASTE=$'\e[?2004h'
 # disable bracketed paste mode
 ESC__DISABLE_BRACKETED_PASTE=$'\e[?2004l'
 
+# enable mouse button report (normal mode + extended SGR mode)
+# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
+ESC__ENABLE_MOUSE_BUTTON_TRACKING=$'\e[?1000h'$'\e[?1006h'
+# disable mouse tracking
+ESC__DISABLE_MOUSE_BUTTON_TRACKING=$'\e[?1006l'$'\e[?1000l'
+
+# enable mouse any event report (any event mode + extended SGR mode)
+ESC__ENABLE_MOUSE_ANY_EVENT_TRACKING=$'\e[?1003h'$'\e[?1006h'
+# disable mouse any event report
+ESC__DISABLE_MOUSE_ANY_EVENT_TRACKING=$'\e[?1006l'$'\e[?1003l'
+
 if [[ ${VALET_CONFIG_DISABLE_ESC_CODES:-} == "true" ]]; then
   # we reset all the color variables to a blank string
   _ESC_VARS="${!ESC__*} ${!__ESC__*}"
