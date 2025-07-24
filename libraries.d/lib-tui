@@ -27,6 +27,7 @@ function tui::test() {
   _OPTION_ON_REDRAW_REQUIRED_CALLBACK=onRedrawRequired \
   _OPTION_ON_EACH_LOOP_ITERATION_CALLBACK=onTick \
   _OPTION_LOOP_DELAY=1.0 \
+  _OPTION_TRACK_MOUSE_BUTTON_ONLY=false \
     tui::startMainLoop onKeyPress
 }
 
@@ -35,6 +36,7 @@ function tui::startMainLoop() {
   local onEachLoopIterationFunction="${_OPTION_ON_EACH_LOOP_ITERATION_CALLBACK:-}"
   local onRedrawRequiredFunction="${_OPTION_ON_REDRAW_REQUIRED_CALLBACK:-}"
   local loopDelay="${_OPTION_LOOP_DELAY:-0.5}"
+  local _TUI_TRACK_MOUSE_BUTTON_ONLY="${_OPTION_TRACK_MOUSE_BUTTON_ONLY:-false}"
   local _TUI_KEY_BINDINGS_PREFIX=":"
 
   if ! declare -F "${onKeyPressFunction}" &>/dev/null; then
@@ -142,7 +144,11 @@ function tui_keyPressListener() {
 
   # enable mouse tracking
   # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Normal-tracking-mode
-  printf "%s" "${ESC__ENABLE_MOUSE_ANY_EVENT_TRACKING}" 1>&"${GLOBAL_FD_TUI}"
+  if [[ ${_TUI_TRACK_MOUSE_BUTTON_ONLY} == "true" ]]; then
+    printf "%s" "${ESC__ENABLE_MOUSE_BUTTON_TRACKING}" 1>&"${GLOBAL_FD_TUI}"
+  else
+    printf "%s" "${ESC__ENABLE_MOUSE_ANY_EVENT_TRACKING}" 1>&"${GLOBAL_FD_TUI}"
+  fi
   bind -x '"\e[<": tui_keyPressListener_handleMouseEvent'
   _TUI_RECEIVED_MOUSE_EVENT=false
 
@@ -199,9 +205,6 @@ function tui_keyPressListener_parseMouseEvent() {
   local mouseEventDecoded=""
 
   # bitwise operations to decode the mouse event type
-  if (( mouseEventType & 2#100000 )); then
-    mouseEventDecoded+="MOVE+"
-  fi
   if (( mouseEventType & 2#10000 )); then
     mouseEventDecoded+="CTRL+"
   fi
@@ -210,6 +213,9 @@ function tui_keyPressListener_parseMouseEvent() {
   fi
   if (( mouseEventType & 2#100 )); then
     mouseEventDecoded+="SHIFT+"
+  fi
+  if (( mouseEventType & 2#100000 )); then
+    mouseEventDecoded+="MOVE+"
   fi
   mouseEventType=$(( mouseEventType & 2#11000011 ))
 
@@ -228,7 +234,7 @@ function tui_keyPressListener_parseMouseEvent() {
   elif (( mouseEventType == 2 )); then
     mouseEventDecoded+="${mouseButtonStatus}MB3 "
   elif (( mouseEventType == 3 )); then
-    mouseEventDecoded+="RELEASE "
+    mouseEventDecoded="${mouseEventDecoded%+} "
   elif (( mouseEventType == 64 )); then
     mouseEventDecoded+="SCROLL_UP "
   elif (( mouseEventType == 65 )); then
