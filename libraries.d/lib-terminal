@@ -76,7 +76,7 @@ function terminal::getCursorPosition() {
 # terminal::switchToFullScreen
 # ```
 function terminal::switchToFullScreen() {
-  _TERMINAL_FULL_SCREEN_MODE=true
+  GLOBAL_TERMINAL_FULL_SCREEN_MODE_ENABLED=true
 
   # switch to the alternate screen, hide the cursor and clear the screen
   printf '%s' "${ESC__ENABLE_ALTERNATE_BUFFER_SCREEN}${ESC__CURSOR_HIDE}${ESC__ERASE_SCREEN}" 1>&"${GLOBAL_FD_TUI}"
@@ -93,7 +93,8 @@ function terminal::switchToFullScreen() {
 # terminal::switchBackFromFullScreen
 # ```
 function terminal::switchBackFromFullScreen() {
-  _TERMINAL_FULL_SCREEN_MODE=false
+  # shellcheck disable=SC2034
+  GLOBAL_TERMINAL_FULL_SCREEN_MODE_ENABLED=false
 
   # restore the terminal state
   printf '%s' "${ESC__ERASE_SCREEN}${ESC__TEXT_RESET}${ESC__DISABLE_ALTERNATE_BUFFER_SCREEN}" 1>&"${GLOBAL_FD_TUI}"
@@ -171,9 +172,7 @@ function terminal::rerouteLogs() {
     _OPTION_PATH_ONLY=true fs::createTempFile
     _TUI_LOG_FILE="${REPLY}"
   fi
-  _TUI_ORIGINAL_LOG_FD="${VALET_CONFIG_LOG_FD:-}"
-  VALET_CONFIG_LOG_FD="${_TUI_LOG_FILE}"
-  log::init
+  log::init "${_TUI_LOG_FILE}"
   GLOBAL_LOG_REROUTED_TO_FILE_ENABLED=true
 }
 
@@ -186,21 +185,15 @@ function terminal::rerouteLogs() {
 # terminal::restoreLogs
 # ```
 function terminal::restoreLogs() {
-  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} != "true" || ! -v _TUI_ORIGINAL_LOG_FD ]]; then
+  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} != "true" ]]; then
     return 0
   fi
-  if [[ -n ${_TUI_ORIGINAL_LOG_FD} ]]; then
-    VALET_CONFIG_LOG_FD="${_TUI_ORIGINAL_LOG_FD}"
-  else
-    unset -v VALET_CONFIG_LOG_FD
-  fi
   log::init
-  unset -v _TUI_ORIGINAL_LOG_FD
 
   # display the accumulated logs
-  if [[ -s "${_TUI_LOG_FILE}" ]]; then
+  if [[ -s ${_TUI_LOG_FILE} ]]; then
     fs::readFile "${_TUI_LOG_FILE}"
-    printf '%s' "${REPLY}" 1>&"${GLOBAL_FD_LOG}"
+    log::printRaw REPLY
   fi
 }
 

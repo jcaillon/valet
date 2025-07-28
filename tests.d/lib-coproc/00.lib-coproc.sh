@@ -155,6 +155,7 @@ function test_coproc::run_testError() {
   test::prompt _OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_20
   _OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_20
   test::unsetTestCallStack
+  coproc::wait _COPROC_20
   if coproc::wait _COPROC_20; then
     test::fail "The coproc ⌜_COPROC_20⌝ should have failed."
   else

@@ -157,7 +157,6 @@ else
 fi
 set +o errexit
 
-#TODO: implement this in a function; use it in lib-test (test::exit) + in self-extend (source extension script)
 set +o errexit
 (
   set -o errexit

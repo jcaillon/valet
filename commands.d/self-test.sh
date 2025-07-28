@@ -19,6 +19,8 @@ source string
 source progress
 # shellcheck source=../libraries.d/lib-bash
 source bash
+# shellcheck source=../libraries.d/lib-coproc
+source coproc
 # shellcheck source=../libraries.d/lib-fs
 source fs
 # shellcheck source=../libraries.d/lib-time
@@ -68,7 +70,7 @@ options:
 - name: -p, --parallel-test-suites <number>
   default: 8
   description: |-
-    The number of test suites to run in parallel. Set to 0 to run all the test suites sequentially.
+    The number of test suites to run in parallel.
 examples:
 - name: self test
   description: |-
@@ -106,12 +108,9 @@ function selfTest() {
     _TEST_EXCLUDE_PATTERN="${exclude}"
   fi
   _TEST_NB_PARALLEL_TEST_SUITES="${parallelTestSuites:-}"
-  if ((_TEST_NB_PARALLEL_TEST_SUITES == 0)); then
-    log::debug "Running all test suites sequentially."
-  else
-    log::debug "Running up to ⌜${_TEST_NB_PARALLEL_TEST_SUITES}⌝ test suites in parallel."
-  fi
+  log::debug "Running up to ⌜${_TEST_NB_PARALLEL_TEST_SUITES}⌝ test suites in parallel."
 
+  GLOBAL_TEST_FRAMEWORK_ERROR_STATUS=140
   GLOBAL_TEST_APPROVAL_FAILURE_STATUS=141
   GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS=142
   declare -g -i _TEST_FAILURE_STATUS=0
@@ -218,11 +217,9 @@ function selfTest_runSingleTestSuites() {
 
   # make a list of all test suite directories
   fs::listDirectories "${testsDotDirectory}"
-  local testDirectory testDirectoryName
+  local testDirectory
   local -a testSuiteDirectories=()
   for testDirectory in "${REPLY_ARRAY[@]}"; do
-    testDirectoryName="${testDirectory##*/}"
-
     # skip if not a directory or hidden dir
     if [[ ! -d ${testDirectory} ]]; then continue; fi
 
@@ -254,46 +251,17 @@ function selfTest_runSingleTestSuites() {
   progress::start
   progress::update 0 "Running test suites."
 
-  # sequential run
-  if ((_TEST_NB_PARALLEL_TEST_SUITES == 0 || ${#testSuiteDirectories[@]} == 1)); then
-    _OPTION_PATH_ONLY=true fs::createTempFile
-    local testLogFile="${REPLY}"
+  # parallel run
+  declare -g -a _TEST_SUITE_NAMES=() _TEST_SUITE_COMMANDS=()
+  for testDirectory in "${testSuiteDirectories[@]}"; do
+    _TEST_SUITE_NAMES+=("${testDirectory##*/}")
+    _TEST_SUITE_COMMANDS+=("selfTest_runSingleTestSuite '${testDirectory}'")
+  done
 
-    local -i testSuitesDoneCount=0
-    for testDirectory in "${testSuiteDirectories[@]}"; do
-      testDirectoryName="${testDirectory##*/}"
-      log::debug "Starting test suite ⌜${testDirectoryName}⌝."
-
-      : >"${testLogFile}"
-
-      progress::update $((testSuitesDoneCount * 100 / ${#testSuiteDirectories[@]})) "Running test suite ⌜${testDirectoryName}⌝."
-      # TODO: to be be replace by bash::runInParallel when we implement
-      # sequential run when n=1
-      (
-        VALET_CONFIG_LOG_FD="${testLogFile}"
-        log::init
-        selfTest_runSingleTestSuite "${testDirectory}") || _TEST_FAILED_TEST_SUITES+=("${testDirectoryName}"
-      )
-
-      # display the job output
-      fs::readFile "${testLogFile}"
-      log::printRaw REPLY
-
-      testSuitesDoneCount+=1
-    done
-
-  else
-    # parallel run
-    declare -g -a _TEST_SUITE_NAMES=() _TEST_SUITE_COMMANDS=() _TEST_SUITE_OUTPUT_FILES=()
-    for testDirectory in "${testSuiteDirectories[@]}"; do
-      _TEST_SUITE_NAMES+=("${testDirectory##*/}")
-      _OPTION_PATH_ONLY=true fs::createTempFile
-      _TEST_SUITE_OUTPUT_FILES+=("${REPLY}")
-      _TEST_SUITE_COMMANDS+=("VALET_CONFIG_LOG_FD='${REPLY}'; log::init; selfTest_runSingleTestSuite '${testDirectory}'")
-    done
-
-    bash::runInParallel _TEST_SUITE_NAMES _TEST_SUITE_COMMANDS "${_TEST_NB_PARALLEL_TEST_SUITES}" selfTest_parallelCallback
-  fi
+  _OPTION_MAX_IN_PARALLEL=${_TEST_NB_PARALLEL_TEST_SUITES} \
+  _OPTION_COMPLETED_CALLBACK=selfTest_parallelCallback \
+  _OPTION_PRINT_REDIRECTED_LOGS=true \
+    coproc::runInParallel _TEST_SUITE_COMMANDS
 
   progress::stop
 
@@ -313,19 +281,20 @@ function selfTest_runSingleTestSuites() {
 # It updates the progress bar and displays the output of the test suite.
 function selfTest_parallelCallback() {
   local -i index="${1}"
-  local jobName="${2}"
-  local -i exitCode="${3}"
-  local -i percent="${4}"
+  local -i exitCode="${2}"
+  local -i percent="${3}"
 
-  progress::update "${percent}" "Done running test suite ⌜${jobName}⌝."
-
-  # display the job output
-  fs::readFile "${_TEST_SUITE_OUTPUT_FILES[${index}]}"
-  log::printRaw REPLY
+  progress::update "${percent}" "Done running test suite ⌜${_TEST_SUITE_NAMES[index]}⌝."
 
   if ((exitCode != 0)); then
-    _TEST_FAILED_TEST_SUITES+=("${jobName}")
+    _TEST_FAILED_TEST_SUITES+=("${_TEST_SUITE_NAMES[index]}")
   fi
+  if (( exitCode == GLOBAL_TEST_FRAMEWORK_ERROR_STATUS )); then
+    # cancel the parallel run
+    REPLY=1
+    core::fail "Error in the test framework, cannot continue running tests."
+  fi
+  REPLY=0
 }
 
 # ## selfTest_runSingleTestSuite
@@ -336,9 +305,6 @@ function selfTest_parallelCallback() {
 #
 function selfTest_runSingleTestSuite() {
   local testSuiteDirectory="${1}"
-
-  core::setShellOptions
-  trap::unregister
 
   GLOBAL_TEST_SUITE_NAME="${testSuiteDirectory##*/}"
   local testsDotDirectory="${testSuiteDirectory%/*}"
@@ -405,16 +371,16 @@ function selfTest_runSingleTestSuite() {
     # Run the test script in a subshell.
     # This way each test can define any vars or functions without polluting
     # the global execution of the tests.
-    if ! (
-      trap 'selfTest_onExitTestInternal $?' EXIT
-      trap 'selfTest_onErrTestInternal' ERR
-      selfTest_runSingleTest "${testSuiteDirectory}" "${testScript}" || exit $?
-    ) 2>&"${GLOBAL_FD_TEST_LOG}" 1>&2; then
+    bash::runInSubshell selfTest_runSingleTest "${testSuiteDirectory}" "${testScript}"
+    local exitCode="${REPLY}"
 
+    if (( exitCode != 0 )); then
       # Handle an error that occurred in the test script.
-      # We trapped the EXIT signal in the subshell that runs the test and we make it output the
-      # stack trace in a file (selfTest_onExitTestInternal). We can now read this file and display the stack trace.
-      local exitCode="${PIPESTATUS[0]:-}"
+      # If the error happened in the test script, we will have capture the stack trace in a file so we can read it.
+
+      if [[ ! -s ${GLOBAL_TEST_STACK_FILE} ]]; then
+        exit "${GLOBAL_TEST_FRAMEWORK_ERROR_STATUS}"
+      fi
 
       # get the stack trace at script exit
       fs::readFile "${GLOBAL_TEST_STACK_FILE}"
@@ -431,7 +397,7 @@ function selfTest_runSingleTestSuite() {
           "${REPLY}" \
           "" \
           "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
-        log::printCallStack 1 7
+        log::printCallStack 1 10
 
       elif [[ -n ${GLOBAL_STACK_FUNCTION_NAMES_ERR:-} ]]; then
         log::error "The test script ⌜${testScript##*/}⌝ had an error and exited with code ⌜${exitCode}⌝." \
@@ -446,12 +412,7 @@ function selfTest_runSingleTestSuite() {
         GLOBAL_STACK_FUNCTION_NAMES=("${GLOBAL_STACK_FUNCTION_NAMES_ERR[@]}")
         GLOBAL_STACK_SOURCE_FILES=("${GLOBAL_STACK_SOURCE_FILES_ERR[@]}")
         GLOBAL_STACK_LINE_NUMBERS=("${GLOBAL_STACK_LINE_NUMBERS_ERR[@]}")
-        # print the last line of the err output, which is supposed to be the bash error message
-        fs::tail "${GLOBAL_TEST_STANDARD_ERROR_FILE}" 1 true
-        if [[ -n ${REPLY_ARRAY[0]:-} ]]; then
-          log::printString "░ ${REPLY_ARRAY[0]:-}" "░ "
-        fi
-        log::printCallStack 2 7
+        log::printCallStack 1 10
       else
         log::error "The test script ⌜${testScript##*/}⌝ exited with code ⌜${exitCode}⌝." \
           "Test scripts must not exit or return an error (shell options are set to exit on error)." \
@@ -462,7 +423,7 @@ function selfTest_runSingleTestSuite() {
           "- ⌜test::exit myCommandThatFails⌝" \
           "" \
           "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
-        log::printCallStack 1 7
+        log::printCallStack 1 10
       fi
 
       nbOfScriptsWithErrors+=1
@@ -488,7 +449,7 @@ function selfTest_runSingleTestSuite() {
 
   # exit with an error if there were errors in the test scripts
   if ((nbOfScriptsWithErrors > 0)); then
-    return 1
+    exit 1
   fi
 
   # compare the test suite outputs with the approved files
@@ -497,46 +458,13 @@ function selfTest_runSingleTestSuite() {
     if ((_TEST_FAILURE_STATUS <= GLOBAL_TEST_APPROVAL_FAILURE_STATUS)); then
       _TEST_FAILURE_STATUS="${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
     fi
-    return "${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
+    exit "${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
   fi
 
   if log::isDebugEnabled; then
     selfTestUtils_displayTestLogs
   fi
-  return 0
-}
-
-# ## selfTest_onExitTestInternal
-#
-# Will be called if a test exits (usually because of an error).
-# It will output the stack trace in a file.
-# We need to capture the stack trace within the subshell that runs the test script.
-function selfTest_onExitTestInternal() {
-  # handle an exit in the test script
-  local exitCode="${1}"
-
-  if ((exitCode == 0)); then
-    return 0
-  fi
-
-  if [[ ! -v GLOBAL_STACK_FUNCTION_NAMES ]]; then
-    GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
-    GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
-    GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
-    declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
-  fi
-}
-
-# ## selfTest_onErrTestInternal
-#
-# Will be called if a test script has an error.
-# We need to capture the stack trace within the subshell that runs the test script.
-function selfTest_onErrTestInternal() {
-  # handle an error in the test script
-  GLOBAL_STACK_FUNCTION_NAMES_ERR=("${FUNCNAME[@]}")
-  GLOBAL_STACK_SOURCE_FILES_ERR=("${BASH_SOURCE[@]}")
-  GLOBAL_STACK_LINE_NUMBERS_ERR=("${BASH_LINENO[@]}")
-  declare -p GLOBAL_STACK_FUNCTION_NAMES_ERR GLOBAL_STACK_SOURCE_FILES_ERR GLOBAL_STACK_LINE_NUMBERS_ERR >>"${GLOBAL_TEST_STACK_FILE}"
+  exit 0
 }
 
 # ## selfTest_runSingleTest
@@ -550,7 +478,6 @@ function selfTest_runSingleTest() {
 
   # Set the value of Valet variables to ensure consistency in the tests
   selfTestUtils_setupValetForConsistency
-
   # reset the temporary location (to have consistency when using fs::createTempDirectory for example)
   if [[ -d ${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY} ]]; then
     rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
@@ -579,11 +506,30 @@ function selfTest_runSingleTest() {
   exec {GLOBAL_FD_TUI}>&2
   unset -v GLOBAL_FD_ORIGINAL_STDERR
 
-  # run a custom user script before the test if it exists
-  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-each-test"
+  # setup extra functions that will allow us to capture the stack trace on exit or error in the test script
+  # shellcheck disable=SC2317
+  function trap::onExitInternalExtra() {
+    local exitCode="${1}"
+    if [[ ${exitCode} -ne 0 && ! -v GLOBAL_STACK_FUNCTION_NAMES ]]; then
+      GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
+      GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
+      GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
+      declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
+    fi
+  }
+  # shellcheck disable=SC2317
+  function trap::onErrorInternalExtra() {
+    GLOBAL_STACK_FUNCTION_NAMES_ERR=("${FUNCNAME[@]}")
+    GLOBAL_STACK_SOURCE_FILES_ERR=("${BASH_SOURCE[@]}")
+    GLOBAL_STACK_LINE_NUMBERS_ERR=("${BASH_LINENO[@]}")
+    declare -p GLOBAL_STACK_FUNCTION_NAMES_ERR GLOBAL_STACK_SOURCE_FILES_ERR GLOBAL_STACK_LINE_NUMBERS_ERR >>"${GLOBAL_TEST_STACK_FILE}"
+  }
 
   # Set the value of important bash variables to ensure consistency in the tests
   selfTestUtils_setupBashForConsistency
+
+  # run a custom user script before the test if it exists
+  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-each-test"
 
   # run the test
   # shellcheck disable=SC1090

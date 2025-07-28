@@ -8,20 +8,31 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<sub
 source "libraries.d/core"
 include tui coproc
 
+function ret1() {
+  ((0/0)) # This will fail and exit the subshell
+  log::info "This line will not be executed because the previous command failed."
+  return 1
+}
+
+compoundCommand=ret1
+set +o errexit
+GLOBAL_ERROR_TRAP_TEST_MODE_ENABLED=true
+eval "${compoundCommand}"
+exitCode="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
+GLOBAL_ERROR_TRAP_TEST_MODE_ENABLED=false
+
+log::info "ok, exitCode=${exitCode}"
+
+exit 0
+
 function onSubshellExit() {
   log::warning "Subshell exited with code $1"
 }
 
 function initCommand() {
-# # re-enable errexit in the subshell
-# set -o errexit
-
-# # we are inside a coproc, register the correct traps
-# trap::registerSubshell
-
   ((0/0)) # This will fail and exit the subshell
   log::info "This line will not be executed because the previous command failed."
 }
 
-coproc::run _COPROC_20 initCommand false willNotBeUsed ":"
+_OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_20
 coproc::wait _COPROC_20

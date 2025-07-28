@@ -2,8 +2,152 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# shellcheck source=lib-bash
-source bash
+# ## coproc::runInParallel
+#
+# This function runs a list of commands in parallel with a maximum number of parallel coprocs.
+#
+# - $1: **job commands array name** _as string_:
+#       The name of the array containing the commands to run.
+#       Each command string will be evaluated in a subshell.
+#       Each command should explicitly exit with a non-zero code if it fails and with zero if it succeeds.
+# - ${_OPTION_MAX_IN_PARALLEL} _as int_:
+#       (optional) The maximum number of parallel coprocs to run.
+#       (defaults to 8)
+# - ${_OPTION_COMPLETED_CALLBACK} _as string_:
+#       (optional) The name of the function to call when a coproc is completed (successfully or not).
+#       The function will receive the following arguments:
+#       - $1 the coproc index
+#       - $2 the coproc exit code
+#       - $3 the percentage of coprocs already completed
+#       - $4 the path of the file containing the accumulated logs of the coproc
+#       If the function sets REPLY to 1, the script will exit early. Otherwise it should set REPLY to 0.
+#       (defaults to "" which does nothing)
+# - ${_OPTION_REDIRECT_LOGS} _as bool_:
+#       (optional) Redirect the logs of the coproc instead of printing them in the current file descriptor.
+#       The accumulated logs of the coproc will be available in the completed callback function.
+#       (defaults to false)
+# - ${_OPTION_PRINT_REDIRECTED_LOGS} _as bool_:
+#       (optional) This option allows to automatically redirect the logs of the coproc to a file and
+#       print the accumulated logs of a coproc when it is completed (successfully or not).
+#       (defaults to false)
+#
+# Returns:
+#
+# - ${REPLY}: 0 if all the jobs completed, 1 if the completed callback function returned 1.
+# - ${REPLY2}: The number of successfully completed jobs.
+# - ${REPLY_ARRAY[@]}: an array containing the exit codes of the jobs.
+#
+# ```bash
+# declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
+# _OPTION_MAX_PARALLEL_COPROCS=2 coproc::runInParallel jobCommands
+# ```
+function coproc::runInParallel() {
+  local -n jobCommands="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -i maxInParallel="${_OPTION_MAX_IN_PARALLEL:-8}"
+  local completedCallback="${_OPTION_COMPLETED_CALLBACK:-}"
+  local redirectLogs="${_OPTION_REDIRECT_LOGS:-false}"
+  local printRedirectedLogs="${_OPTION_PRINT_REDIRECTED_LOGS:-false}"
+  local coprocNamePrefix="_COPROC_PARALLEL_"
+
+  local logOnErrorExit=false
+  if [[ -z ${completedCallback} ]]; then
+    # if no callback is defined, we want to log on error exit
+    logOnErrorExit=true
+  fi
+
+  maxInParallel=$(( maxInParallel < 1 ? 1 : maxInParallel ))
+
+  local -a -i pids=() runningPids=() exitCodes=()
+  local -i index pid endedCoprocPid endedCoprocExitStatus endedCoprocIndex
+  local -a logFiles=()
+  local logFile=""
+
+  for ((index = 0; index < ${#jobCommands[@]}; index++)); do
+    if [[ ${redirectLogs} == "true" || ${printRedirectedLogs} == "true" ]]; then
+      _OPTION_PATH_ONLY=true fs::createTempFile
+      logFile="${REPLY}"
+    fi
+    logFiles+=("${logFile}")
+
+    _OPTION_INIT_COMMAND="${jobCommands[index]}" \
+      _OPTION_REDIRECT_LOGS_TO_FILE="${logFile}" \
+      _OPTION_LOG_ON_ERROR_EXIT="${logOnErrorExit}" \
+      coproc::run "${coprocNamePrefix}${index}"
+
+    pid="${REPLY}"
+    pids+=("${pid}")
+    runningPids+=("${pid}")
+
+    log::debug "Running parallel coproc ${index} with PID ${pid}."
+    log::trace $'\n'"Command: ${jobCommands[index]}"
+
+    while (( ${#runningPids[@]} >= maxInParallel || index == ${#jobCommands[@]} - 1 )); do
+      # wait for one of the coproc to finish (or all of them if they are all scheduled)
+      endedCoprocExitStatus=0
+      wait -n -p endedCoprocPid "${runningPids[@]}" || endedCoprocExitStatus=$?
+      exitCodes+=("${endedCoprocExitStatus}")
+
+      # find the index of the ended coproc in the pids array
+      for endedCoprocIndex in "${!pids[@]}"; do
+        if [[ ${pids[endedCoprocIndex]} == "${endedCoprocPid}" ]]; then
+          log::debug "The coproc with PID ${endedCoprocPid} is at index ${endedCoprocIndex} in ${pids[*]}."
+          break
+        fi
+      done
+
+      log::debug "The parallel coproc ${endedCoprocIndex} with PID ${endedCoprocPid} is completed with code ${endedCoprocExitStatus}."
+
+      # remove the coproc from the list of running pids
+      coproc_removePidFromBackgroundPids "${endedCoprocPid}"
+      local pidIndex
+      for pidIndex in "${!runningPids[@]}"; do
+        if [[ ${runningPids[pidIndex]} == "${endedCoprocPid}" ]]; then
+          unset -v 'runningPids[pidIndex]'
+          break
+        fi
+      done
+
+      # execute the completed callback if defined
+      if [[ -n ${completedCallback} ]]; then
+        local -i percentageCompleted=$(( ${#exitCodes[@]} * 100 / ${#jobCommands[@]} ))
+
+        if [[ ${printRedirectedLogs} == "true" ]]; then
+          # display the accumulated logs
+          if [[ -n ${logFiles[endedCoprocIndex]} && -s ${logFiles[endedCoprocIndex]} ]]; then
+            fs::readFile "${logFiles[endedCoprocIndex]}"
+            log::printRaw REPLY
+          fi
+        fi
+
+        REPLY=0
+        "${completedCallback}" "${endedCoprocIndex}" "${endedCoprocExitStatus}" "${percentageCompleted}" "${logFiles[endedCoprocIndex]}"
+        if (( REPLY != 0 )) ; then
+          log::debug "The completed callback function ⌜${completedCallback}⌝ requested to stop the parallel execution."
+          REPLY=1
+          break 2
+        fi
+      fi
+
+      # if all coproc are scheduled and completed, we can exit the loop
+      if ((${#exitCodes[@]} == ${#jobCommands[@]})); then
+        REPLY=0
+        break 2
+      fi
+    done
+  done
+
+  REPLY2=0
+  local -i exitCode
+  for exitCode in "${exitCodes[@]}"; do
+    if (( exitCode == 0 )); then
+      REPLY2=$((REPLY2 + 1))
+    fi
+  done
+
+  # shellcheck disable=SC2034
+  REPLY_ARRAY=("${exitCodes[@]}")
+}
+
 
 # ## coproc::run
 #
@@ -14,7 +158,7 @@ source bash
 #
 # - $1: **coproc variable name** _as string_:
 #       The variable name to use for the coproc.
-#       It will be used to store the coproc file descriptors and PID.²
+#       It will be used to store the coproc file descriptors and PID.
 #       <coproc_variable_name>[0] will be the input pipe file descriptor,
 #       <coproc_variable_name>[1] will be the output pipe file descriptor,
 #       <coproc_variable_name>_PID will be the PID of the coproc.
@@ -47,6 +191,12 @@ source bash
 #       (optional) If true, the coproc will only keep the last message received
 #       from the main thread to evaluate the on message command.
 #       (defaults to false)
+# - ${_OPTION_REDIRECT_LOGS_TO_FILE} _as string_:
+#       (optional) The path to a file where the logs of the coproc will be redirected.
+#       (defaults to "")
+# - ${_OPTION_LOG_ON_ERROR_EXIT} _as bool_:
+#       (optional) If true, will display an error if the coproc exits with a non zero code
+#       (defaults to true)
 #
 # Returns:
 #
@@ -63,15 +213,18 @@ function coproc::run() {
   local endCommand="${_OPTION_END_COMMAND:-":"}"
   local waitForReadiness="${_OPTION_WAIT_FOR_READINESS:-false}"
   local keepOnlyLastMessage="${_OPTION_KEEP_ONLY_LAST_MESSAGE:-false}"
+  local redirectLogsToFile="${_OPTION_REDIRECT_LOGS_TO_FILE:-""}"
+  local logOnErrorExit="${_OPTION_LOG_ON_ERROR_EXIT:-true}"
 
   if [[ -v "${coprocVarName}" ]]; then
     core::fail "The coproc ⌜${coprocVarName}⌝ is already running."
   fi
 
-  log::debug "Starting coproc ⌜${coprocVarName}⌝ with command ⌜${initCommand}⌝ and loop ⌜${loopCommand}⌝."
+  log::debug "Starting coproc ${coprocVarName}"
+  log::trace $'\n'"Init command: ${initCommand}"$'\n'"loop command: ${loopCommand}."$'\n'"on message command: ${onMessageCommand}"$'\n'"end command: ${endCommand}"$'\n'"wait for readiness: ${waitForReadiness}"$'\n'"keep only last message: ${keepOnlyLastMessage}"
 
   # Start the coproc
-  eval "{ coproc ${coprocVarName} { coproc_program \"${initCommand}\" \"${loopCommand}\" \"${onMessageCommand}\" \"${endCommand}\" ${waitForReadiness} ${keepOnlyLastMessage} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
+  eval "{ coproc ${coprocVarName} { coproc_program \"${initCommand}\" \"${loopCommand}\" \"${onMessageCommand}\" \"${endCommand}\" ${waitForReadiness} ${keepOnlyLastMessage} \"${redirectLogsToFile}\" ${logOnErrorExit} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
 
   # wait for pid variable to be set by bash (we should never enter the loop)
   local -i loopNumber=0
@@ -111,9 +264,15 @@ function coproc_program() {
   local endCommand="${4}"
   local waitForReadiness="${5}"
   local keepOnlyLastMessage="${6}"
+  local redirectLogsToFile="${7}"
+  local logOnErrorExit="${8}"
 
   # we are inside a coproc, register the correct traps
-  trap::registerSubshell
+  _OPTION_LOG_ON_ERROR_EXIT="${logOnErrorExit}" trap::registerSubshell
+
+  if [[ -n ${redirectLogsToFile} ]]; then
+    log::init "${redirectLogsToFile}"
+  fi
 
   # wait for the main process to retrieve our PID
   if ! kill -0 "${GLOBAL_PROGRAM_MAIN_PID}" 2>/dev/null || ! IFS=$'\0' read -rd $'\0' REPLY; then
@@ -309,7 +468,7 @@ function coproc_removePidFromBackgroundPids() {
 
   local index
   for index in "${!GLOBAL_BACKGROUND_PIDS[@]}"; do
-    if [[ "${GLOBAL_BACKGROUND_PIDS[index]}" == "${pid}" ]]; then
+    if [[ ${GLOBAL_BACKGROUND_PIDS[index]} == "${pid}" ]]; then
       unset -v 'GLOBAL_BACKGROUND_PIDS[index]'
       break
     fi

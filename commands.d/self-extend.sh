@@ -423,7 +423,8 @@ function selfExtend_executeSetupScript() {
 
   log::info "Executing the setup script for the extension ⌜${extensionName}⌝: ⌜${extensionDirectory}/extension.setup.sh⌝."
   # shellcheck disable=SC1091
-  if ! bash::runInSubshell source "${extensionDirectory}/extension.setup.sh"; then
+  bash::runInSubshell source "${extensionDirectory}/extension.setup.sh"
+  if (( REPLY != 0 )) ; then
     log::error "The extension setup script for the extension ⌜${extensionName}⌝ failed. You can manually retry the setup by running the script ⌜${extensionDirectory}/extension.setup.sh⌝."
     interactive::promptYesNo "The setup script for the extension ⌜${extensionName}⌝ failed (see above), do you want to continue anyway?" true || core::fail "The setup script for the extension ⌜${extensionName}⌝ failed."
   fi

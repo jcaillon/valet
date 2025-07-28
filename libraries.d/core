@@ -45,6 +45,26 @@ function trap::onErrorInternal() {
     return 0
   fi
 
+  # reset the trap to not call this function again
+  trap ERR
+
+  if declare -F trap::onErrorInternalExtra &>/dev/null; then
+    log::debug "Executing custom ⌜trap::onErrorInternalExtra function ."
+    trap::onErrorInternalExtra "${errorCodes[@]}"
+  fi
+
+  if [[ ${GLOBAL_ERROR_TRAP_TEST_MODE_ENABLED:-} == "true" ]]; then
+    # if we are in test mode, we do not want to exit the program when testing a function that
+    # returns a non-zero code; see function test_exec in lib-test
+    if [[ ${BASH_COMMAND:-} == "return "* ]]; then
+      # shellcheck disable=SC2034
+      GLOBAL_ERROR_TRAP_LAST_ERROR_CODE="${errorCodes[0]}"
+      return 0
+    elif [[ ${BASH_COMMAND:-} == "eval "* && ${FUNCNAME[1]:-} == "test_exec" ]]; then
+      return 0
+    fi
+  fi
+
   local symbol="╰"
   if [[ -n ${FUNCNAME[1]:-} ]]; then
     symbol="╭"
@@ -53,8 +73,6 @@ function trap::onErrorInternal() {
   log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
   log::printCallStack 2
 
-  # reset the trap to not call this function again
-  trap ERR
   GLOBAL_EXPECTED_EXIT=1
   exit 1
 }
@@ -70,6 +88,11 @@ function trap::onExitInternal() {
   fi
 
   log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
+
+  if declare -F trap::onExitInternalExtra &>/dev/null; then
+    log::debug "Executing custom ⌜trap::onExitInternalExtra function ."
+    trap::onExitInternalExtra "${exitCode}"
+  fi
 
   if declare -F trap::onExit &>/dev/null; then
     log::debug "Executing custom ⌜trap::onExit⌝ function ."
@@ -179,7 +202,9 @@ function trap::onCleanUpInternal() {
   if (( ${#GLOBAL_BACKGROUND_PIDS[@]} > 0 )); then
     local pid
     for pid in "${GLOBAL_BACKGROUND_PIDS[@]}"; do
-      kill "${pid}" &>/dev/null || :
+      log::debug "Killing background process with PID ${pid}."
+      kill -INT "${pid}" &>/dev/null || :
+      kill -HUP "${pid}" &>/dev/null || :
     done
   fi
 
@@ -359,26 +384,28 @@ function trap::unregister() {
 function trap::onSubshellExitInternal() {
   local exitCode="$?"
 
-  log::debug "Exiting subshell ${BASH_SUBSHELL} with code ${exitCode}"
-  if declare -F onSubshellExit &>/dev/null; then
-    log::debug "Executing custom ⌜onSubshellExit⌝ function ."
-    onSubshellExit "${exitCode}"
+  local symbol="╰"
+  if [[ -n ${FUNCNAME[1]:-} ]]; then
+    symbol="╭"
   fi
 
-  if [[ ! -v GLOBAL_SUBSHELL_EXPECTED_EXIT ]]; then
-    if (( exitCode != 0 )); then
-      log::error "Exiting subshell ${BASH_SUBSHELL} with code ${exitCode}, stack:"
-    elif log::isDebugEnabled; then
-      log::debug "Exiting subshell ${BASH_SUBSHELL} with code ${exitCode}, stack:"
-    fi
-    if log::isDebugEnabled || (( exitCode != 0 )); then
-      local symbol="╰"
-      if [[ -n ${FUNCNAME[1]:-} ]]; then
-        symbol="╭"
-      fi
+  if [[ ${GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT:-} == "true" && ${exitCode} -ne 0 ]]; then
+    log::error "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
+    log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
+    log::printCallStack 2
+  elif log::isDebugEnabled; then
+    if log::isTraceEnabled; then
+      log::debug "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
       log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
       log::printCallStack 2
+    else
+      log::debug "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}."
     fi
+  fi
+
+  if declare -F onSubshellExit &>/dev/null; then
+    log::debug "Executing custom exit ⌜onSubshellExit⌝ function."
+    onSubshellExit "${exitCode}"
   fi
 }
 
@@ -386,9 +413,9 @@ function trap::onSubshellExitInternal() {
 #
 # Register the traps for a subshell.
 #
-# - ${_OPTION_EXPECTED_EXIT} _as bool_:
-#       (optional) If true, will not display an error if the subshell exits with a non zero code
-#       (defaults to false)
+# - ${_OPTION_LOG_ON_ERROR_EXIT} _as bool_:
+#       (optional) If true, will display an error if the subshell exits with a non zero code
+#       (defaults to true)
 
 # > - For a subshell, we do not want to execute the "cleanup" because it would also delete
 # >   files of the main process.
@@ -401,10 +428,10 @@ function trap::registerSubshell() {
   if (( BASH_SUBSHELL == 0 )); then
     core::fail "This function should only be called in a subshell."
   fi
-  if [[ ${_OPTION_EXPECTED_EXIT:-false} == "true" ]]; then
-    GLOBAL_SUBSHELL_EXPECTED_EXIT=1
+  if [[ ${_OPTION_LOG_ON_ERROR_EXIT:-true} == "true" ]]; then
+    GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=true
   else
-    unset -v GLOBAL_SUBSHELL_EXPECTED_EXIT
+    unset -v GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT
   fi
 
   trap trap::onErrorInternal ERR
@@ -1360,7 +1387,7 @@ function log::parseLogPattern() {
       printfFormat="%${formatSpecifier:-"-5d"}"
       # shellcheck disable=SC2034
       declare -g -A GLOBAL_PID_TO_PNAME
-      REPLY4+=$'\n'"local processName=\${GLOBAL_PID_TO_PNAME[\${BASHPID}]:-}; if [[ -z \${processName} ]]; then if [[ \${BASHPID} == \"${BASHPID}\" ]]; then GLOBAL_PID_TO_PNAME[\${BASHPID}]=\"main\"; else string::numberToUniqueId \"\${BASHPID}\"; GLOBAL_PID_TO_PNAME[\${BASHPID}]=\"\${REPLY}\"; fi; processName=\${GLOBAL_PID_TO_PNAME[\${BASHPID}]}; fi"
+      REPLY4+=$'\n'"local processName=\${GLOBAL_PID_TO_PNAME[\${BASHPID}]:-}; if [[ -z \${processName} ]]; then if [[ \${BASHPID} == \"${GLOBAL_PROGRAM_MAIN_PID}\" ]]; then GLOBAL_PID_TO_PNAME[\${BASHPID}]=\"main\"; else string::numberToUniqueId \"\${BASHPID}\"; GLOBAL_PID_TO_PNAME[\${BASHPID}]=\"\${REPLY}\"; fi; processName=\${GLOBAL_PID_TO_PNAME[\${BASHPID}]}; fi"
       log_setPrintfArgumentFromFormat "processName"
       ;;
     subshell)
@@ -1433,6 +1460,9 @@ function log::parseLogPattern() {
 # Indeed, each log function might have to output the same log to different file descriptors or files,
 # we don't want to repeat code and we don't want to recompute the same output logic on each function.
 #
+# - $1: log file descriptor _as string_:
+#       (optional) The variable name to use for the coproc.
+#       (defaults to "${VALET_CONFIG_LOG_FD}" which defaults to 2).
 # - ${_OPTION_LOG_PATTERN} _as string_:
 #       (optional) If defined, the log pattern to use.
 #       (defaults to "")
@@ -1457,7 +1487,10 @@ function log::parseLogPattern() {
 # - ${GLOBAL_LOG_WRAP_PADDING}: The string with the number of spaces necessary to align with other log messages.
 # - $[GLOBAL_LOG_COLUMNS}: The number of columns to use for the log.
 # - $[GLOBAL_LOG_DISABLE_WRAP}: true if the log should not be wrapped.
+# shellcheck disable=SC2120
 function log::init() {
+  local logFileDescriptor="${1:-${VALET_CONFIG_LOG_FD:-}}"
+
   GLOBAL_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
   GLOBAL_LOG_DISABLE_WRAP="${VALET_CONFIG_LOG_DISABLE_WRAP:-false}"
   GLOBAL_LOG_PATTERN="${_OPTION_LOG_PATTERN:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level>  <icon><colorDefault> <message>"}}"
@@ -1474,18 +1507,18 @@ function log::init() {
   fi
 
   # make sure the file descriptor (if any) is valid
-  if [[ -n ${VALET_CONFIG_LOG_FD:-} && ${VALET_CONFIG_LOG_FD} != "2" ]]; then
+  if [[ -n ${logFileDescriptor} && ${logFileDescriptor} != "2" ]]; then
     local isFdValid=false
-    if [[ ${VALET_CONFIG_LOG_FD} =~ ^[0-9]+$ ]]; then
-      if { : >&"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>&${VALET_CONFIG_LOG_FD}; then
+    if [[ ${logFileDescriptor} =~ ^[0-9]+$ ]]; then
+      if { : >&"${logFileDescriptor}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>&${logFileDescriptor}; then
         isFdValid=true
       fi
-    elif { : >>"${VALET_CONFIG_LOG_FD}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>>"${VALET_CONFIG_LOG_FD}"; then
+    elif { : >>"${logFileDescriptor}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>>"${logFileDescriptor}"; then
       # it is a file
       isFdValid=true
     fi
     if [[ ${isFdValid} != "true" ]]; then
-      core::fail "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${VALET_CONFIG_LOG_FD}⌝."
+      core::fail "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${logFileDescriptor}⌝."
     fi
     # save the original stderr fd so we can restore it if we call log::init again
     exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
@@ -1493,9 +1526,10 @@ function log::init() {
     exec 2>&${GLOBAL_FD_LOG}
   else
     exec {GLOBAL_FD_LOG}>&2
+    logFileDescriptor="${logFileDescriptor:-2}"
   fi
 
-  local progressBarCode progressBarCode2 progressBarCode3 outputCode logFileDescriptor="${VALET_CONFIG_LOG_FD:-2}"
+  local progressBarCode progressBarCode2 progressBarCode3 outputCode
   if [[ ${logFileDescriptor} =~ ^[0-9]+$ ]]; then
     # it is a numbered file descriptor
     outputCode="1>&${logFileDescriptor}"

@@ -193,13 +193,17 @@ function test_exec() {
   # execute the command
   local -i exitCode=0
   if [[ ${canExit} == "true" ]]; then
-    if ! bash::runInSubshell eval "${compoundCommand}"; then
-      exitCode=${PIPESTATUS[0]:-}
-    fi
+    bash::runInSubshell eval "${compoundCommand}"
+    exitCode=${REPLY:-0}
   else
-    if ! eval "${compoundCommand}"; then
-      exitCode=${PIPESTATUS[0]:-}
-    fi
+    # here we allow the ERR trap to catch unexpected errors but we do not allow it to
+    # exit the program if the compound command is a function that returns a code != 0
+    set +o errexit
+    GLOBAL_ERROR_TRAP_TEST_MODE_ENABLED=true
+    eval "${compoundCommand}"
+    exitCode="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
+    GLOBAL_ERROR_TRAP_TEST_MODE_ENABLED=false
+    set -o errexit
   fi
 
   if ((exitCode != 0)); then

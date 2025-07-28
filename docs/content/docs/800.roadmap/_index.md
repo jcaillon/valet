@@ -8,7 +8,9 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- split the core file which is getting too big.
+- Check error handling inside ifs and evals.
+- Check how we can make the list component work in the main screen while user is scrolling. Seems like gum is doing it by positioning the cursor at the end of the screen always, and then using move cursor left to trigger an automatic scroll that takes the user back at the right spot.
+- Split the core file which is getting too big. Make main, the first included file.
 - test with bash 5.1, 5.2 and 5.3 in the pipeline (with different distros each time).
 - handle the drawing of TUI panels in a coproc so each has its own set of variables for its state.
 - rewrite the bash::runInParallel to use coproc instead of jobs. Allow to run the tasks sequentially if number in parallel is set to 1. Use this in the self-test to replace the subshell.

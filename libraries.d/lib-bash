@@ -6,20 +6,23 @@
 # ## bash::runInSubshell
 #
 # This functions runs a command in a subshell.
-  #
+# The command can fail and can trigger errors; it will be caught and this function will return
+# the exit code of the subshell.
+# This function can almost be considered as a try/catch block for bash.
+#
 # - $@: **command with args** _as string_:
 #       The command to run in the subshell.
 # - ${_OPTION_EXIT_ON_FAIL} _as bool_:
 #       (optional) If set to true, the main program will exit with code 1 if the subshell fails.
 #
 # Returns:
-# - $?:
-#   - 0 if the subshell completed successfully.
-#   - 1 if the subshell failed.
+#
+# - ${REPLY}: the exit code of the subshell.
 #
 # ```bash
-# if ! bash::runInSubshell myFunction; then
-#   core::fail "The subshell failed with code ${PIPESTATUS[0]:-}"
+# bash::runInSubshell myFunction
+# if (( REPLY != 0 )); then
+#   core::fail "The subshell failed with code ${REPLY}"
 # fi
 # ```
 #
@@ -27,11 +30,11 @@
 # > This function ensures that errors are properly handled and make the command list fail,
 # > it ensures that we run the exit trap and the custom function "onSubshellExit",
 # > and it gives you the correct exit code of the subshell.
+# > As a reminder, the error trap is not triggered for commands part of until while if ! || && tests,
+# > see <https://www.gnu.org/software/bash/manual/bash.html#index-trap> and
+# > <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.
 function bash::runInSubshell() {
   local exitOnFail="${_OPTION_EXIT_ON_FAIL:-false}"
-  # save the ERR trap to restore it later
-  bash::getBuiltinOutput trap -p ERR
-  local originalErrTrap="${REPLY}"
   # disable the ERR trap or we would catch the subshell failure with it and not restore
   # the errexit and the original trap (and we would display an error message that we do
   # not want to display because we already displayed an error from the subshell).
@@ -41,19 +44,19 @@ function bash::runInSubshell() {
   (
     # re-enable errexit in the subshell
     set -o errexit
-    _OPTION_EXPECTED_EXIT=true trap::registerSubshell
+    _OPTION_LOG_ON_ERROR_EXIT=false trap::registerSubshell
     "${@}"
   )
   local subshellExitCode=${PIPESTATUS[0]:-}
-  set +o errexit
+  set -o errexit
   # restore the original ERR trap
-  eval "${originalErrTrap}"
+  trap trap::onErrorInternal ERR
   if [[ ${exitOnFail} == "true" && ${subshellExitCode} -gt 0 ]]; then
     # shellcheck disable=SC2034
     GLOBAL_EXPECTED_EXIT=1
     exit "${subshellExitCode}"
   fi
-  return "${subshellExitCode}"
+  REPLY="${subshellExitCode}"
 }
 
 # ## bash::countJobs
