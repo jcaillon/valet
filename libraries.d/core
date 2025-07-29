@@ -45,36 +45,24 @@ function trap::onErrorInternal() {
     return 0
   fi
 
-  # reset the trap to not call this function again
-  trap ERR
-
-  if declare -F trap::onErrorInternalExtra &>/dev/null; then
-    log::debug "Executing custom ⌜trap::onErrorInternalExtra function ."
-    trap::onErrorInternalExtra "${errorCodes[@]}"
-  fi
-
-  if [[ ${GLOBAL_ERROR_TRAP_TEST_MODE_ENABLED:-} == "true" ]]; then
-    # if we are in test mode, we do not want to exit the program when testing a function that
-    # returns a non-zero code; see function test_exec in lib-test
-    if [[ ${BASH_COMMAND:-} == "return "* ]]; then
-      # shellcheck disable=SC2034
-      GLOBAL_ERROR_TRAP_LAST_ERROR_CODE="${errorCodes[0]}"
-      return 0
-    elif [[ ${BASH_COMMAND:-} == "eval "* && ${FUNCNAME[1]:-} == "test_exec" ]]; then
-      return 0
+  if [[ ${GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED:-} == "true" ]]; then
+    # if we are in try/catch mode, we do not want to exit the program on error, only capture the error code
+    if log::isTraceEnabled; then
+      log::trace "Caught error in try/catch mode, error code ${errorCodesString} for the command:"
+      log::printTrappedBashCommand
+      log::printCallStack 2
     fi
+    # shellcheck disable=SC2034
+    GLOBAL_ERROR_TRAP_LAST_ERROR_CODE="${errorCodes[0]}"
+    return 0
   fi
 
-  local symbol="╰"
-  if [[ -n ${FUNCNAME[1]:-} ]]; then
-    symbol="╭"
-  fi
   log::print "ERROR" "${ICON_ERROR:-}" "CMDERR" "Error code ${errorCodesString} for the command:"
-  log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
+  log::printTrappedBashCommand
   log::printCallStack 2
 
-  GLOBAL_EXPECTED_EXIT=1
-  exit 1
+  : before-exit
+  _OPTION_SILENT=true exit 1
 }
 
 # This function is called when the program exits (on error, on success, on exit, on interrupt).
@@ -83,34 +71,20 @@ function trap::onErrorInternal() {
 function trap::onExitInternal() {
   local exitCode="$?"
 
-  if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || (! -v GLOBAL_EXPECTED_EXIT && ${exitCode} != "0") ]]; then
+  if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || (${GLOBAL_EXPECTED_EXIT:-} != "true" && ${exitCode} != "0") ]]; then
     _OPTION_DUMP_SUFFIX="-${exitCode}" core::dump
   fi
 
   log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
 
-  if declare -F trap::onExitInternalExtra &>/dev/null; then
-    log::debug "Executing custom ⌜trap::onExitInternalExtra function ."
-    trap::onExitInternalExtra "${exitCode}"
-  fi
-
-  if declare -F trap::onExit &>/dev/null; then
-    log::debug "Executing custom ⌜trap::onExit⌝ function ."
-    trap::onExit "${exitCode}"
-  fi
-
-  if [[ ! -v GLOBAL_EXPECTED_EXIT ]]; then
-    local symbol="╰"
-    if [[ -n ${FUNCNAME[1]:-} ]]; then
-      symbol="╭"
-    fi
+  if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" ]]; then
     if [[ ${VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT:-} == "true" && ! ${BASH_COMMAND:-} =~ ^(exit|return) ]]; then
       log::print "WARNING" "${ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
-      log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
+      log::printTrappedBashCommand
       log::printCallStack 2
     elif (( exitCode != 0 )); then
       log::print "ERROR" "${ICON_EXIT:-}" "EXIT" "Exiting with code ${exitCode}, stack:"
-      log::debug "${symbol} ${BASH_COMMAND:-}" "│ "
+      log::printTrappedBashCommand
       log::printCallStack 2
     fi
   fi
@@ -127,8 +101,17 @@ function trap::onExitInternal() {
 # It is executed in the same shell that has been interrupted, as if we called this function
 # at the line executed at the moment when the interruption took place.
 function trap::onInterruptInternal() {
+  # check if the function exists
+  if declare -F trap::onInterrupt &>/dev/null; then
+    if trap::onInterrupt; then
+      # if trap::onInterrupt returns 0, then we cancel the interrupt
+      return 0
+    fi
+  fi
+
   # reset the trap to not call this function again
-  trap ":;" SIGINT SIGQUIT
+  trap SIGINT SIGQUIT
+
   if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
     printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
@@ -138,23 +121,15 @@ function trap::onInterruptInternal() {
 
   if log::isDebugEnabled; then
     log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:"
+    log::printTrappedBashCommand
     log::printCallStack 2
   fi
 
-  # check if the function exists
-  if declare -F trap::onInterrupt &>/dev/null; then
-    if trap::onInterrupt; then
-      # if trap::onInterrupt returns 0, then we cancel the interrupt
-      return 0
-    fi
-  fi
-  GLOBAL_EXPECTED_EXIT=1
-  exit 1
+  _OPTION_SILENT=true exit 1
 }
 
 # This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
 function trap::onTerminateInternal() {
-  log::print "ERROR" "${ICON_KILLED:-}" "KILLED" "Program killed."
   # check if the function exists
   if declare -F trap::onTerminate &>/dev/null; then
     if trap::onTerminate; then
@@ -162,10 +137,12 @@ function trap::onTerminateInternal() {
       return 0
     fi
   fi
+
+  log::print "ERROR" "${ICON_KILLED:-}" "KILLED" "Program killed."
+
   # reset the trap to not call this function again
   trap SIGHUP SIGTERM
-  GLOBAL_EXPECTED_EXIT=1
-  exit 1
+  _OPTION_SILENT=true exit 1
 }
 
 # This function is called when terminal changes its size.
@@ -252,10 +229,10 @@ function trap::onSuspendInternal() {
   trap SIGTSTP
 
   # check if the function exists
-  if declare -F onHalt &>/dev/null; then
-    if onHalt; then
-      # if onHalt returns 0, then we cancel the suspend
-      onHalt 0
+  if declare -F trap::onSuspend &>/dev/null; then
+    if trap::onSuspend; then
+      # if trap::onSuspend returns 0, then we cancel the suspend
+      return 0
     fi
   fi
 
@@ -277,8 +254,8 @@ function trap::onContinueInternal() {
   trap trap::onSuspendInternal SIGTSTP
 
   # check if the function exists
-  if declare -F onContinue &>/dev/null; then
-    onContinue
+  if declare -F trap::onContinue &>/dev/null; then
+    trap::onContinue
   fi
 
   # if we are in interactive mode, we need to hide the cursor
@@ -333,7 +310,7 @@ function command_not_found_handle() {
     log::printCallStack 2
   fi
 
-  GLOBAL_EXPECTED_EXIT=1
+  GLOBAL_EXPECTED_EXIT=true
   return 1
   # since this runs in a subshell, we don't actually exit the main program
   # but we set $? to 1 so ERR trap is called
@@ -384,28 +361,18 @@ function trap::unregister() {
 function trap::onSubshellExitInternal() {
   local exitCode="$?"
 
-  local symbol="╰"
-  if [[ -n ${FUNCNAME[1]:-} ]]; then
-    symbol="╭"
-  fi
-
-  if [[ ${GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT:-} == "true" && ${exitCode} -ne 0 ]]; then
+  if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" && ${GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT:-} == "true" && ${exitCode} -ne 0 ]]; then
     log::error "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
-    log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
+    log::printTrappedBashCommand
     log::printCallStack 2
   elif log::isDebugEnabled; then
     if log::isTraceEnabled; then
       log::debug "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
-      log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
+      log::printTrappedBashCommand
       log::printCallStack 2
     else
       log::debug "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}."
     fi
-  fi
-
-  if declare -F onSubshellExit &>/dev/null; then
-    log::debug "Executing custom exit ⌜onSubshellExit⌝ function."
-    onSubshellExit "${exitCode}"
   fi
 }
 
@@ -431,7 +398,7 @@ function trap::registerSubshell() {
   if [[ ${_OPTION_LOG_ON_ERROR_EXIT:-true} == "true" ]]; then
     GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=true
   else
-    unset -v GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT
+    GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=false
   fi
 
   trap trap::onErrorInternal ERR
@@ -1135,6 +1102,17 @@ function log::isTraceEnabled() {
     return 0
   fi
   return 1
+}
+
+# ## log::printTrappedBashCommand (private)
+#
+# This function prints the current bash command when called from a trap.
+function log::printTrappedBashCommand() {
+  local symbol="╰"
+  if [[ -n ${FUNCNAME[2]:-} ]]; then
+    symbol="╭"
+  fi
+  log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
 }
 
 # ## log::printCallStack
@@ -2173,6 +2151,42 @@ function time::getProgramElapsedMicroseconds() {
 # >>> Core utilities
 #===============================================================
 
+# ## exit
+#
+# Exits the program with the given exit code.
+#
+# We replace the builtin exit command to make sure that we can correctly capture where
+# the exit was called and print the call stack.
+#
+# - $1: exit code _as int_:
+#       (optional) the exit code to use, should be between 0 and 255
+#       (defaults to 0)
+# - ${_OPTION_SILENT} _as bool_:
+#       (optional) If true, will not print the exit message and call stack for non zero exit codes.
+#       (defaults to false)
+#
+# ```bash
+# exit 0
+# ```
+function exit() {
+  local -i exitCode="${1:-0}"
+  local silent="${_OPTION_SILENT:-false}"
+
+  if log::isTraceEnabled; then
+    log::trace "Explicit exit with code ${exitCode}, stack:"
+    log::printCallStack 2
+  fi
+
+  if [[ ${exitCode} != "0" && ${GLOBAL_EXPECTED_EXIT:-} != "true" && ${silent} != "true" ]];  then
+    log::print "ERROR" "${ICON_EXIT:-}" "EXIT" "Explicit exit with code ${exitCode}, stack:"
+    log::printCallStack 2
+  fi
+
+  # shellcheck disable=SC2034
+  GLOBAL_EXPECTED_EXIT=true
+  builtin exit "${exitCode}"
+}
+
 # ## core::fail
 #
 # Displays an error message and then exit the program with error.
@@ -2192,8 +2206,7 @@ function core::fail() {
     log::printCallStack 2
   fi
   # shellcheck disable=SC2034
-  GLOBAL_EXPECTED_EXIT=1
-  exit "${_OPTION_EXIT_CODE:-1}"
+  _OPTION_SILENT=true exit "${_OPTION_EXIT_CODE:-1}"
 }
 
 # ## source
@@ -2821,7 +2834,7 @@ function command::parseArguments() {
 function command::checkParsedResults() {
   if [[ ${help:-false} == "true" ]]; then
     main::printHelp function "${FUNCNAME[1]?"This function must be called from a command function."}"
-    exit 0
+    _OPTION_SILENT=true exit 0
   fi
   if [[ -n ${commandArgumentsErrors:-} ]]; then
     core::fail "${commandArgumentsErrors}"

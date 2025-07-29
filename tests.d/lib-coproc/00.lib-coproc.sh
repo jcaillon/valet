@@ -9,21 +9,24 @@ function main() {
   test_coproc::run_testError
 }
 
-# shellcheck disable=SC2034
 function test_coproc::run_simpleTests() {
 
+  # shellcheck disable=SC2317
   function initCommand() {
     log::info "Running init command in coproc (${coprocVarName})."
   }
 
+  # shellcheck disable=SC2317
   function loopCommand() {
     log::info "Running loop command in coproc (${coprocVarName})."
   }
 
+  # shellcheck disable=SC2317
   function onMessageCommand() {
     log::info "Received message in coproc (${coprocVarName}): ${REPLY}"
   }
 
+  # shellcheck disable=SC2317
   function endCommand() {
     log::info "Running end command in coproc (${coprocVarName})."
   }
@@ -50,7 +53,6 @@ function test_coproc::run_simpleTests() {
   test::prompt coproc::wait _COPROC_2
   test::prompt coproc::isRunning _COPROC_2
   _OPTION_INIT_COMMAND=initCommand _OPTION_LOOP_COMMAND=loopCommand _OPTION_ON_MESSAGE_COMMAND="onMessageCommand;break" _OPTION_END_COMMAND=endCommand coproc::run _COPROC_2
-  local coproc2Pid="${REPLY}"
   if ! coproc::isRunning _COPROC_2; then
     test::fail "The coproc ⌜_COPROC_2⌝ is not running."
   fi
@@ -67,13 +69,13 @@ function test_coproc::run_simpleTests() {
   test::prompt _OPTION_INIT_COMMAND=initCommand _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_3
   test::prompt coproc::wait _COPROC_3
   _OPTION_INIT_COMMAND=initCommand _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_3
-  local coproc3Pid="${REPLY}"
   coproc::wait _COPROC_3
   test::flush
 
 
   test::title "✅ Testing coproc::kill"
 
+  # shellcheck disable=SC2317
   function loopCommand() {
     bash::sleep 0
   }
@@ -101,6 +103,7 @@ function test_coproc::run_completeTest() {
     test::title "✅ Testing coproc::run with a realistic usage"
   fi
 
+  # shellcheck disable=SC2317
   function realisticLoop() {
     _LOOP_NUMBER=$(( ${_LOOP_NUMBER:-0} + 1 ))
     if (( _LOOP_NUMBER > 2 )); then
@@ -111,6 +114,7 @@ function test_coproc::run_completeTest() {
     printf "%s\0" "continue ${_LOOP_NUMBER}"
   }
 
+  # shellcheck disable=SC2317
   function realisticOnMessage() {
     log::info "Received message in coproc (${coprocVarName}): ${REPLY}"
     if [[ ${REPLY} == "stop" ]]; then
@@ -137,16 +141,11 @@ function test_coproc::run_completeTest() {
 function test_coproc::run_testError() {
   test::title "✅ Testing coproc::run with an error in the init command"
 
-  function onSubshellExit() {
-    log::warning "Subshell exited with code $1"
-  }
+  bash::injectCodeInFunction trap::onSubshellExitInternal 'log::warning "Subshell exited with code $1"'
+  eval "${REPLY}"
+  local originalFunction="${REPLY2}"
 
   function initCommand() {
-  # re-enable errexit in the subshell
-  set -o errexit
-
-  # we are inside a coproc, register the correct traps
-  trap::registerSubshell
     ((0/0)) # This will fail and exit the subshell
     log::info "This line will not be executed because the previous command failed."
   }
@@ -155,13 +154,15 @@ function test_coproc::run_testError() {
   test::prompt _OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_20
   _OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_20
   test::unsetTestCallStack
-  coproc::wait _COPROC_20
+
   if coproc::wait _COPROC_20; then
     test::fail "The coproc ⌜_COPROC_20⌝ should have failed."
   else
     log::info "The coproc ⌜_COPROC_20⌝ failed as expected."
   fi
   test::flush
+
+  eval "${originalFunction}"
 }
 
 main

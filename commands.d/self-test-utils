@@ -249,3 +249,59 @@ function selfTestUtils_internalCompare() {
   fi
   return 0
 }
+
+# ## selfTestUtils_makeReplacementsInReport
+#
+# In order to have consistent results in tests, we need to replace to replace
+# values that could be different on each run/machine.
+function selfTestUtils_makeReplacementsInReport() {
+  fs::readFile "${GLOBAL_TEST_REPORT_FILE}"
+  REPLY="${REPLY//${GLOBAL_INSTALLATION_DIRECTORY}\/valet/valet}"
+  REPLY="${REPLY//${GLOBAL_INSTALLATION_DIRECTORY}/\$GLOBAL_INSTALLATION_DIRECTORY}"
+  REPLY="${REPLY//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
+  REPLY="${REPLY//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
+  REPLY="${REPLY//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
+  printf "%s" "${REPLY}" >"${GLOBAL_TEST_REPORT_FILE}"
+}
+
+# ## selfTestUtils_prepareModifiedTrapFunctions
+#
+# Prepare modified versions of trap functions that can be used inside the test coproc
+# and which allow to capture the stack trace on exit or error.
+function selfTestUtils_prepareModifiedTrapFunctions() {
+  bash::getBuiltinOutput declare -f trap::onErrorInternal
+  _TEST_TRAP_FUNCTIONS_ORIGINAL="${REPLY}"
+  _TEST_TRAP_FUNCTIONS_MODIFIED="${_TEST_TRAP_FUNCTIONS_ORIGINAL/: before-exit/"selfTestUtils_onTestError"}"
+
+  if [[ ${_TEST_TRAP_FUNCTIONS_ORIGINAL} != *": before-exit"* ]]; then
+    core::fail "Expected to find the string ': before-exit' in the original trap::onErrorInternal function."
+  fi
+
+  bash::injectCodeInFunction trap::onSubshellExitInternal "selfTestUtils_onTestExit"
+  _TEST_TRAP_FUNCTIONS_MODIFIED+=$'\n'"${REPLY}"
+  _TEST_TRAP_FUNCTIONS_ORIGINAL+=$'\n'"${REPLY2}"
+
+  # shellcheck disable=SC2016
+  bash::injectCodeInFunction trap::registerSubshell 'eval "${_TEST_TRAP_FUNCTIONS_ORIGINAL}"'
+  _TEST_TRAP_FUNCTIONS_MODIFIED+=$'\n'"${REPLY}"
+  _TEST_TRAP_FUNCTIONS_ORIGINAL+=$'\n'"${REPLY2}"
+}
+
+function selfTestUtils_onTestError() {
+  if [[ ! -s ${GLOBAL_TEST_STACK_FILE} ]]; then
+    GLOBAL_STACK_FUNCTION_NAMES_ERR=("${FUNCNAME[@]}")
+    GLOBAL_STACK_SOURCE_FILES_ERR=("${BASH_SOURCE[@]}")
+    GLOBAL_STACK_LINE_NUMBERS_ERR=("${BASH_LINENO[@]}")
+    declare -p GLOBAL_STACK_FUNCTION_NAMES_ERR GLOBAL_STACK_SOURCE_FILES_ERR GLOBAL_STACK_LINE_NUMBERS_ERR >>"${GLOBAL_TEST_STACK_FILE}"
+  fi
+}
+
+# setup extra functions that will allow us to capture the stack trace on exit or error in the test script
+function selfTestUtils_onTestExit() {
+  if [[ ! -s ${GLOBAL_TEST_STACK_FILE} ]]; then
+    GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
+    GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
+    GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
+    declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
+  fi
+}

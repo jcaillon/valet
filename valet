@@ -107,4 +107,4 @@ source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
 #===============================================================
 main::parseMainArguments "$@"
 # shellcheck disable=SC2034
-GLOBAL_EXPECTED_EXIT=1
+GLOBAL_EXPECTED_EXIT=true

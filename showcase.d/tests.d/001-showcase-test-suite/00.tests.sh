@@ -10,7 +10,7 @@ function main() {
   test::exec showcaseCommand1 -o -2 optionValue2 arg1 more1 more2
 
   testShowCaseSudo
-  testOnInterrupt
+  testOnCleanup
 }
 
 # Another example that reminds you that you can override existing functions
@@ -22,12 +22,12 @@ function testShowCaseSudo() {
 }
 
 # This demonstrates a custom test where we output what we want in the test results file
-function testOnInterrupt() {
-  test::prompt "trap::onInterrupt"
-  if trap::onInterrupt; then
-    echo "trap::onInterrupt is working"
+function testOnCleanup() {
+  test::prompt "trap::onCleanup"
+  if trap::onCleanup; then
+    echo "trap::onCleanup is working"
   else
-    echo "trap::onInterrupt is not working"
+    echo "trap::onCleanup is not working"
   fi
   test::flush
 }

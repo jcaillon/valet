@@ -8,31 +8,13 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<sub
 source "libraries.d/core"
 include tui coproc
 
-function ret1() {
-  ((0/0)) # This will fail and exit the subshell
-  log::info "This line will not be executed because the previous command failed."
-  return 1
-}
+compoundCommand=false
 
-compoundCommand=ret1
-set +o errexit
-GLOBAL_ERROR_TRAP_TEST_MODE_ENABLED=true
-eval "${compoundCommand}"
-exitCode="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
-GLOBAL_ERROR_TRAP_TEST_MODE_ENABLED=false
 
-log::info "ok, exitCode=${exitCode}"
+bash::tryRun eval "${compoundCommand}"
+log::info "Caught: ${REPLY}"
 
-exit 0
+zefzefzefzaefa
 
-function onSubshellExit() {
-  log::warning "Subshell exited with code $1"
-}
-
-function initCommand() {
-  ((0/0)) # This will fail and exit the subshell
-  log::info "This line will not be executed because the previous command failed."
-}
-
-_OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_20
-coproc::wait _COPROC_20
+((0/0))
+echo "ok"

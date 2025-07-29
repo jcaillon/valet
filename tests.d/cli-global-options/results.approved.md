@@ -73,6 +73,12 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 DEBUG    Log level set to trace.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
-DEBUG    Exiting subshell 3 with code 0
+TRACE    Explicit exit with code 0, stack:
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
+DEBUG    Exiting subshell depth 3 with code 0, stack:
+╭ "${@}"
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
 ```
 

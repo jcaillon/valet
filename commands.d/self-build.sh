@@ -656,5 +656,5 @@ source version
 # if this script is run directly, execute the function, otherwise valet will do it
 if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
   selfBuild "$@"
-  GLOBAL_EXPECTED_EXIT=1
+  GLOBAL_EXPECTED_EXIT=true
 fi

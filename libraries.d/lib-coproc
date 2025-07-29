@@ -253,6 +253,8 @@ function coproc::run() {
     fi
   fi
 
+  log::trace "Coproc ⌜${coprocVarName}⌝ started with PID ${pid}."
+
   REPLY="${pid}"
 }
 
@@ -270,6 +272,10 @@ function coproc_program() {
   # we are inside a coproc, register the correct traps
   _OPTION_LOG_ON_ERROR_EXIT="${logOnErrorExit}" trap::registerSubshell
 
+  # unset options or they will be visible from the subshell and might interfere
+  local IFS=' '$'\t'$'\n'
+  unset -v ${!_OPTION_*}
+
   if [[ -n ${redirectLogsToFile} ]]; then
     log::init "${redirectLogsToFile}"
   fi
@@ -279,6 +285,8 @@ function coproc_program() {
     log::debug "Main process is not running, exiting coproc."
     return 0
   fi
+
+  log::trace "Coproc is running, continuing with the coproc program."
 
   # Run the initialization command
   eval "${initCommand}"

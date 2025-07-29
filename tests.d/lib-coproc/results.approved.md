@@ -98,14 +98,9 @@ INFO     Stopping the coproc (_COPROC_9).
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 150: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 149: ((: 0/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0/0))
-├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
-╰─ in myCmd::function() at /path/to/function.sh:300
-WARNING  Subshell exited with code 1
-ERROR    Exiting subshell 3 with code 1, stack:
-╭ eval "${initCommand}"
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
 INFO     The coproc ⌜_COPROC_20⌝ failed as expected.

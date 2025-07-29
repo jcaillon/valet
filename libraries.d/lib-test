@@ -196,14 +196,8 @@ function test_exec() {
     bash::runInSubshell eval "${compoundCommand}"
     exitCode=${REPLY:-0}
   else
-    # here we allow the ERR trap to catch unexpected errors but we do not allow it to
-    # exit the program if the compound command is a function that returns a code != 0
-    set +o errexit
-    GLOBAL_ERROR_TRAP_TEST_MODE_ENABLED=true
-    eval "${compoundCommand}"
-    exitCode="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
-    GLOBAL_ERROR_TRAP_TEST_MODE_ENABLED=false
-    set -o errexit
+    bash::tryRun eval "${compoundCommand}"
+    exitCode=${REPLY:-0}
   fi
 
   if ((exitCode != 0)); then
@@ -486,7 +480,9 @@ function test::fail() {
   declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
 
   test::log "$@"
-  exit "${GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS}"
+
+  # shellcheck disable=SC2034
+  _OPTION_SILENT=true exit "${GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS}"
 }
 
 # ## test::setTerminalInputs

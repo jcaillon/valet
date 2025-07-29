@@ -84,12 +84,6 @@ function showCaseSudo() {
 # >>> Optional hook functions
 #===============================================================
 
-# This function is called before the program exits.
-# It does not have to be defined.
-function trap::onExit() {
-  log::debug "Exiting a showcase command."
-}
-
 # This function is always called before the program ends and allows
 # you to do some custom clean up.
 # It does not have to be defined.

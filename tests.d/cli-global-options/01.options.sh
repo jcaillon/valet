@@ -19,7 +19,9 @@ function test_globalOptions() {
 
 
   test::title "✅ Testing group of single letter options"
+  test::setTestCallStack
   test::exit main::parseMainArguments -vwvw --versin
+  test::unsetTestCallStack
 }
 
 # shellcheck disable=SC2317

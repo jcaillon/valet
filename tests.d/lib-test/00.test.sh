@@ -115,7 +115,7 @@ function functionToTest() {
 function functionThatExit() {
   echo "${1}"
   echo "${2}" 1>&2
-  exit "${3}"
+  _OPTION_SILENT=true exit "${3}"
 }
 
 # shellcheck disable=SC2034

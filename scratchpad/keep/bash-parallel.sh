@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
 export VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT=false
-export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<subshell>{1s}](<pid>{05d}) <colorFaded>line <line>{-4s}<colorDefault> <levelColor><level>{-4s} <colorDefault> <message>"
+export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:pid>{04s}:<subshell>{1s}](<pid>{05d}) <colorFaded>line <line>{-4s}<colorDefault> <levelColor><level>{-4s} <colorDefault> <message>"
 export VALET_LOG_LEVEL="debug"
 
 # shellcheck disable=SC1090

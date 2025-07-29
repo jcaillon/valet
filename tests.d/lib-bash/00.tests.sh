@@ -37,10 +37,6 @@ function test_bash::allVariablesCachedWithValue() {
 function test_bash::runInSubshell() {
   test::title "✅ Testing bash::runInSubshell"
 
-  function onSubshellExit() {
-    log::warning "Subshell exited with code $1"
-  }
-
   test::exec bash::runInSubshell log::info "hello"
 
   function subshellThatFails() {
@@ -58,8 +54,6 @@ function test_bash::runInSubshell() {
   }
 
   test::exec bash::runInSubshell subshellThatExits
-
-  unset -f onSubshellExit subshellThatFails
 }
 
 function test_bash::isFdValid() {

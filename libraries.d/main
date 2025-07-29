@@ -379,7 +379,7 @@ function main::parseMainArgumentsSwitch() {
   case "${1}" in
   --source)
     printf '%s' "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
-    exit 0
+    _OPTION_SILENT=true exit 0
     ;;
   -x | --profiling)
     VALET_PROFILING=true
@@ -410,11 +410,11 @@ function main::parseMainArgumentsSwitch() {
   --version)
     core::getVersion
     printf '%s\n' "${REPLY}"
-    exit 0
+    _OPTION_SILENT=true exit 0
     ;;
   -h | --help)
     main::printHelp function "this"
-    exit 0
+    _OPTION_SILENT=true exit 0
     ;;
   --)
     REPLY=-1

@@ -110,7 +110,8 @@ function selfTest() {
   _TEST_NB_PARALLEL_TEST_SUITES="${parallelTestSuites:-}"
   log::debug "Running up to ⌜${_TEST_NB_PARALLEL_TEST_SUITES}⌝ test suites in parallel."
 
-  GLOBAL_TEST_FRAMEWORK_ERROR_STATUS=140
+  selfTestUtils_prepareModifiedTrapFunctions
+
   GLOBAL_TEST_APPROVAL_FAILURE_STATUS=141
   GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS=142
   declare -g -i _TEST_FAILURE_STATUS=0
@@ -289,11 +290,6 @@ function selfTest_parallelCallback() {
   if ((exitCode != 0)); then
     _TEST_FAILED_TEST_SUITES+=("${_TEST_SUITE_NAMES[index]}")
   fi
-  if (( exitCode == GLOBAL_TEST_FRAMEWORK_ERROR_STATUS )); then
-    # cancel the parallel run
-    REPLY=1
-    core::fail "Error in the test framework, cannot continue running tests."
-  fi
   REPLY=0
 }
 
@@ -356,7 +352,7 @@ function selfTest_runSingleTestSuite() {
   # run the test scripts
   log::info "⌜${GLOBAL_TEST_SUITE_NAME}⌝:"
   local treeString="  ├─" treePadding="  │  "
-  local -i nbScriptsDone=0 nbOfScriptsWithErrors=0
+  local -i nbScriptsDone=0
   for testScript in "${testScripts[@]}"; do
     GLOBAL_TEST_SUITE_SCRIPT_NAME="${testScript##*/}"
     if ((nbScriptsDone == ${#testScripts[@]} - 1)); then
@@ -378,10 +374,6 @@ function selfTest_runSingleTestSuite() {
       # Handle an error that occurred in the test script.
       # If the error happened in the test script, we will have capture the stack trace in a file so we can read it.
 
-      if [[ ! -s ${GLOBAL_TEST_STACK_FILE} ]]; then
-        exit "${GLOBAL_TEST_FRAMEWORK_ERROR_STATUS}"
-      fi
-
       # get the stack trace at script exit
       fs::readFile "${GLOBAL_TEST_STACK_FILE}"
       eval "${REPLY//declare -a/}"
@@ -395,9 +387,8 @@ function selfTest_runSingleTestSuite() {
         log::error "The test script ⌜${testScript##*/}⌝ failed because an error was explicitly thrown in the test script:" \
           "" \
           "${REPLY}" \
-          "" \
-          "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
-        log::printCallStack 1 10
+          "test::fail called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
+        log::printCallStack 0 10
 
       elif [[ -n ${GLOBAL_STACK_FUNCTION_NAMES_ERR:-} ]]; then
         log::error "The test script ⌜${testScript##*/}⌝ had an error and exited with code ⌜${exitCode}⌝." \
@@ -422,21 +413,20 @@ function selfTest_runSingleTestSuite() {
           "- ⌜(myCommandThatFails) || echo 'failed as expected with code \${PIPESTATUS[0]:-}'⌝" \
           "- ⌜test::exit myCommandThatFails⌝" \
           "" \
-          "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
+          "Exited in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
         log::printCallStack 1 10
       fi
 
-      nbOfScriptsWithErrors+=1
+      # exit with an error if there were errors in the test scripts
+      _OPTION_SILENT=true exit 1
 
-    else
-      # check if the user forgot to call flush
-      if [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" || -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
-        selfTestUtils_displayTestLogs
-        selfTestUtils_displayTestSuiteOutputs
-        log::error "The test script had un-flushed when it ended."$'\n'$'\n'"Everything that gets printed to the standard or error output during a test must be flushed to the report. You can use ⌜test::flush⌝ to do that (or other test functions)."$'\n'$'\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
-        nbOfScriptsWithErrors+=1
-      fi
+    elif [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" || -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
+      selfTestUtils_displayTestLogs
+      selfTestUtils_displayTestSuiteOutputs
+      log::error "The test script had un-flushed when it ended."$'\n'$'\n'"Everything that gets printed to the standard or error output during a test must be flushed to the report. You can use ⌜test::flush⌝ to do that (or other test functions)."$'\n'$'\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
 
+      # exit with an error if there were errors in the test scripts
+      _OPTION_SILENT=true exit 1
     fi
 
     nbScriptsDone+=1
@@ -447,24 +437,19 @@ function selfTest_runSingleTestSuite() {
   # run a custom user script after the test suite if it exists
   selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/after-each-test-suite"
 
-  # exit with an error if there were errors in the test scripts
-  if ((nbOfScriptsWithErrors > 0)); then
-    exit 1
-  fi
-
   # compare the test suite outputs with the approved files
   if ! selfTestUtils_compareWithApproved "${testSuiteDirectory}" "${GLOBAL_TEST_REPORT_FILE}"; then
     selfTestUtils_displayTestLogs
     if ((_TEST_FAILURE_STATUS <= GLOBAL_TEST_APPROVAL_FAILURE_STATUS)); then
       _TEST_FAILURE_STATUS="${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
     fi
-    exit "${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
+    _OPTION_SILENT=true exit "${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
   fi
 
   if log::isDebugEnabled; then
     selfTestUtils_displayTestLogs
   fi
-  exit 0
+  _OPTION_SILENT=true exit 0
 }
 
 # ## selfTest_runSingleTest
@@ -506,27 +491,11 @@ function selfTest_runSingleTest() {
   exec {GLOBAL_FD_TUI}>&2
   unset -v GLOBAL_FD_ORIGINAL_STDERR
 
-  # setup extra functions that will allow us to capture the stack trace on exit or error in the test script
-  # shellcheck disable=SC2317
-  function trap::onExitInternalExtra() {
-    local exitCode="${1}"
-    if [[ ${exitCode} -ne 0 && ! -v GLOBAL_STACK_FUNCTION_NAMES ]]; then
-      GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
-      GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
-      GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
-      declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
-    fi
-  }
-  # shellcheck disable=SC2317
-  function trap::onErrorInternalExtra() {
-    GLOBAL_STACK_FUNCTION_NAMES_ERR=("${FUNCNAME[@]}")
-    GLOBAL_STACK_SOURCE_FILES_ERR=("${BASH_SOURCE[@]}")
-    GLOBAL_STACK_LINE_NUMBERS_ERR=("${BASH_LINENO[@]}")
-    declare -p GLOBAL_STACK_FUNCTION_NAMES_ERR GLOBAL_STACK_SOURCE_FILES_ERR GLOBAL_STACK_LINE_NUMBERS_ERR >>"${GLOBAL_TEST_STACK_FILE}"
-  }
-
   # Set the value of important bash variables to ensure consistency in the tests
   selfTestUtils_setupBashForConsistency
+
+  # modify the trap functions to capture the stack trace at script exit/error
+  eval "${_TEST_TRAP_FUNCTIONS_MODIFIED}"
 
   # run a custom user script before the test if it exists
   selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-each-test"
@@ -542,19 +511,6 @@ function selfTest_runSingleTest() {
   exec {GLOBAL_FD_LOG}>&-
   exec {GLOBAL_FD_TUI}>&-
 
-  self_makeReplacementsInReport
+  selfTestUtils_makeReplacementsInReport
 }
 
-# ## self_makeReplacementsInReport
-#
-# In order to have consistent results in tests, we need to replace to replace
-# values that could be different on each run/machine.
-function self_makeReplacementsInReport() {
-  fs::readFile "${GLOBAL_TEST_REPORT_FILE}"
-  REPLY="${REPLY//${GLOBAL_INSTALLATION_DIRECTORY}\/valet/valet}"
-  REPLY="${REPLY//${GLOBAL_INSTALLATION_DIRECTORY}/\$GLOBAL_INSTALLATION_DIRECTORY}"
-  REPLY="${REPLY//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
-  REPLY="${REPLY//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
-  REPLY="${REPLY//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
-  printf "%s" "${REPLY}" >"${GLOBAL_TEST_REPORT_FILE}"
-}

@@ -2,6 +2,46 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
+# ## bash::tryRun
+#
+# This function runs a command and catches any error that occurs instead of failing the program.
+# This can be seen as a try/catch block.
+# To execute code in a similar fashion but in a subshell, use `bash::runInSubshell`.
+#
+# - $@: **command with args** _as string_:
+#       The command to run.
+# - ${_OPTION_EXIT_ON_FAIL} _as bool_:
+#       (optional) If set to true, the main program will exit with code 1 if the command fails.
+#
+# Returns:
+#
+# - ${REPLY}: the exit code of the command.
+#
+# ```bash
+# bash::tryRun myFunction "arg1" "arg2"
+# if (( REPLY != 0 )); then
+#   core::fail "The command failed with code ${REPLY}."
+# fi
+# ```
+function bash::tryRun() {
+  local exitOnFail="${_OPTION_EXIT_ON_FAIL:-false}"
+
+  # temporarily disable errexit in the main shell
+  set +o errexit
+  GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED=true
+  GLOBAL_ERROR_TRAP_LAST_ERROR_CODE=0
+  "${@}"
+  # shellcheck disable=SC2034
+  GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED=false
+  set -o errexit
+
+  if [[ ${exitOnFail} == "true" && ${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE} -gt 0 ]]; then
+    # shellcheck disable=SC2034
+    _OPTION_SILENT=true exit "${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
+  fi
+
+  REPLY="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
+}
 
 # ## bash::runInSubshell
 #
@@ -14,6 +54,9 @@
 #       The command to run in the subshell.
 # - ${_OPTION_EXIT_ON_FAIL} _as bool_:
 #       (optional) If set to true, the main program will exit with code 1 if the subshell fails.
+# - ${_OPTION_LOG_ON_ERROR_EXIT} _as bool_:
+#       (optional) If true, will display an error if the subshell exits with a non zero code
+#       (defaults to false)
 #
 # Returns:
 #
@@ -28,13 +71,14 @@
 #
 # > This function exists because the behavior of bash subshells are not what you would expect.
 # > This function ensures that errors are properly handled and make the command list fail,
-# > it ensures that we run the exit trap and the custom function "onSubshellExit",
-# > and it gives you the correct exit code of the subshell.
+# > it ensures that we run the exit trap and it gives you the correct exit code of the subshell.
 # > As a reminder, the error trap is not triggered for commands part of until while if ! || && tests,
 # > see <https://www.gnu.org/software/bash/manual/bash.html#index-trap> and
 # > <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.
 function bash::runInSubshell() {
   local exitOnFail="${_OPTION_EXIT_ON_FAIL:-false}"
+  local logOnErrorExit="${_OPTION_LOG_ON_ERROR_EXIT:-false}"
+
   # disable the ERR trap or we would catch the subshell failure with it and not restore
   # the errexit and the original trap (and we would display an error message that we do
   # not want to display because we already displayed an error from the subshell).
@@ -44,7 +88,12 @@ function bash::runInSubshell() {
   (
     # re-enable errexit in the subshell
     set -o errexit
-    _OPTION_LOG_ON_ERROR_EXIT=false trap::registerSubshell
+    _OPTION_LOG_ON_ERROR_EXIT="${logOnErrorExit}" trap::registerSubshell
+
+    # unset options or they will be visible from the subshell and might interfere
+    local IFS=' '$'\t'$'\n'
+    unset -v ${!_OPTION_*}
+
     "${@}"
   )
   local subshellExitCode=${PIPESTATUS[0]:-}
@@ -53,8 +102,7 @@ function bash::runInSubshell() {
   trap trap::onErrorInternal ERR
   if [[ ${exitOnFail} == "true" && ${subshellExitCode} -gt 0 ]]; then
     # shellcheck disable=SC2034
-    GLOBAL_EXPECTED_EXIT=1
-    exit "${subshellExitCode}"
+    _OPTION_SILENT=true exit "${subshellExitCode}"
   fi
   REPLY="${subshellExitCode}"
 }
