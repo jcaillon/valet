@@ -89,9 +89,6 @@ function selfTest() {
   time::getProgramElapsedMicroseconds
   local startTimeInMicroSeconds="${REPLY}"
 
-  # check what will be used to display the diff between received and approved files
-  selfTestUtils_setupDiffCommand
-
   # set the options
   unset _TEST_AUTO_APPROVE \
     _TEST_INCLUDE_PATTERN \
@@ -110,67 +107,94 @@ function selfTest() {
   _TEST_NB_PARALLEL_TEST_SUITES="${parallelTestSuites:-}"
   log::debug "Running up to ⌜${_TEST_NB_PARALLEL_TEST_SUITES}⌝ test suites in parallel."
 
+  # check what will be used to display the diff between received and approved files
+  selfTestUtils_setupDiffCommand
+
   selfTestUtils_prepareModifiedTrapFunctions
 
-  GLOBAL_TEST_APPROVAL_FAILURE_STATUS=141
-  GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS=142
+  GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS=141
+  GLOBAL_TEST_APPROVAL_FAILURE_STATUS=142
   declare -g -i _TEST_FAILURE_STATUS=0
-  declare -g -i _TEST_TEST_SUITES_COUNT=0
   declare -g -a _TEST_FAILED_TEST_SUITES=()
 
-  fs::createTempDirectory
-  GLOBAL_TEST_VALET_USER_DATA_DIRECTORY="${REPLY}"
+  # prepare a list of all the test suites to run (with extra info for each test suite)
+  log::info "Listing all test suites to run."
+
+  progress::start "<spinner>"
+
+  local -a \
+    _TEST_TEST_SUITE_NAME=() \
+    _TEST_TEST_SUITE_DIRECTORY=() \
+    _TEST_COMMAND=()
+
+  local tempUserDataDirectory
 
   # test suites in the user directory
   if [[ ${coreOnly:-false} != "true" ]]; then
-    # get the user directory
+    fs::createTempDirectory
+    tempUserDataDirectory="${REPLY}"
+
     core::getExtensionsDirectory
     extensionsDirectory="${extensionsDirectory:-${REPLY}}"
 
     # rebuild the commands for the user dir
-    selfTestUtils_rebuildCommands --extensions-directory "${extensionsDirectory}" --output "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
+    selfTestUtils_rebuildCommands --extensions-directory "${extensionsDirectory}" --output "${tempUserDataDirectory}"
 
     fs::listDirectories "${extensionsDirectory}"
     local extensionDirectory
     for extensionDirectory in "${REPLY_ARRAY[@]}"; do
       if [[ -d ${extensionDirectory}/tests.d ]]; then
-        selfTest_runSingleTestSuites "${extensionDirectory}/tests.d"
+        selfTest_addTestSuites "${extensionDirectory}/tests.d" "${tempUserDataDirectory}"
       fi
     done
   fi
 
   # core test suites
   if [[ -n ${withCore:-} || ${coreOnly:-false} == "true" ]]; then
-    # for consistency, we need to run the core tests from the installation directory
-    local defaultCurrentDirectory="${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}"
-    GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${GLOBAL_INSTALLATION_DIRECTORY}"
-
     if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/tests.d ]]; then
       core::fail "The valet core tests directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/tests.d⌝ does not exist, cannot run core tests."
     fi
 
     # we need to rebuild the commands for the core commands only
-    rm -Rf "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
-    selfTestUtils_rebuildCommands --core-only --include-showcase --output "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}"
-    selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d"
+    fs::createTempDirectory
+    tempUserDataDirectory="${REPLY}"
+
+    selfTestUtils_rebuildCommands --core-only --include-showcase --output "${tempUserDataDirectory}"
+    selfTest_addTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d" "${tempUserDataDirectory}"
 
     # now we can also test the commands in showcase.d if the directory is there
     if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d ]]; then
       log::warning "The valet showcase directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d⌝ does not exist, cannot run the tests on the core showcase."
     else
-      selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/tests.d"
+      selfTest_addTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/tests.d" "${tempUserDataDirectory}"
     fi
-
-    GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${defaultCurrentDirectory}"
   fi
 
+  progress::stop
+
   time::getProgramElapsedMicroseconds
+  local runStartTimeInMicroSeconds="${REPLY}"
   time::convertMicrosecondsToHuman $((REPLY - startTimeInMicroSeconds)) "%S seconds and %l ms"
+  log::info "Found ${#_TEST_TEST_SUITE_NAME[@]} test suites in ⌜${REPLY}⌝."
+
+  # run all tests suites
+  progress::start
+  progress::update 0 "Running test suites."
+
+  _OPTION_MAX_IN_PARALLEL=${_TEST_NB_PARALLEL_TEST_SUITES} \
+  _OPTION_COMPLETED_CALLBACK=selfTest_parallelCallback \
+  _OPTION_PRINT_REDIRECTED_LOGS=true \
+    coproc::runInParallel _TEST_COMMAND
+
+  progress::stop
+
+  time::getProgramElapsedMicroseconds
+  time::convertMicrosecondsToHuman $((REPLY - runStartTimeInMicroSeconds)) "%S seconds and %l ms"
   log::info "Total time running tests: ⌜${REPLY}⌝."
 
   if ((${#_TEST_FAILED_TEST_SUITES[@]} > 0)); then
     local failMessage
-    failMessage="A total of ⌜${#_TEST_FAILED_TEST_SUITES[@]}⌝ out of ${_TEST_TEST_SUITES_COUNT} test(s) failed:"$'\n'
+    failMessage="A total of ⌜${#_TEST_FAILED_TEST_SUITES[@]}⌝ out of ${#_TEST_TEST_SUITE_NAME[@]} test(s) failed:"$'\n'
     local treeString="  ├─" treePadding="  │  " failedTestSuite
     local -i nb=0
     for failedTestSuite in "${_TEST_FAILED_TEST_SUITES[@]}"; do
@@ -193,85 +217,60 @@ function selfTest() {
       fi
       core::fail "${failMessage}"
     fi
-  elif ((_TEST_TEST_SUITES_COUNT > 0)); then
-    log::success "A total of ⌜${_TEST_TEST_SUITES_COUNT}⌝ tests passed!"
+  elif (( ${#_TEST_TEST_SUITE_NAME[@]} > 0)); then
+    log::success "A total of ⌜${#_TEST_TEST_SUITE_NAME[@]}⌝ tests passed!"
   else
     log::warning "No eligible test suites found."
   fi
 }
 
-# ## selfTest_runSingleTestSuites
+# ## selfTest_addTestSuites
 #
-# Run all the test suites in the given `tests.d` directory.
-#
-# - $1: the directory containing the test suites
-#
-# Returns:
-#   the number of test suites run (increments the global variable _TEST_TEST_SUITES_COUNT)
-#   the number of failed test suites (add to the global variable _TEST_FAILED_TEST_SUITES)
-#
-# Usage:
-#   selfTest_runSingleTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d"
-function selfTest_runSingleTestSuites() {
+# Add all the test suites in the given `tests.d` directory to the global test suite lists.
+function selfTest_addTestSuites() {
   local testsDotDirectory="${1}"
-  log::debug "Running all test suites in directory ⌜${testsDotDirectory}⌝."
+  local testUserDataDirectory="${2}"
+  log::debug "Adding all test suites in directory ⌜${testsDotDirectory}⌝."
 
   # make a list of all test suite directories
-  fs::listDirectories "${testsDotDirectory}"
-  local testDirectory
-  local -a testSuiteDirectories=()
-  for testDirectory in "${REPLY_ARRAY[@]}"; do
-    # skip if not a directory or hidden dir
-    if [[ ! -d ${testDirectory} ]]; then continue; fi
+  _OPTION_FILTER=selfTest_filterTestSuiteDirectories fs::listPaths "${testsDotDirectory}"
 
-    # skip if the test directory does not match the include pattern
-    if [[ -n ${_TEST_INCLUDE_PATTERN:-} && ! (${testDirectory} =~ ${_TEST_INCLUDE_PATTERN}) ]]; then
-      log::debug "Skipping test ⌜${testDirectory}⌝ because it does not match the include pattern."
-      continue
-    fi
-    # skip if the test directory matches the exclude pattern
-    if [[ -n ${_TEST_EXCLUDE_PATTERN:-} && ${testDirectory} =~ ${_TEST_EXCLUDE_PATTERN} ]]; then
-      log::debug "Skipping test ⌜${testDirectory}⌝ because it matches the exclude pattern."
-      continue
-    fi
-    testSuiteDirectories+=("${testDirectory}")
-  done
-
-  if ((${#testSuiteDirectories[@]} == 0)); then
+  if ((${#REPLY_ARRAY[@]} == 0)); then
     log::info "No matching test suites found in directory ⌜${testsDotDirectory}⌝."
     return 0
   fi
+  log::info "Found ⌜${#REPLY_ARRAY[@]}⌝ test suites from directory ⌜${testsDotDirectory}⌝."
 
-  log::info "Running ⌜${#testSuiteDirectories[@]}⌝ test suites from directory ⌜${testsDotDirectory}⌝."
-
-  pushd "${testsDotDirectory}" 1>/dev/null
-
-  # run a custom user script before the tests if it exists
-  selfTestUtils_runHookScript "${testsDotDirectory}/before-tests"
-
-  progress::start
-  progress::update 0 "Running test suites."
-
-  # parallel run
-  declare -g -a _TEST_SUITE_NAMES=() _TEST_SUITE_COMMANDS=()
-  for testDirectory in "${testSuiteDirectories[@]}"; do
-    _TEST_SUITE_NAMES+=("${testDirectory##*/}")
-    _TEST_SUITE_COMMANDS+=("selfTest_runSingleTestSuite '${testDirectory}'")
+  local testDirectory
+  for testDirectory in "${REPLY_ARRAY[@]}"; do
+    _TEST_TEST_SUITE_NAME+=("${testDirectory##*/}")
+    _TEST_TEST_SUITE_DIRECTORY+=("${testDirectory}")
+    _TEST_COMMAND+=("selfTest_runSingleTestSuite '${testDirectory}' '${testUserDataDirectory}'")
   done
+}
 
-  _OPTION_MAX_IN_PARALLEL=${_TEST_NB_PARALLEL_TEST_SUITES} \
-  _OPTION_COMPLETED_CALLBACK=selfTest_parallelCallback \
-  _OPTION_PRINT_REDIRECTED_LOGS=true \
-    coproc::runInParallel _TEST_SUITE_COMMANDS
+# ## selfTest_filterTestSuiteDirectories
+#
+# Filter function for the test suite directories.
+function selfTest_filterTestSuiteDirectories() {
+  local testDirectory="${1}"
 
-  progress::stop
+  # skip if not a directory or hidden dir
+  if [[ ! -d ${testDirectory} ]]; then
+    return 1
+  fi
 
-  # run a custom user script after the tests if it exists
-  selfTestUtils_runHookScript "${testsDotDirectory}/after-tests"
+  # skip if the test directory does not match the include pattern
+  if [[ -n ${_TEST_INCLUDE_PATTERN:-} && ! (${testDirectory} =~ ${_TEST_INCLUDE_PATTERN}) ]]; then
+    log::debug "Skipping test ⌜${testDirectory}⌝ because it does not match the include pattern."
+    return 1
+  fi
 
-  _TEST_TEST_SUITES_COUNT=$((_TEST_TEST_SUITES_COUNT + ${#testSuiteDirectories[@]}))
-
-  popd 1>/dev/null
+  # skip if the test directory matches the exclude pattern
+  if [[ -n ${_TEST_EXCLUDE_PATTERN:-} && ${testDirectory} =~ ${_TEST_EXCLUDE_PATTERN} ]]; then
+    log::debug "Skipping test ⌜${testDirectory}⌝ because it matches the exclude pattern."
+    return 1
+  fi
 }
 
 # ## selfTest_parallelCallback
@@ -285,10 +284,13 @@ function selfTest_parallelCallback() {
   local -i exitCode="${2}"
   local -i percent="${3}"
 
-  progress::update "${percent}" "Done running test suite ⌜${_TEST_SUITE_NAMES[index]}⌝."
+  progress::update "${percent}" "Done running test suite ⌜${_TEST_TEST_SUITE_NAME[index]}⌝."
 
-  if ((exitCode != 0)); then
-    _TEST_FAILED_TEST_SUITES+=("${_TEST_SUITE_NAMES[index]}")
+  if (( exitCode != 0 )); then
+    _TEST_FAILED_TEST_SUITES+=("${_TEST_TEST_SUITE_NAME[index]}")
+    if (( exitCode > _TEST_FAILURE_STATUS )); then
+      _TEST_FAILURE_STATUS="${exitCode}"
+    fi
   fi
   REPLY=0
 }
@@ -300,16 +302,18 @@ function selfTest_parallelCallback() {
 # - $1: the directory containing the test suite
 #
 function selfTest_runSingleTestSuite() {
-  local testSuiteDirectory="${1}"
+  GLOBAL_TEST_SUITE_DIRECTORY="${1}"
+  local testUserDataDirectory="${2}"
 
-  GLOBAL_TEST_SUITE_NAME="${testSuiteDirectory##*/}"
-  local testsDotDirectory="${testSuiteDirectory%/*}"
-  log::debug "Running test suite ⌜${testSuiteDirectory}⌝."
+  GLOBAL_TESTS_D_DIRECTORY="${GLOBAL_TEST_SUITE_DIRECTORY%/*}"
+  GLOBAL_TEST_SUITE_NAME="${GLOBAL_TEST_SUITE_DIRECTORY##*/}"
+
+  log::debug "Running test suite ⌜${GLOBAL_TEST_SUITE_DIRECTORY}⌝."
 
   # make a list of all test scripts
   local -a testScripts=()
-  local testScript
-  for testScript in "${testSuiteDirectory}"/*.sh; do
+  local testScript IFS=' '
+  for testScript in "${GLOBAL_TEST_SUITE_DIRECTORY}"/*.sh; do
     # skip if not a file
     if [[ ! -f "${testScript}" ]]; then
       continue
@@ -318,17 +322,12 @@ function selfTest_runSingleTestSuite() {
   done
 
   if ((${#testScripts[@]} == 0)); then
-    log::info "No test scripts found in test suite ⌜${testSuiteDirectory}⌝."
+    log::info "No test scripts found in test suite ⌜${GLOBAL_TEST_SUITE_DIRECTORY}⌝."
     return 0
   fi
 
-  # setup the temp locations for this test suite (cleanup is done at self test command level since
-  # we create everything in the original temp directory)
-  GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY}/tmp-${BASHPID}.${GLOBAL_TEST_SUITE_NAME}"
-  unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
-  TMPDIR="${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
-
-  GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY}/output-${BASHPID}.${GLOBAL_TEST_SUITE_NAME}"
+  GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY}/tmp-${BASHPID}.${GLOBAL_TEST_SUITE_NAME:0:7}"
+  GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY}/output-${BASHPID}.${GLOBAL_TEST_SUITE_NAME:0:7}"
   GLOBAL_TEST_STANDARD_OUTPUT_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/stdout"
   GLOBAL_TEST_STANDARD_ERROR_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/stderr"
   GLOBAL_TEST_REPORT_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/report"
@@ -337,17 +336,8 @@ function selfTest_runSingleTestSuite() {
   mkdir -p "${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}"
   exec {GLOBAL_FD_TEST_LOG}>"${GLOBAL_TEST_LOG_FILE}"
 
-  # shellcheck disable=SC2034
-  GLOBAL_TEST_CURRENT_DIRECTORY="${testSuiteDirectory}"
-  GLOBAL_TESTS_D_DIRECTORY="${testsDotDirectory}"
-
-  # run a custom user script before the test suite if it exists
-  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-each-test-suite"
-
   # write the test suite title
   printf "%s\n\n" "# Test suite ${GLOBAL_TEST_SUITE_NAME}" >"${GLOBAL_TEST_REPORT_FILE}"
-
-  pushd "${testSuiteDirectory}" 1>/dev/null
 
   # run the test scripts
   log::info "⌜${GLOBAL_TEST_SUITE_NAME}⌝:"
@@ -365,9 +355,9 @@ function selfTest_runSingleTestSuite() {
     printf "%s\n\n" "## Test script ${GLOBAL_TEST_SUITE_SCRIPT_NAME%.sh}" >>"${GLOBAL_TEST_REPORT_FILE}"
 
     # Run the test script in a subshell.
-    # This way each test can define any vars or functions without polluting
+    # This way each test script can define any vars or functions without polluting
     # the global execution of the tests.
-    bash::runInSubshell selfTest_runSingleTest "${testSuiteDirectory}" "${testScript}"
+    bash::runInSubshell selfTest_runSingleTest "${testScript}" "${testUserDataDirectory}"
     local exitCode="${REPLY}"
 
     if (( exitCode != 0 )); then
@@ -432,17 +422,9 @@ function selfTest_runSingleTestSuite() {
     nbScriptsDone+=1
   done
 
-  popd 1>/dev/null
-
-  # run a custom user script after the test suite if it exists
-  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/after-each-test-suite"
-
   # compare the test suite outputs with the approved files
-  if ! selfTestUtils_compareWithApproved "${testSuiteDirectory}" "${GLOBAL_TEST_REPORT_FILE}"; then
+  if ! selfTestUtils_compareWithApproved "${GLOBAL_TEST_SUITE_DIRECTORY}" "${GLOBAL_TEST_REPORT_FILE}"; then
     selfTestUtils_displayTestLogs
-    if ((_TEST_FAILURE_STATUS <= GLOBAL_TEST_APPROVAL_FAILURE_STATUS)); then
-      _TEST_FAILURE_STATUS="${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
-    fi
     _OPTION_SILENT=true exit "${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
   fi
 
@@ -458,11 +440,19 @@ function selfTest_runSingleTestSuite() {
 #
 # It will redirect the standard output and error output to files and run the test script.
 function selfTest_runSingleTest() {
-  local testDirectory="${1}"
-  local testScript="${2}"
+  local testScript="${1}"
+  local testUserDataDirectory="${2}"
+
+  pushd "${GLOBAL_TEST_SUITE_DIRECTORY}" 1>/dev/null
 
   # Set the value of Valet variables to ensure consistency in the tests
   selfTestUtils_setupValetForConsistency
+
+  # setup the temp locations for this test suite (cleanup is done at self test command level since
+  # we create everything in the original temp directory)
+  unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
+  TMPDIR="${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
+
   # reset the temporary location (to have consistency when using fs::createTempDirectory for example)
   if [[ -d ${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY} ]]; then
     rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
@@ -473,7 +463,7 @@ function selfTest_runSingleTest() {
 
   # set a new user directories so that commands are correctly recreated if calling
   # valet from a test
-  cp -R "${GLOBAL_TEST_VALET_USER_DATA_DIRECTORY}" "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
+  cp -R "${testUserDataDirectory}" "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
   export VALET_CONFIG_USER_VALET_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
   export VALET_CONFIG_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
   export VALET_CONFIG_USER_DATA_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
@@ -483,6 +473,9 @@ function selfTest_runSingleTest() {
   # shellcheck disable=SC2034
   GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-temp"
 
+  # Set the value of important bash variables to ensure consistency in the tests
+  selfTestUtils_setupBashForConsistency
+
   # redirect the standard output and error output to files
   exec 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
   exec 2>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
@@ -491,26 +484,21 @@ function selfTest_runSingleTest() {
   exec {GLOBAL_FD_TUI}>&2
   unset -v GLOBAL_FD_ORIGINAL_STDERR
 
-  # Set the value of important bash variables to ensure consistency in the tests
-  selfTestUtils_setupBashForConsistency
-
   # modify the trap functions to capture the stack trace at script exit/error
   eval "${_TEST_TRAP_FUNCTIONS_MODIFIED}"
 
-  # run a custom user script before the test if it exists
-  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-each-test"
+  # run a custom user script before the tests if it exists
+  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-tests"
 
   # run the test
   # shellcheck disable=SC1090
   builtin source "${testScript}"
 
-  # run a custom user script after the test if it exists
-  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/after-each-test"
-
-  exec 2>&"${GLOBAL_FD_TEST_LOG}"
-  exec {GLOBAL_FD_LOG}>&-
-  exec {GLOBAL_FD_TUI}>&-
+  # run a custom user scrip after the test if it exists
+  selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/after-tests"
 
   selfTestUtils_makeReplacementsInReport
-}
 
+  exec {GLOBAL_FD_LOG}>&-
+  exec {GLOBAL_FD_TUI}>&-
+}

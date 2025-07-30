@@ -1,6 +1,44 @@
 # Test suite lib-bash
 
-## Test script 00.tests
+## Test script 00.lib-bash
+
+### ✅ Testing bash::catchErrors
+
+❯ `_OPTION_REPLY_DISABLED=false bash::catchErrors echo This\ should\ not\ fail`
+
+**Standard output**:
+
+```text
+This should not fail
+```
+
+Returned variables:
+
+```text
+REPLY='0'
+```
+
+❯ `_OPTION_REPLY_DISABLED=false bash::catchErrors false`
+
+Returned code: `1`
+
+Returned variables:
+
+```text
+REPLY='1'
+```
+
+❯ `bash::catchErrors false`
+
+Returned code: `1`
+
+```text
+GLOBAL_ERROR_TRAP_LAST_ERROR_CODE='1'
+```
+
+❯ `_OPTION_EXIT_ON_FAIL=true bash::catchErrors false`
+
+Exited with code: `1`
 
 ### ✅ Testing bash::allVariablesCachedWithValue
 
@@ -34,22 +72,48 @@ Returned code: `1`
 
 ```text
 INFO     hello
-WARNING  Subshell exited with code 0
+```
+
+Returned variables:
+
+```text
+REPLY='0'
 ```
 
 ❯ `bash::runInSubshell subshellThatFails`
 
-Returned code: `1`
-
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.tests.sh: line 47: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 54: ((: 0/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0/0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
-WARNING  Subshell exited with code 1
+```
+
+Returned variables:
+
+```text
+REPLY='1'
+```
+
+❯ `_OPTION_LOG_ON_ERROR_EXIT=true bash::runInSubshell subshellThatFails`
+
+**Error output**:
+
+```text
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 54: ((: 0/0: division by 0 (error token is "0")
+CMDERR   Error code ⌜1⌝ for the command:
+╭ ((0/0))
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
+```
+
+Returned variables:
+
+```text
+REPLY='1'
 ```
 
 ❯ `_OPTION_EXIT_ON_FAIL=true bash::runInSubshell subshellThatFails`
@@ -59,23 +123,19 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.tests.sh: line 47: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 54: ((: 0/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0/0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
-WARNING  Subshell exited with code 1
-WARNING  Subshell exited with code 1
 ```
 
 ❯ `bash::runInSubshell subshellThatExits`
 
-Returned code: `2`
-
-**Error output**:
+Returned variables:
 
 ```text
-WARNING  Subshell exited with code 2
+REPLY='2'
 ```
 
 ### ✅ Testing bash::isFdValid
@@ -174,18 +234,6 @@ new_name ()
     fi
 }
 
-```
-
-### ✅ Testing bash::countJobs
-
-❯ `stuff &; stuff &; stuff &`
-
-❯ `bash::countJobs`
-
-Returned variables:
-
-```text
-REPLY='3'
 ```
 
 ### ✅ Testing bash::injectCodeInFunction

@@ -2,29 +2,40 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# ## bash::tryRun
+# ## bash::catchErrors
 #
-# This function runs a command and catches any error that occurs instead of failing the program.
-# This can be seen as a try/catch block.
-# To execute code in a similar fashion but in a subshell, use `bash::runInSubshell`.
+# This function runs a command and will catch any error that occurs instead of failing the program.
+# The execution will continue if an error occurs in the command, but each error will be stored for later processing.
+# For a function closer to a try/catch block, see `bash::runInSubshell`.
 #
 # - $@: **command with args** _as string_:
 #       The command to run.
 # - ${_OPTION_EXIT_ON_FAIL} _as bool_:
 #       (optional) If set to true, the main program will exit with code 1 if the command fails.
+#       (defaults to false)
+# - ${_OPTION_REPLY_DISABLED} _as bool_:
+#       (optional) If set to true, the exit code will be stored in `GLOBAL_ERROR_TRAP_LAST_ERROR_CODE`
+#       and `REPLY` will be not be modified.
+#       (defaults to false)
 #
 # Returns:
 #
 # - ${REPLY}: the exit code of the command.
 #
 # ```bash
-# bash::tryRun myFunction "arg1" "arg2"
+# bash::catchErrors myFunction "arg1" "arg2"
 # if (( REPLY != 0 )); then
 #   core::fail "The command failed with code ${REPLY}."
 # fi
 # ```
-function bash::tryRun() {
+#
+# > While you can also put the execution of a command in an `if` (or in a pipeline) statement to effectively
+# > discard any errors happening in that command, the advantage of using this function is that the ERR trap
+# > is still triggered and you can use trace level debugging to see the caught issues.
+# > Additionally, it will report all the errors that occurred during the execution of the command.
+function bash::catchErrors() {
   local exitOnFail="${_OPTION_EXIT_ON_FAIL:-false}"
+  local replyDisabled="${_OPTION_REPLY_DISABLED:-false}"
 
   # temporarily disable errexit in the main shell
   set +o errexit
@@ -40,7 +51,9 @@ function bash::tryRun() {
     _OPTION_SILENT=true exit "${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
   fi
 
-  REPLY="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
+  if [[ ${replyDisabled} != "true" ]]; then
+    REPLY="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
+  fi
 }
 
 # ## bash::runInSubshell
@@ -48,12 +61,14 @@ function bash::tryRun() {
 # This functions runs a command in a subshell.
 # The command can fail and can trigger errors; it will be caught and this function will return
 # the exit code of the subshell.
-# This function can almost be considered as a try/catch block for bash.
+# This function can almost be considered as a try/catch block for bash as the execution will stop on error
+# but the error will be caught and stored for later processing instead of exiting the program.
 #
 # - $@: **command with args** _as string_:
 #       The command to run in the subshell.
 # - ${_OPTION_EXIT_ON_FAIL} _as bool_:
 #       (optional) If set to true, the main program will exit with code 1 if the subshell fails.
+#       (defaults to false)
 # - ${_OPTION_LOG_ON_ERROR_EXIT} _as bool_:
 #       (optional) If true, will display an error if the subshell exits with a non zero code
 #       (defaults to false)
@@ -94,6 +109,10 @@ function bash::runInSubshell() {
     local IFS=' '$'\t'$'\n'
     unset -v ${!_OPTION_*}
 
+    # disable try mode in case we run this function from a tryRun
+    # shellcheck disable=SC2034
+    GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED=false
+
     "${@}"
   )
   local subshellExitCode=${PIPESTATUS[0]:-}
@@ -105,30 +124,6 @@ function bash::runInSubshell() {
     _OPTION_SILENT=true exit "${subshellExitCode}"
   fi
   REPLY="${subshellExitCode}"
-}
-
-# ## bash::countJobs
-#
-# This function counts the number of jobs currently running in the background.
-#
-# Returns:
-#
-# - ${REPLY}: the number of jobs currently running in the background.
-#
-# ```bash
-# bash::countJobs
-# echo "There are currently ${REPLY} jobs running in the background."
-# ```
-function bash::countJobs() {
-  local -i jobsCount=0
-  bash::getBuiltinOutput jobs -r
-  local IFS=$'\n' line
-  for line in ${REPLY}; do
-    if [[ ${line} == "["* ]]; then
-      jobsCount+=1
-    fi
-  done
-  REPLY="${jobsCount}"
 }
 
 # ## bash::runInParallel

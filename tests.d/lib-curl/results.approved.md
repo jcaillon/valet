@@ -117,7 +117,16 @@ Getting 500 with fail mode off:
 
 ❯ `curl::request false '' /tmp/valet-temp --code 500 https://fuu`
 
-Exited with code: `1`
+Returned code: `1`
+
+Returned variables:
+
+```text
+REPLY='(request body response) Writing stuff to file because the --output option was given.'
+REPLY2='(curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f /tmp/valet-temp --code 500 https://fuu
+'
+REPLY3='500'
+```
 
 Getting 500 with fail mode on:
 
@@ -152,7 +161,7 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 
 ```text
 DEBUG    Executing the command ⌜curl⌝.
-DEBUG    The command ⌜curl⌝ ended with exit code ⌜0⌝ in ⌜12.000s⌝.
+DEBUG    The command ⌜curl⌝ ended with exit code ⌜0⌝ in ⌜14.000s⌝.
 DEBUG    The curl command for url ⌜https://fuu⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
 DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
 ```

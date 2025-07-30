@@ -194,10 +194,11 @@ function test_exec() {
   local -i exitCode=0
   if [[ ${canExit} == "true" ]]; then
     bash::runInSubshell eval "${compoundCommand}"
-    exitCode=${REPLY:-0}
+    exitCode=${REPLY}
   else
-    bash::tryRun eval "${compoundCommand}"
-    exitCode=${REPLY:-0}
+    _OPTION_REPLY_DISABLED=true \
+      bash::catchErrors eval "${compoundCommand}"
+    exitCode=${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}
   fi
 
   if ((exitCode != 0)); then

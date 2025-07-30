@@ -65,7 +65,7 @@ function selfMock1() {
       log::warning "This is a custom on exit function."
     }
     log::warning "This is for testing valet core functions, exiting with code 5."
-    _OPTION_SILENT=true exit 5
+    exit 5
     ;;
   unknown-command)
     log::warning "This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle."

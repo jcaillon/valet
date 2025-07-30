@@ -81,5 +81,5 @@ source string
 
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../libraries" title="Libraries" >}}
-  {{< card icon="arrow-circle-right" link="../performance-tips" title="Performance tips" >}}
+  {{< card icon="arrow-circle-right" link="../bash-best-practices" title="Bash best practices" >}}
 {{< /cards >}}

@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-if [[ ${GLOBAL_TEST_SUITE_NAME:-} == "lib-test" ]]; then
-  TESTING_HOOKS+="before-each-test,"
-fi

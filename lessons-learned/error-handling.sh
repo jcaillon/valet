@@ -14,6 +14,7 @@ function problems() {
   subProblems
   log::warning "Should never be reached, this is a problem."
 }
+
 function subProblems() {
   ((0/0))
   log::warning "Should never be reached, this is a problem."
@@ -33,7 +34,7 @@ if (( REPLY != 0 )); then
   log::info "The problems function failed."
 fi
 
-log::info "LESSONS LEARNED:
+log::info "# LESSONS LEARNED:
 
 - It is crucial to remember that any command executed in a 'until', 'while', 'if', or as part of a '!', '||', '&&' pipeline will not trigger the ERR trap if it fails!
   See: <https://www.gnu.org/software/bash/manual/bash.html#index-trap> and <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.

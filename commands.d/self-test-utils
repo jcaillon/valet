@@ -53,6 +53,7 @@ function selfTestUtils_setupValetForConsistency() {
   export GLOBAL_LOG_LEVEL=info
   GLOBAL_FD_TUI=2
   log::init
+  GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
 
   # consistent styles
   export VALET_CONFIG_ENABLE_COLORS=false
@@ -82,6 +83,8 @@ function selfTestUtils_setupValetForConsistency() {
 
 # Set the value of important bash variables to ensure consistency in the tests.
 function selfTestUtils_setupBashForConsistency() {
+  # default IFS
+  IFS=' '$'\t'$'\n'
   # fix the time to a known value
   export TZ=Etc/GMT+0
   unset EPOCHSECONDS
@@ -258,7 +261,7 @@ function selfTestUtils_makeReplacementsInReport() {
   fs::readFile "${GLOBAL_TEST_REPORT_FILE}"
   REPLY="${REPLY//${GLOBAL_INSTALLATION_DIRECTORY}\/valet/valet}"
   REPLY="${REPLY//${GLOBAL_INSTALLATION_DIRECTORY}/\$GLOBAL_INSTALLATION_DIRECTORY}"
-  REPLY="${REPLY//${GLOBAL_TEST_CURRENT_DIRECTORY}/.}"
+  REPLY="${REPLY//${GLOBAL_TEST_SUITE_DIRECTORY}/.}"
   REPLY="${REPLY//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
   REPLY="${REPLY//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
   printf "%s" "${REPLY}" >"${GLOBAL_TEST_REPORT_FILE}"

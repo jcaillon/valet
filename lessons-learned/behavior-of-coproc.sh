@@ -173,7 +173,7 @@ while true; do
 done
 
 
-log::info "LESSONS LEARNED:
+log::info "# LESSONS LEARNED:
 
 - if the main process exits, the coproc (same for background jobs) does not exit:
   - When we exit an interactive shell, a SIGHUP will be sent to the shell process which forwards it to

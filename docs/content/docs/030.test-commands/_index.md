@@ -135,12 +135,8 @@ In addition to the test scripts, you can create other specific scripts which wil
 
 | Script path | Purpose |
 |-------------|---------|
-| `tests.d/before-tests` | Source'd before any test suite inside the tests.d folder is executed. |
-| `tests.d/after-tests` | Source'd after all the test suites inside the tests.d folder are executed. |
-| `tests.d/before-each-test-suite` | Source'd before the execution of each test suite. |
-| `tests.d/after-each-test-suite` | Source'd after the execution of each test suite. |
-| `tests.d/before-each-test` | Source'd before the execution of each test script. |
-| `tests.d/after-each-test` | Source'd after the execution of each test script. |
+| `tests.d/before-tests` | Source'd before each test suite is executed. |
+| `tests.d/after-tests` | Source'd after each test suite is executed. |
 
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../command-properties" title="Command properties" >}}

@@ -36,3 +36,9 @@ benchmark::run func1 func2 func3
 #
 # Better pre compute the length of the array
 # for i loop is not faster than for each loop
+
+log::info "# LESSONS LEARNED:
+
+- Better pre compute the length of the array
+- for i loop is not faster than for each loop
+"

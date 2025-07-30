@@ -199,7 +199,7 @@ CMDERR   Error code ⌜1⌝ for the command:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:76
 ├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:526
 ├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:372
-╰─ in main() at valet:105
+╰─ in main() at valet:108
 
 ```
 

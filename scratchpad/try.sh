@@ -6,15 +6,6 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<sub
 
 
 source "libraries.d/core"
-include tui coproc
+include tui coproc fs
 
-compoundCommand=false
-
-
-bash::tryRun eval "${compoundCommand}"
-log::info "Caught: ${REPLY}"
-
-zefzefzefzaefa
-
-((0/0))
-echo "ok"
+fs::getFileLineCount 'tests.d/lib-fs/resources/file-to-read'

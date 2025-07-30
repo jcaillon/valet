@@ -55,7 +55,7 @@ function test_curl::request() {
   test::func curl::request true 200 "${GLOBAL_TEST_TEMP_FILE}" --code 200 https://fuu
 
   test::markdown "Getting 500 with fail mode off:"
-  test::exit curl::request false \'\' "${GLOBAL_TEST_TEMP_FILE}" --code 500 https://fuu
+  test::func curl::request false \'\' "${GLOBAL_TEST_TEMP_FILE}" --code 500 https://fuu
 
   test::markdown "Getting 500 with fail mode on:"
   test::exit curl::request true 200 "${GLOBAL_TEST_TEMP_FILE}" --code 500 https://fuu

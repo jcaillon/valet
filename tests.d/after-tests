@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+if [[ ${GLOBAL_TEST_SUITE_NAME:-} == "lib-test" ]]; then
+  TESTING_HOOKS+="after-each-test"
+  test::title "🪝 Testing the self test hooks"
+  test::markdown "The variable TESTING_HOOKS shows that the hooks [before-tests](../before-tests) and [after-tests](../after-tests) have been executed."
+  test::printVars TESTING_HOOKS
+fi

@@ -1,6 +1,6 @@
 # Test suite lib-test
 
-## Test script 00.tests
+## Test script 00.test
 
 ### ✅ test::log
 
@@ -280,11 +280,9 @@ While you can test a command by invoking valet (e.g. `test::exec valet my-comman
 
 ### 🪝 Testing the self test hooks
 
-The variable TESTING_HOOKS shows that the hooks [before-tests](../before-tests), [before-each-test-suite](../before-each-test-suite), [before-each-test](../before-each-test) have been executed.
-
-This test is written in the [after-each-test](../after-each-test) script. The `after-each-test-suites` and `after-tests` are executed after the test script exits, thus we can't output their results in this report.
+The variable TESTING_HOOKS shows that the hooks [before-tests](../before-tests) and [after-tests](../after-tests) have been executed.
 
 ```text
-TESTING_HOOKS='before-tests,before-each-test-suite,before-each-test,after-each-test'
+TESTING_HOOKS='before-tests,after-each-test'
 ```
 

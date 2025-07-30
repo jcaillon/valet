@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 function main() {
+  test_bash::catchErrors
   test_bash::allVariablesCachedWithValue
   test_bash::runInSubshell
   test_bash::isFdValid
   test_bash::getFunctionDefinitionWithGlobalVars
-  test_bash::countJobs
   test_bash::injectCodeInFunction
   test_bash::sleep
   test_bash::readStdIn
@@ -15,6 +15,17 @@ function main() {
   test_bash::isCommand
   test_bash::isFunction
   test_bash::getBuiltinOutput
+}
+
+function test_bash::catchErrors() {
+  test::title "✅ Testing bash::catchErrors"
+
+  # shellcheck disable=SC2317
+  test::func _OPTION_REPLY_DISABLED=false bash::catchErrors echo "This should not fail"
+  test::func _OPTION_REPLY_DISABLED=false bash::catchErrors false
+  test::exec bash::catchErrors false
+  test::printVars GLOBAL_ERROR_TRAP_LAST_ERROR_CODE
+  test::exit _OPTION_EXIT_ON_FAIL=true bash::catchErrors false
 }
 
 function test_bash::allVariablesCachedWithValue() {
@@ -37,7 +48,7 @@ function test_bash::allVariablesCachedWithValue() {
 function test_bash::runInSubshell() {
   test::title "✅ Testing bash::runInSubshell"
 
-  test::exec bash::runInSubshell log::info "hello"
+  test::func bash::runInSubshell log::info "hello"
 
   function subshellThatFails() {
     ((0/0)) # This will fail and exit the subshell
@@ -45,15 +56,16 @@ function test_bash::runInSubshell() {
   }
 
   test::setTestCallStack
-  test::exec bash::runInSubshell subshellThatFails
+  test::func bash::runInSubshell subshellThatFails
+  test::func _OPTION_LOG_ON_ERROR_EXIT=true bash::runInSubshell subshellThatFails
   test::exit _OPTION_EXIT_ON_FAIL=true bash::runInSubshell subshellThatFails
   test::unsetTestCallStack
 
   function subshellThatExits() {
-    exit 2
+    _OPTION_SILENT=true exit 2
   }
 
-  test::exec bash::runInSubshell subshellThatExits
+  test::func bash::runInSubshell subshellThatExits
 }
 
 function test_bash::isFdValid() {
@@ -87,22 +99,6 @@ function test_bash::injectCodeInFunction() {
   echo "${REPLY}"
   echo "${REPLY2}"
   test::flush
-}
-
-function test_bash::countJobs() {
-  test::title "✅ Testing bash::countJobs"
-
-  # overriding the builtin jobs command
-  # shellcheck disable=SC2317
-  function jobs() {
-    echo "[1]   Running                 stuff &
-[2]-  Running                 stuff &
-[3]+  Running                 stuff &
-"
-  }
-  test::prompt "stuff &; stuff &; stuff &"
-  test::func bash::countJobs
-  unset -f jobs
 }
 
 function test_function_to_reexport() {
@@ -203,7 +199,7 @@ function test_bash::getBuiltinOutput() {
 
   test::func bash::getBuiltinOutput echo coucou
   test::func bash::getBuiltinOutput declare -f bash::getBuiltinOutput
-  test::func bash::getBuiltinOutput false || echo "Failed as expected"
+  test::func bash::getBuiltinOutput false
 }
 
 main

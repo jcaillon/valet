@@ -16,7 +16,7 @@ log::info "${BASH_SUBSHELL} ${SHLVL}"
   )
 )
 
-log::info "LESSONS LEARNED:
+log::info "# LESSONS LEARNED:
 
 - BASH_SUBSHELL indicates the level of nested shells;
 - SHLVL does not seem to work.

@@ -49,6 +49,10 @@ function coproc::runInParallel() {
   local printRedirectedLogs="${_OPTION_PRINT_REDIRECTED_LOGS:-false}"
   local coprocNamePrefix="_COPROC_PARALLEL_"
 
+  if (( BASH_SUBSHELL > 0 )); then
+    coprocNamePrefix+="${BASH_SUBSHELL}_"
+  fi
+
   local logOnErrorExit=false
   if [[ -z ${completedCallback} ]]; then
     # if no callback is defined, we want to log on error exit

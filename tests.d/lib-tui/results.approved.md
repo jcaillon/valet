@@ -2,13 +2,9 @@
 
 ## Test script 00.tui
 
-**Standard output**:
+### ✅ Testing bash::runInSubshell
 
-```text
-ok
-```
-
-❯ `false`
+❯ `bash::getBuiltinOutput false`
 
 Returned code: `1`
 

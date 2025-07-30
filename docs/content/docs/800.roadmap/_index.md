@@ -67,5 +67,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Add documentation pages for each built in commands. Add an option --markdown to the help command to output the help in markdown.
 - Add an option to enter interactive debug mode when an error occurs and on each log::print call.
 - Add a function to display a table, use it for benchmark.
+- Add a function to display a text using figlet fonts.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues
