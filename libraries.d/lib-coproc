@@ -276,6 +276,9 @@ function coproc_program() {
   # we are inside a coproc, register the correct traps
   _OPTION_LOG_ON_ERROR_EXIT="${logOnErrorExit}" trap::registerSubshell
 
+  # the coproc must have its own set of temp files
+  fs::setupSubshellTempFileGlobalVariable
+
   # unset options or they will be visible from the subshell and might interfere
   local IFS=' '$'\t'$'\n'
   unset -v ${!_OPTION_*}
