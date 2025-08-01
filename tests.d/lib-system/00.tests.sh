@@ -53,6 +53,7 @@ function test_system::getOs() {
 
   test::func OSTYPE=linux-bsd system::getOs
   test::func OSTYPE=msys system::getOs
+  test::func OSTYPE=cygwin system::getOs
   test::func OSTYPE=darwin-stuff system::getOs
   test::func OSTYPE=nop system::getOs
 }

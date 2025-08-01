@@ -1,6 +1,6 @@
 # Test suite lib-fs
 
-## Test script 00.tests
+## Test script 00.lib-fs
 
 ### ✅ Testing fs::getCommandPath
 
@@ -510,7 +510,7 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true`
+❯ `_OPTION_RECURSIVE=true fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
 
 Returned variables:
 
@@ -524,7 +524,7 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search false true`
+❯ `_OPTION_INCLUDE_HIDDEN=true fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
 
 Returned variables:
 
@@ -537,7 +537,7 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true`
+❯ `_OPTION_RECURSIVE=true _OPTION_INCLUDE_HIDDEN=true fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
 
 Returned variables:
 
@@ -577,7 +577,7 @@ fileNamedFile ()
 }
 ```
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true fileNamedFile`
+❯ `_OPTION_RECURSIVE=true _OPTION_INCLUDE_HIDDEN=true _OPTION_FILTER=fileNamedFile fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
 
 Returned variables:
 
@@ -607,7 +607,7 @@ folderNamedHidden ()
 }
 ```
 
-❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true folderNamedHidden`
+❯ `_OPTION_RECURSIVE=true _OPTION_INCLUDE_HIDDEN=true _OPTION_FILTER=folderNamedHidden fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
 
 Returned variables:
 

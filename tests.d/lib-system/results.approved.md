@@ -36,8 +36,6 @@ Returned code: `1`
 
 ❯ `OSTYPE=cygwin system::isWindows`
 
-Returned code: `1`
-
 ❯ `OSTYPE=windows system::isWindows`
 
 Returned code: `1`
@@ -67,6 +65,14 @@ REPLY='linux'
 ```
 
 ❯ `OSTYPE=msys system::getOs`
+
+Returned variables:
+
+```text
+REPLY='windows'
+```
+
+❯ `OSTYPE=cygwin system::getOs`
 
 Returned variables:
 

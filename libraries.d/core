@@ -2708,7 +2708,7 @@ function core::setShellOptions() {
   unset -v CDPATH TMOUT
 
   # default IFS
-  IFS=' '$'\t'$'\n'
+  IFS=$' \t\n'
 
   # Set a locale otherwise we will face inconsistencies in the output of commands:
   # - file listing will not sort the same way

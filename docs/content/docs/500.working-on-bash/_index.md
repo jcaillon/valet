@@ -41,6 +41,8 @@ Here is a list of recommended extensions to work on bash scripts:
 
 A more up-to-date list can be found in [extensions.json](https://raw.githubusercontent.com/jcaillon/valet/refs/heads/latest/extras/.vscode/extensions.json).
 
+You will need to install at least: [shfmt](https://github.com/mvdan/sh#shfmt), [shellcheck](https://github.com/koalaman/shellcheck).
+
 ### 🆎 Autocompletion on Valet library functions
 
 You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/blob/latest/extras/valet.code-snippets) which should already be present in your extension directory. If not, you can setup your directory with `valet self extend .`.

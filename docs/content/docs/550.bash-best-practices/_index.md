@@ -16,6 +16,10 @@ url: /docs/bash-best-practices
 
 I am keeping example bash scripts that demonstrates the points I am making in this page in [lessons-learned][lessons-learned].
 
+## CLI guidelines
+
+Valet is trying to follow the best practices for CLI applications. One good guideline can be found at [clig.dev][cliGuidelineReference].
+
 ## 🕳️ Notable pitfalls
 
 ### Error handling / ERR trap in bash
@@ -56,6 +60,69 @@ To make our life easier, Valet only uses coproc and never uses jobs. Coproc are 
 For background tasks, always use the [coproc](../libraries/coproc) library which correctly handles all the subtleties of correctly managing a coproc.
 {{< /callout >}}
 
+## 🎨 Coding style
+
+### Library functions
+
+This section describes how to write **library** functions that can be used in Valet extensions. For functions that are solely use in one command, you don't have to stick to these strict rules, but it is still a good idea to follow them.
+
+#### Function parameters
+
+Ideally, we would use positional arguments and flags like we do for our CLI. But it would be too costly to parse these in each function that we call. So we use positional arguments for mandatory and obvious parameters, and we use shell parameter syntax for optional parameters.
+
+```bash
+function argument1 argument2 1 2 3 --- myOption=one myOption3="my value"
+```
+
+
+Optional parameters all start with the `_OPTION_` prefix and can be use like so:
+
+```bash
+function myFunction() {
+  local myOption="${_OPTION_MY_OPTION:-default_value}"
+  # ...
+}
+__OPTION_MY_OPTION="my_value" myFunction
+```
+
+This way we can immediately understand what is passed to the function and easily use the option inside our function block.
+
+One caveat to pay attention to is that the inline variables will be also inherited to any child functions called from our function. This is also why our functions should not rely on other functions. But when that is the case, we can simply `unset -v ${!_OPTION_*}` to unset all options.
+
+{{< callout emoji="💡" >}}
+Use positional arguments for mandatory parameters and inline variables for optional parameters. Use the `_OPTION_` prefix for the inline variables.
+{{< /callout >}}
+
+#### Function outputs
+
+When it comes to outputs, we should use the `REPLY` global variable to store the output of our function. This way, we can easily access the output after the function has been called.
+
+```bash
+function myFunction() {
+  local myOption="${_OPTION_MY_OPTION:-default_value}"
+  # ...
+  REPLY="some output"
+}
+__OPTION_MY_OPTION="my_value" myFunction
+echo "${REPLY}"
+```
+
+- We can use `REPLY2`, `REPLY3`, etc... if we need to return multiple values from a function.
+- We can use `REPLY_ARRAY`, `REPLY_ARRAY2`, etc... to return an array of values from a function.
+- We can use `REPLY_CODE` to return an exit code from a function.
+
+As [seen above](#error-handling--err-trap-in-bash), we should not use `return` to return an exit code because it would encourage a bad usage of the function. Instead, we should always return 0 from our functions and use the `REPLY_CODE` variable to return an exit code.
+
+{{< callout emoji="💡" >}}
+Use the `REPLY` global variable to store the string output of your function. Use `REPLY2`, `REPLY_ARRAY`, etc... for multiple outputs. And use `REPLY_CODE` to return an exit code. Do not use `return` with a non-zero exit code because it would push the users to use the function in a way that would not trigger the **ERR trap**.
+{{< /callout >}}
+
+#### Function body
+
+If possible, make each function independent and self-contained. This means that the function should not rely on other functions or global variables. A bit of copy-paste is acceptable if it makes the function self-contained. This will make the function easier to test and debug.
+
+Explicitly declare all the parameters of the function at the top of the function body using `local` declare statements. This will make it easier to understand what parameters it expects and what are the default values. This extra cost is negligible.
+
 {{< cards >}}
   {{< card icon="arrow-circle-left" link="../work-on-bash-scripts" title="Work on bash scripts" >}}
   {{< card icon="arrow-circle-right" link="../performance-tips" title="Performance tips" >}}
@@ -63,3 +130,4 @@ For background tasks, always use the [coproc](../libraries/coproc) library which
 
 [lessons-learned]: https://github.com/jcaillon/valet/tree/main/lessons-learned
 [error-handling]: https://github.com/jcaillon/valet/tree/main/lessons-learned/error-handling.sh
+[cliGuidelineReference]: https://clig.dev/

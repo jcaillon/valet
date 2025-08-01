@@ -46,7 +46,7 @@ function system::getOs() {
   case "${OSTYPE:-}" in
     darwin*) osName="darwin";;
     linux*) osName="linux";;
-    msys*) osName="windows";;
+    cygwin* | mingw* | msys*) osName="windows";;
     *) osName="unknown";;
   esac
   REPLY="${osName}"
@@ -68,7 +68,9 @@ function system::getOs() {
 # fi
 # ```
 function system::isWindows() {
-  [[ ${OSTYPE:-} == "msys"* ]] || return 1
+  local REPLY
+  system::getOs
+  [[ ${REPLY} == "windows" ]] || return 1
 }
 
 # ## system::isLinux
