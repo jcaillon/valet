@@ -1,0 +1,395 @@
+#!/usr/bin/env bash
+# Title:          libraries.d/core
+# Description:    this script contains the core functions and variables and it
+#                 should be sourced, not called directly
+# Author:         github.com/jcaillon
+
+#===============================================================
+# >>> Traps
+#===============================================================
+
+# This function is called when a command or pipeline returns a non-zero exit status.
+# It is executed in the same shell as the command that failed, as if we called this function
+# at the line where the command failed.
+function trap::onErrorInternal() {
+  local -a errorCodes=("$?" "${PIPESTATUS[@]}")
+  local IFS=' '
+  local errorCodesString="⌜${errorCodes[0]}⌝"
+  if ((${#errorCodes[@]} > 2)); then
+    errorCodesString+=" (pipeline statuses ⌜${errorCodes[*]}⌝)"
+  fi
+
+  if [[ ${FUNCNAME[1]:-} == "log::"* ]]; then
+    # we are here if the error happened in a log function and thus we couldn't print the error
+    printf '%s\n%s\n%s\n' "The command had a return code of ${errorCodesString}." "Error in a log function:" "${BASH_COMMAND:-}" >&2
+    log::getCallStack 2
+    printf '%s\n' "${REPLY}" >&2
+    return 0
+  fi
+
+  if [[ ${GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED:-} == "true" ]]; then
+    # if we are in try/catch mode, we do not want to exit the program on error, only capture the error code
+    if log::isTraceEnabled; then
+      log::trace "Caught error in try/catch mode, error code ${errorCodesString} for the command:"
+      log::printTrappedBashCommand
+      log::printCallStack 2
+    fi
+    # shellcheck disable=SC2034
+    GLOBAL_ERROR_TRAP_LAST_ERROR_CODE="${errorCodes[0]}"
+    return 0
+  fi
+
+  log::print "ERROR" "${ICON_ERROR:-}" "CMDERR" "Error code ${errorCodesString} for the command:"
+  log::printTrappedBashCommand
+  log::printCallStack 2
+
+  : before-exit
+  _OPTION_SILENT=true exit 1
+}
+
+# This function is called when the program exits (on error, on success, on exit, on interrupt).
+# It is executed in the same shell that exited, as if we called this function
+# at the line where the exit command is called.
+function trap::onExitInternal() {
+  local exitCode="$?"
+
+  if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || (${GLOBAL_EXPECTED_EXIT:-} != "true" && ${exitCode} != "0") ]]; then
+    _OPTION_DUMP_SUFFIX="-${exitCode}" core::dump
+  fi
+
+  log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
+
+  if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" ]]; then
+    if [[ ${VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT:-} == "true" && ! ${BASH_COMMAND:-} =~ ^(exit|return) ]]; then
+      log::print "WARNING" "${ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
+      log::printTrappedBashCommand
+      log::printCallStack 2
+    elif (( exitCode != 0 )); then
+      log::print "ERROR" "${ICON_EXIT:-}" "EXIT" "Exiting with code ${exitCode}, stack:"
+      log::printTrappedBashCommand
+      log::printCallStack 2
+    fi
+  fi
+
+  if [[ -n ${GLOBAL_ON_EXIT_MESSAGE:-} ]]; then
+    log::error "${GLOBAL_ON_EXIT_MESSAGE}"
+  fi
+
+  # always call cleanUp before exiting
+  trap::onCleanUpInternal
+}
+
+# This function is called when the program is interrupted by the user (CTRL+C).
+# It is executed in the same shell that has been interrupted, as if we called this function
+# at the line executed at the moment when the interruption took place.
+function trap::onInterruptInternal() {
+  # check if the function exists
+  if declare -F trap::onInterrupt &>/dev/null; then
+    if trap::onInterrupt; then
+      # if trap::onInterrupt returns 0, then we cancel the interrupt
+      return 0
+    fi
+  fi
+
+  # reset the trap to not call this function again
+  trap SIGINT SIGQUIT
+
+  if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
+    printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
+  fi
+  if [[ ${GLOBAL_WARN_ON_INTERRUPT_DISABLED:-} != "true" ]]; then
+    log::print "WARNING" "${ICON_STOPPED:-}" "STOPPED" "Program interrupted by the user."
+  fi
+
+  if log::isDebugEnabled; then
+    log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:"
+    log::printTrappedBashCommand
+    log::printCallStack 2
+  fi
+
+  _OPTION_SILENT=true exit 1
+}
+
+# This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
+function trap::onTerminateInternal() {
+  # check if the function exists
+  if declare -F trap::onTerminate &>/dev/null; then
+    if trap::onTerminate; then
+      # if trap::onTerminate returns 0, then we cancel the termination
+      return 0
+    fi
+  fi
+
+  log::print "ERROR" "${ICON_KILLED:-}" "KILLED" "Program killed."
+
+  # reset the trap to not call this function again
+  trap SIGHUP SIGTERM
+  _OPTION_SILENT=true exit 1
+}
+
+# This function is called when terminal changes its size.
+function trap::onResizeInternal() {
+  local currentSize="${GLOBAL_COLUMNS}x${GLOBAL_LINES}"
+  terminal::getTerminalSize
+  local newSize="${GLOBAL_COLUMNS}x${GLOBAL_LINES}"
+
+  if [[ ${currentSize} == "${newSize}" ]]; then
+    log::debug "Terminal size did not change, still ⌜${currentSize}⌝."
+    return 0
+  fi
+  log::debug "Terminal size changed from ⌜${currentSize}⌝ to ⌜${newSize}⌝."
+
+  # shellcheck disable=SC2034
+  GLOBAL_SCREEN_REDRAW_REQUIRED=true
+
+  # need to re init the logs because might depend on the number of columns for wrapping
+  log::init
+
+  if declare -F progress::onResize &>/dev/null; then
+    progress::onResize
+  fi
+  if declare -F trap::onResize &>/dev/null; then
+    trap::onResize
+  fi
+}
+
+# This functions is called before the program exits (in all cases, error or not).
+function trap::onCleanUpInternal() {
+  # kill background processes if still running
+  # we need to do this first because if one of the background is killed during "read"
+  # it will restore the tty as it was when it entered read, effectively discarding our trap::restoreTerminal
+  if (( ${#GLOBAL_BACKGROUND_PIDS[@]} > 0 )); then
+    local pid
+    for pid in "${GLOBAL_BACKGROUND_PIDS[@]}"; do
+      log::debug "Killing background process with PID ${pid}."
+      kill -INT "${pid}" &>/dev/null || :
+      kill -HUP "${pid}" &>/dev/null || :
+    done
+  fi
+
+  # restore the terminal as it was before running this program
+  trap::restoreTerminal
+
+  # call the clean up functions if they exist
+  if declare -F trap::onCleanUp &>/dev/null; then
+    trap::onCleanUp
+  fi
+
+  # disable the profiler if still on
+  if [[ ${GLOBAL_PROFILER_ENABLED:-} == "true" ]]; then
+    profiler::disable
+  fi
+
+  fs::cleanTempFiles
+}
+
+# restore the terminal in its original state, before running valet
+function trap::restoreTerminal() {
+  # if we are in interactive mode, we need to restore the cursor
+  if [[ -t ${GLOBAL_FD_TUI} && ${VALET_CONFIG_DISABLE_ESC_CODES:-} != "true" ]]; then
+    printf '%s' "${ESC__CURSOR_SHOW_FORCE:-$'\e[?25h'}" 1>&"${GLOBAL_FD_TUI}"
+    printf '%s' "${ESC__DISABLE_MOUSE_BUTTON_TRACKING:-$'\e[?1006l'$'\e[?1000l'}${ESC__DISABLE_MOUSE_ANY_EVENT_TRACKING:-$'\e[?1006l'$'\e[?1003l'}" 1>&"${GLOBAL_FD_TUI}"
+  fi
+
+  # if we were in interactive mode, we need to restore the logs
+  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} == "true" ]]; then
+    terminal::restoreLogs
+    GLOBAL_LOG_REROUTED_TO_FILE_ENABLED=true
+  fi
+
+  # restore tty settings if needed
+  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} == "true" ]]; then
+    terminal::restoreSettings
+    GLOBAL_TERMINAL_RAW_MODE_ENABLED=true
+  fi
+}
+
+# This function is called when the program is required to pause (stop/suspend).
+# Usually this is called when the user presses CTRL+Z in bash.
+function trap::onSuspendInternal() {
+  # avoid multiple calls
+  trap SIGTSTP
+
+  # check if the function exists
+  if declare -F trap::onSuspend &>/dev/null; then
+    if trap::onSuspend; then
+      # if trap::onSuspend returns 0, then we cancel the suspend
+      return 0
+    fi
+  fi
+
+  # restore the terminal in its original state, before running valet
+  trap::restoreTerminal
+
+  log::print "WARNING" "${ICON_HALT:-}" "PAUSED" "Program halted."
+
+  # now that we have set up everything for a suspend, we temporarily remove this trap
+  # and send the same signal again to let bash handle the suspend of the process
+  kill -TSTP "${BASHPID}" &>/dev/null || :
+}
+
+# This function is called when the program is required to resume its execution.
+function trap::onContinueInternal() {
+  log::print "INFO" "${ICON_HALT:-}" "RESUMED" "Program resumed (press any key to unfreeze)."
+
+  # we reregister the TSTP trap that removed on halt
+  trap trap::onSuspendInternal SIGTSTP
+
+  # check if the function exists
+  if declare -F trap::onContinue &>/dev/null; then
+    trap::onContinue
+  fi
+
+  # if we are in interactive mode, we need to hide the cursor
+  if [[ -t ${GLOBAL_FD_TUI} ]]; then
+    terminal::getTerminalSize
+    if [[ ${GLOBAL_SOURCED_FOR_PROMPT:-} != "true" ]]; then
+      # hide the cursor (we restore on exit)
+      printf "%s" "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
+    fi
+  fi
+
+  # restore tty settings if needed
+  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} == "true" ]]; then
+    unset -v GLOBAL_TERMINAL_RAW_MODE_ENABLED
+    terminal::setRawMode
+  fi
+
+  # if we were in interactive mode, we need to restore the logs
+  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} == "true" ]]; then
+    unset -v GLOBAL_LOG_REROUTED_TO_FILE_ENABLED
+    terminal::rerouteLogs
+  fi
+
+  GLOBAL_SCREEN_REDRAW_REQUIRED=true
+}
+
+# Function to handle commands not found, so we can display a better message.
+# The name of this function is a bash convention.
+# This is called by bash and executed in a subshell (different PID than the main program).
+function command_not_found_handle() {
+  local commandNotFound="${1:-}"
+
+  local errorMessage
+  if [[ ${commandNotFound} == "curl" ]]; then
+    errorMessage="This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
+  elif [[ ${commandNotFound} == *::* ]]; then
+    # if the command contains :: it is one of our function, we can suggest to source the 'package'
+    errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Did you forget to source/include the package? ⌜include ${commandNotFound%%::*}⌝"
+  else
+    errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
+  fi
+
+  # check for recursive call
+  if [[ -v GLOBAL_COMMAND_NOT_FOUND ]]; then
+    # we are here if the error happened in a log function and thus we couldn't print the error
+    printf '%s\n%s\n' "Command not found: ⌜${commandNotFound}⌝." "Error in a log function." >&2
+    log::getCallStack 2
+    printf '%s\n' "${REPLY}" >&2
+  else
+    GLOBAL_COMMAND_NOT_FOUND=1
+    log::print "ERROR" "${ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
+    log::printCallStack 2
+  fi
+
+  GLOBAL_EXPECTED_EXIT=true
+  return 1
+  # since this runs in a subshell, we don't actually exit the main program
+  # but we set $? to 1 so ERR trap is called
+}
+
+# ## trap::register (private)
+#
+# Register the traps for the program.
+function trap::register() {
+  trap trap::onErrorInternal ERR
+  trap trap::onExitInternal EXIT
+  # Register CTRL+C SIGINT (interrupt) and CTRL+\ SIGQUIT (interrupt with a coredump) event handler
+  trap trap::onInterruptInternal SIGINT SIGQUIT
+  # Register SIGHUP (hang up, terminal disconnected) and SIGTERM (terminate the program) event handler
+  trap trap::onTerminateInternal SIGHUP SIGTERM
+  # Register CTRL+Z SIGTSTP (stop/suspend from tty)
+  trap trap::onSuspendInternal SIGTSTP
+  # Register SIGCONT (continue with fg or bg after suspend) event handler
+  trap trap::onContinueInternal SIGCONT
+  if [[ -t 2 ]]; then
+    # shellcheck disable=SC2034
+    GLOBAL_SCREEN_REDRAW_REQUIRED=false
+    trap trap::onResizeInternal SIGWINCH
+  fi
+}
+
+# ## trap::unregister (private)
+#
+# Unregister the traps for the program.
+# Can be called in a subshell where we want to reset the traps.
+function trap::unregister() {
+  trap ERR
+  trap EXIT
+  trap SIGINT
+  trap SIGQUIT
+  trap SIGHUP
+  trap SIGTERM
+  trap SIGTSTP
+  trap SIGCONT
+  if [[ -t 2 ]]; then
+    trap SIGWINCH
+  fi
+}
+
+# This function is called when a subshell exits (on error, on success, on exit, on interrupt).
+# It is executed in the process that exited, as if we called this function
+# at the line where the exit command is called.
+function trap::onSubshellExitInternal() {
+  local exitCode="$?"
+
+  if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" && ${GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT:-} == "true" && ${exitCode} -ne 0 ]]; then
+    log::error "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
+    log::printTrappedBashCommand
+    log::printCallStack 2
+  elif log::isDebugEnabled; then
+    if log::isTraceEnabled; then
+      log::debug "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
+      log::printTrappedBashCommand
+      log::printCallStack 2
+    else
+      log::debug "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}."
+    fi
+  fi
+}
+
+# ## trap::registerForSubshell (private)
+#
+# Register the traps for a subshell.
+#
+# - ${_OPTION_LOG_ON_ERROR_EXIT} _as bool_:
+#       (optional) If true, will display an error if the subshell exits with a non zero code
+#       (defaults to true)
+
+# > - For a subshell, we do not want to execute the "cleanup" because it would also delete
+# >   files of the main process.
+# > - Additionally, we want to re-register the EXIT trap because it is not properly honored.
+# > - External interruptions of the subshell (e.g. kill) are considered to be voluntary so we exit with 0;
+# >   note that coproc do not respond to interrupt signals (CTRL+C does not work).
+# > - coproc and jobs will not get SIGHUP when the main process ends and they will continue to execute
+# >   until killed or until they check that the main process is dead.
+function trap::registerSubshell() {
+  if (( BASH_SUBSHELL == 0 )); then
+    core::fail "This function should only be called in a subshell."
+  fi
+  if [[ ${_OPTION_LOG_ON_ERROR_EXIT:-true} == "true" ]]; then
+    GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=true
+  else
+    GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=false
+  fi
+
+  trap trap::onErrorInternal ERR
+  trap trap::onSubshellExitInternal EXIT
+  # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
+  trap 'exit 0' SIGINT SIGQUIT
+  # Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
+  trap 'exit 0' SIGHUP SIGTERM
+  trap SIGWINCH
+  trap SIGTSTP
+  trap SIGCONT
+}

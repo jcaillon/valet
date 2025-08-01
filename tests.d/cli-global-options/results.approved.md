@@ -4,7 +4,7 @@
 
 ### ✅ Testing unknown option
 
-❯ `main::parseMainArguments --logging-leeeevel`
+❯ `command::parseProgramArguments --logging-leeeevel`
 
 Exited with code: `1`
 
@@ -12,12 +12,11 @@ Exited with code: `1`
 
 ```text
 FAIL     Unknown option ⌜--logging-leeeevel⌝, valid options are:
--x --profiling
--l --log-level --log
+--profiler
+--log-level --log
 -v --verbose
--w --very-verbose
 --disable-progress-bars
--i --force-interactive-mode
+--interactive
 --source
 --version
 -h --help
@@ -25,19 +24,19 @@ FAIL     Unknown option ⌜--logging-leeeevel⌝, valid options are:
 
 ### ✅ Testing unknown single letter
 
-❯ `main::parseMainArguments -prof`
+❯ `command::parseProgramArguments -prof`
 
 Exited with code: `1`
 
 **Error output**:
 
 ```text
-FAIL     Unknown option letter ⌜p⌝ in group ⌜-p⌝. Valid single letter options are: ⌜x⌝, ⌜l⌝, ⌜v⌝, ⌜w⌝, ⌜i⌝, ⌜h⌝.
+FAIL     Unknown option letter ⌜p⌝ in group ⌜-prof⌝. Valid single letter options are: ⌜v⌝, ⌜h⌝.
 ```
 
 ### ✅ Testing option --version corrected with fuzzy match
 
-❯ `main::parseMainArguments --versin`
+❯ `command::parseProgramArguments --versin`
 
 **Standard output**:
 
@@ -53,7 +52,7 @@ INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
 
 ### ✅ Testing group of single letter options
 
-❯ `main::parseMainArguments -vwvw --versin`
+❯ `command::parseProgramArguments -vvv --versin`
 
 **Standard output**:
 
@@ -66,19 +65,42 @@ INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
 ```text
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Log level set to trace.
+DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-DEBUG    Log level set to trace.
-WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 INFO     Fuzzy matching the option ⌜--versin⌝ to ⌜--version⌝.
-TRACE    Explicit exit with code 0, stack:
+DEBUG    Exiting subshell depth 3 with code 0.
+```
+
+### ✅ Testing invalid single letter options
+
+❯ `command::parseProgramArguments -w --versin`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+FAIL     Unknown option letter ⌜w⌝ in group ⌜-w⌝. Valid single letter options are: ⌜v⌝, ⌜h⌝.
+```
+
+### ✅ Testing invalid letter options
+
+❯ `command::parseProgramArguments -vvw --versin`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+DEBUG    Log level set to debug.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
+DEBUG    Log level set to debug.
+WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
+FAIL     Unknown option letter ⌜w⌝ in group ⌜-vvw⌝. Valid single letter options are: ⌜v⌝, ⌜h⌝.
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
-DEBUG    Exiting subshell depth 3 with code 0, stack:
-╭ "${@}"
-├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
-╰─ in myCmd::function() at /path/to/function.sh:300
+DEBUG    Exiting subshell depth 3 with code 1.
 ```
 

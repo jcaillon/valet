@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-set -Eeu -o pipefail
 # Title:         commands.d/*
 # Description:   this script is a valet command
 # Author:        github.com/jcaillon
 
-# import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
-if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
-  # shellcheck source=../libraries.d/core
-  source "$(valet --source)"
-fi
-# --- END OF COMMAND COMMON PART
+# shellcheck source=../libraries.d/lib-command
+source command
 
 : "---
 command: help
@@ -44,25 +39,23 @@ examples:
 function showCommandHelp() {
   local -a commands
   local commandArgumentsErrors help columns help
-  command::parseFunctionArguments "${FUNCNAME[0]:-}" "$@"
-  eval "${REPLY}"
-
+  command::parseArguments "$@" && eval "${REPLY}"
   command::checkParsedResults
 
   # show the program help if no commands are provided
   if [[ ${#commands[@]} -eq 0 ]]; then
-    main::printHelp function "this" "${columns:-}"
+    command::printHelp function "this" "${columns:-}"
     return 0
   fi
 
   local functionName exactCommand
-  main::fuzzyMatchCommandToFunctionNameOrFail "${commands[@]}"
+  command::fuzzyMatchCommandToFunctionNameOrFail "${commands[@]}"
   functionName="${REPLY:-}"
   exactCommand="${REPLY3:-}"
 
   if [[ ${functionName} == "_menu" ]]; then
-    main::printHelp menu "${exactCommand}" "${columns:-}"
+    command::printHelp menu "${exactCommand}" "${columns:-}"
   else
-    main::printHelp function "${functionName}" "${columns:-}"
+    command::printHelp function "${functionName}" "${columns:-}"
   fi
 }

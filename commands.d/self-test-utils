@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # author: github.com/jcaillon
-# description: Utility functions for the self-test script.
+# description: this script is a valet command
 
 #===============================================================
 # >>> Functions that can be used in the test scripts

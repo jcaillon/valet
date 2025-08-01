@@ -4,7 +4,8 @@ export VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT=false
 export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<subshell>{1s}] <colorFaded>line <line>{-4s}<colorDefault> <levelColor><level>{-4s} <colorDefault> <message>"
 # export VALET_CONFIG_LOG_FD=tmp/log
 
-source "libraries.d/core"
+# shellcheck source=../libraries.d/main
+source "$(valet --source)"
 include bash
 
 function onSubshellExit() {

@@ -7,7 +7,6 @@ if [ ${BASH_VERSINFO:-0} -lt 5 ]; then
   printf '%s\n' "❌ Bash 5 or higher is required to run valet."
   exit 1
 fi
-set -Eeu -o pipefail
 
 ##<<VALET_COMMAND
 # command: valet
@@ -39,13 +38,13 @@ set -Eeu -o pipefail
 #     The command or sub commands to execute.
 #     See the commands section for more information.
 # options:
-# - name: -x, --profiling
+# - name: --profiler
 #   description: |-
 #     Turn on profiling (with debug mode) before running the required command.
 #     It will output to `~/.local/state/valet/logs` by default.
 #     This is useful to debug your command and understand what takes a long time to execute.
 #     The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
-# - name: -l, --log-level, --log <level>
+# - name: --log-level, --log <level>
 #   description: |-
 #     Set the log level of valet (defaults to info).
 #     Possible values are: trace, debug, success, info, success, warning, error.
@@ -53,14 +52,10 @@ set -Eeu -o pipefail
 #   description: |-
 #     Output verbose information.
 #     This is the equivalent of setting the log level to debug.
-# - name: -w, --very-verbose
-#   description: |-
-#     Output very verbose information.
-#     This is the equivalent of setting the log level to trace.
 # - name: --disable-progress-bars
 #   description: |-
 #     Disable all progress bars for commands that use them.
-# - name: -i, --force-interactive-mode
+# - name: --interactive
 #   description: |-
 #     Enter interactive mode for commands even if arguments are not required or provided.
 # - name: --source
@@ -84,7 +79,9 @@ set -Eeu -o pipefail
 GLOBAL_INSTALLATION_DIRECTORY="${BASH_SOURCE[0]}"
 if [[ "${GLOBAL_INSTALLATION_DIRECTORY}" != /* ]]; then
   # resolve relative path
-  if pushd "${GLOBAL_INSTALLATION_DIRECTORY%/*}" &>/dev/null; then GLOBAL_INSTALLATION_DIRECTORY="${PWD}"; popd &>/dev/null;
+  if pushd "${GLOBAL_INSTALLATION_DIRECTORY%/*}" &>/dev/null; then
+    GLOBAL_INSTALLATION_DIRECTORY="${PWD}"
+    popd &>/dev/null || exit 1
   else GLOBAL_INSTALLATION_DIRECTORY="${PWD}"; fi
 else
   GLOBAL_INSTALLATION_DIRECTORY="${GLOBAL_INSTALLATION_DIRECTORY%/*}" # strip filename
@@ -96,15 +93,10 @@ if [[ $# -eq 1 && "${1}" == "--source" ]]; then
   exit 0
 fi
 
-#===============================================================
-# >>> Source main functions
-#===============================================================
 # shellcheck source=libraries.d/main
 source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
 
-#===============================================================
-# >>> Run the main function
-#===============================================================
-main::parseMainArguments "$@"
+core::parseMainArguments "$@"
+
 # shellcheck disable=SC2034
 GLOBAL_EXPECTED_EXIT=true

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-set -Eeu -o pipefail
 # author: github.com/jcaillon
-# Title:         libraries.d/build
 # Description:   This script is called during development to build the commands script.
 #                It reads all the files in which we could find command definitions and generates commands script.
 #                You can call this script directly in case calling ⌜valet self build⌝ is broken:
@@ -69,7 +67,7 @@ function selfBuild() {
   local extensionsDirectory output coreOnly noOutput silent
 
   # if this script is run directly
-  if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || ! -v GLOBAL_CMD_INCLUDED ]]; then
+  if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || ${GLOBAL_CMD_INCLUDED:-} != "true" ]]; then
     # parse arguments manually (basic parsing only)
     while [[ $# -gt 0 ]]; do
       case "${1}" in
@@ -94,14 +92,7 @@ function selfBuild() {
         silent=true
         ;;
       -*)
-        if [[ -v CMD_OPTS_selfBuild ]]; then
-          # shellcheck disable=SC2048
-          # shellcheck disable=SC2086
-          main::fuzzyFindOption "${1}" "${CMD_OPTS_selfBuild[@]}"
-        else
-          REPLY="Unknown option ⌜${1}⌝"
-        fi
-        core::fail "${REPLY}"
+        core::fail "Unknown option ⌜${1}⌝."
         ;;
       *) core::fail "This command takes no arguments." ;;
       esac
@@ -619,22 +610,14 @@ function declareOtherCommandVariables() {
 # >>> Main
 #===============================================================
 
-if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
+if [[ ${GLOBAL_MAIN_INCLUDED:-} != "true" ]]; then
   _NOT_EXECUTED_FROM_VALET=true
 
   # do not read the commands in that case
-  GLOBAL_CMD_INCLUDED=1
+  GLOBAL_CMD_INCLUDED=true
 
-  _COMMANDS_DIR="${BASH_SOURCE[0]:-"${0}"}"
-  if [[ "${_COMMANDS_DIR}" != /* ]]; then
-    if pushd "${_COMMANDS_DIR%/*}" &>/dev/null; then
-      _COMMANDS_DIR="${PWD}"
-      popd &>/dev/null || :
-    else _COMMANDS_DIR="${PWD}"; fi
-  else _COMMANDS_DIR="${_COMMANDS_DIR%/*}"; fi
-
-  # shellcheck source=../libraries.d/core
-  source "${_COMMANDS_DIR%/*}/libraries.d/core"
+  # shellcheck source=../libraries.d/main
+  source "$(valet --source)"
 else
   unset _NOT_EXECUTED_FROM_VALET
 fi

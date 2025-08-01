@@ -180,8 +180,8 @@ When calling `command::parseArguments` options will be parsed to local variable 
 
 Example of a valid option names and their corresponding variable name:
 
-- `-x, --profiling` → `local profiling`
-- `--thing` → `local thing`
+- `--profiler` → `local profiling`
+- `-t, --thing` → `local thing`
 - `-l, --log-level, --log <level>` → `local logLevel`
 
 Short names can be grouped together when calling the command. E.g. `-fsL` is equivalent to `-f -s -L` or equivalent to the long name options `--force --silent --follow`.

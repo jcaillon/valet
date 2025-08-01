@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
-source "libraries.d/core"
+# shellcheck source=../libraries.d/main
+source "$(valet --source)"
 include benchmark
 
 function func1() {
@@ -51,7 +51,34 @@ function func4() {
     VAR10="${10:-default10}"
 }
 
-benchmark::run func1 func2 func3 func4
+function func5() {
+  declare -g \
+    VAR1="${1:-default1}" \
+    VAR2="${2:-default2}" \
+    VAR3="${3:-default3}" \
+    VAR4="${4:-default4}" \
+    VAR5="${5:-default5}" \
+    VAR6="${6:-default6}" \
+    VAR7="${7:-default7}" \
+    VAR8="${8:-default8}" \
+    VAR9="${9:-default9}" \
+    VAR10="${10:-default10}"
+}
+
+function func6() {
+  VAR1="${1:-default1}"
+  VAR2="${2:-default2}"
+  VAR3="${3:-default3}"
+  VAR4="${4:-default4}"
+  VAR5="${5:-default5}"
+  VAR6="${6:-default6}"
+  VAR7="${7:-default7}"
+  VAR8="${8:-default8}"
+  VAR9="${9:-default9}"
+  VAR10="${10:-default10}"
+}
+
+benchmark::run func1 func2 func3 func4 func5 func6
 
 # Function name ░ Average time  ░ Compared to fastest
 # ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

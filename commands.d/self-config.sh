@@ -1,15 +1,6 @@
 #!/usr/bin/env bash
-set -Eeu -o pipefail
-# Title:         commands.d/*
-# Description:   this script is a valet command
-# Author:        github.com/jcaillon
-
-# import the main script (should always be skipped if the command is run from valet, this is mainly for shellcheck)
-if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
-  # shellcheck source=../libraries.d/core
-  source "$(valet --source)"
-fi
-# --- END OF COMMAND COMMON PART
+# author: github.com/jcaillon
+# description: this script is a valet command
 
 #===============================================================
 # >>> command: self config

@@ -16,19 +16,19 @@ function main() {
 
 
   test::title "✅ Testing the profiler cli option"
-  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" -x self mock2 arg1 arg2
+  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" --profiler self mock2 arg1 arg2
   test::exec fs::cat "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
   rm -f "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
 
 
   test::title "✅ Testing the profiler with cleanup using bash"
-  test::exec VALET_CONFIG_STRICT_PURE_BASH=true "${GLOBAL_INSTALLATION_DIRECTORY}/valet" -x self mock2 arg1 arg2
+  test::exec VALET_CONFIG_STRICT_PURE_BASH=true "${GLOBAL_INSTALLATION_DIRECTORY}/valet" --profiler self mock2 arg1 arg2
   test::exec fs::cat "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
   rm -f "${VALET_CONFIG_COMMAND_PROFILING_FILE}"
 
 
   test::title "✅ Testing to enable the profiler on Valet startup"
-  test::exec VALET_CONFIG_STARTUP_PROFILING=true "${GLOBAL_INSTALLATION_DIRECTORY}/valet" --log-level error -x self mock1 logging-level
+  test::exec VALET_CONFIG_STARTUP_PROFILING=true "${GLOBAL_INSTALLATION_DIRECTORY}/valet" --log-level error --profiler self mock1 logging-level
   test::exec fs::head "${VALET_CONFIG_STARTUP_PROFILING_FILE}" 1
 }
 

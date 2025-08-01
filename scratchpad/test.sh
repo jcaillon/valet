@@ -19,8 +19,8 @@ printf "%q" "${IFS}"
 time::startTimer
 
 for((i=0;i<100;i++)); do
-  builtin source "libraries.d/esc-codes"
-  builtin source "libraries.d/styles"
+  builtin source "libraries.d/core-esc-codes"
+  builtin source "libraries.d/core-styles"
 done
 
 _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds

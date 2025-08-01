@@ -27,13 +27,7 @@ function test_logLevelOptions() {
 
 
   test::title "✅ Logging level with --very-verbose option"
-  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" -w self mock1 logging-level
-
-
-  test::title "✅ Logging with -a option"
-  export VALET_CONFIG_LOG_PATTERN_ALTERNATIVE='| <level> <message>'
-  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" -a self mock1 logging-level
-  unset -v VALET_CONFIG_LOG_PATTERN_ALTERNATIVE
+  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" --log trace self mock1 logging-level
 
   unset -f test::scrubOutput
 }

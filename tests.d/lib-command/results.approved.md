@@ -2,11 +2,11 @@
 
 ## Test script 00.parser
 
-### ✅ Testing command::parseFunctionArguments
+### ✅ Testing command_parseFunctionArguments
 
 Missing argument:
 
-❯ `command::parseFunctionArguments selfMock2`
+❯ `command_parseFunctionArguments selfMock2`
 
 Returned variables:
 
@@ -29,7 +29,7 @@ more=(
 
 ok
 
-❯ `command::parseFunctionArguments selfMock2 -o -2 optionValue2 arg1 more1 more2`
+❯ `command_parseFunctionArguments selfMock2 -o -2 optionValue2 arg1 more1 more2`
 
 Returned variables:
 
@@ -51,7 +51,7 @@ more=(
 
 missing argument
 
-❯ `command::parseFunctionArguments selfMock2 -o -2 optionValue2 arg1`
+❯ `command_parseFunctionArguments selfMock2 -o -2 optionValue2 arg1`
 
 Returned variables:
 
@@ -75,7 +75,7 @@ more=(
 
 unknown options
 
-❯ `command::parseFunctionArguments selfMock2 --unknown --what optionValue2 arg`
+❯ `command_parseFunctionArguments selfMock2 --unknown --what optionValue2 arg`
 
 **Error output**:
 
@@ -111,7 +111,7 @@ more=(
 
 ok with the option at the end
 
-❯ `command::parseFunctionArguments selfMock2 arg more1 more2 -o`
+❯ `command_parseFunctionArguments selfMock2 arg more1 more2 -o`
 
 Returned variables:
 
@@ -133,7 +133,7 @@ more=(
 
 fuzzy match the option --this
 
-❯ `command::parseFunctionArguments selfMock2 --this arg more1`
+❯ `command_parseFunctionArguments selfMock2 --this arg more1`
 
 **Error output**:
 
@@ -163,7 +163,7 @@ more=(
 
 ok, --option1 is interpreted as the value for --this-is-option2
 
-❯ `command::parseFunctionArguments selfMock2 --this-is-option2 --option1 arg more1`
+❯ `command_parseFunctionArguments selfMock2 --this-is-option2 --option1 arg more1`
 
 Returned variables:
 
@@ -184,7 +184,7 @@ more=(
 
 ok only args
 
-❯ `command::parseFunctionArguments selfMock4 arg1 arg2`
+❯ `command_parseFunctionArguments selfMock4 arg1 arg2`
 
 Returned variables:
 
@@ -194,7 +194,7 @@ REPLY=''
 
 ok with -- to separate options from args
 
-❯ `command::parseFunctionArguments selfMock2 -- --arg1-- --arg2--`
+❯ `command_parseFunctionArguments selfMock2 -- --arg1-- --arg2--`
 
 Returned variables:
 
@@ -215,7 +215,7 @@ more=(
 
 missing a value for the option 2
 
-❯ `command::parseFunctionArguments selfMock2 arg1 arg2 --this-is-option2`
+❯ `command_parseFunctionArguments selfMock2 arg1 arg2 --this-is-option2`
 
 Returned variables:
 
@@ -236,7 +236,7 @@ more=(
 
 ambiguous fuzzy match
 
-❯ `command::parseFunctionArguments selfMock2 arg1 arg2 --th`
+❯ `command_parseFunctionArguments selfMock2 arg1 arg2 --th`
 
 Returned variables:
 
@@ -261,7 +261,7 @@ more=(
 
 ok single letter options grouped together
 
-❯ `command::parseFunctionArguments selfMock2 -o3 allo1 allo2 allo3 allo4`
+❯ `command_parseFunctionArguments selfMock2 -o3 allo1 allo2 allo3 allo4`
 
 Returned variables:
 
@@ -284,7 +284,7 @@ more=(
 
 ok single letter options, consume argument as option values
 
-❯ `command::parseFunctionArguments selfMock2 -o243 allo1 allo2 allo3 allo4`
+❯ `command_parseFunctionArguments selfMock2 -o243 allo1 allo2 allo3 allo4`
 
 Returned variables:
 
@@ -305,7 +305,7 @@ more=(
 
 ko, single letter options, invalid one
 
-❯ `command::parseFunctionArguments selfMock2 -3ao allo1 allo2`
+❯ `command_parseFunctionArguments selfMock2 -3ao allo1 allo2`
 
 Returned variables:
 
@@ -327,7 +327,7 @@ more=(
 
 ko, missing a value for the option 4
 
-❯ `command::parseFunctionArguments selfMock2 arg1 arg2 -4`
+❯ `command_parseFunctionArguments selfMock2 arg1 arg2 -4`
 
 Returned variables:
 
@@ -348,7 +348,7 @@ more=(
 
 ko, missing multiple values in a group
 
-❯ `command::parseFunctionArguments selfMock2 arg1 arg2 -4444`
+❯ `command_parseFunctionArguments selfMock2 arg1 arg2 -4444`
 
 Returned variables:
 
@@ -372,9 +372,9 @@ more=(
 
 ## Test script 01.command
 
-### ✅ Testing main::getFunctionNameFromCommand
+### ✅ Testing command_getFunctionNameFromCommand
 
-❯ `main::getFunctionNameFromCommand self\ build`
+❯ `command_getFunctionNameFromCommand self\ build`
 
 Returned variables:
 
@@ -382,11 +382,11 @@ Returned variables:
 REPLY='selfBuild'
 ```
 
-### ✅ Testing main::fuzzyMatchCommandToFunctionNameOrFail
+### ✅ Testing command::fuzzyMatchCommandToFunctionNameOrFail
 
 Fuzzy match with single result:
 
-❯ `main::fuzzyMatchCommandToFunctionNameOrFail se\ bu\ other\ stuff\ thing\ derp`
+❯ `command::fuzzyMatchCommandToFunctionNameOrFail se\ bu\ other\ stuff\ thing\ derp`
 
 **Error output**:
 
@@ -404,7 +404,7 @@ REPLY3='self build'
 
 Fuzzy match by strict mode is enabled so it fails:
 
-❯ `VALET_CONFIG_STRICT_MATCHING=true main::fuzzyMatchCommandToFunctionNameOrFail se\ bu\ other\ stuff\ stuff\ thing\ derp`
+❯ `VALET_CONFIG_STRICT_MATCHING=true command::fuzzyMatchCommandToFunctionNameOrFail se\ bu\ other\ stuff\ stuff\ thing\ derp`
 
 Exited with code: `1`
 
@@ -416,7 +416,7 @@ FAIL     Could not find an exact command for ⌜se⌝, use ⌜--help⌝ to get a
 
 Fuzzy match with ambiguous result:
 
-❯ `main::fuzzyMatchCommandToFunctionNameOrFail sf nop other stuff stuff\ thing\ derp`
+❯ `command::fuzzyMatchCommandToFunctionNameOrFail sf nop other stuff stuff\ thing\ derp`
 
 Exited with code: `1`
 
@@ -442,17 +442,9 @@ FAIL     Found multiple matches for the command ⌜sf⌝, please be more specifi
 
 ```
 
-### ✅ Testing main::getMaxPossibleCommandLevel
+### ✅ Testing command_getMaxPossibleCommandLevel
 
-❯ `main::getMaxPossibleCommandLevel 1 2 3`
-
-Returned variables:
-
-```text
-REPLY='2'
-```
-
-❯ `main::getMaxPossibleCommandLevel 1\ 2\ 3`
+❯ `command_getMaxPossibleCommandLevel 1 2 3`
 
 Returned variables:
 
@@ -460,7 +452,15 @@ Returned variables:
 REPLY='2'
 ```
 
-❯ `main::getMaxPossibleCommandLevel 1`
+❯ `command_getMaxPossibleCommandLevel 1\ 2\ 3`
+
+Returned variables:
+
+```text
+REPLY='2'
+```
+
+❯ `command_getMaxPossibleCommandLevel 1`
 
 Returned variables:
 
@@ -468,7 +468,7 @@ Returned variables:
 REPLY='1'
 ```
 
-❯ `main::getMaxPossibleCommandLevel`
+❯ `command_getMaxPossibleCommandLevel`
 
 Returned variables:
 
@@ -476,11 +476,11 @@ Returned variables:
 REPLY='0'
 ```
 
-### ✅ Testing main::fuzzyFindOption
+### ✅ Testing command_fuzzyFindOption
 
 single match, strict mode is enabled
 
-❯ `VALET_CONFIG_STRICT_MATCHING=true main::fuzzyFindOption de --opt1 --derp2 --allo3`
+❯ `VALET_CONFIG_STRICT_MATCHING=true command_fuzzyFindOption de --opt1 --derp2 --allo3`
 
 Returned variables:
 
@@ -491,7 +491,7 @@ REPLY2=''
 
 single match, strict mode is disabled
 
-❯ `main::fuzzyFindOption de --opt1 --derp2 --allo3`
+❯ `command_fuzzyFindOption de --opt1 --derp2 --allo3`
 
 **Error output**:
 
@@ -508,7 +508,7 @@ REPLY2='--derp2'
 
 multiple matches, strict mode is enabled
 
-❯ `VALET_CONFIG_STRICT_MATCHING=true main::fuzzyFindOption -p --opt1 --derp2 --allo3`
+❯ `VALET_CONFIG_STRICT_MATCHING=true command_fuzzyFindOption -p --opt1 --derp2 --allo3`
 
 Returned variables:
 
@@ -522,7 +522,7 @@ REPLY2=''
 
 multiple matches, strict mode is disabled
 
-❯ `main::fuzzyFindOption -p --opt1 --derp2 --allo3`
+❯ `command_fuzzyFindOption -p --opt1 --derp2 --allo3`
 
 Returned variables:
 
@@ -536,7 +536,7 @@ REPLY2=''
 
 no match
 
-❯ `main::fuzzyFindOption thing --opt1 --derp2 --allo3`
+❯ `command_fuzzyFindOption thing --opt1 --derp2 --allo3`
 
 Returned variables:
 
@@ -548,9 +548,9 @@ REPLY='Unknown option ⌜thing⌝, valid options are:
 REPLY2=''
 ```
 
-### ✅ Testing main::getSingleLetterOptions
+### ✅ Testing command_getSingleLetterOptions
 
-❯ `main::getSingleLetterOptions -a --opt1 --derp2 -b --allo3 -c`
+❯ `command_getSingleLetterOptions -a --opt1 --derp2 -b --allo3 -c`
 
 Returned variables:
 
@@ -558,7 +558,7 @@ Returned variables:
 REPLY='Valid single letter options are: ⌜a⌝, ⌜b⌝, ⌜c⌝.'
 ```
 
-### ✅ Testing main::getDisplayableFilteredArray
+### ✅ Testing command_getDisplayableFilteredArray
 
 ```text
 ARRAY=(
@@ -571,7 +571,7 @@ ARRAY=(
 )
 ```
 
-❯ `MY_CHARS=ae main::getDisplayableFilteredArray ARRAY MY_CHARS`
+❯ `MY_CHARS=ae command_getDisplayableFilteredArray ARRAY MY_CHARS`
 
 Returned variables:
 

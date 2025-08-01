@@ -2,7 +2,7 @@
 
 ## Test script 01.sort-commands
 
-### ✅ Testing main::sortCommands
+### ✅ Testing command::sortCommands
 
 ```text
 VALET_CONFIG_USER_DATA_DIRECTORY='/tmp/valet.d/d1-2'
@@ -18,7 +18,7 @@ COMMANDS=(
 
 testing commands sort and that without prior choices, the order of commands is kept
 
-❯ `main::sortCommands my-id1 COMMANDS`
+❯ `command::sortCommands my-id1 COMMANDS`
 
 ```text
 COMMANDS=(
@@ -32,11 +32,11 @@ COMMANDS=(
 
 testing commands sort after choosing another3 then cm2
 
-❯ `main::addLastChoice my-id1 another3`
+❯ `command::addLastChoice my-id1 another3`
 
-❯ `main::addLastChoice my-id1 cm2`
+❯ `command::addLastChoice my-id1 cm2`
 
-❯ `main::sortCommands my-id1 COMMANDS`
+❯ `command::sortCommands my-id1 COMMANDS`
 
 ```text
 COMMANDS=(
@@ -50,7 +50,7 @@ COMMANDS=(
 
 testing with VALET_CONFIG_REMEMBER_LAST_CHOICES=0
 
-❯ `VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands my-id1 COMMANDS`
+❯ `VALET_CONFIG_REMEMBER_LAST_CHOICES=0 command::sortCommands my-id1 COMMANDS`
 
 ```text
 COMMANDS=(
@@ -64,7 +64,7 @@ COMMANDS=(
 
 testing commands sort for another id, the order of commands should be the initial one
 
-❯ `main::sortCommands my-id2 COMMANDS`
+❯ `command::sortCommands my-id2 COMMANDS`
 
 ```text
 COMMANDS=(
@@ -82,13 +82,13 @@ testing that after adding more than x commands, we only keep the last x
 VALET_CONFIG_REMEMBER_LAST_CHOICES='2'
 ```
 
-❯ `main::addLastChoice my-id1 cm1`
+❯ `command::addLastChoice my-id1 cm1`
 
-❯ `main::addLastChoice my-id1 cm2`
+❯ `command::addLastChoice my-id1 cm2`
 
-❯ `main::addLastChoice my-id1 cm3`
+❯ `command::addLastChoice my-id1 cm3`
 
-❯ `main::addLastChoice my-id1 cm4`
+❯ `command::addLastChoice my-id1 cm4`
 
 ❯ `fs::cat /tmp/valet.d/d1-2/last-choices-my-id1`
 
@@ -102,11 +102,11 @@ cm3
 
 testing commands that adding the same command multiple times only keeps the last one
 
-❯ `main::addLastChoice my-id1 another3`
+❯ `command::addLastChoice my-id1 another3`
 
-❯ `main::addLastChoice my-id1 another3`
+❯ `command::addLastChoice my-id1 another3`
 
-❯ `main::addLastChoice my-id1 another3`
+❯ `command::addLastChoice my-id1 another3`
 
 ❯ `fs::cat /tmp/valet.d/d1-2/last-choices-my-id1`
 

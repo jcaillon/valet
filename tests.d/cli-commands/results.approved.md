@@ -4,7 +4,7 @@
 
 ### ✅ Testing that we correctly parse arguments and options and fail if they don't match
 
-❯ `main::parseMainArguments self mock1 non-existing-option nonNeededArg1 -derp anotherArg`
+❯ `command::parseProgramArguments self mock1 non-existing-option nonNeededArg1 -derp anotherArg`
 
 Exited with code: `1`
 
@@ -25,7 +25,7 @@ valet [global options] self mock1 [options] [--] <action>
 
 ### ✅ Testing that a command with sudo ask for sudo privileges
 
-❯ `main::parseMainArguments self mock3`
+❯ `command::parseProgramArguments self mock3`
 
 **Error output**:
 
@@ -37,31 +37,31 @@ INFO     This command requires sudo privileges.
 
 ### ✅ Testing that valet can be called without any arguments and show the menu
 
-❯ `main::parseMainArguments`
+❯ `command::parseProgramArguments`
 
 **Error output**:
 
 ```text
-🙈 mocking main::showInteractiveCommandsMenu:
+🙈 mocking command_showInteractiveCommandsMenu:
 declare -- menuHeader="Please select the command to run."
 declare -n array="_COPIED_COMMANDS_ARRAY"
 ```
 
 ### ✅ Testing that we go into the interactive sub menu with no arguments
 
-❯ `main::parseMainArguments self`
+❯ `command::parseProgramArguments self`
 
 **Error output**:
 
 ```text
-🙈 mocking main::showInteractiveCommandsMenu:
+🙈 mocking command_showInteractiveCommandsMenu:
 declare -- menuHeader="Please select the command to run."
 declare -n array="FILTERED_COMMANDS_FOR_SUB_MENU"
 ```
 
 ### ✅ Testing that we can display the help of a sub menu
 
-❯ `main::parseMainArguments self -h
+❯ `command::parseProgramArguments self -h
 `
 
 **Standard output**:
@@ -81,7 +81,7 @@ GLOBAL OPTIONS
 
 ### ✅ Testing that we catch option errors of a sub menu
 
-❯ `main::parseMainArguments self --unknown`
+❯ `command::parseProgramArguments self --unknown`
 
 Exited with code: `1`
 

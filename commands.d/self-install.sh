@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Title:         commands.d/*
-# Author:        github.com/jcaillon
+# author: github.com/jcaillon
+# description: this script is a valet command
 
 # check the bash version (and that we are running in bash), make it POSIX compliant
 # shellcheck disable=SC2292
@@ -126,7 +126,7 @@ function selfUpdate() {
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
     log::debug "Parsing arguments manually (basic parsing only): ⌜${*}⌝."
     # parse arguments manually (basic parsing only)
-    while (( $# > 0 )); do
+    while (($# > 0)); do
       case "${1}" in
       -u | --unattended)
         unattended="true"
@@ -215,7 +215,6 @@ function selfUpdate() {
     fi
   fi
 
-
   # get the latest version if needed
   if [[ ${useBranch} != "true" && ${version:-"latest"} == "latest" ]]; then
     log::debug "Getting the latest version from GitHub."
@@ -300,7 +299,7 @@ function selfUpdate() {
     selfUpdate_printRecapLine "Add install dir to PATH:" "true"
     addToPath=true
   fi
-  if [[ ${noShowcase} != "true" && (${firstInstallation} == "true" || -d "${extensionsDirectory}/showcase.d" ) ]]; then
+  if [[ ${noShowcase} != "true" && (${firstInstallation} == "true" || -d "${extensionsDirectory}/showcase.d") ]]; then
     selfUpdate_printRecapLine "Copy showcase to:" "${extensionsDirectory}"
     copyExamples=true
   else
@@ -332,16 +331,14 @@ function selfUpdate() {
   fi
 
   # remove the user commands to rebuild them
-  core::getUserDataDirectory
-  rm -f "${REPLY}/commands" 1>/dev/null || :
-
+  command::deleteUserCommands
   if [[ ${firstInstallation} == "true" ]]; then
-    # shellcheck source=../libraries.d/core
-    source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core"
+    # shellcheck source=../libraries.d/main
+    source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
     log::debug "Sourcing the core functions from valet."
     selfUpdate_sourceDependencies
   else
-    core::reloadUserCommands
+    command::reloadUserCommands
   fi
 
   if [[ ${createShim} == "true" ]]; then
@@ -606,6 +603,8 @@ function selfUpdate_sourceDependencies() {
   source string
   # shellcheck source=../libraries.d/lib-version
   source version
+  # shellcheck source=../libraries.d/lib-command
+  source command
 }
 
 # Create a shim (script that calls valet) in a bin directory.
@@ -665,13 +664,12 @@ function selfUpdate_addToPath() {
       continue
     fi
 
-    printf '\n\n%s\n' "${configContent}" >> "${configFile}"
+    printf '\n\n%s\n' "${configContent}" >>"${configFile}"
   done
 
   export PATH="${binDirectory}:${PATH}"
   log::warning "Please login again to apply the changes to your path and make valet available."
 }
-
 
 #===============================================================
 # >>> main
@@ -682,7 +680,7 @@ function selfUpdate_addToPath() {
 VALET_RELEASED_VERSION="0.29.197"
 
 # import the core script (should always be skipped if the command is run from valet)
-if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
+if [[ ${GLOBAL_MAIN_INCLUDED:-} != "true" ]]; then
   _NOT_EXECUTED_FROM_VALET=true
 
   set -Eeu -o pipefail
@@ -769,6 +767,10 @@ if [[ ! -v GLOBAL_CORE_INCLUDED ]]; then
   function fs::readFile() { REPLY="$(<"${1}")"; }
   function progress::start() { :; }
   function progress::stop() { :; }
+  function command::deleteUserCommands() {
+    core::getUserDataDirectory
+    rm -f "${REPLY}/commands" 1>/dev/null || :
+  }
 else
   selfUpdate_sourceDependencies
 fi

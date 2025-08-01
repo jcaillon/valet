@@ -1,74 +1,77 @@
 #!/usr/bin/env bash
 
+# shellcheck source=../../libraries.d/lib-command
+source command
+
 function main() {
-  test_main::getFunctionNameFromCommand
-  test_main::fuzzyMatchCommandToFunctionNameOrFail
-  test_main::getMaxPossibleCommandLevel
-  test_main::fuzzyFindOption
-  test_main::getSingleLetterOptions
-  test_main::getDisplayableFilteredArray
+  test_command_getFunctionNameFromCommand
+  test_command::fuzzyMatchCommandToFunctionNameOrFail
+  test_command_getMaxPossibleCommandLevel
+  test_command_fuzzyFindOption
+  test_command_getSingleLetterOptions
+  test_command_getDisplayableFilteredArray
 }
 
-function test_main::getFunctionNameFromCommand() {
-  test::title "✅ Testing main::getFunctionNameFromCommand"
+function test_command_getFunctionNameFromCommand() {
+  test::title "✅ Testing command_getFunctionNameFromCommand"
 
-  test::func main::getFunctionNameFromCommand "self build"
+  test::func command_getFunctionNameFromCommand "self build"
 }
 
-function test_main::fuzzyMatchCommandToFunctionNameOrFail() {
-  test::title "✅ Testing main::fuzzyMatchCommandToFunctionNameOrFail"
+function test_command::fuzzyMatchCommandToFunctionNameOrFail() {
+  test::title "✅ Testing command::fuzzyMatchCommandToFunctionNameOrFail"
 
   test::markdown "Fuzzy match with single result:"
-  test::func main::fuzzyMatchCommandToFunctionNameOrFail "se bu other stuff thing derp"
+  test::func command::fuzzyMatchCommandToFunctionNameOrFail "se bu other stuff thing derp"
 
   test::markdown "Fuzzy match by strict mode is enabled so it fails:"
-  test::exit VALET_CONFIG_STRICT_MATCHING=true main::fuzzyMatchCommandToFunctionNameOrFail "se bu other stuff stuff thing derp"
+  test::exit VALET_CONFIG_STRICT_MATCHING=true command::fuzzyMatchCommandToFunctionNameOrFail "se bu other stuff stuff thing derp"
 
   test::markdown "Fuzzy match with ambiguous result:"
-  test::exit main::fuzzyMatchCommandToFunctionNameOrFail "sf" "nop" "other" "stuff" "stuff thing derp"
+  test::exit command::fuzzyMatchCommandToFunctionNameOrFail "sf" "nop" "other" "stuff" "stuff thing derp"
 }
 
-function test_main::getMaxPossibleCommandLevel() {
-  test::title "✅ Testing main::getMaxPossibleCommandLevel"
+function test_command_getMaxPossibleCommandLevel() {
+  test::title "✅ Testing command_getMaxPossibleCommandLevel"
 
-  test::func main::getMaxPossibleCommandLevel "1" "2" "3"
-  test::func main::getMaxPossibleCommandLevel "1 2 3"
-  test::func main::getMaxPossibleCommandLevel "1"
-  test::func main::getMaxPossibleCommandLevel
+  test::func command_getMaxPossibleCommandLevel "1" "2" "3"
+  test::func command_getMaxPossibleCommandLevel "1 2 3"
+  test::func command_getMaxPossibleCommandLevel "1"
+  test::func command_getMaxPossibleCommandLevel
 }
 
-function test_main::fuzzyFindOption() {
-  test::title "✅ Testing main::fuzzyFindOption"
+function test_command_fuzzyFindOption() {
+  test::title "✅ Testing command_fuzzyFindOption"
 
   test::markdown "single match, strict mode is enabled"
-  test::func VALET_CONFIG_STRICT_MATCHING=true main::fuzzyFindOption de --opt1 --derp2 --allo3
+  test::func VALET_CONFIG_STRICT_MATCHING=true command_fuzzyFindOption de --opt1 --derp2 --allo3
 
   test::markdown "single match, strict mode is disabled"
-  test::func main::fuzzyFindOption de --opt1 --derp2 --allo3
+  test::func command_fuzzyFindOption de --opt1 --derp2 --allo3
 
   test::markdown "multiple matches, strict mode is enabled"
-  test::func VALET_CONFIG_STRICT_MATCHING=true main::fuzzyFindOption -p --opt1 --derp2 --allo3
+  test::func VALET_CONFIG_STRICT_MATCHING=true command_fuzzyFindOption -p --opt1 --derp2 --allo3
 
   test::markdown "multiple matches, strict mode is disabled"
-  test::func main::fuzzyFindOption -p --opt1 --derp2 --allo3
+  test::func command_fuzzyFindOption -p --opt1 --derp2 --allo3
 
   test::markdown "no match"
-  test::func main::fuzzyFindOption thing --opt1 --derp2 --allo3
+  test::func command_fuzzyFindOption thing --opt1 --derp2 --allo3
 }
 
-function test_main::getSingleLetterOptions() {
-  test::title "✅ Testing main::getSingleLetterOptions"
+function test_command_getSingleLetterOptions() {
+  test::title "✅ Testing command_getSingleLetterOptions"
 
-  test::func main::getSingleLetterOptions -a --opt1 --derp2 -b --allo3 -c
+  test::func command_getSingleLetterOptions -a --opt1 --derp2 -b --allo3 -c
 }
 
-function test_main::getDisplayableFilteredArray() {
-  test::title "✅ Testing main::getDisplayableFilteredArray"
+function test_command_getDisplayableFilteredArray() {
+  test::title "✅ Testing command_getDisplayableFilteredArray"
 
   # shellcheck disable=SC2034
   ARRAY=(banana apple orange grape ananas lemon)
   test::printVars ARRAY
-  test::func MY_CHARS=ae main::getDisplayableFilteredArray ARRAY MY_CHARS
+  test::func MY_CHARS=ae command_getDisplayableFilteredArray ARRAY MY_CHARS
 }
 
 # shellcheck disable=SC2317

@@ -4,7 +4,8 @@ export VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT=false
 export VALET_LOG_LEVEL=debug
 export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<subshell>{1s}] <colorFaded>line <line>{-4s}<colorDefault> <levelColor><level>{-4s} <colorDefault> <message>"
 
-source "libraries.d/core"
+# shellcheck source=../libraries.d/main
+source "$(valet --source)"
 
 function command_not_found_handle() {
   local commandNotFound="${1:-}"

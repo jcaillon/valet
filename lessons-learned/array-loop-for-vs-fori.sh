@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
-source "libraries.d/core"
+# shellcheck source=../libraries.d/main
+source "$(valet --source)"
 include benchmark
 
 MY_ARRAY=( {1..100} )

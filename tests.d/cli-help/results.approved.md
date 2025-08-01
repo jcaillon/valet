@@ -4,7 +4,7 @@
 
 ### ✅ Get help for self mock3 using fuzzy matching
 
-❯ `main::parseMainArguments hel sel mo3`
+❯ `command::parseProgramArguments hel sel mo3`
 
 **Standard output**:
 
@@ -30,7 +30,7 @@ INFO     Fuzzy matching the command ⌜sel mo3⌝ to ⌜self mock3⌝.
 
 ### ✅ Testing help with columns 48
 
-❯ `main::parseMainArguments help --columns 48 help`
+❯ `command::parseProgramArguments help --columns 48 help`
 
 **Standard output**:
 
@@ -49,7 +49,7 @@ USAGE
 
 ### ✅ Testing that no arguments show the valet help
 
-❯ `main::parseMainArguments help`
+❯ `command::parseProgramArguments help`
 
 **Standard output**:
 

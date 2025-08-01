@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+# shellcheck source=../../libraries.d/lib-command
+source command
+
 function main() {
   test::title "✅ Testing exit cleanup"
-  test::exec main::parseMainArguments self mock1 create-temp-files
+  test::exec command::parseProgramArguments self mock1 create-temp-files
   log::setLevel info true
 
   test::title "✅ Testing the bad config"
@@ -40,6 +43,7 @@ function test::scrubOutput() {
   local IFS=$'\n'
   for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do
     line="${line//core:[0-9]*/core:xxx}"
+    line="${line//lib-command:[0-9]*/lib-command:xxx}"
     text+="${line//main:[0-9]*/main:xxx}"$'\n'
   done
   GLOBAL_TEST_OUTPUT_CONTENT="${text%$'\n'}"

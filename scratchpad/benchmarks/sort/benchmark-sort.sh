@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
 # https://en.wikipedia.org/wiki/Sorting_algorithm
-# shellcheck source=../../libraries.d/core
-source "libraries.d/core"
+# shellcheck source=../../../libraries.d/main
+source "$(valet --source)"
 include benchmark array
 
 #===============================================================

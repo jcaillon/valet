@@ -9,7 +9,7 @@
 **Standard output**:
 
 ```text
-source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
+source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main"
 
 ```
 
@@ -18,7 +18,7 @@ source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
 **Standard output**:
 
 ```text
-source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
+source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main"
 source array
 source bash
 source benchmark
@@ -52,7 +52,7 @@ source windows
 
 ```text
 GLOBAL_EXPORTED_FOR_PROMPT=true;
-source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
+source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main"
 function core::fail() { log::error "$@"; }
 set +o errexit
 trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT
@@ -64,7 +64,7 @@ trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT
 **Standard output**:
 
 ```text
-source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core"
+source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main"
 function core::fail() { log::error "$@"; }
 set +o errexit
 

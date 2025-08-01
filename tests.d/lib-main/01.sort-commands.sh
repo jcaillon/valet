@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 
+# shellcheck source=../../libraries.d/lib-command
+source command
 # shellcheck source=../../libraries.d/lib-fs
 source fs
 
 function main() {
-  test_main::sortCommands
+  test_command::sortCommands
 }
 
 # shellcheck disable=SC2034
-function test_main::sortCommands() {
-  test::title "✅ Testing main::sortCommands"
+function test_command::sortCommands() {
+  test::title "✅ Testing command::sortCommands"
 
   # overriding core::getUserDataDirectory to return a temporary directory
   fs::createTempDirectory
@@ -29,26 +31,26 @@ function test_main::sortCommands() {
   local IFS=$'\n'
 
   test::markdown "testing commands sort and that without prior choices, the order of commands is kept"
-  test::exec main::sortCommands "my-id1" COMMANDS
+  test::exec command::sortCommands "my-id1" COMMANDS
   test::printVars COMMANDS
 
   test::markdown "testing commands sort after choosing another3 then cm2"
-  test::exec main::addLastChoice "my-id1" "another3"
-  test::exec main::addLastChoice "my-id1" "cm2"
+  test::exec command::addLastChoice "my-id1" "another3"
+  test::exec command::addLastChoice "my-id1" "cm2"
   COMMANDS=("${commands[@]}")
-  test::exec main::sortCommands "my-id1" COMMANDS
+  test::exec command::sortCommands "my-id1" COMMANDS
   test::printVars COMMANDS
 
   test::markdown "testing with VALET_CONFIG_REMEMBER_LAST_CHOICES=0"
   COMMANDS=("${commands[@]}")
-  test::exec VALET_CONFIG_REMEMBER_LAST_CHOICES=0 main::sortCommands "my-id1" COMMANDS
+  test::exec VALET_CONFIG_REMEMBER_LAST_CHOICES=0 command::sortCommands "my-id1" COMMANDS
   test::printVars COMMANDS
 
   VALET_CONFIG_REMEMBER_LAST_CHOICES=5
 
   test::markdown "testing commands sort for another id, the order of commands should be the initial one"
   COMMANDS=("${commands[@]}")
-  test::exec main::sortCommands "my-id2" COMMANDS
+  test::exec command::sortCommands "my-id2" COMMANDS
   test::printVars COMMANDS
 
   test::markdown "testing that after adding more than x commands, we only keep the last x"
@@ -56,14 +58,14 @@ function test_main::sortCommands() {
   test::printVars VALET_CONFIG_REMEMBER_LAST_CHOICES
   local -i i
   for i in {1..4}; do
-    test::exec main::addLastChoice "my-id1" "cm${i}"
+    test::exec command::addLastChoice "my-id1" "cm${i}"
   done
   test::exec fs::cat "${VALET_CONFIG_USER_DATA_DIRECTORY}/last-choices-my-id1"
 
   test::markdown "testing commands that adding the same command multiple times only keeps the last one"
-  test::exec main::addLastChoice "my-id1" "another3"
-  test::exec main::addLastChoice "my-id1" "another3"
-  test::exec main::addLastChoice "my-id1" "another3"
+  test::exec command::addLastChoice "my-id1" "another3"
+  test::exec command::addLastChoice "my-id1" "another3"
+  test::exec command::addLastChoice "my-id1" "another3"
   test::exec fs::cat "${VALET_CONFIG_USER_DATA_DIRECTORY}/last-choices-my-id1"
 }
 

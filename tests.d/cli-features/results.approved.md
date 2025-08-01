@@ -4,7 +4,7 @@
 
 ### ✅ Testing exit cleanup
 
-❯ `main::parseMainArguments self mock1 create-temp-files`
+❯ `command::parseProgramArguments self mock1 create-temp-files`
 
 **Error output**:
 
@@ -30,7 +30,7 @@ Returned code: `1`
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ builtin source "${GLOBAL_CONFIG_FILE}"
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:103
+╰─ in main() at valet:97
 ERROR    Error sourcing the configuration file ⌜/tmp/valet.valet.d/config⌝.
 Check the file for error and try again, or delete the file to discard your config.
 ```
@@ -48,7 +48,7 @@ Returned code: `1`
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ builtin source "${GLOBAL_STARTUP_FILE}"
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:103
+╰─ in main() at valet:97
 ERROR    Error sourcing the startup file ⌜/tmp/valet.valet.d/startup⌝.
 Check the file for error and try again, or delete the file to discard your config.
 ```
@@ -66,12 +66,12 @@ CMDMISS  Command not found: ⌜zeoifuhizefuhzeh⌝.
 Please check your ⌜PATH⌝ variable.
 ├─ in source() at .env:1
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:103
+╰─ in main() at valet:97
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ zeoifuhizefuhzeh
 ├─ in source() at .env:1
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:103
+╰─ in main() at valet:97
 ERROR    Error sourcing the env file ⌜.env⌝.
 Check the file for error and try again, or delete the file to discard your config.
 ```
@@ -88,9 +88,10 @@ Returned code: `1`
 /tmp/valet.d/d3-2/commands: line 1: 1/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ builtin source "${commandsFile}"
-├─ in core::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
-├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:103
+├─ in command::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
+├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
+├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+╰─ in main() at valet:99
 ERROR    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.
 Please rebuild it using the ⌜valet self build⌝ command.
 ```
@@ -127,10 +128,11 @@ Returned code: `1`
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ return 1
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:54
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:108
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:47
+├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
+├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
+├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+╰─ in main() at valet:99
 ```
 
 ### ✅ Testing exit code (exit 5) and custom exit function
@@ -144,10 +146,11 @@ Returned code: `5`
 ```text
 WARNING  This is for testing valet core functions, exiting with code 5.
 EXIT     Explicit exit with code 5, stack:
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:68
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:108
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:61
+├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
+├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
+├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+╰─ in main() at valet:99
 WARNING  This is a custom on exit function.
 ```
 
@@ -187,15 +190,17 @@ Returned code: `1`
 WARNING  This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle.
 CMDMISS  Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:72
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:108
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:65
+├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
+├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
+├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+╰─ in main() at valet:99
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ thisIsAnUnknownCommandForTesting
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:72
-├─ in main::runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-├─ in main::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:108
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:65
+├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
+├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
+├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+╰─ in main() at valet:99
 ```
 
