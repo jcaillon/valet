@@ -185,7 +185,7 @@ CMDERR   Error code ⌜1⌝ for the command:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:69
 ├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
-├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:524
+├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:170
 ╰─ in main() at valet:99
 
 ```

@@ -107,7 +107,7 @@ This example is for the newline (`$'\n'`) delimiter which is the default delimit
 Do:
 
 ```bash
-while read -r myString || [[ -n ${myString:-} ]]; do
+while IFS=$'\n' read -rd $'\n' myString || [[ -n ${myString:-} ]]; do
   echo "${myString}"
 done < file
 ```
@@ -163,7 +163,7 @@ Instead of [here string](https://tldp.org/LDP/abs/html/x17837.html#HERESTRINGSRE
 var1="1
 2
 3"
-while read -r line; do
+while IFS=$'\n' read -r line; do
   echo "${line}"
 done <<< "${var1}"
 ```

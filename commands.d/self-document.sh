@@ -87,7 +87,7 @@ function selfDocument::getFooter() {
   core::getVersion
   local version="${REPLY}"
 
-  time::getDate "%(%F)T"
+  time::getDate format="%(%F)T"
   local currentDate="${REPLY}"
   REPLY="Documentation generated for the version ${version} (${currentDate})."
 }
@@ -147,7 +147,7 @@ function selfDocument::getAllFunctionsDocumentation() {
     # loop through lines
     # collect the documentation from comments starting with `# ##`
     local line
-    while IFS= read -r line || [[ -n ${line:-} ]]; do
+    while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
       if [[ ${reading} == "false" ]]; then
         if [[ ${line} == "# ##"* && ${line} != *"(private)"*  && ${line} != *"(deprecated)"* ]]; then
           reading=true
@@ -319,5 +319,5 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   originalContent="${originalContent#*$'\n'}"
 
   fs::writeToFile "${outputFile}" content
-  fs::writeToFile "${outputFile}" originalContent true
+  fs::writeToFile "${outputFile}" originalContent append=true
 }

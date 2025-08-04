@@ -106,7 +106,7 @@ function profiler::resume() {
 # Usage:
 #   profilerCleanFile
 function profilerCleanFile() {
-  _OPTION_PATH_ONLY=true fs::createTempFile
+  fs::createTempFile pathOnly=true
   local newProfilerFile="${REPLY}"
 
   local timePrecision=${EPOCHREALTIME#*[.,]}

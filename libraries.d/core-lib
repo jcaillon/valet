@@ -40,7 +40,7 @@ function fs::setupTempFileGlobalVariable() {
 # of a subshell. We keep everything under a new directory named with the process ID;
 # the dir gets cleanup when the main process ends.
 function fs::setupSubshellTempFileGlobalVariable() {
-  if (( BASH_SUBSHELL == 0 )); then
+  if ((BASH_SUBSHELL == 0)); then
     core::fail "This function should only be called in a subshell."
   fi
   TMPDIR="${GLOBAL_TEMPORARY_DIRECTORY}/job-${BASHPID}"
@@ -52,7 +52,7 @@ function fs::setupSubshellTempFileGlobalVariable() {
 #
 # Creates a temporary file and return its path.
 #
-# - ${_OPTION_PATH_ONLY} _as bool_:
+# - ${pathOnly} _as bool_:
 #       (optional) If true, does not create the file, only returns the path.
 #       (defaults to false)
 #
@@ -62,12 +62,18 @@ function fs::setupSubshellTempFileGlobalVariable() {
 #
 # ```bash
 # fs::createTempFile
-# local file="${REPLY}"
+# echo "${REPLY}"
+# fs::createTempFile pathOnly=true
 # ```
 #
 # > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
 function fs::createTempFile() {
+  local \
+    pathOnly="false" \
+    IFS=$' '
+  eval "local a= ${*@Q}"
+
   if [[ ! -v TEMPORARY_FILE_NUMBER ]]; then
     TEMPORARY_FILE_NUMBER=0
     if [[ ! -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
@@ -76,7 +82,7 @@ function fs::createTempFile() {
   fi
   TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
   REPLY="${GLOBAL_TEMPORARY_DIRECTORY}/f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
-  if [[ ${_OPTION_PATH_ONLY:-false} != "true" ]]; then
+  if [[ ${pathOnly} != "true" ]]; then
     : >"${REPLY}"
   fi
 }
@@ -85,7 +91,7 @@ function fs::createTempFile() {
 #
 # Creates a temporary directory.
 #
-# - ${_OPTION_PATH_ONLY} _as bool_:
+# - ${pathOnly} _as bool_:
 #       (optional) If true, does not create the file, only returns the path.
 #       (defaults to false)
 #
@@ -95,21 +101,27 @@ function fs::createTempFile() {
 #
 # ```bash
 # fs::createTempDirectory
-# local directory="${REPLY}"
+# echo "${REPLY}"
+# fs::createTempDirectory pathOnly=true
 # ```
 #
 # > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
 function fs::createTempDirectory() {
+  local \
+    pathOnly="false" \
+    IFS=$' '
+  eval "local a= ${*@Q}"
+
   if [[ ! -v TEMPORARY_DIRECTORY_NUMBER ]]; then
     TEMPORARY_DIRECTORY_NUMBER=0
-    if [[ ${_OPTION_PATH_ONLY:-false} == "true" && ! -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
+    if [[ ${pathOnly} == "true" && ! -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
       mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
     fi
   fi
   TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
   REPLY="${GLOBAL_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
-  if [[ ${_OPTION_PATH_ONLY:-false} != "true" ]]; then
+  if [[ ${pathOnly} != "true" ]]; then
     mkdir -p "${REPLY}" 1>/dev/null
   fi
 }
@@ -122,7 +134,6 @@ function fs::createTempDirectory() {
 # ```bash
 # fs::cleanTempFiles
 # ```
-# shellcheck disable=SC2016
 function fs::cleanTempFiles() {
   if [[ -d ${GLOBAL_TEMPORARY_DIRECTORY:-} ]]; then
     log::debug "Deleting temporary directory."
@@ -193,27 +204,37 @@ function terminal::getTerminalSize() {
 #   - success
 #   - warning
 #   - error
-# - $2: silent _as bool_:
+# - ${silent} _as bool_:
 #       (optional) true to silently switch log level, i.e. does not print a message
 #       (defaults to false)
 #
 # ```bash
 # log::setLevel debug
-# log::setLevel debug true
+# log::setLevel debug silent=true
 # ```
 function log::setLevel() {
-  # log level, defaults to info
   GLOBAL_LOG_LEVEL="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local \
+    silent="false" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
+  # lowercase the log level
+  GLOBAL_LOG_LEVEL="${GLOBAL_LOG_LEVEL,,}"
+
+  # log level, defaults to info
   case "${GLOBAL_LOG_LEVEL}" in
   error) GLOBAL_LOG_LEVEL_INT=4 ;;
   warning) GLOBAL_LOG_LEVEL_INT=3 ;;
   success) GLOBAL_LOG_LEVEL_INT=2 ;;
+  info) GLOBAL_LOG_LEVEL_INT=1 ;;
   debug) GLOBAL_LOG_LEVEL_INT=0 ;;
   trace) GLOBAL_LOG_LEVEL_INT=-1 ;;
-  *) GLOBAL_LOG_LEVEL_INT=1 ;;
+  *) core::fail "Unknown log level: ${GLOBAL_LOG_LEVEL}" ;;
   esac
 
-  if [[ ${2:-false} != "true" ]]; then
+  if [[ ${silent} != "true" ]]; then
     if ((GLOBAL_LOG_LEVEL_INT != 1)); then
       log::debug "Log level set to ${GLOBAL_LOG_LEVEL}."
     fi
@@ -239,34 +260,6 @@ function log::getLevel() {
   REPLY="${GLOBAL_LOG_LEVEL:-info}"
 }
 
-# ## log::printInternal (private)
-#
-# Display log message.
-#
-# - $1: **color name** _as string_:
-#       The color name to use for the severity (TRACE, DEBUG...).
-# - $2: **icon** _as string_:
-#       The icon to display in the log message (utf8 character from nerd icons).
-# - $3: **severity** _as string_:
-#       The severity to display (max 7 chars for the default log pattern).
-# - $@: **message variable name** _as string_:
-#       The name of the variable that contains the message to log.
-#
-# ```bash
-# message="This is a success message."
-# log::Internal "SUCCESS" $'\uf14a' "OK" message
-# ```
-# shellcheck disable=SC2034
-function log::printInternal() {
-  local colorName="${1:-${3}}"
-  local icon="${2}"
-  local level="${3}"
-  local messageVariableName="${4}"
-  local -n levelColor="STYLE_COLOR_${colorName^^}"
-  # evaluated the print statement built in log::init; it uses the local vars defined above
-  eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
-}
-
 # ## log::print
 #
 # Display a log message.
@@ -277,7 +270,7 @@ function log::printInternal() {
 #       The icon to display in the log message (utf8 character from nerd icons).
 # - $3: **severity** _as string_:
 #       The severity to display (max 7 chars for the default log pattern).
-# - $@: **message** _as string_:
+# - $4: **message** _as string_:
 #       The message to log.
 #
 # ```bash
@@ -285,235 +278,20 @@ function log::printInternal() {
 # ```
 # shellcheck disable=SC2034
 function log::print() {
-  local IFS=$'\n'
-  local message="${*:4}"
-  log::printInternal "${1}" "${2}" "${3}" message
-}
-
-# ## log::printFile
-#
-# Display a file content with line numbers in the logs.
-# The file content will be aligned with the current log output and hard wrapped if necessary.
-#
-# - $1: **path** _as string_:
-#       the file path to display.
-# - $2: max lines _as int_:
-#       (optional) Can be set using the variable `_OPTION_MAX_LINES`.
-#       Max lines to display, can be set to 0 to display all lines.
-#       (defaults to 0)
-#
-# ```bash
-# log::printFile "/my/file/path"
-# ```
-# shellcheck disable=SC2317
-function log::printFile() {
-  local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i maxLines="${2:-${_OPTION_MAX_LINES:-0}}"
-
-  local line rawStringToPrintInLog lineNumberPadding="   "
-  local -i lineNumber=1 currentLineNumberLength=1
-  if [[ ! -f "${filePath}" ]]; then
-    log::error "Can not print the file ⌜${filePath}⌝ because does not exist."
-    return 1
-  fi
-  local IFS=""
-  while IFS="" read -r line || [[ -n ${line:-} ]]; do
-    log::printFileInternalLoop || break
-  done <"${filePath}"
-  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
-  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
-}
-
-# ## log::printFileString
-#
-# Display a file content with line numbers in the logs.
-# The file content will be aligned with the current log output and hard wrapped if necessary.
-#
-# - $1: **content variable name** _as string_:
-#       The name of the variable containing the file content to print.
-# - $2: max lines _as int_:
-#       (optional) Can be set using the variable `_OPTION_MAX_LINES`.
-#       Max lines to display, can be set to 0 to display all lines.
-#       (defaults to 0)
-#
-# ```bash
-# log::printFileString "myvar"
-# ```
-#
-# > This function is not at all suited for large strings, print the content to a file instead.
-# shellcheck disable=SC2317
-function log::printFileString() {
-  local -n contentToPrint="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i maxLines="${2:-${_OPTION_MAX_LINES:-0}}"
-
-  local line rawStringToPrintInLog lineNumberPadding="   "
-  local -i lineNumber=1 currentLineNumberLength=1
-
-  local IFS
-  while IFS=$'\n' read -rd $'\n' line; do
-    log::printFileInternalLoop || break
-  done <<<"${contentToPrint}"
-
-  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
-  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
-}
-
-# ## log::printFileInternalLoop (private)
-#
-# An internal function used in log::printFile and log::printFileString to display each line
-# of a file or string. It uses the local variables set by the calling function.
-function log::printFileInternalLoop() {
-  if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
-    string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}     ${STYLE_COLOR_FADED}░${STYLE_COLOR_DEFAULT} " "$((GLOBAL_LOG_COLUMNS - 7 - ${#GLOBAL_LOG_WRAP_PADDING}))"
-
-    rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${REPLY}"$'\n'
-  else
-    rawStringToPrintInLog+="${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${line}"$'\n'
-  fi
-
-  lineNumber+=1
-  if ((${#lineNumber} > currentLineNumberLength)); then
-    lineNumberPadding="${lineNumberPadding%?}"
-    currentLineNumberLength+=1
-  fi
-  if ((maxLines != 0 && lineNumber > maxLines)); then
-    if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
-      rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}"
-    fi
-    rawStringToPrintInLog+="${STYLE_COLOR_FADED}     ░ (truncated)${STYLE_COLOR_DEFAULT}"$'\n'
-    return 1
-  fi
-}
-
-# ## log::printString
-#
-# Display a string in the log.
-# The string will be aligned with the current log output and hard wrapped if necessary.
-# Does not check the log level.
-#
-# - $1: **content** _as string_:
-#       the content to log (can contain new lines)
-# - $2: new line pad string _as string_:
-#       (optional) the string with which to prepend each wrapped line
-#       (empty by default)
-#
-# ```bash
-# log::printString "my line"
-# ```
-# shellcheck disable=SC2317
-function log::printString() {
-  local content="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local wrappedLineLeftPaddingString="${2:-}"
-
-  local line rawStringToPrintInLog
-  while [[ -n ${content} ]]; do
-    line="${content%%$'\n'*}"
-    content="${content:${#line}+1}"
-
-    if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
-      string::wrapCharacters line "${GLOBAL_LOG_COLUMNS}" "${GLOBAL_LOG_WRAP_PADDING}${wrappedLineLeftPaddingString}" "$((GLOBAL_LOG_COLUMNS - ${#GLOBAL_LOG_WRAP_PADDING}))"
-      rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}${REPLY}"$'\n'
-    else
-      rawStringToPrintInLog+="${line}"$'\n'
-    fi
-  done
-  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
-  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
-}
-
-# ## log::saveFile
-#
-# Save the given file by copying it to a new file in the user local state directory
-# (using `core::createSavedFilePath`).
-# Useful for debugging purposes, to save the state of a file during execution.
-#
-# - $1: **path** _as string_:
-#       The file path to save.
-# - $2: **suffix** _as string_:
-#       The suffix to add to the file name.
-# - $3: log path _as bool_:
-#       (optional) if true, log the path of the saved file using `log::printString`
-#       (defaults to true)
-#
-# Returns:
-#
-# - ${REPLY}: The path to the saved file.
-#
-# ```bash
-# log::saveFile "/my/file/path" "suffix" "important result file"
-# ```
-function log::saveFile() {
-  local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local suffix="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local logPath="${3:-"true"}"
-  core::createSavedFilePath "${suffix}"
-  local newFilePath="${REPLY}"
-  cp "${filePath}" "${newFilePath}"
-  if [[ ${logPath} == "true" ]]; then
-    log::printString "⌜${newFilePath}⌝"
-  fi
-  REPLY="${newFilePath}"
-}
-
-# ## log::saveFileString
-#
-# Save the given string to a new file in the user local state directory
-# (using `core::createSavedFilePath`).
-# Useful for debugging purposes, to save the state of a string during execution.
-#
-# - $1: **content variable name** _as string_:
-#       The variable name of the content to save.
-# - $2: **suffix** _as string_:
-#       The suffix to add to the file name.
-# - $3: log path _as bool_:
-#       (optional) if true, log the path of the saved file using `log::printString`
-#       (defaults to true)
-#
-# Returns:
-#
-# - ${REPLY}: The path to the saved file.
-#
-# ```bash
-# log::saveFileString "my content" "suffix" "important result file"
-# ```
-function log::saveFileString() {
-  local -n contentToSave="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local suffix="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local logPath="${3:-"true"}"
-  core::createSavedFilePath "${suffix}"
-  local newFilePath="${REPLY}"
-  printf '%s' "${contentToSave}" >"${newFilePath}"
-  if [[ ${logPath} == "true" ]]; then
-    log::printString "⌜${newFilePath}⌝"
-  fi
-  REPLY="${newFilePath}"
-}
-
-# ## log::printRaw
-#
-# Display something in the log stream.
-# Does not check the log level.
-#
-# - $1: **content variable name** _as string_:
-#       The variable name containing the content to print (can contain new lines).
-#
-# ```bash
-# log::printRaw "my line"
-# ```
-# shellcheck disable=SC2317
-function log::printRaw() {
-  local -n rawStringToPrintInLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  # shellcheck disable=SC2034
-
-  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
-  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
+  local \
+    colorName="${1}" \
+    icon="${2}" \
+    level="${3}" \
+    messageToLog="${4}"
+  # evaluated the print statement built in log::init; it uses the local vars defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
 }
 
 # ## log::error
 #
 # Displays an error message.
 #
-# - $@: **message** _as string_:
+# - $1: **message** _as string_:
 #       the error messages to display
 #
 # ```bash
@@ -522,10 +300,15 @@ function log::printRaw() {
 #
 # > You probably want to exit immediately after an error and should consider using core::fail function instead.
 function log::error() {
-  local IFS=$'\n'
   # shellcheck disable=SC2034
-  local loggedLine="$*"
-  log::printInternal "ERROR" "${ICON_ERROR:-}" "ERROR" loggedLine
+  local \
+    colorName="ERROR" \
+    icon="${ICON_ERROR:-}" \
+    level="ERROR" \
+    messageToLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  # evaluated the print statement built in log::init; it uses the local vars defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
+
   if log::isDebugEnabled; then
     log::printCallStack 2
   fi
@@ -535,7 +318,7 @@ function log::error() {
 #
 # Displays a warning.
 #
-# - $@: **message** _as string_:
+# - $1: **message** _as string_:
 #       the warning messages to display
 #
 # ```bash
@@ -545,18 +328,21 @@ function log::warning() {
   if ((${GLOBAL_LOG_LEVEL_INT:-1} > 3)); then
     return 0
   fi
-  local IFS=$'\n'
   # shellcheck disable=SC2034
-  local loggedLine="$*"
-  log::printInternal "WARNING" "${ICON_WARNING:-}" "WARNING" loggedLine
-  return 0
+  local \
+    colorName="WARNING" \
+    icon="${ICON_WARNING:-}" \
+    level="WARNING" \
+    messageToLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  # evaluated the print statement built in log::init; it uses the local vars defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
 }
 
 # ## log::success
 #
 # Displays a success message.
 #
-# - $@: **message** _as string_:
+# - $1: **message** _as string_:
 #       the success messages to display
 #
 # ```bash
@@ -566,18 +352,21 @@ function log::success() {
   if ((${GLOBAL_LOG_LEVEL_INT:-1} > 2)); then
     return 0
   fi
-  local IFS=$'\n'
   # shellcheck disable=SC2034
-  local loggedLine="$*"
-  log::printInternal "SUCCESS" "${ICON_SUCCESS:-}" "SUCCESS" loggedLine
-  return 0
+  local \
+    colorName="SUCCESS" \
+    icon="${ICON_SUCCESS:-}" \
+    level="SUCCESS" \
+    messageToLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  # evaluated the print statement built in log::init; it uses the local vars defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
 }
 
 # ## log::info
 #
 # Displays an info message.
 #
-# - $@: **message** _as string_:
+# - $1: **message** _as string_:
 #       the info messages to display
 #
 # ```bash
@@ -587,18 +376,21 @@ function log::info() {
   if ((${GLOBAL_LOG_LEVEL_INT:-1} > 1)); then
     return 0
   fi
-  local IFS=$'\n'
   # shellcheck disable=SC2034
-  local loggedLine="$*"
-  log::printInternal "INFO" "${ICON_INFO:-}" "INFO" loggedLine
-  return 0
+  local \
+    colorName="INFO" \
+    icon="${ICON_INFO:-}" \
+    level="INFO" \
+    messageToLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  # evaluated the print statement built in log::init; it uses the local vars defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
 }
 
 # ## log::debug
 #
 # Displays a debug message.
 #
-# - $@: **message** _as string_:
+# - $1: **message** _as string_:
 #       the debug messages to display
 #
 # ```bash
@@ -608,18 +400,21 @@ function log::debug() {
   if ((${GLOBAL_LOG_LEVEL_INT:-1} > 0)); then
     return 0
   fi
-  local IFS=$'\n'
   # shellcheck disable=SC2034
-  local loggedLine="$*"
-  log::printInternal "DEBUG" "${ICON_DEBUG:-}" "DEBUG" loggedLine
-  return 0
+  local \
+    colorName="DEBUG" \
+    icon="${ICON_DEBUG:-}" \
+    level="DEBUG" \
+    messageToLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  # evaluated the print statement built in log::init; it uses the local vars defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
 }
 
 # ## log::trace
 #
 # Displays a trace message.
 #
-# - $@: **message** _as string_:
+# - $1: **message** _as string_:
 #       the trace messages to display
 #
 # ```bash
@@ -629,11 +424,14 @@ function log::trace() {
   if ((${GLOBAL_LOG_LEVEL_INT:-1} > -1)); then
     return 0
   fi
-  local IFS=$'\n'
   # shellcheck disable=SC2034
-  local loggedLine="$*"
-  log::printInternal "TRACE" "${ICON_TRACE:-}" "TRACE" loggedLine
-  return 0
+  local \
+    colorName="TRACE" \
+    icon="${ICON_TRACE:-}" \
+    level="TRACE" \
+    messageToLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  # evaluated the print statement built in log::init; it uses the local vars defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
 }
 
 # ## log::errorTrace
@@ -642,18 +440,21 @@ function log::trace() {
 # This is a trace message that is always displayed, independently of the log level.
 # It can be used before a fatal error to display useful information.
 #
-# - $@: **message** _as string_:
+# - $1: **message** _as string_:
 #       the trace messages to display
 #
 # ```bash
 # log::errorTrace "This is a debug message."
 # ```
 function log::errorTrace() {
-  local IFS=$'\n'
   # shellcheck disable=SC2034
-  local loggedLine="$*"
-  log::printInternal "TRACE" "${ICON_ERROR_TRACE:-}" "TRACE" loggedLine
-  return 0
+  local \
+    colorName="TRACE" \
+    icon="${ICON_TRACE:-}" \
+    level="TRACE" \
+    messageToLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  # evaluated the print statement built in log::init; it uses the local vars defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
 }
 
 # ## log::isDebugEnabled
@@ -704,7 +505,7 @@ function log::printTrappedBashCommand() {
   if [[ -n ${FUNCNAME[2]:-} ]]; then
     symbol="╭"
   fi
-  log::printString "${symbol} ${BASH_COMMAND:-}" "│ "
+  log::printString "${symbol} ${BASH_COMMAND:-}" newLinePadString="│ "
 }
 
 # ## log::printCallStack
@@ -712,12 +513,12 @@ function log::printTrappedBashCommand() {
 # This function prints the current function stack in the logs.
 #
 # - $1: Stack to skip _as int_:
-#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
+#       (optional) Can be set using the variable `stackToSkip`.
 #       The number of stack to skip.
 #       (defaults to 2 which skips this function and the first calling function
 #       which is usually the onError function)
 # - $2: Stack to skip at end _as int_:
-#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.
+#       (optional) Can be set using the variable `stackToSkip_AT_END`.
 #       The number of stack to skip at the end.
 #       (defaults to 0)
 #
@@ -729,10 +530,10 @@ function log::printTrappedBashCommand() {
 # > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
 # > variables to simulate a call stack.
 function log::printCallStack() {
-  local -i levelToSkip="${1:-${_OPTION_STACK_TO_SKIP:-2}}"
-  local -i levelToSkipAtEnd="${2:-${_OPTION_STACK_TO_SKIP_AT_END:-0}}"
+  local -i levelToSkip="${1:-${stackToSkip:-2}}"
+  local -i levelToSkipAtEnd="${2:-${stackToSkip_AT_END:-0}}"
 
-  _OPTION_WRAP_WIDTH="$((${GLOBAL_LOG_COLUMNS:-${GLOBAL_COLUMNS}} - ${#GLOBAL_LOG_WRAP_PADDING}))" log::getCallStack "$((levelToSkip + 1))" "${levelToSkipAtEnd}"
+  wrapWidth="$((${GLOBAL_LOG_COLUMNS:-${GLOBAL_COLUMNS}} - ${#GLOBAL_LOG_WRAP_PADDING}))" log::getCallStack "$((levelToSkip + 1))" "${levelToSkipAtEnd}"
   if ((${#REPLY} > 0)); then
     log::printString "${REPLY}"
   fi
@@ -743,14 +544,14 @@ function log::printCallStack() {
 # This function returns the current function stack.
 #
 # - $1: Stack to skip _as int_:
-#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
+#       (optional) Can be set using the variable `stackToSkip`.
 #       The number of stack to skip.
 #       (defaults to 1 which skips this function)
 # - $2: Stack to skip at end _as int_:
-#       (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.
+#       (optional) Can be set using the variable `stackToSkip_AT_END`.
 #       The number of stack to skip at the end.
 #       (defaults to 0)
-# - ${_OPTION_WRAP_WIDTH} _as int_:
+# - ${wrapWidth} _as int_:
 #       (optional) The width to wrap the call stack.
 #       (defaults to the terminal width)
 #
@@ -766,9 +567,9 @@ function log::printCallStack() {
 # > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
 # > variables to simulate a call stack.
 function log::getCallStack() {
-  local -i levelToSkip="${1:-${_OPTION_STACK_TO_SKIP:-1}}"
-  local -i levelToSkipAtEnd="${2:-${_OPTION_STACK_TO_SKIP_AT_END:-0}}"
-  local -i wrapWidth=${_OPTION_WRAP_WIDTH:-"${GLOBAL_COLUMNS}"}
+  local -i levelToSkip="${1:-${stackToSkip:-1}}"
+  local -i levelToSkipAtEnd="${2:-${stackToSkip_AT_END:-0}}"
+  local -i wrapWidth=${wrapWidth:-"${GLOBAL_COLUMNS}"}
 
   local -a stackFunctionNames stackSourceFiles stackLineNumbers
   if [[ -n ${GLOBAL_STACK_FUNCTION_NAMES:-} ]]; then
@@ -806,7 +607,7 @@ function log::getCallStack() {
     fi
     line="${treeString} in ${functionName} at ${sourceFile}:${lineNumber}"
     if ((wrapWidth > 0)); then
-      string::wrapCharacters line "${wrapWidth}" "${treePadding}"
+      string::wrapCharacters line width="${wrapWidth}" newLinePadString="${treePadding}"
       returnedString+="${REPLY}"$'\n'
     else
       returnedString+="${line}"$'\n'
@@ -814,6 +615,256 @@ function log::getCallStack() {
   done
 
   REPLY="${returnedString}"
+}
+
+# ## log::printFile
+#
+# Display a file content with line numbers in the logs.
+# The file content will be aligned with the current log output and hard wrapped if necessary.
+#
+# - $1: **path** _as string_:
+#       the file path to display.
+# - ${maxLines} _as int_:
+#       (optional) Max lines to display, can be set to 0 to display all lines.
+#       (defaults to 0)
+#
+# ```bash
+# log::printFile "/my/file/path"
+# log::printFile "/my/file/path" maxLines=10
+# ```
+# shellcheck disable=SC2317
+function log::printFile() {
+  local \
+    filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    maxLines="0" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
+  local REPLY_CODE REPLY REPLY2 line rawStringToPrintInLog lineNumberPadding="   "
+  local -i lineNumber=1 currentLineNumberLength=1
+  if [[ ! -f "${filePath}" ]]; then
+    log::error "Can not print the file ⌜${filePath}⌝ because does not exist."
+    return 0
+  fi
+
+  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
+    log::printFileInternalLoop
+    if (( REPLY_CODE != 0 )); then
+      break
+    fi
+  done <"${filePath}"
+
+  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
+}
+
+# ## log::printFileString
+#
+# Display a file content with line numbers in the logs.
+# The file content will be aligned with the current log output and hard wrapped if necessary.
+#
+# - $1: **content variable name** _as string_:
+#       The name of the variable containing the file content to print.
+# - ${maxLines} _as int_:
+#       (optional) Max lines to display, can be set to 0 to display all lines.
+#       (defaults to 0)
+#
+# ```bash
+# log::printFileString "myvar"
+# log::printFileString "myvar" maxLines=10
+# ```
+#
+# > This function is not at all suited for large strings, print the content to a file instead.
+# shellcheck disable=SC2317
+function log::printFileString() {
+  local -n contentToPrint="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local \
+    maxLines="0" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
+  local REPLY_CODE REPLY REPLY2 line rawStringToPrintInLog lineNumberPadding="   "
+  local -i lineNumber=1 currentLineNumberLength=1
+
+  while IFS=$'\n' read -rd $'\n' line; do
+    log::printFileInternalLoop
+    if (( REPLY_CODE != 0 )); then
+      break
+    fi
+  done <<<"${contentToPrint}"
+
+  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
+}
+
+# ## log::printFileInternalLoop (private)
+#
+# An internal function used in log::printFile and log::printFileString to display each line
+# of a file or string. It uses the local variables set by the calling function.
+function log::printFileInternalLoop() {
+  if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
+    string::wrapCharacters line width="${GLOBAL_LOG_COLUMNS}" newLinePadString="${GLOBAL_LOG_WRAP_PADDING}     ${STYLE_COLOR_FADED}░${STYLE_COLOR_DEFAULT} " firstLineWidth=$((GLOBAL_LOG_COLUMNS - 7 - ${#GLOBAL_LOG_WRAP_PADDING}))
+
+    rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${REPLY}"$'\n'
+  else
+    rawStringToPrintInLog+="${STYLE_COLOR_FADED}${lineNumberPadding}${lineNumber} ░${STYLE_COLOR_DEFAULT} ${line}"$'\n'
+  fi
+
+  lineNumber+=1
+  if ((${#lineNumber} > currentLineNumberLength)); then
+    lineNumberPadding="${lineNumberPadding%?}"
+    currentLineNumberLength+=1
+  fi
+  if ((maxLines != 0 && lineNumber > maxLines)); then
+    if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
+      rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}"
+    fi
+    rawStringToPrintInLog+="${STYLE_COLOR_FADED}     ░ (truncated)${STYLE_COLOR_DEFAULT}"$'\n'
+    REPLY_CODE=1
+    return 0
+  fi
+  REPLY_CODE=0
+}
+
+# ## log::printString
+#
+# Display a string in the log.
+# The string will be aligned with the current log output and hard wrapped if necessary.
+# Does not check the log level.
+#
+# - $1: **content** _as string_:
+#       the content to log (can contain new lines)
+# - ${newLinePadString} _as string_:
+#       (optional) the string with which to prepend each wrapped line
+#       (empty by default)
+#
+# ```bash
+# log::printString "my line"
+# log::printString "my line" newLinePadString="  "
+# ```
+# shellcheck disable=SC2317
+function log::printString() {
+  local \
+    content="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    newLinePadString="" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
+  local REPLY REPLY2 line rawStringToPrintInLog
+  while [[ -n ${content} ]]; do
+    line="${content%%$'\n'*}"
+    content="${content:${#line}+1}"
+
+    if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
+      string::wrapCharacters line width="${GLOBAL_LOG_COLUMNS}" newLinePadString="${GLOBAL_LOG_WRAP_PADDING}${newLinePadString}" firstLineWidth="$((GLOBAL_LOG_COLUMNS - ${#GLOBAL_LOG_WRAP_PADDING}))"
+      rawStringToPrintInLog+="${GLOBAL_LOG_WRAP_PADDING}${REPLY}"$'\n'
+    else
+      rawStringToPrintInLog+="${line}"$'\n'
+    fi
+  done
+  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
+}
+
+# ## log::saveFile
+#
+# Save the given file by copying it to a new file in the user local state directory
+# (using `core::createSavedFilePath`).
+# Useful for debugging purposes, to save the state of a file during execution.
+#
+# - $1: **path** _as string_:
+#       The file path to save.
+# - $2: **suffix** _as string_:
+#       The suffix to add to the file name.
+# - ${logPath} _as bool_:
+#       (optional) if true, log the path of the saved file using `log::printString`
+#       (defaults to true)
+#
+# Returns:
+#
+# - ${REPLY}: The path to the saved file.
+#
+# ```bash
+# log::saveFile "/my/file/path" "suffix" "important result file"
+# ```
+function log::saveFile() {
+  local \
+    filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    suffix="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    logPath="true" \
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
+
+  core::createSavedFilePath "${suffix}"
+  local newFilePath="${REPLY}"
+  cp "${filePath}" "${newFilePath}"
+  if [[ ${logPath} == "true" ]]; then
+    log::printString "⌜${newFilePath}⌝"
+  fi
+  REPLY="${newFilePath}"
+}
+
+# ## log::saveFileString
+#
+# Save the given string to a new file in the user local state directory
+# (using `core::createSavedFilePath`).
+# Useful for debugging purposes, to save the state of a string during execution.
+#
+# - $1: **content variable name** _as string_:
+#       The variable name of the content to save.
+# - $2: **suffix** _as string_:
+#       The suffix to add to the file name.
+# - ${logPath} _as bool_:
+#       (optional) if true, log the path of the saved file using `log::printString`
+#       (defaults to true)
+#
+# Returns:
+#
+# - ${REPLY}: The path to the saved file.
+#
+# ```bash
+# log::saveFileString "my content" "suffix" "important result file"
+# ```
+function log::saveFileString() {
+  local -n contentToSave="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local \
+    suffix="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    logPath="true" \
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
+
+  core::createSavedFilePath "${suffix}"
+  local newFilePath="${REPLY}"
+  printf '%s' "${contentToSave}" >"${newFilePath}"
+  if [[ ${logPath} == "true" ]]; then
+    log::printString "⌜${newFilePath}⌝"
+  fi
+  REPLY="${newFilePath}"
+}
+
+# ## log::printRaw
+#
+# Display something in the log stream.
+# Does not check the log level.
+#
+# - $1: **content variable name** _as string_:
+#       The variable name containing the content to print (can contain new lines).
+#
+# ```bash
+# log::printRaw "my line"
+# ```
+# shellcheck disable=SC2317
+function log::printRaw() {
+  local -n rawStringToPrintInLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  # shellcheck disable=SC2034
+
+  # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
+  eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
 }
 
 # ## log_setPrintfArgumentFromFormat (private)
@@ -928,8 +979,10 @@ function log::parseLogPattern() {
       printfArgument="\${EPOCHSECONDS}"
       ;;
     levelColor)
-      printfFormat="%s"
-      printfArgument="\${levelColor:-}"
+      if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
+        printfFormat="%s"
+        printfArgument="\${levelColor:-}"
+      fi
       ;;
     level)
       printfFormat="%${formatSpecifier:-"-8s"}"
@@ -984,16 +1037,16 @@ function log::parseLogPattern() {
     elapsedTime)
       printfFormat="%${formatSpecifier:-"-7s"}"
       log_setPrintfArgumentFromFormat "loggedElapsedTime"
-      # shellcheck source=lib-time
+      # shellcheck disable=SC1091
       source time
-      REPLY4+=$'\n'"time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman \"\${REPLY}\" \"%S.%LLs\"; local loggedElapsedTime=\"\${REPLY}\""
+      REPLY4+=$'\n'"time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman \"\${REPLY}\" format=\"%S.%LLs\"; local loggedElapsedTime=\"\${REPLY}\""
       ;;
     elapsedTimeSinceLastLog)
       printfFormat="%${formatSpecifier:-"-7s"}"
       log_setPrintfArgumentFromFormat "loggedElapsedTimeSinceLastLog"
-      # shellcheck source=lib-time
+      # shellcheck disable=SC1091
       source time
-      REPLY4+=$'\n'"time::getProgramElapsedMicroseconds; local -i currentTime=\${REPLY}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman \"\${_LOG_ELAPSED_TIME}\" \"%S.%LLs\"; local loggedElapsedTimeSinceLastLog=\"\${REPLY}\"; _LOG_ELAPSED_TIME=\${currentTime}"
+      REPLY4+=$'\n'"time::getProgramElapsedMicroseconds; local -i currentTime=\${REPLY}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman \"\${_LOG_ELAPSED_TIME}\" format=\"%S.%LLs\"; local loggedElapsedTimeSinceLastLog=\"\${REPLY}\"; _LOG_ELAPSED_TIME=\${currentTime}"
       ;;
     wrapPadding)
       printfFormat="%s"
@@ -1033,7 +1086,7 @@ function log::parseLogPattern() {
 # - $1: log file descriptor _as string_:
 #       (optional) The variable name to use for the coproc.
 #       (defaults to "${VALET_CONFIG_LOG_FD}" which defaults to 2).
-# - ${_OPTION_LOG_PATTERN} _as string_:
+# - ${logPattern} _as string_:
 #       (optional) If defined, the log pattern to use.
 #       (defaults to "")
 #
@@ -1063,7 +1116,7 @@ function log::init() {
 
   GLOBAL_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
   GLOBAL_LOG_DISABLE_WRAP="${VALET_CONFIG_LOG_DISABLE_WRAP:-false}"
-  GLOBAL_LOG_PATTERN="${_OPTION_LOG_PATTERN:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level>  <icon><colorDefault> <message>"}}"
+  GLOBAL_LOG_PATTERN="${logPattern:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level>  <icon><colorDefault> <message>"}}"
 
   if [[ -v GLOBAL_FD_LOG ]]; then
     # close if already opened
@@ -1134,14 +1187,17 @@ function log::init() {
   GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG=""
   GLOBAL_LOG_PRINT_STATEMENT_STANDARD=""
 
+  if [[ ${VALET_CONFIG_ENABLE_COLORS:-} == "true" ]]; then
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n levelColor=\"STYLE_COLOR_\${colorName}\""$'\n'
+  fi
   if ((${#beforePrintStatementCode} > 0)); then
     GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="${beforePrintStatementCode}"$'\n'
   fi
   if [[ ${GLOBAL_LOG_DISABLE_WRAP} != "true" ]]; then
     # define REPLY/REPLY2 as local so we don't impact the parent scope (they are used during parsing)
-    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local REPLY REPLY2"$'\n'"local -n messageToPrintInLog=REPLY"$'\n'"string::wrapWords \"\${messageVariableName}\" ${GLOBAL_LOG_COLUMNS} \"${GLOBAL_LOG_WRAP_PADDING}\" $((GLOBAL_LOG_COLUMNS - wrapPaddingLength))"$'\n'
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local REPLY REPLY2"$'\n'"local -n messageToPrintInLog=REPLY"$'\n'"string::wrapWords messageToLog width=${GLOBAL_LOG_COLUMNS} newLinePadString=\"${GLOBAL_LOG_WRAP_PADDING}\" firstLineWidth=$((GLOBAL_LOG_COLUMNS - wrapPaddingLength))"$'\n'
   else
-    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n messageToPrintInLog=\"\${messageVariableName}\""$'\n'
+    GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="local -n messageToPrintInLog=messageToLog"$'\n'
   fi
   if [[ ${VALET_CONFIG_LOG_DISABLE_HIGHLIGHT:-false} != "true" ]]; then
     GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+="messageToPrintInLog=\"\${messageToPrintInLog//⌜/${STYLE_COLOR_ACCENT}⌜}\""$'\n'"messageToPrintInLog=\"\${messageToPrintInLog//⌝/⌝${STYLE_COLOR_DEFAULT}}\""$'\n'
@@ -1183,7 +1239,6 @@ function log::init() {
     GLOBAL_LOG_PRINT_STATEMENT_STANDARD+=$'\n'"${standardStatement} ${outputCode}"
   fi
 }
-
 
 #===============================================================
 # >>> String utilities
@@ -1229,20 +1284,17 @@ function string::removeTextFormatting() {
 #
 # - $1: **text variable name** _as string_:
 #       The variable name that contains the text to wrap.
-# - $2: wrap width _as string_:
-#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
-#       The width to wrap the text at.
-#       Note that length of the optional padding characters are subtracted from the
+# - ${width} _as string_:
+#       (optional) The width to wrap the text at.
+#       Note that length of the new line pad string is subtracted from the
 #       width to make sure the text fits in the given width.
 #       (defaults to GLOBAL_COLUMNS)
-# - $3: padding characters _as string_:
-#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
-#       The characters to apply as padding on the left of each new line.
+# - ${newLinePadString} _as string_:
+#       (optional) The characters to apply as padding on the left of each new line.
 #       E.g. '  ' will add 2 spaces on the left of each new line.
 #       (defaults to 0)
-# - $4: first line width _as int_:
-#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
-#       The width to use for the first line.
+# - ${firstLineWidth} _as int_:
+#       (optional) The width to use for the first line.
 #       (defaults to the width)
 #
 # Returns:
@@ -1250,7 +1302,8 @@ function string::removeTextFormatting() {
 # - ${REPLY}: the wrapped text
 #
 # ```bash
-# string::wrapWords "This is a long text that should be wrapped at 20 characters." 20 '  ' 5
+# string::wrapWords "This is a long text."
+# string::wrapWords "This is a long text wrapped at 20 characters." width=20 newLinePadString="---" firstLineWidth=20
 # echo "${REPLY}"
 # ```
 #
@@ -1259,9 +1312,15 @@ function string::removeTextFormatting() {
 # > - It considers escape sequence for text formatting and does not count them as visible characters.
 function string::wrapWords() {
   local -n textToWrapAtWords="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i width="${2:-${_OPTION_WRAP_WIDTH:-${GLOBAL_COLUMNS}}}"
-  local leftPaddingChars="${3:-${_OPTION_PADDING_CHARS:-}}"
-  local -i firstLineWidth="${4:-${_OPTION_FIRST_LINE_WIDTH:-${width}}}"
+  local \
+    width="${GLOBAL_COLUMNS}" \
+    newLinePadString="" \
+    firstLineWidth
+    IFS=$' \t' \
+  shift 1
+  eval "local a= ${*@Q}"
+
+  firstLineWidth="${firstLineWidth:-${width}}"
 
   # short cut in case the text is already shorter than the width
   if [[ ${#textToWrapAtWords} -le ${firstLineWidth} && ${textToWrapAtWords} != *$'\n'* ]]; then
@@ -1270,8 +1329,8 @@ function string::wrapWords() {
   fi
 
   local text="${textToWrapAtWords}"
-  local IFS=$' \t' output="" line word realWord REPLY2
-  local leftPaddingVisibleChars="${leftPaddingChars}"
+  local output="" line word realWord REPLY2
+  local leftPaddingVisibleChars="${newLinePadString}"
   string::removeTextFormatting leftPaddingVisibleChars
   local -i sentenceWidth=$((width - ${#leftPaddingVisibleChars})) realWordLength=0 firstWord=1
   local -i lineLength=$((sentenceWidth - firstLineWidth))
@@ -1280,7 +1339,7 @@ function string::wrapWords() {
     line="${text%%$'\n'*}"
     text="${text:${#line}+1}"
 
-    output+=$'\n'"${leftPaddingChars}"
+    output+=$'\n'"${newLinePadString}"
 
     # short cut in case the text is already shorter than the width
     if ((lineLength + ${#line} <= sentenceWidth)); then
@@ -1313,11 +1372,11 @@ function string::wrapWords() {
       else
         # not enough space left, check if the word fits on the next line
         if ((realWordLength <= sentenceWidth)); then
-          output+=$'\n'"${leftPaddingChars}${word}"
+          output+=$'\n'"${newLinePadString}${word}"
           lineLength=realWordLength
         else
           # the word is too long to fit on a line, split it in multiple lines
-          string::wrapCharacters word "${width}" "${leftPaddingChars}" "$((sentenceWidth - lineLength))"
+          string::wrapCharacters word width="${width}" newLinePadString="${newLinePadString}" firstLineWidth="$((sentenceWidth - lineLength))"
           output+="${REPLY}"
           lineLength=${REPLY2}
         fi
@@ -1328,7 +1387,7 @@ function string::wrapWords() {
     lineLength=0
   done
 
-  REPLY="${output#$'\n'"${leftPaddingChars}"}"
+  REPLY="${output#$'\n'"${newLinePadString}"}"
 }
 
 # ## string::wrapCharacters
@@ -1339,20 +1398,17 @@ function string::wrapWords() {
 #
 # - $1: **text variable name** _as string_:
 #       The variable name that contains the text to wrap.
-# - $2: wrap width _as string_:
-#       (optional) Can be set using the variable `_OPTION_WRAP_WIDTH`.
-#       The width to wrap the text at.
-#       Note that length of the optional padding characters are subtracted from the
+# - ${width} _as string_:
+#       (optional) The width to wrap the text at.
+#       Note that length of the new line pad string is subtracted from the
 #       width to make sure the text fits in the given width.
 #       (defaults to GLOBAL_COLUMNS)
-# - $3: padding characters _as string_:
-#       (optional) Can be set using the variable `_OPTION_PADDING_CHARS`.
-#       The characters to apply as padding on the left of each new line.
+# - ${newLinePadString} _as string_:
+#       (optional) The characters to apply as padding on the left of each new line.
 #       E.g. '  ' will add 2 spaces on the left of each new line.
-#       (defaults to "")
-# - $4: first line width _as int_:
-#       (optional) Can be set using the variable `_OPTION_FIRST_LINE_WIDTH`.
-#       The width to use for the first line.
+#       (defaults to 0)
+# - ${firstLineWidth} _as int_:
+#       (optional) The width to use for the first line.
 #       (defaults to the width)
 #
 # Returns:
@@ -1361,7 +1417,8 @@ function string::wrapWords() {
 # - ${REPLY2}: the length taken on the last line
 #
 # ```bash
-# string::wrapCharacters "This is a long text that should be wrapped at 20 characters." 20 --- 5
+# string::wrapCharacters "This-is-a-long-text"
+# string::wrapCharacters "This-is-a-long-text-that-should-be-wrapped-at-20-characters." width=20 newLinePadString="---" firstLineWidth=5
 # echo "${REPLY}"
 # ```
 #
@@ -1370,12 +1427,18 @@ function string::wrapWords() {
 # > - Leading spaces after a newly wrapped line are removed.
 function string::wrapCharacters() {
   local -n textToWrapAtCharacters="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i width="${2:-${_OPTION_WRAP_WIDTH:-${GLOBAL_COLUMNS}}}"
-  local leftPaddingChars="${3:-${_OPTION_PADDING_CHARS:-}}"
-  local -i firstLineWidth="${4:-${_OPTION_FIRST_LINE_WIDTH:-${width}}}"
+  local \
+    width="${GLOBAL_COLUMNS}" \
+    newLinePadString="" \
+    firstLineWidth
+    IFS=$' \t' \
+  shift 1
+  eval "local a= ${*@Q}"
+
+  firstLineWidth="${firstLineWidth:-${width}}"
 
   local itemChunk spaces text="${textToWrapAtCharacters}"
-  local leftPaddingVisibleChars="${leftPaddingChars}"
+  local leftPaddingVisibleChars="${newLinePadString}"
   string::removeTextFormatting leftPaddingVisibleChars
   width=$((width - ${#leftPaddingVisibleChars}))
   local -i lineLength=$((width - firstLineWidth)) isWrapping=0
@@ -1415,7 +1478,7 @@ function string::wrapCharacters() {
       done
 
       while [[ ${text} == $'\n'* ]]; do
-        REPLY+=$'\n'"${leftPaddingChars}"
+        REPLY+=$'\n'"${newLinePadString}"
         text="${text:1}"
         lineLength=0
         isWrapping=0
@@ -1425,11 +1488,11 @@ function string::wrapCharacters() {
     if ((lineLength >= width)); then
       # we reached the desired size
       lineLength=0
-      REPLY+=$'\n'"${leftPaddingChars}"
+      REPLY+=$'\n'"${newLinePadString}"
     fi
   done
 
-  REPLY="${REPLY%$'\n'"${leftPaddingChars}"}"
+  REPLY="${REPLY%$'\n'"${newLinePadString}"}"
   REPLY2=${lineLength}
 }
 
@@ -1441,13 +1504,11 @@ function string::wrapCharacters() {
 #       The variable name that contains the text to highlight.
 # - $2: **characters variable name** _as string_:
 #       The variable name that contains characters to highlight.
-# - $3: highlight ansi code _as string_:
-#       (optional) Can be set using the variable `_OPTION_HIGHLIGHT_ANSI`.
-#       The ANSI code to use for highlighting.
+# - ${highlightCode} _as string_:
+#       (optional) The ANSI code to use for highlighting.
 #       (defaults to STYLE_COLOR_ACCENT)
-# - $4: reset ansi code _as string_:
-#       (optional) Can be set using the variable `_OPTION_RESET_ANSI`.
-#       The ANSI code to use for resetting the highlighting.
+# - ${resetCode} _as string_:
+#       (optional) The ANSI code to use for resetting the highlighting.
 #       (defaults to STYLE_COLOR_DEFAULT)
 #
 # Returns:
@@ -1462,10 +1523,15 @@ function string::wrapCharacters() {
 # > - All characters to highlight must be found in the same order in the matched line.
 # > - This functions is case insensitive.
 function string::highlight() {
-  local -n textToHighlight="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -n charactersToHighlight="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local highlightCode="${3:-${_OPTION_HIGHLIGHT_ANSI:-${STYLE_COLOR_ACCENT:-$'\e'"[95m"}}}"
-  local resetCode="${4:-${_OPTION_RESET_ANSI:-${STYLE_COLOR_DEFAULT:-$'\e'"[0m"}}}"
+  local -n \
+    textToHighlight="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    charactersToHighlight="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local \
+    highlightCode="${STYLE_COLOR_ACCENT:-$'\e'"[95m"}" \
+    resetCode="${STYLE_COLOR_DEFAULT:-$'\e'"[0m"}"
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
 
   local itemChunk itemChunkPiece
   local -i searchStringIndex=0
@@ -1528,17 +1594,16 @@ function string::numberToUniqueId() {
   REPLY=""
   local toConvert
   local -i index=0
-  while (( index < ${#number} )); do
+  while ((index < ${#number})); do
     toConvert="${number:index:2}"
-    if (( ${#toConvert} == 2 )); then
-      REPLY+="${consonants:$(( 10#${toConvert} / 5 - 2 )):1}${vowels:$(( 10#${toConvert} % 5 )):1}"
-    elif (( ${#toConvert} == 1 )); then
+    if ((${#toConvert} == 2)); then
+      REPLY+="${consonants:$((10#${toConvert} / 5 - 2)):1}${vowels:$((10#${toConvert} % 5)):1}"
+    elif ((${#toConvert} == 1)); then
       REPLY+="${consonants:toConvert:1}"
     fi
     index+=2
   done
 }
-
 
 #===============================================================
 # >>> Array utilities
@@ -1625,8 +1690,9 @@ function regex::getFuzzySearchRegexFromSearchString() {
 # > - Use `shopt -s nocasematch` to make this function is case insensitive.
 # > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.
 function array::fuzzyFilterSort() {
-  local -n arrayToFilter="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -n filterSearchString="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n \
+    arrayToFilter="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    filterSearchString="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   # nothing to filter
   if ((${#filterSearchString} == 0 || ${#arrayToFilter[@]} == 0)); then
@@ -1636,8 +1702,6 @@ function array::fuzzyFilterSort() {
   fi
 
   regex::getFuzzySearchRegexFromSearchString "${2}"
-
-  local -i patternLength=${#filterSearchString}
 
   # will contain a key that allows to sort the items, it is a combination of the length before the pattern,
   # the length of the matched pattern and the initial position of the item
@@ -1657,7 +1721,7 @@ function array::fuzzyFilterSort() {
   done
 
   if ((${#_ARRAY_FUZZY_FILTER_KEYS[@]} > 1)); then
-    array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
+    array_fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
   fi
 
   # will contain the matched lines, sorted
@@ -1668,7 +1732,7 @@ function array::fuzzyFilterSort() {
   unset -v _ARRAY_FUZZY_FILTER_KEYS
 }
 
-# ## array::fuzzyFilterSortQuicksort (private)
+# ## array_fuzzyFilterSortQuicksort (private)
 #
 # A special quicksort implementation dedicated to `array::fuzzyFilterSort`
 # that only compare numbers and that uses _ARRAY_FUZZY_FILTER_KEYS as
@@ -1682,9 +1746,9 @@ function array::fuzzyFilterSort() {
 #
 # ```bash
 
-# array::fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
+# array_fuzzyFilterSortQuicksort 0 $((${#_ARRAY_FUZZY_FILTER_KEYS[@]} - 1))
 # ```
-function array::fuzzyFilterSortQuicksort() {
+function array_fuzzyFilterSortQuicksort() {
   local -i left=${1} right=${2} tempValue pivotValue=${_ARRAY_FUZZY_FILTER_KEYS[${1} + (${2} - ${1}) / 2]}
   while :; do
     while ((_ARRAY_FUZZY_FILTER_KEYS[left] < pivotValue)); do
@@ -1706,10 +1770,10 @@ function array::fuzzyFilterSortQuicksort() {
     right=$((right - 1))
   done
   if ((${1} < right)); then
-    array::fuzzyFilterSortQuicksort ${1} ${right}
+    array_fuzzyFilterSortQuicksort ${1} ${right}
   fi
   if ((right + 1 < ${2})); then
-    array::fuzzyFilterSortQuicksort $((right + 1)) ${2}
+    array_fuzzyFilterSortQuicksort $((right + 1)) ${2}
   fi
 }
 
@@ -1739,7 +1803,6 @@ function time::getProgramElapsedMicroseconds() {
   REPLY=$(((${EPOCHREALTIME%%[.,]*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*[.,]} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))
 }
 
-
 #===============================================================
 # >>> Styles functions
 #===============================================================
@@ -1752,7 +1815,6 @@ function styles::init() {
   builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core-esc-codes"
   builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core-styles"
 }
-
 
 #===============================================================
 # >>> Command functions (called from user command functions)
@@ -1772,7 +1834,7 @@ function styles::init() {
 function command::sourceFunction() {
   local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  # shellcheck source=lib-command
+  # shellcheck disable=SC1091
   source command
 
   command::sourceCommandFunction "${functionName}"
@@ -1808,7 +1870,7 @@ function command::parseArguments() {
   # get the function name of the calling function
   local functionName="${FUNCNAME[1]?"This function must be called from a command function."}"
 
-  # shellcheck source=lib-command
+  # shellcheck disable=SC1091
   source command
 
   command::parseCmdFunctionArgumentsOrGoInteractive "${functionName}" "$@"
@@ -1830,10 +1892,10 @@ function command::parseArguments() {
 # ```
 function command::checkParsedResults() {
   if [[ ${help:-false} == "true" ]]; then
-    # shellcheck source=lib-command
+    # shellcheck disable=SC1091
     source command
     command::printHelp function "${FUNCNAME[1]?"This function must be called from a command function."}"
-    _OPTION_SILENT=true exit 0
+    core::exit 0 silent=true
   fi
   if [[ -n ${commandArgumentsErrors:-} ]]; then
     core::fail "${commandArgumentsErrors}"
@@ -1853,7 +1915,7 @@ function command::showHelp() {
   # get the function name of the calling function
   functionName="${FUNCNAME[1]?"This function must be called from a command function."}"
 
-  # shellcheck source=lib-command
+  # shellcheck disable=SC1091
   source command
 
   command::printHelp function "${functionName}"

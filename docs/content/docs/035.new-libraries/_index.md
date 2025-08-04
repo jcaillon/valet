@@ -68,12 +68,12 @@ An example is given below for a `mylib` library and a `myfunction` function:
 #
 #       Can also be on multiple lines, be careful of the indentation.
 # - $2: optional argument name _as string_:
-#       (optional) Can be set using the variable `_OPTION_OPTIONAL`.
+#       (optional) Can be set using the variable `optional`.
 #       This one is optional. It should not be emphasized (like the previous **argument name**).
 #       The convention for optional positional arguments is to use `_OPTION_` followed by 
-#       the argument name in uppercase. Then you can set `${2:-${_OPTION_OPTIONAL}}` to use it.
+#       the argument name in uppercase. Then you can set `${2:-${optional}}` to use it.
 #       (defaults to empty string)
-# - ${_OPTION_NON_POSITIONAL} _as number_:
+# - ${nonPositional} _as number_:
 #       (optional) This one is a pure option and should not be a positional argument.
 #       (defaults 0)
 # - $@: more args _as string_:
@@ -87,7 +87,7 @@ An example is given below for a `mylib` library and a `myfunction` function:
 # 
 # ```bash
 # mylib::myfunction arg1 && echo "${REPLY}"
-# _OPTION_NON_POSITIONAL=10 mylib::myfunction arg1 optional_arg2 && echo "${REPLY}"
+# nonPositional=10 mylib::myfunction arg1 optional_arg2 && echo "${REPLY}"
 # ```
 # 
 # > A comment on this particular function.

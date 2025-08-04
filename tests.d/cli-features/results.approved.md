@@ -90,7 +90,7 @@ CMDERR   Error code ⌜1⌝ for the command:
 ╭ builtin source "${commandsFile}"
 ├─ in command::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
-├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:99
 ERROR    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.
 Please rebuild it using the ⌜valet self build⌝ command.
@@ -131,7 +131,7 @@ CMDERR   Error code ⌜1⌝ for the command:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:47
 ├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
-├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:99
 ```
 
@@ -149,7 +149,7 @@ EXIT     Explicit exit with code 5, stack:
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:61
 ├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
-├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:99
 WARNING  This is a custom on exit function.
 ```
@@ -193,14 +193,14 @@ Please check your ⌜PATH⌝ variable.
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:65
 ├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
-├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:99
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ thisIsAnUnknownCommandForTesting
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:65
 ├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
-├─ in core::parseMainArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
+├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:99
 ```
 

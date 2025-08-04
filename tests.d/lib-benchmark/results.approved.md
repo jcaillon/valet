@@ -23,7 +23,7 @@ test_function_3 ()
 }
 ```
 
-❯ `_OPTION_TIME=3 _OPTION_MAX_RUN=5 benchmark::run test_function_1 test_function_2 test_function_3`
+❯ `benchmark::run test_function_1 test_function_2 test_function_3 --- baselineTime=3 maxRun=5`
 
 **Error output**:
 

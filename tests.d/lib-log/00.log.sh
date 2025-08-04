@@ -126,20 +126,21 @@ function test_log() {
 
   test::title "✅ Testing log::printString"
   test::exec log::printString 'Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.'
+  test::exec log::printString '  Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.'"  "
 
   test::title "✅ Testing log::info"
-  test::exec log::info 'Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.' '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567' '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'
+  test::exec log::info 'Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.'$'\n''01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'$'\n''01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'
 
   test::title "✅ Testing log::printFile"
-  test::exec log::printFile file-to-read 2
+  test::exec log::printFile file-to-read maxLines=2
   test::exec log::printFile file-to-read
 
   # shellcheck disable=SC2034
   local text="What is Lorem Ipsum?
 
-Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+  Lorem Ipsum is simply dummy text of the printing and typesetting industry.
 Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
-It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
+It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged."'  '"
 It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 
 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
@@ -152,7 +153,7 @@ Many desktop publishing packages and web page editors now use Lorem Ipsum as the
 Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like)."
 
   test::title "✅ Testing log::printFileString"
-  test::exec log::printFileString text 2
+  test::exec log::printFileString text maxLines=2
   test::exec log::printFileString text
 }
 

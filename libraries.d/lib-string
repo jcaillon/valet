@@ -395,7 +395,7 @@ function string::split() {
 # - $2: **nb items** _as int_:
 #       The number of items (lines) to extract.
 # - $3: separator _as string_:
-#       (optional) Can be set using the variable `_OPTION_SEPARATOR`.
+#       (optional) Can be set using the variable `separator`.
 #       The separator character to use.
 #       (defaults to newline if not provided)
 #
@@ -415,7 +415,7 @@ function string::head() {
   string::doForEachLine \
     "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     string_headCallback \
-    "${3:-${_OPTION_SEPARATOR:-$'\n'}}"
+    "${3:-${separator:-$'\n'}}"
 }
 
 function string_headCallback() {
@@ -447,7 +447,7 @@ function string_headCallback() {
 #       The function must return 0 if we should continue to the next line, 1 otherwise.
 #       (defaults to empty)
 # - $3: separator _as string_:
-#       (optional) Can be set using the variable `_OPTION_SEPARATOR`.
+#       (optional) Can be set using the variable `separator`.
 #       The separator character to use.
 #       (defaults to newline if not provided)
 #
@@ -461,7 +461,7 @@ function string_headCallback() {
 function string::doForEachLine() {
   local -n stringForWhichToIterate="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local string="${stringForWhichToIterate}"
-  local separator="${3:-${_OPTION_SEPARATOR:-$'\n'}}"
+  local separator="${3:-${separator:-$'\n'}}"
   local chunk
   while [[ -n ${string} ]]; do
     chunk="${string%%"${separator}"*}"

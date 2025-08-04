@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# shellcheck source=../libraries.d/main
+# shellcheck disable=SC1091
+# shellcheck disable=SC1090
 source "$(valet --source)"
 include benchmark
 

@@ -42,116 +42,116 @@ source fs
 # - $2: **start column** _as int_:
 #       The column at which the autocompleted text starts (this is used to
 #       compute how to display the box).
-# - ${_OPTION_STOP_COLUMN} _as int_:
+# - ${stopColumn} _as int_:
 #       (optional) The column at which to stop showing the autocompleted text.
 #       Longer texts get shifted to display the end of the user input.
 #       (defaults to the end of the screen)
-# - ${_OPTION_ITEMS_ARRAY_NAME} _as string_:
+# - ${itemsArrayName} _as string_:
 #       (optional) The items to display (name of a global array which contains the items).
 #       If left empty, the autocompletion box will not be displayed. Useful to turn this into a simple prompt.
 #       (defaults to empty)
-# - ${_OPTION_STRING} _as string_:
+# - ${string} _as string_:
 #       (optional) The initial string, which corresponds to the text already entered
 #       by the user at the moment the autocompletion box shows up.
 #       Allows to pre-filter the autocompletion.
 #       (defaults to empty)
-# - ${_OPTION_ITEMS_BOX_FORCE_LEFT} _as int_:
+# - ${itemsBoxForceLeft} _as int_:
 #       (optional) The left column at which to display the autocompletion box.
 #       If left empty, the box will auto position itself according to the prompt.
 #       (defaults to empty)
-# - ${_OPTION_ITEMS_BOX_FORCE_TOP} _as int_:
+# - ${itemsBoxForceTop} _as int_:
 #       (optional) The top line at which to display the autocompletion box.
 #       If left empty, the box will auto position itself according to the prompt.
 #       (defaults to empty)
-# - ${_OPTION_ITEMS_BOX_FORCE_WIDTH} _as int_:
+# - ${itemsBoxForceWidth} _as int_:
 #       (optional) The width of the autocompletion box.
 #       If left empty, the box will auto compute its width according to the items.
 #       (defaults to empty)
-# - ${_OPTION_ITEMS_BOX_FORCE_HEIGHT} _as int_:
+# - ${itemsBoxForceHeight} _as int_:
 #       (optional) The height of the autocompletion box.
 #       If left empty, the box will auto compute its height according to the items.
 #       (defaults to empty)
-# - ${_OPTION_ITEMS_BOX_MAX_HEIGHT} _as int_:
+# - ${itemsBoxMaxHeight} _as int_:
 #       (optional) The maximum number of lines/rows to use for the autocompletion box.
 #       If the number of items is greater than this value, the box will be scrollable.
 #       (defaults to a maximized auto-computed value depending on the items and screen size)
-# - ${_OPTION_ITEMS_BOX_FORCE_BELOW} _as bool_:
+# - ${itemsBoxForceBelow} _as bool_:
 #       (optional) If true, the box is forced to be displayed below the input text.
 #       Otherwise it will depend on the space required and space available below/above.
 #       (defaults to false)
-# - ${_OPTION_ITEMS_BOX_ITEM_COUNT_ENABLED} _as bool_:
+# - ${itemsBoxItemCountEnabled} _as bool_:
 #       (optional) If true, the count of items can be displayed at the bottom of the box.
 #       (defaults to true)
-# - ${_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT} _as bool_:
-#       (optional) Can be set using the variable `_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT`.
+# - ${itemsBoxForceShowCount} _as bool_:
+#       (optional) Can be set using the variable `itemsBoxForceShowCount`.
 #       If true, the count of items is always displayed.
 #       If false, the count is only displayed when we can't display all the items at once.
 #       (defaults to false)
-# - ${_OPTION_ITEMS_BOX_SHOW_COUNT_AT_TOP} _as bool_:
+# - ${itemsBoxShowCountAtTop} _as bool_:
 #       (optional) If true, the count of items will be displayed at the top of the box instead of the bottom.
 #       (defaults to false)
-# - ${_OPTION_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD} _as int_:
+# - ${itemsBoxFilterAsynchronouslyThreshold} _as int_:
 #       (optional) The number of items at which the filtering is done asynchronously.
 #       If the number of items is greater than this value, the filtering is done asynchronously.
 #       Can be set to 0 to force asynchronous filtering.
 #       (defaults to 242)
-# - ${_OPTION_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD} _as int_:
+# - ${itemsBoxFilterUsingExternalProgramThreshold} _as int_:
 #       (optional) The number of items at which the filtering is done using an external program.
 #       If the number of items is greater than this value, the filtering is done using an external program.
 #       This is to avoid performance issues when filtering a large number of items using pure bash.
 #       (defaults to 1042)
-# - ${_OPTION_ENABLE_PROMPT} _as bool_:
+# - ${enablePrompt} _as bool_:
 #       (optional) If true, the prompt is displayed. If false, the prompt is hidden.
 #       Useful to turn this into a simple multiple choice list.
 #       (defaults to true)
-# - ${_OPTION_SHOW_SYMBOL} _as bool_:
+# - ${showSymbol} _as bool_:
 #       (optional) If true, the left cursors are displayed (> for prompt and the ◆ for selected item).
 #       Useful to display the most simple auto-completion when false.
 #       (defaults to true)
-# - ${_OPTION_FILTERS_FROM_N_CHARS} _as int_:
+# - ${filterS_FROM_N_CHARS} _as int_:
 #       (optional) The minimum number of characters to type before starting to filter the items.
 #       By default, the list is shown full and the user can start typing to filter.
 #       Put a value superior to 0 to make it behave like a standard autocompletion.
 #       When non-zero, the user can TAB to show the full list.
 #       (defaults to 0)
-# - ${_OPTION_ACCEPT_ANY_VALUE} _as bool_:
+# - ${acceptAnyValue} _as bool_:
 #       (optional) If true, the user can type any value, even if it is not in the list.
 #       If false, the user can only select a value from the list.
 #       (defaults to true)
-# - ${_OPTION_PLACEHOLDER} _as string_:
+# - ${placeholder} _as string_:
 #       (optional) The placeholder to display when the input is empty.
 #       (defaults to empty)
-# - ${_OPTION_STRING_MAX_LENGTH} _as int_:
+# - ${string_MAX_LENGTH} _as int_:
 #       (optional) The maximum length of the input string.
 #       If the user types more characters, they are truncated and an error message is displayed.
 #       (defaults to 99999)
-# - ${_OPTION_AUTOCOMPLETE_WHOLE_LINE} _as bool_:
+# - ${autocompleteWholeLine} _as bool_:
 #       (optional) If true, the whole line is autocompleted (all characters are considered to filter)
 #       the items. If false, only the word characters before the cursor are considered.
 #       (defaults to false)
-# - ${_OPTION_TAB_OPENS_ITEMS_BOX} _as bool_:
+# - ${tabOpensItemsBox} _as bool_:
 #       (optional) If true, the tab key opens the items box if it is not already open.
 #       (defaults to true)
-# - ${_OPTION_ITEMS_BOX_ALLOW_FILTERING} _as bool_:
+# - ${itemsBoxAllowFiltering} _as bool_:
 #       (optional) If true, the items can be filtered by typing characters.
 #       If false, the items are displayed as is.
-#       (defaults to the value of `_OPTION_ENABLE_PROMPT` or true)
-# - ${_OPTION_PASSWORD_MODE} _as bool_:
+#       (defaults to the value of `enablePrompt` or true)
+# - ${passwordMode} _as bool_:
 #       (optional) If true, the input is displayed as a series of stars *.
 #       This mode can be activated/deactivated by pressing CTRL+P.
 #       (defaults to false)
-# - ${_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE} _as string_:
+# - ${callbackFunctionOnTextUpdate} _as string_:
 #       (optional) The name of a function to call each time the text is updated.
 #       Can be used to validate the input and display an error message.
-#       The function is called with no arguments but you can use the global variable `_OPTION_STRING` and
-#       `_OPTION_STRING_INDEX` to access the current text and cursor position.
+#       The function is called with no arguments but you can use the global variable `string` and
+#       `string_INDEX` to access the current text and cursor position.
 #       You must set:
 #
 #       - `REPLY`: The error message to display (or empty).
 #       - `REPLY2`: A boolean to indicate if the autocompletion box should be redrawn.
 #
 #       (defaults to empty)
-# - ${_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED} _as string_:
+# - ${callbackFunctionOnKeyPressed} _as string_:
 #       (optional) The name of a function to call each time a key is pressed.
 #       Can be used to customize the behavior of the prompt.
 #       The function is called with the following arguments:
@@ -161,7 +161,7 @@ source fs
 #
 #       The function must return 0 if the key press was handled, 1 otherwise.
 #       (defaults to empty)
-# - ${_OPTION_CALLBACK_FUNCTION_ON_BOX_CLOSED} _as string_:
+# - ${callbackFunctionOnBoxClosed} _as string_:
 #       (optional) The name of a function to call when the autocompletion box is closed.
 #       Can be used to clean up resources or to update the screen.
 #       The function is called with arguments:
@@ -173,7 +173,7 @@ source fs
 #
 #       The function must return 0 to state that prompt does not have to be redrawn, 1 otherwise.
 #       (defaults to empty)
-# - ${_OPTION_CALLBACK_FUNCTION_ON_ITEM_DISPLAY} _as string_:
+# - ${callbackFunctionOnItemDisplay} _as string_:
 #       (optional) The name of a function to call when an item needs to be displayed in the list.
 #       This will replace the default function that displays the item with highlighted characters.
 #       The following variables are available:
@@ -211,58 +211,58 @@ function prompt::input() {
   _PROMPT_START_LINE="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   _PROMPT_START_COLUMN="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  _PROMPT_STOP_COLUMN="${_OPTION_STOP_COLUMN:-${GLOBAL_COLUMNS}}"
+  _PROMPT_STOP_COLUMN="${stopColumn:-${GLOBAL_COLUMNS}}"
   _PROMPT_STOP_COLUMN_AT_END="false"
-  if [[ -z ${_OPTION_STOP_COLUMN:-} ]]; then
+  if [[ -z ${stopColumn:-} ]]; then
     _PROMPT_STOP_COLUMN_AT_END="true"
   fi
 
-  _PROMPT_ITEMS_ARRAY_NAME="${_OPTION_ITEMS_ARRAY_NAME:-}"
+  _PROMPT_ITEMS_ARRAY_NAME="${itemsArrayName:-}"
 
-  _PROMPT_STRING="${_OPTION_STRING:-}"
+  _PROMPT_STRING="${string:-}"
 
-  _PROMPT_ITEMS_BOX_FORCED_LEFT="${_OPTION_ITEMS_BOX_FORCE_LEFT:-}"
-  _PROMPT_ITEMS_BOX_FORCED_TOP="${_OPTION_ITEMS_BOX_FORCE_TOP:-}"
-  _PROMPT_ITEMS_BOX_FORCED_WIDTH="${_OPTION_ITEMS_BOX_FORCE_WIDTH:-}"
-  _PROMPT_ITEMS_BOX_FORCED_HEIGHT="${_OPTION_ITEMS_BOX_FORCE_HEIGHT:-}"
+  _PROMPT_ITEMS_BOX_FORCED_LEFT="${itemsBoxForceLeft:-}"
+  _PROMPT_ITEMS_BOX_FORCED_TOP="${itemsBoxForceTop:-}"
+  _PROMPT_ITEMS_BOX_FORCED_WIDTH="${itemsBoxForceWidth:-}"
+  _PROMPT_ITEMS_BOX_FORCED_HEIGHT="${itemsBoxForceHeight:-}"
 
-  _PROMPT_ITEMS_BOX_MAX_HEIGHT="${_OPTION_ITEMS_BOX_MAX_HEIGHT:-}"
-  _PROMPT_ITEMS_BOX_FORCE_BELOW="${_OPTION_ITEMS_BOX_FORCE_BELOW:-false}"
+  _PROMPT_ITEMS_BOX_MAX_HEIGHT="${itemsBoxMaxHeight:-}"
+  _PROMPT_ITEMS_BOX_FORCE_BELOW="${itemsBoxForceBelow:-false}"
 
-  _PROMPT_ENABLE_PROMPT="${_OPTION_ENABLE_PROMPT:-true}"
-  _PROMPT_ITEMS_BOX_ITEM_COUNT_ENABLED="${_OPTION_ITEMS_BOX_ITEM_COUNT_ENABLED:-true}"
-  _PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT="${_OPTION_ITEMS_BOX_FORCE_SHOW_COUNT:-false}"
-  _PROMPT_ITEMS_BOX_SHOW_COUNT_AT_TOP="${_OPTION_ITEMS_BOX_SHOW_COUNT_AT_TOP:-false}"
+  _PROMPT_ENABLE_PROMPT="${enablePrompt:-true}"
+  _PROMPT_ITEMS_BOX_ITEM_COUNT_ENABLED="${itemsBoxItemCountEnabled:-true}"
+  _PROMPT_ITEMS_BOX_FORCE_SHOW_COUNT="${itemsBoxForceShowCount:-false}"
+  _PROMPT_ITEMS_BOX_SHOW_COUNT_AT_TOP="${itemsBoxShowCountAtTop:-false}"
 
-  _PROMPT_SHOW_SYMBOL="${_OPTION_SHOW_SYMBOL:-true}"
-  _PROMPT_FILTERS_FROM_N_CHARS="${_OPTION_FILTERS_FROM_N_CHARS:-0}"
+  _PROMPT_SHOW_SYMBOL="${showSymbol:-true}"
+  _PROMPT_FILTERS_FROM_N_CHARS="${filterS_FROM_N_CHARS:-0}"
 
-  _PROMPT_ACCEPT_ANY_VALUE="${_OPTION_ACCEPT_ANY_VALUE:-true}"
+  _PROMPT_ACCEPT_ANY_VALUE="${acceptAnyValue:-true}"
 
-  _PROMPT_PLACEHOLDER="${_OPTION_PLACEHOLDER:-}"
-  _PROMPT_STRING_MAX_LENGTH="${_OPTION_STRING_MAX_LENGTH:-99999}"
+  _PROMPT_PLACEHOLDER="${placeholder:-}"
+  _PROMPT_STRING_MAX_LENGTH="${string_MAX_LENGTH:-99999}"
 
-  _PROMPT_AUTOCOMPLETE_WHOLE_LINE="${_OPTION_AUTOCOMPLETE_WHOLE_LINE:-false}"
-  _PROMPT_TAB_OPENS_ITEMS_BOX="${_OPTION_TAB_OPENS_ITEMS_BOX:-true}"
-  _PROMPT_ITEMS_BOX_ALLOW_FILTERING="${_OPTION_ITEMS_BOX_ALLOW_FILTERING:-${_PROMPT_ENABLE_PROMPT}}"
-  _PROMPT_PASSWORD_MODE="${_OPTION_PASSWORD_MODE:-false}"
+  _PROMPT_AUTOCOMPLETE_WHOLE_LINE="${autocompleteWholeLine:-false}"
+  _PROMPT_TAB_OPENS_ITEMS_BOX="${tabOpensItemsBox:-true}"
+  _PROMPT_ITEMS_BOX_ALLOW_FILTERING="${itemsBoxAllowFiltering:-${_PROMPT_ENABLE_PROMPT}}"
+  _PROMPT_PASSWORD_MODE="${passwordMode:-false}"
 
-  _PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE="${_OPTION_CALLBACK_FUNCTION_ON_TEXT_UPDATE:-}"
+  _PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE="${callbackFunctionOnTextUpdate:-}"
   if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE} ]] && ! declare -F "${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}" &>/dev/null; then
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_TEXT_UPDATE}⌝ does not exist."
   fi
 
-  _PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED="${_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED:-}"
+  _PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED="${callbackFunctionOnKeyPressed:-}"
   if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED} ]] && ! declare -F "${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED}" &>/dev/null; then
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_KEY_PRESSED}⌝ does not exist."
   fi
 
-  _PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED="${_OPTION_CALLBACK_FUNCTION_ON_BOX_CLOSED:-}"
+  _PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED="${callbackFunctionOnBoxClosed:-}"
   if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED} ]] && ! declare -F "${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED}" &>/dev/null; then
     core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_BOX_CLOSED}⌝ does not exist."
   fi
 
-  _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY="${_OPTION_CALLBACK_FUNCTION_ON_ITEM_DISPLAY:-}"
+  _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY="${callbackFunctionOnItemDisplay:-}"
   if [[ -n ${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY} ]]; then
     if ! declare -F "${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}" &>/dev/null; then
       core::fail "The callback function ⌜${_PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY}⌝ does not exist."
@@ -271,8 +271,8 @@ function prompt::input() {
     _PROMPT_CALLBACK_FUNCTION_ON_ITEM_DISPLAY="list::getCurrentItemDisplayableString"
   fi
 
-  _PROMPT_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD="${_OPTION_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD:-242}"
-  _PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${_OPTION_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD:-1042}"
+  _PROMPT_ITEMS_BOX_FILTER_ASYNCHRONOUSLY_THRESHOLD="${itemsBoxFilterAsynchronouslyThreshold:-242}"
+  _PROMPT_ITEMS_BOX_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${itemsBoxFilterUsingExternalProgramThreshold:-1042}"
 
   # default key mapping using the
   # - control characters: https://jvns.ca/ascii
@@ -1037,7 +1037,7 @@ function prompt_showError() {
   list::hide
   prompt_clearErrorBox
 
-  string::wrapWords _message $((${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}} - ${#_PROMPT_ERROR_BOX_SYMBOL_LENGTH}))
+  string::wrapWords _message width=$((${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}} - ${#_PROMPT_ERROR_BOX_SYMBOL_LENGTH}))
   local IFS=$'\n'
   local text="${REPLY}"
   local -i errorLinesNeeded=0
@@ -1097,7 +1097,7 @@ function prompt_clearErrorBox() {
 #
 # Returns:
 #
-# - `_OPTION_STRING_INDEX`: The new index.
+# - `string_INDEX`: The new index.
 #
 # ```bash
 # prompt_changePromptCursorIndex 1
@@ -1392,7 +1392,7 @@ function prompt_drawMultiLinePromptRefreshLines() {
           lineLength=realWordLength
         else
           # the word is too long to fit on a line, split it in multiple lines
-          string::wrapCharacters word "${_PROMPT_STRING_SCREEN_WIDTH}" "" "$((_PROMPT_STRING_SCREEN_WIDTH - lineLength))"
+          string::wrapCharacters word width="${_PROMPT_STRING_SCREEN_WIDTH}" newLinePadString="" firstLineWidth=$((_PROMPT_STRING_SCREEN_WIDTH - lineLength))
           output+="${REPLY}"
           lineLength=${REPLY2}
         fi
@@ -1407,7 +1407,7 @@ function prompt_drawMultiLinePromptRefreshLines() {
 
 
 
-  string::wrapWords _PROMPT_STRING "${_PROMPT_STRING_SCREEN_WIDTH}" "  " "$((_PROMPT_STRING_SCREEN_WIDTH - _PROMPT_SYMBOL_LENGTH))"
+  string::wrapWords _PROMPT_STRING width="${_PROMPT_STRING_SCREEN_WIDTH}" newLinePadString="  " firstLineWidth="$((_PROMPT_STRING_SCREEN_WIDTH - _PROMPT_SYMBOL_LENGTH))"
 
   prompt_getMultiLinePrompt
   printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${_PROMPT_START_LINE};${_PROMPT_START_COLUMN}${__ESC__TO}${REPLY}${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW}"

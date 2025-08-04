@@ -22,8 +22,6 @@ REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/script2.sh'
 
 ❯ `fs::getCommandPath unknown-command1`
 
-Returned code: `1`
-
 Returned variables:
 
 ```text
@@ -52,7 +50,7 @@ $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources
 
 ❯ `fs::writeToFile resources/gitignored/file1 _content`
 
-❯ `fs::writeToFile resources/gitignored/file1 _content true`
+❯ `fs::writeToFile resources/gitignored/file1 _content append=true`
 
 ❯ `fs::cat resources/gitignored/file1`
 
@@ -64,7 +62,7 @@ Hello, World!
 
 ### ✅ Testing fs::createTempFile and fs::createTempDirectory
 
-❯ `_OPTION_PATH_ONLY=true fs::createTempFile`
+❯ `fs::createTempFile pathOnly=true`
 
 Returned variables:
 
@@ -74,7 +72,7 @@ REPLY='/tmp/valet.d/f1-2'
 
 The file path was returned but the file does not exist.
 
-❯ `_OPTION_PATH_ONLY=true fs::createTempDirectory`
+❯ `fs::createTempDirectory pathOnly=true`
 
 Returned variables:
 
@@ -184,9 +182,17 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/missing-file'
 ```
 
+❯ `fs::toAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh realpath=true`
+
+Returned variables:
+
+```text
+REPLY='mocked pwd/01.invoke.sh'
+```
+
 ### ✅ Testing fs::readFile
 
-❯ `fs::readFile resources/file-to-read 22`
+❯ `fs::readFile resources/file-to-read maxCharacters=22`
 
 Returned variables:
 
@@ -201,7 +207,7 @@ Returned variables:
 ```text
 REPLY='# Explore why veganism is kinder to animals, to people and to our planet'"'"'s future.
 
-Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
+  Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
 
 ## For the animals
 
@@ -287,7 +293,7 @@ File created successfully!
 ```text
 # Explore why veganism is kinder to animals, to people and to our planet's future.
 
-Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
+  Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
 
 ## For the animals
 
@@ -316,7 +322,7 @@ Returned variables:
 ```text
 REPLY='# Explore why veganism is kinder to animals, to people and to our planet'"'"'s future.
 
-Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
+  Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
 
 ## For the animals
 
@@ -342,17 +348,13 @@ Just like veganism is the sustainable option when it comes to looking after our 
 
 ### ✅ Testing fs::isDirectoryWritable
 
-❯ `fs::isDirectoryWritable /tmp && echo Writable || echo Not\ writable`
+❯ `fs::isDirectoryWritable /tmp`
 
-**Standard output**:
-
-```text
-Writable
-```
+❯ `fs::isDirectoryWritable /tmp testFileName=test-file`
 
 ### ✅ Testing fs::createLink
 
-❯ `fs::createLink resources/gitignored/file resources/gitignored/try/file2 true`
+❯ `fs::createLink resources/gitignored/file resources/gitignored/try/file2 hardlink=true`
 
 **Standard output**:
 
@@ -368,6 +370,15 @@ Writable
 🙈 mocking ln: -s $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/try $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/new
 ```
 
+❯ `fs::createLink resources/gitignored/file resources/gitignored/try/file2 force=true hardlink=true`
+
+**Standard output**:
+
+```text
+🙈 mocking rm: -f $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/try/file2
+🙈 mocking ln: $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/file $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/try/file2
+```
+
 ### ✅ Testing fs::head
 
 ❯ `fs::head resources/file-to-read 10`
@@ -377,7 +388,7 @@ Writable
 ```text
 # Explore why veganism is kinder to animals, to people and to our planet's future.
 
-Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
+  Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
 
 ## For the animals
 
@@ -396,7 +407,7 @@ Preventing the exploitation of animals is not the only reason for becoming vegan
 ```text
 # Explore why veganism is kinder to animals, to people and to our planet's future.
 
-Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
+  Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
 
 ## For the animals
 
@@ -420,7 +431,7 @@ The production of meat and other animal derived products places a heavy burden o
 Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there's never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it's the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.
 ```
 
-❯ `fs::head resources/file-to-read 3 true`
+❯ `fs::head resources/file-to-read 3 toArray=true`
 
 Returned variables:
 
@@ -428,7 +439,7 @@ Returned variables:
 REPLY_ARRAY=(
 [0]='# Explore why veganism is kinder to animals, to people and to our planet'"'"'s future.'
 [1]=''
-[2]='Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>'
+[2]='  Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>'
 )
 ```
 
@@ -459,7 +470,7 @@ Just like veganism is the sustainable option when it comes to looking after our 
 ```text
 # Explore why veganism is kinder to animals, to people and to our planet's future.
 
-Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
+  Source: <https://www.vegansociety.com/go-vegan/why-go-vegan>
 
 ## For the animals
 
@@ -483,7 +494,7 @@ The production of meat and other animal derived products places a heavy burden o
 Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there's never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it's the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.
 ```
 
-❯ `fs::tail resources/file-to-read 3 true`
+❯ `fs::tail resources/file-to-read 3 toArray=true`
 
 Returned variables:
 
@@ -510,7 +521,7 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `_OPTION_RECURSIVE=true fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search recursive=true`
 
 Returned variables:
 
@@ -524,7 +535,7 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `_OPTION_INCLUDE_HIDDEN=true fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search includeHidden=true`
 
 Returned variables:
 
@@ -537,7 +548,7 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `_OPTION_RECURSIVE=true _OPTION_INCLUDE_HIDDEN=true fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search recursive=true includeHidden=true`
 
 Returned variables:
 
@@ -577,7 +588,7 @@ fileNamedFile ()
 }
 ```
 
-❯ `_OPTION_RECURSIVE=true _OPTION_INCLUDE_HIDDEN=true _OPTION_FILTER=fileNamedFile fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search recursive=true includeHidden=true filter=fileNamedFile`
 
 Returned variables:
 
@@ -607,7 +618,7 @@ folderNamedHidden ()
 }
 ```
 
-❯ `_OPTION_RECURSIVE=true _OPTION_INCLUDE_HIDDEN=true _OPTION_FILTER=folderNamedHidden fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search`
+❯ `fs::listPaths $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search recursive=true includeHidden=true filter=folderNamedHidden`
 
 Returned variables:
 
@@ -635,7 +646,7 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search recursive=true`
 
 Returned variables:
 
@@ -647,7 +658,7 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search recursive=true includeHidden=true`
 
 Returned variables:
 
@@ -667,12 +678,12 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `declare -f fileNamedHidden`
+❯ `declare -f fileNamedContainsHidden`
 
 **Standard output**:
 
 ```text
-fileNamedHidden () 
+fileNamedContainsHidden () 
 { 
     if [[ ${1##*/} == *hidden* ]]; then
         return 0;
@@ -682,17 +693,17 @@ fileNamedHidden ()
 }
 ```
 
-❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true folderNamedHidden`
+❯ `fs::listFiles $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search recursive=true includeHidden=true filter=fileNamedContainsHidden`
 
 Returned variables:
 
 ```text
 REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-file'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/file1'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/file10'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
-[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/file13'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/.hidden-file2'
+[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3/.hidden-file-13'
+[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4/.hidden-file-14'
+[4]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1/subfolder2/.hidden-file3'
 )
 ```
 
@@ -708,7 +719,7 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search recursive=true`
 
 Returned variables:
 
@@ -719,7 +730,7 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search recursive=true includeHidden=true`
 
 Returned variables:
 
@@ -733,12 +744,12 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `declare -f folderNamedHidden`
+❯ `declare -f folderNamedContainsHidden`
 
 **Standard output**:
 
 ```text
-folderNamedHidden () 
+folderNamedContainsHidden () 
 { 
     if [[ ${1##*/} == *hidden* ]]; then
         return 0;
@@ -748,16 +759,14 @@ folderNamedHidden ()
 }
 ```
 
-❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search true true folderNamedHidden`
+❯ `fs::listDirectories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search recursive=true includeHidden=true filter=folderNamedContainsHidden`
 
 Returned variables:
 
 ```text
 REPLY_ARRAY=(
 [0]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder'
-[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/subfolder1'
-[2]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3'
-[3]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/subfolder4'
+[1]='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/search/.hidden-subfolder/.hidden3'
 )
 ```
 

@@ -14,15 +14,15 @@ function test_time::startTimer() {
 
   test::exec time::startTimer
   test::func time::getTimerMicroseconds
-  test::func _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
-  test::func _OPTION_LOG_ELAPSED_TIME=true _OPTION_FORMAT=%L time::getTimerMicroseconds
+  test::func time::getTimerMicroseconds logElapsedTime=true
+  test::func time::getTimerMicroseconds format=%L logElapsedTime=true
 }
 
 function test_time::getDate() {
   test::title "✅ Testing time::getDate"
 
   test::func time::getDate
-  test::func time::getDate "'%(%H:%M:%S)T'"
+  test::func time::getDate format="'%(%H:%M:%S)T'"
 }
 
 function test_time::convertMicrosecondsToHuman() {
@@ -46,9 +46,9 @@ Total seconds: %S
 Total milliseconds: %L
 Total microseconds: %U"
   test::printVars format
-  test::func time::convertMicrosecondsToHuman ${ms} "\"\${format}\""
+  test::func time::convertMicrosecondsToHuman ${ms} format="\"\${format}\""
   test::func time::convertMicrosecondsToHuman ${ms}
-  test::func _OPTION_FORMAT='%U' time::convertMicrosecondsToHuman ${ms}
+  test::func time::convertMicrosecondsToHuman ${ms} format='%U'
 }
 
 main

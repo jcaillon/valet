@@ -44,7 +44,7 @@ function trap::onErrorInternal() {
   log::printCallStack 2
 
   : before-exit
-  _OPTION_SILENT=true exit 1
+  core::exit 1 silent=true
 }
 
 # This function is called when the program exits (on error, on success, on exit, on interrupt).
@@ -54,7 +54,7 @@ function trap::onExitInternal() {
   local exitCode="$?"
 
   if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || (${GLOBAL_EXPECTED_EXIT:-} != "true" && ${exitCode} != "0") ]]; then
-    _OPTION_DUMP_SUFFIX="-${exitCode}" core::dump
+    dumpSuffix="-${exitCode}" core::dump
   fi
 
   log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
@@ -107,7 +107,7 @@ function trap::onInterruptInternal() {
     log::printCallStack 2
   fi
 
-  _OPTION_SILENT=true exit 1
+  core::exit 1 silent=true
 }
 
 # This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
@@ -124,7 +124,7 @@ function trap::onTerminateInternal() {
 
   # reset the trap to not call this function again
   trap SIGHUP SIGTERM
-  _OPTION_SILENT=true exit 1
+  core::exit 1 silent=true
 }
 
 # This function is called when terminal changes its size.
@@ -319,24 +319,6 @@ function trap::register() {
   fi
 }
 
-# ## trap::unregister (private)
-#
-# Unregister the traps for the program.
-# Can be called in a subshell where we want to reset the traps.
-function trap::unregister() {
-  trap ERR
-  trap EXIT
-  trap SIGINT
-  trap SIGQUIT
-  trap SIGHUP
-  trap SIGTERM
-  trap SIGTSTP
-  trap SIGCONT
-  if [[ -t 2 ]]; then
-    trap SIGWINCH
-  fi
-}
-
 # This function is called when a subshell exits (on error, on success, on exit, on interrupt).
 # It is executed in the process that exited, as if we called this function
 # at the line where the exit command is called.
@@ -362,10 +344,10 @@ function trap::onSubshellExitInternal() {
 #
 # Register the traps for a subshell.
 #
-# - ${_OPTION_LOG_ON_ERROR_EXIT} _as bool_:
+# - ${_OPTION_LOG_ERROR_ON_EXIT} _as bool_:
 #       (optional) If true, will display an error if the subshell exits with a non zero code
 #       (defaults to true)
-
+#
 # > - For a subshell, we do not want to execute the "cleanup" because it would also delete
 # >   files of the main process.
 # > - Additionally, we want to re-register the EXIT trap because it is not properly honored.
@@ -377,7 +359,7 @@ function trap::registerSubshell() {
   if (( BASH_SUBSHELL == 0 )); then
     core::fail "This function should only be called in a subshell."
   fi
-  if [[ ${_OPTION_LOG_ON_ERROR_EXIT:-true} == "true" ]]; then
+  if [[ ${_OPTION_LOG_ERROR_ON_EXIT:-true} == "true" ]]; then
     GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=true
   else
     GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=false

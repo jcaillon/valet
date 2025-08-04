@@ -114,7 +114,10 @@ function terminal::setRawMode() {
     return 0
   fi
   if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
-    bash::getBuiltinOutput stty -g || core::fail "Unable to get the current terminal configuration. Please make sure that ⌜stty⌝ is available in your PATH."
+    bash::getBuiltinOutput stty -g
+    if [[ -z ${REPLY} ]]; then
+      core::fail "Unable to get the current terminal configuration. Please make sure that ⌜stty⌝ is available in your PATH."
+    fi
     GLOBAL_STTY_SAVED_CONFIG="${REPLY%%$'\n'}"
     log::debug "Saved terminal stty initial settings: ${GLOBAL_STTY_SAVED_CONFIG}."
   fi
@@ -169,7 +172,7 @@ function terminal::rerouteLogs() {
     return 0
   fi
   if [[ ! -v _TUI_LOG_FILE ]]; then
-    _OPTION_PATH_ONLY=true fs::createTempFile
+    fs::createTempFile pathOnly=true
     _TUI_LOG_FILE="${REPLY}"
   fi
   log::init "${_TUI_LOG_FILE}"
@@ -593,7 +596,7 @@ function terminal::rebindKeymap() {
 
   if [[ -z ${_TERMINAL_SAVED_BINDINGS_FILE:-} ]]; then
     # save the original bindings
-    _OPTION_PATH_ONLY=true fs::createTempFile
+    fs::createTempFile pathOnly=true
     _TERMINAL_SAVED_BINDINGS_FILE="${REPLY}"
     bind -p >"${_TERMINAL_SAVED_BINDINGS_FILE}" 2>/dev/null
   fi

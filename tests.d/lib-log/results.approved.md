@@ -36,9 +36,17 @@ _world
 Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.
 ```
 
+❯ `log::printString \ \ Next\ up\ is\ a\ big\ line\ with\ a\ lot\ of\ numbers\ not\ separated\ by\ spaces.\ Which\ means\ they\ will\ be\ truncated\ by\ characters\ and\ not\ by\ word\ boundaries\ like\ this\ sentence.\ \ `
+
+**Error output**:
+
+```text
+  Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.  
+```
+
 ### ✅ Testing log::info
 
-❯ `log::info Next\ up\ is\ a\ big\ line\ with\ a\ lot\ of\ numbers\ not\ separated\ by\ spaces.\ Which\ means\ they\ will\ be\ truncated\ by\ characters\ and\ not\ by\ word\ boundaries\ like\ this\ sentence. 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567`
+❯ `log::info $'Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.\n01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567\n01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'`
 
 **Error output**:
 
@@ -50,7 +58,7 @@ INFO     Next up is a big line with a lot of numbers not separated by spaces. Wh
 
 ### ✅ Testing log::printFile
 
-❯ `log::printFile file-to-read 2`
+❯ `log::printFile file-to-read maxLines=2`
 
 **Error output**:
 
@@ -84,7 +92,7 @@ INFO     Next up is a big line with a lot of numbers not separated by spaces. Wh
 
 ### ✅ Testing log::printFileString
 
-❯ `log::printFileString text 2`
+❯ `log::printFileString text maxLines=2`
 
 **Error output**:
 
@@ -101,9 +109,9 @@ INFO     Next up is a big line with a lot of numbers not separated by spaces. Wh
 ```text
    1 ░ What is Lorem Ipsum?
    2 ░ 
-   3 ░ Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+   3 ░   Lorem Ipsum is simply dummy text of the printing and typesetting industry.
    4 ░ Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
-   5 ░ It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
+   5 ░ It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.  
    6 ░ It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
    7 ░ 
    8 ░ 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
@@ -165,9 +173,20 @@ _world
                                              undaries like this sentence.
 ```
 
+❯ `log::printString \ \ Next\ up\ is\ a\ big\ line\ with\ a\ lot\ of\ numbers\ not\ separated\ by\ spaces.\ Which\ means\ they\ will\ be\ truncated\ by\ characters\ and\ not\ by\ word\ boundaries\ like\ this\ sentence.\ \ `
+
+**Error output**:
+
+```text
+                                               Next up is a big line with a lot of numbers
+                                             not separated by spaces. Which means they wil
+                                             l be truncated by characters and not by word 
+                                             boundaries like this sentence.  
+```
+
 ### ✅ Testing log::info
 
-❯ `log::info Next\ up\ is\ a\ big\ line\ with\ a\ lot\ of\ numbers\ not\ separated\ by\ spaces.\ Which\ means\ they\ will\ be\ truncated\ by\ characters\ and\ not\ by\ word\ boundaries\ like\ this\ sentence. 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567`
+❯ `log::info $'Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.\n01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567\n01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'`
 
 **Error output**:
 
@@ -194,7 +213,7 @@ _world
 
 ### ✅ Testing log::printFile
 
-❯ `log::printFile file-to-read 2`
+❯ `log::printFile file-to-read maxLines=2`
 
 **Error output**:
 
@@ -268,7 +287,7 @@ _world
 
 ### ✅ Testing log::printFileString
 
-❯ `log::printFileString text 2`
+❯ `log::printFileString text maxLines=2`
 
 **Error output**:
 
@@ -285,8 +304,8 @@ _world
 ```text
                                              [90m   1 ░[39m What is Lorem Ipsum?
                                              [90m   2 ░[39m 
-                                             [90m   3 ░[39m Lorem Ipsum is simply dummy text of th
-                                                  [90m░[39m e printing and typesetting industry.
+                                             [90m   3 ░[39m   Lorem Ipsum is simply dummy text of 
+                                                  [90m░[39m the printing and typesetting industry.
                                              [90m   4 ░[39m Lorem Ipsum has been the industry's st
                                                   [90m░[39m andard dummy text ever since the 1500s
                                                   [90m░[39m , when an unknown printer took a galle
@@ -295,7 +314,7 @@ _world
                                              [90m   5 ░[39m It has survived not only five centurie
                                                   [90m░[39m s, but also the leap into electronic t
                                                   [90m░[39m ypesetting, remaining essentially unch
-                                                  [90m░[39m anged.
+                                                  [90m░[39m anged.  
                                              [90m   6 ░[39m It was popularised in the 1960s with t
                                                   [90m░[39m he release of Letraset sheets containi
                                                   [90m░[39m ng Lorem Ipsum passages, and more rece
@@ -394,9 +413,10 @@ Exited with code: `1`
 ❯ `log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
+local REPLY REPLY2
 local -n messageToPrintInLog=REPLY
-string::wrapWords "${messageVariableName}" 90 "                                             " 45
+string::wrapWords messageToLog width=90 newLinePadString="                                             " firstLineWidth=45
 messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
 messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
 
@@ -415,9 +435,10 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 ❯ `VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true VALET_CONFIG_LOG_DISABLE_WRAP=false log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
+local REPLY REPLY2
 local -n messageToPrintInLog=REPLY
-string::wrapWords "${messageVariableName}" 90 "                                             " 45
+string::wrapWords messageToLog width=90 newLinePadString="                                             " firstLineWidth=45
 
 
 local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
@@ -434,9 +455,10 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 ❯ `VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=local\ extra=1 log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
+local REPLY REPLY2
 local -n messageToPrintInLog=REPLY
-string::wrapWords "${messageVariableName}" 90 "                                             " 45
+string::wrapWords messageToLog width=90 newLinePadString="                                             " firstLineWidth=45
 messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
 messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
 
@@ -455,9 +477,10 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 ❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
+local REPLY REPLY2
 local -n messageToPrintInLog=REPLY
-string::wrapWords "${messageVariableName}" 90 "                                             " 45
+string::wrapWords messageToLog width=90 newLinePadString="                                             " firstLineWidth=45
 messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
 messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
 
@@ -472,9 +495,10 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 ❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
+local REPLY REPLY2
 local -n messageToPrintInLog=REPLY
-string::wrapWords "${messageVariableName}" 90 "                                             " 45
+string::wrapWords messageToLog width=90 newLinePadString="                                             " firstLineWidth=45
 messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
 messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
 
@@ -489,9 +513,10 @@ GLOBAL_LOG_WRAP_PADDING='                                             '
 ❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
 
 ```text
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local REPLY REPLY2
+GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
+local REPLY REPLY2
 local -n messageToPrintInLog=REPLY
-string::wrapWords "${messageVariableName}" 90 "                                             " 45
+string::wrapWords messageToLog width=90 newLinePadString="                                             " firstLineWidth=45
 messageToPrintInLog="${messageToPrintInLog//⌜/[95m⌜}"
 messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
 
@@ -596,8 +621,8 @@ REPLY2='"${levelColor:-}" "${level:0:8}" "[39m" " " "${messageToPrintInLog:-}" 
 " "${GLOBAL_LOG_WRAP_PADDING}" "[90m" "[" "${loggedElapsedTime:0:7}" "] [" "${loggedElapsedTimeSinceLastLog:0:7}" "] in [" "${sourceFile:0:10}" "]" "[39m" '
 REPLY3='9'
 REPLY4='
-time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${REPLY}" "%S.%LLs"; local loggedElapsedTime="${REPLY}"
-time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${REPLY}"; _LOG_ELAPSED_TIME=${currentTime}
+time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${REPLY}" format="%S.%LLs"; local loggedElapsedTime="${REPLY}"
+time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" format="%S.%LLs"; local loggedElapsedTimeSinceLastLog="${REPLY}"; _LOG_ELAPSED_TIME=${currentTime}
 local sourceFile="${BASH_SOURCE[2]##*/}"'
 ```
 
@@ -633,8 +658,8 @@ REPLY3='0'
 REPLY4='
 local variableToPrintInLog="${STUFF:-}"
 local sourceFile="${BASH_SOURCE[2]##*/}"
-time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${REPLY}" "%S.%LLs"; local loggedElapsedTime="${REPLY}"
-time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" "%S.%LLs"; local loggedElapsedTimeSinceLastLog="${REPLY}"; _LOG_ELAPSED_TIME=${currentTime}'
+time::getProgramElapsedMicroseconds; time::convertMicrosecondsToHuman "${REPLY}" format="%S.%LLs"; local loggedElapsedTime="${REPLY}"
+time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToHuman "${_LOG_ELAPSED_TIME}" format="%S.%LLs"; local loggedElapsedTimeSinceLastLog="${REPLY}"; _LOG_ELAPSED_TIME=${currentTime}'
 ```
 
 ## Test script 01.log-level
@@ -1042,6 +1067,14 @@ test
 
 ```
 
+❯ `log::saveFile /tmp/valet.d/f1-2 important logPath=false`
+
+Returned variables:
+
+```text
+REPLY='/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important'
+```
+
 ### ✅ Testing log::saveFileString
 
 ❯ `log::saveFileString _myVar important2`
@@ -1058,5 +1091,13 @@ test
 
 ```text
 test
+```
+
+❯ `log::saveFileString _myVar important logPath=false`
+
+Returned variables:
+
+```text
+REPLY='/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important'
 ```
 

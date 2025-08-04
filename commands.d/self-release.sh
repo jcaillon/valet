@@ -364,7 +364,7 @@ function selfRelease::updateDocumentation() {
       files+=("${file}")
     done
     exe::invoke git add "${files[@]}"
-    fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/extras" true
+    fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/extras" recursive=true
     array::sort REPLY_ARRAY
     exe::invoke git add "${REPLY_ARRAY[@]}"
     exe::invoke git commit -m ":memo: updating the documentation"

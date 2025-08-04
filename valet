@@ -96,7 +96,7 @@ fi
 # shellcheck source=libraries.d/main
 source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
 
-core::parseMainArguments "$@"
+main::parseProgramArguments "$@"
 
 # shellcheck disable=SC2034
 GLOBAL_EXPECTED_EXIT=true

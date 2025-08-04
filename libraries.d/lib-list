@@ -11,40 +11,40 @@ source fs
 #
 # Set up the viewport for a list display.
 #
-# - ${_OPTION_LEFT} _as int_:
+# - ${left} _as int_:
 #       (optional) The left column at which to display the viewport of the list.
 #       (defaults to 1)
-# - ${_OPTION_TOP} _as int_:
+# - ${top} _as int_:
 #       (optional) The top line at which to display the viewport of the list.
 #       (defaults to 1)
-# - ${_OPTION_WIDTH} _as int_:
+# - ${width} _as int_:
 #       (optional) The width of the viewport of the list.
 #       (defaults to GLOBAL_COLUMNS)
-# - ${_OPTION_HEIGHT} _as int_:
+# - ${height} _as int_:
 #       (optional) The height of the viewport of the list.
 #       (defaults to GLOBAL_LINES)
-# - ${_OPTION_ITEM_HEIGHT} _as int_:
+# - ${itemHeight} _as int_:
 #       (optional) The height of each item in the list (num²ber of lines needed to display the item).
 #       (defaults to 1)
-# - ${_OPTION_ENABLE_REVERSE_MODE} _as bool_:
+# - ${enableReverseMode} _as bool_:
 #       (optional) If true, the items are displayed from bottom to top.
 #       (defaults to false)
-# - ${_OPTION_DISABLE_BOTTOM_ITEMS_COUNT} _as bool_:
+# - ${disableBottomItemsCount} _as bool_:
 #       (optional) If true, the count of items is not displayed.
 #       (defaults to false)
-# - ${_OPTION_DISABLE_RIGHT_SCROLLBAR} _as bool_:
+# - ${disableRightScrollbar} _as bool_:
 #       (optional) If true, the scrollbar is not displayed.
 #       (defaults to false)
-# - ${_OPTION_DISABLE_LEFT_CURSOR} _as bool_:
+# - ${disableLeftCursor} _as bool_:
 #       (optional) If true, the left cursors are not displayed.
 #       (defaults to false)
-# - ${_OPTION_DISABLE_TOP_SEPARATOR} _as bool_:
+# - ${disableTopSeparator} _as bool_:
 #       (optional) If true, the top separator is not displayed.
 #       (defaults to false)
-# - ${_OPTION_SHOW_ITEMS_COUNT_AT_TOP} _as bool_:
+# - ${showItemsCountAtTop} _as bool_:
 #       (optional) If true, the count of items will be displayed at the top of the box instead of the bottom.
 #       (defaults to false)
-# - ${_OPTION_ITEMS_COUNT_PATTERN} _as string_:
+# - ${itemsCountPattern} _as string_:
 #       (optional) The pattern to use for displaying the count of items.
 #
 #       - <colorCount>: The color to use for the count of items.
@@ -57,26 +57,26 @@ source fs
 #       - <percentViewed>: The percentage of items viewed in the list.
 #
 #       (defaults to " <colorCount><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorCount><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> ")
-# - ${_OPTION_ITEMS_COUNT_FILTERING_STRING} _as string_:
+# - ${itemsCountFilteringString} _as string_:
 #       (optional) The string to display when the list is being filtered.
 #       (defaults to " <colorCount>Filtering…<colorReset> ")
-# - ${_OPTION_DISABLE_FILTERING} _as bool_:
+# - ${disableFiltering} _as bool_:
 #       (optional) If true, the items can't be filtered using list::filter.
 #       (defaults to false)
-# - ${_OPTION_FILTER_ASYNCHRONOUSLY_THRESHOLD} _as int_:
+# - ${filter_ASYNCHRONOUSLY_THRESHOLD} _as int_:
 #       (optional) The number of items at which the filtering is done asynchronously.
 #       If the number of items is greater than this value, the filtering is done asynchronously.
 #       Can be set to 0 to force asynchronous filtering.
 #       (defaults to 242)
-# - ${_OPTION_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD} _as int_:
+# - ${filter_USING_EXTERNAL_PROGRAM_THRESHOLD} _as int_:
 #       (optional) The number of items at which the filtering is done using an external program.
 #       If the number of items is greater than this value, the filtering is done using an external program.
 #       This is to avoid performance issues when filtering a large number of items using pure bash.
 #       (defaults to 1042)
-# - ${_OPTION_EMPTY_LIST_TEXT} _as string_:
+# - ${emptyListText} _as string_:
 #       (optional) The text to display when the list is empty.
 #       (defaults to "EMPTY")
-# - ${_OPTION_CALLBACK_FUNCTION_ON_KEY_PRESSED} _as string_:
+# - ${callbackFunctionOnKeyPressed} _as string_:
 #       (optional) The name of a function to call each time a key is pressed.
 #       Can be used to customize the behavior of the prompt.
 #       The function is called with the following arguments:
@@ -86,7 +86,7 @@ source fs
 #
 #       The function must return 0 if the key press was handled, 1 otherwise.
 #       (defaults to empty)
-# - ${_OPTION_CALLBACK_FUNCTION_ON_LIST_CLOSED} _as string_:
+# - ${callbackFunctionOnListClosed} _as string_:
 #       (optional) The name of a function to call when the autocompletion box is closed.
 #       Can be used to clean up resources or to update the screen.
 #       The function is called with arguments:
@@ -98,7 +98,7 @@ source fs
 #
 #       The function must return 0 to state that prompt does not have to be redrawn, 1 otherwise.
 #       (defaults to empty)
-# - ${_OPTION_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED} _as string_:
+# - ${callbackFunctionOnItemDisplayED} _as string_:
 #       (optional) The name of a function to call when an item needs to be displayed in the list.
 #       This can be used to change the text displayed for the item (which default to the item string).
 #       The following variables are available:
@@ -113,25 +113,25 @@ source fs
 #       (defaults to empty)
 function list::setViewport() {
   # viewport size
-  _LIST_LEFT="${_OPTION_LEFT:-1}"
-  _LIST_TOP="${_OPTION_TOP:-1}"
-  _LIST_WIDTH="${_OPTION_WIDTH:-${GLOBAL_COLUMNS}}"
-  _LIST_HEIGHT="${_OPTION_HEIGHT:-${GLOBAL_LINES}}"
+  _LIST_LEFT="${left:-1}"
+  _LIST_TOP="${top:-1}"
+  _LIST_WIDTH="${width:-${GLOBAL_COLUMNS}}"
+  _LIST_HEIGHT="${height:-${GLOBAL_LINES}}"
 
   # display modes
-  _LIST_ITEM_HEIGHT="${_OPTION_ITEM_HEIGHT:-1}"
-  _LIST_DISABLE_ITEMS_COUNT="${_OPTION_DISABLE_BOTTOM_ITEMS_COUNT:-false}"
-  _LIST_DISABLE_TOP_SEPARATOR="${_OPTION_DISABLE_TOP_SEPARATOR:-false}"
-  _LIST_DISABLE_RIGHT_SCROLLBAR="${_OPTION_DISABLE_RIGHT_SCROLLBAR:-false}"
-  _LIST_ENABLE_REVERSE_MODE="${_OPTION_ENABLE_REVERSE_MODE:-false}"
+  _LIST_ITEM_HEIGHT="${itemHeight:-1}"
+  _LIST_DISABLE_ITEMS_COUNT="${disableBottomItemsCount:-false}"
+  _LIST_DISABLE_TOP_SEPARATOR="${disableTopSeparator:-false}"
+  _LIST_DISABLE_RIGHT_SCROLLBAR="${disableRightScrollbar:-false}"
+  _LIST_ENABLE_REVERSE_MODE="${enableReverseMode:-false}"
 
   # filtering options
-  _LIST_DISABLE_FILTERING="${_OPTION_DISABLE_FILTERING:-false}"
-  _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD="${_OPTION_FILTER_ASYNCHRONOUSLY_THRESHOLD:-242}"
-  _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${_OPTION_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD:-1042}"
+  _LIST_DISABLE_FILTERING="${disableFiltering:-false}"
+  _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD="${filter_ASYNCHRONOUSLY_THRESHOLD:-242}"
+  _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${filter_USING_EXTERNAL_PROGRAM_THRESHOLD:-1042}"
 
   # left cursor
-  if [[ ${_OPTION_DISABLE_LEFT_CURSOR:-false} != "true" ]]; then
+  if [[ ${disableLeftCursor:-false} != "true" ]]; then
     _LIST_SYMBOL_LEFT_LENGTH="${SYMBOL_LIST_LEFT_LENGTH}"
     _LIST_SYMBOL_LEFT_SELECTED_ITEM="${SYMBOL_LIST_LEFT_SELECTED_ITEM}"
     _LIST_SYMBOL_LEFT_UNSELECTED_ITEM="${SYMBOL_LIST_LEFT_UNSELECTED_ITEM}"
@@ -164,12 +164,12 @@ function list::setViewport() {
   _LIST_STYLE_LETTER_HIGHLIGHT="${STYLE_LIST_LETTER_HIGHLIGHT}"
   _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}"
 
-  _LIST_EMPTY_LIST_TEXT="${_OPTION_EMPTY_LIST_TEXT:-"EMPTY"}"
+  _LIST_EMPTY_LIST_TEXT="${emptyListText:-"EMPTY"}"
   local visibleCharacters="${_LIST_EMPTY_LIST_TEXT}"
   string::removeTextFormatting visibleCharacters
   _LIST_EMPTY_LIST_TEXT_LENGTH=${#visibleCharacters}
 
-  _LIST_ITEMS_COUNT_PATTERN="${_OPTION_ITEMS_COUNT_PATTERN:-" <colorCount><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorCount><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> "}"
+  _LIST_ITEMS_COUNT_PATTERN="${itemsCountPattern:-" <colorCount><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorCount><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> "}"
   _LIST_ITEMS_COUNT_PATTERN="${_LIST_ITEMS_COUNT_PATTERN//"<colorCount>"/"${STYLE_LIST_COUNT_NUMBER}"}"
   _LIST_ITEMS_COUNT_PATTERN="${_LIST_ITEMS_COUNT_PATTERN//"<colorFrame>"/"${STYLE_LIST_COUNT_FRAME}"}"
   _LIST_ITEMS_COUNT_PATTERN="${_LIST_ITEMS_COUNT_PATTERN//"<colorReset>"/"${STYLE_RESET}"}"
@@ -177,7 +177,7 @@ function list::setViewport() {
   string::removeTextFormatting visibleCharacters
   _LIST_ITEMS_COUNT_PATTERN_INVISIBLE_CHARS_LENGTH=$((${#_LIST_ITEMS_COUNT_PATTERN} - ${#visibleCharacters}))
 
-  _LIST_ITEMS_COUNT_FILTERING_STRING="${_OPTION_ITEMS_COUNT_FILTERING_STRING:-" <colorCount>Filtering…<colorReset> "}"
+  _LIST_ITEMS_COUNT_FILTERING_STRING="${itemsCountFilteringString:-" <colorCount>Filtering…<colorReset> "}"
   _LIST_ITEMS_COUNT_FILTERING_STRING="${_LIST_ITEMS_COUNT_FILTERING_STRING//"<colorCount>"/"${STYLE_LIST_COUNT_NUMBER}"}"
   _LIST_ITEMS_COUNT_FILTERING_STRING="${_LIST_ITEMS_COUNT_FILTERING_STRING//"<colorReset>"/"${STYLE_RESET}"}"
   visibleCharacters="${_LIST_ITEMS_COUNT_FILTERING_STRING}"
@@ -185,7 +185,7 @@ function list::setViewport() {
   _LIST_ITEMS_COUNT_FILTERING_STRING_LENGTH=${#visibleCharacters}
 
   # callbacks
-  _LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED="${_OPTION_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED:-}"
+  _LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED="${callbackFunctionOnItemDisplayED:-}"
   if [[ -n ${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED} ]]; then
     if ! declare -F "${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}" &>/dev/null; then
       core::fail "The callback function ⌜${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}⌝ does not exist."
@@ -253,7 +253,7 @@ function list::setItems() {
   # filter with an external program
   if [[ ${VALET_CONFIG_STRICT_PURE_BASH:-false} != "true" && _LIST_ORIGINAL_ITEMS_COUNT -ge _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD ]]; then
 
-    _OPTION_PATH_ONLY=true fs::createTempFile
+    fs::createTempFile pathOnly=true
     _ASYNC_FILTER_ORIGINAL_ITEMS_FILE="${REPLY}"
 
     if command -v fzf &>/dev/null && command -v awk &>/dev/null; then
@@ -361,7 +361,7 @@ function list_appendMultiLineItemDisplayString() {
     _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_UNSELECTED_ITEM}"
   fi
 
-  string::highlight _LIST_CURRENT_ITEM _LIST_FILTER_STRING "${_LIST_STYLE_LETTER_HIGHLIGHT}" "${_LIST_STYLE_LETTER_HIGHLIGHT_RESET}"
+  string::highlight _LIST_CURRENT_ITEM _LIST_FILTER_STRING highlightCode="${_LIST_STYLE_LETTER_HIGHLIGHT}" resetCode="${_LIST_STYLE_LETTER_HIGHLIGHT_RESET}"
   _LIST_CURRENT_ITEM="${REPLY}"
 
   local IFS=$'\n' savedFilterString="${_LIST_FILTER_STRING}"
@@ -433,7 +433,7 @@ function list::drawCounter() {
   fi
 
   local showAtLine leftSymbol rightSymbol
-  if [[ ${_OPTION_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
+  if [[ ${showItemsCountAtTop:-false} == "true" ]]; then
     showAtLine=${_LIST_TOP}
     leftSymbol="${_LIST_SYMBOL_LEFT_SEPARATOR_TOP}"
     rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_TOP}"
@@ -499,7 +499,7 @@ function list::drawTopSeparator() {
   fi
 
   local showAtLine leftSymbol rightSymbol
-  if [[ ${_OPTION_SHOW_ITEMS_COUNT_AT_TOP:-false} != "true" ]]; then
+  if [[ ${showItemsCountAtTop:-false} != "true" ]]; then
     showAtLine=${_LIST_TOP}
     leftSymbol="${_LIST_SYMBOL_LEFT_SEPARATOR_TOP}"
     rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_TOP}"
@@ -596,7 +596,7 @@ function list_post_filter() {
   if [[ ${_LIST_DISABLE_ITEMS_COUNT} != "true" ]]; then
     _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
     # we display the items count at the top or bottom of the box
-    if [[ ${_OPTION_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
+    if [[ ${showItemsCountAtTop:-false} == "true" ]]; then
       _LIST_TOP_SHIFT=$((_LIST_TOP_SHIFT + 1))
     else
       _LIST_BOTTOM_SHIFT=$((_LIST_BOTTOM_SHIFT + 1))
@@ -606,7 +606,7 @@ function list_post_filter() {
   if [[ ${_LIST_DISABLE_TOP_SEPARATOR} != "true" ]]; then
     _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
     # we display the top separator
-    if [[ ${_OPTION_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
+    if [[ ${showItemsCountAtTop:-false} == "true" ]]; then
       _LIST_BOTTOM_SHIFT=$((_LIST_BOTTOM_SHIFT + 1))
     else
       _LIST_TOP_SHIFT=$((_LIST_TOP_SHIFT + 1))
@@ -791,8 +791,8 @@ function list::getCurrentItemDisplayableString() {
 #
 # Returns:
 #
-# - ${_OPTION_FILTERED_ITEMS_SELECTED_INDEX}: The new index.
-# - ${_OPTION_FILTERED_ITEMS_START_INDEX}: The new start index if needed.
+# - ${filterED_ITEMS_SELECTED_INDEX}: The new index.
+# - ${filterED_ITEMS_START_INDEX}: The new start index if needed.
 #
 # ```bash
 # list::changeSelectedItemIndex 1
@@ -868,10 +868,10 @@ function list_startAsyncFiltering() {
 
   # initial setup of files for async filtering if not done
   if [[ -z ${_ASYNC_FILTERED_ITEMS_FILE:-} ]]; then
-    _OPTION_PATH_ONLY=true fs::createTempFile
+    fs::createTempFile pathOnly=true
     _ASYNC_FILTERED_ITEMS_FILE="${REPLY}"
 
-    _OPTION_PATH_ONLY=true fs::createTempFile
+    fs::createTempFile pathOnly=true
     _ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE="${REPLY}"
   fi
 
@@ -922,17 +922,17 @@ function list_asyncFilterJob() {
 
   if [[ -n ${_LIST_FILTER_USING_EXTERNAL_PROGRAM:-} ]]; then
 
-    _OPTION_PATH_ONLY=true fs::createTempFile
+    fs::createTempFile pathOnly=true
     local intermediateItemsFile="${REPLY}"
-    _OPTION_PATH_ONLY=true fs::createTempFile
+    fs::createTempFile pathOnly=true
     local intermediateItemsCorrespondencesFile="${REPLY}"
 
     # initial setup of files for filtering with external programs
     case "${_LIST_FILTER_USING_EXTERNAL_PROGRAM:-}" in
     fzf+awk)
-      _OPTION_PATH_ONLY=true fs::createTempFile
+      fs::createTempFile pathOnly=true
       local fzfOutputFile="${REPLY}"
-      _OPTION_PATH_ONLY=true fs::createTempFile
+      fs::createTempFile pathOnly=true
       local fzfPreviousOutputFile="${REPLY}"
       ;;
     esac
@@ -1145,7 +1145,7 @@ function list_fuzzyFilterSortFileWithGrepAndGawk() {
   if [[ -z ${_ARRAY_TEMP_FILTERED_FILE:-} ]]; then
     # shellcheck source=lib-fs
     source fs
-    _OPTION_PATH_ONLY=true fs::createTempFile
+    fs::createTempFile pathOnly=true
     _ARRAY_TEMP_FILTERED_FILE="${REPLY}"
   fi
 

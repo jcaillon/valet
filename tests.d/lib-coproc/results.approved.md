@@ -4,7 +4,7 @@
 
 ### ✅ Testing coproc::run with a simple init command
 
-❯ `_OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_1`
+❯ `coproc::run _COPROC_1 initCommand=initCommand`
 
 ❯ `coproc::wait _COPROC_1`
 
@@ -16,7 +16,7 @@ INFO     Running init command in coproc (_COPROC_1).
 
 ### ✅ Testing coproc::sendMessage, coproc::isRunning and coproc::wait
 
-❯ `_OPTION_INIT_COMMAND=initCommand _OPTION_LOOP_COMMAND=loopCommand _OPTION_ON_MESSAGE_COMMAND=onMessageCommand;break _OPTION_END_COMMAND=endCommand coproc::run _COPROC_2`
+❯ `coproc::run _COPROC_2 initCommand=initCommand loopCommand=loopCommand onMessageCommand=onMessageCommand;break endCommand=endCommand`
 
 ❯ `coproc::isRunning _COPROC_2`
 
@@ -37,7 +37,7 @@ INFO     Running end command in coproc (_COPROC_2).
 
 ### ✅ Testing coproc::run with wait for readiness
 
-❯ `_OPTION_INIT_COMMAND=initCommand _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_3`
+❯ `coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true`
 
 ❯ `coproc::wait _COPROC_3`
 
@@ -49,7 +49,7 @@ INFO     Running init command in coproc (_COPROC_3).
 
 ### ✅ Testing coproc::kill
 
-❯ `_OPTION_INIT_COMMAND=initCommand _OPTION_LOOP_COMMAND=loopCommand _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_4`
+❯ `coproc::run _COPROC_4 initCommand=initCommand loopCommand=loopCommand waitForReadiness=true`
 
 ❯ `coproc::kill _COPROC_4`
 
@@ -61,7 +61,7 @@ INFO     Running init command in coproc (_COPROC_4).
 
 ### ✅ Testing coproc::run with a realistic usage
 
-❯ `_OPTION_LOOP_COMMAND=realisticLoop _OPTION_ON_MESSAGE_COMMAND=realisticOnMessage coproc::run _COPROC_9`
+❯ `coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage`
 
 **Error output**:
 
@@ -78,14 +78,16 @@ INFO     Stopping the coproc (_COPROC_9).
 
 ### ✅ Testing coproc::run with a realistic usage and keeping only the last message
 
-❯ `_OPTION_LOOP_COMMAND=realisticLoop _OPTION_ON_MESSAGE_COMMAND=realisticOnMessage coproc::run _COPROC_9`
+❯ `coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage`
 
 **Error output**:
 
 ```text
 INFO     Running loop command in coproc (_COPROC_9), loop number: 1.
-INFO     Received message in coproc (_COPROC_9): message 0
+INFO     Received message in coproc (_COPROC_9): decoy
 INFO     Running loop command in coproc (_COPROC_9), loop number: 2.
+INFO     Received message in coproc (_COPROC_9): message 0
+INFO     Received message in coproc (_COPROC_9): decoy
 INFO     Received message in coproc (_COPROC_9): message 1
 INFO     Received message in coproc (_COPROC_9): stop
 INFO     Stopping the coproc (_COPROC_9).
@@ -93,7 +95,7 @@ INFO     Stopping the coproc (_COPROC_9).
 
 ### ✅ Testing coproc::run with an error in the init command
 
-❯ `_OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_20`
+❯ `coproc::run _COPROC_20 initCommand=initCommand`
 
 **Error output**:
 

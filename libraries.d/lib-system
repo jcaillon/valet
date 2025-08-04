@@ -208,9 +208,7 @@ function system::addToPath() {
       continue
     fi
 
-    log::info "Adding directory ⌜${pathToAdd}⌝ to the PATH for ⌜${shellName}⌝ shell." \
-      "Appending to ⌜${configFile}⌝:" \
-      "${configContent}"
+    log::info "Adding directory ⌜${pathToAdd}⌝ to the PATH for ⌜${shellName}⌝ shell."$'\n'"Appending to ⌜${configFile}⌝:"$'\n'"${configContent}"
 
     printf '\n\n%s\n' "${configContent}" >> "${configFile}"
     count+=1
@@ -219,7 +217,6 @@ function system::addToPath() {
   export PATH="${pathToAdd}:${PATH}"
 
   if (( count > 0 )); then
-    log::warning "The directory ⌜${pathToAdd}⌝ has been added to the PATH for ${count} shells." \
-      "Please login again to apply the changes on your current shell if you are not using bash."
+    log::warning "The directory ⌜${pathToAdd}⌝ has been added to the PATH for ${count} shells."$'\n'"Please login again to apply the changes on your current shell if you are not using bash."
   fi
 }

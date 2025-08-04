@@ -15,31 +15,9 @@ function main() {
   test::exit functionWithInfiniteArgs
   test::exec functionWithInfiniteArgs argument1 argument2
   test::exec functionWithInfiniteArgs argument1 argument2 myOption=one
+  test::exec functionWithInfiniteArgs argument1 argument2 ---
   test::exec functionWithInfiniteArgs argument1 argument2 --- myOption=one
   test::exec functionWithInfiniteArgs argument1 argument2 1 2 3 --- myOption=one myOption2="my value"
-}
-
-function getToEval() {
-  local param
-  local -i nb=0
-  for param; do
-    if [[ ${param} == "---" ]]; then
-      break
-    fi
-    nb+=1
-  done
-  if (($# == nb)); then
-    # no separators, only arguments
-    REPLY=":"
-    return 0
-  elif (($# == 0)); then
-    # a separator but no options after it
-    REPLY="set -- \"\${@:1:${nb}}\""
-    return 0
-  fi
-  shift "$((nb + 1))"
-  local IFS=$' '
-  REPLY="local ${*@Q}; set -- \"\${@:1:${nb}}\""
 }
 
 function functionWithFiniteArgs() {
@@ -47,9 +25,9 @@ function functionWithFiniteArgs() {
     arg1="${1}" \
     arg2="${2}" \
     myOption="1" \
-    myOption2="2"
+    myOption2="2" \
+    IFS=$' '
   shift 2
-  local IFS=$' '
   eval "local a= ${*@Q}"
 
   echo "local a= ${*@Q}"
@@ -63,7 +41,7 @@ function functionWithInfiniteArgs() {
     myOption="1" \
     myOption2="2"
   shift 2
-  getToEval "${@}"
+  core::parseShellParameters "${@}"
   eval "${REPLY}"
 
   echo "${REPLY}"

@@ -219,12 +219,12 @@ function sfzfDrawScreen() {
   # - compute the number of content lines for the pane
 
   # 1. draw the prompt string
-  string::wrapWords prompt "$((SFZF_LEFT_PANE_WIDTH - 1))"
+  string::wrapWords prompt width="$((SFZF_LEFT_PANE_WIDTH - 1))"
   prompt="${REPLY}"
   SFZF_LEFT_PANE_FIRST_LINE=1
   local IFS line
   toPrint+="${SFZF_COLOR_PROMPT_STRING}"
-  while IFS= read -r line; do
+  while IFS=$'\n' read -rd $'\n' line; do
     toPrint+="${line}"$'\n'
     SFZF_LEFT_PANE_FIRST_LINE=$((SFZF_LEFT_PANE_FIRST_LINE + 1))
   done <<<"${prompt}"
@@ -429,7 +429,7 @@ function computeRightPaneContent() {
 
     array=()
     local line IFS
-    while IFS= read -r line; do
+    while IFS=$'\n' read -rd $'\n' line; do
       array+=("${line}")
     done <<<"${content}"
   fi

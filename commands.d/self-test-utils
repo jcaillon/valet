@@ -98,6 +98,7 @@ function selfTestUtils_setupBashForConsistency() {
   export BASHPID=1234
   unset SECONDS
   export SECONDS=0
+  export OSTYPE=linux-gnu
 }
 
 function selfTestUtils_runHookScript() {

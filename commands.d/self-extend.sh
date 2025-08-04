@@ -243,7 +243,7 @@ function selfExtend_createExtension() {
     fs::readFile "${extensionDirectory}/.gitignore"
     if [[ ${REPLY} != *"### Valet ###"* ]]; then
       local content=$'\n'$'\n'"### Valet ###"$'\n'"lib-valet"$'\n'"lib-valet.md"$'\n'".vscode/valet.code-snippets"
-      fs::writeToFile "${extensionDirectory}/.gitignore" content true
+      fs::writeToFile "${extensionDirectory}/.gitignore" content append=true
     fi
   fi
 
@@ -304,7 +304,7 @@ function selfExtend_downloadTarball() {
   # move the files to the target directory
   rm -Rf "${targetDirectory}" 1>/dev/null || core::fail "Could not remove the existing files in ⌜${targetDirectory}⌝."
   fs::createDirectoryIfNeeded "${targetDirectory}"
-  fs::listDirectories "${tempDirectory}" false
+  fs::listDirectories "${tempDirectory}"
   if (( ${#REPLY_ARRAY[@]} != 1 )); then
     core::fail "The tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ did not contain a single directory."
   fi
@@ -417,7 +417,7 @@ function selfExtend_executeSetupScript() {
   log::info "Executing the setup script for the extension ⌜${extensionName}⌝: ⌜${extensionDirectory}/extension.setup.sh⌝."
   # shellcheck disable=SC1091
   bash::runInSubshell source "${extensionDirectory}/extension.setup.sh"
-  if (( REPLY != 0 )) ; then
+  if (( REPLY_CODE != 0 )) ; then
     log::error "The extension setup script for the extension ⌜${extensionName}⌝ failed. You can manually retry the setup by running the script ⌜${extensionDirectory}/extension.setup.sh⌝."
     interactive::promptYesNo "The setup script for the extension ⌜${extensionName}⌝ failed (see above), do you want to continue anyway?" true || core::fail "The setup script for the extension ⌜${extensionName}⌝ failed."
   fi
@@ -450,7 +450,7 @@ function selfExtend::updateExtensions() {
   fi
 
   log::info "Attempting to update all git repositories and installed extensions in ⌜${extensionsDirectory}⌝."
-  fs::listDirectories "${extensionsDirectory}" true false selfExtend_filterExtensionFolder
+  fs::listDirectories "${extensionsDirectory}" recursive=true filter=selfExtend_filterExtensionFolder
   local path
   local allUpdateSuccess=true
   local -i count=0

@@ -74,15 +74,14 @@ Ideally, we would use positional arguments and flags like we do for our CLI. But
 function argument1 argument2 1 2 3 --- myOption=one myOption3="my value"
 ```
 
-
 Optional parameters all start with the `_OPTION_` prefix and can be use like so:
 
 ```bash
 function myFunction() {
-  local myOption="${_OPTION_MY_OPTION:-default_value}"
+  local myOption="${myOption:-default_value}"
   # ...
 }
-__OPTION_MY_OPTION="my_value" myFunction
+_myOption="my_value" myFunction
 ```
 
 This way we can immediately understand what is passed to the function and easily use the option inside our function block.
@@ -99,11 +98,11 @@ When it comes to outputs, we should use the `REPLY` global variable to store the
 
 ```bash
 function myFunction() {
-  local myOption="${_OPTION_MY_OPTION:-default_value}"
+  local myOption="${myOption:-default_value}"
   # ...
   REPLY="some output"
 }
-__OPTION_MY_OPTION="my_value" myFunction
+_myOption="my_value" myFunction
 echo "${REPLY}"
 ```
 

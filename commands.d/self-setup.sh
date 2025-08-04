@@ -42,8 +42,7 @@ function selfSetup() {
   styles::init
   log::init
 
-  log::info "If you see an unusual or ? character in the lines below, it means you don't have a nerd-font setup in your terminal." \
-    "You can download a nerd-font here: https://www.nerdfonts.com/font-downloads."
+  log::info "If you see an unusual or ? character in the lines below, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download a nerd-font here: https://www.nerdfonts.com/font-downloads."
 
   printf '%s\n' "─────────────────────────────────────"
   printf '%s\n' "This is a nerd icon check, check out the next lines:"
@@ -54,9 +53,7 @@ function selfSetup() {
   printf '%s\n' "─────────────────────────────────────"
 
   if ! interactive::promptYesNo "Do you correctly see the nerd icons in lines above?" false; then
-    log::info "You can download any font here: https://www.nerdfonts.com/font-downloads and install it." \
-    "After that, you need to setup your terminal to use this newly installed font." \
-    "You can then run the command ⌜valet self setup⌝ again to set up the use of this font."
+    log::info "You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."$'\n'"You can then run the command ⌜valet self setup⌝ again to set up the use of this font."
     VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
   else
     VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
@@ -86,12 +83,12 @@ function selfSetup_setupForWindows() {
   source fs
 
   local linuxInstallationPath="${GLOBAL_INSTALLATION_DIRECTORY}"
-  _OPTION_REALPATH=true fs::toAbsolutePath "${linuxInstallationPath}"
+  fs::toAbsolutePath "${linuxInstallationPath}" realpath=true
   windows::convertPathFromUnix "${REPLY}"
   local windowsInstallationPath="${REPLY}"
 
   local linuxBashPath="${BASH}"
-  _OPTION_REALPATH=true fs::toAbsolutePath "${linuxBashPath}"
+  fs::toAbsolutePath "${linuxBashPath}" realpath=true
   windows::convertPathFromUnix "${REPLY}"
   local windowsBashPath="${REPLY}"
 

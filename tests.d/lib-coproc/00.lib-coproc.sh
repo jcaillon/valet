@@ -5,7 +5,7 @@ include coproc array bash
 function main() {
   test_coproc::run_simpleTests
   test_coproc::run_completeTest
-  _OPTION_KEEP_ONLY_LAST_MESSAGE=true test_coproc::run_completeTest
+  keepOnlyLastMessage=true test_coproc::run_completeTest
   test_coproc::run_testError
 }
 
@@ -34,9 +34,9 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc::run with a simple init command"
 
-  test::prompt _OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_1
+  test::prompt coproc::run _COPROC_1 initCommand=initCommand
   test::prompt coproc::wait _COPROC_1
-  _OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_1 initCommand break willNotBeUsed ":"
+  coproc::run _COPROC_1 initCommand=initCommand
   local coproc1Pid="${REPLY}"
   if (( coproc1Pid <= 0 )); then
     test::fail "The coproc ⌜_COPROC_1⌝ is not running."
@@ -47,12 +47,12 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc::sendMessage, coproc::isRunning and coproc::wait"
 
-  test::prompt _OPTION_INIT_COMMAND=initCommand _OPTION_LOOP_COMMAND=loopCommand _OPTION_ON_MESSAGE_COMMAND="onMessageCommand;break" _OPTION_END_COMMAND=endCommand coproc::run _COPROC_2
+  test::prompt coproc::run _COPROC_2 initCommand=initCommand loopCommand=loopCommand onMessageCommand="onMessageCommand;break" endCommand=endCommand
   test::prompt coproc::isRunning _COPROC_2
   test::prompt coproc::sendMessage _COPROC_2 "Hello, coproc 2!"
   test::prompt coproc::wait _COPROC_2
   test::prompt coproc::isRunning _COPROC_2
-  _OPTION_INIT_COMMAND=initCommand _OPTION_LOOP_COMMAND=loopCommand _OPTION_ON_MESSAGE_COMMAND="onMessageCommand;break" _OPTION_END_COMMAND=endCommand coproc::run _COPROC_2
+  coproc::run _COPROC_2 initCommand=initCommand loopCommand=loopCommand onMessageCommand="onMessageCommand;break" endCommand=endCommand
   if ! coproc::isRunning _COPROC_2; then
     test::fail "The coproc ⌜_COPROC_2⌝ is not running."
   fi
@@ -66,9 +66,9 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc::run with wait for readiness"
 
-  test::prompt _OPTION_INIT_COMMAND=initCommand _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_3
+  test::prompt coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
   test::prompt coproc::wait _COPROC_3
-  _OPTION_INIT_COMMAND=initCommand _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_3
+  coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
   coproc::wait _COPROC_3
   test::flush
 
@@ -80,9 +80,9 @@ function test_coproc::run_simpleTests() {
     bash::sleep 0
   }
 
-  test::prompt _OPTION_INIT_COMMAND=initCommand _OPTION_LOOP_COMMAND=loopCommand _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_4
+  test::prompt coproc::run _COPROC_4 initCommand=initCommand loopCommand=loopCommand waitForReadiness=true
   test::prompt coproc::kill _COPROC_4
-  _OPTION_INIT_COMMAND=initCommand _OPTION_LOOP_COMMAND=loopCommand _OPTION_WAIT_FOR_READINESS=true coproc::run _COPROC_4
+  coproc::run _COPROC_4 initCommand=initCommand loopCommand=loopCommand waitForReadiness=true
   local coproc4Pid="${REPLY}"
   local IFS=" "
   if [[ ${GLOBAL_BACKGROUND_PIDS[*]} != *"${coproc4Pid}"* ]]; then
@@ -97,7 +97,7 @@ function test_coproc::run_simpleTests() {
 
 
 function test_coproc::run_completeTest() {
-  if [[ ${_OPTION_KEEP_ONLY_LAST_MESSAGE:-} == "true" ]]; then
+  if [[ ${keepOnlyLastMessage:-} == "true" ]]; then
     test::title "✅ Testing coproc::run with a realistic usage and keeping only the last message"
   else
     test::title "✅ Testing coproc::run with a realistic usage"
@@ -124,8 +124,8 @@ function test_coproc::run_completeTest() {
     return 0
   }
 
-  test::prompt _OPTION_LOOP_COMMAND=realisticLoop _OPTION_ON_MESSAGE_COMMAND=realisticOnMessage coproc::run _COPROC_9
-  _OPTION_LOOP_COMMAND=realisticLoop _OPTION_ON_MESSAGE_COMMAND=realisticOnMessage coproc::run _COPROC_9
+  test::prompt coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage
+  coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage
 
   local -i messageSent=0
   while coproc::receiveMessage _COPROC_9 && [[ ${REPLY} != "stop" ]]; do
@@ -151,8 +151,8 @@ function test_coproc::run_testError() {
   }
 
   test::setTestCallStack
-  test::prompt _OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_20
-  _OPTION_INIT_COMMAND=initCommand coproc::run _COPROC_20
+  test::prompt coproc::run _COPROC_20 initCommand=initCommand
+  coproc::run _COPROC_20 initCommand=initCommand
   test::unsetTestCallStack
 
   if coproc::wait _COPROC_20; then

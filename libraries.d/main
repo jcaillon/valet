@@ -37,38 +37,33 @@ if [[ ! -v GLOBAL_INSTALLATION_DIRECTORY ]]; then
 fi
 
 # Include core functions
-# shellcheck source=core
 builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core"
-# shellcheck source=core-lib
 builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core-lib"
-# shellcheck source=core-traps
 builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core-traps"
 
 # set different options for the shell, to have consistent behavior on all machines
 core::setShellOptions
 
-# Remember the time the program started (nb of seconds since epoch)
-GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%[.,]*}"
-GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*[.,]}"
-
-# Remember the original working directory
-GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
-
-# Remember the main PID
-# shellcheck disable=SC2034
-GLOBAL_PROGRAM_MAIN_PID="${BASHPID}"
+declare -g \
+  GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%[.,]*}" \
+  GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*[.,]}" \
+  GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}" \
+  GLOBAL_PROGRAM_MAIN_PID="${BASHPID}" \
+  GLOBAL_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}" \
+  GLOBAL_STARTUP_FILE="${VALET_STARTUP_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/startup"}"
 
 # To ensure we print errors even before log::init is called
-GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG="printf \"%-8s %s\n\" \"\${level:-}\" \"\${!messageVariableName}\" 1>&2"
-GLOBAL_LOG_PRINT_STATEMENT_STANDARD="printf \"%s\" \"\${rawStringToPrintInLog}\" 1>&2"
-GLOBAL_LOG_WRAP_PADDING=''
-GLOBAL_LOG_DISABLE_WRAP=true
+declare -g \
+  GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG="printf \"%-8s %s\n\" \"\${level:-}\" \"\${messageToLog}\" 1>&2" \
+  GLOBAL_LOG_PRINT_STATEMENT_STANDARD="printf \"%s\" \"\${rawStringToPrintInLog}\" 1>&2" \
+  GLOBAL_LOG_WRAP_PADDING='' \
+  GLOBAL_LOG_DISABLE_WRAP=true
 
 # start the profiler
 if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
   # profiler will need temp files
   fs::setupTempFileGlobalVariable
-  # shellcheck source=lib-profiler
+  # shellcheck disable=SC1091
   source profiler
   printf -v _PROFILER_FILE_NAME "profiler-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
   core::getUserStateDirectory
@@ -85,7 +80,6 @@ trap::register
 declare -g -a GLOBAL_BACKGROUND_PIDS=()
 
 # Source the valet configuration from the user config dir
-GLOBAL_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}"
 if [[ -f ${GLOBAL_CONFIG_FILE} ]]; then
   GLOBAL_ON_EXIT_MESSAGE="Error sourcing the configuration file ⌜${GLOBAL_CONFIG_FILE}⌝."$'\n'"Check the file for error and try again, or delete the file to discard your config."
   builtin source "${GLOBAL_CONFIG_FILE}"
@@ -94,7 +88,6 @@ fi
 
 # Source the env script
 if [[ ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_SCRIPT:-.env} ]]; then
-  # shellcheck disable=SC2034
   GLOBAL_ON_EXIT_MESSAGE="Error sourcing the env file ⌜${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}⌝."$'\n'"Check the file for error and try again, or delete the file to discard your config."
   builtin source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
   unset -v GLOBAL_ON_EXIT_MESSAGE
@@ -131,9 +124,9 @@ if [[ -t ${GLOBAL_FD_TUI} ]]; then
     printf "%s" "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
   fi
 else
-  GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}"
-  # shellcheck disable=SC2034
-  GLOBAL_LINES="${VALET_CONFIG_DEFAULT_LINES:-30}"
+  declare -g \
+    GLOBAL_COLUMNS="${VALET_CONFIG_DEFAULT_COLUMNS:-120}" \
+    GLOBAL_LINES="${VALET_CONFIG_DEFAULT_LINES:-30}"
 fi
 
 # Initialize the log system
@@ -155,9 +148,24 @@ if [[ -v DEBUG ]]; then
 fi
 
 # Source the startup file
-GLOBAL_STARTUP_FILE="${VALET_STARTUP_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/startup"}"
 if [[ -f ${GLOBAL_STARTUP_FILE} ]]; then
   GLOBAL_ON_EXIT_MESSAGE="Error sourcing the startup file ⌜${GLOBAL_STARTUP_FILE}⌝."$'\n'"Check the file for error and try again, or delete the file to discard your config."
   builtin source "${GLOBAL_STARTUP_FILE}"
   unset -v GLOBAL_ON_EXIT_MESSAGE
 fi
+
+# ## main::parseProgramArguments (private)
+#
+# Parses the main arguments of the valet command.
+#
+# - $@: arguments _as any_:
+#       The arguments to parse.
+#
+# ```bash
+# main::parseProgramArguments "$@"
+# ```
+function main::parseProgramArguments() {
+  # shellcheck disable=SC1091
+  source command
+  command::parseProgramArguments "$@"
+}

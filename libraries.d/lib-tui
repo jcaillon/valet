@@ -24,19 +24,19 @@ function tui::test() {
     printf "%s\n" "1s has elapsed" 1>&"${GLOBAL_FD_TUI}"
   }
 
-  _OPTION_ON_REDRAW_REQUIRED_CALLBACK=onRedrawRequired \
-  _OPTION_ON_EACH_LOOP_ITERATION_CALLBACK=onTick \
-  _OPTION_LOOP_DELAY=1.0 \
-  _OPTION_TRACK_MOUSE_BUTTON_ONLY=false \
+  onRedrawRequiredCallback=onRedrawRequired \
+  onEachLoopIterationCallback=onTick \
+  loopDelay=1.0 \
+  trackMouseButtonOnly=false \
     tui::startMainLoop onKeyPress
 }
 
 function tui::startMainLoop() {
   local onKeyPressFunction="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local onEachLoopIterationFunction="${_OPTION_ON_EACH_LOOP_ITERATION_CALLBACK:-}"
-  local onRedrawRequiredFunction="${_OPTION_ON_REDRAW_REQUIRED_CALLBACK:-}"
-  local loopDelay="${_OPTION_LOOP_DELAY:-0.5}"
-  local _TUI_TRACK_MOUSE_BUTTON_ONLY="${_OPTION_TRACK_MOUSE_BUTTON_ONLY:-false}"
+  local onEachLoopIterationFunction="${onEachLoopIterationCallback:-}"
+  local onRedrawRequiredFunction="${onRedrawRequiredCallback:-}"
+  local loopDelay="${loopDelay:-0.5}"
+  local _TUI_TRACK_MOUSE_BUTTON_ONLY="${trackMouseButtonOnly:-false}"
   local _TUI_KEY_BINDINGS_PREFIX=":"
 
   if ! declare -F "${onKeyPressFunction}" &>/dev/null; then

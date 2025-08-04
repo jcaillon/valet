@@ -92,7 +92,7 @@ function selfConfig::getFileContent() {
 
   # loop through lines of libraries.d/config.md
   local line variableName skipNextLine=false
-  while IFS= read -r line || [[ -n ${line:-} ]]; do
+  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
     if [[ ${skipNextLine} == "true" || ${line} == "<!--"* ]]; then
       skipNextLine="false"
       continue

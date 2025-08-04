@@ -293,14 +293,13 @@ function interactive::displayDialogBox() {
     textWidth=${#text}
   fi
 
-  string::wrapWords text "${textWidth}"
+  string::wrapWords text width="${textWidth}"
   local wrappedText="${REPLY}"
 
   local finalString line sideString
   local -i lineNumber=0 maxLineLength=0
-  local IFS=$'\n'
 
-  while read -r line; do
+  while IFS=$'\n' read -r line; do
     if (( ${#line} > maxLineLength )); then
       maxLineLength=${#line}
     fi
@@ -319,7 +318,7 @@ function interactive::displayDialogBox() {
     startColumn+=1
 
     finalString+="${ESC__CURSOR_MOVE__}${startColumn}${__ESC__COLUMN}${STYLE_FRAMES}${SYMBOL_TL_CORNER}─${frameBorder}─${SYMBOL_TR_CORNER}${STYLE_RESET}"$'\n'
-    while read -r line; do
+    while IFS=$'\n' read -r line; do
       if (( lineNumber == 0 )); then
         sideString="├──░"
       else
@@ -333,7 +332,7 @@ function interactive::displayDialogBox() {
   elif [[ ${speaker} == "system" ]]; then
 
     finalString+="   ${STYLE_FRAMES}${SYMBOL_TL_CORNER}─${frameBorder}─${SYMBOL_TR_CORNER}${STYLE_RESET}"$'\n'
-    while read -r line; do
+    while IFS=$'\n' read -r line; do
       if (( lineNumber == 0 )); then
         sideString="${STYLE_FRAMES}░──┤"
       else

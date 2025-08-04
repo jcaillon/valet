@@ -165,22 +165,22 @@ function selfTest() {
 
   time::getProgramElapsedMicroseconds
   local runStartTimeInMicroSeconds="${REPLY}"
-  time::convertMicrosecondsToHuman $((REPLY - startTimeInMicroSeconds)) "%S seconds and %l ms"
+  time::convertMicrosecondsToHuman $((REPLY - startTimeInMicroSeconds)) format="%S seconds and %l ms"
   log::info "Found ${#_TEST_TEST_SUITE_NAME[@]} test suites in ⌜${REPLY}⌝."
 
   # run all tests suites
   progress::start
   progress::update 0 "Running test suites."
 
-  _OPTION_MAX_IN_PARALLEL=${_TEST_NB_PARALLEL_TEST_SUITES} \
-  _OPTION_COMPLETED_CALLBACK=selfTest_parallelCallback \
-  _OPTION_PRINT_REDIRECTED_LOGS=true \
-    coproc::runInParallel _TEST_COMMAND
+  coproc::runInParallel _TEST_COMMAND \
+    maxInParallel="${_TEST_NB_PARALLEL_TEST_SUITES}" \
+    completedCallback=selfTest_parallelCallback \
+    printRedirectedLogs=true
 
   progress::stop
 
   time::getProgramElapsedMicroseconds
-  time::convertMicrosecondsToHuman $((REPLY - runStartTimeInMicroSeconds)) "%S seconds and %l ms"
+  time::convertMicrosecondsToHuman $((REPLY - runStartTimeInMicroSeconds)) format="%S seconds and %l ms"
   log::info "Total time running tests: ⌜${REPLY}⌝."
 
   if ((${#_TEST_FAILED_TEST_SUITES[@]} > 0)); then
@@ -224,7 +224,7 @@ function selfTest_addTestSuites() {
   log::debug "Adding all test suites in directory ⌜${testsDotDirectory}⌝."
 
   # make a list of all test suite directories
-  _OPTION_FILTER=selfTest_filterTestSuiteDirectories fs::listPaths "${testsDotDirectory}"
+  fs::listPaths "${testsDotDirectory}" filter=selfTest_filterTestSuiteDirectories
 
   if ((${#REPLY_ARRAY[@]} == 0)); then
     log::info "No matching test suites found in directory ⌜${testsDotDirectory}⌝."
@@ -340,7 +340,7 @@ function selfTest_runSingleTestSuite() {
       treeString="  ╰─"
       treePadding="     "
     fi
-    log::printString "${treeString} ${GLOBAL_TEST_SUITE_SCRIPT_NAME}" "${treePadding}"
+    log::printString "${treeString} ${GLOBAL_TEST_SUITE_SCRIPT_NAME}" newLinePadString="${treePadding}"
 
     # write the test script name
     printf "%s\n\n" "## Test script ${GLOBAL_TEST_SUITE_SCRIPT_NAME%.sh}" >>"${GLOBAL_TEST_REPORT_FILE}"
@@ -349,7 +349,7 @@ function selfTest_runSingleTestSuite() {
     # This way each test script can define any vars or functions without polluting
     # the global execution of the tests.
     bash::runInSubshell selfTest_runSingleTest "${testScript}" "${testUserDataDirectory}"
-    local exitCode="${REPLY}"
+    local exitCode="${REPLY_CODE}"
 
     if (( exitCode != 0 )); then
       # Handle an error that occurred in the test script.
@@ -365,41 +365,22 @@ function selfTest_runSingleTestSuite() {
       if ((exitCode == GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS)); then
         # the function test::fail was called, there was a coding mistake in the test script that we caught
         fs::readFile "${GLOBAL_TEST_LOG_FILE}"
-        log::error "The test script ⌜${testScript##*/}⌝ failed because an error was explicitly thrown in the test script:" \
-          "" \
-          "${REPLY}" \
-          "test::fail called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
+        log::error "The test script ⌜${testScript##*/}⌝ failed because an error was explicitly thrown in the test script:"$'\n\n'"${REPLY}"$'\n\n'"test::fail called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
         log::printCallStack 0 10
 
       elif [[ -n ${GLOBAL_STACK_FUNCTION_NAMES_ERR:-} ]]; then
-        log::error "The test script ⌜${testScript##*/}⌝ had an error and exited with code ⌜${exitCode}⌝." \
-          "Test scripts will exit if a command ends with an error (shell option to exit on error)." \
-          "" \
-          "If you expect a tested function or command to fail, use one of these two methods to display the failure without exiting the script:" \
-          "" \
-          "- ⌜myCommandThatFails || echo 'failed as expected with code \$?'⌝" \
-          "- ⌜test::exec myCommandThatFails⌝" \
-          "" \
-          "Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
+        log::error "The test script ⌜${testScript##*/}⌝ had an error and exited with code ⌜${exitCode}⌝."$'\n'"Test scripts will exit if a command ends with an error (shell option to exit on error)."$'\n\n'"If you expect a tested function or command to fail, use one of these two methods to display the failure without exiting the script:"$'\n\n'"- ⌜myCommandThatFails || echo 'failed as expected with code \$?'⌝"$'\n'"- ⌜test::exec myCommandThatFails⌝"$'\n\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
         GLOBAL_STACK_FUNCTION_NAMES=("${GLOBAL_STACK_FUNCTION_NAMES_ERR[@]}")
         GLOBAL_STACK_SOURCE_FILES=("${GLOBAL_STACK_SOURCE_FILES_ERR[@]}")
         GLOBAL_STACK_LINE_NUMBERS=("${GLOBAL_STACK_LINE_NUMBERS_ERR[@]}")
         log::printCallStack 1 10
       else
-        log::error "The test script ⌜${testScript##*/}⌝ exited with code ⌜${exitCode}⌝." \
-          "Test scripts must not exit or return an error (shell options are set to exit on error)." \
-          "" \
-          "If you expect a tested function or command to exit, run it in a subshell using one of these two methods:" \
-          "" \
-          "- ⌜(myCommandThatFails) || echo 'failed as expected with code \${PIPESTATUS[0]:-}'⌝" \
-          "- ⌜test::exit myCommandThatFails⌝" \
-          "" \
-          "Exited in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
+        log::error "The test script ⌜${testScript##*/}⌝ exited with code ⌜${exitCode}⌝."$'\n'"Test scripts must not exit or return an error (shell options are set to exit on error)."$'\n\n'"If you expect a tested function or command to exit, run it in a subshell using one of these two methods:"$'\n\n'"- ⌜(myCommandThatFails) || echo 'failed as expected with code \${PIPESTATUS[0]:-}'⌝"$'\n'"- ⌜test::exit myCommandThatFails⌝"$'\n\n'"Exited in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
         log::printCallStack 1 10
       fi
 
       # exit with an error if there were errors in the test scripts
-      _OPTION_SILENT=true exit 1
+      core::exit 1 silent=true
 
     elif [[ -s "${GLOBAL_TEST_STANDARD_OUTPUT_FILE}" || -s "${GLOBAL_TEST_STANDARD_ERROR_FILE}" ]]; then
       selfTestUtils_displayTestLogs
@@ -407,7 +388,7 @@ function selfTest_runSingleTestSuite() {
       log::error "The test script had un-flushed when it ended."$'\n'$'\n'"Everything that gets printed to the standard or error output during a test must be flushed to the report. You can use ⌜test::flush⌝ to do that (or other test functions)."$'\n'$'\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
 
       # exit with an error if there were errors in the test scripts
-      _OPTION_SILENT=true exit 1
+      core::exit 1 silent=true
     fi
 
     nbScriptsDone+=1
@@ -416,13 +397,13 @@ function selfTest_runSingleTestSuite() {
   # compare the test suite outputs with the approved files
   if ! selfTestUtils_compareWithApproved "${GLOBAL_TEST_SUITE_DIRECTORY}" "${GLOBAL_TEST_REPORT_FILE}"; then
     selfTestUtils_displayTestLogs
-    _OPTION_SILENT=true exit "${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}"
+    core::exit "${GLOBAL_TEST_APPROVAL_FAILURE_STATUS}" silent=true
   fi
 
   if log::isDebugEnabled; then
     selfTestUtils_displayTestLogs
   fi
-  _OPTION_SILENT=true exit 0
+  core::exit 0 silent=true
 }
 
 # ## selfTest_runSingleTest

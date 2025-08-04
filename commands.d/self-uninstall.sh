@@ -61,7 +61,6 @@ rm -f "'"$(which valet)"'" 2>/dev/null || :
 echo "Valet has been uninstalled."
 '
   else
-    log::warning "To uninstall Valet, you can run the following commands:"$'\n' \
-      "bash -c 'eval \"\$(valet self uninstall --script 2>/dev/null)\"'"
+    log::warning "To uninstall Valet, you can run the following commands:"$'\n'"bash -c 'eval \"\$(valet self uninstall --script 2>/dev/null)\"'"
   fi
 }

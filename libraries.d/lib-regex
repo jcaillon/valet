@@ -48,11 +48,11 @@ function regex::getFirstGroup() {
 #       Use \x to refer to the x-th capture group.
 #       Use \c to refer to replacement counter.
 # - $4: max count _as int_:
-#       (optional) Can be set using the variable `_OPTION_MAX_COUNT`.
+#       (optional) Can be set using the variable `maxCount`.
 #       The number of replacements to do.
 #       (default to -1, which is unlimited)
 # - $5: only matches _as bool_:
-#       (optional) Can be set using the variable `_OPTION_ONLY_MATCHES`.
+#       (optional) Can be set using the variable `onlyMatches`.
 #       Instead of replacing with the regex, we keep only the matches.
 #       This can be used to extract information from a string.
 #       (default to false)
@@ -71,8 +71,8 @@ function regex::getFirstGroup() {
 function regex::replace() {
   local -n stringInWhichToReplace="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local regex="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i maxCount="${4:-${_OPTION_MAX_COUNT:-"-1"}}"
-  local onlyMatches="${5:-${_OPTION_ONLY_MATCHES:-"false"}}"
+  local -i maxCount="${4:-${maxCount:-"-1"}}"
+  local onlyMatches="${5:-${onlyMatches:-"false"}}"
   if (( maxCount == 0 )); then
     if [[ ${onlyMatches} == "true" ]]; then
       REPLY=""
@@ -131,13 +131,13 @@ function regex::replace() {
 # - $2: **regex** _as string_:
 #       The regex to use for the match.
 # - $3: replacement _as string_:
-#       (optional) Can be set using the variable `_OPTION_REPLACEMENT`.
+#       (optional) Can be set using the variable `replacement`.
 #       The replacement string to use on each match.
 #       Use \x to refer to the x-th capture group.
 #       Use \c to refer to replacement counter.
 #       (default to "", which means no changes will be done on the matches)
 # - $4: max count _as int_:
-#       (optional) Can be set using the variable `_OPTION_MAX_COUNT`.
+#       (optional) Can be set using the variable `maxCount`.
 #       The number of matches to return.
 #       (default to -1, which is unlimited)
 #
@@ -157,8 +157,8 @@ function regex::replace() {
 function regex::getMatches() {
   local -n stringInWhichToMatch="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local regex="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local replacement="${3:-${_OPTION_REPLACEMENT:-""}}"
-  local -i maxCount="${4:-${_OPTION_MAX_COUNT:-"-1"}}"
+  local replacement="${3:-${replacement:-""}}"
+  local -i maxCount="${4:-${maxCount:-"-1"}}"
 
   REPLY_ARRAY=()
 

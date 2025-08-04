@@ -68,7 +68,7 @@ function command_parseProgramArgumentsSwitch() {
   case "${1}" in
   --source)
     printf '%s' "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
-    _OPTION_SILENT=true exit 0
+    core::exit 0 silent=true
     ;;
   --profiler)
     VALET_PROFILING=true
@@ -93,11 +93,11 @@ function command_parseProgramArgumentsSwitch() {
   --version)
     core::getVersion
     printf '%s\n' "${REPLY}"
-    _OPTION_SILENT=true exit 0
+    core::exit 0 silent=true
     ;;
   -h | --help)
     command::printHelp function "this"
-    _OPTION_SILENT=true exit 0
+    core::exit 0 silent=true
     ;;
   --)
     REPLY=-1
@@ -1113,7 +1113,7 @@ function command::getHelpText() {
   local -n functionExamples="CMD_EXAMPLES_NAME_${functionName}"
 
   # description
-  string::wrapWords description "${helpWidth}" "  " "$((helpWidth - 2))"
+  string::wrapWords description width="${helpWidth}" newLinePadString="  " firstLineWidth="$((helpWidth - 2))"
   local wrappedDescription="  ${REPLY}"
 
   # usage
@@ -1145,7 +1145,7 @@ function command::getHelpText() {
     fi
   fi
   REPLY2="${usage}"
-  string::wrapWords usage "${helpWidth}" "  " "$((helpWidth - 2))"
+  string::wrapWords usage width="${helpWidth}" newLinePadString="  " firstLineWidth="$((helpWidth - 2))"
   usage="  ${REPLY}"
 
   # global options
@@ -1222,10 +1222,10 @@ function command_writeAsTable() {
 
   output=""
   for index in "${!names[@]}"; do
-    string::wrapWords "names[${index}]" "${width}" "  " "$((width - 2))"
+    string::wrapWords "names[${index}]" width="${width}" newLinePadString="  " firstLineWidth="$((width - 2))"
     output+="  ${color}${REPLY}${STYLE_RESET:-}"$'\n'
 
-    string::wrapWords "descriptions[${index}]" "${width}" "      " "$((width - 6))"
+    string::wrapWords "descriptions[${index}]" width="${width}" newLinePadString="      " firstLineWidth="$((width - 6))"
     output+="      ${REPLY}"$'\n'
   done
 

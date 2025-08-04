@@ -15,7 +15,7 @@ This should not fail
 Returned variables:
 
 ```text
-REPLY='0'
+REPLY_CODE='0'
 ```
 
 ❯ `_OPTION_REPLY_DISABLED=false bash::catchErrors false`
@@ -25,7 +25,7 @@ Returned code: `1`
 Returned variables:
 
 ```text
-REPLY='1'
+REPLY_CODE='1'
 ```
 
 ❯ `bash::catchErrors false`
@@ -77,7 +77,7 @@ INFO     hello
 Returned variables:
 
 ```text
-REPLY='0'
+REPLY_CODE='0'
 ```
 
 ❯ `bash::runInSubshell subshellThatFails`
@@ -95,10 +95,10 @@ CMDERR   Error code ⌜1⌝ for the command:
 Returned variables:
 
 ```text
-REPLY='1'
+REPLY_CODE='1'
 ```
 
-❯ `_OPTION_LOG_ON_ERROR_EXIT=true bash::runInSubshell subshellThatFails`
+❯ `logOnErrorExit=true bash::runInSubshell subshellThatFails`
 
 **Error output**:
 
@@ -113,12 +113,10 @@ CMDERR   Error code ⌜1⌝ for the command:
 Returned variables:
 
 ```text
-REPLY='1'
+REPLY_CODE='1'
 ```
 
-❯ `_OPTION_EXIT_ON_FAIL=true bash::runInSubshell subshellThatFails`
-
-Exited with code: `1`
+❯ `exitOnFail=true bash::runInSubshell subshellThatFails`
 
 **Error output**:
 
@@ -135,7 +133,7 @@ CMDERR   Error code ⌜1⌝ for the command:
 Returned variables:
 
 ```text
-REPLY='2'
+REPLY_CODE='2'
 ```
 
 ### ✅ Testing bash::isFdValid
@@ -249,7 +247,7 @@ simpleFunction ()
 }
 ```
 
-❯ `bash::injectCodeInFunction simpleFunction echo\ \'injected\ at\ the\ beginning\!\' true`
+❯ `bash::injectCodeInFunction simpleFunction echo\ \'injected\ at\ the\ beginning\!\' injectAtBeginning=true`
 
 ❯ `echo ${REPLY}; echo ${REPLY2};`
 
@@ -401,6 +399,7 @@ Returned code: `1`
 Returned variables:
 
 ```text
+REPLY_CODE='0'
 REPLY='coucou
 '
 ```
@@ -410,17 +409,27 @@ REPLY='coucou
 Returned variables:
 
 ```text
+REPLY_CODE='0'
 REPLY='bash::getBuiltinOutput () 
 { 
     local IFS='"'"' '"'"';
-    "${@}" &> "${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1;
     REPLY="";
-    IFS='"'"''"'"' read -rd '"'"''"'"' REPLY < "${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+    if "${@}" &> "${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
+        IFS='"'"''"'"' read -rd '"'"''"'"' REPLY < "${GLOBAL_TEMPORARY_STDOUT_FILE}" || :;
+        REPLY_CODE=0;
+    else
+        REPLY_CODE=$?;
+    fi
 }
 '
 ```
 
 ❯ `bash::getBuiltinOutput false`
 
-Returned code: `1`
+Returned variables:
+
+```text
+REPLY_CODE='1'
+REPLY=''
+```
 

@@ -50,7 +50,7 @@ function selfMock1() {
     core::fail "This is for testing valet core functions, failing now."
     ;;
   fail2)
-    _OPTION_EXIT_CODE=255 core::fail "This is for testing valet core functions, failing now with exit code 255."
+    core::fail "This is for testing valet core functions, failing now with exit code 255." exitCode=255
     ;;
   exit)
     # shellcheck disable=SC2317

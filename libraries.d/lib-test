@@ -26,7 +26,7 @@ function test::log() {
 # Call this function to add an H3 title in the report file.
 #
 # - $1: title _as string_:
-#       (optional) Can be set using the variable `_OPTION_TITLE`.
+#       (optional) Can be set using the variable `title`.
 #       The title of the test.
 #      (defaults to "Test")
 #
@@ -34,7 +34,7 @@ function test::log() {
 # test::title "Testing something"
 # ```
 function test::title() {
-  printf "%s\n\n" "### ${1:-${_OPTION_TITLE:-"Test"}}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf "%s\n\n" "### ${1:-${title:-"Test"}}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
 # ## test::markdown
@@ -133,8 +133,9 @@ function test::exit() {
 # ```
 # shellcheck disable=SC2034
 function test_exec() {
-  local canExit="${1}"
-  local printReturnedValues="${2}"
+  local \
+    canExit="${1}" \
+    printReturnedValues="${2}"
   shift 2
 
   if (($# == 0)); then
@@ -152,7 +153,7 @@ function test_exec() {
       # the argument is empty, make sure it is quoted
       params[index]="''"
     fi
-    if [[ ${param:0:1} == [\"\'] && ${param:${#param} - 1} == [\"\'] ]]; then
+    if [[ ${param:0:1} == [\"\'] && ${param:${#param}-1} == [\"\'] ]]; then
       # the argument was quoted by the user, leave it as is
       continue
     fi
@@ -163,7 +164,6 @@ function test_exec() {
     fi
   done
   compoundCommand="${params[*]}"
-
 
   local GLOBAL_TEST_OUTPUT_CONTENT="${compoundCommand}"
   if declare -F test::scrubOutput &>/dev/null; then
@@ -178,12 +178,8 @@ function test_exec() {
   fi
 
   if [[ ${printReturnedValues} == "true" ]]; then
-    local REPLY
-    local REPLY2
-    local REPLY3
-    local REPLY4
-    local -a REPLY_ARRAY
-    local -a REPLY_ARRAY2
+    local REPLY_CODE REPLY REPLY2 REPLY3 REPLY4
+    local -a REPLY_ARRAY REPLY_ARRAY2
     local -A REPLY_ASSOCIATIVE_ARRAY
   fi
 
@@ -194,7 +190,7 @@ function test_exec() {
   local -i exitCode=0
   if [[ ${canExit} == "true" ]]; then
     bash::runInSubshell eval "${compoundCommand}"
-    exitCode=${REPLY}
+    exitCode=${REPLY_CODE}
   else
     _OPTION_REPLY_DISABLED=true \
       bash::catchErrors eval "${compoundCommand}"
@@ -233,7 +229,7 @@ function test::printReplyVars() {
     test::scrubReplyVars
   fi
   local IFS=$'\n' key varName GLOBAL_TEST_OUTPUT_CONTENT=""
-  for varName in REPLY REPLY2 REPLY3 REPLY4; do
+  for varName in REPLY_CODE REPLY REPLY2 REPLY3 REPLY4; do
     if [[ -v ${varName} ]]; then
       GLOBAL_TEST_OUTPUT_CONTENT+="${varName}='${!varName//\'/\'\"\'\"\'}'"$'\n'
     fi
@@ -249,7 +245,7 @@ function test::printReplyVars() {
     fi
   done
   if [[ -v REPLY_ASSOCIATIVE_ARRAY && -v REPLY_ASSOCIATIVE_ARRAY[@] ]]; then
-      GLOBAL_TEST_OUTPUT_CONTENT+="REPLY_ASSOCIATIVE_ARRAY=("$'\n'
+    GLOBAL_TEST_OUTPUT_CONTENT+="REPLY_ASSOCIATIVE_ARRAY=("$'\n'
     for key in "${!REPLY_ASSOCIATIVE_ARRAY[@]}"; do
       GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${REPLY_ASSOCIATIVE_ARRAY[${key}]//\'/\'\"\'\"\'}'"$'\n'
     done
@@ -291,10 +287,12 @@ function test::resetReplyVars() {
 function test::printVars() {
   local IFS=$'\n'
   local chunk varName
-  if ! bash::getBuiltinOutput declare -p "${@}"; then
+  bash::getBuiltinOutput declare -p "${@}"
+  if ((REPLY_CODE != 0)) ; then
     local varName
     for varName in "${@}"; do
-      if ! bash::getBuiltinOutput declare -p "${varName}"; then
+      bash::getBuiltinOutput declare -p "${varName}"
+      if ((REPLY_CODE != 0)); then
         IFS=' '
         test::fail "Variable ⌜${varName}⌝ does not exist, could not execute ⌜test::printVars $*⌝."
       fi
@@ -303,7 +301,7 @@ function test::printVars() {
   GLOBAL_TEST_OUTPUT_CONTENT=""
   while [[ -n ${REPLY} ]]; do
     chunk="${REPLY%%$'\n'*}"
-    REPLY="${REPLY:${#chunk} + 1}"
+    REPLY="${REPLY:${#chunk}+1}"
 
     if [[ ${chunk} =~ "declare -"[aA][ilnrtux]*" "([^=]+)"=" ]]; then
       # we print an array
@@ -337,7 +335,7 @@ function test::printVars() {
 # - $1: **file descriptor number** _as int_:
 #       The file descriptor number to flush (1 or 2).
 # - $2: blockTitle _as string_:
-#       (optional) Can be set using the variable `_OPTION_BLOCK_TITLE`.
+#       (optional) Can be set using the variable `blockTitle`.
 #       Add a 'title' to the code block (`**title**:` before the code block).
 #       (defaults to '' which will not add a title)
 #
@@ -346,7 +344,7 @@ function test::printVars() {
 # ```
 function test_flushFdToCodeBlock() {
   local -i GLOBAL_TEST_FD_NUMBER="${1}"
-  local blockTitle="${2:-${_OPTION_BLOCK_TITLE:-}}"
+  local blockTitle="${2:-${blockTitle:-}}"
   local file
   if ((GLOBAL_TEST_FD_NUMBER == 1)); then
     file="${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
@@ -376,7 +374,7 @@ function test_flushFdToCodeBlock() {
   exec {GLOBAL_TEST_FD_NUMBER}>&-
   : >"${file}"
   eval "exec ${GLOBAL_TEST_FD_NUMBER}>>\"${file}\""
-  if (( GLOBAL_TEST_FD_NUMBER == 2 )); then
+  if ((GLOBAL_TEST_FD_NUMBER == 2)); then
     # since we changed fd2, we also need to redeclare fd that point to fd2
     exec {GLOBAL_FD_LOG}>&-
     exec {GLOBAL_FD_LOG}>&2
@@ -434,7 +432,7 @@ function test::flush() {
 # It will be added as a code block in the report file.
 #
 # - $1: blockTitle _as string_:
-#       (optional) Can be set using the variable `_OPTION_BLOCK_TITLE`.
+#       (optional) Can be set using the variable `blockTitle`.
 #       Add a 'title' to the code block (`**title**:` before the code block).
 #       (defaults to '' which will not add a title)
 #
@@ -442,7 +440,7 @@ function test::flush() {
 # test::flushStdout
 # ```
 function test::flushStdout() {
-  test_flushFdToCodeBlock 1 "${1:-${_OPTION_BLOCK_TITLE:-}}"
+  test_flushFdToCodeBlock 1 "${1:-${blockTitle:-}}"
 }
 
 # ## test::flushStderr
@@ -451,7 +449,7 @@ function test::flushStdout() {
 # It will be added as a code block in the report file.
 #
 # - $1: blockTitle _as string_:
-#       (optional) Can be set using the variable `_OPTION_BLOCK_TITLE`.
+#       (optional) Can be set using the variable `blockTitle`.
 #       Add a 'title' to the code block (`**title**:` before the code block).
 #       (defaults to '' which will not add a title)
 #
@@ -459,7 +457,7 @@ function test::flushStdout() {
 # test::flushStderr
 # ```
 function test::flushStderr() {
-  test_flushFdToCodeBlock 2 "${1:-${_OPTION_BLOCK_TITLE:-}}"
+  test_flushFdToCodeBlock 2 "${1:-${blockTitle:-}}"
 }
 
 # ## test::fail
@@ -483,7 +481,7 @@ function test::fail() {
   test::log "$@"
 
   # shellcheck disable=SC2034
-  _OPTION_SILENT=true exit "${GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS}"
+  core::exit "${GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS}" silent=true
 }
 
 # ## test::setTerminalInputs
@@ -547,4 +545,3 @@ function test::setTestCallStack() {
 function test::unsetTestCallStack() {
   unset -v GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS
 }
-

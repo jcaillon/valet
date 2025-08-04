@@ -26,22 +26,26 @@ source time
 #       the name of the function to use as baseline
 # - $@: functions _as string_:
 #       The names of the functions to benchmark, comma separated.
-# - ${_OPTION_TIME} _as int_:
+# - ${baselineTime} _as int_:
 #       (optional) The time in seconds for which to run the baseline.
 #       (defaults to 3s)
-# - ${_OPTION_MAX_RUNS} _as int_:
+# - ${maxRuns} _as int_:
 #       (optional) The maximum number of runs to do for each function.
 #       (defaults to -1 which means no limit)
 #
 # ```bash
 # benchmark::run baseline function1 function2
-# _OPTION_TIME=10 benchmark::run baseline function1 function2
+# benchmark::run baseline function1 function2 --- baselineTime=5 maxRuns=100
 # ```
 function benchmark::run() {
-  local baseline="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  shift
-  local time="${_OPTION_TIME:-3}"
-  local maxRuns="${_OPTION_MAX_RUNS:--1}"
+  local \
+    baseline="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    baselineTime=3 \
+    maxRuns=-1 \
+    IFS=$' '
+  shift 1
+  core::parseShellParameters "${@}"
+  eval "${REPLY}"
 
   # check functions
   if ! declare -F "${baseline}" >/dev/null; then
@@ -65,7 +69,7 @@ function benchmark::run() {
   local -A functionsElapsed
 
   # Run the baseline
-  progress::start "<spinner> Running the baseline ⌜${baseline}⌝ for ⌜${time}s⌝."
+  progress::start "<spinner> Running the baseline ⌜${baseline}⌝ for ⌜${baselineTime}s⌝."
 
   time::getProgramElapsedMicroseconds
   local startTimeInUs="${REPLY}"
@@ -76,7 +80,7 @@ function benchmark::run() {
   for ((baselineRuns = 1; (baselineRuns <= maxRuns || maxRuns == -1); baselineRuns++)); do
     "${baseline}"
     time::getProgramElapsedMicroseconds
-    if (( REPLY - startTimeInUs > time * 1000000 )); then
+    if (( REPLY - startTimeInUs > baselineTime * 1000000 )); then
       break
     fi
   done
@@ -85,7 +89,7 @@ function benchmark::run() {
 
   time::getProgramElapsedMicroseconds
   local elapsedTimeInUs=$((REPLY - startTimeInUs))
-  time::convertMicrosecondsToHuman "${elapsedTimeInUs}" '%S.%LL'
+  time::convertMicrosecondsToHuman "${elapsedTimeInUs}" format='%S.%LL'
   log::info "The baseline ⌜${baseline}⌝ was initially run ⌜${baselineRuns}⌝ times in ⌜${REPLY}s⌝."
 
   # Run the other functions
@@ -103,7 +107,7 @@ function benchmark::run() {
       time::getProgramElapsedMicroseconds
       local elapsedTimeInUs=$((REPLY - startTimeInUs))
       functionsElapsed["${function}"]="${elapsedTimeInUs}"
-      time::convertMicrosecondsToHuman "${elapsedTimeInUs}" %S.%LL
+      time::convertMicrosecondsToHuman "${elapsedTimeInUs}" format=%S.%LL
       log::info "The function ⌜${function}⌝ was run ⌜${runs}⌝ times in ⌜${REPLY}s⌝."
 
       progress::stop
@@ -122,7 +126,7 @@ function benchmark::run() {
   time::getProgramElapsedMicroseconds
   local elapsedTimeInUs=$((REPLY - startTimeInUs))
   functionsElapsed["${baseline}"]="${elapsedTimeInUs}"
-  time::convertMicrosecondsToHuman "${elapsedTimeInUs}" %S.%LL
+  time::convertMicrosecondsToHuman "${elapsedTimeInUs}" format=%S.%LL
   log::info "The function ⌜${baseline}⌝ was run ⌜${runs}⌝ times in ⌜${REPLY}s⌝."
 
   progress::stop
@@ -144,7 +148,7 @@ function benchmark::run() {
   for function in "${_BENCHMARK_FUNCTIONS[@]}"; do
     local averageTime="$((functionsElapsed[${function}] / baselineRuns))"
     local percentSlowerThanFastest="+$(( (functionsElapsed[${function}] - fastestElapsed) * 100 / fastestElapsed ))%"
-    time::convertMicrosecondsToHuman "${averageTime}" "%S.%LLs %UUµs"
+    time::convertMicrosecondsToHuman "${averageTime}" format="%S.%LLs %UUµs"
     if (( index == 0 )); then
       percentSlowerThanFastest="N/A"
     fi

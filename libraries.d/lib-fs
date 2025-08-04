@@ -7,11 +7,11 @@
 # This function returns the absolute path of a path.
 #
 # If the path exists, it can be resolved to the real path, following symlinks,
-# using the option `_OPTION_REALPATH=true`.
+# using the option `realpath=true`.
 #
 # - $1: **path** _as string_:
 #       The path to translate to absolute path.
-# - ${_OPTION_REALPATH} _as bool_:
+# - ${realpath} _as bool_:
 #       (optional) true to resolve the path to the real path, following symlinks.
 #       (defaults to false)
 #
@@ -21,14 +21,21 @@
 #
 # ```bash
 # fs::toAbsolutePath "myPath"
-# local myPathAbsolutePath="${REPLY}"
+# fs::toAbsolutePath "myPath" realpath=true
+# echo "${REPLY}"
 # ```
 #
 # > This is a pure bash alternative to `realpath` or `readlink`.
 # > The `..` will be processed before following any symlinks, by removing
 # > the immediate pathname component.
 function fs::toAbsolutePath() {
-  local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local \
+    path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    realpath="false" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
   path="${path%/}"
 
   # if path starts with ~, we replace it with the home directory
@@ -38,7 +45,7 @@ function fs::toAbsolutePath() {
 
   # check if the path is an existing directory
   if cd "${path}" &>/dev/null; then
-    if [[ ${_OPTION_REALPATH:-} == "true" ]]; then
+    if [[ ${realpath:-} == "true" ]]; then
       fs::getPwdRealPath
     else
       REPLY="${PWD}"
@@ -49,7 +56,7 @@ function fs::toAbsolutePath() {
 
   # check if the path is an existing file
   if cd "${path%/*}" &>/dev/null; then
-    if [[ ${_OPTION_REALPATH:-} == "true" ]]; then
+    if [[ ${realpath:-} == "true" ]]; then
       fs::getPwdRealPath
       REPLY="${REPLY}/${path##*/}"
     else
@@ -60,7 +67,7 @@ function fs::toAbsolutePath() {
   fi
 
   local currentDirectoryPath
-  if [[ ${_OPTION_REALPATH:-} == "true" ]]; then
+  if [[ ${realpath:-} == "true" ]]; then
     fs::getPwdRealPath
     currentDirectoryPath="${REPLY}"
   else
@@ -87,6 +94,7 @@ function fs::toAbsolutePath() {
 #
 # ```bash
 # fs::getPwdRealPath
+# echo "${REPLY}"
 # ```
 #
 # Returns:
@@ -97,7 +105,6 @@ function fs::toAbsolutePath() {
 function fs::getPwdRealPath() {
   local IFS=''
   pwd -P &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"
-  REPLY=""
   IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
   REPLY="${REPLY%[[:space:]]}"
 }
@@ -109,9 +116,8 @@ function fs::getPwdRealPath() {
 #
 # - $1: **path** _as string_:
 #       the file path to read
-# - $2: max char _as int_:
-#       (optional) Can be set using the variable `_OPTION_MAX_CHAR`.
-#       the maximum number of characters to read
+# - ${maxCharacters} _as int_:
+#       (optional) the maximum number of characters to read
 #       (defaults to 0, which means read the whole file)
 #
 # > If the file does not exist, the function will return an empty string instead of failing.
@@ -121,20 +127,23 @@ function fs::getPwdRealPath() {
 # - ${REPLY}: The content of the file.
 #
 # ```bash
-# fs::readFile "/path/to/file" && local fileContent="${REPLY}"
-# fs::readFile "/path/to/file" 500 && local fileContent="${REPLY}"
+# fs::readFile /path/to/file
+# fs::readFile /path/to/file maxCharacters=100
+# echo "${REPLY}"
 # ```
 function fs::readFile() {
-  local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i maxCharacters="${2:-${_OPTION_MAX_CHAR:-0}}"
+  local \
+    filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    maxCharacters="0" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
 
   if [[ ! -s "${filePath}" ]]; then
     REPLY=""
     return 0
   fi
 
-  REPLY=""
-  local IFS=''
   if [[ "${maxCharacters}" -gt 0 ]]; then
     read -rd '' -n "${maxCharacters}" REPLY <"${filePath}" || [[ -n ${REPLY} ]]
   else
@@ -154,25 +163,32 @@ function fs::readFile() {
 #       the file path to write
 # - $2: **content** _as string_:
 #       The variable containing the content to write.
-# - $3: append _as bool_:
-#       (optional) Can be set using the variable `_OPTION_APPEND`.
-#       true to append the content to the file, false otherwise
+# - ${append} _as bool_:
+#       (optional) true to append the content to the file, false otherwise
 #       (defaults to false)
 #
 # ```bash
-# fs::writeToFile "/path/to/file" "content"
+# fs::writeToFile /path/to/file content
+# fs::writeToFile /path/to/file content append=true
 # ```
 #
 # > - This function will overwrite the file if it already exists.
 # > - If the file path does not exist, the function will create the directory tree.
 # > - The main use case is to be able to mock this function during tests...
 function fs::writeToFile() {
+  local \
+    filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    append="false" \
+    IFS=$' '
   local -n contentToWriteInFile="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  fs::createFileIfNeeded "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  if [[ ${3:-${_OPTION_APPEND:-false}} == "true" ]]; then
-    printf '%s' "${contentToWriteInFile}" >>"${1}"
+  shift 2
+  eval "local a= ${*@Q}"
+
+  fs::createFileIfNeeded "${filePath}"
+  if [[ ${append} == "true" ]]; then
+    printf '%s' "${contentToWriteInFile}" >>"${filePath}"
   else
-    printf '%s' "${contentToWriteInFile}" >"${1}"
+    printf '%s' "${contentToWriteInFile}" >"${filePath}"
   fi
 }
 
@@ -189,6 +205,7 @@ function fs::writeToFile() {
 #
 # ```bash
 # fs::createDirectoryIfNeeded "/my/directory"
+# echo "${REPLY}"
 # ```
 function fs::createDirectoryIfNeeded() {
   fs::toAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -221,6 +238,7 @@ function fs::createDirectoryIfNeeded() {
 #
 # ```bash
 # fs::createFileIfNeeded "myFile"
+# echo "${REPLY}"
 # ```
 function fs::createFileIfNeeded() {
   fs::toAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -249,7 +267,7 @@ function fs::createFileIfNeeded() {
 #       the file to print
 #
 # ```bash
-# fs::cat "myFile"
+# fs::cat myFile
 # ```
 #
 # > Also see log::printFile if you want to print a file for a user.
@@ -267,29 +285,34 @@ function fs::cat() {
 #       The file to print.
 # - $2: **number of lines** _as int_:
 #       The number of lines to print.
-# - $3: to variable _as bool_:
-#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.
-#       If true, the output will be stored in the variable `REPLY_ARRAY`
+# - ${toArray} _as bool_:
+#       (optional) If true, the output will be stored in the variable `REPLY_ARRAY`
 #       instead of being printed to stdout.
 #       (defaults to false)
 #
 # ```bash
-# fs::head "myFile" 10
+# fs::head myFile 10
+# fs::head myFile 10 toArray=true
 # ```
 #
 # > #TODO: faster with mapfile + quantum?
 function fs::head() {
-  local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i numberOfLines="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local toVariable="${3:-${_OPTION_TO_VARIABLE:-false}}"
+  local \
+    filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    numberOfLines="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    toArray="false" \
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
+
   REPLY_ARRAY=()
-  local IFS=$'\n' line
-  nb=0
-  while read -rd $'\n' line || [[ -n ${line:-} ]]; do
+  local line
+  local -i nb=0
+  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
     if ((nb++ >= numberOfLines)); then
       break
     fi
-    if [[ ${toVariable} == "true" ]]; then
+    if [[ ${toArray} == "true" ]]; then
       REPLY_ARRAY+=("${line}")
     else
       printf '%s\n' "${line}"
@@ -307,30 +330,33 @@ function fs::head() {
 #       The file to print.
 # - $2: **number of lines** _as int_:
 #       The number of lines to print from the end of the file.
-# - $3: to variable _as bool_:
-#       (optional) Can be set using the variable `_OPTION_TO_VARIABLE`.
-#       If true, the output will be stored in the variable `REPLY_ARRAY`
+# - ${toArray} _as bool_:
+#       (optional) If true, the output will be stored in the variable `REPLY_ARRAY`
 #       instead of being printed to stdout.
 #       (defaults to false)
 #
 # ```bash
-# fs::tail "myFile" 10
+# fs::tail myFile 10
 # ```
 #
 # > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 function fs::tail() {
-  local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i numberOfLines="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local toVariable="${3:-${_OPTION_TO_VARIABLE:-false}}"
+  local \
+    filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    numberOfLines="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    toArray="false" \
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
+
   REPLY_ARRAY=()
-  local IFS=$'\n'
   local -a lines
-  mapfile -d $'\n' -t lines <"${filePath}"
-  local -i startLine=$(( ${#lines[@]} - numberOfLines ))
+  mapfile -t lines <"${filePath}"
+  local -i startLine=$((${#lines[@]} - numberOfLines))
   if [[ ${startLine} -lt 0 ]]; then
     startLine=0
   fi
-  if [[ ${toVariable} == "true" ]]; then
+  if [[ ${toArray} == "true" ]]; then
     REPLY_ARRAY=("${lines[@]:${startLine}}")
   else
     printf '%s\n' "${lines[@]:${startLine}}"
@@ -343,23 +369,19 @@ function fs::tail() {
 #
 # - $1: **directory** _as string_:
 #       the directory to list
-# - $2: recursive _as bool_:
-#       (optional) Can be set using the variable `_OPTION_RECURSIVE`.
-#       true to list recursively, false otherwise
+# - ${recursive} _as bool_:
+#       (optional) true to list recursively, false otherwise
 #       (defaults to false)
-# - $3: hidden _as bool_:
-#       (optional) Can be set using the variable `_OPTION_INCLUDE_HIDDEN`.
-#       true to list hidden paths, false otherwise
+# - ${includeHidden} _as bool_:
+#       (optional) true to list hidden paths, false otherwise
 #       (defaults to false)
-# - $4: path filter function name _as string_:
-#       (optional) Can be set using the variable `_OPTION_FILTER`.
-#       a function name that is called to filter the paths that will be listed
+# - ${filter} _as string_:
+#       (optional) A function name that is called to filter the paths that will be listed
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 #       (defaults to empty string, no filter)
-# - $5: directory filter function name _as string_:
-#       (optional) Can be set using the variable `_OPTION_FILTER_DIRECTORY`.
-#       a function name that is called to filter the directories (for recursive listing)
+# - ${filterDirectory} _as string_:
+#       (optional) A function name that is called to filter the directories (for recursive listing)
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 #       (defaults to empty string, no filter)
@@ -377,20 +399,19 @@ function fs::tail() {
 #
 # > - It will correctly list files under symbolic link directories.
 function fs::listPaths() {
-  local directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local recursive="${2:-${_OPTION_RECURSIVE:-false}}"
-  local includeHidden="${3:-${_OPTION_INCLUDE_HIDDEN:-false}}"
-  local filterFunction="${4:-${_OPTION_FILTER:-}}"
-  local filterDirectoryFunction="${5:-${_OPTION_FILTER_DIRECTORY:-}}"
+  local \
+    directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    recursive="false" \
+    includeHidden="false" \
+    filter="" \
+    filterDirectory="" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
 
-  local IFS=' '
-
-  local activatedHidden=false
   if [[ ${includeHidden} == "true" ]]; then
-    # change the shell options to include hidden files
-    log::trace "Activating the dotglob shell option."
+    log::trace "Activating the dotglob shell option to include hidden files."
     shopt -s dotglob
-    activatedHidden=true
   fi
 
   REPLY_ARRAY=()
@@ -406,19 +427,19 @@ function fs::listPaths() {
 
     for path in "${currentDirectory}"/*; do
       if [[ ${recursive} == "true" && -d "${path}" ]]; then
-        if [[ -z ${filterDirectoryFunction} ]] || ${filterDirectoryFunction} "${path}"; then
+        if [[ -z ${filterDirectory} ]] || ${filterDirectory} "${path}"; then
           listOfDirectories+="${path}"$'\n'
           log::trace "Adding directory ⌜${path}⌝ to the search list."
         fi
       fi
-      if [[ -n ${filterFunction} ]] && ! ${filterFunction} "${path}"; then
+      if [[ -n ${filter} ]] && ! ${filter} "${path}"; then
         continue
       fi
       REPLY_ARRAY+=("${path}")
     done
   done
 
-  if [[ ${activatedHidden} == "true" ]]; then
+  if [[ ${includeHidden} == "true" ]]; then
     shopt -u dotglob
   fi
 }
@@ -429,22 +450,19 @@ function fs::listPaths() {
 #
 # - $1: **directory** _as string_:
 #       the directory to list
-# - $2: recursive _as bool_:
-#       (optional) Can be set using the variable `_OPTION_RECURSIVE`.
-#       true to list recursively, false otherwise
+# - ${recursive} _as bool_:
+#       (optional) true to list recursively, false otherwise
 #       (defaults to false)
-# - $3: hidden _as bool_:
-#       (optional) Can be set using the variable `_OPTION_INCLUDE_HIDDEN`.
-#       true to list hidden paths, false otherwise
+# - ${includeHidden} _as bool_:
+#       (optional) true to list hidden files, false otherwise
 #       (defaults to false)
-# - $4: directory filter function name _as string_:
-#       (optional) Can be set using the variable `_OPTION_FILTER_DIRECTORY`.
-#       a function name that is called to filter the directories (for recursive listing)
+# - ${filter} _as string_:
+#       (optional) A function name that is called to filter the files that will be listed
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 #       (defaults to empty string, no filter)
-# - ${_OPTION_FILTER} _as string_:
-#       (optional) A function name that is called to filter the files that will be listed
+# - ${filterDirectory} _as string_:
+#       (optional) A function name that is called to filter the directories (for recursive listing)
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 #       (defaults to empty string, no filter)
@@ -460,22 +478,28 @@ function fs::listPaths() {
 # done
 # ```
 function fs::listFiles() {
-  local fileFilterFunction="${_OPTION_FILTER:-":"}"
+  local \
+    directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    recursive="false" \
+    includeHidden="false" \
+    filter="" \
+    filterDirectory="" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
 
   # Helper function to check if the path is a file
   eval "function fs_listFilesReturnTrueIfFile() {
     if [[ ! -f \${1} ]]; then return 1; fi
-    if ! ${fileFilterFunction} '\${1}'; then
+    if ! ${filter:-":"} \"\${1}\"; then
       return 1
     fi
   }"
 
-  fs::listPaths "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${2:-${_OPTION_RECURSIVE:-}}" "${3:-${_OPTION_INCLUDE_HIDDEN:-false}}" fs_listFilesReturnTrueIfFile "${4:-${_OPTION_FILTER_DIRECTORY:-}}"
+  fs::listPaths "${directory}" recursive="${recursive}" includeHidden="${includeHidden}" filter=fs_listFilesReturnTrueIfFile filterDirectory="${filterDirectory}"
 
   unset -f fs_listFilesReturnTrueIfFile
 }
-
-
 
 # ## fs::listDirectories
 #
@@ -483,22 +507,19 @@ function fs::listFiles() {
 #
 # - $1: **directory** _as string_:
 #       the directory to list
-# - $2: recursive _as bool_:
-#       (optional) Can be set using the variable `_OPTION_RECURSIVE`.
-#       true to list recursively, false otherwise
+# - ${recursive} _as bool_:
+#       (optional) true to list recursively, false otherwise
 #       (defaults to false)
-# - $3: hidden _as bool_:
-#       (optional) Can be set using the variable `_OPTION_INCLUDE_HIDDEN`.
-#       true to list hidden paths, false otherwise
+# - ${includeHidden} _as bool_:
+#       (optional) true to list hidden directories, false otherwise
 #       (defaults to false)
-# - $4: directory filter function name _as string_:
-#       (optional) Can be set using the variable `_OPTION_FILTER_DIRECTORY`.
-#       a function name that is called to filter the sub directories (for recursive listing)
+# - ${filter} _as string_:
+#       (optional) A function name that is called to filter the directories that will be listed
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 #       (defaults to empty string, no filter)
-# - ${_OPTION_FILTER} _as string_:
-#       (optional) A function name that is called to filter the files that will be listed
+# - ${filterDirectory} _as string_:
+#       (optional) A function name that is called to filter the directories (for recursive listing)
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
 #       (defaults to empty string, no filter)
@@ -514,17 +535,25 @@ function fs::listFiles() {
 # done
 # ```
 function fs::listDirectories() {
-  local directoryFilterFunction="${_OPTION_FILTER:-":"}"
+  local \
+    directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    recursive="false" \
+    includeHidden="false" \
+    filter="" \
+    filterDirectory="" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
 
   # Helper function to check if the path is a file
   eval "function fs_listDirectoriesReturnTrueIfDirectory() {
     if [[ ! -d \${1} ]]; then return 1; fi
-    if ! ${directoryFilterFunction} '\${1}'; then
+    if ! ${filter:-":"} \"\${1}\"; then
       return 1
     fi
   }"
 
-  fs::listPaths "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" "${2:-${_OPTION_RECURSIVE:-false}}" "${3:-${_OPTION_INCLUDE_HIDDEN:-false}}" fs_listDirectoriesReturnTrueIfDirectory "${4:-${_OPTION_FILTER_DIRECTORY:-}}"
+  fs::listPaths "${directory}" recursive="${recursive}" includeHidden="${includeHidden}" filter=fs_listDirectoriesReturnTrueIfDirectory filterDirectory="${filterDirectory}"
 
   unset -f fs_listDirectoriesReturnTrueIfDirectory
 }
@@ -535,9 +564,9 @@ function fs::listDirectories() {
 #
 # - $1: **directory** _as string_:
 #       the directory to check
-# - $2: test file name _as string_:
-#       (optional) Can be set using the variable `_OPTION_TEST_FILE_NAME`.
-#       the name of the file to create in the directory to test the write access
+# - ${testFileName} _as string_:
+#       (optional) The name of the file to create in the directory to test the write access
+#       (defaults to "writable-test-${BASHPID}", which is a unique name based on the current process ID)
 #
 # Returns:
 #
@@ -551,13 +580,18 @@ function fs::listDirectories() {
 # fi
 # ```
 function fs::isDirectoryWritable() {
-  local directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local testFile="${2:-${_OPTION_TEST_FILE_NAME:-"writable-test-${BASHPID}"}}"
+  local \
+    directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    testFileName="writable-test-${BASHPID}" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
   directory="${directory%/}"
   if ! mkdir -p "${directory}" &>/dev/null; then
     return 1
   fi
-  local path="${1}/${testFile}"
+  local path="${directory}/${testFileName}"
   if { : >"${path}"; } &>/dev/null; then
     if ! rm -f "${path}" 1>/dev/null; then
       return 1
@@ -584,27 +618,31 @@ function fs::isDirectoryWritable() {
 #       the path to link to (the original file)
 # - $2: **link path** _as string_:
 #       the path where to create the link
-# - $3: hard link _as boolean_:
-#       (optional) Can be set using the variable `_OPTION_HARD_LINK`.
+# - ${hardlink} _as boolean_:
+#       (optional) Can be set using the variable `hardLink`.
 #       True to create a hard link, false to create a symbolic link
 #       (defaults to false)
-# - $4: force _as boolean_:
-#       (optional) Can be set using the variable `_OPTION_FORCE`.
+# - ${force} _as boolean_:
+#       (optional) Can be set using the variable `force`.
 #       True to overwrite the link or file if it already exists.
 #       Otherwise, the function will fail on an existing link.
 #       (defaults to true)
 #
 # ```bash
 # fs::createLink "/path/to/link" "/path/to/linked"
-# _OPTION_HARD_LINK=true fs::createLink "/path/to/link" "/path/to/linked"
+# fs::createLink "/path/to/link" "/path/to/linked" hardLink=true force=true
 # ```
 #
 # > The function uses the `ln` command.
 function fs::createLink() {
-  local linkedPath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local linkPath="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local hardLink="${3:-${_OPTION_HARD_LINK:-false}}"
-  local force="${3:-${_OPTION_FORCE:-true}}"
+  local \
+    linkedPath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    linkPath="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    hardlink="false" \
+    force="false" \
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
 
   fs::toAbsolutePath "${linkedPath}"
   linkedPath="${REPLY}"
@@ -633,7 +671,7 @@ function fs::createLink() {
   fs::createDirectoryIfNeeded "${linkParentPath}"
 
   # create link
-  if [[ ${hardLink} == "true" ]]; then
+  if [[ ${hardlink} == "true" ]]; then
     if ! ln "${linkedPath}" "${linkPath}"; then
       core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
     fi
@@ -644,7 +682,7 @@ function fs::createLink() {
   fi
 
   local linkType="symbolic"
-  if [[ ${hardLink} == "true" ]]; then
+  if [[ ${hardlink} == "true" ]]; then
     linkType="hard"
   fi
   log::debug "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
@@ -663,14 +701,14 @@ function fs::createLink() {
 #
 # ```bash
 # fs::getFileLineCount "/path/to/file"
-# local lineCount="${REPLY}"
+# echo "${REPLY}"
 # ```
 #
 # TODO: fails to count the last line if empty
 function fs::getFileLineCount() {
   local filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i lineCount=0
-  while read -rd $'\n' || [[ -n ${REPLY:-} ]]; do
+  while IFS=$'\n' read -rd $'\n' || [[ -n ${REPLY:-} ]]; do
     lineCount+=1
   done <"${filePath}"
   REPLY="${lineCount}"
@@ -717,9 +755,6 @@ function fs::getScriptDirectory() {
 # Returns:
 #
 # - ${REPLY}: The absolute path of the command (or empty if command not found).
-# - $?:
-#   - 0 if the command was found
-#   - 1 otherwise
 #
 # ```bash
 # fs::getCommandPath "command"
@@ -732,8 +767,6 @@ function fs::getCommandPath() {
     return 0
   fi
 
-  local IFS=' '
-  REPLY=""
   if command -v "${command}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
     IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
     REPLY="${REPLY%[[:space:]]}"
@@ -741,5 +774,5 @@ function fs::getCommandPath() {
     return 0
   fi
 
-  return 1
+  REPLY=""
 }

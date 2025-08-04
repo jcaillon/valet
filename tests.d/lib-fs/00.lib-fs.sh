@@ -55,7 +55,7 @@ function test_fs::writeToFile() {
   test::exec fs::writeToFile resources/gitignored/file1 _content
 
   _content=" World!"
-  test::exec fs::writeToFile resources/gitignored/file1 _content true
+  test::exec fs::writeToFile resources/gitignored/file1 _content append=true
 
   test::exec fs::cat resources/gitignored/file1
 }
@@ -63,12 +63,12 @@ function test_fs::writeToFile() {
 function test_fs::createTemp() {
   test::title "✅ Testing fs::createTempFile and fs::createTempDirectory"
 
-  test::func _OPTION_PATH_ONLY=true fs::createTempFile
+  test::func fs::createTempFile pathOnly=true
   if [[ ! -f "${REPLY}" ]]; then
     test::markdown "The file path was returned but the file does not exist."
   fi
 
-  test::func _OPTION_PATH_ONLY=true fs::createTempDirectory
+  test::func fs::createTempDirectory pathOnly=true
   if [[ ! -d "${REPLY}" ]]; then
     test::markdown "The directory path was returned but the directory does not exist."
   fi
@@ -97,12 +97,16 @@ function test_fs::toAbsolutePath() {
   test::func fs::toAbsolutePath ./01.invoke.sh
   test::func fs::toAbsolutePath ./resources
   test::func fs::toAbsolutePath missing-file
+
+  function pwd() { echo "mocked pwd"; }
+  test::func fs::toAbsolutePath "${PWD}/01.invoke.sh" realpath=true
+  unset -f pwd
 }
 
 function test_fs::readFile() {
   test::title "✅ Testing fs::readFile"
 
-  test::func fs::readFile 'resources/file-to-read' 22
+  test::func fs::readFile 'resources/file-to-read' maxCharacters=22
   test::func fs::readFile 'resources/file-to-read'
 }
 
@@ -146,27 +150,30 @@ function test_fs::cat() {
 function test_fs::isDirectoryWritable() {
   test::title "✅ Testing fs::isDirectoryWritable"
 
-  test::exec fs::isDirectoryWritable /tmp "&&" echo 'Writable' "||" echo 'Not writable'
+  test::exec fs::isDirectoryWritable /tmp
+  test::exec fs::isDirectoryWritable /tmp testFileName="test-file"
 }
 
 function test_fs::createLink() {
   test::title "✅ Testing fs::createLink"
 
   function ln() { echo "🙈 mocking ln: $*"; }
-  local osType="${OSTYPE:-}"
-  OSTYPE="linux-gnu"
+  function rm() { echo "🙈 mocking rm: $*"; }
 
   mkdir -p resources/gitignored
   :> resources/gitignored/file
 
-  test::exec fs::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' true
+  test::exec fs::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' hardlink=true
   test::flush
 
   test::exec fs::createLink 'resources/gitignored/try' 'resources/gitignored/new'
   test::flush
 
-  OSTYPE="${osType}"
-  unset -f ln
+  : >"resources/gitignored/try/file2"
+  test::exec fs::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' force=true hardlink=true
+  test::flush
+
+  unset -f ln rm
 }
 
 function test_fs::head() {
@@ -176,7 +183,7 @@ function test_fs::head() {
   test::exec fs::head 'resources/file-to-read' 0
   test::exec fs::head 'resources/file-to-read' 99
 
-  test::func fs::head 'resources/file-to-read' 3 true
+  test::func fs::head 'resources/file-to-read' 3 toArray=true
 }
 
 function test_fs::tail() {
@@ -186,7 +193,7 @@ function test_fs::tail() {
   test::exec fs::tail 'resources/file-to-read' 0
   test::exec fs::tail 'resources/file-to-read' 99
 
-  test::func fs::tail 'resources/file-to-read' 3 true
+  test::func fs::tail 'resources/file-to-read' 3 toArray=true
 }
 
 main

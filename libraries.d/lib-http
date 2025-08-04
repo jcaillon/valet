@@ -17,23 +17,23 @@ source fs
 # - $2: **url** _as string_:
 #       The URL to request. Can be http or https but it will only send a request to port 80 anyway.
 # - $3: fail on error _as bool_:
-#       (optional) Can be set using the variable `_OPTION_FAIL_ON_ERROR`.
+#       (optional) Can be set using the variable `failOnError`.
 #       If true, the function will use core::fail if the HTTP status code is not acceptable.
 #       (defaults to false)
 # - $4: acceptable status codes _as string_:
-#       (optional) Can be set using the variable `_OPTION_ACCEPTABLE_STATUS_CODES`.
+#       (optional) Can be set using the variable `acceptableStatusCodes`.
 #       The list of acceptable status codes, comma separated.
 #       (defaults to 200,201,202,204,301,304,308)
 # - $5: output file _as string_:
-#       (optional) Can be set using the variable `_OPTION_OUTPUT_FILE`.
+#       (optional) Can be set using the variable `outputFile`.
 #       The file in which to save the output of the request.
 #       (defaults to "" which means the body will be returned in the variable `REPLY2`)
 # - $6: follow redirection _as bool_:
-#       (optional) Can be set using the variable `_OPTION_FOLLOW_REDIRECTION`.
+#       (optional) Can be set using the variable `followRedirection`.
 #       If true, the function will follow redirections.
 #       (defaults to true)
 # - $7: response timeout _as int_:
-#       (optional) Can be set using the variable `_OPTION_RESPONSE_TIMEOUT`.
+#       (optional) Can be set using the variable `responseTimeout`.
 #       The timeout in seconds for the response.
 #       (defaults to 1)
 #
@@ -56,11 +56,11 @@ source fs
 function http::request() {
   local verb="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local url="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local failOnError="${3:-${_OPTION_FAIL_ON_ERROR:-false}}"
-  local acceptableStatusCodes="${4:-${_OPTION_ACCEPTABLE_STATUS_CODES:-200,201,202,204,301,304,308}}"
-  local outputFile="${5:-${_OPTION_OUTPUT_FILE:-}}"
-  local followRedirection="${6:-${_OPTION_FOLLOW_REDIRECTION:-true}}"
-  local -i responseTimeout="${7:-${_OPTION_RESPONSE_TIMEOUT:-1}}"
+  local failOnError="${3:-${failOnError:-false}}"
+  local acceptableStatusCodes="${4:-${acceptableStatusCodes:-200,201,202,204,301,304,308}}"
+  local outputFile="${5:-${outputFile:-}}"
+  local followRedirection="${6:-${followRedirection:-true}}"
+  local -i responseTimeout="${7:-${responseTimeout:-1}}"
 
   if [[ ${VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS:-} != "true" ]]; then
     core::fail "For security reasons, insecure web requests are disabled by default. Please explicitly enable them by setting VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS to true."

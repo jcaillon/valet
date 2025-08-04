@@ -8,4 +8,6 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<sub
 source "$(valet --source)"
 include tui coproc fs
 
-fs::getFileLineCount 'tests.d/lib-fs/resources/file-to-read'
+read -rd '' REPLY < 'tests.d/lib-fs/resources/file-to-read' || [[ ${#REPLY} -gt 0 ]]
+
+echo "${REPLY}"

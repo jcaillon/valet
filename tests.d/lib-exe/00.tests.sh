@@ -33,7 +33,7 @@ function test_exe::invoke5() {
   test::func exe::invoke5 true '' '' '' fake
 
   test::markdown "Normal, does not redirect outputs:"
-  _OPTION_NO_REDIRECTION=true test::exec exe::invoke5 true '' '' '' fake
+  noRedirection=true test::exec exe::invoke5 true '' '' '' fake
 
   test::markdown "Input stream for file, return everything as files:"
   test::prompt exe::invokef5 false 0 true "${GLOBAL_TEST_TEMP_FILE}" fake --std-in

@@ -24,7 +24,7 @@ function callback() {
   log::info "logs in: ${4}"
 }
 
-_OPTION_MAX_IN_PARALLEL=1 _OPTION_COMPLETED_CALLBACK=callback _OPTION_PRINT_REDIRECTED_LOGS=true coproc::runInParallel JOB_COMMANDS
+coproc::runInParallel JOB_COMMANDS maxInParallel=1 completedCallback=callback printRedirectedLogs=true
 
 if (( REPLY != 0 )); then
   log::error "Did not executed all coprocs."

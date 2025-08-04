@@ -21,7 +21,7 @@ source terminal
 # The main thread can continue to output logs while this animation is running.
 #
 # - $1: template _as string_:
-#       (optional) Can be set using the variable `_OPTION_TEMPLATE`.
+#       (optional) Can be set using the variable `template`.
 #       The template to display. The template can contain the following placeholders:
 #       - `<spinner>`: the spinner animation
 #       - `<percent>`: the percentage of the progress bar
@@ -30,17 +30,17 @@ source terminal
 #       - #TODO: add `<cGradient>` and `<cDefault>`: colors the bar with a gradient (if colors enabled)
 #       (defaults to VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE or "<spinner> <percent> ░<bar>░ <message>")
 # - $2: bar size _as int_:
-#       (optional) Can be set using the variable `_OPTION_BAR_SIZE`.
+#       (optional) Can be set using the variable `barSize`.
 #       The maximum width of the progress bar.
 #       (defaults to VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE or 20)
 # - $3: frame delay _as int_:
-#       (optional) Can be set using the variable `_OPTION_FRAME_DELAY`.
+#       (optional) Can be set using the variable `frameDelay`.
 #       The time in milliseconds between each frame of the spinner.
 #       (defaults to VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY or 200)
-# - ${_OPTION_MAX_FRAMES} _as int_:
+# - ${maxFrames} _as int_:
 #       (optional) The maximum number of frames to display.
 #       (defaults to 9223372036854775807)
-# - ${_OPTION_SPINNER} _as string_:
+# - ${spinner} _as string_:
 #       (optional) The spinner to display (each character is a frame).
 #       Examples:
 #       - ◐◓◑◒
@@ -51,10 +51,10 @@ source terminal
 #       - ▌▀▐▄
 #       - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
 #       (defaults to VALET_CONFIG_SPINNER_CHARACTERS or "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
-# - ${_OPTION_DEFAULT_PERCENTAGE} _as int_:
+# - ${defaultPercentage} _as int_:
 #       (optional) The default percentage to start with.
 #       (defaults to 0)
-# - ${_OPTION_DEFAULT_MESSAGE} _as int_:
+# - ${defaultMessage} _as int_:
 #       (optional) The default message to start with.
 #       (defaults to "")
 #
@@ -63,7 +63,7 @@ source terminal
 # wait 4
 # progress::stop
 #
-# _OPTION_SPINNER="⢄⢂⢁⡁⡈⡐⡠" progress::start "<spinner> <percent> ░<bar>░ <message>" 30
+# spinner="⢄⢂⢁⡁⡈⡐⡠" progress::start "<spinner> <percent> ░<bar>░ <message>" 30
 # IDX=0
 # while [[ ${IDX} -le 50 ]]; do
 #   progress::update $((IDX * 2)) "Doing something ${IDX}/50..."
@@ -75,13 +75,13 @@ source terminal
 # > Important: all progress functions will only work if called from the same shell
 # > that started the progress bar.
 function progress::start() {
-  local template="${1:-${_OPTION_TEMPLATE:-${VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE:-"<spinner> <percent> ░<bar>░ <message>"}}}"
-  local -i barSize="${2:-${_OPTION_BAR_SIZE:-${VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE:-20}}}"
-  local frameDelay="${3:-${_OPTION_FRAME_DELAY:-${VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY:-200}}}"
-  local -i maxFrames="${_OPTION_MAX_FRAMES:-9223372036854775807}"
-  local spinner="${_OPTION_SPINNER:-${VALET_CONFIG_SPINNER_CHARACTERS:-"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"}}"
-  local -i defaultPercentage="${_OPTION_DEFAULT_PERCENTAGE:-0}"
-  local defaultMessage="${_OPTION_DEFAULT_MESSAGE:-}"
+  local template="${1:-${template:-${VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE:-"<spinner> <percent> ░<bar>░ <message>"}}}"
+  local -i barSize="${2:-${barSize:-${VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE:-20}}}"
+  local frameDelay="${3:-${frameDelay:-${VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY:-200}}}"
+  local -i maxFrames="${maxFrames:-9223372036854775807}"
+  local spinner="${spinner:-${VALET_CONFIG_SPINNER_CHARACTERS:-"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"}}"
+  local -i defaultPercentage="${defaultPercentage:-0}"
+  local defaultMessage="${defaultMessage:-}"
 
   if [[ ! -t 2 || ${VALET_DISABLE_PROGRESS_BARS:-} == "true" ]]; then
     # we are not in an interactive session or progress bars are disabled
@@ -168,7 +168,7 @@ function progress::update() {
   fi
 
   if [[ ${_PROGRESS_BAR_RUNNING:-} != "true" ]]; then
-    _OPTION_DEFAULT_PERCENTAGE="${percent}" _OPTION_DEFAULT_MESSAGE="${message}" progress::start ""
+    defaultPercentage="${percent}" defaultMessage="${message}" progress::start ""
     return 0
   fi
   if [[ ! -v _PROGRESS_BACKGROUND_JOB ]] || ! { printf "1\0%s %s %s\0" "update" "${percent}" "${message}" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; } 2>/dev/null; then
@@ -218,10 +218,6 @@ function progress_runAnimationInBackground() {
   local spinner="${5}"
   local -i percentage="${6}"
   local message="${7}"
-
-  # TODO: understand why unregistering here affects the main thread
-  # core::setShellOptions
-  # trap::unregister
 
   # Hide the cursor
   printf "%s" "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
@@ -338,13 +334,13 @@ function progress_getStringToDisplay() {
 
   if [[ ${template} == *"<message>"* ]]; then
     # cut the message if it is too long
-    local -i templateLengthWithoutMessage="$((templateLengthWithoutBarAndMessage + progressBarSize))"
+    local -i templateLengthWithoutMessage=$((templateLengthWithoutBarAndMessage + progressBarSize))
     local messageWithoutSfrCodes="${message}"
     string::removeSgrCodes messageWithoutSfrCodes
     if (( templateLengthWithoutMessage == GLOBAL_COLUMNS)); then
       message=""
     elif ((templateLengthWithoutMessage + ${#messageWithoutSfrCodes} > GLOBAL_COLUMNS)); then
-      string::wrapCharacters message "$((GLOBAL_COLUMNS - templateLengthWithoutMessage - 1))"
+      string::wrapCharacters message width=$((GLOBAL_COLUMNS - templateLengthWithoutMessage - 1))
       message="${REPLY%%$'\n'*}…"
     fi
     displayedString="${displayedString//"<message>"/"${message}"}"

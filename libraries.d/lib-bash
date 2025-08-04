@@ -20,13 +20,14 @@
 #
 # Returns:
 #
-# - ${REPLY}: the exit code of the command.
+# - ${REPLY_CODE}: the exit code of the command.
 #
 # ```bash
 # bash::catchErrors myFunction "arg1" "arg2"
-# if (( REPLY != 0 )); then
-#   core::fail "The command failed with code ${REPLY}."
+# if (( REPLY_CODE != 0 )); then
+#   core::fail "The command failed with code ${REPLY_CODE}."
 # fi
+# _OPTION_EXIT_ON_FAIL=true bash::catchErrors stuff
 # ```
 #
 # > While you can also put the execution of a command in an `if` (or in a pipeline) statement to effectively
@@ -48,11 +49,11 @@ function bash::catchErrors() {
 
   if [[ ${exitOnFail} == "true" && ${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE} -gt 0 ]]; then
     # shellcheck disable=SC2034
-    _OPTION_SILENT=true exit "${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
+    core::exit "${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}" silent=true
   fi
 
   if [[ ${replyDisabled} != "true" ]]; then
-    REPLY="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
+    REPLY_CODE="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
   fi
 }
 
@@ -67,21 +68,22 @@ function bash::catchErrors() {
 # - $@: **command with args** _as string_:
 #       The command to run in the subshell.
 # - ${_OPTION_EXIT_ON_FAIL} _as bool_:
-#       (optional) If set to true, the main program will exit with code 1 if the subshell fails.
+#       (optional) If set to true, the main program will exit with code 1 if the command fails.
 #       (defaults to false)
-# - ${_OPTION_LOG_ON_ERROR_EXIT} _as bool_:
+# - ${_OPTION_LOG_ERROR_ON_EXIT} _as bool_:
 #       (optional) If true, will display an error if the subshell exits with a non zero code
 #       (defaults to false)
 #
 # Returns:
 #
-# - ${REPLY}: the exit code of the subshell.
+# - ${REPLY_CODE}: the exit code of the subshell.
 #
 # ```bash
 # bash::runInSubshell myFunction
-# if (( REPLY != 0 )); then
-#   core::fail "The subshell failed with code ${REPLY}"
+# if (( REPLY_CODE != 0 )); then
+#   core::fail "The subshell failed with code ${REPLY_CODE}"
 # fi
+# _OPTION_EXIT_ON_FAIL=true bash::runInSubshell myFunction
 # ```
 #
 # > This function exists because the behavior of bash subshells are not what you would expect.
@@ -92,7 +94,7 @@ function bash::catchErrors() {
 # > <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.
 function bash::runInSubshell() {
   local exitOnFail="${_OPTION_EXIT_ON_FAIL:-false}"
-  local logOnErrorExit="${_OPTION_LOG_ON_ERROR_EXIT:-false}"
+  local logOnErrorExit="${_OPTION_LOG_ERROR_ON_EXIT:-false}"
 
   # disable the ERR trap or we would catch the subshell failure with it and not restore
   # the errexit and the original trap (and we would display an error message that we do
@@ -103,11 +105,11 @@ function bash::runInSubshell() {
   (
     # re-enable errexit in the subshell
     set -o errexit
-    _OPTION_LOG_ON_ERROR_EXIT="${logOnErrorExit}" trap::registerSubshell
+    _OPTION_LOG_ERROR_ON_EXIT="${logOnErrorExit}" trap::registerSubshell
 
     # unset options or they will be visible from the subshell and might interfere
     local IFS=' '$'\t'$'\n'
-    unset -v ${!_OPTION_*}
+    unset -v _OPTION_EXIT_ON_FAIL _OPTION_LOG_ERROR_ON_EXIT
 
     # disable try mode in case we run this function from a tryRun
     # shellcheck disable=SC2034
@@ -121,9 +123,10 @@ function bash::runInSubshell() {
   trap trap::onErrorInternal ERR
   if [[ ${exitOnFail} == "true" && ${subshellExitCode} -gt 0 ]]; then
     # shellcheck disable=SC2034
-    _OPTION_SILENT=true exit "${subshellExitCode}"
+    core::exit "${subshellExitCode}" silent=true
   fi
-  REPLY="${subshellExitCode}"
+  # shellcheck disable=SC2034
+  REPLY_CODE="${subshellExitCode}"
 }
 
 # ## bash::injectCodeInFunction
@@ -137,8 +140,8 @@ function bash::runInSubshell() {
 #       The name of the function to inject the code into.
 # - $2: **code** _as string_:
 #       The code to inject.
-# - $3: inject at beginning _as bool_:
-#       (optional) Can be set using the variable `_OPTION_INJECT_AT_BEGINNING`.
+# - ${injectAtBeginning} _as bool_:
+#       (optional) Can be set using the variable `injectAtBeginning`.
 #       Whether to inject the code at the beginning of the function (or at the end).
 #       (defaults to false)
 #
@@ -148,14 +151,19 @@ function bash::runInSubshell() {
 # - ${REPLY2}: the original function.
 #
 # ```bash
-# bash::injectCodeInFunction myFunction "echo 'Hello world!'" true
+# bash::injectCodeInFunction myFunction "echo 'Hello!'" injectAtBeginning=true
+# bash::injectCodeInFunction myFunction "echo 'world!'"
 # eval "${REPLY}"
 # myFunction
 # ```
 function bash::injectCodeInFunction() {
-  local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local code="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local injectAtBeginning="${3:-${_OPTION_INJECT_AT_BEGINNING:-false}}"
+  local \
+    functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    code="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    injectAtBeginning=false \
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
 
   local functionDefinition modifiedFunctionDefinition
   if declare -f "${functionName}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
@@ -384,9 +392,6 @@ function bash::isFunction() {
 #
 # Returns:
 #
-# - $?:
-#   - 0 if the function was successfully re-exported
-#   - 1 if the function does not exist
 # - ${REPLY}: the modified function definition
 # - ${REPLY2}: the original function
 #
@@ -401,7 +406,7 @@ function bash::getFunctionDefinitionWithGlobalVars() {
   shift 2
 
   local IFS=''
-  declare -f "${functionName}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
+  declare -f "${functionName}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || core::fail "The function ⌜${functionName}⌝ does not exist."
   read -rd '' REPLY2 <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || [[ -n ${REPLY2} ]]
   local functionDefinition
   functionDefinition="${REPLY2/"${functionName}"/"${newFunctionName}"}"
@@ -452,7 +457,7 @@ function bash::getFunctionDefinitionWithGlobalVars() {
 #
 # Returns:
 #
-# - $?
+# - ${REPLY_CODE}:
 #   - 0 if the command was successful
 #   - 1 otherwise.
 # - ${REPLY}: The captured output.
@@ -463,10 +468,15 @@ function bash::getFunctionDefinitionWithGlobalVars() {
 # ```
 function bash::getBuiltinOutput() {
   local IFS=' '
-  # shellcheck disable=SC2068
-  "${@}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}" || return 1
   REPLY=""
-  IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+  # shellcheck disable=SC2068
+  if "${@}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
+    IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+    REPLY_CODE=0
+  else
+    # shellcheck disable=SC2034
+    REPLY_CODE=$?
+  fi
 }
 
 # ## bash::isFdValid

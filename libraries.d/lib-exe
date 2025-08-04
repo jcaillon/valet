@@ -28,7 +28,7 @@ source time
 #       the executable or function to execute
 # - $@: **arguments** _as any_:
 #       the arguments to pass to the executable
-# - ${_OPTION_NO_REDIRECTION}: _as bool_:
+# - ${noRedirection}: _as bool_:
 #       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.
 #       (default to false)
 #
@@ -56,7 +56,7 @@ function exe::invokef5() {
   local stdInFromFile="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local stdIn="${4?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local executable="${5?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local noRedirection="${_OPTION_NO_REDIRECTION:-false}"
+  local noRedirection="${noRedirection:-false}"
   shift 5
 
   # if trace mode is on, print some info
@@ -64,7 +64,7 @@ function exe::invokef5() {
     local IFS=' '
     if (( $# > 0 )); then
       printf -v args "%q " "${@}"
-      log::trace "Executing the command ⌜${executable}⌝ with arguments: " "${args% }"
+      log::trace "Executing the command ⌜${executable}⌝ with arguments: "$'\n'"${args% }"
     else
       log::trace "Executing the command ⌜${executable}⌝ (no arguments)."
     fi
@@ -112,7 +112,7 @@ function exe::invokef5() {
 
   time::getProgramElapsedMicroseconds
   local -i elapsed=$((REPLY - timerStart))
-  time::convertMicrosecondsToHuman "${elapsed}" "%S.%LLs"
+  time::convertMicrosecondsToHuman "${elapsed}" format="%S.%LLs"
   local debugMessage="The command ⌜${executable}⌝ ended with exit code ⌜${exitCode}⌝ in ⌜${REPLY}⌝."
 
   # if the error code is acceptable, then we set it to 0
@@ -135,7 +135,7 @@ function exe::invokef5() {
         if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
           log::errorTrace "${executable^} standard output stream:"
           log::saveFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" "${executable}-stdout"
-          log::printFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" 99
+          log::printFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" maxLines=99
         else
           log::errorTrace "${executable^} had no standard output stream."
         fi
@@ -144,7 +144,7 @@ function exe::invokef5() {
         if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
           log::errorTrace "${executable^} standard error stream:"
           log::saveFile "${GLOBAL_TEMPORARY_STDERR_FILE}" "${executable}-stderr"
-          log::printFile "${GLOBAL_TEMPORARY_STDERR_FILE}" 99
+          log::printFile "${GLOBAL_TEMPORARY_STDERR_FILE}" maxLines=99
         else
           log::errorTrace "${executable^} had no standard error stream."
         fi
@@ -281,7 +281,7 @@ function exe::invoke2() {
 # This function call an executable and its arguments.
 # It does not redirect the stdout and stderr so it outputs to the
 # default 1/2 file descriptors.
-# Equivalent to `_OPTION_NO_REDIRECTION=true exe::invokef5 "${1}" 0 "" "" "${@:2}"`
+# Equivalent to `noRedirection=true exe::invokef5 "${1}" 0 "" "" "${@:2}"`
 #
 # - $1: **fail** _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails.
@@ -303,7 +303,7 @@ function exe::invoke2() {
 function exe::invoket2() {
   local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift
-  _OPTION_NO_REDIRECTION=true exe::invokef5 "${failIfFails}" 0 '' '' "$@" || return $?
+  noRedirection=true exe::invokef5 "${failIfFails}" 0 '' '' "$@" || return $?
 }
 
 # ## exe::invokef3piped

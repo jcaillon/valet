@@ -114,7 +114,7 @@ function selfBuild() {
     else
       log::debug "Building the valet user commands silently."
       log::getLevel && originalLogLevel="${REPLY}"
-      log::setLevel warning true
+      log::setLevel warning silent=true
     fi
   fi
 
@@ -203,7 +203,7 @@ function selfBuild() {
   log::success "The valet user commands have been successfully built."
 
   if [[ ${silent:-} == "true" ]]; then
-    log::setLevel "${originalLogLevel}" true
+    log::setLevel "${originalLogLevel}" silent=true
   fi
 }
 

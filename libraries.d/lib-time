@@ -6,8 +6,8 @@
 #
 # Get the current date in the given format.
 #
-# - $1: format _as string_:
-#       (optional) the format of the date to return
+# - ${format} _as string_:
+#       (optional) the format (see printf) of the date to return
 #       (defaults to %(%F_%Hh%Mm%Ss)T).
 #
 # Returns:
@@ -17,11 +17,16 @@
 # ```bash
 # time::getDate
 # local date="${REPLY}"
+# time::getDate format="'%(%Hh%Mm%Ss)T'"
 # ```
 #
 # > This function avoid to call $(date) in a subshell (date is a an external executable).
 function time::getDate() {
-  local format="${1:-"%(%F_%Hh%Mm%Ss)T"}"
+  local \
+    format="%(%F_%Hh%Mm%Ss)T" \
+    IFS=" "
+  eval "local a= ${*@Q}"
+
   # shellcheck disable=SC2059
   printf -v REPLY "${format}" "${EPOCHSECONDS}"
 }
@@ -32,9 +37,8 @@ function time::getDate() {
 #
 # - $1: **microseconds** _as int_:
 #       the microseconds to convert
-# - $2: format _as string_:
-#      (optional) Can be set using the variable `_OPTION_FORMAT`.
-#      the format to use (defaults to "%HH:%MM:%SS")
+# - ${format} _as string_:
+#      (optional) the format to use (defaults to "%HH:%MM:%SS")
 #      Usable formats:
 #      - %HH: hours
 #      - %MM: minutes
@@ -56,11 +60,16 @@ function time::getDate() {
 #
 # ```bash
 # time::convertMicrosecondsToHuman 123456789
+# time::convertMicrosecondsToHuman 123456789 format="%HH:%MM:%SS"
 # echo "${REPLY}"
 # ```
 function time::convertMicrosecondsToHuman() {
   local -i us="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local format="${2:-${_OPTION_FORMAT:-"%HH:%MM:%SS"}}"
+  local \
+    format="%HH:%MM:%SS" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
 
   local -i hours=$((us / 3600 / 1000000))
   local -i minutes=$(((us / 60 / 1000000) % 60))
@@ -128,10 +137,10 @@ function time::startTimer() {
 #
 # Get the time elapsed since the call of `time::startTimer`.
 #
-# - ${_OPTION_LOG_ELAPSED_TIME} _as bool_:
+# - ${logElapsedTime} _as bool_:
 #      (optional) Wether or not to log the elapsed time.
 #      (defaults to false)
-# - ${_OPTION_FORMAT} _as string_:
+# - ${format} _as string_:
 #      (optional) The format to use if we log the elapsed time.
 #      See `time::convertMicrosecondsToHuman` for the format.
 #      (defaults to "%S.%LLs").
@@ -142,18 +151,21 @@ function time::startTimer() {
 #
 # ```bash
 # time::startTimer
-# _OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
+# time::getTimerMicroseconds logElapsedTime=true
 # echo "Total microseconds: ${REPLY}"
 # ```
 function time::getTimerMicroseconds() {
-  local log="${_OPTION_LOG_ELAPSED_TIME:-false}"
-  local format="${_OPTION_FORMAT:-"%S.%LLs"}"
+  local \
+    logElapsedTime=false \
+    format="%S.%LLs" \
+    IFS=" "
+  eval "local a= ${*@Q}"
 
   time::getProgramElapsedMicroseconds
   local -i elapsed=$((REPLY - _TIME_TIMER_START))
 
-  if [[ ${log} == "true" ]]; then
-    time::convertMicrosecondsToHuman ${elapsed} "${format}"
+  if [[ ${logElapsedTime} == "true" ]]; then
+    time::convertMicrosecondsToHuman ${elapsed} format="${format}"
     log::info "Elapsed time: ${REPLY}"
   fi
 

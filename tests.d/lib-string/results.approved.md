@@ -432,7 +432,7 @@ REPLY_ARRAY=(
 
 Wrapping text at column 30 with no padding
 
-❯ `string::wrapWords MULTI_LINES_TEXT 30`
+❯ `string::wrapWords MULTI_LINES_TEXT width=30`
 
 Returned variables:
 
@@ -481,7 +481,7 @@ this.'
 
 Wrapping text at column 50 with padding of 4 on new lines
 
-❯ `string::wrapWords MULTI_LINES_TEXT 50 \ \ \ \ `
+❯ `string::wrapWords MULTI_LINES_TEXT width=50 newLinePadString=\ \ \ \ `
 
 Returned variables:
 
@@ -516,7 +516,7 @@ REPLY='You don`t [36m[36m[36mget better[39m[39m[39m on the days when you f
 
 Wrapping text at column 20 with padding of 3 on all lines
 
-❯ `string::wrapWords MULTI_LINES_TEXT 20 \ \ \  17`
+❯ `string::wrapWords MULTI_LINES_TEXT width=20 newLinePadString=\ \ \  firstLineWidth=17`
 
 Returned variables:
 
@@ -591,7 +591,11 @@ REPLY='You don`t [36m[36m[36mget
 
 Wrapping words, shortcut because the message is a short single line
 
-❯ `_MY_STRING=A\ message. string::wrapWords _MY_STRING 80`
+```text
+MY_STRING='A message.'
+```
+
+❯ `string::wrapWords MY_STRING width=80`
 
 Returned variables:
 
@@ -601,7 +605,11 @@ REPLY='A message.'
 
 Wrapping words, no shortcut!
 
-❯ `_MY_STRING=A\ message. string::wrapWords _MY_STRING 80 '' 5`
+```text
+MY_STRING='A message.'
+```
+
+❯ `string::wrapWords MY_STRING width=80 newLinePadString= firstLineWidth=5`
 
 Returned variables:
 
@@ -617,7 +625,7 @@ MY_STRING='A message.
 A new line'
 ```
 
-❯ `string::wrapWords MY_STRING 13 [36m░░░[0m 10`
+❯ `string::wrapWords MY_STRING width=13 newLinePadString=[36m░░░[0m firstLineWidth=10`
 
 Returned variables:
 
@@ -630,7 +638,7 @@ REPLY='A message.
 
 Wrapping characters at column 20 with padding of 3 on all lines
 
-❯ `string::wrapCharacters MULTI_LINES_TEXT 20 \ \ \  17`
+❯ `string::wrapCharacters MULTI_LINES_TEXT width=20 newLinePadString=\ \ \  firstLineWidth=17`
 
 Returned variables:
 
@@ -701,7 +709,7 @@ REPLY2='1'
 
 Wrapping characters at 20, no other options
 
-❯ `string::wrapCharacters MULTI_LINES_TEXT 20`
+❯ `string::wrapCharacters MULTI_LINES_TEXT width=20`
 
 Returned variables:
 
@@ -765,7 +773,7 @@ Wrapping characters
 MY_STRING='01234567890123456789234'
 ```
 
-❯ `string::wrapCharacters MY_STRING 17 \ \ \  1`
+❯ `string::wrapCharacters MY_STRING width=17 newLinePadString=\ \ \  firstLineWidth=1`
 
 Returned variables:
 
@@ -783,7 +791,7 @@ MY_STRING='A message.
 A new line'
 ```
 
-❯ `string::wrapCharacters MY_STRING 13 [36m░░░[0m 10`
+❯ `string::wrapCharacters MY_STRING width=13 newLinePadString=[36m░░░[0m firstLineWidth=10`
 
 Returned variables:
 
@@ -800,7 +808,7 @@ MY_STRING='  Start With spaces that must be kept! Other spaces can be ignored at
   Also start with spaces'
 ```
 
-❯ `string::wrapCharacters MY_STRING 17 \ \ \  14`
+❯ `string::wrapCharacters MY_STRING width=17 newLinePadString=\ \ \  firstLineWidth=14`
 
 Returned variables:
 
@@ -820,7 +828,7 @@ REPLY2='10'
 MY_STRING='Message'
 ```
 
-❯ `string::wrapCharacters MY_STRING 3`
+❯ `string::wrapCharacters MY_STRING width=3`
 
 Returned variables:
 
@@ -838,10 +846,10 @@ REPLY2='1'
 Returned variables:
 
 ```text
-REPLY='>T<his is a >T<ex>t< >t<o highligh>t<.'
+REPLY='[95mT[0mhis is a [95mT[0mex[95mt[0m [95mt[0mo highligh[95mt[0m.'
 ```
 
-❯ `MY_STRING=This\ is\ a\ texT\ to\ highlight. MY_CHARS=TTTTT string::highlight MY_STRING MY_CHARS '>' '<'`
+❯ `MY_STRING=This\ is\ a\ texT\ to\ highlight. MY_CHARS=TTTTT string::highlight MY_STRING MY_CHARS highlightCode='>' resetCode='<'`
 
 Returned variables:
 

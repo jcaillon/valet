@@ -89,9 +89,9 @@ function test_list_fuzzyFilterSortFileWithGrepAndGawk() {
   test::prompt "SEARCH_STRING=ea list_fuzzyFilterSortFileWithGrepAndGawk /words SEARCH_STRING /out1 /out2"
   test::prompt "fs::head /out1 10"
 
-  _OPTION_PATH_ONLY=true fs::createTempFile
+  fs::createTempFile pathOnly=true
   local outputFilteredFile="${REPLY}"
-  _OPTION_PATH_ONLY=true fs::createTempFile
+  fs::createTempFile pathOnly=true
   local outputCorrespondenceFile="${REPLY}"
 
   if ! command -v grep &>/dev/null || ! command -v gawk &>/dev/null; then

@@ -6,7 +6,7 @@ source command
 function main() {
   test::title "✅ Testing exit cleanup"
   test::exec command::parseProgramArguments self mock1 create-temp-files
-  log::setLevel info true
+  log::setLevel info silent=true
 
   test::title "✅ Testing the bad config"
   core::getConfigurationDirectory

@@ -57,12 +57,12 @@ function test_bash::runInSubshell() {
 
   test::setTestCallStack
   test::func bash::runInSubshell subshellThatFails
-  test::func _OPTION_LOG_ON_ERROR_EXIT=true bash::runInSubshell subshellThatFails
-  test::exit _OPTION_EXIT_ON_FAIL=true bash::runInSubshell subshellThatFails
+  test::func logOnErrorExit=true bash::runInSubshell subshellThatFails
+  test::exit exitOnFail=true bash::runInSubshell subshellThatFails
   test::unsetTestCallStack
 
   function subshellThatExits() {
-    _OPTION_SILENT=true exit 2
+    core::exit 2 silent=true
   }
 
   test::func bash::runInSubshell subshellThatExits
@@ -82,7 +82,7 @@ function test_bash::injectCodeInFunction() {
 
   function simpleFunction() { :;}
   test::exec declare -f simpleFunction
-  test::exec bash::injectCodeInFunction simpleFunction "echo 'injected at the beginning!'" true
+  test::exec bash::injectCodeInFunction simpleFunction "echo 'injected at the beginning!'" injectAtBeginning=true
   test::prompt "echo \${REPLY}; echo \${REPLY2};"
   echo "${REPLY}"
   echo "${REPLY2}"

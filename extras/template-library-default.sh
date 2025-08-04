@@ -10,31 +10,31 @@
 #
 # - $1: **first argument** _as string_:
 #       description of the first argument
-# - $2: second argument _as bool_:
-#       (optional) Can be set using the variable `_OPTION_SECOND_ARGUMENT`.
-#       Description of the second argument.
-#       It should not be emphasized (like the previous **first name**).
-#       The convention for optional positional arguments is to use `_OPTION_` followed by
-#       the argument name in uppercase. Then you can set `${2:-${_OPTION_SECOND_ARGUMENT}}` to use it.
-#       (defaults to false)
-# - ${_OPTION_THIRD_OPTION} _as number_:
-#       (optional) This one is a pure option and should not be a positional argument.
-#       (defaults 0)
 # - $@: more args _as string_:
 #       For functions that take an undetermined number of arguments, you can use $@.
+# - $2{myOption} _as bool_:
+#       (optional) Description of the option.
+#       This describes an optional parameter passed as a shell parameter (e.g. `myOption=true`).
+#       (defaults to false)
 #
 # Returns:
 #
-# - $?: The exit code of the executable.
+# - $?: The exit code of the function.
 # - ${REPLY}: The value to return
 #
 # ```bash
 # _LIBRARY_NAME_::myFunction hi
-# _OPTION_THIRD_OPTION=10 _LIBRARY_NAME_::myFunction hi true
+# _LIBRARY_NAME_::myFunction hi true --- myOption=true
 # echo "${REPLY}"
 # ```
 #
 # > A note about the function.
 function _LIBRARY_NAME_::myFunction() {
-  :;
+  local \
+    arg1="${1}" \
+    myOption=false
+  core::parseShellParameters "${@}"
+  eval "${REPLY}"
+  shift 1
+  echo "arg1: ${arg1}, myOption: ${myOption}, remaining args: '${*}'"
 }

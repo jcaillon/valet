@@ -6,5 +6,10 @@
 
 ❯ `bash::getBuiltinOutput false`
 
-Returned code: `1`
+Returned variables:
+
+```text
+REPLY_CODE='1'
+REPLY=''
+```
 

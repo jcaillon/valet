@@ -14,7 +14,7 @@ Returned variables:
 REPLY='2000000'
 ```
 
-❯ `_OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds`
+❯ `time::getTimerMicroseconds logElapsedTime=true`
 
 **Error output**:
 
@@ -28,7 +28,7 @@ Returned variables:
 REPLY='5000000'
 ```
 
-❯ `_OPTION_LOG_ELAPSED_TIME=true _OPTION_FORMAT=%L time::getTimerMicroseconds`
+❯ `time::getTimerMicroseconds format=%L logElapsedTime=true`
 
 **Error output**:
 
@@ -52,7 +52,7 @@ Returned variables:
 REPLY='1987-05-25_01h00m00s'
 ```
 
-❯ `time::getDate '%(%H:%M:%S)T'`
+❯ `time::getDate format='%(%H:%M:%S)T'`
 
 Returned variables:
 
@@ -81,7 +81,7 @@ Total milliseconds: %L
 Total microseconds: %U'
 ```
 
-❯ `time::convertMicrosecondsToHuman 18243002234 "${format}"`
+❯ `time::convertMicrosecondsToHuman 18243002234 format="${format}"`
 
 Returned variables:
 
@@ -112,7 +112,7 @@ Returned variables:
 REPLY='05:04:03'
 ```
 
-❯ `_OPTION_FORMAT=%U time::convertMicrosecondsToHuman 18243002234`
+❯ `time::convertMicrosecondsToHuman 18243002234 format=%U`
 
 Returned variables:
 

@@ -15,10 +15,10 @@ source fs
 # - $1: **command** _as string_:
 #       the command to run.
 # - $2: run as administrator _as bool_:
-#       (optional) Can be set using the variable `_OPTION_RUN_AS_ADMIN`.
+#       (optional) Can be set using the variable `runAsAdmin`.
 #       Wether to run the command as administrator.
 #       (defaults to false).
-# - ${_OPTION_SILENT} _as bool_:
+# - ${silent} _as bool_:
 #       (optional) Do not log the command stderr.
 #       (defaults to false).
 #
@@ -35,8 +35,8 @@ source fs
 # ```
 function windows::runPs1() {
   local command="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local runAsAdmin="${2:-${_OPTION_RUN_AS_ADMIN:-false}}"
-  local silent="${_OPTION_SILENT:-false}"
+  local runAsAdmin="${2:-${runAsAdmin:-false}}"
+  local silent="${silent:-false}"
 
   local exitCode=0
 
@@ -48,8 +48,8 @@ function windows::runPs1() {
     windows::convertPathToUnix "${powershellPath}"
     powershellCommand="${REPLY}"
     if [[ ! -f "${powershellCommand}" ]]; then
-      if command -v "pwsh" &>/dev/null; then
-        fs::getCommandPath "pwsh"
+      fs::getCommandPath "pwsh"
+      if [[ -n ${REPLY} ]]; then
         powershellCommand="${REPLY}"
         if [[ ! -f "${powershellCommand}.exe" ]]; then
           core::fail "The PowerShell command is not available."
@@ -560,7 +560,7 @@ function windows::getEnvVar() {
 #       the path to add to the PATH environment variable.
 #       The path can be in unix format, it will be converted to windows format.
 # - $2: preprend _as bool_:
-#       (optional) Can be set using the variable `_OPTION_PREPEND`.
+#       (optional) Can be set using the variable `prepend`.
 #       True to prepend the path to the PATH, false to append it.
 #       (defaults to false)
 #
@@ -571,7 +571,7 @@ function windows::getEnvVar() {
 # > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 function windows::addToPath() {
   local pathToAdd="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local prepend="${2:-${_OPTION_PREPEND:-false}}"
+  local prepend="${2:-${prepend:-false}}"
 
   log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
 

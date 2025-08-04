@@ -165,52 +165,52 @@ function test_string::wrapWords() {
   test::title "✅ Testing string::wrapWords"
 
   test::markdown "Wrapping text at column 30 with no padding"
-  test::func string::wrapWords MULTI_LINES_TEXT 30
+  test::func string::wrapWords MULTI_LINES_TEXT width=30
 
   test::markdown "Wrapping text at column 50 with padding of 4 on new lines"
-  test::func string::wrapWords MULTI_LINES_TEXT 50 '    '
+  test::func string::wrapWords MULTI_LINES_TEXT width=50 newLinePadString='    '
 
   test::markdown "Wrapping text at column 20 with padding of 3 on all lines"
-  test::func string::wrapWords MULTI_LINES_TEXT 20 '   ' 17
+  test::func string::wrapWords MULTI_LINES_TEXT width=20 newLinePadString='   ' firstLineWidth=17
 
   test::markdown "Wrapping words, shortcut because the message is a short single line"
-  test::func _MY_STRING='A message.' string::wrapWords _MY_STRING 80
+  test::funcWithString string::wrapWords 'A message.' width=80
 
   test::markdown "Wrapping words, no shortcut!"
-  test::func _MY_STRING='A message.' string::wrapWords _MY_STRING 80 '' 5
+  test::funcWithString string::wrapWords 'A message.' width=80 newLinePadString='' firstLineWidth=5
 
   test::markdown "Wrapping words"
-  test::funcWithString string::wrapWords 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
+  test::funcWithString string::wrapWords 'A message.'$'\n''A new line' width=13 newLinePadString='[36m░░░[0m' firstLineWidth=10
 }
 
 function test_string::wrapCharacters() {
   test::title "✅ Testing string::wrapCharacters"
 
   test::markdown  "Wrapping characters at column 20 with padding of 3 on all lines"
-  test::func string::wrapCharacters MULTI_LINES_TEXT 20 "   " 17
+  test::func string::wrapCharacters MULTI_LINES_TEXT width=20 newLinePadString="   " firstLineWidth=17
 
   test::markdown "Wrapping characters at 20, no other options"
-  test::func string::wrapCharacters MULTI_LINES_TEXT 20
+  test::func string::wrapCharacters MULTI_LINES_TEXT width=20
 
   test::markdown "Wrapping characters"
-  test::funcWithString string::wrapCharacters 01234567890123456789234 17 '   ' 1
+  test::funcWithString string::wrapCharacters 01234567890123456789234 width=17 newLinePadString='   ' firstLineWidth=1
 
   test::markdown "Wrapping characters"
-  test::funcWithString string::wrapCharacters 'A message.'$'\n''A new line' 13 '[36m░░░[0m' 10
+  test::funcWithString string::wrapCharacters 'A message.'$'\n''A new line' width=13 newLinePadString='[36m░░░[0m' firstLineWidth=10
 
   test::markdown "Wrapping characters, spaces at the beginning of the line are kept"
-  test::funcWithString string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' 17 '   ' 14
+  test::funcWithString string::wrapCharacters '  Start With spaces that must be kept! Other spaces can be ignored at wrapping.'$'\n''  Also start with spaces' width=17 newLinePadString='   ' firstLineWidth=14
 
-  test::funcWithString string::wrapCharacters 'Message' 3
+  test::funcWithString string::wrapCharacters 'Message' width=3
 }
 
 function test_string::highlight() {
   test::title "✅ Testing string::highlight"
 
-  _OPTION_HIGHLIGHT_ANSI=">"
-  _OPTION_RESET_ANSI="<"
+  highlightAnsi=">"
+  resetAnsi="<"
   test::func MY_STRING='This is a Text to highlight.' MY_CHARS='ttttt' string::highlight MY_STRING MY_CHARS
-  test::func MY_STRING='This is a texT to highlight.' MY_CHARS='TTTTT' string::highlight MY_STRING MY_CHARS "'>'" "'<'"
+  test::func MY_STRING='This is a texT to highlight.' MY_CHARS='TTTTT' string::highlight MY_STRING MY_CHARS highlightCode="'>'" resetCode="'<'"
   test::func MY_STRING='' MY_CHARS='ttttt' string::highlight MY_STRING MY_CHARS
   test::func MY_STRING='This is a text to highlight.' MY_CHARS='' string::highlight MY_STRING MY_CHARS
 }

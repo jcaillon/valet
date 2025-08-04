@@ -80,7 +80,7 @@ function showcaseInteractive() {
 
   log::warning "Now displaying a spinner"
 
-  _OPTION_SPINNER="⢄⢂⢁⡁⡈⡐⡠" progress::start "<spinner>" "20" 50
+  spinner="⢄⢂⢁⡁⡈⡐⡠" progress::start "<spinner>" "20" 50
 
   IDX=0
   while [[ ${IDX} -lt 3 ]]; do

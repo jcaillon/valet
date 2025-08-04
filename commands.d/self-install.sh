@@ -720,16 +720,16 @@ if [[ ${GLOBAL_MAIN_INCLUDED:-} != "true" ]]; then
   fi
 
   # we are executing this script without valet, create simplified functions to replace the libs
-  function log::info() { printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_INFO}%-8s${STYLE_COLOR_DEFAULT} %s\n" "${EPOCHSECONDS}" "INFO" "$*"; }
+  function log::info() { printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_INFO}%-8s${STYLE_COLOR_DEFAULT} %s\n" "${EPOCHSECONDS}" "INFO" "${1}"; }
   function log::success() { printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_SUCCESS}%-8s${STYLE_COLOR_DEFAULT} %s
-" "${EPOCHSECONDS}" "SUCCESS" "$*"; }
+" "${EPOCHSECONDS}" "SUCCESS" "${1}"; }
   function log::debug() { if [[ ${VALET_VERBOSE:-false} == "true" ]]; then printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_DEBUG}%-8s${STYLE_COLOR_DEFAULT} %s
-" "${EPOCHSECONDS}" "DEBUG" "$*"; fi; }
+" "${EPOCHSECONDS}" "DEBUG" "${1}"; fi; }
   function log::warning() { printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_WARNING}%-8s${STYLE_COLOR_DEFAULT} %s
-" "${EPOCHSECONDS}" "WARNING" "$*"; }
+" "${EPOCHSECONDS}" "WARNING" "${1}"; }
   function core::fail() {
     printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_ERROR}%-8s${STYLE_COLOR_DEFAULT} %s
-" "${EPOCHSECONDS}" "ERROR" "$*"
+" "${EPOCHSECONDS}" "ERROR" "${1}"
     exit 1
   }
   function system::getOs() {
