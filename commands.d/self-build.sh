@@ -616,8 +616,16 @@ if [[ ${GLOBAL_MAIN_INCLUDED:-} != "true" ]]; then
   # do not read the commands in that case
   GLOBAL_CMD_INCLUDED=true
 
+  _COMMANDS_DIR="${BASH_SOURCE[0]:-"${0}"}"
+  if [[ "${_COMMANDS_DIR}" != /* ]]; then
+    if pushd "${_COMMANDS_DIR%/*}" &>/dev/null; then
+      _COMMANDS_DIR="${PWD}"
+      popd &>/dev/null || :
+    else _COMMANDS_DIR="${PWD}"; fi
+  else _COMMANDS_DIR="${_COMMANDS_DIR%/*}"; fi
+
   # shellcheck source=../libraries.d/main
-  source "$(valet --source)"
+  source "${_COMMANDS_DIR%/*}/libraries.d/main"
 else
   unset _NOT_EXECUTED_FROM_VALET
 fi
