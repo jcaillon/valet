@@ -148,11 +148,15 @@ function terminal::setRawMode() {
 # > any background process that is reading inputs before trying to restore these settings).
 # shellcheck disable=SC2120
 function terminal::restoreSettings() {
-  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} != "true" || ! -v GLOBAL_STTY_SAVED_CONFIG ]]; then
+  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} != "true" || ! -v GLOBAL_STTY_SAVED_CONFIG || ${BASH_SUBSHELL} -ne 0 ]]; then
     return 0
   fi
   if [[ ! -t 0 && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
-    core::fail "stdin is not a terminal, cannot reset mode."
+    if [[ -n ${GLOBAL_FD_STDIN:-} && -t ${GLOBAL_FD_STDIN:-} ]] && exec 0<&"${GLOBAL_FD_STDIN}"; then
+      log::debug "Restored terminal fd before using stty command."
+    else
+      core::fail "stdin is not a terminal, cannot reset mode."
+    fi
   fi
   stty "${GLOBAL_STTY_SAVED_CONFIG}" || log::warning "Failed to restore the terminal settings, check stty version."
   log::debug "Restored terminal settings using: stty ${GLOBAL_STTY_SAVED_CONFIG}."

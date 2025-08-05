@@ -73,11 +73,14 @@ fi
 # fd where we write the TUI
 exec {GLOBAL_FD_TUI}>&2
 
+# save stdin fd
+exec {GLOBAL_FD_STDIN}<&0
+
 # set the signal traps
 trap::register
 
 # init the array containing background processes IDs
-declare -g -a GLOBAL_BACKGROUND_PIDS=()
+declare -g -A GLOBAL_BACKGROUND_PROCESSES=() GLOBAL_BACKGROUND_PROCESSES_LOGS=()
 
 # Source the valet configuration from the user config dir
 if [[ -f ${GLOBAL_CONFIG_FILE} ]]; then

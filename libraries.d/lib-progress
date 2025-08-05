@@ -106,7 +106,8 @@ function progress::start() {
     coproc _PROGRESS_BACKGROUND_JOB { progress_runAnimationInBackground "${template}" "${barSize}" "${frameDelay}" "${maxFrames}" "${spinner}" "${defaultPercentage}" "${defaultMessage}" 2>&"${GLOBAL_FD_LOG}"; }
   } 2>/dev/null
   _PROGRESS_BACKGROUND_PID="${_PROGRESS_BACKGROUND_JOB_PID}"
-  GLOBAL_BACKGROUND_PIDS+=("${_PROGRESS_BACKGROUND_JOB_PID}")
+  # shellcheck disable=SC2034
+  GLOBAL_BACKGROUND_PROCESSES["PROGRESS"]="${_PROGRESS_BACKGROUND_JOB_PID}"
 }
 
 # ## progress::stop
@@ -131,6 +132,8 @@ function progress::stop() {
 
   # restore the key echoing
   terminal::restoreSettings
+
+  unset -v "GLOBAL_BACKGROUND_PROCESSES[PROGRESS]"
 }
 
 # ## progress::update

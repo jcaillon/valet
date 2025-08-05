@@ -45,7 +45,9 @@ function test_log::printCallStack() {
 
   test::setTestCallStack
   test::func log::getCallStack
+  test::func log::getCallStack stackToSkip=1 stackToSkipAtEnd=1 wrapWidth=10
   test::exec log::printCallStack
+  test::exec log::printCallStack stackToSkip=1 stackToSkipAtEnd=1
   test::unsetTestCallStack
 }
 

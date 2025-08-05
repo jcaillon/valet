@@ -310,7 +310,7 @@ function log::error() {
   eval "${GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG}"
 
   if log::isDebugEnabled; then
-    log::printCallStack 2
+    log::printCallStack
   fi
 }
 
@@ -512,28 +512,30 @@ function log::printTrappedBashCommand() {
 #
 # This function prints the current function stack in the logs.
 #
-# - $1: Stack to skip _as int_:
-#       (optional) Can be set using the variable `stackToSkip`.
-#       The number of stack to skip.
+# - ${stackToSkip} _as int_:
+#       (optional) The number of stack to skip.
 #       (defaults to 2 which skips this function and the first calling function
 #       which is usually the onError function)
-# - $2: Stack to skip at end _as int_:
-#       (optional) Can be set using the variable `stackToSkip_AT_END`.
-#       The number of stack to skip at the end.
+# - ${stackToSkipAtEnd} _as int_:
+#       (optional) The number of stack to skip at the end.
 #       (defaults to 0)
 #
 # ```bash
 # log::printCallStack
-# log::printCallStack 0
+# log::printCallStack stackToSkip=0
 # ```
 #
 # > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
 # > variables to simulate a call stack.
+# shellcheck disable=SC2120
 function log::printCallStack() {
-  local -i levelToSkip="${1:-${stackToSkip:-2}}"
-  local -i levelToSkipAtEnd="${2:-${stackToSkip_AT_END:-0}}"
+  local \
+    stackToSkip=2 \
+    stackToSkipAtEnd=0 \
+    IFS=$' '
+  eval "local a= ${*@Q}"
 
-  wrapWidth="$((${GLOBAL_LOG_COLUMNS:-${GLOBAL_COLUMNS}} - ${#GLOBAL_LOG_WRAP_PADDING}))" log::getCallStack "$((levelToSkip + 1))" "${levelToSkipAtEnd}"
+  log::getCallStack stackToSkip="$((stackToSkip + 1))" stackToSkipAtEnd="${stackToSkipAtEnd}" wrapWidth="$((${GLOBAL_LOG_COLUMNS:-${GLOBAL_COLUMNS}} - ${#GLOBAL_LOG_WRAP_PADDING}))"
   if ((${#REPLY} > 0)); then
     log::printString "${REPLY}"
   fi
@@ -543,17 +545,15 @@ function log::printCallStack() {
 #
 # This function returns the current function stack.
 #
-# - $1: Stack to skip _as int_:
-#       (optional) Can be set using the variable `stackToSkip`.
-#       The number of stack to skip.
+# - ${stackToSkip} _as int_:
+#       (optional) The number of stack to skip.
 #       (defaults to 1 which skips this function)
-# - $2: Stack to skip at end _as int_:
-#       (optional) Can be set using the variable `stackToSkip_AT_END`.
-#       The number of stack to skip at the end.
+# - ${stackToSkipAtEnd} _as int_:
+#       (optional) The number of stack to skip at the end.
 #       (defaults to 0)
 # - ${wrapWidth} _as int_:
 #       (optional) The width to wrap the call stack.
-#       (defaults to the terminal width)
+#       (defaults 0 which means no wrapping)
 #
 # Returns:
 #
@@ -562,14 +562,18 @@ function log::printCallStack() {
 # ```bash
 # log::getCallStack
 # echo "${REPLY}"
+# log::getCallStack stackToSkip=2 stackToSkipAtEnd=1 wrapWidth=80
 # ```
 #
 # > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
 # > variables to simulate a call stack.
 function log::getCallStack() {
-  local -i levelToSkip="${1:-${stackToSkip:-1}}"
-  local -i levelToSkipAtEnd="${2:-${stackToSkip_AT_END:-0}}"
-  local -i wrapWidth=${wrapWidth:-"${GLOBAL_COLUMNS}"}
+  local \
+    stackToSkip=1 \
+    stackToSkipAtEnd=0 \
+    wrapWidth=0 \
+    IFS=$' '
+  eval "local a= ${*@Q}"
 
   local -a stackFunctionNames stackSourceFiles stackLineNumbers
   if [[ -n ${GLOBAL_STACK_FUNCTION_NAMES:-} ]]; then
@@ -582,10 +586,10 @@ function log::getCallStack() {
     stackLineNumbers=("${BASH_LINENO[@]}")
   fi
 
-  local -i idx stackSize=$((${#stackFunctionNames[@]} - levelToSkipAtEnd))
+  local -i idx stackSize=$((${#stackFunctionNames[@]} - stackToSkipAtEnd))
   local functionName lineNumber="${LINENO}" sourceFile line returnedString=""
   local treeString="├─" treePadding="│  "
-  for ((idx = levelToSkip; idx < stackSize; idx++)); do
+  for ((idx = stackToSkip; idx < stackSize; idx++)); do
     functionName="${stackFunctionNames[${idx}]}"
     if [[ -z ${functionName} ]]; then
       functionName=ROOT
@@ -607,6 +611,7 @@ function log::getCallStack() {
     fi
     line="${treeString} in ${functionName} at ${sourceFile}:${lineNumber}"
     if ((wrapWidth > 0)); then
+      local REPLY2
       string::wrapCharacters line width="${wrapWidth}" newLinePadString="${treePadding}"
       returnedString+="${REPLY}"$'\n'
     else
@@ -650,7 +655,7 @@ function log::printFile() {
 
   while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
     log::printFileInternalLoop
-    if (( REPLY_CODE != 0 )); then
+    if ((REPLY_CODE != 0)); then
       break
     fi
   done <"${filePath}"
@@ -690,7 +695,7 @@ function log::printFileString() {
 
   while IFS=$'\n' read -rd $'\n' line; do
     log::printFileInternalLoop
-    if (( REPLY_CODE != 0 )); then
+    if ((REPLY_CODE != 0)); then
       break
     fi
   done <<<"${contentToPrint}"
@@ -1315,8 +1320,8 @@ function string::wrapWords() {
   local \
     width="${GLOBAL_COLUMNS}" \
     newLinePadString="" \
-    firstLineWidth
-    IFS=$' \t' \
+    firstLineWidth \
+    IFS=$' \t'
   shift 1
   eval "local a= ${*@Q}"
 
@@ -1431,8 +1436,8 @@ function string::wrapCharacters() {
     width="${GLOBAL_COLUMNS}" \
     newLinePadString="" \
     firstLineWidth
-    IFS=$' \t' \
-  shift 1
+  IFS=$' \t' \
+    shift 1
   eval "local a= ${*@Q}"
 
   firstLineWidth="${firstLineWidth:-${width}}"
@@ -1529,7 +1534,7 @@ function string::highlight() {
   local \
     highlightCode="${STYLE_COLOR_ACCENT:-$'\e'"[95m"}" \
     resetCode="${STYLE_COLOR_DEFAULT:-$'\e'"[0m"}"
-    IFS=$' '
+  IFS=$' '
   shift 2
   eval "local a= ${*@Q}"
 

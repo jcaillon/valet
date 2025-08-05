@@ -94,12 +94,12 @@ function exit() {
 
   if log::isTraceEnabled; then
     log::trace "Explicit exit with code ${exitCode}, stack:"
-    log::printCallStack 2
+    log::printCallStack
   fi
 
   if [[ ${exitCode} != "0" && ${GLOBAL_EXPECTED_EXIT:-} != "true" && ${silent} != "true" ]]; then
     log::print "ERROR" "${ICON_EXIT:-}" "EXIT" "Explicit exit with code ${exitCode}, stack:"
-    log::printCallStack 2
+    log::printCallStack
   fi
 
   # shellcheck disable=SC2034
@@ -131,7 +131,7 @@ function core::fail() {
 
   log::print "ERROR" "${ICON_ERROR:-}" "FAIL" "${message}"
   if log::isDebugEnabled; then
-    log::printCallStack 2
+    log::printCallStack
   fi
   # shellcheck disable=SC2034
   _OPTION_SILENT=true exit "${exitCode}"
@@ -469,6 +469,9 @@ function core::dump() {
     IFS=$' '
   eval "local a= ${*@Q}"
 
+  # shellcheck disable=SC2034
+  local REPLY_CODE
+
   # shellcheck disable=SC1091
   source bash
   bash::catchErrors core_dump "${dumpSuffix}"
@@ -478,6 +481,7 @@ function core::dump() {
 function core_dump() {
   local filePath
   printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d%s" "${EPOCHSECONDS}" "${BASHPID}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
   core::getUserStateDirectory
   if [[ ! -d "${REPLY}/core-dumps" ]]; then
     mkdir -p "${REPLY}/core-dumps"

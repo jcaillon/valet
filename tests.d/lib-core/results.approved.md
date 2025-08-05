@@ -10,7 +10,6 @@ Returned variables:
 
 ```text
 REPLY='/tmp/valet.valet.d/core-dumps/1987-05-25T01-00-00+0000--PID_001234'
-REPLY2='75'
 ```
 
 ❯ `fs::head /tmp/valet.valet.d/core-dumps/1987-05-25T01-00-00+0000--PID_001234 2`

@@ -103,8 +103,8 @@ function selfTest() {
 
   selfTestUtils_prepareModifiedTrapFunctions
 
-  GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS=141
-  GLOBAL_TEST_APPROVAL_FAILURE_STATUS=142
+  GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS=241
+  GLOBAL_TEST_APPROVAL_FAILURE_STATUS=242
   declare -g -i _TEST_FAILURE_STATUS=0
   declare -g -a _TEST_FAILED_TEST_SUITES=()
 
@@ -366,17 +366,17 @@ function selfTest_runSingleTestSuite() {
         # the function test::fail was called, there was a coding mistake in the test script that we caught
         fs::readFile "${GLOBAL_TEST_LOG_FILE}"
         log::error "The test script ⌜${testScript##*/}⌝ failed because an error was explicitly thrown in the test script:"$'\n\n'"${REPLY}"$'\n\n'"test::fail called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
-        log::printCallStack 0 10
+        log::printCallStack stackToSkip=0 stackToSkipAtEnd=10
 
       elif [[ -n ${GLOBAL_STACK_FUNCTION_NAMES_ERR:-} ]]; then
         log::error "The test script ⌜${testScript##*/}⌝ had an error and exited with code ⌜${exitCode}⌝."$'\n'"Test scripts will exit if a command ends with an error (shell option to exit on error)."$'\n\n'"If you expect a tested function or command to fail, use one of these two methods to display the failure without exiting the script:"$'\n\n'"- ⌜myCommandThatFails || echo 'failed as expected with code \$?'⌝"$'\n'"- ⌜test::exec myCommandThatFails⌝"$'\n\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
         GLOBAL_STACK_FUNCTION_NAMES=("${GLOBAL_STACK_FUNCTION_NAMES_ERR[@]}")
         GLOBAL_STACK_SOURCE_FILES=("${GLOBAL_STACK_SOURCE_FILES_ERR[@]}")
         GLOBAL_STACK_LINE_NUMBERS=("${GLOBAL_STACK_LINE_NUMBERS_ERR[@]}")
-        log::printCallStack 1 10
+        log::printCallStack stackToSkip=1 stackToSkipAtEnd=10
       else
         log::error "The test script ⌜${testScript##*/}⌝ exited with code ⌜${exitCode}⌝."$'\n'"Test scripts must not exit or return an error (shell options are set to exit on error)."$'\n\n'"If you expect a tested function or command to exit, run it in a subshell using one of these two methods:"$'\n\n'"- ⌜(myCommandThatFails) || echo 'failed as expected with code \${PIPESTATUS[0]:-}'⌝"$'\n'"- ⌜test::exit myCommandThatFails⌝"$'\n\n'"Exited in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
-        log::printCallStack 1 10
+        log::printCallStack stackToSkip=1 stackToSkipAtEnd=10
       fi
 
       # exit with an error if there were errors in the test scripts
@@ -451,6 +451,7 @@ function selfTest_runSingleTest() {
   # redirect the standard output and error output to files
   exec 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
   exec 2>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
+  
   # since we changed fd2, we also need to redeclare fd that point to fd2
   exec {GLOBAL_FD_LOG}>&2
   exec {GLOBAL_FD_TUI}>&2

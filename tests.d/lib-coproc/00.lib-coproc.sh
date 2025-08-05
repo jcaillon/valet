@@ -31,19 +31,17 @@ function test_coproc::run_simpleTests() {
     log::info "Running end command in coproc (${coprocVarName})."
   }
 
-
   test::title "✅ Testing coproc::run with a simple init command"
 
   test::prompt coproc::run _COPROC_1 initCommand=initCommand
   test::prompt coproc::wait _COPROC_1
   coproc::run _COPROC_1 initCommand=initCommand
   local coproc1Pid="${REPLY}"
-  if (( coproc1Pid <= 0 )); then
+  if ((coproc1Pid <= 0)); then
     test::fail "The coproc ⌜_COPROC_1⌝ is not running."
   fi
   coproc::wait _COPROC_1
   test::flush
-
 
   test::title "✅ Testing coproc::sendMessage, coproc::isRunning and coproc::wait"
 
@@ -63,7 +61,6 @@ function test_coproc::run_simpleTests() {
   fi
   test::flush
 
-
   test::title "✅ Testing coproc::run with wait for readiness"
 
   test::prompt coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
@@ -71,7 +68,6 @@ function test_coproc::run_simpleTests() {
   coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
   coproc::wait _COPROC_3
   test::flush
-
 
   test::title "✅ Testing coproc::kill"
 
@@ -85,16 +81,25 @@ function test_coproc::run_simpleTests() {
   coproc::run _COPROC_4 initCommand=initCommand loopCommand=loopCommand waitForReadiness=true
   local coproc4Pid="${REPLY}"
   local IFS=" "
-  if [[ ${GLOBAL_BACKGROUND_PIDS[*]} != *"${coproc4Pid}"* ]]; then
-    test::fail "The coproc ⌜_COPROC_4⌝ is not in the GLOBAL_BACKGROUND_PIDS array."
+  if [[ ${GLOBAL_BACKGROUND_PROCESSES[*]} != *"${coproc4Pid}"* ]]; then
+    test::fail "The coproc ⌜_COPROC_4⌝ is not in the GLOBAL_BACKGROUND_PROCESSES array."
   fi
   coproc::kill _COPROC_4
-  if [[ ${GLOBAL_BACKGROUND_PIDS[*]} == *"${coproc4Pid}"* ]]; then
-    test::fail "The coproc ⌜_COPROC_4⌝ is still in the GLOBAL_BACKGROUND_PIDS array."
+  if [[ ${GLOBAL_BACKGROUND_PROCESSES[*]} == *"${coproc4Pid}"* ]]; then
+    test::fail "The coproc ⌜_COPROC_4⌝ is still in the GLOBAL_BACKGROUND_PROCESSES array."
   fi
   test::flush
-}
 
+
+  test::title "✅ Testing coproc messages when coproc is killed"
+
+  test::exec coproc::run _COPROC_5 waitForReadiness=true
+  test::exec coproc::receiveMessage _COPROC_5
+  test::exec coproc::sendMessage _COPROC_5 hello
+  test::exec coproc::isRunning _COPROC_5
+  test::exec coproc::wait _COPROC_5
+  test::exec coproc::kill _COPROC_5
+}
 
 function test_coproc::run_completeTest() {
   if [[ ${keepOnlyLastMessage:-} == "true" ]]; then
@@ -105,8 +110,8 @@ function test_coproc::run_completeTest() {
 
   # shellcheck disable=SC2317
   function realisticLoop() {
-    _LOOP_NUMBER=$(( ${_LOOP_NUMBER:-0} + 1 ))
-    if (( _LOOP_NUMBER > 2 )); then
+    _LOOP_NUMBER=$((${_LOOP_NUMBER:-0} + 1))
+    if ((_LOOP_NUMBER > 2)); then
       printf "%s\0" "stop"
       return 0
     fi
@@ -146,7 +151,7 @@ function test_coproc::run_testError() {
   local originalFunction="${REPLY2}"
 
   function initCommand() {
-    ((0/0)) # This will fail and exit the subshell
+    ((0 / 0)) # This will fail and exit the subshell
     log::info "This line will not be executed because the previous command failed."
   }
 
@@ -155,7 +160,8 @@ function test_coproc::run_testError() {
   coproc::run _COPROC_20 initCommand=initCommand
   test::unsetTestCallStack
 
-  if coproc::wait _COPROC_20; then
+  coproc::wait _COPROC_20
+  if ((REPLY_CODE == 0)); then
     test::fail "The coproc ⌜_COPROC_20⌝ should have failed."
   else
     log::info "The coproc ⌜_COPROC_20⌝ failed as expected."

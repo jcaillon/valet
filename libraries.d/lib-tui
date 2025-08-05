@@ -109,7 +109,8 @@ function tui_startKeyPressListener() {
     fi
     log::debug "Starting key press listener coproc."
     { coproc _TUI_COPROC_KEY_PRESS_LISTENER { tui_keyPressListener 2>&"${GLOBAL_FD_LOG}"; } } 2>/dev/null
-    GLOBAL_BACKGROUND_PIDS+=("${_TUI_COPROC_KEY_PRESS_LISTENER_PID}")
+    # shellcheck disable=SC2034
+    GLOBAL_BACKGROUND_PROCESSES["KEY_PRESS_LISTENER"]="${_TUI_COPROC_KEY_PRESS_LISTENER_PID}"
   fi
 }
 
@@ -120,10 +121,7 @@ function tui_stopKeyPressListener() {
     local pid="${_TUI_COPROC_KEY_PRESS_LISTENER_PID}"
     kill "${pid}" &>/dev/null || :
     unset _TUI_COPROC_KEY_PRESS_LISTENER _TUI_COPROC_KEY_PRESS_LISTENER_PID
-
-    # shellcheck source=lib-array
-    source array
-    array::remove GLOBAL_BACKGROUND_PIDS pid
+    unset -v "GLOBAL_BACKGROUND_PROCESSES[KEY_PRESS_LISTENER]"
   else
     log::debug "Key press listener coproc is not running."
   fi

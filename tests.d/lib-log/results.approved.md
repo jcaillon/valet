@@ -371,7 +371,31 @@ REPLY='├─ in log::printCallStack() at core:10
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
 '
-REPLY2='48'
+```
+
+❯ `log::getCallStack stackToSkip=1 stackToSkipAtEnd=1 wrapWidth=10`
+
+Returned variables:
+
+```text
+REPLY='├─ in log:
+│  :printC
+│  allStac
+│  k() at 
+│  core:10
+├─ in log:
+│  :error(
+│  ) at co
+│  re:100
+╰─ in myCm
+   d::subF
+   unction
+   () at /
+   path/to
+   /subFun
+   ction.s
+   h:200
+'
 ```
 
 ❯ `log::printCallStack`
@@ -383,6 +407,16 @@ REPLY2='48'
                                              │  ction.sh:200
                                              ╰─ in myCmd::function() at /path/to/function.
                                                 sh:300
+```
+
+❯ `log::printCallStack stackToSkip=1 stackToSkipAtEnd=1`
+
+**Error output**:
+
+```text
+                                             ├─ in log::error() at core:100
+                                             ╰─ in myCmd::subFunction() at /path/to/subFun
+                                                ction.sh:200
 ```
 
 ### ✅ Testing log::init

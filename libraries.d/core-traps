@@ -21,9 +21,9 @@ function trap::onErrorInternal() {
 
   if [[ ${FUNCNAME[1]:-} == "log::"* ]]; then
     # we are here if the error happened in a log function and thus we couldn't print the error
-    printf '%s\n%s\n%s\n' "The command had a return code of ${errorCodesString}." "Error in a log function:" "${BASH_COMMAND:-}" >&2
-    log::getCallStack 2
-    printf '%s\n' "${REPLY}" >&2
+    printf '%s\n%s\n%s\n' "The command had a return code of ${errorCodesString}." "Error in a log function:" "${BASH_COMMAND:-}" >&"${GLOBAL_FD_LOG}"
+    log::getCallStack stackToSkip=2
+    printf '%s\n' "${REPLY}" >&"${GLOBAL_FD_LOG}"
     return 0
   fi
 
@@ -32,7 +32,7 @@ function trap::onErrorInternal() {
     if log::isTraceEnabled; then
       log::trace "Caught error in try/catch mode, error code ${errorCodesString} for the command:"
       log::printTrappedBashCommand
-      log::printCallStack 2
+      log::printCallStack
     fi
     # shellcheck disable=SC2034
     GLOBAL_ERROR_TRAP_LAST_ERROR_CODE="${errorCodes[0]}"
@@ -41,7 +41,7 @@ function trap::onErrorInternal() {
 
   log::print "ERROR" "${ICON_ERROR:-}" "CMDERR" "Error code ${errorCodesString} for the command:"
   log::printTrappedBashCommand
-  log::printCallStack 2
+  log::printCallStack
 
   : before-exit
   core::exit 1 silent=true
@@ -53,6 +53,9 @@ function trap::onErrorInternal() {
 function trap::onExitInternal() {
   local exitCode="$?"
 
+  # disable errexit to avoid exiting before cleaning up
+  set +o errexit
+
   if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || (${GLOBAL_EXPECTED_EXIT:-} != "true" && ${exitCode} != "0") ]]; then
     dumpSuffix="-${exitCode}" core::dump
   fi
@@ -63,11 +66,11 @@ function trap::onExitInternal() {
     if [[ ${VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT:-} == "true" && ! ${BASH_COMMAND:-} =~ ^(exit|return) ]]; then
       log::print "WARNING" "${ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
       log::printTrappedBashCommand
-      log::printCallStack 2
+      log::printCallStack
     elif (( exitCode != 0 )); then
       log::print "ERROR" "${ICON_EXIT:-}" "EXIT" "Exiting with code ${exitCode}, stack:"
       log::printTrappedBashCommand
-      log::printCallStack 2
+      log::printCallStack
     fi
   fi
 
@@ -77,6 +80,8 @@ function trap::onExitInternal() {
 
   # always call cleanUp before exiting
   trap::onCleanUpInternal
+  echo "done ${BASHPID}">>/c/Users/jcaillon/data/repo/github.com/jcaillon/valet/tmp/log
+
 }
 
 # This function is called when the program is interrupted by the user (CTRL+C).
@@ -90,21 +95,26 @@ function trap::onInterruptInternal() {
       return 0
     fi
   fi
+  echo "interrupted ${BASHPID}">>/c/Users/jcaillon/data/repo/github.com/jcaillon/valet/tmp/log
 
   # reset the trap to not call this function again
   trap SIGINT SIGQUIT
 
   if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
-    printf '\n' # Set cursor to the next line of '^C' (only if stty echo is on)
+    printf '\n' 1>&"${GLOBAL_FD_TUI}" # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
   if [[ ${GLOBAL_WARN_ON_INTERRUPT_DISABLED:-} != "true" ]]; then
+    ls -l /proc/"${BASHPID}"/fd>>/c/Users/jcaillon/data/repo/github.com/jcaillon/valet/tmp/log
+    log::getCallStack stackToSkip=2
+    printf '%s\n' "${REPLY}" >>/c/Users/jcaillon/data/repo/github.com/jcaillon/valet/tmp/log
+
     log::print "WARNING" "${ICON_STOPPED:-}" "STOPPED" "Program interrupted by the user."
   fi
 
   if log::isDebugEnabled; then
     log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:"
     log::printTrappedBashCommand
-    log::printCallStack 2
+    log::printCallStack
   fi
 
   core::exit 1 silent=true
@@ -158,14 +168,7 @@ function trap::onCleanUpInternal() {
   # kill background processes if still running
   # we need to do this first because if one of the background is killed during "read"
   # it will restore the tty as it was when it entered read, effectively discarding our trap::restoreTerminal
-  if (( ${#GLOBAL_BACKGROUND_PIDS[@]} > 0 )); then
-    local pid
-    for pid in "${GLOBAL_BACKGROUND_PIDS[@]}"; do
-      log::debug "Killing background process with PID ${pid}."
-      kill -INT "${pid}" &>/dev/null || :
-      kill -HUP "${pid}" &>/dev/null || :
-    done
-  fi
+  trap::killBackgroundProcesses
 
   # restore the terminal as it was before running this program
   trap::restoreTerminal
@@ -202,6 +205,30 @@ function trap::restoreTerminal() {
     terminal::restoreSettings
     GLOBAL_TERMINAL_RAW_MODE_ENABLED=true
   fi
+}
+
+# Kill all background processes that are still running.
+function trap::killBackgroundProcesses() {
+  if [[ ${#GLOBAL_BACKGROUND_PROCESSES[@]} -eq 0 ]]; then
+    return 0
+  fi
+
+  local coprocName
+  for coprocName in "${!GLOBAL_BACKGROUND_PROCESSES[@]}"; do
+    log::debug "Killing background process ${coprocName} with PID ${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]}."
+    kill -INT "${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]}" &>/dev/null || :
+    kill -HUP "${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]}" &>/dev/null || :
+    # TODO: wait for the process to exit (max 500ms then kill -9)
+    if [[ -n ${GLOBAL_BACKGROUND_PROCESSES_LOGS[${coprocName}]:-} ]]; then
+      log::info "===================="$'\n'"Redirected logs for background process ${coprocName}:"
+      log::printString "===================="
+      # shellcheck disable=SC1091
+      source fs
+      fs::readFile "${GLOBAL_BACKGROUND_PROCESSES_LOGS[${coprocName}]:-}"
+      log::printRaw REPLY
+      log::printString "===================="
+    fi
+  done
 }
 
 # This function is called when the program is required to pause (stop/suspend).
@@ -281,15 +308,17 @@ function command_not_found_handle() {
   fi
 
   # check for recursive call
-  if [[ -v GLOBAL_COMMAND_NOT_FOUND ]]; then
+  if ((${GLOBAL_COMMAND_NOT_FOUND:-0} > 1)); then
+    return 1
+  elif ((${GLOBAL_COMMAND_NOT_FOUND:-0} == 1)); then
     # we are here if the error happened in a log function and thus we couldn't print the error
-    printf '%s\n%s\n' "Command not found: ⌜${commandNotFound}⌝." "Error in a log function." >&2
-    log::getCallStack 2
-    printf '%s\n' "${REPLY}" >&2
+    printf '%s\n%s\n' "Command not found: ⌜${commandNotFound}⌝." "Error in a log function." >&"${GLOBAL_FD_LOG}"
+    log::getCallStack stackToSkip=2
+    printf '%s\n' "${REPLY}" >&"${GLOBAL_FD_LOG}"
   else
-    GLOBAL_COMMAND_NOT_FOUND=1
+    GLOBAL_COMMAND_NOT_FOUND=$((${GLOBAL_COMMAND_NOT_FOUND:-0} + 1))
     log::print "ERROR" "${ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
-    log::printCallStack 2
+    log::printCallStack
   fi
 
   GLOBAL_EXPECTED_EXIT=true
@@ -328,12 +357,12 @@ function trap::onSubshellExitInternal() {
   if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" && ${GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT:-} == "true" && ${exitCode} -ne 0 ]]; then
     log::error "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
     log::printTrappedBashCommand
-    log::printCallStack 2
+    log::printCallStack
   elif log::isDebugEnabled; then
     if log::isTraceEnabled; then
       log::debug "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
       log::printTrappedBashCommand
-      log::printCallStack 2
+      log::printCallStack
     else
       log::debug "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}."
     fi

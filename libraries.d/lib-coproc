@@ -72,7 +72,7 @@ function coproc::runInParallel() {
   local -a -i pids=() runningPids=() exitCodes=()
   local -i index pid endedCoprocPid endedCoprocExitStatus endedCoprocIndex
   local -a logFiles=()
-  local logFile=""
+  local logFile="" coprocName
 
   for ((index = 0; index < ${#jobCommands[@]}; index++)); do
     if [[ ${redirectLogs} == "true" || ${printRedirectedLogs} == "true" ]]; then
@@ -81,7 +81,9 @@ function coproc::runInParallel() {
     fi
     logFiles+=("${logFile}")
 
-    coproc::run "${coprocNamePrefix}${index}" \
+    coprocName="${coprocNamePrefix}${index}"
+
+    coproc::run "${coprocName}" \
       initCommand="${jobCommands[index]}" \
       redirectLogsToFile="${logFile}" \
       logOnErrorExit="${logOnErrorExit}"
@@ -110,7 +112,7 @@ function coproc::runInParallel() {
       log::debug "The parallel coproc ${endedCoprocIndex} with PID ${endedCoprocPid} is completed with code ${endedCoprocExitStatus}."
 
       # remove the coproc from the list of running pids
-      coproc_removePidFromBackgroundPids "${endedCoprocPid}"
+      coproc_cleanBackgroundProcess "${coprocName}"
       local pidIndex
       for pidIndex in "${!runningPids[@]}"; do
         if [[ ${runningPids[pidIndex]} == "${endedCoprocPid}" ]]; then
@@ -231,7 +233,7 @@ function coproc::run() {
   shift 1
   eval "local a= ${*@Q}"
 
-  if [[ -v "${coprocVarName}" ]]; then
+  if [[ -v "GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}]" ]]; then
     core::fail "The coproc ⌜${coprocVarName}⌝ is already running."
   fi
 
@@ -244,7 +246,9 @@ function coproc::run() {
   # wait for pid variable to be set by bash (we should never enter the loop)
   local -i loopNumber=0
   while [[ ! -v "${coprocVarName}_PID" && ${loopNumber} -lt 500 ]]; do
-    sleep 0.01
+    # shellcheck disable=SC1091
+    source bash
+    bash::sleep 0.01
     loopNumber+=1
   done
 
@@ -252,14 +256,21 @@ function coproc::run() {
   if ! eval "local pid=\${${coprocVarName}_PID:-}" || [[ -z ${pid} ]]; then
     core::fail "Failed to get the PID for coproc ⌜${coprocVarName}⌝."
   fi
-  GLOBAL_BACKGROUND_PIDS+=("${pid}")
+
+  GLOBAL_BACKGROUND_PROCESSES["${coprocVarName}"]="${pid}"
+
+  if [[ -n ${redirectLogsToFile} ]]; then
+    # shellcheck disable=SC2034
+    GLOBAL_BACKGROUND_PROCESSES_LOGS["${coprocVarName}"]="${redirectLogsToFile}"
+  fi
 
   # tell the coproc to resume (it is waiting for the main thread to retrieve its PID)
   coproc::sendMessage "${coprocVarName}" ":"
 
   # wait for readiness if requested
   if [[ ${waitForReadiness} == "true" ]]; then
-    if ! kill -0 "${pid}" 2>/dev/null || ! coproc::receiveMessage "${coprocVarName}"; then
+    coproc::receiveMessage "${coprocVarName}"
+    if ((REPLY_CODE != 0)); then
       core::fail "The coproc ⌜${coprocVarName}⌝ did not start correctly."
     elif [[ ${REPLY} != "ready" ]]; then
       core::fail "The coproc ⌜${coprocVarName}⌝ did not send the expected readiness message."
@@ -290,12 +301,11 @@ function coproc_program() {
   # the coproc must have its own set of temp files
   fs::setupSubshellTempFileGlobalVariable
 
-  # unset options or they will be visible from the subshell and might interfere
   local IFS=' '$'\t'$'\n'
-  unset -v ${!_OPTION_*}
 
   if [[ -n ${redirectLogsToFile} ]]; then
-    log::init "${redirectLogsToFile}"
+    exec 2>"${redirectLogsToFile}"
+    log::init 2
   fi
 
   # wait for the main process to retrieve our PID
@@ -355,17 +365,18 @@ function coproc_program() {
 # ```bash
 # coproc::sendMessage "myCoproc" "Hello, coproc!"
 # ```
+#
+# > This printf call can cause the whole shell to exit with code 141 if there is an issue with the coproc.
+# > You will want to run this in a subshell to avoid exiting the main shell if your coproc is unstable.
 function coproc::sendMessage() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if ! eval "local coprocFd=\${${coprocVarName}[1]:-}" || [[ -z ${coprocFd} ]]; then
-    return 1
+  if eval "local coprocFd=\${${coprocVarName}[1]:-}" && [[ -n ${coprocFd} ]]; then
+    # This printf call can cause the whole shell to exit with code 141 if there is an issue
+    if { printf '%s\0' "${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" >&"${coprocFd}"; } 2>/dev/null; then
+      return 0
+    fi
   fi
-
-  if { printf '%s\0' "${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" >&"${coprocFd}"; } 2>/dev/null; then
-    return 0
-  fi
-
   return 1
 }
 
@@ -391,46 +402,13 @@ function coproc::sendMessage() {
 function coproc::receiveMessage() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if ! eval "local coprocFd=\${${coprocVarName}[0]:-}" || [[ -z ${coprocFd} ]]; then
-    return 1
+  REPLY=""
+  if eval "local coprocFd=\${${coprocVarName}[0]:-}" && [[ -n ${coprocFd} ]]; then
+    if { IFS=$'\0' read -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
+      return 0
+    fi
   fi
-
-  if { IFS=$'\0' read -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
-    return 0
-  fi
-
   return 1
-}
-
-# ## coproc::wait
-#
-# This function waits for a coproc to finish.
-#
-# - $1: **coproc variable name** _as string_:
-#       The variable name to use for the coproc.
-#
-# Returns:
-# - $?: The exit status of the coproc (or 0 if the coproc is not running).
-#
-# ```bash
-# coproc::wait "myCoproc"
-# ```
-function coproc::wait() {
-  local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-
-  if ! eval "local pid=\${${coprocVarName}_PID:-}" || [[ -z ${pid} ]]; then
-    return 0
-  fi
-
-  log::debug "Waiting for coproc ⌜${coprocVarName}⌝ (PID: ${pid}) to finish."
-
-  local -i exitStatus=0
-  if ! wait -f "${pid}"; then
-    exitStatus="${PIPESTATUS[0]:-}"
-  fi
-
-  coproc_removePidFromBackgroundPids "${pid}"
-  return "${exitStatus}"
 }
 
 # ## coproc::isRunning
@@ -454,13 +432,45 @@ function coproc::wait() {
 function coproc::isRunning() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if ! eval "local pid=\${${coprocVarName}_PID:-}" || [[ -z ${pid} ]]; then
-    return 1
+  if eval "local pid=\${${coprocVarName}_PID:-}" && [[ -n ${pid} ]]; then
+    if kill -0 "${pid}" 2>/dev/null; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
+# ## coproc::wait
+#
+# This function waits for a coproc to finish.
+#
+# - $1: **coproc variable name** _as string_:
+#       The variable name to use for the coproc.
+#
+# Returns:
+# - ${REPLY_CODE}: The exit status of the coproc (or -1 if the coproc is not running).
+#
+# ```bash
+# coproc::wait "myCoproc"
+# ```
+function coproc::wait() {
+  local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  if [[ ! -v GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}] ]]; then
+    REPLY_CODE=-1
+    return 0
+  fi
+  local pid="${GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}]}"
+
+  log::debug "Waiting for coproc ⌜${coprocVarName}⌝ (PID: ${pid}) to finish."
+
+  local -i exitStatus=0
+  if ! wait -f "${pid}"; then
+    exitStatus="${PIPESTATUS[0]:-}"
   fi
 
-  if ! kill -0 "${pid}" 2>/dev/null; then
-    return 1
-  fi
+  coproc_cleanBackgroundProcess "${coprocVarName}"
+  REPLY_CODE="${exitStatus}"
 }
 
 # ## coproc::kill
@@ -476,27 +486,22 @@ function coproc::isRunning() {
 function coproc::kill() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if ! eval "local pid=\${${coprocVarName}_PID:-}" || [[ -z ${pid} ]]; then
+  if [[ ! -v GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}] ]]; then
     return 0
   fi
+  local pid="${GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}]}"
 
   log::debug "Killing coproc ⌜${coprocVarName}⌝ (PID: ${pid})."
 
-  if kill "${pid}" &>/dev/null; then
-    coproc_removePidFromBackgroundPids "${pid}"
-    unset -v "${coprocVarName}" "${coprocVarName}_PID"
-  fi
+  kill -INT "${pid}" &>/dev/null || :
+  kill -HUP "${pid}" &>/dev/null || :
+
+  coproc_cleanBackgroundProcess "${coprocVarName}"
 }
 
-# Remove the coproc pid from GLOBAL_BACKGROUND_PIDS
-function coproc_removePidFromBackgroundPids() {
-  local -i pid="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-
-  local index
-  for index in "${!GLOBAL_BACKGROUND_PIDS[@]}"; do
-    if [[ ${GLOBAL_BACKGROUND_PIDS[index]} == "${pid}" ]]; then
-      unset -v 'GLOBAL_BACKGROUND_PIDS[index]'
-      break
-    fi
-  done
+# Remove the coproc from GLOBAL_BACKGROUND_PROCESSES
+function coproc_cleanBackgroundProcess() {
+  local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  unset -v "GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}]" "${coprocVarName}" "${coprocVarName}_PID"
 }
+
