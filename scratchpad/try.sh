@@ -8,6 +8,8 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<sub
 source "$(valet --source)"
 include tui coproc fs
 
-read -rd '' REPLY < 'tests.d/lib-fs/resources/file-to-read' || [[ ${#REPLY} -gt 0 ]]
 
-echo "${REPLY}"
+exec {GLOBAL_FD_LOG2}>&2
+exec 2>&${GLOBAL_FD_LOG2}
+
+echo "ok?" >&"${GLOBAL_FD_LOG2}"

@@ -1088,7 +1088,7 @@ function log::parseLogPattern() {
 # Indeed, each log function might have to output the same log to different file descriptors or files,
 # we don't want to repeat code and we don't want to recompute the same output logic on each function.
 #
-# - $1: log file descriptor _as string_:
+# - ${logFileDescriptor} _as string_:
 #       (optional) The variable name to use for the coproc.
 #       (defaults to "${VALET_CONFIG_LOG_FD}" which defaults to 2).
 # - ${logPattern} _as string_:
@@ -1117,7 +1117,11 @@ function log::parseLogPattern() {
 # - $[GLOBAL_LOG_DISABLE_WRAP}: true if the log should not be wrapped.
 # shellcheck disable=SC2120
 function log::init() {
-  local logFileDescriptor="${1:-${VALET_CONFIG_LOG_FD:-}}"
+  local \
+    logFileDescriptor="${VALET_CONFIG_LOG_FD:-}" \
+    logPattern="" \
+    IFS=$' '
+  eval "local a= ${*@Q}"
 
   GLOBAL_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
   GLOBAL_LOG_DISABLE_WRAP="${VALET_CONFIG_LOG_DISABLE_WRAP:-false}"
@@ -1126,16 +1130,14 @@ function log::init() {
   if [[ -v GLOBAL_FD_LOG ]]; then
     # close if already opened
     exec {GLOBAL_FD_LOG}>&-
-    if [[ -v GLOBAL_FD_ORIGINAL_STDERR ]]; then
-      # restore the original stderr if it was modified
-      exec 2>&${GLOBAL_FD_ORIGINAL_STDERR}
-      exec {GLOBAL_FD_ORIGINAL_STDERR}>&-
-      unset -v GLOBAL_FD_ORIGINAL_STDERR
-    fi
   fi
 
   # make sure the file descriptor (if any) is valid
-  if [[ -n ${logFileDescriptor} && ${logFileDescriptor} != "2" ]]; then
+  if [[ -n ${logFileDescriptor} && ${logFileDescriptor} == "2" ]]; then
+    # case where we want to force the errors/logs to fd 2 (no matter where this points to)
+    exec {GLOBAL_FD_LOG}>&2
+    logFileDescriptor="2"
+  elif [[ -n ${logFileDescriptor} ]]; then
     local isFdValid=false
     if [[ ${logFileDescriptor} =~ ^[0-9]+$ ]]; then
       if { : >&"${logFileDescriptor}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>&${logFileDescriptor}; then
@@ -1148,13 +1150,12 @@ function log::init() {
     if [[ ${isFdValid} != "true" ]]; then
       core::fail "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${logFileDescriptor}⌝."
     fi
-    # save the original stderr fd so we can restore it if we call log::init again
-    exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
     # we also redirect the builtin bash errors to the same FD so we can have them along the logs
     exec 2>&${GLOBAL_FD_LOG}
   else
-    exec {GLOBAL_FD_LOG}>&2
-    logFileDescriptor="${logFileDescriptor:-2}"
+    exec {GLOBAL_FD_LOG}>&"${GLOBAL_FD_ORIGINAL_STDERR}"
+    exec 2>&"${GLOBAL_FD_ORIGINAL_STDERR}"
+    logFileDescriptor="${GLOBAL_FD_ORIGINAL_STDERR}"
   fi
 
   local progressBarCode progressBarCode2 progressBarCode3 outputCode
@@ -1163,7 +1164,7 @@ function log::init() {
     outputCode="1>&${logFileDescriptor}"
 
     # clear the line before printing if we are display a progress bar/spinner
-    if [[ -t ${GLOBAL_FD_TUI} || ${GLOBAL_TEST_FORCE_FD_OPEN:-} == "true" ]]; then
+    if [[ -t ${logFileDescriptor} || ${GLOBAL_TEST_FORCE_FD_OPEN:-} == "true" ]]; then
       progressBarCode="local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'\e[2K'; fi"$'\n'
       progressBarCode2="\${eraseLine:-}"
       progressBarCode3=$'\n'"if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi"$'\n'

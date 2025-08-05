@@ -304,8 +304,8 @@ function coproc_program() {
   local IFS=' '$'\t'$'\n'
 
   if [[ -n ${redirectLogsToFile} ]]; then
-    exec 2>"${redirectLogsToFile}"
-    log::init 2
+    # exec 2>
+    log::init logFileDescriptor="${redirectLogsToFile}"
   fi
 
   # wait for the main process to retrieve our PID
@@ -502,6 +502,8 @@ function coproc::kill() {
 # Remove the coproc from GLOBAL_BACKGROUND_PROCESSES
 function coproc_cleanBackgroundProcess() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  unset -v "GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}]" "${coprocVarName}" "${coprocVarName}_PID"
+  unset -v "GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}]" \
+    "GLOBAL_BACKGROUND_PROCESSES_LOGS[${coprocVarName}]" \
+    "${coprocVarName}" \
+    "${coprocVarName}_PID"
 }
-

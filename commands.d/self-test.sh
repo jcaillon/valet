@@ -451,11 +451,12 @@ function selfTest_runSingleTest() {
   # redirect the standard output and error output to files
   exec 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
   exec 2>"${GLOBAL_TEST_STANDARD_ERROR_FILE}"
-  
+
   # since we changed fd2, we also need to redeclare fd that point to fd2
+  # shellcheck disable=SC2034
+  exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
   exec {GLOBAL_FD_LOG}>&2
   exec {GLOBAL_FD_TUI}>&2
-  unset -v GLOBAL_FD_ORIGINAL_STDERR
 
   # modify the trap functions to capture the stack trace at script exit/error
   eval "${_TEST_TRAP_FUNCTIONS_MODIFIED}"

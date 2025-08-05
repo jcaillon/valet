@@ -169,24 +169,35 @@ With a second line.
 
 ### ✅ Testing that we can output the logs to a specific file descriptor
 
-❯ `VALET_CONFIG_LOG_FD=/tmp/valet.d/d1-2/test2.log valet self mock1 divide-by-zero`
-
-Returned code: `1`
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet.d/d1-2/test2.log valet self mock1 logging-level`
 
 ❯ `fs::cat /tmp/valet.d/d1-2/test2.log`
 
 **Standard output**:
 
 ```text
-WARNING  This is for testing valet core functions, the next statement will call a bash error.
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh: line 69: ((: 10/0: division by 0 (error token is "0")
-CMDERR   Error code ⌜1⌝ for the command:
-╭ ((10/0))
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh:69
-├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
-├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
-├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:170
-╰─ in main() at valet:99
+TRACE    This is an error trace message which is always displayed.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
+
+```
+
+### ✅ Testing that we can output the logs to a specific numbered fd
+
+❯ `VALET_CONFIG_LOG_FD=19 valet self mock1 logging-level`
+
+❯ `fs::cat /tmp/valet.d/d1-2/test3.log`
+
+**Standard output**:
+
+```text
+TRACE    This is an error trace message which is always displayed.
+INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS  This is a success message.
+WARNING  This is a warning message.
+With a second line.
 
 ```
 

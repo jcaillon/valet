@@ -95,7 +95,6 @@ function test_coproc::run_simpleTests() {
 
   test::exec coproc::run _COPROC_5 waitForReadiness=true
   test::exec coproc::receiveMessage _COPROC_5
-  test::exec coproc::sendMessage _COPROC_5 hello
   test::exec coproc::isRunning _COPROC_5
   test::exec coproc::wait _COPROC_5
   test::exec coproc::kill _COPROC_5

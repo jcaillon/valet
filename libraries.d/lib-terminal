@@ -152,7 +152,7 @@ function terminal::restoreSettings() {
     return 0
   fi
   if [[ ! -t 0 && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
-    if [[ -n ${GLOBAL_FD_STDIN:-} && -t ${GLOBAL_FD_STDIN:-} ]] && exec 0<&"${GLOBAL_FD_STDIN}"; then
+    if [[ -n ${GLOBAL_FD_ORIGINAL_STDIN:-} && -t ${GLOBAL_FD_ORIGINAL_STDIN:-} ]] && exec 0<&"${GLOBAL_FD_ORIGINAL_STDIN}"; then
       log::debug "Restored terminal fd before using stty command."
     else
       core::fail "stdin is not a terminal, cannot reset mode."
@@ -179,7 +179,7 @@ function terminal::rerouteLogs() {
     fs::createTempFile pathOnly=true
     _TUI_LOG_FILE="${REPLY}"
   fi
-  log::init "${_TUI_LOG_FILE}"
+  log::init logFileDescriptor="${_TUI_LOG_FILE}"
   GLOBAL_LOG_REROUTED_TO_FILE_ENABLED=true
 }
 
@@ -202,6 +202,7 @@ function terminal::restoreLogs() {
     fs::readFile "${_TUI_LOG_FILE}"
     log::printRaw REPLY
   fi
+  unset -v GLOBAL_LOG_REROUTED_TO_FILE_ENABLED
 }
 
 # ## terminal::setInterruptTrap (private)

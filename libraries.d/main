@@ -70,11 +70,12 @@ if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
   profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${REPLY}/logs/${_PROFILER_FILE_NAME}"}"
 fi
 
-# fd where we write the TUI
-exec {GLOBAL_FD_TUI}>&2
+# save the original stdin/stderr fd
+exec {GLOBAL_FD_ORIGINAL_STDIN}<&0
+exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
 
-# save stdin fd
-exec {GLOBAL_FD_STDIN}<&0
+# fd where we write the TUI
+GLOBAL_FD_TUI="${GLOBAL_FD_ORIGINAL_STDERR}"
 
 # set the signal traps
 trap::register

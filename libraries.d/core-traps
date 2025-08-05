@@ -21,9 +21,9 @@ function trap::onErrorInternal() {
 
   if [[ ${FUNCNAME[1]:-} == "log::"* ]]; then
     # we are here if the error happened in a log function and thus we couldn't print the error
-    printf '%s\n%s\n%s\n' "The command had a return code of ${errorCodesString}." "Error in a log function:" "${BASH_COMMAND:-}" >&"${GLOBAL_FD_LOG}"
+    printf '%s\n%s\n%s\n' "The command had a return code of ${errorCodesString}." "Error in a log function:" "${BASH_COMMAND:-}" >&"${GLOBAL_FD_LOG:-2}"
     log::getCallStack stackToSkip=2
-    printf '%s\n' "${REPLY}" >&"${GLOBAL_FD_LOG}"
+    printf '%s\n' "${REPLY}" >&"${GLOBAL_FD_LOG:-2}"
     return 0
   fi
 
@@ -80,8 +80,6 @@ function trap::onExitInternal() {
 
   # always call cleanUp before exiting
   trap::onCleanUpInternal
-  echo "done ${BASHPID}">>/c/Users/jcaillon/data/repo/github.com/jcaillon/valet/tmp/log
-
 }
 
 # This function is called when the program is interrupted by the user (CTRL+C).
@@ -95,7 +93,6 @@ function trap::onInterruptInternal() {
       return 0
     fi
   fi
-  echo "interrupted ${BASHPID}">>/c/Users/jcaillon/data/repo/github.com/jcaillon/valet/tmp/log
 
   # reset the trap to not call this function again
   trap SIGINT SIGQUIT
@@ -104,10 +101,6 @@ function trap::onInterruptInternal() {
     printf '\n' 1>&"${GLOBAL_FD_TUI}" # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
   if [[ ${GLOBAL_WARN_ON_INTERRUPT_DISABLED:-} != "true" ]]; then
-    ls -l /proc/"${BASHPID}"/fd>>/c/Users/jcaillon/data/repo/github.com/jcaillon/valet/tmp/log
-    log::getCallStack stackToSkip=2
-    printf '%s\n' "${REPLY}" >>/c/Users/jcaillon/data/repo/github.com/jcaillon/valet/tmp/log
-
     log::print "WARNING" "${ICON_STOPPED:-}" "STOPPED" "Program interrupted by the user."
   fi
 
@@ -312,9 +305,9 @@ function command_not_found_handle() {
     return 1
   elif ((${GLOBAL_COMMAND_NOT_FOUND:-0} == 1)); then
     # we are here if the error happened in a log function and thus we couldn't print the error
-    printf '%s\n%s\n' "Command not found: ⌜${commandNotFound}⌝." "Error in a log function." >&"${GLOBAL_FD_LOG}"
+    printf '%s\n%s\n' "Command not found: ⌜${commandNotFound}⌝." "Error in a log function." >&"${GLOBAL_FD_LOG:-2}"
     log::getCallStack stackToSkip=2
-    printf '%s\n' "${REPLY}" >&"${GLOBAL_FD_LOG}"
+    printf '%s\n' "${REPLY}" >&"${GLOBAL_FD_LOG:-2}"
   else
     GLOBAL_COMMAND_NOT_FOUND=$((${GLOBAL_COMMAND_NOT_FOUND:-0} + 1))
     log::print "ERROR" "${ICON_ERROR:-}" "CMDMISS" "${errorMessage}"
