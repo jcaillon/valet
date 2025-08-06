@@ -200,5 +200,6 @@ doSomething <myfile
 ```
 
 {{< cards >}}
-  {{< card icon="arrow-circle-left" link="../work-on-bash-scripts" title="Work on bash scripts" >}}
+  {{< card icon="arrow-circle-left" link="../bash-best-practices" title="Bash best practices" >}}
+  {{< card icon="arrow-circle-right" link="../valet-internals" title="Valet internals" >}}
 {{< /cards >}}

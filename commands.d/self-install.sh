@@ -134,7 +134,7 @@ function selfUpdate() {
       -s | --single-user-installation)
         singleUserInstallation="true"
         ;;
-      -v | --version)
+      --version)
         shift
         [[ $# -eq 0 ]] && core::fail "Missing value for 'version number' after the option --version."
         version="${1}"

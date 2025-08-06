@@ -71,10 +71,10 @@ function exe::invokef5() {
     if [[ -n ${stdIn} ]]; then
       if [[ ${stdInFromFile} == "true" ]]; then
         log::trace "${executable^} standard input from file ${stdIn}:"
-        log::saveFile "${stdIn}" "${executable}-stdin"
+        log::saveFile "${stdIn}" suffix="${executable}-stdin" logPath=true
       else
         log::trace "${executable^} standard input from string:"
-        log::saveFileString stdIn "${executable}-stdin"
+        log::saveFileString stdIn suffix="${executable}-stdin" logPath=true
       fi
     else
       log::trace "No standard input."
@@ -134,7 +134,7 @@ function exe::invokef5() {
         # print std out
         if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
           log::errorTrace "${executable^} standard output stream:"
-          log::saveFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" "${executable}-stdout"
+          log::saveFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" suffix="${executable}-stdout" logPath=true
           log::printFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" maxLines=99
         else
           log::errorTrace "${executable^} had no standard output stream."
@@ -143,7 +143,7 @@ function exe::invokef5() {
         # print stderr
         if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
           log::errorTrace "${executable^} standard error stream:"
-          log::saveFile "${GLOBAL_TEMPORARY_STDERR_FILE}" "${executable}-stderr"
+          log::saveFile "${GLOBAL_TEMPORARY_STDERR_FILE}" suffix="${executable}-stderr" logPath=true
           log::printFile "${GLOBAL_TEMPORARY_STDERR_FILE}" maxLines=99
         else
           log::errorTrace "${executable^} had no standard error stream."

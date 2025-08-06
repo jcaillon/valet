@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- benchmark time::getElasped with and w/o eval
 - allow to break a test without approval testing it (cancel it basically). This will allow use to run docker if it is present and make a real test for the self install / extend commands.
 - Make the program parser catch all global options and verify in the build command that we do not reuse the same global option in different commands.
 - Check error handling inside ifs and evals.
@@ -18,6 +19,9 @@ This page lists the features that I would like to implement in Valet. They come 
 - in performance tip, document the use of -n
 - self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.
 - conditionally show global options because they take too much space
+- Arguments parser:
+  - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
+  - Allow flags to be inherited from parent commands. We can check the existence of the base flags in the command::parse function (for verbose, log level, progress bars). For source and version, mark them as `inherited: false` as we only want to handle them in the main parsing loop, at valet level.
 - add a global --edit option to edit the command function file
 - for the showcase, actually build a small app like a git conventional commit tool.
 - prompt:
@@ -36,8 +40,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - In benchmark, with debug mode on, we can compute the time spent on each line of a function. See extdebug shopt.
 - add snippets for the esc codes. Add snippets on the global variables.
 - Demo with ascii cinema: https://asciinema.org. Put the showcase in the index page instead.
-- For all the optional arguments of exported functions, allow to set them using a global variable `_OPTION_*` in addition to the positional argument. Add this in the documentation about functions.
-- allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
 - Revamp self build:
   - add more checks on command definition
   - Filter build command for `commands.d` directory
@@ -69,5 +71,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Add an option to enter interactive debug mode when an error occurs and on each log::print call.
 - Add a function to display a table, use it for benchmark.
 - Add a function to display a text using figlet fonts.
+- Modify self install: at the moment we count on the fact that some functions will still exist in valet after an update. The simplest is to redownload the self install script and run it again.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues

@@ -9,9 +9,13 @@ description: Learn how to install Valet on your system.
 
 ## 📦 Dependencies
 
-- Bash version 5 or superior is required (it uses bash `EPOCHREALTIME`).
-- From [GNU coreutils][gnu-core-utils]: it uses `rm`, `mv`, `cp`, `mkdir` for all commands. It uses `chmod`, `touch` for the installation/updates. It falls back to using `cmp`, `diff`, `mkfifo` in some cases. *You most likely already have all of these!*
-- [curl][curl] and [tar][tar] are needed only if you want to use the `self update` or `self extend` command.
+- Bash version 5 or superior is required (it uses bash `EPOCHREALTIME` among other features introduced in bash 5).
+- [GNU coreutils][gnu-core-utils]: valet uses `rm`, `mv`, `cp`, `mkdir` as they can't be done in pure bash. It also uses `chmod`, `touch` for the installation/updates.
+- [curl][curl] and [tar][tar]: needed only if you want to use the `self update` or `self extend` command.
+  
+Other external programs can be used if found but are not required[^exhaustive-programs-list].
+
+
 
 ## 🚚 Automated installation
 
@@ -85,3 +89,4 @@ Alternatively, use `docker run --rm -it noyacode/valet` to pull and run the imag
 [podman]: https://podman.io/
 [valetImageTagsLink]: https://github.com/jcaillon/valet/pkgs/container/valet
 [nerdFontsLink]: https://www.nerdfonts.com/font-downloads
+[^exhaustive-programs-list]: Other external programs that can be used by Valet if present: `delta`, `diff`, `git`, `cmp`, `readlink`, `ls`, `lsof`, `ps`, `fzf`, `grep`, `cygpath`.

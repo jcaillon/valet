@@ -141,6 +141,9 @@ function core::fail() {
 #
 # Allows to source/include a library file or sources a file.
 #
+# When sourcing a library, omit the `lib-` prefix.
+# It will source all user and core libraries with the given name.
+#
 # It replaces the builtin source command to make sure that we do not source the same library twice.
 # We replace source instead of creating a new function to allow us to
 # specify the included file for spellcheck.
@@ -427,7 +430,7 @@ function core::getExtensionsDirectory() {
 # Can be used to save the state of important temporary files generated during a program
 # execution.
 #
-# - $1: **file suffix** _as string_:
+# - ${suffix} _as string_:
 #       The suffix for the file to create.
 #
 # Returns:
@@ -435,12 +438,22 @@ function core::getExtensionsDirectory() {
 # - ${REPLY}: The path to the created file.
 #
 # ```bash
-# core::createSavedFilePath "my-file"
+# core::createSavedFilePath
+# core::createSavedFilePath suffix="my-file"
 # printf '%s\n' "The file is ⌜${REPLY}⌝."
 # ```
 function core::createSavedFilePath() {
+  local \
+    suffix="" \
+    IFS=$' '
+  eval "local a= ${*@Q}"
+
+  if [[ -n ${suffix} ]]; then
+    suffix="--${suffix}"
+  fi
+
   local filePath
-  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d--%s" "${EPOCHSECONDS}" "${BASHPID}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d%s" "${EPOCHSECONDS}" "${BASHPID}" "${suffix}"
   core::getUserStateDirectory
   if [[ ! -d "${REPLY}/saved-files" ]]; then
     mkdir -p "${REPLY}/saved-files"

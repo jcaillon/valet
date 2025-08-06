@@ -8,6 +8,27 @@
 # >>> Traps
 #===============================================================
 
+# ## trap::register (private)
+#
+# Register the traps for the program.
+function trap::register() {
+  trap trap::onErrorInternal ERR
+  trap trap::onExitInternal EXIT
+  # Register CTRL+C SIGINT (interrupt) and CTRL+\ SIGQUIT (interrupt with a coredump) event handler
+  trap trap::onInterruptInternal SIGINT SIGQUIT
+  # Register SIGHUP (hang up, terminal disconnected) and SIGTERM (terminate the program) event handler
+  trap trap::onTerminateInternal SIGHUP SIGTERM
+  # Register CTRL+Z SIGTSTP (stop/suspend from tty)
+  trap trap::onSuspendInternal SIGTSTP
+  # Register SIGCONT (continue with fg or bg after suspend) event handler
+  trap trap::onContinueInternal SIGCONT
+  if [[ -t 2 ]]; then
+    # shellcheck disable=SC2034
+    GLOBAL_SCREEN_REDRAW_REQUIRED=false
+    trap trap::onResizeInternal SIGWINCH
+  fi
+}
+
 # This function is called when a command or pipeline returns a non-zero exit status.
 # It is executed in the same shell as the command that failed, as if we called this function
 # at the line where the command failed.
@@ -51,31 +72,12 @@ function trap::onErrorInternal() {
 # It is executed in the same shell that exited, as if we called this function
 # at the line where the exit command is called.
 function trap::onExitInternal() {
-  local exitCode="$?"
+  local exitCode="${?}"
 
-  # disable errexit to avoid exiting before cleaning up
-  set +o errexit
-
-  if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || (${GLOBAL_EXPECTED_EXIT:-} != "true" && ${exitCode} != "0") ]]; then
-    dumpSuffix="-${exitCode}" core::dump
-  fi
-
-  log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
-
-  if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" ]]; then
-    if [[ ${VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT:-} == "true" && ! ${BASH_COMMAND:-} =~ ^(exit|return) ]]; then
-      log::print "WARNING" "${ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
-      log::printTrappedBashCommand
-      log::printCallStack
-    elif (( exitCode != 0 )); then
-      log::print "ERROR" "${ICON_EXIT:-}" "EXIT" "Exiting with code ${exitCode}, stack:"
-      log::printTrappedBashCommand
-      log::printCallStack
-    fi
-  fi
-
-  if [[ -n ${GLOBAL_ON_EXIT_MESSAGE:-} ]]; then
-    log::error "${GLOBAL_ON_EXIT_MESSAGE}"
+  # as we want to make sure that we execute the cleanup function, we use the fact that
+  # commands in if statements do not exit the program on error
+  if trap::onExitInternalSafe "${exitCode}"; then
+    :
   fi
 
   # always call cleanUp before exiting
@@ -95,6 +97,15 @@ function trap::onInterruptInternal() {
   # reset the trap to not call this function again
   trap SIGINT SIGQUIT
 
+  if [[ ${_TRAP_PROGRAM_INTERRUPTED:-} == "true" ]]; then
+    # we are here if the program was already interrupted,
+    # it can happen if the user pressed CTRL+C multiple times
+    # we are already exiting and we want the program to exit gracefully so
+    # stop there
+    return 0
+  fi
+  _TRAP_PROGRAM_INTERRUPTED=true
+
   if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
     printf '\n' 1>&"${GLOBAL_FD_TUI}" # Set cursor to the next line of '^C' (only if stty echo is on)
   fi
@@ -112,6 +123,7 @@ function trap::onInterruptInternal() {
 }
 
 # This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
+# It is called from the main process.
 function trap::onTerminateInternal() {
   # check if the function exists
   if declare -F trap::onTerminate &>/dev/null && trap::onTerminate; then
@@ -128,6 +140,9 @@ function trap::onTerminateInternal() {
 }
 
 # This function is called when terminal changes its size.
+# It is called from the main process and it will not be triggered if the program is
+# busy running an external command (e.g. sleep). Note that the builtin read command
+# also blocks this trigger only it is finished.
 function trap::onResizeInternal() {
   local currentSize="${GLOBAL_COLUMNS}x${GLOBAL_LINES}"
   terminal::getTerminalSize
@@ -154,82 +169,11 @@ function trap::onResizeInternal() {
   fi
 }
 
-# This functions is called before the program exits (in all cases, error or not).
-function trap::onCleanUpInternal() {
-  # kill background processes if still running
-  # we need to do this first because if one of the background is killed during "read"
-  # it will restore the tty as it was when it entered read, effectively discarding our trap::restoreTerminal
-  trap::killBackgroundProcesses
-
-  # restore the terminal as it was before running this program
-  trap::restoreTerminal
-
-  # call the clean up functions if they exist
-  if declare -F trap::onCleanUp &>/dev/null && trap::onCleanUp; then
-    # (we execute it in a if statement to disable errexit and avoid exiting the program)
-    :
-  fi
-
-  # disable the profiler if still on
-  if [[ ${GLOBAL_PROFILER_ENABLED:-} == "true" ]]; then
-    profiler::disable
-  fi
-
-  fs::cleanTempFiles
-}
-
-# restore the terminal in its original state, before running valet
-function trap::restoreTerminal() {
-  # if we are in interactive mode, we need to restore the cursor
-  if [[ -t ${GLOBAL_FD_TUI} && ${VALET_CONFIG_DISABLE_ESC_CODES:-} != "true" ]]; then
-    printf '%s' "${ESC__CURSOR_SHOW_FORCE:-$'\e[?25h'}" 1>&"${GLOBAL_FD_TUI}"
-    printf '%s' "${ESC__DISABLE_MOUSE_BUTTON_TRACKING:-$'\e[?1006l'$'\e[?1000l'}${ESC__DISABLE_MOUSE_ANY_EVENT_TRACKING:-$'\e[?1006l'$'\e[?1003l'}" 1>&"${GLOBAL_FD_TUI}"
-  fi
-
-  # if we were in interactive mode, we need to restore the logs
-  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} == "true" ]]; then
-    terminal::restoreLogs
-    GLOBAL_LOG_REROUTED_TO_FILE_ENABLED=true
-  fi
-
-  # restore tty settings if needed
-  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} == "true" ]]; then
-    terminal::restoreSettings
-    GLOBAL_TERMINAL_RAW_MODE_ENABLED=true
-  fi
-}
-
-# Kill all background processes that are still running.
-function trap::killBackgroundProcesses() {
-  if [[ ${#GLOBAL_BACKGROUND_PROCESSES[@]} -eq 0 ]]; then
-    return 0
-  fi
-
-  local coprocName
-  for coprocName in "${!GLOBAL_BACKGROUND_PROCESSES[@]}"; do
-    log::debug "Killing background process ${coprocName} with PID ${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]}."
-    kill -INT "${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]}" &>/dev/null || :
-    kill -HUP "${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]}" &>/dev/null || :
-    # TODO: wait for the process to exit (max 500ms then kill -9)
-    if [[ -n ${GLOBAL_BACKGROUND_PROCESSES_LOGS[${coprocName}]:-} ]]; then
-      log::info "===================="$'\n'"Redirected logs for background process ${coprocName}:"
-      log::printString "===================="
-      # shellcheck disable=SC1091
-      source fs
-      fs::readFile "${GLOBAL_BACKGROUND_PROCESSES_LOGS[${coprocName}]:-}"
-      log::printRaw REPLY
-      log::printString "===================="
-    fi
-    log::info "!GLOBAL_BACKGROUND_PROCESSES -> ${!GLOBAL_BACKGROUND_PROCESSES[*]}"
-    log::info "GLOBAL_BACKGROUND_PROCESSES -> ${GLOBAL_BACKGROUND_PROCESSES[*]}"
-    log::info "GLOBAL_BACKGROUND_PROCESSES_LOGS -> ${GLOBAL_BACKGROUND_PROCESSES_LOGS[*]}"
-  done
-}
-
 # This function is called when the program is required to pause (stop/suspend).
 # Usually this is called when the user presses CTRL+Z in bash.
 function trap::onSuspendInternal() {
   # avoid multiple calls
+  # shellcheck disable=SC2034
   trap SIGTSTP
 
   # check if the function exists
@@ -237,6 +181,17 @@ function trap::onSuspendInternal() {
     # if trap::onSuspend returns 0, then we cancel the suspend
     # (we execute it in a if statement to disable errexit and avoid exiting the program)
     return 0
+  fi
+
+  # save these value to restore them on continue
+  # shellcheck disable=SC2034
+  declare -g \
+    GLOBAL_LOG_REROUTED_TO_FILE_ENABLED_SAVED="${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED}" \
+    GLOBAL_TERMINAL_RAW_MODE_ENABLED_SAVED="${GLOBAL_TERMINAL_RAW_MODE_ENABLED}"
+
+  # if we were in interactive mode, we need to restore the logs
+  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} == "true" ]]; then
+    terminal::restoreLogs
   fi
 
   # restore the terminal in its original state, before running valet
@@ -272,17 +227,16 @@ function trap::onContinueInternal() {
   fi
 
   # restore tty settings if needed
-  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} == "true" ]]; then
-    unset -v GLOBAL_TERMINAL_RAW_MODE_ENABLED
+  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED_SAVED:-} == "true" ]]; then
     terminal::setRawMode
   fi
 
   # if we were in interactive mode, we need to restore the logs
-  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} == "true" ]]; then
-    unset -v GLOBAL_LOG_REROUTED_TO_FILE_ENABLED
+  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED_SAVED:-} == "true" ]]; then
     terminal::rerouteLogs
   fi
 
+  # shellcheck disable=SC2034
   GLOBAL_SCREEN_REDRAW_REQUIRED=true
 }
 
@@ -322,47 +276,155 @@ function command_not_found_handle() {
   # but we set $? to 1 so ERR trap is called
 }
 
-# ## trap::register (private)
-#
-# Register the traps for the program.
-function trap::register() {
-  trap trap::onErrorInternal ERR
-  trap trap::onExitInternal EXIT
-  # Register CTRL+C SIGINT (interrupt) and CTRL+\ SIGQUIT (interrupt with a coredump) event handler
-  trap trap::onInterruptInternal SIGINT SIGQUIT
-  # Register SIGHUP (hang up, terminal disconnected) and SIGTERM (terminate the program) event handler
-  trap trap::onTerminateInternal SIGHUP SIGTERM
-  # Register CTRL+Z SIGTSTP (stop/suspend from tty)
-  trap trap::onSuspendInternal SIGTSTP
-  # Register SIGCONT (continue with fg or bg after suspend) event handler
-  trap trap::onContinueInternal SIGCONT
-  if [[ -t 2 ]]; then
-    # shellcheck disable=SC2034
-    GLOBAL_SCREEN_REDRAW_REQUIRED=false
-    trap trap::onResizeInternal SIGWINCH
-  fi
-}
-
-# This function is called when a subshell exits (on error, on success, on exit, on interrupt).
-# It is executed in the process that exited, as if we called this function
+# This function is called when the program exits (on error, on success, on exit, on interrupt).
+# It is executed in the same shell that exited, as if we called this function
 # at the line where the exit command is called.
-function trap::onSubshellExitInternal() {
-  local exitCode="$?"
+function trap::onExitInternalSafe() {
+  local exitCode="${1}"
 
-  if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" && ${GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT:-} == "true" && ${exitCode} -ne 0 ]]; then
-    log::error "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
-    log::printTrappedBashCommand
-    log::printCallStack
-  elif log::isDebugEnabled; then
-    if log::isTraceEnabled; then
-      log::debug "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
+  if [[ ${VALET_CONFIG_CORE_DUMP_ON_EXIT:-} == "true" || (${GLOBAL_EXPECTED_EXIT:-} != "true" && ${exitCode} != "0") ]]; then
+    core::dump dumpSuffix="-exit-${exitCode}"
+  fi
+
+  # if we were in interactive mode, we need to restore the logs
+  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} == "true" ]]; then
+    terminal::restoreLogs
+  fi
+
+  log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
+
+  if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" ]]; then
+    if [[ ${VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT:-} == "true" && ! ${BASH_COMMAND:-} =~ ^(exit|return) ]]; then
+      log::print "WARNING" "${ICON_EXIT:-}" "EXIT" "Unexpected exit with code ${exitCode}:"
       log::printTrappedBashCommand
       log::printCallStack
-    else
-      log::debug "Exiting subshell depth ${BASH_SUBSHELL} with code ${exitCode}."
+    elif ((exitCode != 0)); then
+      log::print "ERROR" "${ICON_EXIT:-}" "EXIT" "Exiting with code ${exitCode}, stack:"
+      log::printTrappedBashCommand
+      log::printCallStack
     fi
   fi
+
+  if [[ -n ${GLOBAL_ON_EXIT_MESSAGE:-} ]]; then
+    log::error "${GLOBAL_ON_EXIT_MESSAGE}"
+  fi
 }
+
+# This functions is called before the program exits (in all cases, error or not).
+# Important note: we can end up here while having the stdout/stderr redirected somewhere
+# else (for example because the program exited in a command &>/dev/null). So we need to make
+# sure to use our GLOBAL_FD variables to actually access the original stdout/stderr.
+function trap::onCleanUpInternal() {
+  if declare -F progress::stop &>/dev/null; then
+    progress::stop
+  fi
+
+  # kill background processes if still running
+  # we need to do this first because if one of the background is killed during "read"
+  # it will restore the tty as it was when it entered read, effectively discarding our trap::restoreTerminal
+  trap::killBackgroundProcesses
+
+  # restore the terminal as it was before running this program
+  trap::restoreTerminal
+
+  # call the clean up functions if they exist
+  if declare -F trap::onCleanUp &>/dev/null && trap::onCleanUp; then
+    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+    :
+  fi
+
+  # disable the profiler if still on
+  if [[ ${GLOBAL_PROFILER_ENABLED:-} == "true" ]]; then
+    profiler::disable
+  fi
+
+  fs::cleanTempFiles
+}
+
+# restore the terminal in its original state, before running valet
+function trap::restoreTerminal() {
+  # Important note: we can end up here while having the stdout/stderr redirected somewhere
+  # else (for example because the program exited in a command &>/dev/null). So we need to make
+  # sure to use our GLOBAL_FD variables to actually access the original stdout/stderr.
+
+  # if we are in interactive mode, we need to restore the cursor
+  if [[ -t ${GLOBAL_FD_TUI} && ${VALET_CONFIG_DISABLE_ESC_CODES:-} != "true" ]]; then
+    printf '%s' "${ESC__CURSOR_SHOW_FORCE:-$'\e[?25h'}" 1>&"${GLOBAL_FD_TUI}"
+    printf '%s' "${ESC__DISABLE_MOUSE_BUTTON_TRACKING:-$'\e[?1006l'$'\e[?1000l'}${ESC__DISABLE_MOUSE_ANY_EVENT_TRACKING:-$'\e[?1006l'$'\e[?1003l'}" 1>&"${GLOBAL_FD_TUI}"
+  fi
+
+  # restore tty settings if needed
+  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} == "true" ]]; then
+    terminal::restoreSettings
+  fi
+}
+
+# Kill all background processes that are still running.
+function trap::killBackgroundProcesses() {
+  if [[ ${#GLOBAL_BACKGROUND_PROCESSES[@]} -eq 0 ]]; then
+    return 0
+  fi
+
+  local coprocName coprocPid coprocLogFile
+
+  # display the logs for on going background processes that redirected their output to a file
+  for coprocName in "${!GLOBAL_BACKGROUND_PROCESSES[@]}"; do
+    coprocPid="${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]:-}"
+    coprocLogFile="${GLOBAL_BACKGROUND_PROCESSES_LOGS[${coprocName}]:-}"
+
+    if [[ -n ${coprocLogFile} && -s ${coprocLogFile} ]] && log::isDebugEnabled; then
+      log::debug "Redirected logs for on going background process ${coprocName} (pid ${coprocPid}):"
+      log::printString "------"
+      # shellcheck disable=SC1091
+      source fs
+      fs::readFile "${coprocLogFile}"
+      log::printRaw REPLY
+      log::printString "------"
+    fi
+  done
+
+  # send SIGHUP to all background processes to terminate them
+  for coprocName in "${!GLOBAL_BACKGROUND_PROCESSES[@]}"; do
+    coprocPid="${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]:-}"
+    log::debug "Killing background process ${coprocName} with PID ${coprocPid}."
+    kill -HUP "${coprocPid}" &>/dev/null || :
+  done
+
+  # wait for them to finish or force kill them after a timeout (500ms - 100ms per subshell level)
+  time::getProgramElapsedMicroseconds
+  local -i startTime=${REPLY} nowTime=${REPLY}
+  for coprocName in "${!GLOBAL_BACKGROUND_PROCESSES[@]}"; do
+    coprocPid="${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]:-}"
+    coprocLogFile="${GLOBAL_BACKGROUND_PROCESSES_LOGS[${coprocName}]:-}"
+    while kill -0 "${coprocPid}" &>/dev/null && ((nowTime - startTime < 500000 - BASH_SUBSHELL * 100000)); do
+      time::getProgramElapsedMicroseconds
+      nowTime=${REPLY}
+    done
+  done
+
+  # if we did not manage to kill the background processes in time, we spawn a coproc to kill them later
+  if ((nowTime - startTime >= 500000 - BASH_SUBSHELL * 100000)); then
+    disown
+    log::debug "Some background processes did not terminate in time, starting a coproc to kill them asynchronously."
+    # shellcheck disable=SC2034
+    # shellcheck disable=SC2317
+    function coproc_killer() {
+      # shellcheck disable=SC1091
+      source bash
+      local IFS=' '
+      GLOBAL_LOG_LEVEL_INT=9
+      bash::sleep 5
+      kill -9 ${GLOBAL_BACKGROUND_PROCESSES[*]}
+      bash::sleep 5
+      fs::cleanTempFiles
+    }
+    eval "{ coproc _coproc_killer { if coproc_killer; then : ; fi } } &>/dev/null"
+  fi
+}
+
+#===============================================================
+# >>> Traps for subshells
+#===============================================================
 
 # ## trap::registerForSubshell (private)
 #
@@ -380,11 +442,11 @@ function trap::onSubshellExitInternal() {
 # > - coproc and jobs will not get SIGHUP when the main process ends and they will continue to execute
 # >   until killed or until they check that the main process is dead.
 function trap::registerSubshell() {
-  if (( BASH_SUBSHELL == 0 )); then
+  if ((BASH_SUBSHELL == 0)); then
     core::fail "This function should only be called in a subshell."
   fi
 
-  # in case we are in a subshell called within a bash::catchErrors, we reset errexit
+  # in case we are in a subshell called within a bash::catchErrors, we reset errexit and not longer catch errors
   unset -v GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED
   set -o errexit
 
@@ -394,13 +456,42 @@ function trap::registerSubshell() {
     GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=false
   fi
 
-  trap trap::onErrorInternal ERR
+  trap '_TRAP_SUBSHELL_EXIT_REASON=ERROR trap::onErrorInternal' ERR
   trap trap::onSubshellExitInternal EXIT
   # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler
-  trap 'exit 0' SIGINT SIGQUIT
+  trap '_TRAP_SUBSHELL_EXIT_REASON=SIGINT exit 0' SIGINT SIGQUIT
   # Register SIGHUP (hang up, terminal disconnected) and TERM (terminate the program) event handler
-  trap 'exit 0' SIGHUP SIGTERM
+  trap '_TRAP_SUBSHELL_EXIT_REASON=SIGTERM exit 0' SIGHUP SIGTERM
   trap SIGWINCH
   trap SIGTSTP
   trap SIGCONT
+}
+
+# This function is called when a subshell exits (on error, on success, on exit, on interrupt).
+# It is executed in the process that exited, as if we called this function
+# at the line where the exit command is called.
+function trap::onSubshellExitInternal() {
+  local exitCode="$?"
+
+  local reason
+  case "${_TRAP_SUBSHELL_EXIT_REASON:-}" in
+  ERROR) reason=" (exited because of an error)" ;;
+  SIGINT) reason=" (got interrupted)" ;;
+  SIGTERM) reason=" (got terminated)" ;;
+  *) reason="" ;;
+  esac
+
+  if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" && ${GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT:-} == "true" && ${exitCode} -ne 0 ]]; then
+    log::error "Exiting subshell${reason} depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
+    log::printTrappedBashCommand
+    log::printCallStack
+  elif log::isDebugEnabled; then
+    if log::isTraceEnabled; then
+      log::debug "Exiting subshell${reason} depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
+      log::printTrappedBashCommand
+      log::printCallStack
+    else
+      log::debug "Exiting subshell${reason} depth ${BASH_SUBSHELL} with code ${exitCode}."
+    fi
+  fi
 }

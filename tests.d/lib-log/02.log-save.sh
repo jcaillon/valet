@@ -14,18 +14,18 @@ function test_log::saveFile() {
   local originalFile="${REPLY}"
   echo "test" >"${originalFile}"
 
-  test::exec log::saveFile "${originalFile}" "important"
+  test::exec log::saveFile "${originalFile}" suffix="important"
   test::exec fs::cat "${REPLY}"
 
-  test::func log::saveFile "${originalFile}" "important" logPath=false
+  test::func log::saveFile "${originalFile}" suffix="important" logPath=true
 
   test::title "✅ Testing log::saveFileString"
 
   local _myVar="test"
-  test::exec log::saveFileString _myVar "important2"
+  test::exec log::saveFileString _myVar suffix="important2"
   test::exec fs::cat "${REPLY}"
 
-  test::func log::saveFileString _myVar "important" logPath=false
+  test::func log::saveFileString _myVar suffix="important" logPath=true
 }
 
 main

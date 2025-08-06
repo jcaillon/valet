@@ -30,7 +30,7 @@ Returned code: `1`
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ builtin source "${GLOBAL_CONFIG_FILE}"
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:97
+╰─ in main() at valet:xxx
 ERROR    Error sourcing the configuration file ⌜/tmp/valet.valet.d/config⌝.
 Check the file for error and try again, or delete the file to discard your config.
 ```
@@ -48,7 +48,7 @@ Returned code: `1`
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ builtin source "${GLOBAL_STARTUP_FILE}"
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:97
+╰─ in main() at valet:xxx
 ERROR    Error sourcing the startup file ⌜/tmp/valet.valet.d/startup⌝.
 Check the file for error and try again, or delete the file to discard your config.
 ```
@@ -64,14 +64,14 @@ Returned code: `1`
 ```text
 CMDMISS  Command not found: ⌜zeoifuhizefuhzeh⌝.
 Please check your ⌜PATH⌝ variable.
-├─ in source() at .env:1
+├─ in source() at .env:xxx
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:97
+╰─ in main() at valet:xxx
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ zeoifuhizefuhzeh
-├─ in source() at .env:1
+├─ in source() at .env:xxx
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:97
+╰─ in main() at valet:xxx
 ERROR    Error sourcing the env file ⌜.env⌝.
 Check the file for error and try again, or delete the file to discard your config.
 ```
@@ -91,7 +91,7 @@ CMDERR   Error code ⌜1⌝ for the command:
 ├─ in command::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
 ├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:99
+╰─ in main() at valet:xxx
 ERROR    Error sourcing the commands file ⌜/tmp/valet.d/d3-2/commands⌝.
 Please rebuild it using the ⌜valet self build⌝ command.
 ```
@@ -112,6 +112,16 @@ FAIL     Expecting ⌜1⌝ argument(s) but got ⌜0⌝.
 Use ⌜valet self mock1 --help⌝ to get help.
 Usage:
 valet [global options] self mock1 [options] [--] <action>
+```
+
+### ✅ Testing that NO_COLOR disable colors
+
+❯ `NO_COLOR=1 VALET_CONFIG_ENABLE_COLORS= TERM=xterm-color valet self mock1 test-color`
+
+**Error output**:
+
+```text
+INFO     Color enabled: false.
 ```
 
 ## Test script 02.traps

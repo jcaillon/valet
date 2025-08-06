@@ -111,6 +111,9 @@ function selfMock1() {
   show-help)
     command::showHelp
     ;;
+  test-color)
+    log::info "Color enabled: ${VALET_CONFIG_ENABLE_COLORS}."
+    ;;
   *)
     log::warning "This is for testing valet core functions, running the tests."
     ;;

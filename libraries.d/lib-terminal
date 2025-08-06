@@ -7,7 +7,6 @@ source bash
 # shellcheck source=lib-fs
 source fs
 
-
 #===============================================================
 # >>> Interactive utilities
 #===============================================================
@@ -31,7 +30,7 @@ source fs
 function terminal::createSpace() {
   local -i nbLines="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   nbLines=$((nbLines > GLOBAL_LINES ? GLOBAL_LINES : nbLines))
-  if (( nbLines <= 1 )); then
+  if ((nbLines <= 1)); then
     printf '%s' "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}${ESC__ERASE_LINE}${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
     return 0
   fi
@@ -113,24 +112,27 @@ function terminal::setRawMode() {
   if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} == "true" ]]; then
     return 0
   fi
+  if [[ ! -t ${GLOBAL_FD_ORIGINAL_STDIN} && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
+    core::fail "stdin is not a terminal, cannot reset mode."
+  fi
   if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
-    bash::getBuiltinOutput stty -g
-    if [[ -z ${REPLY} ]]; then
+    if stty -g <&"${GLOBAL_FD_ORIGINAL_STDIN:-0}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
+      IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+    else
       core::fail "Unable to get the current terminal configuration. Please make sure that ⌜stty⌝ is available in your PATH."
     fi
     GLOBAL_STTY_SAVED_CONFIG="${REPLY%%$'\n'}"
     log::debug "Saved terminal stty initial settings: ${GLOBAL_STTY_SAVED_CONFIG}."
   fi
-  if [[ ! -t 0 && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
-    core::fail "stdin is not a terminal, cannot set raw mode."
-  fi
   # we try to set specific settings and if it fails, we just set raw mode
-  stty -icrnl -inlcr -ixon -ixoff \
-    nl0 cr0 tab0 ff0 -onlret \
-    -icanon -echo -echok -echonl -echoe -echoke -ctlecho -tostop \
-    erase ^B werase ^W \
-    min 1 time 0 || \
-    stty raw -echo || core::fail "Failed to set the terminal in raw mode, check stty version."
+  {
+    stty -icrnl -inlcr -ixon -ixoff \
+      nl0 cr0 tab0 ff0 -onlret \
+      -icanon -echo -echok -echonl -echoe -echoke -ctlecho -tostop \
+      erase ^B werase ^W \
+      min 1 time 0 ||
+      stty raw -echo || core::fail "Failed to set the terminal in raw mode, check stty version."
+  } <&"${GLOBAL_FD_ORIGINAL_STDIN:-0}"
   GLOBAL_TERMINAL_RAW_MODE_ENABLED=true
 }
 
@@ -151,14 +153,10 @@ function terminal::restoreSettings() {
   if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-} != "true" || ! -v GLOBAL_STTY_SAVED_CONFIG || ${BASH_SUBSHELL} -ne 0 ]]; then
     return 0
   fi
-  if [[ ! -t 0 && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
-    if [[ -n ${GLOBAL_FD_ORIGINAL_STDIN:-} && -t ${GLOBAL_FD_ORIGINAL_STDIN:-} ]] && exec 0<&"${GLOBAL_FD_ORIGINAL_STDIN}"; then
-      log::debug "Restored terminal fd before using stty command."
-    else
-      core::fail "stdin is not a terminal, cannot reset mode."
-    fi
+  if [[ ! -t ${GLOBAL_FD_ORIGINAL_STDIN} && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
+    core::fail "stdin is not a terminal, cannot reset mode."
   fi
-  stty "${GLOBAL_STTY_SAVED_CONFIG}" || log::warning "Failed to restore the terminal settings, check stty version."
+  stty "${GLOBAL_STTY_SAVED_CONFIG}" <&"${GLOBAL_FD_ORIGINAL_STDIN:-}" 2>&"${GLOBAL_FD_LOG}" || log::warning "Failed to restore the terminal settings, check stty version."
   log::debug "Restored terminal settings using: stty ${GLOBAL_STTY_SAVED_CONFIG}."
   unset -v GLOBAL_TERMINAL_RAW_MODE_ENABLED
 }
@@ -377,7 +375,6 @@ function terminal::getBestAutocompleteBox() {
   REPLY4="${height}"
 }
 
-
 #===============================================================
 # >>> Key press detection
 #===============================================================
@@ -484,8 +481,7 @@ function terminal::waitForChar() {
     esac
   else
 
-
-    if (( ${#LAST_KEY_PRESSED} > 1 )); then
+    if ((${#LAST_KEY_PRESSED} > 1)); then
       # if we have more than one char, we store the extra chars for the next read
       PREVIOUS_KEY_PRESSED_EXTRA_CHARS="${LAST_KEY_PRESSED:1}"
       LAST_KEY_PRESSED="${LAST_KEY_PRESSED:0:1}"
@@ -557,7 +553,7 @@ function terminal::waitForKeyPress() {
     read "$@" -d '' -s -r -N 1 2>/dev/null
     LAST_KEY_PRESSED+="${REPLY}"
   done
-  if (( ${#LAST_KEY_PRESSED} > 1 )); then
+  if ((${#LAST_KEY_PRESSED} > 1)); then
     # if we have more than one char, we store the extra chars for the next read
     PREVIOUS_KEY_PRESSED_EXTRA_CHARS="${LAST_KEY_PRESSED:1}"
     LAST_KEY_PRESSED="${LAST_KEY_PRESSED:0:1}"
@@ -626,7 +622,6 @@ function terminal::rebindKeymap() {
     bind -r "${key%:}"
   done
 
-
   # some other default values to ensure we get the right behavior
   bind 'set bind-tty-special-chars on'
   bind 'set echo-control-characters on'
@@ -656,8 +651,8 @@ function terminal::rebindKeymap() {
     "ALT+" "\e"
   )
   local -i index modeIndex
-  for((index=0;index<${#normalKeys};index++)); do
-    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+  for ((index = 0; index < ${#normalKeys}; index++)); do
+    for ((modeIndex = 0; modeIndex < ${#modifiers[@]}; modeIndex += 2)); do
       key="${normalKeys:index:1}"
       bind -x "\"${modifiers[modeIndex + 1]}${key}\": ${callBackFunction} ${modifiers[modeIndex]}${key^^}"
     done
@@ -702,8 +697,8 @@ function terminal::rebindKeymap() {
     "CTRL+SHIFT+" ";6"
     "CTRL+ALT+" ";7"
   )
-  for((index=0;index<${#specialKeys[@]};index+=2)); do
-    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+  for ((index = 0; index < ${#specialKeys[@]}; index += 2)); do
+    for ((modeIndex = 0; modeIndex < ${#modifiers[@]}; modeIndex += 2)); do
       key="${specialKeys[index]}"
       bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys[index + 1]}"
       # I have noticed that sometimes the terminal sends the sequence without the \e...
@@ -751,8 +746,8 @@ function terminal::rebindKeymap() {
     "CTRL+SHIFT+" "1;6"
     "CTRL+ALT+" "1;7"
   )
-  for((index=0;index<${#specialKeys2[@]};index+=2)); do
-    for((modeIndex=0;modeIndex<${#modifiers[@]};modeIndex+=2)); do
+  for ((index = 0; index < ${#specialKeys2[@]}; index += 2)); do
+    for ((modeIndex = 0; modeIndex < ${#modifiers[@]}; modeIndex += 2)); do
       key="${specialKeys2[index]}"
       bind -x "\"\e${key//\?/"${modifiers[modeIndex + 1]}"}\": ${callBackFunction} ${modifiers[modeIndex]}${specialKeys2[index + 1]}"
       # I have noticed that sometimes the terminal sends the sequence without the \e...

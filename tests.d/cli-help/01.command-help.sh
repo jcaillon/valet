@@ -21,7 +21,6 @@ function test_helpCommand() {
   test::title "✅ Testing that no arguments show the valet help"
   test::exec command::parseProgramArguments help
 
-
   test::title "✅ Testing that we can display the help of a function using command::showHelp"
   export VALET_CONFIG_ENABLE_COLORS=true
   export VALET_CONFIG_DISABLE_ESC_CODES=false

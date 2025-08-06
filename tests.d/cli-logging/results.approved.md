@@ -29,59 +29,98 @@ With a second line.
 
 ### ✅ Logging level with --verbose option
 
-❯ `valet -v self mock1 logging-level`
+❯ `valet -v self mock1 logging-level
+`
 
 **Error output**:
 
 ```text
 DEBUG    Log level set to debug.
+
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
+
 DEBUG    Loaded file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh⌝.
+
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
+
 DEBUG    Parsed arguments:
+
 local commandArgumentsErrors help action
+
 help=""
+
 commandArgumentsErrors=""
+
 action="logging-level"
+
 TRACE    This is an error trace message which is always displayed.
+
 DEBUG    This is a debug message.
+
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+
 SUCCESS  This is a success message.
+
 WARNING  This is a warning message.
+
 With a second line.
+
 The debug mode is activated!
+
 DEBUG    Exiting with code 0 after 0s.
+
 DEBUG    Deleting temporary files.
 ```
 
-### ✅ Logging level with --very-verbose option
+### ✅ Logging level with DEBUG set (also activates profiling)
 
-❯ `valet --log trace self mock1 logging-level`
+❯ `DEBUG=1 valet self mock1 logging-level
+`
 
 **Error output**:
 
 ```text
-DEBUG    Log level set to trace.
+DEBUG    Log level set to debug.
+
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
-TRACE    Command found ⌜self mock1⌝.
-TRACE    Function name found ⌜selfMock1⌝.
+
+DEBUG    Sourcing the user commands from ⌜/tmp/valet.valet.d/commands⌝.
+
 DEBUG    Loaded file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh⌝.
+
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
+
+INFO     Starting profiler, writing in file...
 DEBUG    Parsed arguments:
+
 local commandArgumentsErrors help action
+
 help=""
+
 commandArgumentsErrors=""
+
 action="logging-level"
+
 TRACE    This is an error trace message which is always displayed.
-TRACE    This is a trace message.
+
 DEBUG    This is a debug message.
+
 INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+
 SUCCESS  This is a success message.
+
 WARNING  This is a warning message.
+
 With a second line.
+
 The debug mode is activated!
-The trace mode is activated!
+
+INFO     Disabling profiler.
+
 DEBUG    Exiting with code 0 after 0s.
+
+DEBUG    Deleting temporary directory.
+
 DEBUG    Deleting temporary files.
 ```
 

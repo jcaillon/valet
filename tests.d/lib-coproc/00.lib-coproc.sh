@@ -33,7 +33,8 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc::run with a simple init command"
 
-  test::exec coproc::run _COPROC_1 initCommand=initCommand
+  test::prompt coproc::run _COPROC_1 initCommand=initCommand
+  coproc::run _COPROC_1 initCommand=initCommand
   local coproc1Pid="${REPLY}"
   if ((coproc1Pid <= 0)); then
     test::fail "The coproc ⌜_COPROC_1⌝ is not running."
@@ -61,7 +62,8 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc::run with wait for readiness"
 
-  test::exec coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
+  test::prompt coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
+  coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
   coproc::wait _COPROC_3
   test::flush
 
@@ -89,7 +91,8 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc messages when coproc is killed"
 
-  test::exec coproc::run _COPROC_5 waitForReadiness=true
+  test::prompt coproc::run _COPROC_5 waitForReadiness=true
+  coproc::run _COPROC_5 waitForReadiness=true
   while kill -0 "${REPLY}" &>/dev/null; do
     bash::sleep 0.1
   done
@@ -128,7 +131,8 @@ function test_coproc::run_completeTest() {
     return 0
   }
 
-  test::exec coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage
+  test::prompt coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage
+  coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage
 
   local -i messageSent=0
   while coproc::receiveMessage _COPROC_9 && [[ ${REPLY} != "stop" ]]; do
@@ -154,7 +158,8 @@ function test_coproc::run_testError() {
   }
 
   test::setTestCallStack
-  test::exec coproc::run _COPROC_20 initCommand=initCommand
+  test::prompt coproc::run _COPROC_20 initCommand=initCommand
+  coproc::run _COPROC_20 initCommand=initCommand
   test::unsetTestCallStack
 
   coproc::wait _COPROC_20

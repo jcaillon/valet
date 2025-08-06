@@ -35,6 +35,9 @@ function main() {
 
   test::title "✅ Testing empty user directory rebuilding the commands"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
+
+  test::title "✅ Testing that NO_COLOR disable colors"
+  test::exec NO_COLOR=1 VALET_CONFIG_ENABLE_COLORS= TERM=xterm-color "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 test-color
 }
 
 # shellcheck disable=SC2317
@@ -42,9 +45,7 @@ function test::scrubOutput() {
   local line text=""
   local IFS=$'\n'
   for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do
-    line="${line//core:[0-9]*/core:xxx}"
-    line="${line//lib-command:[0-9]*/lib-command:xxx}"
-    text+="${line//main:[0-9]*/main:xxx}"$'\n'
+    text+="${line//:[0-9]*/:xxx}"$'\n'
   done
   GLOBAL_TEST_OUTPUT_CONTENT="${text%$'\n'}"
 }

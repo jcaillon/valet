@@ -116,7 +116,7 @@ INFO     Stopping the coproc (_COPROC_9).
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 152: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 156: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200

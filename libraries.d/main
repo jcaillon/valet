@@ -102,7 +102,7 @@ fs::setupTempFileGlobalVariable
 
 core::resetIncludedFiles
 
-# Since we use _OPTION_* variables to pass optional options to functions, we want to make sure
+# Since we use _OPTION_* variables to pass optional options to some functions, we want to make sure
 # to not create collisions so we unset them here.
 # shellcheck disable=SC2086
 unset -v ${!_OPTION_*}
@@ -142,9 +142,6 @@ if [[ -v VALET_LOG_LEVEL ]]; then
 fi
 if [[ ${VALET_VERBOSE:-} == "true" ]]; then
   log::setLevel debug
-fi
-if [[ ${VALET_VERY_VERBOSE:-} == "true" ]]; then
-  log::setLevel trace
 fi
 if [[ -v DEBUG ]]; then
   log::setLevel debug

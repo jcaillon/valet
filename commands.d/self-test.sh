@@ -423,7 +423,7 @@ function selfTest_runSingleTest() {
   # setup the temp locations for this test suite (cleanup is done at self test command level since
   # we create everything in the original temp directory)
   unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
-  TMPDIR="${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
+  export TMPDIR="${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
 
   # reset the temporary location (to have consistency when using fs::createTempDirectory for example)
   if [[ -d ${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY} ]]; then

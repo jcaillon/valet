@@ -67,7 +67,15 @@ REPLY='$GLOBAL_INSTALLATION_DIRECTORY/home/.valet.d'
 
 ### ✅ Test core::createSavedFilePath
 
-❯ `core::createSavedFilePath suffix`
+❯ `core::createSavedFilePath`
+
+Returned variables:
+
+```text
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/home/.local/state/valet/saved-files/1987-05-25T01-00-00+0000--PID_001234'
+```
+
+❯ `core::createSavedFilePath suffix=suffix`
 
 Returned variables:
 

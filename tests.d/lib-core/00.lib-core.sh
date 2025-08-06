@@ -39,7 +39,8 @@ function test_core::getSpecialPaths() {
 
   test::title "✅ Test core::createSavedFilePath"
 
-  test::func core::createSavedFilePath "suffix"
+  test::func core::createSavedFilePath
+  test::func core::createSavedFilePath suffix="suffix"
 
   test::markdown "Content of HOME directory:"
   test::func fs::listDirectories "${HOME}" recursive=true includeHidden=true

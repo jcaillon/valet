@@ -30,8 +30,6 @@ This is also true for the body of a function or for command/functions that runs 
 
 See the [error-handling.sh][error-handling] for a demonstration.
 
-{{< callout emoji="💡" >}}
-
 > Quote from bash manual: If a compound command or shell function executes in a context where -e is being ignored, none of the commands executed within the compound command or function body will be affected by the -e setting, even if -e is set and a command returns a failure status.
 
 {{< callout emoji="💡" >}}

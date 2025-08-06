@@ -17,17 +17,23 @@ function test_logLevelOptions() {
   test::title "✅ Logging level with --log-level option"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" --log-level warning self mock1 logging-level
 
-
   # shellcheck disable=SC2317
-  function test::scrubOutput() { GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//after ?s/after 0s}"; }
-
+  function test::scrubOutput() {
+    local line text=""
+    local IFS=$'\n'
+    for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do
+      line="${line//after ?s/after 0s}"$'\n'
+      text+="${line//"Starting profiler, writing in "*/"Starting profiler, writing in file..."}"$'\n'
+    done
+    GLOBAL_TEST_OUTPUT_CONTENT="${text%$'\n'}"
+  }
 
   test::title "✅ Logging level with --verbose option"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" -v self mock1 logging-level
 
 
-  test::title "✅ Logging level with --very-verbose option"
-  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" --log trace self mock1 logging-level
+  test::title "✅ Logging level with DEBUG set (also activates profiling)"
+  test::exec DEBUG=1 "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
 
   unset -f test::scrubOutput
 }

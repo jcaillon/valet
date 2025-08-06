@@ -112,7 +112,7 @@ function windows::runPs1() {
   if log::isDebugEnabled; then
     log::debug "PowerShell command ⌜${powershellCommand}⌝, path ⌜${powershellPath}⌝."
     log::debug "PowerShell script run:"
-    core::createSavedFilePath "script.ps1"
+    core::createSavedFilePath suffix="script.ps1"
     printf "%s" "${script}" >"${REPLY}"
     log::printString "⌜${REPLY}⌝"
   fi
@@ -121,13 +121,13 @@ function windows::runPs1() {
   if log::isDebugEnabled; then
     if [[ -s "${stdoutFile}" ]]; then
       log::debug "PowerShell stdout:"
-      log::saveFile "${stdoutFile}" "ps1.stdout"
+      log::saveFile "${stdoutFile}" suffix="ps1.stdout"
     else
       log::debug "PowerShell stdout: (empty)"
     fi
     if [[ -s "${stderrFile}" ]]; then
       log::debug "PowerShell stderr:"
-      log::saveFile "${stderrFile}" "ps1.stderr"
+      log::saveFile "${stderrFile}" suffix="ps1.stderr"
     else
       log::debug "PowerShell stderr: (empty)"
     fi

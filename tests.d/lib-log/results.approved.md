@@ -1084,7 +1084,7 @@ TRACE    This is a errorTrace message, always shown.
 
 ### ✅ Testing log::saveFile
 
-❯ `log::saveFile /tmp/valet.d/f1-2 important`
+❯ `log::saveFile /tmp/valet.d/f1-2 suffix=important`
 
 **Error output**:
 
@@ -1101,7 +1101,13 @@ test
 
 ```
 
-❯ `log::saveFile /tmp/valet.d/f1-2 important logPath=false`
+❯ `log::saveFile /tmp/valet.d/f1-2 suffix=important logPath=true`
+
+**Error output**:
+
+```text
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important⌝
+```
 
 Returned variables:
 
@@ -1111,7 +1117,7 @@ REPLY='/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--impo
 
 ### ✅ Testing log::saveFileString
 
-❯ `log::saveFileString _myVar important2`
+❯ `log::saveFileString _myVar suffix=important2`
 
 **Error output**:
 
@@ -1127,7 +1133,13 @@ REPLY='/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--impo
 test
 ```
 
-❯ `log::saveFileString _myVar important logPath=false`
+❯ `log::saveFileString _myVar suffix=important logPath=true`
+
+**Error output**:
+
+```text
+⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important⌝
+```
 
 Returned variables:
 
