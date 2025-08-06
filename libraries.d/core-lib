@@ -1133,14 +1133,10 @@ function log::init() {
   fi
 
   # make sure the file descriptor (if any) is valid
-  if [[ -n ${logFileDescriptor} && ${logFileDescriptor} == "2" ]]; then
-    # case where we want to force the errors/logs to fd 2 (no matter where this points to)
-    exec {GLOBAL_FD_LOG}>&2
-    logFileDescriptor="2"
-  elif [[ -n ${logFileDescriptor} ]]; then
+  if [[ -n ${logFileDescriptor} && ${logFileDescriptor} != 2 ]]; then
     local isFdValid=false
     if [[ ${logFileDescriptor} =~ ^[0-9]+$ ]]; then
-      if { : >&"${logFileDescriptor}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>&${logFileDescriptor}; then
+      if { : >&"${logFileDescriptor}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>&"${logFileDescriptor}"; then
         isFdValid=true
       fi
     elif { : >>"${logFileDescriptor}"; } 2>/dev/null && exec {GLOBAL_FD_LOG}>>"${logFileDescriptor}"; then
@@ -1151,7 +1147,7 @@ function log::init() {
       core::fail "The file descriptor for the logs VALET_CONFIG_LOG_FD is not valid: ⌜${logFileDescriptor}⌝."
     fi
     # we also redirect the builtin bash errors to the same FD so we can have them along the logs
-    exec 2>&${GLOBAL_FD_LOG}
+    exec 2>&"${GLOBAL_FD_LOG}"
   else
     exec {GLOBAL_FD_LOG}>&"${GLOBAL_FD_ORIGINAL_STDERR}"
     exec 2>&"${GLOBAL_FD_ORIGINAL_STDERR}"

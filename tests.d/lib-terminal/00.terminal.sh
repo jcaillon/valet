@@ -128,9 +128,14 @@ function test_terminal::rerouteLogs() {
 
   log::info "Before rerouting Logs"
   test::flush
-  test::exec terminal::rerouteLogs
+
+  test::prompt terminal::rerouteLogs
+  terminal::rerouteLogs
+
   log::info "After rerouting Logs"
-  test::exec terminal::restoreLogs
+
+  test::prompt terminal::restoreLogs
+  terminal::restoreLogs
   test::flush
 }
 

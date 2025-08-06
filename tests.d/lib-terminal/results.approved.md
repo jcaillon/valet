@@ -276,7 +276,7 @@ REPLY4='4'
 
 stty called with `-icrnl -inlcr -ixon -ixoff nl0 cr0 tab0 ff0 -onlret -icanon -echo -echok -echonl -echoe -echoke -ctlecho -tostop erase ^B werase ^W min 1 time 0`
 
-❯ `terminal::restoreSettings`
+❯ `BASH_SUBSHELL=0 terminal::restoreSettings`
 
 stty called with `original config`
 

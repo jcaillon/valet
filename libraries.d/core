@@ -469,12 +469,11 @@ function core::dump() {
     IFS=$' '
   eval "local a= ${*@Q}"
 
-  # shellcheck disable=SC2034
-  local REPLY_CODE
-
   # shellcheck disable=SC1091
-  source bash
-  bash::catchErrors core_dump "${dumpSuffix}"
+  if core_dump "${dumpSuffix}"; then
+    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+    :
+  fi
 }
 
 # Private function to create a core dump file.

@@ -33,9 +33,7 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc::run with a simple init command"
 
-  test::prompt coproc::run _COPROC_1 initCommand=initCommand
-  test::prompt coproc::wait _COPROC_1
-  coproc::run _COPROC_1 initCommand=initCommand
+  test::exec coproc::run _COPROC_1 initCommand=initCommand
   local coproc1Pid="${REPLY}"
   if ((coproc1Pid <= 0)); then
     test::fail "The coproc ⌜_COPROC_1⌝ is not running."
@@ -63,9 +61,7 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc::run with wait for readiness"
 
-  test::prompt coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
-  test::prompt coproc::wait _COPROC_3
-  coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
+  test::exec coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
   coproc::wait _COPROC_3
   test::flush
 
@@ -94,6 +90,10 @@ function test_coproc::run_simpleTests() {
   test::title "✅ Testing coproc messages when coproc is killed"
 
   test::exec coproc::run _COPROC_5 waitForReadiness=true
+  while kill -0 "${REPLY}" &>/dev/null; do
+    bash::sleep 0.1
+  done
+  test::exec coproc::sendMessage _COPROC_5 hello
   test::exec coproc::receiveMessage _COPROC_5
   test::exec coproc::isRunning _COPROC_5
   test::exec coproc::wait _COPROC_5
@@ -128,16 +128,15 @@ function test_coproc::run_completeTest() {
     return 0
   }
 
-  test::prompt coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage
-  coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage
+  test::exec coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage
 
   local -i messageSent=0
   while coproc::receiveMessage _COPROC_9 && [[ ${REPLY} != "stop" ]]; do
     printf "%s\0%s\0" "decoy" "message ${messageSent}" >&"${_COPROC_9[1]}"
     messageSent+=1
   done
-  coproc::sendMessage _COPROC_9 "stop"
 
+  coproc::sendMessage _COPROC_9 "stop"
   coproc::wait _COPROC_9
   test::flush
 }
@@ -145,7 +144,7 @@ function test_coproc::run_completeTest() {
 function test_coproc::run_testError() {
   test::title "✅ Testing coproc::run with an error in the init command"
 
-  bash::injectCodeInFunction trap::onSubshellExitInternal 'log::warning "Subshell exited with code $1"'
+  bash::injectCodeInFunction trap::onSubshellExitInternal 'log::warning "Subshell exited with code $exitCode"'
   eval "${REPLY}"
   local originalFunction="${REPLY2}"
 
@@ -155,8 +154,7 @@ function test_coproc::run_testError() {
   }
 
   test::setTestCallStack
-  test::prompt coproc::run _COPROC_20 initCommand=initCommand
-  coproc::run _COPROC_20 initCommand=initCommand
+  test::exec coproc::run _COPROC_20 initCommand=initCommand
   test::unsetTestCallStack
 
   coproc::wait _COPROC_20

@@ -51,7 +51,6 @@ function selfTestUtils_setupValetForConsistency() {
   export VALET_CONFIG_LOG_FILENAME_PATTERN=""
   export GLOBAL_LOG_LEVEL_INT=1
   export GLOBAL_LOG_LEVEL=info
-  GLOBAL_FD_TUI=2
   log::init
   GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
 
@@ -82,6 +81,7 @@ function selfTestUtils_setupValetForConsistency() {
 }
 
 # Set the value of important bash variables to ensure consistency in the tests.
+# shellcheck disable=SC2034
 function selfTestUtils_setupBashForConsistency() {
   # default IFS
   IFS=' '$'\t'$'\n'
@@ -94,10 +94,12 @@ function selfTestUtils_setupBashForConsistency() {
   unset EPOCHREALTIME
   export EPOCHREALTIME=548902800.000000
   profiler::resume
+  GLOBAL_TEST_ORIGINAL_BASHPID="${BASHPID}"
   unset BASHPID
   export BASHPID=1234
   unset SECONDS
   export SECONDS=0
+  GLOBAL_TEST_ORIGINAL_OSTYPE="${OSTYPE}"
   export OSTYPE=linux-gnu
 }
 

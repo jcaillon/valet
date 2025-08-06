@@ -179,6 +179,7 @@ function terminal::rerouteLogs() {
     fs::createTempFile pathOnly=true
     _TUI_LOG_FILE="${REPLY}"
   fi
+
   log::init logFileDescriptor="${_TUI_LOG_FILE}"
   GLOBAL_LOG_REROUTED_TO_FILE_ENABLED=true
 }

@@ -375,14 +375,27 @@ function test_flushFdToCodeBlock() {
   : >"${file}"
   eval "exec ${GLOBAL_TEST_FD_NUMBER}>>\"${file}\""
   if ((GLOBAL_TEST_FD_NUMBER == 2)); then
-    # since we changed fd2, we also need to redeclare fd that point to fd2
-    exec {GLOBAL_FD_ORIGINAL_STDERR}>&-
-    exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
-    exec {GLOBAL_FD_LOG}>&-
-    exec {GLOBAL_FD_LOG}>&2
-    exec {GLOBAL_FD_TUI}>&-
-    exec {GLOBAL_FD_TUI}>&2
+    test::fixStdErrFileDescriptors
   fi
+}
+
+# ## test::fixStdErrFileDescriptors (private)
+#
+# Call this function after changing stderr to ensure that the other file descriptors
+# pointing to stderr are correctly set.
+#
+# > When we change fd2, we also need to redeclare fd that point to fd2.
+# > Even if they seem to point to the correct file (using ls -l /proc/PID/fd), writing to them
+# > will not write to the correct file.
+function test::fixStdErrFileDescriptors() {
+  # since we changed fd2, we also need to redeclare fd that point to fd2
+  # even if it seems to point to the correct file (using ls -l /proc/PID/fd)
+  exec {GLOBAL_FD_ORIGINAL_STDERR}>&-
+  exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
+  exec {GLOBAL_FD_LOG}>&-
+  exec {GLOBAL_FD_LOG}>&2
+  # shellcheck disable=SC2034
+  GLOBAL_FD_TUI="${GLOBAL_FD_ORIGINAL_STDERR}"
 }
 
 # ## test::scrubOutput

@@ -86,12 +86,10 @@ function trap::onExitInternal() {
 # It is executed in the same shell that has been interrupted, as if we called this function
 # at the line executed at the moment when the interruption took place.
 function trap::onInterruptInternal() {
-  # check if the function exists
-  if declare -F trap::onInterrupt &>/dev/null; then
-    if trap::onInterrupt; then
-      # if trap::onInterrupt returns 0, then we cancel the interrupt
-      return 0
-    fi
+  if declare -F trap::onInterrupt &>/dev/null && trap::onInterrupt; then
+    # if trap::onInterrupt returns 0, then we cancel the interrupt
+    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+    return 0
   fi
 
   # reset the trap to not call this function again
@@ -116,11 +114,10 @@ function trap::onInterruptInternal() {
 # This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
 function trap::onTerminateInternal() {
   # check if the function exists
-  if declare -F trap::onTerminate &>/dev/null; then
-    if trap::onTerminate; then
-      # if trap::onTerminate returns 0, then we cancel the termination
-      return 0
-    fi
+  if declare -F trap::onTerminate &>/dev/null && trap::onTerminate; then
+    # if trap::onTerminate returns 0, then we cancel the termination
+    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+    return 0
   fi
 
   log::print "ERROR" "${ICON_KILLED:-}" "KILLED" "Program killed."
@@ -151,8 +148,9 @@ function trap::onResizeInternal() {
   if declare -F progress::onResize &>/dev/null; then
     progress::onResize
   fi
-  if declare -F trap::onResize &>/dev/null; then
-    trap::onResize
+  if declare -F trap::onResize &>/dev/null && trap::onResize; then
+    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+    :
   fi
 }
 
@@ -167,8 +165,9 @@ function trap::onCleanUpInternal() {
   trap::restoreTerminal
 
   # call the clean up functions if they exist
-  if declare -F trap::onCleanUp &>/dev/null; then
-    trap::onCleanUp
+  if declare -F trap::onCleanUp &>/dev/null && trap::onCleanUp; then
+    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+    :
   fi
 
   # disable the profiler if still on
@@ -221,6 +220,9 @@ function trap::killBackgroundProcesses() {
       log::printRaw REPLY
       log::printString "===================="
     fi
+    log::info "!GLOBAL_BACKGROUND_PROCESSES -> ${!GLOBAL_BACKGROUND_PROCESSES[*]}"
+    log::info "GLOBAL_BACKGROUND_PROCESSES -> ${GLOBAL_BACKGROUND_PROCESSES[*]}"
+    log::info "GLOBAL_BACKGROUND_PROCESSES_LOGS -> ${GLOBAL_BACKGROUND_PROCESSES_LOGS[*]}"
   done
 }
 
@@ -231,11 +233,10 @@ function trap::onSuspendInternal() {
   trap SIGTSTP
 
   # check if the function exists
-  if declare -F trap::onSuspend &>/dev/null; then
-    if trap::onSuspend; then
-      # if trap::onSuspend returns 0, then we cancel the suspend
-      return 0
-    fi
+  if declare -F trap::onSuspend &>/dev/null && trap::onSuspend; then
+    # if trap::onSuspend returns 0, then we cancel the suspend
+    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+    return 0
   fi
 
   # restore the terminal in its original state, before running valet
@@ -256,8 +257,9 @@ function trap::onContinueInternal() {
   trap trap::onSuspendInternal SIGTSTP
 
   # check if the function exists
-  if declare -F trap::onContinue &>/dev/null; then
-    trap::onContinue
+  if declare -F trap::onContinue &>/dev/null && trap::onContinue; then
+    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+    :
   fi
 
   # if we are in interactive mode, we need to hide the cursor
@@ -381,6 +383,11 @@ function trap::registerSubshell() {
   if (( BASH_SUBSHELL == 0 )); then
     core::fail "This function should only be called in a subshell."
   fi
+
+  # in case we are in a subshell called within a bash::catchErrors, we reset errexit
+  unset -v GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED
+  set -o errexit
+
   if [[ ${_OPTION_LOG_ERROR_ON_EXIT:-true} == "true" ]]; then
     GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=true
   else

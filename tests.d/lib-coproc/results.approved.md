@@ -6,8 +6,6 @@
 
 ❯ `coproc::run _COPROC_1 initCommand=initCommand`
 
-❯ `coproc::wait _COPROC_1`
-
 **Error output**:
 
 ```text
@@ -39,8 +37,6 @@ INFO     Running end command in coproc (_COPROC_2).
 
 ❯ `coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true`
 
-❯ `coproc::wait _COPROC_3`
-
 **Error output**:
 
 ```text
@@ -63,11 +59,11 @@ INFO     Running init command in coproc (_COPROC_4).
 
 ❯ `coproc::run _COPROC_5 waitForReadiness=true`
 
-❯ `coproc::receiveMessage _COPROC_5`
+❯ `coproc::sendMessage _COPROC_5 hello`
 
 Returned code: `1`
 
-❯ `coproc::sendMessage _COPROC_5 hello`
+❯ `coproc::receiveMessage _COPROC_5`
 
 Returned code: `1`
 
@@ -120,7 +116,7 @@ INFO     Stopping the coproc (_COPROC_9).
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 154: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 152: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200

@@ -111,10 +111,6 @@ function bash::runInSubshell() {
     local IFS=' '$'\t'$'\n'
     unset -v _OPTION_EXIT_ON_FAIL _OPTION_LOG_ERROR_ON_EXIT
 
-    # disable try mode in case we run this function from a tryRun
-    # shellcheck disable=SC2034
-    GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED=false
-
     "${@}"
   )
   local subshellExitCode=${PIPESTATUS[0]:-}

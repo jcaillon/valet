@@ -108,6 +108,7 @@ function coproc::runInParallel() {
           break
         fi
       done
+      coprocName="${coprocNamePrefix}${endedCoprocIndex}"
 
       log::debug "The parallel coproc ${endedCoprocIndex} with PID ${endedCoprocPid} is completed with code ${endedCoprocExitStatus}."
 
@@ -304,7 +305,6 @@ function coproc_program() {
   local IFS=' '$'\t'$'\n'
 
   if [[ -n ${redirectLogsToFile} ]]; then
-    # exec 2>
     log::init logFileDescriptor="${redirectLogsToFile}"
   fi
 
@@ -432,8 +432,8 @@ function coproc::receiveMessage() {
 function coproc::isRunning() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if eval "local pid=\${${coprocVarName}_PID:-}" && [[ -n ${pid} ]]; then
-    if kill -0 "${pid}" 2>/dev/null; then
+  if [[ -v GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}] ]]; then
+    if kill -0 "${GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}]}" 2>/dev/null; then
       return 0
     fi
   fi

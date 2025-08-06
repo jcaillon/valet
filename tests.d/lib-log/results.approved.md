@@ -456,11 +456,11 @@ messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
 
 
 local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>&2
+printf "${eraseLine:-}%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>&11
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
+printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&11
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_WRAP_PADDING='                                             '
@@ -476,11 +476,11 @@ string::wrapWords messageToLog width=90 newLinePadString="                      
 
 
 local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>&2
+printf "${eraseLine:-}%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>&11
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
+printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&11
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_WRAP_PADDING='                                             '
@@ -498,11 +498,11 @@ messageToPrintInLog="${messageToPrintInLog//⌝/⌝[39m}"
 
 local extra=1
 local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>&2
+printf "${eraseLine:-}%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%s\n" "[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${messageToPrintInLog:-}"  1>&11
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_PRINT_STATEMENT_STANDARD='local eraseLine; if [[ -v _PROGRESS_BAR_RUNNING ]]; then eraseLine=$'"'"'\e[2K'"'"'; fi
-printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&2
+printf "${eraseLine:-}%s" "${rawStringToPrintInLog:-}" 1>&11
 if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 '
 GLOBAL_LOG_WRAP_PADDING='                                             '
