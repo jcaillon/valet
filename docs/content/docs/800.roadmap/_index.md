@@ -8,20 +8,19 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- benchmark time::getElasped with and w/o eval
+- fix the snippets generation now that we use bash param style
 - allow to break a test without approval testing it (cancel it basically). This will allow use to run docker if it is present and make a real test for the self install / extend commands.
-- Make the program parser catch all global options and verify in the build command that we do not reuse the same global option in different commands.
 - Check error handling inside ifs and evals.
 - Check how we can make the list component work in the main screen while user is scrolling. Seems like gum is doing it by positioning the cursor at the end of the screen always, and then using move cursor left to trigger an automatic scroll that takes the user back at the right spot.
-- Split the core file which is getting too big. Make main, the first included file.
 - test with bash 5.1, 5.2 and 5.3 in the pipeline (with different distros each time).
 - handle the drawing of TUI panels in a coproc so each has its own set of variables for its state.
 - in performance tip, document the use of -n
 - self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.
 - conditionally show global options because they take too much space
 - Arguments parser:
+  - Make the program parser catch all global options and verify in the build command that we do not reuse the same global option in different commands.
   - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
-  - Allow flags to be inherited from parent commands. We can check the existence of the base flags in the command::parse function (for verbose, log level, progress bars). For source and version, mark them as `inherited: false` as we only want to handle them in the main parsing loop, at valet level.
+  - Allow options to be inherited from parent commands. We can check the existence of the base options in the command::parse function (for verbose, log level, progress bars). For source and version, mark them as `inherited: false` as we only want to handle them in the main parsing loop, at valet level.
 - add a global --edit option to edit the command function file
 - for the showcase, actually build a small app like a git conventional commit tool.
 - prompt:

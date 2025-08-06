@@ -232,7 +232,7 @@ function array::sortWithCriteria() {
 #
 # Returns:
 #
-# - $?:
+# - ${REPLY_CODE}:
 #   - 0 if the value was added
 #   - 1 if it was already present
 #
@@ -258,7 +258,8 @@ function array::appendIfNotPresent() {
   if ((present == 0)); then
     arrayInWhichToAppend_+=("${valueToAdd}")
   fi
-  return ${present}
+
+  REPLY_CODE=${present}
 }
 
 # ## array::remove
@@ -273,7 +274,7 @@ function array::appendIfNotPresent() {
 #
 # Returns:
 #
-# - $?:
+# - ${REPLY_CODE}:
 #   - 0 if the value was removed
 #   - 1 if it was not present
 #
@@ -290,10 +291,12 @@ function array::remove() {
   for key in "${!arrayInWhichToRemove_[@]}"; do
     if [[ ${arrayInWhichToRemove_[${key}]} == "${valueToRemove_}" ]]; then
       unset -v "arrayInWhichToRemove_[${key}]"
+      REPLY_CODE=0
       return 0
     fi
   done
-  return 1
+  # shellcheck disable=SC2034
+  REPLY_CODE=1
 }
 
 # ## array::contains

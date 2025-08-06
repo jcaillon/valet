@@ -390,7 +390,8 @@ function declareFinalCommandDefinitionCommonVariables() {
   done
   parentCommand="${parentCommand# }"
   if [[ -n ${parentCommand} ]]; then
-    if ! array::appendIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY parentCommand; then
+    array::appendIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY parentCommand
+    if ((REPLY_CODE != 0)); then
       declare -g "CMD_FUNCTION_NAME_${parentCommand//[^[:alnum:]]/_}"="_menu"
     fi
   fi

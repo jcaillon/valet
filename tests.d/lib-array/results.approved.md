@@ -121,6 +121,12 @@ MY_ARRAY=(
 
 ❯ `MY_VALUE=deliver array::appendIfNotPresent MY_ARRAY MY_VALUE`
 
+Returned variables:
+
+```text
+REPLY_CODE='0'
+```
+
 ```text
 MY_ARRAY=(
 [0]='breakdown'
@@ -131,7 +137,11 @@ MY_ARRAY=(
 
 ❯ `MY_VALUE=breakdown array::appendIfNotPresent MY_ARRAY MY_VALUE`
 
-Returned code: `1`
+Returned variables:
+
+```text
+REPLY_CODE='1'
+```
 
 ```text
 MY_ARRAY=(
@@ -185,6 +195,12 @@ MY_ARRAY=(
 
 ❯ `MY_VALUE=deliver array::remove MY_ARRAY MY_VALUE`
 
+Returned variables:
+
+```text
+REPLY_CODE='0'
+```
+
 ```text
 MY_ARRAY=(
 [0]='breakdown'
@@ -194,7 +210,11 @@ MY_ARRAY=(
 
 ❯ `MY_VALUE=holiday array::remove MY_ARRAY MY_VALUE`
 
-Returned code: `1`
+Returned variables:
+
+```text
+REPLY_CODE='1'
+```
 
 ```text
 MY_ARRAY=(
@@ -212,6 +232,12 @@ MY_ASSOCIATIVE_ARRAY=(
 ```
 
 ❯ `MY_VALUE=1 array::remove MY_ASSOCIATIVE_ARRAY MY_VALUE`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+```
 
 ```text
 MY_ASSOCIATIVE_ARRAY=(

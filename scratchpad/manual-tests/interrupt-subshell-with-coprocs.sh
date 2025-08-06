@@ -19,3 +19,5 @@ function callback() {
 }
 
 bash::runInSubshell coproc::runInParallel JOB_COMMANDS maxInParallel=1 completedCallback=callback printRedirectedLogs=true
+
+# We start a subshell that starts a coproc. Verify that CTRL+C kills everything.

@@ -1805,6 +1805,7 @@ function array_fuzzyFilterSortQuicksort() {
 # > The 10# forces the base 10 conversion to avoid issues with leading zeros.
 # > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 function time::getProgramElapsedMicroseconds() {
+  # the eval is here because sometimes bash does not expand the EPOCHREALTIME variable correctly, idk why
   eval "REPLY=\$(((${EPOCHREALTIME%%[.,]*} - GLOBAL_PROGRAM_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*[.,]} - 10#${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND})))"
 }
 

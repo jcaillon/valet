@@ -64,7 +64,9 @@ function trap::onErrorInternal() {
   log::printTrappedBashCommand
   log::printCallStack
 
+  # the following mark is used in self-test-utils
   : before-exit
+
   core::exit 1 silent=true
 }
 
@@ -94,17 +96,14 @@ function trap::onInterruptInternal() {
     return 0
   fi
 
-  # reset the trap to not call this function again
-  trap SIGINT SIGQUIT
-
-  if [[ ${_TRAP_PROGRAM_INTERRUPTED:-} == "true" ]]; then
+  if [[ ${_TRAP_PROGRAM_EXITING:-} == "true" ]]; then
     # we are here if the program was already interrupted,
     # it can happen if the user pressed CTRL+C multiple times
     # we are already exiting and we want the program to exit gracefully so
     # stop there
     return 0
   fi
-  _TRAP_PROGRAM_INTERRUPTED=true
+  _TRAP_PROGRAM_EXITING=true
 
   if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
     printf '\n' 1>&"${GLOBAL_FD_TUI}" # Set cursor to the next line of '^C' (only if stty echo is on)
@@ -132,10 +131,14 @@ function trap::onTerminateInternal() {
     return 0
   fi
 
+  # to avoid multiple calls
+  if [[ ${_TRAP_PROGRAM_EXITING:-} == "true" ]]; then
+    return 0
+  fi
+  _TRAP_PROGRAM_EXITING=true
+
   log::print "ERROR" "${ICON_KILLED:-}" "KILLED" "Program killed."
 
-  # reset the trap to not call this function again
-  trap SIGHUP SIGTERM
   core::exit 1 silent=true
 }
 
@@ -395,16 +398,18 @@ function trap::killBackgroundProcesses() {
   local -i startTime=${REPLY} nowTime=${REPLY}
   for coprocName in "${!GLOBAL_BACKGROUND_PROCESSES[@]}"; do
     coprocPid="${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]:-}"
-    coprocLogFile="${GLOBAL_BACKGROUND_PROCESSES_LOGS[${coprocName}]:-}"
     while kill -0 "${coprocPid}" &>/dev/null && ((nowTime - startTime < 500000 - BASH_SUBSHELL * 100000)); do
       time::getProgramElapsedMicroseconds
       nowTime=${REPLY}
     done
   done
 
-  # if we did not manage to kill the background processes in time, we spawn a coproc to kill them later
+  # if we did not manage to kill the background processes in time, we spawn a coproc to kill them/clean later
   if ((nowTime - startTime >= 500000 - BASH_SUBSHELL * 100000)); then
-    disown
+    local IFS=' '
+    # shellcheck disable=SC2086
+    # shellcheck disable=SC2048
+    disown ${GLOBAL_BACKGROUND_PROCESSES[*]}
     log::debug "Some background processes did not terminate in time, starting a coproc to kill them asynchronously."
     # shellcheck disable=SC2034
     # shellcheck disable=SC2317
@@ -414,6 +419,8 @@ function trap::killBackgroundProcesses() {
       local IFS=' '
       GLOBAL_LOG_LEVEL_INT=9
       bash::sleep 5
+      # shellcheck disable=SC2086
+      # shellcheck disable=SC2048
       kill -9 ${GLOBAL_BACKGROUND_PROCESSES[*]}
       bash::sleep 5
       fs::cleanTempFiles
@@ -450,6 +457,9 @@ function trap::registerSubshell() {
   unset -v GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED
   set -o errexit
 
+  # reset the background processes
+  declare -g -A GLOBAL_BACKGROUND_PROCESSES=() GLOBAL_BACKGROUND_PROCESSES_LOGS=()
+
   if [[ ${_OPTION_LOG_ERROR_ON_EXIT:-true} == "true" ]]; then
     GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=true
   else
@@ -471,7 +481,7 @@ function trap::registerSubshell() {
 # It is executed in the process that exited, as if we called this function
 # at the line where the exit command is called.
 function trap::onSubshellExitInternal() {
-  local exitCode="$?"
+  local exitCode="${?}"
 
   local reason
   case "${_TRAP_SUBSHELL_EXIT_REASON:-}" in
@@ -493,5 +503,11 @@ function trap::onSubshellExitInternal() {
     else
       log::debug "Exiting subshell${reason} depth ${BASH_SUBSHELL} with code ${exitCode}."
     fi
+  fi
+
+  # kill all background processes spawned in this subshell
+  if trap::killBackgroundProcesses; then
+    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+    :
   fi
 }
