@@ -11,7 +11,11 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line 25: 1: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line 29: 1: unbound variable
+ERROR    Exiting subshell depth 3 with code 1, stack:
+╭ local arg1="${1}" arg2="${2}" myOption="1" myOption2="2" IFS=' '
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
 ```
 
 ❯ `functionWithFiniteArgs argument1 argument2`
@@ -73,14 +77,18 @@ declare -- unknownOption="unknownValue"
 
 ### ✅ Testing with a function with infinite arguments
 
-❯ `functionWithInfiniteArgs`
+❯ `functionWithFiniteArgs`
 
 Exited with code: `1`
 
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line 39: 1: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line 29: 1: unbound variable
+ERROR    Exiting subshell depth 3 with code 1, stack:
+╭ local arg1="${1}" arg2="${2}" myOption="1" myOption2="2" IFS=' '
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
 ```
 
 ❯ `functionWithInfiniteArgs argument1 argument2`

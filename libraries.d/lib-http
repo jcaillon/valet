@@ -27,7 +27,7 @@ source fs
 #       (defaults to "" which means the body will be returned in the variable `REPLY`)
 # - ${followRedirection} _as bool_:
 #       (optional) If true, the function will follow redirections.
-#       (defaults to true)
+#       (defaults to false)
 # - ${timeout} _as int_:
 #       (optional) The timeout in seconds for the response (can be a decimal number).
 #       (defaults to 5)
@@ -55,7 +55,7 @@ function http::request() {
     failOnError=false \
     acceptableCodes="200,201,202,204,301,304,308" \
     output="" \
-    followRedirection=true \
+    followRedirection=false \
     responseTimeout=5 \
     IFS=$' '
   shift 2

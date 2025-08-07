@@ -471,6 +471,4 @@ function selfTest_runSingleTest() {
   selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/after-tests"
 
   selfTestUtils_makeReplacementsInReport
-
-  exec {GLOBAL_FD_ORIGINAL_STDERR}>&-
 }

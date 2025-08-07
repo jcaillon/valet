@@ -446,10 +446,6 @@ function trap::killBackgroundProcesses() {
 #
 # Register the traps for a subshell.
 #
-# - ${_OPTION_LOG_ERROR_ON_EXIT} _as bool_:
-#       (optional) If true, will display an error if the subshell exits with a non zero code
-#       (defaults to true)
-#
 # > - For a subshell, we do not want to execute the "cleanup" because it would also delete
 # >   files of the main process.
 # > - Additionally, we want to re-register the EXIT trap because it is not properly honored.
@@ -468,12 +464,6 @@ function trap::registerSubshell() {
 
   # reset the background processes
   declare -g -A GLOBAL_BACKGROUND_PROCESSES=() GLOBAL_BACKGROUND_PROCESSES_LOGS=()
-
-  if [[ ${_OPTION_LOG_ERROR_ON_EXIT:-true} == "true" ]]; then
-    GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=true
-  else
-    GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT=false
-  fi
 
   trap '_TRAP_SUBSHELL_EXIT_REASON=ERROR trap::onErrorInternal' ERR
   trap trap::onSubshellExitInternal EXIT
@@ -500,7 +490,7 @@ function trap::onSubshellExitInternal() {
   *) reason="" ;;
   esac
 
-  if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" && ${GLOBAL_SUBSHELL_LOG_ON_ERROR_EXIT:-} == "true" && ${exitCode} -ne 0 ]]; then
+  if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" && ${exitCode} -ne 0 ]]; then
     log::error "Exiting subshell${reason} depth ${BASH_SUBSHELL} with code ${exitCode}, stack:"
     log::printTrappedBashCommand
     log::printCallStack

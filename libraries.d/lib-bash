@@ -61,9 +61,6 @@ function bash::catchErrors() {
 # - ${_OPTION_EXIT_ON_FAIL} _as bool_:
 #       (optional) If set to true, the main program will exit with code 1 if the command fails.
 #       (defaults to false)
-# - ${_OPTION_LOG_ERROR_ON_EXIT} _as bool_:
-#       (optional) If true, will display an error if the subshell exits with a non zero code
-#       (defaults to false)
 #
 # Returns:
 #
@@ -85,7 +82,6 @@ function bash::catchErrors() {
 # > <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.
 function bash::runInSubshell() {
   local exitOnFail="${_OPTION_EXIT_ON_FAIL:-false}"
-  local logOnErrorExit="${_OPTION_LOG_ERROR_ON_EXIT:-false}"
 
   # disable the ERR trap or we would catch the subshell failure with it and not restore
   # the errexit and the original trap (and we would display an error message that we do
@@ -96,11 +92,11 @@ function bash::runInSubshell() {
   (
     # re-enable errexit in the subshell
     set -o errexit
-    _OPTION_LOG_ERROR_ON_EXIT="${logOnErrorExit}" trap::registerSubshell
+    trap::registerSubshell
 
     # unset options or they will be visible from the subshell and might interfere
     local IFS=' '$'\t'$'\n'
-    unset -v _OPTION_EXIT_ON_FAIL _OPTION_LOG_ERROR_ON_EXIT
+    unset -v _OPTION_EXIT_ON_FAIL
 
     "${@}"
   )

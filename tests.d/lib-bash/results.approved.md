@@ -108,7 +108,7 @@ Returned variables:
 REPLY_CODE='1'
 ```
 
-❯ `logOnErrorExit=true bash::runInSubshell subshellThatFails`
+❯ `bash::runInSubshell subshellThatFails`
 
 **Error output**:
 
@@ -126,7 +126,9 @@ Returned variables:
 REPLY_CODE='1'
 ```
 
-❯ `exitOnFail=true bash::runInSubshell subshellThatFails`
+❯ `_OPTION_EXIT_ON_FAIL=true bash::runInSubshell subshellThatFails`
+
+Exited with code: `1`
 
 **Error output**:
 

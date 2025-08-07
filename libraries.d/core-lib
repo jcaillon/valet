@@ -792,9 +792,9 @@ function log::printString() {
 #       The file path to save.
 # - ${suffix} _as string_:
 #       The suffix for the file to create.
-# - ${logPath} _as bool_:
-#       (optional) if true, log the path of the saved file using `log::printString`
-#       (defaults to true)
+# - ${silent} _as bool_:
+#       (optional) if true, do not log the path of the saved file using `log::printString`
+#       (defaults to false)
 #
 # Returns:
 #
@@ -807,7 +807,7 @@ function log::saveFile() {
   local \
     filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     suffix="" \
-    logPath="true" \
+    silent="false" \
     IFS=$' '
   shift 1
   eval "local a= ${*@Q}"
@@ -815,8 +815,8 @@ function log::saveFile() {
   core::createSavedFilePath suffix="${suffix}"
   local newFilePath="${REPLY}"
   cp "${filePath}" "${newFilePath}"
-  if [[ ${logPath} == "true" ]]; then
-    log::printString "⌜${newFilePath}⌝"
+  if [[ ${silent} != "true" ]]; then
+    log::printString "${newFilePath}"
   fi
   REPLY="${newFilePath}"
 }
@@ -831,9 +831,9 @@ function log::saveFile() {
 #       The variable name of the content to save.
 # - ${suffix} _as string_:
 #       The suffix for the file to create.
-# - ${logPath} _as bool_:
-#       (optional) if true, log the path of the saved file using `log::printString`
-#       (defaults to true)
+# - ${silent} _as bool_:
+#       (optional) if true, do not log the path of the saved file using `log::printString`
+#       (defaults to false)
 #
 # Returns:
 #
@@ -846,7 +846,7 @@ function log::saveFileString() {
   local -n contentToSave="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     suffix="" \
-    logPath="true" \
+    silent="false" \
     IFS=$' '
   shift 1
   eval "local a= ${*@Q}"
@@ -854,8 +854,8 @@ function log::saveFileString() {
   core::createSavedFilePath suffix="${suffix}"
   local newFilePath="${REPLY}"
   printf '%s' "${contentToSave}" >"${newFilePath}"
-  if [[ ${logPath} == "true" ]]; then
-    log::printString "⌜${newFilePath}⌝"
+  if [[ ${silent} != "true" ]]; then
+    log::printString "${newFilePath}"
   fi
   REPLY="${newFilePath}"
 }
@@ -1052,14 +1052,14 @@ function log::parseLogPattern() {
       log_setPrintfArgumentFromFormat "loggedElapsedTime"
       # shellcheck disable=SC1091
       source time
-      REPLY4+=$'\n'"time::getProgramElapsedMicroseconds; time::convertMicrosecondsToSeconds \"\${REPLY}\" precision=3; local loggedElapsedTime=\"\${REPLY}\""
+      REPLY4+=$'\n'"local REPLY; time::getProgramElapsedMicroseconds; time::convertMicrosecondsToSeconds \"\${REPLY}\" precision=3; local loggedElapsedTime=\"\${REPLY}s\""
       ;;
     elapsedTimeSinceLastLog)
       printfFormat="%${formatSpecifier:-"-7s"}"
       log_setPrintfArgumentFromFormat "loggedElapsedTimeSinceLastLog"
       # shellcheck disable=SC1091
       source time
-      REPLY4+=$'\n'"time::getProgramElapsedMicroseconds; local -i currentTime=\${REPLY}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToSeconds \"\${_LOG_ELAPSED_TIME}\" precision=3; local loggedElapsedTimeSinceLastLog=\"\${REPLY}\"; _LOG_ELAPSED_TIME=\${currentTime}"
+      REPLY4+=$'\n'"local REPLY; time::getProgramElapsedMicroseconds; local -i currentTime=\${REPLY}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToSeconds \"\${_LOG_ELAPSED_TIME}\" precision=3; local loggedElapsedTimeSinceLastLog=\"\${REPLY}s\"; _LOG_ELAPSED_TIME=\${currentTime}"
       ;;
     wrapPadding)
       printfFormat="%s"

@@ -77,7 +77,7 @@ Returned code: `1`
 
 ### ✅ Testing coproc::run with a realistic usage
 
-❯ `coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage`
+❯ `coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage keepOnlyLastMessage=false`
 
 **Error output**:
 
@@ -94,16 +94,14 @@ INFO     Stopping the coproc (_COPROC_9).
 
 ### ✅ Testing coproc::run with a realistic usage and keeping only the last message
 
-❯ `coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage`
+❯ `coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage keepOnlyLastMessage=true`
 
 **Error output**:
 
 ```text
 INFO     Running loop command in coproc (_COPROC_9), loop number: 1.
-INFO     Received message in coproc (_COPROC_9): decoy
-INFO     Running loop command in coproc (_COPROC_9), loop number: 2.
 INFO     Received message in coproc (_COPROC_9): message 0
-INFO     Received message in coproc (_COPROC_9): decoy
+INFO     Running loop command in coproc (_COPROC_9), loop number: 2.
 INFO     Received message in coproc (_COPROC_9): message 1
 INFO     Received message in coproc (_COPROC_9): stop
 INFO     Stopping the coproc (_COPROC_9).
@@ -122,5 +120,30 @@ CMDERR   Error code ⌜1⌝ for the command:
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
 INFO     The coproc ⌜_COPROC_20⌝ failed as expected.
+```
+
+❯ `coproc::run _COPROC_21 initCommand=initCommand waitForReadiness=true redirectLogsToFile=/tmp/valet-temp`
+
+❯ `coproc::run _COPROC_21 initCommand=initCommand waitForReadiness=true redirectLogsToFile=/tmp/valet-temp`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+FAIL     The coproc ⌜_COPROC_21⌝ did not start correctly.
+```
+
+❯ `fs::cat /tmp/valet-temp`
+
+**Standard output**:
+
+```text
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 176: 1: unbound variable
+ERROR    Exiting subshell depth 4 with code 1, stack:
+╭ local a="${1}"
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
+
 ```
 

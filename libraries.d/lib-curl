@@ -18,11 +18,13 @@ source fs
 # - $@: **curl arguments** _as any_:
 #       options for curl
 # - ${output} _as string_:
-#       the file in which to save the output of curl, created as a temporary file if not specified
+#       (optional) the file in which to save the output of curl, created as a temporary file if not specified
+#       (default to a temporary file)
 # - ${failOnError} _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails
+#       (optional) true/false to indicate if the function should fail in case the execution fails
+#       (default to false)
 # - ${acceptableCodes} _as string_:
-#       list of http status codes that are acceptable, comma separated
+#       (optional) list of http status codes that are acceptable, comma separated
 #       (defaults to 200,201,202,204,301,304,308 if left empty)
 #
 # Returns:
@@ -114,9 +116,10 @@ function curl::download() {
 # - $@: **curl arguments** _as any_:
 #       options for curl
 # - ${failOnError} _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails
+#       (optional) true/false to indicate if the function should fail in case the execution fails
+#       (default to false)
 # - ${acceptableCodes} _as string_:
-#       list of http status codes that are acceptable, comma separated
+#       (optional) list of http status codes that are acceptable, comma separated
 #       (defaults to 200,201,202,204,301,304,308 if left empty)
 #
 # Returns:

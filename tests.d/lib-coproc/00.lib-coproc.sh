@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-include coproc array bash
+include coproc bash fs
 
 function main() {
   test_coproc::run_simpleTests
-  test_coproc::run_completeTest
-  keepOnlyLastMessage=true test_coproc::run_completeTest
+  test_coproc::run_completeTest false
+  test_coproc::run_completeTest true
   test_coproc::run_testError
 }
 
@@ -104,7 +104,7 @@ function test_coproc::run_simpleTests() {
 }
 
 function test_coproc::run_completeTest() {
-  if [[ ${keepOnlyLastMessage:-} == "true" ]]; then
+  if [[ ${1} == "true" ]]; then
     test::title "✅ Testing coproc::run with a realistic usage and keeping only the last message"
   else
     test::title "✅ Testing coproc::run with a realistic usage"
@@ -131,8 +131,8 @@ function test_coproc::run_completeTest() {
     return 0
   }
 
-  test::prompt coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage
-  coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage
+  test::prompt coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage keepOnlyLastMessage="${1}"
+  coproc::run _COPROC_9 loopCommand=realisticLoop onMessageCommand=realisticOnMessage keepOnlyLastMessage="${1}"
 
   local -i messageSent=0
   while coproc::receiveMessage _COPROC_9 && [[ ${REPLY} != "stop" ]]; do
@@ -158,9 +158,9 @@ function test_coproc::run_testError() {
   }
 
   test::setTestCallStack
+
   test::prompt coproc::run _COPROC_20 initCommand=initCommand
   coproc::run _COPROC_20 initCommand=initCommand
-  test::unsetTestCallStack
 
   coproc::wait _COPROC_20
   if ((REPLY_CODE == 0)); then
@@ -171,6 +171,19 @@ function test_coproc::run_testError() {
   test::flush
 
   eval "${originalFunction}"
+
+  function initCommand() {
+    local a="${1}"
+    log::info "This line will not be executed because the previous command failed ${a}."
+  }
+
+
+  test::prompt coproc::run _COPROC_21 initCommand=initCommand waitForReadiness=true redirectLogsToFile="${GLOBAL_TEST_TEMP_FILE}"
+  test::exit coproc::run _COPROC_21 initCommand=initCommand waitForReadiness=true redirectLogsToFile="${GLOBAL_TEST_TEMP_FILE}"
+
+  test::exec fs::cat "${GLOBAL_TEST_TEMP_FILE}"
+
+  test::unsetTestCallStack
 }
 
 main

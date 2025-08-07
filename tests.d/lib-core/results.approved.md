@@ -288,7 +288,7 @@ Exited with code: `1`
 FAIL     Cannot source the file ⌜NOPNOP⌝ because it does not exist.
 ```
 
-❯ `_OPTION_EXIT_IF_NOT_FOUND=false source NOPNOP`
+❯ `_OPTION_CONTINUE_IF_NOT_FOUND=true source NOPNOP`
 
 Returned code: `1`
 

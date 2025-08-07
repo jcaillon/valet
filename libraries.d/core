@@ -152,10 +152,9 @@ function core::fail() {
 #       the name of the library (array, interactive, string...) or the file path to include.
 # - $@: arguments _as any_:
 #       (optional) the arguments to pass to the sourced file (mimics the builtin source command).
-# - ${_OPTION_EXIT_IF_NOT_FOUND} _as bool_:
-#       (optional) Fail the program if we do not find a file to source.
-#       Otherwise we simply return 1.
-#       (defaults to true)
+# - ${_OPTION_CONTINUE_IF_NOT_FOUND} _as bool_:
+#       (optional) Do not fail the program if we do not find a file to source, we simply return 1.
+#       (defaults to false)
 # - ${_OPTION_RETURN_CODE_IF_ALREADY_INCLUDED} _as int_:
 #       (optional) The function return code if the given file or library was already
 #       included.
@@ -164,7 +163,7 @@ function core::fail() {
 # ```bash
 # source string
 # source ./my/path
-# _OPTION_EXIT_IF_NOT_FOUND=false _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 source ./my/path
+# _OPTION_CONTINUE_IF_NOT_FOUND=false _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 source ./my/path
 # ```
 #
 # > - The file can be relative to the current script (script that calls this function).
@@ -172,7 +171,7 @@ function core::fail() {
 function source() {
   local \
     pathOrName="${1}" \
-    exitIfNotFound="${_OPTION_EXIT_IF_NOT_FOUND:-true}" \
+    continueIfNotFound="${_OPTION_CONTINUE_IF_NOT_FOUND:-false}" \
     returnCodeIfAlreadyIncluded="${_OPTION_RETURN_CODE_IF_ALREADY_INCLUDED:-0}"
   shift 1
 
@@ -228,7 +227,7 @@ function source() {
     return 0
   fi
 
-  if [[ ${exitIfNotFound} == "true" ]]; then
+  if [[ ${continueIfNotFound} != "true" ]]; then
     local failMessage="Cannot source the file ⌜${pathOrName}⌝ because it does not exist."
     if [[ ${pathOrName} =~ ^(core|core-esc-codes|core-lib|core-styles|core-traps|main)$ ]]; then
       failMessage+="The ⌜${pathOrName}⌝ library is included by default in Valet, please remove ⌜source ${pathOrName}⌝."

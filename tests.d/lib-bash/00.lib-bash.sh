@@ -66,8 +66,8 @@ function test_bash::runInSubshell() {
 
   test::setTestCallStack
   test::func bash::runInSubshell subshellThatFails
-  test::func logOnErrorExit=true bash::runInSubshell subshellThatFails
-  test::exit exitOnFail=true bash::runInSubshell subshellThatFails
+  test::func bash::runInSubshell subshellThatFails
+  test::exit _OPTION_EXIT_ON_FAIL=true bash::runInSubshell subshellThatFails
   test::unsetTestCallStack
 
   function subshellThatExits() {

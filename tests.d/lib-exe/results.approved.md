@@ -21,7 +21,7 @@ fake ()
     if [[ -n ${inputStreamContent:-} ]]; then
         echo "Input stream: <${inputStreamContent}>";
     fi;
-    echo "INFO: log line from fake mock" 1>&2;
+    echo "INFO: log line from fake mock to stderr" 1>&2;
     if [[ $* == *"--error"* ]]; then
         echo "ERROR: returning error from fake" 1>&2;
         return 1;
@@ -29,29 +29,25 @@ fake ()
 }
 ```
 
-### ✅ Testing exe::invoke5
+### ✅ Testing exe::invoke
 
-Input stream from string, returns an error:
+Normal invocation:
 
-❯ `exe::invoke5 false 0 false 'input_stream' fake --std-in --error`
-
-Returned code: `1`
+❯ `exe::call fake`
 
 Returned variables:
 
 ```text
-REPLY='🙈 mocking fake --std-in --error
-Input stream: <input_stream
->
+REPLY_CODE='0'
+REPLY='🙈 mocking fake 
 '
-REPLY2='INFO: log line from fake mock
-ERROR: returning error from fake
+REPLY2='INFO: log line from fake mock to stderr
 '
 ```
 
-Input stream from string, fails (exit):
+Error, fails (exit):
 
-❯ `exe::invoke5 true 0 false 'input_stream' fake --std-in --error`
+❯ `exe::call fake --error`
 
 Exited with code: `1`
 
@@ -59,47 +55,113 @@ Exited with code: `1`
 
 ```text
 TRACE    Fake standard output stream:
-⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdout⌝
-   1 ░ 🙈 mocking fake --std-in --error
-   2 ░ Input stream: <input_stream
-   3 ░ >
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdout
+   1 ░ 🙈 mocking fake --error
 TRACE    Fake standard error stream:
-⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr⌝
-   1 ░ INFO: log line from fake mock
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr
+   1 ░ INFO: log line from fake mock to stderr
    2 ░ ERROR: returning error from fake
-FAIL     The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜4.000s⌝.
+FAIL     The command fake ended with exit code 1 in 4.000s.
 ```
 
-Make error 1 acceptable:
+Error but with no fail option:
 
-❯ `exe::invoke5 true 0,1,2 true '' fake --error`
+❯ `exe::call fake --error --- noFail=true`
 
 Returned variables:
 
 ```text
+REPLY_CODE='1'
 REPLY='🙈 mocking fake --error
 '
-REPLY2='INFO: log line from fake mock
+REPLY2='INFO: log line from fake mock to stderr
 ERROR: returning error from fake
 '
 ```
 
-Normal, return everything as variables:
+Input stream from string:
 
-❯ `exe::invoke5 true '' '' '' fake`
+❯ `exe::call fake --std-in --- noFail=true stdin=input_stream`
 
 Returned variables:
 
 ```text
-REPLY='🙈 mocking fake 
+REPLY_CODE='0'
+REPLY='🙈 mocking fake --std-in
+Input stream: <input_stream
+>
 '
-REPLY2='INFO: log line from fake mock
+REPLY2='INFO: log line from fake mock to stderr
 '
 ```
 
-Normal, does not redirect outputs:
+Input stream from string with trace mode:
 
-❯ `exe::invoke5 true '' '' '' fake`
+❯ `exe::call fake --std-in --- noFail=true stdin=input_stream`
+
+**Error output**:
+
+```text
+TRACE    Executing the command fake with arguments: 
+--std-in
+TRACE    Fake standard input from string:
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdin
+TRACE    Fake standard output stream:
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdout
+   1 ░ 🙈 mocking fake --std-in
+   2 ░ Input stream: <input_stream
+   3 ░ >
+TRACE    Fake standard error stream:
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr
+   1 ░ INFO: log line from fake mock to stderr
+DEBUG    The command fake ended with exit code 0 in 8.000s.
+```
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY='🙈 mocking fake --std-in
+Input stream: <input_stream
+>
+'
+REPLY2='INFO: log line from fake mock to stderr
+'
+```
+
+Input stream for file:
+
+❯ `exe::call fake --std-in --- stdinFile=/tmp/valet-temp`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY='🙈 mocking fake --std-in
+Input stream: <Input stream content from a file>
+'
+REPLY2='INFO: log line from fake mock to stderr
+'
+```
+
+Make error 1 acceptable:
+
+❯ `exe::call fake --error --- acceptableCodes=1`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY='🙈 mocking fake --error
+'
+REPLY2='INFO: log line from fake mock to stderr
+ERROR: returning error from fake
+'
+```
+
+Do not redirect the output:
+
+❯ `exe::call fake --- noRedirection=true`
 
 **Standard output**:
 
@@ -110,157 +172,47 @@ Normal, does not redirect outputs:
 **Error output**:
 
 ```text
-INFO: log line from fake mock
+INFO: log line from fake mock to stderr
 ```
-
-Input stream for file, return everything as files:
-
-❯ `exe::invokef5 false 0 true /tmp/valet-temp fake --std-in`
 
 Returned variables:
 
 ```text
+REPLY_CODE='0'
+REPLY=''
+REPLY2=''
+```
+
+Return the paths instead of content:
+
+❯ `exe::call fake --- noRead=true`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
 REPLY='/tmp/valet-stdout.f'
 REPLY2='/tmp/valet-stderr.f'
 ```
 
-❯ `fs::cat /tmp/valet-stdout.f`
+Use custom files:
+
+❯ `exe::call fake --- noRead=true stderrPath=/tmp/valet.d/f1-2 stdoutPath=/tmp/valet-temp`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY='/tmp/valet-temp'
+REPLY2='/tmp/valet.d/f1-2'
+```
+
+❯ `fs::cat /tmp/valet-temp`
 
 **Standard output**:
 
 ```text
-🙈 mocking fake --std-in
-Input stream: <Input stream content from a file>
+🙈 mocking fake 
 
-```
-
-❯ `fs::cat /tmp/valet-stderr.f`
-
-**Standard output**:
-
-```text
-INFO: log line from fake mock
-
-```
-
-### ✅ Testing exe::invoke2
-
-❯ `exe::invoke2 false fake --option argument1 argument2`
-
-Returned variables:
-
-```text
-REPLY='🙈 mocking fake --option argument1 argument2
-'
-REPLY2='INFO: log line from fake mock
-'
-```
-
-❯ `exe::invoke2 false fake --error`
-
-Returned code: `1`
-
-Returned variables:
-
-```text
-REPLY='🙈 mocking fake --error
-'
-REPLY2='INFO: log line from fake mock
-ERROR: returning error from fake
-'
-```
-
-❯ `exe::invoke2 true fake --error`
-
-Exited with code: `1`
-
-**Error output**:
-
-```text
-TRACE    Fake standard output stream:
-⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdout⌝
-   1 ░ 🙈 mocking fake --error
-TRACE    Fake standard error stream:
-⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr⌝
-   1 ░ INFO: log line from fake mock
-   2 ░ ERROR: returning error from fake
-FAIL     The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜16.000s⌝.
-```
-
-❯ `exe::invokef2 false fake --option argument1 argument2`
-
-Returned variables:
-
-```text
-REPLY='/tmp/valet-stdout.f'
-REPLY2='/tmp/valet-stderr.f'
-```
-
-❯ `exe::invoket2 false fake --option argument1 argument2`
-
-**Standard output**:
-
-```text
-🙈 mocking fake --option argument1 argument2
-```
-
-**Error output**:
-
-```text
-INFO: log line from fake mock
-```
-
-### ✅ Testing exe::invoke
-
-❯ `exe::invoke fake --error`
-
-Exited with code: `1`
-
-**Error output**:
-
-```text
-TRACE    Fake standard output stream:
-⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdout⌝
-   1 ░ 🙈 mocking fake --error
-TRACE    Fake standard error stream:
-⌜/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr⌝
-   1 ░ INFO: log line from fake mock
-   2 ░ ERROR: returning error from fake
-FAIL     The command ⌜fake⌝ ended with exit code ⌜1⌝ in ⌜20.000s⌝.
-```
-
-❯ `exe::invoke fake --option argument1 argument2`
-
-Returned variables:
-
-```text
-REPLY='🙈 mocking fake --option argument1 argument2
-'
-REPLY2='INFO: log line from fake mock
-'
-```
-
-### ✅ Testing exe::invoke3piped
-
-❯ `exe::invoke3piped true 'input_stream' fake --std-in --option argument1 argument2`
-
-Returned variables:
-
-```text
-REPLY='🙈 mocking fake --std-in --option argument1 argument2
-Input stream: <input_stream
->
-'
-REPLY2='INFO: log line from fake mock
-'
-```
-
-❯ `exe::invokef3piped true 'input_stream' fake --std-in --option argument1 argument2`
-
-Returned variables:
-
-```text
-REPLY='/tmp/valet-stdout.f'
-REPLY2='/tmp/valet-stderr.f'
 ```
 

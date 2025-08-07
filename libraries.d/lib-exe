@@ -7,45 +7,239 @@ source fs
 # shellcheck source=lib-time
 source time
 
-# ## exe::invokef5
+
+# ## exe::invoke
 #
 # This function call an executable and its arguments.
 # It redirects the stdout and stderr to temporary files.
 #
-# - $1: **fail** _as bool_:
-#       A boolean to indicate if the function should fail in case the execution fails.
-#       If true and the execution fails, the script will exit.
-# - $2: **acceptable codes** _as string_:
-#       The acceptable error codes, comma separated.
-#       (if the error code is matched, then set the output error code to 0)
-# - $3: **sdtin from file** _as bool_:
-#       A boolean to indicate if the 4th argument represents a file path or
-#       directly the content for stdin.
-# - $2: **stdin** _as string_:
-#       The stdin content to pass to the executable.
-#       Can be empty if not used.
-# - $5: **executable** _as string_:
+# - $1: **executable** _as string_:
 #       the executable or function to execute
 # - $@: **arguments** _as any_:
 #       the arguments to pass to the executable
+# - ${noFail} _as bool_:
+#       (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.
+#       If true and the execution fails, the script will exit.
+#       (default to false)
+# - ${acceptableCodes} _as string_:
+#       (optional) The acceptable error codes, comma separated.
+#       If the error code is matched, then REPLY_CODE is set to 0)
+#       (default to 0)
+# - ${stdoutPath}: _as string_:
+#       (optional) The file path to use for the stdout of the executable. Otherwise a temporary work file will be used.
+#       (default to "")
+# - ${stderrPath}: _as string_:
+#       (optional) The file path to use for the stderr of the executable. Otherwise a temporary work file will be used.
+#       (default to "")
+# - ${noRead}: _as bool_:
+#       (optional) If set to true, the function will return the file path of the stdout and stderr files
+#       instead of their content. This will make the function faster.
+#       (default to false)
+# - ${stdinFile} _as bool_:
+#       (optional) The file path to use as stdin for the executable.
+#       (default to empty, which means no stdin is used)
+# - ${stdin} _as string_:
+#       (optional) The stdin content to pass to the executable.
+#       Can be empty if not used.
+#       (default to empty, which means no stdin is used)
 # - ${noRedirection}: _as bool_:
 #       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.
 #       (default to false)
 #
 # Returns:
 #
-# - $?:The exit code of the executable.
-# - ${REPLY}: The file path containing the stdout of the executable.
-# - ${REPLY2}: The file path containing the stderr of the executable.
+# - ${REPLY_CODE}: The exit code of the executable.
+# - ${REPLY}: The content of stdout (or file path to stdout if `noRead=true`).
+# - ${REPLY2}: The content of stderr (or file path to stdout if `noRead=true`).
 #
 # ```bash
-# exe::invokef5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
+# exe::invoke thing --height=10 --flag
+# exe::invoke thing --height=10 --flag --- noFail=true stdoutPath=/path/to/stdout stderrPath=/path/to/stderr
 # stdoutFilePath="${REPLY}"
 # stderrFilePath="${REPLY2}"
 # ```
 #
-# > - In windows, this is tremendously faster to do (or any other invoke flavor):
-# >   `exe::invokef5 false 0 false '' mycommand && myvar="${REPLY}"`
+# > - In windows, this is tremendously faster to do:
+# >   `exe::invoke mycommand; myvar="${REPLY}"`
+# >   than doing:
+# >   `myvar="$(mycommand)".`
+# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
+# > - On linux, you can use a tmpfs directory for massive gains over subshells.
+function exe::call() {
+  local \
+    executable="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    noFail=false \
+    acceptableCodes="0" \
+    stdoutPath="${GLOBAL_TEMPORARY_STDOUT_FILE}" \
+    stderrPath="${GLOBAL_TEMPORARY_STDERR_FILE}" \
+    noRead=false
+    stdinFile="" \
+    stdin="" \
+    noRedirection=false
+  shift 1
+  core::parseShellParameters "${@}"
+  eval "${REPLY}"
+
+  # if trace mode is on, print some info
+  if log::isTraceEnabled; then
+    local IFS=' '
+    if (( $# > 0 )); then
+      printf -v args "%q " "${@}"
+      log::trace "Executing the command ${executable} with arguments: "$'\n'"${args% }"
+    else
+      log::trace "Executing the command ${executable} (no arguments)."
+    fi
+    if [[ -n ${stdin} ]]; then
+      log::trace "${executable^} standard input from string:"
+      log::saveFileString stdin suffix="${executable}-stdin"
+    elif [[ -n ${stdinFile} ]]; then
+      log::trace "${executable^} standard input from file ${stdin}:"
+      log::saveFile "${stdin}" suffix="${executable}-stdin"
+    else
+      log::trace "No standard input."
+    fi
+  else
+    log::debug "Executing the command ${executable}."
+  fi
+
+  time::getProgramElapsedMicroseconds
+  local timerStart="${REPLY}"
+
+  # execute the executable
+  local -i exitCode=0
+  if [[ ${noRedirection} == "true" ]]; then
+    if [[ -n ${stdin} ]]; then
+      "${executable}" "$@" <<<"${stdin}" || exitCode=$?
+    elif [[ -n ${stdinFile} ]]; then
+      "${executable}" "$@" <"${stdinFile}" || exitCode=$?
+    else
+      "${executable}" "$@" || exitCode=$?
+    fi
+  else
+    if [[ -n ${stdin} ]]; then
+      "${executable}" "$@" <<<"${stdin}" 1>"${stdoutPath}" 2>"${stderrPath}" || exitCode=$?
+    elif [[ -n ${stdinFile} ]]; then
+      "${executable}" "$@" <"${stdinFile}" 1>"${stdoutPath}" 2>"${stderrPath}" || exitCode=$?
+    else
+      "${executable}" "$@" 1>"${stdoutPath}" 2>"${stderrPath}" || exitCode=$?
+    fi
+  fi
+
+  time::getProgramElapsedMicroseconds
+  local -i elapsed=$((REPLY - timerStart))
+  time::convertMicrosecondsToSeconds "${elapsed}" precision=3
+
+  local debugMessage="The command ${executable} ended with exit code ${exitCode} in ${REPLY}s."
+
+  # if the error code is acceptable, then we set it to 0
+  if [[ ${exitCode} -ne "0" && ,${acceptableCodes}, == *",${exitCode},"* ]]; then
+    exitCode=0
+    log::trace "The error code ${exitCode} is acceptable and has been reset to 0."
+  fi
+
+  local shouldFail=false
+  if [[ ${noFail} != "true" && exitCode -ne 0 ]]; then
+    shouldFail=true;
+  fi
+
+  # fail if needed or we are debug mode; display all the debug information that could be useful
+  if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
+
+    if [[ ${noRedirection} != "true" ]]; then
+      if log::isTraceEnabled || [[ ${shouldFail} == "true" ]]; then
+        # print std out
+        if [[ -s "${stdoutPath}" ]]; then
+          log::errorTrace "${executable^} standard output stream:"
+          log::saveFile "${stdoutPath}" suffix="${executable}-stdout"
+          log::printFile "${stdoutPath}" maxLines=99
+        else
+          log::errorTrace "${executable^} had no standard output stream."
+        fi
+
+        # print stderr
+        if [[ -s "${stderrPath}" ]]; then
+          log::errorTrace "${executable^} standard error stream:"
+          log::saveFile "${stderrPath}" suffix="${executable}-stderr"
+          log::printFile "${stderrPath}" maxLines=99
+        else
+          log::errorTrace "${executable^} had no standard error stream."
+        fi
+      fi
+    fi
+
+    if [[ ${shouldFail} == "true" ]]; then
+      core::fail "${debugMessage}"
+    else
+      log::debug "${debugMessage}"
+    fi
+  fi
+
+  if [[ ${noRedirection} == "true" ]]; then
+    REPLY=""
+    REPLY2=""
+  elif [[ ${noRead} == "true" ]]; then
+    REPLY="${stdoutPath}"
+    REPLY2="${stderrPath}"
+  else
+    fs::readFile "${stderrPath}"
+    REPLY2="${REPLY}"
+    fs::readFile "${stdoutPath}"
+  fi
+
+  # shellcheck disable=SC2034
+  REPLY_CODE="${exitCode}"
+
+  return 0
+}
+
+
+
+# ## exe::invokef
+#
+# This function call an executable and its arguments.
+# It redirects the stdout and stderr to temporary files.
+#
+# - $1: **executable** _as string_:
+#       the executable or function to execute
+# - $@: **arguments** _as any_:
+#       the arguments to pass to the executable
+# - ${failOnError} _as bool_:
+#       (optional) A boolean to indicate if the function should fail in case the execution fails.
+#       If true and the execution fails, the script will exit.
+#       (default to false)
+# - ${acceptableCodes} _as string_:
+#       (optional) The acceptable error codes, comma separated.
+#       If the error code is matched, then REPLY_CODE is set to 0)
+#       (default to 0)
+# - ${stdinFile} _as bool_:
+#       (optional) The file path to use as stdin for the executable.
+#       (default to empty, which means no stdin is used)
+# - ${stdin} _as string_:
+#       (optional) The stdin content to pass to the executable.
+#       Can be empty if not used.
+#       (default to empty, which means no stdin is used)
+# - ${noRedirection}: _as bool_:
+#       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.
+#       (default to false)
+# - ${noRead}: _as bool_:
+#       (optional) If set to true, the function will return the file path of the stdout and stderr files
+#       instead of their content.
+#       (default to false)
+#
+# Returns:
+#
+# - ${REPLY_CODE}: The exit code of the executable.
+# - ${REPLY}: The content of stdout (or file path to stdout if `noRead=true`).
+# - ${REPLY2}: The content of stderr (or file path to stdout if `noRead=true`).
+#
+# ```bash
+# exe::invokef "false" "130,2" "false" "This is the stdin" "stuff" "--height=10"
+# stdoutFilePath="${REPLY}"
+# stderrFilePath="${REPLY2}"
+# ```
+#
+# > - In windows, this is tremendously faster to do:
+# >   `exe::invokef false 0 false '' mycommand; myvar="${REPLY}"`
 # >   than doing:
 # >   `myvar="$(mycommand)".`
 # > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
@@ -71,10 +265,10 @@ function exe::invokef5() {
     if [[ -n ${stdIn} ]]; then
       if [[ ${stdInFromFile} == "true" ]]; then
         log::trace "${executable^} standard input from file ${stdIn}:"
-        log::saveFile "${stdIn}" suffix="${executable}-stdin" logPath=true
+        log::saveFile "${stdIn}" suffix="${executable}-stdin"
       else
         log::trace "${executable^} standard input from string:"
-        log::saveFileString stdIn suffix="${executable}-stdin" logPath=true
+        log::saveFileString stdIn suffix="${executable}-stdin"
       fi
     else
       log::trace "No standard input."
@@ -134,7 +328,7 @@ function exe::invokef5() {
         # print std out
         if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
           log::errorTrace "${executable^} standard output stream:"
-          log::saveFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" suffix="${executable}-stdout" logPath=true
+          log::saveFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" suffix="${executable}-stdout"
           log::printFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" maxLines=99
         else
           log::errorTrace "${executable^} had no standard output stream."
@@ -143,7 +337,7 @@ function exe::invokef5() {
         # print stderr
         if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
           log::errorTrace "${executable^} standard error stream:"
-          log::saveFile "${GLOBAL_TEMPORARY_STDERR_FILE}" suffix="${executable}-stderr" logPath=true
+          log::saveFile "${GLOBAL_TEMPORARY_STDERR_FILE}" suffix="${executable}-stderr"
           log::printFile "${GLOBAL_TEMPORARY_STDERR_FILE}" maxLines=99
         else
           log::errorTrace "${executable^} had no standard error stream."

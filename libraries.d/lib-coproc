@@ -61,12 +61,6 @@ function coproc::runInParallel() {
     coprocNamePrefix+="${BASH_SUBSHELL}_"
   fi
 
-  local logOnErrorExit=false
-  if [[ -z ${completedCallback} ]]; then
-    # if no callback is defined, we want to log on error exit
-    logOnErrorExit=true
-  fi
-
   maxInParallel=$((maxInParallel < 1 ? 1 : maxInParallel))
 
   local -a -i pids=() runningPids=() exitCodes=()
@@ -85,8 +79,7 @@ function coproc::runInParallel() {
 
     coproc::run "${coprocName}" \
       initCommand="${jobCommands[index]}" \
-      redirectLogsToFile="${logFile}" \
-      logOnErrorExit="${logOnErrorExit}"
+      redirectLogsToFile="${logFile}"
 
     pid="${REPLY}"
     pids+=("${pid}")
@@ -208,9 +201,6 @@ function coproc::runInParallel() {
 # - ${redirectLogsToFile} _as string_:
 #       (optional) The path to a file where the logs of the coproc will be redirected.
 #       (defaults to "")
-# - ${logOnErrorExit} _as bool_:
-#       (optional) If true, will display an error if the coproc exits with a non zero code
-#       (defaults to true)
 #
 # Returns:
 #
@@ -229,8 +219,7 @@ function coproc::run() {
     waitForReadiness=false \
     keepOnlyLastMessage=false \
     redirectLogsToFile="" \
-    logOnErrorExit=true
-  IFS=$' '
+    IFS=$' '
   shift 1
   eval "local a= ${*@Q}"
 
@@ -242,7 +231,7 @@ function coproc::run() {
   log::trace $'\n'"Init command: ${initCommand}"$'\n'"loop command: ${loopCommand}."$'\n'"on message command: ${onMessageCommand}"$'\n'"end command: ${endCommand}"$'\n'"wait for readiness: ${waitForReadiness}"$'\n'"keep only last message: ${keepOnlyLastMessage}"
 
   # Start the coproc
-  eval "{ coproc ${coprocVarName} { coproc_program \"${initCommand}\" \"${loopCommand}\" \"${onMessageCommand}\" \"${endCommand}\" ${waitForReadiness} ${keepOnlyLastMessage} \"${redirectLogsToFile}\" ${logOnErrorExit} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
+  eval "{ coproc ${coprocVarName} { coproc_program \"${initCommand}\" \"${loopCommand}\" \"${onMessageCommand}\" \"${endCommand}\" ${waitForReadiness} ${keepOnlyLastMessage} \"${redirectLogsToFile}\" 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
 
   # wait for pid variable to be set by bash (we should never enter the loop)
   local -i loopNumber=0
@@ -270,8 +259,7 @@ function coproc::run() {
 
   # wait for readiness if requested
   if [[ ${waitForReadiness} == "true" ]]; then
-    coproc::receiveMessage "${coprocVarName}"
-    if ((REPLY_CODE != 0)); then
+    if ! coproc::receiveMessage "${coprocVarName}"; then
       core::fail "The coproc ⌜${coprocVarName}⌝ did not start correctly."
     elif [[ ${REPLY} != "ready" ]]; then
       core::fail "The coproc ⌜${coprocVarName}⌝ did not send the expected readiness message."
@@ -294,10 +282,9 @@ function coproc_program() {
   local waitForReadiness="${5}"
   local keepOnlyLastMessage="${6}"
   local redirectLogsToFile="${7}"
-  local logOnErrorExit="${8}"
 
   # we are inside a coproc, register the correct traps
-  logOnErrorExit="${logOnErrorExit}" trap::registerSubshell
+  trap::registerSubshell
 
   # the coproc must have its own set of temp files
   fs::setupSubshellTempFileGlobalVariable

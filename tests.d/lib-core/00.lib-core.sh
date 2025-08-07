@@ -117,7 +117,7 @@ function test_source() {
 
   test::markdown "Including non existing library."
   test::exit source NOPNOP
-  test::exec _OPTION_EXIT_IF_NOT_FOUND=false source NOPNOP
+  test::exec _OPTION_CONTINUE_IF_NOT_FOUND=true source NOPNOP
   test::flush
 
   test::printVars _CORE_INCLUDED_LIBRARIES
