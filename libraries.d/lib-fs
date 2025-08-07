@@ -176,11 +176,11 @@ function fs::readFile() {
 # > - If the file path does not exist, the function will create the directory tree.
 # > - The main use case is to be able to mock this function during tests...
 function fs::writeToFile() {
+  local -n contentToWriteInFile="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     filePath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     append="false" \
     IFS=$' '
-  local -n contentToWriteInFile="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift 2
   eval "local a= ${*@Q}"
 

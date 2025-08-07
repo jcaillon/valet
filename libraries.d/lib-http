@@ -16,59 +16,57 @@ source fs
 #       The HTTP verb to use (GET, POST, PUT, DELETE, etc.).
 # - $2: **url** _as string_:
 #       The URL to request. Can be http or https but it will only send a request to port 80 anyway.
-# - $3: fail on error _as bool_:
-#       (optional) Can be set using the variable `failOnError`.
-#       If true, the function will use core::fail if the HTTP status code is not acceptable.
+# - ${failOnError} _as bool_:
+#       (optional) If true, the function will use core::fail if the HTTP status code is not acceptable.
 #       (defaults to false)
-# - $4: acceptable status codes _as string_:
-#       (optional) Can be set using the variable `acceptableStatusCodes`.
-#       The list of acceptable status codes, comma separated.
+# - ${acceptableCodes} _as string_:
+#       (optional) The list of acceptable status codes, comma separated.
 #       (defaults to 200,201,202,204,301,304,308)
-# - $5: output file _as string_:
-#       (optional) Can be set using the variable `outputFile`.
-#       The file in which to save the output of the request.
-#       (defaults to "" which means the body will be returned in the variable `REPLY2`)
-# - $6: follow redirection _as bool_:
-#       (optional) Can be set using the variable `followRedirection`.
-#       If true, the function will follow redirections.
+# - ${output} _as string_:
+#       (optional) The file in which to save the output of the request.
+#       (defaults to "" which means the body will be returned in the variable `REPLY`)
+# - ${followRedirection} _as bool_:
+#       (optional) If true, the function will follow redirections.
 #       (defaults to true)
-# - $7: response timeout _as int_:
-#       (optional) Can be set using the variable `responseTimeout`.
-#       The timeout in seconds for the response.
-#       (defaults to 1)
+# - ${timeout} _as int_:
+#       (optional) The timeout in seconds for the response (can be a decimal number).
+#       (defaults to 5)
 #
 # Returns:
 #
-# - $?:
+# - ${REPLY_CODE}:
 #   - 0 if the http status code is acceptable
 #   - 1 otherwise
-# - ${REPLY}: the headers of the response
-# - ${REPLY2}: the body of the response or the path to the file where it was saved
+# - ${REPLY}: the body of the response or the path to the file where it was saved
+# - ${REPLY2}: the headers of the response
 # - ${REPLY3}: the http status code
 #
 # ```bash
 # VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS=true
-# http::request "GET" "http://example.com" "false" "200,201" "" "true" "1" || core::fail "The HTTP request failed."
-# http::request GET https://api.ip2location.io/ true "" test.json
+# http::request GET http://example.com failOnError=true acceptableCodes=200,201 followRedirection=true
+# http::request GET https://api.ip2location.io/ output=test.json
 # http::request GET http://httpbin.org/get
-# echo "Returns HTTP code was ${REPLY3}, response:"$'\n'"${REPLY}"$'\n'"${REPLY2}"
+# echo "Returns HTTP code was ${REPLY3}, response:"$'\n'"${REPLY2}"$'\n'"${REPLY}"
 # ```
 function http::request() {
-  local verb="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local url="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local failOnError="${3:-${failOnError:-false}}"
-  local acceptableStatusCodes="${4:-${acceptableStatusCodes:-200,201,202,204,301,304,308}}"
-  local outputFile="${5:-${outputFile:-}}"
-  local followRedirection="${6:-${followRedirection:-true}}"
-  local -i responseTimeout="${7:-${responseTimeout:-1}}"
+  local \
+    verb="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    url="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    failOnError=false \
+    acceptableCodes="200,201,202,204,301,304,308" \
+    output="" \
+    followRedirection=true \
+    responseTimeout=5
+  shift 2
+  eval "local a= ${*@Q}"
 
   if [[ ${VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS:-} != "true" ]]; then
     core::fail "For security reasons, insecure web requests are disabled by default. Please explicitly enable them by setting the environment variable VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS to true."
   fi
 
-  if [[ -n ${outputFile} ]]; then
-    fs::createFileIfNeeded "${outputFile}"
-    : >"${outputFile}"
+  if [[ -n ${output} ]]; then
+    fs::createFileIfNeeded "${output}"
+    : >"${output}"
   fi
 
   # parse url
@@ -89,45 +87,44 @@ function http::request() {
   local IFS=$'\n'
 
   # send request with headers
-  local -a headers=(
+  local -a requestHeaders=(
     "${verb} ${path} HTTP/1.1"
     "Host: ${host}"
     "Accept: */*"
     "Connection: close"
     ""
   )
-  printf '%s\r\n' "${headers[@]}" >&${requestFd}
+  printf '%s\r\n' "${requestHeaders[@]}" >&${requestFd}
   log::trace "Headers sent:"
   if log::isDebugEnabled; then
-    log::printString "${headers[*]}"
+    log::printString "${requestHeaders[*]}"
   fi
 
   # read response
   log::trace "Headers received:"
   local headers body httpCode line contentLength
-  local -i readBody=0 exitCode=0
+  local -i exitCode=0
   while IFS=$'\n' read -r -d $'\n' -u "${requestFd}" -t "${responseTimeout}" line || [[ -n ${line:-} ]]; do
 
-    if [[ ${readBody} -eq 0 && -n ${line%$'\r'} ]]; then
+    if [[ -n ${line%$'\r'} ]]; then
       # we are still in the headers
       line="${line%$'\r'}"
       headers+="${line}"$'\n'
       if log::isDebugEnabled; then
         log::printString "${line}"
       fi
-    elif [[ -z ${line%$'\r'} ]]; then
+    else
       # we are at the end of the headers
-      readBody=1
-      if [[ -n ${outputFile} ]]; then
+      log::trace "Reading body with content length: ${contentLength:-0}"
+      if [[ -n ${output} ]]; then
         # read the whole body to a file
         local buffer
-        log::trace "Reading body with content length: ${contentLength:-0}"
         if [[ -n ${contentLength:-} ]]; then
           while IFS= read -sr -d '' -u ${requestFd} buffer || [[ -n ${buffer:-} ]]; do
-            printf '%s' "${buffer}" >>"${outputFile}"
+            printf '%s' "${buffer}" >>"${output}"
           done
         else
-          : >"${outputFile}"
+          : >"${output}"
         fi
       else
         if [[ -n ${contentLength:-} ]]; then
@@ -156,7 +153,7 @@ function http::request() {
         exitCode=1
       fi
       log::trace "Following redirection to: ${location}"
-      http::get "${location}"
+      http::request "${verb}" "${location}" "${@}"
       return 0
     fi
   done
@@ -165,27 +162,35 @@ function http::request() {
   exec {requestFd}<&-
   exec {requestFd}>&-
 
-  if [[ ,${acceptableStatusCodes}, == *",${httpCode},"* ]]; then
+  local
+
+  if ((exitCode != 0)); then
+    :
+  elif [[ -z ${httpCode:-} ]]; then
+    log::error "The HTTP response did not contain a valid HTTP code (or timed out)."
+    exitCode=1
+  elif [[ -n ${httpCode:-} && ,${acceptableCodes}, == *",${httpCode},"* ]]; then
     exitCode=0
     log::trace "The HTTP return code ⌜${httpCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
   else
     exitCode=1
   fi
+
   if (( exitCode != 0 )); then
     if log::isDebugEnabled || [[ ${failOnError} == "true" ]]; then
       log::errorTrace "HTTP response:"
       log::printString "${headers}"$'\n'"${body:-}"
     fi
-    local message="The HTTP return code ⌜${httpCode}⌝ is not acceptable for url ⌜${url}⌝."
+    local message="The HTTP return code ⌜${httpCode:-}⌝ is not acceptable for url ⌜${url}⌝."
     if [[ ${failOnError} == "true" ]]; then
       core::fail "${message}"
     fi
     log::trace "${message}"
   fi
 
-  REPLY="${headers}"
-  REPLY2="${body:-${outputFile}}"
+  REPLY="${body:-${output}}"
+  REPLY2="${headers}"
   REPLY3="${httpCode}"
-
-  return ${exitCode}
+  REPLY_CODE="${exitCode}"
+  return 0
 }

@@ -6,7 +6,7 @@
 
 Writing to an output file:
 
-❯ `curl::download https://fuu --code 200 --- failOnError=true acceptableCodes=200 path=/tmp/valet-temp`
+❯ `curl::download https://fuu --code 200 --- failOnError=true acceptableCodes=200 output=/tmp/valet-temp`
 
 Returned variables:
 
@@ -42,7 +42,7 @@ REPLY3='200'
 
 Getting a 500 error with fail mode on:
 
-❯ `curl::download https://fuu --code 500 --- failOnError=true acceptableCodes=200 path=/tmp/valet-temp`
+❯ `curl::download https://fuu --code 500 --- failOnError=true acceptableCodes=200 output=/tmp/valet-temp`
 
 Exited with code: `1`
 
@@ -58,7 +58,7 @@ FAIL     The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu
 
 Getting a 500 error with fail mode off:
 
-❯ `curl::download https://fuu --code 500 --- acceptableCodes=200 path=/tmp/valet-temp`
+❯ `curl::download https://fuu --code 500 --- acceptableCodes=200 output=/tmp/valet-temp`
 
 Returned variables:
 
@@ -72,7 +72,7 @@ REPLY3='500'
 
 Getting an acceptable 400 error with fail mode:
 
-❯ `curl::download https://fuu --code 400 --- failOnError=true acceptableCodes=200,400,401 path=/tmp/valet-temp`
+❯ `curl::download https://fuu --code 400 --- failOnError=true acceptableCodes=200,400,401 output=/tmp/valet-temp`
 
 Returned variables:
 
@@ -95,7 +95,7 @@ DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 ```
 
-❯ `curl::download https://fuu --code 201 --- failOnError=false path=/tmp/valet-temp`
+❯ `curl::download https://fuu --code 201 --- failOnError=false output=/tmp/valet-temp`
 
 **Error output**:
 
@@ -122,7 +122,7 @@ REPLY3='201'
 
 Getting 200:
 
-❯ `curl::request https://fuu --code 200 --- failOnError=true acceptableCodes=200 path=/tmp/valet-temp`
+❯ `curl::request https://fuu --code 200 --- failOnError=true acceptableCodes=200`
 
 Returned variables:
 
@@ -136,7 +136,7 @@ REPLY3='200'
 
 Getting 500 with fail mode off:
 
-❯ `curl::request https://fuu --code 500 --- failOnError=false path=/tmp/valet-temp`
+❯ `curl::request https://fuu --code 500 --- failOnError=false`
 
 Returned variables:
 
@@ -150,7 +150,7 @@ REPLY3='500'
 
 Getting 500 with fail mode on:
 
-❯ `curl::request https://fuu --code 500 --- failOnError=true acceptableCodes=200 path=/tmp/valet-temp`
+❯ `curl::request https://fuu --code 500 --- failOnError=true acceptableCodes=200`
 
 Exited with code: `1`
 
@@ -175,7 +175,7 @@ DEBUG    Log level set to debug.
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 ```
 
-❯ `curl::request https://fuu --code 200 --- failOnError=true acceptableCodes=200 path=/tmp/valet-temp`
+❯ `curl::request https://fuu --code 200 --- failOnError=true acceptableCodes=200`
 
 **Error output**:
 

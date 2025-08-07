@@ -295,7 +295,7 @@ function selfExtend_downloadTarball() {
   # download the tarball
   log::info "Downloading the extension from the URL ⌜${tarballUrl}⌝ for sha1 ⌜${sha1}⌝."
   progress::start "<spinner> Download in progress, please wait..."
-  curl::download "${tarballUrl}" --- failOnError=true acceptableCodes=200,302 path="${tempDirectory}/${sha1}.tar.gz"
+  curl::download "${tarballUrl}" --- failOnError=true acceptableCodes=200,302 output="${tempDirectory}/${sha1}.tar.gz"
   progress::stop
 
   # untar

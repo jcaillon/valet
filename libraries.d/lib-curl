@@ -17,7 +17,7 @@ source fs
 #       The url to download
 # - $@: **curl arguments** _as any_:
 #       options for curl
-# - ${path} _as string_:
+# - ${output} _as string_:
 #       the file in which to save the output of curl, created as a temporary file if not specified
 # - ${failOnError} _as bool_:
 #       true/false to indicate if the function should fail in case the execution fails
@@ -35,14 +35,14 @@ source fs
 # - ${REPLY3}: the http status code
 #
 # ```bash
-# curl::download https://example.com --- path=/filePath
-# curl::download https://example2.com -H "header: value" --- failOnError=true acceptableCodes=200,201 path=/filePath
+# curl::download https://example.com --- output=/filePath
+# curl::download https://example2.com -H "header: value" --- failOnError=true acceptableCodes=200,201 output=/filePath
 # echo "The curl command ended with exit code ⌜${REPLY_CODE}⌝, the http return code was ⌜${REPLY2}⌝: ${REPLY}"
 # ```
 function curl::download() {
   local \
     url="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
-    path="" \
+    output="" \
     failOnError=false \
     acceptableCodes="200,201,202,204,301,304,308"
   shift 1
@@ -50,15 +50,15 @@ function curl::download() {
   eval "${REPLY}"
 
   # temp file if no path is specified
-  if [[ -z ${path} ]]; then
+  if [[ -z ${output} ]]; then
     fs::createTempFile pathOnly=true
-    path="${REPLY}"
+    output="${REPLY}"
   fi
 
   # call curl
   local -i exitCode=0
   local httpStatusCode errors
-  exe::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{response_code}" "--output" "${path}" "$@" "${url}" || exitCode=$?
+  exe::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{response_code}" "--output" "${output}" "$@" "${url}" || exitCode=$?
   httpStatusCode="${REPLY}"
   errors="${REPLY2}"
 
@@ -66,7 +66,7 @@ function curl::download() {
   # and for a bug in curl https://github.com/Homebrew/homebrew-core/issues/173294
   if [[ ${exitCode} != "0" && (${errors} == *"bad argument"* || ${errors} == *"is unknown"*) ]]; then
     log::debug "Trying to use curl without the many options."
-    exe::invoke5 "false" "0" "false" "" "curl" "--location" "-v" "--output" "${path}" "$@" || exitCode=$?
+    exe::invoke5 "false" "0" "false" "" "curl" "--location" "-v" "--output" "${output}" "$@" || exitCode=$?
     if [[ ${REPLY}${REPLY2} =~ "< HTTP/"([0-9.]+)" "([0-9]+)" " ]]; then
       httpStatusCode="${BASH_REMATCH[2]}"
     else
@@ -95,7 +95,7 @@ function curl::download() {
     log::debug "${message}"
   fi
 
-  REPLY="${path}"
+  REPLY="${output}"
   REPLY2="${errors}"
   REPLY3="${httpStatusCode}"
   # shellcheck disable=SC2034
@@ -149,7 +149,7 @@ function curl::request() {
 
   local -i exitCode=0
   local errors httpStatusCode
-  curl::download "${url}" "$@" --- failOnError="${failOnError}" acceptableCodes="${acceptableCodes}" path="${GLOBAL_TEMPORARY_WORK_FILE}" || exitCode=$?
+  curl::download "${url}" "$@" --- failOnError="${failOnError}" acceptableCodes="${acceptableCodes}" output="${GLOBAL_TEMPORARY_WORK_FILE}" || exitCode=$?
   errors="${REPLY2}"
   httpStatusCode="${REPLY3}"
 
