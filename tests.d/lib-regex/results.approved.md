@@ -2,22 +2,6 @@
 
 ## Test script 00.tests
 
-### ✅ Testing regex::getFuzzySearchRegexFromSearchString function
-
-❯ `regex::getFuzzySearchRegexFromSearchString _string`
-
-```text
-_string='the'
-_STRING_FUZZY_FILTER_REGEX='^([^t]*)(t[^h]*h[^e]*e)(.?)'
-```
-
-❯ `regex::getFuzzySearchRegexFromSearchString _string`
-
-```text
-_string='\^$.|?*+[]{}()'
-_STRING_FUZZY_FILTER_REGEX='^([^\]*)(\\[^^]*\^[^$]*\$[^.]*\.[^|]*\|[^?]*\?[^*]*\*[^+]*\+[^[]*\[[^]]*\][^{]*\{[^}]*\}[^(]*\([^)]*\))(.?)'
-```
-
 ### ✅ Testing regex::escapeRegexSpecialChars function
 
 ❯ `regex::escapeRegexSpecialChars \\\^\$.\|\?\*+\[\]\{\}\(\)`
@@ -69,18 +53,18 @@ REPLY_ARRAY=(
 )
 ```
 
-❯ `regex::getMatches _MY_STRING 'name:[[:space:]]*([[:alnum:]]*)' \\1 2`
+❯ `regex::getMatches _MY_STRING 'name:[[:space:]]*([[:alnum:]]*)' replacement=\\c\\1 max=2`
 
 Returned variables:
 
 ```text
 REPLY_ARRAY=(
-[0]='marc'
-[1]='john'
+[0]='0marc'
+[1]='1john'
 )
 ```
 
-❯ `regex::getMatches _MY_STRING 'name:[[:space:]]*([[:alnum:]]*)' \\1 0`
+❯ `regex::getMatches _MY_STRING 'name:[[:space:]]*([[:alnum:]]*)' replacement=\\1 max=0`
 
 ### ✅ Testing regex::replace function
 
@@ -95,7 +79,7 @@ _MY_STRING='---
 '
 ```
 
-❯ `regex::replace _MY_STRING 'name:[[:space:]]*([[:alnum:]]*)' \\c=\\1\  2 true`
+❯ `regex::replace _MY_STRING 'name:[[:space:]]*([[:alnum:]]*)' \\c=\\1\  max=2 onlyMatches=true`
 
 Returned variables:
 
@@ -132,7 +116,7 @@ Returned variables:
 REPLY='This is working.'
 ```
 
-❯ `regex::replace _MY_STRING '^(This) is.*$' \\1\ is\ working. 0`
+❯ `regex::replace _MY_STRING '^(This) is.*$' \\1\ is\ working. max=0`
 
 Returned variables:
 
@@ -140,7 +124,7 @@ Returned variables:
 REPLY='This is the year 2000, madness rules the world.'
 ```
 
-❯ `regex::replace _MY_STRING '^(This) is.*$' \\1\ is\ working. 0 true`
+❯ `regex::replace _MY_STRING '^(This) is.*$' \\1\ is\ working. max=0 onlyMatches=true`
 
 Returned variables:
 

@@ -34,7 +34,7 @@ function trap::register() {
 # at the line where the command failed.
 function trap::onErrorInternal() {
   local -a errorCodes=("$?" "${PIPESTATUS[@]}")
-  local IFS=' '
+  local IFS=' ' REPLY
   local errorCodesString="⌜${errorCodes[0]}⌝"
   if ((${#errorCodes[@]} > 2)); then
     errorCodesString+=" (pipeline statuses ⌜${errorCodes[*]}⌝)"
@@ -55,8 +55,17 @@ function trap::onErrorInternal() {
       log::printTrappedBashCommand
       log::printCallStack
     fi
+    if [[ ! -v GLOBAL_ERROR_TRAP_ERROR_CODES ]]; then
+      # shellcheck disable=SC2034
+      declare -g -a \
+        GLOBAL_ERROR_TRAP_ERROR_CODES=() \
+        GLOBAL_ERROR_TRAP_ERROR_STACKS=()
+    fi
     # shellcheck disable=SC2034
-    GLOBAL_ERROR_TRAP_LAST_ERROR_CODE="${errorCodes[0]}"
+    GLOBAL_ERROR_TRAP_ERROR_CODES+=("${errorCodes[0]}")
+    log::getCallStack
+    # shellcheck disable=SC2034
+    GLOBAL_ERROR_TRAP_ERROR_STACKS+=("Error code ${errorCodesString} for the command:"$'\n'"╭ ${BASH_COMMAND:-}"$'\n'"${REPLY}")
     return 0
   fi
 

@@ -41,4 +41,6 @@ log::info "# LESSONS LEARNED:
   See: <https://www.gnu.org/software/bash/manual/bash.html#index-trap> and <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.
 - This is also true for the body of a function that runs in this context where the ERR trap is not triggered.
   Quote from bash manual : 'If a compound command or shell function executes in a context where -e is being ignored, none of the commands executed within the compound command or function body will be affected by the -e setting, even if -e is set and a command returns a failure status.'
+- with the bash option nounset will cause bash to exit without triggering the ERR trap if a variable is not set.
+  This is because the ERR trap is only triggered by commands that return a non-zero exit status, and an unset variable does not return a non-zero exit status.
 "

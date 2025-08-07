@@ -192,9 +192,8 @@ function test_exec() {
     bash::runInSubshell eval "${compoundCommand}"
     exitCode=${REPLY_CODE}
   else
-    _OPTION_REPLY_DISABLED=true \
-      bash::catchErrors eval "${compoundCommand}"
-    exitCode=${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}
+    bash::catchErrors eval "${compoundCommand}"
+    exitCode="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
   fi
 
   if ((exitCode != 0)); then
@@ -539,6 +538,8 @@ function test::setTerminalInputs() {
 #
 # This function is used to set the call stack for the tests.
 # It is used to ensure that the call stack is consistent with the tests.
+#
+# Call `test::unsetTestCallStack` to unset the call stack after the tests.
 #
 # ```bash
 # test::setTestCallStack

@@ -4,7 +4,7 @@
 
 ### ✅ Testing bash::catchErrors
 
-❯ `_OPTION_REPLY_DISABLED=false bash::catchErrors echo This\ should\ not\ fail`
+❯ `bash::catchErrors echo This\ should\ not\ fail`
 
 **Standard output**:
 
@@ -12,33 +12,43 @@
 This should not fail
 ```
 
-Returned variables:
-
-```text
-REPLY_CODE='0'
-```
-
-❯ `_OPTION_REPLY_DISABLED=false bash::catchErrors false`
+❯ `bash::catchErrors testFunction`
 
 Returned code: `1`
 
-Returned variables:
+**Error output**:
 
 ```text
-REPLY_CODE='1'
+INFO     This is a test function.
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 25: ((: 0/0: division by 0 (error token is "0")
+INFO     This line will be executed since we catch errors.
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 27: ((: 0/0: division by 0 (error token is "0")
+INFO     Again.
 ```
-
-❯ `bash::catchErrors false`
-
-Returned code: `1`
 
 ```text
 GLOBAL_ERROR_TRAP_LAST_ERROR_CODE='1'
+GLOBAL_ERROR_TRAP_ERROR_CODES=(
+[0]='1'
+[1]='1'
+)
+GLOBAL_ERROR_TRAP_ERROR_STACKS=(
+[0]='Error code ⌜1⌝ for the command:
+╭ ((0/0))
+├─ in log::printCallStack() at core:10
+├─ in log::error() at core:100
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
+'
+[1]='Error code ⌜1⌝ for the command:
+╭ ((0/0))
+├─ in log::printCallStack() at core:10
+├─ in log::error() at core:100
+├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
+╰─ in myCmd::function() at /path/to/function.sh:300
+'
+)
 ```
-
-❯ `_OPTION_EXIT_ON_FAIL=true bash::catchErrors false`
-
-Exited with code: `1`
 
 ### ✅ Testing bash::allVariablesCachedWithValue
 
@@ -85,7 +95,7 @@ REPLY_CODE='0'
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 54: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 63: ((: 0/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0/0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -103,7 +113,7 @@ REPLY_CODE='1'
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 54: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 63: ((: 0/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0/0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -121,7 +131,7 @@ REPLY_CODE='1'
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 54: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 63: ((: 0/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0/0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200

@@ -20,12 +20,21 @@ function main() {
 function test_bash::catchErrors() {
   test::title "✅ Testing bash::catchErrors"
 
+  function testFunction() {
+    log::info "This is a test function."
+    ((0/0)) # This will fail and trigger the error trap
+    log::info "This line will be executed since we catch errors."
+    ((0/0)) # This will fail and trigger the error trap
+    log::info "Again."
+  }
+
   # shellcheck disable=SC2317
-  test::func _OPTION_REPLY_DISABLED=false bash::catchErrors echo "This should not fail"
-  test::func _OPTION_REPLY_DISABLED=false bash::catchErrors false
-  test::exec bash::catchErrors false
-  test::printVars GLOBAL_ERROR_TRAP_LAST_ERROR_CODE
-  test::exit _OPTION_EXIT_ON_FAIL=true bash::catchErrors false
+  test::func bash::catchErrors echo "This should not fail"
+
+  test::setTestCallStack
+  test::exec bash::catchErrors testFunction
+  test::printVars GLOBAL_ERROR_TRAP_LAST_ERROR_CODE GLOBAL_ERROR_TRAP_ERROR_CODES GLOBAL_ERROR_TRAP_ERROR_STACKS
+  test::unsetTestCallStack
 }
 
 function test_bash::allVariablesCachedWithValue() {

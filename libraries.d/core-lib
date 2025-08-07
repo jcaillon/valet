@@ -504,11 +504,16 @@ function log::isTraceEnabled() {
 #
 # This function prints the current bash command when called from a trap.
 function log::printTrappedBashCommand() {
-  local symbol="╰"
+  local \
+    symbol="╰" \
+    command="${BASH_COMMAND:-}"
   if [[ -n ${FUNCNAME[2]:-} ]]; then
     symbol="╭"
   fi
-  log::printString "${symbol} ${BASH_COMMAND:-}" newLinePadString="│ "
+  if [[ -n ${GLOBAL_LAST_BASH_COMMAND:-} ]]; then
+    command="${GLOBAL_LAST_BASH_COMMAND}"
+  fi
+  log::printString "${symbol} ${command}" newLinePadString="│ "
 }
 
 # ## log::printCallStack
