@@ -69,7 +69,7 @@ function benchmark::run() {
   local -A functionsElapsed
 
   # Run the baseline
-  progress::start "<spinner> Running the baseline ⌜${baseline}⌝ for ⌜${baselineTime}s⌝."
+  progress::start template="<spinner> Running the baseline ⌜${baseline}⌝ for ⌜${baselineTime}s⌝."
 
   time::getProgramElapsedMicroseconds
   local startTimeInUs="${REPLY}"
@@ -95,7 +95,7 @@ function benchmark::run() {
   # Run the other functions
   if (( $# > 0 )); then
     for function in "${@}"; do
-      progress::start "<spinner> Running the function ⌜${function}⌝ ⌜${baselineRuns}⌝ times."
+      progress::start template="<spinner> Running the function ⌜${function}⌝ ⌜${baselineRuns}⌝ times."
 
       time::getProgramElapsedMicroseconds
       startTimeInUs="${REPLY}"
@@ -115,7 +115,7 @@ function benchmark::run() {
   fi
 
   # Re run the baseline to get the average time
-  progress::start "<spinner> Running the baseline ⌜${baseline}⌝ ⌜${baselineRuns}⌝ times."
+  progress::start template="<spinner> Running the baseline ⌜${baseline}⌝ ⌜${baselineRuns}⌝ times."
 
   time::getProgramElapsedMicroseconds
   startTimeInUs="${REPLY}"

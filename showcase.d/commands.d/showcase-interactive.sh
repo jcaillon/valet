@@ -80,7 +80,7 @@ function showcaseInteractive() {
 
   log::warning "Now displaying a spinner"
 
-  spinner="⢄⢂⢁⡁⡈⡐⡠" progress::start "<spinner>" "20" 50
+  progress::start template="<spinner>" size=20 frameDelay=50 spinnerFrames="⢄⢂⢁⡁⡈⡐⡠"
 
   IDX=0
   while [[ ${IDX} -lt 3 ]]; do

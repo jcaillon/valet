@@ -111,7 +111,7 @@ function selfTest() {
   # prepare a list of all the test suites to run (with extra info for each test suite)
   log::info "Listing all test suites to run."
 
-  progress::start "<spinner>"
+  progress::start template="<spinner>"
 
   local -a \
     _TEST_TEST_SUITE_NAME=() \

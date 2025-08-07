@@ -20,27 +20,24 @@ source terminal
 # This will run in the background and will not block the main thread.
 # The main thread can continue to output logs while this animation is running.
 #
-# - $1: template _as string_:
-#       (optional) Can be set using the variable `template`.
-#       The template to display. The template can contain the following placeholders:
+# - $1{template} _as string_:
+#       (optional) The template to display. The template can contain the following placeholders:
 #       - `<spinner>`: the spinner animation
 #       - `<percent>`: the percentage of the progress bar
 #       - `<bar>`: the progress bar
 #       - `<message>`: the message to display
 #       - #TODO: add `<cGradient>` and `<cDefault>`: colors the bar with a gradient (if colors enabled)
 #       (defaults to VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE or "<spinner> <percent> ░<bar>░ <message>")
-# - $2: bar size _as int_:
-#       (optional) Can be set using the variable `barSize`.
-#       The maximum width of the progress bar.
+# - ${size} _as int_:
+#       (optional) The maximum width of the progress bar.
 #       (defaults to VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE or 20)
-# - $3: frame delay _as int_:
-#       (optional) Can be set using the variable `frameDelay`.
-#       The time in milliseconds between each frame of the spinner.
+# - ${frameDelay} _as int_:
+#       (optional) The time in milliseconds between each frame of the spinner.
 #       (defaults to VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY or 200)
 # - ${maxFrames} _as int_:
 #       (optional) The maximum number of frames to display.
 #       (defaults to 9223372036854775807)
-# - ${spinner} _as string_:
+# - ${spinnerFrames} _as string_:
 #       (optional) The spinner to display (each character is a frame).
 #       Examples:
 #       - ◐◓◑◒
@@ -51,37 +48,41 @@ source terminal
 #       - ▌▀▐▄
 #       - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
 #       (defaults to VALET_CONFIG_SPINNER_CHARACTERS or "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
-# - ${defaultPercentage} _as int_:
+# - ${percentage} _as int_:
 #       (optional) The default percentage to start with.
 #       (defaults to 0)
-# - ${defaultMessage} _as int_:
+# - ${message} _as string_:
 #       (optional) The default message to start with.
 #       (defaults to "")
 #
 # ```bash
-# progress::start "<spinner>" "" 100
+# progress::start template="<spinner>" "" 100
 # wait 4
 # progress::stop
 #
-# spinner="⢄⢂⢁⡁⡈⡐⡠" progress::start "<spinner> <percent> ░<bar>░ <message>" 30
+# progress::start template="<spinner> <percent> ░<bar>░ <message>" size=30 spinnerFrames="⢄⢂⢁⡁⡈⡐⡠"
 # IDX=0
 # while [[ ${IDX} -le 50 ]]; do
 #   progress::update $((IDX * 2)) "Doing something ${IDX}/50..."
 #   IDX=$((IDX + 1))
 #   sleep 0.1
 # done
+# progress::stop
 # ```
 #
 # > Important: all progress functions will only work if called from the same shell
 # > that started the progress bar.
 function progress::start() {
-  local template="${1:-${template:-${VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE:-"<spinner> <percent> ░<bar>░ <message>"}}}"
-  local -i barSize="${2:-${barSize:-${VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE:-20}}}"
-  local frameDelay="${3:-${frameDelay:-${VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY:-200}}}"
-  local -i maxFrames="${maxFrames:-9223372036854775807}"
-  local spinner="${spinner:-${VALET_CONFIG_SPINNER_CHARACTERS:-"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"}}"
-  local -i defaultPercentage="${defaultPercentage:-0}"
-  local defaultMessage="${defaultMessage:-}"
+  local \
+    template="${VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE:-"<spinner> <percent> ░<bar>░ <message>"}" \
+    size="${VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE:-20}" \
+    frameDelay="${VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY:-200}" \
+    maxFrames=9223372036854775807 \
+    spinnerFrames="${VALET_CONFIG_SPINNER_CHARACTERS:-"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"}" \
+    percentage=0 \
+    message="" \
+    IFS=$' '
+  eval "local a= ${*@Q}"
 
   if [[ ! -t 2 || ${VALET_DISABLE_PROGRESS_BARS:-} == "true" ]]; then
     # we are not in an interactive session or progress bars are disabled
@@ -103,7 +104,7 @@ function progress::start() {
   # but we still want to have stderr of progress_runAnimationInBackground so we redirect it to GLOBAL_FD_LOG
   {
     # we use coproc because it gives us a file descriptor to write to the input stream of the background job
-    coproc _PROGRESS_BACKGROUND_JOB { progress_runAnimationInBackground "${template}" "${barSize}" "${frameDelay}" "${maxFrames}" "${spinner}" "${defaultPercentage}" "${defaultMessage}" 2>&"${GLOBAL_FD_LOG}"; }
+    coproc _PROGRESS_BACKGROUND_JOB { progress_runAnimationInBackground "${template}" "${size}" "${frameDelay}" "${maxFrames}" "${spinnerFrames}" "${percentage}" "${message}" 2>&"${GLOBAL_FD_LOG}"; }
   } 2>/dev/null
   _PROGRESS_BACKGROUND_PID="${_PROGRESS_BACKGROUND_JOB_PID}"
   # shellcheck disable=SC2034
@@ -171,7 +172,7 @@ function progress::update() {
   fi
 
   if [[ ${_PROGRESS_BAR_RUNNING:-} != "true" ]]; then
-    defaultPercentage="${percent}" defaultMessage="${message}" progress::start ""
+    progress::start percentage="${percent}" message="${message}"
     return 0
   fi
   if [[ ! -v _PROGRESS_BACKGROUND_JOB ]] || ! { printf "1\0%s %s %s\0" "update" "${percent}" "${message}" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; } 2>/dev/null; then
