@@ -29,7 +29,7 @@ function main() {
   test::flushStdout
   echo "This was written to the error output using: echo '...' 1>&2" 1>&2
   echo "Then flushed with test::flushStderr" 1>&2
-  test::flushStderr "**Optional title for the code block:**"
+  test::flushStderr blockTitle="**Optional title for the code block:**"
 
 
   test::title "🧪 Generic testing method"

@@ -60,6 +60,12 @@ REPLY='muter'
 _myString='My text with some text formatting and some more textunreadable stuff. Inluding some 123;55;25524 bit colors and some 28 bit colors.'
 ```
 
+❯ `string::removeTextFormatting _myString`
+
+```text
+_myString='wo[107mrd wo[107mrd!'
+```
+
 ### ✅ Testing string::convertToHex
 
 ❯ `_myString=d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301 string::convertToHex _myString`
@@ -70,21 +76,13 @@ Returned variables:
 REPLY='64303731656331393166366539386139633738623664353032633832336438653561646366646638336430656135356562633766323432623239636538333031'
 ```
 
-### ✅ Testing string::removeSgrCodes
-
-❯ `string::removeSgrCodes _myStringWithSgrCodes`
-
-```text
-_myStringWithSgrCodes='word!'
-```
-
 ### ✅ Testing string::getField
 
 ```text
 _MY_STRING='field1 field2 field3'
 ```
 
-❯ `string::getField _MY_STRING 0 \ `
+❯ `string::getField _MY_STRING 0 separator=\ `
 
 Returned variables:
 
@@ -92,7 +90,7 @@ Returned variables:
 REPLY='field1'
 ```
 
-❯ `string::getField _MY_STRING 1 \ `
+❯ `string::getField _MY_STRING 1 separator=\ `
 
 Returned variables:
 
@@ -100,7 +98,7 @@ Returned variables:
 REPLY='field2'
 ```
 
-❯ `string::getField _MY_STRING 2 ,`
+❯ `string::getField _MY_STRING 2 separator=,`
 
 Returned variables:
 
@@ -108,7 +106,7 @@ Returned variables:
 REPLY=''
 ```
 
-❯ `string::getField _MY_STRING 4 ,`
+❯ `string::getField _MY_STRING 4 separator=,`
 
 Returned variables:
 
@@ -122,7 +120,7 @@ line2 does it work on lines?
 line3 seems so'
 ```
 
-❯ `string::getField _MY_STRING 2 $'\n'`
+❯ `string::getField _MY_STRING 2 $'separator=\n'`
 
 Returned variables:
 
@@ -257,7 +255,7 @@ REPLY='hello  world'
 MY_STRING='_-_-_hello_-_'
 ```
 
-❯ `string::trimEdges MY_STRING _-`
+❯ `string::trimEdges MY_STRING charsToTrim=_-`
 
 Returned variables:
 
@@ -309,7 +307,7 @@ Returned variables:
 REPLY='0'
 ```
 
-❯ `_MY_STRING=hello string::getIndexOf _MY_STRING he 10`
+❯ `_MY_STRING=hello string::getIndexOf _MY_STRING he startingIndex=10`
 
 Returned variables:
 
@@ -317,7 +315,7 @@ Returned variables:
 REPLY='-1'
 ```
 
-❯ `_MY_STRING=yes-yes string::getIndexOf _MY_STRING ye 1`
+❯ `_MY_STRING=yes-yes string::getIndexOf _MY_STRING ye startingIndex=1`
 
 Returned variables:
 
@@ -325,7 +323,7 @@ Returned variables:
 REPLY='4'
 ```
 
-❯ `_MY_STRING=yes-yes string::getIndexOf _MY_STRING yes 5`
+❯ `_MY_STRING=yes-yes string::getIndexOf _MY_STRING yes startingIndex=5`
 
 Returned variables:
 
@@ -890,8 +888,7 @@ Returned variables:
 
 ```text
 REPLY='1 line one
-2 line two
-'
+2 line two'
 ```
 
 Testing string::head with 0 line
@@ -914,8 +911,17 @@ Returned variables:
 REPLY='1 line one
 2 line two
 3 line three
-4 line four
-'
+4 line four'
+```
+
+Testing string::head with 10 lines
+
+❯ `MY_STRING=1\ 2\ 3\ 4 string::head MY_STRING 2 separator=\ `
+
+Returned variables:
+
+```text
+REPLY='1 2'
 ```
 
 ### ✅ Testing string::doForEachLine
@@ -929,5 +935,15 @@ Line: '1 line one'
 Line: ''
 Line: '3 line three'
 Line: '4 line four'
+```
+
+❯ `MY_STRING=1\ 2\ 3 string::doForEachLine MY_STRING forEachLine separator=\ `
+
+**Standard output**:
+
+```text
+Line: '1'
+Line: '2'
+Line: '3'
 ```
 

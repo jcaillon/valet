@@ -23,7 +23,7 @@ function test_traps() {
   # test::title "✅ Testing the kill signal handler"
   # echo "valet self mock1 wait-indefinitely &"
   # echo "kill \$!"
-  # test::flushStdout "**Prompt**"
+  # test::flushStdout
   # "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 wait-indefinitely &
   # local processId=$!
   # kill -9 ${processId}

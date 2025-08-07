@@ -246,27 +246,33 @@ function terminal::restoreInterruptTrap() {
 # Clear a "box" in the terminal.
 # Will return the cursor at the current position at the end (using GLOBAL_CURSOR_LINE and GLOBAL_CURSOR_COLUMN).
 #
-# - $1: **top** _as int_:
-#       the left position of the box
-# - $2: **left** _as int_:
-#       the top position of the box
-# - $3: **width** _as int_:
-#       the width of the box
-# - $4: **height** _as int_:
-#       the height of the box
+# - ${top} _as int_:
+#       (optional) the top position of the box
+#       (defaults to 1)
+# - ${left} _as int_:
+#       (optional) the left position of the box
+#       (defaults to 1)
+# - ${width} _as int_:
+#       (optional) the width of the box
+#       (defaults to GLOBAL_COLUMNS)
+# - ${height} _as int_:
+#       (optional) the height of the box
+#       (defaults to GLOBAL_LINES)
 #
 # ```bash
 # terminal::getCursorPosition
-# terminal::clearBox 1 1 10 5
+# terminal::clearBox top=1 left=1 width=10 height=5
 # ```
 function terminal::clearBox() {
-  local top="${1}"
-  local left="${2}"
-  local width="${3}"
-  local height="${4}"
+  local \
+    top=1 \
+    left=1 \
+    width="${GLOBAL_COLUMNS:-9999}" \
+    height="${GLOBAL_LINES:-9999}" \
+    IFS=$' '
+  eval "local a= ${*@Q}"
 
-  local toPrint="${ESC__CURSOR_HIDE}"
-  local lineNumber=0
+  local toPrint="${ESC__CURSOR_HIDE}" lineNumber=0
   for ((lineNumber = top; lineNumber < top + height; lineNumber++)); do
     toPrint+="${ESC__CURSOR_MOVE__}${lineNumber};${left}${__ESC__TO}${ESC__ERASE__}${width}${__ECS__CHARS}"
   done
@@ -288,28 +294,28 @@ function terminal::clearBox() {
 # - The box will not be placed on the same line as the current position if notOnCurrentLine is set to true.
 #   Otherwise it can use the current position line.
 #
-# - $1: **current line** _as int_:
+# - ${top} _as int_:
 #       the current line of the cursor (1 based)
-# - $2: **current column** _as int_:
+# - ${left} _as int_:
 #       the current column of the cursor (1 based)
-# - $3: **desired height** _as int_:
+# - ${desiredHeight} _as int_:
 #       the desired height of the box
-# - $4: **desired width** _as int_:
+# - ${desiredWidth} _as int_:
 #       the desired width of the box
-# - $5: **max height** _as int_:
+# - ${maxHeight} _as int_:
 #       the maximum height of the box
-# - $6: force below _as bool_:
+# - ${forceBelow} _as bool_:
 #       (optional) force the box to be below the current position
 #       (defaults to false)
-# - $7: not on current line _as bool_:
+# - ${notOnCurrentLine} _as bool_:
 #       (optional) the box will not be placed on the same line as the current position
 #       (defaults to true)
-# - $8: terminal width _as int_:
-#       (optional) the width of the terminal
-#       (defaults to GLOBAL_COLUMNS)
-# - $9: terminal height _as int_:
+# - ${terminalHeight} _as int_:
 #       (optional) the height of the terminal
 #       (defaults to GLOBAL_LINES)
+# - ${terminalWidth} _as int_:
+#       (optional) the width of the terminal
+#       (defaults to GLOBAL_COLUMNS)
 #
 # Returns:
 #
@@ -319,30 +325,30 @@ function terminal::clearBox() {
 # - ${REPLY4}: the height of the box
 #
 # ```bash
-# terminal::getBestAutocompleteBox 1 1 10 5
+# terminal::getBestAutocompleteBox top=1 left=1 desiredHeight=10 desiredWidth=5
 # ```
 function terminal::getBestAutocompleteBox() {
-  local currentLine="${1}"
-  local currentColumn="${2}"
-  local desiredHeight="${3}"
-  local desiredWidth="${4}"
-  local maxHeight="${5:-${GLOBAL_LINES:-9999}}"
-  local forceBelow="${6:-false}"
-  local notOnCurrentLine="${7:-true}"
-  local terminalWidth="${8:-${GLOBAL_COLUMNS:-9999}}"
-  local terminalHeight="${9:-${GLOBAL_LINES:-9999}}"
+  local \
+    top=1 \
+    left=1 \
+    desiredWidth="${GLOBAL_COLUMNS:-9999}" \
+    desiredHeight="${GLOBAL_LINES:-9999}" \
+    maxHeight="${GLOBAL_LINES:-9999}" \
+    forceBelow=false \
+    notOnCurrentLine=true \
+    terminalWidth="${GLOBAL_COLUMNS:-9999}" \
+    terminalHeight="${GLOBAL_LINES:-9999}" \
+    IFS=$' '
+  eval "local a= ${*@Q}"
 
-  local left top width height
-
-  local extraLine=1
+  local left top width height extraLine=1 below=true
   if [[ ${notOnCurrentLine} == "true" ]]; then
     extraLine=0
   fi
 
-  local below=true
-  local -i maxAvailableLines=$((terminalHeight - currentLine + extraLine))
+  local -i maxAvailableLines=$((terminalHeight - top + extraLine))
   if [[ ${forceBelow} != "true" ]]; then
-    local maxAvailableLinesAbove=$((currentLine - 1 + extraLine))
+    local maxAvailableLinesAbove=$((top - 1 + extraLine))
     if ((desiredHeight > maxAvailableLines && maxAvailableLinesAbove > maxAvailableLines)); then
       maxAvailableLines=${maxAvailableLinesAbove}
       below=false
@@ -352,13 +358,13 @@ function terminal::getBestAutocompleteBox() {
   maxHeight=$((maxAvailableLines >= maxHeight ? maxHeight : maxAvailableLines))
   height=$((desiredHeight >= maxHeight ? maxHeight : desiredHeight))
   if [[ ${below} == "true" ]]; then
-    top=$((currentLine + 1 - extraLine))
+    top=$((top + 1 - extraLine))
   else
-    top=$((currentLine - height + extraLine))
+    top=$((top - height + extraLine))
   fi
 
   width=$((desiredWidth >= terminalWidth ? terminalWidth : desiredWidth))
-  left=$((terminalWidth - currentColumn + 1 > width ? currentColumn : terminalWidth - width + 1))
+  left=$((terminalWidth - left + 1 > width ? left : terminalWidth - width + 1))
 
   if ((width < 1)); then
     width=1

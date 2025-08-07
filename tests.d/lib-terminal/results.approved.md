@@ -65,7 +65,7 @@ GLOBAL_CURSOR_LINE='42'
 GLOBAL_CURSOR_COLUMN='42'
 ```
 
-❯ `terminal::clearBox 1 1 10 10`
+❯ `terminal::clearBox top=1 left=1 width=10 height=10`
 
 **Error output**:
 
@@ -73,7 +73,7 @@ GLOBAL_CURSOR_COLUMN='42'
 [?25l[1;1H[10X[2;1H[10X[3;1H[10X[4;1H[10X[5;1H[10X[6;1H[10X[7;1H[10X[8;1H[10X[9;1H[10X[10;1H[10X[42;42H
 ```
 
-❯ `terminal::clearBox 10 10 5 5`
+❯ `terminal::clearBox top=10 left=10 width=5 height=5`
 
 **Error output**:
 
@@ -88,7 +88,7 @@ GLOBAL_LINES='10'
 GLOBAL_COLUMNS='10'
 ```
 
-❯ `terminal::getBestAutocompleteBox 1 1 20 20`
+❯ `terminal::getBestAutocompleteBox top=1 left=1 desiredHeight=20 desiredWidth=20`
 
 Returned variables:
 
@@ -99,7 +99,7 @@ REPLY3='10'
 REPLY4='9'
 ```
 
-❯ `terminal::getBestAutocompleteBox 1 1 20 20 2`
+❯ `terminal::getBestAutocompleteBox top=1 left=1 desiredHeight=20 desiredWidth=20 maxHeight=2`
 
 Returned variables:
 
@@ -110,7 +110,7 @@ REPLY3='10'
 REPLY4='2'
 ```
 
-❯ `terminal::getBestAutocompleteBox 1 1 5 5`
+❯ `terminal::getBestAutocompleteBox top=1 left=1 desiredHeight=5 desiredWidth=5`
 
 Returned variables:
 
@@ -121,7 +121,7 @@ REPLY3='5'
 REPLY4='5'
 ```
 
-❯ `terminal::getBestAutocompleteBox 5 5 6 9`
+❯ `terminal::getBestAutocompleteBox top=5 left=5 desiredHeight=6 desiredWidth=9`
 
 Returned variables:
 
@@ -132,7 +132,7 @@ REPLY3='9'
 REPLY4='5'
 ```
 
-❯ `terminal::getBestAutocompleteBox 7 7 10 4`
+❯ `terminal::getBestAutocompleteBox top=7 left=7 desiredHeight=10 desiredWidth=4`
 
 Returned variables:
 
@@ -143,7 +143,7 @@ REPLY3='4'
 REPLY4='6'
 ```
 
-❯ `terminal::getBestAutocompleteBox 7 7 10 10 '' true`
+❯ `terminal::getBestAutocompleteBox top=7 left=7 desiredHeight=10 desiredWidth=10 forceBelow=true`
 
 Returned variables:
 
@@ -154,7 +154,7 @@ REPLY3='10'
 REPLY4='3'
 ```
 
-❯ `terminal::getBestAutocompleteBox 1 1 10 10 999 true true 999 5`
+❯ `terminal::getBestAutocompleteBox top=1 left=1 desiredHeight=10 desiredWidth=10 maxHeight=999 forceBelow=true notOnCurrentLine=true terminalWidth=999 terminalHeight=5`
 
 Returned variables:
 
@@ -165,7 +165,7 @@ REPLY3='10'
 REPLY4='4'
 ```
 
-❯ `terminal::getBestAutocompleteBox 1 1 20 20 '' '' false`
+❯ `terminal::getBestAutocompleteBox top=1 left=1 desiredHeight=20 desiredWidth=20 notOnCurrentLine=false`
 
 Returned variables:
 
@@ -176,7 +176,7 @@ REPLY3='10'
 REPLY4='10'
 ```
 
-❯ `terminal::getBestAutocompleteBox 1 1 20 20 2 '' false`
+❯ `terminal::getBestAutocompleteBox top=1 left=1 desiredHeight=20 desiredWidth=20 maxHeight=2 notOnCurrentLine=false`
 
 Returned variables:
 
@@ -187,7 +187,7 @@ REPLY3='10'
 REPLY4='2'
 ```
 
-❯ `terminal::getBestAutocompleteBox 1 1 5 5 '' '' false`
+❯ `terminal::getBestAutocompleteBox top=1 left=1 desiredHeight=5 desiredWidth=5 notOnCurrentLine=false`
 
 Returned variables:
 
@@ -198,7 +198,7 @@ REPLY3='5'
 REPLY4='5'
 ```
 
-❯ `terminal::getBestAutocompleteBox 5 5 6 9 '' '' false`
+❯ `terminal::getBestAutocompleteBox top=5 left=5 desiredHeight=6 desiredWidth=9 notOnCurrentLine=false`
 
 Returned variables:
 
@@ -209,7 +209,7 @@ REPLY3='9'
 REPLY4='6'
 ```
 
-❯ `terminal::getBestAutocompleteBox 7 7 10 4 '' '' false`
+❯ `terminal::getBestAutocompleteBox top=7 left=7 desiredHeight=10 desiredWidth=4 notOnCurrentLine=false`
 
 Returned variables:
 
@@ -220,7 +220,7 @@ REPLY3='4'
 REPLY4='7'
 ```
 
-❯ `terminal::getBestAutocompleteBox 7 7 4 4 '' '' false`
+❯ `terminal::getBestAutocompleteBox top=7 left=7 desiredHeight=4 desiredWidth=4 notOnCurrentLine=false`
 
 Returned variables:
 
@@ -231,7 +231,7 @@ REPLY3='4'
 REPLY4='4'
 ```
 
-❯ `terminal::getBestAutocompleteBox 7 7 10 10 '' true false`
+❯ `terminal::getBestAutocompleteBox top=7 left=7 desiredHeight=10 desiredWidth=10 forceBelow=true notOnCurrentLine=false`
 
 Returned variables:
 

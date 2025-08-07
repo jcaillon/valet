@@ -217,7 +217,7 @@ function selfTestUtils_setupDiffCommand() {
       GLOBAL_TEST_DIFF_COMMAND="selfTestUtils_internalCompare %APPROVED_FILE% %RECEIVED_FILE%"
     fi
   else
-    string::getField GLOBAL_TEST_DIFF_COMMAND 0 " "
+    string::getField GLOBAL_TEST_DIFF_COMMAND 0 separator=" "
     local diffExecutable="${REPLY}"
     if ! command -v "${diffExecutable}" &>/dev/null; then
       log::warning "The user diff command ⌜${diffExecutable}⌝ set with VALET_CONFIG_TEST_DIFF_COMMAND is not available, using the internal comparison function."

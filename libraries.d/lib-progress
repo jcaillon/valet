@@ -311,7 +311,7 @@ function progress_getStringToDisplay() {
   staticCharacters="${staticCharacters//"<percent>"/}"
   staticCharacters="${staticCharacters//"<bar>"/}"
   staticCharacters="${staticCharacters//"<message>"/}"
-  string::removeSgrCodes staticCharacters
+  string::removeTextFormatting staticCharacters
   local -i templateLengthWithoutBarAndMessage="${#staticCharacters}"
   if [[ ${template} == *"<spinner>"* ]]; then
     templateLengthWithoutBarAndMessage+=1
@@ -340,7 +340,7 @@ function progress_getStringToDisplay() {
     # cut the message if it is too long
     local -i templateLengthWithoutMessage=$((templateLengthWithoutBarAndMessage + progressBarSize))
     local messageWithoutSfrCodes="${message}"
-    string::removeSgrCodes messageWithoutSfrCodes
+    string::removeTextFormatting messageWithoutSfrCodes
     if (( templateLengthWithoutMessage == GLOBAL_COLUMNS)); then
       message=""
     elif ((templateLengthWithoutMessage + ${#messageWithoutSfrCodes} > GLOBAL_COLUMNS)); then

@@ -96,7 +96,7 @@ Returned variables:
 REPLY='1.2.4'
 ```
 
-❯ `version::bump 1.2.3-alpha+zae345 major false`
+❯ `version::bump 1.2.3-alpha+zae345 major keepPreRelease=true`
 
 Returned variables:
 
@@ -104,7 +104,7 @@ Returned variables:
 REPLY='2.0.0-alpha+zae345'
 ```
 
-❯ `version::bump 1.2.156-alpha patch false`
+❯ `version::bump 1.2.156-alpha patch keepPreRelease=true`
 
 Returned variables:
 
@@ -112,7 +112,7 @@ Returned variables:
 REPLY='1.2.157-alpha'
 ```
 
-❯ `version::bump aze patch false`
+❯ `version::bump aze patch keepPreRelease=true`
 
 Exited with code: `1`
 

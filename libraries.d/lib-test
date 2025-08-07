@@ -26,15 +26,13 @@ function test::log() {
 # Call this function to add an H3 title in the report file.
 #
 # - $1: title _as string_:
-#       (optional) Can be set using the variable `title`.
 #       The title of the test.
-#      (defaults to "Test")
 #
 # ```bash
 # test::title "Testing something"
 # ```
 function test::title() {
-  printf "%s\n\n" "### ${1:-${title:-"Test"}}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf "%s\n\n" "### ${1}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
 # ## test::markdown
@@ -62,6 +60,7 @@ function test::markdown() {
 # test::prompt "echo 'Hello, world!'"
 # ```
 function test::prompt() {
+  local IFS=' '
   # shellcheck disable=SC2016
   printf '❯ `%s`\n\n' "${*}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
@@ -333,17 +332,15 @@ function test::printVars() {
 #
 # - $1: **file descriptor number** _as int_:
 #       The file descriptor number to flush (1 or 2).
-# - $2: blockTitle _as string_:
-#       (optional) Can be set using the variable `blockTitle`.
+# - $2: **blockTitle** _as string_:
 #       Add a 'title' to the code block (`**title**:` before the code block).
-#       (defaults to '' which will not add a title)
 #
 # ```bash
 # test_flushFdToCodeBlock 1 true
 # ```
 function test_flushFdToCodeBlock() {
   local -i GLOBAL_TEST_FD_NUMBER="${1}"
-  local blockTitle="${2:-${blockTitle:-}}"
+  local blockTitle="${2}"
   local file
   if ((GLOBAL_TEST_FD_NUMBER == 1)); then
     file="${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"
@@ -445,16 +442,19 @@ function test::flush() {
 # Call this function to flush the standard output to the report file.
 # It will be added as a code block in the report file.
 #
-# - $1: blockTitle _as string_:
-#       (optional) Can be set using the variable `blockTitle`.
-#       Add a 'title' to the code block (`**title**:` before the code block).
+# - ${blockTitle} _as string_:
+#       (optional) Add a 'title' to the code block (`**title**:` before the code block).
 #       (defaults to '' which will not add a title)
 #
 # ```bash
 # test::flushStdout
 # ```
 function test::flushStdout() {
-  test_flushFdToCodeBlock 1 "${1:-${blockTitle:-}}"
+  local \
+    blockTitle="" \
+    IFS=$' '
+  eval "local a= ${*@Q}"
+  test_flushFdToCodeBlock 1 "${blockTitle}"
 }
 
 # ## test::flushStderr
@@ -462,16 +462,19 @@ function test::flushStdout() {
 # Call this function to flush the standard error to the report file.
 # It will be added as a code block in the report file.
 #
-# - $1: blockTitle _as string_:
-#       (optional) Can be set using the variable `blockTitle`.
-#       Add a 'title' to the code block (`**title**:` before the code block).
+# - ${blockTitle} _as string_:
+#       (optional) Add a 'title' to the code block (`**title**:` before the code block).
 #       (defaults to '' which will not add a title)
 #
 # ```bash
 # test::flushStderr
 # ```
 function test::flushStderr() {
-  test_flushFdToCodeBlock 2 "${1:-${blockTitle:-}}"
+  local \
+    blockTitle="" \
+    IFS=$' '
+  eval "local a= ${*@Q}"
+  test_flushFdToCodeBlock 2 "${blockTitle}"
 }
 
 # ## test::fail

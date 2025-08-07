@@ -71,7 +71,7 @@ function showcaseInteractive() {
   # shellcheck disable=SC2317
 
   function getColorSample() { local -n color="ESC__FG_${1^^}"; REPLY="${color}ESC__FG_${1^^}${ESC__TEXT_RESET}"; }
-  sfzf::show "What's your favorite color?" SELECTION_ARRAY "getColorSample" "Color sample"
+  sfzf::show SELECTION_ARRAY prompt="What's your favorite color?" itemDetailsCallback="getColorSample" previewTitle="Color sample"
   log::info "You selected: ⌜${REPLY}⌝ (index: ⌜${REPLY2}⌝)"
 
   ############################

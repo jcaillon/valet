@@ -83,8 +83,7 @@ source fs
 #       (optional) If true, the count of items can be displayed at the bottom of the box.
 #       (defaults to true)
 # - ${itemsBoxForceShowCount} _as bool_:
-#       (optional) Can be set using the variable `itemsBoxForceShowCount`.
-#       If true, the count of items is always displayed.
+#       (optional) If true, the count of items is always displayed.
 #       If false, the count is only displayed when we can't display all the items at once.
 #       (defaults to false)
 # - ${itemsBoxShowCountAtTop} _as bool_:
@@ -1009,7 +1008,7 @@ function prompt_showItemsBox() {
   fi
 
   # compute the size of the autocomplete box
-  terminal::getBestAutocompleteBox "${_LIST_FORCED_TOP:-${_LIST_START_LINE}}" "${_LIST_FORCED_LEFT:-${preferredLeftPosition}}" "${_LIST_FORCED_HEIGHT:-${_LIST_PREFERRED_HEIGHT}}" "${_LIST_FORCED_WIDTH:-${_LIST_PREFERRED_WIDTH}}" "${_LIST_MAX_HEIGHT}" "${_LIST_FORCE_BELOW}" "${_LIST_ENABLE_PROMPT}"
+  terminal::getBestAutocompleteBox top="${_LIST_FORCED_TOP:-${_LIST_START_LINE}}" left="${_LIST_FORCED_LEFT:-${preferredLeftPosition}}" desiredHeight="${_LIST_FORCED_HEIGHT:-${_LIST_PREFERRED_HEIGHT}}" desiredWidth="${_LIST_FORCED_WIDTH:-${_LIST_PREFERRED_WIDTH}}" maxHeight="${_LIST_MAX_HEIGHT}" forceBelow="${_LIST_FORCE_BELOW}" notOnCurrentLine="${_LIST_ENABLE_PROMPT}"
   _LIST_TOP="${REPLY}"
   _LIST_LEFT="${REPLY2}"
   _LIST_WIDTH="${REPLY3}"
@@ -1047,7 +1046,7 @@ function prompt_showError() {
 
   # compute the height of the box where we can display error messages
   # This box should fit within the autocomplete width
-  terminal::getBestAutocompleteBox "${_PROMPT_ITEMS_BOX_FORCED_TOP:-${_PROMPT_START_LINE}}" "${_PROMPT_ITEMS_BOX_FORCED_LEFT:-${_PROMPT_START_COLUMN}}" "${_PROMPT_ITEMS_BOX_FORCED_HEIGHT:-${errorLinesNeeded}}" "${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}}" "${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" "${_PROMPT_ITEMS_BOX_FORCE_BELOW}" "${_PROMPT_ENABLE_PROMPT}"
+  terminal::getBestAutocompleteBox top="${_PROMPT_ITEMS_BOX_FORCED_TOP:-${_PROMPT_START_LINE}}" left="${_PROMPT_ITEMS_BOX_FORCED_LEFT:-${_PROMPT_START_COLUMN}}" desiredHeight="${_PROMPT_ITEMS_BOX_FORCED_HEIGHT:-${errorLinesNeeded}}" desiredWidth="${_PROMPT_ITEMS_BOX_FORCED_WIDTH:-${_PROMPT_WIDTH}}" maxHeight="${_PROMPT_ITEMS_BOX_MAX_HEIGHT}" forceBelow="${_PROMPT_ITEMS_BOX_FORCE_BELOW}" notOnCurrentLine="${_PROMPT_ENABLE_PROMPT}"
   _PROMPT_ERROR_BOX_TOP="${REPLY}"
   _PROMPT_ERROR_BOX_LEFT="${REPLY2}"
   _PROMPT_ERROR_BOX_WIDTH="${REPLY3}"
@@ -1084,7 +1083,7 @@ function prompt_clearErrorBox() {
     fi
   fi
 
-  terminal::clearBox "${_PROMPT_ERROR_BOX_TOP}" "${_PROMPT_ERROR_BOX_LEFT}" "${_PROMPT_ERROR_BOX_WIDTH}" "${_PROMPT_ERROR_BOX_HEIGHT}" 2>&3
+  terminal::clearBox top="${_PROMPT_ERROR_BOX_TOP}" left="${_PROMPT_ERROR_BOX_LEFT}" width="${_PROMPT_ERROR_BOX_WIDTH}" height="${_PROMPT_ERROR_BOX_HEIGHT}" 2>&3
 
   _PROMPT_ERROR_BOX_SHOWN=false
 }
@@ -1322,7 +1321,7 @@ function prompt_getDisplayedPromptString() {
 
 # Clear the multi-line prompt
 function prompt_clearMultiLinePrompt() {
-  terminal::clearBox "${_PROMPT_START_LINE}" "${_PROMPT_START_COLUMN}" "${_PROMPT_WIDTH}" "${_PROMPT_NB_PROMPT_LINES}"
+  terminal::clearBox top="${_PROMPT_START_LINE}" left="${_PROMPT_START_COLUMN}" width="${_PROMPT_WIDTH}" height="${_PROMPT_NB_PROMPT_LINES}"
 }
 
 function prompt_drawMultiLinePrompt() {

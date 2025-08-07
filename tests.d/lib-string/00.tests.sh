@@ -7,7 +7,6 @@ function main() {
   test_string::numberToUniqueId
   test_string::removeTextFormatting
   test_string::convertToHex
-  test_string::removeSgrCodes
   test_string::getField
   test_string::convertCamelCaseToSnakeCase
   test_string::convertKebabCaseToSnakeCase
@@ -39,6 +38,10 @@ function test_string::removeTextFormatting() {
   local _myString="My text${ESC__BG_RED}${ESC__FG_WHITE} with some ${ESC__TEXT_BOLD}text formatting${ESC__TEXT_RESET} and some more text${ESC__BG_BLUE}${ESC__FG_BRIGHT_CYAN}unreadable stuff${ESC__TEXT_RESET}. Inluding some ${ESC__FG_COLOR_24b__}123;55;255${__ESC__END_COLOR}24 bit colors${ESC__BG_RESET} and some ${ESC__FG_COLOR__}2${__ESC__END_COLOR}8 bit colors${ESC__TEXT_RESET}."
   test::func string::removeTextFormatting _myString
   test::printVars _myString
+
+  _myString="w[36mo[107mr[38;2;255;255;255md[38;5;255m w[36mo[107mr[38;2;255;255;255md[38;5;255m!"
+  test::func string::removeTextFormatting _myString
+  test::printVars _myString
 }
 
 function test_string::convertToHex() {
@@ -46,14 +49,6 @@ function test_string::convertToHex() {
 
   local _myString="d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301"
   test::func _myString=d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301 string::convertToHex _myString
-}
-
-function test_string::removeSgrCodes() {
-  test::title "✅ Testing string::removeSgrCodes"
-
-  local _myStringWithSgrCodes="w[36mo[107mr[38;2;255;255;255md[38;5;255m!"
-  test::exec string::removeSgrCodes _myStringWithSgrCodes
-  test::printVars _myStringWithSgrCodes
 }
 
 function test_string::doForEachLine() {
@@ -64,6 +59,8 @@ function test_string::doForEachLine() {
   }
 
   test::func string::doForEachLine MULTI_LINES_TEXT3 forEachLine
+
+  test::func MY_STRING="1 2 3" string::doForEachLine MY_STRING forEachLine separator=" "
 }
 
 function test_string::getField() {
@@ -71,15 +68,15 @@ function test_string::getField() {
 
   local _MY_STRING='field1 field2 field3'
   test::printVars "_MY_STRING"
-  test::func string::getField _MY_STRING 0 ' '
-  test::func string::getField _MY_STRING 1 ' '
-  test::func string::getField _MY_STRING 2 ','
-  test::func string::getField _MY_STRING 4 ','
+  test::func string::getField _MY_STRING 0 separator=' '
+  test::func string::getField _MY_STRING 1 separator=' '
+  test::func string::getField _MY_STRING 2 separator=','
+  test::func string::getField _MY_STRING 4 separator=','
 
   # shellcheck disable=SC2034
   _MY_STRING="line1 hm I wonder"$'\n'"line2 does it work on lines?"$'\n'"line3 seems so"
   test::printVars "_MY_STRING"
-  test::func string::getField _MY_STRING 2 $'\n'
+  test::func string::getField _MY_STRING 2 separator=$'\n'
 }
 
 function test_string::convertCamelCaseToSnakeCase() {
@@ -120,7 +117,7 @@ function test_string::trimEdges() {
   test::title "✅ Testing string::trimEdges"
 
   test::funcWithString string::trimEdges '  hello  world  '
-  test::funcWithString string::trimEdges '_-_-_hello_-_' _-
+  test::funcWithString string::trimEdges '_-_-_hello_-_' charsToTrim=_-
   test::funcWithString string::trimEdges '  hello'
   test::funcWithString string::trimEdges $'\n'$'\t''  hello'$'\n'$'\t'' '
 }
@@ -130,9 +127,9 @@ function test_string::getIndexOf() {
 
   test::func _MY_STRING='hello' string::getIndexOf _MY_STRING 'l'
   test::func _MY_STRING='hello' string::getIndexOf _MY_STRING 'he'
-  test::func _MY_STRING='hello' string::getIndexOf _MY_STRING 'he' 10
-  test::func _MY_STRING='yes-yes' string::getIndexOf _MY_STRING 'ye' 1
-  test::func _MY_STRING='yes-yes' string::getIndexOf _MY_STRING 'yes' 5
+  test::func _MY_STRING='hello' string::getIndexOf _MY_STRING 'he' startingIndex=10
+  test::func _MY_STRING='yes-yes' string::getIndexOf _MY_STRING 'ye' startingIndex=1
+  test::func _MY_STRING='yes-yes' string::getIndexOf _MY_STRING 'yes' startingIndex=5
 }
 
 function test_string::extractBetween() {
@@ -226,6 +223,9 @@ function test_string::head() {
 
   test::markdown "Testing string::head with 10 lines"
   test::func string::head MULTI_LINES_TEXT2 10
+
+  test::markdown "Testing string::head with 10 lines"
+  test::func MY_STRING='1 2 3 4' string::head MY_STRING 2 separator=' '
 }
 
 function test::funcWithString() {

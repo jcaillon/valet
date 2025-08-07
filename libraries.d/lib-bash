@@ -124,8 +124,7 @@ function bash::runInSubshell() {
 # - $2: **code** _as string_:
 #       The code to inject.
 # - ${injectAtBeginning} _as bool_:
-#       (optional) Can be set using the variable `injectAtBeginning`.
-#       Whether to inject the code at the beginning of the function (or at the end).
+#       (optional) Whether to inject the code at the beginning of the function (or at the end).
 #       (defaults to false)
 #
 # Returns:

@@ -248,7 +248,7 @@ function bumpValetBuildVersion() {
   local currentVersion="${REPLY:-0.0.0}"
   currentVersion="${currentVersion%%$'\n'*}"
 
-  version::bump "${currentVersion}" "patch" "false"
+  version::bump "${currentVersion}" "patch" keepPreRelease=true
 
   printf '%s' "${REPLY}" >"${GLOBAL_INSTALLATION_DIRECTORY}/version"
 

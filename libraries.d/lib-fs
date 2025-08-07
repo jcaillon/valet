@@ -619,18 +619,16 @@ function fs::isDirectoryWritable() {
 # - $2: **link path** _as string_:
 #       the path where to create the link
 # - ${hardlink} _as boolean_:
-#       (optional) Can be set using the variable `hardLink`.
-#       True to create a hard link, false to create a symbolic link
+#       (optional) True to create a hard link, false to create a symbolic link
 #       (defaults to false)
 # - ${force} _as boolean_:
-#       (optional) Can be set using the variable `force`.
-#       True to overwrite the link or file if it already exists.
+#       (optional) True to overwrite the link or file if it already exists.
 #       Otherwise, the function will fail on an existing link.
 #       (defaults to false)
 #
 # ```bash
 # fs::createLink "/path/to/link" "/path/to/linked"
-# fs::createLink "/path/to/link" "/path/to/linked" hardLink=true force=true
+# fs::createLink "/path/to/link" "/path/to/linked" hardlink=true force=true
 # ```
 #
 # > The function uses the `ln` command.

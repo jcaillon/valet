@@ -61,7 +61,7 @@ Make your scripts more performant and write code faster by using Valet [librarie
 myFunction() {
   source string
   MY_STRING="field1 field2 field3"
-  string::getField MY_STRING 1 " "
+  string::getField MY_STRING 1 separator=" "
   echo "The field at index 1 is ${REPLY}"
 
   source interactive

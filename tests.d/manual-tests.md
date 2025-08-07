@@ -6,3 +6,5 @@ A list of tests that are yet to be automated.
 - Start a subshell that starts a coproc. Verify that CTRL+C kills everything.
 - test CTRL+Z (suspend) + fg command to resume when in interactive mode.
 - curl / http lib
+- test the windows lib functions
+- test the self install / extend / update

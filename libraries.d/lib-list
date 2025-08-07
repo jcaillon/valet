@@ -630,7 +630,7 @@ function list::clearVieWport() {
     fi
   fi
 
-  terminal::clearBox "${_LIST_TOP}" "${_LIST_LEFT}" "${_LIST_WIDTH}" "${_LIST_HEIGHT}" 2>&3
+  terminal::clearBox top="${_LIST_TOP}" left="${_LIST_LEFT}" width="${_LIST_WIDTH}" height="${_LIST_HEIGHT}" 2>&3
 }
 
 function list::destroy() {

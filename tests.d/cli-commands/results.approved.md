@@ -61,8 +61,7 @@ declare -n array="FILTERED_COMMANDS_FOR_SUB_MENU"
 
 ### ✅ Testing that we can display the help of a sub menu
 
-❯ `command::parseProgramArguments self -h
-`
+❯ `command::parseProgramArguments self -h`
 
 **Standard output**:
 
@@ -76,7 +75,6 @@ USAGE
   valet [global options] self [options] [command]
 
 GLOBAL OPTIONS
-
 ```
 
 ### ✅ Testing that we catch option errors of a sub menu

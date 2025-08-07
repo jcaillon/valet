@@ -27,9 +27,9 @@ function test_version::bump() {
   test::func version::bump "1.2.3-alpha+zae345" "major"
   test::func version::bump "1.2.3-alpha+zae345" "minor"
   test::func version::bump "1.2.3-alpha+zae345" "patch"
-  test::func version::bump "1.2.3-alpha+zae345" "major" "false"
-  test::func version::bump "1.2.156-alpha" "patch" "false"
-  test::exit version::bump "aze" "patch" "false"
+  test::func version::bump "1.2.3-alpha+zae345" "major" keepPreRelease=true
+  test::func version::bump "1.2.156-alpha" "patch" keepPreRelease=true
+  test::exit version::bump "aze" "patch" keepPreRelease=true
 }
 
 main

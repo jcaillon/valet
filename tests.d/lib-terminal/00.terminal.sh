@@ -48,8 +48,8 @@ function test_terminal::clearBox() {
   GLOBAL_CURSOR_LINE=42
   GLOBAL_CURSOR_COLUMN=42
   test::printVars GLOBAL_CURSOR_LINE GLOBAL_CURSOR_COLUMN
-  test::exec terminal::clearBox 1 1 10 10
-  test::exec terminal::clearBox 10 10 5 5
+  test::exec terminal::clearBox top=1 left=1 width=10 height=10
+  test::exec terminal::clearBox top=10 left=10 width=5 height=5
 }
 
 function test_terminal::getBestAutocompleteBox() {
@@ -59,33 +59,33 @@ function test_terminal::getBestAutocompleteBox() {
   GLOBAL_COLUMNS=10
   test::printVars GLOBAL_LINES GLOBAL_COLUMNS
 
-  test::func terminal::getBestAutocompleteBox  1 1 20 20
+  test::func terminal::getBestAutocompleteBox  top=1 left=1 desiredHeight=20 desiredWidth=20
 
-  test::func terminal::getBestAutocompleteBox  1 1 20 20 2
+  test::func terminal::getBestAutocompleteBox  top=1 left=1 desiredHeight=20 desiredWidth=20 maxHeight=2
 
-  test::func terminal::getBestAutocompleteBox  1 1 5 5
+  test::func terminal::getBestAutocompleteBox  top=1 left=1 desiredHeight=5 desiredWidth=5
 
-  test::func terminal::getBestAutocompleteBox  5 5 6 9
+  test::func terminal::getBestAutocompleteBox  top=5 left=5 desiredHeight=6 desiredWidth=9
 
-  test::func terminal::getBestAutocompleteBox  7 7 10 4
+  test::func terminal::getBestAutocompleteBox  top=7 left=7 desiredHeight=10 desiredWidth=4
 
-  test::func terminal::getBestAutocompleteBox  7 7 10 10 \'\' true
+  test::func terminal::getBestAutocompleteBox  top=7 left=7 desiredHeight=10 desiredWidth=10 forceBelow=true
 
-  test::func terminal::getBestAutocompleteBox  1 1 10 10 999 true true 999 5
+  test::func terminal::getBestAutocompleteBox  top=1 left=1 desiredHeight=10 desiredWidth=10 maxHeight=999 forceBelow=true notOnCurrentLine=true terminalWidth=999 terminalHeight=5
 
-  test::func terminal::getBestAutocompleteBox  1 1 20 20 \'\' \'\' false
+  test::func terminal::getBestAutocompleteBox  top=1 left=1 desiredHeight=20 desiredWidth=20 notOnCurrentLine=false
 
-  test::func terminal::getBestAutocompleteBox  1 1 20 20 2 \'\' false
+  test::func terminal::getBestAutocompleteBox  top=1 left=1 desiredHeight=20 desiredWidth=20 maxHeight=2 notOnCurrentLine=false
 
-  test::func terminal::getBestAutocompleteBox  1 1 5 5 \'\' \'\' false
+  test::func terminal::getBestAutocompleteBox  top=1 left=1 desiredHeight=5 desiredWidth=5 notOnCurrentLine=false
 
-  test::func terminal::getBestAutocompleteBox  5 5 6 9 \'\' \'\' false
+  test::func terminal::getBestAutocompleteBox  top=5 left=5 desiredHeight=6 desiredWidth=9 notOnCurrentLine=false
 
-  test::func terminal::getBestAutocompleteBox  7 7 10 4 \'\' \'\' false
+  test::func terminal::getBestAutocompleteBox  top=7 left=7 desiredHeight=10 desiredWidth=4 notOnCurrentLine=false
 
-  test::func terminal::getBestAutocompleteBox  7 7 4 4 \'\' \'\' false
+  test::func terminal::getBestAutocompleteBox  top=7 left=7 desiredHeight=4 desiredWidth=4 notOnCurrentLine=false
 
-  test::func terminal::getBestAutocompleteBox  7 7 10 10 \'\' true false
+  test::func terminal::getBestAutocompleteBox  top=7 left=7 desiredHeight=10 desiredWidth=10 forceBelow=true notOnCurrentLine=false
 }
 
 function test_terminal::switchToFullScreen() {

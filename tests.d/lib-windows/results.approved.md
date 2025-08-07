@@ -187,7 +187,7 @@ REPLY='/c/Users/username'
   
 ```
 
-❯ `windows::addToPath /coucou true`
+❯ `windows::addToPath /coucou prepend=true`
 
 **Standard output**:
 
@@ -224,15 +224,15 @@ REPLY='/c/Users/username'
 
 ### ✅ Testing windows::createLink
 
-❯ `windows::createLink resources/gitignored/file resources/gitignored/try/file2 true`
+❯ `windows::createLink resources/gitignored/file resources/gitignored/try/file2 hardlink=true`
 
 **Standard output**:
 
 ```text
-🙈 mocking fs::createLink: resources/gitignored/file resources/gitignored/try/file2 true
+🙈 mocking fs::createLink: resources/gitignored/file resources/gitignored/try/file2 hardlink=true
 ```
 
-❯ `windows::createLink resources/gitignored/file resources/gitignored/try/file2 true`
+❯ `windows::createLink resources/gitignored/file resources/gitignored/try/file2 hardlink=true`
 
 **Standard output**:
 

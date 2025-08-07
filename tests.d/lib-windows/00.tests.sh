@@ -55,7 +55,7 @@ function test_windows::addToPath() {
 
   test::exec windows::addToPath /coucou
 
-  test::exec windows::addToPath /coucou true
+  test::exec windows::addToPath /coucou prepend=true
 }
 
 function test_windows::createLink() {
@@ -65,11 +65,11 @@ function test_windows::createLink() {
   :> resources/gitignored/file
 
   MSYS="winsymlinks:nativestrict"
-  test::exec windows::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' true
+  test::exec windows::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' hardlink=true
   test::flush
 
   MSYS=""
-  test::exec windows::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' true
+  test::exec windows::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' hardlink=true
   test::flush
 
   test::exec windows::createLink 'resources/gitignored/try' 'resources/gitignored/new'

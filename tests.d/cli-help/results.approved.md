@@ -18,7 +18,6 @@ ABOUT
 USAGE
 
   valet [global options] self mock3 [options]
-
 ```
 
 **Error output**:
@@ -44,7 +43,6 @@ ABOUT
   and set the maximum columns for the help text.
 
 USAGE
-
 ```
 
 ### ✅ Testing that no arguments show the valet help
@@ -82,6 +80,5 @@ ABOUT
   valet [94m[global options][0m self mock1 [94m[options][0m [--] [96m<action>[0m
 
 [31mGLOBAL OPTIONS[0m
-
 ```
 

@@ -63,21 +63,14 @@ An example is given below for a `mylib` library and a `myfunction` function:
 # The following argument descriptions should be formatted precisely in order to generate
 # the correct vscode snippets.
 # 
-# - $1: **argument name** _as type_:
-#       The description of the first mandatory argument.
-#
-#       Can also be on multiple lines, be careful of the indentation.
-# - $2: optional argument name _as string_:
-#       (optional) Can be set using the variable `optional`.
-#       This one is optional. It should not be emphasized (like the previous **argument name**).
-#       The convention for optional positional arguments is to use `_OPTION_` followed by 
-#       the argument name in uppercase. Then you can set `${2:-${optional}}` to use it.
-#       (defaults to empty string)
-# - ${nonPositional} _as number_:
-#       (optional) This one is a pure option and should not be a positional argument.
-#       (defaults 0)
+# - $1: **first argument** _as string_:
+#       description of the first argument
 # - $@: more args _as string_:
 #       For functions that take an undetermined number of arguments, you can use $@.
+# - ${myOption} _as bool_:
+#       (optional) Description of the option.
+#       This describes an optional parameter passed as a shell parameter (e.g. `myOption=true`).
+#       (defaults to false)
 # 
 # Returns:
 # 

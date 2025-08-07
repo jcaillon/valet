@@ -316,7 +316,8 @@ function selfRelease::bumpVersion() {
   log::info "The current version of valet is: ${version}."
 
   # bump the version
-  version::bump "${version}" "${bumpLevel}" && newVersion="${REPLY}"
+  version::bump "${version}" "${bumpLevel}"
+  newVersion="${REPLY}"
   if [[ "${dryRun:-}" != "true" ]]; then
     fs::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/version" newVersion
   fi

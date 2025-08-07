@@ -90,8 +90,7 @@ REPLY='#!/usr/bin/env bash
 # You can backup this directory to keep your configuration.
 # Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
 # 
-# VALET_CONFIG_FILE=""
-'
+# VALET_CONFIG_FILE=""'
 ```
 
 Testing selfConfig::getFileContent with exportCurrentValues:
@@ -182,8 +181,7 @@ VALET_CONFIG_DIRECTORY=A\ value
 # You can backup this directory to keep your configuration.
 # Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
 # 
-# VALET_CONFIG_FILE=""
-'
+# VALET_CONFIG_FILE=""'
 ```
 
 ### ✅ Testing self config command

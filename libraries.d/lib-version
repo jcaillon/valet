@@ -38,10 +38,10 @@ function version::compare() {
   local -i semVerIndex
   local semVerNumber1 semVerNumber2
   for semVerIndex in {0..2}; do
-    string::getField version1 "${semVerIndex}" "."
+    string::getField version1 "${semVerIndex}" separator="."
     semVerNumber1="${REPLY%%-*}"
     semVerNumber1="${semVerNumber1%%+*}"
-    string::getField version2 "${semVerIndex}" "."
+    string::getField version2 "${semVerIndex}" separator="."
     semVerNumber2="${REPLY%%-*}"
     semVerNumber2="${semVerNumber2%%+*}"
     if [[ ! ${semVerNumber1} =~ ^[0-9]+$ || ! ${semVerNumber2} =~ ^[0-9]+$ ]]; then
@@ -66,22 +66,27 @@ function version::compare() {
 #       the version to bump
 # - $2: **level** _as string_:
 #       the level to bump (major, minor, patch)
-# - $3: clear build and prerelease _as bool_:
-#       (optional) clear the prerelease and build
-#       (defaults to true)
+# - ${keepPreRelease} _as bool_:
+#       (optional) keep the prerelease and build strings
+#       (defaults to false)
 #
 # Returns:
 #
 # - ${REPLY}: the new version string
 #
 # ```bash
+# version::bump "1.2.3-prerelease+build" "major" keepPreRelease=true
 # version::bump "1.2.3-prerelease+build" "major"
 # local newVersion="${REPLY}"
 # ```
 function version::bump() {
-  local version="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local bumpLevel="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local clearPreRelease="${3:-true}"
+  local \
+    version="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    bumpLevel="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    keepPreRelease=false \
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
 
   local prerelease build modifiedVersion
   modifiedVersion="${version}-+"
@@ -100,7 +105,7 @@ function version::bump() {
   if [[ ${bumpLevel:-} == "minor" ]]; then level=1; fi
   local newVersion semVerString
   for semVerIndex in {0..2}; do
-    string::getField version "${semVerIndex}" "."
+    string::getField version "${semVerIndex}" separator="."
     semVerString="${REPLY%-*}"
     if [[ ! ${semVerString} =~ ^[0-9]+$ ]]; then
       core::fail "Failed to bump the version ⌜${version}⌝ because it is not valid semantic version."
@@ -112,7 +117,7 @@ function version::bump() {
   done
   newVersion="${newVersion%.}"
 
-  if [[ "${clearPreRelease}" != "true" ]]; then
+  if [[ "${keepPreRelease}" == "true" ]]; then
     newVersion="${newVersion%.}${prerelease}${build}"
   fi
 

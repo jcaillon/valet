@@ -14,17 +14,17 @@ source fs
 #
 # - $1: **command** _as string_:
 #       the command to run.
-# - $2: run as administrator _as bool_:
-#       (optional) Can be set using the variable `runAsAdmin`.
-#       Wether to run the command as administrator.
+# - ${runAsAdmin} _as bool_:
+#       (optional) Wether to run the command as administrator.
 #       (defaults to false).
-# - ${silent} _as bool_:
-#       (optional) Do not log the command stderr.
-#       (defaults to false).
+# - ${noFail} _as bool_:
+#       (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.
+#       If true and the execution fails, the script will exit.
+#       (default to false)
 #
 # Returns:
 #
-# - $?
+# - ${REPLY_CODE}:
 #   - 0 if the command was successful
 #   - 1 otherwise.
 # - ${REPLY}: The content of stdout.
@@ -32,11 +32,16 @@ source fs
 #
 # ```bash
 # windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
+# windows::runPs1 "Write-Host \"Hello\"" runAsAdmin=true noFail=true
 # ```
 function windows::runPs1() {
-  local command="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local runAsAdmin="${2:-${runAsAdmin:-false}}"
-  local silent="${silent:-false}"
+  local \
+    command="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    runAsAdmin=false \
+    noFail=false \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
 
   local exitCode=0
 
@@ -140,15 +145,18 @@ function windows::runPs1() {
   local stderr="${REPLY//$'\r'/}"
   stderr="${stderr//$'\r'/}"
 
-  if [[ ${exitCode} -ne 0 && ${silent} != "true" && ${#stderr} -gt 0 ]]; then
+  if [[ ${exitCode} -ne 0 && ${#stderr} -gt 0 ]]; then
     log::error "PowerShell command failed with the following error:"
     log::errorTrace "${stderr}"
+  fi
+  if [[ ${exitCode} -ne 0 && ${noFail} != "true" ]]; then
+    core::fail "PowerShell command failed with exit code ${exitCode}."
   fi
 
   REPLY2="${stderr}"
   REPLY="${stdout}"
-
-  return ${exitCode}
+  REPLY_CODE="${exitCode}"
+  return 0
 }
 
 # ## windows::startPs1Batch
@@ -167,18 +175,29 @@ function windows::runPs1() {
 # windows::endPs1Batch
 # ```
 function windows::startPs1Batch() {
-  _IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS=""
-  _IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN=false
+  _WINDOWS_POWERSHELL_BATCHED_COMMANDS=""
+  _WINDOWS_POWERSHELL_BATCHED_AS_ADMIN=false
+  _WINDOWS_POWERSHELL_BATCHED_NO_FAIL=false
 
   # save the original function before overriding it
   exe::invoke declare -f windows::runPs1
-  _IO_WINDOWS_POWERSHELL_FUNCTION="${REPLY//declare -? /}"
+  _WINDOWS_POWERSHELL_FUNCTION="${REPLY//declare -? /}"
 
   # shellcheck disable=SC2317
   function windows::runPs1() {
-    _IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS+="${1};"
-    if [[ "${2:-false}" == true ]]; then
-      _IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN=true
+    _WINDOWS_POWERSHELL_BATCHED_COMMANDS+="${1};"
+    local \
+      runAsAdmin=false \
+      noFail=false \
+      IFS=$' '
+    shift 1
+    eval "local a= ${*@Q}"
+
+    if [[ "${runAsAdmin}" == true ]]; then
+      _WINDOWS_POWERSHELL_BATCHED_AS_ADMIN=true
+    fi
+    if [[ "${noFail}" == true ]]; then
+      _WINDOWS_POWERSHELL_BATCHED_NO_FAIL=true
     fi
   }
 }
@@ -189,7 +208,7 @@ function windows::startPs1Batch() {
 #
 # Returns:
 #
-# - $?
+# - ${REPLY_CODE}:
 #   - 0 if the command was successful
 #   - 1 otherwise.
 # - ${REPLY}: The content of stdout.
@@ -202,24 +221,26 @@ function windows::startPs1Batch() {
 # windows::endPs1Batch
 # ```
 function windows::endPs1Batch() {
-  if [[ -z ${_IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS} ]]; then
+  if [[ -z ${_WINDOWS_POWERSHELL_BATCHED_COMMANDS} ]]; then
+    # shellcheck disable=SC2034
+    REPLY_CODE=0
     REPLY=""
     REPLY2=""
     return 0
   fi
   # restore the original function
-  eval "${_IO_WINDOWS_POWERSHELL_FUNCTION}"
+  eval "${_WINDOWS_POWERSHELL_FUNCTION}"
 
-  local exitCode
-  if windows::runPs1 "${_IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS}" "${_IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN}"; then
-    exitCode=0
-  else
-    exitCode=1
-  fi
+  windows::runPs1 "${_WINDOWS_POWERSHELL_BATCHED_COMMANDS}" \
+    runAsAdmin="${_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN}" \
+    noFail="${_WINDOWS_POWERSHELL_BATCHED_NO_FAIL}"
 
-  unset -v _IO_WINDOWS_POWERSHELL_BATCHED_COMMANDS _IO_WINDOWS_POWERSHELL_BATCHED_AS_ADMIN _IO_WINDOWS_POWERSHELL_FUNCTION
+  unset -v _WINDOWS_POWERSHELL_BATCHED_COMMANDS \
+    _WINDOWS_POWERSHELL_BATCHED_AS_ADMIN \
+    _WINDOWS_POWERSHELL_FUNCTION \
+    _WINDOWS_POWERSHELL_BATCHED_NO_FAIL
 
-  return ${exitCode}
+  return 0
 }
 
 # ## windows::createLink
@@ -237,18 +258,17 @@ function windows::endPs1Batch() {
 #       the path to link to (the original file)
 # - $2: **link path** _as string_:
 #       the path where to create the link
-# - $3: hard link _as bool_:
-#       (optional) true to create a hard link, false to create a symbolic link
+# - ${hardlink} _as boolean_:
+#       (optional) True to create a hard link, false to create a symbolic link
 #       (defaults to false)
-# - $4: force _as bool_:
-#       (optional) true to overwrite the link or file if it already exists.
-#       Otherwise, the function will not on an existing link not pointing to the
-#       target path.
-#       (defaults to true)
+# - ${force} _as boolean_:
+#       (optional) True to overwrite the link or file if it already exists.
+#       Otherwise, the function will fail on an existing link.
+#       (defaults to false)
 #
 # ```bash
 # windows::createLink "/path/to/link" "/path/to/linked"
-# windows::createLink "/path/to/link" "/path/to/linked" true
+# windows::createLink "/path/to/link" "/path/to/linked" hardlink=true force=true
 # ```
 #
 # > On Windows, the function uses `powershell` (and optionally ls to check the existing link).
@@ -259,10 +279,14 @@ function windows::createLink() {
     fs::createLink "$@"
     return 0
   fi
-  local linkedPath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local linkPath="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local hardLink="${3:-false}"
-  local force="${3:-true}"
+  local \
+    linkedPath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    linkPath="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    hardlink="false" \
+    force="false" \
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
 
   fs::toAbsolutePath "${linkedPath}"
   linkedPath="${REPLY}"
@@ -309,18 +333,18 @@ function windows::createLink() {
   linkedPath="${REPLY}"
 
   log::debug "Creating a new link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝ using powershell."
-  if [[ ${hardLink} == "true" ]]; then
-    if ! windows::runPs1 "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
+  if [[ ${hardlink} == "true" ]]; then
+    if ! windows::runPs1 "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" runAsAdmin=true; then
       core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
     fi
   else
-    if ! windows::runPs1 "New-Item -ItemType SymbolicLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" true; then
+    if ! windows::runPs1 "New-Item -ItemType SymbolicLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" runAsAdmin=true; then
       core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
     fi
   fi
 
   local linkType="symbolic"
-  if [[ ${hardLink} == "true" ]]; then
+  if [[ ${hardlink} == "true" ]]; then
     linkType="hard"
   fi
   log::debug "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
@@ -559,19 +583,23 @@ function windows::getEnvVar() {
 # - $1: **path** _as string_:
 #       the path to add to the PATH environment variable.
 #       The path can be in unix format, it will be converted to windows format.
-# - $2: preprend _as bool_:
-#       (optional) Can be set using the variable `prepend`.
-#       True to prepend the path to the PATH, false to append it.
+# - ${prepend} _as bool_:
+#       (optional) True to prepend the path to the PATH, false to append it.
 #       (defaults to false)
 #
 # ```bash
 # windows::addToPath "/path/to/bin"
+# windows::addToPath "/path/to/bin" prepend=true
 # ```
 #
 # > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 function windows::addToPath() {
-  local pathToAdd="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local prepend="${2:-${prepend:-false}}"
+  local \
+    pathToAdd="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    prepend="false" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
 
   log::debug "Adding directory ⌜${pathToAdd}⌝ to the PATH."
 
