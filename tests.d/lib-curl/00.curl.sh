@@ -14,37 +14,25 @@ function test_curl::download() {
   test::title "✅ Testing curl::download"
 
   test::markdown "Writing to an output file:"
-  test::func curl::download true 200 "${GLOBAL_TEST_TEMP_FILE}" --code 200 https://fuu
+  test::func curl::download https://fuu --code 200 --- failOnError=true acceptableCodes=200 path="${GLOBAL_TEST_TEMP_FILE}"
   test::exec fs::cat "${GLOBAL_TEST_TEMP_FILE}"
 
+  test::markdown "Downloading to a temp file:"
+  test::func curl::download https://fuu --code 200 --- failOnError=true acceptableCodes=200
+
   test::markdown "Getting a 500 error with fail mode on:"
-  test::exit curl::download true 200 "${GLOBAL_TEST_TEMP_FILE}" --code 500 https://fuu
+  test::exit curl::download https://fuu --code 500 --- failOnError=true acceptableCodes=200 path="${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Getting a 500 error with fail mode off:"
-  test::func curl::download false 200 "${GLOBAL_TEST_TEMP_FILE}" --code 500 https://fuu
+  test::func curl::download https://fuu --code 500 --- acceptableCodes=200 path="${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Getting an acceptable 400 error with fail mode:"
-  test::func curl::download true '200,400,401' "${GLOBAL_TEST_TEMP_FILE}" --code 400 https://fuu
+  test::func curl::download https://fuu --code 400 --- failOnError=true acceptableCodes='200,400,401' path="${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Getting an acceptable 201 with debug mode on"
   test::exec log::setLevel debug
-  test::func curl::download false \'\' "${GLOBAL_TEST_TEMP_FILE}" --code 201 https://fuu
+  test::func curl::download https://fuu --code 201 --- failOnError=false path="${GLOBAL_TEST_TEMP_FILE}"
   test::exec log::setLevel info
-}
-
-function echoOutputCurlToFile() {
-  local exitCode filePath
-  exitCode="${1}"
-  filePath="${2}"
-
-  local debugMessage
-  debugMessage="curl::download false function ended with exit code ⌈${exitCode}⌉."$'\n'
-  debugMessage+="http return code was ⌈${REPLY2}⌉"$'\n'
-  if [[ -s "${filePath}" ]]; then
-    debugMessage+="Content of downloaded file:"$'\n'"⌈$(<"${filePath}")⌉"$'\n'
-  fi
-  debugMessage+="stderr:"$'\n'"⌈${REPLY}⌉"
-  echo "${debugMessage}"
 }
 
 function test_curl::request() {
@@ -52,34 +40,22 @@ function test_curl::request() {
   local -i exitCode
 
   test::markdown "Getting 200:"
-  test::func curl::request true 200 "${GLOBAL_TEST_TEMP_FILE}" --code 200 https://fuu
+  test::func curl::request https://fuu --code 200 --- failOnError=true acceptableCodes=200 path="${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Getting 500 with fail mode off:"
-  test::func curl::request false \'\' "${GLOBAL_TEST_TEMP_FILE}" --code 500 https://fuu
+  test::func curl::request https://fuu --code 500 --- failOnError=false path="${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Getting 500 with fail mode on:"
-  test::exit curl::request true 200 "${GLOBAL_TEST_TEMP_FILE}" --code 500 https://fuu
+  test::exit curl::request https://fuu --code 500 --- failOnError=true acceptableCodes=200 path="${GLOBAL_TEST_TEMP_FILE}"
 
   export NO_CURL_CONTENT=true
 
   test::markdown "Getting 200 with no content and debug mode on:"
   test::exec log::setLevel debug
-  test::func curl::request true 200 "${GLOBAL_TEST_TEMP_FILE}" --code 200 https://fuu
+  test::func curl::request https://fuu --code 200 --- failOnError=true acceptableCodes=200 path="${GLOBAL_TEST_TEMP_FILE}"
   test::exec log::setLevel info
 
   unset NO_CURL_CONTENT
-}
-
-function echoOutputCurlToVar() {
-  local exitCode filePath
-  exitCode="${1}"
-
-  local debugMessage
-  debugMessage="curl::request function ended with exit code ⌈${exitCode}⌉."$'\n'
-  debugMessage+="http return code was ⌈${REPLY3}⌉"$'\n'
-  debugMessage+="stdout:"$'\n'"⌈${REPLY}⌉"$'\n'
-  debugMessage+="stderr:"$'\n'"⌈${REPLY2}⌉"
-  echo "${debugMessage}"
 }
 
 # Override curl for tests

@@ -14,7 +14,7 @@ Testing selfRelease, dry run major version
 INFO     Dry run mode is enabled, no changes will be made.
 🙈 mocked exe::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
-🙈 mocked curl::request true 200 -H Accept: application/vnd.github.v3+json https://api.github.com/repos/jcaillon/valet/releases/latest
+🙈 mocked curl::request https://api.github.com/repos/jcaillon/valet/releases/latest -H Accept: application/vnd.github.v3+json --- acceptableCodes=200
 INFO     The latest release on GitHub is: v1.2.3.
 🙈 mocked exe::invoke git rev-parse HEAD
 INFO     The current version of valet is: 1.2.3.
@@ -42,7 +42,7 @@ Testing selfRelease, minor version
 ```text
 🙈 mocked exe::invoke git tag --sort=version:refname --no-color
 INFO     The last tag is: v1.2.3.
-🙈 mocked curl::request true 200 -H Accept: application/vnd.github.v3+json https://api.github.com/repos/jcaillon/valet/releases/latest
+🙈 mocked curl::request https://api.github.com/repos/jcaillon/valet/releases/latest -H Accept: application/vnd.github.v3+json --- acceptableCodes=200
 INFO     The latest release on GitHub is: v1.2.3.
 🙈 mocked exe::invoke git rev-parse HEAD
 🙈 mocked exe::invokef5 false 0   git update-index --really-refresh
@@ -139,13 +139,13 @@ SUCCESS  The new version has been tagged.
 SUCCESS  The ⌜main⌝ branch and the new version ⌜v1.2.3⌝ has been pushed.
 🙈 mocked exe::invoke git push origin -f main:latest
 SUCCESS  The ⌜latest⌝ branch has been updated.
-🙈 mocked curl::request true 201,422 -X POST -H Authorization: token token -H Accept: application/vnd.github.v3+json -H Content-type: application/json; charset=utf-8 -d {
+🙈 mocked curl::request https://api.github.com/repos/jcaillon/valet/releases -X POST -H Authorization: token token -H Accept: application/vnd.github.v3+json -H Content-type: application/json; charset=utf-8 -d {
     "name": "v1.2.3",
     "tag_name": "v1.2.3",
     "body": "# Release of version 1.2.3\n\nChangelog: \n\n- ✨ feature\n- 🐞 fix\n",
     "draft": false,
     "prerelease": false
-  } https://api.github.com/repos/jcaillon/valet/releases
+  } --- failOnError=true acceptableCodes=201,422
 SUCCESS  The new version has been released on GitHub.
 🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/showcase.d .
 🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/commands.d .
@@ -157,7 +157,7 @@ SUCCESS  The new version has been released on GitHub.
 🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/version .
 🙈 mocked exe::invoke tar -czvf valet.tar.gz showcase.d commands.d libraries.d extras valet valet.cmd valet.ps1 version
 INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
-🙈 mocked curl::request true  -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz
+🙈 mocked curl::request https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz --- failOnError=true
 INFO     The current version of valet is: 1.2.3.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/version
 INFO     The bumped version of valet is: 1.3.0.

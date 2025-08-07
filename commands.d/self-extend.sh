@@ -295,7 +295,7 @@ function selfExtend_downloadTarball() {
   # download the tarball
   log::info "Downloading the extension from the URL ⌜${tarballUrl}⌝ for sha1 ⌜${sha1}⌝."
   progress::start "<spinner> Download in progress, please wait..."
-  curl::download true 200,302 "${tempDirectory}/${sha1}.tar.gz" "${tarballUrl}"
+  curl::download "${tarballUrl}" --- failOnError=true acceptableCodes=200,302 path="${tempDirectory}/${sha1}.tar.gz"
   progress::stop
 
   # untar
@@ -340,9 +340,10 @@ function selfExtend_getSha1() {
     REPLY=""
     progress::start "<spinner> Fetching reference information from GitHub..."
     local url="https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${reference}"
-    if ! curl::request false '200' -H "Accept: application/vnd.github.v3+json" "${url}"; then
+    curl::request "${url}" -H "Accept: application/vnd.github.v3+json" --- acceptableCodes=200
+    if ((REPLY_CODE != 0)); then
       url="https://api.github.com/repos/${owner}/${repo}/git/refs/tags/${reference}"
-      curl::request false '200' -H "Accept: application/vnd.github.v3+json" "${url}" || :
+      curl::request "${url}" -H "Accept: application/vnd.github.v3+json" --- acceptableCodes=200
     fi
     local response="${REPLY}"
     local error="${REPLY2}"

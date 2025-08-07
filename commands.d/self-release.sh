@@ -72,7 +72,7 @@ function selfRelease() {
 
   # get the latest release
   local latestReleaseVersion
-  curl::request true '200' -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/jcaillon/valet/releases/latest"
+  curl::request "https://api.github.com/repos/jcaillon/valet/releases/latest" -H "Accept: application/vnd.github.v3+json" --- acceptableCodes=200
   lastReleaseJson="${REPLY}"
   if [[ ${lastReleaseJson} =~ "tag_name\":"([ ]?)"\"v"([^\"]+)"\"" ]]; then
     latestReleaseVersion="v${BASH_REMATCH[2]}"
@@ -238,12 +238,14 @@ function selfRelease::createRelease() {
   local uploadUrl
   local createdReleaseJson
   if [[ "${dryRun:-}" != "true" ]]; then
-    curl::request true '201,422' -X POST \
+    curl::request "https://api.github.com/repos/jcaillon/valet/releases" \
+      -X POST \
       -H "Authorization: token ${githubReleaseToken:-}" \
       -H "Accept: application/vnd.github.v3+json" \
       -H "Content-type: application/json; charset=utf-8" \
       -d "${releasePayload}" \
-      "https://api.github.com/repos/jcaillon/valet/releases"
+      --- failOnError=true acceptableCodes='201,422'
+
 
     createdReleaseJson="${REPLY}"
 
@@ -279,11 +281,12 @@ function selfRelease::uploadArtifact() {
   # upload the artifact
   if [[ ${dryRun:-} != "true" && -n ${uploadUrl} ]]; then
     log::info "Uploading the artifact ⌜${artifactPath}⌝ to ⌜${uploadUrl}⌝."
-    curl::request true '' -X POST \
+    curl::request "${uploadUrl}?name=${artifactPath}" \
+      -X POST \
       -H "Authorization: token ${githubReleaseToken:-}" \
       -H "Content-Type: application/tar+gzip" \
       --data-binary "@${artifactPath}" \
-      "${uploadUrl}?name=${artifactPath}"
+      --- failOnError=true
   fi
 
   rm -f "${artifactPath}"

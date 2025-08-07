@@ -576,7 +576,8 @@ function command::fuzzyMatchCommandToFunctionNameOrFail() {
 # $@: the arguments
 #
 # Usage:
-#  command_getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3" && level="${REPLY}"
+# command_getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3"
+# level="${REPLY}"
 function command_getMaxPossibleCommandLevel() {
   local level maxLevel
   local IFS=' '

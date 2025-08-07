@@ -12,7 +12,7 @@
 #       description of the first argument
 # - $@: more args _as string_:
 #       For functions that take an undetermined number of arguments, you can use $@.
-# - $2{myOption} _as bool_:
+# - ${myOption} _as bool_:
 #       (optional) Description of the option.
 #       This describes an optional parameter passed as a shell parameter (e.g. `myOption=true`).
 #       (defaults to false)

@@ -63,7 +63,7 @@ function http::request() {
   local -i responseTimeout="${7:-${responseTimeout:-1}}"
 
   if [[ ${VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS:-} != "true" ]]; then
-    core::fail "For security reasons, insecure web requests are disabled by default. Please explicitly enable them by setting VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS to true."
+    core::fail "For security reasons, insecure web requests are disabled by default. Please explicitly enable them by setting the environment variable VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS to true."
   fi
 
   if [[ -n ${outputFile} ]]; then

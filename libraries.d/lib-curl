@@ -13,38 +13,52 @@ source fs
 # It allows you to check the http status code and return 1 if it is not acceptable.
 # It invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
 #
-# - $1: **fail** _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails
-# - $2: **acceptable codes** _as string_:
-#       list of http status codes that are acceptable, comma separated
-#       (defaults to 200,201,202,204,301,304,308 if left empty)
-# - $3: **path** _as string_:
-#       the file in which to save the output of curl
+# - $1: **url** _as string_:
+#       The url to download
 # - $@: **curl arguments** _as any_:
 #       options for curl
+# - ${path} _as string_:
+#       the file in which to save the output of curl, created as a temporary file if not specified
+# - ${failOnError} _as bool_:
+#       true/false to indicate if the function should fail in case the execution fails
+# - ${acceptableCodes} _as string_:
+#       list of http status codes that are acceptable, comma separated
+#       (defaults to 200,201,202,204,301,304,308 if left empty)
 #
 # Returns:
 #
-# - $?:
+# - ${REPLY_CODE}:
 #   - 0 if the http status code is acceptable
 #   - 1 otherwise
-# - ${REPLY}: the content of stderr
-# - ${REPLY2}: the http status code
+# - ${REPLY}: the path to the file where the content was saved
+# - ${REPLY2}: the content of curl stderr
+# - ${REPLY3}: the http status code
 #
 # ```bash
-# curl::download true 200,201 "/filePath" "https://example.com"
-# curl::download false 200 "/filePath2" "https://example2.com" || core::fail "The curl command failed."
+# curl::download https://example.com --- path=/filePath
+# curl::download https://example2.com -H "header: value" --- failOnError=true acceptableCodes=200,201 path=/filePath
+# echo "The curl command ended with exit code ⌜${REPLY_CODE}⌝, the http return code was ⌜${REPLY2}⌝: ${REPLY}"
 # ```
 function curl::download() {
-  local failIfFails="${1:-false}"
-  local acceptableStatusCodes="${2:-200,201,202,204,301,304,308}"
-  local outputFile="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  shift 3
+  local \
+    url="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    path="" \
+    failOnError=false \
+    acceptableCodes="200,201,202,204,301,304,308"
+  shift 1
+  core::parseShellParameters "${@}"
+  eval "${REPLY}"
+
+  # temp file if no path is specified
+  if [[ -z ${path} ]]; then
+    fs::createTempFile pathOnly=true
+    path="${REPLY}"
+  fi
 
   # call curl
   local -i exitCode=0
   local httpStatusCode errors
-  exe::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{response_code}" "--output" "${outputFile}" "$@" || exitCode=$?
+  exe::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{response_code}" "--output" "${path}" "$@" "${url}" || exitCode=$?
   httpStatusCode="${REPLY}"
   errors="${REPLY2}"
 
@@ -52,7 +66,7 @@ function curl::download() {
   # and for a bug in curl https://github.com/Homebrew/homebrew-core/issues/173294
   if [[ ${exitCode} != "0" && (${errors} == *"bad argument"* || ${errors} == *"is unknown"*) ]]; then
     log::debug "Trying to use curl without the many options."
-    exe::invoke5 "false" "0" "false" "" "curl" "--location" "-v" "--output" "${outputFile}" "$@" || exitCode=$?
+    exe::invoke5 "false" "0" "false" "" "curl" "--location" "-v" "--output" "${path}" "$@" || exitCode=$?
     if [[ ${REPLY}${REPLY2} =~ "< HTTP/"([0-9.]+)" "([0-9]+)" " ]]; then
       httpStatusCode="${BASH_REMATCH[2]}"
     else
@@ -61,34 +75,32 @@ function curl::download() {
     errors="${REPLY2}"
   fi
 
-  local url="$*"
-  url="http${url##*http}"
-  url="${url%% *}"
-  url="${url%% \'}"
-
   log::debug "The curl command for url ⌜${url}⌝ ended with exit code ⌜${exitCode}⌝, the http return code was ⌜${httpStatusCode}⌝."
 
   # if the error code is acceptable, then we set it to 0
-  if [[ ,${acceptableStatusCodes}, == *",${httpStatusCode},"* ]]; then
+  if [[ ,${acceptableCodes}, == *",${httpStatusCode},"* ]]; then
     exitCode=0
     log::debug "The http return code ⌜${httpStatusCode}⌝ is acceptable and exit code has been reset to 0 from ⌜${exitCode}⌝."
   else
     exitCode=1
-    if log::isDebugEnabled || [[ ${failIfFails} == "true" ]]; then
+    if log::isDebugEnabled || [[ ${failOnError} == "true" ]]; then
       log::errorTrace "Curl error output stream:"
       log::saveFileString errors suffix="curl-stderr"
       log::printFileString errors maxLines=99
     fi
     local message="The http return code ⌜${httpStatusCode}⌝ is not acceptable for url ⌜${url}⌝."
-    if [[ ${failIfFails} == "true" ]]; then
+    if [[ ${failOnError} == "true" ]]; then
       core::fail "${message}"
     fi
     log::debug "${message}"
   fi
 
-  REPLY="${errors}"
-  REPLY2="${httpStatusCode}"
-  return ${exitCode}
+  REPLY="${path}"
+  REPLY2="${errors}"
+  REPLY3="${httpStatusCode}"
+  # shellcheck disable=SC2034
+  REPLY_CODE="${exitCode}"
+  return 0
 }
 
 # ## curl::request
@@ -97,44 +109,55 @@ function curl::download() {
 # It allows you to check the http status code and return 1 if it is not acceptable.
 # It invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
 #
-# - $1: **fail** _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails
-# - $2: **acceptable codes** _as string_:
-#       list of http status codes that are acceptable, comma separated
-#       (defaults to 200,201,202,204,301,304,308 if left empty)
+# - $1: **url** _as string_:
+#       The url to request
 # - $@: **curl arguments** _as any_:
 #       options for curl
+# - ${failOnError} _as bool_:
+#       true/false to indicate if the function should fail in case the execution fails
+# - ${acceptableCodes} _as string_:
+#       list of http status codes that are acceptable, comma separated
+#       (defaults to 200,201,202,204,301,304,308 if left empty)
 #
 # Returns:
 #
-# - $?:
+# - ${REPLY_CODE}:
 #   - 0 if the http status code is acceptable
 #   - 1 otherwise
 # - ${REPLY}: the content of the request
-# - ${REPLY2}: the content of stderr
+# - ${REPLY2}: the content of curl stderr
 # - ${REPLY3}: the http status code
 #
 # ```bash
-# curl::request true 200 https://example.com -X POST -H 'Authorization: token'
-# curl::request false 200,201 https://example.com || core::fail "The curl command failed."
+# curl::request https://example.com
+# curl::request https://example.com -X POST -H 'Authorization: token' --- failOnError=true
+# echo "The curl command ended with exit code ⌜${REPLY_CODE}⌝, the http return code was ⌜${REPLY2}⌝: ${REPLY}"
 # ```
 function curl::request() {
-  local failIfFails="${1:-false}"
-  local acceptableStatusCodes="${2:-}"
-  shift 2
+  local \
+    url="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    failOnError=false \
+    acceptableCodes="200,201,202,204,301,304,308"
+  shift 1
+  core::parseShellParameters "${@}"
+  eval "${REPLY}"
 
   # reset the temporary file, only if needed
-  if [[ -s "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; then : >"${GLOBAL_TEMPORARY_WORK_FILE}"; fi
+  if [[ -s "${GLOBAL_TEMPORARY_WORK_FILE}" ]]; then
+    : >"${GLOBAL_TEMPORARY_WORK_FILE}"
+  fi
 
   local -i exitCode=0
   local errors httpStatusCode
-  curl::download "${failIfFails}" "${acceptableStatusCodes}" "${GLOBAL_TEMPORARY_WORK_FILE}" "$@" || exitCode=$?
-  errors="${REPLY}"
-  httpStatusCode="${REPLY2}"
+  curl::download "${url}" "$@" --- failOnError="${failOnError}" acceptableCodes="${acceptableCodes}" path="${GLOBAL_TEMPORARY_WORK_FILE}" || exitCode=$?
+  errors="${REPLY2}"
+  httpStatusCode="${REPLY3}"
 
   fs::readFile "${GLOBAL_TEMPORARY_WORK_FILE}"
   REPLY2="${errors}"
   # shellcheck disable=SC2034
   REPLY3="${httpStatusCode}"
-  return ${exitCode}
+  # shellcheck disable=SC2034
+  REPLY_CODE="${exitCode}"
+  return 0
 }

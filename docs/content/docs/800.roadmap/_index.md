@@ -44,6 +44,7 @@ This page lists the features that I would like to implement in Valet. They come 
   - Filter build command for `commands.d` directory
   - we split the commands file into several one, per extension, so we don't have to load everything immediately
 - Tests:
+  - add an option to display the received outputs markdown instead of comparing (or in addition to comparing). We can add our own function to display a markdown file.
   - self-add-test
   - propagate the set -x in self test subshells to have profiling enabled. We can create a new method in lib-profiler to profiler::reapply.
   - document the test; use the lib-test test as an example, and also link to the test:: lib.

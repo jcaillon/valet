@@ -246,7 +246,7 @@
 		"description": "Read a file, line by line",
 		"scope": "",
 		"body": [
-			"while read -r line || [[ -n ${line:-} ]]; do",
+			"while IFS=$'\\n' read -rd $'\\n' line || [[ -n ${line:-} ]]; do",
 			"  echo \"${line}\"",
 			"done < file"
 		]
@@ -260,6 +260,14 @@
 			"source $1",
 			"$0",
 			""
+		]
+	},
+	"REPLY_CODE": {
+		"prefix": "REPLY_CODE",
+		"description": "",
+		"scope": "",
+		"body": [
+			"REPLY_CODE$0"
 		]
 	},
 	"REPLY": {
@@ -388,6 +396,14 @@
 		"scope": "",
 		"body": [
 			"\\${LAST_KEY_PRESSED}$0"
+		]
+	},
+	"$REPLY_CODE": {
+		"prefix": "$REPLY_CODE",
+		"description": "",
+		"scope": "",
+		"body": [
+			"\\${REPLY_CODE}$0"
 		]
 	},
 	"$REPLY": {
