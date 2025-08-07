@@ -2,6 +2,48 @@
 
 ## Test script 00.tests
 
+### ✅ Testing time::convertMicrosecondsToSeconds function
+
+❯ `time::convertMicrosecondsToSeconds 1`
+
+Returned variables:
+
+```text
+REPLY='0.000001'
+```
+
+❯ `time::convertMicrosecondsToSeconds 1000 precision=3`
+
+Returned variables:
+
+```text
+REPLY='0.001'
+```
+
+❯ `time::convertMicrosecondsToSeconds 1234567890`
+
+Returned variables:
+
+```text
+REPLY='1234.567890'
+```
+
+❯ `time::convertMicrosecondsToSeconds 1234567890 precision=3`
+
+Returned variables:
+
+```text
+REPLY='1234.567'
+```
+
+❯ `time::convertMicrosecondsToSeconds 1234567890 precision=6`
+
+Returned variables:
+
+```text
+REPLY='1234.567890'
+```
+
 ### ✅ Testing time::startTimer function
 
 ❯ `time::startTimer`

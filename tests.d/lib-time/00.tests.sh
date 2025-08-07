@@ -4,9 +4,20 @@
 source time
 
 function main() {
+  test_time::convertMicrosecondsToSeconds
   test_time::startTimer
   test_time::getDate
   test_time::convertMicrosecondsToHuman
+}
+
+function test_time::convertMicrosecondsToSeconds() {
+  test::title "✅ Testing time::convertMicrosecondsToSeconds function"
+
+  test::func time::convertMicrosecondsToSeconds 1
+  test::func time::convertMicrosecondsToSeconds 1000 precision=3
+  test::func time::convertMicrosecondsToSeconds 1234567890
+  test::func time::convertMicrosecondsToSeconds 1234567890 precision=3
+  test::func time::convertMicrosecondsToSeconds 1234567890 precision=6
 }
 
 function test_time::startTimer() {

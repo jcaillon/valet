@@ -56,7 +56,8 @@ function http::request() {
     acceptableCodes="200,201,202,204,301,304,308" \
     output="" \
     followRedirection=true \
-    responseTimeout=5
+    responseTimeout=5 \
+    IFS=$' '
   shift 2
   eval "local a= ${*@Q}"
 

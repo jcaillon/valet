@@ -51,7 +51,7 @@ function showcaseInteractive() {
   ############################
 
   log::info "Getting user yes/no:"
-  if interactive::promptYesNo "Do you want to abort this demo?" false; then
+  if interactive::promptYesNo "Do you want to abort this demo?" default=false; then
     log::warning "Aborting the demo."
     return 0
   fi

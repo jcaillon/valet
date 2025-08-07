@@ -27,7 +27,7 @@ INFO     The tag message is:
    5 ░ - ✨ feature
    6 ░ - 🐞 fix
    7 ░ 
-🙈 mocked interactive::promptYesNo Do you want to continue with the release of version 1.2.3? false
+🙈 mocked interactive::promptYesNo Do you want to continue with the release of version 1.2.3? default=false
 INFO     The current version of valet is: 1.2.3.
 INFO     The bumped version of valet is: 2.0.0.
 SUCCESS  The new version has been released, check: https://github.com/jcaillon/valet/releases/latest.
@@ -101,7 +101,6 @@ INFO     Writing the xxx functions documentation to the core libraries docs.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/exe.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/fs.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/interactive.md
-🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/list.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/log.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/profiler.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/content/docs/300.libraries/progress.md
@@ -125,7 +124,7 @@ SUCCESS  The documentation update has been committed.
 🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-install.sh
 🙈 mocked exe::invoke git commit -m :rocket: releasing version 1.2.3
 SUCCESS  The new version has been committed.
-🙈 mocked interactive::promptYesNo Do you want to continue with the release of version 1.2.3? false
+🙈 mocked interactive::promptYesNo Do you want to continue with the release of version 1.2.3? default=false
 🙈 mocked exe::invoke git tag -a v1.2.3 -m # Release of version 1.2.3
 
 Changelog: 

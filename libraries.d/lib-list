@@ -7,7 +7,7 @@ source terminal
 # shellcheck source=lib-fs
 source fs
 
-# ## list::setViewport
+# ## list::setViewport (private)
 #
 # Set up the viewport for a list display.
 #
@@ -223,7 +223,7 @@ function list::setViewport() {
   bash::clearCachedVariables _LIST_itemCounterLength _LIST_itemsCounterString _LIST_linesWithScrollBar _LIST_firstLineWithScrollBar
 }
 
-# ## list::setItems
+# ## list::setItems (private)
 #
 # Set up the list of items to display.
 #

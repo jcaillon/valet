@@ -9,7 +9,7 @@
 **Standard output**:
 
 ```text
-🙈 mocking interactive::promptYesNo It does not look like the current directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-command/resources/gitignored⌝ is a valet extension, do you want to proceed anyway? true
+🙈 mocking interactive::promptYesNo It does not look like the current directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-command/resources/gitignored⌝ is a valet extension, do you want to proceed anyway?
 ```
 
 **Error output**:
@@ -24,7 +24,7 @@ SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$G
 **Standard output**:
 
 ```text
-🙈 mocking interactive::promptYesNo Do you want to override the existing command file? true
+🙈 mocking interactive::promptYesNo Do you want to override the existing command file?
 ```
 
 **Error output**:

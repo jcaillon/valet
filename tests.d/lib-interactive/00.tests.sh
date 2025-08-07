@@ -21,9 +21,9 @@ function main() {
 function test_interactive::displayDialogBox() {
   test::title "✅ Testing interactive::displayDialogBox"
 
-  test::exec interactive::displayDialogBox system "Do you want to run the tests?"$'\n'$'\n'"cause it is super cool awesome you one know and stuff (y/n)" 15
+  test::exec interactive::displayQuestion "Do you want to run the tests?"$'\n'$'\n'"cause it is super cool awesome you one know and stuff (y/n)" width=15
 
-  test::exec interactive::displayDialogBox user "Do you want to run the tests?"$'\n'$'\n'"cause it is super cool awesome you one know and stuff (y/n)" 10
+  test::exec interactive::displayAnswer "Do you want to run the tests?"$'\n'$'\n'"cause it is super cool awesome you one know and stuff (y/n)" width=10
 }
 
 function test_interactive::promptYesNo() {

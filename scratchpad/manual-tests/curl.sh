@@ -8,17 +8,17 @@ export VALET_LOG_LEVEL="debug"
 source "$(valet --source)"
 include curl http fs
 
-# log::info "Downloading a file to a specific path:"
-# curl::download https://api.ip2location.io/ --- path=tmp/output.json
-# fs::cat tmp/output.json
+log::info "Downloading a file to a specific path:"
+curl::download https://api.ip2location.io/ --- path=tmp/output.json
+fs::cat tmp/output.json
 
-# log::info "Downloading a file to a temp file:"
-# curl::download https://api.ip2location.io/ -H "header: value" --- failOnError=true acceptableCodes=200,201
-# fs::cat "${REPLY}"
+log::info "Downloading a file to a temp file:"
+curl::download https://api.ip2location.io/ -H "header: value" --- failOnError=true acceptableCodes=200,201
+fs::cat "${REPLY}"
 
-# log::info "Request github API"
-# curl::request "https://api.github.com/repos/jcaillon/valet/releases/latest" -H "Accept: application/vnd.github.v3+json" --- acceptableCodes=200
-# echo "${REPLY}"
+log::info "Request github API"
+curl::request "https://api.github.com/repos/jcaillon/valet/releases/latest" -H "Accept: application/vnd.github.v3+json" --- acceptableCodes=200
+echo "${REPLY}"
 
 log::info "Testing http::request with a GET request:"
 # shellcheck disable=SC2034

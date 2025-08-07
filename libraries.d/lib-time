@@ -114,7 +114,7 @@ function time::convertMicrosecondsToHuman() {
   humanFormat="${humanFormat//%u/${microseconds}}"
   humanFormat="${humanFormat//%M/$((hours * 60 + minutes))}"
   humanFormat="${humanFormat//%S/$((hours * 3600 + minutes * 60 + seconds))}"
-  humanFormat="${humanFormat//%L/$(((hours * 3600 * + minutes * 60 + seconds) * 1000 + milliseconds))}"
+  humanFormat="${humanFormat//%L/$(((hours * 3600 * +minutes * 60 + seconds) * 1000 + milliseconds))}"
   humanFormat="${humanFormat//%U/$((us))}"
 
   REPLY="${humanFormat}"
@@ -170,4 +170,41 @@ function time::getTimerMicroseconds() {
   fi
 
   REPLY="${elapsed}"
+}
+
+# ## time::convertMicrosecondsToSeconds
+#
+# Convert a microseconds integer to seconds float.
+# e.g. 1234567 → 1.234567
+#
+# - $1: **microseconds** _as int_:
+#       the microseconds to convert
+# - ${precision} _as string_:
+#      (optional) The precision to get (number of digits after the dot).
+#      (defaults to 6)
+#
+# Returns:
+#
+# - ${REPLY}: The seconds (float number).
+#
+# ```bash
+# time::convertMicrosecondsToSeconds 1234567
+# time::convertMicrosecondsToSeconds 1234567 precision=3
+# echo "${REPLY}"
+# ```
+function time::convertMicrosecondsToSeconds() {
+  local \
+    microseconds="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    precision=6 \
+    IFS=" "
+  shift 1
+  eval "local a= ${*@Q}"
+
+  if [[ ${#microseconds} -gt 6 ]]; then
+    local ms="${microseconds:${#microseconds}-6}"
+    REPLY="${microseconds:0:${#microseconds}-6}.${ms:0:${precision}}"
+  else
+    printf -v REPLY "%06d" "${microseconds}"
+    printf -v REPLY "0.%s" "${REPLY:0:${precision}}"
+  fi
 }

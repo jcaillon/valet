@@ -4,7 +4,7 @@
 
 ### ✅ Testing interactive::displayDialogBox
 
-❯ `interactive::displayDialogBox system $'Do you want to run the tests?\n\ncause it is super cool awesome you one know and stuff (y/n)' 15`
+❯ `interactive::displayQuestion $'Do you want to run the tests?\n\ncause it is super cool awesome you one know and stuff (y/n)' width=15`
 
 **Error output**:
 
@@ -21,7 +21,7 @@
    [90m╰─────────────────╯[0m
 ```
 
-❯ `interactive::displayDialogBox user $'Do you want to run the tests?\n\ncause it is super cool awesome you one know and stuff (y/n)' 10`
+❯ `interactive::displayAnswer $'Do you want to run the tests?\n\ncause it is super cool awesome you one know and stuff (y/n)' width=10`
 
 **Error output**:
 

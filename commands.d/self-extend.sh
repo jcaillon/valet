@@ -124,7 +124,7 @@ function selfExtend() {
   # if the extension already exists, ask the user for a confirmation
   if [[ -d "${extensionDirectory}" ]]; then
     log::warning "The extension ⌜${extensionName}⌝ already exists in ⌜${extensionDirectory}⌝."
-    if ! interactive::promptYesNo "Do you want to overwrite the existing ⌜${extensionName}⌝ extension?" true; then
+    if ! interactive::promptYesNo "Do you want to overwrite the existing ⌜${extensionName}⌝ extension?"; then
       log::info "The extension ⌜${extensionName}⌝ will not be ${action}."
       return 0
     fi
@@ -190,7 +190,7 @@ function selfExtend_createExtension() {
     # if the extension already exists, ask the user for a confirmation
     if [[ -d "${extensionDirectory}" ]]; then
       log::warning "The extension ⌜${extensionName}⌝ already exists in ⌜${extensionDirectory}⌝."
-      if ! interactive::promptYesNo "Do you want to overwrite the existing ⌜${extensionName}⌝ extension?" true; then
+      if ! interactive::promptYesNo "Do you want to overwrite the existing ⌜${extensionName}⌝ extension?"; then
         log::info "The extension ⌜${extensionName}⌝ will not be created."
         return 0
       fi
@@ -410,7 +410,7 @@ function selfExtend_executeSetupScript() {
   log::info "Found setup script for the extension ⌜${extensionName}⌝: ⌜${extensionDirectory}/extension.setup.sh⌝."
 
   # ask for confirmation before executing the setup script
-  if ! interactive::promptYesNo "Do you trust the setup script for the extension ⌜${extensionName}⌝ and wish to execute it?" true; then
+  if ! interactive::promptYesNo "Do you trust the setup script for the extension ⌜${extensionName}⌝ and wish to execute it?"; then
     log::info "The setup script for the extension ⌜${extensionName}⌝ was not trusted, skipping the setup."
     return 0
   fi
@@ -420,7 +420,7 @@ function selfExtend_executeSetupScript() {
   bash::runInSubshell source "${extensionDirectory}/extension.setup.sh"
   if (( REPLY_CODE != 0 )) ; then
     log::error "The extension setup script for the extension ⌜${extensionName}⌝ failed. You can manually retry the setup by running the script ⌜${extensionDirectory}/extension.setup.sh⌝."
-    interactive::promptYesNo "The setup script for the extension ⌜${extensionName}⌝ failed (see above), do you want to continue anyway?" true || core::fail "The setup script for the extension ⌜${extensionName}⌝ failed."
+    interactive::promptYesNo "The setup script for the extension ⌜${extensionName}⌝ failed (see above), do you want to continue anyway?" || core::fail "The setup script for the extension ⌜${extensionName}⌝ failed."
   fi
   fs::createDirectoryIfNeeded "${extensionDirectory}/.git"
   local content="ok"

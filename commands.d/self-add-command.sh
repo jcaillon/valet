@@ -48,7 +48,7 @@ function selfAddCommand() {
   core::getExtensionsDirectory
   if [[ ${PWD} != "${REPLY}"* && ! -d "commands.d" ]]; then
     log::warning "The current directory is not under the valet user directory ⌜${REPLY}⌝."
-    if ! interactive::promptYesNo "It does not look like the current directory ⌜${PWD}⌝ is a valet extension, do you want to proceed anyway?" true; then
+    if ! interactive::promptYesNo "It does not look like the current directory ⌜${PWD}⌝ is a valet extension, do you want to proceed anyway?"; then
       log::info "Aborting the creation of the command."
       log::info "You should first create an extension with ⌜valet self extend⌝ and then cd into the created directory."
       return 0
@@ -63,7 +63,7 @@ function selfAddCommand() {
 
   if [[ -f ${newCommandFilePath} ]]; then
     log::warning "The command file ⌜${newCommandFilePath}⌝ already exists."
-    if ! interactive::promptYesNo "Do you want to override the existing command file?" true; then
+    if ! interactive::promptYesNo "Do you want to override the existing command file?"; then
       log::info "Aborting the creation of the command."
       return 0
     fi
