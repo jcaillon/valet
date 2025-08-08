@@ -69,6 +69,31 @@ function trap::onErrorInternal() {
     return 0
   fi
 
+  if [[ ${BASH_COMMAND:-} == "local"* ]]; then
+    # we check if this is an issue caused by invalid options passed to a function
+
+    # shellcheck disable=SC1091
+    source bash
+    bash::getBuiltinOutput declare -f "${FUNCNAME[1]:-}"
+    local optionsErrorWithSeparator=false optionsErrorWithoutSeparator=false helpMessage
+    # shellcheck disable=SC2016
+    if [[ ${REPLY} == *'eval "local a= ${*@Q}"'* ]]; then
+      optionsErrorWithoutSeparator=true
+      helpMessage="All options must be passed with the syntax ⌜option=value⌝, i.e.:"$'\n'"░ ${FUNCNAME[1]} <mandatory arguments> option1=value1 option2=value2"
+    elif [[ ${REPLY} == *'core::parseShellParameters'* ]]; then
+      optionsErrorWithSeparator=true
+      helpMessage="All options must be passed with the syntax ⌜option=value⌝ after a ⌜---⌝ separator, i.e.:"$'\n'"░ ${FUNCNAME[1]} <mandatory arguments> --- option1=value1 option2=value2"
+    fi
+    if [[ ${optionsErrorWithoutSeparator} == "true" || ${optionsErrorWithSeparator} == "true" ]]; then
+      local passedOptions="'${BASH_COMMAND#*"'"}"
+      log::print "ERROR" "${ICON_ERROR:-}" "CMDERR" "Bad options passed to function ⌜${FUNCNAME[1]}⌝ ."$'\n\n'"${helpMessage}"$'\n\n'
+      log::printString "╭ invalid options for ⌜${FUNCNAME[1]}⌝: ${passedOptions}"
+      log::printCallStack stackToSkip=3
+
+      core::exit 1 silent=true
+    fi
+  fi
+
   log::print "ERROR" "${ICON_ERROR:-}" "CMDERR" "Error code ${errorCodesString} for the command:"
   log::printTrappedBashCommand
   log::printCallStack

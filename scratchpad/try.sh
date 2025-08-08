@@ -6,22 +6,37 @@ export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<sub
 
 # shellcheck source=../libraries.d/main
 source "$(valet --source)"
-include tui coproc fs bash terminal
+include tui coproc fs bash terminal exe
 
 # ========================================
 
-function shit() {
-  IFS=$'\n'
-  echo "$*"
-  return 2
+function functionWithFiniteArgs() {
+  local \
+    arg1="${1}" \
+    arg2="${2}" \
+    myOption="1" \
+    myOption2="2" \
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
+
+  echo "local a= ${*@Q}"
+  local
 }
 
-set -- 1 "deuxieme truc" 3
+function functionWithInfiniteArgs() {
+  local \
+    arg1="${1}" \
+    arg2="${2}" \
+    myOption="1" \
+    myOption2="2"
+  shift 2
+  core::parseShellParameters "${@}"
+  eval "${REPLY}"
 
-redirections="1> tmp/stdout 2> tmp/stderr"
+  echo "${REPLY}"
+  local
+  echo "remaining arguments: '${*}'"
+}
 
-if eval "shit zero \"\${@}\" ${redirections}"; then
-  echo "$?"
-else
-  echo "$?"
-fi
+functionWithFiniteArgs 1 2 --- 111
