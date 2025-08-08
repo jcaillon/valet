@@ -8,121 +8,24 @@
 
 /* FOR MERMAID */
 
-.mermaid-button {
-    float: right;
-    /* Adjust as needed */
-    right: 10px;
-    /* Adjust as needed */
-    background-color: rgba(255, 255, 255, 0.7);
-    /* Semi-transparent white */
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8em;
-    /* Smaller font for discretion */
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
-}
-
+/*
 .mermaid-button:hover {
     opacity: 1;
 }
 
 .mermaid-button.active {
     background-color: rgba(220, 240, 255, 0.8);
-    /* Slight color change when active */
     border-color: rgba(0, 0, 0, 0.4);
 }
 
 :is(html[class~="dark"] *) .mermaid-button {
     background-color: rgba(0, 0, 0, 0.7);
-    /* Dark theme background */
     border: 1px solid rgba(255, 255, 255, 0.2);
-    /* Dark theme border */
     color: white;
-    /* Dark theme text color */
 }
 
 :is(html[class~="dark"] *) .mermaid-button.active {
     background-color: rgba(40, 60, 80, 0.8);
-    /* Dark theme active background */
     border-color: rgba(200, 220, 240, 0.4);
-    /* Dark theme active border */
 }
-
-
-/* FOR THE COLLAPSE SHORTCODE */
-.collapse-content {
-    display: none;
-    margin-top: 10px;
-}
-
-.collapse-container.active .collapse-content {
-    display: block;
-}
-
-.collapse-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 14px;
-    border: 1px solid #ccc;
-    background-color: #f0f0f0;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.collapse-button:hover {
-    background-color: #e0e0e0;
-}
-
-.collapse-button::before {
-    content: '(Click to toggle)';
-    margin-right: 8px;
-    color: #666;
-    font-size: 0.8em;
-}
-
-.collapse-button::after {
-    content: '▼';
-    /* Down arrow for collapsed */
-    margin-left: 8px;
-    transition: transform 0.2s ease;
-}
-
-.collapse-button.active::after {
-    transform: rotate(180deg);
-    /* Up arrow for expanded */
-}
-
-.collapse-button.active {
-    background-color: #d0e8ff;
-    /* A lighter color when active */
-    border-color: #a0c8ff;
-}
-
-:is(html[class~="dark"] *) .collapse-button {
-    background-color: rgba(48, 48, 48, 0.7);
-    /* Dark theme background */
-    border: 1px solid rgba(255, 255, 255, 0.13);
-    /* Dark theme border */
-    color: white;
-    /* Dark theme text color */
-}
-
-:is(html[class~="dark"] *) .collapse-button:hover {
-    background-color: #e0e0e013;
-}
-
-:is(html[class~="dark"] *) .collapse-button.active {
-    background-color: rgba(69, 87, 104, 0.8);
-    /* Dark theme active background */
-    border-color: rgba(200, 220, 240, 0.4);
-    /* Dark theme active border */
-}
-
-:is(html[class~="dark"] *) .collapse-button::before {
-    color: #a1a1a1;
-}
+*/

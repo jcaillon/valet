@@ -2,6 +2,7 @@
 .vscode/**
 !.vscode/extensions.json
 !.vscode/settings.json
+!.vscode/hextra.code-snippets
 
 ### WINDOWS ###
 desktop.ini

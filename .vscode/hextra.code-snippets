@@ -1,0 +1,237 @@
+{
+	"hex collapsable": {
+		"prefix": "hex collapsable",
+		"description": "",
+		"scope": "",
+		"body": [
+			"{{% details title=\"Click me to reveal\" closed=\"true\" %}}",
+			"",
+			"This will be hidden by default.",
+			"",
+			"{{% /details %}}"
+		]
+	},
+	"hex alert caution": {
+		"prefix": "hex alert caution",
+		"description": "",
+		"scope": "",
+		"body": [
+			"> [!CAUTION]",
+			"> Advises about risks or negative outcomes of certain actions."
+		]
+	},
+	"hex alert warning": {
+		"prefix": "hex alert warning",
+		"description": "",
+		"scope": "",
+		"body": [
+			"> [!WARNING]",
+			"> Urgent info that needs immediate user attention to avoid problems."
+		]
+	},
+	"hex alert important": {
+		"prefix": "hex alert important",
+		"description": "",
+		"scope": "",
+		"body": [
+			"> [!IMPORTANT]",
+			"> Key information users need to know to achieve their goal."
+		]
+	},
+	"hex alert tip": {
+		"prefix": "hex alert tip",
+		"description": "",
+		"scope": "",
+		"body": [
+			"> [!TIP]",
+			"> Helpful advice for doing things better or more easily."
+		]
+	},
+	"hex alert note": {
+		"prefix": "hex alert note",
+		"description": "",
+		"scope": "",
+		"body": [
+			"> [!NOTE]",
+			"> Useful information that users should know, even when skimming content."
+		]
+	},
+	"hex collapse": {
+		"prefix": "hex collapse",
+		"description": "",
+		"scope": "",
+		"body": [
+			"{{< collapse \"Title\" >}}",
+			"content",
+			"{{< /collapse >}}"
+		]
+	},
+	"hugo link ref": {
+		"prefix": "hugo link ref",
+		"description": "",
+		"scope": "",
+		"body": [
+			"[About]({{< ref \"/showcase\" >}} \"About\")"
+		]
+	},
+	"hex code": {
+		"prefix": "hex code",
+		"description": "",
+		"scope": "",
+		"body": [
+			"```python {linenos=table,hl_lines=[2,4],linenostart=1,filename=\"hello.py\"}",
+			"def say_hello():",
+			"    print(\"Hello!\")",
+			"",
+			"def main():",
+			"    say_hello()",
+			"```"
+		]
+	},
+	"hex tabs": {
+		"prefix": "hex tabs",
+		"description": "",
+		"scope": "",
+		"body": [
+			"{{< tabs items=\"JSON,YAML,TOML\" defaultIndex=\"1\" >}}",
+			"",
+			"  {{< tab >}}**JSON**: JavaScript Object Notation (JSON) is a standard text-based format for representing structured data based on JavaScript object syntax.{{< /tab >}}",
+			"  {{< tab >}}**YAML**: YAML is a human-readable data serialization language.{{< /tab >}}",
+			"  {{< tab >}}**TOML**: TOML aims to be a minimal configuration file format that's easy to read due to obvious semantics.{{< /tab >}}",
+			"",
+			"{{< /tabs >}}"
+		]
+	},
+	"hex steps": {
+		"prefix": "hex steps",
+		"description": "",
+		"scope": "",
+		"body": [
+			"{{% steps %}}",
+			"",
+			"### Step 1",
+			"",
+			"This is the first step.",
+			"",
+			"### Step 2",
+			"",
+			"This is the second step.",
+			"",
+			"{{% /steps %}}"
+		]
+	},
+	"hex icon": {
+		"prefix": "hex icon",
+		"description": "Heroicons v1 outline icons are available out of the box.",
+		"scope": "",
+		"body": [
+			"{{< icon \"github\" >}}"
+		]
+	},
+	"hex filetree ": {
+		"prefix": "hex filetree",
+		"description": "",
+		"scope": "",
+		"body": [
+			"{{< filetree/container >}}",
+			"  {{< filetree/folder name=\"content\" >}}",
+			"    {{< filetree/file name=\"_index.md\" >}}",
+			"    {{< filetree/folder name=\"docs\" state=\"closed\" >}}",
+			"      {{< filetree/file name=\"_index.md\" >}}",
+			"      {{< filetree/file name=\"introduction.md\" >}}",
+			"      {{< filetree/file name=\"introduction.fr.md\" >}}",
+			"    {{< /filetree/folder >}}",
+			"  {{< /filetree/folder >}}",
+			"  {{< filetree/file name=\"hugo.toml\" >}}",
+			"{{< /filetree/container >}}"
+		]
+	},
+	"hex details": {
+		"prefix": "hex details",
+		"description": "A built-in component to display a collapsible content.",
+		"scope": "",
+		"body": [
+			"{{% details title=\"Click me to reveal\" closed=\"true\" %}}",
+			"",
+			"This will be hidden by default.",
+			"",
+			"{{% /details %}}"
+		]
+	},
+	"hex cards": {
+		"prefix": "hex cards",
+		"description": "https://imfing.github.io/hextra/docs/guide/shortcodes/cards/",
+		"scope": "",
+		"body": [
+			"{{< cards >}}",
+			"  {{< card link=\"../callout\" title=\"Callout\" icon=\"warning\" >}}",
+			"  {{< card link=\"../callout\" title=\"Card with tag\" icon=\"tag\" tag= \"A custom tag\" >}}",
+			"  {{< card link=\"/\" title=\"No Icon\" >}}",
+			"{{< /cards >}}",
+			"{{< cards >}}",
+			"  {{< card link=\"/\" title=\"Image Card\" image=\"https://source.unsplash.com/featured/800x600?landscape\" subtitle=\"Unsplash Landscape\" >}}",
+			"  {{< card link=\"/\" title=\"Local Image\" image=\"/images/card-image-unprocessed.jpg\" subtitle=\"Raw image under static directory.\" >}}",
+			"  {{< card link=\"/\" title=\"Local Image\" image=\"images/space.jpg\" subtitle=\"Image under assets directory, processed by Hugo.\" method=\"Resize\" options=\"600x q80 webp\" >}}",
+			"{{< /cards >}}",
+			"{{< cards >}}",
+			"  {{< card link=\"../callout\" title=\"Card with default tag color\" tag=\"tag text\" >}}",
+			"  {{< card link=\"../callout\" title=\"Card with default red tag\" tag=\"tag text\" tagType=\"error\" >}}",
+			"  {{< card link=\"../callout\" title=\"Card with blue tag\" tag=\"tag text\" tagType=\"info\" >}}",
+			"  {{< card link=\"../callout\" title=\"Card with yellow tag\" tag=\"tag text\" tagType=\"warning\" >}}",
+			"{{< /cards >}}"
+		]
+	},
+	"hex callout emoji": {
+		"prefix": "hex callout emoji",
+		"description": "",
+		"scope": "",
+		"body": [
+			"{{< callout emoji=\"🌐\" >}}",
+			"  Hugo can be used to create a wide variety of websites, including blogs, portfolios, documentation sites, and more.",
+			"{{< /callout >}}"
+		]
+	},
+	"hex callout error": {
+		"prefix": "hex callout error",
+		"description": "A built-in component to show important information to the reader.",
+		"scope": "",
+		"body": [
+			"{{< callout type=\"error\" >}}",
+			"  Something went wrong and it's going to explode.",
+			"{{< /callout >}}"
+		]
+	},
+	"hex callout warning": {
+		"prefix": "hex callout warning",
+		"description": "A built-in component to show important information to the reader.",
+		"scope": "",
+		"body": [
+			"{{< callout type=\"warning\" >}}",
+			"  A **callout** is a short piece of text intended to attract attention.",
+			"{{< /callout >}}"
+		]
+	},
+	"hex callout info": {
+		"prefix": "hex callout info",
+		"description": "A built-in component to show important information to the reader.",
+		"scope": "",
+		"body": [
+			"{{< callout type=\"info\" >}}",
+			"  Please visit GitHub to see the latest releases.",
+			"{{< /callout >}}"
+		]
+	}
+	// Place your snippets for markdown here. Each snippet is defined under a snippet name and has a prefix, body and 
+	// description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the 
+	// same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+}
