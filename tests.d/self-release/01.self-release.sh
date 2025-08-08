@@ -14,13 +14,6 @@ function main() {
   test::exec selfRelease -t token -b minor
 }
 
-# need to override git, curl
-function exe::invokef5() {
-  echo "🙈 mocked exe::invokef5 $*" 1>&2
-  REPLY=""
-  REPLY2=""
-}
-
 function exe::invoke() {
   echo "🙈 mocked exe::invoke $*" 1>&2
   if [[ ${1} == "git" ]]; then
@@ -33,6 +26,8 @@ function exe::invoke() {
       shift
     done
   fi
+  # shellcheck disable=SC2034
+  REPLY_CODE=0
   REPLY=""
   REPLY2=""
 }
@@ -42,18 +37,23 @@ function interactive::promptYesNo() {
   return 0
 }
 
+# shellcheck disable=SC2034
 function curl::request() {
   echo "🙈 mocked curl::request $*" 1>&2
+  REPLY_CODE=0
   REPLY='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}", "tag_name": "v1.2.3", "browser_download_url": "https:///fake" }'
   REPLY2=""
   REPLY3=200
 }
 
 
+# shellcheck disable=SC2034
 function curl::download() {
   echo "🙈 mocked curl::download $*" 1>&2
+  REPLY_CODE=0
   REPLY=""
-  REPLY2=200
+  REPLY2=""
+  REPLY3=200
 }
 
 function core::getVersion() {

@@ -360,27 +360,46 @@ function selfTest_runSingleTestSuite() {
       REPLY="${REPLY//declare --/}"
       eval "${REPLY//declare -a/}"
 
+      local scriptGotError=false
+      if [[ -n ${GLOBAL_STACK_FUNCTION_NAMES_ERR:-} ]]; then
+        scriptGotError=true
+        GLOBAL_STACK_FUNCTION_NAMES=("${GLOBAL_STACK_FUNCTION_NAMES_ERR[@]}")
+        GLOBAL_STACK_SOURCE_FILES=("${GLOBAL_STACK_SOURCE_FILES_ERR[@]}")
+        GLOBAL_STACK_LINE_NUMBERS=("${GLOBAL_STACK_LINE_NUMBERS_ERR[@]}")
+      fi
+
+      # find the line number of the test script that failed
+      local lineNumber=""
+      local -i stackIndex=0
+      for stackIndex in "${!GLOBAL_STACK_SOURCE_FILES[@]}"; do
+        if [[ "${GLOBAL_STACK_SOURCE_FILES[stackIndex]}" == "${testScript}" && ${stackIndex} -gt 0 ]]; then
+          lineNumber="${GLOBAL_STACK_LINE_NUMBERS[stackIndex - 1]}"
+          break
+        fi
+      done
+
       selfTestUtils_displayTestLogs
       selfTestUtils_displayTestSuiteOutputs
 
       if ((exitCode == GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS)); then
-        # the function test::fail was called, there was a coding mistake in the test script that we caught
+        # the function test::fail was called
+        # Can be reproduced by inserting a `test::fail` call in the test script.
         fs::readFile "${GLOBAL_TEST_LOG_FILE}"
-        log::error "The test script ⌜${testScript##*/}⌝ failed because an error was explicitly thrown in the test script:"$'\n\n'"${REPLY}"$'\n\n'"test::fail called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝."
-        log::printTrappedBashCommand
-        log::printCallStack stackToSkip=0 stackToSkipAtEnd=10
+        log::error "The test script ⌜${testScript##*/}⌝ at line ⌜${lineNumber}⌝ failed because an error was explicitly thrown in the test script:"$'\n\n'"${REPLY}"$'\n\n'"test::fail called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}:${lineNumber}⌝."
+        log::printCallStack stackToSkip=0 stackToSkipAtEnd=11
 
-      elif [[ -n ${GLOBAL_STACK_FUNCTION_NAMES_ERR:-} ]]; then
-        log::error "The test script ⌜${testScript##*/}⌝ had an error and exited with code ⌜${exitCode}⌝."$'\n'"Test scripts will exit if a command ends with an error (shell option to exit on error)."$'\n\n'"If you expect a tested function or command to fail, use one of these two methods to display the failure without exiting the script:"$'\n\n'"- ⌜myCommandThatFails || echo 'failed as expected with code \$?'⌝"$'\n'"- ⌜test::exec myCommandThatFails⌝"$'\n\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
-        GLOBAL_STACK_FUNCTION_NAMES=("${GLOBAL_STACK_FUNCTION_NAMES_ERR[@]}")
-        GLOBAL_STACK_SOURCE_FILES=("${GLOBAL_STACK_SOURCE_FILES_ERR[@]}")
-        GLOBAL_STACK_LINE_NUMBERS=("${GLOBAL_STACK_LINE_NUMBERS_ERR[@]}")
+      elif [[ ${scriptGotError} == "true" ]]; then
+        # there was an error in the test script (coding mistake)
+        # Can be reproduced by inserting a `((0/0))` in the test script.
+        log::error "The test script ⌜${testScript##*/}⌝ at line ⌜${lineNumber}⌝ had an error and exited with code ⌜${exitCode}⌝."$'\n'"Test scripts will exit if a command ends with an error (shell option to exit on error)."$'\n\n'"If you expect a tested function or command to fail, use one of these two methods to display the failure without exiting the script:"$'\n\n'"- myCommandThatFails || echo 'failed as expected with code \$?'"$'\n'"- test::exec myCommandThatFails"$'\n\n'"Error in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}:${lineNumber}⌝:"
+
         log::printTrappedBashCommand
-        log::printCallStack stackToSkip=1 stackToSkipAtEnd=10
+        log::printCallStack stackToSkip=1 stackToSkipAtEnd=11
       else
-        log::error "The test script ⌜${testScript##*/}⌝ exited with code ⌜${exitCode}⌝."$'\n'"Test scripts must not exit or return an error (shell options are set to exit on error)."$'\n\n'"If you expect a tested function or command to exit, run it in a subshell using one of these two methods:"$'\n\n'"- ⌜(myCommandThatFails) || echo 'failed as expected with code \${PIPESTATUS[0]:-}'⌝"$'\n'"- ⌜test::exit myCommandThatFails⌝"$'\n\n'"Exited in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}⌝:"
-        log::printTrappedBashCommand
-        log::printCallStack stackToSkip=1 stackToSkipAtEnd=10
+        # the test script exited with an error code
+        # Can be reproduced by inserting a `exit 1` in the test script.
+        log::error "The test script ⌜${testScript##*/}⌝ at line ⌜${lineNumber}⌝ exited with code ⌜${exitCode}⌝."$'\n'"Test scripts must not exit or return an error (shell options are set to exit on error)."$'\n\n'"If you expect a tested function or command to exit, run it in a subshell using one of these two methods:"$'\n\n'"- (myCommandThatFails) || echo 'failed as expected with code \${PIPESTATUS[0]:-}'"$'\n'"- test::exit myCommandThatFails"$'\n\n'"Exited in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}:${lineNumber}⌝:"
+        log::printCallStack stackToSkip=1 stackToSkipAtEnd=11
       fi
 
       # exit with an error if there were errors in the test scripts

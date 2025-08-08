@@ -605,7 +605,7 @@ function log::getCallStack() {
       functionName="${functionName}()"
     fi
     if ((idx > 0)); then
-      lineNumber="${stackLineNumbers[$((idx - 1))]}"
+      lineNumber="${stackLineNumbers[idx - 1]}"
     fi
     sourceFile="${stackSourceFiles[${idx}]}"
     if [[ -z ${sourceFile} ]]; then

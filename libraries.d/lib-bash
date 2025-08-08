@@ -42,7 +42,7 @@ function bash::catchErrors() {
   set -o errexit
 
   GLOBAL_ERROR_TRAP_LAST_ERROR_CODE=0
-  if (( ${#GLOBAL_ERROR_TRAP_ERROR_CODES[@]} > 0 )) && (( ${GLOBAL_ERROR_TRAP_ERROR_CODES[-1]} > 0 )); then
+  if ((${#GLOBAL_ERROR_TRAP_ERROR_CODES[@]} > 0)) && ((${GLOBAL_ERROR_TRAP_ERROR_CODES[-1]} > 0)); then
     # shellcheck disable=SC2034
     GLOBAL_ERROR_TRAP_LAST_ERROR_CODE="${GLOBAL_ERROR_TRAP_ERROR_CODES[-1]}"
   fi
@@ -383,8 +383,9 @@ function bash::isFunction() {
 # myFunctionWithGlobalVars
 # ```
 function bash::getFunctionDefinitionWithGlobalVars() {
-  local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local newFunctionName="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local \
+    functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    newFunctionName="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift 2
 
   local IFS=''
@@ -498,7 +499,6 @@ function bash::isFdValid() {
   return 1
 }
 
-
 # ## bash::allVariablesCachedWithValue
 #
 # Check if one or more variables are cached with the given value.
@@ -529,7 +529,7 @@ function bash::isFdValid() {
 function bash::allVariablesCachedWithValue() {
   local -i nbNotCached=0
   local varName varValue
-  while (( $# > 0 )); do
+  while (($# > 0)); do
     varName="_BASH_VAR_CACHED_${1}"
     varValue="${2}"
     shift 2
@@ -555,11 +555,11 @@ function bash::allVariablesCachedWithValue() {
 # bash::clearCachedVariables "MY_VAR" "ANOTHER_VAR"
 # ```
 function bash::clearCachedVariables() {
-  if (( $# == 0 )); then
+  if (($# == 0)); then
     # shellcheck disable=SC2086
     unset -v ${!_TUI_CACHED_*}
   else
-    while (( $# > 0 )); do
+    while (($# > 0)); do
       unset -v "_BASH_VAR_CACHED_${1}"
       shift
     done

@@ -4,6 +4,8 @@
 
 # shellcheck source=lib-exe
 source exe
+# shellcheck source=lib-bash
+source bash
 # shellcheck source=lib-fs
 source fs
 
@@ -180,7 +182,7 @@ function windows::startPs1Batch() {
   _WINDOWS_POWERSHELL_BATCHED_NO_FAIL=false
 
   # save the original function before overriding it
-  exe::invoke declare -f windows::runPs1
+  bash::getBuiltinOutput declare -f windows::runPs1
   _WINDOWS_POWERSHELL_FUNCTION="${REPLY//declare -? /}"
 
   # shellcheck disable=SC2317
@@ -288,6 +290,9 @@ function windows::createLink() {
   shift 2
   eval "local a= ${*@Q}"
 
+  # shellcheck disable=SC2034
+  local REPLY_CODE REPLY REPLY2
+
   fs::toAbsolutePath "${linkedPath}"
   linkedPath="${REPLY}"
   fs::toAbsolutePath "${linkPath}"
@@ -381,6 +386,8 @@ function windows::convertPathFromUnix() {
     path="${BASH_REMATCH[1]}:/${path/"${BASH_REMATCH[0]}"/}"
     path="${path^?}"
   elif command -v cygpath &>/dev/null; then
+    # shellcheck disable=SC2034
+    local REPLY_CODE REPLY2
     exe::invoke cygpath -w "${path}"
     REPLY="${REPLY%%$'\n'*}"
     return 0

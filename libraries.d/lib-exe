@@ -4,14 +4,17 @@
 
 # shellcheck source=lib-fs
 source fs
-# shellcheck source=lib-time
-source time
-
 
 # ## exe::invoke
 #
-# This function call an executable and its arguments.
-# It redirects the stdout and stderr to temporary files.
+# This function call an executable with its optional arguments.
+#
+# By default it redirects the stdout and stderr and captures them to output variables.
+# This makes the executes silent unless the executable fails.
+# By default, it will exit (core::fail) if the executable returns a non-zero exit code.
+#
+# This function should be used as a wrapper around any external program as it allows to easily
+# mock the program during tests and facilitates debugging with trace level log.
 #
 # - $1: **executable** _as string_:
 #       the executable or function to execute
@@ -21,20 +24,16 @@ source time
 #       (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.
 #       If true and the execution fails, the script will exit.
 #       (default to false)
-# - ${acceptableCodes} _as string_:
-#       (optional) The acceptable error codes, comma separated.
-#       If the error code is matched, then REPLY_CODE is set to 0)
-#       (default to 0)
+# - ${replyPathOnly}: _as bool_:
+#       (optional) If set to true, the function will return the file path of the stdout and stderr files
+#       instead of their content. This will make the function faster.
+#       (default to false)
 # - ${stdoutPath}: _as string_:
 #       (optional) The file path to use for the stdout of the executable. Otherwise a temporary work file will be used.
 #       (default to "")
 # - ${stderrPath}: _as string_:
 #       (optional) The file path to use for the stderr of the executable. Otherwise a temporary work file will be used.
 #       (default to "")
-# - ${noRead}: _as bool_:
-#       (optional) If set to true, the function will return the file path of the stdout and stderr files
-#       instead of their content. This will make the function faster.
-#       (default to false)
 # - ${stdinFile} _as bool_:
 #       (optional) The file path to use as stdin for the executable.
 #       (default to empty, which means no stdin is used)
@@ -42,6 +41,18 @@ source time
 #       (optional) The stdin content to pass to the executable.
 #       Can be empty if not used.
 #       (default to empty, which means no stdin is used)
+# - ${acceptableCodes} _as string_:
+#       (optional) The acceptable error codes, comma separated.
+#       If the error code is matched, then REPLY_CODE is set to 0)
+#       (default to 0)
+# - ${appendRedirect}: _as bool_:
+#       (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).
+#       This is useful when you want to run the same command multiple times and keep the previous output.
+#       The stderr and stdout REPLY variables will both have the same content.
+#       (default to false)
+# - ${groupRedirect}: _as bool_:
+#       (optional) If true will output stdout/stderr to the same file (&> redirect).
+#       (default to false)
 # - ${noRedirection}: _as bool_:
 #       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.
 #       (default to false)
@@ -49,14 +60,26 @@ source time
 # Returns:
 #
 # - ${REPLY_CODE}: The exit code of the executable.
-# - ${REPLY}: The content of stdout (or file path to stdout if `noRead=true`).
-# - ${REPLY2}: The content of stderr (or file path to stdout if `noRead=true`).
+# - ${REPLY}: The content of stdout (or file path to stdout if `replyPathOnly=true`).
+# - ${REPLY2}: The content of stderr (or file path to stdout if `replyPathOnly=true`).
 #
 # ```bash
-# exe::invoke thing --height=10 --flag
-# exe::invoke thing --height=10 --flag --- noFail=true stdoutPath=/path/to/stdout stderrPath=/path/to/stderr
-# stdoutFilePath="${REPLY}"
-# stderrFilePath="${REPLY2}"
+# # basic usage with some arguments:
+# exe::invoke git branch --list --sort=-committerdate
+# echo "${REPLY}"
+#
+# # invoke a command that is allowed to return an error code:
+# exe::invoke risky-command --- noFail=true
+# echo "${REPLY_CODE}"
+#
+# # invoke a command with custom stdout / stderr files and do not read the output into REPLY vars:
+# exe::invoke thing --- stdoutPath=/path/to/stdout stderrPath=/path/to/stderr replyPathOnly=true
+#
+# # invoke a command and let the outputs go to the console:
+# exe::invoke cat file --- noRedirection=true
+#
+# # invoke a command with stdin from a string:
+# exe::invoke cat --- stdin="Hello World"
 # ```
 #
 # > - In windows, this is tremendously faster to do:
@@ -65,30 +88,56 @@ source time
 # >   `myvar="$(mycommand)".`
 # > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
 # > - On linux, you can use a tmpfs directory for massive gains over subshells.
-function exe::call() {
+function exe::invoke() {
   local \
     executable="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     noFail=false \
-    acceptableCodes="0" \
+    replyPathOnly=false \
     stdoutPath="${GLOBAL_TEMPORARY_STDOUT_FILE}" \
     stderrPath="${GLOBAL_TEMPORARY_STDERR_FILE}" \
-    noRead=false
     stdinFile="" \
     stdin="" \
+    acceptableCodes="0" \
+    appendRedirect=false \
+    groupRedirect=false \
     noRedirection=false
   shift 1
   core::parseShellParameters "${@}"
   eval "${REPLY}"
 
+  # compute the necessary redirects
+  # shellcheck disable=SC2016
+  local \
+    toEval='"${executable}" "${@}"' \
+    redirectExtraSymbol=""
+  if [[ -n ${stdin} ]]; then
+    toEval+=" <<<\"${stdin}\""
+  elif [[ -n ${stdinFile} ]]; then
+    toEval+=" <\"${stdinFile}\""
+  fi
+  if [[ ${appendRedirect} == "true" ]]; then
+    redirectExtraSymbol=">"
+  fi
+  if [[ ${noRedirection} != "true" ]]; then
+    if [[ ${groupRedirect} == "true" ]]; then
+      stderrPath="${stdoutPath}"
+      toEval+=" &>${redirectExtraSymbol}\"${stdoutPath}\""
+    else
+      toEval+=" 1>${redirectExtraSymbol}\"${stdoutPath}\" 2>${redirectExtraSymbol}\"${stderrPath}\""
+    fi
+  fi
+
   # if trace mode is on, print some info
   if log::isTraceEnabled; then
     local IFS=' '
-    if (( $# > 0 )); then
+    if (($# > 0)); then
       printf -v args "%q " "${@}"
       log::trace "Executing the command ${executable} with arguments: "$'\n'"${args% }"
     else
       log::trace "Executing the command ${executable} (no arguments)."
     fi
+    log::trace "The command will be executed as:"$'\n'"${toEval}"
+    log::trace "Options: noFail=${noFail}, acceptableCodes=${acceptableCodes}, replyPathOnly=${replyPathOnly}"
     if [[ -n ${stdin} ]]; then
       log::trace "${executable^} standard input from string:"
       log::saveFileString stdin suffix="${executable}-stdin"
@@ -105,24 +154,12 @@ function exe::call() {
   time::getProgramElapsedMicroseconds
   local timerStart="${REPLY}"
 
-  # execute the executable
-  local -i exitCode=0
-  if [[ ${noRedirection} == "true" ]]; then
-    if [[ -n ${stdin} ]]; then
-      "${executable}" "$@" <<<"${stdin}" || exitCode=$?
-    elif [[ -n ${stdinFile} ]]; then
-      "${executable}" "$@" <"${stdinFile}" || exitCode=$?
-    else
-      "${executable}" "$@" || exitCode=$?
-    fi
+  # execute the program
+  local exitCode
+  if eval "${toEval}"; then
+    exitCode=0
   else
-    if [[ -n ${stdin} ]]; then
-      "${executable}" "$@" <<<"${stdin}" 1>"${stdoutPath}" 2>"${stderrPath}" || exitCode=$?
-    elif [[ -n ${stdinFile} ]]; then
-      "${executable}" "$@" <"${stdinFile}" 1>"${stdoutPath}" 2>"${stderrPath}" || exitCode=$?
-    else
-      "${executable}" "$@" 1>"${stdoutPath}" 2>"${stderrPath}" || exitCode=$?
-    fi
+    exitCode=${?}
   fi
 
   time::getProgramElapsedMicroseconds
@@ -132,21 +169,21 @@ function exe::call() {
   local debugMessage="The command ${executable} ended with exit code ${exitCode} in ${REPLY}s."
 
   # if the error code is acceptable, then we set it to 0
-  if [[ ${exitCode} -ne "0" && ,${acceptableCodes}, == *",${exitCode},"* ]]; then
+  if [[ ${exitCode} -ne 0 && ,${acceptableCodes}, == *",${exitCode},"* ]]; then
     exitCode=0
     log::trace "The error code ${exitCode} is acceptable and has been reset to 0."
   fi
 
   local shouldFail=false
   if [[ ${noFail} != "true" && exitCode -ne 0 ]]; then
-    shouldFail=true;
+    shouldFail=true
   fi
 
   # fail if needed or we are debug mode; display all the debug information that could be useful
-  if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
+  if [[ ${shouldFail} == "true" ]] || log::isDebugEnabled; then
 
     if [[ ${noRedirection} != "true" ]]; then
-      if log::isTraceEnabled || [[ ${shouldFail} == "true" ]]; then
+      if [[ ${shouldFail} == "true" ]] || log::isTraceEnabled; then
         # print std out
         if [[ -s "${stdoutPath}" ]]; then
           log::errorTrace "${executable^} standard output stream:"
@@ -177,11 +214,12 @@ function exe::call() {
   if [[ ${noRedirection} == "true" ]]; then
     REPLY=""
     REPLY2=""
-  elif [[ ${noRead} == "true" ]]; then
+  elif [[ ${replyPathOnly} == "true" ]]; then
     REPLY="${stdoutPath}"
     REPLY2="${stderrPath}"
   else
     fs::readFile "${stderrPath}"
+    # shellcheck disable=SC2034
     REPLY2="${REPLY}"
     fs::readFile "${stdoutPath}"
   fi
@@ -190,421 +228,4 @@ function exe::call() {
   REPLY_CODE="${exitCode}"
 
   return 0
-}
-
-
-
-# ## exe::invokef
-#
-# This function call an executable and its arguments.
-# It redirects the stdout and stderr to temporary files.
-#
-# - $1: **executable** _as string_:
-#       the executable or function to execute
-# - $@: **arguments** _as any_:
-#       the arguments to pass to the executable
-# - ${failOnError} _as bool_:
-#       (optional) A boolean to indicate if the function should fail in case the execution fails.
-#       If true and the execution fails, the script will exit.
-#       (default to false)
-# - ${acceptableCodes} _as string_:
-#       (optional) The acceptable error codes, comma separated.
-#       If the error code is matched, then REPLY_CODE is set to 0)
-#       (default to 0)
-# - ${stdinFile} _as bool_:
-#       (optional) The file path to use as stdin for the executable.
-#       (default to empty, which means no stdin is used)
-# - ${stdin} _as string_:
-#       (optional) The stdin content to pass to the executable.
-#       Can be empty if not used.
-#       (default to empty, which means no stdin is used)
-# - ${noRedirection}: _as bool_:
-#       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.
-#       (default to false)
-# - ${noRead}: _as bool_:
-#       (optional) If set to true, the function will return the file path of the stdout and stderr files
-#       instead of their content.
-#       (default to false)
-#
-# Returns:
-#
-# - ${REPLY_CODE}: The exit code of the executable.
-# - ${REPLY}: The content of stdout (or file path to stdout if `noRead=true`).
-# - ${REPLY2}: The content of stderr (or file path to stdout if `noRead=true`).
-#
-# ```bash
-# exe::invokef "false" "130,2" "false" "This is the stdin" "stuff" "--height=10"
-# stdoutFilePath="${REPLY}"
-# stderrFilePath="${REPLY2}"
-# ```
-#
-# > - In windows, this is tremendously faster to do:
-# >   `exe::invokef false 0 false '' mycommand; myvar="${REPLY}"`
-# >   than doing:
-# >   `myvar="$(mycommand)".`
-# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
-# > - On linux, you can use a tmpfs directory for massive gains over subshells.
-function exe::invokef5() {
-  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local acceptableErrorCodes="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local stdInFromFile="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local stdIn="${4?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local executable="${5?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local noRedirection="${noRedirection:-false}"
-  shift 5
-
-  # if trace mode is on, print some info
-  if log::isTraceEnabled; then
-    local IFS=' '
-    if (( $# > 0 )); then
-      printf -v args "%q " "${@}"
-      log::trace "Executing the command ⌜${executable}⌝ with arguments: "$'\n'"${args% }"
-    else
-      log::trace "Executing the command ⌜${executable}⌝ (no arguments)."
-    fi
-    if [[ -n ${stdIn} ]]; then
-      if [[ ${stdInFromFile} == "true" ]]; then
-        log::trace "${executable^} standard input from file ${stdIn}:"
-        log::saveFile "${stdIn}" suffix="${executable}-stdin"
-      else
-        log::trace "${executable^} standard input from string:"
-        log::saveFileString stdIn suffix="${executable}-stdin"
-      fi
-    else
-      log::trace "No standard input."
-    fi
-  else
-    log::debug "Executing the command ⌜${executable}⌝."
-  fi
-
-  time::getProgramElapsedMicroseconds
-  local timerStart="${REPLY}"
-
-  # execute the executable
-  local -i exitCode=0
-  if [[ ${noRedirection} == "true" ]]; then
-    if [[ -n ${stdIn} ]]; then
-      if [[ ${stdInFromFile} == "true" ]]; then
-        "${executable}" "$@" <"${stdIn}" || exitCode=$?
-      else
-        "${executable}" "$@" <<<"${stdIn}" || exitCode=$?
-      fi
-    else
-      "${executable}" "$@" || exitCode=$?
-    fi
-  else
-    if [[ -n ${stdIn} ]]; then
-      if [[ ${stdInFromFile} == "true" ]]; then
-        "${executable}" "$@" <"${stdIn}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
-      else
-        "${executable}" "$@" <<<"${stdIn}" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
-      fi
-    else
-      "${executable}" "$@" 1>"${GLOBAL_TEMPORARY_STDOUT_FILE}" 2>"${GLOBAL_TEMPORARY_STDERR_FILE}" || exitCode=$?
-    fi
-  fi
-
-  time::getProgramElapsedMicroseconds
-  local -i elapsed=$((REPLY - timerStart))
-  time::convertMicrosecondsToHuman "${elapsed}" format="%S.%LLs"
-  local debugMessage="The command ⌜${executable}⌝ ended with exit code ⌜${exitCode}⌝ in ⌜${REPLY}⌝."
-
-  # if the error code is acceptable, then we set it to 0
-  if [[ ${exitCode} -ne "0" && ,${acceptableErrorCodes}, == *",${exitCode},"* ]]; then
-    exitCode=0
-    log::trace "The error code ⌜${exitCode}⌝ is acceptable and has been reset to 0."
-  fi
-
-  local shouldFail=false
-  if [[ ${failIfFails} == "true" && exitCode -ne 0 ]]; then
-    shouldFail=true;
-  fi
-
-  # fail if needed or we are debug mode; display all the debug information that could be useful
-  if log::isDebugEnabled || [[ ${shouldFail} == "true" ]]; then
-
-    if [[ ${noRedirection} != "true" ]]; then
-      if log::isTraceEnabled || [[ ${shouldFail} == "true" ]]; then
-        # print std out
-        if [[ -s "${GLOBAL_TEMPORARY_STDOUT_FILE}" ]]; then
-          log::errorTrace "${executable^} standard output stream:"
-          log::saveFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" suffix="${executable}-stdout"
-          log::printFile "${GLOBAL_TEMPORARY_STDOUT_FILE}" maxLines=99
-        else
-          log::errorTrace "${executable^} had no standard output stream."
-        fi
-
-        # print stderr
-        if [[ -s "${GLOBAL_TEMPORARY_STDERR_FILE}" ]]; then
-          log::errorTrace "${executable^} standard error stream:"
-          log::saveFile "${GLOBAL_TEMPORARY_STDERR_FILE}" suffix="${executable}-stderr"
-          log::printFile "${GLOBAL_TEMPORARY_STDERR_FILE}" maxLines=99
-        else
-          log::errorTrace "${executable^} had no standard error stream."
-        fi
-      fi
-    fi
-
-    if [[ ${shouldFail} == "true" ]]; then
-      core::fail "${debugMessage}"
-    else
-      log::debug "${debugMessage}"
-    fi
-  fi
-
-  REPLY="${GLOBAL_TEMPORARY_STDOUT_FILE}"
-  REPLY2="${GLOBAL_TEMPORARY_STDERR_FILE}"
-  return ${exitCode}
-}
-
-# ## exe::invoke5
-#
-# This function call an executable and its arguments.
-# It redirects the stdout and stderr to environment variables.
-# It calls invoke5 and reads the files to set the environment variables.
-#
-# - $1: **fail** _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails.
-#       If true and the execution fails, the script will exit.
-# - $2: **acceptable codes** _as string_:
-#       the acceptable error codes, comma separated
-#       (if the error code is matched, then set the output error code to 0)
-# - $3: **stdin from file** _as bool_:
-#       true/false to indicate if the 4th argument represents a file path or directly the content for stdin
-# - $4: **stdin** _as string_:
-#       the stdin (can be empty)
-# - $5: **executable** _as string_:
-#       the executable or function to execute
-# - $@: **arguments** _as any_:
-#       the arguments to pass to the executable
-#
-# Returns:
-#
-# - $?:The exit code of the executable.
-# - ${REPLY}: The content of stdout.
-# - ${REPLY2}: The content of stderr.
-#
-# ```bash
-# exe::invoke5 "false" "130,2" "false" "This is the stdin" "stuff" "--height=10" || core::fail "stuff failed."
-# stdout="${REPLY}"
-# stderr="${REPLY2}"
-# ```
-#
-# > See exe::invokef5 for more information.
-function exe::invoke5() {
-  local -i exitCode=0
-  exe::invokef5 "$@" || exitCode=$?
-  local stdOutFile="${REPLY}"
-  local stdErrFile="${REPLY2}"
-
-  fs::readFile "${stdErrFile}"
-  REPLY2="${REPLY}"
-  fs::readFile "${stdOutFile}"
-
-  return ${exitCode}
-}
-
-# ## exe::invokef2
-#
-# This function call an executable and its arguments.
-# It redirects the stdout and stderr to temporary files.
-# Equivalent to `exe::invokef5 "${1}" 0 "" "" "${@:2}"`
-#
-# - $1: **fail** _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails.
-#       If true and the execution fails, the script will exit.
-# - $2: **executable** _as string_:
-#       the executable or function to execute
-# - $@: **arguments** _as any_:
-#       the arguments to pass to the executable
-#
-# Returns:
-#
-# - $?:The exit code of the executable.
-# - ${REPLY}: The file path containing the stdout of the executable.
-# - ${REPLY2}: The file path containing the stderr of the executable.
-#
-# ```bash
-# exe::invokef2 false git status || core::fail "status failed."
-# stdoutFilePath="${REPLY}"
-# stderrFilePath="${REPLY2}"
-# ```
-#
-# > See exe::invokef5 for more information.
-function exe::invokef2() {
-  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  shift
-  exe::invokef5 "${failIfFails}" 0 '' '' "$@" || return $?
-}
-
-# ## exe::invoke2
-#
-# This function call an executable and its arguments.
-# It redirects the stdout and stderr to environment variables.
-# Equivalent to `exe::invoke5 "${1}" 0 "" "" "${@:2}"`
-#
-# - $1: **fail** _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails.
-#       If true and the execution fails, the script will exit.
-# - $2: **executable** _as string_:
-#       the executable or function to execute
-# - $@: **arguments** _as any_:
-#       the arguments to pass to the executable
-#
-# Returns:
-#
-# - $?:The exit code of the executable.
-# - ${REPLY}: The content of stdout.
-# - ${REPLY2}: The content of stderr.
-#
-# ```bash
-# exe::invoke2 false git status || core::fail "status failed."
-# stdout="${REPLY}"
-# stderr="${REPLY2}"
-# ```
-#
-# > See exe::invokef5 for more information.
-function exe::invoke2() {
-  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  shift
-  exe::invoke5 "${failIfFails}" 0 '' '' "$@" || return $?
-}
-
-# ## exe::invoket2
-#
-# This function call an executable and its arguments.
-# It does not redirect the stdout and stderr so it outputs to the
-# default 1/2 file descriptors.
-# Equivalent to `noRedirection=true exe::invokef5 "${1}" 0 "" "" "${@:2}"`
-#
-# - $1: **fail** _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails.
-#       If true and the execution fails, the script will exit.
-# - $2: **executable** _as string_:
-#       the executable or function to execute
-# - $@: **arguments** _as any_:
-#       the arguments to pass to the executable
-#
-# Returns:
-#
-# - $?:The exit code of the executable.
-#
-# ```bash
-# exe::invoket2 false git status || core::fail "status failed."
-# ```
-#
-# > See exe::invokef5 for more information.
-function exe::invoket2() {
-  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  shift
-  noRedirection=true exe::invokef5 "${failIfFails}" 0 '' '' "$@" || return $?
-}
-
-# ## exe::invokef3piped
-#
-# This function call an executable and its arguments and input a given string as stdin.
-# It redirects the stdout and stderr to temporary files.
-# Equivalent to `exe::invokef5 "${1}" 0 false "${2}" "${@:3}"`
-#
-# - $1: **fail** _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails.
-#       If true and the execution fails, the script will exit.
-# - $2: **stdin** _as string_:
-#       The stdin content to pass to the executable
-# - $3: **executable** _as string_:
-#       the executable or function to execute
-# - $@: **arguments** _as any_:
-#       the arguments to pass to the executable
-#
-# Returns:
-#
-# - $?:The exit code of the executable.
-# - ${REPLY}: The file path containing the stdout of the executable.
-# - ${REPLY2}: The file path containing the stderr of the executable.
-#
-# ```bash
-# exe::invokef3piped true "key: val" yq -o json -p yaml -
-# stdoutFilePath="${REPLY}"
-# stderrFilePath="${REPLY2}"
-# ```
-#
-# > This is the equivalent of:
-# > `myvar="$(printf '%s\n' "mystring" | mycommand)"`
-# > But without using a subshell.
-# >
-# > See exe::invokef5 for more information.
-function exe::invokef3piped() {
-  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local stdIn="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  shift 2
-  exe::invokef5 "${failIfFails}" 0 false "${stdIn}" "$@" || return $?
-}
-
-# ## exe::invoke3piped
-#
-# This function call an executable and its arguments and input a given string as stdin.
-# It redirects the stdout and stderr to environment variables.
-# Equivalent to `exe::invoke5 "${1}" 0 false "${2}" "${@:3}"`
-#
-# - $1: **fail** _as bool_:
-#       true/false to indicate if the function should fail in case the execution fails.
-#       If true and the execution fails, the script will exit.
-# - $2: **stdin** _as string_:
-#       The stdin content to pass to the executable
-# - $3: **executable** _as string_:
-#       the executable or function to execute
-# - $@: **arguments** _as any_:
-#       the arguments to pass to the executable
-#
-# Returns:
-#
-# - $?:The exit code of the executable.
-# - ${REPLY}: The content of stdout.
-# - ${REPLY2}: The content of stderr.
-#
-# ```bash
-# exe::invoke3piped true "key: val" yq -o json -p yaml -
-# stdout="${REPLY}"
-# stderr="${REPLY2}"
-# ```
-#
-# > This is the equivalent of:
-# > `myvar="$(printf '%s\n' "mystring" | mycommand)"`
-# > But without using a subshell.
-# >
-# > See exe::invokef5 for more information.
-function exe::invoke3piped() {
-  local failIfFails="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local stdIn="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  shift 2
-  exe::invoke5 "${failIfFails}" 0 false "${stdIn}" "$@" || return $?
-}
-
-# ## exe::invoke
-#
-# This function call an executable and its arguments.
-# If the execution fails, it will fail the script and show the std/err output.
-# Otherwise it hides both streams, effectively rendering the execution silent unless it fails.
-#
-# It redirects the stdout and stderr to environment variables.
-# Equivalent to `exe::invoke5 true 0 '' '' "${@}"`
-#
-# - $1: **executable** _as string_:
-#       the executable or command
-# - $@: **arguments** _as any_:
-#       the command and its arguments
-#
-# Returns:
-#
-# - $?:The exit code of the executable.
-# - ${REPLY}: The content of stdout.
-# - ${REPLY2}: The content of stderr.
-#
-# ```bash
-# exe::invoke git add --all
-# ```
-#
-# > See exe::invokef5 for more information.
-function exe::invoke() {
-  exe::invoke5 true 0 '' '' "$@"
 }

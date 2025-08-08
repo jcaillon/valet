@@ -10,7 +10,6 @@ Returned variables:
 
 ```text
 REPLY='C:\Users\TEMP\file'
-REPLY2=''
 ```
 
 ❯ `windows::convertPathFromUnix /mnt/d/Users/username`

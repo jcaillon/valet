@@ -252,7 +252,19 @@ Including a user defined library.
 We sourced lib-stuff2 from extension1
 ```
 
-Including a script using relative path twice, expecting to be sourced once.
+Including the custom file next to the calling script, expecting to be sourced once.
+
+❯ `source resources/script2.sh`
+
+**Standard output**:
+
+```text
+We sourced my-lib.sh: 
+```
+
+❯ `source resources/script2.sh`
+
+Including a script using relative path twice, expecting to be sourced twice.
 
 ❯ `source resources/script1.sh my arguments 1 2 3`
 
@@ -264,7 +276,13 @@ We sourced script1.sh: my arguments 1 2 3
 
 ❯ `source resources/script1.sh my arguments 1 2 3`
 
-Including a script using an absolute path twice, expecting to be sourced once.
+**Standard output**:
+
+```text
+We sourced script1.sh: my arguments 1 2 3
+```
+
+Including a script using an absolute path twice, expecting to be sourced twice.
 
 ❯ `source $GLOBAL_INSTALLATION_DIRECTORY/script1.sh`
 
@@ -275,6 +293,12 @@ We sourced script1.sh:
 ```
 
 ❯ `source $GLOBAL_INSTALLATION_DIRECTORY/script1.sh`
+
+**Standard output**:
+
+```text
+We sourced script1.sh: 
+```
 
 Including non existing library.
 
@@ -302,17 +326,7 @@ stuff2
 
 Returning a different code if already included.
 
-❯ `_OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 source $GLOBAL_INSTALLATION_DIRECTORY/script1.sh`
+❯ `_OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 source stuff`
 
 Returned code: `2`
-
-❯ `core::resetIncludedFile $GLOBAL_INSTALLATION_DIRECTORY/script1.sh`
-
-❯ `_OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 source $GLOBAL_INSTALLATION_DIRECTORY/script1.sh`
-
-**Standard output**:
-
-```text
-We sourced script1.sh: 
-```
 

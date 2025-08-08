@@ -53,7 +53,7 @@ TRACE    Curl error output stream:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--curl-stderr
    1 ░ (curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-temp --code 500 https://fuu
    2 ░ 
-FAIL     The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝.
+FAIL     The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝ (acceptable codes are: 200).
 ```
 
 Getting a 500 error with fail mode off:
@@ -100,8 +100,8 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 **Error output**:
 
 ```text
-DEBUG    Executing the command ⌜curl⌝.
-DEBUG    The command ⌜curl⌝ ended with exit code ⌜0⌝ in ⌜10.000s⌝.
+DEBUG    Executing the command curl.
+DEBUG    The command curl ended with exit code 0 in 10.000s.
 DEBUG    The curl command for url ⌜https://fuu⌝ ended with exit code ⌜0⌝, the http return code was ⌜201⌝.
 DEBUG    The http return code ⌜201⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
 ```
@@ -161,7 +161,7 @@ TRACE    Curl error output stream:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--curl-stderr
    1 ░ (curl logs) mocking curl --silent --show-error --location --write-out %{response_code} --output /tmp/valet-work.f --code 500 https://fuu
    2 ░ 
-FAIL     The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝.
+FAIL     The http return code ⌜500⌝ is not acceptable for url ⌜https://fuu⌝ (acceptable codes are: 200).
 ```
 
 Getting 200 with no content and debug mode on:
@@ -180,8 +180,8 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 **Error output**:
 
 ```text
-DEBUG    Executing the command ⌜curl⌝.
-DEBUG    The command ⌜curl⌝ ended with exit code ⌜0⌝ in ⌜16.000s⌝.
+DEBUG    Executing the command curl.
+DEBUG    The command curl ended with exit code 0 in 16.000s.
 DEBUG    The curl command for url ⌜https://fuu⌝ ended with exit code ⌜0⌝, the http return code was ⌜200⌝.
 DEBUG    The http return code ⌜200⌝ is acceptable and exit code has been reset to 0 from ⌜0⌝.
 ```

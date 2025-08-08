@@ -62,6 +62,27 @@ For background tasks, always use the [coproc](../libraries/coproc) library which
 
 ## 🎨 Coding style
 
+TODO: copy some of the sections from <https://google.github.io/styleguide/shellguide.html>.
+
+### Naming conventions
+
+#### Files
+
+- All files should be named using kebab-case (lowercase with hyphens).
+- All scripts should have the `.sh` extension.
+
+#### Variables
+
+- Use camelCase for local variable names. **All variables should be created local to the function by default**.
+- Use upper SNAKE_CASE for global variables and constants.
+  - If the variable is meant to be used outside of the script file, it should be prefixed with `GLOBAL_`.
+  - Otherwise, it can be prefixed with `_${SCRIPT_NAME}_` where SCRIPT_NAME is the filename of the script. This is to avoid conflicts with other scripts.
+
+#### Functions
+
+- Use camelCase for function names.
+- For exposed functions (i.e. 'public' functions that are used outside of the script in which they are defined), prefix the function name with the script name. E.g. `myLib::functionName` (where this function is created in the file `my-lib.sh`).
+
 ### Library functions
 
 This section describes how to write **library** functions that can be used in Valet extensions. For functions that are solely use in one command, you don't have to stick to these strict rules, but it is still a good idea to follow them.

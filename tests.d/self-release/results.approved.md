@@ -45,8 +45,8 @@ INFO     The last tag is: v1.2.3.
 🙈 mocked curl::request https://api.github.com/repos/jcaillon/valet/releases/latest -H Accept: application/vnd.github.v3+json --- acceptableCodes=200
 INFO     The latest release on GitHub is: v1.2.3.
 🙈 mocked exe::invoke git rev-parse HEAD
-🙈 mocked exe::invokef5 false 0   git update-index --really-refresh
-🙈 mocked exe::invokef5 false 0   git diff-index --quiet HEAD
+🙈 mocked exe::invoke git update-index --really-refresh --- noFail=true
+🙈 mocked exe::invoke git diff-index --quiet HEAD --- noFail=true
 INFO     The current version of valet is: 1.2.3.
 🙈 mocked exe::invoke git log --pretty=format:%s v1.2.3..HEAD
 INFO     The tag message is:

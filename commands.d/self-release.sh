@@ -147,10 +147,9 @@ function selfRelease::createRelease() {
 
     # check that the git workarea is clean
     log::debug "Checking if the workarea is clean"
-    exe::invokef2 false git update-index --really-refresh 1>/dev/null || :
-    local -i exitCode=0
-    exe::invokef2 false git diff-index --quiet HEAD || exitCode=$?
-    if [[ exitCode -ne 0 ]]; then
+    exe::invoke git update-index --really-refresh --- noFail=true
+    exe::invoke git diff-index --quiet HEAD --- noFail=true
+    if [[ REPLY_CODE -ne 0 ]]; then
       core::fail "The workarea is not clean, please commit your changes before releasing a new version."
     fi
   fi

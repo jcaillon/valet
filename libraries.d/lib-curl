@@ -50,7 +50,6 @@ function curl::download() {
   shift 1
   core::parseShellParameters "${@}"
   eval "${REPLY}"
-
   # temp file if no path is specified
   if [[ -z ${output} ]]; then
     fs::createTempFile pathOnly=true
@@ -58,9 +57,9 @@ function curl::download() {
   fi
 
   # call curl
-  local -i exitCode=0
   local httpStatusCode errors
-  exe::invoke5 "false" "0" "false" "" "curl" "--silent" "--show-error" "--location" "--write-out" "%{response_code}" "--output" "${output}" "$@" "${url}" || exitCode=$?
+  exe::invoke curl --silent --show-error --location --write-out "%{response_code}" --output "${output}" "$@" "${url}" --- noFail=true
+  local -i exitCode="${REPLY_CODE}"
   httpStatusCode="${REPLY}"
   errors="${REPLY2}"
 
@@ -68,7 +67,8 @@ function curl::download() {
   # and for a bug in curl https://github.com/Homebrew/homebrew-core/issues/173294
   if [[ ${exitCode} != "0" && (${errors} == *"bad argument"* || ${errors} == *"is unknown"*) ]]; then
     log::debug "Trying to use curl without the many options."
-    exe::invoke5 "false" "0" "false" "" "curl" "--location" "-v" "--output" "${output}" "$@" || exitCode=$?
+    exe::invoke curl --location -v --output "${output}" "$@" --- noFail=true
+    exitCode="${REPLY_CODE}"
     if [[ ${REPLY}${REPLY2} =~ "< HTTP/"([0-9.]+)" "([0-9]+)" " ]]; then
       httpStatusCode="${BASH_REMATCH[2]}"
     else
@@ -90,7 +90,7 @@ function curl::download() {
       log::saveFileString errors suffix="curl-stderr"
       log::printFileString errors maxLines=99
     fi
-    local message="The http return code ⌜${httpStatusCode}⌝ is not acceptable for url ⌜${url}⌝."
+    local message="The http return code ⌜${httpStatusCode}⌝ is not acceptable for url ⌜${url}⌝ (acceptable codes are: ${acceptableCodes})."
     if [[ ${failOnError} == "true" ]]; then
       core::fail "${message}"
     fi

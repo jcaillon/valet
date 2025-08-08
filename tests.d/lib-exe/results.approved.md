@@ -1,6 +1,6 @@
 # Test suite lib-exe
 
-## Test script 00.tests
+## Test script 00.lib-exe
 
 For these tests, we will use a special command `fake` defined as such:
 
@@ -33,7 +33,7 @@ fake ()
 
 Normal invocation:
 
-❯ `exe::call fake`
+❯ `exe::invoke fake`
 
 Returned variables:
 
@@ -47,7 +47,7 @@ REPLY2='INFO: log line from fake mock to stderr
 
 Error, fails (exit):
 
-❯ `exe::call fake --error`
+❯ `exe::invoke fake --error`
 
 Exited with code: `1`
 
@@ -66,7 +66,7 @@ FAIL     The command fake ended with exit code 1 in 4.000s.
 
 Error but with no fail option:
 
-❯ `exe::call fake --error --- noFail=true`
+❯ `exe::invoke fake --error --- noFail=true`
 
 Returned variables:
 
@@ -81,7 +81,7 @@ ERROR: returning error from fake
 
 Input stream from string:
 
-❯ `exe::call fake --std-in --- noFail=true stdin=input_stream`
+❯ `exe::invoke fake --std-in --- noFail=true stdin=input_stream`
 
 Returned variables:
 
@@ -97,13 +97,16 @@ REPLY2='INFO: log line from fake mock to stderr
 
 Input stream from string with trace mode:
 
-❯ `exe::call fake --std-in --- noFail=true stdin=input_stream`
+❯ `exe::invoke fake --std-in --- noFail=true stdin=input_stream`
 
 **Error output**:
 
 ```text
 TRACE    Executing the command fake with arguments: 
 --std-in
+TRACE    The command will be executed as:
+"${executable}" "${@}" <<<"input_stream" 1>"/tmp/valet-stdout.f" 2>"/tmp/valet-stderr.f"
+TRACE    Options: noFail=true, acceptableCodes=0, replyPathOnly=false
 TRACE    Fake standard input from string:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdin
 TRACE    Fake standard output stream:
@@ -131,7 +134,7 @@ REPLY2='INFO: log line from fake mock to stderr
 
 Input stream for file:
 
-❯ `exe::call fake --std-in --- stdinFile=/tmp/valet-temp`
+❯ `exe::invoke fake --std-in --- stdinFile=/tmp/valet-temp`
 
 Returned variables:
 
@@ -146,7 +149,7 @@ REPLY2='INFO: log line from fake mock to stderr
 
 Make error 1 acceptable:
 
-❯ `exe::call fake --error --- acceptableCodes=1`
+❯ `exe::invoke fake --error --- acceptableCodes=1`
 
 Returned variables:
 
@@ -161,7 +164,7 @@ ERROR: returning error from fake
 
 Do not redirect the output:
 
-❯ `exe::call fake --- noRedirection=true`
+❯ `exe::invoke fake --- noRedirection=true`
 
 **Standard output**:
 
@@ -185,7 +188,7 @@ REPLY2=''
 
 Return the paths instead of content:
 
-❯ `exe::call fake --- noRead=true`
+❯ `exe::invoke fake --- replyPathOnly=true`
 
 Returned variables:
 
@@ -197,7 +200,7 @@ REPLY2='/tmp/valet-stderr.f'
 
 Use custom files:
 
-❯ `exe::call fake --- noRead=true stderrPath=/tmp/valet.d/f1-2 stdoutPath=/tmp/valet-temp`
+❯ `exe::invoke fake --- replyPathOnly=true stderrPath=/tmp/valet.d/f1-2 stdoutPath=/tmp/valet-temp`
 
 Returned variables:
 
@@ -214,5 +217,37 @@ REPLY2='/tmp/valet.d/f1-2'
 ```text
 🙈 mocking fake 
 
+```
+
+Append output:
+
+❯ `exe::invoke fake --- appendRedirect=true stdoutPath=/tmp/valet-temp`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY='🙈 mocking fake 
+🙈 mocking fake 
+'
+REPLY2='INFO: log line from fake mock to stderr
+INFO: log line from fake mock to stderr
+'
+```
+
+Group redirects:
+
+❯ `exe::invoke fake --- groupRedirect=true stdoutPath=/tmp/valet-temp`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY='🙈 mocking fake 
+INFO: log line from fake mock to stderr
+'
+REPLY2='🙈 mocking fake 
+INFO: log line from fake mock to stderr
+'
 ```
 

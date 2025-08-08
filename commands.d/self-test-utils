@@ -306,10 +306,11 @@ function selfTestUtils_onTestError() {
 # setup extra functions that will allow us to capture the stack trace on exit or error in the test script
 function selfTestUtils_onTestExit() {
   if [[ ! -s ${GLOBAL_TEST_STACK_FILE} ]]; then
-    GLOBAL_LAST_BASH_COMMAND="${BASH_COMMAND:-}"
+    # do not remember the last command, as it is not useful in case of an exit
+    # (it will be builtin source "${testScript}")
     GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
     GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
     GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
-    declare -p GLOBAL_LAST_BASH_COMMAND GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
+    declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
   fi
 }

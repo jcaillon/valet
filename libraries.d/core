@@ -187,6 +187,9 @@ function source() {
     if [[ -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${pathOrName}" ]]; then
       builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${pathOrName}" "$@"
       sourcedFiles+=1
+    elif [[ -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${pathOrName}.sh" ]]; then
+      builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/lib-${pathOrName}.sh" "$@"
+      sourcedFiles+=1
     fi
 
     # source the lib from user libs
@@ -195,6 +198,9 @@ function source() {
       for libraryDirectory in "${CMD_LIBRARY_DIRECTORIES[@]}"; do
         if [[ -f "${libraryDirectory}/lib-${pathOrName}" ]]; then
           builtin source "${libraryDirectory}/lib-${pathOrName}" "$@"
+          sourcedFiles+=1
+        elif [[ -f "${libraryDirectory}/lib-${pathOrName}.sh" ]]; then
+          builtin source "${libraryDirectory}/lib-${pathOrName}.sh" "$@"
           sourcedFiles+=1
         fi
       done
@@ -207,14 +213,15 @@ function source() {
     fi
   fi
 
-  # quick check if the file is already included
-  if [[ ${_CORE_INCLUDED_FILES:-} == *$'\n'"${pathOrName}"$'\n'* ]]; then
-    return "${returnCodeIfAlreadyIncluded}"
-  fi
-
   # source a file next to the file that calls this function
   if [[ -n ${BASH_SOURCE[1]:-} && -f "${BASH_SOURCE[1]%/*}/${pathOrName}" ]]; then
     pathOrName="${BASH_SOURCE[1]%/*}/${pathOrName}"
+
+    # check if the file is already included
+    if [[ ${_CORE_INCLUDED_FILES:-} == *$'\n'"${pathOrName}"$'\n'* ]]; then
+      return "${returnCodeIfAlreadyIncluded}"
+    fi
+
     builtin source "${pathOrName}" "$@"
     _CORE_INCLUDED_FILES="${_CORE_INCLUDED_FILES:-}"$'\n'"${pathOrName}"$'\n'
     return 0
@@ -223,7 +230,8 @@ function source() {
   # source a file with an absolute path or in the current directory
   if [[ -f "${pathOrName}" ]]; then
     builtin source "${pathOrName}" "$@"
-    _CORE_INCLUDED_FILES="${_CORE_INCLUDED_FILES:-}"$'\n'"${pathOrName}"$'\n'
+    # in that case we do not add the file to the included files because we are on the
+    # default builtin source command behavior
     return 0
   fi
 

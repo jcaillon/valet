@@ -105,12 +105,17 @@ function test_source() {
   test::exec source stuff2
   test::flush
 
-  test::markdown "Including a script using relative path twice, expecting to be sourced once."
+  test::markdown "Including the custom file next to the calling script, expecting to be sourced once."
+  test::exec source resources/script2.sh
+  test::exec source resources/script2.sh
+  test::flush
+
+  test::markdown "Including a script using relative path twice, expecting to be sourced twice."
   test::exec source resources/script1.sh my arguments 1 2 3
   test::exec source resources/script1.sh my arguments 1 2 3
   test::flush
 
-  test::markdown "Including a script using an absolute path twice, expecting to be sourced once."
+  test::markdown "Including a script using an absolute path twice, expecting to be sourced twice."
   test::exec source "${PWD}/resources/script1.sh"
   test::exec source "${PWD}/resources/script1.sh"
   test::flush
@@ -123,9 +128,7 @@ function test_source() {
   test::printVars _CORE_INCLUDED_LIBRARIES
 
   test::markdown "Returning a different code if already included."
-  test::exec _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 source "${PWD}/resources/script1.sh"
-  test::exec core::resetIncludedFile "${PWD}/resources/script1.sh"
-  test::exec _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 source "${PWD}/resources/script1.sh"
+  test::exec _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 source stuff
 
 }
 
