@@ -8,7 +8,7 @@ In this page, you will find instructions on how to report issues, suggest new fe
 
 Please follow this simple rule to help us eliminate any unnecessary wasted effort & frustration, and ensure an efficient and effective use of everyone's time - yours, ours, and other community members':
 
-> 👉 If you have a question, think you've discovered an issue, would like to propose a new feature, etc., then find/file an issue **BEFORE** starting work to fix/implement it.
+> 👉 If you have a question, think you've discovered an issue, would like to propose a new feature, etc., then find/file an issue or open a discussion **BEFORE** starting work to fix/implement it.
 
 ### Search existing issues first
 
@@ -44,9 +44,20 @@ The more information you provide, the more likely your issue/ask will be underst
 
 ## Development
 
+### Read the project best practices
+
+Changes that do not comply to the existing coding style and best practices will not be accepted.
+
+Please carefully read these pages before starting to work on a feature or a fix:
+
+- [Work on bash scripts](https://jcaillon.github.io/valet/docs/work-on-bash-scripts/).
+- [Writing performant scripts](https://jcaillon.github.io/valet/docs/performance-tips/).
+- [Bash best practices](https://jcaillon.github.io/valet/docs/bash-best-practices/).
+- [How Valet works](https://jcaillon.github.io/valet/docs/valet-internals/).
+
 ### Fork, Clone, Branch and Create your PR
 
-Once you've discussed your proposed feature/fix/etc. with a team member, and you've agreed an approach, it's time to start development:
+Once you've discussed your proposed feature/fix/etc. and we agreed on an approach, it's time to start the development:
 
 1. Fork the repo if you haven't already
 2. Clone your fork locally
@@ -54,9 +65,6 @@ Once you've discussed your proposed feature/fix/etc. with a team member, and you
 4. Create a [Draft Pull Request (PR)](https://github.blog/2019-02-14-introducing-draft-pull-requests/)
 5. Work on your changes
 6. Build and see if it works.
-
-> [!IMPORTANT]
-> Please check [docs/working-on-bash-scripts.md](docs/working-on-bash-scripts.md) to learn more about working on bash scripts and create performant scripts.
 
 ### Testing
 
@@ -70,12 +78,18 @@ Any new feature that you implement should be accompanied with a test suite.
 In any cases, you must then run all the tests to make sure nothing broke:
 
 ```bash
-valet self test --auto-approve --core-only
+valet self test --core-only
+```
+
+If all the changes look legit, then approve them:
+
+```bash
+valet self test --core-only --auto-approve
 ```
 
 ### Code Review
 
-When you'd like the team to take a look, (even if the work is not yet fully-complete), mark the PR as 'Ready For Review' so that the team can review your work and provide comments, suggestions, and request changes. It may take several cycles, but the end result will be solid, testable, conformant code that is safe for us to merge.
+When you'd like me to take a look, (even if the work is not yet fully-complete), mark the PR as 'Ready For Review' so that I can review your work and provide comments, suggestions, and request changes. It may take several cycles, but the end result will be solid, testable, conformant code that is safe for us to merge.
 
 ### Merge
 

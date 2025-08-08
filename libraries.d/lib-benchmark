@@ -44,7 +44,7 @@ function benchmark::run() {
     maxRuns=-1 \
     IFS=$' '
   shift 1
-  core::parseShellParameters "${@}"
+  core::parseFunctionOptions "${@}"
   eval "${REPLY}"
 
   # check functions

@@ -174,9 +174,9 @@ EXIT     Explicit exit with code 1, stack:
 ╰─ in myCmd::function() at /path/to/function.sh:300
 ```
 
-### ✅ Test core::parseShellParameters
+### ✅ Test core::parseFunctionOptions
 
-❯ `core::parseShellParameters ---`
+❯ `core::parseFunctionOptions ---`
 
 Returned variables:
 
@@ -184,7 +184,7 @@ Returned variables:
 REPLY='set -- "${@:1:0}"'
 ```
 
-❯ `core::parseShellParameters arg1 arg2 arg3`
+❯ `core::parseFunctionOptions arg1 arg2 arg3`
 
 Returned variables:
 
@@ -192,7 +192,7 @@ Returned variables:
 REPLY=':'
 ```
 
-❯ `core::parseShellParameters arg1 arg2 arg3 ---`
+❯ `core::parseFunctionOptions arg1 arg2 arg3 ---`
 
 Returned variables:
 
@@ -200,7 +200,7 @@ Returned variables:
 REPLY='set -- "${@:1:3}"'
 ```
 
-❯ `core::parseShellParameters arg1 arg2 arg3 --- myOption=one`
+❯ `core::parseFunctionOptions arg1 arg2 arg3 --- myOption=one`
 
 Returned variables:
 
@@ -208,7 +208,7 @@ Returned variables:
 REPLY='local '"'"'myOption=one'"'"'; set -- "${@:1:3}"'
 ```
 
-❯ `core::parseShellParameters arg1 arg2 --- myOption=one myOption2=my\ value`
+❯ `core::parseFunctionOptions arg1 arg2 --- myOption=one myOption2=my\ value`
 
 Returned variables:
 

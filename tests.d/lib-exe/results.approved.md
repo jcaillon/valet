@@ -105,7 +105,7 @@ Input stream from string with trace mode:
 TRACE    Executing the command fake with arguments: 
 --std-in
 TRACE    The command will be executed as:
-"${executable}" "${@}" <<<"input_stream" 1>"/tmp/valet-stdout.f" 2>"/tmp/valet-stderr.f"
+"${executable}" "${@}" <<<'input_stream' 1>"/tmp/valet-stdout.f" 2>"/tmp/valet-stderr.f"
 TRACE    Options: noFail=true, acceptableCodes=0, replyPathOnly=false
 TRACE    Fake standard input from string:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdin

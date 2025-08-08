@@ -62,7 +62,7 @@ function functionWithInfiniteArgs() {
     myOption="1" \
     myOption2="2"
   shift 2
-  core::parseShellParameters "${@}"
+  core::parseFunctionOptions "${@}"
   eval "${REPLY}"
 
   echo "${REPLY}"

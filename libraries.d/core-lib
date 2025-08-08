@@ -609,7 +609,7 @@ function log::getCallStack() {
     fi
     sourceFile="${stackSourceFiles[${idx}]}"
     if [[ -z ${sourceFile} ]]; then
-      sourceFile=non_file_source
+      sourceFile=ROOT
     fi
     sourceFile="${sourceFile#"./"}"
     sourceFile="${sourceFile#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"}"
@@ -1032,7 +1032,7 @@ function log::parseLogPattern() {
       ;;
     function)
       printfFormat="%${formatSpecifier:-"-10s"}"
-      log_setPrintfArgumentFromFormat "FUNCNAME[2]"
+      log_setPrintfArgumentFromFormat "FUNCNAME[1]"
       ;;
     line)
       printfFormat="%${formatSpecifier:-"-4s"}"
@@ -1040,11 +1040,11 @@ function log::parseLogPattern() {
       ;;
     source)
       printfFormat="%${formatSpecifier:-"-10s"}"
-      log_setPrintfArgumentFromFormat "BASH_SOURCE[2]"
+      log_setPrintfArgumentFromFormat "BASH_SOURCE[1]"
       ;;
     sourceFile)
       printfFormat="%${formatSpecifier:-"-10s"}"
-      REPLY4+=$'\n'"local sourceFile=\"\${BASH_SOURCE[2]##*/}\""
+      REPLY4+=$'\n'"local sourceFile=\"\${BASH_SOURCE[1]##*/}\""
       log_setPrintfArgumentFromFormat "sourceFile"
       ;;
     elapsedTime)

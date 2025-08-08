@@ -8,7 +8,7 @@
 # >>> Core utilities
 #===============================================================
 
-# ## core::parseShellParameters
+# ## core::parseFunctionOptions
 #
 # Parses the shell parameters passed as arguments and sets the REPLY variable to a string that can be
 # evaluated to set the local variables required in the calling function.
@@ -24,11 +24,11 @@
 # - ${REPLY}: The string to evaluate to set the local variables.
 #
 # ```bash
-# core::parseShellParameters 1 2 3 --- myOption=one
+# core::parseFunctionOptions 1 2 3 --- myOption=one
 # eval "${REPLY}"
 # # REPLY will be: local myOption="one"; set -- "${@:1:3}"
 # ```
-function core::parseShellParameters() {
+function core::parseFunctionOptions() {
   local param
   local -i nb=0
   for param; do

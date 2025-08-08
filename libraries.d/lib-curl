@@ -48,7 +48,7 @@ function curl::download() {
     failOnError=false \
     acceptableCodes="200,201,202,204,301,304,308"
   shift 1
-  core::parseShellParameters "${@}"
+  core::parseFunctionOptions "${@}"
   eval "${REPLY}"
   # temp file if no path is specified
   if [[ -z ${output} ]]; then
@@ -142,7 +142,7 @@ function curl::request() {
     failOnError=false \
     acceptableCodes="200,201,202,204,301,304,308"
   shift 1
-  core::parseShellParameters "${@}"
+  core::parseFunctionOptions "${@}"
   eval "${REPLY}"
 
   # reset the temporary file, only if needed

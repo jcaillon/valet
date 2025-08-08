@@ -33,7 +33,7 @@ function _LIBRARY_NAME_::myFunction() {
   local \
     arg1="${1}" \
     myOption=false
-  core::parseShellParameters "${@}"
+  core::parseFunctionOptions "${@}"
   eval "${REPLY}"
   shift 1
   echo "arg1: ${arg1}, myOption: ${myOption}, remaining args: '${*}'"

@@ -18,7 +18,7 @@ Your custom extensions can then easily be shared and installed by others in a si
 
 ## ✨ What makes Valet different?
 
-First of all, Valet is a **pure bash** framework. If you want to write bash script, chances are that you already have bash installed: and that is all you will need.
+First of all, Valet is a **pure bash**[^1] framework. If you want to write bash script, chances are that you already have bash installed: and that is all you will need.
 
 It works on **any environment with bash** and plays very well with **Git bash for Windows**.
 
@@ -30,3 +30,5 @@ It is made for providing an awesome user experience in interactive mode, but it 
   {{< card icon="sparkles" link="../../showcase" title="Showcase" subtitle="Not convinced yet? Check out the feature showcase." >}}
   {{< card icon="arrow-circle-right" link="../installation" title="Install Valet" subtitle="Install Valet and start coding!" >}}
 {{< /cards >}}
+
+[^1]: Technically, Valet must rely on external programs _when there is no pure bash solution available_ (e.g. we cannot delete a file in pure bash). But it is designed to be as portable as possible and to work on any environment with bash and coreutils installed.

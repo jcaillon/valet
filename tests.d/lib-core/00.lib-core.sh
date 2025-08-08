@@ -8,7 +8,7 @@ function main() {
   test_core::getSpecialPaths
   test_core::fail
   test_core::exit
-  test_core::parseShellParameters
+  test_core::parseFunctionOptions
   test_source
 }
 
@@ -74,14 +74,14 @@ function test_core::exit() {
   test::unsetTestCallStack
 }
 
-function test_core::parseShellParameters() {
-  test::title "✅ Test core::parseShellParameters"
+function test_core::parseFunctionOptions() {
+  test::title "✅ Test core::parseFunctionOptions"
 
-  test::func core::parseShellParameters ---
-  test::func core::parseShellParameters "arg1" "arg2" "arg3"
-  test::func core::parseShellParameters "arg1" "arg2" "arg3" ---
-  test::func core::parseShellParameters "arg1" "arg2" "arg3" --- myOption=one
-  test::func core::parseShellParameters "arg1" "arg2" --- myOption=one myOption2="my value"
+  test::func core::parseFunctionOptions ---
+  test::func core::parseFunctionOptions "arg1" "arg2" "arg3"
+  test::func core::parseFunctionOptions "arg1" "arg2" "arg3" ---
+  test::func core::parseFunctionOptions "arg1" "arg2" "arg3" --- myOption=one
+  test::func core::parseFunctionOptions "arg1" "arg2" --- myOption=one myOption2="my value"
 }
 
 function test_source() {

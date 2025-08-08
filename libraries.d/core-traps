@@ -80,7 +80,7 @@ function trap::onErrorInternal() {
     if [[ ${REPLY} == *'eval "local a= ${*@Q}"'* ]]; then
       optionsErrorWithoutSeparator=true
       helpMessage="All options must be passed with the syntax ⌜option=value⌝, i.e.:"$'\n'"░ ${FUNCNAME[1]} <mandatory arguments> option1=value1 option2=value2"
-    elif [[ ${REPLY} == *'core::parseShellParameters'* ]]; then
+    elif [[ ${REPLY} == *'core::parseFunctionOptions'* ]]; then
       optionsErrorWithSeparator=true
       helpMessage="All options must be passed with the syntax ⌜option=value⌝ after a ⌜---⌝ separator, i.e.:"$'\n'"░ ${FUNCNAME[1]} <mandatory arguments> --- option1=value1 option2=value2"
     fi

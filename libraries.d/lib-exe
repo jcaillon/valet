@@ -4,6 +4,8 @@
 
 # shellcheck source=lib-fs
 source fs
+# shellcheck source=lib-time
+source time
 
 # ## exe::invoke
 #
@@ -102,7 +104,7 @@ function exe::invoke() {
     groupRedirect=false \
     noRedirection=false
   shift 1
-  core::parseShellParameters "${@}"
+  core::parseFunctionOptions "${@}"
   eval "${REPLY}"
 
   # compute the necessary redirects
@@ -111,9 +113,9 @@ function exe::invoke() {
     toEval='"${executable}" "${@}"' \
     redirectExtraSymbol=""
   if [[ -n ${stdin} ]]; then
-    toEval+=" <<<\"${stdin}\""
+    toEval+=" <<<${stdin@Q}"
   elif [[ -n ${stdinFile} ]]; then
-    toEval+=" <\"${stdinFile}\""
+    toEval+=" <${stdinFile@Q}"
   fi
   if [[ ${appendRedirect} == "true" ]]; then
     redirectExtraSymbol=">"
