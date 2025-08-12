@@ -40,7 +40,6 @@ function regex::getFirstGroup() {
 #
 # - $1: **string variable name** _as string_:
 #       The variable name containing the string in which to do replacements.
-#       Replacement is done in place.
 # - $2: **regex** _as string_:
 #       The regex to use for the match.
 # - $3: **replacement string** _as string_:

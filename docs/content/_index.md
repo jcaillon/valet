@@ -9,6 +9,7 @@ keywords:
   - search
   - string
   - cli
+  - tui
   - alternative
   - parser
   - library
@@ -22,6 +23,8 @@ keywords:
   - bash-scripting
   - pure-bash
   - gum
+  - bash-ti
+  - bashly
   - options-parser
   - jcaillon
   - framework
@@ -29,9 +32,13 @@ description: With Valet, you can setup and execute tests, code interactive exper
 ---
 
 <style>
+footer {
+  display: none;
+}
+
 /* https://patterncraft.fun/ */
 body {
-  background: radial-gradient(125% 125% at 50% 90%, rgb(255, 255, 255) 40%, rgb(181, 146, 247) 100%);
+  background: radial-gradient(125% 125% at 50% 90%, #ffffff 40%, #10b981 100%);
 }
 
 body:is(html[class~="dark"] *) {

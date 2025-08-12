@@ -1,9 +1,37 @@
+:root {
+  --primary-hue: 96deg;
+  --primary-saturation: 100%;
+  --primary-lightness: 30%;
+  --tw-text-opacity: 1;
+}
+.dark {
+  --primary-hue: 321deg;
+  --primary-saturation: 100%;
+  --primary-lightness: 83%;
+}
+
 .hx-max-w-6xl {
   max-width: 92rem;
 }
 
 .hx-max-w-\[90rem\] {
   max-width: 120rem;
+}
+
+strong {
+  background: linear-gradient(to left, #017c1b, #03a810);
+    background-clip: border-box;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+strong:is(html[class~="dark"] *) {
+  background: linear-gradient(to left, #fbb3ff, #ee66bf);
+    background-clip: border-box;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .hextra-custom-footer {
@@ -15,6 +43,14 @@
   padding-bottom: 0.5rem;
   padding-left: 1rem;
   padding-right: 1rem;
+}
+
+.gradient-text {
+  background: linear-gradient(to left, #fbb3ff, #ee66bf);
+    background-clip: border-box;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 hr {

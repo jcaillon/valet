@@ -15,8 +15,6 @@ description: Learn how to install Valet on your system.
   
 Other external programs can be used if found but are not required[^exhaustive-programs-list].
 
-
-
 ## 🚚 Automated installation
 
 Run the following command to install Valet:
@@ -57,7 +55,7 @@ Finally, call `valet` to get started with the example commands!
 
 ## 🪟 Use Valet on windows
 
-It is recommended to use Git bash, installed with [Git for Windows][git-for-windows-link] and [Windows terminal][windows-terminal-link] as your terminal program. You can also use Valet with any Linux distribution and [Windows Subsystem for Linux][wsl-installation-link] (WSL).
+It is recommended to use Git bash, installed with [Git for Windows][git-for-windows-link] (or [msys2][msys2Link]) and [Windows terminal][windows-terminal-link] as your terminal program. You can also use Valet with any Linux distribution and [Windows Subsystem for Linux][wsl-installation-link] (WSL).
 
 ## 🐋 Run Valet in a container
 
@@ -89,4 +87,6 @@ Alternatively, use `docker run --rm -it noyacode/valet` to pull and run the imag
 [podman]: https://podman.io/
 [valetImageTagsLink]: https://github.com/jcaillon/valet/pkgs/container/valet
 [nerdFontsLink]: https://www.nerdfonts.com/font-downloads
+[msys2Link]: https://www.msys2.org/
+
 [^exhaustive-programs-list]: Other external programs that can be used by Valet if present: `delta`, `diff`, `git`, `cmp`, `readlink`, `ls`, `lsof`, `ps`, `fzf`, `grep`, `cygpath`.

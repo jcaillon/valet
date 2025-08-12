@@ -236,6 +236,9 @@ function selfDocument::convertFunctionDocumentationToMarkdown() {
     elif [[ "${line}" == '```bash'* ]]; then
       # example
       REPLY+="Example usage:"$'\n'$'\n'"${line}"$'\n'
+    elif [[ "${line}" == '## '* ]]; then
+      # function name
+      REPLY+="## ⚡ ${line#"## "}"$'\n'
     else
       REPLY+="${line}"$'\n'
     fi

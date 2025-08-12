@@ -27,7 +27,7 @@ INFO     The commands documentation has been generated in ⌜/tmp/valet.d/d1-2/v
 
 > Documentation generated for the version 1.2.3 (1987-05-25).
 
-## array::appendIfNotPresent
+## ⚡ array::appendIfNotPresent
 
 Add a value to an array if it is not already present.
 Works for normal and associative arrays.
@@ -121,7 +121,7 @@ echo "${REPLY}"
 Returned variables:
 
 ```text
-REPLY='## exe::invoke
+REPLY='## ⚡ exe::invoke
 
 This function call an executable with its optional arguments.
 
