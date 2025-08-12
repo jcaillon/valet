@@ -21,7 +21,8 @@
 #       - $3 the percentage of coprocs already completed
 #       - $4 the path of the file containing the accumulated logs of the coproc
 #       If the function sets REPLY to 1, the script will exit early. Otherwise it should set REPLY to 0.
-#       (defaults to "" which does nothing)
+#       Set to an empty string to not call any callback function.
+#       (defaults to "")
 # - ${redirectLogs} _as bool_:
 #       (optional) Redirect the logs of the coproc instead of printing them in the current file descriptor.
 #       The accumulated logs of the coproc will be available in the completed callback function.
@@ -172,11 +173,13 @@ function coproc::runInParallel() {
 # - ${initCommand} _as string_:
 #       (optional) The command (will be evaluated) to run at the start of the coproc.
 #       Can exit to stop the coproc.
-#       (defaults to ":" which does nothing)
+#       Set to ":" to do nothing.
+#       (defaults to ":")
 # - ${loopCommand} _as string_:
 #       (optional) The command (will be evaluated) to run in the coproc loop.
 #       Can exit to stop the coproc, can break or continue the loop.
-#      (defaults to ":" which does nothing)
+#       Set to ":" to do nothing.
+#       (defaults to ":")
 # - ${onMessageCommand} _as string_:
 #       (optional) The command (will be evaluated) to run in the coproc loop when a message
 #       is received from the main thread.
@@ -185,10 +188,12 @@ function coproc::runInParallel() {
 #       The command can send messages to the main thread using the syntax
 #       printf "%s\0" "message"
 #       Can exit to stop the coproc, can break or continue the loop.
-#       (defaults to "" which does nothing)
+#       Set to an empty string to not run any command on message.
+#       (defaults to "")
 # - ${endCommand} _as string_:
 #       (optional) The command (will be evaluated) to run at the end of the coproc.
-#       (defaults to ":" which does nothing)
+#       Set to ":" to do nothing.
+#       (defaults to ":")
 # - ${waitForReadiness} _as bool_:
 #       (optional) If true, the main thread will wait for the coproc to be ready
 #       before returning from this function (readiness is achieved after executing

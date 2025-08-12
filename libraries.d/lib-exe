@@ -25,39 +25,39 @@ source time
 # - ${noFail} _as bool_:
 #       (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.
 #       If true and the execution fails, the script will exit.
-#       (default to false)
+#       (defaults to false)
 # - ${replyPathOnly} _as bool_:
 #       (optional) If set to true, the function will return the file path of the stdout and stderr files
 #       instead of their content. This will make the function faster.
-#       (default to false)
+#       (defaults to false)
 # - ${stdoutPath} _as string_:
 #       (optional) The file path to use for the stdout of the executable. Otherwise a temporary work file will be used.
-#       (default to "")
+#       (defaults to "")
 # - ${stderrPath} _as string_:
 #       (optional) The file path to use for the stderr of the executable. Otherwise a temporary work file will be used.
-#       (default to "")
+#       (defaults to "")
 # - ${stdinFile} _as bool_:
 #       (optional) The file path to use as stdin for the executable.
-#       (default to empty, which means no stdin is used)
+#       (defaults to "")
 # - ${stdin} _as string_:
 #       (optional) The stdin content to pass to the executable.
 #       Can be empty if not used.
-#       (default to empty, which means no stdin is used)
+#       (defaults to "")
 # - ${acceptableCodes} _as string_:
 #       (optional) The acceptable error codes, comma separated.
 #       If the error code is matched, then REPLY_CODE is set to 0)
-#       (default to 0)
+#       (defaults to 0)
 # - ${appendRedirect} _as bool_:
 #       (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).
 #       This is useful when you want to run the same command multiple times and keep the previous output.
 #       The stderr and stdout REPLY variables will both have the same content.
-#       (default to false)
+#       (defaults to false)
 # - ${groupRedirect} _as bool_:
 #       (optional) If true will output stdout/stderr to the same file (&> redirect).
-#       (default to false)
+#       (defaults to false)
 # - ${noRedirection} _as bool_:
 #       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.
-#       (default to false)
+#       (defaults to false)
 #
 # Returns:
 #

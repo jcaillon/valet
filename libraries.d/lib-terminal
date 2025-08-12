@@ -254,10 +254,10 @@ function terminal::restoreInterruptTrap() {
 #       (defaults to 1)
 # - ${width} _as int_:
 #       (optional) the width of the box
-#       (defaults to GLOBAL_COLUMNS)
+#       (defaults to "${GLOBAL_COLUMNS}")
 # - ${height} _as int_:
 #       (optional) the height of the box
-#       (defaults to GLOBAL_LINES)
+#       (defaults to "${GLOBAL_LINES}")
 #
 # ```bash
 # terminal::getCursorPosition
@@ -295,15 +295,20 @@ function terminal::clearBox() {
 #   Otherwise it can use the current position line.
 #
 # - ${top} _as int_:
-#       the current line of the cursor (1 based)
+#       (optional) the current line of the cursor (1 based)
+#       (defaults to 1)
 # - ${left} _as int_:
-#       the current column of the cursor (1 based)
+#       (optional) the current column of the cursor (1 based)
+#       (defaults to 1)
 # - ${desiredHeight} _as int_:
-#       the desired height of the box
+#       (optional) the desired height of the box
+#       (defaults to "${GLOBAL_LINES}")
 # - ${desiredWidth} _as int_:
-#       the desired width of the box
+#       (optional) the desired width of the box
+#       (defaults to "${GLOBAL_COLUMNS}")
 # - ${maxHeight} _as int_:
-#       the maximum height of the box
+#       (optional) the maximum height of the box
+#       (defaults to "${GLOBAL_LINES}")
 # - ${forceBelow} _as bool_:
 #       (optional) force the box to be below the current position
 #       (defaults to false)
@@ -312,10 +317,10 @@ function terminal::clearBox() {
 #       (defaults to true)
 # - ${terminalHeight} _as int_:
 #       (optional) the height of the terminal
-#       (defaults to GLOBAL_LINES)
+#       (defaults to "${GLOBAL_LINES}")
 # - ${terminalWidth} _as int_:
 #       (optional) the width of the terminal
-#       (defaults to GLOBAL_COLUMNS)
+#       (defaults to "${GLOBAL_COLUMNS}")
 #
 # Returns:
 #

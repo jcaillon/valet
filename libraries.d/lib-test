@@ -444,7 +444,7 @@ function test::flush() {
 #
 # - ${blockTitle} _as string_:
 #       (optional) Add a 'title' to the code block (`**title**:` before the code block).
-#       (defaults to '' which will not add a title)
+#       (defaults to "")
 #
 # ```bash
 # test::flushStdout
@@ -464,7 +464,7 @@ function test::flushStdout() {
 #
 # - ${blockTitle} _as string_:
 #       (optional) Add a 'title' to the code block (`**title**:` before the code block).
-#       (defaults to '' which will not add a title)
+#       (defaults to "")
 #
 # ```bash
 # test::flushStderr

@@ -49,11 +49,12 @@ function regex::getFirstGroup() {
 #       Use \c to refer to replacement counter.
 # - ${max} _as int_:
 #       (optional) The number of replacements to do.
-#       (default to -1, which is unlimited)
+#       Set to -1 for unlimited replacements.
+#       (defaults to -1)
 # - ${onlyMatches} _as bool_:
 #       (optional) Instead of replacing with the regex, we keep only the matches.
 #       This can be used to extract information from a string.
-#       (default to false)
+#       (defaults to false)
 #
 # Returns:
 #
@@ -136,12 +137,16 @@ function regex::replace() {
 #       The regex to use for the match.
 # - ${replacement} _as string_:
 #       (optional) The replacement string to use on each match.
-#       Use \x to refer to the x-th capture group.
-#       Use \c to refer to replacement counter.
-#       (default to "", which means no changes will be done on the matches)
+#
+#       - Use \x to refer to the x-th capture group.
+#       - Use \c to refer to replacement counter.
+#
+#       Set to an empty string to keep the matches as they are.
+#       (defaults to "")
 # - ${max} _as int_:
 #       (optional) The number of matches to return.
-#       (default to -1, which is unlimited)
+#       Set to -1 for unlimited replacements.
+#       (defaults to -1)
 #
 # Returns:
 #

@@ -22,24 +22,30 @@ source terminal
 #
 # - $1{template} _as string_:
 #       (optional) The template to display. The template can contain the following placeholders:
+#
 #       - `<spinner>`: the spinner animation
 #       - `<percent>`: the percentage of the progress bar
 #       - `<bar>`: the progress bar
 #       - `<message>`: the message to display
 #       - #TODO: add `<cGradient>` and `<cDefault>`: colors the bar with a gradient (if colors enabled)
-#       (defaults to VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE or "<spinner> <percent> ░<bar>░ <message>")
+#
+#       The default template is defined by the environment variable `VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE`.
+#       (defaults to "<spinner> <percent> ░<bar>░ <message>")
 # - ${size} _as int_:
 #       (optional) The maximum width of the progress bar.
-#       (defaults to VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE or 20)
+#       The default size is defined by the environment variable `VALET_CONFIG_PROGRESS_BAR_DEFAULT_SIZE`.
+#       (defaults to 20)
 # - ${frameDelay} _as int_:
 #       (optional) The time in milliseconds between each frame of the spinner.
-#       (defaults to VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY or 200)
+#       The default frame delay is defined by the environment variable `VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY`.
+#       (defaults to 200)
 # - ${maxFrames} _as int_:
 #       (optional) The maximum number of frames to display.
 #       (defaults to 9223372036854775807)
 # - ${spinnerFrames} _as string_:
 #       (optional) The spinner to display (each character is a frame).
 #       Examples:
+#
 #       - ◐◓◑◒
 #       - ▖▘▝▗
 #       - ⣾⣽⣻⢿⡿⣟⣯⣷
@@ -47,7 +53,9 @@ source terminal
 #       - ◡⊙◠
 #       - ▌▀▐▄
 #       - ⠄⠆⠇⠋⠙⠸⠰⠠⠰⠸⠙⠋⠇⠆
-#       (defaults to VALET_CONFIG_SPINNER_CHARACTERS or "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+#
+#       The default spinner is defined by the environment variable `VALET_CONFIG_SPINNER_CHARACTERS`.
+#       (defaults to "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
 # - ${percentage} _as int_:
 #       (optional) The default percentage to start with.
 #       (defaults to 0)

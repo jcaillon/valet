@@ -26,21 +26,22 @@ source time
 #       the name of the function to use as baseline
 # - $@: functions _as string_:
 #       The names of the functions to benchmark, comma separated.
-# - ${baselineTime} _as int_:
+# - ${baselineTimeInSeconds} _as int_:
 #       (optional) The time in seconds for which to run the baseline.
-#       (defaults to 3s)
+#       (defaults to 3)
 # - ${maxRuns} _as int_:
 #       (optional) The maximum number of runs to do for each function.
-#       (defaults to -1 which means no limit)
+#       Set to -1 to run until the baseline time is reached.
+#       (defaults to -1)
 #
 # ```bash
 # benchmark::run baseline function1 function2
-# benchmark::run baseline function1 function2 --- baselineTime=5 maxRuns=100
+# benchmark::run baseline function1 function2 --- baselineTimeInSeconds=5 maxRuns=100
 # ```
 function benchmark::run() {
   local \
     baseline="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
-    baselineTime=3 \
+    baselineTimeInSeconds=3 \
     maxRuns=-1 \
     IFS=$' '
   shift 1
@@ -69,7 +70,7 @@ function benchmark::run() {
   local -A functionsElapsed
 
   # Run the baseline
-  progress::start template="<spinner> Running the baseline ⌜${baseline}⌝ for ⌜${baselineTime}s⌝."
+  progress::start template="<spinner> Running the baseline ⌜${baseline}⌝ for ⌜${baselineTimeInSeconds}s⌝."
 
   time::getProgramElapsedMicroseconds
   local startTimeInUs="${REPLY}"
@@ -80,7 +81,7 @@ function benchmark::run() {
   for ((baselineRuns = 1; (baselineRuns <= maxRuns || maxRuns == -1); baselineRuns++)); do
     "${baseline}"
     time::getProgramElapsedMicroseconds
-    if (( REPLY - startTimeInUs > baselineTime * 1000000 )); then
+    if (( REPLY - startTimeInUs > baselineTimeInSeconds * 1000000 )); then
       break
     fi
   done

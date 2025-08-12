@@ -10,7 +10,6 @@ sidebar:
 url: /showcase
 ---
 
-
 Valet in a gist:
 
 - In Valet, you can create new **commands** that you can invoke with `valet my-command`.

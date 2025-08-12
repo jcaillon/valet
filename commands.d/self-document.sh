@@ -198,7 +198,7 @@ function selfDocument::getAllFunctionsDocumentation() {
 #
 # - ${REPLY}: the documentation in markdown format.
 function selfDocument::convertFunctionDocumentationToMarkdown() {
-  local documentationVar="${1:-}"
+  local documentationVar="${1}"
 
   local -i parameterCount=0
   local \
@@ -223,6 +223,9 @@ function selfDocument::convertFunctionDocumentationToMarkdown() {
     elif [[ "${line}" =~ ^("- \$"([^ :]+)) ]]; then
       # a returned parameter
       REPLY+="${line//"${BASH_REMATCH[1]}"/'- `$'"${BASH_REMATCH[2]}"'`'}"$'\n'
+    elif [[ "${line}" == "      (defaults to "* ]]; then
+      # unindent the line that describe a parameter
+      REPLY+=$'\n'"${line#"    "}"$'\n'
     elif [[ "${line}" == "      "* ]]; then
       # unindent the line that describe a parameter
       REPLY+="${line#"    "}"$'\n'
@@ -290,6 +293,49 @@ function selfDocument_writeAllFunctionsToPrototypeScript() {
   fs::writeToFile "${outputFile}" content
 }
 
+# Converts the function documentation to a vscode snippet body.
+#
+# Returns:
+#
+# - ${REPLY}: the documentation in markdown format.
+function selfDocument::convertFunctionDocumentationToSnippetBody() {
+  local \
+    body="${1}" \
+    documentationVar="${2}"
+
+  local IFS=$'\n' line options="" bashParameters="" hasUndeterminedParameters=false defaultValue
+  local -i tabOrder=1
+
+  for line in ${!documentationVar}; do
+    if [[ "${line}" =~ ^"- \$"([0-9@])": "([^_]+)" _as "([^_]+)"_:" ]]; then
+      body+=" \"\${${tabOrder}:${BASH_REMATCH[2]//"**"/}}\""
+      if [[ "${BASH_REMATCH[1]}" == "@" ]]; then
+        hasUndeterminedParameters=true
+      fi
+      tabOrder+=1
+    elif [[ "${line}" =~ ^"- \${"([a-z][[:alpha:]_]+)"} _as "([^_]+)"_:" ]]; then
+      options+=" ${BASH_REMATCH[1]}=\${${tabOrder}}"
+      tabOrder+=1
+    elif [[ "${line}" =~ ^"- \${"(_[A-Z_]+)"} _as "([^_]+)"_:" ]]; then
+      bashParameters+="${BASH_REMATCH[1]}=\${${tabOrder}} "
+      tabOrder+=1
+    elif [[ "${line}" =~ ^"      (defaults to "([^\)]+)")" ]]; then
+      defaultValue="${BASH_REMATCH[1]//\\/\\\\}"
+      defaultValue="${defaultValue//\"/\\\"}"
+      defaultValue="${defaultValue//$/\\\\\$}"
+      defaultValue="${defaultValue//$'\n'/\\n}"
+      options="${options/"\${$((tabOrder - 1))}"/"\${$((tabOrder - 1)):${defaultValue}}"}"
+    fi
+  done
+
+  if [[ -n ${options} && ${hasUndeterminedParameters} == "true" ]]; then
+    # if there is a $@ parameter, there is an undetermined number of parameters so we need a separator
+    options=" ---${options}"
+  fi
+
+  REPLY="${bashParameters}${body//\"/\\\"}${options}\$0"
+}
+
 # This function writes all the functions to a vscode snippet file.
 function selfDocument_writeAllFunctionsToCodeSnippets() {
   local pageFooter="${1:-}"
@@ -300,12 +346,12 @@ function selfDocument_writeAllFunctionsToCodeSnippets() {
   local content="{"$'\n'"// ${pageFooter}"$'\n'
 
   local -i tabOrder
-  local key functionName documentation body options bashParameters commentedDocumentation hasUndeterminedParameters
+  local key functionName documentationVar commentedDocumentation
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     functionName="${key}"
-    documentation="REPLY_ASSOCIATIVE_ARRAY[${key}]"
+    documentationVar="REPLY_ASSOCIATIVE_ARRAY[${key}]"
 
-    local description="${!documentation}"
+    local description="${!documentationVar}"
 
     # extract the first sentence of the description
     string::extractBetween description $'\n' "."
@@ -314,46 +360,20 @@ function selfDocument_writeAllFunctionsToCodeSnippets() {
     description="${description//'"'/'\"'}"
     description="${description//$'\n'/ }"
 
-    body="${functionName}"
-    options=""
-    bashParameters=""
-    hasUndeterminedParameters=false
-    tabOrder=1
-
-    local IFS=$'\n'
-    for line in ${!documentation}; do
-      if [[ "${line}" =~ ^"- \$"([0-9@])": "([^_]+)" _as "([^_]+)"_:" ]]; then
-        body+=" \"\${${tabOrder}:${BASH_REMATCH[2]//"**"/}}\""
-        if [[ "${BASH_REMATCH[1]}" == "@" ]]; then
-          hasUndeterminedParameters=true
-        fi
-        tabOrder+=1
-      elif [[ "${line}" =~ ^"- \${"([a-z][[:alpha:]_]+)"} _as "([^_]+)"_:" ]]; then
-        options+="${BASH_REMATCH[1]}=\${${tabOrder}} "
-        tabOrder+=1
-      elif [[ "${line}" =~ ^"- \${"(_[A-Z_]+)"} _as "([^_]+)"_:" ]]; then
-        bashParameters+="${BASH_REMATCH[1]}=\${${tabOrder}} "
-        tabOrder+=1
-      fi
-    done
-
-    if [[ -n ${options} && ${hasUndeterminedParameters} == "true" ]]; then
-      # if there is a $@ parameter, there is an undetermined number of parameters so we need a separator
-      options=" --- ${options}"
-    fi
+    selfDocument::convertFunctionDocumentationToSnippetBody "${functionName}" "${documentationVar}"
 
     content+="
 \"${functionName}\": {
   \"prefix\": \"${functionName}\",
   \"description\": \"${description}...\",
   \"scope\": \"\",
-  \"body\": [ \"${bashParameters}${body//\"/\\\"}${options}\$0\" ]
+  \"body\": [ \"${REPLY}\" ]
 },"$'\n'
 
     commentedDocumentation=""
     while IFS=$'\n' read -rd $'\n' line; do
       commentedDocumentation+="# ${line}"$'\n'
-    done <<<"${!documentation}"
+    done <<<"${!documentationVar}"
     commentedDocumentation="${commentedDocumentation//\\/\\\\}"
     commentedDocumentation="${commentedDocumentation//\"/\\\"}"
     commentedDocumentation="${commentedDocumentation//$/\\\\\$}"
@@ -364,7 +384,7 @@ function selfDocument_writeAllFunctionsToCodeSnippets() {
   \"prefix\": \"${functionName}#withdoc\",
   \"description\": \"${description}...\",
   \"scope\": \"\",
-  \"body\": [ \"${commentedDocumentation}${bashParameters}${body//\"/\\\"}${options}\$0\" ]
+  \"body\": [ \"${commentedDocumentation}${REPLY}\" ]
 },"$'\n'
   done
 

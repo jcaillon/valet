@@ -242,7 +242,7 @@ function interactive::promptYesNoRaw() {
 #       the prompt to display
 # - ${width} _as int_:
 #       (optional) the maximum width of the text in the dialog box
-#       (defaults to GLOBAL_COLUMNS)
+#       (defaults to "${GLOBAL_COLUMNS}")
 #
 # ```bash
 # interactive::displayPrompt "Do you want to continue?"
@@ -274,7 +274,7 @@ function interactive::displayQuestion() {
 #       the answer to display
 # - ${width} _as int_:
 #       (optional) the maximum width of the text in the dialog box
-#       (defaults to GLOBAL_COLUMNS)
+#       (defaults to "${GLOBAL_COLUMNS}")
 #
 # ```bash
 # interactive::displayAnswer "My answer."
@@ -300,7 +300,7 @@ function interactive::displayAnswer() {
 #       the text to display
 # - ${width} _as int_:
 #       (optional) the maximum width of the text in the dialog box
-#       (defaults to GLOBAL_COLUMNS)
+#       (defaults to "${GLOBAL_COLUMNS}")
 #
 # ```bash
 # interactive::displayDialogBox "system" "This is a system message."

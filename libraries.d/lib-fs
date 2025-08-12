@@ -118,7 +118,8 @@ function fs::getPwdRealPath() {
 #       the file path to read
 # - ${maxCharacters} _as int_:
 #       (optional) the maximum number of characters to read
-#       (defaults to 0, which means read the whole file)
+#       If set to 0, the whole file will be read.
+#       (defaults to 0)
 #
 # > If the file does not exist, the function will return an empty string instead of failing.
 #
@@ -379,12 +380,12 @@ function fs::tail() {
 #       (optional) A function name that is called to filter the paths that will be listed
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
-#       (defaults to empty string, no filter)
+#       (defaults to "")
 # - ${filterDirectory} _as string_:
 #       (optional) A function name that is called to filter the directories (for recursive listing)
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
-#       (defaults to empty string, no filter)
+#       (defaults to "")
 #
 # Returns:
 #
@@ -460,12 +461,12 @@ function fs::listPaths() {
 #       (optional) A function name that is called to filter the files that will be listed
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
-#       (defaults to empty string, no filter)
+#       (defaults to "")
 # - ${filterDirectory} _as string_:
 #       (optional) A function name that is called to filter the directories (for recursive listing)
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
-#       (defaults to empty string, no filter)
+#       (defaults to "")
 #
 # Returns:
 #
@@ -517,12 +518,12 @@ function fs::listFiles() {
 #       (optional) A function name that is called to filter the directories that will be listed
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
-#       (defaults to empty string, no filter)
+#       (defaults to "")
 # - ${filterDirectory} _as string_:
 #       (optional) A function name that is called to filter the directories (for recursive listing)
 #       The function should return 0 if the path is to be kept, 1 otherwise.
 #       The function is called with the path as the first argument.
-#       (defaults to empty string, no filter)
+#       (defaults to "")
 #
 # Returns:
 #
@@ -566,7 +567,7 @@ function fs::listDirectories() {
 #       the directory to check
 # - ${testFileName} _as string_:
 #       (optional) The name of the file to create in the directory to test the write access
-#       (defaults to "writable-test-${BASHPID}", which is a unique name based on the current process ID)
+#       (defaults to "writable-test-${BASHPID}")
 #
 # Returns:
 #

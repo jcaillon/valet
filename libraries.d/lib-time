@@ -8,7 +8,7 @@
 #
 # - ${format} _as string_:
 #       (optional) the format (see printf) of the date to return
-#       (defaults to %(%F_%Hh%Mm%Ss)T).
+#       (defaults to "%(%F_%Hh%Mm%Ss)T")
 #
 # Returns:
 #
@@ -38,21 +38,24 @@ function time::getDate() {
 # - $1: **microseconds** _as int_:
 #       the microseconds to convert
 # - ${format} _as string_:
-#      (optional) the format to use (defaults to "%HH:%MM:%SS")
-#      Usable formats:
-#      - %HH: hours
-#      - %MM: minutes
-#      - %SS: seconds
-#      - %LL: milliseconds
-#      - %h: hours without leading zero
-#      - %m: minutes without leading zero
-#      - %s: seconds without leading zero
-#      - %l: milliseconds without leading zero
-#      - %u: microseconds without leading zero
-#      - %M: total minutes
-#      - %S: total seconds
-#      - %L: total milliseconds
-#      - %U: total microseconds
+#       (optional) the format to use
+#
+#       Usable formats:
+#       - %HH: hours
+#       - %MM: minutes
+#       - %SS: seconds
+#       - %LL: milliseconds
+#       - %h: hours without leading zero
+#       - %m: minutes without leading zero
+#       - %s: seconds without leading zero
+#       - %l: milliseconds without leading zero
+#       - %u: microseconds without leading zero
+#       - %M: total minutes
+#       - %S: total seconds
+#       - %L: total milliseconds
+#       - %U: total microseconds
+#
+#       (defaults to "%HH:%MM:%SS")
 #
 # Returns:
 #
@@ -138,12 +141,12 @@ function time::startTimer() {
 # Get the time elapsed since the call of `time::startTimer`.
 #
 # - ${logElapsedTime} _as bool_:
-#      (optional) Wether or not to log the elapsed time.
-#      (defaults to false)
+#       (optional) Wether or not to log the elapsed time.
+#       (defaults to false)
 # - ${format} _as string_:
-#      (optional) The format to use if we log the elapsed time.
-#      See `time::convertMicrosecondsToHuman` for the format.
-#      (defaults to "%S.%LLs").
+#       (optional) The format to use if we log the elapsed time.
+#       See `time::convertMicrosecondsToHuman` for the format.
+#       (defaults to "%S.%LLs").
 #
 # Returns:
 #
@@ -180,8 +183,8 @@ function time::getTimerMicroseconds() {
 # - $1: **microseconds** _as int_:
 #       the microseconds to convert
 # - ${precision} _as string_:
-#      (optional) The precision to get (number of digits after the dot).
-#      (defaults to 6)
+#       (optional) The precision to get (number of digits after the dot).
+#       (defaults to 6)
 #
 # Returns:
 #

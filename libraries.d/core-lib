@@ -522,8 +522,8 @@ function log::printTrappedBashCommand() {
 #
 # - ${stackToSkip} _as int_:
 #       (optional) The number of stack to skip.
-#       (defaults to 2 which skips this function and the first calling function
-#       which is usually the onError function)
+#       For instance, a value of 2 will skip this function and the first calling function.
+#       (defaults to 2)
 # - ${stackToSkipAtEnd} _as int_:
 #       (optional) The number of stack to skip at the end.
 #       (defaults to 0)
@@ -555,13 +555,14 @@ function log::printCallStack() {
 #
 # - ${stackToSkip} _as int_:
 #       (optional) The number of stack to skip.
-#       (defaults to 1 which skips this function)
+#       For instance, a value of 1 will skip this function.
+#       (defaults to 1)
 # - ${stackToSkipAtEnd} _as int_:
 #       (optional) The number of stack to skip at the end.
 #       (defaults to 0)
 # - ${wrapWidth} _as int_:
 #       (optional) The width to wrap the call stack.
-#       (defaults 0 which means no wrapping)
+#       (defaults to 0)
 #
 # Returns:
 #
@@ -751,7 +752,7 @@ function log::printFileInternalLoop() {
 #       the content to log (can contain new lines)
 # - ${newLinePadString} _as string_:
 #       (optional) the string with which to prepend each wrapped line
-#       (empty by default)
+#       (defaults to "")
 #
 # ```bash
 # log::printString "my line"
@@ -791,7 +792,8 @@ function log::printString() {
 # - $1: **path** _as string_:
 #       The file path to save.
 # - ${suffix} _as string_:
-#       The suffix for the file to create.
+#       (optional) The suffix for the file to create.
+#       (defaults to "")
 # - ${silent} _as bool_:
 #       (optional) if true, do not log the path of the saved file using `log::printString`
 #       (defaults to false)
@@ -830,7 +832,8 @@ function log::saveFile() {
 # - $1: **content variable name** _as string_:
 #       The variable name of the content to save.
 # - ${suffix} _as string_:
-#       The suffix for the file to create.
+#       (optional) The suffix for the file to create.
+#       (defaults to "")
 # - ${silent} _as bool_:
 #       (optional) if true, do not log the path of the saved file using `log::printString`
 #       (defaults to false)
@@ -1298,14 +1301,14 @@ function string::removeTextFormatting() {
 #       (optional) The width to wrap the text at.
 #       Note that length of the new line pad string is subtracted from the
 #       width to make sure the text fits in the given width.
-#       (defaults to GLOBAL_COLUMNS)
+#       (defaults to "${GLOBAL_COLUMNS}")
 # - ${newLinePadString} _as string_:
 #       (optional) The characters to apply as padding on the left of each new line.
 #       E.g. '  ' will add 2 spaces on the left of each new line.
 #       (defaults to 0)
 # - ${firstLineWidth} _as int_:
 #       (optional) The width to use for the first line.
-#       (defaults to the width)
+#       (defaults to "${width}")
 #
 # Returns:
 #
@@ -1412,14 +1415,14 @@ function string::wrapWords() {
 #       (optional) The width to wrap the text at.
 #       Note that length of the new line pad string is subtracted from the
 #       width to make sure the text fits in the given width.
-#       (defaults to GLOBAL_COLUMNS)
+#       (defaults to "${GLOBAL_COLUMNS}")
 # - ${newLinePadString} _as string_:
 #       (optional) The characters to apply as padding on the left of each new line.
 #       E.g. '  ' will add 2 spaces on the left of each new line.
 #       (defaults to 0)
 # - ${firstLineWidth} _as int_:
 #       (optional) The width to use for the first line.
-#       (defaults to the width)
+#       (defaults to "${width}")
 #
 # Returns:
 #
@@ -1516,10 +1519,12 @@ function string::wrapCharacters() {
 #       The variable name that contains characters to highlight.
 # - ${highlightCode} _as string_:
 #       (optional) The ANSI code to use for highlighting.
-#       (defaults to STYLE_COLOR_ACCENT)
+#       The default value can be set using the variable STYLE_COLOR_ACCENT.
+#       (defaults to $'\e'"[95m"}")
 # - ${resetCode} _as string_:
 #       (optional) The ANSI code to use for resetting the highlighting.
-#       (defaults to STYLE_COLOR_DEFAULT)
+#       The default value can be set using the variable STYLE_COLOR_DEFAULT.
+#       (defaults to $'\e'"[0m")
 #
 # Returns:
 #

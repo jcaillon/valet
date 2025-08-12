@@ -22,7 +22,7 @@ source fs
 # - ${noFail} _as bool_:
 #       (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.
 #       If true and the execution fails, the script will exit.
-#       (default to false)
+#       (defaults to false)
 #
 # Returns:
 #

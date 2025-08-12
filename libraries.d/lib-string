@@ -182,7 +182,7 @@ function string::convertKebabCaseToCamelCase() {
 #       The field number to get (starting at 0).
 # - ${separator} _as string_:
 #       The separator to use.
-#       (defaults to $'\t' if not provided)
+#       (defaults to $'\t')
 #
 # Returns:
 #
@@ -409,7 +409,7 @@ function string::split() {
 #       The number of items (lines) to extract.
 # - ${separator} _as string_:
 #       (optional) The separator character to use.
-#       (defaults to $'\n' if not provided)
+#       (defaults to $'\n')
 #
 # Returns:
 #
@@ -463,10 +463,10 @@ function string_headCallback() {
 #       - $1: the current item (line) content
 #
 #       The function must return 0 if we should continue to the next line, 1 otherwise.
-#       (defaults to empty)
+#       (defaults to "")
 # - ${separator} _as string_:
 #       (optional) The separator character to use.
-#       (defaults to $'\n' if not provided)
+#       (defaults to $'\n')
 #
 # ```bash
 # string::doForEachLine myString myCallback

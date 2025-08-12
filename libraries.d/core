@@ -438,7 +438,8 @@ function core::getExtensionsDirectory() {
 # execution.
 #
 # - ${suffix} _as string_:
-#       The suffix for the file to create.
+#       (optional) The suffix for the file to create.
+#       (defaults to "")
 #
 # Returns:
 #
@@ -474,7 +475,7 @@ function core::createSavedFilePath() {
 #
 # - ${dumpSuffix} _as string_:
 #       (optional) The suffix for the file to create.
-#       (defaults to an empty string)
+#       (defaults to "")
 #
 # Returns:
 #
