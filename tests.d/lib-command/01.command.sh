@@ -4,12 +4,20 @@
 source command
 
 function main() {
+  test_command::listCommands
   test_command_getFunctionNameFromCommand
   test_command::fuzzyMatchCommandToFunctionNameOrFail
   test_command_getMaxPossibleCommandLevel
   test_command_fuzzyFindOption
   test_command_getSingleLetterOptions
   test_command_getDisplayableFilteredArray
+}
+
+function test_command::listCommands() {
+  test::title "✅ Testing command::listCommands"
+
+  test::func command::listCommands true
+  test::func command::listCommands false
 }
 
 function test_command_getFunctionNameFromCommand() {
@@ -74,10 +82,6 @@ function test_command_getDisplayableFilteredArray() {
   test::func MY_CHARS=ae command_getDisplayableFilteredArray ARRAY MY_CHARS
 }
 
-# shellcheck disable=SC2317
-function test::scrubReplyVars() {
-  unset -v REPLY_ARRAY REPLY_ARRAY2
-  unset -v REPLY_ARRAY REPLY_ARRAY2
-}
+
 
 main

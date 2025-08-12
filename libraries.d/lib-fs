@@ -162,7 +162,7 @@ function fs::readFile() {
 #
 # - $1: **path** _as string_:
 #       the file path to write
-# - $2: **content** _as string_:
+# - $2: **variable name** _as string_:
 #       The variable containing the content to write.
 # - ${append} _as bool_:
 #       (optional) true to append the content to the file, false otherwise

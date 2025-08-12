@@ -1,9 +1,26 @@
 .hx-max-w-6xl {
-    max-width: 92rem;
+  max-width: 92rem;
 }
 
 .hx-max-w-\[90rem\] {
-    max-width: 120rem;
+  max-width: 120rem;
+}
+
+.hextra-custom-footer {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+  font-size: .75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid rgba(187, 187, 187, 0.082);
+  margin: 1rem 0;
 }
 
 /* FOR MERMAID */

@@ -70,6 +70,10 @@ function selfDocument() {
   # write each function to the snippet file
   selfDocument_writeAllFunctionsToCodeSnippets "${pageFooter}" "${output}/valet.code-snippets"
   log::info "The vscode snippets have been generated in ⌜${output}/valet.code-snippets⌝."
+
+  # write each command help to a markdown file
+  selfDocument_writeAllCommandsToMarkdown "${pageFooter}" "${output}/valet-commands.md" "${coreOnly}"
+  log::info "The commands documentation has been generated in ⌜${output}/valet-commands.md⌝."
 }
 
 # Returns the footer for the documentation.
@@ -397,4 +401,31 @@ function selfDocument_writeAllFunctionsToCodeSnippets() {
 
   fs::writeToFile "${outputFile}" content
   fs::writeToFile "${outputFile}" originalContent append=true
+}
+
+# This function writes all the commands documentation to a markdown file.
+function selfDocument_writeAllCommandsToMarkdown() {
+  local \
+    pageFooter="${1}" \
+    outputFile="${2}" \
+    coreOnly="${3}"
+
+  fs::createFileIfNeeded "${outputFile}"
+
+  local content="# Valet commands documentation"$'\n'$'\n'"> ${pageFooter}"$'\n'$'\n'
+
+  source command
+  command::listCommands "${coreOnly}"
+
+  log::info "Found ${#REPLY_ARRAY2[@]} commands with documentation."
+
+  local functionName
+  for functionName in "${REPLY_ARRAY2[@]}"; do
+    command::getHelpAsMarkdown "${functionName}"
+    content+="${REPLY}"
+  done
+
+  # add footer
+  content+="> ${pageFooter}"
+  fs::writeToFile "${outputFile}" content
 }

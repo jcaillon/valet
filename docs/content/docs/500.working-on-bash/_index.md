@@ -82,6 +82,6 @@ source string
 - [Dave's videos](https://ysap.sh/)
 
 {{< cards >}}
-  {{< card icon="arrow-circle-left" link="../libraries" title="Libraries" >}}
+  {{< card icon="arrow-circle-left" link="../core-commands" title="Valet core commands" >}}
   {{< card icon="arrow-circle-right" link="../performance-tips" title="Performance tips" >}}
 {{< /cards >}}

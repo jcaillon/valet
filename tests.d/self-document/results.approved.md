@@ -14,6 +14,8 @@ INFO     Found xxx functions with documentation.
 INFO     The documentation has been generated in ⌜/tmp/valet.d/d1-2/lib-valet.md⌝.
 INFO     The prototype script has been generated in ⌜/tmp/valet.d/d1-2/lib-valet⌝.
 INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-2/valet.code-snippets⌝.
+INFO     Found 14 commands with documentation.
+INFO     The commands documentation has been generated in ⌜/tmp/valet.d/d1-2/valet-commands.md⌝.
 ```
 
 ❯ `fs::head /tmp/valet.d/d1-2/lib-valet.md 10`

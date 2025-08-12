@@ -372,6 +372,92 @@ more=(
 
 ## Test script 01.command
 
+### ✅ Testing command::listCommands
+
+❯ `command::listCommands true`
+
+Returned variables:
+
+```text
+REPLY_ARRAY=(
+[0]='self add-command'
+[1]='self add-library'
+[2]='self build'
+[3]='self config'
+[4]='self document'
+[5]='self extend'
+[6]='self release'
+[7]='self setup'
+[8]='self source'
+[9]='self test'
+[10]='self uninstall'
+[11]='self update'
+[12]='help'
+[13]=''
+)
+REPLY_ARRAY2=(
+[0]='selfAddCommand'
+[1]='selfAddLibrary'
+[2]='selfBuild'
+[3]='selfConfig'
+[4]='selfDocument'
+[5]='selfExtend'
+[6]='selfRelease'
+[7]='selfSetup'
+[8]='selfSource'
+[9]='selfTest'
+[10]='selfUninstall'
+[11]='selfUpdate'
+[12]='showCommandHelp'
+[13]='this'
+)
+```
+
+❯ `command::listCommands false`
+
+Returned variables:
+
+```text
+REPLY_ARRAY=(
+[0]='self add-command'
+[1]='self add-library'
+[2]='self build'
+[3]='self config'
+[4]='self document'
+[5]='self extend'
+[6]='self release'
+[7]='self setup'
+[8]='self source'
+[9]='self test'
+[10]='self uninstall'
+[11]='self update'
+[12]='showcase sudo-command'
+[13]='help'
+[14]='showcase command1'
+[15]='showcase interactive'
+[16]=''
+)
+REPLY_ARRAY2=(
+[0]='selfAddCommand'
+[1]='selfAddLibrary'
+[2]='selfBuild'
+[3]='selfConfig'
+[4]='selfDocument'
+[5]='selfExtend'
+[6]='selfRelease'
+[7]='selfSetup'
+[8]='selfSource'
+[9]='selfTest'
+[10]='selfUninstall'
+[11]='selfUpdate'
+[12]='showCaseSudo'
+[13]='showCommandHelp'
+[14]='showcaseCommand1'
+[15]='showcaseInteractive'
+[16]='this'
+)
+```
+
 ### ✅ Testing command_getFunctionNameFromCommand
 
 ❯ `command_getFunctionNameFromCommand self\ build`
@@ -400,6 +486,12 @@ Returned variables:
 REPLY='selfBuild'
 REPLY2='2'
 REPLY3='self build'
+REPLY_ARRAY=(
+[0]='self build'
+)
+REPLY_ARRAY2=(
+[0]='3'
+)
 ```
 
 Fuzzy match by strict mode is enabled so it fails:
@@ -487,6 +579,12 @@ Returned variables:
 ```text
 REPLY='Unknown option ⌜de⌝, did you mean ⌜--derp2⌝?'
 REPLY2=''
+REPLY_ARRAY=(
+[0]='--derp2'
+)
+REPLY_ARRAY2=(
+[0]='1'
+)
 ```
 
 single match, strict mode is disabled
@@ -504,6 +602,12 @@ Returned variables:
 ```text
 REPLY=''
 REPLY2='--derp2'
+REPLY_ARRAY=(
+[0]='--derp2'
+)
+REPLY_ARRAY2=(
+[0]='1'
+)
 ```
 
 multiple matches, strict mode is enabled
@@ -518,6 +622,14 @@ REPLY='Unknown option ⌜-p⌝, valid matches are:
 [95m-[0m-der[95mp[0m2
 '
 REPLY2=''
+REPLY_ARRAY=(
+[0]='--opt1'
+[1]='--derp2'
+)
+REPLY_ARRAY2=(
+[0]='0'
+[1]='1'
+)
 ```
 
 multiple matches, strict mode is disabled
@@ -532,6 +644,14 @@ REPLY='Found multiple matches for the option ⌜-p⌝, please be more specific:
 [95m-[0m-der[95mp[0m2
 '
 REPLY2=''
+REPLY_ARRAY=(
+[0]='--opt1'
+[1]='--derp2'
+)
+REPLY_ARRAY2=(
+[0]='0'
+[1]='1'
+)
 ```
 
 no match
@@ -582,6 +702,63 @@ or[95ma[0mng[95me[0m
 gr[95ma[0mp[95me[0m
 [95ma[0mnanas
 lemon
+'
+```
+
+## Test script 02.help
+
+### ✅ Testing command::getHelpAsMarkdown
+
+❯ `command::getHelpAsMarkdown showcaseCommand1`
+
+Returned variables:
+
+```text
+REPLY='## ▶️ valet showcase command1
+
+An example of description.
+
+You can put any text here, it will be wrapped to fit the terminal width.
+
+You can **highlight** some text as well.
+
+### Usage
+
+```bash
+valet showcase command1 [options] [--] <first-arg> <more...>
+```
+
+### Options
+
+- `-o, --option1`
+
+  First option.
+
+- `-2, --this-is-option2 <level>`
+
+  An option with a value.
+  This option can be set by exporting the variable VALET_THIS_IS_OPTION2='"'"'<level>'"'"'.
+
+- `-h, --help`
+
+  Display the help for this command.
+
+### Arguments
+
+- `first-arg`
+
+  First argument.
+
+- `more...`
+
+  Will be an an array of strings.
+
+### Examples
+
+- `valet showcase command1 -o -2 value1 arg1 more1 more2`
+
+  Call command1 with option1, option2 and some arguments.
+
 '
 ```
 

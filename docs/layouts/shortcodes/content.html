@@ -1,2 +1,6 @@
 {{$file := .Get 0}}
-{{ $file | readFile | markdownify }}
+{{ $content := $file | readFile }}
+{{ $content := replaceRE `# .*` "" $content 1 }}
+{{/*  {{ $content | markdownify }}  */}}
+{{ $content | replaceRE "^---[\\s\\S]+?---" "" | safeHTML }}
+

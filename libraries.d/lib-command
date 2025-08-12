@@ -1044,6 +1044,130 @@ function command_goInteractive() {
 # >>> Help
 #===============================================================
 
+# ## command::listCommands (private)
+#
+# Lists all the commands available in the valet CLI.
+#
+# - $1: if set to "true", only lists the core commands.
+#
+# Returns:
+#
+# - ${REPLY_ARRAY}: an array of command names.
+# - ${REPLY_ARRAY2}: an array of function names corresponding to the commands.
+#
+# ```bash
+# command::listCommands true
+# ```
+function command::listCommands() {
+  local coreOnly="${1}"
+
+  command::sourceUserCommands
+
+  REPLY_ARRAY=()
+  REPLY_ARRAY2=()
+  local varName functionName IFS=$' '
+  for varName in ${!CMD_COMMAND_*}; do
+    functionName="${varName#CMD_COMMAND_}"
+
+    local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
+    local -n command="CMD_COMMAND_${functionName}"
+    if [[ ${fileToSource} == "tests.d/"* ]]; then
+      continue
+    fi
+    if [[ ${coreOnly} == "true" ]]; then
+      if [[ ${fileToSource} == "showcase.d/"* || ! -f "${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}" ]]; then
+        continue
+      fi
+    fi
+
+    REPLY_ARRAY+=("${command}")
+    REPLY_ARRAY2+=("${functionName}")
+  done
+}
+
+# ## command::getHelpAsMarkdown (private)
+#
+# Prints the help text of a function in markdown format.
+#
+# - $1: the name of the function.
+#
+# ```bash
+# command::getHelpAsMarkdown selfUpdate
+# ```
+function command::getHelpAsMarkdown() {
+  local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  command::sourceUserCommands
+
+  local -n command="CMD_COMMAND_${functionName}"
+  local -n description="CMD_DESCRIPTION_${functionName}"
+  local -n functionArguments="CMD_ARGUMENTS_NAME_${functionName}"
+
+  local fullCommand
+  if [[ ${functionName} == "this" ]]; then
+    fullCommand="valet"
+  else
+    fullCommand="valet ${command}"
+  fi
+
+  # usage
+  local usage="${fullCommand} [options]"
+  if [[ -n ${functionCommands:-} ]]; then
+    usage+=" [command]"
+  elif [[ -n ${functionArguments:-} ]]; then
+    usage+=" [--]"
+    for argument in "${functionArguments[@]}"; do
+      if [[ ${argument} == *\?* ]]; then
+        usage+=" [${argument//\?/}]"
+      else
+        usage+=" <${argument}>"
+      fi
+    done
+  fi
+
+  local section sections="" functionNameArray functionDescriptionArray index
+
+  # loop over each section
+  for section in "options" "arguments" "commands" "examples"; do
+    local -n functionNameArray="CMD_${section^^}_NAME_${functionName}"
+    local -n functionDescriptionArray="CMD_${section^^}_DESCRIPTION_${functionName}"
+    if [[ -z "${functionNameArray:-}" ]]; then
+      continue
+    fi
+
+    sections+="### ${section^}"$'\n'$'\n'
+
+    for index in "${!functionNameArray[@]}"; do
+      sections+="- \`${functionNameArray[${index}]}\`"$'\n'$'\n'
+
+      local line itemDescription="${functionDescriptionArray[${index}]}"
+      while [[ -n ${itemDescription} ]]; do
+        line="${itemDescription%%$'\n'*}"
+        itemDescription="${itemDescription:${#line}+1}"
+
+        sections+="  ${line}"$'\n'
+      done
+
+      sections+=$'\n'
+    done
+
+  done
+
+  REPLY="## ▶️ ${fullCommand}
+
+${description}
+
+### Usage
+
+\`\`\`bash
+${usage}
+\`\`\`
+
+${sections}"
+  REPLY="${REPLY//"⌜"/"**"}"
+  REPLY="${REPLY//"⌝"/"**"}"
+}
+
 # ## command::printHelp (private)
 #
 # Prints the help text of a function or a command.

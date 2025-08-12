@@ -337,43 +337,49 @@ function selfRelease::updateDocumentation() {
   selfDocument::getFooter
   local pageFooter="${REPLY}"
 
-  if [[ "${dryRun:-}" != "true" ]]; then
-    selfDocument --core-only --output "${GLOBAL_INSTALLATION_DIRECTORY}/extras"
-    selfRelease_writeAllFunctionsDocumentation "${pageFooter}"
+  if [[ "${dryRun:-}" == "true" ]]; then
+    return 0
   fi
+
+  selfDocument --core-only --output "${GLOBAL_INSTALLATION_DIRECTORY}/extras"
+  selfRelease_writeAllFunctionsDocumentation "${pageFooter}"
 
   # export the valet config md and full documentation to the documentation
-  if [[ "${dryRun:-}" != "true" ]]; then
-    exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/config.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
-    exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/extras/lib-valet.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/lib-valet.md"
-  fi
+  exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/config.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
+  exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/extras/lib-valet.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/lib-valet.md"
+  exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/extras/valet-commands.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/valet-commands.md"
 
   # copy the vscode recommended extensions
-  if [[ "${dryRun:-}" != "true" ]]; then
-    exe::invoke cp "${GLOBAL_INSTALLATION_DIRECTORY}/.vscode/extensions.json" "${GLOBAL_INSTALLATION_DIRECTORY}/extras/extensions.json"
-  fi
+  exe::invoke cp "${GLOBAL_INSTALLATION_DIRECTORY}/.vscode/extensions.json" "${GLOBAL_INSTALLATION_DIRECTORY}/extras/extensions.json"
+
+  # export stats
+  # shellcheck disable=SC2034
+  local statsContent="nbFunctions: ${#SORTED_FUNCTION_NAMES[@]}"$'\n'
+  fs::writeToFile "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/stats.yaml" statsContent
 
   # commit the changes to the documentation
-  if [[ "${dryRun:-}" != "true" ]]; then
-    exe::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
-    fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
-    array::sort REPLY_ARRAY
-    # remove _index.md (otherwise not consistent tests on the CI...)
-    local -a files
-    local file
-    for file in "${REPLY_ARRAY[@]}"; do
-      if [[ ${file} == *"_index.md" ]]; then
-        continue
-      fi
-      files+=("${file}")
-    done
-    exe::invoke git add "${files[@]}"
-    fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/extras" recursive=true
-    array::sort REPLY_ARRAY
-    exe::invoke git add "${REPLY_ARRAY[@]}"
-    exe::invoke git commit -m ":memo: updating the documentation"
-    log::success "The documentation update has been committed."
-  fi
+  exe::invoke git add \
+    "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md" \
+    "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/lib-valet.md" \
+    "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/valet-commands.md" \
+    "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/stats.yaml"
+  fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
+  array::sort REPLY_ARRAY
+  # remove _index.md (otherwise not consistent tests on the CI...)
+  local -a files
+  local file
+  for file in "${REPLY_ARRAY[@]}"; do
+    if [[ ${file} == *"_index.md" ]]; then
+      continue
+    fi
+    files+=("${file}")
+  done
+  exe::invoke git add "${files[@]}"
+  fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/extras" recursive=true
+  array::sort REPLY_ARRAY
+  exe::invoke git add "${REPLY_ARRAY[@]}"
+  exe::invoke git commit -m ":memo: updating the documentation"
+  log::success "The documentation update has been committed."
 }
 
 # This function writes all the functions documentation to the documentation files
