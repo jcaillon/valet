@@ -60,15 +60,15 @@ function selfDocument() {
   selfDocument::getAllFunctionsDocumentation "${coreOnly}"
 
   # write each function documentation to a file
-  selfRelease_writeAllFunctionsToMarkdown "${pageFooter}" "${output}/lib-valet.md"
+  selfDocument_writeAllFunctionsToMarkdown "${pageFooter}" "${output}/lib-valet.md"
   log::info "The documentation has been generated in ⌜${output}/lib-valet.md⌝."
 
   # write each function to a file
-  selfRelease_writeAllFunctionsToPrototypeScript "${pageFooter}" "${output}/lib-valet"
+  selfDocument_writeAllFunctionsToPrototypeScript "${pageFooter}" "${output}/lib-valet"
   log::info "The prototype script has been generated in ⌜${output}/lib-valet⌝."
 
   # write each function to the snippet file
-  selfRelease_writeAllFunctionsToCodeSnippets "${pageFooter}" "${output}/valet.code-snippets"
+  selfDocument_writeAllFunctionsToCodeSnippets "${pageFooter}" "${output}/valet.code-snippets"
   log::info "The vscode snippets have been generated in ⌜${output}/valet.code-snippets⌝."
 }
 
@@ -192,8 +192,51 @@ function selfDocument::getAllFunctionsDocumentation() {
   array::sort SORTED_FUNCTION_NAMES
 }
 
+# Converts the function documentation to markdown format.
+#
+# Returns:
+#
+# - ${REPLY}: the documentation in markdown format.
+function selfDocument::convertFunctionDocumentationToMarkdown() {
+  local documentationVar="${1:-}"
+
+  local -i parameterCount=0
+  local \
+    line \
+    documentation="${!documentationVar}"
+
+  REPLY=""
+
+  while [[ -n ${documentation} ]]; do
+    line="${documentation%%$'\n'*}"
+    documentation="${documentation:${#line}+1}"
+
+    if [[ "${line}" =~ ^("- \$"([^ :]+))[^_]+_[^_]+_:$ ]]; then
+      if (( parameterCount > 0 )); then
+        REPLY+=$'\n'
+      else
+        REPLY+="Inputs:"$'\n'$'\n'
+      fi
+      # shellcheck disable=SC2016
+      REPLY+="${line//"${BASH_REMATCH[1]}"/'- `$'"${BASH_REMATCH[2]}"'`'}"$'\n'$'\n'
+      parameterCount+=1
+    elif [[ "${line}" =~ ^("- \$"([^ :]+)) ]]; then
+      # a returned parameter
+      REPLY+="${line//"${BASH_REMATCH[1]}"/'- `$'"${BASH_REMATCH[2]}"'`'}"$'\n'
+    elif [[ "${line}" == "      "* ]]; then
+      # unindent the line that describe a parameter
+      REPLY+="${line#"    "}"$'\n'
+    elif [[ "${line}" == '```bash'* ]]; then
+      # example
+      REPLY+="Example usage:"$'\n'$'\n'"${line}"$'\n'
+    else
+      REPLY+="${line}"$'\n'
+    fi
+  done
+}
+
 # This function writes all the functions documentation to a given file.
-function selfRelease_writeAllFunctionsToMarkdown() {
+function selfDocument_writeAllFunctionsToMarkdown() {
   local pageFooter="${1:-}"
   local outputFile="${2:-}"
 
@@ -202,10 +245,10 @@ function selfRelease_writeAllFunctionsToMarkdown() {
   local content="# Valet functions documentation"$'\n'$'\n'"> ${pageFooter}"$'\n'$'\n'
 
   # append each function documentation to the file
-  local key documentation
+  local IFS=$'\n' key documentationVar
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
-    documentation="REPLY_ASSOCIATIVE_ARRAY[${key}]"
-    content+="${!documentation}"$'\n'
+    selfDocument::convertFunctionDocumentationToMarkdown "REPLY_ASSOCIATIVE_ARRAY[${key}]"
+    content+="${REPLY}"$'\n'
   done
 
   # add footer
@@ -214,7 +257,7 @@ function selfRelease_writeAllFunctionsToMarkdown() {
 }
 
 # This function writes all the function prototypes in a file.
-function selfRelease_writeAllFunctionsToPrototypeScript() {
+function selfDocument_writeAllFunctionsToPrototypeScript() {
   local pageFooter="${1:-}"
   local outputFile="${2:-}"
 
@@ -248,7 +291,7 @@ function selfRelease_writeAllFunctionsToPrototypeScript() {
 }
 
 # This function writes all the functions to a vscode snippet file.
-function selfRelease_writeAllFunctionsToCodeSnippets() {
+function selfDocument_writeAllFunctionsToCodeSnippets() {
   local pageFooter="${1:-}"
   local outputFile="${2:-}"
 
@@ -257,12 +300,14 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   local content="{"$'\n'"// ${pageFooter}"$'\n'
 
   local -i tabOrder
-  local key functionName documentation body options commentedDocumentation
+  local key functionName documentation body options bashParameters commentedDocumentation hasUndeterminedParameters
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     functionName="${key}"
     documentation="REPLY_ASSOCIATIVE_ARRAY[${key}]"
 
     local description="${!documentation}"
+
+    # extract the first sentence of the description
     string::extractBetween description $'\n' "."
     description="${REPLY#$'\n'}"
     description="${description//\/\\/}"
@@ -271,26 +316,38 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
 
     body="${functionName}"
     options=""
+    bashParameters=""
+    hasUndeterminedParameters=false
     tabOrder=1
 
     local IFS=$'\n'
     for line in ${!documentation}; do
-      if [[ "${line}" =~ "- \$"([0-9@])": "([^_]+)" _as "([^_]+)"_:" ]]; then
-        body+=" \"\${${tabOrder}:${BASH_REMATCH[2]}}\""
+      if [[ "${line}" =~ ^"- \$"([0-9@])": "([^_]+)" _as "([^_]+)"_:" ]]; then
+        body+=" \"\${${tabOrder}:${BASH_REMATCH[2]//"**"/}}\""
+        if [[ "${BASH_REMATCH[1]}" == "@" ]]; then
+          hasUndeterminedParameters=true
+        fi
         tabOrder+=1
-      elif [[ "${line}" =~ "- \${"([[:alpha:]_]+)"} _as "([^_]+)"_:" ]]; then
+      elif [[ "${line}" =~ ^"- \${"([a-z][[:alpha:]_]+)"} _as "([^_]+)"_:" ]]; then
         options+="${BASH_REMATCH[1]}=\${${tabOrder}} "
+        tabOrder+=1
+      elif [[ "${line}" =~ ^"- \${"(_[A-Z_]+)"} _as "([^_]+)"_:" ]]; then
+        bashParameters+="${BASH_REMATCH[1]}=\${${tabOrder}} "
         tabOrder+=1
       fi
     done
-    body+="\$0"
+
+    if [[ -n ${options} && ${hasUndeterminedParameters} == "true" ]]; then
+      # if there is a $@ parameter, there is an undetermined number of parameters so we need a separator
+      options=" --- ${options}"
+    fi
 
     content+="
 \"${functionName}\": {
   \"prefix\": \"${functionName}\",
   \"description\": \"${description}...\",
   \"scope\": \"\",
-  \"body\": [ \"${options}${body//\"/\\\"}\" ]
+  \"body\": [ \"${bashParameters}${body//\"/\\\"}${options}\$0\" ]
 },"$'\n'
 
     commentedDocumentation=""
@@ -307,7 +364,7 @@ function selfRelease_writeAllFunctionsToCodeSnippets() {
   \"prefix\": \"${functionName}#withdoc\",
   \"description\": \"${description}...\",
   \"scope\": \"\",
-  \"body\": [ \"${commentedDocumentation}${options}${body//\"/\\\"}\" ]
+  \"body\": [ \"${commentedDocumentation}${bashParameters}${body//\"/\\\"}${options}\$0\" ]
 },"$'\n'
   done
 

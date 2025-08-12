@@ -791,8 +791,8 @@ function list::getCurrentItemDisplayableString() {
 #
 # Returns:
 #
-# - ${filterED_ITEMS_SELECTED_INDEX}: The new index.
-# - ${filterED_ITEMS_START_INDEX}: The new start index if needed.
+# - ${_LIST_FILTERED_ITEMS_SELECTED_INDEX}: The new index.
+# - ${_LIST_FILTERED_ITEMS_START_INDEX}: The new start index if needed.
 #
 # ```bash
 # list::changeSelectedItemIndex 1

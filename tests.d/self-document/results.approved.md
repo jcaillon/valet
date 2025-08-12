@@ -30,7 +30,7 @@ INFO     The vscode snippets have been generated in ⌜/tmp/valet.d/d1-2/valet.c
 Add a value to an array if it is not already present.
 Works for normal and associative arrays.
 
-- $1: **array name** _as string_:
+Inputs:
 ```
 
 ❯ `fs::head /tmp/valet.d/d1-2/lib-valet 10`
@@ -62,7 +62,7 @@ Works for normal and associative arrays.
   "prefix": "array::appendIfNotPresent",
   "description": "Add a value to an array if it is not already present...",
   "scope": "",
-  "body": [ "array::appendIfNotPresent \"${1:**array name**}\" \"${2:**value variable name**}\"$0" ]
+  "body": [ "array::appendIfNotPresent \"${1:array name}\" \"${2:value variable name}\"$0" ]
 },
 
 ```

@@ -57,6 +57,8 @@ echo "RETURNED_VALUE: ⌜${RETURNED_VALUE}⌝" # will output 'value'
 
 A complete list of library functions can be generated locally in a single file using the `valet self document` command.
 
+The documentation for functions is also available as a single page [that can be found here](../../libraries-single-page-documentation/).
+
 <!-- https://v1.heroicons.com/ -->
 You can also browse the list of available libraries and their functions here;
 

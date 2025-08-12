@@ -152,10 +152,10 @@ function core::fail() {
 #       the name of the library (array, interactive, string...) or the file path to include.
 # - $@: arguments _as any_:
 #       (optional) the arguments to pass to the sourced file (mimics the builtin source command).
-# - ${_OPTION_CONTINUE_IF_NOT_FOUND} _as bool_:
+# - $_OPTION_CONTINUE_IF_NOT_FOUND _as bool_:
 #       (optional) Do not fail the program if we do not find a file to source, we simply return 1.
 #       (defaults to false)
-# - ${_OPTION_RETURN_CODE_IF_ALREADY_INCLUDED} _as int_:
+# - $_OPTION_RETURN_CODE_IF_ALREADY_INCLUDED _as int_:
 #       (optional) The function return code if the given file or library was already
 #       included.
 #       (defaults to 0)
@@ -498,7 +498,7 @@ function core::dump() {
 
 # Private function to create a core dump file.
 function core_dump() {
-  local filePath
+  local filePath REPLY_CODE
   printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d%s" "${EPOCHSECONDS}" "${BASHPID}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   core::getUserStateDirectory

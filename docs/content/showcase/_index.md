@@ -7,6 +7,7 @@ toc: false
 layout: wide
 sidebar:
   exclude: true
+url: /showcase
 ---
 
 

@@ -339,12 +339,13 @@ function selfRelease::updateDocumentation() {
 
   if [[ "${dryRun:-}" != "true" ]]; then
     selfDocument --core-only --output "${GLOBAL_INSTALLATION_DIRECTORY}/extras"
-    selfRelease::writeAllFunctionsDocumentation "${pageFooter}"
+    selfRelease_writeAllFunctionsDocumentation "${pageFooter}"
   fi
 
-  # export the valet config valet to the documentation
+  # export the valet config md and full documentation to the documentation
   if [[ "${dryRun:-}" != "true" ]]; then
     exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/config.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
+    exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/extras/lib-valet.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/lib-valet.md"
   fi
 
   # copy the vscode recommended extensions
@@ -377,7 +378,7 @@ function selfRelease::updateDocumentation() {
 
 # This function writes all the functions documentation to the documentation files
 # under the `docs/content/docs/300.libraries` directory.
-function selfRelease::writeAllFunctionsDocumentation() {
+function selfRelease_writeAllFunctionsDocumentation() {
   local pageFooter="{{< callout type=\"info\" >}}"$'\n'"${1}"$'\n'"{{< /callout >}}"$'\n'
 
   log::info "Writing the ${#SORTED_FUNCTION_NAMES[@]} functions documentation to the core libraries docs."
@@ -397,6 +398,7 @@ function selfRelease::writeAllFunctionsDocumentation() {
   # write the new files
   local key
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
+    # shellcheck disable=SC2034
     local functionName="${key}"
     regex::getFirstGroup functionName '([-[:alnum:]]+)::'
     local packageName="${REPLY}"
@@ -418,7 +420,8 @@ url: /docs/libraries/${packageName}
 "
     fi
 
-    documentationPageContent["${path}"]+="${REPLY_ASSOCIATIVE_ARRAY[${key}]}"$'\n'
+    selfDocument::convertFunctionDocumentationToMarkdown "REPLY_ASSOCIATIVE_ARRAY[${key}]"
+    documentationPageContent["${path}"]+="${REPLY}"$'\n'
   done
 
   local -a filePaths=("${!documentationPageContent[@]}")
@@ -427,6 +430,7 @@ url: /docs/libraries/${packageName}
   # write each file
   local content path
   for path in "${filePaths[@]}"; do
+    # shellcheck disable=SC2034
     content="${documentationPageContent[${path}]}${pageFooter}"
     fs::writeToFile "${path}" content
   done

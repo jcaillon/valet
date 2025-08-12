@@ -1,4 +1,34 @@
 {
+	"function documentation": {
+		"prefix": [
+			"function documentation",
+			"doc"
+		],
+		"description": "The documentation of a function",
+		"scope": "",
+		"body": [
+			"# ## ${1:function name}",
+			"#",
+			"# ${2:description}",
+			"#",
+			"# - $1: **argument one** _as string_:",
+			"#       description",
+			"# - ${option} _as bool_:",
+			"#       (optional) description",
+			"#       (default to false)",
+			"#",
+			"# Returns:",
+			"#",
+			"# - ${REPLY}: ",
+			"#",
+			"# ```bash",
+			"# #${1:function name} ",
+			"# ```",
+			"#",
+			"# > notes",
+			"$0"
+		]
+	},
 	"[[:digit:]]": {
 		"prefix": "[[:digit:]]",
 		"description": "Regex digits, similar to [0-9]",

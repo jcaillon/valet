@@ -58,7 +58,7 @@ function bash::catchErrors() {
 #
 # - $@: **command with args** _as string_:
 #       The command to run in the subshell.
-# - ${_OPTION_EXIT_ON_FAIL} _as bool_:
+# - $_OPTION_EXIT_ON_FAIL _as bool_:
 #       (optional) If set to true, the main program will exit with code 1 if the command fails.
 #       (defaults to false)
 #
