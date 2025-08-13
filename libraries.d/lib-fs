@@ -399,6 +399,8 @@ function fs::tail() {
 # ```
 #
 # > - It will correctly list files under symbolic link directories.
+# > - #TODO: see if we are faster with ** and then looping over dirs to check for symbolic links
+# > - #TODO: introduce an optional (with default 10k) parameter to limit the number of results to avoid looping for too long
 function fs::listPaths() {
   local \
     directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \

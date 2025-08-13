@@ -1,0 +1,232 @@
+<style>
+footer {
+  display: none;
+}
+
+.hextra-feature-card:hover {
+  transform: translateY(-4px) scale(1.03);
+}
+
+hr {
+  width: 50%;
+  margin: 2.5rem auto;
+  border: none;
+  height: 3px;
+  background: linear-gradient(90deg, #017c1b 0%, #03a810 100%);
+}
+
+hr:is(html[class~="dark"] *) {
+  width: 50%;
+  margin: 2.5rem auto;
+  border: none;
+  height: 3px;
+  background: linear-gradient(90deg, #fbb3ff 0%, #ee66bf 100%);
+}
+
+.hero-valet-can-do {
+  background: linear-gradient(90deg, #017c1b 0%, #03a810 100%);
+  background-clip: border-box;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.hero-valet-can-do:is(html[class~="dark"] *) {
+  background: linear-gradient(90deg, #fbb3ff 0%, #ee66bf 100%);
+  background-clip: border-box;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.valet-hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 60rem;
+  z-index: -1000;
+  background: radial-gradient(125% 125% at 50% 90%, #ffffff 40%, #3acf89 100%);
+  pointer-events: none;
+}
+
+.valet-hero-bg:is(html[class~="dark"] *) {
+  background: rgb(17 17 17 / var(--tw-bg-opacity)) radial-gradient(125% 125% at 50% 100%, rgb(17 17 17 / var(--tw-bg-opacity)) 40%, rgb(53, 1, 54) 100%) 0% 0% / 100% 100%;
+}
+
+
+.valet-hero {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 0rem;
+  margin-bottom: 3rem;
+  flex-wrap: nowrap; /* Prevent wrapping on desktop */
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 700px) {
+  .valet-hero {
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    justify-content: center;
+    text-align: center;
+  }
+  .valet-hero-content {
+    min-width: 0;
+    align-items: center;
+  }
+}
+
+.valet-logo-img {
+  height: 8rem;
+  width: 8rem;
+  min-width: 8rem;
+  object-fit: contain;
+  margin-right: 0.5rem;
+  content: url("logo.png");
+}
+
+.valet-logo-img:is(html[class~="dark"] *) {
+  content: url("logo-dark.png");
+}
+
+.valet-hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.valet-hero-button {
+  margin-right: 1rem;
+}
+.valet-hero-button:is(html[class~="dark"] *) {
+  color: #020101ff;
+}
+</style>
+
+<div class="valet-hero-bg"></div>
+
+<div class="valet-hero" style="position: relative; z-index: 1;">
+  <img class="valet-logo-img" src="logo.png" alt="Valet logo" />
+  <div class="valet-hero-content">
+    <h1 class="not-prose hx-text-4xl hx-font-bold hx-leading-none hx-tracking-tighter md:hx-text-5xl hx-py-2 hx-bg-clip-text hx-text-transparent hx-bg-gradient-to-r hx-from-gray-900 hx-to-gray-600 dark:hx-from-gray-100 dark:hx-to-gray-400">
+      Valet
+    </h1>
+    <h2 class="not-prose hx-text-xl hx-text-gray-600 dark:hx-text-gray-400 sm:hx-text-xl">
+      Valet is a zero dependency tool that helps you build fast, robust, testable and interactive CLI applications in bash.
+    </h2>
+    <div>
+      <a href="docs" class="not-prose hx-font-medium hx-cursor-pointer hx-px-6 hx-py-3 hx-rounded-full hx-text-center hx-text-white hx-inline-block hx-bg-primary-600 hover:hx-bg-primary-700 focus:hx-outline-none focus:hx-ring-4 focus:hx-ring-primary-300 dark:hx-bg-primary-600 dark:hover:hx-bg-primary-700 dark:focus:hx-ring-primary-800 hx-transition-all hx-ease-in hx-duration-200 valet-hero-button">Read the docs</a>
+      <button title="Change theme" data-theme="dark" class="theme-toggle hx-group not-prose hx-font-medium hx-cursor-pointer hx-px-6 hx-py-3 hx-rounded-full hx-text-center hx-text-white hx-inline-block hx-bg-primary-600 hover:hx-bg-primary-700 focus:hx-outline-none focus:hx-ring-4 focus:hx-ring-primary-300 dark:hx-bg-primary-600 dark:hover:hx-bg-primary-700 dark:focus:hx-ring-primary-800 hx-transition-all hx-ease-in hx-duration-200 valet-hero-button" type="button" aria-label="Change theme">
+        <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height="12" class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height="12" class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<hr>
+
+<style>
+.valet-pain-points-section {
+  margin-bottom: 3rem;
+}
+.valet-pain-points {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.valet-pain-point {
+  background: linear-gradient(135deg, #fee2e2 60%, #ffb4b4ff 100%);
+  border-radius: 1.25rem;
+
+  padding: 0.5rem 1rem 1rem 1rem;
+  max-width: 340px;
+  min-width: 260px;
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  border: 2px solid #d6baba;
+  overflow: hidden;
+}
+.valet-pain-point:hover {
+  transform: translateY(-4px) scale(1.03);
+}
+.valet-pain-point-icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  color: #b91c1c;
+  filter: drop-shadow(0 0 8px #f87171);
+  z-index: 1;
+}
+.valet-pain-point-title {
+  font-weight: 700;
+  font-size: 1.15rem;
+  margin-bottom: 0.5rem;
+  color: #991b1b;
+  z-index: 1;
+}
+.valet-pain-point-desc {
+  font-size: 1rem;
+  color: #7f1d1d;
+  z-index: 1;
+}
+.valet-pain-point:is(html[class~="dark"] *) {
+  background: linear-gradient(135deg, #7f1d1d 60%, #b91c1c 100%);
+  color: #fee2e2;
+  border: 2px solid #f87171;
+}
+.valet-pain-point-title:is(html[class~="dark"] *) { color: #fff; }
+.valet-pain-point-desc:is(html[class~="dark"] *) { color: #fee2e2; }
+.valet-pain-point-icon:is(html[class~="dark"] *) { color: #f87171; }
+</style>
+
+<div class="valet-pain-points-section">
+  <div class="valet-pain-points">
+    <div class="valet-pain-point">
+      <span class="valet-pain-point-icon">💢</span>
+      <div class="valet-pain-point-title">Duplicated code in all scripts</div>
+      <div class="valet-pain-point-desc">
+        I'm copy/pasting the same log functions across all my scripts!
+      </div>
+    </div>
+    <div class="valet-pain-point">
+      <span class="valet-pain-point-icon">💢</span>
+      <div class="valet-pain-point-title">Frail arguments parser</div>
+      <div class="valet-pain-point-desc">
+        All my scripts contain a variation of a <code>while [[ $# > 0 ]];</code> loop to parse arguments.
+      </div>
+    </div>
+    <div class="valet-pain-point">
+      <span class="valet-pain-point-icon">💢</span>
+      <div class="valet-pain-point-title">Dependency hell</div>
+      <div class="valet-pain-point-desc">
+        My scripts depend on external tools that are not always installed.
+      </div>
+    </div>
+    <div class="valet-pain-point">
+      <span class="valet-pain-point-icon">💢</span>
+      <div class="valet-pain-point-title">Slow scripts</div>
+      <div class="valet-pain-point-desc">
+        Bash scripts on windows are unbearably slow, WSL is absolutely mandatory.
+      </div>
+    </div>
+    <div class="valet-pain-point">
+      <span class="valet-pain-point-icon">💢</span>
+      <div class="valet-pain-point-title">Script reusability &amp; sharing</div>
+      <div class="valet-pain-point-desc">
+        I can never remember the required options and arguments of my script and the help is often outdated.
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="hx-text-center hx-mb-6 hero-valet-can-do">
+  Sound familiar? Let's see what Valet can do for you!
+</p>

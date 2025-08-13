@@ -1,9 +1,11 @@
+/* redefine the primary color */
 :root {
   --primary-hue: 96deg;
   --primary-saturation: 100%;
   --primary-lightness: 30%;
   --tw-text-opacity: 1;
 }
+
 .dark {
   --primary-hue: 321deg;
   --primary-saturation: 100%;
@@ -18,9 +20,17 @@
   max-width: 120rem;
 }
 
+.hero-container {
+  max-width: 100rem;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
 strong {
   background: linear-gradient(to left, #017c1b, #03a810);
-    background-clip: border-box;
+  background-clip: border-box;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -28,7 +38,7 @@ strong {
 
 strong:is(html[class~="dark"] *) {
   background: linear-gradient(to left, #fbb3ff, #ee66bf);
-    background-clip: border-box;
+  background-clip: border-box;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -45,40 +55,8 @@ strong:is(html[class~="dark"] *) {
   padding-right: 1rem;
 }
 
-.gradient-text {
-  background: linear-gradient(to left, #fbb3ff, #ee66bf);
-    background-clip: border-box;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 hr {
   border: 0;
   border-top: 1px solid rgba(187, 187, 187, 0.082);
   margin: 1rem 0;
 }
-
-/* FOR MERMAID */
-
-/*
-.mermaid-button:hover {
-    opacity: 1;
-}
-
-.mermaid-button.active {
-    background-color: rgba(220, 240, 255, 0.8);
-    border-color: rgba(0, 0, 0, 0.4);
-}
-
-:is(html[class~="dark"] *) .mermaid-button {
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
-:is(html[class~="dark"] *) .mermaid-button.active {
-    background-color: rgba(40, 60, 80, 0.8);
-    border-color: rgba(200, 220, 240, 0.4);
-}
-*/

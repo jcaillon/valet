@@ -31,10 +31,6 @@ menu:
       name: Documentation
       pageRef: /docs
       weight: 1
-    - identifier: showcase
-      name: Showcase
-      pageRef: /showcase
-      weight: 20
     - identifier: jcaillon
       name: jcaillon ↗
       url: "https://jcaillon.github.io"
