@@ -62,7 +62,7 @@ It will allow you to navigate to the function definitions with `F12` and `Ctrl+c
 
 You should have autocompletion and help on all ibrary functions:
 
-![autocompletion](image.png)
+![autocompletion](image.png "Autocompletion with VS code")
 
 ### 👮 shellcheck
 

@@ -44,6 +44,16 @@ strong:is(html[class~="dark"] *) {
   color: transparent;
 }
 
+summary strong {
+  background: transparent;
+  color: inherit;
+}
+
+summary strong:is(html[class~="dark"] *) {
+  background: transparent;
+  color: inherit;
+}
+
 .hextra-custom-footer {
   display: flex;
   gap: 0.5rem;

@@ -6,9 +6,13 @@ weight: 300
 url: /docs/libraries
 ---
 
-## 🧩 Source standard libraries
+## 🧩 Standard libraries
 
-A set of standard libraries are available on Valet. To use the library functions, you need to _source_ the library that you need, e.g.:
+Valet comes with standard libraries that declare many useful functions to use in your commands and scripts.
+
+To use a standard function, you need to `source` the library that declares it.
+
+E.g. if you need `string::getField` and `interactive::promptYesNo`, do:
 
 ```bash
 source string
@@ -21,37 +25,65 @@ Alternatively, if you have several libraries to source, you can use the `include
 include string interactive
 ```
 
-All Valet functions are prefixed with the library name. E.g. the function `string::cutField` is from the `string` library. A clear error message will be displayed if you are trying to use a library function without sourcing the library.
+All Valet functions are prefixed with the library name. E.g. the function `string::getField` is from the `string` library. A clear error message will be displayed if you are trying to use a library function without sourcing the library.
 
-{{< callout type="info" emoji="💡" >}}
-The bash built-in `source` is overridden by a function in Valet. This allows to not source the same file twice, so you can safely call `source mylibrary` several times without impacting the runtime performance. If you need to use the default source keyword, use `builtin source`.
-{{< /callout >}}
+> [!IMPORTANT]
+> The bash built-in `source` is [overridden by a function in Valet](../libraries/core/#source). This allows to not source the same file twice, so you can safely call `source mylib` several times without impacting the runtime performance.
+>
+> If you need to use the default source keyword, use `builtin source`.
 
 ## 👔 About library functions
 
-The functions in Valet are implemented for a good compromise between performance and readability. They generally define clear local variables for the inputs as they make the code more understandable. However, they do not implement input validation (beside checking if mandatory arguments are given), it is your responsibility to ensure that the inputs are correct.
+The functions in Valet are implemented for a good compromise between performance and readability. They generally define clear local variables for the inputs as it makes the code more understandable. However, they do not implement input validation (beside checking if the mandatory arguments are given), it is your responsibility to ensure that the inputs are correct.
 
-Functions return values using global variables (see [performance tips](/docs/performance-tips) for an explanation). Depending on the type and number of returned values, they will named as such:
+Functions return values using global variables (see [performance tips](../performance-tips) and [bash best practices](../bash-best-practices) for an explanation). Depending on the type and number of returned values, they will named as such:
 
-- `${RETURNED_VALUE}`
-- `${RETURNED_VALUE2}`
-- `${RETURNED_VALUE3}`
-- `${RETURNED_ARRAY[@]}`
-- `${RETURNED_ARRAY2[@]}`
-- `${RETURNED_ASSOCIATIVE_ARRAY[@]}`
+- `${REPLY}`
+- `${REPLY2}`
+- `${REPLY3}`
+- `${REPLY_ARRAY[@]}`
+- `${REPLY_ARRAY2[@]}`
+- `${REPLY_ASSOCIATIVE_ARRAY[@]}`
 
-This ensures consistency across all functions. The trade off is that you must pay attention to how you use these variables. Calling two functions that are using the same `RETURNED_VALUE` will overwrite the value of the first function, so you will want to assign it to another variable because calling the second function.
+This ensures consistency across all functions. The trade off is that you must pay attention to how you use these variables. Calling two functions that are using the same `REPLY` will overwrite the value of the first function, so you will want to assign it to another variable because calling the second function.
 
-When you want to set a returned value to a particular variable and want to avoid copying the returned value as such `myVar="${RETURNED_VALUE}"`, you can use something like this:
+{{% details title="Advanced syntax for REPLY assignment" closed="true" %}}
+
+When you want to set a returned value to a particular variable and want to avoid copying the returned value as such `myVar="${REPLY}"`, you can use something like this:
 
 ```bash
 declare MY_STRING='kebab-case' MY_OUTPUT
-declare -n RETURNED_VALUE=MY_OUTPUT # make RETURNED_VALUE reference MY_OUTPUT
-string::convertKebabCaseToCamelCase MY_STRING # the function writes to RETURNED_VALUE, which points to MY_OUTPUT
-declare +n RETURNED_VALUE=value # we remove the reference and set another value
+declare -n REPLY=MY_OUTPUT # make REPLY reference MY_OUTPUT
+string::convertKebabCaseToCamelCase MY_STRING # the function writes to REPLY, which points to MY_OUTPUT
+declare +n REPLY=value # we remove the reference and set another value
 echo "MY_OUTPUT: ⌜${MY_OUTPUT}⌝" # will output 'kebabCase'
-echo "RETURNED_VALUE: ⌜${RETURNED_VALUE}⌝" # will output 'value'
+echo "REPLY: ⌜${REPLY}⌝" # will output 'value'
 ```
+
+{{% /details %}}
+
+A lot of functions will accept options in addition to mandatory arguments. Options are passed using the shell parameter syntax `option=value` and must always come after any positional arguments.
+
+E.g., to use the `separator` option of the `string::getField` function:
+
+```bash
+string::getField MY_STRING 1 separator=" "
+```
+
+For functions that accept a undetermined number of positional argument, options must be passed after the `---` separator to differentiate them from the arguments:
+
+```bash
+curl::request https://example.com -X POST -H 'Authorization: token' --- failOnError=true
+```
+
+> [!NOTE]
+> The function documentation will always specify if the --- separator is required. Assume that it is not required otherwise.
+
+## 🪄 Using functions outside Valet
+
+You can use Valet functions in your own scripts by sourcing the Valet library files. This allows you to leverage the powerful functions provided by Valet in your own bash scripts.
+
+See [this section in usage](../usage/#-use-valet-library-functions-in-your-existing-scripts) for more information.
 
 ## 🎀 Available core libraries
 

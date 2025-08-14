@@ -8,18 +8,18 @@ url: /docs/new-tests
 
 Valet comes with a standardized way to implement and run tests for your commands and library functions.
 
-Once you have [created an extension][newExtensionsLink] and opened its directory, you can start creating your new tests.
+Once you have [created an extension][newExtensionsLink] and moved to its directory, you can start creating your new tests.
 
 ## 📂 Test suites and test files
 
-Tests are organized in thematic groups which are called _test suites_. A test suite is a directory which contains test scripts. All test suite directories should be created in the `tests.d` directory if your extensions.
+Tests are organized in thematic groups which are called **test suites**. A test suite is a directory which contains **test scripts**. All test suite directories should be created in the `tests.d` directory in your extension.
 
-A test suite can, for example, regroup tests for a particular command. Organize them as you please, you can even define a single test suite for all your tests.
+A test suite can, for example, regroup tests for a particular command. Organize them as you please. You can even define a single test suite for all your tests.
 
-> [!NOTE]
-> Test suites are run independently from each other and in parallel by default.
+> [!TIP]
+> Test suites are run in parallel, test scripts inside a test suite are run sequentially.
 
-The tests are then coded in `.sh` scripts directly under a test suite directory.
+The tests are coded in `.sh` scripts directly under a test suite directory.
 
 You can check the [test suites defined for Valet][valet-test-suites] to have an example.
 
@@ -44,7 +44,7 @@ Here is an example of directory structure for your user directory:
     {{< /filetree/folder >}}
     {{< filetree/folder name="shared-commands" >}}
       {{< filetree/folder name="tests.d" >}}
-        {{< filetree/file name="before-each-test" >}}
+        {{< filetree/file name="after-tests" >}}
         {{< filetree/folder name="test-suite3" >}}
           {{< filetree/file name="test.sh" >}}
         {{< /filetree/folder >}}
@@ -60,17 +60,25 @@ In your test scripts, you will call your command functions or run any code that 
 Instead:
 
 1. You will just print what you want to the stdout (e.g. `echo stuff`) or stderr (e.g. `echo thing >&2`) file descriptors.
-2. These outputs will be captured and appended to a test report file named `results.received.md`.
+2. These outputs will be captured, formatted, and appended to a test report file named `results.received.md`.
 3. This file will then be compared to an existing file named `results.approved.md` which is supposed to be committed with your sources and which contains the expected test report.
 4. If the files are different but the new received test if correct (or if the approved version does not exist yet), you can approve it and `results.received.md` will be the new `results.approved.md`.
 5. When you run the test again, the 2 files will be identical, ensuring you that your tests still lead to the same results.
 
-You can check an example of [test report for the **test** library of Valet][valet-test-lib-report].
+You can check an example of test report for the [test library of Valet][valet-test-lib-report].
 
 Each test suite will generate a different test results markdown file that can be approved.
 
 > [!TIP]
-> Valet uses a diff tool to compare the received and the approved files. It is strongly recommended to install [delta](https://github.com/dandavison/delta) which will automatically be used by Valet. You can configure your diff tool in the [Valet config](../configuration/). Valet will use a pure bash file compare function if it doesn't find a better diff tool.
+> Valet uses a diff tool to compare the received and the approved files. It is strongly recommended to install [delta](https://github.com/dandavison/delta) which will automatically be used by Valet. You can configure your diff tool in the [Valet config](../configuration/).
+>
+> Valet will use a pure bash file compare function if it doesn't find a better diff tool, but the experience will be suboptimal.
+
+{{% details title="Example of a diff with delta" closed="true" %}}
+
+![delta](delta.png "Example of a diff with delta")
+
+{{% /details %}}
 
 ## 🧪 Tests
 
@@ -94,7 +102,7 @@ You are advised to check the tests for the test library, which also documents ho
 - [The test report generated][valet-test-lib-report].
 - [The test script][valet-test-lib-tests].
 
-The Valet [tests.d][[valet-test-suites]] directory contains many other examples.
+The Valet [tests.d][valet-test-suites] directory contains many other examples.
 
 ## 🏃‍♂️ Run tests
 
@@ -128,12 +136,12 @@ valet self test -i my-test-suite
 
 ## 🪝 Test hooks
 
-In addition to the test scripts, you can create other specific scripts which will be source'd at different time during the tests execution:
+In addition to the test scripts, you can create other specific scripts which will be included (`source`) at different time during the tests execution:
 
 | Script path | Purpose |
 |-------------|---------|
-| `tests.d/before-tests` | Source'd before each test suite is executed. |
-| `tests.d/after-tests` | Source'd after each test suite is executed. |
+| `tests.d/before-tests` | Included before each test suite is executed. |
+| `tests.d/after-tests` | Included after each test suite is executed. |
 
 [valet-test-suites]: https://github.com/jcaillon/valet/tree/latest/tests.d
 [valet-test-lib-report]: https://github.com/jcaillon/valet/blob/latest/tests.d/lib-test/results.approved.md
