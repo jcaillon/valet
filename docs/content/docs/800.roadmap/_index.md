@@ -72,3 +72,5 @@ This page lists the features that I would like to implement in Valet. They come 
 - Modify self install: at the moment we count on the fact that some functions will still exist in valet after an update. The simplest is to redownload the self install script and run it again.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues
+
+{{< main-section-end >}}

@@ -25,14 +25,17 @@ REPLY='#!/usr/bin/env bash
 # - `~/.config/valet/config`: the Valet configuration file (this is the recommended way to configure Valet itself).
 # - `./.env`: a `.env` in the current directory (the filename can be set with `VALET_CONFIG_DOT_ENV_SCRIPT`).
 # 
-# > **Tip:** Use the `.env` files to configure your project-specific variables.
+# > [!TIP]
+# > Use the `.env` files to configure your project-specific variables.
 # > Remember that command options are also configurable through environment variables!
 # 
 ##############################
 # 📄 About the config file
 ##############################
 # 
-# The config file is sourced by Valet on startup which allows you to setup variables to configure Valet.
+# The config file is sourced by Valet on startup.
+# 
+# It allows you to setup `VALET_*` variables to configure Valet.
 # 
 # Use the `valet self config` command to initialize and open the YAML configuration file.
 # 
@@ -45,10 +48,13 @@ REPLY='#!/usr/bin/env bash
 # VALET_CONFIG_MY_VAR="${VALET_CONFIG_MY_VAR:-"default value if not set"}"
 # ```
 # 
-# Do not add custom code to this script, use the custom startup script instead (see next section).
+# > [!IMPORTANT]
+# > Do not add complex logic to this script, use the custom startup script instead (see next section).
 # 
-# If you break this file, valet will fail to start!
-# You can delete it and run the `valet self config` command to recreate it.
+# > [!CAUTION]
+# > If you break this file, valet will fail to start!
+# >
+# > You can delete it and run the `valet self config` command to recreate it.
 # 
 ##############################
 # 🚩 Custom startup script
@@ -59,7 +65,6 @@ REPLY='#!/usr/bin/env bash
 # This allows you to define custom functions or variables that will be available in Valet.
 # 
 # For example, the following script is convenient way to translate `CI_*` variables to `VALET_*` variables.
-# The script should be named `startup` and be in the same directory as the config file.
 # 
 # ```bash
 # # Convert argocd env vars to normal env vars
@@ -69,6 +74,8 @@ REPLY='#!/usr/bin/env bash
 # done
 # eval "${_TO_EVAL}"
 # ```
+# 
+# The script must be named `startup` and be in the same directory as the config file. You can override the path to this file using the variable `VALET_CONFIG_STARTUP_SCRIPT`.
 # 
 ##############################
 # 🅰️ Configuration variables
@@ -83,14 +90,7 @@ REPLY='#!/usr/bin/env bash
 # 
 # These variables define the location of the configuration files.
 # 
-# They **MUST BE** declared outside the config file (in your `~/.bashrc`)!
-# 
-# VALET_CONFIG_DIRECTORY=""
-# The path to the configuration directory of Valet.
-# You can backup this directory to keep your configuration.
-# Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
-# 
-# VALET_CONFIG_FILE=""'
+# **They must be declared outside the config file** (e.g. in your `~/.bashrc`)!'
 ```
 
 Testing selfConfig::getFileContent with exportCurrentValues:
@@ -116,14 +116,17 @@ REPLY='#!/usr/bin/env bash
 # - `~/.config/valet/config`: the Valet configuration file (this is the recommended way to configure Valet itself).
 # - `./.env`: a `.env` in the current directory (the filename can be set with `VALET_CONFIG_DOT_ENV_SCRIPT`).
 # 
-# > **Tip:** Use the `.env` files to configure your project-specific variables.
+# > [!TIP]
+# > Use the `.env` files to configure your project-specific variables.
 # > Remember that command options are also configurable through environment variables!
 # 
 ##############################
 # 📄 About the config file
 ##############################
 # 
-# The config file is sourced by Valet on startup which allows you to setup variables to configure Valet.
+# The config file is sourced by Valet on startup.
+# 
+# It allows you to setup `VALET_*` variables to configure Valet.
 # 
 # Use the `valet self config` command to initialize and open the YAML configuration file.
 # 
@@ -136,10 +139,13 @@ REPLY='#!/usr/bin/env bash
 # VALET_CONFIG_MY_VAR="${VALET_CONFIG_MY_VAR:-"default value if not set"}"
 # ```
 # 
-# Do not add custom code to this script, use the custom startup script instead (see next section).
+# > [!IMPORTANT]
+# > Do not add complex logic to this script, use the custom startup script instead (see next section).
 # 
-# If you break this file, valet will fail to start!
-# You can delete it and run the `valet self config` command to recreate it.
+# > [!CAUTION]
+# > If you break this file, valet will fail to start!
+# >
+# > You can delete it and run the `valet self config` command to recreate it.
 # 
 ##############################
 # 🚩 Custom startup script
@@ -150,7 +156,6 @@ REPLY='#!/usr/bin/env bash
 # This allows you to define custom functions or variables that will be available in Valet.
 # 
 # For example, the following script is convenient way to translate `CI_*` variables to `VALET_*` variables.
-# The script should be named `startup` and be in the same directory as the config file.
 # 
 # ```bash
 # # Convert argocd env vars to normal env vars
@@ -160,6 +165,8 @@ REPLY='#!/usr/bin/env bash
 # done
 # eval "${_TO_EVAL}"
 # ```
+# 
+# The script must be named `startup` and be in the same directory as the config file. You can override the path to this file using the variable `VALET_CONFIG_STARTUP_SCRIPT`.
 # 
 ##############################
 # 🅰️ Configuration variables
@@ -174,14 +181,7 @@ REPLY='#!/usr/bin/env bash
 # 
 # These variables define the location of the configuration files.
 # 
-# They **MUST BE** declared outside the config file (in your `~/.bashrc`)!
-# 
-VALET_CONFIG_DIRECTORY=A\ value
-# The path to the configuration directory of Valet.
-# You can backup this directory to keep your configuration.
-# Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
-# 
-# VALET_CONFIG_FILE=""'
+# **They must be declared outside the config file** (e.g. in your `~/.bashrc`)!'
 ```
 
 ### ✅ Testing self config command

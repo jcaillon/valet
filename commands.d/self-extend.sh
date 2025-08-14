@@ -25,7 +25,7 @@ source command
 # >>> command: self extend
 #===============================================================
 
-##<<VALET_COMMAND
+##<<<VALET_COMMAND
 # command: self extend
 # function: selfExtend
 # author: github.com/jcaillon
@@ -94,7 +94,7 @@ source command
 ##VALET_COMMAND
 function selfExtend() {
   local extensionUri version skipSetup name
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   local action="created"

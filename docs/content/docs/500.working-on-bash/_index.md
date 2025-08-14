@@ -6,8 +6,8 @@ weight: 500
 url: /docs/work-on-bash-scripts
 ---
 
-> [!INFORMATION]
-> Disclaimer: This page is just one opinion. This is not the best way to work on bash scripts, this is just an explanation of how I work.
+> [!IMPORTANT] Disclaimer
+> This page is just one opinion. This is not the best way to work on bash scripts, this is just an explanation of how I work.
 
 ## 🧑‍💻 VS Code
 
@@ -41,7 +41,8 @@ Here is a list of recommended extensions to work on bash scripts:
 
 A more up-to-date list can be found in [extensions.json](https://raw.githubusercontent.com/jcaillon/valet/refs/heads/latest/extras/.vscode/extensions.json).
 
-You will need to install at least: [shfmt](https://github.com/mvdan/sh#shfmt), [shellcheck](https://github.com/koalaman/shellcheck).
+> [!TIP] Dependencies
+> For those extensions to work, you will need to install: [shfmt](https://github.com/mvdan/sh#shfmt), [shellcheck](https://github.com/koalaman/shellcheck).
 
 ### 🆎 Autocompletion on Valet library functions
 
@@ -81,7 +82,4 @@ source string
 - [Pure bash bible](https://github.com/dylanaraps/pure-bash-bible)
 - [Dave's videos](https://ysap.sh/)
 
-{{< cards >}}
-  {{< card icon="arrow-circle-left" link="../core-commands" title="Valet core commands" >}}
-  {{< card icon="arrow-circle-right" link="../performance-tips" title="Performance tips" >}}
-{{< /cards >}}
+{{< main-section-end >}}

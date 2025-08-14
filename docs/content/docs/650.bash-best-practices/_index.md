@@ -6,13 +6,12 @@ weight: 650
 url: /docs/bash-best-practices
 ---
 
-> [!INFORMATION]
-> Disclaimer: This page is just my humble take on how to write bash scripts in Valet. It does not mean that your way of coding isn't fit for your particular use case!
+> [!IMPORTANT] Disclaimer
+> This page is just my humble take on how to write bash scripts in Valet. It does not mean that your way of coding isn't fit for your particular use case!
 > I am writing this page mostly as a reference for myself, to work on Valet and its extensions the way I intended it when building this tool.
 
-{{< callout type="warning" >}}
-🚧 Work in progress 🚧
-{{< /callout >}}
+> [!WARNING]
+> 🚧 Work in progress 🚧
 
 I am keeping example bash scripts that demonstrates the points I am making in this page in [lessons-learned][lessons-learned].
 
@@ -68,9 +67,8 @@ The function `core::parseFunctionOptions` can be used to extract the options fro
 
 A clear example of argument parsing implementation can be found in the [coding-style test suite][codingStyleTestSuite].
 
-{{< callout type="info"  emoji="🎓" >}}
-Use bash parameter syntax for optional parameters. The options can be parsed using the `core::parseFunctionOptions` function.
-{{< /callout >}}
+> [!TIP]
+> Use bash parameter syntax for optional parameters. The options can be parsed using the `core::parseFunctionOptions` function.
 
 #### Function outputs
 
@@ -92,9 +90,8 @@ echo "${REPLY}"
 
 As [seen above](#error-handling--err-trap-in-bash), we should not use `return` to return an exit code because it would encourage a bad usage of the function. Instead, we should always return 0 from our functions and use the `REPLY_CODE` variable to return an exit code.
 
-{{< callout type="info"  emoji="🎓" >}}
-Use the `REPLY` global variable to store the string output of your function. Use `REPLY2`, `REPLY_ARRAY`, etc... for multiple outputs. And use `REPLY_CODE` to return an exit code. Do not use `return` with a non-zero exit code because it would push the users to use the function in a way that would not trigger the **ERR trap**.
-{{< /callout >}}
+> [!TIP]
+> Use the `REPLY` global variable to store the string output of your function. Use `REPLY2`, `REPLY_ARRAY`, etc... for multiple outputs. And use `REPLY_CODE` to return an exit code. Do not use `return` with a non-zero exit code because it would push the users to use the function in a way that would not trigger the **ERR trap**.
 
 #### Function body
 
@@ -116,13 +113,11 @@ See the [lessons-learned/error-handling.sh][error-handling] for a demonstration.
 
 The bash option `nounset` will cause bash to exit without triggering the ERR trap if a variable is not set. This is because the ERR trap is only triggered by commands that return a non-zero exit status, and an unset variable does not return a non-zero exit status.
 
-{{< callout type="info"  emoji="🎓" >}}
-Do not call a complex function in a `until`, `while`, `if`, or as part of a `!`, `||`, `&&` pipeline because any error happening in the function will not trigger the **ERR trap** and will effectively be silent.
-{{< /callout >}}
+> [!TIP]
+> Do not call a complex function in a `until`, `while`, `if`, or as part of a `!`, `||`, `&&` pipeline because any error happening in the function will not trigger the **ERR trap** and will effectively be silent.
 
-{{< callout type="info"  emoji="🎓" >}}
-When creating a complex function, do not use `return` and set an exit code because this would encourage a bad usage of the function. Instead, use `REPLY` and simply return 0 from the function.
-{{< /callout >}}
+> [!TIP]
+> When creating a complex function, do not use `return` and set an exit code because this would encourage a bad usage of the function. Instead, use `REPLY` and simply return 0 from the function.
 
 ### Jobs and coproc
 
@@ -138,21 +133,13 @@ Coproc behaves like a background job with the exception that they do not inherit
 
 To make our life easier, Valet only uses coproc and never uses jobs. Coproc are as fast as jobs to start and they come with two way communication channels (stdin/stdout).
 
-{{< callout type="info"  emoji="🎓" >}}
-For background tasks, always use the [coproc](../libraries/coproc) library which correctly handles all the subtleties of correctly managing a coproc.
-{{< /callout >}}
-
-
-
-
-
-{{< cards >}}
-  {{< card icon="arrow-circle-left" link="../performance-tips" title="Performance tips" >}}
-  {{< card icon="arrow-circle-right" link="../valet-internals" title="Valet internals" >}}
-{{< /cards >}}
+> [!TIP]
+> For background tasks, always use the [coproc](../libraries/coproc) library which correctly handles all the subtleties of correctly managing a coproc.
 
 [lessons-learned]: https://github.com/jcaillon/valet/tree/main/lessons-learned
 [error-handling]: https://github.com/jcaillon/valet/tree/main/lessons-learned/error-handling.sh
 [cliGuidelineReference]: https://clig.dev/
 [passingFunctionParametersLink]: https://github.com/jcaillon/valet/blob/main/lessons-learned/passing-function-parameters.sh
 [codingStyleTestSuite]: https://github.com/jcaillon/valet/blob/main/tests.d/coding-style/00.coding-style.sh
+
+{{< main-section-end >}}

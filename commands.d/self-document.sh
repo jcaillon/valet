@@ -17,7 +17,7 @@ source time
 # >>> command: self document
 #===============================================================
 
-##<<VALET_COMMAND
+##<<<VALET_COMMAND
 # command: self document
 # function: selfDocument
 # author: github.com/jcaillon
@@ -46,7 +46,7 @@ source time
 ##VALET_COMMAND
 function selfDocument() {
   local output coreOnly
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   # default output to the user directory

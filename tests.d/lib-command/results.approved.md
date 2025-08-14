@@ -431,11 +431,10 @@ REPLY_ARRAY=(
 [9]='self test'
 [10]='self uninstall'
 [11]='self update'
-[12]='showcase sudo-command'
-[13]='help'
-[14]='showcase command1'
-[15]='showcase interactive'
-[16]=''
+[12]='help'
+[13]='showcase command1'
+[14]='showcase interactive'
+[15]=''
 )
 REPLY_ARRAY2=(
 [0]='selfAddCommand'
@@ -450,11 +449,10 @@ REPLY_ARRAY2=(
 [9]='selfTest'
 [10]='selfUninstall'
 [11]='selfUpdate'
-[12]='showCaseSudo'
-[13]='showCommandHelp'
-[14]='showcaseCommand1'
-[15]='showcaseInteractive'
-[16]='this'
+[12]='showCommandHelp'
+[13]='showcaseCommand1'
+[14]='showcaseInteractive'
+[15]='this'
 )
 ```
 

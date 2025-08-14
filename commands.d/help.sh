@@ -39,7 +39,7 @@ examples:
 function showCommandHelp() {
   local -a commands
   local commandArgumentsErrors help columns help
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   # show the program help if no commands are provided

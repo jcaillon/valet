@@ -6,7 +6,7 @@
 # >>> command: self uninstall
 #===============================================================
 
-##<<VALET_COMMAND
+##<<<VALET_COMMAND
 # command: self uninstall
 # function: selfUninstall
 # hideInMenu: true
@@ -28,7 +28,7 @@
 ##VALET_COMMAND
 function selfUninstall() {
   local script
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   if [[ ${script:-} == "true" ]]; then

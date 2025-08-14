@@ -9,7 +9,7 @@ array:
 
 echo "Hello, World!"
 
-##<<VALET_COMMAND
+##<<<VALET_COMMAND
 # yep!
 ##VALET_COMMAND
 

@@ -1,0 +1,7 @@
+<tr>
+  <td>{{ .Get "name"}}</td>
+  <td>{{ .Get "mandatory"}}</td>
+  <td>
+    {{- .InnerDeindent | markdownify -}}
+  </td>
+</tr>

@@ -8,9 +8,8 @@ url: /docs/valet-internals
 
 In this page, we will document the internals of Valet. This is useful if you want to contribute to Valet or if you want to understand how it works.
 
-{{< callout type="warning" >}}
-🚧 Work in progress 🚧
-{{< /callout >}}
+> [!WARNING]
+> 🚧 Work in progress 🚧
 
 ## File descriptors
 
@@ -23,7 +22,4 @@ For file descriptors, we create 4 main global variables:
 
 We use these variables to redirect the output of the program to the correct fd.
 
-{{< cards >}}
-  {{< card icon="arrow-circle-left" link="../bash-best-practices" title="Bash best practices" >}}
-  {{< card icon="arrow-circle-right" link="../roadmap" title="Roadmap" >}}
-{{< /cards >}}
+{{< main-section-end >}}

@@ -37,7 +37,7 @@ examples:
 ---"
 function showcaseCommand1() {
   local -a more
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   log::info "First argument: ${firstArg:-}."
@@ -55,28 +55,6 @@ function showcaseCommand1() {
   log::info "Extracted text is: ⌜${extractedText:-}⌝"
 
   echo "That's it!"
-}
-
-
-#===============================================================
-# >>> command: showcase sudo-command
-#===============================================================
-
-: "---
-command: showcase sudo-command
-function: showCaseSudo
-sudo: true
-shortDescription: A command that requires sudo.
-description: |-
-  Before starting this command, valet will check if sudo is available.
-
-  If so, it will require the user to enter the sudo password and you can use the \${SUDO} variable inside the command
----"
-function showCaseSudo() {
-  command::parseArguments "$@" && eval "${REPLY}"
-  command::checkParsedResults
-
-  ${SUDO} whoami
 }
 
 

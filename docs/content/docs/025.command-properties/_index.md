@@ -13,10 +13,9 @@ Here is a definition example that uses all the properties:
 ```yaml {linenos=table,linenostart=1}
 command: command
 function: functionName
-shortDescription: A short sentence.
+shortDescription: A short sentence displayed in the command menu.
 description: |-
-  A long description that can use ⌜quotes⌝.
-sudo: false
+  A long description that can use ⌜quotes⌝ which is displayed on --help.
 hideInMenu: false
 arguments:
 - name: first-arg
@@ -42,98 +41,57 @@ examples:
 
 You can check the [showcase commands][showcase-examples] to get definition examples.
 
-## 🫚 Top level properties
+> [!IMPORTANT]
+> Don't forget to [re-build Valet](../new-commands/#-rebuild-valet-menu) after making changes to your command definitions.
 
-The available properties are:
+## 🫚 API reference
 
-### ✔️ command
+Find below the possible command properties and their meaning:
 
+{{< properties-table >}}
+
+<!-- ___________________________ -->
+<!-- ----- command ---------- -->
+{{< properties-row name="command" mandatory="✔️" >}}
 The name with which your command can be called by the user. E.g. `mycmd` will be accessible with `valet mycmd`.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| yes ✔️ | N/A |
-
-### ✔️ function
-
+<!-- ___________________________ -->
+<!-- ----- function ---------- -->
+{{< properties-row name="function" mandatory="✔️" >}}
 The name of the function that corresponds to the command. This is the function that will be called by Valet when the user executes this command.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| yes ✔️ | N/A |
-
-### ✔️ shortDescription
-
+<!-- ___________________________ -->
+<!-- ----- shortDescription ---------- -->
+{{< properties-row name="shortDescription" mandatory="✔️" >}}
 Shortly describe your command. This will appear next to your command name in the valet menu.
 
 This should be a single, short, line.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| yes ✔️ | N/A |
-
-### ✔️ description
-
+<!-- ___________________________ -->
+<!-- ----- description ---------- -->
+{{< properties-row name="description" mandatory="✔️" >}}
 Long description of your command and its purpose. It will display when getting the help/usage on the command using `valet help command` or `valet command --help`.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| yes ✔️ | N/A |
-
-### sudo
-
-Set to `true` if you intend to use `sudo` in your command. It will define a `SUDO` variable that you should instead (e.g. `${SUDO} cp stuff /usr/bin/local/stuff` instead of `sudo cp stuff /usr/bin/local/stuff`).
-
-The idea is to make your command compatible for systems with and without `sudo`. The variable `SUDO` will be defined as empty if the sudo command can not be found.
-
-If `true`, it will prompt the user for sudo password before executing the command.
-
-| Mandatory? | Default value? |
-|----------|---------------|
-| no | false |
-
-### hideInMenu
-
+<!-- ___________________________ -->
+<!-- ----- hideInMenu ---------- -->
+{{< properties-row name="hideInMenu" mandatory="" >}}
 Set to `true` if you do not want this command to appear in the Valet menu. The command will still get listed in the help/usage of valet.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| no | false |
-
-### arguments
-
-A list of arguments for your command. See [Arguments](#-arguments) for the details of an argument.
-
-| Mandatory? | Default value? |
-|----------|---------------|
-| no | N/A |
-
-### options
-
-A list of options for your command. See [Options](#️-options) for the details of an option.
-
-By definition, an option is optional (i.e. it is not mandatory like an argument). If you expect an option to be defined, then it is an argument.
-
-{{< callout type="info" emoji="💡" >}}
-All commands have, by default, an `-h, --help` option to display the help of the command.
-{{< /callout >}}
-
-| Mandatory? | Default value? |
-|----------|---------------|
-| no | N/A |
-
-### examples
-
-A list of examples for your command. See [Examples](#-examples) for the details of an example.
-
-They are used exclusively in the command help/usage text.
-
-## 💬 Arguments
+<!-- ___________________________ -->
+<!-- ----- arguments ---------- -->
+{{< properties-row name="arguments" mandatory="" >}}
+A list of arguments for your command.
 
 Arguments are parsed in the order given in the list of arguments for the command definition.
 
-### ✔️ name
+{{< properties-table >}}
 
+{{< properties-row name="name" mandatory="✔️" >}}
 The argument name (in kebab-case).
 
 When calling `command::parseArguments` the argument will be parsed to local variable which name correspond to the camelCase equivalent of its name.
@@ -149,23 +107,23 @@ Example of a argument names and their corresponding variables:
 - `my-arg1` → `local myArg1`
 - `files...` → `local -a files`
 - `commands?...` → `local -a commands`
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| yes ✔️ | N/A |
-
-### ✔️ description
-
+{{< properties-row name="description" mandatory="✔️" >}}
 The description for this argument. It will be used to display the help/usage of the command.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| yes ✔️ | N/A |
+{{< /properties-table >}}
+{{< /properties-row >}}
 
-## 🎚️ Options
+<!-- ___________________________ -->
+<!-- ----- options ---------- -->
+{{< properties-row name="options" mandatory="" >}}
+A list of options for your command.
 
-### ✔️ name
+{{< properties-table >}}
 
+{{< properties-row name="name" mandatory="✔️" >}}
 The option name(s). An option can have one or more long name and up to one short name. Each name is separated with `, `.
 
 - A short name is composed of a single hyphen and a single letter. E.g. `-o` or `-b`.
@@ -185,66 +143,56 @@ Example of a valid option names and their corresponding variable name:
 - `-l, --log-level, --log <level>` → `local logLevel`
 
 Short names can be grouped together when calling the command. E.g. `-fsL` is equivalent to `-f -s -L` or equivalent to the long name options `--force --silent --follow`.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| yes ✔️ | N/A |
-
-### ✔️ description
-
+{{< properties-row name="description" mandatory="✔️" >}}
 The description for this option. It will be used to display the help/usage of the command.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| yes ✔️ | N/A |
-
-### noEnvironmentVariable
-
+{{< properties-row name="noEnvironmentVariable" mandatory="" >}}
 By default, an option that can have a value (e.g. `--option <something>`) will be parsed to a local variable which default to a global variable if not value was passed by the user.
 
 For instance, the option `--option1` will be parsed to the local variable `option1` with the following definition: `local option1="${VALET_OPTION1:-}"`. This allows to define options through environment variable.
 
 This behavior can be changed by setting `noEnvironmentVariable: true` which will always make the local variable for the option empty.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| no | false |
-
-### default
-
+{{< properties-row name="default" mandatory="" >}}
 The default value to give to the local variable parsed from the option. The global variable will take precedence (see noEnvironmentVariable).
 
 The local variable will be defined like this: `local option1="${VALET_OPTION1:-"default value"}"`. Where `default value` is the value of this option.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| no | N/A |
+{{< /properties-table >}}
 
-## 🎈 Examples
+> [!TIP]
+> All commands will have, by default, an `-h, --help` option to display the help of the command.
+{{< /properties-row >}}
+
+<!-- ___________________________ -->
+<!-- ----- examples ---------- -->
+{{< properties-row name="examples" mandatory="" >}}
+A list of examples for your command.
 
 Examples are used in the command help/usage and let the user quickly understand how to use the command.
 
-### ✔️ name
+{{< properties-table >}}
 
+{{< properties-row name="name" mandatory="✔️" >}}
 The command for this example.
 
 You should not include `valet` as it will be prepended automatically. If you do not want to prepend it, start the name with `!` (useful to illustrate a more complex command line).
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| yes ✔️ | N/A |
-
-### ✔️ description
-
+{{< properties-row name="description" mandatory="✔️" >}}
 The description for this example.
+{{< /properties-row >}}
 
-| Mandatory? | Default value? |
-|----------|---------------|
-| yes ✔️ | N/A |
+{{< /properties-table >}}
+{{< /properties-row >}}
 
-{{< cards >}}
-  {{< card icon="arrow-circle-left" link="../new-commands" title="New commands" >}}
-  {{< card icon="arrow-circle-right" link="../test-commands" title="Test commands" >}}
-{{< /cards >}}
+{{< /properties-table >}}
 
 [showcase-examples]: https://github.com/jcaillon/valet/tree/main/showcase.d/commands.d
+
+{{< main-section-end >}}

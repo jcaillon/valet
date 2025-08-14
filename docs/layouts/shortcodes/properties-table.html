@@ -1,0 +1,27 @@
+{{/*  Usage:
+{{< properties-table >}}  
+{{< properties-row name="name" mandatory="yes" >}}
+fzeafze
+{< /properties-row >}}
+
+{{< properties-row name="anotherName" mandatory="no" >}}
+zefef
+{< /properties-row >}}
+
+{{< properties-row name="yetAnotherName" mandatory="yes" >}}
+zefzef
+{< /properties-row >}}
+{{</properties-table>}}  
+*/}}
+<table>
+  <thead>
+      <tr>
+          <th>Name</th>
+          <th>Required</th>
+          <th>Value</th>
+      </tr>
+  </thead>
+  <tbody>
+{{- .Inner -}}
+  </tbody>
+</table>

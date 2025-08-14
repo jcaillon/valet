@@ -10,7 +10,8 @@ These scripts are:
 - `~/.config/valet/config`: the Valet configuration file (this is the recommended way to configure Valet itself).
 - `./.env`: a `.env` in the current directory (the filename can be set with `VALET_CONFIG_DOT_ENV_SCRIPT`).
 
-> **Tip:** Use the `.env` files to configure your project-specific variables.
+> [!TIP]
+> Use the `.env` files to configure your project-specific variables.
 > Remember that command options are also configurable through environment variables!
 
 ## 📄 About the config file

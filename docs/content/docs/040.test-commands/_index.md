@@ -2,8 +2,8 @@
 title: 🧪 Create a test
 cascade:
   type: docs
-weight: 30
-url: /docs/test-commands
+weight: 40
+url: /docs/new-tests
 ---
 
 Valet comes with a standardized way to implement and run tests for your commands and library functions.
@@ -16,9 +16,8 @@ Tests are organized in thematic groups which are called _test suites_. A test su
 
 A test suite can, for example, regroup tests for a particular command. Organize them as you please, you can even define a single test suite for all your tests.
 
-{{< callout type="info" >}}
-Test suites are run independently from each other and in parallel by default.
-{{< /callout >}}
+> [!NOTE]
+> Test suites are run independently from each other and in parallel by default.
 
 The tests are then coded in `.sh` scripts directly under a test suite directory.
 
@@ -70,9 +69,8 @@ You can check an example of [test report for the **test** library of Valet][vale
 
 Each test suite will generate a different test results markdown file that can be approved.
 
-{{< callout type="info" >}}
-Valet uses a diff tool to compare the received and the approved files. It is strongly recommended to install [delta](https://github.com/dandavison/delta) which will automatically be used by Valet. You can configure your diff tool in the [Valet config](../configuration/). Valet will use a pure bash file compare function if it doesn't find a better diff tool.
-{{< /callout >}}
+> [!TIP]
+> Valet uses a diff tool to compare the received and the approved files. It is strongly recommended to install [delta](https://github.com/dandavison/delta) which will automatically be used by Valet. You can configure your diff tool in the [Valet config](../configuration/). Valet will use a pure bash file compare function if it doesn't find a better diff tool.
 
 ## 🧪 Tests
 
@@ -120,14 +118,13 @@ You can also exclude or include test suite using `-i` and `-e` options (check `v
 valet self test -i my-test-suite
 ```
 
-{{< callout type="info" >}}
-Some additional information about the test execution:
-
-- Each test suite is executed in a separate subshell.
-- Each test script is executed in a separate subshell (within the subshell of the test suite).
-
-This allow you to modify the shell as you wish in the hooks and test implementation without impacting the other tests.
-{{< /callout >}}
+> [!NOTE]
+> Some additional information about the test execution:
+>
+> - Each test suite is executed in a separate subshell.
+> - Each test script is executed in a separate subshell (within the subshell of the test suite).
+>
+> This allow you to modify the shell as you wish in the hooks and test implementation without impacting the other tests.
 
 ## 🪝 Test hooks
 
@@ -138,13 +135,10 @@ In addition to the test scripts, you can create other specific scripts which wil
 | `tests.d/before-tests` | Source'd before each test suite is executed. |
 | `tests.d/after-tests` | Source'd after each test suite is executed. |
 
-{{< cards >}}
-  {{< card icon="arrow-circle-left" link="../command-properties" title="Command properties" >}}
-  {{< card icon="arrow-circle-right" link="../new-libraries" title="Create a library" >}}
-{{< /cards >}}
-
 [valet-test-suites]: https://github.com/jcaillon/valet/tree/latest/tests.d
 [valet-test-lib-report]: https://github.com/jcaillon/valet/blob/latest/tests.d/lib-test/results.approved.md
 [valet-test-lib-tests]: https://github.com/jcaillon/valet/blob/latest/tests.d/lib-test/00.tests.sh
 [libraries-tests]: ../libraries/test
 [newExtensionsLink]: ../new-extensions
+
+{{< main-section-end >}}

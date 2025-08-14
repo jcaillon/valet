@@ -60,3 +60,33 @@ hr {
   border-top: 1px solid rgba(187, 187, 187, 0.082);
   margin: 1rem 0;
 }
+
+kbd {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  font-size: 0.95em;
+  font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', 'Consolas', monospace;
+  color: #222;
+  background: linear-gradient(180deg, #f3f4f6 60%, #e5e7eb 100%);
+  border: 1.5px solid #bdbdbd;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08), 0 1px 0 #fff inset;
+  margin: 0 0.15em;
+  vertical-align: middle;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+kbd:is(html[class~="dark"] *) {
+  color: #eee;
+  background: linear-gradient(180deg, #23272e 60%, #18181b 100%);
+  border: 1.5px solid #444;
+  box-shadow: 0 2px 8px 0 rgba(16,185,129,0.10), 0 1px 0 #23272e inset;
+}
+
+a.section-nav-links {
+  text-decoration: none;
+}
+
+div.section-nav {
+  margin-top: 2rem;
+}

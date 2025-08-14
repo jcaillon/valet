@@ -8,4 +8,4 @@ Test assertions are done using approval testing, which means that the output of 
 
 You can find each test outputs in the `results.approved.md` file for each test suite.
 
-Learn more about tests in the Valet documentation: <https://jcaillon.github.io/valet/docs/test-commands/>.
+Learn more about tests in the Valet documentation: <https://jcaillon.github.io/valet/docs/new-tests/>.

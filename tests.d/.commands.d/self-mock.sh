@@ -38,7 +38,7 @@ arguments:
     - show-help
 ---"
 function selfMock1() {
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   case "${action:-}" in
@@ -169,7 +169,7 @@ examples:
 ---"
 function selfMock2() {
   local -a more
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   log::info "Option 1 (option1): ${option1:-}."
@@ -205,7 +205,7 @@ description: |-
   If so, it will require the user to enter the sudo password and use sudo inside the command
 ---"
 function selfMock3() {
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   ${SUDO} whoami

@@ -13,7 +13,7 @@ source interactive
 # >>> command: self add-command
 #===============================================================
 
-##<<VALET_COMMAND
+##<<<VALET_COMMAND
 # command: self add-command
 # function: selfAddCommand
 # author: github.com/jcaillon
@@ -33,7 +33,7 @@ source interactive
 ##VALET_COMMAND
 function selfAddCommand() {
   local commandName
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   local templateFlavor="default"

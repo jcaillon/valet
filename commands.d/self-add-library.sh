@@ -13,7 +13,7 @@ source interactive
 # >>> command: self add-library
 #===============================================================
 
-##<<VALET_COMMAND
+##<<<VALET_COMMAND
 # command: self add-library
 # function: selfAddLibrary
 # author: github.com/jcaillon
@@ -33,7 +33,7 @@ source interactive
 ##VALET_COMMAND
 function selfAddLibrary() {
   local libraryName
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   local templateFlavor="default"

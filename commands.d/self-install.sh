@@ -11,7 +11,7 @@ if [ ${BASH_VERSINFO:-0} -lt 5 ]; then
   exit 1
 fi
 
-##<<VALET_COMMAND
+##<<<VALET_COMMAND
 # command: self update
 # function: selfUpdate
 # author: github.com/jcaillon
@@ -183,7 +183,7 @@ function selfUpdate() {
     skipExtensionsSetup="${skipExtensionsSetup:-"${VALET_SKIP_EXTENSIONS_SETUP:-"false"}"}"
   else
     log::debug "Parsing the arguments using the core functions."
-    command::parseArguments "$@" && eval "${REPLY}"
+    command::parseArguments "$@"; eval "${REPLY}"
     command::checkParsedResults
   fi
 

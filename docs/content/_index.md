@@ -161,17 +161,15 @@ myFunction() {
 }
 ```
 
-{{< callout type="info" >}}
-This showcase was recorded with the [windows terminal][windows-terminal], [debian on WSL][debian-wsl] with zsh & [oh my zsh][oh-my-zsh]. The color scheme for the terminal is [dracula][dracula-theme] and the font is a homemade modification of windows Consolas (with ligatures + with nerd font icons).
+> [!NOTE]
+> This showcase was recorded with the [windows terminal][windows-terminal], [debian on WSL][debian-wsl] with zsh & [oh my zsh][oh-my-zsh]. The color scheme for the terminal is [dracula][dracula-theme] and the font is a homemade modification of windows Consolas (with ligatures + with nerd font icons).
+
+{{< cards >}}
+  {{< card icon="document-text" link="docs/introduction" title="Ready to get started?" subtitle="Check out the documentation" >}}
+{{< /cards >}}
 
 [windows-terminal]: https://github.com/microsoft/terminal
 [debian-wsl]: https://wiki.debian.org/InstallingDebianOn/Microsoft/Windows/SubsystemForLinux
 [oh-my-zsh]: https://ohmyz.sh/
 [dracula-theme]: https://draculatheme.com/windows-terminal
-{{< /callout >}}
-
-{{< cards >}}
-  {{< card icon="document-text" link="../docs" title="Ready to get started?" subtitle="Check out the documentation" >}}
-{{< /cards >}}
-
-[libraries-link]: ../docs/libraries/
+[libraries-link]: docs/libraries/

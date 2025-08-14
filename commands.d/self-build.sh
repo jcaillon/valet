@@ -9,7 +9,7 @@
 # >>> command: self build
 #===============================================================
 
-##<<VALET_COMMAND
+##<<<VALET_COMMAND
 # command: self build
 # function: selfBuild
 # author: github.com/jcaillon
@@ -99,7 +99,7 @@ function selfBuild() {
       shift
     done
   else
-    command::parseArguments "$@" && eval "${REPLY}"
+    command::parseArguments "$@"; eval "${REPLY}"
     command::checkParsedResults
   fi
 

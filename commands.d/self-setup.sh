@@ -24,7 +24,7 @@ description: |-
   Let the user know what to do next.
 ---"
 function selfSetup() {
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   log::info "Now setting up Valet."

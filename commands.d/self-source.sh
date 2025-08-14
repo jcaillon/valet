@@ -6,7 +6,7 @@
 # >>> command: self source
 #===============================================================
 
-##<<VALET_COMMAND
+##<<<VALET_COMMAND
 # command: self source
 # function: selfSource
 # hideInMenu: true
@@ -39,7 +39,7 @@
 #     You can then can then use valet function as if you were in a command script.
 ##VALET_COMMAND
 function selfSource() {
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   local output=""

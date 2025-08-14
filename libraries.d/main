@@ -50,7 +50,7 @@ declare -g \
   GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}" \
   GLOBAL_PROGRAM_MAIN_PID="${BASHPID}" \
   GLOBAL_CONFIG_FILE="${VALET_CONFIG_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/config"}" \
-  GLOBAL_STARTUP_FILE="${VALET_STARTUP_FILE:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/startup"}"
+  GLOBAL_STARTUP_FILE="${VALET_CONFIG_STARTUP_SCRIPT:-"${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}/startup"}"
 
 # To ensure we print errors even before log::init is called
 declare -g \

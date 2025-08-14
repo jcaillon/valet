@@ -20,7 +20,7 @@ and if there are parsing errors.
 command::checkParsedResults
 ```
 
-## command::parseArguments
+## ⚡ command::parseArguments
 
 Parse the arguments and options of a function and return a string that can be evaluated to set the variables.
 This should be called from a command function for which you want to parse the arguments.

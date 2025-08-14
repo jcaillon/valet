@@ -6,7 +6,7 @@ weight: 35
 url: /docs/new-libraries
 ---
 
-Once you have created an extension and opened its directory, you can start creating new libraries.
+Once you have [created an extension][newExtensionsLink] and moved to its directory, you can start creating new libraries.
 
 ## 📂 Library files location
 
@@ -25,7 +25,13 @@ Here is an example content for your user directory:
   {{< /filetree/folder >}}
 {{< /filetree/container >}}
 
-With the example above, you will be able to source your library files with: `source gitlab` and `source git`.
+With the example above, you will be able to source your library files from any command script using:
+
+```bash
+source gitlab
+# or
+include git
+```
 
 ## ➕ Create a command
 
@@ -39,7 +45,13 @@ Open your existing extension directory or [create a new one][newExtensionsLink].
 
 ### 📄 Add a new library file
 
-Run the command `valet self add-library mylib` to create a new library file named `lib-mylib.sh` in the `libraries.d` directory of your extension. _Replace `mylib` with the name of your command._
+Run the following command to create a new library file named `lib-mylib.sh` in the `libraries.d` directory of your extension:
+
+_Replace `mylib` with the name of your command._
+
+```bash
+valet self add-library mylib
+```
 
 Alternatively, create the file manually.
 
@@ -107,17 +119,15 @@ It will update the `lib-valet` script, `lib-valet.md` documentation and the vsco
 
 You can now source your new library in your command files with `source mylib`.
 
-{{< callout type="info" emoji="💡" >}}
-The bash built-in `source` is overridden by a function in Valet. This allows to not source the same file twice, so you can safely call `source mylib` several times without impacting the runtime performance. If you need to use the default source keyword, use `builtin source`.
-{{< /callout >}}
+> [!IMPORTANT]
+> The bash built-in `source` is overridden by a function in Valet. This allows to not source the same file twice, so you can safely call `source mylib` several times without impacting the runtime performance.
+>
+> If you need to use the default source keyword, use `builtin source`.
 
 {{% /steps %}}
-
-{{< cards >}}
-  {{< card icon="arrow-circle-left" link="../test-commands" title="Test commands" >}}
-  {{< card icon="arrow-circle-right" link="../libraries" title="Use core libraries" >}}
-{{< /cards >}}
 
 [work-on-bash-scripts]: ../work-on-bash-scripts
 [valetLibraryReference]: https://github.com/jcaillon/valet/blob/latest/extras/lib-valet
 [newExtensionsLink]: ../new-extensions
+
+{{< main-section-end >}}

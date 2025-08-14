@@ -38,7 +38,7 @@ examples:
     Create (or recreate) the configuration file of Valet reusing the possible current values of the variables.
 ---"
 function selfConfig() {
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   core::getConfigurationDirectory

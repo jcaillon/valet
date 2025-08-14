@@ -19,7 +19,7 @@ function selfBuild_extractCommandYamls() {
 
   local firstLine=": \"---"
   local lastLine="---\""
-  local firstLineAlt="##<<VALET_COMMAND"
+  local firstLineAlt="##<<<VALET_COMMAND"
   local lastLineAlt="##VALET_COMMAND"
 
   declare -a contentArray

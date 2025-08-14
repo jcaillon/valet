@@ -20,7 +20,7 @@ description: |-
   This command demonstrates how to interact with the user using valet's interactive library.
 ---"
 function showcaseInteractive() {
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   log::info "Getting the cursor size:"

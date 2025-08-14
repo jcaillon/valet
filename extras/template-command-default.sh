@@ -36,7 +36,7 @@ examples:
 function _FUNCTION_NAME_() {
   local -a more
   local firstArg option1 thisIsOption2
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   log::info "First argument: ${firstArg:-}."

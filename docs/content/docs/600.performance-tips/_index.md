@@ -15,11 +15,10 @@ To write performance script, you should:
 - If possible, prefer manipulating variables content instead of files content.
 - Try to avoid here string `<<<` (AFAIK it uses a temporary file behind the scene).
 
-{{< callout type="info" >}}
-These improvements can lead to **HUGE** differences in run time. Especially in windows bash which is quite slow.
-
-The initial version of valet was taking around 5s to parse and execute a command, and it went down to under a hundred milliseconds after refactoring.
-{{< /callout >}}
+> [!NOTE]
+> These improvements can lead to **HUGE** differences in run time. Especially in windows bash which is quite slow.
+>
+> The initial version of valet was taking around 3s to parse and execute a command, and it went down to milliseconds after refactoring with these rules.
 
 The chapters below give you some tips for the common problems that you can encounter:
 
@@ -199,7 +198,4 @@ echo y 1> myfile
 doSomething <myfile
 ```
 
-{{< cards >}}
-  {{< card icon="arrow-circle-left" link="../work-on-bash-scripts" title="Work on bash scripts" >}}
-  {{< card icon="arrow-circle-right" link="../bash-best-practices" title="Bash best practices" >}}
-{{< /cards >}}
+{{< main-section-end >}}

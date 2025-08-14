@@ -48,6 +48,16 @@ It is recommended to install and work with [vscode](https://code.visualstudio.co
 
 You will find recommended extensions for this project using the filter `@recommended` in vscode extensions marketplace.
 
+### Generate the section navigation
+
+To generate the section navigation, you can use the following command:
+
+```bash
+./generate-section-navigation.sh
+```
+
+It will generate the file `layouts/shortcodes/main-section-end.html` which can then be included in each section page.
+
 ## Update the theme
 
 To update the theme to the latest Hextra version, run:

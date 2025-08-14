@@ -74,7 +74,7 @@ examples:
     Run only the test suites that match the regex pattern ⌜(my-thing|my-stuff)⌝.
 ---"
 function selfTest() {
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   time::getProgramElapsedMicroseconds

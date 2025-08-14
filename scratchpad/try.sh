@@ -1,15 +1,6 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
-export VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT=false
-export VALET_LOG_LEVEL="debug"
-export VALET_CONFIG_LOG_PATTERN="<colorFaded>[<processName>{04s}:<pid>{04d}:<subshell>{1s}] <colorFaded><sourceFile>{-5s}:<line>{-4s}<colorDefault> <function>{-20s}@<source>{20s}  <levelColor><level>{-4s} <colorDefault> <message>"
-
-# shellcheck source=../libraries.d/main
 source "$(valet --source)"
-include tui coproc fs bash terminal exe
 
-# ========================================
-
-
-log::info zefzefez
-log::printCallStack stackToSkip=0
+include system
+system::getOs
+log::success "You are running Valet on ${REPLY}, cool beans!"

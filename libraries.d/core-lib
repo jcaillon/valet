@@ -1880,7 +1880,7 @@ function command::sourceFunction() {
 # ```
 #
 # ```bash
-# command::parseArguments "$@" && eval "${REPLY}"
+# command::parseArguments "$@"; eval "${REPLY}"
 # ```
 function command::parseArguments() {
   # get the function name of the calling function

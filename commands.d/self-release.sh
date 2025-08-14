@@ -55,7 +55,7 @@ options:
     Do not perform the release, just show what would be done.
 ---"
 function selfRelease() {
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   if [[ ${dryRun:-} == "true" ]]; then
@@ -385,7 +385,7 @@ function selfRelease::updateDocumentation() {
 # This function writes all the functions documentation to the documentation files
 # under the `docs/content/docs/300.libraries` directory.
 function selfRelease_writeAllFunctionsDocumentation() {
-  local pageFooter="{{< callout type=\"info\" >}}"$'\n'"${1}"$'\n'"{{< /callout >}}"$'\n'
+  local pageFooter="> [!IMPORTANT]"$'\n'"> ${1}"$'\n'
 
   log::info "Writing the ${#SORTED_FUNCTION_NAMES[@]} functions documentation to the core libraries docs."
 

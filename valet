@@ -8,7 +8,7 @@ if [ ${BASH_VERSINFO:-0} -lt 5 ]; then
   exit 1
 fi
 
-##<<VALET_COMMAND
+##<<<VALET_COMMAND
 # command: valet
 # function: this
 # author: github.com/jcaillon

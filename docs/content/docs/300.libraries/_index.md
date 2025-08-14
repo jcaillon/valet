@@ -1,14 +1,14 @@
 ---
-title: 📦 Use core libraries
+title: 📦 Use standard libraries
 cascade:
   type: docs
 weight: 300
 url: /docs/libraries
 ---
 
-## 🧩 Source core libraries
+## 🧩 Source standard libraries
 
-A set of core libraries are available on Valet. To use the library functions, you need to _source_ the library that you need, e.g.:
+A set of standard libraries are available on Valet. To use the library functions, you need to _source_ the library that you need, e.g.:
 
 ```bash
 source string
@@ -84,9 +84,11 @@ You can also browse the list of available libraries and their functions here;
   {{< card link="string" icon="scissors" title="string" subtitle="Functions for string manipulation." >}}
   {{< card link="system" icon="desktop-computer" title="system" subtitle="Functions to get system/user information." >}}
   {{< card link="terminal" icon="terminal" title="terminal" subtitle="Manipulate the terminal and its display." >}}
-  {{< card link="test" icon="badge-check" title="test" subtitle="Functions usable in your test scripts." >}}
+  {{< card link="test" icon="beaker" title="test" subtitle="Functions usable in your test scripts." >}}
   {{< card link="time" icon="clock" title="time" subtitle="Functions related to time." >}}
   {{< card link="tui" icon="view-boards" title="tui" subtitle="Functions to build a TUI application." >}}
   {{< card link="version" icon="calculator" title="version" subtitle="Compare and manipulate semantic versions." >}}
   {{< card link="windows" icon="view-grid" title="windows" subtitle="Functions specific to windows systems." >}}
 {{< /cards >}}
+
+{{< main-section-end >}}

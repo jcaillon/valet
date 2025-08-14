@@ -1,0 +1,180 @@
+
+{{ if eq .Page.Weight 1 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" ""
+"prevTitle" ""
+"nextLink" "../installation"
+"nextTitle" "💻 Installation"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 2 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../introduction"
+"prevTitle" "💡 Introduction"
+"nextLink" "../usage"
+"nextTitle" "🎹 Usage"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 10 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../installation"
+"prevTitle" "💻 Installation"
+"nextLink" "../configuration"
+"nextTitle" "🔧 Valet configuration"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 15 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../usage"
+"prevTitle" "🎹 Usage"
+"nextLink" "../new-extensions"
+"nextTitle" "🧱 Create an extension"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 17 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../configuration"
+"prevTitle" "🔧 Valet configuration"
+"nextLink" "../new-commands"
+"nextTitle" "✨ Create a command"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 20 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../new-extensions"
+"prevTitle" "🧱 Create an extension"
+"nextLink" "../command-properties"
+"nextTitle" "⚙️ Command properties"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 25 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../new-commands"
+"prevTitle" "✨ Create a command"
+"nextLink" "../implement-a-command"
+"nextTitle" "✒️ Implement a command"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 26 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../command-properties"
+"prevTitle" "⚙️ Command properties"
+"nextLink" "../new-libraries"
+"nextTitle" "📗 Create a library"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 35 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../implement-a-command"
+"prevTitle" "✒️ Implement a command"
+"nextLink" "../new-tests"
+"nextTitle" "🧪 Create a test"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 40 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../new-libraries"
+"prevTitle" "📗 Create a library"
+"nextLink" "../libraries"
+"nextTitle" "📦 Use standard libraries"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 300 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../new-tests"
+"prevTitle" "🧪 Create a test"
+"nextLink" "../valet-commands"
+"nextTitle" "⌨️ Valet commands"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 400 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../libraries"
+"prevTitle" "📦 Use standard libraries"
+"nextLink" "../work-on-bash-scripts"
+"nextTitle" "✍️ Working on bash"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 500 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../valet-commands"
+"prevTitle" "⌨️ Valet commands"
+"nextLink" "../performance-tips"
+"nextTitle" "🐇 Performance tips"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 600 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../work-on-bash-scripts"
+"prevTitle" "✍️ Working on bash"
+"nextLink" "../bash-best-practices"
+"nextTitle" "💅 Bash best practices"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 650 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../performance-tips"
+"prevTitle" "🐇 Performance tips"
+"nextLink" "../valet-internals"
+"nextTitle" "🫀 Valet internals"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 700 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../bash-best-practices"
+"prevTitle" "💅 Bash best practices"
+"nextLink" "../roadmap"
+"nextTitle" "🔭 Roadmap"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 800 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../valet-internals"
+"prevTitle" "🫀 Valet internals"
+"nextLink" "../contributing"
+"nextTitle" "🤝 Contributing"
+) -}}
+{{ end }}
+    
+
+{{ if eq .Page.Weight 900 }}
+{{- partial "custom/sections-navigation.html" (dict
+"prevLink" "../roadmap"
+"prevTitle" "🔭 Roadmap"
+"nextLink" ""
+"nextTitle" ""
+) -}}
+{{ end }}
+    
