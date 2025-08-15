@@ -1,0 +1,37 @@
+{{/*
+  Usage: {{< asciicinema file="zefz">}}
+  You also need to put these in the frontmatter of the page:
+  ---
+  params:
+    asciinema: true
+  ---
+*/}}
+{{$file := .Get "file" }}
+
+{{$fileUrl := relURL (printf "asciinema/%s.cast" $file) }}
+
+<div id="ap-{{$file}}" class="asciinema-player"></div>
+<script>
+  asciinemaPlayerElement["{{$file}}"] = document.getElementById('ap-{{$file}}');
+
+  window.addEventListener("load", (event) => {
+    // initially load without autoplay
+    asciinemaPlayer["{{$file}}"] = AsciinemaPlayer.create('{{$fileUrl}}', asciinemaPlayerElement["{{$file}}"], {
+      idleTimeLimit: 2,
+      loop: true,
+      theme: "dracula"
+    });
+
+    document.fonts.load("1em JetBrainsMono NFM").then(() => {
+      // once the font is loaded auto play
+      asciinemaPlayer["{{$file}}"].dispose();
+      AsciinemaPlayer.create('{{$fileUrl}}', asciinemaPlayerElement["{{$file}}"], {
+        idleTimeLimit: 2,
+        autoPlay: true,
+        loop: true,
+        theme: "dracula",
+        terminalFontFamily: "'JetBrainsMono NFM', monospace"
+      });
+    });
+  });
+</script>

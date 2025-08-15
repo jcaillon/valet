@@ -1,0 +1,15 @@
+@font-face {
+    font-family: "JetBrainsMono NFM";
+    src:    local(nerdfontbold),
+            url("JetBrainsMonoNerdFontMono-Bold.ttf") format("truetype");
+    font-stretch: normal;
+    font-style: normal;
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "JetBrainsMono NFM";
+    src:    local(nerdfont),
+            url("JetBrainsMonoNerdFontMono-Regular.ttf") format("truetype");
+    font-stretch: normal;
+}

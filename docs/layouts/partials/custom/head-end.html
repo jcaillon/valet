@@ -1,0 +1,16 @@
+{{/*  Load all the css files next to the page file  */}}
+{{ range .Resources.Match "**.css*" }}
+{{ $style := . | minify | fingerprint }}
+<link type=text/css rel="stylesheet" href="{{ $style.Permalink }}">
+{{ end }}
+
+{{/*  Activate asciinema for the page (you need to put param.asciinema = true in frontmatter)  */}}
+{{- if .Params.asciinema -}}
+<link type=text/css rel="stylesheet" href="{{ relURL "asciinema/resources/asciinema-player.css" }}">
+<link type=text/css rel="stylesheet" href="{{ relURL "asciinema/resources/asciinema-player-font.css" }}">
+<script type="text/javascript" src="{{relURL "asciinema/resources/asciinema-player.min.js" }}" defer></script>
+<script>
+  asciinemaPlayerElement = {};
+  asciinemaPlayer = {};
+</script>
+{{- end }}

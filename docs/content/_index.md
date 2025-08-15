@@ -29,6 +29,8 @@ keywords:
   - jcaillon
   - framework
 description: With Valet, you can setup and execute tests, code interactive experiences for your users, navigate and execute your scripts (called commands) from a searchable menu interface, and more! It provides libraries of functions that can be sourced to solve standard programming needs such as string, array or file manipulation, prompting the user, and so on...
+params:
+  asciinema: true
 ---
 
 {{< hextra/feature-grid cols="3" >}}
@@ -113,7 +115,7 @@ Valet in a gist:
 
 Invoking `valet` without arguments lets you interactively search and invoke commands:
 
-![demo-menu](/hero/demo-menu.gif)
+{{< asciicinema file="733725" >}}
 
 ## 📖 Clear and standardized help
 

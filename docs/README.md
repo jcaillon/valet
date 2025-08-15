@@ -58,6 +58,35 @@ To generate the section navigation, you can use the following command:
 
 It will generate the file `layouts/shortcodes/main-section-end.html` which can then be included in each section page.
 
+### Add asciinema casts
+
+To add an asciinema cast to a page, you can use the following shortcode:
+
+```html
+{{< asciicinema file="your-cast-file" >}}
+```
+
+Make sure to replace `your-cast-file` with the actual file name of your asciinema cast (without the `.cast` extension).
+
+Put the cast file under `static/asciinema/`.
+
+Add this to the frontmatter of your page (this will load the css/js for asciinema):
+
+```yaml
+params:
+  asciinema: true
+```
+
+You can also convert all .cast files into gifs:
+
+```bash
+cd static/asciinema
+./to-gifs.sh
+```
+
+
+
+
 ## Update the theme
 
 To update the theme to the latest Hextra version, run:
