@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+DOCS_DIRECTORY="${BASH_SOURCE[0]}"
+if [[ "${DOCS_DIRECTORY}" != /* ]]; then
+  # resolve relative path
+  if pushd "${DOCS_DIRECTORY%/*}" &>/dev/null; then
+    DOCS_DIRECTORY="${PWD}"
+    popd &>/dev/null || exit 1
+  else DOCS_DIRECTORY="${PWD}"; fi
+else
+  DOCS_DIRECTORY="${DOCS_DIRECTORY%/*}" # strip filename
+fi
+
+function fail() {
+  echo "🤬 Error: $1" >&2
+  exit 1
+}
+
+cd "${DOCS_DIRECTORY}" || fail "Failed to change directory to ${DOCS_DIRECTORY}"
+
+# regenerate the section nav
+./generate-section-navigation.sh
+
+# regenerate all gifs
+cd "static/asciinema" || fail "Failed to change directory to static/asciinema"
+./to-gifs.sh
+
+cd "${DOCS_DIRECTORY}" || fail "Failed to change directory to ${DOCS_DIRECTORY}"
+
+hugo server --disableFastRender --watch

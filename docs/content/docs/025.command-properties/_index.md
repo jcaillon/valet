@@ -85,7 +85,7 @@ Set to `true` if you do not want this command to appear in the Valet menu. The c
 <!-- ___________________________ -->
 <!-- ----- arguments ---------- -->
 {{< properties-row name="arguments" mandatory="" >}}
-A list of arguments for your command.
+A list of positional arguments for your command.
 
 Arguments are parsed in the order given in the list of arguments for the command definition.
 

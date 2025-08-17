@@ -9,22 +9,17 @@
 {{$file := .Get "file" }}
 
 {{$fileUrl := relURL (printf "asciinema/%s.cast" $file) }}
+{{$fileGifUrl := relURL (printf "asciinema/%s.gif" $file) }}
 
-<div id="ap-{{$file}}" class="asciinema-player"></div>
+<div id="ap-{{$file}}" class="asciinema-player"><img src="{{$fileGifUrl}}" alt="Demo {{$file}}" loading="lazy"></div>
 <script>
   asciinemaPlayerElement["{{$file}}"] = document.getElementById('ap-{{$file}}');
 
   window.addEventListener("load", (event) => {
-    // initially load without autoplay
-    asciinemaPlayer["{{$file}}"] = AsciinemaPlayer.create('{{$fileUrl}}', asciinemaPlayerElement["{{$file}}"], {
-      idleTimeLimit: 2,
-      loop: true,
-      theme: "dracula"
-    });
 
     document.fonts.load("1em JetBrainsMono NFM").then(() => {
       // once the font is loaded auto play
-      asciinemaPlayer["{{$file}}"].dispose();
+      asciinemaPlayerElement["{{$file}}"].innerHTML = "";
       AsciinemaPlayer.create('{{$fileUrl}}', asciinemaPlayerElement["{{$file}}"], {
         idleTimeLimit: 2,
         autoPlay: true,

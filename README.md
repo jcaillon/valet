@@ -5,7 +5,7 @@
 [![MIT license](https://img.shields.io/badge/License-MIT-74A5C2.svg?style=flat)][license]
 [![bash 5+ required](https://img.shields.io/badge/Requires-bash%20v5+-865FC5.svg?logo=gnubash&logoColor=white)][bash]
 
-[![icon](docs/static/logo.png)][valet-site]
+[![icon](docs/static/full-banner.png)][valet-site]
 
 Valet is a zero dependency tool that helps you build fast, robust, testable and interactive CLI applications in bash.
 
@@ -13,7 +13,9 @@ With Valet, you can setup and execute tests, code interactive experiences for yo
 
 Learn more on the [Valet documentation website][valet-site].
 
-Installation instructions can be found [here][installationLink].
+[![demo](docs/static/asciinema/interactive-menu.gif)][valet-site]
+
+Installation instructions can be found [in the documentation][installationLink].
 
 [releases]: https://github.com/jcaillon/valet/releases
 [latest-release]: https://github.com/jcaillon/valet/releases/latest

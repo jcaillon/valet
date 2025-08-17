@@ -49,7 +49,7 @@ Finally, call `valet` to get started with the example commands!
 
 ## ⚙️ Extra config for your terminal
 
-- **Nerd font**: Valet can make use of [Nerd fonts][nerdFontsLink] to display icons in the logs and interactive sessions. You can download any nerd font from [here][nerdFontsLink], install it, and configure your terminal to use that font.
+- **Nerd font**: Valet can make use of [Nerd fonts][nerdFontsLink] to display icons in the logs and interactive sessions. You can download any nerd font from [here][nerdFontsLink], install it, and configure your terminal to use that font. The demos you saw in the landing page are done with _JetBrainsMono Nerd Font_.
 - **Word separator**: Valet usually prints important values between ⌜quotes⌝ using the UTF8 top left and top right corners (respectively U+231C and U+231D). You can add these two characters as word separators in your terminal for quick double click selection: `⌜⌝`.
 
 ## 🪟 Use Valet on windows

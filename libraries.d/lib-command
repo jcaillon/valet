@@ -1034,7 +1034,7 @@ function command_goInteractive() {
   parsedArguments="${2}"
 
   # TODO: go interactive
-  log::warning "Entering interactive mode for the function ⌜${functionName}⌝. This is not yet implemented."
+  log::warning "Entering interactive mode for the function ⌜${functionName}⌝. But this is not yet implemented."
 
   # at the end, printf '%s\n' to the user the complete command that will be run
 }

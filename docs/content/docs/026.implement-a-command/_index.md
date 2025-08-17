@@ -19,7 +19,7 @@ function helloWorld() {
 
 **Explanations:**
 
-- `command::parseArguments "$@"` is a core function of Valet which parses the input argument (i.e. `$@`) and returns a string in the global variable `REPLY` which can be evaluated to set local variables corresponding to arguments and options. See the function help in the [command library documentation page](../libraries/command/#-commandparsearguments).
+- `command::parseArguments "$@"` is a core function of Valet which parses the input argument (i.e. `$@`) and returns a string in the global variable `REPLY` which can be evaluated to set local variables corresponding to positional arguments and options. See the function help in the [command library documentation page](../libraries/command/#-commandparsearguments).
 - `eval "${REPLY}"` evaluates the output string of the parsing function which sets local variables.
 - `command::checkParsedResults` will check if the local variable `help` is true, which corresponds to the option `--help` passed to the function, in which case it will display the function help and stop its execution. It will also check if the local variable `commandArgumentsErrors` is not empty, which indicates that the parsing function encountered input errors: the function execution is also stopped with parsing errors shown to the user.
 
@@ -62,7 +62,7 @@ function example() {
 Executing `valet example --my-option opt1 arg1` will display `opt1 and arg1` in the standard output:
 
 - An option named `-o, --my-option` will translate to a local variable `myOption` (takes the first long name found and convert it to camel case).
-- An argument named `my-argument` will translate to a local variable `myArgument` (camel case).
+- A positional argument named `my-argument` will translate to a local variable `myArgument` (camel case).
 
 Check [the command properties section][command-properties] for more details on how arguments and options are translated to local variables.
 

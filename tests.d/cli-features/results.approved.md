@@ -107,7 +107,7 @@ Returned code: `1`
 ```text
 INFO     The commands index does not exist ⌜/tmp/valet.d/d3-2/commands⌝.
 Now silently building it using ⌜valet self build⌝ command.
-WARNING  Entering interactive mode for the function ⌜selfMock1⌝. This is not yet implemented.
+WARNING  Entering interactive mode for the function ⌜selfMock1⌝. But this is not yet implemented.
 FAIL     Expecting ⌜1⌝ argument(s) but got ⌜0⌝.
 Use ⌜valet self mock1 --help⌝ to get help.
 Usage:
