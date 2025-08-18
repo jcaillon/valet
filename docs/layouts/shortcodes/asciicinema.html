@@ -11,7 +11,7 @@
 {{$fileUrl := relURL (printf "asciinema/%s.cast" $file) }}
 {{$fileGifUrl := relURL (printf "asciinema/%s.gif" $file) }}
 
-<div id="ap-{{$file}}" class="asciinema-player"><img src="{{$fileGifUrl}}" alt="Demo {{$file}}" loading="lazy"></div>
+<div id="ap-{{$file}}" class="asciinema-player asciinema-player-class"><img src="{{$fileGifUrl}}" alt="Demo {{$file}}" loading="lazy"></div>
 <script>
   asciinemaPlayerElement["{{$file}}"] = document.getElementById('ap-{{$file}}');
 

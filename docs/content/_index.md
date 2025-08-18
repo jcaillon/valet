@@ -66,7 +66,7 @@ params:
     link="#-libraries-of-functions"
     icon="puzzle"
     title="Libraries of pure bash functions"
-    subtitle="Make your scripts more performant and write code faster by using Valet libraries for string manipulation, interactive prompt, pure bash I/O and more... You can also extend Valet by creating and sharing your own libraries!"
+    subtitle="Make your scripts more performant and write code faster by using Valet libraries for string manipulation, interactive prompt, pure bash I/O and more... You can also extend Valet to create and share your own libraries!"
     style="background: radial-gradient(ellipse at 50% 80%,rgba(38,116,56,0.15),hsla(0,0%,100%,0));"
   >}}
   {{< hextra/feature-card
@@ -247,7 +247,9 @@ function testLog() {
 
 ## 🧩 Libraries of functions
 
-Make your scripts more performant and write code faster by using Valet [libraries][libraries-link] for string manipulation, interactive prompt, pure bash I/O and more... Some examples:
+Make your scripts more performant and write code faster by using [Valet standard libraries][libraries-link] for string manipulation, interactive prompt, pure bash I/O and more...
+
+Use one of the **{{% stats "nbFunctions" %}} functions coming in standard** with Valet! Some examples:
 
 ```bash {linenos=table,linenostart=1,filename="script.sh"}
 myFunction() {
@@ -266,7 +268,7 @@ myFunction() {
 ```
 
 > [!NOTE]
-> These demo were recorded with the [asciinema][asciinema]. The color scheme for the terminal is [dracula][dracula-theme] and the font is _JetBrainsMono Nerd Font__.
+> These demo were recorded with the [asciinema][asciinema]. The color scheme for the terminal is [dracula][dracula-theme] and the font is _JetBrainsMono Nerd Font_.
 
 {{< cards >}}
   {{< card icon="document-text" link="docs/introduction" title="Ready to get started?" subtitle="Check out the documentation" >}}

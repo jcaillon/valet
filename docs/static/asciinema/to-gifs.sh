@@ -4,7 +4,7 @@
 function main() {
   local file
   for file in *.cast; do
-    agg -v --theme dracula --font-size 20 --speed 2 --renderer fontdue --font-family "JetBrains Mono,Consolas LNF,Fira Code" "${file}" "${file%.cast}.gif"
+    agg -v --theme dracula --font-size 20 --speed 1 --renderer fontdue --font-family "JetBrains Mono,Consolas LNF,Fira Code" "${file}" "${file%.cast}.gif"
   done
 }
 

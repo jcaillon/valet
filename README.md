@@ -13,7 +13,7 @@ With Valet, you can setup and execute tests, code interactive experiences for yo
 
 Learn more on the [Valet documentation website][valet-site].
 
-[![demo](docs/static/asciinema/interactive-menu.gif)][valet-site]
+[![demo](docs/static/asciinema/full-demo.gif)][valet-site]
 
 Installation instructions can be found [in the documentation][installationLink].
 

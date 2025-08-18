@@ -263,7 +263,7 @@ function log::getLevel() {
   REPLY="${GLOBAL_LOG_LEVEL:-info}"
 }
 
-# ## log::print
+# ## log::print (private)
 #
 # Display a log message.
 #

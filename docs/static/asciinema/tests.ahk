@@ -38,6 +38,16 @@
     Send "{Enter}"
 
     Sleep 2000
+    SendEvent "valet self test -i showcase-test-suite"
+    Sleep 1000
+    Send "{Enter}"
+
+    Sleep 4000
+    SendEvent "valet self test -a"
+    Sleep 1000
+    Send "{Enter}"
+
+    Sleep 4000
     SendEvent "valet self test"
     Sleep 1000
     Send "{Enter}"

@@ -14,7 +14,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Check how we can make the list component work in the main screen while user is scrolling. Seems like gum is doing it by positioning the cursor at the end of the screen always, and then using move cursor left to trigger an automatic scroll that takes the user back at the right spot.
 - test with bash 5.1, 5.2 and 5.3 in the pipeline (with different distros each time).
 - handle the drawing of TUI panels in a coproc so each has its own set of variables for its state.
-- self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.
 - Arguments parser:
   - Make the program parser catch all global options and verify in the build command that we do not reuse the same global option in different commands.
   - Allow options to be inherited from parent commands. We can check the existence of the base options in the command::parse function (for verbose, log level, progress bars). For source and version, mark them as `inherited: false` as we only want to handle them in the main parsing loop, at valet level.
@@ -36,11 +35,11 @@ This page lists the features that I would like to implement in Valet. They come 
   - prompt the user in the scrolling terminal. Then we add an option to instead open a full screen editor.
 - In benchmark, with debug mode on, we can compute the time spent on each line of a function. See extdebug shopt.
 - add snippets for the esc codes. Add snippets on the global variables.
-- Demo with ascii cinema: https://asciinema.org. Put the showcase in the index page instead.
 - Revamp self build:
   - add more checks on command definition
   - Filter build command for `commands.d` directory
   - we split the commands file into several one, per extension, so we don't have to load everything immediately
+  - self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.
 - Tests:
   - add an option to display the received outputs markdown instead of comparing (or in addition to comparing). We can add our own function to display a markdown file.
   - self-add-test
@@ -65,11 +64,11 @@ This page lists the features that I would like to implement in Valet. They come 
 - add a new command self diagnostic that will run a series of tests to check the environment and help figure out what's wrong.
 - add a yaml library for basic parsing. Same for json
 - Implement tests that are only run with -e flag and where we test system specific stuff, like the windows library and fs::createLink, absolute path with real path etc...
-- Add documentation pages for each built in commands. Add an option --markdown to the help command to output the help in markdown.
 - Add an option to enter interactive debug mode when an error occurs and on each log::print call.
 - Add a function to display a table, use it for benchmark.
 - Add a function to display a text using figlet fonts.
 - Modify self install: at the moment we count on the fact that some functions will still exist in valet after an update. The simplest is to redownload the self install script and run it again.
+- Links to file and line number of each function implementation.
 
 [valet-issues]: https://github.com/jcaillon/valet/issues
 

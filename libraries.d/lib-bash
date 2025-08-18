@@ -202,7 +202,8 @@ function bash::sleep() {
 # - ${REPLY}: The content of the standard input.
 #
 # ```bash
-# bash::readStdIn && local stdIn="${REPLY}"
+# bash::readStdIn
+# echo "${REPLY}"
 # ```
 function bash::readStdIn() {
   local IFS=''
@@ -435,7 +436,7 @@ function bash::getFunctionDefinitionWithGlobalVars() {
 #
 # This function is a lot more basic than `exe::invoke` and does not support all its features.
 #
-# - $@: **command** _as string_:
+# - $@: **command with arguments** _as string_:
 #       The command to run.
 #
 # Returns:

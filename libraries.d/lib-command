@@ -1361,7 +1361,7 @@ function command_writeAsTable() {
 # >>> Commands sourcing functions
 #===============================================================
 
-# ## command::sourceCommandFunction
+# ## command::sourceCommandFunction (private)
 #
 # Source the file associated with a command function.
 # This allows you to call a command function without having to source the file manually.

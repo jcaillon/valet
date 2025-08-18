@@ -1,6 +1,1 @@
-{{/*  Usage: {{% stats "nbFunctions" %}}  */}}
-{{$name := .Get 0}}
-{{/*  load the stats.json and extract the data for ^$name  */}}
-{{ $stats := readFile "/static/stats.yaml" | transform.Unmarshal }}
-{{ $data := index $stats $name }}
-{{ $data | safeHTML }}
+{{/*  Usage: {{% stats "nbFunctions" %}}  */}}{{ $stats := readFile "/static/stats.yaml" | transform.Unmarshal }}{{ index $stats (.Get 0) }}
