@@ -133,7 +133,7 @@ It will update the `lib-valet` script, the `lib-valet.md` documentation and the 
 You can now source your new library in your command files with `source mylib`.
 
 > [!IMPORTANT]
-> The bash built-in `source` is [overridden by a function in Valet](../libraries/core/#source). This allows to not source the same file twice, so you can safely call `source mylib` several times without impacting the runtime performance.
+> The bash built-in `source` is [overridden by a function in Valet](../libraries/core/#-source). This allows to not source the same file twice, so you can safely call `source mylib` several times without impacting the runtime performance.
 >
 > If you need to use the default source keyword, use `builtin source`.
 

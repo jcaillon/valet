@@ -112,13 +112,13 @@ You can also browse the list of available libraries and their functions here;
   {{< card link="progress" icon="dots-horizontal" title="progress" subtitle="Display a progress bar or a spinner." >}}
   <!-- {{< card link="prompt" icon="chevron-right" title="prompt" subtitle="Prompt the user for input." >}} -->
   {{< card link="regex" icon="tag" title="regex" subtitle="Use regular expressions." >}}
-  {{< card link="sfzf" icon="template" title="sfzf" subtitle="Simple fuzzy search interface, similar to fzf." >}}
+  <!-- {{< card link="sfzf" icon="template" title="sfzf" subtitle="Simple fuzzy search interface, similar to fzf." >}} -->
   {{< card link="string" icon="scissors" title="string" subtitle="Functions for string manipulation." >}}
   {{< card link="system" icon="desktop-computer" title="system" subtitle="Functions to get system/user information." >}}
   {{< card link="terminal" icon="terminal" title="terminal" subtitle="Manipulate the terminal and its display." >}}
   {{< card link="test" icon="beaker" title="test" subtitle="Functions usable in your test scripts." >}}
   {{< card link="time" icon="clock" title="time" subtitle="Functions related to time." >}}
-  {{< card link="tui" icon="view-boards" title="tui" subtitle="Functions to build a TUI application." >}}
+  <!-- {{< card link="tui" icon="view-boards" title="tui" subtitle="Functions to build a TUI application." >}} -->
   {{< card link="version" icon="calculator" title="version" subtitle="Compare and manipulate semantic versions." >}}
   {{< card link="windows" icon="view-grid" title="windows" subtitle="Functions specific to windows systems." >}}
 {{< /cards >}}
