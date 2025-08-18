@@ -5,108 +5,167 @@ cascade:
 url: /docs/libraries/time
 ---
 
-## time::convertMicrosecondsToHuman
+## ⚡ time::convertMicrosecondsToHuman
 
 Convert microseconds to human readable format.
 
-- $1: **microseconds** _as int_:
-      the microseconds to convert
-- $2: format _as string_:
-     (optional) Can be set using the variable `_OPTION_FORMAT`.
-     the format to use (defaults to "%HH:%MM:%SS")
-     Usable formats:
-     - %HH: hours
-     - %MM: minutes
-     - %SS: seconds
-     - %LL: milliseconds
-     - %h: hours without leading zero
-     - %m: minutes without leading zero
-     - %s: seconds without leading zero
-     - %l: milliseconds without leading zero
-     - %u: microseconds without leading zero
-     - %M: total minutes
-     - %S: total seconds
-     - %L: total milliseconds
-     - %U: total microseconds
+Inputs:
+
+- `$1`: **microseconds** _as int_:
+
+  the microseconds to convert
+
+- `${format}` _as string_:
+
+  (optional) the format to use
+
+  Usable formats:
+  - %HH: hours
+  - %MM: minutes
+  - %SS: seconds
+  - %LL: milliseconds
+  - %h: hours without leading zero
+  - %m: minutes without leading zero
+  - %s: seconds without leading zero
+  - %l: milliseconds without leading zero
+  - %u: microseconds without leading zero
+  - %M: total minutes
+  - %S: total seconds
+  - %L: total milliseconds
+  - %U: total microseconds
+
+
+  (defaults to "%HH:%MM:%SS")
 
 Returns:
 
-- ${RETURNED_VALUE}: the human readable format
+- `${REPLY}`: the human readable format
+
+Example usage:
 
 ```bash
 time::convertMicrosecondsToHuman 123456789
-echo "${RETURNED_VALUE}"
+time::convertMicrosecondsToHuman 123456789 format="%HH:%MM:%SS"
+echo "${REPLY}"
 ```
 
-## time::getDate
+## ⚡ time::convertMicrosecondsToSeconds
 
-Get the current date in the given format.
+Convert a microseconds integer to seconds float.
+e.g. 1234567 → 1.234567
 
-- $1: format _as string_:
-      (optional) the format of the date to return
-      (defaults to %(%F_%Hh%Mm%Ss)T).
+Inputs:
+
+- `$1`: **microseconds** _as int_:
+
+  the microseconds to convert
+
+- `${precision}` _as string_:
+
+  (optional) The precision to get (number of digits after the dot).
+
+  (defaults to 6)
 
 Returns:
 
-- ${RETURNED_VALUE}: the current date in the given format.
+- `${REPLY}`: The seconds (float number).
+
+Example usage:
+
+```bash
+time::convertMicrosecondsToSeconds 1234567
+time::convertMicrosecondsToSeconds 1234567 precision=3
+echo "${REPLY}"
+```
+
+## ⚡ time::getDate
+
+Get the current date in the given format.
+
+Inputs:
+
+- `${format}` _as string_:
+
+  (optional) the format (see printf) of the date to return
+
+  (defaults to "%(%F_%Hh%Mm%Ss)T")
+
+Returns:
+
+- `${REPLY}`: the current date in the given format.
+
+Example usage:
 
 ```bash
 time::getDate
-local date="${RETURNED_VALUE}"
+local date="${REPLY}"
+time::getDate format="'%(%Hh%Mm%Ss)T'"
 ```
 
 > This function avoid to call $(date) in a subshell (date is a an external executable).
 
-## time::getProgramElapsedMicroseconds
+## ⚡ time::getProgramElapsedMicroseconds
 
 Get the elapsed time in µs since the program started.
 
 Returns:
 
-- ${RETURNED_VALUE}: the elapsed time in µs since the program started.
+- `${REPLY}`: the elapsed time in µs since the program started.
+
+Example usage:
 
 ```bash
-core::getElapsedProgramTime
-echo "${RETURNED_VALUE}"
-time::convertMicrosecondsToHuman "${RETURNED_VALUE}"
-echo "Human time: ${RETURNED_VALUE}"
+time::getProgramElapsedMicroseconds
+echo "${REPLY}"
+time::convertMicrosecondsToHuman "${REPLY}"
+echo "Human time: ${REPLY}"
 ```
 
 > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.
 > The 10# forces the base 10 conversion to avoid issues with leading zeros.
 > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 
-## time::getTimerMicroseconds
+## ⚡ time::getTimerMicroseconds
 
 Get the time elapsed since the call of `time::startTimer`.
 
-- ${_OPTION_LOG_ELAPSED_TIME} _as bool_:
-     (optional) Wether or not to log the elapsed time.
-     (defaults to false)
-- ${_OPTION_FORMAT} _as string_:
-     (optional) The format to use if we log the elapsed time.
-     See `time::convertMicrosecondsToHuman` for the format.
-     (defaults to "%S.%LLs").
+Inputs:
+
+- `${logElapsedTime}` _as bool_:
+
+  (optional) Wether or not to log the elapsed time.
+
+  (defaults to false)
+
+- `${format}` _as string_:
+
+  (optional) The format to use if we log the elapsed time.
+  See `time::convertMicrosecondsToHuman` for the format.
+
+  (defaults to "%S.%LLs").
 
 Returns:
 
-- ${RETURNED_VALUE}: the elapsed time in microseconds.
+- `${REPLY}`: the elapsed time in microseconds.
+
+Example usage:
 
 ```bash
 time::startTimer
-_OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
-echo "Total microseconds: ${RETURNED_VALUE}"
+time::getTimerMicroseconds logElapsedTime=true
+echo "Total microseconds: ${REPLY}"
 ```
 
-## time::startTimer
+## ⚡ time::startTimer
 
 Start a timer. You can then call `time::getTimerMicroseconds` to get the elapsed time.
+
+Example usage:
 
 ```bash
 time::startTimer
 time::getTimerMicroseconds
 ```
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

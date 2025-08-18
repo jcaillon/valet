@@ -5,23 +5,33 @@ cascade:
 url: /docs/libraries/log
 ---
 
-## log::debug
+## ⚡ log::debug
 
 Displays a debug message.
 
-- $@: **message** _as string_:
-      the debug messages to display
+Inputs:
+
+- `$1`: **message** _as string_:
+
+  the debug messages to display
+
+Example usage:
 
 ```bash
 log::debug "This is a debug message."
 ```
 
-## log::error
+## ⚡ log::error
 
 Displays an error message.
 
-- $@: **message** _as string_:
-      the error messages to display
+Inputs:
+
+- `$1`: **message** _as string_:
+
+  the error messages to display
+
+Example usage:
 
 ```bash
 log::error "This is an error message."
@@ -29,298 +39,392 @@ log::error "This is an error message."
 
 > You probably want to exit immediately after an error and should consider using core::fail function instead.
 
-## log::errorTrace
+## ⚡ log::errorTrace
 
 Displays an error trace message.
 This is a trace message that is always displayed, independently of the log level.
 It can be used before a fatal error to display useful information.
 
-- $@: **message** _as string_:
-      the trace messages to display
+Inputs:
+
+- `$1`: **message** _as string_:
+
+  the trace messages to display
+
+Example usage:
 
 ```bash
 log::errorTrace "This is a debug message."
 ```
 
-## log::getCallStack
+## ⚡ log::getCallStack
 
 This function returns the current function stack.
 
-- $1: Stack to skip _as int_:
-      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
-      The number of stack to skip.
-      (defaults to 1 which skips this function)
-- $2: Stack to skip at end _as int_:
-      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.
-      The number of stack to skip at the end.
-      (defaults to 0)
-- ${_OPTION_WRAP_WIDTH} _as int_:
-      (optional) The width to wrap the call stack.
-      (defaults to the terminal width)
+Inputs:
+
+- `${stackToSkip}` _as int_:
+
+  (optional) The number of stack to skip.
+  For instance, a value of 1 will skip this function.
+
+  (defaults to 1)
+
+- `${stackToSkipAtEnd}` _as int_:
+
+  (optional) The number of stack to skip at the end.
+
+  (defaults to 0)
+
+- `${wrapWidth}` _as int_:
+
+  (optional) The width to wrap the call stack.
+
+  (defaults to 0)
 
 Returns:
 
-- ${RETURNED_VALUE}: The call stack as a string.
+- `${REPLY}`: The call stack as a string.
+
+Example usage:
 
 ```bash
 log::getCallStack
-echo "${RETURNED_VALUE}"
+echo "${REPLY}"
+log::getCallStack stackToSkip=2 stackToSkipAtEnd=1 wrapWidth=80
 ```
 
 > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
 > variables to simulate a call stack.
 
-## log::getLevel
+## ⚡ log::getLevel
 
 Get the current log level.
 
 Returns:
 
-- ${RETURNED_VALUE}: The current log level.
+- `${REPLY}`: The current log level.
+
+Example usage:
 
 ```bash
 log::getLevel
-printf '%s\n' "The log level is ⌜${RETURNED_VALUE}⌝."
+printf '%s\n' "The log level is ⌜${REPLY}⌝."
 ```
 
-## log::info
+## ⚡ log::info
 
 Displays an info message.
 
-- $@: **message** _as string_:
-      the info messages to display
+Inputs:
+
+- `$1`: **message** _as string_:
+
+  the info messages to display
+
+Example usage:
 
 ```bash
 log::info "This is an info message."
 ```
 
-## log::isDebugEnabled
+## ⚡ log::isDebugEnabled
 
 Check if the debug mode is enabled.
 
 Returns:
 
-- $?:
+- `$?`:
   - 0 if debug mode is enabled (log level is debug)
   - 1 if disabled
+
+Example usage:
 
 ```bash
 if log::isDebugEnabled; then printf '%s\n' "Debug mode is active."; fi
 ```
 
-## log::isTraceEnabled
+## ⚡ log::isTraceEnabled
 
 Check if the trace mode is enabled.
 
 Returns:
 
-- $?:
+- `$?`:
   - 0 if trace mode is enabled (log level is trace)
   - 1 if disabled
+
+Example usage:
 
 ```bash
 if log::isTraceEnabled; then printf '%s\n' "Debug mode is active."; fi
 ```
 
-## log::print
-
-Display a log message.
-
-- $1: **color name** _as string_:
-      The color name to use for the severity (TRACE, DEBUG...).
-- $2: **icon** _as string_:
-      The icon to display in the log message (utf8 character from nerd icons).
-- $3: **severity** _as string_:
-      The severity to display (max 7 chars for the default log pattern).
-- $@: **message** _as string_:
-      The message to log.
-
-```bash
-log::print "SUCCESS" $'\uf14a' "OK" "This is a success message."
-```
-
-## log::printCallStack
+## ⚡ log::printCallStack
 
 This function prints the current function stack in the logs.
 
-- $1: Stack to skip _as int_:
-      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP`.
-      The number of stack to skip.
-      (defaults to 2 which skips this function and the first calling function
-      which is usually the onError function)
-- $2: Stack to skip at end _as int_:
-      (optional) Can be set using the variable `_OPTION_STACK_TO_SKIP_AT_END`.
-      The number of stack to skip at the end.
-      (defaults to 0)
+Inputs:
+
+- `${stackToSkip}` _as int_:
+
+  (optional) The number of stack to skip.
+  For instance, a value of 2 will skip this function and the first calling function.
+
+  (defaults to 2)
+
+- `${stackToSkipAtEnd}` _as int_:
+
+  (optional) The number of stack to skip at the end.
+
+  (defaults to 0)
+
+Example usage:
 
 ```bash
 log::printCallStack
-log::printCallStack 0
+log::printCallStack stackToSkip=0
 ```
 
 > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
 > variables to simulate a call stack.
 
-## log::printFile
+## ⚡ log::printFile
 
 Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
 
-- $1: **path** _as string_:
-      the file path to display.
-- $2: max lines _as int_:
-      (optional) Can be set using the variable `_OPTION_MAX_LINES`.
-      Max lines to display, can be set to 0 to display all lines.
-      (defaults to 0)
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  the file path to display.
+
+- `${maxLines}` _as int_:
+
+  (optional) Max lines to display, can be set to 0 to display all lines.
+
+  (defaults to 0)
+
+Example usage:
 
 ```bash
 log::printFile "/my/file/path"
+log::printFile "/my/file/path" maxLines=10
 ```
 
-## log::printFileString
+## ⚡ log::printFileString
 
 Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
 
-- $1: **content variable name** _as string_:
-      The name of the variable containing the file content to print.
-- $2: max lines _as int_:
-      (optional) Can be set using the variable `_OPTION_MAX_LINES`.
-      Max lines to display, can be set to 0 to display all lines.
-      (defaults to 0)
+Inputs:
+
+- `$1`: **content variable name** _as string_:
+
+  The name of the variable containing the file content to print.
+
+- `${maxLines}` _as int_:
+
+  (optional) Max lines to display, can be set to 0 to display all lines.
+
+  (defaults to 0)
+
+Example usage:
 
 ```bash
 log::printFileString "myvar"
+log::printFileString "myvar" maxLines=10
 ```
 
 > This function is not at all suited for large strings, print the content to a file instead.
 
-## log::printRaw
+## ⚡ log::printRaw
 
 Display something in the log stream.
 Does not check the log level.
 
-- $1: **content variable name** _as string_:
-      The variable name containing the content to print (can contain new lines).
+Inputs:
+
+- `$1`: **content variable name** _as string_:
+
+  The variable name containing the content to print (can contain new lines).
+
+Example usage:
 
 ```bash
 log::printRaw "my line"
 ```
 
-## log::printString
+## ⚡ log::printString
 
 Display a string in the log.
 The string will be aligned with the current log output and hard wrapped if necessary.
 Does not check the log level.
 
-- $1: **content** _as string_:
-      the content to log (can contain new lines)
-- $2: new line pad string _as string_:
-      (optional) the string with which to prepend each wrapped line
-      (empty by default)
+Inputs:
+
+- `$1`: **content** _as string_:
+
+  the content to log (can contain new lines)
+
+- `${newLinePadString}` _as string_:
+
+  (optional) the string with which to prepend each wrapped line
+
+  (defaults to "")
+
+Example usage:
 
 ```bash
 log::printString "my line"
+log::printString "my line" newLinePadString="  "
 ```
 
-## log::saveFile
+## ⚡ log::saveFile
 
 Save the given file by copying it to a new file in the user local state directory
-(using `core::createNewStateFilePath`).
+(using `core::createSavedFilePath`).
 Useful for debugging purposes, to save the state of a file during execution.
 
-- $1: **path** _as string_:
-      The file path to save.
-- $2: **suffix** _as string_:
-      The suffix to add to the file name.
-- $3: log path _as bool_:
-      (optional) if true, log the path of the saved file using `log::printString`
-      (defaults to true)
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  The file path to save.
+
+- `${suffix}` _as string_:
+
+  (optional) The suffix for the file to create.
+
+  (defaults to "")
+
+- `${silent}` _as bool_:
+
+  (optional) if true, do not log the path of the saved file using `log::printString`
+
+  (defaults to false)
 
 Returns:
 
-- ${RETURNED_VALUE}: The path to the saved file.
+- `${REPLY}`: The path to the saved file.
+
+Example usage:
 
 ```bash
 log::saveFile "/my/file/path" "suffix" "important result file"
 ```
 
-## log::saveFileString
+## ⚡ log::saveFileString
 
 Save the given string to a new file in the user local state directory
-(using `core::createNewStateFilePath`).
+(using `core::createSavedFilePath`).
 Useful for debugging purposes, to save the state of a string during execution.
 
-- $1: **content variable name** _as string_:
-      The variable name of the content to save.
-- $2: **suffix** _as string_:
-      The suffix to add to the file name.
-- $3: log path _as bool_:
-      (optional) if true, log the path of the saved file using `log::printString`
-      (defaults to true)
+Inputs:
+
+- `$1`: **content variable name** _as string_:
+
+  The variable name of the content to save.
+
+- `${suffix}` _as string_:
+
+  (optional) The suffix for the file to create.
+
+  (defaults to "")
+
+- `${silent}` _as bool_:
+
+  (optional) if true, do not log the path of the saved file using `log::printString`
+
+  (defaults to false)
 
 Returns:
 
-- ${RETURNED_VALUE}: The path to the saved file.
+- `${REPLY}`: The path to the saved file.
+
+Example usage:
 
 ```bash
 log::saveFileString "my content" "suffix" "important result file"
 ```
 
-## log::setLevel
+## ⚡ log::setLevel
 
 Set the log level.
 
-- $1: **log level** _as string_:
-      The log level to set (or defaults to info), acceptable values are:
+Inputs:
+
+- `$1`: **log level** _as string_:
+
+  The log level to set (or defaults to info), acceptable values are:
   - trace
   - debug
   - info
   - success
   - warning
   - error
-- $2: silent _as bool_:
-      (optional) true to silently switch log level, i.e. does not print a message
-      (defaults to false)
+
+- `${silent}` _as bool_:
+
+  (optional) true to silently switch log level, i.e. does not print a message
+
+  (defaults to false)
+
+Example usage:
 
 ```bash
 log::setLevel debug
-log::setLevel debug true
+log::setLevel debug silent=true
 ```
 
-## log::success
+## ⚡ log::success
 
 Displays a success message.
 
-- $@: **message** _as string_:
-      the success messages to display
+Inputs:
+
+- `$1`: **message** _as string_:
+
+  the success messages to display
+
+Example usage:
 
 ```bash
 log::success "This is a success message."
 ```
 
-## log::trace
+## ⚡ log::trace
 
 Displays a trace message.
 
-- $@: **message** _as string_:
-      the trace messages to display
+Inputs:
+
+- `$1`: **message** _as string_:
+
+  the trace messages to display
+
+Example usage:
 
 ```bash
 log::trace "This is a trace message."
 ```
 
-## log::warning
+## ⚡ log::warning
 
 Displays a warning.
 
-- $@: **message** _as string_:
-      the warning messages to display
+Inputs:
+
+- `$1`: **message** _as string_:
+
+  the warning messages to display
+
+Example usage:
 
 ```bash
 log::warning "This is a warning message."
 ```
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

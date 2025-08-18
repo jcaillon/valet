@@ -5,7 +5,7 @@ cascade:
 url: /docs/libraries/command
 ---
 
-## command::checkParsedResults
+## ⚡ command::checkParsedResults
 
 A convenience function to check the parsing results and fails with an error message if there are
 parsing errors.
@@ -15,6 +15,8 @@ This should be called from a command function for which you want to check the pa
 
 It uses the variables `help` and `commandArgumentsErrors` to determine if the help should be displayed
 and if there are parsing errors.
+
+Example usage:
 
 ```bash
 command::checkParsedResults
@@ -28,12 +30,15 @@ This should be called from a command function for which you want to parse the ar
 See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#-implement-your-command>.
 
 
-- $@: **arguments** _as any_:
-      the arguments to parse
+Inputs:
+
+- `$@`: **arguments** _as any_:
+
+  the arguments to parse
 
 Returns:
 
-- ${RETURNED_VALUE}: a string that can be evaluated to set the parsed variables
+- `${REPLY}`: a string that can be evaluated to set the parsed variables
 
 Output example:
 
@@ -43,31 +48,39 @@ arg1="xxx"
 option1="xxx"
 ```
 
+Example usage:
+
 ```bash
-command::parseArguments "$@" && eval "${RETURNED_VALUE}"
+command::parseArguments "$@"; eval "${REPLY}"
 ```
 
-## command::showHelp
+## ⚡ command::showHelp
 
 Show the help for the current function.
 This should be called directly from a command function for which you want to display the help text.
+
+Example usage:
 
 ```bash
 command::showHelp
 ```
 
-## command::sourceFunction
+## ⚡ command::sourceFunction
 
 Source the file associated with a command function.
 This allows you to call a command function without having to source the file manually.
 
-- $1: **function name** _as string_:
-      the function name
+Inputs:
+
+- `$1`: **function name** _as string_:
+
+  the function name
+
+Example usage:
 
 ```bash
 command::sourceFunction "functionName"
 ```
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

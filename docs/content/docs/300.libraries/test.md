@@ -5,197 +5,280 @@ cascade:
 url: /docs/libraries/test
 ---
 
-## test::exec
+## ⚡ test::exec
 
 Call this function to execute a command and write the command and its output to the report file.
 The command can fail, in which case the returned exit code is written to the report file.
 However, the command must not call `exit` (in which case, use test::exit).
 
-- $@: **command** _as string_:
-      The command to execute.
+Inputs:
+
+- `$@`: **command** _as string_:
+
+  The command to execute.
+
+Example usage:
 
 ```bash
 test::exec echo "Hello, world!"
 ```
 
-## test::exit
+## ⚡ test::exit
 
 Call this function to execute a command that can call `exit` and write the command and its output to the report file.
 The command is executed in a subshell to catch the exit.
 
-- $@: **command** _as string_:
-      The command to execute.
+Inputs:
+
+- `$@`: **command** _as string_:
+
+  The command to execute.
+
+Example usage:
 
 ```bash
 test::exit exit 3
 ```
 
-## test::fail
+## ⚡ test::fail
 
 Call this function to log a message and exit with the status 142, which
 indicates to the self test command that the test failed and that we know the
 reason (it is a bad implementation of the test itself).
 
-- $@: **message** _as string_:
-      The message to log.
+Inputs:
+
+- `$@`: **message** _as string_:
+
+  The message to log.
+
+Example usage:
 
 ```bash
 test::fail "This is a failure message with a clear reason."
 ```
 
-## test::flush
+## ⚡ test::flush
 
 Call this function to flush the standard and error outputs to the report file.
 They will be added as code blocks in the report file (one for the standard
 output, one for the standard error).
 
+Example usage:
+
 ```bash
 test::flush
 ```
 
-## test::flushStderr
+## ⚡ test::flushStderr
 
 Call this function to flush the standard error to the report file.
 It will be added as a code block in the report file.
 
-- $1: blockTitle _as string_:
-      (optional) Can be set using the variable `_OPTION_BLOCK_TITLE`.
-      Add a 'title' to the code block (`**title**:` before the code block).
-      (defaults to '' which will not add a title)
+Inputs:
+
+- `${blockTitle}` _as string_:
+
+  (optional) Add a 'title' to the code block (`**title**:` before the code block).
+
+  (defaults to "")
+
+Example usage:
 
 ```bash
 test::flushStderr
 ```
 
-## test::flushStdout
+## ⚡ test::flushStdout
 
 Call this function to flush the standard output to the report file.
 It will be added as a code block in the report file.
 
-- $1: blockTitle _as string_:
-      (optional) Can be set using the variable `_OPTION_BLOCK_TITLE`.
-      Add a 'title' to the code block (`**title**:` before the code block).
-      (defaults to '' which will not add a title)
+Inputs:
+
+- `${blockTitle}` _as string_:
+
+  (optional) Add a 'title' to the code block (`**title**:` before the code block).
+
+  (defaults to "")
+
+Example usage:
 
 ```bash
 test::flushStdout
 ```
 
-## test::func
+## ⚡ test::func
 
 Call this function to test a function that returns a value using the valet
-conventions (RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY, etc...).
+conventions (REPLY, REPLY2, REPLY_ARRAY, etc...).
 
 It will write the command and its output to the report file.
-It will also print the returned values.
+It will also print the REPLY values.
 
-- $@: **command** _as string_:
-      The command to execute (function and its arguments).
+Inputs:
+
+- `$@`: **command** _as string_:
+
+  The command to execute (function and its arguments).
+
+Example usage:
 
 ```bash
 test::func myFunction
 ```
 
-## test::log
+## ⚡ test::log
 
 Call this function to log a message during a test.
 This log will only show in case of a script error or when the debug
 log level is enabled when running the tests.
 
-- $@: **messages** _as string_:
-      The messages to log.
+Inputs:
+
+- `$@`: **messages** _as string_:
+
+  The messages to log.
+
+Example usage:
 
 ```bash
 test::log "This is a log message."
 ```
 
-## test::markdown
+## ⚡ test::markdown
 
 Call this function to add some markdown in the report file.
 
-- $@: **markdown** _as string_:
-      The markdown to add in the report file.
+Inputs:
+
+- `$@`: **markdown** _as string_:
+
+  The markdown to add in the report file.
+
+Example usage:
 
 ```bash
 test::markdown "> This is a **quote**."
 ```
 
-## test::printReturnedVars
+## ⚡ test::printReplyVars
 
-This function can be called to print the returned values,
-e.g. RETURNED_VALUE, RETURNED_VALUE2, RETURNED_ARRAY...
+This function can be called to print the REPLY values,
+e.g. REPLY, REPLY2, REPLY_ARRAY...
 They will each be printed in a code block in the report file.
 
+Example usage:
+
 ```bash
-test::printReturnedVars
+test::printReplyVars
 ```
 
-## test::printVars
+## ⚡ test::printVars
 
 This function can be called to print the global variables in the report file.
 They will printed in a code block in the report file.
 
-- $@: **variables** _as string_:
-      The variables to print.
+Inputs:
+
+- `$@`: **variables** _as string_:
+
+  The variables to print.
+
+Example usage:
 
 ```bash
 test::printVars myVar
 ```
 
-## test::prompt
+## ⚡ test::prompt
 
 Call this function to print a 'prompt' (markdown that looks like a prompt) in the report file.
 
-- $@: **command** _as string_:
-      The command to print as a prompt.
+Inputs:
+
+- `$@`: **command** _as string_:
+
+  The command to print as a prompt.
+
+Example usage:
 
 ```bash
 test::prompt "echo 'Hello, world!'"
 ```
 
-## test::resetReturnedVars
+## ⚡ test::resetReplyVars
 
-Resets the value of each RETURNED_ variable.
+Resets the value of each REPLY variable.
+
+Example usage:
 
 ```bash
-test::resetReturnedVars
+test::resetReplyVars
 ```
 
-## test::title
+## ⚡ test::scrubOutput
+
+This function can be defined to modify the flushed text (both stdout and stderr) before adding it to the report.
+
+Scrubbers are required when we need to convert non-deterministic text to something stable so that
+tests are reproducible.
+
+The text to transform is in the global variable `GLOBAL_TEST_OUTPUT_CONTENT`.
+You can also use `GLOBAL_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
+
+Returns:
+
+- `GLOBAL_TEST_OUTPUT_CONTENT`: The modified text.
+
+> You can define this function directly in the test script, or in a test hook if
+> you need it to be available for multiple tests.
+> Note however that this function can be called very often, so it should be optimized.
+
+## ⚡ test::scrubReplyVars
+
+This function can be defined to modify the REPLY variables before printing them in the report.
+
+Scrubbers are required when we need to convert non-deterministic text to something stable so that
+tests are reproducible.
+
+> You can define this function directly in the test script, or in a test hook if
+> you need it to be available for multiple tests.
+> Note however that this function can be called very often, so it should be optimized.
+
+## ⚡ test::setTerminalInputs
+
+Replaces the functions `terminal::waitForChar` and `terminal::waitForKeyPress` by custom functions
+that return keys defined as an input of this function.
+
+Inputs:
+
+- `$@`: **keys** _as string_:
+
+  The keys to return when `terminal::waitForChar` or `terminal::waitForKeyPress` are called.
+  Keys are consumed in the order they are provided.
+
+Example usage:
+
+```bash
+test::setTerminalInputs "a" "b" "c"
+```
+
+## ⚡ test::title
 
 Call this function to add an H3 title in the report file.
 
-- $1: title _as string_:
-      (optional) Can be set using the variable `_OPTION_TITLE`.
-      The title of the test.
-     (defaults to "Test")
+Inputs:
+
+- `$1`: title _as string_:
+
+  The title of the test.
+
+Example usage:
 
 ```bash
 test::title "Testing something"
 ```
 
-## test::transformReturnedVarsBeforePrinting
-
-This function can be defined to modify the returned variables before printing them in the report.
-
-> You can define this function directly in the test script, or in a test hook if
-> you need it to be available for multiple tests.
-> Note however that this function can be called very often, so it should be optimized.
-
-## test::transformTextBeforeFlushing
-
-This function can be defined to modify the flushed text before adding it to the report.
-
-The text to transform is in the global variable `_TEST_OUTPUT`.
-
-Returns:
-
-- `_TEST_OUTPUT`: The modified text.
-
-> You can define this function directly in the test script, or in a test hook if
-> you need it to be available for multiple tests.
-> Note however that this function can be called very often, so it should be optimized.
-
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

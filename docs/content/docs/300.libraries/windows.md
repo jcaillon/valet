@@ -5,36 +5,49 @@ cascade:
 url: /docs/libraries/windows
 ---
 
-## windows::addToPath
+## ⚡ windows::addToPath
 
 Add the given path to the PATH environment variable on Windows (current user only).
 
 Will also export the PATH variable in the current bash.
 
-- $1: **path** _as string_:
-      the path to add to the PATH environment variable.
-      The path can be in unix format, it will be converted to windows format.
-- $2: preprend _as bool_:
-      (optional) Can be set using the variable `_OPTION_PREPEND`.
-      True to prepend the path to the PATH, false to append it.
-      (defaults to false)
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  the path to add to the PATH environment variable.
+  The path can be in unix format, it will be converted to windows format.
+
+- `${prepend}` _as bool_:
+
+  (optional) True to prepend the path to the PATH, false to append it.
+
+  (defaults to false)
+
+Example usage:
 
 ```bash
 windows::addToPath "/path/to/bin"
+windows::addToPath "/path/to/bin" prepend=true
 ```
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
-## windows::convertPathFromUnix
+## ⚡ windows::convertPathFromUnix
 
 Convert a unix path to a Windows path.
 
-- $1: **path** _as string_:
-      the path to convert
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  the path to convert
 
 Returns:
 
-- ${RETURNED_VALUE}: The Windows path.
+- `${REPLY}`: The Windows path.
+
+Example usage:
 
 ```bash
 windows::convertPathFromUnix "/path/to/file"
@@ -43,16 +56,21 @@ windows::convertPathFromUnix "/path/to/file"
 > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
 > handles other msys2 paths using `cygpath`.
 
-## windows::convertPathToUnix
+## ⚡ windows::convertPathToUnix
 
 Convert a Windows path to a unix path.
 
-- $1: **path** _as string_:
-      the path to convert
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  the path to convert
 
 Returns:
 
-- ${RETURNED_VALUE}: The unix path.
+- `${REPLY}`: The unix path.
+
+Example usage:
 
 ```bash
 windows::convertPathToUnix "C:\path\to\file"
@@ -60,7 +78,7 @@ windows::convertPathToUnix "C:\path\to\file"
 
 > Handles paths starting with `X:\`.
 
-## windows::createLink
+## ⚡ windows::createLink
 
 Create a soft or hard link (original ← link).
 
@@ -71,29 +89,41 @@ Reminder:
 - A hard link is a directory entry that associates a new pathname with an existing
   file (inode + data block) on a file system.
 
-- $1: **linked path** _as string_:
-      the path to link to (the original file)
-- $2: **link path** _as string_:
-      the path where to create the link
-- $3: hard link _as bool_:
-      (optional) true to create a hard link, false to create a symbolic link
-      (defaults to false)
-- $4: force _as bool_:
-      (optional) true to overwrite the link or file if it already exists.
-      Otherwise, the function will not on an existing link not pointing to the
-      target path.
-      (defaults to true)
+Inputs:
+
+- `$1`: **linked path** _as string_:
+
+  the path to link to (the original file)
+
+- `$2`: **link path** _as string_:
+
+  the path where to create the link
+
+- `${hardlink}` _as boolean_:
+
+  (optional) True to create a hard link, false to create a symbolic link
+
+  (defaults to false)
+
+- `${force}` _as boolean_:
+
+  (optional) True to overwrite the link or file if it already exists.
+  Otherwise, the function will fail on an existing link.
+
+  (defaults to false)
+
+Example usage:
 
 ```bash
 windows::createLink "/path/to/link" "/path/to/linked"
-windows::createLink "/path/to/link" "/path/to/linked" true
+windows::createLink "/path/to/link" "/path/to/linked" hardlink=true force=true
 ```
 
 > On Windows, the function uses `powershell` (and optionally ls to check the existing link).
 > If you have the windows "developer mode" enabled + MSYS=winsymlinks:nativestrict,
 > then it uses the ln command.
 
-## windows::createTempDirectory
+## ⚡ windows::createTempDirectory
 
 Create a temporary directory on Windows and return the path both for Windows and Unix.
 
@@ -101,8 +131,10 @@ This is useful for creating temporary directories that can be used in both Windo
 
 Returns:
 
-- ${RETURNED_VALUE}: The Windows path.
-- ${RETURNED_VALUE2}: The Unix path.
+- `${REPLY}`: The Windows path.
+- `${REPLY2}`: The Unix path.
+
+Example usage:
 
 ```bash
 windows::createTempDirectory
@@ -111,7 +143,7 @@ windows::createTempDirectory
 > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
-## windows::createTempFile
+## ⚡ windows::createTempFile
 
 Create a temporary file on Windows and return the path both for Windows and Unix.
 
@@ -119,8 +151,10 @@ This is useful for creating temporary files that can be used in both Windows and
 
 Returns:
 
-- ${RETURNED_VALUE}: The Windows path.
-- ${RETURNED_VALUE2}: The Unix path.
+- `${REPLY}`: The Windows path.
+- `${REPLY2}`: The Unix path.
+
+Example usage:
 
 ```bash
 windows::createTempFile
@@ -129,17 +163,19 @@ windows::createTempFile
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
-## windows::endPs1Batch
+## ⚡ windows::endPs1Batch
 
 This function will run all the commands that were batched with `windows::startPs1Batch`.
 
 Returns:
 
-- $?
+- `${REPLY_CODE}`:
   - 0 if the command was successful
   - 1 otherwise.
-- ${RETURNED_VALUE}: The content of stdout.
-- ${RETURNED_VALUE2}: The content of stderr.
+- `${REPLY}`: The content of stdout.
+- `${REPLY2}`: The content of stderr.
+
+Example usage:
 
 ```bash
 windows::startPs1Batch
@@ -148,58 +184,82 @@ windows::runPs1 "Write-Host \"World\""
 windows::endPs1Batch
 ```
 
-## windows::getEnvVar
+## ⚡ windows::getEnvVar
 
 Get the value of an environment variable for the current user on Windows.
 
-- $1: **variable name** _as string_:
-      the name of the environment variable to get.
+Inputs:
+
+- `$1`: **variable name** _as string_:
+
+  the name of the environment variable to get.
 
 Returns:
 
-- ${RETURNED_VALUE}: the value of the environment variable.
+- `${REPLY}`: the value of the environment variable.
+
+Example usage:
 
 ```bash
 windows::getEnvVar "MY_VAR"
-echo "${RETURNED_VALUE}"
+echo "${REPLY}"
 ```
 
-## windows::runPs1
+## ⚡ windows::runPs1
 
 Runs a PowerShell command.
 This is mostly useful on Windows.
 
-- $1: **command** _as string_:
-      the command to run.
-- $2: run as administrator _as bool_:
-      (optional) Can be set using the variable `_OPTION_RUN_AS_ADMIN`.
-      Wether to run the command as administrator.
-      (defaults to false).
-- ${_OPTION_SILENT} _as bool_:
-      (optional) Do not log the command stderr.
-      (defaults to false).
+Inputs:
+
+- `$1`: **command** _as string_:
+
+  the command to run.
+
+- `${runAsAdmin}` _as bool_:
+
+  (optional) Wether to run the command as administrator.
+
+  (defaults to false).
+
+- `${noFail}` _as bool_:
+
+  (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.
+  If true and the execution fails, the script will exit.
+
+  (defaults to false)
 
 Returns:
 
-- $?
+- `${REPLY_CODE}`:
   - 0 if the command was successful
   - 1 otherwise.
-- ${RETURNED_VALUE}: The content of stdout.
-- ${RETURNED_VALUE2}: The content of stderr.
+- `${REPLY}`: The content of stdout.
+- `${REPLY2}`: The content of stderr.
+
+Example usage:
 
 ```bash
 windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key that was pressed was: {0}' -f [System.Console]::ReadKey().Key.ToString());"
+windows::runPs1 "Write-Host \"Hello\"" runAsAdmin=true noFail=true
 ```
 
-## windows::setEnvVar
+## ⚡ windows::setEnvVar
 
 Set an environment variable for the current user on Windows.
 
-- $1: **variable name** _as string_:
-      The name of the environment variable to set.
-- $2: **variable value** _as string_:
-      The value of the environment variable to set.
-      An empty string will unset the variable.
+Inputs:
+
+- `$1`: **variable name** _as string_:
+
+  The name of the environment variable to set.
+
+- `$2`: **variable value** _as string_:
+
+  The value of the environment variable to set.
+  An empty string will unset the variable.
+
+Example usage:
 
 ```bash
 windows::setEnvVar "MY_VAR" "my_value"
@@ -207,7 +267,7 @@ windows::setEnvVar "MY_VAR" "my_value"
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
-## windows::startPs1Batch
+## ⚡ windows::startPs1Batch
 
 After running this function, all commands that should be executed by
 `windows::runPs1` will be added to a batch that will only be played
@@ -216,6 +276,8 @@ when `windows::endPs1Batch` is called.
 This is a convenient way to run multiple commands in a single PowerShell session.
 It makes up for the fact that running a new PowerShell session for each command is slow.
 
+Example usage:
+
 ```bash
 windows::startPs1Batch
 windows::runPs1 "Write-Host \"Hello\""
@@ -223,6 +285,5 @@ windows::runPs1 "Write-Host \"World\""
 windows::endPs1Batch
 ```
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

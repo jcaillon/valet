@@ -5,63 +5,102 @@ cascade:
 url: /docs/libraries/curl
 ---
 
-## curl::download
+## ⚡ curl::download
 
 This function is a wrapper around curl to save a request result in a file.
 It allows you to check the http status code and return 1 if it is not acceptable.
 It invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o ${2}.
 
-- $1: **fail** _as bool_:
-      true/false to indicate if the function should fail in case the execution fails
-- $2: **acceptable codes** _as string_:
-      list of http status codes that are acceptable, comma separated
-      (defaults to 200,201,202,204,301,304,308 if left empty)
-- $3: **path** _as string_:
-      the file in which to save the output of curl
-- $@: **curl arguments** _as any_:
-      options for curl
+Inputs:
+
+- `$1`: **url** _as string_:
+
+  The url to download
+
+- `$@`: **curl arguments** _as any_:
+
+  options for curl
+
+- `${output}` _as string_:
+
+  (optional) the file in which to save the output of curl.
+  Set to an empty string to create a temporary file instead.
+
+  (defaults to "")
+
+- `${failOnError}` _as bool_:
+
+  (optional) true/false to indicate if the function should fail in case the execution fails
+
+  (defaults to false)
+
+- `${acceptableCodes}` _as string_:
+
+  (optional) list of http status codes that are acceptable, comma separated
+
+  (defaults to 200,201,202,204,301,304,308)
 
 Returns:
 
-- $?:
+- `${REPLY_CODE}`:
   - 0 if the http status code is acceptable
   - 1 otherwise
-- ${RETURNED_VALUE}: the content of stderr
-- ${RETURNED_VALUE2}: the http status code
+- `${REPLY}`: the path to the file where the content was saved
+- `${REPLY2}`: the content of curl stderr
+- `${REPLY3}`: the http status code
+
+Example usage:
 
 ```bash
-curl::download true 200,201 "/filePath" "https://example.com"
-curl::download false 200 "/filePath2" "https://example2.com" || core::fail "The curl command failed."
+curl::download https://example.com --- output=/filePath
+curl::download https://example2.com -H "header: value" --- failOnError=true acceptableCodes=200,201 output=/filePath
+echo "The curl command ended with exit code ⌜${REPLY_CODE}⌝, the http return code was ⌜${REPLY2}⌝: ${REPLY}"
 ```
 
-## curl::request
+## ⚡ curl::request
 
 This function is a wrapper around curl to save the content of a request in a variable.
 It allows you to check the http status code and return 1 if it is not acceptable.
 It invokes curl with the following options (do not repeat them): -sSL -w "%{response_code}" -o "tempfile".
 
-- $1: **fail** _as bool_:
-      true/false to indicate if the function should fail in case the execution fails
-- $2: **acceptable codes** _as string_:
-      list of http status codes that are acceptable, comma separated
-      (defaults to 200,201,202,204,301,304,308 if left empty)
-- $@: **curl arguments** _as any_:
-      options for curl
+Inputs:
+
+- `$1`: **url** _as string_:
+
+  The url to request
+
+- `$@`: **curl arguments** _as any_:
+
+  options for curl
+
+- `${failOnError}` _as bool_:
+
+  (optional) true/false to indicate if the function should fail in case the execution fails
+
+  (defaults to false)
+
+- `${acceptableCodes}` _as string_:
+
+  (optional) list of http status codes that are acceptable, comma separated
+
+  (defaults to 200,201,202,204,301,304,308)
 
 Returns:
 
-- $?:
+- `${REPLY_CODE}`:
   - 0 if the http status code is acceptable
   - 1 otherwise
-- ${RETURNED_VALUE}: the content of the request
-- ${RETURNED_VALUE2}: the content of stderr
-- ${RETURNED_VALUE3}: the http status code
+- `${REPLY}`: the content of the request
+- `${REPLY2}`: the content of curl stderr
+- `${REPLY3}`: the http status code
+
+Example usage:
 
 ```bash
-curl::request true 200 https://example.com -X POST -H 'Authorization: token'
-curl::request false 200,201 https://example.com || core::fail "The curl command failed."
+curl::request https://example.com
+curl::request https://example.com -X POST -H 'Authorization: token' --- failOnError=true
+echo "The curl command ended with exit code ⌜${REPLY_CODE}⌝, the http return code was ⌜${REPLY2}⌝: ${REPLY}"
 ```
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.30.1409 (2025-08-12).
+> Documentation generated for the version 0.30.1455 (2025-08-18).
 
 ## ▶️ valet self add-command
 
@@ -813,9 +813,9 @@ valet [options] [--] [commands...]
 
   Do nothing.
 
-- `fix-videos-name`
+- `find-k8s-issues`
 
-  Rename videos files in a directory.
+  Find issues in the k8s cluster and report them.
 
 - `generate`
 
@@ -913,10 +913,6 @@ valet [options] [--] [commands...]
 
   A showcase command that demonstrates how to interact with the user.
 
-- `showcase sudo-command`
-
-  A command that requires sudo.
-
 - `terraform`
 
   Validate, plan or apply terraform files for a platform or an operation-zone.
@@ -943,4 +939,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.30.1409 (2025-08-12).
+> Documentation generated for the version 0.30.1455 (2025-08-18).

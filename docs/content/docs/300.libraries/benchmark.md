@@ -5,33 +5,45 @@ cascade:
 url: /docs/libraries/benchmark
 ---
 
-## benchmark::run
+## ⚡ benchmark::run
 
 This function runs a benchmark on given functions.
 
-First, it will run the 1st function (the baseline) for a given number of time and
-mark the number of times it was able to run it in that given time.
+First, it will run the 1st function (the baseline) for a given amount of time and
+mark the number of times it was able to run it.
 
 Then, it will run all the functions for the same number of time and
 print the difference between the baseline and the other functions.
 
-- $1: **baseline** _as string_:
-      the name of the function to use as baseline
-- $2: functions _as string_:
-      The names of the functions to benchmark, comma separated.
-- $3: time _as int_:
-      (optional) Can be set using the variable `_OPTION_TIME`.
-      The time in seconds for which to run the baseline.
-      (defaults to 3s)
-- $4: max runs _as int_:
-      (optional) Can be set using the variable `_OPTION_MAX_RUNS`.
-      The maximum number of runs to do for each function.
-      (defaults to -1 which means no limit)
+Inputs:
+
+- `$1`: **baseline** _as string_:
+
+  the name of the function to use as baseline
+
+- `$@`: functions _as string_:
+
+  The names of the functions to benchmark, comma separated.
+
+- `${baselineTimeInSeconds}` _as int_:
+
+  (optional) The time in seconds for which to run the baseline.
+
+  (defaults to 3)
+
+- `${maxRuns}` _as int_:
+
+  (optional) The maximum number of runs to do for each function.
+  Set to -1 to run until the baseline time is reached.
+
+  (defaults to -1)
+
+Example usage:
 
 ```bash
-benchmark::run "baseline" "function1,function2" 1 100
+benchmark::run baseline function1 function2
+benchmark::run baseline function1 function2 --- baselineTimeInSeconds=5 maxRuns=100
 ```
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

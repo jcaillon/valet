@@ -5,7 +5,7 @@ cascade:
 url: /docs/libraries/esc-codes
 ---
 
-## esc-codes::*
+## ⚡ esc-codes::*
 
 ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
 These codes can be used to format text in the terminal.
@@ -19,14 +19,16 @@ They are defined as variables and not as functions. Please check the content of 
 
 References:
 
+- https://jvns.ca/blog/2025/03/07/escape-code-standards/
+- https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 - https://en.wikipedia.org/wiki/ANSI_escape_code
 - https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 - https://paulbourke.net/dataformats/ascii/
 - https://www.aivosto.com/articles/control-characters.html
 - https://github.com/tmux/tmux/blob/master/tools/ansicode.txt
-- https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
 - https://vt100.net/docs/vt102-ug/chapter5.html
-- https://vt100.net/docs/vt100-ug/chapter3.html#S3.3.1
+- https://vt100.net/docs/vt100-ug/chapter3.html#S3.3
+- https://github.com/tmux/tmux/blob/882fb4d295deb3e4b803eb444915763305114e4f/tools/ansicode.txt
 
 Ascii graphics:
 
@@ -34,9 +36,10 @@ Ascii graphics:
 - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing
 - https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements
 
+An interesting read: https://sw.kovidgoyal.net/kitty/keyboard-protocol/
+
 > While it could be very handy to define a function for each of these instructions,
 > it would also be slower to execute (function overhead + multiple printf calls).
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

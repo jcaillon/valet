@@ -5,24 +5,29 @@ cascade:
 url: /docs/libraries/interactive
 ---
 
-##  interactive::askForConfirmation
+## ⚡  interactive::askForConfirmation
 
 Ask the user to press the button to continue.
 
-- $1: **prompt** _as string_:
-      the prompt to display
+Inputs:
+
+- `$1`: **prompt** _as string_:
+
+  the prompt to display
 
 Returns:
 
-- $?:
+- `$?`:
   - 0 if the user pressed enter
   - 1 otherwise
+
+Example usage:
 
 ```bash
 interactive::askForConfirmation "Press enter to continue."
 ```
 
-## interactive::askForConfirmationRaw
+## ⚡ interactive::askForConfirmationRaw
 
 Ask the user to press the button to continue.
 
@@ -30,15 +35,17 @@ This raw version does not display the prompt or the answer.
 
 Returns:
 
-- $?:
+- `$?`:
   - 0 if the user pressed enter
   - 1 otherwise
+
+Example usage:
 
 ```bash
 interactive::askForConfirmationRaw
 ```
 
-## interactive::displayAnswer
+## ⚡ interactive::displayAnswer
 
 Displays an answer to a previous question.
 
@@ -50,33 +57,25 @@ The text is wrapped and put inside a box like so:
     ╰─────╯
 ```
 
-- $1: **answer** _as string_:
-      the answer to display
-- $2: max width _as int_:
-      (optional) the maximum width of the text in the dialog box
-      (defaults to GLOBAL_COLUMNS)
+Inputs:
+
+- `$1`: **answer** _as string_:
+
+  the answer to display
+
+- `${width}` _as int_:
+
+  (optional) the maximum width of the text in the dialog box
+
+  (defaults to "${GLOBAL_COLUMNS}")
+
+Example usage:
 
 ```bash
 interactive::displayAnswer "My answer."
 ```
 
-## interactive::displayDialogBox
-
-Displays a dialog box with a speaker and a text.
-
-- $1: **speaker** _as string_:
-      the speaker (system or user)
-- $2: **text** _as string_:
-      the text to display
-- $3: max width _as int_:
-      (optional) the maximum width of the text in the dialog box
-      (defaults to GLOBAL_COLUMNS)
-
-```bash
-interactive::displayDialogBox "system" "This is a system message."
-```
-
-## interactive::displayQuestion
+## ⚡ interactive::displayQuestion
 
 Displays a question to the user.
 
@@ -88,17 +87,25 @@ The text is wrapped and put inside a box like so:
    ╰────────────────────────────────╯
 ```
 
-- $1: **prompt** _as string_:
-      the prompt to display
-- $2: max width _as int_:
-      (optional) the maximum width of text in the dialog box
-      (defaults to GLOBAL_COLUMNS)
+Inputs:
+
+- `$1`: **prompt** _as string_:
+
+  the prompt to display
+
+- `${width}` _as int_:
+
+  (optional) the maximum width of the text in the dialog box
+
+  (defaults to "${GLOBAL_COLUMNS}")
+
+Example usage:
 
 ```bash
 interactive::displayPrompt "Do you want to continue?"
 ```
 
-## interactive::promptYesNo
+## ⚡ interactive::promptYesNo
 
 Ask the user to yes or no.
 
@@ -108,24 +115,32 @@ Ask the user to yes or no.
 
 Dialog boxes are displayed for the question and answer.
 
-- $1: **prompt** _as string_:
-      the prompt to display
-- $2: default _as bool_:
-      (optional) the default value to select
-      (defaults to true)
+Inputs:
+
+- `$1`: **prompt** _as string_:
+
+  the prompt to display
+
+- `${default}` _as bool_:
+
+  (optional) the default value to select
+
+  (defaults to true)
 
 Returns:
 
-- $?:
+- `$?`:
   - 0 if the user answered yes
   - 1 otherwise
-- ${RETURNED_VALUE}: true or false.
+- `${REPLY}`: true or false.
+
+Example usage:
 
 ```bash
 if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
 ```
 
-## interactive::promptYesNoRaw
+## ⚡ interactive::promptYesNoRaw
 
 Ask the user to yes or no.
 
@@ -135,21 +150,26 @@ Ask the user to yes or no.
 
 This raw version does not display the prompt or the answer.
 
-- $1: default _as bool_:
-      (optional) the default value to select
-      (defaults to true)
+Inputs:
+
+- `${default}` _as bool_:
+
+  (optional) the default value to select
+
+  (defaults to true)
 
 Returns:
 
-- $?:
+- `$?`:
   - 0 if the user answered yes
   - 1 otherwise
-- ${RETURNED_VALUE}: true or false.
+- `${REPLY}`: true or false.
+
+Example usage:
 
 ```bash
-interactive::promptYesNoRaw "Do you want to continue?" && local answer="${RETURNED_VALUE}"
+interactive::promptYesNoRaw "Do you want to continue?" && local answer="${REPLY}"
 ```
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

@@ -5,71 +5,84 @@ cascade:
 url: /docs/libraries/system
 ---
 
-## system::addToPath
+## ⚡ system::addToPath
 
 Add the given path to the PATH environment variable for various shells,
 by adding the appropriate export command to the appropriate file.
 
 Will also export the PATH variable in the current bash.
 
-- $1: **path** _as string_:
-      the path to add to the PATH environment variable.
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  the path to add to the PATH environment variable.
+
+Example usage:
 
 ```bash
 system::addToPath "/path/to/bin"
 ```
 
-## system::getArchitecture
+## ⚡ system::getArchitecture
 
 Returns the CPU architecture of the current machine.
 
 Returns:
 
-- ${RETURNED_VALUE}: the CPU architecture of the current machine.
+- `${REPLY}`: the CPU architecture of the current machine.
+
+Example usage:
 
 ```bash
 system::getArchitecture
-local architecture="${RETURNED_VALUE}"
+local architecture="${REPLY}"
 ```
 
-## system::getEnvVars
+## ⚡ system::getEnvVars
 
 Get the list of all the environment variables.
 In pure bash, no need for env or printenv.
 
 Returns:
 
-- ${RETURNED_ARRAY[@]}: An array with the list of all the environment variables.
+- `${REPLY_ARRAY[@]}`: An array with the list of all the environment variables.
+
+Example usage:
 
 ```bash
 system::getEnvVars
-for var in "${RETURNED_ARRAY[@]}"; do
+for var in "${REPLY_ARRAY[@]}"; do
   printf '%s=%s\n' "${var}" "${!var}"
 done
 ```
 
-## system::getOs
+## ⚡ system::getOs
 
 Returns the name of the current OS.
 
 Returns:
 
-- ${RETURNED_VALUE}: the name of the current OS: "darwin", "linux" or "windows".
+- `${REPLY}`: the name of the current OS: "darwin", "linux" or "windows".
+
+Example usage:
 
 ```bash
 system::getOs
-local osName="${RETURNED_VALUE}"
+local osName="${REPLY}"
 ```
 
-## system::isDarwin
+## ⚡ system::isDarwin
 
 Check if the current OS is macOS.
 
 Returns:
 
-- $?
+- `$?`
   - 0 if the current OS is macOS
   - 1 otherwise.
+
+Example usage:
 
 ```bash
 if system::isDarwin; then
@@ -77,15 +90,17 @@ if system::isDarwin; then
 fi
 ```
 
-## system::isLinux
+## ⚡ system::isLinux
 
 Check if the current OS is Linux.
 
 Returns:
 
-- $?
+- `$?`
   - 0 if the current OS is Linux
   - 1 otherwise.
+
+Example usage:
 
 ```bash
 if system::isLinux; then
@@ -93,15 +108,17 @@ if system::isLinux; then
 fi
 ```
 
-## system::isRoot
+## ⚡ system::isRoot
 
 Check if the script is running as root.
 
 Returns:
 
-- $?
+- `$?`
   - 0 if the script is running as root
   - 1 otherwise.
+
+Example usage:
 
 ```bash
 if system::isRoot; then
@@ -109,15 +126,17 @@ if system::isRoot; then
 fi
 ```
 
-## system::isWindows
+## ⚡ system::isWindows
 
 Check if the current OS is Windows.
 
 Returns:
 
-- $?
+- `$?`
   - 0 if the current OS is Windows
   - 1 otherwise.
+
+Example usage:
 
 ```bash
 if system::isWindows; then
@@ -125,6 +144,5 @@ if system::isWindows; then
 fi
 ```
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

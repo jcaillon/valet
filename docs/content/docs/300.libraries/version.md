@@ -5,52 +5,69 @@ cascade:
 url: /docs/libraries/version
 ---
 
-## version::bump
+## ⚡ version::bump
 
 This function allows to bump a semantic version formatted like:
 major.minor.patch-prerelease+build
 
-- $1: **version** _as string_:
-      the version to bump
-- $2: **level** _as string_:
-      the level to bump (major, minor, patch)
-- $3: clear build and prerelease _as bool_:
-      (optional) clear the prerelease and build
-      (defaults to true)
+Inputs:
+
+- `$1`: **version** _as string_:
+
+  the version to bump
+
+- `$2`: **level** _as string_:
+
+  the level to bump (major, minor, patch)
+
+- `${keepPreRelease}` _as bool_:
+
+  (optional) keep the prerelease and build strings
+
+  (defaults to false)
 
 Returns:
 
-- ${RETURNED_VALUE}: the new version string
+- `${REPLY}`: the new version string
+
+Example usage:
 
 ```bash
+version::bump "1.2.3-prerelease+build" "major" keepPreRelease=true
 version::bump "1.2.3-prerelease+build" "major"
-local newVersion="${RETURNED_VALUE}"
+local newVersion="${REPLY}"
 ```
 
-## version::compare
+## ⚡ version::compare
 
 This function allows to compare two semantic versions formatted like:
 major.minor.patch-prerelease+build
 
-- $1: **version1** _as string_:
-      the first version to compare
-- $2: **version2** _as string_:
-      the second version to compare
+Inputs:
+
+- `$1`: **version1** _as string_:
+
+  the first version to compare
+
+- `$2`: **version2** _as string_:
+
+  the second version to compare
 
 Returns:
 
-- ${RETURNED_VALUE}:
+- `${REPLY}`:
   - 0 if the versions are equal,
   - 1 if version1 is greater,
   - -1 if version2 is greater
 
+Example usage:
+
 ```bash
 version::compare "2.3.4-prerelease+build" "1.2.3-prerelease+build"
-local comparison="${RETURNED_VALUE}"
+local comparison="${REPLY}"
 ```
 
 > The prerelease and build are ignored in the comparison.
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).

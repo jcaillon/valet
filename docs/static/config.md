@@ -16,7 +16,9 @@ These scripts are:
 
 ## 📄 About the config file
 
-The config file is sourced by Valet on startup which allows you to setup variables to configure Valet.
+The config file is sourced by Valet on startup.
+
+It allows you to setup `VALET_*` variables to configure Valet.
 
 Use the `valet self config` command to initialize and open the YAML configuration file.
 
@@ -29,10 +31,13 @@ you can define variables with a default value like this:
 VALET_CONFIG_MY_VAR="${VALET_CONFIG_MY_VAR:-"default value if not set"}"
 ```
 
-Do not add custom code to this script, use the custom startup script instead (see next section).
+> [!IMPORTANT]
+> Do not add complex logic to this script, use the custom startup script instead (see next section).
 
-If you break this file, valet will fail to start!
-You can delete it and run the `valet self config` command to recreate it.
+> [!CAUTION]
+> If you break this file, valet will fail to start!
+>
+> You can delete it and run the `valet self config` command to recreate it.
 
 ## 🚩 Custom startup script
 
@@ -41,7 +46,6 @@ You can define a custom startup script that will be sourced by Valet on startup.
 This allows you to define custom functions or variables that will be available in Valet.
 
 For example, the following script is convenient way to translate `CI_*` variables to `VALET_*` variables.
-The script should be named `startup` and be in the same directory as the config file.
 
 ```bash
 # Convert argocd env vars to normal env vars
@@ -51,6 +55,8 @@ for _MY_VARIABLE_NAME in ${!CI_*}; do
 done
 eval "${_TO_EVAL}"
 ```
+
+The script must be named `startup` and be in the same directory as the config file. You can override the path to this file using the variable `VALET_CONFIG_STARTUP_SCRIPT`.
 
 ## 🅰️ Configuration variables
 
@@ -62,18 +68,20 @@ All configuration variables in valet start with `VALET_CONFIG_`.
 
 These variables define the location of the configuration files.
 
-They **MUST BE** declared outside the config file (in your `~/.bashrc`)!
+**They must be declared outside the config file** (e.g. in your `~/.bashrc`)!
 
 #### VALET_CONFIG_DIRECTORY
 
 The path to the configuration directory of Valet.
 You can backup this directory to keep your configuration.
+
 Defaults to the `${XDG_CONFIG_HOME}/valet` or the `${HOME}/.config/valet` directory.
 
 #### VALET_CONFIG_FILE
 
 The path to this Valet config file.
 Export the variable before calling Valet.
+
 Default to the `config` file in your config directory.
 
 <!-- __________________ GENERAL ______________________ -->
@@ -83,44 +91,60 @@ Default to the `config` file in your config directory.
 #### VALET_CONFIG_USER_VALET_DIRECTORY
 
 The directory in which to find the user commands.
+
 Defaults to the `${HOME}/.valet.d`.
 
 #### VALET_CONFIG_USER_DATA_DIRECTORY
 
 The path to the directory in which to store the user-specific data files.
+
 Defaults to the `${XDG_DATA_HOME}/valet` or the `${HOME}/.local/share/valet` directory.
 
 #### VALET_CONFIG_USER_CACHE_DIRECTORY
 
 The path to the directory in which to store the user cache data.
+
 Defaults to the `${XDG_CACHE_HOME}/valet` or the `${HOME}/.cache/valet` directory.
 
 #### VALET_CONFIG_USER_STATE_DIRECTORY
 
 The path to the directory in which to store the user state data.
+
 Defaults to the `${XDG_STATE_HOME}/valet` or the `.local/state/valet` directory in the user home directory.
 
 #### VALET_CONFIG_TEMP_DIRECTORY
 
 The directory used in valet to store all temporary files and directories created by the program.
+
 Defaults to the temporary directory `${TMPDIR}` or `/tmp`.
 
 #### VALET_CONFIG_RUNTIME_DIRECTORY
 
 The directory in which to write work files (small files to capture output of programs).
 You can set it to a `tmpfs` directory (such as /dev/shm) to speed up the execution of valet.
+
 Defaults to the `${XDG_RUNTIME_DIR}` or the temporary directory.
 
 #### VALET_CONFIG_LOCALE
 
 The value is used to set `LC_ALL` and `LANG` in Valet (see the bash manual for more details on these variables).
+
 Defaults to `C.UTF-8` to ensure that the output is consistent across different systems.
 
 #### VALET_CONFIG_DOT_ENV_SCRIPT
 
 The name of a script which will be sourced by Valet on startup if it is present in
-the current directory. This allows you to define custom functions or variables that
+the current directory. This allows you to define variables that
 will be available in Valet.
+
+Defaults to the `.env` file in the current directory.
+
+#### VALET_CONFIG_STARTUP_SCRIPT
+
+The name of a script which will be sourced by Valet on startup.
+This allows you to define custom functions or variables that
+will be available in Valet.
+
 Defaults to the `.env` file in the current directory.
 
 <!-- ___________________ FEATURES _____________________ -->
@@ -205,6 +229,7 @@ You can use the following placeholders:
 - `<levelColor>`: The color for the log level.
 - `<icon>`: The log level icon.
 - `<pid>`: The process ID of the bash instance that logged the message.
+- `<processName>`: A human readable name for the process that logged the message ("main" for the main process).
 - `<subshell>`: The subshell level of the bash instance that logged the message.
 - `<function>`: The name of the function that logged the message.
 - `<line>`: The line number where the message was logged.
@@ -222,17 +247,11 @@ All the placeholders have a default format which truncates the string to a maxim
 
 Examples:
 
-- Java like logs: `"<colorFaded><time>{(%H:%M:%S)T} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{5s}:<subshell>{1s}] <levelColor><level><colorDefault> <colorFaded><function>{15s}<colorDefault> -- <message>"`
+- Java like logs: `"<colorFaded><time>{(%H:%M:%S)T} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05s}:<subshell>{1s}] <levelColor><level><colorDefault> <colorFaded><function>{15s}<colorDefault> -- <message>"`
 - JSON output: `'{"level": "<level>{s}", "message": "<message>{s}", "source": "<source>{s}", "line": "<line>{s}"}'`
 - Boxed messages: `"<colorFaded>╭─<time>{(%H:%M:%S)T}──<levelColor><level>{7s}<colorFaded>────────<sourceFile>{10s}:<line>{-4s}───░<colorDefault>"$'\n'"<colorFaded>│<colorDefault>  <message>"$'\n'"<colorFaded>╰─ +<elapsedTimeSinceLastLog>{7s}──────────────────────────────────░<colorDefault>"$'\n'`
 - Subtitles message: `"<levelColor><level><colorDefault> <message>"$'\n'"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) | pid <pid>{5s} | shlvl <subshell>{-1s} | from <sourceFile>{10s}:<line>{-4s}<colorDefault>"`
-- Compact debug logs: `"<colorFaded><elapsedTime>{8s} [<pid>{4s}:<subshell>{1s}] <colorFaded><sourceFile>{-5s}:<line>{-4s}<colorDefault> <levelColor><level>{-4s} <icon><colorDefault> <message>"`
-
-#### VALET_CONFIG_LOG_PATTERN_ALTERNATIVE
-
-The pattern to display a log line when the alternative log mode is used (global option `-a`).
-
-Defaults to: `"<colorFaded><elapsedTime>{8s} (+<elapsedTimeSinceLastLog>{7s}) [<pid>{05d}:<subshell>{1s}] <levelColor><level>{7s}<colorDefault> <colorFaded><sourceFile>{15s}:<line>{-4s}<colorDefault> <message>"`
+- Compact debug logs: `"<colorFaded><elapsedTime>{8s} [<pid>{04s}:<subshell>{1s}] <colorFaded><sourceFile>{-5s}:<line>{-4s}<colorDefault> <levelColor><level>{-4s} <icon><colorDefault> <message>"`
 
 #### VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL
 
@@ -273,7 +292,7 @@ the name of the file in which to write the logs.
 
 Only used if [VALET_CONFIG_LOG_TO_DIRECTORY](#valet_config_log_to_directory) is set.
 
-The default is equivalent to setting this string to: `printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"`.
+The default is equivalent to setting this string to: `printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06s.log" "${EPOCHSECONDS}" "${BASHPID}"`.
 
 <!-- _________________ PROFILER _______________________ -->
 
@@ -286,7 +305,7 @@ Defaults to a new file under ~/.local/state/valet/logs.
 
 #### VALET_CONFIG_KEEP_ALL_PROFILER_LINES
 
-The profiler log will be cleanup to only keep lines relevant for your command script
+The profiler log will be cleanup to only keep lines relevant for your command script.
 If true, it disables this behavior and you can see all the profiler lines.
 
 <!-- _________________ LIBRARIES _______________________ -->
@@ -310,13 +329,6 @@ See progress::start.
 #### VALET_CONFIG_PROGRESS_DEFAULT_UPDATE_INTERVAL
 
 The default number of animation frames to wait between two updates of the progress bar.
-
-#### VALET_CONFIG_TUI_KEEP_ESCAPE_KEY_SEQUENCES
-
-By default, in TUI mode, the escape code is immediately translated to the `ESC` key code instead of waiting for a longer sequence of keys
-(which is the default behavior of bash readline).
-
-If true, will keep the escape key sequences as they are, allowing you to remediate issues with key sequences in your terminal.
 
 #### VALET_CONFIG_PROMPT_KEY_MAPPING
 
@@ -368,5 +380,9 @@ Defaults to a new file in your user state directory `~/.local/state/valet/logs`.
 
 Force the creation of a core dump file when valet exits.
 Dump files are created in the user state directory in `~/.local/state/valet/core-dumps` by default.
+
+#### VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT
+
+If true, will display a warning when valet exits unexpectedly (not calling core::fail or doing a exit 0).
 
 <!-- END -->

@@ -5,112 +5,175 @@ cascade:
 url: /docs/libraries/regex
 ---
 
-## regex::escapeRegexSpecialChars
+## ⚡ regex::escapeRegexSpecialChars
 
 Escapes special characters in a string to be used as a regex.
 
-- $1: **string to escape** _as string_:
-      The string to escape.
+Inputs:
+
+- `$1`: **string to escape** _as string_:
+
+  The string to escape.
 
 Returns:
 
-- ${RETURNED_VALUE}: The escaped string.
+- `${REPLY}`: The escaped string.
+
+Example usage:
 
 ```bash
 regex::escapeRegexSpecialChars "a.(b)"
-echo "${RETURNED_VALUE}"
+echo "${REPLY}"
 ```
 
-## regex::getFirstGroup
+## ⚡ regex::getFirstGroup
 
 Matches a string against a regex and returns the first captured group of the first match.
 
-- $1: **string variable name** _as string_:
-      The variable name containing the string to match.
-- $2: **regex** _as string_:
-      The regex to use for the match.
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name containing the string to match.
+
+- `$2`: **regex** _as string_:
+
+  The regex to use for the match.
 
 Returns:
 
-- ${RETURNED_VALUE}: The first capture group in the matched string.
-                     Empty if no match.
+- `${REPLY}`: The first capture group in the matched string.
+                 Empty if no match.
+
+Example usage:
 
 ```bash
 MY_STRING="name: julien"
 regex::getFirstGroup MY_STRING "name:(.*)"
-echo "${RETURNED_VALUE}"
+echo "${REPLY}"
 ```
 
 > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
-## regex::getMatches
+## ⚡ regex::getFuzzySearchRegexFromSearchString
 
-Returns an array containing all the matched for a regex in a string.
+Allows to get a regex that can be used to fuzzy search a string.
+the -> '([^t]*)(t[^h]*h[^e]*e)'
 
-- $1: **string variable name** _as string_:
-      The variable name containing the string to match.
-- $2: **regex** _as string_:
-      The regex to use for the match.
-- $3: replacement _as string_:
-      (optional) Can be set using the variable `_OPTION_REPLACEMENT`.
-      The replacement string to use on each match.
-      Use \x to refer to the x-th capture group.
-      Use \c to refer to replacement counter.
-      (default to "", which means no changes will be done on the matches)
-- $4: max count _as int_:
-      (optional) Can be set using the variable `_OPTION_MAX_COUNT`.
-      The number of matches to return.
-      (default to -1, which is unlimited)
+Inputs:
+
+- `$1`: **search string** _as string_:
+
+  The variable name containing the search string to match.
 
 Returns:
 
-- ${RETURNED_ARRAY[@]}: An array containing all the matches.
+- `${_STRING_FUZZY_FILTER_REGEX}`: the regex
+
+Example usage:
+
+```bash
+regex::getFuzzySearchRegexFromSearchString SEARCH_STRING
+echo "${_STRING_FUZZY_FILTER_REGEX}"
+```
+
+## ⚡ regex::getMatches
+
+Returns an array containing all the matched for a regex in a string.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name containing the string to match.
+
+- `$2`: **regex** _as string_:
+
+  The regex to use for the match.
+
+- `${replacement}` _as string_:
+
+  (optional) The replacement string to use on each match.
+
+  - Use \x to refer to the x-th capture group.
+  - Use \c to refer to replacement counter.
+
+  Set to an empty string to keep the matches as they are.
+
+  (defaults to "")
+
+- `${max}` _as int_:
+
+  (optional) The number of matches to return.
+  Set to -1 for unlimited replacements.
+
+  (defaults to -1)
+
+Returns:
+
+- `${REPLY_ARRAY[@]}`: An array containing all the matches.
+
+Example usage:
 
 ```bash
 MY_STRING="name: julien, name: john"
 regex::getMatches MY_STRING "name: (.*)"
-for match in "${RETURNED_ARRAY[@]}"; do
+regex::getMatches MY_STRING "name: (.*)" max=1
+for match in "${REPLY_ARRAY[@]}"; do
   echo "${match}"
 done
 ```
 
 > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
-## regex::replace
+## ⚡ regex::replace
 
 Replaces strings within a string using a regex.
 
-- $1: **string variable name** _as string_:
-      The variable name containing the string in which to do replacements.
-      Replacement is done in place.
-- $2: **regex** _as string_:
-      The regex to use for the match.
-- $3: **replacement** _as string_:
-      The replacement string.
-      Use \x to refer to the x-th capture group.
-      Use \c to refer to replacement counter.
-- $4: max count _as int_:
-      (optional) Can be set using the variable `_OPTION_MAX_COUNT`.
-      The number of replacements to do.
-      (default to -1, which is unlimited)
-- $5: only matches _as bool_:
-      (optional) Can be set using the variable `_OPTION_ONLY_MATCHES`.
-      Instead of replacing with the regex, we keep only the matches.
-      This can be used to extract information from a string.
-      (default to false)
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name containing the string in which to do replacements.
+
+- `$2`: **regex** _as string_:
+
+  The regex to use for the match.
+
+- `$3`: **replacement string** _as string_:
+
+  The replacement string.
+  Use \x to refer to the x-th capture group.
+  Use \c to refer to replacement counter.
+
+- `${max}` _as int_:
+
+  (optional) The number of replacements to do.
+  Set to -1 for unlimited replacements.
+
+  (defaults to -1)
+
+- `${onlyMatches}` _as bool_:
+
+  (optional) Instead of replacing with the regex, we keep only the matches.
+  This can be used to extract information from a string.
+
+  (defaults to false)
 
 Returns:
 
-- ${RETURNED_VALUE}: The string with replacements.
+- `${REPLY}`: The string with replacements.
+
+Example usage:
 
 ```bash
 MY_STRING="name: julien"
 regex::replace MY_STRING "name: (.*)" "\1"
-echo "${RETURNED_VALUE}"
+regex::replace MY_STRING "name: (.*)" "\1" maxCount=1 onlyMatches=true
+echo "${REPLY}"
 ```
 
 > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
-{{< callout type="info" >}}
-Documentation generated for the version 0.29.197 (2025-03-29).
-{{< /callout >}}
+> [!IMPORTANT]
+> Documentation generated for the version 0.30.1455 (2025-08-18).
