@@ -533,7 +533,7 @@ function log::printTrappedBashCommand() {
 # log::printCallStack stackToSkip=0
 # ```
 #
-# > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+# > For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`
 # > variables to simulate a call stack.
 # shellcheck disable=SC2120
 function log::printCallStack() {
@@ -574,7 +574,7 @@ function log::printCallStack() {
 # log::getCallStack stackToSkip=2 stackToSkipAtEnd=1 wrapWidth=80
 # ```
 #
-# > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+# > For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`
 # > variables to simulate a call stack.
 function log::getCallStack() {
   local \
@@ -585,10 +585,10 @@ function log::getCallStack() {
   eval "local a= ${*@Q}"
 
   local -a stackFunctionNames stackSourceFiles stackLineNumbers
-  if [[ -n ${GLOBAL_STACK_FUNCTION_NAMES:-} ]]; then
-    stackFunctionNames=("${GLOBAL_STACK_FUNCTION_NAMES[@]}")
-    stackSourceFiles=("${GLOBAL_STACK_SOURCE_FILES[@]}")
-    stackLineNumbers=("${GLOBAL_STACK_LINE_NUMBERS[@]}")
+  if [[ -n ${GLOBAL_MOCK_STACK_FUNCTION_NAMES:-} ]]; then
+    stackFunctionNames=("${GLOBAL_MOCK_STACK_FUNCTION_NAMES[@]}")
+    stackSourceFiles=("${GLOBAL_MOCK_STACK_SOURCE_FILES[@]}")
+    stackLineNumbers=("${GLOBAL_MOCK_STACK_LINE_NUMBERS[@]}")
   else
     stackFunctionNames=("${FUNCNAME[@]}")
     stackSourceFiles=("${BASH_SOURCE[@]}")
@@ -1236,7 +1236,7 @@ function log::init() {
         core::fail "The filename pattern for the log files VALET_CONFIG_LOG_FILENAME_PATTERN is not valid (does not create the variable logFile): ⌜${VALET_CONFIG_LOG_FILENAME_PATTERN}⌝."
       fi
     else
-      printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
+      printf -v logFile "log-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}" "${GLOBAL_MOCK_BASHPID:-${BASHPID}}"
     fi
     if [[ ${VALET_CONFIG_LOG_TO_DIRECTORY} == "true" ]]; then
       core::getUserStateDirectory

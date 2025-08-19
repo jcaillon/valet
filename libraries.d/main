@@ -65,7 +65,7 @@ if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
   fs::setupTempFileGlobalVariable
   # shellcheck disable=SC1091
   source profiler
-  printf -v _PROFILER_FILE_NAME "profiler-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${EPOCHSECONDS}" "${BASHPID}"
+  printf -v _PROFILER_FILE_NAME "profiler-%(%FT%H-%M-%S%z)T--PID_%06d.log" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}" "${BASHPID}"
   core::getUserStateDirectory
   profiler::enable "${VALET_CONFIG_STARTUP_PROFILING_FILE:-"${REPLY}/logs/${_PROFILER_FILE_NAME}"}"
 fi

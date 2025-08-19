@@ -30,9 +30,9 @@ function test_functionArgumentsParsing() {
   test::title "✅ Testing errors in a function with finite arguments"
 
   # fix output for printCallStack
-  GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack functionWithFiniteArgs test_functionArgumentsParsing main)
-  GLOBAL_STACK_SOURCE_FILES=("core" "core" "00.coding-style.sh" "00.coding-style.sh" "00.coding-style.sh")
-  GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
+  GLOBAL_MOCK_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack functionWithFiniteArgs test_functionArgumentsParsing main)
+  GLOBAL_MOCK_STACK_SOURCE_FILES=("core" "core" "00.coding-style.sh" "00.coding-style.sh" "00.coding-style.sh")
+  GLOBAL_MOCK_STACK_LINE_NUMBERS=(10 100 200 300)
 
   test::exit functionWithFiniteArgs argument1 argument2 1invalid
 

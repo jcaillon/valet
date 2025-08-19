@@ -490,10 +490,10 @@ function test::flushStderr() {
 # test::fail "This is a failure message with a clear reason."
 # ```
 function test::fail() {
-  GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
-  GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
-  GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
-  declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
+  GLOBAL_MOCK_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
+  GLOBAL_MOCK_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
+  GLOBAL_MOCK_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
+  declare -p GLOBAL_MOCK_STACK_FUNCTION_NAMES GLOBAL_MOCK_STACK_SOURCE_FILES GLOBAL_MOCK_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
 
   test::log "$@"
 
@@ -549,9 +549,9 @@ function test::setTerminalInputs() {
 # ```
 function test::setTestCallStack() {
   # fix output for printCallStack
-  GLOBAL_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
-  GLOBAL_STACK_SOURCE_FILES=("core" "core" "core" "/path/to/subFunction.sh" "/path/to/function.sh")
-  GLOBAL_STACK_LINE_NUMBERS=(10 100 200 300)
+  GLOBAL_MOCK_STACK_FUNCTION_NAMES=(log::getCallStack log::printCallStack log::error myCmd::subFunction myCmd::function)
+  GLOBAL_MOCK_STACK_SOURCE_FILES=("core" "core" "core" "/path/to/subFunction.sh" "/path/to/function.sh")
+  GLOBAL_MOCK_STACK_LINE_NUMBERS=(10 100 200 300)
 }
 
 # ## test::unsetTestCallStack (private)
@@ -562,5 +562,31 @@ function test::setTestCallStack() {
 # test::unsetTestCallStack
 # ```
 function test::unsetTestCallStack() {
-  unset -v GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS
+  unset -v GLOBAL_MOCK_STACK_FUNCTION_NAMES GLOBAL_MOCK_STACK_SOURCE_FILES GLOBAL_MOCK_STACK_LINE_NUMBERS
+}
+
+# shellcheck disable=SC2034
+function test::setupBashForConsistency() {
+  # default IFS
+  IFS=' '$'\t'$'\n'
+  unset EPOCHSECONDS
+  export EPOCHSECONDS=548902800
+  if declare -F profiler::pause &>/dev/null; then
+    profiler::pause
+  fi
+  # because the profiler uses EPOCHREALTIME in PS4, we need to pause it first
+  unset EPOCHREALTIME
+  export EPOCHREALTIME=548902800.000000
+  if declare -F profiler::resume &>/dev/null; then
+    profiler::resume
+  fi
+  GLOBAL_TEST_ORIGINAL_BASHPID="${BASHPID}"
+  unset BASHPID
+  export BASHPID=1234
+  unset SECONDS
+  export SECONDS=0
+  GLOBAL_TEST_ORIGINAL_OSTYPE="${OSTYPE}"
+  export OSTYPE=linux-gnu
+
+  test::setTestCallStack
 }

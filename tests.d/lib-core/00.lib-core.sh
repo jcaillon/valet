@@ -19,7 +19,7 @@ function test_core::dump() {
   test::exec core::dump
   test::printReplyVars
   local dumpFilePath="${REPLY}"
-  test::exec fs::head "${dumpFilePath}" 2
+  test::exec fs::head "${dumpFilePath}" 1
 }
 
 function test_core::getSpecialPaths() {

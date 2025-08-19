@@ -10,8 +10,6 @@
 source fs
 # shellcheck source=../libraries.d/lib-test
 source test
-# shellcheck source=../libraries.d/lib-profiler
-source profiler
 
 # Rebuild all the commands silently.
 function selfTestUtils_rebuildCommands() {
@@ -68,7 +66,22 @@ function selfTestUtils_setupValetForConsistency() {
 
   unset _PROGRESS_BAR_RUNNING
 
+  # default IFS
+  IFS=' '$'\t'$'\n'
+
+  # fix the time to a known value
+  export TZ=Etc/GMT+0
+
+  # set some mock values
+  export GLOBAL_MOCK_EPOCHSECONDS=548902800
+  export GLOBAL_MOCK_EPOCHREALTIME=548902800.000000
+  export GLOBAL_MOCK_BASHPID=1234
+  export GLOBAL_MOCK_SECONDS=0
+
   # override time::getProgramElapsedMicroseconds to return a fake incremental time
+  bash::getBuiltinOutput declare -f time::getProgramElapsedMicroseconds
+  GLOBAL_ORIGINAL_TIME_GET_PROGRAM_ELAPSED_MICROSECONDS_FUNCTION="${REPLY}"
+
   # shellcheck disable=SC2317
   function time::getProgramElapsedMicroseconds() {
     if [[ -z ${_FAKE_TIME:-} ]]; then
@@ -78,29 +91,6 @@ function selfTestUtils_setupValetForConsistency() {
     ((_FAKE_TIME=_FAKE_TIME+ 1000000 * _TIME_FACTOR, _TIME_FACTOR++))
     REPLY="${_FAKE_TIME}"
   }
-}
-
-# Set the value of important bash variables to ensure consistency in the tests.
-# shellcheck disable=SC2034
-function selfTestUtils_setupBashForConsistency() {
-  # default IFS
-  IFS=' '$'\t'$'\n'
-  # fix the time to a known value
-  export TZ=Etc/GMT+0
-  unset EPOCHSECONDS
-  export EPOCHSECONDS=548902800
-  profiler::pause
-  # because the profiler uses EPOCHREALTIME in PS4, we need to pause it first
-  unset EPOCHREALTIME
-  export EPOCHREALTIME=548902800.000000
-  profiler::resume
-  GLOBAL_TEST_ORIGINAL_BASHPID="${BASHPID}"
-  unset BASHPID
-  export BASHPID=1234
-  unset SECONDS
-  export SECONDS=0
-  GLOBAL_TEST_ORIGINAL_OSTYPE="${OSTYPE}"
-  export OSTYPE=linux-gnu
 }
 
 function selfTestUtils_runHookScript() {
@@ -296,10 +286,10 @@ function selfTestUtils_prepareModifiedTrapFunctions() {
 function selfTestUtils_onTestError() {
   if [[ ! -s ${GLOBAL_TEST_STACK_FILE} ]]; then
     GLOBAL_LAST_BASH_COMMAND="${BASH_COMMAND:-}"
-    GLOBAL_STACK_FUNCTION_NAMES_ERR=("${FUNCNAME[@]}")
-    GLOBAL_STACK_SOURCE_FILES_ERR=("${BASH_SOURCE[@]}")
-    GLOBAL_STACK_LINE_NUMBERS_ERR=("${BASH_LINENO[@]}")
-    declare -p GLOBAL_LAST_BASH_COMMAND GLOBAL_STACK_FUNCTION_NAMES_ERR GLOBAL_STACK_SOURCE_FILES_ERR GLOBAL_STACK_LINE_NUMBERS_ERR >>"${GLOBAL_TEST_STACK_FILE}"
+    GLOBAL_MOCK_STACK_FUNCTION_NAMES_ERR=("${FUNCNAME[@]}")
+    GLOBAL_MOCK_STACK_SOURCE_FILES_ERR=("${BASH_SOURCE[@]}")
+    GLOBAL_MOCK_STACK_LINE_NUMBERS_ERR=("${BASH_LINENO[@]}")
+    declare -p GLOBAL_LAST_BASH_COMMAND GLOBAL_MOCK_STACK_FUNCTION_NAMES_ERR GLOBAL_MOCK_STACK_SOURCE_FILES_ERR GLOBAL_MOCK_STACK_LINE_NUMBERS_ERR >>"${GLOBAL_TEST_STACK_FILE}"
   fi
 }
 
@@ -308,9 +298,9 @@ function selfTestUtils_onTestExit() {
   if [[ ! -s ${GLOBAL_TEST_STACK_FILE} ]]; then
     # do not remember the last command, as it is not useful in case of an exit
     # (it will be builtin source "${testScript}")
-    GLOBAL_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
-    GLOBAL_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
-    GLOBAL_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
-    declare -p GLOBAL_STACK_FUNCTION_NAMES GLOBAL_STACK_SOURCE_FILES GLOBAL_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
+    GLOBAL_MOCK_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
+    GLOBAL_MOCK_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
+    GLOBAL_MOCK_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
+    declare -p GLOBAL_MOCK_STACK_FUNCTION_NAMES GLOBAL_MOCK_STACK_SOURCE_FILES GLOBAL_MOCK_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
   fi
 }

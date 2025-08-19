@@ -12,13 +12,12 @@ Returned variables:
 REPLY='/tmp/valet.valet.d/core-dumps/1987-05-25T01-00-00+0000--PID_001234'
 ```
 
-❯ `fs::head /tmp/valet.valet.d/core-dumps/1987-05-25T01-00-00+0000--PID_001234 2`
+❯ `fs::head /tmp/valet.valet.d/core-dumps/1987-05-25T01-00-00+0000--PID_001234 1`
 
 **Standard output**:
 
 ```text
 =================
-BASHPID: 1234
 ```
 
 HOME is set to '$GLOBAL_INSTALLATION_DIRECTORY/home'

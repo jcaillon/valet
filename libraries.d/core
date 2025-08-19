@@ -461,7 +461,7 @@ function core::createSavedFilePath() {
   fi
 
   local filePath
-  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d%s" "${EPOCHSECONDS}" "${BASHPID}" "${suffix}"
+  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d%s" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}" "${GLOBAL_MOCK_BASHPID:-${BASHPID}}" "${suffix}"
   core::getUserStateDirectory
   if [[ ! -d "${REPLY}/saved-files" ]]; then
     mkdir -p "${REPLY}/saved-files"
@@ -500,7 +500,7 @@ function core::dump() {
 # Private function to create a core dump file.
 function core_dump() {
   local filePath REPLY_CODE
-  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d%s" "${EPOCHSECONDS}" "${BASHPID}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d%s" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}" "${GLOBAL_MOCK_BASHPID:-${BASHPID}}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   core::getUserStateDirectory
   if [[ ! -d "${REPLY}/core-dumps" ]]; then

@@ -328,7 +328,7 @@ function trap::onExitInternalSafe() {
     terminal::restoreLogs
   fi
 
-  log::debug "Exiting with code ${exitCode} after ${SECONDS}s."
+  log::debug "Exiting with code ${exitCode} after ${GLOBAL_MOCK_SECONDS:-${SECONDS}}s."
 
   if [[ ${GLOBAL_EXPECTED_EXIT:-} != "true" ]]; then
     if [[ ${VALET_CONFIG_WARNING_ON_UNEXPECTED_EXIT:-} == "true" && ! ${BASH_COMMAND:-} =~ ^(exit|return) ]]; then

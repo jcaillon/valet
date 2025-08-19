@@ -197,7 +197,7 @@ function command_runFunction() {
     # shellcheck source=lib-profiler
     source profiler
     local profilerFileName
-    printf -v profilerFileName "profiler-%(%FT%H-%M-%S%z)T--PID_%06d--fun_%s.log" "${EPOCHSECONDS}" "${BASHPID}" "${functionName}"
+    printf -v profilerFileName "profiler-%(%FT%H-%M-%S%z)T--PID_%06d--fun_%s.log" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}" "${BASHPID}" "${functionName}"
     core::getUserStateDirectory
     profiler::enable "${VALET_CONFIG_COMMAND_PROFILING_FILE:-"${REPLY}/logs/${profilerFileName}"}"
   fi

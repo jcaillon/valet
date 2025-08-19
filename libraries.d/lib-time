@@ -28,7 +28,7 @@ function time::getDate() {
   eval "local a= ${*@Q}"
 
   # shellcheck disable=SC2059
-  printf -v REPLY "${format}" "${EPOCHSECONDS}"
+  printf -v REPLY "${format}" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}"
 }
 
 # ## time::convertMicrosecondsToHuman

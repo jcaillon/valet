@@ -361,19 +361,19 @@ function selfTest_runSingleTestSuite() {
       eval "${REPLY//declare -a/}"
 
       local scriptGotError=false
-      if [[ -n ${GLOBAL_STACK_FUNCTION_NAMES_ERR:-} ]]; then
+      if [[ -n ${GLOBAL_MOCK_STACK_FUNCTION_NAMES_ERR:-} ]]; then
         scriptGotError=true
-        GLOBAL_STACK_FUNCTION_NAMES=("${GLOBAL_STACK_FUNCTION_NAMES_ERR[@]}")
-        GLOBAL_STACK_SOURCE_FILES=("${GLOBAL_STACK_SOURCE_FILES_ERR[@]}")
-        GLOBAL_STACK_LINE_NUMBERS=("${GLOBAL_STACK_LINE_NUMBERS_ERR[@]}")
+        GLOBAL_MOCK_STACK_FUNCTION_NAMES=("${GLOBAL_MOCK_STACK_FUNCTION_NAMES_ERR[@]}")
+        GLOBAL_MOCK_STACK_SOURCE_FILES=("${GLOBAL_MOCK_STACK_SOURCE_FILES_ERR[@]}")
+        GLOBAL_MOCK_STACK_LINE_NUMBERS=("${GLOBAL_MOCK_STACK_LINE_NUMBERS_ERR[@]}")
       fi
 
       # find the line number of the test script that failed
       local lineNumber=""
       local -i stackIndex=0
-      for stackIndex in "${!GLOBAL_STACK_SOURCE_FILES[@]}"; do
-        if [[ "${GLOBAL_STACK_SOURCE_FILES[stackIndex]}" == "${testScript}" && ${stackIndex} -gt 0 ]]; then
-          lineNumber="${GLOBAL_STACK_LINE_NUMBERS[stackIndex - 1]}"
+      for stackIndex in "${!GLOBAL_MOCK_STACK_SOURCE_FILES[@]}"; do
+        if [[ "${GLOBAL_MOCK_STACK_SOURCE_FILES[stackIndex]}" == "${testScript}" && ${stackIndex} -gt 0 ]]; then
+          lineNumber="${GLOBAL_MOCK_STACK_LINE_NUMBERS[stackIndex - 1]}"
           break
         fi
       done
@@ -467,9 +467,6 @@ function selfTest_runSingleTest() {
 
   # shellcheck disable=SC2034
   GLOBAL_TEST_TEMP_FILE="${GLOBAL_TEMPORARY_FILE_PREFIX}-temp"
-
-  # Set the value of important bash variables to ensure consistency in the tests
-  selfTestUtils_setupBashForConsistency
 
   # redirect the standard output and error output to files
   exec 1>"${GLOBAL_TEST_STANDARD_OUTPUT_FILE}"

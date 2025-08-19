@@ -16,4 +16,8 @@ url: /docs
 
 Dive right into the introduction to get started:
 
+{{< cards >}}
+  {{< card icon="document-text" link="docs/introduction" title="Introduction" subtitle="Learn what is valet" >}}
+{{< /cards >}}
+
 {{< main-section-end >}}

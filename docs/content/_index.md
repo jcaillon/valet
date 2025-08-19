@@ -176,24 +176,52 @@ They are made available as local variables in your command function.
 
 ```bash {linenos=table,linenostart=1,filename="showcase-command1.sh"}
 #!/usr/bin/env bash
-# command properties hidden for the sake of brevity
+: "---
+command: showcase command1
+function: showcaseCommand1
+shortDescription: A showcase command that uses arguments and options.
+description: |-
+  An example of description.
+
+  You can put any text here, it will be wrapped to fit the terminal width.
+
+  You can ⌜highlight⌝ some text as well.
+arguments:
+- name: first-arg
+  description: |-
+    First argument.
+- name: more...
+  description: |-
+    Will be an an array of strings.
+options:
+- name: -o, --option1
+  description: |-
+    First option.
+  noEnvironmentVariable: true
+- name: -2, --this-is-option2 <level>
+  description: |-
+    An option with a value.
+  default: two
+examples:
+- name: showcase command1 -o -2 value1 arg1 more1 more2
+  description: |-
+    Call command1 with option1, option2 and some arguments.
+---"
 function showcaseCommand1() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
-  log::info "First argument: ${firstArg:-}."
-  log::info "Option 1: ${option1:-}."
-  log::info "Option 2: ${thisIsOption2:-}."
+  log::info "First argument: ${firstArg}."
+  log::info "Option 1: ${option1}."
+  log::info "Option 2: ${thisIsOption2}."
   log::info "More: ${more[*]}."
 
   # example use of a library function
-  # Importing the string library (note that we could do that at the begining of the script)
-  # shellcheck disable=SC1091
-  source string
-  local _myString="<b>My bold text</b>"
-  string::extractBetween _myString "<b>" "</b>"
-  local extractedText="${REPLY}"
-  log::info "Extracted text is: ⌜${extractedText:-}⌝"
+  # Importing the string library (note that we could also do that at the beginning of the script)
+  include string
+  local myString="<b>My bold text</b>"
+  string::extractBetween myString "<b>" "</b>"
+  log::info "Extracted text is: ⌜${REPLY}⌝"
 
   echo "That's it!"
 }
@@ -253,12 +281,12 @@ Use one of the **{{% stats "nbFunctions" %}} functions coming in standard** with
 
 ```bash {linenos=table,linenostart=1,filename="script.sh"}
 myFunction() {
-  source string
-  MY_STRING="field1 field2 field3"
-  string::getField MY_STRING 1 separator=" "
+  include string interactive
+
+  local myString="field1 field2 field3"
+  string::getField myString 1 separator=" "
   echo "The field at index 1 is ${REPLY}"
 
-  source interactive
   if interactive::promptYesNo "Do you want to continue?"; then 
     echo "Yes."
   else
@@ -267,12 +295,16 @@ myFunction() {
 }
 ```
 
-> [!NOTE]
-> These demo were recorded with the [asciinema][asciinema]. The color scheme for the terminal is [dracula][dracula-theme] and the font is _JetBrainsMono Nerd Font_.
+## 🚩 Getting started
 
 {{< cards >}}
   {{< card icon="document-text" link="docs/introduction" title="Ready to get started?" subtitle="Check out the documentation" >}}
 {{< /cards >}}
+
+---
+
+> [!NOTE]
+> These demo were recorded with the [asciinema][asciinema]. The color scheme for the terminal is [dracula][dracula-theme] and the font is _JetBrainsMono Nerd Font_.
 
 [asciinema]: https://www.asciinema.org/
 [dracula-theme]: https://draculatheme.com/windows-terminal
