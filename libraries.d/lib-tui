@@ -131,6 +131,9 @@ function tui_keyPressListener() {
   # we are inside a coproc, register the correct traps
   trap::registerSubshell
 
+  # the coproc must have its own set of temp files
+  fs::setupSubshellTempFileGlobalVariable
+
   # rebind some keys to call the callback function
   terminal::rebindKeymap tui_keyPressListener_handleKeyBinding
 

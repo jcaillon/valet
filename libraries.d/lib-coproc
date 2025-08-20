@@ -31,6 +31,13 @@
 #       (optional) This option allows to automatically redirect the logs of the coproc to a file and
 #       print the accumulated logs of a coproc when it is completed (successfully or not).
 #       (defaults to false)
+# - ${simulateSequentialRun} _as bool_:
+#       (optional) If true, this will:
+#       - redirect the logs of each task to a file
+#       - print the logs of each task, in natural order (not as they finish) at the end of all execution
+#       - stop at the first error, showing the logs of the tasks finished so far
+#       Tasks will run as if they are called in a for loop; except they actually run in parallel.
+#       (defaults to false)
 # - ${coprocNamePrefix} _as string_:
 #       (optional) The prefix to use for the coproc variable names.
 #       This is useful to avoid conflicts with other coproc variables.
@@ -53,6 +60,7 @@ function coproc::runInParallel() {
     completedCallback="" \
     redirectLogs=false \
     printRedirectedLogs=false \
+    simulateSequentialRun=false \
     coprocNamePrefix="_COPROC_PARALLEL_" \
     IFS=$' '
   shift 1
@@ -64,13 +72,13 @@ function coproc::runInParallel() {
 
   maxInParallel=$((maxInParallel < 1 ? 1 : maxInParallel))
 
-  local -a -i pids=() runningPids=() exitCodes=()
+  local -a -i pids=() runningPids=() exitCodes=() endedCoprocIndexes=()
   local -i index pid endedCoprocPid endedCoprocExitStatus endedCoprocIndex
   local -a logFiles=()
   local logFile="" coprocName
 
   for ((index = 0; index < ${#jobCommands[@]}; index++)); do
-    if [[ ${redirectLogs} == "true" || ${printRedirectedLogs} == "true" ]]; then
+    if [[ ${redirectLogs} == "true" || ${printRedirectedLogs} == "true" || ${simulateSequentialRun} == "true" ]]; then
       fs::createTempFile pathOnly=true
       logFile="${REPLY}"
     fi
@@ -87,7 +95,7 @@ function coproc::runInParallel() {
     runningPids+=("${pid}")
 
     log::debug "Running parallel coproc ${index} with PID ${pid}."
-    log::trace $'\n'"Command: ${jobCommands[index]}"
+    log::trace "Command: ${jobCommands[index]}"
 
     while ((${#runningPids[@]} >= maxInParallel || index == ${#jobCommands[@]} - 1)); do
       # wait for one of the coproc to finish (or all of them if they are all scheduled)
@@ -116,18 +124,17 @@ function coproc::runInParallel() {
         fi
       done
 
+      if [[ ${printRedirectedLogs} == "true" ]]; then
+        # display the accumulated logs
+        if [[ -n ${logFiles[endedCoprocIndex]} && -s ${logFiles[endedCoprocIndex]} ]]; then
+          fs::readFile "${logFiles[endedCoprocIndex]}"
+          log::printRaw REPLY
+        fi
+      fi
+
       # execute the completed callback if defined
       if [[ -n ${completedCallback} ]]; then
         local -i percentageCompleted=$((${#exitCodes[@]} * 100 / ${#jobCommands[@]}))
-
-        if [[ ${printRedirectedLogs} == "true" ]]; then
-          # display the accumulated logs
-          if [[ -n ${logFiles[endedCoprocIndex]} && -s ${logFiles[endedCoprocIndex]} ]]; then
-            fs::readFile "${logFiles[endedCoprocIndex]}"
-            log::printRaw REPLY
-          fi
-        fi
-
         REPLY=0
         "${completedCallback}" "${endedCoprocIndex}" "${endedCoprocExitStatus}" "${percentageCompleted}" "${logFiles[endedCoprocIndex]}"
         if ((REPLY != 0)); then
@@ -136,6 +143,10 @@ function coproc::runInParallel() {
           break 2
         fi
       fi
+
+      # in "pseudo sequential" run
+
+      endedCoprocIndexes+=("${endedCoprocIndex}")
 
       # if all coproc are scheduled and completed, we can exit the loop
       if ((${#exitCodes[@]} == ${#jobCommands[@]})); then
@@ -233,10 +244,10 @@ function coproc::run() {
   fi
 
   log::debug "Starting coproc ${coprocVarName}"
-  log::trace $'\n'"Init command: ${initCommand}"$'\n'"loop command: ${loopCommand}."$'\n'"on message command: ${onMessageCommand}"$'\n'"end command: ${endCommand}"$'\n'"wait for readiness: ${waitForReadiness}"$'\n'"keep only last message: ${keepOnlyLastMessage}"
+  log::trace "Init command: ${initCommand}"$'\n'"loop command: ${loopCommand}."$'\n'"on message command: ${onMessageCommand}"$'\n'"end command: ${endCommand}"$'\n'"wait for readiness: ${waitForReadiness}"$'\n'"keep only last message: ${keepOnlyLastMessage}"
 
   # Start the coproc
-  eval "{ coproc ${coprocVarName} { coproc_program \"${initCommand}\" \"${loopCommand}\" \"${onMessageCommand}\" \"${endCommand}\" ${waitForReadiness} ${keepOnlyLastMessage} \"${redirectLogsToFile}\" 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
+  eval "{ coproc ${coprocVarName} { coproc_program ${initCommand@Q} ${loopCommand@Q} ${onMessageCommand@Q} ${endCommand@Q} ${waitForReadiness} ${keepOnlyLastMessage} ${redirectLogsToFile@Q} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
 
   # wait for pid variable to be set by bash (we should never enter the loop)
   local -i loopNumber=0
@@ -295,7 +306,6 @@ function coproc_program() {
   fs::setupSubshellTempFileGlobalVariable
 
   local IFS=' '$'\t'$'\n'
-
   if [[ -n ${redirectLogsToFile} ]]; then
     log::init logFileDescriptor="${redirectLogsToFile}"
   fi

@@ -44,6 +44,7 @@ function fs::setupSubshellTempFileGlobalVariable() {
     core::fail "This function should only be called in a subshell."
   fi
   TMPDIR="${GLOBAL_TEMPORARY_DIRECTORY}/job-${BASHPID}"
+  mkdir -p "${TMPDIR}" 1>/dev/null
   unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
   fs::setupTempFileGlobalVariable
 }
@@ -1167,7 +1168,7 @@ function log::init() {
 
   local progressBarCode progressBarCode2 progressBarCode3 outputCode
   if [[ ${logFileDescriptor} =~ ^[0-9]+$ ]]; then
-    # it is a numbered file descriptor
+    # the fd is linked to the terminal
     outputCode="1>&${logFileDescriptor}"
 
     # clear the line before printing if we are display a progress bar/spinner

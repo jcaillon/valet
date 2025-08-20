@@ -257,6 +257,9 @@ function selfTestUtils_makeReplacementsInReport() {
   REPLY="${REPLY//${GLOBAL_TEST_SUITE_DIRECTORY}/.}"
   REPLY="${REPLY//${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}/\/tmp/valet}"
   REPLY="${REPLY//${GLOBAL_TEMPORARY_FILE_PREFIX}/\/tmp/valet}"
+  while [[ ${REPLY} =~ "/job-"([0-9]+)"/vt-"([0-9]+) ]]; do
+    REPLY="${REPLY//"${BASH_REMATCH[0]}"/"/job"}"
+  done
   printf "%s" "${REPLY}" >"${GLOBAL_TEST_REPORT_FILE}"
 }
 

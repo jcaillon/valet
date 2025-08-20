@@ -565,6 +565,14 @@ function test::unsetTestCallStack() {
   unset -v GLOBAL_MOCK_STACK_FUNCTION_NAMES GLOBAL_MOCK_STACK_SOURCE_FILES GLOBAL_MOCK_STACK_LINE_NUMBERS
 }
 
+# ## test::setupBashForConsistency
+#
+# This function is used to set up the Bash environment for maximum consistency during testing.
+# It will override important dynamic bash variables to have more static results.
+#
+# ```bash
+# test::setupBashForConsistency
+# ```
 # shellcheck disable=SC2034
 function test::setupBashForConsistency() {
   # default IFS
