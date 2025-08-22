@@ -91,6 +91,9 @@ function selfTestUtils_setupValetForConsistency() {
     ((_FAKE_TIME=_FAKE_TIME+ 1000000 * _TIME_FACTOR, _TIME_FACTOR++))
     REPLY="${_FAKE_TIME}"
   }
+
+  # define it so we can check if it has elements when printing the reply values of a function
+  declare -g -A REPLY_ASSOCIATIVE_ARRAY=()
 }
 
 function selfTestUtils_runHookScript() {

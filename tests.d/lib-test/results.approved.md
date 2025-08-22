@@ -209,6 +209,14 @@ REPLY_ARRAY=(
 [3]='returned'
 [4]='array'
 )
+REPLY_ASSOCIATIVE_ARRAY=(
+[key6]='array'
+[key4]='returned'
+[key5]='associative'
+[key2]='is'
+[key3]='the'
+[key1]='This'
+)
 ```
 
 ### 🙈 Display reporting REPLY variables

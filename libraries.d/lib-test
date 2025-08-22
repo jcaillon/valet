@@ -242,7 +242,7 @@ function test::printReplyVars() {
       GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
     fi
   done
-  if [[ -v REPLY_ASSOCIATIVE_ARRAY && -v REPLY_ASSOCIATIVE_ARRAY[@] ]]; then
+  if [[ -n "${!REPLY_ASSOCIATIVE_ARRAY[*]}" ]]; then
     GLOBAL_TEST_OUTPUT_CONTENT+="REPLY_ASSOCIATIVE_ARRAY=("$'\n'
     for key in "${!REPLY_ASSOCIATIVE_ARRAY[@]}"; do
       GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${REPLY_ASSOCIATIVE_ARRAY[${key}]//\'/\'\"\'\"\'}'"$'\n'
@@ -286,7 +286,7 @@ function test::printVars() {
   local IFS=$'\n'
   local chunk varName
   bash::getBuiltinOutput declare -p "${@}"
-  if ((REPLY_CODE != 0)) ; then
+  if ((REPLY_CODE != 0)); then
     local varName
     for varName in "${@}"; do
       bash::getBuiltinOutput declare -p "${varName}"
