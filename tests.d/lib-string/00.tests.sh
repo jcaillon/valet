@@ -4,13 +4,13 @@
 source string
 
 function main() {
+  test_string::get KebabCase
+  test_string::get SnakeCase
+  test_string::get CamelCase
   test_string::numberToUniqueId
   test_string::removeTextFormatting
-  test_string::convertToHex
+  test_string::getHexRepresentation
   test_string::getField
-  test_string::convertCamelCaseToSnakeCase
-  test_string::convertKebabCaseToSnakeCase
-  test_string::convertKebabCaseToCamelCase
   test_string::trimAll
   test_string::trimEdges
   test_string::getIndexOf
@@ -22,6 +22,34 @@ function main() {
   test_string::highlight
   test_string::head
   test_string::doForEachLine
+}
+
+function test_string::get() {
+  local function="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  test::title "✅ Testing string::get${function}"
+
+  local tests=(
+    "thisIsATest01"
+    "AnotherTest"
+    "--*Another!test--"
+    "_SNAKE_CASE"
+    "__SNAKE_CASE__"
+    "kebab-case"
+    "--kebab-case--"
+  )
+  local test IFS=$'\n'
+
+  test::prompt 'echo "${tests[*]"'
+  echo "${tests[*]}"
+  test::flush
+
+  test::prompt 'for test in ${tests[@]}; do '"string::get${function}"' test; echo "${REPLY}"; done'
+  for test in "${tests[@]}"; do
+    "string::get${function}" test
+    echo "${REPLY}"
+  done
+  test::flush
 }
 
 function test_string::numberToUniqueId() {
@@ -44,11 +72,11 @@ function test_string::removeTextFormatting() {
   test::printVars _myString
 }
 
-function test_string::convertToHex() {
-  test::title "✅ Testing string::convertToHex"
+function test_string::getHexRepresentation() {
+  test::title "✅ Testing string::getHexRepresentation"
 
   local _myString="d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301"
-  test::func _myString=d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301 string::convertToHex _myString
+  test::func _myString=d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301 string::getHexRepresentation _myString
 }
 
 function test_string::doForEachLine() {
@@ -79,47 +107,22 @@ function test_string::getField() {
   test::func string::getField _MY_STRING 2 separator=$'\n'
 }
 
-function test_string::convertCamelCaseToSnakeCase() {
-  test::title "✅ Testing string::convertCamelCaseToSnakeCase"
-
-  test::func _MY_STRING="thisIsATest0" string::convertCamelCaseToSnakeCase _MY_STRING
-  test::func _MY_STRING="AnotherTest" string::convertCamelCaseToSnakeCase _MY_STRING
-
-}
-
-function test_string::convertKebabCaseToSnakeCase() {
-  test::title "✅ Testing string::convertKebabCaseToSnakeCase"
-
-  test::func _MY_STRING="this-is-a-test0" string::convertKebabCaseToSnakeCase _MY_STRING
-  test::func _MY_STRING="--another-test" string::convertKebabCaseToSnakeCase _MY_STRING
-
-}
-
-function test_string::convertKebabCaseToCamelCase() {
-  test::title "✅ Testing string::convertKebabCaseToCamelCase"
-
-  test::func _MY_STRING="this-is-a-test0" string::convertKebabCaseToCamelCase _MY_STRING
-  test::func _MY_STRING="--another-test" string::convertKebabCaseToCamelCase _MY_STRING
-  test::func _MY_STRING="--anotherTest" string::convertKebabCaseToCamelCase _MY_STRING
-  test::func _MY_STRING="--last--" string::convertKebabCaseToCamelCase _MY_STRING
-}
-
 function test_string::trimAll() {
   test::title "✅ Testing string::trimAll"
 
-  test::funcWithString string::trimAll '  a  super test  '
-  test::funcWithString string::trimAll 'this is a command  '
-  test::funcWithString string::trimAll $'\t\n''this is a '$'\t''command  '
+  test::execWithString string::trimAll '  a  super test  '
+  test::execWithString string::trimAll 'this is a command  '
+  test::execWithString string::trimAll $'\t\n''this is a '$'\t''command  '
 
 }
 
 function test_string::trimEdges() {
   test::title "✅ Testing string::trimEdges"
 
-  test::funcWithString string::trimEdges '  hello  world  '
-  test::funcWithString string::trimEdges '_-_-_hello_-_' charsToTrim=_-
-  test::funcWithString string::trimEdges '  hello'
-  test::funcWithString string::trimEdges $'\n'$'\t''  hello'$'\n'$'\t'' '
+  test::execWithString string::trimEdges '  hello  world  '
+  test::execWithString string::trimEdges '_-_-_hello_-_' charsToTrim=_-
+  test::execWithString string::trimEdges '  hello'
+  test::execWithString string::trimEdges $'\n'$'\t''  hello'$'\n'$'\t'' '
 }
 
 function test_string::getIndexOf() {
@@ -235,6 +238,16 @@ function test::funcWithString() {
   shift 2
   test::printVars MY_STRING
   test::func "${function}" MY_STRING "$@"
+}
+
+function test::execWithString() {
+  # shellcheck disable=SC2034
+  MY_STRING="${2}"
+  local function="${1}"
+  shift 2
+  test::printVars MY_STRING
+  test::func "${function}" MY_STRING "$@"
+  test::printVars MY_STRING
 }
 
 # shellcheck disable=SC2034

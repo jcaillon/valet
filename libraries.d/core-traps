@@ -288,7 +288,11 @@ function command_not_found_handle() {
     errorMessage="This command requires ⌜curl⌝ to make https request to the internet."$'\n'"Please install it in your path and run this command again."
   elif [[ ${commandNotFound} == *::* ]]; then
     # if the command contains :: it is one of our function, we can suggest to source the 'package'
-    errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Did you forget to source/include the package? ⌜include ${commandNotFound%%::*}⌝"
+    include string
+    local suggestedLibraryInclude="${commandNotFound%%::*}"
+    string::getKebabCase suggestedLibraryInclude
+    suggestedLibraryInclude="${REPLY}"
+    errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Did you forget to source/include the package? ⌜include ${suggestedLibraryInclude}⌝"
   else
     errorMessage="Command not found: ⌜${commandNotFound}⌝."$'\n'"Please check your ⌜PATH⌝ variable."
   fi

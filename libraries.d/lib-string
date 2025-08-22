@@ -5,35 +5,33 @@
 # ## string::trimAll
 #
 # Trim all whitespaces and truncate spaces.
+# The replacement is done in place, for the given variable.
 #
 # - $1: **string variable name** _as string_:
 #       The variable name that contains the string to trim.
 #
-# Returns:
-#
-# - ${REPLY}: the extracted field
-#
 # ```bash
 # MY_STRING="   example "$'\t'"  string    "$'\n'
 # string::trimAll MY_STRING
-# echo "${REPLY}"
+# echo "${MY_STRING}"
 # ```
 function string::trimAll() {
-  local -n stringToTrimAll="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   set -o noglob +o braceexpand
   # shellcheck disable=SC2086
   # shellcheck disable=SC2048
   local IFS=$' \t\n'
   # shellcheck disable=SC2086
   # shellcheck disable=SC2048
-  set -- ${stringToTrimAll}
-  REPLY="$*"
+  set -- ${inputString_NameRef}
+  inputString_NameRef="$*"
   set +o noglob -o braceexpand
 }
 
 # ## string::trimEdges
 #
 # Trim leading and trailing characters (defaults to whitespaces).
+# The replacement is done in place, for the given variable.
 #
 # - $1: **string variable name** _as string_:
 #       The variable name that contains the string to trim.
@@ -41,133 +39,132 @@ function string::trimAll() {
 #       The characters to trim.
 #       (defaults to $' \t\n')
 #
-# Returns:
-#
-# - ${REPLY}: the extracted field
-#
 # ```bash
 # MY_STRING="   example  string    "
 # string::trimEdges MY_STRING
-# echo "${REPLY}"
+# echo "${MY_STRING}"
 # ```
 function string::trimEdges() {
-  local -n stringToTrim="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     charsToTrim=$' \t\n' \
     IFS=$' '
   shift 1
   eval "local a= ${*@Q}"
 
-  REPLY="${stringToTrim#"${stringToTrim%%[^"${2:-${charsToTrim}}"]*}"}"
-  REPLY="${REPLY%"${REPLY##*[^"${2:-${charsToTrim}}"]}"}"
+  inputString_NameRef="${inputString_NameRef#"${inputString_NameRef%%[^"${2:-${charsToTrim}}"]*}"}"
+  inputString_NameRef="${inputString_NameRef%"${inputString_NameRef##*[^"${2:-${charsToTrim}}"]}"}"
 }
 
-# ## string::convertCamelCaseToSnakeCase
+# ## string::getKebabCase
 #
-# This function convert a camelCase string to a SNAKE_CASE string.
-# It uses pure bash.
-# Removes all leading underscores.
+# This function convert a camelCase, PascalCase or SNAKE_CASE string to a kebab-case string.
+# Removes all leading/trailing dashes.
 #
 # - $1: **string variable name** _as string_:
 #       The variable name that contains the string to convert.
 #
 # Returns:
 #
-# - ${REPLY}: the extracted field
+# - ${REPLY}: The converted string
 #
 # ```bash
 # MY_STRING="myCamelCaseString"
-# string::convertCamelCaseToSnakeCase MY_STRING
+# string::getKebabCase MY_STRING
 # echo "${REPLY}"
 # ```
-function string::convertCamelCaseToSnakeCase() {
-  local -n camelCaseStringToConvert="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i charIndex strLength=${#camelCaseStringToConvert}
-  local char output=""
-  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
-    char="${camelCaseStringToConvert:charIndex:1}"
-    if [[ ${char} =~ ^[[:upper:]]$ ]]; then
-      output+="_${char^}"
-    else
-      output+="${char^}"
-    fi
+function string::getKebabCase() {
+  REPLY="${!1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  if [[ ${REPLY} == *[[:upper:]]* && ${REPLY} == *[[:lower:]]* ]]; then
+    # from camelCase or PascalCase
+    # it is faster to use a regex than loop over each char here
+    while [[ ${REPLY} =~ [[:upper:]] ]]; do
+      REPLY="${REPLY//"${BASH_REMATCH[0]}"/-"${BASH_REMATCH[0],}"}"
+    done
+  else
+    # from SNAKE_CASE of already in kebab-case
+    REPLY="${REPLY,,}"
+  fi
+  REPLY="${REPLY//[![:lower:][:digit:]-]/-}"
+  while [[ ${REPLY} == -* ]]; do
+    REPLY="${REPLY:1}"
   done
-  while [[ ${output} == _* ]]; do
-    output="${output:1}"
+  while [[ ${REPLY} == *- ]]; do
+    REPLY="${REPLY%-}"
   done
-  REPLY="${output}"
 }
 
-# ## string::convertKebabCaseToSnakeCase
+# ## string::getSnakeCase
 #
-# This function convert a kebab-case string to a SNAKE_CASE string.
-# It uses pure bash.
-# Removes all leading dashes.
+# This function convert a camelCase, PascalCase or kebab-case string to a SNAKE_CASE string.
+# Removes all leading/trailing underscores.
 #
 # - $1: **string variable name** _as string_:
 #       The variable name that contains the string to convert.
 #
 # Returns:
 #
-# - ${REPLY}: the extracted field
+# - ${REPLY}: The converted string
 #
 # ```bash
-# MY_STRING="my-kebab-case-string"
-# string::convertKebabCaseToSnakeCase MY_STRING
+# MY_STRING="myCamelCaseString"
+# string::getSnakeCase MY_STRING
 # echo "${REPLY}"
 # ```
-function string::convertKebabCaseToSnakeCase() {
-  local -n kebabCaseStringToConvert="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i charIndex strLength=${#kebabCaseStringToConvert}
-  local char output=""
-  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
-    char="${kebabCaseStringToConvert:charIndex:1}"
-    if [[ ${char} == "-" ]]; then
-      output+="_"
-    else
-      output+="${char^}"
-    fi
+function string::getSnakeCase() {
+  REPLY="${!1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  if [[ ${REPLY} == *[[:upper:]]* && ${REPLY} == *[[:lower:]]* ]]; then
+    # from camelCase or PascalCase
+    while [[ ${REPLY} =~ [[:upper:]] ]]; do
+      REPLY="${REPLY//"${BASH_REMATCH[0]}"/_"${BASH_REMATCH[0],}"}"
+    done
+    REPLY="${REPLY^^}"
+  else
+    # from kebab-case or already in SNAKE_CASE
+    REPLY="${REPLY^^}"
+  fi
+  REPLY="${REPLY//[![:upper:][:digit:]_]/_}"
+  while [[ ${REPLY} == _* ]]; do
+    REPLY="${REPLY:1}"
   done
-  while [[ ${output} == _* ]]; do
-    output="${output:1}"
+  while [[ ${REPLY} == *_ ]]; do
+    REPLY="${REPLY%_}"
   done
-  REPLY="${output}"
 }
 
-# ## string::convertKebabCaseToCamelCase
+# ## string::getCamelCase
 #
-# This function convert a kebab-case string to a camelCase string.
-# It uses pure bash.
-# Removes all leading dashes.
+# This function convert a SNAKE_CASE or kebab-case string to a camelCase string.
 #
 # - $1: **string variable name** _as string_:
 #       The variable name that contains the string to convert.
 #
 # Returns:
 #
-# - ${REPLY}: the extracted field
+# - ${REPLY}: The converted string
 #
 # ```bash
-# MY_STRING="my-kebab-case-string"
-# string::convertKebabCaseToCamelCase MY_STRING
+# MY_STRING="my-kebab-case"
+# string::getCamelCase MY_STRING
 # echo "${REPLY}"
 # ```
-function string::convertKebabCaseToCamelCase() {
-  local -n kebabCaseStringToConvert="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -i charIndex strLength=${#kebabCaseStringToConvert}
-  local char output=""
-  for ((charIndex = 0; charIndex < strLength; charIndex++)); do
-    char="${kebabCaseStringToConvert:charIndex:1}"
-    if [[ ${char} == "-" ]]; then
-      continue
-    fi
-    if [[ ${kebabCaseStringToConvert:charIndex-1:1} == "-" ]]; then
-      output+="${char^}"
-    else
-      output+="${char,}"
-    fi
-  done
-  REPLY="${output,}"
+function string::getCamelCase() {
+  REPLY="${!1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  if [[ ${REPLY} == *[[:upper:]]* && ${REPLY} == *[[:lower:]]* ]]; then
+    # already camelCase or PascalCase
+    :
+  else
+    # from kebab-case or SNAKE_CASE
+    REPLY="${REPLY,,}"
+    while [[ ${REPLY} =~ [-_]([[:alnum:]]) ]]; do
+      REPLY="${REPLY//"${BASH_REMATCH[0]}"/"${BASH_REMATCH[1]^}"}"
+    done
+  fi
+  REPLY="${REPLY//[![:alnum:]]/}"
+  REPLY="${REPLY,}"
 }
 
 # ## string::getField
@@ -199,7 +196,7 @@ function string::convertKebabCaseToCamelCase() {
 # > - using read into an array from a here string
 # > - using bash parameter expansion to remove before/after the separator
 function string::getField() {
-  local -n stringToCut="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     fieldNumber="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     separator=$'\t' \
@@ -209,7 +206,7 @@ function string::getField() {
 
   local field IFS="${separator}"
   local -i index=0
-  for field in ${stringToCut}; do
+  for field in ${inputString_NameRef}; do
     if [[ index -eq fieldNumber ]]; then
       REPLY="${field}"
       return 0
@@ -251,7 +248,7 @@ function string::getIndexOf() {
 # even if the passed string variable is named "REPLY" so we must not erase the value
 # of reply mid function.
 function string_getIndexOf() {
-  local -n stringToSearch="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n inputStringToSearch_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     search="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     startingIndex=0 \
@@ -261,15 +258,15 @@ function string_getIndexOf() {
 
   if ((startingIndex > 0)); then
     # if the starting index is greater than the length of the string, we return -1
-    if ((startingIndex >= ${#stringToSearch})); then
+    if ((startingIndex >= ${#inputStringToSearch_NameRef})); then
       _STRING_INDEX_OF=-1
       return 0
     fi
 
     # otherwise we keep only what is after this index
-    local subStringToSearch="${stringToSearch:startingIndex}"
+    local subStringToSearch="${inputStringToSearch_NameRef:startingIndex}"
   else
-    local -n subStringToSearch=stringToSearch
+    local -n subStringToSearch=inputStringToSearch_NameRef
   fi
 
   local -i originalSubStringLength="${#subStringToSearch}"
@@ -312,14 +309,14 @@ function string_getIndexOf() {
 # local extractedText="${REPLY}"
 # ```
 function string::extractBetween() {
-  local -n stringFromWhichToExtract="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     start="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     end="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   local -i startIndex endIndex _STRING_INDEX_OF
   if [[ -n ${start} ]]; then
-    string_getIndexOf stringFromWhichToExtract "${start}"
+    string_getIndexOf inputString_NameRef "${start}"
     startIndex=${_STRING_INDEX_OF}
     if ((startIndex == -1)); then
       REPLY=""
@@ -331,18 +328,18 @@ function string::extractBetween() {
   fi
 
   if [[ -n ${end} ]]; then
-    string_getIndexOf stringFromWhichToExtract "${end}" startingIndex="${startIndex}"
+    string_getIndexOf inputString_NameRef "${end}" startingIndex="${startIndex}"
     endIndex=${_STRING_INDEX_OF}
     if ((endIndex == -1)); then
       REPLY=""
       return 0
     fi
   else
-    REPLY="${stringFromWhichToExtract:startIndex}"
+    REPLY="${inputString_NameRef:startIndex}"
     return 0
   fi
 
-  REPLY="${stringFromWhichToExtract:startIndex:endIndex-startIndex}"
+  REPLY="${inputString_NameRef:startIndex:endIndex-startIndex}"
 }
 
 # ## string::count
@@ -366,9 +363,9 @@ function string::extractBetween() {
 #
 # > This is faster than looping over the string and check the substring.
 function string::count() {
-  local -n stringInWhichToCount="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local newString="${stringInWhichToCount//"${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"/}"
-  REPLY=$(((${#stringInWhichToCount} - ${#newString}) / ${#2}))
+  local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local newString="${inputString_NameRef//"${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"/}"
+  REPLY=$(((${#inputString_NameRef} - ${#newString}) / ${#2}))
 }
 
 # ## string::split
@@ -392,11 +389,11 @@ function string::count() {
 #
 # > This is faster than using read into an array from a here string.
 function string::split() {
-  local -n stringToSplit="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local IFS="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # shellcheck disable=SC2206
   # shellcheck disable=SC2034
-  REPLY_ARRAY=(${stringToSplit})
+  REPLY_ARRAY=(${inputString_NameRef})
 }
 
 # ## string::head
@@ -476,26 +473,25 @@ function string_headCallback() {
 # > newlines (which is not the case with a "for loop" using parameter expansion and IFS=$'\n').
 # > Here string is significantly slower than using this.
 function string::doForEachLine() {
-  local -n stringForWhichToIterate="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local inputString="${!1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
-    variableName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     callback="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     separator=$'\n' \
     IFS=$' '
   shift 2
   eval "local a= ${*@Q}"
 
-  local string="${stringForWhichToIterate}" chunk
-  while [[ -n ${string} ]]; do
-    chunk="${string%%"${separator}"*}"
-    string="${string:${#chunk}+1}"
+  local chunk
+  while [[ -n ${inputString} ]]; do
+    chunk="${inputString%%"${separator}"*}"
+    inputString="${inputString:${#chunk}+1}"
     if ! "${callback}" "${chunk}"; then
       break
     fi
   done
 }
 
-# ## string::convertToHex
+# ## string::getHexRepresentation
 #
 # Convert a string to its hexadecimal representation.
 #
@@ -508,16 +504,16 @@ function string::doForEachLine() {
 #
 # ```bash
 # MY_STRING="This is a string"
-# string::convertToHex MY_STRING
+# string::getHexRepresentation MY_STRING
 # echo "${REPLY}"
 # ```
-function string::convertToHex() {
-  local -n stringToConvertToHex="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+function string::getHexRepresentation() {
+  local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local -i charIndex
-  local hexChar
-  REPLY=""
-  for ((charIndex = 0; charIndex < ${#stringToConvertToHex}; charIndex++)); do
-    printf -v hexChar "%x" "'${stringToConvertToHex:charIndex:1}"
-    REPLY+="${hexChar}"
+  local hexChar output
+  for ((charIndex = 0; charIndex < ${#inputString_NameRef}; charIndex++)); do
+    printf -v hexChar "%x" "'${inputString_NameRef:charIndex:1}"
+    output+="${hexChar}"
   done
+  REPLY="${output}"
 }

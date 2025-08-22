@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck source=../libraries.d/main
+# shellcheck source=../../../libraries.d/main
 source "$(valet --source)"
 include benchmark
 

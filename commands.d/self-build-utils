@@ -367,7 +367,7 @@ function selfBuild_verifyCommandDefinition() {
     optionNames="${optionNames//,/ }"
     string::trimAll optionNames
     # remove the first short option
-    optionNames="${REPLY/ -? /}"
+    optionNames="${optionNames/ -? /}"
     # if there still are short options, it means that there are more than one or that one has more than one character
     if [[ ${optionNames} =~ " -"[^-]+ ]]; then
       message+="- has an invalid option ⌜${option}⌝, it can only have one short option (single -) and the short option must have a single character."$'\n'

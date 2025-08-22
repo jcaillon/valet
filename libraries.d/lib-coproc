@@ -34,8 +34,8 @@
 # - ${simulateSequentialRun} _as bool_:
 #       (optional) If true, this will:
 #       - redirect the logs of each task to a file
-#       - print the logs of each task, in natural order (not as they finish) at the end of all execution
-#       - stop at the first error, showing the logs of the tasks finished so far
+#       - at the end of all execution, print the logs of each task, in natural order (not as they finish)
+#       - exit at the first error, showing the logs of the task in error
 #       Tasks will run as if they are called in a for loop; except they actually run in parallel.
 #       (defaults to false)
 # - ${coprocNamePrefix} _as string_:
@@ -45,7 +45,7 @@
 #
 # Returns:
 #
-# - ${REPLY}: 0 if all the jobs completed, 1 if the completed callback function returned 1.
+# - ${REPLY}: The number of jobs that did not completed (i.e. not executed until the end, successfully or not)
 # - ${REPLY2}: The number of successfully completed jobs.
 # - ${REPLY_ARRAY[@]}: an array containing the exit codes of the jobs.
 #
@@ -53,6 +53,7 @@
 # declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
 # coproc::runInParallel jobCommands maxParallelCoprocs=2
 # ```
+# TODO: implement unit tests for this function
 function coproc::runInParallel() {
   local -n jobCommands="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
@@ -72,7 +73,7 @@ function coproc::runInParallel() {
 
   maxInParallel=$((maxInParallel < 1 ? 1 : maxInParallel))
 
-  local -a -i pids=() runningPids=() exitCodes=() endedCoprocIndexes=()
+  local -a -i pids=() runningPids=() exitCodes=()
   local -i index pid endedCoprocPid endedCoprocExitStatus endedCoprocIndex
   local -a logFiles=()
   local logFile="" coprocName
@@ -102,6 +103,10 @@ function coproc::runInParallel() {
       endedCoprocExitStatus=0
       wait -n -p endedCoprocPid "${runningPids[@]}" || endedCoprocExitStatus=$?
       exitCodes+=("${endedCoprocExitStatus}")
+
+      if [[ -z ${endedCoprocPid:-} ]]; then
+        continue
+      fi
 
       # find the index of the ended coproc in the pids array
       for endedCoprocIndex in "${!pids[@]}"; do
@@ -138,15 +143,22 @@ function coproc::runInParallel() {
         REPLY=0
         "${completedCallback}" "${endedCoprocIndex}" "${endedCoprocExitStatus}" "${percentageCompleted}" "${logFiles[endedCoprocIndex]}"
         if ((REPLY != 0)); then
-          log::debug "The completed callback function ⌜${completedCallback}⌝ requested to stop the parallel execution."
+          log::debug "The completed callback function ${completedCallback} requested to stop the parallel execution."
           REPLY=1
           break 2
         fi
       fi
 
-      # in "pseudo sequential" run
-
-      endedCoprocIndexes+=("${endedCoprocIndex}")
+      # in "pseudo sequential" run, we exit at the first error and display the log
+      if [[ ${simulateSequentialRun} == "true" && ${endedCoprocExitStatus} != 0 ]]; then
+        log::debug "The coproc ${coprocName} failed with exit code ${endedCoprocExitStatus}."
+        # display the accumulated logs
+        if [[ -n ${logFiles[endedCoprocIndex]} && -s ${logFiles[endedCoprocIndex]} ]]; then
+          fs::readFile "${logFiles[endedCoprocIndex]}"
+          log::printRaw REPLY
+        fi
+        core::exit 1 silent=true
+      fi
 
       # if all coproc are scheduled and completed, we can exit the loop
       if ((${#exitCodes[@]} == ${#jobCommands[@]})); then
@@ -156,6 +168,17 @@ function coproc::runInParallel() {
     done
   done
 
+  # in pseudo sequential run, we display the logs in order
+  if [[ ${simulateSequentialRun} == "true" ]]; then
+    for ((index = 0; index < ${#logFiles[@]}; index++)); do
+      if [[ -s ${logFiles[index]} ]]; then
+        fs::readFile "${logFiles[index]}"
+        log::printRaw REPLY
+      fi
+    done
+  fi
+
+  REPLY=$((${#jobCommands[@]} - ${#exitCodes[@]}))
   REPLY2=0
   local -i exitCode
   for exitCode in "${exitCodes[@]}"; do

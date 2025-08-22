@@ -163,8 +163,8 @@ function selfDocument::getAllFunctionsDocumentation() {
       if [[ ${line} != "#"* ]]; then
         reading=false
         string::extractBetween functionDocumentation "## " $'\n'
-        string::trimEdges REPLY
         functionName="${REPLY}"
+        string::trimEdges functionName
         log::trace "Found function: ⌜${functionName}⌝"
         functionDocumentation="${functionDocumentation%%"shellcheck disable="*}"
         REPLY_ASSOCIATIVE_ARRAY["${functionName}"]="${functionDocumentation}"

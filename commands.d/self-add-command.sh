@@ -56,7 +56,7 @@ function selfAddCommand() {
   fi
 
   local fileName="${commandName// /-}"
-  string::convertKebabCaseToCamelCase fileName
+  string::getCamelCase fileName
   local functionName="${REPLY}"
   local newCommandFilePath="${PWD}/commands.d/${fileName}.sh"
   local commandTemplateFile="${GLOBAL_INSTALLATION_DIRECTORY}/extras/template-command-${templateFlavor}.sh"

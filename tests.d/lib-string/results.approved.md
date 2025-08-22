@@ -2,6 +2,96 @@
 
 ## Test script 00.tests
 
+### ✅ Testing string::getKebabCase
+
+❯ `echo "${tests[*]"`
+
+**Standard output**:
+
+```text
+thisIsATest01
+AnotherTest
+--*Another!test--
+_SNAKE_CASE
+__SNAKE_CASE__
+kebab-case
+--kebab-case--
+```
+
+❯ `for test in ${tests[@]}; do string::getKebabCase test; echo "${REPLY}"; done`
+
+**Standard output**:
+
+```text
+this-is-a-test01
+another-test
+another-test
+snake-case
+snake-case
+kebab-case
+kebab-case
+```
+
+### ✅ Testing string::getSnakeCase
+
+❯ `echo "${tests[*]"`
+
+**Standard output**:
+
+```text
+thisIsATest01
+AnotherTest
+--*Another!test--
+_SNAKE_CASE
+__SNAKE_CASE__
+kebab-case
+--kebab-case--
+```
+
+❯ `for test in ${tests[@]}; do string::getSnakeCase test; echo "${REPLY}"; done`
+
+**Standard output**:
+
+```text
+THIS_IS_A_TEST01
+ANOTHER_TEST
+ANOTHER_TEST
+SNAKE_CASE
+SNAKE_CASE
+KEBAB_CASE
+KEBAB_CASE
+```
+
+### ✅ Testing string::getCamelCase
+
+❯ `echo "${tests[*]"`
+
+**Standard output**:
+
+```text
+thisIsATest01
+AnotherTest
+--*Another!test--
+_SNAKE_CASE
+__SNAKE_CASE__
+kebab-case
+--kebab-case--
+```
+
+❯ `for test in ${tests[@]}; do string::getCamelCase test; echo "${REPLY}"; done`
+
+**Standard output**:
+
+```text
+thisIsATest01
+anotherTest
+anothertest
+snakeCase
+snakeCase
+kebabCase
+kebabCase
+```
+
 ### ✅ Testing string::numberToUniqueId
 
 ❯ `string::numberToUniqueId 0109`
@@ -66,9 +156,9 @@ _myString='My text with some text formatting and some more textunreadable stuff.
 _myString='wo[107mrd wo[107mrd!'
 ```
 
-### ✅ Testing string::convertToHex
+### ✅ Testing string::getHexRepresentation
 
-❯ `_myString=d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301 string::convertToHex _myString`
+❯ `_myString=d071ec191f6e98a9c78b6d502c823d8e5adcfdf83d0ea55ebc7f242b29ce8301 string::getHexRepresentation _myString`
 
 Returned variables:
 
@@ -128,76 +218,6 @@ Returned variables:
 REPLY='line3 seems so'
 ```
 
-### ✅ Testing string::convertCamelCaseToSnakeCase
-
-❯ `_MY_STRING=thisIsATest0 string::convertCamelCaseToSnakeCase _MY_STRING`
-
-Returned variables:
-
-```text
-REPLY='THIS_IS_A_TEST0'
-```
-
-❯ `_MY_STRING=AnotherTest string::convertCamelCaseToSnakeCase _MY_STRING`
-
-Returned variables:
-
-```text
-REPLY='ANOTHER_TEST'
-```
-
-### ✅ Testing string::convertKebabCaseToSnakeCase
-
-❯ `_MY_STRING=this-is-a-test0 string::convertKebabCaseToSnakeCase _MY_STRING`
-
-Returned variables:
-
-```text
-REPLY='THIS_IS_A_TEST0'
-```
-
-❯ `_MY_STRING=--another-test string::convertKebabCaseToSnakeCase _MY_STRING`
-
-Returned variables:
-
-```text
-REPLY='ANOTHER_TEST'
-```
-
-### ✅ Testing string::convertKebabCaseToCamelCase
-
-❯ `_MY_STRING=this-is-a-test0 string::convertKebabCaseToCamelCase _MY_STRING`
-
-Returned variables:
-
-```text
-REPLY='thisIsATest0'
-```
-
-❯ `_MY_STRING=--another-test string::convertKebabCaseToCamelCase _MY_STRING`
-
-Returned variables:
-
-```text
-REPLY='anotherTest'
-```
-
-❯ `_MY_STRING=--anotherTest string::convertKebabCaseToCamelCase _MY_STRING`
-
-Returned variables:
-
-```text
-REPLY='anothertest'
-```
-
-❯ `_MY_STRING=--last-- string::convertKebabCaseToCamelCase _MY_STRING`
-
-Returned variables:
-
-```text
-REPLY='last'
-```
-
 ### ✅ Testing string::trimAll
 
 ```text
@@ -206,10 +226,8 @@ MY_STRING='  a  super test  '
 
 ❯ `string::trimAll MY_STRING`
 
-Returned variables:
-
 ```text
-REPLY='a super test'
+MY_STRING='a super test'
 ```
 
 ```text
@@ -218,10 +236,8 @@ MY_STRING='this is a command  '
 
 ❯ `string::trimAll MY_STRING`
 
-Returned variables:
-
 ```text
-REPLY='this is a command'
+MY_STRING='this is a command'
 ```
 
 ```text
@@ -231,10 +247,8 @@ this is a 	command  '
 
 ❯ `string::trimAll MY_STRING`
 
-Returned variables:
-
 ```text
-REPLY='this is a command'
+MY_STRING='this is a command'
 ```
 
 ### ✅ Testing string::trimEdges
@@ -245,10 +259,8 @@ MY_STRING='  hello  world  '
 
 ❯ `string::trimEdges MY_STRING`
 
-Returned variables:
-
 ```text
-REPLY='hello  world'
+MY_STRING='hello  world'
 ```
 
 ```text
@@ -257,10 +269,8 @@ MY_STRING='_-_-_hello_-_'
 
 ❯ `string::trimEdges MY_STRING charsToTrim=_-`
 
-Returned variables:
-
 ```text
-REPLY='hello'
+MY_STRING='hello'
 ```
 
 ```text
@@ -269,10 +279,8 @@ MY_STRING='  hello'
 
 ❯ `string::trimEdges MY_STRING`
 
-Returned variables:
-
 ```text
-REPLY='hello'
+MY_STRING='hello'
 ```
 
 ```text
@@ -283,10 +291,8 @@ MY_STRING='
 
 ❯ `string::trimEdges MY_STRING`
 
-Returned variables:
-
 ```text
-REPLY='hello'
+MY_STRING='hello'
 ```
 
 ### ✅ Testing string::getIndexOf function

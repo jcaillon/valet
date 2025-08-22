@@ -282,10 +282,8 @@ function extractCommandDefinitionsToVariables() {
       local function command
       function="${TEMP_CMD_BUILD_function:-}"
       string::trimAll function
-      function="${REPLY}"
       command="${TEMP_CMD_BUILD_command:-}"
       string::trimAll command
-      command="${REPLY}"
 
       # trim the leading "valet" from the command
       command="${command#valet }"
@@ -448,7 +446,7 @@ function declareFinalCommandDefinitionHelpVariables() {
       optionValue="${TEMP_CMD_BUILD_options_name[index]}"
       if [[ ${optionValue} == *"<"* ]]; then optionValue="<${optionValue##*<}"; else optionValue="true"; fi
       selfBuild_extractFirstLongNameFromOptionString "${TEMP_CMD_BUILD_options_name[index]}"
-      string::convertKebabCaseToSnakeCase REPLY
+      string::getSnakeCase REPLY
       TEMP_CMD_BUILD_options_description[index]+=$'\n'"This option can be set by exporting the variable VALET_${REPLY}='${optionValue}'."
     fi
   done
@@ -503,14 +501,15 @@ function declareFinalCommandDefinitionParserVariables() {
     fi
     option="${option//,/ }"
     string::trimAll option
-    option="${REPLY}"
     selfBuild_extractFirstLongNameFromOptionString "${option}"
+    # shellcheck disable=SC2034
     optionName="${REPLY}"
-    string::convertKebabCaseToCamelCase optionName
+    string::getCamelCase optionName
     optionNameCc="${REPLY}"
     if [[ "${optionNoEnvVar}" != "true" ]]; then
-      string::convertKebabCaseToSnakeCase optionName
-      optionNameSc="VALET_${REPLY}"
+      string::getSnakeCase optionName
+      optionNameSc="${REPLY}"
+      optionNameSc="VALET_${optionNameSc}"
     else
       optionNameSc=""
     fi
@@ -527,8 +526,7 @@ function declareFinalCommandDefinitionParserVariables() {
     local argument lastArgumentIsArray
     local -i nbOptionalArguments=0
     for ((index = 0; index < ${#TEMP_CMD_BUILD_arguments_name[@]}; index++)); do
-      string::convertKebabCaseToCamelCase TEMP_CMD_BUILD_arguments_name[index]
-      argument="${REPLY}"
+      argument="${TEMP_CMD_BUILD_arguments_name[index]}"
       if [[ ${argument} == *"..."* ]]; then
         argument="${argument//\.\.\./}"
         lastArgumentIsArray="true"
@@ -537,7 +535,8 @@ function declareFinalCommandDefinitionParserVariables() {
         argument="${argument//\?/}"
         nbOptionalArguments+=1
       fi
-      eval "CMD_ARGS_NAME_${function}+=(\"${argument}\")"
+      string::getCamelCase argument
+      eval "CMD_ARGS_NAME_${function}+=(\"${REPLY}\")"
     done
     declare -g "CMD_ARGS_LAST_IS_ARRAY_${function}"="${lastArgumentIsArray:-false}"
     declare -g "CMD_ARGS_NB_OPTIONAL_${function}"="${nbOptionalArguments}"
