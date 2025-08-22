@@ -24,9 +24,9 @@
 #
 # > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 function regex::getFirstGroup() {
-  local -n stringInWhichToMatch="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n inputString_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # Usage: regex "string" "regex"
-  if [[ ${stringInWhichToMatch} =~ ${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."} ]]; then
+  if [[ ${inputString_nameRef} =~ ${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."} ]]; then
     REPLY="${BASH_REMATCH[1]:-}"
   else
     # shellcheck disable=SC2034
@@ -68,8 +68,8 @@ function regex::getFirstGroup() {
 #
 # > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 function regex::replace() {
-  local -n stringInWhichToReplace="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-    local \
+  local -n inputString_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local \
     regex="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     replacement="${3?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     max=-1 \
@@ -78,11 +78,11 @@ function regex::replace() {
   shift 3
   eval "local a= ${*@Q}"
 
-  if (( max == 0 )); then
+  if ((max == 0)); then
     if [[ ${onlyMatches} == "true" ]]; then
       REPLY=""
     else
-      REPLY="${stringInWhichToReplace}"
+      REPLY="${inputString_nameRef}"
     fi
     return 0
   fi
@@ -94,36 +94,36 @@ function regex::replace() {
     actualReplacement="${replacement}"
   fi
 
-  REPLY=""
-  local IFS="" stringBeforeMatch
+  local IFS="" stringBeforeMatch output=""
   local -i count=0 currentCharIndex=0
 
-  while [[ ${stringInWhichToReplace:currentCharIndex} =~ ${regex} ]]; do
-    stringBeforeMatch="${stringInWhichToReplace:currentCharIndex}"
+  while [[ ${inputString_nameRef:currentCharIndex} =~ ${regex} ]]; do
+    stringBeforeMatch="${inputString_nameRef:currentCharIndex}"
     stringBeforeMatch="${stringBeforeMatch%%"${BASH_REMATCH[0]}"*}"
-    currentCharIndex=$(( currentCharIndex + ${#stringBeforeMatch} + ${#BASH_REMATCH[0]} ))
+    currentCharIndex=$((currentCharIndex + ${#stringBeforeMatch} + ${#BASH_REMATCH[0]}))
 
     if [[ ${usePlaceHolders} == "true" ]]; then
       actualReplacement="${replacement//"\c"/"${count}"}"
-      for (( i = 0; i < ${#BASH_REMATCH[@]}; i++ )); do
+      for ((i = 0; i < ${#BASH_REMATCH[@]}; i++)); do
         actualReplacement=${actualReplacement//"\\${i}"/"${BASH_REMATCH[i]}"}
       done
     fi
 
     if [[ ${onlyMatches} == "true" ]]; then
-      REPLY+="${actualReplacement}"
+      output+="${actualReplacement}"
     else
-      REPLY+="${stringBeforeMatch}${actualReplacement}"
+      output+="${stringBeforeMatch}${actualReplacement}"
     fi
 
     count+=1
-    if (( max != -1 && count >= max )); then
+    if ((max != -1 && count >= max)); then
       break
     fi
   done
   if [[ ${onlyMatches} != "true" ]]; then
-    REPLY+="${stringInWhichToReplace:currentCharIndex}"
+    output+="${inputString_nameRef:currentCharIndex}"
   fi
+  REPLY="${output}"
 }
 
 # ## regex::getMatches
@@ -162,8 +162,8 @@ function regex::replace() {
 #
 # > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 function regex::getMatches() {
-  local -n stringInWhichToMatch="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-    local \
+  local -n inputString_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local \
     regex="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     replacement="" \
     max=-1 \
@@ -173,12 +173,12 @@ function regex::getMatches() {
 
   REPLY_ARRAY=()
 
-  if (( max == 0 )); then
+  if ((max == 0)); then
     return 0
   fi
 
   local useReplacement=false usePlaceHolders=false actualReplacement
-  if (( ${#replacement} > 0 )); then
+  if ((${#replacement} > 0)); then
     useReplacement=true
     if [[ ${replacement} == *"\\"* ]]; then
       usePlaceHolders=true
@@ -190,15 +190,15 @@ function regex::getMatches() {
   local IFS="" stringBeforeMatch
   local -i count=0 currentCharIndex=0
 
-  while [[ ${stringInWhichToMatch:currentCharIndex} =~ ${regex} ]]; do
-    stringBeforeMatch="${stringInWhichToMatch:currentCharIndex}"
+  while [[ ${inputString_nameRef:currentCharIndex} =~ ${regex} ]]; do
+    stringBeforeMatch="${inputString_nameRef:currentCharIndex}"
     stringBeforeMatch="${stringBeforeMatch%%"${BASH_REMATCH[0]}"*}"
-    currentCharIndex=$(( currentCharIndex + ${#stringBeforeMatch} + ${#BASH_REMATCH[0]} ))
+    currentCharIndex=$((currentCharIndex + ${#stringBeforeMatch} + ${#BASH_REMATCH[0]}))
 
     if [[ ${useReplacement} == "true" ]]; then
       if [[ ${usePlaceHolders} == "true" ]]; then
         actualReplacement="${replacement//"\c"/"${count}"}"
-        for (( i = 0; i < ${#BASH_REMATCH[@]}; i++ )); do
+        for ((i = 0; i < ${#BASH_REMATCH[@]}; i++)); do
           actualReplacement=${actualReplacement//"\\${i}"/"${BASH_REMATCH[i]}"}
         done
       fi
@@ -208,7 +208,7 @@ function regex::getMatches() {
     fi
 
     count+=1
-    if (( max != -1 && count >= max )); then
+    if ((max != -1 && count >= max)); then
       break
     fi
   done
@@ -247,4 +247,3 @@ function regex::escapeRegexSpecialChars() {
   REPLY=${REPLY//\$/\\\$}
   REPLY=${REPLY//\|/\\|}
 }
-

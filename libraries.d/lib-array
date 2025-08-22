@@ -77,21 +77,20 @@ function array::quicksort() {
 # > - The sorting is not stable (the order of equal elements is not preserved).
 # > - It is not appropriate for large array, use the `sort` binary for such cases.
 function array::sort() {
-  local arrayName=${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}
-  local -n arrayToSort_=${arrayName}
+  local -n arrayToSort_nameRef=${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}
 
   local _tmp _pivot
-  local setPivot="_pivot=\"\${${arrayName}[\${1}]}\""
-  local isInferiorToPivot="[[ \${${arrayName}[\${1}]} < \"\${_pivot}\" ]]"
-  local isSuperiorToPivot="[[ \${${arrayName}[\${1}]} > \"\${_pivot}\" ]]"
+  local setPivot="_pivot=\"\${arrayToSort_nameRef[\${1}]}\""
+  local isInferiorToPivot="[[ \${arrayToSort_nameRef[\${1}]} < \"\${_pivot}\" ]]"
+  local isSuperiorToPivot="[[ \${arrayToSort_nameRef[\${1}]} > \"\${_pivot}\" ]]"
   local swap="
-  _tmp=\"\${${arrayName}[\${1}]}\"
-  ${arrayName}[\${1}]=\"\${${arrayName}[\${2}]}\"
-  ${arrayName}[\${2}]=\"\${_tmp}\"
+  _tmp=\"\${arrayToSort_nameRef[\${1}]}\"
+  arrayToSort_nameRef[\${1}]=\"\${arrayToSort_nameRef[\${2}]}\"
+  arrayToSort_nameRef[\${2}]=\"\${_tmp}\"
   "
 
   local IFS=" "
-  array::quicksort 0 $((${#arrayToSort_[@]} - 1))
+  array::quicksort 0 $((${#arrayToSort_nameRef[@]} - 1))
 }
 
 # ## array_setPivotCallBack (private)
@@ -171,13 +170,12 @@ function array_swapCallBack() {
 # > - The sorting is not stable (the order of equal elements is not preserved).
 # > - It is not appropriate for large array, use the `sort` binary for such cases.
 function array::sortWithCriteria() {
-  local arrayName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -n arrayToSort_="${arrayName}"
+  local -n arrayToSort_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   shift
   local -a criteriaArrayNames=("${@}")
 
   # an array of indices
-  eval "REPLY_ARRAY=( {0..$((${#arrayToSort_[@]} - 1))} )"
+  eval "REPLY_ARRAY=( {0..$((${#arrayToSort_nameRef[@]} - 1))} )"
 
   local name _tmpValue
   local -i arrayNumber=0 _tmp
@@ -211,13 +209,13 @@ function array::sortWithCriteria() {
   REPLY_ARRAY[\${1}]=\"\${REPLY_ARRAY[\${2}]}\"
   REPLY_ARRAY[\${2}]=\"\${_tmp}\"
 
-  _tmpValue=\"\${arrayToSort_[\${1}]}\"
-  arrayToSort_[\${1}]=\"\${arrayToSort_[\${2}]}\"
-  arrayToSort_[\${2}]=\"\${_tmpValue}\"
+  _tmpValue=\"\${arrayToSort_nameRef[\${1}]}\"
+  arrayToSort_nameRef[\${1}]=\"\${arrayToSort_nameRef[\${2}]}\"
+  arrayToSort_nameRef[\${2}]=\"\${_tmpValue}\"
   "
 
   local IFS=" "
-  array::quicksort 0 $((${#arrayToSort_[@]} - 1))
+  array::quicksort 0 $((${#arrayToSort_nameRef[@]} - 1))
 }
 
 # ## array::appendIfNotPresent
@@ -243,20 +241,21 @@ function array::sortWithCriteria() {
 # printf '%s\n' "${myArray[@]}"
 # ```
 function array::appendIfNotPresent() {
-  local -n arrayInWhichToAppend_=${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}
-  local -n valueToAdd="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n \
+    array_nameRef=${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."} \
+    valueToAdd_nameRef="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   # add value to array if not present, check in a loop
   local -i present=0
   local item
-  for item in "${arrayInWhichToAppend_[@]}"; do
-    if [[ ${item} == "${valueToAdd}" ]]; then
+  for item in "${array_nameRef[@]}"; do
+    if [[ ${item} == "${valueToAdd_nameRef}" ]]; then
       present=1
       break
     fi
   done
   if ((present == 0)); then
-    arrayInWhichToAppend_+=("${valueToAdd}")
+    array_nameRef+=("${valueToAdd_nameRef}")
   fi
 
   REPLY_CODE=${present}
@@ -285,12 +284,13 @@ function array::appendIfNotPresent() {
 # printf '%s\n' "${myArray[@]}"
 # ```
 function array::remove() {
-  local -n arrayInWhichToRemove_="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -n valueToRemove_="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n \
+    arrayInWhichToRemove_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    valueToRemove_nameRef="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local key
-  for key in "${!arrayInWhichToRemove_[@]}"; do
-    if [[ ${arrayInWhichToRemove_[${key}]} == "${valueToRemove_}" ]]; then
-      unset -v "arrayInWhichToRemove_[${key}]"
+  for key in "${!arrayInWhichToRemove_nameRef[@]}"; do
+    if [[ ${arrayInWhichToRemove_nameRef[${key}]} == "${valueToRemove_nameRef}" ]]; then
+      unset -v "arrayInWhichToRemove_nameRef[${key}]"
       REPLY_CODE=0
       return 0
     fi
@@ -320,12 +320,13 @@ function array::remove() {
 # ```
 function array::contains() {
   # shellcheck disable=SC2178
-  local -n arrayInWhichToCheck_="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local -n valueToCheck_="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n \
+    arrayInWhichToCheck_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    valueToCheck_nameRef="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   local item
-  for item in "${arrayInWhichToCheck_[@]}"; do
-    if [[ ${item} == "${valueToCheck_}" ]]; then
+  for item in "${arrayInWhichToCheck_nameRef[@]}"; do
+    if [[ ${item} == "${valueToCheck_nameRef}" ]]; then
       return 0
     fi
   done
@@ -345,9 +346,8 @@ function array::contains() {
 # ```
 function array::makeArraysSameSize() {
   local array
-  local -i length
+  local -i length maxLength=0
   local -a lengths
-  local -i maxLength=0
 
   # compute max length among all arrays
   for array in "$@"; do

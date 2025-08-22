@@ -693,7 +693,7 @@ function log::printFile() {
 # > This function is not at all suited for large strings, print the content to a file instead.
 # shellcheck disable=SC2317
 function log::printFileString() {
-  local -n contentToPrint="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n content_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     maxLines="0" \
     IFS=$' '
@@ -708,7 +708,7 @@ function log::printFileString() {
     if ((REPLY_CODE != 0)); then
       break
     fi
-  done <<<"${contentToPrint}"
+  done <<<"${content_nameRef}"
 
   # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
   eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"
@@ -847,7 +847,7 @@ function log::saveFile() {
 # log::saveFileString "my content" "suffix" "important result file"
 # ```
 function log::saveFileString() {
-  local -n contentToSave="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n content_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     suffix="" \
     silent="false" \
@@ -857,7 +857,7 @@ function log::saveFileString() {
 
   core::createSavedFilePath suffix="${suffix}"
   local newFilePath="${REPLY}"
-  printf '%s' "${contentToSave}" >"${newFilePath}"
+  printf '%s' "${content_nameRef}" >"${newFilePath}"
   if [[ ${silent} != "true" ]]; then
     log::printString "${newFilePath}"
   fi
@@ -1271,22 +1271,22 @@ function log::init() {
 # echo "${myText}"
 # ```
 function string::removeTextFormatting() {
-  local -n textForWhichToRemoveFormatting="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  if [[ ${textForWhichToRemoveFormatting} == *$'\e'* ]]; then
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9][0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;5;[0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;5;[0-9][0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;5;[0-9][0-9][0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9];[0-9];[0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9][0-9];[0-9];[0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9][0-9][0-9];[0-9];[0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9];[0-9][0-9];[0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9];[0-9][0-9][0-9];[0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9];[0-9];[0-9][0-9][0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9];[0-9];[0-9][0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9][0-9];[0-9][0-9];[0-9][0-9]m/}"
-    textForWhichToRemoveFormatting="${textForWhichToRemoveFormatting//$'\e['[0-9]8;2;[0-9][0-9][0-9];[0-9][0-9][0-9];[0-9][0-9][0-9]m/}"
+  local -n formattedString_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if [[ ${formattedString_nameRef} == *$'\e'* ]]; then
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9][0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;5;[0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;5;[0-9][0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;5;[0-9][0-9][0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;2;[0-9];[0-9];[0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;2;[0-9][0-9];[0-9];[0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;2;[0-9][0-9][0-9];[0-9];[0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;2;[0-9];[0-9][0-9];[0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;2;[0-9];[0-9][0-9][0-9];[0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;2;[0-9];[0-9];[0-9][0-9][0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;2;[0-9];[0-9];[0-9][0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;2;[0-9][0-9];[0-9][0-9];[0-9][0-9]m/}"
+    formattedString_nameRef="${formattedString_nameRef//$'\e['[0-9]8;2;[0-9][0-9][0-9];[0-9][0-9][0-9];[0-9][0-9][0-9]m/}"
   fi
 }
 
@@ -1325,7 +1325,7 @@ function string::removeTextFormatting() {
 # > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 # > - It considers escape sequence for text formatting and does not count them as visible characters.
 function string::wrapWords() {
-  local -n textToWrapAtWords="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n stringToWrapAtWords_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     width="${GLOBAL_COLUMNS}" \
     newLinePadString="" \
@@ -1337,12 +1337,12 @@ function string::wrapWords() {
   firstLineWidth="${firstLineWidth:-${width}}"
 
   # short cut in case the text is already shorter than the width
-  if [[ ${#textToWrapAtWords} -le ${firstLineWidth} && ${textToWrapAtWords} != *$'\n'* ]]; then
-    REPLY="${textToWrapAtWords}"
+  if [[ ${#stringToWrapAtWords_nameRef} -le ${firstLineWidth} && ${stringToWrapAtWords_nameRef} != *$'\n'* ]]; then
+    REPLY="${stringToWrapAtWords_nameRef}"
     return 0
   fi
 
-  local text="${textToWrapAtWords}"
+  local text="${stringToWrapAtWords_nameRef}"
   local output="" line word realWord REPLY2
   local leftPaddingVisibleChars="${newLinePadString}"
   string::removeTextFormatting leftPaddingVisibleChars
@@ -1440,7 +1440,7 @@ function string::wrapWords() {
 # > - It considers escape sequence for text formatting and does not count them as visible characters.
 # > - Leading spaces after a newly wrapped line are removed.
 function string::wrapCharacters() {
-  local -n textToWrapAtCharacters="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n stringToWrapAtCharacters_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     width="${GLOBAL_COLUMNS}" \
     newLinePadString="" \
@@ -1451,7 +1451,7 @@ function string::wrapCharacters() {
 
   firstLineWidth="${firstLineWidth:-${width}}"
 
-  local itemChunk spaces text="${textToWrapAtCharacters}"
+  local itemChunk spaces text="${stringToWrapAtCharacters_nameRef}"
   local leftPaddingVisibleChars="${newLinePadString}"
   string::removeTextFormatting leftPaddingVisibleChars
   width=$((width - ${#leftPaddingVisibleChars}))
@@ -1540,8 +1540,8 @@ function string::wrapCharacters() {
 # > - This functions is case insensitive.
 function string::highlight() {
   local -n \
-    textToHighlight="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
-    charactersToHighlight="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+    textToHighlight_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    charactersToHighlight_nameRef="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     highlightCode="${STYLE_COLOR_ACCENT:-$'\e'"[95m"}" \
     resetCode="${STYLE_COLOR_DEFAULT:-$'\e'"[0m"}"
@@ -1551,9 +1551,9 @@ function string::highlight() {
 
   local itemChunk itemChunkPiece
   local -i searchStringIndex=0
-  local searchStringCharacter="${charactersToHighlight:0:1}"
+  local searchStringCharacter="${charactersToHighlight_nameRef:0:1}"
   local searchStringCharacters="${searchStringCharacter,}${searchStringCharacter^}"
-  local text="${textToHighlight}"
+  local text="${textToHighlight_nameRef}"
 
   REPLY=""
 
@@ -1569,7 +1569,7 @@ function string::highlight() {
         REPLY+="${itemChunkPiece}${highlightCode}${itemChunk:${#itemChunkPiece}:1}${resetCode}"
         itemChunk="${itemChunk:${#itemChunkPiece}+1}"
         searchStringIndex+=1
-        searchStringCharacter="${charactersToHighlight:searchStringIndex:1}"
+        searchStringCharacter="${charactersToHighlight_nameRef:searchStringIndex:1}"
         searchStringCharacters="${searchStringCharacter,}${searchStringCharacter^}"
       done
 
@@ -1642,10 +1642,10 @@ function string::numberToUniqueId() {
 # echo "${_STRING_FUZZY_FILTER_REGEX}"
 # ```
 function regex::getFuzzySearchRegexFromSearchString() {
-  local -n filterSearchString="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n filterString_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   # nothing to filter
-  if [[ -z ${filterSearchString} ]]; then
+  if [[ -z ${filterString_nameRef} ]]; then
     _STRING_FUZZY_FILTER_REGEX=""
     return 0
   fi
@@ -1656,15 +1656,15 @@ function regex::getFuzzySearchRegexFromSearchString() {
   # prepare the regex for the searched string
   _STRING_FUZZY_FILTER_REGEX=""
   local -i index
-  for ((index = 0; index < ${#filterSearchString}; index++)); do
-    escapedCharacter=${filterSearchString:index:1}
+  for ((index = 0; index < ${#filterString_nameRef}; index++)); do
+    escapedCharacter=${filterString_nameRef:index:1}
     if [[ '\^$.|?*+[]{}()' == *"${escapedCharacter}"* ]]; then
       escapedCharacter="\\"${escapedCharacter}
     fi
     if ((index == 0)); then
-      _STRING_FUZZY_FILTER_REGEX+="^([^${filterSearchString:index:1}]"'*'")(${escapedCharacter}"
+      _STRING_FUZZY_FILTER_REGEX+="^([^${filterString_nameRef:index:1}]"'*'")(${escapedCharacter}"
     else
-      _STRING_FUZZY_FILTER_REGEX+="[^${filterSearchString:index:1}]"'*'"${escapedCharacter}"
+      _STRING_FUZZY_FILTER_REGEX+="[^${filterString_nameRef:index:1}]"'*'"${escapedCharacter}"
     fi
   done
 
@@ -1707,13 +1707,13 @@ function regex::getFuzzySearchRegexFromSearchString() {
 # > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.
 function array::fuzzyFilterSort() {
   local -n \
-    arrayToFilter="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
-    filterSearchString="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+    arrayToFilter_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    filterString_nameRef="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   # nothing to filter
-  if ((${#filterSearchString} == 0 || ${#arrayToFilter[@]} == 0)); then
-    REPLY_ARRAY=("${arrayToFilter[@]}")
-    eval "REPLY_ARRAY2=( {0..$((${#arrayToFilter[@]} - 1))} )"
+  if ((${#filterString_nameRef} == 0 || ${#arrayToFilter_nameRef[@]} == 0)); then
+    REPLY_ARRAY=("${arrayToFilter_nameRef[@]}")
+    eval "REPLY_ARRAY2=( {0..$((${#arrayToFilter_nameRef[@]} - 1))} )"
     return 0
   fi
 
@@ -1725,8 +1725,8 @@ function array::fuzzyFilterSort() {
   # will contain the original indexes corresponding to the sorted array
   REPLY_ARRAY2=()
 
-  for ((index = 0; index < ${#arrayToFilter[@]}; index++)); do
-    if [[ ${arrayToFilter[index]} =~ ${_STRING_FUZZY_FILTER_REGEX} ]]; then
+  for ((index = 0; index < ${#arrayToFilter_nameRef[@]}; index++)); do
+    if [[ ${arrayToFilter_nameRef[index]} =~ ${_STRING_FUZZY_FILTER_REGEX} ]]; then
       if ((${#BASH_REMATCH[3]} == 0 && ${#BASH_REMATCH[1]} == 0)); then
         _ARRAY_FUZZY_FILTER_KEYS+=($((index)))
       else
@@ -1743,7 +1743,7 @@ function array::fuzzyFilterSort() {
   # will contain the matched lines, sorted
   REPLY_ARRAY=()
   for ((index = 0; index < ${#REPLY_ARRAY2[@]}; index++)); do
-    REPLY_ARRAY+=("${arrayToFilter[REPLY_ARRAY2[index]]}")
+    REPLY_ARRAY+=("${arrayToFilter_nameRef[REPLY_ARRAY2[index]]}")
   done
   unset -v _ARRAY_FUZZY_FILTER_KEYS
 }

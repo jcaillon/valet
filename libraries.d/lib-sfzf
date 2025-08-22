@@ -151,9 +151,9 @@ function sfzfInitialize() {
   fi
 
   # an array of items that will be displayed in the left pane
-  local -n originalItems="${itemsArrayName}"
+  local -n originalItems_nameRef="${itemsArrayName}"
 
-  SFZF_ORIGINAL_ITEMS=("${originalItems[@]}")
+  SFZF_ORIGINAL_ITEMS=("${originalItems_nameRef[@]}")
 
   # the list of items filtered with the search string
   # and the correspondence between the currently displayed indexes with

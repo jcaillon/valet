@@ -235,9 +235,9 @@ function test::printReplyVars() {
   for varName in REPLY_ARRAY REPLY_ARRAY2; do
     if [[ -v ${varName} ]]; then
       GLOBAL_TEST_OUTPUT_CONTENT+="${varName}=("$'\n'
-      local -n array="${varName}"
-      for key in "${!array[@]}"; do
-        GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${array[${key}]//\'/\'\"\'\"\'}'"$'\n'
+      local -n array_nameRef="${varName}"
+      for key in "${!array_nameRef[@]}"; do
+        GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${array_nameRef[${key}]//\'/\'\"\'\"\'}'"$'\n'
       done
       GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
     fi
@@ -304,10 +304,10 @@ function test::printVars() {
     if [[ ${chunk} =~ "declare -"[aA][ilnrtux]*" "([^=]+)"=" ]]; then
       # we print an array
       varName="${BASH_REMATCH[1]}"
-      local -n array="${varName}"
+      local -n array_nameRef="${varName}"
       GLOBAL_TEST_OUTPUT_CONTENT+="${varName}=("$'\n'
-      for key in "${!array[@]}"; do
-        GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${array[${key}]//\'/\'\"\'\"\'}'"$'\n'
+      for key in "${!array_nameRef[@]}"; do
+        GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${array_nameRef[${key}]//\'/\'\"\'\"\'}'"$'\n'
       done
       GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
     elif [[ ${chunk} =~ "declare -"[^[:space:]]+" "([^=]+)"=" ]]; then

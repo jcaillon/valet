@@ -8,7 +8,6 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- modify the name of each variable defined as `local -n` to append `_ptr` to the variable name. This will allow us to use the same variable name in different functions without having to worry about it.
 - allow to break a test without approval testing it (cancel it basically). This will allow use to run docker if it is present and make a real test for the self install / extend commands.
 - Check error handling inside ifs and evals.
 - Check how we can make the list component work in the main screen while user is scrolling. Seems like gum is doing it by positioning the cursor at the end of the screen always, and then using move cursor left to trigger an automatic scroll that takes the user back at the right spot.

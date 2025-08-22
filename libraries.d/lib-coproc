@@ -55,7 +55,7 @@
 # ```
 # TODO: implement unit tests for this function
 function coproc::runInParallel() {
-  local -n jobCommands="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n jobCommands_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     maxInParallel=8 \
     completedCallback="" \
@@ -78,7 +78,7 @@ function coproc::runInParallel() {
   local -a logFiles=()
   local logFile="" coprocName
 
-  for ((index = 0; index < ${#jobCommands[@]}; index++)); do
+  for ((index = 0; index < ${#jobCommands_nameRef[@]}; index++)); do
     if [[ ${redirectLogs} == "true" || ${printRedirectedLogs} == "true" || ${simulateSequentialRun} == "true" ]]; then
       fs::createTempFile pathOnly=true
       logFile="${REPLY}"
@@ -88,7 +88,7 @@ function coproc::runInParallel() {
     coprocName="${coprocNamePrefix}${index}"
 
     coproc::run "${coprocName}" \
-      initCommand="${jobCommands[index]}" \
+      initCommand="${jobCommands_nameRef[index]}" \
       redirectLogsToFile="${logFile}"
 
     pid="${REPLY}"
@@ -96,9 +96,9 @@ function coproc::runInParallel() {
     runningPids+=("${pid}")
 
     log::debug "Running parallel coproc ${index} with PID ${pid}."
-    log::trace "Command: ${jobCommands[index]}"
+    log::trace "Command: ${jobCommands_nameRef[index]}"
 
-    while ((${#runningPids[@]} >= maxInParallel || index == ${#jobCommands[@]} - 1)); do
+    while ((${#runningPids[@]} >= maxInParallel || index == ${#jobCommands_nameRef[@]} - 1)); do
       # wait for one of the coproc to finish (or all of them if they are all scheduled)
       endedCoprocExitStatus=0
       wait -n -p endedCoprocPid "${runningPids[@]}" || endedCoprocExitStatus=$?
@@ -139,7 +139,7 @@ function coproc::runInParallel() {
 
       # execute the completed callback if defined
       if [[ -n ${completedCallback} ]]; then
-        local -i percentageCompleted=$((${#exitCodes[@]} * 100 / ${#jobCommands[@]}))
+        local -i percentageCompleted=$((${#exitCodes[@]} * 100 / ${#jobCommands_nameRef[@]}))
         REPLY=0
         "${completedCallback}" "${endedCoprocIndex}" "${endedCoprocExitStatus}" "${percentageCompleted}" "${logFiles[endedCoprocIndex]}"
         if ((REPLY != 0)); then
@@ -161,7 +161,7 @@ function coproc::runInParallel() {
       fi
 
       # if all coproc are scheduled and completed, we can exit the loop
-      if ((${#exitCodes[@]} == ${#jobCommands[@]})); then
+      if ((${#exitCodes[@]} == ${#jobCommands_nameRef[@]})); then
         REPLY=0
         break 2
       fi
@@ -178,7 +178,7 @@ function coproc::runInParallel() {
     done
   fi
 
-  REPLY=$((${#jobCommands[@]} - ${#exitCodes[@]}))
+  REPLY=$((${#jobCommands_nameRef[@]} - ${#exitCodes[@]}))
   REPLY2=0
   local -i exitCode
   for exitCode in "${exitCodes[@]}"; do
