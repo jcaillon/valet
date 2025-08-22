@@ -81,18 +81,14 @@ _MY_STRING='---
 
 ❯ `regex::replace _MY_STRING 'name:[[:space:]]*([[:alnum:]]*)' \\c=\\1\  max=2 onlyMatches=true`
 
-Returned variables:
-
 ```text
-REPLY='0=marc 1=john '
+_MY_STRING='0=marc 1=john '
 ```
 
 ❯ `regex::replace _MY_STRING '- name:[[:space:]]*([[:alnum:]]*)[^-]+' \\c=\\1\ `
 
-Returned variables:
-
 ```text
-REPLY='---
+_MY_STRING='---
 0=marc 1=john 2=julien '
 ```
 
@@ -102,34 +98,26 @@ _MY_STRING='This is the year 2000, madness rules the world.'
 
 ❯ `regex::replace _MY_STRING '[0-9]{4}' 2025`
 
-Returned variables:
-
 ```text
-REPLY='This is the year 2025, madness rules the world.'
+_MY_STRING='This is the year 2025, madness rules the world.'
 ```
 
 ❯ `regex::replace _MY_STRING '^(This) is.*$' \\1\ is\ working.`
 
-Returned variables:
-
 ```text
-REPLY='This is working.'
+_MY_STRING='This is working.'
 ```
 
 ❯ `regex::replace _MY_STRING '^(This) is.*$' \\1\ is\ working. max=0`
 
-Returned variables:
-
 ```text
-REPLY='This is the year 2000, madness rules the world.'
+_MY_STRING='This is the year 2000, madness rules the world.'
 ```
 
 ❯ `regex::replace _MY_STRING '^(This) is.*$' \\1\ is\ working. max=0 onlyMatches=true`
 
-Returned variables:
-
 ```text
-REPLY=''
+_MY_STRING=''
 ```
 
 ### ✅ Testing regex::getFirstGroup function

@@ -126,7 +126,7 @@ function selfBuild() {
     output="${REPLY}"
   fi
 
-  fs::toAbsolutePath "${GLOBAL_INSTALLATION_DIRECTORY}"
+  fs::getAbsolutePath "${GLOBAL_INSTALLATION_DIRECTORY}"
   GLOBAL_INSTALLATION_DIRECTORY="${REPLY}"
 
   # list all the files in which we need to find command definitions
@@ -298,7 +298,7 @@ function extractCommandDefinitionsToVariables() {
       fi
 
 
-      fs::toAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${REPLY}"
+      fs::getAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${REPLY}"
       TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${GLOBAL_INSTALLATION_DIRECTORY}"/}"
 
       # make sure that all these arrays exists and have the same size

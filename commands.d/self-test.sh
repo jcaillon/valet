@@ -165,7 +165,7 @@ function selfTest() {
 
   time::getProgramElapsedMicroseconds
   local runStartTimeInMicroSeconds="${REPLY}"
-  time::convertMicrosecondsToHuman $((REPLY - startTimeInMicroSeconds)) format="%S seconds and %l ms"
+  time::getMicrosecondsToHuman $((REPLY - startTimeInMicroSeconds)) format="%S seconds and %l ms"
   log::info "Found ${#_TEST_TEST_SUITE_NAME[@]} test suites in ⌜${REPLY}⌝."
 
   # run all tests suites
@@ -180,7 +180,7 @@ function selfTest() {
   progress::stop
 
   time::getProgramElapsedMicroseconds
-  time::convertMicrosecondsToHuman $((REPLY - runStartTimeInMicroSeconds)) format="%S seconds and %l ms"
+  time::getMicrosecondsToHuman $((REPLY - runStartTimeInMicroSeconds)) format="%S seconds and %l ms"
   log::info "Total time running tests: ⌜${REPLY}⌝."
 
   if ((${#_TEST_FAILED_TEST_SUITES[@]} > 0)); then

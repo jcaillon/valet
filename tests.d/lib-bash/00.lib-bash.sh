@@ -2,7 +2,7 @@
 
 function main() {
   test_bash::catchErrors
-  test_bash::allVariablesCachedWithValue
+  test_bash::isVariableCachedWithValue
   test_bash::runInSubshell
   test_bash::isFdValid
   test_bash::getFunctionDefinitionWithGlobalVars
@@ -37,19 +37,19 @@ function test_bash::catchErrors() {
   test::unsetTestCallStack
 }
 
-function test_bash::allVariablesCachedWithValue() {
-  test::title "✅ Testing bash::allVariablesCachedWithValue"
+function test_bash::isVariableCachedWithValue() {
+  test::title "✅ Testing bash::isVariableCachedWithValue"
 
-  test::func bash::allVariablesCachedWithValue VAR1 val1 VAR2 val2
-  test::func bash::allVariablesCachedWithValue VAR1 val1
-  test::func bash::allVariablesCachedWithValue VAR1 val2
+  test::func bash::isVariableCachedWithValue VAR1 val1 VAR2 val2
+  test::func bash::isVariableCachedWithValue VAR1 val1
+  test::func bash::isVariableCachedWithValue VAR1 val2
 
   # shellcheck disable=SC2119
   test::func bash::clearCachedVariables
-  test::func bash::allVariablesCachedWithValue VAR2 val2
+  test::func bash::isVariableCachedWithValue VAR2 val2
   test::func bash::clearCachedVariables VAR2
-  test::func bash::allVariablesCachedWithValue VAR2 val2
-  test::func bash::allVariablesCachedWithValue VAR2 val2
+  test::func bash::isVariableCachedWithValue VAR2 val2
+  test::func bash::isVariableCachedWithValue VAR2 val2
 }
 
 # shellcheck disable=SC2317

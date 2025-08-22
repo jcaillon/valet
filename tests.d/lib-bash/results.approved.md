@@ -50,29 +50,29 @@ GLOBAL_ERROR_TRAP_ERROR_STACKS=(
 )
 ```
 
-### ✅ Testing bash::allVariablesCachedWithValue
+### ✅ Testing bash::isVariableCachedWithValue
 
-❯ `bash::allVariablesCachedWithValue VAR1 val1 VAR2 val2`
+❯ `bash::isVariableCachedWithValue VAR1 val1 VAR2 val2`
 
 Returned code: `1`
 
-❯ `bash::allVariablesCachedWithValue VAR1 val1`
+❯ `bash::isVariableCachedWithValue VAR1 val1`
 
-❯ `bash::allVariablesCachedWithValue VAR1 val2`
+❯ `bash::isVariableCachedWithValue VAR1 val2`
 
 Returned code: `1`
 
 ❯ `bash::clearCachedVariables`
 
-❯ `bash::allVariablesCachedWithValue VAR2 val2`
+❯ `bash::isVariableCachedWithValue VAR2 val2`
 
 ❯ `bash::clearCachedVariables VAR2`
 
-❯ `bash::allVariablesCachedWithValue VAR2 val2`
+❯ `bash::isVariableCachedWithValue VAR2 val2`
 
 Returned code: `1`
 
-❯ `bash::allVariablesCachedWithValue VAR2 val2`
+❯ `bash::isVariableCachedWithValue VAR2 val2`
 
 ### ✅ Testing bash::runInSubshell
 

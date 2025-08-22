@@ -59,16 +59,22 @@ function test_regex::replace() {
   city: lyon
 '
 
+  function test_regex_replace() {
+    local _MY_STRING="${_MY_STRING}"
+    test::exec regex::replace "${@}"
+    test::printVars _MY_STRING
+  }
+
   test::printVars _MY_STRING
-  test::func regex::replace _MY_STRING "'name:[[:space:]]*([[:alnum:]]*)'" "\c=\1 " max=2 onlyMatches=true
-  test::func regex::replace _MY_STRING "'- name:[[:space:]]*([[:alnum:]]*)[^-]+'" "\c=\1 "
+  test_regex_replace _MY_STRING "'name:[[:space:]]*([[:alnum:]]*)'" "\c=\1 " max=2 onlyMatches=true
+  test_regex_replace _MY_STRING "'- name:[[:space:]]*([[:alnum:]]*)[^-]+'" "\c=\1 "
 
   _MY_STRING="This is the year 2000, madness rules the world."
   test::printVars _MY_STRING
-  test::func regex::replace _MY_STRING "'[0-9]{4}'" "2025"
-  test::func regex::replace _MY_STRING "'^(This) is.*$'" "\1 is working."
-  test::func regex::replace _MY_STRING "'^(This) is.*$'" "\1 is working." max=0
-  test::func regex::replace _MY_STRING "'^(This) is.*$'" "\1 is working." max=0 onlyMatches=true
+  test_regex_replace _MY_STRING "'[0-9]{4}'" "2025"
+  test_regex_replace _MY_STRING "'^(This) is.*$'" "\1 is working."
+  test_regex_replace _MY_STRING "'^(This) is.*$'" "\1 is working." max=0
+  test_regex_replace _MY_STRING "'^(This) is.*$'" "\1 is working." max=0 onlyMatches=true
 }
 
 function test_regex::getFirstGroup() {

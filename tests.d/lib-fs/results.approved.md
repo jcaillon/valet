@@ -108,9 +108,9 @@ Returned variables:
 REPLY='24'
 ```
 
-### ✅ Testing fs::toAbsolutePath
+### ✅ Testing fs::getAbsolutePath
 
-❯ `fs::toAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh`
+❯ `fs::getAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh`
 
 Returned variables:
 
@@ -118,7 +118,7 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
 ```
 
-❯ `fs::toAbsolutePath .`
+❯ `fs::getAbsolutePath .`
 
 Returned variables:
 
@@ -126,7 +126,7 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs'
 ```
 
-❯ `fs::toAbsolutePath ..`
+❯ `fs::getAbsolutePath ..`
 
 Returned variables:
 
@@ -134,7 +134,7 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d'
 ```
 
-❯ `fs::toAbsolutePath 01.invoke.s`
+❯ `fs::getAbsolutePath 01.invoke.s`
 
 Returned variables:
 
@@ -142,7 +142,7 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.s'
 ```
 
-❯ `fs::toAbsolutePath ../1004-lib-system/00.tests.sh`
+❯ `fs::getAbsolutePath ../1004-lib-system/00.tests.sh`
 
 Returned variables:
 
@@ -150,7 +150,7 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/../1004-lib-system/00.tests.sh'
 ```
 
-❯ `fs::toAbsolutePath resources`
+❯ `fs::getAbsolutePath resources`
 
 Returned variables:
 
@@ -158,7 +158,7 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
 ```
 
-❯ `fs::toAbsolutePath ./01.invoke.sh`
+❯ `fs::getAbsolutePath ./01.invoke.sh`
 
 Returned variables:
 
@@ -166,7 +166,7 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
 ```
 
-❯ `fs::toAbsolutePath ./resources`
+❯ `fs::getAbsolutePath ./resources`
 
 Returned variables:
 
@@ -174,7 +174,7 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
 ```
 
-❯ `fs::toAbsolutePath missing-file`
+❯ `fs::getAbsolutePath missing-file`
 
 Returned variables:
 
@@ -182,7 +182,7 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/missing-file'
 ```
 
-❯ `fs::toAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh realpath=true`
+❯ `fs::getAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh realpath=true`
 
 Returned variables:
 

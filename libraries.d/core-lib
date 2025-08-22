@@ -1056,14 +1056,14 @@ function log::parseLogPattern() {
       log_setPrintfArgumentFromFormat "loggedElapsedTime"
       # shellcheck disable=SC1091
       source time
-      REPLY4+=$'\n'"local REPLY; time::getProgramElapsedMicroseconds; time::convertMicrosecondsToSeconds \"\${REPLY}\" precision=3; local loggedElapsedTime=\"\${REPLY}s\""
+      REPLY4+=$'\n'"local REPLY; time::getProgramElapsedMicroseconds; time::getMicrosecondsToSeconds \"\${REPLY}\" precision=3; local loggedElapsedTime=\"\${REPLY}s\""
       ;;
     elapsedTimeSinceLastLog)
       printfFormat="%${formatSpecifier:-"-7s"}"
       log_setPrintfArgumentFromFormat "loggedElapsedTimeSinceLastLog"
       # shellcheck disable=SC1091
       source time
-      REPLY4+=$'\n'"local REPLY; time::getProgramElapsedMicroseconds; local -i currentTime=\${REPLY}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToSeconds \"\${_LOG_ELAPSED_TIME}\" precision=3; local loggedElapsedTimeSinceLastLog=\"\${REPLY}s\"; _LOG_ELAPSED_TIME=\${currentTime}"
+      REPLY4+=$'\n'"local REPLY; time::getProgramElapsedMicroseconds; local -i currentTime=\${REPLY}; _LOG_ELAPSED_TIME=\$(( currentTime - \${_LOG_ELAPSED_TIME:-0} )); time::getMicrosecondsToSeconds \"\${_LOG_ELAPSED_TIME}\" precision=3; local loggedElapsedTimeSinceLastLog=\"\${REPLY}s\"; _LOG_ELAPSED_TIME=\${currentTime}"
       ;;
     wrapPadding)
       printfFormat="%s"
@@ -1808,7 +1808,7 @@ function array_fuzzyFilterSortQuicksort() {
 # ```bash
 # time::getProgramElapsedMicroseconds
 # echo "${REPLY}"
-# time::convertMicrosecondsToHuman "${REPLY}"
+# time::getMicrosecondsToHuman "${REPLY}"
 # echo "Human time: ${REPLY}"
 # ```
 #

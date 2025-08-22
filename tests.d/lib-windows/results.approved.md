@@ -2,9 +2,9 @@
 
 ## Test script 00.tests
 
-### ✅ Testing windows::convertPathFromUnix
+### ✅ Testing windows::getWindowsPathFromUnixPath
 
-❯ `windows::convertPathFromUnix /tmp/file`
+❯ `windows::getWindowsPathFromUnixPath /tmp/file`
 
 Returned variables:
 
@@ -12,7 +12,7 @@ Returned variables:
 REPLY='C:\Users\TEMP\file'
 ```
 
-❯ `windows::convertPathFromUnix /mnt/d/Users/username`
+❯ `windows::getWindowsPathFromUnixPath /mnt/d/Users/username`
 
 Returned variables:
 
@@ -20,7 +20,7 @@ Returned variables:
 REPLY='D:\Users\username'
 ```
 
-❯ `windows::convertPathFromUnix /c/data/file`
+❯ `windows::getWindowsPathFromUnixPath /c/data/file`
 
 Returned variables:
 
@@ -28,7 +28,7 @@ Returned variables:
 REPLY='C:\data\file'
 ```
 
-❯ `windows::convertPathFromUnix C:\\Users\\username`
+❯ `windows::getWindowsPathFromUnixPath C:\\Users\\username`
 
 Returned variables:
 
@@ -36,9 +36,9 @@ Returned variables:
 REPLY='C:\Users\username'
 ```
 
-### ✅ Testing windows::convertPathToUnix
+### ✅ Testing windows::getUnixPathFromWindowsPath
 
-❯ `windows::convertPathToUnix C:\\Users\\username`
+❯ `windows::getUnixPathFromWindowsPath C:\\Users\\username`
 
 Returned variables:
 
@@ -46,7 +46,7 @@ Returned variables:
 REPLY='/c/Users/username'
 ```
 
-❯ `windows::convertPathToUnix D:\\data\\file`
+❯ `windows::getUnixPathFromWindowsPath D:\\data\\file`
 
 Returned variables:
 
@@ -54,7 +54,7 @@ Returned variables:
 REPLY='/d/data/file'
 ```
 
-❯ `windows::convertPathToUnix /c/Users/username`
+❯ `windows::getUnixPathFromWindowsPath /c/Users/username`
 
 Returned variables:
 

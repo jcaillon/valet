@@ -503,7 +503,7 @@ function bash::isFdValid() {
   return 1
 }
 
-# ## bash::allVariablesCachedWithValue
+# ## bash::isVariableCachedWithValue
 #
 # Check if one or more variables are cached with the given value.
 # If all the variables given already have the same value cached,
@@ -524,13 +524,13 @@ function bash::isFdValid() {
 #   - 1 otherwise
 #
 # ```bash
-# if bash::allVariablesCachedWithValue "MY_VAR" "my_value"; then
+# if bash::isVariableCachedWithValue "MY_VAR" "my_value"; then
 #   echo "MY_VAR is cached with the value 'my_value'"
 # else
 #   echo "MY_VAR is not cached with the value 'my_value'"
 # fi
 # ```
-function bash::allVariablesCachedWithValue() {
+function bash::isVariableCachedWithValue() {
   local -i nbNotCached=0
   local varName varValue
   while (($# > 0)); do
@@ -547,7 +547,7 @@ function bash::allVariablesCachedWithValue() {
 
 # ## bash::clearCachedVariables
 #
-# Clear the cached variables used by bash::allVariablesCachedWithValue.
+# Clear the cached variables used by bash::isVariableCachedWithValue.
 # This will unset all variables starting with _TUI_CACHED_.
 #
 # - $@ : **variable names** _as any_:

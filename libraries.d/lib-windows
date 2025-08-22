@@ -52,7 +52,7 @@ function windows::runPs1() {
   local powershellCommand="powershell"
   if ! command -v "${powershellCommand}" &>/dev/null; then
     powershellPath="${SYSTEMROOT:-C:\\Windows}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
-    windows::convertPathToUnix "${powershellPath}"
+    windows::getUnixPathFromWindowsPath "${powershellPath}"
     powershellCommand="${REPLY}"
     if [[ ! -f "${powershellCommand}" ]]; then
       fs::getCommandPath "pwsh"
@@ -61,7 +61,7 @@ function windows::runPs1() {
         if [[ ! -f "${powershellCommand}.exe" ]]; then
           core::fail "The PowerShell command is not available."
         fi
-        windows::convertPathFromUnix "${powershellCommand}.exe"
+        windows::getWindowsPathFromUnixPath "${powershellCommand}.exe"
         powershellPath="${REPLY}"
       else
         core::fail "The PowerShell command is not available."
@@ -293,9 +293,9 @@ function windows::createLink() {
   # shellcheck disable=SC2034
   local REPLY_CODE REPLY REPLY2
 
-  fs::toAbsolutePath "${linkedPath}"
+  fs::getAbsolutePath "${linkedPath}"
   linkedPath="${REPLY}"
-  fs::toAbsolutePath "${linkPath}"
+  fs::getAbsolutePath "${linkPath}"
   linkPath="${REPLY}"
 
   # check if the linked path exists
@@ -330,11 +330,11 @@ function windows::createLink() {
   fs::createDirectoryIfNeeded "${linkParentPath}"
 
   # create link
-  windows::convertPathFromUnix "${linkPath}"
+  windows::getWindowsPathFromUnixPath "${linkPath}"
   linkPath="${REPLY}"
-  windows::convertPathFromUnix "${linkParentPath}"
+  windows::getWindowsPathFromUnixPath "${linkParentPath}"
   linkParentPath="${REPLY}"
-  windows::convertPathFromUnix "${linkedPath}"
+  windows::getWindowsPathFromUnixPath "${linkedPath}"
   linkedPath="${REPLY}"
 
   log::debug "Creating a new link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝ using powershell."
@@ -355,7 +355,7 @@ function windows::createLink() {
   log::debug "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
 }
 
-# ## windows::convertPathFromUnix
+# ## windows::getWindowsPathFromUnixPath
 #
 # Convert a unix path to a Windows path.
 #
@@ -367,19 +367,19 @@ function windows::createLink() {
 # - ${REPLY}: The Windows path.
 #
 # ```bash
-# windows::convertPathFromUnix "/path/to/file"
+# windows::getWindowsPathFromUnixPath "/path/to/file"
 # ```
 #
 # > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
 # > handles other msys2 paths using `cygpath`.
-function windows::convertPathFromUnix() {
+function windows::getWindowsPathFromUnixPath() {
   local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ ${path} =~ ^([a-zA-Z])":" ]]; then
     REPLY="${path}"
     return 0
   fi
   if [[ ${path} != "/"* ]]; then
-    fs::toAbsolutePath "${path}"
+    fs::getAbsolutePath "${path}"
     path="${REPLY}"
   fi
   if [[ ${path} =~ ^"/mnt/"([a-z])"/" || ${path} =~ ^"/"([a-z])"/" ]]; then
@@ -395,7 +395,7 @@ function windows::convertPathFromUnix() {
   REPLY="${path//\//\\}"
 }
 
-# ## windows::convertPathToUnix
+# ## windows::getUnixPathFromWindowsPath
 #
 # Convert a Windows path to a unix path.
 #
@@ -407,11 +407,11 @@ function windows::convertPathFromUnix() {
 # - ${REPLY}: The unix path.
 #
 # ```bash
-# windows::convertPathToUnix "C:\path\to\file"
+# windows::getUnixPathFromWindowsPath "C:\path\to\file"
 # ```
 #
 # > Handles paths starting with `X:\`.
-function windows::convertPathToUnix() {
+function windows::getUnixPathFromWindowsPath() {
   local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ ${path} == "/"* ]]; then
     REPLY="${path}"
@@ -448,7 +448,7 @@ function windows::createTempFile() {
   local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
 
   if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
-    windows::convertPathToUnix "${windowsTemporaryDirectory}"
+    windows::getUnixPathFromWindowsPath "${windowsTemporaryDirectory}"
     GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${REPLY}"
   fi
 
@@ -457,7 +457,7 @@ function windows::createTempFile() {
   while true; do
     TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
     windowsPath="${windowsTemporaryDirectory}\\f${TEMPORARY_FILE_NUMBER}-${BASH_SUBSHELL}"
-    windows::convertPathToUnix "${windowsPath}"
+    windows::getUnixPathFromWindowsPath "${windowsPath}"
     linuxPath="${REPLY}"
     if [[ ! -f "${linuxPath}" ]]; then
       fs::createFileIfNeeded "${linuxPath}"
@@ -490,7 +490,7 @@ function windows::createTempDirectory() {
   local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
 
   if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
-    windows::convertPathToUnix "${windowsTemporaryDirectory}"
+    windows::getUnixPathFromWindowsPath "${windowsTemporaryDirectory}"
     GLOBAL_WINDOWS_TEMPORARY_DIRECTORY="${REPLY}"
   fi
 
@@ -499,7 +499,7 @@ function windows::createTempDirectory() {
   while true; do
     TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
     windowsPath="${windowsTemporaryDirectory}\\d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
-    windows::convertPathToUnix "${windowsPath}"
+    windows::getUnixPathFromWindowsPath "${windowsPath}"
     linuxPath="${REPLY}"
     if [[ ! -d "${linuxPath}" ]]; then
       fs::createDirectoryIfNeeded "${linuxPath}"
@@ -614,7 +614,7 @@ function windows::addToPath() {
     core::fail "The path to add to the PATH is missing."
   fi
 
-  windows::convertPathFromUnix "${pathToAdd}"
+  windows::getWindowsPathFromUnixPath "${pathToAdd}"
   pathToAdd="${REPLY}"
 
   if [[ ${prepend} == "true" ]]; then

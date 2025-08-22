@@ -36,7 +36,7 @@ function regex::getFirstGroup() {
 
 # ## regex::replace
 #
-# Replaces strings within a string using a regex.
+# Replaces strings within a string using a regex (replaces in place).
 #
 # - $1: **string variable name** _as string_:
 #       The variable name containing the string in which to do replacements.
@@ -55,15 +55,12 @@ function regex::getFirstGroup() {
 #       This can be used to extract information from a string.
 #       (defaults to false)
 #
-# Returns:
-#
-# - ${REPLY}: The string with replacements.
 #
 # ```bash
 # MY_STRING="name: julien"
 # regex::replace MY_STRING "name: (.*)" "\1"
 # regex::replace MY_STRING "name: (.*)" "\1" maxCount=1 onlyMatches=true
-# echo "${REPLY}"
+# echo "${MY_STRING}"
 # ```
 #
 # > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
@@ -80,9 +77,7 @@ function regex::replace() {
 
   if ((max == 0)); then
     if [[ ${onlyMatches} == "true" ]]; then
-      REPLY=""
-    else
-      REPLY="${inputString_nameRef}"
+      inputString_nameRef=""
     fi
     return 0
   fi
@@ -94,8 +89,8 @@ function regex::replace() {
     actualReplacement="${replacement}"
   fi
 
-  local IFS="" stringBeforeMatch output=""
   local -i count=0 currentCharIndex=0
+  local IFS="" stringBeforeMatch output=""
 
   while [[ ${inputString_nameRef:currentCharIndex} =~ ${regex} ]]; do
     stringBeforeMatch="${inputString_nameRef:currentCharIndex}"
@@ -123,7 +118,7 @@ function regex::replace() {
   if [[ ${onlyMatches} != "true" ]]; then
     output+="${inputString_nameRef:currentCharIndex}"
   fi
-  REPLY="${output}"
+  inputString_nameRef="${output}"
 }
 
 # ## regex::getMatches

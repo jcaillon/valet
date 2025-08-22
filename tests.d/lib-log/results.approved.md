@@ -652,8 +652,8 @@ REPLY2='"${levelColor:-}" "${level:0:8}" "[39m" " " "${messageToPrintInLog:-}" 
 " "${GLOBAL_LOG_WRAP_PADDING}" "[90m" "[" "${loggedElapsedTime:0:7}" "] [" "${loggedElapsedTimeSinceLastLog:0:7}" "] in [" "${sourceFile:0:10}" "]" "[39m" '
 REPLY3='9'
 REPLY4='
-local REPLY; time::getProgramElapsedMicroseconds; time::convertMicrosecondsToSeconds "${REPLY}" precision=3; local loggedElapsedTime="${REPLY}s"
-local REPLY; time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToSeconds "${_LOG_ELAPSED_TIME}" precision=3; local loggedElapsedTimeSinceLastLog="${REPLY}s"; _LOG_ELAPSED_TIME=${currentTime}
+local REPLY; time::getProgramElapsedMicroseconds; time::getMicrosecondsToSeconds "${REPLY}" precision=3; local loggedElapsedTime="${REPLY}s"
+local REPLY; time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::getMicrosecondsToSeconds "${_LOG_ELAPSED_TIME}" precision=3; local loggedElapsedTimeSinceLastLog="${REPLY}s"; _LOG_ELAPSED_TIME=${currentTime}
 local sourceFile="${BASH_SOURCE[1]##*/}"'
 ```
 
@@ -689,8 +689,8 @@ REPLY3='0'
 REPLY4='
 local variableToPrintInLog="${STUFF:-}"
 local sourceFile="${BASH_SOURCE[1]##*/}"
-local REPLY; time::getProgramElapsedMicroseconds; time::convertMicrosecondsToSeconds "${REPLY}" precision=3; local loggedElapsedTime="${REPLY}s"
-local REPLY; time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::convertMicrosecondsToSeconds "${_LOG_ELAPSED_TIME}" precision=3; local loggedElapsedTimeSinceLastLog="${REPLY}s"; _LOG_ELAPSED_TIME=${currentTime}'
+local REPLY; time::getProgramElapsedMicroseconds; time::getMicrosecondsToSeconds "${REPLY}" precision=3; local loggedElapsedTime="${REPLY}s"
+local REPLY; time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::getMicrosecondsToSeconds "${_LOG_ELAPSED_TIME}" precision=3; local loggedElapsedTimeSinceLastLog="${REPLY}s"; _LOG_ELAPSED_TIME=${currentTime}'
 ```
 
 ## Test script 01.log-level

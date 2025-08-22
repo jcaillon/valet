@@ -428,7 +428,7 @@ function list::drawCounter() {
     itemsCounterString=""
   fi
 
-  if bash::allVariablesCachedWithValue _LIST_itemCounterLength "${itemCounterLength}" _LIST_itemsCounterString "${itemsCounterString}"; then
+  if bash::isVariableCachedWithValue _LIST_itemCounterLength "${itemCounterLength}" _LIST_itemsCounterString "${itemsCounterString}"; then
     return 0
   fi
 
@@ -466,7 +466,7 @@ function list::drawScrollBar() {
     firstLineWithScrollBar=$(( ((_LIST_NB_USABLE_LINES_FOR_ITEMS - linesWithScrollBar) * percentViewed) / 100))
   fi
 
-  if bash::allVariablesCachedWithValue _LIST_linesWithScrollBar "${linesWithScrollBar}" _LIST_firstLineWithScrollBar "${firstLineWithScrollBar}"; then
+  if bash::isVariableCachedWithValue _LIST_linesWithScrollBar "${linesWithScrollBar}" _LIST_firstLineWithScrollBar "${firstLineWithScrollBar}"; then
     return 0
   fi
 

@@ -83,13 +83,13 @@ function selfSetup_setupForWindows() {
   source fs
 
   local linuxInstallationPath="${GLOBAL_INSTALLATION_DIRECTORY}"
-  fs::toAbsolutePath "${linuxInstallationPath}" realpath=true
-  windows::convertPathFromUnix "${REPLY}"
+  fs::getAbsolutePath "${linuxInstallationPath}" realpath=true
+  windows::getWindowsPathFromUnixPath "${REPLY}"
   local windowsInstallationPath="${REPLY}"
 
   local linuxBashPath="${BASH}"
-  fs::toAbsolutePath "${linuxBashPath}" realpath=true
-  windows::convertPathFromUnix "${REPLY}"
+  fs::getAbsolutePath "${linuxBashPath}" realpath=true
+  windows::getWindowsPathFromUnixPath "${REPLY}"
   local windowsBashPath="${REPLY}"
 
   log::info "Setting the windows variable VALET_WIN_BASH to ⌜${windowsBashPath}⌝."

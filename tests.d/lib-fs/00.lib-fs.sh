@@ -9,7 +9,7 @@ function main() {
   test_fs::writeToFile
   test_fs::createTemp
   test_fs::getFileLineCount
-  test_fs::toAbsolutePath
+  test_fs::getAbsolutePath
   test_fs::readFile
   test_fs::createDirectoryIfNeeded
   test_fs::createFileIfNeeded
@@ -85,21 +85,21 @@ function test_fs::getFileLineCount() {
   test::func VALET_CONFIG_STRICT_PURE_BASH=true fs::getFileLineCount 'resources/file-to-read'
 }
 
-function test_fs::toAbsolutePath() {
-  test::title "✅ Testing fs::toAbsolutePath"
+function test_fs::getAbsolutePath() {
+  test::title "✅ Testing fs::getAbsolutePath"
 
-  test::func fs::toAbsolutePath "${PWD}/01.invoke.sh"
-  test::func fs::toAbsolutePath .
-  test::func fs::toAbsolutePath ..
-  test::func fs::toAbsolutePath 01.invoke.s
-  test::func fs::toAbsolutePath ../1004-lib-system/00.tests.sh
-  test::func fs::toAbsolutePath resources
-  test::func fs::toAbsolutePath ./01.invoke.sh
-  test::func fs::toAbsolutePath ./resources
-  test::func fs::toAbsolutePath missing-file
+  test::func fs::getAbsolutePath "${PWD}/01.invoke.sh"
+  test::func fs::getAbsolutePath .
+  test::func fs::getAbsolutePath ..
+  test::func fs::getAbsolutePath 01.invoke.s
+  test::func fs::getAbsolutePath ../1004-lib-system/00.tests.sh
+  test::func fs::getAbsolutePath resources
+  test::func fs::getAbsolutePath ./01.invoke.sh
+  test::func fs::getAbsolutePath ./resources
+  test::func fs::getAbsolutePath missing-file
 
   function pwd() { echo "mocked pwd"; }
-  test::func fs::toAbsolutePath "${PWD}/01.invoke.sh" realpath=true
+  test::func fs::getAbsolutePath "${PWD}/01.invoke.sh" realpath=true
   unset -f pwd
 }
 

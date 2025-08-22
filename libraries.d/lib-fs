@@ -2,7 +2,7 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
-# ## fs::toAbsolutePath
+# ## fs::getAbsolutePath
 #
 # This function returns the absolute path of a path.
 #
@@ -20,15 +20,15 @@
 # - ${REPLY}: The absolute path of the path.
 #
 # ```bash
-# fs::toAbsolutePath "myPath"
-# fs::toAbsolutePath "myPath" realpath=true
+# fs::getAbsolutePath "myPath"
+# fs::getAbsolutePath "myPath" realpath=true
 # echo "${REPLY}"
 # ```
 #
 # > This is a pure bash alternative to `realpath` or `readlink`.
 # > The `..` will be processed before following any symlinks, by removing
 # > the immediate pathname component.
-function fs::toAbsolutePath() {
+function fs::getAbsolutePath() {
   local \
     path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     realpath="false" \
@@ -209,7 +209,7 @@ function fs::writeToFile() {
 # echo "${REPLY}"
 # ```
 function fs::createDirectoryIfNeeded() {
-  fs::toAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  fs::getAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ -d "${REPLY}" ]]; then
     return 0
   fi
@@ -242,7 +242,7 @@ function fs::createDirectoryIfNeeded() {
 # echo "${REPLY}"
 # ```
 function fs::createFileIfNeeded() {
-  fs::toAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  fs::getAbsolutePath "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ -f "${REPLY}" ]]; then
     return 0
   fi
@@ -645,9 +645,9 @@ function fs::createLink() {
   shift 2
   eval "local a= ${*@Q}"
 
-  fs::toAbsolutePath "${linkedPath}"
+  fs::getAbsolutePath "${linkedPath}"
   linkedPath="${REPLY}"
-  fs::toAbsolutePath "${linkPath}"
+  fs::getAbsolutePath "${linkPath}"
   linkPath="${REPLY}"
 
   # check if the linked path exists
@@ -742,7 +742,7 @@ function fs::getScriptDirectory() {
     # strip filename
     scriptDirectory="${scriptDirectory%/*}"
   fi
-  fs::toAbsolutePath "${scriptDirectory}"
+  fs::getAbsolutePath "${scriptDirectory}"
   REPLY="${scriptDirectory}"
 }
 
@@ -764,14 +764,14 @@ function fs::getScriptDirectory() {
 function fs::getCommandPath() {
   local command="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ -v BASH_CMDS && -n ${BASH_CMDS[${command}]:-} ]]; then
-    fs::toAbsolutePath "${BASH_CMDS[${command}]}"
+    fs::getAbsolutePath "${BASH_CMDS[${command}]}"
     return 0
   fi
 
   if command -v "${command}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
     IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
     REPLY="${REPLY%[[:space:]]}"
-    fs::toAbsolutePath "${REPLY}"
+    fs::getAbsolutePath "${REPLY}"
     return 0
   fi
 

@@ -4,20 +4,20 @@
 source time
 
 function main() {
-  test_time::convertMicrosecondsToSeconds
+  test_time::getMicrosecondsToSeconds
   test_time::startTimer
   test_time::getDate
-  test_time::convertMicrosecondsToHuman
+  test_time::getMicrosecondsToHuman
 }
 
-function test_time::convertMicrosecondsToSeconds() {
-  test::title "✅ Testing time::convertMicrosecondsToSeconds function"
+function test_time::getMicrosecondsToSeconds() {
+  test::title "✅ Testing time::getMicrosecondsToSeconds function"
 
-  test::func time::convertMicrosecondsToSeconds 1
-  test::func time::convertMicrosecondsToSeconds 1000 precision=3
-  test::func time::convertMicrosecondsToSeconds 1234567890
-  test::func time::convertMicrosecondsToSeconds 1234567890 precision=3
-  test::func time::convertMicrosecondsToSeconds 1234567890 precision=6
+  test::func time::getMicrosecondsToSeconds 1
+  test::func time::getMicrosecondsToSeconds 1000 precision=3
+  test::func time::getMicrosecondsToSeconds 1234567890
+  test::func time::getMicrosecondsToSeconds 1234567890 precision=3
+  test::func time::getMicrosecondsToSeconds 1234567890 precision=6
 }
 
 function test_time::startTimer() {
@@ -36,8 +36,8 @@ function test_time::getDate() {
   test::func time::getDate format="'%(%H:%M:%S)T'"
 }
 
-function test_time::convertMicrosecondsToHuman() {
-  test::title "✅ Testing time::convertMicrosecondsToHuman function"
+function test_time::getMicrosecondsToHuman() {
+  test::title "✅ Testing time::getMicrosecondsToHuman function"
 
   local -i ms=$((234 + 1000 * 2 + 1000000 * 3 + 1000000 * 60 * 4 + 1000000 * 60 * 60 * 5))
   local format="Hours: %HH
@@ -57,9 +57,9 @@ Total seconds: %S
 Total milliseconds: %L
 Total microseconds: %U"
   test::printVars format
-  test::func time::convertMicrosecondsToHuman ${ms} format="\"\${format}\""
-  test::func time::convertMicrosecondsToHuman ${ms}
-  test::func time::convertMicrosecondsToHuman ${ms} format='%U'
+  test::func time::getMicrosecondsToHuman ${ms} format="\"\${format}\""
+  test::func time::getMicrosecondsToHuman ${ms}
+  test::func time::getMicrosecondsToHuman ${ms} format='%U'
 }
 
 main

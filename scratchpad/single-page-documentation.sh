@@ -37,7 +37,6 @@ function main() {
       line="${line//"## "/"### "}"
       # remove links
       regex::replace line '\[([^]]+)\]\([^)]+\)' "\1"
-      line="${REPLY}"
 
       modifiedContent+="${line}"$'\n'
     done

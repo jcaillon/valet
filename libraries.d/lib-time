@@ -31,7 +31,7 @@ function time::getDate() {
   printf -v REPLY "${format}" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}"
 }
 
-# ## time::convertMicrosecondsToHuman
+# ## time::getMicrosecondsToHuman
 #
 # Convert microseconds to human readable format.
 #
@@ -62,11 +62,11 @@ function time::getDate() {
 # - ${REPLY}: the human readable format
 #
 # ```bash
-# time::convertMicrosecondsToHuman 123456789
-# time::convertMicrosecondsToHuman 123456789 format="%HH:%MM:%SS"
+# time::getMicrosecondsToHuman 123456789
+# time::getMicrosecondsToHuman 123456789 format="%HH:%MM:%SS"
 # echo "${REPLY}"
 # ```
-function time::convertMicrosecondsToHuman() {
+function time::getMicrosecondsToHuman() {
   local -i us="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     format="%HH:%MM:%SS" \
@@ -145,7 +145,7 @@ function time::startTimer() {
 #       (defaults to false)
 # - ${format} _as string_:
 #       (optional) The format to use if we log the elapsed time.
-#       See `time::convertMicrosecondsToHuman` for the format.
+#       See `time::getMicrosecondsToHuman` for the format.
 #       (defaults to "%S.%LLs").
 #
 # Returns:
@@ -168,14 +168,14 @@ function time::getTimerMicroseconds() {
   local -i elapsed=$((REPLY - _TIME_TIMER_START))
 
   if [[ ${logElapsedTime} == "true" ]]; then
-    time::convertMicrosecondsToHuman ${elapsed} format="${format}"
+    time::getMicrosecondsToHuman ${elapsed} format="${format}"
     log::info "Elapsed time: ${REPLY}"
   fi
 
   REPLY="${elapsed}"
 }
 
-# ## time::convertMicrosecondsToSeconds
+# ## time::getMicrosecondsToSeconds
 #
 # Convert a microseconds integer to seconds float.
 # e.g. 1234567 → 1.234567
@@ -191,11 +191,11 @@ function time::getTimerMicroseconds() {
 # - ${REPLY}: The seconds (float number).
 #
 # ```bash
-# time::convertMicrosecondsToSeconds 1234567
-# time::convertMicrosecondsToSeconds 1234567 precision=3
+# time::getMicrosecondsToSeconds 1234567
+# time::getMicrosecondsToSeconds 1234567 precision=3
 # echo "${REPLY}"
 # ```
-function time::convertMicrosecondsToSeconds() {
+function time::getMicrosecondsToSeconds() {
   local \
     microseconds="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     precision=6 \

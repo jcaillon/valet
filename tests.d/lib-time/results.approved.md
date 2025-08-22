@@ -2,9 +2,9 @@
 
 ## Test script 00.tests
 
-### ✅ Testing time::convertMicrosecondsToSeconds function
+### ✅ Testing time::getMicrosecondsToSeconds function
 
-❯ `time::convertMicrosecondsToSeconds 1`
+❯ `time::getMicrosecondsToSeconds 1`
 
 Returned variables:
 
@@ -12,7 +12,7 @@ Returned variables:
 REPLY='0.000001'
 ```
 
-❯ `time::convertMicrosecondsToSeconds 1000 precision=3`
+❯ `time::getMicrosecondsToSeconds 1000 precision=3`
 
 Returned variables:
 
@@ -20,7 +20,7 @@ Returned variables:
 REPLY='0.001'
 ```
 
-❯ `time::convertMicrosecondsToSeconds 1234567890`
+❯ `time::getMicrosecondsToSeconds 1234567890`
 
 Returned variables:
 
@@ -28,7 +28,7 @@ Returned variables:
 REPLY='1234.567890'
 ```
 
-❯ `time::convertMicrosecondsToSeconds 1234567890 precision=3`
+❯ `time::getMicrosecondsToSeconds 1234567890 precision=3`
 
 Returned variables:
 
@@ -36,7 +36,7 @@ Returned variables:
 REPLY='1234.567'
 ```
 
-❯ `time::convertMicrosecondsToSeconds 1234567890 precision=6`
+❯ `time::getMicrosecondsToSeconds 1234567890 precision=6`
 
 Returned variables:
 
@@ -102,7 +102,7 @@ Returned variables:
 REPLY='01:00:00'
 ```
 
-### ✅ Testing time::convertMicrosecondsToHuman function
+### ✅ Testing time::getMicrosecondsToHuman function
 
 ```text
 format='Hours: %HH
@@ -123,7 +123,7 @@ Total milliseconds: %L
 Total microseconds: %U'
 ```
 
-❯ `time::convertMicrosecondsToHuman 18243002234 format="${format}"`
+❯ `time::getMicrosecondsToHuman 18243002234 format="${format}"`
 
 Returned variables:
 
@@ -146,7 +146,7 @@ Total milliseconds: 4320003002
 Total microseconds: 18243002234'
 ```
 
-❯ `time::convertMicrosecondsToHuman 18243002234`
+❯ `time::getMicrosecondsToHuman 18243002234`
 
 Returned variables:
 
@@ -154,7 +154,7 @@ Returned variables:
 REPLY='05:04:03'
 ```
 
-❯ `time::convertMicrosecondsToHuman 18243002234 format=%U`
+❯ `time::getMicrosecondsToHuman 18243002234 format=%U`
 
 Returned variables:
 
