@@ -145,4 +145,4 @@ fi
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

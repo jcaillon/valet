@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).
 
 ## ⚡ array::appendIfNotPresent
 
@@ -207,43 +207,6 @@ echo "${REPLY_ARRAY[@]}"
 > - The sorting is not stable (the order of equal elements is not preserved).
 > - It is not appropriate for large array, use the `sort` binary for such cases.
 
-## ⚡ bash::allVariablesCachedWithValue
-
-Check if one or more variables are cached with the given value.
-If all the variables given already have the same value cached,
-the function will return true.
-Otherwise, it will return false and cache the given value in the variables.
-
-Inputs:
-
-- `$1`: **variable name** _as string_:
-
-  the name of the variable to check
-
-- `$2`: **value** _as any_:
-
-  the value to check against the variable
-
-- `$@`: **variable/value pair** _as any_:
-
-  additional variable/value pairs to check
-
-Returns:
-
-- `$?`:
-  - 0 if all the variables have the same value as the given value
-  - 1 otherwise
-
-Example usage:
-
-```bash
-if bash::allVariablesCachedWithValue "MY_VAR" "my_value"; then
-  echo "MY_VAR is cached with the value 'my_value'"
-else
-  echo "MY_VAR is not cached with the value 'my_value'"
-fi
-```
-
 ## ⚡ bash::catchErrors
 
 This function runs a command and will catch any error that occurs instead of failing the program.
@@ -278,7 +241,7 @@ fi
 
 ## ⚡ bash::clearCachedVariables
 
-Clear the cached variables used by bash::allVariablesCachedWithValue.
+Clear the cached variables used by bash::isVariableCachedWithValue.
 This will unset all variables starting with _TUI_CACHED_.
 
 Inputs:
@@ -508,6 +471,43 @@ Example usage:
 ```bash
 if bash::isFunction "function1"; then
   printf 'The function exists.'
+fi
+```
+
+## ⚡ bash::isVariableCachedWithValue
+
+Check if one or more variables are cached with the given value.
+If all the variables given already have the same value cached,
+the function will return true.
+Otherwise, it will return false and cache the given value in the variables.
+
+Inputs:
+
+- `$1`: **variable name** _as string_:
+
+  the name of the variable to check
+
+- `$2`: **value** _as any_:
+
+  the value to check against the variable
+
+- `$@`: **variable/value pair** _as any_:
+
+  additional variable/value pairs to check
+
+Returns:
+
+- `$?`:
+  - 0 if all the variables have the same value as the given value
+  - 1 otherwise
+
+Example usage:
+
+```bash
+if bash::isVariableCachedWithValue "MY_VAR" "my_value"; then
+  echo "MY_VAR is cached with the value 'my_value'"
+else
+  echo "MY_VAR is not cached with the value 'my_value'"
 fi
 ```
 
@@ -899,6 +899,16 @@ Inputs:
 
   (defaults to false)
 
+- `${simulateSequentialRun}` _as bool_:
+
+  (optional) If true, this will:
+  - redirect the logs of each task to a file
+  - at the end of all execution, print the logs of each task, in natural order (not as they finish)
+  - exit at the first error, showing the logs of the task in error
+  Tasks will run as if they are called in a for loop; except they actually run in parallel.
+
+  (defaults to false)
+
 - `${coprocNamePrefix}` _as string_:
 
   (optional) The prefix to use for the coproc variable names.
@@ -908,7 +918,7 @@ Inputs:
 
 Returns:
 
-- `${REPLY}`: 0 if all the jobs completed, 1 if the completed callback function returned 1.
+- `${REPLY}`: The number of jobs that did not completed (i.e. not executed until the end, successfully or not)
 - `${REPLY2}`: The number of successfully completed jobs.
 - `${REPLY_ARRAY[@]}`: an array containing the exit codes of the jobs.
 
@@ -918,6 +928,7 @@ Example usage:
 declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
 coproc::runInParallel jobCommands maxParallelCoprocs=2
 ```
+TODO: implement unit tests for this function
 
 ## ⚡ coproc::sendMessage
 
@@ -1627,6 +1638,41 @@ fs::createTempFile pathOnly=true
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
+## ⚡ fs::getAbsolutePath
+
+This function returns the absolute path of a path.
+
+If the path exists, it can be resolved to the real path, following symlinks,
+using the option `realpath=true`.
+
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  The path to translate to absolute path.
+
+- `${realpath}` _as bool_:
+
+  (optional) true to resolve the path to the real path, following symlinks.
+
+  (defaults to false)
+
+Returns:
+
+- `${REPLY}`: The absolute path of the path.
+
+Example usage:
+
+```bash
+fs::getAbsolutePath "myPath"
+fs::getAbsolutePath "myPath" realpath=true
+echo "${REPLY}"
+```
+
+> This is a pure bash alternative to `realpath` or `readlink`.
+> The `..` will be processed before following any symlinks, by removing
+> the immediate pathname component.
+
 ## ⚡ fs::getCommandPath
 
 Get the absolute path of a command.
@@ -1985,41 +2031,6 @@ fs::tail myFile 10
 
 > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 
-## ⚡ fs::toAbsolutePath
-
-This function returns the absolute path of a path.
-
-If the path exists, it can be resolved to the real path, following symlinks,
-using the option `realpath=true`.
-
-Inputs:
-
-- `$1`: **path** _as string_:
-
-  The path to translate to absolute path.
-
-- `${realpath}` _as bool_:
-
-  (optional) true to resolve the path to the real path, following symlinks.
-
-  (defaults to false)
-
-Returns:
-
-- `${REPLY}`: The absolute path of the path.
-
-Example usage:
-
-```bash
-fs::toAbsolutePath "myPath"
-fs::toAbsolutePath "myPath" realpath=true
-echo "${REPLY}"
-```
-
-> This is a pure bash alternative to `realpath` or `readlink`.
-> The `..` will be processed before following any symlinks, by removing
-> the immediate pathname component.
-
 ## ⚡ include
 
 Allows to include multiple library files.
@@ -2294,7 +2305,7 @@ echo "${REPLY}"
 log::getCallStack stackToSkip=2 stackToSkipAtEnd=1 wrapWidth=80
 ```
 
-> For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+> For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`
 > variables to simulate a call stack.
 
 ## ⚡ log::getLevel
@@ -2386,7 +2397,7 @@ log::printCallStack
 log::printCallStack stackToSkip=0
 ```
 
-> For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+> For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`
 > variables to simulate a call stack.
 
 ## ⚡ log::printFile
@@ -2927,7 +2938,7 @@ done
 
 ## ⚡ regex::replace
 
-Replaces strings within a string using a regex.
+Replaces strings within a string using a regex (replaces in place).
 
 Inputs:
 
@@ -2959,9 +2970,6 @@ Inputs:
 
   (defaults to false)
 
-Returns:
-
-- `${REPLY}`: The string with replacements.
 
 Example usage:
 
@@ -2969,7 +2977,7 @@ Example usage:
 MY_STRING="name: julien"
 regex::replace MY_STRING "name: (.*)" "\1"
 regex::replace MY_STRING "name: (.*)" "\1" maxCount=1 onlyMatches=true
-echo "${REPLY}"
+echo "${MY_STRING}"
 ```
 
 > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
@@ -3072,100 +3080,6 @@ _OPTION_CONTINUE_IF_NOT_FOUND=false _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 so
 
 > - The file can be relative to the current script (script that calls this function).
 > - Use `builtin source` if you want to include the file even if it was already included.
-
-## ⚡ string::convertCamelCaseToSnakeCase
-
-This function convert a camelCase string to a SNAKE_CASE string.
-It uses pure bash.
-Removes all leading underscores.
-
-Inputs:
-
-- `$1`: **string variable name** _as string_:
-
-  The variable name that contains the string to convert.
-
-Returns:
-
-- `${REPLY}`: the extracted field
-
-Example usage:
-
-```bash
-MY_STRING="myCamelCaseString"
-string::convertCamelCaseToSnakeCase MY_STRING
-echo "${REPLY}"
-```
-
-## ⚡ string::convertKebabCaseToCamelCase
-
-This function convert a kebab-case string to a camelCase string.
-It uses pure bash.
-Removes all leading dashes.
-
-Inputs:
-
-- `$1`: **string variable name** _as string_:
-
-  The variable name that contains the string to convert.
-
-Returns:
-
-- `${REPLY}`: the extracted field
-
-Example usage:
-
-```bash
-MY_STRING="my-kebab-case-string"
-string::convertKebabCaseToCamelCase MY_STRING
-echo "${REPLY}"
-```
-
-## ⚡ string::convertKebabCaseToSnakeCase
-
-This function convert a kebab-case string to a SNAKE_CASE string.
-It uses pure bash.
-Removes all leading dashes.
-
-Inputs:
-
-- `$1`: **string variable name** _as string_:
-
-  The variable name that contains the string to convert.
-
-Returns:
-
-- `${REPLY}`: the extracted field
-
-Example usage:
-
-```bash
-MY_STRING="my-kebab-case-string"
-string::convertKebabCaseToSnakeCase MY_STRING
-echo "${REPLY}"
-```
-
-## ⚡ string::convertToHex
-
-Convert a string to its hexadecimal representation.
-
-Inputs:
-
-- `$1`: **string variable name** _as string_:
-
-  The variable name that contains the string to convert.
-
-Returns:
-
-- `${REPLY}`: the hexadecimal representation of the string
-
-Example usage:
-
-```bash
-MY_STRING="This is a string"
-string::convertToHex MY_STRING
-echo "${REPLY}"
-```
 
 ## ⚡ string::count
 
@@ -3270,6 +3184,28 @@ string::extractBetween MY_STRING "is a " " text"
 local extractedText="${REPLY}"
 ```
 
+## ⚡ string::getCamelCase
+
+This function convert a SNAKE_CASE or kebab-case string to a camelCase string.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string to convert.
+
+Returns:
+
+- `${REPLY}`: The converted string
+
+Example usage:
+
+```bash
+MY_STRING="my-kebab-case"
+string::getCamelCase MY_STRING
+echo "${REPLY}"
+```
+
 ## ⚡ string::getField
 
 Allows to get the nth element of a string separated by a given separator.
@@ -3309,6 +3245,28 @@ echo "${REPLY}"
 > - using read into an array from a here string
 > - using bash parameter expansion to remove before/after the separator
 
+## ⚡ string::getHexRepresentation
+
+Convert a string to its hexadecimal representation.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string to convert.
+
+Returns:
+
+- `${REPLY}`: the hexadecimal representation of the string
+
+Example usage:
+
+```bash
+MY_STRING="This is a string"
+string::getHexRepresentation MY_STRING
+echo "${REPLY}"
+```
+
 ## ⚡ string::getIndexOf
 
 Find the first index of a string within another string.
@@ -3339,6 +3297,52 @@ Example usage:
 MY_STRING="This is a long text"
 string::getIndexOf MY_STRING "long" startingIndex=2
 string::getIndexOf MY_STRING "long"
+echo "${REPLY}"
+```
+
+## ⚡ string::getKebabCase
+
+This function convert a camelCase, PascalCase or SNAKE_CASE string to a kebab-case string.
+Removes all leading/trailing dashes.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string to convert.
+
+Returns:
+
+- `${REPLY}`: The converted string
+
+Example usage:
+
+```bash
+MY_STRING="myCamelCaseString"
+string::getKebabCase MY_STRING
+echo "${REPLY}"
+```
+
+## ⚡ string::getSnakeCase
+
+This function convert a camelCase, PascalCase or kebab-case string to a SNAKE_CASE string.
+Removes all leading/trailing underscores.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string to convert.
+
+Returns:
+
+- `${REPLY}`: The converted string
+
+Example usage:
+
+```bash
+MY_STRING="myCamelCaseString"
+string::getSnakeCase MY_STRING
 echo "${REPLY}"
 ```
 
@@ -3486,6 +3490,7 @@ ARRAY=("${REPLY_ARRAY[@]}")
 ## ⚡ string::trimAll
 
 Trim all whitespaces and truncate spaces.
+The replacement is done in place, for the given variable.
 
 Inputs:
 
@@ -3493,21 +3498,18 @@ Inputs:
 
   The variable name that contains the string to trim.
 
-Returns:
-
-- `${REPLY}`: the extracted field
-
 Example usage:
 
 ```bash
 MY_STRING="   example "$'\t'"  string    "$'\n'
 string::trimAll MY_STRING
-echo "${REPLY}"
+echo "${MY_STRING}"
 ```
 
 ## ⚡ string::trimEdges
 
 Trim leading and trailing characters (defaults to whitespaces).
+The replacement is done in place, for the given variable.
 
 Inputs:
 
@@ -3521,16 +3523,12 @@ Inputs:
 
   (defaults to $' \t\n')
 
-Returns:
-
-- `${REPLY}`: the extracted field
-
 Example usage:
 
 ```bash
 MY_STRING="   example  string    "
 string::trimEdges MY_STRING
-echo "${REPLY}"
+echo "${MY_STRING}"
 ```
 
 ## ⚡ string::wrapCharacters
@@ -4429,6 +4427,17 @@ Example usage:
 test::setTerminalInputs "a" "b" "c"
 ```
 
+## ⚡ test::setupBashForConsistency
+
+This function is used to set up the Bash environment for maximum consistency during testing.
+It will override important dynamic bash variables to have more static results.
+
+Example usage:
+
+```bash
+test::setupBashForConsistency
+```
+
 ## ⚡ test::title
 
 Call this function to add an H3 title in the report file.
@@ -4445,7 +4454,33 @@ Example usage:
 test::title "Testing something"
 ```
 
-## ⚡ time::convertMicrosecondsToHuman
+## ⚡ time::getDate
+
+Get the current date in the given format.
+
+Inputs:
+
+- `${format}` _as string_:
+
+  (optional) the format (see printf) of the date to return
+
+  (defaults to "%(%F_%Hh%Mm%Ss)T")
+
+Returns:
+
+- `${REPLY}`: the current date in the given format.
+
+Example usage:
+
+```bash
+time::getDate
+local date="${REPLY}"
+time::getDate format="'%(%Hh%Mm%Ss)T'"
+```
+
+> This function avoid to call $(date) in a subshell (date is a an external executable).
+
+## ⚡ time::getMicrosecondsToHuman
 
 Convert microseconds to human readable format.
 
@@ -4484,12 +4519,12 @@ Returns:
 Example usage:
 
 ```bash
-time::convertMicrosecondsToHuman 123456789
-time::convertMicrosecondsToHuman 123456789 format="%HH:%MM:%SS"
+time::getMicrosecondsToHuman 123456789
+time::getMicrosecondsToHuman 123456789 format="%HH:%MM:%SS"
 echo "${REPLY}"
 ```
 
-## ⚡ time::convertMicrosecondsToSeconds
+## ⚡ time::getMicrosecondsToSeconds
 
 Convert a microseconds integer to seconds float.
 e.g. 1234567 → 1.234567
@@ -4513,36 +4548,10 @@ Returns:
 Example usage:
 
 ```bash
-time::convertMicrosecondsToSeconds 1234567
-time::convertMicrosecondsToSeconds 1234567 precision=3
+time::getMicrosecondsToSeconds 1234567
+time::getMicrosecondsToSeconds 1234567 precision=3
 echo "${REPLY}"
 ```
-
-## ⚡ time::getDate
-
-Get the current date in the given format.
-
-Inputs:
-
-- `${format}` _as string_:
-
-  (optional) the format (see printf) of the date to return
-
-  (defaults to "%(%F_%Hh%Mm%Ss)T")
-
-Returns:
-
-- `${REPLY}`: the current date in the given format.
-
-Example usage:
-
-```bash
-time::getDate
-local date="${REPLY}"
-time::getDate format="'%(%Hh%Mm%Ss)T'"
-```
-
-> This function avoid to call $(date) in a subshell (date is a an external executable).
 
 ## ⚡ time::getProgramElapsedMicroseconds
 
@@ -4557,7 +4566,7 @@ Example usage:
 ```bash
 time::getProgramElapsedMicroseconds
 echo "${REPLY}"
-time::convertMicrosecondsToHuman "${REPLY}"
+time::getMicrosecondsToHuman "${REPLY}"
 echo "Human time: ${REPLY}"
 ```
 
@@ -4580,7 +4589,7 @@ Inputs:
 - `${format}` _as string_:
 
   (optional) The format to use if we log the elapsed time.
-  See `time::convertMicrosecondsToHuman` for the format.
+  See `time::getMicrosecondsToHuman` for the format.
 
   (defaults to "%S.%LLs").
 
@@ -4698,51 +4707,6 @@ windows::addToPath "/path/to/bin" prepend=true
 ```
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
-
-## ⚡ windows::convertPathFromUnix
-
-Convert a unix path to a Windows path.
-
-Inputs:
-
-- `$1`: **path** _as string_:
-
-  the path to convert
-
-Returns:
-
-- `${REPLY}`: The Windows path.
-
-Example usage:
-
-```bash
-windows::convertPathFromUnix "/path/to/file"
-```
-
-> Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
-> handles other msys2 paths using `cygpath`.
-
-## ⚡ windows::convertPathToUnix
-
-Convert a Windows path to a unix path.
-
-Inputs:
-
-- `$1`: **path** _as string_:
-
-  the path to convert
-
-Returns:
-
-- `${REPLY}`: The unix path.
-
-Example usage:
-
-```bash
-windows::convertPathToUnix "C:\path\to\file"
-```
-
-> Handles paths starting with `X:\`.
 
 ## ⚡ windows::createLink
 
@@ -4871,6 +4835,51 @@ windows::getEnvVar "MY_VAR"
 echo "${REPLY}"
 ```
 
+## ⚡ windows::getUnixPathFromWindowsPath
+
+Convert a Windows path to a unix path.
+
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  the path to convert
+
+Returns:
+
+- `${REPLY}`: The unix path.
+
+Example usage:
+
+```bash
+windows::getUnixPathFromWindowsPath "C:\path\to\file"
+```
+
+> Handles paths starting with `X:\`.
+
+## ⚡ windows::getWindowsPathFromUnixPath
+
+Convert a unix path to a Windows path.
+
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  the path to convert
+
+Returns:
+
+- `${REPLY}`: The Windows path.
+
+Example usage:
+
+```bash
+windows::getWindowsPathFromUnixPath "/path/to/file"
+```
+
+> Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
+> handles other msys2 paths using `cygpath`.
+
 ## ⚡ windows::runPs1
 
 Runs a PowerShell command.
@@ -4953,4 +4962,4 @@ windows::endPs1Batch
 
 
 
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

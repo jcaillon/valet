@@ -5,100 +5,6 @@ cascade:
 url: /docs/libraries/string
 ---
 
-## ⚡ string::convertCamelCaseToSnakeCase
-
-This function convert a camelCase string to a SNAKE_CASE string.
-It uses pure bash.
-Removes all leading underscores.
-
-Inputs:
-
-- `$1`: **string variable name** _as string_:
-
-  The variable name that contains the string to convert.
-
-Returns:
-
-- `${REPLY}`: the extracted field
-
-Example usage:
-
-```bash
-MY_STRING="myCamelCaseString"
-string::convertCamelCaseToSnakeCase MY_STRING
-echo "${REPLY}"
-```
-
-## ⚡ string::convertKebabCaseToCamelCase
-
-This function convert a kebab-case string to a camelCase string.
-It uses pure bash.
-Removes all leading dashes.
-
-Inputs:
-
-- `$1`: **string variable name** _as string_:
-
-  The variable name that contains the string to convert.
-
-Returns:
-
-- `${REPLY}`: the extracted field
-
-Example usage:
-
-```bash
-MY_STRING="my-kebab-case-string"
-string::convertKebabCaseToCamelCase MY_STRING
-echo "${REPLY}"
-```
-
-## ⚡ string::convertKebabCaseToSnakeCase
-
-This function convert a kebab-case string to a SNAKE_CASE string.
-It uses pure bash.
-Removes all leading dashes.
-
-Inputs:
-
-- `$1`: **string variable name** _as string_:
-
-  The variable name that contains the string to convert.
-
-Returns:
-
-- `${REPLY}`: the extracted field
-
-Example usage:
-
-```bash
-MY_STRING="my-kebab-case-string"
-string::convertKebabCaseToSnakeCase MY_STRING
-echo "${REPLY}"
-```
-
-## ⚡ string::convertToHex
-
-Convert a string to its hexadecimal representation.
-
-Inputs:
-
-- `$1`: **string variable name** _as string_:
-
-  The variable name that contains the string to convert.
-
-Returns:
-
-- `${REPLY}`: the hexadecimal representation of the string
-
-Example usage:
-
-```bash
-MY_STRING="This is a string"
-string::convertToHex MY_STRING
-echo "${REPLY}"
-```
-
 ## ⚡ string::count
 
 Counts the number of occurrences of a substring in a string.
@@ -202,6 +108,28 @@ string::extractBetween MY_STRING "is a " " text"
 local extractedText="${REPLY}"
 ```
 
+## ⚡ string::getCamelCase
+
+This function convert a SNAKE_CASE or kebab-case string to a camelCase string.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string to convert.
+
+Returns:
+
+- `${REPLY}`: The converted string
+
+Example usage:
+
+```bash
+MY_STRING="my-kebab-case"
+string::getCamelCase MY_STRING
+echo "${REPLY}"
+```
+
 ## ⚡ string::getField
 
 Allows to get the nth element of a string separated by a given separator.
@@ -241,6 +169,28 @@ echo "${REPLY}"
 > - using read into an array from a here string
 > - using bash parameter expansion to remove before/after the separator
 
+## ⚡ string::getHexRepresentation
+
+Convert a string to its hexadecimal representation.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string to convert.
+
+Returns:
+
+- `${REPLY}`: the hexadecimal representation of the string
+
+Example usage:
+
+```bash
+MY_STRING="This is a string"
+string::getHexRepresentation MY_STRING
+echo "${REPLY}"
+```
+
 ## ⚡ string::getIndexOf
 
 Find the first index of a string within another string.
@@ -271,6 +221,52 @@ Example usage:
 MY_STRING="This is a long text"
 string::getIndexOf MY_STRING "long" startingIndex=2
 string::getIndexOf MY_STRING "long"
+echo "${REPLY}"
+```
+
+## ⚡ string::getKebabCase
+
+This function convert a camelCase, PascalCase or SNAKE_CASE string to a kebab-case string.
+Removes all leading/trailing dashes.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string to convert.
+
+Returns:
+
+- `${REPLY}`: The converted string
+
+Example usage:
+
+```bash
+MY_STRING="myCamelCaseString"
+string::getKebabCase MY_STRING
+echo "${REPLY}"
+```
+
+## ⚡ string::getSnakeCase
+
+This function convert a camelCase, PascalCase or kebab-case string to a SNAKE_CASE string.
+Removes all leading/trailing underscores.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string to convert.
+
+Returns:
+
+- `${REPLY}`: The converted string
+
+Example usage:
+
+```bash
+MY_STRING="myCamelCaseString"
+string::getSnakeCase MY_STRING
 echo "${REPLY}"
 ```
 
@@ -418,6 +414,7 @@ ARRAY=("${REPLY_ARRAY[@]}")
 ## ⚡ string::trimAll
 
 Trim all whitespaces and truncate spaces.
+The replacement is done in place, for the given variable.
 
 Inputs:
 
@@ -425,21 +422,18 @@ Inputs:
 
   The variable name that contains the string to trim.
 
-Returns:
-
-- `${REPLY}`: the extracted field
-
 Example usage:
 
 ```bash
 MY_STRING="   example "$'\t'"  string    "$'\n'
 string::trimAll MY_STRING
-echo "${REPLY}"
+echo "${MY_STRING}"
 ```
 
 ## ⚡ string::trimEdges
 
 Trim leading and trailing characters (defaults to whitespaces).
+The replacement is done in place, for the given variable.
 
 Inputs:
 
@@ -453,16 +447,12 @@ Inputs:
 
   (defaults to $' \t\n')
 
-Returns:
-
-- `${REPLY}`: the extracted field
-
 Example usage:
 
 ```bash
 MY_STRING="   example  string    "
 string::trimEdges MY_STRING
-echo "${REPLY}"
+echo "${MY_STRING}"
 ```
 
 ## ⚡ string::wrapCharacters
@@ -565,4 +555,4 @@ echo "${REPLY}"
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

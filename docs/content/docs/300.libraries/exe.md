@@ -127,4 +127,4 @@ exe::invoke cat --- stdin="Hello World"
 > - On linux, you can use a tmpfs directory for massive gains over subshells.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

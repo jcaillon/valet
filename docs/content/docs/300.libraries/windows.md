@@ -33,51 +33,6 @@ windows::addToPath "/path/to/bin" prepend=true
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
-## ⚡ windows::convertPathFromUnix
-
-Convert a unix path to a Windows path.
-
-Inputs:
-
-- `$1`: **path** _as string_:
-
-  the path to convert
-
-Returns:
-
-- `${REPLY}`: The Windows path.
-
-Example usage:
-
-```bash
-windows::convertPathFromUnix "/path/to/file"
-```
-
-> Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
-> handles other msys2 paths using `cygpath`.
-
-## ⚡ windows::convertPathToUnix
-
-Convert a Windows path to a unix path.
-
-Inputs:
-
-- `$1`: **path** _as string_:
-
-  the path to convert
-
-Returns:
-
-- `${REPLY}`: The unix path.
-
-Example usage:
-
-```bash
-windows::convertPathToUnix "C:\path\to\file"
-```
-
-> Handles paths starting with `X:\`.
-
 ## ⚡ windows::createLink
 
 Create a soft or hard link (original ← link).
@@ -205,6 +160,51 @@ windows::getEnvVar "MY_VAR"
 echo "${REPLY}"
 ```
 
+## ⚡ windows::getUnixPathFromWindowsPath
+
+Convert a Windows path to a unix path.
+
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  the path to convert
+
+Returns:
+
+- `${REPLY}`: The unix path.
+
+Example usage:
+
+```bash
+windows::getUnixPathFromWindowsPath "C:\path\to\file"
+```
+
+> Handles paths starting with `X:\`.
+
+## ⚡ windows::getWindowsPathFromUnixPath
+
+Convert a unix path to a Windows path.
+
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  the path to convert
+
+Returns:
+
+- `${REPLY}`: The Windows path.
+
+Example usage:
+
+```bash
+windows::getWindowsPathFromUnixPath "/path/to/file"
+```
+
+> Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
+> handles other msys2 paths using `cygpath`.
+
 ## ⚡ windows::runPs1
 
 Runs a PowerShell command.
@@ -286,4 +286,4 @@ windows::endPs1Batch
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

@@ -5,43 +5,6 @@ cascade:
 url: /docs/libraries/bash
 ---
 
-## ⚡ bash::allVariablesCachedWithValue
-
-Check if one or more variables are cached with the given value.
-If all the variables given already have the same value cached,
-the function will return true.
-Otherwise, it will return false and cache the given value in the variables.
-
-Inputs:
-
-- `$1`: **variable name** _as string_:
-
-  the name of the variable to check
-
-- `$2`: **value** _as any_:
-
-  the value to check against the variable
-
-- `$@`: **variable/value pair** _as any_:
-
-  additional variable/value pairs to check
-
-Returns:
-
-- `$?`:
-  - 0 if all the variables have the same value as the given value
-  - 1 otherwise
-
-Example usage:
-
-```bash
-if bash::allVariablesCachedWithValue "MY_VAR" "my_value"; then
-  echo "MY_VAR is cached with the value 'my_value'"
-else
-  echo "MY_VAR is not cached with the value 'my_value'"
-fi
-```
-
 ## ⚡ bash::catchErrors
 
 This function runs a command and will catch any error that occurs instead of failing the program.
@@ -76,7 +39,7 @@ fi
 
 ## ⚡ bash::clearCachedVariables
 
-Clear the cached variables used by bash::allVariablesCachedWithValue.
+Clear the cached variables used by bash::isVariableCachedWithValue.
 This will unset all variables starting with _TUI_CACHED_.
 
 Inputs:
@@ -309,6 +272,43 @@ if bash::isFunction "function1"; then
 fi
 ```
 
+## ⚡ bash::isVariableCachedWithValue
+
+Check if one or more variables are cached with the given value.
+If all the variables given already have the same value cached,
+the function will return true.
+Otherwise, it will return false and cache the given value in the variables.
+
+Inputs:
+
+- `$1`: **variable name** _as string_:
+
+  the name of the variable to check
+
+- `$2`: **value** _as any_:
+
+  the value to check against the variable
+
+- `$@`: **variable/value pair** _as any_:
+
+  additional variable/value pairs to check
+
+Returns:
+
+- `$?`:
+  - 0 if all the variables have the same value as the given value
+  - 1 otherwise
+
+Example usage:
+
+```bash
+if bash::isVariableCachedWithValue "MY_VAR" "my_value"; then
+  echo "MY_VAR is cached with the value 'my_value'"
+else
+  echo "MY_VAR is not cached with the value 'my_value'"
+fi
+```
+
 ## ⚡ bash::readStdIn
 
 Read the content of the standard input.
@@ -387,4 +387,4 @@ bash::sleep 1.5
 > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

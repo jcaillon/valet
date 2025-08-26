@@ -128,7 +128,7 @@ done
 
 ## ⚡ regex::replace
 
-Replaces strings within a string using a regex.
+Replaces strings within a string using a regex (replaces in place).
 
 Inputs:
 
@@ -160,9 +160,6 @@ Inputs:
 
   (defaults to false)
 
-Returns:
-
-- `${REPLY}`: The string with replacements.
 
 Example usage:
 
@@ -170,10 +167,10 @@ Example usage:
 MY_STRING="name: julien"
 regex::replace MY_STRING "name: (.*)" "\1"
 regex::replace MY_STRING "name: (.*)" "\1" maxCount=1 onlyMatches=true
-echo "${REPLY}"
+echo "${MY_STRING}"
 ```
 
 > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

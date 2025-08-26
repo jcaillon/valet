@@ -177,6 +177,41 @@ fs::createTempFile pathOnly=true
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
+## ⚡ fs::getAbsolutePath
+
+This function returns the absolute path of a path.
+
+If the path exists, it can be resolved to the real path, following symlinks,
+using the option `realpath=true`.
+
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  The path to translate to absolute path.
+
+- `${realpath}` _as bool_:
+
+  (optional) true to resolve the path to the real path, following symlinks.
+
+  (defaults to false)
+
+Returns:
+
+- `${REPLY}`: The absolute path of the path.
+
+Example usage:
+
+```bash
+fs::getAbsolutePath "myPath"
+fs::getAbsolutePath "myPath" realpath=true
+echo "${REPLY}"
+```
+
+> This is a pure bash alternative to `realpath` or `readlink`.
+> The `..` will be processed before following any symlinks, by removing
+> the immediate pathname component.
+
 ## ⚡ fs::getCommandPath
 
 Get the absolute path of a command.
@@ -535,40 +570,5 @@ fs::tail myFile 10
 
 > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 
-## ⚡ fs::toAbsolutePath
-
-This function returns the absolute path of a path.
-
-If the path exists, it can be resolved to the real path, following symlinks,
-using the option `realpath=true`.
-
-Inputs:
-
-- `$1`: **path** _as string_:
-
-  The path to translate to absolute path.
-
-- `${realpath}` _as bool_:
-
-  (optional) true to resolve the path to the real path, following symlinks.
-
-  (defaults to false)
-
-Returns:
-
-- `${REPLY}`: The absolute path of the path.
-
-Example usage:
-
-```bash
-fs::toAbsolutePath "myPath"
-fs::toAbsolutePath "myPath" realpath=true
-echo "${REPLY}"
-```
-
-> This is a pure bash alternative to `realpath` or `readlink`.
-> The `..` will be processed before following any symlinks, by removing
-> the immediate pathname component.
-
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

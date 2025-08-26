@@ -199,6 +199,16 @@ Inputs:
 
   (defaults to false)
 
+- `${simulateSequentialRun}` _as bool_:
+
+  (optional) If true, this will:
+  - redirect the logs of each task to a file
+  - at the end of all execution, print the logs of each task, in natural order (not as they finish)
+  - exit at the first error, showing the logs of the task in error
+  Tasks will run as if they are called in a for loop; except they actually run in parallel.
+
+  (defaults to false)
+
 - `${coprocNamePrefix}` _as string_:
 
   (optional) The prefix to use for the coproc variable names.
@@ -208,7 +218,7 @@ Inputs:
 
 Returns:
 
-- `${REPLY}`: 0 if all the jobs completed, 1 if the completed callback function returned 1.
+- `${REPLY}`: The number of jobs that did not completed (i.e. not executed until the end, successfully or not)
 - `${REPLY2}`: The number of successfully completed jobs.
 - `${REPLY_ARRAY[@]}`: an array containing the exit codes of the jobs.
 
@@ -218,6 +228,7 @@ Example usage:
 declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
 coproc::runInParallel jobCommands maxParallelCoprocs=2
 ```
+TODO: implement unit tests for this function
 
 ## ⚡ coproc::sendMessage
 
@@ -268,4 +279,4 @@ coproc::wait "myCoproc"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

@@ -1,5 +1,5 @@
 {
-// Documentation generated for the version 0.30.1455 (2025-08-18).
+// Documentation generated for the version 0.31.272 (2025-08-26).
 
 "array::appendIfNotPresent": {
   "prefix": "array::appendIfNotPresent",
@@ -99,20 +99,6 @@
   "body": [ "# ## array::sortWithCriteria\n# \n# Sorts an array using multiple criteria.\n# Excepts multiple arrays. The first array is the one to sort.\n# The other arrays are used as criteria. Criteria are used in the order they are given.\n# Each criteria array must have the same size as the array to sort.\n# Each criteria array must containing integers representing the order of the elements.\n# We first sort using the first criteria (from smallest to biggest), then the second, etc.\n# \n# - \\$1: **array name** _as string_:\n#       The name of the array to sort (it will be sorted in place).\n# - \\$@: **criteria array names** _as string_:\n#       The names of the arrays to use as criteria.\n#       Each array must have the same size as the array to sort and contain only numbers.\n# \n# Returns:\n# \n# - \\${REPLY_ARRAY[@]}: An array that contains the corresponding indexes of the sorted array in the original array\n# \n# ```bash\n# declare myArray=( \"a\" \"b\" \"c\" )\n# declare criteria1=( 3 2 2 )\n# declare criteria2=( 1 3 2 )\n# array::sortWithCriteria myArray criteria1 criteria2\n# echo \"\\${myArray[@]}\"\n# # c b a\n# echo \"\\${REPLY_ARRAY[@]}\"\n# # 3 2 1\n# ```\n# \n# > - This function uses a quicksort algorithm (hoarse partition).\n# > - The sorting is not stable (the order of equal elements is not preserved).\n# > - It is not appropriate for large array, use the `sort` binary for such cases.\n# \narray::sortWithCriteria \"${1:array name}\" \"${2:criteria array names}\"$0" ]
 },
 
-"bash::allVariablesCachedWithValue": {
-  "prefix": "bash::allVariablesCachedWithValue",
-  "description": "Check if one or more variables are cached with the given value...",
-  "scope": "",
-  "body": [ "bash::allVariablesCachedWithValue \"${1:variable name}\" \"${2:value}\" \"${3:variable/value pair}\"$0" ]
-},
-
-"bash::allVariablesCachedWithValue#withdoc": {
-  "prefix": "bash::allVariablesCachedWithValue#withdoc",
-  "description": "Check if one or more variables are cached with the given value...",
-  "scope": "",
-  "body": [ "# ## bash::allVariablesCachedWithValue\n# \n# Check if one or more variables are cached with the given value.\n# If all the variables given already have the same value cached,\n# the function will return true.\n# Otherwise, it will return false and cache the given value in the variables.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the variable to check\n# - \\$2: **value** _as any_:\n#       the value to check against the variable\n# - \\$@: **variable/value pair** _as any_:\n#       additional variable/value pairs to check\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if all the variables have the same value as the given value\n#   - 1 otherwise\n# \n# ```bash\n# if bash::allVariablesCachedWithValue \"MY_VAR\" \"my_value\"; then\n#   echo \"MY_VAR is cached with the value 'my_value'\"\n# else\n#   echo \"MY_VAR is not cached with the value 'my_value'\"\n# fi\n# ```\n# \nbash::allVariablesCachedWithValue \"${1:variable name}\" \"${2:value}\" \"${3:variable/value pair}\"$0" ]
-},
-
 "bash::catchErrors": {
   "prefix": "bash::catchErrors",
   "description": "This function runs a command and will catch any error that occurs instead of failing the program...",
@@ -129,16 +115,16 @@
 
 "bash::clearCachedVariables": {
   "prefix": "bash::clearCachedVariables",
-  "description": "Clear the cached variables used by bash::allVariablesCachedWithValue...",
+  "description": "Clear the cached variables used by bash::isVariableCachedWithValue...",
   "scope": "",
   "body": [ "bash::clearCachedVariables$0" ]
 },
 
 "bash::clearCachedVariables#withdoc": {
   "prefix": "bash::clearCachedVariables#withdoc",
-  "description": "Clear the cached variables used by bash::allVariablesCachedWithValue...",
+  "description": "Clear the cached variables used by bash::isVariableCachedWithValue...",
   "scope": "",
-  "body": [ "# ## bash::clearCachedVariables\n# \n# Clear the cached variables used by bash::allVariablesCachedWithValue.\n# This will unset all variables starting with _TUI_CACHED_.\n# \n# - \\$@ : **variable names** _as any_:\n#       (optional) the names of the variables to clear\n#       (defaults to all cached variables)\n# \n# ```bash\n# bash::clearCachedVariables\n# bash::clearCachedVariables \"MY_VAR\" \"ANOTHER_VAR\"\n# ```\n# \nbash::clearCachedVariables$0" ]
+  "body": [ "# ## bash::clearCachedVariables\n# \n# Clear the cached variables used by bash::isVariableCachedWithValue.\n# This will unset all variables starting with _TUI_CACHED_.\n# \n# - \\$@ : **variable names** _as any_:\n#       (optional) the names of the variables to clear\n#       (defaults to all cached variables)\n# \n# ```bash\n# bash::clearCachedVariables\n# bash::clearCachedVariables \"MY_VAR\" \"ANOTHER_VAR\"\n# ```\n# \nbash::clearCachedVariables$0" ]
 },
 
 "bash::countArgs": {
@@ -251,6 +237,20 @@
   "description": "Check if the given function exists...",
   "scope": "",
   "body": [ "# ## bash::isFunction\n# \n# Check if the given function exists.\n# \n# - \\$1: **function name** _as string_:\n#       the function name to check.\n# \n# Returns:\n# \n# - \\$?\n#   - 0 if the function exists\n#   - 1 otherwise.\n# \n# ```bash\n# if bash::isFunction \"function1\"; then\n#   printf 'The function exists.'\n# fi\n# ```\n# \nbash::isFunction \"${1:function name}\"$0" ]
+},
+
+"bash::isVariableCachedWithValue": {
+  "prefix": "bash::isVariableCachedWithValue",
+  "description": "Check if one or more variables are cached with the given value...",
+  "scope": "",
+  "body": [ "bash::isVariableCachedWithValue \"${1:variable name}\" \"${2:value}\" \"${3:variable/value pair}\"$0" ]
+},
+
+"bash::isVariableCachedWithValue#withdoc": {
+  "prefix": "bash::isVariableCachedWithValue#withdoc",
+  "description": "Check if one or more variables are cached with the given value...",
+  "scope": "",
+  "body": [ "# ## bash::isVariableCachedWithValue\n# \n# Check if one or more variables are cached with the given value.\n# If all the variables given already have the same value cached,\n# the function will return true.\n# Otherwise, it will return false and cache the given value in the variables.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the variable to check\n# - \\$2: **value** _as any_:\n#       the value to check against the variable\n# - \\$@: **variable/value pair** _as any_:\n#       additional variable/value pairs to check\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if all the variables have the same value as the given value\n#   - 1 otherwise\n# \n# ```bash\n# if bash::isVariableCachedWithValue \"MY_VAR\" \"my_value\"; then\n#   echo \"MY_VAR is cached with the value 'my_value'\"\n# else\n#   echo \"MY_VAR is not cached with the value 'my_value'\"\n# fi\n# ```\n# \nbash::isVariableCachedWithValue \"${1:variable name}\" \"${2:value}\" \"${3:variable/value pair}\"$0" ]
 },
 
 "bash::readStdIn": {
@@ -425,14 +425,14 @@
   "prefix": "coproc::runInParallel",
   "description": "This function runs a list of commands in parallel with a maximum number of parallel coprocs...",
   "scope": "",
-  "body": [ "coproc::runInParallel \"${1:job commands array name}\" maxInParallel=${2:8} completedCallback=${3:\"\"} redirectLogs=${4:false} printRedirectedLogs=${5:false} coprocNamePrefix=${6:\"_COPROC_PARALLEL_\"}$0" ]
+  "body": [ "coproc::runInParallel \"${1:job commands array name}\" maxInParallel=${2:8} completedCallback=${3:\"\"} redirectLogs=${4:false} printRedirectedLogs=${5:false} simulateSequentialRun=${6:false} coprocNamePrefix=${7:\"_COPROC_PARALLEL_\"}$0" ]
 },
 
 "coproc::runInParallel#withdoc": {
   "prefix": "coproc::runInParallel#withdoc",
   "description": "This function runs a list of commands in parallel with a maximum number of parallel coprocs...",
   "scope": "",
-  "body": [ "# ## coproc::runInParallel\n# \n# This function runs a list of commands in parallel with a maximum number of parallel coprocs.\n# \n# - \\$1: **job commands array name** _as string_:\n#       The name of the array containing the commands to run.\n#       Each command string will be evaluated in a subshell.\n#       Each command should explicitly exit with a non-zero code if it fails and with zero if it succeeds.\n# - \\${maxInParallel} _as int_:\n#       (optional) The maximum number of parallel coprocs to run.\n#       (defaults to 8)\n# - \\${completedCallback} _as string_:\n#       (optional) The name of the function to call when a coproc is completed (successfully or not).\n#       The function will receive the following arguments:\n#       - \\$1 the coproc index\n#       - \\$2 the coproc exit code\n#       - \\$3 the percentage of coprocs already completed\n#       - \\$4 the path of the file containing the accumulated logs of the coproc\n#       If the function sets REPLY to 1, the script will exit early. Otherwise it should set REPLY to 0.\n#       Set to an empty string to not call any callback function.\n#       (defaults to \"\")\n# - \\${redirectLogs} _as bool_:\n#       (optional) Redirect the logs of the coproc instead of printing them in the current file descriptor.\n#       The accumulated logs of the coproc will be available in the completed callback function.\n#       (defaults to false)\n# - \\${printRedirectedLogs} _as bool_:\n#       (optional) This option allows to automatically redirect the logs of the coproc to a file and\n#       print the accumulated logs of a coproc when it is completed (successfully or not).\n#       (defaults to false)\n# - \\${coprocNamePrefix} _as string_:\n#       (optional) The prefix to use for the coproc variable names.\n#       This is useful to avoid conflicts with other coproc variables.\n#       (defaults to \"_COPROC_PARALLEL_\")\n# \n# Returns:\n# \n# - \\${REPLY}: 0 if all the jobs completed, 1 if the completed callback function returned 1.\n# - \\${REPLY2}: The number of successfully completed jobs.\n# - \\${REPLY_ARRAY[@]}: an array containing the exit codes of the jobs.\n# \n# ```bash\n# declare -a jobCommands=(\"sleep 1\" \"sleep 2\" \"sleep 3\")\n# coproc::runInParallel jobCommands maxParallelCoprocs=2\n# ```\n# \ncoproc::runInParallel \"${1:job commands array name}\" maxInParallel=${2:8} completedCallback=${3:\"\"} redirectLogs=${4:false} printRedirectedLogs=${5:false} coprocNamePrefix=${6:\"_COPROC_PARALLEL_\"}$0" ]
+  "body": [ "# ## coproc::runInParallel\n# \n# This function runs a list of commands in parallel with a maximum number of parallel coprocs.\n# \n# - \\$1: **job commands array name** _as string_:\n#       The name of the array containing the commands to run.\n#       Each command string will be evaluated in a subshell.\n#       Each command should explicitly exit with a non-zero code if it fails and with zero if it succeeds.\n# - \\${maxInParallel} _as int_:\n#       (optional) The maximum number of parallel coprocs to run.\n#       (defaults to 8)\n# - \\${completedCallback} _as string_:\n#       (optional) The name of the function to call when a coproc is completed (successfully or not).\n#       The function will receive the following arguments:\n#       - \\$1 the coproc index\n#       - \\$2 the coproc exit code\n#       - \\$3 the percentage of coprocs already completed\n#       - \\$4 the path of the file containing the accumulated logs of the coproc\n#       If the function sets REPLY to 1, the script will exit early. Otherwise it should set REPLY to 0.\n#       Set to an empty string to not call any callback function.\n#       (defaults to \"\")\n# - \\${redirectLogs} _as bool_:\n#       (optional) Redirect the logs of the coproc instead of printing them in the current file descriptor.\n#       The accumulated logs of the coproc will be available in the completed callback function.\n#       (defaults to false)\n# - \\${printRedirectedLogs} _as bool_:\n#       (optional) This option allows to automatically redirect the logs of the coproc to a file and\n#       print the accumulated logs of a coproc when it is completed (successfully or not).\n#       (defaults to false)\n# - \\${simulateSequentialRun} _as bool_:\n#       (optional) If true, this will:\n#       - redirect the logs of each task to a file\n#       - at the end of all execution, print the logs of each task, in natural order (not as they finish)\n#       - exit at the first error, showing the logs of the task in error\n#       Tasks will run as if they are called in a for loop; except they actually run in parallel.\n#       (defaults to false)\n# - \\${coprocNamePrefix} _as string_:\n#       (optional) The prefix to use for the coproc variable names.\n#       This is useful to avoid conflicts with other coproc variables.\n#       (defaults to \"_COPROC_PARALLEL_\")\n# \n# Returns:\n# \n# - \\${REPLY}: The number of jobs that did not completed (i.e. not executed until the end, successfully or not)\n# - \\${REPLY2}: The number of successfully completed jobs.\n# - \\${REPLY_ARRAY[@]}: an array containing the exit codes of the jobs.\n# \n# ```bash\n# declare -a jobCommands=(\"sleep 1\" \"sleep 2\" \"sleep 3\")\n# coproc::runInParallel jobCommands maxParallelCoprocs=2\n# ```\n# TODO: implement unit tests for this function\n# \ncoproc::runInParallel \"${1:job commands array name}\" maxInParallel=${2:8} completedCallback=${3:\"\"} redirectLogs=${4:false} printRedirectedLogs=${5:false} simulateSequentialRun=${6:false} coprocNamePrefix=${7:\"_COPROC_PARALLEL_\"}$0" ]
 },
 
 "coproc::sendMessage": {
@@ -771,6 +771,20 @@
   "body": [ "# ## fs::createTempFile\n# \n# Creates a temporary file and return its path.\n# \n# - \\${pathOnly} _as bool_:\n#       (optional) If true, does not create the file, only returns the path.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY}: The created path.\n# \n# ```bash\n# fs::createTempFile\n# echo \"\\${REPLY}\"\n# fs::createTempFile pathOnly=true\n# ```\n# \n# > Files created this way are automatically cleaned up by the fs::cleanTempFiles\n# > function when valet ends.\n# \nfs::createTempFile pathOnly=${1:false}$0" ]
 },
 
+"fs::getAbsolutePath": {
+  "prefix": "fs::getAbsolutePath",
+  "description": "This function returns the absolute path of a path...",
+  "scope": "",
+  "body": [ "fs::getAbsolutePath \"${1:path}\" realpath=${2:false}$0" ]
+},
+
+"fs::getAbsolutePath#withdoc": {
+  "prefix": "fs::getAbsolutePath#withdoc",
+  "description": "This function returns the absolute path of a path...",
+  "scope": "",
+  "body": [ "# ## fs::getAbsolutePath\n# \n# This function returns the absolute path of a path.\n# \n# If the path exists, it can be resolved to the real path, following symlinks,\n# using the option `realpath=true`.\n# \n# - \\$1: **path** _as string_:\n#       The path to translate to absolute path.\n# - \\${realpath} _as bool_:\n#       (optional) true to resolve the path to the real path, following symlinks.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY}: The absolute path of the path.\n# \n# ```bash\n# fs::getAbsolutePath \"myPath\"\n# fs::getAbsolutePath \"myPath\" realpath=true\n# echo \"\\${REPLY}\"\n# ```\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# > The `..` will be processed before following any symlinks, by removing\n# > the immediate pathname component.\n# \nfs::getAbsolutePath \"${1:path}\" realpath=${2:false}$0" ]
+},
+
 "fs::getCommandPath": {
   "prefix": "fs::getCommandPath",
   "description": "Get the absolute path of a command...",
@@ -925,20 +939,6 @@
   "body": [ "# ## fs::tail\n# \n# Print the last lines of a file to stdout.\n# This is a pure bash equivalent of tail.\n# However, because we have to read the whole file, it is not efficient for large files.\n# \n# - \\$1: **path** _as string_:\n#       The file to print.\n# - \\$2: **number of lines** _as int_:\n#       The number of lines to print from the end of the file.\n# - \\${toArray} _as bool_:\n#       (optional) If true, the output will be stored in the variable `REPLY_ARRAY`\n#       instead of being printed to stdout.\n#       (defaults to false)\n# \n# ```bash\n# fs::tail myFile 10\n# ```\n# \n# > #TODO: use mapfile quantum to not have to read the whole file in a single go.\n# \nfs::tail \"${1:path}\" \"${2:number of lines}\" toArray=${3:false}$0" ]
 },
 
-"fs::toAbsolutePath": {
-  "prefix": "fs::toAbsolutePath",
-  "description": "This function returns the absolute path of a path...",
-  "scope": "",
-  "body": [ "fs::toAbsolutePath \"${1:path}\" realpath=${2:false}$0" ]
-},
-
-"fs::toAbsolutePath#withdoc": {
-  "prefix": "fs::toAbsolutePath#withdoc",
-  "description": "This function returns the absolute path of a path...",
-  "scope": "",
-  "body": [ "# ## fs::toAbsolutePath\n# \n# This function returns the absolute path of a path.\n# \n# If the path exists, it can be resolved to the real path, following symlinks,\n# using the option `realpath=true`.\n# \n# - \\$1: **path** _as string_:\n#       The path to translate to absolute path.\n# - \\${realpath} _as bool_:\n#       (optional) true to resolve the path to the real path, following symlinks.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY}: The absolute path of the path.\n# \n# ```bash\n# fs::toAbsolutePath \"myPath\"\n# fs::toAbsolutePath \"myPath\" realpath=true\n# echo \"\\${REPLY}\"\n# ```\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# > The `..` will be processed before following any symlinks, by removing\n# > the immediate pathname component.\n# \nfs::toAbsolutePath \"${1:path}\" realpath=${2:false}$0" ]
-},
-
 "include": {
   "prefix": "include",
   "description": "Allows to include multiple library files...",
@@ -1090,7 +1090,7 @@
   "prefix": "log::getCallStack#withdoc",
   "description": "This function returns the current function stack...",
   "scope": "",
-  "body": [ "# ## log::getCallStack\n# \n# This function returns the current function stack.\n# \n# - \\${stackToSkip} _as int_:\n#       (optional) The number of stack to skip.\n#       For instance, a value of 1 will skip this function.\n#       (defaults to 1)\n# - \\${stackToSkipAtEnd} _as int_:\n#       (optional) The number of stack to skip at the end.\n#       (defaults to 0)\n# - \\${wrapWidth} _as int_:\n#       (optional) The width to wrap the call stack.\n#       (defaults to 0)\n# \n# Returns:\n# \n# - \\${REPLY}: The call stack as a string.\n# \n# ```bash\n# log::getCallStack\n# echo \"\\${REPLY}\"\n# log::getCallStack stackToSkip=2 stackToSkipAtEnd=1 wrapWidth=80\n# ```\n# \n# > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`\n# > variables to simulate a call stack.\n# \nlog::getCallStack stackToSkip=${1:1} stackToSkipAtEnd=${2:0} wrapWidth=${3:0}$0" ]
+  "body": [ "# ## log::getCallStack\n# \n# This function returns the current function stack.\n# \n# - \\${stackToSkip} _as int_:\n#       (optional) The number of stack to skip.\n#       For instance, a value of 1 will skip this function.\n#       (defaults to 1)\n# - \\${stackToSkipAtEnd} _as int_:\n#       (optional) The number of stack to skip at the end.\n#       (defaults to 0)\n# - \\${wrapWidth} _as int_:\n#       (optional) The width to wrap the call stack.\n#       (defaults to 0)\n# \n# Returns:\n# \n# - \\${REPLY}: The call stack as a string.\n# \n# ```bash\n# log::getCallStack\n# echo \"\\${REPLY}\"\n# log::getCallStack stackToSkip=2 stackToSkipAtEnd=1 wrapWidth=80\n# ```\n# \n# > For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`\n# > variables to simulate a call stack.\n# \nlog::getCallStack stackToSkip=${1:1} stackToSkipAtEnd=${2:0} wrapWidth=${3:0}$0" ]
 },
 
 "log::getLevel": {
@@ -1160,7 +1160,7 @@
   "prefix": "log::printCallStack#withdoc",
   "description": "This function prints the current function stack in the logs...",
   "scope": "",
-  "body": [ "# ## log::printCallStack\n# \n# This function prints the current function stack in the logs.\n# \n# - \\${stackToSkip} _as int_:\n#       (optional) The number of stack to skip.\n#       For instance, a value of 2 will skip this function and the first calling function.\n#       (defaults to 2)\n# - \\${stackToSkipAtEnd} _as int_:\n#       (optional) The number of stack to skip at the end.\n#       (defaults to 0)\n# \n# ```bash\n# log::printCallStack\n# log::printCallStack stackToSkip=0\n# ```\n# \n# > For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`\n# > variables to simulate a call stack.\n# \nlog::printCallStack stackToSkip=${1:2} stackToSkipAtEnd=${2:0}$0" ]
+  "body": [ "# ## log::printCallStack\n# \n# This function prints the current function stack in the logs.\n# \n# - \\${stackToSkip} _as int_:\n#       (optional) The number of stack to skip.\n#       For instance, a value of 2 will skip this function and the first calling function.\n#       (defaults to 2)\n# - \\${stackToSkipAtEnd} _as int_:\n#       (optional) The number of stack to skip at the end.\n#       (defaults to 0)\n# \n# ```bash\n# log::printCallStack\n# log::printCallStack stackToSkip=0\n# ```\n# \n# > For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`\n# > variables to simulate a call stack.\n# \nlog::printCallStack stackToSkip=${1:2} stackToSkipAtEnd=${2:0}$0" ]
 },
 
 "log::printFile": {
@@ -1459,16 +1459,16 @@
 
 "regex::replace": {
   "prefix": "regex::replace",
-  "description": "Replaces strings within a string using a regex...",
+  "description": "Replaces strings within a string using a regex (replaces in place)...",
   "scope": "",
   "body": [ "regex::replace \"${1:string variable name}\" \"${2:regex}\" \"${3:replacement string}\" max=${4:-1} onlyMatches=${5:false}$0" ]
 },
 
 "regex::replace#withdoc": {
   "prefix": "regex::replace#withdoc",
-  "description": "Replaces strings within a string using a regex...",
+  "description": "Replaces strings within a string using a regex (replaces in place)...",
   "scope": "",
-  "body": [ "# ## regex::replace\n# \n# Replaces strings within a string using a regex.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name containing the string in which to do replacements.\n# - \\$2: **regex** _as string_:\n#       The regex to use for the match.\n# - \\$3: **replacement string** _as string_:\n#       The replacement string.\n#       Use \\x to refer to the x-th capture group.\n#       Use \\c to refer to replacement counter.\n# - \\${max} _as int_:\n#       (optional) The number of replacements to do.\n#       Set to -1 for unlimited replacements.\n#       (defaults to -1)\n# - \\${onlyMatches} _as bool_:\n#       (optional) Instead of replacing with the regex, we keep only the matches.\n#       This can be used to extract information from a string.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY}: The string with replacements.\n# \n# ```bash\n# MY_STRING=\"name: julien\"\n# regex::replace MY_STRING \"name: (.*)\" \"\\1\"\n# regex::replace MY_STRING \"name: (.*)\" \"\\1\" maxCount=1 onlyMatches=true\n# echo \"\\${REPLY}\"\n# ```\n# \n# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions\n# \nregex::replace \"${1:string variable name}\" \"${2:regex}\" \"${3:replacement string}\" max=${4:-1} onlyMatches=${5:false}$0" ]
+  "body": [ "# ## regex::replace\n# \n# Replaces strings within a string using a regex (replaces in place).\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name containing the string in which to do replacements.\n# - \\$2: **regex** _as string_:\n#       The regex to use for the match.\n# - \\$3: **replacement string** _as string_:\n#       The replacement string.\n#       Use \\x to refer to the x-th capture group.\n#       Use \\c to refer to replacement counter.\n# - \\${max} _as int_:\n#       (optional) The number of replacements to do.\n#       Set to -1 for unlimited replacements.\n#       (defaults to -1)\n# - \\${onlyMatches} _as bool_:\n#       (optional) Instead of replacing with the regex, we keep only the matches.\n#       This can be used to extract information from a string.\n#       (defaults to false)\n# \n# \n# ```bash\n# MY_STRING=\"name: julien\"\n# regex::replace MY_STRING \"name: (.*)\" \"\\1\"\n# regex::replace MY_STRING \"name: (.*)\" \"\\1\" maxCount=1 onlyMatches=true\n# echo \"\\${MY_STRING}\"\n# ```\n# \n# > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions\n# \nregex::replace \"${1:string variable name}\" \"${2:regex}\" \"${3:replacement string}\" max=${4:-1} onlyMatches=${5:false}$0" ]
 },
 
 "sfzf::show": {
@@ -1497,62 +1497,6 @@
   "description": "Allows to source/include a library file or sources a file...",
   "scope": "",
   "body": [ "# ## source\n# \n# Allows to source/include a library file or sources a file.\n# \n# When sourcing a library, omit the `lib-` prefix.\n# It will source all user and core libraries with the given name.\n# \n# It replaces the builtin source command to make sure that we do not source the same library twice.\n# We replace source instead of creating a new function to allow us to\n# specify the included file for spellcheck.\n# \n# - \\$1: **library name or path** _as string_:\n#       the name of the library (array, interactive, string...) or the file path to include.\n# - \\$@: arguments _as any_:\n#       (optional) the arguments to pass to the sourced file (mimics the builtin source command).\n# - \\$_OPTION_CONTINUE_IF_NOT_FOUND _as bool_:\n#       (optional) Do not fail the program if we do not find a file to source, we simply return 1.\n#       (defaults to false)\n# - \\$_OPTION_RETURN_CODE_IF_ALREADY_INCLUDED _as int_:\n#       (optional) The function return code if the given file or library was already\n#       included.\n#       (defaults to 0)\n# \n# ```bash\n# source string\n# source ./my/path\n# _OPTION_CONTINUE_IF_NOT_FOUND=false _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 source ./my/path\n# ```\n# \n# > - The file can be relative to the current script (script that calls this function).\n# > - Use `builtin source` if you want to include the file even if it was already included.\n# \nsource \"${1:library name or path}\" \"${2:arguments}\"$0" ]
-},
-
-"string::convertCamelCaseToSnakeCase": {
-  "prefix": "string::convertCamelCaseToSnakeCase",
-  "description": "This function convert a camelCase string to a SNAKE_CASE string...",
-  "scope": "",
-  "body": [ "string::convertCamelCaseToSnakeCase \"${1:string variable name}\"$0" ]
-},
-
-"string::convertCamelCaseToSnakeCase#withdoc": {
-  "prefix": "string::convertCamelCaseToSnakeCase#withdoc",
-  "description": "This function convert a camelCase string to a SNAKE_CASE string...",
-  "scope": "",
-  "body": [ "# ## string::convertCamelCaseToSnakeCase\n# \n# This function convert a camelCase string to a SNAKE_CASE string.\n# It uses pure bash.\n# Removes all leading underscores.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"myCamelCaseString\"\n# string::convertCamelCaseToSnakeCase MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::convertCamelCaseToSnakeCase \"${1:string variable name}\"$0" ]
-},
-
-"string::convertKebabCaseToCamelCase": {
-  "prefix": "string::convertKebabCaseToCamelCase",
-  "description": "This function convert a kebab-case string to a camelCase string...",
-  "scope": "",
-  "body": [ "string::convertKebabCaseToCamelCase \"${1:string variable name}\"$0" ]
-},
-
-"string::convertKebabCaseToCamelCase#withdoc": {
-  "prefix": "string::convertKebabCaseToCamelCase#withdoc",
-  "description": "This function convert a kebab-case string to a camelCase string...",
-  "scope": "",
-  "body": [ "# ## string::convertKebabCaseToCamelCase\n# \n# This function convert a kebab-case string to a camelCase string.\n# It uses pure bash.\n# Removes all leading dashes.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"my-kebab-case-string\"\n# string::convertKebabCaseToCamelCase MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::convertKebabCaseToCamelCase \"${1:string variable name}\"$0" ]
-},
-
-"string::convertKebabCaseToSnakeCase": {
-  "prefix": "string::convertKebabCaseToSnakeCase",
-  "description": "This function convert a kebab-case string to a SNAKE_CASE string...",
-  "scope": "",
-  "body": [ "string::convertKebabCaseToSnakeCase \"${1:string variable name}\"$0" ]
-},
-
-"string::convertKebabCaseToSnakeCase#withdoc": {
-  "prefix": "string::convertKebabCaseToSnakeCase#withdoc",
-  "description": "This function convert a kebab-case string to a SNAKE_CASE string...",
-  "scope": "",
-  "body": [ "# ## string::convertKebabCaseToSnakeCase\n# \n# This function convert a kebab-case string to a SNAKE_CASE string.\n# It uses pure bash.\n# Removes all leading dashes.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"my-kebab-case-string\"\n# string::convertKebabCaseToSnakeCase MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::convertKebabCaseToSnakeCase \"${1:string variable name}\"$0" ]
-},
-
-"string::convertToHex": {
-  "prefix": "string::convertToHex",
-  "description": "Convert a string to its hexadecimal representation...",
-  "scope": "",
-  "body": [ "string::convertToHex \"${1:string variable name}\"$0" ]
-},
-
-"string::convertToHex#withdoc": {
-  "prefix": "string::convertToHex#withdoc",
-  "description": "Convert a string to its hexadecimal representation...",
-  "scope": "",
-  "body": [ "# ## string::convertToHex\n# \n# Convert a string to its hexadecimal representation.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: the hexadecimal representation of the string\n# \n# ```bash\n# MY_STRING=\"This is a string\"\n# string::convertToHex MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::convertToHex \"${1:string variable name}\"$0" ]
 },
 
 "string::count": {
@@ -1597,6 +1541,20 @@
   "body": [ "# ## string::extractBetween\n# \n# Extract the text between two strings within a string.\n# Search for the first occurrence of the start string and the first occurrence\n# (after the start index) of the end string.\n# Both start and end strings are excluded in the extracted text.\n# Both start and end strings must be found to extract something.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string from which to extract a text.\n# - \\$2: **start string** _as string_:\n#       the start string\n#       (if empty, then it will extract from the beginning of the string)\n# - \\$3: **end string** _as string_:\n#       the end string\n#       (if empty, then it will extract until the end of the string)\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted text\n# \n# ```bash\n# MY_STRING=\"This is a long text\"\n# string::extractBetween MY_STRING \"is a \" \" text\"\n# local extractedText=\"\\${REPLY}\"\n# ```\n# \nstring::extractBetween \"${1:string variable name}\" \"${2:start string}\" \"${3:end string}\"$0" ]
 },
 
+"string::getCamelCase": {
+  "prefix": "string::getCamelCase",
+  "description": "This function convert a SNAKE_CASE or kebab-case string to a camelCase string...",
+  "scope": "",
+  "body": [ "string::getCamelCase \"${1:string variable name}\"$0" ]
+},
+
+"string::getCamelCase#withdoc": {
+  "prefix": "string::getCamelCase#withdoc",
+  "description": "This function convert a SNAKE_CASE or kebab-case string to a camelCase string...",
+  "scope": "",
+  "body": [ "# ## string::getCamelCase\n# \n# This function convert a SNAKE_CASE or kebab-case string to a camelCase string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: The converted string\n# \n# ```bash\n# MY_STRING=\"my-kebab-case\"\n# string::getCamelCase MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::getCamelCase \"${1:string variable name}\"$0" ]
+},
+
 "string::getField": {
   "prefix": "string::getField",
   "description": "Allows to get the nth element of a string separated by a given separator...",
@@ -1611,6 +1569,20 @@
   "body": [ "# ## string::getField\n# \n# Allows to get the nth element of a string separated by a given separator.\n# This is the equivalent of the cut command \"cut -d\"\\${separator}\" -f\"\\${fieldNumber}\"\"\n# but it uses pure bash to go faster.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to extract from.\n# - \\$2: **field number** _as int_:\n#       The field number to get (starting at 0).\n# - \\${separator} _as string_:\n#       The separator to use.\n#       (defaults to \\$'\\t')\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"field1 field2 field3\"\n# string::getField MY_STRING 1 separator=\" \"\n# echo \"\\${REPLY}\"\n# ```\n# \n# > This is faster than:\n# >\n# > - using read into an array from a here string\n# > - using bash parameter expansion to remove before/after the separator\n# \nstring::getField \"${1:string variable name}\" \"${2:field number}\" separator=${3:\\$'\\t'}$0" ]
 },
 
+"string::getHexRepresentation": {
+  "prefix": "string::getHexRepresentation",
+  "description": "Convert a string to its hexadecimal representation...",
+  "scope": "",
+  "body": [ "string::getHexRepresentation \"${1:string variable name}\"$0" ]
+},
+
+"string::getHexRepresentation#withdoc": {
+  "prefix": "string::getHexRepresentation#withdoc",
+  "description": "Convert a string to its hexadecimal representation...",
+  "scope": "",
+  "body": [ "# ## string::getHexRepresentation\n# \n# Convert a string to its hexadecimal representation.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: the hexadecimal representation of the string\n# \n# ```bash\n# MY_STRING=\"This is a string\"\n# string::getHexRepresentation MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::getHexRepresentation \"${1:string variable name}\"$0" ]
+},
+
 "string::getIndexOf": {
   "prefix": "string::getIndexOf",
   "description": "Find the first index of a string within another string...",
@@ -1623,6 +1595,34 @@
   "description": "Find the first index of a string within another string...",
   "scope": "",
   "body": [ "# ## string::getIndexOf\n# \n# Find the first index of a string within another string.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string from which to find an index.\n# - \\$2: **search** _as string_:\n#       the string to search\n# - \\${startingIndex} _as int_:\n#       (optional) the starting index\n#       (defaults to 0)\n# \n# Returns:\n# \n# - \\${REPLY}: the index of the substring in the string or -1 if not found.\n# \n# ```bash\n# MY_STRING=\"This is a long text\"\n# string::getIndexOf MY_STRING \"long\" startingIndex=2\n# string::getIndexOf MY_STRING \"long\"\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::getIndexOf \"${1:string variable name}\" \"${2:search}\" startingIndex=${3:0}$0" ]
+},
+
+"string::getKebabCase": {
+  "prefix": "string::getKebabCase",
+  "description": "This function convert a camelCase, PascalCase or SNAKE_CASE string to a kebab-case string...",
+  "scope": "",
+  "body": [ "string::getKebabCase \"${1:string variable name}\"$0" ]
+},
+
+"string::getKebabCase#withdoc": {
+  "prefix": "string::getKebabCase#withdoc",
+  "description": "This function convert a camelCase, PascalCase or SNAKE_CASE string to a kebab-case string...",
+  "scope": "",
+  "body": [ "# ## string::getKebabCase\n# \n# This function convert a camelCase, PascalCase or SNAKE_CASE string to a kebab-case string.\n# Removes all leading/trailing dashes.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: The converted string\n# \n# ```bash\n# MY_STRING=\"myCamelCaseString\"\n# string::getKebabCase MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::getKebabCase \"${1:string variable name}\"$0" ]
+},
+
+"string::getSnakeCase": {
+  "prefix": "string::getSnakeCase",
+  "description": "This function convert a camelCase, PascalCase or kebab-case string to a SNAKE_CASE string...",
+  "scope": "",
+  "body": [ "string::getSnakeCase \"${1:string variable name}\"$0" ]
+},
+
+"string::getSnakeCase#withdoc": {
+  "prefix": "string::getSnakeCase#withdoc",
+  "description": "This function convert a camelCase, PascalCase or kebab-case string to a SNAKE_CASE string...",
+  "scope": "",
+  "body": [ "# ## string::getSnakeCase\n# \n# This function convert a camelCase, PascalCase or kebab-case string to a SNAKE_CASE string.\n# Removes all leading/trailing underscores.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to convert.\n# \n# Returns:\n# \n# - \\${REPLY}: The converted string\n# \n# ```bash\n# MY_STRING=\"myCamelCaseString\"\n# string::getSnakeCase MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::getSnakeCase \"${1:string variable name}\"$0" ]
 },
 
 "string::head": {
@@ -1706,7 +1706,7 @@
   "prefix": "string::trimAll#withdoc",
   "description": "Trim all whitespaces and truncate spaces...",
   "scope": "",
-  "body": [ "# ## string::trimAll\n# \n# Trim all whitespaces and truncate spaces.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to trim.\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"   example \"\\$'\\t'\"  string    \"\\$'\\n'\n# string::trimAll MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::trimAll \"${1:string variable name}\"$0" ]
+  "body": [ "# ## string::trimAll\n# \n# Trim all whitespaces and truncate spaces.\n# The replacement is done in place, for the given variable.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to trim.\n# \n# ```bash\n# MY_STRING=\"   example \"\\$'\\t'\"  string    \"\\$'\\n'\n# string::trimAll MY_STRING\n# echo \"\\${MY_STRING}\"\n# ```\n# \nstring::trimAll \"${1:string variable name}\"$0" ]
 },
 
 "string::trimEdges": {
@@ -1720,7 +1720,7 @@
   "prefix": "string::trimEdges#withdoc",
   "description": "Trim leading and trailing characters (defaults to whitespaces)...",
   "scope": "",
-  "body": [ "# ## string::trimEdges\n# \n# Trim leading and trailing characters (defaults to whitespaces).\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to trim.\n# - \\${charsToTrim} _as string_:\n#       The characters to trim.\n#       (defaults to \\$' \\t\\n')\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"   example  string    \"\n# string::trimEdges MY_STRING\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::trimEdges \"${1:string variable name}\" charsToTrim=${2:\\$' \\t\\n'}$0" ]
+  "body": [ "# ## string::trimEdges\n# \n# Trim leading and trailing characters (defaults to whitespaces).\n# The replacement is done in place, for the given variable.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to trim.\n# - \\${charsToTrim} _as string_:\n#       The characters to trim.\n#       (defaults to \\$' \\t\\n')\n# \n# ```bash\n# MY_STRING=\"   example  string    \"\n# string::trimEdges MY_STRING\n# echo \"\\${MY_STRING}\"\n# ```\n# \nstring::trimEdges \"${1:string variable name}\" charsToTrim=${2:\\$' \\t\\n'}$0" ]
 },
 
 "string::wrapCharacters": {
@@ -2339,6 +2339,20 @@
   "body": [ "# ## test::setTerminalInputs\n# \n# Replaces the functions `terminal::waitForChar` and `terminal::waitForKeyPress` by custom functions\n# that return keys defined as an input of this function.\n# \n# - \\$@: **keys** _as string_:\n#       The keys to return when `terminal::waitForChar` or `terminal::waitForKeyPress` are called.\n#       Keys are consumed in the order they are provided.\n# \n# ```bash\n# test::setTerminalInputs \"a\" \"b\" \"c\"\n# ```\n# \ntest::setTerminalInputs \"${1:keys}\"$0" ]
 },
 
+"test::setupBashForConsistency": {
+  "prefix": "test::setupBashForConsistency",
+  "description": "This function is used to set up the Bash environment for maximum consistency during testing...",
+  "scope": "",
+  "body": [ "test::setupBashForConsistency$0" ]
+},
+
+"test::setupBashForConsistency#withdoc": {
+  "prefix": "test::setupBashForConsistency#withdoc",
+  "description": "This function is used to set up the Bash environment for maximum consistency during testing...",
+  "scope": "",
+  "body": [ "# ## test::setupBashForConsistency\n# \n# This function is used to set up the Bash environment for maximum consistency during testing.\n# It will override important dynamic bash variables to have more static results.\n# \n# ```bash\n# test::setupBashForConsistency\n# ```\n# \ntest::setupBashForConsistency$0" ]
+},
+
 "test::title": {
   "prefix": "test::title",
   "description": "Call this function to add an H3 title in the report file...",
@@ -2351,34 +2365,6 @@
   "description": "Call this function to add an H3 title in the report file...",
   "scope": "",
   "body": [ "# ## test::title\n# \n# Call this function to add an H3 title in the report file.\n# \n# - \\$1: title _as string_:\n#       The title of the test.\n# \n# ```bash\n# test::title \"Testing something\"\n# ```\n# \ntest::title \"${1:title}\"$0" ]
-},
-
-"time::convertMicrosecondsToHuman": {
-  "prefix": "time::convertMicrosecondsToHuman",
-  "description": "Convert microseconds to human readable format...",
-  "scope": "",
-  "body": [ "time::convertMicrosecondsToHuman \"${1:microseconds}\" format=${2:\"%HH:%MM:%SS\"}$0" ]
-},
-
-"time::convertMicrosecondsToHuman#withdoc": {
-  "prefix": "time::convertMicrosecondsToHuman#withdoc",
-  "description": "Convert microseconds to human readable format...",
-  "scope": "",
-  "body": [ "# ## time::convertMicrosecondsToHuman\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\${format} _as string_:\n#       (optional) the format to use\n# \n#       Usable formats:\n#       - %HH: hours\n#       - %MM: minutes\n#       - %SS: seconds\n#       - %LL: milliseconds\n#       - %h: hours without leading zero\n#       - %m: minutes without leading zero\n#       - %s: seconds without leading zero\n#       - %l: milliseconds without leading zero\n#       - %u: microseconds without leading zero\n#       - %M: total minutes\n#       - %S: total seconds\n#       - %L: total milliseconds\n#       - %U: total microseconds\n# \n#       (defaults to \"%HH:%MM:%SS\")\n# \n# Returns:\n# \n# - \\${REPLY}: the human readable format\n# \n# ```bash\n# time::convertMicrosecondsToHuman 123456789\n# time::convertMicrosecondsToHuman 123456789 format=\"%HH:%MM:%SS\"\n# echo \"\\${REPLY}\"\n# ```\n# \ntime::convertMicrosecondsToHuman \"${1:microseconds}\" format=${2:\"%HH:%MM:%SS\"}$0" ]
-},
-
-"time::convertMicrosecondsToSeconds": {
-  "prefix": "time::convertMicrosecondsToSeconds",
-  "description": "Convert a microseconds integer to seconds float...",
-  "scope": "",
-  "body": [ "time::convertMicrosecondsToSeconds \"${1:microseconds}\" precision=${2:6}$0" ]
-},
-
-"time::convertMicrosecondsToSeconds#withdoc": {
-  "prefix": "time::convertMicrosecondsToSeconds#withdoc",
-  "description": "Convert a microseconds integer to seconds float...",
-  "scope": "",
-  "body": [ "# ## time::convertMicrosecondsToSeconds\n# \n# Convert a microseconds integer to seconds float.\n# e.g. 1234567 → 1.234567\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\${precision} _as string_:\n#       (optional) The precision to get (number of digits after the dot).\n#       (defaults to 6)\n# \n# Returns:\n# \n# - \\${REPLY}: The seconds (float number).\n# \n# ```bash\n# time::convertMicrosecondsToSeconds 1234567\n# time::convertMicrosecondsToSeconds 1234567 precision=3\n# echo \"\\${REPLY}\"\n# ```\n# \ntime::convertMicrosecondsToSeconds \"${1:microseconds}\" precision=${2:6}$0" ]
 },
 
 "time::getDate": {
@@ -2395,6 +2381,34 @@
   "body": [ "# ## time::getDate\n# \n# Get the current date in the given format.\n# \n# - \\${format} _as string_:\n#       (optional) the format (see printf) of the date to return\n#       (defaults to \"%(%F_%Hh%Mm%Ss)T\")\n# \n# Returns:\n# \n# - \\${REPLY}: the current date in the given format.\n# \n# ```bash\n# time::getDate\n# local date=\"\\${REPLY}\"\n# time::getDate format=\"'%(%Hh%Mm%Ss)T'\"\n# ```\n# \n# > This function avoid to call \\$(date) in a subshell (date is a an external executable).\n# \ntime::getDate format=${1:\"%(%F_%Hh%Mm%Ss}$0" ]
 },
 
+"time::getMicrosecondsToHuman": {
+  "prefix": "time::getMicrosecondsToHuman",
+  "description": "Convert microseconds to human readable format...",
+  "scope": "",
+  "body": [ "time::getMicrosecondsToHuman \"${1:microseconds}\" format=${2:\"%HH:%MM:%SS\"}$0" ]
+},
+
+"time::getMicrosecondsToHuman#withdoc": {
+  "prefix": "time::getMicrosecondsToHuman#withdoc",
+  "description": "Convert microseconds to human readable format...",
+  "scope": "",
+  "body": [ "# ## time::getMicrosecondsToHuman\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\${format} _as string_:\n#       (optional) the format to use\n# \n#       Usable formats:\n#       - %HH: hours\n#       - %MM: minutes\n#       - %SS: seconds\n#       - %LL: milliseconds\n#       - %h: hours without leading zero\n#       - %m: minutes without leading zero\n#       - %s: seconds without leading zero\n#       - %l: milliseconds without leading zero\n#       - %u: microseconds without leading zero\n#       - %M: total minutes\n#       - %S: total seconds\n#       - %L: total milliseconds\n#       - %U: total microseconds\n# \n#       (defaults to \"%HH:%MM:%SS\")\n# \n# Returns:\n# \n# - \\${REPLY}: the human readable format\n# \n# ```bash\n# time::getMicrosecondsToHuman 123456789\n# time::getMicrosecondsToHuman 123456789 format=\"%HH:%MM:%SS\"\n# echo \"\\${REPLY}\"\n# ```\n# \ntime::getMicrosecondsToHuman \"${1:microseconds}\" format=${2:\"%HH:%MM:%SS\"}$0" ]
+},
+
+"time::getMicrosecondsToSeconds": {
+  "prefix": "time::getMicrosecondsToSeconds",
+  "description": "Convert a microseconds integer to seconds float...",
+  "scope": "",
+  "body": [ "time::getMicrosecondsToSeconds \"${1:microseconds}\" precision=${2:6}$0" ]
+},
+
+"time::getMicrosecondsToSeconds#withdoc": {
+  "prefix": "time::getMicrosecondsToSeconds#withdoc",
+  "description": "Convert a microseconds integer to seconds float...",
+  "scope": "",
+  "body": [ "# ## time::getMicrosecondsToSeconds\n# \n# Convert a microseconds integer to seconds float.\n# e.g. 1234567 → 1.234567\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\${precision} _as string_:\n#       (optional) The precision to get (number of digits after the dot).\n#       (defaults to 6)\n# \n# Returns:\n# \n# - \\${REPLY}: The seconds (float number).\n# \n# ```bash\n# time::getMicrosecondsToSeconds 1234567\n# time::getMicrosecondsToSeconds 1234567 precision=3\n# echo \"\\${REPLY}\"\n# ```\n# \ntime::getMicrosecondsToSeconds \"${1:microseconds}\" precision=${2:6}$0" ]
+},
+
 "time::getProgramElapsedMicroseconds": {
   "prefix": "time::getProgramElapsedMicroseconds",
   "description": "Get the elapsed time in µs since the program started...",
@@ -2406,7 +2420,7 @@
   "prefix": "time::getProgramElapsedMicroseconds#withdoc",
   "description": "Get the elapsed time in µs since the program started...",
   "scope": "",
-  "body": [ "# ## time::getProgramElapsedMicroseconds\n# \n# Get the elapsed time in µs since the program started.\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in µs since the program started.\n# \n# ```bash\n# time::getProgramElapsedMicroseconds\n# echo \"\\${REPLY}\"\n# time::convertMicrosecondsToHuman \"\\${REPLY}\"\n# echo \"Human time: \\${REPLY}\"\n# ```\n# \n# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.\n# > The 10# forces the base 10 conversion to avoid issues with leading zeros.\n# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.\n# \ntime::getProgramElapsedMicroseconds$0" ]
+  "body": [ "# ## time::getProgramElapsedMicroseconds\n# \n# Get the elapsed time in µs since the program started.\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in µs since the program started.\n# \n# ```bash\n# time::getProgramElapsedMicroseconds\n# echo \"\\${REPLY}\"\n# time::getMicrosecondsToHuman \"\\${REPLY}\"\n# echo \"Human time: \\${REPLY}\"\n# ```\n# \n# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.\n# > The 10# forces the base 10 conversion to avoid issues with leading zeros.\n# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.\n# \ntime::getProgramElapsedMicroseconds$0" ]
 },
 
 "time::getTimerMicroseconds": {
@@ -2420,7 +2434,7 @@
   "prefix": "time::getTimerMicroseconds#withdoc",
   "description": "Get the time elapsed since the call of `time::startTimer`...",
   "scope": "",
-  "body": [ "# ## time::getTimerMicroseconds\n# \n# Get the time elapsed since the call of `time::startTimer`.\n# \n# - \\${logElapsedTime} _as bool_:\n#       (optional) Wether or not to log the elapsed time.\n#       (defaults to false)\n# - \\${format} _as string_:\n#       (optional) The format to use if we log the elapsed time.\n#       See `time::convertMicrosecondsToHuman` for the format.\n#       (defaults to \"%S.%LLs\").\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in microseconds.\n# \n# ```bash\n# time::startTimer\n# time::getTimerMicroseconds logElapsedTime=true\n# echo \"Total microseconds: \\${REPLY}\"\n# ```\n# \ntime::getTimerMicroseconds logElapsedTime=${1:false} format=${2:\"%S.%LLs\"}$0" ]
+  "body": [ "# ## time::getTimerMicroseconds\n# \n# Get the time elapsed since the call of `time::startTimer`.\n# \n# - \\${logElapsedTime} _as bool_:\n#       (optional) Wether or not to log the elapsed time.\n#       (defaults to false)\n# - \\${format} _as string_:\n#       (optional) The format to use if we log the elapsed time.\n#       See `time::getMicrosecondsToHuman` for the format.\n#       (defaults to \"%S.%LLs\").\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in microseconds.\n# \n# ```bash\n# time::startTimer\n# time::getTimerMicroseconds logElapsedTime=true\n# echo \"Total microseconds: \\${REPLY}\"\n# ```\n# \ntime::getTimerMicroseconds logElapsedTime=${1:false} format=${2:\"%S.%LLs\"}$0" ]
 },
 
 "time::startTimer": {
@@ -2477,34 +2491,6 @@
   "description": "Add the given path to the PATH environment variable on Windows (current user only)...",
   "scope": "",
   "body": [ "# ## windows::addToPath\n# \n# Add the given path to the PATH environment variable on Windows (current user only).\n# \n# Will also export the PATH variable in the current bash.\n# \n# - \\$1: **path** _as string_:\n#       the path to add to the PATH environment variable.\n#       The path can be in unix format, it will be converted to windows format.\n# - \\${prepend} _as bool_:\n#       (optional) True to prepend the path to the PATH, false to append it.\n#       (defaults to false)\n# \n# ```bash\n# windows::addToPath \"/path/to/bin\"\n# windows::addToPath \"/path/to/bin\" prepend=true\n# ```\n# \n# > This function is only available on Windows, it uses `powershell` to directly modify the registry.\n# \nwindows::addToPath \"${1:path}\" prepend=${2:false}$0" ]
-},
-
-"windows::convertPathFromUnix": {
-  "prefix": "windows::convertPathFromUnix",
-  "description": "Convert a unix path to a Windows path...",
-  "scope": "",
-  "body": [ "windows::convertPathFromUnix \"${1:path}\"$0" ]
-},
-
-"windows::convertPathFromUnix#withdoc": {
-  "prefix": "windows::convertPathFromUnix#withdoc",
-  "description": "Convert a unix path to a Windows path...",
-  "scope": "",
-  "body": [ "# ## windows::convertPathFromUnix\n# \n# Convert a unix path to a Windows path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - \\${REPLY}: The Windows path.\n# \n# ```bash\n# windows::convertPathFromUnix \"/path/to/file\"\n# ```\n# \n# > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,\n# > handles other msys2 paths using `cygpath`.\n# \nwindows::convertPathFromUnix \"${1:path}\"$0" ]
-},
-
-"windows::convertPathToUnix": {
-  "prefix": "windows::convertPathToUnix",
-  "description": "Convert a Windows path to a unix path...",
-  "scope": "",
-  "body": [ "windows::convertPathToUnix \"${1:path}\"$0" ]
-},
-
-"windows::convertPathToUnix#withdoc": {
-  "prefix": "windows::convertPathToUnix#withdoc",
-  "description": "Convert a Windows path to a unix path...",
-  "scope": "",
-  "body": [ "# ## windows::convertPathToUnix\n# \n# Convert a Windows path to a unix path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - \\${REPLY}: The unix path.\n# \n# ```bash\n# windows::convertPathToUnix \"C:\\path\\to\\file\"\n# ```\n# \n# > Handles paths starting with `X:\\`.\n# \nwindows::convertPathToUnix \"${1:path}\"$0" ]
 },
 
 "windows::createLink": {
@@ -2575,6 +2561,34 @@
   "description": "Get the value of an environment variable for the current user on Windows...",
   "scope": "",
   "body": [ "# ## windows::getEnvVar\n# \n# Get the value of an environment variable for the current user on Windows.\n# \n# - \\$1: **variable name** _as string_:\n#       the name of the environment variable to get.\n# \n# Returns:\n# \n# - \\${REPLY}: the value of the environment variable.\n# \n# ```bash\n# windows::getEnvVar \"MY_VAR\"\n# echo \"\\${REPLY}\"\n# ```\n# \nwindows::getEnvVar \"${1:variable name}\"$0" ]
+},
+
+"windows::getUnixPathFromWindowsPath": {
+  "prefix": "windows::getUnixPathFromWindowsPath",
+  "description": "Convert a Windows path to a unix path...",
+  "scope": "",
+  "body": [ "windows::getUnixPathFromWindowsPath \"${1:path}\"$0" ]
+},
+
+"windows::getUnixPathFromWindowsPath#withdoc": {
+  "prefix": "windows::getUnixPathFromWindowsPath#withdoc",
+  "description": "Convert a Windows path to a unix path...",
+  "scope": "",
+  "body": [ "# ## windows::getUnixPathFromWindowsPath\n# \n# Convert a Windows path to a unix path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - \\${REPLY}: The unix path.\n# \n# ```bash\n# windows::getUnixPathFromWindowsPath \"C:\\path\\to\\file\"\n# ```\n# \n# > Handles paths starting with `X:\\`.\n# \nwindows::getUnixPathFromWindowsPath \"${1:path}\"$0" ]
+},
+
+"windows::getWindowsPathFromUnixPath": {
+  "prefix": "windows::getWindowsPathFromUnixPath",
+  "description": "Convert a unix path to a Windows path...",
+  "scope": "",
+  "body": [ "windows::getWindowsPathFromUnixPath \"${1:path}\"$0" ]
+},
+
+"windows::getWindowsPathFromUnixPath#withdoc": {
+  "prefix": "windows::getWindowsPathFromUnixPath#withdoc",
+  "description": "Convert a unix path to a Windows path...",
+  "scope": "",
+  "body": [ "# ## windows::getWindowsPathFromUnixPath\n# \n# Convert a unix path to a Windows path.\n# \n# - \\$1: **path** _as string_:\n#       the path to convert\n# \n# Returns:\n# \n# - \\${REPLY}: The Windows path.\n# \n# ```bash\n# windows::getWindowsPathFromUnixPath \"/path/to/file\"\n# ```\n# \n# > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,\n# > handles other msys2 paths using `cygpath`.\n# \nwindows::getWindowsPathFromUnixPath \"${1:path}\"$0" ]
 },
 
 "windows::runPs1": {

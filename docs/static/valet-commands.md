@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).
 
 ## ▶️ valet self add-command
 
@@ -789,6 +789,10 @@ valet [options] [--] [commands...]
 
   Generate the yaml from the given kustomize directory.
 
+- `aws-login`
+
+  Log in to AWS and EKS for the specified profile.
+
 - `bootstrap`
 
   Bootstrap a k8s cluster by applying Kustomize configuration step by step.
@@ -833,17 +837,9 @@ valet [options] [--] [commands...]
 
   (Kustomize plugin) Generate k8s resource list from a combination of mustaches templates and scopes.
 
-- `mustache-replace-for-iac`
-
-  Run mustache on a given file or string with the specifications from a platform or an operation-zone.
-
 - `reset-argo-cd`
 
   Deletes all the ArgoCD resources from a cluster.
-
-- `reset-cluster`
-
-  Reset the k8s cluster by removing all objects deploying in the common-plane, tenants and operation zone.
 
 - `self add-command`
 
@@ -939,4 +935,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

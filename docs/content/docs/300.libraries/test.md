@@ -264,6 +264,17 @@ Example usage:
 test::setTerminalInputs "a" "b" "c"
 ```
 
+## ⚡ test::setupBashForConsistency
+
+This function is used to set up the Bash environment for maximum consistency during testing.
+It will override important dynamic bash variables to have more static results.
+
+Example usage:
+
+```bash
+test::setupBashForConsistency
+```
+
 ## ⚡ test::title
 
 Call this function to add an H3 title in the report file.
@@ -281,4 +292,4 @@ test::title "Testing something"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

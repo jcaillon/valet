@@ -5,7 +5,33 @@ cascade:
 url: /docs/libraries/time
 ---
 
-## ⚡ time::convertMicrosecondsToHuman
+## ⚡ time::getDate
+
+Get the current date in the given format.
+
+Inputs:
+
+- `${format}` _as string_:
+
+  (optional) the format (see printf) of the date to return
+
+  (defaults to "%(%F_%Hh%Mm%Ss)T")
+
+Returns:
+
+- `${REPLY}`: the current date in the given format.
+
+Example usage:
+
+```bash
+time::getDate
+local date="${REPLY}"
+time::getDate format="'%(%Hh%Mm%Ss)T'"
+```
+
+> This function avoid to call $(date) in a subshell (date is a an external executable).
+
+## ⚡ time::getMicrosecondsToHuman
 
 Convert microseconds to human readable format.
 
@@ -44,12 +70,12 @@ Returns:
 Example usage:
 
 ```bash
-time::convertMicrosecondsToHuman 123456789
-time::convertMicrosecondsToHuman 123456789 format="%HH:%MM:%SS"
+time::getMicrosecondsToHuman 123456789
+time::getMicrosecondsToHuman 123456789 format="%HH:%MM:%SS"
 echo "${REPLY}"
 ```
 
-## ⚡ time::convertMicrosecondsToSeconds
+## ⚡ time::getMicrosecondsToSeconds
 
 Convert a microseconds integer to seconds float.
 e.g. 1234567 → 1.234567
@@ -73,36 +99,10 @@ Returns:
 Example usage:
 
 ```bash
-time::convertMicrosecondsToSeconds 1234567
-time::convertMicrosecondsToSeconds 1234567 precision=3
+time::getMicrosecondsToSeconds 1234567
+time::getMicrosecondsToSeconds 1234567 precision=3
 echo "${REPLY}"
 ```
-
-## ⚡ time::getDate
-
-Get the current date in the given format.
-
-Inputs:
-
-- `${format}` _as string_:
-
-  (optional) the format (see printf) of the date to return
-
-  (defaults to "%(%F_%Hh%Mm%Ss)T")
-
-Returns:
-
-- `${REPLY}`: the current date in the given format.
-
-Example usage:
-
-```bash
-time::getDate
-local date="${REPLY}"
-time::getDate format="'%(%Hh%Mm%Ss)T'"
-```
-
-> This function avoid to call $(date) in a subshell (date is a an external executable).
 
 ## ⚡ time::getProgramElapsedMicroseconds
 
@@ -117,7 +117,7 @@ Example usage:
 ```bash
 time::getProgramElapsedMicroseconds
 echo "${REPLY}"
-time::convertMicrosecondsToHuman "${REPLY}"
+time::getMicrosecondsToHuman "${REPLY}"
 echo "Human time: ${REPLY}"
 ```
 
@@ -140,7 +140,7 @@ Inputs:
 - `${format}` _as string_:
 
   (optional) The format to use if we log the elapsed time.
-  See `time::convertMicrosecondsToHuman` for the format.
+  See `time::getMicrosecondsToHuman` for the format.
 
   (defaults to "%S.%LLs").
 
@@ -168,4 +168,4 @@ time::getTimerMicroseconds
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).

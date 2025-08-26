@@ -94,7 +94,7 @@ echo "${REPLY}"
 log::getCallStack stackToSkip=2 stackToSkipAtEnd=1 wrapWidth=80
 ```
 
-> For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+> For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`
 > variables to simulate a call stack.
 
 ## ⚡ log::getLevel
@@ -186,7 +186,7 @@ log::printCallStack
 log::printCallStack stackToSkip=0
 ```
 
-> For test purposes, you can set the `GLOBAL_STACK_FUNCTION_NAMES`, `GLOBAL_STACK_SOURCE_FILES` and `GLOBAL_STACK_LINE_NUMBERS`
+> For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`
 > variables to simulate a call stack.
 
 ## ⚡ log::printFile
@@ -427,4 +427,4 @@ log::warning "This is a warning message."
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.30.1455 (2025-08-18).
+> Documentation generated for the version 0.31.272 (2025-08-26).
