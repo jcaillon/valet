@@ -392,12 +392,14 @@ function selfRelease_writeAllFunctionsDocumentation() {
   # delete the existing files
   fs::listFiles "${GLOBAL_INSTALLATION_DIRECTORY}/docs/content/docs/300.libraries"
   local file
+  local -a files
   for file in "${REPLY_ARRAY[@]}"; do
     if [[ ${file} == *"_index.md" ]]; then
       continue
     fi
-    exe::invoke rm -f "${file}"
+    files+=("${file}")
   done
+  exe::invoke rm -f "${files[@]}"
 
   local -A documentationPageContent
 

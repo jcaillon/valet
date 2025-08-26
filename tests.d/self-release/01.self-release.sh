@@ -15,7 +15,17 @@ function main() {
 }
 
 function exe::invoke() {
-  echo "🙈 mocked exe::invoke $*" 1>&2
+  local IFS=" "
+  if [[ $* == *"docs/content/docs/"* ]]; then
+    # since we list files here we can have diffs after a release; we don't display all the args here
+    echo "🙈 mocked exe::invoke ${1} ${2} ..." 1>&2
+    REPLY_CODE=0
+    REPLY=""
+    REPLY2=""
+    return 0
+  fi
+
+  echo "🙈 mocked exe::invoke ${*}" 1>&2
   if [[ ${1} == "git" ]]; then
     while [[ $# -gt 0 ]]; do
       case "${1}" in
@@ -33,13 +43,13 @@ function exe::invoke() {
 }
 
 function interactive::promptYesNo() {
-  echo "🙈 mocked interactive::promptYesNo $*" 1>&2
+  echo "🙈 mocked interactive::promptYesNo ${*}" 1>&2
   return 0
 }
 
 # shellcheck disable=SC2034
 function curl::request() {
-  echo "🙈 mocked curl::request $*" 1>&2
+  echo "🙈 mocked curl::request ${*}" 1>&2
   REPLY_CODE=0
   REPLY='{ "upload_url": "https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets{?name,label}", "tag_name": "v1.2.3", "browser_download_url": "https:///fake" }'
   REPLY2=""
@@ -49,7 +59,7 @@ function curl::request() {
 
 # shellcheck disable=SC2034
 function curl::download() {
-  echo "🙈 mocked curl::download $*" 1>&2
+  echo "🙈 mocked curl::download ${*}" 1>&2
   REPLY_CODE=0
   REPLY=""
   REPLY2=""
@@ -61,7 +71,13 @@ function core::getVersion() {
 }
 
 function fs::writeToFile() {
-  echo "🙈 mocked fs::writeToFile $1" 1>&2
+  if [[ $* == *"docs/content/docs/"* ]]; then
+    # since we list files here we can have diffs after a release; we don't display all the args here
+    echo "🙈 mocked fs::writeToFile ..." 1>&2
+    return 0
+  fi
+
+  echo "🙈 mocked fs::writeToFile ${*}" 1>&2
 }
 
 # shellcheck disable=SC2317
