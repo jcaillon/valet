@@ -334,12 +334,11 @@ function progress_getStringToDisplay() {
     displayedString="${displayedString//"<percent>"/"${percentageString}"}"
   fi
 
+  local progressBarSize="${barSize}"
+  if ((progressBarSize > GLOBAL_COLUMNS - templateLengthWithoutBarAndMessage)); then
+    progressBarSize=$((GLOBAL_COLUMNS - templateLengthWithoutBarAndMessage))
+  fi
   if [[ ${template} == *"<bar>"* ]]; then
-    local progressBarSize="${barSize}"
-    if ((progressBarSize > GLOBAL_COLUMNS - templateLengthWithoutBarAndMessage)); then
-      progressBarSize=$((GLOBAL_COLUMNS - templateLengthWithoutBarAndMessage))
-    fi
-
     progress_getProgressBarString "${percentage}" "${progressBarSize}"
     displayedString="${displayedString//"<bar>"/"${REPLY}"}"
   fi

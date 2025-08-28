@@ -513,7 +513,7 @@ function core_dump() {
     # shellcheck disable=SC1091
     source bash
     for fd in /proc/"${BASHPID}"/fd/*; do
-      bash::getBuiltinOutput readlink -f "${fd}"
+      bash::getBuiltinOutput readlink -f "${fd}" 2>/dev/null
       if [[ -n ${REPLY} ]]; then
         listOfFds+="${fd} -> ${REPLY%$'\n'*}"$'\n'
       else

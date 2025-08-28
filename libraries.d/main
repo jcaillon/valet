@@ -57,7 +57,8 @@ declare -g \
   GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG="printf \"%-8s %s\n\" \"\${level:-}\" \"\${messageToLog}\" 1>&2" \
   GLOBAL_LOG_PRINT_STATEMENT_STANDARD="printf \"%s\" \"\${rawStringToPrintInLog}\" 1>&2" \
   GLOBAL_LOG_WRAP_PADDING='' \
-  GLOBAL_LOG_DISABLE_WRAP=true
+  GLOBAL_LOG_DISABLE_WRAP=true \
+  GLOBAL_COLUMNS=120
 
 # start the profiler
 if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then

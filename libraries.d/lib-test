@@ -515,6 +515,7 @@ function test::fail() {
 # ```
 # shellcheck disable=SC2317
 function test::setTerminalInputs() {
+  include terminal
   if [[ ! -v TEST_TERMINAL_INPUTS ]]; then
     # override the default functions
     function terminal::waitForChar() {
