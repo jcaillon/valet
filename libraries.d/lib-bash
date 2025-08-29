@@ -92,10 +92,9 @@ function bash::runInSubshell() {
   (
     # re-enable errexit in the subshell
     set -o errexit
-    trap::registerSubshell
 
-    # the coproc must have its own set of temp files
-    fs::setupSubshellTempFileGlobalVariable
+    # we are inside a coproc, init the subshell correctly
+    core::initSubshell
 
     # unset options or they will be visible from the subshell and might interfere
     local IFS=' '$'\t'$'\n'

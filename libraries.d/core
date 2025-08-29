@@ -469,6 +469,26 @@ function core::createSavedFilePath() {
   REPLY="${REPLY}/saved-files/${filePath}"
 }
 
+# ## core::initSubshell
+#
+# Do the necessary initialization for a new subshell, ensuring coherent behavior:
+#
+# - Set the correct traps.
+# - Initialize specific temporary files/directories location.
+# - Reset the elapsed time to 0.
+#
+# ```bash
+# core::initSubshell
+# ```
+function core::initSubshell() {
+  trap::registerSubshell
+  fs::setupSubshellTempFileGlobalVariable
+  # shellcheck disable=SC2034
+  declare -g \
+    GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%[.,]*}" \
+    GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*[.,]}"
+}
+
 # ## core::dump
 #
 # Dumps information about the current bash session into a new file.

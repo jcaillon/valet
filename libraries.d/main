@@ -72,7 +72,11 @@ if [[ ${VALET_CONFIG_STARTUP_PROFILING:-} == "true" ]]; then
 fi
 
 # save the original stdin/stderr fd
-exec {GLOBAL_FD_ORIGINAL_STDIN}<&0
+if [[ -t 0 ]]; then
+  exec {GLOBAL_FD_ORIGINAL_STDIN}<&0
+else
+  exec {GLOBAL_FD_ORIGINAL_STDIN}</dev/null
+fi
 exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
 
 # fd where we write the TUI

@@ -322,11 +322,8 @@ function coproc_program() {
   local keepOnlyLastMessage="${6}"
   local redirectLogsToFile="${7}"
 
-  # we are inside a coproc, register the correct traps
-  trap::registerSubshell
-
-  # the coproc must have its own set of temp files
-  fs::setupSubshellTempFileGlobalVariable
+  # we are inside a coproc, init the subshell correctly
+  core::initSubshell
 
   local IFS=' '$'\t'$'\n'
   if [[ -n ${redirectLogsToFile} ]]; then
