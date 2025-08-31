@@ -2,7 +2,7 @@
 # This script contains the documentation of all the valet library functions.
 # It can be used in your editor to provide auto-completion and documentation.
 #
-# Documentation generated for the version 0.31.272 (2025-08-26).
+# Documentation generated for the version 0.32.168 (2025-08-31).
 
 # ## array::appendIfNotPresent
 # 
@@ -1005,6 +1005,20 @@ function core::getUserStateDirectory() { :; }
 # 
 function core::getVersion() { :; }
 
+# ## core::initSubshell
+# 
+# Do the necessary initialization for a new subshell, ensuring coherent behavior:
+# 
+# - Set the correct traps.
+# - Initialize specific temporary files/directories location.
+# - Reset the elapsed time to 0.
+# 
+# ```bash
+# core::initSubshell
+# ```
+# 
+function core::initSubshell() { :; }
+
 # ## core::parseFunctionOptions
 # 
 # Parses the shell parameters passed as arguments and sets the REPLY variable to a string that can be
@@ -1177,7 +1191,10 @@ function esc-codes::*() { :; }
 # - ${acceptableCodes} _as string_:
 #       (optional) The acceptable error codes, comma separated.
 #       If the error code is matched, then REPLY_CODE is set to 0)
-#       (defaults to 0)
+#       (defaults to "0")
+# - ${failMessage} _as string_:
+#       (optional) The message to display on failure.
+#       (defaults to "")
 # - ${appendRedirect} _as bool_:
 #       (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).
 #       This is useful when you want to run the same command multiple times and keep the previous output.
@@ -2264,8 +2281,8 @@ function profiler::resume() { :; }
 # 
 #       The default spinner is defined by the environment variable `VALET_CONFIG_SPINNER_CHARACTERS`.
 #       (defaults to "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
-# - ${percentage} _as int_:
-#       (optional) The default percentage to start with.
+# - ${percent} _as int_:
+#       (optional) The default percent to start with.
 #       (defaults to 0)
 # - ${message} _as string_:
 #       (optional) The default message to start with.
@@ -2279,7 +2296,7 @@ function profiler::resume() { :; }
 # progress::start template="<spinner> <percent> ░<bar>░ <message>" size=30 spinnerFrames="⢄⢂⢁⡁⡈⡐⡠"
 # IDX=0
 # while [[ ${IDX} -le 50 ]]; do
-#   progress::update $((IDX * 2)) "Doing something ${IDX}/50..."
+#   progress::update percent=$((IDX * 2)) message="Doing something ${IDX}/50..."
 #   IDX=$((IDX + 1))
 #   sleep 0.1
 # done
@@ -2308,13 +2325,15 @@ function progress::stop() { :; }
 # The animation can be started with progress::start for more options.
 # The animation will stop if the updated percentage is 100.
 # 
-# - $1: **percent** _as int_:
-#       the percentage of the progress bar (0 to 100)
-# - $2: message _as string_:
+# - ${percent} _as int_:
+#       (optional) the percentage of the progress bar (0 to 100)
+#       (defaults to 0)
+# - ${message} _as string_:
 #       (optional) the message to display
+#       (defaults to "")
 # 
 # ```bash
-# progress::update 50 "Doing something..."
+# progress::update percent=50 percent="Doing something..."
 # ```
 # 
 function progress::update() { :; }

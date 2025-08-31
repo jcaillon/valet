@@ -213,6 +213,20 @@ core::getVersion
 printf '%s\n' "The version of Valet is ⌜${REPLY}⌝."
 ```
 
+## ⚡ core::initSubshell
+
+Do the necessary initialization for a new subshell, ensuring coherent behavior:
+
+- Set the correct traps.
+- Initialize specific temporary files/directories location.
+- Reset the elapsed time to 0.
+
+Example usage:
+
+```bash
+core::initSubshell
+```
+
 ## ⚡ core::parseFunctionOptions
 
 Parses the shell parameters passed as arguments and sets the REPLY variable to a string that can be
@@ -304,4 +318,4 @@ _OPTION_CONTINUE_IF_NOT_FOUND=false _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 so
 > - Use `builtin source` if you want to include the file even if it was already included.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.31.272 (2025-08-26).
+> Documentation generated for the version 0.32.168 (2025-08-31).

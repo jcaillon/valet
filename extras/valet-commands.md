@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.31.272 (2025-08-26).
+> Documentation generated for the version 0.32.168 (2025-08-31).
 
 ## ▶️ valet self add-command
 
@@ -95,15 +95,10 @@ valet self build [options]
   Defaults to the valet extensions directory.
   This option can be set by exporting the variable VALET_EXTENSIONS_DIRECTORY='<path>'.
 
-- `-C, --core-only`
+- `--extra-extension-directories <path>`
 
-  Build only the core commands (under commands.d).
-  This option can be set by exporting the variable VALET_CORE_ONLY='true'.
-
-- `--include-showcase`
-
-  Build the showcase extension if it exists in the valet installation directory.
-  This option can be set by exporting the variable VALET_INCLUDE_SHOWCASE='true'.
+  Comma separated list of additional valet extension directories, in which to look for commands and libraries.
+  This option can be set by exporting the variable VALET_EXTRA_EXTENSION_DIRECTORIES='<path>'.
 
 - `-o, --output <path>`
 
@@ -283,10 +278,10 @@ valet self extend [options] [--] <extension-uri>
   The URI of the extension to install or create.
   
   1. If you want to create a new extension, this argument should be the name of your
-     new extension (e.g. `my-new-extension`).
+    new extension (e.g. `my-new-extension`).
   2. If you want to setup an existing directory as an extension, this argument should be `.`.
   3. If you want to download an extension, this argument should be the URL of the repository.
-     Usually a GitHub or GitLab repository URL such as `https://github.com/jcaillon/valet-devops-toolbox.git`.
+    Usually a GitHub or GitLab repository URL such as `https://github.com/jcaillon/valet-devops-toolbox.git`.
   
   > If the repository is private, you can pass the URL with the username and password like this:
   > `https://username:password@my.gitlab.private/group/project.git`.
@@ -551,15 +546,15 @@ This script will:
   - ~/.local/valet otherwise
 
 - 3. Make the valet script readable and executable, either by adding a shim
-     in a bin directory already present in your PATH, or by adding the Valet
-     directory to your PATH on shell startup.
+    in a bin directory already present in your PATH, or by adding the Valet
+    directory to your PATH on shell startup.
 
 - 4. Copy the showcase (command examples) in the valet user directory ~/.valet.d.
 
 - 6. Run self setup command (in case of a new installation) or re-export the config.
 
 - 7. Try to update (fetch merge --ff-only) the git repositories and all
-     installed extensions in your valet user directory.
+    installed extensions in your valet user directory.
 
 
 ### Usage
@@ -793,6 +788,10 @@ valet [options] [--] [commands...]
 
   Log in to AWS and EKS for the specified profile.
 
+- `aws-logout`
+
+  Log out of AWS.
+
 - `bootstrap`
 
   Bootstrap a k8s cluster by applying Kustomize configuration step by step.
@@ -816,6 +815,10 @@ valet [options] [--] [commands...]
 - `extension3`
 
   Do nothing.
+
+- `find-aws-secret`
+
+  Find a secret from AWS Secrets Manager.
 
 - `find-k8s-issues`
 
@@ -865,18 +868,6 @@ valet [options] [--] [commands...]
 
   Extends Valet by creating or downloading a new extension in the user directory.
 
-- `self mock1`
-
-  A command that only for testing valet core functions.
-
-- `self mock2`
-
-  A command that only for testing valet core functions.
-
-- `self mock3`
-
-  A command that only for testing valet core functions.
-
 - `self release`
 
   Release a new version of valet.
@@ -911,7 +902,7 @@ valet [options] [--] [commands...]
 
 - `terraform`
 
-  Validate, plan or apply terraform files for a platform or an operation-zone.
+  Init, validate, destroy, plan or apply a terraform configuration.
 
 - `test-repository`
 
@@ -935,4 +926,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.31.272 (2025-08-26).
+> Documentation generated for the version 0.32.168 (2025-08-31).

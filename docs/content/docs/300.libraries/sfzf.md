@@ -60,4 +60,4 @@ log::info "You selected: ⌜${REPLY}⌝ (index: ⌜${REPLY2}⌝)"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.31.272 (2025-08-26).
+> Documentation generated for the version 0.32.168 (2025-08-31).

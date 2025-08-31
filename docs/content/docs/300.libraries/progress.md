@@ -69,9 +69,9 @@ Inputs:
 
   (defaults to "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
 
-- `${percentage}` _as int_:
+- `${percent}` _as int_:
 
-  (optional) The default percentage to start with.
+  (optional) The default percent to start with.
 
   (defaults to 0)
 
@@ -91,7 +91,7 @@ progress::stop
 progress::start template="<spinner> <percent> ░<bar>░ <message>" size=30 spinnerFrames="⢄⢂⢁⡁⡈⡐⡠"
 IDX=0
 while [[ ${IDX} -le 50 ]]; do
-  progress::update $((IDX * 2)) "Doing something ${IDX}/50..."
+  progress::update percent=$((IDX * 2)) message="Doing something ${IDX}/50..."
   IDX=$((IDX + 1))
   sleep 0.1
 done
@@ -120,19 +120,23 @@ The animation will stop if the updated percentage is 100.
 
 Inputs:
 
-- `$1`: **percent** _as int_:
+- `${percent}` _as int_:
 
-  the percentage of the progress bar (0 to 100)
+  (optional) the percentage of the progress bar (0 to 100)
 
-- `$2`: message _as string_:
+  (defaults to 0)
+
+- `${message}` _as string_:
 
   (optional) the message to display
+
+  (defaults to "")
 
 Example usage:
 
 ```bash
-progress::update 50 "Doing something..."
+progress::update percent=50 percent="Doing something..."
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.31.272 (2025-08-26).
+> Documentation generated for the version 0.32.168 (2025-08-31).

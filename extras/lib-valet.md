@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.31.272 (2025-08-26).
+> Documentation generated for the version 0.32.168 (2025-08-31).
 
 ## ⚡ array::appendIfNotPresent
 
@@ -1186,6 +1186,20 @@ core::getVersion
 printf '%s\n' "The version of Valet is ⌜${REPLY}⌝."
 ```
 
+## ⚡ core::initSubshell
+
+Do the necessary initialization for a new subshell, ensuring coherent behavior:
+
+- Set the correct traps.
+- Initialize specific temporary files/directories location.
+- Reset the elapsed time to 0.
+
+Example usage:
+
+```bash
+core::initSubshell
+```
+
 ## ⚡ core::parseFunctionOptions
 
 Parses the shell parameters passed as arguments and sets the REPLY variable to a string that can be
@@ -1410,7 +1424,13 @@ Inputs:
   (optional) The acceptable error codes, comma separated.
   If the error code is matched, then REPLY_CODE is set to 0)
 
-  (defaults to 0)
+  (defaults to "0")
+
+- `${failMessage}` _as string_:
+
+  (optional) The message to display on failure.
+
+  (defaults to "")
 
 - `${appendRedirect}` _as bool_:
 
@@ -2750,9 +2770,9 @@ Inputs:
 
   (defaults to "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
 
-- `${percentage}` _as int_:
+- `${percent}` _as int_:
 
-  (optional) The default percentage to start with.
+  (optional) The default percent to start with.
 
   (defaults to 0)
 
@@ -2772,7 +2792,7 @@ progress::stop
 progress::start template="<spinner> <percent> ░<bar>░ <message>" size=30 spinnerFrames="⢄⢂⢁⡁⡈⡐⡠"
 IDX=0
 while [[ ${IDX} -le 50 ]]; do
-  progress::update $((IDX * 2)) "Doing something ${IDX}/50..."
+  progress::update percent=$((IDX * 2)) message="Doing something ${IDX}/50..."
   IDX=$((IDX + 1))
   sleep 0.1
 done
@@ -2801,18 +2821,22 @@ The animation will stop if the updated percentage is 100.
 
 Inputs:
 
-- `$1`: **percent** _as int_:
+- `${percent}` _as int_:
 
-  the percentage of the progress bar (0 to 100)
+  (optional) the percentage of the progress bar (0 to 100)
 
-- `$2`: message _as string_:
+  (defaults to 0)
+
+- `${message}` _as string_:
 
   (optional) the message to display
+
+  (defaults to "")
 
 Example usage:
 
 ```bash
-progress::update 50 "Doing something..."
+progress::update percent=50 percent="Doing something..."
 ```
 
 ## ⚡ regex::escapeRegexSpecialChars
@@ -4962,4 +4986,4 @@ windows::endPs1Batch
 
 
 
-> Documentation generated for the version 0.31.272 (2025-08-26).
+> Documentation generated for the version 0.32.168 (2025-08-31).

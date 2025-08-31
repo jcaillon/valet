@@ -70,7 +70,13 @@ Inputs:
   (optional) The acceptable error codes, comma separated.
   If the error code is matched, then REPLY_CODE is set to 0)
 
-  (defaults to 0)
+  (defaults to "0")
+
+- `${failMessage}` _as string_:
+
+  (optional) The message to display on failure.
+
+  (defaults to "")
 
 - `${appendRedirect}` _as bool_:
 
@@ -127,4 +133,4 @@ exe::invoke cat --- stdin="Hello World"
 > - On linux, you can use a tmpfs directory for massive gains over subshells.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.31.272 (2025-08-26).
+> Documentation generated for the version 0.32.168 (2025-08-31).
