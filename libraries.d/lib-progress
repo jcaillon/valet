@@ -165,7 +165,7 @@ function progress::stop() {
 function progress::update() {
   local \
     message="" \
-    percent=0
+    percent=0 \
     IFS=$' '
   eval "local a= ${*@Q}"
 
@@ -174,12 +174,12 @@ function progress::update() {
     return 0
   fi
 
-  if (( percent < 0 )); then
+  if ((percent < 0)); then
     return
   fi
 
   # stop the progress bar at 100 percent
-  if (( percent >= 100 )); then
+  if ((percent >= 100)); then
     progress::stop
     return
   fi
@@ -257,7 +257,7 @@ function progress_runAnimationInBackground() {
   elif ((readDelay < 1000)); then
     readDelayInSeconds="0${readDelayInSeconds}"
   fi
-  readDelayInSeconds="${readDelayInSeconds:0:${#readDelayInSeconds} - 3}.${readDelayInSeconds:${#readDelayInSeconds} - 3}"
+  readDelayInSeconds="${readDelayInSeconds:0:${#readDelayInSeconds}-3}.${readDelayInSeconds:${#readDelayInSeconds}-3}"
 
   local -i spinnerIndex=0 loop=0
   local IFS='' instructionReceived="" instruction displayedString computeDisplayString=true
@@ -295,7 +295,7 @@ function progress_runAnimationInBackground() {
     time::getProgramElapsedMicroseconds
     local -i elapsed=$((REPLY - timerStart))
     loop=$((elapsed / 1000 / frameDelay))
-    spinnerIndex=$(( loop % ${#spinner} ))
+    spinnerIndex=$((loop % ${#spinner}))
     printf "%-${GLOBAL_COLUMNS}s%s" "${displayedString//"<spinner>"/"${spinner:spinnerIndex:1}"}" "${ESC__CURSOR_MOVE__}1${__ESC__COLUMN}" 1>&"${GLOBAL_FD_TUI}"
 
     # since we put a timeout on the read, we don't want to risk not reading the entire instruction,
@@ -353,7 +353,7 @@ function progress_getStringToDisplay() {
     local -i templateLengthWithoutMessage=$((templateLengthWithoutBarAndMessage + progressBarSize))
     local messageWithoutSfrCodes="${message}"
     string::removeTextFormatting messageWithoutSfrCodes
-    if (( templateLengthWithoutMessage == GLOBAL_COLUMNS)); then
+    if ((templateLengthWithoutMessage == GLOBAL_COLUMNS)); then
       message=""
     elif ((templateLengthWithoutMessage + ${#messageWithoutSfrCodes} > GLOBAL_COLUMNS)); then
       string::wrapCharacters message width=$((GLOBAL_COLUMNS - templateLengthWithoutMessage - 1))

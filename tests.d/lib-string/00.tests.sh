@@ -159,6 +159,8 @@ function test_string::split() {
 
   test::func _MY_STRING="name:firstname:address" string::split _MY_STRING ":"
   test::func _MY_STRING="one:two,three" string::split _MY_STRING ":,"
+  _MY_STRING="one"$'\n'"two"$'\n'"three"
+  test::func string::split _MY_STRING $'\n'
 }
 
 function test_string::wrapWords() {

@@ -432,6 +432,18 @@ REPLY_ARRAY=(
 )
 ```
 
+❯ `string::split _MY_STRING $'\n'`
+
+Returned variables:
+
+```text
+REPLY_ARRAY=(
+[0]='one'
+[1]='two'
+[2]='three'
+)
+```
+
 ### ✅ Testing string::wrapWords
 
 Wrapping text at column 30 with no padding
