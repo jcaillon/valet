@@ -13,7 +13,7 @@ function main() {
   fi
 
   fs::createTempDirectory
-  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-build.sh" --output "${REPLY}" --core-only
+  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-build.sh" --extensions-directory "${GLOBAL_INSTALLATION_DIRECTORY}/no-directory" --extra-extension-directories "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.mock-extension" --output "${REPLY}"
 }
 
 main

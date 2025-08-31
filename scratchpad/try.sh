@@ -4,13 +4,6 @@ source "$(valet --source)"
 
 include system
 
-: <<"COMMAND_YAML"
-bonjour: "messieur"
-hello: "world$'\n'"
-$zazdzef
-COMMAND_YAML
-
-
 function string::getKebabCase() {
   REPLY="${!1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 

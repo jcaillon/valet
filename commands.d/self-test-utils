@@ -16,7 +16,7 @@ function selfTestUtils_rebuildCommands() {
   local IFS=' '
   log::debug "Rebuilding the commands ⌜$*⌝."
   command::sourceFunction selfBuild
-  selfBuild "$@" --silent
+  VALET_NO_OUTPUT=false VALET_CORE_ONLY=false selfBuild "$@" --silent
 }
 
 # Set the value of Valet variables to ensure consistency in the tests

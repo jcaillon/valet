@@ -4,13 +4,12 @@
 
 ### ✅ Testing self-build script
 
-❯ `$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-build.sh --output /tmp/valet.d/d1-2 --core-only`
+❯ `$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-build.sh --extensions-directory $GLOBAL_INSTALLATION_DIRECTORY/no-directory --extra-extension-directories $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension --output /tmp/valet.d/d1-2`
 
 **Error output**:
 
 ```text
-INFO     Added the test commands to the build.
-INFO     Skipping the build of scripts in user directory (building core commands only).
+INFO     Looking for commands and libraries in ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension⌝.
 INFO     Extracting commands from ⌜valet⌝.
 INFO                              ├── ⌜⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/help.sh⌝.
@@ -39,7 +38,7 @@ INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/s
 INFO                              ├── ⌜self test⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-uninstall.sh⌝.
 INFO                              ├── ⌜self uninstall⌝.
-INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh⌝.
 INFO                              ├── ⌜self mock1⌝.
 INFO                              ├── ⌜self mock2⌝.
 INFO                              ├── ⌜self mock3⌝.

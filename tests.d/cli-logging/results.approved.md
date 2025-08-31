@@ -39,7 +39,7 @@ DEBUG    Log level set to debug.
 
 WARNING  Beware that debug log level might lead to secret leak, use it only if necessary.
 
-DEBUG    Loaded file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh⌝.
+DEBUG    Loaded file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh⌝.
 
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 
@@ -86,7 +86,7 @@ WARNING  Beware that debug log level might lead to secret leak, use it only if n
 
 DEBUG    Sourcing the user commands from ⌜/tmp/valet.valet.d/commands⌝.
 
-DEBUG    Loaded file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.commands.d/self-mock.sh⌝.
+DEBUG    Loaded file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh⌝.
 
 DEBUG    Running the command ⌜self mock1⌝ with the function ⌜selfMock1⌝ and the arguments ⌜logging-level⌝.
 

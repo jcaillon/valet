@@ -36,12 +36,10 @@ options:
   description: |-
     Specify your valet extensions directory, in which to look for your extension commands.
     Defaults to the valet extensions directory.
-- name: -C, --core-only
+options:
+- name: --extra-extension-directories <path>
   description: |-
-    Build only the core commands (under commands.d).
-- name: --include-showcase
-  description: |-
-    Build the showcase extension if it exists in the valet installation directory.
+    Comma separated list of additional valet extension directories, in which to look for commands and libraries.
 - name: -o, --output <path>
   description: |-
     Specify the directory path in which to write the command definition variable files.
@@ -64,10 +62,14 @@ examples:
     Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
 COMMAND_YAML
 function selfBuild() {
-  local extensionsDirectory output coreOnly noOutput silent
-
   # if this script is run directly
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || ${GLOBAL_CMD_INCLUDED:-} != "true" ]]; then
+    local \
+      extensionsDirectory="${VALET_EXTENSIONS_DIRECTORY:-}" \
+      extraExtensionDirectories="${VALET_EXTRA_EXTENSION_DIRECTORIES:-}" \
+      output="${VALET_OUTPUT:-}" \
+      noOutput="false" \
+      silent="false"
     # parse arguments manually (basic parsing only)
     while [[ $# -gt 0 ]]; do
       case "${1}" in
@@ -75,15 +77,13 @@ function selfBuild() {
         shift
         extensionsDirectory="${1}"
         ;;
+      --extra-extension-directories)
+        shift
+        extraExtensionDirectories="${1}"
+        ;;
       -o | --output)
         shift
         output="${1}"
-        ;;
-      -C | --core-only)
-        coreOnly=true
-        ;;
-      --include-showcase)
-        includeShowcase=true
         ;;
       -O | --no-output)
         noOutput=true
@@ -103,8 +103,7 @@ function selfBuild() {
     command::checkParsedResults
   fi
 
-  log::debug "Building the valet user commands."
-
+  local IFS
   local originalLogLevel
   if [[ ${silent:-} == "true" ]]; then
     log::getLevel
@@ -118,16 +117,29 @@ function selfBuild() {
     fi
   fi
 
+  fs::getAbsolutePath "${GLOBAL_INSTALLATION_DIRECTORY}"
+  GLOBAL_INSTALLATION_DIRECTORY="${REPLY}"
+
   core::getExtensionsDirectory
   extensionsDirectory="${extensionsDirectory:-${REPLY}}"
+
+  local -a extensionDirectories=()
+  local directory
+  for directory in "${extensionsDirectory}"/*; do
+    if [[ ! -d ${directory} || ${directory} == "."* ]]; then
+      continue
+    fi
+    extensionDirectories+=("${directory}")
+  done
+  if [[ -n ${extraExtensionDirectories:-} ]]; then
+    string::split extraExtensionDirectories ","
+    extensionDirectories+=("${REPLY_ARRAY[@]}")
+  fi
 
   if [[ -z ${output:-} ]]; then
     core::getUserDataDirectory
     output="${REPLY}"
   fi
-
-  fs::getAbsolutePath "${GLOBAL_INSTALLATION_DIRECTORY}"
-  GLOBAL_INSTALLATION_DIRECTORY="${REPLY}"
 
   # list all the files in which we need to find command definitions
   local -a libraryDirectories=()
@@ -136,40 +148,20 @@ function selfBuild() {
     "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d"/*.sh
   )
 
-  if [[ -d "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.commands.d" ]]; then
-    commandDefinitionFiles+=("${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.commands.d"/*.sh)
-    log::info "Added the test commands to the build."
-  fi
-
-  if [[ ${includeShowcase:-} == "true" && -d "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" ]]; then
-    commandDefinitionFiles+=("${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/commands.d"/*.sh)
-    log::info "Added the showcase commands to the build."
-  fi
-
-  if [[ ${coreOnly:-} != "true" ]]; then
-    if [[ -d "${extensionsDirectory}" ]]; then
-      log::info "Building the valet user commands from extensions in the user directory ⌜${extensionsDirectory}⌝."
-      local extensionsDirectory
-      for extensionsDirectory in "${extensionsDirectory}"/*; do
-        if [[ ! -d ${extensionsDirectory} && ${extensionsDirectory} != "."* ]]; then
-          continue
-        fi
-        if [[ -d ${extensionsDirectory}/libraries.d ]]; then
-          libraryDirectories+=("${extensionsDirectory}/libraries.d")
-        fi
-        commandDefinitionFiles+=("${extensionsDirectory}/commands.d"/*.sh)
-      done
-    else
-      log::warning "Skipping the build of scripts in user directory ⌜${extensionsDirectory}⌝ because it does not exist."
+  local extensionDirectory
+  for extensionDirectory in "${extensionDirectories[@]}"; do
+    log::info "Looking for commands and libraries in ⌜${extensionDirectory}⌝."
+    if [[ -d ${extensionDirectory}/libraries.d ]]; then
+      libraryDirectories+=("${extensionDirectory}/libraries.d")
     fi
-  else
-    log::info "Skipping the build of scripts in user directory (building core commands only)."
-  fi
+    if [[ -d ${extensionDirectory}/commands.d ]]; then
+      commandDefinitionFiles+=("${extensionDirectory}/commands.d"/*.sh)
+    fi
+  done
 
   if log::isDebugEnabled; then
-    local IFS=$'\n'
+    IFS=$'\n'
     log::debug "Will extract command definitions from the following files:"$'\n'"${commandDefinitionFiles[*]}"
-    unset IFS
   fi
 
   # make sure to unset all previous CMD_* variables

@@ -34,6 +34,7 @@ function main() {
   rm -f "${VALET_CONFIG_USER_DATA_DIRECTORY}/commands"
 
   test::title "✅ Testing empty user directory rebuilding the commands"
+  export VALET_EXTRA_EXTENSION_DIRECTORIES="${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.mock-extension"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
 
   test::title "✅ Testing that NO_COLOR disable colors"

@@ -150,7 +150,7 @@ function selfTest() {
     fs::createTempDirectory
     tempUserDataDirectory="${REPLY}"
 
-    selfTestUtils_rebuildCommands --core-only --include-showcase --output "${tempUserDataDirectory}"
+    selfTestUtils_rebuildCommands --extensions-directory "${GLOBAL_INSTALLATION_DIRECTORY}/no-directory" --extra-extension-directories "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.mock-extension,${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" --output "${tempUserDataDirectory}"
     selfTest_addTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d" "${tempUserDataDirectory}"
 
     # now we can also test the commands in showcase.d if the directory is there
