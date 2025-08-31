@@ -677,7 +677,7 @@ function selfUpdate_addToPath() {
 
 # set the version to download by default
 # this is automatically updated by the self release command
-VALET_RELEASED_VERSION="0.31.272"
+VALET_RELEASED_VERSION="0.32.168"
 
 # import the core script (should always be skipped if the command is run from valet)
 if [[ ${GLOBAL_MAIN_INCLUDED:-} != "true" ]]; then
