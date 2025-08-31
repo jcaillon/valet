@@ -386,14 +386,10 @@ function string::count() {
 # string::split MY_STRING ","
 # ARRAY=("${REPLY_ARRAY[@]}")
 # ```
-#
-# > This is faster than using read into an array from a here string.
 function string::split() {
   local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local IFS="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  # shellcheck disable=SC2206
   # shellcheck disable=SC2034
-  REPLY_ARRAY=(${inputString_NameRef})
+  IFS="${2}" read -r -a REPLY_ARRAY <<<"${inputString_NameRef}"
 }
 
 # ## string::head
