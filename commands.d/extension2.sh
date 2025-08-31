@@ -7,19 +7,19 @@ source extension2
 # >>> command: extension2
 #===============================================================
 
-##<<VALET_COMMAND
-# command: extension2
-# function: extension2
-# shortDescription: Do nothing.
-# description: |-
-#   Really, it does nothing.
-# examples:
-# - name: extension2
-#   description: |-
-#     Just run the command and do nothing.
-##VALET_COMMAND
+: <<"COMMAND_YAML"
+command: extension2
+function: extension2
+shortDescription: Do nothing.
+description: |-
+  Really, it does nothing.
+examples:
+- name: extension2
+  description: |-
+    Just run the command and do nothing.
+COMMAND_YAML
 function extension2() {
-  command::parseArguments "$@" && eval "${REPLY}"
+  command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
 
   extension2::doNothing
