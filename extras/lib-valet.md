@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.32.168 (2025-08-31).
+> Documentation generated for the version 0.33.0 (2025-08-31).
 
 ## ⚡ array::appendIfNotPresent
 
@@ -4986,4 +4986,4 @@ windows::endPs1Batch
 
 
 
-> Documentation generated for the version 0.32.168 (2025-08-31).
+> Documentation generated for the version 0.33.0 (2025-08-31).

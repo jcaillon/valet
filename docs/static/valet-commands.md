@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.32.168 (2025-08-31).
+> Documentation generated for the version 0.33.0 (2025-08-31).
 
 ## ▶️ valet self add-command
 
@@ -926,4 +926,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.32.168 (2025-08-31).
+> Documentation generated for the version 0.33.0 (2025-08-31).

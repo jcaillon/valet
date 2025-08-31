@@ -211,4 +211,4 @@ echo "${REPLY_ARRAY[@]}"
 > - It is not appropriate for large array, use the `sort` binary for such cases.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.32.168 (2025-08-31).
+> Documentation generated for the version 0.33.0 (2025-08-31).

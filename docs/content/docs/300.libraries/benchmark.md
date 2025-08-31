@@ -46,4 +46,4 @@ benchmark::run baseline function1 function2 --- baselineTimeInSeconds=5 maxRuns=
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.32.168 (2025-08-31).
+> Documentation generated for the version 0.33.0 (2025-08-31).
