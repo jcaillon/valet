@@ -62,14 +62,14 @@ examples:
     Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
 COMMAND_YAML
 function selfBuild() {
+  local extensionsDirectory extraExtensionDirectories output noOutput silent
   # if this script is run directly
   if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" || ${GLOBAL_CMD_INCLUDED:-} != "true" ]]; then
-    local \
-      extensionsDirectory="${VALET_EXTENSIONS_DIRECTORY:-}" \
-      extraExtensionDirectories="${VALET_EXTRA_EXTENSION_DIRECTORIES:-}" \
-      output="${VALET_OUTPUT:-}" \
-      noOutput="false" \
-      silent="false"
+    extensionsDirectory="${VALET_EXTENSIONS_DIRECTORY:-}"
+    extraExtensionDirectories="${VALET_EXTRA_EXTENSION_DIRECTORIES:-}"
+    output="${VALET_OUTPUT:-}"
+    noOutput="false"
+    silent="false"
     # parse arguments manually (basic parsing only)
     while [[ $# -gt 0 ]]; do
       case "${1}" in
@@ -103,7 +103,6 @@ function selfBuild() {
     command::checkParsedResults
   fi
 
-  local IFS
   local originalLogLevel
   if [[ ${silent:-} == "true" ]]; then
     log::getLevel
@@ -160,7 +159,7 @@ function selfBuild() {
   done
 
   if log::isDebugEnabled; then
-    IFS=$'\n'
+    local IFS=$'\n'
     log::debug "Will extract command definitions from the following files:"$'\n'"${commandDefinitionFiles[*]}"
   fi
 
@@ -252,6 +251,7 @@ function bumpValetBuildVersion() {
 #
 # $@: The files to extract from.
 function extractCommandDefinitionsToVariables() {
+  local IFS=$' \t\n'
   local -i duplicatedCommands=0
   while [[ $# -gt 0 ]]; do
     local file="${1}"
