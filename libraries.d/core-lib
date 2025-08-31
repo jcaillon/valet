@@ -1786,10 +1786,10 @@ function array_fuzzyFilterSortQuicksort() {
     right=$((right - 1))
   done
   if ((${1} < right)); then
-    array_fuzzyFilterSortQuicksort ${1} ${right}
+    array_fuzzyFilterSortQuicksort "${1}" ${right}
   fi
   if ((right + 1 < ${2})); then
-    array_fuzzyFilterSortQuicksort $((right + 1)) ${2}
+    array_fuzzyFilterSortQuicksort $((right + 1)) "${2}"
   fi
 }
 

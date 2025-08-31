@@ -12,10 +12,11 @@ include benchmark progress coproc bash
 
 progress::start percent=0 message="Running test suites."
 
+# shellcheck disable=SC2034
 JOB_NAMES=(name{1..30})
 JOB_COMMANDS=()
 for i in {1..30}; do
-  JOB_COMMANDS+=("log::info 'Job $i started'; bash::sleep $((RANDOM % 3 + 1 )); log::warning 'Job $i done'")
+  JOB_COMMANDS+=("log::info 'Job $i started'; bash::sleep $((RANDOM % 3 + 1 )); log::warning 'Job ${i} done'")
 done
 
 function callback() {
