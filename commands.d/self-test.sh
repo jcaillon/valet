@@ -169,8 +169,7 @@ function selfTest() {
   log::info "Found ${#_TEST_TEST_SUITE_NAME[@]} test suites in ⌜${REPLY}⌝."
 
   # run all tests suites
-  progress::start
-  progress::update 0 "Running test suites."
+  progress::start message="Running test suites."
 
   coproc::runInParallel _TEST_COMMAND \
     maxInParallel="${_TEST_NB_PARALLEL_TEST_SUITES}" \
@@ -275,7 +274,7 @@ function selfTest_parallelCallback() {
   local -i exitCode="${2}"
   local -i percent="${3}"
 
-  progress::update "${percent}" "Done running test suite ⌜${_TEST_TEST_SUITE_NAME[index]}⌝."
+  progress::update percent="${percent}" message="Done running test suite ⌜${_TEST_TEST_SUITE_NAME[index]}⌝."
 
   if (( exitCode != 0 )); then
     _TEST_FAILED_TEST_SUITES+=("${_TEST_TEST_SUITE_NAME[index]}")

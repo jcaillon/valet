@@ -10,8 +10,7 @@ include benchmark progress coproc bash
 
 #################################
 
-progress::start
-progress::update 0 "Running test suites."
+progress::start percent=0 message="Running test suites."
 
 JOB_NAMES=(name{1..30})
 JOB_COMMANDS=()
@@ -20,7 +19,7 @@ for i in {1..30}; do
 done
 
 function callback() {
-  progress::update "${3}" "Done running index ${1}: ${2}."
+  progress::update percent="${3}" message="Done running index ${1}: ${2}."
   log::info "logs in: ${4}"
 }
 

@@ -56,8 +56,8 @@ source terminal
 #
 #       The default spinner is defined by the environment variable `VALET_CONFIG_SPINNER_CHARACTERS`.
 #       (defaults to "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
-# - ${percentage} _as int_:
-#       (optional) The default percentage to start with.
+# - ${percent} _as int_:
+#       (optional) The default percent to start with.
 #       (defaults to 0)
 # - ${message} _as string_:
 #       (optional) The default message to start with.
@@ -71,7 +71,7 @@ source terminal
 # progress::start template="<spinner> <percent> ░<bar>░ <message>" size=30 spinnerFrames="⢄⢂⢁⡁⡈⡐⡠"
 # IDX=0
 # while [[ ${IDX} -le 50 ]]; do
-#   progress::update $((IDX * 2)) "Doing something ${IDX}/50..."
+#   progress::update percent=$((IDX * 2)) message="Doing something ${IDX}/50..."
 #   IDX=$((IDX + 1))
 #   sleep 0.1
 # done
@@ -87,7 +87,7 @@ function progress::start() {
     frameDelay="${VALET_CONFIG_PROGRESS_DEFAULT_ANIMATION_DELAY:-200}" \
     maxFrames=9223372036854775807 \
     spinnerFrames="${VALET_CONFIG_SPINNER_CHARACTERS:-"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"}" \
-    percentage=0 \
+    percent=0 \
     message="" \
     IFS=$' '
   eval "local a= ${*@Q}"
@@ -112,7 +112,7 @@ function progress::start() {
   # but we still want to have stderr of progress_runAnimationInBackground so we redirect it to GLOBAL_FD_LOG
   {
     # we use coproc because it gives us a file descriptor to write to the input stream of the background job
-    coproc _PROGRESS_BACKGROUND_JOB { progress_runAnimationInBackground "${template}" "${size}" "${frameDelay}" "${maxFrames}" "${spinnerFrames}" "${percentage}" "${message}" 2>&"${GLOBAL_FD_LOG}"; }
+    coproc _PROGRESS_BACKGROUND_JOB { progress_runAnimationInBackground "${template}" "${size}" "${frameDelay}" "${maxFrames}" "${spinnerFrames}" "${percent}" "${message}" 2>&"${GLOBAL_FD_LOG}"; }
   } 2>/dev/null
   _PROGRESS_BACKGROUND_PID="${_PROGRESS_BACKGROUND_JOB_PID}"
   # shellcheck disable=SC2034
@@ -152,17 +152,22 @@ function progress::stop() {
 # The animation can be started with progress::start for more options.
 # The animation will stop if the updated percentage is 100.
 #
-# - $1: **percent** _as int_:
-#       the percentage of the progress bar (0 to 100)
-# - $2: message _as string_:
+# - ${percent} _as int_:
+#       (optional) the percentage of the progress bar (0 to 100)
+#       (defaults to 0)
+# - ${message} _as string_:
 #       (optional) the message to display
+#       (defaults to "")
 #
 # ```bash
-# progress::update 50 "Doing something..."
+# progress::update percent=50 percent="Doing something..."
 # ```
 function progress::update() {
-  local -i percent="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local message="${2:-}"
+  local \
+    message="" \
+    percent=0
+    IFS=$' '
+  eval "local a= ${*@Q}"
 
   if [[ ! -t 2 || ${VALET_DISABLE_PROGRESS_BARS:-} == "true" ]]; then
     # we are not in an interactive session or progress bars are disabled
@@ -180,7 +185,7 @@ function progress::update() {
   fi
 
   if [[ ${_PROGRESS_BAR_RUNNING:-} != "true" ]]; then
-    progress::start percentage="${percent}" message="${message}"
+    progress::start percent="${percent}" message="${message}"
     return 0
   fi
   if [[ ! -v _PROGRESS_BACKGROUND_JOB ]] || ! { printf "1\0%s %s %s\0" "update" "${percent}" "${message}" >&"${_PROGRESS_BACKGROUND_JOB[1]:-}"; } 2>/dev/null; then
@@ -228,7 +233,7 @@ function progress_runAnimationInBackground() {
   local frameDelay="${3}"
   local -i maxFrames="${4}"
   local spinner="${5}"
-  local -i percentage="${6}"
+  local -i percent="${6}"
   local message="${7}"
 
   # Hide the cursor
@@ -270,8 +275,8 @@ function progress_runAnimationInBackground() {
       case "${instruction%% *}" in
       update)
         instruction="${instruction#"update "}"
-        percentage="${instruction%%" "*}"
-        message="${instruction#"${percentage} "}"
+        percent="${instruction%%" "*}"
+        message="${instruction#"${percent} "}"
         computeDisplayString=true
         ;;
       resize)
@@ -283,7 +288,7 @@ function progress_runAnimationInBackground() {
 
     if [[ ${computeDisplayString} == "true" ]]; then
       computeDisplayString=false
-      progress_getStringToDisplay "${template}" "${barSize}" "${percentage}" "${message}"
+      progress_getStringToDisplay "${template}" "${barSize}" "${percent}" "${message}"
       displayedString="${REPLY}"
     fi
 
@@ -309,7 +314,7 @@ function progress_runAnimationInBackground() {
 function progress_getStringToDisplay() {
   local template="${1}"
   local barSize="${2}"
-  local percentage="${3}"
+  local percent="${3}"
   local message="${4}"
 
   local displayedString="${template}"
@@ -329,9 +334,9 @@ function progress_getStringToDisplay() {
   fi
 
   if [[ ${template} == *"<percent>"* ]]; then
-    local percentageString
-    printf -v percentageString "%4s" "${percentage}%"
-    displayedString="${displayedString//"<percent>"/"${percentageString}"}"
+    local percentString
+    printf -v percentString "%4s" "${percent}%"
+    displayedString="${displayedString//"<percent>"/"${percentString}"}"
   fi
 
   local progressBarSize="${barSize}"
@@ -339,7 +344,7 @@ function progress_getStringToDisplay() {
     progressBarSize=$((GLOBAL_COLUMNS - templateLengthWithoutBarAndMessage))
   fi
   if [[ ${template} == *"<bar>"* ]]; then
-    progress_getProgressBarString "${percentage}" "${progressBarSize}"
+    progress_getProgressBarString "${percent}" "${progressBarSize}"
     displayedString="${displayedString//"<bar>"/"${REPLY}"}"
   fi
 

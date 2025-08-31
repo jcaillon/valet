@@ -36,7 +36,7 @@ log::warning "Now displaying a progress bar."
 
 IDX=0
 while [[ ${IDX} -le 50 ]]; do
-  progress::update $((IDX * 2)) "doing something ${IDX}..."
+  progress::update percent=$((IDX * 2)) message="doing something ${IDX}..."
   IDX=$((IDX + 1))
   # log::info "alright ${IDX}..."
   bash::sleep  0.1
