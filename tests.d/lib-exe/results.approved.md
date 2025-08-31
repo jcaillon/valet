@@ -64,6 +64,26 @@ TRACE    Fake standard error stream:
 FAIL     The command fake ended with exit code 1 in 4.000s.
 ```
 
+Error, fails with message (exit):
+
+❯ `exe::invoke fake --error --- failMessage=Custom\ error\ message.`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+TRACE    Fake standard output stream:
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdout
+   1 ░ 🙈 mocking fake --error
+TRACE    Fake standard error stream:
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr
+   1 ░ INFO: log line from fake mock to stderr
+   2 ░ ERROR: returning error from fake
+FAIL     The command fake ended with exit code 1 in 4.000s.
+Custom error message.
+```
+
 Error but with no fail option:
 
 ❯ `exe::invoke fake --error --- noFail=true`

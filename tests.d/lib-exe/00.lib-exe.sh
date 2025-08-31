@@ -21,6 +21,9 @@ function test_exe::invoke() {
   test::markdown "Error, fails (exit):"
   test::exit exe::invoke fake --error
 
+  test::markdown "Error, fails with message (exit):"
+  test::exit exe::invoke fake --error --- failMessage="Custom error message."
+
   test::markdown "Error but with no fail option:"
   test::func exe::invoke fake --error --- noFail=true
 

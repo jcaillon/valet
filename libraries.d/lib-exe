@@ -46,7 +46,10 @@ source time
 # - ${acceptableCodes} _as string_:
 #       (optional) The acceptable error codes, comma separated.
 #       If the error code is matched, then REPLY_CODE is set to 0)
-#       (defaults to 0)
+#       (defaults to "0")
+# - ${failMessage} _as string_:
+#       (optional) The message to display on failure.
+#       (defaults to "")
 # - ${appendRedirect} _as bool_:
 #       (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).
 #       This is useful when you want to run the same command multiple times and keep the previous output.
@@ -100,6 +103,7 @@ function exe::invoke() {
     stdinFile="" \
     stdin="" \
     acceptableCodes="0" \
+    failMessage="" \
     appendRedirect=false \
     groupRedirect=false \
     noRedirection=false
@@ -169,6 +173,10 @@ function exe::invoke() {
   time::getMicrosecondsToSeconds "${elapsed}" precision=3
 
   local debugMessage="The command ${executable} ended with exit code ${exitCode} in ${REPLY}s."
+
+  if [[ -n ${failMessage} ]]; then
+    debugMessage+=$'\n'"${failMessage}"
+  fi
 
   # if the error code is acceptable, then we set it to 0
   if [[ ${exitCode} -ne 0 && ,${acceptableCodes}, == *",${exitCode},"* ]]; then
