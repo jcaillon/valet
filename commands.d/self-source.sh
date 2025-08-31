@@ -6,38 +6,38 @@
 # >>> command: self source
 #===============================================================
 
-##<<<VALET_COMMAND
-# command: self source
-# function: selfSource
-# hideInMenu: true
-# author: github.com/jcaillon
-# shortDescription: Returns a string that can be evaluated to source Valet functions in bash.
-# description: |-
-#   If you want to use Valet functions directly in bash, you can use this command like this:
-#
-#   ```bash
-#   eval "$(valet self source)"
-#   ```
-#
-#   This will source valet to be able to use its functions as if you were in a command script.
-#
-#   You can optionally export all the functions if needed.
-# options:
-# - name: -a, --source-all-functions
-#   description: |-
-#     Will immediately source all the libraries functions.
-# - name: -E, --no-exit
-#   description: |-
-#     Override the ⌜core::fail⌝  function to not exit the script.
-# - name: -p, --prompt-mode
-#   description: |-
-#     Source valet functions with modifications to be used in a shell prompt.
-# examples:
-# - name: !eval "$(valet self source)"
-#   description: |-
-#     Source valet functions in your bash script or bash prompt.
-#     You can then can then use valet function as if you were in a command script.
-##VALET_COMMAND
+: <<"COMMAND_YAML"
+command: self source
+function: selfSource
+hideInMenu: true
+author: github.com/jcaillon
+shortDescription: Returns a string that can be evaluated to source Valet functions in bash.
+description: |-
+  If you want to use Valet functions directly in bash, you can use this command like this:
+
+  ```bash
+  eval "$(valet self source)"
+  ```
+
+  This will source valet to be able to use its functions as if you were in a command script.
+
+  You can optionally export all the functions if needed.
+options:
+- name: -a, --source-all-functions
+  description: |-
+    Will immediately source all the libraries functions.
+- name: -E, --no-exit
+  description: |-
+    Override the ⌜core::fail⌝  function to not exit the script.
+- name: -p, --prompt-mode
+  description: |-
+    Source valet functions with modifications to be used in a shell prompt.
+examples:
+- name: !eval "$(valet self source)"
+  description: |-
+    Source valet functions in your bash script or bash prompt.
+    You can then can then use valet function as if you were in a command script.
+COMMAND_YAML
 function selfSource() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults

@@ -6,7 +6,7 @@
 # shellcheck source=../libraries.d/lib-command
 source command
 
-: "---
+: <<"COMMAND_YAML"
 command: help
 function: showCommandHelp
 shortDescription: Show the help of this program or of a specific command.
@@ -33,7 +33,7 @@ examples:
 - name: help --no-colors --columns 50
   description: |-
     Shows the help for the program without any color and with a maximum of 50 columns
----"
+COMMAND_YAML
 # show the help of the given command (can be blank to show the root help)
 # e.g. showCommandHelp "cmd1 subcmd2"
 function showCommandHelp() {

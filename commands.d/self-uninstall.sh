@@ -6,26 +6,26 @@
 # >>> command: self uninstall
 #===============================================================
 
-##<<<VALET_COMMAND
-# command: self uninstall
-# function: selfUninstall
-# hideInMenu: true
-# author: github.com/jcaillon
-# shortDescription: A command to uninstall Valet.
-# description: |-
-#   Generate a bash script that can be used to uninstall Valet.
-#   Without any option, this script will print instructions instead.
-#
-#   Usage:
-#
-#   ```bash
-#   eval "$(valet self uninstall --script)"
-#   ```
-# options:
-# - name: -s, --script
-#   description: |-
-#     Generate a bash script that can be evaluated in bash to uninstall Valet.
-##VALET_COMMAND
+: <<"COMMAND_YAML"
+command: self uninstall
+function: selfUninstall
+hideInMenu: true
+author: github.com/jcaillon
+shortDescription: A command to uninstall Valet.
+description: |-
+  Generate a bash script that can be used to uninstall Valet.
+  Without any option, this script will print instructions instead.
+
+  Usage:
+
+  ```bash
+  eval "$(valet self uninstall --script)"
+  ```
+options:
+- name: -s, --script
+  description: |-
+    Generate a bash script that can be evaluated in bash to uninstall Valet.
+COMMAND_YAML
 function selfUninstall() {
   local script
   command::parseArguments "$@"; eval "${REPLY}"

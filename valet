@@ -8,29 +8,29 @@ if [ ${BASH_VERSINFO:-0} -lt 5 ]; then
   exit 1
 fi
 
-##<<<VALET_COMMAND
+# : <<"COMMAND_YAML"
 # command: valet
 # function: this
 # author: github.com/jcaillon
 # shortDescription: Your personal assistant in the terminal!
 # description: |-
 #   Valet helps you browse, understand and execute your custom bash commands.
-#
+
 #   Online documentation is available at https://jcaillon.github.io/valet/.
-#
+
 #   You can call valet without any commands to start an interactive session.
-#
+
 #   ⌜Configuration through environment variables:⌝
-#
+
 #   Core features variables can be defined in the valet user config file. Run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).
-#
+
 #   Command options can also be set through environment variables. Check the command help for more information.
-#
+
 #   ⌜Create your own commands:⌝
-#
+
 #   You can create your own commands and have them available in valet.
 #   A command is part of an extension, which is a collection of commands.
-#
+
 #   To get started, run the command ⌜valet self create-extension⌝.
 # arguments:
 # - name: commands?...
@@ -74,7 +74,7 @@ fi
 # - name: -v a-command and-sub-command
 #   description: |-
 #     Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
-##VALET_COMMAND
+# COMMAND_YAML
 
 GLOBAL_INSTALLATION_DIRECTORY="${BASH_SOURCE[0]}"
 if [[ "${GLOBAL_INSTALLATION_DIRECTORY}" != /* ]]; then

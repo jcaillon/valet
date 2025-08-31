@@ -59,14 +59,16 @@ Valet looks for a specific YAML formatted string to read command properties.
 A simple example is:
 
 ```bash
-: "---
+: <<"COMMAND_YAML"
 command: hello-world
 function: helloWorld
 shortDescription: A dummy command.
 description: |-
   This command says hello world.
----"
+COMMAND_YAML
 ```
+
+> The command properties must start with a line containing only `: <<"COMMAND_YAML"` and end with a line containing only `COMMAND_YAML`.
 
 In the example above, we need to define a bash function named `helloWorld` in the same file as the command properties (see next step). When running `valet hello-world`, this function will be called.
 
@@ -82,17 +84,19 @@ Sub commands can be useful to regroup commands. Valet will show a menu for the c
 
 For more examples, take a look at the [showcase command definitions][showcase-commands].
 
-Alternatively, you can add a new command definition using bash comments and the following format:
+Alternatively, you can comment the whole command properties block like so:
 
 ```bash
-##<<<VALET_COMMAND
+# : <<"COMMAND_YAML"
 # command: hello-world
 # function: helloWorld
 # shortDescription: A dummy command.
 # description: |-
 #   This command says hello world.
-##VALET_COMMAND
+# COMMAND_YAML
 ```
+
+The only advantage would be to have a documentation for your command function that is understandable by your IDE.
 
 ### ✒️ Implement your command
 

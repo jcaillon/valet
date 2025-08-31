@@ -13,24 +13,24 @@ source interactive
 # >>> command: self add-library
 #===============================================================
 
-##<<<VALET_COMMAND
-# command: self add-library
-# function: selfAddLibrary
-# author: github.com/jcaillon
-# shortDescription: Add a new library to the current extension.
-# description: |-
-#   Call this function in an extension directory to add a new library to the extension.
-#
-#   This will create a file from a library template in the ⌜libraries.d⌝ directory.
-# arguments:
-# - name: library-name
-#   description: |-
-#     The name of the library to create.
-# examples:
-# - name: self add-library my-library
-#   description: |-
-#     Create a new library named ⌜my-library⌝ in the current extension under the ⌜libraries.d⌝ directory.
-##VALET_COMMAND
+: <<"COMMAND_YAML"
+command: self add-library
+function: selfAddLibrary
+author: github.com/jcaillon
+shortDescription: Add a new library to the current extension.
+description: |-
+  Call this function in an extension directory to add a new library to the extension.
+
+  This will create a file from a library template in the ⌜libraries.d⌝ directory.
+arguments:
+- name: library-name
+  description: |-
+    The name of the library to create.
+examples:
+- name: self add-library my-library
+  description: |-
+    Create a new library named ⌜my-library⌝ in the current extension under the ⌜libraries.d⌝ directory.
+COMMAND_YAML
 function selfAddLibrary() {
   local libraryName
   command::parseArguments "$@"; eval "${REPLY}"

@@ -13,24 +13,24 @@ source interactive
 # >>> command: self add-command
 #===============================================================
 
-##<<<VALET_COMMAND
-# command: self add-command
-# function: selfAddCommand
-# author: github.com/jcaillon
-# shortDescription: Add a new command to the current extension.
-# description: |-
-#   Call this function in an extension directory to add a new command to the extension.
-#
-#   This will create a file from a command template in the ⌜commands.d⌝ directory.
-# arguments:
-# - name: command-name
-#   description: |-
-#     The name of the command to create.
-# examples:
-# - name: self add-command my-command
-#   description: |-
-#     Create a new command named ⌜my-command⌝ in the current extension under the ⌜commands.d⌝ directory.
-##VALET_COMMAND
+: <<"COMMAND_YAML"
+command: self add-command
+function: selfAddCommand
+author: github.com/jcaillon
+shortDescription: Add a new command to the current extension.
+description: |-
+  Call this function in an extension directory to add a new command to the extension.
+
+  This will create a file from a command template in the ⌜commands.d⌝ directory.
+arguments:
+- name: command-name
+  description: |-
+    The name of the command to create.
+examples:
+- name: self add-command my-command
+  description: |-
+    Create a new command named ⌜my-command⌝ in the current extension under the ⌜commands.d⌝ directory.
+COMMAND_YAML
 function selfAddCommand() {
   local commandName
   command::parseArguments "$@"; eval "${REPLY}"

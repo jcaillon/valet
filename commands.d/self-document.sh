@@ -17,33 +17,33 @@ source time
 # >>> command: self document
 #===============================================================
 
-##<<<VALET_COMMAND
-# command: self document
-# function: selfDocument
-# author: github.com/jcaillon
-# shortDescription: Generate the documentation and code snippets for all the library functions of Valet.
-# description: |-
-#   Generate the documentation and code snippets for all the library functions of Valet.
-#
-#   It will parse all the library files and generate:
-#
-#   - A markdown file with the documentation.
-#   - A bash file with the prototype of each function.
-#   - A vscode snippet file for each function.
-# options:
-# - name: -o, --output <directory path>
-#   description: |-
-#     The directory in which the documentation will be generated.
-#     Defaults to the valet user directory.
-# - name: -C, --core-only
-#   description: |-
-#     Generate the documentation for the core functions only.
-#     Will not generate for libraries present in the valet user directory.
-# examples:
-# - name: self document
-#   description: |-
-#     Generate the documentation for all the library functions of Valet and output to the default directory.
-##VALET_COMMAND
+: <<"COMMAND_YAML"
+command: self document
+function: selfDocument
+author: github.com/jcaillon
+shortDescription: Generate the documentation and code snippets for all the library functions of Valet.
+description: |-
+  Generate the documentation and code snippets for all the library functions of Valet.
+
+  It will parse all the library files and generate:
+
+  - A markdown file with the documentation.
+  - A bash file with the prototype of each function.
+  - A vscode snippet file for each function.
+options:
+- name: -o, --output <directory path>
+  description: |-
+    The directory in which the documentation will be generated.
+    Defaults to the valet user directory.
+- name: -C, --core-only
+  description: |-
+    Generate the documentation for the core functions only.
+    Will not generate for libraries present in the valet user directory.
+examples:
+- name: self document
+  description: |-
+    Generate the documentation for all the library functions of Valet and output to the default directory.
+COMMAND_YAML
 function selfDocument() {
   local output coreOnly
   command::parseArguments "$@"; eval "${REPLY}"

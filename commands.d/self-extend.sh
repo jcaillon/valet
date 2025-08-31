@@ -25,73 +25,73 @@ source command
 # >>> command: self extend
 #===============================================================
 
-##<<<VALET_COMMAND
-# command: self extend
-# function: selfExtend
-# author: github.com/jcaillon
-# shortDescription: Extends Valet by creating or downloading a new extension in the user directory.
-# description: |-
-#   Extends Valet by creating or downloading a new extension in the user directory.
-#   Extensions can add new commands or functions to Valet.
-#
-#   This command will either:
-#
-#   - Create and setup a new extension directory under the valet user directory,
-#   - setup an existing directory as a valet extension,
-#   - or download the given extension (repository) and install it in the Valet user directory.
-#
-#   For downloaded extensions, all GIT repositories are supported.
-#   For the specific cases of GitHub and GitLab repositories, this command will:
-#
-#   1. If git is installed, clone the repository for the given reference (version option).
-#   2. If git is not installed, download source tarball for the given reference and extract it.
-#
-#   For downloaded extensions, if a `extension.setup.sh` script is present in the repository root directory,
-#   it will be executed. This gives the extension the opportunity to setup itself.
-#
-#   Once an extension is installed, you can use the `valet self update` command to update it.
-# arguments:
-# - name: extension-uri
-#   description: |-
-#     The URI of the extension to install or create.
-#
-#     1. If you want to create a new extension, this argument should be the name of your
-#        new extension (e.g. `my-new-extension`).
-#     2. If you want to setup an existing directory as an extension, this argument should be `.`.
-#     3. If you want to download an extension, this argument should be the URL of the repository.
-#        Usually a GitHub or GitLab repository URL such as `https://github.com/jcaillon/valet-devops-toolbox.git`.
-#
-#     > If the repository is private, you can pass the URL with the username and password like this:
-#     > `https://username:password@my.gitlab.private/group/project.git`.
-# options:
-# - name: -v, --version <version>
-#   description: |-
-#     The version of the repository to download.
-#     Usually a tag or a branch name.
-#   default: latest
-# - name: -n, --name <extension-name>
-#   description: |-
-#     The name to give to this extension.
-#     If a name is not provided, the name of the repository will be used.
-# - name: --skip-setup
-#   description: |-
-#     Skip the execution of the `extension.setup.sh` script even if it exists.
-# examples:
-# - name: self extend my-new-extension
-#   description: |-
-#     Create a new extension named ⌜my-new-extension⌝ in the user directory.
-# - name: self extend .
-#   description: |-
-#     Setup the current directory as an extension in the user directory.
-# - name: self extend https://github.com/jcaillon/valet-devops-toolbox.git
-#   description: |-
-#     Download the latest version of the valet-devops-toolbox application and install it for Valet.
-# - name: self extend https://github.com/jcaillon/valet --version extension-1 --name extension-1 --skip-setup
-#   description: |-
-#     Download the ⌜extension-1⌝ reference of the valet repository and install it as ⌜extension-1⌝ for Valet.
-#     Skip the execution of the `extension.setup.sh` script.
-#     (This is actually a fake extension for testing purposes).
-##VALET_COMMAND
+: <<"COMMAND_YAML"
+command: self extend
+function: selfExtend
+author: github.com/jcaillon
+shortDescription: Extends Valet by creating or downloading a new extension in the user directory.
+description: |-
+  Extends Valet by creating or downloading a new extension in the user directory.
+  Extensions can add new commands or functions to Valet.
+
+  This command will either:
+
+  - Create and setup a new extension directory under the valet user directory,
+  - setup an existing directory as a valet extension,
+  - or download the given extension (repository) and install it in the Valet user directory.
+
+  For downloaded extensions, all GIT repositories are supported.
+  For the specific cases of GitHub and GitLab repositories, this command will:
+
+  1. If git is installed, clone the repository for the given reference (version option).
+  2. If git is not installed, download source tarball for the given reference and extract it.
+
+  For downloaded extensions, if a `extension.setup.sh` script is present in the repository root directory,
+  it will be executed. This gives the extension the opportunity to setup itself.
+
+  Once an extension is installed, you can use the `valet self update` command to update it.
+arguments:
+- name: extension-uri
+  description: |-
+    The URI of the extension to install or create.
+
+    1. If you want to create a new extension, this argument should be the name of your
+      new extension (e.g. `my-new-extension`).
+    2. If you want to setup an existing directory as an extension, this argument should be `.`.
+    3. If you want to download an extension, this argument should be the URL of the repository.
+      Usually a GitHub or GitLab repository URL such as `https://github.com/jcaillon/valet-devops-toolbox.git`.
+
+    > If the repository is private, you can pass the URL with the username and password like this:
+    > `https://username:password@my.gitlab.private/group/project.git`.
+options:
+- name: -v, --version <version>
+  description: |-
+    The version of the repository to download.
+    Usually a tag or a branch name.
+  default: latest
+- name: -n, --name <extension-name>
+  description: |-
+    The name to give to this extension.
+    If a name is not provided, the name of the repository will be used.
+- name: --skip-setup
+  description: |-
+    Skip the execution of the `extension.setup.sh` script even if it exists.
+examples:
+- name: self extend my-new-extension
+  description: |-
+    Create a new extension named ⌜my-new-extension⌝ in the user directory.
+- name: self extend .
+  description: |-
+    Setup the current directory as an extension in the user directory.
+- name: self extend https://github.com/jcaillon/valet-devops-toolbox.git
+  description: |-
+    Download the latest version of the valet-devops-toolbox application and install it for Valet.
+- name: self extend https://github.com/jcaillon/valet --version extension-1 --name extension-1 --skip-setup
+  description: |-
+    Download the ⌜extension-1⌝ reference of the valet repository and install it as ⌜extension-1⌝ for Valet.
+    Skip the execution of the `extension.setup.sh` script.
+    (This is actually a fake extension for testing purposes).
+COMMAND_YAML
 function selfExtend() {
   local extensionUri version skipSetup name
   command::parseArguments "$@"; eval "${REPLY}"

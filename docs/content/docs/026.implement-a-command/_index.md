@@ -35,7 +35,7 @@ After these two mandatory lines, you can implement your function and expect the 
 Find below the complete definition of an `example` command that can take an option `--my-option` and requires one argument `my-argument`.
 
 ```bash {linenos=table,linenostart=1,filename="example.sh"}
-: "---
+: <<"COMMAND_YAML"
 command: example
 function: example
 shortDescription: An example command
@@ -49,7 +49,7 @@ options:
 - name: -o, --my-option
   description: |-
     First option.
----"
+COMMAND_YAML
 function example() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults

@@ -13,7 +13,7 @@ source command
 # >>> command: self mock1
 #===============================================================
 
-: "---
+: <<"COMMAND_YAML"
 command: self mock1
 hideInMenu: true
 function: selfMock1
@@ -36,7 +36,7 @@ arguments:
     - logging-level
     - wait-indefinitely
     - show-help
----"
+COMMAND_YAML
 function selfMock1() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
@@ -128,7 +128,7 @@ function returnOne() { return 1; }
 # >>> command: self mock2
 #===============================================================
 
-: "---
+: <<"COMMAND_YAML"
 command: self mock2
 hideInMenu: true
 function: selfMock2
@@ -166,7 +166,7 @@ examples:
 - name: self mock2 -o -2 value1 arg1 more1 more2
   description: |-
     Call command1 with option1, option2 and some arguments.
----"
+COMMAND_YAML
 function selfMock2() {
   local -a more
   command::parseArguments "$@"; eval "${REPLY}"
@@ -193,7 +193,7 @@ function aSubFunctionInselfMock2() {
 #===============================================================
 # >>> command: self mock3
 #===============================================================
-: "---
+: <<"COMMAND_YAML"
 command: self mock3
 hideInMenu: true
 function: selfMock3
@@ -203,7 +203,7 @@ description: |-
   Before starting this command, valet will check if sudo is available.
 
   If so, it will require the user to enter the sudo password and use sudo inside the command
----"
+COMMAND_YAML
 function selfMock3() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults

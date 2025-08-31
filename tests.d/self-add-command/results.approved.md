@@ -45,7 +45,7 @@ SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$G
 # >>> command: new cool command
 #===============================================================
 
-: "---
+: <<"COMMAND_YAML"
 command: new cool command
 function: newCoolCommand
 shortDescription: My new command one line description.
@@ -73,7 +73,7 @@ examples:
 - name: new cool command -o -2 value1 arg1 more1 more2
   description: |-
     Call new cool command with option1, option2 and some arguments.
----"
+COMMAND_YAML
 function newCoolCommand() {
   local -a more
   local firstArg option1 thisIsOption2

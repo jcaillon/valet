@@ -124,7 +124,7 @@ Calling `valet` without arguments lets you interactively search commands, read t
 
 ```bash {linenos=table,linenostart=1,filename="showcase-command1.sh"}
 #!/usr/bin/env bash
-: "---
+: <<"COMMAND_YAML"
 command: showcase command1
 function: showcaseCommand1
 shortDescription: A showcase command that uses arguments and options.
@@ -154,7 +154,7 @@ examples:
 - name: showcase command1 -o -2 value1 arg1 more1 more2
   description: |-
     Call command1 with option1, option2 and some arguments.
----"
+COMMAND_YAML
 function showcaseCommand1() {
   :
 }
@@ -176,7 +176,7 @@ They are made available as local variables in your command function.
 
 ```bash {linenos=table,linenostart=1,filename="showcase-command1.sh"}
 #!/usr/bin/env bash
-: "---
+: <<"COMMAND_YAML"
 command: showcase command1
 function: showcaseCommand1
 shortDescription: A showcase command that uses arguments and options.
@@ -206,7 +206,7 @@ examples:
 - name: showcase command1 -o -2 value1 arg1 more1 more2
   description: |-
     Call command1 with option1, option2 and some arguments.
----"
+COMMAND_YAML
 function showcaseCommand1() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
@@ -239,13 +239,13 @@ Easily log messages and [customize their output](./docs/configuration/#-log-conf
 
 ```bash {linenos=table,linenostart=1,filename="test-log.sh"}
 #!/usr/bin/env bash
-: "---
+: <<"COMMAND_YAML"
 command: test-log
 function: testLog
 shortDescription: A command that only for testing valet logging functions.
 description: |-
   A command that only for testing valet logging functions.
----"
+COMMAND_YAML
 function testLog() {
   log::errorTrace "This is an error trace message which is always displayed."
   log::trace "This is a trace message."

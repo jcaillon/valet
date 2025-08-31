@@ -1,20 +1,21 @@
+#!/usr/bin/env bash
 set -Eeu -o pipefail
-: "---
+: <<"COMMAND_YAML"
 A content between tags
 array:
   - item1
   - item2
   - item3
----"
+COMMAND_YAML
 
 echo "Hello, World!"
 
-##<<<VALET_COMMAND
+# : <<"COMMAND_YAML"
 # yep!
-##VALET_COMMAND
+# COMMAND_YAML
 
-: "---
+: <<"COMMAND_YAML"
 And another one!
----"
+COMMAND_YAML
 
 echo "Nice?!"

@@ -4,7 +4,7 @@
 # >>> command: _COMMAND_NAME_
 #===============================================================
 
-: "---
+: <<"COMMAND_YAML"
 command: _COMMAND_NAME_
 function: _FUNCTION_NAME_
 shortDescription: My new command one line description.
@@ -32,7 +32,7 @@ examples:
 - name: _COMMAND_NAME_ -o -2 value1 arg1 more1 more2
   description: |-
     Call _COMMAND_NAME_ with option1, option2 and some arguments.
----"
+COMMAND_YAML
 function _FUNCTION_NAME_() {
   local -a more
   local firstArg option1 thisIsOption2

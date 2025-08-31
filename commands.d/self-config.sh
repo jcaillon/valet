@@ -6,7 +6,7 @@
 # >>> command: self config
 #===============================================================
 
-: "---
+: <<"COMMAND_YAML"
 command: self config
 function: selfConfig
 author: github.com/jcaillon
@@ -36,7 +36,7 @@ examples:
 - name: self config --no-edit --override --export-current-values
   description: |-
     Create (or recreate) the configuration file of Valet reusing the possible current values of the variables.
----"
+COMMAND_YAML
 function selfConfig() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults

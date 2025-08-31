@@ -4,7 +4,7 @@
 # >>> command: showcase command1
 #===============================================================
 
-: "---
+: <<"COMMAND_YAML"
 command: showcase command1
 function: showcaseCommand1
 shortDescription: A showcase command that uses arguments and options.
@@ -34,7 +34,7 @@ examples:
 - name: showcase command1 -o -2 value1 arg1 more1 more2
   description: |-
     Call command1 with option1, option2 and some arguments.
----"
+COMMAND_YAML
 function showcaseCommand1() {
   local -a more
   command::parseArguments "$@"; eval "${REPLY}"

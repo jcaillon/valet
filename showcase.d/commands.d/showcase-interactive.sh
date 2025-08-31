@@ -12,13 +12,13 @@ source sfzf
 # >>> command: showcase interactive
 #===============================================================
 
-: "---
+: <<"COMMAND_YAML"
 command: showcase interactive
 function: showcaseInteractive
 shortDescription: A showcase command that demonstrates how to interact with the user.
 description: |-
   This command demonstrates how to interact with the user using valet's interactive library.
----"
+COMMAND_YAML
 function showcaseInteractive() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults

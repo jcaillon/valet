@@ -9,60 +9,60 @@
 # >>> command: self build
 #===============================================================
 
-##<<<VALET_COMMAND
-# command: self build
-# function: selfBuild
-# author: github.com/jcaillon
-# shortDescription: Index all the commands and libraries present in the valet user directory and installation directory.
-# description: |-
-#   Index all the command and libraries present in the valet user directory and installation directory.
-#
-#   This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
-#
-#   Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜showcase.d⌝ directory to learn how to create and modified your commands.
-#
-#   This scripts:
-#
-#   - Makes a list of all the eligible files in which we could find command definitions.
-#   - For each file in this list, extract the command definitions.
-#   - Build your commands file (in your valet user directory) from these definitions.
-#   - Makes a list of all `libraries.d` directories found in the user directory.
-#
-#   You can call this script directly in case calling ⌜valet self build⌝ is broken:
-#
-#   → commands.d/self-build.sh
-# options:
-# - name: -d, --extensions-directory <path>
-#   description: |-
-#     Specify your valet extensions directory, in which to look for your extension commands.
-#     Defaults to the valet extensions directory.
-# - name: -C, --core-only
-#   description: |-
-#     Build only the core commands (under commands.d).
-# - name: --include-showcase
-#   description: |-
-#     Build the showcase extension if it exists in the valet installation directory.
-# - name: -o, --output <path>
-#   description: |-
-#     Specify the directory path in which to write the command definition variable files.
-#
-#     This defaults to your user data folder `~/.local/share/valet`.
-# - name: -O, --no-output
-#   description: |-
-#     Do not write the command definition variables to a file.
-#
-#     This will just create the variables.
-# - name: -s, --silent
-#   description: |-
-#     Build silently without any info logs.
-# examples:
-# - name: self build
-#   description: |-
-#     Build the valet user commands.
-# - name: self build -d ~/my-valet-directory --silent
-#   description: |-
-#     Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
-##VALET_COMMAND
+: <<"COMMAND_YAML"
+command: self build
+function: selfBuild
+author: github.com/jcaillon
+shortDescription: Index all the commands and libraries present in the valet user directory and installation directory.
+description: |-
+  Index all the command and libraries present in the valet user directory and installation directory.
+
+  This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
+
+  Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜showcase.d⌝ directory to learn how to create and modified your commands.
+
+  This scripts:
+
+  - Makes a list of all the eligible files in which we could find command definitions.
+  - For each file in this list, extract the command definitions.
+  - Build your commands file (in your valet user directory) from these definitions.
+  - Makes a list of all `libraries.d` directories found in the user directory.
+
+  You can call this script directly in case calling ⌜valet self build⌝ is broken:
+
+  → commands.d/self-build.sh
+options:
+- name: -d, --extensions-directory <path>
+  description: |-
+    Specify your valet extensions directory, in which to look for your extension commands.
+    Defaults to the valet extensions directory.
+- name: -C, --core-only
+  description: |-
+    Build only the core commands (under commands.d).
+- name: --include-showcase
+  description: |-
+    Build the showcase extension if it exists in the valet installation directory.
+- name: -o, --output <path>
+  description: |-
+    Specify the directory path in which to write the command definition variable files.
+
+    This defaults to your user data folder `~/.local/share/valet`.
+- name: -O, --no-output
+  description: |-
+    Do not write the command definition variables to a file.
+
+    This will just create the variables.
+- name: -s, --silent
+  description: |-
+    Build silently without any info logs.
+examples:
+- name: self build
+  description: |-
+    Build the valet user commands.
+- name: self build -d ~/my-valet-directory --silent
+  description: |-
+    Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
+COMMAND_YAML
 function selfBuild() {
   local extensionsDirectory output coreOnly noOutput silent
 

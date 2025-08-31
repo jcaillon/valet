@@ -11,7 +11,7 @@ source system
 # >>> command: self setup
 #===============================================================
 
-: "---
+: <<"COMMAND_YAML"
 command: self setup
 function: selfSetup
 hideInMenu: true
@@ -22,7 +22,7 @@ description: |-
 
   Adjust the Valet configuration according to the user environment.
   Let the user know what to do next.
----"
+COMMAND_YAML
 function selfSetup() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults

@@ -24,7 +24,7 @@ source regex
 #===============================================================
 # >>> self release valet
 #===============================================================
-: "---
+: <<"COMMAND_YAML"
 command: self release
 function: selfRelease
 hideInMenu: true
@@ -53,7 +53,7 @@ options:
 - name: --dry-run
   description: |-
     Do not perform the release, just show what would be done.
----"
+COMMAND_YAML
 function selfRelease() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults

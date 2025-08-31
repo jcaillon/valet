@@ -17,23 +17,23 @@ source bash
 function selfBuild_extractCommandYamls() {
   local file="${1}"
 
-  local firstLine=": \"---"
-  local lastLine="---\""
-  local firstLineAlt="##<<<VALET_COMMAND"
-  local lastLineAlt="##VALET_COMMAND"
+  local beginning=': <<"COMMAND_YAML"'
+  local end="COMMAND_YAML"
 
   declare -a contentArray
 
-  local line content
+  local line content endToMatch
   local -i firstLineMatched=0 lastLineMatched=1 indentation=0
   local IFS
   while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
     if [[ firstLineMatched -eq 0 ]]; then
-      if [[ ${line} == "${firstLine}" || ${line} == "${firstLineAlt}" ]]; then
+      if [[ ${line} == "${beginning}" || ${line} == "# ${beginning}" ]]; then
         firstLineMatched=1
         lastLineMatched=0
         content=""
-        if [[ ${line} == "${firstLineAlt}" ]]; then
+        endToMatch="${end}"
+        if [[ ${line} == "# "* ]]; then
+          endToMatch="# ${endToMatch}"
           indentation=2
         else
           indentation=0
@@ -41,7 +41,7 @@ function selfBuild_extractCommandYamls() {
         continue
       fi
     elif [[ lastLineMatched -eq 0 ]]; then
-      if [[ ${line} == "${lastLine}" || ${line} == "${lastLineAlt}" ]]; then
+      if [[ ${line} == "${endToMatch}" ]]; then
         lastLineMatched=1
         firstLineMatched=0
         contentArray+=("${content}")

@@ -20,7 +20,7 @@ source time
 #===============================================================
 # >>> command: self test
 #===============================================================
-: "---
+: <<"COMMAND_YAML"
 command: self test
 function: selfTest
 author: github.com/jcaillon
@@ -72,7 +72,7 @@ examples:
 - name: self test -i '(my-thing|my-stuff)'
   description: |-
     Run only the test suites that match the regex pattern ⌜(my-thing|my-stuff)⌝.
----"
+COMMAND_YAML
 function selfTest() {
   command::parseArguments "$@"; eval "${REPLY}"
   command::checkParsedResults
