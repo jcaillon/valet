@@ -34,8 +34,8 @@ function test_string::get() {
     "AnotherTest"
     "--*Another!test--"
     "_SNAKE_CASE"
-    "__SNAKE_CASE__"
-    "kebab-case"
+    "__SNAKE__CASE__"
+    "kebab---case"
     "--kebab-case--"
   )
   local test IFS=$'\n'

@@ -13,8 +13,8 @@ thisIsATest01
 AnotherTest
 --*Another!test--
 _SNAKE_CASE
-__SNAKE_CASE__
-kebab-case
+__SNAKE__CASE__
+kebab---case
 --kebab-case--
 ```
 
@@ -43,8 +43,8 @@ thisIsATest01
 AnotherTest
 --*Another!test--
 _SNAKE_CASE
-__SNAKE_CASE__
-kebab-case
+__SNAKE__CASE__
+kebab---case
 --kebab-case--
 ```
 
@@ -73,8 +73,8 @@ thisIsATest01
 AnotherTest
 --*Another!test--
 _SNAKE_CASE
-__SNAKE_CASE__
-kebab-case
+__SNAKE__CASE__
+kebab---case
 --kebab-case--
 ```
 

@@ -223,8 +223,8 @@ function trap::onSuspendInternal() {
   # save these value to restore them on continue
   # shellcheck disable=SC2034
   declare -g \
-    GLOBAL_LOG_REROUTED_TO_FILE_ENABLED_SAVED="${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED}" \
-    GLOBAL_TERMINAL_RAW_MODE_ENABLED_SAVED="${GLOBAL_TERMINAL_RAW_MODE_ENABLED}"
+    GLOBAL_LOG_REROUTED_TO_FILE_ENABLED_SAVED="${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-}" \
+    GLOBAL_TERMINAL_RAW_MODE_ENABLED_SAVED="${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-}"
 
   # if we were in interactive mode, we need to restore the logs
   if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} == "true" ]]; then

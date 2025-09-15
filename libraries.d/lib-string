@@ -93,6 +93,9 @@ function string::getKebabCase() {
   while [[ ${REPLY} == *- ]]; do
     REPLY="${REPLY%-}"
   done
+  while [[ ${REPLY} == *--* ]]; do
+    REPLY="${REPLY//--/-}"
+  done
 }
 
 # ## string::getSnakeCase
@@ -131,6 +134,9 @@ function string::getSnakeCase() {
   done
   while [[ ${REPLY} == *_ ]]; do
     REPLY="${REPLY%_}"
+  done
+  while [[ ${REPLY} == *__* ]]; do
+    REPLY="${REPLY//__/_}"
   done
 }
 
