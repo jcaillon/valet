@@ -55,9 +55,9 @@ When you want to set a returned value to a particular variable and want to avoid
 declare MY_STRING='kebab-case' MY_OUTPUT
 declare -n REPLY=MY_OUTPUT # make REPLY reference MY_OUTPUT
 string::convertKebabCaseToCamelCase MY_STRING # the function writes to REPLY, which points to MY_OUTPUT
-declare +n REPLY=value # we remove the reference and set another value
+unset -vn REPLY # unset REPLY as a nameref
 echo "MY_OUTPUT: ⌜${MY_OUTPUT}⌝" # will output 'kebabCase'
-echo "REPLY: ⌜${REPLY}⌝" # will output 'value'
+echo "REPLY: ⌜${REPLY:-}⌝" # will output ⌜⌝
 ```
 
 {{% /details %}}

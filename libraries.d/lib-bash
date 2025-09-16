@@ -86,7 +86,9 @@ function bash::runInSubshell() {
   # ensure terminal settings are saved if needed because if that happens in the subshell
   # we would not be able to restore it in the main shell
   if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
-    include terminal
+    if ! declare -F terminal::saveSettings &>/dev/null; then
+      include terminal
+    fi
     terminal::saveSettings
   fi
 

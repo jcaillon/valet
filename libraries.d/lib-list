@@ -12,7 +12,7 @@ source fs
 # Set up the options for a list display.
 #
 # - ${itemHeight} _as int_:
-#       (optional) The height of each item in the list (num²ber of lines needed to display the item).
+#       (optional) The height of each item in the list (number of lines needed to display each item).
 #       (defaults to 1)
 # - ${enableReverseMode} _as bool_:
 #       (optional) If true, the items are displayed from bottom to top.
@@ -24,13 +24,13 @@ source fs
 #       (optional) If true, the scrollbar is not displayed.
 #       (defaults to false)
 # - ${disableCursor} _as bool_:
-#       (optional) If true, the left cursors are not displayed.
+#       (optional) If true, the left cursor that indicates the currently selected line is not displayed.
 #       (defaults to false)
 # - ${disableTopSeparator} _as bool_:
-#       (optional) If true, the top separator is not displayed.
+#       (optional) If true, the top separator (that closes the box when nothing else is disabled) is not displayed.
 #       (defaults to false)
 # - ${showItemsCountAtTop} _as bool_:
-#       (optional) If true, the count of items will be displayed at the top of the box instead of the bottom.
+#       (optional) If true, the count of items will be displayed at the top of the list instead of the bottom.
 #       (defaults to false)
 # - ${emptyListText} _as string_:
 #       (optional) The text to display when the list is empty.
@@ -104,10 +104,10 @@ function list::setOptions() {
   # left cursor
   if [[ ${disableCursor:-false} != "true" ]]; then
     _LIST_SYMBOL_LEFT_LENGTH="${SYMBOL_LIST_LEFT_LENGTH}"
-    _LIST_SYMBOL_LEFT_SELECTED_ITEM="${SYMBOL_LIST_LEFT_SELECTED_ITEM}"
-    _LIST_SYMBOL_LEFT_UNSELECTED_ITEM="${SYMBOL_LIST_LEFT_UNSELECTED_ITEM}"
-    _LIST_SYMBOL_LEFT_SEPARATOR_TOP="${SYMBOL_LIST_LEFT_SEPARATOR_TOP}"
-    _LIST_SYMBOL_LEFT_SEPARATOR_BOTTOM="${SYMBOL_LIST_LEFT_SEPARATOR_BOTTOM}"
+    _LIST_SYMBOL_LEFT_SELECTED_ITEM="${SYMBOL_LIST_LEFT_SELECTED_CURSOR}"
+    _LIST_SYMBOL_LEFT_UNSELECTED_ITEM="${SYMBOL_LIST_LEFT_UNSELECTED_CURSOR}"
+    _LIST_SYMBOL_LEFT_SEPARATOR_TOP="${SYMBOL_LIST_FRAME_LEFT_TOP}"
+    _LIST_SYMBOL_LEFT_SEPARATOR_BOTTOM="${SYMBOL_LIST_FRAME_LEFT_BOTTOM}"
   else
     _LIST_SYMBOL_LEFT_LENGTH=0
     _LIST_SYMBOL_LEFT_SELECTED_ITEM=""
@@ -121,8 +121,8 @@ function list::setOptions() {
     _LIST_SYMBOL_RIGHT_LENGTH="${SYMBOL_LIST_RIGHT_LENGTH}"
     _LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR="${SYMBOL_LIST_RIGHT_WITH_SCROLL_BAR}"
     _LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR="${SYMBOL_LIST_RIGHT_WITHOUT_SCROLL_BAR}"
-    _LIST_SYMBOL_RIGHT_SEPARATOR_TOP="${SYMBOL_LIST_RIGHT_SEPARATOR_TOP}"
-    _LIST_SYMBOL_RIGHT_SEPARATOR_BOTTOM="${SYMBOL_LIST_RIGHT_SEPARATOR_BOTTOM}"
+    _LIST_SYMBOL_RIGHT_SEPARATOR_TOP="${SYMBOL_LIST_FRAME_RIGHT_TOP}"
+    _LIST_SYMBOL_RIGHT_SEPARATOR_BOTTOM="${SYMBOL_LIST_FRAME_RIGHT_BOTTOM}"
   else
     _LIST_SYMBOL_RIGHT_LENGTH=0
     _LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR=""
@@ -134,6 +134,11 @@ function list::setOptions() {
   # visual options
   _LIST_STYLE_LETTER_HIGHLIGHT="${STYLE_LIST_LETTER_HIGHLIGHT}"
   _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}"
+  _LIST_STYLE_FRAME="${STYLE_FRAMES}"
+  _LIST_STYLE_SCROLLBAR="${STYLE_LIST_SCROLLBAR}"
+
+  _LIST_SYMBOL_FRAME_HR="${SYMBOL_LIST_FRAME_HR}"
+  _LIST_SYMBOL_EMPTY_LIST="${SYMBOL_LIST_EMPTY}"
 
   _LIST_EMPTY_LIST_TEXT="${emptyListText:-"EMPTY"}"
   local visibleCharacters="${_LIST_EMPTY_LIST_TEXT}"
@@ -142,8 +147,8 @@ function list::setOptions() {
 
   _LIST_ITEMS_COUNT_PATTERN="${itemsCountPattern:-" <colorCount><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorCount><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> "}"
   _LIST_ITEMS_COUNT_PATTERN="${_LIST_ITEMS_COUNT_PATTERN//"<colorCount>"/"${STYLE_LIST_COUNT_NUMBER}"}"
-  _LIST_ITEMS_COUNT_PATTERN="${_LIST_ITEMS_COUNT_PATTERN//"<colorFrame>"/"${STYLE_LIST_COUNT_FRAME}"}"
   _LIST_ITEMS_COUNT_PATTERN="${_LIST_ITEMS_COUNT_PATTERN//"<colorReset>"/"${STYLE_RESET}"}"
+  _LIST_ITEMS_COUNT_PATTERN="${_LIST_ITEMS_COUNT_PATTERN//"<colorFrame>"/"${STYLE_FRAMES}"}"
   local visibleCharacters="${_LIST_ITEMS_COUNT_PATTERN}"
   string::removeTextFormatting visibleCharacters
   _LIST_ITEMS_COUNT_PATTERN_INVISIBLE_CHARS_LENGTH=$((${#_LIST_ITEMS_COUNT_PATTERN} - ${#visibleCharacters}))
@@ -151,6 +156,7 @@ function list::setOptions() {
   _LIST_ITEMS_COUNT_FILTERING_STRING="${itemsCountFilteringString:-" <colorCount>Filtering…<colorReset> "}"
   _LIST_ITEMS_COUNT_FILTERING_STRING="${_LIST_ITEMS_COUNT_FILTERING_STRING//"<colorCount>"/"${STYLE_LIST_COUNT_NUMBER}"}"
   _LIST_ITEMS_COUNT_FILTERING_STRING="${_LIST_ITEMS_COUNT_FILTERING_STRING//"<colorReset>"/"${STYLE_RESET}"}"
+  _LIST_ITEMS_COUNT_FILTERING_STRING="${_LIST_ITEMS_COUNT_FILTERING_STRING//"<colorFrame>"/"${STYLE_FRAMES}"}"
   visibleCharacters="${_LIST_ITEMS_COUNT_FILTERING_STRING}"
   string::removeTextFormatting visibleCharacters
   _LIST_ITEMS_COUNT_FILTERING_STRING_LENGTH=${#visibleCharacters}
@@ -317,6 +323,8 @@ function list::draw() {
     list::drawCounter finalStringToPrint
   fi
 
+  # TODO: possible improvement: instead of appending to toString, append to an array and compare each line to the previous one to avoid redrawing unchanged lines
+
   printf '%s%s%s' "${ESC__CURSOR_HIDE}" "${finalStringToPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
 }
 
@@ -330,12 +338,14 @@ function list::drawItems() {
   local -i line \
     displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT)) \
     index=${_LIST_FILTERED_ITEMS_START_INDEX}
+
+  _LIST_CURRENT_SCROLLBAR=""
   _LIST_NB_DISPLAYED_ITEMS=0
 
   for ((line = 0; line < _LIST_NB_USABLE_LINES_FOR_ITEMS; line++)); do
     # line at which to display the item
     if [[ ${_LIST_ENABLE_REVERSE_MODE} == "true" ]]; then
-      _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_TOP + _LIST_HEIGHT - 1 - _LIST_BOTTOM_SHIFT - line - (_LIST_ITEM_HEIGHT - 1)))
+      _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_TOP + _LIST_HEIGHT - 1 - _LIST_BOTTOM_SHIFT - line))
     else
       _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_TOP + _LIST_TOP_SHIFT + line))
     fi
@@ -343,13 +353,21 @@ function list::drawItems() {
     # position
     toPrint+="${ESC__CURSOR_MOVE__}${_LIST_CURRENT_ITEM_SHOWN_AT_LINE};${_LIST_LEFT}${__ESC__TO}"
 
+    # scrollbar
+    if ((line < firstLineWithScrollBar + linesWithScrollBar && line >= firstLineWithScrollBar)); then
+      _LIST_CURRENT_SCROLLBAR="${_LIST_STYLE_SCROLLBAR}${_LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR}${STYLE_RESET}"
+    elif ((firstLineWithScrollBar >= 0)); then
+      _LIST_CURRENT_SCROLLBAR="${_LIST_STYLE_FRAME}${_LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR}${STYLE_RESET}"
+    fi
+
     if ((index >= ${#_LIST_FILTERED_ITEMS[@]})); then
       # we displayed all the items, show empty lines
-      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH// /${SYMBOL_LIST_EMPTY}}${STYLE_RESET}"
+      toPrint+="${_LIST_STYLE_FRAME}${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH// /${_LIST_SYMBOL_EMPTY_LIST}}${STYLE_RESET}${_LIST_CURRENT_SCROLLBAR}"
 
     elif ((_LIST_NB_DISPLAYED_ITEMS >= displayableItems)); then
       # we reached the maximum number of items to display, show blank line
-      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH}${STYLE_RESET}"
+      # (case of multi line items where the list size is not a multiple of item height...)
+      toPrint+="${_LIST_STYLE_FRAME}${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH}${STYLE_RESET}${_LIST_CURRENT_SCROLLBAR}"
 
     else
       # we can display an item
@@ -369,12 +387,6 @@ function list::drawItems() {
       index=$((index + 1))
       _LIST_NB_DISPLAYED_ITEMS=$((_LIST_NB_DISPLAYED_ITEMS + 1))
     fi
-
-    if ((line < firstLineWithScrollBar + linesWithScrollBar && line >= firstLineWithScrollBar)); then
-      toPrint+="${_LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR}"
-    else
-      toPrint+="${_LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR}"
-    fi
   done
 
   # case of an empty list
@@ -389,14 +401,16 @@ function list_appendSingleLineItemDisplayString() {
     # highlight the selected item
     _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_SELECTED_ITEM}"
     list::getCurrentItemDisplayableString
-    toPrint+="${_LIST_SYMBOL_LEFT_SELECTED_ITEM}${STYLE_LIST_SELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+    toPrint+="${STYLE_LIST_CURSOR}${_LIST_SYMBOL_LEFT_SELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_SELECTED_ITEM}${_LIST_CURRENT_ITEM}"
   else
     _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_UNSELECTED_ITEM}"
     list::getCurrentItemDisplayableString
-    toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+    toPrint+="${_LIST_STYLE_FRAME}${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
   fi
   if ((REPLY > 0)); then
-    toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}"
+    toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}${STYLE_RESET}${_LIST_CURRENT_SCROLLBAR}"
+  else
+    toPrint+="${STYLE_RESET}${_LIST_CURRENT_SCROLLBAR}"
   fi
 }
 
@@ -409,42 +423,51 @@ function list_appendMultiLineItemDisplayString() {
     _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_UNSELECTED_ITEM}"
   fi
 
+
   string::highlight _LIST_CURRENT_ITEM _LIST_FILTER_STRING highlightCode="${_LIST_STYLE_LETTER_HIGHLIGHT}" resetCode="${_LIST_STYLE_LETTER_HIGHLIGHT_RESET}"
   _LIST_CURRENT_ITEM="${REPLY}"
 
   local IFS=$'\n' savedFilterString="${_LIST_FILTER_STRING}"
   _LIST_FILTER_STRING=""
 
+  if [[ ${_LIST_ENABLE_REVERSE_MODE} == "true" ]]; then
+    _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_CURRENT_ITEM_SHOWN_AT_LINE - (_LIST_ITEM_HEIGHT - 1)))
+  fi
+
   set -o noglob
   # shellcheck disable=SC2206
   local -a lines=(${_LIST_CURRENT_ITEM})
   set +o noglob
 
-  local -i nbLines=0
+  local -i nbLines=0 currentLine
   for _LIST_CURRENT_ITEM in "${lines[@]}"; do
-    if ((nbLines > 0)); then
-      toPrint+="${ESC__CURSOR_MOVE__}$((_LIST_CURRENT_ITEM_SHOWN_AT_LINE + nbLines));${_LIST_LEFT}${__ESC__TO}"
-    fi
+    toPrint+="${ESC__CURSOR_MOVE__}$((_LIST_CURRENT_ITEM_SHOWN_AT_LINE + nbLines));${_LIST_LEFT}${__ESC__TO}"
 
     list::getCurrentItemDisplayableString
 
     if ((index == _LIST_FILTERED_ITEMS_SELECTED_INDEX)); then
-      toPrint+="${_LIST_SYMBOL_LEFT_SELECTED_ITEM}${STYLE_LIST_SELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+      toPrint+="${STYLE_LIST_CURSOR}${_LIST_SYMBOL_LEFT_SELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_SELECTED_ITEM}${_LIST_CURRENT_ITEM}"
     else
-      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
+      toPrint+="${_LIST_STYLE_FRAME}${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
     fi
 
     if ((REPLY > 0)); then
-      toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}"
+      toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}${STYLE_RESET}"
+    else
+      toPrint+="${STYLE_RESET}"
     fi
 
-    if ((nbLines < ${#lines[@]} - 1)); then
-      # if not for the last line, we need to add the right scrollbar
-      if ((line + nbLines < firstLineWithScrollBar + linesWithScrollBar && line + nbLines >= firstLineWithScrollBar)); then
-        toPrint+="${_LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR}"
-      else
-        toPrint+="${_LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR}"
-      fi
+    if [[ ${_LIST_ENABLE_REVERSE_MODE} == "true" ]]; then
+      currentLine=$((line + (_LIST_ITEM_HEIGHT - 1) - nbLines))
+    else
+      currentLine=$((line + nbLines))
+    fi
+
+    # optionally display the scrollbar
+    if ((currentLine < firstLineWithScrollBar + linesWithScrollBar && currentLine >= firstLineWithScrollBar)); then
+      toPrint+="${_LIST_STYLE_SCROLLBAR}${_LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR}${STYLE_RESET}"
+    elif ((firstLineWithScrollBar >= 0)); then
+      toPrint+="${_LIST_STYLE_FRAME}${_LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR}${STYLE_RESET}"
     fi
 
     nbLines=$((nbLines + 1))
@@ -503,7 +526,7 @@ function list::drawCounter() {
 
   local counterFrame="${_LIST_BLANKS_WIDTH:0:counterAvailableLength-itemCounterLength}"
 
-  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${STYLE_LIST_COUNT_FRAME}${leftSymbol}${counterFrame// /"${SYMBOL_LIST_FRAME_HR}"}${STYLE_RESET}${itemsCounterString}${STYLE_LIST_COUNT_FRAME}${rightSymbol}${STYLE_RESET}"
+  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${_LIST_STYLE_FRAME}${leftSymbol}${counterFrame// /"${_LIST_SYMBOL_FRAME_HR}"}${STYLE_RESET}${itemsCounterString}${_LIST_STYLE_FRAME}${rightSymbol}${STYLE_RESET}"
 }
 
 # Draw the scroll bar top separator.
@@ -521,7 +544,7 @@ function list::drawTopSeparator() {
     rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_BOTTOM}"
   fi
 
-  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${STYLE_LIST_COUNT_FRAME}${leftSymbol}${_LIST_BLANKS_ITEM_WIDTH// /"${SYMBOL_LIST_FRAME_HR}"}${rightSymbol}${STYLE_RESET}"
+  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${_LIST_STYLE_FRAME}${leftSymbol}${_LIST_BLANKS_ITEM_WIDTH// /"${_LIST_SYMBOL_FRAME_HR}"}${rightSymbol}${STYLE_RESET}"
 }
 
 # Filter the items of the autocompletion box, will either filter synchronously or asynchronously

@@ -140,7 +140,8 @@ function terminal::setRawMode() {
 # ```
 function terminal::saveSettings() {
   if [[ ! -t ${GLOBAL_FD_ORIGINAL_STDIN} && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
-    core::fail "stdin is not a terminal, cannot reset mode."
+    log::debug "stdin is not a terminal, cannot save settings."
+    return 0
   fi
   if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
     if stty -g <&"${GLOBAL_FD_ORIGINAL_STDIN:-0}" &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
@@ -171,7 +172,7 @@ function terminal::restoreSettings() {
     return 0
   fi
   if [[ ! -t ${GLOBAL_FD_ORIGINAL_STDIN} && ${GLOBAL_TEST_FORCE_FD_OPEN:-} != "true" ]]; then
-    core::fail "stdin is not a terminal, cannot reset mode."
+    core::fail "stdin is not a terminal, cannot restore settings."
   fi
   stty "${GLOBAL_STTY_SAVED_CONFIG}" <&"${GLOBAL_FD_ORIGINAL_STDIN:-}" 2>&"${GLOBAL_FD_LOG}" || log::warning "Failed to restore the terminal settings, check stty version."
   log::debug "Restored terminal settings using: stty ${GLOBAL_STTY_SAVED_CONFIG}."

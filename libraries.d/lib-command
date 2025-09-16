@@ -557,7 +557,7 @@ function command::fuzzyMatchCommandToFunctionNameOrFail() {
     else
       messageDetails="a matching command"
     fi
-    core::fail "Could not find ${messageDetails} for ⌜${*:0:level}⌝, use ⌜--help⌝ to get a list of valid commands."
+    core::fail "Could not find ${messageDetails} for ⌜${*:1:level}⌝, use ⌜--help⌝ to get a list of valid commands."
   fi
 
   shopt -u nocasematch
