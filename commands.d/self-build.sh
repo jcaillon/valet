@@ -358,7 +358,6 @@ function declareFinalCommandDefinitionCommonVariables() {
   # we count the number of spaces in the command name
   local -i level=-1
   local word
-  # shellcheck disable=SC2034
   for word in ${command}; do
     level+=1
   done

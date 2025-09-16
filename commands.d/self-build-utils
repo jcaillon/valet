@@ -216,7 +216,6 @@ function selfBuild_createGlobalVariable() {
 function selfBuild_extractFirstLongNameFromOptionString() {
   local optionString="${1}"
   local word
-  # shellcheck disable=SC2034
   for word in ${optionString}; do
     if [[ ${word} == "--"* ]]; then
       REPLY="${word%,}"

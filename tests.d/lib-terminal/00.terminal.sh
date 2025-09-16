@@ -118,6 +118,13 @@ function test_terminal::setRawMode() {
   test::exec BASH_SUBSHELL=0 terminal::restoreSettings
   test::markdown 'stty called with `'"${_stty_args[*]}"'`'
 
+  unset -v GLOBAL_STTY_SAVED_CONFIG
+  test::exec terminal::saveSettings
+  test::printVars GLOBAL_STTY_SAVED_CONFIG
+  test::markdown 'stty called with `'"${_stty_args[*]}"'`'
+
+  terminal::saveSettings
+
   unset -f stty
 }
 

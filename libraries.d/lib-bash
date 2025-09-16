@@ -83,6 +83,13 @@ function bash::catchErrors() {
 function bash::runInSubshell() {
   local exitOnFail="${_OPTION_EXIT_ON_FAIL:-false}"
 
+  # ensure terminal settings are saved if needed because if that happens in the subshell
+  # we would not be able to restore it in the main shell
+  if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
+    include terminal
+    terminal::saveSettings
+  fi
+
   # disable the ERR trap or we would catch the subshell failure with it and not restore
   # the errexit and the original trap (and we would display an error message that we do
   # not want to display because we already displayed an error from the subshell).

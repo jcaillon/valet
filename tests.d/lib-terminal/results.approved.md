@@ -280,6 +280,14 @@ stty called with `-icrnl -inlcr -ixon -ixoff nl0 cr0 tab0 ff0 -onlret -icanon -e
 
 stty called with `original config`
 
+❯ `terminal::saveSettings`
+
+```text
+GLOBAL_STTY_SAVED_CONFIG='original config'
+```
+
+stty called with `-g`
+
 ### ✅ Testing terminal::rerouteLogs
 
 ❯ `terminal::restoreLogs`
