@@ -22,27 +22,34 @@ MY_ARRAY=(
   "honeydew"$'\n'"(green)"
   "kiwi"$'\n'"(brown)"
   "lemon"$'\n'"(yellow)"
-  "mango"$'\n'"(orange)"
-  "nectarine"$'\n'"(orange)"
-  "orange"$'\n'"(orange)"
-  "papaya"$'\n'"(orange)"
-  "quince"$'\n'"(orange)"
 )
 # MY_ARRAY=(
+#   "appl"
+#   "bana"
+#   "cher"
+#   "date"
+#   "elde"
+#   "figz"
+#   "grap"
+#   "hone"
+#   "kiwi"
+#   "lemo"
+#   "mang"
+#   "nect"
+#   "oran"
+#   "papa"
+#   "quin"
 # )
 terminal::createSpace 10
 terminal::getCursorPosition
 log::info "Drawing the list with ${#MY_ARRAY[@]} items."
 
 time::startTimer
-list::setOptions itemHeight=2
-list::setViewport _OPTION_TOP="${GLOBAL_CURSOR_LINE}" _OPTION_HEIGHT=10
+list::setOptions itemHeight=2 enableReverseMode=true
+list::setViewport top="${GLOBAL_CURSOR_LINE}" height=10
 
 list::setItems MY_ARRAY
-list::drawTopSeparator
-list::drawItems
-list::drawCounter
-list::drawScrollBar
+list::draw
 # list::filter ""
 
 

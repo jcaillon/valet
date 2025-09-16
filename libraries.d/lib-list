@@ -186,7 +186,7 @@ function list::setOptions() {
     done
   fi
 
-    # filtering options
+  # filtering options
   _LIST_DISABLE_FILTERING="${disableFiltering:-false}"
   _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD="${filterAsynchronousThreshold:-242}"
   _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${filterUsingExternalProgramThreshold:-1042}"
@@ -227,7 +227,7 @@ function list::setViewport() {
   printf -v _LIST_BLANKS_WIDTH "%${_LIST_WIDTH}s" " "
   printf -v _LIST_BLANKS_ITEM_WIDTH "%${_LIST_ITEM_WIDTH}s" " "
 
-  bash::clearCachedVariables _LIST_itemCounterLength _LIST_itemsCounterString _LIST_linesWithScrollBar _LIST_firstLineWithScrollBar
+  bash::clearCachedVariables _LIST_itemCounterLength _LIST_itemsCounterString
 }
 
 # ## list::setItems (private)
@@ -288,23 +288,63 @@ function list::setItems() {
   fi
 }
 
+# Draw the list box.
 function list::draw() {
-:
+  local finalStringToPrint=""
+
+  if [[ ${_LIST_DISABLE_TOP_SEPARATOR} != "true" ]]; then
+    list::drawTopSeparator finalStringToPrint
+  fi
+
+  if [[ ${_LIST_DISABLE_RIGHT_SCROLLBAR} != "true" ]]; then
+    # calculate the size and position of the scroll bar
+    local -i \
+      firstLineWithScrollBar=0 \
+      linesWithScrollBar=0 \
+      filteredItems=${#_LIST_FILTERED_ITEMS[@]} \
+      displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
+    if ((filteredItems > displayableItems)); then
+      local -i \
+        percentViewed=$((filteredItems - displayableItems > 0 ? (_LIST_FILTERED_ITEMS_START_INDEX * 100) / (filteredItems - displayableItems) : 100))
+      linesWithScrollBar=$((filteredItems > 0 ? _LIST_NB_USABLE_LINES_FOR_ITEMS * displayableItems / filteredItems : 0))
+      firstLineWithScrollBar=$((((_LIST_NB_USABLE_LINES_FOR_ITEMS - linesWithScrollBar) * percentViewed) / 100))
+    fi
+  fi
+
+  list::drawItems finalStringToPrint "${firstLineWithScrollBar:-"-1"}" "${linesWithScrollBar:-"-1"}"
+
+  if [[ ${_LIST_DISABLE_ITEMS_COUNT} != "true" ]]; then
+    list::drawCounter finalStringToPrint
+  fi
+
+  printf '%s%s%s' "${ESC__CURSOR_HIDE}" "${finalStringToPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # Draw the autocompletion box
 function list::drawItems() {
-  local toPrint="${ESC__CURSOR_HIDE}"
+  local -n toPrint="${1}"
+  local -i \
+    firstLineWithScrollBar="${2:-0}" \
+    linesWithScrollBar="${3:-0}"
 
-  local -i line displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT)) index=${_LIST_FILTERED_ITEMS_START_INDEX}
+  local -i line \
+    displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT)) \
+    index=${_LIST_FILTERED_ITEMS_START_INDEX}
   _LIST_NB_DISPLAYED_ITEMS=0
 
   for ((line = 0; line < _LIST_NB_USABLE_LINES_FOR_ITEMS; line++)); do
     # line at which to display the item
     if [[ ${_LIST_ENABLE_REVERSE_MODE} == "true" ]]; then
-      _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_TOP + _LIST_HEIGHT - 1 - _LIST_BOTTOM_SHIFT - line))
+      _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_TOP + _LIST_HEIGHT - 1 - _LIST_BOTTOM_SHIFT - line - (_LIST_ITEM_HEIGHT - 1)))
     else
       _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_TOP + _LIST_TOP_SHIFT + line))
+    fi
+
+    # right side scrollbar character
+    if ((line < firstLineWithScrollBar + linesWithScrollBar && line >= firstLineWithScrollBar)); then
+      _LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL="${_LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR}"
+    else
+      _LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL="${_LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR}"
     fi
 
     # position
@@ -312,11 +352,11 @@ function list::drawItems() {
 
     if ((index >= ${#_LIST_FILTERED_ITEMS[@]})); then
       # we displayed all the items, show empty lines
-      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH// /${SYMBOL_LIST_EMPTY}}${STYLE_RESET}"
+      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH// /${SYMBOL_LIST_EMPTY}}${STYLE_RESET}${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
 
     elif ((_LIST_NB_DISPLAYED_ITEMS >= displayableItems)); then
       # we reached the maximum number of items to display, show blank line
-      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH}${STYLE_RESET}"
+      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH}${STYLE_RESET}${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
 
     else
       # we can display an item
@@ -342,8 +382,6 @@ function list::drawItems() {
   if ((_LIST_NB_DISPLAYED_ITEMS == 0)); then
     toPrint+="${ESC__CURSOR_MOVE__}$((_LIST_TOP + _LIST_NB_USABLE_LINES_FOR_ITEMS / 2));$((_LIST_LEFT + _LIST_WIDTH / 2 - _LIST_EMPTY_LIST_TEXT_LENGTH / 2))${__ESC__TO}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_EMPTY_LIST_TEXT}${STYLE_RESET}"
   fi
-
-  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # ## list_appendSingleLineItemDisplayString (private)
@@ -359,7 +397,9 @@ function list_appendSingleLineItemDisplayString() {
     toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
   fi
   if ((REPLY > 0)); then
-    toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}"
+    toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
+  else
+    toPrint+="${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
   fi
 }
 
@@ -393,7 +433,9 @@ function list_appendMultiLineItemDisplayString() {
     fi
 
     if ((REPLY > 0)); then
-      toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}"
+      toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
+    else
+      toPrint+="${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
     fi
 
     nbLines=$((nbLines + 1))
@@ -404,11 +446,11 @@ function list_appendMultiLineItemDisplayString() {
 
 # Draw the items count at the bottom/top of the list.
 function list::drawCounter() {
-  if [[ ${_LIST_DISABLE_ITEMS_COUNT} == "true" ]]; then
-    return 0
-  fi
+  local -n toPrint="${1}"
 
-  local -i itemCounterLength counterAvailableLength=$((_LIST_WIDTH - _LIST_SYMBOL_LEFT_LENGTH - _LIST_SYMBOL_RIGHT_LENGTH))
+  local -i \
+    itemCounterLength \
+    counterAvailableLength=$((_LIST_WIDTH - _LIST_SYMBOL_LEFT_LENGTH - _LIST_SYMBOL_RIGHT_LENGTH))
   local itemsCounterString
   if ((_LIST_ORIGINAL_ITEMS_COUNT == 0)); then
     itemsCounterString=""
@@ -439,10 +481,6 @@ function list::drawCounter() {
     itemsCounterString=""
   fi
 
-  if bash::isVariableCachedWithValue _LIST_itemCounterLength "${itemCounterLength}" _LIST_itemsCounterString "${itemsCounterString}"; then
-    return 0
-  fi
-
   local showAtLine leftSymbol rightSymbol
   if [[ ${_LIST_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
     showAtLine=${_LIST_TOP}
@@ -455,59 +493,13 @@ function list::drawCounter() {
   fi
 
   local counterFrame="${_LIST_BLANKS_WIDTH:0:counterAvailableLength-itemCounterLength}"
-  printf '%s%s' \
-    "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${STYLE_LIST_COUNT_FRAME}${leftSymbol}${counterFrame// /"${SYMBOL_LIST_SEPARATOR}"}${STYLE_RESET}${itemsCounterString}${STYLE_LIST_COUNT_FRAME}${rightSymbol}${STYLE_RESET}" \
-    "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
-}
 
-# Draw the scroll bar on the right side of the list.
-function list::drawScrollBar() {
-  if [[ ${_LIST_DISABLE_RIGHT_SCROLLBAR} == "true" ]]; then
-    return 0
-  fi
-
-  local toPrint="${ESC__CURSOR_HIDE}"
-
-  # calculate the size and position of the scroll bar
-  local -i filteredItems=${#_LIST_FILTERED_ITEMS[@]} linesWithScrollBar=0 firstLineWithScrollBar=0
-  if ((filteredItems > _LIST_NB_DISPLAYED_ITEMS)); then
-    local -i displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
-    local -i percentViewed=$((filteredItems - _LIST_NB_DISPLAYED_ITEMS > 0 ? (_LIST_FILTERED_ITEMS_START_INDEX * 100) / (filteredItems - _LIST_NB_DISPLAYED_ITEMS) : 100))
-    linesWithScrollBar=$((filteredItems > 0 ? _LIST_NB_USABLE_LINES_FOR_ITEMS * displayableItems / filteredItems : 0))
-    firstLineWithScrollBar=$(( ((_LIST_NB_USABLE_LINES_FOR_ITEMS - linesWithScrollBar) * percentViewed) / 100))
-  fi
-
-  if bash::isVariableCachedWithValue _LIST_linesWithScrollBar "${linesWithScrollBar}" _LIST_firstLineWithScrollBar "${firstLineWithScrollBar}"; then
-    return 0
-  fi
-
-  local showAtLine
-  for ((line = 0; line < _LIST_NB_USABLE_LINES_FOR_ITEMS; line++)); do
-      # line at which to display the item
-    if [[ ${_LIST_ENABLE_REVERSE_MODE} == "true" ]]; then
-      showAtLine=$((_LIST_TOP + _LIST_HEIGHT - 1 - _LIST_BOTTOM_SHIFT - line))
-    else
-      showAtLine=$((_LIST_TOP + _LIST_TOP_SHIFT + line))
-    fi
-
-    # position
-    toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};$((_LIST_LEFT + _LIST_WIDTH - _LIST_SYMBOL_RIGHT_LENGTH))${__ESC__TO}"
-
-    if ((line < firstLineWithScrollBar + linesWithScrollBar && line >= firstLineWithScrollBar)); then
-      toPrint+="${_LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR}"
-    else
-      toPrint+="${_LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR}"
-    fi
-  done
-
-  printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
+  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${STYLE_LIST_COUNT_FRAME}${leftSymbol}${counterFrame// /"${SYMBOL_LIST_FRAME_HR}"}${STYLE_RESET}${itemsCounterString}${STYLE_LIST_COUNT_FRAME}${rightSymbol}${STYLE_RESET}"
 }
 
 # Draw the scroll bar top separator.
 function list::drawTopSeparator() {
-  if [[ ${_LIST_DISABLE_TOP_SEPARATOR} == "true" ]]; then
-    return 0
-  fi
+  local -n toPrint="${1}"
 
   local showAtLine leftSymbol rightSymbol
   if [[ ${_LIST_SHOW_ITEMS_COUNT_AT_TOP:-false} != "true" ]]; then
@@ -520,9 +512,7 @@ function list::drawTopSeparator() {
     rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_BOTTOM}"
   fi
 
-  printf '%s%s' \
-    "${ESC__CURSOR_HIDE}${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${STYLE_LIST_COUNT_FRAME}${leftSymbol}${_LIST_BLANKS_ITEM_WIDTH// /"${SYMBOL_LIST_SEPARATOR}"}${rightSymbol}${STYLE_RESET}" \
-    "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
+  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${STYLE_LIST_COUNT_FRAME}${leftSymbol}${_LIST_BLANKS_ITEM_WIDTH// /"${SYMBOL_LIST_FRAME_HR}"}${rightSymbol}${STYLE_RESET}"
 }
 
 # Filter the items of the autocompletion box, will either filter synchronously or asynchronously
