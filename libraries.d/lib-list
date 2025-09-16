@@ -340,23 +340,16 @@ function list::drawItems() {
       _LIST_CURRENT_ITEM_SHOWN_AT_LINE=$((_LIST_TOP + _LIST_TOP_SHIFT + line))
     fi
 
-    # right side scrollbar character
-    if ((line < firstLineWithScrollBar + linesWithScrollBar && line >= firstLineWithScrollBar)); then
-      _LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL="${_LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR}"
-    else
-      _LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL="${_LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR}"
-    fi
-
     # position
     toPrint+="${ESC__CURSOR_MOVE__}${_LIST_CURRENT_ITEM_SHOWN_AT_LINE};${_LIST_LEFT}${__ESC__TO}"
 
     if ((index >= ${#_LIST_FILTERED_ITEMS[@]})); then
       # we displayed all the items, show empty lines
-      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH// /${SYMBOL_LIST_EMPTY}}${STYLE_RESET}${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
+      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH// /${SYMBOL_LIST_EMPTY}}${STYLE_RESET}"
 
     elif ((_LIST_NB_DISPLAYED_ITEMS >= displayableItems)); then
       # we reached the maximum number of items to display, show blank line
-      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH}${STYLE_RESET}${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
+      toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH}${STYLE_RESET}"
 
     else
       # we can display an item
@@ -375,6 +368,12 @@ function list::drawItems() {
       line=$((line + _LIST_ITEM_HEIGHT - 1))
       index=$((index + 1))
       _LIST_NB_DISPLAYED_ITEMS=$((_LIST_NB_DISPLAYED_ITEMS + 1))
+    fi
+
+    if ((line < firstLineWithScrollBar + linesWithScrollBar && line >= firstLineWithScrollBar)); then
+      toPrint+="${_LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR}"
+    else
+      toPrint+="${_LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR}"
     fi
   done
 
@@ -397,9 +396,7 @@ function list_appendSingleLineItemDisplayString() {
     toPrint+="${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_CURRENT_ITEM}"
   fi
   if ((REPLY > 0)); then
-    toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
-  else
-    toPrint+="${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
+    toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}"
   fi
 }
 
@@ -418,8 +415,13 @@ function list_appendMultiLineItemDisplayString() {
   local IFS=$'\n' savedFilterString="${_LIST_FILTER_STRING}"
   _LIST_FILTER_STRING=""
 
+  set -o noglob
+  # shellcheck disable=SC2206
+  local -a lines=(${_LIST_CURRENT_ITEM})
+  set +o noglob
+
   local -i nbLines=0
-  for _LIST_CURRENT_ITEM in ${_LIST_CURRENT_ITEM}; do
+  for _LIST_CURRENT_ITEM in "${lines[@]}"; do
     if ((nbLines > 0)); then
       toPrint+="${ESC__CURSOR_MOVE__}$((_LIST_CURRENT_ITEM_SHOWN_AT_LINE + nbLines));${_LIST_LEFT}${__ESC__TO}"
     fi
@@ -433,9 +435,16 @@ function list_appendMultiLineItemDisplayString() {
     fi
 
     if ((REPLY > 0)); then
-      toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
-    else
-      toPrint+="${_LIST_CURRENT_ITEM_SCROLL_BAR_SYMBOL}"
+      toPrint+="${_LIST_BLANKS_WIDTH:0:REPLY}"
+    fi
+
+    if ((nbLines < ${#lines[@]} - 1)); then
+      # if not for the last line, we need to add the right scrollbar
+      if ((line + nbLines < firstLineWithScrollBar + linesWithScrollBar && line + nbLines >= firstLineWithScrollBar)); then
+        toPrint+="${_LIST_SYMBOL_RIGHT_WITH_SCROLL_BAR}"
+      else
+        toPrint+="${_LIST_SYMBOL_RIGHT_WITHOUT_SCROLL_BAR}"
+      fi
     fi
 
     nbLines=$((nbLines + 1))

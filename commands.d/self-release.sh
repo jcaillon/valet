@@ -165,14 +165,14 @@ function selfRelease::createRelease() {
   tagMessage="# Release of version ${version}"$'\n'$'\n'
   tagMessage+="Changelog: "$'\n'$'\n'
   exe::invoke git log --pretty=format:"%s" "${lastLocalTag}..HEAD"
-  local IFS=$'\n'
-  for line in ${REPLY}; do
+  string::split REPLY $'\n'
+  for line in "${REPLY_ARRAY[@]}"; do
     if [[ ${line} == ":bookmark:"* ]]; then
       continue
     fi
     tagMessage+="- ${line}"$'\n'
   done
-  IFS=$' '
+
   log::info "The tag message is:"
   log::printFileString tagMessage
 

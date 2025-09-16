@@ -501,7 +501,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-FAIL     Could not find an exact command for ⌜se⌝, use ⌜--help⌝ to get a list of valid commands.
+FAIL     Could not find an exact command for ⌜valet se bu other stuff stuff thing derp⌝, use ⌜--help⌝ to get a list of valid commands.
 ```
 
 Fuzzy match with ambiguous result:

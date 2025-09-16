@@ -4,6 +4,9 @@ source "$(valet --source)"
 
 include system
 
+log::info "checking * fuck zaefziuhey gazuyehgf uyzaeg fiuyazgefuy gzueyf gziauyegfiuzyaegiuyzaegfiuyzaegiuyzagefuyzgaeuifygzaeuiyfgzeiuyfgzaiueygfziuayegfuiyzaegfguzye uiyg uyz geiuygzuiyeguyzegf"
+exit 0
+
 function string::getKebabCase() {
   REPLY="${!1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 

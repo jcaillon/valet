@@ -22,6 +22,7 @@ function main() {
   local IFS=$'\n'
   local line
   local key
+  set -o noglob
   for line in ${bindings}; do
     if [[ ${line} == "#"* || ${line} != *"self-insert" ]]; then
       continue
@@ -41,7 +42,7 @@ function main() {
     bind -x "${key}: \"for_each_key ${val}\"" &>/dev/null
     key="${key//\"/}"
   done
-
+  set +o noglob
 }
 
 main

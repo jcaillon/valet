@@ -214,15 +214,11 @@ function selfBuild_createGlobalVariable() {
 # Usage:
 #   selfBuild_extractFirstLongNameFromOptionString "--option -o" && local firstLongName="${REPLY}"
 function selfBuild_extractFirstLongNameFromOptionString() {
-  local optionString="${1}"
-  local word
-  for word in ${optionString}; do
-    if [[ ${word} == "--"* ]]; then
-      REPLY="${word%,}"
-      return 0
-    fi
-  done
-  REPLY=""
+  if [[ ${1} =~ ("--"[^[:space:]]+) ]]; then
+    REPLY="${BASH_REMATCH[1]}"
+  else
+    REPLY=""
+  fi
 }
 
 

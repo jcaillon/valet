@@ -313,7 +313,9 @@ function selfDocument::convertFunctionDocumentationToSnippetBody() {
   local IFS=$'\n' line options="" bashParameters="" hasUndeterminedParameters=false defaultValue
   local -i tabOrder=1
 
-  for line in ${!documentationVar}; do
+  local -a REPLY_ARRAY
+  string::split "${documentationVar}" $'\n'
+  for line in "${REPLY_ARRAY[@]}"; do
     if [[ "${line}" =~ ^"- \$"([0-9@])": "([^_]+)" _as "([^_]+)"_:" ]]; then
       body+=" \"\${${tabOrder}:${BASH_REMATCH[2]//"**"/}}\""
       if [[ "${BASH_REMATCH[1]}" == "@" ]]; then

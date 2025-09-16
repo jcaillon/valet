@@ -1363,6 +1363,8 @@ function string::wrapWords() {
 
     firstWord=1
 
+    # make sure to turn off globbing to avoid expanding special characters like * or ?
+    set -o noglob
     for word in ${line}; do
       if [[ ${word} == *$'\e'* ]]; then
         realWord="${word}"
@@ -1397,6 +1399,7 @@ function string::wrapWords() {
       fi
 
     done
+    set +o noglob
 
     lineLength=0
   done

@@ -557,7 +557,7 @@ function command::fuzzyMatchCommandToFunctionNameOrFail() {
     else
       messageDetails="a matching command"
     fi
-    core::fail "Could not find ${messageDetails} for ⌜${command}⌝, use ⌜--help⌝ to get a list of valid commands."
+    core::fail "Could not find ${messageDetails} for ⌜${*:0:level}⌝, use ⌜--help⌝ to get a list of valid commands."
   fi
 
   shopt -u nocasematch
@@ -579,16 +579,17 @@ function command::fuzzyMatchCommandToFunctionNameOrFail() {
 # command_getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3"
 # level="${REPLY}"
 function command_getMaxPossibleCommandLevel() {
-  local level maxLevel
-  local IFS=' '
-  level=0
+  local IFS=' ' level=0
+  # make sure to turn off globbing to avoid expanding special characters like * or ?
+  set -o noglob
   # shellcheck disable=SC2048
   for _ in ${*}; do
     level=$((level + 1))
   done
-  maxLevel=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
+  set +o noglob
+
   if (( level > CMD_MAX_SUB_COMMAND_LEVEL + 1 )); then
-    level="${maxLevel}"
+    level=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
   fi
   REPLY="${level}"
 }

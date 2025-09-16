@@ -638,9 +638,11 @@ function terminal::rebindKeymap() {
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
   fs::readFile "${_TERMINAL_SAVED_BINDINGS_FILE}"
   local bindings="${REPLY}"
-  local IFS=$'\n'
-  local line
-  local key
+  local \
+    IFS=$'\n' \
+    line \
+    key
+  set -o noglob
   for line in ${bindings}; do
     if [[ ${line} == "#"* || ${line} == *"self-insert" ]]; then
       continue
@@ -649,6 +651,7 @@ function terminal::rebindKeymap() {
     key="${key//\"/}"
     bind -r "${key%:}"
   done
+  set +o noglob
 
   # some other default values to ensure we get the right behavior
   bind 'set bind-tty-special-chars on'
@@ -838,9 +841,11 @@ function terminal::restoreBindings() {
   # try to remove all bindings
   bash::getBuiltinOutput bind -p
   local bindings="${REPLY}"
-  local IFS=$'\n'
-  local line
-  local key
+  local \
+    IFS=$'\n' \
+    line \
+    key
+  set -o noglob
   for line in ${bindings}; do
     if [[ ${line} == "#"* ]]; then
       continue
@@ -849,6 +854,7 @@ function terminal::restoreBindings() {
     key="${key//\"/}"
     bind -r "${key%:}"
   done
+  set +o noglob
 
   # restore the default bindings
   bind -f "${_TERMINAL_SAVED_BINDINGS_FILE}"

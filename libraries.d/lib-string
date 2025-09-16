@@ -212,14 +212,18 @@ function string::getField() {
 
   local field IFS="${separator}"
   local -i index=0
+  # make sure to turn off globbing to avoid expanding special characters like * or ?
+  set -o noglob
   for field in ${inputString_NameRef}; do
     if [[ index -eq fieldNumber ]]; then
       REPLY="${field}"
+      set +o noglob
       return 0
     fi
     index=$((index + 1))
   done
   REPLY=""
+  set +o noglob
 }
 
 # ## string::getIndexOf
@@ -397,10 +401,12 @@ function string::count() {
 function string::split() {
   local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local IFS="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  # make sure to turn off globbing to avoid expanding special characters like * or ?
+  set -o noglob
   # shellcheck disable=SC2206
   # shellcheck disable=SC2034
   REPLY_ARRAY=(${inputString_NameRef})
-  # TODO, see: IFS="${2}" read -rd '' -a REPLY_ARRAY <<<"${inputString_NameRef}" || [[ -v REPLY_ARRAY ]]
+  set +o noglob
 }
 
 # ## string::head

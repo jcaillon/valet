@@ -22,6 +22,11 @@ MY_ARRAY=(
   "honeydew"$'\n'"(green)"
   "kiwi"$'\n'"(brown)"
   "lemon"$'\n'"(yellow)"
+  "mango"$'\n'"(orange)"
+  "nectarine"$'\n'"(orange)"
+  "orange"$'\n'"(orange)"
+  "papaya"$'\n'"(orange)"
+  "quince"$'\n'"(orange)"
 )
 # MY_ARRAY=(
 #   "appl"

@@ -412,9 +412,8 @@ function bash::getFunctionDefinitionWithGlobalVars() {
   # find the mapping between the positional parameters and the new global variable names
   local -A globalVars=()
   local -a positionalParameters=("$@")
-  local IFS=$'\n'
-  local line varName varPosition
-  local modifiedFunctionDefinition=""
+  local IFS=$'\n' line varName varPosition modifiedFunctionDefinition=""
+  set -o noglob
   for line in ${functionDefinition}; do
     if ((${#positionalParameters[@]} != ${#globalVars[@]})); then
       if [[ "${line}" =~ ^\ *local\ +(-[[:alpha:]]+\ )?([[:alpha:]]+)=[^$]*\$\{?([[:digit:]]+) ]]; then
@@ -429,6 +428,7 @@ function bash::getFunctionDefinitionWithGlobalVars() {
     fi
     modifiedFunctionDefinition+="${line}"$'\n'
   done
+  set +o noglob
 
   # modify the function to use the global variables instead of the positional parameters
   for varName in "${!globalVars[@]}"; do

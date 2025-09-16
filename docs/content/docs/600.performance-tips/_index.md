@@ -174,9 +174,11 @@ var1="1
 2
 3"
 IFS=$'\n'
+set -o noglob
 for line in ${var1}; do
   echo "${line}"
 done
+set +o noglob
 ```
 
 IFS can be set as a `local` variable, and it can be any character.
