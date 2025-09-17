@@ -2,7 +2,7 @@
 # This script contains the documentation of all the valet library functions.
 # It can be used in your editor to provide auto-completion and documentation.
 #
-# Documentation generated for the version 0.33.0 (2025-08-31).
+# Documentation generated for the version 0.34.68 (2025-09-17).
 
 # ## array::appendIfNotPresent
 # 
@@ -122,6 +122,22 @@ function array::makeArraysSameSize() { :; }
 # ```
 # 
 function array::remove() { :; }
+
+# ## array::reverse
+# 
+# Reverse an array.
+# Will not work for associative arrays.
+# 
+# - $1: **array name** _as string_:
+#       The variable name of the array to reverse  (it will be reversed in place).
+# 
+# ```bash
+# declare myArray=(z f b h a j)
+# array::reverse myArray
+# echo "${myArray[*]}"
+# ```
+# 
+function array::reverse() { :; }
 
 # ## array::sort
 # 
@@ -3335,6 +3351,17 @@ function terminal::restoreLogs() { :; }
 # > any background process that is reading inputs before trying to restore these settings).
 # 
 function terminal::restoreSettings() { :; }
+
+# ## terminal::saveSettings
+# 
+# Save the current terminal options (`stty -g`) so they can be restored later.
+# Call `terminal::restoreSettings` to restore the original settings.
+# 
+# ```bash
+# terminal::saveSettings
+# ```
+# 
+function terminal::saveSettings() { :; }
 
 # ## terminal::setRawMode
 # 

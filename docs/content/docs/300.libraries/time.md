@@ -168,4 +168,4 @@ time::getTimerMicroseconds
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.33.0 (2025-08-31).
+> Documentation generated for the version 0.34.68 (2025-09-17).

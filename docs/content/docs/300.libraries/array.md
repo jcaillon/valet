@@ -147,6 +147,25 @@ array::remove myArray myValue
 printf '%s\n' "${myArray[@]}"
 ```
 
+## ⚡ array::reverse
+
+Reverse an array.
+Will not work for associative arrays.
+
+Inputs:
+
+- `$1`: **array name** _as string_:
+
+  The variable name of the array to reverse  (it will be reversed in place).
+
+Example usage:
+
+```bash
+declare myArray=(z f b h a j)
+array::reverse myArray
+echo "${myArray[*]}"
+```
+
 ## ⚡ array::sort
 
 Sorts an array using the > bash operator (lexicographic order).
@@ -211,4 +230,4 @@ echo "${REPLY_ARRAY[@]}"
 > - It is not appropriate for large array, use the `sort` binary for such cases.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.33.0 (2025-08-31).
+> Documentation generated for the version 0.34.68 (2025-09-17).

@@ -1,5 +1,5 @@
 {
-// Documentation generated for the version 0.33.0 (2025-08-31).
+// Documentation generated for the version 0.34.68 (2025-09-17).
 
 "array::appendIfNotPresent": {
   "prefix": "array::appendIfNotPresent",
@@ -69,6 +69,20 @@
   "description": "Remove a value from an array...",
   "scope": "",
   "body": [ "# ## array::remove\n# \n# Remove a value from an array.\n# Works for normal and associative arrays.\n# \n# - \\$1: **array name** _as string_:\n#       The variable name of the array.\n# - \\$2: **value variable name** _as any_:\n#       The variable name containing the value to remove.\n# \n# Returns:\n# \n# - \\${REPLY_CODE}:\n#   - 0 if the value was removed\n#   - 1 if it was not present\n# \n# ```bash\n# declare myArray=( \"a\" \"b\" )\n# declare myValue=\"b\"\n# array::remove myArray myValue\n# printf '%s\\n' \"\\${myArray[@]}\"\n# ```\n# \narray::remove \"${1:array name}\" \"${2:value variable name}\"$0" ]
+},
+
+"array::reverse": {
+  "prefix": "array::reverse",
+  "description": "Reverse an array...",
+  "scope": "",
+  "body": [ "array::reverse \"${1:array name}\"$0" ]
+},
+
+"array::reverse#withdoc": {
+  "prefix": "array::reverse#withdoc",
+  "description": "Reverse an array...",
+  "scope": "",
+  "body": [ "# ## array::reverse\n# \n# Reverse an array.\n# Will not work for associative arrays.\n# \n# - \\$1: **array name** _as string_:\n#       The variable name of the array to reverse  (it will be reversed in place).\n# \n# ```bash\n# declare myArray=(z f b h a j)\n# array::reverse myArray\n# echo \"\\${myArray[*]}\"\n# ```\n# \narray::reverse \"${1:array name}\"$0" ]
 },
 
 "array::sort": {
@@ -2043,6 +2057,20 @@
   "description": "Restore the terminal options to their original state...",
   "scope": "",
   "body": [ "# ## terminal::restoreSettings\n# \n# Restore the terminal options to their original state.\n# Should be called after `terminal::setRawMode`.\n# \n# ```bash\n# terminal::restoreSettings\n# ```\n# \n# > Note that the bash read builtin will restore stty state as it was before entering.\n# > So you want to call this after all read has been finished (particularly, you want to kill\n# > any background process that is reading inputs before trying to restore these settings).\n# \nterminal::restoreSettings$0" ]
+},
+
+"terminal::saveSettings": {
+  "prefix": "terminal::saveSettings",
+  "description": "Save the current terminal options (`stty -g`) so they can be restored later...",
+  "scope": "",
+  "body": [ "terminal::saveSettings$0" ]
+},
+
+"terminal::saveSettings#withdoc": {
+  "prefix": "terminal::saveSettings#withdoc",
+  "description": "Save the current terminal options (`stty -g`) so they can be restored later...",
+  "scope": "",
+  "body": [ "# ## terminal::saveSettings\n# \n# Save the current terminal options (`stty -g`) so they can be restored later.\n# Call `terminal::restoreSettings` to restore the original settings.\n# \n# ```bash\n# terminal::saveSettings\n# ```\n# \nterminal::saveSettings$0" ]
 },
 
 "terminal::setRawMode": {

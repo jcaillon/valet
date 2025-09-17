@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.33.0 (2025-08-31).
+> Documentation generated for the version 0.34.68 (2025-09-17).
 
 ## ⚡ array::appendIfNotPresent
 
@@ -142,6 +142,25 @@ declare myArray=( "a" "b" )
 declare myValue="b"
 array::remove myArray myValue
 printf '%s\n' "${myArray[@]}"
+```
+
+## ⚡ array::reverse
+
+Reverse an array.
+Will not work for associative arrays.
+
+Inputs:
+
+- `$1`: **array name** _as string_:
+
+  The variable name of the array to reverse  (it will be reversed in place).
+
+Example usage:
+
+```bash
+declare myArray=(z f b h a j)
+array::reverse myArray
+echo "${myArray[*]}"
 ```
 
 ## ⚡ array::sort
@@ -4055,6 +4074,17 @@ terminal::restoreSettings
 > So you want to call this after all read has been finished (particularly, you want to kill
 > any background process that is reading inputs before trying to restore these settings).
 
+## ⚡ terminal::saveSettings
+
+Save the current terminal options (`stty -g`) so they can be restored later.
+Call `terminal::restoreSettings` to restore the original settings.
+
+Example usage:
+
+```bash
+terminal::saveSettings
+```
+
 ## ⚡ terminal::setRawMode
 
 Put the terminal in "raw" mode.
@@ -4986,4 +5016,4 @@ windows::endPs1Batch
 
 
 
-> Documentation generated for the version 0.33.0 (2025-08-31).
+> Documentation generated for the version 0.34.68 (2025-09-17).

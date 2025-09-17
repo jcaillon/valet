@@ -267,6 +267,17 @@ terminal::restoreSettings
 > So you want to call this after all read has been finished (particularly, you want to kill
 > any background process that is reading inputs before trying to restore these settings).
 
+## ⚡ terminal::saveSettings
+
+Save the current terminal options (`stty -g`) so they can be restored later.
+Call `terminal::restoreSettings` to restore the original settings.
+
+Example usage:
+
+```bash
+terminal::saveSettings
+```
+
 ## ⚡ terminal::setRawMode
 
 Put the terminal in "raw" mode.
@@ -405,4 +416,4 @@ terminal::waitForKeyPress -t 0.1
 >    and send a specific sequence of characters that you can bind in bash.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.33.0 (2025-08-31).
+> Documentation generated for the version 0.34.68 (2025-09-17).
