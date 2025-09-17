@@ -2,6 +2,47 @@
 
 ## Test script 00.lib-array
 
+### ✅ Testing array::reverse
+
+```text
+MY_ARRAY=(
+[0]='breakdown'
+[1]='constitutional'
+[2]='conventional'
+[3]='baby'
+[4]='holiday'
+[5]='abundant'
+[6]='deliver'
+[7]='position'
+[8]='economics'
+)
+```
+
+❯ `array::reverse MY_ARRAY`
+
+```text
+MY_ARRAY=(
+[0]='economics'
+[1]='position'
+[2]='deliver'
+[3]='abundant'
+[4]='holiday'
+[5]='baby'
+[6]='conventional'
+[7]='constitutional'
+[8]='breakdown'
+)
+```
+
+Testing with an empty array:
+
+❯ `array::reverse MY_ARRAY`
+
+```text
+MY_ARRAY=(
+)
+```
+
 ### ✅ Testing array::sort
 
 ```text

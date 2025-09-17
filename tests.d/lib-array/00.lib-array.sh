@@ -6,6 +6,7 @@ source array
 source fs
 
 function main() {
+  test_array::reverse
   test_array::sort
   test_array::sortWithCriteria
   test_array::appendIfNotPresent
@@ -13,6 +14,31 @@ function main() {
   test_array::remove
   test_array::makeArraysSameSize
   test_array::fuzzyFilterSort
+}
+
+function test_array::reverse() {
+  test::title "✅ Testing array::reverse"
+
+  MY_ARRAY=(
+    breakdown
+    constitutional
+    conventional
+    baby
+    holiday
+    abundant
+    deliver
+    position
+    economics
+  )
+
+  test::printVars MY_ARRAY
+  test::exec array::reverse MY_ARRAY
+  test::printVars MY_ARRAY
+
+  test::markdown "Testing with an empty array:"
+  MY_ARRAY=()
+  test::func array::reverse MY_ARRAY
+  test::printVars MY_ARRAY
 }
 
 function test_array::sort() {
@@ -105,7 +131,7 @@ function test_array::remove() {
   test::func MY_VALUE='holiday' array::remove MY_ARRAY MY_VALUE
   test::printVars MY_ARRAY
 
-  
+
   # shellcheck disable=SC2034
   declare -A MY_ASSOCIATIVE_ARRAY
   MY_ASSOCIATIVE_ARRAY[breakdown]=1
