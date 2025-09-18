@@ -4,6 +4,7 @@
 source string
 
 function main() {
+  test_string::getFormattedHeader
   test_string::get KebabCase
   test_string::get SnakeCase
   test_string::get CamelCase
@@ -22,6 +23,40 @@ function main() {
   test_string::highlight
   test_string::head
   test_string::doForEachLine
+}
+
+function test_string::getFormattedHeader() {
+  test::title "✅ Testing string::getFormattedHeader"
+
+  test::func string::getFormattedHeader "'left|middle|right'" width=50
+
+  test::title "✅ Testing string::getFormattedHeader combinations"
+
+  test_printFormattedHeader "left|middle|right" width=50
+  test_printFormattedHeader "|middle|" width=50
+  test_printFormattedHeader "|middle|right" width=50
+  test_printFormattedHeader "left|middle|" width=50
+  test_printFormattedHeader "left||" width=50
+  test_printFormattedHeader "||right" width=50
+
+  for ((i=20; i>=0; i--)); do
+    test_printFormattedHeader "left|middle|right" width="${i}"
+  done
+
+  test_printFormattedHeader "@|%|+" width=50 paddingChar="." paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
+
+  string::getFormattedHeader "@|%|+" width=50 partWidths="4|6|5" paddingChar="." paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
+  REPLY="${REPLY//"@"/left}"
+  REPLY="${REPLY//"%"/middle}"
+  REPLY="${REPLY//"+"/right}"
+  printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+  test::flush
+}
+
+function test_printFormattedHeader() {
+  string::getFormattedHeader "${@}"
+  printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
 }
 
 function test_string::get() {

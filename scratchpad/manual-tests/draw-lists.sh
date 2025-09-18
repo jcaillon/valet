@@ -39,36 +39,50 @@ ONE_LINE_ITEMS=(
 
 function draw() {
   local \
-    move=${1} \
-    width=${2} \
-    height=${3} \
+    move="${1}" \
+    width="${2}" \
+    height="${3}" \
     arrayName="${4}" \
     filter="${5}"
   shift 5
-
   terminal::createSpace "$((height + 1))"
   terminal::getCursorPosition
 
-  list::setOptions "${@}"
+  local -n arrayRef="${arrayName}"
+  local -i itemHeight
+  if [[ ${arrayRef[0]} == *$'\n'* ]]; then
+    itemHeight=2
+  else
+    itemHeight=1
+  fi
+
+  list::setOptions "${@}" itemHeight=${itemHeight}
   list::setViewport top="${GLOBAL_CURSOR_LINE}" height="${height}" width="${width}"
 
   list::setItems "${arrayName}"
   list::filter "${filter}"
   list::changeSelectedItemIndex "${move}"
-  list::draw
+  list::onTick
 
   printf "%s" "${ESC__CURSOR_MOVE__}$((GLOBAL_CURSOR_LINE + height));1${__ESC__TO}" 1>&"${GLOBAL_FD_TUI}"
 }
 
-draw 0 "" 10 TWO_LINES_ITEMS "" itemHeight=2
-draw 0 20 9 TWO_LINES_ITEMS "" itemHeight=2
-draw 0 "" 10 TWO_LINES_ITEMS "" itemHeight=2 enableReverseMode=true
-draw 0 20 9 TWO_LINES_ITEMS "" itemHeight=2 enableReverseMode=true
+for array in TWO_LINES_ITEMS ONE_LINE_ITEMS; do
+  draw 0 "" 10 "${array}" ""
+  draw 0 20 9 "${array}" ""
+  draw 0 "" 10 "${array}" "" enableReverseMode=true
+  draw 0 20 9 "${array}" "" enableReverseMode=true
 
-draw 0 40 9 TWO_LINES_ITEMS "notfound" itemHeight=2
+  draw 0 40 9 "${array}" "notfound"
+  draw 0 40 9 "${array}" "notfound" emptyListText="No item found"
 
-draw 1 20 9 TWO_LINES_ITEMS "o" itemHeight=2
-draw 3 20 9 TWO_LINES_ITEMS "o" itemHeight=2
+  draw 1 20 9 "${array}" "o"
+  draw 3 20 9 "${array}" "o"
+  draw 3 20 9 "${array}" "o" disableItemsCount=true disableScrollbar=true disableCursor=true disableTopSeparator=true
+  draw 3 20 9 "${array}" "o" showItemsCountAtTop=true
 
-# option for title, option for text on the bottom left
-# fix the counter
+  draw 5 "" 9 "${array}" "o" itemsCountPattern="Items: <colorCount><firstItemNumber>-<lastItemNumber>/<totalItems><colorReset> <colorFrame>(filtered: <filteredItems>) <percentViewed><colorReset>"
+
+  echo "----------------------------------------"
+done
+

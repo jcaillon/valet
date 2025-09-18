@@ -530,3 +530,163 @@ function string::getHexRepresentation() {
   done
   REPLY="${output}"
 }
+
+# ## string::getFormattedHeader
+#
+# Get a formatted header string with a given width.
+# The header can be composed of a left/middle/right part(s).
+# The header is padded with a given character to fit the given width.
+# The parts are trimmed if too long but they are prioritized in this order: middle, left, right
+# (middle will take all the space necessary, then left, then right).
+#
+# - $1: **format** _as string_:
+#       The format of the header.
+#       It must include two | characters to separate the left, middle and right parts.
+#       Any part can be empty.
+#       Example: "left|middle|right"
+# - ${width} _as int_:
+#       The total width of the header.
+#       (defaults to "GLOBAL_COLUMNS")
+# - ${paddingChar} _as string_:
+#       (optional) The character to use for padding.
+#       (defaults to " ")
+# - ${paddingStyle} _as string_:
+#       (optional) The style (ANSI escape codes) to apply the padding characters.
+#       (defaults to "")
+# - ${paddingStyleReset} _as string_:
+#       (optional) The style (ANSI escape codes) to apply at the end of the padding characters.
+#       (defaults to "")
+# - ${partWidths} _as string_:
+#       (optional) The actual widths of each part separated by |.
+#       If not provided, the actual width of each part will be computed automatically,
+#       not taking into account invisible characters (like ANSI escape codes).
+#       Example: "10|20|10"
+#       (defaults to "")
+#
+# Returns:
+#
+# - ${REPLY}: the formatted header string
+# - ${REPLY2}: the actual widths of each part separated by | (same format as partWidths argument)
+#
+# ```bash
+# string::getFormattedHeader "Left|Middle|Right" width=50 paddingChar="-" paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
+# echo "${REPLY}"
+# ```
+function string::getFormattedHeader() {
+  local \
+    format="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    width="${GLOBAL_COLUMNS:-80}" \
+    paddingChar=" " \
+    paddingStyle="" \
+    paddingStyleReset="" \
+    partWidths="" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
+  if ((width <= 0)); then
+    REPLY=""
+    REPLY2="0|0|0"
+    return 0
+  fi
+
+  local \
+    leftPart="${format%%|*}" \
+    middlePart="${format#*|}" \
+    rightPart="${format##*|}"
+  middlePart="${middlePart%%|*}"
+
+  local -i leftPartLength middlePartLength rightPartLength
+  if [[ -n ${partWidths} ]]; then
+    leftPartLength="${partWidths%%|*}"
+    local middlePartLengthStr="${partWidths#*|}"
+    middlePartLength="${middlePartLengthStr%%|*}"
+    rightPartLength="${partWidths##*|}"
+  else
+    local part="${leftPart}"
+    string::removeTextFormatting part
+    leftPartLength="${#part}"
+    part="${middlePart}"
+    string::removeTextFormatting part
+    middlePartLength="${#part}"
+    part="${rightPart}"
+    string::removeTextFormatting part
+    rightPartLength="${#part}"
+  fi
+
+  local finalString=""
+  local -i remainingWidth=${width}
+
+  if ((remainingWidth - middlePartLength >= 0)); then
+    finalString+="${middlePart}"
+    remainingWidth=$((remainingWidth - middlePartLength))
+  else
+    finalString+="${middlePart:0:remainingWidth - 1}…"
+    middlePartLength=$((remainingWidth - 1))
+    remainingWidth=0
+  fi
+
+  local -i availableSpaceForLeft availableSpaceForRight
+  if ((middlePartLength > 0)); then
+    # if we have a middle part, we add a space on each side if possible
+    availableSpaceForRight=$((remainingWidth / 2))
+    availableSpaceForLeft=$((remainingWidth - availableSpaceForRight))
+  else
+    availableSpaceForLeft=${remainingWidth}
+    availableSpaceForRight=${remainingWidth}
+  fi
+
+  if ((availableSpaceForLeft <= 0)); then
+    REPLY="${finalString}"
+    REPLY2="0|${middlePartLength}|0"
+    return 0
+  fi
+
+  local spaces padding
+  printf -v spaces "%${remainingWidth}s" " "
+
+  if ((availableSpaceForLeft - leftPartLength >= 0)); then
+    if ((middlePartLength > 0)); then
+      padding="${spaces:0:availableSpaceForLeft - leftPartLength}"
+      finalString="${leftPart}${paddingStyle}${padding//" "/"${paddingChar}"}${paddingStyleReset}${finalString}"
+    else
+      finalString="${leftPart}"
+    fi
+    remainingWidth=$((remainingWidth - leftPartLength))
+  elif ((availableSpaceForLeft == 1)); then
+    finalString=" ${finalString}"
+    remainingWidth=$((remainingWidth - 1))
+    leftPartLength=0
+  else
+    finalString="${leftPart:0:availableSpaceForLeft - 1}…${finalString}"
+    remainingWidth=$((remainingWidth - availableSpaceForLeft - 1))
+    leftPartLength=$((availableSpaceForLeft - 1))
+  fi
+
+  if ((middlePartLength <= 0)); then
+    availableSpaceForRight=${remainingWidth}
+  fi
+
+  if ((availableSpaceForRight <= 0)); then
+    REPLY="${finalString}"
+    REPLY2="${leftPartLength}|${middlePartLength}|0"
+    return 0
+  fi
+
+  if ((availableSpaceForRight - rightPartLength >= 0)); then
+    padding="${spaces:0:availableSpaceForRight - rightPartLength}"
+    finalString+="${paddingStyle}${padding//" "/"${paddingChar}"}${paddingStyleReset}${rightPart}"
+    remainingWidth=$((remainingWidth - rightPartLength))
+  elif ((availableSpaceForRight == 1)); then
+    finalString+=" "
+    remainingWidth=$((remainingWidth - 1))
+    rightPartLength=0
+  else
+    finalString+="${rightPart:0:availableSpaceForRight - 1}…"
+    remainingWidth=$((remainingWidth - availableSpaceForRight - 1))
+    rightPartLength=$((availableSpaceForRight - 1))
+  fi
+
+  REPLY="${finalString}"
+  REPLY2="${leftPartLength}|${middlePartLength}|${rightPartLength}"
+}

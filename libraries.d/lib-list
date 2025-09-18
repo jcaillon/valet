@@ -11,6 +11,10 @@ source fs
 #
 # Set up the options for a list display.
 #
+# This list manages its own filtering and scrolling.
+# Filter can be done asynchronously. The list user should call list::onTick regularly; this function is responsible
+# of redrawing the list when needed.
+#
 # - ${itemHeight} _as int_:
 #       (optional) The height of each item in the list (number of lines needed to display each item).
 #       (defaults to 1)
@@ -196,11 +200,14 @@ function list::setOptions() {
   _LIST_DISABLE_FILTERING="${disableFiltering:-false}"
   _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD="${filterAsynchronousThreshold:-242}"
   _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${filterUsingExternalProgramThreshold:-1042}"
+
+  list::requestRedraw
 }
 
-# ## list::setViewport (private)
+# ## list::setViewport
 #
 # Set up the viewport for a list display.
+# Must be called after list::setOptions.
 #
 # - ${left} _as int_:
 #       (optional) The left column at which to display the viewport of the list.
@@ -233,10 +240,10 @@ function list::setViewport() {
   printf -v _LIST_BLANKS_WIDTH "%${_LIST_WIDTH}s" " "
   printf -v _LIST_BLANKS_ITEM_WIDTH "%${_LIST_ITEM_WIDTH}s" " "
 
-  bash::clearCachedVariables _LIST_itemCounterLength _LIST_itemsCounterString
+  list::requestRedraw
 }
 
-# ## list::setItems (private)
+# ## list::setItems
 #
 # Set up the list of items to display.
 #
@@ -292,6 +299,23 @@ function list::setItems() {
   else
     list::filter "${initialFilterString}"
   fi
+
+  list::requestRedraw
+}
+
+# ## list::onTick
+#
+# This function must be called regularly (on refresh tick) and is responsible for redrawing the list if necessary.
+#
+function list::onTick() {
+  if [[ ${_LIST_REDRAW_NEXT_TICK:-} == "true" ]]; then
+    list::draw
+  fi
+}
+
+# call to trigger a redraw at next tick
+function list::requestRedraw() {
+  _LIST_REDRAW_NEXT_TICK=true
 }
 
 # Draw the list box.
@@ -307,12 +331,11 @@ function list::draw() {
     local -i \
       firstLineWithScrollBar=0 \
       linesWithScrollBar=0 \
-      filteredItems=${#_LIST_FILTERED_ITEMS[@]} \
-      displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
-    if ((filteredItems > displayableItems)); then
+      filteredItems=${#_LIST_FILTERED_ITEMS[@]}
+    if ((filteredItems > _LIST_NB_DISPLAYABLE_ITEMS)); then
       local -i \
-        percentViewed=$((filteredItems - displayableItems > 0 ? (_LIST_FILTERED_ITEMS_START_INDEX * 100) / (filteredItems - displayableItems) : 100))
-      linesWithScrollBar=$((filteredItems > 0 ? _LIST_NB_USABLE_LINES_FOR_ITEMS * displayableItems / filteredItems : 0))
+        percentViewed=$((filteredItems - _LIST_NB_DISPLAYABLE_ITEMS > 0 ? (_LIST_FILTERED_ITEMS_START_INDEX * 100) / (filteredItems - _LIST_NB_DISPLAYABLE_ITEMS) : 100))
+      linesWithScrollBar=$((filteredItems > 0 ? _LIST_NB_USABLE_LINES_FOR_ITEMS * _LIST_NB_DISPLAYABLE_ITEMS / filteredItems : 0))
       firstLineWithScrollBar=$((((_LIST_NB_USABLE_LINES_FOR_ITEMS - linesWithScrollBar) * percentViewed) / 100))
     fi
   fi
@@ -324,6 +347,7 @@ function list::draw() {
   fi
 
   # TODO: possible improvement: instead of appending to toString, append to an array and compare each line to the previous one to avoid redrawing unchanged lines
+  # Can be tested with a benchmark and 1000 draw calls
 
   printf '%s%s%s' "${ESC__CURSOR_HIDE}" "${finalStringToPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
 }
@@ -336,7 +360,6 @@ function list::drawItems() {
     linesWithScrollBar="${3:-0}"
 
   local -i line \
-    displayableItems=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT)) \
     index=${_LIST_FILTERED_ITEMS_START_INDEX}
 
   _LIST_CURRENT_SCROLLBAR=""
@@ -364,7 +387,7 @@ function list::drawItems() {
       # we displayed all the items, show empty lines
       toPrint+="${_LIST_STYLE_FRAME}${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH// /${_LIST_SYMBOL_EMPTY_LIST}}${STYLE_RESET}${_LIST_CURRENT_SCROLLBAR}"
 
-    elif ((_LIST_NB_DISPLAYED_ITEMS >= displayableItems)); then
+    elif ((_LIST_NB_DISPLAYED_ITEMS >= _LIST_NB_DISPLAYABLE_ITEMS)); then
       # we reached the maximum number of items to display, show blank line
       # (case of multi line items where the list size is not a multiple of item height...)
       toPrint+="${_LIST_STYLE_FRAME}${_LIST_SYMBOL_LEFT_UNSELECTED_ITEM}${STYLE_RESET}${STYLE_LIST_EMPTY}${_LIST_BLANKS_ITEM_WIDTH}${STYLE_RESET}${_LIST_CURRENT_SCROLLBAR}"
@@ -493,6 +516,9 @@ function list::drawCounter() {
     itemCounterLength=${_LIST_ITEMS_COUNT_FILTERING_STRING_LENGTH}
   else
     local lastItemNumber=$((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYED_ITEMS - 1))
+    if ((lastItemNumber < 0)); then
+      lastItemNumber=0
+    fi
     printf -v firstItemNumber "%0${#lastItemNumber}i" "${_LIST_FILTERED_ITEMS_START_INDEX}"
     local totalItems="${_LIST_ORIGINAL_ITEMS_COUNT}"
     printf -v filteredItems "%0${#totalItems}i" "${#_LIST_FILTERED_ITEMS[@]}"
@@ -646,6 +672,8 @@ function list_post_filter() {
     fi
   fi
 
+  _LIST_NB_DISPLAYABLE_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
+
   # make sure to select an existing index regarding the filtered items +
   # make sure it is in the view
   list::changeSelectedItemIndex 0
@@ -703,27 +731,21 @@ function list::onKeyBindingPress() {
   # autocompletion box selected item
   scroll-up)
     list::changeSelectedItemIndex "-$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
-    list::draw
     ;;
   scroll-down)
     list::changeSelectedItemIndex "$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
-    list::draw
     ;;
   move-beginning)
     list::changeSelectedItemIndex "-$((_LIST_ORIGINAL_ITEMS_COUNT + 1))"
-    list::draw
     ;;
   move-end)
     list::changeSelectedItemIndex "$((_LIST_ORIGINAL_ITEMS_COUNT + 1))"
-    list::draw
     ;;
   move-up)
     list::changeSelectedItemIndex -1
-    list::draw
     ;;
   move-down)
     list::changeSelectedItemIndex 1
-    list::draw
     ;;
   esac
 }
@@ -865,18 +887,20 @@ function list::changeSelectedItemIndex() {
   # to make sure that the new index is visible on the screen
   if ((newIndex < _LIST_FILTERED_ITEMS_START_INDEX)); then
     _LIST_FILTERED_ITEMS_START_INDEX=${newIndex}
-  elif ((newIndex > _LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_USABLE_LINES_FOR_ITEMS - 1)); then
-    _LIST_FILTERED_ITEMS_START_INDEX=$((newIndex - _LIST_NB_USABLE_LINES_FOR_ITEMS + 1))
+  elif ((newIndex > _LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYABLE_ITEMS - 1)); then
+    _LIST_FILTERED_ITEMS_START_INDEX=$((newIndex - _LIST_NB_DISPLAYABLE_ITEMS + 1))
   fi
   # also to make sure that we use all the space available on screen
-  if ((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_USABLE_LINES_FOR_ITEMS > ${#_LIST_FILTERED_ITEMS[@]})); then
-    _LIST_FILTERED_ITEMS_START_INDEX=$((${#_LIST_FILTERED_ITEMS[@]} - _LIST_NB_USABLE_LINES_FOR_ITEMS))
+  if ((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYABLE_ITEMS > ${#_LIST_FILTERED_ITEMS[@]})); then
+    _LIST_FILTERED_ITEMS_START_INDEX=$((${#_LIST_FILTERED_ITEMS[@]} - _LIST_NB_DISPLAYABLE_ITEMS))
     if ((_LIST_FILTERED_ITEMS_START_INDEX < 0)); then
       _LIST_FILTERED_ITEMS_START_INDEX=0
     fi
   fi
 
   _LIST_FILTERED_ITEMS_SELECTED_INDEX=${newIndex}
+
+  list::requestRedraw
 }
 
 # Returns the index of the item in the original array (if any, or -1).

@@ -2,46 +2,76 @@
 export VALET_VERBOSE=true
 source "$(valet --source)"
 
-include system
+include system string
 
-log::info "checking * fuck zaefziuhey gazuyehgf uyzaeg fiuyazgefuy gzueyf gziauyegfiuzyaegiuyzaegfiuyzaegiuyzagefuyzgaeuifygzaeuiyfgzeiuyfgzaiueygfziuayegfuiyzaegfguzye uiyg uyz geiuygzuiyeguyzegf"
-exit 0
+string::getFormattedHeader "|middle|" width=50
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
 
-function string::getKebabCase() {
-  REPLY="${!1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+string::getFormattedHeader "|middle|right" width=50
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
 
-  if [[ ${REPLY} == *[[:upper:]]* && ${REPLY} == *[[:lower:]]* ]]; then
-    # from camelCase or PascalCase
-    # it is faster to use a regex than loop over each char here
-    while [[ ${REPLY} =~ [[:upper:]] ]]; do
-      REPLY="${REPLY//"${BASH_REMATCH[0]}"/-"${BASH_REMATCH[0],}"}"
-    done
-  else
-    # from SNAKE_CASE of already in kebab-case
-    REPLY="${REPLY,,}"
-  fi
-  REPLY="${REPLY//[![:lower:][:digit:]-]/-}"
-  while [[ ${REPLY} == -* ]]; do
-    REPLY="${REPLY:1}"
-  done
-  while [[ ${REPLY} == *- ]]; do
-    REPLY="${REPLY%-}"
-  done
-}
+string::getFormattedHeader "left|middle|" width=50
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
 
+string::getFormattedHeader "left||" width=50
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
 
+string::getFormattedHeader "||right" width=50
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
 
-tests=(
-thisIsATest0
-AnotherTest
---AnotherTest--
-_SNAKE_CASE
-__SNAKE_CASE__
-kebab-case
---kebab-case--
-)
+string::getFormattedHeader "left|middle|right" width=50
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
 
-for REPLY in "${tests[@]}"; do
-  string::getKebabCase REPLY
-  echo "${REPLY}"
-done
+string::getFormattedHeader "left|middle|right" width=17
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=16
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=15
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=14
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=13
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=12
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=11
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=10
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=9
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=8
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=7
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=6
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=5
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=4
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "left|middle|right" width=0
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "@|%|+" width=50 paddingChar="." paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
+
+string::getFormattedHeader "@|%|+" width=50 partWidths="4|6|5" paddingChar="." paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
+REPLY="${REPLY//"@"/left}"
+REPLY="${REPLY//"%"/middle}"
+REPLY="${REPLY//"+"/right}"
+printf '%-10s %s\n' "${REPLY2}" "${REPLY}"

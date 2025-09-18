@@ -2,6 +2,53 @@
 
 ## Test script 00.tests
 
+### ✅ Testing string::getFormattedHeader
+
+❯ `string::getFormattedHeader 'left|middle|right' width=50`
+
+Returned variables:
+
+```text
+REPLY='left                  middle                 right'
+REPLY2='4|6|5'
+```
+
+### ✅ Testing string::getFormattedHeader combinations
+
+**Standard output**:
+
+```text
+4|6|5      left                  middle                 right
+0|6|0                            middle                      
+0|6|5                            middle                 right
+4|6|0      left                  middle                      
+4|0|0      left                                              
+0|0|5                                                   right
+4|6|5      left   middle  right
+4|6|5      left   middle right
+4|6|5      left  middle right
+4|6|5      left  middleright
+4|6|5      left middleright
+4|6|3      left middlerig…
+4|6|3      leftmiddlerig…
+4|6|2      leftmiddleri…
+2|6|2      le…middleri…
+2|6|1      le…middler…
+1|6|1      l…middler…
+1|6|0      l…middle 
+0|6|0       middle 
+0|6|0       middle
+0|6|0      middle
+0|4|0      midd…
+0|3|0      mid…
+0|2|0      mi…
+0|1|0      m…
+0|0|0      …
+0|0|0      
+1|1|1      @[1;34m........................[0m%[1;34m.......................[0m+
+4|6|5      left[1;34m..................[0mmiddle[1;34m.................[0mright
+```
+
 ### ✅ Testing string::getKebabCase
 
 ❯ `echo "${tests[*]"`
