@@ -126,7 +126,7 @@ TRACE    Executing the command fake with arguments:
 --std-in
 TRACE    The command will be executed as:
 "${executable}" "${@}" <<<'input_stream' 1>"/tmp/valet-stdout.f" 2>"/tmp/valet-stderr.f"
-TRACE    Options: noFail=true, acceptableCodes=0, replyPathOnly=false
+TRACE    Options: noFail=true, warnOnFailure=false, acceptableCodes=0, replyPathOnly=false
 TRACE    Fake standard input from string:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdin
 TRACE    Fake standard output stream:
@@ -268,6 +268,34 @@ INFO: log line from fake mock to stderr
 '
 REPLY2='🙈 mocking fake 
 INFO: log line from fake mock to stderr
+'
+```
+
+Only warn on errors:
+
+❯ `exe::invoke fake --error --- warnOnFailure=true`
+
+**Error output**:
+
+```text
+TRACE    Fake standard output stream:
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdout
+   1 ░ 🙈 mocking fake --error
+TRACE    Fake standard error stream:
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr
+   1 ░ INFO: log line from fake mock to stderr
+   2 ░ ERROR: returning error from fake
+WARNING  The command fake ended with exit code 1 in 24.000s.
+```
+
+Returned variables:
+
+```text
+REPLY_CODE='1'
+REPLY='🙈 mocking fake --error
+'
+REPLY2='INFO: log line from fake mock to stderr
+ERROR: returning error from fake
 '
 ```
 

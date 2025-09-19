@@ -50,6 +50,11 @@ source time
 # - ${failMessage} _as string_:
 #       (optional) The message to display on failure.
 #       (defaults to "")
+# - ${warnOnFailure} _as bool_:
+#       (optional) If true, a warning message (uses failMessage) will be displayed on failure but
+#       it will not cause the function to exit.
+#       Contrary to noFail, it will display a warning message (noFail is silent).
+#       (defaults to false)
 # - ${appendRedirect} _as bool_:
 #       (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).
 #       This is useful when you want to run the same command multiple times and keep the previous output.
@@ -104,6 +109,7 @@ function exe::invoke() {
     stdin="" \
     acceptableCodes="0" \
     failMessage="" \
+    warnOnFailure=false \
     appendRedirect=false \
     groupRedirect=false \
     noRedirection=false
@@ -133,8 +139,13 @@ function exe::invoke() {
     fi
   fi
 
-  # if trace mode is on, print some info
+  local isTraceEnabled=false
   if log::isTraceEnabled; then
+    isTraceEnabled=true
+  fi
+
+  # if trace mode is on, print some info
+  if [[ ${isTraceEnabled} == "true" ]]; then
     local IFS=' '
     if (($# > 0)); then
       printf -v args "%q " "${@}"
@@ -143,7 +154,7 @@ function exe::invoke() {
       log::trace "Executing the command ${executable} (no arguments)."
     fi
     log::trace "The command will be executed as:"$'\n'"${toEval}"
-    log::trace "Options: noFail=${noFail}, acceptableCodes=${acceptableCodes}, replyPathOnly=${replyPathOnly}"
+    log::trace "Options: noFail=${noFail}, warnOnFailure=${warnOnFailure}, acceptableCodes=${acceptableCodes}, replyPathOnly=${replyPathOnly}"
     if [[ -n ${stdin} ]]; then
       log::trace "${executable^} standard input from string:"
       log::saveFileString stdin suffix="${executable}-stdin"
@@ -185,40 +196,36 @@ function exe::invoke() {
   fi
 
   local shouldFail=false
-  if [[ ${noFail} != "true" && exitCode -ne 0 ]]; then
+  if [[ ${warnOnFailure} != "true" && ${noFail} != "true" && exitCode -ne 0 ]]; then
     shouldFail=true
   fi
 
   # fail if needed or we are debug mode; display all the debug information that could be useful
-  if [[ ${shouldFail} == "true" ]] || log::isDebugEnabled; then
-
-    if [[ ${noRedirection} != "true" ]]; then
-      if [[ ${shouldFail} == "true" ]] || log::isTraceEnabled; then
-        # print std out
-        if [[ -s "${stdoutPath}" ]]; then
-          log::errorTrace "${executable^} standard output stream:"
-          log::saveFile "${stdoutPath}" suffix="${executable}-stdout"
-          log::printFile "${stdoutPath}" maxLines=99
-        else
-          log::errorTrace "${executable^} had no standard output stream."
-        fi
-
-        # print stderr
-        if [[ -s "${stderrPath}" ]]; then
-          log::errorTrace "${executable^} standard error stream:"
-          log::saveFile "${stderrPath}" suffix="${executable}-stderr"
-          log::printFile "${stderrPath}" maxLines=99
-        else
-          log::errorTrace "${executable^} had no standard error stream."
-        fi
-      fi
-    fi
-
-    if [[ ${shouldFail} == "true" ]]; then
-      core::fail "${debugMessage}"
+  if [[ ${noRedirection} != "true" && (${warnOnFailure} == "true" || ${shouldFail} == "true" || ${isTraceEnabled} == "true") ]]; then
+    # print std out
+    if [[ -s "${stdoutPath}" ]]; then
+      log::errorTrace "${executable^} standard output stream:"
+      log::saveFile "${stdoutPath}" suffix="${executable}-stdout"
+      log::printFile "${stdoutPath}" maxLines=99
     else
-      log::debug "${debugMessage}"
+      log::errorTrace "${executable^} had no standard output stream."
     fi
+
+    # print stderr
+    if [[ -s "${stderrPath}" ]]; then
+      log::errorTrace "${executable^} standard error stream:"
+      log::saveFile "${stderrPath}" suffix="${executable}-stderr"
+      log::printFile "${stderrPath}" maxLines=99
+    else
+      log::errorTrace "${executable^} had no standard error stream."
+    fi
+  fi
+  if [[ ${shouldFail} == "true" ]]; then
+    core::fail "${debugMessage}"
+  elif [[ ${warnOnFailure} == "true" ]]; then
+    log::warning "${debugMessage}"
+  else
+    log::debug "${debugMessage}"
   fi
 
   if [[ ${noRedirection} == "true" ]]; then

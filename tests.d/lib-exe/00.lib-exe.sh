@@ -58,6 +58,9 @@ function test_exe::invoke() {
 
   test::markdown "Group redirects:"
   test::func exe::invoke fake --- groupRedirect=true stdoutPath="${GLOBAL_TEST_TEMP_FILE}"
+
+  test::markdown "Only warn on errors:"
+  test::func exe::invoke fake --error --- warnOnFailure=true
 }
 
 function fake() {
