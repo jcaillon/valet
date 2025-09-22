@@ -88,7 +88,7 @@ function coproc::runInParallel() {
     coprocName="${coprocNamePrefix}${index}"
 
     coproc::run "${coprocName}" \
-      initCommand="${jobCommands_nameRef[index]}" \
+      mainCommand="${jobCommands_nameRef[index]}" \
       redirectLogsToFile="${logFile}"
 
     pid="${REPLY}"
@@ -193,10 +193,17 @@ function coproc::runInParallel() {
 
 # ## coproc::run
 #
-# This function runs commands in a coproc.
-# Each command can be set to ":" in order to do nothing.
-# It returns the file descriptors/PID of the coproc and defines functions to easily
-# interact with the coproc.
+# This function runs commands in a coproc:
+#
+# - Run a main command (mainCommand) that is run once at the start of the coproc.
+# - Loop until the main thread or the coproc exits. Inside the loop, the coproc can receive messages
+#   from the main thread. In the loop, more commands are run:
+#   - A loop command (loopCommand) is run at the beginning of each iteration of the loop.
+#   - An on message command (onMessageCommand) is run when a message is received from the main thread.
+# - Finally, it runs an end command (endCommand) once at the end of the coproc.
+#
+# Each command is optional and will do nothing by default.
+# It returns the PID of the coproc.
 #
 # - $1: **coproc variable name** _as string_:
 #       The variable name to use for the coproc.
@@ -204,8 +211,8 @@ function coproc::runInParallel() {
 #       <coproc_variable_name>[0] will be the input pipe file descriptor,
 #       <coproc_variable_name>[1] will be the output pipe file descriptor,
 #       <coproc_variable_name>_PID will be the PID of the coproc.
-# - ${initCommand} _as string_:
-#       (optional) The command (will be evaluated) to run at the start of the coproc.
+# - ${mainCommand} _as string_:
+#       (optional) The main command (will be evaluated) to run in the coproc.
 #       Can exit to stop the coproc.
 #       Set to ":" to do nothing.
 #       (defaults to ":")
@@ -228,10 +235,9 @@ function coproc::runInParallel() {
 #       (optional) The command (will be evaluated) to run at the end of the coproc.
 #       Set to ":" to do nothing.
 #       (defaults to ":")
-# - ${waitForReadiness} _as bool_:
-#       (optional) If true, the main thread will wait for the coproc to be ready
-#       before returning from this function (readiness is achieved after executing
-#       the init command in the coproc).
+# - ${waitForMainEnd} _as bool_:
+#       (optional) If true, the main thread will wait for the main command to finish
+#       before returning from this function.
 #       (defaults to false)
 # - ${keepOnlyLastMessage} _as bool_:
 #       (optional) If true, the coproc will only keep the last message received
@@ -246,16 +252,16 @@ function coproc::runInParallel() {
 # - ${REPLY}: The PID of the coproc.
 #
 # ```bash
-# waitForReadiness=true coproc::run "_MY_COPROC" initCommand loopCommand onMessageCommand
+# waitForMainEnd=true coproc::run "_MY_COPROC" mainCommand loopCommand onMessageCommand
 # ```
 function coproc::run() {
   local \
     coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
-    initCommand=":" \
+    mainCommand=":" \
     loopCommand=":" \
     onMessageCommand="" \
     endCommand=":" \
-    waitForReadiness=false \
+    waitForMainEnd=false \
     keepOnlyLastMessage=false \
     redirectLogsToFile="" \
     IFS=$' '
@@ -267,10 +273,10 @@ function coproc::run() {
   fi
 
   log::debug "Starting coproc ${coprocVarName}"
-  log::trace "Init command: ${initCommand}"$'\n'"loop command: ${loopCommand}."$'\n'"on message command: ${onMessageCommand}"$'\n'"end command: ${endCommand}"$'\n'"wait for readiness: ${waitForReadiness}"$'\n'"keep only last message: ${keepOnlyLastMessage}"
+  log::trace "Init command: ${mainCommand}"$'\n'"loop command: ${loopCommand}."$'\n'"on message command: ${onMessageCommand}"$'\n'"end command: ${endCommand}"$'\n'"wait for readiness: ${waitForMainEnd}"$'\n'"keep only last message: ${keepOnlyLastMessage}"
 
   # Start the coproc
-  eval "{ coproc ${coprocVarName} { coproc_program ${initCommand@Q} ${loopCommand@Q} ${onMessageCommand@Q} ${endCommand@Q} ${waitForReadiness} ${keepOnlyLastMessage} ${redirectLogsToFile@Q} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
+  eval "{ coproc ${coprocVarName} { coproc_program ${mainCommand@Q} ${loopCommand@Q} ${onMessageCommand@Q} ${endCommand@Q} ${waitForMainEnd} ${keepOnlyLastMessage} ${redirectLogsToFile@Q} 2>&${GLOBAL_FD_LOG}; } } 2>/dev/null"
 
   # wait for pid variable to be set by bash (we should never enter the loop)
   local -i loopNumber=0
@@ -297,7 +303,7 @@ function coproc::run() {
   coproc::sendMessage "${coprocVarName}" ":"
 
   # wait for readiness if requested
-  if [[ ${waitForReadiness} == "true" ]]; then
+  if [[ ${waitForMainEnd} == "true" ]]; then
     if ! coproc::receiveMessage "${coprocVarName}"; then
       core::fail "The coproc ⌜${coprocVarName}⌝ did not start correctly."
     elif [[ ${REPLY} != "ready" ]]; then
@@ -314,11 +320,11 @@ function coproc::run() {
 
 # The function that will run in the coproc.
 function coproc_program() {
-  local initCommand="${1}"
+  local mainCommand="${1}"
   local loopCommand="${2}"
   local onMessageCommand="${3}"
   local endCommand="${4}"
-  local waitForReadiness="${5}"
+  local waitForMainEnd="${5}"
   local keepOnlyLastMessage="${6}"
   local redirectLogsToFile="${7}"
 
@@ -339,9 +345,9 @@ function coproc_program() {
   log::trace "Coproc is running, continuing with the coproc program."
 
   # Run the initialization command
-  eval "${initCommand}"
+  eval "${mainCommand}"
 
-  if [[ ${waitForReadiness} == "true" ]]; then
+  if [[ ${waitForMainEnd} == "true" ]]; then
     # Send a readiness message to the main thread
     printf "%s\0" "ready"
   fi

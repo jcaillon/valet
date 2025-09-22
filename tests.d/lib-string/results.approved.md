@@ -11,6 +11,11 @@ Returned variables:
 ```text
 REPLY='left                  middle                 right'
 REPLY2='4|6|5'
+REPLY_ARRAY=(
+[0]='4'
+[1]='6'
+[2]='5'
+)
 ```
 
 ### ✅ Testing string::getFormattedHeader combinations

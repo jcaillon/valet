@@ -6,6 +6,8 @@
 source terminal
 # shellcheck source=lib-fs
 source fs
+# shellcheck source=lib-string
+source string
 
 # ## list::setOptions (private)
 #
@@ -39,6 +41,32 @@ source fs
 # - ${emptyListText} _as string_:
 #       (optional) The text to display when the list is empty.
 #       (defaults to "EMPTY")
+# - ${headerPattern} _as string_:
+#       (optional) The pattern to use for displaying the header.
+#       The header must be composed of a left/middle/right part(s), separated by the pipe character |.
+#       Each part can be empty. They will be placed in the header according to their position.
+#
+#       Additionally, you can use the following placeholders in the pattern:
+#
+#       - <colorHeader>: The color used for the header text.
+#       - <colorFrame>: The color used for the frame.
+#       - <colorReset>: The color reset code.
+#       - <lastItemNumber>: The last item number displayed in the list.
+#       - <firstItemNumber>: The first item number displayed in the list.
+#       - <totalItems>: The total number of items in the list.
+#       - <filteredItems>: The number of items that match the filter.
+#       - <percentViewed>: The percentage of items viewed in the list.
+#       - <filteringString>: The string to display when the list is being filtered.
+#
+#       (defaults to "")
+# - ${footerPattern} _as string_:
+#       (optional) The pattern to use for displaying the footer.
+#       Works identically to headerPattern (see above).
+#
+#       (defaults to " <colorHeader><filteringString><colorReset> || <colorHeader><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorHeader><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> ")
+# - ${filteringString} _as string_:
+#       (optional) The string to display when the list is being filtered.
+#       (defaults to "Filtering…")
 # - ${itemsCountPattern} _as string_:
 #       (optional) The pattern to use for displaying the count of items.
 #
@@ -201,6 +229,48 @@ function list::setOptions() {
   _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD="${filterAsynchronousThreshold:-242}"
   _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${filterUsingExternalProgramThreshold:-1042}"
 
+  # header/footer patterns
+  _LIST_HEAD_FOOT_USES_PATTERNS="false"
+  declare -A -g \
+    _LIST_HEAD_FOOT_PATTERNS=() \
+    _LIST_HEAD_FOOT_IS_STATIC=() \
+    _LIST_HEAD_FOOT_PATTERNS_INVISIBLE_CHARS_LENGTHS=() \
+    _LIST_HEAD_FOOT_STATIC_STRINGS_LENGTHS=()
+  local \
+    headerPattern="${headerPattern:-""}" \
+    footerPattern="${footerPattern:-" <colorHeader><filteringString><colorReset> || <colorHeader><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorHeader><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> "}"
+  # shellcheck disable=SC2034
+  local \
+    headerLeftPart="${headerPattern%%|*}" \
+    headerMiddlePart="${headerPattern#*|}" \
+    headerRightPart="${headerPattern##*|}" \
+    footerLeftPart="${footerPattern%%|*}" \
+    footerMiddlePart="${footerPattern#*|}" \
+    footerRightPart="${footerPattern##*|}"
+  headerMiddlePart="${headerMiddlePart%%|*}"
+  footerMiddlePart="${footerMiddlePart%%|*}"
+  local varName
+  for varName in headerLeftPart headerMiddlePart headerRightPart footerLeftPart footerMiddlePart footerRightPart; do
+    local pattern="${!varName}"
+    pattern="${pattern//"<colorHeader>"/"${STYLE_LIST_COUNT_NUMBER}"}"
+    pattern="${pattern//"<colorFrame>"/"${STYLE_LIST_FRAME}"}"
+    pattern="${pattern//"<colorReset>"/"${STYLE_RESET}"}"
+
+    local visibleCharacters="${pattern}"
+    string::removeTextFormatting visibleCharacters
+
+    _LIST_HEAD_FOOT_PATTERNS["${varName}"]="${pattern}"
+    if [[ ${pattern} == *"<"* ]]; then
+      _LIST_HEAD_FOOT_USES_PATTERNS="true"
+      _LIST_HEAD_FOOT_IS_STATIC["${varName}"]="false"
+      _LIST_HEAD_FOOT_PATTERNS_INVISIBLE_CHARS_LENGTHS["${varName}"]=$((${#pattern} - ${#visibleCharacters}))
+    else
+      _LIST_HEAD_FOOT_IS_STATIC["${varName}"]="true"
+      _LIST_HEAD_FOOT_STATIC_STRINGS_LENGTHS["${varName}"]=${#visibleCharacters}
+    fi
+  done
+  _LIST_FILTERING_STRING="${filteringString:-"Filtering…"}"
+
   list::requestRedraw
 }
 
@@ -321,13 +391,13 @@ function list::requestRedraw() {
 # Draw the list box.
 function list::draw() {
   local finalStringToPrint=""
-
+  log::info "start drawing"
   if [[ ${_LIST_DISABLE_TOP_SEPARATOR} != "true" ]]; then
     list::drawTopSeparator finalStringToPrint
   fi
 
+  # calculate the size and position of the scroll bar
   if [[ ${_LIST_DISABLE_RIGHT_SCROLLBAR} != "true" ]]; then
-    # calculate the size and position of the scroll bar
     local -i \
       firstLineWithScrollBar=0 \
       linesWithScrollBar=0 \
@@ -346,10 +416,14 @@ function list::draw() {
     list::drawCounter finalStringToPrint
   fi
 
+  list::drawHeaderOrFooter finalStringToPrint footer
+
   # TODO: possible improvement: instead of appending to toString, append to an array and compare each line to the previous one to avoid redrawing unchanged lines
   # Can be tested with a benchmark and 1000 draw calls
 
+  log::info "end drawing"
   printf '%s%s%s' "${ESC__CURSOR_HIDE}" "${finalStringToPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
+  log::info "drew"
 }
 
 # Draw the autocompletion box
@@ -446,7 +520,6 @@ function list_appendMultiLineItemDisplayString() {
     _LIST_STYLE_LETTER_HIGHLIGHT_RESET="${STYLE_LIST_LETTER_HIGHLIGHT_RESET}${STYLE_LIST_UNSELECTED_ITEM}"
   fi
 
-
   string::highlight _LIST_CURRENT_ITEM _LIST_FILTER_STRING highlightCode="${_LIST_STYLE_LETTER_HIGHLIGHT}" resetCode="${_LIST_STYLE_LETTER_HIGHLIGHT_RESET}"
   _LIST_CURRENT_ITEM="${REPLY}"
 
@@ -497,6 +570,95 @@ function list_appendMultiLineItemDisplayString() {
   done
 
   _LIST_FILTER_STRING="${savedFilterString}"
+}
+
+# Draw the items count at the bottom/top of the list.
+function list::drawHeaderOrFooter() {
+  local -n toPrint="${1}"
+  local headerOrFooter="${2}"
+
+  log::info "start"
+
+  # compute the placeholder values
+  if [[ ${_LIST_HEAD_FOOT_USES_PATTERNS} == "true" ]]; then
+    local \
+      lastItemNumber=$((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYED_ITEMS - 1)) \
+      firstItemNumber \
+      totalItems="${_LIST_ORIGINAL_ITEMS_COUNT}" \
+      filteredItems \
+      percentViewed=$((_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS > 0 ? (_LIST_FILTERED_ITEMS_START_INDEX * 100) / (_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS) : 100))
+
+    if ((lastItemNumber < 0)); then
+      lastItemNumber=0
+    fi
+    printf -v firstItemNumber "%0${#lastItemNumber}i" "${_LIST_FILTERED_ITEMS_START_INDEX}"
+    printf -v filteredItems "%0${#totalItems}i" "${#_LIST_FILTERED_ITEMS[@]}"
+
+    # shellcheck disable=SC2016
+    _LIST_HEAD_FOOT_PLACEHOLDER_REPLACEMENTS_STATEMENT='
+    part="${part//"<lastItemNumber>"/"'"${lastItemNumber}"'"}"
+    part="${part//"<firstItemNumber>"/"'"${firstItemNumber}"'"}"
+    part="${part//"<totalItems>"/"'"${totalItems}"'"}"
+    part="${part//"<filteredItems>"/"'"${filteredItems}"'"}"
+    part="${part//"<percentViewed>"/"'"${percentViewed}%"'"}"
+    part="${part//"<filteringString>"/"'"${_LIST_FILTERING_STRING}"'"}"
+    '
+  fi
+
+  local partName part
+  local -a parts=() partWidths=()
+  for partName in LeftPart MiddlePart RightPart; do
+    if [[ ${_LIST_HEAD_FOOT_IS_STATIC["${headerOrFooter}${partName}"]} == "true" ]]; then
+      partWidths+=("${_LIST_HEAD_FOOT_STATIC_STRINGS_LENGTHS["${headerOrFooter}${partName}"]}")
+      parts+=("${_LIST_HEAD_FOOT_PATTERNS["${headerOrFooter}${partName}"]}")
+    else
+      part="${_LIST_HEAD_FOOT_PATTERNS["${headerOrFooter}${partName}"]}"
+      eval "${_LIST_HEAD_FOOT_PLACEHOLDER_REPLACEMENTS_STATEMENT}"
+      partWidths+=($((${#part} - _LIST_HEAD_FOOT_PATTERNS_INVISIBLE_CHARS_LENGTHS["${headerOrFooter}${partName}"])))
+      parts+=("${part}")
+    fi
+  done
+
+  local IFS='|'
+
+  log::info "partWidths: ${partWidths[*]}"
+  log::info "parts: ${parts[*]}"
+
+  string::getFormattedHeader "part0|part1|part2" \
+    width="$((_LIST_WIDTH - _LIST_SYMBOL_LEFT_LENGTH - _LIST_SYMBOL_RIGHT_LENGTH))" \
+    paddingChar="${_LIST_SYMBOL_FRAME_HR}" \
+    paddingStyle="${_LIST_STYLE_FRAME}" \
+    paddingStyleReset="${STYLE_RESET}" \
+    partWidths="${partWidths[*]}"
+
+  local finalString="${REPLY}"
+  for partName in 0 1 2; do
+    if ((partWidths[partName] == REPLY_ARRAY[partName])); then
+      # enough space to fit the whole part
+      finalString="${finalString/"part${partName}"/"${parts[partName]}"}"
+    else
+      _LIST_CURRENT_ITEM="${parts[partName]}"
+      _LIST_ITEM_WIDTH="${REPLY_ARRAY[partName]}"
+      _LIST_FILTER_STRING=""
+      list::getCurrentItemDisplayableString
+      finalString="${finalString/"part${partName}"/"${_LIST_CURRENT_ITEM}"}"
+    fi
+  done
+
+  log::info "REPLY: ${finalString}"
+
+  local showAtLine leftSymbol rightSymbol
+  if [[ ${headerOrFooter} == "header" ]]; then
+    showAtLine=${_LIST_TOP}
+    leftSymbol="${_LIST_SYMBOL_LEFT_SEPARATOR_TOP}"
+    rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_TOP}"
+  else
+    showAtLine=$((_LIST_TOP + _LIST_HEIGHT - 1))
+    leftSymbol="${_LIST_SYMBOL_LEFT_SEPARATOR_BOTTOM}"
+    rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_BOTTOM}"
+  fi
+
+  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${_LIST_STYLE_FRAME}${leftSymbol}${STYLE_RESET}${finalString}${_LIST_STYLE_FRAME}${rightSymbol}${STYLE_RESET}"
 }
 
 # Draw the items count at the bottom/top of the list.
@@ -573,112 +735,6 @@ function list::drawTopSeparator() {
   toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${_LIST_STYLE_FRAME}${leftSymbol}${_LIST_BLANKS_ITEM_WIDTH// /"${_LIST_SYMBOL_FRAME_HR}"}${rightSymbol}${STYLE_RESET}"
 }
 
-# Filter the items of the autocompletion box, will either filter synchronously or asynchronously
-function list::filter() {
-  _LIST_FILTER_STRING="${1}"
-
-  list_filter
-
-  if [[ ${_LIST_ASYNC_FILTERING_RUNNING} != "true" ]]; then
-    list_post_filter
-  fi
-}
-
-# Filter the items of the autocompletion box, will either filter synchronously or asynchronously
-function list_filter() {
-  if [[ ${_LIST_DISABLE_FILTERING} == "true" ]]; then
-    return 0
-  fi
-
-  _LIST_ASYNC_FILTERING_RUNNING=false
-
-  # case where we can return the original items
-  if [[ -z ${_LIST_FILTER_STRING} ]]; then
-    _LIST_FILTERED_ITEMS=("${_LIST_ORIGINAL_ITEMS[@]}")
-    _LIST_FILTERED_ITEMS_CORRESPONDENCES=()
-    _LIST_CURRENT_FILTER_STRING=""
-    return 0
-  fi
-
-  # if the current filter string is a prefix of the previous one, we can filter the already filtered items synchronously
-  if [[ -n ${_LIST_CURRENT_FILTER_STRING:-} && ${_LIST_FILTER_STRING} == "${_LIST_CURRENT_FILTER_STRING}"* && (${_LIST_FILTER_SYNCHRONOUSLY} == "true" || ${#_LIST_FILTERED_ITEMS[@]} -lt _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD) ]]; then
-    if ((${#_LIST_FILTERED_ITEMS[@]} == 0)); then
-      return 0
-    fi
-    local -a _LIST_PRE_FILTERED_ITEMS=("${_LIST_FILTERED_ITEMS[@]}")
-    local -a _LIST_PRE_FILTERED_ITEMS_CORRESPONDENCES=("${_LIST_FILTERED_ITEMS_CORRESPONDENCES[@]}")
-    # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
-    # shellcheck disable=SC2178
-    local -n REPLY_ARRAY=_LIST_FILTERED_ITEMS
-    # shellcheck disable=SC2034
-    local -n REPLY_ARRAY2=_LIST_FILTERED_ITEMS_CORRESPONDENCES
-    array::fuzzyFilterSort _LIST_PRE_FILTERED_ITEMS _LIST_FILTER_STRING
-    _LIST_CURRENT_FILTER_STRING="${_LIST_FILTER_STRING}"
-    # we need to update the correspondences
-    local -i index
-    for ((index = 0; index < ${#_LIST_FILTERED_ITEMS_CORRESPONDENCES[@]}; index++)); do
-      _LIST_FILTERED_ITEMS_CORRESPONDENCES[index]="${_LIST_PRE_FILTERED_ITEMS_CORRESPONDENCES[${_LIST_FILTERED_ITEMS_CORRESPONDENCES[index]}]}"
-    done
-    return 0
-  fi
-
-  if [[ ${_LIST_FILTER_SYNCHRONOUSLY} == "true" ]]; then
-    # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
-    # shellcheck disable=SC2178
-    local -n REPLY_ARRAY=_LIST_FILTERED_ITEMS
-    # shellcheck disable=SC2034
-    local -n REPLY_ARRAY2=_LIST_FILTERED_ITEMS_CORRESPONDENCES
-    array::fuzzyFilterSort _LIST_ORIGINAL_ITEMS _LIST_FILTER_STRING
-    _LIST_CURRENT_FILTER_STRING="${_LIST_FILTER_STRING}"
-  else
-    # asynchronous filtering
-    if [[ ! -v _LIST_ASYNC_FILTER_JOB ]]; then
-      list_startAsyncFiltering
-    fi
-
-    # send a message to the async filter job
-    if ! { printf "filter=%s\0" "${_LIST_FILTER_STRING}" >&"${_LIST_ASYNC_FILTER_JOB[1]:-}"; } 2>/dev/null; then
-      list_startAsyncFiltering
-    fi
-
-    _LIST_ASYNC_FILTERING_LAST_REQUESTED_STRING="${_LIST_FILTER_STRING}"
-    _LIST_ASYNC_FILTERING_RUNNING=true
-  fi
-}
-
-function list_post_filter() {
-  # check if we display the item count
-  _LIST_NB_USABLE_LINES_FOR_ITEMS="${_LIST_HEIGHT}"
-  _LIST_BOTTOM_SHIFT=0
-  _LIST_TOP_SHIFT=0
-
-  if [[ ${_LIST_DISABLE_ITEMS_COUNT} != "true" ]]; then
-    _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
-    # we display the items count at the top or bottom of the box
-    if [[ ${_LIST_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
-      _LIST_TOP_SHIFT=$((_LIST_TOP_SHIFT + 1))
-    else
-      _LIST_BOTTOM_SHIFT=$((_LIST_BOTTOM_SHIFT + 1))
-    fi
-  fi
-
-  if [[ ${_LIST_DISABLE_TOP_SEPARATOR} != "true" ]]; then
-    _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
-    # we display the top separator
-    if [[ ${_LIST_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
-      _LIST_BOTTOM_SHIFT=$((_LIST_BOTTOM_SHIFT + 1))
-    else
-      _LIST_TOP_SHIFT=$((_LIST_TOP_SHIFT + 1))
-    fi
-  fi
-
-  _LIST_NB_DISPLAYABLE_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
-
-  # make sure to select an existing index regarding the filtered items +
-  # make sure it is in the view
-  list::changeSelectedItemIndex 0
-}
-
 # Clear the items box
 function list::clearVieWport() {
   if [[ _LIST_HEIGHT -le 0 ]]; then
@@ -699,57 +755,6 @@ function list::destroy() {
   unset -v ${!_LIST_*}
 }
 
-# Called when a special key is pressed.
-#
-# - $1: **key** _as string_:
-#       The special key that was pressed (UP, DOWN, etc...).
-#
-# define the callback function called when a special key is pressed
-# shellcheck disable=SC2317
-function list::onKeyBindingPress() {
-  local action="${_LIST_KEY_MAPPING[${1}]:-}"
-  if [[ -z ${action} ]]; then
-    return 1
-  fi
-
-  # handle spamming of keys (the actions before this do not need to be protected from spam,
-  # but the actions after this are slow to execute and should not be spammed)
-  time::getProgramElapsedMicroseconds
-  if ((REPLY - _LIST_LAST_KEY_PRESSED_TIME < 100000)); then
-    # key pressed under 100ms of the last
-    _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
-  else
-    _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
-  fi
-  if ((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED > 3)); then
-    # if we have 3 rapid successive key pressed
-    return 0
-  fi
-  _LIST_LAST_KEY_PRESSED_TIME=${REPLY}
-
-  case "${action}" in
-  # autocompletion box selected item
-  scroll-up)
-    list::changeSelectedItemIndex "-$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
-    ;;
-  scroll-down)
-    list::changeSelectedItemIndex "$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
-    ;;
-  move-beginning)
-    list::changeSelectedItemIndex "-$((_LIST_ORIGINAL_ITEMS_COUNT + 1))"
-    ;;
-  move-end)
-    list::changeSelectedItemIndex "$((_LIST_ORIGINAL_ITEMS_COUNT + 1))"
-    ;;
-  move-up)
-    list::changeSelectedItemIndex -1
-    ;;
-  move-down)
-    list::changeSelectedItemIndex 1
-    ;;
-  esac
-}
-
 # ## list::getCurrentItemDisplayableString (private)
 #
 # Truncate a string to a given number of visible characters,
@@ -762,7 +767,7 @@ function list::onKeyBindingPress() {
 # - ${_LIST_CURRENT_ITEM} _as string_:
 #       the string to truncate
 # - ${_LIST_ITEM_WIDTH} _as int_:
-#       the number of visible characters
+#       the number of visible characters allowed
 # - ${_LIST_FILTER_STRING} _as string_:
 #       the string to search for in the string
 # - ${_LIST_STYLE_LETTER_HIGHLIGHT} _as string_:
@@ -916,6 +921,163 @@ function list::convertToInitialItemsIndex() {
     return 0
   fi
   REPLY=-1
+}
+
+# Called when a special key is pressed.
+#
+# - $1: **key** _as string_:
+#       The special key that was pressed (UP, DOWN, etc...).
+#
+# define the callback function called when a special key is pressed
+# shellcheck disable=SC2317
+function list::onKeyBindingPress() {
+  local action="${_LIST_KEY_MAPPING[${1}]:-}"
+  if [[ -z ${action} ]]; then
+    return 1
+  fi
+
+  # handle spamming of keys (the actions before this do not need to be protected from spam,
+  # but the actions after this are slow to execute and should not be spammed)
+  time::getProgramElapsedMicroseconds
+  if ((REPLY - _LIST_LAST_KEY_PRESSED_TIME < 100000)); then
+    # key pressed under 100ms of the last
+    _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
+  else
+    _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
+  fi
+  if ((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED > 3)); then
+    # if we have 3 rapid successive key pressed
+    return 0
+  fi
+  _LIST_LAST_KEY_PRESSED_TIME=${REPLY}
+
+  case "${action}" in
+  # autocompletion box selected item
+  scroll-up)
+    list::changeSelectedItemIndex "-$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
+    ;;
+  scroll-down)
+    list::changeSelectedItemIndex "$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
+    ;;
+  move-beginning)
+    list::changeSelectedItemIndex "-$((_LIST_ORIGINAL_ITEMS_COUNT + 1))"
+    ;;
+  move-end)
+    list::changeSelectedItemIndex "$((_LIST_ORIGINAL_ITEMS_COUNT + 1))"
+    ;;
+  move-up)
+    list::changeSelectedItemIndex -1
+    ;;
+  move-down)
+    list::changeSelectedItemIndex 1
+    ;;
+  esac
+}
+
+# Filter the items of the autocompletion box, will either filter synchronously or asynchronously
+function list::filter() {
+  _LIST_FILTER_STRING="${1}"
+
+  list_filter
+
+  if [[ ${_LIST_ASYNC_FILTERING_RUNNING} != "true" ]]; then
+    list_post_filter
+  fi
+}
+
+# Filter the items of the autocompletion box, will either filter synchronously or asynchronously
+function list_filter() {
+  if [[ ${_LIST_DISABLE_FILTERING} == "true" ]]; then
+    return 0
+  fi
+
+  _LIST_ASYNC_FILTERING_RUNNING=false
+
+  # case where we can return the original items
+  if [[ -z ${_LIST_FILTER_STRING} ]]; then
+    _LIST_FILTERED_ITEMS=("${_LIST_ORIGINAL_ITEMS[@]}")
+    _LIST_FILTERED_ITEMS_CORRESPONDENCES=()
+    _LIST_CURRENT_FILTER_STRING=""
+    return 0
+  fi
+
+  # if the current filter string is a prefix of the previous one, we can filter the already filtered items synchronously
+  if [[ -n ${_LIST_CURRENT_FILTER_STRING:-} && ${_LIST_FILTER_STRING} == "${_LIST_CURRENT_FILTER_STRING}"* && (${_LIST_FILTER_SYNCHRONOUSLY} == "true" || ${#_LIST_FILTERED_ITEMS[@]} -lt _LIST_FILTER_ASYNCHRONOUSLY_THRESHOLD) ]]; then
+    if ((${#_LIST_FILTERED_ITEMS[@]} == 0)); then
+      return 0
+    fi
+    local -a _LIST_PRE_FILTERED_ITEMS=("${_LIST_FILTERED_ITEMS[@]}")
+    local -a _LIST_PRE_FILTERED_ITEMS_CORRESPONDENCES=("${_LIST_FILTERED_ITEMS_CORRESPONDENCES[@]}")
+    # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
+    # shellcheck disable=SC2178
+    local -n REPLY_ARRAY=_LIST_FILTERED_ITEMS
+    # shellcheck disable=SC2034
+    local -n REPLY_ARRAY2=_LIST_FILTERED_ITEMS_CORRESPONDENCES
+    array::fuzzyFilterSort _LIST_PRE_FILTERED_ITEMS _LIST_FILTER_STRING
+    _LIST_CURRENT_FILTER_STRING="${_LIST_FILTER_STRING}"
+    # we need to update the correspondences
+    local -i index
+    for ((index = 0; index < ${#_LIST_FILTERED_ITEMS_CORRESPONDENCES[@]}; index++)); do
+      _LIST_FILTERED_ITEMS_CORRESPONDENCES[index]="${_LIST_PRE_FILTERED_ITEMS_CORRESPONDENCES[${_LIST_FILTERED_ITEMS_CORRESPONDENCES[index]}]}"
+    done
+    return 0
+  fi
+
+  if [[ ${_LIST_FILTER_SYNCHRONOUSLY} == "true" ]]; then
+    # We define these to allow array::fuzzyFilterSort to modify the arrays directly (avoiding a copy)
+    # shellcheck disable=SC2178
+    local -n REPLY_ARRAY=_LIST_FILTERED_ITEMS
+    # shellcheck disable=SC2034
+    local -n REPLY_ARRAY2=_LIST_FILTERED_ITEMS_CORRESPONDENCES
+    array::fuzzyFilterSort _LIST_ORIGINAL_ITEMS _LIST_FILTER_STRING
+    _LIST_CURRENT_FILTER_STRING="${_LIST_FILTER_STRING}"
+  else
+    # asynchronous filtering
+    if [[ ! -v _LIST_ASYNC_FILTER_JOB ]]; then
+      list_startAsyncFiltering
+    fi
+
+    # send a message to the async filter job
+    if ! { printf "filter=%s\0" "${_LIST_FILTER_STRING}" >&"${_LIST_ASYNC_FILTER_JOB[1]:-}"; } 2>/dev/null; then
+      list_startAsyncFiltering
+    fi
+
+    _LIST_ASYNC_FILTERING_LAST_REQUESTED_STRING="${_LIST_FILTER_STRING}"
+    _LIST_ASYNC_FILTERING_RUNNING=true
+  fi
+}
+
+function list_post_filter() {
+  # check if we display the item count
+  _LIST_NB_USABLE_LINES_FOR_ITEMS="${_LIST_HEIGHT}"
+  _LIST_BOTTOM_SHIFT=0
+  _LIST_TOP_SHIFT=0
+
+  if [[ ${_LIST_DISABLE_ITEMS_COUNT} != "true" ]]; then
+    _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
+    # we display the items count at the top or bottom of the box
+    if [[ ${_LIST_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
+      _LIST_TOP_SHIFT=$((_LIST_TOP_SHIFT + 1))
+    else
+      _LIST_BOTTOM_SHIFT=$((_LIST_BOTTOM_SHIFT + 1))
+    fi
+  fi
+
+  if [[ ${_LIST_DISABLE_TOP_SEPARATOR} != "true" ]]; then
+    _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
+    # we display the top separator
+    if [[ ${_LIST_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
+      _LIST_BOTTOM_SHIFT=$((_LIST_BOTTOM_SHIFT + 1))
+    else
+      _LIST_TOP_SHIFT=$((_LIST_TOP_SHIFT + 1))
+    fi
+  fi
+
+  _LIST_NB_DISPLAYABLE_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
+
+  # make sure to select an existing index regarding the filtered items +
+  # make sure it is in the view
+  list::changeSelectedItemIndex 0
 }
 
 function list_startAsyncFiltering() {

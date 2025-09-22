@@ -534,7 +534,7 @@ function string::getHexRepresentation() {
 # ## string::getFormattedHeader
 #
 # Get a formatted header string with a given width.
-# The header can be composed of a left/middle/right part(s).
+# The header is composed of a left/middle/right part(s).
 # The header is padded with a given character to fit the given width.
 # The parts are trimmed if too long but they are prioritized in this order: middle, left, right
 # (middle will take all the space necessary, then left, then right).
@@ -567,6 +567,7 @@ function string::getHexRepresentation() {
 #
 # - ${REPLY}: the formatted header string
 # - ${REPLY2}: the actual widths of each part separated by | (same format as partWidths argument)
+# - ${REPLY_ARRAY}: the actual widths of each part
 #
 # ```bash
 # string::getFormattedHeader "Left|Middle|Right" width=50 paddingChar="-" paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
@@ -587,6 +588,7 @@ function string::getFormattedHeader() {
   if ((width <= 0)); then
     REPLY=""
     REPLY2="0|0|0"
+    REPLY_ARRAY=(0 0 0)
     return 0
   fi
 
@@ -639,6 +641,7 @@ function string::getFormattedHeader() {
   if ((availableSpaceForLeft <= 0)); then
     REPLY="${finalString}"
     REPLY2="0|${middlePartLength}|0"
+    REPLY_ARRAY=(0 "${middlePartLength}" 0)
     return 0
   fi
 
@@ -670,6 +673,7 @@ function string::getFormattedHeader() {
   if ((availableSpaceForRight <= 0)); then
     REPLY="${finalString}"
     REPLY2="${leftPartLength}|${middlePartLength}|0"
+    REPLY_ARRAY=("${leftPartLength}" "${middlePartLength}" 0)
     return 0
   fi
 
@@ -689,4 +693,5 @@ function string::getFormattedHeader() {
 
   REPLY="${finalString}"
   REPLY2="${leftPartLength}|${middlePartLength}|${rightPartLength}"
+  REPLY_ARRAY=("${leftPartLength}" "${middlePartLength}" "${rightPartLength}")
 }

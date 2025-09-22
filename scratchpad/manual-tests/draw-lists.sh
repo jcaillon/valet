@@ -67,22 +67,23 @@ function draw() {
   printf "%s" "${ESC__CURSOR_MOVE__}$((GLOBAL_CURSOR_LINE + height));1${__ESC__TO}" 1>&"${GLOBAL_FD_TUI}"
 }
 
-for array in TWO_LINES_ITEMS ONE_LINE_ITEMS; do
-  draw 0 "" 10 "${array}" ""
-  draw 0 20 9 "${array}" ""
-  draw 0 "" 10 "${array}" "" enableReverseMode=true
-  draw 0 20 9 "${array}" "" enableReverseMode=true
+# for array in TWO_LINES_ITEMS ONE_LINE_ITEMS; do
+#   draw 0 "" 10 "${array}" ""
+#   draw 0 20 9 "${array}" ""
+#   draw 0 "" 10 "${array}" "" enableReverseMode=true
+#   draw 0 20 9 "${array}" "" enableReverseMode=true
 
-  draw 0 40 9 "${array}" "notfound"
-  draw 0 40 9 "${array}" "notfound" emptyListText="No item found"
+#   draw 0 40 9 "${array}" "notfound"
+#   draw 0 40 9 "${array}" "notfound" emptyListText="No item found"
 
-  draw 1 20 9 "${array}" "o"
-  draw 3 20 9 "${array}" "o"
-  draw 3 20 9 "${array}" "o" disableItemsCount=true disableScrollbar=true disableCursor=true disableTopSeparator=true
-  draw 3 20 9 "${array}" "o" showItemsCountAtTop=true
+#   draw 1 20 9 "${array}" "o"
+#   draw 3 20 9 "${array}" "o"
+#   draw 3 20 9 "${array}" "o" disableItemsCount=true disableScrollbar=true disableCursor=true disableTopSeparator=true
+#   draw 3 20 9 "${array}" "o" showItemsCountAtTop=true
 
-  draw 5 "" 9 "${array}" "o" itemsCountPattern="Items: <colorCount><firstItemNumber>-<lastItemNumber>/<totalItems><colorReset> <colorFrame>(filtered: <filteredItems>) <percentViewed><colorReset>"
+#   draw 5 "" 9 "${array}" "o" itemsCountPattern="Items: <colorCount><firstItemNumber>-<lastItemNumber>/<totalItems><colorReset> <colorFrame>(filtered: <filteredItems>) <percentViewed><colorReset>"
 
-  echo "----------------------------------------"
-done
+#   echo "----------------------------------------"
+# done
 
+draw 5 "" 9 "TWO_LINES_ITEMS" "o" headerPattern="coucou||Items: <colorCount><firstItemNumber>-<lastItemNumber>/<totalItems><colorReset> <colorFrame>(filtered: <filteredItems>) <percentViewed><colorReset>"

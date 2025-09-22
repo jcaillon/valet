@@ -4,7 +4,7 @@
 
 ### ✅ Testing coproc::run with a simple init command
 
-❯ `coproc::run _COPROC_1 initCommand=initCommand`
+❯ `coproc::run _COPROC_1 mainCommand=mainCommand`
 
 **Error output**:
 
@@ -14,7 +14,7 @@ INFO     Running init command in coproc (_COPROC_1).
 
 ### ✅ Testing coproc::sendMessage, coproc::isRunning and coproc::wait
 
-❯ `coproc::run _COPROC_2 initCommand=initCommand loopCommand=loopCommand onMessageCommand=onMessageCommand;break endCommand=endCommand`
+❯ `coproc::run _COPROC_2 mainCommand=mainCommand loopCommand=loopCommand onMessageCommand=onMessageCommand;break endCommand=endCommand`
 
 ❯ `coproc::isRunning _COPROC_2`
 
@@ -35,7 +35,7 @@ INFO     Running end command in coproc (_COPROC_2).
 
 ### ✅ Testing coproc::run with wait for readiness
 
-❯ `coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true`
+❯ `coproc::run _COPROC_3 mainCommand=mainCommand waitForMainEnd=true`
 
 **Error output**:
 
@@ -45,7 +45,7 @@ INFO     Running init command in coproc (_COPROC_3).
 
 ### ✅ Testing coproc::kill
 
-❯ `coproc::run _COPROC_4 initCommand=initCommand loopCommand=loopCommand waitForReadiness=true`
+❯ `coproc::run _COPROC_4 mainCommand=mainCommand loopCommand=loopCommand waitForMainEnd=true`
 
 ❯ `coproc::kill _COPROC_4`
 
@@ -57,7 +57,7 @@ INFO     Running init command in coproc (_COPROC_4).
 
 ### ✅ Testing coproc messages when coproc is killed
 
-❯ `coproc::run _COPROC_5 waitForReadiness=true`
+❯ `coproc::run _COPROC_5 waitForMainEnd=true`
 
 ❯ `coproc::sendMessage _COPROC_5 hello`
 
@@ -109,7 +109,7 @@ INFO     Stopping the coproc (_COPROC_9).
 
 ### ✅ Testing coproc::run with an error in the init command
 
-❯ `coproc::run _COPROC_20 initCommand=initCommand`
+❯ `coproc::run _COPROC_20 mainCommand=mainCommand`
 
 **Error output**:
 
@@ -122,9 +122,9 @@ CMDERR   Error code ⌜1⌝ for the command:
 INFO     The coproc ⌜_COPROC_20⌝ failed as expected.
 ```
 
-❯ `coproc::run _COPROC_21 initCommand=initCommand waitForReadiness=true redirectLogsToFile=/tmp/valet-temp`
+❯ `coproc::run _COPROC_21 mainCommand=mainCommand waitForMainEnd=true redirectLogsToFile=/tmp/valet-temp`
 
-❯ `coproc::run _COPROC_21 initCommand=initCommand waitForReadiness=true redirectLogsToFile=/tmp/valet-temp`
+❯ `coproc::run _COPROC_21 mainCommand=mainCommand waitForMainEnd=true redirectLogsToFile=/tmp/valet-temp`
 
 Exited with code: `1`
 

@@ -12,7 +12,7 @@ function main() {
 function test_coproc::run_simpleTests() {
 
   # shellcheck disable=SC2317
-  function initCommand() {
+  function mainCommand() {
     log::info "Running init command in coproc (${coprocVarName})."
   }
 
@@ -33,8 +33,8 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc::run with a simple init command"
 
-  test::prompt coproc::run _COPROC_1 initCommand=initCommand
-  coproc::run _COPROC_1 initCommand=initCommand
+  test::prompt coproc::run _COPROC_1 mainCommand=mainCommand
+  coproc::run _COPROC_1 mainCommand=mainCommand
   local coproc1Pid="${REPLY}"
   if ((coproc1Pid <= 0)); then
     test::fail "The coproc ⌜_COPROC_1⌝ is not running."
@@ -44,12 +44,12 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc::sendMessage, coproc::isRunning and coproc::wait"
 
-  test::prompt coproc::run _COPROC_2 initCommand=initCommand loopCommand=loopCommand onMessageCommand="onMessageCommand;break" endCommand=endCommand
+  test::prompt coproc::run _COPROC_2 mainCommand=mainCommand loopCommand=loopCommand onMessageCommand="onMessageCommand;break" endCommand=endCommand
   test::prompt coproc::isRunning _COPROC_2
   test::prompt coproc::sendMessage _COPROC_2 "Hello, coproc 2!"
   test::prompt coproc::wait _COPROC_2
   test::prompt coproc::isRunning _COPROC_2
-  coproc::run _COPROC_2 initCommand=initCommand loopCommand=loopCommand onMessageCommand="onMessageCommand;break" endCommand=endCommand
+  coproc::run _COPROC_2 mainCommand=mainCommand loopCommand=loopCommand onMessageCommand="onMessageCommand;break" endCommand=endCommand
   if ! coproc::isRunning _COPROC_2; then
     test::fail "The coproc ⌜_COPROC_2⌝ is not running."
   fi
@@ -62,8 +62,8 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc::run with wait for readiness"
 
-  test::prompt coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
-  coproc::run _COPROC_3 initCommand=initCommand waitForReadiness=true
+  test::prompt coproc::run _COPROC_3 mainCommand=mainCommand waitForMainEnd=true
+  coproc::run _COPROC_3 mainCommand=mainCommand waitForMainEnd=true
   coproc::wait _COPROC_3
   test::flush
 
@@ -74,9 +74,9 @@ function test_coproc::run_simpleTests() {
     bash::sleep 0
   }
 
-  test::prompt coproc::run _COPROC_4 initCommand=initCommand loopCommand=loopCommand waitForReadiness=true
+  test::prompt coproc::run _COPROC_4 mainCommand=mainCommand loopCommand=loopCommand waitForMainEnd=true
   test::prompt coproc::kill _COPROC_4
-  coproc::run _COPROC_4 initCommand=initCommand loopCommand=loopCommand waitForReadiness=true
+  coproc::run _COPROC_4 mainCommand=mainCommand loopCommand=loopCommand waitForMainEnd=true
   local coproc4Pid="${REPLY}"
   local IFS=" "
   if [[ ${GLOBAL_BACKGROUND_PROCESSES[*]} != *"${coproc4Pid}"* ]]; then
@@ -91,8 +91,8 @@ function test_coproc::run_simpleTests() {
 
   test::title "✅ Testing coproc messages when coproc is killed"
 
-  test::prompt coproc::run _COPROC_5 waitForReadiness=true
-  coproc::run _COPROC_5 waitForReadiness=true
+  test::prompt coproc::run _COPROC_5 waitForMainEnd=true
+  coproc::run _COPROC_5 waitForMainEnd=true
   while kill -0 "${REPLY}" &>/dev/null; do
     bash::sleep 0.1
   done
@@ -152,15 +152,15 @@ function test_coproc::run_testError() {
   eval "${REPLY}"
   local originalFunction="${REPLY2}"
 
-  function initCommand() {
+  function mainCommand() {
     ((0 / 0)) # This will fail and exit the subshell
     log::info "This line will not be executed because the previous command failed."
   }
 
   test::setTestCallStack
 
-  test::prompt coproc::run _COPROC_20 initCommand=initCommand
-  coproc::run _COPROC_20 initCommand=initCommand
+  test::prompt coproc::run _COPROC_20 mainCommand=mainCommand
+  coproc::run _COPROC_20 mainCommand=mainCommand
 
   coproc::wait _COPROC_20
   if ((REPLY_CODE == 0)); then
@@ -172,14 +172,14 @@ function test_coproc::run_testError() {
 
   eval "${originalFunction}"
 
-  function initCommand() {
+  function mainCommand() {
     local a="${1}"
     log::info "This line will not be executed because the previous command failed ${a}."
   }
 
 
-  test::prompt coproc::run _COPROC_21 initCommand=initCommand waitForReadiness=true redirectLogsToFile="${GLOBAL_TEST_TEMP_FILE}"
-  test::exit coproc::run _COPROC_21 initCommand=initCommand waitForReadiness=true redirectLogsToFile="${GLOBAL_TEST_TEMP_FILE}"
+  test::prompt coproc::run _COPROC_21 mainCommand=mainCommand waitForMainEnd=true redirectLogsToFile="${GLOBAL_TEST_TEMP_FILE}"
+  test::exit coproc::run _COPROC_21 mainCommand=mainCommand waitForMainEnd=true redirectLogsToFile="${GLOBAL_TEST_TEMP_FILE}"
 
   test::exec fs::cat "${GLOBAL_TEST_TEMP_FILE}"
 
