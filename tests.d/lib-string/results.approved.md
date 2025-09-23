@@ -23,26 +23,26 @@ REPLY_ARRAY=(
 **Standard output**:
 
 ```text
-4|6|5      left                  middle                 right
-0|6|0                            middle                      
-0|6|5                            middle                 right
-4|6|0      left                  middle                      
-4|0|0      left                                              
-0|0|5                                                   right
-4|6|5      left   middle  right
-4|6|5      left   middle right
-4|6|5      left  middle right
-4|6|5      left  middleright
-4|6|5      left middleright
-4|6|3      left middlerig…
+4|6|5      left__________________middle_________________right
+0|6|0      ______________________middle______________________
+0|6|5      ______________________middle_________________right
+4|6|0      left__________________middle______________________
+4|0|0      left______________________________________________
+0|0|5      _____________________________________________right
+4|6|5      left___middle__right
+4|6|5      left___middle_right
+4|6|5      left__middle_right
+4|6|5      left__middleright
+4|6|5      left_middleright
+4|6|3      left_middlerig…
 4|6|3      leftmiddlerig…
 4|6|2      leftmiddleri…
 2|6|2      le…middleri…
 2|6|1      le…middler…
 1|6|1      l…middler…
-1|6|0      l…middle 
-0|6|0       middle 
-0|6|0       middle
+1|6|0      l…middle_
+0|6|0      _middle_
+0|6|0      _middle
 0|6|0      middle
 0|4|0      midd…
 0|3|0      mid…
@@ -50,7 +50,49 @@ REPLY_ARRAY=(
 0|1|0      m…
 0|0|0      …
 0|0|0      
-1|1|1      @[1;34m........................[0m%[1;34m.......................[0m+
+4|6|5      left[1;34m___[0mmiddle[1;34m__[0mright
+4|6|5      left[1;34m___[0mmiddle[1;34m_[0mright
+4|6|5      left[1;34m__[0mmiddle[1;34m_[0mright
+4|6|5      left[1;34m__[0mmiddle[1;34m[0mright
+4|6|5      left[1;34m_[0mmiddle[1;34m[0mright
+4|6|3      left[1;34m_[0mmiddlerig…
+4|6|3      left[1;34m[0mmiddlerig…
+4|6|2      left[1;34m[0mmiddleri…
+2|6|2      le…middleri…
+2|6|1      le…middler…
+1|6|1      l…middler…
+1|6|0      l…middle[1;34m_[0m
+0|6|0      [1;34m_[0mmiddle[1;34m_[0m
+0|6|0      [1;34m_[0mmiddle
+0|6|0      middle
+0|4|0      midd…
+0|3|0      mid…
+0|2|0      mi…
+0|1|0      m…
+0|0|0      …
+0|0|0      
+4|6|5      left___middle__right
+4|6|5      left___middle_right
+4|6|5      left__middle_right
+4|6|5      left__middleright
+4|6|5      left_middleright
+4|6|4      left_middlerigh
+4|6|4      leftmiddlerigh
+4|6|3      leftmiddlerig
+3|6|3      lefmiddlerig
+3|6|2      lefmiddleri
+2|6|2      lemiddleri
+2|6|1      lemiddler
+1|6|1      lmiddler
+1|6|0      lmiddle
+0|6|0      middle
+0|5|0      middl
+0|4|0      midd
+0|3|0      mid
+0|2|0      mi
+0|1|0      m
+0|0|0      
+1|1|1      @[1;34m________________________[0m%[1;34m_______________________[0m+
 4|6|5      left[1;34m..................[0mmiddle[1;34m.................[0mright
 ```
 

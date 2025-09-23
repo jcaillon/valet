@@ -562,6 +562,9 @@ function string::getHexRepresentation() {
 #       not taking into account invisible characters (like ANSI escape codes).
 #       Example: "10|20|10"
 #       (defaults to "")
+# - ${noEllipsis} _as bool_:
+#       (optional) If set to true, no ellipsis will be added when a part is trimmed.
+#       (defaults to false)
 #
 # Returns:
 #
@@ -581,6 +584,7 @@ function string::getFormattedHeader() {
     paddingStyle="" \
     paddingStyleReset="" \
     partWidths="" \
+    noEllipsis=false \
     IFS=$' '
   shift 1
   eval "local a= ${*@Q}"
@@ -616,15 +620,21 @@ function string::getFormattedHeader() {
     rightPartLength="${#part}"
   fi
 
-  local finalString=""
+  local \
+    finalString="" \
+    ellipsis="…"
   local -i remainingWidth=${width}
+
+  if [[ ${noEllipsis} == "true" ]]; then
+    ellipsis=""
+  fi
 
   if ((remainingWidth - middlePartLength >= 0)); then
     finalString+="${middlePart}"
     remainingWidth=$((remainingWidth - middlePartLength))
   else
-    finalString+="${middlePart:0:remainingWidth - 1}…"
-    middlePartLength=$((remainingWidth - 1))
+    finalString+="${middlePart:0:remainingWidth - ${#ellipsis}}${ellipsis}"
+    middlePartLength=$((remainingWidth - ${#ellipsis}))
     remainingWidth=0
   fi
 
@@ -656,14 +666,14 @@ function string::getFormattedHeader() {
       finalString="${leftPart}"
     fi
     remainingWidth=$((remainingWidth - leftPartLength))
-  elif ((availableSpaceForLeft == 1)); then
-    finalString=" ${finalString}"
+  elif [[ ${noEllipsis} != "true" && availableSpaceForLeft -eq 1 ]]; then
+    finalString="${paddingStyle}${paddingChar}${paddingStyleReset}${finalString}"
     remainingWidth=$((remainingWidth - 1))
     leftPartLength=0
   else
-    finalString="${leftPart:0:availableSpaceForLeft - 1}…${finalString}"
-    remainingWidth=$((remainingWidth - availableSpaceForLeft - 1))
-    leftPartLength=$((availableSpaceForLeft - 1))
+    finalString="${leftPart:0:availableSpaceForLeft - ${#ellipsis}}${ellipsis}${finalString}"
+    remainingWidth=$((remainingWidth - availableSpaceForLeft - ${#ellipsis}))
+    leftPartLength=$((availableSpaceForLeft - ${#ellipsis}))
   fi
 
   if ((middlePartLength <= 0)); then
@@ -681,14 +691,14 @@ function string::getFormattedHeader() {
     padding="${spaces:0:availableSpaceForRight - rightPartLength}"
     finalString+="${paddingStyle}${padding//" "/"${paddingChar}"}${paddingStyleReset}${rightPart}"
     remainingWidth=$((remainingWidth - rightPartLength))
-  elif ((availableSpaceForRight == 1)); then
-    finalString+=" "
+  elif [[ ${noEllipsis} != "true" && availableSpaceForRight -eq 1 ]]; then
+    finalString+="${paddingStyle}${paddingChar}${paddingStyleReset}"
     remainingWidth=$((remainingWidth - 1))
     rightPartLength=0
   else
-    finalString+="${rightPart:0:availableSpaceForRight - 1}…"
-    remainingWidth=$((remainingWidth - availableSpaceForRight - 1))
-    rightPartLength=$((availableSpaceForRight - 1))
+    finalString+="${rightPart:0:availableSpaceForRight - ${#ellipsis}}${ellipsis}"
+    remainingWidth=$((remainingWidth - availableSpaceForRight - ${#ellipsis}))
+    rightPartLength=$((availableSpaceForRight - ${#ellipsis}))
   fi
 
   REPLY="${finalString}"

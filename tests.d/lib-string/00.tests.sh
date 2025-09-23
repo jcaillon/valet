@@ -42,6 +42,12 @@ function test_string::getFormattedHeader() {
   for ((i=20; i>=0; i--)); do
     test_printFormattedHeader "left|middle|right" width="${i}"
   done
+  for ((i=20; i>=0; i--)); do
+    test_printFormattedHeader "left|middle|right" width="${i}" paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
+  done
+  for ((i=20; i>=0; i--)); do
+    test_printFormattedHeader "left|middle|right" width="${i}" noEllipsis=true
+  done
 
   test_printFormattedHeader "@|%|+" width=50 paddingChar="." paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
 
@@ -55,7 +61,7 @@ function test_string::getFormattedHeader() {
 }
 
 function test_printFormattedHeader() {
-  string::getFormattedHeader "${@}"
+  string::getFormattedHeader "${@}" paddingChar='_'
   printf '%-10s %s\n' "${REPLY2}" "${REPLY}"
 }
 

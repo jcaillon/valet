@@ -23,20 +23,17 @@ source string
 # - ${enableReverseMode} _as bool_:
 #       (optional) If true, the items are displayed from bottom to top.
 #       (defaults to false)
-# - ${disableItemsCount} _as bool_:
-#       (optional) If true, the count of items is not displayed.
+# - ${disableCursor} _as bool_:
+#       (optional) If true, the left cursor that indicates the currently selected line is not displayed.
 #       (defaults to false)
 # - ${disableScrollbar} _as bool_:
 #       (optional) If true, the scrollbar is not displayed.
 #       (defaults to false)
-# - ${disableCursor} _as bool_:
-#       (optional) If true, the left cursor that indicates the currently selected line is not displayed.
+# - ${disableHeader} _as bool_:
+#       (optional) If true, the header is not displayed.
 #       (defaults to false)
-# - ${disableTopSeparator} _as bool_:
-#       (optional) If true, the top separator (that closes the box when nothing else is disabled) is not displayed.
-#       (defaults to false)
-# - ${showItemsCountAtTop} _as bool_:
-#       (optional) If true, the count of items will be displayed at the top of the list instead of the bottom.
+# - ${disableFooter} _as bool_:
+#       (optional) If true, the footer is not displayed.
 #       (defaults to false)
 # - ${emptyListText} _as string_:
 #       (optional) The text to display when the list is empty.
@@ -67,22 +64,6 @@ source string
 # - ${filteringString} _as string_:
 #       (optional) The string to display when the list is being filtered.
 #       (defaults to "Filtering…")
-# - ${itemsCountPattern} _as string_:
-#       (optional) The pattern to use for displaying the count of items.
-#
-#       - <colorCount>: The color to use for the count of items.
-#       - <colorFrame>: The color to use for items count frame.
-#       - <colorReset>: The color reset code.
-#       - <lastItemNumber>: The last item number displayed in the list.
-#       - <firstItemNumber>: The first item number displayed in the list.
-#       - <totalItems>: The total number of items in the list.
-#       - <filteredItems>: The number of items that match the filter.
-#       - <percentViewed>: The percentage of items viewed in the list.
-#
-#       (defaults to " <colorCount><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorCount><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> ")
-# - ${itemsCountFilteringString} _as string_:
-#       (optional) The string to display when the list is being filtered.
-#       (defaults to " <colorCount>Filtering…<colorReset> ")
 # - ${disableFiltering} _as bool_:
 #       (optional) If true, the items can't be filtered using list::filter.
 #       (defaults to false)
@@ -128,10 +109,9 @@ function list::setOptions() {
   # display modes
   _LIST_ITEM_HEIGHT="${itemHeight:-1}"
   _LIST_ENABLE_REVERSE_MODE="${enableReverseMode:-false}"
-  _LIST_DISABLE_ITEMS_COUNT="${disableItemsCount:-false}"
+  _LIST_DISABLE_HEADER="${disableHeader:-false}"
+  _LIST_DISABLE_FOOTER="${disableFooter:-false}"
   _LIST_DISABLE_RIGHT_SCROLLBAR="${disableScrollbar:-false}"
-  _LIST_DISABLE_TOP_SEPARATOR="${disableTopSeparator:-false}"
-  _LIST_SHOW_ITEMS_COUNT_AT_TOP="${showItemsCountAtTop:-false}"
 
   # left cursor
   if [[ ${disableCursor:-false} != "true" ]]; then
@@ -230,46 +210,48 @@ function list::setOptions() {
   _LIST_FILTER_USING_EXTERNAL_PROGRAM_THRESHOLD="${filterUsingExternalProgramThreshold:-1042}"
 
   # header/footer patterns
-  _LIST_HEAD_FOOT_USES_PATTERNS="false"
-  declare -A -g \
-    _LIST_HEAD_FOOT_PATTERNS=() \
-    _LIST_HEAD_FOOT_IS_STATIC=() \
-    _LIST_HEAD_FOOT_PATTERNS_INVISIBLE_CHARS_LENGTHS=() \
-    _LIST_HEAD_FOOT_STATIC_STRINGS_LENGTHS=()
-  local \
-    headerPattern="${headerPattern:-""}" \
-    footerPattern="${footerPattern:-" <colorHeader><filteringString><colorReset> || <colorHeader><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorHeader><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> "}"
-  # shellcheck disable=SC2034
-  local \
-    headerLeftPart="${headerPattern%%|*}" \
-    headerMiddlePart="${headerPattern#*|}" \
-    headerRightPart="${headerPattern##*|}" \
-    footerLeftPart="${footerPattern%%|*}" \
-    footerMiddlePart="${footerPattern#*|}" \
-    footerRightPart="${footerPattern##*|}"
-  headerMiddlePart="${headerMiddlePart%%|*}"
-  footerMiddlePart="${footerMiddlePart%%|*}"
-  local varName
-  for varName in headerLeftPart headerMiddlePart headerRightPart footerLeftPart footerMiddlePart footerRightPart; do
-    local pattern="${!varName}"
-    pattern="${pattern//"<colorHeader>"/"${STYLE_LIST_COUNT_NUMBER}"}"
-    pattern="${pattern//"<colorFrame>"/"${STYLE_LIST_FRAME}"}"
-    pattern="${pattern//"<colorReset>"/"${STYLE_RESET}"}"
+  if [[ ${_LIST_DISABLE_HEADER} != "true" || ${_LIST_DISABLE_FOOTER} != "true" ]]; then
+    _LIST_HEAD_FOOT_USES_PATTERNS="false"
+    declare -A -g \
+      _LIST_HEAD_FOOT_PATTERNS=() \
+      _LIST_HEAD_FOOT_IS_STATIC=() \
+      _LIST_HEAD_FOOT_PATTERNS_INVISIBLE_CHARS_LENGTHS=() \
+      _LIST_HEAD_FOOT_STATIC_STRINGS_LENGTHS=()
+    local \
+      headerPattern="${headerPattern:-""}" \
+      footerPattern="${footerPattern:-" <colorHeader><filteringString><colorReset> || <colorHeader><firstItemNumber><colorFrame>-<lastItemNumber> of <colorReset><colorHeader><filteredItems><colorReset><colorFrame>/<totalItems><colorReset> "}"
+    # shellcheck disable=SC2034
+    local \
+      headerLeftPart="${headerPattern%%|*}" \
+      headerMiddlePart="${headerPattern#*|}" \
+      headerRightPart="${headerPattern##*|}" \
+      footerLeftPart="${footerPattern%%|*}" \
+      footerMiddlePart="${footerPattern#*|}" \
+      footerRightPart="${footerPattern##*|}"
+    headerMiddlePart="${headerMiddlePart%%|*}"
+    footerMiddlePart="${footerMiddlePart%%|*}"
+    local varName
+    for varName in headerLeftPart headerMiddlePart headerRightPart footerLeftPart footerMiddlePart footerRightPart; do
+      local pattern="${!varName}"
+      pattern="${pattern//"<colorHeader>"/"${STYLE_LIST_COUNT_NUMBER}"}"
+      pattern="${pattern//"<colorFrame>"/"${STYLE_LIST_FRAME}"}"
+      pattern="${pattern//"<colorReset>"/"${STYLE_RESET}"}"
 
-    local visibleCharacters="${pattern}"
-    string::removeTextFormatting visibleCharacters
+      local visibleCharacters="${pattern}"
+      string::removeTextFormatting visibleCharacters
 
-    _LIST_HEAD_FOOT_PATTERNS["${varName}"]="${pattern}"
-    if [[ ${pattern} == *"<"* ]]; then
-      _LIST_HEAD_FOOT_USES_PATTERNS="true"
-      _LIST_HEAD_FOOT_IS_STATIC["${varName}"]="false"
-      _LIST_HEAD_FOOT_PATTERNS_INVISIBLE_CHARS_LENGTHS["${varName}"]=$((${#pattern} - ${#visibleCharacters}))
-    else
-      _LIST_HEAD_FOOT_IS_STATIC["${varName}"]="true"
-      _LIST_HEAD_FOOT_STATIC_STRINGS_LENGTHS["${varName}"]=${#visibleCharacters}
-    fi
-  done
-  _LIST_FILTERING_STRING="${filteringString:-"Filtering…"}"
+      _LIST_HEAD_FOOT_PATTERNS["${varName}"]="${pattern}"
+      if [[ ${pattern} == *"<"* ]]; then
+        _LIST_HEAD_FOOT_USES_PATTERNS="true"
+        _LIST_HEAD_FOOT_IS_STATIC["${varName}"]="false"
+        _LIST_HEAD_FOOT_PATTERNS_INVISIBLE_CHARS_LENGTHS["${varName}"]=$((${#pattern} - ${#visibleCharacters}))
+      else
+        _LIST_HEAD_FOOT_IS_STATIC["${varName}"]="true"
+        _LIST_HEAD_FOOT_STATIC_STRINGS_LENGTHS["${varName}"]=${#visibleCharacters}
+      fi
+    done
+    _LIST_FILTERING_STRING="${filteringString:-"Filtering…"}"
+  fi
 
   list::requestRedraw
 }
@@ -309,6 +291,23 @@ function list::setViewport() {
   _LIST_ITEM_WIDTH="$((_LIST_WIDTH - _LIST_SYMBOL_LEFT_LENGTH - _LIST_SYMBOL_RIGHT_LENGTH))"
   printf -v _LIST_BLANKS_WIDTH "%${_LIST_WIDTH}s" " "
   printf -v _LIST_BLANKS_ITEM_WIDTH "%${_LIST_ITEM_WIDTH}s" " "
+
+  _LIST_NB_USABLE_LINES_FOR_ITEMS="${_LIST_HEIGHT}"
+  _LIST_BOTTOM_SHIFT=0
+  _LIST_TOP_SHIFT=0
+
+  if [[ ${_LIST_DISABLE_HEADER} != "true" ]]; then
+    _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
+    _LIST_TOP_SHIFT=$((_LIST_TOP_SHIFT + 1))
+  fi
+  if [[ ${_LIST_DISABLE_FOOTER} != "true" ]]; then
+    _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
+    _LIST_BOTTOM_SHIFT=$((_LIST_BOTTOM_SHIFT + 1))
+  fi
+
+  _LIST_NB_DISPLAYABLE_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
+
+  _LIST_PREVIOUS_LINES=()
 
   list::requestRedraw
 }
@@ -390,11 +389,7 @@ function list::requestRedraw() {
 
 # Draw the list box.
 function list::draw() {
-  local finalStringToPrint=""
-  log::info "start drawing"
-  if [[ ${_LIST_DISABLE_TOP_SEPARATOR} != "true" ]]; then
-    list::drawTopSeparator finalStringToPrint
-  fi
+  local -a lines=()
 
   # calculate the size and position of the scroll bar
   if [[ ${_LIST_DISABLE_RIGHT_SCROLLBAR} != "true" ]]; then
@@ -410,29 +405,65 @@ function list::draw() {
     fi
   fi
 
-  list::drawItems finalStringToPrint "${firstLineWithScrollBar:-"-1"}" "${linesWithScrollBar:-"-1"}"
+  list::drawItems lines "${firstLineWithScrollBar:-"-1"}" "${linesWithScrollBar:-"-1"}"
 
-  if [[ ${_LIST_DISABLE_ITEMS_COUNT} != "true" ]]; then
-    list::drawCounter finalStringToPrint
+  # compute the placeholder values
+  if [[ ${_LIST_HEAD_FOOT_USES_PATTERNS} == "true" ]]; then
+    local \
+      lastItemNumber=$((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYED_ITEMS - 1)) \
+      firstItemNumber \
+      totalItems="${_LIST_ORIGINAL_ITEMS_COUNT}" \
+      filteredItems \
+      percentViewed=$((_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS > 0 ? (_LIST_FILTERED_ITEMS_START_INDEX * 100) / (_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS) : 100))
+
+    if ((lastItemNumber < 0)); then
+      lastItemNumber=0
+    fi
+    printf -v firstItemNumber "%0${#lastItemNumber}i" "${_LIST_FILTERED_ITEMS_START_INDEX}"
+    printf -v filteredItems "%0${#totalItems}i" "${#_LIST_FILTERED_ITEMS[@]}"
+
+    # shellcheck disable=SC2016
+    _LIST_HEAD_FOOT_PLACEHOLDER_REPLACEMENTS_STATEMENT='
+    part="${part//"<lastItemNumber>"/"'"${lastItemNumber}"'"}"
+    part="${part//"<firstItemNumber>"/"'"${firstItemNumber}"'"}"
+    part="${part//"<totalItems>"/"'"${totalItems}"'"}"
+    part="${part//"<filteredItems>"/"'"${filteredItems}"'"}"
+    part="${part//"<percentViewed>"/"'"${percentViewed}%"'"}"
+    part="${part//"<filteringString>"/"'"${_LIST_FILTERING_STRING}"'"}"
+    '
   fi
 
-  list::drawHeaderOrFooter finalStringToPrint footer
+  if [[ ${_LIST_DISABLE_HEADER} != "true" ]]; then
+    list::drawHeaderOrFooter lines header
+  fi
+  if [[ ${_LIST_DISABLE_FOOTER} != "true" ]]; then
+    list::drawHeaderOrFooter lines footer
+  fi
 
-  # TODO: possible improvement: instead of appending to toString, append to an array and compare each line to the previous one to avoid redrawing unchanged lines
-  # Can be tested with a benchmark and 1000 draw calls
+  # compare with previous draw to avoid flickering
+  local -i index maxLength=${#_LIST_PREVIOUS_LINES[@]}
+  if ((maxLength > ${#lines[@]})); then
+    maxLength=${#lines[@]}
+  fi
+  for ((index = 0; index < maxLength; index++)); do
+    if [[ ${lines[index]} == "${_LIST_PREVIOUS_LINES[index]:-}" ]]; then
+      lines[index]=''
+    fi
+  done
+  _LIST_PREVIOUS_LINES=("${lines[@]}")
 
-  log::info "end drawing"
-  printf '%s%s%s' "${ESC__CURSOR_HIDE}" "${finalStringToPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
-  log::info "drew"
+  local IFS=''
+  printf '%s%s%s' "${ESC__CURSOR_HIDE}" "${lines[*]}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 # Draw the autocompletion box
 function list::drawItems() {
-  local -n toPrint="${1}"
+  local -n linesToPrint="${1}"
   local -i \
     firstLineWithScrollBar="${2:-0}" \
     linesWithScrollBar="${3:-0}"
 
+  local toPrint=""
   local -i line \
     index=${_LIST_FILTERED_ITEMS_START_INDEX}
 
@@ -490,6 +521,8 @@ function list::drawItems() {
   if ((_LIST_NB_DISPLAYED_ITEMS == 0)); then
     toPrint+="${ESC__CURSOR_MOVE__}$((_LIST_TOP + _LIST_NB_USABLE_LINES_FOR_ITEMS / 2));$((_LIST_LEFT + _LIST_WIDTH / 2 - _LIST_EMPTY_LIST_TEXT_LENGTH / 2))${__ESC__TO}${STYLE_LIST_UNSELECTED_ITEM}${_LIST_EMPTY_LIST_TEXT}${STYLE_RESET}"
   fi
+
+  linesToPrint+=("${toPrint}")
 }
 
 # ## list_appendSingleLineItemDisplayString (private)
@@ -572,38 +605,11 @@ function list_appendMultiLineItemDisplayString() {
   _LIST_FILTER_STRING="${savedFilterString}"
 }
 
-# Draw the items count at the bottom/top of the list.
+# Draw the header or footer.
 function list::drawHeaderOrFooter() {
-  local -n toPrint="${1}"
+  # shellcheck disable=SC2178
+  local -n linesToPrint="${1}"
   local headerOrFooter="${2}"
-
-  log::info "start"
-
-  # compute the placeholder values
-  if [[ ${_LIST_HEAD_FOOT_USES_PATTERNS} == "true" ]]; then
-    local \
-      lastItemNumber=$((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYED_ITEMS - 1)) \
-      firstItemNumber \
-      totalItems="${_LIST_ORIGINAL_ITEMS_COUNT}" \
-      filteredItems \
-      percentViewed=$((_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS > 0 ? (_LIST_FILTERED_ITEMS_START_INDEX * 100) / (_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS) : 100))
-
-    if ((lastItemNumber < 0)); then
-      lastItemNumber=0
-    fi
-    printf -v firstItemNumber "%0${#lastItemNumber}i" "${_LIST_FILTERED_ITEMS_START_INDEX}"
-    printf -v filteredItems "%0${#totalItems}i" "${#_LIST_FILTERED_ITEMS[@]}"
-
-    # shellcheck disable=SC2016
-    _LIST_HEAD_FOOT_PLACEHOLDER_REPLACEMENTS_STATEMENT='
-    part="${part//"<lastItemNumber>"/"'"${lastItemNumber}"'"}"
-    part="${part//"<firstItemNumber>"/"'"${firstItemNumber}"'"}"
-    part="${part//"<totalItems>"/"'"${totalItems}"'"}"
-    part="${part//"<filteredItems>"/"'"${filteredItems}"'"}"
-    part="${part//"<percentViewed>"/"'"${percentViewed}%"'"}"
-    part="${part//"<filteringString>"/"'"${_LIST_FILTERING_STRING}"'"}"
-    '
-  fi
 
   local partName part
   local -a parts=() partWidths=()
@@ -619,33 +625,31 @@ function list::drawHeaderOrFooter() {
     fi
   done
 
-  local IFS='|'
+  local IFS='|' savedItemWidth="${_LIST_ITEM_WIDTH}"
 
-  log::info "partWidths: ${partWidths[*]}"
-  log::info "parts: ${parts[*]}"
-
-  string::getFormattedHeader "part0|part1|part2" \
+  string::getFormattedHeader "^|#|$" \
     width="$((_LIST_WIDTH - _LIST_SYMBOL_LEFT_LENGTH - _LIST_SYMBOL_RIGHT_LENGTH))" \
     paddingChar="${_LIST_SYMBOL_FRAME_HR}" \
     paddingStyle="${_LIST_STYLE_FRAME}" \
     paddingStyleReset="${STYLE_RESET}" \
-    partWidths="${partWidths[*]}"
+    partWidths="${partWidths[*]}" \
+    noEllipsis=true
 
-  local finalString="${REPLY}"
+  local finalString="${REPLY}" partToReplace="^#$"
   for partName in 0 1 2; do
     if ((partWidths[partName] == REPLY_ARRAY[partName])); then
       # enough space to fit the whole part
-      finalString="${finalString/"part${partName}"/"${parts[partName]}"}"
+      finalString="${finalString/"${partToReplace:partName:1}"/"${parts[partName]}"}"
     else
       _LIST_CURRENT_ITEM="${parts[partName]}"
       _LIST_ITEM_WIDTH="${REPLY_ARRAY[partName]}"
       _LIST_FILTER_STRING=""
       list::getCurrentItemDisplayableString
-      finalString="${finalString/"part${partName}"/"${_LIST_CURRENT_ITEM}"}"
+      finalString="${finalString/"${partToReplace:partName:1}"/"${_LIST_CURRENT_ITEM}"}"
     fi
   done
 
-  log::info "REPLY: ${finalString}"
+  _LIST_ITEM_WIDTH="${savedItemWidth}"
 
   local showAtLine leftSymbol rightSymbol
   if [[ ${headerOrFooter} == "header" ]]; then
@@ -658,81 +662,7 @@ function list::drawHeaderOrFooter() {
     rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_BOTTOM}"
   fi
 
-  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${_LIST_STYLE_FRAME}${leftSymbol}${STYLE_RESET}${finalString}${_LIST_STYLE_FRAME}${rightSymbol}${STYLE_RESET}"
-}
-
-# Draw the items count at the bottom/top of the list.
-function list::drawCounter() {
-  local -n toPrint="${1}"
-
-  local -i \
-    itemCounterLength \
-    counterAvailableLength=$((_LIST_WIDTH - _LIST_SYMBOL_LEFT_LENGTH - _LIST_SYMBOL_RIGHT_LENGTH))
-  local itemsCounterString
-  if ((_LIST_ORIGINAL_ITEMS_COUNT == 0)); then
-    itemsCounterString=""
-    itemCounterLength=0
-  elif [[ ${_LIST_ASYNC_FILTERING_RUNNING:-} == "true" ]]; then
-    # case where we are filtering asynchronously, we display a loading message
-    itemsCounterString=" ${_LIST_ITEMS_COUNT_FILTERING_STRING}"
-    itemCounterLength=${_LIST_ITEMS_COUNT_FILTERING_STRING_LENGTH}
-  else
-    local lastItemNumber=$((_LIST_FILTERED_ITEMS_START_INDEX + _LIST_NB_DISPLAYED_ITEMS - 1))
-    if ((lastItemNumber < 0)); then
-      lastItemNumber=0
-    fi
-    printf -v firstItemNumber "%0${#lastItemNumber}i" "${_LIST_FILTERED_ITEMS_START_INDEX}"
-    local totalItems="${_LIST_ORIGINAL_ITEMS_COUNT}"
-    printf -v filteredItems "%0${#totalItems}i" "${#_LIST_FILTERED_ITEMS[@]}"
-    local percentViewed=$((_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS > 0 ? (_LIST_FILTERED_ITEMS_START_INDEX * 100) / (_LIST_ORIGINAL_ITEMS_COUNT - _LIST_NB_DISPLAYED_ITEMS) : 100))
-
-    local itemsCounterString="${_LIST_ITEMS_COUNT_PATTERN//"<lastItemNumber>"/"${lastItemNumber}"}"
-    itemsCounterString="${itemsCounterString//"<firstItemNumber>"/"${firstItemNumber}"}"
-    itemsCounterString="${itemsCounterString//"<totalItems>"/"${totalItems}"}"
-    itemsCounterString="${itemsCounterString//"<filteredItems>"/"${filteredItems}"}"
-    itemsCounterString="${itemsCounterString//"<percentViewed>"/"${percentViewed}%"}"
-
-    itemCounterLength=$((${#itemsCounterString} - _LIST_ITEMS_COUNT_PATTERN_INVISIBLE_CHARS_LENGTH))
-  fi
-
-  if ((itemCounterLength > counterAvailableLength)); then
-    # case where we do not have the space to display the count
-    itemCounterLength=0
-    itemsCounterString=""
-  fi
-
-  local showAtLine leftSymbol rightSymbol
-  if [[ ${_LIST_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
-    showAtLine=${_LIST_TOP}
-    leftSymbol="${_LIST_SYMBOL_LEFT_SEPARATOR_TOP}"
-    rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_TOP}"
-  else
-    showAtLine=$((_LIST_TOP + _LIST_HEIGHT - 1))
-    leftSymbol="${_LIST_SYMBOL_LEFT_SEPARATOR_BOTTOM}"
-    rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_BOTTOM}"
-  fi
-
-  local counterFrame="${_LIST_BLANKS_WIDTH:0:counterAvailableLength-itemCounterLength}"
-
-  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${_LIST_STYLE_FRAME}${leftSymbol}${counterFrame// /"${_LIST_SYMBOL_FRAME_HR}"}${STYLE_RESET}${itemsCounterString}${_LIST_STYLE_FRAME}${rightSymbol}${STYLE_RESET}"
-}
-
-# Draw the scroll bar top separator.
-function list::drawTopSeparator() {
-  local -n toPrint="${1}"
-
-  local showAtLine leftSymbol rightSymbol
-  if [[ ${_LIST_SHOW_ITEMS_COUNT_AT_TOP:-false} != "true" ]]; then
-    showAtLine=${_LIST_TOP}
-    leftSymbol="${_LIST_SYMBOL_LEFT_SEPARATOR_TOP}"
-    rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_TOP}"
-  else
-    showAtLine=$((_LIST_TOP + _LIST_HEIGHT - 1))
-    leftSymbol="${_LIST_SYMBOL_LEFT_SEPARATOR_BOTTOM}"
-    rightSymbol="${_LIST_SYMBOL_RIGHT_SEPARATOR_BOTTOM}"
-  fi
-
-  toPrint+="${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${_LIST_STYLE_FRAME}${leftSymbol}${_LIST_BLANKS_ITEM_WIDTH// /"${_LIST_SYMBOL_FRAME_HR}"}${rightSymbol}${STYLE_RESET}"
+  linesToPrint+=("${ESC__CURSOR_MOVE__}${showAtLine};${_LIST_LEFT}${__ESC__TO}${_LIST_STYLE_FRAME}${leftSymbol}${STYLE_RESET}${finalString}${_LIST_STYLE_FRAME}${rightSymbol}${STYLE_RESET}")
 }
 
 # Clear the items box
@@ -1048,33 +978,6 @@ function list_filter() {
 }
 
 function list_post_filter() {
-  # check if we display the item count
-  _LIST_NB_USABLE_LINES_FOR_ITEMS="${_LIST_HEIGHT}"
-  _LIST_BOTTOM_SHIFT=0
-  _LIST_TOP_SHIFT=0
-
-  if [[ ${_LIST_DISABLE_ITEMS_COUNT} != "true" ]]; then
-    _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
-    # we display the items count at the top or bottom of the box
-    if [[ ${_LIST_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
-      _LIST_TOP_SHIFT=$((_LIST_TOP_SHIFT + 1))
-    else
-      _LIST_BOTTOM_SHIFT=$((_LIST_BOTTOM_SHIFT + 1))
-    fi
-  fi
-
-  if [[ ${_LIST_DISABLE_TOP_SEPARATOR} != "true" ]]; then
-    _LIST_NB_USABLE_LINES_FOR_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS - 1))
-    # we display the top separator
-    if [[ ${_LIST_SHOW_ITEMS_COUNT_AT_TOP:-false} == "true" ]]; then
-      _LIST_BOTTOM_SHIFT=$((_LIST_BOTTOM_SHIFT + 1))
-    else
-      _LIST_TOP_SHIFT=$((_LIST_TOP_SHIFT + 1))
-    fi
-  fi
-
-  _LIST_NB_DISPLAYABLE_ITEMS=$((_LIST_NB_USABLE_LINES_FOR_ITEMS / _LIST_ITEM_HEIGHT))
-
   # make sure to select an existing index regarding the filtered items +
   # make sure it is in the view
   list::changeSelectedItemIndex 0
