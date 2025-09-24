@@ -4,6 +4,10 @@
 
 # shellcheck source=lib-terminal
 source terminal
+# shellcheck source=lib-coproc
+source coproc
+# shellcheck source=lib-time
+source time
 
 # shellcheck disable=SC2317
 function tui::test() {
@@ -24,26 +28,39 @@ function tui::test() {
     printf "%s\n" "1s has elapsed" 1>&"${GLOBAL_FD_TUI}"
   }
 
-  onRedrawRequiredCallback=onRedrawRequired \
-  onEachLoopIterationCallback=onTick \
-  loopDelay=1.0 \
-  trackMouseButtonOnly=false \
-    tui::startMainLoop onKeyPress
+  tui::startMainLoop onKeyPress \
+    onRedrawRequiredCallback=onRedrawRequired \
+    onTickCallback=onTick \
+    tickDelay=1.0 \
+    trackAllMouseEvents=true
 }
 
 function tui::startMainLoop() {
-  local onKeyPressFunction="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local onEachLoopIterationFunction="${onEachLoopIterationCallback:-}"
-  local onRedrawRequiredFunction="${onRedrawRequiredCallback:-}"
-  local loopDelay="${loopDelay:-0.5}"
-  local _TUI_TRACK_MOUSE_BUTTON_ONLY="${trackMouseButtonOnly:-false}"
-  local _TUI_KEY_BINDINGS_PREFIX=":"
+  local \
+    onKeyPressCallback="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    onTickCallback="" \
+    onRedrawRequiredCallback="" \
+    tickDelay=0.5 \
+    trackAllMouseEvents=false \
+    keyBindingsPrefix=":"
+  shift 1
+  eval "local a= ${*@Q}"
 
-  if ! declare -F "${onKeyPressFunction}" &>/dev/null; then
-    core::fail "The on key press callback function ⌜${onKeyPressFunction}⌝ does not exist."
+  local \
+    _TUI_TRACK_ALL_MOUSE_EVENTS="${trackAllMouseEvents}" \
+    _TUI_KEY_BINDINGS_PREFIX="${keyBindingsPrefix}"
+
+  time::getSecondsToMicroseconds tickDelay
+  local tickDelayMicroseconds="${REPLY}"
+
+  if ! declare -F "${onKeyPressCallback}" &>/dev/null; then
+    core::fail "The on key press callback function ⌜${onKeyPressCallback}⌝ does not exist."
   fi
-  if [[ -n ${onEachLoopIterationFunction} ]] && ! declare -F "${onEachLoopIterationFunction}" &>/dev/null; then
-    core::fail "The on each loop iteration callback function ⌜${onEachLoopIterationFunction}⌝ does not exist."
+  if [[ -n ${onTickCallback} ]] && ! declare -F "${onTickCallback}" &>/dev/null; then
+    core::fail "The on each loop iteration callback function ⌜${onTickCallback}⌝ does not exist."
+  fi
+  if [[ -n ${onRedrawRequiredCallback} ]] && ! declare -F "${onRedrawRequiredCallback}" &>/dev/null; then
+    core::fail "The on redraw required callback function ⌜${onRedrawRequiredCallback}⌝ does not exist."
   fi
 
   # setup the terminal to be ready for readline
@@ -55,27 +72,33 @@ function tui::startMainLoop() {
 
   # shellcheck disable=SC2034
   GLOBAL_WARN_ON_INTERRUPT_DISABLED=true
-  GLOBAL_SCREEN_REDRAW_REQUIRED=false
+  GLOBAL_SCREEN_REDRAW_REQUIRED=true
 
   local -i nbCoprocRestart=0
   local IFS=" "
 
   # main loop
   while [[ -t ${GLOBAL_FD_TUI} ]]; do
-    # call the on each loop iteration callback function if defined
-    if [[ -n ${onEachLoopIterationFunction} ]] && ! "${onEachLoopIterationFunction}"; then
-      log::debug "The on each loop iteration callback function ⌜${onEachLoopIterationFunction}⌝ returned non-zero exit code, stopping the main loop."
-      break
-    fi
-
     # call the on redraw required callback function if defined
-    if [[ ${GLOBAL_SCREEN_REDRAW_REQUIRED} == "true" && -n ${onRedrawRequiredFunction} ]]; then
-      "${onRedrawRequiredFunction}"
+    if [[ ${GLOBAL_SCREEN_REDRAW_REQUIRED} == "true" && -n ${onRedrawRequiredCallback} ]]; then
+      "${onRedrawRequiredCallback}"
       GLOBAL_SCREEN_REDRAW_REQUIRED=false
     fi
 
-    # restart coproc if it is not running
-    if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER_PID ]]; then
+    # call the on each loop iteration callback function if defined
+    if [[ -n ${onTickCallback} ]]; then
+      "${onTickCallback}"
+    fi
+
+    # read the key pressed from the key press listener coproc
+    if coproc::receiveMessage KEY_PRESS_LISTENER -t "${tickDelay}"; then
+      REPLY_CODE=0
+      "${onKeyPressCallback}" "${REPLY}"
+      if (( REPLY_CODE != 0)); then
+        log::debug "The on key press callback function ⌜${onKeyPressCallback}⌝ returned non-zero exit code, stopping the main loop."
+        break
+      fi
+    elif ! coproc::isRunning KEY_PRESS_LISTENER; then
       if (( nbCoprocRestart > 3 )); then
         log::error "Key press listener coproc is failing to start, check the logs for errors."
         break
@@ -84,53 +107,28 @@ function tui::startMainLoop() {
       tui_startKeyPressListener
       nbCoprocRestart+=1
     fi
-
-    # read the key pressed from the key press listener coproc
-    if { IFS=$'\0' read -t "${loopDelay}" -rd $'\0' -u "${_TUI_COPROC_KEY_PRESS_LISTENER[0]}" LAST_KEY_PRESSED; } 2>/dev/null; then
-      if ! "${onKeyPressFunction}" "${LAST_KEY_PRESSED}"; then
-        log::debug "The on key press callback function ⌜${onKeyPressFunction}⌝ returned non-zero exit code, stopping the main loop."
-        break
-      fi
-    fi
   done
 
   unset -v GLOBAL_WARN_ON_INTERRUPT_DISABLED
 
-  tui_stopKeyPressListener
+  coproc::kill KEY_PRESS_LISTENER
   terminal::restoreLogs
   terminal::restoreSettings
 }
 
 function tui_startKeyPressListener() {
   # if the key press listener is not already running, we start it
-  if [[ ! -v _TUI_COPROC_KEY_PRESS_LISTENER ]]; then
-    if [[ ! -v _TUI_USER_INPUT_FD ]]; then
-      exec {_TUI_USER_INPUT_FD}<&0
-    fi
+  if ! coproc::isRunning KEY_PRESS_LISTENER; then
     log::debug "Starting key press listener coproc."
-    { coproc _TUI_COPROC_KEY_PRESS_LISTENER { tui_keyPressListener 2>&"${GLOBAL_FD_LOG}"; } } 2>/dev/null
-    # shellcheck disable=SC2034
-    GLOBAL_BACKGROUND_PROCESSES["KEY_PRESS_LISTENER"]="${_TUI_COPROC_KEY_PRESS_LISTENER_PID}"
+    coproc::run KEY_PRESS_LISTENER \
+      mainCommand=tui_keyPressListenerCoprocMain \
+      loopCommand=tui_keyPressListenerCoprocLoop \
+      onMessageCommand= \
+      waitForMainEnd=true
   fi
 }
 
-function tui_stopKeyPressListener() {
-  # if the key press listener is running, we stop it
-  if [[ -v _TUI_COPROC_KEY_PRESS_LISTENER_PID ]]; then
-    log::debug "Stopping key press listener coproc."
-    local pid="${_TUI_COPROC_KEY_PRESS_LISTENER_PID}"
-    kill "${pid}" &>/dev/null || :
-    unset _TUI_COPROC_KEY_PRESS_LISTENER _TUI_COPROC_KEY_PRESS_LISTENER_PID
-    unset -v "GLOBAL_BACKGROUND_PROCESSES[KEY_PRESS_LISTENER]"
-  else
-    log::debug "Key press listener coproc is not running."
-  fi
-}
-
-function tui_keyPressListener() {
-  # we are inside a coproc, init the subshell correctly
-  core::initSubshell
-
+function tui_keyPressListenerCoprocMain() {
   # rebind some keys to call the callback function
   terminal::rebindKeymap tui_keyPressListener_handleKeyBinding
 
@@ -142,40 +140,39 @@ function tui_keyPressListener() {
 
   # enable mouse tracking
   # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Normal-tracking-mode
-  if [[ ${_TUI_TRACK_MOUSE_BUTTON_ONLY} == "true" ]]; then
-    printf "%s" "${ESC__ENABLE_MOUSE_BUTTON_TRACKING}" 1>&"${GLOBAL_FD_TUI}"
-  else
+  if [[ ${_TUI_TRACK_ALL_MOUSE_EVENTS} == "true" ]]; then
     printf "%s" "${ESC__ENABLE_MOUSE_ANY_EVENT_TRACKING}" 1>&"${GLOBAL_FD_TUI}"
+  else
+    printf "%s" "${ESC__ENABLE_MOUSE_BUTTON_TRACKING}" 1>&"${GLOBAL_FD_TUI}"
   fi
   bind -x '"\e[<": tui_keyPressListener_handleMouseEvent'
   _TUI_RECEIVED_MOUSE_EVENT=false
+}
 
-  while [[ -t ${_TUI_USER_INPUT_FD} ]] && kill -0 "${GLOBAL_PROGRAM_MAIN_PID}" 2>/dev/null; do
-    if terminal::waitForKeyPress -u "${_TUI_USER_INPUT_FD}"; then
-
-      if [[ ${_TUI_RECEIVED_MOUSE_EVENT} == "true" ]]; then
-        # we received a mouse event, we need to parse it
-        tui_keyPressListener_parseMouseEvent "${LAST_KEY_PRESSED}${PREVIOUS_KEY_PRESSED_EXTRA_CHARS%%$'\e'*}"
-        PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
-        _TUI_RECEIVED_MOUSE_EVENT=false
-        continue
-      fi
-
-      if [[ ${_TUI_RECEIVED_PASTE_EVENT} == "true" ]]; then
-        # the user is pasting text, we handle it; pasted text will end with \e[201~
-        printf "%s%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "PASTE" "=${LAST_KEY_PRESSED}${PREVIOUS_KEY_PRESSED_EXTRA_CHARS%%$'\e[201~'}"
-        PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
-        _TUI_RECEIVED_PASTE_EVENT=false
-        continue
-      fi
-
-      case ${LAST_KEY_PRESSED} in
-      $'\r') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "ENTER" ;;
-      $'\n') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "CTRL+ENTER" ;;
-      $'\t') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "TAB" ;;
-      *) printf "%s\0" "${LAST_KEY_PRESSED}" ;;
-      esac
+function tui_keyPressListenerCoprocLoop() {
+  while terminal::waitForKeyPress -u "${GLOBAL_FD_ORIGINAL_STDIN}"; do
+    if [[ ${_TUI_RECEIVED_MOUSE_EVENT} == "true" ]]; then
+      # we received a mouse event, we need to parse it
+      tui_keyPressListener_parseMouseEvent "${LAST_KEY_PRESSED}${PREVIOUS_KEY_PRESSED_EXTRA_CHARS%%$'\e'*}"
+      PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
+      _TUI_RECEIVED_MOUSE_EVENT=false
+      continue
     fi
+
+    if [[ ${_TUI_RECEIVED_PASTE_EVENT} == "true" ]]; then
+      # the user is pasting text, we handle it; pasted text will end with \e[201~
+      printf "%s%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "PASTE" "=${LAST_KEY_PRESSED}${PREVIOUS_KEY_PRESSED_EXTRA_CHARS%%$'\e[201~'}"
+      PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
+      _TUI_RECEIVED_PASTE_EVENT=false
+      continue
+    fi
+
+    case ${LAST_KEY_PRESSED} in
+    $'\r') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "ENTER" ;;
+    $'\n') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "CTRL+ENTER" ;;
+    $'\t') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "TAB" ;;
+    *) printf "%s\0" "${LAST_KEY_PRESSED}" ;;
+    esac
   done
 }
 

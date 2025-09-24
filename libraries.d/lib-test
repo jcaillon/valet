@@ -538,6 +538,35 @@ function test::setTerminalInputs() {
   TEST_TERMINAL_INPUTS=("${@}")
 }
 
+# ## test::setProgramElapsedFunction (private)
+#
+# Sets properties for the mocked `time::getProgramElapsedMicroseconds` function.
+#
+# - $1: **current value** _as int_:
+#       The current elapsed time in microseconds.
+# - ${increment} _as int_:
+#       The increment to add to the elapsed time at each call.
+# - ${incrementIncrement} _as int_:
+#       The increment to add to the increment at each call.
+#
+# ```bash
+# test::setProgramElapsedFunction currentValue=0 increment=1000000 incrementIncrement=1000000
+# ```
+# shellcheck disable=SC2034
+function test::setProgramElapsedFunction() {
+  local \
+    currentValue="${1:-0}" \
+    increment="1000000" \
+    incrementIncrement="1000000" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
+  GLOBAL_FAKE_TIME="${currentValue}"
+  GLOBAL_FAKE_TIME_INCREMENT="${increment}"
+  GLOBAL_FAKE_TIME_INCREMENT_INCREMENT="${incrementIncrement}"
+}
+
 # ## test::setTestCallStack (private)
 #
 # This function is used to set the call stack for the tests.

@@ -424,10 +424,11 @@ function trap::killBackgroundProcesses() {
     fi
   done
 
-  # send SIGHUP to all background processes to terminate them
+  # send SIGINT and SIGHUP to all background processes to terminate them
   for coprocName in "${!GLOBAL_BACKGROUND_PROCESSES[@]}"; do
     coprocPid="${GLOBAL_BACKGROUND_PROCESSES[${coprocName}]:-}"
     log::debug "Killing background process ${coprocName} with PID ${coprocPid}."
+    kill -INT "${coprocPid}" &>/dev/null || :
     kill -HUP "${coprocPid}" &>/dev/null || :
   done
 
@@ -483,17 +484,6 @@ function trap::killBackgroundProcesses() {
 # > - coproc and jobs will not get SIGHUP when the main process ends and they will continue to execute
 # >   until killed or until they check that the main process is dead.
 function trap::registerSubshell() {
-  if ((BASH_SUBSHELL == 0)); then
-    core::fail "This function should only be called in a subshell."
-  fi
-
-  # in case we are in a subshell called within a bash::catchErrors, we reset errexit and not longer catch errors
-  unset -v GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED
-  set -o errexit
-
-  # reset the background processes
-  declare -g -A GLOBAL_BACKGROUND_PROCESSES=() GLOBAL_BACKGROUND_PROCESSES_LOGS=()
-
   trap '_TRAP_SUBSHELL_EXIT_REASON=ERROR trap::onErrorInternal' ERR
   trap trap::onSubshellExitInternal EXIT
   # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler

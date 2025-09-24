@@ -197,7 +197,7 @@ function coproc::runInParallel() {
 #
 # - Run a main command (mainCommand) that is run once at the start of the coproc.
 # - Loop until the main thread or the coproc exits. Inside the loop, the coproc can receive messages
-#   from the main thread. In the loop, more commands are run:
+#   from the main thread, and more commands are run:
 #   - A loop command (loopCommand) is run at the beginning of each iteration of the loop.
 #   - An on message command (onMessageCommand) is run when a message is received from the main thread.
 # - Finally, it runs an end command (endCommand) once at the end of the coproc.
@@ -268,7 +268,7 @@ function coproc::run() {
   shift 1
   eval "local a= ${*@Q}"
 
-  if [[ -v "GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}]" ]]; then
+  if [[ -v "GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}]" ]] && coproc::isRunning "${coprocVarName}"; then
     core::fail "The coproc ⌜${coprocVarName}⌝ is already running."
   fi
 
@@ -414,6 +414,8 @@ function coproc::sendMessage() {
 #
 # - $1: **coproc variable name** _as string_:
 #       The variable name to use for the coproc.
+# - $@: read parameters _as any_:
+#       The arguments to pass to the read command (e.g. -t for timeout).
 #
 # Returns:
 #
@@ -429,10 +431,11 @@ function coproc::sendMessage() {
 # ```
 function coproc::receiveMessage() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  shift 1
 
   REPLY=""
   if eval "local coprocFd=\${${coprocVarName}[0]:-}" && [[ -n ${coprocFd} ]]; then
-    if { IFS=$'\0' read -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
+    if { IFS=$'\0' read "$@" -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
       return 0
     fi
   fi

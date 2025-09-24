@@ -451,7 +451,7 @@ function terminal::testWaitForChar() {
 # to be set using `terminal::setRawMode`.
 #
 #
-# - $@: **read parameters** _as any_:
+# - $@: read parameters _as any_:
 #       additional parameters to pass to the read command
 #
 # Returns:
@@ -535,7 +535,7 @@ function terminal::waitForChar() {
 # You must call `terminal::rebindKeymap` and `terminal::setRawMode` before using this function.
 # You should use `tui::start` instead of using this function directly.
 #
-# - $@: **read parameters** _as any_:
+# - $@: read parameters _as any_:
 #       additional parameters to pass to the read command
 #
 # Returns:

@@ -1,6 +1,64 @@
 # Test suite lib-time
 
-## Test script 00.tests
+## Test script 00.lib-time
+
+### ✅ Testing time::isTimeElapsed function
+
+❯ `time::isTimeElapsed 1900000`
+
+Returned code: `1`
+
+❯ `time::isTimeElapsed 1900000`
+
+Returned code: `1`
+
+❯ `time::isTimeElapsed 1900000`
+
+### ✅ Testing time::isTimeElapsed called from a different function
+
+### ✅ Testing time::isTimeElapsed using timerName
+
+### ✅ Testing time::getSecondsToMicroseconds function
+
+❯ `time::getSecondsToMicroseconds 987`
+
+Returned variables:
+
+```text
+REPLY='987000000'
+```
+
+❯ `time::getSecondsToMicroseconds 1.5`
+
+Returned variables:
+
+```text
+REPLY='1500000'
+```
+
+❯ `time::getSecondsToMicroseconds 1.234567`
+
+Returned variables:
+
+```text
+REPLY='1234567'
+```
+
+❯ `time::getSecondsToMicroseconds 33.00405`
+
+Returned variables:
+
+```text
+REPLY='33004050'
+```
+
+❯ `time::getSecondsToMicroseconds 1234567890.123456`
+
+Returned variables:
+
+```text
+REPLY='1234567890123456'
+```
 
 ### ✅ Testing time::getMicrosecondsToSeconds function
 
@@ -53,7 +111,7 @@ REPLY='1234.567890'
 Returned variables:
 
 ```text
-REPLY='2000000'
+REPLY='1000000'
 ```
 
 ❯ `time::getTimerMicroseconds logElapsedTime=true`
@@ -61,13 +119,13 @@ REPLY='2000000'
 **Error output**:
 
 ```text
-INFO     Elapsed time: 5.000s
+INFO     Elapsed time: 2.000s
 ```
 
 Returned variables:
 
 ```text
-REPLY='5000000'
+REPLY='2000000'
 ```
 
 ❯ `time::getTimerMicroseconds format=%L logElapsedTime=true`
@@ -75,13 +133,13 @@ REPLY='5000000'
 **Error output**:
 
 ```text
-INFO     Elapsed time: 9000
+INFO     Elapsed time: 3000
 ```
 
 Returned variables:
 
 ```text
-REPLY='9000000'
+REPLY='3000000'
 ```
 
 ### ✅ Testing time::getDate

@@ -9,3 +9,8 @@ source "$(valet --source)"
 include tui
 
 tui::test
+
+panes=(
+  "_COPROC_NAME pane1_options" # first pane
+)
+pane1_options=(left=0 top=0 width=20 height=10 disableLeftBorder=false disableRightBorder=false disableTopBorder=false disableBottomBorder=false headerText="" footerText="")

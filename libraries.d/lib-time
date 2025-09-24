@@ -211,3 +211,85 @@ function time::getMicrosecondsToSeconds() {
     printf -v REPLY "0.%s" "${REPLY:0:${precision}}"
   fi
 }
+
+# ## time::getSecondsToMicroseconds
+#
+# Convert a seconds float to microseconds integer.
+# e.g. 1.234567 → 1234567
+#
+# - $1: **seconds** _as float_:
+#       the seconds to convert
+#
+# Returns:
+#
+# - ${REPLY}: The microseconds (integer number).
+#
+# ```bash
+# time::getSecondsToMicroseconds 1.234567
+# echo "${REPLY}"
+# ```
+function time::getSecondsToMicroseconds() {
+  local seconds="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  local integerPart="${seconds%%.*}"
+  local decimalPart="${seconds#*.}"
+  if [[ ${integerPart} == "${seconds}" ]]; then
+    decimalPart="0"
+  fi
+  printf -v decimalPart "%-06s" "${decimalPart}"
+  decimalPart="${decimalPart// /0}"
+  REPLY="$((integerPart * 1000000 + 10#${decimalPart:0:6}))"
+}
+
+# ## time::isTimeElapsed
+#
+# Check if a given time in microseconds has elapsed since the last call
+# to this function.
+#
+# - $1: **microseconds** _as int_:
+#       the microseconds to check
+# - ${timerName} _as int_:
+#       A variable name that will be used to store the last time this function was called.
+#       Defaults to the name of the calling function.
+#       Can be set to a fixed value if you call this function from different functions
+#       and want to share the same timer.
+#       (defaults to "${FUNCNAME[1]}")
+#
+# Returns:
+#
+# - 0 if the time has elapsed
+# - 1 if the time has not yet elapsed
+#
+# ```bash
+# if time::isTimeElapsed 500000; then
+#   echo "500ms has elapsed since the last call to this function"
+# fi
+# ```
+function time::isTimeElapsed() {
+  local \
+    microseconds="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    timerName="${FUNCNAME[1]:-main}" \
+    IFS=" "
+  shift 1
+  eval "local a= ${*@Q}"
+
+  timerName="${timerName//[^a-zA-Z0-9_]/_}"
+
+  local REPLY
+  time::getProgramElapsedMicroseconds
+
+  if [[ ! -v _TIME_IS_TIME_ELAPSED_${timerName} ]]; then
+    # initialize the variable to 0 if it does not exist
+    declare -g "_TIME_IS_TIME_ELAPSED_${timerName}=${REPLY}"
+    return 1
+  fi
+
+  local -n lastTime="_TIME_IS_TIME_ELAPSED_${timerName}"
+
+  if ((REPLY - lastTime >= microseconds)); then
+    lastTime="${REPLY}"
+    return 0
+  fi
+
+  return 1
+}

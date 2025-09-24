@@ -476,17 +476,33 @@ function core::createSavedFilePath() {
 # - Set the correct traps.
 # - Initialize specific temporary files/directories location.
 # - Reset the elapsed time to 0.
+# - Reset the background processes.
 #
 # ```bash
 # core::initSubshell
 # ```
 function core::initSubshell() {
-  trap::registerSubshell
-  fs::setupSubshellTempFileGlobalVariable
+  if ((BASH_SUBSHELL == 0)); then
+    core::fail "This function should only be called in a subshell."
+  fi
+
+  # in case we are in a subshell called within a bash::catchErrors, we reset errexit and not longer catch errors
+  unset -v GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED
+  set -o errexit
+
+  # reset the background processes
+  # shellcheck disable=SC2034
+  declare -g -A \
+    GLOBAL_BACKGROUND_PROCESSES=() \
+    GLOBAL_BACKGROUND_PROCESSES_LOGS=()
+
   # shellcheck disable=SC2034
   declare -g \
     GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%[.,]*}" \
     GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*[.,]}"
+
+  trap::registerSubshell
+  fs::setupSubshellTempFileGlobalVariable
 }
 
 # ## core::dump

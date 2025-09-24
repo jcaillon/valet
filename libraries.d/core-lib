@@ -40,9 +40,6 @@ function fs::setupTempFileGlobalVariable() {
 # of a subshell. We keep everything under a new directory named with the process ID;
 # the dir gets cleanup when the main process ends.
 function fs::setupSubshellTempFileGlobalVariable() {
-  if ((BASH_SUBSHELL == 0)); then
-    core::fail "This function should only be called in a subshell."
-  fi
   TMPDIR="${GLOBAL_TEMPORARY_DIRECTORY}/job-${BASHPID}"
   mkdir -p "${TMPDIR}" 1>/dev/null
   unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
