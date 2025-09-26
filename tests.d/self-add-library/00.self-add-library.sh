@@ -19,8 +19,8 @@ function main() {
   rm -rf resources/gitignored
 }
 
-function interactive::promptYesNo() {
-  echo "🙈 mocking interactive::promptYesNo $*"
+function interactive::confirm() {
+  echo "🙈 mocking interactive::confirm $*"
   return 0
 }
 

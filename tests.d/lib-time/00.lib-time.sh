@@ -7,11 +7,11 @@ function main() {
   test::setProgramElapsedFunction 0 increment=1000000 incrementIncrement=0
 
   test_time::isTimeElapsed
-  test_time::getSecondsToMicroseconds
-  test_time::getMicrosecondsToSeconds
+  test_time::getMicrosecondsFromSeconds
+  test_time::getSecondsFromMicroseconds
   test_time::startTimer
   test_time::getDate
-  test_time::getMicrosecondsToHuman
+  test_time::getHumanTimeFromMicroseconds
 }
 
 function test_time::isTimeElapsed() {
@@ -53,24 +53,24 @@ function test_time::isTimeElapsed() {
   test_time::isTimeElapsed_sub2
 }
 
-function test_time::getSecondsToMicroseconds() {
-  test::title "✅ Testing time::getSecondsToMicroseconds function"
+function test_time::getMicrosecondsFromSeconds() {
+  test::title "✅ Testing time::getMicrosecondsFromSeconds function"
 
-  test::func time::getSecondsToMicroseconds 987
-  test::func time::getSecondsToMicroseconds 1.5
-  test::func time::getSecondsToMicroseconds 1.234567
-  test::func time::getSecondsToMicroseconds 33.00405
-  test::func time::getSecondsToMicroseconds 1234567890.123456
+  test::func time::getMicrosecondsFromSeconds 987
+  test::func time::getMicrosecondsFromSeconds 1.5
+  test::func time::getMicrosecondsFromSeconds 1.234567
+  test::func time::getMicrosecondsFromSeconds 33.00405
+  test::func time::getMicrosecondsFromSeconds 1234567890.123456
 }
 
-function test_time::getMicrosecondsToSeconds() {
-  test::title "✅ Testing time::getMicrosecondsToSeconds function"
+function test_time::getSecondsFromMicroseconds() {
+  test::title "✅ Testing time::getSecondsFromMicroseconds function"
 
-  test::func time::getMicrosecondsToSeconds 1
-  test::func time::getMicrosecondsToSeconds 1000 precision=3
-  test::func time::getMicrosecondsToSeconds 1234567890
-  test::func time::getMicrosecondsToSeconds 1234567890 precision=3
-  test::func time::getMicrosecondsToSeconds 1234567890 precision=6
+  test::func time::getSecondsFromMicroseconds 1
+  test::func time::getSecondsFromMicroseconds 1000 precision=3
+  test::func time::getSecondsFromMicroseconds 1234567890
+  test::func time::getSecondsFromMicroseconds 1234567890 precision=3
+  test::func time::getSecondsFromMicroseconds 1234567890 precision=6
 }
 
 function test_time::startTimer() {
@@ -89,8 +89,8 @@ function test_time::getDate() {
   test::func time::getDate format="'%(%H:%M:%S)T'"
 }
 
-function test_time::getMicrosecondsToHuman() {
-  test::title "✅ Testing time::getMicrosecondsToHuman function"
+function test_time::getHumanTimeFromMicroseconds() {
+  test::title "✅ Testing time::getHumanTimeFromMicroseconds function"
 
   local -i ms=$((234 + 1000 * 2 + 1000000 * 3 + 1000000 * 60 * 4 + 1000000 * 60 * 60 * 5))
   local format="Hours: %HH
@@ -110,9 +110,9 @@ Total seconds: %S
 Total milliseconds: %L
 Total microseconds: %U"
   test::printVars format
-  test::func time::getMicrosecondsToHuman ${ms} format="\"\${format}\""
-  test::func time::getMicrosecondsToHuman ${ms}
-  test::func time::getMicrosecondsToHuman ${ms} format='%U'
+  test::func time::getHumanTimeFromMicroseconds ${ms} format="\"\${format}\""
+  test::func time::getHumanTimeFromMicroseconds ${ms}
+  test::func time::getHumanTimeFromMicroseconds ${ms} format='%U'
 }
 
 main

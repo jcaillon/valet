@@ -114,7 +114,7 @@ Thanks to the `self source` command, you can source Valet functions so they are 
 eval "$(valet self source -a)"
 
 log::info "Cool logs!"
-if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
+if interactive::confirm "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
 ```
 
 > [!NOTE]

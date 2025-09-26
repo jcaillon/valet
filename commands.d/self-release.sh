@@ -132,7 +132,7 @@ function selfRelease::createRelease() {
   local uploadExistingTag=false
   if [[ ${latestReleaseVersion} != "${lastLocalTag}" ]]; then
     log::info "The latest release on GitHub is ${latestReleaseVersion} but the local latest tag is ${lastLocalTag}."
-    if ! interactive::promptYesNo "Do you want to upload this tag (${lastLocalTag}) as a new version?" default=false; then
+    if ! interactive::confirm "Do you want to upload this tag (${lastLocalTag}) as a new version?" default=false; then
       core::fail "The release has been canceled."
     else
       uploadExistingTag=true
@@ -191,7 +191,7 @@ function selfRelease::createRelease() {
       log::success "The new version has been committed."
     fi
 
-    if ! interactive::promptYesNo "Do you want to continue with the release of version ${version}?" default=false; then
+    if ! interactive::confirm "Do you want to continue with the release of version ${version}?" default=false; then
       # reset to the original head
       if [[ "${dryRun:-}" != "true" ]]; then
         exe::invoke git reset --hard "${currentHead}"

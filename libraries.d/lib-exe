@@ -181,7 +181,7 @@ function exe::invoke() {
 
   time::getProgramElapsedMicroseconds
   local -i elapsed=$((REPLY - timerStart))
-  time::getMicrosecondsToSeconds "${elapsed}" precision=3
+  time::getSecondsFromMicroseconds "${elapsed}" precision=3
 
   local debugMessage="The command ${executable} ended with exit code ${exitCode} in ${REPLY}s."
 

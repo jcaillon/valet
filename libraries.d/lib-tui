@@ -52,8 +52,12 @@ function tui::startMainLoop() {
     _TUI_TRACK_ALL_MOUSE_EVENTS="${trackAllMouseEvents}" \
     _TUI_KEY_BINDINGS_PREFIX="${keyBindingsPrefix}"
 
-  time::getSecondsToMicroseconds "${tickDelay}"
+  time::getMicrosecondsFromSeconds "${tickDelay}"
   local tickDelayMicroseconds="${REPLY}"
+
+  # take ~52% for the read delay to ensure we do not miss the tick
+  time::getSecondsFromMicroseconds $((tickDelayMicroseconds * 52 / 100))
+  local readDelay="${REPLY}"
 
   time::getProgramElapsedMicroseconds
   local lastTickTime="${REPLY}"
@@ -67,6 +71,8 @@ function tui::startMainLoop() {
   if [[ -n ${onRedrawRequiredCallback} ]] && ! declare -F "${onRedrawRequiredCallback}" &>/dev/null; then
     core::fail "The on redraw required callback function ⌜${onRedrawRequiredCallback}⌝ does not exist."
   fi
+
+  printf '%s' "${ESC__CURSOR_HIDE}"
 
   # setup the terminal to be ready for readline
   terminal::setRawMode
@@ -98,7 +104,7 @@ function tui::startMainLoop() {
     fi
 
     # read the key pressed from the key press listener coproc
-    if coproc::receiveMessage KEY_PRESS_LISTENER -t "${tickDelay}"; then
+    if coproc::receiveMessage KEY_PRESS_LISTENER -t "${readDelay}"; then
       REPLY_CODE=0
       "${onKeyPressCallback}" "${REPLY}"
       if ((REPLY_CODE != 0)); then
@@ -121,6 +127,8 @@ function tui::startMainLoop() {
   coproc::kill KEY_PRESS_LISTENER
   terminal::restoreLogs
   terminal::restoreSettings
+
+  printf '%s' "${ESC__CURSOR_SHOW}"
 }
 
 function tui_startKeyPressListener() {

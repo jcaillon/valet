@@ -43,11 +43,11 @@
 [9G[90m╰───────────╯[0m
 ```
 
-### ✅ Testing interactive::promptYesNo
+### ✅ Testing interactive::confirm
 
-❯ `echo y | interactive::promptYesNo 'Do you see this message?'`
+❯ `echo y | interactive::confirm 'Do you see this message?'`
 
-❯ `interactive::promptYesNo Do\ you\ see\ this\ message\?`
+❯ `interactive::confirm Do\ you\ see\ this\ message\?`
 
 **Error output**:
 
@@ -67,9 +67,9 @@ Returned variables:
 REPLY='true'
 ```
 
-❯ `echo n | interactive::promptYesNo 'Do you see this message?'`
+❯ `echo n | interactive::confirm 'Do you see this message?'`
 
-❯ `interactive::promptYesNo Do\ you\ see\ this\ message\?`
+❯ `interactive::confirm Do\ you\ see\ this\ message\?`
 
 Returned code: `1`
 
@@ -91,11 +91,11 @@ Returned variables:
 REPLY='false'
 ```
 
-### ✅ Testing interactive::askForConfirmation
+### ✅ Testing interactive::continue
 
-❯ `echo o | interactive::askForConfirmation 'Please press OK.'`
+❯ `echo o | interactive::continue 'Please press OK.'`
 
-❯ `interactive::askForConfirmation Please\ press\ OK.`
+❯ `interactive::continue Please\ press\ OK.`
 
 **Error output**:
 
@@ -107,9 +107,9 @@ REPLY='false'
 [1F[0J [?25l[7m[95m   (O)K   [0m[1G[0K
 ```
 
-❯ `echo n | interactive::askForConfirmation 'Please press OK.'`
+❯ `echo n | interactive::continue 'Please press OK.'`
 
-❯ `interactive::askForConfirmation Please\ press\ OK.`
+❯ `interactive::continue Please\ press\ OK.`
 
 Returned code: `1`
 

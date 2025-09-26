@@ -42,8 +42,8 @@ function exe::invoke() {
   REPLY2=""
 }
 
-function interactive::promptYesNo() {
-  echo "🙈 mocked interactive::promptYesNo ${*}" 1>&2
+function interactive::confirm() {
+  echo "🙈 mocked interactive::confirm ${*}" 1>&2
   return 0
 }
 

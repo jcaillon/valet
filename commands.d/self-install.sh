@@ -210,7 +210,7 @@ function selfUpdate() {
 
   elif command -v valet &>/dev/null; then
     log::warning "Valet is already installed but you are executing the install script. It could be updated using the 'valet self update' command."
-    if [[ ${unattended} != "true" ]] && ! interactive::promptYesNo "Execute this installation script?"; then
+    if [[ ${unattended} != "true" ]] && ! interactive::confirm "Execute this installation script?"; then
       core::fail "Installation aborted."
     fi
   fi
@@ -309,7 +309,7 @@ function selfUpdate() {
 
   # ask for confirmation
   if [[ ${unattended} != "true" ]]; then
-    interactive::promptYesNo "Proceed with the installation?" || core::fail "Installation aborted."
+    interactive::confirm "Proceed with the installation?" || core::fail "Installation aborted."
   fi
 
   selfUpdate_testCommand "chmod"
@@ -660,7 +660,7 @@ function selfUpdate_addToPath() {
     printf '\n  %s\n\n' "${STYLE_COLOR_PRIMARY}Append to${STYLE_COLOR_DEFAULT}: ${STYLE_COLOR_ACCENT}${configFile}${STYLE_COLOR_DEFAULT}"
     printf '    %s%s\n\n' "${configContent}" "${STYLE_COLOR_DEFAULT}"
 
-    if [[ ${unattended} != "true" ]] && ! interactive::promptYesNo "Do you want to modify ⌜${configFile}⌝ as described above ?"; then
+    if [[ ${unattended} != "true" ]] && ! interactive::confirm "Do you want to modify ⌜${configFile}⌝ as described above ?"; then
       continue
     fi
 
@@ -742,7 +742,7 @@ if [[ ${GLOBAL_MAIN_INCLUDED:-} != "true" ]]; then
   }
   function core::getExtensionsDirectory() { REPLY="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"; }
   function core::getUserDataDirectory() { REPLY="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"; }
-  function interactive::promptYesNo() {
+  function interactive::confirm() {
     local \
       prompt="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
       default=true \

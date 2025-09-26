@@ -4,12 +4,16 @@
 
 # shellcheck source=lib-terminal
 source terminal
+# shellcheck source=lib-list
+source list
+# shellcheck source=lib-tui
+source tui
 
 #===============================================================
 # >>> Interactive prompts
 #===============================================================
 
-# ##  interactive::askForConfirmation
+# ## interactive::continue
 #
 # Ask the user to press the button to continue.
 #
@@ -23,17 +27,17 @@ source terminal
 #   - 1 otherwise
 #
 # ```bash
-# interactive::askForConfirmation "Press enter to continue."
+# interactive::continue "Press enter to continue."
 # ```
-function interactive::askForConfirmation() {
+function interactive::continue() {
   interactive::displayQuestion "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  if ! interactive::askForConfirmationRaw; then
+  if ! interactive::continueRaw; then
     return 1
   fi
   return 0
 }
 
-# ## interactive::askForConfirmationRaw
+# ## interactive::continueRaw
 #
 # Ask the user to press the button to continue.
 #
@@ -46,9 +50,9 @@ function interactive::askForConfirmation() {
 #   - 1 otherwise
 #
 # ```bash
-# interactive::askForConfirmationRaw
+# interactive::continueRaw
 # ```
-function interactive::askForConfirmationRaw() {
+function interactive::continueRaw() {
   terminal::createSpace 2
 
   # print the current state (then move to column 1 to be ready to rewrite)
@@ -86,7 +90,7 @@ function interactive::askForConfirmationRaw() {
   return ${returnedCode}
 }
 
-# ## interactive::promptYesNo
+# ## interactive::confirm
 #
 # Ask the user to yes or no.
 #
@@ -110,9 +114,9 @@ function interactive::askForConfirmationRaw() {
 # - ${REPLY}: true or false.
 #
 # ```bash
-# if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
+# if interactive::confirm "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
 # ```
-function interactive::promptYesNo() {
+function interactive::confirm() {
   local \
     prompt="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     default=true \
@@ -122,7 +126,7 @@ function interactive::promptYesNo() {
 
   interactive::displayQuestion "${prompt}"
 
-  if ! interactive::promptYesNoRaw default="${default}"; then
+  if ! interactive::confirmRaw default="${default}"; then
     interactive::displayAnswer "No."
     REPLY=false
     return 1
@@ -133,7 +137,7 @@ function interactive::promptYesNo() {
   return 0
 }
 
-# ## interactive::promptYesNoRaw
+# ## interactive::confirmRaw
 #
 # Ask the user to yes or no.
 #
@@ -155,9 +159,9 @@ function interactive::promptYesNo() {
 # - ${REPLY}: true or false.
 #
 # ```bash
-# interactive::promptYesNoRaw "Do you want to continue?" && local answer="${REPLY}"
+# interactive::confirmRaw "Do you want to continue?" && local answer="${REPLY}"
 # ```
-function interactive::promptYesNoRaw() {
+function interactive::confirmRaw() {
   local \
     default=true \
     IFS=$' '
@@ -378,3 +382,56 @@ function interactive::displayDialogBox() {
   printf '%s' "${finalString}" 1>&"${GLOBAL_FD_TUI}"
 }
 
+#===============================================================
+# >>> List
+#===============================================================
+
+function interactive::choose() {
+  local \
+    arrayName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    width="${GLOBAL_COLUMNS}" \
+    height="${GLOBAL_LINES}" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
+  height=$((height - 4))
+  terminal::createSpace "$((height + 1))"
+  terminal::getCursorPosition
+
+  list::setOptions \
+    itemHeight=1
+  list::setViewport top="${GLOBAL_CURSOR_LINE}" height="${height}" width="${width}"
+
+  list::setItems "${arrayName}"
+  # list::filter "${filter}"
+  # list::changeSelectedItemIndex "${move}"
+  # list::onTick
+
+  # define the callback function called when a special key is pressed
+  function onKeyPress() {
+    log::info "Key pressed: ⌜%s⌝" "${1}"
+    if [[ ${1} == ":"* ]]; then
+      list::onKeyBindingPressed "${1#:}"
+    fi
+  }
+
+  # define the callback function called when the screen needs to be redrawn
+  function onRedrawRequired() {
+    log::info "Redraw required, terminal changed to: ⌜%s x %s⌝" "${GLOBAL_COLUMNS}" "${GLOBAL_LINES}"
+    terminal::getCursorPosition
+    list::setViewport top="${GLOBAL_CURSOR_LINE}" height="$((GLOBAL_LINES - 4))" width="${GLOBAL_COLUMNS}"
+    list::draw
+  }
+
+  # define the callback function called on each loop iteration
+  function onTick() {
+    log::info "Tick"
+    list::onTick
+  }
+
+  tui::startMainLoop onKeyPress \
+    onRedrawRequiredCallback=onRedrawRequired \
+    onTickCallback=onTick \
+    tickDelay=0.05
+}

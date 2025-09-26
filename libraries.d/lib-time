@@ -31,7 +31,7 @@ function time::getDate() {
   printf -v REPLY "${format}" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}"
 }
 
-# ## time::getMicrosecondsToHuman
+# ## time::getHumanTimeFromMicroseconds
 #
 # Convert microseconds to human readable format.
 #
@@ -62,11 +62,11 @@ function time::getDate() {
 # - ${REPLY}: the human readable format
 #
 # ```bash
-# time::getMicrosecondsToHuman 123456789
-# time::getMicrosecondsToHuman 123456789 format="%HH:%MM:%SS"
+# time::getHumanTimeFromMicroseconds 123456789
+# time::getHumanTimeFromMicroseconds 123456789 format="%HH:%MM:%SS"
 # echo "${REPLY}"
 # ```
-function time::getMicrosecondsToHuman() {
+function time::getHumanTimeFromMicroseconds() {
   local -i us="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     format="%HH:%MM:%SS" \
@@ -145,7 +145,7 @@ function time::startTimer() {
 #       (defaults to false)
 # - ${format} _as string_:
 #       (optional) The format to use if we log the elapsed time.
-#       See `time::getMicrosecondsToHuman` for the format.
+#       See `time::getHumanTimeFromMicroseconds` for the format.
 #       (defaults to "%S.%LLs").
 #
 # Returns:
@@ -168,16 +168,16 @@ function time::getTimerMicroseconds() {
   local -i elapsed=$((REPLY - _TIME_TIMER_START))
 
   if [[ ${logElapsedTime} == "true" ]]; then
-    time::getMicrosecondsToHuman ${elapsed} format="${format}"
+    time::getHumanTimeFromMicroseconds ${elapsed} format="${format}"
     log::info "Elapsed time: ${REPLY}"
   fi
 
   REPLY="${elapsed}"
 }
 
-# ## time::getMicrosecondsToSeconds
+# ## time::getSecondsFromMicroseconds
 #
-# Convert a microseconds integer to seconds float.
+# Convert microseconds to seconds (float number representation).
 # e.g. 1234567 → 1.234567
 #
 # - $1: **microseconds** _as int_:
@@ -191,11 +191,11 @@ function time::getTimerMicroseconds() {
 # - ${REPLY}: The seconds (float number).
 #
 # ```bash
-# time::getMicrosecondsToSeconds 1234567
-# time::getMicrosecondsToSeconds 1234567 precision=3
+# time::getSecondsFromMicroseconds 1234567
+# time::getSecondsFromMicroseconds 1234567 precision=3
 # echo "${REPLY}"
 # ```
-function time::getMicrosecondsToSeconds() {
+function time::getSecondsFromMicroseconds() {
   local \
     microseconds="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     precision=6 \
@@ -212,9 +212,9 @@ function time::getMicrosecondsToSeconds() {
   fi
 }
 
-# ## time::getSecondsToMicroseconds
+# ## time::getMicrosecondsFromSeconds
 #
-# Convert a seconds float to microseconds integer.
+# Convert seconds (float number representation) to microseconds.
 # e.g. 1.234567 → 1234567
 #
 # - $1: **seconds** _as float_:
@@ -225,10 +225,10 @@ function time::getMicrosecondsToSeconds() {
 # - ${REPLY}: The microseconds (integer number).
 #
 # ```bash
-# time::getSecondsToMicroseconds 1.234567
+# time::getMicrosecondsFromSeconds 1.234567
 # echo "${REPLY}"
 # ```
-function time::getSecondsToMicroseconds() {
+function time::getMicrosecondsFromSeconds() {
   local seconds="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   local integerPart="${seconds%%.*}"

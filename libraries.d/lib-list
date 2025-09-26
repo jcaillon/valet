@@ -391,6 +391,7 @@ function list::requestRedraw() {
 #
 # Draw the list box.
 function list::draw() {
+  log::info "Redrawing the list."
   local -a lines=()
 
   # calculate the size and position of the scroll bar
@@ -455,7 +456,9 @@ function list::draw() {
   _LIST_PREVIOUS_LINES=("${lines[@]}")
 
   local IFS=''
-  printf '%s%s%s' "${ESC__CURSOR_HIDE}" "${lines[*]}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}${ESC__CURSOR_SHOW_FORCE}" 1>&"${GLOBAL_FD_TUI}"
+  printf '%s%s' "${lines[*]}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${STYLE_RESET}" 1>&"${GLOBAL_FD_TUI}"
+
+  _LIST_REDRAW_NEXT_TICK=false
 }
 
 # Draw the autocompletion box
@@ -627,7 +630,7 @@ function list::drawHeaderOrFooter() {
     fi
   done
 
-  local IFS='|' savedItemWidth="${_LIST_ITEM_WIDTH}"
+  local IFS='|'
 
   string::getFormattedHeader "^|#|$" \
     width="$((_LIST_WIDTH - _LIST_SYMBOL_LEFT_LENGTH - _LIST_SYMBOL_RIGHT_LENGTH))" \
@@ -643,15 +646,10 @@ function list::drawHeaderOrFooter() {
       # enough space to fit the whole part
       finalString="${finalString/"${partToReplace:partName:1}"/"${parts[partName]}"}"
     else
-      _LIST_CURRENT_ITEM="${parts[partName]}"
-      _LIST_ITEM_WIDTH="${REPLY_ARRAY[partName]}"
-      _LIST_FILTER_STRING=""
-      list::getCurrentItemDisplayableString
-      finalString="${finalString/"${partToReplace:partName:1}"/"${_LIST_CURRENT_ITEM}"}"
+      string::truncateWithEllipsis "parts[${partName}]" maxLength="${REPLY_ARRAY[partName]}"
+      finalString="${finalString/"${partToReplace:partName:1}"/"${parts[partName]}"}${STYLE_RESET}"
     fi
   done
-
-  _LIST_ITEM_WIDTH="${savedItemWidth}"
 
   local showAtLine leftSymbol rightSymbol
   if [[ ${headerOrFooter} == "header" ]]; then
@@ -862,26 +860,27 @@ function list::convertToInitialItemsIndex() {
 #
 # define the callback function called when a special key is pressed
 # shellcheck disable=SC2317
-function list::onKeyBindingPress() {
+function list::onKeyBindingPressed() {
   local action="${_LIST_KEY_MAPPING[${1}]:-}"
   if [[ -z ${action} ]]; then
-    return 1
-  fi
-
-  # handle spamming of keys (the actions before this do not need to be protected from spam,
-  # but the actions after this are slow to execute and should not be spammed)
-  time::getProgramElapsedMicroseconds
-  if ((REPLY - _LIST_LAST_KEY_PRESSED_TIME < 100000)); then
-    # key pressed under 100ms of the last
-    _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
-  else
-    _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
-  fi
-  if ((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED > 3)); then
-    # if we have 3 rapid successive key pressed
+    REPLY_CODE=1
     return 0
   fi
-  _LIST_LAST_KEY_PRESSED_TIME=${REPLY}
+
+  # # handle spamming of keys (the actions before this do not need to be protected from spam,
+  # # but the actions after this are slow to execute and should not be spammed)
+  # time::getProgramElapsedMicroseconds
+  # if ((REPLY - _LIST_LAST_KEY_PRESSED_TIME < 100000)); then
+  #   # key pressed under 100ms of the last
+  #   _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=$((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED + 1))
+  # else
+  #   _LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED=0
+  # fi
+  # if ((_LIST_NB_SUCCESSIVE_RAPID_KEY_PRESSED > 3)); then
+  #   # if we have 3 rapid successive key pressed
+  #   return 0
+  # fi
+  # _LIST_LAST_KEY_PRESSED_TIME=${REPLY}
 
   case "${action}" in
   # autocompletion box selected item
@@ -904,6 +903,8 @@ function list::onKeyBindingPress() {
     list::changeSelectedItemIndex 1
     ;;
   esac
+
+  REPLY_CODE=0
 }
 
 # Filter the items of the autocompletion box, will either filter synchronously or asynchronously

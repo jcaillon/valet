@@ -18,9 +18,9 @@ Returned code: `1`
 
 ### ✅ Testing time::isTimeElapsed using timerName
 
-### ✅ Testing time::getSecondsToMicroseconds function
+### ✅ Testing time::getMicrosecondsFromSeconds function
 
-❯ `time::getSecondsToMicroseconds 987`
+❯ `time::getMicrosecondsFromSeconds 987`
 
 Returned variables:
 
@@ -28,7 +28,7 @@ Returned variables:
 REPLY='987000000'
 ```
 
-❯ `time::getSecondsToMicroseconds 1.5`
+❯ `time::getMicrosecondsFromSeconds 1.5`
 
 Returned variables:
 
@@ -36,7 +36,7 @@ Returned variables:
 REPLY='1500000'
 ```
 
-❯ `time::getSecondsToMicroseconds 1.234567`
+❯ `time::getMicrosecondsFromSeconds 1.234567`
 
 Returned variables:
 
@@ -44,7 +44,7 @@ Returned variables:
 REPLY='1234567'
 ```
 
-❯ `time::getSecondsToMicroseconds 33.00405`
+❯ `time::getMicrosecondsFromSeconds 33.00405`
 
 Returned variables:
 
@@ -52,7 +52,7 @@ Returned variables:
 REPLY='33004050'
 ```
 
-❯ `time::getSecondsToMicroseconds 1234567890.123456`
+❯ `time::getMicrosecondsFromSeconds 1234567890.123456`
 
 Returned variables:
 
@@ -60,9 +60,9 @@ Returned variables:
 REPLY='1234567890123456'
 ```
 
-### ✅ Testing time::getMicrosecondsToSeconds function
+### ✅ Testing time::getSecondsFromMicroseconds function
 
-❯ `time::getMicrosecondsToSeconds 1`
+❯ `time::getSecondsFromMicroseconds 1`
 
 Returned variables:
 
@@ -70,7 +70,7 @@ Returned variables:
 REPLY='0.000001'
 ```
 
-❯ `time::getMicrosecondsToSeconds 1000 precision=3`
+❯ `time::getSecondsFromMicroseconds 1000 precision=3`
 
 Returned variables:
 
@@ -78,7 +78,7 @@ Returned variables:
 REPLY='0.001'
 ```
 
-❯ `time::getMicrosecondsToSeconds 1234567890`
+❯ `time::getSecondsFromMicroseconds 1234567890`
 
 Returned variables:
 
@@ -86,7 +86,7 @@ Returned variables:
 REPLY='1234.567890'
 ```
 
-❯ `time::getMicrosecondsToSeconds 1234567890 precision=3`
+❯ `time::getSecondsFromMicroseconds 1234567890 precision=3`
 
 Returned variables:
 
@@ -94,7 +94,7 @@ Returned variables:
 REPLY='1234.567'
 ```
 
-❯ `time::getMicrosecondsToSeconds 1234567890 precision=6`
+❯ `time::getSecondsFromMicroseconds 1234567890 precision=6`
 
 Returned variables:
 
@@ -160,7 +160,7 @@ Returned variables:
 REPLY='01:00:00'
 ```
 
-### ✅ Testing time::getMicrosecondsToHuman function
+### ✅ Testing time::getHumanTimeFromMicroseconds function
 
 ```text
 format='Hours: %HH
@@ -181,7 +181,7 @@ Total milliseconds: %L
 Total microseconds: %U'
 ```
 
-❯ `time::getMicrosecondsToHuman 18243002234 format="${format}"`
+❯ `time::getHumanTimeFromMicroseconds 18243002234 format="${format}"`
 
 Returned variables:
 
@@ -204,7 +204,7 @@ Total milliseconds: 4320003002
 Total microseconds: 18243002234'
 ```
 
-❯ `time::getMicrosecondsToHuman 18243002234`
+❯ `time::getHumanTimeFromMicroseconds 18243002234`
 
 Returned variables:
 
@@ -212,7 +212,7 @@ Returned variables:
 REPLY='05:04:03'
 ```
 
-❯ `time::getMicrosecondsToHuman 18243002234 format=%U`
+❯ `time::getHumanTimeFromMicroseconds 18243002234 format=%U`
 
 Returned variables:
 

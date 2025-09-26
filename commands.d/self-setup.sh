@@ -34,7 +34,7 @@ function selfSetup() {
   printf '%s\n' $'\e'"[0;32mThis is a COLOR CHECK, this line should be COLORED (in green by default)."$'\e'"[0m"
   printf '%s\n' "─────────────────────────────────────"
 
-  if interactive::promptYesNo "Do you see the colors in the color check above the line?"; then
+  if interactive::confirm "Do you see the colors in the color check above the line?"; then
     VALET_CONFIG_ENABLE_COLORS=true
   else
     VALET_CONFIG_ENABLE_COLORS=false
@@ -52,7 +52,7 @@ function selfSetup() {
   printf '%s\n' "An information icon: "$'\uf05a'
   printf '%s\n' "─────────────────────────────────────"
 
-  if ! interactive::promptYesNo "Do you correctly see the nerd icons in lines above?" default=false; then
+  if ! interactive::confirm "Do you correctly see the nerd icons in lines above?" default=false; then
     log::info "You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."$'\n'"You can then run the command ⌜valet self setup⌝ again to set up the use of this font."
     VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
   else
@@ -66,7 +66,7 @@ function selfSetup() {
   selfConfig --export-current-values --no-edit --override
 
   # on windows, we can add the installation path to the windows PATH
-  if system::isWindows && interactive::promptYesNo "Valet can be setup to be called from the windows CMD or windows powershell."$'\n'"Do you want to add Valet to your windows PATH?" default=false; then
+  if system::isWindows && interactive::confirm "Valet can be setup to be called from the windows CMD or windows powershell."$'\n'"Do you want to add Valet to your windows PATH?" default=false; then
     selfSetup_setupForWindows
   fi
 

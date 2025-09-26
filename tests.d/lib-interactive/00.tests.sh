@@ -14,8 +14,8 @@ function main() {
   styles::init
 
   test_interactive::displayDialogBox
-  test_interactive::promptYesNo
-  test_interactive::askForConfirmation
+  test_interactive::confirm
+  test_interactive::continue
 }
 
 function test_interactive::displayDialogBox() {
@@ -26,28 +26,28 @@ function test_interactive::displayDialogBox() {
   test::exec interactive::displayAnswer "Do you want to run the tests?"$'\n'$'\n'"cause it is super cool awesome you one know and stuff (y/n)" width=10
 }
 
-function test_interactive::promptYesNo() {
-  test::title "✅ Testing interactive::promptYesNo"
+function test_interactive::confirm() {
+  test::title "✅ Testing interactive::confirm"
 
-  test::prompt "echo y | interactive::promptYesNo 'Do you see this message?'"
+  test::prompt "echo y | interactive::confirm 'Do you see this message?'"
   test::setTerminalInputs y
-  test::func interactive::promptYesNo 'Do you see this message?'
+  test::func interactive::confirm 'Do you see this message?'
 
-  test::prompt "echo n | interactive::promptYesNo 'Do you see this message?'"
+  test::prompt "echo n | interactive::confirm 'Do you see this message?'"
   test::setTerminalInputs n
-  test::func interactive::promptYesNo 'Do you see this message?'
+  test::func interactive::confirm 'Do you see this message?'
 }
 
-function test_interactive::askForConfirmation() {
-  test::title "✅ Testing interactive::askForConfirmation"
+function test_interactive::continue() {
+  test::title "✅ Testing interactive::continue"
 
-  test::prompt "echo o | interactive::askForConfirmation 'Please press OK.'"
+  test::prompt "echo o | interactive::continue 'Please press OK.'"
   test::setTerminalInputs o
-  test::exec interactive::askForConfirmation 'Please press OK.'
+  test::exec interactive::continue 'Please press OK.'
 
-  test::prompt "echo n | interactive::askForConfirmation 'Please press OK.'"
+  test::prompt "echo n | interactive::continue 'Please press OK.'"
   test::setTerminalInputs n
-  test::exec interactive::askForConfirmation 'Please press OK.'
+  test::exec interactive::continue 'Please press OK.'
 }
 
 main

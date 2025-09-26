@@ -14,14 +14,14 @@ interactive::displayAnswer "My favorite color is blue."
 ############################
 
 log::info "Getting user confirmation:"
-interactive::askForConfirmation "Please press ENTER to continue."
+interactive::continue "Please press ENTER to continue."
 
 ############################
 # Yes/no
 ############################
 
 log::info "Getting user yes/no:"
-if interactive::promptYesNo "Do you want to abort this demo?" false; then
+if interactive::confirm "Do you want to abort this demo?" false; then
   log::warning "Aborting the demo."
   return 0
 fi

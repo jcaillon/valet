@@ -300,7 +300,7 @@ myFunction() {
   string::getField myString 1 separator=" "
   echo "The field at index 1 is ${REPLY}"
 
-  if interactive::promptYesNo "Do you want to continue?"; then 
+  if interactive::confirm "Do you want to continue?"; then 
     echo "Yes."
   else
     echo "No."
