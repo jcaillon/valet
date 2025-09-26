@@ -605,7 +605,7 @@ function terminal::waitForKeyPress() {
 #
 # - $1: **callback function** _as string_:
 #       The function name to call when a special key is pressed.
-
+#
 # ```bash
 # terminal::rebindKeymap
 # ```
@@ -865,11 +865,14 @@ function terminal::restoreBindings() {
 #
 # This function reads all the inputs from the user, effectively discarding them.
 #
+# - $@: read parameters _as any_:
+#       additional parameters to pass to the read command
+#
 # ```bash
 # terminal::clearKeyPressed
 # ```
 function terminal::clearKeyPressed() {
   local IFS
-  IFS='' read -d '' -sr -t 0 LAST_KEY_PRESSED || :
+  IFS='' read "$@" -d '' -sr -t 0 LAST_KEY_PRESSED || :
   PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
 }

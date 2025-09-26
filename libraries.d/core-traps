@@ -392,6 +392,12 @@ function trap::restoreTerminal() {
   if [[ -t ${GLOBAL_FD_TUI} && ${VALET_CONFIG_DISABLE_ESC_CODES:-} != "true" ]]; then
     printf '%s' "${ESC__CURSOR_SHOW_FORCE:-$'\e[?25h'}" 1>&"${GLOBAL_FD_TUI}"
     printf '%s' "${ESC__DISABLE_MOUSE_BUTTON_TRACKING:-$'\e[?1006l'$'\e[?1000l'}${ESC__DISABLE_MOUSE_ANY_EVENT_TRACKING:-$'\e[?1006l'$'\e[?1003l'}" 1>&"${GLOBAL_FD_TUI}"
+
+    # swallow all pending input (e.g. mouse events) that could be in the stdin buffer
+    # otherwise they would be processed after the end of the program, in the user terminal
+    if declare -F terminal::clearKeyPressed &>/dev/null; then
+      terminal::clearKeyPressed -u "${GLOBAL_FD_ORIGINAL_STDIN}"
+    fi
   fi
 
   # restore tty settings if needed

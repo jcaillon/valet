@@ -4,15 +4,6 @@ source "$(valet --source)"
 
 include system string time bash
 
-if time::isTimeElapsed 2000000; then
-  log::info "2000000 microseconds have elapsed"
-fi
-bash::sleep 1
-if time::isTimeElapsed 2000000; then
-  log::info "2000000 microseconds have elapsed"
-fi
-bash::sleep 1
-if time::isTimeElapsed 2000000; then
-  log::info "2000000 microseconds have elapsed"
-fi
+string::getFormattedHeader "l${ESC__FG_BRIGHT_CYAN}ef${ESC__TEXT_RESET}t|mi${ESC__FG_BRIGHT_CYAN}dd${ESC__TEXT_RESET}le|ri${ESC__FG_BRIGHT_CYAN}gh${ESC__TEXT_RESET}t" width=10 paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
 
+echo "${REPLY}"

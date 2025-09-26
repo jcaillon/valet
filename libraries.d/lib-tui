@@ -47,11 +47,16 @@ function tui::startMainLoop() {
   eval "local a= ${*@Q}"
 
   local \
+    REPLY \
+    REPLY_CODE \
     _TUI_TRACK_ALL_MOUSE_EVENTS="${trackAllMouseEvents}" \
     _TUI_KEY_BINDINGS_PREFIX="${keyBindingsPrefix}"
 
-  time::getSecondsToMicroseconds tickDelay
+  time::getSecondsToMicroseconds "${tickDelay}"
   local tickDelayMicroseconds="${REPLY}"
+
+  time::getProgramElapsedMicroseconds
+  local lastTickTime="${REPLY}"
 
   if ! declare -F "${onKeyPressCallback}" &>/dev/null; then
     core::fail "The on key press callback function ⌜${onKeyPressCallback}⌝ does not exist."
@@ -86,7 +91,9 @@ function tui::startMainLoop() {
     fi
 
     # call the on each loop iteration callback function if defined
-    if [[ -n ${onTickCallback} ]]; then
+    time::getProgramElapsedMicroseconds
+    if [[ -n ${onTickCallback} && REPLY -gt $((lastTickTime + tickDelayMicroseconds)) ]]; then
+      lastTickTime="${REPLY}"
       "${onTickCallback}"
     fi
 
@@ -94,12 +101,12 @@ function tui::startMainLoop() {
     if coproc::receiveMessage KEY_PRESS_LISTENER -t "${tickDelay}"; then
       REPLY_CODE=0
       "${onKeyPressCallback}" "${REPLY}"
-      if (( REPLY_CODE != 0)); then
+      if ((REPLY_CODE != 0)); then
         log::debug "The on key press callback function ⌜${onKeyPressCallback}⌝ returned non-zero exit code, stopping the main loop."
         break
       fi
     elif ! coproc::isRunning KEY_PRESS_LISTENER; then
-      if (( nbCoprocRestart > 3 )); then
+      if ((nbCoprocRestart > 3)); then
         log::error "Key press listener coproc is failing to start, check the logs for errors."
         break
       fi
@@ -117,6 +124,8 @@ function tui::startMainLoop() {
 }
 
 function tui_startKeyPressListener() {
+  local REPLY
+
   # if the key press listener is not already running, we start it
   if ! coproc::isRunning KEY_PRESS_LISTENER; then
     log::debug "Starting key press listener coproc."
@@ -200,19 +209,19 @@ function tui_keyPressListener_parseMouseEvent() {
   local mouseEventDecoded=""
 
   # bitwise operations to decode the mouse event type
-  if (( mouseEventType & 2#10000 )); then
+  if ((mouseEventType & 2#10000)); then
     mouseEventDecoded+="CTRL+"
   fi
-  if (( mouseEventType & 2#1000 )); then
+  if ((mouseEventType & 2#1000)); then
     mouseEventDecoded+="ALT+"
   fi
-  if (( mouseEventType & 2#100 )); then
+  if ((mouseEventType & 2#100)); then
     mouseEventDecoded+="SHIFT+"
   fi
-  if (( mouseEventType & 2#100000 )); then
+  if ((mouseEventType & 2#100000)); then
     mouseEventDecoded+="MOVE+"
   fi
-  mouseEventType=$(( mouseEventType & 2#11000011 ))
+  mouseEventType=$((mouseEventType & 2#11000011))
 
   local mouseButtonStatus
   if [[ ${mouseEventEncoded} == *"M" ]]; then
@@ -222,17 +231,17 @@ function tui_keyPressListener_parseMouseEvent() {
   fi
   mouseEventEncoded="${mouseEventEncoded%[Mm]}"
 
-  if (( mouseEventType == 0 )); then
+  if ((mouseEventType == 0)); then
     mouseEventDecoded+="${mouseButtonStatus}MB1 "
-  elif (( mouseEventType == 1 )); then
+  elif ((mouseEventType == 1)); then
     mouseEventDecoded+="${mouseButtonStatus}MB2 "
-  elif (( mouseEventType == 2 )); then
+  elif ((mouseEventType == 2)); then
     mouseEventDecoded+="${mouseButtonStatus}MB3 "
-  elif (( mouseEventType == 3 )); then
+  elif ((mouseEventType == 3)); then
     mouseEventDecoded="${mouseEventDecoded%+} "
-  elif (( mouseEventType == 64 )); then
+  elif ((mouseEventType == 64)); then
     mouseEventDecoded+="SCROLL_UP "
-  elif (( mouseEventType == 65 )); then
+  elif ((mouseEventType == 65)); then
     mouseEventDecoded+="SCROLL_DOWN "
   else
     mouseEventDecoded+="${mouseButtonStatus}MB${mouseEventType} "

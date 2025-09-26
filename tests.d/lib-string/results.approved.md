@@ -2,6 +2,148 @@
 
 ## Test script 00.tests
 
+### ✅ Testing string::truncateWithEllipsis
+
+```text
+MY_STRING='This is a test string'
+```
+
+❯ `string::truncateWithEllipsis MY_STRING maxLength=11`
+
+Returned variables:
+
+```text
+REPLY='0'
+```
+
+```text
+MY_STRING='This is a …'
+```
+
+```text
+MY_STRING='This is a test string'
+```
+
+❯ `string::truncateWithEllipsis MY_STRING maxLength=11`
+
+Returned variables:
+
+```text
+REPLY='0'
+```
+
+```text
+MY_STRING='This is a …'
+```
+
+```text
+MY_STRING='This is a test string'
+```
+
+❯ `string::truncateWithEllipsis MY_STRING maxLength=11 noEllipsis=true`
+
+Returned variables:
+
+```text
+REPLY='0'
+```
+
+```text
+MY_STRING='This is a t'
+```
+
+```text
+MY_STRING='This is a test string'
+```
+
+❯ `string::truncateWithEllipsis MY_STRING maxLength=40`
+
+Returned variables:
+
+```text
+REPLY='19'
+```
+
+```text
+MY_STRING='This is a test string'
+```
+
+```text
+MY_STRING='This is a test string'
+```
+
+❯ `string::truncateWithEllipsis MY_STRING maxLength=21`
+
+Returned variables:
+
+```text
+REPLY='0'
+```
+
+```text
+MY_STRING='This is a test string'
+```
+
+```text
+MY_STRING='This is a test string'
+```
+
+❯ `string::truncateWithEllipsis MY_STRING maxLength=0`
+
+Returned variables:
+
+```text
+REPLY='0'
+```
+
+```text
+MY_STRING=''
+```
+
+```text
+MY_STRING='This is a test string'
+```
+
+❯ `string::truncateWithEllipsis MY_STRING maxLength=1`
+
+Returned variables:
+
+```text
+REPLY='0'
+```
+
+```text
+MY_STRING='…'
+```
+
+```text
+MY_STRING='This is a test string'
+```
+
+❯ `string::truncateWithEllipsis MY_STRING maxLength=2`
+
+Returned variables:
+
+```text
+REPLY='0'
+```
+
+```text
+MY_STRING='T…'
+```
+
+**Standard output**:
+
+```text
+REPLY=1 → abcde
+REPLY=0 → abcde
+REPLY=0 → abc…
+REPLY=0 → ab…
+REPLY=0 → a…
+REPLY=0 → …
+REPLY=0 → 
+```
+
 ### ✅ Testing string::getFormattedHeader
 
 ❯ `string::getFormattedHeader 'left|middle|right' width=50`

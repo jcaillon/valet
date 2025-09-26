@@ -4,6 +4,7 @@
 source string
 
 function main() {
+  test_string::truncateWithEllipsis
   test_string::getFormattedHeader
   test_string::get KebabCase
   test_string::get SnakeCase
@@ -25,6 +26,26 @@ function main() {
   test_string::doForEachLine
 }
 
+function test_string::truncateWithEllipsis() {
+  test::title "✅ Testing string::truncateWithEllipsis"
+
+  test::funcWithInPlaceString string::truncateWithEllipsis 'This is a test string' maxLength=11
+  test::funcWithInPlaceString string::truncateWithEllipsis "${ESC__FG_BRIGHT_CYAN}This ${ESC__FG_BRIGHT_CYAN}is a test string" maxLength=11
+  test::funcWithInPlaceString string::truncateWithEllipsis 'This is a test string' maxLength=11 noEllipsis=true
+  test::funcWithInPlaceString string::truncateWithEllipsis 'This is a test string' maxLength=40
+  test::funcWithInPlaceString string::truncateWithEllipsis 'This is a test string' maxLength=21
+  test::funcWithInPlaceString string::truncateWithEllipsis 'This is a test string' maxLength=0
+  test::funcWithInPlaceString string::truncateWithEllipsis 'This is a test string' maxLength=1
+  test::funcWithInPlaceString string::truncateWithEllipsis 'This is a test string' maxLength=2
+
+  for ((i=6; i>=0; i--)); do
+    local myString="${ESC__FG_BRIGHT_CYAN}a${ESC__FG_BRIGHT_CYAN}b${ESC__FG_BRIGHT_CYAN}c${ESC__FG_BRIGHT_CYAN}d${ESC__FG_BRIGHT_CYAN}e"
+    string::truncateWithEllipsis myString maxLength="${i}"
+    echo "REPLY=${REPLY} → ${myString}"
+  done
+  test::flush
+}
+
 function test_string::getFormattedHeader() {
   test::title "✅ Testing string::getFormattedHeader"
 
@@ -40,7 +61,7 @@ function test_string::getFormattedHeader() {
   test_printFormattedHeader "||right" width=50
 
   for ((i=20; i>=0; i--)); do
-    test_printFormattedHeader "left|middle|right" width="${i}"
+    test_printFormattedHeader "${ESC__FG_BRIGHT_CYAN}le${ESC__FG_BRIGHT_CYAN}ft|${ESC__FG_BRIGHT_CYAN}middle|ri${ESC__FG_BRIGHT_CYAN}gh${ESC__FG_BRIGHT_CYAN}t" width="${i}"
   done
   for ((i=20; i>=0; i--)); do
     test_printFormattedHeader "left|middle|right" width="${i}" paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
@@ -287,6 +308,17 @@ function test::execWithString() {
   # shellcheck disable=SC2034
   MY_STRING="${2}"
   local function="${1}"
+  shift 2
+  test::printVars MY_STRING
+  test::func "${function}" MY_STRING "$@"
+  test::printVars MY_STRING
+}
+
+function test::funcWithInPlaceString() {
+  # shellcheck disable=SC2034
+  local \
+    function="${1}" \
+    MY_STRING="${2}"
   shift 2
   test::printVars MY_STRING
   test::func "${function}" MY_STRING "$@"
