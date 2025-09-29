@@ -391,7 +391,6 @@ function list::requestRedraw() {
 #
 # Draw the list box.
 function list::draw() {
-  log::info "Redrawing the list."
   local -a lines=()
 
   # calculate the size and position of the scroll bar

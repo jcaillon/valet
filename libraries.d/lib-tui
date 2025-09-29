@@ -31,7 +31,7 @@ function tui::test() {
   tui::startMainLoop onKeyPress \
     onRedrawRequiredCallback=onRedrawRequired \
     onTickCallback=onTick \
-    tickDelay=1.0 \
+    tickDelay=1.00 \
     trackAllMouseEvents=true
 }
 
@@ -72,7 +72,7 @@ function tui::startMainLoop() {
     core::fail "The on redraw required callback function ⌜${onRedrawRequiredCallback}⌝ does not exist."
   fi
 
-  printf '%s' "${ESC__CURSOR_HIDE}"
+  printf '%s' "${ESC__CURSOR_HIDE}" 1>&"${GLOBAL_FD_TUI}"
 
   # setup the terminal to be ready for readline
   terminal::setRawMode
@@ -104,7 +104,7 @@ function tui::startMainLoop() {
     fi
 
     # read the key pressed from the key press listener coproc
-    if coproc::receiveMessage KEY_PRESS_LISTENER -t "${readDelay}"; then
+    if coproc::receiveMessageWithTimeOut KEY_PRESS_LISTENER "${readDelay}"; then
       REPLY_CODE=0
       "${onKeyPressCallback}" "${REPLY}"
       if ((REPLY_CODE != 0)); then
@@ -113,8 +113,7 @@ function tui::startMainLoop() {
       fi
     elif ! coproc::isRunning KEY_PRESS_LISTENER; then
       if ((nbCoprocRestart > 3)); then
-        log::error "Key press listener coproc is failing to start, check the logs for errors."
-        break
+        core::fail "Key press listener coproc is failing to start, check the logs for errors."
       fi
       log::warning "Key press listener coproc is not already running, re-starting it."
       tui_startKeyPressListener
@@ -128,7 +127,7 @@ function tui::startMainLoop() {
   terminal::restoreLogs
   terminal::restoreSettings
 
-  printf '%s' "${ESC__CURSOR_SHOW}"
+  printf '%s' "${ESC__CURSOR_SHOW}" 1>&"${GLOBAL_FD_TUI}"
 }
 
 function tui_startKeyPressListener() {
@@ -145,6 +144,10 @@ function tui_startKeyPressListener() {
   fi
 }
 
+# we send all messages to the main loop with the \0<message>\0 format.
+# this is because the read command in the main loop can have a low timeout that would prevent
+# it to read the whole message if it is sent slowly.
+# so we read until we get the \0 string, then we read the message.
 function tui_keyPressListenerCoprocMain() {
   # rebind some keys to call the callback function
   terminal::rebindKeymap tui_keyPressListener_handleKeyBinding
@@ -178,27 +181,57 @@ function tui_keyPressListenerCoprocLoop() {
 
     if [[ ${_TUI_RECEIVED_PASTE_EVENT} == "true" ]]; then
       # the user is pasting text, we handle it; pasted text will end with \e[201~
-      printf "%s%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "PASTE" "=${LAST_KEY_PRESSED}${PREVIOUS_KEY_PRESSED_EXTRA_CHARS%%$'\e[201~'}"
+      LAST_KEY_PRESSED="${LAST_KEY_PRESSED}${PREVIOUS_KEY_PRESSED_EXTRA_CHARS%%$'\e[201~'*}"
+      printf "\0%s%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "PASTE" "=${LAST_KEY_PRESSED@Q}"
       PREVIOUS_KEY_PRESSED_EXTRA_CHARS=""
       _TUI_RECEIVED_PASTE_EVENT=false
       continue
     fi
 
     case ${LAST_KEY_PRESSED} in
-    $'\r') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "ENTER" ;;
-    $'\n') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "CTRL+ENTER" ;;
-    $'\t') printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "TAB" ;;
-    *) printf "%s\0" "${LAST_KEY_PRESSED}" ;;
+    $'\r') printf "\0%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "ENTER" ;;
+    $'\n') printf "\0%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "CTRL+ENTER" ;;
+    $'\t') printf "\0%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "TAB" ;;
+    *) printf "\0%s\0" "${LAST_KEY_PRESSED}" ;;
     esac
   done
 }
 
 function tui_keyPressListener_handleKeyBinding() {
-  # make sure we see any error happening in this function, since it is
+  # we will never see any error happening in this function, since it is
   # executed as a callback of the readline process and we redirected the stderr
   # to /dev/null to avoid a bug with readline (see tui_waitForKeyPress)
   # exec 2>&"${GLOBAL_FD_LOG}"
-  printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "${1}"
+  printf "\0%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "${1}"
+}
+
+function tui_keyPressListener_handleKeyBindingWithRateLimit() {
+  # we will never see any error happening in this function, since it is
+  # executed as a callback of the readline process and we redirected the stderr
+  # to /dev/null to avoid a bug with readline (see tui_waitForKeyPress)
+  # exec 2>&"${GLOBAL_FD_LOG}"
+  # _TUI_LAST_KEY=""
+  # time::getProgramElapsedMicroseconds
+  # _TUI_LAST_KEY_TIME="${REPLY}"
+  # _TUI_LAST_KEY_REPEATED_COUNT=0
+
+  # if [[ ${1} == "${_TUI_LAST_KEY}" ]]; then
+  #   time::getProgramElapsedMicroseconds
+  #   if ((REPLY - _TUI_LAST_KEY_TIME < 100000)); then
+  #     # same key pressed within 100ms, we ignore it to avoid flooding the main loop
+  #     _TUI_LAST_KEY_REPEATED_COUNT=$((_TUI_LAST_KEY_REPEATED_COUNT + 1))
+  #   else
+  #     _TUI_LAST_KEY_REPEATED_COUNT=0
+  #   fi
+  #   if ((_TUI_LAST_KEY_REPEATED_COUNT > 5)); then
+  #     return 0
+  #   fi
+  #   _TUI_LAST_KEY_TIME="${REPLY}"
+  # else
+  #   _TUI_LAST_KEY="${1}"
+  #   _TUI_LAST_KEY_REPEATED_COUNT=0
+  # fi
+  printf "\0%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "${1}"
 }
 
 function tui_keyPressListener_handlePaste() {
@@ -257,5 +290,5 @@ function tui_keyPressListener_parseMouseEvent() {
 
   mouseEventDecoded+="${mouseEventEncoded#*;}"
 
-  printf "%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "${mouseEventDecoded}"
+  printf "\0%s%s\0" "${_TUI_KEY_BINDINGS_PREFIX}" "${mouseEventDecoded}"
 }

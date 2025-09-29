@@ -410,7 +410,7 @@ function interactive::choose() {
 
   # define the callback function called when a special key is pressed
   function onKeyPress() {
-    log::info "Key pressed: ⌜%s⌝" "${1}"
+    log::debug "Key pressed: ⌜${1}⌝"
     if [[ ${1} == ":"* ]]; then
       list::onKeyBindingPressed "${1#:}"
     fi
@@ -418,7 +418,7 @@ function interactive::choose() {
 
   # define the callback function called when the screen needs to be redrawn
   function onRedrawRequired() {
-    log::info "Redraw required, terminal changed to: ⌜%s x %s⌝" "${GLOBAL_COLUMNS}" "${GLOBAL_LINES}"
+    log::debug "Redraw required, terminal changed to: ⌜%s x %s⌝" "${GLOBAL_COLUMNS}" "${GLOBAL_LINES}"
     terminal::getCursorPosition
     list::setViewport top="${GLOBAL_CURSOR_LINE}" height="$((GLOBAL_LINES - 4))" width="${GLOBAL_COLUMNS}"
     list::draw
@@ -426,7 +426,7 @@ function interactive::choose() {
 
   # define the callback function called on each loop iteration
   function onTick() {
-    log::info "Tick"
+    log::debug "Tick"
     list::onTick
   }
 

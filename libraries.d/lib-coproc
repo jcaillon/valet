@@ -378,6 +378,7 @@ function coproc_program() {
 # ## coproc::sendMessage
 #
 # This function sends a message to a given coproc.
+# The message will be sent with a $'\0' character at the end.
 #
 # - $1: **coproc variable name** _as string_:
 #       The variable name to use for the coproc.
@@ -411,11 +412,10 @@ function coproc::sendMessage() {
 # ## coproc::receiveMessage
 #
 # This function receives a message from a given coproc.
+# It expects the message to end with a $'\0' character.
 #
 # - $1: **coproc variable name** _as string_:
 #       The variable name to use for the coproc.
-# - $@: read parameters _as any_:
-#       The arguments to pass to the read command (e.g. -t for timeout).
 #
 # Returns:
 #
@@ -431,12 +431,54 @@ function coproc::sendMessage() {
 # ```
 function coproc::receiveMessage() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  shift 1
 
   REPLY=""
   if eval "local coprocFd=\${${coprocVarName}[0]:-}" && [[ -n ${coprocFd} ]]; then
-    if { IFS=$'\0' read "$@" -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
+    if { IFS=$'\0' read -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
       return 0
+    fi
+  fi
+  return 1
+}
+
+# ## coproc::receiveMessageWithTimeOut
+#
+# This function receives a message from a given coproc.
+# It expects the message to be placed after a $'\0' string and end with a $'\0' character.
+# This is because the read timeout can prevent to read the whole message if it is sent too slowly.
+# So we read until we get the $'\0', then we read the message until the $'\0' character.
+#
+# - $1: **coproc variable name** _as string_:
+#       The variable name to use for the coproc.
+# - $2: **time out** _as int_:
+#       The time out in seconds to wait for a message.
+#
+# Returns:
+#
+# - $?:
+#   - 0 if a message was received successfully.
+#   - 1 if the coproc is not running or no message could be received.
+# - ${REPLY}: The received message.
+#
+# ```bash
+# if coproc::receiveMessageWithTimeOut "myCoproc" 0.05; then
+#   echo "Received message: ${REPLY}"
+# fi
+# ```
+function coproc::receiveMessageWithTimeOut() {
+  local \
+    coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    timeOut="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  REPLY=""
+  if eval "local coprocFd=\${${coprocVarName}[0]:-}" && [[ -n ${coprocFd} ]]; then
+    if { IFS=$'\0' read -t "${timeOut}" -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
+      if [[ -n ${REPLY} ]]; then
+        return 0
+      fi
+      if { IFS=$'\0' read -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
+        return 0
+      fi
     fi
   fi
   return 1
