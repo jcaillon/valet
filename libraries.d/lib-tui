@@ -85,7 +85,7 @@ function tui::startMainLoop() {
   GLOBAL_WARN_ON_INTERRUPT_DISABLED=true
   GLOBAL_SCREEN_REDRAW_REQUIRED=true
 
-  local -i nbCoprocRestart=0
+  local -i nbCoprocRestart=0 readDelayInMicroseconds
   local IFS=" "
 
   # main loop
@@ -96,28 +96,37 @@ function tui::startMainLoop() {
       GLOBAL_SCREEN_REDRAW_REQUIRED=false
     fi
 
-    # call the on each loop iteration callback function if defined
     time::getProgramElapsedMicroseconds
-    if [[ -n ${onTickCallback} && REPLY -gt $((lastTickTime + tickDelayMicroseconds)) ]]; then
-      lastTickTime="${REPLY}"
-      "${onTickCallback}"
-    fi
+    readDelayInMicroseconds=$((tickDelayMicroseconds - (REPLY - lastTickTime)))
+    while (( REPLY - lastTickTime <= tickDelayMicroseconds )); do
+      readDelayInMicroseconds=$((readDelayInMicroseconds - (REPLY - lastTickTime)))
 
-    # read the key pressed from the key press listener coproc
-    if coproc::receiveMessageWithTimeOut KEY_PRESS_LISTENER "${readDelay}"; then
-      REPLY_CODE=0
-      "${onKeyPressCallback}" "${REPLY}"
-      if ((REPLY_CODE != 0)); then
-        log::debug "The on key press callback function ⌜${onKeyPressCallback}⌝ returned non-zero exit code, stopping the main loop."
-        break
+      time::getSecondsFromMicroseconds ${readDelayInMicroseconds}
+
+      # read the key pressed from the key press listener coproc
+      if coproc::receiveMessageWithTimeOut KEY_PRESS_LISTENER "${REPLY}"; then
+        REPLY_CODE=0
+        "${onKeyPressCallback}" "${REPLY}"
+        if ((REPLY_CODE != 0)); then
+          log::debug "The on key press callback function ⌜${onKeyPressCallback}⌝ returned non-zero exit code, stopping the main loop."
+          break 2
+        fi
+      elif ! coproc::isRunning KEY_PRESS_LISTENER; then
+        if ((nbCoprocRestart > 3)); then
+          core::fail "Key press listener coproc is failing to start, check the logs for errors."
+        fi
+        log::warning "Key press listener coproc is not already running, re-starting it."
+        tui_startKeyPressListener
+        nbCoprocRestart+=1
       fi
-    elif ! coproc::isRunning KEY_PRESS_LISTENER; then
-      if ((nbCoprocRestart > 3)); then
-        core::fail "Key press listener coproc is failing to start, check the logs for errors."
-      fi
-      log::warning "Key press listener coproc is not already running, re-starting it."
-      tui_startKeyPressListener
-      nbCoprocRestart+=1
+
+      time::getProgramElapsedMicroseconds
+    done
+    lastTickTime="${REPLY}"
+
+    # call the on each loop iteration callback function if defined
+    if [[ -n ${onTickCallback} ]]; then
+      "${onTickCallback}"
     fi
   done
 

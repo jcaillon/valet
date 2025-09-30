@@ -426,7 +426,6 @@ function interactive::choose() {
 
   # define the callback function called on each loop iteration
   function onTick() {
-    log::debug "Tick"
     list::onTick
   }
 

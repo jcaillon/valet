@@ -55,13 +55,19 @@ function terminal::createSpace() {
 # terminal::getCursorPosition
 # ```
 function terminal::getCursorPosition() {
-  local IFS
-  # we request the position
-  printf "%s" "${ESC__REQUEST_CURSOR_POSITION}" 1>&"${GLOBAL_FD_TUI}"
-  # then read \e[line;colR
-  # shellcheck disable=SC2034
-  IFS=';' read -d 'R' -sr GLOBAL_CURSOR_LINE GLOBAL_CURSOR_COLUMN || :
-  GLOBAL_CURSOR_LINE="${GLOBAL_CURSOR_LINE#$'\e['}"
+  local IFS attempts=0
+  while ((attempts < 3)); do
+    attempts=$((attempts + 1))
+    # we request the position
+    printf "%s" "${ESC__REQUEST_CURSOR_POSITION}" 1>&"${GLOBAL_FD_TUI}"
+    # then read \e[line;colR
+    # shellcheck disable=SC2034
+    if IFS=';' read -t 0.2 -u "${GLOBAL_FD_ORIGINAL_STDIN}" -d 'R' -sr GLOBAL_CURSOR_LINE GLOBAL_CURSOR_COLUMN; then
+      GLOBAL_CURSOR_LINE="${GLOBAL_CURSOR_LINE#$'\e['}"
+      return 0
+    fi
+  done
+  core::fail "Unable to get the current cursor position after ${attempts} attempts."
 }
 
 # ## terminal::switchToFullScreen

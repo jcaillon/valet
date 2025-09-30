@@ -476,7 +476,7 @@ function coproc::receiveMessageWithTimeOut() {
       if [[ -n ${REPLY} ]]; then
         return 0
       fi
-      if { IFS=$'\0' read -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
+      if { IFS=$'\0' read -t 0.2 -rd $'\0' -u "${coprocFd}" REPLY; } 2>/dev/null; then
         return 0
       fi
     fi

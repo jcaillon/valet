@@ -38,7 +38,9 @@ function test_terminal::getCursorPosition() {
 
   test::prompt "printf '\e[%sR' '123;456' | terminal::getCursorPosition"
   printf '\e[%sR' '123;456' 1>"${GLOBAL_TEMPORARY_WORK_FILE}"
-  test::exec terminal::getCursorPosition <"${GLOBAL_TEMPORARY_WORK_FILE}"
+  local GLOBAL_FD_ORIGINAL_STDIN
+  exec {GLOBAL_FD_ORIGINAL_STDIN}<"${GLOBAL_TEMPORARY_WORK_FILE}"
+  test::exec terminal::getCursorPosition
   test::printVars GLOBAL_CURSOR_LINE GLOBAL_CURSOR_COLUMN
 }
 
