@@ -2,6 +2,30 @@
 
 ## Test script 00.terminal
 
+### ✅ Testing terminal::isCursorInBox
+
+❯ `terminal::isCursorInBox cursorTop=5 cursorLeft=5 top=2 left=2 width=9 height=9`
+
+❯ `terminal::isCursorInBox cursorTop=2 cursorLeft=10 top=2 left=2 width=9 height=9`
+
+❯ `terminal::isCursorInBox cursorTop=10 cursorLeft=2 top=2 left=2 width=9 height=9`
+
+❯ `terminal::isCursorInBox cursorTop=2 cursorLeft=11 top=2 left=2 width=9 height=9`
+
+Returned code: `1`
+
+❯ `terminal::isCursorInBox cursorTop=2 cursorLeft=1 top=2 left=2 width=9 height=9`
+
+Returned code: `1`
+
+❯ `terminal::isCursorInBox cursorTop=1 cursorLeft=10 top=2 left=2 width=9 height=9`
+
+Returned code: `1`
+
+❯ `terminal::isCursorInBox cursorTop=11 cursorLeft=10 top=2 left=2 width=9 height=9`
+
+Returned code: `1`
+
 ### ✅ Testing terminal::createSpace
 
 ❯ `terminal::createSpace 1`

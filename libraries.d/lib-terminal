@@ -11,6 +11,60 @@ source fs
 # >>> Interactive utilities
 #===============================================================
 
+# ## terminal::isCursorInBox
+#
+# Check if the cursor is inside a given box.
+#
+# - ${cursorTop} _as int_:
+#       the line number of the cursor (1 based)
+# - ${cursorLeft} _as int_:
+#       the column number of the cursor (1 based)
+# - ${top} _as int_:
+#       (optional) the top position of the box
+#       (defaults to 1)
+# - ${left} _as int_:
+#       (optional) the left position of the box
+#       (defaults to 1)
+# - ${width} _as int_:
+#       (optional) the width of the box
+#       (defaults to "${GLOBAL_COLUMNS}")
+# - ${height} _as int_:
+#       (optional) the height of the box
+#       (defaults to "${GLOBAL_LINES}")
+#
+# Returns:
+#
+# - $?:
+#   - 0 if the cursor is inside the box
+#   - 1 otherwise
+#
+# ```bash
+# if terminal::isCursorInBox 10 10 top=5 left=5 width=10 height=10; then
+#   echo "Cursor is inside the box"
+# else
+#   echo "Cursor is outside the box"
+# fi
+# ```
+function terminal::isCursorInBox() {
+  local \
+    cursorTop=1 \
+    cursorLeft=1 \
+    top=1 \
+    left=1 \
+    width="${GLOBAL_COLUMNS:-9999}" \
+    height="${GLOBAL_LINES:-9999}" \
+    IFS=$' '
+  eval "local a= ${*@Q}"
+
+  if ((cursorTop < top || cursorTop >= top + height)); then
+    return 1
+  fi
+  if ((cursorLeft < left || cursorLeft >= left + width)); then
+    return 1
+  fi
+  return 0
+}
+
 # ## terminal::createSpace
 #
 # This function creates empty lines from the current cursor position.

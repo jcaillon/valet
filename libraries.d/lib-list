@@ -188,8 +188,10 @@ function list::setOptions() {
 
   # handle shortcuts, allow to override the default key mapping
   declare -g -A _LIST_KEY_MAPPING=(
-    ["PAGE_UP"]="scroll-up"
-    ["PAGE_DOWN"]="scroll-down"
+    ["SCROLL_UP"]="scroll-up"
+    ["PAGE_UP"]="page-up"
+    ["SCROLL_DOWN"]="scroll-down"
+    ["PAGE_DOWN"]="page-down"
     ["HOME"]="move-beginning"
     ["CTRL+UP"]="move-beginning"
     ["END"]="move-end"
@@ -860,7 +862,7 @@ function list::convertToInitialItemsIndex() {
 # define the callback function called when a special key is pressed
 # shellcheck disable=SC2317
 function list::onKeyBindingPressed() {
-  local action="${_LIST_KEY_MAPPING[${1}]:-}"
+  local action="${_LIST_KEY_MAPPING[${1%% *}]:-}"
   if [[ -z ${action} ]]; then
     REPLY_CODE=1
     return 0
@@ -883,10 +885,10 @@ function list::onKeyBindingPressed() {
 
   case "${action}" in
   # autocompletion box selected item
-  scroll-up)
+  page-up)
     list::changeSelectedItemIndex "-$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
     ;;
-  scroll-down)
+  page-down)
     list::changeSelectedItemIndex "$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
     ;;
   move-beginning)
@@ -901,6 +903,30 @@ function list::onKeyBindingPressed() {
   move-down)
     list::changeSelectedItemIndex 1
     ;;
+  scroll*)
+    local cursorPosition="${1#* }"
+    if terminal::isCursorInBox cursorLeft="${cursorPosition%;*}" cursorTop="${cursorPosition##*;}" top="${_LIST_TOP}" left="${_LIST_LEFT}" width="$((_LIST_WIDTH - _LIST_SYMBOL_RIGHT_LENGTH))" height="${_LIST_HEIGHT}"; then
+      # scroll inside the box
+      case "${action}" in
+      scroll-up)
+        list::changeSelectedItemIndex -1
+        ;;
+      scroll-down)
+        list::changeSelectedItemIndex 1
+        ;;
+      esac
+    elif terminal::isCursorInBox cursorLeft="${cursorPosition%;*}" cursorTop="${cursorPosition##*;}" top="${_LIST_TOP}" left="$((_LIST_LEFT + _LIST_WIDTH - _LIST_SYMBOL_RIGHT_LENGTH))" width="${_LIST_SYMBOL_RIGHT_LENGTH}" height="${_LIST_HEIGHT}"; then
+      # scroll on the scroll bar
+      case "${action}" in
+      scroll-up)
+        list::changeSelectedItemIndex "-$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
+        ;;
+      scroll-down)
+        list::changeSelectedItemIndex "$((${_LIST_NB_USABLE_LINES_FOR_ITEMS:-10} - 1))"
+        ;;
+      esac
+    fi
+    ;;
   esac
 
   REPLY_CODE=0
@@ -912,9 +938,7 @@ function list::filter() {
 
   list_filter
 
-  if [[ ${_LIST_ASYNC_FILTERING_RUNNING} != "true" ]]; then
-    list_post_filter
-  fi
+  list_post_filter
 }
 
 # Filter the items of the autocompletion box, will either filter synchronously or asynchronously

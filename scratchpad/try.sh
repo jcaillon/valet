@@ -17,4 +17,8 @@ ONE_LINE_ITEMS=(
   "kiwi"
   "lemon"
 )
+
 interactive::choose ONE_LINE_ITEMS
+
+# mapfile -t MY_ARRAY < "scratchpad/words"
+# interactive::choose MY_ARRAY

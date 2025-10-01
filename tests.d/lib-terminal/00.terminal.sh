@@ -5,7 +5,7 @@ source terminal
 
 # shellcheck disable=SC2034
 function main() {
-  # to test the interactive functions we reactive all escape characters and styles
+  # to test the interactive functions we re-enable all escape characters and styles
   VALET_CONFIG_ENABLE_COLORS=true
   VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
   VALET_CONFIG_STYLE_SQUARED_BOXES=false
@@ -13,6 +13,7 @@ function main() {
   VALET_CONFIG_DISABLE_ESC_CODES=false
   styles::init
 
+  test_terminal::isCursorInBox
   test_terminal::createSpace
   test_terminal::getCursorPosition
   test_terminal::clearBox
@@ -20,6 +21,18 @@ function main() {
   test_terminal::switchToFullScreen
   test_terminal::setRawMode
   test_terminal::rerouteLogs
+}
+
+function test_terminal::isCursorInBox() {
+  test::title "✅ Testing terminal::isCursorInBox"
+
+  test::func terminal::isCursorInBox cursorTop=5 cursorLeft=5 top=2 left=2 width=9 height=9
+  test::func terminal::isCursorInBox cursorTop=2 cursorLeft=10 top=2 left=2 width=9 height=9
+  test::func terminal::isCursorInBox cursorTop=10 cursorLeft=2 top=2 left=2 width=9 height=9
+  test::func terminal::isCursorInBox cursorTop=2 cursorLeft=11 top=2 left=2 width=9 height=9
+  test::func terminal::isCursorInBox cursorTop=2 cursorLeft=1 top=2 left=2 width=9 height=9
+  test::func terminal::isCursorInBox cursorTop=1 cursorLeft=10 top=2 left=2 width=9 height=9
+  test::func terminal::isCursorInBox cursorTop=11 cursorLeft=10 top=2 left=2 width=9 height=9
 }
 
 function test_terminal::createSpace() {

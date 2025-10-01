@@ -4,8 +4,6 @@
 
 # shellcheck source=lib-terminal
 source terminal
-# shellcheck source=lib-list
-source list
 # shellcheck source=lib-tui
 source tui
 
@@ -395,6 +393,8 @@ function interactive::choose() {
   shift 1
   eval "local a= ${*@Q}"
 
+  include list
+
   height=$((height - 4))
   terminal::createSpace "$((height + 1))"
   terminal::getCursorPosition
@@ -408,12 +408,30 @@ function interactive::choose() {
   # list::changeSelectedItemIndex "${move}"
   # list::onTick
 
+  local filterString=""
+
   # define the callback function called when a special key is pressed
   function onKeyPress() {
     log::debug "Key pressed: ⌜${1}⌝"
     if [[ ${1} == ":"* ]]; then
       list::onKeyBindingPressed "${1#:}"
+      if ((REPLY_CODE != 0)); then
+        case ${1} in
+        :BACKSPACE)
+          filterString="${filterString%?}"
+          list::filter "${filterString}"
+          ;;
+        :ESC)
+          REPLY_CODE=1
+          return 0
+          ;;
+        esac
+      fi
+    else
+      filterString+="${1}"
+      list::filter "${filterString}"
     fi
+    REPLY_CODE=0
   }
 
   # define the callback function called when the screen needs to be redrawn
@@ -432,5 +450,5 @@ function interactive::choose() {
   tui::startMainLoop onKeyPress \
     onRedrawRequiredCallback=onRedrawRequired \
     onTickCallback=onTick \
-    tickDelay=0.05
+    tickDelay=0.01
 }
