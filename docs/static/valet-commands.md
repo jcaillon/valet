@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.34.68 (2025-09-17).
+> Documentation generated for the version 0.35.114 (2025-10-03).
 
 ## ▶️ valet self add-command
 
@@ -784,6 +784,10 @@ valet [options] [--] [commands...]
 
   Generate the yaml from the given kustomize directory.
 
+- `aws-cleanup-resources`
+
+  Cleanup AWS resources.
+
 - `aws-login`
 
   Log in to AWS and EKS for the specified profile.
@@ -843,6 +847,10 @@ valet [options] [--] [commands...]
 - `reset-argo-cd`
 
   Deletes all the ArgoCD resources from a cluster.
+
+- `reset-cluster`
+
+  Reset the k8s cluster by removing all objects deploying in the common-plane, tenants and operation zone.
 
 - `self add-command`
 
@@ -926,4 +934,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.34.68 (2025-09-17).
+> Documentation generated for the version 0.35.114 (2025-10-03).

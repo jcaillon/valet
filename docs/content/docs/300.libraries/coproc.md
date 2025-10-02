@@ -48,6 +48,7 @@ coproc::kill "myCoproc"
 ## ⚡ coproc::receiveMessage
 
 This function receives a message from a given coproc.
+It expects the message to end with a $'\0' character.
 
 Inputs:
 
@@ -70,12 +71,51 @@ if coproc::receiveMessage "myCoproc"; then
 fi
 ```
 
+## ⚡ coproc::receiveMessageWithTimeOut
+
+This function receives a message from a given coproc.
+It expects the message to be placed after a $'\0' string and end with a $'\0' character.
+This is because the read timeout can prevent to read the whole message if it is sent too slowly.
+So we read until we get the $'\0', then we read the message until the $'\0' character.
+
+Inputs:
+
+- `$1`: **coproc variable name** _as string_:
+
+  The variable name to use for the coproc.
+
+- `$2`: **time out** _as int_:
+
+  The time out in seconds to wait for a message.
+
+Returns:
+
+- `$?`:
+  - 0 if a message was received successfully.
+  - 1 if the coproc is not running or no message could be received.
+- `${REPLY}`: The received message.
+
+Example usage:
+
+```bash
+if coproc::receiveMessageWithTimeOut "myCoproc" 0.05; then
+  echo "Received message: ${REPLY}"
+fi
+```
+
 ## ⚡ coproc::run
 
-This function runs commands in a coproc.
-Each command can be set to ":" in order to do nothing.
-It returns the file descriptors/PID of the coproc and defines functions to easily
-interact with the coproc.
+This function runs commands in a coproc:
+
+- Run a main command (mainCommand) that is run once at the start of the coproc.
+- Loop until the main thread or the coproc exits. Inside the loop, the coproc can receive messages
+  from the main thread, and more commands are run:
+  - A loop command (loopCommand) is run at the beginning of each iteration of the loop.
+  - An on message command (onMessageCommand) is run when a message is received from the main thread.
+- Finally, it runs an end command (endCommand) once at the end of the coproc.
+
+Each command is optional and will do nothing by default.
+It returns the PID of the coproc.
 
 Inputs:
 
@@ -87,9 +127,9 @@ Inputs:
   <coproc_variable_name>[1] will be the output pipe file descriptor,
   <coproc_variable_name>_PID will be the PID of the coproc.
 
-- `${initCommand}` _as string_:
+- `${mainCommand}` _as string_:
 
-  (optional) The command (will be evaluated) to run at the start of the coproc.
+  (optional) The main command (will be evaluated) to run in the coproc.
   Can exit to stop the coproc.
   Set to ":" to do nothing.
 
@@ -123,11 +163,10 @@ Inputs:
 
   (defaults to ":")
 
-- `${waitForReadiness}` _as bool_:
+- `${waitForMainEnd}` _as bool_:
 
-  (optional) If true, the main thread will wait for the coproc to be ready
-  before returning from this function (readiness is achieved after executing
-  the init command in the coproc).
+  (optional) If true, the main thread will wait for the main command to finish
+  before returning from this function.
 
   (defaults to false)
 
@@ -151,7 +190,7 @@ Returns:
 Example usage:
 
 ```bash
-waitForReadiness=true coproc::run "_MY_COPROC" initCommand loopCommand onMessageCommand
+waitForMainEnd=true coproc::run "_MY_COPROC" mainCommand loopCommand onMessageCommand
 ```
 
 ## ⚡ coproc::runInParallel
@@ -233,6 +272,7 @@ TODO: implement unit tests for this function
 ## ⚡ coproc::sendMessage
 
 This function sends a message to a given coproc.
+The message will be sent with a $'\0' character at the end.
 
 Inputs:
 
@@ -279,4 +319,4 @@ coproc::wait "myCoproc"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.34.68 (2025-09-17).
+> Documentation generated for the version 0.35.114 (2025-10-03).

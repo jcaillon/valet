@@ -78,6 +78,14 @@ Inputs:
 
   (defaults to "")
 
+- `${warnOnFailure}` _as bool_:
+
+  (optional) If true, a warning message (uses failMessage) will be displayed on failure but
+  it will not cause the function to exit.
+  Contrary to noFail, it will display a warning message (noFail is silent).
+
+  (defaults to false)
+
 - `${appendRedirect}` _as bool_:
 
   (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).
@@ -133,4 +141,4 @@ exe::invoke cat --- stdin="Hello World"
 > - On linux, you can use a tmpfs directory for massive gains over subshells.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.34.68 (2025-09-17).
+> Documentation generated for the version 0.35.114 (2025-10-03).

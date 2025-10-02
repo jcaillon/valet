@@ -169,6 +169,75 @@ echo "${REPLY}"
 > - using read into an array from a here string
 > - using bash parameter expansion to remove before/after the separator
 
+## ⚡ string::getFormattedHeader
+
+Get a formatted header string with a given width.
+The header is composed of a left/middle/right part(s).
+The header is padded with a given character to fit the given width.
+The parts are trimmed if too long but they are prioritized in this order: middle, left, right
+(middle will take all the space necessary, then left, then right).
+
+Inputs:
+
+- `$1`: **format** _as string_:
+
+  The format of the header.
+  It must include two | characters to separate the left, middle and right parts.
+  Any part can be empty.
+  Example: "left|middle|right"
+
+- `${width}` _as int_:
+
+  The total width of the header.
+
+  (defaults to "GLOBAL_COLUMNS")
+
+- `${paddingChar}` _as string_:
+
+  (optional) The character to use for padding.
+
+  (defaults to " ")
+
+- `${paddingStyle}` _as string_:
+
+  (optional) The style (ANSI escape codes) to apply the padding characters.
+
+  (defaults to "")
+
+- `${paddingStyleReset}` _as string_:
+
+  (optional) The style (ANSI escape codes) to apply at the end of the padding characters.
+
+  (defaults to "")
+
+- `${partWidths}` _as string_:
+
+  (optional) The actual widths of each part separated by |.
+  If not provided, the actual width of each part will be computed automatically,
+  not taking into account invisible characters (like ANSI escape codes).
+  Example: "10|20|10"
+
+  (defaults to "")
+
+- `${noEllipsis}` _as bool_:
+
+  (optional) If set to true, no ellipsis will be added when a part is trimmed.
+
+  (defaults to false)
+
+Returns:
+
+- `${REPLY}`: the formatted header string
+- `${REPLY2}`: the actual widths of each part separated by | (same format as partWidths argument)
+- `${REPLY_ARRAY}`: the actual widths of each part
+
+Example usage:
+
+```bash
+string::getFormattedHeader "Left|Middle|Right" width=50 paddingChar="-" paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
+echo "${REPLY}"
+```
+
 ## ⚡ string::getHexRepresentation
 
 Convert a string to its hexadecimal representation.
@@ -455,6 +524,41 @@ string::trimEdges MY_STRING
 echo "${MY_STRING}"
 ```
 
+## ⚡ string::truncateWithEllipsis
+
+Truncate a string to a given length and add an ellipsis if truncated.
+This function takes into account invisible characters (ANSI escape codes for text formatting).
+The truncation is done in place, for the given variable.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string to truncate.
+
+- `${maxLength}` _as int_:
+
+  The maximum length of the string.
+
+  (defaults to "GLOBAL_COLUMNS")
+
+- `${noEllipsis}` _as bool_:
+
+  (optional) If set to true, no ellipsis will be added when the string is truncated.
+
+  (defaults to false)
+
+Returns:
+- `${REPLY}`: the space left after truncation
+
+Example usage:
+
+```bash
+MY_STRING="This is a long string that might need to be truncated"
+string::truncateWithEllipsis MY_STRING maxLength=20
+echo "${REPLY}"
+```
+
 ## ⚡ string::wrapCharacters
 
 Allows to hard wrap the given string at the given width.
@@ -555,4 +659,4 @@ echo "${REPLY}"
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.34.68 (2025-09-17).
+> Documentation generated for the version 0.35.114 (2025-10-03).

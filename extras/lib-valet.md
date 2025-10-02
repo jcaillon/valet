@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.34.68 (2025-09-17).
+> Documentation generated for the version 0.35.114 (2025-10-03).
 
 ## ⚡ array::appendIfNotPresent
 
@@ -767,6 +767,7 @@ coproc::kill "myCoproc"
 ## ⚡ coproc::receiveMessage
 
 This function receives a message from a given coproc.
+It expects the message to end with a $'\0' character.
 
 Inputs:
 
@@ -789,12 +790,51 @@ if coproc::receiveMessage "myCoproc"; then
 fi
 ```
 
+## ⚡ coproc::receiveMessageWithTimeOut
+
+This function receives a message from a given coproc.
+It expects the message to be placed after a $'\0' string and end with a $'\0' character.
+This is because the read timeout can prevent to read the whole message if it is sent too slowly.
+So we read until we get the $'\0', then we read the message until the $'\0' character.
+
+Inputs:
+
+- `$1`: **coproc variable name** _as string_:
+
+  The variable name to use for the coproc.
+
+- `$2`: **time out** _as int_:
+
+  The time out in seconds to wait for a message.
+
+Returns:
+
+- `$?`:
+  - 0 if a message was received successfully.
+  - 1 if the coproc is not running or no message could be received.
+- `${REPLY}`: The received message.
+
+Example usage:
+
+```bash
+if coproc::receiveMessageWithTimeOut "myCoproc" 0.05; then
+  echo "Received message: ${REPLY}"
+fi
+```
+
 ## ⚡ coproc::run
 
-This function runs commands in a coproc.
-Each command can be set to ":" in order to do nothing.
-It returns the file descriptors/PID of the coproc and defines functions to easily
-interact with the coproc.
+This function runs commands in a coproc:
+
+- Run a main command (mainCommand) that is run once at the start of the coproc.
+- Loop until the main thread or the coproc exits. Inside the loop, the coproc can receive messages
+  from the main thread, and more commands are run:
+  - A loop command (loopCommand) is run at the beginning of each iteration of the loop.
+  - An on message command (onMessageCommand) is run when a message is received from the main thread.
+- Finally, it runs an end command (endCommand) once at the end of the coproc.
+
+Each command is optional and will do nothing by default.
+It returns the PID of the coproc.
 
 Inputs:
 
@@ -806,9 +846,9 @@ Inputs:
   <coproc_variable_name>[1] will be the output pipe file descriptor,
   <coproc_variable_name>_PID will be the PID of the coproc.
 
-- `${initCommand}` _as string_:
+- `${mainCommand}` _as string_:
 
-  (optional) The command (will be evaluated) to run at the start of the coproc.
+  (optional) The main command (will be evaluated) to run in the coproc.
   Can exit to stop the coproc.
   Set to ":" to do nothing.
 
@@ -842,11 +882,10 @@ Inputs:
 
   (defaults to ":")
 
-- `${waitForReadiness}` _as bool_:
+- `${waitForMainEnd}` _as bool_:
 
-  (optional) If true, the main thread will wait for the coproc to be ready
-  before returning from this function (readiness is achieved after executing
-  the init command in the coproc).
+  (optional) If true, the main thread will wait for the main command to finish
+  before returning from this function.
 
   (defaults to false)
 
@@ -870,7 +909,7 @@ Returns:
 Example usage:
 
 ```bash
-waitForReadiness=true coproc::run "_MY_COPROC" initCommand loopCommand onMessageCommand
+waitForMainEnd=true coproc::run "_MY_COPROC" mainCommand loopCommand onMessageCommand
 ```
 
 ## ⚡ coproc::runInParallel
@@ -952,6 +991,7 @@ TODO: implement unit tests for this function
 ## ⚡ coproc::sendMessage
 
 This function sends a message to a given coproc.
+The message will be sent with a $'\0' character at the end.
 
 Inputs:
 
@@ -1212,6 +1252,7 @@ Do the necessary initialization for a new subshell, ensuring coherent behavior:
 - Set the correct traps.
 - Initialize specific temporary files/directories location.
 - Reset the elapsed time to 0.
+- Reset the background processes.
 
 Example usage:
 
@@ -1450,6 +1491,14 @@ Inputs:
   (optional) The message to display on failure.
 
   (defaults to "")
+
+- `${warnOnFailure}` _as bool_:
+
+  (optional) If true, a warning message (uses failMessage) will be displayed on failure but
+  it will not cause the function to exit.
+  Contrary to noFail, it will display a warning message (noFail is silent).
+
+  (defaults to false)
 
 - `${appendRedirect}` _as bool_:
 
@@ -2089,7 +2138,73 @@ Example usage:
 include string array ./my/path
 ```
 
-## ⚡  interactive::askForConfirmation
+## ⚡ interactive::confirm
+
+Ask the user to yes or no.
+
+- The user can switch between the two options with the arrow keys or space.
+- The user can validate the choice with the enter key.
+- The user can also validate immediately with the y or n key.
+
+Dialog boxes are displayed for the question and answer.
+
+Inputs:
+
+- `$1`: **prompt** _as string_:
+
+  the prompt to display
+
+- `${default}` _as bool_:
+
+  (optional) the default value to select
+
+  (defaults to true)
+
+Returns:
+
+- `$?`:
+  - 0 if the user answered yes
+  - 1 otherwise
+- `${REPLY}`: true or false.
+
+Example usage:
+
+```bash
+if interactive::confirm "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
+```
+
+## ⚡ interactive::confirmRaw
+
+Ask the user to yes or no.
+
+- The user can switch between the two options with the arrow keys or space.
+- The user can validate the choice with the enter key.
+- The user can also validate immediately with the y or n key.
+
+This raw version does not display the prompt or the answer.
+
+Inputs:
+
+- `${default}` _as bool_:
+
+  (optional) the default value to select
+
+  (defaults to true)
+
+Returns:
+
+- `$?`:
+  - 0 if the user answered yes
+  - 1 otherwise
+- `${REPLY}`: true or false.
+
+Example usage:
+
+```bash
+interactive::confirmRaw "Do you want to continue?" && local answer="${REPLY}"
+```
+
+## ⚡ interactive::continue
 
 Ask the user to press the button to continue.
 
@@ -2108,10 +2223,10 @@ Returns:
 Example usage:
 
 ```bash
-interactive::askForConfirmation "Press enter to continue."
+interactive::continue "Press enter to continue."
 ```
 
-## ⚡ interactive::askForConfirmationRaw
+## ⚡ interactive::continueRaw
 
 Ask the user to press the button to continue.
 
@@ -2126,7 +2241,7 @@ Returns:
 Example usage:
 
 ```bash
-interactive::askForConfirmationRaw
+interactive::continueRaw
 ```
 
 ## ⚡ interactive::displayAnswer
@@ -2189,71 +2304,20 @@ Example usage:
 interactive::displayPrompt "Do you want to continue?"
 ```
 
-## ⚡ interactive::promptYesNo
+## ⚡ list::onTick
 
-Ask the user to yes or no.
+This function must be called regularly (on refresh tick) and is responsible for redrawing the list if necessary.
 
-- The user can switch between the two options with the arrow keys or space.
-- The user can validate the choice with the enter key.
-- The user can also validate immediately with the y or n key.
 
-Dialog boxes are displayed for the question and answer.
+## ⚡ list::setItems
 
-Inputs:
-
-- `$1`: **prompt** _as string_:
-
-  the prompt to display
-
-- `${default}` _as bool_:
-
-  (optional) the default value to select
-
-  (defaults to true)
-
-Returns:
-
-- `$?`:
-  - 0 if the user answered yes
-  - 1 otherwise
-- `${REPLY}`: true or false.
-
-Example usage:
-
-```bash
-if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
-```
-
-## ⚡ interactive::promptYesNoRaw
-
-Ask the user to yes or no.
-
-- The user can switch between the two options with the arrow keys or space.
-- The user can validate the choice with the enter key.
-- The user can also validate immediately with the y or n key.
-
-This raw version does not display the prompt or the answer.
+Set up the list of items to display.
 
 Inputs:
 
-- `${default}` _as bool_:
+- `$1` _as string_:
 
-  (optional) the default value to select
-
-  (defaults to true)
-
-Returns:
-
-- `$?`:
-  - 0 if the user answered yes
-  - 1 otherwise
-- `${REPLY}`: true or false.
-
-Example usage:
-
-```bash
-interactive::promptYesNoRaw "Do you want to continue?" && local answer="${REPLY}"
-```
+  The name of the array that contains the items to display.
 
 ## ⚡ log::debug
 
@@ -3288,6 +3352,75 @@ echo "${REPLY}"
 > - using read into an array from a here string
 > - using bash parameter expansion to remove before/after the separator
 
+## ⚡ string::getFormattedHeader
+
+Get a formatted header string with a given width.
+The header is composed of a left/middle/right part(s).
+The header is padded with a given character to fit the given width.
+The parts are trimmed if too long but they are prioritized in this order: middle, left, right
+(middle will take all the space necessary, then left, then right).
+
+Inputs:
+
+- `$1`: **format** _as string_:
+
+  The format of the header.
+  It must include two | characters to separate the left, middle and right parts.
+  Any part can be empty.
+  Example: "left|middle|right"
+
+- `${width}` _as int_:
+
+  The total width of the header.
+
+  (defaults to "GLOBAL_COLUMNS")
+
+- `${paddingChar}` _as string_:
+
+  (optional) The character to use for padding.
+
+  (defaults to " ")
+
+- `${paddingStyle}` _as string_:
+
+  (optional) The style (ANSI escape codes) to apply the padding characters.
+
+  (defaults to "")
+
+- `${paddingStyleReset}` _as string_:
+
+  (optional) The style (ANSI escape codes) to apply at the end of the padding characters.
+
+  (defaults to "")
+
+- `${partWidths}` _as string_:
+
+  (optional) The actual widths of each part separated by |.
+  If not provided, the actual width of each part will be computed automatically,
+  not taking into account invisible characters (like ANSI escape codes).
+  Example: "10|20|10"
+
+  (defaults to "")
+
+- `${noEllipsis}` _as bool_:
+
+  (optional) If set to true, no ellipsis will be added when a part is trimmed.
+
+  (defaults to false)
+
+Returns:
+
+- `${REPLY}`: the formatted header string
+- `${REPLY2}`: the actual widths of each part separated by | (same format as partWidths argument)
+- `${REPLY_ARRAY}`: the actual widths of each part
+
+Example usage:
+
+```bash
+string::getFormattedHeader "Left|Middle|Right" width=50 paddingChar="-" paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
+echo "${REPLY}"
+```
+
 ## ⚡ string::getHexRepresentation
 
 Convert a string to its hexadecimal representation.
@@ -3574,6 +3707,41 @@ string::trimEdges MY_STRING
 echo "${MY_STRING}"
 ```
 
+## ⚡ string::truncateWithEllipsis
+
+Truncate a string to a given length and add an ellipsis if truncated.
+This function takes into account invisible characters (ANSI escape codes for text formatting).
+The truncation is done in place, for the given variable.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string to truncate.
+
+- `${maxLength}` _as int_:
+
+  The maximum length of the string.
+
+  (defaults to "GLOBAL_COLUMNS")
+
+- `${noEllipsis}` _as bool_:
+
+  (optional) If set to true, no ellipsis will be added when the string is truncated.
+
+  (defaults to false)
+
+Returns:
+- `${REPLY}`: the space left after truncation
+
+Example usage:
+
+```bash
+MY_STRING="This is a long string that might need to be truncated"
+string::truncateWithEllipsis MY_STRING maxLength=20
+echo "${REPLY}"
+```
+
 ## ⚡ string::wrapCharacters
 
 Allows to hard wrap the given string at the given width.
@@ -3854,6 +4022,12 @@ terminal::clearBox top=1 left=1 width=10 height=5
 
 This function reads all the inputs from the user, effectively discarding them.
 
+Inputs:
+
+- `$@`: read parameters _as any_:
+
+  additional parameters to pass to the read command
+
 Example usage:
 
 ```bash
@@ -3996,6 +4170,60 @@ terminal::getTerminalSize
 printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
 ```
 
+## ⚡ terminal::isCursorInBox
+
+Check if the cursor is inside a given box.
+
+Inputs:
+
+- `${cursorTop}` _as int_:
+
+  the line number of the cursor (1 based)
+
+- `${cursorLeft}` _as int_:
+
+  the column number of the cursor (1 based)
+
+- `${top}` _as int_:
+
+  (optional) the top position of the box
+
+  (defaults to 1)
+
+- `${left}` _as int_:
+
+  (optional) the left position of the box
+
+  (defaults to 1)
+
+- `${width}` _as int_:
+
+  (optional) the width of the box
+
+  (defaults to "${GLOBAL_COLUMNS}")
+
+- `${height}` _as int_:
+
+  (optional) the height of the box
+
+  (defaults to "${GLOBAL_LINES}")
+
+Returns:
+
+- `$?`:
+  - 0 if the cursor is inside the box
+  - 1 otherwise
+
+Example usage:
+
+```bash
+if terminal::isCursorInBox 10 10 top=5 left=5 width=10 height=10; then
+  echo "Cursor is inside the box"
+else
+  echo "Cursor is outside the box"
+fi
+```
+
 ## ⚡ terminal::rebindKeymap
 
 Rebinds all special keys to call a given callback function.
@@ -4014,6 +4242,21 @@ Inputs:
 - `$1`: **callback function** _as string_:
 
   The function name to call when a special key is pressed.
+
+Example usage:
+
+```bash
+terminal::rebindKeymap
+```
+
+> Key binding is a mess because binding is based on the sequence of characters that gets
+> generated by the terminal when a key is pressed and this is not standard across all terminals.
+> We do our best here to cover most cases but it is by no mean perfect.
+> A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.
+> This means that certain keys cannot be bound, like SHIFT+ENTER. For this, you will
+> need to use a terminal that allows to remap such keys and send a specific sequence
+> of characters that you can bind in bash.
+> `showkey -a` is a good program to see the sequence of characters sent by the terminal.
 
 ## ⚡ terminal::rerouteLogs
 
@@ -4158,7 +4401,7 @@ to be set using `terminal::setRawMode`.
 
 Inputs:
 
-- `$@`: **read parameters** _as any_:
+- `$@`: read parameters _as any_:
 
   additional parameters to pass to the read command
 
@@ -4192,7 +4435,7 @@ You should use `tui::start` instead of using this function directly.
 
 Inputs:
 
-- `$@`: **read parameters** _as any_:
+- `$@`: read parameters _as any_:
 
   additional parameters to pass to the read command
 
@@ -4534,7 +4777,7 @@ time::getDate format="'%(%Hh%Mm%Ss)T'"
 
 > This function avoid to call $(date) in a subshell (date is a an external executable).
 
-## ⚡ time::getMicrosecondsToHuman
+## ⚡ time::getHumanTimeFromMicroseconds
 
 Convert microseconds to human readable format.
 
@@ -4573,14 +4816,57 @@ Returns:
 Example usage:
 
 ```bash
-time::getMicrosecondsToHuman 123456789
-time::getMicrosecondsToHuman 123456789 format="%HH:%MM:%SS"
+time::getHumanTimeFromMicroseconds 123456789
+time::getHumanTimeFromMicroseconds 123456789 format="%HH:%MM:%SS"
 echo "${REPLY}"
 ```
 
-## ⚡ time::getMicrosecondsToSeconds
+## ⚡ time::getMicrosecondsFromSeconds
 
-Convert a microseconds integer to seconds float.
+Convert seconds (float number representation) to microseconds.
+e.g. 1.234567 → 1234567
+
+Inputs:
+
+- `$1`: **seconds** _as float_:
+
+  the seconds to convert
+
+Returns:
+
+- `${REPLY}`: The microseconds (integer number).
+
+Example usage:
+
+```bash
+time::getMicrosecondsFromSeconds 1.234567
+echo "${REPLY}"
+```
+
+## ⚡ time::getProgramElapsedMicroseconds
+
+Get the elapsed time in µs since the program started.
+
+Returns:
+
+- `${REPLY}`: the elapsed time in µs since the program started.
+
+Example usage:
+
+```bash
+time::getProgramElapsedMicroseconds
+echo "${REPLY}"
+time::getHumanTimeFromMicroseconds "${REPLY}"
+echo "Human time: ${REPLY}"
+```
+
+> We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.
+> The 10# forces the base 10 conversion to avoid issues with leading zeros.
+> Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
+
+## ⚡ time::getSecondsFromMicroseconds
+
+Convert microseconds to seconds (float number representation).
 e.g. 1234567 → 1.234567
 
 Inputs:
@@ -4602,31 +4888,10 @@ Returns:
 Example usage:
 
 ```bash
-time::getMicrosecondsToSeconds 1234567
-time::getMicrosecondsToSeconds 1234567 precision=3
+time::getSecondsFromMicroseconds 1234567
+time::getSecondsFromMicroseconds 1234567 precision=3
 echo "${REPLY}"
 ```
-
-## ⚡ time::getProgramElapsedMicroseconds
-
-Get the elapsed time in µs since the program started.
-
-Returns:
-
-- `${REPLY}`: the elapsed time in µs since the program started.
-
-Example usage:
-
-```bash
-time::getProgramElapsedMicroseconds
-echo "${REPLY}"
-time::getMicrosecondsToHuman "${REPLY}"
-echo "Human time: ${REPLY}"
-```
-
-> We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.
-> The 10# forces the base 10 conversion to avoid issues with leading zeros.
-> Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 
 ## ⚡ time::getTimerMicroseconds
 
@@ -4643,7 +4908,7 @@ Inputs:
 - `${format}` _as string_:
 
   (optional) The format to use if we log the elapsed time.
-  See `time::getMicrosecondsToHuman` for the format.
+  See `time::getHumanTimeFromMicroseconds` for the format.
 
   (defaults to "%S.%LLs").
 
@@ -4657,6 +4922,39 @@ Example usage:
 time::startTimer
 time::getTimerMicroseconds logElapsedTime=true
 echo "Total microseconds: ${REPLY}"
+```
+
+## ⚡ time::isTimeElapsed
+
+Check if a given time in microseconds has elapsed since the last call
+to this function.
+
+Inputs:
+
+- `$1`: **microseconds** _as int_:
+
+  the microseconds to check
+
+- `${timerName}` _as int_:
+
+  A variable name that will be used to store the last time this function was called.
+  Defaults to the name of the calling function.
+  Can be set to a fixed value if you call this function from different functions
+  and want to share the same timer.
+
+  (defaults to "${FUNCNAME[1]}")
+
+Returns:
+
+- 0 if the time has elapsed
+- 1 if the time has not yet elapsed
+
+Example usage:
+
+```bash
+if time::isTimeElapsed 500000; then
+  echo "500ms has elapsed since the last call to this function"
+fi
 ```
 
 ## ⚡ time::startTimer
@@ -5016,4 +5314,4 @@ windows::endPs1Batch
 
 
 
-> Documentation generated for the version 0.34.68 (2025-09-17).
+> Documentation generated for the version 0.35.114 (2025-10-03).

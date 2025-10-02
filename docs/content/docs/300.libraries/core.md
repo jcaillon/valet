@@ -220,6 +220,7 @@ Do the necessary initialization for a new subshell, ensuring coherent behavior:
 - Set the correct traps.
 - Initialize specific temporary files/directories location.
 - Reset the elapsed time to 0.
+- Reset the background processes.
 
 Example usage:
 
@@ -318,4 +319,4 @@ _OPTION_CONTINUE_IF_NOT_FOUND=false _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 so
 > - Use `builtin source` if you want to include the file even if it was already included.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.34.68 (2025-09-17).
+> Documentation generated for the version 0.35.114 (2025-10-03).

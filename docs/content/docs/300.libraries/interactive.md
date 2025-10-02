@@ -5,7 +5,73 @@ cascade:
 url: /docs/libraries/interactive
 ---
 
-## ⚡  interactive::askForConfirmation
+## ⚡ interactive::confirm
+
+Ask the user to yes or no.
+
+- The user can switch between the two options with the arrow keys or space.
+- The user can validate the choice with the enter key.
+- The user can also validate immediately with the y or n key.
+
+Dialog boxes are displayed for the question and answer.
+
+Inputs:
+
+- `$1`: **prompt** _as string_:
+
+  the prompt to display
+
+- `${default}` _as bool_:
+
+  (optional) the default value to select
+
+  (defaults to true)
+
+Returns:
+
+- `$?`:
+  - 0 if the user answered yes
+  - 1 otherwise
+- `${REPLY}`: true or false.
+
+Example usage:
+
+```bash
+if interactive::confirm "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
+```
+
+## ⚡ interactive::confirmRaw
+
+Ask the user to yes or no.
+
+- The user can switch between the two options with the arrow keys or space.
+- The user can validate the choice with the enter key.
+- The user can also validate immediately with the y or n key.
+
+This raw version does not display the prompt or the answer.
+
+Inputs:
+
+- `${default}` _as bool_:
+
+  (optional) the default value to select
+
+  (defaults to true)
+
+Returns:
+
+- `$?`:
+  - 0 if the user answered yes
+  - 1 otherwise
+- `${REPLY}`: true or false.
+
+Example usage:
+
+```bash
+interactive::confirmRaw "Do you want to continue?" && local answer="${REPLY}"
+```
+
+## ⚡ interactive::continue
 
 Ask the user to press the button to continue.
 
@@ -24,10 +90,10 @@ Returns:
 Example usage:
 
 ```bash
-interactive::askForConfirmation "Press enter to continue."
+interactive::continue "Press enter to continue."
 ```
 
-## ⚡ interactive::askForConfirmationRaw
+## ⚡ interactive::continueRaw
 
 Ask the user to press the button to continue.
 
@@ -42,7 +108,7 @@ Returns:
 Example usage:
 
 ```bash
-interactive::askForConfirmationRaw
+interactive::continueRaw
 ```
 
 ## ⚡ interactive::displayAnswer
@@ -105,71 +171,5 @@ Example usage:
 interactive::displayPrompt "Do you want to continue?"
 ```
 
-## ⚡ interactive::promptYesNo
-
-Ask the user to yes or no.
-
-- The user can switch between the two options with the arrow keys or space.
-- The user can validate the choice with the enter key.
-- The user can also validate immediately with the y or n key.
-
-Dialog boxes are displayed for the question and answer.
-
-Inputs:
-
-- `$1`: **prompt** _as string_:
-
-  the prompt to display
-
-- `${default}` _as bool_:
-
-  (optional) the default value to select
-
-  (defaults to true)
-
-Returns:
-
-- `$?`:
-  - 0 if the user answered yes
-  - 1 otherwise
-- `${REPLY}`: true or false.
-
-Example usage:
-
-```bash
-if interactive::promptYesNo "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
-```
-
-## ⚡ interactive::promptYesNoRaw
-
-Ask the user to yes or no.
-
-- The user can switch between the two options with the arrow keys or space.
-- The user can validate the choice with the enter key.
-- The user can also validate immediately with the y or n key.
-
-This raw version does not display the prompt or the answer.
-
-Inputs:
-
-- `${default}` _as bool_:
-
-  (optional) the default value to select
-
-  (defaults to true)
-
-Returns:
-
-- `$?`:
-  - 0 if the user answered yes
-  - 1 otherwise
-- `${REPLY}`: true or false.
-
-Example usage:
-
-```bash
-interactive::promptYesNoRaw "Do you want to continue?" && local answer="${REPLY}"
-```
-
 > [!IMPORTANT]
-> Documentation generated for the version 0.34.68 (2025-09-17).
+> Documentation generated for the version 0.35.114 (2025-10-03).

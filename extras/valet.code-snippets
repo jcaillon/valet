@@ -1,5 +1,5 @@
 {
-// Documentation generated for the version 0.34.68 (2025-09-17).
+// Documentation generated for the version 0.35.114 (2025-10-03).
 
 "array::appendIfNotPresent": {
   "prefix": "array::appendIfNotPresent",
@@ -418,21 +418,35 @@
   "prefix": "coproc::receiveMessage#withdoc",
   "description": "This function receives a message from a given coproc...",
   "scope": "",
-  "body": [ "# ## coproc::receiveMessage\n# \n# This function receives a message from a given coproc.\n# \n# - \\$1: **coproc variable name** _as string_:\n#       The variable name to use for the coproc.\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a message was received successfully.\n#   - 1 if the coproc is not running or no message could be received.\n# - \\${REPLY}: The received message.\n# \n# ```bash\n# if coproc::receiveMessage \"myCoproc\"; then\n#   echo \"Received message: \\${REPLY}\"\n# fi\n# ```\n# \ncoproc::receiveMessage \"${1:coproc variable name}\"$0" ]
+  "body": [ "# ## coproc::receiveMessage\n# \n# This function receives a message from a given coproc.\n# It expects the message to end with a \\$'\\0' character.\n# \n# - \\$1: **coproc variable name** _as string_:\n#       The variable name to use for the coproc.\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a message was received successfully.\n#   - 1 if the coproc is not running or no message could be received.\n# - \\${REPLY}: The received message.\n# \n# ```bash\n# if coproc::receiveMessage \"myCoproc\"; then\n#   echo \"Received message: \\${REPLY}\"\n# fi\n# ```\n# \ncoproc::receiveMessage \"${1:coproc variable name}\"$0" ]
+},
+
+"coproc::receiveMessageWithTimeOut": {
+  "prefix": "coproc::receiveMessageWithTimeOut",
+  "description": "This function receives a message from a given coproc...",
+  "scope": "",
+  "body": [ "coproc::receiveMessageWithTimeOut \"${1:coproc variable name}\" \"${2:time out}\"$0" ]
+},
+
+"coproc::receiveMessageWithTimeOut#withdoc": {
+  "prefix": "coproc::receiveMessageWithTimeOut#withdoc",
+  "description": "This function receives a message from a given coproc...",
+  "scope": "",
+  "body": [ "# ## coproc::receiveMessageWithTimeOut\n# \n# This function receives a message from a given coproc.\n# It expects the message to be placed after a \\$'\\0' string and end with a \\$'\\0' character.\n# This is because the read timeout can prevent to read the whole message if it is sent too slowly.\n# So we read until we get the \\$'\\0', then we read the message until the \\$'\\0' character.\n# \n# - \\$1: **coproc variable name** _as string_:\n#       The variable name to use for the coproc.\n# - \\$2: **time out** _as int_:\n#       The time out in seconds to wait for a message.\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a message was received successfully.\n#   - 1 if the coproc is not running or no message could be received.\n# - \\${REPLY}: The received message.\n# \n# ```bash\n# if coproc::receiveMessageWithTimeOut \"myCoproc\" 0.05; then\n#   echo \"Received message: \\${REPLY}\"\n# fi\n# ```\n# \ncoproc::receiveMessageWithTimeOut \"${1:coproc variable name}\" \"${2:time out}\"$0" ]
 },
 
 "coproc::run": {
   "prefix": "coproc::run",
-  "description": "This function runs commands in a coproc...",
+  "description": "This function runs commands in a coproc:  - Run a main command (mainCommand) that is run once at the start of the coproc...",
   "scope": "",
-  "body": [ "coproc::run \"${1:coproc variable name}\" initCommand=${2:\":\"} loopCommand=${3:\":\"} onMessageCommand=${4:\"\"} endCommand=${5:\":\"} waitForReadiness=${6:false} keepOnlyLastMessage=${7:false} redirectLogsToFile=${8:\"\"}$0" ]
+  "body": [ "coproc::run \"${1:coproc variable name}\" mainCommand=${2:\":\"} loopCommand=${3:\":\"} onMessageCommand=${4:\"\"} endCommand=${5:\":\"} waitForMainEnd=${6:false} keepOnlyLastMessage=${7:false} redirectLogsToFile=${8:\"\"}$0" ]
 },
 
 "coproc::run#withdoc": {
   "prefix": "coproc::run#withdoc",
-  "description": "This function runs commands in a coproc...",
+  "description": "This function runs commands in a coproc:  - Run a main command (mainCommand) that is run once at the start of the coproc...",
   "scope": "",
-  "body": [ "# ## coproc::run\n# \n# This function runs commands in a coproc.\n# Each command can be set to \":\" in order to do nothing.\n# It returns the file descriptors/PID of the coproc and defines functions to easily\n# interact with the coproc.\n# \n# - \\$1: **coproc variable name** _as string_:\n#       The variable name to use for the coproc.\n#       It will be used to store the coproc file descriptors and PID.\n#       <coproc_variable_name>[0] will be the input pipe file descriptor,\n#       <coproc_variable_name>[1] will be the output pipe file descriptor,\n#       <coproc_variable_name>_PID will be the PID of the coproc.\n# - \\${initCommand} _as string_:\n#       (optional) The command (will be evaluated) to run at the start of the coproc.\n#       Can exit to stop the coproc.\n#       Set to \":\" to do nothing.\n#       (defaults to \":\")\n# - \\${loopCommand} _as string_:\n#       (optional) The command (will be evaluated) to run in the coproc loop.\n#       Can exit to stop the coproc, can break or continue the loop.\n#       Set to \":\" to do nothing.\n#       (defaults to \":\")\n# - \\${onMessageCommand} _as string_:\n#       (optional) The command (will be evaluated) to run in the coproc loop when a message\n#       is received from the main thread.\n#       The command can expect to use the variable REPLY which contains\n#       the message (string) received from the main thread.\n#       The command can send messages to the main thread using the syntax\n#       printf \"%s\\0\" \"message\"\n#       Can exit to stop the coproc, can break or continue the loop.\n#       Set to an empty string to not run any command on message.\n#       (defaults to \"\")\n# - \\${endCommand} _as string_:\n#       (optional) The command (will be evaluated) to run at the end of the coproc.\n#       Set to \":\" to do nothing.\n#       (defaults to \":\")\n# - \\${waitForReadiness} _as bool_:\n#       (optional) If true, the main thread will wait for the coproc to be ready\n#       before returning from this function (readiness is achieved after executing\n#       the init command in the coproc).\n#       (defaults to false)\n# - \\${keepOnlyLastMessage} _as bool_:\n#       (optional) If true, the coproc will only keep the last message received\n#       from the main thread to evaluate the on message command.\n#       (defaults to false)\n# - \\${redirectLogsToFile} _as string_:\n#       (optional) The path to a file where the logs of the coproc will be redirected.\n#       (defaults to \"\")\n# \n# Returns:\n# \n# - \\${REPLY}: The PID of the coproc.\n# \n# ```bash\n# waitForReadiness=true coproc::run \"_MY_COPROC\" initCommand loopCommand onMessageCommand\n# ```\n# \ncoproc::run \"${1:coproc variable name}\" initCommand=${2:\":\"} loopCommand=${3:\":\"} onMessageCommand=${4:\"\"} endCommand=${5:\":\"} waitForReadiness=${6:false} keepOnlyLastMessage=${7:false} redirectLogsToFile=${8:\"\"}$0" ]
+  "body": [ "# ## coproc::run\n# \n# This function runs commands in a coproc:\n# \n# - Run a main command (mainCommand) that is run once at the start of the coproc.\n# - Loop until the main thread or the coproc exits. Inside the loop, the coproc can receive messages\n#   from the main thread, and more commands are run:\n#   - A loop command (loopCommand) is run at the beginning of each iteration of the loop.\n#   - An on message command (onMessageCommand) is run when a message is received from the main thread.\n# - Finally, it runs an end command (endCommand) once at the end of the coproc.\n# \n# Each command is optional and will do nothing by default.\n# It returns the PID of the coproc.\n# \n# - \\$1: **coproc variable name** _as string_:\n#       The variable name to use for the coproc.\n#       It will be used to store the coproc file descriptors and PID.\n#       <coproc_variable_name>[0] will be the input pipe file descriptor,\n#       <coproc_variable_name>[1] will be the output pipe file descriptor,\n#       <coproc_variable_name>_PID will be the PID of the coproc.\n# - \\${mainCommand} _as string_:\n#       (optional) The main command (will be evaluated) to run in the coproc.\n#       Can exit to stop the coproc.\n#       Set to \":\" to do nothing.\n#       (defaults to \":\")\n# - \\${loopCommand} _as string_:\n#       (optional) The command (will be evaluated) to run in the coproc loop.\n#       Can exit to stop the coproc, can break or continue the loop.\n#       Set to \":\" to do nothing.\n#       (defaults to \":\")\n# - \\${onMessageCommand} _as string_:\n#       (optional) The command (will be evaluated) to run in the coproc loop when a message\n#       is received from the main thread.\n#       The command can expect to use the variable REPLY which contains\n#       the message (string) received from the main thread.\n#       The command can send messages to the main thread using the syntax\n#       printf \"%s\\0\" \"message\"\n#       Can exit to stop the coproc, can break or continue the loop.\n#       Set to an empty string to not run any command on message.\n#       (defaults to \"\")\n# - \\${endCommand} _as string_:\n#       (optional) The command (will be evaluated) to run at the end of the coproc.\n#       Set to \":\" to do nothing.\n#       (defaults to \":\")\n# - \\${waitForMainEnd} _as bool_:\n#       (optional) If true, the main thread will wait for the main command to finish\n#       before returning from this function.\n#       (defaults to false)\n# - \\${keepOnlyLastMessage} _as bool_:\n#       (optional) If true, the coproc will only keep the last message received\n#       from the main thread to evaluate the on message command.\n#       (defaults to false)\n# - \\${redirectLogsToFile} _as string_:\n#       (optional) The path to a file where the logs of the coproc will be redirected.\n#       (defaults to \"\")\n# \n# Returns:\n# \n# - \\${REPLY}: The PID of the coproc.\n# \n# ```bash\n# waitForMainEnd=true coproc::run \"_MY_COPROC\" mainCommand loopCommand onMessageCommand\n# ```\n# \ncoproc::run \"${1:coproc variable name}\" mainCommand=${2:\":\"} loopCommand=${3:\":\"} onMessageCommand=${4:\"\"} endCommand=${5:\":\"} waitForMainEnd=${6:false} keepOnlyLastMessage=${7:false} redirectLogsToFile=${8:\"\"}$0" ]
 },
 
 "coproc::runInParallel": {
@@ -460,7 +474,7 @@
   "prefix": "coproc::sendMessage#withdoc",
   "description": "This function sends a message to a given coproc...",
   "scope": "",
-  "body": [ "# ## coproc::sendMessage\n# \n# This function sends a message to a given coproc.\n# \n# - \\$1: **coproc variable name** _as string_:\n#       The variable name to use for the coproc.\n# - \\$2: **message** _as string_:\n#       The message to send to the coproc.\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the message was sent successfully.\n#   - 1 if the coproc is not running or the message could not be sent.\n# \n# ```bash\n# coproc::sendMessage \"myCoproc\" \"Hello, coproc!\"\n# ```\n# \n# > This printf call can cause the whole shell to exit with code 141 if there is an issue with the coproc.\n# > You will want to run this in a subshell to avoid exiting the main shell if your coproc is unstable.\n# \ncoproc::sendMessage \"${1:coproc variable name}\" \"${2:message}\"$0" ]
+  "body": [ "# ## coproc::sendMessage\n# \n# This function sends a message to a given coproc.\n# The message will be sent with a \\$'\\0' character at the end.\n# \n# - \\$1: **coproc variable name** _as string_:\n#       The variable name to use for the coproc.\n# - \\$2: **message** _as string_:\n#       The message to send to the coproc.\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the message was sent successfully.\n#   - 1 if the coproc is not running or the message could not be sent.\n# \n# ```bash\n# coproc::sendMessage \"myCoproc\" \"Hello, coproc!\"\n# ```\n# \n# > This printf call can cause the whole shell to exit with code 141 if there is an issue with the coproc.\n# > You will want to run this in a subshell to avoid exiting the main shell if your coproc is unstable.\n# \ncoproc::sendMessage \"${1:coproc variable name}\" \"${2:message}\"$0" ]
 },
 
 "coproc::wait": {
@@ -628,7 +642,7 @@
   "prefix": "core::initSubshell#withdoc",
   "description": "Do the necessary initialization for a new subshell, ensuring coherent behavior:  - Set the correct traps...",
   "scope": "",
-  "body": [ "# ## core::initSubshell\n# \n# Do the necessary initialization for a new subshell, ensuring coherent behavior:\n# \n# - Set the correct traps.\n# - Initialize specific temporary files/directories location.\n# - Reset the elapsed time to 0.\n# \n# ```bash\n# core::initSubshell\n# ```\n# \ncore::initSubshell$0" ]
+  "body": [ "# ## core::initSubshell\n# \n# Do the necessary initialization for a new subshell, ensuring coherent behavior:\n# \n# - Set the correct traps.\n# - Initialize specific temporary files/directories location.\n# - Reset the elapsed time to 0.\n# - Reset the background processes.\n# \n# ```bash\n# core::initSubshell\n# ```\n# \ncore::initSubshell$0" ]
 },
 
 "core::parseFunctionOptions": {
@@ -691,14 +705,14 @@
   "prefix": "exe::invoke",
   "description": "This function call an executable with its optional arguments...",
   "scope": "",
-  "body": [ "exe::invoke \"${1:executable}\" \"${2:arguments}\" --- noFail=${3:false} replyPathOnly=${4:false} stdoutPath=${5:\"\"} stderrPath=${6:\"\"} stdinFile=${7:\"\"} stdin=${8:\"\"} acceptableCodes=${9:\"0\"} failMessage=${10:\"\"} appendRedirect=${11:false} groupRedirect=${12:false} noRedirection=${13:false}$0" ]
+  "body": [ "exe::invoke \"${1:executable}\" \"${2:arguments}\" --- noFail=${3:false} replyPathOnly=${4:false} stdoutPath=${5:\"\"} stderrPath=${6:\"\"} stdinFile=${7:\"\"} stdin=${8:\"\"} acceptableCodes=${9:\"0\"} failMessage=${10:\"\"} warnOnFailure=${11:false} appendRedirect=${12:false} groupRedirect=${13:false} noRedirection=${14:false}$0" ]
 },
 
 "exe::invoke#withdoc": {
   "prefix": "exe::invoke#withdoc",
   "description": "This function call an executable with its optional arguments...",
   "scope": "",
-  "body": [ "# ## exe::invoke\n# \n# This function call an executable with its optional arguments.\n# \n# By default it redirects the stdout and stderr and captures them to output variables.\n# This makes the executes silent unless the executable fails.\n# By default, it will exit (core::fail) if the executable returns a non-zero exit code.\n# \n# This function should be used as a wrapper around any external program as it allows to easily\n# mock the program during tests and facilitates debugging with trace level log.\n# \n# - \\$1: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# - \\${noFail} _as bool_:\n#       (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.\n#       If true and the execution fails, the script will exit.\n#       (defaults to false)\n# - \\${replyPathOnly} _as bool_:\n#       (optional) If set to true, the function will return the file path of the stdout and stderr files\n#       instead of their content. This will make the function faster.\n#       (defaults to false)\n# - \\${stdoutPath} _as string_:\n#       (optional) The file path to use for the stdout of the executable. Otherwise a temporary work file will be used.\n#       (defaults to \"\")\n# - \\${stderrPath} _as string_:\n#       (optional) The file path to use for the stderr of the executable. Otherwise a temporary work file will be used.\n#       (defaults to \"\")\n# - \\${stdinFile} _as bool_:\n#       (optional) The file path to use as stdin for the executable.\n#       (defaults to \"\")\n# - \\${stdin} _as string_:\n#       (optional) The stdin content to pass to the executable.\n#       Can be empty if not used.\n#       (defaults to \"\")\n# - \\${acceptableCodes} _as string_:\n#       (optional) The acceptable error codes, comma separated.\n#       If the error code is matched, then REPLY_CODE is set to 0)\n#       (defaults to \"0\")\n# - \\${failMessage} _as string_:\n#       (optional) The message to display on failure.\n#       (defaults to \"\")\n# - \\${appendRedirect} _as bool_:\n#       (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).\n#       This is useful when you want to run the same command multiple times and keep the previous output.\n#       The stderr and stdout REPLY variables will both have the same content.\n#       (defaults to false)\n# - \\${groupRedirect} _as bool_:\n#       (optional) If true will output stdout/stderr to the same file (&> redirect).\n#       (defaults to false)\n# - \\${noRedirection} _as bool_:\n#       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY_CODE}: The exit code of the executable.\n# - \\${REPLY}: The content of stdout (or file path to stdout if `replyPathOnly=true`).\n# - \\${REPLY2}: The content of stderr (or file path to stdout if `replyPathOnly=true`).\n# \n# ```bash\n# # basic usage with some arguments:\n# exe::invoke git branch --list --sort=-committerdate\n# echo \"\\${REPLY}\"\n# \n# # invoke a command that is allowed to return an error code:\n# exe::invoke risky-command --- noFail=true\n# echo \"\\${REPLY_CODE}\"\n# \n# # invoke a command with custom stdout / stderr files and do not read the output into REPLY vars:\n# exe::invoke thing --- stdoutPath=/path/to/stdout stderrPath=/path/to/stderr replyPathOnly=true\n# \n# # invoke a command and let the outputs go to the console:\n# exe::invoke cat file --- noRedirection=true\n# \n# # invoke a command with stdin from a string:\n# exe::invoke cat --- stdin=\"Hello World\"\n# ```\n# \n# > - In windows, this is tremendously faster to do:\n# >   `exe::invoke mycommand; myvar=\"\\${REPLY}\"`\n# >   than doing:\n# >   `myvar=\"\\$(mycommand)\".`\n# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).\n# > - On linux, you can use a tmpfs directory for massive gains over subshells.\n# \nexe::invoke \"${1:executable}\" \"${2:arguments}\" --- noFail=${3:false} replyPathOnly=${4:false} stdoutPath=${5:\"\"} stderrPath=${6:\"\"} stdinFile=${7:\"\"} stdin=${8:\"\"} acceptableCodes=${9:\"0\"} failMessage=${10:\"\"} appendRedirect=${11:false} groupRedirect=${12:false} noRedirection=${13:false}$0" ]
+  "body": [ "# ## exe::invoke\n# \n# This function call an executable with its optional arguments.\n# \n# By default it redirects the stdout and stderr and captures them to output variables.\n# This makes the executes silent unless the executable fails.\n# By default, it will exit (core::fail) if the executable returns a non-zero exit code.\n# \n# This function should be used as a wrapper around any external program as it allows to easily\n# mock the program during tests and facilitates debugging with trace level log.\n# \n# - \\$1: **executable** _as string_:\n#       the executable or function to execute\n# - \\$@: **arguments** _as any_:\n#       the arguments to pass to the executable\n# - \\${noFail} _as bool_:\n#       (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.\n#       If true and the execution fails, the script will exit.\n#       (defaults to false)\n# - \\${replyPathOnly} _as bool_:\n#       (optional) If set to true, the function will return the file path of the stdout and stderr files\n#       instead of their content. This will make the function faster.\n#       (defaults to false)\n# - \\${stdoutPath} _as string_:\n#       (optional) The file path to use for the stdout of the executable. Otherwise a temporary work file will be used.\n#       (defaults to \"\")\n# - \\${stderrPath} _as string_:\n#       (optional) The file path to use for the stderr of the executable. Otherwise a temporary work file will be used.\n#       (defaults to \"\")\n# - \\${stdinFile} _as bool_:\n#       (optional) The file path to use as stdin for the executable.\n#       (defaults to \"\")\n# - \\${stdin} _as string_:\n#       (optional) The stdin content to pass to the executable.\n#       Can be empty if not used.\n#       (defaults to \"\")\n# - \\${acceptableCodes} _as string_:\n#       (optional) The acceptable error codes, comma separated.\n#       If the error code is matched, then REPLY_CODE is set to 0)\n#       (defaults to \"0\")\n# - \\${failMessage} _as string_:\n#       (optional) The message to display on failure.\n#       (defaults to \"\")\n# - \\${warnOnFailure} _as bool_:\n#       (optional) If true, a warning message (uses failMessage) will be displayed on failure but\n#       it will not cause the function to exit.\n#       Contrary to noFail, it will display a warning message (noFail is silent).\n#       (defaults to false)\n# - \\${appendRedirect} _as bool_:\n#       (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).\n#       This is useful when you want to run the same command multiple times and keep the previous output.\n#       The stderr and stdout REPLY variables will both have the same content.\n#       (defaults to false)\n# - \\${groupRedirect} _as bool_:\n#       (optional) If true will output stdout/stderr to the same file (&> redirect).\n#       (defaults to false)\n# - \\${noRedirection} _as bool_:\n#       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY_CODE}: The exit code of the executable.\n# - \\${REPLY}: The content of stdout (or file path to stdout if `replyPathOnly=true`).\n# - \\${REPLY2}: The content of stderr (or file path to stdout if `replyPathOnly=true`).\n# \n# ```bash\n# # basic usage with some arguments:\n# exe::invoke git branch --list --sort=-committerdate\n# echo \"\\${REPLY}\"\n# \n# # invoke a command that is allowed to return an error code:\n# exe::invoke risky-command --- noFail=true\n# echo \"\\${REPLY_CODE}\"\n# \n# # invoke a command with custom stdout / stderr files and do not read the output into REPLY vars:\n# exe::invoke thing --- stdoutPath=/path/to/stdout stderrPath=/path/to/stderr replyPathOnly=true\n# \n# # invoke a command and let the outputs go to the console:\n# exe::invoke cat file --- noRedirection=true\n# \n# # invoke a command with stdin from a string:\n# exe::invoke cat --- stdin=\"Hello World\"\n# ```\n# \n# > - In windows, this is tremendously faster to do:\n# >   `exe::invoke mycommand; myvar=\"\\${REPLY}\"`\n# >   than doing:\n# >   `myvar=\"\\$(mycommand)\".`\n# > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).\n# > - On linux, you can use a tmpfs directory for massive gains over subshells.\n# \nexe::invoke \"${1:executable}\" \"${2:arguments}\" --- noFail=${3:false} replyPathOnly=${4:false} stdoutPath=${5:\"\"} stderrPath=${6:\"\"} stdinFile=${7:\"\"} stdin=${8:\"\"} acceptableCodes=${9:\"0\"} failMessage=${10:\"\"} warnOnFailure=${11:false} appendRedirect=${12:false} groupRedirect=${13:false} noRedirection=${14:false}$0" ]
 },
 
 "fs::cat": {
@@ -981,32 +995,60 @@
   "body": [ "# ## include\n# \n# Allows to include multiple library files.\n# \n# It calls `source` for each argument.\n# Useful if you don't have arguments to pass to the sourced files.\n# \n# - \\$@: **libraries** _as string_:\n#       The names of the libraries (array, interactive, string...) or the file paths to include.\n# \n# ```bash\n# include string array ./my/path\n# ```\n# \ninclude \"${1:libraries}\"$0" ]
 },
 
-"interactive::askForConfirmation": {
-  "prefix": "interactive::askForConfirmation",
-  "description": "Ask the user to press the button to continue...",
+"interactive::confirm": {
+  "prefix": "interactive::confirm",
+  "description": "Ask the user to yes or no...",
   "scope": "",
-  "body": [ "interactive::askForConfirmation \"${1:prompt}\"$0" ]
+  "body": [ "interactive::confirm \"${1:prompt}\" default=${2:true}$0" ]
 },
 
-"interactive::askForConfirmation#withdoc": {
-  "prefix": "interactive::askForConfirmation#withdoc",
-  "description": "Ask the user to press the button to continue...",
+"interactive::confirm#withdoc": {
+  "prefix": "interactive::confirm#withdoc",
+  "description": "Ask the user to yes or no...",
   "scope": "",
-  "body": [ "# ##  interactive::askForConfirmation\n# \n# Ask the user to press the button to continue.\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user pressed enter\n#   - 1 otherwise\n# \n# ```bash\n# interactive::askForConfirmation \"Press enter to continue.\"\n# ```\n# \ninteractive::askForConfirmation \"${1:prompt}\"$0" ]
+  "body": [ "# ## interactive::confirm\n# \n# Ask the user to yes or no.\n# \n# - The user can switch between the two options with the arrow keys or space.\n# - The user can validate the choice with the enter key.\n# - The user can also validate immediately with the y or n key.\n# \n# Dialog boxes are displayed for the question and answer.\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# - \\${default} _as bool_:\n#       (optional) the default value to select\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user answered yes\n#   - 1 otherwise\n# - \\${REPLY}: true or false.\n# \n# ```bash\n# if interactive::confirm \"Do you want to continue?\"; then echo \"Yes.\"; else echo \"No.\"; fi\n# ```\n# \ninteractive::confirm \"${1:prompt}\" default=${2:true}$0" ]
 },
 
-"interactive::askForConfirmationRaw": {
-  "prefix": "interactive::askForConfirmationRaw",
-  "description": "Ask the user to press the button to continue...",
+"interactive::confirmRaw": {
+  "prefix": "interactive::confirmRaw",
+  "description": "Ask the user to yes or no...",
   "scope": "",
-  "body": [ "interactive::askForConfirmationRaw$0" ]
+  "body": [ "interactive::confirmRaw default=${1:true}$0" ]
 },
 
-"interactive::askForConfirmationRaw#withdoc": {
-  "prefix": "interactive::askForConfirmationRaw#withdoc",
+"interactive::confirmRaw#withdoc": {
+  "prefix": "interactive::confirmRaw#withdoc",
+  "description": "Ask the user to yes or no...",
+  "scope": "",
+  "body": [ "# ## interactive::confirmRaw\n# \n# Ask the user to yes or no.\n# \n# - The user can switch between the two options with the arrow keys or space.\n# - The user can validate the choice with the enter key.\n# - The user can also validate immediately with the y or n key.\n# \n# This raw version does not display the prompt or the answer.\n# \n# - \\${default} _as bool_:\n#       (optional) the default value to select\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user answered yes\n#   - 1 otherwise\n# - \\${REPLY}: true or false.\n# \n# ```bash\n# interactive::confirmRaw \"Do you want to continue?\" && local answer=\"\\${REPLY}\"\n# ```\n# \ninteractive::confirmRaw default=${1:true}$0" ]
+},
+
+"interactive::continue": {
+  "prefix": "interactive::continue",
   "description": "Ask the user to press the button to continue...",
   "scope": "",
-  "body": [ "# ## interactive::askForConfirmationRaw\n# \n# Ask the user to press the button to continue.\n# \n# This raw version does not display the prompt or the answer.\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user pressed enter\n#   - 1 otherwise\n# \n# ```bash\n# interactive::askForConfirmationRaw\n# ```\n# \ninteractive::askForConfirmationRaw$0" ]
+  "body": [ "interactive::continue \"${1:prompt}\"$0" ]
+},
+
+"interactive::continue#withdoc": {
+  "prefix": "interactive::continue#withdoc",
+  "description": "Ask the user to press the button to continue...",
+  "scope": "",
+  "body": [ "# ## interactive::continue\n# \n# Ask the user to press the button to continue.\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user pressed enter\n#   - 1 otherwise\n# \n# ```bash\n# interactive::continue \"Press enter to continue.\"\n# ```\n# \ninteractive::continue \"${1:prompt}\"$0" ]
+},
+
+"interactive::continueRaw": {
+  "prefix": "interactive::continueRaw",
+  "description": "Ask the user to press the button to continue...",
+  "scope": "",
+  "body": [ "interactive::continueRaw$0" ]
+},
+
+"interactive::continueRaw#withdoc": {
+  "prefix": "interactive::continueRaw#withdoc",
+  "description": "Ask the user to press the button to continue...",
+  "scope": "",
+  "body": [ "# ## interactive::continueRaw\n# \n# Ask the user to press the button to continue.\n# \n# This raw version does not display the prompt or the answer.\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user pressed enter\n#   - 1 otherwise\n# \n# ```bash\n# interactive::continueRaw\n# ```\n# \ninteractive::continueRaw$0" ]
 },
 
 "interactive::displayAnswer": {
@@ -1037,32 +1079,32 @@
   "body": [ "# ## interactive::displayQuestion\n# \n# Displays a question to the user.\n# \n# The text is wrapped and put inside a box like so:\n# \n# ```text\n#    ╭────────────────────────────────╮\n# ░──┤ Is this an important question? │\n#    ╰────────────────────────────────╯\n# ```\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# - \\${width} _as int_:\n#       (optional) the maximum width of the text in the dialog box\n#       (defaults to \"\\${GLOBAL_COLUMNS}\")\n# \n# ```bash\n# interactive::displayPrompt \"Do you want to continue?\"\n# ```\n# \ninteractive::displayQuestion \"${1:prompt}\" width=${2:\"\\${GLOBAL_COLUMNS}\"}$0" ]
 },
 
-"interactive::promptYesNo": {
-  "prefix": "interactive::promptYesNo",
-  "description": "Ask the user to yes or no...",
+"list::onTick": {
+  "prefix": "list::onTick",
+  "description": "This function must be called regularly (on refresh tick) and is responsible for redrawing the list if necessary...",
   "scope": "",
-  "body": [ "interactive::promptYesNo \"${1:prompt}\" default=${2:true}$0" ]
+  "body": [ "list::onTick$0" ]
 },
 
-"interactive::promptYesNo#withdoc": {
-  "prefix": "interactive::promptYesNo#withdoc",
-  "description": "Ask the user to yes or no...",
+"list::onTick#withdoc": {
+  "prefix": "list::onTick#withdoc",
+  "description": "This function must be called regularly (on refresh tick) and is responsible for redrawing the list if necessary...",
   "scope": "",
-  "body": [ "# ## interactive::promptYesNo\n# \n# Ask the user to yes or no.\n# \n# - The user can switch between the two options with the arrow keys or space.\n# - The user can validate the choice with the enter key.\n# - The user can also validate immediately with the y or n key.\n# \n# Dialog boxes are displayed for the question and answer.\n# \n# - \\$1: **prompt** _as string_:\n#       the prompt to display\n# - \\${default} _as bool_:\n#       (optional) the default value to select\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user answered yes\n#   - 1 otherwise\n# - \\${REPLY}: true or false.\n# \n# ```bash\n# if interactive::promptYesNo \"Do you want to continue?\"; then echo \"Yes.\"; else echo \"No.\"; fi\n# ```\n# \ninteractive::promptYesNo \"${1:prompt}\" default=${2:true}$0" ]
+  "body": [ "# ## list::onTick\n# \n# This function must be called regularly (on refresh tick) and is responsible for redrawing the list if necessary.\n# \n# \nlist::onTick$0" ]
 },
 
-"interactive::promptYesNoRaw": {
-  "prefix": "interactive::promptYesNoRaw",
-  "description": "Ask the user to yes or no...",
+"list::setItems": {
+  "prefix": "list::setItems",
+  "description": "Set up the list of items to display...",
   "scope": "",
-  "body": [ "interactive::promptYesNoRaw default=${1:true}$0" ]
+  "body": [ "list::setItems$0" ]
 },
 
-"interactive::promptYesNoRaw#withdoc": {
-  "prefix": "interactive::promptYesNoRaw#withdoc",
-  "description": "Ask the user to yes or no...",
+"list::setItems#withdoc": {
+  "prefix": "list::setItems#withdoc",
+  "description": "Set up the list of items to display...",
   "scope": "",
-  "body": [ "# ## interactive::promptYesNoRaw\n# \n# Ask the user to yes or no.\n# \n# - The user can switch between the two options with the arrow keys or space.\n# - The user can validate the choice with the enter key.\n# - The user can also validate immediately with the y or n key.\n# \n# This raw version does not display the prompt or the answer.\n# \n# - \\${default} _as bool_:\n#       (optional) the default value to select\n#       (defaults to true)\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the user answered yes\n#   - 1 otherwise\n# - \\${REPLY}: true or false.\n# \n# ```bash\n# interactive::promptYesNoRaw \"Do you want to continue?\" && local answer=\"\\${REPLY}\"\n# ```\n# \ninteractive::promptYesNoRaw default=${1:true}$0" ]
+  "body": [ "# ## list::setItems\n# \n# Set up the list of items to display.\n# \n# - \\$1 _as string_:\n#       The name of the array that contains the items to display.\n# \nlist::setItems$0" ]
 },
 
 "log::debug": {
@@ -1597,6 +1639,20 @@
   "body": [ "# ## string::getField\n# \n# Allows to get the nth element of a string separated by a given separator.\n# This is the equivalent of the cut command \"cut -d\"\\${separator}\" -f\"\\${fieldNumber}\"\"\n# but it uses pure bash to go faster.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to extract from.\n# - \\$2: **field number** _as int_:\n#       The field number to get (starting at 0).\n# - \\${separator} _as string_:\n#       The separator to use.\n#       (defaults to \\$'\\t')\n# \n# Returns:\n# \n# - \\${REPLY}: the extracted field\n# \n# ```bash\n# MY_STRING=\"field1 field2 field3\"\n# string::getField MY_STRING 1 separator=\" \"\n# echo \"\\${REPLY}\"\n# ```\n# \n# > This is faster than:\n# >\n# > - using read into an array from a here string\n# > - using bash parameter expansion to remove before/after the separator\n# \nstring::getField \"${1:string variable name}\" \"${2:field number}\" separator=${3:\\$'\\t'}$0" ]
 },
 
+"string::getFormattedHeader": {
+  "prefix": "string::getFormattedHeader",
+  "description": "Get a formatted header string with a given width...",
+  "scope": "",
+  "body": [ "string::getFormattedHeader \"${1:format}\" width=${2:\"GLOBAL_COLUMNS\"} paddingChar=${3:\" \"} paddingStyle=${4:\"\"} paddingStyleReset=${5:\"\"} partWidths=${6:\"\"} noEllipsis=${7:false}$0" ]
+},
+
+"string::getFormattedHeader#withdoc": {
+  "prefix": "string::getFormattedHeader#withdoc",
+  "description": "Get a formatted header string with a given width...",
+  "scope": "",
+  "body": [ "# ## string::getFormattedHeader\n# \n# Get a formatted header string with a given width.\n# The header is composed of a left/middle/right part(s).\n# The header is padded with a given character to fit the given width.\n# The parts are trimmed if too long but they are prioritized in this order: middle, left, right\n# (middle will take all the space necessary, then left, then right).\n# \n# - \\$1: **format** _as string_:\n#       The format of the header.\n#       It must include two | characters to separate the left, middle and right parts.\n#       Any part can be empty.\n#       Example: \"left|middle|right\"\n# - \\${width} _as int_:\n#       The total width of the header.\n#       (defaults to \"GLOBAL_COLUMNS\")\n# - \\${paddingChar} _as string_:\n#       (optional) The character to use for padding.\n#       (defaults to \" \")\n# - \\${paddingStyle} _as string_:\n#       (optional) The style (ANSI escape codes) to apply the padding characters.\n#       (defaults to \"\")\n# - \\${paddingStyleReset} _as string_:\n#       (optional) The style (ANSI escape codes) to apply at the end of the padding characters.\n#       (defaults to \"\")\n# - \\${partWidths} _as string_:\n#       (optional) The actual widths of each part separated by |.\n#       If not provided, the actual width of each part will be computed automatically,\n#       not taking into account invisible characters (like ANSI escape codes).\n#       Example: \"10|20|10\"\n#       (defaults to \"\")\n# - \\${noEllipsis} _as bool_:\n#       (optional) If set to true, no ellipsis will be added when a part is trimmed.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY}: the formatted header string\n# - \\${REPLY2}: the actual widths of each part separated by | (same format as partWidths argument)\n# - \\${REPLY_ARRAY}: the actual widths of each part\n# \n# ```bash\n# string::getFormattedHeader \"Left|Middle|Right\" width=50 paddingChar=\"-\" paddingStyle=\\$'\\e[1;34m' paddingStyleReset=\\$'\\e[0m'\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::getFormattedHeader \"${1:format}\" width=${2:\"GLOBAL_COLUMNS\"} paddingChar=${3:\" \"} paddingStyle=${4:\"\"} paddingStyleReset=${5:\"\"} partWidths=${6:\"\"} noEllipsis=${7:false}$0" ]
+},
+
 "string::getHexRepresentation": {
   "prefix": "string::getHexRepresentation",
   "description": "Convert a string to its hexadecimal representation...",
@@ -1749,6 +1805,20 @@
   "description": "Trim leading and trailing characters (defaults to whitespaces)...",
   "scope": "",
   "body": [ "# ## string::trimEdges\n# \n# Trim leading and trailing characters (defaults to whitespaces).\n# The replacement is done in place, for the given variable.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to trim.\n# - \\${charsToTrim} _as string_:\n#       The characters to trim.\n#       (defaults to \\$' \\t\\n')\n# \n# ```bash\n# MY_STRING=\"   example  string    \"\n# string::trimEdges MY_STRING\n# echo \"\\${MY_STRING}\"\n# ```\n# \nstring::trimEdges \"${1:string variable name}\" charsToTrim=${2:\\$' \\t\\n'}$0" ]
+},
+
+"string::truncateWithEllipsis": {
+  "prefix": "string::truncateWithEllipsis",
+  "description": "Truncate a string to a given length and add an ellipsis if truncated...",
+  "scope": "",
+  "body": [ "string::truncateWithEllipsis \"${1:string variable name}\" maxLength=${2:\"GLOBAL_COLUMNS\"} noEllipsis=${3:false}$0" ]
+},
+
+"string::truncateWithEllipsis#withdoc": {
+  "prefix": "string::truncateWithEllipsis#withdoc",
+  "description": "Truncate a string to a given length and add an ellipsis if truncated...",
+  "scope": "",
+  "body": [ "# ## string::truncateWithEllipsis\n# \n# Truncate a string to a given length and add an ellipsis if truncated.\n# This function takes into account invisible characters (ANSI escape codes for text formatting).\n# The truncation is done in place, for the given variable.\n# \n# - \\$1: **string variable name** _as string_:\n#       The variable name that contains the string to truncate.\n# - \\${maxLength} _as int_:\n#       The maximum length of the string.\n#       (defaults to \"GLOBAL_COLUMNS\")\n# - \\${noEllipsis} _as bool_:\n#       (optional) If set to true, no ellipsis will be added when the string is truncated.\n#       (defaults to false)\n# \n# Returns:\n# - \\${REPLY}: the space left after truncation\n# \n# ```bash\n# MY_STRING=\"This is a long string that might need to be truncated\"\n# string::truncateWithEllipsis MY_STRING maxLength=20\n# echo \"\\${REPLY}\"\n# ```\n# \nstring::truncateWithEllipsis \"${1:string variable name}\" maxLength=${2:\"GLOBAL_COLUMNS\"} noEllipsis=${3:false}$0" ]
 },
 
 "string::wrapCharacters": {
@@ -1909,14 +1979,14 @@
   "prefix": "terminal::clearKeyPressed",
   "description": "This function reads all the inputs from the user, effectively discarding them...",
   "scope": "",
-  "body": [ "terminal::clearKeyPressed$0" ]
+  "body": [ "terminal::clearKeyPressed \"${1:read parameters}\"$0" ]
 },
 
 "terminal::clearKeyPressed#withdoc": {
   "prefix": "terminal::clearKeyPressed#withdoc",
   "description": "This function reads all the inputs from the user, effectively discarding them...",
   "scope": "",
-  "body": [ "# ## terminal::clearKeyPressed\n# \n# This function reads all the inputs from the user, effectively discarding them.\n# \n# ```bash\n# terminal::clearKeyPressed\n# ```\n# \nterminal::clearKeyPressed$0" ]
+  "body": [ "# ## terminal::clearKeyPressed\n# \n# This function reads all the inputs from the user, effectively discarding them.\n# \n# - \\$@: read parameters _as any_:\n#       additional parameters to pass to the read command\n# \n# ```bash\n# terminal::clearKeyPressed\n# ```\n# \nterminal::clearKeyPressed \"${1:read parameters}\"$0" ]
 },
 
 "terminal::createSpace": {
@@ -1975,6 +2045,20 @@
   "body": [ "# ## terminal::getTerminalSize\n# \n# This function exports the terminal size.\n# \n# Returns:\n# \n# - `GLOBAL_COLUMNS`: The number of columns in the terminal.\n# - `GLOBAL_LINES`: The number of lines in the terminal.\n# \n# ```bash\n# terminal::getTerminalSize\n# printf '%s\\n' \"The terminal has ⌜\\${GLOBAL_COLUMNS}⌝ columns and ⌜\\${GLOBAL_LINES}⌝ lines.\"\n# ```\n# \nterminal::getTerminalSize$0" ]
 },
 
+"terminal::isCursorInBox": {
+  "prefix": "terminal::isCursorInBox",
+  "description": "Check if the cursor is inside a given box...",
+  "scope": "",
+  "body": [ "terminal::isCursorInBox cursorTop=${1} cursorLeft=${2} top=${3:1} left=${4:1} width=${5:\"\\${GLOBAL_COLUMNS}\"} height=${6:\"\\${GLOBAL_LINES}\"}$0" ]
+},
+
+"terminal::isCursorInBox#withdoc": {
+  "prefix": "terminal::isCursorInBox#withdoc",
+  "description": "Check if the cursor is inside a given box...",
+  "scope": "",
+  "body": [ "# ## terminal::isCursorInBox\n# \n# Check if the cursor is inside a given box.\n# \n# - \\${cursorTop} _as int_:\n#       the line number of the cursor (1 based)\n# - \\${cursorLeft} _as int_:\n#       the column number of the cursor (1 based)\n# - \\${top} _as int_:\n#       (optional) the top position of the box\n#       (defaults to 1)\n# - \\${left} _as int_:\n#       (optional) the left position of the box\n#       (defaults to 1)\n# - \\${width} _as int_:\n#       (optional) the width of the box\n#       (defaults to \"\\${GLOBAL_COLUMNS}\")\n# - \\${height} _as int_:\n#       (optional) the height of the box\n#       (defaults to \"\\${GLOBAL_LINES}\")\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the cursor is inside the box\n#   - 1 otherwise\n# \n# ```bash\n# if terminal::isCursorInBox 10 10 top=5 left=5 width=10 height=10; then\n#   echo \"Cursor is inside the box\"\n# else\n#   echo \"Cursor is outside the box\"\n# fi\n# ```\n# \nterminal::isCursorInBox cursorTop=${1} cursorLeft=${2} top=${3:1} left=${4:1} width=${5:\"\\${GLOBAL_COLUMNS}\"} height=${6:\"\\${GLOBAL_LINES}\"}$0" ]
+},
+
 "terminal::rebindKeymap": {
   "prefix": "terminal::rebindKeymap",
   "description": "Rebinds all special keys to call a given callback function...",
@@ -1986,7 +2070,7 @@
   "prefix": "terminal::rebindKeymap#withdoc",
   "description": "Rebinds all special keys to call a given callback function...",
   "scope": "",
-  "body": [ "# ## terminal::rebindKeymap\n# \n# Rebinds all special keys to call a given callback function.\n# See @terminal::testWaitForKeyPress for an implementation example.\n# \n# This allows to use the `-e` option with the read command and receive events for special key press.\n# \n# \n# This function should be called before using terminal::waitForKeyPress.\n# \n# You can call `terminal::restoreBindings` to restore the default bindings. However, this is not\n# necessary as the bindings are local to the script.\n# \n# - \\$1: **callback function** _as string_:\n#       The function name to call when a special key is pressed.\n# \nterminal::rebindKeymap \"${1:callback function}\"$0" ]
+  "body": [ "# ## terminal::rebindKeymap\n# \n# Rebinds all special keys to call a given callback function.\n# See @terminal::testWaitForKeyPress for an implementation example.\n# \n# This allows to use the `-e` option with the read command and receive events for special key press.\n# \n# \n# This function should be called before using terminal::waitForKeyPress.\n# \n# You can call `terminal::restoreBindings` to restore the default bindings. However, this is not\n# necessary as the bindings are local to the script.\n# \n# - \\$1: **callback function** _as string_:\n#       The function name to call when a special key is pressed.\n# \n# ```bash\n# terminal::rebindKeymap\n# ```\n# \n# > Key binding is a mess because binding is based on the sequence of characters that gets\n# > generated by the terminal when a key is pressed and this is not standard across all terminals.\n# > We do our best here to cover most cases but it is by no mean perfect.\n# > A good base documentation was <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>.\n# > This means that certain keys cannot be bound, like SHIFT+ENTER. For this, you will\n# > need to use a terminal that allows to remap such keys and send a specific sequence\n# > of characters that you can bind in bash.\n# > `showkey -a` is a good program to see the sequence of characters sent by the terminal.\n# \nterminal::rebindKeymap \"${1:callback function}\"$0" ]
 },
 
 "terminal::rerouteLogs": {
@@ -2140,7 +2224,7 @@
   "prefix": "terminal::waitForChar#withdoc",
   "description": "Wait for a user input (single char)...",
   "scope": "",
-  "body": [ "# ## terminal::waitForChar\n# \n# Wait for a user input (single char).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command. This will not detect all key combinations.\n# The output will depend on the terminal used and the character sequences it sends on each key press.\n# \n# Some special keys are translated into more readable strings:\n# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1, ALT+?.\n# However, this is not at all exhaustive and will depend on the terminal used.\n# Use `terminal::waitForKeyPress` if you need to listen to special keys.\n# \n# This simple implementation does not rely on GNU readline and does not require terminal options\n# to be set using `terminal::setRawMode`.\n# \n# \n# - \\$@: **read parameters** _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a char was retrieved\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the last char (key) retrieved.\n# \n# ```bash\n# terminal::waitForChar\n# terminal::waitForChar -t 0.1\n# ```\n# \n# > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>\n# \nterminal::waitForChar \"${1:read parameters}\"$0" ]
+  "body": [ "# ## terminal::waitForChar\n# \n# Wait for a user input (single char).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command. This will not detect all key combinations.\n# The output will depend on the terminal used and the character sequences it sends on each key press.\n# \n# Some special keys are translated into more readable strings:\n# UP, DOWN, RIGHT, LEFT, BACKSPACE, DEL, PAGE_UP, PAGE_DOWN, HOME, END, ESC, F1, ALT+?.\n# However, this is not at all exhaustive and will depend on the terminal used.\n# Use `terminal::waitForKeyPress` if you need to listen to special keys.\n# \n# This simple implementation does not rely on GNU readline and does not require terminal options\n# to be set using `terminal::setRawMode`.\n# \n# \n# - \\$@: read parameters _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a char was retrieved\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the last char (key) retrieved.\n# \n# ```bash\n# terminal::waitForChar\n# terminal::waitForChar -t 0.1\n# ```\n# \n# > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>\n# \nterminal::waitForChar \"${1:read parameters}\"$0" ]
 },
 
 "terminal::waitForKeyPress": {
@@ -2154,7 +2238,7 @@
   "prefix": "terminal::waitForKeyPress#withdoc",
   "description": "Wait for a key press (single key)...",
   "scope": "",
-  "body": [ "# ## terminal::waitForKeyPress\n# \n# Wait for a key press (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command with the option `-e` to use readline behind the scene.\n# This means we can detect more key combinations but all keys needs to be bound first...\n# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.\n# \n# You must call `terminal::rebindKeymap` and `terminal::setRawMode` before using this function.\n# You should use `tui::start` instead of using this function directly.\n# \n# - \\$@: **read parameters** _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# terminal::waitForKeyPress\n# terminal::waitForKeyPress -t 0.1\n# ```\n# \n# > There are issues when using readline in bash:\n# >\n# > 1. if the cursor is at the end of the screen, it will make the screen scroll\n# >    even when nothing is read... Make sure to not position the cursor at the end of the screen.\n# > 2. When read is done, it will print a new line in stderr. So we redirect stderr to null.\n# >    This means that if you print something to stderr in a readline bound function, you will see nothing\n# >    As a workaround, do this in your callback function: `exec 2>&\"\\${GLOBAL_FD_LOG}\"`\n# > 3. Not all key combinations can be bound, like SHIFT+ENTER. This is inherent to the way terminals work,\n# >    they send a sequence of characters when a key is pressed and this sequence is read by readline/bash.\n# >    For advanced key combinations, you will need to use a terminal that allows to remap such keys\n# >    and send a specific sequence of characters that you can bind in bash.\n# \nterminal::waitForKeyPress \"${1:read parameters}\"$0" ]
+  "body": [ "# ## terminal::waitForKeyPress\n# \n# Wait for a key press (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command with the option `-e` to use readline behind the scene.\n# This means we can detect more key combinations but all keys needs to be bound first...\n# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.\n# \n# You must call `terminal::rebindKeymap` and `terminal::setRawMode` before using this function.\n# You should use `tui::start` instead of using this function directly.\n# \n# - \\$@: read parameters _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# terminal::waitForKeyPress\n# terminal::waitForKeyPress -t 0.1\n# ```\n# \n# > There are issues when using readline in bash:\n# >\n# > 1. if the cursor is at the end of the screen, it will make the screen scroll\n# >    even when nothing is read... Make sure to not position the cursor at the end of the screen.\n# > 2. When read is done, it will print a new line in stderr. So we redirect stderr to null.\n# >    This means that if you print something to stderr in a readline bound function, you will see nothing\n# >    As a workaround, do this in your callback function: `exec 2>&\"\\${GLOBAL_FD_LOG}\"`\n# > 3. Not all key combinations can be bound, like SHIFT+ENTER. This is inherent to the way terminals work,\n# >    they send a sequence of characters when a key is pressed and this sequence is read by readline/bash.\n# >    For advanced key combinations, you will need to use a terminal that allows to remap such keys\n# >    and send a specific sequence of characters that you can bind in bash.\n# \nterminal::waitForKeyPress \"${1:read parameters}\"$0" ]
 },
 
 "test::exec": {
@@ -2423,32 +2507,32 @@
   "body": [ "# ## time::getDate\n# \n# Get the current date in the given format.\n# \n# - \\${format} _as string_:\n#       (optional) the format (see printf) of the date to return\n#       (defaults to \"%(%F_%Hh%Mm%Ss)T\")\n# \n# Returns:\n# \n# - \\${REPLY}: the current date in the given format.\n# \n# ```bash\n# time::getDate\n# local date=\"\\${REPLY}\"\n# time::getDate format=\"'%(%Hh%Mm%Ss)T'\"\n# ```\n# \n# > This function avoid to call \\$(date) in a subshell (date is a an external executable).\n# \ntime::getDate format=${1:\"%(%F_%Hh%Mm%Ss}$0" ]
 },
 
-"time::getMicrosecondsToHuman": {
-  "prefix": "time::getMicrosecondsToHuman",
+"time::getHumanTimeFromMicroseconds": {
+  "prefix": "time::getHumanTimeFromMicroseconds",
   "description": "Convert microseconds to human readable format...",
   "scope": "",
-  "body": [ "time::getMicrosecondsToHuman \"${1:microseconds}\" format=${2:\"%HH:%MM:%SS\"}$0" ]
+  "body": [ "time::getHumanTimeFromMicroseconds \"${1:microseconds}\" format=${2:\"%HH:%MM:%SS\"}$0" ]
 },
 
-"time::getMicrosecondsToHuman#withdoc": {
-  "prefix": "time::getMicrosecondsToHuman#withdoc",
+"time::getHumanTimeFromMicroseconds#withdoc": {
+  "prefix": "time::getHumanTimeFromMicroseconds#withdoc",
   "description": "Convert microseconds to human readable format...",
   "scope": "",
-  "body": [ "# ## time::getMicrosecondsToHuman\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\${format} _as string_:\n#       (optional) the format to use\n# \n#       Usable formats:\n#       - %HH: hours\n#       - %MM: minutes\n#       - %SS: seconds\n#       - %LL: milliseconds\n#       - %h: hours without leading zero\n#       - %m: minutes without leading zero\n#       - %s: seconds without leading zero\n#       - %l: milliseconds without leading zero\n#       - %u: microseconds without leading zero\n#       - %M: total minutes\n#       - %S: total seconds\n#       - %L: total milliseconds\n#       - %U: total microseconds\n# \n#       (defaults to \"%HH:%MM:%SS\")\n# \n# Returns:\n# \n# - \\${REPLY}: the human readable format\n# \n# ```bash\n# time::getMicrosecondsToHuman 123456789\n# time::getMicrosecondsToHuman 123456789 format=\"%HH:%MM:%SS\"\n# echo \"\\${REPLY}\"\n# ```\n# \ntime::getMicrosecondsToHuman \"${1:microseconds}\" format=${2:\"%HH:%MM:%SS\"}$0" ]
+  "body": [ "# ## time::getHumanTimeFromMicroseconds\n# \n# Convert microseconds to human readable format.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\${format} _as string_:\n#       (optional) the format to use\n# \n#       Usable formats:\n#       - %HH: hours\n#       - %MM: minutes\n#       - %SS: seconds\n#       - %LL: milliseconds\n#       - %h: hours without leading zero\n#       - %m: minutes without leading zero\n#       - %s: seconds without leading zero\n#       - %l: milliseconds without leading zero\n#       - %u: microseconds without leading zero\n#       - %M: total minutes\n#       - %S: total seconds\n#       - %L: total milliseconds\n#       - %U: total microseconds\n# \n#       (defaults to \"%HH:%MM:%SS\")\n# \n# Returns:\n# \n# - \\${REPLY}: the human readable format\n# \n# ```bash\n# time::getHumanTimeFromMicroseconds 123456789\n# time::getHumanTimeFromMicroseconds 123456789 format=\"%HH:%MM:%SS\"\n# echo \"\\${REPLY}\"\n# ```\n# \ntime::getHumanTimeFromMicroseconds \"${1:microseconds}\" format=${2:\"%HH:%MM:%SS\"}$0" ]
 },
 
-"time::getMicrosecondsToSeconds": {
-  "prefix": "time::getMicrosecondsToSeconds",
-  "description": "Convert a microseconds integer to seconds float...",
+"time::getMicrosecondsFromSeconds": {
+  "prefix": "time::getMicrosecondsFromSeconds",
+  "description": "Convert seconds (float number representation) to microseconds...",
   "scope": "",
-  "body": [ "time::getMicrosecondsToSeconds \"${1:microseconds}\" precision=${2:6}$0" ]
+  "body": [ "time::getMicrosecondsFromSeconds \"${1:seconds}\"$0" ]
 },
 
-"time::getMicrosecondsToSeconds#withdoc": {
-  "prefix": "time::getMicrosecondsToSeconds#withdoc",
-  "description": "Convert a microseconds integer to seconds float...",
+"time::getMicrosecondsFromSeconds#withdoc": {
+  "prefix": "time::getMicrosecondsFromSeconds#withdoc",
+  "description": "Convert seconds (float number representation) to microseconds...",
   "scope": "",
-  "body": [ "# ## time::getMicrosecondsToSeconds\n# \n# Convert a microseconds integer to seconds float.\n# e.g. 1234567 → 1.234567\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\${precision} _as string_:\n#       (optional) The precision to get (number of digits after the dot).\n#       (defaults to 6)\n# \n# Returns:\n# \n# - \\${REPLY}: The seconds (float number).\n# \n# ```bash\n# time::getMicrosecondsToSeconds 1234567\n# time::getMicrosecondsToSeconds 1234567 precision=3\n# echo \"\\${REPLY}\"\n# ```\n# \ntime::getMicrosecondsToSeconds \"${1:microseconds}\" precision=${2:6}$0" ]
+  "body": [ "# ## time::getMicrosecondsFromSeconds\n# \n# Convert seconds (float number representation) to microseconds.\n# e.g. 1.234567 → 1234567\n# \n# - \\$1: **seconds** _as float_:\n#       the seconds to convert\n# \n# Returns:\n# \n# - \\${REPLY}: The microseconds (integer number).\n# \n# ```bash\n# time::getMicrosecondsFromSeconds 1.234567\n# echo \"\\${REPLY}\"\n# ```\n# \ntime::getMicrosecondsFromSeconds \"${1:seconds}\"$0" ]
 },
 
 "time::getProgramElapsedMicroseconds": {
@@ -2462,7 +2546,21 @@
   "prefix": "time::getProgramElapsedMicroseconds#withdoc",
   "description": "Get the elapsed time in µs since the program started...",
   "scope": "",
-  "body": [ "# ## time::getProgramElapsedMicroseconds\n# \n# Get the elapsed time in µs since the program started.\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in µs since the program started.\n# \n# ```bash\n# time::getProgramElapsedMicroseconds\n# echo \"\\${REPLY}\"\n# time::getMicrosecondsToHuman \"\\${REPLY}\"\n# echo \"Human time: \\${REPLY}\"\n# ```\n# \n# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.\n# > The 10# forces the base 10 conversion to avoid issues with leading zeros.\n# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.\n# \ntime::getProgramElapsedMicroseconds$0" ]
+  "body": [ "# ## time::getProgramElapsedMicroseconds\n# \n# Get the elapsed time in µs since the program started.\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in µs since the program started.\n# \n# ```bash\n# time::getProgramElapsedMicroseconds\n# echo \"\\${REPLY}\"\n# time::getHumanTimeFromMicroseconds \"\\${REPLY}\"\n# echo \"Human time: \\${REPLY}\"\n# ```\n# \n# > We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.\n# > The 10# forces the base 10 conversion to avoid issues with leading zeros.\n# > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.\n# \ntime::getProgramElapsedMicroseconds$0" ]
+},
+
+"time::getSecondsFromMicroseconds": {
+  "prefix": "time::getSecondsFromMicroseconds",
+  "description": "Convert microseconds to seconds (float number representation)...",
+  "scope": "",
+  "body": [ "time::getSecondsFromMicroseconds \"${1:microseconds}\" precision=${2:6}$0" ]
+},
+
+"time::getSecondsFromMicroseconds#withdoc": {
+  "prefix": "time::getSecondsFromMicroseconds#withdoc",
+  "description": "Convert microseconds to seconds (float number representation)...",
+  "scope": "",
+  "body": [ "# ## time::getSecondsFromMicroseconds\n# \n# Convert microseconds to seconds (float number representation).\n# e.g. 1234567 → 1.234567\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to convert\n# - \\${precision} _as string_:\n#       (optional) The precision to get (number of digits after the dot).\n#       (defaults to 6)\n# \n# Returns:\n# \n# - \\${REPLY}: The seconds (float number).\n# \n# ```bash\n# time::getSecondsFromMicroseconds 1234567\n# time::getSecondsFromMicroseconds 1234567 precision=3\n# echo \"\\${REPLY}\"\n# ```\n# \ntime::getSecondsFromMicroseconds \"${1:microseconds}\" precision=${2:6}$0" ]
 },
 
 "time::getTimerMicroseconds": {
@@ -2476,7 +2574,21 @@
   "prefix": "time::getTimerMicroseconds#withdoc",
   "description": "Get the time elapsed since the call of `time::startTimer`...",
   "scope": "",
-  "body": [ "# ## time::getTimerMicroseconds\n# \n# Get the time elapsed since the call of `time::startTimer`.\n# \n# - \\${logElapsedTime} _as bool_:\n#       (optional) Wether or not to log the elapsed time.\n#       (defaults to false)\n# - \\${format} _as string_:\n#       (optional) The format to use if we log the elapsed time.\n#       See `time::getMicrosecondsToHuman` for the format.\n#       (defaults to \"%S.%LLs\").\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in microseconds.\n# \n# ```bash\n# time::startTimer\n# time::getTimerMicroseconds logElapsedTime=true\n# echo \"Total microseconds: \\${REPLY}\"\n# ```\n# \ntime::getTimerMicroseconds logElapsedTime=${1:false} format=${2:\"%S.%LLs\"}$0" ]
+  "body": [ "# ## time::getTimerMicroseconds\n# \n# Get the time elapsed since the call of `time::startTimer`.\n# \n# - \\${logElapsedTime} _as bool_:\n#       (optional) Wether or not to log the elapsed time.\n#       (defaults to false)\n# - \\${format} _as string_:\n#       (optional) The format to use if we log the elapsed time.\n#       See `time::getHumanTimeFromMicroseconds` for the format.\n#       (defaults to \"%S.%LLs\").\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in microseconds.\n# \n# ```bash\n# time::startTimer\n# time::getTimerMicroseconds logElapsedTime=true\n# echo \"Total microseconds: \\${REPLY}\"\n# ```\n# \ntime::getTimerMicroseconds logElapsedTime=${1:false} format=${2:\"%S.%LLs\"}$0" ]
+},
+
+"time::isTimeElapsed": {
+  "prefix": "time::isTimeElapsed",
+  "description": "Check if a given time in microseconds has elapsed since the last call to this function...",
+  "scope": "",
+  "body": [ "time::isTimeElapsed \"${1:microseconds}\" timerName=${2:\"\\${FUNCNAME[1]}\"}$0" ]
+},
+
+"time::isTimeElapsed#withdoc": {
+  "prefix": "time::isTimeElapsed#withdoc",
+  "description": "Check if a given time in microseconds has elapsed since the last call to this function...",
+  "scope": "",
+  "body": [ "# ## time::isTimeElapsed\n# \n# Check if a given time in microseconds has elapsed since the last call\n# to this function.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to check\n# - \\${timerName} _as int_:\n#       A variable name that will be used to store the last time this function was called.\n#       Defaults to the name of the calling function.\n#       Can be set to a fixed value if you call this function from different functions\n#       and want to share the same timer.\n#       (defaults to \"\\${FUNCNAME[1]}\")\n# \n# Returns:\n# \n# - 0 if the time has elapsed\n# - 1 if the time has not yet elapsed\n# \n# ```bash\n# if time::isTimeElapsed 500000; then\n#   echo \"500ms has elapsed since the last call to this function\"\n# fi\n# ```\n# \ntime::isTimeElapsed \"${1:microseconds}\" timerName=${2:\"\\${FUNCNAME[1]}\"}$0" ]
 },
 
 "time::startTimer": {
