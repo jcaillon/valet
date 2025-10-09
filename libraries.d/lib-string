@@ -661,7 +661,7 @@ function string::getFormattedHeader() {
 
   if ((availableSpaceForLeft - leftPartLength >= 0)); then
     if ((middlePartLength > 0)); then
-      padding="${spaces:0:availableSpaceForLeft - leftPartLength}"
+      padding="${spaces:0:availableSpaceForLeft-leftPartLength}"
       finalString="${leftPart}${paddingStyle}${padding//" "/"${paddingChar}"}${paddingStyleReset}${finalString}"
     else
       finalString="${leftPart}"
@@ -690,7 +690,7 @@ function string::getFormattedHeader() {
   fi
 
   if ((availableSpaceForRight - rightPartLength >= 0)); then
-    padding="${spaces:0:availableSpaceForRight - rightPartLength}"
+    padding="${spaces:0:availableSpaceForRight-rightPartLength}"
     finalString+="${paddingStyle}${padding//" "/"${paddingChar}"}${paddingStyleReset}${rightPart}"
     remainingWidth=$((remainingWidth - rightPartLength))
   elif [[ ${noEllipsis} != "true" && availableSpaceForRight -eq 1 ]]; then
@@ -751,11 +751,11 @@ function string::truncateWithEllipsis() {
 
   # shortcut if no invisible characters
   if [[ ${inputString_NameRef} != *$'\e'* ]]; then
-    if (( ${#inputString_NameRef} > maxLength )); then
+    if ((${#inputString_NameRef} > maxLength)); then
       if [[ ${noEllipsis} == "true" ]]; then
         inputString_NameRef="${inputString_NameRef:0:maxLength}"
       else
-        inputString_NameRef="${inputString_NameRef:0:maxLength - 1}…"
+        inputString_NameRef="${inputString_NameRef:0:maxLength-1}…"
       fi
       REPLY=0
     else
@@ -799,4 +799,47 @@ function string::truncateWithEllipsis() {
   done
 
   REPLY=$((maxLength - displayedLength))
+}
+
+# ## string::join
+#
+# Join an array of strings into a single string using a separator.
+#
+# - $1: **array variable name** _as string_:
+#       The variable name that contains the array to join.
+# - ${separator} _as string_:
+#       The separator character to use.
+#       (defaults to $'\n')
+#
+# Returns:
+# - ${REPLY}: the joined string
+#
+# ```bash
+# MY_ARRAY=("name" "first_name" "address")
+# string::join MY_ARRAY separator=","
+# echo "${REPLY}"
+# ```
+function string::join() {
+  local -n inputArray_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local \
+    separator=$'\n' \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+  if ((${#separator} == 1)); then
+    # optimization for single character separator
+    IFS="${separator}"
+    REPLY="${inputArray_NameRef[*]}"
+  else
+    REPLY=""
+    local item
+    local -i index=0
+    for item in "${inputArray_NameRef[@]}"; do
+      if ((index > 0)); then
+        REPLY+="${separator}"
+      fi
+      REPLY+="${item}"
+      ((index++))
+    done
+  fi
 }

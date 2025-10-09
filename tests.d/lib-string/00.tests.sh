@@ -4,6 +4,7 @@
 source string
 
 function main() {
+  test_string::join
   test_string::truncateWithEllipsis
   test_string::getFormattedHeader
   test_string::get KebabCase
@@ -26,6 +27,18 @@ function main() {
   test_string::doForEachLine
 }
 
+function test_string::join() {
+  test::title "✅ Testing string::join"
+
+  local -a myArray
+  myArray=(one two 3 four 5)
+  test::printVars myArray
+  test::func string::join myArray
+  test::func string::join myArray separator='@'
+  test::func string::join myArray separator=''
+  test::func string::join myArray separator=$'\n  - '
+}
+
 function test_string::truncateWithEllipsis() {
   test::title "✅ Testing string::truncateWithEllipsis"
 
@@ -38,7 +51,7 @@ function test_string::truncateWithEllipsis() {
   test::funcWithInPlaceString string::truncateWithEllipsis 'This is a test string' maxLength=1
   test::funcWithInPlaceString string::truncateWithEllipsis 'This is a test string' maxLength=2
 
-  for ((i=6; i>=0; i--)); do
+  for ((i = 6; i >= 0; i--)); do
     local myString="${ESC__FG_BRIGHT_CYAN}a${ESC__FG_BRIGHT_CYAN}b${ESC__FG_BRIGHT_CYAN}c${ESC__FG_BRIGHT_CYAN}d${ESC__FG_BRIGHT_CYAN}e"
     string::truncateWithEllipsis myString maxLength="${i}"
     echo "REPLY=${REPLY} → ${myString}"
@@ -60,13 +73,13 @@ function test_string::getFormattedHeader() {
   test_printFormattedHeader "left||" width=50
   test_printFormattedHeader "||right" width=50
 
-  for ((i=20; i>=0; i--)); do
+  for ((i = 20; i >= 0; i--)); do
     test_printFormattedHeader "${ESC__FG_BRIGHT_CYAN}le${ESC__FG_BRIGHT_CYAN}ft|${ESC__FG_BRIGHT_CYAN}middle|ri${ESC__FG_BRIGHT_CYAN}gh${ESC__FG_BRIGHT_CYAN}t" width="${i}"
   done
-  for ((i=20; i>=0; i--)); do
+  for ((i = 20; i >= 0; i--)); do
     test_printFormattedHeader "left|middle|right" width="${i}" paddingStyle=$'\e[1;34m' paddingStyleReset=$'\e[0m'
   done
-  for ((i=20; i>=0; i--)); do
+  for ((i = 20; i >= 0; i--)); do
     test_printFormattedHeader "left|middle|right" width="${i}" noEllipsis=true
   done
 
@@ -250,7 +263,7 @@ function test_string::wrapWords() {
 function test_string::wrapCharacters() {
   test::title "✅ Testing string::wrapCharacters"
 
-  test::markdown  "Wrapping characters at column 20 with padding of 3 on all lines"
+  test::markdown "Wrapping characters at column 20 with padding of 3 on all lines"
   test::func string::wrapCharacters MULTI_LINES_TEXT width=20 newLinePadString="   " firstLineWidth=17
 
   test::markdown "Wrapping characters at 20, no other options"

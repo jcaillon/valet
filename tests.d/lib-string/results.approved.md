@@ -2,6 +2,62 @@
 
 ## Test script 00.tests
 
+### ✅ Testing string::join
+
+```text
+myArray=(
+[0]='one'
+[1]='two'
+[2]='3'
+[3]='four'
+[4]='5'
+)
+```
+
+❯ `string::join myArray`
+
+Returned variables:
+
+```text
+REPLY='one
+two
+3
+four
+5'
+```
+
+❯ `string::join myArray separator=@`
+
+Returned variables:
+
+```text
+REPLY='one@two@3@four@5'
+```
+
+❯ `string::join myArray separator=`
+
+Returned code: `1`
+
+Returned variables:
+
+```text
+REPLY='onetwo3four5'
+```
+
+❯ `string::join myArray $'separator=\n  - '`
+
+Returned code: `1`
+
+Returned variables:
+
+```text
+REPLY='one
+  - two
+  - 3
+  - four
+  - 5'
+```
+
 ### ✅ Testing string::truncateWithEllipsis
 
 ```text
