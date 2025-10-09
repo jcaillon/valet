@@ -159,8 +159,8 @@ function exe::invoke() {
       log::trace "${executable^} standard input from string:"
       log::saveFileString stdin suffix="${executable}-stdin"
     elif [[ -n ${stdinFile} ]]; then
-      log::trace "${executable^} standard input from file ${stdin}:"
-      log::saveFile "${stdin}" suffix="${executable}-stdin"
+      log::trace "${executable^} standard input from file ${stdinFile}:"
+      log::saveFile "${stdinFile}" suffix="${executable}-stdin"
     else
       log::trace "No standard input."
     fi
@@ -195,13 +195,17 @@ function exe::invoke() {
     log::trace "The error code ${exitCode} is acceptable and has been reset to 0."
   fi
 
-  local shouldFail=false
+  local \
+    shouldFail=false \
+    shouldWarn=false
   if [[ ${warnOnFailure} != "true" && ${noFail} != "true" && exitCode -ne 0 ]]; then
     shouldFail=true
+  elif [[ ${warnOnFailure} == "true" && exitCode -ne 0 ]]; then
+    shouldWarn=true
   fi
 
   # fail if needed or we are debug mode; display all the debug information that could be useful
-  if [[ ${noRedirection} != "true" && (${warnOnFailure} == "true" || ${shouldFail} == "true" || ${isTraceEnabled} == "true") ]]; then
+  if [[ ${noRedirection} != "true" && (${shouldWarn} == "true" || ${shouldFail} == "true" || ${isTraceEnabled} == "true") ]]; then
     # print std out
     if [[ -s "${stdoutPath}" ]]; then
       log::errorTrace "${executable^} standard output stream:"
@@ -222,7 +226,7 @@ function exe::invoke() {
   fi
   if [[ ${shouldFail} == "true" ]]; then
     core::fail "${debugMessage}"
-  elif [[ ${warnOnFailure} == "true" ]]; then
+  elif [[ ${shouldWarn} == "true" ]]; then
     log::warning "${debugMessage}"
   else
     log::debug "${debugMessage}"
