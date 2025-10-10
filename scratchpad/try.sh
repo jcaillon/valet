@@ -22,3 +22,27 @@ interactive::choose ONE_LINE_ITEMS
 
 # mapfile -t MY_ARRAY < "scratchpad/words"
 # interactive::choose MY_ARRAY
+
+
+include progress exe
+
+progress::start template="<spinner>"
+
+log::info "Cleaning up windows temp files"
+pushd ~/AppData/Local/Temp >/dev/null || log::error "Could not change directory to Temp folder"
+exe::invoke rm -rf ./* --- warnOnFailure=true
+popd >/dev/null || log::error "Could not change directory to previous folder"
+
+log::info "Cleaning up bash temp files"
+pushd ~/AppData/Local/tmp >/dev/null || log::error "Could not change directory to tmp folder"
+exe::invoke rm -rf ./* --- warnOnFailure=true
+popd >/dev/null || log::error "Could not change directory to previous folder"
+
+KOMOREBI_CONFIG_HOME=~\.config\komorebi \
+    komorebic start --ahk
+
+windows::runPs1
+
+interactive::continue
+
+progress::stop

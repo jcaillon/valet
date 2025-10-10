@@ -64,7 +64,7 @@ source terminal
 #       (defaults to "")
 #
 # ```bash
-# progress::start template="<spinner>" "" 100
+# progress::start template="<spinner>" message="" percent=100
 # wait 4
 # progress::stop
 #
@@ -160,7 +160,7 @@ function progress::stop() {
 #       (defaults to "")
 #
 # ```bash
-# progress::update percent=50 percent="Doing something..."
+# progress::update percent=50 message="Doing something..."
 # ```
 function progress::update() {
   local \
