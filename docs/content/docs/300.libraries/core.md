@@ -319,4 +319,4 @@ _OPTION_CONTINUE_IF_NOT_FOUND=false _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 so
 > - Use `builtin source` if you want to include the file even if it was already included.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.35.114 (2025-10-03).
+> Documentation generated for the version 0.36.26 (2025-10-10).

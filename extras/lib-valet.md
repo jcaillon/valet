@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.35.114 (2025-10-03).
+> Documentation generated for the version 0.36.26 (2025-10-10).
 
 ## ⚡ array::appendIfNotPresent
 
@@ -2868,7 +2868,7 @@ Inputs:
 Example usage:
 
 ```bash
-progress::start template="<spinner>" "" 100
+progress::start template="<spinner>" message="" percent=100
 wait 4
 progress::stop
 
@@ -2919,7 +2919,7 @@ Inputs:
 Example usage:
 
 ```bash
-progress::update percent=50 percent="Doing something..."
+progress::update percent=50 message="Doing something..."
 ```
 
 ## ⚡ regex::escapeRegexSpecialChars
@@ -3595,6 +3595,33 @@ echo "${REPLY}"
 
 > - All characters to highlight must be found in the same order in the matched line.
 > - This functions is case insensitive.
+
+## ⚡ string::join
+
+Join an array of strings into a single string using a separator.
+
+Inputs:
+
+- `$1`: **array variable name** _as string_:
+
+  The variable name that contains the array to join.
+
+- `${separator}` _as string_:
+
+  The separator character to use.
+
+  (defaults to $'\n')
+
+Returns:
+- `${REPLY}`: the joined string
+
+Example usage:
+
+```bash
+MY_ARRAY=("name" "first_name" "address")
+string::join MY_ARRAY separator=","
+echo "${REPLY}"
+```
 
 ## ⚡ string::numberToUniqueId
 
@@ -5314,4 +5341,4 @@ windows::endPs1Batch
 
 
 
-> Documentation generated for the version 0.35.114 (2025-10-03).
+> Documentation generated for the version 0.36.26 (2025-10-10).

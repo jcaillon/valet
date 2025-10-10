@@ -286,4 +286,4 @@ windows::endPs1Batch
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.35.114 (2025-10-03).
+> Documentation generated for the version 0.36.26 (2025-10-10).

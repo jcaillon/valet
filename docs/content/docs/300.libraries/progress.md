@@ -84,7 +84,7 @@ Inputs:
 Example usage:
 
 ```bash
-progress::start template="<spinner>" "" 100
+progress::start template="<spinner>" message="" percent=100
 wait 4
 progress::stop
 
@@ -135,8 +135,8 @@ Inputs:
 Example usage:
 
 ```bash
-progress::update percent=50 percent="Doing something..."
+progress::update percent=50 message="Doing something..."
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.35.114 (2025-10-03).
+> Documentation generated for the version 0.36.26 (2025-10-10).

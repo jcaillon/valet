@@ -413,6 +413,33 @@ echo "${REPLY}"
 > - All characters to highlight must be found in the same order in the matched line.
 > - This functions is case insensitive.
 
+## ⚡ string::join
+
+Join an array of strings into a single string using a separator.
+
+Inputs:
+
+- `$1`: **array variable name** _as string_:
+
+  The variable name that contains the array to join.
+
+- `${separator}` _as string_:
+
+  The separator character to use.
+
+  (defaults to $'\n')
+
+Returns:
+- `${REPLY}`: the joined string
+
+Example usage:
+
+```bash
+MY_ARRAY=("name" "first_name" "address")
+string::join MY_ARRAY separator=","
+echo "${REPLY}"
+```
+
 ## ⚡ string::numberToUniqueId
 
 Converts a number into a unique and human readable string of the same length.
@@ -659,4 +686,4 @@ echo "${REPLY}"
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.35.114 (2025-10-03).
+> Documentation generated for the version 0.36.26 (2025-10-10).
